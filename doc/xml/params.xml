@@ -26,7 +26,7 @@
 
     <description>
         <p>
-            Bestimmt Parameter für einen Job.
+            Bestimmt Parameter für einen Job oder für einen Auftrag.
             Die Parameter können zur Laufzeit überschrieben und erweitert werden.
         </p>
         <p>
@@ -34,6 +34,9 @@
         </p>
         <p>
             Parameter eines Auftrags können mit der Methode <scheduler_method class="Order" method="payload" /> abgerufen werden.
+        </p>
+        <p>
+            Siehe auch die Klasse <scheduler_method class="Variable_set" />.
         </p>
     </description>
         

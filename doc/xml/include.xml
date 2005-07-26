@@ -44,7 +44,8 @@
         </p>
         <ul>
             <li>
-                Im Element <code>&lt;description></code>: Der Scheduler ignoriert Fehler.
+                Im Element <code>&lt;description></code>: Der Scheduler ignoriert Fehler, 
+                fügt aber die Fehlermeldung in die <code>&lt;description></code> ein.
             </li>
             <li>
                 Im Element <code>&lt;script></code>: Der Scheduler versetzt den Job in den Zustand <code>read_error</code>.

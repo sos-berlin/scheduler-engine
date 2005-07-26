@@ -13,13 +13,20 @@
 
     <description>
         <p>
-            Gibt einen Parameterwert an. 
-            <br/>
-            Weiteres siehe <scheduler_element name="params" />.
+            Siehe <scheduler_element name="params" />.
         </p>
         <p>
-            Definiert einen Parameter mit dem gegebenen Name und Wert über die Klasse <scheduler_method class="Task"/> können Jobs
-            auf die Parameter zugreifen.
+            Bestimmt einen einzelnen Parameter für einen Job oder für einen Auftrag.
+            Die Parameter können zur Laufzeit überschrieben und erweitert werden.
+        </p>
+        <p>
+            Job-Parameter können mit der Methode <scheduler_method class="Task" method="params" /> abgerufen werden.
+        </p>
+        <p>
+            Parameter eines Auftrags können mit der Methode <scheduler_method class="Order" method="payload" /> abgerufen werden.
+        </p>
+        <p>
+            Siehe auch die Klasse <scheduler_method class="Variable_set" />.
         </p>
     </description>
 

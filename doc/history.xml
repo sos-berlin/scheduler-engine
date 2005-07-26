@@ -137,7 +137,7 @@ Blob geschrieben.&#160;</p>
 Die Tabellename ist <font class="mono">spooler_history</font>. Wenn die Datei
 nicht vorhanden ist, wird sie als Datenbank angelegt. Wenn die Tabelle <font class="mono">spooler_history
 </font>nicht vorhanden ist, wird sie angelegt (das gilt nur für
-Access-Datenbanken).</p>
+Microsoft-Access-Datenbanken).</p>
 
 <p>In der Tabelle <font class="mono">spooler_variables</font> wird in einem
 Eintrag die nächste freie Jobnummer gehalten.</p>
@@ -167,11 +167,11 @@ log_dir=*stderr</font> eingestellt sind, kann die Datenbank mangels Verzeichnis
 nicht geöffnet werden. Bei <font class="mono">need_db=yes</font> startet dann
 der Spooler nicht.</p>
 
-<p class="zwischentitel">Access-Datenbank wird automatisch angelegt</p>
+<p class="zwischentitel">Microsoft-Access-Datenbank wird automatisch angelegt</p>
 
 <p>Wenn bei <font class="mono">db=</font> nur ein einfacher Dateiname angegeben
 ist, stellt der Spooler ihm&#160; &quot;<font class="mono">odbc -create</font>&quot;
-voran.&#160;Damit wird eine Access-Datenbank automatisch angelegt (s. Dateityp
+voran.&#160;Damit wird eine Microsoft-Access-Datenbank automatisch angelegt (s. Dateityp
 ODBC).</p>
 
 <p>In der Datenbank werden die Tabellen <font class="mono">spooler_history</font>
@@ -299,7 +299,7 @@ kann:</p>
 Historientabelle bekannt sein. Die Großschreibung spielt keine Rolle.</p>
 <p>Wenn die Historie in einer Datenbank geführt wird, kann es eine Rolle
 spielen, von welchem Typ <i>wert</i> ist, insbesondere ob Zahl oder Zeichenkette
-(bei Access spielt es keine Rolle).</p>
+(bei Microsoft Access spielt es keine Rolle).</p>
 <h3>3.1&#160; Extra Felder in der tabulierten Datei</h3>
 
 <p>Die zusätzlichen Spalten werden in der<font class="mono"> factory.ini</font>

@@ -275,7 +275,8 @@ log = scheduler.wait com_server.* >scheduler.log
              title   = "Name der Datenbanktabelle für die internen Variablen des Schedulers">
         <description>
             <p>
-                Hier hält der Scheduler z.B. die nächste freie Task-Id.
+                Der Scheduler hält in dieser Tabelle interne Zähler, 
+                zum Beispiel für die nächste freie Task-Id.
             </p>
             <p>
                 Siehe auch <scheduler_method class="Spooler" method="db_variables_table_name"/>
@@ -408,7 +409,7 @@ Ohne Eintrag werden Dateien im .csv-Format erzeugt, siehe <scheduler_ini_entry f
             </p>
             <p>
 Unter Windows kann auch ein einfacher Dateiname angegebenen werden, der auf <code>.mdb</code> endet (z.B. <code>scheduler.mdb</code>).
-Der Scheduler verwendet dann eine Access-Datenbank dieses Namens, 
+Der Scheduler verwendet dann eine Microsoft-Access-Datenbank dieses Namens, 
 die im Protokollverzeichnis (s. Option <scheduler_option name="log-dir"/>) liegt.
 Der Scheduler richtet die Datei ein, wenn sie fehlt.
             </p>
@@ -419,14 +420,14 @@ Der Scheduler richtet die Tabellen selbständig ein.
         
         <example>
 <pre>
-;db = jdbc -wait=30 -class=com.microsoft.jdbc.sqlserver.SQLServerDriver jdbc:microsoft:sqlserver://localhost:1433;selectMethod=Cursor;databaseName=factory -user=factory -password=factory
-;db = odbc -wait=30 -db=factory_sql -user=factory -password=factory
+db = jdbc -class=com.microsoft.jdbc.sqlserver.SQLServerDriver jdbc:microsoft:sqlserver://localhost:1433;selectMethod=Cursor;databaseName=factory -user=factory -password=factory
+db = odbc -db=factory_sql -user=factory -password=factory
  
-db  = jdbc -wait=15 -class=com.mysql.jdbc.Driver jdbc:mysql://localhost/factory:3307?user=factory&amp;password=factory
-;db = odbc -wait=30 -db=factory_mysql -user=factory -password=factory
+db = jdbc -class=com.mysql.jdbc.Driver jdbc:mysql://localhost/factory:3307?user=factory&amp;password=factory
+db = odbc -db=factory_mysql -user=factory -password=factory
  
-;db = jdbc -wait=30 -class=oracle.jdbc.driver.OracleDriver jdbc:oracle:thin:@apnb:1521:test -user=factory -password=factory
-;db = odbc -wait=30 -db=factory_oracle -user=factory -password=factory
+db = jdbc -class=oracle.jdbc.driver.OracleDriver jdbc:oracle:thin:@apnb:1521:test -user=factory -password=factory
+db = odbc -db=factory_oracle -user=factory -password=factory
 
 ;db = scheduler.mdb 
 </pre>        

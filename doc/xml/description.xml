@@ -18,7 +18,15 @@
 
     
     <xml_child_elements>
-        <xml_child_element name="include"/>
+        <xml_child_element name="include">
+            <description>
+                <p>
+                    Wenn die einzuziehende Datei nicht lesbar (nicht vorhanden) ist, 
+                    wird statt des Inhalts die Fehlermeldung in die Beschreibung übernommen.
+                </p>
+            </description>
+        </xml_child_element>
+            
     </xml_child_elements>
     
     <behavior_with_xml_element element="base" replace="yes"/>

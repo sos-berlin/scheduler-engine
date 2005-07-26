@@ -33,7 +33,7 @@ kann in jeder Sprache, die <span style="font-variant: small-caps">com</span>
 unterstützt, implementiert werden, u.a. C++, Delphi und VisualBasic. Mit Hilfe
 von &quot;Windows
 Script Component&quot; lässt sich die <span style="font-variant: small-caps">com</span>-Klasse
-auch mit VBScript, JScript und (vermutlich) PerlScript realisieren.</p>
+auch mit VBScript, JScript und PerlScript realisieren.</p>
 
 <p>Die Klasse stellt die Methoden eines Jobs, Thread-Skripts oder
 Spooler-Skripts bereit, also:</p>
