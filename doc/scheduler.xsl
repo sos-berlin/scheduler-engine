@@ -606,7 +606,7 @@
                     <xsl:call-template name="scheduler_ini_entry">
                         <xsl:with-param name="file"    select="'factory.ini'"/>
                         <xsl:with-param name="section" select="ancestor::ini_section/@name"/>
-                        <xsl:with-param name="entry"   select="@setting"/>
+                        <xsl:with-param name="entry"   select="@name | @setting"/>
                     </xsl:call-template>
 
                     <xsl:choose>
