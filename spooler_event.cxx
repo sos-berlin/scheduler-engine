@@ -243,11 +243,11 @@ int Scheduler_event::send_mail( const xml::Document_ptr& mail_dom_ )
 
         // MAIL SENDEN
 
-        ptr<Com_mail> mail = _mail;
+        ptr<Com_mail> mail;
 
         if( xml::Element_ptr mail_element = mail_dom? mail_dom.select_node( mail_xpath ) : NULL )
         {
-            if( !mail_element.bool_getAttribute( "ignore" ) )
+            if( !mail_element.bool_getAttribute( "suppress" ) )
             {
                 mail = new Com_mail( _spooler );
                 mail->init();
@@ -255,17 +255,22 @@ int Scheduler_event::send_mail( const xml::Document_ptr& mail_dom_ )
                 mail->set_dom( mail_element );
             }
         }
-
-        if( mail_dom  &&  mail_dom.documentElement()  &&  mail_dom.documentElement().bool_getAttribute( "attach_xml" ) )
+        else
         {
-            if( event_dom )
-            mail->add_attachment( event_dom.xml(true), "event.xml", "text/xml", "quoted-printable" );
-
-            mail->add_attachment( mail_dom.xml(true), "mail.xml", "text/xml", "quoted-printable" );
+            mail = _mail;
         }
+
 
         if( mail )
         {
+            if( mail_dom  &&  mail_dom.documentElement()  &&  mail_dom.documentElement().bool_getAttribute( "attach_xml" ) )
+            {
+                if( event_dom )
+                mail->add_attachment( event_dom.xml(true), "event.xml", "text/xml", "quoted-printable" );
+
+                mail->add_attachment( mail_dom.xml(true), "mail.xml", "text/xml", "quoted-printable" );
+            }
+
             return mail->send();
         }
     }
