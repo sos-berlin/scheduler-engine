@@ -534,7 +534,9 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
     state_element.setAttribute( "loop"                 , _loop_counter );
     state_element.setAttribute( "waits"                , _wait_counter );
 
-    state_element.appendChild( jobs_dom_element( dom, show ) );
+    if( show & show_jobs )  state_element.appendChild( jobs_dom_element( dom, show ) );
+                      else  state_element.append_new_comment( "<jobs> suppressed. Use what=\"jobs\"." );
+
   //state_element.appendChild( execute_show_threads( show ) );
     state_element.appendChild( process_classes_dom_element( dom, show ) );
     state_element.appendChild( job_chains_dom_element( dom, show ) );
@@ -568,7 +570,15 @@ xml::Element_ptr Spooler::jobs_dom_element( const xml::Document_ptr& document, c
     xml::Element_ptr jobs_element = document.createElement( "jobs" );
     dom_append_nl( jobs_element );
 
-    THREAD_LOCK( _lock )  FOR_EACH( Job_list, _job_list, it )  jobs_element.appendChild( (*it)->dom_element( document, show ) ), dom_append_nl( jobs_element );
+    FOR_EACH( Job_list, _job_list, it )
+    {
+        Job* job = *it;
+
+        if( show._job_name == ""  ||  show._job_name == job->name() )
+        {
+            jobs_element.appendChild( job->dom_element( document, show ) ), dom_append_nl( jobs_element );
+        }
+    }
 
     return jobs_element;
 }

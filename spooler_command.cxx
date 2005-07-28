@@ -646,7 +646,7 @@ xml::Element_ptr Command_processor::execute_register_remote_scheduler( const xml
 
 xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& element, const Time& xml_mod_time )
 {
-    Show_what show;
+    Show_what show = show_jobs | show_tasks;        // Zur Kompatibilität. Besser: <show_state what="jobs,tasks"/>
 
     string max_orders = element.getAttribute( "max_orders" );
     if( max_orders != "" )  show._max_orders = as_int( max_orders );
@@ -661,6 +661,8 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     {
         while( *p == ' ' )  p++;
 
+        if( string_equals_prefix_then_skip( &p, "none"             ) )  show = show_standard;       // Setzt Flags zurück! (Provisorisch, solange jobs,tasks default ist)
+        else
         if( string_equals_prefix_then_skip( &p, "all!"             ) )  show |= show_all;
         else
         if( string_equals_prefix_then_skip( &p, "all"              ) )  show |= show_all_;
@@ -688,6 +690,10 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
         if( string_equals_prefix_then_skip( &p, "run_time"         ) )  show |= show_run_time;
         else
         if( string_equals_prefix_then_skip( &p, "job_chain_jobs"   ) )  show |= show_job_chain_jobs;
+        else
+        if( string_equals_prefix_then_skip( &p, "jobs"             ) )  show |= show_jobs;
+        else
+        if( string_equals_prefix_then_skip( &p, "tasks"            ) )  show |= show_tasks;
         else
         if( string_equals_prefix_then_skip( &p, "standard"         ) )  ;
         else

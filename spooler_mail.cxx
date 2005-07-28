@@ -3,6 +3,7 @@
 
 #include "spooler.h"
 #include "spooler_mail.h"
+#include "../zschimmer/z_mail.h"
 
 namespace sos {
 namespace spooler {
@@ -96,7 +97,12 @@ xml::Element_ptr Com_mail::dom_element( const xml::Document_ptr& dom )
     xml::Element_ptr header_element = mail_element.append_new_element( "header" );
 
     
-    header_element.setAttribute_optional( "from"   , _from    );
+    Email_address from;
+    from.suppress_exceptions( true );
+    from = _from;
+    header_element.setAttribute_optional( "from_address", from.address() );
+    header_element.setAttribute_optional( "from_name"   , from.name()    );
+
     header_element.setAttribute_optional( "to"     , _to      );
     header_element.setAttribute_optional( "cc"     , _cc      );
     header_element.setAttribute_optional( "bcc"    , _bcc     );
@@ -138,13 +144,14 @@ void Com_mail::set_dom( const xml::Element_ptr& mail_element )
 
     xml::Element_ptr header_element = mail_element.select_node_strict( "header" );
 
-    set_from   ( header_element.getAttribute( "from"    ) );
-    set_to     ( header_element.getAttribute( "to"      ) );
-    set_cc     ( header_element.getAttribute( "cc"      ) );
-    set_bcc    ( header_element.getAttribute( "bcc"     ) );
-  //set_smtp   ( header_element.getAttribute( "smtp"    ) );
-  //set_subject( header_element.getAttribute( "subject" ) );
-    set_subject( xml::Element_ptr( header_element.select_node( "subject" ) ).trimmed_text() );
+    set_from     ( header_element.getAttribute( "from_address" ) );
+    set_from_name( header_element.getAttribute( "from_name" ) );
+    set_to       ( header_element.getAttribute( "to"        ) );
+    set_cc       ( header_element.getAttribute( "cc"        ) );
+    set_bcc      ( header_element.getAttribute( "bcc"       ) );
+  //set_smtp     ( header_element.getAttribute( "smtp"      ) );
+  //set_subject  ( header_element.getAttribute( "subject"   ) );
+    set_subject  ( xml::Element_ptr( header_element.select_node( "subject" ) ).trimmed_text() );
 
     xml::Xpath_nodes field_elements = mail_element.select_nodes( "header/field" );
     for( int i = 0; i < field_elements.count(); i++ )

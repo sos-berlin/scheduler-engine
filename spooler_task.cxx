@@ -1535,9 +1535,13 @@ void Task::trigger_event( Scheduler_event* scheduler_event )
 {
     try
     {
-        bool is_error = has_error();
-
         _log->set_mail_from_name( _job->profile_section() );
+
+
+        Scheduler_event event ( Scheduler_event::evt_task_ended, _log->highest_level(), this );
+        if( _error )  event.set_error( _error );
+
+        bool is_error = has_error();
 
         string body = Sos_optional_date_time::now().as_string() + "\n\nJob " + _job->name() + "  " + _job->title() + "\n";
         body += "Task-Id " + as_string(id()) + ", " + as_string(_step_count) + " Schritte\n";
@@ -1549,6 +1553,7 @@ void Task::trigger_event( Scheduler_event* scheduler_event )
 
             if( _log->highest_level() == log_warn )
             {
+                event.set_warning( _log->highest_msg() );
                 subject += " mit Warnung beendet";
                 body += _log->highest_msg() + "\n\n";
             }
@@ -1569,8 +1574,6 @@ void Task::trigger_event( Scheduler_event* scheduler_event )
 
         _log->set_mail_body( body + "Das Jobprotokoll liegt dieser Nachricht bei." );   //, is_error );
 
-        Scheduler_event event ( Scheduler_event::evt_task_ended, _log->highest_level(), this );
-        if( _error )  event.set_error( _error );
         _log->send( has_error() || _log->highest_level() >= log_error? -1 : _step_count, &event );
 
         /*
@@ -1584,7 +1587,6 @@ void Task::trigger_event( Scheduler_event* scheduler_event )
     }
     catch( const exception& x  ) { _log->warn( x.what() ); }
     catch( const _com_error& x ) { _log->warn( bstr_as_string(x.Description()) ); }  
-
 }
 
 //----------------------------------------------------------------------Task::wait_until_terminated

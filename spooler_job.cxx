@@ -1708,21 +1708,32 @@ xml::Element_ptr Job::dom_element( const xml::Document_ptr& document, const Show
         if( show & show_run_time )  job_element.appendChild( _run_time->dom_element( document ) );
 
         dom_append_nl( job_element );
-        xml::Element_ptr tasks_element = document.createElement( "tasks" );
-        //tasks_element.setAttribute( "count", (int)_running_tasks.size() );
-        int task_count = 0;        
-        Z_FOR_EACH( Task_list, _running_tasks, t )
+
+
+        if( show & show_tasks )
         {
-            Task* task = *t;
-            if( !which_job_chain  ||  !task->_order  ||  task->_order->job_chain() == which_job_chain )
+            xml::Element_ptr tasks_element = document.createElement( "tasks" );
+            //tasks_element.setAttribute( "count", (int)_running_tasks.size() );
+            int task_count = 0;        
+            Z_FOR_EACH( Task_list, _running_tasks, t )
             {
-                tasks_element.appendChild( task->dom_element( document, show ) ), dom_append_nl( tasks_element );
-                task_count++;
+                Task* task = *t;
+                if( !which_job_chain  ||  !task->_order  ||  task->_order->job_chain() == which_job_chain )
+                {
+                    if( !show._task_id  ||  show._task_id == task->id() )
+                    {
+                        tasks_element.appendChild( task->dom_element( document, show ) ), dom_append_nl( tasks_element );
+                    }
+
+                    task_count++;
+                }
             }
+            tasks_element.setAttribute( "count", task_count );
+            job_element.appendChild( tasks_element );
         }
-        tasks_element.setAttribute( "count", task_count );
-        job_element.appendChild( tasks_element );
-      //dom_append_nl( job_element );
+        else
+            job_element.append_new_comment( "<tasks> suppressed. Use what=\"tasks\"." );
+
 
 
         if( show & show_description )  dom_append_text_element( job_element, "description", _description );

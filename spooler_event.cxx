@@ -48,7 +48,8 @@ Scheduler_event::Scheduler_event( Event_code event_code, Log_level severity, Sch
 
 xml::Document_ptr Scheduler_event::dom()
 {
-    xml::Document_ptr event_dom;
+    Show_what           state_show = show_standard;
+    xml::Document_ptr   event_dom;
 
     event_dom.create();
     event_dom.appendChild( event_dom.createProcessingInstruction( "xml", "version=\"1.0\"" ) );
@@ -78,14 +79,21 @@ xml::Document_ptr Scheduler_event::dom()
 
         case Scheduler_object::type_job:
         {
-            scheduler_event_element.setAttribute( "job"     , static_cast<Job*>( +_object )->name() );
+            Job* job = static_cast<Job*>( +_object );
+            scheduler_event_element.setAttribute( "job"     , job->name() );
+            state_show |= show_jobs | show_tasks;
+            state_show._job_name = job->name();
             break;
         }
 
         case Scheduler_object::type_task:
         {
-            scheduler_event_element.setAttribute( "task"    , static_cast<Task*>( +_object )->id() );
-            scheduler_event_element.setAttribute( "job"     , static_cast<Task*>( +_object )->job()->name() );
+            Task* task = static_cast<Task*>( +_object );
+            scheduler_event_element.setAttribute( "task"    , task->id() );
+            scheduler_event_element.setAttribute( "job"     , task->job()->name() );
+            state_show |= show_jobs | show_tasks;
+            state_show._job_name = task->job()->name();
+            state_show._task_id  = task->id();
             break;
         }
 
@@ -99,10 +107,13 @@ xml::Document_ptr Scheduler_event::dom()
             break;
     }
 
+
+    if( _has_warning )  scheduler_event_element.setAttribute( "warning", _warning );
+
     if( _error )
     append_error_element( scheduler_event_element, _error );
 
-    scheduler_event_element.appendChild( _spooler->state_dom_element( event_dom, show_standard ) );
+    scheduler_event_element.appendChild( _spooler->state_dom_element( event_dom, state_show ) );
 
 
     if( _mail ) 
@@ -236,10 +247,13 @@ int Scheduler_event::send_mail( const xml::Document_ptr& mail_dom_ )
 
         if( xml::Element_ptr mail_element = mail_dom? mail_dom.select_node( mail_xpath ) : NULL )
         {
-            mail = new Com_mail( _spooler );
-            mail->init();
-            if( _mail  &&  _mail->smtp() != "" )  mail->set_smtp( _mail->smtp() );
-            mail->set_dom( mail_element );
+            if( !mail_element.bool_getAttribute( "ignore" ) )
+            {
+                mail = new Com_mail( _spooler );
+                mail->init();
+                if( _mail  &&  _mail->smtp() != "" )  mail->set_smtp( _mail->smtp() );
+                mail->set_dom( mail_element );
+            }
         }
 
         if( mail_dom  &&  mail_dom.documentElement()  &&  mail_dom.documentElement().bool_getAttribute( "attach_xml" ) )
@@ -247,17 +261,7 @@ int Scheduler_event::send_mail( const xml::Document_ptr& mail_dom_ )
             if( event_dom )
             mail->add_attachment( event_dom.xml(true), "event.xml", "text/xml", "quoted-printable" );
 
-            mail->add_attachment( mail_dom .xml(true), "mail.xml", "text/xml", "quoted-printable" );
-            /*
-            {
-                zschimmer::File mail_xml_file;
-                mail_xml_file.open_temporary();
-                mail_xml_file.print( mail_dom.xml(true) );
-                mail_xml_file.close();
-
-                mail->add_file( xml_file.filename(), "mail.xml", "text/xml", "quoted-printable" );
-            }
-            */
+            mail->add_attachment( mail_dom.xml(true), "mail.xml", "text/xml", "quoted-printable" );
         }
 
         if( mail )

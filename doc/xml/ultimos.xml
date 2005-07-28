@@ -39,7 +39,7 @@
     
     <example>
         <pre>
-&lt;montdays>
+&lt;monthdays>
     &lt;day day="0">
         &lt;period begin="10:00" end="12:00"/>
     &lt;/day>        
@@ -47,7 +47,7 @@
         &lt;period begin="08:00" end="12:00"/>
         &lt;period begin="15:00" end="18:00"/>
     &lt;/day>
-&lt;/day>    
+&lt;/monthdays>    
         </pre>
         <p>
             Setzt die Laufzeiten fest für den Letzten eines Monats 10:00 bis 12:00 und

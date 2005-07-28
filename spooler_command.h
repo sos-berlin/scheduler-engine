@@ -28,6 +28,8 @@ enum Show_what_enum
     show_run_time           = 0x200,
     show_job_chains         = 0x400,
     show_job_chain_jobs     = 0x800,
+    show_jobs               = 0x1000,   // <jobs>
+    show_tasks              = 0x2000,   // <tasks>
 
     show_all_               = 0x8000,
     show_all                = 0xFFFF    // Alle Flags und show_all_ (Bei <show_state> ist z.B. show_orders nicht in show_all enthalten)
@@ -52,6 +54,8 @@ struct Show_what
     Show_what_enum             _what;
     int                        _max_orders;
     int                        _max_task_history;
+    string                     _job_name;
+    int                        _task_id;
 };
 
 //-------------------------------------------------------------------------------------------------
