@@ -1540,6 +1540,7 @@ void Task::trigger_event( Scheduler_event* scheduler_event )
 
         Scheduler_event event ( Scheduler_event::evt_task_ended, _log->highest_level(), this );
         if( _error )  event.set_error( _error );
+        event.set_message( _log->highest_msg() );
 
         bool is_error = has_error();
 
@@ -1553,7 +1554,6 @@ void Task::trigger_event( Scheduler_event* scheduler_event )
 
             if( _log->highest_level() == log_warn )
             {
-                event.set_warning( _log->highest_msg() );
                 subject += " mit Warnung beendet";
                 body += _log->highest_msg() + "\n\n";
             }

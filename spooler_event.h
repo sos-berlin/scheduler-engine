@@ -36,7 +36,7 @@ struct Scheduler_event
     Com_mail*                   mail                        ();
     void                    set_scheduler_terminates        ( bool b )                              { _scheduler_terminates = b; }
     void                    set_error                       ( const Xc_copy& x )                    { _error    = x; }
-    void                    set_warning                     ( const string& w )                     { _warning  = w;  _has_warning = true; }
+    void                    set_message                     ( const string& m )                     { _message  = m; }
     void                    set_count                       ( int c )                               { _count    = c; }
     void                    set_log_path                    ( const string& path )                  { _log_path = path; }
     void                    set_subject                     ( const string& subject )               { _subject  = remove_password( subject ); }
@@ -56,8 +56,7 @@ struct Scheduler_event
     ptr<IUnknown>              _object_iunknown;            // Hält das Objekt (IUnknown ist die gemeinsame eindeutige Oberklasse)
     string                     _log_path;
     Xc_copy                    _error;
-    string                     _warning;
-    bool                       _has_warning;
+    string                     _message;
     int                        _count;
     ptr<Com_mail>              _mail;                       
     string                     _subject;

@@ -108,7 +108,7 @@ xml::Document_ptr Scheduler_event::dom()
     }
 
 
-    if( _has_warning )  scheduler_event_element.setAttribute( "warning", _warning );
+    scheduler_event_element.setAttribute_optional( "message", _message != ""? _message : _error.what() );
 
     if( _error )
     append_error_element( scheduler_event_element, _error );
