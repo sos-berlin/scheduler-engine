@@ -415,10 +415,11 @@ void Spooler_db::try_reopen_after_error( const exception& x, bool wait_endless )
             string body = "Dies ist das " + as_string(_error_count) + ". Problem mit der Datenbank.";
             if( !_spooler->_wait_endless_for_db_open )  body += "\n(" + warn_msg + ")";
             body += "\ndb=" + _spooler->_db_name + "\r\n\r\n" + x.what() + "\r\n\r\nDer Scheduler versucht, die Datenbank erneut zu oeffnen.";
-            if( !_spooler->_need_db )  body += "\r\nWenn das nicht geht, schreibt der Scheduler die Historie in Textdateien.";
+          //if( !_spooler->_need_db )  body += "\r\nWenn das nicht geht, schreibt der Scheduler die Historie in Textdateien.";
 
             Scheduler_event scheduler_event ( Scheduler_event::evt_database_error, log_warn, this );
             scheduler_event.set_error( x );
+            scheduler_event.set_count( _error_count );
             scheduler_event.set_subject( S() << "FEHLER BEIM ZUGRIFF AUF DATENBANK: " << x.what() );
             scheduler_event.set_body( body );
             scheduler_event.send_mail();
@@ -427,37 +428,34 @@ void Spooler_db::try_reopen_after_error( const exception& x, bool wait_endless )
             _email_sent_after_db_error = true;
         }
 
-        //Z_MUTEX( _lock )
-        {
-            //sos_sleep( 2 );    // Bremse, falls der Fehler nicht an einer unterbrochenen Verbindung liegt. Denn für jeden Fehler gibt es eine eMail!
+        //sos_sleep( 2 );    // Bremse, falls der Fehler nicht an einer unterbrochenen Verbindung liegt. Denn für jeden Fehler gibt es eine eMail!
 
-            while(1)
+        while(1)
+        {
+            try
             {
-                try
+                open2( _spooler->_db_name );
+                open_history_table();
+                THREAD_LOCK( _error_lock )  _error = "";
+                break;
+            }
+            catch( const exception& x )
+            {
+                THREAD_LOCK( _error_lock )  _error = x.what();
+                _spooler->log()->warn( x.what() );
+
+                if( !_spooler->_need_db )  break;
+                
+                if( !_spooler->_wait_endless_for_db_open )
                 {
-                    open2( _spooler->_db_name );
-                    open_history_table();
-                    THREAD_LOCK( _error_lock )  _error = "";
+                    too_much_errors = true;
+                    warn_msg = "Datenbank lässt sich nicht öffnen. Wegen need_db=strict wird der Scheduler sofort beendet.";
                     break;
                 }
-                catch( const exception& x )
-                {
-                    THREAD_LOCK( _error_lock )  _error = x.what();
-                    _spooler->log()->warn( x.what() );
 
-                    if( !_spooler->_need_db )  break;
-                    
-                    if( !_spooler->_wait_endless_for_db_open )
-                    {
-                        too_much_errors = true;
-                        warn_msg = "Datenbank lässt sich nicht öffnen. Wegen need_db=strict wird der Scheduler sofort beendet.";
-                        break;
-                    }
-
-                    _spooler->log()->warn( "Eine Minute warten bevor Datenbank erneut geöffnet wird ..." );
-                    //sos_sleep( 60 );
-                    _spooler->_connection_manager->async_continue_selected( is_communication_operation, 60 );
-                }
+                _spooler->log()->warn( "Eine Minute warten bevor Datenbank erneut geöffnet wird ..." );
+                //sos_sleep( 60 );
+                _spooler->_connection_manager->async_continue_selected( is_communication_operation, 60 );
             }
         }
     }
@@ -472,7 +470,7 @@ void Spooler_db::try_reopen_after_error( const exception& x, bool wait_endless )
             _log->error( msg );
             string body = "db=" + _spooler->_db_name + "\r\n\r\n" + x.what() + "\r\n\r\n" + warn_msg;
 
-            Scheduler_event scheduler_event ( Scheduler_event::evt_database_error, log_error, this );
+            Scheduler_event scheduler_event ( Scheduler_event::evt_database_error_abort, log_error, this );
             scheduler_event.set_error( x );
             scheduler_event.set_scheduler_terminates( true );
             scheduler_event.set_subject( msg );
@@ -483,23 +481,23 @@ void Spooler_db::try_reopen_after_error( const exception& x, bool wait_endless )
             _spooler->abort_immediately();
             //throw exception( x.what() );  // Wird nicht ausgeführt
         }
-        else
-        {
-            string body = "Wegen need_db=no\n" "db=" + _spooler->_db_name + "\r\n\r\n" + x.what() + "\r\n\r\n" + warn_msg;
-            
-            Scheduler_event scheduler_event ( Scheduler_event::evt_database_error, log_warn, this );
-            scheduler_event.set_error( x );
-            scheduler_event.set_subject( string("SCHEDULER ARBEITET NACH FEHLERN OHNE DATENBANK: ") + x.what() );
-            scheduler_event.set_body( body );
-            scheduler_event.send_mail();
-            //_spooler->send_error_email( string("SCHEDULER ARBEITET NACH FEHLERN OHNE DATENBANK: ") + x.what(), body );
-            // Datenbank nicht mehr öffnen und auf Dateihistorie umschalten.
-        }
     }
 
     if( !_db.opened() )
     {
         _spooler->log()->info( "Historie wird von Datenbank auf Dateien umgeschaltet" );
+
+        string body = "Wegen need_db=no\n" "db=" + _spooler->_db_name + "\r\n\r\n" + x.what() + "\r\n\r\n" + warn_msg;
+        
+        Scheduler_event scheduler_event ( Scheduler_event::evt_database_error_switch_to_file, log_warn, this );
+        scheduler_event.set_error( x );
+        scheduler_event.set_subject( string("SCHEDULER ARBEITET NACH FEHLERN OHNE DATENBANK: ") + x.what() );
+        scheduler_event.set_body( body );
+        scheduler_event.send_mail();
+        //_spooler->send_error_email( string("SCHEDULER ARBEITET NACH FEHLERN OHNE DATENBANK: ") + x.what(), body );
+        // Datenbank nicht mehr öffnen und auf Dateihistorie umschalten.
+
+
         open2( "" );     // Umschalten auf dateibasierte Historie
     }
 

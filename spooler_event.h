@@ -21,6 +21,8 @@ struct Scheduler_event
         evt_task_ended,
         evt_disk_full,
         evt_database_error,
+        evt_database_error_switch_to_file,
+        evt_database_error_abort,
         evt_task_start_error,
     };
 
@@ -34,6 +36,7 @@ struct Scheduler_event
     Com_mail*                   mail                        ();
     void                    set_scheduler_terminates        ( bool b )                              { _scheduler_terminates = b; }
     void                    set_error                       ( const Xc_copy& x )                    { _error    = x; }
+    void                    set_count                       ( int c )                               { _count    = c; }
     void                    set_log_path                    ( const string& path )                  { _log_path = path; }
     void                    set_subject                     ( const string& subject )               { _subject  = remove_password( subject ); }
     void                    set_body                        ( const string& body )                  { _body     = remove_password( body    ); }
@@ -45,12 +48,14 @@ struct Scheduler_event
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
     Event_code                 _event_code;
+    Time                       _timestamp;
     Log_level                  _severity;
     bool                       _scheduler_terminates;
     Scheduler_object*          _object;
     ptr<IUnknown>              _object_iunknown;            // Hält das Objekt (IUnknown ist die gemeinsame eindeutige Oberklasse)
     string                     _log_path;
     Xc_copy                    _error;
+    int                        _count;
     ptr<Com_mail>              _mail;                       
     string                     _subject;
     string                     _body;

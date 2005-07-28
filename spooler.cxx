@@ -489,10 +489,11 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
     state_element.setAttribute( "host"                 , _hostname );
 
     if( _need_db )
-    state_element.setAttribute( "need_db"              , _need_db? "yes" : "no" );
+    state_element.setAttribute( "need_db"              , _need_db? _wait_endless_for_db_open? "yes" : "strict" 
+                                                                 : "no" );
 
-    if( _wait_endless_for_db_open )
-    state_element.setAttribute( "wait_endless_for_db"  , _wait_endless_for_db_open? "yes" : "no" );
+  //if( _wait_endless_for_db_open )
+  //state_element.setAttribute( "wait_endless_for_db"  , _wait_endless_for_db_open? "yes" : "no" );
 
     if( _tcp_port )
     state_element.setAttribute( "tcp_port"             , _tcp_port );
@@ -1503,7 +1504,6 @@ void Spooler::load_arg()
     _db_name                    =            read_profile_string    ( _factory_ini, "spooler", "db"                 );
 
     // need_db=yes|no|strict
-  //_need_db                    =            read_profile_bool      ( _factory_ini, "spooler", "need_db"            , true                );
     string need_db_str          =            read_profile_string    ( _factory_ini, "spooler", "need_db"            , "no"                );
     if( stricmp( need_db_str.c_str(), "strict" ) == 0 )
     {

@@ -15,15 +15,17 @@ string Scheduler_event::name_of_event_code( Event_code event_code )
 {
     switch( event_code )
     {
-        case evt_none:              return "none";
-        case evt_unknown:           return "unknown";
-        case evt_scheduler_started: return "scheduler_started";
-        case evt_job_error:         return "job_error";
-        case evt_task_ended:        return "task_ended";
-        case evt_disk_full:         return "disk_full";
-        case evt_database_error:    return "database_error";
-        case evt_task_start_error:  return "task_start_error";
-        default:                    return S() << "Event_code(" << event_code << ")";
+        case evt_none:                          return "none";
+        case evt_unknown:                       return "unknown";
+        case evt_scheduler_started:             return "scheduler_started";
+        case evt_job_error:                     return "job_error";
+        case evt_task_ended:                    return "task_ended";
+        case evt_disk_full:                     return "disk_full";
+        case evt_database_error:                return "database_error";
+        case evt_database_error_switch_to_file: return "database_error_switch_to_file";
+        case evt_database_error_abort:          return "database_error_abort";
+        case evt_task_start_error:              return "task_start_error";
+        default:                                return S() << "Event_code(" << event_code << ")";
     }
 }
 
@@ -32,11 +34,12 @@ string Scheduler_event::name_of_event_code( Event_code event_code )
 Scheduler_event::Scheduler_event( Event_code event_code, Log_level severity, Scheduler_object* object )
 :
     _zero_(this+1),
+    _spooler(object->_spooler),
     _event_code(event_code),
+    _timestamp( Time::now() ),
     _severity(severity),
     _object(object),
-    _object_iunknown( object->_my_iunknown ),
-    _spooler(object->_spooler)
+    _object_iunknown( object->_my_iunknown )
 {
     assert( _object_iunknown );
 }
@@ -53,16 +56,20 @@ xml::Document_ptr Scheduler_event::dom()
     xml::Element_ptr scheduler_event_element = event_dom.createElement( "scheduler_event" );
     event_dom.appendChild( scheduler_event_element  );
 
-    scheduler_event_element.setAttribute( "time"        , Time::now().xml_value() );
-    scheduler_event_element.setAttribute( "event"       , name_of_event_code( _event_code ) );
-    scheduler_event_element.setAttribute( "severity"    , name_of_log_level( _severity ) );
+    scheduler_event_element.setAttribute( "time"          , _timestamp.xml_value() );
+    scheduler_event_element.setAttribute( "event"         , name_of_event_code( _event_code ) );
+    scheduler_event_element.setAttribute( "severity"      , name_of_log_level( _severity ) );
     scheduler_event_element.setAttribute( "severity_value", (int)_severity );
 
     if( _scheduler_terminates )
     scheduler_event_element.setAttribute( "scheduler_terminates", _scheduler_terminates? "yes" : "no" );
 
     scheduler_event_element.setAttribute( "object_type" , Scheduler_object::name_of_type_code( _object->scheduler_type_code() ) );
-    scheduler_event_element.setAttribute( "log_file"    , _log_path );
+    scheduler_event_element.setAttribute_optional( "log_file"    , _log_path );
+
+    if( _count )
+    scheduler_event_element.setAttribute( "count", _count );
+
 
     switch( _object->scheduler_type_code() )
     {
