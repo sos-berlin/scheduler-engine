@@ -384,11 +384,11 @@ xml::Element_ptr Command_processor::execute_start_job( const xml::Element_ptr& e
 
     Time start_at;
 
-    if( !after_str.empty() )  start_at = Time::now() + Time( as_int( after_str ) );
-
     if( at_str == ""       )  at_str = "now";
     if( at_str == "period" )  start_at = 0;                                     // start="period" => start_at = 0 (sobald eine Periode es zulässt)
                         else  start_at = (Sos_optional_date_time) at_str;       // 
+
+    if( !after_str.empty() )  start_at = Time::now() + Time( as_int( after_str ) );     // Entweder at= oder after=
 
     ptr<Com_variable_set> pars = new Com_variable_set;
 

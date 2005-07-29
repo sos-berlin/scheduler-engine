@@ -440,8 +440,6 @@ void Subprocess_register::wait()
         
         throw_xc( x );
     }
-    //if( signal_subprocess )  throw_xc( "SCHEDULER-219", "si=" + as_string( signal_subprocess->_process.termination_signal() ) + "  " + signal_subprocess->_process.command_line(), signal_subprocess->_process.pid()  );
-    //if( error_subprocess  )  throw_xc( "SCHEDULER-218", as_string( error_subprocess ->_process.exit_code()          ), as_string( error_subprocess ->_process.pid() ), error_subprocess ->_process.command_line() );
 }
 
 //-------------------------------------------------------------------------------------------------
