@@ -33,7 +33,7 @@ public class Subprocess  extends Idispatch
     public int              exit_code           ()                                  { return     int_com_call( "<exit_code" ); }
 
 
-    /** Verhindert, dass der Job stoppt, wenn der Subprozess bei Task-Ende mit exit_code != 0 geendet hat.
+    /** Verhindert, dass der Job stoppt, wenn der Subprozess bei Task-Ende mit exit_code <> 0 geendet hat.
       * <p/>
       *  Wenn das Ende des Subprocesses nicht mit {@link #wait_for_termination()} oder {@link #wait_for_termination(double)} 
       * abgewartet worden ist, tut das der Scheduler bei Task-Ende.
