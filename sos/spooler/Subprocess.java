@@ -33,21 +33,39 @@ public class Subprocess  extends Idispatch
     public int              exit_code           ()                                  { return     int_com_call( "<exit_code" ); }
 
 
-    /** Wenn ignore_error nicht gesetzt ist und der Subprozess mit exit_code != 0 endet, 
-      * dann stoppt der Job mit Fehler. 
+    /** Verhindert, dass der Job stoppt, wenn der Subprozess bei Task-Ende mit exit_code != 0 geendet hat.
+      * <p/>
+      *  Wenn das Ende des Subprocesses nicht mit {@link #wait_for_termination()} oder {@link #wait_for_termination(double)} 
+      * abgewartet worden ist, tut das der Scheduler bei Task-Ende.
+      * Wenn dann der Subprocess mit {@link #exit_code()} != 0 endet, stoppt der Job mit Fehler.
+      * <p/>
+      * Mit set_ignore_error( true ) kann das verhindert werden.
+      * {@link #wait_for_termination()} 
       */
     public void         set_ignore_error        ( boolean b )                       {                com_call( ">ignore_error", b ); }
 
 
+    /**
+      * @see #set_ignore_error(boolean)
+      */
     public boolean          ignore_error        ()                                  { return boolean_com_call( "<ignore_error" ); }
 
 
-    /** Wenn ignore_signal nicht gesetzt ist und der Subprozess mit einem Signal endet (nur Unix),
-        dann stoppt der Job mit Fehler.
-        */
+    /** Verhindert, dass der Job stoppt, wenn der Subprozess bei Task-Ende mit Signal (nur Unix) geendet hat.
+      * <p/>
+      * Wenn das Ende des Subprocesses nicht mit {@link #wait_for_termination()} oder {@link #wait_for_termination(double)} 
+      * abgewartet worden ist, tut das der Scheduler bei Task-Ende.
+      * Wenn dann der Subprocess mit Signal endet, stoppt der Job mit Fehler.
+      * <p/>
+      * Mit set_ignore_signal(true) kann das verhindert werden.
+      * {@link #wait_for_termination()} 
+      */
     public void         set_ignore_signal       ( boolean b )                       {                com_call( ">ignore_signal", b ); }
 
 
+    /**
+      * @see #set_ignore_signal(boolean)
+      */
     public boolean          ignore_signal       ()                                  { return boolean_com_call( "<ignore_signal" ); }
 
 
@@ -61,11 +79,15 @@ public class Subprocess  extends Idispatch
     
 
     /** Wartet aufs Ende des Subprocesses. 
-        @return true, wenn der Subprozess geendet hat */
+      * @return true, wenn der Subprozess geendet hat 
+      * @see #wait_for_termination()
+      */
     public boolean          wait_for_termination( double seconds )                  { return boolean_com_call( "wait_for_termination", new Double( seconds ) ); }
 
 
-    /** Wartet aufs Ende des Subprocesses. */
+    /** Wartet aufs Ende des Subprocesses. 
+      * @see #wait_for_termination(double)
+      */
     public void             wait_for_termination()                                  {                com_call( "wait_for_termination" ); }
 
 
