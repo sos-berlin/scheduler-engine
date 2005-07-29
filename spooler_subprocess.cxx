@@ -55,7 +55,7 @@ const Com_method Subprocess::_methods[] =
     COM_PROPERTY_GET( Subprocess, 12, Ignore_signal  , VT_BOOL    , 0 ),
     COM_PROPERTY_PUT( Subprocess, 13, Timeout        ,              0, VT_R8 ),
     COM_METHOD      ( Subprocess, 14, Wait_for_termination, VT_BOOL   , 1, VT_BYREF|VT_VARIANT ),
-    COM_METHOD      ( Subprocess, 15, Kill           , VT_EMPTY   , 0, VT_INT  ),
+    COM_METHOD      ( Subprocess, 15, Kill           , VT_EMPTY   , 1, VT_INT  ),
     COM_PROPERTY_PUT( Subprocess, 16, Environment    ,              0, VT_BSTR, VT_BSTR ),
   //COM_PROPERTY_PUT( Subprocess, 17, Show_window    ,              0, VT_BYREF|VT_VARIANT ),
 #endif
@@ -440,6 +440,8 @@ void Subprocess_register::wait()
         
         throw_xc( x );
     }
+    //if( signal_subprocess )  throw_xc( "SCHEDULER-219", "si=" + as_string( signal_subprocess->_process.termination_signal() ) + "  " + signal_subprocess->_process.command_line(), signal_subprocess->_process.pid()  );
+    //if( error_subprocess  )  throw_xc( "SCHEDULER-218", as_string( error_subprocess ->_process.exit_code()          ), as_string( error_subprocess ->_process.pid() ), error_subprocess ->_process.command_line() );
 }
 
 //-------------------------------------------------------------------------------------------------
