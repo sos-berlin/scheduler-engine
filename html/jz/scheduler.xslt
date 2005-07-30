@@ -1372,7 +1372,7 @@
         
         <xsl:choose>
             <xsl:when test="parent::job/@delay_until">
-                <xsl:text> (delay_after_error)</xsl:text>
+                <xsl:text> (delayed after error)</xsl:text>
             </xsl:when>
             <xsl:when test="parent::job/@in_period='no'">
                 <xsl:text> (not in period)</xsl:text>
