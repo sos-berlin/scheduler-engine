@@ -74,6 +74,10 @@
             bis er eine Periode mit <code>single_start</code> oder <code>repeat</code> erreicht.
         </xml_attribute>
 
+        <xml_attribute name="delay_after_error" type="yyyy-mm-dd hh:mm:ss.mmm" title="delay_after_error ist nach einem Fehler wirksam" />
+
+        <xml_attribute name="in_period" type="yes|no" title="Wenn gerade eine &lt;period&gt; wirksam ist" />
+
         <xml_attribute name="has_description" type="yes" title="yes, wenn der Job eine &lt;description&gt; hat"/>
     </xml_attributes>
     

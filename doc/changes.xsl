@@ -46,11 +46,11 @@
             <tbody>
                 <tr>
                     <td valign="top">
-                        <span style="font-weight: bold">
+                        <span style="font-weight: bold; white-space: nowrap">
                             <xsl:value-of select="@version"/>.<xsl:value-of select="@subversion_revision"/>&#160;
                         </span>
                     </td>
-                    <td valign="top" style="padding-left: 1ex">
+                    <td valign="top" style="padding-left: 1ex; white-space: nowrap">
                         <span style="font-weight: bold">
                             <xsl:value-of select="@date"/>
                         </span>

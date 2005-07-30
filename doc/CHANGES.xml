@@ -8,6 +8,35 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2005-07-30" version="2.0.134" subversion_revision="3812">
+        <revision type="new" title="delay_after_error erzeugt neue Task">
+            <description>
+                <p>
+                    Eine Task, für die nach einem Fehler 
+                    <scheduler_method class="Job" property="delay_after_error" java_signature="int, double" access="write"/> 
+                    wirksam wird, 
+                    fügt der Scheduler jetzt (mit neuer Kennung) erneut in die Task-Warteschlange ein.
+                    Dabei werden die Task-Parameter übernommen.
+                </p>
+                <p>
+                    Das gilt nicht für Auftragsjobs.
+                    Für die wird wie bisher keine neue Task gestartet, 
+                    denn der Start wird durch den evtl. anstehenden Auftrag angestossen.
+                </p>
+            </description>
+        </revision>
+
+        <revision type="new" title="Neue Attribute delay_after_error= und in_period= im Antwort-XML-Element &lt;job&gt;">
+            <description>
+                <p>
+                    Siehe <scheduler_element directory="xml/answer/" name="job" attribute="delay_after_error"/>
+                    <br/>
+                    und <scheduler_element directory="xml/answer/" name="job" attribute="in_period"/>.
+                </p>
+            </description>
+        </revision>
+    </change>
+
     <change date="2005-07-04" version="2.0.133" subversion_revision="3786">
         <revision type="new" title="XSLT-Stylesheets für eMails">
             <description>
