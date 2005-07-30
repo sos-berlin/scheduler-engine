@@ -826,12 +826,20 @@
                                             </xsl:call-template>
                                         </xsl:when>
                                         <xsl:otherwise>
+                                            <xsl:if test="$job/@next_start_time">
+                                                <xsl:text>, </xsl:text>
+                                                <span style="white-space: nowrap">
+                                                    <xsl:value-of select="$job/@next_start_time__xslt_date_or_time_with_diff"/>
+                                                </span>
+                                            </xsl:if>
+                                            <!--
                                             <xsl:if test="$job/order_queue/@next_start_time">
                                                 <xsl:text>, </xsl:text>
                                                 <span style="white-space: nowrap">
                                                     <xsl:value-of select="$job/order_queue/@next_start_time__xslt_date_or_time_with_diff"/>
                                                 </span>
                                             </xsl:if>
+                                            -->
                                         </xsl:otherwise>
                                     </xsl:choose>
                                 </td>
@@ -1347,15 +1355,30 @@
 
     <xsl:template match="job/@state">
         <xsl:choose>
-            <xsl:when test=".='pending' or .='running'">
+            <xsl:when test=".='pending'">
                 <xsl:value-of select="."/>
             </xsl:when>
+            
+            <xsl:when test=".='running'">
+                <xsl:value-of select="."/>
+            </xsl:when>
+            
             <xsl:otherwise>
                 <span class="job_error">
                     <xsl:value-of select="."/>
                 </span>
             </xsl:otherwise>
         </xsl:choose>
+        
+        <xsl:choose>
+            <xsl:when test="parent::job/@delay_until">
+                <xsl:text> (delay_after_error)</xsl:text>
+            </xsl:when>
+            <xsl:when test="parent::job/@in_period='no'">
+                <xsl:text> (not in period)</xsl:text>
+            </xsl:when>
+        </xsl:choose>                
+
     </xsl:template>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Detailsicht einer Task-->

@@ -94,17 +94,18 @@ scheduler hallo_welt.xml
 <pre>
 
 &lt;<a class="silent" href="xml/spooler.xml">spooler</a>>
-    &lt;<a class="silent" href="xml/config.xml">config</a> spooler_id      = ""
-            main_scheduler  = "hostname:4444"
-            port            = "4444"
-            tcp_port        = "4444"
-            udp_port        = "4444"
-            param           = "…"
-            log_dir         = "…"
-            include_path    = "…"
-            priority_max    = "1000"
-            java_class_path = "…"
-            java_options    = "…"    >
+    &lt;<a class="silent" href="xml/config.xml">config</a> spooler_id          = ""
+            main_scheduler       = "hostname:4444"
+            port                 = "4444"
+            tcp_port             = "4444"
+            udp_port             = "4444"
+            param                = "…"
+            log_dir              = "…"
+            include_path         = "…"
+            priority_max         = "1000"
+            mail_xslt_stylesheet = "…"
+            java_class_path      = "…"
+            java_options         = "…"    >
 
         &lt;<a class="silent" href="xml/base.xml">base</a> file="…"/>
 

@@ -290,6 +290,9 @@ xml::Element_ptr Task::dom_element( const xml::Document_ptr& document, const Sho
         task_element.setAttribute( "task"              , _id );
         task_element.setAttribute( "state"           , state_name() );
 
+        if( _delayed_after_error_task_id )
+        task_element.setAttribute( "delayed_after_error_task", _delayed_after_error_task_id );
+
         if( _thread )
         task_element.setAttribute( "thread"          , _thread->name() );
 
@@ -1510,6 +1513,21 @@ void Task::finish()
             else
             {
                 _job->_delay_until = Time::now() + delay;
+
+                if( !_job->order_queue() )
+                {
+                    try
+                    {
+                        ptr<Task> task = _job->start( +_params, _name );   // Keine Startzeit: Nach Periode und _delay_until richten
+                        task->_delayed_after_error_task_id = id();
+                    }
+                    catch( exception& x )
+                    {
+                        _log->error( x.what() );
+                        _job->_delay_until = 0;
+                        _job->stop( false );
+                    }
+                }
             }
         }
     }
@@ -1524,7 +1542,6 @@ void Task::finish()
     // eMail versenden
     {
         Scheduler_event event ( Scheduler_event::evt_task_ended, _log->highest_level(), this );
-        if( _error )  event.set_error( _error );
         trigger_event( &event );
     }
 }
@@ -1537,10 +1554,8 @@ void Task::trigger_event( Scheduler_event* scheduler_event )
     {
         _log->set_mail_from_name( _job->profile_section() );
 
-
-        Scheduler_event event ( Scheduler_event::evt_task_ended, _log->highest_level(), this );
-        if( _error )  event.set_error( _error );
-        event.set_message( _log->highest_msg() );
+        scheduler_event->set_message( _log->highest_msg() );
+        if( _error )  scheduler_event->set_error( _error );
 
         bool is_error = has_error();
 
@@ -1574,7 +1589,7 @@ void Task::trigger_event( Scheduler_event* scheduler_event )
 
         _log->set_mail_body( body + "Das Jobprotokoll liegt dieser Nachricht bei." );   //, is_error );
 
-        _log->send( has_error() || _log->highest_level() >= log_error? -1 : _step_count, &event );
+        _log->send( has_error() || _log->highest_level() >= log_error? -1 : _step_count, scheduler_event );
 
         /*
         if( !_spooler->_manual )

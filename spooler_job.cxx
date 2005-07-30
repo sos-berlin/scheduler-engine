@@ -1668,11 +1668,17 @@ xml::Element_ptr Job::dom_element( const xml::Document_ptr& document, const Show
 
         if( _state_cmd         )  job_element.setAttribute( "cmd"    , state_cmd_name()  );
 
-        //if( _next_start_time < latter_day )
-        //job_element.setAttribute( "next_start_time", _next_start_time.as_string() );
+        if( _next_start_time < latter_day )
+        job_element.setAttribute( "next_start_time", _next_start_time.as_string() );
 
+        if( _delay_until )
+        job_element.setAttribute( "delay_until", _delay_until.as_string() );
+
+        job_element.setAttribute( "in_period", is_in_period()? "yes" : "no" );
+/*
         if( _state == s_pending )
         {
+
             // Versuchen, nächste Startzeit herauszubekommen
             Period p             = _period;  
             int    i             = 100;      // Anzahl Perioden, die wir probieren
@@ -1704,6 +1710,7 @@ xml::Element_ptr Job::dom_element( const xml::Document_ptr& document, const Show
             if( _order_queue )  next = min( next, _order_queue->next_time() );
             if( next < latter_day )  job_element.setAttribute( "next_start_time", next.as_string() );
         }
+*/
 
         if( show & show_run_time )  job_element.appendChild( _run_time->dom_element( document ) );
 

@@ -249,6 +249,7 @@ struct Task : Object,
     bool                       _kill_immediately;
     bool                       _closed;
     bool                       _signaled;
+    int                        _delayed_after_error_task_id;
 
 
     Time                       _enqueue_time;
