@@ -8,6 +8,20 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2005-08-01" version="2.0.134" subversion_revision="3814">
+        <revision type="new" title="Subprocess.termination_signal">
+            <description>
+                <p>
+                    <scheduler_method class="Subprocess" property="termination_signal" /> 
+                    liefert unter Unix 0 oder die Nummer des Signals, mit dem der Subprozess endete.
+                </p>
+                <p>
+                    Unter Windows liefert die Methode 0.
+                </p>
+            </description>
+        </revision>
+    </change>
+
     <change date="2005-07-30" version="2.0.134" subversion_revision="3812">
         <revision type="new" title="delay_after_error erzeugt neue Task">
             <description>
