@@ -1193,6 +1193,9 @@ library Spooler
         [propget]
         HRESULT                 Exit_code               ( [out,retval] int* );
 
+        [propget]
+        HRESULT                 Termination_signal      ( [out,retval] int* );
+
       //[propput]
       //HRESULT                 Stdout_path             ( [in] BSTR );
 

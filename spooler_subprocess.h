@@ -55,6 +55,7 @@ struct Subprocess : idispatch_implementation< Subprocess, spooler_com::Isubproce
     STDMETHODIMP            get_Pid                         ( int* result )                         { return _process.get_Pid( result ); }
     STDMETHODIMP            get_Terminated                  ( VARIANT_BOOL* result )                { return _process.get_Terminated( result ); }
     STDMETHODIMP            get_Exit_code                   ( int* result )                         { return _process.get_Exit_code( result ); }
+    STDMETHODIMP            get_Termination_signal          ( int* result )                         { return _process.get_Termination_signal( result ); }
     STDMETHODIMP            put_Stdout_path                 ( BSTR path )                           { _process.set_stdout_path( string_from_bstr( path ) );  return S_OK; }
     STDMETHODIMP            get_Stdout_path                 ( BSTR* result )                        { return String_to_bstr( _process.stdout_path(), result ); }
     STDMETHODIMP            put_Stderr_path                 ( BSTR path )                           { _process.set_stderr_path( string_from_bstr( path ) );  return S_OK; }

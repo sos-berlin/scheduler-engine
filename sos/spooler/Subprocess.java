@@ -26,11 +26,20 @@ public class Subprocess  extends Idispatch
     public int              pid                 ()                                  { return     int_com_call( "<pid" ); }
 
 
+    /** Pr¸ft, ob der Prozess geendet hat.
+      * Wenn er geendet hat, kann
+      * anschlieﬂend {@link #exit_code()} und {@link #termination_signal} gerufen werden.
+      * @see #wait_for_termination()
+      * @see #wait_for_termination(double)
+      */
     public boolean          terminated          ()                                  { return boolean_com_call( "<terminated" ); }
 
 
     /** Erst aufrufen, wenn {@link #terminated()} == true. */
     public int              exit_code           ()                                  { return     int_com_call( "<exit_code" ); }
+
+    /** Erst aufrufen, wenn {@link #terminated()} == true. */
+    public int              termination_signal  ()                                  { return     int_com_call( "<termination_signal" ); }
 
 
     /** Verhindert, dass der Job stoppt, wenn der Subprozess bei Task-Ende mit exit_code <> 0 geendet hat.
@@ -79,6 +88,7 @@ public class Subprocess  extends Idispatch
     
 
     /** Wartet aufs Ende des Subprocesses. 
+      * Anschlieﬂend kann {@link #exit_code()} und {@link #termination_signal} gerufen werden.
       * @return true, wenn der Subprozess geendet hat 
       * @see #wait_for_termination()
       */
@@ -86,6 +96,7 @@ public class Subprocess  extends Idispatch
 
 
     /** Wartet aufs Ende des Subprocesses. 
+      * Anschlieﬂend kann {@link #exit_code()} und {@link #termination_signal} gerufen werden.
       * @see #wait_for_termination(double)
       */
     public void             wait_for_termination()                                  {                com_call( "wait_for_termination" ); }

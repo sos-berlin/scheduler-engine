@@ -579,6 +579,7 @@ struct Isubprocess : IDispatch
     virtual HRESULT     get_Pid                     ( int* )                                        = 0;
     virtual HRESULT     get_Terminated              ( VARIANT_BOOL* )                               = 0;
     virtual HRESULT     get_Exit_code               ( int* )                                        = 0;
+    virtual HRESULT     get_Termination_signal      ( int* )                                        = 0;
   //virtual HRESULT     get_Stdout_path             ( BSTR* )                                       = 0;
   //virtual HRESULT     get_Stderr_path             ( BSTR* )                                       = 0;
     virtual HRESULT     put_Ignore_error            ( VARIANT_BOOL )                                = 0;
