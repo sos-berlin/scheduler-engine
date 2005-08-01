@@ -42,15 +42,15 @@
     
     <xsl:template match="change">
 
-        <table>
+        <table width="100%" style="border-top: 1px solid #f0f0f0; margin-top: 1ex">
             <tbody>
                 <tr>
-                    <td valign="top">
+                    <td valign="top" width="50">
                         <span style="font-weight: bold; white-space: nowrap">
                             <xsl:value-of select="@version"/>.<xsl:value-of select="@subversion_revision"/>&#160;
                         </span>
                     </td>
-                    <td valign="top" style="padding-left: 1ex; white-space: nowrap">
+                    <td valign="top" width="80" style="padding-left: 1ex; white-space: nowrap">
                         <span style="font-weight: bold">
                             <xsl:value-of select="@date"/>
                         </span>
@@ -61,7 +61,7 @@
                 </tr>
             </tbody>
         </table>
-    
+        
     </xsl:template>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~revision-->
@@ -79,7 +79,6 @@
         <xsl:if test="description">
             <p style="margin-top: 1ex">&#160;</p>
             <xsl:apply-templates select="description"/>
-            <p style="margin-top: 2ex">&#160;</p>
         </xsl:if>
     
     </xsl:template>
