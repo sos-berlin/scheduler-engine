@@ -300,6 +300,16 @@
             </description>
         </xml_attribute>
 
+        <xml_attribute name="delayed_after_error_task" type="zahl">
+            <description>
+                <p>
+                    Wenn diese Task eine Wiederholung einer mit Fehler abgebrochen Task ist
+                    (s. <scheduler_method class="Job" property="delay_after_error" java_signature="int, double" access="write"/>),
+                    dann gibt dieses Attribut die Kennung der fehlerhaften Task an.                    
+                </p>
+            </description>
+        </xml_attribute>
+
     </xml_attributes>
     
     <xml_child_elements>

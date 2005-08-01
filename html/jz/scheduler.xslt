@@ -1567,7 +1567,13 @@
                     </td>
 
                     <td><xsl:value-of select="@enqueued__xslt_date_or_time"        disable-output-escaping="yes"/></td>
-                    <td><xsl:value-of select="@start_at__xslt_datetime_with_diff"  disable-output-escaping="yes"/></td>
+                    <td>
+                        <xsl:value-of select="@start_at__xslt_datetime_with_diff"  disable-output-escaping="yes"/>
+                        <xsl:if test="@delayed_after_error_task">
+                            <xsl:text>, </xsl:text>
+                            delay_after_error of task <xsl:value-of select="@delayed_after_error_task"/>
+                        </xsl:if>
+                    </td>
                 </tr>
             </xsl:for-each>
         </table>

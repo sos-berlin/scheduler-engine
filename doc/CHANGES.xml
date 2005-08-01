@@ -40,6 +40,14 @@
             </description>
         </revision>
 
+        <revision type="new" title="Neues Attribut delayed_after_error_task im Antwort-XML-Element &lt;task&gt;">
+            <description>
+                <p>
+                    Siehe <scheduler_element directory="xml/answer/" name="task" attribute="delayed_after_error_task"/>.
+                </p>
+            </description>
+        </revision>
+        
         <revision type="new" title="Neue Attribute delay_after_error= und in_period= im Antwort-XML-Element &lt;job&gt;">
             <description>
                 <p>
@@ -49,6 +57,7 @@
                 </p>
             </description>
         </revision>
+        
     </change>
 
     <change date="2005-07-04" version="2.0.133" subversion_revision="3786">
