@@ -1341,8 +1341,6 @@ void Order::postprocessing( bool success )
                 }
                 else 
                 {
-                  //_period_once = false;
-                    
                     Time next_start = next_start_time();
                     if( next_start != latter_day )
                     {
@@ -1479,16 +1477,14 @@ Time Order::next_start_time( bool first_call )
         {
             _period = _run_time->next_period( now, time::wss_next_period_or_single_start );  
             result = _period.begin();
-          //_period_once = true;
         }
         else
-      //if( _period.begin() <= now  &&  _period.repeat() < latter_day )
         {
             result = now + _period.repeat();
 
-            if( result >= _period.end() )
+            if( _period.is_single_start()  ||  result >= _period.end() )       // Periode am Ende?
             {
-                Period next_period = _run_time->next_period( result == latter_day? _period.end() : result, time::wss_next_begin_or_single_start );  
+                Period next_period = _run_time->next_period( result == latter_day? _period.is_single_start()? now : _period.end() : result, time::wss_next_begin );
 
                 if( _period.end()    != next_period.begin()  
                  || _period.repeat() != next_period.repeat() )
@@ -1497,12 +1493,18 @@ Time Order::next_start_time( bool first_call )
                 }
 
                 _period = next_period;
-              //_period_once = true;
+            }
+
+
+            // Aber gibt es ein single_start vorher?
+
+            Period next_single_start_period = _run_time->next_period( now, time::wss_next_single_start );
+            if( result > next_single_start_period.begin() )
+            {
+                _period = next_single_start_period;
+                result  = next_single_start_period.begin();
             }
         }
-
-      //if( result == latter_day )  result = _period.begin();
-      //if( result == latter_day  &&  ( first_call || _period._repeat != latter_day ) )  result = _period.begin();
 
         if( result < now )  result = 0;
 

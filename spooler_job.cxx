@@ -1660,7 +1660,7 @@ xml::Element_ptr Job::dom_element( const xml::Document_ptr& document, const Show
         job_element.setAttribute( "state_text", _state_text             );
 
         job_element.setAttribute( "log_file"  , _log->filename()         );
-        job_element.setAttribute( "order"     , _order_queue? "yes" : "no" );
+        job_element.setAttribute( "order"     , order_controlled()? "yes" : "no" );
         job_element.setAttribute( "tasks"     , _max_tasks              );
 
 

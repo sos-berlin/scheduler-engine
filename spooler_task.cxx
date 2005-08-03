@@ -1514,7 +1514,7 @@ void Task::finish()
             {
                 _job->_delay_until = Time::now() + delay;
 
-                if( !_job->order_queue() )
+                if( !_job->order_controlled() )
                 {
                     try
                     {

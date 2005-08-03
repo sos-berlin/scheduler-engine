@@ -8,6 +8,18 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2005-08-03" version="2.0.134" subversion_revision="3817">
+        <revision type="correction" title="Order &lt;period single_start&gt; korrigiert">
+            <description>
+                <p>
+                    Der nächste Single_start bei einem Auftrag mit 
+                    <scheduler_element name="period" attrbute="single_start"/> 
+                    wird jetzt korrekt ausgeführt.
+                </p>
+            </description>
+        </revision>
+    </change>
+
     <change date="2005-08-01" version="2.0.134" subversion_revision="3814">
         <revision type="new" title="Subprocess.termination_signal">
             <description>
