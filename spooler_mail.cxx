@@ -46,6 +46,7 @@ const Com_method Com_mail::_methods[] =
     { DISPATCH_PROPERTYGET, 13, "Xslt_stylesheet_path" , (Com_method_ptr)&Com_mail::get_Xslt_stylesheet_path, VT_BSTR },
     { DISPATCH_PROPERTYPUT, 13, "Xslt_stylesheet_path" , (Com_method_ptr)&Com_mail::put_Xslt_stylesheet_path, VT_EMPTY, { VT_BSTR } },
     { DISPATCH_PROPERTYPUT, 14, "Xslt_stylesheet" , (Com_method_ptr)&Com_mail::get_Xslt_stylesheet, VT_DISPATCH },
+    { DISPATCH_PROPERTYGET, 15, "Java_class_name" , (Com_method_ptr)&Com_mail::get_Java_class_name, VT_BSTR },
     {}
 };
 

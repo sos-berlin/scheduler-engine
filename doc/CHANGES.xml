@@ -8,6 +8,16 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2005-08-04" version="2.0.134" subversion_revision="3818">
+        <revision type="correction" title="Klasse sos.spooler.Mail unter Unix/Java funktionsfähig">
+            <description>
+                <p>
+                    Unter Unix in Java war die Klasse sos.spooler.Mail nicht benutzbar (Fehlercode COM-80020009  DISP_E_EXCEPTION).
+                </p>
+            </description>
+        </revision>
+    </change>
+
     <change date="2005-08-03" version="2.0.134" subversion_revision="3817">
         <revision type="correction" title="Order &lt;period single_start&gt; korrigiert">
             <description>
