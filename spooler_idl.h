@@ -451,9 +451,6 @@ struct Ijob_chain_node : IDispatch
     virtual HRESULT     get_Error_node              ( Ijob_chain_node** result ) = 0;
 
     virtual HRESULT     get_Job                     ( Ijob** result )                               = 0;
-
-    virtual HRESULT         Add_or_replace_order    ( Iorder* )                                     = 0;
-
 };
 
 //-------------------------------------------------------------------------------------Job_chain
@@ -478,6 +475,8 @@ struct Ijob_chain : IDispatch
                                                       VARIANT* input_state,
                                                       VARIANT* output_state,
                                                       VARIANT* error_state )                        = 0;
+
+    virtual HRESULT         Add_or_replace_order    ( Iorder* )                                     = 0;
 
     virtual HRESULT         Add_end_state           ( VARIANT* state )                              = 0;
 

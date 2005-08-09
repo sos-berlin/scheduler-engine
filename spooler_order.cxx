@@ -1342,7 +1342,7 @@ bool Order::try_add_to_job_chain( Job_chain* job_chain )
             _is_in_database = true;
         }
 
-        set_state( _state, _run_time->set()? next_start_time( true ) : 0 );
+        set_state( _state, _run_time->set()? next_start_time( true ) : Time(0) );
     }
 
     return true;
@@ -1557,16 +1557,13 @@ void Order::setback_()
 
 //------------------------------------------------------------------------------------Order::set_at
 
-void Order::set_at( const Time& time, bool force )
+void Order::set_at( const Time& time )
 {
     //THREAD_LOCK( _lock )
     {
-        if( !force )
-        {
-            assert_no_task();
-            if( _moved      )  throw_xc( "SCHEDULER-188", obj_name() );
-            if( _job_chain  )  throw_xc( "SCHEDULER-186", obj_name(), _job_chain->name() );
-        }        
+        assert_no_task();
+        if( _moved      )  throw_xc( "SCHEDULER-188", obj_name() );
+        if( _job_chain  )  throw_xc( "SCHEDULER-186", obj_name(), _job_chain->name() );
 
         set_state( _state, time );
 
@@ -1646,7 +1643,7 @@ void Order::before_modify_event()
 
 void Order::modified_event()
 {
-    set_state( _state, _run_time->set()? next_start_time( true ) : 0 );
+    set_state( _state, _run_time->set()? next_start_time( true ) : Time(0) );
 }
 
 //------------------------------------------------------------------------------Order::set_run_time

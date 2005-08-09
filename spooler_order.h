@@ -89,7 +89,7 @@ struct Order : Com_order,
     void                        add_to_job              ( const string& job_name );
 
     void                        setback_                ();
-    void                    set_at                      ( const Time&, bool force = false );
+    void                    set_at                      ( const Time& );
     Time                        at                      ()                                          { return _setback; }
   //void                    set_run_time_xml            ( const string& );
     Time                        next_start_time         ( bool first_call = false );
