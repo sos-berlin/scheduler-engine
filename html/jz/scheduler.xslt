@@ -558,7 +558,7 @@
                             <xsl:when test="../../@order='yes'">
                                 <td class="order">
                                     <xsl:if test="@state!='running'">
-                                        <xsl:value-of select="@state"/>
+                                        <xsl:apply-templates select="@state" />
                                         <xsl:text> </xsl:text>
                                     </xsl:if>
                                     <xsl:if test="order">
@@ -583,7 +583,7 @@
                             </xsl:when>
                             <xsl:otherwise>
                                 <td>
-                                    <xsl:value-of select="@state"/>
+                                    <xsl:apply-templates select="@state" />
                                     <xsl:text> </xsl:text>
                                     <xsl:if test="@in_process_since!=''">
                                         <span class="small">
@@ -620,9 +620,9 @@
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Job_chains-->
 
     <xsl:template name="job_chains">
-        <xsl:param    name="job_chain_select"/>
-        <xsl:param    name="single"             select="false()"/>                              <!-- false: Mehrere im linken Frame,
-                                                                                                     true:  Eine Jobkette im rechten frame -->
+        <xsl:param name="job_chain_select"/>
+        <xsl:param name="single"             select="false()"/>     <!-- false: Mehrere im linken Frame,
+                                                                         true:  Eine Jobkette im rechten frame -->
         <xsl:variable name="max_orders">
             <xsl:choose>
                 <xsl:when test="$single">
@@ -981,10 +981,12 @@
                     <xsl:attribute name="class">order</xsl:attribute>
 
                     <xsl:element name="td">
-                        <xsl:attribute name="style">padding-left: 2ex</xsl:attribute>
-                        <xsl:if test="@task">
-                            <xsl:attribute name="style">font-weight: bold</xsl:attribute>
-                        </xsl:if>
+                        <xsl:attribute name="style">
+                            padding-left: 3ex;
+                            <xsl:if test="@task">
+                                font-weight: bold;
+                            </xsl:if>
+                        </xsl:attribute>
 
                         <span style="white-space: nowrap">
                             <xsl:value-of select="@id"/>&#160;
@@ -1420,7 +1422,7 @@
                                 </xsl:if>
                                 <xsl:if test="@state!=''">
                                     <xsl:text>, </xsl:text>
-                                    <xsl:value-of select="@state"/>
+                                    <xsl:apply-templates select="@state" />
                                 </xsl:if>
                                 <xsl:if test="@calling">
                                     <xsl:text> </xsl:text>(<xsl:value-of select="@calling"/>)
@@ -1523,6 +1525,23 @@
                 </xsl:for-each>
             </xsl:if>
         </table>
+    </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~task/@state-->
+
+    <xsl:template match="task/@state">
+        <xsl:choose>
+            <xsl:when test=".='suspended'">
+                <span class="task_error">
+                    <xsl:value-of select="."/>
+                </span>
+            </xsl:when>
+            
+            <xsl:otherwise>
+                <xsl:value-of select="."/>
+            </xsl:otherwise>
+        </xsl:choose>
+        
     </xsl:template>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~queued_tasks-->

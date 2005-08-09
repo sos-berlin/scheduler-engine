@@ -362,6 +362,22 @@ void Job_chain::finish()
                                          else  n->_error_state = empty_variant;
         }
 
+
+        if( zschimmer::Log_ptr log = "" )
+        {
+            log << "Job_chain " << _name << " finished\n:";
+
+            for( Chain::iterator it = _chain.begin(); it != _chain.end(); it++ )
+            {
+                Job_chain_node* n = *it;
+
+                log << "    job=" << ( n->_job? n->_job->_name : "(end)" );
+                log << " state=" << n->_state;
+                log << " next="  << n->_next_state;
+                log << " error=" << n->_error_state;
+                log << '\n';
+            }
+        }
     }
 }
 
@@ -483,7 +499,7 @@ void Job_chain::register_order( Order* order )
 
 void Job_chain::unregister_order( Order* order )
 {
-    THREAD_LOCK( _lock )
+    //THREAD_LOCK( _lock )
     {
         string id_string = string_from_variant( order->id() );
         Order_map::iterator it = _order_map.find( id_string );
@@ -515,7 +531,7 @@ xml::Element_ptr Order_queue::dom_element( const xml::Document_ptr& document, co
 {
     xml::Element_ptr element = document.createElement( "order_queue" );
 
-    THREAD_LOCK( _lock )
+    //THREAD_LOCK( _lock )
     {
         int queue_length = order_count( which_job_chain );
         element.setAttribute( "length", queue_length );
@@ -559,7 +575,7 @@ int Order_queue::order_count( Job_chain* which_job_chain )
     {
         int count = 0;
         
-        THREAD_LOCK( _lock ) 
+        //THREAD_LOCK( _lock ) 
         {
             FOR_EACH( Queue, _queue        , it )  if( (*it)->_job_chain == which_job_chain )  count++;
             FOR_EACH( Queue, _setback_queue, it )  if( (*it)->_job_chain == which_job_chain )  count++;
@@ -579,7 +595,7 @@ void Order_queue::add_order( Order* order )
 {
     // Wird von Order mit geperrtem order->_lock gerufen.
 
-    THREAD_LOCK( _lock )
+    //THREAD_LOCK( _lock )
     {
         if( order->_setback )
         {
@@ -660,7 +676,7 @@ void Order_queue::remove_order( Order* order )
 {
     // Wird von Order mit geperrtem order->_lock gerufen.
 
-    THREAD_LOCK( _lock )
+    //THREAD_LOCK( _lock )
     {
         if( order->_setback )
         {
@@ -713,7 +729,7 @@ Order* Order_queue::first_order( const Time& now )
 {
     // SEITENEFFEKT: Aufträge aus der _setback_queue, deren Rückstellungszeitpunkt erreicht ist, werden in die _queue verschoben.
 
-    THREAD_LOCK( _lock )
+    //THREAD_LOCK( _lock )
     {
         // Zurückgestellte Aufträge, deren Wartezeit abgelaufen ist, hervorholen
 
@@ -728,7 +744,7 @@ Order* Order_queue::first_order( const Time& now )
         }
 
 
-        FOR_EACH( Queue, _queue, o )  if( !(*o)->_task )  return *o;
+        FOR_EACH( Queue, _queue, o )  if( !(*o)->_task  &&  !(*o)->_replacement_for )  return *o;
     }
 
     return NULL;
@@ -743,7 +759,7 @@ ptr<Order> Order_queue::get_order_for_processing( const Time& now )
 
     ptr<Order> order;
 
-    THREAD_LOCK( _lock )
+    //THREAD_LOCK( _lock )
     {
         order = first_order( now );
 
@@ -763,7 +779,7 @@ ptr<Order> Order_queue::get_order_for_processing( const Time& now )
 
 Time Order_queue::next_time()
 {
-    THREAD_LOCK( _lock )
+    //THREAD_LOCK( _lock )
     {
         Order* o = first_order( 0 );
         if( o )  return o->_setback;
@@ -779,7 +795,7 @@ Time Order_queue::next_time()
 
 ptr<Order> Order_queue::order_or_null( const Order::Id& id )
 {
-    THREAD_LOCK( _lock )
+    //THREAD_LOCK( _lock )
     {
         FOR_EACH( Queue, _queue        , it )  if( (*it)->_id == id )  return *it;
         FOR_EACH( Queue, _setback_queue, it )  if( (*it)->_id == id )  return *it;
@@ -825,7 +841,7 @@ Order::Order( Spooler* spooler, const Record& record )
 
     init();
 
-    _id         = record.as_string( "id"         );
+    set_id      ( record.as_string( "id"         ) );
     _state      = record.as_string( "state"      );
     _state_text = record.as_string( "state_text" );
     _title      = record.as_string( "title"      );
@@ -847,12 +863,14 @@ Order::Order( Spooler* spooler, const Record& record )
                                 else  _payload = payload_string;
     }
 
-    string run_time_xml = record.as_string( "run_time" );
-    if( run_time_xml != "" )  set_run_time( xml::Document_ptr( run_time_xml ).documentElement() );
-
     _initial_state = record.as_string( "initial_state" );
 
     _created.set_datetime( record.as_string( "created_time" ) );
+
+    _log->set_prefix( obj_name() );
+
+    string run_time_xml = record.as_string( "run_time" );
+    if( run_time_xml != "" )  set_run_time( xml::Document_ptr( run_time_xml ).documentElement() );
 }
 
 //------------------------------------------------------------------------------------Order::~Order
@@ -866,7 +884,7 @@ Order::~Order()
 void Order::init()
 {
     _log = Z_NEW( Prefix_log( this ) );
-    _log->set_prefix( "Order" );
+    _log->set_prefix( obj_name() );
     _created = Time::now();
 
     set_run_time( NULL );
@@ -876,10 +894,17 @@ void Order::init()
 
 void Order::attach_task( Task* task )
 {
-    if( _task )  throw_xc( "SCHEDULER-0", obj_name() + " task=" + _task->obj_name() );
+    assert_no_task();   // Vorsichtshalber
 
     _task = task;
     if( !_log->opened() )  open_log();
+}
+
+//----------------------------------------------------------------------------Order::assert_no_task
+
+void Order::assert_no_task()
+{
+    if( _task )  throw_xc( "SCHEDULER-217", obj_name(), _task->obj_name() );
 }
 
 //----------------------------------------------------------------------------------Order::open_log
@@ -913,6 +938,9 @@ void Order::close()
 */
 
     _task = NULL;
+    _removed_from_job_chain = NULL;
+    if( _replaced_by )  _replaced_by->_replacement_for = NULL, _replaced_by = NULL;
+
     remove_from_job_chain();
 }
 
@@ -922,7 +950,7 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
 {
     xml::Element_ptr element = document.createElement( "order" );
 
-    THREAD_LOCK( _lock )
+    //THREAD_LOCK( _lock )
     {
         element.setAttribute( "order"     , debug_string_from_variant( _id ) );
         element.setAttribute( "id"        , debug_string_from_variant( _id ) );     // veraltet
@@ -965,6 +993,9 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
         if( _setback )
         element.setAttribute( "setback"   , _setback.as_string() );
 
+        if( _replacement_for ) 
+        element.setAttribute( "replacement", "yes" );
+
 
         if( show & show_run_time )  element.appendChild( _run_time->dom_element( document ) );
 
@@ -1003,14 +1034,15 @@ void Order::set_job_by_name( const string& jobname )
 
 void Order::set_id( const Order::Id& id )
 { 
-    THREAD_LOCK(_lock)
+    //THREAD_LOCK(_lock)
     {
         if( _id_locked )  throw_xc( "SCHEDULER-159" );
 
         _id = id; 
         _is_users_id = true;
 
-        _log->set_prefix( "Order " + _id.as_string() );
+        //_log->set_prefix( "Order " + _id.as_string() );
+        _log->set_prefix( obj_name() );
         _log->set_title ( "Order " + _id.as_string() );
     }
 }
@@ -1019,7 +1051,7 @@ void Order::set_id( const Order::Id& id )
 
 void Order::set_default_id()
 { 
-    THREAD_LOCK( _lock )
+    //THREAD_LOCK( _lock )
     {
         if( _id.vt == VT_EMPTY )
         {
@@ -1033,8 +1065,14 @@ void Order::set_default_id()
 
 void Order::set_job( Job* job )
 {
-    THREAD_LOCK( _lock )
+    //THREAD_LOCK( _lock )
     {
+        if( _removed_from_job_chain )
+        {
+            _log->warn( S() << "job=" << job->name() << " wird ignoriert, weil Auftrag bereits aus der Jobkette entfernt ist" );
+            return;
+        }
+
         if( !_job_chain )  throw_xc( "SCHEDULER-157", obj_name() );
         
         move_to_node( _job_chain->node_from_job( job ) );       // Fehler, wenn Job nicht in der Jobkette
@@ -1047,7 +1085,7 @@ Job* Order::job()
 {
     Job* result = NULL;
 
-    THREAD_LOCK( _lock )
+    //THREAD_LOCK( _lock )
     {
         if( _job_chain_node )  result = _job_chain_node->_job;
         else
@@ -1061,7 +1099,7 @@ Job* Order::job()
 
 void Order::set_payload( const VARIANT& payload )
 { 
-    THREAD_LOCK( _lock )  
+    //THREAD_LOCK( _lock )  
     { 
         Z_LOG2( "scheduler.order", "Order " << obj_name() << ".payload=" << debug_string_from_variant(payload) << "\n" );
         _payload = payload;  
@@ -1073,14 +1111,14 @@ void Order::set_payload( const VARIANT& payload )
 
 bool Order::finished()
 { 
-    return !_job_chain_node  ||  !_job_chain_node->_job; 
+    return !_job_chain_node  ||  !_job_chain_node->_job;
 }
 
 //---------------------------------------------------------------------------------Order::set_state
 
 void Order::set_state( const State& state, const Time& start_time )
 {
-    THREAD_LOCK( _lock )
+    //THREAD_LOCK( _lock )
     {
         _setback = start_time;
         _setback_count = 0;
@@ -1115,7 +1153,7 @@ void Order::set_state2( const State& state, bool is_error_state )
 
 void Order::set_priority( Priority priority )
 { 
-    THREAD_LOCK( _lock )
+    //THREAD_LOCK( _lock )
     {
         if( _priority != priority )
         {
@@ -1139,7 +1177,7 @@ Com_job* Order::com_job()
 { 
     Com_job* result = NULL;
 
-    THREAD_LOCK( _lock )
+    //THREAD_LOCK( _lock )
     {
         Job* j = job();
         if( j )  result = j->com_job();
@@ -1152,7 +1190,7 @@ Com_job* Order::com_job()
 
 void Order::add_to_job( const string& job_name )
 {
-    THREAD_LOCK( _lock )
+    //THREAD_LOCK( _lock )
     {
         ptr<Order_queue> order_queue = _spooler->get_job( job_name )->order_queue();
         if( !order_queue )  throw_xc( "SCHEDULER-147", job_name );
@@ -1168,7 +1206,7 @@ void Order::add_to_order_queue( Order_queue* order_queue )
 
     ptr<Order> me = this;   // Halten
 
-    THREAD_LOCK( _lock )
+    //THREAD_LOCK( _lock )
     {
         if( _task )  _moved = true;
 
@@ -1176,6 +1214,7 @@ void Order::add_to_order_queue( Order_queue* order_queue )
         _id_locked = true;
 
         if( _job_chain )  remove_from_job_chain();
+        _removed_from_job_chain = NULL;
 
         order_queue->add_order( this );
         _order_queue = order_queue;
@@ -1188,27 +1227,28 @@ void Order::remove_from_job_chain()
 {
     ptr<Order> me = this;   // Halten
 
-    THREAD_LOCK( _lock )
+    if( _job_chain_node )
     {
-        if( _job_chain_node )
+        if( _in_job_queue )  
         {
-            if( _in_job_queue )  
-            {
-                Order_queue* order_queue = _job_chain_node->_job->order_queue();        // Kann bei Programmende NULL sein
-                if( order_queue )  order_queue->remove_order( this );       
-            }
-
-            _job_chain_node = NULL;
+            Order_queue* order_queue = _job_chain_node->_job->order_queue();        // Kann bei Programmende NULL sein
+            if( order_queue )  order_queue->remove_order( this );       
         }
 
-        if( _job_chain )
-        {
-            _job_chain->unregister_order( this );
-            _job_chain = NULL;
-        }
-
-        _moved = true;
+        _job_chain_node = NULL;
     }
+
+    if( _job_chain )
+    {
+        if( _task )  _removed_from_job_chain = _job_chain;      // Für die Task merken, in welcher Jobkette wir waren
+
+        _job_chain->unregister_order( this );
+        _job_chain = NULL;
+    }
+
+    if( _replacement_for )  _replacement_for->_replaced_by = NULL,  _replacement_for = NULL;
+
+    _moved = true;
 }
 
 //--------------------------------------------------------------------------Order::add_to_job_chain
@@ -1225,6 +1265,7 @@ bool Order::try_add_to_job_chain( Job_chain* job_chain )
 {
     if( job_chain->has_order_id( id() ) )  return false;
 
+  //if( _remove_from_job_chain )  throw_xc( "SCHEDULER-228", obj_name() );
     if( !job_chain->finished() )  throw_xc( "SCHEDULER-151" );
 
     ptr<Order> me = this;   // Halten
@@ -1252,6 +1293,7 @@ bool Order::try_add_to_job_chain( Job_chain* job_chain )
 
             _job_chain = job_chain;
             _job_chain_node = node;
+            _removed_from_job_chain = NULL;
         }
 
 
@@ -1263,6 +1305,29 @@ bool Order::try_add_to_job_chain( Job_chain* job_chain )
     }
 
     return true;
+}
+
+//------------------------------------------------------------Order::add_to_or_replace_in_job_chain
+
+void Order::add_to_or_replace_in_job_chain( Job_chain* job_chain )
+{
+    if( ptr<Order> other_order = job_chain->order_or_null( id() ) )
+    {
+        other_order->remove_from_job_chain();
+        add_to_job_chain( job_chain );
+
+        if( other_order->_task )
+        {
+            _replacement_for = other_order;
+            _replacement_for->_replaced_by = this;
+            //_log = other_order->_log;
+            //other_order->_dont_close_log = true;
+        }
+    }
+    else
+    {
+        add_to_job_chain( job_chain );
+    }
 }
 
 //------------------------------------------------------------------------------Order::move_to_node
@@ -1296,14 +1361,19 @@ void Order::postprocessing( bool success )
         
         _task = NULL;
 
-        if( _setback )
+/*
+        if( _remove_from_job_chain )
         {
-            if( _setback == latter_day )
-            {
-                _log->info( as_string(_setback_count) + " mal zurückgestellt. Der Auftrag wechselt in den Fehlerzustand" );
-                success = false;
-                force_error_state = true;
-            }
+            if( _job_chain )  remove_from_job_chain( true );    // Setzt _moved = true
+            _setback = 0;   // Ignorieren
+        }
+*/
+
+        if( _setback == latter_day )
+        {
+            _log->info( as_string(_setback_count) + " mal zurückgestellt. Der Auftrag wechselt in den Fehlerzustand" );
+            success = false;
+            force_error_state = true;
         }
 
         if( !_setback && !_moved  ||  force_error_state )
@@ -1400,11 +1470,12 @@ void Order::postprocessing2()
     if( finished() ) 
     {
         _end_time = Time::now();
+        //if( !_dont_close_log )
         _log->close();
     }
 
     if( _job_chain  &&  ( _is_in_database || finished() ) )  _spooler->_db->update_order( this );
-    
+
     if( finished() )  close();
 }
 
@@ -1444,14 +1515,16 @@ void Order::setback_()
 
 //------------------------------------------------------------------------------------Order::set_at
 
-void Order::set_at( const Time& time )
+void Order::set_at( const Time& time, bool force )
 {
     //THREAD_LOCK( _lock )
     {
-        if( _task       )  throw_xc( "SCHEDULER-217", obj_name(), _task->obj_name() );
-        if( _moved      )  throw_xc( "SCHEDULER-188", obj_name() );
-        if( _job_chain  )  throw_xc( "SCHEDULER-186", obj_name(), _job_chain->name() );
-        
+        if( !force )
+        {
+            assert_no_task();
+            if( _moved      )  throw_xc( "SCHEDULER-188", obj_name() );
+            if( _job_chain  )  throw_xc( "SCHEDULER-186", obj_name(), _job_chain->name() );
+        }        
 
         _setback = time > Time::now()? time : Time(0);
 
@@ -1522,16 +1595,16 @@ Time Order::next_start_time( bool first_call )
 
 void Order::before_modify_event()
 {
-    if( _task       )  throw_xc( "SCHEDULER-217", obj_name(), _task->obj_name() );
-    if( _moved      )  throw_xc( "SCHEDULER-188", obj_name() );
-    if( _job_chain  )  throw_xc( "SCHEDULER-186", obj_name(), _job_chain->name() );
+  //if( _task       )  throw_xc( "SCHEDULER-217", obj_name(), _task->obj_name() );
+  //if( _moved      )  throw_xc( "SCHEDULER-188", obj_name() );
+  //if( _job_chain  )  throw_xc( "SCHEDULER-186", obj_name(), _job_chain->name() );
 }
 
 //----------------------------------------------------------------------------Order::modified_event
 
 void Order::modified_event()
 {
-    set_at( next_start_time( true ) );
+    set_at( next_start_time( true ), true );
 }
 
 //------------------------------------------------------------------------------Order::set_run_time
@@ -1548,17 +1621,20 @@ void Order::set_run_time( const xml::Element_ptr& e )
 
 string Order::obj_name()
 { 
-    string result;
+    string result = "Order ";
 
     //THREAD_LOCK( _lock )
     {
-        if( _job_chain )  result = _job_chain->name() + " ";
+        if( _job_chain )  result = _job_chain->name() + ":";
 
-        result += debug_string_from_variant(_id) + rtrim( "  " + _title );
+        result += debug_string_from_variant(_id);
+        if( _title != "" )  result += "  " + quoted_string( _title );
 
+        /*
         if( _setback )
-            if( _setback == latter_day )  result += ", keine Startzeit mehr";
+            if( _setback == latter_day )  result += ", without start time!";
                                     else  result += ", at=" + _setback.as_string();
+        */
       //else
       //if( _priority )  result += ", pri=" + as_string( _priority );
     }

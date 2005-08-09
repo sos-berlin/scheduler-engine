@@ -71,6 +71,11 @@ namespace sos {
 
 extern const Bool _dll = false;
 
+#ifdef Z_WINDOWS
+    extern HINSTANCE _hinstance; 
+#endif
+
+
 namespace spooler {
 
 
@@ -1747,6 +1752,58 @@ void Spooler::load()
     cp.execute_file( _config_filename );
 }
 
+//----------------------------------------------------------------------------Spooler::create_window
+/*
+#if defined Z_WINDOWS && defined Z_DEBUG
+    
+    static LRESULT CALLBACK window_callback( HWND, UINT, WPARAM, LPARAM )
+    {
+        return 0;
+    }
+
+#endif
+*/
+
+void Spooler::create_window()
+{
+#   if defined Z_WINDOWS && defined Z_DEBUG
+
+        SetConsoleTitle( name().c_str() );
+/*
+        const char* window_class_name = "Scheduler";
+        WNDCLASSEX window_class;
+ 
+        memset( &window_class, 0, sizeof window_class );
+        window_class.cbSize        = sizeof window_class;
+      //window_class.style         = CS_HREDRAW | CS_VREDRAW;
+        window_class.lpfnWndProc   = window_callback;
+        window_class.hInstance     = _hinstance;
+        window_class.hbrBackground = (HBRUSH)COLOR_WINDOW;
+        window_class.lpszClassName = window_class_name;
+ 
+        RegisterClassEx( &window_class ); 
+
+
+        HWND window = CreateWindow
+        ( 
+            window_class_name,
+            name().c_str(),      // title-bar string 
+            WS_OVERLAPPEDWINDOW, // top-level window 
+            CW_USEDEFAULT,       // default horizontal position 
+            CW_USEDEFAULT,       // default vertical position 
+            CW_USEDEFAULT,       // default width 
+            CW_USEDEFAULT,       // default height 
+            (HWND)NULL,          // no owner window 
+            (HMENU)NULL,         // use class menu 
+            _hinstance,          // handle to application instance 
+            NULL                 // no window-creation data 
+        );
+
+        ShowWindow( window, SW_SHOW ); 
+*/
+#   endif
+}
+
 //-----------------------------------------------------------------------------------Spooler::start
 
 void Spooler::start()
@@ -2430,6 +2487,9 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line )
             _config_element_to_load = NULL;
             _config_document_to_load = NULL;
         }
+
+
+        create_window();
 
 
         _module._dont_remote = true;

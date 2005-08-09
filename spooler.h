@@ -259,6 +259,7 @@ struct Spooler : Object,
     void                        set_state                   ( State );
   //void                        connect_to_main_scheduler   ();
 
+    void                        create_window               ();
     void                        start                       ();
     void                        stop                        ( const exception* = NULL );
     void                        signal_threads              ( const string& signal_name );

@@ -199,8 +199,8 @@ void Period::set_dom( const xml::Element_ptr& element, const Period* deflt )
 
     if( deflt )  *this = *deflt;
 
-    _let_run = element.bool_getAttribute( "let_run ", _let_run );
-  //if( _application == application_order  &&  _let_run )  throw_xc( "SCHEDULER-220", "let_run='yes'" );
+    //if( _application == application_order  &&  element.getAttribute( "let_run" ) != "" )  throw_xc( "SCHEDULER-220", "let_run='yes'" );
+    _let_run = element.bool_getAttribute( "let_run", _let_run );
 
     string single_start = element.getAttribute( "single_start" );
     if( !single_start.empty() ) 

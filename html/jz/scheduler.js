@@ -750,6 +750,8 @@ function task_menu__onclick( task_id, x, y )
     popup_builder.add_show_log( "Show log"        , "show_log?task=" + task_id, "show_log_task_" + task_id );
     popup_builder.add_bar();
     popup_builder.add_command ( "End"             , "<kill_task job='" + _job_name + "' id='" + task_id + "'/>" );
+  //popup_builder.add_command ( "Suspend"         , "<modify_task id='" + task_id + "'/> cmd='suspend'" );
+  //popup_builder.add_command ( "Continue"        , "<modify_task id='" + task_id + "'/> cmd='continue'" );
     popup_builder.add_command ( "Kill immediately", "<kill_task job='" + _job_name + "' id='" + task_id + "' immediately='yes'/>" );
 
     _popup_menu = popup_builder.show_popup_menu( x, y );

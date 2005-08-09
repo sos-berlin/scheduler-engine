@@ -113,7 +113,7 @@ struct Task : Object,
     Time                        next_time                   ();
     Spooler_thread*             thread                      ()                                      { return _thread; }
     string                      name                        () const                                { return obj_name(); }
-    virtual string              obj_name                    () const                                { return "Task " + _job->name() + " " + as_string(_id) ; }
+    virtual string              obj_name                    () const                                { return "Task " + _job->name() + ":" + as_string(_id) ; }
 
     string                      state_name                  ()                                      { return state_name( state() ); }
     static string               state_name                  ( State );

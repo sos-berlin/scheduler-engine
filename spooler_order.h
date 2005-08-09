@@ -34,6 +34,7 @@ struct Order : Com_order,
 
     void                        init                    ();
     void                        attach_task             ( Task* );
+    void                        assert_no_task          ();
     void                        open_log                ();
     void                        close                   ();
 
@@ -53,6 +54,7 @@ struct Order : Com_order,
 
     Job_chain*                  job_chain               () const                                    { return _job_chain; }
     Job_chain_node*             job_chain_node          () const                                    { return _job_chain_node; }
+    Job_chain*                  removed_from_job_chain  () const                                    { return _removed_from_job_chain; }
     Order_queue*                order_queue             ();
 
     bool                        finished                ();
@@ -87,13 +89,14 @@ struct Order : Com_order,
     void                        add_to_job              ( const string& job_name );
 
     void                        setback_                ();
-    void                    set_at                      ( const Time& );
+    void                    set_at                      ( const Time&, bool force = false );
     Time                        at                      ()                                          { return _setback; }
   //void                    set_run_time_xml            ( const string& );
     Time                        next_start_time         ( bool first_call = false );
 
     // Auftrag in einer Jobkette:
     void                        add_to_job_chain        ( Job_chain* );
+    void                        add_to_or_replace_in_job_chain( Job_chain* );
     bool                        try_add_to_job_chain    ( Job_chain* );
     void                        remove_from_job_chain   ();
     void                        move_to_node            ( Job_chain_node* );
@@ -123,6 +126,7 @@ struct Order : Com_order,
     Id                         _id;
     bool                       _id_locked;              // Einmal gesperrt, immer gesperrt
     bool                       _is_users_id;            // Id ist nicht vom Spooler generiert, also nicht sicher eindeutig.
+  //bool                       _remove_from_job_chain;  // Nur wenn _task != NULL: Nach spooler_process() remove_form_job_chain() rufen!
     Priority                   _priority;
     bool                       _priority_modified;
     State                      _state;
@@ -134,9 +138,14 @@ struct Order : Com_order,
     bool                       _title_modified;
     Job_chain*                 _job_chain;              
     Job_chain_node*            _job_chain_node;         // Nächster Stelle, falls in einer Jobkette
+    Job_chain*                 _removed_from_job_chain; // Ehemaliges _job_chain, nach remove_from_job_chain(), wenn _task != NULL
+  //bool                       _dont_close_log;
     Order_queue*               _order_queue;            // Auftrag ist in einer Auftragsliste, aber nicht in einer Jobkette. _job_chain == NULL, _job_chain_node == NULL!
     Payload                    _payload;
     bool                       _payload_modified;       // (Bei einem Objekt wird nur bemerkt, dass die Referenz geändert wurde, nicht das Objekt selbst)
+
+    ptr<Order>                 _replaced_by;            // Nur wenn _task != NULL: _replaced_by soll this in der Jobkette ersetzen
+    Order*                     _replacement_for;        // _replacement_for == NULL  ||  _replacement_for->_replaced_by == this && _replacement_for->_task != NULL
 
     Time                       _created;
     Time                       _start_time;             // Erster Jobschritt

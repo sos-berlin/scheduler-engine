@@ -595,6 +595,11 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
 
     if( priority != "" )  order->set_priority( as_int( priority ) );
 
+    if( xml::Element_ptr run_time_element = modify_order_element.select_node( "run_time" ) )
+    {
+        order->set_run_time( run_time_element );
+    }
+
     return _answer.createElement( "ok" );
 }
 
