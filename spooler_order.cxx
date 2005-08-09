@@ -1129,6 +1129,12 @@ void Order::set_state( const State& state, const Time& start_time_ )
 {
     //THREAD_LOCK( _lock )
     {
+        if( _removed_from_job_chain )
+        {
+            _log->warn( S() << "state=" << debug_string_from_variant( state ) << " wird ignoriert, weil Auftrag bereits aus der Jobkette entfernt ist" );
+            return;
+        }
+
         Time start_time = start_time_ > Time::now()? start_time_ : Time(0);
 
         if( _setback != start_time )
