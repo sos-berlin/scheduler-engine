@@ -982,13 +982,25 @@
 
                     <xsl:element name="td">
                         <xsl:attribute name="style">
-                            padding-left: 3ex;
+                            white-space: nowrap;
                             <xsl:if test="@task">
                                 font-weight: bold;
                             </xsl:if>
+                            <!--xsl:if test="@removed='yes'">
+                                text-decoration: line-through;
+                            </xsl:if>
+                            <xsl:if test="@replacement">
+                                font-style: italic;
+                            </xsl:if-->
                         </xsl:attribute>
 
-                        <span style="white-space: nowrap">
+                        <xsl:if test="@replacement">
+                            <span style="cursor: pointer; position: absolute" title="This order is going to replace a currently processed order with same ID">
+                                r
+                            </span>
+                        </xsl:if>
+
+                        <span style="padding-left: 3ex">
                             <xsl:value-of select="@id"/>&#160;
                         </span>
                     </xsl:element>
@@ -1455,11 +1467,28 @@
                     <td class="order" colspan="99">
                         <xsl:choose>
                             <xsl:when test="order">
-                                <b>
-                                    <xsl:value-of select="order/@id"/>
-                                    &#160;
-                                    <xsl:value-of select="order/@title"/>
-                                </b>
+                                <xsl:element name="span">
+                                    <xsl:attribute name="style">
+                                        cursor: pointer;
+                                        <xsl:if test="order/@removed='yes' or order/@replaced='yes'">
+                                            text-decoration: line-through;
+                                        </xsl:if>
+                                    </xsl:attribute>
+
+                                    <xsl:if test="order/@removed='yes'">
+                                        <xsl:attribute name="title">Order is removed</xsl:attribute>
+                                    </xsl:if>
+                                    
+                                    <xsl:if test="order/@replaced='yes'">
+                                        <xsl:attribute name="title">Order is replaced</xsl:attribute>
+                                    </xsl:if>
+                                    
+                                    <b>
+                                        <xsl:value-of select="order/@id"/>
+                                        &#160;
+                                        <xsl:value-of select="order/@title"/>
+                                    </b>
+                                </xsl:element>
                             </xsl:when>
                             <xsl:when test="@state='running_waiting_for_order'">
                                 waiting for order ...

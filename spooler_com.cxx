@@ -3834,13 +3834,11 @@ STDMETHODIMP Com_order::get_Job_chain( Ijob_chain** result )
         if( !_order )  return E_POINTER;
 
         Job_chain* job_chain = _order->job_chain();
-        if( !job_chain )  job_chain = _order->removed_from_job_chain();
         if( job_chain )  
         {
             ptr<Ijob_chain> ijob_chain = job_chain; //->com_job_chain();
             ijob_chain.CopyTo( result );
         }
-
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Order.job_chain" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Order.job_chain" ); }

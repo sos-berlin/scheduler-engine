@@ -968,8 +968,14 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
 
         element.setAttribute( "initial_state", debug_string_from_variant( _initial_state ) );
 
-        if( _job_chain )  
-        element.setAttribute( "job_chain" , _job_chain->name() );
+        if( Job_chain* job_chain = this->job_chain() )  
+        element.setAttribute( "job_chain" , job_chain->name() );
+
+        if( _replaced_by )
+        element.setAttribute( "replaced"  , "yes" );
+        else
+        if( _removed_from_job_chain )
+        element.setAttribute( "removed"   , "yes" );
 
         Job* job = this->job();
         if( job )
@@ -1265,7 +1271,7 @@ void Order::remove_from_job_chain()
         if( _task )  _removed_from_job_chain = _job_chain;      // Für die Task merken, in welcher Jobkette wir waren
 
         _job_chain->unregister_order( this );
-        _job_chain->_log.info( S() << obj_name() << " ist entfernt" );
+        //_job_chain->_log.info( S() << obj_name() << " ist entfernt" );
 
         _job_chain = NULL;
         _log->set_prefix( obj_name() );
@@ -1330,7 +1336,7 @@ bool Order::try_add_to_job_chain( Job_chain* job_chain )
             _is_in_database = true;
         }
 
-        set_state( _state, next_start_time( true ) );
+        set_state( _state, _run_time->set()? next_start_time( true ) : 0 );
     }
 
     return true;
@@ -1634,7 +1640,7 @@ void Order::before_modify_event()
 
 void Order::modified_event()
 {
-    set_state( _state, next_start_time( true ) );
+    set_state( _state, _run_time->set()? next_start_time( true ) : 0 );
 }
 
 //------------------------------------------------------------------------------Order::set_run_time

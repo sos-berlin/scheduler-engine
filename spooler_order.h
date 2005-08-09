@@ -52,9 +52,9 @@ struct Order : Com_order,
     void                    set_priority                ( Priority );
     Priority                    priority                () const                                    { return _priority; }
 
-    Job_chain*                  job_chain               () const                                    { return _job_chain; }
+    Job_chain*                  job_chain               () const                                    { return _job_chain? _job_chain : _removed_from_job_chain; }
     Job_chain_node*             job_chain_node          () const                                    { return _job_chain_node; }
-    Job_chain*                  removed_from_job_chain  () const                                    { return _removed_from_job_chain; }
+  //Job_chain*                  removed_from_job_chain  () const                                    { return _removed_from_job_chain; }
     Order_queue*                order_queue             ();
 
     bool                        finished                ();
