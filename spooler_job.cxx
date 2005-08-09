@@ -1126,12 +1126,13 @@ void Job::calculate_next_time( Time now )
                     if( next_time > _next_start_time   )  next_time = _next_start_time;
                     if( next_time > _next_single_start )  next_time = _next_single_start;
                 }
-            }
 
-            if( _order_queue )
-            {
-                Time next_order_time = _order_queue->next_time();
-                if( next_time > next_order_time )  next_time = next_order_time;
+                if( _order_queue )
+                {
+                    Time next_order_time = _order_queue->next_time();
+                    if( next_order_time < _period.begin() )  next_order_time = _period.begin();
+                    if( next_time > next_order_time )  next_time = next_order_time;
+                }
             }
 
 
@@ -1285,7 +1286,7 @@ ptr<Task> Job::task_to_start()
             if( order )  // Ist der Auftrag noch da? (Muss bei Ein-Thread-Betrieb immer da sein!)
             {
                 cause = cause_order;
-                log_line += "Task startet wegen Auftrag " + order->obj_name();
+                log_line += "Task startet wegen " + order->obj_name();
             }
         }
 

@@ -3213,6 +3213,7 @@ const Com_method Com_job_chain::_methods[] =
     { DISPATCH_PROPERTYGET,  9, "store_orders_in_database"  , (Com_method_ptr)&Com_job_chain::get_Store_orders_in_database, VT_BOOL },
     { DISPATCH_METHOD     , 10, "remove_all_pending_orders" , (Com_method_ptr)&Com_job_chain::Remove_all_pending_orders   , VT_INT  },
     { DISPATCH_METHOD     , 11, "Try_add_order"             , (Com_method_ptr)&Com_job_chain::Try_add_order      , VT_BOOL       , { VT_DISPATCH } },
+    { DISPATCH_METHOD     , 12, "Add_or_replace_order"      , (Com_method_ptr)&Com_job_chain::Add_or_replace_order, VT_EMPTY     , { VT_DISPATCH } },
     {}
 };
 
@@ -3417,6 +3418,32 @@ STDMETHODIMP Com_job_chain::Add_order( VARIANT* order_or_payload, spooler_com::I
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Job_chain.add_order" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Job_chain.add_order" ); }
+
+    //LOG( "Job_chain.add_order  hr=" << (void*)hr << "\n" );
+
+    return hr;
+}
+
+//--------------------------------------------------------------Com_job_chain::Add_or_replace_order
+
+STDMETHODIMP Com_job_chain::Add_or_replace_order( spooler_com::Iorder* iorder )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_job_chain )  return E_POINTER;
+        if( !_job_chain->finished() )  throw_xc( "SCHEDULER-151" );
+
+        Order* order = dynamic_cast<Order*>( &*iorder );
+        if( !order )  return E_INVALIDARG;
+
+        // Einstieg nur über Order, damit Semaphoren stets in derselben Reihenfolge gesperrt werden.
+        order->add_to_or_replace_in_job_chain( dynamic_cast<Job_chain*>( this ) );  
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
 
     //LOG( "Job_chain.add_order  hr=" << (void*)hr << "\n" );
 

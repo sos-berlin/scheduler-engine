@@ -557,6 +557,13 @@ STDMETHODIMP Run_time::put_Xml( BSTR xml )
     Z_COM_IMPLEMENT( set_xml( string_from_bstr( xml ) ) ); 
 }
 
+//----------------------------------------------------------------------------Run_time::operator ==
+
+bool Run_time::operator == ( const Run_time& r )
+{
+    return dom_document().xml() == r.dom_document().xml();
+}
+
 //----------------------------------------------------------------------------Run_time::set_default
 
 void Run_time::set_default()
@@ -588,7 +595,7 @@ void Run_time::set_xml( const string& xml )
 
 void Run_time::set_dom( const xml::Element_ptr& element )
 {
-    if( _modified_event_handler )  _modified_event_handler->modified_event();
+    if( _modified_event_handler )  _modified_event_handler->before_modify_event();
 
 
     Sos_optional_date_time  dt;

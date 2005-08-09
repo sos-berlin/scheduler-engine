@@ -647,6 +647,7 @@ struct Com_job_chain : spooler_com::Ijob_chain,
     STDMETHODIMP                Add_end_state           ( VARIANT* );
 
     STDMETHODIMP                Add_order               ( VARIANT* order_or_payload, spooler_com::Iorder** );
+    STDMETHODIMP                Add_or_replace_order    ( spooler_com::Iorder* );
 
     STDMETHODIMP                Try_add_order           ( spooler_com::Iorder* order_or_payload, VARIANT_BOOL* );
 

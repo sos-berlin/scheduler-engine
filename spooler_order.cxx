@@ -599,7 +599,10 @@ void Order_queue::add_order( Order* order )
     {
         if( order->_setback )
         {
-            _log->debug( "add_order (setback queue) " + order->obj_name() );
+            if( order->_setback < latter_day )  order->_log->info( S() << "Auftrag wird gestartet um " << order->_setback );
+                                          else  order->_log->warn( "Die <run_time> des Auftrags hat keine nächste Startzeit" );
+
+          //_log->debug( "add_order (setback queue) " + order->obj_name() );
 
             // Auftrag nach Rückstellungszeitpunkt (und Priorität) geordnet in die _setback_queue einfügen:
 
@@ -1116,15 +1119,33 @@ bool Order::finished()
 
 //---------------------------------------------------------------------------------Order::set_state
 
-void Order::set_state( const State& state, const Time& start_time )
+void Order::set_state( const State& state, const Time& start_time_ )
 {
     //THREAD_LOCK( _lock )
     {
-        _setback = start_time;
+        Time start_time = start_time_ > Time::now()? start_time_ : Time(0);
+
+        if( _setback != start_time )
+        {
+            if( _in_job_queue )
+            {
+                ptr<Order> hold_me = this;
+                order_queue()->remove_order( this );
+                _setback = start_time;
+                order_queue()->add_order( this );
+            }
+            else
+                _setback = start_time;
+        }
+
         _setback_count = 0;
 
-        if( _job_chain )  move_to_node( _job_chain->node_from_state( state ) );
-                    else  set_state2( state );
+
+        if( state != _state )
+        {
+            if( _job_chain )  move_to_node( _job_chain->node_from_state( state ) );
+                        else  set_state2( state );
+        }
     }
 }
 
@@ -1227,6 +1248,7 @@ void Order::remove_from_job_chain()
 {
     ptr<Order> me = this;   // Halten
 
+
     if( _job_chain_node )
     {
         if( _in_job_queue )  
@@ -1243,7 +1265,10 @@ void Order::remove_from_job_chain()
         if( _task )  _removed_from_job_chain = _job_chain;      // Für die Task merken, in welcher Jobkette wir waren
 
         _job_chain->unregister_order( this );
+        _job_chain->_log.info( S() << obj_name() << " ist entfernt" );
+
         _job_chain = NULL;
+        _log->set_prefix( obj_name() );
     }
 
     if( _replacement_for )  _replacement_for->_replaced_by = NULL,  _replacement_for = NULL;
@@ -1294,6 +1319,8 @@ bool Order::try_add_to_job_chain( Job_chain* job_chain )
             _job_chain = job_chain;
             _job_chain_node = node;
             _removed_from_job_chain = NULL;
+
+            _log->set_prefix( obj_name() );
         }
 
 
@@ -1302,6 +1329,8 @@ bool Order::try_add_to_job_chain( Job_chain* job_chain )
             _spooler->_db->insert_order( this );
             _is_in_database = true;
         }
+
+        set_state( _state, next_start_time( true ) );
     }
 
     return true;
@@ -1316,12 +1345,20 @@ void Order::add_to_or_replace_in_job_chain( Job_chain* job_chain )
         other_order->remove_from_job_chain();
         add_to_job_chain( job_chain );
 
+
+        //if( other_order->_run_time == _run_time  &&  other_order->_setback_count == 0 )
+        {
+            // FÜr Andreas Liebert: repeat-Intervall beibehalten
+        }
+
         if( other_order->_task )
         {
             _replacement_for = other_order;
             _replacement_for->_replaced_by = this;
             //_log = other_order->_log;
             //other_order->_dont_close_log = true;
+
+            _log->info( S() << "add_or_replace_order(): Auftrag wird verzögert bis " << other_order->_task->obj_name() << "  " << other_order->obj_name() << " ausgeführt hat" );
         }
     }
     else
@@ -1361,13 +1398,6 @@ void Order::postprocessing( bool success )
         
         _task = NULL;
 
-/*
-        if( _remove_from_job_chain )
-        {
-            if( _job_chain )  remove_from_job_chain( true );    // Setzt _moved = true
-            _setback = 0;   // Ignorieren
-        }
-*/
 
         if( _setback == latter_day )
         {
@@ -1526,13 +1556,19 @@ void Order::set_at( const Time& time, bool force )
             if( _job_chain  )  throw_xc( "SCHEDULER-186", obj_name(), _job_chain->name() );
         }        
 
-        _setback = time > Time::now()? time : Time(0);
+        set_state( _state, time );
 
-        if( job() )
-        {
-            order_queue()->remove_order( this );
-            order_queue()->add_order( this );
-        }
+      //Time new_setback = time > Time::now()? time : Time(0);
+      //if( new_setback != _setback )
+      //{
+      //    _setback = new_setback;
+      //
+      //    if( _in_job_queue )
+      //    {
+      //        order_queue()->remove_order( this );
+      //        order_queue()->add_order( this );
+      //    }
+      //}
     }
 }
 
@@ -1580,12 +1616,6 @@ Time Order::next_start_time( bool first_call )
         }
 
         if( result < now )  result = 0;
-
-        if( first_call  &&  result > 0 )
-        {
-            if( result == latter_day )  _log->warn( "Die <run_time> des Auftrags hat keine nächste Startzeit" );
-                                  else  _log->info( S() << "Auftrag wird gestartet um " << result );
-        }
     }
 
     return result;
@@ -1604,7 +1634,7 @@ void Order::before_modify_event()
 
 void Order::modified_event()
 {
-    set_at( next_start_time( true ), true );
+    set_state( _state, next_start_time( true ) );
 }
 
 //------------------------------------------------------------------------------Order::set_run_time
@@ -1625,10 +1655,10 @@ string Order::obj_name()
 
     //THREAD_LOCK( _lock )
     {
-        if( _job_chain )  result = _job_chain->name() + ":";
+        if( _job_chain )  result += _job_chain->name() + ":";
 
         result += debug_string_from_variant(_id);
-        if( _title != "" )  result += "  " + quoted_string( _title );
+        if( _title != "" )  result += " " + quoted_string( _title );
 
         /*
         if( _setback )

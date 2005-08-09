@@ -302,6 +302,7 @@ struct Run_time : idispatch_implementation< Run_time, spooler_com::Irun_time >,
     STDMETHODIMP            put_Xml                         ( BSTR xml );
 
 
+    bool                        operator ==                 ( const Run_time& );
 
                                 Run_time                    ( Spooler*, Application );
 

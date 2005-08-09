@@ -45,7 +45,7 @@ struct Order : Com_order,
     void                    set_default_id              ();
     bool                        id_is_equal             ( const Id& id )                            { if( _id_locked ) return _id == id; else THREAD_LOCK_RETURN( _lock, bool, _id == id ); }
 
-    void                    set_title                   ( const string& title )                     { THREAD_LOCK(_lock)  _title = title,  _title_modified = true; }
+    void                    set_title                   ( const string& title )                     { THREAD_LOCK(_lock)  _title = title,  _title_modified = true,  _log->set_prefix( obj_name() ); }
     string&                     title                   ()                                          { THREAD_LOCK_RETURN( _lock, string, _title ); }
     string                      obj_name                ();
                                                             
