@@ -369,8 +369,35 @@ bool Wait_handles::wait_until_2( Time until )
             for( int i = 0; i < _handles.size(); i++ )  handles[i] = _handles[i];
         }
 
-        DWORD ret = MsgWaitForMultipleObjects( _handles.size(), handles, FALSE, t, QS_ALLINPUT ); 
+
+#       ifdef Z_DEBUG
+            bool print_time_every_second = _spooler->log_directory() == "*stderr";
+#       else
+            bool print_time_every_second = false;
+#       endif
+
+        DWORD ret;
+
+        if( print_time_every_second )
+        {
+            double step = 1.0;
+            while( Time::now() < until - step )
+            {
+                ret = MsgWaitForMultipleObjects( _handles.size(), handles, FALSE, (int)( ceil( step * 1000 ) ), QS_ALLINPUT ); 
+                if( ret != WAIT_TIMEOUT )  goto WAIT_OK;
+                Time now = Time::now();
+                t = (int)ceil( ( until - now ) * 1000 );
+                cerr << Time::now().as_string( Time::without_ms ) << " (" << ( -t / 1000 ) << "s)   \r";
+            }
+
+            ret = MsgWaitForMultipleObjects( _handles.size(), handles, FALSE, max( 0, t ), QS_ALLINPUT ); 
+        }
+        else
+        {
+            ret = MsgWaitForMultipleObjects( _handles.size(), handles, FALSE, t, QS_ALLINPUT ); 
+        }
         
+WAIT_OK:
         delete [] handles;  handles = NULL;
 
         if( ret == WAIT_FAILED )  throw_mswin_error( "MsgWaitForMultipleObjects" );

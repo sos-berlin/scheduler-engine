@@ -60,7 +60,7 @@ public class Order extends Idispatch
     
     
     /** Liefert die Kennung des Auftrags. */
-    public String           id                  ()                                  { return (String)   com_call( "<id"                 ); }
+    public String           id                  ()                                  { return            com_call( "<id"                 ).toString(); }
     
     
     

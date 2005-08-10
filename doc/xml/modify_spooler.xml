@@ -71,8 +71,10 @@
                     
                     <dt><code>cmd="let_run_terminate_and_restart"</code></dt>
                     <dd>
-                        Beendet den Scheduler ordentlich und versucht ihn dann neu zu starten
-                        (näheres <a href="../termination.xml">hier</a>).
+                        Beendet den Scheduler ordentlich und versucht ihn dann neu zu starten.
+                        Laufende Tasks werden nicht beendet (außer wartende Tasks im Zustand running_waiting_for_order).
+                        Erst wenn sich alle Tasks beendet haben, endet der Scheduler.
+                        (Näheres <a href="../termination.xml">hier</a>).
                     </dd>
                     
                     <dt><code>cmd="abort_immediately"</code></dt>

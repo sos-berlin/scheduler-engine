@@ -73,7 +73,7 @@ struct Spooler_thread : zschimmer::Thread
     Task*                      _current_task;               // Task, die gerade einen Schritt tut
     bool                       _free_threading;
 
-  private:
+//private:
     bool                        step                        ();
     bool                        do_something                ( Task* );
     void                        wait                        ();

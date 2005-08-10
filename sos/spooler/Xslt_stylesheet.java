@@ -25,7 +25,7 @@ public class Xslt_stylesheet  extends Idispatch
     public Xslt_stylesheet  load_xml            ( String xml )                      { return (Xslt_stylesheet)com_call( "load_xml", xml ); }
 
     /** Wendet das Stylesheet auf den XML-String an.
-      * @returns Das transformierte XML-Dokument
+      * @return Das transformierte XML-Dokument
       */
     public String           apply_xml           ( String xml )                      { return (String)com_call( "apply_xml", xml ); }    
 }

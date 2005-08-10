@@ -64,7 +64,8 @@ struct Order : Com_order,
     void                    set_job_by_name             ( const string& );
     Job*                        job                     ();
 
-    void                    set_state                   ( const State&, const Time& = Time(0) );
+    void                    set_state                   ( const State& );
+    void                    set_state                   ( const State&, const Time& );
     void                    set_state2                  ( const State&, bool is_error_state = false );
     State                       state                   ()                                          { THREAD_LOCK_RETURN( _lock, State, _state ); }
     bool                        state_is_equal          ( const State& state )                      { THREAD_LOCK_RETURN( _lock, bool, _state == state ); }
@@ -89,6 +90,7 @@ struct Order : Com_order,
     void                        add_to_job              ( const string& job_name );
 
     void                        setback_                ();
+    void                        setback                 ( const Time& );
     void                    set_at                      ( const Time& );
     Time                        at                      ()                                          { return _setback; }
   //void                    set_run_time_xml            ( const string& );
@@ -153,7 +155,7 @@ struct Order : Com_order,
 
     bool                       _in_job_queue;           // Auftrag ist in _job_chain_node->_job->order_queue() eingehängt
     Task*                      _task;                   // Auftrag wird gerade von dieser Task in spooler_process() verarbeitet 
-    bool                       _moved;                  // true, wenn Job state oder job geändert hat. Dann nicht automatisch in Jobkette weitersetzen
+    bool                       _moved;                  // Nur wenn _task != NULL: true, wenn Job state oder job geändert hat. Dann nicht automatisch in Jobkette weitersetzen
     ptr<Run_time>              _run_time;
     Period                     _period;                 // Bei _run_time.set(): Aktuelle oder nächste Periode
   //bool                       _period_once;
@@ -268,11 +270,18 @@ struct Internal_priority
 
 struct Order_queue : Com_order_queue
 {
+    enum Do_log
+    {
+        dont_log = false,
+        do_log   = true
+    };
+
+
     Z_GNU_ONLY(                 Order_queue             ();  )                                      // Für gcc 3.2. Nicht implementiert
                                 Order_queue             ( Job*, Prefix_log* );
                                ~Order_queue             ();
 
-    void                        add_order               ( Order* );
+    void                        add_order               ( Order*, Do_log = do_log );
   //Order*                      add_order               ( const Order::Payload& );
     void                        remove_order            ( Order* );
     int                         order_count             ( Job_chain* = NULL );

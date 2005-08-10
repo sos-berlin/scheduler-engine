@@ -8,6 +8,28 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2005-08-10" version="2.0.135" subversion_revision="3824">
+        <revision type="correction" title="Java-Methode sos.spooler.id() liefert auch Integer als String">
+            <description>
+                <p>
+                    Statt einem Cast (String) wird jetzt .toString() gerufen, 
+                    sodass auch eine Auftragskennung die als Integer-Variant (o.dgl.) gespeichert ist, 
+                    in Java als String geliefert wird.
+                    (Bisher gab es eine ClassCastException.)
+                </p>
+            </description>
+        </revision>
+        
+        <revision type="correction" title="let_run_terminate_and_restart beendet Tasks im Zustand running_waiting_for_order">
+            <description>
+                <p>
+                    Siehe <scheduler_element name="modify_spooler" attribute="cmd"/>.
+                </p>
+            </description>
+        </revision>
+        
+    </change>
+
     <change date="2005-08-04" version="2.0.134" subversion_revision="3818">
         <revision type="correction" title="Klasse sos.spooler.Mail unter Unix/Java funktionsfähig">
             <description>

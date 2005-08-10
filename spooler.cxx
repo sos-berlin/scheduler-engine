@@ -1766,7 +1766,7 @@ void Spooler::load()
 
 void Spooler::create_window()
 {
-#   if defined Z_WINDOWS && defined Z_DEBUG
+#   if defined Z_WINDOWS
 
         SetConsoleTitle( name().c_str() );
 /*
@@ -2065,6 +2065,14 @@ void Spooler::execute_state_cmd()
             {
                 set_state( _state_cmd == sc_let_run_terminate_and_restart? s_stopping_let_run : s_stopping );
                 if( _state == s_stopping )  FOR_EACH( Thread_list, _thread_list, t )  (*t)->cmd_shutdown();
+
+                if( _state == s_stopping_let_run  &&  _single_thread )
+                {
+                    FOR_EACH( Task_list, _single_thread->_task_list, t )
+                    {
+                        if( (*t)->state() == Task::s_running_waiting_for_order )  (*t)->cmd_end();
+                    }
+                }
             }
 
             _shutdown_cmd = _state_cmd;
