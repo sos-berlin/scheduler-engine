@@ -42,7 +42,7 @@
     
     <xsl:template match="change">
 
-        <table width="100%" style="border-top: 1px solid #f0f0f0; margin-top: 1ex">
+        <table width="100%" style="border-top: 1px solid #f0f0f0; margin-top: 0ex">
             <tbody>
                 <tr>
                     <td valign="top" width="50">
@@ -68,10 +68,14 @@
     
     <xsl:template match="revision">
 
+        <!--xsl:if test="position() &gt; 1">
+            <p style="margin-top: 1ex">&#160;</p>
+        </xsl:if-->
+        
         <xsl:element name="p">
-            <xsl:if test="@type='correction'">
-                <xsl:attribute name="style">color: green</xsl:attribute>
-            </xsl:if>
+            <xsl:attribute name="style">
+                <xsl:if test="@type='correction'">color: green;</xsl:if>
+            </xsl:attribute>
             
             <b><xsl:value-of select="@title"/></b>
         </xsl:element>
@@ -79,6 +83,7 @@
         <xsl:if test="description">
             <p style="margin-top: 1ex">&#160;</p>
             <xsl:apply-templates select="description"/>
+            <p style="margin-top: 1ex">&#160;</p>
         </xsl:if>
     
     </xsl:template>

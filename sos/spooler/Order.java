@@ -184,7 +184,16 @@ public class Order extends Idispatch
      */
     public Run_time         run_time            ()                                  { return (Run_time) com_call( "<run_time"           ); }
 
-    
+
+    /** Entfernt den Auftrag aus seiner Jobkette.
+      * <p>
+      * Wenn der Auftrag gerade von einer Task ausgeführt wird,
+      * liefert die Eigenschaft {@link #job_chain}
+      * weiterhin die Jobkette, aus der der Auftrag gerade entfernt wird.
+      * Erst wenn die Ausführung beendet ist, liefert die Eigenschaft null
+      * (außer der Auftrag ist wieder in eine Jobkette eingetragen worden).
+      * Damit bleibt die Eigenschaft job_chain während der Ausführung durch die Task stabil.
+      */
     public void             remove_from_job_chain()                                 {                   com_call( "remove_from_job_chain" ); }
     
 

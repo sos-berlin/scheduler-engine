@@ -549,6 +549,7 @@ xml::Element_ptr Command_processor::execute_add_order( const xml::Element_ptr& a
     string job_name       = add_order_element.getAttribute( "job"       );
     string job_chain_name = add_order_element.getAttribute( "job_chain" );
     string state_name     = add_order_element.getAttribute( "state"     );
+    bool   replace        = add_order_element.bool_getAttribute( "replace", false );
 
     ptr<Order> order = new Order( _spooler );
 
@@ -574,8 +575,16 @@ xml::Element_ptr Command_processor::execute_add_order( const xml::Element_ptr& a
     }
 
 
-    if( job_name != "" )  order->add_to_job( job_name );
-                    else  order->add_to_job_chain( _spooler->job_chain( job_chain_name ) );
+    if( job_chain_name != "" )
+    {
+        Job_chain* job_chain = _spooler->job_chain( job_chain_name );
+        if( replace )  order->add_to_or_replace_in_job_chain( job_chain );
+                 else  order->add_to_job_chain( job_chain );
+    }
+    else 
+    {
+        order->add_to_job( job_name );
+    }
 
     return _answer.createElement( "ok" );
 }

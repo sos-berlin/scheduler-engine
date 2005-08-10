@@ -45,6 +45,10 @@
         
     </xml_attributes>
 
+    <xml_child_elements>
+        <xml_child_element name="run_time"/>
+    </xml_child_elements>
+    
     <xml_answer element="ok"/>
     
     

@@ -126,13 +126,29 @@ public class Job_chain extends Idispatch
      * <p>
      * add_order() kann erst benutzt werden, wenn die Jobkette mit {@link Spooler#add_job_chain(Job_chain)} dem Scheduler übergeben worden ist.
      * <p>
-     * Wenn die Jobkette bereits einen Auftrag mit gleicher Id enthält, wird dieser ersetzt.
+     * Wenn die Jobkette bereits einen Auftrag mit gleicher Id enthält, 
+     * wird eine Exception mit Fehlercode SCHEDULER-186 geliefert.
      * 
+     * @see #add_or_replace_order( Order )
      * @see Spooler#create_order()
+     * @see Order#remove_from_job_chain()
      */ 
     
     public void             add_order           ( Order order )                     {                           com_call( "add_order", order    ); }
 
+
+    /** Gibt einen Auftrag in die Jobkette und ersetzt ggfs einen mit gleicher Kennung.
+      * <p>
+      * Hat die Jobkette bereits einen Auftrag mit gleicher Kennung, dann wird dieser ersetzt.
+      * Genauer: Er wird aus der Jobkette entfernt, 
+      * und der neue Auftrag wird hinzugefügt.
+      * <p>
+      * Falls der ersetzte Auftrag gerade von einer Task ausgeführt wird,
+      * dann wartet der Scheduler die Ausführung ab, bevor der neue Auftrag ausgeführt werden kann.
+      */
+    
+    public void             add_or_replace_order( Order order )                     {                           com_call( "add_or_replace_order", order ); }
+    
     
     /** @return Die Zahl der Aufträge in der Jobkette */
     public int              order_count         ()                                  { return                int_com_call( "<order_count"        ); }

@@ -3,12 +3,64 @@
 
 <!--$Id: factory_ini.xml 3623 2005-04-20 06:53:16Z jz $-->
 
-<changes title="Änderungsprotokoll">
+<changes title    = "Änderungsprotokoll"
+         author   = "$Author: jz $"
+         date     = "$Date: 2005-05-08 01:44:34 +0200 (So, 08 Mai 2005) $">
 
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
     <change date="2005-08-10" version="2.0.135" subversion_revision="3824">
+        <revision type="new" title="&lt;modify_order&gt; kann &lt;run_time&gt; ändern">
+            <description>
+                <p>
+                    In <scheduler_element name="modify_order"/> kann jetzt
+                    <scheduler_element name="run_time"/> gesetzt werden.
+                </p>
+            </description>
+        </revision>
+        
+        <revision type="new" title="Methode Job_chain.add_or_replace_order() neu">
+            <description>
+                <p>
+                    <scheduler_method class="Job_chain" method="add_or_replace_order" java_signature="sos.spooler.Order" />
+                    wirkt wie 
+                    <scheduler_method class="Job_chain" method="add_order" java_signature="sos.spooler.Order" />,
+                    wenn die Jobkette keinen Auftrag mit gleicher Kennung hat.
+                </p>
+                <p>
+                    Hat die Jobkette bereits einen Auftrag mit gleicher Kennung, dann wird dieser ersetzt.
+                    Genauer: Er wird aus der Jobkette entfernt 
+                    (wie mit <scheduler_method class="Order" method="remove_from_job_chain"/>),
+                    und der neue Auftrag wird hinzugefügt.
+                </p>
+                <p>
+                    Falls der ersetzte Auftrag gerade von einer Task ausgeführt wird,
+                    dann wartet der Scheduler die Ausführung ab, bevor der neue Auftrag ausgeführt werden kann.
+                </p>
+                <p>
+                    Siehe auch <scheduler_element name="add_order" attribute="replace" value="yes"/>.
+                </p>
+            </description>
+        </revision>
+
+        <revision type="modification" title="Methode Order.remove_from_job_chain() geändert">
+            <description>
+                <p>
+                    (<scheduler_method class="Order" method="remove_from_job_chain"/> wirkt wie
+                    <scheduler_element name="remove_order" />.)
+                </p>
+                <p>
+                    Wenn der Auftrag gerade von einer Task ausgeführt wird,
+                    liefert die Eigenschaft <scheduler_method class="Order" property="job_chain" /> 
+                    weiterhin die Jobkette, aus der der Auftrag gerade entfernt wird.
+                    Erst wenn die Ausführung beendet ist, liefert die Eigenschaft <code>null</code>
+                    (außer der Auftrag ist wieder in eine Jobkette eingetragen worden).
+                    Damit bleibt die Eigenschaft <code>job_chain</code> während der Ausführung durch die Task stabil.
+                </p>
+            </description>
+        </revision>
+        
         <revision type="correction" title="Java-Methode sos.spooler.id() liefert auch Integer als String">
             <description>
                 <p>
@@ -23,7 +75,7 @@
         <revision type="correction" title="let_run_terminate_and_restart beendet Tasks im Zustand running_waiting_for_order">
             <description>
                 <p>
-                    Siehe <scheduler_element name="modify_spooler" attribute="cmd"/>.
+                    Siehe <scheduler_element name="modify_spooler" attribute="cmd" value="let_run_terminate_and_restart"/>.
                 </p>
             </description>
         </revision>

@@ -17,6 +17,9 @@
             Entfernt einen Auftrag aus einer Jobkette.
             Ein gerade den Auftrag ausführender Job bleibt unbeinflusst.
         </p>
+        <p>
+            Das Kommando nutzt die Methode <scheduler_method class="Order" method="remove_from_job_chain"/>.
+        </p>
     </description>
 
     <xml_attributes>

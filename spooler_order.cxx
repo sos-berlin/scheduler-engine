@@ -1664,6 +1664,7 @@ void Order::set_run_time( const xml::Element_ptr& e )
     _run_time->set_modified_event_handler( this );
 
     if( e )  _run_time->set_dom( e );
+       else  setback( 0 );
 }
 
 //----------------------------------------------------------------------------------Order::obj_name
