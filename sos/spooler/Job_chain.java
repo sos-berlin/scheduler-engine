@@ -151,7 +151,7 @@ public class Job_chain extends Idispatch
       * bis die Ausführung des alten Auftrags beendet ist.
       *
       * @see #add_order(Order)
-      * @see #remove_from_job_chain()
+      * @see Order#remove_from_job_chain()
       */
     
     public void             add_or_replace_order( Order order )                     {                           com_call( "add_or_replace_order", order ); }
