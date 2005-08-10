@@ -717,6 +717,8 @@ void Spooler_db::insert_order( Order* order )
                     ta.commit();
                 }
 
+                order->_is_in_database = true;
+
                 break;
             }
             catch( const exception& x )  
@@ -767,6 +769,7 @@ void Spooler_db::update_order( Order* order )
                     {
                         delete_order( order, &ta );
                         write_order_history( order, &ta );
+                        order->_is_in_database = false;
                     }
                     else
                     {

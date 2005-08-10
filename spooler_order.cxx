@@ -1283,7 +1283,8 @@ void Order::remove_from_job_chain()
 
     if( job_chain )
     {
-        S log_line = "Auftrag ist aus Jobkette " + job_chain->name() + " entfernt";
+        S log_line;
+        log_line << "Auftrag ist aus Jobkette " << job_chain->name() << " entfernt";
         if( _task )  log_line << ", wird aber weiter von " << _task->obj_name() << " ausgeführt";
         _log->info( log_line );
     }
@@ -1339,7 +1340,6 @@ bool Order::try_add_to_job_chain( Job_chain* job_chain )
         if( !_is_in_database  &&  job_chain->_store_orders_in_database )
         {
             _spooler->_db->insert_order( this );
-            _is_in_database = true;
         }
 
         setback( _run_time->set()? next_start_time( true ) : Time(0) );

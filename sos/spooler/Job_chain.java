@@ -143,8 +143,15 @@ public class Job_chain extends Idispatch
       * Genauer: Er wird aus der Jobkette entfernt, 
       * und der neue Auftrag wird hinzugefügt.
       * <p>
-      * Falls der ersetzte Auftrag gerade von einer Task ausgeführt wird,
-      * dann wartet der Scheduler die Ausführung ab, bevor der neue Auftrag ausgeführt werden kann.
+      * Solange eine Task den vorhandenen Auftrag ausführt, sind im Scheduler zwei Aufträge mit gleicher Kennung vorhanden.
+      * Allerdings ist der vorhandene Auftrag aus der Jobkette und aus der Datenbank bereits entfernt.
+      * Er ist nur noch für die Task nutzbar und verschwindet nach der Ausführung.
+      * <p>
+      * In diesem Fall wartet der Scheduler die Ausführung des neuen Auftrags ab,
+      * bis die Ausführung des alten Auftrags beendet ist.
+      *
+      * @see #add_order(Order)
+      * @see #remove_from_job_chain()
       */
     
     public void             add_or_replace_order( Order order )                     {                           com_call( "add_or_replace_order", order ); }
