@@ -15,6 +15,7 @@
     <xml_parent_elements>
         <xml_parent_element name="answer"/>
         <xml_parent_element name="order_queue"/>
+        <xml_parent_element name="task"/>
     </xml_parent_elements>
     
     <xml_attributes>
@@ -124,6 +125,44 @@
             </description>
         </xml_attribute>
         
+        <xml_attribute name="removed" type="yes|no" initial="no" title="Auftrag ist aus der Jobkette entfernt worden">
+            <description>
+                <p>
+                    <code>removed="yes"</code>:
+                    Der Auftrag ist durch einen Aufruf von 
+                    <scheduler_method class="Order" method="remove_from_job_chain"/>
+                    aus der Jobkette entfernt worden, aber wird noch von einer Task ausgeführt 
+                    (Elternelement ist <scheduler_element directory="xml/answer/" name="task"/>).
+                </p>
+            </description>
+        </xml_attribute>
+        
+        <xml_attribute name="replaced" type="yes|no" initial="no" title="Auftrag ist ersetzt worden">
+            <description>
+                <p>
+                    <code>replaced="yes"</code>:
+                    Der Auftrag ist durch einen Aufruf von 
+                    <scheduler_method class="Job_chain" method="add_or_replace_order" java_signature="sos.spooler.Order"/>
+                    ersetzt worden, aber wird noch von einer Task ausgeführt 
+                    (Elternelement ist <scheduler_element directory="xml/answer/" name="task"/>).
+                </p>
+            </description>
+        </xml_attribute>
+        
+        <xml_attribute name="replacement" type="yes|no" initial="no" title="Auftrag ersetzt einen anderen gerade ausgeführten">
+            <description>
+                <p>
+                    <code>replacement="yes"</code>:
+                    Nach 
+                    <scheduler_method class="Job_chain" method="add_or_replace_order" java_signature="sos.spooler.Order"/>
+                    wird noch der ersetzte Auftrag von einer Task ausgeführt.
+                </p>
+                <p>
+                    Dieser Auftrag wird erst ausgeführt, wenn der ersetzte Auftrag ausgeführt worden ist.
+                </p>
+            </description>
+        </xml_attribute>
+        
     </xml_attributes>
     
     <xml_child_elements>
@@ -131,14 +170,9 @@
         <xml_child_element name="run_time"/>
     </xml_child_elements>
 
-    <description>
+    <!--description>
         <p>
         </p>
-    </description>
+    </description-->
     
-    <example>
-        <pre>
-        </pre>
-    </example>
-        
 </xml_element>

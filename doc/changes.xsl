@@ -46,12 +46,12 @@
             <tbody>
                 <tr>
                     <td valign="top" width="50">
-                        <span style="font-weight: bold; white-space: nowrap">
+                        <span style="font-weight: normal; white-space: nowrap">
                             <xsl:value-of select="@version"/>.<xsl:value-of select="@subversion_revision"/>&#160;
                         </span>
                     </td>
                     <td valign="top" width="80" style="padding-left: 1ex; white-space: nowrap">
-                        <span style="font-weight: bold">
+                        <span style="font-weight: normal">
                             <xsl:value-of select="@date"/>
                         </span>
                     </td>
@@ -81,9 +81,9 @@
         </xsl:element>
         
         <xsl:if test="description">
-            <p style="margin-top: 1ex">&#160;</p>
+            <p style="margin-top: 0ex">&#160;</p>
             <xsl:apply-templates select="description"/>
-            <p style="margin-top: 1ex">&#160;</p>
+            <p style="margin-top: 0ex">&#160;</p>
         </xsl:if>
     
     </xsl:template>

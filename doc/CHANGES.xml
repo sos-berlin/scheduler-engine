@@ -30,13 +30,25 @@
                 </p>
                 <p>
                     Hat die Jobkette bereits einen Auftrag mit gleicher Kennung, dann wird dieser ersetzt.
-                    Genauer: Er wird aus der Jobkette entfernt 
+                    Genauer: er wird aus der Jobkette entfernt 
                     (wie mit <scheduler_method class="Order" method="remove_from_job_chain"/>),
                     und der neue Auftrag wird hinzugefügt.
                 </p>
                 <p>
                     Falls der ersetzte Auftrag gerade von einer Task ausgeführt wird,
                     dann wartet der Scheduler die Ausführung ab, bevor der neue Auftrag ausgeführt werden kann.
+                </p>
+                <p>
+                    Der ersetzte Auftrag erscheint in der XML-Antwort als
+                    <scheduler_element name="order" directory="xml/answer/" attribute="replaced" value="yes"/>.
+                    Dies nur innerhalb von 
+                    <scheduler_element name="task" directory="xml/answer/"/>,
+                    (nicht von <scheduler_element name="order_queue" directory="xml/answer/"/>),
+                    denn der Auftrag ist nicht mehr in der Auftragswarteschlange.
+                </p>
+                <p>
+                    Der neue, ersetzende Auftrag erscheint in der XML-Antwort als
+                    <scheduler_element name="order" directory="xml/answer/" attribute="replacement" value="yes"/>.
                 </p>
                 <p>
                     Siehe auch <scheduler_element name="add_order" attribute="replace" value="yes"/>.
@@ -58,14 +70,23 @@
                     (außer der Auftrag ist wieder in eine Jobkette eingetragen worden).
                     Damit bleibt die Eigenschaft <code>job_chain</code> während der Ausführung durch die Task stabil.
                 </p>
+                <p>
+                    Der entfernte, aber noch ausgeführte Auftrag erscheint in der XML-Antwort als
+                    <scheduler_element name="order" directory="xml/answer/" attribute="removed" value="yes"/>.
+                    Dies nur innerhalb von 
+                    <scheduler_element name="task" directory="xml/answer/"/>,
+                    (nicht von <scheduler_element name="order_queue" directory="xml/answer/"/>),
+                    denn der Auftrag ist nicht mehr in der Auftragswarteschlange.
+                </p>
             </description>
         </revision>
         
         <revision type="correction" title="Java-Methode sos.spooler.id() liefert auch Integer als String">
             <description>
                 <p>
-                    Statt einem Cast (String) wird jetzt .toString() gerufen, 
-                    sodass auch eine Auftragskennung die als Integer-Variant (o.dgl.) gespeichert ist, 
+                    Statt einem Cast <code>(String)</code> wird jetzt <code>.toString()</code> gerufen, 
+                    so dass auch eine Auftragskennung, 
+                    die als Integer-Variant (o.dgl.) gespeichert ist, 
                     in Java als String geliefert wird.
                     (Bisher gab es eine ClassCastException.)
                 </p>

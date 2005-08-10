@@ -29,6 +29,14 @@
                 </p>
             </description>
         </xml_parent_element>
+
+        <xml_parent_element name="task">
+            <description>
+                <p>
+                </p>
+            </description>
+        </xml_parent_element>
+
     </xml_parent_elements>
     
     <xml_attributes>
