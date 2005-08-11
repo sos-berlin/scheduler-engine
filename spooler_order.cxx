@@ -1588,7 +1588,20 @@ void Order::set_at( const Time& time )
     if( _moved      )  throw_xc( "SCHEDULER-188", obj_name() );
   //if( _job_chain  )  throw_xc( "SCHEDULER-186", obj_name(), _job_chain->name() );
 
-    setback( time );
+
+    xml::Document_ptr run_time_dom;
+    run_time_dom.create();
+
+    xml::Element_ptr run_time_element = run_time_dom    .create_root_element( "run_time" );
+    xml::Element_ptr date_element     = run_time_element.append_new_element( "date" );
+    xml::Element_ptr day_element      = date_element    .append_new_element( "day" );
+
+    date_element.setAttribute( "date"        , time.as_string().substr( 0, 10 ) );
+    day_element .setAttribute( "single_start", time.as_string().substr( 11 ) );
+
+    set_run_time( run_time_element );
+
+    //setback( time );
 }
 
 //---------------------------------------------------------------------------Order::next_start_time
@@ -1663,7 +1676,7 @@ void Order::set_run_time( const xml::Element_ptr& e )
     _run_time = Z_NEW( Run_time( _spooler, Run_time::application_order ) );
     _run_time->set_modified_event_handler( this );
 
-    if( e )  _run_time->set_dom( e );
+    if( e )  _run_time->set_dom( e );       // Ruft setback() über modify_event() 
        else  setback( 0 );
 }
 
