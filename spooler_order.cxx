@@ -1342,7 +1342,7 @@ bool Order::try_add_to_job_chain( Job_chain* job_chain )
             _spooler->_db->insert_order( this );
         }
 
-        setback( _run_time->set()? next_start_time( true ) : Time(0) );
+        setback( _state == _initial_state  &&  _run_time->set()? next_start_time( true ) : Time(0) );
     }
 
     return true;
@@ -1666,7 +1666,7 @@ void Order::before_modify_event()
 
 void Order::modified_event()
 {
-    setback( _run_time->set()? next_start_time( true ) : Time(0) );
+    setback( _state == _initial_state && _run_time->set()? next_start_time( true ) : Time(0) );
 }
 
 //------------------------------------------------------------------------------Order::set_run_time
@@ -1677,7 +1677,7 @@ void Order::set_run_time( const xml::Element_ptr& e )
     _run_time->set_modified_event_handler( this );
 
     if( e )  _run_time->set_dom( e );       // Ruft setback() über modify_event() 
-       else  setback( 0 );
+       else  modified_event();
 }
 
 //----------------------------------------------------------------------------------Order::obj_name

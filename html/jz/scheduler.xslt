@@ -1007,12 +1007,12 @@
 
                     <xsl:element name="td">
                         <xsl:attribute name="align">left</xsl:attribute>
-                        <xsl:if test="@task">
-                            <xsl:attribute name="style">font-weight: bold</xsl:attribute>
-                        </xsl:if>
-                        <span style="padding-left: 2ex; white-space: wrap;">
-                            <xsl:value-of select="@title"/>
-                        </span>
+                        <xsl:attribute name="style">
+                            <xsl:if test="@task">font-weight: bold;</xsl:if>
+                            padding-left: 2ex;
+                        </xsl:attribute>
+                        
+                        <xsl:value-of select="@title"/>
                     </xsl:element>
 
                     <td>
