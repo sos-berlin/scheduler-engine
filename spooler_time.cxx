@@ -38,6 +38,13 @@ extern const Time                      latter_day                  = latter_day_
 static const char                      last_day_name[]             = "never";
 static const char                      immediately_name[]          = "now";
 
+const char* weekday_names[] = { "so"     , "mo"    , "di"      , "mi"       , "do"        , "fr"     , "sa"      ,
+                                "sonntag", "montag", "dienstag", "mittwoch" , "donnerstag", "freitag", "samstag" ,
+                                "sun"    , "mon"   , "tue"     , "wed"      , "thu"       , "fri"    , "sat"     ,
+                                "sunday" , "monday", "tuesday" , "wednesday", "thursday"  , "friday" , "saturday",
+                                NULL };
+
+
 //-------------------------------------------------------------------------------------------------
 
 Run_time::Class_descriptor              Run_time::class_descriptor ( &typelib, "sos.spooler.Run_time", Run_time::_methods );
@@ -499,9 +506,23 @@ void Day_set::set_dom( const xml::Element_ptr& element, const Day* default_day, 
         {
             Day my_default_day ( e, default_day, default_period );
 
-            int day = int_from_variant( e.getAttribute( "day" ) );
+            int day = -1;
 
-            if( _minimum == 0  &&  _maximum == 6  &&  day == 7 )  day = 0;      // Sonntag darf auch 7 sein
+            if( _minimum == 0  &&  _maximum == 6 )      // Es ist ein Wochentag
+            {
+                string day_string = lcase( e.getAttribute( "day" ) );
+                for( const char** p = weekday_names; *p && day == -1; p++ )
+                    if( day_string == *p )  day = ( p - weekday_names ) % 7;
+
+                if( day == -1 ) 
+                {
+                    day = e.int_getAttribute( "day" );
+                    if( day == 7 )  day = 0;      // Sonntag darf auch 7 sein
+                }
+            }
+            else
+                day = e.int_getAttribute( "day" );
+
 
             if( day < _minimum  ||  day > _maximum )  throw_xc( "SCHEDULER-221", day, _minimum, _maximum );
             if( (uint)day >= NO_OF(_days) )  throw_xc( "SCHEDULER-INVALID-DAY", day );
