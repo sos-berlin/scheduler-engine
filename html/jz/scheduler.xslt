@@ -684,7 +684,7 @@
                         </span>
                     </td>
                     <td class="head" valign="baseline">
-                        Job state, next start
+                        Job state, <span style="white-space: nowrap">next start</span>
                     </td>
                     <td colspan="2" class="head" valign="baseline">
                         <span style="white-space: nowrap">

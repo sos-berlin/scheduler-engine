@@ -1959,6 +1959,7 @@ const Com_method Com_task::_methods[] =
     { DISPATCH_METHOD     , 21, "Add_subprocess"            , (Com_method_ptr)&Com_task::Add_subprocess         , VT_EMPTY      , { VT_INT, VT_R8, VT_BOOL, VT_BOOL, VT_BSTR }, 1 },
     { DISPATCH_PROPERTYPUT, 22, "Priority_class"            , (Com_method_ptr)&Com_task::put_Priority_class     , VT_EMPTY      , { VT_BYREF|VT_VARIANT } },
     { DISPATCH_PROPERTYGET, 22, "Priority_class"            , (Com_method_ptr)&Com_task::get_Priority_class     , VT_BSTR       },
+    { DISPATCH_PROPERTYGET, 23, "Step_count"                , (Com_method_ptr)&Com_task::get_Step_count         , VT_INT        },
     {}
 };
 
@@ -2458,8 +2459,28 @@ STDMETHODIMP Com_task::Add_subprocess( int pid, double timeout, VARIANT_BOOL ign
 
 STDMETHODIMP Com_task::get_Priority_class( BSTR* result )
 {
-    Z_COM_IMPLEMENT( hr = zschimmer::Process( getpid() ).get_Priority_class( result ) );
+    //Z_COM_IMPLEMENT( hr = zschimmer::Process( getpid() ).get_Priority_class( result ) );
+    return E_NOTIMPL;
 }
+
+//-------------------------------------------------------------------------Com_task::get_Step_count
+
+STDMETHODIMP Com_task::get_Step_count( int* result )
+{
+    HRESULT hr = S_OK;
+    
+    try
+    {
+        if( !_task )  throw_xc( "SCHEDULER-122" );
+
+        *result = _task->_step_count;
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    
+    return hr;
+}
+
 
 //-------------------------------------------------------------------------Com_task_proxy::_methods
 // Dispid wie bei Com_task!

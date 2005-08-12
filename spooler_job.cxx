@@ -1669,7 +1669,7 @@ xml::Element_ptr Job::dom_element( const xml::Document_ptr& document, const Show
 
         if( _state_cmd         )  job_element.setAttribute( "cmd"    , state_cmd_name()  );
 
-        Time next = _next_start_time;
+        Time next = min( _next_start_time, _next_single_start );
         if( _order_queue )  next = min( next, _order_queue->next_time() );
 
         if( next < latter_day )

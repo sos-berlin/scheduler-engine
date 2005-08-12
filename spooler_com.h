@@ -459,6 +459,7 @@ struct Com_task : spooler_com::Itask,
     STDMETHODIMP                Add_subprocess              ( int, double, VARIANT_BOOL, VARIANT_BOOL, BSTR );
     STDMETHODIMP            put_Priority_class              ( VARIANT* )                            { return FALSE; }
     STDMETHODIMP            get_Priority_class              ( BSTR* );
+    STDMETHODIMP            get_Step_count                  ( int* );
 
   private:
     Thread_semaphore           _lock;

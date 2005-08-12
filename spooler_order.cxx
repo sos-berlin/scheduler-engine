@@ -1666,7 +1666,7 @@ void Order::before_modify_event()
 
 void Order::modified_event()
 {
-    setback( _state == _initial_state && _run_time->set()? next_start_time( true ) : Time(0) );
+    if( _state == _initial_state  &&  !_task )  setback( _run_time->set()? next_start_time( true ) : Time(0) );
 }
 
 //------------------------------------------------------------------------------Order::set_run_time

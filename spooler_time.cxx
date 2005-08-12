@@ -505,8 +505,7 @@ void Day_set::set_dom( const xml::Element_ptr& element, const Day* default_day, 
         if( e.nodeName_is( "day" ) )
         {
             Day my_default_day ( e, default_day, default_period );
-
-            int day = -1;
+            int day            = -1;
 
             if( _minimum == 0  &&  _maximum == 6 )      // Es ist ein Wochentag
             {
@@ -526,6 +525,7 @@ void Day_set::set_dom( const xml::Element_ptr& element, const Day* default_day, 
 
             if( day < _minimum  ||  day > _maximum )  throw_xc( "SCHEDULER-221", day, _minimum, _maximum );
             if( (uint)day >= NO_OF(_days) )  throw_xc( "SCHEDULER-INVALID-DAY", day );
+
             _days[day].set_dom( e, &my_default_day, default_period );
         }
     }
@@ -751,12 +751,18 @@ Period Run_time::next_period( Time tim_par, With_single_start single_start )
         next = min( next, _monthday_set.next_period( tim, single_start ) );
         next = min( next, _ultimo_set  .next_period( tim, single_start ) );
 
-        if( _holiday_set.find( (uint)next.begin().midnight() ) == _holiday_set.end() )  break;  // Gefundener Zeitpunkt ist kein Feiertag? Dann ok!
-
-        tim = next.begin().midnight() + 24*60*60;   // Feiertag? Dann nächsten Tag probieren
+        if( next.begin() != latter_day )
+        {
+            if( _holiday_set.find( (uint)next.begin().midnight() ) == _holiday_set.end() )  return next;  // Gefundener Zeitpunkt ist kein Feiertag? Dann ok!
+            tim = next.begin().midnight() + 24*60*60;   // Feiertag? Dann nächsten Tag probieren
+        }
+        else
+        {
+            tim = tim.midnight() + 24*60*60;   // Keine Periode? Dann nächsten Tag probieren
+        }
     }
 
-    return next;
+    return Period();
 }
 
 //----------------------------------------------------------------------------------Run_time::print

@@ -2640,7 +2640,7 @@ const char file_jz_scheduler_xslt[] =
     "</span>\n"
     "</td>\n"
     "<td class=\"head\" valign=\"baseline\">\n"
-    "Job state, next start\n"
+    "Job state, <span style=\"white-space: nowrap\">next start</span>\n"
     "</td>\n"
     "<td colspan=\"2\" class=\"head\" valign=\"baseline\">\n"
     "<span style=\"white-space: nowrap\">\n"

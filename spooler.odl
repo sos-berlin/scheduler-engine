@@ -395,6 +395,9 @@ library Spooler
 
         [id(22),propget]
         HRESULT                 Priority_class              ( [out,retval] BSTR* );                             // Für Joacim 2005-04-02
+
+        [id(23),propget]
+        HRESULT                 Step_count                  ( [out,retval] int* );                              // Für Joacim 2005-04-02
     }
 
     [
