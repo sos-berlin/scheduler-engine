@@ -10,6 +10,18 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2005-08-12" version="2.0.134" subversion_revision="3832">
+        <revision type="modification" title="Änderung der &lt;run_time&gt; eines Auftrags wirkt nur am Beginn der Jobkette">
+            <description>
+                <p>
+                    Eine Änderung der &lt;run_time&gt; eines Auftrags wirkt nur, 
+                    wenn er am Anfang der Jobkette steht und noch nicht ausgeführt wird.
+                    Sonst wird die Wirkung verzögert, bis der Auftrag einen Endzustand erreicht hat.
+                </p>
+            </description>
+        </revision>
+    </change>
+
     <change date="2005-08-10" version="2.0.135" subversion_revision="3824">
         <revision type="new" title="&lt;modify_order&gt; kann &lt;run_time&gt; ändern">
             <description>
