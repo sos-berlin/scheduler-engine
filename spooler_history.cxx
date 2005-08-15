@@ -169,8 +169,6 @@ void Spooler_db::open2( const string& db_name )
     
         if( _db_name != "" )
         {
-//static int c = 1; if( c-- <= 0 )  throw_xc( "OPENERROR" ); 
-
             if( _db_name.find(' ') == string::npos  &&  _db_name.find( ':', 1 ) == string::npos )
             {
                 if( !is_absolute_filename( _db_name  )  &&  (_spooler->log_directory() + " ")[0] == '*' ) 
@@ -195,106 +193,94 @@ void Spooler_db::open2( const string& db_name )
 
                 _db.open( "-in -out " + my_db_name );   // -create
 
-                _db_name += " ";
-
-                create_table_when_needed( _spooler->_variables_tablename, 
-                                          "\"NAME\" char(100) not null,"
-                                          "\"WERT\" char(250),"  
-                                          "primary key ( \"name\" )" );
-
-
-                vector<string> create_extra = vector_map( sql_quoted_name, vector_split( " *, *", _spooler->_job_history_columns ) );
-                for( int i = 0; i < create_extra.size(); i++ )  create_extra[i] += " char(250),";
-
-                create_table_when_needed( _spooler->_job_history_tablename, 
-                                          "\"ID\"          integer not null,"
-                                          "\"SPOOLER_ID\"  char(100),"
-                                          "\"JOB_NAME\"    char(100) not null,"
-                                          "\"START_TIME\"  datetime not null,"
-                                          "\"END_TIME\"    datetime,"
-                                          "\"CAUSE\"       char(50),"
-                                          "\"STEPS\"       integer,"
-                                          "\"ERROR\"       bit,"
-                                          "\"ERROR_CODE\"  char(50),"
-                                          "\"ERROR_TEXT\"  char(250),"
-                                          "\"PARAMETERS\"  clob,"
-                                          "\"LOG\"         blob," 
-                                          + join( "", create_extra ) 
-                                          + "primary key( \"ID\" )" );
-
-                create_table_when_needed( _spooler->_orders_tablename, 
-                                          "\"JOB_CHAIN\"   char(100) not null,"         // Primärschlüssel
-                                          "\"ID\"          char(100) not null,"         // Primärschlüssel
-                                          "\"SPOOLER_ID\"  char(100),"
-                                          "\"PRIORITY\"    integer not null,"
-                                          "\"STATE\"       char(100),"
-                                          "\"STATE_TEXT\"  char(100),"
-                                          "\"TITLE\"       char(200),"
-                                          "\"CREATED_TIME\" datetime not null,"
-                                          "\"MOD_TIME\"    datetime,"
-                                          "\"ORDERING\"    integer not null,"           // Um die Reihenfolge zu erhalten
-                                          "\"PAYLOAD\"     clob,"
-                                          "\"INITIAL_STATE\" char(100),"               
-                                          "\"RUN_TIME\"    clob,"
-                                          "primary key( \"JOB_CHAIN\", \"ID\" )" );
-
-
-                try
+                if( _db.opened() )
                 {
-                    Transaction ta ( this );
-                    Any_file select ( "-in " + _db_name + " SELECT \"INITIAL_STATE\" from " + uquoted(_spooler->_orders_tablename) + " where 1=0" );
+                    _db_name += " ";
+
+                    create_table_when_needed( _spooler->_variables_tablename, 
+                                            "\"NAME\" char(100) not null,"
+                                            "\"WERT\" char(250),"  
+                                            "primary key ( \"name\" )" );
+
+
+                    vector<string> create_extra = vector_map( sql_quoted_name, vector_split( " *, *", _spooler->_job_history_columns ) );
+                    for( int i = 0; i < create_extra.size(); i++ )  create_extra[i] += " char(250),";
+
+                    create_table_when_needed( _spooler->_job_history_tablename, 
+                                            "\"ID\"          integer not null,"
+                                            "\"SPOOLER_ID\"  char(100),"
+                                            "\"JOB_NAME\"    char(100) not null,"
+                                            "\"START_TIME\"  datetime not null,"
+                                            "\"END_TIME\"    datetime,"
+                                            "\"CAUSE\"       char(50),"
+                                            "\"STEPS\"       integer,"
+                                            "\"ERROR\"       bit,"
+                                            "\"ERROR_CODE\"  char(50),"
+                                            "\"ERROR_TEXT\"  char(250),"
+                                            "\"PARAMETERS\"  clob,"
+                                            "\"LOG\"         blob," 
+                                            + join( "", create_extra ) 
+                                            + "primary key( \"ID\" )" );
+
+                    create_table_when_needed( _spooler->_orders_tablename, 
+                                            "\"JOB_CHAIN\"   char(100) not null,"         // Primärschlüssel
+                                            "\"ID\"          char(100) not null,"         // Primärschlüssel
+                                            "\"SPOOLER_ID\"  char(100),"
+                                            "\"PRIORITY\"    integer not null,"
+                                            "\"STATE\"       char(100),"
+                                            "\"STATE_TEXT\"  char(100),"
+                                            "\"TITLE\"       char(200),"
+                                            "\"CREATED_TIME\" datetime not null,"
+                                            "\"MOD_TIME\"    datetime,"
+                                            "\"ORDERING\"    integer not null,"           // Um die Reihenfolge zu erhalten
+                                            "\"PAYLOAD\"     clob,"
+                                            "\"INITIAL_STATE\" char(100),"               
+                                            "\"RUN_TIME\"    clob,"
+                                            "primary key( \"JOB_CHAIN\", \"ID\" )" );
+
+
+                    try
+                    {
+                        Transaction ta ( this );
+                        Any_file select ( "-in " + _db_name + " SELECT \"INITIAL_STATE\" from " + uquoted(_spooler->_orders_tablename) + " where 1=0" );
+                    }
+                    catch( exception& x )
+                    {
+                        Transaction ta ( this );
+                        _log->warn( x.what() );
+                        _log->info( "Tabelle " + _spooler->_orders_tablename + " wird um die Spalten INITIAL_STATE und RUN_TIME erweitert" );
+                        
+                        _db.put( "ALTER TABLE " + uquoted(_spooler->_orders_tablename) + 
+                                " add ( \"INITIAL_STATE\" char(100)," 
+                                        "\"RUN_TIME\" clob )" );
+                        ta.commit();
+                    }
+
+
+                    create_table_when_needed( _spooler->_order_history_tablename, 
+                                            "\"HISTORY_ID\"  integer not null,"           // Primärschlüssel
+                                            "\"JOB_CHAIN\"   char(100) not null,"         // Primärschlüssel
+                                            "\"ORDER_ID\"    char(100) not null,"
+                                            "\"SPOOLER_ID\"  char(100),"
+                                            "\"TITLE\"       char(200),"
+                                            "\"STATE\"       varchar(100) not null,"
+                                            "\"STATE_TEXT\"  varchar(100),"
+                                            "\"START_TIME\"  datetime not null,"
+                                            "\"END_TIME\"    datetime not null,"
+                                            "\"LOG\"         blob," 
+                                            "primary key( \"HISTORY_ID\" )" );
+
+                    create_table_when_needed( _spooler->_tasks_tablename, 
+                                            "\"TASK_ID\"        integer not null,"           // Primärschlüssel
+                                            "\"SPOOLER_ID\"     char(100),"
+                                            "\"JOB_NAME\"       char(100) not null,"
+                                            "\"ENQUEUE_TIME\"   datetime,"
+                                            "\"START_AT_TIME\"  datetime,"
+                                            "\"PARAMETERS\"     clob,"
+                                            "primary key( \"TASK_ID\" )" );
+
+                    commit();
                 }
-                catch( exception& x )
-                {
-                    Transaction ta ( this );
-                    _log->warn( x.what() );
-                    _log->info( "Tabelle " + _spooler->_orders_tablename + " wird um die Spalten INITIAL_STATE und RUN_TIME erweitert" );
-                    
-                    _db.put( "ALTER TABLE " + uquoted(_spooler->_orders_tablename) + 
-                             " add ( \"INITIAL_STATE\" char(100)," 
-                                     "\"RUN_TIME\" clob )" );
-                    ta.commit();
-                }
-
-
-                create_table_when_needed( _spooler->_order_history_tablename, 
-                                          "\"HISTORY_ID\"  integer not null,"           // Primärschlüssel
-                                          "\"JOB_CHAIN\"   char(100) not null,"         // Primärschlüssel
-                                          "\"ORDER_ID\"    char(100) not null,"
-                                          "\"SPOOLER_ID\"  char(100),"
-                                          "\"TITLE\"       char(200),"
-                                          "\"STATE\"       varchar(100) not null,"
-                                          "\"STATE_TEXT\"  varchar(100),"
-                                          "\"START_TIME\"  datetime not null,"
-                                          "\"END_TIME\"    datetime not null,"
-                                          "\"LOG\"         blob," 
-                                          "primary key( \"HISTORY_ID\" )" );
-
-                create_table_when_needed( _spooler->_tasks_tablename, 
-                                          "\"TASK_ID\"        integer not null,"           // Primärschlüssel
-                                          "\"SPOOLER_ID\"     char(100),"
-                                          "\"JOB_NAME\"       char(100) not null,"
-                                          "\"ENQUEUE_TIME\"   datetime,"
-                                          "\"START_AT_TIME\"  datetime,"
-                                          "\"PARAMETERS\"     clob,"
-                                          "primary key( \"TASK_ID\" )" );
-
-              //stmt = "UPDATE " + uquoted(_spooler->_variables_tablename) + " set \"WERT\" = \"WERT\"+1 where \"NAME\"='spooler_job_id'";
-              //_job_id_update.prepare( _db_name + stmt );
-
-
-              //stmt = "SELECT \"WERT\" from " + _spooler->_variables_tablename + " where \"NAME\"='spooler_job_id'";
-              //_job_id_select.prepare( "-in " + _db_name + stmt );
-
-              //_job_id_select.execute();
-              //if( _job_id_select.eof() )  execute( "INSERT into " + uquoted(_spooler->_variables_tablename) + " (\"NAME\",\"WERT\") values ('spooler_job_id','0')" );
-              //_job_id_select.close( close_cursor );
-                commit();
-
-                //stmt = "UPDATE " + _spooler->_job_history_tablename + " set \"end\"=?, steps=?, \"error\"=?, error_code=?, error_text=?  where \"id\"=?";
-                //_history_update.prepare( _db_name + stmt );       //            1        2            3             4             5               6
-                //_history_update_params.resize( 1+6 );
-                //for( int i = 1; i <= 6; i++ )  _history_update.bind_parameter( i, &_history_update_params[i] );
 
                 _email_sent_after_db_error = false;
             }
@@ -476,10 +462,8 @@ void Spooler_db::try_reopen_after_error( const exception& x, bool wait_endless )
             scheduler_event.set_subject( msg );
             scheduler_event.set_body( body );
             scheduler_event.send_mail();
-            //_spooler->send_error_email( msg, body );
             
             _spooler->abort_immediately();
-            //throw exception( x.what() );  // Wird nicht ausgeführt
         }
     }
 
@@ -494,9 +478,6 @@ void Spooler_db::try_reopen_after_error( const exception& x, bool wait_endless )
         scheduler_event.set_subject( string("SCHEDULER ARBEITET NACH FEHLERN OHNE DATENBANK: ") + x.what() );
         scheduler_event.set_body( body );
         scheduler_event.send_mail();
-        //_spooler->send_error_email( string("SCHEDULER ARBEITET NACH FEHLERN OHNE DATENBANK: ") + x.what(), body );
-        // Datenbank nicht mehr öffnen und auf Dateihistorie umschalten.
-
 
         open2( "" );     // Umschalten auf dateibasierte Historie
     }
@@ -565,6 +546,11 @@ int Spooler_db::get_id_( const string& variable_name, Transaction* outer_transac
             sel.open( "-in " + _db_name + "SELECT \"WERT\" from " + uquoted(_spooler->_variables_tablename) + " where \"NAME\"=" + sql::quoted( variable_name ) );
             if( sel.eof() )
             {
+                //Any_file sel2 ( "-in " + _db_name + "SELECT max( \"ID\" )  from " + uquoted(_spooler->_job_history_tablename) );
+                //Record record = sel2.get_record();
+                //id = record.null( 0 )? 1 : record.as_int( 0 );  Fehler in Hostware: record.null(0) liefert immer true
+                //sel2.close();
+
                 id = 1;
                 execute( "INSERT into " + uquoted(_spooler->_variables_tablename) + " (\"NAME\",\"WERT\") " 
                          "values (" + sql::quoted( variable_name ) + ",'" + as_string(id) + "')" );
@@ -1136,7 +1122,6 @@ void Job_history::open()
 
             _type_string = history_column_names;
 
-            //_extra_record.construct( make_record_type( extra_columns ) );
             _extra_type = make_record_type( extra_columns );
 
             if( extra_columns != "" )  _type_string += "," + extra_columns;
@@ -1439,26 +1424,26 @@ void Task_history::write( bool start )
     string start_time = !start || _task->_running_since? _task->_running_since.as_string(Time::without_ms)
                                                        : Time::now().as_string(Time::without_ms);
 
-    if( _job_history->_use_db )
+    while(1)
     {
-        if( !_spooler->_db->opened() )       // Datenbank ist (wegen eines Fehlers) geschlossen worden?
+        try
         {
-            _job_history->close();
-            _job_history->open();
-            
-            if( !start )  
+            if( _job_history->_use_db )
             {
-                _spooler->log()->info( "Historiensatz wird wegen vorausgegangen Datenbankfehlers nicht geschrieben" );
-                return;
+                if( !_spooler->_db->opened() )       // Datenbank ist (wegen eines Fehlers) geschlossen worden?
+                {
+                    _job_history->close();
+                    _job_history->open();
+                    
+                    if( !start )  
+                    {
+                        _spooler->log()->info( "Historiensatz wird wegen vorausgegangen Datenbankfehlers nicht geschrieben" );
+                        return;
+                    }
+                }
             }
-        }
-    }
 
-    if( _job_history->_use_db )
-    {
-        while(1)
-        {
-            try
+            if( _job_history->_use_db )
             {
                 Transaction ta ( +_spooler->_db );
                 {
@@ -1535,12 +1520,13 @@ void Task_history::write( bool start )
                 }
 
                 ta.commit();
-                break;
             }
-            catch( const exception& x )
-            {
-                _spooler->_db->try_reopen_after_error( x );
-            }
+
+            break;
+        }
+        catch( const exception& x )
+        {
+            _spooler->_db->try_reopen_after_error( x );
         }
     }
 

@@ -10,6 +10,10 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2005-08-12" version="2.0.136" subversion_revision="3834">
+        <revision type="correction" title="Fehler bei SQL-Insert für neue Task führt nicht mehr zur eMail-Flut"/>
+    </change>
+
     <change date="2005-08-12" version="2.0.134" subversion_revision="3832">
         <revision type="modification" title="Änderung der &lt;run_time&gt; eines Auftrags wirkt nur am Beginn der Jobkette">
             <description>
@@ -23,7 +27,7 @@
     </change>
 
     <change date="2005-08-10" version="2.0.135" subversion_revision="3824">
-        <revision type="new" title="&lt;modify_order&gt; kann &lt;run_time&gt; ändern">
+        <revision type="new" title="Kommando &lt;modify_order&gt; kann &lt;run_time&gt; ändern">
             <description>
                 <p>
                     In <scheduler_element name="modify_order"/> kann jetzt
