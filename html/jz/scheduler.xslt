@@ -1166,7 +1166,10 @@
                     <xsl:element name="tr">
                         <xsl:variable name="url" select="concat( 'http://', @hostname, ':', @tcp_port, /*/@my_url_path_base )" />
                         
-                        <xsl:attribute name="style">cursor: pointer</xsl:attribute>
+                        <xsl:attribute name="style">
+                            cursor: pointer;
+                            <xsl:if test="@connected='no'">color: gray;</xsl:if>
+                        </xsl:attribute>
                         <xsl:attribute name="title"><xsl:value-of select="$url"/></xsl:attribute>
                         <xsl:attribute name="onclick">
                             window.open( "<xsl:value-of select="$url"/>", "<xsl:value-of select="translate( $url, ':/.-', '____' )" />" )
