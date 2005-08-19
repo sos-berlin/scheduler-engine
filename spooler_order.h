@@ -121,6 +121,7 @@ struct Order : Com_order,
     friend struct               Job_chain;
     friend void                 Spooler_db::insert_order( Order* );
     friend void                 Spooler_db::update_order( Order* );
+    friend void                 Spooler_db::finish_order( Order*, Transaction* );
 
 
     Thread_semaphore           _lock;

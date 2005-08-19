@@ -1251,6 +1251,11 @@ void Order::remove_from_job_chain()
     ptr<Order> me        = this;        // Halten
     Job_chain* job_chain = _job_chain;
 
+    if( !_end_time )  _end_time = Time::now();
+
+    if( _is_in_database )  _spooler->_db->finish_order( this );
+
+
 
     if( _job_chain_node )
     {

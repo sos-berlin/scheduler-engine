@@ -61,8 +61,9 @@ struct Spooler_db : Object, Scheduler_object
 
     void                        insert_order            ( Order* );
     void                        update_order            ( Order* );
+    void                        finish_order            ( Order*, Transaction* = NULL );
 
-    void                        write_order_history     ( Order*, Transaction* = NULL );
+  //void                        write_order_history     ( Order*, Transaction* = NULL );
 
     void                        execute                 ( const string& stmt );
     void                        commit                  ();
@@ -111,6 +112,7 @@ struct Transaction
 
     void                        commit                  ();
     void                        rollback                ();
+  //void                        try_reopen_after_error  ();
 
     Spooler_db*                _db;
     Mutex_guard                _guard;

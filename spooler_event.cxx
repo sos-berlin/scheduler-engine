@@ -213,7 +213,7 @@ int Scheduler_event::send_mail( const xml::Document_ptr& mail_dom_ )
         if( !_mail )
         {
             if( _subject != "" )  mail()->set_subject( _subject );
-            if( _body    != "" )  mail()->set_body( _subject );
+            if( _body    != "" )  mail()->set_body( _body );
 
             if( _mail )
             {

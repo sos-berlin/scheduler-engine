@@ -129,6 +129,13 @@ void Transaction::rollback()
     if( _outer_transaction )  throw_xc( "ROLLBACK-FEHLER", "Rollback in innerer Transaktion setzt die äußere Transaktion zurück" );
 }
 
+//--------------------------------------------------------------Transaction::try_reopen_after_error
+/*
+void Transaction::try_reopen_after_error( const exception& x, bool wait_endless )
+{
+    _db->try_reopen_after_error();
+}
+*/
 //---------------------------------------------------------------------------Spooler_db::Spooler_db
 
 Spooler_db::Spooler_db( Spooler* spooler )
@@ -368,7 +375,8 @@ void Spooler_db::try_reopen_after_error( const exception& x, bool wait_endless )
 
 
     // Wenn ein TCP-Kommando ausgeführt wird, müssen wir hier sofort raus, sonst wird das Kommando doppelt oder rekursiv aufgerufen werden async_continue_selected(), s.u.
-    if( _waiting || _spooler->_executing_command )  throw_xc( x );   
+    if( _spooler->_executing_command )  throw;
+    if( _waiting )  throw_xc( x );   
     _waiting = true;
 
     THREAD_LOCK( _error_lock )  _error = x.what();
@@ -385,33 +393,36 @@ void Spooler_db::try_reopen_after_error( const exception& x, bool wait_endless )
 
     while( !_db.opened()  &&  !too_much_errors )
     {
-        if( !wait_endless || _error_count == 0 )  ++_error_count;
-        
-        warn_msg = "Nach max_db_errors=" + as_string(_spooler->_max_db_errors) + " Problemen mit der Datenbank wird sie nicht weiter verwendet";
-
-        if( !wait_endless  &&  _error_count >= _spooler->_max_db_errors )
+        if( !_spooler->_executing_command )
         {
-            too_much_errors = true;
-            break;
-        }
+            if( !wait_endless || _error_count == 0 )  ++_error_count;
+            
+            warn_msg = "Nach max_db_errors=" + as_string(_spooler->_max_db_errors) + " Problemen mit der Datenbank wird sie nicht weiter verwendet";
+
+            if( !wait_endless  &&  _error_count >= _spooler->_max_db_errors )
+            {
+                too_much_errors = true;
+                break;
+            }
 
 
-        if( !_email_sent_after_db_error )
-        {
-            string body = "Dies ist das " + as_string(_error_count) + ". Problem mit der Datenbank.";
-            if( !_spooler->_wait_endless_for_db_open )  body += "\n(" + warn_msg + ")";
-            body += "\ndb=" + _spooler->_db_name + "\r\n\r\n" + x.what() + "\r\n\r\nDer Scheduler versucht, die Datenbank erneut zu oeffnen.";
-          //if( !_spooler->_need_db )  body += "\r\nWenn das nicht geht, schreibt der Scheduler die Historie in Textdateien.";
+            if( !_email_sent_after_db_error )
+            {
+                string body = "Dies ist das " + as_string(_error_count) + ". Problem mit der Datenbank.";
+                if( !_spooler->_wait_endless_for_db_open )  body += "\n(" + warn_msg + ")";
+                body += "\ndb=" + _spooler->_db_name + "\r\n\r\n" + x.what() + "\r\n\r\nDer Scheduler versucht, die Datenbank erneut zu oeffnen.";
+            //if( !_spooler->_need_db )  body += "\r\nWenn das nicht geht, schreibt der Scheduler die Historie in Textdateien.";
 
-            Scheduler_event scheduler_event ( Scheduler_event::evt_database_error, log_warn, this );
-            scheduler_event.set_error( x );
-            scheduler_event.set_count( _error_count );
-            scheduler_event.set_subject( S() << "FEHLER BEIM ZUGRIFF AUF DATENBANK: " << x.what() );
-            scheduler_event.set_body( body );
-            scheduler_event.send_mail();
+                Scheduler_event scheduler_event ( Scheduler_event::evt_database_error, log_warn, this );
+                scheduler_event.set_error( x );
+                scheduler_event.set_count( _error_count );
+                scheduler_event.set_subject( S() << "FEHLER BEIM ZUGRIFF AUF DATENBANK: " << x.what() );
+                scheduler_event.set_body( body );
+                scheduler_event.send_mail();
 
-            //_spooler->send_error_email( string("FEHLER BEIM ZUGRIFF AUF DATENBANK: ") + x.what(), body );
-            _email_sent_after_db_error = true;
+                //_spooler->send_error_email( string("FEHLER BEIM ZUGRIFF AUF DATENBANK: ") + x.what(), body );
+                _email_sent_after_db_error = true;
+            }
         }
 
         //sos_sleep( 2 );    // Bremse, falls der Fehler nicht an einer unterbrochenen Verbindung liegt. Denn für jeden Fehler gibt es eine eMail!
@@ -428,6 +439,9 @@ void Spooler_db::try_reopen_after_error( const exception& x, bool wait_endless )
             catch( const exception& x )
             {
                 THREAD_LOCK( _error_lock )  _error = x.what();
+
+                if( _spooler->_executing_command )  throw;
+
                 _spooler->log()->warn( x.what() );
 
                 if( !_spooler->_need_db )  break;
@@ -729,10 +743,88 @@ void Spooler_db::delete_order( Order* order, Transaction* )
 
     del.set_table_name( _spooler->_orders_tablename );
 
-    del.and_where_condition( "job_chain", order->job_chain()->name() );
-    del.and_where_condition( "id"       , order->id().as_string() );
+    del.and_where_condition( "job_chain" , order->job_chain()->name() );
+    del.and_where_condition( "id"        , order->id().as_string() );
+    del.and_where_condition( "spooler_id", _spooler->id_for_db() );
 
     execute( del );
+}
+
+//-------------------------------------------------------------------------Spooler_db::finish_order
+
+void Spooler_db::finish_order( Order* order, Transaction* outer_transaction )
+{
+    try
+    {
+      //int  retry_count = db_error_retry_max;
+
+        while(1)
+        {
+            if( !_db.opened() )  return;
+
+
+            Transaction ta ( this, outer_transaction );
+            {
+                if( order->_is_in_database )
+                {
+                    delete_order( order, &ta );
+                    order->_is_in_database = false;
+                }
+
+
+                if( order->start_time() )
+                {
+                    int history_id = get_order_history_id( &ta );
+
+                    {
+                        sql::Insert_stmt insert ( &_db_descr );
+                        
+                        insert.set_table_name( _spooler->_order_history_tablename );
+                        
+                        insert[ "history_id" ] = history_id;
+                        insert[ "job_chain"  ] = order->job_chain()->name();
+                        insert[ "order_id"   ] = order->id().as_string();
+                        insert[ "title"      ] = order->title();
+                        insert[ "state"      ] = order->state().as_string();
+                        insert[ "state_text" ] = order->state_text();
+                        insert[ "spooler_id" ] = _spooler->id_for_db();
+                        insert.set_datetime( "start_time", order->start_time().as_string(Time::without_ms) );
+
+                        if( order->end_time() )
+                        insert.set_datetime( "end_time"  , order->end_time().as_string(Time::without_ms) );
+
+                        execute( insert );
+
+
+                        // Auftragsprotokoll
+                        string log_filename = order->log()->filename();
+
+                        if( _spooler->_order_history_with_log  &&  !log_filename.empty()  &&  log_filename[0] != '*' )
+                        {
+                            try 
+                            {
+                                string blob_filename = db_name() + " -table=" + _spooler->_order_history_tablename + " -blob=log where \"HISTORY_ID\"=" + as_string( history_id );
+                                if( _spooler->_order_history_with_log == arc_gzip )  blob_filename = GZIP + blob_filename;
+                                copy_file( "file -b " + log_filename, blob_filename );
+                            }
+                            catch( const exception& x ) 
+                            { 
+                                _log->warn( "FEHLER BEIM SCHREIBEN DES LOGS IN DIE TABELLE " + _spooler->_order_history_tablename + ": " + x.what() ); 
+                            }
+                        }
+                    }
+                }
+            }
+
+            ta.commit();
+            break;
+        }
+    }
+    catch( const exception& x )  
+    { 
+        if( outer_transaction )  throw;
+        try_reopen_after_error( x );
+    }
 }
 
 //-------------------------------------------------------------------------Spooler_db::update_order
@@ -751,11 +843,9 @@ void Spooler_db::update_order( Order* order )
             {
                 Transaction ta ( this );
                 {
-                    if( order->finished() )
+                    if( order->finished() )  
                     {
-                        delete_order( order, &ta );
-                        write_order_history( order, &ta );
-                        order->_is_in_database = false;
+                        finish_order( order, &ta );
                     }
                     else
                     {
@@ -803,7 +893,7 @@ void Spooler_db::update_order( Order* order )
 }
 
 //------------------------------------------------------------------Spooler_db::write_order_history
-
+/*
 void Spooler_db::write_order_history( Order* order, Transaction* outer_transaction )
 {
     try
@@ -875,7 +965,7 @@ void Spooler_db::write_order_history( Order* order, Transaction* outer_transacti
         throw;
     }
 }
-
+*/
 //---------------------------------------------------------------------Job_chain::read_order_history
 /*
 xml::Element_ptr Job_chain::read_history( const xml::Document_ptr& doc, int id, int next, const Show_what& show )

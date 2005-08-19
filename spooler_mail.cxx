@@ -92,7 +92,6 @@ void Com_mail::init()
 xml::Element_ptr Com_mail::dom_element( const xml::Document_ptr& dom )
 {
     xml::Element_ptr mail_element = dom.createElement( "mail" );
-    mail_element.setAttribute( "test", 123 );
   //mail_element.setAttribute_optional( "smtp"   , _smtp    );
 
     xml::Element_ptr header_element = mail_element.append_new_element( "header" );
@@ -594,7 +593,18 @@ int Com_mail::send()
 
     _spooler->_log.debug( "email " + _msg->to() + ": " + _msg->subject() );
 
+
+    const double throttle = 1.0;
+    if( _spooler->_last_mail_timestamp + throttle > Time::now() )    // eMail-Drossel
+    {
+        Z_LOG( "eMail-Drossel " << throttle << "s\n" );
+        sleep( throttle );
+    }
+
+
     return _msg->send();
+
+    _spooler->_last_mail_timestamp = Time::now();
 }
 
 //------------------------------------------------------------------------Com_mail::xslt_stylesheet

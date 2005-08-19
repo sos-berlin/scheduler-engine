@@ -354,6 +354,8 @@ struct Spooler : Object,
     int                        _log_collect_within;
     int                        _log_collect_max;
 
+    Time                       _last_mail_timestamp;
+
     string                     _variables_tablename;
     string                     _orders_tablename;
 
