@@ -453,8 +453,10 @@ struct Com_task : spooler_com::Itask,
     STDMETHODIMP                Add_pid                     ( int, VARIANT* );
     STDMETHODIMP                Remove_pid                  ( int );
     STDMETHODIMP            get_Stderr_text                 ( BSTR* );
+    STDMETHODIMP            get_Stderr_path                 ( BSTR* );
     STDMETHODIMP            get_Stdout_text                 ( BSTR* );
-    STDMETHODIMP            get_Stderr_or_stdout_text       ( BSTR*, bool get_stderr );
+    STDMETHODIMP            get_Stdout_path                 ( BSTR* );
+    STDMETHODIMP            get_Stderr_or_stdout_text_or_path( BSTR*, bool get_stderr, bool get_text );
     STDMETHODIMP                Create_subprocess           ( VARIANT*, spooler_com::Isubprocess** );
     STDMETHODIMP                Add_subprocess              ( int, double, VARIANT_BOOL, VARIANT_BOOL, BSTR );
     STDMETHODIMP            put_Priority_class              ( VARIANT* )                            { return FALSE; }

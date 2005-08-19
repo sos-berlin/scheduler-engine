@@ -381,7 +381,13 @@ library Spooler
         HRESULT                 Stderr_text                 ( [out,retval] BSTR* Result );
 
         [propget]
+        HRESULT                 Stderr_path                 ( [out,retval] BSTR* Result );
+
+        [propget]
         HRESULT                 Stdout_text                 ( [out,retval] BSTR* Result );
+
+        [propget]
+        HRESULT                 Stdout_path                 ( [out,retval] BSTR* Result );
 
         [id(20)]
         HRESULT                 Create_subprocess           ( [in,optional] VARIANT* program_and_parameters, [out,retval] Isubprocess** );

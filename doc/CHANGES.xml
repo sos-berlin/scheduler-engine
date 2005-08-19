@@ -10,6 +10,20 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2005-08-12" version="2.0.136" subversion_revision="3836">
+        <revision type="new" title="Neue Methoden Task.stdout_path und Task.stderr_path">
+            <description>
+                <p>
+                    Siehe <scheduler_method class="Task" property="stdout_path"/>
+                    und <scheduler_method class="Task" property="stderr_path"/>.
+                </p>
+            </description>
+        </revision>
+
+        <revision type="correction" title="&lt;remove_order&gt; wirkt sofort auf Datenbank"/>
+        <revision type="correction" title="Fehler-eMails jetzt mit richtigem Nachrichtentext"/>
+    </change>
+
     <change date="2005-08-12" version="2.0.136" subversion_revision="3834">
         <revision type="correction" title="Fehler bei SQL-Insert für neue Task führt nicht mehr zur eMail-Flut"/>
     </change>

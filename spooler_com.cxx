@@ -1960,6 +1960,8 @@ const Com_method Com_task::_methods[] =
     { DISPATCH_PROPERTYPUT, 22, "Priority_class"            , (Com_method_ptr)&Com_task::put_Priority_class     , VT_EMPTY      , { VT_BYREF|VT_VARIANT } },
     { DISPATCH_PROPERTYGET, 22, "Priority_class"            , (Com_method_ptr)&Com_task::get_Priority_class     , VT_BSTR       },
     { DISPATCH_PROPERTYGET, 23, "Step_count"                , (Com_method_ptr)&Com_task::get_Step_count         , VT_INT        },
+    { DISPATCH_PROPERTYGET, 24, "Stderr_path"               , (Com_method_ptr)&Com_task::get_Stderr_path        , VT_BSTR       },
+    { DISPATCH_PROPERTYGET, 25, "Stdout_path"               , (Com_method_ptr)&Com_task::get_Stdout_path        , VT_BSTR       },
     {}
 };
 
@@ -2377,9 +2379,9 @@ STDMETHODIMP Com_task::Remove_pid( int pid )
     return hr;
 }
 
-//--------------------------------------------------------------Com_task::get_Stderr_or_stdout_text
+//------------------------------------------------------Com_task::get_Stderr_or_stdout_text_or_path
 
-STDMETHODIMP Com_task::get_Stderr_or_stdout_text( BSTR* result, bool get_stderr )
+STDMETHODIMP Com_task::get_Stderr_or_stdout_text_or_path( BSTR* result, bool get_stderr, bool get_text )
 {
     HRESULT hr = S_OK;
     
@@ -2395,7 +2397,8 @@ STDMETHODIMP Com_task::get_Stderr_or_stdout_text( BSTR* result, bool get_stderr 
                                     : _task->_module_instance->stdout_filename();
         if( filename == "" )  return S_FALSE;
 
-        return String_to_bstr( string_from_file( filename ), result );
+        if( get_text )  hr = String_to_bstr( string_from_file( filename ), result );
+                  else  hr = String_to_bstr( filename, result );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
@@ -2409,7 +2412,16 @@ STDMETHODIMP Com_task::get_Stderr_text( BSTR* result )
 {
     Z_LOG( __PRETTY_FUNCTION__ << "()\n" );
 
-    return get_Stderr_or_stdout_text( result, true );
+    return get_Stderr_or_stdout_text_or_path( result, true, true );
+}
+
+//------------------------------------------------------------------------Com_task::get_Stderr_path
+
+STDMETHODIMP Com_task::get_Stderr_path( BSTR* result )
+{
+    Z_LOG( __PRETTY_FUNCTION__ << "()\n" );
+
+    return get_Stderr_or_stdout_text_or_path( result, true, false );
 }
 
 //------------------------------------------------------------------------Com_task::get_Stdout_text
@@ -2418,7 +2430,16 @@ STDMETHODIMP Com_task::get_Stdout_text( BSTR* result )
 {
     Z_LOG( __PRETTY_FUNCTION__ << "()\n" );
     
-    return get_Stderr_or_stdout_text( result, false );
+    return get_Stderr_or_stdout_text_or_path( result, false, true );
+}
+
+//------------------------------------------------------------------------Com_task::get_Stdout_path
+
+STDMETHODIMP Com_task::get_Stdout_path( BSTR* result )
+{
+    Z_LOG( __PRETTY_FUNCTION__ << "()\n" );
+    
+    return get_Stderr_or_stdout_text_or_path( result, false, false );
 }
 
 //----------------------------------------------------------------------Com_task::Create_subprocess

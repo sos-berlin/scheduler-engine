@@ -217,6 +217,16 @@ public class Task extends Idispatch
      */
     public String           stdout_text         ()                                  { return (String)       com_call( "<stdout_text"                    ); }
 
+
+    /** Pfadname für stdout.
+     * 
+     * <p>
+     * Nur, wenn die Task in einem separaten Prozess (&lt;process_classes/>) läuft. Sonst "".
+     * 
+     * @see #stdout_text()
+     */
+    public String           stdout_path         ()                                  { return (String)       com_call( "<stdout_path"                    ); }
+
     
     
     /** Der bisher nach stderr geschriebene Text.
@@ -228,6 +238,14 @@ public class Task extends Idispatch
      */
     public String           stderr_text         ()                                  { return (String)       com_call( "<stderr_text"                    ); }
     
+    /** Pfadname für stderr.
+     * 
+     * <p>
+     * Nur, wenn die Task in einem separaten Prozess (&lt;process_classes/>) läuft. Sonst "".
+     * 
+     * @see #stderr_text()
+     */
+    public String           stderr_path         ()                                  { return (String)       com_call( "<stderr_path"                    ); }
     
     public Subprocess       create_subprocess   ()                                  { return (Subprocess)   com_call( "create_subprocess" ); }
 
