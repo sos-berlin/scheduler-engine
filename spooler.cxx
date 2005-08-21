@@ -653,8 +653,10 @@ void Spooler::cmd_job( const xml::Element_ptr& element )
 
 //-------------------------------------------------------------------Spooler::remove_temporary_jobs
 
-void Spooler::remove_temporary_jobs()
+int Spooler::remove_temporary_jobs( Job* which_job )
 {
+    int count = 0;
+
     THREAD_LOCK( _lock )
     {
         Job_list::iterator it = _job_list.begin();
@@ -662,22 +664,43 @@ void Spooler::remove_temporary_jobs()
         {
             Job* job = *it;
 
-            if( job->should_removed() )    
+            if( !which_job  ||  which_job == job )
             {
-                if( _debug )  job->_log->debug( "Temporärer Job wird entfernt" );
-
-                try
+                if( job->should_removed() )    
                 {
-                    job->close(); 
-                }
-                catch( exception &x )  { _log.warn( x.what() ); }   // Kann das überhaupt passieren?
+                    if( _debug )  job->_log->debug( "Job wird jetzt entfernt" );
 
-                it = _job_list.erase( it );
-                continue;
+                    try
+                    {
+                        job->close(); 
+                    }
+                    catch( exception &x )  { _log.warn( x.what() ); }   // Kann das überhaupt passieren?
+
+                    it = _job_list.erase( it );
+                    count++;
+
+                    // Bei Auftragsjobs: _single_thread->build_prioritized_order_job_array();
+                    continue;
+                }
             }
 
             it++;
         }
+    }
+
+    return count;
+}
+
+//------------------------------------------------------------------------------Spooler::remove_job
+
+void Spooler::remove_job( Job* job )
+{
+    job->set_remove( true );
+    
+    int removed = remove_temporary_jobs( job );
+    if( !removed )
+    {
+        job->_log->debug( "Job wird entfernt sobald alle Tasks beendet sind" );
     }
 }
 
@@ -1962,6 +1985,7 @@ void Spooler::stop( const exception* )
 
     //_log.msg( "Spooler::stop" );
 
+    _job_chain_map.clear();
     close_threads();
     close_jobs();
 
@@ -2139,7 +2163,7 @@ void Spooler::run()
 */
 
         _next_time = latter_day;
-        _next_job  = NULL;
+      //_next_job  = NULL;
 
         string msg = "Warten";
 

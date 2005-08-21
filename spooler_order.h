@@ -282,6 +282,7 @@ struct Order_queue : Com_order_queue
                                 Order_queue             ( Job*, Prefix_log* );
                                ~Order_queue             ();
 
+    void                        clear                   ();
     void                        add_order               ( Order*, Do_log = do_log );
   //Order*                      add_order               ( const Order::Payload& );
     void                        remove_order            ( Order* );

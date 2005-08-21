@@ -289,7 +289,8 @@ struct Spooler : Object,
     void                        cmd_add_jobs                ( const xml::Element_ptr& );
     void                        cmd_job                     ( const xml::Element_ptr& );
   //void                        do_add_jobs                 ();
-    void                        remove_temporary_jobs       ();
+    int                         remove_temporary_jobs       ( Job* which_job = NULL );
+    void                        remove_job                  ( Job* );
     void                        init_jobs                   ();
     void                        close_jobs                  ();
 
@@ -474,7 +475,7 @@ struct Spooler : Object,
   //int                        _process_count_max;
 
 
-    Job*                       _next_job;
+  //Job*                       _next_job;
     Time                       _next_time;
     Time                       _next_start_time;
 

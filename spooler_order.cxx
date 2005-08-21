@@ -523,6 +523,29 @@ Order_queue::Order_queue( Job* job, Prefix_log* log )
 
 Order_queue::~Order_queue()
 {
+    try
+    {
+        clear();
+    }
+    catch( exception& x )  { _log->warn( x.what() ); }
+}
+
+//-------------------------------------------------------------------------------Order_queue::clear
+
+void Order_queue::clear()
+{
+    Queue* queues[] = { &_queue, &_setback_queue };
+    for( Queue** q = queues; q < queues + NO_OF(queues); q++ )
+    {
+        for( Queue::iterator it = (*q)->begin(); it != (*q)->end(); it = (*q)->erase( it ) )
+        {
+            Order* order = *it;
+            _log->info( S() << "Removing " << order->obj_name() );
+        }
+    }
+
+    update_priorities();
+    _has_users_id = false;
 }
 
 //-------------------------------------------------------------------------Order_queue::dom_element
@@ -723,6 +746,11 @@ void Order_queue::update_priorities()
     {
         _highest_priority = _queue.front()->priority();
         _lowest_priority  = _queue.back()->priority();
+    }
+    else
+    {
+        _highest_priority = 0;
+        _lowest_priority  = 0;
     }
 }
 

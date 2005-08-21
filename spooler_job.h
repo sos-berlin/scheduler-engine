@@ -213,6 +213,7 @@ struct Job : Object,
     string                      jobname_as_filename         ();
     string                      profile_section             ();
     bool                        temporary                   () const                                { return _temporary; }
+    void                    set_remove                      ( bool );
     void                        set_delay_after_error       ( int error_steps, Time delay )         { _log->debug9( "delay_after_error["        +as_string(error_steps)+"]="+delay.as_string() ); _delay_after_error[ error_steps ] = delay; }
     void                        set_stop_after_error        ( int error_steps )                     { _log->debug9( "delay_after_error["        +as_string(error_steps)+"]=\"STOP\""           ); _delay_after_error[ error_steps ] = latter_day; }
     void                        clear_delay_after_error     ()                                      { _log->debug9( "clear_delay_after_error()" ); _delay_after_error.clear(); }
@@ -256,7 +257,7 @@ struct Job : Object,
     void                        reread                      ();
     ptr<Task>                   task_to_start               ();
     bool                        do_something                ();
-    bool                        should_removed              ()                                      { return _temporary && _state == s_stopped; }
+    bool                        should_removed              ();
 
     void                    set_repeat                      ( double seconds )                      { THREAD_LOCK( _lock )  _log->debug( "repeat=" + as_string(seconds) ),  _repeat = seconds; }
     Time                        repeat                      ()                                      { THREAD_LOCK_RETURN( _lock, Time, _repeat ); }
@@ -357,6 +358,7 @@ struct Job : Object,
     Time                       _idle_timeout;               // Frist für den Zustand Task::s_running_waiting_for_order
     int                        _priority;
     bool                       _temporary;                  // Job nach einem Lauf entfernen
+    bool                       _remove;                     // Job enfernen sobald möglich. _state == s_stopping, dann s_stopped
     bool                       _start_once;                 // <run_time start_once="">, wird false nach Start
 
     bool                       _log_append;                 // Jobprotokoll fortschreiben <job log_append=(yes|no)>

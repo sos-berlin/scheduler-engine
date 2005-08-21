@@ -354,6 +354,8 @@ void Job::close()
             }
         }
 
+        if( _order_queue )  _order_queue->clear();
+
         _log->close();
         _history.close();
 
@@ -361,6 +363,49 @@ void Job::close()
         if( _com_job  )  _com_job->close(),         _com_job  = NULL;
       //if( _com_log  )  _com_log->close(),         _com_log  = NULL;
     }
+}
+
+//----------------------------------------------------------------------------------Job::set_remove
+
+void Job::set_remove( bool remove )
+{ 
+    if( !remove )
+    {
+        _remove = false;
+        return;
+    }
+
+    if( order_controlled() )  throw_xc( "SCHEDULER-229", obj_name() );
+
+    _remove = true; 
+    stop( true );
+}
+
+//------------------------------------------------------------------------------Job::should_removed
+
+bool Job::should_removed()
+{ 
+    if( !_remove  &&  !_temporary )  return false;
+
+    if( _running_tasks.size() > 0 )
+    {
+        Z_DEBUG_ONLY( if( _state != s_stopping )  _log->error( "??? Laufende Tasks, aber _state != s_stopping ???" ) );
+        return false;
+    }
+
+    if( _order_queue )
+    {
+        Z_DEBUG_ONLY( _log->error( "??? _remove, aber _order_queue != NULL ???" ) );
+        return false;
+    }
+
+    if( _state == s_none       )  return true;
+    if( _state == s_stopped    )  return true;
+  //if( _state == s_read_error )  return true;  Läuft jetzt keine Task?
+  //if( _state == s_error      )  return true;  Diesen Zustand sollte es nicht geben
+    if( _state == s_pending    )  return true;
+
+    return false;
 }
 
 //-------------------------------------------------------------------------Job::jobname_as_filename
@@ -445,6 +490,9 @@ void Job::signal( const string& signal_name )
 
 ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, const string& name, const Time& start_at, int id )
 {
+    if( _remove )  throw_xc( "SCHEDULER-230", obj_name() );
+
+
     ptr<Task> task;
 
     if( !_process_filename.empty() )   task = Z_NEW( Process_task   ( this ) );
@@ -734,6 +782,9 @@ ptr<Task> Job::start( const ptr<spooler_com::Ivariable_set>& params, const strin
 
 ptr<Task> Job::start( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, Time start_at, bool log )
 {
+    if( _remove )  throw_xc( "SCHEDULER-230", obj_name() );
+
+
     Time now = Time::now();
 
     THREAD_LOCK_DUMMY( _lock )
@@ -836,7 +887,19 @@ bool Job::execute_state_cmd()
 
                 case sc_unstop:     if( _state == s_stopping
                                      || _state == s_stopped
-                                     || _state == s_error      )  set_state( s_pending ),      something_done = true,  set_next_start_time( Time::now() );
+                                     || _state == s_error      )
+                                    {
+                                        if( _remove )
+                                        {
+                                            _log->error( "cmd='unstop' wird ignoriert, weil Job entfernt wird" );
+                                        }
+                                        else
+                                        {
+                                            set_state( s_pending );
+                                            something_done = true;
+                                            set_next_start_time( Time::now() );
+                                        }
+                                    }
                                     break;
 
                 case sc_end:        if( _state == s_running 
@@ -895,13 +958,20 @@ bool Job::execute_state_cmd()
                     if( _state == s_pending
                      || _state == s_stopped )
                     {
-                        set_state( s_pending );
+                        if( _remove )
+                        {
+                            _log->error( "cmd='wake' wird ignoriert, weil Job entfernt wird" );
+                        }
+                        else
+                        {
+                            ptr<Task> task = create_task( NULL, "", 0 );      // create_task() nicht mit gesperrten _lock rufen, denn get_id() in DB blockieren.
+                            
+                            set_state( s_pending );
 
-                        ptr<Task> task = create_task( NULL, "", 0 );      // create_task() nicht mit gesperrten _lock rufen, denn get_id() in DB blockieren.
-                        
-                        task->_cause = cause_wake;
-                        task->_let_run = true;
-                        task->attach_to_a_thread();   // Es gibt zZ nur einen Thread
+                            task->_cause = cause_wake;
+                            task->_let_run = true;
+                            task->attach_to_a_thread();   // Es gibt zZ nur einen Thread
+                        }
                     }
                     break;
                 }
