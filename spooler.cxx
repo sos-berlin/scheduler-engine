@@ -668,7 +668,7 @@ int Spooler::remove_temporary_jobs( Job* which_job )
             {
                 if( job->should_removed() )    
                 {
-                    if( _debug )  job->_log->debug( "Job wird jetzt entfernt" );
+                    job->_log->log( job->temporary()? log_debug : log_info, "Job wird jetzt entfernt" );
 
                     try
                     {
