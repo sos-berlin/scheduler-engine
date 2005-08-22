@@ -336,14 +336,13 @@ void Job::close()
             catch( const exception& x ) { LOG( *task << ".kill() => " << x.what() << "\n" ); }
         }
 
-        Z_FOR_EACH( Task_list, _running_tasks, t )
-        {
-            Task* task = *t;
-            task->close();
-        }
-
+        Z_FOR_EACH( Task_list, _running_tasks, t )  (*t)->job_close();
         _running_tasks.clear();
+
+
+        Z_FOR_EACH( Task_list, _task_queue, t )  (*t)->job_close();
         _task_queue.clear();
+
 
         Z_FOR_EACH( Module_instance_vector, _module_instances, m )
         {
@@ -357,6 +356,7 @@ void Job::close()
         if( _order_queue )  _order_queue->clear();
 
         _log->close();
+
         _history.close();
 
         // COM-Objekte entkoppeln, falls noch jemand eine Referenz darauf hat:
@@ -502,6 +502,7 @@ ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, const
                                        task = Z_NEW( Job_module_task( this ) );
 
     task->_id           = id;
+    task->_obj_name     = S() << "Task " << _name << ":" << task->_id;
 
     _default_params->Clone( (spooler_com::Ivariable_set**)task->_params.pp() );
     if( params )  task->_params->Merge( params );
@@ -1596,6 +1597,10 @@ void Job::set_state_cmd( State_cmd cmd )
                                 signal( state_cmd_name(cmd) );
                                 break;
 
+            case sc_remove:     _spooler->remove_job( this );
+                                // this ist möglicherweise ungültig
+                                return;
+
             default:            ok = false;
         }
     }
@@ -1686,6 +1691,7 @@ string Job::state_cmd_name( Job::State_cmd cmd )
         case Job::sc_suspend:  return "suspend";
         case Job::sc_continue: return "continue";
         case Job::sc_reread:   return "reread";
+        case Job::sc_remove:   return "remove";
         default:               return as_string( (int)cmd );
     }
 }
@@ -1749,6 +1755,12 @@ xml::Element_ptr Job::dom_element( const xml::Document_ptr& document, const Show
         job_element.setAttribute( "delay_until", _delay_until.as_string() );
 
         job_element.setAttribute( "in_period", is_in_period()? "yes" : "no" );
+
+        if( _remove )
+        job_element.setAttribute( "remove", "yes" );
+
+        if( _temporary )
+        job_element.setAttribute( "temporary", "yes" );
 /*
         if( _state == s_pending )
         {

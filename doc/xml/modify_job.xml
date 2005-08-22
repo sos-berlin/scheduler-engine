@@ -116,6 +116,12 @@
                             wird das Kommando <code>continue</code> angewendet.
                         </td>
                     </tr>
+                    <tr>
+                        <td><code>cmd="remove"</code></td>
+                        <td>
+                            Siehe <scheduler_method class="Job" method="remove"/>.
+                        </td>
+                    </tr>
                 </table>
             </description>
         </xml_attribute>

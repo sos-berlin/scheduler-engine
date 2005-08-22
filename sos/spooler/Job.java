@@ -289,4 +289,16 @@ public class Job extends Idispatch
     /** Nimmt alle Aufrufe von set_delay_after_error() zurück. 
      */
     public void             clear_delay_after_error()                               {                     com_call( "clear_delay_after_error"       ); }
+    
+    
+    /** Entfernt den Job.
+      * Der Job wird gestoppt, d.h. laufende Tasks werden beendet, keine neuen werden gestartet.
+      * Sobald keine Task mehr läuft, wird der Job entfernt.
+      * Tasks in der Warteschlange werden ignoriert.
+      * <p>
+      * Wenn keine Task des Jobs läuft, entfernt remove() den Job sofort.
+      * <p>
+      * Auftragsjobs ( &lt;job order="yes">) können nicht entfernt werden.
+     */
+    public void             remove              ()                                  {                     com_call( "remove"                        ); }
 }

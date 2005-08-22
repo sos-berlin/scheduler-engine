@@ -79,6 +79,22 @@
         <xml_attribute name="in_period" type="yes|no" title="Wenn gerade eine &lt;period&gt; wirksam ist" />
 
         <xml_attribute name="has_description" type="yes" title="yes, wenn der Job eine &lt;description&gt; hat"/>
+
+        <xml_attribute name="remove" type="yes" title="yes, wenn der Job entfernt wird">
+            <description>
+                <p>
+                    Siehe <scheduler_element name="modify_job" attribute="cmd" value="remove"/>.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="temporary" type="yes" title="yes, wenn der Job temporär ist">
+            <description>
+                <p>
+                    Siehe <scheduler_element name="job" attribute="temporary" value="yes"/>.
+                </p>
+            </description>
+        </xml_attribute>
     </xml_attributes>
     
     <xml_child_elements>

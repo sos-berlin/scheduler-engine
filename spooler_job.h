@@ -127,6 +127,7 @@ struct Job : Object,
         sc_suspend,             // s_running                 -> s_suspended
         sc_continue,            // s_suspended               -> s_running
         sc_reread,              // Job::_reread = true
+        sc_remove,              // Spooler::remove_job
         sc__max
     };
 

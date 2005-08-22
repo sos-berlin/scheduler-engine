@@ -102,6 +102,7 @@ struct Task : Object,
     void                        cmd_nice_end                ( Job* for_job = NULL );
 
     void                        close                       ();
+    void                        job_close                   ();                                     // Setzt _job = NULL
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
 
     State                       state                       () const                                { return _state; }
@@ -113,7 +114,7 @@ struct Task : Object,
     Time                        next_time                   ();
     Spooler_thread*             thread                      ()                                      { return _thread; }
     string                      name                        () const                                { return obj_name(); }
-    virtual string              obj_name                    () const                                { return "Task " + _job->name() + ":" + as_string(_id) ; }
+    virtual string              obj_name                    () const                                { return _obj_name; }
 
     string                      state_name                  ()                                      { return state_name( state() ); }
     static string               state_name                  ( State );
@@ -229,6 +230,7 @@ struct Task : Object,
     Z_DEBUG_ONLY( string       _job_name; )
     int                        _id;
     State                      _state;
+    string                     _obj_name;
 
     Job*                       _job;
     Thread_semaphore           _lock;

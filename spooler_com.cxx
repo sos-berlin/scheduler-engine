@@ -1612,6 +1612,7 @@ const Com_method Com_job::_methods[] =
     { DISPATCH_PROPERTYPUT, 13, "delay_order_after_setback"     , (Com_method_ptr)&Com_job::put_Delay_order_after_setback,VT_EMPTY      , { VT_I4, VT_BYREF|VT_VARIANT } },
     { DISPATCH_PROPERTYPUT, 14, "max_order_setbacks"            , (Com_method_ptr)&Com_job::put_Max_order_setbacks      , VT_EMPTY      , { VT_I4 } },
     { DISPATCH_METHOD     , 15, "clear_delay_after_error"       , (Com_method_ptr)&Com_job::Clear_delay_after_error     , VT_EMPTY      },
+    { DISPATCH_METHOD     , 16, "Remove"                        , (Com_method_ptr)&Com_job::Remove                      , VT_EMPTY      },
     {}
 };
 
@@ -1866,6 +1867,25 @@ STDMETHODIMP Com_job::Clear_delay_after_error()
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Job.clear_delay_after_error" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Job.clear_delay_after_error" ); }
+
+    return hr;
+}
+
+//----------------------------------------------------------------------------------Com_job::Remove
+
+STDMETHODIMP Com_job::Remove()
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_job )  throw_xc( "SCHEDULER-122" );
+
+        _job->_spooler->remove_job( _job );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
 
     return hr;
 }

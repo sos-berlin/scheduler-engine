@@ -1667,6 +1667,7 @@ const char file_jz_scheduler_js[] =
     "popup_builder.add_command ( \"Unstop\"        , \"<modify_job job='\" + job_name + \"' cmd='unstop'  />\", state == \"stopped\"  ||  state == \"stopping\" );\n"
     "//  popup_builder.add_command ( \"Wake\"          , \"<modify_job job='\" + job_name + \"' cmd='wake'    />\" );\n"
     "popup_builder.add_command ( \"Reread\"        , \"<modify_job job='\" + job_name + \"' cmd='reread'  />\" );\n"
+    "popup_builder.add_command ( \"Remove job\"    , \"<modify_job job='\" + job_name + \"' cmd='remove'  />\", job_element.getAttribute( \"order\" ) != \"yes\" );\n"
     "popup_builder.add_bar();\n"
     "popup_builder.add_command ( \"End tasks\"     , \"<modify_job job='\" + job_name + \"' cmd='end'     />\" );\n"
     "popup_builder.add_command ( \"Suspend tasks\" , \"<modify_job job='\" + job_name + \"' cmd='suspend' />\" );\n"

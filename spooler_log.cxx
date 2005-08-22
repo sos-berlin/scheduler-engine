@@ -893,7 +893,7 @@ void Prefix_log::log2( Log_level level, const string& prefix, const string& line
     //if( level == log_error )  _last_error_line = line;
     _last[ level ] = line;
 
-    if( _log )  _log->log2( level, _task? "Task " + _job->name() + " " + sos::as_string(_task->id()) : _prefix, line, this, _order_log );
+    if( _log )  _log->log2( level, _task? _task->obj_name() : _prefix, line, this, _order_log );
 }
 
 //----------------------------------------------------------------------------Prefix_log::add_event

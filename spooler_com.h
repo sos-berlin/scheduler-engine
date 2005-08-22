@@ -396,6 +396,7 @@ struct Com_job : spooler_com::Ijob,
     STDMETHODIMP            put_Delay_order_after_setback   ( int setback_number, VARIANT* time );
     STDMETHODIMP            put_Max_order_setbacks          ( int );
     STDMETHODIMP                Clear_delay_after_error     ();
+    STDMETHODIMP                Remove                      ();
 
 
   private:

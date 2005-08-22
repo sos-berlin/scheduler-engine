@@ -233,6 +233,14 @@ Task::~Task()
     _log->close();
 }
 
+//----------------------------------------------------------------------------------Task::job_close
+
+void Task::job_close()
+{
+    close();
+    _job = NULL;
+}
+
 //--------------------------------------------------------------------------------------Task::close
 // Kann von anderem Thread gerufen werden, wenn der noch eine COM-Referenz hat
 
@@ -287,7 +295,7 @@ xml::Element_ptr Task::dom_element( const xml::Document_ptr& document, const Sho
     THREAD_LOCK_DUMMY( _lock )
     {
         task_element.setAttribute( "id"              , _id );
-        task_element.setAttribute( "task"              , _id );
+        task_element.setAttribute( "task"            , _id );
         task_element.setAttribute( "state"           , state_name() );
 
         if( _delayed_after_error_task_id )
@@ -446,7 +454,7 @@ void Task::attach_to_a_thread()
 void Task::set_error_xc_only( const Xc& x )
 {
     THREAD_LOCK_DUMMY( _lock )  _error = x;
-    _job->set_error_xc_only( x );
+    if( _job )  _job->set_error_xc_only( x );
 }
 
 //-------------------------------------------------------------------------------Task::set_error_xc
@@ -1201,7 +1209,8 @@ bool Task::do_something()
                                 //if( log_time > Time::now()  &&  _next_time > log_time )  set_next_time( log_time );
 
                                 set_state( s_closed );
-						        something_done = true;
+				
+                                something_done = true;
                                 loop = true;
                             }
 

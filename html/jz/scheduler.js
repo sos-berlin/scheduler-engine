@@ -733,6 +733,7 @@ function job_menu__onclick( job_name, x, y )
     popup_builder.add_command ( "Unstop"        , "<modify_job job='" + job_name + "' cmd='unstop'  />", state == "stopped"  ||  state == "stopping" );
 //  popup_builder.add_command ( "Wake"          , "<modify_job job='" + job_name + "' cmd='wake'    />" );
     popup_builder.add_command ( "Reread"        , "<modify_job job='" + job_name + "' cmd='reread'  />" );
+    popup_builder.add_command ( "Remove job"    , "<modify_job job='" + job_name + "' cmd='remove'  />", job_element.getAttribute( "order" ) != "yes" );
     popup_builder.add_bar();
     popup_builder.add_command ( "End tasks"     , "<modify_job job='" + job_name + "' cmd='end'     />" );
     popup_builder.add_command ( "Suspend tasks" , "<modify_job job='" + job_name + "' cmd='suspend' />" );

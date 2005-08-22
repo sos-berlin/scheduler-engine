@@ -300,6 +300,8 @@ library Spooler
         HRESULT                 Max_order_setbacks          ( [in] int setback_count );
 
         HRESULT                 Clear_delay_after_error     ();
+
+        HRESULT                 Remove                      ();
     }
 
     [
