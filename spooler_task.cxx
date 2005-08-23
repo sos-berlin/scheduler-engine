@@ -210,7 +210,7 @@ Task::Task( Job* job )
 
     _let_run = _job->_period.let_run();
 
-    _log->set_job( _job );
+    _log->set_job_name( job->name() );
     _log->set_task( this );
     _log->inherit_settings( *_job->_log );
 
@@ -385,6 +385,14 @@ xml::Element_ptr Task::dom_element( const xml::Document_ptr& document, const Sho
     }
 
     return task_element;
+}
+
+//----------------------------------------------------------------------------------------Task::job
+
+Job* Task::job()
+{ 
+    if( !_job )  throw_xc( "TASK-WITHOUT-JOB", obj_name() );
+    return _job; 
 }
 
 //-------------------------------------------------------------------------------Task::enter_thread

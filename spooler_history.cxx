@@ -481,13 +481,12 @@ void Spooler_db::try_reopen_after_error( const exception& x, bool wait_endless )
                 {
                     string msg = string("SCHEDULER WIRD BEENDET WEGEN FEHLERS BEIM ZUGRIFF AUF DATENBANK: ") + x.what();
                     _log->error( msg );
-                    string body = "db=" + _spooler->_db_name + "\r\n\r\n" + x.what() + "\r\n\r\n" + warn_msg;
 
                     Scheduler_event scheduler_event ( Scheduler_event::evt_database_error_abort, log_error, this );
                     scheduler_event.set_error( x );
                     scheduler_event.set_scheduler_terminates( true );
                     scheduler_event.set_subject( msg );
-                    scheduler_event.set_body( body );
+                    scheduler_event.set_body( S() << "db=" << _spooler->_db_name << "\r\n\r\n" << x.what() << "\r\n\r\n" << warn_msg );
                     scheduler_event.send_mail();
                     
                     _spooler->abort_immediately();
@@ -496,12 +495,10 @@ void Spooler_db::try_reopen_after_error( const exception& x, bool wait_endless )
 
             _spooler->log()->info( "Historie wird von Datenbank auf Dateien umgeschaltet" );
 
-            string body = "Wegen need_db=no\n" "db=" + _spooler->_db_name + "\r\n\r\n" + x.what() + "\r\n\r\n" + warn_msg;
-            
             Scheduler_event scheduler_event ( Scheduler_event::evt_database_error_switch_to_file, log_warn, this );
             scheduler_event.set_error( x );
             scheduler_event.set_subject( string("SCHEDULER ARBEITET NACH FEHLERN OHNE DATENBANK: ") + x.what() );
-            scheduler_event.set_body( body );
+            scheduler_event.set_body( S() << "Wegen need_db=no\n" "db=" << _spooler->_db_name << "\r\n\r\n" << x.what() << "\r\n\r\n" << warn_msg );
             scheduler_event.send_mail();
 
             open2( "" );     // Umschalten auf dateibasierte Historie

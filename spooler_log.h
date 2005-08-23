@@ -87,7 +87,7 @@ struct Prefix_log : Object, Has_log
     Time                        collect_end                 ()                                  { return _first_send? _first_send + _collect_max : Time(0); }
 
     void                        inherit_settings            ( const Prefix_log& );
-    void                    set_job                         ( Job* job )                        { _job = job; }
+    void                    set_job_name                    ( const string& job_name )          { _job_name = job_name; }
     void                    set_task                        ( Task* task )                      { _task = task; }
     void                    set_prefix                      ( const string& prefix )            { _prefix = prefix; }
     void                    set_profile_section             ( const string& );
@@ -161,7 +161,7 @@ struct Prefix_log : Object, Has_log
 
     Scheduler_object*          _object;
     Spooler*                   _spooler;
-    Job*                       _job;
+    string                     _job_name;
     Task*                      _task;
     Log*                       _log;
     Prefix_log*                _order_log;

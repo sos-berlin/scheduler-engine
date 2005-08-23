@@ -525,15 +525,18 @@ Order_queue::~Order_queue()
 {
     try
     {
-        clear();
+        close();
     }
     catch( exception& x )  { _log->warn( x.what() ); }
 }
 
-//-------------------------------------------------------------------------------Order_queue::clear
+//-------------------------------------------------------------------------------Order_queue::close 
 
-void Order_queue::clear()
+void Order_queue::close()
 {
+    _job = NULL;    // Falls Job gelöscht wird
+
+
     Queue* queues[] = { &_queue, &_setback_queue };
     for( Queue** q = queues; q < queues + NO_OF(queues); q++ )
     {

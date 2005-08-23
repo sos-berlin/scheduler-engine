@@ -109,7 +109,7 @@ struct Task : Object,
     void                        attach_to_a_thread          ();
     bool                        do_something                ();
 
-    Job*                        job                         ()                                      { return _job; }
+    Job*                        job                         ();
     Prefix_log*                 log                         ()                                      { return _log; }
     Time                        next_time                   ();
     Spooler_thread*             thread                      ()                                      { return _thread; }

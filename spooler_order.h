@@ -177,7 +177,7 @@ struct Job_chain_node : Com_job_chain_node
 
     Fill_zero                  _zero_;
 
-    Job*                       _job;                    // NULL: Kein Job, Auftrag endet
+    ptr<Job>                   _job;                    // NULL: Kein Job, Auftrag endet
 
     Order::State               _state;                  // Bezeichnung des Zustands
 
@@ -282,7 +282,7 @@ struct Order_queue : Com_order_queue
                                 Order_queue             ( Job*, Prefix_log* );
                                ~Order_queue             ();
 
-    void                        clear                   ();
+    void                        close                   ();
     void                        add_order               ( Order*, Do_log = do_log );
   //Order*                      add_order               ( const Order::Payload& );
     void                        remove_order            ( Order* );

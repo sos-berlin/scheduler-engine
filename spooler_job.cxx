@@ -52,7 +52,7 @@ Job::Job( Spooler* spooler )
     init_run_time();
 
     _log            = Z_NEW( Prefix_log( this ) );
-    _log->set_job( this );
+  //_log->set_job( this );
 
     _next_time      = latter_day;
     _directory_watcher_next_time = latter_day;
@@ -227,6 +227,7 @@ void Job::init0()
 
 void Job::set_log()
 {
+    _log->set_job_name( _name );
     _log->set_prefix( "Job  " + _name );       // Zwei Blanks, damit die Länge mit "Task " übereinstimmt
     _log->set_profile_section( profile_section() );
     _log->set_title( obj_name() );
@@ -324,7 +325,12 @@ void Job::close()
 {
     THREAD_LOCK_DUMMY( _lock )
     {
-        clear_when_directory_changed();
+        try
+        {
+            clear_when_directory_changed();
+        }
+        catch( const exception& x ) { _log->warn( S() << "clear_when_directory_changed() ==> " << x.what() ); }
+
 
         Z_FOR_EACH( Task_list, _running_tasks, t )
         {
@@ -353,10 +359,8 @@ void Job::close()
             }
         }
 
-        if( _order_queue )  _order_queue->clear();
-
+        if( _order_queue )  _order_queue->close();    // Entkoppelt auch COM-Object Com_order_queue
         _log->close();
-
         _history.close();
 
         // COM-Objekte entkoppeln, falls noch jemand eine Referenz darauf hat:
@@ -375,7 +379,7 @@ void Job::set_remove( bool remove )
         return;
     }
 
-    if( order_controlled() )  throw_xc( "SCHEDULER-229", obj_name() );
+    if( order_controlled() )  throw_xc( "SCHEDULER-229", obj_name() );   // _prioritized_order_job_array und Job_chain_node enthalten Job*!
 
     _remove = true; 
     stop( true );
@@ -395,6 +399,7 @@ bool Job::should_removed()
 
     if( _order_queue )
     {
+        // _prioritized_order_job_array und Job_chain_node enthalten Job*!
         Z_DEBUG_ONLY( _log->error( "??? _remove, aber _order_queue != NULL ???" ) );
         return false;
     }
