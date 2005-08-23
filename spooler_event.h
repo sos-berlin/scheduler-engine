@@ -23,6 +23,7 @@ struct Scheduler_event
         evt_database_error,
         evt_database_error_switch_to_file,
         evt_database_error_abort,
+        evt_database_continue,
         evt_task_start_error,
     };
 

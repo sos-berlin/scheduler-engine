@@ -376,127 +376,137 @@ void Spooler_db::try_reopen_after_error( const exception& x, bool wait_endless )
 
     // Wenn ein TCP-Kommando ausgeführt wird, müssen wir hier sofort raus, sonst wird das Kommando doppelt oder rekursiv aufgerufen werden async_continue_selected(), s.u.
     if( _spooler->_executing_command )  throw;
-    if( _waiting )  throw_xc( x );   
-    _waiting = true;
 
-    THREAD_LOCK( _error_lock )  _error = x.what();
-
-    _spooler->log()->error( string("FEHLER BEIM ZUGRIFF AUF DATENBANK: ") + x.what() );
-
-    _spooler->log()->info( "Datenbank wird geschlossen" );
-    try
+    if( In_recursion in_recursion = &_waiting )  throw_xc( x );   
+    else
     {
-        close();
-    }
-    catch( const exception& x ) { _log->warn( string("FEHLER BEIM SCHLIESSEN DER DATENBANK: ") + x.what() ); }
+        THREAD_LOCK( _error_lock )  _error = x.what();
 
+        _spooler->log()->error( string("FEHLER BEIM ZUGRIFF AUF DATENBANK: ") + x.what() );
 
-    while( !_db.opened()  &&  !too_much_errors )
-    {
-        if( !_spooler->_executing_command )
+        _spooler->log()->info( "Datenbank wird geschlossen" );
+        try
         {
-            if( !wait_endless || _error_count == 0 )  ++_error_count;
-            
-            warn_msg = "Nach max_db_errors=" + as_string(_spooler->_max_db_errors) + " Problemen mit der Datenbank wird sie nicht weiter verwendet";
-
-            if( !wait_endless  &&  _error_count >= _spooler->_max_db_errors )
-            {
-                too_much_errors = true;
-                break;
-            }
-
-
-            if( !_email_sent_after_db_error )
-            {
-                string body = "Dies ist das " + as_string(_error_count) + ". Problem mit der Datenbank.";
-                if( !_spooler->_wait_endless_for_db_open )  body += "\n(" + warn_msg + ")";
-                body += "\ndb=" + _spooler->_db_name + "\r\n\r\n" + x.what() + "\r\n\r\nDer Scheduler versucht, die Datenbank erneut zu oeffnen.";
-            //if( !_spooler->_need_db )  body += "\r\nWenn das nicht geht, schreibt der Scheduler die Historie in Textdateien.";
-
-                Scheduler_event scheduler_event ( Scheduler_event::evt_database_error, log_warn, this );
-                scheduler_event.set_error( x );
-                scheduler_event.set_count( _error_count );
-                scheduler_event.set_subject( S() << "FEHLER BEIM ZUGRIFF AUF DATENBANK: " << x.what() );
-                scheduler_event.set_body( body );
-                scheduler_event.send_mail();
-
-                //_spooler->send_error_email( string("FEHLER BEIM ZUGRIFF AUF DATENBANK: ") + x.what(), body );
-                _email_sent_after_db_error = true;
-            }
+            close();
         }
+        catch( const exception& x ) { _log->warn( string("FEHLER BEIM SCHLIESSEN DER DATENBANK: ") + x.what() ); }
 
-        //sos_sleep( 2 );    // Bremse, falls der Fehler nicht an einer unterbrochenen Verbindung liegt. Denn für jeden Fehler gibt es eine eMail!
 
-        while(1)
+        while( !_db.opened()  &&  !too_much_errors )
         {
-            try
+            if( !_spooler->_executing_command )
             {
-                open2( _spooler->_db_name );
-                open_history_table();
-                THREAD_LOCK( _error_lock )  _error = "";
-                break;
-            }
-            catch( const exception& x )
-            {
-                THREAD_LOCK( _error_lock )  _error = x.what();
-
-                if( _spooler->_executing_command )  throw;
-
-                _spooler->log()->warn( x.what() );
-
-                if( !_spooler->_need_db )  break;
+                if( !wait_endless || _error_count == 0 )  ++_error_count;
                 
-                if( !_spooler->_wait_endless_for_db_open )
+                warn_msg = "Nach max_db_errors=" + as_string(_spooler->_max_db_errors) + " Problemen mit der Datenbank wird sie nicht weiter verwendet";
+
+                if( !wait_endless  &&  _error_count >= _spooler->_max_db_errors )
                 {
                     too_much_errors = true;
-                    warn_msg = "Datenbank lässt sich nicht öffnen. Wegen need_db=strict wird der Scheduler sofort beendet.";
                     break;
                 }
 
-                _spooler->log()->warn( "Eine Minute warten bevor Datenbank erneut geöffnet wird ..." );
-                //sos_sleep( 60 );
-                _spooler->_connection_manager->async_continue_selected( is_communication_operation, 60 );
+
+                if( !_email_sent_after_db_error )
+                {
+                    string body = "Dies ist das " + as_string(_error_count) + ". Problem mit der Datenbank.";
+                    if( !_spooler->_wait_endless_for_db_open )  body += "\n(" + warn_msg + ")";
+                    body += "\ndb=" + _spooler->_db_name + "\r\n\r\n" + x.what() + "\r\n\r\nDer Scheduler versucht, die Datenbank erneut zu oeffnen.";
+                //if( !_spooler->_need_db )  body += "\r\nWenn das nicht geht, schreibt der Scheduler die Historie in Textdateien.";
+
+                    Scheduler_event scheduler_event ( Scheduler_event::evt_database_error, log_warn, this );
+                    scheduler_event.set_error( x );
+                    scheduler_event.set_count( _error_count );
+                    scheduler_event.set_subject( S() << "FEHLER BEIM ZUGRIFF AUF DATENBANK: " << x.what() );
+                    scheduler_event.set_body( body );
+                    scheduler_event.send_mail();
+
+                    //_spooler->send_error_email( string("FEHLER BEIM ZUGRIFF AUF DATENBANK: ") + x.what(), body );
+                    _email_sent_after_db_error = true;
+                }
+            }
+
+            //sos_sleep( 2 );    // Bremse, falls der Fehler nicht an einer unterbrochenen Verbindung liegt. Denn für jeden Fehler gibt es eine eMail!
+
+            while(1)
+            {
+                try
+                {
+                    open2( _spooler->_db_name );
+                    open_history_table();
+                    THREAD_LOCK( _error_lock )  _error = "";
+
+                    break;
+                }
+                catch( const exception& x )
+                {
+                    THREAD_LOCK( _error_lock )  _error = x.what();
+
+                    if( _spooler->_executing_command )  throw;
+
+                    _spooler->log()->warn( x.what() );
+
+                    if( !_spooler->_need_db )  break;
+                    
+                    if( !_spooler->_wait_endless_for_db_open )
+                    {
+                        too_much_errors = true;
+                        warn_msg = "Datenbank lässt sich nicht öffnen. Wegen need_db=strict wird der Scheduler sofort beendet.";
+                        break;
+                    }
+
+                    _spooler->log()->warn( "Eine Minute warten bevor Datenbank erneut geöffnet wird ..." );
+                    _spooler->_connection_manager->async_continue_selected( is_communication_operation, 60 );
+                }
             }
         }
-    }
 
-    if( too_much_errors )
-    {
-        _spooler->log()->warn( warn_msg );
-        
-        if( _spooler->_need_db ) 
+        if( _db.opened() )
         {
-            string msg = string("SCHEDULER WIRD BEENDET WEGEN FEHLERS BEIM ZUGRIFF AUF DATENBANK: ") + x.what();
-            _log->error( msg );
-            string body = "db=" + _spooler->_db_name + "\r\n\r\n" + x.what() + "\r\n\r\n" + warn_msg;
+            if( _email_sent_after_db_error )    // Zurzeit immer true
+            {
+                Scheduler_event scheduler_event ( Scheduler_event::evt_database_continue, log_info, this );
+                scheduler_event.set_subject( "Scheduler ist wieder mit der Datenbank verbunden" );
+                scheduler_event.set_body( "Der Scheduler setzt den Betrieb fort.\n\ndb=" + _spooler->_db_name );
+                scheduler_event.send_mail();
+            }
+        }
+        else
+        {
+            if( too_much_errors )
+            {
+                _spooler->log()->warn( warn_msg );
+                
+                if( _spooler->_need_db ) 
+                {
+                    string msg = string("SCHEDULER WIRD BEENDET WEGEN FEHLERS BEIM ZUGRIFF AUF DATENBANK: ") + x.what();
+                    _log->error( msg );
+                    string body = "db=" + _spooler->_db_name + "\r\n\r\n" + x.what() + "\r\n\r\n" + warn_msg;
 
-            Scheduler_event scheduler_event ( Scheduler_event::evt_database_error_abort, log_error, this );
+                    Scheduler_event scheduler_event ( Scheduler_event::evt_database_error_abort, log_error, this );
+                    scheduler_event.set_error( x );
+                    scheduler_event.set_scheduler_terminates( true );
+                    scheduler_event.set_subject( msg );
+                    scheduler_event.set_body( body );
+                    scheduler_event.send_mail();
+                    
+                    _spooler->abort_immediately();
+                }
+            }
+
+            _spooler->log()->info( "Historie wird von Datenbank auf Dateien umgeschaltet" );
+
+            string body = "Wegen need_db=no\n" "db=" + _spooler->_db_name + "\r\n\r\n" + x.what() + "\r\n\r\n" + warn_msg;
+            
+            Scheduler_event scheduler_event ( Scheduler_event::evt_database_error_switch_to_file, log_warn, this );
             scheduler_event.set_error( x );
-            scheduler_event.set_scheduler_terminates( true );
-            scheduler_event.set_subject( msg );
+            scheduler_event.set_subject( string("SCHEDULER ARBEITET NACH FEHLERN OHNE DATENBANK: ") + x.what() );
             scheduler_event.set_body( body );
             scheduler_event.send_mail();
-            
-            _spooler->abort_immediately();
+
+            open2( "" );     // Umschalten auf dateibasierte Historie
         }
     }
-
-    if( !_db.opened() )
-    {
-        _spooler->log()->info( "Historie wird von Datenbank auf Dateien umgeschaltet" );
-
-        string body = "Wegen need_db=no\n" "db=" + _spooler->_db_name + "\r\n\r\n" + x.what() + "\r\n\r\n" + warn_msg;
-        
-        Scheduler_event scheduler_event ( Scheduler_event::evt_database_error_switch_to_file, log_warn, this );
-        scheduler_event.set_error( x );
-        scheduler_event.set_subject( string("SCHEDULER ARBEITET NACH FEHLERN OHNE DATENBANK: ") + x.what() );
-        scheduler_event.set_body( body );
-        scheduler_event.send_mail();
-
-        open2( "" );     // Umschalten auf dateibasierte Historie
-    }
-
-    _waiting = false;
 }
 
 //-------------------------------------------------------------------------------Spooler_db::get_id
