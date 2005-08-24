@@ -132,14 +132,14 @@
 <h2>Fehlertoleranz</h2>
 <p>
     Der Scheduler toleriert Datenbankfehler. 
-    Damit kann er bei tagelangem Betrieb mit einer vorübergehend heruntergefahrenen Datenbank umgeben.
+    Damit kann er bei tagelangem Betrieb mit einer vorübergehend heruntergefahrenen Datenbank umgehen.
     Näheres hierzu finden sie hier: <scheduler_ini_entry file="factory.ini" section="spooler" entry="need_db"/>.
 </p>
 <p>
     Wenn eingestellt ist, dass der Scheduler nach Verbindungsverlust auf eine erneute Verbindung zur Datenbank warten soll,
     hält der Scheduler solange an.
     Nur Kommandos über TCP oder HTTP verarbeitet er.
-    Er kann nicht beendet werden, nur abgebrochen werden (s. <a href="termination.xml">Beendigung</a>).
+    Er kann nicht beendet, nur abgebrochen werden (s. <a href="termination.xml">Beendigung</a>).
 </p>
 
 

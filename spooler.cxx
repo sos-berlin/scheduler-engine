@@ -493,6 +493,10 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
     state_element.setAttribute( "config_file"          , _config_filename );
     state_element.setAttribute( "host"                 , _hostname );
 
+  //if( _need_db )
+  //state_element.setAttribute( "need_db"              , _need_db == need_db_yes? "yes" 
+  //                            : "strict" 
+  //                                                             : "no" );
     if( _need_db )
     state_element.setAttribute( "need_db"              , _need_db? _wait_endless_for_db_open? "yes" : "strict" 
                                                                  : "no" );

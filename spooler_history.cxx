@@ -101,7 +101,7 @@ Transaction::~Transaction()
         { 
             rollback();
         } 
-        catch( const exception& ) {}
+        catch( exception& ) {}
     }
 }
 
@@ -131,7 +131,7 @@ void Transaction::rollback()
 
 //--------------------------------------------------------------Transaction::try_reopen_after_error
 /*
-void Transaction::try_reopen_after_error( const exception& x, bool wait_endless )
+void Transaction::try_reopen_after_error( exception& x, bool wait_endless )
 {
     _db->try_reopen_after_error();
 }
@@ -156,7 +156,7 @@ void Spooler_db::open( const string& db_name )
     {
         open2( db_name );
     }
-    catch( const exception& x )
+    catch( exception& x )
     {
         if( !_spooler->_wait_endless_for_db_open )  throw;
         
@@ -291,7 +291,7 @@ void Spooler_db::open2( const string& db_name )
 
                 _email_sent_after_db_error = false;
             }
-            catch( const exception& x )  
+            catch( exception& x )  
             { 
                 close();
 
@@ -321,7 +321,7 @@ void Spooler_db::close()
         {
             _db.close();  // odbc.cxx und jdbc.cxx unterdrücken selbst Fehler.
         }
-        catch( const exception& x ) { _log->warn( S() << "FEHLER BEIM SCHLIESSEN DER DATENBANK: " << x ); }
+        catch( exception& x ) { _log->warn( S() << "FEHLER BEIM SCHLIESSEN DER DATENBANK: " << x ); }
 
         _db.destroy();
     }
@@ -356,7 +356,7 @@ void Spooler_db::create_table_when_needed( const string& tablename, const string
         select.close();
         // ok
     }
-    catch( const exception& x )
+    catch( exception& x )
     {
         _log->warn( x.what() );
         _log->info( "Tabelle " + tablename + " wird eingerichtet" );
@@ -368,7 +368,7 @@ void Spooler_db::create_table_when_needed( const string& tablename, const string
 
 //---------------------------------------------------------------Spooler_db::try_reopen_after_error
 
-void Spooler_db::try_reopen_after_error( const exception& x, bool wait_endless )
+void Spooler_db::try_reopen_after_error( exception& x, bool wait_endless )
 {
     bool    too_much_errors = false;
     string  warn_msg;
@@ -384,22 +384,22 @@ void Spooler_db::try_reopen_after_error( const exception& x, bool wait_endless )
 
         _spooler->log()->error( string("FEHLER BEIM ZUGRIFF AUF DATENBANK: ") + x.what() );
 
-        _spooler->log()->info( "Datenbank wird geschlossen" );
+        if( _db.opened() )  _spooler->log()->info( "Datenbank wird geschlossen" );
         try
         {
             close();
         }
-        catch( const exception& x ) { _log->warn( string("FEHLER BEIM SCHLIESSEN DER DATENBANK: ") + x.what() ); }
+        catch( exception& x ) { _log->warn( string("FEHLER BEIM SCHLIESSEN DER DATENBANK: ") + x.what() ); }
 
 
         while( !_db.opened()  &&  !too_much_errors )
         {
             if( !_spooler->_executing_command )
             {
-                if( !wait_endless || _error_count == 0 )  ++_error_count;
-                
                 warn_msg = "Nach max_db_errors=" + as_string(_spooler->_max_db_errors) + " Problemen mit der Datenbank wird sie nicht weiter verwendet";
 
+                if( !wait_endless || _error_count == 0 )  ++_error_count;
+                
                 if( !wait_endless  &&  _error_count >= _spooler->_max_db_errors )
                 {
                     too_much_errors = true;
@@ -412,7 +412,7 @@ void Spooler_db::try_reopen_after_error( const exception& x, bool wait_endless )
                     string body = "Dies ist das " + as_string(_error_count) + ". Problem mit der Datenbank.";
                     if( !_spooler->_wait_endless_for_db_open )  body += "\n(" + warn_msg + ")";
                     body += "\ndb=" + _spooler->_db_name + "\r\n\r\n" + x.what() + "\r\n\r\nDer Scheduler versucht, die Datenbank erneut zu oeffnen.";
-                //if( !_spooler->_need_db )  body += "\r\nWenn das nicht geht, schreibt der Scheduler die Historie in Textdateien.";
+                    //if( !_spooler->_need_db )  body += "\r\nWenn das nicht geht, schreibt der Scheduler die Historie in Textdateien.";
 
                     Scheduler_event scheduler_event ( Scheduler_event::evt_database_error, log_warn, this );
                     scheduler_event.set_error( x );
@@ -421,7 +421,6 @@ void Spooler_db::try_reopen_after_error( const exception& x, bool wait_endless )
                     scheduler_event.set_body( body );
                     scheduler_event.send_mail();
 
-                    //_spooler->send_error_email( string("FEHLER BEIM ZUGRIFF AUF DATENBANK: ") + x.what(), body );
                     _email_sent_after_db_error = true;
                 }
             }
@@ -438,7 +437,7 @@ void Spooler_db::try_reopen_after_error( const exception& x, bool wait_endless )
 
                     break;
                 }
-                catch( const exception& x )
+                catch( exception& x )
                 {
                     THREAD_LOCK( _error_lock )  _error = x.what();
 
@@ -448,7 +447,7 @@ void Spooler_db::try_reopen_after_error( const exception& x, bool wait_endless )
 
                     if( !_spooler->_need_db )  break;
                     
-                    if( !_spooler->_wait_endless_for_db_open )
+                    if( !_spooler->_wait_endless_for_db_open )  // need_db=strict?
                     {
                         too_much_errors = true;
                         warn_msg = "Datenbank lässt sich nicht öffnen. Wegen need_db=strict wird der Scheduler sofort beendet.";
@@ -460,6 +459,7 @@ void Spooler_db::try_reopen_after_error( const exception& x, bool wait_endless )
                 }
             }
         }
+
 
         if( _db.opened() )
         {
@@ -523,7 +523,7 @@ int Spooler_db::get_id( const string& variable_name, Transaction* outer_transact
                 id = get_id_( variable_name, outer_transaction );
                 break;
             }
-            catch( const exception& x )
+            catch( exception& x )
             {
             //if( --retry_count < 0 )  throw;
                 if( outer_transaction )  throw;         // Fehlerschleife in der rufenden Routine, um Transaktion und damit _lock freizugeben!
@@ -531,7 +531,7 @@ int Spooler_db::get_id( const string& variable_name, Transaction* outer_transact
             }
         }
     }
-    catch( const exception& x ) 
+    catch( exception& x ) 
     { 
         _spooler->log()->error( string("FEHLER BEIM LESEN DER NÄCHSTEN ID: ") + x.what() ); 
         throw;
@@ -652,7 +652,7 @@ void Spooler_db::spooler_start()
                 }
             }
         }
-        //catch( const exception& x )  
+        //catch( exception& x )  
         //{ 
         //    _log->warn( string("FEHLER BEIM SCHREIBEN DER HISTORIE: ") + x.what() ); 
         //}
@@ -674,7 +674,7 @@ void Spooler_db::spooler_stop()
                 ta.commit();
             }
         }
-        catch( const exception& x )  
+        catch( exception& x )  
         { 
             _log->warn( string("FEHLER BEIM SCHREIBEN DER HISTORIE: ") + x.what() ); 
         }
@@ -728,14 +728,14 @@ void Spooler_db::insert_order( Order* order )
 
                 break;
             }
-            catch( const exception& x )  
+            catch( exception& x )  
             { 
               //if( --retry_count < 0 )  throw;
                 try_reopen_after_error( x );
             }
         }
     }
-    catch( const exception& x ) 
+    catch( exception& x ) 
     { 
         _spooler->log()->error( "FEHLER BEIM EINFÜGEN IN DIE TABELLE " + _spooler->_orders_tablename + ": " + x.what() ); 
         throw;
@@ -814,7 +814,7 @@ void Spooler_db::finish_order( Order* order, Transaction* outer_transaction )
                                 if( _spooler->_order_history_with_log == arc_gzip )  blob_filename = GZIP + blob_filename;
                                 copy_file( "file -b " + log_filename, blob_filename );
                             }
-                            catch( const exception& x ) 
+                            catch( exception& x ) 
                             { 
                                 _log->warn( "FEHLER BEIM SCHREIBEN DES LOGS IN DIE TABELLE " + _spooler->_order_history_tablename + ": " + x.what() ); 
                             }
@@ -827,7 +827,7 @@ void Spooler_db::finish_order( Order* order, Transaction* outer_transaction )
             break;
         }
     }
-    catch( const exception& x )  
+    catch( exception& x )  
     { 
         if( outer_transaction )  throw;
         try_reopen_after_error( x );
@@ -885,14 +885,14 @@ void Spooler_db::update_order( Order* order )
 
                 break;
             }
-            catch( const exception& x )  
+            catch( exception& x )  
             { 
               //if( --retry_count < 0 )  throw;
                 try_reopen_after_error( x );
             }
         }
     }
-    catch( const exception& x ) 
+    catch( exception& x ) 
     { 
         _spooler->log()->error( "FEHLER BEIM UPDATE DER TABELLE " + _spooler->_orders_tablename + ": " + x.what() ); 
         throw;
@@ -948,7 +948,7 @@ void Spooler_db::write_order_history( Order* order, Transaction* outer_transacti
                             if( _spooler->_order_history_with_log == arc_gzip )  blob_filename = GZIP + blob_filename;
                             copy_file( "file -b " + log_filename, blob_filename );
                         }
-                        catch( const exception& x ) 
+                        catch( exception& x ) 
                         { 
                             _log->warn( "FEHLER BEIM SCHREIBEN DES LOGS IN DIE TABELLE " + _spooler->_order_history_tablename + ": " + x.what() ); 
                         }
@@ -958,7 +958,7 @@ void Spooler_db::write_order_history( Order* order, Transaction* outer_transacti
                 ta.commit();
                 break;
             }
-            catch( const exception& x )  
+            catch( exception& x )  
             { 
               //if( --retry_count < 0 )  throw;
                 if( outer_transaction )  throw;         // Fehlerschleife in der rufenden Routine, um Transaktion und damit _lock freizugeben!
@@ -966,7 +966,7 @@ void Spooler_db::write_order_history( Order* order, Transaction* outer_transacti
             }
         }
     }
-    catch( const exception& x ) 
+    catch( exception& x ) 
     { 
         _spooler->log()->error( string("FEHLER BEIM SCHREIBEN DER ORDER-HISTORIE: ") + x.what() ); 
         throw;
@@ -1056,7 +1056,7 @@ xml::Element_ptr Job_chain::read_history( const xml::Document_ptr& doc, int id, 
                         string log = file_as_string( GZIP_AUTO + _spooler->_db->_db_name + "-table=" + _spooler->_job_history_tablename + " -blob=log where \"ID\"=" + as_string(id), "" );
                         if( !log.empty() ) dom_append_text_element( history_entry, "log", log );
                     }
-                    catch( const exception&  x ) { _log->warn( string("Historie: ") + x.what() ); }
+                    catch( exception&  x ) { _log->warn( string("Historie: ") + x.what() ); }
                 }
 
                 history_element.appendChild( history_entry );
@@ -1136,7 +1136,7 @@ xml::Element_ptr Spooler_db::read_task( const xml::Document_ptr& doc, int task_i
                                                 " where \"ID\"=" + as_string(task_id) );
                     dom_append_text_element( task_element, "log", log );
                 }
-                catch( const exception& x ) { _log->warn( "FEHLER BEIM LESEN DES LOGS FÜR TASK " + as_string(task_id) + " AUS DER DATENBANK: " + x.what() ); }
+                catch( exception& x ) { _log->warn( "FEHLER BEIM LESEN DES LOGS FÜR TASK " + as_string(task_id) + " AUS DER DATENBANK: " + x.what() ); }
             }
         }
     }
@@ -1163,7 +1163,7 @@ Job_history::~Job_history()
     {
         close();
     }
-    catch( const exception& x ) { _job->_log->warn( string("FEHLER BEIM SCHLIESSEN DER JOB-HISTORIE: ") + x.what() ); }
+    catch( exception& x ) { _job->_log->warn( string("FEHLER BEIM SCHLIESSEN DER JOB-HISTORIE: ") + x.what() ); }
 }
 
 //--------------------------------------------------------------------------------Job_history::open
@@ -1245,7 +1245,7 @@ void Job_history::open()
 
          //record.type()->field_descr_ptr("error_text")->type_ptr()->field_size()
     }
-    catch( const exception& x )  
+    catch( exception& x )  
     { 
         _job->_log->warn( string("FEHLER BEIM ÖFFNEN DER HISTORIE: ") + x.what() ); 
         _error = true;
@@ -1264,7 +1264,7 @@ void Job_history::close()
 
         _file.close();
     }
-    catch( const exception& x )  
+    catch( exception& x )  
     { 
         _job->_log->warn( string("FEHLER BEIM SCHLIESSEN DER HISTORIE: ") + x.what() ); 
     }
@@ -1432,7 +1432,7 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
                                 par_doc.load_xml( param_xml );
                                 if( par_doc.documentElement() )  history_entry.appendChild( par_doc.documentElement() );
                             }
-                            catch( const exception&  x ) { _log->warn( string("Historie: ") + x.what() ); }
+                            catch( exception&  x ) { _log->warn( string("Historie: ") + x.what() ); }
                             catch( const _com_error& x ) { _log->warn( string("Historie: ") + w_as_string(x.Description() )) ; }
                         }
 #endif
@@ -1443,7 +1443,7 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
                                 string log = file_as_string( GZIP_AUTO + _spooler->_db->_db_name + "-table=" + _spooler->_job_history_tablename + " -blob=log where \"ID\"=" + as_string(id), "" );
                                 if( !log.empty() ) dom_append_text_element( history_entry, "log", log );
                             }
-                            catch( const exception&  x ) { _job->_log->warn( string("Historie: ") + x.what() ); }
+                            catch( exception&  x ) { _job->_log->warn( string("Historie: ") + x.what() ); }
                         }
 
                         history_element.appendChild( history_entry );
@@ -1611,7 +1611,7 @@ void Task_history::write( bool start )
                                 if( _job_history->_with_log == arc_gzip )  blob_filename = GZIP + blob_filename;
                                 copy_file( "file -b " + log_filename, blob_filename );
                             }
-                            catch( const exception& x ) { _task->_log->warn( string("Historie: ") + x.what() ); }
+                            catch( exception& x ) { _task->_log->warn( string("Historie: ") + x.what() ); }
                         }
                     }
                 }
@@ -1621,7 +1621,7 @@ void Task_history::write( bool start )
 
             break;
         }
-        catch( const exception& x )
+        catch( exception& x )
         {
             _spooler->_db->try_reopen_after_error( x );
         }
@@ -1675,7 +1675,7 @@ void Task_history::start()
 
         write( true );
     }
-    catch( const exception& x )  
+    catch( exception& x )  
     { 
         _task->_log->warn( string("FEHLER BEIM SCHREIBEN DER HISTORIE: ") + x.what() );
         //_error = true;
@@ -1718,7 +1718,7 @@ void Task_history::end()
         }
 */
     }
-    catch( const exception& x )  
+    catch( exception& x )  
     { 
         _task->_log->warn( string("FEHLER BEIM SCHREIBEN DER HISTORIE: ") + x.what() ); 
         //_error = true;

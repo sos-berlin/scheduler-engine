@@ -1069,27 +1069,31 @@
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_setting-->
 
     <xsl:template match="scheduler_setting" mode="description">
-    
-        <xsl:choose>
-            <xsl:when test="ancestor::ini_entry">
-                <code><xsl:value-of select="@name"/>=</code>
-            </xsl:when>
-            <xsl:when test="ancestor::command_option">
-                <code>-<xsl:value-of select="@name"/>=</code>
-            </xsl:when>
-            <xsl:otherwise>
-                <code><xsl:value-of select="@name | @setting"/>=</code>
-            </xsl:otherwise>
-        </xsl:choose>
 
-        <xsl:choose>
-            <xsl:when test="@value">
-                <code><xsl:value-of select="@value"/></code>
-            </xsl:when>
-            <xsl:otherwise>
-                <span class="type"><xsl:value-of select="@type"/></span>
-            </xsl:otherwise>
-        </xsl:choose>
+        <xsl:element name="a">
+            <xsl:attribute name="href">settings.xml#option_<xsl:value-of select="@setting | @name"/></xsl:attribute>
+    
+            <xsl:choose>
+                <xsl:when test="ancestor::ini_entry">
+                    <code><xsl:value-of select="@name"/>=</code>
+                </xsl:when>
+                <xsl:when test="ancestor::command_option">
+                    <code>-<xsl:value-of select="@name"/>=</code>
+                </xsl:when>
+                <xsl:otherwise>
+                    <code><xsl:value-of select="@name | @setting"/>=</code>
+                </xsl:otherwise>
+            </xsl:choose>
+
+            <xsl:choose>
+                <xsl:when test="@value">
+                    <code><xsl:value-of select="@value"/></code>
+                </xsl:when>
+                <xsl:otherwise>
+                    <span class="type"><xsl:value-of select="@type"/></span>
+                </xsl:otherwise>
+            </xsl:choose>
+        </xsl:element>
     </xsl:template>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_ini_entry-->
