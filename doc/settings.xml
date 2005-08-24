@@ -467,11 +467,7 @@ db = odbc -db=factory_oracle -user=factory -password=factory
                         <scheduler_error code="SCHEDULER-205"/> aus.
                     </p>
                     <p>
-                        Wenn das Öffnen der Datenbank oder das automatische Anlegen der Tabellen fehlschlägt,
-                        startet der Scheduler nicht.
-                    </p>
-                    <p>
-                        Bei einem Datenbankfehler während des Betriebs schließt der Scheduler die Datenbank und
+                        Bei einem Datenbankfehler schließt der Scheduler die Datenbank und
                         öffnet sie erneut.
                         Wenn das fehlschlägt, versucht der Scheduler endlos im Abstand von einer Minute
                         die Datenbank erneut zu öffnen.
