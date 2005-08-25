@@ -487,6 +487,8 @@ db = odbc -db=factory_oracle -user=factory -password=factory
                     <p>
                         Bei einem Datenbankfehler während des Betriebs schließt der Scheduler die Datenbank und
                         öffnet sie erneut.
+                        Bei einem erneuten Fehler wiederholt der Scheduler den Versuch so oft,
+                        wie mit <scheduler_setting setting="max_db_errors"/> eingestellt.
                         Wenn das fehlschlägt, beendet sich der Scheduler.
                     </p>
                 </dd>
@@ -504,6 +506,10 @@ db = odbc -db=factory_oracle -user=factory -password=factory
                 Der Scheduler toleriert diese Anzahl Datenbankfehler.
                 Wird sie überschritten, dann setzt er bei <code>need_db=no</code> ohne Datenbank fort,
                 anderfalls beendet er sich sofort.
+            </p>
+            <p>
+                Bei <scheduler_setting setting="need_db" value="yes"/> werden Fehler, die beim Versuch, die Datenbank zu öffnen, auftreten, nicht gezählt.
+                Damit kann er Scheduler auf eine Datenbank warten, die noch nicht angelaufen ist.
             </p>
         </description>
     </setting>
