@@ -2013,7 +2013,7 @@ void Spooler::stop( const exception* )
 
     if( _module_instance )
     {
-        Z_LOG( "Startskript wird beendet ...\n" );
+        Z_LOG2( "scheduler", "Startskript wird beendet ...\n" );
 
         try
         {
@@ -2023,7 +2023,7 @@ void Spooler::stop( const exception* )
 
         _module_instance->close();
 
-        Z_LOG( "Startskript ist beendet.\n" );
+        Z_LOG2( "scheduler", "Startskript ist beendet.\n" );
     }
 
     //_java_vm.close();  Erneutes _java.init() stürzt ab, deshalb lassen wird Java stehen und schließen es erst am Schluss
@@ -2902,7 +2902,15 @@ int object_server( int argc, char** argv )
 
 int spooler_main( int argc, char** argv, const string& parameter_line )
 {
-    LOG( "Scheduler " VER_PRODUCTVERSION_STR "\n" );
+    set_log_category_default( "scheduler"     , true );
+  //set_log_category_default( "scheduler.*"   , true );
+  //set_log_category_default( "scheduler.wait", false );
+    set_log_category_default( "scheduler.call", true );   // Aufrufe von spooler_process() etc. protokollieren (Beginn und Ende)
+    set_log_category_default( "scheduler.order", true );
+
+
+
+    Z_LOG2( "scheduler", "Scheduler " VER_PRODUCTVERSION_STR "\n" );
 
     int     ret                = 0;
     bool    is_service         = false;
@@ -2915,8 +2923,6 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
 #   ifdef Z_WINDOWS
         SetErrorMode( SEM_FAILCRITICALERRORS | SEM_NOOPENFILEERRORBOX );    // Das System soll sich Messageboxen verkneifen (außer beim Absturz)
 #   endif
-
-    set_log_category_default( "scheduler.call", true );   // Aufrufe von spooler_process() etc. protokollieren (Beginn und Ende)
 
     spooler::error_settings.read( spooler::default_factory_ini );
 

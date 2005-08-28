@@ -211,7 +211,7 @@ void Log::open_new()
             if( !_spooler->id().empty() )  filename += "." + _spooler->id();
             filename += ".log";
 
-            Z_LOG2( "scheduler.log", "\nopen(\"" << filename << "\")\n" );
+            Z_LOG2( "scheduler.log", "open(\"" << filename << "\")\n" );
             _file = open( filename.c_str(), O_CREAT | O_TRUNC | O_WRONLY | O_NOINHERIT, 0666 );
             if( _file == -1 )  throw_errno( errno, filename.c_str() );
             Z_LOG2( "scheduler.log", "open() => " << _file << "\n" );

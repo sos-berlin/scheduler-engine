@@ -174,7 +174,7 @@ Job_chain::~Job_chain()
 
 void Job_chain::close()
 {
-    Z_LOGI( "scheduler", *this << ".close()\n" );
+    Z_LOGI2( "scheduler", *this << ".close()\n" );
     remove_all_pending_orders( true );
 }
 
