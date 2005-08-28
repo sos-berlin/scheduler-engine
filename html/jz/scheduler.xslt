@@ -911,7 +911,7 @@
                                 <b><xsl:value-of select="@job"/></b>
                             </td>
                             
-                            <td colspan="2">
+                            <td colspan="3">
                                 <xsl:apply-templates select="$job/@state"/>
                                 
                                 <xsl:choose>
@@ -932,8 +932,6 @@
                                     </xsl:otherwise>
                                 </xsl:choose>
                             </td>
-                            
-                            <td colspan="1"></td>
                         </xsl:element>
                     </xsl:for-each>
                 </xsl:if>

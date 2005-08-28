@@ -10,6 +10,10 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <!--change date="2005-08-28" version="2.0.137" subversion_revision="3851">
+        <revision type="correction" title="Scheduler beendet sich wieder, wenn eine Jobkette gefüllt ist (Folge der Implementierung von remove_job)"/>
+    </change-->
+
     <change date="2005-08-24" version="2.0.137" subversion_revision="3844">
         <revision type="correction" title="-sos.ini= akzeptiert Leerzeichen im Dateinamen"/>
     </change>

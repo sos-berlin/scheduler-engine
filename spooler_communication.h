@@ -48,7 +48,7 @@ struct Communication
                                ~Channel                     ();
 
         void                    remove_me                   ( const exception* = NULL );
-        void                    terminate                   ();
+        void                    terminate                   ( double wait_time );
 
         bool                    do_accept                   ( SOCKET listen_socket );
         void                    do_close                    ();
@@ -185,7 +185,7 @@ struct Communication
     void                        init                        ();
     void                        start_or_rebind             ();
   //void                        start_thread                ();
-    void                        close                       ( double wait_time = 0.0 );
+    void                        close                       ( double wait_time );
     void                        bind                        ();
     void                        rebind                      ()                                      { bind(); }
   //int                         thread_main                 ();

@@ -163,6 +163,18 @@ Job_chain::Job_chain( Spooler* spooler )
 
 Job_chain::~Job_chain()
 {
+    try
+    {
+        remove_all_pending_orders( true );
+    }
+    catch( exception& x ) { Z_LOG( S() << __FUNCTION__ << ": " << x.what() << '\n' ); }
+}
+
+//---------------------------------------------------------------------------------Job_chain::close
+
+void Job_chain::close()
+{
+    remove_all_pending_orders( true );
 }
 
 //----------------------------------------------------------xml::Element_ptr Job_chain::dom_element
@@ -275,7 +287,7 @@ void Job_chain::load_orders_from_database()
 
 //-------------------------------------------------------------Job_chain::remove_all_pending_orders
 
-int Job_chain::remove_all_pending_orders()
+int Job_chain::remove_all_pending_orders( bool force )
 {
     int         result       = 0;
     Order_map   my_order_map = _order_map;
@@ -284,7 +296,7 @@ int Job_chain::remove_all_pending_orders()
     {
         Order* order = o->second;
 
-        if( !order->_task )
+        if( !order->_task || force )
         {
             order->remove_from_job_chain();
             order = NULL;
@@ -1632,8 +1644,8 @@ void Order::set_at( const Time& time )
     xml::Element_ptr date_element     = run_time_element.append_new_element( "date" );
     xml::Element_ptr day_element      = date_element    .append_new_element( "day" );
 
-    date_element.setAttribute( "date"        , time.as_string().substr( 0, 10 ) );
-    day_element .setAttribute( "single_start", time.as_string().substr( 11 ) );
+    date_element.setAttribute( "date" , time.as_string().substr( 0, 10 ) );
+    day_element .setAttribute( "begin", time.as_string().substr( 11 ) );
 
     set_run_time( run_time_element );
 

@@ -2033,10 +2033,14 @@ void Spooler::stop( const exception* )
         //_main_scheduler_connection->logoff( x );
     }
 
-    _communication.close( 5 );      // 5 Sekunden aufs Ende warten. Vor Restart, damit offene Verbindungen nicht vererbt werden.
+    _communication.close( 5.0 );      // Mit Wartezeit. Vor Restart, damit offene Verbindungen nicht vererbt werden.
 
     if( _shutdown_cmd == sc_terminate_and_restart 
-     || _shutdown_cmd == sc_let_run_terminate_and_restart )  spooler_restart( &_base_log, _is_service );
+     || _shutdown_cmd == sc_let_run_terminate_and_restart )  
+    {
+        sleep( 2 );   // Etwas warten, damit der Browser nicht h‰ngenbleibt. Sonst wird die HTTP-Verbindung nicht richtig geschlossen. Warum bloﬂ?
+        spooler_restart( &_base_log, _is_service );
+    }
 
     _db->spooler_stop();
 
@@ -2455,7 +2459,7 @@ void Spooler::abort_immediately( bool restart )
     try
     { 
         _log.close(); 
-        _communication.close();   // Damit offene HTTP-Logs ordentlich schlieﬂen (denn sonst ersetzt ie6 das Log durch eine Fehlermeldung)
+        _communication.close( 0.0 );   // Damit offene HTTP-Logs ordentlich schlieﬂen (denn sonst ersetzt ie6 das Log durch eine Fehlermeldung)
     } 
     catch( ... ) {}
 

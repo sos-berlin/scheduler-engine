@@ -106,8 +106,9 @@ static void set_linger( SOCKET socket )
 {
     struct linger l; 
     
-    l.l_onoff  = 1; 
-    l.l_linger = 5;  // Sekunden
+    l.l_onoff  = 1;     // 0: Kein Linger, 1: Linger (mit l_linger)
+    l.l_linger = 0;     // Sekunden. 0: Sofort schlieﬂen (schickt RST, Verbindungsabbruch?)
+                        // >0: Bei Scheduler-Restart kann der Browser h‰ngen. Windows schlieﬂt die Verbindung manchmal nie, obwohl Prozess l‰ngst beendet ist.
 
     setsockopt( socket, SOL_SOCKET, SO_LINGER, (const char*)&l, sizeof l );
 }
@@ -223,13 +224,13 @@ void Communication::Channel::remove_me( const exception* x )
 }
 
 //----------------------------------------------------------------Communication::Channel::terminate
-
+/*
 void Communication::Channel::terminate()
 {
     _dont_receive = true;
     async_continue( false );  // Wir warten nicht. Was nicht sofort gesendet werden kann, geht verloren (nur bei sehr vollem Puffer)
 }
-
+*/
 //----------------------------------------------------------------Communication::Channel::do_accept
 
 bool Communication::Channel::do_accept( SOCKET listen_socket )
@@ -495,7 +496,7 @@ Communication::Communication( Spooler* spooler )
 
 Communication::~Communication()
 {
-    close();
+    close( 0.0 );
 
     if( _initialized ) 
     {
@@ -509,36 +510,43 @@ Communication::~Communication()
 
 void Communication::close( double wait_time )
 {
-    //THREAD_LOCK( _semaphore )
+    // Funktioniert nicht: double until = Time::now() + wait_time;
+
+    //while(1)
     {
+        //bool responding = false;
+
         Channel_list::iterator c = _channel_list.begin();
         while( c != _channel_list.end() )
         {
-            Channel* channel = *c;
+            ptr<Channel> channel = *c;
             c++;
-            channel->terminate();    // Kann Channel aus _channel_list entfernen.
+            //channel->terminate();    // Kann Channel aus _channel_list entfernen.
+            channel->_dont_receive = true;
+            channel->async_continue( false );
+            //if( channel->_responding )
+            //{
+            //    responding = true;
+            //    Z_LOG( "Warten auf " << *channel << '\n' );
+            //}
         }
 
-        //c = _channel_list.begin();
-        //while( c != _channel_list.end() )  remove_channel( *c );
+        //if( !responding )  break;
+        //if( Time::now() > until )  break;
 
-        _channel_list.clear();
-
-        _listen_socket.close();
-        _udp_socket.close();
-
-        _terminate = true;
+        //sleep( 0.1 );
     }
 
-/*
-#   ifdef Z_WINDOWS
-       thread_wait_for_termination( wait_time );
-#    else
-       thread_wait_for_termination();
-#   endif
 
-    thread_close();
-*/
+    //c = _channel_list.begin();
+    //while( c != _channel_list.end() )  remove_channel( *c );
+
+    _channel_list.clear();
+
+    _listen_socket.close();
+    _udp_socket.close();
+
+    _terminate = true;
 }
 
 //--------------------------------------------------------------------Communication::remove_channel

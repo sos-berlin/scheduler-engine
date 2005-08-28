@@ -201,6 +201,8 @@ struct Job_chain : Com_job_chain
                                 Job_chain               ( Spooler* );
                                ~Job_chain               ();
 
+    void                        close                   ();
+
     void                    set_name                    ( const string& name )                      { THREAD_LOCK( _lock )  _name = name,  _log.set_prefix( "Jobchain " + _name ); }
     string                      name                    ()                                          { THREAD_LOCK_RETURN( _lock, string, _name ); }
 
@@ -209,7 +211,7 @@ struct Job_chain : Com_job_chain
 
     void                    set_store_orders_in_database( bool b )                                  { _store_orders_in_database = b; }
     void                        load_orders_from_database();
-    int                         remove_all_pending_orders();
+    int                         remove_all_pending_orders( bool force = false );
 
     void                        add_job                 ( Job*, const State& input_state, const State& output_state = error_variant, const State& error_state = error_variant );
     void                        finish                  ();
