@@ -748,6 +748,8 @@ struct Com_order : spooler_com::Iorder,
 
     STDMETHODIMP            get_String_next_start_time  ( BSTR* );
 
+  //STDMETHODIMP            get_Log                     ( spooler_com::Ilog** );
+
   private:
     Fill_zero                  _zero_;
     Thread_semaphore           _lock;

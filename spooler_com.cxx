@@ -3745,6 +3745,7 @@ const Com_method Com_order::_methods[] =
     { DISPATCH_PROPERTYGET, 15, "Run_time"                  , (Com_method_ptr)&Com_order::get_Run_time          , VT_DISPATCH   },
     { DISPATCH_METHOD     , 16, "remove_from_job_chain"     , (Com_method_ptr)&Com_order::Remove_from_job_chain , VT_EMPTY      },
     { DISPATCH_PROPERTYGET, 17, "String_next_start_time"    , (Com_method_ptr)&Com_order::get_String_next_start_time, VT_BSTR   },
+  //{ DISPATCH_PROPERTYGET, 18, "Log"                       , (Com_method_ptr)&Com_order::get_Log               , VT_DISPATCH   },
     {}
 };
 
@@ -4313,6 +4314,25 @@ STDMETHODIMP Com_order::get_String_next_start_time( BSTR* result )
     return hr;
 }
 
+//-------------------------------------------------------------------------------Com_order::get_Log
+/*
+STDMETHODIMP Com_order::get_Log( Ilog** result )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_order )  return E_POINTER;
+
+        *result = _order->_com_log;
+        if( *result )  (*com_log)->AddRef();
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+*/
 //----------------------------------------------------------------------Com_order::add_to_job_chain
 /*
 STDMETHODIMP Com_order::add_to_job_chain( Ijob_chain* ijob_chain )
