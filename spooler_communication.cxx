@@ -499,6 +499,13 @@ void Communication::close( double wait_time )
 {
     // Funktioniert nicht: double until = Time::now() + wait_time;
 
+    _listen_socket.set_linger( true, 0 );
+    _listen_socket.close();
+
+    _udp_socket.set_linger( true, 0 );
+    _udp_socket.close();
+
+
     //while(1)
     {
         //bool responding = false;
@@ -509,7 +516,8 @@ void Communication::close( double wait_time )
             ptr<Channel> channel = *c;
             c++;
             
-            channel->set_linger( true, 0 );     // close() bricht Verbindung ab (jedenfalls unter Unix). Schickt RST. D
+            channel->set_linger( true, 1 );     // 1: Eine Sekunde Zeit, um asynchron (non-blocking) die Verbindung abzubauen. sleep(2) in spooler.cxx!
+                                                // 0: close() bricht Verbindung ab (jedenfalls unter Unix). Schickt RST. D
                                                 // Damit bleibt beim Neustart Windows-Schedulers der Browser nicht kleben (der kriegt den Verbindungsabbau nicht mit)
 
             //channel->terminate();    // Kann Channel aus _channel_list entfernen.
@@ -533,9 +541,6 @@ void Communication::close( double wait_time )
     //while( c != _channel_list.end() )  remove_channel( *c );
 
     _channel_list.clear();
-
-    _listen_socket.close();
-    _udp_socket.close();
 
     _terminate = true;
 }

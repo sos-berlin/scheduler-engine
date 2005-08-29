@@ -2043,7 +2043,8 @@ void Spooler::stop( const exception* )
     if( _shutdown_cmd == sc_terminate_and_restart 
      || _shutdown_cmd == sc_let_run_terminate_and_restart )  
     {
-        sleep( 2.0 );   // Etwas warten, damit der Browser nicht h‰ngenbleibt. Sonst wird die HTTP-Verbindung nicht richtig geschlossen. Warum bloﬂ?
+        sleep( 5.0 + 1.0 );   // Etwas warten, damit der Browser nicht h‰ngenbleibt. Sonst wird die HTTP-Verbindung nicht richtig geschlossen. Warum bloﬂ?
+                              // Siehe auch Spooler_communication::close(): set_linger( true, 1 );
         spooler_restart( &_base_log, _is_service );
     }
 
