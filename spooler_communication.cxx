@@ -100,19 +100,6 @@ void Xml_processor::process()
     if( command_processor._error )  _channel->_log.error( command_processor._error->what() );
 }
 
-//---------------------------------------------------------------------------------------set_linger
-
-static void set_linger( SOCKET socket )
-{
-    struct linger l; 
-    
-    l.l_onoff  = 1;     // 0: Kein Linger, 1: Linger (mit l_linger)
-    l.l_linger = 0;     // Sekunden. 0: Sofort schließen (schickt RST, Verbindungsabbruch?)
-                        // >0: Bei Scheduler-Restart kann der Browser hängen. Windows schließt die Verbindung manchmal nie, obwohl Prozess längst beendet ist.
-
-    setsockopt( socket, SOL_SOCKET, SO_LINGER, (const char*)&l, sizeof l );
-}
-
 //----------------------------------------------------Communication::Listen_socket::async_continue_
 
 bool Communication::Listen_socket::async_continue_( bool wait )
@@ -240,7 +227,7 @@ bool Communication::Channel::do_accept( SOCKET listen_socket )
         bool ok = this->accept( listen_socket );
         if( !ok )  return false;        // EWOULDBLOCK
 
-        set_linger( _read_socket );
+        //_read_socket.set_linger( true, 0 );
         call_ioctl( FIONBIO, 1 );
 
         set_buffer_size();
@@ -521,6 +508,10 @@ void Communication::close( double wait_time )
         {
             ptr<Channel> channel = *c;
             c++;
+            
+            channel->set_linger( true, 0 );     // close() bricht Verbindung ab (jedenfalls unter Unix). Schickt RST. D
+                                                // Damit bleibt beim Neustart Windows-Schedulers der Browser nicht kleben (der kriegt den Verbindungsabbau nicht mit)
+
             //channel->terminate();    // Kann Channel aus _channel_list entfernen.
             channel->_dont_receive = true;
             channel->async_continue( false );
@@ -660,7 +651,7 @@ void Communication::bind()
                 _udp_socket._read_socket = socket( AF_INET, SOCK_DGRAM, 0 );
                 if( _udp_socket._read_socket == SOCKET_ERROR )  throw_socket( socket_errno(), "socket" );
 
-                set_linger( _udp_socket._read_socket );
+                //_udp_socket.set_linger( false );
                 
                 sa.sin_port        = htons( _spooler->udp_port() );
                 sa.sin_family      = AF_INET;
@@ -702,7 +693,7 @@ void Communication::bind()
                 _listen_socket._read_socket = socket( AF_INET, SOCK_STREAM, 0 );
                 if( _listen_socket._read_socket == SOCKET_ERROR )  throw_socket( socket_errno(), "socket" );
 
-                set_linger( _listen_socket._read_socket );
+                //_listen_socket.set_linger( false );
                 
                 sa.sin_port        = htons( _spooler->tcp_port() );
                 sa.sin_family      = AF_INET;

@@ -167,7 +167,7 @@ Job_chain::~Job_chain()
     {
         close();
     }
-    catch( exception& x ) { Z_LOG( S() << __FUNCTION__ << ": " << x.what() << '\n' ); }
+    catch( exception& x ) { Z_LOG( __FUNCTION__ << ": " << x.what() << '\n' ); }
 }
 
 //---------------------------------------------------------------------------------Job_chain::close

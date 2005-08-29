@@ -1989,10 +1989,11 @@ void Spooler::stop( const exception* )
 
     //_log.msg( "Spooler::stop" );
 
-    for( Job_chain_map::iterator j = _job_chain_map.begin(); j != _job_chain_map.end(); j = _job_chain_map.erase( j ) )
+    for( Job_chain_map::iterator j = _job_chain_map.begin(); j != _job_chain_map.end(); j++ )  //j = _job_chain_map.erase( j ) )
     {
         j->second->close(); 
     }
+    _job_chain_map.clear();
 
     close_threads();
     close_jobs();
