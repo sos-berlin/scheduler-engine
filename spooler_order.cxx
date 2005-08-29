@@ -165,7 +165,7 @@ Job_chain::~Job_chain()
 {
     try
     {
-        remove_all_pending_orders( true );
+        close();
     }
     catch( exception& x ) { Z_LOG( S() << __FUNCTION__ << ": " << x.what() << '\n' ); }
 }
@@ -299,7 +299,8 @@ int Job_chain::remove_all_pending_orders( bool force )
 
         if( !order->_task || force )
         {
-            order->remove_from_job_chain();
+            bool leave_in_database = force;
+            order->remove_from_job_chain( leave_in_database );
             order = NULL;
             result++;
         }
@@ -517,6 +518,7 @@ void Job_chain::unregister_order( Order* order )
         string id_string = string_from_variant( order->id() );
         Order_map::iterator it = _order_map.find( id_string );
         if( it != _order_map.end() )  _order_map.erase( it );
+                                else  Z_LOG( __FUNCTION__ << " " << order->obj_name() << " ist nicht registriert!?\n" );
     }
 }
 
@@ -1290,14 +1292,14 @@ void Order::add_to_order_queue( Order_queue* order_queue )
 
 //---------------------------------------------------------------------Order::remove_from_job_chain
 
-void Order::remove_from_job_chain()
+void Order::remove_from_job_chain( bool leave_in_database )
 {
     ptr<Order> me        = this;        // Halten
     Job_chain* job_chain = _job_chain;
 
     if( !_end_time )  _end_time = Time::now();
 
-    if( _is_in_database )  _spooler->_db->finish_order( this );
+    if( _is_in_database  &&  !leave_in_database )  _spooler->_db->finish_order( this );
 
 
 
@@ -1316,11 +1318,11 @@ void Order::remove_from_job_chain()
     {
         if( _task )  _removed_from_job_chain = _job_chain;      // Für die Task merken, in welcher Jobkette wir waren
 
-        _job_chain->unregister_order( this );
-        //_job_chain->_log.info( S() << obj_name() << " ist entfernt" );
-
         _job_chain = NULL;
         _log->set_prefix( obj_name() );
+
+        job_chain->unregister_order( this );
+        //_job_chain->_log.info( S() << obj_name() << " ist entfernt" );
     }
 
     _setback_count = 0;
