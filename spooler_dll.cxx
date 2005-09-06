@@ -2,6 +2,7 @@
 
 #include "spooler.h"
 
+#ifdef _DEBUG       // Nur die Debug-Variante wird als DLL erzeugt
 
 namespace sos
 {
@@ -65,3 +66,4 @@ extern "C" int __declspec(dllexport) spooler_program( int argc, char** argv )
     //return sos::spooler_main( argc, argv, "" );
 }
 
+#endif

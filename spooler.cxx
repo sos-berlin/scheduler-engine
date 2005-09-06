@@ -46,22 +46,6 @@
 #include "../zschimmer/com_remote.h"
 #include "../zschimmer/xml_end_finder.h"
 
-/*
-#ifdef Z_WINDOWS
-#   include <process.h>
-#   include <direct.h>
-#   define DEFAULT_VM_MODULE "msjava.dll"
-#else
-#   ifdef Z_HPUX
-#       define DEFAULT_VM_MODULE "libjvm.sl"
-#    else
-#       define DEFAULT_VM_MODULE "libjvm.so"
-#   endif
-#endif
-*/
-
-//char** _argv = NULL;
-//int    _argc = 0;
 
 
 using namespace std;

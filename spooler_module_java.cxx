@@ -71,7 +71,8 @@ static jobject jobject_from_variant( JNIEnv* jenv, const VARIANT& v, Java_idispa
 //--------------------------------------------------------------Java sos.spooler.Idispatch.com_call
 
 extern "C"
-JNIEXPORT jobject JNICALL Java_sos_spooler_Idispatch_com_1call( JNIEnv* jenv, jclass cls, jlong jidispatch, jstring jname, jobjectArray jparams )
+//JNIEXPORT
+jobject JNICALL Java_sos_spooler_Idispatch_com_1call( JNIEnv* jenv, jclass cls, jlong jidispatch, jstring jname, jobjectArray jparams )
 {
     try
     {

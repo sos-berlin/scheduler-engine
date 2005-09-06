@@ -4,6 +4,7 @@
 #include "../zschimmer/java.h"
 
 
+#ifdef _DEBUG       // Nur die Debug-Variante wird als DLL erzeugt
 #ifdef Z_WINDOWS
 
 #ifdef _DEBUG
@@ -96,4 +97,5 @@ JNIEXPORT void JNICALL Java_sos_spooler_Spooler_1program_construct_1argv( JNIEnv
 
 //-------------------------------------------------------------------------------------------------
 
+#endif
 #endif
