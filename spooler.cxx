@@ -2972,8 +2972,6 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
             else
             if( opt.with_value( "kill"             ) )  kill_pid = opt.as_int();
             else
-            if( opt.with_value( "pid-file"         ) )  pid_filename = opt.value();
-            else
             if( opt.flag      ( "install-service"  ) )  do_install_service = opt.set();
             else
             if( opt.with_value( "install-service"  ) )  do_install_service = true, service_name = opt.value();
@@ -3006,6 +3004,8 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
                 if( opt.with_value( "ini"              ) )  factory_ini = opt.value(), spooler::error_settings.read( factory_ini );
                 else
                 if( opt.with_value( "log"              ) )  log_filename = opt.value();
+                else
+                if( opt.with_value( "pid-file"         ) )  pid_filename = opt.value();
                 else
                     call_scheduler = true;
 

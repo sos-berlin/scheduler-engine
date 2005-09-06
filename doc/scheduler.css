@@ -19,7 +19,7 @@ caption         { font-size: 10pt; padding-bottom: 5pt; padding-left: 3pt; paddi
 dt              { margin-top: 2ex; }
 dd              { margin-left: 4ex }
 
-p.first         { margin-top: 1ex; }
+p.first         { margin-top: 0ex; }
 p.mono          { font-family: Lucida Console, monospace; font-size: 9pt; margin-left: 4ex }
 .mono           { font-family: Lucida Console, monospace; font-size: 9pt; }
 code            { font-family: Lucida Console, monospace; font-size: 9pt; }

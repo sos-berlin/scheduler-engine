@@ -9,7 +9,7 @@
       Um diese Dokumentation zu lesen, benötigen Sie einen Browser, 
       der die ersten beiden Zeilen interpretieren, 
       also XSLT-Stylesheets ausführen kann,
-      z.B. Firefox oder Microsoft Internet Explorer                          
+      z.B. Firefox oder Microsoft Internet Explorer.
       *************************************************************  -->
 
 
@@ -28,7 +28,7 @@
     date                = "$Date$"
 >
 
-<style>
+<style type="text/css">
   /*h2 { border-top: 1 solid #e0e0e0; margin-padding-top: 10ex; text-align: center; }*/
   /*h2 { margin-top: 4ex; border-top: 1 solid #f0f0f0; padding-top: 3ex; text-align: center; }*/
     h2 { text-align: center; }
@@ -83,7 +83,7 @@
     </a>
 
     <a href="sos_ini.xml">
-        <dt><b>Datei sos.ini</b></dt>
+        <dt>Datei sos.ini</dt>
         <dd>
             <p>
                 Hier können einige Einstellungen vorgenommen werden,

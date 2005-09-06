@@ -10,6 +10,26 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2005-09-06" version="2.0.138" subversion_revision="3851">
+        <revision type="new" title="Option -pid-file wird bei Installation als Windows-Dienst übernommen">
+            <description>
+                <p>
+                    Siehe <scheduler_option name="pid-file"/>
+                </p>
+            </description>
+        </revision>
+
+        <revision type="new" title="XSLT-eMail erhält &lt;order&gt;-Element">
+            <description>
+                <p>
+                    Das Element <scheduler_element name="order" directory="xml/answer/"/> wird 
+                    bei einem Abbruch der Task
+                    im Element <scheduler_element name="task" directory="xml/answer/"/> geliefert.
+                </p>
+            </description>
+        </revision>
+    </change>
+
     <!--change date="2005-08-28" version="2.0.137" subversion_revision="3851">
         <revision type="correction" title="Scheduler beendet sich wieder, wenn eine Jobkette gefüllt ist (Folge der Implementierung von remove_job)"/>
     </change-->

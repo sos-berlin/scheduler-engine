@@ -13,7 +13,7 @@
                 version   = "1.0">
                 
     <xsl:output doctype-public="-//W3C//DTD HTML 4.01//EN" />  <!--"http://www.w3.org/TR/html4/strict.dtd"-->
-
+    <!--xsl:output doctype-public="-//W3C//DTD HTML 4.01 Transitional//EN"/> <!- - "http://www.w3.org/TR/html4/loose.dtd"-->
     <xsl:variable name="start_page" select="'index.xml'"/>
     <xsl:variable name="base_dir"   select="/*/@base_dir"/>
         
@@ -561,9 +561,7 @@
                     (s.
                     <xsl:element name="a">
                         <xsl:attribute name="class">silent</xsl:attribute>
-                        <xsl:attribute name="href">
-                            <xsl:value-of select="$base_dir"/>ersetzung_von_umgebungsvariablen.xml
-                        </xsl:attribute>
+                        <xsl:attribute name="href"><xsl:value-of select="$base_dir"/>ersetzung_von_umgebungsvariablen.xml</xsl:attribute>
                         <xsl:text>hier</xsl:text>
                     </xsl:element>).
                 </p>
@@ -978,25 +976,27 @@
          Damit fällt die Leerzeile am Anfang weg. -->
     
     <xsl:template match="p [ position()=1 and not( @class ) ]" mode="description">
-        <element name="p">
+        <xsl:element name="p">
             <xsl:attribute name="class">first</xsl:attribute>
             <xsl:for-each select="@*">
                 <xsl:copy><xsl:value-of select="."/></xsl:copy>
             </xsl:for-each>
             <xsl:apply-templates mode="description"/>
-        </element>
+        </xsl:element>
     </xsl:template>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_comment-->
     <!-- Für Bemerkungen und Anregungen, die nicht für die Anwender gedacht sind -->
     
     <xsl:template match="scheduler_comment" mode="description">
+	<!--
         <span class="comment">
             <xsl:for-each select="@*">
                 <xsl:copy><xsl:value-of select="."/></xsl:copy>
             </xsl:for-each>
             <xsl:apply-templates mode="description"/>
         </span>
+        -->
     </xsl:template>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_element-->

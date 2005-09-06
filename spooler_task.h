@@ -276,6 +276,7 @@ struct Task : Object,
     Variant                    _result;
     string                     _name;
     ptr<Order>                 _order;
+    ptr<Order>                 _order_for_error;            // Wird später als _order auf NULL gesetzt, damit im Fehlerfall XSLT-eMail mit <order> verschickt wird
     string                     _changed_directories;        // Durch Semikolon getrennt
 
     Registered_pids            _registered_pids;            // Für add_pid() und remove_pid(). kill_task immediately_yes soll auch diese Prozesse abbrechen.

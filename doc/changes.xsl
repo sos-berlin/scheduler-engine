@@ -74,6 +74,7 @@
         
         <xsl:element name="p">
             <xsl:attribute name="style">
+		margin-top: 0px;
                 <xsl:if test="@type='correction'">color: green;</xsl:if>
             </xsl:attribute>
             
