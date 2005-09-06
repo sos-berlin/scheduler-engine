@@ -205,43 +205,43 @@ void Spooler_db::open2( const string& db_name )
                     _db_name += " ";
 
                     create_table_when_needed( _spooler->_variables_tablename, 
-                                            "\"NAME\" char(100) not null,"
-                                            "\"WERT\" char(250),"  
+                                            "\"NAME\" varchar(100) not null,"
+                                            "\"WERT\" varchar(250),"  
                                             "primary key ( \"name\" )" );
 
 
                     vector<string> create_extra = vector_map( sql_quoted_name, vector_split( " *, *", _spooler->_job_history_columns ) );
-                    for( int i = 0; i < create_extra.size(); i++ )  create_extra[i] += " char(250),";
+                    for( int i = 0; i < create_extra.size(); i++ )  create_extra[i] += " varchar(250),";
 
                     create_table_when_needed( _spooler->_job_history_tablename, 
                                             "\"ID\"          integer not null,"
-                                            "\"SPOOLER_ID\"  char(100),"
-                                            "\"JOB_NAME\"    char(100) not null,"
+                                            "\"SPOOLER_ID\"  varchar(100),"
+                                            "\"JOB_NAME\"    varchar(100) not null,"
                                             "\"START_TIME\"  datetime not null,"
                                             "\"END_TIME\"    datetime,"
-                                            "\"CAUSE\"       char(50),"
+                                            "\"CAUSE\"       varchar(50),"
                                             "\"STEPS\"       integer,"
                                             "\"ERROR\"       bit,"
-                                            "\"ERROR_CODE\"  char(50),"
-                                            "\"ERROR_TEXT\"  char(250),"
+                                            "\"ERROR_CODE\"  varchar(50),"
+                                            "\"ERROR_TEXT\"  varchar(250),"
                                             "\"PARAMETERS\"  clob,"
                                             "\"LOG\"         blob," 
                                             + join( "", create_extra ) 
                                             + "primary key( \"ID\" )" );
 
                     create_table_when_needed( _spooler->_orders_tablename, 
-                                            "\"JOB_CHAIN\"   char(100) not null,"         // Primärschlüssel
-                                            "\"ID\"          char(100) not null,"         // Primärschlüssel
-                                            "\"SPOOLER_ID\"  char(100),"
+                                            "\"JOB_CHAIN\"   varchar(100) not null,"         // Primärschlüssel
+                                            "\"ID\"          varchar(100) not null,"         // Primärschlüssel
+                                            "\"SPOOLER_ID\"  varchar(100),"
                                             "\"PRIORITY\"    integer not null,"
-                                            "\"STATE\"       char(100),"
-                                            "\"STATE_TEXT\"  char(100),"
-                                            "\"TITLE\"       char(200),"
+                                            "\"STATE\"       varchar(100),"
+                                            "\"STATE_TEXT\"  varchar(100),"
+                                            "\"TITLE\"       varchar(200),"
                                             "\"CREATED_TIME\" datetime not null,"
                                             "\"MOD_TIME\"    datetime,"
                                             "\"ORDERING\"    integer not null,"           // Um die Reihenfolge zu erhalten
                                             "\"PAYLOAD\"     clob,"
-                                            "\"INITIAL_STATE\" char(100),"               
+                                            "\"INITIAL_STATE\" varchar(100),"               
                                             "\"RUN_TIME\"    clob,"
                                             "primary key( \"JOB_CHAIN\", \"ID\" )" );
 
@@ -258,7 +258,7 @@ void Spooler_db::open2( const string& db_name )
                         _log->info( "Tabelle " + _spooler->_orders_tablename + " wird um die Spalten INITIAL_STATE und RUN_TIME erweitert" );
                         
                         _db.put( "ALTER TABLE " + uquoted(_spooler->_orders_tablename) + 
-                                " add ( \"INITIAL_STATE\" char(100)," 
+                                " add ( \"INITIAL_STATE\" varchar(100)," 
                                         "\"RUN_TIME\" clob )" );
                         ta.commit();
                     }
@@ -266,10 +266,10 @@ void Spooler_db::open2( const string& db_name )
 
                     create_table_when_needed( _spooler->_order_history_tablename, 
                                             "\"HISTORY_ID\"  integer not null,"           // Primärschlüssel
-                                            "\"JOB_CHAIN\"   char(100) not null,"         // Primärschlüssel
-                                            "\"ORDER_ID\"    char(100) not null,"
-                                            "\"SPOOLER_ID\"  char(100),"
-                                            "\"TITLE\"       char(200),"
+                                            "\"JOB_CHAIN\"   varchar(100) not null,"         // Primärschlüssel
+                                            "\"ORDER_ID\"    varchar(100) not null,"
+                                            "\"SPOOLER_ID\"  varchar(100),"
+                                            "\"TITLE\"       varchar(200),"
                                             "\"STATE\"       varchar(100) not null,"
                                             "\"STATE_TEXT\"  varchar(100),"
                                             "\"START_TIME\"  datetime not null,"
@@ -279,8 +279,8 @@ void Spooler_db::open2( const string& db_name )
 
                     create_table_when_needed( _spooler->_tasks_tablename, 
                                             "\"TASK_ID\"        integer not null,"           // Primärschlüssel
-                                            "\"SPOOLER_ID\"     char(100),"
-                                            "\"JOB_NAME\"       char(100) not null,"
+                                            "\"SPOOLER_ID\"     varchar(100),"
+                                            "\"JOB_NAME\"       varchar(100) not null,"
                                             "\"ENQUEUE_TIME\"   datetime,"
                                             "\"START_AT_TIME\"  datetime,"
                                             "\"PARAMETERS\"     clob,"
