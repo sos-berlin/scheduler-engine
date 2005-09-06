@@ -62,10 +62,23 @@
         <command_option name="tcp-port"     setting="tcp_port"/>
         <command_option name="udp-port"     setting="udp_port"/>
         
-        <command_option name="reuse-port" title="TCP- und UDP-Port wiederverwenden">
+        <command_option name="reuse-port" title="TCP- und UDP-Port wiederverwenden (im Notfall)">
             <description>
                 <p>
                     Ruft <code>setsockopt(socket,SOL_SOCKET,SO_REUSEADDR,true)</code>.
+                </p>
+                <p>
+		    Die Option sollte <u>nur im Notfall</u> benutzt werden, falls das Betriebssystem den Port dauerhaft sperrt,
+		    obwohl keine Anwendung ihn mehr belegt. 
+		    Das kann unter Windows XP passieren, wenn die Anwendung mit einem Debugger abgebrochen wird.
+		    Suse 8.0 kann fast eine Minute brauchen, um einen Port freizugeben.
+                </p>
+                <p>
+		    U.U. ist der Scheduler mit <code>-reuse-port</code> über TCP oder UDP nicht erreichbar,
+		    weil statt dessen der Port der anderen Anwendung angesprochen wird.
+                </p>
+                <p>
+		    Wenn ein Port blockiert ist, versucht der Scheduler eine Minute lang, ihn zu belegen, bevor er aufgibt.
                 </p>
             </description>
         </command_option>
