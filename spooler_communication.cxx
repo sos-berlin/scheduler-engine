@@ -592,8 +592,11 @@ int Communication::bind_socket( SOCKET socket, struct sockaddr_in* sa, const str
     int ret;
     int true_ = 1;
 
+    string port_name = tcp_or_udp + "-Port " + as_string( ntohs( sa->sin_port ) );
+
     if( _spooler->_reuse_port )     // War für Suse 8 nötig. Und für Windows XP, wenn Scheduler zuvor abgestürzt ist (mit Debugger), denn dann bleibt der Port ewig blockiert
     {
+        _spooler->_log.warn( S() << "-reuse-port: " << port_name << " wird verwendet, auch wenn er schon von einer anderen Anwendung belegt ist\n" );
         LOG( "setsockopt(" << socket << ",SOL_SOCKET,SO_REUSEADDR,1)  " );
         ret = setsockopt( socket, SOL_SOCKET, SO_REUSEADDR, (const char*)&true_, sizeof true_ );
         LOG( "ret=" << ret );  if( ret == SOCKET_ERROR )  LOG( "errno=" << errno << "  "  << strerror(errno) );
@@ -608,7 +611,7 @@ int Communication::bind_socket( SOCKET socket, struct sockaddr_in* sa, const str
     {
         int my_errno = errno;  // Nur für Unix
 
-        _spooler->_log.warn( tcp_or_udp + "-Port " + as_string( ntohs( sa->sin_port ) ) + " ist blockiert. Wir probieren es " + as_string(wait_for_port_available) + " Sekunden" );
+        _spooler->_log.warn( port_name + " ist blockiert. Wir probieren es " + as_string(wait_for_port_available) + " Sekunden" );
 
         for( int i = 1; i <= wait_for_port_available; i++ )
         {
