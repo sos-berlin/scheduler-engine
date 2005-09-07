@@ -57,7 +57,7 @@ public class Task extends Idispatch
     /** Startet erneut eine Task nach der eingestellten Zeit.
      * 
      * <p>
-     * Diese Methode gehört eigentlich in die Klasse Job. Sieht hat nichts mit der gerade laufenden Task zu tun.
+     * Diese Methode gehört eigentlich in die Klasse Job. Sie hat nichts mit der gerade laufenden Task zu tun.
      * <p>
      * Wenn nach Ablauf der angegebenen Zeit keine Task des Jobs läuft, startet der Scheduler eine Task.
      * <p>

@@ -358,7 +358,8 @@ void Log::log2( Log_level level, const string& prefix, const string& line_, Pref
 Prefix_log::Prefix_log( int )
 :
     _zero_(this+1),
-    _file(-1)
+    _file(-1),
+    _log_level(log_unknown)
 {
 }
 
@@ -371,7 +372,8 @@ Prefix_log::Prefix_log( Scheduler_object* o, const string& prefix )
     _spooler(o->_spooler),
     _log(&o->_spooler->_base_log),
     _prefix(prefix),
-    _file(-1)
+    _file(-1),
+    _log_level(log_unknown)
 {
     init( o, prefix );
 }
@@ -407,7 +409,7 @@ void Prefix_log::init( Scheduler_object* o, const string& prefix )
     _log     = &o->_spooler->_base_log;
     _prefix  = prefix;
 
-    _log_level       = _spooler->_log_level;
+  //_log_level       = _spooler->_log_level;
     _mail_on_warning = _spooler->_mail_on_warning;
     _mail_on_error   = _spooler->_mail_on_error;
     _mail_on_process = _spooler->_mail_on_process;
@@ -421,6 +423,14 @@ void Prefix_log::init( Scheduler_object* o, const string& prefix )
     _to              = _spooler->_log_mail_to;
     _cc              = _spooler->_log_mail_cc;
     _bcc             = _spooler->_log_mail_bcc;
+}
+
+//----------------------------------------------------------------------------Prefix_log::log_level
+
+int Prefix_log::log_level()
+{ 
+    return _log_level == log_unknown && _spooler? _spooler->_log_level 
+                                                : _log_level; 
 }
 
 //------------------------------------------------------------------Prefix_log::set_profile_section
@@ -886,7 +896,7 @@ void Prefix_log::log2( Log_level level, const string& prefix, const string& line
     if( level == log_error  &&  _task  &&  !_task->has_error() )  _task->set_error_xc_only( Xc( "SCHEDULER-140", line.c_str() ) );
 
     if( _highest_level < level )  _highest_level = level, _highest_msg = line;
-    if( level < _log_level )  return;
+    if( level < log_level() )  return;
 
     //if( level == log_error )  _last_error_line = line;
     _last[ level ] = line;
@@ -938,7 +948,7 @@ xml::Element_ptr Prefix_log::dom_element( const xml::Document_ptr& document, con
 {
     xml::Element_ptr log_element = document.createElement( "log" );
 
-    if( _log_level     >= log_min   )  log_element.setAttribute( "level"          , name_of_log_level( (Log_level)_log_level ) );
+    if( log_level()    >= log_min   )  log_element.setAttribute( "level"          , name_of_log_level( (Log_level)log_level() ) );
     if( _highest_level >= log_min   )  log_element.setAttribute( "highest_level"  , name_of_log_level( (Log_level)_highest_level ) );
     if( last( log_error ) != ""     )  log_element.setAttribute( "last_error"     , last( log_error ) );
     if( last( log_warn  ) != ""     )  log_element.setAttribute( "last_warning"   , last( log_warn ) );

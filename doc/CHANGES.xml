@@ -10,6 +10,11 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2005-09-07" version="2.0.138" subversion_revision="3866">
+        <revision type="correction" title="debug1 bis debug9 im Startskript wird nicht mehr unterdrückt"/>
+        <revision type="modification" title="Datenbanktabellen werden mit varchar statt char angelegt"/>
+    </change>
+
     <change date="2005-09-06" version="2.0.138" subversion_revision="3851">
         <revision type="new" title="Option -pid-file wird bei Installation als Windows-Dienst übernommen">
             <description>

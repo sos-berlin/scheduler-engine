@@ -277,7 +277,7 @@ bool Period::is_comming( Time time_of_day, With_single_start single_start ) cons
     else
         result = false;
 
-    //Z_LOG2( "joacim", *this << ".is_coming(" << time_of_day << ',' << (int)single_start << ") ==> " << result << "\n" );
+    //Z_LOG2( "joacim", *this << ".is_comming(" << time_of_day << ',' << (int)single_start << ") ==> " << result << "\n" );
 
     return result;
 }

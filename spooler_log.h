@@ -75,7 +75,7 @@ struct Prefix_log : Object, Has_log
     string                      new_filename                ()                                  { return _new_filename; }
     void                        start_new_file              ();
     void                    set_log_level                   ( Log_level level )                 { _log_level = level; }
-    int                         log_level                   ()                                  { return _log_level; }
+    int                         log_level                   ();
     void                        reset_highest_level         ()                                  { _highest_level = (Log_level)-999; }
     Log_level                   highest_level               () const                            { return _highest_level; }
     string                      highest_msg                 () const                            { return _highest_msg; }
