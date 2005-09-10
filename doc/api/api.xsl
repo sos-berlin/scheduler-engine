@@ -10,8 +10,6 @@
 
 <xsl:output doctype-public="-//W3C//DTD HTML 4.01//EN" />  <!--"http://www.w3.org/TR/html4/strict.dtd"-->
 <!--xsl:output doctype-public="-//W3C//DTD HTML 4.01 Transitional//EN"/> <!- - "http://www.w3.org/TR/html4/loose.dtd"-->
-    
-    
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~api-->
 
@@ -34,11 +32,10 @@
 
 </xsl:template>
 
-
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <xsl:template match="api_classes" mode="description">
-    <xsl:apply-templates mode="script" select="document( 'all_classes.xml' )/class_references/class_reference"/>
+    <xsl:apply-templates select="document( 'all_classes.xml' )/class_references/class_reference" mode="script"/>
 </xsl:template>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
@@ -55,7 +52,7 @@
 <xsl:template match="class_reference" mode="script">
     <xsl:element name="a">
         <xsl:attribute name="href">javascript:void(0)</xsl:attribute>  <!-- Für ie6 -->
-        <xsl:attribute name="onclick"><xsl:value-of select="concat( 'api.class_reference__onclick(&quot;', @name, '&quot;)' )"/></xsl:attribute>
+        <xsl:attribute name="onclick">api.class_reference_onclick( "<xsl:value-of select="@name"/>" ); api.show(); </xsl:attribute>
         <xsl:value-of select="@name"/>
     </xsl:element>
     <br/>
@@ -67,13 +64,13 @@
 
 
 <xsl:template match="/class [ /*/@show_list ]">
-    <xsl:apply-templates mode="list" select="."/>
+    <xsl:apply-templates select="." mode="list"/>
 </xsl:template>    
 
 
 
 
-<xsl:template mode="list" match="class">
+<xsl:template match="class" mode="list">
     <p style="margin-top: 0px; padding-bottom: 3ex; font-weight: bold;">
         <xsl:value-of select="@name"/>
         <xsl:if test="@title">
@@ -94,7 +91,7 @@
             <td colspan="5"><hr size="1"/></td>
         </tr>
         
-        <xsl:apply-templates mode="list_properties_and_methods" select="property"/>
+        <xsl:apply-templates select="property" mode="list_properties_and_methods"/>
 
         
         <tr><td colspan="4" style="padding-top: 6ex; padding-bottom: 1ex; font-weight: bold;"> </td></tr>
@@ -109,16 +106,16 @@
             <td colspan="5"><hr size="1"/></td>
         </tr>
         
-        <xsl:apply-templates mode="list_properties_and_methods" select="method"/>
+        <xsl:apply-templates select="method" mode="list_properties_and_methods"/>
     </table>
 
 </xsl:template>
 
 
-<xsl:template mode="list_properties_and_methods" match="property | method">
+<xsl:template match="property | method" mode="list_properties_and_methods">
     <xsl:for-each select="com">
         <tr>
-            <xsl:apply-templates mode="list" select=".">
+            <xsl:apply-templates select="." mode="list">
                 <xsl:with-param name="td" select="'x'"/>
             </xsl:apply-templates>
         </tr>
@@ -126,20 +123,67 @@
 </xsl:template>
 
 
-<xsl:template mode="list" match="property | method">
+<xsl:template match="property | method" mode="list">
     <p>
-        <xsl:apply-templates mode="list" select="com"/>
+        <xsl:apply-templates select="com" mode="list"/>
     </p>
 </xsl:template>
 
 
 
-<xsl:template mode="list" match="com">
-    <xsl:param name="td"/>
-
-    <td class="mono">
+<xsl:template match="com" mode="list">
+    <td style="white-space: nowrap">
         <xsl:if test="com.type">
-            <xsl:value-of select="com.type/@type"/>
+            <xsl:apply-templates select="com.type"/>
+        </xsl:if>
+    </td>
+
+    <td style="padding-left: 1ex">
+        <xsl:value-of select="parent::*/parent::class/@object_name"/>.<span class="mono" style="font-weight: bold"><xsl:value-of select="../@name"/></span>
+    </td>
+    
+    <xsl:element name="td">
+        <xsl:if test="not( parent::property )">
+            <xsl:attribute name="colspan">2</xsl:attribute>
+        </xsl:if>
+        
+        <xsl:if test="com.parameter or parent::method">
+            <span class="mono"><xsl:text>(</xsl:text></span>
+
+            <xsl:if test="com.parameter">
+                <span class="mono"><xsl:text> </xsl:text></span>
+                <xsl:for-each select="com.parameter">
+                    <xsl:if test="position() &gt; 1">
+                        <span class="mono"><xsl:text>, </xsl:text></span>
+                    </xsl:if>
+                    <xsl:apply-templates select="."/>
+                </xsl:for-each>
+                <span class="mono"><xsl:text> </xsl:text></span>
+            </xsl:if>
+
+            <span class="mono">)</span>
+        </xsl:if>
+    </xsl:element>
+    
+    <xsl:if test="parent::property">
+        <td style="padding-left: 1ex">
+            <xsl:if test="@access">
+                <xsl:value-of select="@access"/> only
+            </xsl:if>
+        </td>
+    </xsl:if>
+    
+    <td style="padding-left: 1ex">
+        <xsl:value-of select="parent::property/title"/>
+    </td>
+    
+</xsl:template>
+
+
+<xsl:template match="com [ /*/programming_language='javascript' ]" mode="list">
+    <td>
+        <xsl:if test="com.type">
+            <xsl:apply-templates select="com.type"/>
         </xsl:if>
     </td>
 
@@ -186,7 +230,7 @@
 
 
 <xsl:template match="com.parameter">
-    <span class="mono"><xsl:value-of select="com.type/@type"/></span>
+    <xsl:apply-templates select="com.type"/>
     <span class="mono"><xsl:text> </xsl:text></span>
     <span class="mono"><xsl:value-of select="@name"/></span>
 </xsl:template>
@@ -256,6 +300,42 @@
 </xsl:template>
 
 -->
+
+
+<xsl:template match="com.type [ /*/@programming_language='javascript' and @type='VARIANT' ]">
+    <span class="mono">var</span>
+</xsl:template>
+
+<xsl:template match="com.type [ /*/@programming_language='javascript' and @type='bool' ]">
+    <span class="mono">boolean</span>
+</xsl:template>
+
+<xsl:template match="com.type [ /*/@programming_language='javascript' and @type='BSTR' ]">
+    <span class="mono">String</span>
+</xsl:template>
+
+<xsl:template match="com.type [ /*/@programming_language='javascript' and @class ]">
+    <span class="mono">Object</span> (<xsl:value-of select="@class"/>)
+</xsl:template>
+
+
+<xsl:template match="com.type [ /*/@programming_language='java' and @type='bool' ]">
+    <span class="mono">boolean</span>
+</xsl:template>
+
+<xsl:template match="com.type [ /*/@programming_language='java' and @type='BSTR' ]">
+    <span class="mono">java.lang.String</span>
+</xsl:template>
+
+<xsl:template match="com.type [ /*/@programming_language='java' and @type='VARIANT' ]">
+    <span class="mono">java.lang.String</span>
+</xsl:template>
+
+<xsl:template match="com.type">
+    <span class="mono"><xsl:value-of select="@type"/></span>
+</xsl:template>
+
+
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_commands-->
     

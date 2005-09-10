@@ -20,9 +20,9 @@
             </td>
             <td align="right">
                 Programmiersprache:
-                <select onclick="programming_language__onclick()">
+                <select id="programming_languages_select" onclick="api.programming_language__onchange()">
                     <option>Java</option>
-                    <option selected="selected">JavaScript</option>
+                    <option>JavaScript</option>
                     <option>Perl</option>
                     <option>VBScript</option>
                 </select>
@@ -55,7 +55,10 @@
 
 <script defer="defer" type="text/javascript" for="window" event="onload">
 
+
     var api = new Api();
+
+
 
 </script>
 

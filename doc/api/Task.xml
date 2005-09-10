@@ -9,7 +9,7 @@
 
     <com.type interface="Itask" iid="feee478c-6c1b-11d8-8103-000476ee8afb"/>
     
-    <java.type class="sos.spooler.Task"/>
+    <java.type type="sos.spooler.Task"/>
     
     
     
@@ -18,11 +18,11 @@
 
     <property name="job">
         <title>
-            Der <scheduler_method class="Job"/>, zu dem die Task gehört.
+            Der Job, zu dem die Task gehört.
         </title>
         
         <com access="read">
-            <com.type type="Job" interface="Ijob"/>
+            <com.type class="Job" interface="Ijob"/>
         </com>
         
         <java>
@@ -51,7 +51,7 @@
         </description>
         
         <com>
-            <com.type type="Variable_set"/>
+            <com.type class="Variable_set"/>
         </com>
     </property>
 
@@ -87,7 +87,7 @@
         </com>
         
         <com access="read">
-            <com.type type="Error" interface="Ierror"/>
+            <com.type class="Error" interface="Ierror"/>
         </com>
     </property>
 
@@ -105,9 +105,9 @@
             </com.parameter>
         </com>
         
-        <java type="java.lang.String">
+        <java class="java.lang.String">
             <java.parameter name="name">
-                <com.type type="java.lang.String"/>
+                <com.type class="java.lang.String"/>
             </java.parameter>
         </java>
     </property>
@@ -120,7 +120,7 @@
         
         <java name="seconds" type="double"/>
         
-        <java name="hhmm_ss" type="java.lang.String" description="time_from_variant.xml"/>
+        <java name="hhmm_ss" class="java.lang.String" description="time_from_variant.xml"/>
     </property>
 
     <method name="add_pid">
@@ -183,7 +183,7 @@
     
     <method name="create_subprocess">
         <com>
-            <com.type type="Subprocess" interface="Isubprocess"/>
+            <com.type class="Subprocess" interface="Isubprocess"/>
             
             <com.parameter name="program_and_parameters">
                 <com.type type="VARIANT">
