@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="api.xsl" type="text/xsl"?>
+
+<class_references>
+    <class_reference name="Task"/>
+    <class_reference name="Job"/>
+</class_references>

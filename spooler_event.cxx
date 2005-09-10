@@ -18,14 +18,14 @@ string Scheduler_event::name_of_event_code( Event_code event_code )
         case evt_none:                          return "none";
         case evt_unknown:                       return "unknown";
         case evt_scheduler_started:             return "scheduler_started";
-        case evt_scheduler_fatal_error:         return "evt_scheduler_fatal_error";
+        case evt_scheduler_fatal_error:         return "scheduler_fatal_error";
         case evt_job_error:                     return "job_error";
         case evt_task_ended:                    return "task_ended";
         case evt_disk_full:                     return "disk_full";
         case evt_database_error:                return "database_error";
         case evt_database_error_switch_to_file: return "database_error_switch_to_file";
         case evt_database_error_abort:          return "database_error_abort";
-        case evt_database_continue:             return "evt_database_continue";
+        case evt_database_continue:             return "database_continue";
         case evt_task_start_error:              return "task_start_error";
         default:                                return S() << "Event_code(" << event_code << ")";
     }
