@@ -16,27 +16,23 @@
     
 
 
-    <property name="job">
+    <property name="job" access="read">
         <title>
             Der Job, zu dem die Task gehört.
         </title>
         
-        <com access="read">
+        <com>
             <com.type class="Job" interface="Ijob"/>
         </com>
-        
-        <java>
-            <java.type type="sos.spooler.Job"/>
-        </java>
     </property>
 
 
-    <property name="id">
+    <property name="id" access="read">
         <title>
             Die Task-Kennung.
         </title>
         
-        <com access="read">
+        <com>
             <com.type type="int"/>
         </com>
     </property>
@@ -58,18 +54,14 @@
 
     <property name="result">
         <com>
-            <com.type type="VARIANT"/>
+            <com.type type="VARIANT*"/>
         </com>
-        
-        <java>
-            <java.type type="java.lang.String"/>
-        </java>
     </property>
 
 
-    <property name="repeat" access="write_only">
+    <property name="repeat" access="write">
         <com>
-            <com.type type="double"/>
+            <com.type type="double" parameter_name="seconds"/>
         </com>
     </property>
 
@@ -80,7 +72,7 @@
 
     <property name="error">
         <com access="write">
-            <com.type type="VARIANT">
+            <com.type type="VARIANT*">
                 <com.variant accepted_type="BSTR"/>
                 <!--com.variant accepted_type="Ierror"/-->
             </com.type>
@@ -92,36 +84,31 @@
     </property>
 
 
-    <method name="wait_until_terminated">
-        <com type="bool"/>
-    </method>
-
     <property name="history_field" access="write">
         <com>
-            <com.type type="VARIANT"/>
+            <com.type type="VARIANT*"/>
             
             <com.parameter name="name">
                 <com.type type="BSTR"/>
             </com.parameter>
         </com>
-        
-        <java class="java.lang.String">
-            <java.parameter name="name">
-                <com.type class="java.lang.String"/>
-            </java.parameter>
-        </java>
     </property>
 
 
     <property name="delay_spooler_process" access="write">
         <com>
-            <com.type type="VARIANT" description="time_from_variant.xml"/>
+            <com.type type="VARIANT*" parameter_name="seconds_or_hhmm_ss" description="time_from_variant.xml"/>
         </com> 
         
-        <java name="seconds" type="double"/>
+        <java>
+            <java.type type="double" parameter_name="seconds"/>
+        </java>
         
-        <java name="hhmm_ss" class="java.lang.String" description="time_from_variant.xml"/>
+        <java>
+            <java.type class="java.lang.String" parameter_name="hhmm_ss" description="time_from_variant.xml"/>
+        </java>
     </property>
+
 
     <method name="add_pid">
         <com>
@@ -130,7 +117,7 @@
             </com.parameter>  
             
             <com.parameter name="timeout">
-                <com.type type="VARIANT">
+                <com.type type="VARIANT*">
                     <com.variant optional="true"/>
                 </com.type>
             </com.parameter> 
@@ -185,8 +172,8 @@
         <com>
             <com.type class="Subprocess" interface="Isubprocess"/>
             
-            <com.parameter name="program_and_parameters">
-                <com.type type="VARIANT">
+            <com.parameter name="filename_and_arguments">
+                <com.type type="VARIANT*">
                     <com.variant accepted_type="BSTR"/>
                     <com.variant accepted_array_type="BSTR"/>
                     <com.variant optional="true"/>
@@ -195,11 +182,11 @@
         </com>
 
         <java>
-            <java.type type="sos.spooler.Subprocess"/>
+            <java.type class="sos.spooler.Subprocess"/>
         </java>            
         
         <java>
-            <java.type type="sos.spooler.Subprocess"/>
+            <java.type class="sos.spooler.Subprocess"/>
             
             <java.parameter name="command_line">
                  <java.type type="java.lang.String"/>
@@ -207,7 +194,7 @@
         </java>
         
         <java>
-            <java.type type="sos.spooler.Subprocess"/>
+            <java.type class="sos.spooler.Subprocess"/>
             
             <java.parameter name="filename_and_arguments">
                 <java.type type="java.lang.String[]"/>

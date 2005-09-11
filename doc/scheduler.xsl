@@ -13,6 +13,12 @@
                 version   = "1.0">
                 
     <xsl:output doctype-public="-//W3C//DTD HTML 4.01//EN" />  <!--"http://www.w3.org/TR/html4/strict.dtd"-->
+    
+    <!-- Nicht für Firefox 1.0.6:
+    <xsl:output method="xml" 
+                media-type="application/xhtml+xml" 
+                doctype-public="-//W3C//DTD XHTML 1.0 Strict//EN" 
+                doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"/-->
     <!--xsl:output doctype-public="-//W3C//DTD HTML 4.01 Transitional//EN"/> <!- - "http://www.w3.org/TR/html4/loose.dtd"-->
     <xsl:variable name="start_page" select="'index.xml'"/>
     <xsl:variable name="base_dir"   select="/*/@base_dir"/>
@@ -63,7 +69,7 @@
                 </tr>
                 <tr>
                     <td colspan="2">
-                        <hr size="1"/>
+                        <hr/>
                     </td>
                 </tr>
             </thead>
@@ -280,7 +286,7 @@
             <tr>
                 <xsl:element name="td">
                     <xsl:if test="count( ../* ) &gt; 1  and  not( ../*/description )">
-                        <xsl:attribute name="width">150</xsl:attribute>
+                        <xsl:attribute name="style">width: 150px</xsl:attribute>
                     </xsl:if>
                     <p class="xml_element">
                         <b>
@@ -435,7 +441,7 @@
                             </tr>
                             <tr>
                                 <td colspan="3">
-                                    <hr size="1"/>
+                                    <hr/>
                                 </td>
                             </tr>
                         </thead>
@@ -745,57 +751,55 @@
 
         <p>&#160;</p>
         
-        <p>
-            <table cellspacing="0" cellpadding="0">
-                <col valign="baseline"/>
-                <col valign="baseline" style="padding-top: 0pt; padding-left: 2ex"/>
+        <table cellspacing="0" cellpadding="0">
+            <col valign="baseline"/>
+            <col valign="baseline" style="padding-top: 0pt; padding-left: 2ex"/>
 
-                <xsl:for-each select="register_keyword">
-                    <!--xsl:sort select="@keyword"/   Nicht hier sortieren, sonst funktioniert preceding-sibling:self nicht. -->
+            <xsl:for-each select="register_keyword">
+                <!--xsl:sort select="@keyword"/   Nicht hier sortieren, sonst funktioniert preceding-sibling:self nicht. -->
 
-                    <xsl:variable name="first_letter" select="translate( substring( @keyword, 1, 1 ), 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' )"/>
-                    
-                    <xsl:if test="$first_letter != translate( substring( (preceding-sibling::*)[ position() = last() ]/@keyword, 1, 1 ), 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' )">
-                        <tr><td colspan="9">
-                            <xsl:element name="a">
-                                <xsl:attribute name="name">letter__<xsl:value-of select="$first_letter"/></xsl:attribute>
-                            </xsl:element>
-                            <xsl:if test="position() > 1">
-                                &#160;<br/><!--<hr size="1" style="color: #f0f0f0"/>-->
-                            </xsl:if>
-                            <b><xsl:value-of select="$first_letter"/></b>
-                        </td></tr>
-                    </xsl:if>
-                    
-                    <tr>
-                        <td nowrap="true">
-                            <xsl:choose>
-                                <xsl:when test="register_keyword_display">
-                                    <xsl:apply-templates select="register_keyword_display" mode="description"/>
-                                </xsl:when>
-                                <xsl:otherwise>
-                                    <xsl:value-of select="@keyword"/>
-                                </xsl:otherwise>
-                            </xsl:choose>
-                            <!--xsl:apply-templates select="*[ name(.) = $children_name ][ position() = 1]/.." mode="keyword"/-->
-                        </td>
-                        <td>
-                            <xsl:for-each select="register_entry | register_ini_entry">
-                                <xsl:sort select="@type" order="descending"/>
+                <xsl:variable name="first_letter" select="translate( substring( @keyword, 1, 1 ), 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' )"/>
+                
+                <xsl:if test="$first_letter != translate( substring( (preceding-sibling::*)[ position() = last() ]/@keyword, 1, 1 ), 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' )">
+                    <tr><td colspan="9">
+                        <xsl:element name="a">
+                            <xsl:attribute name="name">letter__<xsl:value-of select="$first_letter"/></xsl:attribute>
+                        </xsl:element>
+                        <xsl:if test="position() > 1">
+                            &#160;<br/><!--<hr size="1" style="color: #f0f0f0"/>-->
+                        </xsl:if>
+                        <b><xsl:value-of select="$first_letter"/></b>
+                    </td></tr>
+                </xsl:if>
+                
+                <tr>
+                    <td style="white-space: nowrap">
+                        <xsl:choose>
+                            <xsl:when test="register_keyword_display">
+                                <xsl:apply-templates select="register_keyword_display/*" mode="description"/>
+                            </xsl:when>
+                            <xsl:otherwise>
+                                <xsl:value-of select="@keyword"/>
+                            </xsl:otherwise>
+                        </xsl:choose>
+                        <!--xsl:apply-templates select="*[ name(.) = $children_name ][ position() = 1]/.." mode="keyword"/-->
+                    </td>
+                    <td>
+                        <xsl:for-each select="register_entry | register_ini_entry">
+                            <xsl:sort select="@type" order="descending"/>
+                            <xsl:sort select="@register_title"/>
+
+                            <xsl:apply-templates select=".">
+                                <xsl:sort select="@register_keyword"/>
                                 <xsl:sort select="@register_title"/>
-
-                                <xsl:apply-templates select=".">
-                                    <xsl:sort select="@register_keyword"/>
-                                    <xsl:sort select="@register_title"/>
-                                </xsl:apply-templates>
-                                            
-                                <xsl:if test="position() &lt; last()">,&#160; </xsl:if>
-                            </xsl:for-each>
-                        </td>
-                    </tr>
-                </xsl:for-each>
-            </table>                
-        </p>
+                            </xsl:apply-templates>
+                                        
+                            <xsl:if test="position() &lt; last()">,&#160; </xsl:if>
+                        </xsl:for-each>
+                    </td>
+                </tr>
+            </xsl:for-each>
+        </table>                
 
     </xsl:template>
 
@@ -812,7 +816,7 @@
                 <xsl:sort select="@keyword"/>
                 
                 <tr>
-                    <td nowrap="true">
+                    <td style="white-space: nowrap">
                         <xsl:value-of select="@keyword"/>
                         <!--xsl:apply-templates select="*[ name(.) = $children_name ][ position() = 1]/.." mode="keyword"/-->
                     </td>
@@ -983,6 +987,13 @@
             </xsl:for-each>
             <xsl:apply-templates mode="description"/>
         </xsl:element>
+    </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~description.style-->
+    <!-- Wird schon von html_head interpretiert -->
+    
+    <xsl:template match="description.style" mode="description">
+	<!-- style gehört ins <head>, s. html_head -->
     </xsl:template>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_comment-->
@@ -1271,7 +1282,9 @@
     
     <xsl:template match="command_options" mode="table">
     
-        <code><xsl:value-of select="parent::*/@program"/></code>
+        <p>
+            <code><xsl:value-of select="parent::*/@program"/></code>
+        </p>
         
         <div class="indent">
             <table cellspacing="0" cellpadding="0">
@@ -1322,11 +1335,11 @@
     
         <xsl:variable name="setting" select="document( 'settings.xml' )/settings/setting[ @setting = current()/@setting ]"/>
         
-        <xsl:element name="a">
-            <xsl:attribute name="name">option_<xsl:value-of select="@name"/></xsl:attribute>
-        </xsl:element>
-        
         <p class="command_option">
+            <xsl:element name="a">
+                <xsl:attribute name="name">option_<xsl:value-of select="@name"/></xsl:attribute>
+            </xsl:element>
+            
             <b><code>-<xsl:value-of select="@name"/></code></b>
             <xsl:if test="@type | $setting/@type">
                 <b><code>=</code></b>
@@ -1357,7 +1370,7 @@
                     <xsl:with-param name="title" select="$title"/>
                 </xsl:call-template>
                 
-                <xsl:apply-templates mode="description" select="."/>
+                <xsl:apply-templates mode="description" select="description/*"/>
 
                 <p>
                     Unter Windows wird sollte die Datei dort angelegt werden, wo Windows seine <code>.ini</code>-Dateien erwartet.
@@ -1424,7 +1437,7 @@
             
             <tr>
                 <td colspan="3">
-                    <xsl:apply-templates mode="description" select="description"/>
+                    <xsl:apply-templates mode="description" select="description/*"/>
                     <p>&#160;</p>
                 </td>
             </tr>
@@ -1520,7 +1533,7 @@
                 
                 <table cellspacing="0" cellpadding="0">
                     <tr>
-                        <td width="250">
+                        <td style="width: 250px">
                             <b><code><xsl:value-of select="@name | @setting"/></code></b>
                             
                             <b><code>=</code></b>
@@ -1603,7 +1616,7 @@
             
             <style type="text/css">
                 @import "<xsl:value-of select="$base_dir"/>scheduler.css";
-                <xsl:copy-of select="/*/style/node()"/>
+                <xsl:copy-of select="/*/description.style/node()"/>
             </style>
         </head>
     </xsl:template>
@@ -1633,7 +1646,7 @@
             </tr>
         </table>
 
-        <hr size="1"/>
+        <hr/>
         
         <xsl:if test="$title">
             <h1>
@@ -1647,7 +1660,7 @@
     <xsl:template name="bottom">
         <xsl:param name="parent_page"/>
 
-        <hr size="1" style="margin-top: 3ex"/>
+        <hr style="margin-top: 3ex"/>
         <table cellspacing="0" cellpadding="0" width="100%">
             <tr>
                 <td>
@@ -1687,6 +1700,7 @@
                 <xsl:element name="a">
                     <xsl:attribute name="class">silent</xsl:attribute>
                     <xsl:attribute name="href"><xsl:value-of select="concat( $base_dir, $start_page )"/></xsl:attribute>
+                    <xsl:attribute name="rel">start</xsl:attribute>
                     <xsl:text>Erste Seite</xsl:text>
                 </xsl:element>
                 
@@ -1710,6 +1724,7 @@
 
         <xsl:element name="a">
             <xsl:attribute name="href"><xsl:value-of select="$base_dir"/>register.xml</xsl:attribute>
+            <xsl:attribute name="rel">index</xsl:attribute>
             <xsl:text>Register</xsl:text>
         </xsl:element>
         &#160; &#160; &#160; 

@@ -261,9 +261,6 @@
                     <scheduler_method class="Mail" property="xslt_stylesheet_path" java_signature="java.lang.String" access="write"/> 
                     setzt das XSLT-Stylesheet für eMails.
                 </p>
-                <example>
-                    
-                </example>
             </description>
         </revision>
 

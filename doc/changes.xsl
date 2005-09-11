@@ -45,12 +45,12 @@
         <table width="100%" style="border-top: 1px solid #f0f0f0; margin-top: 0ex">
             <tbody>
                 <tr>
-                    <td valign="top" width="50">
+                    <td valign="top" style="width: 50px">
                         <span style="font-weight: normal; white-space: nowrap">
                             <xsl:value-of select="@version"/>.<xsl:value-of select="@subversion_revision"/>&#160;
                         </span>
                     </td>
-                    <td valign="top" width="80" style="padding-left: 1ex; white-space: nowrap">
+                    <td valign="top" style="padding-left: 1ex; width: 80px; white-space: nowrap">
                         <span style="font-weight: normal">
                             <xsl:value-of select="@date"/>
                         </span>

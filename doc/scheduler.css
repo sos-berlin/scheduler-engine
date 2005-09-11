@@ -6,6 +6,8 @@ h2              { font-size: 12pt; font-weight: bold; margin-top: 4ex; border-to
 h3              { font-size: 10pt; font-weight: bold; margin-top: 4ex;  }
 .zwischentitel  { font-weight: bold; margin-top: 6ex }
 
+hr              { height: 1px; border: 0px; color: gray; background-color: gray; }
+
 p               { font-size: 10pt; margin-bottom: 0px }
 td              { font-size: 10pt }
 div             { font-size: 10pt }
@@ -60,3 +62,10 @@ p.ini_entry         { margin-top: 2ex; border-top: 1px solid #f0f0f0; padding-to
 .sos_name           { font-variant: small-caps; }
 
 .indent             { margin-left: 4ex; }
+
+
+td.api_type         { vertical-align: top; white-space: nowrap; }
+td.api_method       { vertical-align: top; padding-left: 1ex; white-space: nowrap; }
+td.api_parameters   { vertical-align: top; white-space: nowrap; }
+td.api_access       { vertical-align: top; padding-left: 1ex; white-space: nowrap; }
+td.api_title        { vertical-align: top; padding-left: 1ex; white-space: nowrap; }

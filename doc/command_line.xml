@@ -68,7 +68,8 @@
                     Ruft <code>setsockopt(socket,SOL_SOCKET,SO_REUSEADDR,true)</code>.
                 </p>
                 <p>
-		    Die Option sollte <u>nur im Notfall</u> benutzt werden, falls das Betriebssystem den Port dauerhaft sperrt,
+		    Die Option sollte <span style="text-decoration: underline">nur im Notfall</span> benutzt werden, 
+		    falls das Betriebssystem den Port dauerhaft sperrt,
 		    obwohl keine Anwendung ihn mehr belegt. 
 		    Das kann unter Windows XP passieren, wenn die Anwendung mit einem Debugger abgebrochen wird.
 		    Suse 8.0 kann fast eine Minute brauchen, um einen Port freizugeben.
@@ -267,8 +268,6 @@
     </command_options>
     
     <description>
-        <scheduler_keyword keyword="Kommandozeile"/>
-        <scheduler_keyword keyword="Optionen"/>
         <p>
             Der Programmdateiname <code>scheduler</code> muss absolut und vollständig angegeben werden. 
             In Windows mit der Endung "<code>.exe</code>"
@@ -279,5 +278,8 @@
             gesetzt werden.
         </p>
     </description>
+
+    <scheduler_keyword keyword="Kommandozeile"/>
+    <scheduler_keyword keyword="Optionen"/>
     
 </command_line>

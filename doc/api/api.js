@@ -77,7 +77,7 @@ Api.prototype.show = function()
         document.getElementById( "class" ).innerHTML = new XMLSerializer().serializeToString( this._xslt_processor.transformToDocument( dom_document ) );
         
         document.cookie = "class=" + this._class_name;
-        document.cookie = "programming_lanugage=" + this._programming_language;
+        document.cookie = "programming_language=" + this._programming_language;
         
     }
     catch( x ) { alert( x ); }

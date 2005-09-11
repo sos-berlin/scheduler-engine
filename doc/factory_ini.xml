@@ -16,8 +16,6 @@
     </ini_sections>
     
     <description>
-        <scheduler_keyword keyword="factory.ini"/>
-
         <p>
             In dieser Datei können Einstellungen für den Scheduler vorgenommen werden.
         </p>
@@ -25,4 +23,7 @@
             Den Pfad dieser Datei können sie mit der Option <scheduler_option name="ini"/> ändern.
         </p>
     </description>
+
+    <scheduler_keyword keyword="factory.ini"/>
+
 </ini>

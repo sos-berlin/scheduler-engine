@@ -20,7 +20,7 @@
             </td>
             <td align="right">
                 Programmiersprache:
-                <select id="programming_languages_select" onclick="api.programming_language__onchange()">
+                <select id="programming_languages_select" onclick="api.programming_language__onchange()" size="4">
                     <option>Java</option>
                     <option>JavaScript</option>
                     <option>Perl</option>
