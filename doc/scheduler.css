@@ -9,7 +9,7 @@ h3              { font-size: 10pt; font-weight: bold; margin-top: 4ex;  }
 hr              { height: 1px; border: 0px; color: gray; background-color: gray; }
 
 p               { font-size: 10pt; margin-bottom: 0px }
-td              { font-size: 10pt }
+td              { font-size: 10pt; vertical-align: top; }
 div             { font-size: 10pt }
 /*p:first-child   { font-size: 10pt; margin-top: 0px; margin-bottom: 0px }   Wirkt in ie6 nicht */
 li              { font-size: 10pt }
@@ -68,4 +68,4 @@ td.api_type         { vertical-align: top; white-space: nowrap; }
 td.api_method       { vertical-align: top; padding-left: 1ex; white-space: nowrap; }
 td.api_parameters   { vertical-align: top; white-space: nowrap; }
 td.api_access       { vertical-align: top; padding-left: 1ex; white-space: nowrap; }
-td.api_title        { vertical-align: top; padding-left: 1ex; white-space: nowrap; }
+td.api_title        { vertical-align: top; padding-left: 1ex; }

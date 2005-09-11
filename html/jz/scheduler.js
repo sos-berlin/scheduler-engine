@@ -278,7 +278,7 @@ Stylesheet.prototype.xml_transform = function( dom_document )
 {
     if( this._xslt_processor )
     {
-		return new XMLSerializer().serializeToString( this._xslt_processor.transformToDocument( dom_document ) );
+        return new XMLSerializer().serializeToString( this._xslt_processor.transformToDocument( dom_document ) );
     }
     else
     {

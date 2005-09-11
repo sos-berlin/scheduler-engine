@@ -169,6 +169,10 @@
     
     
     <method name="create_subprocess">
+        <title>
+            Start eines überwachten Subprozesses.
+        </title>
+        
         <com>
             <com.type class="Subprocess" interface="Isubprocess"/>
             
