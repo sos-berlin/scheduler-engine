@@ -4,8 +4,8 @@
 <description
     title          = "Programmschnittstelle (API)"
     base_dir       = "../"
-    author         = "$Author: jz $"
-    date           = "$Date: 2005-09-06 10:38:41 +0200 (Di, 06 Sep 2005) $"
+    author         = "$Author$"
+    date           = "$Date$"
 >
 
 
