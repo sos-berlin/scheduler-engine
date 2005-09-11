@@ -82,13 +82,13 @@
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<xsl:template match="/class [ /*/@show_list ]">
-    <xsl:apply-templates select="." mode="list"/>
+<xsl:template match="/class [ /*/@show_headline ]">
+    <xsl:apply-templates select="." mode="headline"/>
 </xsl:template>    
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<xsl:template match="class" mode="list">
+<xsl:template match="class" mode="headline">
     <p style="margin-top: 0ex; padding-bottom: 3ex; font-size: 14pt; font-weight: bold;">
         <xsl:value-of select="@name"/>
 
@@ -96,7 +96,17 @@
              - <xsl:value-of select="@title"/>
         </xsl:if>
     </p>
+</xsl:template>
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<xsl:template match="/class [ /*/@show_list ]">
+    <xsl:apply-templates select="." mode="list"/>
+</xsl:template>    
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<xsl:template match="class" mode="list">
     <table cellpadding="0" cellspacing="0">
         <!--tr><td colspan="4" style="padding-top: 4ex; padding-bottom: 1ex; font-weight: bold;">Eigenschaften</td></tr-->
         <tr>

@@ -2,7 +2,7 @@
 <?xml-stylesheet href="api.xsl" type="text/xsl"?>
 
 <description
-    title="Scheduler-Programmschnittstelle (API)"
+    title          = "Programmschnittstelle (API)"
     base_dir       = "../"
     author         = "$Author: jz $"
     date           = "$Date: 2005-09-06 10:38:41 +0200 (Di, 06 Sep 2005) $"
@@ -43,7 +43,7 @@
 
 
 
-<table cellpadding="0" cellspacing="0" width="100%" style="padding-bottom: 2ex">
+<table cellpadding="0" cellspacing="0" style="padding-bottom: 4ex">
     <!--tr>
         <td colspan="5" style="font-size: 1px"><hr size="1"/></td>
     </tr-->
@@ -67,19 +67,19 @@
             &#160;            
         </td>
         
-        <td style="border-top: 1px dotted black; border-left: 1px dotted black; font-size: 4pt;">
+        <td colspan="99" style="border-top: 1px dotted black; border-left: 1px dotted black; font-size: 4pt;">
             &#160;            
         </td>
     </tr>
     
     <tr>
-        <td style="vertical-align: top; padding-right: 3ex; width: 20pt">
+        <td style="vertical-align: top; padding-right: 3ex; width: 20pt;">
             <api_classes/>
         </td>
         
         <td style="padding-left: 3ex; border-left: 1px dotted black;">
+            <div id="class_headline"> </div>
             <div id="class"> </div>
-            <div id="method"> </div>
         </td>
     </tr>
 </table>

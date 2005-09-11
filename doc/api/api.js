@@ -126,35 +126,48 @@ Api.prototype.class_reference__onclick = function( class_name )
 
 //-------------------------------------------------------------------------------------------------
 
+Api.prototype.apply_xslt_stylesheet = function( html_element, dom_document )
+{
+    html_element.style.color = "";
+    
+    if( window.ActiveXObject )
+    {
+        this._xslt_processor.reset();
+        this._xslt_processor.input = dom_document;
+        var ok = this._xslt_processor.transform();
+        if( !ok )  throw new Error( "Fehler in XSLProcessor.transform()" );
+        html_element.innerHTML = this._xslt_processor.output;
+    }
+    else
+    {
+        html_element.innerHTML = new XMLSerializer().serializeToString( this._xslt_processor.transformToDocument( dom_document ) );
+    }
+}
+
+//-------------------------------------------------------------------------------------------------
+
 Api.prototype.show = function()
 {
+    var class_headline_element = document.getElementById( "class_headline" );
     var class_element = document.getElementById( "class" );
     
     try
     {
         var dom_document = dom_from_xml( this.fetch_by_url( this._class_name + ".xml" ) );
-        dom_document.documentElement.setAttribute( "show_list", "true" );
         dom_document.documentElement.setAttribute( "programming_language", this._programming_language );
         
         if( this._programming_language == "java" )  dom_document.documentElement.removeAttribute( "language_has_properties" );
                                               else  dom_document.documentElement.setAttribute( "language_has_properties", "true" );
+                                              
+        dom_document.documentElement.setAttribute( "show_list", "true" );
+        this.apply_xslt_stylesheet( class_element, dom_document );                                             
+        dom_document.documentElement.removeAttribute( "show_list");
         
-        class_element.style.color = "";
-        
-        if( window.ActiveXObject )
-        {
-            this._xslt_processor.reset();
-            this._xslt_processor.input = dom_document;
-            var ok = this._xslt_processor.transform();
-            if( !ok )  throw new Error( "Fehler in XSLProcessor.transform()" );
-            class_element.innerHTML = this._xslt_processor.output;
-        }
-        else
-        {
-            class_element.innerHTML = new XMLSerializer().serializeToString( this._xslt_processor.transformToDocument( dom_document ) );
-        }
-
-
+        dom_document.documentElement.setAttribute( "show_headline", "true" );
+        this.apply_xslt_stylesheet( class_headline_element, dom_document );                                             
+        dom_document.documentElement.removeAttribute( "headline");
+    
+    
         var e = document.getElementById( "class_reference_" + this._class_name )
         if( e )  e.style.fontWeight = "bold";
         
