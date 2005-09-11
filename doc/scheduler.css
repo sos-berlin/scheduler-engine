@@ -6,10 +6,10 @@ h2              { font-size: 12pt; font-weight: bold; margin-top: 4ex; border-to
 h3              { font-size: 10pt; font-weight: bold; margin-top: 4ex;  }
 .zwischentitel  { font-weight: bold; margin-top: 6ex }
 
-hr              { height: 1px; border: 0px; color: gray; background-color: gray; }
+hr              { height: 1px; font-size: 1px; border: 0px; color: gray; background-color: gray; }
 
 p               { font-size: 10pt; margin-bottom: 0px }
-td              { font-size: 10pt; vertical-align: top; }
+td              { font-size: 10pt; vertical-align: baseline; }
 div             { font-size: 10pt }
 /*p:first-child   { font-size: 10pt; margin-top: 0px; margin-bottom: 0px }   Wirkt in ie6 nicht */
 li              { font-size: 10pt }
@@ -31,7 +31,7 @@ code            { font-family: Lucida Console, monospace; font-size: 9pt; }
 a.silent        { text-decoration: none; color: #0000A0 }
 a               { text-decoration: none; color: #0000A0 }
 
-a:link          { color: #0000A0 }
+a:link          { color: #0000A0; cursor: hand; }
 a:active        { color: #0000A0 }
 a:visited       { color: #0000A0 }
 a:hover         { background-color: #e0e0FF }
@@ -64,8 +64,10 @@ p.ini_entry         { margin-top: 2ex; border-top: 1px solid #f0f0f0; padding-to
 .indent             { margin-left: 4ex; }
 
 
-td.api_type         { vertical-align: top; white-space: nowrap; }
-td.api_method       { vertical-align: top; padding-left: 1ex; white-space: nowrap; }
-td.api_parameters   { vertical-align: top; white-space: nowrap; }
-td.api_access       { vertical-align: top; padding-left: 1ex; white-space: nowrap; }
-td.api_title        { vertical-align: top; padding-left: 1ex; }
+td.api_type         { white-space: nowrap;  }
+td.api_method       { padding-left: 1ex; white-space: nowrap; }
+td.api_parameters   { white-space: nowrap; }
+td.api_access       { padding-left: 1ex; white-space: nowrap; }
+td.api_title        { padding-left: 1ex; }
+
+.api_programming_language_selector { padding-left: 3pt; padding-right: 3pt; margin-right: 2ex; }

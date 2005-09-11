@@ -32,6 +32,20 @@
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
+<xsl:template match="api_programming_language_selector" mode="description">
+    <xsl:variable name="plang" select="translate( @programming_language, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz' )"/>
+    <xsl:element name="a">
+        <xsl:attribute name="id">programming_language_selector__<xsl:value-of select="$plang"/></xsl:attribute>
+        <xsl:attribute name="onclick">api.programming_language_selector__onclick( "<xsl:value-of select="$plang"/>" )</xsl:attribute>
+        <xsl:attribute name="class">api_programming_language_selector</xsl:attribute>
+        <xsl:attribute name="href">javascript:void(0)</xsl:attribute>
+        
+        <xsl:value-of select="@programming_language"/>
+    </xsl:element>
+</xsl:template>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
 <xsl:template match="api_classes" mode="description">
     <xsl:apply-templates select="document( 'all_classes.xml' )/class_references/class_reference" mode="script"/>
 </xsl:template>
@@ -75,7 +89,7 @@
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <xsl:template match="class" mode="list">
-    <p style="margin-top: 0px; padding-bottom: 3ex; font-weight: bold;">
+    <p style="margin-top: 0ex; padding-bottom: 3ex; font-size: 14pt; font-weight: bold;">
         <xsl:value-of select="@name"/>
 
         <xsl:if test="@title">
@@ -94,7 +108,7 @@
         </tr>
 
         <tr>
-            <td colspan="5" style="padding-bottom: 4pt; font-size: 1px"><hr/></td>
+            <td colspan="5" style="padding-bottom: 4pt;"><hr/></td>
         </tr>
         
         <xsl:apply-templates select="property" mode="list_properties_and_methods">
@@ -102,7 +116,7 @@
         </xsl:apply-templates>
 
         
-        <tr><td colspan="4" style="padding-top: 6ex; padding-bottom: 1ex; font-weight: bold;"> </td></tr>
+        <tr><td colspan="4" style="padding-top: 6ex; padding-bottom: 1ex; font-weight: bold;">&#160;</td></tr>
         <tr>
             <td class="api_type"       >Ergebnistyp</td>
             <td class="api_method"     style="font-weight: bold">Methode&#160;</td>
@@ -112,7 +126,7 @@
         </tr>
         
         <tr>
-            <td colspan="5" style="padding-bottom: 4pt; font-size: 1px"><hr size="1"/></td>
+            <td colspan="5" style="padding-bottom: 4pt;"><hr/></td>
         </tr>
         
         <xsl:apply-templates select="method" mode="list_properties_and_methods">
@@ -127,8 +141,9 @@
 <xsl:template match="property | method" mode="list_properties_and_methods">
     <xsl:if test="position() &gt; 1">
         <tr>
-            <td colspan="99" style="font-size: 1px">
-                <hr style="color: lightgrey; background-color: lightgrey"/>
+            <td colspan="99" style="font-size: 4pt">
+                <!--hr style="color: lightgrey; background-color: lightgrey"/-->
+                &#160;
             </td>
         </tr>
     </xsl:if>
@@ -229,16 +244,16 @@
             <xsl:element name="td">
                 <xsl:attribute name="class">api_title</xsl:attribute>
                 <xsl:attribute name="rowspan"><xsl:value-of select="$rowspan"/></xsl:attribute>
+                <xsl:attribute name="style">white-space: nowrap;</xsl:attribute>
 
-                <xsl:element name="div">
+                <!--xsl:element name="div">
                     <xsl:attribute name="style">
                         height: <xsl:value-of select="12 * $rowspan"/>pt; 
                         overflow: hidden; 
-                        text-overflow: ellipsis; 
-                    </xsl:attribute>
+                    </xsl:attribute-->
                     
-                    <xsl:value-of select="parent::property/title"/>
-                </xsl:element>
+                    <xsl:value-of select="parent::*/title"/>
+                <!--/xsl:element-->
             </xsl:element>
         </xsl:if>
 
@@ -277,7 +292,7 @@
                 <span class="mono"><xsl:text>, </xsl:text></span>
             </xsl:if>
             
-            <span class="mono">
+            <span class="mono" style="white-space: nowrap">
                 <xsl:apply-templates select="java.type | com.type"/>
                 <xsl:text> </xsl:text>
                 <xsl:value-of select="java.type/@parameter_name | com.type/@parameter_name"/>

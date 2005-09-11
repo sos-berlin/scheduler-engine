@@ -11,7 +11,7 @@ function human_language__onclick()
 }
 */
 //---------------------------------------------------------------Api.programming_language__onchange
-
+/*
 Api.prototype.programming_language__onchange = function()
 {
     var select = document.getElementById( "programming_languages_select" );
@@ -22,6 +22,25 @@ Api.prototype.programming_language__onchange = function()
         api._programming_language = programming_language;
         api.show();
     }
+}
+*/
+
+//-------------------------------------------------------Api.programming_language_selector__onclick
+
+Api.prototype.programming_language_selector__onclick = function( programming_language )
+{
+    try
+    {
+        if( programming_language != api._programming_language )
+        {
+            var e = document.getElementById( "programming_language_selector__" + this._programming_language );
+            if( e )  e.style.fontWeight = "normal";
+            
+            api._programming_language = programming_language.toLowerCase();
+            api.show();
+        }
+    }
+    catch( x )  { alert( x && x.message? x.message : ( "" + x ) ); }
 }
 
 //----------------------------------------------------------------------------------------------Api
@@ -69,8 +88,10 @@ function Api()
     var programming_language = get_cookie( "programming_language" );
     if( !programming_language )  programming_language = this._programming_language;
 
-    // Dropdown-Box einstellen:
     
+    
+    // Dropdown-Box einstellen:
+    /*    
     var select = document.getElementById( "programming_languages_select" );
 
     for( var i = 0; i < select.options.length; i++ )
@@ -82,6 +103,8 @@ function Api()
             break;
         }
     }
+    */
+    
         
     var class_name = get_cookie( "class" );
     if( class_name )
@@ -130,21 +153,22 @@ Api.prototype.show = function()
         {
             class_element.innerHTML = new XMLSerializer().serializeToString( this._xslt_processor.transformToDocument( dom_document ) );
         }
+
+
+        var e = document.getElementById( "class_reference_" + this._class_name )
+        if( e )  e.style.fontWeight = "bold";
+        
+        var e = document.getElementById( "programming_language_selector__" + this._programming_language );
+        if( e )  e.style.fontWeight = "bold";
+
+        document.cookie = "class=" + this._class_name;
+        document.cookie = "programming_language=" + this._programming_language;
     }
     catch( x ) 
     { 
         class_element.innerHTML = ( x? x.message? x.message : x.toString() : "" + x ).replace( /&/g, "&amp;" ).replace( /</g, "&lt;" );
         class_element.style.color = "red";
     }
-        
-    try 
-    {
-        document.getElementById( "class_reference_" + this._class_name ).style.fontWeight = "bold";
-
-        document.cookie = "class=" + this._class_name;
-        document.cookie = "programming_language=" + this._programming_language;
-    }
-    catch( x ) { alert( x ); }
 }
 
 //---------------------------------------------------------------------------------Api.fetch_by_url
@@ -185,6 +209,7 @@ Api.prototype.fetch_by_url = function( url )
     }
 */
     
+    window.status = "";
     this._xml_http = xml_http;
     
     return this._xml_http.responseText;

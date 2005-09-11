@@ -1694,7 +1694,7 @@
     <xsl:template name="browse_bar">
         <xsl:param name="parent_page"/>
 
-        <p style="font-size: 8pt; margin-top: 0">
+        <p style="font-size: 8pt; margin-top: 0px; padding-top: 0px">
             Scheduler &#160; &#160; &#160; 
             <xsl:if test="not( /*/@suppress_browse_bar='yes' )">
                 <xsl:element name="a">

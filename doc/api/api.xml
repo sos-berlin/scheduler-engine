@@ -2,6 +2,7 @@
 <?xml-stylesheet href="api.xsl" type="text/xsl"?>
 
 <description
+    title="Scheduler-Programmschnittstelle (API)"
     base_dir       = "../"
     author         = "$Author: jz $"
     date           = "$Date: 2005-09-06 10:38:41 +0200 (Di, 06 Sep 2005) $"
@@ -15,10 +16,10 @@
 <form>
     <table cellpadding="0" cellspacing="0" width="100%">
         <tr>
-            <td style="font-size: 16pt; font-weight: bold;">
+            <!--td style="font-size: 14pt; font-weight: bold;">
                 Scheduler-Programmschnittstelle (API)
-            </td>
-            <td align="right">
+            </td-->
+            <!--td align="right">
                 Programmiersprache:
                 <select id="programming_languages_select" 
                         onchange="api.programming_language__onchange()" 
@@ -28,7 +29,7 @@
                     <option>Perl</option>
                     <option>VBScript</option>
                 </select>
-            </td>
+            </td-->
             <!--td align="right">
                 Sprache:
                 <select onclick="human_language__onclick()">
@@ -41,19 +42,42 @@
 </form>
 
 
-<table cellpadding="0" cellspacing="0" width="100%" style="padding-top: 2ex; padding-bottom: 2ex">
-    <tr>
+
+<table cellpadding="0" cellspacing="0" width="100%" style="padding-bottom: 2ex">
+    <!--tr>
         <td colspan="5" style="font-size: 1px"><hr size="1"/></td>
-    </tr>
+    </tr-->
     <tr>
-        <td style="vertical-align: top; border-right: 1px solid black; padding-right: 4ex; width: 20pt">
-            <p style="padding-bottom: 1em; font-weight: bold;">
+        <td style="vertical-align: top; padding-right: 3ex; padding-bottom: 4pt;">
+            <p style="font-weight: bold; border">
                 Klassen
             </p>
-             
+        </td>
+        
+        <td style="padding-left: 3ex; border-left: 1px dotted black; padding-bottom: 4pt;">
+            <api_programming_language_selector programming_language="Java"/>
+            <api_programming_language_selector programming_language="JavaScript"/>
+            <api_programming_language_selector programming_language="Perl"/>
+            <api_programming_language_selector programming_language="VBScript"/>
+        </td>
+    </tr>
+    
+    <tr>
+        <td style="border-top: 1px dotted black; font-size: 1pt;">
+            &#160;            
+        </td>
+        
+        <td style="border-top: 1px dotted black; border-left: 1px dotted black; font-size: 4pt;">
+            &#160;            
+        </td>
+    </tr>
+    
+    <tr>
+        <td style="vertical-align: top; padding-right: 3ex; width: 20pt">
             <api_classes/>
         </td>
-        <td style="padding-left: 2ex;">
+        
+        <td style="padding-left: 3ex; border-left: 1px dotted black;">
             <div id="class"> </div>
             <div id="method"> </div>
         </td>
