@@ -100,13 +100,13 @@
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<xsl:template match="/class [ /*/@show_list ]">
-    <xsl:apply-templates select="." mode="list"/>
+<xsl:template match="/class [ /*/@show_table ]">
+    <xsl:apply-templates select="." mode="table"/>
 </xsl:template>    
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<xsl:template match="class" mode="list">
+<xsl:template match="class" mode="table">
     <table cellpadding="0" cellspacing="0">
         <!--tr><td colspan="4" style="padding-top: 4ex; padding-bottom: 1ex; font-weight: bold;">Eigenschaften</td></tr-->
         <tr>
@@ -121,7 +121,7 @@
             <td colspan="5" style="padding-bottom: 4pt;"><hr/></td>
         </tr>
         
-        <xsl:apply-templates select="property" mode="list_properties_and_methods">
+        <xsl:apply-templates select="property" mode="table">
             <xsl:sort select="@name"/>
         </xsl:apply-templates>
 
@@ -139,7 +139,7 @@
             <td colspan="5" style="padding-bottom: 4pt;"><hr/></td>
         </tr>
         
-        <xsl:apply-templates select="method" mode="list_properties_and_methods">
+        <xsl:apply-templates select="method" mode="table">
             <xsl:sort select="@name"/>
         </xsl:apply-templates>
     </table>
@@ -148,8 +148,11 @@
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<xsl:template match="property | method" mode="list_properties_and_methods">
+<xsl:template match="property | method" mode="table">
+
     <xsl:if test="position() &gt; 1">
+        <!-- Trenner zwischen verschiedenen Eigenschaften oder Methoden -->
+        
         <tr>
             <td colspan="99" style="font-size: 4pt">
                 <!--hr style="color: lightgrey; background-color: lightgrey"/-->
@@ -158,63 +161,117 @@
         </tr>
     </xsl:if>
 
-    <xsl:apply-templates select="." mode="list_property_or_method"/>
+    <xsl:apply-templates select="." mode="table_rows">
+        <xsl:with-param name="is_in_table" select="true()"/>
+    </xsl:apply-templates>
 
 </xsl:template>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<xsl:template match="property | method" mode="list_property_or_method">
-    <xsl:choose>
-        <xsl:when test="com">
-            <xsl:apply-templates select="com" mode="table_row"/>
-        </xsl:when>
+<xsl:template match="property | method" mode="table_rows">
+    <xsl:param name="is_in_table" select="false()"/>
+    <xsl:param name="show_title"  select="true()"/>
 
+    <xsl:apply-templates select="." mode="com_table_rows">
+        <xsl:with-param name="is_in_table" select="$is_in_table"/>
+        <xsl:with-param name="show_title"  select="$show_title"/>
+    </xsl:apply-templates>
+</xsl:template>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<xsl:template match="property | method" mode="com_table_rows">
+    <xsl:param name="is_in_table" select="false()"/>
+    <xsl:param name="show_title"  select="true()"/>
+    
+    <xsl:choose>
+        <xsl:when test="/*/@language_has_properties">
+            <xsl:apply-templates select="com" mode="table_row">
+                <xsl:with-param name="is_in_table" select="$is_in_table"/>
+                <xsl:with-param name="show_title"  select="$show_title"/>
+            </xsl:apply-templates>
+        </xsl:when>
         <xsl:otherwise>
-            <!-- Methode ohne Parameter, ohne Ergebnis -->
-            <xsl:apply-templates select="." mode="table_row"/>
+            <xsl:for-each select="com">
+                <xsl:choose>
+                    <xsl:when test="parent::property and parent::property/@access='write'">
+                        <xsl:apply-templates select="." mode="table_row">
+                            <xsl:with-param name="access"      select="'write'"/>
+                            <xsl:with-param name="is_in_table" select="$is_in_table"/>
+                            <xsl:with-param name="show_title"  select="$show_title"/>
+                        </xsl:apply-templates>
+                    </xsl:when>
+                        
+                    <xsl:when test="parent::property and parent::property/@access='read'">
+                        <xsl:apply-templates select="." mode="table_row">
+                            <xsl:with-param name="access"      select="'read'"/>
+                            <xsl:with-param name="is_in_table" select="$is_in_table"/>
+                            <xsl:with-param name="show_title"  select="$show_title"/>
+                        </xsl:apply-templates>
+                    </xsl:when>
+                    
+                    <xsl:when test="parent::property and not( parent::property/@access )">
+                        <xsl:apply-templates select="." mode="table_row">
+                            <xsl:with-param name="access"      select="'write'"/>
+                            <xsl:with-param name="is_in_table" select="$is_in_table"/>
+                            <xsl:with-param name="show_title"  select="$show_title"/>
+                        </xsl:apply-templates>
+                    
+                        <xsl:apply-templates select="." mode="table_row">
+                            <xsl:with-param name="access"      select="'read'"/>
+                            <xsl:with-param name="is_in_table" select="$is_in_table"/>
+                            <xsl:with-param name="show_title"  select="false()"/>
+                        </xsl:apply-templates>
+                    </xsl:when>
+                    
+                    <xsl:otherwise>
+                        <xsl:apply-templates select="." mode="table_row">
+                            <xsl:with-param name="is_in_table" select="$is_in_table"/>
+                            <xsl:with-param name="show_title"  select="$show_title"/>
+                        </xsl:apply-templates>
+                    </xsl:otherwise>
+                </xsl:choose>
+            </xsl:for-each>
         </xsl:otherwise>
     </xsl:choose>
 </xsl:template>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
-<!-- Methode ohne Rückgabe, ohne Parameter -->
 
-<xsl:template match="*" mode="table_row">
-    <xsl:param name="access"/>
+<xsl:template match="java | com" mode="signature">
+
+    <table cellpadding="0" cellspacing="0">
+        <xsl:apply-templates select="." mode="table_row">
+            <xsl:with-param name="show_title" select="false()"/>
+        </xsl:apply-templates>
+    </table>
     
-    <tr>
-        <td class="api_type">
-                <span class="mono">void</span>
-        </td>
-
-        <td class="api_method">
-            <xsl:apply-templates select="." mode="method_name">
-                <xsl:with-param name="access" select="$access"/>
-            </xsl:apply-templates>
-        </td>
-        
-        <td class="api_parameters" colspan="2">
-            <span class="mono">()</span>
-        </td>
-        
-        <td class="api_title">
-            <xsl:value-of select="parent::property/title"/>
-        </td>
-    </tr>    
 </xsl:template>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <xsl:template match="java | com" mode="table_row">
-    <xsl:param name="access"/>
-    <xsl:param name="rowspan" select="1"/>
+    <xsl:param name="access"        select="string( @access | parent::*/@access )"/>
+    <xsl:param name="show_title"    select="true()"/>
+    <xsl:param name="title_rowspan" select="1"/>
+    <xsl:param name="is_in_table"   select="false()"/>
     
-    <tr>
+    <xsl:variable name="tr_id" select="concat( local-name(.), '.', position(), $access )"/>
+    
+    <xsl:element name="tr">
+        <xsl:if test="$is_in_table">
+            <xsl:attribute name="id">tr_<xsl:value-of select="$tr_id"/></xsl:attribute>
+            <xsl:attribute name="class">api_method</xsl:attribute>
+            <xsl:attribute name="onclick">window.location = "#method__<xsl:value-of select="parent::*/@name"/>";</xsl:attribute>
+            <xsl:attribute name="style">cursor: hand;</xsl:attribute>
+        </xsl:if>
+    
+    
         <td class="api_type">
             <xsl:choose>
-                <xsl:when test="not( $access='write' )">
-                    <xsl:apply-templates select="." mode="com.type"/>
+                <xsl:when test="( java.result or com.result ) and not( $access='write' )">
+                    <xsl:apply-templates select="java.result/java.type | com.result/com.type"/>
                 </xsl:when>
                 <xsl:otherwise>
                     <span class="mono">void</span>
@@ -236,38 +293,42 @@
             </xsl:if>
             
             <xsl:if test="com.parameter or parent::method or not( /*/@language_has_properties )">
-                <xsl:apply-templates select="." mode="parameter_list">
-                    <xsl:with-param name="with_property_type" select="$access='write'"/>
-                </xsl:apply-templates>
+                <xsl:choose>
+                    <xsl:when test="$access='write'">
+                        <xsl:apply-templates select="." mode="parameter_list">
+                            <xsl:with-param name="parameters" select="java.parameter | java.result | com.parameter | com.result"/>
+                        </xsl:apply-templates>
+                    </xsl:when>
+                    <xsl:otherwise>
+                        <xsl:apply-templates select="." mode="parameter_list">
+                            <xsl:with-param name="parameters" select="java.parameter | com.parameter"/>
+                        </xsl:apply-templates>
+                    </xsl:otherwise>
+                </xsl:choose>
             </xsl:if>
         </xsl:element>
         
         <xsl:if test="parent::property and /*/@language_has_properties">
             <td class="api_access">
-                <xsl:if test="@access">
-                    <xsl:value-of select="@access"/> only
+                <xsl:if test="$access">
+                    <xsl:value-of select="$access"/> only
                 </xsl:if>
             </td>
         </xsl:if>
-        
-        <xsl:if test="$rowspan &gt; 0">
-            <xsl:element name="td">
-                <xsl:attribute name="class">api_title</xsl:attribute>
-                <xsl:attribute name="rowspan"><xsl:value-of select="$rowspan"/></xsl:attribute>
-                <xsl:attribute name="style">white-space: nowrap;</xsl:attribute>
 
-                <!--xsl:element name="div">
-                    <xsl:attribute name="style">
-                        height: <xsl:value-of select="12 * $rowspan"/>pt; 
-                        overflow: hidden; 
-                    </xsl:attribute-->
-                    
-                    <xsl:value-of select="parent::*/title"/>
-                <!--/xsl:element-->
-            </xsl:element>
-        </xsl:if>
+    </xsl:element>    
+    
+    
+    <xsl:if test="parent::*/title and $show_title and $title_rowspan &gt; 0 and position() = last()">
+        <tr>
+            <td> </td>
+            
+            <td colspan="99" class="api_title">
+                <xsl:value-of select="parent::*/title"/>
+            </td>
+        </tr>
+    </xsl:if>
 
-    </tr>    
 </xsl:template>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
@@ -283,31 +344,19 @@
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 <!-- ( parameter ... ) -->
 
-<xsl:template match="com | java" mode="parameter_list">
-    <xsl:param name="with_property_type"/>
+<xsl:template match="java | com" mode="parameter_list">
+    <xsl:param name="parameters"/>
     
     <span class="mono"><xsl:text>(</xsl:text></span>
 
-    <xsl:if test="com.parameter or java.parameter or $with_property_type">
+    <xsl:if test="$parameters">
         <span class="mono"><xsl:text> </xsl:text></span>
-        <xsl:for-each select="com.parameter | java.parameter">
+        <xsl:for-each select="$parameters">
             <xsl:if test="position() &gt; 1">
                 <span class="mono"><xsl:text>, </xsl:text></span>
             </xsl:if>
             <xsl:apply-templates select="."/>
         </xsl:for-each>
-        
-        <xsl:if test="$with_property_type">
-            <xsl:if test="com.parameter or java.parameter">
-                <span class="mono"><xsl:text>, </xsl:text></span>
-            </xsl:if>
-            
-            <span class="mono" style="white-space: nowrap">
-                <xsl:apply-templates select="java.type | com.type"/>
-                <xsl:text> </xsl:text>
-                <xsl:value-of select="java.type/@parameter_name | com.type/@parameter_name"/>
-            </span>
-        </xsl:if>
         
         <span class="mono"><xsl:text> </xsl:text></span>
     </xsl:if>
@@ -318,40 +367,14 @@
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 <!-- Parametertyp und -name -->
 
-<xsl:template match="com.parameter | java.parameter">
-    <xsl:apply-templates select="java.type | com.type"/>
-    <span class="mono"><xsl:text> </xsl:text></span>
-    <span class="mono"><xsl:value-of select="@name"/></span>
-</xsl:template>
+<xsl:template match="com.parameter | com.result | java.parameter | java.result">
 
-<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
-
-<xsl:template match="*" mode="com.type">
-    <xsl:param name="access"/>
+    <span style="white-space: nowrap">
+        <xsl:apply-templates select="java.type | com.type"/>
+        <span class="mono"><xsl:text> </xsl:text></span>
+        <span class="mono"><xsl:value-of select="@name"/></span>
+    </span>
     
-    <xsl:choose>
-        <xsl:when test="( not( /*/@language_has_properties ) and $access='write' ) or not( java.type or com.type )">
-            <span class="mono">void</span>
-        </xsl:when>
-        <xsl:otherwise>
-            <xsl:apply-templates select="java.type | com.type"/>
-        </xsl:otherwise>
-    </xsl:choose>
-</xsl:template>
-
-<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
-
-<xsl:template match="*" mode="com.type">
-    <xsl:param name="access"/>
-    
-    <xsl:choose>
-        <xsl:when test="( not( /*/@language_has_properties ) and $access='write' ) or not( java.type or com.type )">
-            <span class="mono">void</span>
-        </xsl:when>
-        <xsl:otherwise>
-            <xsl:apply-templates select="java.type | com.type"/>
-        </xsl:otherwise>
-    </xsl:choose>
 </xsl:template>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
@@ -382,6 +405,79 @@
 
 <xsl:template match="java.type">
     <span class="mono"><xsl:value-of select="@type | @class"/></span>
+</xsl:template>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<xsl:template match="class" mode="detailed_methods">
+    
+    <p style="padding-top: 3em">&#160;</p>
+    
+    <xsl:apply-templates select="method | property" mode="detailed_methods"/>
+    
+</xsl:template>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<xsl:template match="/class [ /*/@show_detailed_methods ]">
+    <xsl:apply-templates select="." mode="detailed_methods"/>
+</xsl:template>    
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<xsl:template match="method | property" mode="detailed_methods">
+    
+    <xsl:element name="h2">
+        <xsl:attribute name="id">method__<xsl:value-of select="@name"/></xsl:attribute>
+        
+        <xsl:value-of select="@name"/>
+        
+        <xsl:if test="title">
+            &#160; – &#160; <xsl:value-of select="title"/>
+        </xsl:if>
+    </xsl:element>
+
+    <table cellpadding="0" cellspacing="0">
+        <xsl:apply-templates select="." mode="table_rows">
+            <xsl:with-param name="show_title" select="false()"/>
+        </xsl:apply-templates>
+    </table>
+
+    <xsl:if test="description">
+        <p>&#160;</p>
+        <xsl:apply-templates select="description"/>
+    </xsl:if>
+    
+    <xsl:if test="com.parameter">
+        <h3>Parameter</h3>
+        
+        <table cellpadding="0" cellspacing="0">
+            <xsl:for-each select="com.parameter">
+                <tr>
+                    <td>
+                        <span class="mono"><xsl:value-of select="@name"/></span>
+                    </td>
+                    <td style="padding-left: 2ex">
+                        <xsl:apply-templates select="title"/>
+                        <xsl:apply-templates select="description"/>
+                    </td>
+                </tr>
+            </xsl:for-each>
+        </table>
+    </xsl:if>
+    
+    <xsl:if test="com.type[ title or description ]">
+        <h3>Rückgabe</h3>
+        <xsl:apply-templates select="com.type/title"/>
+        <xsl:apply-templates select="com.type/description"/>
+    </xsl:if>
+    
+</xsl:template>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<xsl:template match="com" mode="detailed_methods">
+    
 </xsl:template>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->

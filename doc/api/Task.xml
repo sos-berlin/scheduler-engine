@@ -5,112 +5,336 @@
 
 
 
-<class name="Task" object_name="spooler_task">
+<class name="Task" 
+       object_name="spooler_task"
+       base_dir="../">
 
-    <com.type interface="Itask" iid="feee478c-6c1b-11d8-8103-000476ee8afb"/>
+    <!--com.type interface="Itask" iid="feee478c-6c1b-11d8-8103-000476ee8afb"/>
     
-    <java.type type="sos.spooler.Task"/>
-    
-    
+    <java.type type="sos.spooler.Task"/-->
     
     
 
 
     <property name="job" access="read">
+        <com>
+            <com.result>
+                <com.type class="Job" interface="Ijob"/>
+            </com.result>
+        </com>
+
         <title>
             Der Job, zu dem die Task gehört.
         </title>
-        
-        <com>
-            <com.type class="Job" interface="Ijob"/>
-        </com>
     </property>
 
 
     <property name="id" access="read">
+        <com>
+            <com.result>
+                <com.type type="int"/>
+            </com.result>
+        </com>
+
         <title>
             Die Task-Kennung.
         </title>
-        
-        <com>
-            <com.type type="int"/>
-        </com>
     </property>
 
 
     <property name="params">
-        <description>
-            Eine Task kann Parameter haben. 
-            Die Parameter können in der Konfiguration mit <scheduler_element name="parameter"/>, 
-            mit <scheduler_method class="Job" method="start"/>
-            oder mit <scheduler_element name="start_job"/> gesetzt werden. 
-        </description>
-        
         <com>
-            <com.type class="Variable_set"/>
+            <com.result>
+                <com.type class="Variable_set"/>
+            </com.result>
         </com>
+
+        <title>
+            Die Parameter der Task
+        </title>        
+
+        <description>
+            <p>
+                Eine Task kann Parameter haben. 
+                Die Parameter können in der Konfiguration mit <scheduler_element name="parameter"/>, 
+                mit <scheduler_method class="Job" method="start"/>
+                oder mit <scheduler_element name="start_job"/> gesetzt werden. 
+            </p>
+        </description>
     </property>
 
 
     <property name="result">
         <com>
-            <com.type type="VARIANT*"/>
+            <com.result>
+                <com.type type="VARIANT*"/>
+            </com.result>
         </com>
+        
+        <title>
+            Ergebnis der Task
+        </title>
+        
+        <description>
+            <p>
+                Hier kann die Task ein Ergebnis speichern, 
+                das von einer anderen solange wartenden Taskabgeholt werden kann.
+            </p>
+            <p>
+                Siehe <scheduler_method class="Task" method="wait_until_terminated"/>
+            </p>
+        </description>
     </property>
 
 
     <property name="repeat" access="write">
         <com>
-            <com.type type="double" parameter_name="seconds"/>
+            <com.result>
+                <com.type type="double" parameter_name="seconds"/>
+            </com.result>
         </com>
     </property>
 
 
     <method name="end">
+        <com>
+        </com>
+        
+        <title>
+            Beendet die Task
+        </title>
+        
+        <description>
+            Der Scheduler ruft nicht mehr <scheduler_method class="Job_impl" method="spooler_process"/> auf.
+            Statt dessen ruft er <scheduler_method class="Job_impl" method="spooler_close"/> auf.
+        </description>
     </method>
 
 
     <property name="error">
         <com access="write">
-            <com.type type="VARIANT*">
-                <com.variant accepted_type="BSTR"/>
-                <!--com.variant accepted_type="Ierror"/-->
-            </com.type>
+            <com.result>
+                <com.type type="VARIANT*">
+                    <com.variant accepted_type="BSTR"/>
+                    <!--com.variant accepted_type="Ierror"/-->
+                </com.type>
+            </com.result>
         </com>
         
         <com access="read">
-            <com.type class="Error" interface="Ierror"/>
+            <com.result>
+                <com.type class="Error" interface="Ierror"/>
+            </com.result>
         </com>
+        
+        <java access="write">
+            <java.result>
+                <java.type type="java.lang.String"/>
+            </java.result>
+        </java>
+        
+        <java access="read">
+            <java.result>
+                <java.type class="Error"/>
+            </java.result>
+        </java>
+       
+        <title>
+            Setzt einen Fehler und stoppt den Job
+        </title>
+        
+        <description>
+            <p>
+                Der lesende Aufruf liefert den letzten Fehler dieser Task.
+                Wenn kein Fehler vorliegt, wird ein <scheduler_method class="Error"/>-Objekt zurückgeliefert, 
+                dessen Eigenschaft <code>is_error</code> <code>false</code> liefert.
+            </p>
+        </description>
     </property>
 
 
     <property name="history_field" access="write">
         <com>
-            <com.type type="VARIANT*"/>
-            
             <com.parameter name="name">
                 <com.type type="BSTR"/>
             </com.parameter>
+
+            <com.result>
+                <com.type type="VARIANT*"/>
+            </com.result>
         </com>
+        
+        <title>
+            Ein Feld in der Task-Historie
+        </title>
+        
+        <description>
+            Die Datenbanktabelle muss eine Spalte mit dem Namen haben
+            und diese Spalte muss in der Datei <code>factory.ini</code> mit history_columns**************** deklariert sein.
+        </description>
     </property>
 
 
     <property name="delay_spooler_process" access="write">
         <com>
-            <com.type type="VARIANT*" parameter_name="seconds_or_hhmm_ss" description="time_from_variant.xml"/>
+            <com.result>
+                <com.type type="VARIANT*" parameter_name="seconds_or_hhmm_ss" description="time_from_variant.xml"/>
+            </com.result>
         </com> 
         
         <java>
-            <java.type type="double" parameter_name="seconds"/>
+            <java.result>
+                <java.type type="double"/>
+            </java.result>
         </java>
         
         <java>
-            <java.type class="java.lang.String" parameter_name="hhmm_ss" description="time_from_variant.xml"/>
+            <java.result name="hhmm_ss">
+                <java.type class="java.lang.String" description="time_from_variant.xml"/>
+            </java.result>
         </java>
+        
+        <title>
+            Verzögert den nächsten Aufruf von spooler_process()
+        </title>
+    </property>
+
+    
+    <property name="order" access="read">
+        <com>
+            <com.result>
+                <com.type type="Order"/>
+            </com.result>
+        </com>
+        
+        <title>
+            Der zu verarbeitende Auftrag, oder <code>null</code>.
+        </title>
     </property>
 
 
+    <property name="changed_directories" access="read">
+        <com>
+            <com.result>
+                <com.type type="BSTR"/>
+            </com.result>
+        </com>
+        
+        <title>
+            Die Verzeichnisse, deren Änderung den Start der Task veranlasst haben, oder <code>""</code>.
+        </title>
+        
+        <description>
+            <p>
+                Siehe <scheduler_methode class="Job" method="start_when_directory_changed"/>.
+            </p>
+        </description>
+    </property>
+
+
+    <property name="stdout_path" access="read">
+        <com>
+            <com.result>
+                <com.type type="BSTR"/>
+                <description>
+                    <p>
+                        Wenn die Task nicht in einem separaten Prozess <scheduler_element name="process_classes"/> läuft: <code>""</code>.
+                    </p>
+                </description>
+            </com.result>
+        </com>
+        
+        <title>
+            Der Pfadname der <code>stdout</code>-Ausgabe der Task.
+        </title>
+        
+        <description>
+            <p>
+                Der Text in <code>stdout</code> wird im Zeichensatz ISO-8859-1 interpretiert.
+            </p>
+        </description>
+    </property>
+
+
+    <property name="stdout_text" access="read">
+        <com>
+            <com.result>
+                <com.type type="BSTR"/>
+                <description>
+                    <p>
+                        Wenn die Task nicht in einem separaten Prozess <scheduler_element name="process_classes"/> läuft: <code>""</code>.
+                    </p>
+                </description>
+            </com.result>
+        </com>
+        
+        <title>
+            Der bisher vom Prozess der Task nach <code>stdout</code> geschriebene Text.
+        </title>
+        
+        <description>
+            <p>
+                Der Text in <code>stdout</code> wird im Zeichensatz ISO-8859-1 interpretiert.
+            </p>
+        </description>
+    </property>
+
+
+    <property name="stderr_path" access="read">
+        <com>
+            <com.result>
+                <com.type type="BSTR"/>
+                <description>
+                    <p>
+                        Wenn die Task nicht in einem separaten Prozess <scheduler_element name="process_classes"/> läuft: <code>""</code>.
+                    </p>
+                </description>
+            </com.result>
+        </com>
+        
+        <title>
+            Der Pfadname der <code>stderr</code>-Ausgabe der Task.
+        </title>
+        
+        <description>
+            <p>
+                Der Text in <code>stderr</code> wird im Zeichensatz ISO-8859-1 interpretiert.
+            </p>
+        </description>
+    </property>
+
+
+    <property name="stderr_text" access="read">
+        <com>
+            <com.result>
+                <com.type type="BSTR"/>
+                <description>
+                    <p>
+                        Wenn die Task nicht in einem separaten Prozess <scheduler_element name="process_classes"/> läuft: <code>""</code>.
+                    </p>
+                </description>
+            </com.result>
+        </com>
+        
+        <title>
+            Der bisher vom Prozess der Task nach <code>stderr</code> geschriebene Text.
+        </title>
+        
+        <description>
+            <p>
+                Der Text in <code>stderr</code> wird im Zeichensatz ISO-8859-1 interpretiert.
+            </p>
+        </description>
+    </property>
+
+
+
+
     <method name="add_pid">
+        <title>
+            Macht dem Scheduler einen abhängigen, befristeten Prozess bekannt
+        </title>
+        
         <com>
             <com.parameter name="pid">
                 <com.type type="int"/>
@@ -132,39 +356,94 @@
         <java>
             <java.parameter name="pid">
                  <java.type type="int"/>
+                 <title>Die Kennung des Prozesses</title>
             </java.parameter>
             
             <java.parameter name="timeout">
                 <java.type type="double"/>
+                <title>Die Frist für den Prozess</title>
+                <description>
+                    <p>
+                        Der Scheduler bricht den Prozess nach der angegebenen Zeit ab, sollte er noch laufen.
+                    </p>
+                </description>
             </java.parameter>
         </java>
+
+        <description>
+            <p>
+                Mit dem Aufruf kann die Laufzeit von abhängigen Prozessen eingegeschränkt werden.
+                Bei Task-Ende bricht der Scheduler noch laufende abhängigen Prozesse in jedem Fall ab.
+            </p>
+            <p>
+                Wenn der Scheduler einen Prozess abbricht, gibt es einen Eintrag ins Protokoll.
+                Die Task erfährt davon nichts.  
+            </p>
+            <p>
+                Der Aufruf <scheduler_element name="kill_task"/> bricht alle mit <code>add_pid()</code> bekannt gemachten Prozesse ab.
+            </p>
+        </description>
     </method>
     
-    
-    <method name="wait_until_terminated">
-        <abstract>
-            <type>
-                <description>
-                    True, wenn die Task in der Wartezeit geendet hat.
-                    <br/>
-                    False, wenn die Wartezeit abgelaufen ist, ohne dass die Task geendet hat.
-                </description>
-            </type>
-            
-            <parameter name="wait_time">
-                <description>
-                    Wartezeit in Sekunden
-                </description>
-            </parameter>
-        </abstract>
-    
+
+    <method name="remove_pid">
         <com>
-            <com.type type="bool"/>
-            
-            <com.parameter name="wait_time">
-                <com.type type="double" default="999999999"/>
+            <com.parameter name="pid">
+                <com.type type="int"/>
+                <title>
+                    Kennung der Task, die nicht länger überwacht werden soll.
+                </title>
             </com.parameter>
         </com>
+
+        <title>
+            Gegenstück zu <code>add_pid()</code>
+        </title>
+        
+        <description>
+            <p>
+                Es gibt keinen Fehler, wenn die Pid nicht mit <scheduler_method class="Task" name="remove_pid"/> hinzugefügt worden ist.
+            </p>
+            <p>
+                Siehe <scheduler_method class="Task" method="add_pid"/>.
+            </p>
+        </description>
+    </method>
+    
+    <method name="wait_until_terminated">
+        <com>
+            <com.parameter name="wait_time">
+                <com.type type="double" default="999999999"/>
+                <title>
+                    Wartezeit in Sekunden
+                </title>
+            </com.parameter>
+
+            <com.result>
+                <com.type type="bool">
+                    <description>
+                        True, wenn die Task in der Wartezeit geendet hat.
+                        <br/>
+                        False, wenn die Wartezeit abgelaufen ist, ohne dass die Task geendet hat.
+                    </description>
+                </com.type>
+            </com.result>
+        </com>
+        
+        <title>
+            Wartet aufs Ende einer anderen Task
+        </title>
+        
+        <description>
+            <p>
+                In Kombination mit {@link Job#start()} kann eine Task aufs Ende einer anderen warten.
+            </p>
+            <p>
+                Wenn die andere Task nicht starten kann, 
+                weil nicht genügend Ressourcen bereitstehen, 
+                kann dieser Aufruf zur Verklemmung führen.
+            </p>
+        </description>
     </method>
     
     
@@ -174,8 +453,6 @@
         </title>
         
         <com>
-            <com.type class="Subprocess" interface="Isubprocess"/>
-            
             <com.parameter name="filename_and_arguments">
                 <com.type type="VARIANT*">
                     <com.variant accepted_type="BSTR"/>
@@ -183,26 +460,36 @@
                     <com.variant optional="true"/>
                 </com.type>
             </com.parameter>
+
+            <com.result>
+                <com.type class="Subprocess" interface="Isubprocess"/>
+            </com.result>
         </com>
 
         <java>
-            <java.type class="sos.spooler.Subprocess"/>
+            <java.result>
+                <java.type class="sos.spooler.Subprocess"/>
+            </java.result>
         </java>            
         
         <java>
-            <java.type class="sos.spooler.Subprocess"/>
-            
             <java.parameter name="command_line">
                  <java.type type="java.lang.String"/>
             </java.parameter>
+
+            <java.result>
+                <java.type class="sos.spooler.Subprocess"/>
+            </java.result>
         </java>
         
         <java>
-            <java.type class="sos.spooler.Subprocess"/>
-            
             <java.parameter name="filename_and_arguments">
                 <java.type type="java.lang.String[]"/>
             </java.parameter>
+
+            <java.result>
+                <java.type class="sos.spooler.Subprocess"/>
+            </java.result>
         </java>
     </method>
 

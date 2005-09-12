@@ -56,6 +56,7 @@
         
         <td style="padding-left: 3ex; border-left: 1px dotted black; padding-bottom: 4pt;">
             <api_programming_language_selector programming_language="Java"/>
+            <!--api_programming_language_selector programming_language="javadoc"/-->
             <api_programming_language_selector programming_language="JavaScript"/>
             <api_programming_language_selector programming_language="Perl"/>
             <api_programming_language_selector programming_language="VBScript"/>
@@ -80,6 +81,7 @@
         <td style="padding-left: 3ex; border-left: 1px dotted black;">
             <div id="class_headline"> </div>
             <div id="class"> </div>
+            <div id="methods"> </div>
         </td>
     </tr>
 </table>

@@ -1,7 +1,9 @@
 // $Id$
 
 // Sarissa wählt die höchste Version aus. Das ist nicht gut.
-_SARISSA_DOM_PROGID = "MSXML2.DOMDocument";
+//_SARISSA_DOM_PROGID = "MSXML2.DOMDocument";
+
+var base_dir = "../";
 
 //--------------------------------------------------------------------------human_language__onclick
 /*
@@ -47,8 +49,6 @@ Api.prototype.programming_language_selector__onclick = function( programming_lan
 
 function Api()
 {
-    this._programming_language = "javascript";
-    
     var stylesheet_name = "api.xsl";
     
     if( window.ActiveXObject )
@@ -85,8 +85,10 @@ function Api()
     }
 
 
-    var programming_language = get_cookie( "programming_language" );
-    if( !programming_language )  programming_language = this._programming_language;
+    this._programming_language = get_cookie( "programming_language" );
+    if( !this._programming_language )  this._programming_language = "javascript";
+    
+
 
     
     
@@ -149,25 +151,40 @@ Api.prototype.apply_xslt_stylesheet = function( html_element, dom_document )
 Api.prototype.show = function()
 {
     var class_headline_element = document.getElementById( "class_headline" );
-    var class_element = document.getElementById( "class" );
+    var class_element          = document.getElementById( "class" );
+    var methods_element        = document.getElementById( "methods" );
     
     try
     {
-        var dom_document = dom_from_xml( this.fetch_by_url( this._class_name + ".xml" ) );
-        dom_document.documentElement.setAttribute( "programming_language", this._programming_language );
+        //if( this._programming_language.toLowerCase() == "javadoc" )
+        //{
+        //    class_headline_element.innerHTML = "";
+        //    class_element.style.color = "";
+        //    class_element.innerHTML = this.fetch_by_url( base_dir + "javadoc/sos/spooler/" + this._class_name + ".html" );
+        //    methods_element.innerHTML = "";
+        //}
+        //else
+        {
+            var dom_document = dom_from_xml( this.fetch_by_url( this._class_name + ".xml" ) );
+            dom_document.documentElement.setAttribute( "programming_language", this._programming_language );
+            
+            if( this._programming_language == "java" )  dom_document.documentElement.removeAttribute( "language_has_properties" );
+                                                  else  dom_document.documentElement.setAttribute( "language_has_properties", "true" );
+                                                  
+            dom_document.documentElement.setAttribute( "show_table", "true" );
+            this.apply_xslt_stylesheet( class_element, dom_document );                                             
+            dom_document.documentElement.removeAttribute( "show_table");
+            
+            dom_document.documentElement.setAttribute( "show_headline", "true" );
+            this.apply_xslt_stylesheet( class_headline_element, dom_document );                                             
+            dom_document.documentElement.removeAttribute( "headline");
+
+            dom_document.documentElement.setAttribute( "show_detailed_methods", "true" );
+            this.apply_xslt_stylesheet( methods_element, dom_document );                                             
+            dom_document.documentElement.removeAttribute( "show_methods");
+        }
         
-        if( this._programming_language == "java" )  dom_document.documentElement.removeAttribute( "language_has_properties" );
-                                              else  dom_document.documentElement.setAttribute( "language_has_properties", "true" );
-                                              
-        dom_document.documentElement.setAttribute( "show_list", "true" );
-        this.apply_xslt_stylesheet( class_element, dom_document );                                             
-        dom_document.documentElement.removeAttribute( "show_list");
         
-        dom_document.documentElement.setAttribute( "show_headline", "true" );
-        this.apply_xslt_stylesheet( class_headline_element, dom_document );                                             
-        dom_document.documentElement.removeAttribute( "headline");
-    
-    
         var e = document.getElementById( "class_reference_" + this._class_name )
         if( e )  e.style.fontWeight = "bold";
         
@@ -179,8 +196,12 @@ Api.prototype.show = function()
     }
     catch( x ) 
     { 
+        class_headline_element.innerHTML = "";
+        
         class_element.innerHTML = ( x? x.message? x.message : x.toString() : "" + x ).replace( /&/g, "&amp;" ).replace( /</g, "&lt;" );
         class_element.style.color = "red";
+        
+        methods_element.innerHTML= "";
     }
 }
 
@@ -235,7 +256,7 @@ function get_cookie( name )
     if( document.cookie )
     {
         var prefix = name + "=";
-        var cookies = document.cookie.split( "; " );
+        var cookies = document.cookie.split( /; */ );
         for( i = 0; i < cookies.length; i++ )
         {
             if( cookies[i].substring( 0, prefix.length ) == prefix )  return cookies[i].substring( prefix.length );

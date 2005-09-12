@@ -1,72 +1,25 @@
 <?xml version='1.0'?>
 <!-- $Id$ -->
 
-
-
 <xsl:stylesheet xmlns:xsl = "http://www.w3.org/1999/XSL/Transform" 
                 version   = "1.0">
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<xsl:template match="property [ /*/@programming_language='java' ] | method [ /*/@programming_language='java' ]" mode="list_property_or_method">
+<xsl:template match="property [ java and /*/@programming_language='java' ] | method [ java and /*/@programming_language='java' ]" mode="table_rows">
+    <xsl:param name="show_title"  select="true()"/>
+    <xsl:param name="is_in_table" select="false()"/>
 
-    <xsl:choose>
-        <xsl:when test="java">
-            <xsl:apply-templates select="java [ position() = 1 ]" mode="table_row">
-                <xsl:with-param name="access" select="@access | parent::*/@access"/>
-                <xsl:with-param name="rowspan" select="count(java)"/>
-            </xsl:apply-templates>
-            <xsl:apply-templates select="java [ position() &gt; 1 ]" mode="table_row">
-                <xsl:with-param name="access" select="@access | parent::*/@access"/>
-                <xsl:with-param name="rowspan" select="0"/>
-            </xsl:apply-templates>
-        </xsl:when>
-        
-        <xsl:when test="com">
-            <xsl:for-each select="com">
-                <xsl:choose>
-                    <xsl:when test="parent::property and @access='write'">
-                        <xsl:apply-templates select="." mode="table_row">
-                            <xsl:with-param name="access" select="'write'"/>
-                        </xsl:apply-templates>
-                    </xsl:when>
-                        
-                    <xsl:when test="parent::property and @access='read'">
-                        <xsl:apply-templates select="." mode="table_row">
-                            <xsl:with-param name="access" select="'read'"/>
-                        </xsl:apply-templates>
-                    </xsl:when>
-                    
-                    <xsl:when test="parent::property and not( @access )">
-                        <xsl:apply-templates select="." mode="table_row">
-                            <xsl:with-param name="access" select="'write'"/>
-                            <xsl:with-param name="rowspan" select="2"/>
-                        </xsl:apply-templates>
-                    
-                        <xsl:apply-templates select="." mode="table_row">
-                            <xsl:with-param name="access" select="'read'"/>
-                            <xsl:with-param name="rowspan" select="0"/>
-                        </xsl:apply-templates>
-                    </xsl:when>
-                    
-                    <xsl:otherwise>
-                        <xsl:apply-templates select="." mode="table_row"/>
-                    </xsl:otherwise>
-                </xsl:choose>
-            </xsl:for-each>
-        </xsl:when>
-        
-        <xsl:otherwise>
-            <!-- Methode ohne Parameter, ohne Ergebnis -->
-            <xsl:apply-templates select="." mode="table_row"/>
-        </xsl:otherwise>
-    </xsl:choose>
+    <xsl:apply-templates select="java" mode="table_row">
+        <xsl:with-param name="show_title"  select="$show_title"/>
+        <xsl:with-param name="is_in_table" select="$is_in_table"/>
+    </xsl:apply-templates>
     
 </xsl:template>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<xsl:template match="method [ /*/@programming_language='java' ] | property [ /*/@programming_language='java' ] " mode="method_name">
+<xsl:template match="property [ /*/@programming_language='java' ] | method [ /*/@programming_language='java' ]" mode="method_name">
     <xsl:param name="access"/>
 
     <!--    
@@ -76,7 +29,7 @@
     
     <span class="mono" style="font-weight: bold">
         <xsl:if test="$access='write'">set_</xsl:if>
-        <xsl:if test="$access='read'">&#160;&#160;&#160;&#160;</xsl:if>
+        <!--xsl:if test="$access='read'">&#160;&#160;&#160;&#160;</xsl:if>-->
         <xsl:value-of select="@name"/>
     </span>
 </xsl:template>
