@@ -5,8 +5,8 @@
 
 
 <api.class 
-    name        = "Xslt_stylesheet" 
-    object_name = "x"
+    name        = "Variable_set" 
+    object_name = "v"
     base_dir    = "../"
     author      = "$Author: jz $"
     date        = "$Date: 2005-09-13 23:21:44 +0200 (Di, 13 Sep 2005) $"
@@ -44,9 +44,28 @@
         <description>
             <p>
                 Wenn eine nicht vorhandene Variable gelesen wird, 
-                kommt <code>Empty</code> zurück.
+                kommt <api.empty/> zurück.
             </p>
         </description>
+
+        <!--        
+        <java>
+            <java.parameter name="name">
+                <java.type class="java.lang.String"/>
+            </java.parameter>
+
+            <java.result name="value">
+                <java.type class="java.lang.String"/>
+            </java.result>
+
+            <description>
+                <p>
+                    Wenn die Variable in einer anderen Sprache in einem anderen Typ als String gesetzt worden ist,
+                    wird der Wert in einen String konvertiert zurückgegebeb.
+                </p>
+            </description>
+        </java>
+        -->
     </property>
 
 
@@ -64,7 +83,7 @@
         <not_implemented programming_language="java"/>
 
         <title>
-            Eine Variable setzen
+            Setzt eine Variable
         </title>
     </method>
 
@@ -90,7 +109,7 @@
         </com>
 
         <title>
-            Mischt eine andere Variablenmenge ein.
+            Mischt eine andere Variablenmenge ein
         </title>        
 
         <description>
@@ -107,10 +126,11 @@
 
     <description>
         <p>
-            Eine Task ist eine laufende Instanz eines Jobs.
+            Die Variablenmenge hält Variablen mit Namen und Wert. 
+            Die Variablenwerte können von jedem COM-Typ sein (Java: nur Strings).
         </p>
         <p>
-            Eine Task kann wartend in der Task-Warteschlange des Jobs sein oder laufen.
+            Objekte sollten nicht als Variablenwert verwendet werden.
         </p>
     </description>
     

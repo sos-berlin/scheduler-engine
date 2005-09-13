@@ -680,6 +680,12 @@
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
+<xsl:template match="api.empty" mode="description">
+    <code>empty</code>
+</xsl:template>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
 <xsl:template match="api.class" mode="detailed_methods">
     
     <xsl:apply-templates select="method | property" mode="detailed_methods"/>

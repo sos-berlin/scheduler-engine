@@ -5,8 +5,8 @@
 
 
 <api.class 
-    name        = "Variable_set" 
-    object_name = "v"
+    name        = "Xslt_stylesheet" 
+    object_name = "x"
     base_dir    = "../"
     author      = "$Author: jz $"
     date        = "$Date: 2005-09-13 23:21:44 +0200 (Di, 13 Sep 2005) $"
@@ -14,10 +14,11 @@
 
     <method name="close">
         <title>
-            Gibt die Ressourcen des Stylesheets frei.
+            Gibt die Ressourcen des Stylesheets frei
         </title>
         
-        <com/>
+        <com>
+        </com>
     </method>
 
 
@@ -47,6 +48,9 @@
         <com>
             <com.parameter name="path">
                 <com.type type="BSTR"/>
+                <title>
+                    Pfadname der Datei mit dem XML-Dokument.
+                </title>
             </com.parameter>
         </com>
     </method>
@@ -84,6 +88,11 @@
 
     <description>
         <p>
+            Mit einem <a href="http://www.w3.org/Style/XSL/">XSLT-Stylesheet</a> wird die Konvertierung eines XML-Dokuments in ein anderes beschrieben.
+            Die Variablenwerte können von jedem COM-Typ sein (Java: nur Strings).
+        </p>
+        <p>
+            Der XSLT-Prozessor ist mit <a href="http://xmlsoft.org/XSLT/">libxslt</a> (1.1.14 vom 2.5.2005) implementiert.
         </p>
     </description>
     
