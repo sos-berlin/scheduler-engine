@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<!-- $Id$ -->
+
+<?xml-stylesheet href="api.xsl" type="text/xsl"?>
+
+
+<api.class base_dir="../">
+
+    <description>
+        <p class="api_headline">
+            Übersicht
+        </p>
+        
+        <p>
+            Jobs, die die Programmschnittstelle des Schedulers nutzen, 
+            können in den Sprachen Java, JavaScript (Mozilla) und Perl implementiert werden
+            (beachten Sie die Installationsvoraussetzungen).
+            Unter Microsoft Windows stehen auch JScript und VBScript zur Verfügung.
+            
+        </p>
+        <p>
+            Ein Job wird gemäß der Schnittstelle <scheduler_method class="Job_impl"/> implementiert.
+            Die Objekte des Schedulers sind direkt oder indirekt über diese Schnittstelle zugreifbar.
+        </p>
+        <p>
+            TEST <scheduler_method class="Task"/>
+        </p>
+    </description>
+
+</api.class>
