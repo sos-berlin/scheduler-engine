@@ -8,6 +8,24 @@
     date           = "$Date$"
 >
 
+<description.style type="text/css">
+    tr.api_method:active        { color: #0000A0; }
+    tr.api_method:visited       { color: #0000A0 }
+    tr.api_method:hover         { background-color: #e0e0FF; cursor: pointer; }
+    tr.api_method               { color: blue; }
+
+    td.api_type                 { white-space: nowrap; }
+    td.api_method               { white-space: nowrap; }
+    /*td.api_parameters   { }
+    td.api_access               { padding-left: 3mm; white-space: nowrap; }*/
+    td.api_title                { font-size: 8pt; padding-bottom: 6pt; }
+    
+    .object_name                { font-size: 9pt; font-family: Lucida Console, monospace; color: #8080ff; }
+
+    .api_programming_language_selector { padding-left: 3pt; padding-right: 3pt; margin-right: 2ex; }
+  /*api_type                   { font-size: 9pt; font-family: Lucida Console, monospace; color: blue; }*/
+</description.style>
+
 
 <script defer="defer" type="text/javascript" src="../scripts/browser_dependencies.js"/>
 <script defer="defer" type="text/javascript" src="../scripts/sarissa.js"/>
@@ -49,7 +67,7 @@
     </tr-->
     <tr>
         <td style="vertical-align: top; padding-right: 3ex; padding-bottom: 4pt;">
-            <p style="font-weight: bold; border">
+            <p style="">
                 Klassen
             </p>
         </td>
@@ -58,8 +76,8 @@
             <api_programming_language_selector programming_language="Java"/>
             <!--api_programming_language_selector programming_language="javadoc"/-->
             <api_programming_language_selector programming_language="JavaScript"/>
-            <api_programming_language_selector programming_language="Perl"/>
             <api_programming_language_selector programming_language="VBScript"/>
+            <api_programming_language_selector programming_language="Perl"/>
         </td>
     </tr>
     

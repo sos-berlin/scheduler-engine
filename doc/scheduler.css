@@ -62,15 +62,3 @@ p.ini_entry         { margin-top: 2ex; border-top: 1px solid #f0f0f0; padding-to
 .sos_name           { font-variant: small-caps; }
 
 .indent             { margin-left: 4ex; }
-
-tr.api_method:active        { color: #0000A0; }
-tr.api_method:visited       { color: #0000A0 }
-tr.api_method:hover         { background-color: #e0e0FF; cursor: pointer; }
-
-td.api_type         { white-space: nowrap;  }
-td.api_method       { padding-left: 3mm; white-space: nowrap; }
-td.api_parameters   { }
-td.api_access       { padding-left: 3mm; white-space: nowrap; }
-td.api_title        { padding-left: 3mm; font-size: 8pt; padding-bottom: 6pt; }
-
-.api_programming_language_selector { padding-left: 3pt; padding-right: 3pt; margin-right: 2ex; }

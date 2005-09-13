@@ -50,6 +50,10 @@ Api.prototype.programming_language_selector__onclick = function( programming_lan
 function Api()
 {
     var stylesheet_name = "api.xsl";
+
+    this._class_name           = get_cookie( "class"               , "Job_impl"   );
+    this._programming_language = get_cookie( "programming_language", "javascript" );
+    
     
     if( window.ActiveXObject )
     {
@@ -84,43 +88,19 @@ function Api()
         this._xslt_processor.importStylesheet( dom_from_xml( this.fetch_by_url( stylesheet_name ) ) );
     }
 
-
-    this._programming_language = get_cookie( "programming_language" );
-    if( !this._programming_language )  this._programming_language = "javascript";
-    
-
-
-    
-    
-    // Dropdown-Box einstellen:
-    /*    
-    var select = document.getElementById( "programming_languages_select" );
-
-    for( var i = 0; i < select.options.length; i++ )
-    {
-        if( select.options[ i ].text.toLowerCase() == programming_language )
-        {
-            select.selectedIndex = i;
-            this._programming_language = programming_language;
-            break;
-        }
-    }
-    */
-    
         
-    var class_name = get_cookie( "class" );
-    if( class_name )
-    {
-        this.class_reference__onclick( class_name );
-        this.show();
-    }
+    if( this._class_name  &&  this._programming_language )  this.show();
 }
 
 //---------------------------------------------------------------------Api.class_reference__onclick
 
 Api.prototype.class_reference__onclick = function( class_name )
 {
-    if( this._class_name )  document.getElementById( "class_reference_" + this._class_name ).style.fontWeight = "normal";
+    if( this._class_name )  
+    {
+        var e = document.getElementById( "class_reference_" + this._class_name );
+        if( e )  e.style.fontWeight = "normal";
+    }
 
     this._class_name = class_name;
     this.show();
@@ -168,7 +148,8 @@ Api.prototype.show = function()
             var dom_document = dom_from_xml( this.fetch_by_url( this._class_name + ".xml" ) );
             dom_document.documentElement.setAttribute( "programming_language", this._programming_language );
             
-            if( this._programming_language == "java" )  dom_document.documentElement.removeAttribute( "language_has_properties" );
+            if( this._programming_language == "java"
+             || this._programming_language == "perl" )  dom_document.documentElement.removeAttribute( "language_has_properties" );
                                                   else  dom_document.documentElement.setAttribute( "language_has_properties", "true" );
                                                   
             dom_document.documentElement.setAttribute( "show_table", "true" );
@@ -251,7 +232,7 @@ Api.prototype.fetch_by_url = function( url )
 
 //---------------------------------------------------------------------------------------get_cookie
 
-function get_cookie( name )
+function get_cookie( name, deflt )
 {
     if( document.cookie )
     {
@@ -262,6 +243,8 @@ function get_cookie( name )
             if( cookies[i].substring( 0, prefix.length ) == prefix )  return cookies[i].substring( prefix.length );
         }
     }
+    
+    return deflt;
 }
     
-
+//-------------------------------------------------------------------------------------------------

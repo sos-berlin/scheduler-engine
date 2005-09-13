@@ -1,7 +1,24 @@
 <?xml version="1.0"?>
+<!-- $Id -->
+
 <?xml-stylesheet href="api.xsl" type="text/xsl"?>
 
+
 <class_references>
-    <class_reference name="Task"/>
+    <class_reference name="Error"/>
     <class_reference name="Job"/>
+    <class_reference name="Job_chain"/>
+    <class_reference name="Job_chain_node"/>
+    <class_reference name="Job_impl"/>
+    <class_reference name="Log"/>
+    <class_reference name="Mail"/>
+    <class_reference name="Order"/>
+    <class_reference name="Order_queue"/>
+    <class_reference name="Run_time"/>
+    <class_reference name="Spooler"/>
+    <class_reference name="Spooler_program"/>
+    <class_reference name="Subprocess"/>
+    <class_reference name="Task"/>
+    <class_reference name="Variable_set"/>
+    <class_reference name="Xslt_stylesheet"/>
 </class_references>

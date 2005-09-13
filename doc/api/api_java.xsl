@@ -22,16 +22,24 @@
 <xsl:template match="property [ /*/@programming_language='java' ] | method [ /*/@programming_language='java' ]" mode="method_name">
     <xsl:param name="access"/>
 
-    <!--    
-    <span style="font-size: 8pt"><xsl:value-of select="parent::*/parent::class/@object_name"/></span>
-    <xsl:text>.</xsl:text>
-    -->
+    <span class="object_name">
+        <xsl:value-of select="parent::class/@object_name"/>
+        <xsl:text>.</xsl:text>
+    </span>        
     
-    <span class="mono" style="font-weight: bold">
+    <span class="mono">
         <xsl:if test="$access='write'">set_</xsl:if>
         <!--xsl:if test="$access='read'">&#160;&#160;&#160;&#160;</xsl:if>-->
+    </span>
+    <span class="mono" style="font-weight: bold">
         <xsl:value-of select="@name"/>
     </span>
+</xsl:template>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<xsl:template match="java.type">
+    <span class="mono"><xsl:value-of select="@type | @class"/></span>
 </xsl:template>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
