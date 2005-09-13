@@ -1214,7 +1214,16 @@
         
         <xsl:element name="a">
             <xsl:attribute name="class">silent</xsl:attribute>
-            <xsl:attribute name="href"><xsl:value-of select="$base_dir"/>javadoc/sos/spooler/<xsl:value-of select="@class"/>.html#<xsl:value-of select="$java_method"/>(<xsl:value-of select="$java_signature"/>)</xsl:attribute>
+            
+            <xsl:choose>
+                <xsl:when test="/api or /class or /api.introduction">
+                    <xsl:attribute name="href"><xsl:value-of select="$base_dir"/>api/classes/<xsl:value-of select="@class"/>.xml#<xsl:value-of select="$java_method"/></xsl:attribute>
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:attribute name="href"><xsl:value-of select="$base_dir"/>javadoc/sos/spooler/<xsl:value-of select="@class"/>.html#<xsl:value-of select="$java_method"/>(<xsl:value-of select="$java_signature"/>)</xsl:attribute>
+                </xsl:otherwise>
+            </xsl:choose>
+            
             <code>
                 <xsl:value-of select="@class"/>
                 

@@ -104,7 +104,7 @@ Api.prototype.load_stylesheet = function()
     if( this._xslt_processor )  return;
     
     
-    var stylesheet_name = base_dir + "api/api.xsl";
+    var stylesheet_name = base_dir + "api/api_all_languages.xsl";
     var stylesheet_href_base = stylesheet_name.replace( /\/[^\/]*$/, "/" );   // Alles bis zum letzten Schräger
 
     if( window.ActiveXObject )

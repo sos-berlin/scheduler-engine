@@ -6,6 +6,10 @@
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
+<!--xsl:include href="api.xsl" /-->
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
 <xsl:template match="property [ /*/@programming_language='perl' ] | method [ /*/@programming_language='perl' ]" mode="method_name">
     <xsl:param name="access"/>
 

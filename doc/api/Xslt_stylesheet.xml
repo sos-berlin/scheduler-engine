@@ -1,0 +1,90 @@
+<?xml version="1.0"?>
+<!-- $Id: Task.xml 3885 2005-09-13 21:21:44Z jz $ -->
+
+<?xml-stylesheet href="api_all_languages.xsl" type="text/xsl"?>
+
+
+<api.class 
+    name        = "Variable_set" 
+    object_name = "v"
+    base_dir    = "../"
+    author      = "$Author: jz $"
+    date        = "$Date: 2005-09-13 23:21:44 +0200 (Di, 13 Sep 2005) $"
+>
+
+    <method name="close">
+        <title>
+            Gibt die Ressourcen des Stylesheets frei.
+        </title>
+        
+        <com/>
+    </method>
+
+
+    <method name="load_xml">
+        <title>
+            Lädt das Stylesheet aus einem XML-Dokument
+        </title>
+
+        <com>
+            <com.parameter name="xml">
+                <com.type type="BSTR"/>
+                <title>
+                    XML-Dokument als String. 
+                    Jedes Zeichen des Strings wird als ein Byte interpretiert.
+                    Der String sollte beginnen mit <code>&lt;?xml encoding="iso-8859-1"?></code>.
+                </title>
+            </com.parameter>
+        </com>
+    </method>
+
+
+    <method name="load_file">
+        <title>
+            Lädt das Stylesheet aus einer XML-Datei
+        </title>
+
+        <com>
+            <com.parameter name="path">
+                <com.type type="BSTR"/>
+            </com.parameter>
+        </com>
+    </method>
+
+
+    <method name="apply_xml">
+        <title>
+            Wendet das Stylesheet auf ein XML-Dokument an.
+        </title>
+
+        <com>
+            <com.parameter name="xml">
+                <com.type type="BSTR"/>
+                <title>
+                    XML-Dokument als String. 
+                    Jedes Zeichen des Strings wird als ein Byte interpretiert.
+                    Der String sollte beginnen mit <code>&lt;?xml encoding="iso-8859-1"?></code>.
+                </title>
+            </com.parameter>
+            
+            <com.result>
+                <com.type type="BSTR"/>
+                <title>
+                    Ergebnis der Transformation.
+                </title>
+            </com.result>
+        </com>
+    </method>
+
+
+    <title>
+        XSLT-Stylesheet
+    </title>
+
+
+    <description>
+        <p>
+        </p>
+    </description>
+    
+</api.class>

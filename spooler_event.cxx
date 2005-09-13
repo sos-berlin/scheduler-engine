@@ -162,25 +162,6 @@ xml::Document_ptr Scheduler_event::mail_dom( const xml::Document_ptr& event_dom_
     }    
 
 
-/*
-    if( !mail_dom  ||  !mail_dom.has_node( "/mail/header" ) )
-    {
-        try
-        {
-            int STYLESHEET_LOAD_FILE_ERSETZEN;
-            stylesheet = Z_NEW( Xslt_stylesheet );
-            stylesheet->load_file( "s:/prod/scheduler/mail.xsl" );
-            //stylesheet.load_xml( default_mail_xslt_stylesheet_xsl );        // spooler_http_files.cxx ==> spooler_files.cxx, spooler_files.h
-            mail_dom = stylesheet->apply( event_dom );
-        }
-        catch( exception& x )
-        {
-            _object->log()->warn( S() << "Internes XSLT-Stylesheet: " << x );
-        }
-    }
-*/
-    //Z_LOG2( "joacim", mail_dom.xml( true ) );
-
     if( !mail_dom.has_node( mail_xpath ) )
     {
         if( xml::Element_ptr mail_element = event_dom.select_node( mail_xpath ) )

@@ -262,7 +262,7 @@
                 api._class_name = "<xsl:value-of select="/api.class/@name"/>";
                 
                 api.show();
-                //api.highlight_html_selectors( true );
+                api.highlight_html_selectors( true );
                 
             </script>
 
@@ -353,7 +353,7 @@
         </tr>
         -->
         
-        <xsl:apply-templates select="property | method" mode="table">
+        <xsl:apply-templates select="property [ not( not_implemented/@programming_language=/*/@programming_language ) ] | method [ not( not_implemented/@programming_language=/*/@programming_language ) ]" mode="table">
             <xsl:sort select="@name"/>
         </xsl:apply-templates>
         
@@ -752,12 +752,12 @@
 </xsl:template>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
-    
+<!--    
 <xsl:include href="api_java.xsl" />
 <xsl:include href="api_javascript.xsl" />
 <xsl:include href="api_vbscript.xsl" />
 <xsl:include href="api_perl.xsl" />
-
+-->
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 </xsl:stylesheet>

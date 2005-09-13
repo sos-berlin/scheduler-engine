@@ -1212,7 +1212,7 @@ const char file_jz_scheduler_js[] =
     "{\n"
     "if( this._xslt_processor )\n"
     "{\n"
-    "\x09" "\x09" "return new XMLSerializer().serializeToString( this._xslt_processor.transformToDocument( dom_document ) );\n"
+    "return new XMLSerializer().serializeToString( this._xslt_processor.transformToDocument( dom_document ) );\n"
     "}\n"
     "else\n"
     "{\n"

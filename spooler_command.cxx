@@ -795,8 +795,8 @@ ptr<Http_response> Command_processor::execute_http( Http_request* http_request )
     {
         if( _security_level < Security::seclev_info )  throw_xc( "SCHEDULER-121" );
 
-        if( path.find( ".." ) != string::npos )  throw_xc( "SCHEDULER-214" );
-        if( path.find( ":" )  != string::npos )  throw_xc( "SCHEDULER-214" );
+        if( path.find( ".." ) != string::npos )  throw_xc( "SCHEDULER-214", path );
+        if( path.find( ":" )  != string::npos )  throw_xc( "SCHEDULER-214", path );
 
         if( http_request->_http_cmd == "GET" )
         {

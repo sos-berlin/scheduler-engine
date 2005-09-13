@@ -258,7 +258,7 @@ void Task::close()
             _operation = NULL;
         }
 
-        _order_for_error = NULL;
+        _order_for_mail = NULL;
         if( _order )  _order->close();  //remove_order_after_error(); Nicht rufen! Der Auftrag bleibt stehen und der Job startet wieder und wieder.
 
         try
@@ -341,7 +341,7 @@ xml::Element_ptr Task::dom_element( const xml::Document_ptr& document, const Sho
             }
         }
 
-        if( Order* order = _order? _order : _order_for_error )  dom_append_nl( task_element ),  task_element.appendChild( order->dom_element( document, show ) );
+        if( Order* order = _order? _order : _order_for_mail )  dom_append_nl( task_element ),  task_element.appendChild( order->dom_element( document, show ) );
         if( _error )  dom_append_nl( task_element ),  append_error_element( task_element, _error );
         
         if( !_registered_pids.empty() )
@@ -950,6 +950,9 @@ bool Task::do_something()
                             else
                                                     set_state( s_ending );
                         }
+                        
+                        if( _state < s_ending )  _order_for_mail = NULL;
+
 
                         // Historie beginnen?
                         if( _state == s_starting 
@@ -1043,8 +1046,7 @@ bool Task::do_something()
                                 ok = step__end();
                                 _operation = NULL;
 
-                                if( ok && !has_error() )  _order_for_error = NULL;
-                                                    else  set_state( s_ending ), loop = true;
+                                if( !ok || has_error() )  set_state( s_ending ), loop = true;
                                 something_done = true;
                             }
 
@@ -1452,7 +1454,7 @@ void Task::set_order( Order* order )
     // Wird von Job gerufen, wenn Task wegen neuen Auftrags startet
 
     _order = order;
-    _order_for_error = order;                   // Damit bei Task-Ende im Fehlerfall noch der Auftrag gezeigt wird, s. dom_element()
+    _order_for_mail = order;                   // Damit bei Task-Ende im Fehlerfall noch der Auftrag gezeigt wird, s. dom_element()
     if( _order )  _order->attach_task( this );  // Auftrag war schon bereitgestellt
 }
 
@@ -1558,7 +1560,7 @@ void Task::finish()
 
     // eMail versenden
     {
-        // Vor Task::close(), damit _order_for_error genutzt werden kann, s. Task::dom_element()
+        // Vor Task::close(), damit _order_for_mail genutzt werden kann, s. Task::dom_element()
         Scheduler_event event ( Scheduler_event::evt_task_ended, _log->highest_level(), this );
         trigger_event( &event );
     }

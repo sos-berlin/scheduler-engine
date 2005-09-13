@@ -6,6 +6,10 @@
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
+<!--xsl:include href="api.xsl" /-->
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
 <xsl:template match="property [ java and /*/@programming_language='java' ] | method [ java and /*/@programming_language='java' ]" mode="table_rows">
     <xsl:param name="show_title"  select="true()"/>
     <xsl:param name="is_in_table" select="false()"/>

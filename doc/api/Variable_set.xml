@@ -1,0 +1,117 @@
+<?xml version="1.0"?>
+<!-- $Id: Task.xml 3885 2005-09-13 21:21:44Z jz $ -->
+
+<?xml-stylesheet href="api_all_languages.xsl" type="text/xsl"?>
+
+
+<api.class 
+    name        = "Xslt_stylesheet" 
+    object_name = "x"
+    base_dir    = "../"
+    author      = "$Author: jz $"
+    date        = "$Date: 2005-09-13 23:21:44 +0200 (Di, 13 Sep 2005) $"
+>
+
+
+    <property name="count" access="read">
+        <com>
+            <com.result>
+                <com.type type="int"/>
+            </com.result>
+        </com>
+
+        <title>
+            Anzahl der Variablen
+        </title>
+    </property>
+
+
+    <property name="var">
+        <com>
+            <com.parameter name="name">
+                <com.type type="BSTR"/>
+            </com.parameter>
+
+            <com.result name="value">
+                <com.type type="VARIANT*"/>
+            </com.result>
+        </com>
+
+        <title>
+            Eine Variable
+        </title>
+        
+        <description>
+            <p>
+                Wenn eine nicht vorhandene Variable gelesen wird, 
+                kommt <code>Empty</code> zurück.
+            </p>
+        </description>
+    </property>
+
+
+    <method name="set_var">
+        <com>
+            <com.parameter name="name">
+                <com.type type="BSTR"/>
+            </com.parameter>
+
+            <com.parameter name="value">
+                <com.type type="VARIANT*"/>
+            </com.parameter>
+        </com>
+        
+        <not_implemented programming_language="java"/>
+
+        <title>
+            Eine Variable setzen
+        </title>
+    </method>
+
+
+    <property name="xml">
+        <com>
+            <com.result>
+                <com.type type="BSTR"/>
+            </com.result>
+        </com>
+
+        <title>
+            <code>Variable_set</code> als XML-Dokument
+        </title>
+    </property>
+
+
+    <method name="merge">
+        <com>
+            <com.parameter>
+                <com.type class="Variable_set"/>
+            </com.parameter>
+        </com>
+
+        <title>
+            Mischt eine andere Variablenmenge ein.
+        </title>        
+
+        <description>
+            <p>
+            </p>
+        </description>
+    </method>
+
+
+    <title>
+        Variablenmenge
+    </title>
+
+
+    <description>
+        <p>
+            Eine Task ist eine laufende Instanz eines Jobs.
+        </p>
+        <p>
+            Eine Task kann wartend in der Task-Warteschlange des Jobs sein oder laufen.
+        </p>
+    </description>
+    
+</api.class>
