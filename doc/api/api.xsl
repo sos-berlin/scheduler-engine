@@ -39,7 +39,7 @@
 <xsl:template name="programming_language_selector">
     <xsl:param name="programming_language"/>
     
-    <xsl:variable name="plang" select="translate( @programming_language, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz' )"/>
+    <xsl:variable name="plang" select="translate( $programming_language, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz' )"/>
     
     <xsl:element name="a">
         <xsl:attribute name="id">programming_language_selector__<xsl:value-of select="$plang"/></xsl:attribute>
@@ -49,6 +49,7 @@
         
         <xsl:value-of select="$programming_language"/>
     </xsl:element>
+    
 </xsl:template>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
@@ -108,7 +109,7 @@
             <xsl:attribute name="href">
                 <xsl:choose>
                     <xsl:when test="@class">
-                        <xsl:value-of select="/*/@base_dir"/>api/classes/<xsl:value-of select="$class"/>.xml
+                        <xsl:value-of select="/*/@base_dir"/>api/<xsl:value-of select="$class"/>.xml
                     </xsl:when>
                     <xsl:otherwise>
                         <xsl:value-of select="/*/@base_dir"/>api/introduction.xml
@@ -138,6 +139,24 @@
     
 </xsl:template>
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+<!--
+<xsl:template match="api.class [ @programming_language ]">
+    <xsl:apply-templates select="document( concat( @name, '.xml' ) )"/>
+    <xsl:call-template name="api.class">
+        <xsl:with-param name="xml" select="document( concat( @name, '.xml' ) )"/>
+        <xsl:with-param name="programming_language" select="@programming_language"/>
+    </xsl:call-template> 
+</xsl:template>
+
+
+<xsl:template name="api.class">
+    <xsl:param name="xml"/>
+    <xsl:param name="programming_language"/>
+    
+    <xsl:apply-templates select="$xml"/>
+</xsl:template>
+-->
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <xsl:template match="api.class">
@@ -194,25 +213,15 @@
                         &#160;            
                     </td>
                 </tr>
-                
+
                 <tr>
                     <td style="vertical-align: top; padding-right: 3ex; width: 20pt;">
                         <!--p style="font-weight: bold; padding-bottom: 1em">Klassen:</p-->
-                        <xsl:apply-templates select="document( 'classes/all_classes.xml' )/*"/>
+                        <xsl:apply-templates select="document( 'all_classes.xml' )/*"/>
                     </td>
                     
                     <td style="padding-left: 3ex; border-left: 1px dotted black;">
-                        <div id="class_headline">
-                            <xsl:apply-templates select="." mode="headline"/>
-                        </div>
-                        
-                        <div id="class">
-                            <xsl:apply-templates select="." mode="table"/>
-                        </div>
-                        
-                        <div id="methods">
-                            <xsl:apply-templates select="." mode="detailed_methods"/>
-                        </div>
+                        <xsl:call-template name="api.class-content-only"/>
                     </td>
                 </tr>
             </table>
@@ -239,13 +248,42 @@
 
                 href_base = document.location.href.replace( /\/[^\/]*$/, "/" );   // Alles bis zum letzten Schräger
                 base_dir = href_base + "<xsl:value-of select="/*/@base_dir"/>";
+                
                 api = new Api();
-
+                
+                api._class_name = "<xsl:value-of select="/api.class/@name"/>";
+                
+                api.highlight_html_selectors( true );
+                
             </script>
 
         </body>
     </html>
 </xsl:template>    
+
+
+<xsl:template match="api.class [ @programming_language ]">
+    **
+    <xsl:call-template name="api.class-content-only"/>
+    
+</xsl:template>
+
+
+<xsl:template name="api.class-content-only">
+
+    <div id="class_headline">
+        <xsl:apply-templates select="." mode="headline"/>
+    </div>
+    
+    <div id="class">
+        <xsl:apply-templates select="." mode="table"/>
+    </div>
+    
+    <div id="methods">
+        <xsl:apply-templates select="." mode="detailed_methods"/>
+    </div>
+    
+</xsl:template>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 

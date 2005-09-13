@@ -89,50 +89,27 @@ function human_language__onclick()
     // ?
 }
 */
-//---------------------------------------------------------------Api.programming_language__onchange
-/*
-Api.prototype.programming_language__onchange = function()
-{
-    var select = document.getElementById( "programming_languages_select" );
-
-    var programming_language = select.options[ select.selectedIndex ].text.toLowerCase();
-    if( programming_language != api._programming_language )
-    {
-        api._programming_language = programming_language;
-        api.show();
-    }
-}
-*/
-
-//-------------------------------------------------------Api.programming_language_selector__onclick
-
-Api.prototype.programming_language_selector__onclick = function( programming_language )
-{
-    //try
-    {
-        if( programming_language != api._programming_language )
-        {
-            var e = document.getElementById( "programming_language_selector__" + this._programming_language );
-            if( e )  e.style.fontWeight = "normal";
-            
-            api._programming_language = programming_language.toLowerCase();
-            api.show();
-        }
-    }
-    //catch( x )  { alert( x && x.message? x.message : ( "" + x ) ); }
-}
-
 //----------------------------------------------------------------------------------------------Api
 
 function Api()
 {
-    var stylesheet_name = base_dir + "api/api.xsl";
-    var stylesheet_href_base = stylesheet_name.replace( /\/[^\/]*$/, "/" );   // Alles bis zum letzten Schräger
-
     this._class_name           = get_cookie( "class", "" );
     this._programming_language = get_cookie( "programming_language", "javascript" );
     
     
+    //this.show();
+}
+
+//--------------------------------------------------------------------Api.prototype.load_stylesheet
+
+Api.prototype.load_stylesheet = function()
+{
+    if( this._xslt_processor )  return;
+    
+    
+    var stylesheet_name = base_dir + "api/api.xsl";
+    var stylesheet_href_base = stylesheet_name.replace( /\/[^\/]*$/, "/" );   // Alles bis zum letzten Schräger
+
     if( window.ActiveXObject )
     {
         var stylesheet = new ActiveXObject( "MSXML2.FreeThreadedDOMDocument" ); 
@@ -166,7 +143,39 @@ function Api()
     }
 
         
-    //this.show();
+}
+
+//---------------------------------------------------------------Api.programming_language__onchange
+/*
+Api.prototype.programming_language__onchange = function()
+{
+    var select = document.getElementById( "programming_languages_select" );
+
+    var programming_language = select.options[ select.selectedIndex ].text.toLowerCase();
+    if( programming_language != api._programming_language )
+    {
+        api._programming_language = programming_language;
+        api.show();
+    }
+}
+*/
+
+//-------------------------------------------------------Api.programming_language_selector__onclick
+
+Api.prototype.programming_language_selector__onclick = function( programming_language )
+{
+    //try
+    {
+        if( programming_language != api._programming_language )
+        {
+            var e = document.getElementById( "programming_language_selector__" + this._programming_language );
+            if( e )  e.style.fontWeight = "normal";
+            
+            api._programming_language = programming_language.toLowerCase();
+            api.show();
+        }
+    }
+    //catch( x )  { alert( x && x.message? x.message : ( "" + x ) ); }
 }
 
 //---------------------------------------------------------------------Api.class_reference__onclick
@@ -178,6 +187,17 @@ Api.prototype.class_reference__onclick = function( class_name )
 
     this._class_name = class_name;
     this.show();
+}
+
+//-------------------------------------------------------------------------------------------------
+
+Api.prototype.highlight_html_selectors = function( on_off )
+{
+    var e = document.getElementById( "class_reference_" + api._class_name )
+    if( e )  e.style.fontWeight = on_off? "bold" : "normal";
+    
+    var e = document.getElementById( "programming_language_selector__" + api._programming_language );
+    if( e )  e.style.fontWeight = on_off? "bold" : "normal";
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -212,6 +232,8 @@ Api.prototype.show = function()
     class_element.style.color        = "";
     methods_element.innerHTML        = "";
     
+    api.load_stylesheet();
+    
     //try
     {
         //if( this._programming_language.toLowerCase() == "javadoc" )
@@ -223,7 +245,7 @@ Api.prototype.show = function()
         //}
         //else
         {
-            var dom_document = dom_from_xml( this.fetch_by_url( this._class_name? "classes/" + this._class_name + ".xml" : "introduction.xml" ) );
+            var dom_document = dom_from_xml( this.fetch_by_url( this._class_name? this._class_name + ".xml" : "introduction.xml" ) );
             dom_document.documentElement.setAttribute( "programming_language", this._programming_language );
             
             if( this._programming_language == "java"
@@ -250,12 +272,7 @@ Api.prototype.show = function()
             }
         }
         
-        
-        var e = document.getElementById( "class_reference_" + this._class_name )
-        if( e )  e.style.fontWeight = "bold";
-        
-        var e = document.getElementById( "programming_language_selector__" + this._programming_language );
-        if( e )  e.style.fontWeight = "bold";
+        this.highlight_html_selectors( true );
 
         document.cookie = "class=" + this._class_name;
         document.cookie = "programming_language=" + this._programming_language;

@@ -5,11 +5,8 @@
 
 
 <class_references
-    base_dir="../../"
+    base_dir="../"
 >
-    <!-- ??? base_dir muss mit base_dir in <api.class> übereinstimmen: Also muss dieses Dokument im Verzeichnis der Klassen sein. -->
-    
-    
     <class_reference class="Error"/>
     <class_reference class="Job"/>
     <class_reference class="Job_chain"/>
