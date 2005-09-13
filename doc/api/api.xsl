@@ -221,7 +221,17 @@
                     </td>
                     
                     <td style="padding-left: 3ex; border-left: 1px dotted black;">
-                        <xsl:call-template name="api.class-content-only"/>
+                        <div id="class_headline">
+                            <!--xsl:apply-templates select="." mode="headline"/-->
+                        </div>
+                        
+                        <div id="class">
+                            <!--xsl:apply-templates select="." mode="table"/-->
+                        </div>
+                        
+                        <div id="methods">
+                            <!--xsl:apply-templates select="." mode="detailed_methods"/-->
+                        </div>
                     </td>
                 </tr>
             </table>
@@ -253,7 +263,8 @@
                 
                 api._class_name = "<xsl:value-of select="/api.class/@name"/>";
                 
-                api.highlight_html_selectors( true );
+                api.show();
+                //api.highlight_html_selectors( true );
                 
             </script>
 
@@ -262,8 +273,9 @@
 </xsl:template>    
 
 
+<!--
 <xsl:template match="api.class [ @programming_language ]">
-    **
+
     <xsl:call-template name="api.class-content-only"/>
     
 </xsl:template>
@@ -271,19 +283,9 @@
 
 <xsl:template name="api.class-content-only">
 
-    <div id="class_headline">
-        <xsl:apply-templates select="." mode="headline"/>
-    </div>
-    
-    <div id="class">
-        <xsl:apply-templates select="." mode="table"/>
-    </div>
-    
-    <div id="methods">
-        <xsl:apply-templates select="." mode="detailed_methods"/>
-    </div>
     
 </xsl:template>
+-->
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 

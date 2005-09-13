@@ -93,11 +93,8 @@ function human_language__onclick()
 
 function Api()
 {
-    this._class_name           = get_cookie( "class", "" );
+    //this._class_name           = get_cookie( "class", "" );
     this._programming_language = get_cookie( "programming_language", "javascript" );
-    
-    
-    //this.show();
 }
 
 //--------------------------------------------------------------------Api.prototype.load_stylesheet
@@ -141,30 +138,13 @@ Api.prototype.load_stylesheet = function()
         this._xslt_processor = new XSLTProcessor();
         this._xslt_processor.importStylesheet( dom_from_xml( this.fetch_by_url( stylesheet_name ) ) );
     }
-
-        
 }
-
-//---------------------------------------------------------------Api.programming_language__onchange
-/*
-Api.prototype.programming_language__onchange = function()
-{
-    var select = document.getElementById( "programming_languages_select" );
-
-    var programming_language = select.options[ select.selectedIndex ].text.toLowerCase();
-    if( programming_language != api._programming_language )
-    {
-        api._programming_language = programming_language;
-        api.show();
-    }
-}
-*/
 
 //-------------------------------------------------------Api.programming_language_selector__onclick
 
 Api.prototype.programming_language_selector__onclick = function( programming_language )
 {
-    //try
+    try
     {
         if( programming_language != api._programming_language )
         {
@@ -175,7 +155,7 @@ Api.prototype.programming_language_selector__onclick = function( programming_lan
             api.show();
         }
     }
-    //catch( x )  { alert( x && x.message? x.message : ( "" + x ) ); }
+    catch( x )  { alert( x && x.message? x.message : ( "" + x ) ); }
 }
 
 //---------------------------------------------------------------------Api.class_reference__onclick
@@ -234,7 +214,7 @@ Api.prototype.show = function()
     
     api.load_stylesheet();
     
-    //try
+    try
     {
         //if( this._programming_language.toLowerCase() == "javadoc" )
         //{
@@ -274,10 +254,10 @@ Api.prototype.show = function()
         
         this.highlight_html_selectors( true );
 
-        document.cookie = "class=" + this._class_name;
+        //document.cookie = "class=" + this._class_name;
         document.cookie = "programming_language=" + this._programming_language;
     }
-    if(0)//catch( x ) 
+    catch( x ) 
     { 
         class_element.innerHTML = ( x? x.message? x.message : x.toString() : "" + x ).replace( /&/g, "&amp;" ).replace( /</g, "&lt;" );
         class_element.style.color = "red";
