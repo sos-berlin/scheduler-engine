@@ -198,7 +198,7 @@
                 <tr>
                     <td style="vertical-align: top; padding-right: 3ex; width: 20pt;">
                         <!--p style="font-weight: bold; padding-bottom: 1em">Klassen:</p-->
-                        <xsl:apply-templates select="document( 'all_classes.xml' )/*"/>
+                        <xsl:apply-templates select="document( 'classes/all_classes.xml' )/*"/>
                     </td>
                     
                     <td style="padding-left: 3ex; border-left: 1px dotted black;">
