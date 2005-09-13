@@ -118,8 +118,6 @@
             </xsl:attribute>  
             <!--xsl:attribute name="onclick">api.class_reference__onclick( "<xsl:value-of select="$class"/>" );</xsl:attribute>-->
             
-            <xsl:value-of select="/*/@base_dir"/>
-            
             <xsl:attribute name="style">
                 <xsl:if test="$class = $active_class">
                     font-weight: bold;
@@ -268,6 +266,7 @@
                 
             </script>
 
+            <xsl:call-template name="bottom"/>
         </body>
     </html>
 </xsl:template>    

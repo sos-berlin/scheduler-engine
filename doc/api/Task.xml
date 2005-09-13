@@ -5,9 +5,11 @@
 
 
 <api.class 
-    name="Task" 
-    object_name="spooler_task"
-    base_dir="../"
+    name        = "Task" 
+    object_name = "spooler_task"
+    base_dir    = "../"
+    author      = "$Author$"
+    date        = "$Date$"
 >
 
     <!--com.type interface="Itask" iid="feee478c-6c1b-11d8-8103-000476ee8afb"/>
