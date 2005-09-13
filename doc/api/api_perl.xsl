@@ -10,7 +10,7 @@
     <xsl:param name="access"/>
 
     <span class="object_name">
-        $<xsl:value-of select="parent::class/@object_name"/>
+        $<xsl:value-of select="parent::api.class/@object_name"/>
         <xsl:text>-></xsl:text>
     </span>        
     

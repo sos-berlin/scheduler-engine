@@ -1,13 +1,15 @@
 <?xml version="1.0"?>
-<?xml-stylesheet href="api.xsl" type="text/xsl"?>
+<!-- $Id$ -->
 
-<!-- Versuch -->
+<?xml-stylesheet href="../api.xsl" type="text/xsl"?>
 
 
-
-<class name="Task" 
-       object_name="spooler_task"
-       base_dir="../">
+<api.class 
+    name="Task" 
+    object_name="spooler_task"
+    base_dir="../../"
+    xslt_base_dir="../"
+>
 
     <!--com.type interface="Itask" iid="feee478c-6c1b-11d8-8103-000476ee8afb"/>
     
@@ -242,7 +244,7 @@
     <property name="order" access="read">
         <com>
             <com.result>
-                <com.type type="Order"/>
+                <com.type class="Order"/>
                 <description>
                     <api.null/>, wenn kein Auftrag vorliegt.
                 </description>
@@ -564,4 +566,4 @@
         </description>
     </java>
 
-</class>
+</api.class>

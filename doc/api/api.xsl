@@ -32,22 +32,29 @@
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<xsl:template match="api_programming_language_selector" mode="description">
+<!--xsl:template name="api.programming_language_selector" mode="description">
+    <xsl:apply-templates 
+</xsl:template-->
+
+<xsl:template name="programming_language_selector">
+    <xsl:param name="programming_language"/>
+    
     <xsl:variable name="plang" select="translate( @programming_language, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz' )"/>
+    
     <xsl:element name="a">
         <xsl:attribute name="id">programming_language_selector__<xsl:value-of select="$plang"/></xsl:attribute>
         <xsl:attribute name="onclick">api.programming_language_selector__onclick( "<xsl:value-of select="$plang"/>" )</xsl:attribute>
         <xsl:attribute name="class">api_programming_language_selector</xsl:attribute>
         <xsl:attribute name="href">javascript:void(0)</xsl:attribute>
         
-        <xsl:value-of select="@programming_language"/>
+        <xsl:value-of select="$programming_language"/>
     </xsl:element>
 </xsl:template>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<xsl:template match="api_classes" mode="description">
-    <xsl:apply-templates select="document( 'all_classes.xml' )/class_references/class_reference" mode="script"/>
+<xsl:template match="api.classes" mode="description">
+    <xsl:apply-templates select="document( 'all_classes.xml' )/class_references/class_reference"/>
 </xsl:template>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
@@ -67,29 +74,189 @@
 </xsl:template>
 -->
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
-<!-- Klick auf den Klassennamen ruft im rechten Teil die Beschreibung der Klasse auf -->
 
-<xsl:template match="class_reference" mode="script">
-    <p style="margin-top: 0px">
-        <xsl:element name="a">
-            <xsl:attribute name="id">class_reference_<xsl:value-of select="@name"/></xsl:attribute>
-            <xsl:attribute name="href">javascript:void(0)</xsl:attribute>  <!-- Für ie6 -->
-            <xsl:attribute name="onclick">api.class_reference__onclick( "<xsl:value-of select="@name"/>" );</xsl:attribute>
-            <xsl:value-of select="@name"/>
-        </xsl:element>
-    </p>
+<xsl:template match="api.class_reference" mode="description">
+    <xsl:apply-templates select="."/>
 </xsl:template>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<xsl:template match="/class [ /*/@show_headline ]">
+<xsl:template match="api.introduction">
+    <xsl:apply-templates select="description"/>
+</xsl:template>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+<!-- Klick auf den Klassennamen ruft im rechten Teil die Beschreibung der Klasse auf -->
+
+<xsl:template match="class_reference | api.class_reference">
+    <xsl:call-template name="class_reference">
+        <xsl:with-param name="class" select="@class"/>
+        <xsl:with-param name="active_class" select="/api.class/@name"/>
+    </xsl:call-template>
+</xsl:template>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<xsl:template name="class_reference">
+    <xsl:param name="class"/>
+    <xsl:param name="active_class"/>
+    
+    <p style="margin-top: 0px; margin-bottom: 0px; padding-top: 0px; padding-bottom: 0px">
+        <xsl:element name="a">
+            <xsl:attribute name="id">class_reference_<xsl:value-of select="$class"/></xsl:attribute>
+            <!--xsl:attribute name="href">javascript:void(0)</xsl:attribute>  <!- - Für ie6 -->
+            <xsl:attribute name="href">
+                <xsl:choose>
+                    <xsl:when test="@class">
+                        <xsl:value-of select="/*/@base_dir"/>api/classes/<xsl:value-of select="$class"/>.xml
+                    </xsl:when>
+                    <xsl:otherwise>
+                        <xsl:value-of select="/*/@base_dir"/>api/introduction.xml
+                    </xsl:otherwise>
+                </xsl:choose>
+            </xsl:attribute>  
+            <!--xsl:attribute name="onclick">api.class_reference__onclick( "<xsl:value-of select="$class"/>" );</xsl:attribute>-->
+            
+            <xsl:value-of select="/*/@base_dir"/>
+            
+            <xsl:attribute name="style">
+                <xsl:if test="$class = $active_class">
+                    font-weight: bold;
+                </xsl:if>
+            </xsl:attribute>
+            
+            <xsl:choose>
+                <xsl:when test="$class">
+                    <xsl:value-of select="$class"/>
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:text xml:lang="de">Übersicht</xsl:text>
+                </xsl:otherwise>
+            </xsl:choose>
+        </xsl:element>
+    </p>
+    
+</xsl:template>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<xsl:template match="api.class">
+    <html>
+        <!--xsl:variable name="title" select="concat( 'Klasse ', @name )"/-->
+        <xsl:variable name="title" select="'Programmschnittstelle (API)'"/>
+        
+        <xsl:call-template name="html_head">
+            <xsl:with-param name="title" select="$title"/>
+        </xsl:call-template>
+    
+        <body>
+            <xsl:call-template name="body_start">
+                <xsl:with-param name="title" select="$title"/>
+            </xsl:call-template>
+
+
+            <table cellpadding="0" cellspacing="0" style="padding-bottom: 4ex">
+                <!--tr>
+                    <td colspan="5" style="font-size: 1px"><hr size="1"/></td>
+                </tr-->
+                <tr>
+                    <td style="vertical-align: top; padding-right: 3ex; padding-bottom: 4pt;">
+                        <xsl:call-template name="class_reference">
+                            <xsl:with-param name="active_class" select="'-'"/>
+                        </xsl:call-template>
+                    </td>
+                    
+                    <td style="padding-left: 3ex; border-left: 1px dotted black; padding-bottom: 4pt;">
+                        <xsl:call-template name="programming_language_selector">
+                            <xsl:with-param name="programming_language">Java</xsl:with-param>
+                        </xsl:call-template>
+
+                        <xsl:call-template name="programming_language_selector">
+                            <xsl:with-param name="programming_language">JavaScript</xsl:with-param>
+                        </xsl:call-template>
+
+                        <xsl:call-template name="programming_language_selector">
+                            <xsl:with-param name="programming_language">VBScript</xsl:with-param>
+                        </xsl:call-template>
+
+                        <xsl:call-template name="programming_language_selector">
+                            <xsl:with-param name="programming_language">Perl</xsl:with-param>
+                        </xsl:call-template>
+                    </td>
+                </tr>
+                
+                <tr>
+                    <td style="border-top: 1px dotted black; font-size: 1pt;">
+                        &#160;            
+                    </td>
+                    
+                    <td colspan="99" style="border-top: 1px dotted black; border-left: 1px dotted black; font-size: 4pt;">
+                        &#160;            
+                    </td>
+                </tr>
+                
+                <tr>
+                    <td style="vertical-align: top; padding-right: 3ex; width: 20pt;">
+                        <!--p style="font-weight: bold; padding-bottom: 1em">Klassen:</p-->
+                        <xsl:apply-templates select="document( 'all_classes.xml' )/*"/>
+                    </td>
+                    
+                    <td style="padding-left: 3ex; border-left: 1px dotted black;">
+                        <div id="class_headline">
+                            <xsl:apply-templates select="." mode="headline"/>
+                        </div>
+                        
+                        <div id="class">
+                            <xsl:apply-templates select="." mode="table"/>
+                        </div>
+                        
+                        <div id="methods">
+                            <xsl:apply-templates select="." mode="detailed_methods"/>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+
+            <xsl:element name="script">
+                <xsl:attribute name="defer">defer</xsl:attribute>
+                <xsl:attribute name="type">text/javascript</xsl:attribute>
+                <xsl:attribute name="src"><xsl:value-of select="/*/@base_dir"/>scripts/browser_dependencies.js</xsl:attribute>
+            </xsl:element>
+            
+            <xsl:element name="script">
+                <xsl:attribute name="defer">defer</xsl:attribute>
+                <xsl:attribute name="type">text/javascript</xsl:attribute>
+                <xsl:attribute name="src"><xsl:value-of select="/*/@base_dir"/>scripts/sarissa.js</xsl:attribute>
+            </xsl:element>
+            
+            <xsl:element name="script">
+                <xsl:attribute name="defer">defer</xsl:attribute>
+                <xsl:attribute name="type">text/javascript</xsl:attribute>
+                <xsl:attribute name="src"><xsl:value-of select="/*/@base_dir"/>api/api.js</xsl:attribute>
+            </xsl:element>
+            
+            <script defer="defer" type="text/javascript" for="window" event="onload">
+
+                href_base = document.location.href.replace( /\/[^\/]*$/, "/" );   // Alles bis zum letzten Schräger
+                base_dir = href_base + "<xsl:value-of select="/*/@base_dir"/>";
+                api = new Api();
+
+            </script>
+
+        </body>
+    </html>
+</xsl:template>    
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<xsl:template match="/api.class [ /*/@show_headline ]">
     <xsl:apply-templates select="." mode="headline"/>
 </xsl:template>    
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<xsl:template match="class" mode="headline">
-    <p style="margin-top: 0ex; padding-bottom: 3ex; font-size: 14pt; font-weight: bold;">
+<xsl:template match="api.class" mode="headline">
+    <p class="api_headline">
         <xsl:value-of select="@name"/>
 
         <xsl:if test="@title">
@@ -111,13 +278,13 @@
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<xsl:template match="/class [ /*/@show_table ]">
+<xsl:template match="/api.class [ /*/@show_table ]">
     <xsl:apply-templates select="." mode="table"/>
 </xsl:template>    
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<xsl:template match="class" mode="table">
+<xsl:template match="api.class" mode="table">
 
     <table cellpadding="0" cellspacing="0">
         <!--tr><td colspan="4" style="padding-top: 4ex; padding-bottom: 1ex; font-weight: bold;">Eigenschaften</td></tr-->
@@ -362,7 +529,7 @@
 <xsl:template match="method | property" mode="method_name">
 
     <span class="object_name">
-        <xsl:value-of select="parent::class/@object_name"/>
+        <xsl:value-of select="parent::api.class/@object_name"/>
         <xsl:text>.</xsl:text>
     </span>        
 
@@ -462,7 +629,7 @@
 <xsl:template match="com.type [ @class ]">
     <span class="mono">
         <xsl:value-of select="@class"/>
-        <span title="A Scheduler class name, not a real class name of the programming language">¹</span>
+        <span style="cursor: default" title="A Scheduler class name, not a real class name of the programming language">¹</span>
     </span>
 </xsl:template>
 
@@ -474,7 +641,7 @@
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<xsl:template match="class" mode="detailed_methods">
+<xsl:template match="api.class" mode="detailed_methods">
     
     <xsl:apply-templates select="method | property" mode="detailed_methods"/>
     
@@ -482,7 +649,7 @@
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<xsl:template match="/class [ /*/@show_detailed_methods ]">
+<xsl:template match="/api.class [ /*/@show_detailed_methods ]">
     <xsl:apply-templates select="." mode="detailed_methods"/>
 </xsl:template>    
 
@@ -542,12 +709,6 @@
         <xsl:apply-templates select="com/com.result/title"/>
         <xsl:apply-templates select="com/com.result/description"/>
     </xsl:if>
-    
-</xsl:template>
-
-<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
-
-<xsl:template match="com" mode="detailed_methods">
     
 </xsl:template>
 
