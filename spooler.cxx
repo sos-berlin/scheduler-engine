@@ -164,10 +164,12 @@ void send_error_email( const exception& x, int argc, char** argv, const string& 
         Scheduler_event scheduler_event ( Scheduler_event::evt_scheduler_fatal_error, log_error, spooler );
         scheduler_event.set_error( x );
         scheduler_event.set_scheduler_terminates( true );
-        scheduler_event.set_subject( subject );
-        scheduler_event.set_body( body );
-        scheduler_event.send_mail();
-        //spooler->send_error_email( subject, body );
+
+        Mail_defaults mail_defaults( spooler );
+        mail_defaults.set( "subject", subject );
+        mail_defaults.set( "body"   , body    );
+
+        scheduler_event.send_mail( mail_defaults );
     }
     else           
         send_error_email( subject, body );
@@ -348,11 +350,12 @@ Spooler::Spooler()
     _module(this,&_log),
     _log_level( log_info ),
     _factory_ini( default_factory_ini ),
-    _smtp_server   ("-"),   // Für spooler_log.cxx: Nicht setzen, damit Default aus sos.ini erhalten bleibt
-    _log_mail_from ("-"),
-    _log_mail_cc   ("-"),
-    _log_mail_bcc  ("-"),
-    _mail_queue_dir("-")
+    _mail_defaults(NULL)
+  //_smtp_server   ("-")    // Für spooler_log.cxx: Nicht setzen, damit Default aus sos.ini erhalten bleibt
+  //_log_mail_from ("-"),
+  //_log_mail_cc   ("-"),
+  //_log_mail_bcc  ("-"),
+  //_mail_queue_dir("-")
 {
     if( spooler_ptr )  throw_xc( "spooler_ptr" );
     spooler_ptr = this;
@@ -1549,19 +1552,20 @@ void Spooler::load_arg()
   //_interactive                = true;     // Kann ohne weiteres true gesetzt werden (aber _is_service setzt es wieder false)
 
 
-    _mail_on_warning =            read_profile_bool           ( _factory_ini, "spooler", "mail_on_warning", _mail_on_warning );
-    _mail_on_error   =            read_profile_bool           ( _factory_ini, "spooler", "mail_on_error"  , _mail_on_error   );
-    _mail_on_process =            read_profile_mail_on_process( _factory_ini, "spooler", "mail_on_process", _mail_on_process );
-    _mail_on_success =            read_profile_bool           ( _factory_ini, "spooler", "mail_on_success", _mail_on_success );
-    _mail_queue_dir  = subst_env( read_profile_string         ( _factory_ini, "spooler", "mail_queue_dir" , _mail_queue_dir ) );
-    _mail_encoding   =            read_profile_string         ( _factory_ini, "spooler", "mail_encoding"  , "base64"        );      // "quoted-printable": Jmail braucht 1s pro 100KB dafür
-    _smtp_server     =            read_profile_string         ( _factory_ini, "spooler", "smtp"           , _smtp_server );
+    _mail_on_warning = read_profile_bool           ( _factory_ini, "spooler", "mail_on_warning", _mail_on_warning );
+    _mail_on_error   = read_profile_bool           ( _factory_ini, "spooler", "mail_on_error"  , _mail_on_error   );
+    _mail_on_process = read_profile_mail_on_process( _factory_ini, "spooler", "mail_on_process", _mail_on_process );
+    _mail_on_success = read_profile_bool           ( _factory_ini, "spooler", "mail_on_success", _mail_on_success );
+    _mail_encoding   = read_profile_string         ( _factory_ini, "spooler", "mail_encoding"  , "base64"        );      // "quoted-printable": Jmail braucht 1s pro 100KB dafür
 
-    _log_mail_from      = read_profile_string( _factory_ini, "spooler", "log_mail_from"   );
-    _log_mail_to        = read_profile_string( _factory_ini, "spooler", "log_mail_to"     );
-    _log_mail_cc        = read_profile_string( _factory_ini, "spooler", "log_mail_cc"     );
-    _log_mail_bcc       = read_profile_string( _factory_ini, "spooler", "log_mail_bcc"    );
-    _log_mail_subject   = read_profile_string( _factory_ini, "spooler", "log_mail_subject");
+    _mail_defaults.set( "queue_dir", subst_env( read_profile_string( _factory_ini, "spooler", "mail_queue_dir"   , "-" ) ) );
+    _mail_defaults.set( "smtp"     ,            read_profile_string( _factory_ini, "spooler", "smtp"             , "-" ) );
+    _mail_defaults.set( "from"     ,            read_profile_string( _factory_ini, "spooler", "log_mail_from"    ) );
+    _mail_defaults.set( "to"       ,            read_profile_string( _factory_ini, "spooler", "log_mail_to"      ) );
+    _mail_defaults.set( "cc"       ,            read_profile_string( _factory_ini, "spooler", "log_mail_cc"      ) );
+    _mail_defaults.set( "bcc"      ,            read_profile_string( _factory_ini, "spooler", "log_mail_bcc"     ) );
+    _mail_defaults.set( "subject"  ,            read_profile_string( _factory_ini, "spooler", "log_mail_subject" ) );
+
     _log_collect_within = read_profile_uint  ( _factory_ini, "spooler", "log_collect_within", 0 );
     _log_collect_max    = read_profile_uint  ( _factory_ini, "spooler", "log_collect_max"   , 900 );
 
@@ -1718,7 +1722,7 @@ void Spooler::load()
 {
     assert( current_thread_id() == _thread_id );
 
-    _log.init( this );
+    _log.init( this );              // Nochmal nach load_argv()
     _log.set_title( "Main log" );
 
     set_state( s_starting );
@@ -1733,6 +1737,8 @@ void Spooler::load()
 
 
     load_arg();
+    
+
 
     if( _pid_filename != ""  &&  !_pid_file.opened() )
     {
@@ -1761,6 +1767,13 @@ void Spooler::load()
                                             // damit der Scheduler nicht in einem TCP-Kommando blockiert.
 
     cp.execute_file( _config_filename );
+
+
+
+    // Nachdem argv und profile gelesen sind:
+
+    _mail_defaults.set( "from_name", name() );      // Jetzt sind _hostname und _tcp_port bekannt
+    _log.init( this );                              // Neue Einstellungen übernehmen: Default für from_name
 }
 
 //----------------------------------------------------------------------------Spooler::create_window
@@ -1910,7 +1923,7 @@ void Spooler::start()
 
         bool ok = check_result( _module_instance->call_if_exists( spooler_init_name ) );
 
-        if( _log.highest_level() >= log_warn  &&  _log.mail_to() != ""  &&  _log.mail_from() != "" )
+        if( _log.highest_level() >= log_warn ) // &&  _log.mail_to() != ""  &&  _log.mail_from() != "" )
         {
             try
             {
@@ -1924,9 +1937,8 @@ void Spooler::start()
 
                 Scheduler_event scheduler_event ( Scheduler_event::evt_scheduler_started, _log.highest_level(), this );
                 scheduler_event.set_error( Xc( "SCHEDULER-227", _log.last( _log.highest_level() ).c_str() ) );
-                _log.set_mail_from_name( name(), true );
-                _log.set_mail_subject( subject );
-                _log.set_mail_body( body );
+                _log.set_mail_default( "subject"  , subject );
+                _log.set_mail_default( "body"     , body );
                 _log.send( -1, &scheduler_event );
             }
             catch( exception& x )  { _log.warn( S() << "Fehler beim eMail-Versand: " << x.what() ); }

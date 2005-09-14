@@ -417,9 +417,12 @@ void Spooler_db::try_reopen_after_error( exception& x, bool wait_endless )
                     Scheduler_event scheduler_event ( Scheduler_event::evt_database_error, log_warn, this );
                     scheduler_event.set_error( x );
                     scheduler_event.set_count( _error_count );
-                    scheduler_event.set_subject( S() << "FEHLER BEIM ZUGRIFF AUF DATENBANK: " << x.what() );
-                    scheduler_event.set_body( body );
-                    scheduler_event.send_mail();
+
+                    Mail_defaults mail_defaults ( _spooler );
+                    mail_defaults.set( "subject", S() << "FEHLER BEIM ZUGRIFF AUF DATENBANK: " << x.what() );
+                    mail_defaults.set( "body"   , body );
+
+                    scheduler_event.send_mail( mail_defaults );
 
                     _email_sent_after_db_error = true;
                 }
@@ -466,9 +469,13 @@ void Spooler_db::try_reopen_after_error( exception& x, bool wait_endless )
             if( _email_sent_after_db_error )    // Zurzeit immer true
             {
                 Scheduler_event scheduler_event ( Scheduler_event::evt_database_continue, log_info, this );
-                scheduler_event.set_subject( "Scheduler ist wieder mit der Datenbank verbunden" );
-                scheduler_event.set_body( "Der Scheduler setzt den Betrieb fort.\n\ndb=" + _spooler->_db_name );
-                scheduler_event.send_mail();
+
+                Mail_defaults mail_defaults ( _spooler );
+
+                mail_defaults.set( "subject", "Scheduler ist wieder mit der Datenbank verbunden" );
+                mail_defaults.set( "body"   , "Der Scheduler setzt den Betrieb fort.\n\ndb=" + _spooler->_db_name );
+
+                scheduler_event.send_mail( mail_defaults );
             }
         }
         else
@@ -485,10 +492,15 @@ void Spooler_db::try_reopen_after_error( exception& x, bool wait_endless )
                     Scheduler_event scheduler_event ( Scheduler_event::evt_database_error_abort, log_error, this );
                     scheduler_event.set_error( x );
                     scheduler_event.set_scheduler_terminates( true );
-                    scheduler_event.set_subject( msg );
-                    scheduler_event.set_body( S() << "db=" << _spooler->_db_name << "\r\n\r\n" << x.what() << "\r\n\r\n" << warn_msg );
-                    scheduler_event.send_mail();
+
+                    Mail_defaults mail_defaults ( _spooler );
+
+                    mail_defaults.set( "subject", msg );
+                    mail_defaults.set( "body"   , S() << "db=" << _spooler->_db_name << "\r\n\r\n" << x.what() << "\r\n\r\n" << warn_msg );
+
+                    scheduler_event.send_mail( mail_defaults );
                     
+
                     _spooler->abort_immediately();
                 }
             }
@@ -497,9 +509,12 @@ void Spooler_db::try_reopen_after_error( exception& x, bool wait_endless )
 
             Scheduler_event scheduler_event ( Scheduler_event::evt_database_error_switch_to_file, log_warn, this );
             scheduler_event.set_error( x );
-            scheduler_event.set_subject( string("SCHEDULER ARBEITET NACH FEHLERN OHNE DATENBANK: ") + x.what() );
-            scheduler_event.set_body( S() << "Wegen need_db=no\n" "db=" << _spooler->_db_name << "\r\n\r\n" << x.what() << "\r\n\r\n" << warn_msg );
-            scheduler_event.send_mail();
+
+            Mail_defaults mail_defaults( _spooler );
+            mail_defaults.set( "subject", string("SCHEDULER ARBEITET NACH FEHLERN OHNE DATENBANK: ") + x.what() );
+            mail_defaults.set( "body"   , S() << "Wegen need_db=no\n" "db=" << _spooler->_db_name << "\r\n\r\n" << x.what() << "\r\n\r\n" << warn_msg );
+            
+            scheduler_event.send_mail( mail_defaults );
 
             open2( "" );     // Umschalten auf dateibasierte Historie
         }

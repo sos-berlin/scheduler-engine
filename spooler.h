@@ -352,14 +352,19 @@ struct Spooler : Object,
     bool                       _mail_on_error;              // Für Job-Protokolle
     int                        _mail_on_process;            // Für Job-Protokolle
     bool                       _mail_on_success;            // Für Job-Protokolle
-    string                     _mail_queue_dir;
     string                     _mail_encoding;
+
+    Mail_defaults              _mail_defaults;
+    /*
+    string                     _mail_queue_dir;
     string                     _smtp_server;                // Für Job-Protokolle
     string                     _log_mail_from;
     string                     _log_mail_to;
     string                     _log_mail_cc;
     string                     _log_mail_bcc;
     string                     _log_mail_subject;
+    */
+
     int                        _log_collect_within;
     int                        _log_collect_max;
 

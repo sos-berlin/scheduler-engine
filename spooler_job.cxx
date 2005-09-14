@@ -1516,11 +1516,12 @@ void Job::set_job_error( const exception& x )
 
     Scheduler_event scheduler_event ( Scheduler_event::evt_job_error, log_error, this );
     scheduler_event.set_error( x );
-    scheduler_event.set_subject( x.what() );
-    scheduler_event.set_body( body );
-    scheduler_event.send_mail();
 
-    //_spooler->send_error_email( what, body );
+    Mail_defaults mail_defaults ( _spooler );
+    mail_defaults.set( "subject", x.what() );
+    mail_defaults.set( "body", body );
+
+    scheduler_event.send_mail( mail_defaults);
 }
 
 //-----------------------------------------------------------------------------------Job::set_state

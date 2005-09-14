@@ -1576,7 +1576,8 @@ void Task::trigger_event( Scheduler_event* scheduler_event )
 {
     try
     {
-        _log->set_mail_from_name( _job->profile_section() );
+        //_log->set_mail_from_name( _job->profile_section() );
+        _log->set_mail_default( "from_name", _job->profile_section() );
 
         scheduler_event->set_message( _log->highest_msg() );
         if( _error )  scheduler_event->set_error( _error );
@@ -1601,17 +1602,17 @@ void Task::trigger_event( Scheduler_event* scheduler_event )
                 subject += " gelungen";
             }
 
-            _log->set_mail_subject( subject );
+            _log->set_mail_default( "subject", subject );
         }
         else
         {
             string errmsg = _error? _error->what() : _log->highest_msg();
-            _log->set_mail_subject( string("FEHLER ") + errmsg );   //, is_error );
+            _log->set_mail_default( "subject", string("FEHLER ") + errmsg );   //, is_error );
         
             body += errmsg + "\n\n";
         }
 
-        _log->set_mail_body( body + "Das Jobprotokoll liegt dieser Nachricht bei." );   //, is_error );
+        _log->set_mail_default( "body", body + "Das Jobprotokoll liegt dieser Nachricht bei." );   //, is_error );
 
         _log->send( has_error() || _log->highest_level() >= log_error? -1 : _step_count, scheduler_event );
 
@@ -1622,7 +1623,7 @@ void Task::trigger_event( Scheduler_event* scheduler_event )
             _log->send( has_error() || _log->highest_level() >= log_error? -1 : _step_count, &event );
         }
         */
-        clear_mail();
+        //clear_mail();
     }
     catch( const exception& x  ) { _log->warn( x.what() ); }
     catch( const _com_error& x ) { _log->warn( bstr_as_string(x.Description()) ); }  
@@ -1703,14 +1704,14 @@ void Task::set_mail_defaults()
 }
 */
 //---------------------------------------------------------------------------------Task::clear_mail
-
+/*
 void Task::clear_mail()
 {
     _log->set_mail_from_name( "", true );
     _log->set_mail_subject  ( "", true );
     _log->set_mail_body     ( "", true );
 }
-
+*/
 //---------------------------------------------------------------------Module_task::do_close__start
 
 Async_operation* Module_task::do_close__start()

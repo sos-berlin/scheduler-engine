@@ -40,12 +40,13 @@ struct Scheduler_event
     void                    set_message                     ( const string& m )                     { _message  = m; }
     void                    set_count                       ( int c )                               { _count    = c; }
     void                    set_log_path                    ( const string& path )                  { _log_path = path; }
-    void                    set_subject                     ( const string& subject )               { _subject  = remove_password( subject ); }
-    void                    set_body                        ( const string& body )                  { _body     = remove_password( body    ); }
+  //void                    set_subject                     ( const string& subject )               { _mail_defaults[ "subject" ] = remove_password( subject ); }
+  //void                    set_body                        ( const string& body )                  { _mail_defaults[ "body"    ] = remove_password( body    ); }
 
     xml::Document_ptr           dom                         ();
     xml::Document_ptr           mail_dom                    ( const xml::Document_ptr& event = xml::Document_ptr() );  // Default: dom()
-    int                         send_mail                   ( const xml::Document_ptr& mail  = xml::Document_ptr() );  // Default: mail_dom()
+  //int                         send_mail                   ( const xml::Document_ptr& mail  = xml::Document_ptr() );  // Default: mail_dom()
+    int                         send_mail                   ( const Mail_defaults& );
 
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
@@ -60,8 +61,8 @@ struct Scheduler_event
     string                     _message;
     int                        _count;
     ptr<Com_mail>              _mail;                       
-    string                     _subject;
-    string                     _body;
+  //string                     _subject;
+  //string                     _body;
 };
 
 //-------------------------------------------------------------------------------------------------

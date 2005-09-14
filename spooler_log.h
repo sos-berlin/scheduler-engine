@@ -138,13 +138,15 @@ struct Prefix_log : Object, Has_log
     Com_mail*                   imail                       ();
 
     // Defaults setzen, ohne eMail-Objekt anzulegen:
-    void                    set_mail_from_name              ( const string&, bool overwrite = false );
-    void                    set_mail_subject                ( const string&, bool overwrite = false );
-    void                    set_mail_body                   ( const string&, bool overwrite = false );
-    string                      mail_to                     () const                            { return _to; }
-    string                      mail_from                   () const                            { return _from; }
+  //void                    set_mail_from_name              ( const string&, bool overwrite = false );
+  //void                    set_mail_subject                ( const string&, bool overwrite = false );
+  //void                    set_mail_body                   ( const string&, bool overwrite = false );
+  //string                      mail_to                     () const                            { return _to; }
+  //string                      mail_from                   () const                            { return _from; }
 
-    void                        send                        ( int reason, Scheduler_event*e );
+    void                    set_mail_default                ( const string& field_name, const string& value )  { _mail_defaults.set( field_name, value ); }
+
+    void                        send                        ( int reason, Scheduler_event* );
     void                        send_really                 ( Scheduler_event* );
 
 
@@ -154,7 +156,7 @@ struct Prefix_log : Object, Has_log
   protected:
 
     void                        write                       ( const char*, int );
-    void                        set_mail_header             ();
+  //void                        set_mail_header             ();
 
     friend struct               Log;
 
@@ -196,12 +198,16 @@ struct Prefix_log : Object, Has_log
     Time                       _collect_max;                // Nach dieser Frist eMail auf jeden Fall versenden
     Time                       _first_send;                 // Beginn dieser Frist
 
+    /*
     string                     _smtp_server;                // Aus factory.ini [Job ...]
     string                     _queue_dir;
     string                     _to, _cc, _bcc, _from;
     string                     _from_name;
     string                     _subject;
     string                     _body;
+    */
+    typedef map<string,string>  Defaults_map;
+    Mail_defaults              _mail_defaults;
 
     string                     _log_buffer;                 // Für Jobprotokollausgaben bis open(), also vor dem Jobstart
 

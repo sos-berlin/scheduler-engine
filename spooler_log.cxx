@@ -63,15 +63,19 @@ static void io_error( Spooler* spooler, const string& filename )
 
         Scheduler_event scheduler_event ( Scheduler_event::evt_disk_full, log_warn, spooler );
         scheduler_event.set_error( x );
-        scheduler_event.set_subject( "SCHEDULER SUSPENDED:  " + string( x.what() ) );
-        scheduler_event.set_body( "Job Scheduler is suspended due to disk space shortage.\n"
-                                  "\n" + 
-                                  string( x.what() ) + "\n"
-                                  "File " + filename + "\n"
-                                  "\n"
-                                  "You can continue the Job Scheduler as soon as there is enough disk space.\n"
-                                  "Use this XML-command: <modify_spooler cmd=\"continue\"/>" );
-        scheduler_event.send_mail();
+
+        Mail_defaults mail_defaults ( spooler );
+
+        mail_defaults.set( "subject", "SCHEDULER SUSPENDED:  " + string( x.what() ) );
+        mail_defaults.set( "body"   , "Job Scheduler is suspended due to disk space shortage.\n"
+                                      "\n" + 
+                                      string( x.what() ) + "\n"
+                                      "File " + filename + "\n"
+                                      "\n"
+                                      "You can continue the Job Scheduler as soon as there is enough disk space.\n"
+                                      "Use this XML-command: <modify_spooler cmd=\"continue\"/>" );
+
+        scheduler_event.send_mail( mail_defaults );
 /*
         spooler->send_error_email( "SCHEDULER SUSPENDED:  " + error_text,
                                    "Job Scheduler is suspended due to disk space shortage.\n"
@@ -359,7 +363,8 @@ Prefix_log::Prefix_log( int )
 :
     _zero_(this+1),
     _file(-1),
-    _log_level(log_unknown)
+    _log_level(log_unknown),
+    _mail_defaults(NULL)
 {
 }
 
@@ -373,7 +378,8 @@ Prefix_log::Prefix_log( Scheduler_object* o, const string& prefix )
     _log(&o->_spooler->_base_log),
     _prefix(prefix),
     _file(-1),
-    _log_level(log_unknown)
+    _log_level(log_unknown),
+    _mail_defaults(NULL)
 {
     init( o, prefix );
 }
@@ -404,6 +410,7 @@ Prefix_log::~Prefix_log()
 
 void Prefix_log::init( Scheduler_object* o, const string& prefix )
 {
+    _mail_defaults = o->_spooler->_mail_defaults;
     _object  = o;
     _spooler = o->_spooler;
     _log     = &o->_spooler->_base_log;
@@ -414,15 +421,19 @@ void Prefix_log::init( Scheduler_object* o, const string& prefix )
     _mail_on_error   = _spooler->_mail_on_error;
     _mail_on_process = _spooler->_mail_on_process;
     _mail_on_success = _spooler->_mail_on_success;
-    _subject         = _spooler->_log_mail_subject;
+  //_subject         = _spooler->_log_mail_subject;
     _collect_within  = _spooler->_log_collect_within;
     _collect_max     = _spooler->_log_collect_max;
-    _smtp_server     = _spooler->_smtp_server;
-    _queue_dir       = _spooler->_mail_queue_dir;
-    _from            = _spooler->_log_mail_from;
-    _to              = _spooler->_log_mail_to;
-    _cc              = _spooler->_log_mail_cc;
-    _bcc             = _spooler->_log_mail_bcc;
+
+    /*
+    _mail_defaults[ "queue_dir" ] = _spooler->_mail_queue_dir;
+    _mail_defaults[ "smtp"      ] = _spooler->_smtp_server;
+    _mail_defaults[ "from"      ] = _spooler->_log_mail_from;
+    _mail_defaults[ "to"        ] = _spooler->_log_mail_to;
+    _mail_defaults[ "cc"        ] = _spooler->_log_mail_cc;
+    _mail_defaults[ "bcc"       ] = _spooler->_log_mail_bcc;
+    _mail_defaults[ "subject"   ] = _spooler->_log_mail_subject;
+    */
 }
 
 //----------------------------------------------------------------------------Prefix_log::log_level
@@ -446,15 +457,10 @@ void Prefix_log::set_profile_section( const string& section )
         _mail_on_error   = read_profile_bool           ( _spooler->_factory_ini, _section, "mail_on_error"     , _mail_on_error   );
         _mail_on_process = read_profile_mail_on_process( _spooler->_factory_ini, _section, "mail_on_process"   , _mail_on_process );
         _mail_on_success =         read_profile_bool   ( _spooler->_factory_ini, _section, "mail_on_success"   , _mail_on_success );
-        _subject         =         read_profile_string ( _spooler->_factory_ini, _section, "log_mail_subject"  , _subject );
+      //_subject         =         read_profile_string ( _spooler->_factory_ini, _section, "log_mail_subject"  , _subject );
         _collect_within  = (double)read_profile_uint   ( _spooler->_factory_ini, _section, "log_collect_within", (uint)_collect_within );
         _collect_max     = (double)read_profile_uint   ( _spooler->_factory_ini, _section, "log_collect_max"   , (uint)_collect_max );
-        _smtp_server     =         read_profile_string ( _spooler->_factory_ini, _section, "smtp"              , _smtp_server );
-        _queue_dir       =         read_profile_string ( _spooler->_factory_ini, _section, "mail_queue_dir"    , _queue_dir );
-        _from            =         read_profile_string ( _spooler->_factory_ini, _section, "log_mail_from"     , _from );
-        _to              =         read_profile_string ( _spooler->_factory_ini, _section, "log_mail_to"       , _spooler->_log_mail_to );
-        _cc              =         read_profile_string ( _spooler->_factory_ini, _section, "log_mail_cc"       , _spooler->_log_mail_cc );
-        _bcc             =         read_profile_string ( _spooler->_factory_ini, _section, "log_mail_bcc"      , _spooler->_log_mail_bcc );
+
     }
 }
 
@@ -468,15 +474,25 @@ void Prefix_log::inherit_settings( const Prefix_log& other )
     _mail_on_error   = other._mail_on_error;
     _mail_on_process = other._mail_on_process;
     _mail_on_success = other._mail_on_success;
-    _subject         = other._subject;
+  //_subject         = other._subject;
     _collect_within  = other._collect_within;
     _collect_max     = other._collect_max;
-    _smtp_server     = other._smtp_server;
-    _queue_dir       = other._queue_dir;
-    _from            = other._from;
-    _to              = other._to;
-    _cc              = other._cc;
-    _bcc             = other._bcc;
+  //_smtp_server     = other._smtp_server;
+  //_queue_dir       = other._queue_dir;
+  //_from            = other._from;
+  //_to              = other._to;
+  //_cc              = other._cc;
+  //_bcc             = other._bcc;
+
+    _mail_defaults = other._mail_defaults;
+    /*
+    _mail_defaults[ "smtp"    ] = other._mail_defaults[ "smtp"    ];
+    _mail_defaults[ "from"    ] = other._mail_defaults[ "from"    ];
+    _mail_defaults[ "to"      ] = other._mail_defaults[ "to"      ];
+    _mail_defaults[ "cc"      ] = other._mail_defaults[ "cc"      ];
+    _mail_defaults[ "bcc"     ] = other._mail_defaults[ "bcc"     ];
+    _mail_defaults[ "subject" ] = other._mail_defaults[ "subject" ];
+    */
 }
 
 //-------------------------------------------------------------------------Prefix_log::set_filename
@@ -541,9 +557,10 @@ void Prefix_log::close()
     {
         close2();
 
+        /*
         try
         {
-            if( !_subject.empty()  ||  !_body.empty() )     // 20.11.2002
+            //if( !_subject.empty()  ||  !_body.empty() )     // 20.11.2002
             {
                 Scheduler_event::Event_code event_code = _object->scheduler_type_code() == Scheduler_object::type_task? Scheduler_event::evt_task_ended 
                                                                                                                       : Scheduler_event::evt_unknown;
@@ -553,6 +570,7 @@ void Prefix_log::close()
         }
         catch( const exception&  x ) { _spooler->_log.error(x.what());                         _remove_after_close = false; }
         catch( const _com_error& x ) { _spooler->_log.error(bstr_as_string(x.Description()));  _remove_after_close = false; }
+        */
     }
 
     signal_events();
@@ -623,15 +641,26 @@ void Prefix_log::write( const char* text, int len )
 
 Com_mail* Prefix_log::imail()
 {
-    HRESULT hr;
+    //HRESULT hr;
 
     if( !_mail )
     {
         ptr<Com_mail> mail = new Com_mail( _spooler );
         mail->init();
 
-        _mail = mail;   // Nur bei fehlerfreiem init() speichern
+        if( _section != "" )
+        {
+            _mail_defaults.set( "queue_dir", read_profile_string ( _spooler->_factory_ini, _section, "mail_queue_dir"    , _mail_defaults[ "queue_dir" ] ) );
+            _mail_defaults.set( "smtp"     , read_profile_string ( _spooler->_factory_ini, _section, "smtp"              , _mail_defaults[ "smtp"      ] ) );
+            _mail_defaults.set( "from"     , read_profile_string ( _spooler->_factory_ini, _section, "log_mail_from"     , _mail_defaults[ "from"      ] ) );
+            _mail_defaults.set( "to"       , read_profile_string ( _spooler->_factory_ini, _section, "log_mail_to"       , _mail_defaults[ "to"        ] ) );
+            _mail_defaults.set( "cc"       , read_profile_string ( _spooler->_factory_ini, _section, "log_mail_cc"       , _mail_defaults[ "cc"        ] ) );
+            _mail_defaults.set( "bcc"      , read_profile_string ( _spooler->_factory_ini, _section, "log_mail_bcc"      , _mail_defaults[ "bcc"       ] ) );
+            _mail_defaults.set( "subject"  , read_profile_string ( _spooler->_factory_ini, _section, "log_mail_subject"  , _mail_defaults[ "subject"   ] ) );
+        }
 
+        _mail = mail;   // Nur bei fehlerfreiem init() speichern
+/*
         if( _smtp_server != "-" )
         {
             hr = _mail->put_Smtp( Bstr(_smtp_server) );     if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::smtp_server", _smtp_server.c_str() );
@@ -641,14 +670,28 @@ Com_mail* Prefix_log::imail()
         {
             hr = _mail->put_Queue_dir( Bstr(_queue_dir) );     if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::queue_dir", _smtp_server.c_str() );
         }
+        if( _mail_defaults[ "queue_dir" ] != "-" )
+        {
+            hr = _mail->put_Queue_dir( Bstr(_mail_defaults[ "queue_dir" ]) );     if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::queue_dir", _queue_dir.c_str() );
+        }
+*/
 
-        set_mail_header();
+        /*
+        if( _smtp_server != "-" )  _mail->set_smtp( _smtp_server );
+        if( _from        != "-" )  _mail->set_from( _from );
+                                   _mail->set_to  ( _to   );
+        if( _cc          != "-" )  _mail->set_cc  ( _cc   );
+        if( _bcc         != "-" )  _mail->set_bcc ( _bcc  );
+        */
+        //_mail->set_defaults( _mail_defaults );
+        //set_mail_header();
 
         // Vorbesetzungen von spooler_task.cxx:
+        /*
         if( !_from_name.empty() )  set_mail_from_name( _from_name, true ),  _from_name = "";   
-        if( !_subject  .empty() )  set_mail_subject  ( _subject ),    _subject   = "";
-        if( !_body     .empty() )  set_mail_body     ( _body ),       _body      = "";
-
+        if( !_subject  .empty() )  set_mail_subject  ( _subject         ),  _subject   = "";
+        if( !_body     .empty() )  set_mail_body     ( _body            ),  _body      = "";
+        */
 
         _mail->Add_header_field( Bstr(L"X-SOS-Spooler-Job"), Bstr( _job_name ) );
     }
@@ -657,17 +700,18 @@ Com_mail* Prefix_log::imail()
 }
 
 //----------------------------------------------------------------------Prefix_log::set_mail_header
-
+/*
 void Prefix_log::set_mail_header()
 {
-   HRESULT hr = NOERROR;
+    HRESULT hr = NOERROR;
 
     if( _from != "-" )  hr = _mail->put_From( Bstr( _from ) );    if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::from", _from.c_str() );
                         hr = _mail->put_To  ( Bstr( _to   ) );    if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::to"  , _to.c_str() );
     if( _cc   != "-" )  hr = _mail->put_Cc  ( Bstr( _cc   ) );    if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::cc"  , _cc.c_str() );
+    if( _cc   != "-" )  hr = _mail->put_Cc  ( Bstr( _cc   ) );    if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::cc"  , _cc.c_str() );
     if( _bcc  != "-" )  hr = _mail->put_Bcc ( Bstr( _bcc  ) );    if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::bcc" , _bcc.c_str() );
 }
-
+*/
 //-----------------------------------------------------------------------Prefix_log::start_new_file
 
 void Prefix_log::start_new_file()
@@ -683,7 +727,7 @@ void Prefix_log::start_new_file()
 }
 
 //-------------------------------------------------------------------Prefix_log::set_mail_from_name
-
+/*
 void Prefix_log::set_mail_from_name( const string& from_name, bool overwrite )
 {
     HRESULT hr;
@@ -713,9 +757,9 @@ void Prefix_log::set_mail_from_name( const string& from_name, bool overwrite )
         _from_name = from_name;
     }
 }
-
+*/
 //---------------------------------------------------------------------Prefix_log::set_mail_subject
-
+/*
 void Prefix_log::set_mail_subject( const string& subject, bool overwrite )
 {
     HRESULT hr;
@@ -738,9 +782,9 @@ void Prefix_log::set_mail_subject( const string& subject, bool overwrite )
         _subject = subject;
     }
 }
-
+*/
 //------------------------------------------------------------------------Prefix_log::set_mail_body
-
+/*
 void Prefix_log::set_mail_body( const string& body, bool overwrite )
 {
     HRESULT hr;
@@ -763,7 +807,7 @@ void Prefix_log::set_mail_body( const string& body, bool overwrite )
         _body = body;
     }
 }
-
+*/
 //---------------------------------------------------------------------------------Prefix_log::send
 
 void Prefix_log::send( int reason, Scheduler_event* scheduler_event )
@@ -828,6 +872,9 @@ void Prefix_log::send( int reason, Scheduler_event* scheduler_event )
 
 void Prefix_log::send_really( Scheduler_event* scheduler_event )
 {
+    assert( scheduler_event );
+
+
     int ok;
 
     if( filename() != "*stderr" )
@@ -837,13 +884,13 @@ void Prefix_log::send_really( Scheduler_event* scheduler_event )
         if( scheduler_event )  scheduler_event->set_log_path( filename() );
     }
 
-    if( scheduler_event )
+  //if( scheduler_event )
     {
         scheduler_event->set_mail( imail() );
-        ok = scheduler_event->send_mail();
+        ok = scheduler_event->send_mail( _mail_defaults );
     }
-    else
-        ok = imail()->send();
+  //else
+  //    ok = imail()->send();
 
 
     if( ok )
@@ -959,13 +1006,21 @@ xml::Element_ptr Prefix_log::dom_element( const xml::Document_ptr& document, con
     if( _mail_on_success            )  log_element.setAttribute( "mail_on_success", "yes" );
     if( _mail_on_process            )  log_element.setAttribute( "mail_on_process", _mail_on_process );
 
-
+/*
     string smtp_server = _smtp_server == "-"? "" : _smtp_server;
     string from        = _from        == "-"? "" : _from;
     string to          = _to          == "-"? "" : _to;
     string cc          = _cc          == "-"? "" : _cc;
     string bcc         = _bcc         == "-"? "" : _bcc;
     string subject     = _subject     == "-"? "" : _subject;
+*/
+
+    string smtp_server = _mail_defaults[ "smtp"    ];
+    string from        = _mail_defaults[ "from"    ];
+    string to          = _mail_defaults[ "to"      ];
+    string cc          = _mail_defaults[ "cc"      ];
+    string bcc         = _mail_defaults[ "bcc"     ];
+    string subject     = _mail_defaults[ "subject" ];
 
     if( _mail )
     {

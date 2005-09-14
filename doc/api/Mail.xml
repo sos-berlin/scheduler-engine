@@ -1,0 +1,208 @@
+<?xml version="1.0"?>
+<!-- $Id: Task.xml 3885 2005-09-13 21:21:44Z jz $ -->
+
+<?xml-stylesheet href="api_all_languages.xsl" type="text/xsl"?>
+
+
+<api.class 
+    name        = "Mail" 
+    object_name = "mail"
+    base_dir    = "../"
+    author      = "$Author: jz $"
+    date        = "$Date: 2005-09-13 23:21:44 +0200 (Di, 13 Sep 2005) $"
+>
+
+
+    <property name="smtp">
+        <com>
+            <com.result>
+                <com.type type="BSTR"/>
+            </com.result>
+        </com>
+
+        <title>
+            Name des SMTP-Servers
+        </title>
+    </property>
+
+
+    <property name="queue_dir">
+        <com>
+            <com.result name="path">
+                <com.type type="BSTR"/>
+            </com.result>
+        </com>
+
+        <title>
+            Verzeichnis der nicht versendbaren eMails
+        </title>
+    </property>
+
+
+    <property name="from">
+        <com>
+            <com.result>
+                <com.type type="BSTR"/>
+            </com.result>
+        </com>
+
+        <title>
+            Absender
+        </title>
+    </property>
+
+
+    <property name="to">
+        <com>
+            <com.result>
+                <com.type type="BSTR"/>
+            </com.result>
+        </com>
+
+        <title>
+            Empfänger
+        </title>
+    </property>
+
+
+    <property name="cc">
+        <com>
+            <com.result>
+                <com.type type="BSTR"/>
+            </com.result>
+        </com>
+
+        <title>
+            Empfänger einer Kopie der Nachricht, <i>carbon copy</i>
+        </title>
+    </property>
+
+
+    <property name="bcc">
+        <com>
+            <com.result>
+                <com.type type="BSTR"/>
+            </com.result>
+        </com>
+
+        <title>
+            Unsichtbarer Empfänger einer Kopie der Nachricht, <i>blind carbon copy</i>
+        </title>
+    </property>
+
+
+    <property name="subject">
+        <com>
+            <com.result>
+                <com.type type="BSTR"/>
+            </com.result>
+        </com>
+
+        <title>
+            Betreff
+        </title>
+    </property>
+
+
+    <property name="body">
+        <com>
+            <com.result>
+                <com.type type="BSTR"/>
+            </com.result>
+        </com>
+
+        <title>
+            Inhalt der Nachricht
+        </title>
+    </property>
+
+
+    <method name="add_file">
+        <com>
+            <com.parameter name="path">
+                <com.type type="BSTR"/>
+            </com.parameter>
+
+            <com.parameter name="filename_for_mail">
+                <com.type type="BSTR"/>
+            </com.parameter>
+
+            <com.parameter name="content_type" optional="true">
+                <com.type type="BSTR"/>
+            </com.parameter>
+
+            <com.parameter name="enconding" optional="true">
+                <com.type type="BSTR"/>
+            </com.parameter>
+        </com>
+        
+        <title>
+            Fügt einen Anhang hinzu
+        </title>
+    </method>
+
+
+    <method name="add_header_field">
+        <com>   
+            <com.parameter name="field_name">
+                <com.type type="BSTR"/>
+            </com.parameter>
+
+            <com.parameter name="value">
+                <com.type type="BSTR"/>
+            </com.parameter>
+        </com>
+        
+        <title>
+            Fügt dem eMail-Kopf ein Feld hinzu
+        </title>
+    </method>
+
+
+    <method name="dequeue">
+        <com/>   
+        
+        <title>
+            Nachrichten aus dem Verzeichnis <code>queue_dir</code> erneut versuchen zu versenden
+        </title>
+    </method>
+
+
+    <property name="dequeue_log" access="read">
+        <com>
+            <com.result name="content">
+                <com.type type="BSTR"/>
+            </com.result>        
+        </com>
+    </property>
+
+
+    <property name="xslt_stylesheet_path">
+        <com>
+            <com.result name="path">
+                <com.type type="BSTR"/>
+            </com.result>        
+        </com>
+    </property>    
+
+
+    <property name="xslt_stylesheet" access="read">
+        <com>
+            <com.result name="path">
+                <com.type class="Xslt_stylesheet"/>
+            </com.result>        
+        </com>
+    </property>    
+
+
+    <title>
+        eMail-Versand
+    </title>
+
+
+    <description>
+        <p>
+        </p>
+    </description>
+    
+</api.class>

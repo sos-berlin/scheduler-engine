@@ -18,12 +18,28 @@ namespace sos {
 namespace spooler {
 
 
+//------------------------------------------------------------------------------------Mail_defaults
+    
+struct Mail_defaults
+{
+                                Mail_defaults               ( Spooler* );
+
+    bool                        has_value                   ( const string& name ) const            { return _map.find( name ) != _map.end(); }
+    string                      operator[]                  ( const string& name ) const            { Map::const_iterator it = _map.find( name );  return it == _map.end()? "" : it->second; }
+    void                        set                         ( const string& name, const string& value )  { _map[ name ] = value; }
+
+    typedef map<string,string>  Map;
+    Map                        _map;
+};
+
 //-----------------------------------------------------------------------------------------Com_mail
 
 struct Com_mail : spooler_com::Imail, 
                   spooler_com::Ihas_java_class_name, 
                   Sos_ole_object               
 {
+    typedef map<string,string>  Defaults_map;
+
     struct File
     {
         string                 _real_filename;
@@ -91,6 +107,10 @@ struct Com_mail : spooler_com::Imail,
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr& dom );
     void                    set_dom                         ( const xml::Element_ptr& );
 
+  //void                    set_defaults                    ( const Defaults_map& defaults          ) { _defaults = defaults; }
+  //void                    set_default                     ( const string& what, const string& value ) { _defaults[ what ] = value; }
+  //Defaults_map*               defaults                    ()                                      { return &_defaults; }
+
     void                    set_subject                     ( const string& );
     void                    set_from                        ( const string& );
     void                    set_from_name                   ( const string& );
@@ -99,6 +119,8 @@ struct Com_mail : spooler_com::Imail,
     void                    set_bcc                         ( const string& );
     void                    set_body                        ( const string& );
     void                    set_smtp                        ( const string& );
+    void                    set_queue_dir                   ( const string& );
+    string                      queue_dir                   ();
     string                      smtp                        ()                                      { return _smtp; }
     void                        add_header_field            ( const string& name, const string& value );
     void                        add_file                    ( const string& real_filename, const string& mail_filename, const string& content_type, const string& encoding );
@@ -106,7 +128,7 @@ struct Com_mail : spooler_com::Imail,
 
 
     int                         auto_dequeue                ()                                      { return _msg->auto_dequeue(); }
-    int                         send                        ();
+    int                         send                        ( const Mail_defaults& );
     ptr<Xslt_stylesheet>        xslt_stylesheet             ();
 
   private:
@@ -120,12 +142,16 @@ struct Com_mail : spooler_com::Imail,
     string                     _from;
     string                     _to;
     string                     _cc;
+    bool                       _cc_set;
     string                     _bcc;
+    bool                       _bcc_set;
     string                     _body;
     list<File>                 _files;
 
     typedef list< pair<string,string> >  Header_fields;
     Header_fields              _header_fields;
+
+  //Mail_defaults              _defaults;
 
     string                     _xslt_stylesheet_path;
     ptr<Xslt_stylesheet>       _xslt_stylesheet;

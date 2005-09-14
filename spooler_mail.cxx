@@ -17,6 +17,16 @@ extern Typelib_descr spooler_typelib;
 
 DESCRIBE_CLASS( &spooler_typelib, Com_mail, mail, CLSID_Mail, "Spooler.Mail", "1.0" )
 
+//---------------------------------------------------------------------Mail_defaults::Mail_defaults
+
+Mail_defaults::Mail_defaults( Spooler* spooler )
+{
+    if( spooler  &&  this != &spooler->_mail_defaults )  
+    {
+        _map = spooler->_mail_defaults._map;
+    }
+}
+
 //-------------------------------------------------------------------------------Com_mail::_methods
 #ifdef Z_COM
 
@@ -144,14 +154,21 @@ void Com_mail::set_dom( const xml::Element_ptr& mail_element )
 
     xml::Element_ptr header_element = mail_element.select_node_strict( "header" );
 
-    set_from     ( header_element.getAttribute( "from_address" ) );
-    set_from_name( header_element.getAttribute( "from_name" ) );
-    set_to       ( header_element.getAttribute( "to"        ) );
-    set_cc       ( header_element.getAttribute( "cc"        ) );
-    set_bcc      ( header_element.getAttribute( "bcc"       ) );
+
+    // getAttribute() liefert "", wenn das Attribut nicht angegeben ist. 
+    // Also bestimmen wir: cc="-" löscht das voreingestellte cc.
+
+    string value;
+    value = header_element.getAttribute( "from_address" );    if( value != "" )  set_from     ( value == "-"? "" : value );
+    value = header_element.getAttribute( "from_name"    );    if( value != "" )  set_from_name( value == "-"? "" : value );
+    value = header_element.getAttribute( "to"           );    if( value != "" )  set_to       ( value == "-"? "" : value );
+    value = header_element.getAttribute( "cc"           );    if( value != "" )  set_cc       ( value == "-"? "" : value );
+    value = header_element.getAttribute( "bcc"          );    if( value != "" )  set_bcc      ( value == "-"? "" : value );
   //set_smtp     ( header_element.getAttribute( "smtp"      ) );
   //set_subject  ( header_element.getAttribute( "subject"   ) );
-    set_subject  ( xml::Element_ptr( header_element.select_node( "subject" ) ).trimmed_text() );
+
+    if( xml::Element_ptr e = header_element.select_node( "subject" ) )  set_subject( e.trimmed_text() );
+
 
     xml::Xpath_nodes field_elements = mail_element.select_nodes( "header/field" );
     for( int i = 0; i < field_elements.count(); i++ )
@@ -163,7 +180,7 @@ void Com_mail::set_dom( const xml::Element_ptr& mail_element )
     }
 
 
-    set_body( xml::Element_ptr( mail_element.select_node( "body/text" ) ).trimmed_text() );
+    if( xml::Element_ptr e = header_element.select_node( "body/text" ) )  set_body( e.trimmed_text() );
 
     xml::Xpath_nodes file_elements = mail_element.select_nodes( "body/file" );
     for( int i = 0; i < file_elements.count(); i++ )
@@ -215,6 +232,7 @@ void Com_mail::set_cc( const string& cc )
 {
     _msg->set_cc( cc );
     _cc = _msg->cc();
+    _cc_set = true;
 }
 
 //--------------------------------------------------------------------------------Com_mail::set_bcc
@@ -223,6 +241,7 @@ void Com_mail::set_bcc( const string& bcc )
 {
     _msg->set_bcc( bcc );
     _bcc = _msg->bcc();
+    _bcc_set = true;
 }
 
 //-------------------------------------------------------------------------------Com_mail::set_body
@@ -239,6 +258,20 @@ void Com_mail::set_smtp( const string& smtp )
 {
     _smtp = smtp;
     _msg->set_smtp( smtp );
+}
+
+//--------------------------------------------------------------------------Com_mail::set_queue_dir
+
+void Com_mail::set_queue_dir( const string& queue_dir )
+{
+    _msg->set_queue_dir( queue_dir);
+}
+
+//------------------------------------------------------------------------------Com_mail::queue_dir
+
+string Com_mail::queue_dir()
+{
+    return _msg->queue_dir();
 }
 
 //-----------------------------------------------------------------------Com_mail::add_header_field
@@ -524,7 +557,7 @@ STDMETHODIMP Com_mail::put_Queue_dir( BSTR queue_dir )
 
     try
     {
-        _msg->set_queue_dir( bstr_as_string(queue_dir) );
+        set_queue_dir( bstr_as_string(queue_dir) );
     }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Mail.queue_dir" ); }
     catch( const exception & x )  { hr = _set_excepinfo( x, "Spooler.Mail.queue_dir" ); }
@@ -534,7 +567,7 @@ STDMETHODIMP Com_mail::put_Queue_dir( BSTR queue_dir )
 
 //--------------------------------------------------------------------------Com_mail::get_queue_dir
 
-STDMETHODIMP Com_mail::get_Queue_dir( BSTR* queue_dir )
+STDMETHODIMP Com_mail::get_Queue_dir( BSTR* result )
 {
     HRESULT hr = NOERROR;
 
@@ -542,7 +575,7 @@ STDMETHODIMP Com_mail::get_Queue_dir( BSTR* queue_dir )
 
     try
     {
-        *queue_dir = SysAllocString_string( _msg->queue_dir() );
+        *result = SysAllocString_string( queue_dir() );
     }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Mail.queue_dir" ); }
     catch( const exception & x )  { hr = _set_excepinfo( x, "Spooler.Mail.queue_dir" ); }
@@ -587,9 +620,30 @@ STDMETHODIMP Com_mail::get_Xslt_stylesheet( Ixslt_stylesheet** result )
 
 //-----------------------------------------------------------------------------------Com_mail::send
 
-int Com_mail::send()
+int Com_mail::send( const Mail_defaults& defaults )
 {
     if( _msg == 0 )  throw_ole( E_POINTER, "Com_mail::send" );
+
+
+    Email_address from = _from;
+
+    if( _from           == ""  &&  defaults.has_value( "from"      ) )  set_from     ( defaults[ "from"      ] );
+    if( from.name()     == ""  &&  defaults.has_value( "from_name" ) )  set_from_name( defaults[ "from_name" ] );
+    if( _to             == ""  &&  defaults.has_value( "to"        ) )  set_to       ( defaults[ "to"        ] );
+    if( !_cc_set               &&  defaults.has_value( "cc"        ) )  set_cc       ( defaults[ "cc"        ] );
+    if( !_bcc_set              &&  defaults.has_value( "bcc"       ) )  set_bcc      ( defaults[ "bcc"       ] );
+    if( _subject        == ""  &&  defaults.has_value( "subject"   ) )  set_subject  ( defaults[ "subject"   ] );
+    if( _body           == ""  &&  defaults.has_value( "body"      ) )  set_body     ( defaults[ "body"      ] );
+
+    if( queue_dir()     == ""  &&  defaults.has_value( "queue_dir" )  &&  defaults[ "queue_dir" ] != "-" )  set_queue_dir( defaults[ "queue_dir" ] );
+    if( _smtp           == ""  &&  defaults.has_value( "smtp"      )  &&  defaults[ "smtp"      ] != "-" )  set_smtp     ( defaults[ "smtp"      ] );
+
+
+    if( _from == ""  ||  _to == ""  ||  _subject == ""  ||  _body == "" )
+    {
+        _spooler->_log.debug( "Email unterdrückt, weil To oder From fehlt" );
+        return 0;
+    }
 
     _spooler->_log.debug( "email " + _msg->to() + ": " + _msg->subject() );
 

@@ -156,7 +156,7 @@ struct Task : Object,
     bool                        operation__end              ();
 
     void                        set_mail_defaults           ();
-    void                        clear_mail                  ();
+  //void                        clear_mail                  ();
     void                        trigger_event               ( Scheduler_event* );
     void                        send_collected_log          ();
 

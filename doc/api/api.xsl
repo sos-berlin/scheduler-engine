@@ -298,8 +298,8 @@
     <p class="api_headline">
         <xsl:value-of select="@name"/>
 
-        <xsl:if test="@title">
-             - <xsl:value-of select="@title"/>
+        <xsl:if test="title">
+             &#160;–&#160; <xsl:value-of select="title"/>
         </xsl:if>
     </p>
     
@@ -593,18 +593,20 @@
                 <span class="mono"><xsl:text>, </xsl:text></span>
             </xsl:if>
             
-            <xsl:apply-templates select="."/>
-            
-            <xsl:if test="@default">
-                <span class="mono">
-                    <xsl:text> = </xsl:text>
-                    <xsl:value-of select="@default"/>
-                </span>
-            </xsl:if>
-            
-            <xsl:if test="@optional">
-                &#160;<span style="font-size: 8pt">optional</span>
-            </xsl:if>
+            <span style="white-space: nowrap">
+                <xsl:apply-templates select="."/>
+                
+                <xsl:if test="@default">
+                    <span class="mono">
+                        <xsl:text> = </xsl:text>
+                        <xsl:value-of select="@default"/>
+                    </span>
+                </xsl:if>
+                
+                <xsl:if test="@optional">
+                    &#160;<span style="font-size: 8pt">(optional)</span>
+                </xsl:if>
+            </span>
         </xsl:for-each>
         
         <span class="mono"><xsl:text> </xsl:text></span>

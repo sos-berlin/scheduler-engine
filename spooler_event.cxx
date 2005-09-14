@@ -2,7 +2,7 @@
 
 
 #include "spooler.h"
-//#include "spooler_files.h"
+
 
 namespace sos {
 namespace spooler {
@@ -151,6 +151,7 @@ xml::Document_ptr Scheduler_event::mail_dom( const xml::Document_ptr& event_dom_
     }    
 
 
+    if( !mail_dom )
     try
     {
         stylesheet = _object->mail_xslt_stylesheet();
@@ -187,34 +188,42 @@ Com_mail* Scheduler_event::mail()
     return _mail;
 }
 
+//----------------------------------------------------------------------Scheduler_event::make_email
+/*
+void Scheduler_event::make_email()
+{
+}
+*/
 //-----------------------------------------------------------------------Scheduler_event::send_mail
 
-int Scheduler_event::send_mail( const xml::Document_ptr& mail_dom_ )
+int Scheduler_event::send_mail( const Mail_defaults& mail_defaults )
 {
     try
     {
         if( !_mail )
         {
-            if( _subject != "" )  mail()->set_subject( _subject );
-            if( _body    != "" )  mail()->set_body( _body );
+            //if( _subject != "" )  mail()->set_subject( _subject );
+            //if( _body    != "" )  mail()->set_body( _body );
 
             if( _mail )
             {
-                if( _spooler->_log_mail_from != ""  &&  _spooler->_log_mail_from != "-" )  _mail->set_from( _spooler->_log_mail_from );
+                //if( _spooler->_log_mail_from != ""  &&  _spooler->_log_mail_from != "-" )  _mail->set_from( _spooler->_log_mail_from );
                 
                 _mail->set_from_name( _spooler->name() );
 
+                /*
                 if( _spooler->_log_mail_to   != ""  &&  _spooler->_log_mail_to   != "-" )  _mail->set_to  ( _spooler->_log_mail_to   );
                 if( _spooler->_log_mail_cc   != ""  &&  _spooler->_log_mail_cc   != "-" )  _mail->set_cc  ( _spooler->_log_mail_cc   );
                 if( _spooler->_log_mail_bcc  != ""  &&  _spooler->_log_mail_bcc  != "-" )  _mail->set_bcc ( _spooler->_log_mail_bcc  );
                 if( _spooler->_smtp_server   != ""  &&  _spooler->_smtp_server   != "-" )  _mail->set_smtp( _spooler->_smtp_server   );
+                */
 
                 _mail->add_header_field( "X-SOS-Spooler", "" );
             }
         }
 
 
-        xml::Document_ptr mail_dom  = mail_dom_;
+        xml::Document_ptr mail_dom;
         xml::Document_ptr event_dom;
 
         if( !mail_dom )
@@ -254,7 +263,7 @@ int Scheduler_event::send_mail( const xml::Document_ptr& mail_dom_ )
                 mail->add_attachment( mail_dom.xml(true), "mail.xml", "text/xml", "quoted-printable" );
             }
 
-            return mail->send();
+            return mail->send( mail_defaults );
         }
     }
     catch( exception& x )
