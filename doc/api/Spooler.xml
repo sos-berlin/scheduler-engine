@@ -24,18 +24,38 @@
 <property name="id" access="read">
     <com>
         <com.result>
-            <com.type class="BSTR"/>
+            <com.type type="BSTR"/>
         </com.result>
     </com>
+    
+    <title>
+        Wert der Kommandozeilenoption <scheduler_option name="id"/>.
+    </title>
+    
+    <description>
+        <p>
+            Siehe <scheduler_option name="id"/>;
+        </p>
+    </description>
 </property>
 
 
 <property name="param" access="read">
     <com>
         <com.result>
-            <com.type class="BSTR"/>
+            <com.type type="BSTR"/>
         </com.result>
     </com>
+    
+    <title>
+        Wert der Kommandozeilenoption <code>-param=</code> beim Start des Schedulers
+    </title>
+
+    <description>
+        <p>
+            Siehe <scheduler_option name="param"/>;
+        </p>
+    </description>
 </property>
 
 
@@ -78,6 +98,16 @@
             <com.type type="BSTR"/>
         </com.result>
     </com>
+    
+    <title>
+        Liefert die Kommandozeilenoption <code>-include-path=</code>.
+    </title>
+    
+    <description>
+        <p>
+            Siehe <scheduler_option name="include-path"/>.
+        </p>
+    </description>
 </property>
 
 
@@ -102,7 +132,7 @@
         </com.parameter>
         
         <com.result>
-            <com.type class="VARIANT*"/>
+            <com.type type="VARIANT*"/>
         </com.result>
     </com>
 </property>
@@ -132,6 +162,15 @@
             <com.type class="Job_chain"/>
         </com.result>
     </com>
+    
+    <description>
+        <p>
+            Liefert eine neue <scheduler_method class="Job_chain"/>.
+            Diese Jobkette kann, nachdem sie mit Jobs gefüllt worden ist, 
+            mit <scheduler_method class="Spooler" name="add_job_chain"/> 
+            dem Scheduler hinzugefügt werden
+        </p>
+    </description>
 </method>
 
 
@@ -179,8 +218,23 @@
     <com>
         <com.result>
             <com.type type="BSTR"/>
+            <description>
+                <p> 
+                    Der Pfad endet unter Unix mit "<code>/</code>" und unter Windows mit "<code>\</code>".
+                </p>
+            </description>
         </com.result>
     </com>
+    
+    <title>
+        Das Arbeitsverzeichnis beim Start des Schedulers
+    </title>
+    
+    <description>
+        <p>
+            Siehe <scheduler_option name="cd"/>.
+        </p>
+    </description>
 </property>
 
 
@@ -208,11 +262,39 @@
 
 <method name="abort_immediately">
     <com/>
+    
+    <title>
+        Bricht den Scheduler augenblicklich ab
+    </title>
+    
+    <description>
+        <p>
+            Bricht den Scheduler augenblicklich ab. 
+            Kein Job hat Gelegenheit, darauf zu reagieren. 
+        </p>
+        <p>
+            Der Scheduler bricht zuvor alle gestarteten Prozesse ab.
+            Das sind die Tasks und die Prozesse von <scheduler_method class="Task" method="create_subprocess"/>
+            und <scheduler_method class="Task" method="add_pid"/>.
+        </p>
+    </description>
 </method>
 
 
 <method name="abort_immediately_and_restart">
     <com/>
+    
+    <title>
+        Bricht den Scheduler augenblicklich ab und startet ein neu.
+    </title>
+
+    <description>
+        <p>
+            Wie <scheduler_method class="Task" method="abort_immediately"/>,
+            nur dass der Scheduler sich erneut startet.
+            Dabei verwendet er die Kommandozeilenparametern wieder.
+        </p>
+    </description>
 </method>
 
 
@@ -289,8 +371,14 @@
     </com>
     
     <title>
-         Option <scheduler_option name="ini"/> (Pfadname der <scheduler_ini_entry file="factory.ini"/>)
+         Wert der Option <code>-ini=</code> (Dateiname der <code>factory.ini</code>)
     </title>
+
+    <description>
+        <p>
+            Siehe <scheduler_option name="ini"/>, <a href="../factory_ini.xml"><code>factory.ini</code></a>
+        </p>
+    </description>
 </property>
 
 
@@ -298,12 +386,32 @@
     <com>
         <com.parameter name="xml">
             <com.type type="BSTR"/>
+            <description>
+                <p>
+                    Siehe <a href="../xml_commands.xml">XML-Kommandos</a>.
+                </p>
+            </description>
         </com.parameter>
 
         <com.result name="xml_result">
             <com.type type="BSTR"/>
+            <description>
+                <p>
+                    Liefert die XML-Antwort des ausgeführten Kommandos.
+                </p>
+            </description>
         </com.result>
     </com>
+    
+    <title>
+        Führt ein XML-Kommando aus
+    </title>
+    
+    <description>
+        <p>
+            Fehler werden als XML-Antwort <scheduler_element name="ERROR" directory="xml/answer/"/> geliefert.
+        </p>
+    </description>
 </method>
 
 

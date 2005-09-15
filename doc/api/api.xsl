@@ -591,7 +591,7 @@
     
     <xsl:if test="parent::*/title and $show_title and $title_rowspan &gt; 0 and position() = last()">
         <xsl:element name="tr">
-            <xsl:if test="$is_in_table">
+            <!--xsl:if test="$is_in_table">
                 <xsl:attribute name="class">api_method_clickable</xsl:attribute>
                 <xsl:attribute name="id"><xsl:value-of select="$tr_id"/></xsl:attribute>
                 <xsl:attribute name="onclick">window.location = "#method__<xsl:value-of select="parent::*/@name"/>";</xsl:attribute>
@@ -605,7 +605,7 @@
                     api_method_in_table__onmouseout( "<xsl:value-of select="$method_tr_id"/>" )
                 </xsl:attribute>
                 
-            </xsl:if>
+            </xsl:if-->
             
             <td></td>
             

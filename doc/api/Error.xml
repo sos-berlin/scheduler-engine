@@ -19,6 +19,10 @@
         </com.result>
     </com>
     
+    <title>
+        <code>true</code>, wenn ein Fehler vorliegt
+    </title>
+    
 </property>
 
 
