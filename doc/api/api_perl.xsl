@@ -14,7 +14,7 @@
     <xsl:param name="access"/>
 
     <xsl:if test="parent::api.class/@object_name">
-        <span class="object_name">
+        <span class="api_object_name">
             $<xsl:value-of select="parent::api.class/@object_name"/>
             <xsl:text>-></xsl:text>
         </span>        

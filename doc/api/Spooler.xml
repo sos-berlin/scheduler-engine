@@ -342,25 +342,31 @@
         </com.result>
     </com>
     
-    <com>
-        <com.parameter name="path">
-            <com.type type="java.io.path"/>
-        </com.parameter>
-
-        <com.result>
-            <com.type type="Xslt_stylesheet"/>
-        </com.result>
-    </com>
+    <java>
+        <java.result>
+            <java.type type="Xslt_stylesheet"/>
+        </java.result>
+    </java>
     
-    <com>
-        <com.parameter name="path">
-            <com.type type="java.lang.String"/>
-        </com.parameter>
+    <java>
+        <java.parameter name="path">
+            <java.type type="java.io.path"/>
+        </java.parameter>
 
-        <com.result>
-            <com.type type="Xslt_stylesheet"/>
-        </com.result>
-    </com>
+        <java.result>
+            <java.type type="Xslt_stylesheet"/>
+        </java.result>
+    </java>
+    
+    <java>
+        <java.parameter name="path">
+            <java.type type="java.lang.String"/>
+        </java.parameter>
+
+        <java.result>
+            <java.type type="Xslt_stylesheet"/>
+        </java.result>
+    </java>
 </method>
 
 

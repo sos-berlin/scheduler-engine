@@ -395,7 +395,7 @@
         <!-- Trenner zwischen verschiedenen Eigenschaften oder Methoden -->
         
         <tr>
-            <td colspan="99" style="font-size: 4pt">
+            <td colspan="99" style="font-size: 1em">
                 <!--hr style="color: lightgrey; background-color: lightgrey"/-->
                 &#160;
             </td>
@@ -498,17 +498,32 @@
     <xsl:param name="title_rowspan" select="1"/>
     <xsl:param name="is_in_table"   select="false()"/>
     
-    <xsl:variable name="tr_id" select="concat( local-name(.), '.', position(), $access )"/>
+    <xsl:variable name="method_tr_id" select="concat( 'tr_', generate-id(parent::*) )"/>
+    <xsl:variable name="tr_id"        select="concat( $method_tr_id, '.', position(), $access )"/>
     
     <xsl:element name="tr">
-        <xsl:attribute name="class">api_method</xsl:attribute>
-        
-        <xsl:if test="$is_in_table">
-            <xsl:attribute name="id">tr_<xsl:value-of select="$tr_id"/></xsl:attribute>
-            <xsl:attribute name="onclick">window.location = "#method__<xsl:value-of select="parent::*/@name"/>";</xsl:attribute>
-            <xsl:attribute name="style">cursor: hand;</xsl:attribute>
-        </xsl:if>
-    
+
+        <xsl:choose>
+            <xsl:when test="$is_in_table">
+                <xsl:attribute name="class">api_method_clickable</xsl:attribute>
+                <xsl:attribute name="id"><xsl:value-of select="$tr_id"/></xsl:attribute>
+                <xsl:attribute name="onclick">window.location = "#method__<xsl:value-of select="parent::*/@name"/>";</xsl:attribute>
+                <xsl:attribute name="style">cursor: hand;</xsl:attribute>
+                
+                <xsl:attribute name="onmouseover">
+                    api_method_in_table__onmouseover( "<xsl:value-of select="$method_tr_id"/>" )
+                </xsl:attribute>
+
+                <xsl:attribute name="onmouseout" >
+                    api_method_in_table__onmouseout( "<xsl:value-of select="$method_tr_id"/>" )
+                </xsl:attribute>
+                
+            </xsl:when>
+
+            <xsl:otherwise>
+                <xsl:attribute name="class">api_method</xsl:attribute>
+            </xsl:otherwise>
+        </xsl:choose>        
     
         <td class="api_type">
             <xsl:choose>
@@ -526,9 +541,6 @@
             </xsl:choose>
         </td>
 
-        <!--td class="api_method">
-        </td-->
-        
         <xsl:element name="td">
             <xsl:attribute name="class">api_method</xsl:attribute>
             
@@ -578,13 +590,29 @@
     
     
     <xsl:if test="parent::*/title and $show_title and $title_rowspan &gt; 0 and position() = last()">
-        <tr>
+        <xsl:element name="tr">
+            <xsl:if test="$is_in_table">
+                <xsl:attribute name="class">api_method_clickable</xsl:attribute>
+                <xsl:attribute name="id"><xsl:value-of select="$tr_id"/></xsl:attribute>
+                <xsl:attribute name="onclick">window.location = "#method__<xsl:value-of select="parent::*/@name"/>";</xsl:attribute>
+                <xsl:attribute name="style">cursor: hand;</xsl:attribute>
+                
+                <xsl:attribute name="onmouseover">
+                    api_method_in_table__onmouseover( "<xsl:value-of select="$method_tr_id"/>" )
+                </xsl:attribute>
+
+                <xsl:attribute name="onmouseout" >
+                    api_method_in_table__onmouseout( "<xsl:value-of select="$method_tr_id"/>" )
+                </xsl:attribute>
+                
+            </xsl:if>
+            
             <td></td>
             
             <td colspan="99" class="api_title">
                 <xsl:value-of select="parent::*/title"/>
             </td>
-        </tr>
+        </xsl:element>
     </xsl:if>
 
 </xsl:template>
@@ -594,7 +622,7 @@
 <xsl:template match="method | property" mode="method_name">
 
     <xsl:if test="parent::api.class/@object_name">
-        <span class="object_name">
+        <span class="api_object_name">
             <xsl:value-of select="parent::api.class/@object_name"/>
             <xsl:text>.</xsl:text>
         </span>        
@@ -718,7 +746,7 @@
 
 <xsl:template match="api.class" mode="detailed_methods">
     
-    <xsl:apply-templates select="method | property" mode="detailed_methods"/>
+    <xsl:apply-templates select="method [ com ] | property [ com ]" mode="detailed_methods"/>
     
 </xsl:template>
 
