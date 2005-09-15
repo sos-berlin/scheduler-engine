@@ -5,25 +5,39 @@
 
 
 <api.class 
-    name        = "Run_time" 
-    object_name = "run_time"
+    name        = "Variable" 
+    object_name = "variable"
     base_dir    = "../"
     author      = "$Author: jz $"
     date        = "$Date: 2005-09-14 00:36:46 +0200 (Mi, 14 Sep 2005) $"
 >
 
+<property name="value" default_property="true">
+    <com>
+        <com.result name="value">
+            <com.type type="VARIANT*"/>
+        </com.result>
+    </com>
+</property>
 
-<property name="xml" access="write">
+
+<property name="name">
     <com>
         <com.result>
             <com.type type="BSTR"/>
         </com.result>
     </com>
-
-    <title>
-        Siehe <scheduler_element name="run_time"/>.
-    </title>
 </property>
 
+
+<!--
+<method name="clone">
+    <com>
+        <com.result>
+            <com.type class="Variable"/>
+        </com.result>
+    </com>
+</method>
+-->
 
 </api.class>

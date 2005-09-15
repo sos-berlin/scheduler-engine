@@ -1,0 +1,70 @@
+<?xml version="1.0"?>
+<!-- $Id: Task.xml 3886 2005-09-13 22:36:46Z jz $ -->
+
+<?xml-stylesheet href="api_all_languages.xsl" type="text/xsl"?>
+
+
+<api.class 
+    name        = "Job_chain_node" 
+    object_name = "node"
+    base_dir    = "../"
+    author      = "$Author: jz $"
+    date        = "$Date: 2005-09-14 00:36:46 +0200 (Mi, 14 Sep 2005) $"
+>
+
+
+<property name="state" access="read">
+    <com>
+        <com.result>
+            <com.type type="VARIANT*"/>
+        </com.result>
+    </com>
+</property>
+
+
+<property name="next_node" access="read">
+    <com>
+        <com.result>
+            <com.type class="Job_chain_node"/>
+        </com.result>
+    </com>
+</property>
+
+
+<property name="error_node" access="read">
+    <com>
+        <com.result>
+            <com.type class="Job_chain_node"/>
+        </com.result>
+    </com>
+</property>
+
+
+<property name="job" access="read">
+    <com>
+        <com.result>
+            <com.type class="Job"/>
+        </com.result>
+    </com>
+</property>
+
+
+<property name="next_state" access="read">
+    <com>
+        <com.result>
+            <com.type type="VARIANT*"/>
+        </com.result>
+    </com>
+</property>
+
+
+<property name="error_state" access="read">
+    <com>
+        <com.result>
+            <com.type type="VARIANT*"/>
+        </com.result>
+    </com>
+</property>
+
+
+</api.class>

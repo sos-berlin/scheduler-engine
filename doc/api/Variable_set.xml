@@ -26,6 +26,31 @@
     </property>
 
 
+    <property name="value" default_property="true">
+        <com>
+            <com.parameter name="name">
+                <com.type type="BSTR"/>
+            </com.parameter>
+
+            <com.result name="value">
+                <com.type type="VARIANT*"/>
+            </com.result>
+        </com>
+        
+        <not_implemented programming_language="java"/>
+
+        <title>
+            Eine Variable
+        </title>
+        
+        <description>
+            <p>
+                Wenn eine nicht vorhandene Variable gelesen wird, 
+                kommt <api.empty/> zurück.
+            </p>
+        </description>
+    </property>
+
     <property name="var">
         <com>
             <com.parameter name="name">

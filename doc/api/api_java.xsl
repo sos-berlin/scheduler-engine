@@ -26,11 +26,13 @@
 <xsl:template match="property [ /*/@programming_language='java' ] | method [ /*/@programming_language='java' ]" mode="method_name">
     <xsl:param name="access"/>
 
-    <span class="object_name">
-        <xsl:value-of select="parent::api.class/@object_name"/>
-        <xsl:text>.</xsl:text>
-    </span>        
-    
+    <xsl:if test="parent::api.class/@object_name">
+        <span class="object_name">
+            <xsl:value-of select="parent::api.class/@object_name"/>
+            <xsl:text>.</xsl:text>
+        </span>        
+    </xsl:if>
+        
     <span class="mono">
         <xsl:if test="$access='write'">set_</xsl:if>
         <!--xsl:if test="$access='read'">&#160;&#160;&#160;&#160;</xsl:if>-->

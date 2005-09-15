@@ -1,0 +1,286 @@
+<?xml version="1.0"?>
+<!-- $Id: Task.xml 3886 2005-09-13 22:36:46Z jz $ -->
+
+<?xml-stylesheet href="api_all_languages.xsl" type="text/xsl"?>
+
+
+<api.class 
+    name        = "Log" 
+    object_name = "spooler_log"
+    base_dir    = "../"
+    author      = "$Author: jz $"
+    date        = "$Date: 2005-09-14 00:36:46 +0200 (Mi, 14 Sep 2005) $"
+>
+
+
+<method name="log">
+    <com>
+        <com.parameter name="level">
+            <com.type type="int"/>
+        </com.parameter>
+        
+        <com.parameter name="line">
+            <com.type type="BSTR"/>
+        </com.parameter>
+    </com>
+</method>
+
+
+<method name="error">
+    <com>
+        <com.parameter name="line">
+            <com.type type="BSTR"/>
+        </com.parameter>
+    </com>
+</method>
+
+
+<method name="warn">
+    <com>
+        <com.parameter name="line">
+            <com.type type="BSTR"/>
+        </com.parameter>
+    </com>
+</method>
+
+
+<method name="info">
+    <com>
+        <com.parameter name="line">
+            <com.type type="BSTR"/>
+        </com.parameter>
+    </com>
+</method>
+
+
+<method name="debug">
+    <com>
+        <com.parameter name="line">
+            <com.type type="BSTR"/>
+        </com.parameter>
+    </com>
+</method>
+
+
+<method name="debug1">
+    <com>
+        <com.parameter name="line">
+            <com.type type="BSTR"/>
+        </com.parameter>
+    </com>
+</method>
+
+
+<method name="debug2">
+    <com>
+        <com.parameter name="line">
+            <com.type type="BSTR"/>
+        </com.parameter>
+    </com>
+</method>
+
+
+<method name="debug3">
+    <com>
+        <com.parameter name="line">
+            <com.type type="BSTR"/>
+        </com.parameter>
+    </com>
+</method>
+
+
+<method name="debug4">
+    <com>
+        <com.parameter name="line">
+            <com.type type="BSTR"/>
+        </com.parameter>
+    </com>
+</method>
+
+
+<method name="debug5">
+    <com>
+        <com.parameter name="line">
+            <com.type type="BSTR"/>
+        </com.parameter>
+    </com>
+</method>
+
+
+<method name="debug6">
+    <com>
+        <com.parameter name="line">
+            <com.type type="BSTR"/>
+        </com.parameter>
+    </com>
+</method>
+
+
+<method name="debug7">
+    <com>
+        <com.parameter name="line">
+            <com.type type="BSTR"/>
+        </com.parameter>
+    </com>
+</method>
+
+
+<method name="debug8">
+    <com>
+        <com.parameter name="line">
+            <com.type type="BSTR"/>
+        </com.parameter>
+    </com>
+</method>
+
+
+<method name="debug9">
+    <com>
+        <com.parameter name="line">
+            <com.type type="BSTR"/>
+        </com.parameter>
+    </com>
+</method>
+
+
+<property name="log_file">
+    <com>
+        <com.result name="path">
+            <com.type type="BSTR"/>
+        </com.result>
+    </com>
+</property>
+
+
+<property name="mail">
+    <com>
+        <com.result>
+            <com.type class="Mail"/>
+        </com.result>
+    </com>
+</property>
+
+
+<property name="mail_on_error">
+    <com>
+        <com.result>
+            <com.type type="bool"/>
+        </com.result>
+    </com>
+</property>
+
+
+<property name="mail_on_warning">
+    <com>
+        <com.result>
+            <com.type type="bool"/>
+        </com.result>
+    </com>
+</property>
+
+
+<property name="mail_on_success">
+    <com>
+        <com.result>
+            <com.type type="bool"/>
+        </com.result>
+    </com>
+</property>
+
+
+<property name="mail_on_process">
+    <com>
+        <com.result>
+            <com.type type="int"/>
+        </com.result>
+    </com>
+</property>
+
+
+<property name="level">
+    <com>
+        <com.result>
+            <com.type type="int"/>
+        </com.result>
+    </com>
+</property>
+
+
+
+<property name="filename" access="read">
+    <com>
+        <com.result>
+            <com.type type="BSTR"/>
+        </com.result>
+    </com>
+</property>
+
+
+
+<property name="new_filename">
+    <com>
+        <com.result>
+            <com.type type="BSTR"/>
+        </com.result>
+    </com>
+</property>
+
+
+<!--
+<property name="collect_within">
+    <com>
+        <com.result>
+            <com.type type="VARIANT*"/>
+        </com.result>
+    </com>
+</property>
+
+
+<property name="collect_max">
+    <com>
+        <com.result>
+            <com.type type="VARIANT*"/>
+        </com.result>
+    </com>
+</property>
+-->
+
+
+<property name="mail_it">
+    <com>
+        <com.result>
+            <com.type type="bool"/>
+        </com.result>
+    </com>
+</property>
+
+
+<property name="last_error_line">
+    <com>
+        <com.result>
+            <com.type type="BSTR"/>
+        </com.result>
+    </com>
+</property>
+
+
+<property name="last">
+    <com>
+        <com.parameter name="level">
+            <com.type type="VARIANT*"/>
+        </com.parameter>
+        
+        <com.parameter>
+            <com.type type="BSTR"/>
+        </com.parameter>
+    </com>
+</property>
+
+
+<method name="start_new_file">
+    <com/>
+</method>
+
+
+
+</api.class>

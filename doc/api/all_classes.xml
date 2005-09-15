@@ -7,25 +7,19 @@
 <class_references
     base_dir="../"
 >
-<!--
     <class_reference class="Error"/>
--->    
     <class_reference class="Job"/>
-<!--    
     <class_reference class="Job_chain"/>
     <class_reference class="Job_chain_node"/>
     <class_reference class="Job_impl"/>
     <class_reference class="Log"/>
--->    
     <class_reference class="Mail"/>
-<!--    
     <class_reference class="Order"/>
     <class_reference class="Order_queue"/>
     <class_reference class="Run_time"/>
     <class_reference class="Spooler"/>
     <class_reference class="Spooler_program"/>
     <class_reference class="Subprocess"/>
--->    
     <class_reference class="Task"/>
     <class_reference class="Variable_set"/>
     <class_reference class="Xslt_stylesheet"/>

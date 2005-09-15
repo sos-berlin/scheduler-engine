@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<!-- $Id: Task.xml 3886 2005-09-13 22:36:46Z jz $ -->
+
+<?xml-stylesheet href="api_all_languages.xsl" type="text/xsl"?>
+
+
+<api.class 
+    name        = "Job_impl" 
+    base_dir    = "../"
+    author      = "$Author: jz $"
+    date        = "$Date: 2005-09-14 00:36:46 +0200 (Mi, 14 Sep 2005) $"
+>
+
+<method name="spooler_init">
+    <com>
+        <com.result name="continue">
+            <com.type type="bool"/>
+        </com.result>
+    </com>
+</method>
+
+
+<method name="spooler_exit">
+    <com/>
+</method>
+
+
+<method name="spooler_open">
+    <com>
+        <com.result name="continue">
+            <com.type type="bool"/>
+        </com.result>
+    </com>
+</method>
+
+
+<method name="spooler_close">
+    <com/>
+</method>
+
+
+<method name="spooler_process">
+    <com>
+        <com.result name="continue">
+            <com.type type="bool"/>
+        </com.result>
+    </com>
+</method>
+
+
+<method name="spooler_on_success">
+    <com/>
+</method>
+
+
+<method name="spooler_on_error">
+    <com/>
+</method>
+
+
+</api.class>

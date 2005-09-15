@@ -1,0 +1,360 @@
+<?xml version="1.0"?>
+<!-- $Id: Task.xml 3886 2005-09-13 22:36:46Z jz $ -->
+
+<?xml-stylesheet href="api_all_languages.xsl" type="text/xsl"?>
+
+
+<api.class 
+    name        = "Spooler" 
+    object_name = "spooler"
+    base_dir    = "../"
+    author      = "$Author: jz $"
+    date        = "$Date: 2005-09-14 00:36:46 +0200 (Mi, 14 Sep 2005) $"
+>
+
+<property name="log" access="read">
+    <com>
+        <com.result>
+            <com.type class="Log"/>
+        </com.result>
+    </com>
+</property>
+
+
+<property name="id" access="read">
+    <com>
+        <com.result>
+            <com.type class="BSTR"/>
+        </com.result>
+    </com>
+</property>
+
+
+<property name="param" access="read">
+    <com>
+        <com.result>
+            <com.type class="BSTR"/>
+        </com.result>
+    </com>
+</property>
+
+
+<!--
+<property name="script" access="read">
+    <com>
+        <com.result>
+            <com.type class="IDispatch"/>
+        </com.result>
+    </com>
+</property>
+-->
+
+
+<property name="job" access="read">
+    <com>
+        <com.parameter name="job_name">
+            <com.type type="BSTR"/>
+        </com.parameter>
+        
+        <com.result>
+            <com.type class="Job"/>
+        </com.result>
+    </com>
+</property>
+
+
+<method name="create_variable_set">
+    <com>
+        <com.result>
+            <com.type class="Variable_set"/>
+        </com.result>
+    </com>
+</method>
+
+
+<property name="include_path" access="read">
+    <com>
+        <com.result>
+            <com.type type="BSTR"/>
+        </com.result>
+    </com>
+</property>
+
+
+<property name="log_dir" access="read">
+    <com>
+        <com.result>
+            <com.type type="BSTR"/>
+        </com.result>
+    </com>
+</property>
+
+
+<method name="let_run_terminate_and_restart">
+    <com/>
+</method>
+
+
+<property name="var">
+    <com>
+        <com.parameter name="name">
+            <com.type type="BSTR"/>
+        </com.parameter>
+        
+        <com.result>
+            <com.type class="VARIANT*"/>
+        </com.result>
+    </com>
+</property>
+
+
+<property name="variables">
+    <com>
+        <com.result>
+            <com.type class="Variable_set"/>
+        </com.result>
+    </com>
+</property>
+
+
+<property name="db_name" access="read">
+    <com>
+        <com.result>
+            <com.type class="BSTR"/>
+        </com.result>
+    </com>
+</property>
+
+
+<method name="create_job_chain">
+    <com>
+        <com.result>
+            <com.type class="Job_chain"/>
+        </com.result>
+    </com>
+</method>
+
+
+<method name="add_job_chain">
+    <com>
+        <com.parameter name="name">
+            <com.type type="BSTR"/>
+        </com.parameter>
+        
+        <com.parameter>
+            <com.type class="Job_chain"/>
+        </com.parameter>
+    </com>
+</method>
+
+
+<method name="job_chain">
+    <com>
+        <com.parameter name="name">
+            <com.type type="BSTR"/>
+        </com.parameter>
+        
+        <com.result>
+            <com.type class="Job_chain"/>
+        </com.result>
+    </com>
+</method>
+
+
+<method name="create_order">
+    <com>
+        <com.result>
+            <com.type class="Order"/>
+        </com.result>
+    </com>
+</method>
+
+
+<property name="is_service" access="read">
+    <com>
+        <com.result>
+            <com.type type="bool"/>
+        </com.result>
+    </com>
+</property>
+
+
+<property name="directory" access="read">
+    <com>
+        <com.result>
+            <com.type type="BSTR"/>
+        </com.result>
+    </com>
+</property>
+
+
+<method name="job_chain_exists">
+    <com>
+        <com.parameter name="name">
+            <com.type type="BSTR"/>
+        </com.parameter>
+        
+        <com.result>
+            <com.type type="bool"/>
+        </com.result>
+    </com>
+</method>
+
+
+<property name="hostname" access="read">
+    <com>
+        <com.result>
+            <com.type type="BSTR"/>
+        </com.result>
+    </com>
+</property>
+
+
+<method name="abort_immediately">
+    <com/>
+</method>
+
+
+<method name="abort_immediately_and_restart">
+    <com/>
+</method>
+
+
+<property name="db_variables_table_name" access="read">
+    <com>
+        <com.result>
+            <com.type type="BSTR"/>
+        </com.result>
+    </com>
+    
+    <title>
+        Name der Datenbanktabelle für die internen Variablen des Schedulers
+    </title>
+</property>
+
+
+<property name="db_variables_table_name" access="read">
+    <com>
+        <com.result>
+            <com.type type="BSTR"/>
+        </com.result>
+    </com>
+</property>
+
+
+<property name="db_tasks_table_name" access="read">
+    <com>
+        <com.result>
+            <com.type type="BSTR"/>
+        </com.result>
+    </com>               
+    
+    <title>
+        Name der Datenbanktabelle für die Tasks
+    </title>
+</property>
+
+
+<property name="db_orders_table_name" access="read">
+    <com>
+        <com.result>
+            <com.type type="BSTR"/>
+        </com.result>
+    </com>
+    
+    <title>     
+        Name der Datenbanktabelle für die Aufträge
+    </title>
+</property>
+
+
+<property name="Db_history_table_name" access="read">
+    <com>
+        <com.result>
+            <com.type type="BSTR"/>
+        </com.result>
+    </com>
+    
+    <title>
+         Name der Datenbanktabelle für die Auftragshistorie
+    </title>
+</property>
+
+
+<property name="Db_order_history_table_name" access="read">
+    <com>
+        <com.result>
+            <com.type type="BSTR"/>
+        </com.result>
+    </com>
+    
+    <title>
+         Name der Datenbanktabelle für die Historie
+    </title>
+</property>
+
+
+<property name="ini_path" access="read">
+    <com>
+        <com.result>
+            <com.type type="BSTR"/>
+        </com.result>
+    </com>
+    
+    <title>
+         Option <scheduler_option name="ini"/> (Pfadname der <scheduler_ini_entry file="factory.ini"/>)
+    </title>
+</property>
+
+
+<method name="execute_xml">
+    <com>
+        <com.parameter name="xml">
+            <com.type type="BSTR"/>
+        </com.parameter>
+
+        <com.result name="xml_result">
+            <com.type type="BSTR"/>
+        </com.result>
+    </com>
+</method>
+
+
+<property name="tcp_port" access="read">
+    <com>
+        <com.result>
+            <com.type type="int"/>
+        </com.result>
+    </com>
+    
+    <title>
+    </title>
+</property>
+
+
+<property name="udp_port" access="read">
+    <com>
+        <com.result>
+            <com.type type="int"/>
+        </com.result>
+    </com>
+    
+    <title>
+    </title>
+</property>
+
+
+<method name="create_xslt_stylesheet">
+    <com>
+        <com.parameter name="xml">
+            <com.type type="BSTR"/>
+        </com.parameter>
+
+        <com.result>
+            <com.type type="Xslt_stylesheet"/>
+        </com.result>
+    </com>
+</method>
+
+
+</api.class>

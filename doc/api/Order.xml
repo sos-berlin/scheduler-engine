@@ -1,0 +1,170 @@
+<?xml version="1.0"?>
+<!-- $Id: Task.xml 3886 2005-09-13 22:36:46Z jz $ -->
+
+<?xml-stylesheet href="api_all_languages.xsl" type="text/xsl"?>
+
+
+<api.class 
+    name        = "Order" 
+    object_name = "order"
+    base_dir    = "../"
+    author      = "$Author: jz $"
+    date        = "$Date: 2005-09-14 00:36:46 +0200 (Mi, 14 Sep 2005) $"
+>
+
+
+<property name="id">
+    <com>
+        <com.result>
+            <com.type type="VARIANT*"/>
+        </com.result>
+    </com>
+</property>
+
+
+<property name="title">
+    <com>
+        <com.result>
+            <com.type type="BSTR"/>
+        </com.result>
+    </com>
+</property>
+
+
+<property name="priority">
+    <com>
+        <com.result>
+            <com.type type="int"/>
+        </com.result>
+    </com>
+</property>
+
+
+<property name="job_chain">
+    <com>
+        <com.result>
+            <com.type class="Job_chain"/>
+        </com.result>
+    </com>
+</property>
+
+
+<property name="job_chain_node">
+    <com>
+        <com.result>
+            <com.type class="Job_chain_node"/>
+        </com.result>
+    </com>
+</property>
+
+
+<property name="job">
+    <com access="write">
+        <com.result name="job_or_name">
+            <com.type type="VARIANT*"/>
+        </com.result>
+    </com>
+
+    <!-- 
+    <com access="putref">
+        <com.result>
+            <com.type type="Job"/>
+        </com.result>
+    </com>
+    -->
+
+    <com access="read">
+        <com.result>
+            <com.type type="Job"/>
+        </com.result>
+    </com>
+</property>
+
+
+<property name="state">
+    <com>
+        <com.result>
+            <com.type type="VARIANT*"/>
+        </com.result>
+    </com>
+</property>
+
+
+<property name="state_text">
+    <com>
+        <com.result>
+            <com.type type="BSTR"/>
+        </com.result>
+    </com>
+</property>
+
+
+<property name="error" access="read">
+    <com>
+        <com.result>
+            <com.type class="Error"/>
+        </com.result>
+    </com>
+</property>
+
+
+<property name="payload">
+    <com>
+        <com.result>
+            <com.type type="VARIANT*"/>
+        </com.result>
+    </com>
+    
+    <!--
+    <com access="putref">
+        <com.result>
+            <com.type type="IUnknown*"/>
+        </com.result>
+    </com>
+    -->
+</property>
+
+
+<method name="payload_is_type">
+    <com>
+        <com.parameter name="type_name">
+            <com.type type="BSTR"/>
+        </com.parameter>
+        
+        <com.result>
+            <com.type type="bool"/>
+        </com.result>
+    </com>
+</method>
+
+
+<method name="setback">
+    <com/>
+</method>
+
+
+<property name="run_time" access="read">
+    <com>
+        <com.result>
+            <com.type class="Run_time"/>
+        </com.result>
+    </com>
+</property>
+
+
+<method name="remove_from_job_chain">
+    <com/>
+</method>
+
+
+<property name="string_next_start_time" access="read">
+    <com>
+        <com.result>
+            <com.type type="BSTR"/>
+        </com.result>
+    </com>
+</property>
+
+
+
+</api.class>

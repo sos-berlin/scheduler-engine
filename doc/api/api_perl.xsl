@@ -13,10 +13,12 @@
 <xsl:template match="property [ /*/@programming_language='perl' ] | method [ /*/@programming_language='perl' ]" mode="method_name">
     <xsl:param name="access"/>
 
-    <span class="object_name">
-        $<xsl:value-of select="parent::api.class/@object_name"/>
-        <xsl:text>-></xsl:text>
-    </span>        
+    <xsl:if test="parent::api.class/@object_name">
+        <span class="object_name">
+            $<xsl:value-of select="parent::api.class/@object_name"/>
+            <xsl:text>-></xsl:text>
+        </span>        
+    </xsl:if>    
     
     <span class="mono">
         <xsl:choose>

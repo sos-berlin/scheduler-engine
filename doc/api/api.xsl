@@ -5,6 +5,8 @@
 
 <xsl:stylesheet xmlns:xsl = "http://www.w3.org/1999/XSL/Transform" 
                 version   = "1.0">
+
+<xsl:param name="fixed_programming_language"/>
                 
 <xsl:include href="../scheduler.xsl" />
 <!-- Nachrangige <xsl:include> sind am Ende dieses Stylesheets -->
@@ -40,12 +42,24 @@
     <xsl:param name="programming_language"/>
     
     <xsl:variable name="plang" select="translate( $programming_language, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz' )"/>
-    
+
     <xsl:element name="a">
         <xsl:attribute name="id">programming_language_selector__<xsl:value-of select="$plang"/></xsl:attribute>
-        <xsl:attribute name="onclick">api.programming_language_selector__onclick( "<xsl:value-of select="$plang"/>" )</xsl:attribute>
         <xsl:attribute name="class">api_programming_language_selector</xsl:attribute>
-        <xsl:attribute name="href">javascript:void(0)</xsl:attribute>
+
+        <xsl:if test="$fixed_programming_language and not( $fixed_programming_language=$plang )">
+            <xsl:attribute name="style">color: lightgray;</xsl:attribute>
+            <xsl:attribute name="title">Use XML-Version of this document to show other programming languages</xsl:attribute>
+        </xsl:if>
+
+        <xsl:if test="$fixed_programming_language=$plang">
+            <xsl:attribute name="style">font-weight: bold;</xsl:attribute>
+        </xsl:if>
+        
+        <xsl:if test="not( $fixed_programming_language )">
+            <xsl:attribute name="onclick">api.programming_language_selector__onclick( "<xsl:value-of select="$plang"/>" )</xsl:attribute>
+            <xsl:attribute name="href">javascript:void(0)</xsl:attribute>
+        </xsl:if>            
         
         <xsl:value-of select="$programming_language"/>
     </xsl:element>
@@ -101,21 +115,23 @@
 <xsl:template name="class_reference">
     <xsl:param name="class"/>
     <xsl:param name="active_class"/>
+
+    <xsl:variable name="href">
+        <xsl:choose>
+            <xsl:when test="@class">
+                <xsl:value-of select="/*/@base_dir"/>api/<xsl:value-of select="$class"/>.xml
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:value-of select="/*/@base_dir"/>api/introduction.xml
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:variable>    
     
     <p style="margin-top: 0px; margin-bottom: 0px; padding-top: 0px; padding-bottom: 0px">
         <xsl:element name="a">
             <xsl:attribute name="id">class_reference_<xsl:value-of select="$class"/></xsl:attribute>
             <!--xsl:attribute name="href">javascript:void(0)</xsl:attribute>  <!- - Für ie6 -->
-            <xsl:attribute name="href">
-                <xsl:choose>
-                    <xsl:when test="@class">
-                        <xsl:value-of select="/*/@base_dir"/>api/<xsl:value-of select="$class"/>.xml
-                    </xsl:when>
-                    <xsl:otherwise>
-                        <xsl:value-of select="/*/@base_dir"/>api/introduction.xml
-                    </xsl:otherwise>
-                </xsl:choose>
-            </xsl:attribute>  
+            <xsl:attribute name="href"><xsl:value-of select="normalize-space( $href )"/></xsl:attribute>  
             <!--xsl:attribute name="onclick">api.class_reference__onclick( "<xsl:value-of select="$class"/>" );</xsl:attribute>-->
             
             <xsl:attribute name="style">
@@ -184,6 +200,7 @@
                     </td>
                     
                     <td style="padding-left: 3ex; border-left: 1px dotted black; padding-bottom: 4pt;">
+                    
                         <xsl:call-template name="programming_language_selector">
                             <xsl:with-param name="programming_language">Java</xsl:with-param>
                         </xsl:call-template>
@@ -220,51 +237,60 @@
                     
                     <td style="padding-left: 3ex; border-left: 1px dotted black;">
                         <div id="class_headline">
-                            <!--xsl:apply-templates select="." mode="headline"/-->
+                            <xsl:if test="$fixed_programming_language">
+                                <xsl:apply-templates select="." mode="headline"/>
+                            </xsl:if>
                         </div>
                         
                         <div id="class">
-                            <!--xsl:apply-templates select="." mode="table"/-->
+                            <xsl:if test="$fixed_programming_language">
+                                <xsl:apply-templates select="." mode="table"/>
+                            </xsl:if>
                         </div>
                         
                         <div id="methods">
-                            <!--xsl:apply-templates select="." mode="detailed_methods"/-->
+                            <xsl:if test="$fixed_programming_language">
+                                <xsl:apply-templates select="." mode="detailed_methods"/>
+                            </xsl:if>
                         </div>
                     </td>
                 </tr>
             </table>
 
-            <xsl:element name="script">
-                <xsl:attribute name="defer">defer</xsl:attribute>
-                <xsl:attribute name="type">text/javascript</xsl:attribute>
-                <xsl:attribute name="src"><xsl:value-of select="/*/@base_dir"/>scripts/browser_dependencies.js</xsl:attribute>
-            </xsl:element>
+            <xsl:if test="not( $fixed_programming_language )">
+                <xsl:element name="script">
+                    <xsl:attribute name="defer">defer</xsl:attribute>
+                    <xsl:attribute name="type">text/javascript</xsl:attribute>
+                    <xsl:attribute name="src"><xsl:value-of select="/*/@base_dir"/>scripts/browser_dependencies.js</xsl:attribute>
+                </xsl:element>
+                
+                <xsl:element name="script">
+                    <xsl:attribute name="defer">defer</xsl:attribute>
+                    <xsl:attribute name="type">text/javascript</xsl:attribute>
+                    <xsl:attribute name="src"><xsl:value-of select="/*/@base_dir"/>scripts/sarissa.js</xsl:attribute>
+                </xsl:element>
+                
+                <xsl:element name="script">
+                    <xsl:attribute name="defer">defer</xsl:attribute>
+                    <xsl:attribute name="type">text/javascript</xsl:attribute>
+                    <xsl:attribute name="src"><xsl:value-of select="/*/@base_dir"/>api/api.js</xsl:attribute>
+                </xsl:element>
             
-            <xsl:element name="script">
-                <xsl:attribute name="defer">defer</xsl:attribute>
-                <xsl:attribute name="type">text/javascript</xsl:attribute>
-                <xsl:attribute name="src"><xsl:value-of select="/*/@base_dir"/>scripts/sarissa.js</xsl:attribute>
-            </xsl:element>
-            
-            <xsl:element name="script">
-                <xsl:attribute name="defer">defer</xsl:attribute>
-                <xsl:attribute name="type">text/javascript</xsl:attribute>
-                <xsl:attribute name="src"><xsl:value-of select="/*/@base_dir"/>api/api.js</xsl:attribute>
-            </xsl:element>
-            
-            <script defer="defer" type="text/javascript" for="window" event="onload">
+                <script defer="defer" type="text/javascript" for="window" event="onload">
 
-                href_base = document.location.href.replace( /\/[^\/]*$/, "/" );   // Alles bis zum letzten Schräger
-                base_dir = href_base + "<xsl:value-of select="/*/@base_dir"/>";
+                    href_base = document.location.href.replace( /\/[^\/]*$/, "/" );   // Alles bis zum letzten Schräger
+                    base_dir = href_base + "<xsl:value-of select="/*/@base_dir"/>";
+                    
+                    api = new Api();
+                    
+                    api._class_name = "<xsl:value-of select="/api.class/@name"/>";
+                    
+                    api.show();
+                    api.highlight_html_selectors( true );
+
+                </script>
                 
-                api = new Api();
-                
-                api._class_name = "<xsl:value-of select="/api.class/@name"/>";
-                
-                api.show();
-                api.highlight_html_selectors( true );
-                
-            </script>
+            </xsl:if>
 
             <xsl:call-template name="bottom"/>
         </body>
@@ -567,10 +593,12 @@
 
 <xsl:template match="method | property" mode="method_name">
 
-    <span class="object_name">
-        <xsl:value-of select="parent::api.class/@object_name"/>
-        <xsl:text>.</xsl:text>
-    </span>        
+    <xsl:if test="parent::api.class/@object_name">
+        <span class="object_name">
+            <xsl:value-of select="parent::api.class/@object_name"/>
+            <xsl:text>.</xsl:text>
+        </span>        
+    </xsl:if>
 
     <span class="mono" style="font-weight: bold"><xsl:value-of select="@name"/></span>
 </xsl:template>

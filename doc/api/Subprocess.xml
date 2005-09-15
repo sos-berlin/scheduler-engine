@@ -1,0 +1,128 @@
+<?xml version="1.0"?>
+<!-- $Id: Task.xml 3886 2005-09-13 22:36:46Z jz $ -->
+
+<?xml-stylesheet href="api_all_languages.xsl" type="text/xsl"?>
+
+
+<api.class 
+    name        = "Subprocess" 
+    object_name = "subprocess"
+    base_dir    = "../"
+    author      = "$Author: jz $"
+    date        = "$Date: 2005-09-14 00:36:46 +0200 (Mi, 14 Sep 2005) $"
+>
+
+
+<method name="close">
+    <com/>
+</method>
+
+
+<method name="start">
+    <com>
+        <com.parameter name="command_line">
+            <com.type type="VARIANT*"/>
+        </com.parameter>
+    </com>
+</method>
+
+
+<property name="pid" access="read">
+    <com>
+        <com.result>
+            <com.type type="int"/>
+        </com.result>
+    </com>
+</property>
+
+
+<property name="terminated" access="read">
+    <com>
+        <com.result>
+            <com.type type="bool"/>
+        </com.result>
+    </com>
+</property>
+
+
+<property name="exit_code" access="read">
+    <com>
+        <com.result>
+            <com.type type="int"/>
+        </com.result>
+    </com>
+</property>
+
+
+<property name="termination_signal" access="read">
+    <com>
+        <com.result>
+            <com.type type="int"/>
+        </com.result>
+    </com>
+</property>
+
+
+<property name="ignore_error">
+    <com>
+        <com.result>
+            <com.type type="bool"/>
+        </com.result>
+    </com>
+</property>
+
+
+<property name="ignore_signal">
+    <com>
+        <com.result>
+            <com.type type="int"/>
+        </com.result>
+    </com>
+</property>
+
+
+<property name="timeout" access="write">
+    <com>
+        <com.result name="seconds">
+            <com.type type="double"/>
+        </com.result>
+    </com>
+</property>
+
+
+<property name="environment" access="put">
+    <com>
+        <com.parameter name="name">
+            <com.type type="BSTR"/>
+        </com.parameter>
+        
+        <com.result name="value">
+            <com.type type="BSTR"/>
+        </com.result>
+    </com>
+</property>
+
+
+<method name="wait_for_termination">
+    <com>
+        <com.parameter name="seconds">
+            <com.type type="VARIANT*"/>
+        </com.parameter>
+        
+        <com.result name="terminated">
+            <com.type type="bool"/>
+        </com.result>
+    </com>
+</method>
+
+
+<method name="kill">
+    <com>
+        <com.parameter name="signal" optional="true">
+            <com.type type="bool"/>
+        </com.parameter>
+    </com>
+</method>
+
+
+</api.class>

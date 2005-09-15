@@ -88,7 +88,9 @@
             Die Variablenwerte können von jedem COM-Typ sein (Java: nur Strings).
         </p>
         <p>
-            Der XSLT-Prozessor ist mit <a href="http://xmlsoft.org/XSLT/">libxslt</a> (1.1.14 vom 2.5.2005) implementiert.
+            Der XSLT-Prozessor ist mit <a href="http://xmlsoft.org/XSLT/">libxslt</a> 
+            <!--(1.1.14 vom 2.5.2005)-->
+            implementiert.
         </p>
     </description>
     

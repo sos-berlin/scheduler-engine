@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<!-- $Id: Task.xml 3886 2005-09-13 22:36:46Z jz $ -->
+
+<?xml-stylesheet href="api_all_languages.xsl" type="text/xsl"?>
+
+
+<api.class 
+    name        = "Order_queue" 
+    object_name = "q"
+    base_dir    = "../"
+    author      = "$Author: jz $"
+    date        = "$Date: 2005-09-14 00:36:46 +0200 (Mi, 14 Sep 2005) $"
+>
+
+
+<property name="length" access="read">
+    <com>
+        <com.result>
+            <com.type type="int"/>
+        </com.result>
+    </com>
+</property>
+
+
+<method name="add_order" deprecated="true">
+    <com>
+        <com.parameter name="order_or_payload">
+            <com.type type="BSTR"/>
+        </com.parameter>
+
+        <com.result>
+            <com.type class="Order"/>
+        </com.result>
+    </com>
+</method>
+
+
+</api.class>
