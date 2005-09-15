@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!-- $Id: Task.xml 3886 2005-09-13 22:36:46Z jz $ -->
+<!-- $Id$ -->
 
 <?xml-stylesheet href="api_all_languages.xsl" type="text/xsl"?>
 
@@ -8,34 +8,43 @@
     name        = "Error" 
     object_name = "error"
     base_dir    = "../"
-    author      = "$Author: jz $"
-    date        = "$Date: 2005-09-14 00:36:46 +0200 (Mi, 14 Sep 2005) $"
+    author      = "$Author$"
+    date        = "$Date$"
 >
 
-<property name="is_error">
+<property name="is_error" access="read">
     <com>
         <com.result>
             <com.type type="bool"/>
         </com.result>
     </com>
+    
 </property>
 
 
-<property name="code">
+<property name="code" access="read">
     <com>
         <com.result>
             <com.type type="BSTR"/>
         </com.result>
     </com>
+
+    <title>
+        Der Fehlercode
+    </title>
 </property>
 
 
-<property name="text">
+<property name="text" access="read">
     <com>
         <com.result>
             <com.type type="BSTR"/>
         </com.result>
     </com>
+    
+    <title>
+        Fehlertext (mit Fehlercode)
+    </title>
 </property>
 
 </api.class>

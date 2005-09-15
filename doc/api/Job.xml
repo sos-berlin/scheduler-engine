@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!-- $Id: Task.xml 3886 2005-09-13 22:36:46Z jz $ -->
+<!-- $Id$ -->
 
 <?xml-stylesheet href="api_all_languages.xsl" type="text/xsl"?>
 
@@ -8,8 +8,8 @@
     name        = "Job" 
     object_name = "spooler_job"
     base_dir    = "../"
-    author      = "$Author: jz $"
-    date        = "$Date: 2005-09-14 00:36:46 +0200 (Mi, 14 Sep 2005) $"
+    author      = "$Author$"
+    date        = "$Date$"
 >
 
     <method name="start_when_directory_changed">
@@ -22,6 +22,43 @@
                 <com.type type="BSTR"/>
             </com.parameter>
         </com>
+
+        
+        <java>
+            <java.parameter name="directory_path">
+                <java.type class="java.io.File"/>
+            </java.parameter>
+
+            <java.parameter name="filename_pattern" optional="true">
+                <java.type type="BSTR"/>
+            </java.parameter>
+        </java>
+
+        <java>
+            <java.parameter name="directory_path">
+                <java.type class="java.io.File"/>
+            </java.parameter>
+
+            <java.parameter name="filename_pattern" optional="true">
+                <java.type type="BSTR"/>
+            </java.parameter>
+        </java>
+
+        <java>
+            <java.parameter name="directory_path">
+                <java.type type="BSTR"/>
+            </java.parameter>
+        </java>
+
+        <java>
+            <java.parameter name="directory_path">
+                <java.type class="BSTR"/>
+            </java.parameter>
+
+            <java.parameter name="filename_pattern" optional="true">
+                <java.type type="BSTR"/>
+            </java.parameter>
+        </java>
 
         <title>
             Überwacht ein Verzeichnis und lässt bei Änderung eine Task starten
@@ -41,8 +78,8 @@
 
     <method name="start">
         <com>
-            <com.parameter name="variables">
-                <com.type class="Variable_set" optional="true"/>
+            <com.parameter name="variables" optional="true">
+                <com.type class="Variable_set"/>
             </com.parameter>
             
             <com.result>
@@ -130,6 +167,27 @@
                 </com.type>
             </com.result>
         </com>
+        
+        <java>
+            <com.parameter name="error_steps">
+                <com.type type="int"/>
+            </com.parameter>
+            
+            <com.result name="seconds">
+                <com.type type="double"/>
+            </com.result>
+        </java>
+
+
+        <java>
+            <java.parameter name="error_steps">
+                <java.type type="int"/>
+            </java.parameter>
+            
+            <java.result name="hhmm_ss">
+                <java.type type="java.lang.String"/>
+            </java.result>
+        </java>
 
         <title>
             Verzögert erneuten Jobstart nach Fehler.
@@ -166,6 +224,16 @@
                 </com.type>
             </com.result>
         </com>
+
+        <java>
+            <java.parameter name="setback_count">
+                <java.type type="int"/>
+            </java.parameter>
+            
+            <java.result name="seconds">
+                <java.type type="double"/>
+            </java.result>
+        </java>
 
         <title>
             Stellt Auftrag nach Fehler zurück

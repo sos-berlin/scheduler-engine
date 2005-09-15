@@ -1,16 +1,27 @@
 <?xml version="1.0"?>
-<!-- $Id: Task.xml 3886 2005-09-13 22:36:46Z jz $ -->
+<!-- $Id$ -->
 
 <?xml-stylesheet href="api_all_languages.xsl" type="text/xsl"?>
 
 
 <api.class 
     name        = "Spooler_program" 
-    object_name = "spooler_program"
     base_dir    = "../"
-    author      = "$Author: jz $"
-    date        = "$Date: 2005-09-14 00:36:46 +0200 (Mi, 14 Sep 2005) $"
+    author      = "$Author$"
+    date        = "$Date$"
 >
+
+<method name="Spooler_program">
+    <java>
+        <java.parameter name="Parameter">
+            <java.type type="String[]"/>
+        </java.parameter>
+        
+        <java.result>
+            <java.result type=""/>
+        </java.result>
+    </java>
+</method>
 
 <method name="main">
     <java>

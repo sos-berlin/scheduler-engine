@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!-- $Id: Task.xml 3886 2005-09-13 22:36:46Z jz $ -->
+<!-- $Id$ -->
 
 <?xml-stylesheet href="api_all_languages.xsl" type="text/xsl"?>
 
@@ -8,8 +8,8 @@
     name        = "Order_queue" 
     object_name = "q"
     base_dir    = "../"
-    author      = "$Author: jz $"
-    date        = "$Date: 2005-09-14 00:36:46 +0200 (Mi, 14 Sep 2005) $"
+    author      = "$Author$"
+    date        = "$Date$"
 >
 
 

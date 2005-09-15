@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!-- $Id: Task.xml 3886 2005-09-13 22:36:46Z jz $ -->
+<!-- $Id$ -->
 
 <?xml-stylesheet href="api_all_languages.xsl" type="text/xsl"?>
 
@@ -8,8 +8,8 @@
     name        = "Spooler" 
     object_name = "spooler"
     base_dir    = "../"
-    author      = "$Author: jz $"
-    date        = "$Date: 2005-09-14 00:36:46 +0200 (Mi, 14 Sep 2005) $"
+    author      = "$Author$"
+    date        = "$Date$"
 >
 
 <property name="log" access="read">
@@ -108,7 +108,7 @@
 </property>
 
 
-<property name="variables">
+<property name="variables" access="read">
     <com>
         <com.result>
             <com.type class="Variable_set"/>
@@ -120,7 +120,7 @@
 <property name="db_name" access="read">
     <com>
         <com.result>
-            <com.type class="BSTR"/>
+            <com.type type="BSTR"/>
         </com.result>
     </com>
 </property>
@@ -137,10 +137,6 @@
 
 <method name="add_job_chain">
     <com>
-        <com.parameter name="name">
-            <com.type type="BSTR"/>
-        </com.parameter>
-        
         <com.parameter>
             <com.type class="Job_chain"/>
         </com.parameter>
@@ -233,15 +229,6 @@
 </property>
 
 
-<property name="db_variables_table_name" access="read">
-    <com>
-        <com.result>
-            <com.type type="BSTR"/>
-        </com.result>
-    </com>
-</property>
-
-
 <property name="db_tasks_table_name" access="read">
     <com>
         <com.result>
@@ -268,7 +255,7 @@
 </property>
 
 
-<property name="Db_history_table_name" access="read">
+<property name="db_history_table_name" access="read">
     <com>
         <com.result>
             <com.type type="BSTR"/>
@@ -346,8 +333,28 @@
 
 <method name="create_xslt_stylesheet">
     <com>
-        <com.parameter name="xml">
+        <com.parameter name="xml" optional="true">
             <com.type type="BSTR"/>
+        </com.parameter>
+
+        <com.result>
+            <com.type type="Xslt_stylesheet"/>
+        </com.result>
+    </com>
+    
+    <com>
+        <com.parameter name="path">
+            <com.type type="java.io.path"/>
+        </com.parameter>
+
+        <com.result>
+            <com.type type="Xslt_stylesheet"/>
+        </com.result>
+    </com>
+    
+    <com>
+        <com.parameter name="path">
+            <com.type type="java.lang.String"/>
         </com.parameter>
 
         <com.result>

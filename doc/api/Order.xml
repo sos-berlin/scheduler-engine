@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!-- $Id: Task.xml 3886 2005-09-13 22:36:46Z jz $ -->
+<!-- $Id$ -->
 
 <?xml-stylesheet href="api_all_languages.xsl" type="text/xsl"?>
 
@@ -8,8 +8,8 @@
     name        = "Order" 
     object_name = "order"
     base_dir    = "../"
-    author      = "$Author: jz $"
-    date        = "$Date: 2005-09-14 00:36:46 +0200 (Mi, 14 Sep 2005) $"
+    author      = "$Author$"
+    date        = "$Date$"
 >
 
 
@@ -28,6 +28,10 @@
             <com.type type="BSTR"/>
         </com.result>
     </com>
+    
+    <title>
+        Der Titel ist ein Klartext, der den Auftrag bezeichnet
+    </title>
 </property>
 
 
@@ -40,7 +44,7 @@
 </property>
 
 
-<property name="job_chain">
+<property name="job_chain" access="read">
     <com>
         <com.result>
             <com.type class="Job_chain"/>
@@ -49,7 +53,7 @@
 </property>
 
 
-<property name="job_chain_node">
+<property name="job_chain_node" access="read">
     <com>
         <com.result>
             <com.type class="Job_chain_node"/>
@@ -105,6 +109,8 @@
             <com.type class="Error"/>
         </com.result>
     </com>
+    
+    <not_implemented programming_language="java"/>
 </property>
 
 

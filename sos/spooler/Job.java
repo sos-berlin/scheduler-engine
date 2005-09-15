@@ -291,6 +291,8 @@ public class Job extends Idispatch
     public void             clear_delay_after_error()                               {                     com_call( "clear_delay_after_error"       ); }
     
     
+    public void         set_delay_order_after_setback( int setback_count, double seconds ) {              com_call( ">delay_order_after_setback", new Integer(error_steps), new Integer( seconds ) ); }
+    
     /** Entfernt den Job.
       * Der Job wird gestoppt, d.h. laufende Tasks werden beendet, keine neuen werden gestartet.
       * Sobald keine Task mehr läuft, wird der Job entfernt.

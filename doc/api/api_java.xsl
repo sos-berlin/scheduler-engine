@@ -63,7 +63,7 @@
 </xsl:template>
 
 <xsl:template match="com.type [ @class and /*/@programming_language='java' ]">
-    <span class="mono"><xsl:value-of select="concat( 'sos.spooler.', @class )"/></span>
+    <span class="mono"><xsl:value-of select="@class"/></span>
 </xsl:template>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->

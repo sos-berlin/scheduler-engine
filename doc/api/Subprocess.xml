@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!-- $Id: Task.xml 3886 2005-09-13 22:36:46Z jz $ -->
+<!-- $Id$ -->
 
 <?xml-stylesheet href="api_all_languages.xsl" type="text/xsl"?>
 
@@ -8,8 +8,8 @@
     name        = "Subprocess" 
     object_name = "subprocess"
     base_dir    = "../"
-    author      = "$Author: jz $"
-    date        = "$Date: 2005-09-14 00:36:46 +0200 (Mi, 14 Sep 2005) $"
+    author      = "$Author$"
+    date        = "$Date$"
 >
 
 
@@ -24,6 +24,18 @@
             <com.type type="VARIANT*"/>
         </com.parameter>
     </com>
+
+    <java>
+        <java.parameter name="command_line">
+            <java.type type="java.lang.String"/>
+        </java.parameter>
+    </java>
+
+    <java>
+        <java.parameter name="command_line">
+            <java.type type="java.lang.String[]"/>
+        </java.parameter>
+    </java>
 </method>
 
 
@@ -90,7 +102,7 @@
 </property>
 
 
-<property name="environment" access="put">
+<property name="environment" access="write">
     <com>
         <com.parameter name="name">
             <com.type type="BSTR"/>
