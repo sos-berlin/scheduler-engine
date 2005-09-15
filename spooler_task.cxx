@@ -951,9 +951,6 @@ bool Task::do_something()
                                                     set_state( s_ending );
                         }
                         
-                        if( _state < s_ending )  _order_for_mail = NULL;
-
-
                         // Historie beginnen?
                         if( _state == s_starting 
                          || _state == s_running 
@@ -1047,6 +1044,9 @@ bool Task::do_something()
                                 _operation = NULL;
 
                                 if( !ok || has_error() )  set_state( s_ending ), loop = true;
+
+                                if( _state != s_ending  &&  !_end )  _order_for_mail = NULL;
+
                                 something_done = true;
                             }
 
@@ -1454,7 +1454,7 @@ void Task::set_order( Order* order )
     // Wird von Job gerufen, wenn Task wegen neuen Auftrags startet
 
     _order = order;
-    _order_for_mail = order;                   // Damit bei Task-Ende im Fehlerfall noch der Auftrag gezeigt wird, s. dom_element()
+    _order_for_mail = order;                    // Damit bei Task-Ende im Fehlerfall noch der Auftrag gezeigt wird, s. dom_element()
     if( _order )  _order->attach_task( this );  // Auftrag war schon bereitgestellt
 }
 

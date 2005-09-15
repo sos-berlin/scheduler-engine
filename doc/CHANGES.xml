@@ -10,6 +10,10 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2005-09-15" version="2.0.139" subversion_revision="3889">
+        <revision type="modification" title="Neue Behandlung der Voreinstellungen für den eMail-Versand"/>
+    </change>
+
     <change date="2005-09-07" version="2.0.138" subversion_revision="3866">
         <revision type="correction" title="spooler_log.debug1() bis spooler_log.debug9() im Startskript werden nicht mehr unterdrückt"/>
         <revision type="modification" title="Datenbanktabellen werden mit varchar statt char angelegt"/>

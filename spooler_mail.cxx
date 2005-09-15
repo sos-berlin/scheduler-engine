@@ -117,6 +117,8 @@ xml::Element_ptr Com_mail::dom_element( const xml::Document_ptr& dom )
     header_element.setAttribute_optional( "cc"     , _cc      );
     header_element.setAttribute_optional( "bcc"    , _bcc     );
   //header_element.setAttribute_optional( "subject", _subject );
+
+    if( _subject != "" )
     header_element.append_new_text_element( "subject", _subject );
 
     Z_FOR_EACH( Header_fields, _header_fields, h )
@@ -128,6 +130,8 @@ xml::Element_ptr Com_mail::dom_element( const xml::Document_ptr& dom )
 
 
     xml::Element_ptr body_element = mail_element.append_new_element( "body" );
+
+    if( _body != "" )
     body_element.append_new_text_element( "text"   , _body    );
 
 
@@ -152,35 +156,34 @@ void Com_mail::set_dom( const xml::Element_ptr& mail_element )
 
     init();
 
-    xml::Element_ptr header_element = mail_element.select_node_strict( "header" );
 
-
-    // getAttribute() liefert "", wenn das Attribut nicht angegeben ist. 
-    // Also bestimmen wir: cc="-" löscht das voreingestellte cc.
-
-    string value;
-    value = header_element.getAttribute( "from_address" );    if( value != "" )  set_from     ( value == "-"? "" : value );
-    value = header_element.getAttribute( "from_name"    );    if( value != "" )  set_from_name( value == "-"? "" : value );
-    value = header_element.getAttribute( "to"           );    if( value != "" )  set_to       ( value == "-"? "" : value );
-    value = header_element.getAttribute( "cc"           );    if( value != "" )  set_cc       ( value == "-"? "" : value );
-    value = header_element.getAttribute( "bcc"          );    if( value != "" )  set_bcc      ( value == "-"? "" : value );
-  //set_smtp     ( header_element.getAttribute( "smtp"      ) );
-  //set_subject  ( header_element.getAttribute( "subject"   ) );
-
-    if( xml::Element_ptr e = header_element.select_node( "subject" ) )  set_subject( e.trimmed_text() );
-
-
-    xml::Xpath_nodes field_elements = mail_element.select_nodes( "header/field" );
-    for( int i = 0; i < field_elements.count(); i++ )
+    if( xml::Element_ptr header_element = mail_element.select_node( "header" ) )
     {
-        xml::Element_ptr field_element = field_elements[ i ];
+        // getAttribute() liefert "", wenn das Attribut nicht angegeben ist. 
 
-        add_header_field( field_element.getAttribute( "name" ),
-                          field_element.getAttribute( "value" ) );
+        string value;
+        value = header_element.getAttribute( "from_address" );    if( value != "" )  set_from     ( value );
+        value = header_element.getAttribute( "from_name"    );    if( value != "" )  set_from_name( value == "-"? "" : value );
+        value = header_element.getAttribute( "to"           );    if( value != "" )  set_to       ( value );
+        value = header_element.getAttribute( "cc"           );    if( value != "" )  set_cc       ( value == "-"? "" : value );
+        value = header_element.getAttribute( "bcc"          );    if( value != "" )  set_bcc      ( value == "-"? "" : value );
+      //set_smtp     ( header_element.getAttribute( "smtp"      ) );
+
+        if( xml::Element_ptr e = header_element.select_node( "subject" ) )  set_subject( e.trimmed_text() );
+
+
+        xml::Xpath_nodes field_elements = header_element.select_nodes( "field" );
+        for( int i = 0; i < field_elements.count(); i++ )
+        {
+            xml::Element_ptr field_element = field_elements[ i ];
+
+            add_header_field( field_element.getAttribute( "name" ),
+                              field_element.getAttribute( "value" ) );
+        }
     }
 
 
-    if( xml::Element_ptr e = header_element.select_node( "body/text" ) )  set_body( e.trimmed_text() );
+    if( xml::Element_ptr e = mail_element.select_node( "body/text" ) )  set_body( e.trimmed_text() );
 
     xml::Xpath_nodes file_elements = mail_element.select_nodes( "body/file" );
     for( int i = 0; i < file_elements.count(); i++ )
@@ -641,7 +644,7 @@ int Com_mail::send( const Mail_defaults& defaults )
 
     if( _from == ""  ||  _to == ""  ||  _subject == ""  ||  _body == "" )
     {
-        _spooler->_log.debug( "Email unterdrückt, weil To oder From fehlt" );
+        _spooler->_log.debug( "Email unterdrückt, weil From, To, Subject oder der Nachrichtentext fehlt" );
         return 0;
     }
 

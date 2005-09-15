@@ -1,0 +1,223 @@
+<?xml version="1.0"?>
+<!-- $Id: Task.xml 3886 2005-09-13 22:36:46Z jz $ -->
+
+<?xml-stylesheet href="api_all_languages.xsl" type="text/xsl"?>
+
+
+<api.class 
+    name        = "Job" 
+    object_name = "spooler_job"
+    base_dir    = "../"
+    author      = "$Author: jz $"
+    date        = "$Date: 2005-09-14 00:36:46 +0200 (Mi, 14 Sep 2005) $"
+>
+
+    <!--com.type interface="Itask" iid="feee478c-6c1b-11d8-8103-000476ee8afb"/>
+    
+    <java.type type="sos.spooler.Task"/-->
+    
+
+
+
+
+
+    <method name="start_when_directory_changed">
+        <com>
+            <com.parameter name="directory_path">
+                <com.type type="BSTR"/>
+            </com.parameter>
+
+            <com.parameter name="filename_pattern" optional="true">
+                <com.type type="BSTR"/>
+            </com.parameter>
+        </com>
+
+        <title>
+            Überwacht ein Verzeichnis und lässt bei Änderung eine Task starten
+        </title>
+    </method>
+
+
+    <method name="clear_when_directory_changed">
+        <com>
+        </com>
+
+        <title>
+            Nimmt alle <code>start_when_directory_changed()</code> zurück
+        </title>
+    </method>
+
+
+    <method name="start">
+        <com>
+            <com.parameter name="variables">
+                <com.type class="Variable_set" optional="true"/>
+            </com.parameter>
+            
+            <com.result>
+                <com.type class="Task"/>
+            </com.result>
+        </com>
+
+        <title>
+            Startet eine Task
+        </title>
+    </method>
+
+
+    <property name="include_path" access="read">
+        <com>
+            <com.result>
+                <com.type type="BSTR"/>
+            </com.result>
+        </com>
+
+        <title>
+            
+        </title>
+    </property>
+
+
+    <property name="name" access="read">
+        <com>
+            <com.result>
+                <com.type type="BSTR"/>
+            </com.result>
+        </com>
+
+        <title>
+            Name des Jobs
+        </title>
+    </property>
+
+
+    <method name="wake">
+        <com/>
+        <title>
+            Veranlasst den Start einer Task
+        </title>
+    </method>
+
+
+    <property name="state_text" access="write">
+        <com>
+            <com.result>
+                <com.type type="BSTR"/>
+            </com.result>
+        </com>
+
+        <title>
+            Freier Text für den Zustand des Jobs
+        </title>
+    </property>
+
+
+    <property name="title" access="read">
+        <com>
+            <com.result>
+                <com.type type="BSTR"/>
+            </com.result>
+        </com>
+
+        <title>
+            Der Titel des Jobs.
+        </title>
+    </property>
+
+
+    <property name="delay_after_error" access="write">
+        <com>
+            <com.parameter name="error_steps">
+                <com.type type="int"/>
+            </com.parameter>
+            
+            <com.result name="seconds_or_hhmm_ss">
+                <com.type type="VARIANT*">
+                    <com.variant type="double"/>
+                    <com.variant type="int"/>
+                    <com.variant type="BSTR"/>
+                </com.type>
+            </com.result>
+        </com>
+
+        <title>
+            Verzögert erneuten Jobstart nach Fehler.
+        </title>
+    </property>
+
+
+
+    <property name="order_queue" access="read">
+        <com>
+            <com.result>
+                <com.type class="Order_queue"/>
+            </com.result>
+        </com>
+
+        <title>
+            Freier Text für den Zustand des Jobs
+        </title>
+    </property>
+
+
+
+    <method name="delay_order_after_setback" access="write">
+        <com>
+            <com.parameter name="setback_count">
+                <com.type type="int"/>
+            </com.parameter>
+            
+            <com.result name="seconds_or_hhmm_ss">
+                <com.type type="VARIANT*">
+                    <com.variant type="double"/>
+                    <com.variant type="int"/>
+                    <com.variant type="BSTR"/>
+                </com.type>
+            </com.result>
+        </com>
+
+        <title>
+            Stellt Auftrag nach Fehler zurück
+        </title>
+    </method>
+
+
+    <property name="max_order_setbacks" access="write">
+        <com>
+            <com.result>
+                <com.type type="int"/>
+            </com.result>
+        </com>
+
+        <title>
+            Begrenzt die Anzahl der Rückstellungen eines Auftrags
+        </title>
+    </property>
+
+
+    <method name="clear_delay_after_error">
+        <com/>
+
+        <title>
+            Nimmt alle <code>delay_after_error</code> zurück
+        </title>
+    </method>
+
+
+    <method name="remove">
+        <com/>
+
+        <title>
+            Entfernt den Job
+        </title>
+    </method>
+
+
+    <description>
+        <p>
+            Eine Task kann wartend in der Task-Warteschlange des Jobs sein oder laufen.
+        </p>
+    </description>
+    
+
+</api.class>
