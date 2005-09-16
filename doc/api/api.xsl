@@ -98,12 +98,6 @@
 </xsl:template>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
-
-<xsl:template match="api.introduction">
-    <xsl:apply-templates select="description"/>
-</xsl:template>
-
-<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 <!-- Klick auf den Klassennamen ruft im rechten Teil die Beschreibung der Klasse auf -->
 
 <xsl:template match="class_reference | api.class_reference">
@@ -178,7 +172,6 @@
 
 <xsl:template match="api.class">
     <html>
-        <!--xsl:variable name="title" select="concat( 'Klasse ', @name )"/-->
         <xsl:variable name="title" select="'Programmschnittstelle (API)'"/>
         
         <xsl:call-template name="html_head">
@@ -192,9 +185,6 @@
 
 
             <table cellpadding="0" cellspacing="0" style="padding-bottom: 4ex">
-                <!--tr>
-                    <td colspan="5" style="font-size: 1px"><hr size="1"/></td>
-                </tr-->
                 <tr>
                     <td style="vertical-align: top; padding-right: 3ex; padding-bottom: 4pt;">
                         <xsl:call-template name="class_reference">
@@ -247,13 +237,13 @@
                         
                         <div id="class">
                             <xsl:if test="$fixed_programming_language">
-                                <xsl:apply-templates select="." mode="table"/>
+                                <xsl:apply-templates select=". [ not( @introduction ) ]" mode="table"/>
                             </xsl:if>
                         </div>
                         
                         <div id="methods">
                             <xsl:if test="$fixed_programming_language">
-                                <xsl:apply-templates select="." mode="detailed_methods"/>
+                                <xsl:apply-templates select=". [ not( @introduction ) ]" mode="detailed_methods"/>
                             </xsl:if>
                         </div>
                     </td>
@@ -324,6 +314,7 @@
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <xsl:template match="api.class" mode="headline">
+
     <p class="api_headline">
         <xsl:value-of select="@name"/>
 

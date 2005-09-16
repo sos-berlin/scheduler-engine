@@ -45,7 +45,7 @@ function Xslt_stylesheet()
 }
 
 //---------------------------------------------------------------------------------------------Xslt
-
+/*
 if( window.ActiveXObject )
 {
     Xslt_stylesheet.prototype.load = function( stylesheet_dom_document )
@@ -114,7 +114,7 @@ else
         this._xslt_processor.setParameter( name, value );
     }    
 }
-
+*/
 //--------------------------------------------------------------------------human_language__onclick
 /*
 function human_language__onclick()
@@ -267,21 +267,23 @@ Api.prototype.show = function()
             
             if( this._class_name )
             {                                      
-                dom_document.documentElement.setAttribute( "show_table", "true" );
-                this.apply_xslt_stylesheet( class_element, dom_document );                                             
-                dom_document.documentElement.removeAttribute( "show_table");
-                
                 dom_document.documentElement.setAttribute( "show_headline", "true" );
                 this.apply_xslt_stylesheet( class_headline_element, dom_document );                                             
                 dom_document.documentElement.removeAttribute( "headline");
 
+                dom_document.documentElement.setAttribute( "show_table", "true" );
+                this.apply_xslt_stylesheet( class_element, dom_document );                                             
+                dom_document.documentElement.removeAttribute( "show_table");
+                
                 dom_document.documentElement.setAttribute( "show_detailed_methods", "true" );
                 this.apply_xslt_stylesheet( methods_element, dom_document );                                             
                 dom_document.documentElement.removeAttribute( "show_methods");
             }
             else
             {
-                this.apply_xslt_stylesheet( class_headline_element, dom_document );                                             
+                dom_document.documentElement.setAttribute( "show_headline", "true" );
+                this.apply_xslt_stylesheet( class_headline_element, dom_document );
+                dom_document.documentElement.removeAttribute( "show_headline");
             }
         }
         
