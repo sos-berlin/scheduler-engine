@@ -1,5 +1,5 @@
 <?xml version='1.0'?>
-<!-- $Id: scheduler.xsl 3721 2005-06-21 14:41:04Z jz $ -->
+<!-- $Id$ -->
 
 <xsl:stylesheet xmlns:xsl = "http://www.w3.org/1999/XSL/Transform" 
                 version   = "1.0">

@@ -11,7 +11,7 @@
 <xsl:variable name="default_programming_language"  select="'javascript'"/>
 <xsl:variable name="default_programming_language2" select="'java'"/>       <!-- Alternative -->
                 
-<xsl:include href="../scheduler.xsl" />
+<xsl:include href="../scheduler_base.xsl" />
 <!-- Nachrangige <xsl:include> sind am Ende dieses Stylesheets -->
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~api-->
