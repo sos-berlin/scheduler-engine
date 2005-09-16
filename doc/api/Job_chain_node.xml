@@ -19,6 +19,21 @@
             <com.type type="VARIANT*"/>
         </com.result>
     </com>
+    
+    <title>
+        Zustand, für den dieser Jobkettenknoten gilt
+    </title>
+    
+    <example programming_language="java">
+        <pre>Job_chain_node job_chain_node = spooler.job_chain( "Jobkette" ).node( 100 );                                                  
+spooler_log.info( "state=" + job_chain_node.state() );                      // "state=100"</pre>
+    </example>
+
+    <example programming_language="javascript">
+        <pre>var job_chain_node = spooler.job_chain( "Jobkette" ).node( 100 );                                                  
+spooler_log.info( "state=" + job_chain_node.state );                        // "state=100"</pre>
+    </example>
+    
 </property>
 
 
@@ -35,8 +50,27 @@
     <com>
         <com.result>
             <com.type class="Job_chain_node"/>
+            <description>
+                <api.null/>, wenn es keinen Fehler-Knoten gibt (Fehlerzustand ist nicht angegeben)
+            </description>
         </com.result>
     </com>
+    
+        
+    <title>
+        Nächster Knoten in der Jobkette für den Fehlerfall
+    </title>
+        
+    <example programming_language="java">
+        <pre>Job_chain_node job_chain_node = spooler.job_chain( "Jobkette" ).node( 100 );                                                  
+spooler_log.debug( "error state=" + job_chain_node.error_node().state() );   // "state=999"</pre>
+    </example>
+
+    <example programming_language="javascript">
+        <pre>var job_chain_node = spooler.job_chain( "Jobkette" ).node( 100 );                                                  
+     spooler_log.debug( "error state=" + job_chain_node.error_node.state );       // "state=999"</pre>
+    </example>
+
 </property>
 
 
@@ -46,6 +80,21 @@
             <com.type class="Job"/>
         </com.result>
     </com>
+    
+    <title>
+        Job, der dem Knoten zugeordnet ist
+    </title>
+    
+    <example programming_language="java">
+        <pre>Job_chain_node job_chain_node = spooler.job_chain( "Jobkette" ).node( 100 );                                                  
+spooler_log.debug( "job=" + job_chain_node.job().name() );                   // "job=job_100"</pre>
+    </example>
+
+    <example programming_language="javascript">
+        <pre>var job_chain_node = spooler.job_chain( "Jobkette" ).node( 100 );                                                  
+spooler_log.debug( "job=" + job_chain_node.job.name );                       // "job=job_100"</pre>
+    </example>
+    
 </property>
 
 
@@ -55,6 +104,20 @@
             <com.type type="VARIANT*"/>
         </com.result>
     </com>
+
+    <title>
+        Zustand in der Jobkette für den Erfolgsfall
+    </title>
+    
+    <example programming_language="java">
+        <pre>Job_chain_node job_chain_node = spooler.job_chain( "Jobkette" ).node( 100 );                                                  
+spooler_log.debug( "next state=" + job_chain_node.next_state() );            // "state=200"</pre>
+    </example>
+
+    <example programming_language="javascript">
+        <pre>var job_chain_node = spooler.job_chain( "Jobkette" ).node( 100 );                                                  
+spooler_log.debug( "next_state=" + job_chain_node.next_state );              // "state=200"</pre>
+    </example>
 </property>
 
 
@@ -64,7 +127,34 @@
             <com.type type="VARIANT*"/>
         </com.result>
     </com>
+
+    <title>
+        Zustand in der Jobkette für den Fehlerfall
+    </title>
+    
+    <example programming_language="java">
+        <pre>Job_chain_node job_chain_node = spooler.job_chain( "Jobkette" ).node( 100 );                                                  
+spooler_log.debug( "error state=" + job_chain_node.error_node().state() );   // "error state=999"</pre>
+    </example>
+
+    <example programming_language="javascript">
+        <pre>var job_chain_node = spooler.job_chain( "Jobkette" ).node( 100 );                                                  
+spooler_log.debug( "error state=" + job_chain_node.error_node.state );       // "error state=999"</pre>
+    </example>
 </property>
 
+
+<description>
+    <p>
+        Ein Jobkettenknoten beschreibt eine Stelle in einer Jobkette (<scheduler_method class="Job_chain"/>).
+        Einem Jobkettenknoten sind zugeordnet: 
+        ein Zustand, ein Job, ein Folgezustand und ein Fehlerzustand. 
+    </p>
+    <p>
+        Ein Jobkettenknoten wird mit <scheduler_method class="Job_chain" method="add_job"/>
+        oder mit <scheduler_method class="Job_chain" method="add_end_state"/>
+        erzeugt.
+    </p>
+</description>
 
 </api.class>

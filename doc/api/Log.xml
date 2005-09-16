@@ -32,6 +32,10 @@
             <com.type type="BSTR"/>
         </com.parameter>
     </com>
+    
+    <title>
+        Fehlermeldung (Level 1)
+    </title>
 </method>
 
 
@@ -41,6 +45,10 @@
             <com.type type="BSTR"/>
         </com.parameter>
     </com>
+    
+    <title>
+        Warnung (Level 2)
+    </title>
 </method>
 
 
@@ -50,6 +58,10 @@
             <com.type type="BSTR"/>
         </com.parameter>
     </com>
+    
+    <title>
+        Informationsmeldung (Level 0)
+    </title>
 </method>
 
 
@@ -59,6 +71,10 @@
             <com.type type="BSTR"/>
         </com.parameter>
     </com>
+        
+    <title>
+        Debug-Meldung (Level -1)
+    </title>
 </method>
 
 
@@ -68,6 +84,10 @@
             <com.type type="BSTR"/>
         </com.parameter>
     </com>
+
+    <title>
+        Debug-Meldung (Level -1)
+    </title>
 </method>
 
 
@@ -77,6 +97,10 @@
             <com.type type="BSTR"/>
         </com.parameter>
     </com>
+
+    <title>
+        Debug-Meldung (Level -2)
+    </title>
 </method>
 
 
@@ -86,6 +110,10 @@
             <com.type type="BSTR"/>
         </com.parameter>
     </com>
+
+    <title>
+        Debug-Meldung (Level -3)
+    </title>
 </method>
 
 
@@ -95,6 +123,10 @@
             <com.type type="BSTR"/>
         </com.parameter>
     </com>
+
+    <title>
+        Debug-Meldung (Level -4)
+    </title>
 </method>
 
 
@@ -104,6 +136,10 @@
             <com.type type="BSTR"/>
         </com.parameter>
     </com>
+
+    <title>
+        Debug-Meldung (Level -5)
+    </title>
 </method>
 
 
@@ -113,6 +149,10 @@
             <com.type type="BSTR"/>
         </com.parameter>
     </com>
+
+    <title>
+        Debug-Meldung (Level -6)
+    </title>
 </method>
 
 
@@ -122,6 +162,10 @@
             <com.type type="BSTR"/>
         </com.parameter>
     </com>
+
+    <title>
+        Debug-Meldung (Level -7)
+    </title>
 </method>
 
 
@@ -131,6 +175,10 @@
             <com.type type="BSTR"/>
         </com.parameter>
     </com>
+
+    <title>
+        Debug-Meldung (Level -8)
+    </title>
 </method>
 
 
@@ -140,6 +188,10 @@
             <com.type type="BSTR"/>
         </com.parameter>
     </com>
+
+    <title>
+        Debug-Meldung (Level -9)
+    </title>
 </method>
 
 
@@ -161,6 +213,15 @@
             <java.type type="java.lang.String"/>
         </java.parameter>
     </java>
+    
+    <title>
+        Protokolliert den Inhalt der Datei
+    </title>
+    
+    <description>
+        Protokolliert den Inhalt der Datei mit Level 0 (info).
+        Ein Fehler beim Zugriff auf die Datei wird als Warnung protokolliert.
+    </description>
 </property>
 
 
@@ -170,6 +231,10 @@
             <com.type class="Mail"/>
         </com.result>
     </com>
+    
+    <title>
+        Im <code>Mail</code>-Objekt können Sie Einstellungen zur eMail vornehmen
+    </title>
 </property>
 
 
@@ -179,6 +244,10 @@
             <com.type type="bool"/>
         </com.result>
     </com>
+    
+    <description>
+        Siehe <scheduler_ini_entry file="factory.ini" section="spooler" entry="mail_on_error"/>.
+    </description>
 </property>
 
 
@@ -188,6 +257,10 @@
             <com.type type="bool"/>
         </com.result>
     </com>
+    
+    <description>
+        Siehe <scheduler_ini_entry file="factory.ini" section="spooler" entry="mail_on_warning"/>.
+    </description>
 </property>
 
 
@@ -197,6 +270,10 @@
             <com.type type="bool"/>
         </com.result>
     </com>
+    
+    <description>
+        Siehe <scheduler_ini_entry file="factory.ini" section="spooler" entry="mail_on_success"/>.
+    </description>
 </property>
 
 
@@ -206,6 +283,10 @@
             <com.type type="int"/>
         </com.result>
     </com>
+    
+    <description>
+        Siehe <scheduler_ini_entry file="factory.ini" section="spooler" entry="mail_on_process"/>.
+    </description>
 </property>
 
 
@@ -225,6 +306,10 @@
             <com.type type="BSTR"/>
         </com.result>
     </com>
+    
+    <title>
+        Dateiname des Protokolls
+    </title>
 </property>
 
 
@@ -235,6 +320,15 @@
             <com.type type="BSTR"/>
         </com.result>
     </com>
+    
+    <title>
+        Neuer Dateiname fürs Protokoll
+    </title>
+
+    <description>
+        Setzt den Dateinamen fürs Protokoll. 
+        Wenn das Protokoll geschlossen wird, schreibt der Scheduler es in diese Datei
+    </description>
 </property>
 
 
@@ -264,6 +358,10 @@
             <com.type type="bool"/>
         </com.result>
     </com>
+    
+    <title>
+        Versand erzwingen
+    </title>
 </property>
 
 
@@ -273,6 +371,10 @@
             <com.type type="BSTR"/>
         </com.result>
     </com>
+    
+    <title>
+        Die zuletzt mit Level 2 (error) ausgegebene Zeile
+    </title>
 </property>
 
 
@@ -307,11 +409,19 @@
         </java.result>
     </java>
     
+    <title>
+        Letzte Ausgabe des angegebenen Levels
+    </title>
+    
 </property>
 
 
 <method name="start_new_file">
     <com/>
+    
+    <title>
+        Nur fürs Hauptprotokoll: Schließt das bisherige und beginnt ein neues Protokoll
+    </title>
 </method>
 
 

@@ -157,7 +157,7 @@ job_chain.name = "Jobkette";</pre>
     </com>
     
     <title>
-        <code>=node(state).job().order_queue()</code> 
+        <code>= node(state).job().order_queue()</code> 
     </title>
     
     <description>

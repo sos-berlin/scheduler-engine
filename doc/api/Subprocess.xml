@@ -54,6 +54,16 @@
             <com.type type="bool"/>
         </com.result>
     </com>
+    
+    <description>
+        <p>
+            Prüft, ob der Prozess geendet hat. 
+            Wenn er geendet hat, kann anschließend 
+            <scheduler_method class="Subprocess" property="exit_code"/> und
+            <scheduler_method class="Subprocess" property="termination_signal"/>
+            gerufen werden.
+        </p>
+    </description>
 </property>
 
 
@@ -63,6 +73,11 @@
             <com.type type="int"/>
         </com.result>
     </com>
+    
+    <description>
+        Erst aufrufen, wenn
+        <scheduler_method class="Subprocess" property="terminated"/><code> == true</code>.
+    </description>
 </property>
 
 
@@ -72,6 +87,11 @@
             <com.type type="int"/>
         </com.result>
     </com>
+    
+    <description>
+        Erst aufrufen, wenn
+        <scheduler_method class="Subprocess" property="terminated"/><code> == true</code>.
+    </description>
 </property>
 
 
@@ -81,6 +101,30 @@
             <com.type type="bool"/>
         </com.result>
     </com>
+
+    <title>
+        Verhindert, dass bei <code>exit_code != 0</code> der Job stoppt 
+    </title>    
+    
+    <description>
+        <p>
+            Verhindert, dass der Job stoppt, wenn der Subprozess bei Task-Ende mit 
+            <scheduler_method class="Subprocess" property="exit_code"/><code> != 0</code>
+            geendet hat. 
+        </p>
+        <p>
+            Wenn das Ende des Subprocesses nicht mit 
+            <scheduler_method class="Subprocess" property="wait_for_termination"/>
+            abgewartet worden ist, 
+            tut das der Scheduler bei Task-Ende. 
+            Wenn dann der Subprocess mit 
+            <scheduler_method class="Subprocess" property="exit_code"/><code> != 0</code> endet,
+            stoppt der Job mit Fehler. 
+        </p>
+        <p>
+            Mit <code>ignore_error</code> kann das verhindert werden.
+        </p>
+    </description>
 </property>
 
 
@@ -99,6 +143,14 @@
             <com.type type="double"/>
         </com.result>
     </com>
+    
+    <title>
+        Frist für den Subprozess
+    </title>
+    
+    <description>
+        Nach Ablauf der Zeit bricht der Scheduler den Subprozess ab (Unix: mit <code>SIGKILL</code>).
+    </description>
 </property>
 
 
@@ -131,10 +183,26 @@
 <method name="kill">
     <com>
         <com.parameter name="signal" optional="true">
-            <com.type type="bool"/>
+            <com.type type="int"/>
+            
+            <description>
+                Nur unter Unix: Das Signal für <code>kill()</code>.
+                0 wird als 9 (<code>SIGKILL</code>, sofortiges Ende) interpretiert.
+            </description>
         </com.parameter>
     </com>
+    
+    <title>
+        Bricht den Subprozess ab
+    </title>
 </method>
 
+
+<description>
+    <p>
+        Ein Subprozess ist irgendein Prozess, 
+        der mit <scheduler_method class="Task" method="create_subprocess"/> gestartet werden kann.
+    </p>
+</description>
 
 </api.class>

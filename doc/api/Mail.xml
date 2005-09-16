@@ -23,6 +23,14 @@
         <title>
             Name des SMTP-Servers
         </title>
+
+        <example programming_language="java">
+            <pre>spooler_log.mail().set_smtp( "mail.company.com" );</pre>
+        </example>
+
+        <example programming_language="javascript">
+            <pre>spooler_log.mail.smtp = "mail.company.com";</pre>
+        </example>
     </property>
 
 
@@ -49,6 +57,14 @@
         <title>
             Absender
         </title>
+        
+        <example programming_language="java">
+            <pre>spooler_log.mail().set_from( "scheduler@company.com" );</pre>
+        </example>
+
+        <example programming_language="javascript">
+            <pre>spooler_log.mail.from = "scheduler@company.com";</pre>
+        </example>
     </property>
 
 
@@ -62,6 +78,22 @@
         <title>
             Empfänger
         </title>
+        
+        <description>
+            <p>
+                Wenn die Hostware zum eMail-Versand JavaMail verwendet, 
+                können Sie mehere Adressen durch Komma getrennt angeben. 
+                Siehe <a href="http://java.sun.com/products/javamail/javadocs/javax/mail/internet/InternetAddress.html#parse(java.lang.String)">javax.mail.InternetAddress.parse(String)</a>. 
+            </p>        
+        </description>
+        
+        <example programming_language="java">
+            <pre>spooler_log.mail().set_to( "admin@company.com" );</pre>
+        </example>
+
+        <example programming_language="javascript">
+            <pre>spooler_log.mail.to = "admin@company.com";</pre>
+        </example>
     </property>
 
 
@@ -75,6 +107,22 @@
         <title>
             Empfänger einer Kopie der Nachricht, <i>carbon copy</i>
         </title>
+
+        <description>
+            <p>
+                Wenn die Hostware zum eMail-Versand JavaMail verwendet, 
+                können Sie mehere Adressen durch Komma getrennt angeben. 
+                Siehe <a href="http://java.sun.com/products/javamail/javadocs/javax/mail/internet/InternetAddress.html#parse(java.lang.String)">javax.mail.InternetAddress.parse(String)</a>. 
+            </p>        
+        </description>
+        
+        <example programming_language="java">
+            <pre>spooler_log.mail().set_cc( "hans@company.com" );</pre>
+        </example>
+
+        <example programming_language="javascript">
+            <pre>spooler_log.mail.cc = "hans@company.com";</pre>
+        </example>
     </property>
 
 
@@ -88,6 +136,22 @@
         <title>
             Unsichtbarer Empfänger einer Kopie der Nachricht, <i>blind carbon copy</i>
         </title>
+        
+        <description>
+            <p>
+                Wenn die Hostware zum eMail-Versand JavaMail verwendet, 
+                können Sie mehere Adressen durch Komma getrennt angeben. 
+                Siehe <a href="http://java.sun.com/products/javamail/javadocs/javax/mail/internet/InternetAddress.html#parse(java.lang.String)">javax.mail.InternetAddress.parse(String)</a>. 
+            </p>        
+        </description>
+        
+        <example programming_language="java">
+            <pre>spooler_log.mail().set_bcc( "hans@company.com" );</pre>
+        </example>
+
+        <example programming_language="javascript">
+            <pre>spooler_log.mail.bcc = "hans@company.com";</pre>
+        </example>
     </property>
 
 
@@ -101,6 +165,14 @@
         <title>
             Betreff
         </title>
+        
+        <example programming_language="java">
+            <pre>spooler_log.mail().set_subject( "Job succeeded" );</pre>
+        </example>
+
+        <example programming_language="javascript">
+            <pre>spooler_log.mail.subject = "Job succeeded";</pre>
+        </example>
     </property>
 
 
@@ -114,6 +186,18 @@
         <title>
             Inhalt der Nachricht
         </title>
+        
+        <description>
+            Codieren SIe Zeilenwechsel mit <code>\n</code> (in VBScript mit <code>chr(10)</code>).
+        </description>
+
+        <example programming_language="java">
+            <pre>spooler_log.mail().set_body( "Job succeeded" );</pre>
+        </example>
+
+        <example programming_language="javascript">
+            <pre>spooler_log.mail.body = "Job succeeded";</pre>
+        </example>
     </property>
 
 
@@ -121,24 +205,47 @@
         <com>
             <com.parameter name="path">
                 <com.type type="BSTR"/>
+                
+                <description>
+                    Pfadname der anzuhängenden Datei
+                </description>
             </com.parameter>
 
             <com.parameter name="filename_for_mail" optional="true">
                 <com.type type="BSTR"/>
+                
+                <description>
+                    Dateiname, der in der Nachricht erscheinen soll
+                </description>
             </com.parameter>
 
             <com.parameter name="content_type" optional="true">
                 <com.type type="BSTR"/>
+                
+                <description>
+                    <code>"text/plain"</code> ist voreingestellt.
+                </description>
             </com.parameter>
 
             <com.parameter name="enconding" optional="true">
                 <com.type type="BSTR"/>
+                <description>
+                    Z.B. <code>"quoted-printable"</code>
+                </description>
             </com.parameter>
         </com>
         
         <title>
             Fügt einen Anhang hinzu
         </title>
+
+        <example programming_language="java">
+            <pre>spooler_log.mail().add_file( "c:/tmp/1.txt", "1.txt", "text/plain", "quoted-printable" );</pre>
+        </example>
+
+        <example programming_language="javascript">
+            <pre>spooler_log.mail.add_file( "c:/tmp/1.txt", "1.txt", "text/plain", "quoted-printable" );</pre>
+        </example>
     </method>
 
 
@@ -195,6 +302,18 @@
                 <java.type type="java.lang.String"/>
             </java.parameter>        
         </java>
+
+        <title>
+            XSLT-Stylesheet für eMail-Aufbereitung
+        </title>
+        
+        <example programming_language="java">
+            <pre>spooler_log.mail().set_xslt_stylesheet_path( "c:/stylesheets/mail.xslt" );</pre>
+        </example>
+
+        <example programming_language="javascript">
+            <pre>spooler_log.mail.xslt_stylesheet_path = "c:/stylesheets/mail.xslt";</pre>
+        </example>
     </property>    
 
 
@@ -204,6 +323,10 @@
                 <com.type class="Xslt_stylesheet"/>
             </com.result>        
         </com>
+        
+        <title>
+            XSLT-Stylesheet für eMail-Aufbereitung
+        </title>
     </property>    
 
 
