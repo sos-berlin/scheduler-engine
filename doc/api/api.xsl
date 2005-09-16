@@ -8,7 +8,8 @@
 
 <xsl:param name="fixed_programming_language"/>
 
-<xsl:variable name="default_programming_language" select="'javascript'"/>
+<xsl:variable name="default_programming_language"  select="'javascript'"/>
+<xsl:variable name="default_programming_language2" select="'java'"/>       <!-- Alternative -->
                 
 <xsl:include href="../scheduler.xsl" />
 <!-- Nachrangige <xsl:include> sind am Ende dieses Stylesheets -->
@@ -330,8 +331,11 @@
              &#160;–&#160; <xsl:value-of select="title"/>
         </xsl:if>
     </p>
+
+    <xsl:apply-templates select="." mode="example"/>
     
     <xsl:if test="description or ( /*/@programming_language='java' and java/description )">
+        <p style="margin-top: 0em">&#160;</p>
         <xsl:apply-templates select="description"/>
         
         <xsl:if test="/*/@programming_language='java'">
@@ -341,6 +345,8 @@
         
         <p style="padding-top: 0em; border-top: 1px solid #f0f0f0;">&#160;</p>
     </xsl:if>
+
+    <p style="margin-top: 0em">&#160;</p>
 </xsl:template>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
@@ -795,16 +801,7 @@
     </table>
 
 
-    <xsl:choose>
-        <xsl:when test="example [ not( @programming_language )  or  @programming_language=/*/@programming_language ]">
-            <xsl:apply-templates select="example [ not( @programming_language )  or  @programming_language=/*/@programming_language ]"/>
-        </xsl:when>
-        <xsl:otherwise>
-            <xsl:apply-templates select="example [ @programming_language=$default_programming_language ]">
-                <xsl:with-param name="programming_language" select="$default_programming_language"/>
-            </xsl:apply-templates>
-        </xsl:otherwise>
-    </xsl:choose>
+    <xsl:apply-templates select="." mode="example"/>
 
 
     <xsl:if test="description">
@@ -840,6 +837,26 @@
     
 </xsl:template>
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<xsl:template match="*" mode="example">
+    <xsl:choose>
+        <xsl:when test="example [ not( @programming_language )  or  @programming_language=/*/@programming_language ]">
+            <xsl:apply-templates select="example [ not( @programming_language )  or  @programming_language=/*/@programming_language ]"/>
+        </xsl:when>
+        <xsl:when test="example [ @programming_language=$default_programming_language ]">
+            <xsl:apply-templates select="example [ @programming_language=$default_programming_language ]">
+                <xsl:with-param name="programming_language" select="$default_programming_language"/>
+            </xsl:apply-templates>
+        </xsl:when>
+        <xsl:otherwise>
+            <xsl:apply-templates select="example [ @programming_language=$default_programming_language2 ]">
+                <xsl:with-param name="programming_language" select="$default_programming_language2"/>
+            </xsl:apply-templates>
+        </xsl:otherwise>
+    </xsl:choose>
+</xsl:template>
+    
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 <!--    
 <xsl:include href="api_java.xsl" />
