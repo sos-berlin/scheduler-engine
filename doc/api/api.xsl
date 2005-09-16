@@ -784,7 +784,7 @@
     </xsl:if>
 
 
-    <p style="padding-top: 0em">&#160;</p>
+    <p style="margin-top: 0em">&#160;</p>
 
 
     <!-- Signatur -->    
