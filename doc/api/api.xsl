@@ -262,7 +262,6 @@
             </table>
 
             <!--
-            <xsl:if test="not( $fixed_programming_language )">
                 <xsl:element name="script">
                     <xsl:attribute name="defer">defer</xsl:attribute>
                     <xsl:attribute name="type">text/javascript</xsl:attribute>
@@ -274,13 +273,14 @@
                     <xsl:attribute name="type">text/javascript</xsl:attribute>
                     <xsl:attribute name="src"><xsl:value-of select="/*/@base_dir"/>scripts/sarissa.js</xsl:attribute>
                 </xsl:element>
-                
+            -->                
                 <xsl:element name="script">
                     <xsl:attribute name="defer">defer</xsl:attribute>
                     <xsl:attribute name="type">text/javascript</xsl:attribute>
                     <xsl:attribute name="src"><xsl:value-of select="/*/@base_dir"/>api/api.js</xsl:attribute>
                 </xsl:element>
             
+            <!--
                 <script defer="defer" type="text/javascript" for="window" event="onload">
 
                     href_base = document.location.href.replace( /\/[^\/]*$/, "/" );   // Alles bis zum letzten Schräger
@@ -294,8 +294,6 @@
                     api.highlight_html_selectors( true );
 
                 </script>
-                
-            </xsl:if>
             -->
 
             <xsl:call-template name="bottom"/>

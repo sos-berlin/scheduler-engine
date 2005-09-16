@@ -14,16 +14,17 @@
                 
     <xsl:output doctype-public="-//W3C//DTD HTML 4.01//EN" />  <!--"http://www.w3.org/TR/html4/strict.dtd"-->
 
+
     <!-- Nicht für Firefox 1.0.6:
     <xsl:output method="xml" 
                 media-type="application/xhtml+xml" 
                 doctype-public="-//W3C//DTD XHTML 1.0 Strict//EN" 
                 doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"/-->
     <!--xsl:output doctype-public="-//W3C//DTD HTML 4.01 Transitional//EN"/> <!- - "http://www.w3.org/TR/html4/loose.dtd"-->
+    
     <xsl:variable name="start_page" select="'index.xml'"/>
     <xsl:variable name="base_dir"   select="/*/@base_dir"/>
-        
-        
+    <xsl:variable name="programming_language" select="'javascript'"/>     <!-- Default -->
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~xml_commands-->
     <!-- Für xml_commands.xml -->
@@ -1224,14 +1225,8 @@
         <xsl:element name="a">
             <xsl:attribute name="class">silent</xsl:attribute>
             
-            <xsl:choose>
-                <xsl:when test="/api.class">
-                    <xsl:attribute name="href"><xsl:value-of select="$base_dir"/>api/<xsl:value-of select="@class"/>.xml#<xsl:value-of select="$java_method"/></xsl:attribute>
-                </xsl:when>
-                <xsl:otherwise>
-                    <xsl:attribute name="href"><xsl:value-of select="$base_dir"/>javadoc/sos/spooler/<xsl:value-of select="@class"/>.html#<xsl:value-of select="$java_method"/>(<xsl:value-of select="$java_signature"/>)</xsl:attribute>
-                </xsl:otherwise>
-            </xsl:choose>
+            <xsl:attribute name="href"><xsl:value-of select="$base_dir"/>api/<xsl:value-of select="@class"/>-<xsl:value-of select="$programming_language"/>.xml#method__<xsl:value-of select="$java_method"/></xsl:attribute>
+            <!--xsl:attribute name="href"><xsl:value-of select="$base_dir"/>javadoc/sos/spooler/<xsl:value-of select="@class"/>.html#<xsl:value-of select="$java_method"/>(<xsl:value-of select="$java_signature"/>)</xsl:attribute-->
             
             <code>
                 <xsl:value-of select="@class"/>

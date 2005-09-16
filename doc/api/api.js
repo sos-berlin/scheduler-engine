@@ -42,13 +42,13 @@ function api_method_in_table__onmouse( method_id, class_name )
 }
 
 //----------------------------------------------------------------------------------Xslt_stylesheet
-
+/*
 function Xslt_stylesheet()
 {
 }
 
 //---------------------------------------------------------------------------------------------Xslt
-/*
+
 if( window.ActiveXObject )
 {
     Xslt_stylesheet.prototype.load = function( stylesheet_dom_document )
@@ -118,15 +118,8 @@ else
     }    
 }
 */
-//--------------------------------------------------------------------------human_language__onclick
-/*
-function human_language__onclick()
-{
-    // ?
-}
-*/
 //----------------------------------------------------------------------------------------------Api
-
+/*
 function Api()
 {
     //this._class_name           = get_cookie( "class", "" );
@@ -319,7 +312,7 @@ Api.prototype.fetch_by_url = function( url )
     {
         xml_http.send( "" );
     }
-    /*
+/*
     catch( x )
     {
         if(1)
@@ -338,7 +331,7 @@ Api.prototype.fetch_by_url = function( url )
     {
         window.status = status;
     }
-*/
+* /
     
     window.status = "";
     this._xml_http = xml_http;
@@ -353,7 +346,7 @@ function get_cookie( name, deflt )
     if( document.cookie )
     {
         var prefix = name + "=";
-        var cookies = document.cookie.split( /; */ );
+        var cookies = document.cookie.split( /; *[]/ );
         for( i = 0; i < cookies.length; i++ )
         {
             if( cookies[i].substring( 0, prefix.length ) == prefix )  return cookies[i].substring( prefix.length );
@@ -362,5 +355,5 @@ function get_cookie( name, deflt )
     
     return deflt;
 }
-    
+*/    
 //-------------------------------------------------------------------------------------------------

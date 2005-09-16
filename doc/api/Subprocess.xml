@@ -88,6 +88,10 @@
         </com.result>
     </com>
     
+    <title>
+        Signal, mit dem sich der Prozess beendet hat (nur Unix)
+    </title>
+    
     <description>
         Erst aufrufen, wenn
         <scheduler_method class="Subprocess" property="terminated"/><code> == true</code>.
@@ -134,6 +138,14 @@
             <com.type type="int"/>
         </com.result>
     </com>
+    
+    <title>
+        Verhindert, dass bei einem Abbruch des Prozesses mit Signal der Job stoppt
+    </title>
+    
+    <description>
+        Wirkt nicht unter Windows, weil es hier keine Signale gibt.
+    </description>
 </property>
 
 
