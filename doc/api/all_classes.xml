@@ -7,6 +7,7 @@
 <class_references
     base_dir="../"
 >
+    <class_reference class="introduction"/>                      <!-- Für "Übersicht" -->
     <class_reference class="Error"/>
     <class_reference class="Job"/>
     <class_reference class="Job_chain"/>
@@ -21,6 +22,7 @@
     <class_reference class="Spooler_program"/>
     <class_reference class="Subprocess"/>
     <class_reference class="Task"/>
+    <class_reference class="Variable"/>
     <class_reference class="Variable_set"/>
     <class_reference class="Xslt_stylesheet"/>
 </class_references>

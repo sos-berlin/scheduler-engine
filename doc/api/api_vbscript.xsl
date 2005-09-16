@@ -6,7 +6,10 @@
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<!--xsl:include href="api.xsl" /-->
+<xsl:variable name="programming_language"    select="'vbscript'"/>
+<xsl:variable name="language_has_properties" select="false()"/>
+
+<xsl:include href="api.xsl" />
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 

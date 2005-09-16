@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<!-- $Id$ -->
+
+<?xml-stylesheet href="api_java.xsl" type="text/xsl"?>
+
+
+<api.class 
+    name                 = "Order_queue" 
+    base_dir             = "../"
+/>

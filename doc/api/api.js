@@ -1,5 +1,8 @@
 // $Id$
 
+/// WIRD NICHT BENUTZT ///
+
+
 // Sarissa wählt die höchste Version aus. Das ist nicht gut.
 //_SARISSA_DOM_PROGID = "MSXML2.DOMDocument";
 

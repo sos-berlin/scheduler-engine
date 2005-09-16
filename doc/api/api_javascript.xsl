@@ -6,7 +6,10 @@
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<!--xsl:include href="api.xsl" /-->
+<xsl:variable name="programming_language"    select="'javascript'"/>
+<xsl:variable name="language_has_properties" select="true()"/>
+
+<xsl:include href="api.xsl" />
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 

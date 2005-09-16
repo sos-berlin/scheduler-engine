@@ -92,7 +92,8 @@
             <com.result>
                 <com.type type="BSTR"/>
                 <title>
-                    Ergebnis der Transformation.
+                    Ergebnis der Transformation als XML-String 
+                    (der String sollte in ISO-8859-1 codiert sein).
                 </title>
             </com.result>
         </com>
@@ -102,7 +103,7 @@
 
     <description>
         <p>
-            Mit einem <a href="http://www.w3.org/Style/XSL/">XSLT-Stylesheet</a> wird die Konvertierung eines XML-Dokuments in ein anderes beschrieben.
+            Mit einem XSLT-Stylesheet wird die Konvertierung eines XML-Dokuments in ein anderes beschrieben.
             Die Variablenwerte können von jedem COM-Typ sein (Java: nur Strings).
         </p>
         <p>

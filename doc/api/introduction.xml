@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 <!-- $Id$ -->
 
-<?xml-stylesheet href="api.xsl" type="text/xsl"?>
+<?xml-stylesheet href="api_javascript.xsl" type="text/xsl"?>
 
 
 <api.class 
-    introduction = "true"
-    base_dir     = "../" 
+    name        = "introduction"
+    base_dir    = "../" 
     author      = "$Author$"
     date        = "$Date$"
 >

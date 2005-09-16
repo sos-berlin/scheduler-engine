@@ -42,39 +42,46 @@
 </xsl:template-->
 
 <xsl:template name="programming_language_selector">
-    <xsl:param name="programming_language"/>
+    <xsl:param name="this_programming_language"/>
     
-    <xsl:variable name="plang" select="translate( $programming_language, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz' )"/>
+    <xsl:variable name="plang" select="translate( $this_programming_language, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz' )"/>
 
     <xsl:element name="a">
         <xsl:attribute name="id">programming_language_selector__<xsl:value-of select="$plang"/></xsl:attribute>
         <xsl:attribute name="class">api_programming_language_selector</xsl:attribute>
 
+        <xsl:choose>
+            <xsl:when test="$programming_language=$plang">
+                <xsl:attribute name="style">font-weight: bold;</xsl:attribute>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:attribute name="href"><xsl:value-of select="/api.class/@name"/>-<xsl:value-of select="$plang"/>.xml</xsl:attribute>
+            </xsl:otherwise>
+        </xsl:choose>
+        
+        <!--
         <xsl:if test="$fixed_programming_language and not( $fixed_programming_language=$plang )">
             <xsl:attribute name="style">color: lightgray;</xsl:attribute>
             <xsl:attribute name="title">Use XML-Version of this document to show other programming languages</xsl:attribute>
         </xsl:if>
 
-        <xsl:if test="$fixed_programming_language=$plang">
-            <xsl:attribute name="style">font-weight: bold;</xsl:attribute>
-        </xsl:if>
-        
         <xsl:if test="not( $fixed_programming_language )">
             <xsl:attribute name="onclick">api.programming_language_selector__onclick( "<xsl:value-of select="$plang"/>" )</xsl:attribute>
             <xsl:attribute name="href">javascript:void(0)</xsl:attribute>
         </xsl:if>            
+        -->
         
-        <xsl:value-of select="$programming_language"/>
+        <xsl:value-of select="$this_programming_language"/>
     </xsl:element>
     
 </xsl:template>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
-
+<!--
 <xsl:template match="api.classes" mode="description">
     <xsl:apply-templates select="document( 'all_classes.xml' )/class_references/class_reference"/>
 </xsl:template>
-
+-->
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 <!--
 <xsl:template match="class_reference">
@@ -99,55 +106,49 @@
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 <!-- Klick auf den Klassennamen ruft im rechten Teil die Beschreibung der Klasse auf -->
-
+<!--
 <xsl:template match="class_reference | api.class_reference">
-    <xsl:call-template name="class_reference">
+    <xsl:call-template name="all_classes">
         <xsl:with-param name="class" select="@class"/>
         <xsl:with-param name="active_class" select="/api.class/@name"/>
     </xsl:call-template>
 </xsl:template>
-
+-->
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<xsl:template name="class_reference">
+<xsl:template name="all_classes">
     <xsl:param name="class"/>
+    <xsl:param name="class_references"/>
     <xsl:param name="active_class"/>
 
-    <xsl:variable name="href">
-        <xsl:choose>
-            <xsl:when test="@class">
-                <xsl:value-of select="/*/@base_dir"/>api/<xsl:value-of select="$class"/>.xml
-            </xsl:when>
-            <xsl:otherwise>
-                <xsl:value-of select="/*/@base_dir"/>api/introduction.xml
-            </xsl:otherwise>
-        </xsl:choose>
-    </xsl:variable>    
-    
-    <p style="margin-top: 0px; margin-bottom: 0px; padding-top: 0px; padding-bottom: 0px">
-        <xsl:element name="a">
-            <xsl:attribute name="id">class_reference_<xsl:value-of select="$class"/></xsl:attribute>
-            <!--xsl:attribute name="href">javascript:void(0)</xsl:attribute>  <!- - Für ie6 -->
-            <xsl:attribute name="href"><xsl:value-of select="normalize-space( $href )"/></xsl:attribute>  
-            <!--xsl:attribute name="onclick">api.class_reference__onclick( "<xsl:value-of select="$class"/>" );</xsl:attribute>-->
-            
-            <xsl:attribute name="style">
-                <xsl:if test="$class = $active_class">
-                    font-weight: bold;
+    <xsl:for-each select="$class_references">
+        <xsl:variable name="href">
+            <xsl:value-of select="/*/@base_dir"/>api/<xsl:value-of select="@class"/>-<xsl:value-of select="$programming_language"/>.xml
+        </xsl:variable>    
+        
+        <p style="margin-top: 0px; margin-bottom: 0px; padding-top: 0px; padding-bottom: 0px">
+            <xsl:element name="a">
+                <xsl:attribute name="id">class_reference_<xsl:value-of select="$class"/></xsl:attribute>
+                <!--xsl:attribute name="href">javascript:void(0)</xsl:attribute>  <!- - Für ie6 -->
+                <!--xsl:attribute name="onclick">api.class_reference__onclick( "<xsl:value-of select="$class"/>" );</xsl:attribute>-->
+                
+                <xsl:attribute name="href"><xsl:value-of select="normalize-space( $href )"/></xsl:attribute>  
+                
+                <xsl:if test="@class=$active_class">
+                    <xsl:attribute name="style">font-weight: bold;</xsl:attribute>
                 </xsl:if>
-            </xsl:attribute>
-            
-            <xsl:choose>
-                <xsl:when test="$class">
-                    <xsl:value-of select="$class"/>
-                </xsl:when>
-                <xsl:otherwise>
-                    <xsl:text xml:lang="de">Übersicht</xsl:text>
-                </xsl:otherwise>
-            </xsl:choose>
-        </xsl:element>
-    </p>
-    
+                
+                <xsl:choose>
+                    <xsl:when test="@class != 'introduction'">
+                        <xsl:value-of select="@class"/>
+                    </xsl:when>
+                    <xsl:otherwise>
+                        <xsl:text xml:lang="de">Übersicht</xsl:text>
+                    </xsl:otherwise>
+                </xsl:choose>
+            </xsl:element>
+        </p>
+    </xsl:for-each>
 </xsl:template>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
@@ -170,6 +171,12 @@
 -->
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
+<xsl:template match="api.class [ not(*) ]">
+    <xsl:apply-templates select="document( concat( @name, '.xml' ) )"/>
+</xsl:template>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
 <xsl:template match="api.class">
     <html>
         <xsl:variable name="title" select="'Programmschnittstelle (API)'"/>
@@ -187,27 +194,28 @@
             <table cellpadding="0" cellspacing="0" style="padding-bottom: 4ex">
                 <tr>
                     <td style="vertical-align: top; padding-right: 3ex; padding-bottom: 4pt;">
-                        <xsl:call-template name="class_reference">
-                            <xsl:with-param name="active_class" select="'-'"/>
+                        <xsl:call-template name="all_classes">   <!-- Übersicht -->
+                            <xsl:with-param name="class_references"  select="document( 'all_classes.xml' )/class_references/class_reference [ @class='introduction' ]"/>
+                            <xsl:with-param name="active_class"      select="/api.class/@name"/>
                         </xsl:call-template>
                     </td>
                     
                     <td style="padding-left: 3ex; border-left: 1px dotted black; padding-bottom: 4pt;">
                     
                         <xsl:call-template name="programming_language_selector">
-                            <xsl:with-param name="programming_language">Java</xsl:with-param>
+                            <xsl:with-param name="this_programming_language">Java</xsl:with-param>
                         </xsl:call-template>
 
                         <xsl:call-template name="programming_language_selector">
-                            <xsl:with-param name="programming_language">JavaScript</xsl:with-param>
+                            <xsl:with-param name="this_programming_language">JavaScript</xsl:with-param>
                         </xsl:call-template>
 
                         <xsl:call-template name="programming_language_selector">
-                            <xsl:with-param name="programming_language">VBScript</xsl:with-param>
+                            <xsl:with-param name="this_programming_language">VBScript</xsl:with-param>
                         </xsl:call-template>
 
                         <xsl:call-template name="programming_language_selector">
-                            <xsl:with-param name="programming_language">Perl</xsl:with-param>
+                            <xsl:with-param name="this_programming_language">Perl</xsl:with-param>
                         </xsl:call-template>
                     </td>
                 </tr>
@@ -225,31 +233,35 @@
                 <tr>
                     <td style="vertical-align: top; padding-right: 3ex; width: 20pt;">
                         <!--p style="font-weight: bold; padding-bottom: 1em">Klassen:</p-->
-                        <xsl:apply-templates select="document( 'all_classes.xml' )/*"/>
+                        <xsl:call-template name="all_classes">
+                            <xsl:with-param name="class_references"  select="document( 'all_classes.xml' )/class_references/class_reference [ @class != 'introduction' ]"/>
+                            <xsl:with-param name="active_class"      select="/api.class/@name"/>
+                        </xsl:call-template>
                     </td>
                     
                     <td style="padding-left: 3ex; border-left: 1px dotted black;">
                         <div id="class_headline">
-                            <xsl:if test="$fixed_programming_language">
+                            <xsl:if test="$fixed_programming_language or true()">
                                 <xsl:apply-templates select="." mode="headline"/>
                             </xsl:if>
                         </div>
                         
                         <div id="class">
-                            <xsl:if test="$fixed_programming_language">
-                                <xsl:apply-templates select=". [ not( @introduction ) ]" mode="table"/>
+                            <xsl:if test="$fixed_programming_language and not( @introduction ) or true()">
+                                <xsl:apply-templates select="." mode="table"/>
                             </xsl:if>
                         </div>
                         
                         <div id="methods">
-                            <xsl:if test="$fixed_programming_language">
-                                <xsl:apply-templates select=". [ not( @introduction ) ]" mode="detailed_methods"/>
+                            <xsl:if test="$fixed_programming_language and not( @introduction ) or true()">
+                                <xsl:apply-templates select="." mode="detailed_methods"/>
                             </xsl:if>
                         </div>
                     </td>
                 </tr>
             </table>
 
+            <!--
             <xsl:if test="not( $fixed_programming_language )">
                 <xsl:element name="script">
                     <xsl:attribute name="defer">defer</xsl:attribute>
@@ -284,6 +296,7 @@
                 </script>
                 
             </xsl:if>
+            -->
 
             <xsl:call-template name="bottom"/>
         </body>
@@ -315,21 +328,23 @@
 
 <xsl:template match="api.class" mode="headline">
 
-    <p class="api_headline">
-        <xsl:value-of select="@name"/>
+    <xsl:if test="@name != 'introduction'">
+        <p class="api_headline">
+            <xsl:value-of select="@name"/>
 
-        <xsl:if test="title">
-             &#160;–&#160; <xsl:value-of select="title"/>
-        </xsl:if>
-    </p>
+            <xsl:if test="title">
+                &#160;–&#160; <xsl:value-of select="title"/>
+            </xsl:if>
+        </p>
+    </xsl:if>
 
     <xsl:apply-templates select="." mode="example"/>
     
-    <xsl:if test="description or ( /*/@programming_language='java' and java/description )">
+    <xsl:if test="description or ( $programming_language='java' and java/description )">
         <p style="margin-top: 0em">&#160;</p>
         <xsl:apply-templates select="description"/>
         
-        <xsl:if test="/*/@programming_language='java'">
+        <xsl:if test="$programming_language='java'">
             <p style="padding-top: 0em">&#160;</p>
             <xsl:apply-templates select="java/description"/>
         </xsl:if>
@@ -378,7 +393,7 @@
         </tr>
         -->
         
-        <xsl:apply-templates select="property [ not( not_implemented/@programming_language=/*/@programming_language ) ] | method [ not( not_implemented/@programming_language=/*/@programming_language ) ]" mode="table">
+        <xsl:apply-templates select="property [ not( not_implemented/@programming_language=$programming_language ) ] | method [ not( not_implemented/@programming_language=$programming_language ) ]" mode="table">
             <xsl:sort select="@name"/>
         </xsl:apply-templates>
         
@@ -426,7 +441,7 @@
     <xsl:param name="show_title"  select="true()"/>
     
     <xsl:choose>
-        <xsl:when test="/*/@language_has_properties and false()">
+        <xsl:when test="$language_has_properties and false()">
             <xsl:apply-templates select="com" mode="table_row">
                 <xsl:with-param name="is_in_table" select="$is_in_table"/>
                 <xsl:with-param name="show_title"  select="$show_title"/>
@@ -530,9 +545,9 @@
                     <xsl:apply-templates select="java.result/java.type | com.result/com.type"/>
                     &#160;
                 </xsl:when>
-                <xsl:when test="parent::property and /*/@language_has_properties and $access='write'">
+                <xsl:when test="parent::property and $language_has_properties and $access='write'">
                 </xsl:when>
-                <xsl:when test="not( /*/@programming_language='java' )">
+                <xsl:when test="not( $programming_language='java' )">
                 </xsl:when>
                 <xsl:otherwise>
                     <span class="mono">void&#160;</span>
@@ -543,7 +558,7 @@
         <xsl:element name="td">
             <xsl:attribute name="class">api_method</xsl:attribute>
             
-            <xsl:if test="not( /*/@language_has_properties and parent::property )">
+            <xsl:if test="not( $language_has_properties and parent::property )">
                 <xsl:attribute name="colspan">2</xsl:attribute>
             </xsl:if>
             
@@ -558,9 +573,9 @@
             </xsl:element>
 
 
-            <xsl:if test="com.parameter or parent::method or not( /*/@language_has_properties )">
+            <xsl:if test="com.parameter or parent::method or not( $language_has_properties )">
                 <xsl:choose>
-                    <xsl:when test="$access='write' and not( /*/@language_has_properties )">
+                    <xsl:when test="$access='write' and not( $language_has_properties )">
                         <xsl:apply-templates select="." mode="parameter_list">
                             <xsl:with-param name="parameters" select="java.parameter | java.result | com.parameter | com.result"/>
                         </xsl:apply-templates>
@@ -573,13 +588,13 @@
                 </xsl:choose>
             </xsl:if>
             
-            <xsl:if test="parent::property and /*/@language_has_properties and $access='write'">
+            <xsl:if test="parent::property and $language_has_properties and $access='write'">
                 <span class="mono"> = </span>
                 <xsl:apply-templates select="com.result"/>
             </xsl:if>
             
 
-            <!--xsl:if test="parent::property and /*/@language_has_properties and $access">
+            <!--xsl:if test="parent::property and $language_has_properties and $access">
                 <span style="font-size: 8pt"> &#160;(<xsl:value-of select="$access"/> only)</span>
             </xsl:if-->
             
@@ -636,7 +651,7 @@
 <xsl:template match="java | com" mode="parameter_list">
     <xsl:param name="parameters"/>
     
-    <xsl:if test="not( /*/@programming_language='perl' )">
+    <xsl:if test="not( $programming_language='perl' )">
         <span class="mono"><xsl:text>(</xsl:text></span>
     </xsl:if>
 
@@ -667,7 +682,7 @@
         <span class="mono"><xsl:text> </xsl:text></span>
     </xsl:if>
 
-    <xsl:if test="not( /*/@programming_language='perl' ) or $parameters or parent::method">
+    <xsl:if test="not( $programming_language='perl' ) or $parameters or parent::method">
         <span class="mono"><xsl:text>)</xsl:text></span>
     </xsl:if>
 
@@ -832,8 +847,8 @@
 
 <xsl:template match="*" mode="example">
     <xsl:choose>
-        <xsl:when test="example [ not( @programming_language )  or  @programming_language=/*/@programming_language ]">
-            <xsl:apply-templates select="example [ not( @programming_language )  or  @programming_language=/*/@programming_language ]"/>
+        <xsl:when test="example [ not( @programming_language )  or  @programming_language=$programming_language ]">
+            <xsl:apply-templates select="example [ not( @programming_language )  or  @programming_language=$programming_language ]"/>
         </xsl:when>
         <xsl:when test="example [ @programming_language=$default_programming_language ]">
             <xsl:apply-templates select="example [ @programming_language=$default_programming_language ]">

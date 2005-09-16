@@ -6,13 +6,17 @@
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<!--xsl:include href="api.xsl" /-->
+<xsl:variable name="programming_language"    select="'perl'"/>
+<xsl:variable name="language_has_properties" select="false()"/>
+
+<xsl:include href="api.xsl" />
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <!-- Für Perl wird auch die öffnende Klammer der Parameterliste erzeugt (wegen LetProperty) -->
 
-<xsl:template match="property [ /*/@programming_language='perl' ] | method [ /*/@programming_language='perl' ]" mode="method_name">
+<!--xsl:template match="property [ /*/@programming_language='perl' ] | method [ /*/@programming_language='perl' ]" mode="method_name"-->
+<xsl:template match="property | method" mode="method_name">
     <xsl:param name="access"/>
 
     <xsl:if test="parent::api.class/@object_name">
@@ -50,7 +54,8 @@
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<xsl:template match="com.type [ /*/@programming_language='perl' and @type='bool' ]">
+<!--xsl:template match="com.type [ /*/@programming_language='perl' and @type='bool' ]"-->
+<xsl:template match="com.type [ @type='bool' ]">
     <span class="mono">boolean</span>
 </xsl:template>
 

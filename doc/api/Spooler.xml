@@ -355,7 +355,7 @@
 
     <description>
         <p>
-            Wie <scheduler_method class="Task" method="abort_immediately"/>,
+            Wie <scheduler_method class="Spooler" method="abort_immediately"/>,
             nur dass der Scheduler sich erneut startet.
             Dabei verwendet er die Kommandozeilenparametern wieder.
         </p>
