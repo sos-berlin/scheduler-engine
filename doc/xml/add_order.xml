@@ -99,12 +99,10 @@
     <xml_answer element="ok"/>
     
     <example>
-        <pre>
-&lt;add_order job_chain="jobkette" id="1234" title="Mein erster Auftrag" state="100">
+        <pre>&lt;add_order job_chain="jobkette" id="1234" title="Mein erster Auftrag" state="100">
     &lt;params>
         &lt;param name="ein_parameter" value="ein Wert"/>
     &lt;/params>
-&lt;/add_order>
-        </pre>
+&lt;/add_order></pre>
     </example>
 </xml_element>    

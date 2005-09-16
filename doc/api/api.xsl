@@ -7,6 +7,8 @@
                 version   = "1.0">
 
 <xsl:param name="fixed_programming_language"/>
+
+<xsl:variable name="default_programming_language" select="'javascript'"/>
                 
 <xsl:include href="../scheduler.xsl" />
 <!-- Nachrangige <xsl:include> sind am Ende dieses Stylesheets -->
@@ -761,14 +763,19 @@
 <xsl:template match="method | property" mode="detailed_methods">
     
     <xsl:element name="h2">
+        <xsl:attribute name="class">bar</xsl:attribute>
         <xsl:attribute name="id">method__<xsl:value-of select="@name"/></xsl:attribute>
         
         <xsl:value-of select="@name"/>
         
-        <xsl:if test="title">
+        <!--xsl:if test="title">
             &#160; – &#160; <xsl:value-of select="title"/>
-        </xsl:if>
+        </xsl:if-->
     </xsl:element>
+
+
+    <xsl:apply-templates select="title"/>
+
     
     <xsl:if test="@deprecated">
         <p>
@@ -776,18 +783,35 @@
         </p>
     </xsl:if>
 
+
     <p style="padding-top: 0em">&#160;</p>
-    
+
+
+    <!-- Signatur -->    
     <table cellpadding="0" cellspacing="0">
         <xsl:apply-templates select="." mode="table_rows">
             <xsl:with-param name="show_title" select="false()"/>
         </xsl:apply-templates>
     </table>
 
+
+    <xsl:choose>
+        <xsl:when test="example [ not( @programming_language )  or  @programming_language=/*/@programming_language ]">
+            <xsl:apply-templates select="example [ not( @programming_language )  or  @programming_language=/*/@programming_language ]"/>
+        </xsl:when>
+        <xsl:otherwise>
+            <xsl:apply-templates select="example [ @programming_language=$default_programming_language ]">
+                <xsl:with-param name="programming_language" select="$default_programming_language"/>
+            </xsl:apply-templates>
+        </xsl:otherwise>
+    </xsl:choose>
+
+
     <xsl:if test="description">
         <p>&#160;</p>
         <xsl:apply-templates select="description"/>
     </xsl:if>
+
     
     <xsl:if test="com.parameter">
         <h3>Parameter</h3>
@@ -806,6 +830,7 @@
             </xsl:for-each>
         </table>
     </xsl:if>
+
     
     <xsl:if test="com/com.result[ title or description ]">
         <h3>Rückgabe</h3>

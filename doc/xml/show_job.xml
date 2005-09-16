@@ -44,8 +44,6 @@
     
     
     <example>
-        <pre>
-&lt;show_job job="mein_job"/>
-        </pre>
+        <pre>&lt;show_job job="my_job"/></pre>
     </example>
 </xml_element>    

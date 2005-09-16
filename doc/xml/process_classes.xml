@@ -31,18 +31,14 @@
     </description>
 
     <example>
-        <pre>
-&lt;process_classes>
+        <pre>&lt;process_classes>
     &lt;process_class                max_processes="3"/>
     &lt;process_class name="klasse2" max_processes="3"/>
-&lt;/process_classes>
-        </pre>
+&lt;/process_classes></pre>
     </example>
     
     <example>
-        <pre>
-&lt;process_classes/>
-        </pre>
+        <pre>&lt;process_classes/></pre>
         <p>
             Lässt die Tasks in eigenen Prozessen ablaufen.
         </p>

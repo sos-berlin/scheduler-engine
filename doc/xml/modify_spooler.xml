@@ -99,8 +99,6 @@
     
     
     <example>
-        <pre>
-&lt;modify_spooler cmd="abort_immediately_and_restart"/>
-        </pre>
+        <pre>&lt;modify_spooler cmd="abort_immediately_and_restart"/></pre>
     </example>
 </xml_element>    

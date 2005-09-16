@@ -10,6 +10,8 @@
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
+<!-- Für Perl wird auch die öffnende Klammer der Parameterliste erzeugt (wegen LetProperty) -->
+
 <xsl:template match="property [ /*/@programming_language='perl' ] | method [ /*/@programming_language='perl' ]" mode="method_name">
     <xsl:param name="access"/>
 
@@ -33,6 +35,7 @@
                 <span style="font-weight: bold">
                     <xsl:value-of select="@name"/>
                 </span>
+                <xsl:if test="com/com.parameter">(</xsl:if>
             </xsl:when>
             
             <xsl:otherwise>

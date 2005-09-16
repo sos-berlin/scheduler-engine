@@ -50,10 +50,9 @@
             stellt mit der Methode <a href="javadoc/sos/spooler/Log.html#mail()"><code>mail()</code></a>
             das Objekt <a href="javadoc/sos/spooler/Mail.html"><code>Mail</code></a> bereit,
             über dessen Methoden Sie Absender, Empfänger, Betreff usw. einstellen können.
+            
             <p class="example">Beispiel</p>
-            <pre>
-spooler_log.mail().set_to( "admin@xxx.com" );
-            </pre>
+            <pre>spooler_log.mail().set_to( "admin@xxx.com" );</pre>
         </div>
 
     

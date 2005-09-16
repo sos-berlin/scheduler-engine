@@ -27,8 +27,6 @@
     
     
     <example>
-        <pre>
-&lt;show_job_chains/>
-        </pre>
+        <pre>&lt;show_job_chains/></pre>
     </example>
 </xml_element>    

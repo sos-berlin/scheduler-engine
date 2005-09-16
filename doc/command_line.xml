@@ -176,15 +176,15 @@
                     sondern installiert ihn als Windows-Dienst.
                     Dabei werden folgende Optionen aus der Kommandozeile übernommen:
                 </p>
-                <pre class="indent">
-
--cd=                
--config=                
--id=
--log=                
--ini=
--sos.ini=
-                </pre>
+                <p>
+                    <scheduler_option name="cd"/><br/>
+                    <scheduler_option name="config"/><br/>
+                    <scheduler_option name="id"/><br/>
+                    <scheduler_option name="ini"/><br/>
+                    <scheduler_option name="log"/><br/>
+                    <scheduler_option name="pid-file"/><br/>
+                    <scheduler_option name="sos.ini"/><br/>
+                </p>
                 <p>
                     <code>-install-service=</code><i>name</i> ist dasselbe wie
                     <code>-install-service -service-name=</code><i>name</i>.

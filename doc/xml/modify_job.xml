@@ -132,8 +132,6 @@
     
     
     <example>
-        <pre>
-&lt;modify_job job="mein_job" cmd="wake"/>
-        </pre>
+        <pre>&lt;modify_job job="mein_job" cmd="wake"/></pre>
     </example>
 </xml_element>    

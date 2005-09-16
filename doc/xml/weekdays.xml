@@ -43,8 +43,7 @@
     <behavior_with_xml_element element="base" complete="yes"/>
     
     <example>
-        <pre>
-&lt;weekdays>
+        <pre>&lt;weekdays>
     &lt;day day="1">
         &lt;period begin="10:00" end="12:00"/>
     &lt;/day>
@@ -52,8 +51,8 @@
         &lt;period begin="08:00" end="12:00"/>
         &lt;period begin="15:00" end="18:00"/>
     &lt;/day>
-&lt;/day>    
-        </pre>
+&lt;/day></pre>
+
         <p>
             Setzt die Laufzeit fest für Montags 10:00 bis 12:00 und
             Dienstags 08:00 bis 12:00 und 15:00 bis 18:00.

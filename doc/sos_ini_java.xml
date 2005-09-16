@@ -33,9 +33,7 @@
                 </p>
             </description>
             <example>
-                <pre>
-class_path = s:\prod\bind\sos.spooler.jar;s:\prod\bind\sos.hostware.jar;s:\prod\bind\sos.mail.jar
-                </pre>
+                <pre>class_path = s:\prod\bind\sos.spooler.jar;s:\prod\bind\sos.hostware.jar;s:\prod\bind\sos.mail.jar</pre>
             </example>
         </ini_entry>
 
@@ -48,9 +46,7 @@ class_path = s:\prod\bind\sos.spooler.jar;s:\prod\bind\sos.hostware.jar;s:\prod\
             </description>
 
             <example>
-                <pre>
-options = -Xdebug -Djava.library.path=s:/prod/bind
-                </pre>
+                <pre>options = -Xdebug -Djava.library.path=s:/prod/bind</pre>
             </example>
         </ini_entry>
 

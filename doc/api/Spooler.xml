@@ -18,6 +18,16 @@
             <com.type class="Log"/>
         </com.result>
     </com>
+    
+    <title>
+        Das Hauptprotokoll
+    </title>
+    
+    <description>
+        <p>
+            Normalerweise wird man <scheduler_method class="Job_impl" method="spooler_log"/> verwenden.
+        </p>
+    </description>
 </property>
 
 
@@ -29,12 +39,12 @@
     </com>
     
     <title>
-        Wert der Kommandozeilenoption <scheduler_option name="id"/>.
+        Wert der Kommandozeilenoption <code>-id=</code>
     </title>
     
     <description>
         <p>
-            Siehe <scheduler_option name="id"/>;
+            Siehe <scheduler_option name="id"/>.
         </p>
     </description>
 </property>
@@ -53,7 +63,7 @@
 
     <description>
         <p>
-            Siehe <scheduler_option name="param"/>;
+            Siehe <scheduler_option name="param"/>.
         </p>
     </description>
 </property>
@@ -117,11 +127,27 @@
             <com.type type="BSTR"/>
         </com.result>
     </com>
+    
+    <description>
+        <p>
+            Siehe <scheduler_option name="log-dir"/>.
+        </p>
+    </description>
 </property>
 
 
 <method name="let_run_terminate_and_restart">
     <com/>
+    
+    <description>
+        <p>
+            Sobald alle Aufträge abgearbeitet sind, 
+            beendet der Scheduler alle Jobs 
+            (durch Aufruf von <scheduler_method class="Job_impl" name="spooler_close"/>)
+            und dann sich selbst. 
+            Ein neuer Scheduler mit unveränderten Kommandozeilenparametern wird gestartet.        
+        </p>
+    </description>
 </method>
 
 
@@ -135,6 +161,16 @@
             <com.type type="VARIANT*"/>
         </com.result>
     </com>
+    
+    <title>
+        Zugriff auf Scheduler-weite Variablen
+    </title>
+    
+    <description>
+        <p>
+            Die Variablen sind überall im Scheduler benutzbar.
+        </p>
+    </description>
 </property>
 
 
@@ -144,6 +180,14 @@
             <com.type class="Variable_set"/>
         </com.result>
     </com>
+    
+    <title>
+        Die Scheduler-weiten Variablen als <code>Variable_set</code>
+    </title>
+    
+    <description>
+        Siehe <scheduler_method class="Spooler" method="var"/>
+    </description>
 </property>
 
 
@@ -180,10 +224,16 @@
             <com.type class="Job_chain"/>
         </com.parameter>
     </com>
+    
+    <description>
+        <p>
+            Siehe <scheduler_method class="Spooler" method="create_job_chain"/>.
+        </p>
+    </description>
 </method>
 
 
-<method name="job_chain">
+<property name="job_chain" access="read">
     <com>
         <com.parameter name="name">
             <com.type type="BSTR"/>
@@ -193,7 +243,7 @@
             <com.type class="Job_chain"/>
         </com.result>
     </com>
-</method>
+</property>
 
 
 <method name="create_order">
@@ -202,6 +252,14 @@
             <com.type class="Order"/>
         </com.result>
     </com>
+    
+    <description>
+        <p>
+            Erzeugt einen neuen Auftrag. 
+            Dieser Auftrag kann mit <scheduler_method class="Spooler" method="add_order"/>
+            einer Jobkette übergeben werden.
+        </p>
+    </description>
 </method>
 
 
@@ -209,6 +267,9 @@
     <com>
         <com.result>
             <com.type type="bool"/>
+            <description>
+                true, genau dann wenn der Scheduler als Dienst (in Windows) oder als Daemon (in Unix) läuft.
+            </description>
         </com.result>
     </com>
 </property>
@@ -257,6 +318,10 @@
             <com.type type="BSTR"/>
         </com.result>
     </com>
+    
+    <titel>
+        Der Namen des Rechners, auf dem der Scheduler läuft.
+    </titel>
 </property>
 
 
@@ -285,7 +350,7 @@
     <com/>
     
     <title>
-        Bricht den Scheduler augenblicklich ab und startet ein neu.
+        Bricht den Scheduler augenblicklich ab und startet ihn neu.
     </title>
 
     <description>
@@ -419,11 +484,15 @@
     <com>
         <com.result>
             <com.type type="int"/>
+            <description>
+                0, wenn kein Port geöffnet ist.
+            </description>
         </com.result>
     </com>
     
-    <title>
-    </title>
+    <description>
+        Siehe <scheduler_option name="tcp-port"/>
+    </description>
 </property>
 
 
@@ -431,11 +500,15 @@
     <com>
         <com.result>
             <com.type type="int"/>
+            <description>
+                0, wenn kein Port geöffnet ist.
+            </description>
         </com.result>
     </com>
     
-    <title>
-    </title>
+    <description>
+        Siehe <scheduler_option name="udp-port"/>
+    </description>
 </property>
 
 
@@ -476,6 +549,13 @@
         </java.result>
     </java>
 </method>
+
+
+<description>
+    <p>
+        Von dieser Klasse gibt es nur ein Objekt, <scheduler_method class="Job_impl" property="spooler"/>.
+    </p>
+</description>
 
 
 </api.class>

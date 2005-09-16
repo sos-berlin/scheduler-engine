@@ -45,8 +45,6 @@
     
     
     <example>
-        <pre>
-&lt;remove_order job_chain="meine_jobkette" order="42" />
-        </pre>
+        <pre>&lt;remove_order job_chain="my_job_chain" order="42" /></pre>
     </example>
 </xml_element>    

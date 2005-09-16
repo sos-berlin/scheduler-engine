@@ -76,9 +76,7 @@
             (Vorsicht beim Test! Der Job löscht wirklich!)
         </p>
     
-        <pre>
-        
-&lt;?xml version="1.0" encoding="iso-8859-1"?>
+        <pre>&lt;?xml version="1.0" encoding="iso-8859-1"?>
 &lt;spooler>
     &lt;config>
         &lt;process_classes/>
@@ -119,8 +117,7 @@
             &lt;/job>
         &lt;/jobs>
     &lt;/config>
-&lt;/spooler>
-        </pre>
+&lt;/spooler></pre>
         
                 
 </description>

@@ -88,8 +88,45 @@
         </com>
 
         <title>
-            Startet eine Task
+            Erzeugt eine neue Task und reiht sie in die Task-Warteschlange ein
         </title>
+        
+        <example programming_language="java">
+            <pre>spooler.job( "job_a" ).start();</pre>
+            
+            <pre>sos.spooler.Variable_set parameters = spooler.create_variable_set();
+parameter.set_var( "my_parameter", "my_value" );
+parameter.set_var( "other_parameter", "other_value" );
+spooler.job( "job_a" ).start( parameters );</pre>
+        </example>
+        
+        <example programming_language="javascript">
+            <pre>spooler.job( "job_a" ).start();</pre>
+
+            <pre>var parameters = spooler.create_variable_set();
+parameters.value( "my_parameter" ) = "my_value";
+parameters.value( "other_parameter" ) = "other_value";
+spooler.job( "job_a" ).start( parameters );</pre>
+        </example>
+        
+        <example programming_language="vbscript">
+            <pre>spooler.job( "job_a" ).start</pre>
+            
+            <pre>Dim parameters
+Set parameters = spooler.create_variable_set()
+parameters.var( "my_parameter" ) = "my_value"
+parameters.var( "other_parameter" ) = "other_value"
+spooler.job( "job_a" ).start( parameters )</pre>
+        </example>
+        
+        <example programming_language="perl">
+            <pre>$spooler->job( "job_a" )->start();</pre>
+
+            <pre>my $parameters = $spooler->create_variable_set();
+parameter->LetProperty( "var", "my_parameter", "my_value" );
+parameter->LetProperty( "var", "other_parameter", "other_value" );
+$spooler->job( "job_a" )->start( parameters );</pre>
+        </example>
     </method>
 
 
@@ -148,7 +185,7 @@
         </com>
 
         <title>
-            Der Titel des Jobs.
+            Titel des Jobs
         </title>
     </property>
 
@@ -190,7 +227,7 @@
         </java>
 
         <title>
-            Verzögert erneuten Jobstart nach Fehler.
+            Verzögert erneuten Jobstart nach Fehler
         </title>
     </property>
 

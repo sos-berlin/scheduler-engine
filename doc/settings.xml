@@ -44,11 +44,11 @@
             </p>
         </description>
 
-        <example><pre>
-log = c:/tmp/scheduler.log
+        <example>
+            <pre>log = c:/tmp/scheduler.log
 log = scheduler.wait >scheduler.log
-log = scheduler.wait com_server.* >scheduler.log
-        </pre></example>
+log = scheduler.wait com_server.* >scheduler.log</pre>
+        </example>
         
     </setting>
 
@@ -419,8 +419,8 @@ Der Scheduler richtet die Tabellen selbständig ein.
         </description>
         
         <example>
-<pre>
-db = jdbc -class=com.microsoft.jdbc.sqlserver.SQLServerDriver jdbc:microsoft:sqlserver://localhost:1433;selectMethod=Cursor;databaseName=factory -user=factory -password=factory
+        
+<pre>db = jdbc -class=com.microsoft.jdbc.sqlserver.SQLServerDriver jdbc:microsoft:sqlserver://localhost:1433;selectMethod=Cursor;databaseName=factory -user=factory -password=factory
 db = odbc -db=factory_sql -user=factory -password=factory
  
 db = jdbc -class=com.mysql.jdbc.Driver jdbc:mysql://localhost/factory:3307?user=factory&amp;password=factory
@@ -429,8 +429,7 @@ db = odbc -db=factory_mysql -user=factory -password=factory
 db = jdbc -class=oracle.jdbc.driver.OracleDriver jdbc:oracle:thin:@apnb:1521:test -user=factory -password=factory
 db = odbc -db=factory_oracle -user=factory -password=factory
 
-;db = scheduler.mdb 
-</pre>        
+;db = scheduler.mdb</pre>        
  
         </example>
     </setting>

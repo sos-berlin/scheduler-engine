@@ -69,13 +69,11 @@
     </description>
     
     <example>
-        <pre>
-&lt;security>
+        <pre>&lt;security>
     &lt;allowed_host host="127.0.0.1"         level="all"/>
     &lt;allowed_host host="admin.company.com" level="all"/>
     &lt;allowed_host host="192.168.1.0"       level="info"/>
-&lt;/security>
-        </pre>
+&lt;/security></pre>
         <p>
             Die IP-Adressen 127.0.0.1 und admin.company.com und die Adressen im 
             Klasse-C-Netzwerk 192.168.1 dürfen sich mit dem Scheduler verbinden. Der letzte 
@@ -83,11 +81,9 @@
         </p>
     </example>
     <example>
-        <pre>
-&lt;security>
+        <pre>&lt;security>
     &lt;allowed_host host="0.0.0.0" level="all"/>
-&lt;/security>
-        </pre>
+&lt;/security></pre>
         <p>
             Jeder Rechner hat vollen Zugriff.
         </p>

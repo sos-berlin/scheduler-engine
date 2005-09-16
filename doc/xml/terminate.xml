@@ -21,8 +21,6 @@
     <xml_answer element="ok"/>
     
     <example>
-        <pre>
-&lt;terminate>
-        </pre>
+        <pre>&lt;terminate></pre>
     </example>
 </xml_element>    

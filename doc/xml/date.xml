@@ -46,17 +46,13 @@
     <behavior_with_xml_element for_element="base" replace_attribute="date"/>
     
     <example>
-        <pre>
-&lt;date date="2004-08-22">
+        <pre>&lt;date date="2004-08-22">
     &lt;period begin="10:00" end="12:00"/>
     &lt;period begin="16:00" end="22:00"/>
-&lt;/date>    
-        </pre>
+&lt;/date></pre>
     </example>
     <example>
-        <pre>
-&lt;date date="2004-09-02" begin="14:00" end="18:00"/>
-        </pre>
+        <pre>&lt;date date="2004-09-02" begin="14:00" end="18:00"/></pre>
     </example>
     
 </xml_element>

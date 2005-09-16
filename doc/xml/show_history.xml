@@ -66,8 +66,6 @@
     
     
     <example>
-        <pre>
-&lt;show_history id="4711" next="10"/>
-        </pre>
+        <pre>&lt;show_history id="4711" next="10"/></pre>
     </example>
 </xml_element>    

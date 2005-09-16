@@ -37,8 +37,6 @@
     
     
     <example>
-        <pre>
-&lt;show_task id="4711"/>
-        </pre>
+        <pre>&lt;show_task id="4711"/></pre>
     </example>
 </xml_element>    

@@ -21,10 +21,5 @@
             Jede Antwort ist in die Elemente <code>&lt;spooler&gt;</code> und <code>&lt;answer&gt;</code> eingepackt.
         </p>
     </description>
-    
-    <example>
-        <pre>
-        </pre>
-    </example>
         
 </xml_element>

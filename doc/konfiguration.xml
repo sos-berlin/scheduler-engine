@@ -29,9 +29,7 @@
     Die <code>DOCTYPE</code>-Zeile ist optional. Hier ist die jeweils aktuelle DTD eingestellt
 </p>
 -->    
-<pre>
-
-&lt;?xml version="1.0"?>
+<pre>&lt;?xml version="1.0"?>
 &lt;spooler>
     &lt;config>
         &lt;process_classes/>
@@ -51,18 +49,14 @@
             &lt;/job>
         &lt;/jobs>
     &lt;/config>
-&lt;/spooler>
-</pre>
+&lt;/spooler></pre>
 
 <p>
     Konfiguriert ist hier der Job <code>test_job</code>, den der Scheduler alle 10 Sekunden wiederholen wird. Wenn diese Konfiguration 
     in der Datei <code>hallo_welt.xml</code> abgelegt ist, können Sie den Scheduler so starten:
 </p>
 
-<pre>
-
-scheduler hallo_welt.xml
-</pre>
+<pre>scheduler hallo_welt.xml</pre>
 
 <p>
     Sie können den Scheduler mit Ctrl-C abbbrechen.
@@ -91,9 +85,7 @@ scheduler hallo_welt.xml
     Klicken Sie auf ein Element des Schemas, um dessen Beschreibung zu sehen.
 </p>
 
-<pre>
-
-&lt;<a class="silent" href="xml/spooler.xml">spooler</a>>
+<pre>&lt;<a class="silent" href="xml/spooler.xml">spooler</a>>
     &lt;<a class="silent" href="xml/config.xml">config</a> spooler_id          = ""
             main_scheduler       = "hostname:4444"
             port                 = "4444"
@@ -225,7 +217,6 @@ scheduler hallo_welt.xml
              …
         &lt;/jobs>
     &lt;/config>
-&lt;/spooler>
-</pre>
+&lt;/spooler></pre>
 
 </description>

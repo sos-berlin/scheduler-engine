@@ -1,20 +1,24 @@
 /* $Id$ */
 
 body            { font-size: 10pt; font-family: Arial, sans-serif; }
-h1              { font-size: 14pt; font-weight: bold; margin-bottom: 4ex;  }
-h2              { font-size: 12pt; font-weight: bold; margin-top: 4ex; border-top: 1px solid #f0f0f0; padding-top: 3ex; }
-h3              { font-size: 10pt; font-weight: bold; margin-top: 4ex;  }
+h1              { font-size: 14pt; font-weight: bold; margin-bottom: 2em;  }
+h2              { font-size: 12pt; font-weight: bold; margin-top: 2em; border-top: 1px solid #f0f0f0; padding-top: 3ex; }
+h2.bar          { font-size: 12pt; font-weight: bold; margin-top: 2em; border-top: 1px solid #f0f0f0; padding-top: 3ex; }
+h3              { font-size: 10pt; font-weight: bold; margin-top: 3em;  }
+h3.bar          { font-size: 10pt; font-weight: bold; margin-top: 3em; border-top: 1px solid #f0f0f0; padding-top: 3ex; }
 .zwischentitel  { font-weight: bold; margin-top: 6ex }
 
 hr              { height: 1px; font-size: 1px; border: 0px; color: gray; background-color: gray; }
 
 p               { font-size: 10pt; margin-bottom: 0px }
 td              { font-size: 10pt; vertical-align: baseline; }
-div             { font-size: 10pt }
+div             { font-size: 10pt; }
 /*p:first-child   { font-size: 10pt; margin-top: 0px; margin-bottom: 0px }   Wirkt in ie6 nicht */
 li              { font-size: 10pt }
 ul              { margin-left: 13pt }
-pre             { font-family: Lucida Console, monospace; font-size: 9pt; margin-left: 4ex; margin-top: 2pt; margin-bottom: 0px; line-height: 1.2em; }
+.example        { background-color: #ffffe0; }
+pre             { background-color: #ffffe0; font-family: Lucida Console, monospace; font-size: 9pt; 
+                  padding-left: 4ex; margin-top: 1em; margin-bottom: 1em; line-height: 1.2em; }
 col             { padding-bottom: 1pt; padding-right: 2pt }
 caption         { font-size: 10pt; padding-bottom: 5pt; padding-left: 3pt; padding-right: 2pt; padding-top: 2pt }
 

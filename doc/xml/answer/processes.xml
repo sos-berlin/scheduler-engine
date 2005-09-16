@@ -20,14 +20,4 @@
         <xml_child_element name="process" multiple="yes"/>
     </xml_child_elements>
 
-    <description>
-        <p>
-        </p>
-    </description>
-    
-    <example>
-        <pre>
-        </pre>
-    </example>
-        
 </xml_element>

@@ -13,7 +13,7 @@
                 version   = "1.0">
                 
     <xsl:output doctype-public="-//W3C//DTD HTML 4.01//EN" />  <!--"http://www.w3.org/TR/html4/strict.dtd"-->
-    
+
     <!-- Nicht für Firefox 1.0.6:
     <xsl:output method="xml" 
                 media-type="application/xhtml+xml" 
@@ -193,6 +193,7 @@
                 <p>&#160;</p>
                 
                 <xsl:apply-templates select="description"/>
+                <xsl:apply-templates select="example"/>
                 
                 <xsl:for-each select="behavior_with_xml_element">
                     <h2>
@@ -239,7 +240,6 @@
                     </div>
                 </xsl:for-each>
                 
-                <xsl:apply-templates select="example"/>
                 <xsl:apply-templates select="xml_parent_elements"/>
                 <xsl:apply-templates select="xml_attributes"/>
                 <xsl:apply-templates select="xml_child_elements"/>
@@ -651,8 +651,17 @@
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~example-->
 
     <xsl:template match="example">
-        <!--<p class="example">Beispiel</p>-->
-        <h2>Beispiel</h2>
+        <xsl:param name="programming_language"/>
+        <h3>
+            Beispiel
+            
+            <xsl:if test="$programming_language">
+                <span style="font-weight: normal">
+                    in <xsl:value-of select="$programming_language"/>
+                </span>
+            </xsl:if>
+        </h3>
+        
         <xsl:copy-of select="* | text()"/>
     </xsl:template>
     
@@ -1655,10 +1664,10 @@
             </tr>
         </table>
 
-        <hr/>
+        <hr style="margin-bottom: 20pt"/>
         
         <xsl:if test="$title">
-            <h1>
+            <h1 style="margin-top: 0pt">
                 <xsl:value-of select="$title"/>
             </h1>
         </xsl:if>
@@ -1669,7 +1678,7 @@
     <xsl:template name="bottom">
         <xsl:param name="parent_page"/>
 
-        <hr style="margin-top: 3ex"/>
+        <hr style="margin-top: 30pt"/>
         <table cellspacing="0" cellpadding="0" width="100%">
             <tr>
                 <td>

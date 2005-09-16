@@ -43,8 +43,6 @@
     <xml_answer element="ok"/>
     
     <example>
-        <pre>
-&lt;kill_task job="mein_job" id="4711"/>
-        </pre>
+        <pre>&lt;kill_task job="mein_job" id="4711"/></pre>
     </example>
 </xml_element>    

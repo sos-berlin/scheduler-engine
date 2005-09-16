@@ -42,17 +42,15 @@
     
     
     <example>
-        <pre>
-&lt;job name="mein_job">
+        <pre>&lt;job name="my_job">
     &lt;description>
 
-Das ist die Beschreibung meines Jobs:
-&lt;include file="beschreibung_meines_jobs.txt"/>
+Here follows the description of the job:
+&lt;include file="description_of_my_job.txt"/>
 
     &lt;/description>
     ...
-&lt;/job>        
-        </pre>
+&lt;/job></pre>
     </example>
         
 </xml_element>

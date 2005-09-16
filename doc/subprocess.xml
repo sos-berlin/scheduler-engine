@@ -19,11 +19,8 @@
 <p>
     Beispiel (Javascript):
 </p>
-<pre>
-
-var my_process = spooler.start_subprocess( "kommandozeile mit parametern" );
-spooler_log.info( "pid=" + my_process.pid() );
-</pre>
+<pre>var my_process = spooler.start_subprocess( "kommandozeile mit parametern" );
+spooler_log.info( "pid=" + my_process.pid() );</pre>
 
 <p>
     Siehe <scheduler_method class="Task" method="create_subprocess"/>

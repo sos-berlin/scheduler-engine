@@ -38,8 +38,7 @@
     <behavior_with_xml_element element="base" complete="yes"/>
     
     <example>
-        <pre>
-&lt;montdays>
+        <pre>&lt;montdays>
     &lt;day day="1">
         &lt;period begin="10:00" end="12:00"/>
     &lt;/day>
@@ -47,8 +46,7 @@
         &lt;period begin="08:00" end="12:00"/>
         &lt;period begin="15:00" end="18:00"/>
     &lt;/day>
-&lt;/day>    
-        </pre>
+&lt;/day></pre>
         <p>
             Setzt die Laufzeiten fest für den Ersten eines Monats 10:00 bis 12:00 und
             für den Zweiten eines Monats 08:00 bis 12:00 und 15:00 bis 18:00.

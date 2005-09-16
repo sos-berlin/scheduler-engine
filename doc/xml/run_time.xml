@@ -147,19 +147,18 @@
     </description>
     
     <example>
-        <pre>
-&lt;run_time/>       
-        </pre>
+        <pre>&lt;run_time/></pre>
+        
             ist, wegen der Voreinstellungen für <code>begin=</code> und <code>end=</code>, dasselbe wie        
-        <pre>
-&lt;run_time begin="00:00" end="24:00"/>        
-        </pre>
+            
+        <pre>&lt;run_time begin="00:00" end="24:00"/></pre>
+        
             ist, weil <code>&lt;run_time></code> leer ist, dasselbe wie        
-        <pre>
-&lt;run_time>
+            
+        <pre>&lt;run_time>
     &lt;period begin="00:00" end="24:00"/>
-&lt;/run_time>    
-        </pre>
+&lt;/run_time></pre>
+
             also eine Periode für jeden Tag rund um die Uhr.
             Der Job kann immer laufen.
     </example>

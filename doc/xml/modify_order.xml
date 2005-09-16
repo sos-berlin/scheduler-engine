@@ -53,8 +53,6 @@
     
     
     <example>
-        <pre>
-&lt;modify_order job_chain="meine_jobkette" order="42" priority="1"/>
-        </pre>
+        <pre>&lt;modify_order job_chain="meine_jobkette" order="42" priority="1"/></pre>
     </example>
 </xml_element>    

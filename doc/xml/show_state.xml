@@ -135,9 +135,7 @@
 
     
     <example>
-        <pre>
-&lt;show_state/>
-&lt;show_state what="job_chain_orders,job_orders"/>
-        </pre>
+        <pre>&lt;show_state/>
+&lt;show_state what="job_chain_orders,job_orders"/></pre>
     </example>
 </xml_element>    

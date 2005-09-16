@@ -44,21 +44,16 @@
         Der Fehlertext kann bei jeder Exception (auch normalen JavaScript-Exception) so ermittelt werden:
     </p>
     
-    <pre class="indent">
-
-catch( x )
+    <pre>catch( x )
 {
     var error_text = x + "";
-}
-    </pre>
+}</pre>
 
     <p>
         Hier ein Beispiel, das auf die verschiedenen Exceptions Rücksicht nimmt:
     </p>    
     
-    <pre class="indent">
-
-function log_exception( x )
+    <pre>function log_exception( x )
 {
     var msg = x + "";
     
@@ -97,8 +92,7 @@ try
 catch( x )
 {                      
     log_exception( x );                                     // x ist Java-Exception
-}
-    </pre>
+}</pre>
                 
 </description>
 

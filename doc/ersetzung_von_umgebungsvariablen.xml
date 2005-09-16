@@ -22,9 +22,6 @@
 </p>
 
 <p class="example">Beispiel</p>
-<pre>
-    
-html_dir = $HOME/scheduler/html
-</pre>
+<pre>html_dir = $HOME/scheduler/html</pre>
 
 </description>

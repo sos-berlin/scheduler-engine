@@ -37,14 +37,12 @@
     </description>
     
     <example>
-        <pre>
-&lt;holidays>
+        <pre>&lt;holidays>
     &lt;holiday date="2004-12-24"/>
     &lt;holiday date="2004-12-25"/>
     &lt;holiday date="2004-12-26"/>
     &lt;holiday date="2004-12-31"/>
-&lt;/holidays>
-        </pre>
+&lt;/holidays></pre>
     </example>
     
 </xml_element>

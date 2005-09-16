@@ -28,8 +28,6 @@
     
     
     <example>
-        <pre>
-&lt;show_jobs/>
-        </pre>
+        <pre>&lt;show_jobs/></pre>
     </example>
 </xml_element>    

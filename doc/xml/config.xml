@@ -185,13 +185,11 @@
                 </p>
             </description>
             <example>
-                <pre>
-&lt;script language="javascript">&lt;[CDATA[
+                <pre>&lt;script language="javascript">&lt;[CDATA[
 
     spooler.variables( "database_name" ) = "db7";
 
-]]&gt;&lt;/script>
-                </pre>
+]]&gt;&lt;/script></pre>
             </example>
         </xml_child_element>        
         
@@ -205,14 +203,13 @@
             <description>
                 Enthält die Jobs als Folge von <code>&lt;job></code>-Elementen.
             </description>
+            
             <example>
-                <pre>
-&lt;script language="javascript">&lt;[CDATA[
+                <pre>&lt;script language="javascript">&lt;[CDATA[
 
     spooler.variables( "database_name" ) = "db7";
 
-]]&gt;&lt;/script>
-                </pre>
+]]&gt;&lt;/script></pre>
             </example>
         </xml_child_element>        
         

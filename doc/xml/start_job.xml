@@ -71,12 +71,10 @@
     
 
     <example>
-        <pre>
-&lt;start_job job="mein_job" at="now">
+        <pre>&lt;start_job job="mein_job" at="now">
     &lt;params>
         &lt;param name="anzahl" value="100"/>
     &lt;/params>
-&lt;/start_job>        
-        </pre>
+&lt;/start_job></pre>
     </example>
 </xml_element>    
