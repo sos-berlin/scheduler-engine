@@ -132,14 +132,17 @@
         </dd>
     </a>
         
-    <a href="javadoc/index.html">
-        <dt>Java-Schnittstelle</dt>
-        <dd>
-            Die Dokumentation der Java-Klassen (Package <code>sos.spooler</code>), auf die ein Job Zugriff hat.
-            Sie gilt entsprechend für die COM- und Perl-Schnittstellen, 
-            wenn Sie Ihren Job in einer anderen Sprache implementieren.
-        </dd>
-    </a>
+    <dt>Programmschnittstelle (API)</dt>
+    <dd>
+        Die Dokumentation der Klassen und Methoden, auf die ein Job Zugriff hat.
+        Für 
+        <a style="font-weight: bold" href="api/introduction-java.xml">Java</a>,
+        <a style="font-weight: bold" href="api/introduction-javascript.xml">JavaScript</a>,
+        <a style="font-weight: bold" href="api/introduction-VBScript.xml">VBScript</a> und
+        <a style="font-weight: bold" href="api/introduction-perl.xml">Perl</a>
+        
+        (<a href="javadoc/index.html">und hier die bisherige Javadoc</a>).
+    </dd>
 </dl>
 
 
