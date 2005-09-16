@@ -213,7 +213,7 @@
                 </tr>
                 
                 <tr>
-                    <td style="border-top: 1px dotted black; font-size: 1pt;">
+                    <td style="font-size: 1pt;">
                         &#160;            
                     </td>
                     
