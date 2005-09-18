@@ -21,7 +21,7 @@ DESCRIBE_CLASS( &spooler_typelib, Com_mail, mail, CLSID_Mail, "Spooler.Mail", "1
 
 Mail_defaults::Mail_defaults( Spooler* spooler )
 {
-    if( spooler  &&  this != &spooler->_mail_defaults )  
+    if( spooler  &&  this != &spooler->_mail_defaults )
     {
         _map = spooler->_mail_defaults._map;
     }
@@ -31,7 +31,7 @@ Mail_defaults::Mail_defaults( Spooler* spooler )
 #ifdef Z_COM
 
 const Com_method Com_mail::_methods[] =
-{ 
+{
    // _flags              , _name                , _method                                     , _result_type, _types        , _default_arg_count
     { DISPATCH_PROPERTYPUT,  1, "to"              , (Com_method_ptr)&Com_mail::put_To           , VT_EMPTY    , { VT_BSTR } },
     { DISPATCH_PROPERTYGET,  1, "to"              , (Com_method_ptr)&Com_mail::get_To           , VT_BSTR     },
@@ -64,7 +64,7 @@ const Com_method Com_mail::_methods[] =
 //-------------------------------------------------------------------------------Com_mail::Com_mail
 
 Com_mail::Com_mail( Spooler* spooler )
-: 
+:
     Sos_ole_object( mail_class_ptr, (Imail*)this ),
     _zero_(this+1),
     _spooler(spooler)
@@ -106,7 +106,7 @@ xml::Element_ptr Com_mail::dom_element( const xml::Document_ptr& dom )
 
     xml::Element_ptr header_element = mail_element.append_new_element( "header" );
 
-    
+
     Email_address from;
     from.suppress_exceptions( true );
     from = _from;
@@ -159,7 +159,7 @@ void Com_mail::set_dom( const xml::Element_ptr& mail_element )
 
     if( xml::Element_ptr header_element = mail_element.select_node( "header" ) )
     {
-        // getAttribute() liefert "", wenn das Attribut nicht angegeben ist. 
+        // getAttribute() liefert "", wenn das Attribut nicht angegeben ist.
 
         string value;
         value = header_element.getAttribute( "from_address" );    if( value != "" )  set_from     ( value );
@@ -594,7 +594,7 @@ STDMETHODIMP Com_mail::Add_header_field( BSTR field_name, BSTR value )
 
     if( _msg == 0 )  return E_POINTER;
 
-    try 
+    try
     {
         add_header_field( bstr_as_string(field_name), bstr_as_string(value) );
     }
@@ -610,7 +610,7 @@ STDMETHODIMP Com_mail::get_Xslt_stylesheet( Ixslt_stylesheet** result )
 {
     HRESULT hr = NOERROR;
 
-    try 
+    try
     {
         *result = NULL;
         ptr<Xslt_stylesheet> stylesheet = xslt_stylesheet();
@@ -672,7 +672,7 @@ ptr<Xslt_stylesheet> Com_mail::xslt_stylesheet()
     {
         ptr<Xslt_stylesheet> stylesheet = Z_NEW( Xslt_stylesheet );
         stylesheet->load_file( _xslt_stylesheet_path );
-        
+
         _xslt_stylesheet = stylesheet;
     }
 

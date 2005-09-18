@@ -1,7 +1,7 @@
 <?xml version='1.0'?>
 <!-- $Id$ -->
 
-<xsl:stylesheet xmlns:xsl = "http://www.w3.org/1999/XSL/Transform" 
+<xsl:stylesheet xmlns:xsl = "http://www.w3.org/1999/XSL/Transform"
                 version   = "1.0">
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
@@ -17,7 +17,7 @@
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<xsl:template match="property [ java and /*/@programming_language='java' ] | method [ java and /*/@programming_language='java' ]" mode="table_rows">
+<xsl:template match="property [ java ] | method [ java ]" mode="table_rows">
     <xsl:param name="show_title"  select="true()"/>
     <xsl:param name="is_in_table" select="false()"/>
 
@@ -25,21 +25,21 @@
         <xsl:with-param name="show_title"  select="$show_title"/>
         <xsl:with-param name="is_in_table" select="$is_in_table"/>
     </xsl:apply-templates>
-    
+
 </xsl:template>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<xsl:template match="property [ /*/@programming_language='java' ] | method [ /*/@programming_language='java' ]" mode="method_name">
+<xsl:template match="property | method " mode="method_name">
     <xsl:param name="access"/>
 
     <xsl:if test="parent::api.class/@object_name">
         <span class="api_object_name">
             <xsl:value-of select="parent::api.class/@object_name"/>
             <xsl:text>.</xsl:text>
-        </span>        
+        </span>
     </xsl:if>
-        
+
     <span class="mono">
         <xsl:if test="$access='write'">set_</xsl:if>
         <!--xsl:if test="$access='read'">&#160;&#160;&#160;&#160;</xsl:if>-->
@@ -57,25 +57,25 @@
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<xsl:template match="com.type [ /*/@programming_language='java' and @type='bool' ]">
+<xsl:template match="com.type [ @type='bool' ]">
     <span class="mono">boolean</span>
 </xsl:template>
 
-<xsl:template match="com.type [ /*/@programming_language='java' and @type='BSTR' ]">
-    <span class="mono">java.lang.String</span>
+<!--xsl:template match="com.type [ @type='BSTR' ]">
+    <span class="mono" title="java.lang.String">String</span>
+</xsl:template-->
+
+<xsl:template match="com.type [ @type='VARIANT*' and not( com.type ) ]">
+    <span class="mono" title="java.lang.String">String</span>
 </xsl:template>
 
-<xsl:template match="com.type [ /*/@programming_language='java' and @type='VARIANT*' ]">
-    <span class="mono">java.lang.String</span>
-</xsl:template>
-
-<xsl:template match="com.type [ @class and /*/@programming_language='java' ]">
+<!--xsl:template match="com.type [ @class ]">
     <span class="mono"><xsl:value-of select="@class"/></span>
-</xsl:template>
+</xsl:template-->
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<xsl:template match="api.empty [ /*/@programming_language='java' ]" mode="description">
+<xsl:template match="api.empty" mode="description">
     <code>""</code>
 </xsl:template>
 
@@ -83,6 +83,6 @@
 
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
-                
-    
+
+
 </xsl:stylesheet>

@@ -4,9 +4,9 @@
 <?xml-stylesheet href="api_javascript.xsl" type="text/xsl"?>
 
 
-<api.class 
+<api.class
     name        = "introduction"
-    base_dir    = "../" 
+    base_dir    = "../"
     author      = "$Author$"
     date        = "$Date$"
 >
@@ -15,9 +15,9 @@
         <p class="api_headline">
             Übersicht
         </p>
-        
+
         <p>
-            Jobs, die die Programmschnittstelle des Schedulers nutzen, 
+            Jobs, die die Programmschnittstelle des Schedulers nutzen,
             können in den Sprachen Java, JavaScript (Mozilla) und Perl implementiert werden
             (beachten Sie die Installationsvoraussetzungen).
             Unter Microsoft Windows stehen auch JScript und VBScript zur Verfügung.

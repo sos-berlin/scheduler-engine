@@ -24,8 +24,8 @@
             </td-->
             <!--td align="right">
                 Programmiersprache:
-                <select id="programming_languages_select" 
-                        onchange="api.programming_language__onchange()" 
+                <select id="programming_languages_select"
+                        onchange="api.programming_language__onchange()"
                         size="4">
                     <option>Java</option>
                     <option>JavaScript</option>
@@ -56,7 +56,7 @@
                 Übersicht
             </api.class_reference>
         </td>
-        
+
         <td style="padding-left: 3ex; border-left: 1px dotted black; padding-bottom: 4pt;">
             <api.programming_language_selector programming_language="Java"/>
             <!--<api.programming_language_selector programming_language="javadoc"/-->
@@ -65,23 +65,23 @@
             <api.programming_language_selector programming_language="Perl"/>
         </td>
     </tr>
-    
+
     <tr>
         <td style="border-top: 1px dotted black; font-size: 1pt;">
-            &#160;            
+            &#160;
         </td>
-        
+
         <td colspan="99" style="border-top: 1px dotted black; border-left: 1px dotted black; font-size: 4pt;">
-            &#160;            
+            &#160;
         </td>
     </tr>
-    
+
     <tr>
         <td style="vertical-align: top; padding-right: 3ex; width: 20pt;">
             <!--p style="font-weight: bold; padding-bottom: 1em">Klassen:</p-->
             <api.classes/>
         </td>
-        
+
         <td style="padding-left: 3ex; border-left: 1px dotted black;">
             <div id="class_headline"> </div>
             <div id="class"> </div>

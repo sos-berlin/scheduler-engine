@@ -4,8 +4,8 @@
 <?xml-stylesheet href="api_default_language.xsl" type="text/xsl"?>
 
 
-<api.class 
-    name        = "Log" 
+<api.class
+    name        = "Log"
     object_name = "spooler_log"
     base_dir    = "../"
     author      = "$Author$"
@@ -18,7 +18,7 @@
         <com.parameter name="level">
             <com.type type="int"/>
         </com.parameter>
-        
+
         <com.parameter name="line">
             <com.type type="BSTR"/>
         </com.parameter>
@@ -32,7 +32,7 @@
             <com.type type="BSTR"/>
         </com.parameter>
     </com>
-    
+
     <title>
         Fehlermeldung (Level 1)
     </title>
@@ -45,7 +45,7 @@
             <com.type type="BSTR"/>
         </com.parameter>
     </com>
-    
+
     <title>
         Warnung (Level 2)
     </title>
@@ -58,7 +58,7 @@
             <com.type type="BSTR"/>
         </com.parameter>
     </com>
-    
+
     <title>
         Informationsmeldung (Level 0)
     </title>
@@ -71,7 +71,7 @@
             <com.type type="BSTR"/>
         </com.parameter>
     </com>
-        
+
     <title>
         Debug-Meldung (Level -1)
     </title>
@@ -201,7 +201,7 @@
             <com.type type="BSTR"/>
         </com.parameter>
     </com>
-    
+
     <java>
         <java.parameter name="path">
             <java.type type="java.io.File"/>
@@ -210,14 +210,14 @@
 
     <java>
         <java.parameter name="path">
-            <java.type type="java.lang.String"/>
+            <com.type type="BSTR"/>
         </java.parameter>
     </java>
-    
+
     <title>
         Protokolliert den Inhalt der Datei
     </title>
-    
+
     <description>
         Protokolliert den Inhalt der Datei mit Level 0 (info).
         Ein Fehler beim Zugriff auf die Datei wird als Warnung protokolliert.
@@ -231,7 +231,7 @@
             <com.type class="Mail"/>
         </com.result>
     </com>
-    
+
     <title>
         Im <code>Mail</code>-Objekt können Sie Einstellungen zur eMail vornehmen
     </title>
@@ -244,7 +244,7 @@
             <com.type type="bool"/>
         </com.result>
     </com>
-    
+
     <description>
         Siehe <scheduler_ini_entry file="factory.ini" section="spooler" entry="mail_on_error"/>.
     </description>
@@ -257,7 +257,7 @@
             <com.type type="bool"/>
         </com.result>
     </com>
-    
+
     <description>
         Siehe <scheduler_ini_entry file="factory.ini" section="spooler" entry="mail_on_warning"/>.
     </description>
@@ -270,7 +270,7 @@
             <com.type type="bool"/>
         </com.result>
     </com>
-    
+
     <description>
         Siehe <scheduler_ini_entry file="factory.ini" section="spooler" entry="mail_on_success"/>.
     </description>
@@ -283,7 +283,7 @@
             <com.type type="int"/>
         </com.result>
     </com>
-    
+
     <description>
         Siehe <scheduler_ini_entry file="factory.ini" section="spooler" entry="mail_on_process"/>.
     </description>
@@ -306,7 +306,7 @@
             <com.type type="BSTR"/>
         </com.result>
     </com>
-    
+
     <title>
         Dateiname des Protokolls
     </title>
@@ -320,13 +320,13 @@
             <com.type type="BSTR"/>
         </com.result>
     </com>
-    
+
     <title>
         Neuer Dateiname fürs Protokoll
     </title>
 
     <description>
-        Setzt den Dateinamen fürs Protokoll. 
+        Setzt den Dateinamen fürs Protokoll.
         Wenn das Protokoll geschlossen wird, schreibt der Scheduler es in diese Datei
     </description>
 </property>
@@ -358,7 +358,7 @@
             <com.type type="bool"/>
         </com.result>
     </com>
-    
+
     <title>
         Versand erzwingen
     </title>
@@ -371,7 +371,7 @@
             <com.type type="BSTR"/>
         </com.result>
     </com>
-    
+
     <title>
         Die zuletzt mit Level 2 (error) ausgegebene Zeile
     </title>
@@ -383,47 +383,104 @@
         <com.parameter name="level">
             <com.type type="VARIANT*"/>
         </com.parameter>
-        
+
         <com.result>
             <com.type type="BSTR"/>
         </com.result>
     </com>
-    
+
     <java>
         <java.parameter name="level">
             <java.type type="int"/>
         </java.parameter>
-        
+
         <java.result>
-            <java.type type="java.lang.String"/>
+            <com.type type="BSTR"/>
         </java.result>
     </java>
-    
+
     <java>
         <java.parameter name="level">
-            <java.type type="java.lang.String"/>
+            <com.type type="BSTR"/>
         </java.parameter>
-        
+
         <java.result>
-            <java.type type="java.lang.String"/>
+            <com.type type="BSTR"/>
         </java.result>
     </java>
-    
+
     <title>
         Letzte Ausgabe des angegebenen Levels
     </title>
-    
+
 </property>
 
 
 <method name="start_new_file">
     <com/>
-    
+
     <title>
         Nur fürs Hauptprotokoll: Schließt das bisherige und beginnt ein neues Protokoll
     </title>
 </method>
 
 
+<title>
+    Protokollierung
+</title>
+
+<description>
+    <p>
+        In einem Job oder im Scheduler-Skript stellt 
+        <scheduler_method class="Job_impl" property="spooler_log"/>
+        die hier beschriebenen Methoden bereit.
+    </p>
+    
+    <!--
+    <h3>eMail-Versand</h3>
+    <p>
+        Am Ende einer Task kann er Scheduler das Task-Protokoll per eMail verschicken.
+        In welchen Fällen eine eMail versandt werden soll, geben die Eigenschaften 
+        <scheduler_method class="Log" property="mail_on_error"/>,
+        <scheduler_method class="Log" property="mail_on_warning"/>,
+        <scheduler_method class="Log" property="mail_on_process"/>,
+        <scheduler_method class="Log" property="mail_on_success"/> und
+        <scheduler_method class="Log" property="mail_it"/>
+        an.
+    </p>
+    <p>
+        <scheduler_method class="Log" property="mail"/> stellt ein 
+        <scheduler_method class="Mail"/>-Objekt bereit, 
+        das die Adressierung übernimmt.
+    </p>
+     -->
+</description>
+
+<example programming_language="java">
+    <pre>spooler_log.info( "Something for the Log" );
+    
+spooler_log.set_mail_on_warning( true );
+spooler_log.mail().set_from   ( "scheduler@company.com" );
+spooler_log.mail().set_to     ( "admin@company.com" );
+spooler_log.mail().set_subject( "Task ended" );</pre>
+</example>
+
+<example programming_language="javascript">
+    <pre>spooler_log.info( "Something for the Log" );
+    
+spooler_log.mail_on_warning = true;
+spooler_log.mail.from    = "scheduler@company.com";
+spooler_log.mail.to      = "admin@company.com";
+spooler_log.mail.subject = "ended";</pre>
+</example>
+
+<example programming_language="perl">
+    <pre>$spooler_log->info( "Something for the Log" );
+    
+$spooler_log->LetProperty( 'mail_on_warning', 1 );
+$spooler_log->mail->LetProperty( 'from'  , 'scheduler@company.com' );
+$spooler_log->mail->LetProperty( 'to     , 'admin@company.com' );
+$spooler_log->mail->LetProperty( 'subject, 'ended' );</pre>
+</example>
 
 </api.class>

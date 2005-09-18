@@ -1213,37 +1213,46 @@
         <xsl:param name="property"/>
         <xsl:param name="java_signature"/>
         <xsl:param name="access"/>          <!-- "read" (default), "write" -->
-        
+<!--        
         <xsl:variable name="java_method">
             <xsl:choose>
                 <xsl:when test="$access = 'write'"><xsl:value-of select="concat( 'set_', $property )"/></xsl:when>
                 <xsl:otherwise                    ><xsl:value-of select="$method | $property"/></xsl:otherwise>
             </xsl:choose>
         </xsl:variable>
-        
+-->        
         <xsl:element name="a">
             <xsl:attribute name="class">silent</xsl:attribute>
             
-            <xsl:attribute name="href"><xsl:value-of select="$base_dir"/>api/<xsl:value-of select="@class"/>-<xsl:value-of select="$programming_language"/>.xml#method__<xsl:value-of select="$java_method"/></xsl:attribute>
+            <xsl:variable name="href_local"><xsl:if test="@method | @property">#method__<xsl:value-of select="@method | @property"/></xsl:if></xsl:variable>
+
+            <xsl:attribute name="href"><xsl:value-of select="concat( $base_dir, 'api/', @class, '-', $programming_language, '.xml', $href_local )"/></xsl:attribute> 
             <!--xsl:attribute name="href"><xsl:value-of select="$base_dir"/>javadoc/sos/spooler/<xsl:value-of select="@class"/>.html#<xsl:value-of select="$java_method"/>(<xsl:value-of select="$java_signature"/>)</xsl:attribute-->
             
             <code>
-                <xsl:value-of select="@class"/>
+                <xsl:if test="@class != 'Job_impl'">
+                    <xsl:value-of select="@class"/>
+                </xsl:if>
                 
+                <xsl:if test="@class != 'Job_impl' and ( @method or @property )">
+                    <xsl:text>.</xsl:text>
+                </xsl:if>
+<!--                
                 <xsl:if test="@method | @property">
                     <xsl:text>.</xsl:text>
                     <xsl:value-of select="$java_method"/>
                     <xsl:text>()</xsl:text>
                 </xsl:if>
-<!--                
+-->
                 <xsl:if test="@method">
-                    <xsl:value-of select="@method"/>()
+                    <xsl:value-of select="@method"/>
+                    <xsl:text>()</xsl:text>
                 </xsl:if>
                 
                 <xsl:if test="@property">
                     <xsl:value-of select="@property"/>
                 </xsl:if>
--->                
+                
             </code>
         </xsl:element>
         

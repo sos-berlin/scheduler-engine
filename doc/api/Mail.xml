@@ -4,8 +4,8 @@
 <?xml-stylesheet href="api_default_language.xsl" type="text/xsl"?>
 
 
-<api.class 
-    name        = "Mail" 
+<api.class
+    name        = "Mail"
     object_name = "mail"
     base_dir    = "../"
     author      = "$Author$"
@@ -57,7 +57,7 @@
         <title>
             Absender
         </title>
-        
+
         <example programming_language="java">
             <pre>spooler_log.mail().set_from( "scheduler@company.com" );</pre>
         </example>
@@ -78,15 +78,15 @@
         <title>
             Empfänger
         </title>
-        
+
         <description>
             <p>
-                Wenn die Hostware zum eMail-Versand JavaMail verwendet, 
-                können Sie mehere Adressen durch Komma getrennt angeben. 
-                Siehe <a href="http://java.sun.com/products/javamail/javadocs/javax/mail/internet/InternetAddress.html#parse(java.lang.String)">javax.mail.InternetAddress.parse(String)</a>. 
-            </p>        
+                Wenn die Hostware zum eMail-Versand JavaMail verwendet,
+                können Sie mehere Adressen durch Komma getrennt angeben.
+                Siehe <a href="http://java.sun.com/products/javamail/javadocs/javax/mail/internet/InternetAddress.html#parse(java.lang.String)">javax.mail.InternetAddress.parse(String)</a>.
+            </p>
         </description>
-        
+
         <example programming_language="java">
             <pre>spooler_log.mail().set_to( "admin@company.com" );</pre>
         </example>
@@ -110,12 +110,12 @@
 
         <description>
             <p>
-                Wenn die Hostware zum eMail-Versand JavaMail verwendet, 
-                können Sie mehere Adressen durch Komma getrennt angeben. 
-                Siehe <a href="http://java.sun.com/products/javamail/javadocs/javax/mail/internet/InternetAddress.html#parse(java.lang.String)">javax.mail.InternetAddress.parse(String)</a>. 
-            </p>        
+                Wenn die Hostware zum eMail-Versand JavaMail verwendet,
+                können Sie mehere Adressen durch Komma getrennt angeben.
+                Siehe <a href="http://java.sun.com/products/javamail/javadocs/javax/mail/internet/InternetAddress.html#parse(java.lang.String)">javax.mail.InternetAddress.parse(String)</a>.
+            </p>
         </description>
-        
+
         <example programming_language="java">
             <pre>spooler_log.mail().set_cc( "hans@company.com" );</pre>
         </example>
@@ -136,15 +136,15 @@
         <title>
             Unsichtbarer Empfänger einer Kopie der Nachricht, <i>blind carbon copy</i>
         </title>
-        
+
         <description>
             <p>
-                Wenn die Hostware zum eMail-Versand JavaMail verwendet, 
-                können Sie mehere Adressen durch Komma getrennt angeben. 
-                Siehe <a href="http://java.sun.com/products/javamail/javadocs/javax/mail/internet/InternetAddress.html#parse(java.lang.String)">javax.mail.InternetAddress.parse(String)</a>. 
-            </p>        
+                Wenn die Hostware zum eMail-Versand JavaMail verwendet,
+                können Sie mehere Adressen durch Komma getrennt angeben.
+                Siehe <a href="http://java.sun.com/products/javamail/javadocs/javax/mail/internet/InternetAddress.html#parse(java.lang.String)">javax.mail.InternetAddress.parse(String)</a>.
+            </p>
         </description>
-        
+
         <example programming_language="java">
             <pre>spooler_log.mail().set_bcc( "hans@company.com" );</pre>
         </example>
@@ -165,7 +165,7 @@
         <title>
             Betreff
         </title>
-        
+
         <example programming_language="java">
             <pre>spooler_log.mail().set_subject( "Job succeeded" );</pre>
         </example>
@@ -186,7 +186,7 @@
         <title>
             Inhalt der Nachricht
         </title>
-        
+
         <description>
             Codieren SIe Zeilenwechsel mit <code>\n</code> (in VBScript mit <code>chr(10)</code>).
         </description>
@@ -205,7 +205,7 @@
         <com>
             <com.parameter name="path">
                 <com.type type="BSTR"/>
-                
+
                 <description>
                     Pfadname der anzuhängenden Datei
                 </description>
@@ -213,7 +213,7 @@
 
             <com.parameter name="filename_for_mail" optional="true">
                 <com.type type="BSTR"/>
-                
+
                 <description>
                     Dateiname, der in der Nachricht erscheinen soll
                 </description>
@@ -221,7 +221,7 @@
 
             <com.parameter name="content_type" optional="true">
                 <com.type type="BSTR"/>
-                
+
                 <description>
                     <code>"text/plain"</code> ist voreingestellt.
                 </description>
@@ -234,7 +234,7 @@
                 </description>
             </com.parameter>
         </com>
-        
+
         <title>
             Fügt einen Anhang hinzu
         </title>
@@ -250,7 +250,7 @@
 
 
     <method name="add_header_field">
-        <com>   
+        <com>
             <com.parameter name="field_name">
                 <com.type type="BSTR"/>
             </com.parameter>
@@ -259,7 +259,7 @@
                 <com.type type="BSTR"/>
             </com.parameter>
         </com>
-        
+
         <title>
             Fügt dem eMail-Kopf ein Feld hinzu
         </title>
@@ -267,8 +267,8 @@
 
 
     <method name="dequeue">
-        <com/>   
-        
+        <com/>
+
         <title>
             Nachrichten aus dem Verzeichnis <code>queue_dir</code> erneut versuchen zu versenden
         </title>
@@ -279,7 +279,7 @@
         <com>
             <com.result name="content">
                 <com.type type="BSTR"/>
-            </com.result>        
+            </com.result>
         </com>
     </property>
 
@@ -288,25 +288,25 @@
         <com>
             <com.result name="path">
                 <com.type type="BSTR"/>
-            </com.result>        
+            </com.result>
         </com>
 
         <java>
             <java.parameter name="path">
                 <java.type type="java.io.path"/>
-            </java.parameter>        
+            </java.parameter>
         </java>
 
         <java>
             <java.parameter name="path">
-                <java.type type="java.lang.String"/>
-            </java.parameter>        
+                <com.type type="BSTR"/>
+            </java.parameter>
         </java>
 
         <title>
             XSLT-Stylesheet für eMail-Aufbereitung
         </title>
-        
+
         <example programming_language="java">
             <pre>spooler_log.mail().set_xslt_stylesheet_path( "c:/stylesheets/mail.xslt" );</pre>
         </example>
@@ -314,20 +314,20 @@
         <example programming_language="javascript">
             <pre>spooler_log.mail.xslt_stylesheet_path = "c:/stylesheets/mail.xslt";</pre>
         </example>
-    </property>    
+    </property>
 
 
     <property name="xslt_stylesheet" access="read">
         <com>
             <com.result name="path">
                 <com.type class="Xslt_stylesheet"/>
-            </com.result>        
+            </com.result>
         </com>
-        
+
         <title>
             XSLT-Stylesheet für eMail-Aufbereitung
         </title>
-    </property>    
+    </property>
 
 
     <title>
@@ -339,5 +339,5 @@
         <p>
         </p>
     </description>
-    
+
 </api.class>

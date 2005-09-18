@@ -4,8 +4,8 @@
 <?xml-stylesheet href="api_default_language.xsl" type="text/xsl"?>
 
 
-<api.class 
-    name        = "Variable" 
+<api.class
+    name        = "Variable"
     object_name = "variable"
     base_dir    = "../"
     author      = "$Author$"
@@ -18,6 +18,8 @@
             <com.type type="VARIANT*"/>
         </com.result>
     </com>
+    
+    <not_implemented programming_language="java"/>
 </property>
 
 
@@ -27,6 +29,8 @@
             <com.type type="BSTR"/>
         </com.result>
     </com>
+
+    <not_implemented programming_language="java"/>
 </property>
 
 
@@ -39,5 +43,15 @@
     </com>
 </method>
 -->
+
+<description programming_language="java">
+    <p>
+        Die Klasse ist für Java nicht implementiert.
+    </p>
+    <p>
+        Siehe <scheduler_method class="Variable_set"/>.
+    </p>
+</description>
+
 
 </api.class>

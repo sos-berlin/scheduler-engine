@@ -48,8 +48,8 @@ void Spooler_object::process( Level output_level )
 
 //---------------------------------------------------------------------------Object_set::Object_set
 
-Object_set::Object_set( Spooler* spooler, Module_task* task, const Sos_ptr<Object_set_descr>& descr ) 
-: 
+Object_set::Object_set( Spooler* spooler, Module_task* task, const Sos_ptr<Object_set_descr>& descr )
+:
     _zero_(this+1),
     _spooler(spooler),
     _task(task),
@@ -77,7 +77,7 @@ bool Object_set::open()
         Module_instance::In_call( _task->_module_instance, "spooler_make_object_set" );
         object_set_vt = _task->_module_instance->call( "spooler_make_object_set" );
 
-        if( object_set_vt.vt != VT_DISPATCH 
+        if( object_set_vt.vt != VT_DISPATCH
          || object_set_vt.pdispVal == NULL  )  throw_xc( "SCHEDULER-103", _object_set_descr->_class_name );
 
         _idispatch = object_set_vt.pdispVal;
@@ -87,13 +87,13 @@ bool Object_set::open()
         _idispatch = _task->_module_instance->dispatch();
     }
 
-    if( com_name_exists( _idispatch, spooler_open_name ) ) 
+    if( com_name_exists( _idispatch, spooler_open_name ) )
     {
         Module_instance::In_call in_call ( _task->_module_instance, spooler_open_name );
         ok = check_result( com_call( _idispatch, spooler_open_name ) );
         in_call.set_result( ok );
     }
-    else  
+    else
         ok = true;
 
     return ok && !_task->has_error();
@@ -103,7 +103,7 @@ bool Object_set::open()
 
 void Object_set::close()
 {
-    if( com_name_exists( _idispatch, spooler_close_name ) )  
+    if( com_name_exists( _idispatch, spooler_close_name ) )
     {
         Module_instance::In_call in_call ( _task->_module_instance, spooler_close_name );
         com_call( _idispatch, spooler_close_name );
@@ -126,7 +126,7 @@ Spooler_object Object_set::get()
         if( obj.vt == VT_EMPTY    )  return Spooler_object(NULL);
         if( obj.vt != VT_DISPATCH
          || obj.pdispVal == NULL  )  throw_xc( "SCHEDULER-102", _object_set_descr->_class_name );
-    
+
         object = obj.pdispVal;
 
         if( obj.pdispVal == NULL )  break;  // EOF
@@ -168,8 +168,8 @@ bool Object_set::step( Level result_level )
 //-------------------------------------------------------------------------------Object_set::thread
 /*
 Spooler_thread* Object_set::thread() const
-{ 
-    return _task->_job->_thread; 
+{
+    return _task->_job->_thread;
 }
 */
 //---------------------------------------------------------------------------------start_cause_name
@@ -196,10 +196,10 @@ string start_cause_name( Start_cause cause )
 
 //---------------------------------------------------------------------------------------Task::Task
 
-Task::Task( Job* job )    
-: 
+Task::Task( Job* job )
+:
     Scheduler_object( job->_spooler, this, Scheduler_object::type_task ),
-    _zero_(this+1), 
+    _zero_(this+1),
     _job(job),
     _history(&job->_history,this),
     _timeout(job->_task_timeout),
@@ -222,12 +222,12 @@ Task::Task( Job* job )
 //--------------------------------------------------------------------------------------Task::~Task
 // Kann von anderem Thread gerufen werden, wenn der noch eine COM-Referenz hat
 
-Task::~Task()    
+Task::~Task()
 {
     try
-    { 
-        close(); 
-    } 
+    {
+        close();
+    }
     catch( const exception& x ) { _log->warn( x.what() ); }
 
     _log->close();
@@ -246,7 +246,7 @@ void Task::job_close()
 
 void Task::close()
 {
-    if( !_closed ) 
+    if( !_closed )
     {
         FOR_EACH( Registered_pids, _registered_pids, p )  p->second->close();
 
@@ -272,7 +272,7 @@ void Task::close()
 
 
         // Alle, die mit wait_until_terminated() auf diese Task warten, wecken:
-        THREAD_LOCK_DUMMY( _terminated_events_lock )  
+        THREAD_LOCK_DUMMY( _terminated_events_lock )
         {
             FOR_EACH( vector<Event*>, _terminated_events, it )  (*it)->signal( "task closed" );
             _terminated_events.clear();
@@ -331,9 +331,9 @@ xml::Element_ptr Task::dom_element( const xml::Document_ptr& document, const Sho
 
         if( Module_task* t = dynamic_cast<Module_task*>( this ) )
         {
-            if( t->_module_instance )  
+            if( t->_module_instance )
             {
-                if( t->_module_instance->_in_call )  
+                if( t->_module_instance->_in_call )
                 task_element.setAttribute( "calling"         , t->_module_instance->_in_call->name() );
 
                 int pid = t->_module_instance->pid();
@@ -343,11 +343,11 @@ xml::Element_ptr Task::dom_element( const xml::Document_ptr& document, const Sho
 
         if( Order* order = _order? _order : _order_for_mail )  dom_append_nl( task_element ),  task_element.appendChild( order->dom_element( document, show ) );
         if( _error )  dom_append_nl( task_element ),  append_error_element( task_element, _error );
-        
+
         if( !_registered_pids.empty() )
         {
             xml::Element_ptr subprocesses_element = document.createElement( "subprocesses" );
-            FOR_EACH_CONST( Registered_pids, _registered_pids, it )  
+            FOR_EACH_CONST( Registered_pids, _registered_pids, it )
             {
                 const Registered_pid* p = it->second;
 
@@ -377,7 +377,7 @@ xml::Element_ptr Task::dom_element( const xml::Document_ptr& document, const Sho
                     subprocesses_element.appendChild( subprocess_element );
                 }
             }
-            
+
             task_element.appendChild( subprocesses_element );
         }
 
@@ -391,19 +391,19 @@ xml::Element_ptr Task::dom_element( const xml::Document_ptr& document, const Sho
 //----------------------------------------------------------------------------------------Task::job
 
 Job* Task::job()
-{ 
+{
     if( !_job )  throw_xc( "TASK-WITHOUT-JOB", obj_name() );
-    return _job; 
+    return _job;
 }
 
 //-------------------------------------------------------------------------------Task::enter_thread
 // Anderer Thread!
 
 void Task::enter_thread( Spooler_thread* thread )
-{ 
+{
     THREAD_LOCK_DUMMY( _lock )
     {
-        _thread = thread;  
+        _thread = thread;
 
       //if( dynamic_cast<Remote_module_instance_proxy*>( +_module_instance ) )
         set_state( s_loading );
@@ -415,20 +415,20 @@ void Task::enter_thread( Spooler_thread* thread )
 //------------------------------------------------------------------------------------Task::cmd_end
 
 void Task::cmd_end( bool kill_immediately )
-{ 
-    THREAD_LOCK_DUMMY( _lock ) 
-    { 
-        _end = true; 
+{
+    THREAD_LOCK_DUMMY( _lock )
+    {
+        _end = true;
         _kill_immediately = kill_immediately;
-        if( !_ending_since )  _ending_since = Time::now(); 
-        signal( "end" ); 
+        if( !_ending_since )  _ending_since = Time::now();
+        signal( "end" );
 
         if( _state == s_none )
         {
             _job->kill_queued_task( _id );
             // this ist hier möglicherweise ungültig!
         }
-    } 
+    }
 }
 
 //-------------------------------------------------------------------------------Task::cmd_nice_end
@@ -443,9 +443,9 @@ void Task::cmd_nice_end( Job* for_job )
 //-------------------------------------------------------------------------------Task::leave_thread
 
 void Task::leave_thread()
-{ 
-    // Thread entfernt die Task, wenn er die Schleife über die _task_list beendet hat. _thread->remove_task( this );  
-    _thread = NULL; 
+{
+    // Thread entfernt die Task, wenn er die Schleife über die _task_list beendet hat. _thread->remove_task( this );
+    _thread = NULL;
 }
 
 //-------------------------------------------------------------------------Task::attach_to_a_thread
@@ -470,11 +470,11 @@ void Task::set_error_xc_only( const Xc& x )
 
 void Task::set_error_xc( const Xc& x )
 {
-    string msg; 
+    string msg;
 
     //Module_task* t = dynamic_cast<Module_task*>( this );
     //Ist nie in _in_call: if( t  &&  t->_module_instance  &&  t->_module_instance->_in_call )  msg = "In " + t->_module_instance->_in_call->name() + "(): ";
-    
+
     _log->error( msg + x.what() );
 
     set_error_xc_only( x );
@@ -484,12 +484,12 @@ void Task::set_error_xc( const Xc& x )
 
 void Task::set_error( const exception& x )
 {
-    if( dynamic_cast< const zschimmer::Xc* >( &x ) ) 
+    if( dynamic_cast< const zschimmer::Xc* >( &x ) )
     {
         set_error_xc( *(zschimmer::Xc*)&x );
     }
     else
-    if( dynamic_cast< const Xc* >( &x ) ) 
+    if( dynamic_cast< const Xc* >( &x ) )
     {
         set_error_xc( *(Xc*)&x );
     }
@@ -519,23 +519,23 @@ void Task::set_error( const _com_error& x )
 //----------------------------------------------------------------------------------Task::set_state
 
 void Task::set_state( State new_state )
-{ 
-    THREAD_LOCK_DUMMY( _lock )  
+{
+    THREAD_LOCK_DUMMY( _lock )
     {
         _idle_since = 0;
 
         switch( new_state )
         {
-            case s_waiting_for_process:         
-                _next_time = latter_day;                        
+            case s_waiting_for_process:
+                _next_time = latter_day;
                 break;
 
-            case s_running_process:             
-                _next_time = latter_day;                        
+            case s_running_process:
+                _next_time = latter_day;
                 break;
 
-            case s_running_delayed:             
-                _next_time = _next_spooler_process;             
+            case s_running_delayed:
+                _next_time = _next_spooler_process;
                 break;
 
             case s_running_waiting_for_order:
@@ -552,7 +552,7 @@ void Task::set_state( State new_state )
                 break;
             }
 
-            default:                            
+            default:
                 _next_time = 0;
         }
 
@@ -561,7 +561,7 @@ void Task::set_state( State new_state )
 
         if( _end )  _next_time = 0;   // Falls vor set_state() cmd_end() gerufen worden ist. Damit _end ausgeführt wird.
 
-        if( new_state != _state ) 
+        if( new_state != _state )
         {
             if( new_state == s_running  ||  new_state == s_starting )  _job->increment_running_tasks(),  _thread->increment_running_tasks();
             if( _state    == s_running  ||  _state    == s_starting )  _job->decrement_running_tasks(),  _thread->decrement_running_tasks();
@@ -638,13 +638,13 @@ string Task::state_name( State state )
 //-------------------------------------------------------------------------------------Task::signal
 
 void Task::signal( const string& signal_name )
-{ 
+{
     THREAD_LOCK_DUMMY( _lock )
     {
         _signaled = true;
         set_next_time( 0 );
 
-        if( _thread )  _thread->signal( signal_name ); 
+        if( _thread )  _thread->signal( signal_name );
                //else  Task ist noch nicht richtig gestartet. Passiert, wenn end() von anderer Task gerufen wird.
     }
 }
@@ -684,9 +684,9 @@ void Task::set_next_time( const Time& next_time )
 //----------------------------------------------------------------------------------Task::next_time
 
 Time Task::next_time()
-{ 
+{
     Time result;
-    
+
     if( _operation )
     {
         result = _operation->async_finished()? Time(0) :                                    // Falls Operation synchron ist (das ist, wenn Task nicht in einem separaten Prozess läuft)
@@ -719,16 +719,16 @@ bool Task::check_timeout( const Time& now )
 //------------------------------------------------------------------------------------Task::add_pid
 
 void Task::add_pid( int pid, const Time& timeout_period )
-{ 
+{
     Time timeout_at = latter_day;
-    
+
     if( timeout_period != latter_day )
     {
         timeout_at = Time::now() + timeout_period;
         _log->debug9( S() << "add_pid(" << pid << ")  Frist endet " << timeout_at );
     }
 
-    _registered_pids[ pid ] = Z_NEW( Registered_pid( this, pid, timeout_at, false, false, false, "" ) );  
+    _registered_pids[ pid ] = Z_NEW( Registered_pid( this, pid, timeout_at, false, false, false, "" ) );
 
     set_subprocess_timeout();
 }
@@ -736,8 +736,8 @@ void Task::add_pid( int pid, const Time& timeout_period )
 //---------------------------------------------------------------------------------Task::remove_pid
 
 void Task::remove_pid( int pid )
-{ 
-    _registered_pids.erase( pid );  
+{
+    _registered_pids.erase( pid );
 
     set_subprocess_timeout();
 }
@@ -745,11 +745,11 @@ void Task::remove_pid( int pid )
 //------------------------------------------------------------------------------------Task::add_pid
 
 void Task::add_subprocess( int pid, double timeout, bool ignore_exitcode, bool ignore_signal, const string& title )
-{ 
+{
     Time timeout_at = timeout < INT_MAX - 1? Time::now() + timeout
                                            : latter_day;
-    
-    _registered_pids[ pid ] = Z_NEW( Registered_pid( this, pid, timeout_at, true, ignore_exitcode, ignore_signal, title ) );  
+
+    _registered_pids[ pid ] = Z_NEW( Registered_pid( this, pid, timeout_at, true, ignore_exitcode, ignore_signal, title ) );
 
     set_subprocess_timeout();
 }
@@ -765,16 +765,16 @@ bool Task::shall_wait_for_registered_pid()
 //-------------------------------------------------------------Task::Registered_pid::Registered_pid
 
 Task::Registered_pid::Registered_pid( Task* task, int pid, const Time& timeout_at, bool wait, bool ignore_error, bool ignore_signal, const string& title )
-: 
+:
     _spooler(task->_spooler),
     _task(task),
-    _pid(pid), 
-    _timeout_at(timeout_at), 
+    _pid(pid),
+    _timeout_at(timeout_at),
     _wait(wait),
     _ignore_error(ignore_error),
     _ignore_signal(ignore_signal),
     _title(title),
-    _killed(false) 
+    _killed(false)
 {
     _spooler->register_pid( pid );
 }
@@ -783,7 +783,7 @@ Task::Registered_pid::Registered_pid( Task* task, int pid, const Time& timeout_a
 
 void Task::Registered_pid::close()
 {
-    if( _spooler )  
+    if( _spooler )
     {
         _spooler->unregister_pid( _pid );
         _spooler = NULL;
@@ -791,9 +791,9 @@ void Task::Registered_pid::close()
 }
 
 //-------------------------------------------------------------------Task::Registered_pid::try_kill
-                                
+
 void Task::Registered_pid::try_kill()
-{ 
+{
     if( !_killed )
     {
         try
@@ -806,8 +806,8 @@ void Task::Registered_pid::try_kill()
             _task->_log->warn( S() << "Subprozess " << _pid << " lässt sich nicht abbrechen: " << x );
         }
 
-        _killed = true; 
-        _timeout_at = latter_day; 
+        _killed = true;
+        _timeout_at = latter_day;
 
         close();
     }
@@ -828,15 +828,15 @@ void Task::set_subprocess_timeout()
 
 bool Task::check_subprocess_timeout( const Time& now )
 {
-    bool something_done = false; 
+    bool something_done = false;
 
     if( _subprocess_timeout < now )
     {
-        FOR_EACH( Registered_pids, _registered_pids, p )  
+        FOR_EACH( Registered_pids, _registered_pids, p )
         {
             Registered_pid* subprocess = p->second;
 
-            if( subprocess->_timeout_at < now ) 
+            if( subprocess->_timeout_at < now )
             {
                 _log->warn( S() << "Subprozess " << subprocess->_pid << " wird abgebrochen, weil seine Frist überschritten ist" );
                 subprocess->try_kill();
@@ -882,7 +882,7 @@ bool Task::do_something()
 
     _signaled = false;
 
-    if( _kill_immediately  &&  !_kill_tried ) 
+    if( _kill_immediately  &&  !_kill_tried )
     {
         _log->error( "Task wird nach Anforderung abgebrochen" );
         return try_kill();
@@ -890,7 +890,7 @@ bool Task::do_something()
 
     something_done |= check_subprocess_timeout( now );
 
-    if( _operation &&  !_operation->async_finished() )  
+    if( _operation &&  !_operation->async_finished() )
     {
         something_done |= check_timeout( now );
     }
@@ -899,14 +899,14 @@ bool Task::do_something()
         // Periode endet?
         if( !_operation )
         {
-            if( _state == s_running 
-             || _state == s_running_process 
-             || _state == s_running_delayed  
-             || _state == s_running_waiting_for_order )      
+            if( _state == s_running
+             || _state == s_running_process
+             || _state == s_running_delayed
+             || _state == s_running_waiting_for_order )
             {
                 bool let_run = _let_run  ||  _job->_period.is_in_time( now )  ||  ( _job->select_period(now), _job->is_in_period(now) );
 
-                if( !let_run ) 
+                if( !let_run )
                 {
                     _log->info( "Laufzeitperiode ist abgelaufen, Task wird beendet" );
                     set_state( s_ending );
@@ -929,15 +929,15 @@ bool Task::do_something()
 
                     if( !_operation )
                     {
-                        if( _module_instance && !_module_instance_async_error ) 
+                        if( _module_instance && !_module_instance_async_error )
                         {
-                            try 
-                            { 
-                                _module_instance->check_connection_error(); 
-                            }  
+                            try
+                            {
+                                _module_instance->check_connection_error();
+                            }
                             catch( exception& x )
-                            { 
-                                _module_instance_async_error = true;  
+                            {
+                                _module_instance_async_error = true;
                                 throw_xc( "SCHEDULER-202", x.what() );
                             }
                         }
@@ -950,12 +950,12 @@ bool Task::do_something()
                             else
                                                     set_state( s_ending );
                         }
-                        
+
                         // Historie beginnen?
-                        if( _state == s_starting 
-                         || _state == s_running 
-                         || _state == s_running_delayed 
-                         || _state == s_running_waiting_for_order 
+                        if( _state == s_starting
+                         || _state == s_running
+                         || _state == s_running_delayed
+                         || _state == s_running_waiting_for_order
                          || _state == s_running_process           )
                         {
                             if( _step_count == _job->_history.min_steps() )  _history.start();
@@ -988,7 +988,7 @@ bool Task::do_something()
                             }
                             else
                             {
-                                ok = operation__end(); 
+                                ok = operation__end();
                                 if( _state != s_running_process )  set_state( ok? s_running : s_ending );
                                 loop = true;
                             }
@@ -1064,7 +1064,7 @@ bool Task::do_something()
                             else
                             if( _job->_idle_timeout != latter_day )
                             {
-                                if( now >= _idle_since + _job->_idle_timeout )  
+                                if( now >= _idle_since + _job->_idle_timeout )
                                 {
                                     _log->debug9( "idle_timeout ist abgelaufen, Task beendet sich" );
                                     _end = true;
@@ -1075,14 +1075,14 @@ bool Task::do_something()
                         }
 
 
-                        case s_running_delayed:  
+                        case s_running_delayed:
                         {
                             if( now >= _next_spooler_process )
                             {
                                 _next_spooler_process = 0;
                                 set_state( s_running ), loop = true;
                             }
-                         
+
                             break;
                         }
 
@@ -1147,7 +1147,7 @@ bool Task::do_something()
 
                             if( !_operation )
                             {
-                                set_state( has_error()? s_on_error 
+                                set_state( has_error()? s_on_error
                                                       : s_on_success );
                                 loop = true;
                             }
@@ -1207,7 +1207,7 @@ bool Task::do_something()
 
                         case s_ended:
                         {
-                            if( !_operation )  
+                            if( !_operation )
                             {
                                 _operation = do_close__start();
                             }
@@ -1244,12 +1244,12 @@ bool Task::do_something()
 
                     if( !_operation )
                     {
-                        if( !ok || has_error() )  
+                        if( !ok || has_error() )
                         {
                             if( _state < s_ending )  set_state( s_ending ), loop = true;
                         }
 
-                    
+
                         if( _killed  &&  _state < s_ended )  set_state( s_ended ), loop = true;
                     }
                 }
@@ -1320,10 +1320,10 @@ bool Task::do_something()
   //if( _next_time && !_let_run )  set_next_time( min( _next_time, _job->_period.end() ) );                      // Am Ende der Run_time wecken, damit die Task beendet werden kann
 
 /*
-    if( _state != s_running  
+    if( _state != s_running
      && _state != s_running_delayed
      && _state != s_running_waiting_for_order
-     && _state != s_running_process  
+     && _state != s_running_process
      && _state != s_suspended                 )  send_collected_log();
 */
 
@@ -1380,11 +1380,11 @@ bool Task::step__end()
 {
     bool continue_task;
 
-    try 
+    try
     {
         bool    result;
         Variant spooler_process_result = do_step__end();
-        
+
         if( spooler_process_result.vt == VT_ERROR  &&  V_ERROR( &spooler_process_result ) == DISP_E_UNKNOWNNAME )
         {
             result = true;
@@ -1420,13 +1420,13 @@ bool Task::operation__end()
 {
     bool result = false;
 
-    try 
+    try
     {
         switch( _state )
         {
             case s_starting:                        result = do_begin__end();    break;
             case s_ending:                                   do_end__end();      break;
-            
+
             case s_ending_waiting_for_subprocesses: if( Remote_module_instance_proxy* m = dynamic_cast< Remote_module_instance_proxy* >( +_module_instance ) )
                                                         m->_remote_instance->call__end();
                                                     else throw_xc( "NO_REMOTE_INSTANCE" );
@@ -1450,7 +1450,7 @@ bool Task::operation__end()
 //---------------------------------------------------------------------------------Task::set_order
 
 void Task::set_order( Order* order )
-{                                  
+{
     // Wird von Job gerufen, wenn Task wegen neuen Auftrags startet
 
     _order = order;
@@ -1506,7 +1506,7 @@ void Task::finish()
         _job->stop( false );
     }
     else
-    if( _job->_temporary  &&  _job->repeat() == 0 )  
+    if( _job->_temporary  &&  _job->repeat() == 0 )
     {
         _job->stop( false );   // _temporary && s_stopped ==> spooler_thread.cxx entfernt den Job
     }
@@ -1519,12 +1519,12 @@ void Task::finish()
     if( has_error() )
     {
         InterlockedIncrement( &_job->_error_steps );
-    
+
         if( !_job->repeat() )   // spooler_task.repeat hat Vorrang
         {
             Time delay = _job->_delay_after_error.empty()? latter_day : Time(0);
 
-            FOR_EACH( Job::Delay_after_error, _job->_delay_after_error, it )  
+            FOR_EACH( Job::Delay_after_error, _job->_delay_after_error, it )
                 if( _job->_error_steps >= it->first )  delay = it->second;
 
             if( delay == latter_day )
@@ -1608,7 +1608,7 @@ void Task::trigger_event( Scheduler_event* scheduler_event )
         {
             string errmsg = _error? _error->what() : _log->highest_msg();
             _log->set_mail_default( "subject", string("FEHLER ") + errmsg );   //, is_error );
-        
+
             body += errmsg + "\n\n";
         }
 
@@ -1626,7 +1626,7 @@ void Task::trigger_event( Scheduler_event* scheduler_event )
         //clear_mail();
     }
     catch( const exception& x  ) { _log->warn( x.what() ); }
-    catch( const _com_error& x ) { _log->warn( bstr_as_string(x.Description()) ); }  
+    catch( const _com_error& x ) { _log->warn( bstr_as_string(x.Description()) ); }
 }
 
 //----------------------------------------------------------------------Task::wait_until_terminated
@@ -1696,7 +1696,7 @@ void Task::set_mail_defaults()
     {
         string errmsg = _error? _error->what() : _log->highest_msg();
         _log->set_mail_subject( string("FEHLER ") + errmsg );   //, is_error );
-    
+
         body += errmsg + "\n\n";
     }
 
@@ -1727,8 +1727,8 @@ Async_operation* Module_task::do_close__start()
 
 void Module_task::do_close__end()
 {
-    if( _module_instance )  
-    { 
+    if( _module_instance )
+    {
         _module_instance->close__end();
 
         int exit_code = _module_instance->exit_code();
@@ -1750,7 +1750,7 @@ void Module_task::do_close__end()
 /*
 void Module_task::close_engine()
 {
-    try 
+    try
     {
       //_log->debug3( "close scripting engine" );
         _module_instance->close();
@@ -1775,7 +1775,7 @@ bool Object_set_task::do_load()
 {
     bool ok = true;
 
-    if( !_object_set ) 
+    if( !_object_set )
     {
         _object_set = SOS_NEW( Object_set( _spooler, this, _job->_object_set_descr ) );
         _com_object_set = new Com_object_set( _object_set );
@@ -1800,7 +1800,7 @@ bool Object_set_task::do_begin__end()
     {
         bool ok = true;
 
-        if( !_object_set ) 
+        if( !_object_set )
         {
             _object_set = SOS_NEW( Object_set( _spooler, this, _job->_object_set_descr ) );
             _com_object_set = new Com_object_set( _object_set );
@@ -1843,7 +1843,7 @@ bool Object_set_task::do_step__end()
 bool Job_module_task::do_kill()
 {
     return _module_instance? _module_instance->kill() :
-           _operation      ? _operation->async_kill() 
+           _operation      ? _operation->async_kill()
                            : false;
 }
 
@@ -1987,18 +1987,18 @@ void Job_module_task::do_release__end()
 
 //-----------------------------------------------------------------------Process_task::Process_task
 
-Process_task::Process_task( Job* job ) 
-: 
+Process_task::Process_task( Job* job )
+:
     Task(job),
     _zero_(this+1),
-    _process_handle( "process_handle" ) 
+    _process_handle( "process_handle" )
 {
 }
 
 //----------------------------------------------------------------------Process_task::~Process_task
 
 Process_task::~Process_task()
-{ 
+{
     close_handle();
 }
 
@@ -2020,7 +2020,7 @@ void Process_task::close_handle()
         if( _job )
         {
 #           ifdef Z_WINDOWS
-                _job->_spooler->unregister_process_handle( _process_handle ); 
+                _job->_spooler->unregister_process_handle( _process_handle );
 #           endif
         }
 
@@ -2073,8 +2073,8 @@ bool Process_task::do_begin__end()
 {
     if( _spooler->_process_count == max_processes )  throw_xc( "SCHEDULER-210", max_processes );
 
-    PROCESS_INFORMATION process_info; 
-    STARTUPINFO         startup_info; 
+    PROCESS_INFORMATION process_info;
+    STARTUPINFO         startup_info;
     BOOL                ok;
 
     memset( &process_info, 0, sizeof process_info );
@@ -2084,7 +2084,7 @@ bool Process_task::do_begin__end()
     _stderr_file.open_temporary( File::open_unlink_later | File::open_inheritable );
 
     memset( &startup_info, 0, sizeof startup_info );
-    startup_info.cb          = sizeof startup_info; 
+    startup_info.cb          = sizeof startup_info;
     startup_info.dwFlags     = STARTF_USESTDHANDLES | STARTF_USESHOWWINDOW;
     startup_info.hStdInput   = INVALID_HANDLE_VALUE;
     startup_info.hStdOutput  = _stdout_file.handle();
@@ -2127,15 +2127,15 @@ bool Process_task::do_begin__end()
 
 
     ok = CreateProcess( _job->_process_filename.c_str(),  // application name
-                        (char*)command_line.c_str(),      // command line 
-                        NULL,                       // process security attributes 
-                        NULL,                       // primary thread security attributes 
+                        (char*)command_line.c_str(),      // command line
+                        NULL,                       // process security attributes
+                        NULL,                       // primary thread security attributes
                         TRUE,                       // handles are inherited?
-                        0,                          // creation flags 
-                        (char*)((string)env).c_str(),      // use parent's environment 
-                        NULL,                       // use parent's current directory 
-                        &startup_info,              // STARTUPINFO pointer 
-                        &process_info );            // receives PROCESS_INFORMATION 
+                        0,                          // creation flags
+                        (char*)((string)env).c_str(),      // use parent's environment
+                        NULL,                       // use parent's current directory
+                        &startup_info,              // STARTUPINFO pointer
+                        &process_info );            // receives PROCESS_INFORMATION
     if( !ok )  throw_mswin_error( "CreateProcess", _job->_process_filename.c_str() );
 
     CloseHandle( process_info.hThread );
@@ -2146,7 +2146,7 @@ bool Process_task::do_begin__end()
   //_process_handle.add_to( &_thread->_wait_handles );
     _process_handle.add_to( &_spooler->_wait_handles );
 
-    _job->_spooler->register_process_handle( _process_handle ); 
+    _job->_spooler->register_process_handle( _process_handle );
 
     set_state( s_running_process );
 
@@ -2229,12 +2229,12 @@ bool Process_event::wait( double seconds )
       //if( log_ptr )  *log_ptr << "waitpid(" << _pid << ")  ";
 
         int ret = waitpid( _pid, &status, WNOHANG | WUNTRACED );    // WUNTRACED: "which means to also return for children which are stopped, and whose status has not been reported."
-        if( ret == -1 )  
-        { 
+        if( ret == -1 )
+        {
             LOG( "waitpid(" << _pid << ") ==> ERRNO-" << errno << "  " << strerror(errno) << "\n" );
-            //int pid = _pid; 
-            _pid = 0; 
-            //throw_errno( errno, "waitpid", as_string(pid).c_str() ); 
+            //int pid = _pid;
+            _pid = 0;
+            //throw_errno( errno, "waitpid", as_string(pid).c_str() );
             set_signaled();
             return true;
         }
@@ -2327,9 +2327,9 @@ bool Process_task::do_begin__end()
 
     switch( pid )
     {
-        case -1:    
+        case -1:
             throw_errno( errno, "fork" );
-        
+
         case 0:
         {
             dup2( _stdout_file._file, STDOUT_FILENO );
@@ -2341,7 +2341,7 @@ bool Process_task::do_begin__end()
             int new_stdin = ::open( "/dev/null", O_RDONLY );
             if( new_stdin != -1  &&  new_stdin != STDIN_FILENO )  dup2( new_stdin, STDIN_FILENO ),  ::close( new_stdin );
 
-            // Arguments 
+            // Arguments
 
             char** args = new char* [ string_args.size() + 1 ];
             int    i;
@@ -2385,7 +2385,7 @@ bool Process_task::do_begin__end()
     _process_handle.set_name( "Process " + _job->_process_filename );
     _process_handle.add_to( &_spooler->_wait_handles );
 
-    _job->_spooler->register_process_handle( _process_handle._pid ); 
+    _job->_spooler->register_process_handle( _process_handle._pid );
     _pid_to_unregister = _process_handle._pid;
 
     _operation = &dummy_sync_operation;
@@ -2408,7 +2408,7 @@ bool Process_task::do_kill()
         //? _process_handle._pid = 0;
         return true;
     }
-    
+
     return false;
 }
 
@@ -2435,7 +2435,7 @@ void Process_task::do_end__end()
 
         if( _process_handle._pid )
         {
-            do_step__end();      // waitpid() sollte schon gerufen sein. 
+            do_step__end();      // waitpid() sollte schon gerufen sein.
             if( _process_handle._pid )   throw_xc( "SCHEDULER-179", _process_handle._pid );       // Sollte nicht passieren (ein Zombie wird stehen bleiben)
         }
 
@@ -2460,7 +2460,7 @@ void Process_task::do_end__end()
 
     _result = (int)exit_code;
 
-    _log->log_file( _job->_process_log_filename ); 
+    _log->log_file( _job->_process_log_filename );
 
     if( exit_code )
     {

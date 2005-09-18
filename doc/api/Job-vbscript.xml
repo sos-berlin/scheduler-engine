@@ -4,7 +4,7 @@
 <?xml-stylesheet href="api_vbscript.xsl" type="text/xsl"?>
 
 
-<api.class 
-    name                 = "Job" 
+<api.class
+    name                 = "Job"
     base_dir             = "../"
 />

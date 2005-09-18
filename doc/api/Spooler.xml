@@ -4,8 +4,8 @@
 <?xml-stylesheet href="api_default_language.xsl" type="text/xsl"?>
 
 
-<api.class 
-    name        = "Spooler" 
+<api.class
+    name        = "Spooler"
     object_name = "spooler"
     base_dir    = "../"
     author      = "$Author$"
@@ -18,11 +18,11 @@
             <com.type class="Log"/>
         </com.result>
     </com>
-    
+
     <title>
         Das Hauptprotokoll
     </title>
-    
+
     <description>
         <p>
             Normalerweise wird man <scheduler_method class="Job_impl" method="spooler_log"/> verwenden.
@@ -37,11 +37,11 @@
             <com.type type="BSTR"/>
         </com.result>
     </com>
-    
+
     <title>
         Wert der Kommandozeilenoption <code>-id=</code>
     </title>
-    
+
     <description>
         <p>
             Siehe <scheduler_option name="id"/>.
@@ -56,7 +56,7 @@
             <com.type type="BSTR"/>
         </com.result>
     </com>
-    
+
     <title>
         Wert der Kommandozeilenoption <code>-param=</code> beim Start des Schedulers
     </title>
@@ -85,7 +85,7 @@
         <com.parameter name="job_name">
             <com.type type="BSTR"/>
         </com.parameter>
-        
+
         <com.result>
             <com.type class="Job"/>
         </com.result>
@@ -108,11 +108,11 @@
             <com.type type="BSTR"/>
         </com.result>
     </com>
-    
+
     <title>
         Liefert die Kommandozeilenoption <code>-include-path=</code>.
     </title>
-    
+
     <description>
         <p>
             Siehe <scheduler_option name="include-path"/>.
@@ -127,7 +127,7 @@
             <com.type type="BSTR"/>
         </com.result>
     </com>
-    
+
     <description>
         <p>
             Siehe <scheduler_option name="log-dir"/>.
@@ -138,14 +138,14 @@
 
 <method name="let_run_terminate_and_restart">
     <com/>
-    
+
     <description>
         <p>
-            Sobald alle Aufträge abgearbeitet sind, 
-            beendet der Scheduler alle Jobs 
+            Sobald alle Aufträge abgearbeitet sind,
+            beendet der Scheduler alle Jobs
             (durch Aufruf von <scheduler_method class="Job_impl" name="spooler_close"/>)
-            und dann sich selbst. 
-            Ein neuer Scheduler mit unveränderten Kommandozeilenparametern wird gestartet.        
+            und dann sich selbst.
+            Ein neuer Scheduler mit unveränderten Kommandozeilenparametern wird gestartet.
         </p>
     </description>
 </method>
@@ -156,16 +156,16 @@
         <com.parameter name="name">
             <com.type type="BSTR"/>
         </com.parameter>
-        
+
         <com.result>
             <com.type type="VARIANT*"/>
         </com.result>
     </com>
-    
+
     <title>
         Zugriff auf Scheduler-weite Variablen
     </title>
-    
+
     <description>
         <p>
             Die Variablen sind überall im Scheduler benutzbar.
@@ -180,11 +180,11 @@
             <com.type class="Variable_set"/>
         </com.result>
     </com>
-    
+
     <title>
         Die Scheduler-weiten Variablen als <code>Variable_set</code>
     </title>
-    
+
     <description>
         Siehe <scheduler_method class="Spooler" method="var"/>
     </description>
@@ -206,12 +206,12 @@
             <com.type class="Job_chain"/>
         </com.result>
     </com>
-    
+
     <description>
         <p>
             Liefert eine neue <scheduler_method class="Job_chain"/>.
-            Diese Jobkette kann, nachdem sie mit Jobs gefüllt worden ist, 
-            mit <scheduler_method class="Spooler" name="add_job_chain"/> 
+            Diese Jobkette kann, nachdem sie mit Jobs gefüllt worden ist,
+            mit <scheduler_method class="Spooler" name="add_job_chain"/>
             dem Scheduler hinzugefügt werden
         </p>
     </description>
@@ -224,7 +224,7 @@
             <com.type class="Job_chain"/>
         </com.parameter>
     </com>
-    
+
     <description>
         <p>
             Siehe <scheduler_method class="Spooler" method="create_job_chain"/>.
@@ -238,7 +238,7 @@
         <com.parameter name="name">
             <com.type type="BSTR"/>
         </com.parameter>
-        
+
         <com.result>
             <com.type class="Job_chain"/>
         </com.result>
@@ -252,10 +252,10 @@
             <com.type class="Order"/>
         </com.result>
     </com>
-    
+
     <description>
         <p>
-            Erzeugt einen neuen Auftrag. 
+            Erzeugt einen neuen Auftrag.
             Dieser Auftrag kann mit <scheduler_method class="Spooler" method="add_order"/>
             einer Jobkette übergeben werden.
         </p>
@@ -280,17 +280,17 @@
         <com.result>
             <com.type type="BSTR"/>
             <description>
-                <p> 
+                <p>
                     Der Pfad endet unter Unix mit "<code>/</code>" und unter Windows mit "<code>\</code>".
                 </p>
             </description>
         </com.result>
     </com>
-    
+
     <title>
         Das Arbeitsverzeichnis beim Start des Schedulers
     </title>
-    
+
     <description>
         <p>
             Siehe <scheduler_option name="cd"/>.
@@ -304,7 +304,7 @@
         <com.parameter name="name">
             <com.type type="BSTR"/>
         </com.parameter>
-        
+
         <com.result>
             <com.type type="bool"/>
         </com.result>
@@ -318,7 +318,7 @@
             <com.type type="BSTR"/>
         </com.result>
     </com>
-    
+
     <titel>
         Der Namen des Rechners, auf dem der Scheduler läuft.
     </titel>
@@ -327,15 +327,15 @@
 
 <method name="abort_immediately">
     <com/>
-    
+
     <title>
         Bricht den Scheduler augenblicklich ab
     </title>
-    
+   
     <description>
         <p>
-            Bricht den Scheduler augenblicklich ab. 
-            Kein Job hat Gelegenheit, darauf zu reagieren. 
+            Bricht den Scheduler augenblicklich ab.
+            Kein Job hat Gelegenheit, darauf zu reagieren.
         </p>
         <p>
             Der Scheduler bricht zuvor alle gestarteten Prozesse ab.
@@ -348,7 +348,7 @@
 
 <method name="abort_immediately_and_restart">
     <com/>
-    
+
     <title>
         Bricht den Scheduler augenblicklich ab und startet ihn neu.
     </title>
@@ -369,7 +369,7 @@
             <com.type type="BSTR"/>
         </com.result>
     </com>
-    
+
     <title>
         Name der Datenbanktabelle für die internen Variablen des Schedulers
     </title>
@@ -381,8 +381,8 @@
         <com.result>
             <com.type type="BSTR"/>
         </com.result>
-    </com>               
-    
+    </com>
+
     <title>
         Name der Datenbanktabelle für die Tasks
     </title>
@@ -395,8 +395,8 @@
             <com.type type="BSTR"/>
         </com.result>
     </com>
-    
-    <title>     
+
+    <title>
         Name der Datenbanktabelle für die Aufträge
     </title>
 </property>
@@ -408,7 +408,7 @@
             <com.type type="BSTR"/>
         </com.result>
     </com>
-    
+
     <title>
          Name der Datenbanktabelle für die Auftragshistorie
     </title>
@@ -421,7 +421,7 @@
             <com.type type="BSTR"/>
         </com.result>
     </com>
-    
+
     <title>
          Name der Datenbanktabelle für die Historie
     </title>
@@ -434,7 +434,7 @@
             <com.type type="BSTR"/>
         </com.result>
     </com>
-    
+
     <title>
          Wert der Option <code>-ini=</code> (Dateiname der <code>factory.ini</code>)
     </title>
@@ -467,11 +467,11 @@
             </description>
         </com.result>
     </com>
-    
+
     <title>
         Führt ein XML-Kommando aus
     </title>
-    
+
     <description>
         <p>
             Fehler werden als XML-Antwort <scheduler_element name="ERROR" directory="xml/answer/"/> geliefert.
@@ -489,7 +489,7 @@
             </description>
         </com.result>
     </com>
-    
+
     <description>
         Siehe <scheduler_option name="tcp-port"/>
     </description>
@@ -505,7 +505,7 @@
             </description>
         </com.result>
     </com>
-    
+
     <description>
         Siehe <scheduler_option name="udp-port"/>
     </description>
@@ -516,19 +516,23 @@
     <com>
         <com.parameter name="xml" optional="true">
             <com.type type="BSTR"/>
+            
+            <description>
+                XSLT-Stylesheet als XML-String
+            </description>
         </com.parameter>
 
         <com.result>
-            <com.type type="Xslt_stylesheet"/>
+            <com.type class="Xslt_stylesheet"/>
         </com.result>
     </com>
-    
+
     <java>
         <java.result>
             <java.type type="Xslt_stylesheet"/>
         </java.result>
     </java>
-    
+
     <java>
         <java.parameter name="path">
             <java.type type="java.io.path"/>
@@ -538,10 +542,10 @@
             <java.type type="Xslt_stylesheet"/>
         </java.result>
     </java>
-    
+
     <java>
         <java.parameter name="path">
-            <java.type type="java.lang.String"/>
+            <com.type type="BSTR"/>
         </java.parameter>
 
         <java.result>

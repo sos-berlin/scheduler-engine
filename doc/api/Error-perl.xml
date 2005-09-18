@@ -4,7 +4,7 @@
 <?xml-stylesheet href="api_perl.xsl" type="text/xsl"?>
 
 
-<api.class 
-    name                 = "Error" 
+<api.class
+    name                 = "Error"
     base_dir             = "../"
 />

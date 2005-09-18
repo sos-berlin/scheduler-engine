@@ -4,7 +4,7 @@
 <?xml-stylesheet href="api_java.xsl" type="text/xsl"?>
 
 
-<api.class 
-    name                 = "introduction" 
+<api.class
+    name                 = "introduction"
     base_dir             = "../"
 />

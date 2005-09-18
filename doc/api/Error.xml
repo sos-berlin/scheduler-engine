@@ -4,8 +4,8 @@
 <?xml-stylesheet href="api_default_language.xsl" type="text/xsl"?>
 
 
-<api.class 
-    name        = "Error" 
+<api.class
+    name        = "Error"
     object_name = "error"
     base_dir    = "../"
     author      = "$Author$"
@@ -18,11 +18,11 @@
             <com.type type="bool"/>
         </com.result>
     </com>
-    
+
     <title>
         <code>true</code>, wenn ein Fehler vorliegt
     </title>
-    
+
 </property>
 
 
@@ -45,7 +45,7 @@
             <com.type type="BSTR"/>
         </com.result>
     </com>
-    
+
     <title>
         Fehlertext (mit Fehlercode)
     </title>

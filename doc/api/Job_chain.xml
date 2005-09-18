@@ -4,8 +4,8 @@
 <?xml-stylesheet href="api_default_language.xsl" type="text/xsl"?>
 
 
-<api.class 
-    name        = "Job_chain" 
+<api.class
+    name        = "Job_chain"
     object_name = "job_chain"
     base_dir    = "../"
     author      = "$Author$"
@@ -19,18 +19,18 @@
             <com.type type="BSTR"/>
         </com.result>
     </com>
-    
+
     <title>
         Name der Jobkette
     </title>
-    
+
     <example programming_language="java">
-        <pre>Job_chain job_chain = spooler.create_job_chain();                                                  
+        <pre>Job_chain job_chain = spooler.create_job_chain();
 job_chain.set_name( "Jobkette" );</pre>
     </example>
 
     <example programming_language="javascript">
-        <pre>var job_chain = spooler.create_job_chain();                                                  
+        <pre>var job_chain = spooler.create_job_chain();
 job_chain.name = "Jobkette";</pre>
     </example>
 </property>
@@ -43,7 +43,7 @@ job_chain.name = "Jobkette";</pre>
             <com.type type="int"/>
         </com.result>
     </com>
-        
+
     <title>
         Anzahl der Aufträge in der Jobkette
     </title>
@@ -78,15 +78,15 @@ job_chain.name = "Jobkette";</pre>
             <com.type type="VARIANT*"/>
         </com.parameter>
     </com>
-    
+
     <title>
         Fügt der Jobkette einen Endknoten hinzu
     </title>
-    
+
     <description>
         <p>
-            Diesem Knoten ist kein Job zugeordnet. 
-            Ein Auftrag, der einen Endknoten erreicht, hat die Jobkette durchlaufen und wird vom Scheduler aus ihr entfernt. 
+            Diesem Knoten ist kein Job zugeordnet.
+            Ein Auftrag, der einen Endknoten erreicht, hat die Jobkette durchlaufen und wird vom Scheduler aus ihr entfernt.
         </p>
     </description>
 </method>
@@ -102,27 +102,27 @@ job_chain.name = "Jobkette";</pre>
             <com.type class="Order"/>
         </com.result>
     </com>
-    
+
     <title>
         Gibt einen Auftrag in die Jobkette
     </title>
-    
+
     <description>
         <p>
-            Wenn der Auftrag in einer anderen Jobkette enthalten ist, entfernt der Scheduler ihn daraus. 
+            Wenn der Auftrag in einer anderen Jobkette enthalten ist, entfernt der Scheduler ihn daraus.
         </p>
         <p>
-            Der Auftrag wird in die Auftragswarteschlange des Jobs, der seinem Zustand entspricht, 
-            gemäß seiner Priorität eingeordnet. 
+            Der Auftrag wird in die Auftragswarteschlange des Jobs, der seinem Zustand entspricht,
+            gemäß seiner Priorität eingeordnet.
         </p>
         <p>
-            Die Jobkette mit muss mit 
-            <scheduler_method class="Spooler" method="add_job_chain"/> 
-            dem Scheduler übergeben worden sein. 
+            Die Jobkette mit muss mit
+            <scheduler_method class="Spooler" method="add_job_chain"/>
+            dem Scheduler übergeben worden sein.
         </p>
         <p>
-            Wenn die Jobkette bereits einen Auftrag mit gleicher Id enthält, 
-            wird eine Exception mit Fehlercode <code>SCHEDULER-186</code> geliefert. 
+            Wenn die Jobkette bereits einen Auftrag mit gleicher Id enthält,
+            wird eine Exception mit Fehlercode <code>SCHEDULER-186</code> geliefert.
         </p>
     </description>
 </method>
@@ -138,7 +138,7 @@ job_chain.name = "Jobkette";</pre>
             <com.type class="Job_chain_node"/>
         </com.result>
     </com>
-    
+
     <title>
         Der Jobkettenknoten zum angegebenen Zustand
     </title>
@@ -155,11 +155,11 @@ job_chain.name = "Jobkette";</pre>
             <com.type class="Order_queue"/>
         </com.result>
     </com>
-    
+
     <title>
-        <code>= node(state).job().order_queue()</code> 
+        <code>= node(state).job().order_queue()</code>
     </title>
-    
+
     <description>
         Liefert die Auftragswarteschlange des Jobs, der dem angegebenen Zustand zugeordnet ist.
     </description>
@@ -172,27 +172,27 @@ job_chain.name = "Jobkette";</pre>
             <com.type class="Order"/>
         </com.parameter>
     </com>
-    
+
     <title>
         Gibt einen Auftrag in die Jobkette und ersetzt ggfs einen mit gleicher Kennung
     </title>
-    
+
     <description>
         <p>
-            Hat die Jobkette bereits einen Auftrag mit gleicher Kennung, dann wird dieser ersetzt. 
-            Genauer: Er wird aus der Jobkette entfernt, und der neue Auftrag wird hinzugefügt. 
+            Hat die Jobkette bereits einen Auftrag mit gleicher Kennung, dann wird dieser ersetzt.
+            Genauer: Er wird aus der Jobkette entfernt, und der neue Auftrag wird hinzugefügt.
         </p>
         <p>
-            Solange eine Task den vorhandenen Auftrag ausführt, 
-            sind im Scheduler zwei Aufträge mit gleicher Kennung vorhanden. 
-            Allerdings ist der vorhandene Auftrag aus der Jobkette und aus der Datenbank bereits entfernt. 
-            Er ist nur noch für die Task nutzbar und verschwindet nach der Ausführung. 
+            Solange eine Task den vorhandenen Auftrag ausführt,
+            sind im Scheduler zwei Aufträge mit gleicher Kennung vorhanden.
+            Allerdings ist der vorhandene Auftrag aus der Jobkette und aus der Datenbank bereits entfernt.
+            Er ist nur noch für die Task nutzbar und verschwindet nach der Ausführung.
         </p>
         <p>
-            In diesem Fall wartet der Scheduler die Ausführung des neuen Auftrags ab, 
-            bis die Ausführung des alten Auftrags beendet ist. 
+            In diesem Fall wartet der Scheduler die Ausführung des neuen Auftrags ab,
+            bis die Ausführung des alten Auftrags beendet ist.
         </p>
-        <p> 
+        <p>
             Siehe <scheduler_method class="Job_chain" method="add_order"/> und
             <scheduler_method class="Job_chain" method="remove_from_job_chain"/>
         </p>
@@ -207,32 +207,32 @@ job_chain.name = "Jobkette";</pre>
 
 <description>
     <p>
-        Eine Jobkette (Job_chain) ist eine Kette von Jobs (Jobkettenknoten oder Stellen). 
-        Diese Kette wird von Aufträgen (<scheduler_method class="Order"/>) durchlaufen. 
+        Eine Jobkette (Job_chain) ist eine Kette von Jobs (Jobkettenknoten oder Stellen).
+        Diese Kette wird von Aufträgen (<scheduler_method class="Order"/>) durchlaufen.
     </p>
     <p>
-        Jeder Stelle in der Jobkette ist ein Zustand und ein Job zugeordnet. 
-        Wenn ein Auftrag der Jobkette hinzugefügt wird, setzt der Scheduler ihn an die seinem Zustand entsprechende Stelle. 
-        Der dieser Stelle zugeordnete Job führt den Auftrag aus. 
+        Jeder Stelle in der Jobkette ist ein Zustand und ein Job zugeordnet.
+        Wenn ein Auftrag der Jobkette hinzugefügt wird, setzt der Scheduler ihn an die seinem Zustand entsprechende Stelle.
+        Der dieser Stelle zugeordnete Job führt den Auftrag aus.
     </p>
     <p>
-        Jede Stelle hat außerdem einen Folgezustand und einen Fehlerzustand. 
-        Nach der Verarbeitung eines Auftrags durch einen Jobschritt ändert der Scheduler den Zustand des Auftrags. 
-        Wenn der Jobschritt (spooler_process) true liefert, stellt der Scheduler den Folgezustand, 
-        sonst den Fehlerzustand ein. 
-        Der Auftrag rutscht damit an eine andere Stelle der Jobkette, die dem neuen Zustand zugeordnet ist. 
+        Jede Stelle hat außerdem einen Folgezustand und einen Fehlerzustand.
+        Nach der Verarbeitung eines Auftrags durch einen Jobschritt ändert der Scheduler den Zustand des Auftrags.
+        Wenn der Jobschritt (spooler_process) true liefert, stellt der Scheduler den Folgezustand,
+        sonst den Fehlerzustand ein.
+        Der Auftrag rutscht damit an eine andere Stelle der Jobkette, die dem neuen Zustand zugeordnet ist.
     </p>
     <p>
         Sie erzeugen eine Jobkette mit <scheduler_method class="Spooler" method="create_job_chain"/>,
         füllen sie mit <scheduler_method class="Job_chain" method="add_job"/>
         und <scheduler_method class="Job_chain" method="add_end_state"/>
         und machen sie schließlich mit <scheduler_method class="Spooler" method="add_job_chain"/>
-        bekannt. 
+        bekannt.
     </p>
     <p>
-        Jeder Knoten ist eindeutig einem Zustand zugeordnet. 
-        Für jeden Zustand muss genau einmal <scheduler_method class="Job_chain" method="add_job"/> 
-        oder <scheduler_method class="Job_chain" method="add_end_state"/> aufgerufen werden. 
+        Jeder Knoten ist eindeutig einem Zustand zugeordnet.
+        Für jeden Zustand muss genau einmal <scheduler_method class="Job_chain" method="add_job"/>
+        oder <scheduler_method class="Job_chain" method="add_end_state"/> aufgerufen werden.
     </p>
 </description>
 

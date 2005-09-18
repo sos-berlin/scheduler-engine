@@ -4,8 +4,8 @@
 <?xml-stylesheet href="api_default_language.xsl" type="text/xsl"?>
 
 
-<api.class 
-    name        = "Order_queue" 
+<api.class
+    name        = "Order_queue"
     object_name = "q"
     base_dir    = "../"
     author      = "$Author$"
@@ -19,7 +19,7 @@
             <com.type type="int"/>
         </com.result>
     </com>
-    
+
     <title>
         Anzahl der Aufträge in der Auftragswarteschlange
     </title>
@@ -36,23 +36,23 @@
             <com.type class="Order"/>
         </com.result>
     </com>
-    
+
     <title>
         Fügt einen Auftrag der Auftragswarteschlange hinzu
     </title>
-    
+
     <description>
         <p>
-            Der Aufruf gilt nur für den Fall, dass der Auftrag nicht in einer Jobkette enthalten ist. 
+            Der Aufruf gilt nur für den Fall, dass der Auftrag nicht in einer Jobkette enthalten ist.
         </p>
         <p>
             Die Priorität des Auftrags
             (<scheduler_method class="Order" property="priority"/>)
-            wird dabei berücksichtigt. 
+            wird dabei berücksichtigt.
         </p>
         <p>
-            Wenn die Auftragswarteschlange bereits einen Auftrag mit gleicher Id enthält, 
-            wird dieser ersetzt. 
+            Wenn die Auftragswarteschlange bereits einen Auftrag mit gleicher Id enthält,
+            wird dieser ersetzt.
         </p>
     </description>
 </method>
@@ -66,20 +66,20 @@
 <description>
     <p>
         Ein auftragsgesteuerter Job (<scheduler_element name="job" attribute="order" value="yes"/>
-        hat eine Auftragswarteschlange, 
-        die die vom Job zu verarbeitenden Aufträge aufnimmt. 
-        Die Aufträge sind nach Priorität und Zeitpunkt des Eintreffens geordnet. 
-    </p>        
+        hat eine Auftragswarteschlange,
+        die die vom Job zu verarbeitenden Aufträge aufnimmt.
+        Die Aufträge sind nach Priorität und Zeitpunkt des Eintreffens geordnet.
+    </p>
     <p>
         Verarbeiten bedeutet, dass der Scheduler die Methode
-        <scheduler_method class="Job_impl" method="spooler_process"/> 
-        einer Task des Jobs aufruft. 
-        Die Methode kann über 
-        <scheduler_method class="Task" property="order"/> 
-        auf den Auftrag zugreifen. 
-        Endet <code>spooler_process()</code> ohne Fehler (ohne Exception), 
-        entfernt der Scheduler den Auftrag aus der Auftragswarteschlange. 
-        Ist der Auftrag in einer Jobkette, dann rückt der Auftrag an die nächste Position der Jobkette. 
+        <scheduler_method class="Job_impl" method="spooler_process"/>
+        einer Task des Jobs aufruft.
+        Die Methode kann über
+        <scheduler_method class="Task" property="order"/>
+        auf den Auftrag zugreifen.
+        Endet <code>spooler_process()</code> ohne Fehler (ohne Exception),
+        entfernt der Scheduler den Auftrag aus der Auftragswarteschlange.
+        Ist der Auftrag in einer Jobkette, dann rückt der Auftrag an die nächste Position der Jobkette.
     </p>
 </description>
 

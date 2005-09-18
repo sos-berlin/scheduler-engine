@@ -4,8 +4,8 @@
 <?xml-stylesheet href="api_default_language.xsl" type="text/xsl"?>
 
 
-<api.class 
-    name        = "Spooler_program" 
+<api.class
+    name        = "Spooler_program"
     base_dir    = "../"
     author      = "$Author$"
     date        = "$Date$"
@@ -16,7 +16,7 @@
         <java.parameter name="Parameter">
             <java.type type="String[]"/>
         </java.parameter>
-        
+
         <java.result>
             <java.result type=""/>
         </java.result>

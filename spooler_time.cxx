@@ -90,17 +90,17 @@ void Time::set( const string& t )
 //----------------------------------------------------------------------------------------Time::set
 
 void Time::set( double t )
-{ 
-    _time = round(t); 
+{
+    _time = round(t);
 
     if( _time > latter_day_int )  _time = latter_day_int;
 
 
 #   if defined Z_DEBUG && defined Z_WINDOWS
         if( _time == 0 )  _time_as_string.clear();   // Für static empty_period sollte in gcc as_string() nicht gerufen werden! (Sonst Absturz)
-                    else  _time_as_string = _time == latter_day_int? last_day_name 
+                    else  _time_as_string = _time == latter_day_int? last_day_name
                                                                    : as_string();
-#   endif                                                           
+#   endif
 }
 
 //-------------------------------------------------------------------------------Time::set_datetime
@@ -210,7 +210,7 @@ void Period::set_dom( const xml::Element_ptr& element, const Period* deflt )
     _let_run = element.bool_getAttribute( "let_run", _let_run );
 
     string single_start = element.getAttribute( "single_start" );
-    if( !single_start.empty() ) 
+    if( !single_start.empty() )
     {
         dt.set_time( single_start );
 
@@ -285,13 +285,13 @@ bool Period::is_comming( Time time_of_day, With_single_start single_start ) cons
 //---------------------------------------------------------------------------------Period::next_try
 
 Time Period::next_try( Time t )
-{ 
+{
 /* 30.5.03
     Time result = latter_day;
 
     if( _repeat )
     {
-        result = min( Time( t + _repeat ), latter_day ); 
+        result = min( Time( t + _repeat ), latter_day );
         if( result >= end() )  result = latter_day;
     }
 */
@@ -344,7 +344,7 @@ void Day::set_default()
 
 //------------------------------------------------------------------------------------Day::has_time
 
-bool Day::has_time( Time time_of_day ) 
+bool Day::has_time( Time time_of_day )
 {
     FOR_EACH( Period_set, _period_set, it )
     {
@@ -369,9 +369,9 @@ Period Day::next_period_( Time time_of_day, With_single_start single_start ) con
 //---------------------------------------------------------------------------------------Day::print
 
 void Day::print( ostream& s ) const
-{ 
+{
     s << "Day(";
-    
+
     FOR_EACH_CONST( Period_set, _period_set, it )
     {
         s << *it << ' ';
@@ -392,12 +392,12 @@ void Day_set::print( ostream& s ) const
 
 //--------------------------------------------------------------------------------Weekday_set::next
 
-Period Weekday_set::next_period( Time tim, With_single_start single_start ) 
+Period Weekday_set::next_period( Time tim, With_single_start single_start )
 {
     Time time_of_day = tim.time_of_day();
     int  day_nr      = tim.day_nr();
     int  weekday     = ( day_nr + 4 ) % 7;
-    
+
     for( int i = weekday; i <= weekday+7; i++ )
     {
         Period period = _days[ i % 7 ].next_period( time_of_day, single_start );
@@ -431,7 +431,7 @@ Period Monthday_set::next_period( Time tim, With_single_start single_start )
 
 //--------------------------------------------------------------------------Ultimo_set::next_period
 
-Period Ultimo_set::next_period( Time tim, With_single_start single_start ) 
+Period Ultimo_set::next_period( Time tim, With_single_start single_start )
 {
     Time     time_of_day = tim.time_of_day();
     int      day_nr      = tim.day_nr();
@@ -452,7 +452,7 @@ Period Ultimo_set::next_period( Time tim, With_single_start single_start )
 //--------------------------------------------------------------------------------------Date::print
 
 void Date::print( ostream& s ) const
-{   
+{
     Sos_optional_date dt;
     dt.set_time_t( _day_nr * (24*60*60) );
 
@@ -469,7 +469,7 @@ Period Date_set::next_period( Time tim, With_single_start single_start )
     FOR_EACH( set<Date>, _date_set, it )
     {
         const Date& date = *it;
-        
+
         if( date._day_nr >= day_nr )
         {
             const Period& period = date._day.next_period( date._day_nr == day_nr? time_of_day : Time(0), single_start );
@@ -513,7 +513,7 @@ void Day_set::set_dom( const xml::Element_ptr& element, const Day* default_day, 
                 for( const char** p = weekday_names; *p && day == -1; p++ )
                     if( day_string == *p )  day = ( p - weekday_names ) % 7;
 
-                if( day == -1 ) 
+                if( day == -1 )
                 {
                     day = e.int_getAttribute( "day" );
                     if( day == 7 )  day = 0;      // Sonntag darf auch 7 sein
@@ -534,7 +534,7 @@ void Day_set::set_dom( const xml::Element_ptr& element, const Day* default_day, 
 //-------------------------------------------------------------------------------Run_time::_methods
 
 const Com_method Run_time::_methods[] =
-{ 
+{
 #ifdef COM_METHOD
     COM_PROPERTY_GET( Run_time,  1, Java_class_name, VT_BSTR    , 0 ),
     COM_PROPERTY_PUT( Run_time,  2, Xml            ,              0, VT_BSTR ),
@@ -545,11 +545,11 @@ const Com_method Run_time::_methods[] =
 //-------------------------------------------------------------------------------Run_time::Run_time
 
 Run_time::Run_time( Spooler* spooler, Application a )
-: 
+:
     Idispatch_implementation( &class_descriptor ),
-    _zero_(this+1), 
+    _zero_(this+1),
     _spooler(spooler),
-    _application(a) 
+    _application(a)
 {
     if( _application == application_order )
     {
@@ -574,8 +574,8 @@ STDMETHODIMP Run_time::QueryInterface( const IID& iid, void** result )
 //--------------------------------------------------------------------------------Run_time::put_Xml
 
 STDMETHODIMP Run_time::put_Xml( BSTR xml )
-{ 
-    Z_COM_IMPLEMENT( set_xml( string_from_bstr( xml ) ) ); 
+{
+    Z_COM_IMPLEMENT( set_xml( string_from_bstr( xml ) ) );
 }
 
 //----------------------------------------------------------------------------Run_time::operator ==
@@ -606,7 +606,7 @@ void Run_time::set_default_days()
 //--------------------------------------------------------------------------------Run_time::set_xml
 
 void Run_time::set_xml( const string& xml )
-{ 
+{
     //_xml = xml;
 
     set_dom( _spooler->_dtd.validate_xml( xml ).documentElement() );
@@ -623,13 +623,13 @@ void Run_time::set_dom( const xml::Element_ptr& element )
     Period                  default_period;
     Day                     default_day;
     bool                    period_seen = false;
-    
+
 
     _dom.create();
     _dom.appendChild( _dom.clone( element ) );
 
     _set = true;
-    
+
     _once = element.bool_getAttribute( "once", _once );
     if( _application == application_order  &&  !_once )  throw_xc( "SCHEDULER-220", "once='yes'" );
 
@@ -720,7 +720,7 @@ xml::Element_ptr Run_time::dom_element( const xml::Document_ptr& document ) cons
 xml::Document_ptr Run_time::dom_document() const
 {
     xml::Document_ptr document;
-    
+
     document.create();
     document.appendChild( dom_element( document ) );
 
@@ -740,7 +740,7 @@ Period Run_time::next_period( Time tim_par, With_single_start single_start )
 {
     Time    tim = tim_par;
     Period  next;
- 
+
     //while(1)
     while( tim < tim_par + 366*24*60*60 )
     {

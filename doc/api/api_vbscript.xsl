@@ -1,7 +1,7 @@
 <?xml version='1.0'?>
 <!-- $Id$ -->
 
-<xsl:stylesheet xmlns:xsl = "http://www.w3.org/1999/XSL/Transform" 
+<xsl:stylesheet xmlns:xsl = "http://www.w3.org/1999/XSL/Transform"
                 version   = "1.0">
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
@@ -13,23 +13,27 @@
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<xsl:template match="com.type [ /*/@programming_language='vbscript' and @type='bool' ]">
+<xsl:template match="com.type [ @type='bool' ]">
     <span class="mono">Boolean</span>
 </xsl:template>
 
-<xsl:template match="com.type [ /*/@programming_language='vbscript' and @type='int' ]">
+<xsl:template match="com.type [ @type='int' ]">
     <span class="mono" title="32bit">Integer</span>
 </xsl:template>
 
-<xsl:template match="com.type [ /*/@programming_language='vbscript' and @type='double' ]">
+<xsl:template match="com.type [ @type='double' ]">
     <span class="mono">Double</span>
 </xsl:template>
 
-<xsl:template match="com.type [ /*/@programming_language='vbscript' and @type='BSTR' ]">
+<xsl:template match="com.type [ @type='BSTR' ]">
     <span class="mono">String</span>
 </xsl:template>
 
-<xsl:template match="com.type [ /*/@programming_language='vbscript' and @type='VARIANT*' ]">
+<xsl:template match="com.type [ @type='BSTR' and @array ]">
+    <span class="mono" title="Array of strings">String[]</span>
+</xsl:template>
+
+<xsl:template match="com.type [ @type='VARIANT*' and not( com.type ) ]">
     <span class="mono">Variant</span>
 </xsl:template>
 
@@ -39,17 +43,17 @@
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<xsl:template match="api.null [ /*/@programming_language='vbscript' ]" mode="description">
+<xsl:template match="api.null" mode="description">
     <code>Nothing</code>
 </xsl:template>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<xsl:template match="api.empty [ /*/@programming_language='vbscript' ]" mode="description">
+<xsl:template match="api.empty" mode="description">
     <code>Empty</code>
 </xsl:template>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
-                
-    
+
+
 </xsl:stylesheet>

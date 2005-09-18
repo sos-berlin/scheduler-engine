@@ -4,8 +4,8 @@
 <?xml-stylesheet href="api_default_language.xsl" type="text/xsl"?>
 
 
-<api.class 
-    name        = "Variable_set" 
+<api.class
+    name        = "Variable_set"
     object_name = "v"
     base_dir    = "../"
     author      = "$Author$"
@@ -34,26 +34,23 @@
 
             <com.result name="value">
                 <com.type type="VARIANT*"/>
+
+                <description>
+                    <api.empty/>, wenn die Variable nicht vorhanden ist.
+                </description>
             </com.result>
         </com>
-        
+
         <not_implemented programming_language="java"/>
 
         <title>
             Eine Variable
         </title>
-        
-        <description>
-            <p>
-                Wenn eine nicht vorhandene Variable gelesen wird, 
-                kommt <api.empty/> zurück.
-            </p>
-        </description>
     </property>
 
     <property name="var">
         <not_implemented programming_language="javascript"/>        <!-- var ist Schlüsselwort -->
-        
+
         <com>
             <com.parameter name="name">
                 <com.type type="BSTR"/>
@@ -61,21 +58,18 @@
 
             <com.result name="value">
                 <com.type type="VARIANT*"/>
+
+                <description>
+                    <api.empty/>, wenn die Variable nicht vorhanden ist.
+                </description>
             </com.result>
         </com>
 
         <title>
             Eine Variable
         </title>
-        
-        <description>
-            <p>
-                Wenn eine nicht vorhandene Variable gelesen wird, 
-                kommt <api.empty/> zurück.
-            </p>
-        </description>
 
-        <!--        
+        <!--
         <java>
             <java.parameter name="name">
                 <java.type class="java.lang.String"/>
@@ -106,7 +100,7 @@
                 <com.type type="VARIANT*"/>
             </com.parameter>
         </com>
-        
+
         <not_implemented programming_language="java"/>
 
         <title>
@@ -137,7 +131,7 @@
 
         <title>
             Mischt eine andere Variablenmenge ein
-        </title>        
+        </title>
 
         <description>
             <p>
@@ -154,36 +148,36 @@
     <description>
         <!--
         <p>
-            Die Variablenmenge hält Variablen mit Namen und Wert. 
+            Die Variablenmenge hält Variablen mit Namen und Wert.
             Die Variablenwerte können von jedem COM-Typ sein (Java: nur Strings).
         </p>
         <p>
             Objekte sollten nicht als Variablenwert verwendet werden.
         </p>
         -->
-        
+
         <p>
-            Variablenmengen werden gebraucht für die Scheduler-weiten Variablen und Task-Parameter. 
-            Eine neue Variablenmenge wird mit 
-            <scheduler_method class="Spooler" method="create_variable_set"/> 
-            angelegt. 
+            Variablenmengen werden gebraucht für die Scheduler-weiten Variablen und Task-Parameter.
+            Eine neue Variablenmenge wird mit
+            <scheduler_method class="Spooler" method="create_variable_set"/>
+            angelegt.
         </p>
         <p>
-            Die Großschreibung der Variablennamen ist relevant. 
+            Die Großschreibung der Variablennamen ist relevant.
         </p>
         <p>
-            In COM (JavaScript, VBScript, Perl) ist ein Variablenwert ein Variant. 
-            Weil die Variablen in der Regel in die Scheduler-Datenbank geschrieben werden, 
-            sollten nur nach String konvertierbare Variant-Werte verwendet werden 
-            (d.h. es sollten keine Objekte verwendet werden). 
+            In COM (JavaScript, VBScript, Perl) ist ein Variablenwert ein Variant.
+            Weil die Variablen in der Regel in die Scheduler-Datenbank geschrieben werden,
+            sollten nur nach String konvertierbare Variant-Werte verwendet werden
+            (d.h. es sollten keine Objekte verwendet werden).
         </p>
         <p>
-            In Java ist ein Variablenwert ein String. 
-            Wenn die Variable mit COM als Variant gesetzt worden ist, 
-            wird beim Lesen der nach String konvertierte Wert zurückgegeben. 
-            <code>Null</code> und <code>Empty</code> werden als <api.null/> zurückgeliefert. 
-            Wenn ein Variant-Wert nicht konvertierbar ist, wird eine Exception ausgelöst. 
+            In Java ist ein Variablenwert ein String.
+            Wenn die Variable mit COM als Variant gesetzt worden ist,
+            wird beim Lesen der nach String konvertierte Wert zurückgegeben.
+            <code>Null</code> und <code>Empty</code> werden als <api.null/> zurückgeliefert.
+            Wenn ein Variant-Wert nicht konvertierbar ist, wird eine Exception ausgelöst.
         </p>
     </description>
-    
+
 </api.class>

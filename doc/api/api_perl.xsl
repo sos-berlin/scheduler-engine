@@ -1,7 +1,7 @@
 <?xml version='1.0'?>
 <!-- $Id$ -->
 
-<xsl:stylesheet xmlns:xsl = "http://www.w3.org/1999/XSL/Transform" 
+<xsl:stylesheet xmlns:xsl = "http://www.w3.org/1999/XSL/Transform"
                 version   = "1.0">
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
@@ -23,30 +23,30 @@
         <span class="api_object_name">
             $<xsl:value-of select="parent::api.class/@object_name"/>
             <xsl:text>-></xsl:text>
-        </span>        
-    </xsl:if>    
-    
+        </span>
+    </xsl:if>
+
     <span class="mono">
         <xsl:choose>
             <xsl:when test="$access='write'">
-                <xsl:text>LetProperty(</xsl:text> 
+                <xsl:text>LetProperty(</xsl:text>
                 '<span style="font-weight: bold">
                     <xsl:value-of select="@name"/>
                 </span>',
             </xsl:when>
-            
+
             <xsl:when test="$access='read'">
                 <span style="font-weight: bold">
                     <xsl:value-of select="@name"/>
                 </span>
                 <xsl:if test="com/com.parameter">(</xsl:if>
             </xsl:when>
-            
+
             <xsl:otherwise>
                 <span style="font-weight: bold">
                     <xsl:value-of select="@name"/>
                 </span>
-                <xsl:text>(</xsl:text> 
+                <xsl:text>(</xsl:text>
             </xsl:otherwise>
         </xsl:choose>
     </span>
@@ -54,9 +54,8 @@
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<!--xsl:template match="com.type [ /*/@programming_language='perl' and @type='bool' ]"-->
 <xsl:template match="com.type [ @type='bool' ]">
-    <span class="mono">boolean</span>
+    <span class="mono">Boolean</span>
 </xsl:template>
 
 <!--xsl:template match="com.type [ @class and /*/@programming_language='java' ]">
@@ -64,6 +63,18 @@
 </xsl:template-->
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
-                
-    
+
+<xsl:template match="api.empty" mode="description">
+    <code>undefined</code>
+</xsl:template>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<xsl:template match="api.null" mode="description">
+    <code>undefined</code>
+</xsl:template>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+
 </xsl:stylesheet>

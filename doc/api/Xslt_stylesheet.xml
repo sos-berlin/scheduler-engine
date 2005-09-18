@@ -4,8 +4,8 @@
 <?xml-stylesheet href="api_default_language.xsl" type="text/xsl"?>
 
 
-<api.class 
-    name        = "Xslt_stylesheet" 
+<api.class
+    name        = "Xslt_stylesheet"
     object_name = "x"
     base_dir    = "../"
     author      = "$Author$"
@@ -16,7 +16,7 @@
         <title>
             Gibt die Ressourcen des Stylesheets frei
         </title>
-        
+
         <com>
         </com>
     </method>
@@ -31,7 +31,7 @@
             <com.parameter name="xml">
                 <com.type type="BSTR"/>
                 <title>
-                    XML-Dokument als String. 
+                    XML-Dokument als String.
                     Jedes Zeichen des Strings wird als ein Byte interpretiert.
                     Der String sollte beginnen mit <code>&lt;?xml encoding="iso-8859-1"?></code>.
                 </title>
@@ -65,7 +65,7 @@
 
         <java>
             <java.parameter name="path">
-                <java.type type="java.lang.String"/>
+                <com.type type="BSTR"/>
                 <title>
                     Pfadname der Datei mit dem XML-Dokument.
                 </title>
@@ -83,16 +83,16 @@
             <com.parameter name="xml">
                 <com.type type="BSTR"/>
                 <title>
-                    XML-Dokument als String. 
+                    XML-Dokument als String.
                     Jedes Zeichen des Strings wird als ein Byte interpretiert.
                     Der String sollte beginnen mit <code>&lt;?xml encoding="iso-8859-1"?></code>.
                 </title>
             </com.parameter>
-            
+
             <com.result>
                 <com.type type="BSTR"/>
                 <title>
-                    Ergebnis der Transformation als XML-String 
+                    Ergebnis der Transformation als XML-String
                     (der String sollte in ISO-8859-1 codiert sein).
                 </title>
             </com.result>
@@ -107,10 +107,10 @@
             Die Variablenwerte können von jedem COM-Typ sein (Java: nur Strings).
         </p>
         <p>
-            Der XSLT-Prozessor ist mit <a href="http://xmlsoft.org/XSLT/">libxslt</a> 
+            Der XSLT-Prozessor ist mit <a href="http://xmlsoft.org/XSLT/">libxslt</a>
             <!--(1.1.14 vom 2.5.2005)-->
             implementiert.
         </p>
     </description>
-    
+
 </api.class>
