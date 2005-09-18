@@ -139,7 +139,7 @@
                 </xsl:if>
 
                 <xsl:choose>
-                    <xsl:when test="@class != 'introduction'">
+                    <xsl:when test="@class != 'api'">
                         <xsl:value-of select="@class"/>
                     </xsl:when>
                     <xsl:otherwise>
@@ -195,7 +195,7 @@
                 <tr>
                     <td style="vertical-align: top; padding-right: 3ex; padding-bottom: 4pt;">
                         <xsl:call-template name="all_classes">   <!-- Übersicht -->
-                            <xsl:with-param name="class_references"  select="document( 'all_classes.xml' )/class_references/class_reference [ @class='introduction' ]"/>
+                            <xsl:with-param name="class_references"  select="document( 'all_classes.xml' )/class_references/class_reference [ @class='api' ]"/>
                             <xsl:with-param name="active_class"      select="/api.class/@name"/>
                         </xsl:call-template>
                     </td>
@@ -234,7 +234,7 @@
                     <td style="vertical-align: top; padding-right: 3ex; width: 20pt;">
                         <!--p style="font-weight: bold; padding-bottom: 1em">Klassen:</p-->
                         <xsl:call-template name="all_classes">
-                            <xsl:with-param name="class_references"  select="document( 'all_classes.xml' )/class_references/class_reference [ @class != 'introduction' ]"/>
+                            <xsl:with-param name="class_references"  select="document( 'all_classes.xml' )/class_references/class_reference [ @class != 'api' ]"/>
                             <xsl:with-param name="active_class"      select="/api.class/@name"/>
                         </xsl:call-template>
                     </td>
@@ -312,7 +312,7 @@
 
 <xsl:template match="api.class" mode="headline">
 
-    <xsl:if test="@name != 'introduction'">
+    <xsl:if test="@name != 'api'">
         <p class="api_headline">
             <xsl:value-of select="@name"/>
 

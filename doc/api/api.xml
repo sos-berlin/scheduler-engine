@@ -5,7 +5,7 @@
 
 
 <api.class
-    name        = "introduction"
+    name        = "api"
     base_dir    = "../"
     author      = "$Author$"
     date        = "$Date$"

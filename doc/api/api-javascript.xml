@@ -5,6 +5,10 @@
 
 
 <api.class
-    name                 = "introduction"
+    name                 = "api"
     base_dir             = "../"
-/>
+>
+
+Sorry, you need a browser which can process XML files with XSLT stylesheets.
+
+</api.class>
