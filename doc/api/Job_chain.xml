@@ -69,6 +69,10 @@ job_chain.name = "Jobkette";</pre>
             <com.type type="VARIANT*"/>
         </com.parameter>
     </com>
+    
+    <title>
+        Erweitert die Jobkette um einen Job
+    </title>
 </method>
 
 
@@ -121,7 +125,8 @@ job_chain.name = "Jobkette";</pre>
             dem Scheduler übergeben worden sein.
         </p>
         <p>
-            Wenn die Jobkette bereits einen Auftrag mit gleicher Id enthält,
+            Wenn die Jobkette bereits einen Auftrag mit gleicher <scheduler_method class="Order" property="id"/>
+            enthält,
             wird eine Exception mit Fehlercode <code>SCHEDULER-186</code> geliefert.
         </p>
     </description>
@@ -174,7 +179,7 @@ job_chain.name = "Jobkette";</pre>
     </com>
 
     <title>
-        Gibt einen Auftrag in die Jobkette und ersetzt ggfs einen mit gleicher Kennung
+        Gibt einen Auftrag in die Jobkette und ersetzt ggfs. einen mit gleicher Kennung
     </title>
 
     <description>

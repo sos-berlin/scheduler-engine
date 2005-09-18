@@ -166,6 +166,16 @@
             <com.type type="BSTR"/>
         </com.result>
     </com>
+        
+    <title>
+        Freier Text für den Zustand des Auftrags
+    </title>
+    
+    <description>
+        <p>
+            Der Text wird auf der HTML-Oberfläche gezeigt.
+        </p>
+    </description>
 </property>
 
 
@@ -232,6 +242,16 @@
 
 <method name="setback">
     <com/>
+    
+    <title>
+        Stellt den Auftrag eine Zeit lang zurück
+    </title>
+    
+    <description>
+        <p>
+            Siehe <scheduler_method class="Job" property="delay_order_after_setback"/>
+        </p>
+    </description>
 </method>
 
 

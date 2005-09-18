@@ -15,7 +15,7 @@
     </change>
 
     <change date="2005-09-07" version="2.0.138" subversion_revision="3866">
-        <revision type="correction" title="spooler_log.debug1() bis spooler_log.debug9() im Startskript werden nicht mehr unterdrückt"/>
+        <revision type="correction" title="spooler_log.debug1() bis spooler_log.debug9() im Scheduler-Skript werden nicht mehr unterdrückt"/>
         <revision type="modification" title="Datenbanktabellen werden mit varchar statt char angelegt"/>
     </change>
 

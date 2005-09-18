@@ -186,6 +186,10 @@
             <com.type type="BSTR"/>
         </com.result>
     </com>
+    
+    <title>
+        Hostware-Pfad der Datenbank
+    </title>
 </property>
 
 
@@ -200,7 +204,7 @@
         <p>
             Liefert eine neue <scheduler_method class="Job_chain"/>.
             Diese Jobkette kann, nachdem sie mit Jobs gefüllt worden ist,
-            mit <scheduler_method class="Spooler" name="add_job_chain"/>
+            mit <scheduler_method class="Spooler" method="add_job_chain"/>
             dem Scheduler hinzugefügt werden
         </p>
     </description>
@@ -397,12 +401,12 @@
     </com>
 
     <title>
-         Name der Datenbanktabelle für die Auftragshistorie
+         Name der Datenbanktabelle für die Historie
     </title>
 </property>
 
 
-<property name="Db_order_history_table_name" access="read">
+<property name="db_order_history_table_name" access="read">
     <com>
         <com.result>
             <com.type type="BSTR"/>
@@ -410,7 +414,7 @@
     </com>
 
     <title>
-         Name der Datenbanktabelle für die Historie
+         Name der Datenbanktabelle für die Auftragshistorie
     </title>
 </property>
 

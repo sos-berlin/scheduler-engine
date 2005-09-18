@@ -779,7 +779,9 @@
 
     <xsl:apply-templates select="  method   [ com and not( not_implemented/@programming_language=$programming_language ) ]
                                  | property [ com and not( not_implemented/@programming_language=$programming_language ) ]" 
-                         mode="detailed_methods"/>
+                         mode="detailed_methods">
+        <xsl:sort select="@name"/>                         
+    </xsl:apply-templates>
 
 </xsl:template>
 

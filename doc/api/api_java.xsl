@@ -61,9 +61,9 @@
     <span class="mono">boolean</span>
 </xsl:template>
 
-<!--xsl:template match="com.type [ @type='BSTR' ]">
+<xsl:template match="com.type [ @type='BSTR' ]">
     <span class="mono" title="java.lang.String">String</span>
-</xsl:template-->
+</xsl:template>
 
 <xsl:template match="com.type [ @type='VARIANT*' and not( com.type ) ]">
     <span class="mono" title="java.lang.String">String</span>

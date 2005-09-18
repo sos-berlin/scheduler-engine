@@ -14,9 +14,9 @@
     <xml_parent_elements>
         <xml_parent_element name="config">
             <description>
-                <scheduler_keyword keyword="Startskript"/>
+                <scheduler_keyword keyword="Scheduler-Skript"/>
                 <p>
-                    Das Skript ist das Startskript.
+                    Das Skript ist das Scheduler-Skript.
                     Dem Skript stehen die Variablen <code>spooler</code> und <code>spooler_log</code> zur Verfügung.
                 </p>
                 <p>
