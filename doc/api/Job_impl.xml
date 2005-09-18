@@ -11,7 +11,7 @@
     date        = "$Date$"
 >
 
-<property name="spooler" access="read">
+<property name="spooler" is_variable="true" access="read">
     <com>
         <com.result>
             <com.type class="Spooler"/>
@@ -20,7 +20,7 @@
 </property>
 
 
-<property name="spooler_log" access="read">
+<property name="spooler_log" is_variable="true" access="read">
     <com>
         <com.result>
             <com.type class="Log"/>
@@ -29,7 +29,7 @@
 </property>
 
 
-<property name="spooler_job" access="read">
+<property name="spooler_job" is_variable="true" access="read">
     <com>
         <com.result>
             <com.type class="Job"/>
@@ -38,7 +38,7 @@
 </property>
 
 
-<property name="spooler_task" access="read">
+<property name="spooler_task" is_variable="true" access="read">
     <com>
         <com.result>
             <com.type class="Task"/>

@@ -75,7 +75,7 @@ tr.api_method_clickable:active  { background-color: #0000A0; }
 tr.api_method_clickable:visited { background-color: #0000A0 }
 tr.api_method_clickable:hover   { background-color: #e0e0FF; cursor: pointer; }
 tr.api_method_clickable_hover   { background-color: #e0e0FF; cursor: pointer; }
-tr.api_method_clickable         { background-color: #f6f6FF; }
+tr.api_method_clickable         { background-color: #f6f6FF; cursor: pointer; }
 tr.api_method                   { background-color: #f6f6FF; }
 .api_object_name                { font-size: 9pt; font-family: Lucida Console, monospace; color: gray; }
 /*

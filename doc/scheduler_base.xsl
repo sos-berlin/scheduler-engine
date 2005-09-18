@@ -968,7 +968,6 @@
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~description-->
 
     <xsl:template match="description">
-        <!--<xsl:copy-of select="* | text()"/>-->
         <xsl:apply-templates select="node()" mode="description"/>
     </xsl:template>    
     
@@ -1230,7 +1229,7 @@
             <!--xsl:attribute name="href"><xsl:value-of select="$base_dir"/>javadoc/sos/spooler/<xsl:value-of select="@class"/>.html#<xsl:value-of select="$java_method"/>(<xsl:value-of select="$java_signature"/>)</xsl:attribute-->
             
             <code>
-                <xsl:if test="@class != 'Job_impl'">
+                <xsl:if test="@class != 'Job_impl' or not( @method or @property )">
                     <xsl:value-of select="@class"/>
                 </xsl:if>
                 

@@ -69,17 +69,6 @@
 </property>
 
 
-<!--
-<property name="script" access="read">
-    <com>
-        <com.result>
-            <com.type class="IDispatch"/>
-        </com.result>
-    </com>
-</property>
--->
-
-
 <property name="job" access="read">
     <com>
         <com.parameter name="job_name">
@@ -324,7 +313,6 @@
     </titel>
 </property>
 
-
 <method name="abort_immediately">
     <com/>
 
@@ -338,13 +326,12 @@
             Kein Job hat Gelegenheit, darauf zu reagieren.
         </p>
         <p>
-            Der Scheduler bricht zuvor alle gestarteten Prozesse ab.
-            Das sind die Tasks und die Prozesse von <scheduler_method class="Task" method="create_subprocess"/>
-            und <scheduler_method class="Task" method="add_pid"/>.
+            Der Scheduler bricht zuvor alle gestarteten Prozesse ab.
+            Das sind die Tasks und die Prozesse von <scheduler_method class="Task" method="create_subprocess"/>
+            und <scheduler_method class="Task" method="add_pid"/>.
         </p>
     </description>
 </method>
-
 
 <method name="abort_immediately_and_restart">
     <com/>
@@ -355,9 +342,9 @@
 
     <description>
         <p>
-            Wie <scheduler_method class="Spooler" method="abort_immediately"/>,
-            nur dass der Scheduler sich erneut startet.
-            Dabei verwendet er die Kommandozeilenparametern wieder.
+            Wie <scheduler_method class="Spooler" method="abort_immediately"/>,
+            nur dass der Scheduler sich erneut startet.
+            Dabei verwendet er die Kommandozeilenparametern wieder.
         </p>
     </description>
 </method>
@@ -529,7 +516,7 @@
 
     <java>
         <java.result>
-            <java.type type="Xslt_stylesheet"/>
+            <com.type class="Xslt_stylesheet"/>
         </java.result>
     </java>
 
@@ -539,7 +526,7 @@
         </java.parameter>
 
         <java.result>
-            <java.type type="Xslt_stylesheet"/>
+            <com.type class="Xslt_stylesheet"/>
         </java.result>
     </java>
 
@@ -549,7 +536,7 @@
         </java.parameter>
 
         <java.result>
-            <java.type type="Xslt_stylesheet"/>
+            <com.type class="Xslt_stylesheet"/>
         </java.result>
     </java>
 </method>
@@ -560,6 +547,5 @@
         Von dieser Klasse gibt es nur ein Objekt, <scheduler_method class="Job_impl" property="spooler"/>.
     </p>
 </description>
-
 
 </api.class>

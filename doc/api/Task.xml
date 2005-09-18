@@ -618,13 +618,11 @@ $spooler_log->info( 'order.id=' . $order->id . ', order.title=' . $order->title 
         </p>
     </description>
 
-    <java>
-        <description>
-            <p>
-                Implementiert wird eine Task mit <scheduler_method class="Job_impl"/>.
-            </p>
-        </description>
-    </java>
+    <description programming_language="java">
+        <p>
+            Implementiert wird eine Task mit <scheduler_method class="Job_impl"/>.
+        </p>
+    </description>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 

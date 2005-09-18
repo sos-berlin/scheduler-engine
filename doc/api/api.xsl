@@ -126,9 +126,9 @@
             <xsl:value-of select="/*/@base_dir"/>api/<xsl:value-of select="@class"/>-<xsl:value-of select="$programming_language"/>.xml
         </xsl:variable>
 
-        <p style="margin-top: 0px; margin-bottom: 0px; padding-top: 0px; padding-bottom: 0px">
+        <p style="margin-top: 0px;">
             <xsl:element name="a">
-                <xsl:attribute name="id">class_reference_<xsl:value-of select="$class"/></xsl:attribute>
+                <!--xsl:attribute name="id">class_reference_<xsl:value-of select="$class"/></xsl:attribute-->
                 <!--xsl:attribute name="href">javascript:void(0)</xsl:attribute>  <!- - Für ie6 -->
                 <!--xsl:attribute name="onclick">api.class_reference__onclick( "<xsl:value-of select="$class"/>" );</xsl:attribute>-->
 
@@ -240,23 +240,9 @@
                     </td>
 
                     <td style="padding-left: 3ex; border-left: 1px dotted black;">
-                        <div id="class_headline">
-                            <xsl:if test="$fixed_programming_language or true()">
-                                <xsl:apply-templates select="." mode="headline"/>
-                            </xsl:if>
-                        </div>
-
-                        <div id="class">
-                            <xsl:if test="$fixed_programming_language and not( @introduction ) or true()">
-                                <xsl:apply-templates select="." mode="table"/>
-                            </xsl:if>
-                        </div>
-
-                        <div id="methods">
-                            <xsl:if test="$fixed_programming_language and not( @introduction ) or true()">
-                                <xsl:apply-templates select="." mode="detailed_methods"/>
-                            </xsl:if>
-                        </div>
+                        <xsl:apply-templates select="." mode="headline"/>
+                        <xsl:apply-templates select="." mode="table"/>
+                        <xsl:apply-templates select="." mode="detailed_methods"/>
                     </td>
                 </tr>
             </table>
@@ -338,18 +324,16 @@
 
     <xsl:apply-templates select="." mode="example"/>
 
-    <xsl:if test="description or ( $programming_language='java' and java/description )">
+    <xsl:if test="description [ not ( @programming_language ) ]">
         <p style="margin-top: 0em">&#160;</p>
-        <xsl:apply-templates select="description"/>
-
-        <xsl:if test="$programming_language='java'">
-            <p style="padding-top: 0em">&#160;</p>
-            <xsl:apply-templates select="java/description"/>
-        </xsl:if>
-
-        <p style="padding-top: 0em; border-top: 1px solid #f0f0f0;">&#160;</p>
+        <xsl:apply-templates select="description [ not ( @programming_language ) ]"/>
     </xsl:if>
-
+    
+    <xsl:if test="description [ @programming_language = $programming_language ]">
+        <p style="margin-top: 0em">&#160;</p>
+        <xsl:apply-templates select="description [ @programming_language = $programming_language ]"/>
+    </xsl:if>
+    
     <p style="margin-top: 0em">&#160;</p>
 </xsl:template>
 
@@ -521,16 +505,8 @@
                 <xsl:attribute name="class">api_method_clickable</xsl:attribute>
                 <xsl:attribute name="id"><xsl:value-of select="$tr_id"/></xsl:attribute>
                 <xsl:attribute name="onclick">window.location = "#method__<xsl:value-of select="parent::*/@name"/>";</xsl:attribute>
-                <xsl:attribute name="style">cursor: hand;</xsl:attribute>
-
-                <xsl:attribute name="onmouseover">
-                    api_method_in_table__onmouseover( "<xsl:value-of select="$method_tr_id"/>" )
-                </xsl:attribute>
-
-                <xsl:attribute name="onmouseout" >
-                    api_method_in_table__onmouseout( "<xsl:value-of select="$method_tr_id"/>" )
-                </xsl:attribute>
-
+                <xsl:attribute name="onmouseover">api_method_in_table__onmouseover( "<xsl:value-of select="$method_tr_id"/>" )</xsl:attribute>
+                <xsl:attribute name="onmouseout" >api_method_in_table__onmouseout ( "<xsl:value-of select="$method_tr_id"/>" )</xsl:attribute>
             </xsl:when>
 
             <xsl:otherwise>
@@ -574,7 +550,7 @@
             </xsl:element>
 
 
-            <xsl:if test="com.parameter or parent::method or not( $language_has_properties )">
+            <xsl:if test="com.parameter or parent::method or not( $language_has_properties or parent::property/@is_variable )">
                 <xsl:choose>
                     <xsl:when test="$access='write' and not( $language_has_properties )">
                         <xsl:apply-templates select="." mode="parameter_list">
