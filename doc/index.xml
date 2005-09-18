@@ -28,6 +28,11 @@
     date                = "$Date$"
 >
 
+<scheduler_ignore>
+    <p style="font-size: 20pt"><b>Sorry, you need a browser which can process XML files with XSLT stylesheet. </b></p>
+    <p>&#160;</p>
+</scheduler_ignore>
+
 <description.style type="text/css">
     h2 { text-align: center; }
     dt { margin-top: 4ex; font-weight: bold; }
@@ -136,10 +141,10 @@
     <dd>
         Die Dokumentation der Klassen und Methoden, auf die ein Job Zugriff hat.
         Für 
-        <a style="font-weight: bold" href="api/introduction-java.xml">Java</a>,
-        <a style="font-weight: bold" href="api/introduction-javascript.xml">JavaScript</a>,
-        <a style="font-weight: bold" href="api/introduction-vbscript.xml">VBScript</a> und
-        <a style="font-weight: bold" href="api/introduction-perl.xml">Perl</a>
+        <a style="font-weight: bold" href="api/api-java.xml">Java</a>,
+        <a style="font-weight: bold" href="api/api-javascript.xml">JavaScript</a>,
+        <a style="font-weight: bold" href="api/api-vbscript.xml">VBScript</a> und
+        <a style="font-weight: bold" href="api/api-perl.xml">Perl</a>
         
         (<a href="javadoc/index.html">und hier die bisherige Javadoc</a>).
     </dd>

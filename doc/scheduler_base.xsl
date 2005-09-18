@@ -1018,6 +1018,13 @@
         -->
     </xsl:template>
 
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_comment-->
+    <!-- Falls der Browser kein XML/XSLT kann -->
+    
+    <xsl:template match="scheduler_ignore" mode="description">
+        <!-- Der Text wird von einem Browser, der nicht XSLT kann, anzeigt -->
+    </xsl:template>
+
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_element-->
 
     <xsl:template match="scheduler_element" mode="description">
