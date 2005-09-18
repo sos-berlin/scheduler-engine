@@ -17,7 +17,7 @@ div             { font-size: 10pt; }
 li              { font-size: 10pt }
 ul              { margin-left: 13pt }
 .example        { background-color: #ffffe0; }
-pre             { background-color: #ffffe0; font-family: Lucida Console, monospace; font-size: 9pt; 
+pre             { background-color: #ffffe0; font-family: "Lucida Console", monospace; font-size: 9pt; 
                   padding-left: 0ex; margin-top: 1em; margin-bottom: 1em; line-height: 1.2em; }
 col             { padding-bottom: 1pt; padding-right: 2pt }
 caption         { font-size: 10pt; padding-bottom: 5pt; padding-left: 3pt; padding-right: 2pt; padding-top: 2pt }
@@ -26,16 +26,16 @@ dt              { margin-top: 2ex; }
 dd              { margin-left: 4ex }
 
 p.first         { margin-top: 0ex; }
-p.mono          { font-family: Lucida Console, monospace; font-size: 9pt; margin-left: 4ex }
-.mono           { font-family: Lucida Console, monospace; font-size: 9pt; }
-code            { font-family: Lucida Console, monospace; font-size: 9pt; }
-.code           { font-family: Lucida Console, monospace; font-size: 9pt; }
+p.mono          { font-family: "Lucida Console", monospace; font-size: 9pt; margin-left: 4ex }
+.mono           { font-family: "Lucida Console", monospace; font-size: 9pt; }
+code            { font-family: "Lucida Console", monospace; font-size: 9pt; }
+.code           { font-family: "Lucida Console", monospace; font-size: 9pt; }
 .comment        { background-color: #FFFF00 }
 
 a.silent        { text-decoration: none; color: #0000A0 }
 a               { text-decoration: none; color: #0000A0 }
 
-a:link          { color: #0000A0; cursor: hand; }
+a:link          { color: #0000A0; cursor: pointer; }
 a:active        { color: #0000A0 }
 a:visited       { color: #0000A0 }
 a:hover         { background-color: #e0e0FF }
@@ -77,7 +77,7 @@ tr.api_method_clickable:hover   { background-color: #e0e0FF; cursor: pointer; }
 tr.api_method_clickable_hover   { background-color: #e0e0FF; cursor: pointer; }
 tr.api_method_clickable         { background-color: #f6f6FF; cursor: pointer; }
 tr.api_method                   { background-color: #f6f6FF; }
-.api_object_name                { font-size: 9pt; font-family: Lucida Console, monospace; color: gray; }
+.api_object_name                { font-size: 9pt; font-family: "Lucida Console", monospace; color: gray; }
 /*
 tr.api_method_clickable:active  { color: #0000A0; }
 tr.api_method_clickable:visited { color: #0000A0 }
