@@ -92,6 +92,18 @@
                 </dl>
             </description>
         </xml_attribute>
+
+        <xml_attribute name="timeout" type="int">
+            <description>
+                <p>
+                    Für <code>cmd="terminate"</code> und <code>cmd="terminate_and_restart"</code>: 
+                    Die Frist, nach der der Scheduler nicht beendete Prozesse abbrechen soll.
+                </p>
+                <p> 
+                    Siehe <scheduler_method class="Spooler" method="terminate"/>.
+                </p>
+            </description>
+        </xml_attribute>
         
     </xml_attributes>
 
