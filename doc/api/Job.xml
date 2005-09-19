@@ -161,8 +161,8 @@ spooler_job.start_when_directory_changed( "c:/tmp", "^.*[^~]$" );</pre>
             </table>
 
             <p>
-                Siehe <scheduler_method class="spooler" method="create_variable_set"/>,
-                <scheduler_method class="spooler" property="job"/>,
+                Siehe <scheduler_method class="Spooler" method="create_variable_set"/>,
+                <scheduler_method class="Spooler" property="job"/>,
                 <scheduler_method class="Variable_set" property="var"/>.
             </p>
         </description>

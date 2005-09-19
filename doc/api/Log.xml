@@ -368,11 +368,11 @@
         <p>
             Bei <code>true</code> wird das Protokoll bei Task-Ende 
             verschickt unabhängig von den Einstellungen
-            <scheduler_method clsas="Log" property="mail_on_error"/>,
-            <scheduler_method clsas="Log" property="mail_on_warning"/>,
-            <scheduler_method clsas="Log" property="mail_on_success"/>,
-            <scheduler_method clsas="Log" property="mail_on_process"/> und
-            <scheduler_method clsas="Log" property="mail_on_error"/>.
+            <scheduler_method class="Log" property="mail_on_error"/>,
+            <scheduler_method class="Log" property="mail_on_warning"/>,
+            <scheduler_method class="Log" property="mail_on_success"/>,
+            <scheduler_method class="Log" property="mail_on_process"/> und
+            <scheduler_method class="Log" property="mail_on_error"/>.
         </p>
     </description>
 </property>

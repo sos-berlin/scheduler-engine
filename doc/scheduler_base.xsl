@@ -737,32 +737,32 @@
     <xsl:template name="complete_register">
 
         <p>
-            <a href="#letter__a">A&#160;</a>
-            <a href="#letter__b">B&#160;</a>
-            <a href="#letter__c">C&#160;</a>
-            <a href="#letter__d">D&#160;</a>
-            <a href="#letter__e">E&#160;</a>
-            <a href="#letter__f">F&#160;</a>
-            <a href="#letter__g">G&#160;</a>
-            <a href="#letter__h">H&#160;</a>
-            <a href="#letter__i">I&#160;</a>
-            <a href="#letter__j">J&#160;</a>
-            <a href="#letter__k">K&#160;</a>
-            <a href="#letter__l">L&#160;</a>
-            <a href="#letter__m">M&#160;</a>
-            <a href="#letter__n">N&#160;</a>
-            <a href="#letter__o">O&#160;</a>
-            <a href="#letter__p">P&#160;</a>
-            <a href="#letter__q">Q&#160;</a>
-            <a href="#letter__r">R&#160;</a>
-            <a href="#letter__s">S&#160;</a>
-            <a href="#letter__t">T&#160;</a>
-            <a href="#letter__u">U&#160;</a>
-            <a href="#letter__v">V&#160;</a>
-            <a href="#letter__w">W&#160;</a>
-            <a href="#letter__x">X&#160;</a>
-            <a href="#letter__y">Y&#160;</a>
-            <a href="#letter__z">Z&#160;</a>
+            <a href="#letter__A">A&#160;</a>
+            <a href="#letter__B">B&#160;</a>
+            <a href="#letter__C">C&#160;</a>
+            <a href="#letter__D">D&#160;</a>
+            <a href="#letter__E">E&#160;</a>
+            <a href="#letter__F">F&#160;</a>
+            <a href="#letter__G">G&#160;</a>
+            <a href="#letter__H">H&#160;</a>
+            <a href="#letter__I">I&#160;</a>
+            <a href="#letter__J">J&#160;</a>
+            <a href="#letter__K">K&#160;</a>
+            <a href="#letter__L">L&#160;</a>
+            <a href="#letter__M">M&#160;</a>
+            <a href="#letter__N">N&#160;</a>
+            <a href="#letter__O">O&#160;</a>
+            <a href="#letter__P">P&#160;</a>
+            <a href="#letter__Q">Q&#160;</a>
+            <a href="#letter__R">R&#160;</a>
+            <a href="#letter__S">S&#160;</a>
+            <a href="#letter__T">T&#160;</a>
+            <a href="#letter__U">U&#160;</a>
+            <a href="#letter__V">V&#160;</a>
+            <a href="#letter__W">W&#160;</a>
+            <a href="#letter__X">X&#160;</a>
+            <a href="#letter__Y">Y&#160;</a>
+            <a href="#letter__Z">Z&#160;</a>
         </p>
 
         <p>&#160;</p>

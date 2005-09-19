@@ -96,7 +96,7 @@
                         <td>
                             Wie <code>ending</code>, zuvor wird aber auf das Ende der Subprozessen gewartet.
                             <br/>
-                            (Siehe <scheduler_method class="Task" method="start_subprocess" java_signature="java.lang.String"/>.)
+                            (Siehe <scheduler_method class="Task" method="create_subprocess" java_signature="java.lang.String"/>.)
                         </td>
                     </tr>
                     <tr>
@@ -211,7 +211,7 @@
                     <tr>
                         <td><code>cause="period_once"</code></td>
                         <td>
-                            Wegen <scheduler_element name="period" attribute="once" value="yes"/>.
+                            Wegen <scheduler_element name="run_time" attribute="once" value="yes"/>.
                         </td>
                     </tr>
                     <tr>
@@ -271,7 +271,7 @@
         <xml_attribute name="steps" type="zahl">
             <description>
                 <p>
-                    Anzahl abgeschlossener Jobschritte, also Aufrufe von <scheduler_method class="Job" method="spooler_process"/>.
+                    Anzahl abgeschlossener Jobschritte, also Aufrufe von <scheduler_method class="Job_impl" method="spooler_process"/>.
                 </p>
             </description>
         </xml_attribute>

@@ -199,7 +199,7 @@ job_chain.name = "Jobkette";</pre>
         </p>
         <p>
             Siehe <scheduler_method class="Job_chain" method="add_order"/> und
-            <scheduler_method class="Job_chain" method="remove_from_job_chain"/>
+            <scheduler_method class="Order" method="remove_from_job_chain"/>
         </p>
     </description>
 </method>

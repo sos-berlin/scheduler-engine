@@ -567,6 +567,10 @@
             Fehler werden als XML-Antwort <scheduler_element name="ERROR" directory="xml/answer/"/> geliefert.
         </p>
     </description>
+    
+    <example programming_language="javascript">
+    <pre>spooler_log.info( spooler.execute_xml( "&lt;show_state/>" ) );</pre>
+    </example>
 </method>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
