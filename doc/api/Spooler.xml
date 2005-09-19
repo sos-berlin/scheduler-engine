@@ -12,6 +12,8 @@
     date        = "$Date$"
 >
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
 <property name="log" access="read">
     <com>
         <com.result>
@@ -30,6 +32,7 @@
     </description>
 </property>
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <property name="id" access="read">
     <com>
@@ -49,6 +52,7 @@
     </description>
 </property>
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <property name="param" access="read">
     <com>
@@ -68,6 +72,7 @@
     </description>
 </property>
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <property name="job" access="read">
     <com>
@@ -81,6 +86,7 @@
     </com>
 </property>
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <method name="create_variable_set">
     <com>
@@ -90,6 +96,7 @@
     </com>
 </method>
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <property name="include_path" access="read">
     <com>
@@ -109,6 +116,7 @@
     </description>
 </property>
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <property name="log_dir" access="read">
     <com>
@@ -124,6 +132,7 @@
     </description>
 </property>
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <method name="let_run_terminate_and_restart">
     <com/>
@@ -139,6 +148,75 @@
     </description>
 </method>
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<method name="terminate">
+    <title>
+        Scheduler mit allen Tasks ordentlich beenden
+    </title>
+    
+    <com>
+        <com.parameter name="timeout" optional="true">
+            <com.type type="int"/>
+            
+            <description>
+                Frist in Sekunden, die der Scheduler auf die Beendigung der Tasks wartet
+                und nach der der Scheduler alle Prozesse abbricht, um sich schließlich selbst zu beenden.
+                Ohne diesen Parameter wartet der Scheduler endlos auf die Tasks.
+            </description>
+        </com.parameter>
+    </com>
+
+    <description>
+        <p>
+            Beendet alle Tasks 
+            (kein weiterer <scheduler_method class="Job_impl" method="spooler_process"/>,
+            stattdessen <scheduler_method class="Job_impl" method="spooler_close"/>)
+            und schließlich sich selbst.           
+        </p>
+        <p>
+            Wenn eine Frist angegeben ist, bricht der Scheduler nach Ablauf alle Prozesse ab.
+            Damit kann der Scheduler beendet werden, auch wenn eine Task zu lange in einem Aufruf 
+            (<scheduler_method class="Job_impl" method="spooler_process"/> verharrt.
+        </p>
+        <p>
+            Siehe <scheduler_element name="modify_spooler" attribute="cmd" value="terminate"/>.
+        </p>
+    </description>
+</method>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<method name="terminate_and_restart">
+    <title>
+        Scheduler mit allen Tasks ordentlich beenden und dann erneut starten
+    </title>
+    
+    <com>
+        <com.parameter name="timeout" optional="true">
+            <com.type type="int"/>
+            
+            <description>
+                Frist in Sekunden, die der Scheduler auf die Beendigung der Tasks wartet
+                und nach der der Scheduler alle Prozesse abbricht, um sich schließlich selbst zu beenden.
+                Ohne diesen Parameter wartet der Scheduler endlos auf die Tasks.
+            </description>
+        </com.parameter>
+    </com>
+
+
+    <description>
+        <p>
+            Wie <scheduler_method class="Spooler" method="terminate"/>,
+            aber der Scheduler startet sich neu.
+        </p>
+        <p>
+            Siehe <scheduler_element name="modify_spooler" attribute="cmd" value="terminate_and_restart"/>.
+        </p>
+    </description>
+</method>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <property name="var">
     <com>
@@ -162,6 +240,7 @@
     </description>
 </property>
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <property name="variables" access="read">
     <com>
@@ -179,6 +258,7 @@
     </description>
 </property>
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <property name="db_name" access="read">
     <com>
@@ -192,6 +272,7 @@
     </title>
 </property>
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <method name="create_job_chain">
     <com>
@@ -210,6 +291,7 @@
     </description>
 </method>
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <method name="add_job_chain">
     <com>
@@ -225,6 +307,7 @@
     </description>
 </method>
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <property name="job_chain" access="read">
     <com>
@@ -238,6 +321,7 @@
     </com>
 </property>
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <method name="create_order">
     <com>
@@ -249,12 +333,13 @@
     <description>
         <p>
             Erzeugt einen neuen Auftrag.
-            Dieser Auftrag kann mit <scheduler_method class="Spooler" method="add_order"/>
+            Dieser Auftrag kann mit <scheduler_method class="Job_chain" method="add_order"/>
             einer Jobkette übergeben werden.
         </p>
     </description>
 </method>
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <property name="is_service" access="read">
     <com>
@@ -267,6 +352,7 @@
     </com>
 </property>
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <property name="directory" access="read">
     <com>
@@ -291,6 +377,7 @@
     </description>
 </property>
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <method name="job_chain_exists">
     <com>
@@ -304,6 +391,7 @@
     </com>
 </method>
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <property name="hostname" access="read">
     <com>
@@ -312,10 +400,12 @@
         </com.result>
     </com>
 
-    <titel>
-        Der Namen des Rechners, auf dem der Scheduler läuft.
-    </titel>
+    <title>
+        Name des Rechners, auf dem der Scheduler läuft.
+    </title>
 </property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <method name="abort_immediately">
     <com/>
@@ -337,6 +427,8 @@
     </description>
 </method>
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
 <method name="abort_immediately_and_restart">
     <com/>
 
@@ -353,6 +445,7 @@
     </description>
 </method>
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <property name="db_variables_table_name" access="read">
     <com>
@@ -366,6 +459,7 @@
     </title>
 </property>
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <property name="db_tasks_table_name" access="read">
     <com>
@@ -379,6 +473,7 @@
     </title>
 </property>
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <property name="db_orders_table_name" access="read">
     <com>
@@ -392,6 +487,7 @@
     </title>
 </property>
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <property name="db_history_table_name" access="read">
     <com>
@@ -405,6 +501,7 @@
     </title>
 </property>
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <property name="db_order_history_table_name" access="read">
     <com>
@@ -418,6 +515,7 @@
     </title>
 </property>
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <property name="ini_path" access="read">
     <com>
@@ -437,6 +535,7 @@
     </description>
 </property>
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <method name="execute_xml">
     <com>
@@ -470,6 +569,7 @@
     </description>
 </method>
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <property name="tcp_port" access="read">
     <com>
@@ -486,6 +586,7 @@
     </description>
 </property>
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <property name="udp_port" access="read">
     <com>
@@ -502,6 +603,7 @@
     </description>
 </property>
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <method name="create_xslt_stylesheet">
     <com>
@@ -545,10 +647,11 @@
     </java>
 </method>
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <description>
     <p>
-        Von dieser Klasse gibt es nur ein Objekt, <scheduler_method class="Job_impl" property="spooler"/>.
+        Von dieser Klasse gibt es nur ein Objekt: <scheduler_method class="Job_impl" property="spooler"/>.
     </p>
 </description>
 

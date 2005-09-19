@@ -652,14 +652,21 @@
 
     <xsl:template match="example">
         <xsl:param name="programming_language"/>
+        
         <h3>
-            Beispiel
+            Beispiel&#160;&#160;
+
+            <span style="font-weight: normal">
+                <xsl:value-of select="@title"/>
             
-            <xsl:if test="$programming_language">
-                <span style="font-weight: normal">
+                <xsl:if test="$programming_language">
+                    <xsl:if test="@title">
+                        <xsl:text>, </xsl:text>
+                    </xsl:if>
+                    
                     in <xsl:value-of select="$programming_language"/>
-                </span>
-            </xsl:if>
+                </xsl:if>
+            </span>
         </h3>
         
         <xsl:copy-of select="* | text()"/>
@@ -967,10 +974,16 @@
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~description-->
 
-    <xsl:template match="description">
+    <xsl:template match="description | title">
         <xsl:apply-templates select="node()" mode="description"/>
     </xsl:template>    
     
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~description-->
+    <!--
+    <xsl:template match="text()" mode="description">
+        <xsl:value-of select="."/>
+    </xsl:template>    
+    -->    
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~description-->
     
     <!-- Alles kopieren, außer <scheduler_element> usw. -->
@@ -1018,13 +1031,22 @@
         -->
     </xsl:template>
 
-    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_comment-->
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_ignore-->
     <!-- Falls der Browser kein XML/XSLT kann -->
     
     <xsl:template match="scheduler_ignore" mode="description">
         <!-- Der Text wird von einem Browser, der nicht XSLT kann, anzeigt -->
     </xsl:template>
 
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_ignore-->
+    <!--    
+    <xsl:template match="scheduler_see" mode="description">
+        <p>
+            Siehe
+            <xsl:apply-templates mode="description"/>
+        </p>
+    </xsl:template>
+    -->
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_element-->
 
     <xsl:template match="scheduler_element" mode="description">

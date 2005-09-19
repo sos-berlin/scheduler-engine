@@ -172,8 +172,15 @@ my $value2 = $parameters->var( "parameter2" );</pre>
         </title>
 
         <description>
-            Der Scheduler ruft nicht mehr <scheduler_method class="Job_impl" method="spooler_process"/> auf.
-            Statt dessen ruft er <scheduler_method class="Job_impl" method="spooler_close"/> auf.
+            <p>
+                Der Scheduler ruft nicht mehr <scheduler_method class="Job_impl" method="spooler_process"/> auf.
+                Statt dessen ruft er <scheduler_method class="Job_impl" method="spooler_close"/> auf.
+            </p>
+            <p>
+                Der Aufruf kann verwendet werden, 
+                um beim Task-Ende den Versand des Task-Protokolls zu veranlassen,
+                siehe <scheduler_method class="Log"/>.
+            </p>
         </description>
     </method>
 
@@ -184,7 +191,7 @@ my $value2 = $parameters->var( "parameter2" );</pre>
             <com.result>
                 <com.type type="VARIANT*">
                     <com.type type="BSTR"/>
-                    <!--com.variant accepted_type="Ierror"/-->
+                    <!--com.type accepted_type="Ierror"/-->
                 </com.type>
             </com.result>
         </com>

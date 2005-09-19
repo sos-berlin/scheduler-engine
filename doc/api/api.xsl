@@ -179,7 +179,12 @@
 
 <xsl:template match="api.class">
     <html>
-        <xsl:variable name="title" select="'Programmschnittstelle (API)'"/>
+        <xsl:variable name="title">
+            <xsl:choose>
+                <xsl:when test="@name='api'">Programmschnittstelle (API)</xsl:when>
+                <xsl:otherwise><xsl:value-of select="@name"/> - Programmschnittstelle (API)</xsl:otherwise>
+            </xsl:choose>
+        </xsl:variable>
 
         <xsl:call-template name="html_head">
             <xsl:with-param name="title" select="$title"/>
@@ -240,8 +245,36 @@
                     </td>
 
                     <td style="padding-left: 3ex; border-left: 1px dotted black;">
-                        <xsl:apply-templates select="." mode="headline"/>
+                        <!--xsl:apply-templates select="." mode="headline"/-->
+                        <xsl:if test="@name != 'api'">
+                            <p class="api_headline">
+                                <xsl:value-of select="@name"/>
+
+                                <xsl:if test="title">
+                                    &#160;–&#160; <xsl:value-of select="title"/>
+                                </xsl:if>
+                            </p>
+                        </xsl:if>
+
+                        <p>&#160;</p>
                         <xsl:apply-templates select="." mode="table"/>
+                        
+                        <xsl:apply-templates select="." mode="example"/>
+
+                        <xsl:if test="description [ not ( @programming_language ) ]">
+                            <p>&#160;</p>
+                            <!--p style="margin-top: 0em">&#160;</p-->
+                            <xsl:apply-templates select="description [ not ( @programming_language ) ]"/>
+                        </xsl:if>
+                        
+                        <xsl:if test="description [ @programming_language = $programming_language ]">
+                            <p style="margin-top: 0em">&#160;</p>
+                            <xsl:apply-templates select="description [ @programming_language = $programming_language ]"/>
+                        </xsl:if>
+                        
+                        <p style="margin-top: 0em">&#160;</p>
+                        
+
                         <xsl:apply-templates select="." mode="detailed_methods"/>
                     </td>
                 </tr>
@@ -303,13 +336,13 @@
 -->
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
-
+<!--
 <xsl:template match="/api.class [ /*/@show_headline ]">
     <xsl:apply-templates select="." mode="headline"/>
 </xsl:template>
-
+-->
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
-
+<!--
 <xsl:template match="api.class" mode="headline">
 
     <xsl:if test="@name != 'api'">
@@ -336,7 +369,7 @@
     
     <p style="margin-top: 0em">&#160;</p>
 </xsl:template>
-
+-->
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <xsl:template match="/api.class [ /*/@show_table ]">
@@ -347,6 +380,8 @@
 
 <xsl:template match="api.class" mode="table">
 
+    <!--h2>Methoden</h2>  <!- - zieht einen Strich -->
+    
     <table cellpadding="0" cellspacing="0">
         <!--tr><td colspan="4" style="padding-top: 4ex; padding-bottom: 1ex; font-weight: bold;">Eigenschaften</td></tr-->
         <!--
@@ -390,12 +425,8 @@
 
     <xsl:if test="position() &gt; 1">
         <!-- Trenner zwischen verschiedenen Eigenschaften oder Methoden -->
-
         <tr>
-            <td colspan="99" style="font-size: 1em">
-                <!--hr style="color: lightgrey; background-color: lightgrey"/-->
-                &#160;
-            </td>
+            <td style="font-size: 1pt">&#160;</td>
         </tr>
     </xsl:if>
 
@@ -453,13 +484,13 @@
                         <xsl:apply-templates select="." mode="table_row">
                             <xsl:with-param name="access"      select="'write'"/>
                             <xsl:with-param name="is_in_table" select="$is_in_table"/>
-                            <xsl:with-param name="show_title"  select="false()"/>
+                            <xsl:with-param name="show_title"  select="$show_title"/>
                         </xsl:apply-templates>
 
                         <xsl:apply-templates select="." mode="table_row">
                             <xsl:with-param name="access"      select="'read'"/>
                             <xsl:with-param name="is_in_table" select="$is_in_table"/>
-                            <xsl:with-param name="show_title"  select="$show_title"/>
+                            <xsl:with-param name="show_title"  select="false()"/>
                         </xsl:apply-templates>
                     </xsl:when>
 
@@ -535,9 +566,9 @@
         <xsl:element name="td">
             <xsl:attribute name="class">api_method</xsl:attribute>
 
-            <xsl:if test="not( $language_has_properties and parent::property )">
+            <!--xsl:if test="not( $language_has_properties and parent::property )">
                 <xsl:attribute name="colspan">2</xsl:attribute>
-            </xsl:if>
+            </xsl:if-->
 
             <xsl:element name="span">
                 <xsl:if test="parent::*/@deprecated">
@@ -581,27 +612,20 @@
 
         </xsl:element>
 
+
+        <xsl:if test="$is_in_table">
+            <td class="api_title">
+                <xsl:if test="$show_title and $title_rowspan &gt; 0 and position() = 1">
+                    <xsl:apply-templates select="parent::*/title"/>
+                </xsl:if>
+            </td>
+        </xsl:if>
+
     </xsl:element>
 
-
+    <!--
     <xsl:if test="parent::*/title and $show_title and $title_rowspan &gt; 0 and position() = last()">
         <xsl:element name="tr">
-            <!--xsl:if test="$is_in_table">
-                <xsl:attribute name="class">api_method_clickable</xsl:attribute>
-                <xsl:attribute name="id"><xsl:value-of select="$tr_id"/></xsl:attribute>
-                <xsl:attribute name="onclick">window.location = "#method__<xsl:value-of select="parent::*/@name"/>";</xsl:attribute>
-                <xsl:attribute name="style">cursor: hand;</xsl:attribute>
-
-                <xsl:attribute name="onmouseover">
-                    api_method_in_table__onmouseover( "<xsl:value-of select="$method_tr_id"/>" )
-                </xsl:attribute>
-
-                <xsl:attribute name="onmouseout" >
-                    api_method_in_table__onmouseout( "<xsl:value-of select="$method_tr_id"/>" )
-                </xsl:attribute>
-
-            </xsl:if-->
-
             <td></td>
 
             <td colspan="99" class="api_title">
@@ -609,7 +633,8 @@
             </td>
         </xsl:element>
     </xsl:if>
-
+    -->
+        
 </xsl:template>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
@@ -650,14 +675,14 @@
                     <xsl:with-param name="is_in_table" select="$is_in_table"/>
                 </xsl:apply-templates>
 
-                <xsl:if test="@default">
+                <xsl:if test="@default and not( $is_in_table )">
                     <span class="mono">
                         <xsl:text> = </xsl:text>
                         <xsl:value-of select="@default"/>
                     </span>
                 </xsl:if>
 
-                <xsl:if test="@optional">
+                <xsl:if test="@optional and not( $is_in_table )">
                     &#160;<span style="font-size: 8pt">(optional)</span>
                 </xsl:if>
             </span>
@@ -679,11 +704,14 @@
     <xsl:param name="is_in_table"/>
 
     <span style="white-space: nowrap">
-        <xsl:apply-templates select="java.type | com.type">
-            <xsl:with-param name="is_in_table" select="$is_in_table"/>
-        </xsl:apply-templates>
-        
-        <span class="mono"><xsl:text> </xsl:text></span>
+        <xsl:if test="not( $is_in_table ) or not( @name )">
+            <xsl:apply-templates select="java.type | com.type">
+                <xsl:with-param name="is_in_table" select="$is_in_table"/>
+            </xsl:apply-templates>
+
+            <span class="mono"><xsl:text> </xsl:text></span>
+        </xsl:if>
+
         <span class="mono"><xsl:value-of select="@name"/></span>
     </span>
 
@@ -794,11 +822,14 @@
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <xsl:template match="method | property" mode="detailed_methods">
-    <xsl:param name="is_in_table"/>
     
     <xsl:element name="h2">
         <xsl:attribute name="class">bar</xsl:attribute>
         <xsl:attribute name="id">method__<xsl:value-of select="@name"/></xsl:attribute>
+        
+        <xsl:attribute name="style">
+            <xsl:if test="position() = 1 or true()">border-top: 1px solid black;</xsl:if>
+        </xsl:attribute>
 
         <xsl:value-of select="@name"/>
 
@@ -838,11 +869,14 @@
     </xsl:if>
 
 
-    <xsl:if test="com/com.parameter [ description ]">
+    <xsl:variable name="read_result"  select="com [ @access='read' or not( @access ) and ( not( parent::*/@access ) or parent::*/@access='read' ) ]/com.result"/>
+    <xsl:variable name="write_result" select="com [ @access='write' or not( @access ) and ( not( parent::*/@access ) or parent::*/@access='write' ) ]/com.result"/>
+
+    <xsl:if test="com/com.parameter [ description ] | $write_result [ description ]">
         <h3>Parameter</h3>
 
         <table cellpadding="0" cellspacing="0">
-            <xsl:for-each select="com/com.parameter [ description ]">
+            <xsl:for-each select="com/com.parameter | $write_result">
                 <tr>
                     <td>
                         <span class="mono"><xsl:value-of select="@name"/></span>
@@ -857,15 +891,9 @@
     </xsl:if>
 
 
-    <xsl:variable name="result_type" select="com [ @access='read' or not( @access ) and ( not( parent::*/@access ) or parent::*/@access='read' ) ]/com.result/com.type"/>
-
-    <xsl:if test="$result_type">
+    <xsl:if test="$read_result/com.type [ @class or parent::*/description ]">
         <h3>Rückgabe</h3>
-        <xsl:apply-templates select="$result_type">
-            <xsl:with-param name="is_in_table" select="$is_in_table"/>
-        </xsl:apply-templates>
-        
-        <xsl:apply-templates select="com/com.result/title"/>
+        <xsl:apply-templates select="$read_result/com.type"/>&#160;&#160;
         <xsl:apply-templates select="com/com.result/description"/>
     </xsl:if>
 

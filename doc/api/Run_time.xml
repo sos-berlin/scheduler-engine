@@ -12,18 +12,41 @@
     date        = "$Date$"
 >
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <property name="xml" access="write">
     <com>
         <com.result>
             <com.type type="BSTR"/>
+
+            <description>
+                XML-Dokument als String
+            </description>
         </com.result>
     </com>
 
     <title>
-        Siehe <scheduler_element name="run_time"/>.
+        <code>&lt;run_time></code>
     </title>
+    
 </property>
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<title>Laufzeit</title>
+
+<description>
+    <p>
+        Siehe <scheduler_element name="run_time"/>,
+        <scheduler_method class="Order"/>.
+    </p>
+</description>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<example programming_language="javascript">
+    <pre>var order = spooler_task.order;
+order.run_time.xml = "&lt;run_time>&lt;period single_start='15:00'/>&lt;/run_time>";   // Order is repeated daily at 15:00</pre>
+</example>
 
 </api.class>

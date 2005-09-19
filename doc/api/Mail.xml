@@ -288,6 +288,10 @@
         <com>
             <com.result name="path">
                 <com.type type="BSTR"/>
+
+                <description>
+                    Der Pfad der Datei, die das XSLT-Stylesheet enthält
+                </description>
             </com.result>
         </com>
 
@@ -306,6 +310,13 @@
         <title>
             XSLT-Stylesheet für eMail-Aufbereitung
         </title>
+        
+        <description>
+            <p>
+                Siehe <scheduler_element name="config" attribute="mail_xslt_stylesheet"/>.
+            </p>
+        </description>
+        
 
         <example programming_language="java">
             <pre>spooler_log.mail().set_xslt_stylesheet_path( "c:/stylesheets/mail.xslt" );</pre>
@@ -321,6 +332,10 @@
         <com>
             <com.result name="path">
                 <com.type class="Xslt_stylesheet"/>
+
+                <description>
+                    Das XSLT-Stylesheet als String
+                </description>
             </com.result>
         </com>
 

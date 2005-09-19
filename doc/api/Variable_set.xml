@@ -12,172 +12,188 @@
     date        = "$Date$"
 >
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-    <property name="count" access="read">
-        <com>
-            <com.result>
-                <com.type type="int"/>
-            </com.result>
-        </com>
+<property name="count" access="read">
+    <com>
+        <com.result>
+            <com.type type="int"/>
+        </com.result>
+    </com>
 
-        <title>
-            Anzahl der Variablen
-        </title>
-    </property>
+    <title>
+        Anzahl der Variablen
+    </title>
+</property>
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-    <property name="value" default_property="true">
-        <com>
-            <com.parameter name="name">
-                <com.type type="BSTR"/>
-            </com.parameter>
+<property name="value" default_property="true">
+    <com>
+        <com.parameter name="name">
+            <com.type type="BSTR"/>
+        </com.parameter>
 
-            <com.result name="value">
-                <com.type type="VARIANT*"/>
-
-                <description>
-                    <api.empty/>, wenn die Variable nicht vorhanden ist.
-                </description>
-            </com.result>
-        </com>
-
-        <not_implemented programming_language="java"/>
-
-        <title>
-            Eine Variable
-        </title>
-    </property>
-
-    <property name="var">
-        <not_implemented programming_language="javascript"/>        <!-- var ist Schlüsselwort -->
-
-        <com>
-            <com.parameter name="name">
-                <com.type type="BSTR"/>
-            </com.parameter>
-
-            <com.result name="value">
-                <com.type type="VARIANT*"/>
-
-                <description>
-                    <api.empty/>, wenn die Variable nicht vorhanden ist.
-                </description>
-            </com.result>
-        </com>
-
-        <title>
-            Eine Variable
-        </title>
-
-        <!--
-        <java>
-            <java.parameter name="name">
-                <java.type class="java.lang.String"/>
-            </java.parameter>
-
-            <java.result name="value">
-                <java.type class="java.lang.String"/>
-            </java.result>
+        <com.result name="value">
+            <com.type type="VARIANT*"/>
 
             <description>
-                <p>
-                    Wenn die Variable in einer anderen Sprache in einem anderen Typ als String gesetzt worden ist,
-                    wird der Wert in einen String konvertiert zurückgegebeb.
-                </p>
+                <api.empty/>, wenn die Variable nicht vorhanden ist.
             </description>
-        </java>
-        -->
-    </property>
+        </com.result>
+    </com>
 
+    <not_implemented programming_language="java"/>
 
-    <method name="set_var">
-        <com>
-            <com.parameter name="name">
-                <com.type type="BSTR"/>
-            </com.parameter>
+    <title>
+        Eine Variable
+    </title>
+</property>
 
-            <com.parameter name="value">
-                <com.type type="VARIANT*"/>
-            </com.parameter>
-        </com>
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-        <not_implemented programming_language="java"/>
+<property name="var">
+    <not_implemented programming_language="javascript"/>        <!-- var ist Schlüsselwort -->
 
-        <title>
-            Setzt eine Variable
-        </title>
-    </method>
+    <com>
+        <com.parameter name="name">
+            <com.type type="BSTR"/>
+        </com.parameter>
 
+        <com.result name="value">
+            <com.type type="VARIANT*"/>
 
-    <property name="xml">
-        <com>
-            <com.result>
-                <com.type type="BSTR"/>
-            </com.result>
-        </com>
+            <description>
+                <api.empty/>, wenn die Variable nicht vorhanden ist.
+            </description>
+        </com.result>
+    </com>
 
-        <title>
-            <code>Variable_set</code> als XML-Dokument
-        </title>
-    </property>
+    <title>
+        Eine Variable
+    </title>
 
+    <!--
+    <java>
+        <java.parameter name="name">
+            <java.type class="java.lang.String"/>
+        </java.parameter>
 
-    <method name="merge">
-        <com>
-            <com.parameter>
-                <com.type class="Variable_set"/>
-            </com.parameter>
-        </com>
-
-        <title>
-            Mischt eine andere Variablenmenge ein
-        </title>
+        <java.result name="value">
+            <java.type class="java.lang.String"/>
+        </java.result>
 
         <description>
             <p>
+                Wenn die Variable in einer anderen Sprache in einem anderen Typ als String gesetzt worden ist,
+                wird der Wert in einen String konvertiert zurückgegebeb.
             </p>
         </description>
-    </method>
+    </java>
+    -->
+</property>
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<method name="set_var">
+    <com>
+        <com.parameter name="name">
+            <com.type type="BSTR"/>
+        </com.parameter>
+
+        <com.parameter name="value">
+            <com.type type="VARIANT*"/>
+        </com.parameter>
+    </com>
+
+    <not_implemented programming_language="java"/>
 
     <title>
-        Variablenmenge zur Übergabe von Parametern
+        Setzt eine Variable
+    </title>
+</method>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="xml">
+    <com>
+        <com.result>
+            <com.type type="BSTR"/>
+            
+            <description>
+                XML-Dokument als String
+            </description>
+        </com.result>
+    </com>
+
+    <title>
+        <code>Variable_set</code> als XML-Dokument
+    </title>
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<method name="merge">
+    <com>
+        <com.parameter>
+            <com.type class="Variable_set"/>
+        </com.parameter>
+    </com>
+
+    <title>
+        Mischt eine andere Variablenmenge ein
     </title>
 
-
     <description>
-        <!--
         <p>
-            Die Variablenmenge hält Variablen mit Namen und Wert.
-            Die Variablenwerte können von jedem COM-Typ sein (Java: nur Strings).
-        </p>
-        <p>
-            Objekte sollten nicht als Variablenwert verwendet werden.
-        </p>
-        -->
-
-        <p>
-            Variablenmengen werden gebraucht für die Scheduler-weiten Variablen und Task-Parameter.
-            Eine neue Variablenmenge wird mit
-            <scheduler_method class="Spooler" method="create_variable_set"/>
-            angelegt.
-        </p>
-        <p>
-            Die Großschreibung der Variablennamen ist relevant.
-        </p>
-        <p>
-            In COM (JavaScript, VBScript, Perl) ist ein Variablenwert ein Variant.
-            Weil die Variablen in der Regel in die Scheduler-Datenbank geschrieben werden,
-            sollten nur nach String konvertierbare Variant-Werte verwendet werden
-            (d.h. es sollten keine Objekte verwendet werden).
-        </p>
-        <p>
-            In Java ist ein Variablenwert ein String.
-            Wenn die Variable mit COM als Variant gesetzt worden ist,
-            wird beim Lesen der nach String konvertierte Wert zurückgegeben.
-            <code>Null</code> und <code>Empty</code> werden als <api.null/> zurückgeliefert.
-            Wenn ein Variant-Wert nicht konvertierbar ist, wird eine Exception ausgelöst.
+            Gleichnamige Variablen werden überschrieben.
         </p>
     </description>
+</method>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<title>
+    Variablenmenge zur Übergabe von Parametern
+</title>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<description>
+    <!--
+    <p>
+        Die Variablenmenge hält Variablen mit Namen und Wert.
+        Die Variablenwerte können von jedem COM-Typ sein (Java: nur Strings).
+    </p>
+    <p>
+        Objekte sollten nicht als Variablenwert verwendet werden.
+    </p>
+    -->
+
+    <p>
+        Variablenmengen werden gebraucht für die Scheduler-weiten Variablen und Task-Parameter.
+        Eine neue Variablenmenge wird mit
+        <scheduler_method class="Spooler" method="create_variable_set"/>
+        angelegt.
+    </p>
+    <p>
+        Die Großschreibung der Variablennamen ist nicht relevant.
+    </p>
+    <p>
+        In COM (JavaScript, VBScript, Perl) ist ein Variablenwert ein Variant.
+        Weil die Variablen in der Regel in die Scheduler-Datenbank geschrieben werden,
+        sollten nur nach String konvertierbare Variant-Werte verwendet werden
+        (d.h. es sollten keine Objekte verwendet werden).
+    </p>
+    <p>
+        In Java ist ein Variablenwert ein String.
+        Wenn die Variable mit COM als Variant gesetzt worden ist,
+        wird beim Lesen der nach String konvertierte Wert zurückgegeben.
+        <code>Null</code> und <code>Empty</code> werden als <api.null/> zurückgeliefert.
+        Wenn ein Variant-Wert nicht konvertierbar ist, wird eine Exception ausgelöst.
+    </p>
+</description>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 </api.class>

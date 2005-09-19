@@ -91,7 +91,8 @@ tr.api_method                   { color: blue; }
 td.api_type                     { white-space: nowrap; }
 td.api_method                   {}
 td.api_access                   { padding-left: 3mm; white-space: nowrap; }
-td.api_title                    { font-size: 8pt;  }
+/*td.api_title                    { font-size: 8pt;  }*/
+td.api_title                    { padding-left: 3mm; }
 
 
 .api_programming_language_selector { margin-right: 2ex; }

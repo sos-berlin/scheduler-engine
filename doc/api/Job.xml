@@ -90,6 +90,11 @@
                 damit der Aufruf wirksam wird.
                 Verwenden Sie dazu die Einstellung <scheduler_element name="run_time" attribute="once" value="yes"/>.
             </p>
+            <p>
+                Dieselbe Einstellung können Sie auch in der XML-Konfiguration mit 
+                <scheduler_element name="start_when_directory_changed"/>
+                vornehmen.
+            </p>
         </description>
 
         <example programming_language="javascript">
@@ -210,8 +215,14 @@ $spooler->job( 'job_a' )->start( parameters );</pre>
         </com>
 
         <title>
-
+            Wert der Option <code>-include-path=</code>
         </title>
+        
+        <description>
+            <p>
+                Siehe <scheduler_option name="include-path"/>.
+            </p>
+        </description>
     </property>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
@@ -237,7 +248,14 @@ $spooler->job( 'job_a' )->start( parameters );</pre>
         </title>
         
         <description>
-            Nur wirksam, wenn gerade keine Task läuft.
+            <p>
+                Wenn der Job im Zustand <code>pending</code> oder <code>stopped</code> ist
+                (also keine Task läuft), 
+                startet der Aufruf eine Task.
+            </p>
+            <p>
+                Siehe <scheduler_method class="Job" method="start"/>.
+            </p>
         </description>
     </method>
 
@@ -284,6 +302,12 @@ $spooler->job( 'job_a' )->start( parameters );</pre>
             Titel des Jobs
         </title>
         
+        <description>
+            <p>
+                Siehe <scheduler_element name="job" attribute="title"/>.
+            </p>
+        </description>
+        
         <example programming_language="java">
             <pre>spooler_log.info( "Job title=" + spooler_job.title() );</pre>
         </example>
@@ -304,16 +328,20 @@ $spooler->job( 'job_a' )->start( parameters );</pre>
             <com.parameter name="error_steps">
                 <com.type type="int"/>
                 <description>
-                    Anzahl der aufeinanderfolgenden Jobfehler, ab der die Verzögerung gilt.
+                    Anzahl der aufeinanderfolgenden Jobfehler, ab der die Verzögerung gilt
                 </description>
             </com.parameter>
 
             <com.result name="seconds_or_hhmm_ss">
                 <com.type type="VARIANT*">
-                    <com.variant type="double"/>
-                    <com.variant type="int"/>
-                    <com.variant type="BSTR"/>
+                    <com.type type="double"/>
+                    <com.type type="int"/>
+                    <com.type type="BSTR"/>
                 </com.type>
+                
+                <description>
+                    Frist, nach der der Job wiederholt wird                    
+                </description>
             </com.result>
         </com>
 
@@ -409,22 +437,42 @@ spooler_job.delay_after_error( 20 ) = "STOP";</pre>
         <title>
             Auftragswarteschlange des Jobs
         </title>
+        
+        <description>
+            <p>
+                Ein Auftragsjob (<scheduler_element name="job" attribute="order" value="yes"/>)
+                hat eine Auftragswarteschlange.
+                Die Auftragswarteschlange wird über eine Jobkette, in der der Job eingetragen ist, gefüllt.
+            </p>
+            <p>
+                Siehe <scheduler_method class="Job_chain" method="add_order"/>,
+                <scheduler_method class="Job_chain" method="add_job"/>.
+            </p>
+        </description>
     </property>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-    <method name="delay_order_after_setback" access="write">
+    <property name="delay_order_after_setback" access="write">
         <com>
             <com.parameter name="setback_count">
                 <com.type type="int"/>
+                <description>
+                    Für die 1., 2. usw. aufeinanderfolgende Rückstellung desselben Auftrags 
+                    können verschiedene Fristen eingestellt werden.
+                </description>
             </com.parameter>
 
             <com.result name="seconds_or_hhmm_ss">
                 <com.type type="VARIANT*">
-                    <com.variant type="double"/>
-                    <com.variant type="int"/>
-                    <com.variant type="BSTR"/>
+                    <com.type type="double"/>
+                    <com.type type="int"/>
+                    <com.type type="BSTR"/>
                 </com.type>
+                <description>
+                    Frist für die Rückstellung.
+                    Nach Ablauf der Frist kommt der Auftrag erneut in diesem Job zu Ausführung.
+                </description>
             </com.result>
         </com>
 
@@ -439,10 +487,42 @@ spooler_job.delay_after_error( 20 ) = "STOP";</pre>
         </java>
 
         <title>
-            Stellt Auftrag nach Fehler zurück
+            Stellt Aufträge nach Fehler zurück
         </title>
-    </method>
+        
+        <description>
+            <p>
+                Ein Auftragsjob kann einen Auftrag, den er gerade ausführt, 
+                mit <scheduler_method class="Order" method="setback"/>
+                zurückstellen. 
+                Er wird dann an eine hintere Stelle der Auftragswarteschlange des Jobs eingereiht
+                und kommt nach der eingestellten Zeit erneut zur Ausführung.
+            </p>
+            <p>
+                Die aufeinanderfolgenden Rückstellungen eines Auftrags werden gezählt.
+                Mit <code>delay_order_after_setback</code> können Sie verschiedene Fristen
+                für wiederholte Rückstellungen festlegen.
+            </p>
+            <p>
+                Siehe <scheduler_method class="Order" method="setback"/>,
+                <scheduler_method class="Job" property="max_order_setbacks"/>,
+                <scheduler_method class="Job_chain" method="add_job"/>,
+                <scheduler_method class="Job" method="delay_after_error"/>.
+            </p>
+        </description>
+        
+        <example language="javascript">
+            <pre>spooler_job.delay_after_error( 1 ) = 60;         // 1. bis 2. aufeinderfolgende Rückstellung desselben Auftrags: 
+                                                 // Auftrag um 60s verzögern.
+                                                 
+spooler_job.delay_after_error( 3 ) = "01:00";    // Ab 3. aufeinanderfolgender Rückstellung desselben Auftrags: 
+                                                 // Auftrag um eine Stunde verzögern.
+                                                 
+spooler_job.max_order_setbacks = 5;              // Die 5. Rückstellung versetzt den Auftrag in den Fehlerzustand</pre>
+        </example>
+    </property>
 
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
     <property name="max_order_setbacks" access="write">
         <com>
@@ -456,6 +536,7 @@ spooler_job.delay_after_error( 20 ) = "STOP";</pre>
         </title>
     </property>
 
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
     <method name="clear_delay_after_error">
         <com/>
@@ -465,6 +546,7 @@ spooler_job.delay_after_error( 20 ) = "STOP";</pre>
         </title>
     </method>
 
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
     <method name="remove">
         <com/>
@@ -494,6 +576,7 @@ spooler_job.delay_after_error( 20 ) = "STOP";</pre>
         </description>
     </method>
 
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
     <description>
         <p>

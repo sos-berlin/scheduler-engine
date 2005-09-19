@@ -12,6 +12,7 @@
     date        = "$Date$"
 >
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <property name="id">
     <com>
@@ -39,6 +40,7 @@
     </description>
 </property>
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <property name="title">
     <com>
@@ -52,6 +54,7 @@
     </title>
 </property>
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <property name="priority">
     <com>
@@ -65,6 +68,7 @@
     </title>
 </property>
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <property name="job_chain" access="read">
     <com>
@@ -82,6 +86,7 @@
     </title>
 </property>
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <property name="job_chain_node" access="read">
     <com>
@@ -100,6 +105,7 @@
 
 </property>
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <property name="job">
     <com access="write">
@@ -139,6 +145,7 @@
     </description>
 </property>
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <property name="state">
     <com>
@@ -159,6 +166,7 @@
     </description>
 </property>
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <property name="state_text">
     <com>
@@ -178,17 +186,7 @@
     </description>
 </property>
 
-
-<property name="error" access="read">
-    <com>
-        <com.result>
-            <com.type class="Error"/>
-        </com.result>
-    </com>
-
-    <not_implemented programming_language="java"/>
-</property>
-
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <property name="payload">
     <com>
@@ -216,6 +214,7 @@
     </description>
 </property>
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <method name="payload_is_type">
     <com>
@@ -239,6 +238,7 @@
     </title>
 </method>
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <method name="setback">
     <com/>
@@ -254,6 +254,7 @@
     </description>
 </method>
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <property name="run_time" access="read">
     <com>
@@ -271,6 +272,7 @@
     </description>
 </property>
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <method name="remove_from_job_chain">
     <com/>
@@ -291,6 +293,7 @@
     </description>
 </method>
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <property name="string_next_start_time" access="read">
     <com>
@@ -304,8 +307,76 @@
             </description>
         </com.result>
     </com>
+    
+    <title>
+        Nächste Startzeit des Auftrags bei Verwendung von <code>&lt;run_time></code>
+    </title>
 </property>
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<title>
+    Auftrag
+</title>
+
+
+<description>
+    <p>
+        Siehe <a href="../order.xml">Aufträge</a>,
+        <scheduler_method class="Spooler" method="create_order"/>,
+        <scheduler_method class="Job_chain" method="add_order"/>,
+        <scheduler_method class="Task" property="order"/>.
+    </p>
+</description>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<example programming_language="javascript" title="Auftrag mit einfacher Nutzlast" >
+    <pre>// Create order:
+{    
+    var order = spooler.create_order();
+    order.id         = 1234;    
+    order.title      = "This is my order";
+    order.state_text = "This is my state text";
+    order.payload    = "This is my payload";
+    spooler.job_chain( "my_job_chain" ).add_order( order );
+}
+...
+
+// Process order:
+function spooler_process()
+{
+    var order = spooler_task.order;
+    spooler_log.info( "order.payload=" + order.payload );
+    return true;
+}</pre>    
+    </example>
+
+<example programming_language="javascript" title="Erzeugen eines Auftrags mit Variable_set als Nutzlast">
+    <pre>// Create order:
+{
+    var variable_set = spooler.create_variable_set();
+    variable_set.value( "param_one" ) = "11111";
+    variable_set.value( "param_two" ) = "22222";
+
+    var order = spooler.create_order();
+    order.id      = 1234;    
+    order.payload = variable_set;
+    spooler.job_chain( "my_job_chain" ).add_order( order );
+}
+...
+
+// Process order:
+function spooler_process()
+{
+    var order = spooler_task.order;
+    var variable_set = order.payload;
+    spooler_log.info( "param_one=" + variable_set.value( "param_one" ) );
+    spooler_log.info( "param_two=" + variable_set.value( "param_two" ) );
+    return true;
+}</pre>    
+
+    </example>
 
 
 </api.class>
