@@ -104,7 +104,6 @@
     <description>
         <p>
             Mit einem XSLT-Stylesheet wird die Konvertierung eines XML-Dokuments in ein anderes beschrieben.
-            Die Variablenwerte können von jedem COM-Typ sein (Java: nur Strings).
         </p>
         <p>
             Der XSLT-Prozessor ist mit <a href="http://xmlsoft.org/XSLT/">libxslt</a>

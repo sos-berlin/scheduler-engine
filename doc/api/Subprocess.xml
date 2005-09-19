@@ -12,11 +12,27 @@
     date        = "$Date$"
 >
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <method name="close">
     <com/>
+    
+    <title>
+        Gibt die System-Ressourcen frei
+    </title>
+    
+    <description>
+        <p>
+            Sollte in Sprachen mit Garbage Collector (Java, JavaScript) gerufen werden,
+            außer die Task beendet sich sofort.
+        </p>
+        <p>
+            Der <code>Subprocess</code> ist danach unbrauchbar.
+        </p>
+    </description>
 </method>
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <method name="start">
     <com>
@@ -39,8 +55,13 @@
             <com.type type="BSTR" array="true"/>
         </java.parameter>
     </java>
+    
+    <title>
+        Startet einen Prozess
+    </title>
 </method>
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <property name="pid" access="read">
     <com>
@@ -48,8 +69,13 @@
             <com.type type="int"/>
         </com.result>
     </com>
+    
+    <title>
+        Prozesskennung
+    </title>
 </property>
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <property name="terminated" access="read">
     <com>
@@ -69,6 +95,7 @@
     </description>
 </property>
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <property name="exit_code" access="read">
     <com>
@@ -83,6 +110,7 @@
     </description>
 </property>
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <property name="termination_signal" access="read">
     <com>
@@ -101,6 +129,7 @@
     </description>
 </property>
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <property name="ignore_error">
     <com>
@@ -134,6 +163,7 @@
     </description>
 </property>
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <property name="ignore_signal">
     <com>
@@ -151,6 +181,7 @@
     </description>
 </property>
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <property name="timeout" access="write">
     <com>
@@ -168,6 +199,7 @@
     </description>
 </property>
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <property name="environment" access="write">
     <com>
@@ -179,8 +211,21 @@
             <com.type type="BSTR"/>
         </com.result>
     </com>
+    
+    <title>
+        Umgebungsvariablen
+    </title>
+    
+    <description>
+        <p>
+            Die hier gesetzten Variablen werden zusammen 
+            mit den übrigen Umgebungsvariablen des laufenden Prozesses 
+            dem neuen Subprozess übergeben.
+        </p>
+    </description>
 </property>
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <method name="wait_for_termination">
     <com>
@@ -194,6 +239,7 @@
     </com>
 </method>
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <method name="kill">
     <com>
@@ -212,12 +258,43 @@
     </title>
 </method>
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <description>
     <p>
         Ein Subprozess ist irgendein Prozess,
-        der mit <scheduler_method class="Task" method="create_subprocess"/> gestartet werden kann.
+        der mit 
+        <scheduler_method class="Task" method="create_subprocess"/> 
+        oder
+        <scheduler_method class="Subprocess" method="start"/> 
+        gestartet werden kann.
     </p>
 </description>
+
+
+<example programming_language="javascript">
+    <pre>var subprocess = spooler_task.create_subprocess();
+
+subprocess.environment( "test1" ) = "one";
+subprocess.environment( "test2" ) = "two";
+subprocess.ignore_error = true;
+
+subprocess.start( "sleep 20" );
+
+spooler_log.info( "pid=" + subprocess.pid );
+subprocess.timeout = 10;
+
+spooler_log.info( "wait_for_termination ..." );
+var ok = subprocess.wait_for_termination( 10 );
+spooler_log.info( "wait_for_termination ok=" + ok );
+
+if( subprocess.terminated ) 
+{
+    spooler_log.info( "exit code=" + subprocess.exit_code );
+    spooler_log.info( "termination signal=" + subprocess.termination_signal );
+}</pre>
+</example>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 </api.class>
