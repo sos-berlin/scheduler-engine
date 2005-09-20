@@ -412,11 +412,11 @@
 
     <title>
         Bricht den Scheduler augenblicklich ab
-    </title>
+    </title>
    
     <description>
         <p>
-            Bricht den Scheduler augenblicklich ab.
+            Bricht den Scheduler augenblicklich ab.
             Kein Job hat Gelegenheit, darauf zu reagieren.
         </p>
         <p>

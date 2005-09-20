@@ -15,7 +15,7 @@
         <ini_entry setting="key1" type="licence_key" title="Lizenzschlüssel">
             <description>
                 <p>
-                    Wenn Sie mehrere Lizenzschlüssel haben, können sie weitere unter <code>key2=</code>, <code>key3=</code> usw. eintragen.
+                    Wenn Sie mehrere Lizenzschlüssel haben, können Sie weitere unter <code>key2=</code>, <code>key3=</code> usw. eintragen.
                     Achten Sie darauf, dass die Nummerierung lückenlos ist.
                 </p>
             </description>

@@ -30,7 +30,7 @@
         </p>
     </description>
     
-    <behavior_with_xml_element for_element="base" replace_attribute="date"/>
+    <behavior_with_xml_element element="base" replace_attribute="date"/>
     
     <example>
         <pre>&lt;holiday date="2004-12-24"/></pre>

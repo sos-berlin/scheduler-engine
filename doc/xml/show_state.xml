@@ -86,7 +86,7 @@
                     <dt><code>task_history</code></dt>
                     <dd>
                         Liefert auch die Task-Historie
-                        (<scheduler_element name="task_history" directory="xml/answer/"/>).
+                        (<scheduler_element name="history" directory="xml/answer/"/>).
                     </dd>
                     
                     <dt><code>remote_schedulers</code></dt>
