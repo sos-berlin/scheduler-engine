@@ -106,6 +106,12 @@ job_chain.name = "Jobkette";</pre>
             <com.type class="Order"/>
         </com.result>
     </com>
+    
+    <java>
+        <java.parameter name="order">
+            <com.type class="Order"/>
+        </java.parameter>
+    </java>
 
     <title>
         Gibt einen Auftrag in die Jobkette

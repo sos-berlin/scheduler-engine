@@ -893,8 +893,10 @@
     </xsl:if>
 
 
-    <xsl:variable name="read_result"  select="com [ @access='read' or not( @access ) and ( not( parent::*/@access ) or parent::*/@access='read' ) ]/com.result"/>
-    <xsl:variable name="write_result" select="com [ @access='write' or not( @access ) and ( not( parent::*/@access ) or parent::*/@access='write' ) ]/com.result"/>
+    <!-- Bei einer <property access="write" (oder write und read) ist <com.result> der Parameter, die rechte Seite der Zuweisung -->
+
+    <xsl:variable name="read_result"  select="com                            [ @access='read'  or not( @access ) and ( not( parent::*/@access        ) or parent::property/@access='read'  ) ]/com.result"/>
+    <xsl:variable name="write_result" select="com [ not ( parent::method ) ] [ @access='write' or not( @access ) and ( not( parent::property/@access ) or parent::property/@access='write' ) ]/com.result"/>
 
     <xsl:if test="com/com.parameter [ description ] | $write_result [ description ]">
         <h3>Parameter</h3>
