@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!-- $Id$ -->
 
-<?xml-stylesheet href="api_default_language.xsl" type="text/xsl"?>
+<?xml-stylesheet href="api-default_language.xsl" type="text/xsl"?>
 
 
 <api.class
@@ -62,7 +62,7 @@
     </com>
 
     <title>
-        Wert der Kommandozeilenoption <code>-param=</code> beim Start des Schedulers
+        Kommandozeilenoption <code>-param=</code>
     </title>
 
     <description>
@@ -189,7 +189,7 @@
 
 <method name="terminate_and_restart">
     <title>
-        Scheduler mit allen Tasks ordentlich beenden und dann erneut starten
+        Scheduler mit allen Tasks ordentlich beenden und erneut starten
     </title>
     
     <com>
@@ -455,7 +455,7 @@
     </com>
 
     <title>
-        Name der Datenbanktabelle für die internen Variablen des Schedulers
+        Name der Datenbanktabelle für interne Variablen des Schedulers
     </title>
 </property>
 

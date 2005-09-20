@@ -2,7 +2,7 @@
 
 package sos.spooler;
 
-/** Ein Auftrag zur Verarbeitung durch einen Job.
+/*+ Ein Auftrag zur Verarbeitung durch einen Job.
  * 
  * <p>
  * Ein Auftrag, der in der Auftragswarteschlange eines Jobs steht, veranlasst diesen, einen Jobschritt 
@@ -43,7 +43,7 @@ public class Order extends Idispatch
 
     
     
-    /** Stellt die Kennung des Auftrags ein.
+    /*+ Stellt die Kennung des Auftrags ein.
      * 
      * <p>
      * Jeder Auftrag hat eine (innerhalb der Jobkette oder der Auftragswarteschlange des Jobs eindeutige) Kennung.
@@ -59,41 +59,41 @@ public class Order extends Idispatch
     
     
     
-    /** Liefert die Kennung des Auftrags. */
+    /*+ Liefert die Kennung des Auftrags. */
     public String           id                  ()                                  { return            com_call( "<id"                 ).toString(); }
     
     
     
-    /** Der Titel ist ein Klartext, der den Auftrag bezeichnet. */ 
+    /*+ Der Titel ist ein Klartext, der den Auftrag bezeichnet. */ 
     public void         set_title               ( String value )                    {                   com_call( ">title", value       ); }
 
     
     
-    /** Der Titel ist ein Klartext, der den Auftrag bezeichnet. */ 
+    /*+ Der Titel ist ein Klartext, der den Auftrag bezeichnet. */ 
     public String           title               ()                                  { return (String)   com_call( "<title"              ); }
     
     
     
-    /** Aufträge mit höherer Priorität werden zuerst verarbeitet. */
+    /*+ Aufträge mit höherer Priorität werden zuerst verarbeitet. */
     public void         set_priority            ( int value )                       {                   com_call( ">priority", value    ); }
     
 
     
-    /** Aufträge mit höherer Priorität werden zuerst abgearbeitet. */
+    /*+ Aufträge mit höherer Priorität werden zuerst abgearbeitet. */
     public String           priority            ()                                  { return (String)   com_call( "<priority"           ); }
     
     
     
-    /** Liefert die Jobkette, in der der Auftrag enthalten ist, oder null. */
+    /*+ Liefert die Jobkette, in der der Auftrag enthalten ist, oder null. */
     public Job_chain        job_chain           ()                                  { return (Job_chain)com_call( "<job_chain"          ); }
 
     
     
-    /** Liefert den Jobkettenknoten, der dem Zustand des Auftrags entspricht, oder null, wenn der Auftrag nicht in einer Jobkette ist. */
+    /*+ Liefert den Jobkettenknoten, der dem Zustand des Auftrags entspricht, oder null, wenn der Auftrag nicht in einer Jobkette ist. */
     public Job_chain_node   job_chain_node      ()                                  { return (Job_chain_node)com_call( "<job_chain_node" ); }
 
     
-    /** Stellt den Zustand des Auftrags auf den Zustand ein, für den in der Jobkette der angegebene Job eingestellt ist.
+    /*+ Stellt den Zustand des Auftrags auf den Zustand ein, für den in der Jobkette der angegebene Job eingestellt ist.
      * 
      * <p>
      * Besser ist der Aufruf von {@link #set_state(String)}.
@@ -102,7 +102,7 @@ public class Order extends Idispatch
 
     
     
-    /** Stellt den Zustand des Auftrags auf den Zustand ein, der dem Job in Jobkette entspricht.
+    /*+ Stellt den Zustand des Auftrags auf den Zustand ein, der dem Job in Jobkette entspricht.
      * 
      * <p>
      * Besser ist der Aufruf von {@link #set_state(String)}.
@@ -111,14 +111,14 @@ public class Order extends Idispatch
     
     
     
-    /**
+    /*+
      * Liefert den Job, in dessen Auftragswarteschlange sich der Auftrag befindet, oder null.
      */
     public Job              job                 ()                                  { return (Job)      com_call( "<job"                ); }
     
     
     
-    /**
+    /*+
      * Stellt den Zustand des Auftrags ein.
      * 
      * <p>
@@ -129,24 +129,24 @@ public class Order extends Idispatch
     
     
     
-    /**
+    /*+
      * Liefert den Zustand des Auftrags.
      */
     public String           state               ()                                  { return (String)   com_call( "<state"              ); }
 
     
     
-    /** Stellt einen Klartext ein, der den Zustand des Auftrags beschreibet. */
+    /*+ Stellt einen Klartext ein, der den Zustand des Auftrags beschreibet. */
     public void         set_state_text          ( String value )                    {                   com_call( ">state_text", value  ); }
     
     
     
-    /** Liefert den mit set_state_text() eingestellten Text. */
+    /*+ Liefert den mit set_state_text() eingestellten Text. */
     public String           state_text          ()                                  { return (String)   com_call( "<state_text"         ); }
 
     
     
-    /** Die Nutzlast, also Parameter des Auftrags.
+    /*+ Die Nutzlast, also Parameter des Auftrags.
      * Neben der Auftragskennung (id), die den Auftrag identifiziert, können hier zusätzliche
      * Angaben gemacht werden. 
      * 
@@ -159,7 +159,7 @@ public class Order extends Idispatch
 
     
     
-    /** Liefert den mit set_payload() eingestellten Wert. 
+    /*+ Liefert den mit set_payload() eingestellten Wert. 
       * Das kann ein {@link Variable_set} sein: 
       * <pre>
       *     Variable_set variable_set = (Variable_set)spooler_task.payload();
@@ -170,7 +170,7 @@ public class Order extends Idispatch
     
     
     
-    /** Prüft den COM-Typ der Nutzlast.
+    /*+ Prüft den COM-Typ der Nutzlast.
      * 
      * @param name "Spooler.Variable_set", "Hostware.Dyn_obj" oder "Hostware.Record".  
      * @return true, wenn die Nutzlast vom angegebenen COM-Typ ist. 
@@ -179,13 +179,13 @@ public class Order extends Idispatch
     
     
     
-    /** Liefert die &lt;run_time> (zur periodischen Wiederholung des Auftrags).
+    /*+ Liefert die &lt;run_time> (zur periodischen Wiederholung des Auftrags).
      * 
      */
     public Run_time         run_time            ()                                  { return (Run_time) com_call( "<run_time"           ); }
 
 
-    /** Entfernt den Auftrag aus seiner Jobkette.
+    /*+ Entfernt den Auftrag aus seiner Jobkette.
       * <p>
       * Wenn der Auftrag gerade von einer Task ausgeführt wird,
       * liefert die Eigenschaft {@link #job_chain}
@@ -202,6 +202,6 @@ public class Order extends Idispatch
 
 
 
-    /** Liefert "yyyy-mm-dd HH:MM:SS.MMM" oder "now" oder "never" */
+    /*+ Liefert "yyyy-mm-dd HH:MM:SS.MMM" oder "now" oder "never" */
     public String           string_next_start_time()                                { return (String)   com_call( "<string_next_start_time" ); }
 }

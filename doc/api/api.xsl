@@ -43,6 +43,7 @@
 
 <xsl:template name="programming_language_selector">
     <xsl:param name="this_programming_language"/>
+    <xsl:param name="href"/>
 
     <xsl:variable name="plang" select="translate( $this_programming_language, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz' )"/>
 
@@ -53,6 +54,9 @@
         <xsl:choose>
             <xsl:when test="$programming_language=$plang">
                 <xsl:attribute name="style">font-weight: bold;</xsl:attribute>
+            </xsl:when>
+            <xsl:when test="$href">
+                <xsl:attribute name="href"><xsl:value-of select="$href"/></xsl:attribute>
             </xsl:when>
             <xsl:otherwise>
                 <xsl:attribute name="href"><xsl:value-of select="/api.class/@name"/>-<xsl:value-of select="$plang"/>.xml</xsl:attribute>
@@ -196,7 +200,7 @@
             </xsl:call-template>
 
 
-            <table cellpadding="0" cellspacing="0" style="padding-bottom: 4ex">
+            <table cellpadding="0" cellspacing="0" width="100%" style="padding-bottom: 4ex">
                 <tr>
                     <td style="vertical-align: top; padding-right: 3ex; padding-bottom: 4pt;">
                         <xsl:call-template name="all_classes">   <!-- Übersicht -->
@@ -223,6 +227,15 @@
                             <xsl:with-param name="this_programming_language">Perl</xsl:with-param>
                         </xsl:call-template>
                     </td>
+                    
+                    <xsl:if test="/api.class/@name != 'api' and not( /api.class/not_implemented/@programming_language='java' )">
+                        <td style="padding-left: 3ex; padding-bottom: 4pt; text-align: right;">
+                            <xsl:call-template name="programming_language_selector">
+                                <xsl:with-param name="this_programming_language">Javadoc</xsl:with-param>
+                                <xsl:with-param name="href"><xsl:value-of select="@base_dir"/>javadoc/sos/spooler/<xsl:value-of select="@name"/>.html</xsl:with-param>
+                            </xsl:call-template>
+                        </td>
+                    </xsl:if>
                 </tr>
 
                 <tr>
@@ -244,20 +257,24 @@
                         </xsl:call-template>
                     </td>
 
-                    <td style="padding-left: 3ex; border-left: 1px dotted black;">
+                    <td colspan="2" style="padding-left: 3ex; border-left: 1px dotted black;">
                         <!--xsl:apply-templates select="." mode="headline"/-->
-                        <xsl:if test="@name != 'api'">
-                            <p class="api_headline">
+                        <p class="api_headline">
+                            <xsl:if test="@name != 'api'">
                                 <xsl:value-of select="@name"/>
-
+                                
                                 <xsl:if test="title">
-                                    &#160;–&#160; <xsl:value-of select="title"/>
+                                    &#160;–&#160;
                                 </xsl:if>
-                            </p>
-                        </xsl:if>
+                            </xsl:if>
 
-                        <p>&#160;</p>
-                        <xsl:apply-templates select="." mode="table"/>
+                            <xsl:value-of select="title"/>
+                        </p>
+
+                        <xsl:if test="property | method">
+                            <p>&#160;</p>
+                            <xsl:apply-templates select="." mode="table"/>
+                        </xsl:if>
                         
                         <xsl:apply-templates select="." mode="example"/>
 
@@ -410,11 +427,12 @@
         </tr>
         -->
 
-        <xsl:apply-templates select="  property [ not( not_implemented/@programming_language=$programming_language ) ] 
-                                     | method   [ not( not_implemented/@programming_language=$programming_language ) ]" mode="table">
-            <xsl:sort select="@name"/>
-        </xsl:apply-templates>
-
+        <xsl:if test="not( not_implemented/@programming_language=$programming_language )">
+            <xsl:apply-templates select="  property [ not( not_implemented/@programming_language=$programming_language ) ] 
+                                        | method   [ not( not_implemented/@programming_language=$programming_language ) ]" mode="table">
+                <xsl:sort select="@name"/>
+            </xsl:apply-templates>
+        </xsl:if>
     </table>
 
 </xsl:template>
@@ -709,7 +727,9 @@
                 <xsl:with-param name="is_in_table" select="$is_in_table"/>
             </xsl:apply-templates>
 
-            <span class="mono"><xsl:text> </xsl:text></span>
+            <xsl:if test="@name">
+                <span class="mono"><xsl:text> </xsl:text></span>
+            </xsl:if>
         </xsl:if>
 
         <span class="mono"><xsl:value-of select="@name"/></span>
@@ -805,11 +825,15 @@
 
 <xsl:template match="api.class" mode="detailed_methods">
 
-    <xsl:apply-templates select="  method   [ com and not( not_implemented/@programming_language=$programming_language ) ]
-                                 | property [ com and not( not_implemented/@programming_language=$programming_language ) ]" 
-                         mode="detailed_methods">
-        <xsl:sort select="@name"/>                         
-    </xsl:apply-templates>
+    <xsl:if test="not( not_implemented/@programming_language=$programming_language )">
+    
+        <xsl:apply-templates select="  method   [ com and not( not_implemented/@programming_language=$programming_language ) ]
+                                    | property [ com and not( not_implemented/@programming_language=$programming_language ) ]" 
+                            mode="detailed_methods">
+            <xsl:sort select="@name"/>                         
+        </xsl:apply-templates>
+
+    </xsl:if>
 
 </xsl:template>
 

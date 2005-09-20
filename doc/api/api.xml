@@ -11,11 +11,11 @@
     date        = "$Date$"
 >
 
-    <description>
-        <p class="api_headline">
-            Übersicht
-        </p>
+    <title>
+        Übersicht
+    </title>
 
+    <description>
         <p>
             Jobs, die die Programmschnittstelle des Schedulers nutzen,
             können in den Sprachen Java, JavaScript (Mozilla) und Perl implementiert werden

@@ -1,5 +1,5 @@
 ﻿<?xml version='1.0'?>
-<!-- $Id$ -->
+<!-- $Id$      Zschimmer GmbH -->
 
 
 <xsl:stylesheet xmlns:xsl = "http://www.w3.org/1999/XSL/Transform" 
@@ -48,7 +48,7 @@
            td           / text() |"
     >
 -->
-<xsl:template match="* [ not( parent::pre ) ] / text()">
+<xsl:template match="* / text() [ not( ancestor::pre ) ] ">
     
     <xsl:if test="normalize-space(.) != ''">
 

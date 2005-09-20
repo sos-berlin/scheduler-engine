@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!-- $Id$ -->
 
-<?xml-stylesheet href="api_default_language.xsl" type="text/xsl"?>
+<?xml-stylesheet href="api-default_language.xsl" type="text/xsl"?>
 
 
 <api.class
@@ -141,7 +141,8 @@
         <pre>var variable_set = spooler.create_variable_set();
 spooler_log.info( variable_set );
 
-variable_set.xml= "&lt;?xml version='1.0'?>&lt;variable_set>&lt;variable name='nachname' value='Meier'/>&lt;variable name='vorname' value='Hans'/>&lt;/variable_set>";
+variable_set.xml= "&lt;?xml version='1.0'?>&lt;variable_set>&lt;variable name='nachname' value='Meier'/>" + 
+                  "&lt;variable name='vorname' value='Hans'/>&lt;/variable_set>";
 spooler_log.info( variable_set );
 spooler_log.info( "nachname=" + variable_set.value( "nachname" ) );
 spooler_log.info( "vorname =" + variable_set.value( "vorname" ) );</pre></example>

@@ -2,7 +2,7 @@
 
 package sos.spooler;
 
-/**
+/*+
  * Ein Jobkettenknoten beschreibt eine Stelle in einer Jobkette ({@link Job_chain}). 
  * Einem Jobkettenknoten sind zugeordnet: ein Zustand, ein Job, ein Folgezustand und ein Fehlerzustand.
  * <p>
@@ -24,7 +24,7 @@ public class Job_chain_node extends Idispatch
 
 
     
-    /** Zustand, für den dieser Jobkettenknoten gilt.
+    /*+ Zustand, für den dieser Jobkettenknoten gilt.
      * 
      * <p><br/><b>Beispiel</b>
      * <pre>
@@ -43,7 +43,7 @@ public class Job_chain_node extends Idispatch
 
 
     
-    /** Liefert den nächsten Knoten in der Jobkette für den Erfolgsfall.
+    /*+ Liefert den nächsten Knoten in der Jobkette für den Erfolgsfall.
      * 
      * <p><br/><b>Beispiel</b>
      * <pre>
@@ -63,7 +63,7 @@ public class Job_chain_node extends Idispatch
 
 
     
-    /** Liefert den nächsten Knoten in der Jobkette für den Fehlerfall.
+    /*+ Liefert den nächsten Knoten in der Jobkette für den Fehlerfall.
      *  
      * <p><br/><b>Beispiel</b>
      * <pre>
@@ -82,7 +82,7 @@ public class Job_chain_node extends Idispatch
     public Job_chain_node   error_node          ()                                  { return (Job_chain_node)com_call( "<error_node"  ); }
 
 
-    /** Liefert den Job, der dem Knoten zugeordnet ist.
+    /*+ Liefert den Job, der dem Knoten zugeordnet ist.
      * 
      * <p><br/><b>Beispiel</b>
      * <pre>
@@ -99,7 +99,7 @@ public class Job_chain_node extends Idispatch
     public Job              job                 ()                                  { return (Job)           com_call( "<job"         ); }
 
 
-    /** Liefert den nächsten Zustand in der Jobkette für den Erfolgsfall.
+    /*+ Liefert den nächsten Zustand in der Jobkette für den Erfolgsfall.
      * 
      * <p><br/><b>Beispiel</b>
      * <pre>
@@ -116,7 +116,7 @@ public class Job_chain_node extends Idispatch
     public String           next_state          ()                                  { return (String)        com_call( "<next_state"  ); }
 
 
-    /** Liefert den nächsten Zustand in der Jobkette für den Fehlerfall.
+    /*+ Liefert den nächsten Zustand in der Jobkette für den Fehlerfall.
      *  
      * <p><br/><b>Beispiel</b>
      * <pre>

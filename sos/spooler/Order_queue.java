@@ -2,7 +2,7 @@
 
 package sos.spooler;
 
-/** Auftragswarteschlange eines auftragsgesteuerten Jobs.
+/*+ Auftragswarteschlange eines auftragsgesteuerten Jobs.
  * 
  * <p>
  * Ein auftragsgesteuerter Job (&lt;job order="yes">) hat eine Auftragswarteschlange, 
@@ -26,12 +26,12 @@ public class Order_queue extends Idispatch
 {
     private                 Order_queue         ( long idispatch )                  { super(idispatch); }
 
-    /** Liefert die Anzahl der Aufträge in der Auftragswarteschlange. */
+    /*+ Liefert die Anzahl der Aufträge in der Auftragswarteschlange. */
     public int              length              ()                                  { return        int_com_call( "<length"             ); }
     
     
     
-    /** Fügt einen Auftrag der Auftragswarteschlange hinzu.
+    /*+ Fügt einen Auftrag der Auftragswarteschlange hinzu.
      * <p>
      * Der Aufruf gilt nur für den Fall, dass der Auftrag nicht in einer Jobkette enthalten ist.
      * 

@@ -2,7 +2,7 @@
 
 package sos.spooler;
 
-/**
+/*+
  * Oberklasse für die Implementierung eines Startskripts oder eines Jobs.
  * 
  * Der Methoden eines Jobs werden in folgender Reihenfolge aufgerufen.
@@ -44,7 +44,7 @@ public class Job_impl
     
     
     
-    /** Der Scheduler ruft diese Methode nach dem Konstruktor und vor {@link #spooler_open()} genau einmal auf. 
+    /*+ Der Scheduler ruft diese Methode nach dem Konstruktor und vor {@link #spooler_open()} genau einmal auf. 
       * Gegenstück ist {@link #spooler_exit()}. Die Methode ist geeignet, um die Task zu initialisieren 
       * (z.B. um eine Datenbank-Verbindung aufzubauen).
       * 
@@ -57,7 +57,7 @@ public class Job_impl
 
     
 
-    /** Wir als allerletzte Methode gerufen, bevor das Java-Objekt verworfen wird. 
+    /*+ Wir als allerletzte Methode gerufen, bevor das Java-Objekt verworfen wird. 
       * Hier kann z.B. eine Datenbank-Verbindung geschlossen werden. 
       */
     
@@ -65,7 +65,7 @@ public class Job_impl
 
 
     
-    /** Wird zu Beginn einer Task gerufen. 
+    /*+ Wird zu Beginn einer Task gerufen. 
       * Die Methode wird direkt nach {@link #spooler_init()} gerufen, es gibt derzeit keinen Unterschied.
       * Gegenstück ist {@link #spooler_close()}.
       * @return false beendet die Task. Der Scheduler setzt mit spooler_close() fort.
@@ -75,14 +75,14 @@ public class Job_impl
 
 
     
-    /** Wird am Ende eines Joblaufs gerufen.
+    /*+ Wird am Ende eines Joblaufs gerufen.
       * Gegenstück zu {@link #spooler_open()}.
       */
 
     public void     spooler_close       ()      throws Exception  {}
 
 
-    /** Führt einen Jobschritt aus.
+    /*+ Führt einen Jobschritt aus.
       * Gegenstück ist {@link #spooler_exit()}.
       * Die Default-Implementierung gibt false zurück (versetzt aber einen Auftrag in den Folgezustand).
       * 
@@ -93,21 +93,21 @@ public class Job_impl
     public boolean  spooler_process     ()      throws Exception  { return false; }
 
 
-    /** Wird als letzte Funktion eines Joblaufs gerufen, wenn ein Fehler aufgetreten ist 
+    /*+ Wird als letzte Funktion eines Joblaufs gerufen, wenn ein Fehler aufgetreten ist 
       * (nach {@link #spooler_close()}, vor {@link #spooler_exit()}).
       */
 
     public void     spooler_on_error    ()      throws Exception  {}
 
     
-    /** Wird als letzte Funktion einer fehlerlosen Task gerufen (nach {@link #spooler_close()}, vor {@link #spooler_exit()}).
+    /*+ Wird als letzte Funktion einer fehlerlosen Task gerufen (nach {@link #spooler_close()}, vor {@link #spooler_exit()}).
       */
 
     public void     spooler_on_success  ()      throws Exception  {}
 
 
     
-    /** Zum Protokollieren.
+    /*+ Zum Protokollieren.
      * 
      * <p><br/><b>Beispiel</b>
      * <pre>
@@ -119,7 +119,7 @@ public class Job_impl
     public Log      spooler_log;
 
     
-    /** Das Objekt der Task.
+    /*+ Das Objekt der Task.
      * 
      * <p><br/><b>Beispiel</b>
      * <pre>
@@ -137,7 +137,7 @@ public class Job_impl
 
 
     
-    /** Das Objekt des Jobs.
+    /*+ Das Objekt des Jobs.
      * 
      * <p><br/><b>Beispiel</b>
      * <pre>
@@ -157,7 +157,7 @@ public class Job_impl
     //public Thread   spooler_thread;
 
     
-    /** Das Objekt des Schedulers.
+    /*+ Das Objekt des Schedulers.
      * 
      * <p><br/><b>Beispiel</b>
      * <pre>

@@ -2,7 +2,7 @@
 
 package sos.spooler;
 
-/** Variablenmenge zur Übergabe von Parametern.
+/*+ Variablenmenge zur Übergabe von Parametern.
  * <p> 
  * Variablenmengen werden gebraucht für die scheduler-weiten Variablen und Task-Parameter.
  * Eine neue Variablenmenge wird mit {@link Spooler#create_variable_set()} angelegt.
@@ -29,7 +29,7 @@ public class Variable_set extends Idispatch
 {
     private                 Variable_set        ( long idispatch )                  { super(idispatch); }
 
-    /** Setzt eine Variable.
+    /*+ Setzt eine Variable.
      * 
      * <p><br/><b>Beispiel</b>
      * <pre>
@@ -49,7 +49,7 @@ public class Variable_set extends Idispatch
     
 
     
-    /** Liefert den Wert einer Variablen.
+    /*+ Liefert den Wert einer Variablen.
      * 
      * <p><br/><b>Beispiel</b>
      * <pre>
@@ -67,7 +67,7 @@ public class Variable_set extends Idispatch
     public String           var                 ( String name )                     { return (String)       com_call( "<var", name              ); }
 
 
-    /** Liefert die Anzahl der Variablen.
+    /*+ Liefert die Anzahl der Variablen.
      * <p>
      * Es gibt keine Möglichkeit, über Variablen über einen Index anzusprechen oder über sie zu iterieren. 
      * Dieser Aufruf ist also nicht so nützlich. 
@@ -91,7 +91,7 @@ public class Variable_set extends Idispatch
   //public Variable_set     clone               ()                                  { return (Variable_set) com_call( "clone"                   ); }
     
     
-    /** Mischt die Variablen aus einer anderen Variablenmenge ein.
+    /*+ Mischt die Variablen aus einer anderen Variablenmenge ein.
      * 
      * Bereits vorhandene Variablen werden bei gleichen Namen überschrieben.
      * 
@@ -100,7 +100,7 @@ public class Variable_set extends Idispatch
     public void             merge               ( Variable_set vars )               {                       com_call( "merge", vars             ); }
 
 
-    /** Übernimmt ein die Variablenmenge aus einem XML-Dokument.
+    /*+ Übernimmt ein die Variablenmenge aus einem XML-Dokument.
      * Mit folgender DTD:
      * <p>
      * <pre>
@@ -131,7 +131,7 @@ public class Variable_set extends Idispatch
     public void         set_xml                 ( String xml_text )                 {                       com_call( ">xml", xml_text          ); }
 
 
-    /** Liefert die Variablenmenge als XML-Dokument, wie in {@link #set_xml(String)} beschrieben.
+    /*+ Liefert die Variablenmenge als XML-Dokument, wie in {@link #set_xml(String)} beschrieben.
      * Das XML-Dokument kann {@link #set_xml(String)} übergeben werden.
 
      * <p><br/><b>Beispiel</b>

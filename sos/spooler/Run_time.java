@@ -2,7 +2,7 @@
 
 package sos.spooler;
 
-/** &lt;run_time>-Element.
+/*+ &lt;run_time>-Element.
  * 
  * @see Order#run_time()
  *
@@ -16,7 +16,7 @@ public class Run_time  extends Idispatch
 
     
     
-    /** Setzt die Run_time oder erweitert sie.
+    /*+ Setzt die Run_time oder erweitert sie.
      *  
      * @param xml Ein &lt;run_time>-Dokument.
      */

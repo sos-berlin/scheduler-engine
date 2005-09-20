@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!-- $Id$ -->
 
-<?xml-stylesheet href="api_default_language.xsl" type="text/xsl"?>
+<?xml-stylesheet href="api-default_language.xsl" type="text/xsl"?>
 
 
 <api.class
@@ -11,6 +11,8 @@
     author      = "$Author$"
     date        = "$Date$"
 >
+
+<not_implemented programming_language="java"/>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 

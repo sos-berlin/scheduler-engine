@@ -2,7 +2,7 @@
 
 package sos.spooler;
 
-/** Eine Task ist eine laufende Instanz eines Jobs.
+/*+ Eine Task ist eine laufende Instanz eines Jobs.
  * 
  * <p>
  * Eine Task kann wartend in der Task-Warteschlange des Jobs sein oder laufen.
@@ -20,15 +20,15 @@ public class Task extends Idispatch
   //public Object_set       object_set
 
     
-    /** Liefert den {@link Job}, zu der die Task gehört. */
+    /*+ Liefert den {@link Job}, zu der die Task gehört. */
     public Job              job                 ()                                  { return (Job)          com_call( "<job"                            ); }
     
     
 
-    /** Liefert die Kennung der Task. */
+    /*+ Liefert die Kennung der Task. */
     public int              id                  ()                                  { return            int_com_call( "<id"                             ); }
     
-    /** Liefert die Parameter der Task.
+    /*+ Liefert die Parameter der Task.
      * 
      * <p>
      * Eine Task kann Parameter haben. Die Parameter können in der Konfiguration mit &lt;parameter>, 
@@ -37,7 +37,7 @@ public class Task extends Idispatch
     public Variable_set     params              ()                                  { return (Variable_set) com_call( "<params"                         ); }
     
     
-    /** Hier kann die Task ein Ergebnis speichern, das von einer anderen, solange wartenden Task
+    /*+ Hier kann die Task ein Ergebnis speichern, das von einer anderen, solange wartenden Task
      * abgeholt werden kann.
      * 
      * <p>
@@ -49,12 +49,12 @@ public class Task extends Idispatch
     
     
     
-    /** Liefert das mit set_result() gesetzte Ergebnis. */
+    /*+ Liefert das mit set_result() gesetzte Ergebnis. */
     public String           result              ()                                  { return (String)       com_call( "<result"                         ); }
     
     
     
-    /** Startet erneut eine Task nach der eingestellten Zeit.
+    /*+ Startet erneut eine Task nach der eingestellten Zeit.
      * 
      * <p>
      * Diese Methode gehört eigentlich in die Klasse Job. Sie hat nichts mit der gerade laufenden Task zu tun.
@@ -70,7 +70,7 @@ public class Task extends Idispatch
     
     
     
-    /** Veranlasst den Scheduler, nicht mehr spooler_process() zu rufen.
+    /*+ Veranlasst den Scheduler, nicht mehr spooler_process() zu rufen.
      * 
      * <p>
      * Der nächste Aufruf wird spooler_close() sein.
@@ -79,7 +79,7 @@ public class Task extends Idispatch
     
     
     
-    /** Setzt einen Fehler und stoppt den Job.
+    /*+ Setzt einen Fehler und stoppt den Job.
      *
      * @param text Fehlertext
      */ 
@@ -87,7 +87,7 @@ public class Task extends Idispatch
     
     
     
-    /** Liefert den Fehler der Task als {@link Error}.
+    /*+ Liefert den Fehler der Task als {@link Error}.
      * 
      * <p>
      * Wenn kein Fehler vorliegt, wird ein Error-Objekt zurückgeliefert, dessen Aufruf is_error false liefert.
@@ -96,7 +96,7 @@ public class Task extends Idispatch
 
     
     
-    /** Wartet aufs Ende einer anderen Task.
+    /*+ Wartet aufs Ende einer anderen Task.
      * 
      * <p>
      * In Kombination mit {@link Job#start()} kann eine Task aufs Ende einer anderen warten.
@@ -108,7 +108,7 @@ public class Task extends Idispatch
     
     
     
-    /** Wie {@link #wait_until_terminated()}, mit Begrenzung der Wartezeit. 
+    /*+ Wie {@link #wait_until_terminated()}, mit Begrenzung der Wartezeit. 
      * 
      * @return true, wenn Task geendet; false, wenn Zeit abgelaufen. */
     public boolean          wait_until_terminated( double wait_seconds )            { return ( (Boolean)    com_call( "wait_until_terminated", new Double(wait_seconds) ) ).booleanValue(); }
@@ -119,7 +119,7 @@ public class Task extends Idispatch
 
     
     
-    /** Setzt ein Feld in der Task-Historie.
+    /*+ Setzt ein Feld in der Task-Historie.
      * 
      * <p>
      * Die Datenbanktabelle muss eine Spalte mit dem Namen haben
@@ -129,12 +129,12 @@ public class Task extends Idispatch
     
     
     
-    /** Verzögert den nächsten Aufruf von spooler_process().
+    /*+ Verzögert den nächsten Aufruf von spooler_process().
      */
     public void         set_delay_spooler_process( double seconds )                 {                       com_call( ">delay_spooler_process", seconds ); }
 
     
-    /** Verzögert den nächsten Aufruf von spooler_process().
+    /*+ Verzögert den nächsten Aufruf von spooler_process().
      * 
      * @param hhmm_ss "HH:MM:SS" oder "HH:MM", die Dauer in Stunde, Minute, Sekunde.
      */
@@ -142,18 +142,18 @@ public class Task extends Idispatch
 
     
 
-    /** @deprecated Die Methode galt für use_engine="job", was es nicht mehr gibt. */    
+    /*+ @deprecated Die Methode galt für use_engine="job", was es nicht mehr gibt. */    
     public void         set_close_engine        ( boolean close_after_task )        {                       com_call( ">close_engine", close_after_task ); }
 
     
 
-    /** Liefert den zu verarbeitenden Auftrag oder null.
+    /*+ Liefert den zu verarbeitenden Auftrag oder null.
      */
     public Order            order               ()                                  { return (Order)        com_call( "<order"                          ); }
 
     
     
-    /** Liefert die Verzeichnisse, deren Änderung den Start der Task veranlasst haben.
+    /*+ Liefert die Verzeichnisse, deren Änderung den Start der Task veranlasst haben.
      * 
      * Mehrere Verzeichnisnamen sind durch Semikolon getrennt.
      * 
@@ -163,7 +163,7 @@ public class Task extends Idispatch
     public String           changed_directories ()                                  { return (String)       com_call( "<changed_directories"            ); }
 
     
-    /** Macht dem Scheduler einen abhängigen Prozess bekannt.
+    /*+ Macht dem Scheduler einen abhängigen Prozess bekannt.
      * 
      * <p>
      * Wenn die Task endet, bricht der Scheduler die evtl. noch laufenden Prozesse ab.
@@ -176,7 +176,7 @@ public class Task extends Idispatch
     
     
 
-    /** Macht dem Scheduler einen abhängigen, befristeten Prozess bekannt.
+    /*+ Macht dem Scheduler einen abhängigen, befristeten Prozess bekannt.
      * 
      * <p>
      * Wie {@link #add_pid(int)}, mit dem Zusatz, dass der Scheduler den Prozess nach der
@@ -195,7 +195,7 @@ public class Task extends Idispatch
 
     
     
-    /** Nimmt ein add_pid() zurück.
+    /*+ Nimmt ein add_pid() zurück.
      * 
      * <p>
      * Wenn die Pid nicht bekannt ist, gibt es keinen Fehler.
@@ -208,7 +208,7 @@ public class Task extends Idispatch
 
     
     
-    /** Der bisher nach stdout geschriebene Text.
+    /*+ Der bisher nach stdout geschriebene Text.
      * 
      * <p>
      * Nur, wenn die Task in einem separaten Prozess (&lt;process_classes/>) läuft. Sonst "".
@@ -218,7 +218,7 @@ public class Task extends Idispatch
     public String           stdout_text         ()                                  { return (String)       com_call( "<stdout_text"                    ); }
 
 
-    /** Pfadname für stdout.
+    /*+ Pfadname für stdout.
      * 
      * <p>
      * Nur, wenn die Task in einem separaten Prozess (&lt;process_classes/>) läuft. Sonst "".
@@ -229,7 +229,7 @@ public class Task extends Idispatch
 
     
     
-    /** Der bisher nach stderr geschriebene Text.
+    /*+ Der bisher nach stderr geschriebene Text.
      * 
      * <p>
      * Nur, wenn die Task in einem separaten Prozess (&lt;process_classes/>) läuft. Sonst "".
@@ -238,7 +238,7 @@ public class Task extends Idispatch
      */
     public String           stderr_text         ()                                  { return (String)       com_call( "<stderr_text"                    ); }
     
-    /** Pfadname für stderr.
+    /*+ Pfadname für stderr.
      * 
      * <p>
      * Nur, wenn die Task in einem separaten Prozess (&lt;process_classes/>) läuft. Sonst "".

@@ -2,7 +2,7 @@
 
 package sos.spooler;
 
-/**
+/*+
  * Eine Jobkette (Job_chain) ist eine Kette von Jobs (Jobkettenknoten oder Stellen). 
  * Diese Kette wird von Aufträgen ({@link Order}) durchlaufen.
  * <p> 
@@ -61,7 +61,7 @@ public class Job_chain extends Idispatch
 
     
     
-    /** Setzt den Namen der Jobkette.
+    /*+ Setzt den Namen der Jobkette.
      * 
      * <p><br/><b>Beispiel</b>
      * <pre>
@@ -77,7 +77,7 @@ public class Job_chain extends Idispatch
      */
     public void         set_name                ( String value )                    {                           com_call( ">name", value        ); }
     
-    /** Liefert den Namen der Jobkette.
+    /*+ Liefert den Namen der Jobkette.
      * 
      * <p><br/><b>Beispiel</b>
      * <pre>
@@ -95,7 +95,7 @@ public class Job_chain extends Idispatch
      */
     public String           name                ()                                  { return (String)           com_call( "<name"               ); }
     
-    /** Fügt der Jobkette einen Knoten hinzu.
+    /*+ Fügt der Jobkette einen Knoten hinzu.
      * <p>
      * @param jobname Name des Jobs.
      * @param input_state Zustand, für den dieser Knoten gilt. Für jeden Knoten muss ein neuer Zustand angegeben sein.
@@ -106,7 +106,7 @@ public class Job_chain extends Idispatch
     public void             add_job             ( String jobname, String input_state, 
                                                   String output_state, String error_state ) {                   com_call( "add_job", jobname, input_state, output_state, error_state ); }
     
-    /** Fügt der Jobkette einen Endknoten hinzu.
+    /*+ Fügt der Jobkette einen Endknoten hinzu.
      * <p/>
      * Diesem Knoten ist kein Job zugeordnet. 
      * Ein Auftrag, der einen Endknoten erreicht, hat die Jobkette durchlaufen und wird vom Scheduler aus ihr entfernt.
@@ -116,7 +116,7 @@ public class Job_chain extends Idispatch
     public void             add_end_state       ( String state )                    {                           com_call( "add_end_state", state ); }
     
     
-    /** Gibt einen Auftrag in die Jobkette.
+    /*+ Gibt einen Auftrag in die Jobkette.
      * <p>
      * Wenn der Auftrag in einer anderen Jobkette enthalten ist,
      * entfernt der Scheduler ihn daraus.
@@ -137,7 +137,7 @@ public class Job_chain extends Idispatch
     public void             add_order           ( Order order )                     {                           com_call( "add_order", order    ); }
 
 
-    /** Gibt einen Auftrag in die Jobkette und ersetzt ggfs einen mit gleicher Kennung.
+    /*+ Gibt einen Auftrag in die Jobkette und ersetzt ggfs einen mit gleicher Kennung.
       * <p>
       * Hat die Jobkette bereits einen Auftrag mit gleicher Kennung, dann wird dieser ersetzt.
       * Genauer: Er wird aus der Jobkette entfernt, 
@@ -157,13 +157,13 @@ public class Job_chain extends Idispatch
     public void             add_or_replace_order( Order order )                     {                           com_call( "add_or_replace_order", order ); }
     
     
-    /** @return Die Zahl der Aufträge in der Jobkette */
+    /*+ @return Die Zahl der Aufträge in der Jobkette */
     public int              order_count         ()                                  { return                int_com_call( "<order_count"        ); }
     
-    /** @return Der Jobkettenknoten zum angegebenen Zustand */ 
+    /*+ @return Der Jobkettenknoten zum angegebenen Zustand */ 
     public Job_chain_node   node                ( String state )                    { return (Job_chain_node)   com_call( "<node", state        ); }
     
-    /** Dasselbe wie node(state).job().order_queue(). 
+    /*+ Dasselbe wie node(state).job().order_queue(). 
      * @return Liefert die Auftragswarteschlange des Jobs, der dem angegebenen Zustand zugeordnet ist. */
     public Order_queue      order_queue         ( String state )                    { return (Order_queue)      com_call( "<order_queue", state ); }
 }

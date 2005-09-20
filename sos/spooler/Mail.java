@@ -2,7 +2,7 @@
 
 package sos.spooler;
 
-/** eMail-Versand eines Protokolls.
+/*+ eMail-Versand eines Protokolls.
  *
  * @see Log#mail()
  * @author Joacim Zschimmer
@@ -15,7 +15,7 @@ public class Mail extends Idispatch
 
     
     
-    /** Stellt den Empfänger ein.
+    /*+ Stellt den Empfänger ein.
      *
      * <p>Wenn die Hostware zum eMail-Versand JavaMail verwendet, können Sie mehere Adressen durch Komma getrennt angeben. 
      *    Siehe <a href="http://java.sun.com/products/javamail/javadocs/javax/mail/internet/InternetAddress.html#parse(java.lang.String)">javax.mail.InternetAddress.parse(String)</a>.
@@ -37,7 +37,7 @@ public class Mail extends Idispatch
     
     
     
-    /** Der Empfänger.
+    /*+ Der Empfänger.
      * 
      * <p><br/><b>Beispiel</b>
      * <pre>
@@ -53,7 +53,7 @@ public class Mail extends Idispatch
 
     
     
-    /** Stellt den Absender ein.
+    /*+ Stellt den Absender ein.
      * 
      * <p><br/><b>Beispiel</b>
      * <pre>
@@ -71,7 +71,7 @@ public class Mail extends Idispatch
     
     
     
-    /** Der Absender.
+    /*+ Der Absender.
      * 
      * <p><br/><b>Beispiel</b>
      * <pre>
@@ -88,7 +88,7 @@ public class Mail extends Idispatch
 
     
     
-    /** Stellt den Empfänger einer Kopie ein.
+    /*+ Stellt den Empfänger einer Kopie ein.
      * 
      * <p>Wenn die Hostware zum eMail-Versand JavaMail verwendet, können Sie mehere Adressen durch Komma getrennt angeben. 
      *    Siehe <a href="http://java.sun.com/products/javamail/javadocs/javax/mail/internet/InternetAddress.html#parse(java.lang.String)">javax.mail.InternetAddress.parse(String)</a>.
@@ -108,7 +108,7 @@ public class Mail extends Idispatch
     
     
     
-    /** Empfänger einer Kopie.
+    /*+ Empfänger einer Kopie.
      * 
      * <p><br/><b>Beispiel</b>
      * <pre>
@@ -124,7 +124,7 @@ public class Mail extends Idispatch
 
     
     
-    /** Stellt den nicht sichtbaren Empfänger einer Kopie ein.
+    /*+ Stellt den nicht sichtbaren Empfänger einer Kopie ein.
      * 
      * <p>Wenn die Hostware zum eMail-Versand JavaMail verwendet, können Sie mehere Adressen durch Komma getrennt angeben. 
      *    Siehe <a href="http://java.sun.com/products/javamail/javadocs/javax/mail/internet/InternetAddress.html#parse(java.lang.String)">javax.mail.InternetAddress.parse(String)</a>.
@@ -144,7 +144,7 @@ public class Mail extends Idispatch
     
     
     
-    /** Der nicht sichtbare Empfänger einer Kopie.
+    /*+ Der nicht sichtbare Empfänger einer Kopie.
      * 
      * <p><br/><b>Beispiel</b>
      * <pre>
@@ -160,7 +160,7 @@ public class Mail extends Idispatch
 
     
     
-    /** Stellt die Betreffzeile ein.
+    /*+ Stellt die Betreffzeile ein.
      * 
      * <p><br/><b>Beispiel</b>
      * <pre>
@@ -177,7 +177,7 @@ public class Mail extends Idispatch
     
     
     
-    /** Die Betreffzeile.
+    /*+ Die Betreffzeile.
      * 
      * <p><br/><b>Beispiel</b>
      * <pre>
@@ -193,7 +193,7 @@ public class Mail extends Idispatch
 
     
     
-    /** Stellt die Nachricht ein.
+    /*+ Stellt die Nachricht ein.
      * 
      * <p><br/><b>Beispiel</b>
      * <pre>
@@ -211,7 +211,7 @@ public class Mail extends Idispatch
     
     
     
-    /** Die Nachricht.
+    /*+ Die Nachricht.
      * 
      * <p><br/><b>Beispiel</b>
      * <pre>
@@ -228,7 +228,7 @@ public class Mail extends Idispatch
 
     
     
-    /** Hängt der Nachricht eine Datei an.
+    /*+ Hängt der Nachricht eine Datei an.
      * 
      * <p><br/><b>Beispiel</b>
      * <pre>
@@ -249,7 +249,7 @@ public class Mail extends Idispatch
                                               String content_type, String encoding )        {                   com_call( "add_file", pathname, mail_filename,
                                                                                                                                       content_type, encoding ); }
 
-    /** Hängt der Nachricht eine Datei an.
+    /*+ Hängt der Nachricht eine Datei an.
      * 
      * Dasselbe wie add_file( pathname, mail_filename, content_type, "" );
      * 
@@ -269,7 +269,7 @@ public class Mail extends Idispatch
                                               String content_type )                         {                   com_call( "add_file", real_filename, mail_filename, content_type ); }
 
     
-    /** Hängt der Nachricht eine Datei an.
+    /*+ Hängt der Nachricht eine Datei an.
      * 
      * Dasselbe wie add_file( pathname, mail_filename, "", "" );
      * 
@@ -289,7 +289,7 @@ public class Mail extends Idispatch
 
     
     
-    /** Hängt der Nachricht eine Datei an.
+    /*+ Hängt der Nachricht eine Datei an.
      * 
      * Dasselbe wie add_file( pathname, "", "", "" );
      * 
@@ -309,7 +309,7 @@ public class Mail extends Idispatch
 
     
     
-    /** Stellt den SMTP-Server ein.
+    /*+ Stellt den SMTP-Server ein.
      * 
      * <p><br/><b>Beispiel</b>
      * <pre>
@@ -328,7 +328,7 @@ public class Mail extends Idispatch
     
     
     
-    /** Liefert den Namen oder die IP-Adresse des SMTP-Server.
+    /*+ Liefert den Namen oder die IP-Adresse des SMTP-Server.
      * 
      * <p><br/><b>Beispiel</b>
      * <pre>
@@ -344,7 +344,7 @@ public class Mail extends Idispatch
 
     
     
-    /** Stellt das Verzeichnis für noch nicht versendbare Nachrichten ein.
+    /*+ Stellt das Verzeichnis für noch nicht versendbare Nachrichten ein.
      * 
      * <p><br/><b>Beispiel</b>
      * <pre>
@@ -362,7 +362,7 @@ public class Mail extends Idispatch
 
     
     
-    /** Liefert das Verzeichnis für noch nicht versendbare Nachrichten.
+    /*+ Liefert das Verzeichnis für noch nicht versendbare Nachrichten.
      * 
      * <p><br/><b>Beispiel</b>
      * <pre>
@@ -379,7 +379,7 @@ public class Mail extends Idispatch
 
     
     
-    /** Fügt der Nachricht eine Kopfzeile hinzu.
+    /*+ Fügt der Nachricht eine Kopfzeile hinzu.
      * 
      * <p><br/><b>Beispiel</b>
      * <pre>
@@ -393,7 +393,7 @@ public class Mail extends Idispatch
 
     
     
-    /** Versendet die Nachrichten aus dem Verzeichnis der noch nicht versendeten Nachrichten.
+    /*+ Versendet die Nachrichten aus dem Verzeichnis der noch nicht versendeten Nachrichten.
      * 
      * <p><br/><b>Beispiel</b>
      * <pre>
@@ -412,7 +412,7 @@ public class Mail extends Idispatch
 
     
     
-    /** Protokoll von dequeue().
+    /*+ Protokoll von dequeue().
      * 
      * <p><br/><b>Beispiel</b>
      * <pre>
@@ -431,7 +431,7 @@ public class Mail extends Idispatch
     public String       dequeue_log         ()                                              { return (String)   com_call( "<dequeue_log"            ); }
     
     
-    /** XSLT-Stylesheet für eMail-Aufbereitung setzen.
+    /*+ XSLT-Stylesheet für eMail-Aufbereitung setzen.
      * 
      * <p><br/><b>Beispiel</b>
      * <pre>
@@ -449,14 +449,14 @@ public class Mail extends Idispatch
 
 
 
-    /** XSLT-Stylesheet für eMail-Aufbereitung setzen.
+    /*+ XSLT-Stylesheet für eMail-Aufbereitung setzen.
      * @see #set_xslt_stylesheet_path(String)
      */
     public void         set_xslt_stylesheet_path( java.io.File file )                       {                   com_call( ">xslt_stylesheet_path", file.toString() ); }
 
 
 
-    /** XSLT-Stylesheet für eMail-Aufbereitung.
+    /*+ XSLT-Stylesheet für eMail-Aufbereitung.
      * @see #set_xslt_stylesheet_path(String)
      */
     public String       xslt_stylesheet_path()                                              { return (String)   com_call( "<xslt_stylesheet_path"   ); }
