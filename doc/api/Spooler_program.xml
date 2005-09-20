@@ -13,22 +13,32 @@
 
 <method name="Spooler_program">
     <java>
-        <java.parameter name="Parameter">
-            <java.type type="String[]"/>
+        <java.parameter name="parameter">
+            <com.type type="BSTR" array="true"/>
         </java.parameter>
 
         <java.result>
-            <java.result type=""/>
+            <java.result type="int"/>
         </java.result>
     </java>
 </method>
 
 <method name="main">
     <java>
-        <java.parameter name="Parameter">
-            <java.type type="String[]"/>
+        <java.parameter name="parameter">
+            <com.type type="BSTR" array="true"/>
         </java.parameter>
     </java>
 </method>
+
+<title>
+    Für den Java-Debugger
+</title>
+
+<description>
+    <p>
+        Nur für Java verfügbar.
+    </p>
+</description>
 
 </api.class>

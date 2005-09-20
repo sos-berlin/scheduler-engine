@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!-- $Id$ -->
 
-<?xml-stylesheet href="api_perl.xsl" type="text/xsl"?>
+<?xml-stylesheet href="api-perl.xsl" type="text/xsl"?>
 
 
 <api.class

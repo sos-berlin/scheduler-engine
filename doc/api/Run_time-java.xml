@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!-- $Id$ -->
 
-<?xml-stylesheet href="api_java.xsl" type="text/xsl"?>
+<?xml-stylesheet href="api-java.xsl" type="text/xsl"?>
 
 
 <api.class

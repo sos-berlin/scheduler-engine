@@ -1772,6 +1772,12 @@
     <xsl:template name="browse_bar_register">
 
         <xsl:element name="a">
+            <xsl:attribute name="href"><xsl:value-of select="$base_dir"/>api/api.xml</xsl:attribute>
+            <xsl:text>API</xsl:text>
+        </xsl:element>
+        &#160; &#160; &#160; 
+
+        <xsl:element name="a">
             <xsl:attribute name="href"><xsl:value-of select="$base_dir"/>register.xml</xsl:attribute>
             <xsl:attribute name="rel">index</xsl:attribute>
             <xsl:text>Register</xsl:text>
