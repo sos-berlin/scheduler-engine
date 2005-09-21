@@ -203,10 +203,12 @@
             <table cellpadding="0" cellspacing="0" width="100%" style="padding-bottom: 4ex">
                 <tr>
                     <td style="vertical-align: top; padding-right: 3ex; padding-bottom: 4pt;">
-                        <xsl:call-template name="all_classes">   <!-- Übersicht -->
-                            <xsl:with-param name="class_references"  select="document( 'all_classes.xml' )/class_references/class_reference [ @class='api' ]"/>
-                            <xsl:with-param name="active_class"      select="/api.class/@name"/>
-                        </xsl:call-template>
+                        <div id="all_classes_1" style="position: relative">  <!-- Wird mit JavaScript positioniert -->
+                            <xsl:call-template name="all_classes">   <!-- Übersicht -->
+                                <xsl:with-param name="class_references"  select="document( 'all_classes.xml' )/class_references/class_reference [ @class='api' ]"/>
+                                <xsl:with-param name="active_class"      select="/api.class/@name"/>
+                            </xsl:call-template>
+                        </div>
                     </td>
 
                     <td style="padding-left: 3ex; border-left: 1px dotted black; padding-bottom: 4pt;">
@@ -251,10 +253,12 @@
                 <tr>
                     <td style="vertical-align: top; padding-right: 3ex; width: 20pt;">
                         <!--p style="font-weight: bold; padding-bottom: 1em">Klassen:</p-->
-                        <xsl:call-template name="all_classes">
-                            <xsl:with-param name="class_references"  select="document( 'all_classes.xml' )/class_references/class_reference [ @class != 'api' ]"/>
-                            <xsl:with-param name="active_class"      select="/api.class/@name"/>
-                        </xsl:call-template>
+                        <div id="all_classes_2" style="position: relative">  <!-- Wird mit JavaScript positioniert -->
+                            <xsl:call-template name="all_classes">
+                                <xsl:with-param name="class_references"  select="document( 'all_classes.xml' )/class_references/class_reference [ @class != 'api' ]"/>
+                                <xsl:with-param name="active_class"      select="/api.class/@name"/>
+                            </xsl:call-template>
+                        </div>
                     </td>
 
                     <td colspan="2" style="padding-left: 3ex; border-left: 1px dotted black;">
@@ -316,8 +320,15 @@
                     <xsl:attribute name="src"><xsl:value-of select="/*/@base_dir"/>api/api.js</xsl:attribute>
                 </xsl:element>
 
+                <script defer="defer" type="text/javascript" for="window" event="onload">
+
+                    //window.onscroll = function() { set_all_classes_position(); };
+                    window.setInterval( set_all_classes_position, 1*1000, "JavaScript" );
+
+                </script>
             <!--
                 <script defer="defer" type="text/javascript" for="window" event="onload">
+
 
                     href_base = document.location.href.replace( /\/[^\/]*$/, "/" );   // Alles bis zum letzten Schräger
                     base_dir = href_base + "<xsl:value-of select="/*/@base_dir"/>";
