@@ -23,6 +23,7 @@
                 <p>
                     Wenn die einzuziehende Datei nicht lesbar (nicht vorhanden) ist, 
                     wird statt des Inhalts die Fehlermeldung in die Beschreibung übernommen.
+                    Ins Jobprotokoll wird eine Warnung geschrieben.
                 </p>
             </description>
         </xml_child_element>

@@ -113,7 +113,6 @@ Source_with_parts text_from_xml_with_include( const xml::Element_ptr& element, c
                 xml::Text_ptr t = n;
                 text = t.data();
                 goto TEXT;
-
             }
 
             TEXT:

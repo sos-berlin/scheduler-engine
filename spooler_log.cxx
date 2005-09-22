@@ -410,6 +410,8 @@ Prefix_log::~Prefix_log()
 
 void Prefix_log::init( Scheduler_object* o, const string& prefix )
 {
+    reset_highest_level();
+
     _mail_defaults = o->_spooler->_mail_defaults;
     _object  = o;
     _spooler = o->_spooler;
@@ -515,8 +517,8 @@ void Prefix_log::set_new_filename( const string& filename )
 
 void Prefix_log::open()
 {
-    reset_highest_level();
-    _highest_msg = "";
+    //2005-09-22  reset_highest_level();
+    //2005-09-22  _highest_msg = "";
     
     if( _file != -1 )  return; //throw_xc( "SCHEDULER-134", _filename );
 

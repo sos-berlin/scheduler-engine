@@ -1577,7 +1577,7 @@ void Task::trigger_event( Scheduler_event* scheduler_event )
     try
     {
         //_log->set_mail_from_name( _job->profile_section() );
-        _log->set_mail_default( "from_name", _job->profile_section() );
+        _log->set_mail_default( "from_name", _job->obj_name() );    // "Job xxx"
 
         scheduler_event->set_message( _log->highest_msg() );
         if( _error )  scheduler_event->set_error( _error );

@@ -137,8 +137,8 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
             if( e.nodeName_is( "description" ) )
             {
                 try { _description = text_from_xml_with_include( e, xml_mod_time, _spooler->include_path() ); }
-                catch( const exception& x  ) { _spooler->_log.error( x.what() );  _description = x.what(); }
-                catch( const _com_error& x ) { string d = bstr_as_string(x.Description()); _spooler->_log.error(d);  _description = d; }
+                catch( const exception& x  ) { _log->warn( x.what() );  _description = x.what(); }
+                catch( const _com_error& x ) { string d = bstr_as_string(x.Description()); _log->warn(d);  _description = d; }
             }
             else
             if( e.nodeName_is( "object_set" ) )  _object_set_descr = SOS_NEW( Object_set_descr( e ) );

@@ -10,6 +10,19 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2005-09-21" version="2.0.139" subversion_revision="3925">
+        <revision type="modification" title="Fehlerhaftes &lt;include&gt; im &lt;description&gt; eines Jobs führt zur Warnung im Jobprotokoll">
+            <description>
+                <p>
+                    (Bisher gab's einen Fehler nur im Hauptprotokoll.)
+                </p>
+                <p>
+                    Siehe <scheduler_element name="description"/>.
+                </p>
+            </description>
+        </revision>
+    </change>
+
     <change date="2005-09-15" version="2.0.139" subversion_revision="3889">
         <revision type="modification" title="Neue Behandlung der Voreinstellungen für den eMail-Versand"/>
     </change>
