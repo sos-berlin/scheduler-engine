@@ -67,17 +67,21 @@ const char*                     default_factory_ini                 = "factory.i
 const string                    new_suffix                          = "~new";  // Suffix für den neuen Spooler, der den bisherigen beim Neustart ersetzen soll
 const double                    renew_wait_interval                 = 0.25;
 const double                    renew_wait_time                     = 30;      // Wartezeit für Brückenspooler, bis der alte Spooler beendet ist und der neue gestartet werden kann.
+const int                       kill_timeout                        = 60;       // terminate mit timeout: Nach timeout und kill noch soviele Sekunden warten
 const double                    wait_for_thread_termination         = latter_day;  // Haltbarkeit des Geduldfadens
 const double                    wait_step_for_thread_termination    = 5.0;         // 1. Nörgelabstand
 const double                    wait_step_for_thread_termination2   = 600.0;       // 2. Nörgelabstand
 //const double wait_for_thread_termination_after_interrupt = 1.0;
 
 const char*                     temporary_process_class_name        = "(temporaries)";
+const int                       no_termination_timeout              = UINT_MAX;
 static bool                     is_daemon                           = false;
 //static t                      daemon_starter_pid;
 //bool                          spooler_is_running      = false;
 volatile int                    ctrl_c_pressed                      = 0;
 Spooler*                        spooler_ptr                         = NULL;
+
+//-----------------------------------------------------------------------------------Error_settings
 
 struct Error_settings
 {
@@ -97,7 +101,11 @@ struct Error_settings
     string                     _smtp;
 };
 
+//-------------------------------------------------------------------------------------------------
+
 static Error_settings           error_settings;
+
+//-------------------------------------------------------------------------------------------------
 
 
 
@@ -112,6 +120,22 @@ struct Set_console_code_page
 */
 
 static void set_ctrl_c_handler( bool on );
+
+//----------------------------------------------------------------------Termination_async_operation
+
+struct Termination_async_operation : Async_operation
+{
+                                Termination_async_operation ( Spooler*, time_t timeout );
+
+    virtual bool                async_continue_             ( bool wait );
+    virtual bool                async_finished_             ()                                      { return false; }
+    virtual string              async_state_text_           ()                                      { return "Termination_async_operation"; }
+
+
+    Fill_zero                  _zero_;
+    Spooler*                   _spooler;
+    bool                       _killing;
+};
 
 //---------------------------------------------------------------------------------send_error_email
 
@@ -334,6 +358,41 @@ static void be_daemon()
 }
 
 #endif
+
+//-------------------------------------------------------------Termination_async_operation::Termination_async_operation
+
+Termination_async_operation::Termination_async_operation( Spooler* spooler, time_t timeout_at )
+:
+    _zero_(this+1),
+    _spooler(spooler)
+{
+    set_async_next_gmtime( timeout_at );
+}
+
+//-----------------------------------------------------Termination_async_operation::async_continue_
+
+bool Termination_async_operation::async_continue_( bool wait )
+{
+    bool something_done = false;
+
+    time_t now = ::time(NULL);
+
+    if( now >= async_next_gmtime() )
+    {
+        if( !_killing )
+        {
+            _spooler->kill_all_processes();
+            set_async_next_gmtime( now + kill_timeout );
+        }
+        else
+        {
+            _spooler->abort_now( _spooler->_shutdown_cmd == Spooler::sc_terminate_and_restart );
+        }
+    }
+
+    return something_done;
+}
+
 //---------------------------------------------------------------------------------Spooler::Spooler
 // Die Objektserver-Prozesse haben kein Spooler-Objekt.
 
@@ -2109,6 +2168,21 @@ void Spooler::execute_state_cmd()
                 }
             }
 
+
+
+            if( _termination_async_operation )
+            {
+                _connection_manager->remove_operation( _termination_async_operation );
+                _termination_async_operation = NULL;
+            }
+
+            if( _termination_gmtimeout_at != no_termination_timeout ) 
+            {
+                _termination_async_operation = Z_NEW( Termination_async_operation( this, _termination_gmtimeout_at ) );
+                _connection_manager->add_operation( _termination_async_operation );
+            }
+
+
             _shutdown_cmd = _state_cmd;
         }
 
@@ -2191,6 +2265,8 @@ void Spooler::run()
 
 
         something_done |= _connection_manager->async_continue();        // spooler_communication.cxx:
+      //something_done |= _async_manager->async_continue();             // Termination_async_operation
+        
 
         if( _main_scheduler_connection )
         {
@@ -2415,20 +2491,26 @@ void Spooler::cmd_stop()
 //---------------------------------------------------------------------------Spooler::cmd_terminate
 // Anderer Thread
 
-void Spooler::cmd_terminate()
+void Spooler::cmd_terminate( int timeout )
 {
-    //_log.msg( "Spooler::cmd_terminate" );
+    if( timeout < 0 )  timeout = 0;
 
-    _state_cmd = sc_terminate;
+    _state_cmd                = sc_terminate;
+    _termination_gmtimeout_at = timeout < 999999999? ::time(NULL) + timeout : no_termination_timeout;
+
     signal( "terminate" );
 }
 
 //---------------------------------------------------------------Spooler::cmd_terminate_and_restart
 // Anderer Thread
 
-void Spooler::cmd_terminate_and_restart()
+void Spooler::cmd_terminate_and_restart( int timeout )
 {
-    _state_cmd = sc_terminate_and_restart;
+    if( timeout < 0 )  timeout = 0;
+
+    _state_cmd                = sc_terminate_and_restart;
+    _termination_gmtimeout_at = timeout < 999999999? ::time(NULL) + timeout : no_termination_timeout;
+    
     signal( "terminate_and_restart" );
 }
 
@@ -2441,17 +2523,23 @@ void Spooler::cmd_let_run_terminate_and_restart()
     signal( "let_run_terminate_and_restart" );
 }
 
-//--------------------------------------------------------------------------------abort_immediately
+//-----------------------------------------------------------------------Spooler::abort_immediately
 
 void Spooler::abort_immediately( bool restart )
+{
+    abort_now( restart );
+}
+
+//-------------------------------------------------------------------------------Spooler::abort_now
+
+void Spooler::abort_now( bool restart )
 {
     // So schnell wie möglich abbrechen!
 
     int exit_code = 99;
 
 
-    for( int i = 0; i < NO_OF( _process_handles ); i++ )  if( _process_handles[i] )  try_kill_process_immediately( _process_handles[i] );
-    for( int i = 0; i < NO_OF( _pids            ); i++ )  if( _pids[i]            )  try_kill_process_immediately( _pids[i]            );
+    kill_all_processes();
 
     if( restart )
     {
@@ -2485,6 +2573,14 @@ void Spooler::abort_immediately( bool restart )
         kill( _pid, SIGKILL );
         _exit( exit_code );
 #   endif
+}
+
+//----------------------------------------------------------------------Spooler::kill_all_processes
+
+void Spooler::kill_all_processes()
+{
+    for( int i = 0; i < NO_OF( _process_handles ); i++ )  if( _process_handles[i] )  try_kill_process_immediately( _process_handles[i] );
+    for( int i = 0; i < NO_OF( _pids            ); i++ )  if( _pids[i]            )  try_kill_process_immediately( _pids[i]            );
 }
 
 //----------------------------------------------------------------------------------Spooler::launch

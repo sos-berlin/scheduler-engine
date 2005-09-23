@@ -239,11 +239,14 @@ struct Spooler : Object,
     void                        cmd_pause                   ()                                  { _state_cmd = sc_pause; signal( "pause" ); }
     void                        cmd_continue                ();
   //void                        cmd_stop                    ();
-    void                        cmd_terminate               ();
-    void                        cmd_terminate_and_restart   ();
+    void                        cmd_terminate               ( int timeout = INT_MAX );
+    void                        cmd_terminate_and_restart   ( int timeout = INT_MAX );
     void                        cmd_let_run_terminate_and_restart();
 
     void                        abort_immediately           ( bool restart = false );
+    void                        terminate                   ( bool restart, int timeout );
+    void                        abort_now                   ( bool restart );
+    void                        kill_all_processes          ();
 
     void                        cmd_load_config             ( const xml::Element_ptr&, const Time& xml_mod_time, const string& source_filename );
     void                        execute_state_cmd           ();
@@ -435,6 +438,7 @@ struct Spooler : Object,
     time_t                     _last_time_enter_pressed;    // int wegen Threads (Spooler_communication und Spooler_wait)
 
     ptr<object_server::Connection_manager>  _connection_manager;
+  //ptr<Async_manager>                      _async_manager;
 
     xml::Dtd_ptr               _dtd;
     string                     _config_filename;            // -config=
@@ -512,6 +516,8 @@ struct Spooler : Object,
     State                      _state;
     State_cmd                  _state_cmd;
     State_cmd                  _shutdown_cmd;               // run() beenden, also alle Tasks beenden!
+    time_t                     _termination_gmtimeout_at;   // Für sc_terminate und sc_terminate_with_restart
+    ptr<Async_operation>       _termination_async_operation;
 
     string                     _directory;
     File                       _pid_file;

@@ -2713,8 +2713,8 @@ const Com_method Com_spooler::_methods[] =
     { DISPATCH_PROPERTYGET, 19, "directory"                 , (Com_method_ptr)&Com_spooler::get_Directory       , VT_BSTR      },
     { DISPATCH_METHOD     , 20, "job_chain_exists"          , (Com_method_ptr)&Com_spooler::Job_chain_exists    , VT_BOOL       , { VT_BSTR } },
     { DISPATCH_PROPERTYGET, 21, "hostname"                  , (Com_method_ptr)&Com_spooler::get_Hostname        , VT_BSTR      },
-    { DISPATCH_METHOD     , 22, "abort_immediately"         , (Com_method_ptr)&Com_spooler::Abort_immediately   , VT_BSTR      },
-    { DISPATCH_METHOD     , 23, "abort_immediately_and_restart", (Com_method_ptr)&Com_spooler::Abort_immediately_and_restart, VT_BSTR },
+    { DISPATCH_METHOD     , 22, "abort_immediately"         , (Com_method_ptr)&Com_spooler::Abort_immediately   , VT_EMPTY     },
+    { DISPATCH_METHOD     , 23, "abort_immediately_and_restart", (Com_method_ptr)&Com_spooler::Abort_immediately_and_restart, VT_EMPTY },
     { DISPATCH_PROPERTYGET, 24, "Db_variables_table_name"   , (Com_method_ptr)&Com_spooler::get_Db_variables_table_name, VT_BSTR      },
     { DISPATCH_PROPERTYGET, 25, "Db_tasks_table_name"       , (Com_method_ptr)&Com_spooler::get_Db_tasks_table_name    , VT_BSTR      },
     { DISPATCH_PROPERTYGET, 26, "Db_orders_table_name"      , (Com_method_ptr)&Com_spooler::get_Db_orders_table_name   , VT_BSTR      },
@@ -2725,6 +2725,8 @@ const Com_method Com_spooler::_methods[] =
     { DISPATCH_PROPERTYGET, 31, "Tcp_port"                  , (Com_method_ptr)&Com_spooler::get_Tcp_port         , VT_INT       },
     { DISPATCH_PROPERTYGET, 32, "Udp_port"                  , (Com_method_ptr)&Com_spooler::get_Udp_port         , VT_INT       },
     { DISPATCH_METHOD     , 33, "Create_xslt_stylesheet"    , (Com_method_ptr)&Com_spooler::Create_xslt_stylesheet, VT_DISPATCH },
+    { DISPATCH_METHOD     , 34, "Terminate"                 , (Com_method_ptr)&Com_spooler::Terminate            , VT_EMPTY     , { VT_INT } },
+    { DISPATCH_METHOD     , 35, "Terminate_and_restart"     , (Com_method_ptr)&Com_spooler::Terminate_and_restart, VT_EMPTY     , { VT_INT } },
     {}
 };
 
@@ -3083,6 +3085,42 @@ STDMETHODIMP Com_spooler::Job_chain_exists( BSTR name, VARIANT_BOOL* result )
     return hr;
 }
 
+//---------------------------------------------------------------------------Com_spooler::Terminate
+
+STDMETHODIMP Com_spooler::Terminate( int timeout )
+{
+    HRESULT hr = S_OK;
+
+    if( !_spooler )  return E_POINTER;
+
+    try
+    {
+        _spooler->cmd_terminate( timeout );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+
+//---------------------------------------------------------------Com_spooler::Terminate_and_restart
+
+STDMETHODIMP Com_spooler::Terminate_and_restart( int timeout )
+{
+    HRESULT hr = S_OK;
+
+    if( !_spooler )  return E_POINTER;
+
+    try
+    {
+        _spooler->cmd_terminate_and_restart( timeout );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+
 //-------------------------------------------------------------------Com_spooler::abort_immediately
 
 STDMETHODIMP Com_spooler::Abort_immediately()
@@ -3093,7 +3131,7 @@ STDMETHODIMP Com_spooler::Abort_immediately()
 
     try
     {
-        _spooler->abort_immediately();
+        _spooler->terminate( false, 0 );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
@@ -3111,7 +3149,7 @@ STDMETHODIMP Com_spooler::Abort_immediately_and_restart()
 
     try
     {
-        _spooler->abort_immediately( true );
+        _spooler->terminate( true, 0 );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
