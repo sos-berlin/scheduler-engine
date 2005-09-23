@@ -563,6 +563,8 @@ struct Com_spooler : spooler_com::Ispooler,
     STDMETHODIMP            get_Directory                   ( BSTR* );
     STDMETHODIMP                Job_chain_exists            ( BSTR name, VARIANT_BOOL* );
     STDMETHODIMP            get_Hostname                    ( BSTR* );
+    STDMETHODIMP                Terminate                   ( int timeout );
+    STDMETHODIMP                Terminate_and_restart       ( int timeout );
     STDMETHODIMP                Abort_immediately           ();
     STDMETHODIMP                Abort_immediately_and_restart();
     STDMETHODIMP            get_Db_variables_table_name     ( BSTR* );

@@ -371,7 +371,7 @@ Termination_async_operation::Termination_async_operation( Spooler* spooler, time
 
 //-----------------------------------------------------Termination_async_operation::async_continue_
 
-bool Termination_async_operation::async_continue_( bool wait )
+bool Termination_async_operation::async_continue_( bool )
 {
     bool something_done = false;
 
@@ -381,7 +381,18 @@ bool Termination_async_operation::async_continue_( bool wait )
     {
         if( !_killing )
         {
-            _spooler->kill_all_processes();
+            _spooler->_log.error( "Frist zur Beendigung des Schedulers ist abgelaufen, und es laufen noch Tasks:" );
+
+            Z_FOR_EACH( Task_list, _spooler->_single_thread->_task_list, t )
+            {
+                _spooler->_log.error( S() << "Kill " << *t );
+
+                bool kill_immediately = true;
+                (*t)->cmd_end( kill_immediately );      // Wirkt erst beim nächsten Task::do_something()
+            }
+
+            //_spooler->kill_all_processes();           // Es reicht, wenn die Tasks gekillt werden. Die killen die abhängigigen Prozesse
+
             set_async_next_gmtime( now + kill_timeout );
         }
         else
