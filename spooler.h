@@ -244,7 +244,6 @@ struct Spooler : Object,
     void                        cmd_let_run_terminate_and_restart();
 
     void                        abort_immediately           ( bool restart = false );
-    void                        terminate                   ( bool restart, int timeout );
     void                        abort_now                   ( bool restart );
     void                        kill_all_processes          ();
 

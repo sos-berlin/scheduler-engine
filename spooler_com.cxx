@@ -3131,7 +3131,7 @@ STDMETHODIMP Com_spooler::Abort_immediately()
 
     try
     {
-        _spooler->terminate( false, 0 );
+        _spooler->abort_immediately( false );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
@@ -3149,7 +3149,7 @@ STDMETHODIMP Com_spooler::Abort_immediately_and_restart()
 
     try
     {
-        _spooler->terminate( true, 0 );
+        _spooler->abort_immediately( true );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
