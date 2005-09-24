@@ -254,13 +254,22 @@ void Task::close()
         {
             // Was machen wir jetzt?
             // _operation->kill()?
-            LOG( *this << " _operation ist nicht NULL\n" );
+            LOG( *this << ".close(): Operation aktiv: " << _operation->async_state_text() << "\n" );
+            _operation->async_kill();  // do_kill() macht nachher das gleiche
             _operation = NULL;
         }
 
         _order_for_mail = NULL;
         if( _order )  _order->close();  //remove_order_after_error(); Nicht rufen! Der Auftrag bleibt stehen und der Job startet wieder und wieder.
 
+
+        if( _module_instance )
+        {
+            do_kill();
+            _module_instance->detach_task();
+        }
+
+/* 2005-09-24 nicht blockieren. Scheduler kann sich beenden (nach timeout), auch wenn Tasks laufen
         try
         {
             //do_close();
@@ -269,7 +278,7 @@ void Task::close()
             do_close__end();
         }
         catch( const exception& x ) { _log->error( string("close: ") + x.what() ); }
-
+*/
 
         // Alle, die mit wait_until_terminated() auf diese Task warten, wecken:
         THREAD_LOCK_DUMMY( _terminated_events_lock )

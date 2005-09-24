@@ -254,6 +254,8 @@ xml::Element_ptr Command_processor::execute_modify_spooler( const xml::Element_p
 {
     if( _security_level < Security::seclev_no_add )  throw_xc( "SCHEDULER-121" );
 
+    int timeout = element.int_getAttribute( "timeout", 999999999 );
+
     string cmd = element.getAttribute( "cmd" );
   //if( !cmd.empty() )
     {
@@ -265,18 +267,16 @@ xml::Element_ptr Command_processor::execute_modify_spooler( const xml::Element_p
       //else
         if( cmd == "reload"                )  _spooler->cmd_reload();
         else
-        if( cmd == "terminate"             )  _spooler->cmd_terminate();
+        if( cmd == "terminate"             )  _spooler->cmd_terminate( timeout );
         else
-        if( cmd == "terminate_and_restart" )  _spooler->cmd_terminate_and_restart();
+        if( cmd == "terminate_and_restart" )  _spooler->cmd_terminate_and_restart( timeout );
         else
         if( cmd == "let_run_terminate_and_restart" )  _spooler->cmd_let_run_terminate_and_restart();
         else
-        if( cmd == "abort_immediately"     )  _spooler->abort_immediately();  //abort_immediately();
+        if( cmd == "abort_immediately"             )  _spooler->abort_immediately(); 
         else
-        if( cmd == "abort_immediately_and_restart" )  _spooler->abort_immediately( true ); //){ try{ spooler_restart( NULL, _spooler->is_service() ); } catch(...) {}; abort_immediately(); }
+        if( cmd == "abort_immediately_and_restart" )  _spooler->abort_immediately( true );
         else
-      //if( cmd == "new_log"               )  _spooler->cmd_new_log();
-      //else
             throw_xc( "SCHEDULER-105", cmd );
     }
     

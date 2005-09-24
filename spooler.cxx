@@ -67,7 +67,8 @@ const char*                     default_factory_ini                 = "factory.i
 const string                    new_suffix                          = "~new";  // Suffix für den neuen Spooler, der den bisherigen beim Neustart ersetzen soll
 const double                    renew_wait_interval                 = 0.25;
 const double                    renew_wait_time                     = 30;      // Wartezeit für Brückenspooler, bis der alte Spooler beendet ist und der neue gestartet werden kann.
-const int                       kill_timeout                        = 60;       // terminate mit timeout: Nach timeout und kill noch soviele Sekunden warten
+const int                       kill_timeout_1                      = 10;          // < kill_timeout_total
+const int                       kill_timeout_total                  = 60;          // terminate mit timeout: Nach timeout und kill noch soviele Sekunden warten
 const double                    wait_for_thread_termination         = latter_day;  // Haltbarkeit des Geduldfadens
 const double                    wait_step_for_thread_termination    = 5.0;         // 1. Nörgelabstand
 const double                    wait_step_for_thread_termination2   = 600.0;       // 2. Nörgelabstand
@@ -125,7 +126,15 @@ static void set_ctrl_c_handler( bool on );
 
 struct Termination_async_operation : Async_operation
 {
-                                Termination_async_operation ( Spooler*, time_t timeout );
+    enum State
+    {
+        s_initial,
+        s_ending,
+        s_killing_1,
+        s_killing_2
+    };
+
+                                Termination_async_operation ( Spooler*, time_t timeout_at );
 
     virtual bool                async_continue_             ( bool wait );
     virtual bool                async_finished_             ()                                      { return false; }
@@ -134,7 +143,8 @@ struct Termination_async_operation : Async_operation
 
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
-    bool                       _killing;
+    State                      _state;
+    time_t                     _timeout_at;
 };
 
 //---------------------------------------------------------------------------------send_error_email
@@ -256,11 +266,18 @@ With_log_switch read_profile_with_log( const string& profile, const string& sect
 
     static BOOL WINAPI ctrl_c_handler( DWORD dwCtrlType )
     {
-        if( dwCtrlType == CTRL_C_EVENT  &&  !ctrl_c_pressed )
+        if( dwCtrlType == CTRL_C_EVENT )
         {
             ctrl_c_pressed++;
+
+            if( ctrl_c_pressed >= 2 )
+            {
+                if( ctrl_c_pressed == 2  &&  spooler_ptr )  spooler_ptr->abort_now();  
+                return false;
+            }
+
             //Kein Systemaufruf hier! (Aber bei Ctrl-C riskieren wir einen Absturz. Ich will diese Meldung sehen.)
-            fprintf( stderr, "Scheduler wird wegen Ctrl-C beendet ...\n" );
+            //fprintf( stderr, "Scheduler wird wegen Ctrl-C beendet ...\n" );
             if( spooler_ptr )  spooler_ptr->async_signal( "Ctrl+C" );
             return true;
         }
@@ -286,19 +303,18 @@ With_log_switch read_profile_with_log( const string& profile, const string& sect
             case SIGINT:        // Ctrl-C
             case SIGTERM:       // Normales kill
             {
-                //if( !ctrl_c_pressed )
-                //{
-                    ctrl_c_pressed++;
-                    //Kein Systemaufruf hier! (Aber bei Ctrl-C riskieren wir einen Absturz. Ich will diese Meldung sehen.)
-                    if( !is_daemon )  fprintf( stderr, "Scheduler wird wegen kill -%d beendet ...\n", sig );
+                if( ctrl_c_pressed  && spooler_ptr )  spooler_ptr->abort_now();
 
-                    // pthread_mutex_lock:
-                    // The  mutex  functions  are  not  async-signal  safe.  What  this  means  is  that  they
-                    // should  not  be  called from  a signal handler. In particular, calling pthread_mutex_lock 
-                    // or pthread_mutex_unlock from a signal handler may deadlock the calling thread.
+                ctrl_c_pressed++;
+                //Kein Systemaufruf hier! (Aber bei Ctrl-C riskieren wir einen Absturz. Ich will diese Meldung sehen.)
+                //if( !is_daemon )  fprintf( stderr, "Scheduler wird wegen kill -%d beendet ...\n", sig );
 
-                    if( !is_daemon && spooler_ptr )  spooler_ptr->async_signal( "Ctrl+C" );
-                //}
+                // pthread_mutex_lock:
+                // The  mutex  functions  are  not  async-signal  safe.  What  this  means  is  that  they
+                // should  not  be  called from  a signal handler. In particular, calling pthread_mutex_lock 
+                // or pthread_mutex_unlock from a signal handler may deadlock the calling thread.
+
+                if( !is_daemon && spooler_ptr )  spooler_ptr->async_signal( "Ctrl+C" );
             }
 
             default: ;
@@ -364,7 +380,8 @@ static void be_daemon()
 Termination_async_operation::Termination_async_operation( Spooler* spooler, time_t timeout_at )
 :
     _zero_(this+1),
-    _spooler(spooler)
+    _spooler(spooler),
+    _timeout_at( timeout_at )
 {
     set_async_next_gmtime( timeout_at );
 }
@@ -375,13 +392,15 @@ bool Termination_async_operation::async_continue_( bool )
 {
     bool something_done = false;
 
-    time_t now = ::time(NULL);
+    if( !async_next_gmtime_reached() )  return false;
 
-    if( now >= async_next_gmtime() )
+
+    switch( _state )
     {
-        if( !_killing )
+        case s_initial:
         {
-            _spooler->_log.error( "Frist zur Beendigung des Schedulers ist abgelaufen, und es laufen noch Tasks:" );
+            int count = _spooler->_single_thread->_task_list.size();
+            _spooler->_log.error( S() << "Frist zur Beendigung des Schedulers ist abgelaufen, aber " << count << " Tasks haben sich nicht beendet" );
 
             Z_FOR_EACH( Task_list, _spooler->_single_thread->_task_list, t )
             {
@@ -391,13 +410,38 @@ bool Termination_async_operation::async_continue_( bool )
                 (*t)->cmd_end( kill_immediately );      // Wirkt erst beim nächsten Task::do_something()
             }
 
-            //_spooler->kill_all_processes();           // Es reicht, wenn die Tasks gekillt werden. Die killen die abhängigigen Prozesse
+            //_spooler->kill_all_processes();           Es reicht, wenn die Tasks gekillt werden. Die killen dann ihre abhängigigen Prozesse.
 
-            set_async_next_gmtime( now + kill_timeout );
+            set_async_next_gmtime( _timeout_at + kill_timeout_1 );
+
+            _state = s_killing_1;
+            something_done = true;
+            break;
         }
-        else
+
+        case s_killing_1:
         {
-            _spooler->abort_now( _spooler->_shutdown_cmd == Spooler::sc_terminate_and_restart );
+            int count = _spooler->_single_thread->_task_list.size();
+            _spooler->_log.warn( S() << count << " Tasks ließen sich nicht abbrechen. " << kill_timeout_total << "s Nachfrist läuft ..." ); 
+
+            set_async_next_gmtime( _timeout_at + kill_timeout_total );
+
+            _state = s_killing_1;
+            something_done = true;
+            break;
+        }
+
+        case s_killing_2:
+        {
+            int count = _spooler->_single_thread->_task_list.size();
+            _spooler->_log.error( S() << count << " Tasks ließen sich nicht abbrechen. Scheduler bricht ab" ); 
+
+            _spooler->kill_all_processes();
+
+            _spooler->_shutdown_ignore_running_tasks = true;
+
+            something_done = true;
+            break;
         }
     }
 
@@ -1560,12 +1604,6 @@ void Spooler::send_cmd()
     closesocket( sock );
 }
 
-//---------------------------------------------------------------Spooler::connect_to_main_scheduler
-/*
-void Spooler::connect_to_main_scheduler()
-{
-}
-*/
 //--------------------------------------------------------------------------------Spooler::load_arg
 
 void Spooler::load_arg()
@@ -2022,8 +2060,8 @@ void Spooler::start()
 
     if( _main_scheduler_connection )  
     {
+        //_main_scheduler_connection->set_async_manager( _connection_manager );
         _main_scheduler_connection->add_to_socket_manager( _connection_manager );
-        //_main_scheduler_connection->start();
     }
     
 /*
@@ -2180,6 +2218,15 @@ void Spooler::execute_state_cmd()
             }
 
 
+            Z_FOR_EACH( Task_list, _single_thread->_task_list, t )
+            {
+                S line;
+                line << (*t)->obj_name();
+
+                //Z_FOR_EACH( Task::Registered_pids, (*t)->_registered_pids, p )  line << p->second->obj_name();
+                _log.info( line );
+            }
+
 
             if( _termination_async_operation )
             {
@@ -2189,7 +2236,9 @@ void Spooler::execute_state_cmd()
 
             if( _termination_gmtimeout_at != no_termination_timeout ) 
             {
+                _log.info( S() << "Die Frist zum Beenden der Tasks endet in " << ( _termination_gmtimeout_at - ::time(NULL) ) << "s" );
                 _termination_async_operation = Z_NEW( Termination_async_operation( this, _termination_gmtimeout_at ) );
+                _termination_async_operation->set_async_manager( _connection_manager );
                 _connection_manager->add_operation( _termination_async_operation );
             }
 
@@ -2247,7 +2296,7 @@ void Spooler::run()
 
 
         execute_state_cmd();
-        if( _shutdown_cmd )  if( !_single_thread  ||  !_single_thread->has_tasks() )  break;
+        if( _shutdown_cmd )  if( !_single_thread  ||  !_single_thread->has_tasks()  ||  _shutdown_ignore_running_tasks )  break;
 
 /*
         if( _state == Spooler::s_paused )
@@ -2278,12 +2327,12 @@ void Spooler::run()
         something_done |= _connection_manager->async_continue();        // spooler_communication.cxx:
       //something_done |= _async_manager->async_continue();             // Termination_async_operation
         
-
+/*
         if( _main_scheduler_connection )
         {
             something_done |= _main_scheduler_connection->async_continue();     // spooler_remote.cxx
         }
-
+*/
 
         if( _state != Spooler::s_paused )
         {
@@ -2442,10 +2491,21 @@ void Spooler::run()
 
         _next_time = 0;
 
-        if( ctrl_c_pressed && _state != s_stopping )
+        if( ctrl_c_pressed )
         {
-            _log.warn( "Abbruch-Signal (Ctrl-C) empfangen. Der Scheduler wird beendet.\n" );
-            _state_cmd = sc_terminate;
+            if( _state != s_stopping )
+            {
+                _log.warn( "Abbruch-Signal (Ctrl-C) empfangen. Der Scheduler wird beendet.\n" );
+                cmd_terminate();
+
+                ctrl_c_pressed = 0;
+                set_ctrl_c_handler( true );
+            }
+            else
+            {
+                _log.warn( "Zweites Abbruch-Signal (Ctrl-C) empfangen. Der Scheduler wird abgebrochen.\n" );
+                abort_now();
+            }
         }
 
         _loop_counter++;
@@ -2500,7 +2560,7 @@ void Spooler::cmd_stop()
 }
 */
 //---------------------------------------------------------------------------Spooler::cmd_terminate
-// Anderer Thread
+// Anderer Thread (spooler_service.cxx)
 
 void Spooler::cmd_terminate( int timeout )
 {
@@ -2538,10 +2598,18 @@ void Spooler::cmd_let_run_terminate_and_restart()
 
 void Spooler::abort_immediately( bool restart )
 {
+    try
+    { 
+        _log.close(); 
+        _communication.close( 0.0 );   // Damit offene HTTP-Logs ordentlich schließen (denn sonst ersetzt ie6 das Log durch eine Fehlermeldung)
+    } 
+    catch( ... ) {}
+
     abort_now( restart );
 }
 
 //-------------------------------------------------------------------------------Spooler::abort_now
+// KANN VON EINEM ANDEREN THREAD GERUFEN WERDEN (
 
 void Spooler::abort_now( bool restart )
 {
@@ -2556,14 +2624,6 @@ void Spooler::abort_now( bool restart )
     {
         try{ spooler_restart( NULL, is_service() ); } catch(...) {}
     }
-
-    try
-    { 
-        _log.close(); 
-        _communication.close( 0.0 );   // Damit offene HTTP-Logs ordentlich schließen (denn sonst ersetzt ie6 das Log durch eine Fehlermeldung)
-    } 
-    catch( ... ) {}
-
 
     try
     {

@@ -244,7 +244,7 @@ struct Spooler : Object,
     void                        cmd_let_run_terminate_and_restart();
 
     void                        abort_immediately           ( bool restart = false );
-    void                        abort_now                   ( bool restart );
+    void                        abort_now                   ( bool restart = false );
     void                        kill_all_processes          ();
 
     void                        cmd_load_config             ( const xml::Element_ptr&, const Time& xml_mod_time, const string& source_filename );
@@ -515,6 +515,7 @@ struct Spooler : Object,
     State                      _state;
     State_cmd                  _state_cmd;
     State_cmd                  _shutdown_cmd;               // run() beenden, also alle Tasks beenden!
+    bool                       _shutdown_ignore_running_tasks;
     time_t                     _termination_gmtimeout_at;   // Für sc_terminate und sc_terminate_with_restart
     ptr<Async_operation>       _termination_async_operation;
 

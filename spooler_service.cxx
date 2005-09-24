@@ -30,7 +30,8 @@ using namespace zschimmer::windows;
 static const char               std_service_name[]          = "sos_scheduler";    // Windows 2000 Service
 static const char               std_service_display_name[]  = "SOS Scheduler";    // Gezeigter Name
 //static const char             service_description[]       = "Hintergrund-Jobs der Document Factory";
-static const int                stop_timeout                = 30;
+static const int                terminate_timeout           = 30;
+static const int                stop_timeout                = terminate_timeout + 5;        // Zeit lassen, um Datenbank zu schließen, dann abort_now() per Thread
 static const int                pending_timeout             = 60;
 
 //-----------------------------------------------------------------------------------Service_handle
@@ -402,21 +403,7 @@ static uint __stdcall self_destruction_thread( void* )
     SetThreadPriority( GetCurrentThread(), THREAD_PRIORITY_HIGHEST );
 
     LOG( "Selbstzerstörung in " << stop_timeout << " Sekunden (ohne weitere Ankündigung) ...\n" );
-/*
-    double timeout = stop_timeout;
 
-    while( timeout > 0 )
-    {
-        double wait = 0.1;
-        sos_sleep( wait );
-
-        if( !spooler_is_running )  break;
-
-        timeout -= wait;
-    }
-
-    if( spooler_is_running )
-*/
     sos_sleep( stop_timeout );      // exit() sollte diesen Thread abbrechen. 25.11.2002
     {
         terminate_immediately = true;
@@ -434,7 +421,7 @@ static uint __stdcall self_destruction_thread( void* )
 */
         try
         {
-            if( spooler_ptr )  spooler_ptr->abort_immediately();
+            if( spooler_ptr )  spooler_ptr->abort_now();
         }
         catch( ... ) {}
 
@@ -501,7 +488,7 @@ static void __stdcall Handler( DWORD dwControl )
             {
                 pending_timed_out = false;
                 service_stop = true;
-                spooler_ptr->cmd_terminate();
+                spooler_ptr->cmd_terminate( terminate_timeout );
                 set_service_status( 0, SERVICE_STOP_PENDING );
 
                 break;
