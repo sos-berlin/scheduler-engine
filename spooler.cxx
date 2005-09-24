@@ -128,7 +128,6 @@ struct Termination_async_operation : Async_operation
 {
     enum State
     {
-        s_initial,
         s_ending,
         s_killing_1,
         s_killing_2
@@ -289,7 +288,7 @@ With_log_switch read_profile_with_log( const string& profile, const string& sect
 
     static void ctrl_c_handler( int sig )
     {
-        set_ctrl_c_handler( false );
+        set_ctrl_c_handler( ctrl_c_pressed < 2 );
 
         switch( sig )
         {
@@ -397,7 +396,7 @@ bool Termination_async_operation::async_continue_( bool )
 
     switch( _state )
     {
-        case s_initial:
+        case s_ending:
         {
             int count = _spooler->_single_thread->_task_list.size();
             _spooler->_log.error( S() << "Frist zur Beendigung des Schedulers ist abgelaufen, aber " << count << " Tasks haben sich nicht beendet" );
@@ -2640,7 +2639,7 @@ void Spooler::abort_now( bool restart )
         TerminateProcess( GetCurrentProcess(), exit_code );
         _exit( exit_code );
 #    else
-        LOG( "kill(_pid,SIGKILL);\n" );
+        LOG( "kill(" << _pid << ",SIGKILL);\n" );
         kill( _pid, SIGKILL );
         _exit( exit_code );
 #   endif
