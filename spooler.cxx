@@ -68,7 +68,7 @@ const string                    new_suffix                          = "~new";  /
 const double                    renew_wait_interval                 = 0.25;
 const double                    renew_wait_time                     = 30;      // Wartezeit für Brückenspooler, bis der alte Spooler beendet ist und der neue gestartet werden kann.
 const int                       kill_timeout_1                      = 10;          // < kill_timeout_total
-const int                       kill_timeout_total                  = 60;          // terminate mit timeout: Nach timeout und kill noch soviele Sekunden warten
+const int                       kill_timeout_total                  = 30;          // terminate mit timeout: Nach timeout und kill noch soviele Sekunden warten
 const double                    wait_for_thread_termination         = latter_day;  // Haltbarkeit des Geduldfadens
 const double                    wait_step_for_thread_termination    = 5.0;         // 1. Nörgelabstand
 const double                    wait_step_for_thread_termination2   = 600.0;       // 2. Nörgelabstand
@@ -176,7 +176,6 @@ static void send_error_email( const string& subject, const string& text )
 
 void send_error_email( const exception& x, int argc, char** argv, const string& parameter_line, Spooler* spooler )
 {
-
     string body = "Der Scheduler konnte nicht gestartet werden.\n"
                   "\n"
                   "\n"
@@ -374,7 +373,7 @@ static void be_daemon()
 
 #endif
 
-//-------------------------------------------------------------Termination_async_operation::Termination_async_operation
+//-----------------------------------------Termination_async_operation::Termination_async_operation
 
 Termination_async_operation::Termination_async_operation( Spooler* spooler, time_t timeout_at )
 :
@@ -399,7 +398,22 @@ bool Termination_async_operation::async_continue_( bool )
         case s_ending:
         {
             int count = _spooler->_single_thread->_task_list.size();
-            _spooler->_log.error( S() << "Frist zur Beendigung des Schedulers ist abgelaufen, aber " << count << " Tasks haben sich nicht beendet" );
+            S error_line;
+            error_line << "Frist zur Beendigung des Schedulers ist abgelaufen, aber " << count << " Tasks haben sich nicht beendet";
+            
+            _spooler->_log.error( error_line );
+
+            {
+                Scheduler_event scheduler_event ( Scheduler_event::evt_scheduler_kills, log_error, _spooler );
+                //scheduler_event.set_error( x );
+                scheduler_event.set_scheduler_terminates( true );
+
+                Mail_defaults mail_defaults( _spooler );
+                mail_defaults.set( "subject", error_line );
+                mail_defaults.set( "body"   , "Die Tasks werden abgebrochen, damit der Scheduler sich beenden kann." );
+
+                scheduler_event.send_mail( mail_defaults );
+            }
 
             Z_FOR_EACH( Task_list, _spooler->_single_thread->_task_list, t )
             {
@@ -2765,38 +2779,6 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line )
     return rc;
 }
 
-//------------------------------------------------------------------------Spooler::send_error_email
-/*
-void Spooler::send_error_email( const string& subject, const string& text )
-{
-    try
-    {
-        Sos_ptr<mail::Message> msg = mail::create_message();
-
-        if( _log_mail_from != ""  &&  _log_mail_from != "-" )  msg->set_from( _log_mail_from );
-        
-        msg->set_from_name( name() );
-
-        if( _log_mail_to   != ""  &&  _log_mail_to   != "-" )  msg->set_to  ( _log_mail_to   );
-        if( _log_mail_cc   != ""  &&  _log_mail_cc   != "-" )  msg->set_cc  ( _log_mail_cc   );
-        if( _log_mail_bcc  != ""  &&  _log_mail_bcc  != "-" )  msg->set_bcc ( _log_mail_bcc  );
-        if( _smtp_server   != ""  &&  _smtp_server   != "-" )  msg->set_smtp( _smtp_server   );
-
-        msg->add_header_field( "X-SOS-Spooler", "" );
-        msg->set_subject( remove_password( subject ) );
-        msg->set_body( Time::now().as_string() + "  " + name() + "\n\n" + remove_password( text ) );
-
-        Scheduler_event scheduler_event ( Scheduler_event::evt_scheduler_fatal_error, log_error, this );
-        scheduler_event.send_mail();
-
-      //msg->send(); 
-    }
-    catch( const exception& x ) 
-    {
-        _log.warn( "Fehler beim eMail-Versand: " + string(x.what()) );
-    }
-}
-*/
 //------------------------------------------------------------------------------------start_process
 #ifdef Z_WINDOWS
 

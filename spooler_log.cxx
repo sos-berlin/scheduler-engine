@@ -695,7 +695,7 @@ Com_mail* Prefix_log::imail()
         if( !_body     .empty() )  set_mail_body     ( _body            ),  _body      = "";
         */
 
-        _mail->Add_header_field( Bstr(L"X-SOS-Spooler-Job"), Bstr( _job_name ) );
+        //_mail->Add_header_field( Bstr(L"X-SOS-Spooler-Job"), Bstr( _job_name ) );
     }
 
     return _mail;

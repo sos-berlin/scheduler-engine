@@ -17,6 +17,7 @@ struct Scheduler_event
         evt_unknown,
         evt_scheduler_started,
         evt_scheduler_fatal_error,
+        evt_scheduler_kills,
         evt_job_error,
         evt_task_ended,
         evt_disk_full,

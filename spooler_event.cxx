@@ -19,6 +19,7 @@ string Scheduler_event::name_of_event_code( Event_code event_code )
         case evt_unknown:                       return "unknown";
         case evt_scheduler_started:             return "scheduler_started";
         case evt_scheduler_fatal_error:         return "scheduler_fatal_error";
+        case evt_scheduler_kills:               return "scheduler_kills";
         case evt_job_error:                     return "job_error";
         case evt_task_ended:                    return "task_ended";
         case evt_disk_full:                     return "disk_full";
@@ -77,7 +78,10 @@ xml::Document_ptr Scheduler_event::dom()
     switch( _object->scheduler_type_code() )
     {
         case Scheduler_object::type_scheduler:
+        {
+            state_show |= show_jobs | show_tasks;
             break;
+        }
 
         case Scheduler_object::type_job:
         {
@@ -140,16 +144,18 @@ xml::Document_ptr Scheduler_event::mail_dom( const xml::Document_ptr& event_dom_
     xml::Document_ptr    mail_dom;
     ptr<Xslt_stylesheet> stylesheet;
 
-    try
+    if( _mail )
     {
-        stylesheet = _mail->xslt_stylesheet();
-        if( stylesheet )  mail_dom = stylesheet->apply( event_dom );
+        try
+        {
+            stylesheet = _mail->xslt_stylesheet();
+            if( stylesheet )  mail_dom = stylesheet->apply( event_dom );
+        }
+        catch( exception& x )
+        {
+            _object->log()->warn( S() << "XSLT-Stylesheet: " << x );
+        }    
     }
-    catch( exception& x )
-    {
-        _object->log()->warn( S() << "XSLT-Stylesheet: " << x );
-    }    
-
 
     if( !mail_dom )
     try
@@ -262,6 +268,29 @@ int Scheduler_event::send_mail( const Mail_defaults& mail_defaults )
 
                 mail->add_attachment( mail_dom.xml(true), "mail.xml", "text/xml", "quoted-printable" );
             }
+
+
+            switch( _object->scheduler_type_code() )
+            {
+                case Scheduler_object::type_job:
+                {
+                    Job* job = static_cast<Job*>( +_object );
+                    mail->Add_header_field( Bstr(L"X-SOS-Spooler-Job"), Bstr( job->name() ) );
+                    break;
+                }
+
+                case Scheduler_object::type_task:
+                {
+                    Task* task = static_cast<Task*>( +_object );
+                    mail->Add_header_field( Bstr(L"X-SOS-Spooler-Job"), Bstr( task->job()->name() ) );
+                    break;
+                }
+
+                default:                              
+                    mail->Add_header_field( Bstr(L"X-SOS-Spooler"), NULL );
+                    break;
+            }
+
 
             return mail->send( mail_defaults );
         }

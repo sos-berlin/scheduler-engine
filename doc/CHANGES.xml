@@ -10,6 +10,37 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2005-09-24" version="2.0.140" subversion_revision="3939">
+        <revision type="modification" title="Doppeltes Ctrl-C bricht alle Prozesse ab">
+            <description>
+                <p>
+                    Das erste Ctrl-C (Unix: <code>SIGINT</code> und <code>SIGKILL</code>)
+                    beendet den Scheduler wie <scheduler_element name="modify_spooler" attribute="cmd" value="terminate"/>.
+                </p>
+                <p>
+                    Das zweite Ctrl-C (Unix: <code>SIGINT</code> und <code>SIGKILL</code>) führt dann zum Abbruch aller Prozesse.
+                </p>
+                <p>
+                    Erste das dritte lässt das Betriebssystem den Scheduler abbrechen.
+                </p>
+            </description>
+        </revision>
+
+        <revision type="new" title="Terminate mit Frist">
+            <description>
+                <p>
+                    Der Scheduler kann jetzt mit Frist beendet werden.
+                    Wenn innerhalb der Frist die Tasks nicht enden, bricht der Scheduler die Prozesse der Tasks ab,
+                    und wartet dann längstens weitere 30s auf die Tasks, bevor er sich beendet.
+                </p>
+                <p>
+                    Siehe <scheduler_element name="modify_spooler" attribute="cmd" value="terminate"/> und 
+                    <scheduler_method class="Spooler" method="terminate"/>.
+                </p>
+            </description>
+        </revision>
+    </change>
+
     <change date="2005-09-21" version="2.0.139" subversion_revision="3925">
         <revision type="modification" title="Fehlerhaftes &lt;include&gt; im &lt;description&gt; eines Jobs führt zur Warnung im Jobprotokoll">
             <description>
