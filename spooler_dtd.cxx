@@ -259,6 +259,7 @@ const char dtd_string[] =
 "                                                    | abort_immediately             \n"
 "                                                    | abort_immediately_and_restart ) #IMPLIED>\n"
 "                                                                                   <!-- Antwort: <ok> -->\n"
+"<!ATTLIST modify_spooler        timeout             CDATA #IMPLIED>\n"
 "\n"
 "\n"
 "<!ELEMENT show_history          EMPTY>\n"
