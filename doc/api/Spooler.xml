@@ -31,6 +31,10 @@
             Das sind die Tasks und die Prozesse von <scheduler_method class="Task" method="create_subprocess"/>
             und <scheduler_method class="Task" method="add_pid"/>.
         </p>
+        <p>
+            Siehe <scheduler_element name="modify_spooler" attribute="cmd" value="abort_immediately"/>
+            und <a href="../termination.xml">Beendigung des Schedulers</a>.
+        </p>
     </description>
 </method>
 
@@ -48,6 +52,10 @@
             Wie <scheduler_method class="Spooler" method="abort_immediately"/>,
             nur dass der Scheduler sich erneut startet.
             Dabei verwendet er die Kommandozeilenparametern wieder.
+        </p>
+        <p>
+            Siehe <scheduler_element name="modify_spooler" attribute="cmd" value="abort_immediately_and_restart"/>
+            und <a href="../termination.xml">Beendigung des Schedulers</a>.
         </p>
     </description>
 </method>
@@ -521,7 +529,8 @@
             (das sind Tasks, die zulange in einem Aufruf wie <scheduler_method class="Job_impl" method="spooler_process"/> verharren).
         </p>
         <p>
-            Siehe <scheduler_element name="modify_spooler" attribute="cmd" value="terminate"/>.
+            Siehe <scheduler_element name="modify_spooler" attribute="cmd" value="terminate"/> 
+            und <a href="../termination.xml">Beendigung des Schedulers</a>.
         </p>
     </description>
 </method>
@@ -552,7 +561,8 @@
             aber der Scheduler startet sich neu.
         </p>
         <p>
-            Siehe <scheduler_element name="modify_spooler" attribute="cmd" value="terminate_and_restart"/>.
+            Siehe <scheduler_element name="modify_spooler" attribute="cmd" value="terminate_and_restart"/>
+            und <a href="../termination.xml">Beendigung des Schedulers</a>.
         </p>
     </description>
 </method>
@@ -569,6 +579,10 @@
             (durch Aufruf von <scheduler_method class="Job_impl" name="spooler_close"/>)
             und beendet dann sich selbst.
             Ein neuer Scheduler mit unveränderten Kommandozeilenparametern wird gestartet.
+        </p>
+        <p>
+            Siehe <scheduler_element name="modify_spooler" attribute="cmd" value="let_run_terminate_and_restart"/>
+            und <a href="../termination.xml">Beendigung des Schedulers</a>.
         </p>
     </description>
 </method>

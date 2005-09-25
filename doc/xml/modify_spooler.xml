@@ -61,12 +61,14 @@
                     
                     <dt><code>cmd="terminate"</code></dt>
                     <dd>
-                        Beendet den Scheduler ordentlich (näheres <a href="../termination.xml">hier</a>).
+                        Beendet den Scheduler ordentlich 
+                        (näheres <a href="../termination.xml">hier</a>) und <scheduler_method class="Spooler" method="terminate"/>).
                     </dd>
                     
                     <dt><code>cmd="terminate_and_restart"</code></dt>
                     <dd>
-                        Beendet den Scheduler ordentlich und versucht ihn dann neu zu starten (näheres <a href="../termination.xml">hier</a>).
+                        Beendet den Scheduler ordentlich und versucht ihn dann neu zu starten 
+                        (näheres <a href="../termination.xml">hier</a> und <scheduler_method class="Spooler" method="terminate_and_restart"/>).
                     </dd>
                     
                     <dt><code>cmd="let_run_terminate_and_restart"</code></dt>

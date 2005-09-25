@@ -11,7 +11,33 @@
 >
 
     <h2>Ordentliches Beenden</h2>
-    Der Scheduler beendet sich erst, wenn kein Job mehr läuft.
+    <p>
+        Der Scheduler beendet sich erst, wenn kein Job mehr läuft.
+    </p>
+    <p>
+        Siehe <scheduler_method class="Spooler" method="terminate"/> 
+        und <scheduler_element name="modify_spooler" attribute="cmd" value="terminate"/>.
+    </p>
+
+
+    <h2>Ordentliches Beenden mit Frist</h2>
+    <p>
+        Sie können zum Beenden eine Frist angeben. 
+        Wenn nach Ablauf der First noch Tasks laufen,
+        weil sie in z.B. <scheduler_method class="Job_impl" method="spooler_process"/> zu lange verharren,
+        bricht der Scheduler alle noch laufenden Prozesse ab.
+    </p>
+    <p>
+        Zuvor verschickt er eine eMail mit dem Hinweis auf Tasks, die abgebrochen werden.
+    </p>
+    <p>
+        Er wartet dann längstens 30s aufs Ende der Tasks (normalerweise gelingt der Abbruch sofort)
+        und beendet sich dann.
+    </p>
+    <p>
+        Siehe <scheduler_method class="Spooler" method="terminate"/> 
+        und <scheduler_element name="modify_spooler" attribute="cmd" value="terminate"/>.
+    </p>
 
 
     <h2>Abbruch</h2>
