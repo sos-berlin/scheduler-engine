@@ -7,7 +7,7 @@
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <xsl:variable name="programming_language"    select="'vbscript'"/>
-<xsl:variable name="language_has_properties" select="false()"/>
+<xsl:variable name="language_has_properties" select="true()"/>
 
 <xsl:include href="api.xsl" />
 
@@ -33,7 +33,7 @@
     <span class="mono" title="Array of strings">String[]</span>
 </xsl:template>
 
-<xsl:template match="com.type [ @type='VARIANT*' and not( com.type ) ]">
+<xsl:template match="com.type [ @type='VARIANT' and not( com.type ) ]">
     <span class="mono">Variant</span>
 </xsl:template>
 

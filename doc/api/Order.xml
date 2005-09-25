@@ -17,7 +17,7 @@
 <property name="id">
     <com>
         <com.result>
-            <com.type type="VARIANT*"/>
+            <com.type type="VARIANT"/>
         </com.result>
     </com>
 
@@ -110,7 +110,10 @@
 <property name="job">
     <com access="write">
         <com.result name="job_or_name">
-            <com.type type="VARIANT*"/>
+            <com.type type="VARIANT">
+                <com.type class="Job"/>
+                <com.type type="BSTR"/>
+            </com.type>
         </com.result>
     </com>
 
@@ -124,7 +127,7 @@
 
     <com access="read">
         <com.result>
-            <com.type type="Job"/>
+            <com.type class="Job"/>
 
             <description>
                 <api.null/>, wenn der Auftrag nicht in einer Jobkette oder der Zustand ein Endzustand ist.
@@ -150,7 +153,7 @@
 <property name="state">
     <com>
         <com.result>
-            <com.type type="VARIANT*"/>
+            <com.type type="VARIANT"/>
         </com.result>
     </com>
 
@@ -190,8 +193,16 @@
 
 <property name="payload">
     <com>
-        <com.result>
-            <com.type type="VARIANT*"/>
+        <com.result name="payload">
+            <com.type type="VARIANT">
+                <com.type class="Variable_set"/>
+                <com.type type="BSTR"/>
+                <com.type type="int"/>
+                <com.type type="…"/>
+            </com.type>
+            <description>
+                Kann ein String oder ein <scheduler_method class="Variable_set"/> sein.
+            </description>
         </com.result>
     </com>
 
@@ -202,6 +213,18 @@
         </com.result>
     </com>
     -->
+
+    <java access="write">
+        <java.parameter name="payload">
+            <java.type type="Object"/>
+        </java.parameter>
+    </java>    
+
+    <java access="read">
+        <java.result>
+            <java.type type="Object"/>
+        </java.result>
+    </java>    
 
     <title>
         Nutzlast, also Parameter des Auftrags.

@@ -58,15 +58,15 @@ job_chain.name = "Jobkette";</pre>
         </com.parameter>
 
         <com.parameter name="input_state">
-            <com.type type="VARIANT*"/>
+            <com.type type="VARIANT"/>
         </com.parameter>
 
         <com.parameter name="output_state">
-            <com.type type="VARIANT*"/>
+            <com.type type="VARIANT"/>
         </com.parameter>
 
         <com.parameter name="error_state">
-            <com.type type="VARIANT*"/>
+            <com.type type="VARIANT"/>
         </com.parameter>
     </com>
     
@@ -79,7 +79,7 @@ job_chain.name = "Jobkette";</pre>
 <method name="add_end_state">
     <com>
         <com.parameter name="state">
-            <com.type type="VARIANT*"/>
+            <com.type type="VARIANT"/>
         </com.parameter>
     </com>
 
@@ -142,7 +142,7 @@ job_chain.name = "Jobkette";</pre>
 <property name="node" access="read">
     <com>
         <com.parameter name="state">
-            <com.type type="VARIANT*"/>
+            <com.type type="VARIANT"/>
         </com.parameter>
 
         <com.result>
@@ -159,7 +159,7 @@ job_chain.name = "Jobkette";</pre>
 <property name="order_queue" access="read">
     <com>
         <com.parameter name="state">
-            <com.type type="VARIANT*"/>
+            <com.type type="VARIANT"/>
         </com.parameter>
 
         <com.result>

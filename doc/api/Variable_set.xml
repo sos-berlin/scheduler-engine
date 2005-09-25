@@ -35,7 +35,7 @@
         </com.parameter>
 
         <com.result name="value">
-            <com.type type="VARIANT*"/>
+            <com.type type="VARIANT"/>
 
             <description>
                 <api.empty/>, wenn die Variable nicht vorhanden ist.
@@ -61,7 +61,7 @@
         </com.parameter>
 
         <com.result name="value">
-            <com.type type="VARIANT*"/>
+            <com.type type="VARIANT"/>
 
             <description>
                 <api.empty/>, wenn die Variable nicht vorhanden ist.
@@ -73,24 +73,6 @@
         Eine Variable
     </title>
 
-    <!--
-    <java>
-        <java.parameter name="name">
-            <java.type class="java.lang.String"/>
-        </java.parameter>
-
-        <java.result name="value">
-            <java.type class="java.lang.String"/>
-        </java.result>
-
-        <description>
-            <p>
-                Wenn die Variable in einer anderen Sprache in einem anderen Typ als String gesetzt worden ist,
-                wird der Wert in einen String konvertiert zurückgegebeb.
-            </p>
-        </description>
-    </java>
-    -->
 </property>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
@@ -102,7 +84,7 @@
         </com.parameter>
 
         <com.parameter name="value">
-            <com.type type="VARIANT*"/>
+            <com.type type="VARIANT"/>
         </com.parameter>
     </com>
 

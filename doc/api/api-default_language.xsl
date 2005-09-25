@@ -13,7 +13,7 @@
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<xsl:template match="com.type [ /*/@programming_language='javascript' and @type='VARIANT*' ]">
+<xsl:template match="com.type [ /*/@programming_language='javascript' and @type='VARIANT' ]">
     <span class="mono">var</span>
 </xsl:template>
 

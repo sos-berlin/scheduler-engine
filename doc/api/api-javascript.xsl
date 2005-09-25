@@ -13,7 +13,7 @@
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<xsl:template match="com.type [ @type='VARIANT*' and not( com.type ) ]">
+<xsl:template match="com.type [ @type='VARIANT' and not( com.type ) ]">
     <span class="mono">var</span>
 </xsl:template>
 

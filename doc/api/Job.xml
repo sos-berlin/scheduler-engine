@@ -34,7 +34,7 @@
 
         <java>
             <java.parameter name="directory_path">
-                <java.type class="java.io.File"/>
+                <java.type type="java.io.File"/>
             </java.parameter>
 
             <java.parameter name="filename_pattern" optional="true">
@@ -44,7 +44,7 @@
 
         <java>
             <java.parameter name="directory_path">
-                <java.type class="java.io.File"/>
+                <java.type type="java.io.File"/>
             </java.parameter>
 
             <java.parameter name="filename_pattern" optional="true">
@@ -60,7 +60,7 @@
 
         <java>
             <java.parameter name="directory_path">
-                <java.type class="BSTR"/>
+                <com.type type="BSTR"/>
             </java.parameter>
 
             <java.parameter name="filename_pattern" optional="true">
@@ -333,7 +333,7 @@ $spooler->job( 'job_a' )->start( parameters );</pre>
             </com.parameter>
 
             <com.result name="seconds_or_hhmm_ss">
-                <com.type type="VARIANT*">
+                <com.type type="VARIANT">
                     <com.type type="double"/>
                     <com.type type="int"/>
                     <com.type type="BSTR"/>
@@ -358,7 +358,7 @@ $spooler->job( 'job_a' )->start( parameters );</pre>
 
         <java>
             <java.parameter name="error_steps">
-                <java.type type="int"/>
+                <com.type type="int"/>
             </java.parameter>
 
             <java.result name="hhmm_ss">
@@ -464,7 +464,7 @@ spooler_job.delay_after_error( 20 ) = "STOP";</pre>
             </com.parameter>
 
             <com.result name="seconds_or_hhmm_ss">
-                <com.type type="VARIANT*">
+                <com.type type="VARIANT">
                     <com.type type="double"/>
                     <com.type type="int"/>
                     <com.type type="BSTR"/>
@@ -478,11 +478,11 @@ spooler_job.delay_after_error( 20 ) = "STOP";</pre>
 
         <java>
             <java.parameter name="setback_count">
-                <java.type type="int"/>
+                <com.type type="int"/>
             </java.parameter>
 
             <java.result name="seconds">
-                <java.type type="double"/>
+                <com.type type="double"/>
             </java.result>
         </java>
 
@@ -534,6 +534,18 @@ spooler_job.max_order_setbacks = 5;              // Die 5. Rückstellung versetz
         <title>
             Begrenzt die Anzahl der Rückstellungen eines Auftrags
         </title>
+        
+        <description>
+            <p>
+                Wenn derselbe Auftrag mehr als hier angegeben aufeinderfolgend zurückgesetzt worden ist 
+                (s. <scheduler_method class="Order" method="setback"/>),
+                gerät er in den Fehlerzustand 
+                (s. <scheduler_method class="Job_chain_node" property="error_state"/>).
+            </p>
+            <p>
+                Siehe <scheduler_method class="Job" property="delay_order_after_setback"/>.
+            </p>
+        </description>
     </property>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->

@@ -6,13 +6,11 @@
 <xsl:stylesheet xmlns:xsl = "http://www.w3.org/1999/XSL/Transform"
                 version   = "1.0">
 
-<xsl:param name="fixed_programming_language"/>
 
 <xsl:variable name="default_programming_language"  select="'javascript'"/>
 <xsl:variable name="default_programming_language2" select="'java'"/>       <!-- Alternative -->
 
 <xsl:include href="../scheduler_base.xsl" />
-<!-- Nachrangige <xsl:include> sind am Ende dieses Stylesheets -->
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~api-->
 
@@ -62,18 +60,6 @@
                 <xsl:attribute name="href"><xsl:value-of select="/api.class/@name"/>-<xsl:value-of select="$plang"/>.xml</xsl:attribute>
             </xsl:otherwise>
         </xsl:choose>
-
-        <!--
-        <xsl:if test="$fixed_programming_language and not( $fixed_programming_language=$plang )">
-            <xsl:attribute name="style">color: lightgray;</xsl:attribute>
-            <xsl:attribute name="title">Use XML-Version of this document to show other programming languages</xsl:attribute>
-        </xsl:if>
-
-        <xsl:if test="not( $fixed_programming_language )">
-            <xsl:attribute name="onclick">api.programming_language_selector__onclick( "<xsl:value-of select="$plang"/>" )</xsl:attribute>
-            <xsl:attribute name="href">javascript:void(0)</xsl:attribute>
-        </xsl:if>
-        -->
 
         <xsl:value-of select="$this_programming_language"/>
     </xsl:element>
@@ -801,11 +787,11 @@
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<xsl:template match="com.type [ @type='VARIANT*' ]">
+<xsl:template match="com.type [ @type='VARIANT' ]">
 
     <xsl:choose>
         <xsl:when test="com.type [ @type ]">
-            <xsl:for-each select="com.type [ @type ]">
+            <xsl:for-each select="com.type [ @type or @class ]">
                 <xsl:if test="position() &gt; 1">|</xsl:if>
                 <xsl:apply-templates select="."/>
             </xsl:for-each>
@@ -849,11 +835,11 @@
 </xsl:template>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
-
+<!--
 <xsl:template match="/api.class [ /*/@show_detailed_methods ]">
     <xsl:apply-templates select="." mode="detailed_methods"/>
 </xsl:template>
-
+-->
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <xsl:template match="method | property" mode="detailed_methods">
@@ -956,13 +942,6 @@
     </xsl:choose>
 </xsl:template>
 
-<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
-<!--
-<xsl:include href="api-java.xsl" />
-<xsl:include href="api-javascript.xsl" />
-<xsl:include href="api-vbscript.xsl" />
-<xsl:include href="api-perl.xsl" />
--->
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 </xsl:stylesheet>

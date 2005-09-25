@@ -2105,6 +2105,22 @@ void Spooler::stop( const exception* )
 
     //_log.msg( "Spooler::stop" );
 
+    if( _module_instance )      // Scheduler-Skript zuerst beenden, damit die Finalizer die Tasks (von Job.start()) und andere Objekte schließen können.
+    {
+        Z_LOG2( "scheduler", "Scheduler-Skript wird beendet ...\n" );
+
+        try
+        {
+            _module_instance->call_if_exists( spooler_exit_name );
+        }
+        catch( exception& x )  { _log.warn( string( "Scheduler-Skript spooler_exit(): " ) + x.what() ); }
+
+        _module_instance->close();
+
+        Z_LOG2( "scheduler", "Scheduler-Skript ist beendet.\n" );
+    }
+
+
     for( Job_chain_map::iterator j = _job_chain_map.begin(); j != _job_chain_map.end(); j++ )  //j = _job_chain_map.erase( j ) )
     {
         j->second->close(); 
@@ -2131,21 +2147,6 @@ void Spooler::stop( const exception* )
     _thread_list.clear();
     _job_list.clear();
     _process_class_list.clear();
-
-    if( _module_instance )
-    {
-        Z_LOG2( "scheduler", "Startskript wird beendet ...\n" );
-
-        try
-        {
-            _module_instance->call_if_exists( spooler_exit_name );
-        }
-        catch( exception& x )  { _log.warn( string( "Scheduler-Skript spooler_exit(): " ) + x.what() ); }
-
-        _module_instance->close();
-
-        Z_LOG2( "scheduler", "Startskript ist beendet.\n" );
-    }
 
     //_java_vm.close();  Erneutes _java.init() stürzt ab, deshalb lassen wird Java stehen und schließen es erst am Schluss
 

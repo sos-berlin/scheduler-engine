@@ -16,7 +16,7 @@
 <property name="state" access="read">
     <com>
         <com.result>
-            <com.type type="VARIANT*"/>
+            <com.type type="VARIANT"/>
         </com.result>
     </com>
 
@@ -101,7 +101,7 @@ spooler_log.debug( "job=" + job_chain_node.job.name );                       // 
 <property name="next_state" access="read">
     <com>
         <com.result>
-            <com.type type="VARIANT*"/>
+            <com.type type="VARIANT"/>
         </com.result>
     </com>
 
@@ -124,7 +124,7 @@ spooler_log.debug( "next_state=" + job_chain_node.next_state );              // 
 <property name="error_state" access="read">
     <com>
         <com.result>
-            <com.type type="VARIANT*"/>
+            <com.type type="VARIANT"/>
         </com.result>
     </com>
 

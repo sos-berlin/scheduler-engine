@@ -52,7 +52,7 @@
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <xsl:template match="java.type">
-    <span class="mono"><xsl:value-of select="@type | @class"/></span>
+    <span class="mono"><xsl:value-of select="@type"/></span>
 </xsl:template>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
@@ -65,7 +65,7 @@
     <span class="mono" title="java.lang.String">String</span>
 </xsl:template>
 
-<xsl:template match="com.type [ @type='VARIANT*' and not( com.type ) ]">
+<xsl:template match="com.type [ @type='VARIANT' and not( com.type ) ]">
     <span class="mono" title="java.lang.String">String</span>
 </xsl:template>
 

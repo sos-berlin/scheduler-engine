@@ -37,7 +37,7 @@
 <method name="start">
     <com>
         <com.parameter name="command_line">
-            <com.type type="VARIANT*">
+            <com.type type="VARIANT">
                 <com.type type="BSTR"/>
                 <com.type type="BSTR" array="true"/>
             </com.type>
@@ -230,7 +230,7 @@
 <method name="wait_for_termination">
     <com>
         <com.parameter name="seconds">
-            <com.type type="VARIANT*"/>
+            <com.type type="VARIANT"/>
         </com.parameter>
 
         <com.result name="terminated">

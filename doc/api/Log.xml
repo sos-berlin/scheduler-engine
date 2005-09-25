@@ -337,7 +337,7 @@
 <property name="collect_within">
     <com>
         <com.result>
-            <com.type type="VARIANT*"/>
+            <com.type type="VARIANT"/>
         </com.result>
     </com>
 </property>
@@ -346,7 +346,7 @@
 <property name="collect_max">
     <com>
         <com.result>
-            <com.type type="VARIANT*"/>
+            <com.type type="VARIANT"/>
         </com.result>
     </com>
 </property>
@@ -394,7 +394,10 @@
 <property name="last">
     <com>
         <com.parameter name="level">
-            <com.type type="VARIANT*"/>
+            <com.type type="VARIANT">
+                <com.type type="int"/>
+                <com.type type="BSTR"/>
+            </com.type>
         </com.parameter>
 
         <com.result>
@@ -404,7 +407,7 @@
 
     <java>
         <java.parameter name="level">
-            <java.type type="int"/>
+            <com.type type="int"/>
         </java.parameter>
 
         <java.result>

@@ -18,7 +18,7 @@
 <property name="value" default_property="true">
     <com>
         <com.result name="value">
-            <com.type type="VARIANT*"/>
+            <com.type type="VARIANT"/>
         </com.result>
     </com>
     
