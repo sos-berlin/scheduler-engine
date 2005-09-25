@@ -3,8 +3,8 @@
 
 <!--$Id$-->
 
-<description 
-    title    = "HTTP-Server" 
+<description
+    title    = "HTTP-Server"
     base_dir = ""
     author   = "$Author$"
     date     = "$Date$"
@@ -28,7 +28,7 @@
 
 <!--
 <p>
-    Der Scheduler betreibt einen eingebauten HTTP-Server und der mit 
+    Der Scheduler betreibt einen eingebauten HTTP-Server und der mit
     <scheduler_element name="config" attribute="tcp_port"/> angegeben Portnummer.
     Er stellt eine HTML-Seite mit Informationen über den Scheduler-Betrieb bereit.
     Diese Seite laufen zurzeit nur mit Microsoft Internet Explorer 6.
@@ -108,10 +108,10 @@
     Die Beschreibung wird in HTML codiert erwartet.
 </p>
 <p>
-    
+
 </p>
 
 
 
-    
+
 </description>

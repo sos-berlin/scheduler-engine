@@ -3,7 +3,7 @@
 
 <!--$Id$-->
 
-<xml_element name          = "processes" 
+<xml_element name          = "processes"
              title         = "Prozesse"
              category      = "Antwort"
              sub_directory = "answer/"
@@ -15,7 +15,7 @@
     <xml_parent_elements>
         <xml_parent_element name="process_class"/>
     </xml_parent_elements>
-    
+
     <xml_child_elements>
         <xml_child_element name="process" multiple="yes"/>
     </xml_child_elements>

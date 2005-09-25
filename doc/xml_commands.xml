@@ -5,14 +5,14 @@
 <!--$Id$-->
 
 <xml_commands
-    title    = "XML-Kommandos" 
+    title    = "XML-Kommandos"
     base_dir = ""
     author   = "$Author$"
     date     = "$Date$"
->    
+>
     <description>
         <p>
-            Die Kommandos können über TCP (z.B. telnet), über HTTP 
+            Die Kommandos können über TCP (z.B. telnet), über HTTP
             und über die Kommandozeilenoptionen <scheduler_option name="cmd"/> und <scheduler_option name="send-cmd"/>
             gegeben werden.
         </p>

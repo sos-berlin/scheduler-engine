@@ -13,10 +13,10 @@
         <ini_section name="licence"/>
         <ini_section name="java"/>
     </ini_sections>
-    
+
     <description>
         <scheduler_keyword keyword="sos.ini"/>
-        
+
         <p>
             Die Datei gilt für allgemeine Einstellungen, die neben dem Scheduler auch für andere Produkte gelten.
         </p>

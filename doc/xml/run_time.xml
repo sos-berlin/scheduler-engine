@@ -3,7 +3,7 @@
 
 <!--$Id$-->
 
-<xml_element name     = "run_time" 
+<xml_element name     = "run_time"
              title    = "Laufzeiten"
              category = "Konfiguration"
              base_dir = "../"
@@ -13,9 +13,9 @@
 
     <xml_parent_elements>
         <xml_parent_element name="job">
-        </xml_parent_element>        
+        </xml_parent_element>
     </xml_parent_elements>
-    
+
 
     <xml_attributes>
         <xml_attribute name="once" type="yes_no" initial="no">
@@ -30,12 +30,12 @@
 
         <!-- Die Beschreibungen für let_run, single_start, begin und end werden auch für andere Elemente (date, weekday etc.) verwendet.
              Also den Text neutral halten! -->
-        
+
         <xml_attribute name="begin" type="hh:mm[:ss]" initial="00:00">
             <description>
                 <p>
                     Wenn das Element leer ist (also kein <code>&lt;period></code> enthält),
-                    generiert der Scheduler eine Periode mit dieser Einstellung, 
+                    generiert der Scheduler eine Periode mit dieser Einstellung,
                     anderfalls ist es die Voreinstellung für die Kind-Elemente.
                 </p>
             </description>
@@ -45,7 +45,7 @@
             <description>
                 <p>
                     Wenn das Element leer ist (also kein <code>&lt;period></code> enthält),
-                    generiert der Scheduler eine Periode mit dieser Einstellung, 
+                    generiert der Scheduler eine Periode mit dieser Einstellung,
                     anderfalls ist es die Voreinstellung für die Kind-Elemente.
                 </p>
             </description>
@@ -59,7 +59,7 @@
                 </p>
             </description>
         </xml_attribute>
-        
+
         <xml_attribute name="let_run" type="yes_no">
             <description>
                 <p>
@@ -84,45 +84,45 @@
                     Wenn keines dieser Elemente angegeben ist, gelten die Perioden für jeden Tag.
                 </p>
             </description>
-        </xml_child_element>        
+        </xml_child_element>
 
         <xml_child_element name="date" multiple="yes">
             <description>
                 <p>
                 </p>
             </description>
-        </xml_child_element>        
+        </xml_child_element>
 
         <xml_child_element name="weekdays" multiple="yes">
             <description>
                 <p>
                 </p>
             </description>
-        </xml_child_element>        
+        </xml_child_element>
 
         <xml_child_element name="monthdays" multiple="yes">
             <description>
                 <p>
                 </p>
             </description>
-        </xml_child_element>        
+        </xml_child_element>
 
         <xml_child_element name="ultimos" multiple="yes">
             <description>
                 <p>
                 </p>
             </description>
-        </xml_child_element>        
+        </xml_child_element>
 
         <xml_child_element name="holidays">
             <description>
                 <p>
                 </p>
             </description>
-        </xml_child_element>        
+        </xml_child_element>
     </xml_child_elements>
-    
-    
+
+
     <description>
         <p>
             <code>&lt;run_time></code> gibt an, zu welchen Zeiten der Scheduler Tasks dieses Jobs laufen lässt.
@@ -133,28 +133,28 @@
         <p>
             Eine Periode mit <code>single_start</code> gilt nur für einen Zeitpunkt.
         </p>
-        
-        
+
+
         <h3>Sommer- und Winterzeit</h3>
         <p>
-            Der Scheduler berücksichtigt die Zeitumstellung zu Beginn und Ende der Sommerzeit. 
+            Der Scheduler berücksichtigt die Zeitumstellung zu Beginn und Ende der Sommerzeit.
             Es gilt stets die lokale Zeit.
         </p>
         <p>
-            Ein Job, der eine Startzeit zwischen 2 und 3 Uhr hat, kann zum Ende 
+            Ein Job, der eine Startzeit zwischen 2 und 3 Uhr hat, kann zum Ende
             der Sommerzeit zweimal gestartet werden.
         </p>
     </description>
-    
+
     <example>
         <pre>&lt;run_time/></pre>
-        
-            ist, wegen der Voreinstellungen für <code>begin=</code> und <code>end=</code>, dasselbe wie        
-            
+
+            ist, wegen der Voreinstellungen für <code>begin=</code> und <code>end=</code>, dasselbe wie
+
         <pre>&lt;run_time begin="00:00" end="24:00"/></pre>
-        
-            ist, weil <code>&lt;run_time></code> leer ist, dasselbe wie        
-            
+
+            ist, weil <code>&lt;run_time></code> leer ist, dasselbe wie
+
         <pre>&lt;run_time>
     &lt;period begin="00:00" end="24:00"/>
 &lt;/run_time></pre>
@@ -162,5 +162,5 @@
             also eine Periode für jeden Tag rund um die Uhr.
             Der Job kann immer laufen.
     </example>
-    
+
 </xml_element>

@@ -3,8 +3,8 @@
 
 <!--$Id$-->
 
-<description 
-    title               = "Historie" 
+<description
+    title               = "Historie"
     base_dir            = ""
     author              = "$Author$"
     date                = "$Date$"

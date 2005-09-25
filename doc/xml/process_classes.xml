@@ -3,7 +3,7 @@
 
 <!--$Id$-->
 
-<xml_element name     = "process_classes" 
+<xml_element name     = "process_classes"
              title    = "Prozessklassen"
              category = "Konfiguration"
              base_dir = "../"
@@ -13,16 +13,16 @@
 
     <xml_parent_elements>
         <xml_parent_element name="config">
-        </xml_parent_element>        
+        </xml_parent_element>
     </xml_parent_elements>
 
     <xml_child_elements>
         <xml_child_element name="process_class" multiple="yes">
-        </xml_child_element>        
+        </xml_child_element>
     </xml_child_elements>
-        
+
     <behavior_with_xml_element element="base" complete="yes"/>
-    
+
     <description>
         <p>
             Dieses Element sollten Sie (wenigstens leer) angegeben, damit der Scheduler Tasks in eigenen Prozessen ablaufen lässt.
@@ -36,12 +36,12 @@
     &lt;process_class name="klasse2" max_processes="3"/>
 &lt;/process_classes></pre>
     </example>
-    
+
     <example>
         <pre>&lt;process_classes/></pre>
         <p>
             Lässt die Tasks in eigenen Prozessen ablaufen.
         </p>
     </example>
-    
+
 </xml_element>

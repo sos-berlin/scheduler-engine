@@ -4,7 +4,7 @@
 
 <!--$Id$-->
 
-<xml_element name     = "show_state" 
+<xml_element name     = "show_state"
              title    = "Status zeigen"
              category = "Kommando"
              base_dir = "../"
@@ -38,68 +38,68 @@
                 <dl>
                     <dt><code>task_queue</code></dt>
                     <dd>
-                        Liefert auch die Task-Warteschlange eines Jobs 
+                        Liefert auch die Task-Warteschlange eines Jobs
                         (<scheduler_element name="queued_tasks" directory="xml/answer/"/>).
                     </dd>
-                    
+
                     <dt><code>job_chains</code></dt>
                     <dd>
                         Liefert auch die Jobketten
                         (<scheduler_element name="job_chains" directory="xml/answer/"/>).
                     </dd>
-                    
+
                     <dt><code>job_chain_orders</code></dt>
                     <dd>
                         Liefert auch die Aufträge in einer Jobkette
                         (<scheduler_element name="order_queue" directory="xml/answer/"/>).
                     </dd>
-                    
+
                     <dt><code>job_chain_jobs</code></dt>
                     <dd>
                         Liefert auch die Jobs in einer Jobkette
                         (<scheduler_element name="job" directory="xml/answer/"/>).
                     </dd>
-                    
+
                     <dt><code>job_orders</code></dt>
                     <dd>
                         Liefert auch die Aufträge in einer Auftragswarteschlange außerhalb einer Jobkette
                         (<scheduler_element name="order_queue" directory="xml/answer/"/>).
                     </dd>
-                    
+
                     <dt><code>description</code></dt>
                     <dd>
                         Liefert auch die
                         (<scheduler_element name="description" directory="xml/answer/"/>).
                     </dd>
-                    
+
                     <dt><code>log</code></dt>
                     <dd>
                         Liefert auch Protokolle
                         (<scheduler_element name="log" directory="xml/answer/"/>).
                     </dd>
-                    
+
                     <dt><code>run_time</code></dt>
                     <dd>
                         Liefert auch das Element <code><a href="answer/run_time.xml">&lt;run_time></a></code>.
                     </dd>
-                    
+
                     <dt><code>task_history</code></dt>
                     <dd>
                         Liefert auch die Task-Historie
                         (<scheduler_element name="history" directory="xml/answer/"/>).
                     </dd>
-                    
+
                     <dt><code>remote_schedulers</code></dt>
                     <dd>
                         Liefert auch die registrierten Scheduler
                         (<scheduler_element name="remote_schedulers" directory="xml/answer/"/>).
                     </dd>
-                    
+
                     <dt><code>standard</code></dt>
                     <dd>
                         Wie <code>what=""</code> (keine Auswahl).
                     </dd>
-                    
+
                     <dt><code>all</code></dt>
                     <dd>
                         Eine Kombination der Schlüsselwörter, abhängig vom Kommando.
@@ -108,7 +108,7 @@
                 </dl>
             </description>
         </xml_attribute>
-        
+
         <xml_attribute name="max_orders" type="zahl">
             <!-- Text wird von anderen XML-Dokumenten mitbenutzt. Also allgemein halten! -->
             <description>
@@ -117,7 +117,7 @@
                 </p>
             </description>
         </xml_attribute>
-        
+
         <xml_attribute name="max_task_history" type="zahl">
             <!-- Text wird von anderen XML-Dokumenten mitbenutzt. Also allgemein halten! -->
             <description>
@@ -126,16 +126,16 @@
                 </p>
             </description>
         </xml_attribute>
-        
-    </xml_attributes>
-    
-    
-    <xml_answer element="state"/>
-    
 
-    
+    </xml_attributes>
+
+
+    <xml_answer element="state"/>
+
+
+
     <example>
         <pre>&lt;show_state/>
 &lt;show_state what="job_chain_orders,job_orders"/></pre>
     </example>
-</xml_element>    
+</xml_element>

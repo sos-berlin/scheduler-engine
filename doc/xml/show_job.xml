@@ -4,7 +4,7 @@
 
 <!--$Id$-->
 
-<xml_element name     = "show_job" 
+<xml_element name     = "show_job"
              title    = "Job zeigen"
              category = "Kommando"
              base_dir = "../"
@@ -34,16 +34,16 @@
                 </p>
             </description>
         </xml_attribute>
-        
+
         <xml_attribute name="what"             same_as_element="show_state"/>
         <xml_attribute name="max_orders"       same_as_element="show_state"/>
         <xml_attribute name="max_task_history" same_as_element="show_state"/>
     </xml_attributes>
 
     <xml_answer element="job"/>
-    
-    
+
+
     <example>
         <pre>&lt;show_job job="my_job"/></pre>
     </example>
-</xml_element>    
+</xml_element>

@@ -4,7 +4,7 @@
 
 <!--$Id$-->
 
-<xml_element name     = "modify_spooler" 
+<xml_element name     = "modify_spooler"
              title    = "Kommando an den ganzen Scheduler"
              base_dir = "../"
              category = "Kommando"
@@ -17,9 +17,9 @@
         <p>
             Wenn der Scheduler wegen Plattenplatzmangel für ein Protokoll angehalten hat
             (<code><a href="answer/state.xml#attribute_waiting_errno">&lt;state waiting_errno="..."/></a></code>),
-            werden die Subkommandos 
-            <code>pause</code>, 
-            <code>reload</code>, 
+            werden die Subkommandos
+            <code>pause</code>,
+            <code>reload</code>,
             <code>terminate</code>,
             <code>terminate_and_restart</code>,
             <code>let_run_terminate_and_restart</code>
@@ -34,43 +34,43 @@
                 <p>
                     Folgende Subkommandos sind möglich:
                 </p>
-                
+
                 <dl>
                     <dt><code>cmd="pause"</code></dt>
                     <dd>
                         Hält den Scheduler vorübergehend an.
                         Tasks in eigenen Prozessen laufen noch solange weiter, wie sie nicht mit dem Scheduler kommunizieren.
                     </dd>
-                    
+
                     <dt><code>cmd="continue"</code></dt>
                     <dd>
                         Hebt <code>cmd="pause"</code> auf.<br/>
-                        Oder setzt den Scheduler fort, wenn er wegen Platzmangels für die Protokolldateien angehalten hat 
+                        Oder setzt den Scheduler fort, wenn er wegen Platzmangels für die Protokolldateien angehalten hat
                         (<a href="answer/state.xml#attribute_waiting_errno">siehe hier</a>).
                     </dd>
-<!--                    
+<!--
                     <dt><code>cmd="stop"</code></dt>
                     <dd>
                         ?
                     </dd>
--->                    
+-->
                     <dt><code>cmd="reload"</code></dt>
                     <dd>
                         Lädt die Skripte der Jobs neu.
                     </dd>
-                    
+
                     <dt><code>cmd="terminate"</code></dt>
                     <dd>
-                        Beendet den Scheduler ordentlich 
+                        Beendet den Scheduler ordentlich
                         (näheres <a href="../termination.xml">hier</a>) und <scheduler_method class="Spooler" method="terminate"/>).
                     </dd>
-                    
+
                     <dt><code>cmd="terminate_and_restart"</code></dt>
                     <dd>
-                        Beendet den Scheduler ordentlich und versucht ihn dann neu zu starten 
+                        Beendet den Scheduler ordentlich und versucht ihn dann neu zu starten
                         (näheres <a href="../termination.xml">hier</a> und <scheduler_method class="Spooler" method="terminate_and_restart"/>).
                     </dd>
-                    
+
                     <dt><code>cmd="let_run_terminate_and_restart"</code></dt>
                     <dd>
                         Beendet den Scheduler ordentlich und versucht ihn dann neu zu starten.
@@ -78,19 +78,19 @@
                         Erst wenn sich alle Tasks beendet haben, endet der Scheduler.
                         (Näheres <a href="../termination.xml">hier</a>).
                     </dd>
-                    
+
                     <dt><code>cmd="abort_immediately"</code></dt>
                     <dd>
                         Bricht den Scheduler sofort ab
                         (näheres <a href="../termination.xml">hier</a>).
                     </dd>
-                    
+
                     <dt><code>cmd="abort_immediately_and_restart"</code></dt>
                     <dd>
                         Bricht den Scheduler sofort ab und versucht ihn dann neu zu starten
                         (näheres <a href="../termination.xml">hier</a>).
                     </dd>
-                    
+
                 </dl>
             </description>
         </xml_attribute>
@@ -98,24 +98,24 @@
         <xml_attribute name="timeout" type="int">
             <description>
                 <p>
-                    Für <code>cmd="terminate"</code> und <code>cmd="terminate_and_restart"</code>: 
+                    Für <code>cmd="terminate"</code> und <code>cmd="terminate_and_restart"</code>:
                     Die Frist, nach der der Scheduler nicht beendete Prozesse abbrechen soll.
                 </p>
                 <p>
                     Voreingestellt ist eine endlose Frist.
                 </p>
-                <p> 
+                <p>
                     Siehe <scheduler_method class="Spooler" method="terminate"/>.
                 </p>
             </description>
         </xml_attribute>
-        
+
     </xml_attributes>
 
     <xml_answer element="ok"/>
-    
-    
+
+
     <example>
         <pre>&lt;modify_spooler cmd="abort_immediately_and_restart"/></pre>
     </example>
-</xml_element>    
+</xml_element>

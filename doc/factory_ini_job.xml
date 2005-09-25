@@ -3,8 +3,8 @@
 
 <!--$Id$-->
 
-<ini_section 
-    name     = "job"  
+<ini_section
+    name     = "job"
     variable_suffix = "jobname"
     file     = "factory.ini"
     title    = ""
@@ -13,7 +13,7 @@
     date     = "$Date$">
 
     <ini_entries>
-        <ini_entry setting="history_file"/> 
+        <ini_entry setting="history_file"/>
         <ini_entry setting="history" />
         <ini_entry setting="history_on_process" />
         <ini_entry setting="history_with_log" />
@@ -33,7 +33,7 @@
         <ini_entry setting="log_mail_bcc" />
         <!--ini_entry setting="smtp" /-->
     </ini_entries>
-    
+
     <description>
         <p>
             Für jeden Job kann ein Abschnitt in der <code>factory.ini</code> eingerichtet werden.

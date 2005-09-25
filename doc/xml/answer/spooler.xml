@@ -3,7 +3,7 @@
 
 <!--$Id$-->
 
-<xml_element name          = "spooler" 
+<xml_element name          = "spooler"
              title         = "Wurzelelement der XML-Antwort"
              category      = "Antwort"
              sub_directory = "answer/"
@@ -21,5 +21,5 @@
             Jede Antwort ist in die Elemente <code>&lt;spooler&gt;</code> und <code>&lt;answer&gt;</code> eingepackt.
         </p>
     </description>
-        
+
 </xml_element>

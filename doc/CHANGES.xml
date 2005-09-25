@@ -10,6 +10,30 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2005-09-25" version="2.0.140" subversion_revision="3943">
+        <revision type="modification" title="Wegen &lt;run_time&gt; wiederholter Auftrag erzeugt eigenen Historieneintrag">
+            <description>
+                <p>
+                    Wenn ein Auftrag mit den Endzustand erreicht hat und 
+                    dessen <scheduler_method class="Order" property="run_time"/>  einen weiteren Termin vorsieht,
+                    dann
+                </p>
+                <ul>
+                    <li>
+                        schließt der Scheduler das Auftragsprotokoll, 
+                    </li>
+                    <li>
+                        schreibt einen Eintrag in die Auftragshistorie,
+                        siehe <scheduler_ini_entry file="factory.ini" section="spooler" entry="db_order_history_table"/>,
+                    </li>
+                    <li>
+                    und beginnt ein neues Auftragsprotokoll.
+                    </li>
+                </ul>
+            </description>
+        </revision>
+    </change>
+
     <change date="2005-09-24" version="2.0.140" subversion_revision="3939">
         <revision type="modification" title="Doppeltes Ctrl-C bricht alle Prozesse ab">
             <description>
@@ -34,7 +58,7 @@
                     und wartet dann längstens weitere 30s auf die Tasks, bevor er sich beendet.
                 </p>
                 <p>
-                    Siehe <scheduler_element name="modify_spooler" attribute="cmd" value="terminate"/> und 
+                    Siehe <scheduler_element name="modify_spooler" attribute="cmd" value="terminate"/> und
                     <scheduler_method class="Spooler" method="terminate"/>.
                 </p>
             </description>
@@ -75,7 +99,7 @@
         <revision type="new" title="XSLT-eMail erhält &lt;order&gt;-Element">
             <description>
                 <p>
-                    Das Element <scheduler_element name="order" directory="xml/answer/"/> wird 
+                    Das Element <scheduler_element name="order" directory="xml/answer/"/> wird
                     bei einem Abbruch der Task
                     im Element <scheduler_element name="task" directory="xml/answer/"/> geliefert.
                 </p>
@@ -127,7 +151,7 @@
         <revision type="modification" title="Änderung der &lt;run_time&gt; eines Auftrags wirkt nur am Beginn der Jobkette">
             <description>
                 <p>
-                    Eine Änderung der &lt;run_time&gt; eines Auftrags wirkt nur, 
+                    Eine Änderung der &lt;run_time&gt; eines Auftrags wirkt nur,
                     wenn er am Anfang der Jobkette steht und noch nicht ausgeführt wird.
                     Sonst wird die Wirkung verzögert, bis der Auftrag einen Endzustand erreicht hat.
                 </p>
@@ -144,18 +168,18 @@
                 </p>
             </description>
         </revision>
-        
+
         <revision type="new" title="Methode Job_chain.add_or_replace_order() neu">
             <description>
                 <p>
                     <scheduler_method class="Job_chain" method="add_or_replace_order" java_signature="sos.spooler.Order" />
-                    wirkt wie 
+                    wirkt wie
                     <scheduler_method class="Job_chain" method="add_order" java_signature="sos.spooler.Order" />,
                     wenn die Jobkette keinen Auftrag mit gleicher Kennung hat.
                 </p>
                 <p>
                     Hat die Jobkette bereits einen Auftrag mit gleicher Kennung, dann wird dieser ersetzt.
-                    Genauer: er wird aus der Jobkette entfernt 
+                    Genauer: er wird aus der Jobkette entfernt
                     (wie mit <scheduler_method class="Order" method="remove_from_job_chain"/>),
                     und der neue Auftrag wird hinzugefügt.
                 </p>
@@ -166,7 +190,7 @@
                 <p>
                     Der ersetzte Auftrag erscheint in der XML-Antwort als
                     <scheduler_element name="order" directory="xml/answer/" attribute="replaced" value="yes"/>.
-                    Dies nur innerhalb von 
+                    Dies nur innerhalb von
                     <scheduler_element name="task" directory="xml/answer/"/>,
                     (nicht von <scheduler_element name="order_queue" directory="xml/answer/"/>),
                     denn der Auftrag ist nicht mehr in der Auftragswarteschlange.
@@ -189,7 +213,7 @@
                 </p>
                 <p>
                     Wenn der Auftrag gerade von einer Task ausgeführt wird,
-                    liefert die Eigenschaft <scheduler_method class="Order" property="job_chain" /> 
+                    liefert die Eigenschaft <scheduler_method class="Order" property="job_chain" />
                     weiterhin die Jobkette, aus der der Auftrag gerade entfernt wird.
                     Erst wenn die Ausführung beendet ist, liefert die Eigenschaft <code>null</code>
                     (außer der Auftrag ist wieder in eine Jobkette eingetragen worden).
@@ -198,26 +222,26 @@
                 <p>
                     Der entfernte, aber noch ausgeführte Auftrag erscheint in der XML-Antwort als
                     <scheduler_element name="order" directory="xml/answer/" attribute="removed" value="yes"/>.
-                    Dies nur innerhalb von 
+                    Dies nur innerhalb von
                     <scheduler_element name="task" directory="xml/answer/"/>,
                     (nicht von <scheduler_element name="order_queue" directory="xml/answer/"/>),
                     denn der Auftrag ist nicht mehr in der Auftragswarteschlange.
                 </p>
             </description>
         </revision>
-        
+
         <revision type="correction" title="Java-Methode sos.spooler.id() liefert auch Integer als String">
             <description>
                 <p>
-                    Statt einem Cast <code>(String)</code> wird jetzt <code>.toString()</code> gerufen, 
-                    so dass auch eine Auftragskennung, 
-                    die als Integer-Variant (o.dgl.) gespeichert ist, 
+                    Statt einem Cast <code>(String)</code> wird jetzt <code>.toString()</code> gerufen,
+                    so dass auch eine Auftragskennung,
+                    die als Integer-Variant (o.dgl.) gespeichert ist,
                     in Java als String geliefert wird.
                     (Bisher gab es eine ClassCastException.)
                 </p>
             </description>
         </revision>
-        
+
         <revision type="correction" title="let_run_terminate_and_restart beendet Tasks im Zustand running_waiting_for_order">
             <description>
                 <p>
@@ -225,7 +249,7 @@
                 </p>
             </description>
         </revision>
-        
+
     </change>
 
     <change date="2005-08-04" version="2.0.134" subversion_revision="3818">
@@ -242,8 +266,8 @@
         <revision type="correction" title="Order &lt;period single_start&gt; korrigiert">
             <description>
                 <p>
-                    Der nächste Single_start bei einem Auftrag mit 
-                    <scheduler_element name="period" attrbute="single_start"/> 
+                    Der nächste Single_start bei einem Auftrag mit
+                    <scheduler_element name="period" attrbute="single_start"/>
                     wird jetzt korrekt ausgeführt.
                 </p>
             </description>
@@ -254,7 +278,7 @@
         <revision type="new" title="Subprocess.termination_signal">
             <description>
                 <p>
-                    <scheduler_method class="Subprocess" property="termination_signal" /> 
+                    <scheduler_method class="Subprocess" property="termination_signal" />
                     liefert unter Unix 0 oder die Nummer des Signals, mit dem der Subprozess endete.
                 </p>
                 <p>
@@ -268,15 +292,15 @@
         <revision type="new" title="delay_after_error erzeugt neue Task">
             <description>
                 <p>
-                    Eine Task, für die nach einem Fehler 
-                    <scheduler_method class="Job" property="delay_after_error" java_signature="int, double" access="write"/> 
-                    wirksam wird, 
+                    Eine Task, für die nach einem Fehler
+                    <scheduler_method class="Job" property="delay_after_error" java_signature="int, double" access="write"/>
+                    wirksam wird,
                     fügt der Scheduler jetzt (mit neuer Kennung) erneut in die Task-Warteschlange ein.
                     Dabei werden die Task-Parameter übernommen.
                 </p>
                 <p>
                     Das gilt nicht für Auftragsjobs.
-                    Für die wird wie bisher keine neue Task gestartet, 
+                    Für die wird wie bisher keine neue Task gestartet,
                     denn der Start wird durch den evtl. anstehenden Auftrag angestossen.
                 </p>
             </description>
@@ -289,7 +313,7 @@
                 </p>
             </description>
         </revision>
-        
+
         <revision type="new" title="Neue Attribute delay_after_error= und in_period= im Antwort-XML-Element &lt;job&gt;">
             <description>
                 <p>
@@ -299,14 +323,14 @@
                 </p>
             </description>
         </revision>
-        
+
     </change>
 
     <change date="2005-07-04" version="2.0.133" subversion_revision="3786">
         <revision type="new" title="XSLT-Stylesheets für eMails">
             <description>
                 <p>
-                    <scheduler_method class="Mail" property="xslt_stylesheet_path" java_signature="java.lang.String" access="write"/> 
+                    <scheduler_method class="Mail" property="xslt_stylesheet_path" java_signature="java.lang.String" access="write"/>
                     setzt das XSLT-Stylesheet für eMails.
                 </p>
             </description>
@@ -315,7 +339,7 @@
         <revision type="new" title="Neue Klasse Xslt_stylesheet">
             <description>
                 <p>
-                    <scheduler_method class="Spooler" method="create_xslt_stylesheet" /> 
+                    <scheduler_method class="Spooler" method="create_xslt_stylesheet" />
                     liefert ein <scheduler_method class="Xslt_stylesheet" />.
                 </p>
             </description>
@@ -334,21 +358,21 @@
         <revision type="modification" title="Auftragsjob stoppt bei return false in spooler_init() oder spooler_open()">
             <description>
                 <p>
-                    Ein Auftragsjob, der 
-                    <code>false</code> in 
+                    Ein Auftragsjob, der
+                    <code>false</code> in
                     <scheduler_method class="Job_impl" method="spooler_init"/>
-                    oder 
+                    oder
                     <scheduler_method class="Job_impl" method="spooler_open"/>
                     liefert,
                     wird mit Fehlermeldung gestoppt.
                 </p>
                 <p>
-                    Das Stoppen kann mit 
-                    <scheduler_method class="Job" property="delay_after_error" java_signature="int, double" access="write"/> 
+                    Das Stoppen kann mit
+                    <scheduler_method class="Job" property="delay_after_error" java_signature="int, double" access="write"/>
                     verhindert werden.
                 </p>
                 <p>
-                    Der Auftrag bleibt in der Auftragswarteschlange des Jobs 
+                    Der Auftrag bleibt in der Auftragswarteschlange des Jobs
                     und wird beim nächsten erfolgreichen Start des Jobs verarbeitet.
                 </p>
             </description>

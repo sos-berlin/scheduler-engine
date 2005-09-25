@@ -22,18 +22,18 @@
     <event name="scheduler_started">
         <description>
             <p>
-                Das Scheduler-Skript ist ausgeführt worden 
+                Das Scheduler-Skript ist ausgeführt worden
                 (freistehende Anweisungen und <scheduler_method class="Job_impl" method="spooler_init" />)
                 und hat eine Fehlermeldung mit <scheduler_method class="Log" method="error" java_signature="String" />
                 ausgegeben.
             </p>
             <p>
-                Eine Exception führt nicht zu diesem Ereignis. 
+                Eine Exception führt nicht zu diesem Ereignis.
                 Stattdessen führt sie zur Beendigung des Schedulers.
                 Siehe Ereignis scheduler_fatal_error.
-                
+
 ********************************************************************************************
-                
+
             </p>
         </description>
 
@@ -45,9 +45,9 @@
                 </p>
             </description>
         </event.error>
-        
+
     </event>
-    
+
 
     <event name="scheduler_fatal_error">
         <description>
@@ -56,7 +56,7 @@
                 Das kann eine Exception im Scheduler-Skript, ein Datenbankfehler oder ein internes Problem sein.
             </p>
             <p>
-                Eine Exception führt nicht zu diesem Ereignis. 
+                Eine Exception führt nicht zu diesem Ereignis.
                 Stattdessen führt sie zur Beendigung des Schedulers.
                 Siehe Ereignis XXXXXXXXXXXXXXXX.
             </p>
@@ -69,7 +69,7 @@
                 </p>
             </description>
         </event.error>
-        
+
     </event>
 
 
@@ -82,7 +82,7 @@
         </description>
 
         <event.error/>
-        
+
     </event>
 
 
@@ -101,7 +101,7 @@
                 </p>
             </description>
         </event.error>>
-        
+
     </event>
 
 
@@ -123,7 +123,7 @@
                 </p>
             </description>
         </event.error>>
-        
+
     </event>
 
 
@@ -144,7 +144,7 @@
                 </p>
             </description>
         </event.error>>
-        
+
     </event>
 
 
@@ -164,8 +164,8 @@
                 </p>
             </description>
         </event.error>>
-        
+
     </event>
 
-    
+
 </events>

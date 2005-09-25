@@ -3,7 +3,7 @@
 
 <!--$Id$-->
 
-<xml_element name     = "day" 
+<xml_element name     = "day"
              title    = "Perioden für bestimmte Tage"
              category = "Konfiguration"
              base_dir = "../"
@@ -13,11 +13,11 @@
 
     <xml_parent_elements>
         <xml_parent_element name="weekdays">
-        </xml_parent_element>        
+        </xml_parent_element>
         <xml_parent_element name="monthdays">
-        </xml_parent_element>        
+        </xml_parent_element>
         <xml_parent_element name="ultimos">
-        </xml_parent_element>        
+        </xml_parent_element>
     </xml_parent_elements>
 
 
@@ -48,14 +48,14 @@
         </xml_attribute>
     </xml_attributes>
 
-Das Attribut <code>day</code> gibt den Tag von 0 für Sonntag bis 6 für Samstag an.    
-    
+Das Attribut <code>day</code> gibt den Tag von 0 für Sonntag bis 6 für Samstag an.
+
     <description>
         <p>
             Setzt die Perioden für einen bestimmten Tag fest.
         </p>
     </description>
-    
+
     <behavior_with_xml_element element="base" replace_attribute="day"/>
-    
+
 </xml_element>

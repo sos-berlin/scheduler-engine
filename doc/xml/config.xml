@@ -3,7 +3,7 @@
 
 <!--$Id$-->
 
-<xml_element name     = "config" 
+<xml_element name     = "config"
              title    = "Konfiguration"
              category = "Konfiguration"
              base_dir = "../"
@@ -15,9 +15,9 @@
         <xml_parent_element name="spooler"/>
     </xml_parent_elements>
 
-    
+
     <xml_attributes>
-    
+
         <xml_attribute name="main_scheduler" type="host:port">
             <description>
                 <p>
@@ -25,12 +25,12 @@
                     Das geschieht asynchron und Fehler beeinträchtigen nicht den Betrieb.
                 </p>
                 <p>
-                    Version 2.0.116: Wenn der Haupt-Scheduler unter Windows läuft, 
+                    Version 2.0.116: Wenn der Haupt-Scheduler unter Windows läuft,
                     sollten nicht mehr als vier Scheduler sich bei ihn anmelden.
                 </p>
             </description>
         </xml_attribute>
-        
+
 
         <xml_attribute name="spooler_id" type="spooler_id">
             <!-- Diese Beschreibung wird auch von anderen Elementen verwendet. Also allgemein halten! -->
@@ -41,14 +41,14 @@
             </description>
         </xml_attribute>
 
-        
+
         <xml_attribute name="port" type="zahl" initial="4444" title="Für Kommandos per TCP, HTTP und UDP">
             <description>
                 <p>
-                    Fasst die Attribute 
-                    <a href="#attribute_tcp_port"><code>tcp_port</code></a> 
-                    und 
-                    <a href="#attribute_udp_port"><code>udp_port</code></a> 
+                    Fasst die Attribute
+                    <a href="#attribute_tcp_port"><code>tcp_port</code></a>
+                    und
+                    <a href="#attribute_udp_port"><code>udp_port</code></a>
                 </p>
             </description>
             <example>
@@ -56,12 +56,12 @@
             </example>
         </xml_attribute>
 
-        
+
         <xml_attribute name="tcp_port" type="zahl" initial="4444" title="Für Kommandos per TCP und HTTP">
             <description>
                 <p>
-                    Der Scheduler kann auf einem TCP-Port während des Betriebs Kommandos entgegennehmen. Hier kann ein 
-                    Portnummer eingestellt werden. Die Portnummer ist eine Zahl zwischen mindestens 2048 (betriebssystem-abhängig) und 
+                    Der Scheduler kann auf einem TCP-Port während des Betriebs Kommandos entgegennehmen. Hier kann ein
+                    Portnummer eingestellt werden. Die Portnummer ist eine Zahl zwischen mindestens 2048 (betriebssystem-abhängig) und
                     65535. In dieser Dokumentation verwenden wir 4444.
                 </p>
                 <p>
@@ -78,12 +78,12 @@
             </example>
         </xml_attribute>
 
-        
+
         <xml_attribute name="udp_port" type="zahl" initial="4444" title="Für Kommandos per UDP">
             <description>
                 <p>
-                    Auch über UDP kann der Scheduler Kommandos entgegennehmen. 
-                    Hier wird die Portnummer angegeben. 
+                    Auch über UDP kann der Scheduler Kommandos entgegennehmen.
+                    Hier wird die Portnummer angegeben.
                     Ein Kommando muss in eine Nachricht passen. Der Scheduler schickt keine Antwort.
                 </p>
                 <p>
@@ -94,7 +94,7 @@
                 <pre>&lt;config udp_port="4444"></pre>
             </example>
         </xml_attribute>
-        
+
         <xml_attribute name="param" type="text" command_line_option="param" title="Zur freien Verwendung">
             <description>
                 Setzt spooler.param (Objekt spooler, Eigenschaft param). Zur freien Verwendung in den Skripten.
@@ -129,7 +129,7 @@
         <xml_attribute name="mail_xslt_stylesheet" type="filename" title="Zur Aufbereitung der eMails">
             <description>
                 <p>
-                    Der Dateiname eines XSLT-Stylesheets. 
+                    Der Dateiname eines XSLT-Stylesheets.
                     Der Scheduler verwendet das XSLT-Stylesheet zum Aufbereiten der eMails.
                     (Die Dokumentation hierzu ist noch nicht geschrieben.)
                 </p>
@@ -138,21 +138,21 @@
 
         <xml_attribute setting="java_class_path"/>
         <xml_attribute setting="java_options"/>
-        
-    </xml_attributes>      
-    
+
+    </xml_attributes>
+
 
     <xml_child_elements>
         <xml_child_element name="base" multiple="yes" title="Basiskonfiguration">
             <description>
-                Eine Basiskonfigurationsdatei kann hier angegeben werden, die der Scheduler zuerst auswertet. 
+                Eine Basiskonfigurationsdatei kann hier angegeben werden, die der Scheduler zuerst auswertet.
                 Die Einstellungen darin bilden die Voreinstellungen für die Konfigurationsdatei, die das Element
                 <code>&lt;base></code> enthält.
             </description>
-        </xml_child_element>        
+        </xml_child_element>
 
         <xml_child_element name="security" title="Stellt den Zugriffsschutz ein">
-        </xml_child_element>        
+        </xml_child_element>
 
         <xml_child_element name="process_classes" title="Jobs in eigenen Prozessen">
             <description>
@@ -160,14 +160,14 @@
                     Jede Prozessklasse stellt eine Anzahl Prozesse zum Betrieb der Jobs bereit.
                 </p>
                 <p>
-                    Dieses Element sollte angegeben werden, denn sonst laufen die Jobs im Prozess des Schedulers, was nur zum Debuggen 
+                    Dieses Element sollte angegeben werden, denn sonst laufen die Jobs im Prozess des Schedulers, was nur zum Debuggen
                     empfehlenswert ist.
                 </p>
             </description>
             <example>
                 <pre>&lt;process_classes/></pre>
             </example>
-        </xml_child_element>        
+        </xml_child_element>
 
         <xml_child_element name="script" title="Scheduler-Skript">
             <description>
@@ -191,19 +191,19 @@
 
 ]]&gt;&lt;/script></pre>
             </example>
-        </xml_child_element>        
-        
+        </xml_child_element>
+
         <xml_child_element name="holidays" title="Feiertage">
             <description>
                 Grundsätzliche Einstellung der Feiertage (an denen Jobs nicht laufen sollen).
             </description>
-        </xml_child_element>        
+        </xml_child_element>
 
         <xml_child_element name="jobs">
             <description>
                 Enthält die Jobs als Folge von <code>&lt;job></code>-Elementen.
             </description>
-            
+
             <example>
                 <pre>&lt;script language="javascript">&lt;[CDATA[
 
@@ -211,8 +211,8 @@
 
 ]]&gt;&lt;/script></pre>
             </example>
-        </xml_child_element>        
-        
+        </xml_child_element>
+
     </xml_child_elements>
 
     <behavior_with_xml_element element="base" complete_attribute="spooler_id"/>
@@ -221,8 +221,8 @@
         <p>
             <code>&lt;config></code> enthält die Konfiguration des Schedulers, vor allem die Jobs.
             Das Element kann wiederholt werden, wenn das Attribut <code>spooler_id</code> wechselt.
-            Wenn bei Scheduler-Start der Parameter <code>-id=</code> 
-            nicht angegeben worden ist, ist das erste <code>&lt;config></code>, sonst das mit gleichem Wert im 
+            Wenn bei Scheduler-Start der Parameter <code>-id=</code>
+            nicht angegeben worden ist, ist das erste <code>&lt;config></code>, sonst das mit gleichem Wert im
             Attribut <code>spooler_id</code> wirksam.
         </p>
     </description>

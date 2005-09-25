@@ -1,17 +1,17 @@
 <?xml version='1.0'?>
 <!-- $Id$ -->
 
-<xsl:stylesheet xmlns:xsl = "http://www.w3.org/1999/XSL/Transform" 
+<xsl:stylesheet xmlns:xsl = "http://www.w3.org/1999/XSL/Transform"
                 version   = "1.0">
 
     <xsl:include href="scheduler.xsl" />
     <!--xsl:output doctype-public="-//W3C//DTD HTML 4.01//EN" />  <!- -"http://www.w3.org/TR/html4/strict.dtd"-->
-    
-    
+
+
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~changes-->
-    
+
     <xsl:template match="changes">
-    
+
         <xsl:variable name="title" select="@title"/>
 
         <html>
@@ -19,7 +19,7 @@
                 <xsl:with-param name="title" select="$title"/>
             </xsl:call-template>
 
-            
+
             <body>
                 <xsl:call-template name="body_start">
                     <xsl:with-param name="title"       select="$title"/>
@@ -28,18 +28,18 @@
 
                 <xsl:apply-templates select="change">
                     <xsl:sort select="@subversion_revision" data-type="number" order="descending"/>
-                </xsl:apply-templates>                    
-                
+                </xsl:apply-templates>
+
                 <xsl:call-template name="bottom">
                     <xsl:with-param name="parent_page" select="@parent_page"/>
                 </xsl:call-template>
             </body>
         </html>
-    
+
     </xsl:template>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~change-->
-    
+
     <xsl:template match="change">
 
         <table width="100%" style="border-top: 1px solid #f0f0f0; margin-top: 0ex">
@@ -61,34 +61,34 @@
                 </tr>
             </tbody>
         </table>
-        
+
     </xsl:template>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~revision-->
-    
+
     <xsl:template match="revision">
 
         <!--xsl:if test="position() &gt; 1">
             <p style="margin-top: 1ex">&#160;</p>
         </xsl:if-->
-        
+
         <xsl:element name="p">
             <xsl:attribute name="style">
 		margin-top: 0px;
                 <xsl:if test="@type='correction'">color: green;</xsl:if>
             </xsl:attribute>
-            
+
             <b><xsl:value-of select="@title"/></b>
         </xsl:element>
-        
+
         <xsl:if test="description">
             <p style="margin-top: 0ex">&#160;</p>
             <xsl:apply-templates select="description"/>
             <p style="margin-top: 0ex">&#160;</p>
         </xsl:if>
-    
+
     </xsl:template>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
-    
+
 </xsl:stylesheet>

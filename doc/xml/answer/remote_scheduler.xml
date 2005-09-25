@@ -3,7 +3,7 @@
 
 <!--$Id$-->
 
-<xml_element name          = "remote_scheduler" 
+<xml_element name          = "remote_scheduler"
              title         = "Ein registrierter Scheduler"
              category      = "Antwort"
              sub_directory = "answer/"
@@ -15,7 +15,7 @@
     <xml_parent_elements>
         <xml_parent_element name="remote_scheduler"/>
     </xml_parent_elements>
-    
+
     <xml_attributes>
         <xml_attribute name="ip" type="ip_address" title="IP-Adresse des Schedulers">
             <description>
@@ -74,11 +74,11 @@
         </xml_attribute>
 
     </xml_attributes>
-    
+
     <description>
         <p>
             <code>&lt;show_state what="remote_schedulers"/></code>
         </p>
     </description>
-    
+
 </xml_element>

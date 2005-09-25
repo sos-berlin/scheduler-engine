@@ -4,7 +4,7 @@
 
 <!--$Id$-->
 
-<xml_element name     = "modify_job" 
+<xml_element name     = "modify_job"
              title    = "Kommando an einen Job"
              category = "Kommando"
              base_dir = "../"
@@ -26,27 +26,27 @@
                 </p>
             </description>
         </xml_attribute>
-        
+
         <xml_attribute name="cmd" type="cmd">
             <description>
                 <p>
                     Folgende Subkommandos sind möglich:
                 </p>
-                
+
                 <table cellspacing="0" cellpadding="0">
                     <col valign="baseline" style="padding-top: 1ex"/>
                     <col valign="baseline" style="padding-top: 1ex; padding-left: 2ex"/>
-                    
+
                     <tr>
                         <td><code>cmd="stop"</code></td>
                         <td>
                             <p>
-                                Stoppt den Job. Der Scheduler versetzt den Job in den Zustand <code>stopping</code> solange noch eine Task läuft, 
+                                Stoppt den Job. Der Scheduler versetzt den Job in den Zustand <code>stopping</code> solange noch eine Task läuft,
                                 dann in den Zustand <code>stopped</code>.
                             </p>
                             <p>
                                 Wirkt in allen Zuständen außer <code>stopping</code>, <code>stopped</code> und <code>read_error</code>.
-                            </p>                        
+                            </p>
                         </td>
                     </tr>
                     <tr>
@@ -57,14 +57,14 @@
                             </p>
                             <p>
                                 Wirkt in allen Zuständen außer <code>stopping</code>, <code>stopped</code> und <code>error</code>.
-                            </p>                        
+                            </p>
                         </td>
                     </tr>
                     <tr>
                         <td><code>cmd="reread"</code></td>
                         <td>
                             <p>
-                                Wertet die XML-Elemente <scheduler_element name="include"/> in <scheduler_element name="script"/> neu aus, 
+                                Wertet die XML-Elemente <scheduler_element name="include"/> in <scheduler_element name="script"/> neu aus,
                                 sobald der Job neu gestartet wird.
                                 Der Scheduler liest die Dateien neu ein und lässt die nächste Task mit dem neuen Programmcode starten.
                             </p>
@@ -85,7 +85,7 @@
                         <td><code>cmd="wake"</code></td>
                         <td>
                             <p>
-                                Wenn der Job im Zustand <code>pending</code> oder <code>stopped</code> ist, 
+                                Wenn der Job im Zustand <code>pending</code> oder <code>stopped</code> ist,
                                 startet dieses Kommando eine Task.
                             </p>
                             <p>
@@ -96,13 +96,13 @@
                     <tr>
                         <td><code>cmd="end"</code></td>
                         <td>
-                            Lässt alle Tasks enden. 
+                            Lässt alle Tasks enden.
                         </td>
                     </tr>
                     <tr>
                         <td><code>cmd="suspend"</code></td>
                         <td>
-                            Auf alle laufenden Tasks, die im Zustand <code>running</code>, <code>running_delayed</code> oder 
+                            Auf alle laufenden Tasks, die im Zustand <code>running</code>, <code>running_delayed</code> oder
                             <code>running_waiting_for_order</code> sind,
                             wird das Kommando <code>suspend</code> angewendet,
                             d.h. der Scheduler ruft keine weitere Methode des Jobs auf.
@@ -111,7 +111,7 @@
                     <tr>
                         <td><code>cmd="continue"</code></td>
                         <td>
-                            Auf alle suspendierten Tasks, die im Zustand <code>suspended</code>, <code>running_delayed</code> oder 
+                            Auf alle suspendierten Tasks, die im Zustand <code>suspended</code>, <code>running_delayed</code> oder
                             <code>running_waiting_for_order</code> sind,
                             wird das Kommando <code>continue</code> angewendet.
                         </td>
@@ -125,13 +125,13 @@
                 </table>
             </description>
         </xml_attribute>
-        
+
     </xml_attributes>
 
     <xml_answer element="ok"/>
-    
-    
+
+
     <example>
         <pre>&lt;modify_job job="mein_job" cmd="wake"/></pre>
     </example>
-</xml_element>    
+</xml_element>

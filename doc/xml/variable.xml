@@ -3,7 +3,7 @@
 
 <!--$Id$-->
 
-<xml_element name     = "variable" 
+<xml_element name     = "variable"
              title    = "Eine Variable"
              category = "Konfiguration"
              base_dir = "../"
@@ -13,7 +13,7 @@
 
     <xml_parent_elements>
         <xml_parent_element name="environment">
-        </xml_parent_element>        
+        </xml_parent_element>
         <xml_parent_element name="sos.spooler.variable_set"/>
     </xml_parent_elements>
 
@@ -29,7 +29,7 @@
                 </p>
             </description>
         </xml_attribute>
-        
+
         <xml_attribute name="value">
             <description>
                 <p>
@@ -39,10 +39,10 @@
             </description>
         </xml_attribute>
     </xml_attributes>
-        
-    
+
+
     <behavior_with_xml_element element="base" complete_attribute="name"/>
-    
+
     <example><pre>
 &lt;environment>
     &lt;variable name="LD_LIBRARY_PATH" value="$HOME/lib">
@@ -50,7 +50,7 @@
     &lt;variable name="PATH" value="$PATH:$JAVAHOME/bin">
 &lt;/environment>
 </pre>
-        
+
     </example>
-    
+
 </xml_element>

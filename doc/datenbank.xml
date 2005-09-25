@@ -3,8 +3,8 @@
 
 <!--$Id$-->
 
-<description 
-    title               = "Datenbank" 
+<description
+    title               = "Datenbank"
     base_dir            = ""
     author              = "$Author$"
     date                = "$Date$"
@@ -24,20 +24,20 @@
         unter seiner Scheduler-Id  (Option <scheduler_option name="id"/>).
         Wenn der Scheduler erneut startet, liest er die Warteschlange aus der Datenbank.
     </dd>
-    
+
     <dt>Aufträge</dt>
     <dd>
-        Der Scheduler speichert jeden Auftrag in einer Tabelle 
+        Der Scheduler speichert jeden Auftrag in einer Tabelle
         unter seiner Scheduler-Id  (Option <scheduler_option name="id"/>).
         Wenn der Scheduler erneut startet, liest er die Aufträge aus der Datenbank.
     </dd>
-    
+
     <dt>Task-Historie</dt>
     <dd>
-        Für jede Task schreibt der Scheduler einen Satz, 
+        Für jede Task schreibt der Scheduler einen Satz,
         außerdem bei Start und Ende des Schedulers.
     </dd>
-    
+
     <dt>Auftragshistorie</dt>
     <dd>
         Der Scheduler hält den Lauf der Aufträge durch die Jobketten in der Auftragshistorie fest.
@@ -59,7 +59,7 @@
         <scheduler_ini_entry file="factory.ini" section="spooler" entry="need_db"/><br/>
         <scheduler_ini_entry file="factory.ini" section="spooler" entry="max_db_errors"/><br/>
     </dd>
-        
+
     <!--scheduler_keyword keyword="Tabelle (Datenbank)"/-->
     <dt>Die Namen der Tabellen</dt>
     <dd>
@@ -69,14 +69,14 @@
         <scheduler_ini_entry file="factory.ini" section="spooler" entry="db_history_table"/><br/>
         <scheduler_ini_entry file="factory.ini" section="spooler" entry="db_order_history_table"/><br/>
     </dd>
-    
+
     <dt>Ob eine Historie geschrieben werden soll</dt>
     <dd>
         <scheduler_ini_entry file="factory.ini" section="spooler" entry="history"/><br/>
         <scheduler_ini_entry file="factory.ini" section="spooler" entry="order_history"/><br/>
         <scheduler_ini_entry file="factory.ini" section="job" entry="history"/><br/>
     </dd>
-    
+
     <scheduler_keyword keyword="Protokoll"/>
     <dt>Ob die Protokolle in der Historie aufgenommen werden sollen</dt>
     <dd>
@@ -84,14 +84,14 @@
         <scheduler_ini_entry file="factory.ini" section="spooler" entry="order_history_with_log"/><br/>
         <scheduler_ini_entry file="factory.ini" section="job" entry="history_with_log"/><br/>
     </dd>
-    
+
     <dt>Der Task-Historie können Sie eigene Spalten hinzufügen</dt>
     <dd>
         <scheduler_ini_entry file="factory.ini" section="spooler" entry="history_columns"/><br/>
         <scheduler_ini_entry file="factory.ini" section="job" entry="history_columns"/><br/>
         <scheduler_method class="Task" method="set_history_field" java_signature="java.lang.String, java.lang.String"/>
     </dd>
-    
+
     <dt>Die Bedingungen für einen Eintrag in die Task-Historie</dt>
     <dd>
         <scheduler_ini_entry file="factory.ini" section="spooler" entry="history_on_process"/><br/>
@@ -109,7 +109,7 @@
         <scheduler_method class="Spooler" method="db_history_table_name"/><br/>
         <scheduler_method class="Spooler" method="db_order_history_table_name"/><br/>
     </dd>
-    
+
     <dt>Eigene Felder der Historie beschreiben (<scheduler_ini_entry file="factory.ini" section="job" entry="history_columns"/>)</dt>
     <dd>
         <scheduler_method class="Task" method="set_history_field" java_signature="java.lang.String, java.lang.String"/>
@@ -131,7 +131,7 @@
 
 <h2>Fehlertoleranz</h2>
 <p>
-    Der Scheduler toleriert Datenbankfehler. 
+    Der Scheduler toleriert Datenbankfehler.
     Damit kann er bei tagelangem Betrieb mit einer vorübergehend heruntergefahrenen Datenbank umgehen.
     Näheres hierzu finden sie hier: <scheduler_ini_entry file="factory.ini" section="spooler" entry="need_db"/>.
 </p>

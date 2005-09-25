@@ -4,7 +4,7 @@
 
 <!--$Id$-->
 
-<xml_element name     = "show_job_chains" 
+<xml_element name     = "show_job_chains"
              title    = ""
              category = "Kommando"
              base_dir = "../"
@@ -24,9 +24,9 @@
     </xml_attributes>
 
     <xml_answer element="job_chains"/>
-    
-    
+
+
     <example>
         <pre>&lt;show_job_chains/></pre>
     </example>
-</xml_element>    
+</xml_element>

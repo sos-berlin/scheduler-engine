@@ -3,7 +3,7 @@
 
 <!--$Id$-->
 
-<xml_element name          = "param" 
+<xml_element name          = "param"
              title         = "Parameter"
              category      = "Antwort"
              sub_directory = "answer/"
@@ -15,7 +15,7 @@
     <xml_parent_elements>
         <xml_parent_element name="params"/>
     </xml_parent_elements>
-    
+
     <xml_attributes>
         <xml_attribute name="name" type="name" title="Name des Parameters"/>
         <xml_attribute name="value" type="text" title="Wert des Parameters"/>
@@ -25,5 +25,5 @@
         <p>
         </p>
     </description>
-        
+
 </xml_element>

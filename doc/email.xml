@@ -3,8 +3,8 @@
 
 <!--$Id$-->
 
-<description 
-    title               = "eMail-Versand" 
+<description
+    title               = "eMail-Versand"
     base_dir            = ""
     author              = "$Author$"
     date                = "$Date$"
@@ -46,16 +46,16 @@
             Oder an der Programmschnittstelle:
         </p>
         <div class="indent">
-            Das Objekt <a href="javadoc/sos/spooler/Job_impl.html#spooler_log"><code>spooler_log</code></a> 
+            Das Objekt <a href="javadoc/sos/spooler/Job_impl.html#spooler_log"><code>spooler_log</code></a>
             stellt mit der Methode <a href="javadoc/sos/spooler/Log.html#mail()"><code>mail()</code></a>
             das Objekt <a href="javadoc/sos/spooler/Mail.html"><code>Mail</code></a> bereit,
             über dessen Methoden Sie Absender, Empfänger, Betreff usw. einstellen können.
-            
+
             <p class="example">Beispiel</p>
             <pre>spooler_log.mail().set_to( "admin@xxx.com" );</pre>
         </div>
 
-    
+
     <h2>eMails nach dem Ende einer Task</h2>
 
         <p>
@@ -89,36 +89,36 @@
             Mit dem Aufruf <a href="javadoc/sos/spooler/Log.html#set_mail_it(boolean)"><code>spooler_log.set_mail_it(boolean)</code></a>
             können Sie einstellen, ob der Scheduler beim Ende der Task das Protokoll sendet.
         </div>
-        
-        
+
+
     <h2>eMails, wenn der Scheduler wegen eines Fehlers sich beendet</h2>
 
         <p>
             Für diese eMails werden die Einstellungen im Abschnit <code>[spooler]</code> der Datei <code>factory.ini</code> verwendet.
         </p>
         <p>
-            Wenn ein Fehler auftritt, 
+            Wenn ein Fehler auftritt,
             bevor die Option <scheduler_option name="ini"/> berücksichtigt werden konnte,
             verwendet der Scheduler die Einstellungen aus der Datei <code>factory.ini</code> mit unverändertem Namen.
         </p>
         <p>
-            Wenn der Scheduler als Dienst oder Daemon läuft und 
+            Wenn der Scheduler als Dienst oder Daemon läuft und
             ein Fehler auftritt, der so ernst ist, dass der Scheduler abbrechen muss,
             verschickt er eine eMail mit der Fehlermeldung.
-        </p>    
+        </p>
         <p>
             Wenn ein Datenbankfehler auftritt, verschickt der Scheduler eine eMail.
             Fehler, die bei den Versuchen auftreten, die Datenbank erneut zu öffnen, führen nicht zu einer eMail.
-        </p>    
+        </p>
         <p>
             Wenn der Scheduler nach einem Fehler den Datenbankbetrieb aufgibt, schickt er eine eMail.
-        </p>    
+        </p>
 
-    
+
     <h2>
         Installation mit JavaMail
     </h2>
-    
+
         <p>
             Für den eMail-Versand mit JavaMail werden folgende Dateien im <code>class_path</code> benötigt.
         </p>
@@ -161,10 +161,10 @@
                 </tr>
             </table>
 
-            <br/>            
+            <br/>
             Siehe <scheduler_ini_entry file="sos.ini" section="java" entry="class_path"/>.
         </p>
-            
-    
+
+
 
 </description>

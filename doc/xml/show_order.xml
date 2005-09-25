@@ -4,7 +4,7 @@
 
 <!--$Id$-->
 
-<xml_element name     = "show_order" 
+<xml_element name     = "show_order"
              title    = ""
              category = "Kommando"
              base_dir = "../"
@@ -28,7 +28,7 @@
             </description>
         </xml_attribute>
 
-        
+
         <xml_attribute name="order" type="id">
             <description>
                 <p>
@@ -36,13 +36,13 @@
                 </p>
             </description>
         </xml_attribute>
-        
+
         <xml_attribute name="what" same_as_element="show_state"/>
     </xml_attributes>
 
     <xml_answer element="order"/>
-    
+
     <example>
         <pre>&lt;show_order job_chain="meine_jobkette" order="E4711"/></pre>
     </example>
-</xml_element>    
+</xml_element>

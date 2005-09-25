@@ -20,12 +20,12 @@
         <ini_entry setting="param"/>
         <ini_entry setting="include_path"/>
         <ini_entry setting="html_dir"/>
-        
+
         <ini_entry setting="history" />
         <ini_entry setting="db" />
         <ini_entry setting="need_db" />
         <ini_entry setting="db_variables_table" />
-        <ini_entry setting="db_tasks_table"/> 
+        <ini_entry setting="db_tasks_table"/>
         <ini_entry setting="db_orders_table" />
         <ini_entry setting="db_history_table"/>
         <ini_entry setting="db_order_history_table" />
@@ -52,7 +52,7 @@
         <ini_entry setting="mail_on_success" />
         <ini_entry setting="mail_queue_dir" />
     </ini_entries>
-    
+
     <description>
         <p>
             In diesem Abschnitt werden allgemeine Einstellungen des Schedulers vorgenommen.

@@ -4,7 +4,7 @@
 
 <!--$Id$-->
 
-<xml_element name     = "kill_task" 
+<xml_element name     = "kill_task"
              title    = ""
              category = "Kommando"
              base_dir = "../"
@@ -26,7 +26,7 @@
                 </p>
             </description>
         </xml_attribute>
-        
+
         <xml_attribute name="id" type="zahl">
             <!-- Text wird von anderen XML-Dokumenten mitbenutzt. Also allgemein halten! -->
             <description>
@@ -41,8 +41,8 @@
     </xml_attributes>
 
     <xml_answer element="ok"/>
-    
+
     <example>
         <pre>&lt;kill_task job="mein_job" id="4711"/></pre>
     </example>
-</xml_element>    
+</xml_element>

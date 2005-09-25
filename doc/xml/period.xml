@@ -3,7 +3,7 @@
 
 <!--$Id$-->
 
-<xml_element name     = "period" 
+<xml_element name     = "period"
              title    = "Periode"
              category = "Konfiguration"
              base_dir = "../"
@@ -13,9 +13,9 @@
 
     <xml_parent_elements>
         <xml_parent_element name="run_time">
-        </xml_parent_element>        
+        </xml_parent_element>
     </xml_parent_elements>
-    
+
 
     <xml_attributes>
         <xml_attribute name="begin" type="hh:mm[:ss]" initial="00:00">
@@ -40,7 +40,7 @@
             <description>
                 <p>
                     Der Job wird, wenn er nicht schon läuft, zu Beginn der Periode gestartet.
-                    Nach Jobende soll der Scheduler den Job nach ablauf der angegebenen Zeit erneut starten, 
+                    Nach Jobende soll der Scheduler den Job nach ablauf der angegebenen Zeit erneut starten,
                     soweit die <code>&lt;run_time></code> das zulässt.
                     Die Wiederholung kann im Format <i>hh:mm</i> oder <i>hh:mm:ss</i> oder in Sekunden angegeben werden.
                 </p>
@@ -63,7 +63,7 @@
                 </p>
             </description>
         </xml_attribute>
-        
+
         <xml_attribute name="let_run" type="yes_no">
             <description>
                 <p>
@@ -72,7 +72,7 @@
                 </p>
                 <p>
                     Bei <code>let_run="no"</code> beendet der Scheduler die Task
-                    (ruft also nicht mehr spooler_process, sondern spooler_close auf), 
+                    (ruft also nicht mehr spooler_process, sondern spooler_close auf),
                     sobald die <code>&lt;run_time</code> nicht mehr gilt.
                 </p>
             </description>
@@ -87,5 +87,5 @@
             (Attribute <code>begin</code> und <code>end</code>) oder einen Zeitpunkt (Attribut <code>single_start</code>).
         </p>
     </description>
-    
+
 </xml_element>

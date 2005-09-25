@@ -69,7 +69,7 @@ job_chain.name = "Jobkette";</pre>
             <com.type type="VARIANT"/>
         </com.parameter>
     </com>
-    
+
     <title>
         Erweitert die Jobkette um einen Job
     </title>
@@ -106,7 +106,7 @@ job_chain.name = "Jobkette";</pre>
             <com.type class="Order"/>
         </com.result>
     </com>
-    
+
     <java>
         <java.parameter name="order">
             <com.type class="Order"/>

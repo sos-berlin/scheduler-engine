@@ -3,7 +3,7 @@
 
 <!--$Id$-->
 
-<xml_element name     = "spooler" 
+<xml_element name     = "spooler"
              title    = "Wurzelelement des XML-Dokuments"
              category = "Konfiguration"
              base_dir = "../"
@@ -13,7 +13,7 @@
 
     <xml_child_elements>
         <xml_child_element name="config" multiple="yes" title="Konfiguration">
-        </xml_child_element>        
+        </xml_child_element>
     </xml_child_elements>
-        
+
 </xml_element>

@@ -3,7 +3,7 @@
 
 <!--$Id$-->
 
-<xml_element name     = "include" 
+<xml_element name     = "include"
              title    = "Fügt Text aus einer Datei ein"
              category = "Konfiguration"
              base_dir = "../"
@@ -13,45 +13,45 @@
 
     <xml_parent_elements>
         <xml_parent_element name="script">
-        </xml_parent_element>        
+        </xml_parent_element>
         <xml_parent_element name="description">
-        </xml_parent_element>        
+        </xml_parent_element>
     </xml_parent_elements>
-    
-    
+
+
     <xml_attributes>
         <xml_attribute name="file" type="filename">
             <description>
                 <p>
                     Der Name der Datei, deren Inhalt eingefügt werden soll.
-                    Wenn der Dateiname nicht absolut ist, 
+                    Wenn der Dateiname nicht absolut ist,
                     dann gibt die Option <scheduler_option name="include"/> das Verzeichnis an.
                 </p>
             </description>
         </xml_attribute>
-        
+
     </xml_attributes>
-    
+
     <description>
         <p>
-            Dieses Element kann in den Text gestreut werden 
+            Dieses Element kann in den Text gestreut werden
             (aber außerhalb von <code>&lt;[CDATA[</code>&#160; und&#160; <code>]]&gt;</code>),
             um Quell-Code, der in anderen Dateien steht, einzuziehen.
         </p>
-        
+
         <p>
             Wenn der Scheduler die einzuziehende Datei nicht lesen kann:
         </p>
         <ul>
             <li>
-                Im Element <code>&lt;description></code>: Der Scheduler ignoriert Fehler, 
+                Im Element <code>&lt;description></code>: Der Scheduler ignoriert Fehler,
                 fügt aber die Fehlermeldung in die <code>&lt;description></code> ein.
             </li>
             <li>
                 Im Element <code>&lt;script></code>: Der Scheduler versetzt den Job in den Zustand <code>read_error</code>.
                 Das Kommando <scheduler_element name="modify_job" attribute="cmd" value="reread"/> lässt den Scheduler das Skript erneut lesen.
             </li>
-        </ul>        
+        </ul>
     </description>
-        
+
 </xml_element>

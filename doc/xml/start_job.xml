@@ -4,7 +4,7 @@
 
 <!--$Id$-->
 
-<xml_element name     = "start_job" 
+<xml_element name     = "start_job"
              title    = "Eine Task starten"
              category = "Kommando"
              base_dir = "../"
@@ -26,7 +26,7 @@
                 </p>
             </description>
         </xml_attribute>
-        
+
         <xml_attribute name="name" type="name">
             <description>
                 <p>
@@ -50,7 +50,7 @@
                     <scheduler_element name="run_time"/> ist außer Kraft.
                 </p>
                 <p>
-                    Statt eines Zeitpunkts kann auch <code>at="now"</code> angeben werden, um den Job sofort zu starten. 
+                    Statt eines Zeitpunkts kann auch <code>at="now"</code> angeben werden, um den Job sofort zu starten.
                     <code>"now"</code> ist voreingestellt.
                 </p>
                 <p>
@@ -66,9 +66,9 @@
     <xml_child_elements>
         <xml_child_element name="params"/>
     </xml_child_elements>
-    
+
     <xml_answer element="ok"/>
-    
+
 
     <example>
         <pre>&lt;start_job job="mein_job" at="now">
@@ -77,4 +77,4 @@
     &lt;/params>
 &lt;/start_job></pre>
     </example>
-</xml_element>    
+</xml_element>

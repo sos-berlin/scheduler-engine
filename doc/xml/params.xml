@@ -3,7 +3,7 @@
 
 <!--$Id$-->
 
-<xml_element name     = "params" 
+<xml_element name     = "params"
              title    = "Parameter"
              category = "Konfiguration"
              base_dir = "../"
@@ -16,12 +16,12 @@
         <xml_parent_element name="add_order" />
     </xml_parent_elements>
 
-        
+
     <xml_child_elements>
         <xml_child_element name="param"/>
     </xml_child_elements>
 
-    
+
     <behavior_with_xml_element element="base" complete="yes"/>
 
     <description>
@@ -39,5 +39,5 @@
             Siehe auch die Klasse <scheduler_method class="Variable_set" />.
         </p>
     </description>
-        
+
 </xml_element>

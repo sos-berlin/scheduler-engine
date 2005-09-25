@@ -3,7 +3,7 @@
 
 <!--$Id$-->
 
-<xml_element name     = "param" 
+<xml_element name     = "param"
              title    = "Ein Parameter"
              category = "Konfiguration"
              base_dir = "../"
@@ -32,15 +32,15 @@
 
     <xml_parent_elements>
         <xml_parent_element name="params">
-        </xml_parent_element>        
+        </xml_parent_element>
     </xml_parent_elements>
 
     <xml_attributes>
         <xml_attribute name="name" title="Eindeutiger Name"/>
         <xml_attribute name="value"/>
     </xml_attributes>
-        
-    
+
+
     <behavior_with_xml_element element="base" complete_attribute="name"/>
-    
+
 </xml_element>

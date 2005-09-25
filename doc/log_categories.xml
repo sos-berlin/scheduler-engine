@@ -3,8 +3,8 @@
 
 <!--$Id$-->
 
-<log_categories 
-    title    = "Log-Kategorien" 
+<log_categories
+    title    = "Log-Kategorien"
     base_dir = ""
     author   = "$Author$"
     date     = "$Date$"
@@ -12,7 +12,7 @@
 
     <scheduler_keyword keyword="Log-Kategorien"/>
     <scheduler_keyword keyword="Kategorien fürs Log"/>
-    
+
     <log_category name="all"            title="Alle Kategorien (außer nur explizite)">
     </log_category>
 
@@ -96,15 +96,15 @@
         <log_category name="callback"       local_default="off"  title="Rückrufe von Spidermonkey"/>
         <log_category name="idispatch"      local_default="off"  title="Verwaltung der COM-Objekte"/>
     </log_category>
-    
+
     <log_category name="sossql"         title="SQL-Prozessor (Dateityp sossql)">
         <log_category name="get_key"       title="Operation get_key()"/>
     </log_category>
 
-    
+
     <description>
         <p>
-            Viele Ausgaben in die Logdatei (<code>scheduler.log</code>) sind einer Kategorie zugeordnet, 
+            Viele Ausgaben in die Logdatei (<code>scheduler.log</code>) sind einer Kategorie zugeordnet,
             mit der die Ausgaben an- oder ausgeschaltet werden können.
         </p>
         <p>
@@ -117,7 +117,7 @@
         </p>
         <p>
             Die Kategorien sind hierarchisch organisiert.
-            Sie können eine Kategorie mit all deren Unterkategorien auswählen, indem Sie dem Namen ein "<code>.*</code>" anhängen. 
+            Sie können eine Kategorie mit all deren Unterkategorien auswählen, indem Sie dem Namen ein "<code>.*</code>" anhängen.
             Beispiel: <code>scheduler.*</code>.
         </p>
     </description>

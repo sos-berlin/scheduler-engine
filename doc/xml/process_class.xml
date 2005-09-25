@@ -3,7 +3,7 @@
 
 <!--$Id$-->
 
-<xml_element name     = "process_class" 
+<xml_element name     = "process_class"
              title    = "Prozessklasse"
              category = "Konfiguration"
              base_dir = "../"
@@ -13,12 +13,12 @@
 
     <xml_parent_elements>
         <xml_parent_element name="process_classes">
-        </xml_parent_element>        
+        </xml_parent_element>
     </xml_parent_elements>
 
     <xml_attributes>
         <xml_attribute setting="spooler_id"/>
-        
+
         <xml_attribute name="name" type="name">
             <description>
                 <p>
@@ -29,7 +29,7 @@
                     Siehe <scheduler_element name="job"/>, Attribut <code>process_class=</code>.
                 </p>
             </description>
-        </xml_attribute>   
+        </xml_attribute>
 
         <xml_attribute name="max_processes" type="zahl" initial="10">
             <description>
@@ -41,10 +41,10 @@
                     Es sollten nicht mehr Prozesse konfiguriert werden als das Betriebssystem erlaubt.
                 </p>
             </description>
-        </xml_attribute>   
+        </xml_attribute>
 
-    </xml_attributes>    
+    </xml_attributes>
 
-        
+
     <behavior_with_xml_element element="base" complete="yes"/>
 </xml_element>

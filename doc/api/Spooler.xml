@@ -20,7 +20,7 @@
     <title>
         Bricht den Scheduler augenblicklich ab
     </title>
-   
+  
     <description>
         <p>
             Bricht den Scheduler augenblicklich ab.
@@ -51,7 +51,7 @@
         <p>
             Wie <scheduler_method class="Spooler" method="abort_immediately"/>,
             nur dass der Scheduler sich erneut startet.
-            Dabei verwendet er die Kommandozeilenparametern wieder.
+            Dabei verwendet er die Kommandozeilenparameter wieder.
         </p>
         <p>
             Siehe <scheduler_element name="modify_spooler" attribute="cmd" value="abort_immediately_and_restart"/>
@@ -129,7 +129,7 @@
     <com>
         <com.parameter name="xml" optional="true">
             <com.type type="BSTR"/>
-            
+
             <description>
                 XSLT-Stylesheet als XML-String
             </description>
@@ -175,7 +175,7 @@
             <com.type type="BSTR"/>
         </com.result>
     </com>
-    
+
     <title>
         Hostware-Pfad der Datenbank
     </title>
@@ -193,6 +193,12 @@
     <title>
          Name der Datenbanktabelle für die Historie
     </title>
+    
+    <description>
+        <p>
+            Siehe <scheduler_ini_entry file="factory.ini" section="spooler" entry="db_history_table"/>.
+        </p>
+    </description>
 </property>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
@@ -207,6 +213,12 @@
     <title>
          Name der Datenbanktabelle für die Auftragshistorie
     </title>
+    
+    <description>
+        <p>
+            Siehe <scheduler_ini_entry file="factory.ini" section="spooler" entry="db_order_history_table"/>.
+        </p>
+    </description>
 </property>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
@@ -221,6 +233,12 @@
     <title>
         Name der Datenbanktabelle für die Aufträge
     </title>
+    
+    <description>
+        <p>
+            Siehe <scheduler_ini_entry file="factory.ini" section="spooler" entry="db_orders_table"/>.
+        </p>
+    </description>
 </property>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
@@ -235,6 +253,12 @@
     <title>
         Name der Datenbanktabelle für die Tasks
     </title>
+    
+    <description>
+        <p>
+            Siehe <scheduler_ini_entry file="factory.ini" section="spooler" entry="db_tasks_table"/>.
+        </p>
+    </description>
 </property>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
@@ -249,6 +273,12 @@
     <title>
         Name der Datenbanktabelle für interne Variablen des Schedulers
     </title>
+    
+    <description>
+        <p>
+            Siehe <scheduler_ini_entry file="factory.ini" section="spooler" entry="db_variables_table"/>.
+        </p>
+    </description>
 </property>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
@@ -370,7 +400,7 @@
             Fehler werden als XML-Antwort <scheduler_element name="ERROR" directory="xml/answer/"/> geliefert.
         </p>
     </description>
-    
+
     <example programming_language="javascript">
     <pre>spooler_log.info( spooler.execute_xml( "&lt;show_state/>" ) );</pre>
     </example>
@@ -505,11 +535,11 @@
     <title>
         Scheduler mit allen Tasks ordentlich beenden
     </title>
-    
+
     <com>
         <com.parameter name="timeout" optional="true">
             <com.type type="int"/>
-            
+
             <description>
                 Frist in Sekunden, die der Scheduler auf die Beendigung der Tasks wartet
                 und nach der der Scheduler alle Prozesse abbricht, um sich schließlich selbst zu beenden.
@@ -520,16 +550,16 @@
 
     <description>
         <p>
-            Beendet alle Tasks 
+            Beendet alle Tasks
             (durch Aufruf von <scheduler_method class="Job_impl" method="spooler_close"/>)
-            und schließlich sich selbst.           
+            und schließlich sich selbst.
         </p>
         <p>
             Wenn eine Frist angegeben ist, bricht der Scheduler nach Ablauf alle noch laufenden Prozesse ab
             (das sind Tasks, die zulange in einem Aufruf wie <scheduler_method class="Job_impl" method="spooler_process"/> verharren).
         </p>
         <p>
-            Siehe <scheduler_element name="modify_spooler" attribute="cmd" value="terminate"/> 
+            Siehe <scheduler_element name="modify_spooler" attribute="cmd" value="terminate"/>
             und <a href="../termination.xml">Beendigung des Schedulers</a>.
         </p>
     </description>
@@ -541,11 +571,11 @@
     <title>
         Scheduler mit allen Tasks ordentlich beenden und erneut starten
     </title>
-    
+
     <com>
         <com.parameter name="timeout" optional="true">
             <com.type type="int"/>
-            
+
             <description>
                 Frist in Sekunden, die der Scheduler auf die Beendigung der Tasks wartet
                 und nach der der Scheduler alle Prozesse abbricht, um sich schließlich selbst zu beenden.

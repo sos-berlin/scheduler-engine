@@ -3,7 +3,7 @@
 
 <!--$Id$-->
 
-<xml_element name          = "history.entry" 
+<xml_element name          = "history.entry"
              title         = "Eintrag in der Task-Historie"
              category      = "Antwort"
              sub_directory = "answer/"
@@ -15,11 +15,11 @@
     <xml_parent_elements>
         <xml_parent_element name="history"/>
     </xml_parent_elements>
-    
+
 
     <xml_attributes>
         <xml_attribute name="task" type="zahl" title="Task-Id"/>
-        
+
         <xml_attribute name="id" type="zahl" title="Task-Id (veraltet)">
             <description>
                 <p>
@@ -27,7 +27,7 @@
                 </p>
             </description>
         </xml_attribute>
-        
+
         <xml_attribute name="spooler_id" type="name" title="Scheduler-Id">
             <description>
                 <p>
@@ -36,12 +36,12 @@
                 </p>
             </description>
         </xml_attribute>
-        
+
         <xml_attribute name="job_name" type="name" title="Jobname"/>
-        
+
         <xml_attribute name="start_time" type="yyyy-mm-dd hh:mm:ss" title="Zeitpunkt des Starts der Task"/>
         <xml_attribute name="end_time"   type="yyyy-mm-dd hh:mm:ss" title="Zeitpunkt des Endes der Task"/>
-        
+
         <xml_attribute name="cause" type="cause" title="Grund des Starts">
             <description>
                 <p>
@@ -49,32 +49,32 @@
                 </p>
             </description>
         </xml_attribute>
-        
+
         <xml_attribute name="steps" type="zahl" title="Zahl der Jobschritte"/>
         <xml_attribute name="error" type="0|1" title="&quot;1&quot; bei einem Jobfehler"/>
-        
+
         <xml_attribute name="error_code" type="text" title="Fehlercode">
             <description>
                 <p>
-                    Innerhalb von <scheduler_element name="job" directory="xml/answer/"/> 
-                    wird anstelle dieses Attributs das Element 
+                    Innerhalb von <scheduler_element name="job" directory="xml/answer/"/>
+                    wird anstelle dieses Attributs das Element
                     <scheduler_element name="ERROR" directory="xml/answer/"/> ausgegeben.
                 </p>
             </description>
         </xml_attribute>
-        
+
         <xml_attribute name="error_text" type="text" title="Fehlercode mit Fehlertext">
             <description>
                 <p>
-                    Innerhalb von <scheduler_element name="job" directory="xml/answer/"/> 
-                    wird anstelle dieses Attributs das Element 
+                    Innerhalb von <scheduler_element name="job" directory="xml/answer/"/>
+                    wird anstelle dieses Attributs das Element
                     <scheduler_element name="ERROR" directory="xml/answer/"/> ausgegeben.
                 </p>
             </description>
         </xml_attribute>
-        
+
     </xml_attributes>
-    
+
     <xml_child_elements>
         <xml_child_element name="ERROR"/>
     </xml_child_elements>
@@ -84,5 +84,5 @@
             Die Histore wird aus der Datenbank gelesen.
         </p>
     </description>
-        
+
 </xml_element>

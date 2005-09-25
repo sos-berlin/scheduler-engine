@@ -3,7 +3,7 @@
 
 <!--$Id$-->
 
-<xml_element name          = "order" 
+<xml_element name          = "order"
              title         = "Auftrag"
              category      = "Antwort"
              sub_directory = "answer/"
@@ -17,7 +17,7 @@
         <xml_parent_element name="order_queue"/>
         <xml_parent_element name="task"/>
     </xml_parent_elements>
-    
+
     <xml_attributes>
         <xml_attribute name="order" type="id" title="Auftragskennung">
             <description>
@@ -26,7 +26,7 @@
                 </p>
             </description>
         </xml_attribute>
-        
+
         <xml_attribute name="title" type="text" title="Titel">
             <description>
                 <p>
@@ -34,7 +34,7 @@
                 </p>
             </description>
         </xml_attribute>
-        
+
         <xml_attribute name="state" type="text" title="Zustand">
             <description>
                 <p>
@@ -42,7 +42,7 @@
                 </p>
             </description>
         </xml_attribute>
-        
+
         <xml_attribute name="job_chain" type="name" title="Name der Jobkette">
             <description>
                 <p>
@@ -50,7 +50,7 @@
                 </p>
             </description>
         </xml_attribute>
-        
+
         <xml_attribute name="job" type="name" title="Job">
             <description>
                 <p>
@@ -58,30 +58,30 @@
                 </p>
             </description>
         </xml_attribute>
-        
+
         <xml_attribute name="task" type="id" title="Kennung der Task, die den Auftrag gerade ausführt">
             <description>
                 <p>
                 </p>
             </description>
         </xml_attribute>
-        
+
         <xml_attribute name="in_process_since" type="yyyy-mm-dd hh:mm:ss.mmm" title="Seit wann die Task den Auftrag ausführt">
             <description>
                 <p>
                 </p>
             </description>
         </xml_attribute>
-        
-        
+
+
         <xml_attribute name="state_text" type="text" title="Zustandstext">
             <description>
                 <p>
                     Siehe <scheduler_method class="Order" property="state_text"/>.
                 </p>
-            </description>    
+            </description>
         </xml_attribute>
-        
+
         <xml_attribute name="priority" type="zahl" title="Priorität">
             <description>
                 <p>
@@ -89,21 +89,21 @@
                 </p>
             </description>
         </xml_attribute>
-        
+
         <xml_attribute name="created" type="yyyy-mm-dd hh:mm:ss.mmm" title="Wann der Auftrag erzeugt worden ist">
             <description>
                 <p>
                 </p>
             </description>
         </xml_attribute>
-        
+
         <xml_attribute name="log_file" type="dateiname" title="Name der Protokolldatei">
             <description>
                 <p>
                 </p>
             </description>
         </xml_attribute>
-        
+
         <xml_attribute name="setback" type="hh:mm:ss.mmm" title="Wann der Auftrag zurückgestellt worden ist">
             <description>
                 <p>
@@ -113,7 +113,7 @@
                 </p>
             </description>
         </xml_attribute>
-        
+
         <xml_attribute name="next_start_time" type="yyyy-mm-dd hh:mm:ss.mmm" title="Nächster Startzeitpunkt">
             <description>
                 <p>
@@ -124,36 +124,36 @@
                 </p>
             </description>
         </xml_attribute>
-        
+
         <xml_attribute name="removed" type="yes|no" initial="no" title="Auftrag ist aus der Jobkette entfernt worden">
             <description>
                 <p>
                     <code>removed="yes"</code>:
-                    Der Auftrag ist durch einen Aufruf von 
+                    Der Auftrag ist durch einen Aufruf von
                     <scheduler_method class="Order" method="remove_from_job_chain"/>
-                    aus der Jobkette entfernt worden, aber wird noch von einer Task ausgeführt 
+                    aus der Jobkette entfernt worden, aber wird noch von einer Task ausgeführt
                     (Elternelement ist <scheduler_element directory="xml/answer/" name="task"/>).
                 </p>
             </description>
         </xml_attribute>
-        
+
         <xml_attribute name="replaced" type="yes|no" initial="no" title="Auftrag ist ersetzt worden">
             <description>
                 <p>
                     <code>replaced="yes"</code>:
-                    Der Auftrag ist durch einen Aufruf von 
+                    Der Auftrag ist durch einen Aufruf von
                     <scheduler_method class="Job_chain" method="add_or_replace_order" java_signature="sos.spooler.Order"/>
-                    ersetzt worden, aber wird noch von einer Task ausgeführt 
+                    ersetzt worden, aber wird noch von einer Task ausgeführt
                     (Elternelement ist <scheduler_element directory="xml/answer/" name="task"/>).
                 </p>
             </description>
         </xml_attribute>
-        
+
         <xml_attribute name="replacement" type="yes|no" initial="no" title="Auftrag ersetzt einen anderen gerade ausgeführten">
             <description>
                 <p>
                     <code>replacement="yes"</code>:
-                    Nach 
+                    Nach
                     <scheduler_method class="Job_chain" method="add_or_replace_order" java_signature="sos.spooler.Order"/>
                     wird noch der ersetzte Auftrag von einer Task ausgeführt.
                 </p>
@@ -162,9 +162,9 @@
                 </p>
             </description>
         </xml_attribute>
-        
+
     </xml_attributes>
-    
+
     <xml_child_elements>
         <xml_child_element name="log"/>
         <xml_child_element name="run_time"/>
@@ -174,5 +174,5 @@
         <p>
         </p>
     </description-->
-    
+
 </xml_element>

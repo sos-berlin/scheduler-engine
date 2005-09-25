@@ -6,8 +6,8 @@
 
 
 <!--  *************************************************************
-      Um diese Dokumentation zu lesen, benötigen Sie einen Browser, 
-      der die ersten beiden Zeilen interpretieren, 
+      Um diese Dokumentation zu lesen, benötigen Sie einen Browser,
+      der die ersten beiden Zeilen interpretieren,
       also XSLT-Stylesheets ausführen kann,
       z.B. Firefox oder Microsoft Internet Explorer.
       *************************************************************  -->
@@ -20,8 +20,8 @@
 
 <!--$Id$-->
 
-<description 
-    head_title          = "Dokumentation" 
+<description
+    head_title          = "Dokumentation"
     base_dir            = ""
     suppress_browse_bar = "yes"
     author              = "$Author$"
@@ -74,12 +74,12 @@
             </p>
         </dd>
     </a>
-    
+
     <a href="factory_ini.xml">
         <dt>Datei factory.ini</dt>
         <dd>
             <p>
-                Die Einstellungen in der Datei <code>factory.ini</code> haben Vorrang 
+                Die Einstellungen in der Datei <code>factory.ini</code> haben Vorrang
                 vor den Einstellungen in der XML-Konfiguration (leere Einträge "<code>eintrag=</code>" gelten als nicht vorhanden).
             </p>
         </dd>
@@ -99,7 +99,7 @@
         <dt>Kommandozeile</dt>
         <dd>
             <p>
-                Die Optionen an der Kommandozeile haben Vorrang vor den Einstellungen 
+                Die Optionen an der Kommandozeile haben Vorrang vor den Einstellungen
                 in der Datei <code>factory.ini</code> und der XML-Konfiguration.
             </p>
         </dd>
@@ -128,7 +128,7 @@
 
 
 
-<h2>Jobs</h2>    
+<h2>Jobs</h2>
 <dl>
     <a href="job.xml">
         <dt>Was ist ein Job?</dt>
@@ -136,16 +136,16 @@
             Zu einem Job gehören der Programm-Code, die Laufzeit und weitere Dinge.
         </dd>
     </a>
-        
+
     <dt>Programmschnittstelle (API)</dt>
     <dd>
         Die Dokumentation der Klassen und Methoden, auf die ein Job Zugriff hat.
-        Für 
+        Für
         <a style="font-weight: bold" href="api/api-java.xml">Java</a>,
         <a style="font-weight: bold" href="api/api-javascript.xml">JavaScript</a>,
         <a style="font-weight: bold" href="api/api-vbscript.xml">VBScript</a> und
         <a style="font-weight: bold" href="api/api-perl.xml">Perl</a>
-        
+
         (<a href="javadoc/index.html">und hier die bisherige Javadoc</a>).
     </dd>
 </dl>
@@ -172,7 +172,7 @@
             Es gibt ein Hauptprotokoll und Job-, Task- und Auftragsprotokolle. Und das <code>scheduler.log</code>.
         </dd>
     </a>
-    
+
     <a href="email.xml">
         <dt>eMail-Versand</dt>
         <dd>

@@ -3,14 +3,14 @@
 
 <!--$Id$-->
 
-<description 
-    title    = "Spooler-Skripte als COM-Klassen implementieren" 
+<description
+    title    = "Spooler-Skripte als COM-Klassen implementieren"
     base_dir = ""
     author   = "$Author$"
     date     = "$Date$"
 >
     <scheduler_keyword keyword="COM"/>
-    
+
 
 <div align="left">
 <table border="0" cellpadding="0" cellspacing="0" width="100%">

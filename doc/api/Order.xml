@@ -177,11 +177,11 @@
             <com.type type="BSTR"/>
         </com.result>
     </com>
-        
+
     <title>
         Freier Text für den Zustand des Auftrags
     </title>
-    
+
     <description>
         <p>
             Der Text wird auf der HTML-Oberfläche gezeigt.
@@ -218,13 +218,13 @@
         <java.parameter name="payload">
             <java.type type="Object"/>
         </java.parameter>
-    </java>    
+    </java>
 
     <java access="read">
         <java.result>
             <java.type type="Object"/>
         </java.result>
-    </java>    
+    </java>
 
     <title>
         Nutzlast, also Parameter des Auftrags.
@@ -265,11 +265,11 @@
 
 <method name="setback">
     <com/>
-    
+
     <title>
         Stellt den Auftrag eine Zeit lang zurück
     </title>
-    
+
     <description>
         <p>
             Siehe <scheduler_method class="Job" property="delay_order_after_setback"/>
@@ -330,7 +330,7 @@
             </description>
         </com.result>
     </com>
-    
+
     <title>
         Nächste Startzeit des Auftrags bei Verwendung von <code>&lt;run_time></code>
     </title>
@@ -356,9 +356,9 @@
 
 <example programming_language="javascript" title="Auftrag mit einfacher Nutzlast" >
     <pre>// Create order:
-{    
+{
     var order = spooler.create_order();
-    order.id         = 1234;    
+    order.id         = 1234;
     order.title      = "This is my order";
     order.state_text = "This is my state text";
     order.payload    = "This is my payload";
@@ -372,7 +372,7 @@ function spooler_process()
     var order = spooler_task.order;
     spooler_log.info( "order.payload=" + order.payload );
     return true;
-}</pre>    
+}</pre>
     </example>
 
 <example programming_language="javascript" title="Erzeugen eines Auftrags mit Variable_set als Nutzlast">
@@ -383,7 +383,7 @@ function spooler_process()
     variable_set.value( "param_two" ) = "22222";
 
     var order = spooler.create_order();
-    order.id      = 1234;    
+    order.id      = 1234;
     order.payload = variable_set;
     spooler.job_chain( "my_job_chain" ).add_order( order );
 }
@@ -397,7 +397,7 @@ function spooler_process()
     spooler_log.info( "param_one=" + variable_set.value( "param_one" ) );
     spooler_log.info( "param_two=" + variable_set.value( "param_two" ) );
     return true;
-}</pre>    
+}</pre>
 
     </example>
 

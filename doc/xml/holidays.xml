@@ -3,7 +3,7 @@
 
 <!--$Id$-->
 
-<xml_element name     = "holidays" 
+<xml_element name     = "holidays"
              title    = "Feiertage"
              category = "Konfiguration"
              base_dir = "../"
@@ -16,14 +16,14 @@
             <description>
                 Zur Einstellung der Feiertage für alle Jobs.
             </description>
-        </xml_parent_element>        
+        </xml_parent_element>
         <xml_parent_element name="run_time">
             <description>
                 Zur Einstellung der Feiertage für einen Job.
             </description>
-        </xml_parent_element>        
+        </xml_parent_element>
     </xml_parent_elements>
-    
+
     <xml_child_elements>
         <xml_child_element name="holiday">
             <description>
@@ -31,11 +31,11 @@
             </description>
         </xml_child_element>
     </xml_child_elements>
-    
+
     <description>
         <code>&lt;holidays></code> führt die Feiertage auf, an denen der Scheduler einen Job nicht laufen lassen soll.
     </description>
-    
+
     <example>
         <pre>&lt;holidays>
     &lt;holiday date="2004-12-24"/>
@@ -44,5 +44,5 @@
     &lt;holiday date="2004-12-31"/>
 &lt;/holidays></pre>
     </example>
-    
+
 </xml_element>

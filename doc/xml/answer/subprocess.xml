@@ -3,7 +3,7 @@
 
 <!--$Id$-->
 
-<xml_element name          = "subprocess" 
+<xml_element name          = "subprocess"
              title         = "Subprozess (abhängiger Prozess)"
              category      = "Antwort"
              sub_directory = "answer/"
@@ -15,20 +15,20 @@
     <xml_parent_elements>
         <xml_parent_element name="subprocesses"/>
     </xml_parent_elements>
-    
+
     <xml_attributes>
         <xml_attribute name="pid" type="zahl" title="Prozess-Id vom Betriebssystems"/>
-        
+
         <xml_attribute name="timeout_at" type="yyyy-mm-dd hh:mm:ss.mmm" title="Frist des Prozesses">
             <description>
                 <p>
-                    Wenn der Prozess mit 
-                    <scheduler_method class="Task" method="add_pid" java_signature="int, double"/> 
+                    Wenn der Prozess mit
+                    <scheduler_method class="Task" method="add_pid" java_signature="int, double"/>
                     eine Frist bekommen hat.
                 </p>
             </description>
         </xml_attribute>
-        
+
         <xml_attribute name="killed" type="yes|no" initial="no" title="Wenn die Task gerade abgebrochen wird"/>
     </xml_attributes>
 
@@ -36,5 +36,5 @@
         <p>
         </p>
     </description>
-        
+
 </xml_element>

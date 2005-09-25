@@ -3,7 +3,7 @@
 
 <!--$Id$-->
 
-<xml_element name          = "ERROR" 
+<xml_element name          = "ERROR"
              title         = "Fehlermeldung"
              category      = "Antwort"
              sub_directory = "answer/"
@@ -20,7 +20,7 @@
                 </p>
             </description>
         </xml_parent_element>
-        
+
         <xml_parent_element name="job">
             <description>
                 <p>
@@ -38,48 +38,48 @@
         </xml_parent_element>
 
     </xml_parent_elements>
-    
+
     <xml_attributes>
         <xml_attribute name="time" type="yyyy-mm-dd hh:mm:ss" title="Zeitstempel">
         </xml_attribute>
-        
+
         <xml_attribute name="class" type="name" title="Name der Exception-Klasse (C++)">
         </xml_attribute>
-        
+
         <xml_attribute name="code" type="text" title="Fehlercode">
         </xml_attribute>
-        
+
         <xml_attribute name="text" type="text" title="Fehlercode und Fehlertext">
         </xml_attribute>
-        
+
         <xml_attribute name="source" type="filename" title="Name der Datei, die den Fehler enthält">
             <description>
                 <p>
-                    Wenn der Fehler einer Datei zugeordnet werden konnte. 
+                    Wenn der Fehler einer Datei zugeordnet werden konnte.
                 </p>
             </description>
         </xml_attribute>
-        
+
         <xml_attribute name="line" type="zahl" title="Zeilennummer">
             <description>
                 <p>
                     Nummer der Zeile (ab 1), die den Fehler enthält,
-                    wenn der Fehler einer Zeile zugeordnet werden konnte. 
+                    wenn der Fehler einer Zeile zugeordnet werden konnte.
                 </p>
             </description>
         </xml_attribute>
-        
+
         <xml_attribute name="col" type="zahl" title="Spaltennummer">
             <description>
                 <p>
                     Nummer der Spalte (ab 1), die den Fehler enthält,
-                    wenn der Fehler einer Spalte zugeordnet werden konnte. 
+                    wenn der Fehler einer Spalte zugeordnet werden konnte.
                 </p>
             </description>
         </xml_attribute>
-        
+
     </xml_attributes>
-    
+
     <description>
         <p>
         </p>
@@ -95,6 +95,6 @@
 &lt;/spooler>
         </pre>
     </example>
--->    
-        
+-->
+
 </xml_element>

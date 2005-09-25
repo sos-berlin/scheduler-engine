@@ -58,7 +58,7 @@
 
         <description>
             <p>
-                Mit dem Aufruf kann die Laufzeit von abhängigen Prozessen eingegeschränkt werden.
+                Mit dem Aufruf kann die Laufzeit von abhängigen Prozessen eingeschränkt werden.
                 Bei Task-Ende bricht der Scheduler noch laufende abhängigen Prozesse in jedem Fall ab.
             </p>
             <p>
@@ -189,7 +189,7 @@
                 Statt dessen ruft er <scheduler_method class="Job_impl" method="spooler_close"/> auf.
             </p>
             <p>
-                Der Aufruf kann verwendet werden, 
+                Der Aufruf kann verwendet werden,
                 um beim Task-Ende den Versand des Task-Protokolls zu veranlassen,
                 siehe <scheduler_method class="Log"/>.
             </p>
@@ -289,8 +289,8 @@
         <description>
             Die Datenbanktabelle (s. <scheduler_ini_entry file="factory.ini" section="spooler" entry="db_history_table"/>
             muss eine Spalte mit dem Namen haben
-            und diese Spalte muss in der Datei 
-            <scheduler_ini_entry file="factory.ini" section="job" entry="history_columns"/> 
+            und diese Spalte muss in der Datei
+            <scheduler_ini_entry file="factory.ini" section="job" entry="history_columns"/>
             deklariert sein.
         </description>
     </property>
@@ -316,7 +316,7 @@
     </property>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
-    
+
     <property name="job" access="read">
         <com>
             <com.result>
@@ -339,7 +339,7 @@
                     <code>!= </code><api.null/>
                 </description>
             </com.result>
-            
+
         </com>
 
         <title>
@@ -363,24 +363,24 @@
                 </li>
             </ul>
         </description>
-        
-        
+
+
         <example programming_language="java">
             <pre>String value = spooler_task.params().var( "parameter3" );</pre>
         </example>
-            
+
         <example programming_language="java">
         <pre>Variable_set parameters = spooler_task.params();
 if( parameters.count() > 0 )  spooler_log.info( "Parameters given" );
 
-String value1 = parameters.var( "parameter1" );
+String value1 = parameters.var( "parameter1" );   // "", wenn die Variable nicht vorhanden ist
 String value2 = parameters.var( "parameter2" );</pre>
         </example>
-        
+
         <example programming_language="javascript">
             <pre>var value = spooler_task.params.value( "parameter3" );</pre>
         </example>
-            
+
         <example programming_language="javascript">
             <pre>var parameters = spooler_task.params;
 if( parameters.count > 0 )  spooler_log.info( "Parameters given" );
@@ -388,10 +388,10 @@ if( parameters.count > 0 )  spooler_log.info( "Parameters given" );
 var value1 = parameters.value( "parameter1" );
 var value2 = parameters.value( "parameter2" );</pre>
         </example>
-        
+
         <example programming_language="perl">
             <pre>my $value = $spooler_task->params->var( "parameter3" );
-            
+
 my $parameters = $spooler_task->params;
 my $value1 = $parameters->var( "parameter1" );
 my $value2 = $parameters->var( "parameter2" );</pre>
@@ -429,7 +429,7 @@ my $value2 = $parameters->var( "parameter2" );</pre>
     </property>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
-
+    <!--
     <property name="result" deprecated="true">
         <com>
             <com.result>
@@ -451,7 +451,7 @@ my $value2 = $parameters->var( "parameter2" );</pre>
             </p>
         </description>
     </property>
-
+    -->
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
     <property name="order" access="read">
@@ -467,25 +467,25 @@ my $value2 = $parameters->var( "parameter2" );</pre>
         <title>
             Der zu verarbeitende Auftrag
         </title>
-        
+
         <example programming_language="java">
             <pre>Order order = spooler_task.order();
-            
+
 spooler_log.info( "order.id=" + order.id() + ", order.title=" + order.title() );</pre>
         </example>
-        
+
         <example programming_language="javascript">
             <pre>var order = spooler_task.order;
-            
+
 spooler_log.info( "order.id=" + order.id + ", order.title=" + order.title );</pre>
         </example>
-        
+
         <example programming_language="perl">
             <pre>my $order = spooler_task.order();
-            
+
 $spooler_log->info( 'order.id=' . $order->id . ', order.title=' . $order->title );</pre>
         </example>
-        
+
     </property>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
@@ -589,7 +589,7 @@ $spooler_log->info( 'order.id=' . $order->id . ', order.title=' . $order->title 
     </property>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
-
+    <!--
     <method name="wait_until_terminated" deprecated="true">
         <com>
             <com.parameter name="wait_time" default="999999999">
@@ -624,7 +624,7 @@ $spooler_log->info( 'order.id=' . $order->id . ', order.title=' . $order->title 
             </p>
         </description>
     </method>
-
+    -->
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
     <description>

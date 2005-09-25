@@ -3,8 +3,8 @@
 
 <!--$Id: datenbank.xml 3303 2005-01-11 23:22:22Z jz $-->
 
-<description 
-    title               = "Subprozesse" 
+<description
+    title               = "Subprozesse"
     base_dir            = ""
     author              = "$Author: jz $"
     date                = "$Date: 2005-01-12 00:22:22 +0100 (Mi, 12 Jan 2005) $"

@@ -3,7 +3,7 @@
 
 <!--$Id$-->
 
-<xml_element name          = "queued_tasks" 
+<xml_element name          = "queued_tasks"
              title         = "Tasks in der Warteschlange"
              category      = "Antwort"
              sub_directory = "answer/"
@@ -15,12 +15,12 @@
     <xml_parent_elements>
         <xml_parent_element name="job"/>
     </xml_parent_elements>
-   
-    
+
+
     <xml_attributes>
         <xml_attribute name="length" type="zahl" title="Anzahl der Tasks in der Warteschlange"/>
     </xml_attributes>
-    
+
     <xml_child_elements>
         <xml_child_element name="queued_task" multiple="yes"/>
     </xml_child_elements>
@@ -29,5 +29,5 @@
         <p>
         </p>
     </description>
-    
+
 </xml_element>

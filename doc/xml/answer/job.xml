@@ -3,7 +3,7 @@
 
 <!--$Id$-->
 
-<xml_element name          = "job" 
+<xml_element name          = "job"
              title         = "Job"
              category      = "Antwort"
              sub_directory = "answer/"
@@ -16,18 +16,18 @@
         <xml_parent_element name="jobs"/>
         <xml_parent_element name="answer"/>
     </xml_parent_elements>
-   
+
     <xml_attributes>
         <xml_attribute name="job" type="name" title="Jobname"/>
-        
+
         <xml_attribute name="state" type="name" title="Zustand">
             <description>
                 <p>
                 </p>
             </description>
         </xml_attribute>
-        
-        
+
+
         <xml_attribute name="waiting_for_process" type="yes|no" initial="no" title="Wenn der Job auf einen Prozess wartet">
             <description>
                 <p>
@@ -39,7 +39,7 @@
                 </p>
             </description>
         </xml_attribute>
-        
+
         <xml_attribute name="all_steps"  type="zahl" title="Zahl der Jobschritte aller Tasks"/>
         <xml_attribute name="all_tasks"  type="zahl" title="Zahl aller bisher gestarteten Tasks"/>
         <xml_attribute name="state_text" type="text" title="Eigenschaft Job.state_text">
@@ -49,10 +49,10 @@
                 </p>
             </description>
         </xml_attribute>
-        
-        
+
+
         <xml_attribute name="log_file" type="dateiname" title="Dateiname des Protokolls"/>
-        
+
         <xml_attribute name="order" type="yes|no" initial="no" title="Bei auftragsgesteuertem Job">
             <description>
                 <p>
@@ -60,7 +60,7 @@
                 </p>
             </description>
         </xml_attribute>
-        
+
         <xml_attribute name="tasks" type="zahl" title="Anzahl der zugelassenen Tasks">
             <description>
                 <p>
@@ -70,7 +70,7 @@
         </xml_attribute>
 
         <xml_attribute name="next_start_time" type="yyyy-mm-dd hh:mm:ss.mmm" title="Voraussichtliche nächste Startzeit">
-            Zur Ermittlung der nächsten Startzeit prüft der Scheduler die nächsten hundert Perioden, 
+            Zur Ermittlung der nächsten Startzeit prüft der Scheduler die nächsten hundert Perioden,
             bis er eine Periode mit <code>single_start</code> oder <code>repeat</code> erreicht.
         </xml_attribute>
 
@@ -96,7 +96,7 @@
             </description>
         </xml_attribute>
     </xml_attributes>
-    
+
     <xml_child_elements>
         <xml_child_element name="tasks"/>
         <xml_child_element name="description"/>
@@ -110,5 +110,5 @@
         <p>
         </p>
     </description>
-        
+
 </xml_element>

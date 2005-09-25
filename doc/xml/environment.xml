@@ -3,7 +3,7 @@
 
 <!--$Id$-->
 
-<xml_element name     = "environment" 
+<xml_element name     = "environment"
              title    = "Umgebungsvariablen"
              category = "Konfiguration"
              base_dir = "../"
@@ -18,11 +18,11 @@
     <xml_child_elements>
         <xml_child_element name="variable"/>
     </xml_child_elements>
-    
+
     <description>
         <p>
             Bestimmt die zusätzlichen Umgebungsvariablen für einen Prozess.
         </p>
     </description>
-    
+
 </xml_element>

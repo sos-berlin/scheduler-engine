@@ -3,7 +3,7 @@
 
 <!--$Id$-->
 
-<xml_element name          = "ok" 
+<xml_element name          = "ok"
              title         = "Einfache Antwort"
              category      = "Antwort"
              sub_directory = "answer/"
@@ -15,12 +15,12 @@
     <xml_parent_elements>
         <xml_parent_element name="answer"/>
     </xml_parent_elements>
-    
+
 
     <description>
         <p>
             Ein leeres Element, mit dem Kommandos antworten, die kein weiteres Ergebnis liefern.
         </p>
     </description>
-    
+
 </xml_element>

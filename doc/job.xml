@@ -3,28 +3,28 @@
 
 <!--$Id$-->
 
-<description 
-    title    = "Was ist ein Job?" 
+<description
+    title    = "Was ist ein Job?"
     base_dir = ""
     author   = "$Author$"
     date     = "$Date$"
 >
     <scheduler_keyword keyword="Job"/>
-    
+
     Ein Job wird definiert in der XML-Konfiguration mit <b><scheduler_element name="job"/></b>.
     Hier werden u.a. der Programmcode und die Laufzeit bestimmt.
-    
+
 
     <h2>Zustand eines Jobs</h2>
 
     <p>
         Ein Job ist in einem der folgenden Zustände.
     </p>
-    
+
     <table cellspacing="0" cellpadding="0">
         <col valign="baseline" style="padding-top: 1ex"/>
         <col valign="baseline" style="padding-top: 1ex; padding-left: 2ex"/>
-        
+
         <tr>
             <td><scheduler_keyword keyword="pending"/><code>pending</code></td>
             <td>
@@ -71,14 +71,14 @@
             </td>
         </tr>
     </table>
-    
-    
+
+
     <h2>Zustand des Jobs ändern</h2>
     <p>
         Mit dem Kommando <scheduler_element name="modify_job"/> können Sie den Zustand des Jobs ändern.
     </p>
-    
-    
+
+
     <h2>Eine Task starten</h2>
     <p>
         In der Konfiguration können Sie mit <scheduler_element name="run_time"/> einstellen, dass eine Task einmal oder periodisch gestartet werden soll.
@@ -90,7 +90,7 @@
 
 
     <p>&#160;</p>
-    
+
     <p>
         Eine Task wird automatisch gestartet, wenn noch keine Task läuft und eine der folgenden Bedingungen gilt.
     </p>
@@ -99,18 +99,18 @@
             Zu Beginn einer <scheduler_element name="period"/>, wenn in ihr <code>repeat=</code> oder <code>single_start=</code> angegeben ist.
         </li>
         <li>
-            Wenn ein vorangehender Lauf 
+            Wenn ein vorangehender Lauf
             <scheduler_method class="Task" property="repeat" access="write" java_signature="double"/>
             gesetzt hat und die Zeit erreicht ist.
         </li>
         <li>
-            Wenn ein vorangehender Lauf fehlerhaft war und 
+            Wenn ein vorangehender Lauf fehlerhaft war und
             <scheduler_method class="Job" property="delay_after_error" access="write" java_signature="int, double"/>
             abgelaufen ist.
         </li>
         <li>
             Wenn das mit
-            <scheduler_element name="period" attribute="repeat"/> 
+            <scheduler_element name="period" attribute="repeat"/>
             angegebene Intervall nach dem Ende der zuletzt gelaufenen Task abgelaufen ist.
         </li>
         <li>
@@ -118,7 +118,7 @@
             aktiv ist und das überwachte Verzeichnis geändert worden ist.
         </li>
     </ul>
-    
+
     <p>
         Außerdem startet eine Task
     </p>
@@ -134,15 +134,15 @@
     </p>
     <ul>
         <li>
-            der Job nicht gestoppt ist, 
+            der Job nicht gestoppt ist,
         </li>
         <li>
-            es eine Periode für die aktuelle Zeit gibt, 
+            es eine Periode für die aktuelle Zeit gibt,
         </li>
         <li>
-            und die Verzögerung nach Fehler 
-            (<scheduler_method class="Job" property="delay_after_error" access="write" java_signature="int, double"/>) 
-            nicht wirkt. 
+            und die Verzögerung nach Fehler
+            (<scheduler_method class="Job" property="delay_after_error" access="write" java_signature="int, double"/>)
+            nicht wirkt.
         </li>
     </ul>
 
@@ -159,15 +159,15 @@
         Der Scheduler kann einen Job starten, wenn sich in einem Dateiverzeichnis etwas tut.
         Näheres im Kapitel <a href="directory_watch.xml">Verzeichnisüberwachung</a>.
     </p>
-    
-    
-    
+
+
+
     <h2>Implementierung</h2>
-    
+
     <p>
         Ein Job lässt sich auf verschiedene Weise implementieren.
     </p>
-    
+
     <p><b>Java</b></p>
     <div class="indent">
         <p>
@@ -176,7 +176,7 @@
         </p>
         <p>
             Die <a href="javadoc/index.html">Java-Schnittstelle</a> stellt weitere Klassen bereit.
-            Sie gilt entsprechend für die COM- und Perl-Schnittstellen, 
+            Sie gilt entsprechend für die COM- und Perl-Schnittstellen,
             wenn Sie Ihren Job in einer anderen Sprache implementieren.
         </p>
         <p>
@@ -185,32 +185,32 @@
             an.
         </p>
     </div>
-    
+
     <p><b><a href="script_language_javascript.xml">JavaScript und JScript</a></b></p>
     <div class="indent">
         <p>
         </p>
     </div>
-                
+
     <p><b>VBScript</b></p>
     <div class="indent">
         <p>
         </p>
     </div>
-                
+
     <p><b>Perl</b></p>
     <div class="indent">
         <p>
         </p>
     </div>
-                
+
     <p><b>COM</b></p>
     <div class="indent">
         <p>
             Sie können auch (unter Windows) einen Job in jeder beliebigen Programmiersprache
-            als COM-Server implementieren. 
+            als COM-Server implementieren.
             Weiteres siehe <a href="job_com.xml">hier</a>.
         </p>
     </div>
-                
+
 </description>

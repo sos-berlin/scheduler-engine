@@ -4,7 +4,7 @@
 
 <!--$Id$-->
 
-<xml_element name     = "add_jobs" 
+<xml_element name     = "add_jobs"
              parent_page = "../xml_commands.xml"
              category = "Kommando"
              title    = "XML-Element &lt;add_jobs&gt;"
@@ -26,7 +26,7 @@
     <xml_child_elements>
         <xml_child_element name="job" multiple="yes"/>
     </xml_child_elements>
-    
+
     <xml_answer element="ok"/>
-    
-</xml_element>    
+
+</xml_element>

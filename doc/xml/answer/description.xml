@@ -3,7 +3,7 @@
 
 <!--$Id$-->
 
-<xml_element name          = "description" 
+<xml_element name          = "description"
              title         = "Beschreibung"
              category      = "Antwort"
              sub_directory = "answer/"
@@ -15,11 +15,11 @@
     <xml_parent_elements>
         <xml_parent_element name="job"/>
     </xml_parent_elements>
-    
+
     <description>
         <p>
             Der Inhalt (<scheduler_element name="include"/> sind aufgelöst) von <scheduler_element name="description"/>.
         </p>
     </description>
-    
+
 </xml_element>

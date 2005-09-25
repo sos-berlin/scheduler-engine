@@ -4,7 +4,7 @@
 
 <!--$Id$-->
 
-<xml_element name     = "show_history" 
+<xml_element name     = "show_history"
              title    = ""
              category = "Kommando"
              base_dir = "../"
@@ -47,7 +47,7 @@
                 </p>
             </description>
         </xml_attribute>
-        
+
 
         <xml_attribute name="prev" type="zahl">
             <!-- Text wird von anderen XML-Dokumenten mitbenutzt. Also allgemein halten! -->
@@ -57,15 +57,15 @@
                 </p>
             </description>
         </xml_attribute>
-        
+
 
         <xml_attribute name="what" same_as_element="show_state"/>
     </xml_attributes>
 
     <xml_answer element="history"/>
-    
-    
+
+
     <example>
         <pre>&lt;show_history id="4711" next="10"/></pre>
     </example>
-</xml_element>    
+</xml_element>

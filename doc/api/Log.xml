@@ -36,6 +36,12 @@
     <title>
         Fehlermeldung (Level 1)
     </title>
+    
+    <description>
+        <p>
+            Anschließend stoppt der Job.
+        </p>
+    </description>
 </method>
 
 
@@ -363,10 +369,10 @@
     <title>
         Versand erzwingen
     </title>
-    
+
     <description>
         <p>
-            Bei <code>true</code> wird das Protokoll bei Task-Ende 
+            Bei <code>true</code> wird das Protokoll bei Task-Ende
             verschickt unabhängig von den Einstellungen
             <scheduler_method class="Log" property="mail_on_error"/>,
             <scheduler_method class="Log" property="mail_on_warning"/>,
@@ -447,11 +453,11 @@
 
 <description>
     <p>
-        In einem Job oder im Scheduler-Skript stellt 
+        In einem Job oder im Scheduler-Skript stellt
         <scheduler_method class="Job_impl" property="spooler_log"/>
         die hier beschriebenen Methoden bereit.
     </p>
-    
+
     <h3>eMail-Versand</h3>
     <p>
         Am Ende einer Task kann der Scheduler das Task-Protokoll per eMail versenden.
@@ -471,15 +477,15 @@
         Siehe aber <scheduler_method class="Task" method="end"/>.
     </p>
     <p>
-        <scheduler_method class="Log" property="mail"/> stellt ein 
-        <scheduler_method class="Mail"/>-Objekt bereit, 
+        <scheduler_method class="Log" property="mail"/> stellt ein
+        <scheduler_method class="Mail"/>-Objekt bereit,
         das die Adressierung übernimmt.
     </p>
 </description>
 
 <example programming_language="java">
     <pre>spooler_log.info( "Something for the Log" );
-    
+
 spooler_log.set_mail_on_warning( true );
 spooler_log.mail().set_from   ( "scheduler@company.com" );
 spooler_log.mail().set_to     ( "admin@company.com" );
@@ -488,7 +494,7 @@ spooler_log.mail().set_subject( "Task ended" );</pre>
 
 <example programming_language="javascript">
     <pre>spooler_log.info( "Something for the Log" );
-    
+
 spooler_log.mail_on_warning = true;
 spooler_log.mail.from    = "scheduler@company.com";
 spooler_log.mail.to      = "admin@company.com";
@@ -497,7 +503,7 @@ spooler_log.mail.subject = "ended";</pre>
 
 <example programming_language="perl">
     <pre>$spooler_log->info( "Something for the Log" );
-    
+
 $spooler_log->LetProperty( 'mail_on_warning', 1 );
 $spooler_log->mail->LetProperty( 'from'  , 'scheduler@company.com' );
 $spooler_log->mail->LetProperty( 'to     , 'admin@company.com' );

@@ -4,7 +4,7 @@
 
 <!--$Id$-->
 
-<xml_element name     = "allowed_host" 
+<xml_element name     = "allowed_host"
              title    = "Rechner, der Verbindung aufnehmen darf"
              category = "Konfiguration"
              parent_page = "../konfiguration.xml"
@@ -20,14 +20,14 @@
                     kann in <span class="mono">&lt;security></span> wiederholt werden.
                 </p>
             </description>
-        </xml_parent_element>        
+        </xml_parent_element>
     </xml_parent_elements>
-    
+
     <xml_attributes>
         <xml_attribute name="host" type="host">
             <description>
                 <p>
-                    <i>host</i> ist der Name oder die IP-Adresse des Rechners, für den der Zugriffsschutz eingestellt werden soll. 
+                    <i>host</i> ist der Name oder die IP-Adresse des Rechners, für den der Zugriffsschutz eingestellt werden soll.
                     Es kann auch die IP-Nummer eines Netzwerks sein.
                 </p>
                 <p>
@@ -35,7 +35,7 @@
                 </p>
             </description>
         </xml_attribute>
-      
+
         <xml_attribute name="level" type="level">
             <description>
                 <p>level="none"</p>
@@ -46,28 +46,28 @@
                 <p class="list_text">Der Rechner darf Kommandos ausführen, die Informationen liefern,
                 aber den Zustand des Schedulers nicht ändern.</p>
                 <p>level="no_add"</p>
-                <p class="list_text">Der Rechner hat vollen Zugriff, 
+                <p class="list_text">Der Rechner hat vollen Zugriff,
                 nur <scheduler_element name="add_jobs"/>, <scheduler_element name="job"/> und <scheduler_element name="add_order"/> sind gesperrt.</p>
                 <p>level="all"</p>
                 <p class="list_text">Der Rechner hat vollen Zugriff.</p>
             </description>
         </xml_attribute>
     </xml_attributes>
-    
+
     <behavior_with_xml_element element="base" complete_attribute="host"/>
-    
+
     <description>
         <p>
             <span class="mono">&lt;allowed_host></span>
             gibt den Namen oder die IP-Nummer eines Rechners an, der Verbindung mit dem Scheduler aufnehmen darf.
         </p>
         <p>
-            Die IP-Nummer kann eine Netzwerkadresse sein (Klasse A, B oder C). 
+            Die IP-Nummer kann eine Netzwerkadresse sein (Klasse A, B oder C).
             Dann werden alle Rechner des Netzwerks zugelassen. Das ist der Fall, wenn der letzte Teil der IP-Nummer 0 ist.
             Der Scheduler beachtet eine genau angegebene IP-Nummer vor einer Netzwerkadresse.
         </p>
     </description>
-    
+
     <example>
         <pre>&lt;security>
     &lt;allowed_host host="127.0.0.1"         level="all"/>
@@ -75,8 +75,8 @@
     &lt;allowed_host host="192.168.1.0"       level="info"/>
 &lt;/security></pre>
         <p>
-            Die IP-Adressen 127.0.0.1 und admin.company.com und die Adressen im 
-            Klasse-C-Netzwerk 192.168.1 dürfen sich mit dem Scheduler verbinden. Der letzte 
+            Die IP-Adressen 127.0.0.1 und admin.company.com und die Adressen im
+            Klasse-C-Netzwerk 192.168.1 dürfen sich mit dem Scheduler verbinden. Der letzte
             Eintrag beschränkt die Kommandos auf die, die Informationen liefern.
         </p>
     </example>
@@ -88,4 +88,4 @@
             Jeder Rechner hat vollen Zugriff.
         </p>
     </example>
-</xml_element>    
+</xml_element>

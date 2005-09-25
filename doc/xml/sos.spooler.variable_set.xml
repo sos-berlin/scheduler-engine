@@ -3,7 +3,7 @@
 
 <!--$Id$-->
 
-<xml_element name     = "sos.spooler.variable_set" 
+<xml_element name     = "sos.spooler.variable_set"
              title    = "Variablenmenge"
              base_dir = "../"
              parent_page = "../konfiguration.xml"
@@ -13,15 +13,15 @@
     <xml_child_elements>
         <xml_child_element name="variable"/>
     </xml_child_elements>
-        
-    
+
+
     <example><pre>
 &lt;sos.spooler.variable_set>
     &lt;variable name="param1" value="11111">
     &lt;variable name="param2" value="2222">
 &lt;/sos.spooler.variable_set>
 </pre>
-        
+
     </example>
-    
+
 </xml_element>

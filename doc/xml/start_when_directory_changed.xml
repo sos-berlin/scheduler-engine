@@ -3,7 +3,7 @@
 
 <!--$Id: run_time.xml 3623 2005-04-20 06:53:16Z jz $-->
 
-<xml_element name     = "start_when_directory_changed" 
+<xml_element name     = "start_when_directory_changed"
              title    = "Verzeichnis überwachen"
              category = "Konfiguration"
              base_dir = "../"
@@ -13,9 +13,9 @@
 
     <xml_parent_elements>
         <xml_parent_element name="job">
-        </xml_parent_element>        
+        </xml_parent_element>
     </xml_parent_elements>
-    
+
 
     <xml_attributes>
         <xml_attribute name="directory" type="path">
@@ -31,14 +31,14 @@
         <xml_attribute name="regex" type="regex">
             <description>
                 <p>
-                    Wenn Sie hier einen Regulären Ausdruck angeben, 
+                    Wenn Sie hier einen Regulären Ausdruck angeben,
                     werden nur Dateinamen beachtet, die ihm entsprechen.
                 </p>
             </description>
         </xml_attribute>
 
     </xml_attributes>
-    
+
     <description>
         <p>
             <code>&lt;start_when_directory_changed directory="<i>directory</i>" regex="<i>regex</i>"/></code>
@@ -47,13 +47,13 @@
         </p>
         <p>
             Wenn das Verzeichnis nach dem Start des Schedulers entfernt wird, also nicht mehr überwacht werden kann,
-            startet eine Task, während der Job gestoppt wird. 
+            startet eine Task, während der Job gestoppt wird.
             Weitere Tasks werden nicht gestartet (weil der Job gestoppt ist).
         </p>
         <p>
             Siehe <scheduler_method class="Job" method="start_when_directory_changed" java_signature="java.lang.String, java.lang.String"/>.
         </p>
     </description>
-    
-    
+
+
 </xml_element>

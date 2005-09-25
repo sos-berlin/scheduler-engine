@@ -3,7 +3,7 @@
 
 <!--$Id$-->
 
-<xml_element name          = "process" 
+<xml_element name          = "process"
              title         = "Prozess"
              category      = "Antwort"
              sub_directory = "answer/"
@@ -15,17 +15,17 @@
     <xml_parent_elements>
         <xml_parent_element name="processes"/>
     </xml_parent_elements>
-    
+
     <xml_attributes>
         <xml_attribute name="pid" type="zahl" title="Prozess-Id vom Betriebssystem"/>
         <xml_attribute name="job" type="name" title="Job, der von dem Prozess ausgeführt wird"/>
         <xml_attribute name="task" type="zahl" title="Id der Task, die der Prozess ausgeführt"/>
     </xml_attributes>
-    
+
     <description>
         <p>
         </p>
     </description>
-    
-      
+
+
 </xml_element>

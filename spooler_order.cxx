@@ -1511,6 +1511,14 @@ void Order::postprocessing( bool success )
                     {
                         _log->info( S() << "Kein weiterer Job in der Jobkette, der Auftrag wird mit state=" << _initial_state << " wiederholt um " << next_start );
 
+                        _end_time = Time::now();
+                        _log->close();
+                        if( _job_chain  &&  _is_in_database )  _spooler->_db->write_order_history( this );
+
+                        _start_time = 0;
+                        _end_time = 0;
+                        open_log();
+
                         try
                         {
                             set_state( _initial_state, next_start );

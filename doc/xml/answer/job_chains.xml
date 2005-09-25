@@ -3,7 +3,7 @@
 
 <!--$Id$-->
 
-<xml_element name          = "job_chains" 
+<xml_element name          = "job_chains"
              title         = "Jobketten"
              category      = "Antwort"
              sub_directory = "answer/"
@@ -15,11 +15,11 @@
     <xml_parent_elements>
         <xml_parent_element name="answer"/>
     </xml_parent_elements>
-    
+
     <xml_attributes>
         <xml_attribute name="count" type="integer" title="Anzahl der Jobketten"/>
     </xml_attributes>
-    
+
     <xml_child_elements>
         <xml_child_element name="job_chain" multiple="yes"/>
     </xml_child_elements>
@@ -28,5 +28,5 @@
         <p>
         </p>
     </description>
-    
+
 </xml_element>

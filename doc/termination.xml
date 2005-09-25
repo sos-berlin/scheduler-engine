@@ -3,8 +3,8 @@
 
 <!--$Id$-->
 
-<description 
-    title    = "Beendigung des Schedulers" 
+<description
+    title    = "Beendigung des Schedulers"
     base_dir = ""
     author   = "$Author$"
     date     = "$Date$"
@@ -15,14 +15,14 @@
         Der Scheduler beendet sich erst, wenn kein Job mehr läuft.
     </p>
     <p>
-        Siehe <scheduler_method class="Spooler" method="terminate"/> 
+        Siehe <scheduler_method class="Spooler" method="terminate"/>
         und <scheduler_element name="modify_spooler" attribute="cmd" value="terminate"/>.
     </p>
 
 
     <h2>Ordentliches Beenden mit Frist</h2>
     <p>
-        Sie können zum Beenden eine Frist angeben. 
+        Sie können zum Beenden eine Frist angeben.
         Wenn nach Ablauf der First noch Tasks laufen,
         weil sie in z.B. <scheduler_method class="Job_impl" method="spooler_process"/> zu lange verharren,
         bricht der Scheduler alle noch laufenden Prozesse ab.
@@ -35,7 +35,7 @@
         und beendet sich dann.
     </p>
     <p>
-        Siehe <scheduler_method class="Spooler" method="terminate"/> 
+        Siehe <scheduler_method class="Spooler" method="terminate"/>
         und <scheduler_element name="modify_spooler" attribute="cmd" value="terminate"/>.
     </p>
 
@@ -49,7 +49,7 @@
         Vorteil: Der Abbruch wirkt sofort.
     </p>
     <p>
-        Nachteil: Sie Software, insbesondere die Jobs können nicht darauf reagieren. 
+        Nachteil: Sie Software, insbesondere die Jobs können nicht darauf reagieren.
         Z.B. können temporäre Dateien nicht gelöscht werden.
     </p>
 </description>

@@ -16,11 +16,11 @@
 
 <method name="close">
     <com/>
-    
+
     <title>
         Gibt die System-Ressourcen frei
     </title>
-    
+
     <description>
         <p>
             Sollte in Sprachen mit Garbage Collector (Java, JavaScript) gerufen werden,
@@ -55,7 +55,7 @@
             <com.type type="BSTR" array="true"/>
         </java.parameter>
     </java>
-    
+
     <title>
         Startet einen Prozess
     </title>
@@ -69,7 +69,7 @@
             <com.type type="int"/>
         </com.result>
     </com>
-    
+
     <title>
         Prozesskennung
     </title>
@@ -211,15 +211,15 @@
             <com.type type="BSTR"/>
         </com.result>
     </com>
-    
+
     <title>
         Umgebungsvariablen
     </title>
-    
+
     <description>
         <p>
-            Die hier gesetzten Variablen werden zusammen 
-            mit den übrigen Umgebungsvariablen des laufenden Prozesses 
+            Die hier gesetzten Variablen werden zusammen
+            mit den übrigen Umgebungsvariablen des laufenden Prozesses
             dem neuen Subprozess übergeben.
         </p>
     </description>
@@ -263,10 +263,10 @@
 <description>
     <p>
         Ein Subprozess ist irgendein Prozess,
-        der mit 
-        <scheduler_method class="Task" method="create_subprocess"/> 
+        der mit
+        <scheduler_method class="Task" method="create_subprocess"/>
         oder
-        <scheduler_method class="Subprocess" method="start"/> 
+        <scheduler_method class="Subprocess" method="start"/>
         gestartet werden kann.
     </p>
 </description>
@@ -288,7 +288,7 @@ spooler_log.info( "wait_for_termination ..." );
 var ok = subprocess.wait_for_termination( 10 );
 spooler_log.info( "wait_for_termination ok=" + ok );
 
-if( subprocess.terminated ) 
+if( subprocess.terminated )
 {
     spooler_log.info( "exit code=" + subprocess.exit_code );
     spooler_log.info( "termination signal=" + subprocess.termination_signal );

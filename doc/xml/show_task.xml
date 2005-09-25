@@ -4,7 +4,7 @@
 
 <!--$Id$-->
 
-<xml_element name     = "show_task" 
+<xml_element name     = "show_task"
              title    = ""
              category = "Kommando"
              base_dir = "../"
@@ -29,14 +29,14 @@
                 </p>
             </description>
         </xml_attribute>
-        
+
         <xml_attribute name="what" same_as_element="show_state"/>
     </xml_attributes>
 
     <xml_answer element="task"/>
-    
-    
+
+
     <example>
         <pre>&lt;show_task id="4711"/></pre>
     </example>
-</xml_element>    
+</xml_element>

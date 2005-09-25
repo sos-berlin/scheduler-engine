@@ -3,7 +3,7 @@
 
 <!--$Id$-->
 
-<ini_section 
+<ini_section
     file     = "sos.ini"
     name     = "licence"
     title    = ""
@@ -23,7 +23,7 @@
 
 
     </ini_entries>
-    
+
     <description>
         <p>
             Der Scheduler verlangt einen Lizenzschlüssel, der hier eingetragen werden kann.

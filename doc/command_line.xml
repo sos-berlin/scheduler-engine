@@ -47,7 +47,7 @@
         <command_option name="pid-file" type="dateiname" title="Dateiname für Prozess-Id">
             <description>
                 <p>
-                    Für Unix: 
+                    Für Unix:
                     In diese Datei schreibt der Scheduler seine Pid.
                     Beim Beenden löscht der Scheduler die Datei.
                 </p>
@@ -61,16 +61,16 @@
         <command_option name="port"         setting="port"/>
         <command_option name="tcp-port"     setting="tcp_port"/>
         <command_option name="udp-port"     setting="udp_port"/>
-        
+
         <command_option name="reuse-port" title="TCP- und UDP-Port wiederverwenden (im Notfall)">
             <description>
                 <p>
                     Ruft <code>setsockopt(socket,SOL_SOCKET,SO_REUSEADDR,true)</code>.
                 </p>
                 <p>
-		    Die Option sollte <span style="text-decoration: underline">nur im Notfall</span> benutzt werden, 
+		    Die Option sollte <span style="text-decoration: underline">nur im Notfall</span> benutzt werden,
 		    falls das Betriebssystem den Port dauerhaft sperrt,
-		    obwohl keine Anwendung ihn mehr belegt. 
+		    obwohl keine Anwendung ihn mehr belegt.
 		    Das kann unter Windows XP passieren, wenn die Anwendung mit einem Debugger abgebrochen wird.
 		    Suse 8.0 kann fast eine Minute brauchen, um einen Port freizugeben.
                 </p>
@@ -88,10 +88,10 @@
         <command_option name="show-dtd" title="schreibt die DTD nach stdout">
             <description>
                 <p>
-                    Der Scheduler hat eine DTD, 
+                    Der Scheduler hat eine DTD,
                     der die XML-Kommandos und die XML-Konfiguration entsprechen müssen.
                 </p>
-                
+
                 <p>
                     Beispiel: <code>scheduler -show-dtd | less</code>
                 </p>
@@ -112,7 +112,7 @@
         <command_option name="send-cmd" type="xmlkommando" title="Anderem Scheduler zu schickendes Kommando">
             <description>
                 <p>
-                    Mit dieser Option startet der Scheduler nicht, 
+                    Mit dieser Option startet der Scheduler nicht,
                     sondern schickt einem anderen Scheduler mit gleicher Option <code>-tcp-port=</code>
                     auf demselben Rechner das XML-Kommando.
                     Das kann z.B. ein <scheduler_element name="terminate"/> sein: <code>-send-cmd="&lt;terminate/>"</code>
@@ -150,7 +150,7 @@
             <description>
                 <p>
                     Beim Aufruf des Schedulers aus einer Java-Klasse heraus (zum Debuggen)
-                    geben Sie hier den Programmdateinamen an, 
+                    geben Sie hier den Programmdateinamen an,
                     wenn der Scheduler Jobs in eigenen Prozessen starten können soll.
                 </p>
             </description>
@@ -172,7 +172,7 @@
                 <scheduler_keyword keyword="Service"/>
                 <scheduler_keyword keyword="Dienst"/>
                 <p>
-                    Die Option startet nicht den Scheduler, 
+                    Die Option startet nicht den Scheduler,
                     sondern installiert ihn als Windows-Dienst.
                     Dabei werden folgende Optionen aus der Kommandozeile übernommen:
                 </p>
@@ -266,10 +266,10 @@
         </command_option>
 
     </command_options>
-    
+
     <description>
         <p>
-            Der Programmdateiname <code>scheduler</code> muss absolut und vollständig angegeben werden. 
+            Der Programmdateiname <code>scheduler</code> muss absolut und vollständig angegeben werden.
             In Windows mit der Endung "<code>.exe</code>"
             (warum? weil der Scheduler den vollständigen Dateinamen braucht, um einen Job oder sich selbst neu zu starten).
         </p>
@@ -281,5 +281,5 @@
 
     <scheduler_keyword keyword="Kommandozeile"/>
     <scheduler_keyword keyword="Optionen"/>
-    
+
 </command_line>

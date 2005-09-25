@@ -19,13 +19,13 @@
     date        = "$Date$"
 >
 
-    <setting setting        = "scheduler_log" 
-             type           = "dateiname" 
+    <setting setting        = "scheduler_log"
+             type           = "dateiname"
              title          = "Dateiname des scheduler.log">
 
         <description>
             <p>
-                Wenn diese Einstellung gesetzt ist, 
+                Wenn diese Einstellung gesetzt ist,
                 schreibt der Scheduler ein detailliertes Protokoll zur Fehlerdiagnose in die Datei.
                 Geben Sie den Dateinamen absolut an (als vollständigen Pfad).
             </p>
@@ -35,8 +35,8 @@
             </p>
             <h3>Kategorien</h3>
             <p>
-                Sie können das Log mit Kategorien erweitern oder einschränken. 
-                Schreiben Sie die Namen der Kategorien mit Zwischenräumen getrennt vor den Dateinamen, 
+                Sie können das Log mit Kategorien erweitern oder einschränken.
+                Schreiben Sie die Namen der Kategorien mit Zwischenräumen getrennt vor den Dateinamen,
                 den Sie mit einem Größerzeichen (>) einleiten.
             </p>
             <p>
@@ -49,12 +49,12 @@
 log = scheduler.wait >scheduler.log
 log = scheduler.wait com_server.* >scheduler.log</pre>
         </example>
-        
+
     </setting>
 
 
-    <setting setting        = "log_dir" 
-             type           = "verzeichnis" 
+    <setting setting        = "log_dir"
+             type           = "verzeichnis"
              title          = "Verzeichnis der Protokolle">
 
         <description>
@@ -62,16 +62,16 @@ log = scheduler.wait com_server.* >scheduler.log</pre>
                 In dieses Verzeichnis schreibt der Scheduler seine Protokolle.
             </p>
             <p>
-                <scheduler_setting name="log_dir" value="*stderr"/> lässt den Scheduler 
+                <scheduler_setting name="log_dir" value="*stderr"/> lässt den Scheduler
                 die Protokollausgabe nach stderr (auf den Schirm) schreiben.
             </p>
         </description>
     </setting>
 
 
-    <setting setting           = "param" 
+    <setting setting           = "param"
              api               = "Spooler.param"
-             type              = "text" 
+             type              = "text"
              title             = "Zur freien Verwendung">
 
         <description>
@@ -83,14 +83,14 @@ log = scheduler.wait com_server.* >scheduler.log</pre>
     </setting>
 
 
-    <setting setting= "config" 
-             type   = "dateiname" 
+    <setting setting= "config"
+             type   = "dateiname"
              title  = "Konfigurationsdatei">
 
         <description>
             <scheduler_keyword keyword="Konfiguration"/>
             <scheduler_keyword keyword="XML-Konfiguration"/>
-            
+
             <p>
                 Gibt die <a href="konfiguration.xml">Konfigurationsdatei</a> an.
             </p>
@@ -98,7 +98,7 @@ log = scheduler.wait com_server.* >scheduler.log</pre>
     </setting>
 
 
-    <setting setting= "option_id" 
+    <setting setting= "option_id"
              type   = "scheduler_id"
              title  = "Kennung des Schedulers">
 
@@ -118,8 +118,8 @@ log = scheduler.wait com_server.* >scheduler.log</pre>
         </description>
     </setting>
 
-    
-    <setting setting= "spooler_id" 
+
+    <setting setting= "spooler_id"
              type   = "scheduler_id">
 
         <description>
@@ -129,17 +129,17 @@ log = scheduler.wait com_server.* >scheduler.log</pre>
                 oder wenn beim Scheduler-Start die Option <scheduler_option name="id"/> nicht angegeben worden ist.
 <!--
                 Gibt die Scheduler-Id an.
-                Der Scheduler wählt aus der Konfigurationsdatei die Einträge mit dem Attribut 
-                <code>spooler_id="</code><i>spooler_id</i><code>"</code> oder 
+                Der Scheduler wählt aus der Konfigurationsdatei die Einträge mit dem Attribut
+                <code>spooler_id="</code><i>spooler_id</i><code>"</code> oder
                 <code>spooler_id=""</code>
                 aus.
--->                
+-->
             </p>
         </description>
     </setting>
-    
 
-    <setting setting= "port" 
+
+    <setting setting= "port"
              type   = "number"
              title  = "TCP- und UDP-Port zur Steuerung des Schedulers">
 
@@ -148,9 +148,9 @@ log = scheduler.wait com_server.* >scheduler.log</pre>
             </p>
         </description>
     </setting>
-    
 
-    <setting setting= "tcp_port" 
+
+    <setting setting= "tcp_port"
              type   = "number"
              title  = "TCP-Port zur Steuerung des Schedulers">
 
@@ -159,9 +159,9 @@ log = scheduler.wait com_server.* >scheduler.log</pre>
             </p>
         </description>
     </setting>
-    
 
-    <setting setting= "udp_port" 
+
+    <setting setting= "udp_port"
              type   = "number"
              title  = "UDP-Port zur Steuerung des Schedulers">
 
@@ -170,16 +170,16 @@ log = scheduler.wait com_server.* >scheduler.log</pre>
             </p>
         </description>
     </setting>
-    
 
-    <setting setting= "log_level" 
+
+    <setting setting= "log_level"
              type   = "log_level"
              title  = "Protokollausgaben beschränken">
         <description>
             <p>
                 Legt fest, ab welcher Stufe der Scheduler Protokollzeilen ausgibt.
                 Jede Protokollzeile ist auf einer der folgenden Stufen:
-                <code>error</code>, <code>warn</code>, <code>info</code>, <code>debug1</code> bis <code>debug9</code> 
+                <code>error</code>, <code>warn</code>, <code>info</code>, <code>debug1</code> bis <code>debug9</code>
                 (<code>debug1</code> ist dasselbe wie <code>debug</code>).
             </p>
             <p>
@@ -189,7 +189,7 @@ log = scheduler.wait com_server.* >scheduler.log</pre>
     </setting>
 
 
-    <setting setting   = "include_path" 
+    <setting setting   = "include_path"
              type      = "verzeichnis"
              title     = "Für &lt;include&gt;"
              subst_env = "yes">
@@ -200,8 +200,8 @@ log = scheduler.wait com_server.* >scheduler.log</pre>
         </description>
     </setting>
 
-    
-    <setting setting = "html_dir" 
+
+    <setting setting = "html_dir"
              type    = "verzeichnis"
              title   = "Verzeichnis der HTML-Dateien">
         <description>
@@ -215,7 +215,7 @@ log = scheduler.wait com_server.* >scheduler.log</pre>
     </setting>
 
 
-    <setting setting = "db_tasks_table" 
+    <setting setting = "db_tasks_table"
              type    = "name"
              initial = "SCHEDULER_TASKS"
              title   = "Name der Datenbanktabelle für die Tasks">
@@ -229,7 +229,7 @@ log = scheduler.wait com_server.* >scheduler.log</pre>
     </setting>
 
 
-    <setting setting = "db_history_table" 
+    <setting setting = "db_history_table"
              type    = "name"
              initial = "SCHEDULER_HISTORY"
              title   = "Name der Datenbanktabelle für die Historie">
@@ -243,7 +243,7 @@ log = scheduler.wait com_server.* >scheduler.log</pre>
     </setting>
 
 
-    <setting setting = "db_order_history_table" 
+    <setting setting = "db_order_history_table"
              type    = "name"
              initial = "SCHEDULER_ORDER_HISTORY"
              title   = "Name der Datenbanktabelle für die Auftragshistorie">
@@ -257,7 +257,7 @@ log = scheduler.wait com_server.* >scheduler.log</pre>
     </setting>
 
 
-    <setting setting = "db_orders_table" 
+    <setting setting = "db_orders_table"
              type    = "name"
              initial = "SCHEDULER_ORDERS"
              title   = "Name der Datenbanktabelle für die Aufträge">
@@ -269,13 +269,13 @@ log = scheduler.wait com_server.* >scheduler.log</pre>
     </setting>
 
 
-    <setting setting = "db_variables_table" 
+    <setting setting = "db_variables_table"
              type    = "name"
              initial = "SCHEDULER_VARIABLES"
              title   = "Name der Datenbanktabelle für die internen Variablen des Schedulers">
         <description>
             <p>
-                Der Scheduler hält in dieser Tabelle interne Zähler, 
+                Der Scheduler hält in dieser Tabelle interne Zähler,
                 zum Beispiel für die nächste freie Task-Id.
             </p>
             <p>
@@ -285,25 +285,25 @@ log = scheduler.wait com_server.* >scheduler.log</pre>
     </setting>
 
 
-    <setting setting = "history_columns" 
+    <setting setting = "history_columns"
              type    = "name, name, ..."
              title   = "Zusätzliche Spalten in der Historie">
         <description>
             <p>
-                Eine Task kann mit der Methode 
+                Eine Task kann mit der Methode
                 <scheduler_method class="Task" method="set_history_field" java_signature="java.lang.String, java.lang.String"/>
                 die hier angegebenen Felder der Datenbanktabelle für die Task-Historie setzen.
             </p>
         </description>
     </setting>
 
-    <setting setting = "history" 
+    <setting setting = "history"
              type    = "yes|no"
              initial = "yes"
              title   = "Historie schreiben?">
         <description>
             <p>
-                Gibt ein, ob eine Task-Historie geschrieben werden soll. 
+                Gibt ein, ob eine Task-Historie geschrieben werden soll.
                 Der Scheduler schreibt dann für jede Task einen Satz in die Datenbank, oder, wenn der Scheduler ohne Datenbank arbeitet,
                 in eine Datei im mit <scheduler_option name="log-dir"/> angegebenen Verzeichnis.
             </p>
@@ -311,12 +311,12 @@ log = scheduler.wait com_server.* >scheduler.log</pre>
     </setting>
 
 
-    <setting setting = "history_file" 
+    <setting setting = "history_file"
              type    = "dateiname"
              title   = "Dateiname der Historie (für datenbanklosen Betrieb)">
         <description>
             <p>
-                Der Scheduler nimmt einen eigenen Namen, wenn diese Option fehlt. 
+                Der Scheduler nimmt einen eigenen Namen, wenn diese Option fehlt.
                 Die Option <scheduler_option name="log-dir"/> muss gesetzt sein oder der Scheduler schreibt die Datei nicht.
                 In diese Datei wird, wenn der <code>history=yes</code> gesetzt ist und der Scheduler keine Datenbank verwendet,
                 für jede gelaufende Task ein Satz geschrieben.
@@ -325,7 +325,7 @@ log = scheduler.wait com_server.* >scheduler.log</pre>
     </setting>
 
 
-    <setting setting= "history_on_process" 
+    <setting setting= "history_on_process"
              type   = "yes|no|zahl"
              initial = "0"
              title  = "Nach spooler_process() Historiensatz schreiben?">
@@ -335,14 +335,14 @@ log = scheduler.wait com_server.* >scheduler.log</pre>
                 einen Satz in die Historie (wenn eine geführt wird).
             </p>
             <p>
-                Wenn eine Zahl angegeben ist, schreibt der Scheduler erst vor dem 
+                Wenn eine Zahl angegeben ist, schreibt der Scheduler erst vor dem
                 soundsovielten Aufruf von <code>spooler_process()</code> einen Satz in die Historie.
             </p>
         </description>
     </setting>
 
 
-    <setting setting = "history_archive" 
+    <setting setting = "history_archive"
              type    = "yes|no|gzip"
              initial = "no"
              title   = "Historiendateien archivieren?">
@@ -355,7 +355,7 @@ log = scheduler.wait com_server.* >scheduler.log</pre>
     </setting>
 
 
-    <setting setting = "history_with_log" 
+    <setting setting = "history_with_log"
              type    = "yes|no|gzip"
              initial = "no"
              title   = "Protokoll in die Historie schreiben?">
@@ -371,7 +371,7 @@ log = scheduler.wait com_server.* >scheduler.log</pre>
         </description>
     </setting>
 
-    <setting setting = "order_history" 
+    <setting setting = "order_history"
              type    = "yes_no"
              initial = "yes"
              title   = "Aufträge in die Historie schreiben?">
@@ -383,7 +383,7 @@ log = scheduler.wait com_server.* >scheduler.log</pre>
     </setting>
 
 
-    <setting setting = "order_history_with_log" 
+    <setting setting = "order_history_with_log"
              type    = "yes|no|gzip"
              initial = "no"
              title   = "Auftragsprotokolle in die Historie schreiben?">
@@ -399,7 +399,7 @@ log = scheduler.wait com_server.* >scheduler.log</pre>
     </setting>
 
 
-    <setting setting = "db" 
+    <setting setting = "db"
              type    = "hostware_filename"
              title   = "Hostware-Dateiname der Datenbank">
         <description>
@@ -409,33 +409,33 @@ Ohne Eintrag werden Dateien im .csv-Format erzeugt, siehe <scheduler_ini_entry f
             </p>
             <p>
 Unter Windows kann auch ein einfacher Dateiname angegebenen werden, der auf <code>.mdb</code> endet (z.B. <code>scheduler.mdb</code>).
-Der Scheduler verwendet dann eine Microsoft-Access-Datenbank dieses Namens, 
+Der Scheduler verwendet dann eine Microsoft-Access-Datenbank dieses Namens,
 die im Protokollverzeichnis (s. Option <scheduler_option name="log-dir"/>) liegt.
 Der Scheduler richtet die Datei ein, wenn sie fehlt.
             </p>
             <p>
-Der Scheduler richtet die Tabellen selbständig ein.            
+Der Scheduler richtet die Tabellen selbständig ein.
             </p>
         </description>
-        
+
         <example>
-        
+
 <pre>db = jdbc -class=com.microsoft.jdbc.sqlserver.SQLServerDriver jdbc:microsoft:sqlserver://localhost:1433;selectMethod=Cursor;databaseName=factory -user=factory -password=factory
 db = odbc -db=factory_sql -user=factory -password=factory
- 
+
 db = jdbc -class=com.mysql.jdbc.Driver jdbc:mysql://localhost/factory:3307?user=factory&amp;password=factory
 db = odbc -db=factory_mysql -user=factory -password=factory
- 
+
 db = jdbc -class=oracle.jdbc.driver.OracleDriver jdbc:oracle:thin:@apnb:1521:test -user=factory -password=factory
 db = odbc -db=factory_oracle -user=factory -password=factory
 
-;db = scheduler.mdb</pre>        
- 
+;db = scheduler.mdb</pre>
+
         </example>
     </setting>
 
 
-    <setting setting = "need_db" 
+    <setting setting = "need_db"
              type    = "yes|no|strict"
              initial = "no"
              title   = "Ist die Datenbank notwendig?">
@@ -444,7 +444,7 @@ db = odbc -db=factory_oracle -user=factory -password=factory
                 <dt><code>need_db=no</code></dt>
                 <dd>
                     <p>
-                        Wenn die Einstellung <scheduler_setting setting="db"/> fehlt, 
+                        Wenn die Einstellung <scheduler_setting setting="db"/> fehlt,
                         gibt der Scheduler eine Warnung aus und arbeitet ohne Datenbank.
                     </p>
                     <p>
@@ -461,8 +461,8 @@ db = odbc -db=factory_oracle -user=factory -password=factory
                 <dt><code>need_db=yes</code></dt>
                 <dd>
                     <p>
-                        Wenn die Einstellung <scheduler_setting setting="db"/> fehlt, 
-                        startet der Scheduler nicht und gibt die Meldung 
+                        Wenn die Einstellung <scheduler_setting setting="db"/> fehlt,
+                        startet der Scheduler nicht und gibt die Meldung
                         <scheduler_error code="SCHEDULER-205"/> aus.
                     </p>
                     <p>
@@ -496,7 +496,7 @@ db = odbc -db=factory_oracle -user=factory -password=factory
     </setting>
 
 
-    <setting setting = "max_db_errors" 
+    <setting setting = "max_db_errors"
              type    = "zahl"
              initial = "5"
              title   = "Anzahl Datenbank-Fehler, bevor Scheduler aufgibt">
@@ -513,21 +513,21 @@ db = odbc -db=factory_oracle -user=factory -password=factory
         </description>
     </setting>
 
-    <setting setting = "mail_encoding" 
+    <setting setting = "mail_encoding"
              type    = "quoted-printable|base64"
              initial = "quoted-printable"
              title   = "Codierung des eMail-Anhangs">
         <description>
             <p>
-                Das Protokoll wird beim Versand mit quoted-printable codiert. Diese Codierung 
-                kann in der factory.ini auf einen anderen von Jmail akzeptierten Wert geändert 
+                Das Protokoll wird beim Versand mit quoted-printable codiert. Diese Codierung
+                kann in der factory.ini auf einen anderen von Jmail akzeptierten Wert geändert
                 werden (für JMail von Dimac).
             </p>
         </description>
     </setting>
 
 
-    <setting setting = "mail_on_error" 
+    <setting setting = "mail_on_error"
              type    = "yes|no"
              initial = "no"
              title   = "Mit Fehler beendete Task verschickt eMail">
@@ -539,7 +539,7 @@ db = odbc -db=factory_oracle -user=factory -password=factory
     </setting>
 
 
-    <setting setting = "mail_on_warning" 
+    <setting setting = "mail_on_warning"
              type    = "yes|no"
              initial = "no"
              title   = "Wenn eine Warnung oder ein Fehler ausgegeben worden ist, wird am Task-Ende eine eMail verschickt">
@@ -551,7 +551,7 @@ db = odbc -db=factory_oracle -user=factory -password=factory
     </setting>
 
 
-    <setting setting = "mail_on_process" 
+    <setting setting = "mail_on_process"
              type    = "yes|no|zahl"
              initial = "no"
              title   = "Task mit spooler_process() verschickt eMail">
@@ -563,7 +563,7 @@ db = odbc -db=factory_oracle -user=factory -password=factory
     </setting>
 
 
-    <setting setting = "mail_on_success" 
+    <setting setting = "mail_on_success"
              type    = "yes|no"
              initial = "no"
              title   = "Erfolgreich gelaufende Task verschickt eMail">
@@ -575,7 +575,7 @@ db = odbc -db=factory_oracle -user=factory -password=factory
     </setting>
 
 
-    <setting setting = "mail_queue_dir" 
+    <setting setting = "mail_queue_dir"
              type    = "verzeichnis"
              title   = "Verzeichnis der zeitweilig nicht versendbaren eMails">
         <description>
@@ -584,14 +584,14 @@ db = odbc -db=factory_oracle -user=factory -password=factory
                 werden hier abgelegt.
             </p>
             <p>
-                Um diese eMails später zu verschicken, muss ein Job geschrieben werden, der die 
+                Um diese eMails später zu verschicken, muss ein Job geschrieben werden, der die
                 Methode <scheduler_method class="Mail" method="dequeue"/> aufruft.
             </p>
         </description>
     </setting>
 
 
-    <setting setting   = "java_class_path" 
+    <setting setting   = "java_class_path"
              type      = "dateinamen"
              prepend   = "yes"
              subst_env = "yes"
@@ -599,14 +599,14 @@ db = odbc -db=factory_oracle -user=factory -password=factory
         <description>
             <p>
                 Wenn Jobs in Java implementiert sind, kann hier der <code>CLASS_PATH</code> eingestellt werden.
-                Das ist eine Liste von Verzeichnissen, in Windows durch Semikolons (;), in Unix 
+                Das ist eine Liste von Verzeichnissen, in Windows durch Semikolons (;), in Unix
                 durch Doppelpunkte getrennt.
             </p>
         </description>
     </setting>
 
 
-    <setting setting   = "java_options" 
+    <setting setting   = "java_options"
              type      = "text"
              prepend   = "yes"
              subst_env = "yes"
@@ -619,7 +619,7 @@ db = odbc -db=factory_oracle -user=factory -password=factory
     </setting>
 
 
-    <setting setting = "javac" 
+    <setting setting = "javac"
              type    = "dateiname"
              initial = "javac"
              title   = "Dateiname des Java-Compilers">
@@ -630,7 +630,7 @@ db = odbc -db=factory_oracle -user=factory -password=factory
     </setting>
 
 
-    <setting setting = "log_mail_subject" 
+    <setting setting = "log_mail_subject"
              type    = "text"
              title   = "Betreff der eMails">
         <description>
@@ -640,7 +640,7 @@ db = odbc -db=factory_oracle -user=factory -password=factory
     </setting>
 
 
-    <setting setting = "log_mail_from" 
+    <setting setting = "log_mail_from"
              type    = "email_address"
              title   = "Absender der eMails">
         <description>
@@ -650,7 +650,7 @@ db = odbc -db=factory_oracle -user=factory -password=factory
     </setting>
 
 
-    <setting setting = "log_mail_to" 
+    <setting setting = "log_mail_to"
              type    = "email_address"
              title   = "To-Empfänger der eMails">
         <description>
@@ -660,7 +660,7 @@ db = odbc -db=factory_oracle -user=factory -password=factory
     </setting>
 
 
-    <setting setting = "log_mail_cc" 
+    <setting setting = "log_mail_cc"
              type    = "email_address"
              title   = "Cc-Empfänger der eMails">
         <description>
@@ -670,7 +670,7 @@ db = odbc -db=factory_oracle -user=factory -password=factory
     </setting>
 
 
-    <setting setting = "log_mail_bcc" 
+    <setting setting = "log_mail_bcc"
              type    = "email_address"
              title   = "Bcc-Empfänger der eMails">
         <description>
@@ -680,7 +680,7 @@ db = odbc -db=factory_oracle -user=factory -password=factory
     </setting>
 
 
-    <setting setting = "smtp" 
+    <setting setting = "smtp"
              type    = "host_address"
              title   = "Hostname oder IP-Nummer des SMTP-Servers für eMail">
         <description>
@@ -690,34 +690,34 @@ db = odbc -db=factory_oracle -user=factory -password=factory
     </setting>
 
 <!--
-    <setting setting = "run_time_begin" 
+    <setting setting = "run_time_begin"
              type    = "hh:mm[:ss]"
              initial = "00:00">
         <description>
             <p>
                 Wenn das Element leer ist (also kein <code>&lt;period></code> enthält),
-                generiert der Scheduler eine Periode mit dieser Einstellung, 
+                generiert der Scheduler eine Periode mit dieser Einstellung,
                 anderfalls ist es die Voreinstellung für die Kind-Elemente.
             </p>
         </description>
     </setting>
 
 
-    <setting setting = "run_time_end" 
+    <setting setting = "run_time_end"
              type    = "hh:mm[:ss]"
              initial = "24:00"
              title   = "">
         <description>
             <p>
                 Wenn das Element leer ist (also kein <code>&lt;period></code> enthält),
-                generiert der Scheduler eine Periode mit dieser Einstellung, 
+                generiert der Scheduler eine Periode mit dieser Einstellung,
                 anderfalls ist es die Voreinstellung für die Kind-Elemente.
             </p>
         </description>
     </setting>
 
 
-    <setting setting = "run_time_single_start" 
+    <setting setting = "run_time_single_start"
              type    = "hh:mm[:ss]"
              initial = ""
              title   = "">
@@ -730,7 +730,7 @@ db = odbc -db=factory_oracle -user=factory -password=factory
     </setting>
 
 
-    <setting setting = "run_time_let_run" 
+    <setting setting = "run_time_let_run"
              type    = "yes_no"
              initial = ""
              title   = "">
@@ -748,5 +748,5 @@ db = odbc -db=factory_oracle -user=factory -password=factory
             Hier sind Einstellungen aufgeführt, die an mehreren Stellen vorgenommen werden können.
         </p>
     </description>
-    
+
 </settings>

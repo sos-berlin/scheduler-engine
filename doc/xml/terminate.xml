@@ -4,7 +4,7 @@
 
 <!--$Id$-->
 
-<xml_element name     = "terminate" 
+<xml_element name     = "terminate"
              title    = "Scheduler ordentlich beenden"
              category = "Kommando"
              base_dir = "../"
@@ -17,10 +17,10 @@
             Beendet den Scheduler ordentlich (s. <a href="../termination.xml">Beendigung des Schedulers</a>).
         </p>
     </description>
-    
+
     <xml_answer element="ok"/>
-    
+
     <example>
         <pre>&lt;terminate></pre>
     </example>
-</xml_element>    
+</xml_element>

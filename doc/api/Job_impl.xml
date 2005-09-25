@@ -19,12 +19,12 @@
             <com.type class="Spooler"/>
         </com.result>
     </com>
-    
-    
+
+
     <title>
         Das allgemeine Objekt des Schedulers
     </title>
-    
+
 
     <example programming_language="java">
         <pre>spooler_log.debug( "The working directory of the Scheduler is " + spooler.directory() );</pre>
@@ -43,11 +43,11 @@
             <com.type class="Log"/>
         </com.result>
     </com>
-    
+
     <title>
         Zum Protokollieren
     </title>
-    
+
     <example programming_language="java">
         <pre>spooler_log.info( "Something has happend" );</pre>
     </example>
@@ -61,12 +61,12 @@
             <com.type class="Job"/>
         </com.result>
     </com>
-    
-    
+
+
     <title>
         Das Objekt des Jobs
     </title>
-    
+
     <example programming_language="java">
         <pre>spooler_log.info( "The name of this job is " + spooler_job.name() );</pre>
     </example>
@@ -84,11 +84,11 @@
             <com.type class="Task"/>
         </com.result>
     </com>
-    
+
     <title>
         Das Objekt der Task
     </title>
-    
+
     <example programming_language="java">
         <pre>spooler_log.info( "The task id is " + spooler_task.id() );</pre>
     </example>
@@ -105,11 +105,11 @@
         <com.result name="continue">
             <com.type type="bool"/>
             <description>
-                <code>false</code> beendet die Task. 
+                <code>false</code> beendet die Task.
                 Der Scheduler setzt mit spooler_exit().
                 <scheduler_method class="Job_impl" method="spooler_exit"/> fort.
                 Wenn die Task einen Auftrag verarbeiten soll, wird die Task mit Fehler beendet,
-                was den Job stoppt (wenn nicht 
+                was den Job stoppt (wenn nicht
                 <scheduler_method class="Job" property="delay_after_error"/>
                 gesetzt ist).
             </description>
@@ -123,14 +123,14 @@
 
     <description>
         <p>
-            Der Scheduler ruft diese Methode nach dem Konstruktor und vor 
+            Der Scheduler ruft diese Methode nach dem Konstruktor und vor
             <scheduler_method class="Job_impl" method="spooler_open"/>
-            genau einmal auf. 
-            Gegenstück ist 
+            genau einmal auf.
+            Gegenstück ist
             <scheduler_method class="Job_impl" method="spooler_exit"/>.
-            Die Methode ist geeignet, um die Task zu initialisieren 
+            Die Methode ist geeignet, um die Task zu initialisieren
             (z.B. um eine Datenbank-Verbindung aufzubauen).
-        </p>    
+        </p>
     </description>
 </method>
 
@@ -143,13 +143,13 @@
     <title>
         Destruktor
     </title>
-    
+
     <description>
         <p>
-            Wird als allerletzte Methode gerufen, bevor das Skript entladen wird. 
-            Hier kann z.B. eine Datenbank-Verbindung geschlossen werden. 
+            Wird als allerletzte Methode gerufen, bevor das Skript entladen wird.
+            Hier kann z.B. eine Datenbank-Verbindung geschlossen werden.
         </p>
-    </description>    
+    </description>
 </method>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
@@ -159,27 +159,27 @@
         <com.result name="continue">
             <com.type type="bool"/>
         </com.result>
-        
+
         <description>
-            <code>false</code> beendet die Task. 
-            Der Scheduler setzt mit 
+            <code>false</code> beendet die Task.
+            Der Scheduler setzt mit
             <scheduler_method class="Job_impl" method="spooler_close"/>.
             fort.
         </description>
     </com>
-    
+
     <description>
-        <p>   
-            Wird zu Beginn einer Task gerufen. 
-            Die Methode wird direkt nach 
+        <p>
+            Wird zu Beginn einer Task gerufen.
+            Die Methode wird direkt nach
             <scheduler_method class="Job_impl" method="spooler_init"/>
-            gerufen, 
+            gerufen,
             es gibt derzeit keinen Unterschied.
-            Gegenstück ist 
+            Gegenstück ist
             <scheduler_method class="Job_impl" method="spooler_close"/>.
         </p>
     </description>
-    
+
     <title>
         Task-Beginn
     </title>
@@ -189,15 +189,15 @@
 
 <method name="spooler_close">
     <com/>
-    
+
     <title>
         Task-Ende
     </title>
-    
+
     <description>
         <p>
             Wird am Ende eines Joblaufs gerufen.
-            Gegenstück zu 
+            Gegenstück zu
             <scheduler_method class="Job_impl" method="spooler_open"/>.
         </p>
     </description>
@@ -209,31 +209,31 @@
     <com>
         <com.result name="continue">
             <com.type type="bool"/>
-            
+
             <description>
                 <p>
-                    Bei <scheduler_element name="job" attribute="order" value="no"/>: 
+                    Bei <scheduler_element name="job" attribute="order" value="no"/>:
                     <code>false</code> beendet den Joblauf.
                 </p>
                 <p>
-                    Bei <scheduler_element name="job" attribute="order" value="yes"/>: 
-                    <code>false</code> versetzt den Auftrag in den Fehlerzustand 
+                    Bei <scheduler_element name="job" attribute="order" value="yes"/>:
+                    <code>false</code> versetzt den Auftrag in den Fehlerzustand
                     (s. <scheduler_method class="Job_chain_node"/>).
                 </p>
             </description>
         </com.result>
     </com>
-    
+
     <title>
         Jobschritt oder Ausführung eines Auftrags
     </title>
-    
+
     <description>
         <p>
             Führt einen Jobschritt aus.
         </p>
         <p>
-            Ein Auftragsjob erhält in 
+            Ein Auftragsjob erhält in
             <scheduler_method class="Task" property="order"/>
             den auszuführenden Auftrag.
         </p>
@@ -248,13 +248,13 @@
 
 <method name="spooler_on_success">
     <com/>
-    
+
     <title>
         Bei Task-Ende im Erfolgsfall
     </title>
 
     <description>
-        <p>    
+        <p>
             Wird nach <scheduler_method class="Job_impl" method="spooler_close"/>,
             vor <scheduler_method class="Job_impl" method="spooler_exit"/>
             aufgerufen, wenn kein Fehler aufgetreten ist.
@@ -266,15 +266,15 @@
 
 <method name="spooler_on_error">
     <com/>
-    
+
     <title>
         Bei Task-Ende im Fehlerfall
     </title>
-    
+
     <description>
-        <p>    
-            Wird als letzte Funktion eines Joblaufs gerufen, 
-            wenn ein Fehler aufgetreten ist 
+        <p>
+            Wird als letzte Funktion eines Joblaufs gerufen,
+            wenn ein Fehler aufgetreten ist
             (nach <scheduler_method class="Job_impl" method="spooler_close"/> und
             vor <scheduler_method class="Job_impl" method="spooler_exit"/>).
         </p>
@@ -303,31 +303,31 @@
 spooler_exit()</pre>
 
     <p>
-        Keine dieser Methoden muss implementiert werden. In der Regel wird wenigstens 
-        <scheduler_method class="Job_impl" method="spooler_process"/> 
+        Keine dieser Methoden muss implementiert werden. In der Regel wird wenigstens
+        <scheduler_method class="Job_impl" method="spooler_process"/>
         implementiert.
     </p>
     <p>
-        Ein Fehler beim Ausführen des Job-Skripts während des Ladens oder in 
+        Ein Fehler beim Ausführen des Job-Skripts während des Ladens oder in
         <scheduler_method class="Job_impl" method="spooler_init"/>
-        führt zum Aufruf von 
-        <scheduler_method class="Job_impl" method="spooler_on_error"/>. 
-        Der Job wird gestoppt. 
-        <scheduler_method class="Job_impl" method="spooler_exit"/> wird gerufen 
-        (obwohl 
+        führt zum Aufruf von
+        <scheduler_method class="Job_impl" method="spooler_on_error"/>.
+        Der Job wird gestoppt.
+        <scheduler_method class="Job_impl" method="spooler_exit"/> wird gerufen
+        (obwohl
         <scheduler_method class="Job_impl" method="spooler_init"/>
-        nicht gerufen worden ist!) 
+        nicht gerufen worden ist!)
         und das Skript entladen.
     </p>
     <p>
         <scheduler_method class="Job_impl" method="spooler_on_error"/>
-        muss also auch mit Fehlern umgehen, die beim Laden oder in 
+        muss also auch mit Fehlern umgehen, die beim Laden oder in
         <scheduler_method class="Job_impl" method="spooler_init"/>
-        auftreten. 
+        auftreten.
     </p>
     <p>
         <scheduler_method class="Job_impl" method="spooler_exit"/>
-        wird gerufen, auch wenn 
+        wird gerufen, auch wenn
         <scheduler_method class="Job_impl" method="spooler_init"/>
         nicht gerufen worden ist.
     </p>

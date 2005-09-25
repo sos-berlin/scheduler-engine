@@ -101,7 +101,7 @@
     <com>
         <com.result>
             <com.type type="BSTR"/>
-            
+
             <description>
                 XML-Dokument als String.
                 Beim Setzen wird der Name des Wurzelelements (<code>&lt;sos.spooler.Variable_set></code>) nicht beachtet.
@@ -112,18 +112,18 @@
     <title>
         <code>Variable_set</code> als XML-Dokument
     </title>
-    
+
     <description>
         <p>
             Siehe <scheduler_element name="sos.spooler.variable_set"/>.
         </p>
     </description>
-    
+
     <example programming_language="javascript">
         <pre>var variable_set = spooler.create_variable_set();
 spooler_log.info( variable_set );
 
-variable_set.xml= "&lt;?xml version='1.0'?>&lt;variable_set>&lt;variable name='nachname' value='Meier'/>" + 
+variable_set.xml= "&lt;?xml version='1.0'?>&lt;variable_set>&lt;variable name='nachname' value='Meier'/>" +
                   "&lt;variable name='vorname' value='Hans'/>&lt;/variable_set>";
 spooler_log.info( variable_set );
 spooler_log.info( "nachname=" + variable_set.value( "nachname" ) );

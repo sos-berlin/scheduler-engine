@@ -4,8 +4,8 @@
 
 <!--$Id$-->
 
-<description 
-    title    = "Ersetzung von Umgebungsvariablen" 
+<description
+    title    = "Ersetzung von Umgebungsvariablen"
     base_dir = ""
     author   = "$Author$"
     date     = "$Date$"
@@ -15,9 +15,9 @@
 <scheduler_keyword keyword="Environment variables"/>
 
 <p>
-    In einigen Einstellungen können Umgebungsvariablen benutzt werden. 
+    In einigen Einstellungen können Umgebungsvariablen benutzt werden.
     Diese werden mit einem Dollarzeichen ($) eingeleitet.
-    Alle folgenden alphanumerischen Zeichen und Unterstriche werden zum Variablennamen gerechnet. 
+    Alle folgenden alphanumerischen Zeichen und Unterstriche werden zum Variablennamen gerechnet.
     In Unix ist die Großschreibung relevant.
 </p>
 

@@ -3,7 +3,7 @@
 
 <!--$Id$-->
 
-<xml_element name          = "history" 
+<xml_element name          = "history"
              title         = "Task-Historie"
              category      = "Antwort"
              sub_directory = "answer/"
@@ -25,5 +25,5 @@
             Die Histore wird aus der Datenbank gelesen.
         </p>
     </description>
-    
+
 </xml_element>

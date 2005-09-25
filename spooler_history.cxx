@@ -526,7 +526,6 @@ void Spooler_db::try_reopen_after_error( exception& x, bool wait_endless )
 
 int Spooler_db::get_id( const string& variable_name, Transaction* outer_transaction )
 {
-  //int  retry_count = db_error_retry_max;
     int  id;
 
     try
@@ -540,7 +539,6 @@ int Spooler_db::get_id( const string& variable_name, Transaction* outer_transact
             }
             catch( exception& x )
             {
-            //if( --retry_count < 0 )  throw;
                 if( outer_transaction )  throw;         // Fehlerschleife in der rufenden Routine, um Transaktion und damit _lock freizugeben!
                 try_reopen_after_error( x );
             }
@@ -702,8 +700,6 @@ void Spooler_db::insert_order( Order* order )
 {
     try
     {
-      //int  retry_count = db_error_retry_max;
-
         while(1)
         {
             if( !_db.opened() )  return;
@@ -745,7 +741,6 @@ void Spooler_db::insert_order( Order* order )
             }
             catch( exception& x )  
             { 
-              //if( --retry_count < 0 )  throw;
                 try_reopen_after_error( x );
             }
         }
@@ -776,11 +771,9 @@ void Spooler_db::delete_order( Order* order, Transaction* )
 
 void Spooler_db::finish_order( Order* order, Transaction* outer_transaction )
 {
-    try
+    while(1)
     {
-      //int  retry_count = db_error_retry_max;
-
-        while(1)
+        try
         {
             if( !_db.opened() )  return;
 
@@ -793,59 +786,80 @@ void Spooler_db::finish_order( Order* order, Transaction* outer_transaction )
                     order->_is_in_database = false;
                 }
 
+                write_order_history( order, outer_transaction );
+            }
 
-                if( order->start_time() )
+            ta.commit();
+            break;
+        }
+        catch( exception& x )  
+        { 
+            if( outer_transaction )  throw;
+            try_reopen_after_error( x );
+        }
+    }
+}
+
+//------------------------------------------------------------------Spooler_db::write_order_history
+
+void Spooler_db::write_order_history( Order* order, Transaction* outer_transaction )
+{
+    if( !order->start_time() )  return;
+
+
+    while(1)
+    {
+        if( !_db.opened() )  return;
+
+        try
+        {
+            Transaction ta ( this, outer_transaction );
+
+            int              history_id = get_order_history_id( &ta );
+            sql::Insert_stmt insert     ( &_db_descr );
+
+            insert.set_table_name( _spooler->_order_history_tablename );
+            
+            insert[ "history_id" ] = history_id;
+            insert[ "job_chain"  ] = order->job_chain()->name();
+            insert[ "order_id"   ] = order->id().as_string();
+            insert[ "title"      ] = order->title();
+            insert[ "state"      ] = order->state().as_string();
+            insert[ "state_text" ] = order->state_text();
+            insert[ "spooler_id" ] = _spooler->id_for_db();
+            insert.set_datetime( "start_time", order->start_time().as_string(Time::without_ms) );
+
+            if( order->end_time() )
+            insert.set_datetime( "end_time"  , order->end_time().as_string(Time::without_ms) );
+
+            execute( insert );
+
+
+            // Auftragsprotokoll
+            string log_filename = order->log()->filename();
+
+            if( _spooler->_order_history_with_log  &&  !log_filename.empty()  &&  log_filename[0] != '*' )
+            {
+                try 
                 {
-                    int history_id = get_order_history_id( &ta );
-
-                    {
-                        sql::Insert_stmt insert ( &_db_descr );
-                        
-                        insert.set_table_name( _spooler->_order_history_tablename );
-                        
-                        insert[ "history_id" ] = history_id;
-                        insert[ "job_chain"  ] = order->job_chain()->name();
-                        insert[ "order_id"   ] = order->id().as_string();
-                        insert[ "title"      ] = order->title();
-                        insert[ "state"      ] = order->state().as_string();
-                        insert[ "state_text" ] = order->state_text();
-                        insert[ "spooler_id" ] = _spooler->id_for_db();
-                        insert.set_datetime( "start_time", order->start_time().as_string(Time::without_ms) );
-
-                        if( order->end_time() )
-                        insert.set_datetime( "end_time"  , order->end_time().as_string(Time::without_ms) );
-
-                        execute( insert );
-
-
-                        // Auftragsprotokoll
-                        string log_filename = order->log()->filename();
-
-                        if( _spooler->_order_history_with_log  &&  !log_filename.empty()  &&  log_filename[0] != '*' )
-                        {
-                            try 
-                            {
-                                string blob_filename = db_name() + " -table=" + _spooler->_order_history_tablename + " -blob=log where \"HISTORY_ID\"=" + as_string( history_id );
-                                if( _spooler->_order_history_with_log == arc_gzip )  blob_filename = GZIP + blob_filename;
-                                copy_file( "file -b " + log_filename, blob_filename );
-                            }
-                            catch( exception& x ) 
-                            { 
-                                _log->warn( "FEHLER BEIM SCHREIBEN DES LOGS IN DIE TABELLE " + _spooler->_order_history_tablename + ": " + x.what() ); 
-                            }
-                        }
-                    }
+                    string blob_filename = db_name() + " -table=" + _spooler->_order_history_tablename + " -blob=log where \"HISTORY_ID\"=" + as_string( history_id );
+                    if( _spooler->_order_history_with_log == arc_gzip )  blob_filename = GZIP + blob_filename;
+                    copy_file( "file -b " + log_filename, blob_filename );
+                }
+                catch( exception& x ) 
+                { 
+                    _log->warn( "FEHLER BEIM SCHREIBEN DES LOGS IN DIE TABELLE " + _spooler->_order_history_tablename + ": " + x.what() ); 
                 }
             }
 
             ta.commit();
             break;
         }
-    }
-    catch( exception& x )  
-    { 
-        if( outer_transaction )  throw;
-        try_reopen_after_error( x );
+        catch( exception& x )  
+        { 
+            if( outer_transaction )  throw;
+            try_reopen_after_error( x );
+        }
     }
 }
 
@@ -855,8 +869,6 @@ void Spooler_db::update_order( Order* order )
 {
     try
     {
-      //int  retry_count = db_error_retry_max;
-
         while(1)
         {
             if( !_db.opened() )  return;
@@ -902,7 +914,6 @@ void Spooler_db::update_order( Order* order )
             }
             catch( exception& x )  
             { 
-              //if( --retry_count < 0 )  throw;
                 try_reopen_after_error( x );
             }
         }
@@ -914,179 +925,6 @@ void Spooler_db::update_order( Order* order )
     }
 }
 
-//------------------------------------------------------------------Spooler_db::write_order_history
-/*
-void Spooler_db::write_order_history( Order* order, Transaction* outer_transaction )
-{
-    try
-    {
-      //int  retry_count = db_error_retry_max;
-
-        while(1)
-        {
-            if( !_db.opened() )  return;
-
-            try
-            {
-                Transaction ta ( this, outer_transaction );
-
-                int history_id = get_order_history_id( &ta );
-
-                {
-                    sql::Insert_stmt insert ( &_db_descr );
-                    
-                    insert.set_table_name( _spooler->_order_history_tablename );
-                    
-                    insert[ "history_id" ] = history_id;
-                    insert[ "job_chain"  ] = order->job_chain()->name();
-                    insert[ "order_id"   ] = order->id().as_string();
-                    insert[ "title"      ] = order->title();
-                    insert[ "state"      ] = order->state().as_string();
-                    insert[ "state_text" ] = order->state_text();
-                    insert[ "spooler_id" ] = _spooler->id_for_db();
-                    insert.set_datetime( "start_time", order->start_time().as_string(Time::without_ms) );
-
-                    if( order->end_time() )
-                    insert.set_datetime( "end_time"  , order->end_time().as_string(Time::without_ms) );
-
-                    execute( insert );
-
-
-                    // Auftragsprotokoll
-                    string log_filename = order->log()->filename();
-
-                    if( _spooler->_order_history_with_log  &&  !log_filename.empty()  &&  log_filename[0] != '*' )
-                    {
-                        try 
-                        {
-                            string blob_filename = db_name() + " -table=" + _spooler->_order_history_tablename + " -blob=log where \"HISTORY_ID\"=" + as_string( history_id );
-                            if( _spooler->_order_history_with_log == arc_gzip )  blob_filename = GZIP + blob_filename;
-                            copy_file( "file -b " + log_filename, blob_filename );
-                        }
-                        catch( exception& x ) 
-                        { 
-                            _log->warn( "FEHLER BEIM SCHREIBEN DES LOGS IN DIE TABELLE " + _spooler->_order_history_tablename + ": " + x.what() ); 
-                        }
-                    }
-                }
-
-                ta.commit();
-                break;
-            }
-            catch( exception& x )  
-            { 
-              //if( --retry_count < 0 )  throw;
-                if( outer_transaction )  throw;         // Fehlerschleife in der rufenden Routine, um Transaktion und damit _lock freizugeben!
-                try_reopen_after_error( x );
-            }
-        }
-    }
-    catch( exception& x ) 
-    { 
-        _spooler->log()->error( string("FEHLER BEIM SCHREIBEN DER ORDER-HISTORIE: ") + x.what() ); 
-        throw;
-    }
-}
-*/
-//---------------------------------------------------------------------Job_chain::read_order_history
-/*
-xml::Element_ptr Job_chain::read_history( const xml::Document_ptr& doc, int id, int next, const Show_what& show )
-{
-    bool with_log = ( show & show_log ) != 0;
-
-    xml::Element_ptr history_element;
-
-    with_log &= _use_db;
-
-    try
-    {
-        if( !_spooler->_db->opened() )  throw_xc( "SCHEDULER-184" );     // Wenn die DB verübergegehen (wegen Nichterreichbarkeit) geschlossen ist, s. get_task_id()
-
-        Transaction ta ( +_spooler->_db );
-        {
-            Any_file sel;
-/ *
-            if( _use_file )
-            {
-                if( id != -1  ||  next >= 0 )  throw_xc( "SCHEDULER-139" );
-                sel.open( "-in -seq tab -field-names | tail -head=1 -reverse -" + as_string(-next) + " | " + _filename );
-            }
-            else
-            if( _use_db )
-* /
-            {
-                string prefix = ( next < 0? "-in -seq head -" : "-in -seq tail -reverse -" ) + as_string(max(1,abs(next))) + " | ";
-                string clause = " where \"JOB_CHAIN\"=" + sql_quoted(_job_name);
-                
-                if( id != -1 )
-                {
-                    clause += " and \"ID\"";
-                    clause += next<0? "<" : next>0? ">" : "=";
-                    clause += as_string(id);
-                }
-
-                clause += " order by \"ID\" ";
-                if( next < 0 )  clause += " desc";
-                
-                sel.open( prefix + _spooler->_db->_db_name + 
-                            "select %limit(" + abs(next) + ") \"ID\", \"SPOOLER_ID\", \"JOB_NAME\", \"START_TIME\", \"END_TIME\", \"CAUSE\", \"STEPS\", \"ERROR\", \"ERROR_CODE\", \"ERROR_TEXT\" " +
-                            join( "", vector_map( prepend_comma, _extra_names ) ) +
-                            " from " + uquoted(_spooler->_job_history_tablename) + 
-                            clause );
-            }
-            else
-                throw_xc( "SCHEDULER-136" );
-
-            history_element = doc.createElement( "history" );
-            dom_append_nl( history_element );
-
-            const Record_type* type = sel.spec().field_type_ptr();
-            Dynamic_area rec ( type->field_size() );
-
-            while( !sel.eof() )
-            {
-                string           param_xml;
-                xml::Element_ptr history_entry = doc.createElement( "history.entry" );
-
-                sel.get( &rec );
-    
-                for( int i = 0; i < type->field_count(); i++ )
-                {
-                    string value = type->as_string( i, rec.byte_ptr() );
-                    if( value != "" )
-                    {
-                        string name = type->field_descr_ptr(i)->name();
-                        if( name == "parameters" )  param_xml = value;
-                                              else  history_entry.setAttribute( lcase(name), value );
-                    }
-                }
-
-                int id = type->field_descr_ptr("id")->as_int( rec.byte_ptr() );
-
-
-                if( with_log )
-                {
-                    try
-                    {
-                        string log = file_as_string( GZIP_AUTO + _spooler->_db->_db_name + "-table=" + _spooler->_job_history_tablename + " -blob=log where \"ID\"=" + as_string(id), "" );
-                        if( !log.empty() ) dom_append_text_element( history_entry, "log", log );
-                    }
-                    catch( exception&  x ) { _log->warn( string("Historie: ") + x.what() ); }
-                }
-
-                history_element.appendChild( history_entry );
-                dom_append_nl( history_element );
-            }
-
-            sel.close();
-        }
-        ta.commit();
-    }
-    catch( const _com_error& x ) { throw_com_error( x, "Job_history::read_tail" ); }
-
-    return history_element;
-}
-*/
 //----------------------------------------------------------------------------Spooler_db::read_task
 // Die XML-Struktur ist wie Task::dom_element(), nicht wie Job_history::read_tail()
 

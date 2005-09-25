@@ -4,8 +4,8 @@
 
 <!--$Id$-->
 
-<description 
-    title    = "XML-Konfiguration" 
+<description
+    title    = "XML-Konfiguration"
     base_dir = ""
     author   = "$Author$"
     date     = "$Date$"
@@ -28,7 +28,7 @@
 <p>
     Die <code>DOCTYPE</code>-Zeile ist optional. Hier ist die jeweils aktuelle DTD eingestellt
 </p>
--->    
+-->
 <pre>&lt;?xml version="1.0"?>
 &lt;spooler>
     &lt;config>
@@ -42,7 +42,7 @@
                         spooler_log.info( "Hallo Welt!" );
                         return false;
                     }
-                    
+
                 ]]&gt;&lt;/script>
 
                 &lt;run_time repeat="10"/>
@@ -52,7 +52,7 @@
 &lt;/spooler></pre>
 
 <p>
-    Konfiguriert ist hier der Job <code>test_job</code>, den der Scheduler alle 10 Sekunden wiederholen wird. Wenn diese Konfiguration 
+    Konfiguriert ist hier der Job <code>test_job</code>, den der Scheduler alle 10 Sekunden wiederholen wird. Wenn diese Konfiguration
     in der Datei <code>hallo_welt.xml</code> abgelegt ist, können Sie den Scheduler so starten:
 </p>
 
@@ -68,7 +68,7 @@
 <p>
     <code>&lt;?xml encoding="UTF-8"?></code>&#160; und<br/>
     <code>&lt;?xml encoding="ISO-8859-1"?></code>&#160; sind möglich.<br/>
-</p>                                                        
+</p>
 <p>
     Der Scheduler verarbeitet nur 8bit-Zeichen (ISO-8859-1).
 </p>
@@ -124,7 +124,7 @@
                 filename   = "…" >
             &lt;<a class="silent" href="xml/include.xml">include</a> file="…"/>
             &lt;![CDATA[
-                <i>programm-code</i>… 
+                <i>programm-code</i>…
             ]]&gt;
         &lt;/script>
 
@@ -136,8 +136,8 @@
                  order         = "no"
                  process_class = "…"
                  tasks         = "1"
-                 timeout       = "…" 
-                 idle_timeout  = "…" 
+                 timeout       = "…"
+                 idle_timeout  = "…"
                  priority      = "1"   >
 
                  &lt;<a class="silent" href="xml/description.xml">description</a>> … &lt;/description>
@@ -153,7 +153,7 @@
                          filename   = "…" >
                      &lt;<a class="silent" href="xml/include.xml">include</a> file="…"/>
                      &lt;![CDATA[
-                         <i>programm-code</i>… 
+                         <i>programm-code</i>…
                      ]]&gt;
                  &lt;/script>
                <i>oder</i>
@@ -166,7 +166,7 @@
                          &lt;<a class="silent" href="xml/variable.xml">variable</a> name  = "…"
                                    value = "…"
                          &lt;/variable>
-                     &lt;/environment>                          
+                     &lt;/environment>
                  &lt;/process>
 
                  &lt;<a class="silent" href="xml/start_when_directory_changed.xml">start_when_directory_changed</a> directory = "…"
@@ -177,7 +177,7 @@
                      &lt;<a class="silent" href="xml/period.xml">period</a> let_run      = "…"
                              begin        = "00:00"
                              end          = "24:00"
-                             single_start = "…"     
+                             single_start = "…"
                              repeat       = "…"     >
                      &lt;/period>
 

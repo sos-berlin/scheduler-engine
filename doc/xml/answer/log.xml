@@ -3,7 +3,7 @@
 
 <!--$Id$-->
 
-<xml_element name          = "log" 
+<xml_element name          = "log"
              title         = "Protokoll"
              category      = "Antwort"
              sub_directory = "answer/"
@@ -17,17 +17,17 @@
         <xml_parent_element name="task"/>
     </xml_parent_elements>
 
-    
+
     <xml_attributes>
         <xml_attribute name="level" type="log_level" title="Mindest-Level, ab dem Ausgaben durchgelassen werden">
             <description>
                 <p>
-                    Siehe 
+                    Siehe
                 </p>
             </description>
         </xml_attribute>
 
-        
+
         <xml_attribute name="highest_level" type="log_level" title="Das höchste bisher benutzte Level"/>
         <xml_attribute name="last_error" type="string" title="Letzter Ausgabe des Levels error"/>
         <xml_attribute name="last_warning" type="string" title="Letzter Ausgabe des Levels warn"/>
@@ -66,7 +66,7 @@
                 </p>
             </description>
         </xml_attribute>
-        
+
 
         <xml_attribute name="smtp" type="name">
             <description>
@@ -75,8 +75,8 @@
                 </p>
             </description>
         </xml_attribute>
-        
-        
+
+
         <xml_attribute name="mail_from" type="email_adresse">
             <description>
                 <p>
@@ -84,7 +84,7 @@
                 </p>
             </description>
         </xml_attribute>
-        
+
 
         <xml_attribute name="mail_to" type="email_adresse">
             <description>
@@ -93,7 +93,7 @@
                 </p>
             </description>
         </xml_attribute>
-        
+
 
         <xml_attribute name="mail_cc" type="email_adresse">
             <description>
@@ -102,7 +102,7 @@
                 </p>
             </description>
         </xml_attribute>
-        
+
 
         <xml_attribute name="mail_bcc" type="email_adresse">
             <description>
@@ -111,7 +111,7 @@
                 </p>
             </description>
         </xml_attribute>
-        
+
 
         <xml_attribute name="mail_subject" type="email_subject">
             <description>
@@ -120,14 +120,14 @@
                 </p>
             </description>
         </xml_attribute>
-        
+
     </xml_attributes>
 
-    
+
     <description>
         <p>
             Der Inhalt von <code>&lt;log></code> ist das Protokoll (wenn mit <code>what="log"</code> bestellt).
         </p>
     </description>
-    
+
 </xml_element>

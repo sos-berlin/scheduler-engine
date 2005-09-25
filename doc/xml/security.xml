@@ -3,7 +3,7 @@
 
 <!--$Id$-->
 
-<xml_element name     = "security" 
+<xml_element name     = "security"
              title    = "Zugriffsschutz für TCP, HTTP und UDP"
              category = "Konfiguration"
              base_dir = "../"
@@ -13,7 +13,7 @@
 
     <xml_parent_elements>
         <xml_parent_element name="config">
-        </xml_parent_element>        
+        </xml_parent_element>
     </xml_parent_elements>
 
     <xml_attributes>
@@ -21,19 +21,19 @@
             <description>
                 <p>
                     Mit <code>ignore_unknown_hosts="yes"</code> ignoriert der Scheduler unbekannte oder nicht auflösbare Hostnamen in
-                    <code>&lt;allowed_host></code>. 
+                    <code>&lt;allowed_host></code>.
                 </p>
                 <p>
-                    Das Attribut wirkt nur auf die hier angegebenen <code>&lt;allowed_host></code>, 
+                    Das Attribut wirkt nur auf die hier angegebenen <code>&lt;allowed_host></code>,
                     nicht auf die Basiskonfiguration.
                 </p>
             </description>
-        </xml_attribute>   
-    </xml_attributes>    
+        </xml_attribute>
+    </xml_attributes>
 
     <xml_child_elements>
         <xml_child_element name="allowed_host">
-        </xml_child_element>        
+        </xml_child_element>
     </xml_child_elements>
 
     <behavior_with_xml_element element="base" complete="yes"/>

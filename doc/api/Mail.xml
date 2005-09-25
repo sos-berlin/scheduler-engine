@@ -267,11 +267,25 @@
 
 
     <method name="dequeue">
-        <com/>
+        <com>
+            <com.result name="count">
+                <com.type type="int"/>
+                <description>
+                    Zahl der versandten Nachrichten
+                </description>
+            </com.result>
+        </com>
 
         <title>
             Nachrichten aus dem Verzeichnis <code>queue_dir</code> erneut versuchen zu versenden
         </title>
+
+        <description>
+            <p>
+                Siehe <scheduler_method class="Mail" property="dequeue_log"/>,
+                <scheduler_ini_entry file="factory.ini" section="spooler" entry="mail_queue_dir"/>.
+            </p>
+        </description>
     </method>
 
 
@@ -281,6 +295,22 @@
                 <com.type type="BSTR"/>
             </com.result>
         </com>
+        
+        <title>
+            Protokoll von <code>dequeue()</code>
+        </title>
+        
+        <description>
+            <p>
+                Siehe <scheduler_method class="Mail" method="dequeue"/>.
+            </p>
+        </description>
+        
+        <example programming_language="javascript">
+            <pre>var count = spooler_log.mail.dequeue();
+spooler_log.info( count + " messages from mail queue sent" );
+spooler_log.info( spooler_log.mail.dequeue_log );</pre>
+        </example>
     </property>
 
 
@@ -310,13 +340,13 @@
         <title>
             XSLT-Stylesheet für eMail-Aufbereitung
         </title>
-        
+
         <description>
             <p>
                 Siehe <scheduler_element name="config" attribute="mail_xslt_stylesheet"/>.
             </p>
         </description>
-        
+
 
         <example programming_language="java">
             <pre>spooler_log.mail().set_xslt_stylesheet_path( "c:/stylesheets/mail.xslt" );</pre>

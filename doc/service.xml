@@ -3,8 +3,8 @@
 
 <!--$Id$-->
 
-<description 
-    title               = "Der Scheduler als Dienst" 
+<description
+    title               = "Der Scheduler als Dienst"
     base_dir            = ""
     author              = "$Author$"
     date                = "$Date$"

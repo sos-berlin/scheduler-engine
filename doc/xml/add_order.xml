@@ -4,7 +4,7 @@
 
 <!--$Id$-->
 
-<xml_element name     = "add_order" 
+<xml_element name     = "add_order"
              parent_page = "../xml_commands.xml"
              category = "Kommando"
              title    = "Auftrag hinzufügen"
@@ -18,8 +18,8 @@
             Fügt einen neuen Auftrag hinzu.
         </p>
         <p>
-            Wenn Sie das Element <code>&lt;params></code> angegeben, 
-            erstellt der Scheduler ein <scheduler_method class="Variable_set"/> 
+            Wenn Sie das Element <code>&lt;params></code> angegeben,
+            erstellt der Scheduler ein <scheduler_method class="Variable_set"/>
             und stellt es dem Job in <scheduler_method class="Order" method="payload"/> zur Verfügung.
         </p>
     </description>
@@ -33,7 +33,7 @@
             </description>
         </xml_attribute>
 
-        
+
         <xml_attribute name="id" type="id">
             <description>
                 <p>
@@ -42,7 +42,7 @@
                 </p>
             </description>
         </xml_attribute>
-        
+
 
         <xml_attribute name="replace" type="yes|no" initial="no">
             <description>
@@ -55,7 +55,7 @@
                 </p>
             </description>
         </xml_attribute>
-        
+
         <xml_attribute name="priority" type="zahl">
             <description>
                 <p>
@@ -63,7 +63,7 @@
             </description>
         </xml_attribute>
 
-        
+
         <xml_attribute name="title" type="text">
             <description>
                 <p>
@@ -71,7 +71,7 @@
                 </p>
             </description>
         </xml_attribute>
-        
+
 
 
         <xml_attribute name="state" type="text">
@@ -81,23 +81,23 @@
             </description>
         </xml_attribute>
 
-        
+
         <xml_attribute name="job" type="name">
             <description>
                 <p>
                 </p>
             </description>
         </xml_attribute>
-        
+
     </xml_attributes>
 
 
     <xml_child_elements>
         <xml_child_element name="params"/>
     </xml_child_elements>
-    
+
     <xml_answer element="ok"/>
-    
+
     <example>
         <pre>&lt;add_order job_chain="jobkette" id="1234" title="Mein erster Auftrag" state="100">
     &lt;params>
@@ -105,4 +105,4 @@
     &lt;/params>
 &lt;/add_order></pre>
     </example>
-</xml_element>    
+</xml_element>

@@ -3,7 +3,7 @@
 
 <!--$Id$-->
 
-<ini_section 
+<ini_section
     file     = "sos.ini"
     name     = "java"
     title    = ""
@@ -18,7 +18,7 @@
                     Voreingestellt ist für Windows <code>jvm.dll</code>, für HP-UX <code>jvm.sl</code> und sonst <code>jvm.so</code>.
                 </p>
                 <p>
-                    Wenn das Verzeichnis des Moduls nicht im <code>PATH</code> ist, 
+                    Wenn das Verzeichnis des Moduls nicht im <code>PATH</code> ist,
                     können Sie hier den vollständigen Pfad angeben.
                 </p>
             </description>
@@ -51,7 +51,7 @@
         </ini_entry>
 
     </ini_entries>
-    
+
     <description>
         <p>
             Hier werden Einstellungen für Java vorgenommen.

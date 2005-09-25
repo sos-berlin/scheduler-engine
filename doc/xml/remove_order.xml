@@ -3,7 +3,7 @@
 
 <!--$Id: modify_order.xml 3623 2005-04-20 06:53:16Z jz $-->
 
-<xml_element name     = "remove_order" 
+<xml_element name     = "remove_order"
              title    = ""
              category = "Kommando"
              base_dir = "../"
@@ -30,7 +30,7 @@
             </description>
         </xml_attribute>
 
-        
+
         <xml_attribute name="order" type="id">
             <description>
                 <p>
@@ -38,13 +38,13 @@
                 </p>
             </description>
         </xml_attribute>
-        
+
     </xml_attributes>
 
     <xml_answer element="ok"/>
-    
-    
+
+
     <example>
         <pre>&lt;remove_order job_chain="my_job_chain" order="42" /></pre>
     </example>
-</xml_element>    
+</xml_element>

@@ -3,8 +3,8 @@
 
 <!--$Id$-->
 
-<description 
-    title    = "Protokolle" 
+<description
+    title    = "Protokolle"
     base_dir = ""
     author   = "$Author$"
     date     = "$Date$"
@@ -23,10 +23,10 @@
 <h3>Hauptprotokoll</h3>
 <p>
     Das Hauptprotokoll fast alle Protokolle zusammen.
-    Der Dateiname wird aus Scheduler-Id, Datum und Uhrzeit gebildet, z.B. 
+    Der Dateiname wird aus Scheduler-Id, Datum und Uhrzeit gebildet, z.B.
     <code>scheduler-2004-08-24-104111.log</code>.
 </p>
-    
+
 
 
 <scheduler_keyword keyword="Jobprotokoll"/>
@@ -47,12 +47,12 @@
 
 <h3>Taskprotokolle</h3>
 <p>
-    Für jeden Task erstellt der Scheduler ein Taskprotokoll. 
-    Der Dateiname wird aus dem Jobnamen und, wenn mehrere Tasks zugelassen sind, der Task-Id gebildet, 
+    Für jeden Task erstellt der Scheduler ein Taskprotokoll.
+    Der Dateiname wird aus dem Jobnamen und, wenn mehrere Tasks zugelassen sind, der Task-Id gebildet,
     z.B.: <code>task.mein_job.log</code> und <code>task.ein_job.1234.log</code>.
     Taskprotokolle mit Task-Id werden nach Ende der Task gelöscht.
 </p>
-    
+
 
 
 <scheduler_keyword keyword="Auftragsprotokoll"/>
@@ -73,7 +73,7 @@
 
 <h3>scheduler.log</h3>
 <p>
-    Zur Fehlerdiagnose kann der Scheduler das <code>scheduler.log</code> schreiben. 
+    Zur Fehlerdiagnose kann der Scheduler das <code>scheduler.log</code> schreiben.
     In <scheduler_ini_entry file="factory.ini" section="spooler" entry="log"/> stellen sie den Dateinamen ein.
     In dieser Dokumentation steht <code>factory.ini</code> für den hier eingestellten Dateinamen.
 </p>
@@ -84,7 +84,7 @@
 
 <h2>Umfang</h2>
 <p>
-    Mit <scheduler_option name="log-level"/> und 
+    Mit <scheduler_option name="log-level"/> und
     <scheduler_method class="Log" property="level" access="write" java_signature="int"/>
     kann die Stufe (error, warn, info, debug bis debug9) eingestellt werden, ab der Protokollzeilen gelten.
 </p>
@@ -96,7 +96,7 @@
     Wenn das Hauptprotokoll nicht geöffnet werden kann, bricht der Scheduler ab.
 </p>
 <p>
-    Wenn nicht genug Plattenplatz vorhanden ist, um ein Protokoll fortzuschreiben, 
+    Wenn nicht genug Plattenplatz vorhanden ist, um ein Protokoll fortzuschreiben,
     hält der Scheduler an.
     Er reagiert auf über TCP, UDP oder HTTP übergebene Kommandos.
 </p>
@@ -119,10 +119,10 @@
     Der Scheduler kann die Task- und Auftragsprotokolle mit in die Historie schreiben.
     Voraussetzung sind
 </p>
-    
+
 <ul>
     <li>
-        Betrieb mit einer <a href="datenbank.xml">Datenbank</a>, 
+        Betrieb mit einer <a href="datenbank.xml">Datenbank</a>,
     </li>
     <li>
         die Einstellung <scheduler_ini_entry file="factory.ini" section="spooler" entry="history"/>), um die Historie einzuschalten,
@@ -149,7 +149,7 @@
 <scheduler_keyword keyword="eMail-Versand"/>
 <scheduler_keyword keyword="Mail-Versand"/>
 
-<h2>eMail-Versand</h2>    
+<h2>eMail-Versand</h2>
 
 <p>
     Der Scheduler kann das Task-Protokoll per eMail verschicken. Lesen Sie weiter im Kapitel <a href="email.xml">eMail</a>.
@@ -165,7 +165,7 @@
 </p>
 
 <p>
-    Mit einem Browser können Sie den eingebauten <a href="http.xml">HTTP-Server</a> ansprechen 
+    Mit einem Browser können Sie den eingebauten <a href="http.xml">HTTP-Server</a> ansprechen
     und sich ein Protokoll fortlaufend anzeigen lassen.
 </p>
 
