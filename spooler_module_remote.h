@@ -40,7 +40,7 @@ struct Remote_module_instance_proxy : Com_module_instance_base
         bool                    begin__end                  ();
 
         virtual bool            async_finished_             ();
-        virtual bool            async_continue_             ( bool wait )                           { return _proxy->continue_async_operation( this, wait ); }
+        virtual bool            async_continue_             ( Continue_flags flags )                    { return _proxy->continue_async_operation( this, flags ); }
       //virtual bool            async_has_error_            ();
       //virtual void            async_check_error_          ();
         virtual string          async_state_text_           ();
@@ -90,7 +90,7 @@ struct Remote_module_instance_proxy : Com_module_instance_base
     virtual Async_operation*    release__start              ();
     virtual void                release__end                ();
 
-    bool                        continue_async_operation    ( Operation*, bool wait );
+    bool                        continue_async_operation    ( Operation*, Async_operation::Continue_flags );
     void                        check_connection_error      ();
     int                         exit_code                   ();
     int                         termination_signal          ();

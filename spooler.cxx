@@ -135,7 +135,7 @@ struct Termination_async_operation : Async_operation
 
                                 Termination_async_operation ( Spooler*, time_t timeout_at );
 
-    virtual bool                async_continue_             ( bool wait );
+    virtual bool                async_continue_             ( Continue_flags );
     virtual bool                async_finished_             ()                                      { return false; }
     virtual string              async_state_text_           ()                                      { return "Termination_async_operation"; }
 
@@ -386,11 +386,11 @@ Termination_async_operation::Termination_async_operation( Spooler* spooler, time
 
 //-----------------------------------------------------Termination_async_operation::async_continue_
 
-bool Termination_async_operation::async_continue_( bool )
+bool Termination_async_operation::async_continue_( Continue_flags flags )
 {
     bool something_done = false;
 
-    if( !async_next_gmtime_reached() )  return false;
+    if( !( flags & cont_next_gmtime_reached ) )  return false;
 
 
     switch( _state )
@@ -405,7 +405,6 @@ bool Termination_async_operation::async_continue_( bool )
 
             {
                 Scheduler_event scheduler_event ( Scheduler_event::evt_scheduler_kills, log_error, _spooler );
-                //scheduler_event.set_error( x );
                 scheduler_event.set_scheduler_terminates( true );
 
                 Mail_defaults mail_defaults( _spooler );

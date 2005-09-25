@@ -125,7 +125,7 @@ struct Directory_watcher : Event  //, Async_operation
   protected: 
     virtual void                close_handle                ();
 
-  //virtual bool                async_continue_             ( bool wait )                           { return has_changed(); }
+  //virtual bool                async_continue_             ( Continue_flags )                      { return has_changed(); }
   //virtual bool                async_finished_             ()                                      { return false; }   // Nie fertig
   //virtual string              async_state_text_           ()                                      { return "Directory_watcher(\"" + _filename_pattern + "\")" };
 

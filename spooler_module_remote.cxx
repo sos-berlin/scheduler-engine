@@ -458,7 +458,7 @@ bool Remote_module_instance_proxy::try_to_get_process()
 
 //-----------------------------------------Remote_module_instance_proxy::Operation::async_continue_
 
-bool Remote_module_instance_proxy::continue_async_operation( Operation* operation, bool wait )
+bool Remote_module_instance_proxy::continue_async_operation( Operation* operation, Async_operation::Continue_flags )
 { 
     switch( operation->_call_state )
     {

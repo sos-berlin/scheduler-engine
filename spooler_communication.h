@@ -57,7 +57,7 @@ struct Communication
 
         void                    recv_clear                  ();
 
-        virtual bool            async_continue_             ( bool wait );
+        virtual bool            async_continue_             ( Continue_flags );
         virtual bool            async_finished_             ()                                      { return false; }
         virtual string          async_state_text_           ()                                      { return "Spooler::Communication::Channel()"; }  // \"" + _named_host + "\"
 
@@ -85,7 +85,7 @@ struct Communication
     {
                                 Listen_socket               ( Communication* c )                    : _communication(c), _spooler(c->_spooler) {}
 
-        virtual bool            async_continue_             ( bool wait );
+        virtual bool            async_continue_             ( Continue_flags );
         virtual bool            async_finished_             ()                                      { return false; }
         virtual string          async_state_text_           ()                                      { return "Spooler::Communication::Listen_socket()"; }
 
@@ -98,7 +98,7 @@ struct Communication
     {
                                 Udp_socket                  ( Communication* c )                    : _communication(c), _spooler(c->_spooler) {}
 
-        virtual bool            async_continue_             ( bool wait );
+        virtual bool            async_continue_             ( Continue_flags );
         virtual bool            async_finished_             ()                                      { return false; }
         virtual string          async_state_text_           ()                                      { return "Spooler::Communication::Udp_socket()"; }
 

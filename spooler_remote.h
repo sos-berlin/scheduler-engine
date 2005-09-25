@@ -31,7 +31,7 @@ struct Xml_client_connection : Async_operation
 
   protected:
     string                      async_state_text_           ();
-    bool                        async_continue_             ( bool wait );
+    bool                        async_continue_             ( Continue_flags );
     bool                        async_finished_             ()                                      { return _state == s_initial  
                                                                                                           || _state == s_stand_by; }
     bool                        async_signaled_             ()                                      { return _socket_operation && _socket_operation->async_signaled(); }
@@ -63,7 +63,7 @@ struct Main_scheduler_connection : Async_operation
 
   protected:
     string                      async_state_text_           ();
-    bool                        async_continue_             ( bool wait );
+    bool                        async_continue_             ( Continue_flags );
     bool                        async_finished_             ()                                      { return _state == s_initial  
 
   private:

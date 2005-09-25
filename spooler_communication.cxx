@@ -102,7 +102,7 @@ void Xml_processor::process()
 
 //----------------------------------------------------Communication::Listen_socket::async_continue_
 
-bool Communication::Listen_socket::async_continue_( bool wait )
+bool Communication::Listen_socket::async_continue_( Continue_flags flags )
 {
     bool something_done = false;
 
@@ -135,7 +135,7 @@ bool Communication::Listen_socket::async_continue_( bool wait )
 
 //-------------------------------------------------------Communication::Udp_socket::async_continue_
 
-bool Communication::Udp_socket::async_continue_( bool wait )
+bool Communication::Udp_socket::async_continue_( Continue_flags )
 {
     bool something_done = false;
 
@@ -391,7 +391,7 @@ bool Communication::Channel::do_send()
 */
 //----------------------------------------------------------Communication::Channel::async_continue_
 
-bool Communication::Channel::async_continue_( bool wait )
+bool Communication::Channel::async_continue_( Continue_flags )
 {
     bool something_done = false;
 
@@ -522,7 +522,7 @@ void Communication::close( double wait_time )
 
             //channel->terminate();    // Kann Channel aus _channel_list entfernen.
             channel->_dont_receive = true;
-            channel->async_continue( false );
+            channel->async_continue();
             //if( channel->_responding )
             //{
             //    responding = true;

@@ -127,7 +127,7 @@ string Xml_client_connection::async_state_text_()
 
 //-----------------------------------------------------------Xml_client_connection::async_continue_
     
-bool Xml_client_connection::async_continue_( bool wait )
+bool Xml_client_connection::async_continue_( Continue_flags flags )
 {
     bool something_done = false;
 
@@ -150,7 +150,7 @@ bool Xml_client_connection::async_continue_( bool wait )
         {
             case s_initial:
                 //if( async_next_gmtime() > ::time(NULL) )  return false;
-                if( !async_next_gmtime_reached() )  return false;
+                if( !( flags & cont_next_gmtime_reached ) )  return false;
                 //set_async_next_gmtime( double_time_max );
 
                 _socket_operation = Z_NEW( Buffered_socket_operation( _socket_manager ) );
