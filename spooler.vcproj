@@ -48,8 +48,8 @@
 				DebugInformationFormat="2"/>
 			<Tool
 				Name="VCCustomBuildTool"
-				CommandLine="echo perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml
-cd doc &amp;&amp; bash -c &quot;perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml&quot;
+				CommandLine="echo perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml api/*.xml
+cd doc &amp;&amp; bash -c &quot;perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml api/*.xml&quot;
 cd $(ProjectDir)
 
 echo jar cvfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class
@@ -142,8 +142,8 @@ cd $(ProjectDir)
 				DebugInformationFormat="3"/>
 			<Tool
 				Name="VCCustomBuildTool"
-				CommandLine="echo perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml
-cd doc &amp;&amp; bash -c &quot;perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml&quot;
+				CommandLine="echo perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml api/*.xml
+cd doc &amp;&amp; bash -c &quot;perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml api/*.xml&quot;
 cd $(ProjectDir)
 
 echo jar cvfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class
@@ -232,8 +232,8 @@ cd $(ProjectDir)
 				DebugInformationFormat="2"/>
 			<Tool
 				Name="VCCustomBuildTool"
-				CommandLine="echo perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml
-cd doc &amp;&amp; bash -c &quot;perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml&quot;
+				CommandLine="echo perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml api/*.xml
+cd doc &amp;&amp; bash -c &quot;perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml api/*.xml&quot;
 cd $(ProjectDir)
 
 echo jar cvfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class

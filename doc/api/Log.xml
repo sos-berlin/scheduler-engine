@@ -203,9 +203,9 @@
 
 <property name="log_file">
     <com>
-        <com.parameter name="path">
+        <com.result name="path">
             <com.type type="BSTR"/>
-        </com.parameter>
+        </com.result>
     </com>
 
     <java>
@@ -244,59 +244,43 @@
 </property>
 
 
-<property name="mail_on_error">
+<property name="mail_on_error" setting="mail_on_error">
     <com>
         <com.result>
             <com.type type="bool"/>
         </com.result>
     </com>
-
-    <description>
-        Siehe <scheduler_ini_entry file="factory.ini" section="spooler" entry="mail_on_error"/>.
-    </description>
 </property>
 
 
-<property name="mail_on_warning">
+<property name="mail_on_warning" setting="mail_on_warning">
     <com>
         <com.result>
             <com.type type="bool"/>
         </com.result>
     </com>
-
-    <description>
-        Siehe <scheduler_ini_entry file="factory.ini" section="spooler" entry="mail_on_warning"/>.
-    </description>
 </property>
 
 
-<property name="mail_on_success">
+<property name="mail_on_success" setting="mail_on_success">
     <com>
         <com.result>
             <com.type type="bool"/>
         </com.result>
     </com>
-
-    <description>
-        Siehe <scheduler_ini_entry file="factory.ini" section="spooler" entry="mail_on_success"/>.
-    </description>
 </property>
 
 
-<property name="mail_on_process">
+<property name="mail_on_process" setting="mail_on_process">
     <com>
         <com.result>
             <com.type type="int"/>
         </com.result>
     </com>
-
-    <description>
-        Siehe <scheduler_ini_entry file="factory.ini" section="spooler" entry="mail_on_process"/>.
-    </description>
 </property>
 
 
-<property name="level">
+<property name="level" setting="log_level">
     <com>
         <com.result>
             <com.type type="int"/>

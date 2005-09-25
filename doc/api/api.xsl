@@ -926,6 +926,15 @@
         <xsl:apply-templates select="." mode="result_type"/>&#160;&#160;
         <xsl:apply-templates select="com/com.result/description"/>
     </xsl:if>
+    
+
+    <xsl:if test="@setting">
+        <div class="see_also">
+            <h3>Siehe auch</h3>
+            <xsl:apply-templates mode="setting_references" select="."/>
+        </div>  
+    </xsl:if>
+
 
 </xsl:template>
 

@@ -12,8 +12,7 @@
     date        = "$Date$"
 >
 
-
-    <property name="smtp">
+    <property name="smtp" setting="smtp">
         <com>
             <com.result>
                 <com.type type="BSTR"/>
@@ -34,7 +33,7 @@
     </property>
 
 
-    <property name="queue_dir">
+    <property name="queue_dir" setting="mail_queue_dir">
         <com>
             <com.result name="path">
                 <com.type type="BSTR"/>
@@ -47,7 +46,7 @@
     </property>
 
 
-    <property name="from">
+    <property name="from" setting="log_mail_from">
         <com>
             <com.result>
                 <com.type type="BSTR"/>
@@ -68,7 +67,7 @@
     </property>
 
 
-    <property name="to">
+    <property name="to" setting="log_mail_to">
         <com>
             <com.result>
                 <com.type type="BSTR"/>
@@ -97,7 +96,7 @@
     </property>
 
 
-    <property name="cc">
+    <property name="cc" setting="log_mail_cc">
         <com>
             <com.result>
                 <com.type type="BSTR"/>
@@ -126,7 +125,7 @@
     </property>
 
 
-    <property name="bcc">
+    <property name="bcc" setting="log_mail_bcc">
         <com>
             <com.result>
                 <com.type type="BSTR"/>
@@ -155,7 +154,7 @@
     </property>
 
 
-    <property name="subject">
+    <property name="subject" setting="log_mail_subject">
         <com>
             <com.result>
                 <com.type type="BSTR"/>
@@ -314,7 +313,7 @@ spooler_log.info( spooler_log.mail.dequeue_log );</pre>
     </property>
 
 
-    <property name="xslt_stylesheet_path" access="write">
+    <property name="xslt_stylesheet_path" access="write" setting="mail_xslt_stylesheet">
         <com>
             <com.result name="path">
                 <com.type type="BSTR"/>
@@ -340,13 +339,6 @@ spooler_log.info( spooler_log.mail.dequeue_log );</pre>
         <title>
             XSLT-Stylesheet für eMail-Aufbereitung
         </title>
-
-        <description>
-            <p>
-                Siehe <scheduler_element name="config" attribute="mail_xslt_stylesheet"/>.
-            </p>
-        </description>
-
 
         <example programming_language="java">
             <pre>spooler_log.mail().set_xslt_stylesheet_path( "c:/stylesheets/mail.xslt" );</pre>

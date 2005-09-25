@@ -33,16 +33,7 @@
 
         <command_option name="id" setting="option_id"/>
 
-        <command_option name="cd" type="verzeichnis" title="Arbeitsverzeichnis">
-            <description>
-                <scheduler_keyword keyword="Arbeitsverzeichnis"/>
-                <scheduler_keyword keyword="Verzeichnis"/>
-                <p>
-                    Ändert das Arbeitsverzeichnis.
-                </p>
-            </description>
-        </command_option>
-
+        <command_option name="cd" setting="directory"/>
 
         <command_option name="pid-file" type="dateiname" title="Dateiname für Prozess-Id">
             <description>

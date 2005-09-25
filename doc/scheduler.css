@@ -67,8 +67,9 @@ p.ini_entry         { margin-top: 2ex; border-top: 1px solid #f0f0f0; padding-to
 
 .indent             { margin-left: 4ex; }
 
+.see_also                       { background-color: #f8f8f8; }
 
-.api_headline               { margin-top: 0ex; font-size: 14pt; font-weight: bold; }
+.api_headline                   { margin-top: 0ex; font-size: 14pt; font-weight: bold; }
 
 
 tr.api_method_clickable:active  { background-color: #0000A0; }

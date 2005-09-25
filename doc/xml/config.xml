@@ -126,15 +126,7 @@
             </example>
         </xml_attribute>
 
-        <xml_attribute name="mail_xslt_stylesheet" type="filename" title="Zur Aufbereitung der eMails">
-            <description>
-                <p>
-                    Der Dateiname eines XSLT-Stylesheets.
-                    Der Scheduler verwendet das XSLT-Stylesheet zum Aufbereiten der eMails.
-                    (Die Dokumentation hierzu ist noch nicht geschrieben.)
-                </p>
-            </description>
-        </xml_attribute>
+        <xml_attribute setting="mail_xslt_stylesheet"/>
 
         <xml_attribute setting="java_class_path"/>
         <xml_attribute setting="java_options"/>

@@ -98,11 +98,25 @@ sub read_file
     if( $root_element eq "ini_section" )
     { 
         my $section = $name;
-        $file_title = "Datei $file, Abschnitt [$section]"  if !$file_title || $file_title eq "XXX";
+        $file_title = "file $file, section [$section]"  if !$file_title || $file_title eq "XXX";
         
         my $xml_line = "<register_entry register_file='$filename#' register_title='$file_title'  register_keyword='$section' type='definition'/>\n";
         add_keyword_reference( $section, "<code>[$section]</code>", $xml_line );
     }
+    
+    if( $root_element eq "api.class" )
+    { 
+        if( !( $filename =~ /-/ ) )   # Nur Task.xml, nicht Task-javascript.xml etc.
+        {
+            my $section = $name;
+            $file_title = "Class $name"  if !$file_title || $file_title eq "XXX";
+            
+            my $xml_line = "<register_entry register_file='$filename' register_keyword='$name' type='definition'/>\n";
+            add_keyword_reference( $name, "<code>$name</code>", $xml_line );
+        }
+    }
+    
+    
         
 
     while( <FILE> )
@@ -172,6 +186,22 @@ sub read_file
             }
         }
 
+        if( $root_element eq "api.class" )
+        {
+            if( my $element = get_element( "property" ) )
+            { 
+                my $a_name   = get_attribute( $element, "name" );
+                my $xml_line = "<register_entry register_file='$filename#method__$a_name' register_title='$name.$a_name' register_keyword='$a_name' type='definition'/>\n";
+                add_keyword_reference( $a_name, "<code>$a_name</code>", $xml_line );
+            }
+            
+            if( my $element = get_element( "method" ) )
+            { 
+                my $a_name   = get_attribute( $element, "name" );
+                my $xml_line = "<register_entry register_file='$filename#method__$a_name' register_title='$name.$a_name()' register_keyword='$a_name()' type='definition'/>\n";
+                add_keyword_reference( $a_name, "<code>$a_name()</code>", $xml_line );
+            }
+        }
     }
     
     close( FILE );

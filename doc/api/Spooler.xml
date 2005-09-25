@@ -169,7 +169,7 @@
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<property name="db_name" access="read">
+<property name="db_name" access="read" setting="db">
     <com>
         <com.result>
             <com.type type="BSTR"/>
@@ -183,7 +183,7 @@
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<property name="db_history_table_name" access="read">
+<property name="db_history_table_name" access="read" setting="db_history_table">
     <com>
         <com.result>
             <com.type type="BSTR"/>
@@ -193,17 +193,11 @@
     <title>
          Name der Datenbanktabelle für die Historie
     </title>
-    
-    <description>
-        <p>
-            Siehe <scheduler_ini_entry file="factory.ini" section="spooler" entry="db_history_table"/>.
-        </p>
-    </description>
 </property>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<property name="db_order_history_table_name" access="read">
+<property name="db_order_history_table_name" access="read" setting="db_order_history_table">
     <com>
         <com.result>
             <com.type type="BSTR"/>
@@ -213,17 +207,11 @@
     <title>
          Name der Datenbanktabelle für die Auftragshistorie
     </title>
-    
-    <description>
-        <p>
-            Siehe <scheduler_ini_entry file="factory.ini" section="spooler" entry="db_order_history_table"/>.
-        </p>
-    </description>
 </property>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<property name="db_orders_table_name" access="read">
+<property name="db_orders_table_name" access="read" setting="db_orders_table">
     <com>
         <com.result>
             <com.type type="BSTR"/>
@@ -233,17 +221,11 @@
     <title>
         Name der Datenbanktabelle für die Aufträge
     </title>
-    
-    <description>
-        <p>
-            Siehe <scheduler_ini_entry file="factory.ini" section="spooler" entry="db_orders_table"/>.
-        </p>
-    </description>
 </property>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<property name="db_tasks_table_name" access="read">
+<property name="db_tasks_table_name" access="read" setting="db_tasks_table">
     <com>
         <com.result>
             <com.type type="BSTR"/>
@@ -253,17 +235,11 @@
     <title>
         Name der Datenbanktabelle für die Tasks
     </title>
-    
-    <description>
-        <p>
-            Siehe <scheduler_ini_entry file="factory.ini" section="spooler" entry="db_tasks_table"/>.
-        </p>
-    </description>
 </property>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<property name="db_variables_table_name" access="read">
+<property name="db_variables_table_name" access="read" setting="db_variables_table">
     <com>
         <com.result>
             <com.type type="BSTR"/>
@@ -273,17 +249,11 @@
     <title>
         Name der Datenbanktabelle für interne Variablen des Schedulers
     </title>
-    
-    <description>
-        <p>
-            Siehe <scheduler_ini_entry file="factory.ini" section="spooler" entry="db_variables_table"/>.
-        </p>
-    </description>
 </property>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<property name="directory" access="read">
+<property name="directory" access="read" setting="directory">
     <com>
         <com.result>
             <com.type type="BSTR"/>
@@ -298,12 +268,6 @@
     <title>
         Das Arbeitsverzeichnis beim Start des Schedulers
     </title>
-
-    <description>
-        <p>
-            Siehe <scheduler_option name="cd"/>.
-        </p>
-    </description>
 </property>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
@@ -408,7 +372,7 @@
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<property name="id" access="read">
+<property name="id" access="read" setting="option_id">
     <com>
         <com.result>
             <com.type type="BSTR"/>
@@ -418,17 +382,11 @@
     <title>
         Wert der Kommandozeilenoption <code>-id=</code>
     </title>
-
-    <description>
-        <p>
-            Siehe <scheduler_option name="id"/>.
-        </p>
-    </description>
 </property>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<property name="include_path" access="read">
+<property name="include_path" access="read" setting="include_path">
     <com>
         <com.result>
             <com.type type="BSTR"/>
@@ -438,12 +396,6 @@
     <title>
         Liefert die Kommandozeilenoption <code>-include-path=</code>.
     </title>
-
-    <description>
-        <p>
-            Siehe <scheduler_option name="include-path"/>.
-        </p>
-    </description>
 </property>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
@@ -495,23 +447,17 @@
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<property name="log_dir" access="read">
+<property name="log_dir" access="read" setting="log_dir">
     <com>
         <com.result>
             <com.type type="BSTR"/>
         </com.result>
     </com>
-
-    <description>
-        <p>
-            Siehe <scheduler_option name="log-dir"/>.
-        </p>
-    </description>
 </property>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<property name="param" access="read">
+<property name="param" access="read" setting="param">
     <com>
         <com.result>
             <com.type type="BSTR"/>
@@ -521,12 +467,6 @@
     <title>
         Kommandozeilenoption <code>-param=</code>
     </title>
-
-    <description>
-        <p>
-            Siehe <scheduler_option name="param"/>.
-        </p>
-    </description>
 </property>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
@@ -619,7 +559,7 @@
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<property name="tcp_port" access="read">
+<property name="tcp_port" access="read" setting="tcp_port">
     <com>
         <com.result>
             <com.type type="int"/>
@@ -628,15 +568,11 @@
             </description>
         </com.result>
     </com>
-
-    <description>
-        Siehe <scheduler_option name="tcp-port"/>
-    </description>
 </property>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<property name="udp_port" access="read">
+<property name="udp_port" access="read" setting="udp_port">
     <com>
         <com.result>
             <com.type type="int"/>
@@ -645,10 +581,6 @@
             </description>
         </com.result>
     </com>
-
-    <description>
-        Siehe <scheduler_option name="udp-port"/>
-    </description>
 </property>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->

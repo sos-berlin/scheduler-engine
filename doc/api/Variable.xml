@@ -37,16 +37,6 @@
 </property>
 
 
-<!--
-<method name="clone">
-    <com>
-        <com.result>
-            <com.type class="Variable"/>
-        </com.result>
-    </com>
-</method>
--->
-
 <description programming_language="java">
     <p>
         Die Klasse ist für Java nicht implementiert.

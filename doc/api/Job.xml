@@ -237,6 +237,12 @@ $spooler->job( 'job_a' )->start( parameters );</pre>
         <title>
             Name des Jobs
         </title>
+        
+        <description>
+            <p>
+                Siehe <scheduler_element name="job" attribute="name"/>.
+            </p>
+        </description>
     </property>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->

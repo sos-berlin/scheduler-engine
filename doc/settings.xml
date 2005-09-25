@@ -53,6 +53,20 @@ log = scheduler.wait com_server.* >scheduler.log</pre>
     </setting>
 
 
+    <setting setting        = "directory"
+             type           = "verzeichnis"
+             title          = "Arbeitsverzeichnis">
+
+        <description>
+            <scheduler_keyword keyword="Arbeitsverzeichnis"/>
+            <scheduler_keyword keyword="Verzeichnis"/>
+            <p>
+                Ändert das Arbeitsverzeichnis.
+            </p>
+        </description>
+    </setting>
+
+
     <setting setting        = "log_dir"
              type           = "verzeichnis"
              title          = "Verzeichnis der Protokolle">
@@ -174,6 +188,7 @@ log = scheduler.wait com_server.* >scheduler.log</pre>
 
     <setting setting= "log_level"
              type   = "log_level"
+             initial= "info"
              title  = "Protokollausgaben beschränken">
         <description>
             <p>
@@ -181,9 +196,6 @@ log = scheduler.wait com_server.* >scheduler.log</pre>
                 Jede Protokollzeile ist auf einer der folgenden Stufen:
                 <code>error</code>, <code>warn</code>, <code>info</code>, <code>debug1</code> bis <code>debug9</code>
                 (<code>debug1</code> ist dasselbe wie <code>debug</code>).
-            </p>
-            <p>
-                Siehe auch <scheduler_method class="Log" method="level"/>.
             </p>
         </description>
     </setting>
@@ -219,13 +231,6 @@ log = scheduler.wait com_server.* >scheduler.log</pre>
              type    = "name"
              initial = "SCHEDULER_TASKS"
              title   = "Name der Datenbanktabelle für die Tasks">
-        <description>
-            <p>
-            </p>
-            <p>
-                Siehe auch <scheduler_method class="Spooler" method="db_tasks_table_name"/>
-            </p>
-        </description>
     </setting>
 
 
@@ -233,13 +238,6 @@ log = scheduler.wait com_server.* >scheduler.log</pre>
              type    = "name"
              initial = "SCHEDULER_HISTORY"
              title   = "Name der Datenbanktabelle für die Historie">
-        <description>
-            <p>
-            </p>
-            <p>
-                Siehe auch <scheduler_method class="Spooler" method="db_history_table_name"/>
-            </p>
-        </description>
     </setting>
 
 
@@ -247,13 +245,6 @@ log = scheduler.wait com_server.* >scheduler.log</pre>
              type    = "name"
              initial = "SCHEDULER_ORDER_HISTORY"
              title   = "Name der Datenbanktabelle für die Auftragshistorie">
-        <description>
-            <p>
-            </p>
-            <p>
-                Siehe auch <scheduler_method class="Spooler" method="db_order_history_table_name"/>
-            </p>
-        </description>
     </setting>
 
 
@@ -261,11 +252,6 @@ log = scheduler.wait com_server.* >scheduler.log</pre>
              type    = "name"
              initial = "SCHEDULER_ORDERS"
              title   = "Name der Datenbanktabelle für die Aufträge">
-        <description>
-            <p>
-                Siehe auch <scheduler_method class="Spooler" method="db_orders_table_name"/>
-            </p>
-        </description>
     </setting>
 
 
@@ -277,9 +263,6 @@ log = scheduler.wait com_server.* >scheduler.log</pre>
             <p>
                 Der Scheduler hält in dieser Tabelle interne Zähler,
                 zum Beispiel für die nächste freie Task-Id.
-            </p>
-            <p>
-                Siehe auch <scheduler_method class="Spooler" method="db_variables_table_name"/>
             </p>
         </description>
     </setting>
@@ -404,17 +387,17 @@ log = scheduler.wait com_server.* >scheduler.log</pre>
              title   = "Hostware-Dateiname der Datenbank">
         <description>
             <p>
-Hostware-Dateiname der Datenbank für die Historienführung.
-Ohne Eintrag werden Dateien im .csv-Format erzeugt, siehe <scheduler_ini_entry file="factory.ini" section="spooler" entry="history_file"/>.
+                Hostware-Dateiname der Datenbank für die Historienführung.
+                Ohne Eintrag werden Dateien im .csv-Format erzeugt, siehe <scheduler_ini_entry file="factory.ini" section="spooler" entry="history_file"/>.
             </p>
             <p>
-Unter Windows kann auch ein einfacher Dateiname angegebenen werden, der auf <code>.mdb</code> endet (z.B. <code>scheduler.mdb</code>).
-Der Scheduler verwendet dann eine Microsoft-Access-Datenbank dieses Namens,
-die im Protokollverzeichnis (s. Option <scheduler_option name="log-dir"/>) liegt.
-Der Scheduler richtet die Datei ein, wenn sie fehlt.
+                Unter Windows kann auch ein einfacher Dateiname angegebenen werden, der auf <code>.mdb</code> endet (z.B. <code>scheduler.mdb</code>).
+                Der Scheduler verwendet dann eine Microsoft-Access-Datenbank dieses Namens,
+                die im Protokollverzeichnis (s. Option <scheduler_option name="log-dir"/>) liegt.
+                Der Scheduler richtet die Datei ein, wenn sie fehlt.
             </p>
             <p>
-Der Scheduler richtet die Tabellen selbständig ein.
+                Der Scheduler richtet die Tabellen selbständig ein.
             </p>
         </description>
 
@@ -531,11 +514,6 @@ db = odbc -db=factory_oracle -user=factory -password=factory
              type    = "yes|no"
              initial = "no"
              title   = "Mit Fehler beendete Task verschickt eMail">
-        <description>
-            <p>
-                Siehe auch <scheduler_method class="Log" property="mail_on_error"/>
-            </p>
-        </description>
     </setting>
 
 
@@ -543,11 +521,6 @@ db = odbc -db=factory_oracle -user=factory -password=factory
              type    = "yes|no"
              initial = "no"
              title   = "Wenn eine Warnung oder ein Fehler ausgegeben worden ist, wird am Task-Ende eine eMail verschickt">
-        <description>
-            <p>
-                Siehe auch <scheduler_method class="Log" property="mail_on_warning"/>
-            </p>
-        </description>
     </setting>
 
 
@@ -555,11 +528,6 @@ db = odbc -db=factory_oracle -user=factory -password=factory
              type    = "yes|no|zahl"
              initial = "no"
              title   = "Task mit spooler_process() verschickt eMail">
-        <description>
-            <p>
-                Siehe auch <scheduler_method class="Log" property="mail_on_process"/>
-            </p>
-        </description>
     </setting>
 
 
@@ -567,11 +535,6 @@ db = odbc -db=factory_oracle -user=factory -password=factory
              type    = "yes|no"
              initial = "no"
              title   = "Erfolgreich gelaufende Task verschickt eMail">
-        <description>
-            <p>
-                Siehe auch <scheduler_method class="Log" property="mail_on_success"/>
-            </p>
-        </description>
     </setting>
 
 
@@ -590,6 +553,19 @@ db = odbc -db=factory_oracle -user=factory -password=factory
         </description>
     </setting>
 
+
+    <setting setting = "mail_xslt_stylesheet"
+             type    = "path"
+             title   = "Pfad des XSLT-Stylesheets zur eMail-Aufbereitung">
+        <description>
+            <p>
+                Der Pfad eines XSLT-Stylesheets.
+                Der Scheduler verwendet das XSLT-Stylesheet zum Aufbereiten der eMails.
+                (Die Dokumentation hierzu ist noch nicht geschrieben.)
+            </p>
+        </description>
+    </setting>
+    
 
     <setting setting   = "java_class_path"
              type      = "dateinamen"
@@ -688,7 +664,8 @@ db = odbc -db=factory_oracle -user=factory -password=factory
             </p>
         </description>
     </setting>
-
+    
+    
 <!--
     <setting setting = "run_time_begin"
              type    = "hh:mm[:ss]"

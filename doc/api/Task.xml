@@ -429,30 +429,6 @@ my $value2 = $parameters->var( "parameter2" );</pre>
     </property>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
-    <!--
-    <property name="result" deprecated="true">
-        <com>
-            <com.result>
-                <com.type type="VARIANT"/>
-            </com.result>
-        </com>
-
-        <title>
-            Ergebnis der Task
-        </title>
-
-        <description>
-            <p>
-                Hier kann die Task ein Ergebnis speichern,
-                das von einer anderen solange wartenden Taskabgeholt werden kann.
-            </p>
-            <p>
-                Siehe <scheduler_method class="Task" method="wait_until_terminated"/>
-            </p>
-        </description>
-    </property>
-    -->
-    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
     <property name="order" access="read">
         <com>
@@ -588,43 +564,6 @@ $spooler_log->info( 'order.id=' . $order->id . ', order.title=' . $order->title 
         </description>
     </property>
 
-    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
-    <!--
-    <method name="wait_until_terminated" deprecated="true">
-        <com>
-            <com.parameter name="wait_time" default="999999999">
-                <com.type type="double"/>
-                <title>
-                    Wartezeit in Sekunden
-                </title>
-            </com.parameter>
-
-            <com.result>
-                <com.type type="bool"/>
-                <description>
-                    <code>true</code>, wenn die Task in der Wartezeit geendet hat.
-                    <br/>
-                    <code>false</code>, wenn die Wartezeit abgelaufen ist, ohne dass die Task geendet hat.
-                </description>
-            </com.result>
-        </com>
-
-        <title>
-            Wartet aufs Ende einer anderen Task
-        </title>
-
-        <description>
-            <p>
-                In Kombination mit {@link Job#start()} kann eine Task aufs Ende einer anderen warten.
-            </p>
-            <p>
-                Wenn die andere Task nicht starten kann,
-                weil nicht genügend Ressourcen bereitstehen,
-                kann dieser Aufruf zur Verklemmung führen.
-            </p>
-        </description>
-    </method>
-    -->
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
     <description>

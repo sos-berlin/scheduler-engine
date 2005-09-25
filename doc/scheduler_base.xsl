@@ -584,68 +584,138 @@
     <xsl:template match="*" mode="setting_references">
         <!-- Verweise auf andere Stellen, wo der Wert eingestellt werden kann: -->
 
-        <p>
-            <xsl:if test="not( self::command_option )">
-                <xsl:variable name="command_option" select="document( 'command_line.xml' )/command_line/command_options/command_option[ @setting = current()/@setting ]"/>
-                <xsl:if test="$command_option">
-                    <!--Die Einstellung-->
-                    Die Option
+        <table cellpadding="0" cellspacing="0" class="see_also" style="margin-top: 1em;">
+            <xsl:if test="not( self::property )">
+                <xsl:variable name="property" select="document( 'api/Spooler.xml' )/api.class/property [ @setting = current()/@setting ] |
+                                                      document( 'api/Log.xml'     )/api.class/property [ @setting = current()/@setting ] |
+                                                      document( 'api/Mail.xml'    )/api.class/property [ @setting = current()/@setting ] "/>
+                <xsl:if test="$property">
+                  <tr>
+                    <td>
+                        Die Eigenschaft
+                    </td>
 
-                    <xsl:call-template name="scheduler_option">
-                        <xsl:with-param name="name" select="$command_option/@name"/>
-                    </xsl:call-template>
+                    <td style="padding-left: 1ex">
+                        <xsl:call-template name="scheduler_method">
+                            <xsl:with-param name="class"    select="$property/parent::api.class/@name"/>
+                            <xsl:with-param name="property" select="$property/@name"/>
+                        </xsl:call-template>
+                    </td>
 
-                    hat Vorrang.
-                    <br/>
+                    <td style="padding-left: 1ex">
+                        <xsl:choose>
+                            <xsl:when test="$property [ not( @access ) or @access='write' ]">
+                                hat Vorrang.
+                            </xsl:when>
+                            <xsl:otherwise>
+                                liest die Einstellung.
+                            </xsl:otherwise>
+                        </xsl:choose>
+                    </td>
+                  </tr>  
                 </xsl:if>
             </xsl:if>
 
-            <xsl:if test="not( self::ini_entry )">
+            <xsl:if test="not( self::command_option )">
+                <xsl:variable name="command_option" select="document( 'command_line.xml' )/command_line/command_options/command_option[ @setting = current()/@setting ]"/>
+                <xsl:if test="$command_option">
+                 <tr>
+                    <td>
+                        Die Option
+                    </td>
+                    
+                    <td style="padding-left: 1ex">
+                        <xsl:call-template name="scheduler_option">
+                            <xsl:with-param name="name"  select="$command_option/@name"/>
+                            <xsl:with-param name="value" select="document( 'settings.xml' )/settings/setting[ @setting = current()/@setting ]/@initial"/>
+                        </xsl:call-template>
+                    </td>
+
+                    <td style="padding-left: 1ex">
+                        <xsl:choose>
+                            <xsl:when test="not( self::property )">
+                                hat Vorrang.
+                            </xsl:when>
+                            <xsl:otherwise>
+                                wird damit überschrieben.
+                            </xsl:otherwise>
+                        </xsl:choose>
+                    </td>
+                  </tr>
+                </xsl:if>
+            </xsl:if>
+
+            
+            <xsl:if test="true()">
                 <xsl:variable name="ini_entry" select="( document( 'factory_ini_job.xml' ) | document( 'factory_ini_spooler.xml' ) )/ini_section/ini_entries/ini_entry[ @setting = current()/@setting ]"/>
                 <xsl:variable name="current_setting" select="."/>
 
                 <xsl:for-each select="$ini_entry">
-                    <!--Die Einstellung-->
+                 <xsl:if test="not( $current_setting [ self::ini_entry ] ) or 
+                               ancestor::ini_section/@file != $current_setting/ancestor::ini_section/@file  or  
+                               ancestor::ini_section/@name != $current_setting/ancestor::ini_section/@name">
+                  <tr>
+                    <td>
+                        Die Einstellung
+                    </td>
 
-                    <xsl:call-template name="scheduler_ini_entry">
-                        <xsl:with-param name="file"    select="'factory.ini'"/>
-                        <xsl:with-param name="section" select="ancestor::ini_section/@name"/>
-                        <xsl:with-param name="entry"   select="@name | @setting"/>
-                    </xsl:call-template>
+                    <td style="padding-left: 1ex">
+                        <xsl:call-template name="scheduler_ini_entry">
+                            <xsl:with-param name="file"    select="'factory.ini'"/>
+                            <xsl:with-param name="section" select="ancestor::ini_section/@name"/>
+                            <xsl:with-param name="entry"   select="@name | @setting"/>
+                            <xsl:with-param name="value"   select="document( 'settings.xml' )/settings/setting[ @setting = current()/@setting ]/@initial"/>
+                        </xsl:call-template>
+                    </td>
 
-                    <xsl:choose>
-                        <xsl:when test="$current_setting/self::xml_attribute">
-                            hat Vorrang.
-                        </xsl:when>
-                        <xsl:when test="$current_setting/self::command_option">
-                            wird damit überschrieben.
-                        </xsl:when>
-                    </xsl:choose>
-                    <br/>
-                </xsl:for-each>
+                    <td style="padding-left: 1ex">
+                        <xsl:choose>
+                            <xsl:when test="not( $current_setting/self::property       ) and
+                                            not( $current_setting/self::command_option ) and 
+                                            not( $current_setting/self::ini_entry and $current_setting/ancestor::ini_section/@name='job' )">
+                                hat Vorrang.                                                            
+                            </xsl:when>
+                            <!--xsl:when test="$current_setting/self::command_option or $current_setting/self::property [ not( @access='read' ) ]">
+                            </xsl:when-->
+                            <xsl:otherwise>
+                                wird damit überschrieben.
+                            </xsl:otherwise>
+                        </xsl:choose>
+                    </td>
+                   </tr>
+                  </xsl:if>
+                 </xsl:for-each>
             </xsl:if>
+
 
             <xsl:if test="not( self::xml_attribute )">
                 <xsl:variable name="config_attribute" select="document( 'xml/config.xml' )/xml_element/xml_attributes/xml_attribute[ @setting = current()/@setting ]"/>
                 <xsl:variable name="current_setting" select="."/>
 
                 <xsl:if test="$config_attribute">
-                    <!--Die Einstellung-->
+                  <tr>
+                    <td>
+                        Das XML-Attribut
+                    </td>
 
-                    <xsl:call-template name="scheduler_element">
-                        <xsl:with-param name="name"      select="'config'"/>
-                        <xsl:with-param name="attribute" select="$config_attribute/@name | $config_attribute/@setting"/>
-                    </xsl:call-template>
+                    <td style="padding-left: 1ex">
+                        <xsl:call-template name="scheduler_element">
+                            <xsl:with-param name="name"      select="'config'"/>
+                            <xsl:with-param name="attribute" select="$config_attribute/@name | $config_attribute/@setting"/>
+                        </xsl:call-template>
+                    </td>
 
-                    <xsl:choose>
-                        <xsl:when test="$current_setting/self::ini_entry or $current_setting/self::command_option">
-                            wird damit überschrieben.
-                        </xsl:when>
-                    </xsl:choose>
-                    <br/>
+                    <td style="padding-left: 1ex">
+                        <!--xsl:choose>
+                            <xsl:when test="$current_setting/self::ini_entry or $current_setting/self::command_option or $current_setting/self::property [ not( @access='read' ) ]">
+                            </xsl:when>
+                        </xsl:choose-->
+                        wird damit überschrieben.
+                    </td>
+                  </tr>
                 </xsl:if>
             </xsl:if>
-        </p>
+        </table>
     </xsl:template>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~example-->
@@ -938,10 +1008,10 @@
 
         <xsl:choose>
             <xsl:when test="@type='definition'">
-                <span class="register_definition"><xsl:value-of select="@register_title"/></span>
+                <span class="register_definition"><xsl:value-of select="@register_title | @register_keyword"/></span>
             </xsl:when>
             <xsl:otherwise>
-                <xsl:value-of select="@register_title"/>
+                <xsl:value-of select="@register_title | @register_keyword"/>
             </xsl:otherwise>
         </xsl:choose>
 
@@ -1152,6 +1222,7 @@
             <xsl:with-param name="file"    select="@file"/>
             <xsl:with-param name="section" select="@section"/>
             <xsl:with-param name="entry"   select="@entry"/>
+            <xsl:with-param name="value"   select="@value"/>
         </xsl:call-template>
     </xsl:template>
 
@@ -1161,6 +1232,7 @@
         <xsl:param name="file"/>
         <xsl:param name="section"/>
         <xsl:param name="entry"/>
+        <xsl:param name="value"/>
 
         <xsl:element name="a">
             <xsl:attribute name="name">use_entry__<xsl:value-of select="$file"/>__<xsl:value-of select="$section"/>__<xsl:value-of select="$entry"/></xsl:attribute>
@@ -1176,8 +1248,19 @@
             <code>[<xsl:value-of select="$section"/>]</code>,
 
             Eintrag
-            <code><xsl:value-of select="$entry"/>=…</code>
-
+            <code>
+                <xsl:value-of select="$entry"/>
+                <xsl:text>=</xsl:text>
+                <xsl:choose>
+                    <xsl:when test="$value">
+                        <xsl:value-of select="$value"/>
+                    </xsl:when>
+                    <xsl:otherwise>
+                        <xsl:text>…</xsl:text>
+                    </xsl:otherwise>
+                </xsl:choose>
+            </code>
+            
             <xsl:text>)</xsl:text>
         </xsl:element>
     </xsl:template>
@@ -1186,7 +1269,8 @@
 
     <xsl:template match="scheduler_option" mode="description">
         <xsl:call-template name="scheduler_option">
-            <xsl:with-param name="name" select="@name"/>
+            <xsl:with-param name="name"  select="@name"/>
+            <xsl:with-param name="value" select="@value"/>
         </xsl:call-template>
         <!--
         <xsl:element name="a">
@@ -1201,6 +1285,7 @@
 
     <xsl:template name="scheduler_option">
         <xsl:param name="name"/>
+        <xsl:param name="value"/>
 
         <xsl:element name="a">
             <xsl:attribute name="name">use_option__<xsl:value-of select="$name"/></xsl:attribute>
@@ -1210,6 +1295,10 @@
             <xsl:attribute name="class">silent</xsl:attribute>
             <xsl:attribute name="href"><xsl:value-of select="concat( $base_dir, 'command_line.xml#option_', $name )"/></xsl:attribute>
             <code>-<xsl:value-of select="$name"/></code>
+            
+            <xsl:if test="$value">
+                <code>=<xsl:value-of select="$value"/></code>
+            </xsl:if>
 
 <!--
             <xsl:variable name="command_option" select="document( 'command_line.xml' )/command_line/command_options/command_option[ @name = current()/@name or @setting = current()/@name ]"/>
@@ -1236,11 +1325,11 @@
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_method-->
 
     <xsl:template name="scheduler_method">
-        <xsl:param name="class"/>
-        <xsl:param name="method"/>
-        <xsl:param name="property"/>
-        <xsl:param name="java_signature"/>
-        <xsl:param name="access"/>          <!-- "read" (default), "write" -->
+        <xsl:param name="class"          select="/.."/>
+        <xsl:param name="method"         select="/.."/>
+        <xsl:param name="property"       select="/.."/>
+        <xsl:param name="java_signature" select="/.."/>
+        <xsl:param name="access"         select="/.."/>          <!-- "read" (default), "write" -->
 <!--
         <xsl:variable name="java_method">
             <xsl:choose>
@@ -1252,33 +1341,33 @@
         <xsl:element name="a">
             <xsl:attribute name="class">silent</xsl:attribute>
 
-            <xsl:variable name="href_local"><xsl:if test="@method | @property">#method__<xsl:value-of select="@method | @property"/></xsl:if></xsl:variable>
+            <xsl:variable name="href_local"><xsl:if test="$method or $property">#method__<xsl:value-of select="$method | $property"/></xsl:if></xsl:variable>
 
-            <xsl:attribute name="href"><xsl:value-of select="concat( $base_dir, 'api/', @class, '-', $programming_language, '.xml', $href_local )"/></xsl:attribute>
-            <!--xsl:attribute name="href"><xsl:value-of select="$base_dir"/>javadoc/sos/spooler/<xsl:value-of select="@class"/>.html#<xsl:value-of select="$java_method"/>(<xsl:value-of select="$java_signature"/>)</xsl:attribute-->
+            <xsl:attribute name="href"><xsl:value-of select="concat( $base_dir, 'api/', $class, '-', $programming_language, '.xml', $href_local )"/></xsl:attribute>
+            <!--xsl:attribute name="href"><xsl:value-of select="$base_dir"/>javadoc/sos/spooler/<xsl:value-of select="$class"/>.html#<xsl:value-of select="$java_method"/>(<xsl:value-of select="$java_signature"/>)</xsl:attribute-->
 
             <code>
-                <xsl:if test="@class != 'Job_impl' or not( @method or @property )">
-                    <xsl:value-of select="@class"/>
+                <xsl:if test="$class != 'Job_impl' or not( $method or $property )">
+                    <xsl:value-of select="$class"/>
                 </xsl:if>
 
-                <xsl:if test="@class != 'Job_impl' and ( @method or @property )">
+                <xsl:if test="$class != 'Job_impl' and ( $method or $property )">
                     <xsl:text>.</xsl:text>
                 </xsl:if>
 <!--
-                <xsl:if test="@method | @property">
+                <xsl:if test="$method | $property">
                     <xsl:text>.</xsl:text>
                     <xsl:value-of select="$java_method"/>
                     <xsl:text>()</xsl:text>
                 </xsl:if>
 -->
-                <xsl:if test="@method">
-                    <xsl:value-of select="@method"/>
+                <xsl:if test="$method">
+                    <xsl:value-of select="$method"/>
                     <xsl:text>()</xsl:text>
                 </xsl:if>
 
-                <xsl:if test="@property">
-                    <xsl:value-of select="@property"/>
+                <xsl:if test="$property">
+                    <xsl:value-of select="$property"/>
                 </xsl:if>
 
             </code>
@@ -1582,7 +1671,7 @@
 
                 <table cellspacing="0" cellpadding="0">
                     <tr>
-                        <td style="width: 250px">
+                        <td style="width: 300px">
                             <b><code><xsl:value-of select="@name | @setting"/></code></b>
 
                             <b><code>=</code></b>

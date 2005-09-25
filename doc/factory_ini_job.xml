@@ -31,7 +31,7 @@
         <ini_entry setting="log_mail_to" />
         <ini_entry setting="log_mail_cc" />
         <ini_entry setting="log_mail_bcc" />
-        <!--ini_entry setting="smtp" /-->
+        <ini_entry setting="smtp"/>   <!-- Unsinn! -->
     </ini_entries>
 
     <description>
