@@ -148,7 +148,7 @@
 
     <property name="changed_directories" access="read">
         <com>
-            <com.result>
+            <com.result name="directories">
                 <com.type type="BSTR"/>
 
                 <description>

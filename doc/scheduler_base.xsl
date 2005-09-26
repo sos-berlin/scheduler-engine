@@ -839,7 +839,7 @@
 
         <table cellspacing="0" cellpadding="0">
             <col valign="baseline"/>
-            <col valign="baseline" style="padding-top: 0pt; padding-left: 2ex"/>
+            <col valign="baseline" style="padding-left: 2ex"/>
 
             <xsl:for-each select="register_keyword">
                 <!--xsl:sort select="@keyword"/   Nicht hier sortieren, sonst funktioniert preceding-sibling:self nicht. -->
@@ -862,7 +862,7 @@
                     <td style="white-space: nowrap">
                         <xsl:choose>
                             <xsl:when test="register_keyword_display">
-                                <xsl:apply-templates select="register_keyword_display/*" mode="description"/>
+                                <xsl:apply-templates select="register_keyword_display/* | register_keyword_display/text()" mode="description"/>
                             </xsl:when>
                             <xsl:otherwise>
                                 <xsl:value-of select="@keyword"/>

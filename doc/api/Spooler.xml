@@ -272,68 +272,6 @@
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<property name="hostname" access="read">
-    <com>
-        <com.result>
-            <com.type type="BSTR"/>
-        </com.result>
-    </com>
-
-    <title>
-        Name des Rechners, auf dem der Scheduler läuft.
-    </title>
-</property>
-
-<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
-
-<property name="ini_path" access="read">
-    <com>
-        <com.result>
-            <com.type type="BSTR"/>
-        </com.result>
-    </com>
-
-    <title>
-         Wert der Option <code>-ini=</code> (Dateiname der <code>factory.ini</code>)
-    </title>
-
-    <description>
-        <p>
-            Siehe <scheduler_option name="ini"/>, <a href="../factory_ini.xml"><code>factory.ini</code></a>
-        </p>
-    </description>
-</property>
-
-<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
-
-<property name="job_chain" access="read">
-    <com>
-        <com.parameter name="name">
-            <com.type type="BSTR"/>
-        </com.parameter>
-
-        <com.result>
-            <com.type class="Job_chain"/>
-        </com.result>
-    </com>
-</property>
-
-<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
-
-<method name="job_chain_exists">
-    <com>
-        <com.parameter name="name">
-            <com.type type="BSTR"/>
-        </com.parameter>
-
-        <com.result>
-            <com.type type="bool"/>
-        </com.result>
-    </com>
-</method>
-
-<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
-
 <method name="execute_xml">
     <com>
         <com.parameter name="xml">
@@ -372,6 +310,20 @@
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
+<property name="hostname" access="read">
+    <com>
+        <com.result>
+            <com.type type="BSTR"/>
+        </com.result>
+    </com>
+
+    <title>
+        Name des Rechners, auf dem der Scheduler läuft.
+    </title>
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
 <property name="id" access="read" setting="option_id">
     <com>
         <com.result>
@@ -400,6 +352,26 @@
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
+<property name="ini_path" access="read">
+    <com>
+        <com.result>
+            <com.type type="BSTR"/>
+        </com.result>
+    </com>
+
+    <title>
+         Wert der Option <code>-ini=</code> (Dateiname der <code>factory.ini</code>)
+    </title>
+
+    <description>
+        <p>
+            Siehe <scheduler_option name="ini"/>, <a href="../factory_ini.xml"><code>factory.ini</code></a>
+        </p>
+    </description>
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
 <property name="is_service" access="read">
     <com>
         <com.result>
@@ -423,7 +395,51 @@
             <com.type class="Job"/>
         </com.result>
     </com>
+    
+    <title>
+        Liefert einen Job
+    </title>
+    
+    <description>
+        Wenn der Jobname nicht bekannt ist, wird eine Exception geliefert.
+    </description>
 </property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="job_chain" access="read">
+    <com>
+        <com.parameter name="name">
+            <com.type type="BSTR"/>
+        </com.parameter>
+
+        <com.result>
+            <com.type class="Job_chain"/>
+        </com.result>
+    </com>
+    
+    <title>
+        Liefert eine Jobkette
+    </title>
+    
+    <description>
+        Wenn der Name der Jobkette nicht bekannt ist, wird eine Exception geliefert.
+    </description>
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<method name="job_chain_exists">
+    <com>
+        <com.parameter name="name">
+            <com.type type="BSTR"/>
+        </com.parameter>
+
+        <com.result>
+            <com.type type="bool"/>
+        </com.result>
+    </com>
+</method>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 

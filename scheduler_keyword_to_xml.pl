@@ -65,6 +65,8 @@ sub read_file
     my $root_element = "";
     my $name         = "";
     my $category     = "";
+    my $last_method  = "";
+    my $last_call    = "";
     
     open( FILE, "<$filename" )  or die "$filename: $!";
 
@@ -112,7 +114,7 @@ sub read_file
             $file_title = "Class $name"  if !$file_title || $file_title eq "XXX";
             
             my $xml_line = "<register_entry register_file='$filename' register_keyword='$name' type='definition'/>\n";
-            add_keyword_reference( $name, "<code>$name</code>", $xml_line );
+            add_keyword_reference( "$name (class)", "<code>$name</code> (class)", $xml_line );
         }
     }
     
@@ -191,15 +193,37 @@ sub read_file
             if( my $element = get_element( "property" ) )
             { 
                 my $a_name   = get_attribute( $element, "name" );
+                $last_method = $a_name;
+                $last_call   = "$name.$a_name";
                 my $xml_line = "<register_entry register_file='$filename#method__$a_name' register_title='$name.$a_name' register_keyword='$a_name' type='definition'/>\n";
-                add_keyword_reference( $a_name, "<code>$a_name</code>", $xml_line );
+                add_keyword_reference( "$a_name (property)", "<code>$a_name</code> (property)", $xml_line );
             }
             
             if( my $element = get_element( "method" ) )
             { 
                 my $a_name   = get_attribute( $element, "name" );
+                $last_method = $a_name;
+                $last_call   = "$name.$a_name()";
                 my $xml_line = "<register_entry register_file='$filename#method__$a_name' register_title='$name.$a_name()' register_keyword='$a_name()' type='definition'/>\n";
                 add_keyword_reference( $a_name, "<code>$a_name()</code>", $xml_line );
+            }
+
+            if( my $element = get_element( "com.parameter" ) )
+            { 
+                if( my $a_name = get_attribute( $element, "name" ) )
+                {
+                    my $xml_line = "<register_entry register_file='$filename#method__$last_method' register_title='$last_call' register_keyword='$a_name'/>\n";
+                    add_keyword_reference( $a_name, "<code>$a_name</code>", $xml_line );
+                }
+            }
+
+            if( my $element = get_element( "com.type" ) )
+            { 
+                if( my $a_class = get_attribute( $element, "class" ) )
+                {
+                    my $xml_line = "<register_entry register_file='$filename#method__$last_method' register_title='$last_call' register_keyword='$a_class'/>\n";
+                    add_keyword_reference( "$a_class (class)", "<code>$a_class</code> (class)", $xml_line );
+                }
             }
         }
     }
