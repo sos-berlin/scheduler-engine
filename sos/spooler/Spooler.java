@@ -84,6 +84,10 @@ public class Spooler extends Idispatch
      * oder mit {@link Order_queue#add_order(Order)} direkt einem Job übergeben werden. */
     public Order            create_order        ()                                  { return (Order)        com_call( "create_order"                    ); }
     
+    public void             terminate           ()                                  {                       com_call( "terminate"                       ); }
+    public void             terminate           ( int timeout_in_seconds )          {                       com_call( "terminate", timeout_in_seconds   ); }
+    public void             terminate_and_restart()                                 {                       com_call( "terminate_and_restart"           ); }
+    public void             terminate_and_restart( int timeout_in_seconds )         {                       com_call( "terminate_and_restart", timeout_in_seconds); }
     
     /*+ Sobald alle Aufträge abgerbeitet sind, beendet der Scheduler alle Jobs (durch Aufruf von {@link Job_impl#spooler_close}) und dann sich selbst.
      * Ein neuer Scheduler mit unveränderten Kommandozeilenparametern wird gestartet. */
