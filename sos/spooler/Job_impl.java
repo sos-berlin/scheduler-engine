@@ -29,9 +29,8 @@ package sos.spooler;
  * <p>
  *  spooler_exit() wird gerufen, auch wenn spooler_init() nicht gerufen worden ist.
  * </p>
-
- 
- *
+ */
+/** 
  * @author Joacim Zschimmer, Zschimmer GmbH
  * @version $Revision$
  */

@@ -5,6 +5,8 @@ package sos.spooler;
 /*+ eMail-Versand eines Protokolls.
  *
  * @see Log#mail()
+ */
+/** 
  * @author Joacim Zschimmer
  * @version $Revision $
  */

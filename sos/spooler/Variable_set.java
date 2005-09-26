@@ -21,6 +21,8 @@ package sos.spooler;
  * @see Spooler#variables()
  * @see Task#params()
  * @see Spooler#create_variable_set()
+ */
+/** 
  * @author Joacim Zschimmer
  * @version $Revision$
  */

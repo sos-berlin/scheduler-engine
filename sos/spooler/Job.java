@@ -12,6 +12,8 @@ package sos.spooler;
  * Implementiert wird ein Job mit {@link Job_impl}. 
  * 
  * 
+ */
+/** 
  * @author Joacim Zschimmer
  * @version $Revision$
  */

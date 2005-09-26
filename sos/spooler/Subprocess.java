@@ -4,7 +4,8 @@ package sos.spooler;
 
 /*+ Ein Subprozess ist irgendein Prozess, der mit {@link Task#create_subprocess()} gestartet werden kann.
  * 
- * 
+ */
+/** 
  * @author Joacim Zschimmer
  * @version $Revision$
  */

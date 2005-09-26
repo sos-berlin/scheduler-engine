@@ -11,6 +11,8 @@ package sos.spooler;
  *
  * @see Job_chain#node(String)
  * @see Order#job_chain_node()
+ */
+/** 
  * @author Joacim Zschimmer
  * @version $Revision$
  */

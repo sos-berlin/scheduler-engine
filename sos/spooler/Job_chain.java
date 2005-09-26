@@ -50,6 +50,8 @@ package sos.spooler;
  *
  * @see Spooler#create_job_chain()
  * @see Spooler#job_chain(String)
+ */
+/** 
  * @author Joacim Zschimmer
  * @version $Revision$
  */

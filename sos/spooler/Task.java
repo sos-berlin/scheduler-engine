@@ -8,7 +8,8 @@ package sos.spooler;
  * Eine Task kann wartend in der Task-Warteschlange des Jobs sein oder laufen.
  * <p>
  * Implementiert wird eine Task durch {@link Job_impl}.
- * 
+ */
+/** 
  * @author Joacim Zschimmer
  * @version $Revision$
  */

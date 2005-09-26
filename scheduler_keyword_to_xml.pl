@@ -111,7 +111,7 @@ sub read_file
         if( !( $filename =~ /-/ ) )   # Nur Task.xml, nicht Task-javascript.xml etc.
         {
             my $section = $name;
-            $file_title = "Class $name"  if !$file_title || $file_title eq "XXX";
+            $file_title = "$name"  if !$file_title || $file_title eq "XXX";
             
             my $xml_line = "<register_entry register_file='$filename' register_keyword='$name' type='definition'/>\n";
             add_keyword_reference( "$name (class)", "<code>$name</code> (class)", $xml_line );

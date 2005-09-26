@@ -4,6 +4,8 @@ package sos.spooler;
 
 /*+
  * Interne Klasse des Schedulers.
+ */
+/** 
  * @author Joacim Zschimmer
  * @version $Revision$
  */

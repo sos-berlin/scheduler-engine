@@ -29,7 +29,8 @@ package sos.spooler;
  * @see Spooler#create_order()
  * @see Spooler#job_chain(String)
  * @see Task#order() 
- *
+ */
+/** 
  * @author Joacim Zschimmer
  * @version $Revision$
  */

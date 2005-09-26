@@ -6,6 +6,8 @@ package sos.spooler;
  *
  * @see Job_impl#spooler_log
  * @see Spooler#log()
+ */
+/** 
  * @author Joacim Zschimmer
  * @version $Revision$
  */

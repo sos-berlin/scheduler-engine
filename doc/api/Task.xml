@@ -293,6 +293,14 @@
             <scheduler_ini_entry file="factory.ini" section="job" entry="history_columns"/>
             deklariert sein.
         </description>
+        
+        <example programming_language="javascript">
+            <pre>spooler_task.history_field( "extra" ) = 4711;</pre>
+        </example>
+
+        <example programming_language="perl">
+            <pre>$spooler_task->LetProperty( 'history_field', 'extra', 4711 );</pre>
+        </example>
     </property>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->

@@ -4,6 +4,8 @@ package sos.spooler;
 
 /*+
  * Fehlercode und -text.
+ */
+/** 
  * @author Joacim Zschimmer, Zschimmer GmbH
  * @version $Revision$
  */

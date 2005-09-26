@@ -17,7 +17,8 @@ package sos.spooler;
  * @see Order
  * @see Job_chain
  * @see Task#order() 
- * 
+ */
+/** 
  * @author Joacim Zschimmer
  * @version $Revision$
  */

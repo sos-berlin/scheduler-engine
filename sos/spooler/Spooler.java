@@ -3,7 +3,8 @@
 package sos.spooler;
 
 /*+ Das allgemeine Scheduler-Objekt.
- * 
+ */
+/** 
  * @author Joacim Zschimmer, Zschimmer GmbH
  * @version $Revision$
  */
