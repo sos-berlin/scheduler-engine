@@ -2070,11 +2070,7 @@ void Spooler::start()
     }
 
 
-    if( _main_scheduler_connection )  
-    {
-        //_main_scheduler_connection->set_async_manager( _connection_manager );
-        _main_scheduler_connection->add_to_socket_manager( _connection_manager );
-    }
+    if( _main_scheduler_connection )  _main_scheduler_connection->set_socket_manager( _connection_manager );
     
 /*
     if( _is_service || is_daemon )

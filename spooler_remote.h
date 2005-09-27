@@ -15,7 +15,7 @@ struct Xml_client_connection : Async_operation
     {
         s_initial,
         s_connecting,
-        s_stand_by,
+        s_finished,
         s_sending,
         s_waiting,
         s_receiving
@@ -25,15 +25,17 @@ struct Xml_client_connection : Async_operation
                                 Xml_client_connection       ( Spooler*, const Host_and_port& );
                                ~Xml_client_connection       ();
 
+    virtual string              obj_name                    () const;
                                 
-    void                        add_to_socket_manager       ( Socket_manager* );
+    void                        set_socket_manager          ( Socket_manager* );
+    static string               state_name                  ( State );
 
 
   protected:
-    string                      async_state_text_           ();
+    string                      async_state_text_           ()                                      { return obj_name(); }
     bool                        async_continue_             ( Continue_flags );
     bool                        async_finished_             ()                                      { return _state == s_initial  
-                                                                                                          || _state == s_stand_by; }
+                                                                                                          || _state == s_finished; }
     bool                        async_signaled_             ()                                      { return _socket_operation && _socket_operation->async_signaled(); }
 
   private:

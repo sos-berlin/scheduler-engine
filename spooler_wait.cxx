@@ -117,7 +117,7 @@ Wait_handles::~Wait_handles()
 
 void Wait_handles::close()
 {
-    THREAD_LOCK( _lock )
+    //THREAD_LOCK( _lock )
     {
         FOR_EACH( Event_vector, _events, it )  
         {
@@ -130,7 +130,7 @@ void Wait_handles::close()
 
 void Wait_handles::clear()
 {
-    THREAD_LOCK( _lock )
+    //THREAD_LOCK( _lock )
     {
         _events.clear();
 
@@ -144,7 +144,7 @@ void Wait_handles::clear()
 
 bool Wait_handles::signaled()
 {
-    THREAD_LOCK( _lock )
+    //THREAD_LOCK( _lock )
     {
         FOR_EACH( Event_vector, _events, it )  
         {
@@ -159,8 +159,8 @@ bool Wait_handles::signaled()
 
 Wait_handles& Wait_handles::operator += ( Wait_handles& o )
 {
-    THREAD_LOCK( _lock )
-    THREAD_LOCK( o._lock )      // Vorsicht, Deadlock-Gefahr!
+    //THREAD_LOCK( _lock )
+    //THREAD_LOCK( o._lock )      // Vorsicht, Deadlock-Gefahr!
     {
         Event_vector::iterator   e = o._events.begin();
         Z_WINDOWS_ONLY( vector<HANDLE>::iterator h = o._handles.begin(); )
@@ -187,8 +187,9 @@ Wait_handles& Wait_handles::operator += ( Wait_handles& o )
 
 void Wait_handles::add( System_event* event )
 {
-    THREAD_LOCK( _lock )
+    //THREAD_LOCK( _lock )
     {
+        Z_LOG2( "joacim", __FUNCTION__ << *event << "\n" );
 #       ifdef Z_WINDOWS
             _handles.push_back( event->handle() );
 #       endif
@@ -202,7 +203,7 @@ void Wait_handles::add( System_event* event )
 
 void Wait_handles::add_handle( HANDLE handle ) //, System_event* event )
 {
-    THREAD_LOCK( _lock )
+    //THREAD_LOCK( _lock )
     {
         // Nützt nicht viel, denn spooler.exe fügt mehrere Wait_handles zusammen (mit operator +=).
         if( _handles.size() >= MAXIMUM_WAIT_OBJECTS-1 )  throw_xc( "SCHEDULER-209", MAXIMUM_WAIT_OBJECTS-1 );   // Grenze für MsgWaitForMultipleObjects() ist 64
@@ -218,7 +219,7 @@ void Wait_handles::add_handle( HANDLE handle ) //, System_event* event )
 /*
 void Wait_handles::remove_handle( HANDLE handle, z::Event_base* event )
 {
-    THREAD_LOCK( _lock )
+    //THREAD_LOCK( _lock )
     {
         vector<HANDLE>::iterator it = _handles.begin();
 
@@ -254,7 +255,7 @@ void Wait_handles::remove( System_event* event )
 
         // Das ist fast der gleiche Code wie von remove_handle(). Kann man das zusammenfassen? 26.11.2002
 
-        THREAD_LOCK( _lock )
+        //THREAD_LOCK( _lock )
         {
             Event_vector::iterator it = _events.begin();
 
@@ -360,7 +361,7 @@ bool Wait_handles::wait_until_2( Time until )
             if( wait_time >= 1.0 )  _log->debug9( "Noch " + sos::as_string(wait_time) + "s warten ..." );
         }
 
-        THREAD_LOCK( _lock )
+        //THREAD_LOCK( _lock )
         {
           //if( _log->log_level() <= log_debug9 )
             if( t > 0 )  Z_LOG2( "scheduler.wait", "MsgWaitForMultipleObjects " << sos::as_string(t/1000.0) << "s (bis " << until << ")  " << as_string() << "\n" );
@@ -404,7 +405,7 @@ WAIT_OK:
 
         if( ret >= WAIT_OBJECT_0  &&  ret < WAIT_OBJECT_0 + _handles.size() )
         {
-            THREAD_LOCK( _lock )
+            //THREAD_LOCK( _lock )
             {
                 int            index = ret - WAIT_OBJECT_0;
                 z::Event_base* event = _events[ index ];
@@ -494,7 +495,7 @@ string Wait_handles::as_string()
 {
     string result;
 
-    THREAD_LOCK( _lock )
+    //THREAD_LOCK( _lock )
     {
         if( _events.empty() )
         {
