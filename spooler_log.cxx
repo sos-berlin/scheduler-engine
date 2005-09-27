@@ -1008,15 +1008,6 @@ xml::Element_ptr Prefix_log::dom_element( const xml::Document_ptr& document, con
     if( _mail_on_success            )  log_element.setAttribute( "mail_on_success", "yes" );
     if( _mail_on_process            )  log_element.setAttribute( "mail_on_process", _mail_on_process );
 
-/*
-    string smtp_server = _smtp_server == "-"? "" : _smtp_server;
-    string from        = _from        == "-"? "" : _from;
-    string to          = _to          == "-"? "" : _to;
-    string cc          = _cc          == "-"? "" : _cc;
-    string bcc         = _bcc         == "-"? "" : _bcc;
-    string subject     = _subject     == "-"? "" : _subject;
-*/
-
     string smtp_server = _mail_defaults[ "smtp"    ];
     string from        = _mail_defaults[ "from"    ];
     string to          = _mail_defaults[ "to"      ];

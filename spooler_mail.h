@@ -24,8 +24,8 @@ struct Mail_defaults
 {
                                 Mail_defaults               ( Spooler* );
 
-    bool                        has_value                   ( const string& name ) const            { return _map.find( name ) != _map.end(); }
-    string                      operator[]                  ( const string& name ) const            { Map::const_iterator it = _map.find( name );  return it == _map.end()? "" : it->second; }
+    bool                        has_value                   ( const string& name ) const;
+    string                      operator[]                  ( const string& name ) const;
     void                        set                         ( const string& name, const string& value )  { _map[ name ] = value; }
 
     typedef map<string,string>  Map;

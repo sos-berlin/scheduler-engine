@@ -189,7 +189,6 @@ void Wait_handles::add( System_event* event )
 {
     //THREAD_LOCK( _lock )
     {
-        Z_LOG2( "joacim", __FUNCTION__ << *event << "\n" );
 #       ifdef Z_WINDOWS
             _handles.push_back( event->handle() );
 #       endif

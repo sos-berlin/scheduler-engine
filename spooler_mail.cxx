@@ -27,6 +27,22 @@ Mail_defaults::Mail_defaults( Spooler* spooler )
     }
 }
 
+//-------------------------------------------------------------------------Mail_defaults::has_value
+
+bool Mail_defaults::has_value( const string& name ) const
+{ 
+    Map::const_iterator it = _map.find( name );
+    return it != _map.end() &&  it->second != "";
+}
+
+//------------------------------------------------------------------------Mail_defaults::operator[]
+
+string Mail_defaults::operator[] ( const string& name ) const
+{ 
+    Map::const_iterator it = _map.find( name );  
+    return it == _map.end()? "" : it->second; 
+}
+
 //-------------------------------------------------------------------------------Com_mail::_methods
 #ifdef Z_COM
 
