@@ -16,7 +16,7 @@ using namespace std;
 namespace sos {
 namespace spooler {
 
-const int wait_for_port_available = 60;   // Soviele Sekunden warten, bis TCP- oder UDP-Port frei wird
+const int wait_for_port_available = 2*60;   // Soviele Sekunden warten, bis TCP- oder UDP-Port frei wird
 
 #ifdef Z_WINDOWS
 #   include <io.h>
