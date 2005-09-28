@@ -643,24 +643,7 @@ int Com_mail::send( const Mail_defaults& defaults )
 {
     if( _msg == 0 )  throw_ole( E_POINTER, "Com_mail::send" );
 
-
-    Email_address from        ( _from );
-    Email_address default_from( defaults[ "from" ] );
-
-    if( from.address() == "" )  from.set_address( default_from.address() );
-    if( from.name   () == "" )  from.set_name   ( default_from.name() != ""? default_from.name() : defaults[ "from_name" ] );
-    set_from( from );
-  //if( from.address()  == ""  &&  defaults.has_value( "from"      ) )  set_from     ( defaults[ "from"      ] );
-  //if( from.name()     == ""  &&  defaults.has_value( "from_name" ) )  set_from_name( defaults[ "from_name" ] );
-
-    if( _to             == ""  &&  defaults.has_value( "to"        ) )  set_to       ( defaults[ "to"        ] );
-    if( !_cc_set               &&  defaults.has_value( "cc"        ) )  set_cc       ( defaults[ "cc"        ] );
-    if( !_bcc_set              &&  defaults.has_value( "bcc"       ) )  set_bcc      ( defaults[ "bcc"       ] );
-    if( _subject        == ""  &&  defaults.has_value( "subject"   ) )  set_subject  ( defaults[ "subject"   ] );
-    if( _body           == ""  &&  defaults.has_value( "body"      ) )  set_body     ( defaults[ "body"      ] );
-
-    if( queue_dir()     == ""  &&  defaults.has_value( "queue_dir" )  &&  defaults[ "queue_dir" ] != "-" )  set_queue_dir( defaults[ "queue_dir" ] );
-    if( _smtp           == ""  &&  defaults.has_value( "smtp"      )  &&  defaults[ "smtp"      ] != "-" )  set_smtp     ( defaults[ "smtp"      ] );
+    use_defaults( defaults );
 
 
     if( _from == ""  ||  _to == ""  ||  _subject == ""  ||  _body == "" )
@@ -710,12 +693,37 @@ STDMETHODIMP Com_mail::Dequeue( int* result )
 
     try
     {
+        use_defaults( spooler->_mail_defaults );
+
         *result = _msg->dequeue();
     }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Mail.dequeue" ); }
     catch( const exception & x )  { hr = _set_excepinfo( x, "Spooler.Mail.dequeue" ); }
 
     return hr;
+}
+
+//-----------------------------------------------------------------------Spooler_mail::use_defaults
+
+void Spooler_mail::use_defaults( const Mail_defaults& defaults )
+{
+    Email_address from        ( _from );
+    Email_address default_from( defaults[ "from" ] );
+
+    if( from.address() == "" )  from.set_address( default_from.address() );
+    if( from.name   () == "" )  from.set_name   ( default_from.name() != ""? default_from.name() : defaults[ "from_name" ] );
+    set_from( from );
+  //if( from.address()  == ""  &&  defaults.has_value( "from"      ) )  set_from     ( defaults[ "from"      ] );
+  //if( from.name()     == ""  &&  defaults.has_value( "from_name" ) )  set_from_name( defaults[ "from_name" ] );
+
+    if( _to             == ""  &&  defaults.has_value( "to"        ) )  set_to       ( defaults[ "to"        ] );
+    if( !_cc_set               &&  defaults.has_value( "cc"        ) )  set_cc       ( defaults[ "cc"        ] );
+    if( !_bcc_set              &&  defaults.has_value( "bcc"       ) )  set_bcc      ( defaults[ "bcc"       ] );
+    if( _subject        == ""  &&  defaults.has_value( "subject"   ) )  set_subject  ( defaults[ "subject"   ] );
+    if( _body           == ""  &&  defaults.has_value( "body"      ) )  set_body     ( defaults[ "body"      ] );
+
+    if( queue_dir()     == ""  &&  defaults.has_value( "queue_dir" )  &&  defaults[ "queue_dir" ] != "-" )  set_queue_dir( defaults[ "queue_dir" ] );
+    if( _smtp           == ""  &&  defaults.has_value( "smtp"      )  &&  defaults[ "smtp"      ] != "-" )  set_smtp     ( defaults[ "smtp"      ] );
 }
 
 //-------------------------------------------------------------------------------------------------
