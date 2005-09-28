@@ -693,7 +693,7 @@ STDMETHODIMP Com_mail::Dequeue( int* result )
 
     try
     {
-        use_defaults( spooler->_mail_defaults );
+        use_defaults( _spooler->_mail_defaults );
 
         *result = _msg->dequeue();
     }
@@ -703,9 +703,9 @@ STDMETHODIMP Com_mail::Dequeue( int* result )
     return hr;
 }
 
-//-----------------------------------------------------------------------Spooler_mail::use_defaults
+//---------------------------------------------------------------------------Com_mail::use_defaults
 
-void Spooler_mail::use_defaults( const Mail_defaults& defaults )
+void Com_mail::use_defaults( const Mail_defaults& defaults )
 {
     Email_address from        ( _from );
     Email_address default_from( defaults[ "from" ] );
