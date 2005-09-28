@@ -35,17 +35,17 @@
     </change>
 
     <change date="2005-09-24" version="2.0.140" subversion_revision="3939">
-        <revision type="modification" title="Doppeltes Ctrl-C bricht alle Prozesse ab">
+        <revision type="modification" title="Windows: Doppeltes Ctrl-C bricht alle Prozesse ab">
             <description>
                 <p>
-                    Das erste Ctrl-C (Unix: <code>SIGINT</code> und <code>SIGKILL</code>)
+                    Das erste Ctrl-C 
                     beendet den Scheduler wie <scheduler_element name="modify_spooler" attribute="cmd" value="terminate"/>.
                 </p>
                 <p>
-                    Das zweite Ctrl-C (Unix: <code>SIGINT</code> und <code>SIGKILL</code>) führt dann zum Abbruch aller Prozesse.
+                    Das zweite Ctrl-C führt dann zum Abbruch aller Prozesse.
                 </p>
                 <p>
-                    Erste das dritte lässt das Betriebssystem den Scheduler abbrechen.
+                    Erst das dritte lässt das Betriebssystem den Scheduler abbrechen.
                 </p>
             </description>
         </revision>
