@@ -287,8 +287,6 @@ With_log_switch read_profile_with_log( const string& profile, const string& sect
 
     static void ctrl_c_handler( int sig )
     {
-        set_ctrl_c_handler( ctrl_c_pressed < 2 );
-
         switch( sig )
         {
             case SIGUSR1:
@@ -301,9 +299,12 @@ With_log_switch read_profile_with_log( const string& profile, const string& sect
             case SIGINT:        // Ctrl-C
             case SIGTERM:       // Normales kill
             {
-                if( ctrl_c_pressed  && spooler_ptr )  spooler_ptr->abort_now();
-
                 ctrl_c_pressed++;
+
+                if( ctrl_c_pressed >= 2  &&  spooler_ptr )  spooler_ptr->abort_now();  // Unter Linux ist ctrl_c_pressed meisten > 2, weil 
+                                                                                       // jeder Thread diese Routine durchlaufen lässt. Lösung: sigaction()
+
+
                 //Kein Systemaufruf hier! (Aber bei Ctrl-C riskieren wir einen Absturz. Ich will diese Meldung sehen.)
                 //if( !is_daemon )  fprintf( stderr, "Scheduler wird wegen kill -%d beendet ...\n", sig );
 
@@ -317,6 +318,8 @@ With_log_switch read_profile_with_log( const string& profile, const string& sect
 
             default: ;
         }
+
+        set_ctrl_c_handler( ctrl_c_pressed < 2 );
     }
 
 #endif
@@ -2512,7 +2515,7 @@ void Spooler::run()
             }
             else
             {
-                _log.warn( "Zweites Abbruch-Signal (Ctrl-C) empfangen. Der Scheduler wird abgebrochen.\n" );
+                _log.warn( "Abbruch-Signal (Ctrl-C) beim Beenden des Schedulers empfangen. Der Scheduler wird abgebrochen, sofort.\n" );
                 abort_now();
             }
         }

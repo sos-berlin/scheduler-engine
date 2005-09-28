@@ -644,10 +644,15 @@ int Com_mail::send( const Mail_defaults& defaults )
     if( _msg == 0 )  throw_ole( E_POINTER, "Com_mail::send" );
 
 
-    Email_address from = _from;
+    Email_address from        ( _from );
+    Email_address default_from( defaults[ "from" ] );
 
-    if( _from           == ""  &&  defaults.has_value( "from"      ) )  set_from     ( defaults[ "from"      ] );
-    if( from.name()     == ""  &&  defaults.has_value( "from_name" ) )  set_from_name( defaults[ "from_name" ] );
+    if( from.address() == "" )  from.set_address( default_from.address() );
+    if( from.name   () == "" )  from.set_name   ( default_from.name() != ""? default_from.name() : defaults[ "from_name" ] );
+    set_from( from );
+  //if( from.address()  == ""  &&  defaults.has_value( "from"      ) )  set_from     ( defaults[ "from"      ] );
+  //if( from.name()     == ""  &&  defaults.has_value( "from_name" ) )  set_from_name( defaults[ "from_name" ] );
+
     if( _to             == ""  &&  defaults.has_value( "to"        ) )  set_to       ( defaults[ "to"        ] );
     if( !_cc_set               &&  defaults.has_value( "cc"        ) )  set_cc       ( defaults[ "cc"        ] );
     if( !_bcc_set              &&  defaults.has_value( "bcc"       ) )  set_bcc      ( defaults[ "bcc"       ] );
