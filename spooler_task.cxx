@@ -427,7 +427,7 @@ void Task::cmd_end( bool kill_immediately )
 {
     THREAD_LOCK_DUMMY( _lock )
     {
-        if( _kill_immediately )  _log->warn( "Kill immediately" );
+        if( kill_immediately )  _log->warn( "Kill immediately" );
         else
         if( _state < s_ending )  _log->info( "end()" );
 
