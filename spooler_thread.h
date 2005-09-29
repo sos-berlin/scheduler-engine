@@ -37,7 +37,7 @@ struct Spooler_thread : zschimmer::Thread
     void                        start                       ( Event* destination );
   //void                        stop_jobs                   ();
 
-    void                        cmd_shutdown                ();
+  //void                        cmd_shutdown                ();
     void                        add_task                    ( Task* task )                          { _task_list.push_back( task );  signal( task->obj_name() ); }
   //void                        remove_task                 ( Task* this_task )                     { FOR_EACH_TASK( t, task )  if( task == this_task )  { _task_list.erase(t);  break; } }
     int                         task_count                  ( Job* = NULL );

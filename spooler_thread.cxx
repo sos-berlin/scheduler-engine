@@ -199,7 +199,7 @@ int Spooler_thread::task_count( Job* job )
 }
 
 //---------------------------------------------------------------------Spooler_thread::cmd_shutdown
-// Wird von Spooler gerufen
+/* Wird von Spooler gerufen
 
 void Spooler_thread::cmd_shutdown()
 {
@@ -208,7 +208,7 @@ void Spooler_thread::cmd_shutdown()
         FOR_EACH_TASK( t, task )  task->cmd_end();
     }
 }
-
+*/
 //------------------------------------------------Spooler_thread::build_prioritized_order_job_array
 
 void Spooler_thread::build_prioritized_order_job_array()

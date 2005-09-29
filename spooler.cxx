@@ -70,8 +70,8 @@ const double                    renew_wait_time                     = 30;      /
 const int                       kill_timeout_1                      = 10;          // < kill_timeout_total
 const int                       kill_timeout_total                  = 30;          // terminate mit timeout: Nach timeout und kill noch soviele Sekunden warten
 const double                    wait_for_thread_termination         = latter_day;  // Haltbarkeit des Geduldfadens
-const double                    wait_step_for_thread_termination    = 5.0;         // 1. Nörgelabstand
-const double                    wait_step_for_thread_termination2   = 600.0;       // 2. Nörgelabstand
+//const double                    wait_step_for_thread_termination    = 5.0;         // 1. Nörgelabstand
+//const double                    wait_step_for_thread_termination2   = 600.0;       // 2. Nörgelabstand
 //const double wait_for_thread_termination_after_interrupt = 1.0;
 
 const char*                     temporary_process_class_name        = "(temporaries)";
@@ -130,7 +130,8 @@ struct Termination_async_operation : Async_operation
     {
         s_ending,
         s_killing_1,
-        s_killing_2
+        s_killing_2,
+        s_finished
     };
 
                                 Termination_async_operation ( Spooler*, time_t timeout_at );
@@ -419,7 +420,7 @@ bool Termination_async_operation::async_continue_( Continue_flags flags )
 
             Z_FOR_EACH( Task_list, _spooler->_single_thread->_task_list, t )
             {
-                _spooler->_log.warn( S() << "Kill " << (*t)->obj_name() );
+                _spooler->_log.error( S() << "Kill " << (*t)->obj_name() );
 
                 bool kill_immediately = true;
                 (*t)->cmd_end( kill_immediately );      // Wirkt erst beim nächsten Task::do_something()
@@ -437,11 +438,17 @@ bool Termination_async_operation::async_continue_( Continue_flags flags )
         case s_killing_1:
         {
             int count = _spooler->_single_thread->_task_list.size();
-            _spooler->_log.warn( S() << count << " Tasks ließen sich nicht abbrechen. " << kill_timeout_total << "s Nachfrist läuft ..." ); 
+            _spooler->_log.warn( S() << count << " Tasks haben sich nicht beendet trotz kill vor " << kill_timeout_1 << "s."
+                                 " Die " << kill_timeout_total << "s lange Nachfrist läuft weiter" ); 
+
+            Z_FOR_EACH( Task_list, _spooler->_single_thread->_task_list, t )
+            {
+                _spooler->_log.warn( S() << "    " << (*t)->obj_name() );
+            }
 
             set_async_next_gmtime( _timeout_at + kill_timeout_total );
 
-            _state = s_killing_1;
+            _state = s_killing_2;
             something_done = true;
             break;
         }
@@ -449,11 +456,16 @@ bool Termination_async_operation::async_continue_( Continue_flags flags )
         case s_killing_2:
         {
             int count = _spooler->_single_thread->_task_list.size();
-            _spooler->_log.error( S() << count << " Tasks ließen sich nicht abbrechen. Scheduler bricht ab" ); 
+            _spooler->_log.error( S() << count << " Tasks haben sich nicht beendet trotz kill vor " << kill_timeout_total << "s."
+                                                  " Scheduler bricht ab" ); 
 
-            _spooler->kill_all_processes();
+            Z_FOR_EACH( Task_list, _spooler->_single_thread->_task_list, t )
+            {
+                _spooler->_log.error( S() << "    " << (*t)->obj_name() );
+            }
 
             _spooler->_shutdown_ignore_running_tasks = true;
+            _state = s_finished;
 
             something_done = true;
             break;
@@ -2129,18 +2141,9 @@ void Spooler::stop( const exception* )
     close_threads();
     close_jobs();
 
-    //FOR_EACH( Thread_list, _thread_list, it )  it = _thread_list.erase( it );
+    if( _shutdown_ignore_running_tasks )  _spooler->kill_all_processes();   // Übriggebliebene Prozesse killen
 
 
-/*  interrupt() lässt PerlScript abstürzen
-    FOR_EACH( Thread_list, _thread_list, it )
-    {
-        Job* job = (*it)->current_job();
-        if( job )  try { job->interrupt_script(); } catch(const exception& x){_log.error(x.what());}
-    }
-
-    wait_until_threads_stopped( Time::now() + wait_for_thread_termination_after_interrupt );
-*/
     _object_set_class_list.clear();
   //_spooler_thread_list.clear();
     _thread_list.clear();
@@ -2156,14 +2159,6 @@ void Spooler::stop( const exception* )
 
     _communication.close( 5.0 );      // Mit Wartezeit. Vor Restart, damit offene Verbindungen nicht vererbt werden.
 
-    if( _shutdown_cmd == sc_terminate_and_restart 
-     || _shutdown_cmd == sc_let_run_terminate_and_restart )  
-    {
-        sleep( 5.0 + 1.0 );   // Etwas warten, damit der Browser nicht hängenbleibt. Sonst wird die HTTP-Verbindung nicht richtig geschlossen. Warum bloß?
-                              // Siehe auch Spooler_communication::close(): set_linger( true, 1 );
-        spooler_restart( &_base_log, _is_service );
-    }
-
     _db->spooler_stop();
 
     THREAD_LOCK( _lock )
@@ -2174,6 +2169,14 @@ void Spooler::stop( const exception* )
 
     set_state( s_stopped );     
     // Der Dienst ist hier beendet
+
+    if( _shutdown_cmd == sc_terminate_and_restart 
+     || _shutdown_cmd == sc_let_run_terminate_and_restart )  
+    {
+        sleep( 5.0 + 1.0 );   // Etwas warten, damit der Browser nicht hängenbleibt. Sonst wird die HTTP-Verbindung nicht richtig geschlossen. Warum bloß?
+                              // Siehe auch Spooler_communication::close(): set_linger( true, 1 );
+        spooler_restart( &_base_log, _is_service );
+    }
 }
 
 //----------------------------------------------------------------------------Spooler::nichts_getan
@@ -2218,44 +2221,49 @@ void Spooler::execute_state_cmd()
             if( _state_cmd != _shutdown_cmd )
             {
                 set_state( _state_cmd == sc_let_run_terminate_and_restart? s_stopping_let_run : s_stopping );
-                if( _state == s_stopping )  FOR_EACH( Thread_list, _thread_list, t )  (*t)->cmd_shutdown();
 
-                if( _state == s_stopping_let_run  &&  _single_thread )
+                if( _state == s_stopping )
+                {
+                    Z_FOR_EACH( Job_list, _job_list, j )
+                    {
+                        Job* job = *j;
+                        _log.info( S() << "stop " << job->obj_name() );
+                        bool end_all_tasks = true;
+                        job->stop( end_all_tasks );
+                    }
+                }
+
+                if( _state == s_stopping_let_run )
                 {
                     FOR_EACH( Task_list, _single_thread->_task_list, t )
                     {
-                        if( (*t)->state() == Task::s_running_waiting_for_order )  (*t)->cmd_end();
+                        Task* task = *t;
+
+                        if( task->state() == Task::s_running_waiting_for_order ) 
+                        {
+                            //_log.info( S() << "end " << task->obj_name() );
+                            task->cmd_end();
+                        }
                     }
                 }
+
+                if( _termination_async_operation )
+                {
+                    _connection_manager->remove_operation( _termination_async_operation );
+                    _termination_async_operation = NULL;
+                }
+
+                if( _termination_gmtimeout_at != no_termination_timeout ) 
+                {
+                    _log.info( S() << "Die Frist zum Beenden der Tasks endet in " << ( _termination_gmtimeout_at - ::time(NULL) ) << "s" );
+                    _termination_async_operation = Z_NEW( Termination_async_operation( this, _termination_gmtimeout_at ) );
+                    _termination_async_operation->set_async_manager( _connection_manager );
+                    _connection_manager->add_operation( _termination_async_operation );
+                }
+
+
+                _shutdown_cmd = _state_cmd;
             }
-
-
-            Z_FOR_EACH( Task_list, _single_thread->_task_list, t )
-            {
-                S line;
-                line << (*t)->obj_name();
-
-                //Z_FOR_EACH( Task::Registered_pids, (*t)->_registered_pids, p )  line << p->second->obj_name();
-                _log.info( line );
-            }
-
-
-            if( _termination_async_operation )
-            {
-                _connection_manager->remove_operation( _termination_async_operation );
-                _termination_async_operation = NULL;
-            }
-
-            if( _termination_gmtimeout_at != no_termination_timeout ) 
-            {
-                _log.info( S() << "Die Frist zum Beenden der Tasks endet in " << ( _termination_gmtimeout_at - ::time(NULL) ) << "s" );
-                _termination_async_operation = Z_NEW( Termination_async_operation( this, _termination_gmtimeout_at ) );
-                _termination_async_operation->set_async_manager( _connection_manager );
-                _connection_manager->add_operation( _termination_async_operation );
-            }
-
-
-            _shutdown_cmd = _state_cmd;
         }
 
         _state_cmd = sc_none;

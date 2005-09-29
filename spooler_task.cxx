@@ -427,6 +427,14 @@ void Task::cmd_end( bool kill_immediately )
 {
     THREAD_LOCK_DUMMY( _lock )
     {
+        if( _state < s_ending  ||  kill_immediately )
+        {
+            S line;
+            line << "end()";
+            if( kill_immediately )  line << ", kill immediately";
+            _log->info( line );
+        }
+
         _end = true;
         _kill_immediately = kill_immediately;
         if( !_ending_since )  _ending_since = Time::now();
@@ -444,7 +452,7 @@ void Task::cmd_end( bool kill_immediately )
 
 void Task::cmd_nice_end( Job* for_job )
 {
-    _log->debug( "Task wird dem Job " + for_job->name() + " zugunsten beendet" );
+    _log->info( "Task wird dem Job " + for_job->name() + " zugunsten beendet" );
 
     cmd_end();
 }

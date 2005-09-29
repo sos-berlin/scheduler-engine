@@ -856,7 +856,11 @@ void Job::stop( bool end_all_tasks )
             Z_FOR_EACH( Task_list, _running_tasks, t )
             {
                 Task* task = *t;
-                task->cmd_end();
+
+                if( task->state() < Task::s_ending )
+                {
+                    task->cmd_end();
+                }
             }
         }
 
