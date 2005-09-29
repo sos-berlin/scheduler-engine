@@ -420,7 +420,7 @@ bool Termination_async_operation::async_continue_( Continue_flags flags )
 
             Z_FOR_EACH( Task_list, _spooler->_single_thread->_task_list, t )
             {
-                _spooler->_log.error( S() << "Kill " << (*t)->obj_name() );
+                //_spooler->_log.error( S() << "Kill " << (*t)->obj_name() );
 
                 bool kill_immediately = true;
                 (*t)->cmd_end( kill_immediately );      // Wirkt erst beim nächsten Task::do_something()
