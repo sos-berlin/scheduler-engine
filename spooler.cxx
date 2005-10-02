@@ -1927,7 +1927,8 @@ void Spooler::create_window()
 {
 #   if defined Z_WINDOWS
 
-        SetConsoleTitle( name().c_str() );
+        string title = S() << name() << " " << _config_filename;
+        SetConsoleTitle( title.c_str() );
 /*
         const char* window_class_name = "Scheduler";
         WNDCLASSEX window_class;
