@@ -470,6 +470,11 @@ bool Termination_async_operation::async_continue_( Continue_flags flags )
             something_done = true;
             break;
         }
+
+        case s_finished:
+        {
+            break;
+        }
     }
 
     return something_done;

@@ -48,7 +48,9 @@
 
 <example programming_language="javascript">
     <pre>var order = spooler_task.order;
-order.run_time.xml = "&lt;run_time>&lt;period single_start='15:00'/>&lt;/run_time>";   // Order is repeated daily at 15:00</pre>
+
+// Repeat order daily at 15:00
+order.run_time.xml = "&lt;run_time>&lt;period single_start='15:00'/>&lt;/run_time>";</pre>
 </example>
 
 </api.class>
