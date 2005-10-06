@@ -42,13 +42,11 @@
         </xml_attribute>
 
 
-        <xml_attribute name="port" type="zahl" initial="4444" title="Für Kommandos per TCP, HTTP und UDP">
+        <xml_attribute setting="port">
             <description>
                 <p>
-                    Fasst die Attribute
-                    <a href="#attribute_tcp_port"><code>tcp_port</code></a>
-                    und
-                    <a href="#attribute_udp_port"><code>udp_port</code></a>
+                    Siehe auch <scheduler_element name="config" attribute="tcp_port"/>.
+                    und <scheduler_element name="config" attribute="udp_port"/>.
                 </p>
             </description>
             <example>
@@ -57,20 +55,10 @@
         </xml_attribute>
 
 
-        <xml_attribute name="tcp_port" type="zahl" initial="4444" title="Für Kommandos per TCP und HTTP">
+        <xml_attribute setting="tcp_port">
             <description>
                 <p>
-                    Der Scheduler kann auf einem TCP-Port während des Betriebs Kommandos entgegennehmen. Hier kann ein
-                    Portnummer eingestellt werden. Die Portnummer ist eine Zahl zwischen mindestens 2048 (betriebssystem-abhängig) und
-                    65535. In dieser Dokumentation verwenden wir 4444.
-                </p>
-                <p>
-                    Über denselben Port betreibt der Scheduler auch einen HTTP/HTML-Server, sodass er über einen Browswer ansprechbar ist,
-                    z.B.: http://localhost:4444.
-                </p>
-                <p>
-                    Bei <code>tcp_port="0"</code> ist der Scheduler nicht über TCP oder HTTP ansprechbar.
-                    Damit kann die Steuerung des Schedulers per TCP-Kommando, z.B. über eine Web-Seite, unterbunden werden.
+                    Siehe auch <scheduler_element name="config" attribute="port"/>.
                 </p>
             </description>
             <example>
@@ -79,21 +67,17 @@
         </xml_attribute>
 
 
-        <xml_attribute name="udp_port" type="zahl" initial="4444" title="Für Kommandos per UDP">
+        <xml_attribute setting="udp_port" >
             <description>
                 <p>
-                    Auch über UDP kann der Scheduler Kommandos entgegennehmen.
-                    Hier wird die Portnummer angegeben.
-                    Ein Kommando muss in eine Nachricht passen. Der Scheduler schickt keine Antwort.
-                </p>
-                <p>
-                    Bei <code>udp_port="0"</code> öffnet der Scheduler keinen UDP-Port.
+                    Siehe auch <scheduler_element name="config" attribute="port"/>.
                 </p>
             </description>
             <example>
                 <pre>&lt;config udp_port="4444"></pre>
             </example>
         </xml_attribute>
+
 
         <xml_attribute name="param" type="text" command_line_option="param" title="Zur freien Verwendung">
             <description>

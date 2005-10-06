@@ -122,6 +122,7 @@ namespace spooler {
 
 extern const char*              temporary_process_class_name;
 extern const char               dtd_string[];
+extern volatile int             ctrl_c_pressed;
 
 
 #ifdef Z_WINDOWS

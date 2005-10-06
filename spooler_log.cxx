@@ -886,13 +886,8 @@ void Prefix_log::send_really( Scheduler_event* scheduler_event )
         if( scheduler_event )  scheduler_event->set_log_path( filename() );
     }
 
-  //if( scheduler_event )
-    {
-        scheduler_event->set_mail( imail() );
-        ok = scheduler_event->send_mail( _mail_defaults );
-    }
-  //else
-  //    ok = imail()->send();
+    scheduler_event->set_mail( imail() );
+    ok = scheduler_event->send_mail( _mail_defaults );
 
 
     if( ok )

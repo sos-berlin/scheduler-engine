@@ -579,9 +579,8 @@ string Spooler::name() const
 {
     S result;
     
-    result << "Scheduler";
-
-    result << " " <<  _hostname;
+    result << "Scheduler ";
+    result << _hostname;
     if( _tcp_port )  result << ":" << _tcp_port;
 
     if( _spooler_id != "" )  result << " -id=" << _spooler_id;
@@ -1902,13 +1901,6 @@ void Spooler::load()
                                             // damit der Scheduler nicht in einem TCP-Kommando blockiert.
 
     cp.execute_file( _config_filename );
-
-
-
-    // Nachdem argv und profile gelesen sind:
-
-    _mail_defaults.set( "from_name", name() );      // Jetzt sind _hostname und _tcp_port bekannt
-    _log.init( this );                              // Neue Einstellungen übernehmen: Default für from_name
 }
 
 //----------------------------------------------------------------------------Spooler::create_window
@@ -2072,7 +2064,9 @@ void Spooler::start()
                 body << subject << "\n\n";
 
                 Scheduler_event scheduler_event ( Scheduler_event::evt_scheduler_started, _log.highest_level(), this );
-                scheduler_event.set_error( Xc( "SCHEDULER-227", _log.last( _log.highest_level() ).c_str() ) );
+
+                if( _log.highest_level() >= log_error )  scheduler_event.set_error( Xc( "SCHEDULER-227", _log.last( _log.highest_level() ).c_str() ) );
+
                 _log.set_mail_default( "subject"  , subject );
                 _log.set_mail_default( "body"     , body );
                 _log.send( -1, &scheduler_event );
@@ -2717,6 +2711,13 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line )
             _config_element_to_load = NULL;
             _config_document_to_load = NULL;
         }
+
+
+
+        // Nachdem argv und profile gelesen sind, und config geladen ist:
+
+        _mail_defaults.set( "from_name", name() );      // Jetzt sind _hostname und _tcp_port bekannt
+        _log.init( this );                              // Neue Einstellungen übernehmen: Default für from_name
 
 
         create_window();

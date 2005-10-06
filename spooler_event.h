@@ -34,7 +34,7 @@ struct Scheduler_event
 
                                 Scheduler_event             ( Event_code, Log_level severity, Scheduler_object* );
 
-    void                    set_mail                        ( Com_mail* mail )                      { _mail = mail; }
+    void                    set_mail                        ( Com_mail* );
     Com_mail*                   mail                        ();
     void                    set_scheduler_terminates        ( bool b )                              { _scheduler_terminates = b; }
     void                    set_error                       ( const Xc_copy& x )                    { _error    = x; }
@@ -49,6 +49,7 @@ struct Scheduler_event
   //int                         send_mail                   ( const xml::Document_ptr& mail  = xml::Document_ptr() );  // Default: mail_dom()
     int                         send_mail                   ( const Mail_defaults& );
 
+  private:
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
     Event_code                 _event_code;

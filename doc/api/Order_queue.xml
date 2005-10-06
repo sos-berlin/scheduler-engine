@@ -26,9 +26,9 @@
 </property>
 
 
-<method name="add_order" deprecated="true">
+<!--method name="add_order" deprecated="true">
     <com>
-        <com.parameter name="order_or_payload">
+        < com.parameter name="order_or_payload">
             <com.type type="BSTR"/>
         </com.parameter>
 
@@ -55,7 +55,7 @@
             wird dieser ersetzt.
         </p>
     </description>
-</method>
+</method-->
 
 
 <title>

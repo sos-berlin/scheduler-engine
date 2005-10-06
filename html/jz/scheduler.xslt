@@ -148,14 +148,14 @@
         <table cellpadding="0" cellspacing="0" class="scheduler">
             <!--
             <tr>
-                <td valign="baseline" align="left" style="padding-right: 1ex">
+                <td align="left" style="padding-right: 1ex">
                     <span style="margin-top: 2px; margin-bottom: 2pt">
 
 
                     </span>
                 </td>
 
-                <td valign="baseline" align="right" style="padding-left: 0">
+                <td align="right" style="padding-left: 0">
                     <span style="margin-top: 2px; margin-bottom: 2px">
                         <xsl:text> </xsl:text>
                     </span>
@@ -314,10 +314,10 @@
 
     <xsl:template match="jobs">
         <table cellpadding="0" cellspacing="0" width="100%" class="job">
-            <col valign="baseline"  width="100"/>
-            <col valign="baseline"  width="50"  align="right"/>
-            <col valign="baseline"  width="30"  align="right"/>
-            <col valign="baseline"/>
+            <col width="100"/>
+            <col width="50"  align="right"/>
+            <col width="30"  align="right"/>
+            <col/>
 
             <thead>
                 <xsl:call-template name="card_top"/>
@@ -663,10 +663,10 @@
                 <xsl:call-template name="card_top"/>
 
                 <tr>
-                    <td class="head1" style="padding-left: 2ex" valign="baseline">
+                    <td class="head1" style="padding-left: 2ex">
                         State
                     </td>
-                    <td class="head" valign="baseline">
+                    <td class="head">
                         <span style="white-space: nowrap">
                         Job
                         <xsl:if test="not( $single )">
@@ -683,10 +683,10 @@
                         </xsl:if>
                         </span>
                     </td>
-                    <td class="head" valign="baseline">
+                    <td class="head">
                         Job state, <span style="white-space: nowrap">next start</span>
                     </td>
-                    <td colspan="2" class="head" valign="baseline">
+                    <td colspan="2" class="head">
                         <span style="white-space: nowrap">
                             Orders
                             <xsl:if test="not( $single )">
@@ -1062,13 +1062,13 @@
                 <b>Process classes</b>
             </caption-->
 
-            <col valign="baseline"  width=" 50"/>
-            <col valign="baseline"  width=" 150"/>
-            <!--col valign="baseline"  width=" 150"/-->
-            <col valign="baseline"  width="$datetime_column_width"/>
-            <col valign="baseline"  width=" 10"  align="right"/>
-            <col valign="baseline"  width=" 10"  align="right"/>
-            <col valign="baseline"  width="*"/>
+            <col width=" 50"/>
+            <col width=" 150"/>
+            <!--col width=" 150"/-->
+            <col width="$datetime_column_width"/>
+            <col width=" 10" align="right"/>
+            <col width=" 10" align="right"/>
+            <col width="*"/>
 
             <thead>
                 <xsl:call-template name="card_top"/>
@@ -1126,13 +1126,13 @@
 
     <xsl:template match="remote_schedulers">
         <table cellpadding="0" cellspacing="0" width="100%" class="remote_scheduler">
-            <col valign="baseline" />
-            <col valign="baseline" />
-            <col valign="baseline" />
-            <col valign="baseline" />
-            <col valign="baseline" />
-            <col valign="baseline" />
-            <col valign="baseline" />
+            <col/>
+            <col/>
+            <col/>
+            <col/>
+            <col/>
+            <col/>
+            <col/>
 
             <thead>
                 <xsl:call-template name="card_top"/>
@@ -1198,10 +1198,10 @@
 
     <xsl:template match="job">
         <table cellpadding="0" cellspacing="0" width="100%" class="job">
-            <col valign="baseline" align="left" width="1"/>
-            <col valign="baseline" align="left" width="160"  />
-            <col valign="baseline" align="left" width="1"/>
-            <col valign="baseline" align="left" width="*"  />
+            <col align="left" width="1"/>
+            <col align="left" width="160"  />
+            <col align="left" width="1"/>
+            <col align="left" width="*"  />
 
             <tr>
                 <td colspan="99" class="job">
@@ -1400,8 +1400,8 @@
 
     <xsl:template match="task">
         <table cellpadding="0" cellspacing="0" class="task" width="100%" >
-            <col valign="baseline" align="left"  width="1"/>
-            <col valign="baseline" align="left"  />
+            <col align="left"  width="1"/>
+            <col align="left"  />
 
             <tr>
                 <td colspan="2" class="task">
@@ -1580,9 +1580,9 @@
 
         <table valign="top" cellpadding="0" cellspacing="0" width="100%" class="task">
 
-            <col valign="baseline" align="left" width="40"/>
-            <col valign="baseline" align="left" width="70"/>
-            <col valign="baseline" align="left" width="$datetime_column_width"/>
+            <col align="left" width="40"/>
+            <col align="left" width="70"/>
+            <col align="left" width="$datetime_column_width"/>
 
             <thead>
                 <xsl:call-template name="card_top"/>
@@ -1635,12 +1635,12 @@
 
         <table valign="top" cellpadding="0" cellspacing="0" width="100%" class="task">
 
-            <col valign="baseline" align="left" width="1"/>
-            <col valign="baseline" align="left" width="1"/>
-            <col valign="baseline" align="left" width="$datetime_column_width"/>
-            <col valign="baseline" align="right" width="1"/>
-            <col valign="baseline" align="left" width="$datetime_column_width"/>
-            <col valign="baseline" align="left"/>
+            <col align="left" width="1"/>
+            <col align="left" width="1"/>
+            <col align="left" width="$datetime_column_width"/>
+            <col align="right" width="1"/>
+            <col align="left" width="$datetime_column_width"/>
+            <col align="left"/>
 
             <thead>
                 <xsl:call-template name="card_top"/>
@@ -1705,25 +1705,25 @@
         <table class="order" cellpadding="0" cellspacing="0" width="100%">
 
             <!--xsl:if test="order"-->
-                <col valign="baseline"  width=" 30"/>
+                <col width=" 30"/>
                 <!--col valign="top"  width=" 15"  style="padding-right: 2ex"/-->
-                <!--col valign="baseline"  width=" 55"/-->
+                <!--col width=" 55"/-->
                 
                 <xsl:if test="order/@title">
-                    <col valign="baseline"  width="*"/>
+                    <col width="*"/>
                 </xsl:if>
                 
                 <xsl:if test="order/@setback">
-                    <col valign="baseline"  width="40"/>
+                    <col width="40"/>
                 </xsl:if>
                 
-                <col valign="baseline"  width=" 30"/>
+                <col width=" 30"/>
                 
                 <xsl:if test="order/@state_text">
-                    <col valign="baseline"  width="*"/>
+                    <col width="*"/>
                 </xsl:if>
                 
-                <col valign="baseline"  width="  1" align="right"/>
+                <col width="  1" align="right"/>
 
                 <thead class="order">
                     <xsl:call-template name="card_top"/>
@@ -1771,29 +1771,29 @@
                                 <xsl:attribute name="style">font-weight: bold</xsl:attribute>
                             </xsl:if>
 
-                            <td valign="baseline"><xsl:value-of select="@id"/></td>
+                            <td><xsl:value-of select="@id"/></td>
                             <!--td class="order"><xsl:value-of select="@priority"/></td-->
-                            <!--td valign="baseline" class="small"><xsl:value-of select="@created__xslt_date_or_time"        disable-output-escaping="yes"/></td-->
+                            <!--td class="small"><xsl:value-of select="@created__xslt_date_or_time"        disable-output-escaping="yes"/></td-->
 
                             <xsl:if test="../order/@title">
-                                <td valign="baseline"><xsl:value-of select="@title"/></td>
+                                <td><xsl:value-of select="@title"/></td>
                             </xsl:if>
 
                             <xsl:if test="../order/@setback">
-                                <td valign="baseline" class="small">
+                                <td class="small">
                                     <span style="white-space: nowrap">
                                         <xsl:value-of select="@setback__xslt_date_or_time_with_diff"  disable-output-escaping="yes"/>
                                     </span>
                                 </td>
                             </xsl:if>
                             
-                            <td valign="baseline"><xsl:value-of select="@state"/></td>
+                            <td><xsl:value-of select="@state"/></td>
                             
                             <xsl:if test="../order/@state_text">
-                                <td valign="baseline"><xsl:value-of select="@state_text"/></td>
+                                <td><xsl:value-of select="@state_text"/></td>
                             </xsl:if>
                             
-                            <td valign="baseline" align="right">
+                            <td align="right">
                                 <xsl:call-template name="command_menu">
                                     <xsl:with-param name="onclick" select="concat( 'order_menu__onclick( &quot;', @job_chain, '&quot;, &quot;', @id, '&quot;, mouse_x() - 70, mouse_y() - 1 )' )"/>
                                 </xsl:call-template>

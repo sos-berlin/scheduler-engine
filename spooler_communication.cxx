@@ -624,6 +624,7 @@ int Communication::bind_socket( SOCKET socket, struct sockaddr_in* sa, const str
             my_errno = errno;
             if( ret != SOCKET_ERROR ) break;
             if( socket_errno() != EADDRINUSE )  break;
+            if( ctrl_c_pressed )  break;
 
             if( print_dots )  fputc( i % 10 == 0? '0' + i / 10 % 10 : '.', stderr );
         }

@@ -81,7 +81,7 @@
         <description>
             <p>
                 Wenn die Hostware zum eMail-Versand JavaMail verwendet,
-                können Sie mehere Adressen durch Komma getrennt angeben.
+                können Sie mehrere Adressen durch Komma getrennt angeben.
                 Siehe <a href="http://java.sun.com/products/javamail/javadocs/javax/mail/internet/InternetAddress.html#parse(java.lang.String)">javax.mail.InternetAddress.parse(String)</a>.
             </p>
         </description>
@@ -110,7 +110,7 @@
         <description>
             <p>
                 Wenn die Hostware zum eMail-Versand JavaMail verwendet,
-                können Sie mehere Adressen durch Komma getrennt angeben.
+                können Sie mehrere Adressen durch Komma getrennt angeben.
                 Siehe <a href="http://java.sun.com/products/javamail/javadocs/javax/mail/internet/InternetAddress.html#parse(java.lang.String)">javax.mail.InternetAddress.parse(String)</a>.
             </p>
         </description>
@@ -139,7 +139,7 @@
         <description>
             <p>
                 Wenn die Hostware zum eMail-Versand JavaMail verwendet,
-                können Sie mehere Adressen durch Komma getrennt angeben.
+                können Sie mehrere Adressen durch Komma getrennt angeben.
                 Siehe <a href="http://java.sun.com/products/javamail/javadocs/javax/mail/internet/InternetAddress.html#parse(java.lang.String)">javax.mail.InternetAddress.parse(String)</a>.
             </p>
         </description>
@@ -187,7 +187,7 @@
         </title>
 
         <description>
-            Codieren SIe Zeilenwechsel mit <code>\n</code> (in VBScript mit <code>chr(10)</code>).
+            Codieren Sie Zeilenwechsel mit <code>\n</code> (in VBScript mit <code>chr(10)</code>).
         </description>
 
         <example programming_language="java">

@@ -158,16 +158,17 @@ xml::Document_ptr Scheduler_event::mail_dom( const xml::Document_ptr& event_dom_
     }
 
     if( !mail_dom )
-    try
     {
-        stylesheet = _object->mail_xslt_stylesheet();
-        if( stylesheet )  mail_dom = stylesheet->apply( event_dom );
+        try
+        {
+            stylesheet = _object->mail_xslt_stylesheet();
+            if( stylesheet )  mail_dom = stylesheet->apply( event_dom );
+        }
+        catch( exception& x )
+        {
+            _object->log()->warn( S() << "XSLT-Stylesheet: " << x );
+        }    
     }
-    catch( exception& x )
-    {
-        _object->log()->warn( S() << "XSLT-Stylesheet: " << x );
-    }    
-
 
     if( !mail_dom.has_node( mail_xpath ) )
     {
@@ -187,47 +188,55 @@ Com_mail* Scheduler_event::mail()
 {
     if( !_mail )
     {
-        _mail = new Com_mail( _spooler );
-        _mail->init();
+        ptr<Com_mail> mail = new Com_mail( _spooler );
+        mail->init();
+
+        set_mail( mail );
     }
 
     return _mail;
 }
 
-//----------------------------------------------------------------------Scheduler_event::make_email
-/*
-void Scheduler_event::make_email()
+//------------------------------------------------------------------------Scheduler_event::set_mail
+
+void Scheduler_event::set_mail( Com_mail* mail )
 {
+    switch( _object->scheduler_type_code() )
+    {
+        case Scheduler_object::type_job:
+        {
+            Job* job = static_cast<Job*>( +_object );
+            mail->add_header_field( "X-SOS-Spooler-Job", job->name() );
+            break;
+        }
+
+        case Scheduler_object::type_task:
+        {
+            Task* task = static_cast<Task*>( +_object );
+            mail->add_header_field( "X-SOS-Spooler-Job", task->job()->name() );
+            break;
+        }
+
+        default:                              
+            mail->add_header_field( "X-SOS-Spooler", "" );
+            break;
+    }
+
+    _mail = mail;
 }
-*/
+
 //-----------------------------------------------------------------------Scheduler_event::send_mail
 
 int Scheduler_event::send_mail( const Mail_defaults& mail_defaults )
 {
     try
     {
-        if( !_mail )
+        //if( !_mail )
         {
-            //if( _subject != "" )  mail()->set_subject( _subject );
-            //if( _body    != "" )  mail()->set_body( _body );
-
-            if( _mail )
-            {
-                //if( _spooler->_log_mail_from != ""  &&  _spooler->_log_mail_from != "-" )  _mail->set_from( _spooler->_log_mail_from );
-                
-                _mail->set_from_name( _spooler->name() );
-
-                /*
-                if( _spooler->_log_mail_to   != ""  &&  _spooler->_log_mail_to   != "-" )  _mail->set_to  ( _spooler->_log_mail_to   );
-                if( _spooler->_log_mail_cc   != ""  &&  _spooler->_log_mail_cc   != "-" )  _mail->set_cc  ( _spooler->_log_mail_cc   );
-                if( _spooler->_log_mail_bcc  != ""  &&  _spooler->_log_mail_bcc  != "-" )  _mail->set_bcc ( _spooler->_log_mail_bcc  );
-                if( _spooler->_smtp_server   != ""  &&  _spooler->_smtp_server   != "-" )  _mail->set_smtp( _spooler->_smtp_server   );
-                */
-
-                _mail->add_header_field( "X-SOS-Spooler", "" );
-            }
+            mail();
+            //_mail->set_from_name( _spooler->name() );
+            //_mail->add_header_field( "X-SOS-Spooler", "" );
         }
-
 
         xml::Document_ptr mail_dom;
         xml::Document_ptr event_dom;
@@ -267,28 +276,6 @@ int Scheduler_event::send_mail( const Mail_defaults& mail_defaults )
                 mail->add_attachment( event_dom.xml(true), "event.xml", "text/xml", "quoted-printable" );
 
                 mail->add_attachment( mail_dom.xml(true), "mail.xml", "text/xml", "quoted-printable" );
-            }
-
-
-            switch( _object->scheduler_type_code() )
-            {
-                case Scheduler_object::type_job:
-                {
-                    Job* job = static_cast<Job*>( +_object );
-                    mail->Add_header_field( Bstr(L"X-SOS-Spooler-Job"), Bstr( job->name() ) );
-                    break;
-                }
-
-                case Scheduler_object::type_task:
-                {
-                    Task* task = static_cast<Task*>( +_object );
-                    mail->Add_header_field( Bstr(L"X-SOS-Spooler-Job"), Bstr( task->job()->name() ) );
-                    break;
-                }
-
-                default:                              
-                    mail->Add_header_field( Bstr(L"X-SOS-Spooler"), NULL );
-                    break;
             }
 
 

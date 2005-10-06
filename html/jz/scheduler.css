@@ -9,7 +9,7 @@
 
 body                    { font-family: Sans-Serif; font-size: 10pt; margin-top: 5pt; }
 th                      { font-size: 10pt; }
-td                      { font-size: 10pt; }
+td                      { font-size: 10pt; vertical-align: baseline; }
 p                       { font-size: 10pt; margin-top: 2ex; margin-bottom: 0; padding-left: 3pt; }
 label                   { font-size: 10pt; }
 /*col                   { padding-bottom: 1pt; padding-left: 3pt; padding-right: 2pt }  /* wirkt nicht in Firefox */
