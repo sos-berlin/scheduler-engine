@@ -6,24 +6,6 @@
 #include "../zschimmer/z_sockets.h"
 #include "../zschimmer/xml_end_finder.h"
 
-/*
-#ifdef __GNUC__
-#   include <errno.h>
-#   include <sys/socket.h>
-
-#   ifndef SYSTEM_HPUX
-#       include <sys/select.h>
-#   endif
-
-#   include <netdb.h>
-#   include <netinet/in.h>   // gethostbyname()
-#   include <arpa/inet.h>    // inet_addr()
-#   include <unistd.h>       // close()
-
-    typedef int SOCKET;
-    const SOCKET SOCKET_ERROR = (SOCKET)-1;
-#endif
-*/
 
 namespace sos {
 namespace spooler {

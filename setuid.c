@@ -32,8 +32,13 @@ int main( int argc, char** argv )
 
 
     // Effektive User-Id und Group-Id zurücksetzen, damit wir Zugriff aufs Verzeichnis von setuid haben.
-    setresuid( -1, getuid(), -1 );
-    setresgid( -1, getgid(), -1 );
+#   ifdef sparc
+        seteuid( getuid() );
+        setegid( getgid() );
+#   else
+        setresuid( -1, getuid(), -1 );
+        setresgid( -1, getgid(), -1 );
+#   endif
 
 
     // chmod-Bits von setuid prüfen: Darf für group und others nicht kopierbar oder beschreibbar sein.
