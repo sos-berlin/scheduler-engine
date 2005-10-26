@@ -1778,7 +1778,7 @@
                             <xsl:with-param name="parent_page" select="$parent_page"/>
                         </xsl:call-template>
 
-                        Software- und Organisations-Service GmbH
+                        <a href="http://www.sos-berlin.com">Software- und Organisations-Service GmbH</a>
                     </p>
                 </td>
             </tr>
