@@ -25,7 +25,9 @@ extern const string spooler_init_name           = "spooler_init()Z";
 extern const string spooler_exit_name           = "spooler_exit()V";
 extern const string spooler_open_name           = "spooler_open()Z";
 extern const string spooler_close_name          = "spooler_close()V";
+extern const string spooler_process_before_name = "spooler_process_before()Z";          // Für Monitor
 extern const string spooler_process_name        = "spooler_process()Z";
+extern const string spooler_process_after_name  = "spooler_process_after(Z)Z";          // Für Monitor
 extern const string spooler_on_error_name       = "spooler_on_error()V";
 extern const string spooler_on_success_name     = "spooler_on_success()V";
 //extern const string wait_for_subprocesses_name  = "wait_for_subprocesses()";         // Interne Funktion, nicht von Job implemeniert
@@ -114,8 +116,12 @@ void Source_with_parts::add( int linenr, const string& text, const Time& mod_tim
 
 //----------------------------------------------------------------------------------Module::set_dom
 
-void Module::set_dom_without_source( const xml::Element_ptr& element )
+void Module::set_dom_without_source( const xml::Element_ptr& element, const Time& xml_mod_time )
 {
+    _dom_document = element.ownerDocument();
+    _dom_element  = element;
+    _xml_mod_time = xml_mod_time;
+
     _source.clear();  //clear();
 
     _language           = element.     getAttribute( "language"      );
@@ -140,9 +146,9 @@ void Module::set_dom_without_source( const xml::Element_ptr& element )
 
 //----------------------------------------------------------------------Module::set_dom_source_only
 
-void Module::set_dom_source_only( const xml::Element_ptr& element, const Time& xml_mod_time, const string& include_path )
+void Module::set_dom_source_only( const string& include_path )
 {
-    set_source_only( text_from_xml_with_include( element, xml_mod_time, include_path ) );
+    set_source_only( text_from_xml_with_include( _dom_element, _xml_mod_time, include_path ) );
 }
 
 //--------------------------------------------------------------------------Module::set_source_only
@@ -233,6 +239,8 @@ void Module::init()
 
 ptr<Module_instance> Module::create_instance()
 {
+    ptr<Module_instance> result;
+
     switch( _kind )
     {
         case kind_java:              
@@ -242,32 +250,41 @@ ptr<Module_instance> Module::create_instance()
             _java_vm = get_java_vm();
             _java_vm->set_destroy_vm( false );   //  Nicht DestroyJavaVM() rufen, denn das hängt manchmal
             ptr<Java_module_instance> p = Z_NEW( Java_module_instance( _java_vm, this ) );
-            return +p;
+            result = +p;
+            break;
         }
 
         case kind_scripting_engine:  
         {
             ptr<Scripting_engine_module_instance> p = Z_NEW( Scripting_engine_module_instance( this ) );
-            return +p;
+            result = +p;
+            break;
         }
 
 #     ifdef Z_WINDOWS
         case kind_com:               
         {
             ptr<Com_module_instance> p = Z_NEW( Com_module_instance( this ) );
-            return +p;
+            result = +p;
+            break;
         }
 #     endif
 
         case kind_remote:
         {
             ptr<Remote_module_instance_proxy> p = Z_NEW( Remote_module_instance_proxy( this ) );
-            return +p;
+            result = +p;
+            break;
         }
 
         default:                     
             throw_xc( "SCHEDULER-173" );
     }
+
+
+    if( _monitor  &&  _kind != kind_remote )  result->_monitor_instance = _monitor->create_instance();
+
+    return result;
 }
 
 //----------------------------------------------------------------Module_instance::In_call::In_call
@@ -341,6 +358,44 @@ void Module_instance::init()
     _spooler = _module->_spooler;
 
     if( !_module->set() )  throw_xc( "SCHEDULER-146" );
+
+    if( _monitor_instance )  _monitor_instance->init();
+}
+
+//---------------------------------------------------------------------------Module_instance::clear
+
+void Module_instance::clear()
+{ 
+    _object_list.clear(); 
+
+    if( _monitor_instance )  _monitor_instance->clear();
+}
+
+//--------------------------------------------------------------------Module_instance::set_job_name
+
+void Module_instance::set_job_name( const string& job_name )
+{
+    _job_name = job_name; 
+
+    if( _monitor_instance )  _monitor_instance->set_job_name( job_name );
+}
+
+//---------------------------------------------------------------------Module_instance::set_task_id
+
+void Module_instance::set_task_id( int id )
+{ 
+    _task_id = id; 
+
+    if( _monitor_instance )  _monitor_instance->set_task_id( id );
+}
+
+//-------------------------------------------------------------------------Module_instance::set_log
+
+void Module_instance::set_log( Prefix_log* log )
+{ 
+    _log = log; 
+
+    if( _monitor_instance )  _monitor_instance->set_log( log );
 }
 
 //--------------------------------------------------------------------------------Task::set_in_call
@@ -366,6 +421,8 @@ void Module_instance::attach_task( Task* task, Prefix_log* log )
 
     _task_id = task->id();
     //_title = task->obj_name();          // Titel für Prozess
+
+    if( _monitor_instance )  _monitor_instance->attach_task( task, log );
 }
 
 //---------------------------------------------------------------------Module_instance::detach_task
@@ -377,12 +434,15 @@ void Module_instance::detach_task()
     
     _task_id = 0;
     //_title = "";
+
+    if( _monitor_instance )  _monitor_instance->detach_task();
 }
 
 //-------------------------------------------------------------------------Module_instance::add_obj
 
-void Module_instance::add_obj( IDispatch*, const string& )
+void Module_instance::add_obj( IDispatch* object, const string& name )
 {
+    if( _monitor_instance )  _monitor_instance->add_obj( object, name );
 }
 
 //--------------------------------------------------------------------------Module_instance::object
@@ -397,11 +457,33 @@ IDispatch* Module_instance::object( const string& name )
     throw_xc( "Module_instance::object", name );
 }
 
+//----------------------------------------------------------------------------Module_instance::load
+
+void Module_instance::load()
+{
+    if( _monitor_instance )  _monitor_instance->load();
+}
+
+//---------------------------------------------------------------------------Module_instance::start
+
+void Module_instance::start()
+{
+    if( _monitor_instance )  _monitor_instance->start();
+}
+
 //------------------------------------------------------------------Module_instance::call_if_exists
 
 Variant Module_instance::call_if_exists( const string& name )
 {
     if( name_exists(name) )  return call( name );
+                       else  return Variant( Variant::vt_error, DISP_E_UNKNOWNNAME );
+}
+
+//------------------------------------------------------------------Module_instance::call_if_exists
+
+Variant Module_instance::call_if_exists( const string& name, bool param )
+{
+    if( name_exists(name) )  return call( name, param );
                        else  return Variant( Variant::vt_error, DISP_E_UNKNOWNNAME );
 }
 
@@ -412,6 +494,8 @@ void Module_instance::close()
     Async_operation* op = close__start();
     if( !op->async_finished() )  _log.warn( "Warten auf Schließen der Modulinstanz ..." );
     close__end();
+
+    if( _monitor_instance )  _monitor_instance->close();
 }
 
 //--------------------------------------------------------------------Module_instance::begin__start
@@ -475,7 +559,23 @@ Async_operation* Module_instance::step__start()
 
 Variant Module_instance::step__end()
 {
-    return call_if_exists( spooler_process_name );
+    Variant ok;
+
+    if( _monitor_instance )
+    {
+        ok = _monitor_instance->call_if_exists( spooler_process_before_name );
+        if( !check_result( ok ) )  return false;
+    }
+
+    ok = call_if_exists( spooler_process_name );
+
+    if( _monitor_instance )
+    {
+        Variant result = _monitor_instance->call_if_exists( spooler_process_after_name, check_result( ok ) );
+        if( !result.is_missing() )  ok = result;
+    }
+
+    return ok;
 }
 
 //---------------------------------------------------------------------Module_instance::call__start

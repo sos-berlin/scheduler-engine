@@ -347,7 +347,6 @@ void Java_module_instance::init()
         _module->_java_class = e.find_class( class_name.c_str() );
     }
 
-
     jmethodID method_id = _module->java_method_id( "<init>()V" );   // Konstruktor
     
     assert( _jobject == NULL );
@@ -431,7 +430,7 @@ Variant Java_module_instance::call( const string& name_par )
 
 //-----------------------------------------------------------------------Java_module_instance::call
 
-Variant Java_module_instance::call( const string& name, int param )
+Variant Java_module_instance::call( const string& name, bool param )
 {
     Env e = env();
     Java_idispatch_stack_frame stack_frame;

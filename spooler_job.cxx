@@ -147,10 +147,7 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
             else
             if( e.nodeName_is( "script"     ) )  
             {
-                _module.set_dom_without_source( e );
-                _module_xml_document  = e.ownerDocument();
-                _module_xml_element   = e;
-                _module_xml_mod_time  = xml_mod_time;
+                _module.set_dom_without_source( e, xml_mod_time );
 
                 _process_filename     = "";
                 _process_param        = "";
@@ -159,8 +156,8 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
             else
             if( e.nodeName_is( "process"    ) )
             {
-                _module_xml_document  = NULL;
-                _module_xml_element   = NULL;
+                //_module_xml_document  = NULL;
+                //_module_xml_element   = NULL;
 
                 _process_filename     = subst_env( e.     getAttribute( "file"         , _process_filename      ) );
                 _process_param        = subst_env( e.     getAttribute( "param"        , _process_param         ) );
@@ -180,6 +177,19 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
                                                                subst_env( eee.getAttribute( "value" ), _process_environment ) );
                             }
                         }
+                    }
+                }
+            }
+            else
+            if( e.nodeName_is( "monitor" ) )
+            {
+                if( !_module._monitor )  _module._monitor = Z_NEW( Module( _spooler, _log ) );
+
+                DOM_FOR_EACH_ELEMENT( e, ee )
+                {
+                    if( ee.nodeName_is( "script" ) )  
+                    {
+                        _module._monitor->set_dom_without_source( ee, xml_mod_time );
                     }
                 }
             }
@@ -213,8 +223,14 @@ void Job::init0()
     _com_job  = new Com_job( this );
   //_com_log  = new Com_log( &_log );
 
-    if( _module_xml_element )  read_script();
+    if( _module._dom_element )  read_script( &_module );
     if( _module.set() )  _module.init();
+
+    if( _module._monitor )
+    {
+        if( _module._monitor->_dom_element )  read_script( _module._monitor );
+        if( _module._monitor->set() )  _module._monitor->init();
+    }
 
     _next_start_time = latter_day;
     _period._begin = 0;
@@ -825,13 +841,13 @@ ptr<Task> Job::start( const ptr<spooler_com::Ivariable_set>& params, const strin
 
 //---------------------------------------------------------------------------------Job::read_script
 
-bool Job::read_script()
+bool Job::read_script( Module* module )
 {
     THREAD_LOCK_DUMMY( _lock )
     {
         try
         {
-            _module.set_dom_source_only( _module_xml_element, _module_xml_mod_time, include_path() );
+            module->set_dom_source_only( include_path() );
         }
         catch( const exception& x ) 
         { 
@@ -875,7 +891,8 @@ void Job::stop( bool end_all_tasks )
 void Job::reread()
 {
     _log->info( "Skript wird erneut gelesen (<include> wird erneut ausgeführt)" );
-    read_script();
+    read_script( &_module );
+    if( _module._monitor )  read_script( _module._monitor );
 }
 
 //---------------------------------------------------------------------------Job::execute_state_cmd

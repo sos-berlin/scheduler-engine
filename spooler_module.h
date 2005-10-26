@@ -102,9 +102,9 @@ struct Module : Object
     explicit                    Module                      ( Spooler* sp, const xml::Element_ptr& e, const Time& xml_mod_time, const string& include_path )  : _zero_(_end_), _spooler(sp) { set_dom(e,xml_mod_time,include_path); }
                                ~Module                      ()                                      {}
 
-    void                        set_dom                     ( const xml::Element_ptr& e, const Time& xml_mod_time, const string& include_path )  { set_dom_without_source(e); set_dom_source_only(e,xml_mod_time,include_path); }
-    void                        set_dom_without_source      ( const xml::Element_ptr& );
-    void                        set_dom_source_only         ( const xml::Element_ptr&, const Time& xml_mod_time, const string& include_path );
+    void                        set_dom                     ( const xml::Element_ptr& e, const Time& xml_mod_time, const string& include_path )  { set_dom_without_source(e,xml_mod_time); set_dom_source_only(include_path); }
+    void                        set_dom_without_source      ( const xml::Element_ptr&, const Time& xml_mod_time );
+    void                        set_dom_source_only         ( const string& include_path );
     void                        set_source_only             ( const Source_with_parts& );
     void                        init                        ();
 
@@ -149,6 +149,12 @@ struct Module : Object
     Method_map                 _method_map;
 
     bool                       _dont_remote;
+
+    xml::Document_ptr          _dom_document;
+    xml::Element_ptr           _dom_element;                // <script> aus <config>
+    Time                       _xml_mod_time;
+
+    ptr<Module>                _monitor;
 
     Fill_end                   _end_;
 };
@@ -195,14 +201,14 @@ struct Module_instance : Object
                                 Module_instance             ( Module* );
     virtual                    ~Module_instance             ();
 
-    void                    set_job_name                    ( const string& job_name )              { _job_name = job_name; }
-    void                    set_task_id                     ( int id )                              { _task_id = id; }
+    void                    set_job_name                    ( const string& );
+    void                    set_task_id                     ( int );
 
-    void                        clear                       ()                                      { _object_list.clear(); }
+    void                        clear                       ();
     void                        close                       ();
     virtual void                init                        ();
     virtual bool                kill                        ()                                      { return false; }
-    void                    set_log                         ( Prefix_log* log )                     { _log = log; }
+    void                    set_log                         ( Prefix_log* );
     void                    set_in_call                     ( In_call* in_call, const string& extra = "" );
     void                    set_close_instance_at_end       ( bool )                                {} // veraltet: _close_instance_at_end = b; }   // Nach spooler_close() Instanz schlieﬂen
 
@@ -212,12 +218,13 @@ struct Module_instance : Object
   //virtual void                add_log_obj                 ( Com_log* log, const string& name )    { add_obj( log, name ); }
     IDispatch*                  object                      ( const string& name );
 
-    virtual void                load                        ()                                      {}
-    virtual void                start                       ()                                      {}
+    virtual void                load                        ();
+    virtual void                start                       ();
     virtual IDispatch*          dispatch                    () const                                { throw_xc( "SCHEDULER-172", "dispatch()" ); }
     Variant                     call_if_exists              ( const string& name );
+    Variant                     call_if_exists              ( const string& name, bool param );
     virtual Variant             call                        ( const string& name )                  = 0;
-    virtual Variant             call                        ( const string& name, int param )       = 0;
+    virtual Variant             call                        ( const string& name, bool param ) = 0;
     virtual bool                name_exists                 ( const string& name )                  = 0;
     virtual bool                loaded                      ()                                      = 0;
     virtual bool                callable                    ()                                      = 0;
@@ -274,6 +281,8 @@ struct Module_instance : Object
 
     ptr<Com_task>              _com_task;                   // spooler_task
     ptr<Com_log>               _com_log;                    // spooler_log
+
+    ptr<Module_instance>       _monitor_instance;
 
     Fill_end                   _end_;
 };

@@ -7,33 +7,33 @@
 
 if( window.XMLDocument  &&  !XMLDocument.prototype.xml )
 {
-	Document.prototype.__defineGetter__
-	( 
-	    "xml", 
-	    
-	    function()
-	    {
-		    return new XMLSerializer().serializeToString( this );
-	    } 
-	);
+    Document.prototype.__defineGetter__
+    ( 
+        "xml", 
+    
+        function()
+        {
+            return new XMLSerializer().serializeToString( this );
+        } 
+    );
 }
-	
+    
 //--------------------------------------------------------------------------------------Element.xml
 // Nachbildung von Microsofts IXMLDOMElement.xml
 
 if( window.Element  &&  !Element.prototype.xml )
 {
-	Element.prototype.__defineGetter__
-	( 
-	    "xml", 
-	    
-	    function()
-	    {
-		    return new XMLSerializer().serializeToString( this );
-	    } 
-	);
+    Element.prototype.__defineGetter__
+    ( 
+        "xml", 
+        
+        function()
+        {
+            return new XMLSerializer().serializeToString( this );
+        } 
+    );
 }
-	
+    
 //---------------------------------------------------------------------XMLDocument.selectSingleNode
 // Nachbildung von Microsofts DOMDocument.selectSingleNode
 
@@ -90,7 +90,7 @@ if( window.XMLDocument  &&  !XMLDocument.prototype.transformNode )
     {
         var xslt_processor = new XSLTProcessor();
         xslt_processor.importStylesheet( stylesheet_dom_document );
-		return new XMLSerializer().serializeToString( xslt_processor.transformToDocument( this ) );
+        return new XMLSerializer().serializeToString( xslt_processor.transformToDocument( this ) );
     }
 }
 

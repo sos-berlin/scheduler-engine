@@ -245,7 +245,7 @@ struct Job : Object,
   //void                        remove_from_task_queue      ( Task*, Log_level );
     void                        remove_running_task         ( Task* );
   //void                        close_task                  ();
-    bool                        read_script                 ();
+    bool                        read_script                 ( Module* );
   //void                        end                         ();
     void                        stop                        ( bool end_all_tasks );
     void                        set_next_start_time         ( Time now, bool repeat = false );
@@ -381,9 +381,6 @@ struct Job : Object,
     Module                     _module;                     // Job hat ein eigenes Skript
     xml::Element_ptr           _script_element;             // <script> (mit <include>) für <modify_job cmd="reload"/>
 
-    xml::Document_ptr          _module_xml_document;
-    xml::Element_ptr           _module_xml_element;         // <script> aus <config>
-    Time                       _module_xml_mod_time;
     Module*                    _module_ptr;
     typedef vector< ptr<Module_instance> >  Module_instance_vector;
     Module_instance_vector     _module_instances;

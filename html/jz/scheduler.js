@@ -120,7 +120,7 @@ Scheduler.prototype.close = function()
 //--------------------------------------------------------------------------------Scheduler.execute
 // public
 
-Scheduler.prototype.execute = function( xml )
+Scheduler.prototype.execute = function Scheduler__execute( xml )
 {
     this.call_http( xml );
 

@@ -77,7 +77,7 @@ Variant Com_module_instance_base::call( const string& name )
 
 //-------------------------------------------------------------------Com_module_instance_base::call
 
-Variant Com_module_instance_base::call( const string& name, int param )
+Variant Com_module_instance_base::call( const string& name, bool param )
 {
     In_call in_call ( this, name );
 
@@ -312,7 +312,7 @@ Variant Scripting_engine_module_instance::call( const string& name )
 
 //-----------------------------------------------------------Scripting_engine_module_instance::call
 
-Variant Scripting_engine_module_instance::call( const string& name, int param )
+Variant Scripting_engine_module_instance::call( const string& name, bool param )
 {
     SOS_DELETE( _script_site->_script_exception );
 

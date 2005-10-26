@@ -22,7 +22,7 @@ struct Com_module_instance_base : Module_instance
                Module_instance::add_obj;
     void                        close__end                  ();
     Variant                     call                        ( const string& name );
-    Variant                     call                        ( const string& name, int param );
+    Variant                     call                        ( const string& name, bool param );
     bool                        name_exists                 ( const string& name );
     bool                        loaded                      ()                                      { return _idispatch != NULL; }
     bool                        callable                    ()                                      { return _idispatch != NULL; }
@@ -72,7 +72,7 @@ struct Scripting_engine_module_instance : Com_module_instance_base
     void                        start                       ();
     virtual void                add_obj                     ( IDispatch*, const string& name );
     Variant                     call                        ( const string& name );
-    Variant                     call                        ( const string& name, int param );
+    Variant                     call                        ( const string& name, bool param );
 
 
     ptr<Script_site>           _script_site;
