@@ -61,7 +61,7 @@ struct Remote_module_instance_proxy : Com_module_instance_base
                                ~Remote_module_instance_proxy();
 
     void                        init                        ();
-    void                        load                        ();
+    bool                        load                        ();
   //void                        close                       ();
     bool                        kill                        ();
   

@@ -154,13 +154,18 @@ void Com_module_instance::init()
 
 //------------------------------------------------------------------------Com_module_instance::load
 
-void Com_module_instance::load()
+bool Com_module_instance::load()
 {
+    bool ok = Com_module_instance_base::load();
+    if( !ok )  return false;
+
     if( _com_context  &&  name_exists( "spooler_set_context" ) )
     {
         Variant com_context_vt = +_com_context;
         com_call( _idispatch, "spooler_set_context", &com_context_vt );
     }
+
+    return true;
 }
 
 //---------------------------------------------------------------------Com_module_instance::add_obj
@@ -254,8 +259,11 @@ void Scripting_engine_module_instance::add_obj( IDispatch* object, const string&
 
 //---------------------------------------------------------------------Scripting_engine_module_instance::load
 
-void Scripting_engine_module_instance::load()
+bool Scripting_engine_module_instance::load()
 {
+    bool ok = Com_module_instance_base::load();
+    if( !ok )  return false;
+
     if( _script_site->_engine_name != _module->_language )  throw_xc( "SCHEDULER-117" );
 
 /*
@@ -275,6 +283,8 @@ void Scripting_engine_module_instance::load()
     }
 
     _idispatch = _script_site->dispatch();
+
+    return true;
 }
 
 //----------------------------------------------------------Scripting_engine_module_instance::start

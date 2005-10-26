@@ -196,12 +196,27 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray 
                 else
                 if( key_word == "task_id"         )  task_id                           = as_int( value );
                 else
+                if( key_word == "monitor.language"   )  _server._module->_monitor = Z_NEW( Module( NULL, NULL ) ),  // Muss der erste Parameter für den Monitor sein
+                                                        _server._module->_monitor->_language        = value;
+                else                                                                         
+                if( key_word == "monitor.com_class"  )  _server._module->_monitor->_com_class_name  = value;
+                else                                                                         
+                if( key_word == "monitor.filename"   )  _server._module->_monitor->_filename        = value;
+                else
+                if( key_word == "monitor.java_class" )  _server._module->_monitor->_java_class_name = value;
+                else
+                if( key_word == "monitor.recompile"  )  _server._module->_monitor->_recompile       = value[0] == '1';
+                else
+                if( key_word == "monitor.script"     )  _server._module->_monitor->_source          = xml::Document_ptr( value ).documentElement();
+                else
                     throw_xc( "server::construct" );
             }
         }
 
         _server._module->init();
         _server._module->set_source_only( _server._module->_source );
+
+        if( _server._module->_monitor )  _server._module->_monitor->set_source_only( _server._module->_monitor->_source );
 
 
         _server._module->_java_vm = get_java_vm( false );
@@ -221,7 +236,8 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray 
         }
 
 
-        if( _server._module->_kind == Module::kind_java )
+        if( _server._module->_kind == Module::kind_java  
+        ||  _server._module->_monitor && _server._module->_monitor->_kind == Module::kind_java )
         {
             if( !_server._module->_java_vm->running() )
             {

@@ -84,7 +84,7 @@ struct Java_module_instance : Module_instance, java::Has_vm
     void                        close__end                  ();
     void                        init                        ();
     void                        add_obj                     ( IDispatch* object, const string& name );
-    void                        load                        ();
+    bool                        load                        ();
     Variant                     call                        ( const string& name );
     Variant                     call                        ( const string& name, bool param );
     virtual bool                name_exists                 ( const string& name );

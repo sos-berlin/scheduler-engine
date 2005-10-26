@@ -25,12 +25,15 @@ extern const string spooler_init_name           = "spooler_init()Z";
 extern const string spooler_exit_name           = "spooler_exit()V";
 extern const string spooler_open_name           = "spooler_open()Z";
 extern const string spooler_close_name          = "spooler_close()V";
-extern const string spooler_process_before_name = "spooler_process_before()Z";          // Für Monitor
 extern const string spooler_process_name        = "spooler_process()Z";
-extern const string spooler_process_after_name  = "spooler_process_after(Z)Z";          // Für Monitor
 extern const string spooler_on_error_name       = "spooler_on_error()V";
 extern const string spooler_on_success_name     = "spooler_on_success()V";
-//extern const string wait_for_subprocesses_name  = "wait_for_subprocesses()";         // Interne Funktion, nicht von Job implemeniert
+
+// Monitor-Methoden:
+extern const string spooler_task_before_name    = "spooler_task_before()Z";       
+extern const string spooler_task_after_name     = "spooler_task_after()V";
+extern const string spooler_process_before_name = "spooler_process_before()Z";    
+extern const string spooler_process_after_name  = "spooler_process_after(Z)Z";    
 
 //-------------------------------------------------------------------------Source_part::Source_part
 
@@ -167,6 +170,8 @@ void Module::set_source_only( const Source_with_parts& source )
 
 void Module::init()
 {
+    if( _monitor )  _monitor->init();
+
     if( _spooler )  _use_process_class = _spooler->has_process_classes();
 
     if( _dont_remote )  _separate_process = false, _use_process_class = false, _process_class_name = "";
@@ -459,9 +464,19 @@ IDispatch* Module_instance::object( const string& name )
 
 //----------------------------------------------------------------------------Module_instance::load
 
-void Module_instance::load()
+bool Module_instance::load()
 {
-    if( _monitor_instance )  _monitor_instance->load();
+    bool ok = true;
+
+    if( _monitor_instance )
+    {
+        if( _monitor_instance )  _monitor_instance->load();
+
+        ok = check_result( _monitor_instance->call_if_exists( spooler_task_before_name ) );
+        if( !ok )  return false;
+    }
+
+    return ok;
 }
 
 //---------------------------------------------------------------------------Module_instance::start
@@ -495,7 +510,11 @@ void Module_instance::close()
     if( !op->async_finished() )  _log.warn( "Warten auf Schließen der Modulinstanz ..." );
     close__end();
 
-    if( _monitor_instance )  _monitor_instance->close();
+    if( _monitor_instance )  
+    {
+        _monitor_instance->call_if_exists( spooler_task_after_name );
+        _monitor_instance->close();
+    }
 }
 
 //--------------------------------------------------------------------Module_instance::begin__start
@@ -513,7 +532,10 @@ bool Module_instance::begin__end()
     {
         init();
         FOR_EACH_CONST( Object_list, _object_list, o )  add_obj( o->_object, o->_name );
-        load();
+
+        bool ok = load();
+        if( !ok )  return load;
+
         start();
     }
 

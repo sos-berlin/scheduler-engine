@@ -42,7 +42,7 @@ struct Com_module_instance : Com_module_instance_base
 
     void                        init                        ();
     virtual void                add_obj                     ( IDispatch*, const string& name );
-    void                        load                        ();
+    bool                        load                        ();
     void                        close__end                  ();
 
 
@@ -68,7 +68,7 @@ struct Scripting_engine_module_instance : Com_module_instance_base
 
     void                        close__end                  ();
     void                        init                        ();
-    void                        load                        ();
+    bool                        load                        ();
     void                        start                       ();
     virtual void                add_obj                     ( IDispatch*, const string& name );
     Variant                     call                        ( const string& name );

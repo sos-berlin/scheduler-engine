@@ -218,7 +218,7 @@ struct Module_instance : Object
   //virtual void                add_log_obj                 ( Com_log* log, const string& name )    { add_obj( log, name ); }
     IDispatch*                  object                      ( const string& name );
 
-    virtual void                load                        ();
+    virtual bool                load                        ();
     virtual void                start                       ();
     virtual IDispatch*          dispatch                    () const                                { throw_xc( "SCHEDULER-172", "dispatch()" ); }
     Variant                     call_if_exists              ( const string& name );

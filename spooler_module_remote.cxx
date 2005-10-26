@@ -47,8 +47,9 @@ void Remote_module_instance_proxy::init()
 
 //---------------------------------------------------------------Remote_module_instance_proxy::load
 
-void Remote_module_instance_proxy::load()
+bool Remote_module_instance_proxy::load()
 {
+    return Com_module_instance_base::load();
     //_remote_instance->call( "load" );
 }
 
@@ -377,6 +378,8 @@ void Remote_module_instance_proxy::release__end()
         _remote_instance->release__end();
         _remote_instance = NULL;
     }
+
+    Com_module_instance_base::release__end();
 }
 
 //---------------------------------------------Remote_module_instance_proxy::check_connection_error
@@ -513,7 +516,7 @@ bool Remote_module_instance_proxy::continue_async_operation( Operation* operatio
         // Nächste Operation
 
         {
-            Variant params ( Variant::vt_array, 10 );
+            Variant params ( Variant::vt_array, 18 );
 
             {
                 Locked_safearray params_array = V_ARRAY( &params );
@@ -533,6 +536,16 @@ bool Remote_module_instance_proxy::continue_async_operation( Operation* operatio
                 params_array[7] = "script="          + _module->_source.dom_document().xml();
                 params_array[8] = "job="             + _job_name;
                 params_array[9] = "task_id="         + as_string( _task_id );
+
+                if( _module->_monitor )
+                {
+                    params_array[10] = "monitor.language="        + _module->_monitor->_language;       // Muss der erste Paramter sein, legt den Monitor an
+                    params_array[11] = "monitor.com_class="       + _module->_monitor->_com_class_name;
+                    params_array[12] = "monitor.filename="        + _module->_monitor->_filename;
+                    params_array[13] = "monitor.java_class="      + _module->_monitor->_java_class_name;
+                    params_array[16] = "monitor.recompile="       + as_string( _module->_monitor->_recompile && !_module->_monitor->_compiled );
+                    params_array[17] = "monitor.script="          + _module->_monitor->_source.dom_document().xml();
+                }
             }
 
             operation->set_async_child( _remote_instance->call__start( "construct", params ) );

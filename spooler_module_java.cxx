@@ -387,9 +387,9 @@ void Java_module_instance::add_obj( IDispatch* object, const string& name )
 
 //-----------------------------------------------------------------------Java_module_instance::load
 
-void Java_module_instance::load()
+bool Java_module_instance::load()
 {
-    Module_instance::load();
+    return Module_instance::load();
 }
 
 //-----------------------------------------------------------------------Java_module_instance::call
