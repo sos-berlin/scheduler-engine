@@ -393,10 +393,14 @@ bool Communication::Channel::do_send()
 
 bool Communication::Channel::async_continue_( Continue_flags )
 {
+    //Z_LOG2( "joacim", __FUNCTION__ << state() << "\n" );
+
     bool something_done = false;
 
     try
     {
+        if( _responding )  assert_no_recv_data();  //2005-10-25 wegen endloser read-Signalisierung zwischen Firefox und Linux-Scheduler (F5 im Protokollfenster)
+
         while( !_responding  &&  !_dont_receive )
         {
             bool ok = do_recv();
