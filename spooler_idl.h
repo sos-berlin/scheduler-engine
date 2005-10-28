@@ -557,7 +557,7 @@ struct Iremote_module_instance_server : IDispatch
 {
     DEFINE_UUIDOF( Iremote_module_instance_server )
 
-    virtual HRESULT     Construct                   ( SAFEARRAY* parameters )                       = 0;
+    virtual HRESULT     Construct                   ( SAFEARRAY* parameters, VARIANT_BOOL* )        = 0;
     virtual HRESULT     Add_obj                     ( IDispatch*, BSTR name )                       = 0;
     virtual HRESULT     Name_exists                 ( BSTR name, VARIANT_BOOL* result )             = 0;
     virtual HRESULT     Call                        ( BSTR name, VARIANT* result )                  = 0;

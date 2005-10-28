@@ -589,7 +589,7 @@ bool Module_instance::implicit_load_and_start()
     FOR_EACH_CONST( Object_list, _object_list, o )  add_obj( o->_object, o->_name );
 
     bool ok = load();
-    if( !ok )  return load;
+    if( !ok )  return false;
 
     start();
     return true;
