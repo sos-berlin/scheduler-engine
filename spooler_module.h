@@ -129,6 +129,7 @@ struct Module : Object
     bool                       _use_process_class;
     Kind                       _kind;
     Kind                       _real_kind;                  // Falls _kind == kind_remote
+    bool                       _initialized;
 
 
     // Scripting Engine
@@ -218,6 +219,7 @@ struct Module_instance : Object
   //virtual void                add_log_obj                 ( Com_log* log, const string& name )    { add_obj( log, name ); }
     IDispatch*                  object                      ( const string& name );
 
+    bool                        implicit_load_and_start     ();
     virtual bool                load                        ();
     virtual void                start                       ();
     virtual IDispatch*          dispatch                    () const                                { throw_xc( "SCHEDULER-172", "dispatch()" ); }
@@ -267,6 +269,7 @@ struct Module_instance : Object
     Delegated_log              _log;
     ptr<Module>                _module;
     int                        _pid;                        // Wird von Remote_module_instance_proxy gesetzt
+    bool                       _initialized;
 
     Object_list                _object_list;
     ptr<IDispatch>             _idispatch;

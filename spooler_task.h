@@ -146,7 +146,7 @@ struct Task : Object,
     void                        remove_order_after_error    ();
 
     void                        finish                      ();
-    void                        load                        ();
+    bool                        load                        ();
     Async_operation*            begin__start                ();
   //bool                        begin__end                  ();
   //void                        end__start                  ();
@@ -199,7 +199,7 @@ struct Task : Object,
 
     friend struct               Task_history;
 
-    virtual void                do_load                     ()                                      {}
+    virtual bool                do_load                     ()                                      { return true; }
     virtual bool                do_kill                     ()                                      { return false; }
     virtual Async_operation*    do_close__start             ()                                      { return &dummy_sync_operation; }
     virtual void                do_close__end               ()                                      {}
@@ -345,7 +345,7 @@ struct Job_module_task : Module_task
                                 Job_module_task             ( Job* j )                              : Module_task(j) {}
 
     virtual bool                do_kill                     ();
-    virtual void                do_load                     ();
+    virtual bool                do_load                     ();
   //virtual void                do_close__end               ();
     virtual Async_operation*    do_begin__start             ();
     virtual bool                do_begin__end               ();

@@ -221,6 +221,7 @@ void Scripting_engine_module_instance::init()
 {
     Com_module_instance_base::init();
 
+    assert( !_script_site );
     _script_site = new Script_site;
     _script_site->_engine_name = _module->_language;
 
@@ -253,7 +254,6 @@ void Scripting_engine_module_instance::add_obj( IDispatch* object, const string&
 {
     _script_site->add_obj( object, Bstr(name) );
 
-
     Module_instance::add_obj( object, name );
 }
 
@@ -265,14 +265,6 @@ bool Scripting_engine_module_instance::load()
     if( !ok )  return false;
 
     if( _script_site->_engine_name != _module->_language )  throw_xc( "SCHEDULER-117" );
-
-/*
-    if( _com_context->_log     )  _script_site->add_obj( _com_context->_log    , Bstr("spooler_log"    ) );
-    if( _com_context->_spooler )  _script_site->add_obj( _com_context->_spooler, Bstr("spooler"        ) );
-  //if( _com_context->_thread  )  _script_site->add_obj( _com_context->_thread , Bstr("spooler_thread" ) );
-    if( _com_context->_job     )  _script_site->add_obj( _com_context->_job    , Bstr("spooler_job"    ) );
-    if( _com_context->_task    )  _script_site->add_obj( _com_context->_task   , Bstr("spooler_task"   ) );
-*/
 
     HRESULT hr = _script_site->_script->SetScriptState( SCRIPTSTATE_INITIALIZED );
     if( FAILED( hr ) )  throw_ole( hr, "IActiveScript::SetScriptState", "SCRIPTSTATE_INITIALIZED" );

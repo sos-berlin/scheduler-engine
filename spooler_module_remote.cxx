@@ -463,6 +463,8 @@ bool Remote_module_instance_proxy::try_to_get_process()
 
 bool Remote_module_instance_proxy::continue_async_operation( Operation* operation, Async_operation::Continue_flags )
 { 
+
+AGAIN:
     switch( operation->_call_state )
     {
         // begin__start() ... begin_end()
@@ -559,7 +561,14 @@ bool Remote_module_instance_proxy::continue_async_operation( Operation* operatio
         case c_construct:
         {
             operation->set_async_child( NULL );
-            _remote_instance->call__end();
+            
+            Variant ok = _remote_instance->call__end();
+            
+            if( !check_result( ok ) )
+            {
+                operation->_call_state = c_release_begin;
+                goto AGAIN;
+            }
 
             _module->_compiled = true;
         }
@@ -632,15 +641,23 @@ bool Remote_module_instance_proxy::continue_async_operation( Operation* operatio
             break;
         }
 
+*/
+        case c_release_begin:     // Nur, wenn Construct() NULL geliefert hat (weil Monitor.spooler_task_before() false lieferte)
+        {
+            operation->set_async_child( NULL );
+            operation->set_async_child( _remote_instance->release__start() );
+            operation->_call_state = c_release;
+            break;
+        }
 
         case c_release:
         {
-            operation->set_async_child( NULL );
             _remote_instance->release__end();
             _remote_instance = NULL;
             _idispatch = NULL;
+            operation->_call_state = c_finished;
         }
-*/
+
 //      operation->_call_state = c_finished;
 //      break;
 
@@ -700,9 +717,8 @@ string Remote_module_instance_proxy::Operation::state_name()
         case c_construct      : return "construct";
         case c_begin          : return "begin";
 
-      //case c_end            : return "end";
-      //case c_call_end       : return "call_end";
-      //case c_release        : return "release";
+        case c_release_begin  : return "release_begin";
+        case c_release        : return "release";
 
         case c_finished       : return "finished";
         default               : return as_string(_call_state);      // Für Microsoft

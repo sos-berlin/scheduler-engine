@@ -170,6 +170,8 @@ void Module::set_source_only( const Source_with_parts& source )
 
 void Module::init()
 {
+    if( _initialized )  return;
+    
     if( _monitor )  _monitor->init();
 
     if( _spooler )  _use_process_class = _spooler->has_process_classes();
@@ -238,6 +240,8 @@ void Module::init()
 
         default:                        throw_xc( __FUNCTION__ );
     }
+
+    _initialized = true;
 }
 
 //--------------------------------------------------------------------------Module::create_instance
@@ -245,6 +249,7 @@ void Module::init()
 ptr<Module_instance> Module::create_instance()
 {
     ptr<Module_instance> result;
+    ptr<Module_instance> monitor_instance;
 
     switch( _kind )
     {
@@ -360,11 +365,12 @@ Module_instance::~Module_instance()
 
 void Module_instance::init()
 {
+    _initialized = true;
     _spooler = _module->_spooler;
 
     if( !_module->set() )  throw_xc( "SCHEDULER-146" );
 
-    if( _monitor_instance )  _monitor_instance->init();
+    if( _monitor_instance  &&  !_monitor_instance->_initialized )  _monitor_instance->init();
 }
 
 //---------------------------------------------------------------------------Module_instance::clear
@@ -468,12 +474,13 @@ bool Module_instance::load()
 {
     bool ok = true;
 
-    if( _monitor_instance )
+    if( _monitor_instance  &&  !_monitor_instance->loaded() )  
     {
-        if( _monitor_instance )  _monitor_instance->load();
-
-        ok = check_result( _monitor_instance->call_if_exists( spooler_task_before_name ) );
+        bool ok = _monitor_instance->implicit_load_and_start();
         if( !ok )  return false;
+
+        Variant result = _monitor_instance->call_if_exists( spooler_task_before_name );
+        if( !result.is_missing() )  ok = check_result( result );
     }
 
     return ok;
@@ -483,7 +490,7 @@ bool Module_instance::load()
 
 void Module_instance::start()
 {
-    if( _monitor_instance )  _monitor_instance->start();
+    //Schon in implicit_load_and_start() erledigt: if( _monitor_instance ) ...
 }
 
 //------------------------------------------------------------------Module_instance::call_if_exists
@@ -524,19 +531,35 @@ Async_operation* Module_instance::begin__start()
     return &dummy_sync_operation;
 }
 
+//---------------------------------------------------------Module_instance::implicit_load_and_start
+
+bool Module_instance::implicit_load_and_start()
+{
+    if( !_initialized )  init();
+
+    FOR_EACH_CONST( Object_list, _object_list, o )  add_obj( o->_object, o->_name );
+
+    if( _monitor_instance  &&  !_monitor_instance->loaded() )
+    {
+        bool ok = _monitor_instance->implicit_load_and_start();
+        if( !ok )  return false;
+    }
+
+    bool ok = load();
+    if( !ok )  return load;
+
+    start();
+    return true;
+}
+
 //----------------------------------------------------------------------Module_instance::begin__end
 
 bool Module_instance::begin__end()
 {
     if( !loaded() )
     {
-        init();
-        FOR_EACH_CONST( Object_list, _object_list, o )  add_obj( o->_object, o->_name );
-
-        bool ok = load();
-        if( !ok )  return load;
-
-        start();
+        bool ok = implicit_load_and_start();
+        if( !ok )  return false;
     }
 
     if( !_spooler_init_called )

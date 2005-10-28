@@ -1149,7 +1149,7 @@ library Spooler
     ]
     interface Iremote_module_instance_server : IDispatch
     {
-        HRESULT                 Construct               ( [in] SAFEARRAY(VARIANT) parameters );
+        HRESULT                 Construct               ( [in] SAFEARRAY(VARIANT) parameters, [out,retval] VARIANT_BOOL* Result );
         HRESULT                 Add_obj                 ( [in] IDispatch*, [in] BSTR Name );
         HRESULT                 Name_exists             ( [in] BSTR Name, [out,retval] VARIANT_BOOL* Result );
         HRESULT                 Call                    ( [in] BSTR Name, [out,retval] VARIANT* Result );

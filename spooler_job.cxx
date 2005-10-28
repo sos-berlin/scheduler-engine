@@ -224,13 +224,8 @@ void Job::init0()
   //_com_log  = new Com_log( &_log );
 
     if( _module._dom_element )  read_script( &_module );
+    if( _module._monitor  &&  _module._monitor->_dom_element )  read_script( _module._monitor );
     if( _module.set() )  _module.init();
-
-    if( _module._monitor )
-    {
-        if( _module._monitor->_dom_element )  read_script( _module._monitor );
-        if( _module._monitor->set() )  _module._monitor->init();
-    }
 
     _next_start_time = latter_day;
     _period._begin = 0;
@@ -1973,8 +1968,11 @@ ptr<Module_instance> Job::create_module_instance()
 
         result = _module_ptr->create_instance();
 
-        result->set_job_name( name() ); 
-        result->set_log( _log );
+        if( result )
+        {
+            result->set_job_name( name() ); 
+            result->set_log( _log );
+        }
     }
 
     return result;

@@ -51,31 +51,13 @@ void Remote_module_instance_server::close__end()   // synchron
     Com_module_instance_base::close__end();  // synchron
 }
 
-//---------------------------------------------------Remote_module_instance_server::load_implicitly
-/*
-void Remote_module_instance_server::load_implicitly()
-{
-    if( !_loaded_and_started )
-    {
-        if( _load_error )  throw_xc( "SCHEDULER-185" );
-
-        _load_error = true;
-        
-        _module_instance->load();
-        _module_instance->start();
-
-        _load_error = false;
-        _loaded_and_started = true;
-    }
-}
-*/
 //------------------------------------------------------Com_remote_module_instance_server::_methods
 #ifdef Z_COM
 
 const Com_method Com_remote_module_instance_server::_methods[] =
 { 
    // _flags              , _name                     , _method                                                                  , _result_type , _types        , _default_arg_count
-    { DISPATCH_METHOD     , 1, "construct"            , (Com_method_ptr)&Com_remote_module_instance_server::Construct            , VT_EMPTY     , { VT_BYREF|VT_ARRAY|VT_VARIANT } },
+    { DISPATCH_METHOD     , 1, "construct"            , (Com_method_ptr)&Com_remote_module_instance_server::Construct            , VT_EMPTY     , { VT_BYREF|VT_ARRAY|VT_VARIANT }, VT_BOOL },
     { DISPATCH_METHOD     , 2, "add_obj"              , (Com_method_ptr)&Com_remote_module_instance_server::Add_obj              , VT_EMPTY     , { VT_DISPATCH, VT_BSTR } },
     { DISPATCH_METHOD     , 3, "name_exists"          , (Com_method_ptr)&Com_remote_module_instance_server::Name_exists          , VT_BOOL      , { VT_BSTR } },
     { DISPATCH_METHOD     , 4, "call"                 , (Com_method_ptr)&Com_remote_module_instance_server::Call                 , VT_VARIANT   , { VT_BSTR } },
@@ -146,9 +128,11 @@ STDMETHODIMP Com_remote_module_instance_server::QueryInterface( const IID& iid, 
 
 //-----------------------------------------------------Com_remote_module_instance_server::construct
 
-STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray )
+STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray, VARIANT_BOOL* result )
 {
     HRESULT hr = NOERROR;
+
+    *result = VARIANT_FALSE;;
 
     try
     {
@@ -235,7 +219,7 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray 
             _server._module->_java_vm->set_options( java_options );
         }
 
-
+        /* Jetzt in Module::create_instance()
         if( _server._module->_kind == Module::kind_java  
         ||  _server._module->_monitor && _server._module->_monitor->_kind == Module::kind_java )
         {
@@ -249,13 +233,18 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray 
                 // Parameter für Java können nicht übernommen werden.
             }
         }
-
+        */
 
         _server._module_instance = _server._module->create_instance();
-        _server._module_instance->set_job_name( job_name );             // Nur zur Diagnose
-        _server._module_instance->set_task_id( task_id );               // Nur zur Diagnose
-      //_server._module_instance->init();
-      //_server._module_instance->_spooler_exit_called = true;            // Der Client wird spooler_exit() explizit aufrufen, um den Fehler zu bekommen.
+       
+        if( _server._module_instance )
+        {
+            _server._module_instance->set_job_name( job_name );             // Nur zur Diagnose
+            _server._module_instance->set_task_id( task_id );               // Nur zur Diagnose
+          //_server._module_instance->init();
+          //_server._module_instance->_spooler_exit_called = true;            // Der Client wird spooler_exit() explizit aufrufen, um den Fehler zu bekommen.
+            *result = VARIANT_TRUE;
+        }
     }
     catch( const exception& x ) { hr = Com_set_error( x, "Remote_module_instance_server::construct" ); }
 

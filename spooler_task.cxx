@@ -980,10 +980,18 @@ bool Task::do_something()
                     {
                         case s_loading:
                         {
-                            load();
+                            bool ok = load();
+                            if( ok )  set_state( s_waiting_for_process );
+                                else  set_state( s_release );
+                            
                             something_done = true;
+                            loop = true;
+                            break;
+                        }
+
 
                         case s_waiting_for_process:
+                        {
                             bool ok = !_module_instance || _module_instance->try_to_get_process();
                             if( ok )  something_done = true, set_state( s_starting ), loop = true;
                                 else  set_state( s_waiting_for_process );
@@ -1352,7 +1360,7 @@ bool Task::do_something2()
 */
 //---------------------------------------------------------------------------------------Task::load
 
-void Task::load()
+bool Task::load()
 {
     if( !_spooler->log_directory().empty()  &&  _spooler->log_directory()[0] != '*' )
     {
@@ -1377,7 +1385,7 @@ void Task::load()
         _running_since = Time::now();
     }
 
-    do_load();
+    return do_load();
 }
 
 //---------------------------------------------------------------------------------Task::begin_start
@@ -1861,7 +1869,7 @@ bool Job_module_task::do_kill()
 
 //-------------------------------------------------------------------------Job_module_task::do_load
 
-void Job_module_task::do_load()
+bool Job_module_task::do_load()
 {
     ptr<Module_instance> module_instance;
     bool                 is_new = false;
@@ -1871,10 +1879,13 @@ void Job_module_task::do_load()
     {
         //module_instance = _job->get_free_module_instance( this );
         module_instance = _job->create_module_instance();
+        if( !module_instance )  return false;
     }
     else
     {
         module_instance = _job->create_module_instance();
+        if( !module_instance )  return false;
+
         is_new = true;
         module_instance->set_close_instance_at_end( true );
         module_instance->set_job_name( _job->name() );      // Nur zum Debuggen (für shell-Kommando ps)
@@ -1898,9 +1909,13 @@ void Job_module_task::do_load()
         module_instance->add_obj( (IDispatch*)module_instance->_com_task, "spooler_task"   );
         module_instance->add_obj( (IDispatch*)module_instance->_com_log , "spooler_log"    );
 
-        module_instance->load();
+        bool ok =  module_instance->load();
+        if( !ok ) return false;
+
         module_instance->start();
     }
+
+    return true;
 }
 
 //------------------------------------------------------------------Job_module_task::do_begin_start

@@ -44,7 +44,7 @@ struct Com_remote_module_instance_server : spooler_com::Iremote_module_instance_
     STDMETHODIMP                QueryInterface              ( const IID&, void** );
     USE_SOS_OLE_OBJECT_WITHOUT_QI
 
-    STDMETHODIMP                Construct                   ( SAFEARRAY* );
+    STDMETHODIMP                Construct                   ( SAFEARRAY*, VARIANT_BOOL* );
     STDMETHODIMP                Add_obj                     ( IDispatch*, BSTR name );
     STDMETHODIMP                Name_exists                 ( BSTR name, VARIANT_BOOL* result );
     STDMETHODIMP                Call                        ( BSTR name, VARIANT* result );
