@@ -30,10 +30,10 @@ extern const string spooler_on_error_name       = "spooler_on_error()V";
 extern const string spooler_on_success_name     = "spooler_on_success()V";
 
 // Monitor-Methoden:
-extern const string spooler_task_before_name    = "spooler_task_before()Z";       
-extern const string spooler_task_after_name     = "spooler_task_after()V";
-extern const string spooler_process_before_name = "spooler_process_before()Z";    
-extern const string spooler_process_after_name  = "spooler_process_after(Z)Z";    
+const string spooler_task_before_name    = "spooler_task_before()Z";       
+const string spooler_task_after_name     = "spooler_task_after()V";
+const string spooler_process_before_name = "spooler_process_before()Z";    
+const string spooler_process_after_name  = "spooler_process_after(Z)Z";    
 
 //-------------------------------------------------------------------------Source_part::Source_part
 
@@ -251,14 +251,21 @@ ptr<Module_instance> Module::create_instance()
     ptr<Module_instance> result;
     ptr<Module_instance> monitor_instance;
 
+
     switch( _kind )
     {
         case kind_java:              
         {
             if( _spooler )  if( !_spooler->_java_vm  ||  !_spooler->_java_vm->running() )  throw_xc( "SCHEDULER-177" );
 
-            _java_vm = get_java_vm();
+            _java_vm = get_java_vm( false );
             _java_vm->set_destroy_vm( false );   //  Nicht DestroyJavaVM() rufen, denn das hängt manchmal
+
+            if( !_java_vm->running() )
+            {
+                Java_module_instance::init_java_vm( _java_vm );     // Native Java-Methoden (Callbacks) bekannt machen
+            }
+            
             ptr<Java_module_instance> p = Z_NEW( Java_module_instance( _java_vm, this ) );
             result = +p;
             break;
@@ -293,6 +300,8 @@ ptr<Module_instance> Module::create_instance()
 
 
     if( _monitor  &&  _kind != kind_remote )  result->_monitor_instance = _monitor->create_instance();
+
+
 
     return result;
 }
@@ -440,6 +449,8 @@ void Module_instance::attach_task( Task* task, Prefix_log* log )
 
 void Module_instance::detach_task()
 {
+    close_monitor();
+
     _com_task->set_task( NULL );
     _com_log ->set_log ( NULL );
     
@@ -474,7 +485,7 @@ bool Module_instance::load()
 {
     bool ok = true;
 
-    if( _monitor_instance  &&  !_monitor_instance->loaded() )  
+    if( _monitor_instance  &&  !_monitor_instance->_load_called )  
     {
         bool ok = _monitor_instance->implicit_load_and_start();
         if( !ok )  return false;
@@ -482,6 +493,8 @@ bool Module_instance::load()
         Variant result = _monitor_instance->call_if_exists( spooler_task_before_name );
         if( !result.is_missing() )  ok = check_result( result );
     }
+
+    _load_called = true;
 
     return ok;
 }
@@ -516,11 +529,47 @@ void Module_instance::close()
     Async_operation* op = close__start();
     if( !op->async_finished() )  _log.warn( "Warten auf Schließen der Modulinstanz ..." );
     close__end();
+}
 
+//--------------------------------------------------------------------Module_instance::close__start
+
+Async_operation* Module_instance::close__start()
+{ 
+    return &dummy_sync_operation; 
+}
+
+//----------------------------------------------------------------------Module_instance::close__end
+
+void Module_instance::close__end()
+{
+    close_monitor();
+}
+
+//-------------------------------------------------------------------Module_instance::close_monitor
+
+void Module_instance::close_monitor()
+{
     if( _monitor_instance )  
     {
-        _monitor_instance->call_if_exists( spooler_task_after_name );
-        _monitor_instance->close();
+        try
+        {
+            _monitor_instance->call_if_exists( spooler_task_after_name );
+        }
+        catch( exception& x )
+        {
+            _log.error( spooler_task_after_name + ": " + x.what() );
+        }
+
+        try
+        {
+            _monitor_instance->close();
+        }
+        catch( exception& x )
+        {
+            _log.error( string("Monitor: ") + x.what() );
+        }
+
+        _monitor_instance = NULL;
     }
 }
 
@@ -539,12 +588,6 @@ bool Module_instance::implicit_load_and_start()
 
     FOR_EACH_CONST( Object_list, _object_list, o )  add_obj( o->_object, o->_name );
 
-    if( _monitor_instance  &&  !_monitor_instance->loaded() )
-    {
-        bool ok = _monitor_instance->implicit_load_and_start();
-        if( !ok )  return false;
-    }
-
     bool ok = load();
     if( !ok )  return load;
 
@@ -556,7 +599,7 @@ bool Module_instance::implicit_load_and_start()
 
 bool Module_instance::begin__end()
 {
-    if( !loaded() )
+    if( !_load_called )
     {
         bool ok = implicit_load_and_start();
         if( !ok )  return false;

@@ -46,7 +46,7 @@ void Com_module_instance_base::init()
 
 void Com_module_instance_base::close__end()
 {
-    //Module_instance::close();
+    close_monitor();
 
     _idispatch = NULL;
 }
@@ -224,25 +224,19 @@ void Scripting_engine_module_instance::init()
     assert( !_script_site );
     _script_site = new Script_site;
     _script_site->_engine_name = _module->_language;
-
-//#   ifdef Z_WINDOWS
-        _script_site->init_engine();
-//#    else
-        // Perl auf Unix will init_engine() erst nachdem die Quelle vollständig geladen ist.
-//#   endif
-
-    //HRESULT hr = _script_site->_module->SetScriptState( SCRIPTSTATE_INITIALIZED );
-    //if( FAILED( hr ) )  throw_ole( hr, "IActiveScript::SetScriptState", "SCRIPTSTATE_INITIALIZED" );
+    _script_site->init_engine();
 }
 
 //-------------------------------------------------------------Com_module_instance_base::close__end
 
 void Scripting_engine_module_instance::close__end()
 {
-    Com_module_instance_base::close__end();   // Synchron
+    close_monitor();
 
     if( _script_site )
     {
+        _idispatch = NULL;
+
         _script_site->close_engine();
         _script_site = NULL;
     }

@@ -89,24 +89,8 @@ Async_operation* Remote_module_instance_proxy::close__start()
 
 void Remote_module_instance_proxy::close__end()
 {
+    close_monitor();
     _session = NULL;
-
-    if( _process )
-    {
-/*
-        _process->remove_module_instance( this );
-        exit_code();   // Exit code merken
-        _process = NULL;
-*/
-    }
-/*
-  //if( _session )
-    {
-  //    _session->close();
-        _session = NULL;
-    }
-*/
-    //Com_module_instance_base::close();
 }
 
 //---------------------------------------------------------------Remote_module_instance_proxy::kill

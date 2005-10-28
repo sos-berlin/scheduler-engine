@@ -46,6 +46,8 @@ Remote_module_instance_server::~Remote_module_instance_server()
 
 void Remote_module_instance_server::close__end()   // synchron
 {
+    close_monitor();
+
     if( _module_instance )  _module_instance->close(), _module_instance = NULL;;
 
     Com_module_instance_base::close__end();  // synchron

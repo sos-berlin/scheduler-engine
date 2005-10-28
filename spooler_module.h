@@ -207,6 +207,7 @@ struct Module_instance : Object
 
     void                        clear                       ();
     void                        close                       ();
+    void                        close_monitor               ();
     virtual void                init                        ();
     virtual bool                kill                        ()                                      { return false; }
     void                    set_log                         ( Prefix_log* );
@@ -234,8 +235,8 @@ struct Module_instance : Object
 
     virtual bool                try_to_get_process          ()                                      { return true; }
 
-    virtual Async_operation*    close__start                ()                                      { return &dummy_sync_operation; }
-    virtual void                close__end                  ()                                      {}
+    virtual Async_operation*    close__start                ();
+    virtual void                close__end                  ();
 
     virtual Async_operation*    begin__start                (); // const Object_list& );
     virtual bool                begin__end                  ();
@@ -270,6 +271,7 @@ struct Module_instance : Object
     ptr<Module>                _module;
     int                        _pid;                        // Wird von Remote_module_instance_proxy gesetzt
     bool                       _initialized;
+    bool                       _load_called;
 
     Object_list                _object_list;
     ptr<IDispatch>             _idispatch;

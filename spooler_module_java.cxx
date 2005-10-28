@@ -306,6 +306,7 @@ Java_module_instance::Java_module_instance( Vm* vm, Module* module )
 
 void Java_module_instance::close__end()  // Synchron
 {
+    close_monitor();
     Module_instance::close__end();   // Synchron
 
     _added_jobjects.clear();
