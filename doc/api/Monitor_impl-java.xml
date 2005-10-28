@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<!-- $Id: Job_impl-java.xml 3920 2005-09-20 13:57:40Z jz $ -->
+
+<?xml-stylesheet href="api-java.xsl" type="text/xsl"?>
+
+
+<api.class
+    name                 = "Monitor_impl"
+    base_dir             = "../"
+/>

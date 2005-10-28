@@ -213,4 +213,18 @@
         </p>
     </div>
 
+
+
+    <h2>Monitor</h2>
+
+    <p>
+        Ein Job kann ein Monitor-Skript haben. 
+        Der Scheduler ruft Funktionen des Monitor-Skripts auf bei Start und Ende der Task 
+        sowie vor und nach von <scheduler_method class="Job_impl" method="spooler_process"/>.
+    </p>
+    <p>
+        Den Monitor bestimmen Sie mit <scheduler_element name="monitor"/>.
+    </p>
+
+
 </description>

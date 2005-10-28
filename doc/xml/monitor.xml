@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: script.xml 3943 2005-09-25 18:33:33Z jz $-->
+
+<xml_element name     = "monitor"
+             title    = "Monitor"
+             category = "Konfiguration"
+             base_dir = "../"
+             parent_page = "../konfiguration.xml"
+             author   = "$Author: jz $"
+             date     = "$Date: 2005-09-25 20:33:33 +0200 (So, 25 Sep 2005) $">
+
+    <xml_parent_elements>
+        <xml_parent_element name="job"/>
+    </xml_parent_elements>
+
+
+    <xml_child_elements>
+        <xml_child_element name="script"/>
+    </xml_child_elements>
+
+
+    <description>
+        <p>
+            Ein Monitor stellt Funktionen bereit, die vor und nach der Task 
+            sowie vor und nach von <scheduler_method class="Job_impl" method="spooler_process"/> gerufen werden.
+        </p>
+        <p>
+            Der Monitor kann den Start der Task 
+            oder die Ausführung von <scheduler_method class="Job_impl" method="spooler_process"/> verhindern.
+        </p>
+        <p>
+            Siehe Oberklasse <scheduler_method class="Monitor_impl"/>, 
+            deren Methoden ein Monitor implementieren kann.
+        </p>
+    </description>
+
+
+    <example title="Neutrale Implementierung eines Monitors"><pre>&lt;monitor>
+    &lt;script java_class="spooler_job.Java_monitor">&lt;![CDATA[
+        package spooler_job;
+        import sos.spooler.*;
+
+        public class Java_monitor  extends sos.spooler.Monitor_impl
+        {
+            public boolean spooler_task_before()  throws Exception
+            {
+                spooler_log.info( "SPOOLER_TASK_BEFORE()" );
+                return true;
+            }
+
+            public void spooler_task_after()  throws Exception
+            {
+                spooler_log.info( "SPOOLER_TASK_AFTER()" );
+            }
+
+            public boolean spooler_process_before()  throws Exception
+            {
+                spooler_log.info( "SPOOLER_PROCESS_BEFORE()" );
+                return true;
+            }
+
+            public boolean spooler_process_after( boolean spooler_process_result )  throws Exception
+            {
+                spooler_log.info( "SPOOLER_PROCESS_AFTER(" + spooler_process_result + ")" );
+                return spooler_process_result;
+            }
+        }
+    ]]&gt;&lt;/script>
+&lt;/monitor></pre>
+    </example>
+
+
+    <behavior_with_xml_element element="base" allowed="no"/>
+
+
+</xml_element>

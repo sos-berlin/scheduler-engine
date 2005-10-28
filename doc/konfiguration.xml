@@ -169,6 +169,10 @@
                      &lt;/environment>
                  &lt;/process>
 
+                 &lt;<a class="silent" href="xml/monitor.xml">monitor></a>
+                    &lt;<a class="silent" href="xml/script.xml">script></a>…&lt;script/>
+                 &lt;/monitor>
+
                  &lt;<a class="silent" href="xml/start_when_directory_changed.xml">start_when_directory_changed</a> directory = "…"
                                                regex     = "…" />
 

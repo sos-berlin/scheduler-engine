@@ -35,6 +35,8 @@
                 </p>
             </description>
         </xml_parent_element>
+
+        <xml_parent_element name="monitor"/>
     </xml_parent_elements>
 
 
@@ -153,6 +155,5 @@
 
 
     <behavior_with_xml_element element="base" allowed="no"/>
-
-
+    
 </xml_element>

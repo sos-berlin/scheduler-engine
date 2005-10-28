@@ -15,6 +15,7 @@
     <class_reference class="Job_impl"/>
     <class_reference class="Log"/>
     <class_reference class="Mail"/>
+    <class_reference class="Monitor_impl"/>
     <class_reference class="Order"/>
     <class_reference class="Order_queue"/>
     <class_reference class="Run_time"/>
