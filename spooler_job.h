@@ -215,9 +215,11 @@ struct Job : Object,
     string                      profile_section             ();
     bool                        temporary                   () const                                { return _temporary; }
     void                    set_remove                      ( bool );
+    void                        set_delay_after_error       ( int error_steps, const string& delay );
     void                        set_delay_after_error       ( int error_steps, Time delay )         { _log->debug9( "delay_after_error["        +as_string(error_steps)+"]="+delay.as_string() ); _delay_after_error[ error_steps ] = delay; }
     void                        set_stop_after_error        ( int error_steps )                     { _log->debug9( "delay_after_error["        +as_string(error_steps)+"]=\"STOP\""           ); _delay_after_error[ error_steps ] = latter_day; }
     void                        clear_delay_after_error     ()                                      { _log->debug9( "clear_delay_after_error()" ); _delay_after_error.clear(); }
+    void                        set_delay_order_after_setback( int setbacks, const string& delay );
     void                        set_delay_order_after_setback( int setbacks, Time delay )           { _log->debug9( "delay_order_after_setback["+as_string(setbacks   )+"]="+delay.as_string() ); _delay_order_after_setback[setbacks   ] = delay; }
     Time                        get_delay_order_after_setback( int setback_count );
     void                        set_max_order_setbacks      ( int n )                               { _log->debug9( "max_order_setbacks"+as_string(n) ); _max_order_setbacks = n; }

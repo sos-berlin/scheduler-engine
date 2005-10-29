@@ -1837,14 +1837,7 @@ STDMETHODIMP Com_job::put_Delay_after_error( int error_steps, VARIANT* time )
     {
         if( !_job )  throw_xc( "SCHEDULER-122" );
 
-        if( time->vt == VT_BSTR  &&  stricmp( string_from_variant( *time ).c_str(), "stop" ) == 0 )
-        {
-            _job->set_stop_after_error( error_steps );
-        }
-        else
-        {
-            _job->set_delay_after_error( error_steps, time_from_variant(*time) );
-        }
+        _job->set_delay_after_error( error_steps, string_from_variant( *time ) );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Job.delay_after_error" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Job.delay_after_error" ); }
@@ -1921,7 +1914,7 @@ STDMETHODIMP Com_job::put_Delay_order_after_setback( int setback_number, VARIANT
     {
         if( !_job )  throw_xc( "SCHEDULER-122" );
 
-        _job->set_delay_order_after_setback( setback_number, time_from_variant(*time) );
+        _job->set_delay_order_after_setback( setback_number, string_from_variant(*time) );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Job.delay_order_after_setback" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Job.delay_order_after_setback" ); }

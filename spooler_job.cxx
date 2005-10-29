@@ -199,6 +199,16 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
                 _start_when_directory_changed_list.push_back( pair<string,string>( subst_env( e.getAttribute( "directory" ) ), e.getAttribute( "regex" ) ) );
             }
             else
+            if( e.nodeName_is( "delay_after_error" ) )
+            {
+                set_delay_after_error( e.int_getAttribute( "error_count" ), e.getAttribute( "time" ) );
+            }
+            else
+            if( e.nodeName_is( "delay_order_after_setback" ) )
+            {
+                set_delay_order_after_setback( e.int_getAttribute( "setback_count" ), e.getAttribute( "time" ) );
+            }
+            else
             if( e.nodeName_is( "run_time" ) &&  !_spooler->_manual )  set_run_time( e );
         }
 
@@ -1716,6 +1726,21 @@ string Job::state_cmd_name( Job::State_cmd cmd )
         case Job::sc_remove:   return "remove";
         default:               return as_string( (int)cmd );
     }
+}
+
+//-----------------------------------------------------------------------Job::set_delay_after_error
+
+void Job::set_delay_after_error( int error_steps, const string& delay )
+{ 
+    if( delay == "stop" )  set_stop_after_error( error_steps );
+                     else  set_delay_after_error( error_steps, time::time_from_string( delay ) );
+}
+
+//---------------------------------------------------------------Job::set_delay_order_after_setback
+
+void Job::set_delay_order_after_setback( int setback_count, const string& delay )
+{
+    set_delay_order_after_setback( setback_count, time::time_from_string( delay ) );
 }
 
 //---------------------------------------------------------------Job::get_delay_order_after_setback
