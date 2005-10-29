@@ -3454,8 +3454,8 @@ STDMETHODIMP Com_job_chain::Add_job( VARIANT* job_or_jobname, VARIANT* begin_sta
             {
                 string jobname = string_from_variant(*job_or_jobname);
                 
-                job = stricmp( jobname.c_str(), "*end" ) == 0? NULL
-                                                             : _job_chain->_spooler->get_job( jobname );
+                job = jobname == ""  ||  stricmp( jobname.c_str(), "*end" ) == 0? NULL
+                                                                                : _job_chain->_spooler->get_job( jobname );
                 break;
             }
 

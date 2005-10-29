@@ -48,7 +48,7 @@ void Spooler::add_job_chain( Job_chain* job_chain )
     }
 */
 
-    if( _db->opened()  &&  job_chain->_store_orders_in_database )  job_chain->load_orders_from_database();
+    if( _db->opened() )  job_chain->load_orders_from_database();
 
 
     _job_chain_time = Time::now();
@@ -262,6 +262,9 @@ static Order::State normalized_state( const Order::State& state )
 
 void Job_chain::load_orders_from_database()
 {
+    if( !_store_orders_in_database )  return;
+
+
     int count = 0;
 
     {

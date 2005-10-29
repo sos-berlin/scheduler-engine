@@ -309,6 +309,8 @@ struct Spooler : Object,
     void                        load_jobs_from_xml          ( const xml::Element_ptr&, const Time& xml_mod_time, bool init = false );
     void                        load_job_from_xml           ( const xml::Element_ptr&, const Time& xml_mod_time, bool init = false );
     xml::Element_ptr            jobs_dom_element            ( const xml::Document_ptr&, const Show_what& );
+
+    void                        load_job_chains_from_xml    ( const xml::Element_ptr&, const Time& xml_mod_time );
     void                        add_job_chain               ( Job_chain* );
     Job_chain*                  job_chain                   ( const string& name );
     Job_chain*                  job_chain_or_null           ( const string& name );

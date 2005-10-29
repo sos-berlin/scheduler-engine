@@ -291,6 +291,8 @@ void Spooler::load_threads_from_xml( const xml::Element_ptr& threads_element, co
                     if( e.nodeName_is( "script" ) )  throw_xc( "SCHEDULER-189", "<script in thread>" );  //_module.set_dom( e, xml_mod_time, include_path() );
                     else
                     if( e.nodeName_is( "jobs"   ) )  load_jobs_from_xml( e, xml_mod_time );   // Zur Kompatibilität
+                    else
+                    if( e.nodeName_is( "job_chains"  ) )  load_job_chains_from_xml( e, xml_mod_time );   // Zur Kompatibilität
                 }
 
 /*

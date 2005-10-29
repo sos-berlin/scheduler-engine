@@ -787,6 +787,37 @@ void Spooler::cmd_job( const xml::Element_ptr& element )
     signal( "add_job" );
 }
 
+//----------------------------------------------------------------Spooler::load_job_chains_from_xml
+
+void Spooler::load_job_chains_from_xml( const xml::Element_ptr& element, const Time& )
+{
+    DOM_FOR_EACH_ELEMENT( element, e )
+    {
+        if( e.nodeName_is( "job_chain" ) )
+        {
+            ptr<Job_chain> job_chain = new Job_chain( this );
+
+            DOM_FOR_EACH_ELEMENT( e, ee )
+            {
+                if( ee.nodeName_is( "job_chain" ) )
+                {
+                    string job_name    = ee.getAttribute( "job" );
+                    string state       = ee.getAttribute( "state" );
+                    string next_state  = ee.getAttribute( "next_state" );
+                    string error_state = ee.getAttribute( "error_state" );
+
+                    Job* job = job_name == ""? NULL : get_job( job_name );
+                    if( state == "" )  throw_xc( "SCHEDULER-231", "state" );
+
+                    job_chain->add_job( job, state, e.getAttribute( "next_state" ), ee.getAttribute( "error_state" ) );
+                }
+            }
+
+            add_job_chain( job_chain );
+        }
+    }
+}
+
 //-------------------------------------------------------------------Spooler::remove_temporary_jobs
 
 int Spooler::remove_temporary_jobs( Job* which_job )
@@ -2014,14 +2045,13 @@ void Spooler::start()
 
     _db->spooler_start();
 
-    // Thread _communication nach Java starten (auch implizit durch _db). Java muss laufen, wenn der Thread startet! (Damit attach_thread() greift)
-    if( !_manual )  _communication.start_or_rebind();
-
-
     set_ctrl_c_handler( false );
     set_ctrl_c_handler( true );       // Falls Java (über Dateityp jdbc) gestartet worden ist und den Signal-Handler verändert hat
 
+    // Thread _communication nach Java starten (auch implizit durch _db). Java muss laufen, wenn der Thread startet! (Damit attach_thread() greift)
+    if( !_manual )  _communication.start_or_rebind();
 
+    FOR_EACH( Job_chain_map, _job_chain_map, it )  it->second->load_orders_from_database();  // Die Jobketten aus der XML-Konfiguration
 
   //_spooler_thread_list.clear();
 
