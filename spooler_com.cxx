@@ -2544,7 +2544,9 @@ STDMETHODIMP Com_task::Set_error_code_and_text( BSTR error_code, BSTR error_text
         }
         else
         {
-            _task->set_error( exception( string_from_bstr( error_text ).c_str() ) );
+            Xc x ( "SOS-2000" );   // Dummy
+            x.set_what( string_from_bstr( error_text ) );
+            _task->set_error( *(const exception*)&x );
         }
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
