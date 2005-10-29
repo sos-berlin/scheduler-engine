@@ -226,7 +226,7 @@ struct Itask : IDispatch
     virtual HRESULT         Add_subprocess              ( int, double, VARIANT_BOOL, VARIANT_BOOL, BSTR ) = 0;
     virtual HRESULT     put_Priority_class              ( VARIANT* )                            = 0;
     virtual HRESULT     get_Priority_class              ( BSTR* )                               = 0;
-    virtual HRESULT     get_Step_count                  ( int* );                               = 0;
+    virtual HRESULT     get_Step_count                  ( int* )                                = 0;
     virtual HRESULT         Set_error_code_and_text     ( BSTR code, BSTR text )                = 0;
 };
 
