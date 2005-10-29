@@ -219,6 +219,7 @@ struct Module_instance : Object
     virtual void                add_obj                     ( IDispatch*, const string& name );
   //virtual void                add_log_obj                 ( Com_log* log, const string& name )    { add_obj( log, name ); }
     IDispatch*                  object                      ( const string& name );
+    IDispatch*                  object                      ( const string& name, IDispatch* deflt );
 
     bool                        implicit_load_and_start     ();
     virtual bool                load                        ();

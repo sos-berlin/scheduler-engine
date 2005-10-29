@@ -155,7 +155,7 @@ bool Module::make_java_class( bool force )
         //utimbuf.actime = utimbuf.modtime = (time_t)_source._max_modification_time;
         //utime( java_filename.c_str(), &utimbuf );
 
-        string cmd = '"' + _java_vm->javac_filename() + "\" -O -classpath " + _java_vm->class_path() + ' ' + java_filename;     // + " -verbose"
+        string cmd = '"' + _java_vm->javac_filename() + "\" -g -classpath " + _java_vm->class_path() + ' ' + java_filename;     // + " -verbose"
         _log.info( cmd );
         
         System_command c;

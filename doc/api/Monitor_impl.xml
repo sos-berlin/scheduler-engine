@@ -229,6 +229,7 @@
             <com.type type="bool"/>
             <description>
                 Rückgabewert von <scheduler_method class="Job_impl" method="spooler_process"/>.
+                false, wenn <code>spooler_process()</code> mit einer Exception geendet hat.
             </description>
         </com.parameter>
 
@@ -244,10 +245,6 @@
     <description>
         <p>
             Der Scheduler ruft diese Methode nach jedem <scheduler_method class="Job_impl" method="spooler_process"/> auf.
-        </p>
-        <p>
-            <code>spooler_process_after</code> wird nicht aufgerufen,
-            wenn <scheduler_method class="Job_impl" method="spooler_process"/> mit einer Exception geendet hat.
         </p>
     </description>
 
@@ -292,7 +289,7 @@
 
         <dt><scheduler_method class="Monitor_impl" method="spooler_process_after"/></dt>
         <dd>
-            Nach dem ordentlichen Ende von <scheduler_method class="Job_impl" method="spooler_process"/>,
+            Nach <scheduler_method class="Job_impl" method="spooler_process"/>,
             kann dessen Rückgabewert ändern.
         </dd>
 

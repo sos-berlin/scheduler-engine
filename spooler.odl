@@ -406,6 +406,8 @@ library Spooler
 
         [id(23),propget]
         HRESULT                 Step_count                  ( [out,retval] int* );                              // Für Joacim 2005-04-02
+
+        HRESULT                 Set_error_code_and_text     ( [in] BSTR Code, [in] BSTR Text );                 // Für spooler_process_after()
     }
 
     [

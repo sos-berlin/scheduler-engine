@@ -471,12 +471,21 @@ void Module_instance::add_obj( IDispatch* object, const string& name )
 
 IDispatch* Module_instance::object( const string& name )
 {
+    IDispatch* result = object( name, NULL );
+    if( !result )  throw_xc( "Module_instance::object", name );
+    return result;
+}
+
+//--------------------------------------------------------------------------Module_instance::object
+
+IDispatch* Module_instance::object( const string& name, IDispatch* deflt )
+{
     Z_FOR_EACH( Object_list, _object_list, o )
     {
         if( o->_name == name )  return o->_object;
     }
     
-    throw_xc( "Module_instance::object", name );
+    return deflt;
 }
 
 //----------------------------------------------------------------------------Module_instance::load
@@ -649,18 +658,38 @@ Variant Module_instance::step__end()
 {
     Variant ok;
 
-    if( _monitor_instance )
+    if( !_monitor_instance )
+    {
+        ok = call_if_exists( spooler_process_name );
+    }
+    else
     {
         ok = _monitor_instance->call_if_exists( spooler_process_before_name );
-        if( !check_result( ok ) )  return false;
-    }
+        if( check_result( ok ) )
+        {
+            try
+            {
+                ok = call_if_exists( spooler_process_name );
+            }
+            catch( Xc& x )
+            {
+                com_call( object( "spooler_task", _com_task ), "Set_error_code_and_text", x.code(), x.what() );
+                ok = false;
+            }
+            catch( zschimmer::Xc& x )
+            {
+                com_call( object( "spooler_task", _com_task ), "Set_error_code_and_text", x.code(), x.what() );
+                ok = false;
+            }
+            catch( exception& x )
+            {
+                com_call( object( "spooler_task", _com_task ), "Set_error_code_and_text", "", x.what() );
+                ok = false;
+            }
 
-    ok = call_if_exists( spooler_process_name );
-
-    if( _monitor_instance )
-    {
-        Variant result = _monitor_instance->call_if_exists( spooler_process_after_name, check_result( ok ) );
-        if( !result.is_missing() )  ok = result;
+            Variant result = _monitor_instance->call_if_exists( spooler_process_after_name, check_result( ok ) );
+            if( !result.is_missing() )  ok = result;
+        }
     }
 
     return ok;

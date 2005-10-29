@@ -463,6 +463,7 @@ struct Com_task : spooler_com::Itask,
     STDMETHODIMP            put_Priority_class              ( VARIANT* )                            { return FALSE; }
     STDMETHODIMP            get_Priority_class              ( BSTR* );
     STDMETHODIMP            get_Step_count                  ( int* );
+    STDMETHODIMP                Set_error_code_and_text     ( BSTR, BSTR );
 
   private:
     Thread_semaphore           _lock;

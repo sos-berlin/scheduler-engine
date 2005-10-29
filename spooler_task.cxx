@@ -508,7 +508,7 @@ void Task::set_error( const exception& x )
     }
     else
     {
-        Xc xc ( "SOS-2000", x.what(), exception_name(x).c_str() );
+        Xc xc ( "SOS-2000", x.what(), exception_name(x).c_str() );      // Siehe auch Spooler_com::set_error_silently
         set_error_xc( xc );
     }
 }

@@ -2498,7 +2498,7 @@ STDMETHODIMP Com_task::Add_subprocess( int pid, double timeout, VARIANT_BOOL ign
 
 //---------------------------------------------------------------------Com_task::get_Priority_class
 
-STDMETHODIMP Com_task::get_Priority_class( BSTR* result )
+STDMETHODIMP Com_task::get_Priority_class( BSTR* )
 {
     //Z_COM_IMPLEMENT( hr = zschimmer::Process( getpid() ).get_Priority_class( result ) );
     return E_NOTIMPL;
@@ -2522,6 +2522,36 @@ STDMETHODIMP Com_task::get_Step_count( int* result )
     return hr;
 }
 
+//------------------------------------------------------------------------------Com_task::Set_error_code_and_text
+
+STDMETHODIMP Com_task::Set_error_code_and_text( BSTR error_code, BSTR error_text )
+{
+    HRESULT hr = S_OK;
+
+    // Für Monitor: Wenn spooler_process() eine Exception liefert, fängt der Scheduler sie zunächst ab,
+    // meldet sie mit dieser Methode und ruft dann spooler_process_after().
+    // Ohne Monitor wird die Exception wie üblich geliefert.
+    
+    try
+    {
+        if( !_task )  throw_xc( "SCHEDULER-122" );
+
+        if( SysStringLen( error_code ) > 0 )
+        {
+            Xc x ( string_from_bstr( error_code ).c_str() );
+            x.set_what( string_from_bstr( error_text ) );
+            _task->set_error_xc( x );
+        }
+        else
+        {
+            _task->set_error( exception( string_from_bstr( error_text ).c_str() ) );
+        }
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    
+    return hr;
+}
 
 //-------------------------------------------------------------------------Com_task_proxy::_methods
 // Dispid wie bei Com_task!
