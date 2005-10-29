@@ -267,6 +267,9 @@
 
 <description>
     <p>
+        Mit <scheduler_element name="monitor"/> können Sie einem Job einen Monitor geben.
+    </p>
+    <p>
         Ein Monitor kann folgende Methoden bereitstellen:
     </p>
     
