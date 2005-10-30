@@ -272,47 +272,6 @@ void Spooler_thread::set_dom( const xml::Element_ptr& element, const Time& xml_m
     }
 }
 */
-//-------------------------------------------------------------------Spooler::load_threads_from_xml
-
-void Spooler::load_threads_from_xml( const xml::Element_ptr& threads_element, const Time& xml_mod_time )
-{
-    DOM_FOR_EACH_ELEMENT( threads_element, element )
-    {
-        if( element.nodeName_is( "thread" ) )
-        {
-            string spooler_id = element.getAttribute( "spooler_id" );
-            if( _manual  ||  spooler_id.empty()  ||  spooler_id == _spooler_id )
-            {
-
-                if( element.getAttributeNode( "include_path" ) )  throw_xc( "SCHEDULER-189", "<thread include_path=>" );  //_include_path = element.getAttribute( "include_path" );
-
-                DOM_FOR_EACH_ELEMENT( element, e )
-                {
-                    if( e.nodeName_is( "script" ) )  throw_xc( "SCHEDULER-189", "<script in thread>" );  //_module.set_dom( e, xml_mod_time, include_path() );
-                    else
-                    if( e.nodeName_is( "jobs"   ) )  load_jobs_from_xml( e, xml_mod_time );   // Zur Kompatibilität
-                    else
-                    if( e.nodeName_is( "job_chains"  ) )  load_job_chains_from_xml( e, xml_mod_time );   // Zur Kompatibilität
-                }
-
-/*
-                string thread_name = e.getAttribute( "name" );
-                ptr<Spooler_thread> thread = get_thread_or_null( thread_name );
-                if( !thread )  
-                {
-                    thread = Z_NEW( Spooler_thread( this ) );
-                    _thread_list.push_back( thread );
-
-                    //if( !thread->_free_threading )  _spooler_thread_list.push_back( thread );
-                }
-
-                thread->set_dom( e, xml_mod_time );
-*/
-            }
-        }
-    }
-}
-
 //-----------------------------------------------------------------------------Spooler::load_config
 
 void Spooler::load_config( const xml::Element_ptr& config_element, const Time& xml_mod_time, const string& source_filename )
@@ -441,10 +400,9 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const Time& x
                 load_jobs_from_xml( e, xml_mod_time );
             }
             else
-            if( e.nodeName_is( "threads" ) )
+            if( e.nodeName_is( "job_chains" ) )
             {
-                _log.warn( "Element <threads> ist veraltet, in " + source_filename );
-                load_threads_from_xml( e, xml_mod_time );
+                load_job_chains_from_xml( e );
             }
         }
     }

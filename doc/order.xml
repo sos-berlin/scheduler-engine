@@ -39,6 +39,9 @@
     <scheduler_method class="Job_chain_node"/> beschrieben.
 </p>
 <p>
+    Siehe auch <scheduler_element name="job_chains"/>.
+</p>
+<p>
     Einen auftragsgesteuerten Job definieren Sie mit <scheduler_element name="job" attribute="order" value="yes"/>.
 </p>
 

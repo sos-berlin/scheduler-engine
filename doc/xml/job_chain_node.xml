@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+<!--$Id: process.xml 3943 2005-09-25 18:33:33Z jz $-->
+
+<xml_element name     = "job_chain_node"
+             title    = "Jobkettenknoten"
+             category = "Konfiguration"
+             base_dir = "../"
+             parent_page = "../konfiguration.xml"
+             author   = "$Author: jz $"
+             date     = "$Date: 2005-09-25 20:33:33 +0200 (So, 25 Sep 2005) $">
+
+    <scheduler_keyword keyword="Jobkettenknoten"/>
+
+    <xml_parent_elements>
+        <xml_parent_element name="job_chain"/>
+    </xml_parent_elements>
+
+    <xml_attributes>
+        <xml_attribute name="state" type="string">
+            <description>
+                <p>
+                    Zustand, für den dieser Jobkettenknoten gilt.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="job" type="job_name">
+            <description>
+                <p>
+                    Job, der aufgerufen werden soll, wenn ein Auftrag den Zustand erreicht.
+                </p>
+                <p>
+                    Wenn der Zustand einen Endzustand ist, dann geben Sie dieses Attribut nicht an.
+                </p>
+            </description>
+        </xml_attribute>
+
+
+        <xml_attribute name="next_state" type="string">
+            <description>
+                <p>
+                    <scheduler_method class="Job_impl" method="spooler_process"/> des Jobs mit <code>return true</code> 
+                    versetzt einen Auftrag in diesen Folgezustand.
+                </p>
+                <p>
+                    Voreingestellt ist der Wert des Attributes <code>state=</code> des folgenden <code>&lt;job_chain_node></code>.
+                </p>
+            </description>
+        </xml_attribute>
+
+
+        <xml_attribute name="error_state" type="string">
+            <description>
+                <p>
+                    <scheduler_method class="Job_impl" method="spooler_process"/> des Jobs mit <code>return false</code> 
+                    versetzt einen Auftrag in diesen Fehlerzustand.
+                </p>
+            </description>
+        </xml_attribute>
+
+
+    </xml_attributes>
+
+
+
+    <description>
+        <p>
+            Fügt einer Jobkette einen neuen Jobkettenknoten hinzu (siehe Klasse <scheduler_method class="Job_chain_node"/>).
+        </p>
+        
+        <p>
+            Die XML-Elemente
+        </p>
+
+        <pre>&lt;job_chain_node state="STATE"       job="JOB" next_state="NEXT_STATE" error_state="ERROR_STATE"/>
+&lt;job_chain_node state="ERROR_STATE" /></pre> 
+
+        <p>
+            entsprechen den API-Aufrufen
+        </p>
+        
+        <pre>job_chain.add_job( "JOB", "STATE", "NEXT_STATE", "ERROR_STATE" );
+job_chain.add_end_state( "ERROR_STATE" );</pre> 
+        
+        <p>
+            Siehe <scheduler_method class="Job_chain_node"/>, 
+            <scheduler_method class="Job_chain" method="add_job"/> 
+            und <scheduler_method class="Job_chain" method="add_end_state"/>.
+        </p>
+    </description>
+</xml_element>

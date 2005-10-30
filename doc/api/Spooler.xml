@@ -71,7 +71,8 @@
 
     <description>
         <p>
-            Siehe <scheduler_method class="Spooler" method="create_job_chain"/>.
+            Siehe <scheduler_method class="Spooler" method="create_job_chain"/>
+            und <scheduler_element name="job_chain"/>.
         </p>
     </description>
 </method>
@@ -91,6 +92,9 @@
             Diese Jobkette kann, nachdem sie mit Jobs gefüllt worden ist,
             mit <scheduler_method class="Spooler" method="add_job_chain"/>
             dem Scheduler hinzugefügt werden
+        </p>
+        <p>
+            Siehe <scheduler_element name="job_chain"/>.
         </p>
     </description>
 </method>

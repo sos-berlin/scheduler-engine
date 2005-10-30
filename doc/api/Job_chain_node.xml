@@ -68,7 +68,7 @@ spooler_log.debug( "error state=" + job_chain_node.error_node().state() );   // 
 
     <example programming_language="javascript">
         <pre>var job_chain_node = spooler.job_chain( "Jobkette" ).node( 100 );
-     spooler_log.debug( "error state=" + job_chain_node.error_node.state );       // "state=999"</pre>
+spooler_log.debug( "error state=" + job_chain_node.error_node.state );       // "state=999"</pre>
     </example>
 
 </property>

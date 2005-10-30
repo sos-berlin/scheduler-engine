@@ -229,11 +229,13 @@
                             Ergänzt ein Element <code>&lt;<xsl:value-of select="parent::*/@name"/>></code>
                             an der entsprechenden Stelle
                             aus der Basiskonfiguration.
-                            Hier angegebene Attribute überschreiben die aus der Basiskonfiguration.
+                            In <code>&lt;<xsl:value-of select="parent::*/@name"/>></code> 
+                            angegebene Attribute überschreiben die aus der Basiskonfiguration.
                         </xsl:if>
 
                         <xsl:if test="@allowed='no'">
-                            Das Element darf nicht angegeben werden, wenn es bereits in der Basiskonfiguration steht.
+                            <code>&lt;<xsl:value-of select="parent::*/@name"/>></code> darf nicht angegeben werden, 
+                            wenn es bereits in der Basiskonfiguration steht.
                         </xsl:if>
 
                         <xsl:apply-templates select="description"/>
@@ -739,7 +741,8 @@
             </span>
         </h3>
 
-        <xsl:copy-of select="* | text()"/>
+        <!--xsl:copy-of select="* | text()"/-->
+        <xsl:apply-templates select="* | text()" mode="description"/>        
     </xsl:template>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~/register-->

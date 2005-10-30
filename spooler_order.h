@@ -238,6 +238,7 @@ struct Job_chain : Com_job_chain
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
     bool                       _store_orders_in_database;
+    bool                       _load_orders_from_database;      // load_orders_from_database() muss noch gerufen werden.
 
   private:
     friend struct               Order;

@@ -789,27 +789,27 @@ void Spooler::cmd_job( const xml::Element_ptr& element )
 
 //----------------------------------------------------------------Spooler::load_job_chains_from_xml
 
-void Spooler::load_job_chains_from_xml( const xml::Element_ptr& element, const Time& )
+void Spooler::load_job_chains_from_xml( const xml::Element_ptr& element )
 {
     DOM_FOR_EACH_ELEMENT( element, e )
     {
         if( e.nodeName_is( "job_chain" ) )
         {
             ptr<Job_chain> job_chain = new Job_chain( this );
+            job_chain->set_name( e.getAttribute( "name" ) );
 
             DOM_FOR_EACH_ELEMENT( e, ee )
             {
-                if( ee.nodeName_is( "job_chain" ) )
+                if( ee.nodeName_is( "job_chain_node" ) )
                 {
                     string job_name    = ee.getAttribute( "job" );
                     string state       = ee.getAttribute( "state" );
-                    string next_state  = ee.getAttribute( "next_state" );
-                    string error_state = ee.getAttribute( "error_state" );
 
-                    Job* job = job_name == ""? NULL : get_job( job_name );
+                    bool can_be_not_initialized = true;
+                    Job* job = job_name == ""? NULL : get_job( job_name, can_be_not_initialized  );
                     if( state == "" )  throw_xc( "SCHEDULER-231", "state" );
 
-                    job_chain->add_job( job, state, e.getAttribute( "next_state" ), ee.getAttribute( "error_state" ) );
+                    job_chain->add_job( job, state, ee.getAttribute( "next_state" ), ee.getAttribute( "error_state" ) );
                 }
             }
 
@@ -1276,10 +1276,10 @@ void Spooler::add_job( const ptr<Job>& job )
 //---------------------------------------------------------------------------------Spooler::get_job
 // Anderer Thread
 
-Job* Spooler::get_job( const string& job_name )
+Job* Spooler::get_job( const string& job_name, bool can_be_not_initialized )
 {
     Job* job = get_job_or_null( job_name );
-    if( !job  ||  !job->state() )  throw_xc( "SCHEDULER-108", job_name );
+    if( !job  ||  ( !can_be_not_initialized && !job->state() ) )  throw_xc( "SCHEDULER-108", job_name );
     return job;
 }
 
@@ -2051,7 +2051,12 @@ void Spooler::start()
     // Thread _communication nach Java starten (auch implizit durch _db). Java muss laufen, wenn der Thread startet! (Damit attach_thread() greift)
     if( !_manual )  _communication.start_or_rebind();
 
-    FOR_EACH( Job_chain_map, _job_chain_map, it )  it->second->load_orders_from_database();  // Die Jobketten aus der XML-Konfiguration
+    FOR_EACH( Job_chain_map, _job_chain_map, it ) 
+    {
+        Job_chain* job_chain = it->second;
+        if( job_chain->_load_orders_from_database )
+            job_chain->load_orders_from_database();  // Die Jobketten aus der XML-Konfiguration
+    }
 
   //_spooler_thread_list.clear();
 

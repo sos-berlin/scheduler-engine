@@ -218,7 +218,7 @@
                 <p>
                     Bei <scheduler_element name="job" attribute="order" value="yes"/>:
                     <code>false</code> versetzt den Auftrag in den Fehlerzustand
-                    (s. <scheduler_method class="Job_chain_node"/>).
+                    (s. <scheduler_method class="Job_chain_node"/> und <scheduler_element name="job_chain_node"/>).
                 </p>
             </description>
         </com.result>

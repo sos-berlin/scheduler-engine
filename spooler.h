@@ -251,7 +251,7 @@ struct Spooler : Object,
     void                        cmd_load_config             ( const xml::Element_ptr&, const Time& xml_mod_time, const string& source_filename );
     void                        execute_state_cmd           ();
 
-    Job*                        get_job                     ( const string& job_name );
+    Job*                        get_job                     ( const string& job_name, bool can_be_not_initialized = false );
     Job*                        get_job_or_null             ( const string& job_name );
     Job*                        get_next_job_to_start       ();
     ptr<Task>                   get_task                    ( int task_id );
@@ -264,7 +264,6 @@ struct Spooler : Object,
     void                        load_config                 ( const xml::Element_ptr& config, const Time& xml_mod_time, const string& source_filename );
 
     void                        load_object_set_classes_from_xml( Object_set_class_list*, const xml::Element_ptr&, const Time& xml_mod_time );
-    void                        load_threads_from_xml       ( const xml::Element_ptr&, const Time& xml_mod_time );
 
     xml::Element_ptr            state_dom_element           ( const xml::Document_ptr&, const Show_what& = show_standard );
     void                        set_state                   ( State );
@@ -310,7 +309,7 @@ struct Spooler : Object,
     void                        load_job_from_xml           ( const xml::Element_ptr&, const Time& xml_mod_time, bool init = false );
     xml::Element_ptr            jobs_dom_element            ( const xml::Document_ptr&, const Show_what& );
 
-    void                        load_job_chains_from_xml    ( const xml::Element_ptr&, const Time& xml_mod_time );
+    void                        load_job_chains_from_xml    ( const xml::Element_ptr& );
     void                        add_job_chain               ( Job_chain* );
     Job_chain*                  job_chain                   ( const string& name );
     Job_chain*                  job_chain_or_null           ( const string& name );

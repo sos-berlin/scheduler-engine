@@ -51,7 +51,7 @@ const char dtd_string[] =
 "\n"
 "<!-- KONFIGURATION DES SPOOLERS - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->\n"
 "\n"
-"<!ELEMENT config              ( base*, security?, process_classes?, script?, object_set_classes?, ( holidays | holiday*), jobs? )>\n"
+"<!ELEMENT config              ( base*, security?, process_classes?, script?, object_set_classes?, ( holidays | holiday*), jobs?, job_chains? )>\n"
 "<!ATTLIST config                spooler_id          CDATA ''>           <!-- Diese Konfiguration ist nur für einen Spooler mit dieser Kennung -->\n"
 "<!ATTLIST config                port                CDATA #IMPLIED>\n"
 "<!ATTLIST config                tcp_port            CDATA #IMPLIED>     <!-- Für TCP-Kommandoschnittstelle -->\n"
