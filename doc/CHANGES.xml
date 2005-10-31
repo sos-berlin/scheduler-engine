@@ -16,6 +16,9 @@
                 <p>
                     Siehe <scheduler_element name="monitor"/>.
                 </p>
+                <p>
+                    Für Monitoren in Javascript muss die aktuelle spidermonkey.dll bzw. libspidermonkey.so eingesetzt werden.
+                </p>
             </description>
         </revision>
         <revision type="new" title="Neues XML-Element &lt;job_chains&gt;">

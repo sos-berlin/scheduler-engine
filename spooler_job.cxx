@@ -147,7 +147,10 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
             else
             if( e.nodeName_is( "script"     ) )  
             {
+                if( _process_filename != "" )  throw_xc( "SCHEDULER-234", obj_name() );
+
                 _module.set_dom_without_source( e, xml_mod_time );
+                if( _init0_called )  _module.set_dom_source_only( include_path() );
 
                 _process_filename     = "";
                 _process_param        = "";
@@ -156,6 +159,8 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
             else
             if( e.nodeName_is( "process"    ) )
             {
+                if( _module.set() )  throw_xc( "SCHEDULER-234", obj_name() );
+
                 //_module_xml_document  = NULL;
                 //_module_xml_element   = NULL;
 
@@ -190,6 +195,7 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
                     if( ee.nodeName_is( "script" ) )  
                     {
                         _module._monitor->set_dom_without_source( ee, xml_mod_time );
+                        if( _init0_called )  _module._monitor->set_dom_source_only( include_path() );
                     }
                 }
             }

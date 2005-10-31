@@ -26,7 +26,7 @@
             </description>
         </xml_attribute>
 
-        <xml_attribute name="time" type="seconds|HH:MM|HH:MM:SS">
+        <xml_attribute name="delay" type="seconds|HH:MM|HH:MM:SS">
             <description>
                 <p>
                     Frist für die Rückstellung.

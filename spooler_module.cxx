@@ -117,6 +117,27 @@ void Source_with_parts::add( int linenr, const string& text, const Time& mod_tim
     if( mod_time  &&  _max_modification_time < mod_time )   _max_modification_time = mod_time;
 }
 
+//------------------------------------------------------------------------check_unchanged_attribute
+
+static void check_unchanged_attribute( const xml::Element_ptr& element, const string& attribute_name, const string& current_value )
+{
+    if( element.hasAttribute( attribute_name  )  &&  element.getAttribute( attribute_name ) != current_value )  
+        throw_xc( "SCHEDULER-234", attribute_name + "+" + current_value );
+}
+
+//------------------------------------------------------------------------check_unchanged_attribute
+
+void Module::set_checked_attribute( string* variable, const xml::Element_ptr& element, const string& attribute_name )
+{
+    if( !_initialized ) 
+    {
+        *variable = element.getAttribute( attribute_name );
+    }
+    else
+    if( element.hasAttribute( attribute_name  )  &&  element.getAttribute( attribute_name ) != *variable )  
+        throw_xc( "SCHEDULER-234", attribute_name + "=\"" + *variable + '"' );
+}
+
 //----------------------------------------------------------------------------------Module::set_dom
 
 void Module::set_dom_without_source( const xml::Element_ptr& element, const Time& xml_mod_time )
@@ -127,12 +148,13 @@ void Module::set_dom_without_source( const xml::Element_ptr& element, const Time
 
     _source.clear();  //clear();
 
-    _language           = element.     getAttribute( "language"      );
-    _com_class_name     = element.     getAttribute( "com_class"     );
-    _filename           = element.     getAttribute( "filename"      );
-    _java_class_name    = element.     getAttribute( "java_class"    );
-    _recompile          = element.bool_getAttribute( "recompile"     , true );
-    _process_class_name = element.     getAttribute( "process_class" , _process_class_name );
+    _recompile = element.bool_getAttribute( "recompile", true );
+
+    set_checked_attribute( &_language          , element, "language"      );
+    set_checked_attribute( &_com_class_name    , element, "com_class"     );
+    set_checked_attribute( &_filename          , element, "filename"      );
+    set_checked_attribute( &_java_class_name   , element, "java_class"    );
+    set_checked_attribute( &_process_class_name, element, "process_class" );
 
     bool separate_process_default = false;
 
@@ -158,8 +180,8 @@ void Module::set_dom_source_only( const string& include_path )
 
 void Module::set_source_only( const Source_with_parts& source )
 {
-    _compiled = false;
     _source = source;
+    _compiled = false;
 
     clear_java();
 

@@ -18,13 +18,13 @@
     <thead>
         <tr>
             <th>
-                Konfiguration
+                <a href="konfiguration.xml">Konfiguration</a>
             </th>
             <th>
-                Kommandos
+                <a href="xml_commands.xml">Kommandos</a>
             </th>
             <th>
-                Antworten
+                <a href="xml_commands.xml">Antworten</a>
             </th>
         </tr>
         <tr>
