@@ -1975,6 +1975,7 @@ const Com_method Com_task::_methods[] =
     { DISPATCH_PROPERTYGET, 23, "Step_count"                , (Com_method_ptr)&Com_task::get_Step_count         , VT_INT        },
     { DISPATCH_PROPERTYGET, 24, "Stderr_path"               , (Com_method_ptr)&Com_task::get_Stderr_path        , VT_BSTR       },
     { DISPATCH_PROPERTYGET, 25, "Stdout_path"               , (Com_method_ptr)&Com_task::get_Stdout_path        , VT_BSTR       },
+    { DISPATCH_METHOD     , 26, "Set_error_code_and_text"   , (Com_method_ptr)&Com_task::Set_error_code_and_text, VT_EMPTY      , { VT_BSTR, VT_BSTR } },
     {}
 };
 

@@ -59,13 +59,13 @@ void Remote_module_instance_server::close__end()   // synchron
 const Com_method Com_remote_module_instance_server::_methods[] =
 { 
    // _flags              , _name                     , _method                                                                  , _result_type , _types        , _default_arg_count
-    { DISPATCH_METHOD     , 1, "construct"            , (Com_method_ptr)&Com_remote_module_instance_server::Construct            , VT_EMPTY     , { VT_BYREF|VT_ARRAY|VT_VARIANT }, VT_BOOL },
-    { DISPATCH_METHOD     , 2, "add_obj"              , (Com_method_ptr)&Com_remote_module_instance_server::Add_obj              , VT_EMPTY     , { VT_DISPATCH, VT_BSTR } },
-    { DISPATCH_METHOD     , 3, "name_exists"          , (Com_method_ptr)&Com_remote_module_instance_server::Name_exists          , VT_BOOL      , { VT_BSTR } },
-    { DISPATCH_METHOD     , 4, "call"                 , (Com_method_ptr)&Com_remote_module_instance_server::Call                 , VT_VARIANT   , { VT_BSTR } },
-    { DISPATCH_METHOD     , 5, "begin"                , (Com_method_ptr)&Com_remote_module_instance_server::Begin                , VT_VARIANT   , { VT_BYREF|VT_ARRAY|VT_VARIANT, VT_BYREF|VT_ARRAY|VT_VARIANT } },
-    { DISPATCH_METHOD     , 6, "end"                  , (Com_method_ptr)&Com_remote_module_instance_server::End                  , VT_VARIANT   , { VT_BOOL } },
-    { DISPATCH_METHOD     , 7, "step"                 , (Com_method_ptr)&Com_remote_module_instance_server::Step                 , VT_VARIANT   },
+    { DISPATCH_METHOD     , 1, "Construct"            , (Com_method_ptr)&Com_remote_module_instance_server::Construct            , VT_BOOL      , { VT_BYREF|VT_ARRAY|VT_VARIANT } },
+    { DISPATCH_METHOD     , 2, "Add_obj"              , (Com_method_ptr)&Com_remote_module_instance_server::Add_obj              , VT_EMPTY     , { VT_DISPATCH, VT_BSTR } },
+    { DISPATCH_METHOD     , 3, "Name_exists"          , (Com_method_ptr)&Com_remote_module_instance_server::Name_exists          , VT_BOOL      , { VT_BSTR } },
+    { DISPATCH_METHOD     , 4, "Call"                 , (Com_method_ptr)&Com_remote_module_instance_server::Call                 , VT_VARIANT   , { VT_BSTR } },
+    { DISPATCH_METHOD     , 5, "Begin"                , (Com_method_ptr)&Com_remote_module_instance_server::Begin                , VT_VARIANT   , { VT_BYREF|VT_ARRAY|VT_VARIANT, VT_BYREF|VT_ARRAY|VT_VARIANT } },
+    { DISPATCH_METHOD     , 6, "End"                  , (Com_method_ptr)&Com_remote_module_instance_server::End                  , VT_VARIANT   , { VT_BOOL } },
+    { DISPATCH_METHOD     , 7, "Step"                 , (Com_method_ptr)&Com_remote_module_instance_server::Step                 , VT_VARIANT   },
     { DISPATCH_METHOD     , 8, "Wait_for_subprocesses", (Com_method_ptr)&Com_remote_module_instance_server::Wait_for_subprocesses, VT_EMPTY     },
     {}
 };

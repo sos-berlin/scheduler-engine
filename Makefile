@@ -45,6 +45,7 @@ java_classes=\
  sos/spooler/Job_impl.class\
  sos/spooler/Log.class\
  sos/spooler/Mail.class\
+ sos/spooler/Monitor_impl.class\
  sos/spooler/Order.class\
  sos/spooler/Order_queue.class\
  sos/spooler/Spooler.class\
