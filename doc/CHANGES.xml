@@ -10,6 +10,21 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2005-10-31" version="2.0.140" subversion_revision="3999">
+        <revision type="modification" title="Job-&lt;script&gt; ist überschreibbar">
+            <description>
+                <p>
+                    Siehe <scheduler_element name="script"/>.
+                </p>
+                <p>
+                    Die Attribute (<code>language=</code> etc.) sind nicht änderbar.
+                    Nur der Skript-Code mit <scheduler_element name="include"/> ist änderbar.
+                    Die nächste Task verwendet den neuen Skript-Code.
+                </p>
+            </description>
+        </revision>
+    </change>
+    
     <change date="2005-10-30" version="2.0.140" subversion_revision="3995">
         <revision type="new" title="Monitor zur Überwachung eines Jobs">
             <description>
