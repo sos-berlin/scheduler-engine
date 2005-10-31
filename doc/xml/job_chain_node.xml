@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
-<!--$Id: process.xml 3943 2005-09-25 18:33:33Z jz $-->
+<!--$Id$-->
 
 <xml_element name     = "job_chain_node"
              title    = "Jobkettenknoten"
              category = "Konfiguration"
              base_dir = "../"
              parent_page = "../konfiguration.xml"
-             author   = "$Author: jz $"
-             date     = "$Date: 2005-09-25 20:33:33 +0200 (So, 25 Sep 2005) $">
+             author   = "$Author$"
+             date     = "$Date$">
 
     <scheduler_keyword keyword="Jobkettenknoten"/>
 

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id$-->
+
+<xml_element name     = "delay_after_error"
+             title    = "Job nach Fehler verzögern"
+             category = "Konfiguration"
+             base_dir = "../"
+             parent_page = "../konfiguration.xml"
+             author   = "$Author$"
+             date     = "$Date$">
+
+    <xml_parent_elements>
+        <xml_parent_element name="job"/>
+    </xml_parent_elements>
+
+
+    <xml_attributes>
+        <xml_attribute name="error_count" type="integer">
+            <description>
+                <p>
+                    Anzahl der aufeinanderfolgenden Jobfehler, ab der die Verzögerung gilt.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="delay" type="seconds|HH:MM|HH:MM:SS|stop">
+            <description>
+                <p>
+                    Frist, nach der der Job wiederholt wird.
+                </p>
+                <p>
+                    <code>delay="stop"</code> lässt den Job bei dieser Anzahl aufeinanderfolgender Fehler stoppen.
+                </p>
+            </description>
+        </xml_attribute>
+
+    </xml_attributes>
+
+    <description>
+        <p>
+            Siehe <scheduler_method class="Job" property="delay_after_error"/>.
+        </p>
+    </description>
+
+</xml_element>

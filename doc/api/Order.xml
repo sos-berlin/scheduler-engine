@@ -273,6 +273,7 @@
     <description>
         <p>
             Siehe <scheduler_method class="Job" property="delay_order_after_setback"/>
+            und <scheduler_element name="delay_order_after_setback"/>.
         </p>
     </description>
 </method>

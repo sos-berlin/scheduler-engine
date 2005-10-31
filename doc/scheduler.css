@@ -11,6 +11,7 @@ h3.bar          { font-size: 10pt; font-weight: bold; margin-top: 3em; border-to
 hr              { height: 1px; font-size: 1px; border: 0px; color: gray; background-color: gray; }
 
 p               { font-size: 10pt; margin-bottom: 0px }
+th              { font-size: 10pt; vertical-align: baseline; text-align: left; border-bottom: 1px solid black; font-weight: normal; }
 td              { font-size: 10pt; vertical-align: baseline; }
 div             { font-size: 10pt; }
 /*p:first-child   { font-size: 10pt; margin-top: 0px; margin-bottom: 0px }   Wirkt in ie6 nicht */

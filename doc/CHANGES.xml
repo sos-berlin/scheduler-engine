@@ -1,14 +1,52 @@
 <?xml version="1.0"?>
 <?xml-stylesheet href="changes.xsl" type="text/xsl"?>
 
-<!--$Id: factory_ini.xml 3623 2005-04-20 06:53:16Z jz $-->
+<!--$Id$-->
 
 <changes title    = "Änderungsprotokoll"
-         author   = "$Author: jz $"
-         date     = "$Date: 2005-05-08 01:44:34 +0200 (So, 08 Mai 2005) $">
+         author   = "$Author$"
+         date     = "$Date$">
 
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
+
+    <change date="2005-10-30" version="2.0.140" subversion_revision="3995">
+        <revision type="new" title="Monitor zur Überwachung eines Jobs">
+            <description>
+                <p>
+                    Siehe <scheduler_element name="monitor"/>.
+                </p>
+            </description>
+        </revision>
+        <revision type="new" title="Neues XML-Element &lt;job_chains&gt;">
+            <description>
+                <p>
+                    Siehe <scheduler_element name="job_chains"/>.
+                </p>
+            </description>
+        </revision>
+        <revision type="new" title="Neues XML-Element &lt;start_when_directory_changed&gt;">
+            <description>
+                <p>
+                    Siehe <scheduler_element name="start_when_directory_changed"/>.
+                </p>
+            </description>
+        </revision>
+        <revision type="new" title="Neues XML-Element &lt;delay_after_error&gt;">
+            <description>
+                <p>
+                    Siehe <scheduler_element name="delay_after_error"/>.
+                </p>
+            </description>
+        </revision>
+        <revision type="new" title="Neues XML-Element &lt;delay_order_after_setback&gt;">
+            <description>
+                <p>
+                    Siehe <scheduler_element name="delay_order_after_setback"/>.
+                </p>
+            </description>
+        </revision>
+    </change>
 
     <change date="2005-09-25" version="2.0.140" subversion_revision="3943">
         <revision type="modification" title="Wegen &lt;run_time&gt; wiederholter Auftrag erzeugt eigenen Historieneintrag">

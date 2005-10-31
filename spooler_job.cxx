@@ -201,12 +201,23 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
             else
             if( e.nodeName_is( "delay_after_error" ) )
             {
-                set_delay_after_error( e.int_getAttribute( "error_count" ), e.getAttribute( "time" ) );
+                set_delay_after_error( e.int_getAttribute( "error_count" ), e.getAttribute( "delay" ) );
             }
             else
             if( e.nodeName_is( "delay_order_after_setback" ) )
             {
-                set_delay_order_after_setback( e.int_getAttribute( "setback_count" ), e.getAttribute( "time" ) );
+                //if( e.has_attribute( "max_order_setbacks" ) )  set_max_order_setbacks( e.int_getAttribte( "max_order_setbacks" ) );
+                if( e.bool_getAttribute( "is_maximum", false ) )
+                {
+                    set_max_order_setbacks( e.int_getAttribute( "setback_count" ) );
+                }
+                else
+                    if( !e.hasAttribute( "delay" ) )  throw_xc( "SCHEDULER-231", "delay_order_after_setback", "delay" );
+
+                if( e.hasAttribute( "delay" ) )
+                {
+                    set_delay_order_after_setback( e.int_getAttribute( "setback_count" ), e.getAttribute( "delay" ) );
+                }
             }
             else
             if( e.nodeName_is( "run_time" ) &&  !_spooler->_manual )  set_run_time( e );
@@ -1732,8 +1743,8 @@ string Job::state_cmd_name( Job::State_cmd cmd )
 
 void Job::set_delay_after_error( int error_steps, const string& delay )
 { 
-    if( delay == "stop" )  set_stop_after_error( error_steps );
-                     else  set_delay_after_error( error_steps, time::time_from_string( delay ) );
+    if( lcase( delay ) == "stop" )  set_stop_after_error( error_steps );
+                              else  set_delay_after_error( error_steps, time::time_from_string( delay ) );
 }
 
 //---------------------------------------------------------------Job::set_delay_order_after_setback

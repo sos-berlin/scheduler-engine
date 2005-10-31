@@ -393,6 +393,9 @@ $spooler->job( 'job_a' )->start( parameters );</pre>
             <p>
                 Eine gute Stelle für die Aufrufe ist <scheduler_method class="Job_impl" method="spooler_init"/>.
             </p>
+            <p>
+                Siehe <scheduler_element name="delay_after_error"/>.
+            </p>
         </description>
 
         <example programming_language="java">
@@ -510,7 +513,9 @@ spooler_job.delay_after_error( 20 ) = "STOP";</pre>
                 für wiederholte Rückstellungen festlegen.
             </p>
             <p>
-                Siehe <scheduler_method class="Order" method="setback"/>,
+                Siehe 
+                <scheduler_element name="delay_order_after_setback"/>,
+                <scheduler_method class="Order" method="setback"/>,
                 <scheduler_method class="Job" property="max_order_setbacks"/>,
                 <scheduler_method class="Job_chain" method="add_job"/>,
                 <scheduler_method class="Job" method="delay_after_error"/>.
@@ -549,7 +554,8 @@ spooler_job.max_order_setbacks = 5;              // Die 5. Rückstellung versetz
                 (s. <scheduler_method class="Job_chain_node" property="error_state"/>).
             </p>
             <p>
-                Siehe <scheduler_method class="Job" property="delay_order_after_setback"/>.
+                Siehe <scheduler_method class="Job" property="delay_order_after_setback"/> und
+                <scheduler_element name="delay_order_after_setback" attribute="is_maximum" value="yes"/>.
             </p>
         </description>
     </property>

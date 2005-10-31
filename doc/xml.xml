@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
+
+
+<!--$Id$-->
+
+<description
+    title    = "Alle XML-Elemente"
+    base_dir = ""
+    author   = "$Author$"
+    date     = "$Date$"
+>
+
+<scheduler_keyword keyword="XML-Elemente (alle)"/><br/>
+
+
+<table cellpadding="0" cellspacing="0">
+    <thead>
+        <tr>
+            <th>
+                Konfiguration
+            </th>
+            <th>
+                Kommandos
+            </th>
+            <th>
+                Antworten
+            </th>
+        </tr>
+        <tr>
+            <td style="font-size: 5pt">&#160;</td>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+                <scheduler_element name="allowed_host"/><br/>
+                <scheduler_element name="base"/><br/>
+                <scheduler_element name="config"/><br/>
+                <scheduler_element name="date"/><br/>
+                <scheduler_element name="day"/><br/>
+                <scheduler_element name="delay_after_error"/><br/>
+                <scheduler_element name="delay_order_after_setback"/><br/>
+                <scheduler_element name="description"/><br/>
+                <scheduler_element name="environment"/><br/>
+                <scheduler_element name="holiday"/><br/>
+                <scheduler_element name="holidays"/><br/>
+                <scheduler_element name="include"/><br/>
+                <scheduler_element name="job"/><br/>
+                <scheduler_element name="job_chain"/><br/>
+                <scheduler_element name="job_chain_node"/><br/>
+                <scheduler_element name="job_chains"/><br/>
+                <scheduler_element name="jobs"/><br/>
+                <scheduler_element name="monitor"/><br/>
+                <scheduler_element name="monthdays"/><br/>
+                <scheduler_element name="param"/><br/>
+                <scheduler_element name="params"/><br/>
+                <scheduler_element name="period"/><br/>
+                <scheduler_element name="process"/><br/>
+                <scheduler_element name="process_class"/><br/>
+                <scheduler_element name="process_classes"/><br/>
+                <scheduler_element name="run_time"/><br/>
+                <scheduler_element name="script"/><br/>
+                <scheduler_element name="security"/><br/>
+                <scheduler_element name="sos.spooler.variable_set"/><br/>
+                <scheduler_element name="spooler"/><br/>
+                <scheduler_element name="start_when_directory_changed"/><br/>
+                <scheduler_element name="ultimos"/><br/>
+                <scheduler_element name="variable"/><br/>
+                <scheduler_element name="weekdays"/><br/>
+            </td>
+            <td>
+                <scheduler_element name="add_jobs"/><br/>
+                <scheduler_element name="add_order"/><br/>
+                <scheduler_element name="kill_task"/><br/>
+                <scheduler_element name="modify_job"/><br/>
+                <scheduler_element name="modify_order"/><br/>
+                <scheduler_element name="modify_spooler"/><br/>
+                <scheduler_element name="remove_order"/><br/>
+                <scheduler_element name="start_job"/><br/>
+                <scheduler_element name="show_history"/><br/>
+                <scheduler_element name="show_job"/><br/>
+                <scheduler_element name="show_job_chains"/><br/>
+                <scheduler_element name="show_jobs"/><br/>
+                <scheduler_element name="show_order"/><br/>
+                <scheduler_element name="show_state"/><br/>
+                <scheduler_element name="show_task"/><br/>
+                <scheduler_element name="terminate"/><br/>
+            </td>
+            <td>
+                <scheduler_element directory="xml/answer/" name="answer"/><br/>
+                <scheduler_element directory="xml/answer/" name="description"/><br/>
+                <scheduler_element directory="xml/answer/" name="ERROR"/><br/>
+                <scheduler_element directory="xml/answer/" name="history.entry"/><br/>
+                <scheduler_element directory="xml/answer/" name="history"/><br/>
+                <scheduler_element directory="xml/answer/" name="job"/><br/>
+                <scheduler_element directory="xml/answer/" name="job_chain"/><br/>
+                <scheduler_element directory="xml/answer/" name="job_chain_node"/><br/>
+                <scheduler_element directory="xml/answer/" name="job_chains"/><br/>
+                <scheduler_element directory="xml/answer/" name="jobs"/><br/>
+                <scheduler_element directory="xml/answer/" name="log"/><br/>
+                <scheduler_element directory="xml/answer/" name="ok"/><br/>
+                <scheduler_element directory="xml/answer/" name="order"/><br/>
+                <scheduler_element directory="xml/answer/" name="order_queue"/><br/>
+                <scheduler_element directory="xml/answer/" name="param"/><br/>
+                <scheduler_element directory="xml/answer/" name="params"/><br/>
+                <scheduler_element directory="xml/answer/" name="process"/><br/>
+                <scheduler_element directory="xml/answer/" name="process_class"/><br/>
+                <scheduler_element directory="xml/answer/" name="process_classes"/><br/>
+                <scheduler_element directory="xml/answer/" name="processes"/><br/>
+                <scheduler_element directory="xml/answer/" name="queued_task"/><br/>
+                <scheduler_element directory="xml/answer/" name="queued_tasks"/><br/>
+                <scheduler_element directory="xml/answer/" name="remote_scheduler"/><br/>
+                <scheduler_element directory="xml/answer/" name="remote_schedulers"/><br/>
+                <scheduler_element directory="xml/answer/" name="run_time"/><br/>
+                <scheduler_element directory="xml/answer/" name="spooler"/><br/>
+                <scheduler_element directory="xml/answer/" name="state"/><br/>
+                <scheduler_element directory="xml/answer/" name="subprocess"/><br/>
+                <scheduler_element directory="xml/answer/" name="subprocesses"/><br/>
+                <scheduler_element directory="xml/answer/" name="task"/><br/>
+                <scheduler_element directory="xml/answer/" name="tasks"/><br/>
+                <scheduler_element directory="xml/answer/" name="waiting_jobs"/><br/>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<p style="margin-top: 2em">
+    Siehe auch 
+    <a href="konfiguration.xml">XML-Konfiguration</a> und
+    <a href="xml_commands.xml">XML-Kommandos</a>.
+</p>
+
+
+</description>

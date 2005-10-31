@@ -807,7 +807,7 @@ void Spooler::load_job_chains_from_xml( const xml::Element_ptr& element )
 
                     bool can_be_not_initialized = true;
                     Job* job = job_name == ""? NULL : get_job( job_name, can_be_not_initialized  );
-                    if( state == "" )  throw_xc( "SCHEDULER-231", "state" );
+                    if( state == "" )  throw_xc( "SCHEDULER-231", "job_chain_node", "state" );
 
                     job_chain->add_job( job, state, ee.getAttribute( "next_state" ), ee.getAttribute( "error_state" ) );
                 }

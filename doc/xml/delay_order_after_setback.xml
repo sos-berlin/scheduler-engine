@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id$-->
+
+<xml_element name     = "delay_order_after_setback"
+             title    = "Auftrag nach Rückstellung verzögern"
+             category = "Konfiguration"
+             base_dir = "../"
+             parent_page = "../konfiguration.xml"
+             author   = "$Author$"
+             date     = "$Date$">
+
+    <xml_parent_elements>
+        <xml_parent_element name="job"/>
+    </xml_parent_elements>
+
+
+    <xml_attributes>
+        <xml_attribute name="setback_count" type="integer">
+            <description>
+                <p>
+                    Für die 1., 2. usw. aufeinanderfolgende Rückstellung desselben Auftrags
+                    können verschiedene Fristen eingestellt werden.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="time" type="seconds|HH:MM|HH:MM:SS">
+            <description>
+                <p>
+                    Frist für die Rückstellung.
+                    Nach Ablauf der Frist kommt der Auftrag erneut in diesem Job zu Ausführung.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="is_maximum" type="yes|no" initial="no">
+            <description>
+                <p>
+                    Attribut <code>setback_count=</code> gibt die maximale Anzahl aufeinanderfolgender Rückstellungen an.
+                    Bei einer weiteren Rückstellung (<scheduler_method class="Order" method="setback"/>)
+                    versetzt der Scheduler den Auftrag in den Fehlerzustand <scheduler_method class="Job_chain_node" property="error_state"/>.
+                </p>
+                <p>
+                    Siehe <scheduler_method class="Job" property="max_order_setbacks"/>.
+                </p>
+            </description>
+        </xml_attribute>
+
+    </xml_attributes>
+
+    <description>
+        <p>
+            Siehe <scheduler_method class="Job" property="delay_order_after_setback"/>,
+            <scheduler_method class="Job" property="max_order_setbacks"/>
+            und <scheduler_method class="Order" method="setback"/>.
+        </p>
+    </description>
+
+</xml_element>
