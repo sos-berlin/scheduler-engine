@@ -181,7 +181,8 @@
                           class   = "small"
                           style   = "cursor: pointer; text-decoration: underline;">
                     </span-->
-                    <a href="javascript:void(0)" onclick="open_url( '/doc/index.xml', 'scheduler_documentation' )" target="scheduler_documentation" class="small">Doku</a>&#160;
+                    <a href="/doc/index.xml" target="scheduler_documentation" onclick="open_url( '/doc/index.xml', 'scheduler_documentation' )" class="small">Doku</a>&#160;
+                    <!--a href="javascript:void(0)" onclick="open_url( '/doc/index.xml', 'scheduler_documentation' )" target="scheduler_documentation" class="small">Doku</a>&#160;-->
 
                     <xsl:call-template name="command_menu">
                         <xsl:with-param name="onclick" select="'scheduler_menu__onclick( mouse_x() - 100, mouse_y() - 1 )'"/>
@@ -1387,7 +1388,7 @@
         
         <xsl:choose>
             <xsl:when test="parent::job/@delay_until">
-                <xsl:text> (delayed after error)</xsl:text>
+                <xsl:text> (</xsl:text><span class="task_error">delayed after error</span><xsl:text>)</xsl:text>
             </xsl:when>
             <xsl:when test="parent::job/@in_period='no'">
                 <xsl:text> (not in period)</xsl:text>

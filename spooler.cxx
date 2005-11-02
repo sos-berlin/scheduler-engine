@@ -2106,6 +2106,9 @@ void Spooler::start()
                 Scheduler_event scheduler_event ( Scheduler_event::evt_scheduler_started, _log.highest_level(), this );
 
                 if( _log.highest_level() >= log_error )  scheduler_event.set_error( Xc( "SCHEDULER-227", _log.last( _log.highest_level() ).c_str() ) );
+                else
+                if( _log.highest_level() == log_warn )   scheduler_event.set_message( _log.last( log_warn ) );
+                
 
                 _log.set_mail_default( "subject"  , subject );
                 _log.set_mail_default( "body"     , body );
