@@ -502,35 +502,37 @@ AGAIN:
         // Nächste Operation
 
         {
-            Variant params ( Variant::vt_array, 18 );
+            Variant params ( Variant::vt_array, 17 );   // Wichtig: Größe anpassen!
 
             {
                 Locked_safearray params_array = V_ARRAY( &params );
+                int nr = 0;
 
-                params_array[0] = "language="        + _module->_language;
-                params_array[1] = "com_class="       + _module->_com_class_name;
-                params_array[2] = "filename="        + _module->_filename;
-                params_array[3] = "java_class="      + _module->_java_class_name;
+                params_array[ nr++ ] = "language="        + _module->_language;
+                params_array[ nr++ ] = "com_class="       + _module->_com_class_name;
+                params_array[ nr++ ] = "filename="        + _module->_filename;
+                params_array[ nr++ ] = "java_class="      + _module->_java_class_name;
+                params_array[ nr++ ] = "java_options="    + _spooler->_config_java_options + " " + _module->_java_options;
 
                 if( _server_hostname.empty() )
                 {
-                    params_array[4] = "java_class_path=" + _module->_spooler->_java_vm->class_path();
-                    params_array[5] = "java_work_dir="   + _module->_spooler->_java_vm->work_dir();
+                    params_array[ nr++ ] = "java_class_path=" + _module->_spooler->_java_vm->class_path();
+                    params_array[ nr++ ] = "java_work_dir="   + _module->_spooler->_java_vm->work_dir();
                 }
 
-                params_array[6] = "recompile="       + as_string( _module->_recompile && !_module->_compiled );
-                params_array[7] = "script="          + _module->_source.dom_document().xml();
-                params_array[8] = "job="             + _job_name;
-                params_array[9] = "task_id="         + as_string( _task_id );
+                params_array[ nr++ ] = "recompile="       + as_string( _module->_recompile && !_module->_compiled );
+                params_array[ nr++ ] = "script="          + _module->_source.dom_document().xml();
+                params_array[ nr++ ] = "job="             + _job_name;
+                params_array[ nr++ ] = "task_id="         + as_string( _task_id );
 
                 if( _module->_monitor )
                 {
-                    params_array[10] = "monitor.language="        + _module->_monitor->_language;       // Muss der erste Paramter sein, legt den Monitor an
-                    params_array[11] = "monitor.com_class="       + _module->_monitor->_com_class_name;
-                    params_array[12] = "monitor.filename="        + _module->_monitor->_filename;
-                    params_array[13] = "monitor.java_class="      + _module->_monitor->_java_class_name;
-                    params_array[16] = "monitor.recompile="       + as_string( _module->_monitor->_recompile && !_module->_monitor->_compiled );
-                    params_array[17] = "monitor.script="          + _module->_monitor->_source.dom_document().xml();
+                    params_array[ nr++ ] = "monitor.language="        + _module->_monitor->_language;       // Muss der erste Paramter sein, legt den Monitor an
+                    params_array[ nr++ ] = "monitor.com_class="       + _module->_monitor->_com_class_name;
+                    params_array[ nr++ ] = "monitor.filename="        + _module->_monitor->_filename;
+                    params_array[ nr++ ] = "monitor.java_class="      + _module->_monitor->_java_class_name;
+                    params_array[ nr++ ] = "monitor.recompile="       + as_string( _module->_monitor->_recompile && !_module->_monitor->_compiled );
+                    params_array[ nr++ ] = "monitor.script="          + _module->_monitor->_source.dom_document().xml();
                 }
             }
 

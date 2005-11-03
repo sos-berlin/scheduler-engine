@@ -143,6 +143,7 @@ struct Module : Object
     // Java
     ptr<java::Vm>              _java_vm;
     string                     _java_class_name;            // <script java_class="...">
+    string                     _java_options;               // Gehört eigentlich nach Job
     bool                       _recompile;                  // <script recompile="..">    Immer kompilieren
     bool                       _compiled;
 

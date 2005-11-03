@@ -220,22 +220,11 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
             _server._module->_java_vm->set_javac_filename( javac );
             _server._module->_java_vm->set_options( java_options );
         }
-
-        /* Jetzt in Module::create_instance()
-        if( _server._module->_kind == Module::kind_java  
-        ||  _server._module->_monitor && _server._module->_monitor->_kind == Module::kind_java )
+        else
         {
-            if( !_server._module->_java_vm->running() )
-            {
-                Java_module_instance::init_java_vm( _server._module->_java_vm );
-            }
-            else
-            {
-                LOG( "Com_remote_module_instance_server::construct: Die Java Virtual Machine läuft bereits.\n" );
-                // Parameter für Java können nicht übernommen werden.
-            }
+            LOG( "Com_remote_module_instance_server::Construct: Die Java Virtual Machine läuft bereits.\n" );
+            // Parameter für Java können nicht übernommen werden.
         }
-        */
 
         _server._module_instance = _server._module->create_instance();
        

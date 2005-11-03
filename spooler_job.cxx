@@ -98,6 +98,8 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
         order       = element.bool_getAttribute( "order"        );
         _module._process_class_name 
                     = element.     getAttribute( "process_class", _module._process_class_name );
+        _module._java_options += " " +
+                      element.     getAttribute( "java_options" );
         _max_tasks  = element.uint_getAttribute( "tasks"        , _max_tasks );
         string t    = element.     getAttribute( "timeout"      );
         if( t != "" )  

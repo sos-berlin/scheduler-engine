@@ -131,7 +131,7 @@ void Module::set_checked_attribute( string* variable, const xml::Element_ptr& el
 {
     if( !_initialized ) 
     {
-        *variable = element.getAttribute( attribute_name );
+        *variable = element.getAttribute( attribute_name, *variable );
     }
     else
     if( element.hasAttribute( attribute_name  )  &&  element.getAttribute( attribute_name ) != *variable )  

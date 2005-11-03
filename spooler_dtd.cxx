@@ -144,6 +144,7 @@ const char dtd_string[] =
 "<!ATTLIST job                   idle_timeout        CDATA #IMPLIED>     <!--  -->\n"
 "<!ATTLIST job                   process_class       CDATA #IMPLIED>     <!--  -->\n"
 "<!ATTLIST job                   mail_xslt_stylesheet CDATA #IMPLIED> \n"
+"<!ATTLIST job                   java_options        CDATA #IMPLIED> \n"
 "\n"
 "\n"
 "<!ELEMENT description           ( #PCDATA | include )*>                 <!-- Beschreibung des Jobs -->\n"
