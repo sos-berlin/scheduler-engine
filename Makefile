@@ -2,7 +2,13 @@
 
 PROD_DIR = $(shell cd ../.. && /bin/pwd)
 
-DEP_PRODUCTS = kram file fs zschimmer
+DEP_PRODUCTS := kram file fs zschimmer
+
+#HPUX: Hostjava einbinden
+ifeq ($(shell uname),HP-UX)
+DEP_PRODUCTS += hostjava hostole
+endif
+
 
 objects = \
  spooler.o\
