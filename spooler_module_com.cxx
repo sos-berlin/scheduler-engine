@@ -109,7 +109,7 @@ Com_module_instance::~Com_module_instance()
     try {
         close__end();   // Synchron
     }
-    catch( const Xc& ) {}
+    catch( exception& ) {}
 }
 
 //------------------------------------------------------------------------Com_module_instance::init
@@ -212,7 +212,7 @@ Scripting_engine_module_instance::~Scripting_engine_module_instance()
     try {
         close__end();  // Synchron
     }
-    catch( const Xc& ) {}
+    catch( exception& ) {}
 }
 
 //-----------------------------------------------------------Scripting_engine_module_instance::init

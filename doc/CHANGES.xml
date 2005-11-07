@@ -10,6 +10,26 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2005-11-07" version="2.0.143" subversion_revision="4005">
+        <revision type="correction" title="&lt;security ignore_unknown_hosts=&quot;yes&quot;&gt;">
+            <description>
+                <p>
+                    <scheduler_element name="security" attribute="ignore_unknown_hosts" value="yes"/> funktioniert wieder.
+                </p>
+            </description>
+        </revision>
+        
+        <revision type="modification" title="HPUX: Hostjava ist im Scheduler eingebunden">
+            <description>
+                <p>
+                    Weil es ein Problem mit gcc 3.2 beim Nachladen der libhostjava.sl gibt
+                    (die statischen Variablen werden nicht initialisiert), 
+                    ist Hostjava auf HP-UX jetzt fest eingebunden.
+                </p>
+            </description>
+        </revision>
+    </change>
+    
     <change date="2005-11-03" version="2.0.142" subversion_revision="4003">
         <revision type="new" title="&lt;job java_options=&gt;">
             <description>

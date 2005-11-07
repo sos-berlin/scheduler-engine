@@ -164,9 +164,9 @@ void Security::set_dom( const xml::Element_ptr& security_element )
             try {
                 host_set = Ip_address::get_host_set_by_name( hostname );
             }
-            catch( const Xc& x )
+            catch( exception& x )
             {
-                _spooler->log()->error( "<allowed_host host=\"" + hostname + "\">  " + x.what() );
+                _spooler->log()->warn( "<allowed_host host=\"" + hostname + "\">  " + x.what() );
                 if( !ignore_unknown_hosts )  throw;
             }
             
