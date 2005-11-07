@@ -297,7 +297,7 @@ void Java_module_instance::init_java_vm( java::Vm* java_vm )
 
 #   ifdef Z_HPUX
         Z_LOG( "init_hostjava()\n" );
-        hostjava::init_hostjava();          // Weil gcc 3.2 in libhostjava.sl die statischen Variablen nicht initialisiert, bin wir das Module ein.
+        hostjava::init_hostjava( java_vm );     // Weil gcc 3.2 in libhostjava.sl die statischen Variablen nicht initialisiert, bin wir das Module ein.
 #   endif
 }
 

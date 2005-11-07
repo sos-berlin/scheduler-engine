@@ -24,7 +24,7 @@
                 <p>
                     Weil es ein Problem mit gcc 3.2 beim Nachladen der libhostjava.sl gibt
                     (die statischen Variablen werden nicht initialisiert), 
-                    ist Hostjava auf HP-UX jetzt fest eingebunden.
+                    ist Hostjava auf HP-UX fest eingebunden.
                 </p>
             </description>
         </revision>
