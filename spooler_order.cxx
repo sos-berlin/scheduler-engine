@@ -210,7 +210,7 @@ xml::Element_ptr Job_chain::dom_element( const xml::Document_ptr& document, cons
             {
                 Any_file sel ( "-in " + _spooler->_db->db_name() + "-max-length=32K  "
                                "select %limit(20) \"ORDER_ID\" as \"ID\", \"JOB_CHAIN\", \"START_TIME\", \"TITLE\", \"STATE\", \"STATE_TEXT\""
-                               " from " + sql::uquoted_name( _spooler->_order_history_tablename ) +
+                               " from " + _spooler->_order_history_tablename +
                                " where \"JOB_CHAIN\"=" + sql::quoted( _name ) +
                                  " and \"SPOOLER_ID\"=" + sql::quoted( _spooler->id_for_db() ) +
                                " order by \"HISTORY_ID\" desc" );
@@ -278,15 +278,16 @@ void Job_chain::load_orders_from_database()
         Transaction ta ( _spooler->_db );
 
         Any_file sel ( "-in " + _spooler->_db->db_name() + "-max-length=32K "
-                    " select \"ID\", \"PRIORITY\", \"STATE\", \"STATE_TEXT\", \"TITLE\", \"CREATED_TIME\", \"PAYLOAD\", \"RUN_TIME\", \"INITIAL_STATE\""
-                    " from " + sql::uquoted_name( _spooler->_orders_tablename ) +
+                    " select \"ID\", \"PRIORITY\", \"STATE\", \"STATE_TEXT\", \"TITLE\", \"CREATED_TIME\",  \"RUN_TIME\", \"INITIAL_STATE\""
+                    " from " + _spooler->_orders_tablename +
                     " where \"SPOOLER_ID\"=" + sql::quoted(_spooler->id_for_db()) +
                     " and \"JOB_CHAIN\"=" + sql::quoted(_name) +
                     " order by \"ORDERING\"" );
 
         while( !sel.eof() )
         {
-            ptr<Order> order = new Order( _spooler, sel.get_record() );
+            Record record = sel.get_record();
+            ptr<Order> order = new Order( _spooler, record, _spooler->_db->read_payload_clob( record.as_string( "id" ) ) );
             order->_is_in_database = true;
             order->add_to_job_chain( this );    // Einstieg nur über Order, damit Semaphoren stets in derselben Reihenfolge gesperrt werden.
             count++;
@@ -890,7 +891,7 @@ Order::Order( Spooler* spooler, const VARIANT& payload )
 
 //-------------------------------------------------------------------------------------Order::Order
 
-Order::Order( Spooler* spooler, const Record& record )
+Order::Order( Spooler* spooler, const Record& record, const string& payload_string )
 :
     Com_order(this),
     Scheduler_object( spooler, static_cast<IDispatch*>( this ), type_order ),
@@ -906,7 +907,7 @@ Order::Order( Spooler* spooler, const Record& record )
     _title      = record.as_string( "title"      );
     _priority   = record.as_int   ( "priority"   );
 
-    string payload_string = record.as_string( "payload" );
+    //string payload_string = record.as_string( "payload" );
 
     //LOG( "db payload=" << payload_string << "\n" );
     if( payload_string.find( "<" + Com_variable_set::xml_element_name() ) != string::npos )

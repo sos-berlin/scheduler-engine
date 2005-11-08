@@ -498,7 +498,7 @@ xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& 
         {
             Any_file sel ( "-in " + _spooler->_db->db_name() + 
                            " select max(\"HISTORY_ID\") as history_id_max "
-                           " from " + sql::uquoted_name( _spooler->_order_history_tablename ) +
+                           " from " + _spooler->_order_history_tablename +
                            " where \"SPOOLER_ID\"=" + sql::quoted( _spooler->id_for_db() ) + 
                             " and \"JOB_CHAIN\"="   + sql::quoted( job_chain_name ) +
                             " and \"ORDER_ID\"="    + sql::quoted( id_string ) );
@@ -512,7 +512,7 @@ xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& 
         {
             Any_file sel ( "-in " + _spooler->_db->db_name() + "-max-length=32K "
                            "select \"ORDER_ID\" as \"ID\", \"START_TIME\", \"TITLE\", \"STATE\", \"STATE_TEXT\""
-                           " from " + sql::uquoted_name( _spooler->_order_history_tablename ) +
+                           " from " + _spooler->_order_history_tablename +
                            " where \"HISTORY_ID\"=" + history_id );
 
             Record record = sel.get_record();
@@ -526,7 +526,7 @@ xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& 
           //order->set_priority  ( record.as_int   ( "priority"   ) );
         }
 
-        string log = file_as_string( GZIP_AUTO + _spooler->_db->db_name() + " -table=" + sql::uquoted_name( _spooler->_order_history_tablename ) + " -blob=\"LOG\"" 
+        string log = file_as_string( GZIP_AUTO + _spooler->_db->db_name() + " -table=" + _spooler->_order_history_tablename + " -blob=\"LOG\"" 
                                      " where \"HISTORY_ID\"=" + history_id );
 
         return order->dom_element( _answer, show, &log );
@@ -865,7 +865,7 @@ ptr<Http_response> Command_processor::execute_http( Http_request* http_request )
                         {
                             Any_file sel ( "-in " + _spooler->_db->db_name() + 
                                            " select max(\"HISTORY_ID\") as history_id_max "
-                                           " from " + sql::uquoted_name( _spooler->_order_history_tablename ) +
+                                           " from " + _spooler->_order_history_tablename +
                                            " where \"SPOOLER_ID\"=" + sql::quoted( _spooler->id_for_db() ) + 
                                              " and \"JOB_CHAIN\"="  + sql::quoted( job_chain_name ) +
                                              " and \"ORDER_ID\"="   + sql::quoted( order_id ) );
@@ -875,7 +875,7 @@ ptr<Http_response> Command_processor::execute_http( Http_request* http_request )
                                 string history_id = sel.get_record().as_string( "history_id_max" );
                                 if( history_id != "" )
                                 {
-                                    string log_text = file_as_string( GZIP_AUTO + _spooler->_db->db_name() + " -table=" + sql::uquoted_name( _spooler->_order_history_tablename ) + " -blob=\"LOG\"" 
+                                    string log_text = file_as_string( GZIP_AUTO + _spooler->_db->db_name() + " -table=" + _spooler->_order_history_tablename + " -blob=\"LOG\"" 
                                                                     " where \"HISTORY_ID\"=" + history_id );
                                     string title = "Auftrag " + order_id;
                                     //TODO Log wird im Speicher gehalten! Besser: In Datei schreiben, vielleicht sogar Order und Log anlegen

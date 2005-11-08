@@ -1691,8 +1691,8 @@ void Spooler::load_arg()
     _include_path               = subst_env( read_profile_string    ( _factory_ini, "spooler", "include_path"       , _include_path ) );   _include_path_as_option_set  = !_include_path.empty();
     _spooler_param              =            read_profile_string    ( _factory_ini, "spooler", "param"              );                   _spooler_param_as_option_set = !_spooler_param.empty();
     log_level                   =            read_profile_string    ( _factory_ini, "spooler", "log_level"          , log_level );   
-    _tasks_tablename            =            read_profile_string    ( _factory_ini, "spooler", "db_tasks_table"     , "SCHEDULER_TASKS"   );
-    _job_history_tablename      =            read_profile_string    ( _factory_ini, "spooler", "db_history_table"   , "SCHEDULER_HISTORY" );
+    _tasks_tablename            = ucase(     read_profile_string    ( _factory_ini, "spooler", "db_tasks_table"     , "SCHEDULER_TASKS"   ) );
+    _job_history_tablename      = ucase(     read_profile_string    ( _factory_ini, "spooler", "db_history_table"   , "SCHEDULER_HISTORY" ) );
     _job_history_columns        =            read_profile_string    ( _factory_ini, "spooler", "history_columns"    );
     _job_history_yes            =            read_profile_bool      ( _factory_ini, "spooler", "history"            , true );
     _job_history_on_process     =            read_profile_history_on_process( _factory_ini, "spooler", "history_on_process", 0 );
@@ -1716,9 +1716,9 @@ void Spooler::load_arg()
     }
 
     _max_db_errors              =            read_profile_int       ( _factory_ini, "spooler", "max_db_errors"         , 5 );
-    _order_history_tablename    =            read_profile_string    ( _factory_ini, "spooler", "db_order_history_table", "SCHEDULER_ORDER_HISTORY" );
-    _orders_tablename           =            read_profile_string    ( _factory_ini, "spooler", "db_orders_table"       , "SCHEDULER_ORDERS"    );
-    _variables_tablename        =            read_profile_string    ( _factory_ini, "spooler", "db_variables_table"    , "SCHEDULER_VARIABLES" );
+    _order_history_tablename    = ucase(     read_profile_string    ( _factory_ini, "spooler", "db_order_history_table", "SCHEDULER_ORDER_HISTORY" ) );
+    _orders_tablename           = ucase(     read_profile_string    ( _factory_ini, "spooler", "db_orders_table"       , "SCHEDULER_ORDERS"    ) );
+    _variables_tablename        = ucase(     read_profile_string    ( _factory_ini, "spooler", "db_variables_table"    , "SCHEDULER_VARIABLES" ) );
   //_interactive                = true;     // Kann ohne weiteres true gesetzt werden (aber _is_service setzt es wieder false)
 
 

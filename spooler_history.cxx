@@ -50,12 +50,12 @@ string operator << ( const char* a, const B& b )
 }
 */
 //------------------------------------------------------------------------------------------uquoted
-
+/*
 static string uquoted( const string& value ) 
 { 
     return quoted_string( ucase( value ), '\"', '\"' ); 
 }
-
+*/
 //---------------------------------------------------------------------------------------sql_quoted
 
 inline string sql_quoted( const string& value ) 
@@ -143,7 +143,7 @@ Spooler_db::Spooler_db( Spooler* spooler )
     Scheduler_object( spooler, spooler, Scheduler_object::type_database ),
     _zero_(this+1),
     _lock("Spooler_db"),
-    _db_descr( z::sql::flag_uppercase_names | z::sql::flag_quote_names )
+    _db_descr( z::sql::flag_uppercase_names | z::sql::flag_quote_names | z::sql::flag_dont_quote_table_names )
 {
     _log = Z_NEW( Prefix_log( this, "Database" ) );
 }
@@ -206,7 +206,7 @@ void Spooler_db::open2( const string& db_name )
 
                     create_table_when_needed( _spooler->_variables_tablename, 
                                             "\"NAME\" varchar(100) not null,"
-                                            "\"WERT\" varchar(250),"  
+                                            "\"WERT\" integer,"  
                                             "primary key ( \"name\" )" );
 
 
@@ -249,7 +249,7 @@ void Spooler_db::open2( const string& db_name )
                     try
                     {
                         Transaction ta ( this );
-                        Any_file select ( "-in " + _db_name + " SELECT \"INITIAL_STATE\" from " + uquoted(_spooler->_orders_tablename) + " where 1=0" );
+                        Any_file select ( "-in " + _db_name + " SELECT \"INITIAL_STATE\" from " + _spooler->_orders_tablename + " where 1=0" );
                     }
                     catch( exception& x )
                     {
@@ -257,7 +257,7 @@ void Spooler_db::open2( const string& db_name )
                         _log->warn( x.what() );
                         _log->info( "Tabelle " + _spooler->_orders_tablename + " wird um die Spalten INITIAL_STATE und RUN_TIME erweitert" );
                         
-                        _db.put( "ALTER TABLE " + uquoted(_spooler->_orders_tablename) + 
+                        _db.put( "ALTER TABLE " + _spooler->_orders_tablename + 
                                 " add ( \"INITIAL_STATE\" varchar(100)," 
                                         "\"RUN_TIME\" clob )" );
                         ta.commit();
@@ -351,7 +351,7 @@ void Spooler_db::create_table_when_needed( const string& tablename, const string
     try
     {
         Any_file select;
-        select.open( "-in " + _db_name + " SELECT count(*) from " + uquoted(tablename) + " where 1=0" );
+        select.open( "-in " + _db_name + " SELECT count(*) from " + tablename + " where 1=0" );
         select.get_record();
         select.close();
         // ok
@@ -360,7 +360,7 @@ void Spooler_db::create_table_when_needed( const string& tablename, const string
     {
         _log->warn( x.what() );
         _log->info( "Tabelle " + tablename + " wird eingerichtet" );
-        _db.put( "CREATE TABLE " + uquoted(tablename) + " (" + fields + ") " );
+        _db.put( "CREATE TABLE " + tablename + " (" + fields + ") " );
     }
 
     ta.commit();        // Für select und für create table (jedenfalls bei Jet)
@@ -574,10 +574,10 @@ int Spooler_db::get_id_( const string& variable_name, Transaction* outer_transac
             //_job_id_select.close( close_cursor );
 
 //static int c = 3;  if( --c <= 0 )  throw_xc( "FEHLER" );
-            execute( "UPDATE " + uquoted(_spooler->_variables_tablename) + " set \"WERT\" = \"WERT\"+1 where \"NAME\"=" + sql::quoted( variable_name ) );
+            execute( "UPDATE " + _spooler->_variables_tablename + " set \"WERT\" = \"WERT\"+1 where \"NAME\"=" + sql::quoted( variable_name ) );
 
             Any_file sel;
-            sel.open( "-in " + _db_name + "SELECT \"WERT\" from " + uquoted(_spooler->_variables_tablename) + " where \"NAME\"=" + sql::quoted( variable_name ) );
+            sel.open( "-in " + _db_name + "SELECT \"WERT\" from " + _spooler->_variables_tablename + " where \"NAME\"=" + sql::quoted( variable_name ) );
             if( sel.eof() )
             {
                 //Any_file sel2 ( "-in " + _db_name + "SELECT max( \"ID\" )  from " + uquoted(_spooler->_job_history_tablename) );
@@ -586,7 +586,7 @@ int Spooler_db::get_id_( const string& variable_name, Transaction* outer_transac
                 //sel2.close();
 
                 id = 1;
-                execute( "INSERT into " + uquoted(_spooler->_variables_tablename) + " (\"NAME\",\"WERT\") " 
+                execute( "INSERT into " + _spooler->_variables_tablename + " (\"NAME\",\"WERT\") " 
                          "values (" + sql::quoted( variable_name ) + ",'" + as_string(id) + "')" );
             }
             else
@@ -659,7 +659,7 @@ void Spooler_db::spooler_start()
             {
                 Transaction ta ( this );
                 {
-                    execute( "INSERT into " + uquoted(_spooler->_job_history_tablename) + " (\"ID\",\"SPOOLER_ID\",\"JOB_NAME\",\"START_TIME\") "
+                    execute( "INSERT into " + _spooler->_job_history_tablename + " (\"ID\",\"SPOOLER_ID\",\"JOB_NAME\",\"START_TIME\") "
                              "values (" + as_string(_id) + "," + sql_quoted(_spooler->id_for_db()) + ",'(Spooler)',{ts'" + Time::now().as_string(Time::without_ms) + "'})" );
                     ta.commit();
                 }
@@ -682,7 +682,7 @@ void Spooler_db::spooler_stop()
         {
             Transaction ta ( this );
             {
-                execute( "UPDATE " + uquoted(_spooler->_job_history_tablename) + " set end_time={ts'" + Time::now().as_string(Time::without_ms) + "'} "
+                execute( "UPDATE " + _spooler->_job_history_tablename + "  set end_time={ts'" + Time::now().as_string(Time::without_ms) + "'} "
                          "where id=" + as_string(_id) );
                 ta.commit();
             }
@@ -721,8 +721,8 @@ void Spooler_db::insert_order( Order* order )
                     insert[ "title"         ] = order->title()                     , order->_title_modified      = false;
                     insert[ "state"         ] = order->state().as_string();
                     insert[ "state_text"    ] = order->state_text()                , order->_state_text_modified = false;
+                  //insert[ "payload"       ] = order->payload().as_string()       , order->_payload_modified    = false;
                     insert[ "priority"      ] = order->priority()                  , order->_priority_modified   = false;
-                    insert[ "payload"       ] = order->payload().as_string()       , order->_payload_modified    = false;
                     insert.set_datetime( "created_time", order->_created.as_string(Time::without_ms) );
                     insert.set_datetime( "mod_time", Time::now().as_string(Time::without_ms) );
 
@@ -732,6 +732,10 @@ void Spooler_db::insert_order( Order* order )
                     insert[ "initial_state" ] = order->initial_state().as_string();
 
                     execute( insert );
+
+                    
+                    update_payload_clob( order ), order->_payload_modified = false;
+
                     ta.commit();
                 }
 
@@ -750,6 +754,24 @@ void Spooler_db::insert_order( Order* order )
         _spooler->log()->error( "FEHLER BEIM EINFÜGEN IN DIE TABELLE " + _spooler->_orders_tablename + ": " + x.what() ); 
         throw;
     }
+}
+
+//------------------------------------------------------------------Spooler_db::update_payload_clob
+
+void Spooler_db::update_payload_clob( Order* order )
+{
+    Any_file clob ( "-out " + _db_name + " -table=" + _spooler->_orders_tablename + " -clob=payload"
+                    "  where id=" + sql::quoted( order->id().as_string() ) );
+    clob.put( order->payload().as_string() );
+    clob.close();
+}
+
+//--------------------------------------------------------------------Spooler_db::read_payload_clob
+
+string Spooler_db::read_payload_clob( const string& order_id )
+{
+    return file_as_string( _db_name + " -table=" + _spooler->_orders_tablename + " -clob=payload"
+                           "  where id=" + sql::quoted( order_id ) );
 }
 
 //-------------------------------------------------------------------------Spooler_db::delete_order
@@ -892,7 +914,7 @@ void Spooler_db::update_order( Order* order )
                         if( order->_priority_modified   )  update[ "priority"   ] = order->priority()           ,  order->_state_text_modified = false;
                         if( order->_title_modified      )  update[ "title"      ] = order->title()              ,  order->_title_modified      = false;
                         if( order->_state_text_modified )  update[ "state_text" ] = order->state_text()         ,  order->_state_text_modified = false;
-                        if( order->_payload_modified    )  update[ "payload"    ] = order->payload().as_string(),  order->_payload_modified    = false;
+                      //if( order->_payload_modified    )  update[ "payload"    ] = order->payload().as_string(),  order->_payload_modified    = false;
 
                         if( order->run_time() )  update[ "run_time" ] = order->run_time()->dom_document().xml();
                                            else  update[ "run_time" ].set_direct( "null" );
@@ -905,6 +927,8 @@ void Spooler_db::update_order( Order* order )
                         update.and_where_condition( "id"       , order->id().as_string()    );
 
                         execute( update );
+
+                        if( order->_payload_modified )  update_payload_clob( order ),  order->_payload_modified = false;
                     }
 
                     ta.commit();
@@ -940,7 +964,7 @@ xml::Element_ptr Spooler_db::read_task( const xml::Document_ptr& doc, int task_i
         {
             Any_file sel ( "-in " + _spooler->_db->db_name() + 
                             "select \"SPOOLER_ID\", \"JOB_NAME\", \"START_TIME\", \"END_TIME\", \"CAUSE\", \"STEPS\", \"ERROR\", \"ERROR_CODE\", \"ERROR_TEXT\" " +
-                            "  from " + quoted_string( ucase( _spooler->_job_history_tablename ), '\"', '\"' ) +
+                            "  from " + _spooler->_job_history_tablename  +
                             "  where \"ID\"=" + as_string(task_id) );
             if( sel.eof() )  throw_xc( "SCHEDULER-207", task_id );
 
@@ -985,7 +1009,7 @@ xml::Element_ptr Spooler_db::read_task( const xml::Document_ptr& doc, int task_i
             {
                 try
                 {
-                    string log = file_as_string( GZIP_AUTO + _spooler->_db->db_name() + " -table=" + sql::uquoted_name( _spooler->_job_history_tablename ) + " -blob=\"LOG\"" 
+                    string log = file_as_string( GZIP_AUTO + _spooler->_db->db_name() + " -table=" + _spooler->_job_history_tablename + " -blob=\"LOG\"" 
                                                 " where \"ID\"=" + as_string(task_id) );
                     dom_append_text_element( task_element, "log", log );
                 }
@@ -1210,7 +1234,7 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
                                 ( next == 0? "" : "%limit(" + as_string(abs(next)) + ") " ) +
                                 " \"ID\", \"SPOOLER_ID\", \"JOB_NAME\", \"START_TIME\", \"END_TIME\", \"CAUSE\", \"STEPS\", \"ERROR\", \"ERROR_CODE\", \"ERROR_TEXT\" " +
                                 join( "", vector_map( prepend_comma, _extra_names ) ) +
-                                " from " + uquoted(_spooler->_job_history_tablename) + 
+                                " from " + _spooler->_job_history_tablename + 
                                 clause );
                     }
                     else
@@ -1430,7 +1454,7 @@ void Task_history::write( bool start )
                         _spooler->_db->_history_update_params[6] = _task->_id;
                         _spooler->_db->_history_update.execute();
         */
-                        string stmt = "UPDATE " + uquoted(_spooler->_job_history_tablename) + " set ";
+                        string stmt = "UPDATE " + _spooler->_job_history_tablename + "  set ";
                         stmt +=   "\"START_TIME\"={ts'" + start_time + "'}";
                         stmt += ", \"END_TIME\"={ts'" + Time::now().as_string(Time::without_ms) + "'}";
                         stmt += ", \"STEPS\"=" + as_string( _task->_step_count );

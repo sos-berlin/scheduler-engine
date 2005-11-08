@@ -366,7 +366,7 @@ STDMETHODIMP Com_variable_set::get_Value( VARIANT* name, VARIANT* value )
         value->bstrVal = NULL;
 
         HRESULT hr = get_Xml( &V_BSTR(value) );
-        if( !FAILED(hr) )  LOG( "Com_variable_set::get_value => " << string_from_bstr(V_BSTR(value)) << "\n" );
+        //if( !FAILED(hr) )  LOG( "Com_variable_set::get_value => " << string_from_bstr(V_BSTR(value)) << "\n" );
         return hr;
     }
     else 

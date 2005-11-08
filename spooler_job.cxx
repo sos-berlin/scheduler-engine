@@ -577,7 +577,7 @@ void Job::load_tasks_from_db()
 
     Any_file sel ( "-in " + _spooler->_db->db_name() + 
                     "select \"TASK_ID\", \"ENQUEUE_TIME\", \"START_AT_TIME\"" //, length(\"PARAMETERS\") parlen " +
-                    "  from " + quoted_string( ucase( _spooler->_tasks_tablename ), '"', '"' ) +
+                    "  from " + _spooler->_tasks_tablename +
                     "  where \"SPOOLER_ID\"=" + quoted_string( _spooler->id_for_db(), '\'', '\'' ) +
                        " and \"JOB_NAME\"=" + quoted_string( _name, '\'', '\'' ) +
                     "  order by \"TASK_ID\"" );
@@ -686,7 +686,7 @@ void Job::Task_queue::remove_task_from_db( int task_id )
             {
                 Transaction ta ( _spooler->_db );
 
-                _spooler->_db->execute( "DELETE from " + uquoted_name( _spooler->_tasks_tablename ) +
+                _spooler->_db->execute( "DELETE from " + _spooler->_tasks_tablename +
                                         "  where \"TASK_ID\"=" + as_string( task_id ) );
                 ta.commit();
             }

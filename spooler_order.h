@@ -29,7 +29,7 @@ struct Order : Com_order,
     Z_GNU_ONLY(                 Order                   (); )                                       // Für gcc 3.2. Nicht implementiert
                                 Order                   ( Spooler* );
                                 Order                   ( Spooler*, const VARIANT& );
-                                Order                   ( Spooler*, const Record& );
+                                Order                   ( Spooler*, const Record&, const string& payload );
                                ~Order                   ();
 
     void                        init                    ();
