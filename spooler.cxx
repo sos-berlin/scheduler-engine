@@ -3332,7 +3332,25 @@ int sos_main( int argc, char** argv )
     _argc = argc;
     _argv = argv;
 
-    return sos::spooler_main( argc, argv, "" );
+    int ret = sos::spooler_main( argc, argv, "" );
+
+
+
+#   ifdef SCHEDULER_WITH_HOSTJAVA
+
+        // HP-UX und eingebundenes Hostjava: Irgendein atexit() stürzt in InterlockedIncrement() (AddRef()?") ab.
+        // Deshalb beenden wir den Scheduler hier mit _exit(), schließen aber alle Dateien vorher
+
+        Z_LOG( "_exit(" << ret << ") für Hostjava\n" );
+
+        int n = sysconf( _SC_OPEN_MAX );
+        for( int i = 0; i < n; i++ )  ::close(i);
+
+        _exit( ret );   // Kein atexit() wird gerufen, keine Standard-I/O-Puffer werden geschrieben
+
+#   endif
+
+    return ret;
 }
 
 

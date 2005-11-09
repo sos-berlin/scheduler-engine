@@ -8,6 +8,10 @@
 #include "../kram/sysxcept.h"
 #include "../kram/sosopt.h"
 
+#ifdef Z_HPUX
+#   define SCHEDULER_WITH_HOSTJAVA
+#endif
+
 #ifdef Z_WINDOWS
 #   define SPOOLER_USE_LIBXML2              // Gnomes libxml2
 //# define SPOOLER_USE_MSXML                // Microsofts msxml3

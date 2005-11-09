@@ -10,7 +10,7 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2005-11-08" version="2.0.144" subversion_revision="4011">
+    <change date="2005-11-08" version="2.0.144" subversion_revision="4015">
         <revision type="correction" title="SQL-Tabellenamen ohne &quot;&quot;; Große order.payload möglich">
             <description>
                 <p>
@@ -23,7 +23,7 @@
                 </p>
             </description>
         </revision>
-<!--        
+
         <revision type="modification" title="HPUX: Hostjava ist im Scheduler eingebunden">
             <description>
                 <p>
@@ -31,9 +31,12 @@
                     (die statischen Variablen werden nicht initialisiert), 
                     ist Hostjava auf HP-UX fest eingebunden.
                 </p>
+                <p>
+                    system_information() implementiert für HP-UX die Plattenplatz-Funktionen bereit.
+                </p>
             </description>
         </revision>
--->        
+
     </change>
     
     <change date="2005-11-07" version="2.0.143" subversion_revision="4005">

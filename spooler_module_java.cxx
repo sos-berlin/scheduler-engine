@@ -32,7 +32,7 @@
 #   error "Der Scheduler braucht jni.h Version 1.2"
 #endif
 
-#ifdef Z_HPUX
+#ifdef SCHEDULER_WITH_HOSTJAVA
 #   include "../hostjava/hostjava.h"
 #endif
 
@@ -295,7 +295,7 @@ void Java_module_instance::init_java_vm( java::Vm* java_vm )
     if( ret < 0 )  throw_java_ret( ret, "RegisterNatives" );
 
 
-#   ifdef Z_HPUX
+#   ifdef SCHEDULER_WITH_HOSTJAVA
         Z_LOG( "init_hostjava()\n" );
         hostjava::init_hostjava( java_vm );     // Weil gcc 3.2 in libhostjava.sl die statischen Variablen nicht initialisiert, bin wir das Module ein.
 #   endif

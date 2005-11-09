@@ -207,6 +207,7 @@ void Spooler_db::open2( const string& db_name )
                     create_table_when_needed( _spooler->_variables_tablename, 
                                             "\"NAME\" varchar(100) not null,"
                                             "\"WERT\" integer,"  
+                                            "\"TEXTWERT\" varchar(250),"  
                                             "primary key ( \"name\" )" );
 
 
