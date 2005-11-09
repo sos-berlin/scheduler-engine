@@ -37,6 +37,15 @@
             </description>
         </revision>
 
+        <revision type="modification" title="Tabelle scheduler_variables geändert">
+            <description>
+                <p>
+                    Die Spalte "wert" ist jetzt ein Integer. Die neue Spalte Textwert ist ein Varchar(250)
+                    (wird vom Scheduler zurzeit nicht verwendet).
+                </p>
+            </description>
+        </revision>
+
     </change>
     
     <change date="2005-11-07" version="2.0.143" subversion_revision="4005">

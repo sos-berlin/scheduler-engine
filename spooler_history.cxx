@@ -207,6 +207,7 @@ void Spooler_db::open2( const string& db_name )
                     create_table_when_needed( _spooler->_variables_tablename, 
                                             "\"NAME\" varchar(100) not null,"
                                             "\"WERT\" integer,"  
+                                            "\"TEXTWERT\" varchar(250),"  
                                             "primary key ( \"name\" )" );
 
 
@@ -682,8 +683,8 @@ void Spooler_db::spooler_stop()
         {
             Transaction ta ( this );
             {
-                execute( "UPDATE " + _spooler->_job_history_tablename + "  set end_time={ts'" + Time::now().as_string(Time::without_ms) + "'} "
-                         "where id=" + as_string(_id) );
+                execute( "UPDATE " + _spooler->_job_history_tablename + "  set \"END_TIME\"={ts'" + Time::now().as_string(Time::without_ms) + "'} "
+                         "where \"ID\"=" + as_string(_id) );
                 ta.commit();
             }
         }
@@ -761,7 +762,7 @@ void Spooler_db::insert_order( Order* order )
 void Spooler_db::update_payload_clob( Order* order )
 {
     Any_file clob ( "-out " + _db_name + " -table=" + _spooler->_orders_tablename + " -clob=payload"
-                    "  where id=" + sql::quoted( order->id().as_string() ) );
+                    "  where `id`=" + sql::quoted( order->id().as_string() ) );
     clob.put( order->payload().as_string() );
     clob.close();
 }
@@ -771,7 +772,7 @@ void Spooler_db::update_payload_clob( Order* order )
 string Spooler_db::read_payload_clob( const string& order_id )
 {
     return file_as_string( _db_name + " -table=" + _spooler->_orders_tablename + " -clob=payload"
-                           "  where id=" + sql::quoted( order_id ) );
+                           "  where `id`=" + sql::quoted( order_id ) );
 }
 
 //-------------------------------------------------------------------------Spooler_db::delete_order
@@ -1298,7 +1299,7 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
 
 #ifndef SPOOLER_USE_LIBXML2     // libxml2 stürzt in Dump() ab:
                         if( _use_db ) 
-                            param_xml = file_as_string( _spooler->_db->_db_name + "-table=" + _spooler->_job_history_tablename + " -clob=parameters where id=" + as_string(id), "" );
+                            param_xml = file_as_string( _spooler->_db->_db_name + "-table=" + _spooler->_job_history_tablename + " -clob=parameters where `id`=" + as_string(id), "" );
 
                         if( !param_xml.empty() )
                         {
@@ -1475,7 +1476,7 @@ void Task_history::write( bool start )
                             }
                         }
 
-                        stmt += " where id=" + as_string( _task->_id );
+                        stmt += " where `id`=" + as_string( _task->_id );
                         _spooler->_db->execute( stmt );
 
 
