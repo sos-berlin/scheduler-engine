@@ -338,7 +338,7 @@ void Spooler_db::open_history_table()
         {
             _history_table.open( "-in -out -key=id sql -table=" + _spooler->_job_history_tablename + 
                                //" -sql-fields=(id,spooler_id,job_name,start_time,cause,parameters) | " +       extra-Felder nicht vergessen!
-                                 " | " + _db_name + " -ignore=(log) -max-length=" + as_string(blob_field_size) );
+                                 " | " + _db_name + " -ignore=(parameters,log) -max-length=" + as_string(blob_field_size) );
         }
     }
 }
