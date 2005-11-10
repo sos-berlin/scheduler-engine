@@ -70,11 +70,11 @@ inline string sql_quoted_name( const string& value )
     return quoted_string( value, '"', '"' ); 
 }
 
-//------------------------------------------------------------------------------------prepend_comma
+//--------------------------------------------------------------------------quote_and_prepend_comma
 
-static string prepend_comma( const string& s )  
+static string quote_and_prepend_comma( const string& s )  
 { 
-    return ", " + s; 
+    return ", `" + s + "`"; 
 }
 
 //-------------------------------------------------------------------------Transaction::Transaction
@@ -1234,7 +1234,7 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
                                 " select " + 
                                 ( next == 0? "" : "%limit(" + as_string(abs(next)) + ") " ) +
                                 " \"ID\", \"SPOOLER_ID\", \"JOB_NAME\", \"START_TIME\", \"END_TIME\", \"CAUSE\", \"STEPS\", \"ERROR\", \"ERROR_CODE\", \"ERROR_TEXT\" " +
-                                join( "", vector_map( prepend_comma, _extra_names ) ) +
+                                join( "", vector_map( quote_and_prepend_comma, _extra_names ) ) +
                                 " from " + _spooler->_job_history_tablename + 
                                 clause );
                     }
