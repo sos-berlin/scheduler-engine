@@ -722,7 +722,6 @@ void Spooler_db::insert_order( Order* order )
                     insert[ "title"         ] = order->title()                     , order->_title_modified      = false;
                     insert[ "state"         ] = order->state().as_string();
                     insert[ "state_text"    ] = order->state_text()                , order->_state_text_modified = false;
-                  //insert[ "payload"       ] = order->payload().as_string()       , order->_payload_modified    = false;
                     insert[ "priority"      ] = order->priority()                  , order->_priority_modified   = false;
                     insert.set_datetime( "created_time", order->_created.as_string(Time::without_ms) );
                     insert.set_datetime( "mod_time", Time::now().as_string(Time::without_ms) );
@@ -734,8 +733,10 @@ void Spooler_db::insert_order( Order* order )
 
                     execute( insert );
 
-                    
-                    update_payload_clob( order ), order->_payload_modified = false;
+
+                    string payload_string = order->payload().as_string();
+                    if( payload_string != "" )  update_payload_clob( order->id().as_string(), payload_string );
+                    order->_payload_modified = false;
 
                     ta.commit();
                 }
@@ -759,12 +760,22 @@ void Spooler_db::insert_order( Order* order )
 
 //------------------------------------------------------------------Spooler_db::update_payload_clob
 
-void Spooler_db::update_payload_clob( Order* order )
+void Spooler_db::update_payload_clob( const string& order_id, const string& payload_string )
 {
-    Any_file clob ( "-out " + _db_name + " -table=" + _spooler->_orders_tablename + " -clob=payload"
-                    "  where `id`=" + sql::quoted( order->id().as_string() ) );
-    clob.put( order->payload().as_string() );
-    clob.close();
+    if( payload_string == "" )
+    {
+        sql::Update_stmt update ( &_db_descr );
+        update.set_table_name( _spooler->_orders_tablename );
+        update[ "payload" ].set_direct( "null" );
+        update.and_where_condition( "id", order_id );
+        execute( update );
+    }
+    else
+    {
+        Any_file clob ( "-out " + _db_name + " -table=" + _spooler->_orders_tablename + " -clob=payload  where `id`=" + sql::quoted( order_id ) );
+        clob.put( payload_string );
+        clob.close();
+    }
 }
 
 //--------------------------------------------------------------------Spooler_db::read_payload_clob
@@ -915,7 +926,6 @@ void Spooler_db::update_order( Order* order )
                         if( order->_priority_modified   )  update[ "priority"   ] = order->priority()           ,  order->_state_text_modified = false;
                         if( order->_title_modified      )  update[ "title"      ] = order->title()              ,  order->_title_modified      = false;
                         if( order->_state_text_modified )  update[ "state_text" ] = order->state_text()         ,  order->_state_text_modified = false;
-                      //if( order->_payload_modified    )  update[ "payload"    ] = order->payload().as_string(),  order->_payload_modified    = false;
 
                         if( order->run_time() )  update[ "run_time" ] = order->run_time()->dom_document().xml();
                                            else  update[ "run_time" ].set_direct( "null" );
@@ -924,12 +934,20 @@ void Spooler_db::update_order( Order* order )
 
                         update.set_datetime( "mod_time", Time::now().as_string(Time::without_ms) );
 
+                        if( order->_payload_modified )
+                        {
+                            string payload_string = order->payload().as_string();
+                            if( payload_string == "" )  update[ "payload" ].set_direct( "null" );
+                                                  else  update_payload_clob( order->id().as_string(), payload_string );
+                            order->_payload_modified = false;
+                        }
+    
+
                         update.and_where_condition( "job_chain", order->job_chain()->name() );
                         update.and_where_condition( "id"       , order->id().as_string()    );
 
                         execute( update );
 
-                        if( order->_payload_modified )  update_payload_clob( order ),  order->_payload_modified = false;
                     }
 
                     ta.commit();

@@ -61,7 +61,7 @@ struct Spooler_db : Object, Scheduler_object
 
     void                        insert_order            ( Order* );
     void                        update_order            ( Order* );
-    void                        update_payload_clob     ( Order* );
+    void                        update_payload_clob     ( const string& order_id, const string& payload_string );
     string                      read_payload_clob       ( const string& order_id );
 
     void                        write_order_history     ( Order*, Transaction* = NULL );
