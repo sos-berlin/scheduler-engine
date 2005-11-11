@@ -10,6 +10,17 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2005-11-11" version="2.0.144" subversion_revision="4026">
+        <revision type="correction" title="Auftrag mit &lt;run_time&gt; weckt jetzt auf Auftrag wartende Task">
+            <description>
+                <p>
+                    Bislang hat der Scheduler einen wegen <code>run_time</code> wiederholten Auftrag verschlafen,
+                    wenn bereits eine Task auf den Auftrag wartete (im Zustand <code>running_waiting_for_order</code>).
+                </p>
+            </description>
+        </revision>
+    </change>
+
     <change date="2005-11-08" version="2.0.144" subversion_revision="4015">
         <revision type="correction" title="SQL-Tabellenamen ohne &quot;&quot;; Große order.payload möglich">
             <description>

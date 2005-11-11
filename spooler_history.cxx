@@ -1460,7 +1460,7 @@ void Task_history::write( bool start )
                         record.set_field( "start_time"     , start_time );
                         record.set_field( "cause"          , start_cause_name( _task->_cause ) );
 
-                        if( !parameters.empty()  &&  parameters.length() < blob_field_size )  record.set_field( "parameters", parameters ), parameters = "";
+                        //if( !parameters.empty()  &&  parameters.length() < blob_field_size )  record.set_field( "parameters", parameters ), parameters = "";
 
                         _spooler->_db->_history_table.insert( record );
 
