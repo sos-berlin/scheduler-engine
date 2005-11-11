@@ -510,7 +510,7 @@ xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& 
         }
 
         {
-            Any_file sel ( "-in " + _spooler->_db->db_name() + "-max-length=32K "
+            Any_file sel ( "-in " + _spooler->_db->db_name() +
                            "select \"ORDER_ID\" as \"ID\", \"START_TIME\", \"TITLE\", \"STATE\", \"STATE_TEXT\""
                            " from " + _spooler->_order_history_tablename +
                            " where \"HISTORY_ID\"=" + history_id );

@@ -222,7 +222,7 @@ void Spooler_db::open2( const string& db_name )
                                             "\"END_TIME\"    datetime,"
                                             "\"CAUSE\"       varchar(50),"
                                             "\"STEPS\"       integer,"
-                                            "\"ERROR\"       bit,"
+                                            "\"ERROR\"       boolean,"
                                             "\"ERROR_CODE\"  varchar(50),"
                                             "\"ERROR_TEXT\"  varchar(250),"
                                             "\"PARAMETERS\"  clob,"
@@ -347,10 +347,10 @@ void Spooler_db::open_history_table()
 
 void Spooler_db::create_table_when_needed( const string& tablename, const string& fields )
 {
-    Transaction ta ( this );
-
     try
     {
+        Transaction ta ( this );        // Select und Create table nicht in derselben Transaktion. Für Access und PostgresQL
+
         Any_file select;
         select.open( "-in " + _db_name + " SELECT count(*) from " + tablename + " where 1=0" );
         select.get_record();
@@ -361,10 +361,11 @@ void Spooler_db::create_table_when_needed( const string& tablename, const string
     {
         _log->warn( x.what() );
         _log->info( "Tabelle " + tablename + " wird eingerichtet" );
-        _db.put( "CREATE TABLE " + tablename + " (" + fields + ") " );
-    }
 
-    ta.commit();        // Für select und für create table (jedenfalls bei Jet)
+        Transaction ta ( this );
+            _db.put( "CREATE TABLE " + tablename + " (" + fields + ") " );
+        ta.commit(); 
+    }
 }
 
 //---------------------------------------------------------------Spooler_db::try_reopen_after_error
@@ -783,6 +784,15 @@ void Spooler_db::update_payload_clob( const string& order_id, const string& payl
 string Spooler_db::read_payload_clob( const string& order_id )
 {
     return file_as_string( _db_name + " -table=" + _spooler->_orders_tablename + " -clob=payload"
+                           "  where `id`=" + sql::quoted( order_id ) );
+}
+
+//-------------------------------------------------------------------------------------------------
+
+
+string Spooler_db::read_orders_runtime_clob( const string& order_id )
+{
+    return file_as_string( _db_name + " -table=" + _spooler->_orders_tablename + " -clob=run_time"
                            "  where `id`=" + sql::quoted( order_id ) );
 }
 
