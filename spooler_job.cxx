@@ -1247,13 +1247,13 @@ void Job::calculate_next_time( Time now )
                     if( next_time > _next_start_time   )  next_time = _next_start_time;
                     if( next_time > _next_single_start )  next_time = _next_single_start;
                 }
+            }
 
-                if( _order_queue )
-                {
-                    Time next_order_time = _order_queue->next_time();
-                    if( next_order_time < _period.begin() )  next_order_time = _period.begin();
-                    if( next_time > next_order_time )  next_time = next_order_time;
-                }
+            if( ( _state == s_pending || _state == s_running )  &&  _order_queue )
+            {
+                Time next_order_time = _order_queue->next_time();
+                if( next_order_time < _period.begin() )  next_order_time = _period.begin();
+                if( next_time > next_order_time )  next_time = next_order_time;
             }
 
 
@@ -1488,6 +1488,20 @@ bool Job::do_something()
                     select_period();
                     if( !_period.is_in_time( _next_start_time ) )  set_next_start_time( now );
                 }
+
+
+                if( _state == s_running  &&  _order_queue )     // Auftrag bereit und Tasks warten auf Aufträge?
+                {
+                    if( ptr<Order> order = _order_queue->first_order( now ) )
+                    {
+                        FOR_EACH( Task_list, _running_tasks, t )
+                        {
+                            Task* task = *t;
+                            if( task->state() == Task::s_running_waiting_for_order )  task->do_something();
+                        }
+                    }
+                }
+
 
                 if( _state == s_pending 
                  || _state == s_running  &&  _running_tasks.size() < _max_tasks )

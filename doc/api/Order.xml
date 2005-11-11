@@ -355,7 +355,7 @@
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<example programming_language="javascript" title="Auftrag mit einfacher Nutzlast" >
+<example programming_language="javascript" title="Auftrag mit einfacher Nutzlast">
     <pre>// Create order:
 {
     var order = spooler.create_order();
@@ -374,7 +374,8 @@ function spooler_process()
     spooler_log.info( "order.payload=" + order.payload );
     return true;
 }</pre>
-    </example>
+</example>
+
 
 <example programming_language="javascript" title="Erzeugen eines Auftrags mit Variable_set als Nutzlast">
     <pre>// Create order:
@@ -400,7 +401,56 @@ function spooler_process()
     return true;
 }</pre>
 
-    </example>
+</example>
+
+
+<example programming_language="perl" title="Auftrag mit einfacher Nutzlast">
+    <pre>// Create order:
+{
+    my $order = $spooler->create_order();
+    $order->LetProperty( 'id'        , 1234 );
+    $order->LetProperty( 'title'     , 'This is my order' );
+    $order->LetProperty( 'state_text', 'This is my state text' );
+    $order->LetProperty( 'payload'   , 'This is my payload' );
+    $spooler->job_chain( 'my_job_chain' )->add_order( $order );
+}
+...
+
+// Process order:
+sub spooler_process()
+{
+    my $order = $spooler_task->order;
+    $spooler_log->info( 'order.payload=" + $order->payload );
+    return 1;
+}</pre>
+</example>
+
+
+<example programming_language="perl" title="Erzeugen eines Auftrags mit Variable_set als Nutzlast">
+    <pre>// Create order:
+{
+    my $variable_set = $spooler->create_variable_set();
+    $variable_set->set_var( 'param_one', 111 );
+    $variable_set->set_var( 'param_two', 222 );
+
+    my $order = $spooler->create_order();
+    $order->LetProperty( 'id'     , 1234 );
+    $order->LetProperty( 'payload', $variable_set );
+    $spooler->job_chain( 'my_job_chain' )->add_order( $order );
+}
+...
+
+// Process order:
+sub spooler_process()
+{
+    my $order = $spooler_task->order;
+    my $variable_set = $order->payload;
+    $spooler_log->info( 'param_one=' . $variable_set->value( 'param_one' ) );
+    $spooler_log->info( 'param_two=' . $variable_set->value( 'param_two' ) );
+    return 1;
+}</pre>
+
+</example>
 
 
 </api.class>
