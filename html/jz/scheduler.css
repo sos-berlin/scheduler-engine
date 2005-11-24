@@ -16,6 +16,8 @@ label                   { font-size: 10pt; }
 td                      { padding-bottom: 1pt; padding-left: 3pt; padding-right: 2pt } 
 caption                 { font-size: 10pt; padding-bottom: 5pt; padding-left: 3pt; padding-right: 2pt; padding-top: 2pt }
 
+a:visited               { color: windowtext; }
+a.silent                { text-decoration: none; }
 
 .small                  { font-size: 8pt }
 .label                  { font-size: 8pt; white-space: nowrap }

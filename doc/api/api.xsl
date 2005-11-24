@@ -788,12 +788,15 @@
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <xsl:template match="com.type [ @type='VARIANT' ]">
+    <xsl:param name="is_in_table" select="false()"/>
 
     <xsl:choose>
         <xsl:when test="com.type [ @type ]">
             <xsl:for-each select="com.type [ @type or @class ]">
                 <xsl:if test="position() &gt; 1">|</xsl:if>
-                <xsl:apply-templates select="."/>
+                <xsl:apply-templates select=".">
+                    <xsl:with-param name="is_in_table" select="$is_in_table"/>
+                </xsl:apply-templates>
             </xsl:for-each>
         </xsl:when>
 

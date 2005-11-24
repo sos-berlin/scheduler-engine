@@ -733,6 +733,8 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     else
     if( element.nodeName_is( "show_job"         ) )  return execute_show_job( element, show );
     else
+    if( element.nodeName_is( "show_jobs"        ) )  return execute_show_jobs( show );
+    else
     if( element.nodeName_is( "start_job"        ) )  return execute_start_job( element );
     else
     if( element.nodeName_is( "show_task"        ) )  return execute_show_task( element, show );

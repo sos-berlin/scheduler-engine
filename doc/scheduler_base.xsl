@@ -113,83 +113,84 @@
                 </xsl:call-template>
 
                 <!--<h2>Schema</h2>-->
+                <div class="example">
+                    <code>&lt;<xsl:value-of select="@name"/></code>
 
-                <code>&lt;<xsl:value-of select="@name"/></code>
-
-                <xsl:if test="xml_attributes/xml_attribute">
-                    <div class="indent">
-                        <table cellspacing="0" cellpadding="0">
-                            <col/>
-                            <col/>
-                            <col style="padding-left: 4ex"/>
-
-                            <xsl:for-each select="xml_attributes/xml_attribute">
-                                <xsl:sort select="@name | @setting"/>
-
-                                <xsl:variable name="setting" select="document( 'settings.xml' )/settings/setting[ @setting = current()/@setting ]"/>
-
-                                <tr>
-                                    <td valign="baseline">
-                                        <xsl:element name="a">
-                                            <xsl:attribute name="class">silent</xsl:attribute>
-                                            <xsl:attribute name="href">#attribute_<xsl:value-of select="@name | @setting"/></xsl:attribute>
-                                            <code><xsl:value-of select="@name | @setting"/></code>&#160;
-                                        </xsl:element>
-                                    </td>
-                                    <td valign="baseline">
-                                        <code>= "</code><span class="type"><xsl:value-of select="@type | $setting/@type"/></span><code>"</code>
-                                    </td>
-                                    <td valign="baseline">
-                                        <span class="title">
-                                            <xsl:value-of select="@title | $setting/@title"/>
-                                        </span>
-                                    </td>
-                                </tr>
-                            </xsl:for-each>
-                        </table>
-                    </div>
-                </xsl:if>
-
-                <xsl:choose>
-                    <xsl:when test="xml_child_elements/xml_child_element">
-
-                        <code>></code>
-
+                    <xsl:if test="xml_attributes/xml_attribute">
                         <div class="indent">
                             <table cellspacing="0" cellpadding="0">
                                 <col/>
-                                <col style="padding-left: 4ex"/>
-                                <xsl:for-each select="xml_child_elements/xml_child_element">
+                                <col/>
+                                <col/>
 
-                                    <xsl:variable name="element" select="document( concat( 'xml/', /*/@sub_directory, @name, '.xml' ) )/xml_element[ @name=current()/@name ]"/>
+                                <xsl:for-each select="xml_attributes/xml_attribute">
+                                    <xsl:sort select="@name | @setting"/>
+
+                                    <xsl:variable name="setting" select="document( 'settings.xml' )/settings/setting[ @setting = current()/@setting ]"/>
 
                                     <tr>
                                         <td valign="baseline">
                                             <xsl:element name="a">
                                                 <xsl:attribute name="class">silent</xsl:attribute>
-                                                <!--xsl:attribute name="href">#element_<xsl:value-of select="@name"/></xsl:attribute-->
-                                                <xsl:attribute name="href"><xsl:value-of select="@name"/>.xml</xsl:attribute>
-                                                <code>&lt;<xsl:value-of select="@name"/></code> ...<code>></code><br/>
+                                                <xsl:attribute name="href">#attribute_<xsl:value-of select="@name | @setting"/></xsl:attribute>
+                                                <code><xsl:value-of select="@name | @setting"/></code>&#160;
                                             </xsl:element>
                                         </td>
                                         <td valign="baseline">
+                                            <code>= "</code><span class="type"><xsl:value-of select="@type | $setting/@type"/></span><code>"</code>
+                                        </td>
+                                        <td valign="baseline" style="padding-left: 4ex">
                                             <span class="title">
-                                                <xsl:value-of select="@title | $element/@title"/>
+                                                <xsl:value-of select="@title | $setting/@title"/>
                                             </span>
                                         </td>
                                     </tr>
                                 </xsl:for-each>
                             </table>
                         </div>
+                    </xsl:if>
 
-                        <br/>
-                        <code>&lt;/<xsl:value-of select="@name"/>></code>
-                    </xsl:when>
-                    <xsl:otherwise>
-                        <code>/></code>
-                    </xsl:otherwise>
-                </xsl:choose>
+                    <xsl:choose>
+                        <xsl:when test="xml_child_elements/xml_child_element">
 
+                            <code>></code>
+
+                            <div class="indent">
+                                <table cellspacing="0" cellpadding="0">
+                                    <col/>
+                                    <col/>
+                                    <xsl:for-each select="xml_child_elements/xml_child_element">
+
+                                        <xsl:variable name="element" select="document( concat( 'xml/', /*/@sub_directory, @name, '.xml' ) )/xml_element[ @name=current()/@name ]"/>
+
+                                        <tr>
+                                            <td valign="baseline">
+                                                <xsl:element name="a">
+                                                    <xsl:attribute name="class">silent</xsl:attribute>
+                                                    <!--xsl:attribute name="href">#element_<xsl:value-of select="@name"/></xsl:attribute-->
+                                                    <xsl:attribute name="href"><xsl:value-of select="@name"/>.xml</xsl:attribute>
+                                                    <code>&lt;<xsl:value-of select="@name"/></code> ...<code>></code><br/>
+                                                </xsl:element>
+                                            </td>
+                                            <td valign="baseline" style="padding-left: 4ex">
+                                                <span class="title">
+                                                    <xsl:value-of select="@title | $element/@title"/>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    </xsl:for-each>
+                                </table>
+                            </div>
+
+                            <br/>
+                            <code>&lt;/<xsl:value-of select="@name"/>></code>
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <code>/></code>
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </div>
+                
                 <p>&#160;</p>
 
                 <xsl:apply-templates select="description"/>
@@ -370,7 +371,7 @@
             Antwort&#160; &lt;<xsl:value-of select="@element"/>>
         </h2>
 
-        <p>
+        <div class="example">
             <code>
                 <xsl:call-template name="scheduler_element">
                     <xsl:with-param name="directory" select="'xml/answer/'"/>
@@ -402,7 +403,7 @@
             <code>&lt;/answer></code>
             <br/>
             <code>&lt;/spooler></code>
-        </p>
+        </div>
 
     </xsl:template>
 

@@ -3992,6 +3992,8 @@ const char file_jz_scheduler_css[] =
     "td                      { padding-bottom: 1pt; padding-left: 3pt; padding-right: 2pt } \n"
     "caption                 { font-size: 10pt; padding-bottom: 5pt; padding-left: 3pt; padding-right: 2pt; padding-top: 2pt }\n"
     "\n"
+    "a:visited               { color: windowtext; }\n"
+    "a.silent                { text-decoration: none; }\n"
     "\n"
     ".small                  { font-size: 8pt }\n"
     ".label                  { font-size: 8pt; white-space: nowrap }\n"

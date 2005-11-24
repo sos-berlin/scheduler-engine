@@ -496,12 +496,8 @@ Spooler::Spooler()
     _module(this,&_log),
     _log_level( log_info ),
     _factory_ini( default_factory_ini ),
-    _mail_defaults(NULL)
-  //_smtp_server   ("-")    // Für spooler_log.cxx: Nicht setzen, damit Default aus sos.ini erhalten bleibt
-  //_log_mail_from ("-"),
-  //_log_mail_cc   ("-"),
-  //_log_mail_bcc  ("-"),
-  //_mail_queue_dir("-")
+    _mail_defaults(NULL),
+    _termination_gmtimeout_at(no_termination_timeout)
 {
     if( spooler_ptr )  throw_xc( "spooler_ptr" );
     spooler_ptr = this;

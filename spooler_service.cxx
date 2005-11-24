@@ -353,7 +353,7 @@ static void set_service_status( int spooler_error, int state = 0 )
     if( service_status.dwCurrentState == SERVICE_STOPPED )
     {
         service_status_handle = NULL;  // Sonst beim nächsten Mal: Fehler MSWIN-00000006  Das Handle ist ungültig. [SetServiceStatus] [SERVICE_STOPPED]
-        start_self_destruction();
+        if( service_stop )  start_self_destruction();
     }
 }
 
