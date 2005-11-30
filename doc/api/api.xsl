@@ -810,11 +810,11 @@
 </xsl:template>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
-
+<!--
 <xsl:template match="property | method" mode="result_type">
     <xsl:apply-templates select="com/com.result/com.type"/>
 </xsl:template>
-
+-->
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <xsl:template match="api.null" mode="description">
@@ -926,7 +926,7 @@
     <xsl:if test="$read_result/com.type [ @class or parent::*/description ]">
         <h3>Rückgabe</h3>
 
-        <xsl:apply-templates select="." mode="result_type"/>&#160;&#160;
+        <xsl:apply-templates select="$read_result/com.type"/>&#160;&#160;
         <xsl:apply-templates select="com/com.result/description"/>
     </xsl:if>
     

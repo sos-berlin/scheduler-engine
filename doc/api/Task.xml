@@ -222,8 +222,14 @@
         </java>
 
         <title>
-            Verzögert den nächsten Aufruf von spooler_process()
+            Verzögert den nächsten Aufruf von <code>spooler_process()</code>
         </title>
+        
+        <description>
+            <p>
+                Wirkt nur in <scheduler_method class="Job_impl" method="spooler_process"/>.
+            </p>
+        </description>
     </property>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->

@@ -74,12 +74,12 @@
 </xsl:template-->
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
-
+<!--
 <xsl:template match="property [ java/java.result/java.type or java/java.result/com.type ] |
                      method   [ java/java.result/java.type or java/java.result/com.type ]" mode="result_type">
     <xsl:apply-templates select="java/java.result/java.type | java/java.result/com.type"/>
 </xsl:template>
-
+-->
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <xsl:template match="api.empty" mode="description">
