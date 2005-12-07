@@ -426,16 +426,6 @@ void Prefix_log::init( Scheduler_object* o, const string& prefix )
   //_subject         = _spooler->_log_mail_subject;
     _collect_within  = _spooler->_log_collect_within;
     _collect_max     = _spooler->_log_collect_max;
-
-    /*
-    _mail_defaults[ "queue_dir" ] = _spooler->_mail_queue_dir;
-    _mail_defaults[ "smtp"      ] = _spooler->_smtp_server;
-    _mail_defaults[ "from"      ] = _spooler->_log_mail_from;
-    _mail_defaults[ "to"        ] = _spooler->_log_mail_to;
-    _mail_defaults[ "cc"        ] = _spooler->_log_mail_cc;
-    _mail_defaults[ "bcc"       ] = _spooler->_log_mail_bcc;
-    _mail_defaults[ "subject"   ] = _spooler->_log_mail_subject;
-    */
 }
 
 //----------------------------------------------------------------------------Prefix_log::log_level
@@ -462,7 +452,6 @@ void Prefix_log::set_profile_section( const string& section )
       //_subject         =         read_profile_string ( _spooler->_factory_ini, _section, "log_mail_subject"  , _subject );
         _collect_within  = (double)read_profile_uint   ( _spooler->_factory_ini, _section, "log_collect_within", (uint)_collect_within );
         _collect_max     = (double)read_profile_uint   ( _spooler->_factory_ini, _section, "log_collect_max"   , (uint)_collect_max );
-
     }
 }
 
@@ -487,14 +476,6 @@ void Prefix_log::inherit_settings( const Prefix_log& other )
   //_bcc             = other._bcc;
 
     _mail_defaults = other._mail_defaults;
-    /*
-    _mail_defaults[ "smtp"    ] = other._mail_defaults[ "smtp"    ];
-    _mail_defaults[ "from"    ] = other._mail_defaults[ "from"    ];
-    _mail_defaults[ "to"      ] = other._mail_defaults[ "to"      ];
-    _mail_defaults[ "cc"      ] = other._mail_defaults[ "cc"      ];
-    _mail_defaults[ "bcc"     ] = other._mail_defaults[ "bcc"     ];
-    _mail_defaults[ "subject" ] = other._mail_defaults[ "subject" ];
-    */
 }
 
 //-------------------------------------------------------------------------Prefix_log::set_filename
@@ -639,6 +620,31 @@ void Prefix_log::write( const char* text, int len )
     }
 }
 
+//--------------------------------------------------------------------Prefix_log::set_mail_defaults
+
+void Prefix_log::set_mail_defaults()
+{
+    if( _section != "" )
+    {
+        _mail_defaults.set( "queue_dir", read_profile_string ( _spooler->_factory_ini, _section, "mail_queue_dir"    , _mail_defaults[ "queue_dir" ] ) );
+        _mail_defaults.set( "smtp"     , read_profile_string ( _spooler->_factory_ini, _section, "smtp"              , _mail_defaults[ "smtp"      ] ) );
+        _mail_defaults.set( "from"     , read_profile_string ( _spooler->_factory_ini, _section, "log_mail_from"     , _mail_defaults[ "from"      ] ) );
+        _mail_defaults.set( "to"       , read_profile_string ( _spooler->_factory_ini, _section, "log_mail_to"       , _mail_defaults[ "to"        ] ) );
+        _mail_defaults.set( "cc"       , read_profile_string ( _spooler->_factory_ini, _section, "log_mail_cc"       , _mail_defaults[ "cc"        ] ) );
+        _mail_defaults.set( "bcc"      , read_profile_string ( _spooler->_factory_ini, _section, "log_mail_bcc"      , _mail_defaults[ "bcc"       ] ) );
+        _mail_defaults.set( "subject"  , read_profile_string ( _spooler->_factory_ini, _section, "log_mail_subject"  , _mail_defaults[ "subject"   ] ) );
+    }
+
+    _mail_defaults_set = true;
+}
+
+//---------------------------------------------------------------------Prefix_log::set_mail_default
+
+void Prefix_log::set_mail_default( const string& field_name, const string& value, bool overwrite )
+{ 
+    if( overwrite  ||  !_mail_defaults.has_value( field_name ) )   _mail_defaults.set( field_name, value ); 
+}
+
 //--------------------------------------------------------------------------------Prefix_log::imail
 
 Com_mail* Prefix_log::imail()
@@ -647,19 +653,10 @@ Com_mail* Prefix_log::imail()
 
     if( !_mail )
     {
+        if( !_mail_defaults_set )  set_mail_defaults();
+
         ptr<Com_mail> mail = new Com_mail( _spooler );
         mail->init();
-
-        if( _section != "" )
-        {
-            _mail_defaults.set( "queue_dir", read_profile_string ( _spooler->_factory_ini, _section, "mail_queue_dir"    , _mail_defaults[ "queue_dir" ] ) );
-            _mail_defaults.set( "smtp"     , read_profile_string ( _spooler->_factory_ini, _section, "smtp"              , _mail_defaults[ "smtp"      ] ) );
-            _mail_defaults.set( "from"     , read_profile_string ( _spooler->_factory_ini, _section, "log_mail_from"     , _mail_defaults[ "from"      ] ) );
-            _mail_defaults.set( "to"       , read_profile_string ( _spooler->_factory_ini, _section, "log_mail_to"       , _mail_defaults[ "to"        ] ) );
-            _mail_defaults.set( "cc"       , read_profile_string ( _spooler->_factory_ini, _section, "log_mail_cc"       , _mail_defaults[ "cc"        ] ) );
-            _mail_defaults.set( "bcc"      , read_profile_string ( _spooler->_factory_ini, _section, "log_mail_bcc"      , _mail_defaults[ "bcc"       ] ) );
-            _mail_defaults.set( "subject"  , read_profile_string ( _spooler->_factory_ini, _section, "log_mail_subject"  , _mail_defaults[ "subject"   ] ) );
-        }
 
         _mail = mail;   // Nur bei fehlerfreiem init() speichern
 /*

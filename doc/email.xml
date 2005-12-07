@@ -46,12 +46,15 @@
             Oder an der Programmschnittstelle:
         </p>
         <div class="indent">
-            Das Objekt <a href="javadoc/sos/spooler/Job_impl.html#spooler_log"><code>spooler_log</code></a>
-            stellt mit der Methode <a href="javadoc/sos/spooler/Log.html#mail()"><code>mail()</code></a>
-            das Objekt <a href="javadoc/sos/spooler/Mail.html"><code>Mail</code></a> bereit,
+            <scheduler_method class="Job_impl" property="spooler_log"/>
+            stellt mit 
+            <scheduler_method class="Log" property="mail"/>
+            das Objekt 
+            <scheduler_method class="Mail"/>
+            bereit,
             über dessen Methoden Sie Absender, Empfänger, Betreff usw. einstellen können.
 
-            <p class="example">Beispiel</p>
+            <p class="example">Beispiel (in Java)</p>
             <pre>spooler_log.mail().set_to( "admin@xxx.com" );</pre>
         </div>
 
@@ -86,9 +89,43 @@
             Oder an der Programmschnittstelle:
         </p>
         <div class="indent">
-            Mit dem Aufruf <a href="javadoc/sos/spooler/Log.html#set_mail_it(boolean)"><code>spooler_log.set_mail_it(boolean)</code></a>
+            Mit dem Aufruf 
+            <scheduler_method class="Log" property="mail_it"/>
             können Sie einstellen, ob der Scheduler beim Ende der Task das Protokoll sendet.
         </div>
+        
+        
+    
+    <h2>Rangfolge der Einstellungen</h2>        
+        
+        <ol>
+            <li>
+                Das Job-Skript kann Einstellungen mit der Klasse <scheduler_method class="Mail"/> vornehmen.
+            </li>
+            <li>
+                Im Fehlerfall setzt der Scheduler den Betreff, 
+                überschreibt also die Einstellung
+                <scheduler_method class="Mail" property="log_mail_subject"/> 
+                des Jobs.
+            </li>
+            <li>
+                Das eMail-XSLT-Stylesheet 
+                (<scheduler_element name="config" attribute="mail_xslt_stylesheet"/>),
+                kann die Einstellungen ändern.
+            </li>
+            <li>
+                Leere Einstellungen werden mit den Angaben aus
+                <br/>
+                <scheduler_ini_entry file="factory.ini" section="job"/>
+                und
+                <br/>
+                <scheduler_ini_entry file="factory.ini" section="spooler"/>
+                gefüllt. 
+            </li>
+        </ol>
+            
+    
+    
 
 
     <h2>eMails, wenn der Scheduler wegen eines Fehlers sich beendet</h2>
@@ -126,12 +163,12 @@
         <p>
             <table cellspacing="0" cellpadding="0">
                 <col valign="baseline" class="code"/>
-                <col valign="baseline" style="padding-left: 2ex"/>
+                <col valign="baseline"/>
                 <tr>
                     <td>
                         sos.mail.jar
                     </td>
-                    <td class="small">
+                    <td class="small" style="padding-left: 2ex">
                         (wird mit dem Scheduler geliefert)
                     </td>
                 </tr>
@@ -139,7 +176,7 @@
                     <td>
                         mail.jar
                     </td>
-                    <td class="small">
+                    <td class="small" style="padding-left: 2ex">
                         (Sun Microsystems, Inc.)
                     </td>
                 </tr>
@@ -147,7 +184,7 @@
                     <td>
                         smtp.jar
                     </td>
-                    <td class="small">
+                    <td class="small" style="padding-left: 2ex">
                         (Sun Microsystems, Inc.)
                     </td>
                 </tr>
@@ -155,7 +192,7 @@
                     <td>
                         activation.jar
                     </td>
-                    <td class="small">
+                    <td class="small" style="padding-left: 2ex">
                         (Sun Microsystems, Inc.)
                     </td>
                 </tr>

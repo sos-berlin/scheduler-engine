@@ -213,6 +213,7 @@ Task::Task( Job* job )
     _log->set_job_name( job->name() );
     _log->set_task( this );
     _log->inherit_settings( *_job->_log );
+    _log->set_mail_defaults();
 
     set_subprocess_timeout();
 
@@ -1622,12 +1623,12 @@ void Task::trigger_event( Scheduler_event* scheduler_event )
                 subject += " gelungen";
             }
 
-            _log->set_mail_default( "subject", subject );
+            _log->set_mail_default( "subject", subject, false );
         }
         else
         {
             string errmsg = _error? _error->what() : _log->highest_msg();
-            _log->set_mail_default( "subject", string("FEHLER ") + errmsg );   //, is_error );
+            _log->set_mail_default( "subject", string("FEHLER ") + errmsg, true );
 
             body += errmsg + "\n\n";
         }

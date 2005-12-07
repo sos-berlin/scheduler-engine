@@ -144,7 +144,8 @@ struct Prefix_log : Object, Has_log
   //string                      mail_to                     () const                            { return _to; }
   //string                      mail_from                   () const                            { return _from; }
 
-    void                    set_mail_default                ( const string& field_name, const string& value )  { _mail_defaults.set( field_name, value ); }
+    void                    set_mail_defaults               ();
+    void                    set_mail_default                ( const string& field_name, const string& value, bool overwrite = true );
 
     void                        send                        ( int reason, Scheduler_event* );
     void                        send_really                 ( Scheduler_event* );
@@ -184,7 +185,7 @@ struct Prefix_log : Object, Has_log
     int                        _err_no;
     bool                       _started;                    // open() gerufen
     bool                       _closed;
-
+    bool                       _mail_defaults_set;
     bool                       _mail_on_warning;
     bool                       _mail_on_error;
     bool                       _mail_on_success;
@@ -198,15 +199,6 @@ struct Prefix_log : Object, Has_log
     Time                       _collect_max;                // Nach dieser Frist eMail auf jeden Fall versenden
     Time                       _first_send;                 // Beginn dieser Frist
 
-    /*
-    string                     _smtp_server;                // Aus factory.ini [Job ...]
-    string                     _queue_dir;
-    string                     _to, _cc, _bcc, _from;
-    string                     _from_name;
-    string                     _subject;
-    string                     _body;
-    */
-    typedef map<string,string>  Defaults_map;
     Mail_defaults              _mail_defaults;
 
     string                     _log_buffer;                 // Für Jobprotokollausgaben bis open(), also vor dem Jobstart

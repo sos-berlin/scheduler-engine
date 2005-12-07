@@ -374,6 +374,7 @@ spooler_log.info( spooler_log.mail.dequeue_log );</pre>
 
     <description>
         <p>
+            Siehe <scheduler_method class="Log" property="mail"/>.
         </p>
     </description>
 

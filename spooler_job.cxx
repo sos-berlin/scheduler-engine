@@ -271,6 +271,7 @@ void Job::set_log()
     _log->set_prefix( "Job  " + _name );       // Zwei Blanks, damit die Länge mit "Task " übereinstimmt
     _log->set_profile_section( profile_section() );
     _log->set_title( obj_name() );
+    _log->set_mail_defaults();
 }
 
 //----------------------------------------------------------------------------------------Job::init

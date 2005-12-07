@@ -10,6 +10,18 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2005-06-07" version="2.0.144" subversion_revision="4032">
+        <revision type="correction" title="eMail-Einstellungen aus factory.ini [job ...] werden wieder berücksichtigt">
+            <description>
+                <p>
+                    Wenn eine Task mit Fehler oder Warnung endet,
+                    überschreibt der Scheduler die Einstellung von <code>log_mail_subject</code>.
+                    Das eMail-Stylesheet kann dies ändern.
+                </p>
+            </description>
+        </revision>
+    </change>
+
     <change date="2005-11-11" version="2.0.144" subversion_revision="4026">
         <revision type="correction" title="Auftrag mit &lt;run_time&gt; weckt jetzt auf Auftrag wartende Task">
             <description>
