@@ -693,7 +693,8 @@ STDMETHODIMP Com_mail::Dequeue( int* result )
 
     try
     {
-        use_defaults( _spooler->_mail_defaults );
+        use_queue_defaults( _spooler->_mail_defaults );
+        use_smtp_default( _spooler->_mail_defaults );
 
         *result = _msg->dequeue();
     }
@@ -722,9 +723,25 @@ void Com_mail::use_defaults( const Mail_defaults& defaults )
     if( _subject        == ""  &&  defaults.has_value( "subject"   ) )  set_subject  ( defaults[ "subject"   ] );
     if( _body           == ""  &&  defaults.has_value( "body"      ) )  set_body     ( defaults[ "body"      ] );
 
+
+    use_queue_defaults( defaults );     // Nach dequeue() ist der Default von _spooler->_mail_defaults genommen.
+    use_smtp_default( defaults );       // Nach dequeue() ist der Default von _spooler->_mail_defaults genommen.
+}
+
+//---------------------------------------------------------------------Com_mail::use_queue_defaults
+
+void Com_mail::use_queue_defaults( const Mail_defaults& defaults )
+{
     if( queue_dir()     == ""  &&  defaults.has_value( "queue_dir" )  &&  defaults[ "queue_dir" ] != "-" )  set_queue_dir( defaults[ "queue_dir" ] );
+}
+
+//-----------------------------------------------------------------------Com_mail::use_smtp_default
+
+void Com_mail::use_smtp_default( const Mail_defaults& defaults )
+{
     if( _smtp           == ""  &&  defaults.has_value( "smtp"      )  &&  defaults[ "smtp"      ] != "-" )  set_smtp     ( defaults[ "smtp"      ] );
 }
+
 
 //-------------------------------------------------------------------------------------------------
 

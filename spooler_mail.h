@@ -129,6 +129,8 @@ struct Com_mail : spooler_com::Imail,
 
     int                         auto_dequeue                ()                                      { return _msg->auto_dequeue(); }
     void                    use_defaults                    ( const Mail_defaults& );
+    void                    use_queue_defaults              ( const Mail_defaults& );
+    void                    use_smtp_default                ( const Mail_defaults& );
     int                         send                        ( const Mail_defaults& );
     ptr<Xslt_stylesheet>        xslt_stylesheet             ();
 
