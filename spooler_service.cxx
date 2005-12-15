@@ -43,7 +43,7 @@ struct Service_handle
 
         void                    operator =                  ( SC_HANDLE h )                 { set_handle( h ); }
                                 operator SC_HANDLE          () const                        { return _handle; }
-                                operator !                  () const                        { return _handle == 0; }
+        bool                    operator !                  () const                        { return _handle == 0; }
 
         void                    set_handle                  ( SC_HANDLE h )                 { close(); _handle = h; }
         SC_HANDLE               handle                      () const                        { return _handle; }

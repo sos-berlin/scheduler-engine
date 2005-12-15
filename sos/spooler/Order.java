@@ -205,4 +205,7 @@ public class Order extends Idispatch
 
     /*+ Liefert "yyyy-mm-dd HH:MM:SS.MMM" oder "now" oder "never" */
     public String           string_next_start_time()                                { return (String)   com_call( "<string_next_start_time" ); }
+    
+    
+    public void             setback             ()                                  {                   com_call( "setback" ); }
 }

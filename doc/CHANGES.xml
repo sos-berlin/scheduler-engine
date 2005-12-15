@@ -10,7 +10,18 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2005-06-08" version="2.0.144" subversion_revision="4036">
+    <change date="2005-12-15" version="2.0.144" subversion_revision="4038">
+        <revision type="correction" title="Order.setback() und Job.set_max_order_setbacks() jetzt auch in Java verfügbar">
+            <description>
+                <p>
+                    Siehe <scheduler_method class="Order" method="setback"/> und
+                    <scheduler_method class="Job" property="max_order_setbacks"/>.
+                </p>
+            </description>
+        </revision>
+    </change>
+
+    <change date="2005-12-08" version="2.0.144" subversion_revision="4036">
         <revision type="correction" title="eMail-Einstellungen aus factory.ini [job ...] werden wieder berücksichtigt">
             <description>
                 <p>

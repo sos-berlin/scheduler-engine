@@ -272,8 +272,11 @@
 
     <description>
         <p>
-            Siehe <scheduler_method class="Job" property="delay_order_after_setback"/>
-            und <scheduler_element name="delay_order_after_setback"/>.
+            Der Auftrag wird zurückgestellt und nach der mit 
+            <scheduler_element name="delay_order_after_setback"/> oder
+            <scheduler_method class="Job" property="delay_order_after_setback"/> 
+            eingestellten Frist wiederholt.
+            Die Rückgabe von <scheduler_method class="Job_impl" method="spooler_process"/> bleibt ohne Wirkung.
         </p>
     </description>
 </method>
