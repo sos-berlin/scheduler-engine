@@ -35,10 +35,6 @@
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<!--xsl:template name="api.programming_language_selector" mode="description">
-    <xsl:apply-templates
-</xsl:template-->
-
 <xsl:template name="programming_language_selector">
     <xsl:param name="this_programming_language"/>
     <xsl:param name="href"/>
@@ -736,7 +732,17 @@
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<xsl:template match="com.type [ @class ]">
+<xsl:template match="com.type">
+    <xsl:apply-templates select="." mode="no_array"/>
+
+    <xsl:if test="@array">
+        <span class="mono">[]</span>
+    </xsl:if>
+</xsl:template>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<xsl:template match="com.type [ @class ]" mode="no_array">
     <xsl:param name="is_in_table"/>
 
     <xsl:choose>
@@ -766,28 +772,27 @@
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<xsl:template match="com.type [ @type ]">
+<xsl:template match="com.type [ @type ]" mode="no_array">
     <span class="mono"><xsl:value-of select="@type"/></span>
 </xsl:template>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<xsl:template match="com.type [ @type='BSTR' ]">
+<xsl:template match="com.type [ @type='BSTR' ]" mode="no_array">
     <span class="mono">
         <xsl:text>String</xsl:text>
-        <xsl:if test="@array">[]</xsl:if>
     </span>
 </xsl:template>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
-
+<!--
 <xsl:template match="com.type [ @type='BSTR' and @array ]">
     <span class="mono" title="Array of Strings">String[]</span>
 </xsl:template>
-
+-->
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<xsl:template match="com.type [ @type='VARIANT' ]">
+<xsl:template match="com.type [ @type='VARIANT' ]" mode="no_array">
     <xsl:param name="is_in_table" select="false()"/>
 
     <xsl:choose>

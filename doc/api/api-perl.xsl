@@ -54,7 +54,7 @@
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<xsl:template match="com.type [ @type='bool' ]">
+<xsl:template match="com.type [ @type='bool' ]" mode="no_array">
     <span class="mono">Boolean</span>
 </xsl:template>
 

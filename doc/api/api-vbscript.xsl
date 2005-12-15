@@ -13,27 +13,27 @@
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<xsl:template match="com.type [ @type='bool' ]">
+<xsl:template match="com.type [ @type='bool' ]" mode="no_array">
     <span class="mono">Boolean</span>
 </xsl:template>
 
-<xsl:template match="com.type [ @type='int' ]">
+<xsl:template match="com.type [ @type='int' ]" mode="no_array">
     <span class="mono" title="32bit">Integer</span>
 </xsl:template>
 
-<xsl:template match="com.type [ @type='double' ]">
+<xsl:template match="com.type [ @type='double' ]" mode="no_array">
     <span class="mono">Double</span>
 </xsl:template>
 
-<xsl:template match="com.type [ @type='BSTR' ]">
+<xsl:template match="com.type [ @type='BSTR' ]" mode="no_array">
     <span class="mono">String</span>
 </xsl:template>
 
-<xsl:template match="com.type [ @type='BSTR' and @array ]">
+<!--xsl:template match="com.type [ @type='BSTR' and @array ]">
     <span class="mono" title="Array of strings">String[]</span>
-</xsl:template>
+</xsl:template-->
 
-<xsl:template match="com.type [ @type='VARIANT' and not( com.type ) ]">
+<xsl:template match="com.type [ @type='VARIANT' and not( com.type ) ]" mode="no_array">
     <span class="mono">Variant</span>
 </xsl:template>
 

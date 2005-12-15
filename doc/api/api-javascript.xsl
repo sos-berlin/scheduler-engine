@@ -13,21 +13,21 @@
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<xsl:template match="com.type [ @type='VARIANT' and not( com.type ) ]">
+<xsl:template match="com.type [ @type='VARIANT' and not( com.type ) ]" mode="no_array">
     <span class="mono">var</span>
 </xsl:template>
 
-<xsl:template match="com.type [ @type='bool' ]">
+<xsl:template match="com.type [ @type='bool' ]" mode="no_array">
     <span class="mono">boolean</span>
 </xsl:template>
 
-<xsl:template match="com.type [ @type='BSTR' ]">
+<xsl:template match="com.type [ @type='BSTR' ]" mode="no_array">
     <span class="mono">string</span>
 </xsl:template>
 
-<xsl:template match="com.type [ @type='BSTR' and @array ]">
+<!--xsl:template match="com.type [ @type='BSTR' and @array ]">
     <span class="mono" title="Array of strings">string[]</span>
-</xsl:template>
+</xsl:template-->
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 

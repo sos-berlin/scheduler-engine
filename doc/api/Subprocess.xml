@@ -51,7 +51,7 @@
     </java>
 
     <java>
-        <java.parameter name="command_line">
+        <java.parameter name="filename_and_arguments">
             <com.type type="BSTR" array="true"/>
         </java.parameter>
     </java>
@@ -229,12 +229,18 @@
 
 <method name="wait_for_termination">
     <com>
+    </com>
+
+    <com>
         <com.parameter name="seconds">
             <com.type type="VARIANT"/>
         </com.parameter>
 
         <com.result name="terminated">
             <com.type type="bool"/>
+            <description>
+                <code>true</code>, wenn der Subprozess geendet hat.
+            </description>
         </com.result>
     </com>
 </method>
