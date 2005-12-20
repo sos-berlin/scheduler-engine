@@ -101,10 +101,10 @@
 
         &lt;<a class="silent" href="xml/base.xml">base</a> file="…"/>
 
-        &lt;<a class="silent" href="xml/holidays.xml">holidays</a>>
-            &lt;<a class="silent" href="xml/holiday.xml">holiday</a> day="…"/>
+        &lt;<a class="silent" href="xml/security.xml">security</a>>
+            &lt;<a class="silent" href="xml/allowed_host.xml">allowed_host</a> name="…" level="…"/>
             …
-        &lt;/holiday>
+        &lt;/security>
 
         &lt;<a class="silent" href="xml/process_classes.xml">process_classes></a>
             &lt;<a class="silent" href="xml/process_class.xml">process_class</a> name          = "…"
@@ -112,11 +112,6 @@
                            spooler_id    = "…"/>
             …
         &lt;/process_classes>
-
-        &lt;<a class="silent" href="xml/security.xml">security</a>>
-            &lt;<a class="silent" href="xml/allowed_host.xml">allowed_host</a> name="…" level="…"/>
-            …
-        &lt;/security>
 
         &lt;<a class="silent" href="xml/script.xml">script</a> language   = "…"
                 java_class = "…"
@@ -127,6 +122,11 @@
                 <i>programm-code</i>…
             ]]&gt;
         &lt;/script>
+
+        &lt;<a class="silent" href="xml/holidays.xml">holidays</a>>
+            &lt;<a class="silent" href="xml/holiday.xml">holiday</a> day="…"/>
+            …
+        &lt;/holiday>
 
         &lt;<a class="silent" href="xml/jobs.xml">jobs</a>
             &lt;<a class="silent" href="xml/job.xml">job</a> name          = "…"
