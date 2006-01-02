@@ -284,7 +284,7 @@
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <title>
-    Oberklasse für ein Startskript oder einen Jobs
+    Oberklasse für einen Job oder das Scheduler-Skript
 </title>
 
 

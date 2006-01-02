@@ -1891,3 +1891,4 @@
 
 <!-- Das ist ein Gedankenstrich: – -->
 <!-- Das ist drei Punkte: … -->
+<!-- Das ist ein Pfeil: → -->

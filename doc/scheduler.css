@@ -16,6 +16,7 @@ td              { font-size: 10pt; vertical-align: baseline; }
 div             { font-size: 10pt; }
 /*p:first-child   { font-size: 10pt; margin-top: 0px; margin-bottom: 0px }   Wirkt in ie6 nicht */
 li              { font-size: 10pt }
+ol              {  }
 ul              { margin-left: 13pt }
 .example        { background-color: #ffffe0; }
 pre             { background-color: #ffffe0; font-family: "Lucida Console", monospace; font-size: 9pt; 
