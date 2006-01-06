@@ -12,7 +12,7 @@
     date     = "$Date$">
 
     <ini_entries>
-        <ini_entry name="vm" type="dateiname" title="Dateiname der Java virtual machine">
+        <!--ini_entry name="vm" type="dateiname" title="Dateiname der Java virtual machine">
             <description>
                 <p>
                     Voreingestellt ist für Windows <code>jvm.dll</code>, für HP-UX <code>jvm.sl</code> und sonst <code>jvm.so</code>.
@@ -22,7 +22,7 @@
                     können Sie hier den vollständigen Pfad angeben.
                 </p>
             </description>
-        </ini_entry>
+        </ini_entry-->
 
         <ini_entry name="class_path" type="verzeichnisse" title="classpath">
             <description>
