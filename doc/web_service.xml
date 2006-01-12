@@ -1,0 +1,205 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: http.xml 3943 2005-09-25 18:33:33Z jz $-->
+
+<description
+    title    = "Web-Service"
+    base_dir = ""
+    author   = "$Author: jz $"
+    date     = "$Date: 2005-12-21 20:33:33 +0200 (So, 25 Sep 2005) $"
+>
+    <p>
+        Web-Dienste lassen sich einrichten, um Aufträge oder Tasks zu erzeugen.
+        Die angenommene Anforderung wird sofort beantwortet.
+        Das Ergebnis des Auftrags oder der Task kann einem anderen Web-Dienst zugestellt werden.
+    </p>
+
+    <p>
+        Der vorhandene (evtl. noch anzupassende, s. <a href="http://www.ietf.org/rfc/rfc2616.txt">RFC 2616</a>) HTTP-Server des Schedulers wird verwendet. 
+        Der TCP-Port wird mit <scheduler_element name="config" attribute="tcp_port"/> festgelegt.
+    </p>
+    <p>
+        Ein Web-Dienst kann so eingerichtet werden:
+    </p>
+
+    <scheduler_keyword keyword="Web-Service"/>
+
+    <pre>&lt;web_service
+    name                     = "<i>service_name</i>"
+    url_path                 = "<i>url_path</i>" 
+    request_xslt_stylesheet  = "<i>filename</i>" 
+    response_xslt_stylesheet = "<i>filename</i>" 
+    forward_xslt_stylesheet  = "<i>filename</i>"
+    debug                    = "yes|<u>no</u>"
+/></pre>
+
+    <p>
+        <code>debug="yes"</code> lässt den Scheduler die intern erzeugten XML-Dokument in Dateien und <scheduler_option name="log-dir"/> ablegen.
+    </p>
+
+    <h2>Annahme</h2>
+
+    <p>
+        Ein HTTP-POST auf den URL des Web-Dienstes löst folgende Schritte aus:
+    </p>
+
+    <ol>
+        <li>
+            Das mit HTTP-POST übergebene XML-Dokument packt der Scheduler in ein <scheduler_element name="service_request"/>. 
+            
+            <pre>&lt;service_request service="<i>service_name</i>">
+    &lt;body><i>…data…</i>&lt;/body>
+&lt;/service_request></pre>
+        </li>
+        <li>
+            Das <code>&lt;service_request></code> wird mit dem Stylesheet <code>request_xslt_stylesheet</code> in ein XML-Kommando transformiert,
+            in der Regel <scheduler_element name="add_order"/> oder <scheduler_element name="start_job"/>.
+        </li>
+        <li>
+            Der Scheduler führt das XML-Kommando aus.
+        </li>
+        <li>
+            Die Antwort des XML-Kommandos (<code>&lt;spooler></code><scheduler_element name="answer" directory="xml/answer/"/>,
+            die auch eine Fehlermeldung <scheduler_element directory="xml/answer/" name="ERROR"/> enthalten kann) 
+            wird mit dem <code>response_xslt_stylesheet</code> zu einem <scheduler_element name="service_response"/> transformiert und
+            dem Aufrufer über HTTP zurückgeliefert.
+            
+            <pre>&lt;service_response>
+    &lt;body><i>…data…</i>&lt;/body>
+&lt;/service_response></pre>
+        </li>
+        <li>
+            Um eine ungültige Anforderung zu beantworten, kann das Stylesheet <code>request_xslt_stylesheet</code> sofort ein
+            <scheduler_element name="service_response"/> liefern.
+        </li>
+        <li>
+            Fehlerbehandlung:<br/>
+            Wenn mit POST kein XML-Dokument übergeben worden ist, führt das zum HTTP-Fehlercode "404 Bad Request".
+            <br/>
+            Ein Fehler in der Transformation führt zum HTTP-Fehlercode "500 Internal Server Error".
+        </li>
+    </ol>
+
+    
+
+
+    <h2>Ergebnis der Ausführung</h2>
+    <p>
+        Aufträge und Tasks können einem Web-Dienst zugeordnet sein (neues Datenbankfeld).
+        Die Kommandos <scheduler_element name="add_order"/> und <scheduler_element name="start_job"/> 
+        erhalten dazu das neue Attribut <code>service="<i>service_name</i>"</code>.
+    </p>
+
+    <h3>Ergebnis der Ausführung eines Auftrags</h3>
+    <p>
+        Wenn ein Auftrag beendet ist, gelangt er in die vordefinierte Jobkette <code>scheduler_service_forwarding</code>.
+        Der einzige Job dieser Jobkette, <code>scheduler_service_forwarder</code>, transformiert den Auftrag mit <code>forward_xslt_stylesheet</code> des Web-Dienstes
+        in ein <scheduler_element name="service_request"/>.
+    </p>
+    <p>
+        Das XSLT-Stylesheet <code>forward_xslt_stylesheet</code> erhält einen erweiterten Auftrag:
+    </p>
+    <pre>&lt;order service="<i>service_name</i>" last_job="<i>job_name</i>" …>
+    &lt;payload>&lt;params>…&lt;/params>&lt;/payload>
+    &lt;log last_error="…" last_warning="…"/>
+    …
+&lt;/order></pre>
+    <p>
+        (<code>last_error=""</code> wird von geringer Bedeutung sein.
+        Das Attribut bezeichnet einen Fehler des Jobs, der zum Stopp des Jobs führt;
+        der Auftrag wird bei einem folgenden Lauf des Jobs wiederholt.)
+    </p>
+
+    <pre>&lt;service_request url="<i>url</i>">
+    &lt;body><i>…data…</i>&lt;/body>
+&lt;/service_request></pre>
+    
+    <p>
+        Der Job baut mit dem URL eine HTTP-Verbindung auf, überträgt mit POST die Daten, wartet die Antwort ab
+        und protokolliert sie.
+    </p>
+    <p>
+        Implementiert ist der Job in Java.
+    </p>
+
+    <h3>Ergebnis der Ausführung einer Task</h3>
+    <p>
+        Endet eine einem Web-Dienst zugeordnete Task (<code>request_xslt_stylesheet</code> hat ein <scheduler_element name="start_job"/> erzeugt),
+        dann erzeugt der Scheduler einen Auftrag für die vordefinierte Jobkette <code>scheduler_service_forwarding</code>,
+        dessen Nutzlast eine <scheduler_element directory="xml/answer/" name="task"/> ist. 
+        Die weitere Verarbeitung ist dann wie oben.
+    </p>
+    <pre>&lt;order service="<i>service_name</i>" …>
+    &lt;payload>
+        &lt;task job="…" …>
+            …
+            &lt;log last_error="…" last_warning="…"/>
+        &lt;/task>
+    &lt;/payload>
+    …
+&lt;/order></pre>
+
+    <p>
+        Implementierung der <code>&lt;task></code> in <code>Order.payload</code>: 
+        Die Task wird als XML-Dokument mit Prolog (<code>&lt;?xml …?></code>) in einem String gespeichert.
+        Ein Payload-String, der mit "<code>&lt;?xml</code>" beginnt, wird in <code>&lt;payload></code> nicht als PCDATA, 
+        sondern direkt als XML-Element eingefügt.
+    </p>
+
+
+    <h2>Änderungen in der Datenbank</h2>
+
+    <h3>Tabelle scheduler_orders</h3>
+
+    <p>
+        Zu einem Auftrag werden zusätzliche Informationen gespeichert:
+    </p>
+    <ul>
+        <li>
+            service_name
+        </li>
+        <li>
+            last_job
+        </li>
+        <li>
+            last_error
+        </li>
+        <li>
+            last_warning
+        </li>
+    </ul>
+
+    <p>
+        Statt einzelner Datenbankfelder, schlage ich vor, ein neues XML-Feld einzuführen, 
+        das die neuen Felder in einem XML-Dokument enthält.
+    </p>
+    <pre>&lt;?xml version="1.0"?>
+&lt;order service="<i>service_name</i>" last_job="<i>job_name</i>">
+    &lt;log last_error="…" last_warning="…"/>
+&lt;/order></pre>
+
+    <p>
+        (Man könnte auch <code>payload</code> und <code>runtime</code> hierin speichern und damit auf zwei Clobs verzichten.)
+    </p>
+
+    <h3>Tabelle scheduler_tasks</h3>
+    
+    Hier wird nur der Name des Web-Dienstes gespeichert. 
+    Ich schlage hier ebenfalls ein XML-Feld vor, das wir auch für spätere Erweiterungen nutzen können.
+    
+    
+    
+    <h2>Jobkette scheduler_service_forwarding und Job scheduler_service_forwarder</h2>
+    
+    <p>
+        Der Scheduler definiert die Jobkette <code>scheduler_service_forwarding</code>, 
+        wenn sie nicht in der XML-Konfiguration enthalten ist.
+    </p>
+    
+    <p>
+        In der XML-Konfiguration kann der Job <code>scheduler_service_forwarder</code> um 
+        <scheduler_element name="delay_order_after_setback"/> erweitert werden.
+    </p>
+
+</description>
