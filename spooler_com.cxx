@@ -3340,6 +3340,7 @@ const Com_method Com_job_chain::_methods[] =
     { DISPATCH_METHOD     , 10, "remove_all_pending_orders" , (Com_method_ptr)&Com_job_chain::Remove_all_pending_orders   , VT_INT  },
     { DISPATCH_METHOD     , 11, "Try_add_order"             , (Com_method_ptr)&Com_job_chain::Try_add_order      , VT_BOOL       , { VT_DISPATCH } },
     { DISPATCH_METHOD     , 12, "Add_or_replace_order"      , (Com_method_ptr)&Com_job_chain::Add_or_replace_order, VT_EMPTY     , { VT_DISPATCH } },
+    { DISPATCH_METHOD     , 13, "Remove"                    , (Com_method_ptr)&Com_job_chain::Remove             , VT_EMPTY      },
     {}
 };
 
@@ -3687,6 +3688,24 @@ STDMETHODIMP Com_job_chain::Remove_all_pending_orders( int* result )
         if( !_job_chain )  return E_POINTER;
 
         *result = _job_chain->remove_all_pending_orders();
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+
+//----------------------------------------------------------------------------Com_job_chain::Remove
+
+STDMETHODIMP Com_job_chain::Remove()
+{
+    HRESULT hr = NOERROR;
+
+    try
+    {
+        if( !_job_chain )  return E_POINTER;
+
+        _job_chain->remove();
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }

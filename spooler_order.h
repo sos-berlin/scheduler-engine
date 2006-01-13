@@ -194,7 +194,16 @@ struct Job_chain_node : Com_job_chain_node
 
 struct Job_chain : Com_job_chain
 {
-    typedef Variant             State;
+    //typedef Variant             State;
+
+    enum State
+    {
+        s_under_construction,   // add_job() gesperrt, add_order() frei
+        s_finished,             // in Betrieb
+        s_closing,              // Wird entfernt, aber ein Auftrag wird noch verarbeitet
+        s_closed                
+    };
+
 
 
     Z_GNU_ONLY(                 Job_chain               ();  )                                      // Für gcc 3.2. Nicht implementiert
@@ -202,22 +211,25 @@ struct Job_chain : Com_job_chain
                                ~Job_chain               ();
 
     void                        close                   ();
+    void                        remove                  ();
+    void                        check_for_removing      ();
 
     void                    set_name                    ( const string& name )                      { THREAD_LOCK( _lock )  _name = name,  _log.set_prefix( "Jobchain " + _name ); }
     string                      name                    ()                                          { THREAD_LOCK_RETURN( _lock, string, _name ); }
 
-    void                    set_finished                ( bool b )                                  { _finished = b; }
-    bool                        finished                () const                                    { return _finished; }
+    void                    set_state                   ( State state )                             { _state = state; }
+    State                       state                   () const                                    { return _state; }
+    bool                        finished                () const                                    { return _state == s_finished; }
 
     void                    set_store_orders_in_database( bool b )                                  { _store_orders_in_database = b; }
     void                        load_orders_from_database();
-    int                         remove_all_pending_orders( bool force = false );
+    int                         remove_all_pending_orders( bool leave_in_database = false );
 
-    void                        add_job                 ( Job*, const State& input_state, const State& output_state = error_variant, const State& error_state = error_variant );
+    void                        add_job                 ( Job*, const Order::State& input_state, const Order::State& output_state = error_variant, const Order::State& error_state = error_variant );
     void                        finish                  ();
 
-    Job_chain_node*             node_from_state         ( const State& );
-    Job_chain_node*             node_from_state_or_null ( const State& );
+    Job_chain_node*             node_from_state         ( const Order::State& );
+    Job_chain_node*             node_from_state_or_null ( const Order::State& );
     Job_chain_node*             node_from_job           ( Job* );
 
   //Order*                      add_order               ( VARIANT* order_or_payload, VARIANT* job_or_state );
@@ -231,6 +243,7 @@ struct Job_chain : Com_job_chain
     void                        unregister_order        ( Order* );
 
     int                         order_count             ();
+    bool                        has_order               () const;
 
     xml::Element_ptr            dom_element             ( const xml::Document_ptr&, const Show_what& );
 
@@ -245,7 +258,7 @@ struct Job_chain : Com_job_chain
     Thread_semaphore           _lock;
     Prefix_log                 _log;
     string                     _name;
-    bool                       _finished;               // add_job() gesperrt, add_order() frei
+    State                      _state;
 
     typedef list< ptr<Job_chain_node> >  Chain;
     Chain                      _chain;
@@ -289,8 +302,9 @@ struct Order_queue : Com_order_queue
     void                        add_order               ( Order*, Do_log = do_log );
   //Order*                      add_order               ( const Order::Payload& );
     void                        remove_order            ( Order* );
-    int                         order_count             ( Job_chain* = NULL );
+    int                         order_count             ( const Job_chain* = NULL );
     bool                        empty                   ()                                          { return _queue.empty(); }
+    bool                        empty                   ( const Job_chain* job_chain )              { return order_count( job_chain ) == 0; }
     Order*                      first_order             ( const Time& now );
     bool                        has_order               ( const Time& now )                         { return first_order(now) != NULL; }
     ptr<Order>                  get_order_for_processing( const Time& now );

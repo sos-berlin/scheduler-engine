@@ -32,7 +32,7 @@ void Spooler::add_job_chain( Job_chain* job_chain )
 
         _job_chain_map[lname] = job_chain;
 
-        job_chain->set_finished( true );       // _finished erst, wenn Jobkette in der _job_chain_map eingetragen ist.
+        job_chain->set_state( Job_chain::s_finished );       // _finished erst, wenn Jobkette in der _job_chain_map eingetragen ist.
     }
 
 /*
@@ -175,6 +175,7 @@ void Job_chain::close()
 {
     Z_LOGI2( "scheduler", *this << ".close()\n" );
     remove_all_pending_orders( true );
+    set_state( s_closed );
 }
 
 //----------------------------------------------------------xml::Element_ptr Job_chain::dom_element
@@ -192,7 +193,7 @@ xml::Element_ptr Job_chain::dom_element( const xml::Document_ptr& document, cons
         element.setAttribute( "name"  , _name );
         element.setAttribute( "orders", order_count() );
 
-        if( _finished )
+        if( _state >= s_finished )
         {
             FOR_EACH( Chain, _chain, it )
             {
@@ -301,8 +302,9 @@ void Job_chain::load_orders_from_database()
 
 //-------------------------------------------------------------Job_chain::remove_all_pending_orders
 
-int Job_chain::remove_all_pending_orders( bool force )
+int Job_chain::remove_all_pending_orders( bool leave_in_database )
 {
+    bool        force        = false;
     int         result       = 0;
     Order_map   my_order_map = _order_map;
 
@@ -312,7 +314,6 @@ int Job_chain::remove_all_pending_orders( bool force )
 
         if( !order->_task || force )
         {
-            bool leave_in_database = force;
             order->remove_from_job_chain( leave_in_database );
             order = NULL;
             result++;
@@ -332,7 +333,7 @@ void Job_chain::add_job( Job* job, const Order::State& state, const Order::State
 {
     if( job  &&  !job->order_queue() )  throw_xc( "SCHEDULER-147", job->name() );
 
-    if( _finished )  throw_xc( "SCHEDULER-148" );
+    if( !finished() )  throw_xc( "SCHEDULER-148" );
 
     ptr<Job_chain_node> node = new Job_chain_node;
 
@@ -367,7 +368,7 @@ void Job_chain::finish()
 {
     //THREAD_LOCK( _lock )
     {
-        if( _finished )  return;
+        if( _state != s_under_construction )  return;
 
         if( !_chain.empty() )
         {
@@ -427,7 +428,7 @@ Job_chain_node* Job_chain::node_from_job( Job* job )
 
 //-----------------------------------------------------------------------Job_chain::node_from_state
 
-Job_chain_node* Job_chain::node_from_state( const State& state )
+Job_chain_node* Job_chain::node_from_state( const Order::State& state )
 {
     Job_chain_node* result = node_from_state_or_null( state );
     if( !result )  throw_xc( "SCHEDULER-149", name(), debug_string_from_variant(state) );
@@ -436,7 +437,7 @@ Job_chain_node* Job_chain::node_from_state( const State& state )
 
 //---------------------------------------------------------------Job_chain::node_from_state_or_null
 
-Job_chain_node* Job_chain::node_from_state_or_null( const State& state )
+Job_chain_node* Job_chain::node_from_state_or_null( const Order::State& state )
 {
     //THREAD_LOCK( _lock )
     {
@@ -479,6 +480,19 @@ ptr<Order> Job_chain::order_or_null( const Order::Id& id )
     }
 
     return NULL;
+}
+
+//-----------------------------------------------------------------------------Job_chain::has_order
+
+bool Job_chain::has_order() const
+{
+    for( Chain::const_iterator it = _chain.begin(); it != _chain.end(); it++ )
+    {
+        Job* job = (*it)->_job;
+        if( job->order_queue()  &&  !job->order_queue()->empty( this ) )  return true;
+    }
+
+    return false;
 }
 
 //---------------------------------------------------------------------------Job_chain::order_count
@@ -532,6 +546,38 @@ void Job_chain::unregister_order( Order* order )
         Order_map::iterator it = _order_map.find( id_string );
         if( it != _order_map.end() )  _order_map.erase( it );
                                 else  Z_LOG( __FUNCTION__ << " " << order->obj_name() << " ist nicht registriert!?\n" );
+    }
+}
+
+//--------------------------------------------------------------------------------Job_chain::remove
+
+void Job_chain::remove()
+{
+    remove_all_pending_orders( true );
+    
+    if( has_order() )
+    {
+        set_state( s_closing );
+    }
+    else
+    {
+        close();
+
+        for( Spooler::Job_chain_map::iterator j = _spooler->_job_chain_map.begin(); j != _spooler->_job_chain_map.end(); j++ )
+        {
+            if( j->second == this )  { _spooler->_job_chain_map.erase( j );  break; }
+        }
+    }
+}
+
+//--------------------------------------------------------------------Job_chain::check_for_removing
+
+void Job_chain::check_for_removing()
+{
+    if( state() == s_closing  &&  !has_order() )
+    {
+        _log.info( "Removing" );
+        remove();
     }
 }
 
@@ -623,7 +669,7 @@ xml::Element_ptr Order_queue::dom_element( const xml::Document_ptr& document, co
 
 //-------------------------------------------------------------------------Order_queue::order_count
 
-int Order_queue::order_count( Job_chain* which_job_chain )
+int Order_queue::order_count( const Job_chain* which_job_chain )
 {
     if( which_job_chain )
     {
@@ -806,7 +852,17 @@ Order* Order_queue::first_order( const Time& now )
         }
 
 
-        FOR_EACH( Queue, _queue, o )  if( !(*o)->_task  &&  !(*o)->_replacement_for )  return *o;
+        FOR_EACH( Queue, _queue, o )
+        {
+            Order* order = *o;
+            
+            if( order->_task )  continue;               // Schon in Verarbeitung
+            if( order->_replacement_for )  continue;
+            if( order->_job_chain  &&  order->_job_chain->state() != Job_chain::s_finished )  continue;   // Jobkette wird nicht gelöscht?
+
+            return order;
+            //if( !(*o)->_task  &&  !(*o)->_replacement_for )  return *o;
+        }
     }
 
     return NULL;
@@ -1351,6 +1407,8 @@ void Order::remove_from_job_chain( bool leave_in_database )
         log_line << "Auftrag ist aus Jobkette " << job_chain->name() << " entfernt";
         if( _task )  log_line << ", wird aber weiter von " << _task->obj_name() << " ausgeführt";
         _log->info( log_line );
+
+        job_chain->check_for_removing();
     }
 }
 

@@ -836,6 +836,8 @@ library Spooler
                                                                                             // End_refresh_all_orders() (automatisch bei Jobende)
                                                                                             // Alle nicht angerührten Aufträge werden entfernt.
         HRESULT                 Add_or_replace_order    ( [in] Iorder* );
+
+        HRESULT                 Remove                  ();
     }
 
     [

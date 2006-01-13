@@ -31,7 +31,7 @@ struct Time
     };
 
                                 Time                        ( double t = 0.0 )              { set(t); }
-                                Time                        ( time_t t )                    { set(t); }
+                                Time                        ( time_t t )                    { set((double)t); }
                                 Time                        ( int t )                       { set(t); }
                                 Time                        ( uint t )                      { set(t); }
                                 Time                        ( const string& t )             { set(t); }

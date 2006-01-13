@@ -118,14 +118,14 @@ void Source_with_parts::add( int linenr, const string& text, const Time& mod_tim
 }
 
 //------------------------------------------------------------------------check_unchanged_attribute
-
+/*
 static void check_unchanged_attribute( const xml::Element_ptr& element, const string& attribute_name, const string& current_value )
 {
     if( element.hasAttribute( attribute_name  )  &&  element.getAttribute( attribute_name ) != current_value )  
         throw_xc( "SCHEDULER-234", attribute_name + "+" + current_value );
 }
-
-//------------------------------------------------------------------------check_unchanged_attribute
+*/
+//----------------------------------------------------------------------------set_checked_attribute
 
 void Module::set_checked_attribute( string* variable, const xml::Element_ptr& element, const string& attribute_name )
 {

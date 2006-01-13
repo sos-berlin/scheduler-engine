@@ -487,6 +487,8 @@ struct Ijob_chain : IDispatch
     virtual HRESULT     get_Node                    ( VARIANT* state, Ijob_chain_node** result )    = 0;
 
     virtual HRESULT     get_Order_queue             ( VARIANT* state, Iorder_queue** result )       = 0;
+
+    virtual HRESULT         Remove                  ()                                              = 0;
 };
 
 //----------------------------------------------------------------------------------Order_queue
