@@ -333,7 +333,7 @@ void Job_chain::add_job( Job* job, const Order::State& state, const Order::State
 {
     if( job  &&  !job->order_queue() )  throw_xc( "SCHEDULER-147", job->name() );
 
-    if( !finished() )  throw_xc( "SCHEDULER-148" );
+    if( _state != s_under_construction )  throw_xc( "SCHEDULER-148" );
 
     ptr<Job_chain_node> node = new Job_chain_node;
 
@@ -489,7 +489,7 @@ bool Job_chain::has_order() const
     for( Chain::const_iterator it = _chain.begin(); it != _chain.end(); it++ )
     {
         Job* job = (*it)->_job;
-        if( job->order_queue()  &&  !job->order_queue()->empty( this ) )  return true;
+        if( job  &&  job->order_queue()  &&  !job->order_queue()->empty( this ) )  return true;
     }
 
     return false;
@@ -553,6 +553,8 @@ void Job_chain::unregister_order( Order* order )
 
 void Job_chain::remove()
 {
+    if( _state < s_finished )  throw_xc( "SCHEDULER-151" );
+
     remove_all_pending_orders( true );
     
     if( has_order() )
@@ -1427,7 +1429,7 @@ bool Order::try_add_to_job_chain( Job_chain* job_chain )
     if( job_chain->has_order_id( id() ) )  return false;
 
   //if( _remove_from_job_chain )  throw_xc( "SCHEDULER-228", obj_name() );
-    if( !job_chain->finished() )  throw_xc( "SCHEDULER-151" );
+    if( job_chain->state() != Job_chain::s_finished )  throw_xc( "SCHEDULER-151" );
 
     ptr<Order> me = this;   // Halten
 

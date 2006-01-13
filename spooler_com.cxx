@@ -3529,7 +3529,7 @@ STDMETHODIMP Com_job_chain::Add_order( VARIANT* order_or_payload, spooler_com::I
     try
     {
         if( !_job_chain )  return E_POINTER;
-        if( !_job_chain->finished() )  throw_xc( "SCHEDULER-151" );
+        if( _job_chain->state() != Job_chain::s_finished )  throw_xc( "SCHEDULER-151" );
 
         ptr<spooler_com::Iorder> iorder = order_from_order_or_payload( _job_chain->_spooler, *order_or_payload );
         if( !iorder )  return E_POINTER;
@@ -3561,7 +3561,7 @@ STDMETHODIMP Com_job_chain::Add_or_replace_order( spooler_com::Iorder* iorder )
     try
     {
         if( !_job_chain )  return E_POINTER;
-        if( !_job_chain->finished() )  throw_xc( "SCHEDULER-151" );
+        if( _job_chain->state() != Job_chain::s_finished )  throw_xc( "SCHEDULER-151" );
 
         Order* order = dynamic_cast<Order*>( &*iorder );
         if( !order )  return E_INVALIDARG;
@@ -3589,7 +3589,7 @@ STDMETHODIMP Com_job_chain::Try_add_order( Iorder* iorder, VARIANT_BOOL* result 
     try
     {
         if( !_job_chain )  return E_POINTER;
-        if( !_job_chain->finished() )  throw_xc( "SCHEDULER-151" );
+        if( _job_chain->state() != Job_chain::s_finished )  throw_xc( "SCHEDULER-151" );
         if( !iorder )  return E_POINTER;
 
         Order* order = dynamic_cast<Order*>( &*iorder );
@@ -3616,7 +3616,7 @@ STDMETHODIMP Com_job_chain::get_Order_queue( VARIANT* state, Iorder_queue** resu
     try
     {
         if( !_job_chain )  return E_POINTER;
-        if( !_job_chain->finished() )  throw_xc( "SCHEDULER-151" );
+        if( _job_chain->state() < Job_chain::s_finished )  throw_xc( "SCHEDULER-151" );
 
         *result = _job_chain->node_from_state( *state )->_job->order_queue();
         if( *result )  (*result)->AddRef();
@@ -3637,7 +3637,7 @@ STDMETHODIMP Com_job_chain::get_Node( VARIANT* state, Ijob_chain_node** result )
     try
     {
         if( !_job_chain )  return E_POINTER;
-        if( !_job_chain->finished() )  throw_xc( "SCHEDULER-151" );
+        if( _job_chain->state() < Job_chain::s_finished )  throw_xc( "SCHEDULER-151" );
 
         *result = _job_chain->node_from_state( *state );
         if( *result )  (*result)->AddRef();

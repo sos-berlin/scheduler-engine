@@ -219,7 +219,7 @@ struct Job_chain : Com_job_chain
 
     void                    set_state                   ( State state )                             { _state = state; }
     State                       state                   () const                                    { return _state; }
-    bool                        finished                () const                                    { return _state == s_finished; }
+  //bool                        finished                () const                                    { return _state == s_finished; }
 
     void                    set_store_orders_in_database( bool b )                                  { _store_orders_in_database = b; }
     void                        load_orders_from_database();

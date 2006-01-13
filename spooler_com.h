@@ -663,6 +663,7 @@ struct Com_job_chain : spooler_com::Ijob_chain,
 
     STDMETHODIMP                Remove_all_pending_orders( int* result );
 
+    STDMETHODIMP                Remove                  ();
 
     Thread_semaphore           _lock;
     Job_chain*                 _job_chain;

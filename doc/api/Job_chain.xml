@@ -210,6 +210,29 @@ job_chain.name = "Jobkette";</pre>
     </description>
 </method>
 
+    
+<method name="remove">
+    <com>
+    </com>
+
+    <title>
+        Entfernt die Jobkette
+    </title>
+
+    <description>
+        <p>
+            Wenn gerade Aufträge der Jobkette verarbeitet werden (in <scheduler_method class="Job_impl" method="spooler_process"/>),
+            dann entfernt der Scheduler die Jobkette, sobald der letzte Auftrag verarbeitet worden ist.
+        </p>
+        <p>
+            Die Aufträge bleiben in der Datenbank erhalten.
+            Wenn später eine Jobkette mit gleichen Namen hinzugefügt wird (<scheduler_method class="Spooler" method="add_job_chain"/>),
+            dann lädt der Scheduler diese Aufträge erneut. 
+            Die Zustände der Aufträge müssen in der erneuerten Jobkette vorhanden sein. 
+        </p>
+    </description>
+</method>
+    
 
 
 <title>

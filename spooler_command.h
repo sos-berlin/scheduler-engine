@@ -102,6 +102,7 @@ struct Command_processor
     xml::Element_ptr            execute_add_order           ( const xml::Element_ptr& );
     xml::Element_ptr            execute_modify_order        ( const xml::Element_ptr& );
     xml::Element_ptr            execute_remove_order        ( const xml::Element_ptr& );
+    xml::Element_ptr            execute_remove_job_chain    ( const xml::Element_ptr& );
     xml::Element_ptr            execute_register_remote_scheduler( const xml::Element_ptr& );
 
     void                        get_id_and_next             ( const xml::Element_ptr& element, int* id, int* next );

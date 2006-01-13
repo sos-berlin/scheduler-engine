@@ -629,6 +629,19 @@ xml::Element_ptr Command_processor::execute_remove_order( const xml::Element_ptr
     return _answer.createElement( "ok" );
 }
 
+//------------------------------------------------------Command_processor::execute_remove_job_chain
+
+xml::Element_ptr Command_processor::execute_remove_job_chain( const xml::Element_ptr& modify_order_element )
+{
+    if( _security_level < Security::seclev_no_add )  throw_xc( "SCHEDULER-121" );
+
+    string job_chain_name = modify_order_element.getAttribute( "job_chain" );
+
+    _spooler->job_chain( job_chain_name )->remove();
+
+    return _answer.createElement( "ok" );
+}
+
 //---------------------------------------------Command_processor::execute_register_remote_scheduler
 
 xml::Element_ptr Command_processor::execute_register_remote_scheduler( const xml::Element_ptr& register_scheduler_element )
@@ -764,6 +777,8 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     if( element.nodeName_is( "register_remote_scheduler" ) )  return execute_register_remote_scheduler( element );
     else
     if( element.nodeName_is( "remove_order"     ) )  return execute_remove_order( element );
+    else
+    if( element.nodeName_is( "remove_job_chain" ) )  return execute_remove_job_chain( element );
     else
     {
         throw_xc( "SCHEDULER-105", element.nodeName() ); return xml::Element_ptr();

@@ -168,4 +168,6 @@ public class Job_chain extends Idispatch
     /*+ Dasselbe wie node(state).job().order_queue(). 
      * @return Liefert die Auftragswarteschlange des Jobs, der dem angegebenen Zustand zugeordnet ist. */
     public Order_queue      order_queue         ( String state )                    { return (Order_queue)      com_call( "<order_queue", state ); }
+    
+    public void             remove              ()                                  {                           com_call( "remove" );              }
 }
