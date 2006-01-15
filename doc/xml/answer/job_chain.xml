@@ -19,6 +19,32 @@
     <xml_attributes>
         <xml_attribute name="name" type="name" title="Name der Jobkette"/>
         <xml_attribute name="orders" type="zahl" title="Anzahl der Aufträge in der Jobkette"/>
+        
+        <xml_attribute name="state" type="Zustand der Jobkette">
+            <description>
+                <table cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td valign="baseline" style="padding-top: 1ex"><scheduler_keyword keyword="under_construction"/><code>state="under_construction"</code></td>
+                        <td valign="baseline" style="padding-top: 1ex; padding-left: 2ex">
+                            Der anfängliche Status nach <scheduler_method class="Spooler" method="create_job_chain"/>.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td valign="baseline" style="padding-top: 1ex"><scheduler_keyword keyword="finished"/><code>state="finished"</code></td>
+                        <td valign="baseline" style="padding-top: 1ex; padding-left: 2ex">
+                            Nach <scheduler_method class="Spooler" method="add_job_chain"/>.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td valign="baseline" style="padding-top: 1ex"><scheduler_keyword keyword="removing"/><code>state="removing"</code></td>
+                        <td valign="baseline" style="padding-top: 1ex; padding-left: 2ex">
+                            Nach <scheduler_method class="Job_chain" method="remove"/>, 
+                            solange noch Aufträge ausgeführt werden.
+                        </td>
+                    </tr>
+                </table>
+            </description>
+        </xml_attribute>
     </xml_attributes>
 
     <xml_child_elements>

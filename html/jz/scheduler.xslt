@@ -753,7 +753,17 @@
                                         <xsl:with-param name="counter" select="count( /spooler/answer/state/jobs/job/tasks/task [ order/@job_chain=$job_chain_name ] )" />
                                         <xsl:with-param name="suffix"  select="'tasks'" />
                                     </xsl:call-template>
+                                    &#160;
                                 </xsl:if>
+                                
+                                <xsl:choose>
+                                    <xsl:when test="not( @state )"/>
+                                    <xsl:when test="@state='under_construction'"/>
+                                    <xsl:when test="@state='ready'"/>
+                                    <xsl:otherwise>
+                                        <span class="job_chain_error">state=<xsl:value-of select="@state"/></span>
+                                    </xsl:otherwise>
+                                </xsl:choose>
                             </td>
                             
                             <td>

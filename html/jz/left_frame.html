@@ -187,7 +187,7 @@ function update()
   // || window.parent.details_frame.document.readyState == "complete" )
     if( window.parent._details_frame_loaded )
     {
-        window.parent.details_frame.update();
+        call_error_checked( window.parent.details_frame.update );
     }
     
     if( _timer != undefined )  set_update_timer();

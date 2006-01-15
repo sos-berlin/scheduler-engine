@@ -32,7 +32,7 @@ void Spooler::add_job_chain( Job_chain* job_chain )
 
         _job_chain_map[lname] = job_chain;
 
-        job_chain->set_state( Job_chain::s_finished );       // _finished erst, wenn Jobkette in der _job_chain_map eingetragen ist.
+        job_chain->set_state( Job_chain::s_ready );
     }
 
 /*
@@ -178,6 +178,19 @@ void Job_chain::close()
     set_state( s_closed );
 }
 
+//----------------------------------------------------------------------------Job_chain::state_name
+
+string Job_chain::state_name( State state )
+{
+    switch( state )
+    {
+        case s_under_construction:  return "under_construction";
+        case s_ready:               return "ready";
+        case s_removing:            return "removing";
+        default:                    return S() << "State(" << state << ")";
+    }
+}
+
 //----------------------------------------------------------xml::Element_ptr Job_chain::dom_element
 
 xml::Element_ptr Job_chain::dom_element( const xml::Document_ptr& document, const Show_what& show )
@@ -192,8 +205,9 @@ xml::Element_ptr Job_chain::dom_element( const xml::Document_ptr& document, cons
     {
         element.setAttribute( "name"  , _name );
         element.setAttribute( "orders", order_count() );
+        element.setAttribute( "state" , state_name( state() ) );
 
-        if( _state >= s_finished )
+        if( _state >= s_ready )
         {
             FOR_EACH( Chain, _chain, it )
             {
@@ -553,13 +567,13 @@ void Job_chain::unregister_order( Order* order )
 
 void Job_chain::remove()
 {
-    if( _state < s_finished )  throw_xc( "SCHEDULER-151" );
+    if( _state < s_ready )  throw_xc( "SCHEDULER-151" );
 
     remove_all_pending_orders( true );
     
     if( has_order() )
     {
-        set_state( s_closing );
+        set_state( s_removing );
     }
     else
     {
@@ -576,7 +590,7 @@ void Job_chain::remove()
 
 void Job_chain::check_for_removing()
 {
-    if( state() == s_closing  &&  !has_order() )
+    if( state() == s_removing &&  !has_order() )
     {
         _log.info( "Removing" );
         remove();
@@ -860,7 +874,7 @@ Order* Order_queue::first_order( const Time& now )
             
             if( order->_task )  continue;               // Schon in Verarbeitung
             if( order->_replacement_for )  continue;
-            if( order->_job_chain  &&  order->_job_chain->state() != Job_chain::s_finished )  continue;   // Jobkette wird nicht gelöscht?
+            if( order->_job_chain  &&  order->_job_chain->state() != Job_chain::s_ready )  continue;   // Jobkette wird nicht gelöscht?
 
             return order;
             //if( !(*o)->_task  &&  !(*o)->_replacement_for )  return *o;
@@ -1429,7 +1443,7 @@ bool Order::try_add_to_job_chain( Job_chain* job_chain )
     if( job_chain->has_order_id( id() ) )  return false;
 
   //if( _remove_from_job_chain )  throw_xc( "SCHEDULER-228", obj_name() );
-    if( job_chain->state() != Job_chain::s_finished )  throw_xc( "SCHEDULER-151" );
+    if( job_chain->state() != Job_chain::s_ready )  throw_xc( "SCHEDULER-151" );
 
     ptr<Order> me = this;   // Halten
 

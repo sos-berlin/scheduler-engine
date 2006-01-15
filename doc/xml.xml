@@ -33,7 +33,7 @@
     </thead>
     <tbody>
         <tr>
-            <td>
+            <td valign="baseline">
                 <scheduler_element name="allowed_host"/><br/>
                 <scheduler_element name="base"/><br/>
                 <scheduler_element name="config"/><br/>
@@ -69,7 +69,7 @@
                 <scheduler_element name="variable"/><br/>
                 <scheduler_element name="weekdays"/><br/>
             </td>
-            <td>
+            <td valign="baseline" style="padding-left: 2ex">
                 <scheduler_element name="add_jobs"/><br/>
                 <scheduler_element name="add_order"/><br/>
                 <scheduler_element name="kill_task"/><br/>
@@ -88,7 +88,7 @@
                 <scheduler_element name="show_task"/><br/>
                 <scheduler_element name="terminate"/><br/>
             </td>
-            <td>
+            <td valign="baseline" style="padding-left: 2ex">
                 <scheduler_element directory="xml/answer/" name="answer"/><br/>
                 <scheduler_element directory="xml/answer/" name="description"/><br/>
                 <scheduler_element directory="xml/answer/" name="ERROR"/><br/>

@@ -20,10 +20,46 @@
     <xml_attributes>
         <xml_attribute name="job" type="name" title="Jobname"/>
 
-        <xml_attribute name="state" type="name" title="Zustand">
+        <xml_attribute name="state" type="state" title="Zustand">
             <description>
-                <p>
-                </p>
+                <table cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td valign="baseline" style="padding-top: 1ex"><scheduler_keyword keyword="none"/><code>state="none"</code></td>
+                        <td valign="baseline" style="padding-top: 1ex; padding-left: 2ex">
+                            Der anfängliche Status des Jobs beim Start des Schedulers.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td valign="baseline" style="padding-top: 1ex"><scheduler_keyword keyword="stopping"/><code>state="stopping"</code></td>
+                        <td valign="baseline" style="padding-top: 1ex; padding-left: 2ex">
+                            Wenn der Job gestoppt wird und noch nicht alle Tasks beendet sind.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td valign="baseline" style="padding-top: 1ex"><scheduler_keyword keyword="stopped"/><code>state="stopped"</code></td>
+                        <td valign="baseline" style="padding-top: 1ex; padding-left: 2ex">
+                            Der Job ist gestoppt und alle Tasks sind beendet.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td valign="baseline" style="padding-top: 1ex"><scheduler_keyword keyword="read_error"/><code>state="read_error"</code></td>
+                        <td valign="baseline" style="padding-top: 1ex; padding-left: 2ex">
+                            Wenn <scheduler_element name="script"/> nicht gelesen werden konnte.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td valign="baseline" style="padding-top: 1ex"><scheduler_keyword keyword="pending"/><code>state="pending"</code></td>
+                        <td valign="baseline" style="padding-top: 1ex; padding-left: 2ex">
+                            Keine Task läuft.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td valign="baseline" style="padding-top: 1ex"><scheduler_keyword keyword="running"/><code>state="running"</code></td>
+                        <td valign="baseline" style="padding-top: 1ex; padding-left: 2ex">
+                            Wenigstens eine Task läuft.
+                        </td>
+                    </tr>
+                </table>
             </description>
         </xml_attribute>
 

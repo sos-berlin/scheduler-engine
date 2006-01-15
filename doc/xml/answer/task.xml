@@ -37,108 +37,106 @@
                 </p>
 
                 <table cellspacing="0" cellpadding="0">
-                    <col valign="baseline" style="padding-top: 1ex"/>
-                    <col valign="baseline" style="padding-top: 1ex; padding-left: 2ex"/>
                     <tr>
-                        <td><code>state="none"</code>
+                        <td valign="baseline" style="padding-top: 1ex"><code>state="none"</code>
                         </td>
-                        <td>
+                        <td valign="baseline" style="padding-top: 1ex; padding-left: 2ex">
                             Der anfängliche Status.
                         </td>
                     </tr>
                     <tr>
-                        <td><scheduler_keyword keyword="loading"/><code>state="loading"</code></td>
-                        <td>
+                        <td valign="baseline" style="padding-top: 1ex"><scheduler_keyword keyword="loading"/><code>state="loading"</code></td>
+                        <td valign="baseline" style="padding-top: 1ex; padding-left: 2ex">
                             Der Programmcode der Task wird geladen.
                         </td>
                     </tr>
                     <tr>
-                        <td><scheduler_keyword keyword="waiting_for_process"/><code>state="waiting_for_process"</code></td>
-                        <td>
+                        <td valign="baseline" style="padding-top: 1ex"><scheduler_keyword keyword="waiting_for_process"/><code>state="waiting_for_process"</code></td>
+                        <td valign="baseline" style="padding-top: 1ex; padding-left: 2ex">
                             Ein Prozess ist gestartet worden und die Task wartet darauf, dass der Prozess bereit ist.
                         </td>
                     </tr>
                     <tr>
-                        <td><scheduler_keyword keyword="starting"/><code>state="starting"</code></td>
-                        <td>
+                        <td valign="baseline" style="padding-top: 1ex"><scheduler_keyword keyword="starting"/><code>state="starting"</code></td>
+                        <td valign="baseline" style="padding-top: 1ex; padding-left: 2ex">
                             Die Task startet. <scheduler_method class="Job_impl" method="spooler_init"/>
                             und <scheduler_method class="Job_impl" method="spooler_open"/> werden aufgerufen.
                         </td>
                     </tr>
                     <tr>
-                        <td><scheduler_keyword keyword="running_process"/><code>state="running_process"</code></td>
-                        <td>
+                        <td valign="baseline" style="padding-top: 1ex"><scheduler_keyword keyword="running_process"/><code>state="running_process"</code></td>
+                        <td valign="baseline" style="padding-top: 1ex; padding-left: 2ex">
                             Nur, wenn der Job mit <scheduler_element name="process"/> definiert ist: Der Prozess läuft.
                         </td>
                     </tr>
                     <tr>
-                        <td><scheduler_keyword keyword="running"/><code>state="running"</code></td>
-                        <td>
+                        <td valign="baseline" style="padding-top: 1ex"><scheduler_keyword keyword="running"/><code>state="running"</code></td>
+                        <td valign="baseline" style="padding-top: 1ex; padding-left: 2ex">
                             Die Task läuft.
                             <scheduler_method class="Job_impl" method="spooler_process"/> wird aufgerufen.
                         </td>
                     </tr>
                     <tr>
-                        <td><scheduler_keyword keyword="running_waiting_for_order"/><code>state="running_waiting_for_order"</code></td>
-                        <td>
+                        <td valign="baseline" style="padding-top: 1ex"><scheduler_keyword keyword="running_waiting_for_order"/><code>state="running_waiting_for_order"</code></td>
+                        <td valign="baseline" style="padding-top: 1ex; padding-left: 2ex">
                             Nur bei einem auftragsgesteuerten Job:
                             Die Task ist bereit, den nächsten Auftrag auszuführen, aber es liegt kein Auftrag vor.
                         </td>
                     </tr>
                     <tr>
-                        <td><scheduler_keyword keyword="running_delayed"/><code>state="running_delayed"</code></td>
-                        <td>
+                        <td valign="baseline" style="padding-top: 1ex"><scheduler_keyword keyword="running_delayed"/><code>state="running_delayed"</code></td>
+                        <td valign="baseline" style="padding-top: 1ex; padding-left: 2ex">
                             Die Task hat <scheduler_method class="Task" property="delay_spooler_process"/> aufgerufen und wird verzögert.
                         </td>
                     </tr>
                     <tr>
-                        <td><scheduler_keyword keyword="ending_waiting_for_subprocesses"/><code>state="ending_waiting_for_subprocesses"</code></td>
-                        <td>
+                        <td valign="baseline" style="padding-top: 1ex"><scheduler_keyword keyword="ending_waiting_for_subprocesses"/><code>state="ending_waiting_for_subprocesses"</code></td>
+                        <td valign="baseline" style="padding-top: 1ex; padding-left: 2ex">
                             Wie <code>ending</code>, zuvor wird aber auf das Ende der Subprozessen gewartet.
                             <br/>
                             (Siehe <scheduler_method class="Task" method="create_subprocess" java_signature="java.lang.String"/>.)
                         </td>
                     </tr>
                     <tr>
-                        <td><scheduler_keyword keyword="ending"/><code>state="ending"</code></td>
-                        <td>
+                        <td valign="baseline" style="padding-top: 1ex"><scheduler_keyword keyword="ending"/><code>state="ending"</code></td>
+                        <td valign="baseline" style="padding-top: 1ex; padding-left: 2ex">
                             <scheduler_method class="Job_impl" method="spooler_process"/> wird nicht mehr aufgerufen.
                             Der nächste Aufruf ist <scheduler_method class="Job_impl" method="spooler_close"/>.
                         </td>
                     </tr>
                     <tr>
-                        <td><scheduler_keyword keyword="on_success"/><code>state="on_success"</code></td>
-                        <td>
+                        <td valign="baseline" style="padding-top: 1ex"><scheduler_keyword keyword="on_success"/><code>state="on_success"</code></td>
+                        <td valign="baseline" style="padding-top: 1ex; padding-left: 2ex">
                             <scheduler_method class="Job_impl" method="spooler_on_success"/> wird aufgerufen.
                         </td>
                     </tr>
                     <tr>
-                        <td><scheduler_keyword keyword="on_error"/><code>state="on_error"</code></td>
-                        <td>
+                        <td valign="baseline" style="padding-top: 1ex"><scheduler_keyword keyword="on_error"/><code>state="on_error"</code></td>
+                        <td valign="baseline" style="padding-top: 1ex; padding-left: 2ex">
                             <scheduler_method class="Job_impl" method="spooler_on_error"/> wird aufgerufen.
                         </td>
                     </tr>
                     <tr>
-                        <td><scheduler_keyword keyword="exit"/><code>state="exit"</code></td>
-                        <td>
+                        <td valign="baseline" style="padding-top: 1ex"><scheduler_keyword keyword="exit"/><code>state="exit"</code></td>
+                        <td valign="baseline" style="padding-top: 1ex; padding-left: 2ex">
                             <scheduler_method class="Job_impl" method="spooler_exit"/> wird aufgerufen.
                         </td>
                     </tr>
                     <tr>
-                        <td><scheduler_keyword keyword="release"/><code>state="release"</code></td>
-                        <td>
+                        <td valign="baseline" style="padding-top: 1ex"><scheduler_keyword keyword="release"/><code>state="release"</code></td>
+                        <td valign="baseline" style="padding-top: 1ex; padding-left: 2ex">
                             Das Task-Objekt wird freigegeben, das Programm wird beendet.
                         </td>
                     </tr>
                     <tr>
-                        <td><scheduler_keyword keyword="ended"/><code>state="ended"</code></td>
-                        <td>
+                        <td valign="baseline" style="padding-top: 1ex"><scheduler_keyword keyword="ended"/><code>state="ended"</code></td>
+                        <td valign="baseline" style="padding-top: 1ex; padding-left: 2ex">
                             Das Task-Objekt ist freigeben.
                         </td>
                     </tr>
                     <tr>
-                        <td><scheduler_keyword keyword="closed"/><code>state="closed"</code></td>
-                        <td>
+                        <td valign="baseline" style="padding-top: 1ex"><scheduler_keyword keyword="closed"/><code>state="closed"</code></td>
+                        <td valign="baseline" style="padding-top: 1ex; padding-left: 2ex">
                             Endzustand.
                         </td>
                     </tr>

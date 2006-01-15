@@ -199,8 +199,8 @@ struct Job_chain : Com_job_chain
     enum State
     {
         s_under_construction,   // add_job() gesperrt, add_order() frei
-        s_finished,             // in Betrieb
-        s_closing,              // Wird entfernt, aber ein Auftrag wird noch verarbeitet
+        s_ready,                // in Betrieb
+        s_removing,             // Wird entfernt, aber ein Auftrag wird noch verarbeitet
         s_closed                
     };
 
@@ -214,12 +214,13 @@ struct Job_chain : Com_job_chain
     void                        remove                  ();
     void                        check_for_removing      ();
 
-    void                    set_name                    ( const string& name )                      { THREAD_LOCK( _lock )  _name = name,  _log.set_prefix( "Jobchain " + _name ); }
+    void                    set_name                    ( const string& name )                      { THREAD_LOCK( _lock )  _name = name,  _log.set_prefix( "Job_chain " + _name ); }
     string                      name                    ()                                          { THREAD_LOCK_RETURN( _lock, string, _name ); }
 
     void                    set_state                   ( State state )                             { _state = state; }
     State                       state                   () const                                    { return _state; }
   //bool                        finished                () const                                    { return _state == s_finished; }
+    static string               state_name              ( State );
 
     void                    set_store_orders_in_database( bool b )                                  { _store_orders_in_database = b; }
     void                        load_orders_from_database();
