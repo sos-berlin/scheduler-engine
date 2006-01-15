@@ -10,6 +10,17 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2006-01-15" version="2.0.145" subversion_revision="4049">
+        <revision type="new" title="Job_chain.remove()">
+            <description>
+                <p>
+                    Neue Kommandos <scheduler_method class="Job_chain" method="remove"/> und
+                    <scheduler_element name="remove_job_chain"/>.
+                </p>
+            </description>
+        </revision>
+    </change>
+
     <change date="2005-12-15" version="2.0.144" subversion_revision="4038">
         <revision type="correction" title="Order.setback() und Job.set_max_order_setbacks() jetzt auch in Java verfügbar">
             <description>
