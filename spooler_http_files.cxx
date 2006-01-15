@@ -509,7 +509,7 @@ const char file_jz_left_frame_html[] =
     "// || window.parent.details_frame.document.readyState == \"complete\" )\n"
     "if( window.parent._details_frame_loaded )\n"
     "{\n"
-    "window.parent.details_frame.update();\n"
+    "call_error_checked( window.parent.details_frame.update );\n"
     "}\n"
     "\n"
     "if( _timer != undefined )  set_update_timer();\n"
