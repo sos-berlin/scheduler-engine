@@ -163,6 +163,8 @@ struct Order : Com_order,
     Time                       _setback;                // Bis wann der Auftrag zurückgestellt ist
     int                        _setback_count;
     bool                       _is_in_database;
+
+    string                     _web_service_name;
 };
 
 //-----------------------------------------------------------------------------------Job_chain_node
@@ -222,6 +224,9 @@ struct Job_chain : Com_job_chain
   //bool                        finished                () const                                    { return _state == s_finished; }
     static string               state_name              ( State );
 
+    void                    set_visible                 ( bool b )                                  { _visible = b; }
+    bool                        visible                 () const                                    { return _visible; }
+
     void                    set_store_orders_in_database( bool b )                                  { _store_orders_in_database = b; }
     void                        load_orders_from_database();
     int                         remove_all_pending_orders( bool leave_in_database = false );
@@ -246,6 +251,7 @@ struct Job_chain : Com_job_chain
     int                         order_count             ();
     bool                        has_order               () const;
 
+    void                    set_dom                     ( const xml::Element_ptr& );
     xml::Element_ptr            dom_element             ( const xml::Document_ptr&, const Show_what& );
 
 
@@ -260,6 +266,7 @@ struct Job_chain : Com_job_chain
     Prefix_log                 _log;
     string                     _name;
     State                      _state;
+    bool                       _visible;
 
     typedef list< ptr<Job_chain_node> >  Chain;
     Chain                      _chain;

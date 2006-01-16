@@ -47,7 +47,8 @@ Job::Job( Spooler* spooler )
     _module(spooler,_log),
     _task_queue(this),
     _history(this),
-    _lock( "Job" )
+    _lock( "Job" ),
+    _visible(true)
 {
     init_run_time();
 
@@ -91,6 +92,7 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
         _name       = element.     getAttribute( "name"         , _name       );
         set_log();
 
+        _visible    = element.bool_getAttribute( "visible"      , _visible    );
         _temporary  = element.bool_getAttribute( "temporary"    , _temporary  );
         _priority   = element. int_getAttribute( "priority"     , _priority   );
         _title      = element.     getAttribute( "title"        , _title      );

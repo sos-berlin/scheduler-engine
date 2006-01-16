@@ -519,7 +519,6 @@ Spooler::Spooler()
 
     _dtd.read( dtd_string );
         
-
 #   ifdef __GNUC__
 /*
         sigset_t sigset;
@@ -711,7 +710,7 @@ xml::Element_ptr Spooler::jobs_dom_element( const xml::Document_ptr& document, c
     {
         Job* job = *it;
 
-        if( show._job_name == ""  ||  show._job_name == job->name() )
+        if( job->visible()  &&  ( show._job_name == ""  ||  show._job_name == job->name() ) )
         {
             jobs_element.appendChild( job->dom_element( document, show ) ), dom_append_nl( jobs_element );
         }
@@ -791,24 +790,9 @@ void Spooler::load_job_chains_from_xml( const xml::Element_ptr& element )
     {
         if( e.nodeName_is( "job_chain" ) )
         {
+            // Siehe auch Command_processor::execute_job_chain()
             ptr<Job_chain> job_chain = new Job_chain( this );
-            job_chain->set_name( e.getAttribute( "name" ) );
-
-            DOM_FOR_EACH_ELEMENT( e, ee )
-            {
-                if( ee.nodeName_is( "job_chain_node" ) )
-                {
-                    string job_name    = ee.getAttribute( "job" );
-                    string state       = ee.getAttribute( "state" );
-
-                    bool can_be_not_initialized = true;
-                    Job* job = job_name == ""? NULL : get_job( job_name, can_be_not_initialized  );
-                    if( state == "" )  throw_xc( "SCHEDULER-231", "job_chain_node", "state" );
-
-                    job_chain->add_job( job, state, ee.getAttribute( "next_state" ), ee.getAttribute( "error_state" ) );
-                }
-            }
-
+            job_chain->set_dom( e );
             add_job_chain( job_chain );
         }
     }
@@ -2736,6 +2720,11 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line )
 
     _communication.init();  // Für Windows
     //_communication.bind();  // Falls der Port belegt ist, gibt's hier einen Abbruch
+
+
+    init_web_services();    // Ein Job und eine Jobkette einrichten, s. spooler_web_service.cxx
+
+
 
     //do
     {

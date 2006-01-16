@@ -87,6 +87,7 @@ struct Command_processor
     xml::Element_ptr            execute_show_process_classes( const Show_what& );
     xml::Element_ptr            execute_add_jobs            ( const xml::Element_ptr& );
     xml::Element_ptr            execute_job                 ( const xml::Element_ptr& );
+    xml::Element_ptr            execute_job_chain           ( const xml::Element_ptr& );
     xml::Element_ptr            execute_show_job            ( const xml::Element_ptr&, const Show_what& );
   //xml::Element_ptr            execute_show_job            ( Job* );
     xml::Element_ptr            execute_modify_job          ( const xml::Element_ptr& );

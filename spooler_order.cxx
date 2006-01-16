@@ -94,7 +94,10 @@ xml::Element_ptr Spooler::job_chains_dom_element( const xml::Document_ptr& docum
         FOR_EACH( Job_chain_map, _job_chain_map, it )
         {
             Job_chain* job_chain = it->second;
-            job_chains_element.appendChild( job_chain->dom_element( document, show ) );
+            if( job_chain->visible() )
+            {
+                job_chains_element.appendChild( job_chain->dom_element( document, show ) );
+            }
         }
     }
 
@@ -153,7 +156,8 @@ Job_chain::Job_chain( Spooler* spooler )
     _spooler(spooler),
     _log(_spooler),
     _lock("Job_chain"),
-    _store_orders_in_database(true)
+    _store_orders_in_database(true),
+    _visible(true)
 {
     set_name( "" );     // Ruft _log.set_prefix()
 }
@@ -188,6 +192,29 @@ string Job_chain::state_name( State state )
         case s_ready:               return "ready";
         case s_removing:            return "removing";
         default:                    return S() << "State(" << state << ")";
+    }
+}
+
+//-------------------------------------------------------------------------------Job_chain::set_dom
+
+void Job_chain::set_dom( const xml::Element_ptr& element )
+{
+    set_name( element.getAttribute( "name" ) );
+    _visible = element.bool_getAttribute( "visible", _visible );
+
+    DOM_FOR_EACH_ELEMENT( element, e )
+    {
+        if( e.nodeName_is( "job_chain_node" ) )
+        {
+            string job_name    = e.getAttribute( "job" );
+            string state       = e.getAttribute( "state" );
+
+            bool can_be_not_initialized = true;
+            Job* job = job_name == ""? NULL : _spooler->get_job( job_name, can_be_not_initialized  );
+            if( state == "" )  throw_xc( "SCHEDULER-231", "job_chain_node", "state" );
+
+            add_job( job, state, e.getAttribute( "next_state" ), e.getAttribute( "error_state" ) );
+        }
     }
 }
 
@@ -938,7 +965,7 @@ ptr<Order> Order_queue::order_or_null( const Order::Id& id )
     return NULL;
 }
 
-//--------------------------------------------------------------------------------------rder::Order
+//-------------------------------------------------------------------------------------Order::Order
 
 Order::Order( Spooler* spooler )
 :
@@ -1656,6 +1683,19 @@ void Order::postprocessing2()
     _moved = false;
 
 
+
+    if( finished()  &&  _web_service_name != "" )
+    {
+        try
+        {
+            _spooler->web_service_by_name( _web_service_name )->forward_order( this );
+            assert( !finished() );
+        }
+        catch( exception& x )
+        {
+            _log->error( string("Web-service forward: ") + x.what() );
+        }
+    }
 
     if( finished() )
     {

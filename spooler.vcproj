@@ -773,6 +773,9 @@ cd $(ProjectDir)
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\spooler_web_service.cxx">
+			</File>
+			<File
 				RelativePath=".\spooler_xslt_stylesheet.cxx">
 			</File>
 		</Filter>
@@ -859,6 +862,9 @@ cd $(ProjectDir)
 			</File>
 			<File
 				RelativePath="spooler_wait.h">
+			</File>
+			<File
+				RelativePath=".\spooler_web_service.h">
 			</File>
 		</Filter>
 		<Filter

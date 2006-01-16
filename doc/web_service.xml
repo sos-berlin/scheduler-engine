@@ -48,7 +48,8 @@
         <li>
             Das mit HTTP-POST übergebene XML-Dokument packt der Scheduler in ein <scheduler_element name="service_request"/>. 
             
-            <pre>&lt;service_request service="<i>service_name</i>">
+            <pre>&lt;service_request>
+    &lt;web_service name="<i>service_name</i>" url_path="<i>url_path</i>"/>
     &lt;body><i>…data…</i>&lt;/body>
 &lt;/service_request></pre>
         </li>

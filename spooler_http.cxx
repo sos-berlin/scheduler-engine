@@ -703,11 +703,22 @@ void Http_processor::process()
     Z_LOG2( "scheduler.http", "HTTP: " << _http_parser->_text << "\n" );
     
 
-    Command_processor command_processor ( _spooler );
+    if( Web_service* web_service = _spooler->web_service_by_url_path_or_null( _http_request->_path ) )
+    {
+        ptr<Web_service_transaction> web_service_transaction = web_service->new_transaction( this );
+        
+        string response = web_service_transaction->process_request( _http_request->_body );
 
-    command_processor.set_host( _host );
+        _http_response = Z_NEW( Http_response( _http_request, Z_NEW( String_chunk_reader( response ) ), "text/xml" ) );
+    }
+    else
+    {
+        Command_processor command_processor ( _spooler );
 
-    _http_response = command_processor.execute_http( _http_request );
+        command_processor.set_host( _host );
+
+        _http_response = command_processor.execute_http( _http_request );
+    }
 
     _http_response->set_event( &_channel->_socket_event );
     _http_response->recommend_block_size( 32768 );

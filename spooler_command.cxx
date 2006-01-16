@@ -441,6 +441,22 @@ xml::Element_ptr Command_processor::execute_job( const xml::Element_ptr& job_ele
     return _answer.createElement( "ok" );
 }
 
+//--------------------------------------------------------------Command_processor::execute_add_jobs
+
+xml::Element_ptr Command_processor::execute_job_chain( const xml::Element_ptr& job_chain_element )
+{
+    if( _security_level < Security::seclev_all )  throw_xc( "SCHEDULER-121" );
+
+
+    // Siehe auch Spooler::load_job_chains_from_xml()
+
+    ptr<Job_chain> job_chain = new Job_chain( _spooler );
+    job_chain->set_dom( job_chain_element );
+    _spooler->add_job_chain( job_chain );
+
+    return _answer.createElement( "ok" );
+}
+
 //-------------------------------------------------------Command_processor::execute_show_job_chains
 
 xml::Element_ptr Command_processor::execute_show_job_chains( const xml::Element_ptr&, const Show_what& show_ )
@@ -757,6 +773,8 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     if( element.nodeName_is( "add_jobs"         ) )  return execute_add_jobs( element );
     else
     if( element.nodeName_is( "job"              ) )  return execute_job( element );
+    else
+    if( element.nodeName_is( "job_chain"        ) )  return execute_job_chain( element );
     else
     if( element.nodeName_is( "signal_object"    ) )  return execute_signal_object( element );
     else

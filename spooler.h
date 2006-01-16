@@ -115,6 +115,7 @@ namespace sos {
 #include "spooler_process.h"
 #include "spooler_thread.h"
 #include "spooler_service.h"
+#include "spooler_web_service.h"
 #include "spooler_module_remote.h"
 #include "spooler_module_remote_server.h"
 
@@ -254,6 +255,10 @@ struct Spooler : Object,
 
     void                        cmd_load_config             ( const xml::Element_ptr&, const Time& xml_mod_time, const string& source_filename );
     void                        execute_state_cmd           ();
+
+    void                        init_web_services           ();
+    Web_service*                web_service_by_url_path_or_null( const string& url_path );          // In spooler_web_service.cxx
+    Web_service*                web_service_by_name         ( const string& name );
 
     Job*                        get_job                     ( const string& job_name, bool can_be_not_initialized = false );
     Job*                        get_job_or_null             ( const string& job_name );
@@ -432,6 +437,7 @@ struct Spooler : Object,
     string                     _xml_cmd;                    // Parameter -cmd, ein zuerst auszuführendes Kommando.
     string                     _pid_filename;
 
+    Web_service_map            _web_service_map;
     Job_list                   _job_list;
     Wait_handles               _wait_handles;
 

@@ -213,6 +213,8 @@ struct Job : Object,
     string                      title                       ()                                      { string title; THREAD_LOCK( _lock )  title = _title;  return title; }
     string                      jobname_as_filename         ();
     string                      profile_section             ();
+    void                    set_visible                     ( bool b )                              { _visible = b; }
+    bool                        visible                     () const                                { return _visible; }
     bool                        temporary                   () const                                { return _temporary; }
     void                    set_remove                      ( bool );
     void                        set_delay_after_error       ( int error_steps, const string& delay );
@@ -360,6 +362,7 @@ struct Job : Object,
     Time                       _task_timeout;               // Frist für einen Schritt einer Task
     Time                       _idle_timeout;               // Frist für den Zustand Task::s_running_waiting_for_order
     int                        _priority;
+    bool                       _visible;
     bool                       _temporary;                  // Job nach einem Lauf entfernen
     bool                       _remove;                     // Job enfernen sobald möglich. _state == s_stopping, dann s_stopped
     bool                       _start_once;                 // <run_time start_once="">, wird false nach Start
