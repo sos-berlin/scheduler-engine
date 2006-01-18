@@ -1,4 +1,5 @@
 // $Id$
+// Joacim Zschimmer
 
 #include "spooler.h"
 
@@ -91,6 +92,9 @@ xml::Element_ptr Web_service::dom_element( const xml::Document_ptr& document, co
     web_service_element.setAttribute_optional( "response_xslt_stylesheet", _response_xslt_stylesheet_path );
     web_service_element.setAttribute_optional( "forward_xslt_stylesheet" , _forward_xslt_stylesheet_path  );
 
+    if( _debug )
+    web_service_element.setAttribute         ( "debug"                   , _debug );
+    
     return web_service_element;
 }
 

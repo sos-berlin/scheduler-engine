@@ -754,6 +754,8 @@ struct Com_order : spooler_com::Iorder,
 
   //STDMETHODIMP            get_Log                     ( spooler_com::Ilog** );
 
+    STDMETHODIMP            get_Xml                     ( BSTR, BSTR* );
+
   private:
     Fill_zero                  _zero_;
     Thread_semaphore           _lock;

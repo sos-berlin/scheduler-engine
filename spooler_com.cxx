@@ -4397,6 +4397,28 @@ STDMETHODIMP Com_order::get_String_next_start_time( BSTR* result )
     return hr;
 }
 
+//-------------------------------------------------------------------------------Com_order::get_Xml
+
+STDMETHODIMP Com_order::get_Xml( BSTR show_what_bstr, BSTR* result )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_order )  return E_POINTER;
+
+        xml::Document_ptr document;
+        document.create();
+
+        document.appendChild( _order->dom_element( document, Show_what( show_run_time | show_log ) ) );
+        hr = String_to_bstr( document.xml(), result );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+
 //-------------------------------------------------------------------------------Com_order::get_Log
 /*
 STDMETHODIMP Com_order::get_Log( Ilog** result )

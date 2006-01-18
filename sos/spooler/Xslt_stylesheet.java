@@ -15,13 +15,13 @@ public class Xslt_stylesheet  extends Idispatch
     /*+ Sollte nach dem Gebrauch gerufen werden. */
     public void             close               ()                                  { com_call( "close" ); }
     
-    /*+ Lädt das Stylesheet aus einer Datei. */
-    public Xslt_stylesheet  load_file           ( java.io.File file )               { return (Xslt_stylesheet)load_file( file.toString() ); }
+    /*+ Lï¿½dt das Stylesheet aus einer Datei. */
+    public Xslt_stylesheet  load_file           ( java.io.File file )               { return load_file( file.toString() ); }
     
-    /*+ Lädt das Stylesheet aus einer Datei. */
+    /*+ Lï¿½dt das Stylesheet aus einer Datei. */
     public Xslt_stylesheet  load_file           ( String path )                     { return (Xslt_stylesheet)com_call( "load_file", path ); }
     
-    /*+ Lädt das Stylesheet aus dem XML-String. */
+    /*+ Lï¿½dt das Stylesheet aus dem XML-String. */
     public Xslt_stylesheet  load_xml            ( String xml )                      { return (Xslt_stylesheet)com_call( "load_xml", xml ); }
 
     /*+ Wendet das Stylesheet auf den XML-String an.

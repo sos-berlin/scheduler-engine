@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: remove_order.xml 3995 2005-10-31 07:57:11Z jz $-->
+
+<xml_element name     = "remove_job_chain"
+             title    = ""
+             category = "Kommando"
+             base_dir = "../"
+             parent_page = "../xml_commands.xml"
+             author   = "$Author: jz $"
+             date     = "$Date: 2005-10-31 08:57:11 +0100 (Mo, 31 Okt 2005) $">
+
+
+    <description>
+        <p>
+            Entfernt eine Jobkette.
+        </p>
+        <p>
+            Das Kommando nutzt die Methode <scheduler_method class="Job_chain" method="remove"/>.
+        </p>
+    </description>
+
+    <xml_attributes>
+        <xml_attribute name="job_chain" type="name">
+            <description>
+                <p>
+                </p>
+            </description>
+        </xml_attribute>
+    </xml_attributes>
+
+    <xml_answer element="ok"/>
+
+
+    <example>
+        <pre>&lt;remove_job_chain job_chain="my_job_chain" /></pre>
+    </example>
+</xml_element>

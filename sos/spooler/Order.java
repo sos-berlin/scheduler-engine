@@ -6,13 +6,13 @@ package sos.spooler;
  * 
  * <p>
  * Ein Auftrag, der in der Auftragswarteschlange eines Jobs steht, veranlasst diesen, einen Jobschritt 
- * (also {@link Job_impl#spooler_process()}) durchzuführen.
+ * (also {@link Job_impl#spooler_process()}) durchzufï¿½hren.
  *
  * <p><br/><b>Beispiel</b>
  * <pre>
  *     Order order = spooler.create_order();
  *     order.set_id   ( "10001" );
- *     order.set_title( "Auftrag für Datensatz 10001" );
+ *     order.set_title( "Auftrag fï¿½r Datensatz 10001" );
  *     order.set_state( "100" );
  *     spooler.job_chain( "jobkette1" ).add_order( order );
  * </pre>
@@ -21,7 +21,7 @@ package sos.spooler;
  * <pre>
  *     var order = spooler.create_order();
  *     order.id    = "10001";
- *     order.title = "Auftrag für Datensatz 10001";
+ *     order.title = "Auftrag fï¿½r Datensatz 10001";
  *     order.state = 100;
  *     spooler.job_chain( "jobkette1" ).add_order( order );
  * </pre>
@@ -35,7 +35,6 @@ package sos.spooler;
  * @version $Revision$
  */
 
-import java.util.Date;
 
 
 public class Order extends Idispatch
@@ -49,7 +48,7 @@ public class Order extends Idispatch
      * <p>
      * Jeder Auftrag hat eine (innerhalb der Jobkette oder der Auftragswarteschlange des Jobs eindeutige) Kennung.
      * Diese Kennung sollten den zu verarbeitenden Daten entsprechen.
-     * Überlicherweise wird der Schlüssel eines Datenbanksatzes verwendet.  
+     * ï¿½berlicherweise wird der Schlï¿½ssel eines Datenbanksatzes verwendet.  
      * <p>
      * Ohne diesen Aufruf vergibt der Aufruf {@link Job_chain#add_order(Order)} bzw. {@link Order_queue#add_order(Order)} eine Kennung.
      *  
@@ -75,12 +74,12 @@ public class Order extends Idispatch
     
     
     
-    /*+ Aufträge mit höherer Priorität werden zuerst verarbeitet. */
+    /*+ Auftrï¿½ge mit hï¿½herer Prioritï¿½t werden zuerst verarbeitet. */
     public void         set_priority            ( int value )                       {                   com_call( ">priority", value    ); }
     
 
     
-    /*+ Aufträge mit höherer Priorität werden zuerst abgearbeitet. */
+    /*+ Auftrï¿½ge mit hï¿½herer Prioritï¿½t werden zuerst abgearbeitet. */
     public String           priority            ()                                  { return (String)   com_call( "<priority"           ); }
     
     
@@ -94,7 +93,7 @@ public class Order extends Idispatch
     public Job_chain_node   job_chain_node      ()                                  { return (Job_chain_node)com_call( "<job_chain_node" ); }
 
     
-    /*+ Stellt den Zustand des Auftrags auf den Zustand ein, für den in der Jobkette der angegebene Job eingestellt ist.
+    /*+ Stellt den Zustand des Auftrags auf den Zustand ein, fï¿½r den in der Jobkette der angegebene Job eingestellt ist.
      * 
      * <p>
      * Besser ist der Aufruf von {@link #set_state(String)}.
@@ -148,7 +147,7 @@ public class Order extends Idispatch
     
     
     /*+ Die Nutzlast, also Parameter des Auftrags.
-     * Neben der Auftragskennung (id), die den Auftrag identifiziert, können hier zusätzliche
+     * Neben der Auftragskennung (id), die den Auftrag identifiziert, kï¿½nnen hier zusï¿½tzliche
      * Angaben gemacht werden. 
      * 
      * @param payload Ein String oder ein {@link Variable_set}.
@@ -171,12 +170,12 @@ public class Order extends Idispatch
     
     
     
-    /*+ Prüft den COM-Typ der Nutzlast.
+    /*+ Prï¿½ft den COM-Typ der Nutzlast.
      * 
      * @param name "Spooler.Variable_set", "Hostware.Dyn_obj" oder "Hostware.Record".  
      * @return true, wenn die Nutzlast vom angegebenen COM-Typ ist. 
      */
-    public boolean          payload_is_type     ( String name )                     { return    boolean_com_call( "payload_is_type"     ); }
+    public boolean          payload_is_type     ( String type )                     { return    boolean_com_call( "payload_is_type", type ); }
     
     
     
@@ -188,12 +187,12 @@ public class Order extends Idispatch
 
     /*+ Entfernt den Auftrag aus seiner Jobkette.
       * <p>
-      * Wenn der Auftrag gerade von einer Task ausgeführt wird,
+      * Wenn der Auftrag gerade von einer Task ausgefï¿½hrt wird,
       * liefert die Eigenschaft {@link #job_chain}
       * weiterhin die Jobkette, aus der der Auftrag gerade entfernt wird.
-      * Erst wenn die Ausführung beendet ist, liefert die Eigenschaft null
-      * (außer der Auftrag ist wieder in eine Jobkette eingetragen worden).
-      * Damit bleibt die Eigenschaft job_chain während der Ausführung durch die Task stabil.
+      * Erst wenn die Ausfï¿½hrung beendet ist, liefert die Eigenschaft null
+      * (auï¿½er der Auftrag ist wieder in eine Jobkette eingetragen worden).
+      * Damit bleibt die Eigenschaft job_chain wï¿½hrend der Ausfï¿½hrung durch die Task stabil.
       */
     public void             remove_from_job_chain()                                 {                   com_call( "remove_from_job_chain" ); }
     
@@ -208,4 +207,6 @@ public class Order extends Idispatch
     
     
     public void             setback             ()                                  {                   com_call( "setback" ); }
+
+    public String           xml                 ()                                  { return (String)   com_call( "", "<xml" ); }
 }

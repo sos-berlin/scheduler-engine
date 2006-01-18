@@ -967,6 +967,9 @@ library Spooler
 
       //[propget]
       //HRESULT                 Log                     ( [out,retval] Ilog* );                     // Für Joacim, 2005-08-28
+
+        [propget]
+        HRESULT                 Xml                     ( [in,defaultvalue("")] BSTR options, [out,retval] BSTR* );
     }
 
     [

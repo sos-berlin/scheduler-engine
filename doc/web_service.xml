@@ -113,7 +113,7 @@
     </p>
 
     <pre>&lt;service_request url="<i>url</i>">
-    &lt;body><i>…data…</i>&lt;/body>
+    &lt;content><i>…data…</i>&lt;/content>
 &lt;/service_request></pre>
     
     <p>
@@ -202,5 +202,15 @@
         In der XML-Konfiguration kann der Job <code>scheduler_service_forwarder</code> um 
         <scheduler_element name="delay_order_after_setback"/> erweitert werden.
     </p>
+    
+    
+    <h2>Neue Klassen und Methoden</h2>
+    
+    <ul>
+        <li><scheduler_method class="Web_service"/></li>
+        <li><scheduler_method class="Order" property="xml"/></li>
+        <li><scheduler_method class="Order" property="web_service"/></li>
+        <li><scheduler_method class="Task" property="web_service"/></li>
+    </ul>
 
 </description>

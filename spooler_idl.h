@@ -550,6 +550,9 @@ struct Iorder : IDispatch
     virtual HRESULT         Payload_is_type         ( BSTR name, VARIANT_BOOL* result )             = 0;
 
     virtual HRESULT         Setback                 ()                                              = 0;
+
+    virtual HRESULT     get_Xml                     ( BSTR, BSTR* )                                 = 0;
+
 };
 
 //--------------------------------------------------------------------Remote_module_instance_server
