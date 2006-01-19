@@ -256,6 +256,8 @@ struct Spooler : Object,
     void                        cmd_load_config             ( const xml::Element_ptr&, const Time& xml_mod_time, const string& source_filename );
     void                        execute_state_cmd           ();
 
+    void                        add_web_services            ( const xml::Element_ptr& web_services_element );
+    void                        add_web_service             ( Web_service* );
     void                        init_web_services           ();
     Web_service*                web_service_by_url_path_or_null( const string& url_path );          // In spooler_web_service.cxx
     Web_service*                web_service_by_name         ( const string& name );

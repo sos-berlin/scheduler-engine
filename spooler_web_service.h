@@ -13,22 +13,37 @@ struct Web_service_transaction;
 
 //--------------------------------------------------------------------------------------Web_service
 
-struct Web_service : Object
+struct Web_service: idispatch_implementation< Web_service, spooler_com::Iweb_service >
 {
-                                Web_service                 ( Spooler* sp )                         : _spooler(sp), _zero_(this+1) {}
-                                Web_service                 ( Spooler* sp, const xml::Element_ptr& e ) : _spooler(sp), _zero_(this+1) { set_dom( e ); }
+    static Class_descriptor     class_descriptor;
+    static const Com_method     _methods[];
+
+
+                                Web_service                 ( Spooler* );
+                                Web_service                 ( Spooler*, const xml::Element_ptr& );
     Z_GNU_ONLY(                 Web_service                 (); )
                                ~Web_service                 ();
+
+
+    // interface Ihas_java_class_name
+    STDMETHODIMP            get_Java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
+    STDMETHODIMP_(char*)  const_java_class_name             ()                                      { return (char*)"sos.spooler.Web_service"; }
+
+
+    // interface Isubprocess
+    STDMETHODIMP            get_Name                        ( BSTR* result )                        { return String_to_bstr( _name, result ); }
+    STDMETHODIMP            get_Forward_xslt_stylesheet_path( BSTR* result )                        { return String_to_bstr( _forward_xslt_stylesheet_path, result ); }
+
 
     string                      url_path                    () const                                { return _url_path; }
 
     void                    set_dom                         ( const xml::Element_ptr&, const Time& xml_mod_time = Time() );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& = Show_what() );
 
+    string                      name                        () const                                { return _name; }
     ptr<Web_service_transaction> new_transaction            ( Http_processor* );
     xml::Document_ptr           transform_request           ( const xml::Document_ptr& request );
     xml::Document_ptr           transform_response          ( const xml::Document_ptr& command_answer );
-  //string                      transform_forward           ( const string& request_xml );
     void                        forward_order               ( Order* );
     void                        forward_task                ( Task* );
     

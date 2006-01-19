@@ -53,7 +53,7 @@ cd doc &amp;&amp; bash -c &quot;perl ../scheduler_keyword_to_xml.pl *.xml xml/*.
 cd $(ProjectDir)
 
 echo jar cvfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class
-cd $(IntDir) &amp;&amp; pwd &amp;&amp; jar cvfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class
+cd $(IntDir) &amp;&amp; pwd &amp;&amp; jar cvfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class sos/spooler/jobs/*.class
 
 echo ant -f ../javadoc.xml
 ant -f ../javadoc.xml
@@ -147,7 +147,7 @@ cd doc &amp;&amp; bash -c &quot;perl ../scheduler_keyword_to_xml.pl *.xml xml/*.
 cd $(ProjectDir)
 
 echo jar cvfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class
-cd $(IntDir) &amp;&amp; pwd &amp;&amp; jar cvfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class
+cd $(IntDir) &amp;&amp; pwd &amp;&amp; jar cvfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class sos/spooler/jobs/*.class
 
 echo ant -f ../javadoc.xml
 ant -f ../javadoc.xml
@@ -237,7 +237,7 @@ cd doc &amp;&amp; bash -c &quot;perl ../scheduler_keyword_to_xml.pl *.xml xml/*.
 cd $(ProjectDir)
 
 echo jar cvfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class
-cd $(IntDir) &amp;&amp; pwd &amp;&amp; jar cvfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class
+cd $(IntDir) &amp;&amp; pwd &amp;&amp; jar cvfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class sos/spooler/jobs/*.class
 
 echo ant -f ../javadoc.xml
 ant -f ../javadoc.xml
@@ -1698,11 +1698,12 @@ javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quo
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\sos\spooler\jobs\Web_service_forwarder.java">
+				RelativePath=".\sos\spooler\Web_service.java">
 				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
+						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;
 javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;
 
@@ -1730,6 +1731,7 @@ javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quo
 					Name="Release-DLL|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
+						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;
 javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;
 
@@ -1785,6 +1787,44 @@ javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quo
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"/>
 				</FileConfiguration>
 			</File>
+			<Filter
+				Name="jobs"
+				Filter="">
+				<File
+					RelativePath=".\sos\spooler\jobs\Web_service_forwarder.java">
+					<FileConfiguration
+						Name="Release|Win32">
+						<Tool
+							Name="VCCustomBuildTool"
+							CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;
+javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;
+"
+							AdditionalDependencies="$(IntDir)/sos/spooler/Job_impl.class"
+							Outputs="$(IntDir)/sos/spooler/jobs/$(InputName).class"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Debug|Win32">
+						<Tool
+							Name="VCCustomBuildTool"
+							Description=""
+							CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;
+javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;
+"
+							AdditionalDependencies="$(IntDir)/sos/spooler/Job_impl.class"
+							Outputs="$(IntDir)/sos/spooler/jobs/$(InputName).class"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release-DLL|Win32">
+						<Tool
+							Name="VCCustomBuildTool"
+							CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;
+javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;
+"
+							AdditionalDependencies="$(IntDir)/sos/spooler/Job_impl.class"
+							Outputs="$(IntDir)/sos/spooler/jobs/$(InputName).class"/>
+					</FileConfiguration>
+				</File>
+			</Filter>
 		</Filter>
 		<File
 			RelativePath="..\kram\sosmain.cxx">

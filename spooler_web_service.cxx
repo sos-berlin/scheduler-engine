@@ -27,6 +27,46 @@ const string job_chain_xml = "<job_chain visible='no'\n"
                              "    <job_chain_node state='" + forwarding_job_chain_finished_state + "'/>\n"
                              "</job_chain>";
 
+//-------------------------------------------------------------------------------------------------
+
+Web_service::Class_descriptor   Web_service::class_descriptor ( &typelib, "Spooler.Web_service", Web_service::_methods );
+
+//-----------------------------------------------------------------------------Subprocess::_methods
+
+const Com_method Web_service::_methods[] =
+{ 
+#ifdef COM_METHOD
+    COM_PROPERTY_GET( Subprocess,  1, Java_class_name               , VT_BSTR    , 0 ),
+    COM_PROPERTY_GET( Subprocess,  2, Name                          , VT_BSTR    , 0 ),
+    COM_PROPERTY_GET( Subprocess,  3, Forward_xslt_stylesheet_path  , VT_BSTR    , 0 ),
+#endif
+    {}
+};
+
+//------------------------------------------------------------------------Spooler::add_web_services
+
+void Spooler::add_web_services( const xml::Element_ptr& web_services_element )
+{
+    DOM_FOR_EACH_ELEMENT( web_services_element, e )
+    {
+        if( e.nodeName_is( "web_service" ) )
+        {
+            ptr<Web_service> web_service = Z_NEW( Web_service( this, e ) );
+            add_web_service( web_service );
+        }
+    }
+}
+
+//-------------------------------------------------------------------------Spooler::add_web_service
+
+void Spooler::add_web_service( Web_service* web_service )
+{
+    Web_service_map::iterator ws = _web_service_map.find( web_service->name() );
+    if( ws != _web_service_map.end() )  throw_xc( "SCHEDULER-236", web_service->name() );
+
+    _web_service_map[ web_service->name() ] = web_service;
+}
+
 //-----------------------------------------------------------------------Spooler::init_web_services
     
 void Spooler::init_web_services()
@@ -57,6 +97,33 @@ Web_service* Spooler::web_service_by_name( const string& name )
     if( ws == _web_service_map.end() )  throw_xc( "SCHEDULER-235", name );
 
     return ws->second;
+}
+
+//-------------------------------------------------------------------------Web_service::Web_service
+
+Web_service::Web_service( Spooler* sp )
+: 
+    Idispatch_implementation( &class_descriptor ),
+    _spooler(sp),
+    _zero_(this+1) 
+{
+}
+
+//-------------------------------------------------------------------------eb_service::~Web_service
+
+Web_service::~Web_service()
+{
+}
+
+//-------------------------------------------------------------------------Web_service::Web_service
+
+Web_service::Web_service( Spooler* sp, const xml::Element_ptr& e ) 
+: 
+    Idispatch_implementation( &class_descriptor ),
+    _spooler(sp), 
+    _zero_(this+1) 
+{ 
+    set_dom( e ); 
 }
 
 //-----------------------------------------------------------------------------Web_service::set_dom

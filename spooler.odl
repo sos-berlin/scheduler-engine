@@ -1302,13 +1302,30 @@ library Spooler
         interface Ihas_java_class_name;
     }
     */    
+    
+    //---------------------------------------------------------------------------------Iweb_service
+    
+    [
+        uuid       ( feee47ad-6c1b-11d8-8103-000476ee8afb ),
+        odl,
+        dual
+    ]
+    interface Iweb_service: IDispatch
+    {
+        [propget]
+        HRESULT                 Java_class_name         ( [out,retval] BSTR* );                 // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
+                                                                                                // Für den Objectserver
+        [propget]
+        HRESULT                 Name                    ( [out,retval] BSTR* );
+        [propget]
+        HRESULT                 Forward_xslt_stylesheet_path( [out,retval] BSTR* );
+    };
 };
 
 //-------------------------------------------------------------------------------------------------
 /*
 Ein paar freie GUIDs:
 
-feee47ad-6c1b-11d8-8103-000476ee8afb
 feee47ae-6c1b-11d8-8103-000476ee8afb
 feee47af-6c1b-11d8-8103-000476ee8afb
 feee47b0-6c1b-11d8-8103-000476ee8afb

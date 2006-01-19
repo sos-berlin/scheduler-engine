@@ -52,7 +52,7 @@ const char dtd_string[] =
 "\n"
 "<!-- KONFIGURATION DES SPOOLERS - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->\n"
 "\n"
-"<!ELEMENT config              ( base*, security?, process_classes?, script?, object_set_classes?, web_service*, ( holidays | holiday*), jobs?, job_chains? )>\n"
+"<!ELEMENT config              ( base*, security?, process_classes?, script?, object_set_classes?, web_services?, ( holidays | holiday*), jobs?, job_chains? )>\n"
 "<!ATTLIST config                spooler_id          CDATA ''>           <!-- Diese Konfiguration ist nur für einen Spooler mit dieser Kennung -->\n"
 "<!ATTLIST config                port                CDATA #IMPLIED>\n"
 "<!ATTLIST config                tcp_port            CDATA #IMPLIED>     <!-- Für TCP-Kommandoschnittstelle -->\n"
@@ -396,6 +396,8 @@ const char dtd_string[] =
 "\n"
 "\n"
 "\n"
+"<!ELEMENT web_services         ( web_service* ) >\n"
+
 "<!ELEMENT web_service          EMPTY >\n"
 "<!ATTLIST web_service          name                        CDATA #REQUIRED >\n"
 "<!ATTLIST web_service          url_path                    CDATA #REQUIRED >\n"

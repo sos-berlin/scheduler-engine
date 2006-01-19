@@ -613,6 +613,18 @@ struct Ixslt_stylesheet : IDispatch
     //virtual HRESULT       Apply_file              ( BSTR input_filename, STR output_filename )    = 0;
 };
 
+//-------------------------------------------------------------------------------------Iweb_service
+
+DEFINE_GUID( IID_Iweb_service, 0xfeee47ad, 0x6c1b, 0x11d8, 0x81, 0x03, 0x00, 0x04, 0x76, 0xee, 0x8a, 0xfb );   // {feee47ad-6c1b-11d8-8103-000476ee8afb}
+                                                                                                                   
+struct Iweb_service: IDispatch
+{
+    [propget]
+    virtual HRESULT     get_Java_class_name         ( BSTR* )                                       = 0;
+    virtual HRESULT     get_Name                    ( BSTR* )                                       = 0;
+    virtual HRESULT     get_Forward_xslt_stylesheet_path( BSTR* )                                   = 0;
+};
+
 //-------------------------------------------------------------------------------------------------
 
 } //namespace spooler_com

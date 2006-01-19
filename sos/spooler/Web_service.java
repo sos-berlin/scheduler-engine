@@ -1,0 +1,19 @@
+// $Id: Order.java 4051 2006-01-18 19:05:50Z jz $
+
+package sos.spooler;
+
+/** 
+ * @author Joacim Zschimmer
+ * @version $Revision: 4051 $
+ */
+
+
+
+public class Web_service  extends Idispatch
+{
+    private                 Web_service         ( long idispatch )                  { super(idispatch); }
+
+    
+    public String           name                ()                                  { return (String)   com_call( "<name" ); }
+    public String           forward_xslt_stylesheet_path()                          { return (String)   com_call( "<forward_xslt_stylesheet_path" ); }
+}

@@ -209,4 +209,6 @@ public class Order extends Idispatch
     public void             setback             ()                                  {                   com_call( "setback" ); }
 
     public String           xml                 ()                                  { return (String)   com_call( "", "<xml" ); }
+    
+    public Web_service      web_service         ()                                  { return (Web_service)com_call( "", "<web_service" ); }
 }
