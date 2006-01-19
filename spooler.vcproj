@@ -1791,6 +1791,42 @@ javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quo
 				Name="jobs"
 				Filter="">
 				<File
+					RelativePath=".\sos\spooler\jobs\Test_web_service.java">
+					<FileConfiguration
+						Name="Release|Win32">
+						<Tool
+							Name="VCCustomBuildTool"
+							Description=""
+							CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;
+javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;
+"
+							AdditionalDependencies="$(IntDir)/sos/spooler/Job_impl.class"
+							Outputs="$(IntDir)/sos/spooler/jobs/$(InputName).class"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Debug|Win32">
+						<Tool
+							Name="VCCustomBuildTool"
+							Description=""
+							CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;
+javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;
+"
+							AdditionalDependencies="$(IntDir)/sos/spooler/Job_impl.class"
+							Outputs="$(IntDir)/sos/spooler/jobs/$(InputName).class"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release-DLL|Win32">
+						<Tool
+							Name="VCCustomBuildTool"
+							Description=""
+							CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;
+javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;
+"
+							AdditionalDependencies="$(IntDir)/sos/spooler/Job_impl.class"
+							Outputs="$(IntDir)/sos/spooler/jobs/$(InputName).class"/>
+					</FileConfiguration>
+				</File>
+				<File
 					RelativePath=".\sos\spooler\jobs\Web_service_forwarder.java">
 					<FileConfiguration
 						Name="Release|Win32">

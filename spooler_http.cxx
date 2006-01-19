@@ -706,10 +706,8 @@ void Http_processor::process()
     if( Web_service* web_service = _spooler->web_service_by_url_path_or_null( _http_request->_path ) )
     {
         ptr<Web_service_transaction> web_service_transaction = web_service->new_transaction( this );
-        
-        string response = web_service_transaction->process_request( _http_request->_body );
 
-        _http_response = Z_NEW( Http_response( _http_request, Z_NEW( String_chunk_reader( response ) ), "text/xml" ) );
+        _http_response = web_service_transaction->process_http( _http_request );
     }
     else
     {

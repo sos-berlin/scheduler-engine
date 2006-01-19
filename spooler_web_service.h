@@ -13,14 +13,14 @@ struct Web_service_transaction;
 
 //--------------------------------------------------------------------------------------Web_service
 
-struct Web_service: idispatch_implementation< Web_service, spooler_com::Iweb_service >
+struct Web_service: idispatch_implementation< Web_service, spooler_com::Iweb_service >,
+                    Scheduler_object
 {
     static Class_descriptor     class_descriptor;
     static const Com_method     _methods[];
 
 
                                 Web_service                 ( Spooler* );
-                                Web_service                 ( Spooler*, const xml::Element_ptr& );
     Z_GNU_ONLY(                 Web_service                 (); )
                                ~Web_service                 ();
 
@@ -34,6 +34,9 @@ struct Web_service: idispatch_implementation< Web_service, spooler_com::Iweb_ser
     STDMETHODIMP            get_Name                        ( BSTR* result )                        { return String_to_bstr( _name, result ); }
     STDMETHODIMP            get_Forward_xslt_stylesheet_path( BSTR* result )                        { return String_to_bstr( _forward_xslt_stylesheet_path, result ); }
 
+
+    // Scheduler_object
+    Prefix_log*                 log                         ()                                      { return _log; }
 
     string                      url_path                    () const                                { return _url_path; }
 
@@ -52,9 +55,9 @@ struct Web_service: idispatch_implementation< Web_service, spooler_com::Iweb_ser
   //friend Web_service*         Spooler::web_service_by_url_path_or_null( const string& url_path );
 
     Fill_zero                  _zero_;
-    Spooler* const             _spooler;
     string                     _name;
     string                     _url_path;
+    ptr<Prefix_log>            _log;
     string                     _request_xslt_stylesheet_path;
     Xslt_stylesheet            _request_xslt_stylesheet;
     string                     _response_xslt_stylesheet_path;
@@ -70,15 +73,22 @@ typedef map< string, ptr<Web_service> >    Web_service_map;
 
 //-------------------------------------------------------------------------------------------------
 
-struct Web_service_transaction : zschimmer::Object
+struct Web_service_transaction : zschimmer::Object,
+                                 Scheduler_object
 {
-                                Web_service_transaction     ( Web_service* ws, Http_processor* ht ) : _zero_(this+1), _spooler(ws->_spooler), _web_service(ws), _http_processor(ht) {}
+                                Web_service_transaction     ( Web_service*, Http_processor* );
 
+
+    // Scheduler_object
+    Prefix_log*                 log                         ()                                      { return _log; }
+
+
+    ptr<Http_response>          process_http                ( Http_request* );
     string                      process_request             ( const string& request_data );
 
   private:
     Fill_zero                  _zero_;
-    Spooler*                   _spooler;
+    ptr<Prefix_log>            _log;
     ptr<Web_service>           _web_service;
     ptr<Http_processor>        _http_processor;
 };

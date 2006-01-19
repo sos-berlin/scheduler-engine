@@ -261,6 +261,7 @@ struct Spooler : Object,
     void                        init_web_services           ();
     Web_service*                web_service_by_url_path_or_null( const string& url_path );          // In spooler_web_service.cxx
     Web_service*                web_service_by_name         ( const string& name );
+    Web_service*                web_service_by_name_or_null ( const string& name );
 
     Job*                        get_job                     ( const string& job_name, bool can_be_not_initialized = false );
     Job*                        get_job_or_null             ( const string& job_name );

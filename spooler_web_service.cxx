@@ -51,7 +51,10 @@ void Spooler::add_web_services( const xml::Element_ptr& web_services_element )
     {
         if( e.nodeName_is( "web_service" ) )
         {
-            ptr<Web_service> web_service = Z_NEW( Web_service( this, e ) );
+            ptr<Web_service> web_service = web_service_by_url_path_or_null( web_services_element.getAttribute( "name" ) );
+            if( !web_service )   web_service = Z_NEW( Web_service( this ) );
+
+            web_service->set_dom( e );
             add_web_service( web_service );
         }
     }
@@ -61,8 +64,7 @@ void Spooler::add_web_services( const xml::Element_ptr& web_services_element )
 
 void Spooler::add_web_service( Web_service* web_service )
 {
-    Web_service_map::iterator ws = _web_service_map.find( web_service->name() );
-    if( ws != _web_service_map.end() )  throw_xc( "SCHEDULER-236", web_service->name() );
+    if( web_service_by_url_path_or_null( web_service->name() ) )  throw_xc( "SCHEDULER-236", web_service->name() );
 
     _web_service_map[ web_service->name() ] = web_service;
 }
@@ -93,10 +95,18 @@ Web_service* Spooler::web_service_by_url_path_or_null( const string& url_path )
 
 Web_service* Spooler::web_service_by_name( const string& name )
 {
-    Web_service_map::iterator ws = _web_service_map.find( name );
-    if( ws == _web_service_map.end() )  throw_xc( "SCHEDULER-235", name );
+    Web_service* result = web_service_by_name_or_null( name );
+    if( !result )  throw_xc( "SCHEDULER-235", name );
 
-    return ws->second;
+    return result;
+}
+
+//-------------------------------------------------------------Spooler::web_service_by_name_or_null
+
+Web_service* Spooler::web_service_by_name_or_null( const string& name )
+{
+    Web_service_map::iterator ws = _web_service_map.find( name );
+    return ws != _web_service_map.end()? ws->second : NULL;
 }
 
 //-------------------------------------------------------------------------Web_service::Web_service
@@ -104,9 +114,10 @@ Web_service* Spooler::web_service_by_name( const string& name )
 Web_service::Web_service( Spooler* sp )
 : 
     Idispatch_implementation( &class_descriptor ),
-    _spooler(sp),
+    Scheduler_object( sp, (Iweb_service*)this, Scheduler_object::type_web_service ),
     _zero_(this+1) 
 {
+    _log = Z_NEW( Prefix_log( this, "Web_service" ) );
 }
 
 //-------------------------------------------------------------------------eb_service::~Web_service
@@ -115,27 +126,18 @@ Web_service::~Web_service()
 {
 }
 
-//-------------------------------------------------------------------------Web_service::Web_service
-
-Web_service::Web_service( Spooler* sp, const xml::Element_ptr& e ) 
-: 
-    Idispatch_implementation( &class_descriptor ),
-    _spooler(sp), 
-    _zero_(this+1) 
-{ 
-    set_dom( e ); 
-}
-
 //-----------------------------------------------------------------------------Web_service::set_dom
     
 void Web_service::set_dom( const xml::Element_ptr& element, const Time& )
 {
-    _name                          = element.getAttribute( "name" );
-    _url_path                      = element.getAttribute( "url_path" );
-    _request_xslt_stylesheet_path  = element.getAttribute( "request_xslt_stylesheet" );
-    _response_xslt_stylesheet_path = element.getAttribute( "response_xslt_stylesheet" );
-    _forward_xslt_stylesheet_path  = element.getAttribute( "forward_xslt_stylesheet" );
-    _debug                         = element.bool_getAttribute( "debug", _debug );
+    _name                          = element.     getAttribute( "name" );
+    _log->set_prefix( "Web_service " + _name );
+
+    _url_path                      = element.     getAttribute( "url_path"                , _url_path );
+    _request_xslt_stylesheet_path  = element.     getAttribute( "request_xslt_stylesheet" , _request_xslt_stylesheet_path   );
+    _response_xslt_stylesheet_path = element.     getAttribute( "response_xslt_stylesheet", _response_xslt_stylesheet_path  );
+    _forward_xslt_stylesheet_path  = element.     getAttribute( "forward_xslt_stylesheet" , _forward_xslt_stylesheet_path   );
+    _debug                         = element.bool_getAttribute( "debug"                   , _debug );
 
 
     if( _forward_xslt_stylesheet_path != "" )
@@ -143,7 +145,7 @@ void Web_service::set_dom( const xml::Element_ptr& element, const Time& )
         // Interne Jobkette und Job jetzt sichtbar machen
 
         _spooler->job_chain( forwarding_job_chain_name )->set_visible( true );
-        _spooler->get_job( forwarder_job_name )->set_visible( true );
+        _spooler->get_job( forwarder_job_name, true )->set_visible( true );
     }
 }
 
@@ -225,6 +227,45 @@ void Web_service::forward_task( Task* task )
     forward_order( order );
 }
 
+//--------------------------------------------------eb_service_transaction::Web_service_transaction
+
+Web_service_transaction::Web_service_transaction( Web_service* ws, Http_processor* ht ) 
+: 
+    _zero_(this+1), 
+    Scheduler_object( ws->_spooler, this, Scheduler_object::type_web_service_transaction ),
+    _web_service(ws), 
+    _http_processor(ht)
+{
+    _log = Z_NEW( Prefix_log( this, "Web_service " + ws->name() ) );
+}
+
+//---------------------------------------------------------Web_service_transaction::process_request
+
+ptr<Http_response> Web_service_transaction::process_http( Http_request* http_request )
+{
+    string response;
+    int    http_status      = 0;
+    string http_status_text;
+
+    try
+    {
+        response = process_request( http_request->_body );
+    }
+    catch( exception& x )
+    {
+        _log->error( x.what() );
+
+        http_status      = 500;
+        http_status_text = "Internal Server Error";
+    }
+
+    ptr<Http_response> http_response = Z_NEW( Http_response( http_request, Z_NEW( String_chunk_reader( response ) ), "text/xml" ) );
+    
+    if( http_status )  http_response->set_status( http_status, http_status_text );
+
+    return http_response;
+}
+
 //---------------------------------------------------------Web_service_transaction::process_request
 
 string Web_service_transaction::process_request( const string& request_data )
@@ -247,24 +288,29 @@ string Web_service_transaction::process_request( const string& request_data )
     }
 
 
-    // In <service_request> einwickleln
+    // In <service_request> einwickeln:
+    //
+    // <service_request>
+    //     <web_service>...</web_service>
+    //     <content> ...request_data... </content>
+    // </service_request>
+
 
     xml::Element_ptr service_request_element = request_document.createElement( "service_request" );
-    service_request_element.appendChild( _web_service->dom_element( service_request_element.ownerDocument() ) );  // <web_service> anhängen
+    service_request_element.appendChild( _web_service->dom_element( request_document ) );           // <web_service> anhängen
 
-    xml::Element_ptr body_element = request_document.createElement( "body" );
+    xml::Element_ptr content_element = service_request_element.append_new_element( "content" );
 
     if( is_xml )
     {
-        service_request_element.appendChild( request_document.documentElement() );      // request_data anhängen
+        xml::Element_ptr data_element = request_document.replaceChild( service_request_element, request_document.documentElement() );
+        service_request_element.appendChild( data_element );      // request_data anhängen
     }
     else
     {
         service_request_element.appendChild( request_document.createTextNode( request_data ) );     // POST-Daten als Text anhängen (nicht spezifiziert)
     }
 
-
-    request_document.appendChild( service_request_element );
 
 
     // KOMMANDO AUSFÜHREN
