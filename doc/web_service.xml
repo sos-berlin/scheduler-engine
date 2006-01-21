@@ -35,7 +35,7 @@
 /></pre>
 
     <p>
-        <code>debug="yes"</code> lässt den Scheduler die intern erzeugten XML-Dokument in Dateien und <scheduler_option name="log-dir"/> ablegen.
+        <code>debug="yes"</code> lässt den Scheduler die intern erzeugten XML-Dokumente in Dateien und <scheduler_option name="log-dir"/> ablegen.
     </p>
 
     <h2>Annahme</h2>
@@ -50,7 +50,7 @@
             
             <pre>&lt;service_request>
     &lt;web_service name="<i>service_name</i>" url_path="<i>url_path</i>"/>
-    &lt;body><i>…data…</i>&lt;/body>
+    &lt;content><i>…data…</i>&lt;/content>
 &lt;/service_request></pre>
         </li>
         <li>
@@ -67,7 +67,7 @@
             dem Aufrufer über HTTP zurückgeliefert.
             
             <pre>&lt;service_response>
-    &lt;body><i>…data…</i>&lt;/body>
+    &lt;content><i>…data…</i>&lt;/content>
 &lt;/service_response></pre>
         </li>
         <li>

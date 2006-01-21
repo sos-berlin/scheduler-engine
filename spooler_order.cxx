@@ -1163,6 +1163,31 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
         if( _replacement_for )
         element.setAttribute( "replacement", "yes" );
 
+        if( _web_service )
+        element.setAttribute( "web_service", _web_service->name() );
+
+        if( !_payload.is_null_or_empty_string()  &&  !_payload.is_missing() )
+        {
+            xml::Element_ptr payload_element = element.append_new_element( "payload" );
+            bool             ok              = false;
+
+            if( _payload.vt == VT_BSTR  &&  wcsncmp( V_BSTR( &_payload ), L"<?xml", 5 ) == 0 )
+            {
+                try
+                {
+                    xml::Document_ptr doc ( V_BSTR( &_payload ) );
+                    payload_element.appendChild( doc.documentElement() );
+                    ok = true;
+                }
+                catch( exception& x )
+                {
+                    Z_LOG( obj_name() << ".payload enthält fehlerhaftes XML: " << x.what() );
+                }
+            }
+
+            if( !ok )  payload_element.appendChild( document.createTextNode( _payload.as_string() ) );
+        }
+
 
         if( show & show_run_time )  element.appendChild( _run_time->dom_element( document ) );
 
@@ -1684,11 +1709,11 @@ void Order::postprocessing2()
 
 
 
-    if( finished()  &&  _web_service_name != "" )
+    if( finished()  &&  _web_service )
     {
         try
         {
-            _spooler->_web_services.web_service_by_name( _web_service_name )->forward_order( this );
+            _web_service->forward_order( this );
             assert( !finished() );
         }
         catch( exception& x )
@@ -1864,6 +1889,15 @@ void Order::set_run_time( const xml::Element_ptr& e )
 
     if( e )  _run_time->set_dom( e );       // Ruft setback() über modify_event()
        else  modified_event();
+}
+
+//-------------------------------------------------------------------------------Order::web_service
+
+Web_service* Order::web_service() const
+{
+    Web_service* result = web_service_or_null();
+    if( !result )  throw_xc( "SCHEDULER-240" );
+    return result;
 }
 
 //----------------------------------------------------------------------------------Order::obj_name

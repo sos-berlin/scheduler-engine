@@ -30,7 +30,7 @@
             Jeder Auftrag hat eine
             (innerhalb der Jobkette oder der Auftragswarteschlange des Jobs eindeutige)
             Kennung.
-            Diese Kennung sollten den zu verarbeitenden Daten entsprechen.
+            Diese Kennung sollte den zu verarbeitenden Daten entsprechen.
             Überlicherweise wird der Schlüssel eines Datenbanksatzes verwendet.
         </p>
         <p>
@@ -338,6 +338,73 @@
     <title>
         Nächste Startzeit des Auftrags bei Verwendung von <code>&lt;run_time></code>
     </title>
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="xml" access="read">
+    <com>
+        <com.result>
+            <com.type type="BSTR"/>
+
+            <description>
+                Siehe <scheduler_element directory="xml/answer/" name="order"/>
+            </description>
+        </com.result>
+    </com>
+
+    <title>
+        Auftrag in XML: &lt;order>...&lt;/order>
+    </title>
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="web_service" access="read">
+    <com>
+        <com.result>
+            <com.type class="Web_service"/>
+        </com.result>
+    </com>
+
+    <title>
+        Der Webdienst, der dem Auftrag zugeordnet ist
+    </title>
+    
+    <description>
+        <p>
+            Wenn der Auftrag keinem Webdienst zugeordnet ist, 
+            liefert der Aufruf eine Exception.
+        </p>
+        <p>
+            Siehe auch <scheduler_method class="Order" property="has_web_service"/>.
+        </p>
+    </description>
+    
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="has_web_service" access="read">
+    <com>
+        <com.result>
+            <com.type type="bool"/>
+            <description>
+                <code>true</code>, wenn ein Webdienst zugeordnet ist.
+            </description>
+        </com.result>
+    </com>
+
+    <title>
+        Ob der Auftrag einem Webdienst zugeordnet ist
+    </title>
+    
+    <description>
+        <p>
+            Siehe auch <scheduler_method class="Order" property="web_service"/>.
+        </p>
+    </description>
+    
 </property>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->

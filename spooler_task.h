@@ -130,6 +130,10 @@ struct Task : Object,
     bool                        has_error                   ()                                      { return _error != NULL; }
     void                    set_error_xc_only               ( const Xc& );
 
+    void                    set_web_service                 ( Web_service* web_service )            { _web_service = web_service; }
+    Web_service*                web_service                 () const;
+    Web_service*                web_service_or_null         () const                                { return _web_service; }
+
     void                    set_order                       ( Order* );
     Order*                      take_order                  ( const Time& now );
     void                        postprocess_order           ( bool spooler_process_result );
@@ -285,6 +289,7 @@ struct Task : Object,
     Xc_copy                    _error;
 
     ptr<Module_instance>       _module_instance;            // Nur für Module_task. Hier, damit wir nicht immer wieder casten müssen.
+    ptr<Web_service>           _web_service;
 };
 
 //----------------------------------------------------------------------------------------Task_list

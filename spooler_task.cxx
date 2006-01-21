@@ -1733,6 +1733,15 @@ void Task::clear_mail()
     _log->set_mail_body     ( "", true );
 }
 */
+//--------------------------------------------------------------------------------Task::web_service
+
+Web_service* Task::web_service() const
+{
+    Web_service* result = web_service_or_null();
+    if( !result )  throw_xc( "SCHEDULER-241" );
+    return result;
+}
+
 //---------------------------------------------------------------------Module_task::do_close__start
 
 Async_operation* Module_task::do_close__start()

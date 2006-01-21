@@ -226,6 +226,7 @@ void Web_service::forward_order( Order* order )
 {
     if( order->job_chain()->name() != forwarding_job_chain_name )
     {
+        if( order->job_chain() )  order->remove_from_job_chain();
         order->set_state( forwarding_job_chain_forward_state );
         order->add_to_job_chain( _spooler->job_chain( forwarding_job_chain_name ) );
     }

@@ -756,6 +756,10 @@ struct Com_order : spooler_com::Iorder,
 
     STDMETHODIMP            get_Xml                     ( BSTR, BSTR* );
 
+    STDMETHODIMP        get_Web_service                 ( spooler_com::Iweb_service** );
+
+    STDMETHODIMP        get_Has_web_service             ( VARIANT_BOOL* );
+
   private:
     Fill_zero                  _zero_;
     Thread_semaphore           _lock;

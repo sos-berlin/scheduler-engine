@@ -553,6 +553,9 @@ struct Iorder : IDispatch
 
     virtual HRESULT     get_Xml                     ( BSTR, BSTR* )                                 = 0;
 
+    virtual HRESULT     get_Web_service             ( Iweb_service** )                              = 0;
+
+    virtual HRESULT     get_Has_web_service         ( VARIANT_BOOL* )                               = 0;
 };
 
 //--------------------------------------------------------------------Remote_module_instance_server

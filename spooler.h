@@ -87,6 +87,7 @@ namespace sos {
         struct Show_what;
         struct Subprocess;
         struct Subprocess_register;
+        struct Web_service;
         struct Xslt_stylesheet;
     }
 }

@@ -381,6 +381,7 @@ xml::Element_ptr Command_processor::execute_start_job( const xml::Element_ptr& e
     string task_name       = element.getAttribute( "name"  );
     string after_str       = element.getAttribute( "after" );
     string at_str          = element.getAttribute( "at"    );
+    string web_service_name= element.getAttribute( "web_service" );
 
     Time start_at;
 
@@ -397,7 +398,10 @@ xml::Element_ptr Command_processor::execute_start_job( const xml::Element_ptr& e
         if( e.nodeName_is( "params" ) )  { pars->set_dom( e );  break; }
     }
 
+    Web_service* web_service = _spooler->_web_services.web_service_by_name( web_service_name );
+
     ptr<Task> task = _spooler->get_job( job_name )->start( ptr<spooler_com::Ivariable_set>(pars), task_name, start_at, true );
+    task->set_web_service( web_service );
 
     return _answer.createElement( "ok" );
 }
@@ -559,24 +563,42 @@ xml::Element_ptr Command_processor::execute_add_order( const xml::Element_ptr& a
 {
     if( _security_level < Security::seclev_all )  throw_xc( "SCHEDULER-121" );
 
-    string priority       = add_order_element.getAttribute( "priority"  );
-    string id             = add_order_element.getAttribute( "id"        );
-    string title          = add_order_element.getAttribute( "title"     );
-    string job_name       = add_order_element.getAttribute( "job"       );
-    string job_chain_name = add_order_element.getAttribute( "job_chain" );
-    string state_name     = add_order_element.getAttribute( "state"     );
-    bool   replace        = add_order_element.bool_getAttribute( "replace", false );
+    string priority         = add_order_element.getAttribute( "priority"  );
+    string id               = add_order_element.getAttribute( "id"        );
+    string title            = add_order_element.getAttribute( "title"     );
+    string job_name         = add_order_element.getAttribute( "job"       );
+    string job_chain_name   = add_order_element.getAttribute( "job_chain" );
+    string state_name       = add_order_element.getAttribute( "state"     );
+    bool   replace          = add_order_element.bool_getAttribute( "replace", false );
+    string web_service_name = add_order_element.getAttribute( "web_service" );
 
     ptr<Order> order = new Order( _spooler );
 
-    if( priority   != "" )  order->set_priority( as_int(priority) );
-    if( id         != "" )  order->set_id      ( id.c_str() );
-                            order->set_title   ( title );
-    if( state_name != "" )  order->set_state   ( state_name.c_str() );
+    if( priority         != "" )  order->set_priority( as_int(priority) );
+    if( id               != "" )  order->set_id      ( id.c_str() );
+                                  order->set_title   ( title );
+    if( state_name       != "" )  order->set_state   ( state_name.c_str() );
+    if( web_service_name != "" )  order->set_web_service( _spooler->_web_services.web_service_by_name( web_service_name ) );
 
 
     DOM_FOR_EACH_ELEMENT( add_order_element, e )  
     {
+        /*
+        if( e.nodeName_is( "payload" ) )
+        {
+            xml::Node_ptr node = e.firstChild();
+            while( node  &&  node.nodeType() == xml::COMMENT_NODE )  node = node.nextSibling();
+            
+            if( node )
+            {
+                if( node.nodeType() != xml::ELEMENT_NODE )  throw_xc( "SCHEDULER-239", node.nodeName() );
+                Variant payload = ((xml::Element_ptr)node).xml();
+                while( node  &&  node.nodeType() == xml::COMMENT_NODE )  node = node.nextSibling();
+                if( node )  throw_xc( "SCHEDULER-239", node.nodeName() );
+            }
+        }
+        else
+        */
         if( e.nodeName_is( "params" ) )
         { 
             ptr<Com_variable_set> pars = new Com_variable_set;
@@ -1181,8 +1203,6 @@ void Command_processor::execute_2( const string& xml_text, const Time& xml_mod_t
             throw_xc( "XML-ERROR", text );
         }
 
-        command_doc.validate_against_dtd( _spooler->_dtd );
-
         Z_LOG2( "scheduler.xml", "XML-Dokument ist eingelesen\n" );
 
         execute_2( command_doc, xml_mod_time );
@@ -1197,6 +1217,8 @@ void Command_processor::execute_2( const xml::Document_ptr& command_doc, const T
 {
     try 
     {
+        command_doc.validate_against_dtd( _spooler->_dtd );
+
         _answer.create();
         _answer.appendChild( _answer.createProcessingInstruction( "xml", "version=\"1.0\" encoding=\"iso-8859-1\"" ) );
         _answer.appendChild( _answer.createElement( "spooler" ) );

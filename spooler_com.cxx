@@ -3829,6 +3829,9 @@ const Com_method Com_order::_methods[] =
     { DISPATCH_METHOD     , 16, "remove_from_job_chain"     , (Com_method_ptr)&Com_order::Remove_from_job_chain , VT_EMPTY      },
     { DISPATCH_PROPERTYGET, 17, "String_next_start_time"    , (Com_method_ptr)&Com_order::get_String_next_start_time, VT_BSTR   },
   //{ DISPATCH_PROPERTYGET, 18, "Log"                       , (Com_method_ptr)&Com_order::get_Log               , VT_DISPATCH   },
+    { DISPATCH_PROPERTYGET, 18, "Xml"                       , (Com_method_ptr)&Com_order::get_Xml               , VT_BSTR       , { VT_BSTR }, 1 },
+    { DISPATCH_PROPERTYGET, 19, "Web_service"               , (Com_method_ptr)&Com_order::get_Web_service       , VT_DISPATCH   },
+    { DISPATCH_PROPERTYGET, 20, "Has_web_service"           , (Com_method_ptr)&Com_order::get_Has_web_service   , VT_BOOL       },
     {}
 };
 
@@ -4413,6 +4416,43 @@ STDMETHODIMP Com_order::get_Xml( BSTR show_what_bstr, BSTR* result )
 
         document.appendChild( _order->dom_element( document, Show_what( show_run_time | show_log ) ) );
         hr = String_to_bstr( document.xml(), result );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+
+//-----------------------------------------------------------------------Com_order::get_Web_service
+
+STDMETHODIMP Com_order::get_Web_service( Iweb_service** result )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_order )  return E_POINTER;
+
+        *result = _order->web_service();
+        (*result)->AddRef();
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+
+//-------------------------------------------------------------------Com_order::get_Has_web_service
+
+STDMETHODIMP Com_order::get_Has_web_service( VARIANT_BOOL* result )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_order )  return E_POINTER;
+
+        *result = _order->web_service_or_null() != NULL? VARIANT_TRUE : VARIANT_FALSE;
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
 

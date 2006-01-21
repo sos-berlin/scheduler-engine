@@ -81,6 +81,10 @@ struct Order : Com_order,
     void                    set_payload                 ( const VARIANT& );
     Payload                     payload                 ()                                          { THREAD_LOCK_RETURN( _lock, Variant, _payload ); }
 
+    void                    set_web_service             ( Web_service* web_service )                { _web_service = web_service; }
+    Web_service*                web_service             () const;
+    Web_service*                web_service_or_null     () const                                    { return _web_service; }
+
     Run_time*                   run_time                ()                                          { return _run_time; }
 
     Com_job*                    com_job                 ();
@@ -164,7 +168,7 @@ struct Order : Com_order,
     int                        _setback_count;
     bool                       _is_in_database;
 
-    string                     _web_service_name;
+    ptr<Web_service>           _web_service;
 };
 
 //-----------------------------------------------------------------------------------Job_chain_node

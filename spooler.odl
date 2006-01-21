@@ -25,6 +25,7 @@ library Spooler
     interface Iorder_queue;
     interface Iorder;
     interface Isubprocess;
+    interface Iweb_service;
     interface Ixslt_stylesheet;
 
     //------------------------------------------------------------------------------------Log_level
@@ -970,6 +971,12 @@ library Spooler
 
         [propget]
         HRESULT                 Xml                     ( [in,defaultvalue("")] BSTR options, [out,retval] BSTR* );
+
+        [propget]
+        HRESULT                 Web_service             ( [out,retval] Iweb_service** );
+
+        [propget]
+        HRESULT                 Has_web_service         ( [out,retval] VARIANT_BOOL* );
     }
 
     [
