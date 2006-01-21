@@ -4411,11 +4411,7 @@ STDMETHODIMP Com_order::get_Xml( BSTR show_what_bstr, BSTR* result )
     {
         if( !_order )  return E_POINTER;
 
-        xml::Document_ptr document;
-        document.create();
-
-        document.appendChild( _order->dom_element( document, Show_what( show_run_time | show_log ) ) );
-        hr = String_to_bstr( document.xml(), result );
+        hr = String_to_bstr( _order->dom( Show_what( show_run_time | show_log ) ).xml(), result );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
 

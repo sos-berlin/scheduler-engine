@@ -132,13 +132,16 @@ void Web_service::load()
     _log->set_prefix( obj_name() );
     _log->set_title( obj_name() );
 
-    if( _debug  &&  _log->log_level() < log_debug_spooler )  _log->set_log_level( log_debug_spooler );
+    if( _debug  &&  _log->log_level() > log_debug_spooler )  _log->set_log_level( log_debug_spooler );
     
     if( !string_begins_with( _spooler->log_directory(), "*" ) ) 
     {
-        _log->set_filename( _spooler->log_directory() + "/web_service." + _name + ".log" );
+        _log_filename_prefix = S() << _spooler->log_directory() << "/web_service." << _name;
+        _log->set_filename( _log_filename_prefix + ".log" );
         _log->set_remove_after_close( false );
         _log->open();
+
+        if( _debug )  _log_xml = true;
     }
 
     _request_xslt_stylesheet .load_file( _request_xslt_stylesheet_path  );
@@ -201,9 +204,7 @@ ptr<Web_service_transaction> Web_service::new_transaction( Http_processor* http_
 xml::Document_ptr Web_service::transform_request( const xml::Document_ptr& request_document )
 {
     xml::Document_ptr result = _request_xslt_stylesheet.apply( request_document );
-
     if( !result.documentElement() )  throw_xc( "SCHEDULER-237", _request_xslt_stylesheet_path );
-
     return result;
 }
 
@@ -211,44 +212,64 @@ xml::Document_ptr Web_service::transform_request( const xml::Document_ptr& reque
 
 xml::Document_ptr Web_service::transform_response( const xml::Document_ptr& command_answer_document )
 {
-    return _response_xslt_stylesheet.apply( command_answer_document );
+    xml::Document_ptr result = _response_xslt_stylesheet.apply( command_answer_document );
+    if( !result.documentElement() )  throw_xc( "SCHEDULER-237", _response_xslt_stylesheet_path );
+    return result;
 }
 
-//-------------------------------------------------------------------Web_service::transform_forward
-/*
-string Web_service::transform_forward( const string& request_xml )
+//------------------------------------------------------------------Web_service::transform_response
+
+xml::Document_ptr Web_service::transform_forward( const xml::Document_ptr& order_or_task_document )
 {
+    xml::Document_ptr result = _forward_xslt_stylesheet.apply( order_or_task_document );
+    if( !result.documentElement() )  throw_xc( "SCHEDULER-237", _forward_xslt_stylesheet_path );
+
+    if( result.documentElement().nodeName() != "service_request" )  throw_xc( "SCHEDULER-242", _forward_xslt_stylesheet_path );
+
+    return result;
 }
-*/
+
 //-----------------------------------------------------------------------Web_service::forward_order
 
-void Web_service::forward_order( Order* order )
+void Web_service::forward_order( const Order& order )
 {
-    if( order->job_chain()->name() != forwarding_job_chain_name )
-    {
-        if( order->job_chain() )  order->remove_from_job_chain();
-        order->set_state( forwarding_job_chain_forward_state );
-        order->add_to_job_chain( _spooler->job_chain( forwarding_job_chain_name ) );
-    }
-    else
-    {
-        // Ende der forwarding_job_chain bereits erreicht, Auftrag ist erledigt
-    }
+    forward( order.dom( Show_what() ) );
 }
 
 //------------------------------------------------------------------------Web_service::forward_task
 
-void Web_service::forward_task( Task* task )
+void Web_service::forward_task( const Task& task )
 {
-    ptr<Order> order = new Order( _spooler );
+    forward( task.dom( show_log ) );
+}
 
-    xml::Document_ptr task_document;
-    task_document.create();
-    task_document.appendChild( task->dom_element( task_document, Show_what( show_log ) ) );
+//-----------------------------------------------------------------------------Web_service::forward
 
-    order->set_payload( Variant( task_document.xml() ) );
+void Web_service::forward( const xml::Document_ptr& payload_dom )
+{
+    try
+    {
+        xml::Document_ptr transformed_payload_dom = transform_forward( payload_dom );
 
-    forward_order( order );
+        if( _debug )
+        {
+            _log->debug( "forward_xslt_stylesheet " + _forward_xslt_stylesheet_path + " liefert:\n" );
+            _log->debug( transformed_payload_dom .xml( true ) );
+            if( _log_xml )  File( _log_filename_prefix + ".command.xml", "w" ).print( transformed_payload_dom.xml() );
+        }
+
+
+        ptr<Order> order = new Order( _spooler );
+
+        order->set_state( forwarding_job_chain_forward_state );
+        order->set_payload( Variant( transformed_payload_dom.xml() ) );
+        order->add_to_job_chain( _spooler->job_chain( forwarding_job_chain_name ) );
+    }
+    catch( exception& x )
+    {
+        _log->error( "Forward: " + string(x.what()) );
+        _log->info( payload_dom.xml( true ) );
+    }
 }
 
 //--------------------------------------------------eb_service_transaction::Web_service_transaction
@@ -266,12 +287,11 @@ Web_service_transaction::Web_service_transaction( Web_service* ws, Http_processo
     _log->set_prefix( obj_name() );
     _log->set_title( obj_name() );
 
-    if( _web_service->_debug  &&  _log->log_level() < log_debug_spooler )  _log->set_log_level( log_debug_spooler );
+    if( _web_service->_debug  &&  _log->log_level() > log_debug_spooler )  _log->set_log_level( log_debug_spooler );
 
     if( !string_begins_with( _spooler->log_directory(), "*" ) )   
     {
         _log_filename_prefix = S() << _spooler->log_directory() << "/web_service." << _web_service->_name << "." << _transaction_number;
-        if( _web_service->_debug )  _log_xml = true;
 
         _log->set_filename( _log_filename_prefix +  ".log" );
         _log->set_remove_after_close( !_web_service->_debug );
@@ -336,7 +356,7 @@ string Web_service_transaction::process_request( const string& request_data )
 
     if( is_xml )
     {
-        if( _log_xml )  File( _log_filename_prefix + ".raw_request.xml", "w" ).print( request_data );
+        if( _web_service->_log_xml )  File( _log_filename_prefix + ".raw_request.xml", "w" ).print( request_data );
 
         int ok = request_document.try_load_xml( request_data );
         if( !ok )
@@ -377,7 +397,7 @@ string Web_service_transaction::process_request( const string& request_data )
         _log->debug( "service_request.xml:\n" );
         _log->debug( request_document.xml( true ) );
         _log->debug( "\n" );
-        if( _log_xml )  File( _log_filename_prefix + ".service_request.xml", "w" ).print( request_document.xml() );
+        if( _web_service->_log_xml )  File( _log_filename_prefix + ".service_request.xml", "w" ).print( request_document.xml() );
     }
 
 
@@ -388,9 +408,9 @@ string Web_service_transaction::process_request( const string& request_data )
     
     if( _web_service->_debug )
     {
-        _log->debug( "Command:\n" );
+        _log->debug( "request_xslt_stylesheet " + _web_service->_request_xslt_stylesheet_path + " liefert:\n" );
         _log->debug( command_document.xml( true ) );
-        if( _log_xml )  File( _log_filename_prefix + ".command.xml", "w" ).print( command_document.xml() );
+        if( _web_service->_log_xml )  File( _log_filename_prefix + ".command.xml", "w" ).print( command_document.xml() );
     }
 
 
@@ -411,7 +431,7 @@ string Web_service_transaction::process_request( const string& request_data )
         {
             _log->debug( "Command response:\n" );
             _log->debug( command_processor._answer.xml( true ) );
-            if( _log_xml )  File( _log_filename_prefix + ".response.xml", "w" ).print( response_document.xml() );
+            if( _web_service->_log_xml )  File( _log_filename_prefix + ".response.xml", "w" ).print( response_document.xml() );
         }
 
         response_document = _web_service->transform_response( command_processor._answer );
@@ -425,7 +445,7 @@ string Web_service_transaction::process_request( const string& request_data )
     //if( _web_service->_debug )
     //{
     //    _log->debug( response_document.xml( true ) );
-    //    if( _log_xml )  File( _log_filename_prefix + ".response.xml", "w" ).print( response_document.xml() );
+    //    if( _web_service->_log_xml )  File( _log_filename_prefix + ".response.xml", "w" ).print( response_document.xml() );
     //}
 
 

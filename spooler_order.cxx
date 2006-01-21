@@ -1107,7 +1107,7 @@ void Order::close()
 
 //-------------------------------------------------------------------------------Order::dom_element
 
-xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Show_what& show, const string* log )
+xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Show_what& show, const string* log ) const
 {
     xml::Element_ptr element = document.createElement( "order" );
 
@@ -1176,7 +1176,7 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
                 try
                 {
                     xml::Document_ptr doc ( V_BSTR( &_payload ) );
-                    payload_element.appendChild( doc.documentElement() );
+                    payload_element.appendChild( document.clone( doc.documentElement() ) );
                     ok = true;
                 }
                 catch( exception& x )
@@ -1202,6 +1202,18 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
     }
 
     return element;
+}
+
+//---------------------------------------------------------------------------------------Order::dom
+
+xml::Document_ptr Order::dom( const Show_what& show ) const
+{
+    xml::Document_ptr document;
+
+    document.create();
+    document.appendChild( dom_element( document, show ) );
+
+    return document;
 }
 
 //-------------------------------------------------------------------------------Order::order_queue
@@ -1243,14 +1255,8 @@ void Order::set_id( const Order::Id& id )
 
 void Order::set_default_id()
 {
-    //THREAD_LOCK( _lock )
-    {
-        if( _id.vt == VT_EMPTY )
-        {
-            set_id( _spooler->_db->get_order_id() );
-            _is_users_id = false;
-        }
-    }
+    set_id( _spooler->_db->get_order_id() );
+    _is_users_id = false;
 }
 
 //-----------------------------------------------------------------------------------Order::set_job
@@ -1273,7 +1279,7 @@ void Order::set_job( Job* job )
 
 //---------------------------------------------------------------------------------------Order::job
 
-Job* Order::job()
+Job* Order::job() const
 {
     Job* result = NULL;
 
@@ -1416,11 +1422,11 @@ void Order::add_to_order_queue( Order_queue* order_queue )
     {
         if( _task )  _moved = true;
 
-        if( _id.vt == VT_EMPTY )  set_default_id();
-        _id_locked = true;
-
         if( _job_chain )  remove_from_job_chain();
         _removed_from_job_chain = NULL;
+
+        if( _id.vt == VT_EMPTY )  set_default_id();
+        _id_locked = true;
 
         order_queue->add_order( this );
         _order_queue = order_queue;
@@ -1468,6 +1474,7 @@ void Order::remove_from_job_chain( bool leave_in_database )
 
     if( _task )  _moved = true;
 
+    _id_locked = false;
 
     if( job_chain )
     {
@@ -1501,9 +1508,6 @@ bool Order::try_add_to_job_chain( Job_chain* job_chain )
 
     //THREAD_LOCK( _lock )
     {
-        if( _id.vt == VT_EMPTY )  set_default_id();
-        _id_locked = true;
-
         if( _job_chain )  remove_from_job_chain();
 
         if( !job_chain->_chain.empty() )
@@ -1515,6 +1519,9 @@ bool Order::try_add_to_job_chain( Job_chain* job_chain )
 
             if( !node->_job  || !node->_job->order_queue() )  throw_xc( "SCHEDULER-149", job_chain->name(), debug_string_from_variant(_state) );
 
+            if( _id.vt == VT_EMPTY )  set_default_id();
+            _id_locked = true;
+
             job_chain->register_order( this );
 
             _removed_from_job_chain = NULL;
@@ -1524,13 +1531,14 @@ bool Order::try_add_to_job_chain( Job_chain* job_chain )
             _log->set_prefix( obj_name() );
 
             node->_job->order_queue()->add_order( this );
-        }
 
 
-        if( !_is_in_database  &&  job_chain->_store_orders_in_database )
-        {
-            _spooler->_db->insert_order( this );
+            if( !_is_in_database  &&  job_chain->_store_orders_in_database )
+            {
+                _spooler->_db->insert_order( this );
+            }
         }
+
 
         setback( _state == _initial_state  &&  _run_time->set()? next_start_time( true ) : Time(0) );
     }
@@ -1711,15 +1719,7 @@ void Order::postprocessing2()
 
     if( finished()  &&  _web_service )
     {
-        try
-        {
-            _web_service->forward_order( this );
-            assert( !finished() );
-        }
-        catch( exception& x )
-        {
-            _log->error( string("Web-service forward: ") + x.what() );
-        }
+        _web_service->forward_order( *this );
     }
 
     if( finished() )
@@ -1902,7 +1902,7 @@ Web_service* Order::web_service() const
 
 //----------------------------------------------------------------------------------Order::obj_name
 
-string Order::obj_name()
+string Order::obj_name() const
 {
     string result = "Order ";
 

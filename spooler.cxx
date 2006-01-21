@@ -778,7 +778,7 @@ void Spooler::cmd_add_jobs( const xml::Element_ptr& element )
 
 void Spooler::cmd_job( const xml::Element_ptr& element )
 {
-    load_job_from_xml( element, Time::now(), true );
+    load_job_from_xml( element, Time::now(), _state >= s_running );
 
     signal( "add_job" );
 }

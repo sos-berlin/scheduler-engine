@@ -78,10 +78,15 @@ public class Web_service_forwarder  extends sos.spooler.Job_impl
             }
             */
             
-            Web_service web_service = order.web_service();
-            File stylesheet_file = new File( web_service.forward_xslt_stylesheet_path() );
-            Document web_service_request_document = apply_xslt_stylesheet( stylesheet_file, dom_from_xml( order.xml() ) ); 
-            execute_service( web_service_request_document  );
+            //Web_service web_service = order.web_service();
+            //File stylesheet_file = new File( web_service.forward_xslt_stylesheet_path() );
+            //Document web_service_request_document = apply_xslt_stylesheet( stylesheet_file, dom_from_xml( order.xml() ) ); 
+            //execute_service( web_service_request_document  );
+            
+            Object payload = order.payload();
+            if( !(payload instanceof String ) )  throw new Order_exception( "order.payload ist kein String" );
+            
+            execute_service( dom_from_xml( (String)payload ) );
         }
         
         //-----------------------------------------------------------------------------------------
@@ -114,7 +119,7 @@ public class Web_service_forwarder  extends sos.spooler.Job_impl
             Element service_request_element = service_request_document.getDocumentElement();
             
             if( !service_request_element.getNodeName().equals( "service_request" ) )
-                throw new Order_exception( "Forward_xslt_stylesheet liefert nicht <service_request>" );
+                throw new Order_exception( "Payload ist kein <service_request>" );
     
             
             HttpURLConnection http_connection = null;
@@ -210,16 +215,17 @@ public class Web_service_forwarder  extends sos.spooler.Job_impl
     
     static String string_from_reader( Reader reader )  throws IOException
     {
-        char[] buffer = new char[ 1024 ];
-        StringBuffer response = new StringBuffer();
+        StringBuffer result = new StringBuffer( 10000 );
+        char[]       buffer = new char[ 1024 ];
+        
         while(true)
         {
             int len = reader.read( buffer );
-            if( len == 0 )  break;
-            response.append( buffer, 0, len );
+            if( len <= 0 )  break;
+            result.append( buffer, 0, len );
         }
         
-        return buffer.toString();
+        return result.toString();
     }
     
     //---------------------------------------------------------------------------------------------

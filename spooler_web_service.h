@@ -50,8 +50,10 @@ struct Web_service: idispatch_implementation< Web_service, spooler_com::Iweb_ser
     ptr<Web_service_transaction> new_transaction            ( Http_processor* );
     xml::Document_ptr           transform_request           ( const xml::Document_ptr& request );
     xml::Document_ptr           transform_response          ( const xml::Document_ptr& command_answer );
-    void                        forward_order               ( Order* );
-    void                        forward_task                ( Task* );
+    xml::Document_ptr           transform_forward           ( const xml::Document_ptr& order_or_task );
+    void                        forward_order               ( const Order& );
+    void                        forward_task                ( const Task& );
+    void                        forward                     ( const xml::Document_ptr& payload );
     
   private:
     friend struct               Web_service_transaction;
@@ -60,6 +62,7 @@ struct Web_service: idispatch_implementation< Web_service, spooler_com::Iweb_ser
     Fill_zero                  _zero_;
     string                     _name;
     string                     _url_path;
+    string                     _log_filename_prefix;
     ptr<Prefix_log>            _log;
     string                     _request_xslt_stylesheet_path;
     Xslt_stylesheet            _request_xslt_stylesheet;
@@ -69,6 +72,7 @@ struct Web_service: idispatch_implementation< Web_service, spooler_com::Iweb_ser
     Xslt_stylesheet            _forward_xslt_stylesheet;
     int                        _next_transaction_number;
     bool                       _debug;
+    bool                       _log_xml;
 };
 
 //-------------------------------------------------------------------------------------------------
@@ -93,7 +97,6 @@ struct Web_service_transaction : zschimmer::Object,
     int                        _transaction_number;
     ptr<Http_processor>        _http_processor;
     string                     _log_filename_prefix;
-    bool                       _log_xml;
     ptr<Prefix_log>            _log;
 };
 

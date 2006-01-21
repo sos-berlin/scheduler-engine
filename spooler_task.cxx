@@ -299,7 +299,7 @@ void Task::close()
 //----------------------------------------------------------------------------------------Task::dom_element
 // s.a. Spooler_command::execute_show_task() zum Aufbau des XML-Elements <task>
 
-xml::Element_ptr Task::dom_element( const xml::Document_ptr& document, const Show_what& show )
+xml::Element_ptr Task::dom_element( const xml::Document_ptr& document, const Show_what& show ) const
 {
     xml::Element_ptr task_element = document.createElement( "task" );
 
@@ -339,7 +339,7 @@ xml::Element_ptr Task::dom_element( const xml::Document_ptr& document, const Sho
 
         task_element.setAttribute( "log_file"        , _log->filename() );
 
-        if( Module_task* t = dynamic_cast<Module_task*>( this ) )
+        if( const Module_task* t = dynamic_cast<const Module_task*>( this ) )
         {
             if( t->_module_instance )
             {
@@ -396,6 +396,18 @@ xml::Element_ptr Task::dom_element( const xml::Document_ptr& document, const Sho
     }
 
     return task_element;
+}
+
+//----------------------------------------------------------------------------------------Task::dom
+
+xml::Document_ptr Task::dom( const Show_what& show ) const
+{
+    xml::Document_ptr document;
+
+    document.create();
+    document.appendChild( dom_element( document, show ) );
+
+    return document;
 }
 
 //----------------------------------------------------------------------------------------Task::job
@@ -622,7 +634,7 @@ void Task::set_state( State new_state )
 
 //---------------------------------------------------------------------------------Task::state_name
 
-string Task::state_name( State state )
+string Task::state_name( State state ) 
 {
     switch( state )
     {
@@ -1577,6 +1589,12 @@ void Task::finish()
     else
     {
        _job->_error_steps = 0;
+    }
+
+
+    if( _web_service )
+    {
+        _web_service->forward_task( *this );
     }
 
 

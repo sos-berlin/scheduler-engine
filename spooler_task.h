@@ -103,7 +103,8 @@ struct Task : Object,
 
     void                        close                       ();
     void                        job_close                   ();                                     // Setzt _job = NULL
-    xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
+    xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& ) const;
+    xml::Document_ptr           dom                         ( const Show_what& ) const;
 
     State                       state                       () const                                { return _state; }
     void                        attach_to_a_thread          ();
@@ -116,7 +117,7 @@ struct Task : Object,
     string                      name                        () const                                { return obj_name(); }
     virtual string              obj_name                    () const                                { return _obj_name; }
 
-    string                      state_name                  ()                                      { return state_name( state() ); }
+    string                      state_name                  () const                                { return state_name( state() ); }
     static string               state_name                  ( State );
     State                       state                       ()                                      { return _state; }
     bool                        starting                    ()                                      { return _state > s_none  &&  _state <= s_starting; }

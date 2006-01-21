@@ -51,23 +51,6 @@ public class Test_web_service  extends sos.spooler.Job_impl
     }
     
     //---------------------------------------------------------------------------------------------
-    
-    public boolean spooler_open()  throws Exception
-    {
-        return true;
-    }
-    
-    //---------------------------------------------------------------------------------------------
-    
-    public void spooler_close()
-    {
-        //if( http_connection != null )
-        //{
-        //    http_connection.disconnect();
-        //}
-    }
-    
-    //---------------------------------------------------------------------------------------------
 
     public boolean spooler_process()  throws Exception
     {
@@ -78,6 +61,8 @@ public class Test_web_service  extends sos.spooler.Job_impl
         
         try
         {
+            spooler_log.info( "url=" + url );
+            
             URLConnection connection = url.openConnection();
             if( !( connection instanceof HttpURLConnection ) )  throw new Exception( "Nur HTTP-URLs werden akzeptiert: url=" + url );
 

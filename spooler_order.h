@@ -47,7 +47,7 @@ struct Order : Com_order,
 
     void                    set_title                   ( const string& title )                     { THREAD_LOCK(_lock)  _title = title,  _title_modified = true,  _log->set_prefix( obj_name() ); }
     string&                     title                   ()                                          { THREAD_LOCK_RETURN( _lock, string, _title ); }
-    string                      obj_name                ();
+    string                      obj_name                () const;
                                                             
     void                    set_priority                ( Priority );
     Priority                    priority                () const                                    { return _priority; }
@@ -62,7 +62,7 @@ struct Order : Com_order,
     void                    set_job                     ( Job* );
     void                    set_job                     ( spooler_com::Ijob* );
     void                    set_job_by_name             ( const string& );
-    Job*                        job                     ();
+    Job*                        job                     () const;
 
     void                    set_state                   ( const State& );
     void                    set_state                   ( const State&, const Time& );
@@ -109,7 +109,9 @@ struct Order : Com_order,
     void                        postprocessing          ( bool success );                           // Verarbeitung nach spooler_process()
     void                        processing_error        ();
 
-    xml::Element_ptr            dom_element             ( const xml::Document_ptr&, const Show_what&, const string* log = NULL );
+    xml::Element_ptr            dom_element             ( const xml::Document_ptr&, const Show_what&, const string* log = NULL ) const;
+    xml::Document_ptr           dom                     ( const Show_what& ) const;
+
     void                    set_run_time                ( const xml::Element_ptr& );
     void                        before_modify_event     ();
     void                        modified_event          ();
