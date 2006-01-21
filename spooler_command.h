@@ -77,6 +77,7 @@ struct Command_processor
     ptr<Http_response>          execute_http                ( Http_request* );
     string                      execute                     ( const string& xml_text, const Time& xml_mod_time, bool indent = false );
     void                        execute_2                   ( const string& xml_text, const Time& xml_mod_time );
+    void                        execute_2                   ( const xml::Document_ptr&, const Time& xml_mod_time );
     xml::Element_ptr            execute_command             ( const xml::Element_ptr&, const Time& xml_mod_time );
     xml::Element_ptr            execute_config              ( const xml::Element_ptr&, const Time& xml_mod_time );
 

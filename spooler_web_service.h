@@ -37,7 +37,10 @@ struct Web_service: idispatch_implementation< Web_service, spooler_com::Iweb_ser
 
     // Scheduler_object
     Prefix_log*                 log                         ()                                      { return _log; }
+    string                      obj_name                    () const                                { return "Web_service " + _name; }
 
+
+    void                        load                        ();
     string                      url_path                    () const                                { return _url_path; }
 
     void                    set_dom                         ( const xml::Element_ptr&, const Time& xml_mod_time = Time() );
@@ -64,33 +67,64 @@ struct Web_service: idispatch_implementation< Web_service, spooler_com::Iweb_ser
     Xslt_stylesheet            _response_xslt_stylesheet;
     string                     _forward_xslt_stylesheet_path;
     Xslt_stylesheet            _forward_xslt_stylesheet;
+    int                        _next_transaction_number;
     bool                       _debug;
 };
-
-//----------------------------------------------------------------------------------Web_service_map
-
-typedef map< string, ptr<Web_service> >    Web_service_map;
 
 //-------------------------------------------------------------------------------------------------
 
 struct Web_service_transaction : zschimmer::Object,
                                  Scheduler_object
 {
-                                Web_service_transaction     ( Web_service*, Http_processor* );
+                                Web_service_transaction     ( Web_service*, Http_processor*, int transaction_number );
 
 
     // Scheduler_object
     Prefix_log*                 log                         ()                                      { return _log; }
+    string                      obj_name                    () const;
 
 
-    ptr<Http_response>          process_http                ( Http_request* );
+    ptr<Http_response>          process_http                ( Http_processor* );
     string                      process_request             ( const string& request_data );
 
   private:
     Fill_zero                  _zero_;
-    ptr<Prefix_log>            _log;
     ptr<Web_service>           _web_service;
+    int                        _transaction_number;
     ptr<Http_processor>        _http_processor;
+    string                     _log_filename_prefix;
+    bool                       _log_xml;
+    ptr<Prefix_log>            _log;
+};
+
+//-------------------------------------------------------------------------------------Web_services
+
+struct Web_services
+{
+    Fill_zero _zero_;
+
+                                Web_services                ( Spooler* sp )                         : _spooler(sp), _zero_(this+1) {}
+
+    void                        add_web_services            ( const xml::Element_ptr& web_services_element );
+    void                        add_web_service             ( Web_service* );
+    void                        init                        ();
+
+    Web_service*                web_service_by_url_path_or_null( const string& url_path );
+    Web_service*                web_service_by_name         ( const string& name );
+    Web_service*                web_service_by_name_or_null ( const string& name );
+
+
+
+  private:
+    Spooler*                   _spooler;
+
+    typedef stdext::hash_map< string, ptr<Web_service> >    Name_web_service_map;
+    Name_web_service_map       _name_web_service_map;
+
+    typedef stdext::hash_map< string, ptr<Web_service> >    Url_web_service_map;
+    Url_web_service_map        _url_web_service_map;
+
+    int                        _next_transaction_number;
 };
 
 //-------------------------------------------------------------------------------------------------

@@ -211,6 +211,7 @@ struct Http_response : Object
 
     bool                        eof                         ();
     string                      read                        ( int recommended_size );
+    string                      header_text                 () const                                { return _header; }
 
 
   protected:

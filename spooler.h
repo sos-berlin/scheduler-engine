@@ -256,13 +256,6 @@ struct Spooler : Object,
     void                        cmd_load_config             ( const xml::Element_ptr&, const Time& xml_mod_time, const string& source_filename );
     void                        execute_state_cmd           ();
 
-    void                        add_web_services            ( const xml::Element_ptr& web_services_element );
-    void                        add_web_service             ( Web_service* );
-    void                        init_web_services           ();
-    Web_service*                web_service_by_url_path_or_null( const string& url_path );          // In spooler_web_service.cxx
-    Web_service*                web_service_by_name         ( const string& name );
-    Web_service*                web_service_by_name_or_null ( const string& name );
-
     Job*                        get_job                     ( const string& job_name, bool can_be_not_initialized = false );
     Job*                        get_job_or_null             ( const string& job_name );
     Job*                        get_next_job_to_start       ();
@@ -440,7 +433,7 @@ struct Spooler : Object,
     string                     _xml_cmd;                    // Parameter -cmd, ein zuerst auszuführendes Kommando.
     string                     _pid_filename;
 
-    Web_service_map            _web_service_map;
+    Web_services               _web_services;
     Job_list                   _job_list;
     Wait_handles               _wait_handles;
 

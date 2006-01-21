@@ -41,11 +41,13 @@ void Http_parser::add_text( const char* text, int len )
     if( !_reading_body )
     {
         int end_size = 3;
-        int header_end = _text.find( "\n\r\n" );
+        int header_end = _text.find( "\n\r\n" );  // Leerzeile?
         if( header_end == string::npos )  header_end = _text.find( "\n\n" ), end_size = 2;
 
         if( header_end != string::npos )
         {
+            // Kopf gelesen
+
             _body_start = header_end + end_size;
             _reading_body = true;
 
@@ -703,11 +705,11 @@ void Http_processor::process()
     Z_LOG2( "scheduler.http", "HTTP: " << _http_parser->_text << "\n" );
     
 
-    if( Web_service* web_service = _spooler->web_service_by_url_path_or_null( _http_request->_path ) )
+    if( Web_service* web_service = _spooler->_web_services.web_service_by_url_path_or_null( _http_request->_path ) )
     {
         ptr<Web_service_transaction> web_service_transaction = web_service->new_transaction( this );
 
-        _http_response = web_service_transaction->process_http( _http_request );
+        _http_response = web_service_transaction->process_http( this );
     }
     else
     {

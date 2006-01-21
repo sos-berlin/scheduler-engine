@@ -1170,14 +1170,6 @@ void Command_processor::execute_2( const string& xml_text, const Time& xml_mod_t
     {
         Z_LOGI2( "scheduler.xml", "XML-Dokument wird gelesen ...\n" );
 
-        //_answer = msxml::Document_ptr( __uuidof(msxml::DOMDocument30), NULL );
-        _answer.create();
-        _answer.appendChild( _answer.createProcessingInstruction( "xml", "version=\"1.0\" encoding=\"iso-8859-1\"" ) );
-        _answer.appendChild( _answer.createElement( "spooler" ) );
-
-        xml::Element_ptr answer_element = _answer.documentElement().appendChild( _answer.createElement( "answer" ) );
-        answer_element.setAttribute( "time", Time::now().as_string() );
-
         xml::Document_ptr command_doc;
         command_doc.create();
 
@@ -1190,6 +1182,27 @@ void Command_processor::execute_2( const string& xml_text, const Time& xml_mod_t
         }
 
         command_doc.validate_against_dtd( _spooler->_dtd );
+
+        Z_LOG2( "scheduler.xml", "XML-Dokument ist eingelesen\n" );
+
+        execute_2( command_doc, xml_mod_time );
+
+    }
+    catch( const _com_error& com_error ) { throw_com_error( com_error, "DOM/XML" ); }
+}
+
+//----------------------------------------------------------------------Command_processor::execute_2
+
+void Command_processor::execute_2( const xml::Document_ptr& command_doc, const Time& xml_mod_time )
+{
+    try 
+    {
+        _answer.create();
+        _answer.appendChild( _answer.createProcessingInstruction( "xml", "version=\"1.0\" encoding=\"iso-8859-1\"" ) );
+        _answer.appendChild( _answer.createElement( "spooler" ) );
+
+        xml::Element_ptr answer_element = _answer.documentElement().appendChild( _answer.createElement( "answer" ) );
+        answer_element.setAttribute( "time", Time::now().as_string() );
 
 /*
         xml::DocumentType_ptr doctype = command_doc->doctype;
@@ -1225,7 +1238,6 @@ void Command_processor::execute_2( const string& xml_text, const Time& xml_mod_t
             }
         }
 
-        Z_LOG2( "scheduler.xml", "XML-Dokument ist eingelesen\n" );
 
     }
     catch( const _com_error& com_error ) { throw_com_error( com_error, "DOM/XML" ); }

@@ -497,7 +497,8 @@ Spooler::Spooler()
     _log_level( log_info ),
     _factory_ini( default_factory_ini ),
     _mail_defaults(NULL),
-    _termination_gmtimeout_at(no_termination_timeout)
+    _termination_gmtimeout_at(no_termination_timeout),
+    _web_services(this)
 {
     if( spooler_ptr )  throw_xc( "spooler_ptr" );
     spooler_ptr = this;
@@ -2722,7 +2723,7 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line )
     //_communication.bind();  // Falls der Port belegt ist, gibt's hier einen Abbruch
 
 
-    init_web_services();    // Ein Job und eine Jobkette einrichten, s. spooler_web_service.cxx
+    _web_services.init();    // Ein Job und eine Jobkette einrichten, s. spooler_web_service.cxx
 
 
 

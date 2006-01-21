@@ -1688,7 +1688,7 @@ void Order::postprocessing2()
     {
         try
         {
-            _spooler->web_service_by_name( _web_service_name )->forward_order( this );
+            _spooler->_web_services.web_service_by_name( _web_service_name )->forward_order( this );
             assert( !finished() );
         }
         catch( exception& x )
