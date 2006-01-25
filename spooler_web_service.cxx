@@ -36,9 +36,9 @@ Web_service::Class_descriptor   Web_service::class_descriptor ( &typelib, "Spool
 const Com_method Web_service::_methods[] =
 { 
 #ifdef COM_METHOD
-    COM_PROPERTY_GET( Subprocess,  1, Java_class_name               , VT_BSTR    , 0 ),
-    COM_PROPERTY_GET( Subprocess,  2, Name                          , VT_BSTR    , 0 ),
-    COM_PROPERTY_GET( Subprocess,  3, Forward_xslt_stylesheet_path  , VT_BSTR    , 0 ),
+    COM_PROPERTY_GET( Web_service,  1, Java_class_name               , VT_BSTR    , 0 ),
+    COM_PROPERTY_GET( Web_service,  2, Name                          , VT_BSTR    , 0 ),
+    COM_PROPERTY_GET( Web_service,  3, Forward_xslt_stylesheet_path  , VT_BSTR    , 0 ),
 #endif
     {}
 };

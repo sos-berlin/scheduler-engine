@@ -32,6 +32,7 @@ struct Ijob_chain;
 struct Iorder_queue;
 struct Iorder;
 struct Isubprocess;
+struct Iweb_service;
 struct Ixslt_stylesheet;
 
 //------------------------------------------------------------------------------------Log_level
@@ -622,7 +623,6 @@ DEFINE_GUID( IID_Iweb_service, 0xfeee47ad, 0x6c1b, 0x11d8, 0x81, 0x03, 0x00, 0x0
                                                                                                                    
 struct Iweb_service: IDispatch
 {
-    [propget]
     virtual HRESULT     get_Java_class_name         ( BSTR* )                                       = 0;
     virtual HRESULT     get_Name                    ( BSTR* )                                       = 0;
     virtual HRESULT     get_Forward_xslt_stylesheet_path( BSTR* )                                   = 0;

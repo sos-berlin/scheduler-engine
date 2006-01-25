@@ -39,6 +39,7 @@ objects = \
  spooler_thread.o\
  spooler_time.o\
  spooler_wait.o\
+ spooler_web_service.o\
  spooler_xslt_stylesheet.o
 
 
