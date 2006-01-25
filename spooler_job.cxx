@@ -85,6 +85,8 @@ Job::~Job()
 
 void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
 {
+    if( !element )  return;
+
     THREAD_LOCK_DUMMY( _lock )
     {
         bool order;
@@ -540,6 +542,13 @@ ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, const
 {
     if( _remove )  throw_xc( "SCHEDULER-230", obj_name() );
 
+    switch( _state )
+    {
+        case s_read_error:  throw_xc( "SCHEDULER-132", _name, _error? _error->what() : "" );
+        case s_error:       throw_xc( "SCHEDULER-204", _name, _error.what() );
+        case s_stopped:     set_state( s_pending );  break;
+        default: ;
+    }
 
     ptr<Task> task;
 
@@ -587,36 +596,44 @@ void Job::load_tasks_from_db()
     
     while( !sel.eof() )
     {
-        Record record = sel.get_record();
-
-        int                     task_id    = record.as_int   ( "task_id" );
-        Time                    start_at;
-        ptr<Com_variable_set>   parameters = new Com_variable_set;
-
-        start_at.set_datetime( record.as_string( "start_at_time" ) );
-
-        //if( !record.null( "parlen" )  &&  record.as_int( "parlen" ) > 0 )
+        Record record  = sel.get_record();
+        int    task_id = record.as_int( "task_id" );
+        try
         {
+            Time                    start_at;
+            ptr<Com_variable_set>   parameters = new Com_variable_set;
+
+            start_at.set_datetime( record.as_string( "start_at_time" ) );
+
             string parameters_xml = file_as_string( _spooler->_db->db_name() + " -table=" + _spooler->_tasks_tablename + " -clob='parameters'"
-                                                                               " where \"TASK_ID\"=" + as_string( task_id ) );
+                                                                                " where \"TASK_ID\"=" + as_string( task_id ) );
             if( !parameters_xml.empty() )  parameters->set_xml( parameters_xml );
+
+            string xml = file_as_string( _spooler->_db->db_name() + " -table=" + _spooler->_tasks_tablename + " -clob='task_xml'"
+                                                                    " where \"TASK_ID\"=" + as_string( task_id ) );
+            if( !xml.empty() )  set_dom( xml::Document_ptr( xml ).documentElement(), Time::now() );
+
+
+            _log->info( "Zu startende Task aus Datenbank geladen: id=" + as_string(task_id) + " start_at=" + start_at.as_string() );
+
+
+            ptr<Task> task = create_task( +parameters, "", start_at, task_id );
+            
+            task->_is_in_database = true;
+            task->_let_run        = true;
+            task->_enqueue_time.set_datetime( record.as_string( "enqueue_time" ) );
+
+            if( !start_at  &&  !_run_time->period_follows( now ) ) 
+            {
+                try{ throw_xc( "SCHEDULER-143" ); } catch( const exception& x ) { _log->warn( x.what() ); }
+            }
+
+            _task_queue.enqueue_task( task );
         }
-
-        _log->info( "Zu startende Task aus Datenbank geladen: id=" + as_string(task_id) + " start_at=" + start_at.as_string() );
-
-
-        ptr<Task> task = create_task( +parameters, "", start_at, task_id );
-        
-        task->_is_in_db     = true;
-        task->_let_run      = true;
-        task->_enqueue_time.set_datetime( record.as_string( "enqueue_time" ) );
-
-        if( !start_at  &&  !_run_time->period_follows( now ) ) 
+        catch( exception& x )
         {
-            try{ throw_xc( "SCHEDULER-143" ); } catch( const exception& x ) { _log->warn( x.what() ); }
+            _log->error( S() << "Task " << task_id << " aus der Datenbank ist fehlerhaft: " << x.what() );
         }
-
-        _task_queue.enqueue_task( task );
     }
 }
 
@@ -624,13 +641,15 @@ void Job::load_tasks_from_db()
 
 void Job::Task_queue::enqueue_task( const ptr<Task>& task )
 {
+    _job->set_visible( true );
+
     if( !task->_enqueue_time )  task->_enqueue_time = Time::now();
 
     while(1)
     {
         try
         {
-            if( !task->_is_in_db  &&  _spooler->_db->opened() )
+            if( !task->_is_in_database  &&  _spooler->_db->opened() )
             {
                 Transaction ta ( _spooler->_db );
                 //task->_history.enqueue();
@@ -657,9 +676,14 @@ void Job::Task_queue::enqueue_task( const ptr<Task>& task )
                     blob.close();
                 }
 
+                xml::Document_ptr task_document = task->dom( show_for_database );
+                xml::Element_ptr  task_element  = task_document.documentElement();
+                if( task_element.hasAttributes()  ||  task_element.firstChild() )
+                    _spooler->_db->update_clob( _spooler->_tasks_tablename, "task_xml", "task_id", task->id(), task_document.xml() );
+
                 ta.commit();
 
-                task->_is_in_db = true;
+                task->_is_in_database = true;
             }
             break;
         }
@@ -714,7 +738,7 @@ bool Job::Task_queue::remove_task( int task_id, Why_remove )
         Task* task = *it;
         if( task->_id == task_id )
         {
-            bool remove_from_db = task->_is_in_db;
+            bool remove_from_db = task->_is_in_database;
             _queue.erase( it );
             task = NULL;
 
@@ -829,41 +853,33 @@ ptr<Task> Job::start( const ptr<spooler_com::Ivariable_set>& params, const strin
 //---------------------------------------------------------------------------------------Job::start
 // start() und create_task() nicht mit gesperrten _lock rufen, denn get_id() in DB blockieren!
 
-ptr<Task> Job::start( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, Time start_at, bool log )
+ptr<Task> Job::start( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, const Time& start_at )
 {
     if( _remove )  throw_xc( "SCHEDULER-230", obj_name() );
+    
+    ptr<Task> task = create_task( params, task_name, start_at );
+    enqueue_task( task );
 
+    return task;
+}
 
+//--------------------------------------------------------------------------------Job::enqueue_task
+
+void Job::enqueue_task( Task* task )
+{
     Time now = Time::now();
 
-    THREAD_LOCK_DUMMY( _lock )
-    {
-        if( log && _spooler->_debug )  _log->debug( "start(at=" + start_at.as_string() + ( task_name == ""? "" : ",name=\"" + task_name + '"' ) + ")" );
+    if( _spooler->_debug )  _log->debug( "start(at=" + task->_start_at.as_string() + ( task->_name == ""? "" : ",name=\"" + task->_name + '"' ) + ")" );
 
-        switch( _state )
-        {
-            case s_read_error:  throw_xc( "SCHEDULER-132", name(), _error? _error->what() : "" );
-            
-            case s_error:       throw_xc( "SCHEDULER-204", _name, _error.what() );
+    if( !task->_start_at  &&  !_run_time->period_follows( now ) )   throw_xc( "SCHEDULER-143" );
 
-            case s_stopped:     set_state( s_pending );
-                                break;
-
-            default: ;
-        }
-
-        if( !start_at  &&  !_run_time->period_follows( now ) )   throw_xc( "SCHEDULER-143" );
-    }
-
-    ptr<Task> task = create_task( params, task_name, start_at );
     task->_let_run = true;
+
 
     _task_queue.enqueue_task( task );
     calculate_next_time( now );
 
     signal( "start job" );
-
-    return task;
 }
 
 //---------------------------------------------------------------------------------Job::read_script
@@ -930,9 +946,12 @@ bool Job::execute_state_cmd()
 
     //THREAD_LOCK( _lock )   // create_task() nicht mit gesperrten _lock rufen, denn get_id() in DB blockieren.
     {
-        if( _state_cmd )
+        State_cmd state_cmd = _state_cmd;
+        _state_cmd = sc_none;
+
+        if( state_cmd )
         {
-            switch( _state_cmd )
+            switch( state_cmd )
             {
                 case sc_stop:       if( _state != s_stopping
                                      && _state != s_stopped  
@@ -1032,8 +1051,6 @@ bool Job::execute_state_cmd()
 
                 default: ;
             }
-
-            _state_cmd = sc_none;
         }
     }
 
@@ -1560,7 +1577,7 @@ bool Job::do_something()
         catch( const _com_error& x )  { throw_com_error( x ); }
     }
   //catch( Stop_scheduler_exception& ) { throw; }
-    catch( const exception&  x ) { set_error( x );  set_job_error( x );  sos_sleep(5); }     // Bremsen, falls sich der Fehler sofort wiederholt
+    catch( const exception&  x ) { set_error( x );  set_job_error( x );  sos_sleep(1); }     // Bremsen, falls sich der Fehler sofort wiederholt
 
     return something_done;
 }
@@ -1640,7 +1657,7 @@ void Job::set_state_cmd( State_cmd cmd )
                                 break;
 
             case sc_start:      {
-                                    start( NULL, "", Time::now(), true );
+                                    start( NULL, "", Time::now() );
                                     break;
                                 }
 

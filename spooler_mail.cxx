@@ -168,6 +168,8 @@ xml::Element_ptr Com_mail::dom_element( const xml::Document_ptr& dom )
 
 void Com_mail::set_dom( const xml::Element_ptr& mail_element )
 {
+    if( !mail_element )  return;
+
     if( !mail_element )  throw_xc( "Com_mail::set_dom", "NULL pointer" );
 
     init();

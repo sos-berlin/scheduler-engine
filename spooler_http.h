@@ -195,13 +195,13 @@ struct Http_response : Object
 {
                                 Http_response               ( Http_request*, Chunk_reader*, const string& content_type );
     
-    void                        recommend_block_size        ( int size )                            { _chunk_reader->recommend_block_size( size ); }
-    int                         recommended_block_size      () const                                { return _chunk_reader->_recommended_block_size; }
+    void                        recommend_block_size        ( int size )                            { if( _chunk_reader )  _chunk_reader->recommend_block_size( size ); }
+    int                         recommended_block_size      () const                                { return _chunk_reader? _chunk_reader->_recommended_block_size : recommended_chunk_size; }
 
   //bool                        is_http_1_1                 ()                                      { return _http_1_1; }
     bool                        close_connection_at_eof     ()                                      { return _close_connection_at_eof; }
 
-    void                    set_event                       ( Event_base* event )                   { _chunk_reader->set_event( event ); }
+    void                    set_event                       ( Event_base* event )                   { if( _chunk_reader )  _chunk_reader->set_event( event ); }
 
     string                      content_type                ()                                      { return _content_type; }
     void                    set_content_type                ( const string& value )                 { _content_type = value; }
@@ -269,6 +269,8 @@ struct Http_processor_channel : Communication::Processor_channel
 
     ptr<Communication::Processor> processor                 ()                                      { ptr<Http_processor> result = Z_NEW( Http_processor( this ) ); 
                                                                                                       return +result; }
+
+    string                      channel_type                () const                                { return "HTTP"; }
 };
 
 //-------------------------------------------------------------------------------------------------

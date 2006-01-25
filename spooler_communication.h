@@ -122,6 +122,7 @@ struct Communication
 
         virtual ptr<Processor>  processor                   ()                                      = 0;
         virtual void            connection_lost_event       ( const exception* )                    {}
+        virtual string          channel_type                () const                                = 0;
 
 
 
@@ -174,6 +175,8 @@ struct Communication
     bool                        started                     ()                                      { return _started; }
   //bool                        main_thread_exists          ();
     void                        remove_channel              ( Channel* );
+
+    xml::Element_ptr            dom_element                 ( const xml::Document_ptr& document, const Show_what& ) const;
 
   private:
   //int                         run                         ();
@@ -234,6 +237,7 @@ struct Xml_processor_channel : Communication::Processor_channel
                                                                                                       return +result; }
 
     virtual void                connection_lost_event       ( const exception* );
+    string                      channel_type                () const                                { return "TCP"; }
 
 
     bool                       _indent;

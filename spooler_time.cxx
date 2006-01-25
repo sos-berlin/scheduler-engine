@@ -202,6 +202,8 @@ void Period::set_default()
 
 void Period::set_dom( const xml::Element_ptr& element, const Period* deflt )
 {
+    if( !element )  return;
+
     Sos_optional_date_time dt;
 
     if( deflt )  *this = *deflt;
@@ -317,6 +319,8 @@ void Period::print( ostream& s ) const
 
 void Day::set_dom( const xml::Element_ptr& element, const Day* default_day, const Period* default_period )
 {
+    if( !element )  return;
+
     if( default_day )  _period_set = default_day->_period_set;
 
   //Period my_default_period ( element, default_period );
@@ -498,6 +502,8 @@ void Date_set::print( ostream& s ) const
 
 void Day_set::set_dom( const xml::Element_ptr& element, const Day* default_day, const Period* default_period )
 {
+    if( !element )  return;
+
     //Period my_default_period ( element, default_period );
 
     DOM_FOR_EACH_ELEMENT( element, e )
@@ -616,6 +622,8 @@ void Run_time::set_xml( const string& xml )
 
 void Run_time::set_dom( const xml::Element_ptr& element )
 {
+    if( !element )  return;
+
     if( _modified_event_handler )  _modified_event_handler->before_modify_event();
 
 

@@ -265,8 +265,10 @@ void Http_response::finish()
     
     time_text[24] = '\0';
 
-    if( _chunked )  _header = "HTTP/1.1 ";
-              else  _header = "HTTP/1.0 ";
+    _header = _http_request->is_http_1_1()? "HTTP/1.1 " 
+                                          : "HTTP/1.0 ";
+
+    _chunked = _http_request->is_http_1_1()  &&  _chunk_reader;
 
     if( _status_code )
     {
@@ -282,9 +284,10 @@ void Http_response::finish()
         _header += "200 OK\r\n";
     }
 
-    _header += "Content-Type: "  + _content_type + "\r\n"
-               "Date: " + string(time_text) + " GMT\r\n"
+    _header += "Date: " + string(time_text) + " GMT\r\n"
                "Server: Scheduler " + string(VER_PRODUCTVERSION_STR) + "\r\n";
+
+    if( _content_type != "" )  _header += "Content-Type: "  + _content_type + "\r\n";
 
     //if( _http_request->_header[ "cache-control" ] == "no-cache" )
         _header += "Cache-Control: no-cache\r\n";   // Sonst bleibt z.B. die scheduler.xslt im Browser kleben und ein Wechsel der Datei wirkt nicht.
@@ -331,7 +334,8 @@ string Http_response::read( int recommended_size )
 
     if( _chunk_offset == _chunk_size ) 
     {
-        result += start_new_chunk();
+        if( _chunk_reader )  result += start_new_chunk();
+                      else  _eof = true;
     }
 
     if( _chunk_offset < _chunk_size )
@@ -707,6 +711,8 @@ void Http_processor::process()
 
     if( Web_service* web_service = _spooler->_web_services.web_service_by_url_path_or_null( _http_request->_path ) )
     {
+        Z_LOG2( "scheduler.http", "    web_service=" << web_service->name() << "\n" );
+
         ptr<Web_service_transaction> web_service_transaction = web_service->new_transaction( this );
 
         _http_response = web_service_transaction->process_http( this );

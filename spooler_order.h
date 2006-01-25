@@ -29,7 +29,7 @@ struct Order : Com_order,
     Z_GNU_ONLY(                 Order                   (); )                                       // Für gcc 3.2. Nicht implementiert
                                 Order                   ( Spooler* );
                                 Order                   ( Spooler*, const VARIANT& );
-                                Order                   ( Spooler*, const Record&, const string& payload, const string& run_time );
+                                Order                   ( Spooler*, const Record&, const string& payload, const string& run_time, const string& xml );
                                ~Order                   ();
 
     void                        init                    ();
@@ -81,7 +81,8 @@ struct Order : Com_order,
     void                    set_payload                 ( const VARIANT& );
     Payload                     payload                 ()                                          { THREAD_LOCK_RETURN( _lock, Variant, _payload ); }
 
-    void                    set_web_service             ( Web_service* web_service )                { _web_service = web_service; }
+    void                    set_web_service             ( const string& );
+    void                    set_web_service             ( Web_service* );
     Web_service*                web_service             () const;
     Web_service*                web_service_or_null     () const                                    { return _web_service; }
 
@@ -109,6 +110,7 @@ struct Order : Com_order,
     void                        postprocessing          ( bool success );                           // Verarbeitung nach spooler_process()
     void                        processing_error        ();
 
+    void                    set_dom                     ( const xml::Element_ptr& );
     xml::Element_ptr            dom_element             ( const xml::Document_ptr&, const Show_what&, const string* log = NULL ) const;
     xml::Document_ptr           dom                     ( const Show_what& ) const;
 
@@ -120,7 +122,7 @@ struct Order : Com_order,
 
 
   private:
-    void                        postprocessing2         ();
+    void                        postprocessing2         ( Job* last_job );
 
 
     friend struct               Order_queue;

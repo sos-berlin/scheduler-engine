@@ -231,8 +231,9 @@ struct Job : Object,
 
     void                        close                       ();
 
-    ptr<Task>                   start                       ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, Time = 0, bool log = false );
+    ptr<Task>                   start                       ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, const Time& = 0 );
   //Sos_ptr<Task>               start_without_lock          ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, Time = 0, bool log = false );
+    void                        enqueue_task                ( Task* );
     void                        start_when_directory_changed( const string& directory_name, const string& filename_pattern );
     void                        clear_when_directory_changed();
     void                        check_for_changed_directory ( const Time& now );

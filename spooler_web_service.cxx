@@ -155,6 +155,8 @@ void Web_service::load()
     
 void Web_service::set_dom( const xml::Element_ptr& element, const Time& )
 {
+    if( !element )  return;
+
     _name                          =            element.     getAttribute( "name" );
     _url_path                      = subst_env( element.     getAttribute( "url_path"                , _url_path                      ) );
     _request_xslt_stylesheet_path  = subst_env( element.     getAttribute( "request_xslt_stylesheet" , _request_xslt_stylesheet_path  ) );
@@ -231,16 +233,24 @@ xml::Document_ptr Web_service::transform_forward( const xml::Document_ptr& order
 
 //-----------------------------------------------------------------------Web_service::forward_order
 
-void Web_service::forward_order( const Order& order )
+void Web_service::forward_order( const Order& order, Job* last_job )
 {
-    forward( order.dom( Show_what() ) );
+    if( _forward_xslt_stylesheet_path != "" )
+    {
+        xml::Document_ptr order_document = order.dom( show_all );
+        if( last_job )  order_document.documentElement().setAttribute( "last_job", last_job->name() );   // Stylesheet will den letzten Job haben
+        forward( order_document );
+    }
 }
 
 //------------------------------------------------------------------------Web_service::forward_task
 
 void Web_service::forward_task( const Task& task )
 {
-    forward( task.dom( show_log ) );
+    if( _forward_xslt_stylesheet_path != "" )
+    {
+        forward( task.dom( show_all ) );
+    }
 }
 
 //-----------------------------------------------------------------------------Web_service::forward
@@ -254,7 +264,7 @@ void Web_service::forward( const xml::Document_ptr& payload_dom )
         if( _debug )
         {
             _log->debug( "forward_xslt_stylesheet " + _forward_xslt_stylesheet_path + " liefert:\n" );
-            _log->debug( transformed_payload_dom .xml( true ) );
+            _log->debug( transformed_payload_dom.xml( true ) );
             if( _log_xml )  File( _log_filename_prefix + ".command.xml", "w" ).print( transformed_payload_dom.xml() );
         }
 
@@ -310,10 +320,9 @@ string Web_service_transaction::obj_name() const
 
 ptr<Http_response> Web_service_transaction::process_http( Http_processor* http_processor )
 {
-    Http_request* http_request = http_processor->_http_request;
-    string        response;
-    int           http_status      = 0;
-    string        http_status_text;
+    Http_request*       http_request     = http_processor->_http_request;
+    ptr<Http_response>  http_response;
+    string              response;
 
     if( _web_service->_debug  &&  http_processor->_http_parser )  _log->debug( "\n" "HTTP request:\n " ), _log->debug( http_processor->_http_parser->_text ), _log->debug( "" );;
 
@@ -321,21 +330,16 @@ ptr<Http_response> Web_service_transaction::process_http( Http_processor* http_p
     try
     {
         response = process_request( http_request->_body );
+        http_response = Z_NEW( Http_response( http_request, Z_NEW( String_chunk_reader( response ) ), "text/xml" ) );
     }
     catch( exception& x )
     {
         _log->error( x.what() );
 
-        http_status      = 500;
-        http_status_text = "Internal Server Error";
+        http_response = Z_NEW( Http_response( http_request, NULL, "" ) );
+        http_response->set_status( 500, "Internal Server Error" );
     }
 
-
-    // HTTP-Antwort 
-
-    ptr<Http_response> http_response = Z_NEW( Http_response( http_request, Z_NEW( String_chunk_reader( response ) ), "text/xml" ) );
-    
-    if( http_status )  http_response->set_status( http_status, http_status_text );
 
     http_response->finish();
     if( _web_service->_debug )  _log->debug( "\n" "HTTP RESPONSE:" ), _log->debug( http_response->header_text() ), _log->debug( response );

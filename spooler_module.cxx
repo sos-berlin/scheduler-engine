@@ -138,10 +138,12 @@ void Module::set_checked_attribute( string* variable, const xml::Element_ptr& el
         throw_xc( "SCHEDULER-234", attribute_name + "=\"" + *variable + '"' );
 }
 
-//----------------------------------------------------------------------------------Module::set_dom
+//-------------------------------------------------------------------Module::set_dom_without_source
 
 void Module::set_dom_without_source( const xml::Element_ptr& element, const Time& xml_mod_time )
 {
+    if( !element )  return;
+
     _dom_document = element.ownerDocument();
     _dom_element  = element;
     _xml_mod_time = xml_mod_time;

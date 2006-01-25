@@ -995,41 +995,51 @@ xml::Element_ptr Prefix_log::dom_element( const xml::Document_ptr& document, con
     if( last( log_warn  ) != ""     )  log_element.setAttribute( "last_warning"   , last( log_warn ) );
     if( last( log_info  ) != ""     )  log_element.setAttribute( "last_info"      , last( log_info ) );
 
-    if( _mail_on_error              )  log_element.setAttribute( "mail_on_error"  , "yes" );
-    if( _mail_on_warning            )  log_element.setAttribute( "mail_on_warning", "yes" );
-    if( _mail_on_success            )  log_element.setAttribute( "mail_on_success", "yes" );
-    if( _mail_on_process            )  log_element.setAttribute( "mail_on_process", _mail_on_process );
-
-    string smtp_server = _mail_defaults[ "smtp"    ];
-    string from        = _mail_defaults[ "from"    ];
-    string to          = _mail_defaults[ "to"      ];
-    string cc          = _mail_defaults[ "cc"      ];
-    string bcc         = _mail_defaults[ "bcc"     ];
-    string subject     = _mail_defaults[ "subject" ];
-
-    if( _mail )
+    if( _filename != "" )
     {
-        HRESULT hr;
-        Bstr bstr;
-        hr = _mail->get_Smtp   ( &bstr );  if( !FAILED(hr) )  smtp_server = string_from_bstr( bstr );
-        hr = _mail->get_From   ( &bstr );  if( !FAILED(hr) )  from        = string_from_bstr( bstr );
-        hr = _mail->get_To     ( &bstr );  if( !FAILED(hr) )  to          = string_from_bstr( bstr );
-        hr = _mail->get_Cc     ( &bstr );  if( !FAILED(hr) )  cc          = string_from_bstr( bstr );
-        hr = _mail->get_Bcc    ( &bstr );  if( !FAILED(hr) )  bcc         = string_from_bstr( bstr );
-        hr = _mail->get_Subject( &bstr );  if( !FAILED(hr) )  subject     = string_from_bstr( bstr );
+        if( _mail_on_error              )  log_element.setAttribute( "mail_on_error"  , "yes" );
+        if( _mail_on_warning            )  log_element.setAttribute( "mail_on_warning", "yes" );
+        if( _mail_on_success            )  log_element.setAttribute( "mail_on_success", "yes" );
+        if( _mail_on_process            )  log_element.setAttribute( "mail_on_process", _mail_on_process );
+
+        string smtp_server = _mail_defaults[ "smtp"    ];
+        string from        = _mail_defaults[ "from"    ];
+        string to          = _mail_defaults[ "to"      ];
+        string cc          = _mail_defaults[ "cc"      ];
+        string bcc         = _mail_defaults[ "bcc"     ];
+        string subject     = _mail_defaults[ "subject" ];
+
+        if( _mail )
+        {
+            HRESULT hr;
+            Bstr bstr;
+            hr = _mail->get_Smtp   ( &bstr );  if( !FAILED(hr) )  smtp_server = string_from_bstr( bstr );
+            hr = _mail->get_From   ( &bstr );  if( !FAILED(hr) )  from        = string_from_bstr( bstr );
+            hr = _mail->get_To     ( &bstr );  if( !FAILED(hr) )  to          = string_from_bstr( bstr );
+            hr = _mail->get_Cc     ( &bstr );  if( !FAILED(hr) )  cc          = string_from_bstr( bstr );
+            hr = _mail->get_Bcc    ( &bstr );  if( !FAILED(hr) )  bcc         = string_from_bstr( bstr );
+            hr = _mail->get_Subject( &bstr );  if( !FAILED(hr) )  subject     = string_from_bstr( bstr );
+        }
+
+        if( smtp_server != "" )  log_element.setAttribute( "smtp"        , smtp_server );
+        if( from        != "" )  log_element.setAttribute( "mail_from"   , from );
+        if( to          != "" )  log_element.setAttribute( "mail_to"     , to );
+        if( cc          != "" )  log_element.setAttribute( "mail_cc"     , cc );
+        if( bcc         != "" )  log_element.setAttribute( "mail_bcc"    , bcc );
+        if( subject     != "" )  log_element.setAttribute( "mail_subject", subject );
     }
-
-    if( smtp_server != "" )  log_element.setAttribute( "smtp"        , smtp_server );
-    if( from        != "" )  log_element.setAttribute( "mail_from"   , from );
-    if( to          != "" )  log_element.setAttribute( "mail_to"     , to );
-    if( cc          != "" )  log_element.setAttribute( "mail_cc"     , cc );
-    if( bcc         != "" )  log_element.setAttribute( "mail_bcc"    , bcc );
-    if( subject     != "" )  log_element.setAttribute( "mail_subject", subject );
-
 
     if( show & show_log )
     {
-        log_element.appendChild( document.createTextNode( as_string() ) );
+        try
+        {
+            log_element.appendChild( document.createTextNode( as_string() ) );
+        }
+        catch( exception& x ) 
+        { 
+            _spooler->_log.warn( x.what() ); 
+            log_element.appendChild( document.createTextNode( x.what() ) );
+        }
     }
 
 

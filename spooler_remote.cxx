@@ -227,6 +227,8 @@ xml::Element_ptr Remote_scheduler_register::dom_element( const xml::Document_ptr
 
 void Remote_scheduler::set_dom( const xml::Element_ptr& register_scheduler_element )
 {
+    if( !register_scheduler_element )  return;
+
     if( register_scheduler_element.bool_getAttribute( "logoff", false ) )
     {
         _logged_on = false;

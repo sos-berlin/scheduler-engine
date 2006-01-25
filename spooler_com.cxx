@@ -315,6 +315,8 @@ STDMETHODIMP Com_variable_set::QueryInterface( const IID& iid, void** result )
 
 void Com_variable_set::set_dom( const xml::Element_ptr& params, const string& variable_element_name )
 {
+    if( !params)  return;
+
     HRESULT hr;
 
     THREAD_LOCK( _lock )
@@ -1710,7 +1712,7 @@ STDMETHODIMP Com_job::Start( VARIANT* params, Itask** itask )
         //THREAD_LOCK( _job->_lock )
         {
             string name = bstr_as_string( task_name_vt.bstrVal );
-            task = _job->start( pars, name, start_at, true );
+            task = _job->start( pars, name, start_at );
         }
 
         *itask = new Com_task( task );

@@ -131,7 +131,8 @@ struct Task : Object,
     bool                        has_error                   ()                                      { return _error != NULL; }
     void                    set_error_xc_only               ( const Xc& );
 
-    void                    set_web_service                 ( Web_service* web_service )            { _web_service = web_service; }
+    void                    set_web_service                 ( Web_service* );
+    void                    set_web_service                 ( const string& name );
     Web_service*                web_service                 () const;
     Web_service*                web_service_or_null         () const                                { return _web_service; }
 
@@ -274,7 +275,7 @@ struct Task : Object,
     bool                       _killed;                     // Task abgebrochen (nach do_kill/timeout)
     bool                       _kill_tried;
     bool                       _module_instance_async_error;    // SCHEDULER-202
-    bool                       _is_in_db;                   // Datensatz für diese Task ist in der Datenbank
+    bool                       _is_in_database;                   // Datensatz für diese Task ist in der Datenbank
 
     ptr<Async_operation>       _operation;
     ptr<Com_variable_set>      _params;

@@ -152,6 +152,8 @@ Source_with_parts text_from_xml_with_include( const xml::Element_ptr& element, c
 
 void Security::set_dom( const xml::Element_ptr& security_element ) 
 { 
+    if( !security_element )  return;
+
     bool ignore_unknown_hosts = as_bool( security_element.getAttribute( "ignore_unknown_hosts" ), true );
 
     DOM_FOR_EACH_ELEMENT( security_element, e )

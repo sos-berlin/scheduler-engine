@@ -244,26 +244,12 @@ void Spooler_db::open2( const string& db_name )
                                             "\"PAYLOAD\"     clob,"
                                             "\"INITIAL_STATE\" varchar(100),"               
                                             "\"RUN_TIME\"    clob,"
+                                            "\"ORDER_XML\"   clob,"
                                             "primary key( \"JOB_CHAIN\", \"ID\" )" );
 
 
-                    try
-                    {
-                        Transaction ta ( this );
-                        Any_file select ( "-in " + _db_name + " SELECT \"INITIAL_STATE\" from " + _spooler->_orders_tablename + " where 1=0" );
-                    }
-                    catch( exception& x )
-                    {
-                        Transaction ta ( this );
-                        _log->warn( x.what() );
-                        _log->info( "Tabelle " + _spooler->_orders_tablename + " wird um die Spalten INITIAL_STATE und RUN_TIME erweitert" );
-                        
-                        _db.put( "ALTER TABLE " + _spooler->_orders_tablename + 
-                                " add ( \"INITIAL_STATE\" varchar(100)," 
-                                        "\"RUN_TIME\" clob )" );
-                        ta.commit();
-                    }
-
+                    add_column( _spooler->_orders_tablename, "INITIAL_STATE", "add ( \"INITIAL_STATE\" varchar(100), \"RUN_TIME\" clob )" );
+                    add_column( _spooler->_orders_tablename, "ORDER_XML"    , "add ( \"ORDER_XML\" clob )" );
 
                     create_table_when_needed( _spooler->_order_history_tablename, 
                                             "\"HISTORY_ID\"  integer not null,"             // Primärschlüssel
@@ -285,7 +271,10 @@ void Spooler_db::open2( const string& db_name )
                                             "\"ENQUEUE_TIME\"   datetime,"
                                             "\"START_AT_TIME\"  datetime,"
                                             "\"PARAMETERS\"     clob,"
+                                            "\"TASK_XML\"       clob,"
                                             "primary key( \"TASK_ID\" )" );
+
+                    add_column( _spooler->_tasks_tablename, "TASK_XML", " add ( \"TASK_XML\" clob )" );
 
                     commit();
                 }
@@ -301,6 +290,28 @@ void Spooler_db::open2( const string& db_name )
                 _log->warn( string("FEHLER BEIM ÖFFNEN DER HISTORIENDATENBANK: ") + x.what() ); 
             }
         }
+    }
+}
+
+//---------------------------------------------------------------------------Spooler_db::add_column
+
+void Spooler_db::add_column( const string& table_name, const string& column_name, const string add_clause )
+{
+    try
+    {
+        Transaction ta ( this );
+        Any_file select ( "-in " + _db_name + " -max-length=1K  SELECT \"" + column_name + "\" from " + table_name + " where 1=0" );
+    }
+    catch( exception& x )
+    {
+        Transaction ta ( this );
+        
+        _log->warn( x.what() );
+        string cmd = "ALTER TABLE " + table_name + " " + add_clause;
+        _log->info( S() << "Tabelle " << table_name << " wird um die Spalte " << column_name << " erweitert: " << cmd );
+        
+        _db.put( cmd );
+        ta.commit();
     }
 }
 
@@ -739,6 +750,11 @@ void Spooler_db::insert_order( Order* order )
                     if( payload_string != "" )  update_payload_clob( order->id().as_string(), payload_string );
                     order->_payload_modified = false;
 
+                    xml::Document_ptr order_document = order->dom( show_for_database );
+                    xml::Element_ptr  order_element  = order_document.documentElement();
+                    if( order_element.hasAttributes()  ||  order_element.firstChild() )
+                        update_clob( _spooler->_orders_tablename, "order_xml", "id", order->id().as_string(), order_document.xml() );
+
                     ta.commit();
                 }
 
@@ -789,11 +805,57 @@ string Spooler_db::read_payload_clob( const string& order_id )
 
 //-------------------------------------------------------------------------------------------------
 
-
 string Spooler_db::read_orders_runtime_clob( const string& order_id )
 {
     return file_as_string( _db_name + " -table=" + _spooler->_orders_tablename + " -clob=run_time"
                            "  where `id`=" + sql::quoted( order_id ) );
+}
+
+//---------------------------------------------------------------Spooler_db::update_orders_xml_clob
+
+void Spooler_db::update_clob( const string& table_name, const string& column_name, const string& key_name, int key_value, const string& value )
+{
+    if( value == "" )
+    {
+        sql::Update_stmt update ( &_db_descr );
+        update.set_table_name( table_name );
+        update[ column_name ].set_direct( "null" );
+        update.and_where_condition( key_name, key_value );
+        execute( update );
+    }
+    else
+    {
+        Any_file clob ( "-out " + _db_name + " -table=" + table_name + " -clob=" + column_name + " where `" + key_name + "`=" + as_string( key_value ) );
+        clob.put( value );
+        clob.close();
+    }
+}
+
+//---------------------------------------------------------------Spooler_db::update_orders_xml_clob
+
+void Spooler_db::update_clob( const string& table_name, const string& column_name, const string& key_name, const string& key_value, const string& value )
+{
+    if( value == "" )
+    {
+        sql::Update_stmt update ( &_db_descr );
+        update.set_table_name( table_name );
+        update[ column_name ].set_direct( "null" );
+        update.and_where_condition( key_name, key_value );
+        execute( update );
+    }
+    else
+    {
+        Any_file clob ( "-out " + _db_name + " -table=" + table_name + " -clob=" + column_name + " where `" + key_name + "`=" + sql::quoted( key_value ) );
+        clob.put( value );
+        clob.close();
+    }
+}
+
+//-------------------------------------------------------------------------------------------------
+
+string Spooler_db::read_clob( const string& table_name, const string& column_name, const string& key_name, const string& key_value )
+{
+    return file_as_string( _db_name + " -table=" + table_name + " -clob=" + column_name + "  where `" + key_name + "`=" + sql::quoted( key_value ) );
 }
 
 //-------------------------------------------------------------------------Spooler_db::delete_order

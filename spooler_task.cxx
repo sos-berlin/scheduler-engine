@@ -303,7 +303,7 @@ xml::Element_ptr Task::dom_element( const xml::Document_ptr& document, const Sho
 {
     xml::Element_ptr task_element = document.createElement( "task" );
 
-    THREAD_LOCK_DUMMY( _lock )
+    if( show != show_for_database )
     {
         task_element.setAttribute( "id"              , _id );
         task_element.setAttribute( "task"            , _id );
@@ -394,6 +394,9 @@ xml::Element_ptr Task::dom_element( const xml::Document_ptr& document, const Sho
         //if( show & show_log )  dom_append_text_element( task_element, "log", _log->as_string() );
         task_element.appendChild( _log->dom_element( document, show ) );
     }
+
+    if( _web_service )
+    task_element.setAttribute( "web_service"     , _web_service->name() );
 
     return task_element;
 }
@@ -1751,6 +1754,26 @@ void Task::clear_mail()
     _log->set_mail_body     ( "", true );
 }
 */
+
+//----------------------------------------------------------------------------Task::set_web_service
+
+void Task::set_web_service( const string& name )
+{ 
+    if( _is_in_database )  throw_xc( "SCHEDULER-243", "web_service" );
+
+    set_web_service( name == ""? NULL 
+                               : _spooler->_web_services.web_service_by_name( name ) );
+}
+
+//----------------------------------------------------------------------------Task::set_web_service
+
+void Task::set_web_service( Web_service* web_service )                
+{ 
+    if( _is_in_database )  throw_xc( "SCHEDULER-243", "web_service" );
+
+    _web_service = web_service; 
+}
+
 //--------------------------------------------------------------------------------Task::web_service
 
 Web_service* Task::web_service() const

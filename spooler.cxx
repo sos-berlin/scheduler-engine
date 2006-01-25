@@ -696,6 +696,7 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
     }
 
     state_element.appendChild( _remote_scheduler_register.dom_element( dom, show ) );
+    state_element.appendChild( _communication.dom_element( dom, show ) );
 
     return state_element;
 }

@@ -30,6 +30,8 @@ enum Show_what_enum
     show_job_chain_jobs     = 0x800,
     show_jobs               = 0x1000,   // <jobs>
     show_tasks              = 0x2000,   // <tasks>
+    show_payload            = 0x4000,
+    show_for_database       = 0x8000,   // XML-Element nur für Datenbank
 
     show_all_               = 0x8000,
     show_all                = 0xFFFF    // Alle Flags und show_all_ (Bei <show_state> ist z.B. show_orders nicht in show_all enthalten)
@@ -79,6 +81,7 @@ struct Command_processor
     void                        execute_2                   ( const string& xml_text, const Time& xml_mod_time );
     void                        execute_2                   ( const xml::Document_ptr&, const Time& xml_mod_time );
     xml::Element_ptr            execute_command             ( const xml::Element_ptr&, const Time& xml_mod_time );
+    void                        begin_answer                ();
     xml::Element_ptr            execute_config              ( const xml::Element_ptr&, const Time& xml_mod_time );
 
     xml::Element_ptr            execute_show_state          ( const xml::Element_ptr&, const Show_what& );

@@ -62,8 +62,11 @@ struct Spooler_db : Object, Scheduler_object
     void                        insert_order            ( Order* );
     void                        update_order            ( Order* );
     void                        update_payload_clob     ( const string& order_id, const string& payload_string );
+    void                        update_clob             ( const string& table_name, const string& column_name, const string& key_name, int           key_value, const string& value );
+    void                        update_clob             ( const string& table_name, const string& column_name, const string& key_name, const string& key_value, const string& value );
     string                      read_payload_clob       ( const string& order_id );
     string                      read_orders_runtime_clob( const string& order_id );
+    string                      read_clob               ( const string& table_name, const string& column_name, const string& key_name, const string& key_value );
 
     void                        write_order_history     ( Order*, Transaction* = NULL );
     void                        finish_order            ( Order*, Transaction* = NULL );
@@ -88,6 +91,7 @@ struct Spooler_db : Object, Scheduler_object
     void                        open2                   ( const string& db_name );
     void                        open_history_table      ();
     void                        create_table_when_needed( const string& tablename, const string& fields );
+    void                        add_column              ( const string& table_name, const string& column_name, const string add_clause );
     int                         get_id                  ( const string& variable_name, Transaction* = NULL );
     int                         get_id_                 ( const string& variable_name, Transaction* );
     void                        delete_order            ( Order*, Transaction* );

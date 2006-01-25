@@ -398,10 +398,11 @@ xml::Element_ptr Command_processor::execute_start_job( const xml::Element_ptr& e
         if( e.nodeName_is( "params" ) )  { pars->set_dom( e );  break; }
     }
 
-    Web_service* web_service = _spooler->_web_services.web_service_by_name( web_service_name );
+    Job* job = _spooler->get_job( job_name );
+    ptr<Task> task = job->create_task( ptr<spooler_com::Ivariable_set>(pars), task_name, start_at );
+    task->set_web_service( web_service_name );
+    job->enqueue_task( task );
 
-    ptr<Task> task = _spooler->get_job( job_name )->start( ptr<spooler_com::Ivariable_set>(pars), task_name, start_at, true );
-    task->set_web_service( web_service );
 
     return _answer.createElement( "ok" );
 }
@@ -563,54 +564,12 @@ xml::Element_ptr Command_processor::execute_add_order( const xml::Element_ptr& a
 {
     if( _security_level < Security::seclev_all )  throw_xc( "SCHEDULER-121" );
 
-    string priority         = add_order_element.getAttribute( "priority"  );
-    string id               = add_order_element.getAttribute( "id"        );
-    string title            = add_order_element.getAttribute( "title"     );
     string job_name         = add_order_element.getAttribute( "job"       );
     string job_chain_name   = add_order_element.getAttribute( "job_chain" );
-    string state_name       = add_order_element.getAttribute( "state"     );
     bool   replace          = add_order_element.bool_getAttribute( "replace", false );
-    string web_service_name = add_order_element.getAttribute( "web_service" );
 
     ptr<Order> order = new Order( _spooler );
-
-    if( priority         != "" )  order->set_priority( as_int(priority) );
-    if( id               != "" )  order->set_id      ( id.c_str() );
-                                  order->set_title   ( title );
-    if( state_name       != "" )  order->set_state   ( state_name.c_str() );
-    if( web_service_name != "" )  order->set_web_service( _spooler->_web_services.web_service_by_name( web_service_name ) );
-
-
-    DOM_FOR_EACH_ELEMENT( add_order_element, e )  
-    {
-        /*
-        if( e.nodeName_is( "payload" ) )
-        {
-            xml::Node_ptr node = e.firstChild();
-            while( node  &&  node.nodeType() == xml::COMMENT_NODE )  node = node.nextSibling();
-            
-            if( node )
-            {
-                if( node.nodeType() != xml::ELEMENT_NODE )  throw_xc( "SCHEDULER-239", node.nodeName() );
-                Variant payload = ((xml::Element_ptr)node).xml();
-                while( node  &&  node.nodeType() == xml::COMMENT_NODE )  node = node.nextSibling();
-                if( node )  throw_xc( "SCHEDULER-239", node.nodeName() );
-            }
-        }
-        else
-        */
-        if( e.nodeName_is( "params" ) )
-        { 
-            ptr<Com_variable_set> pars = new Com_variable_set;
-            pars->set_dom( e );  
-            order->set_payload( Variant( (IDispatch*)pars ) );
-        }
-        else
-        if( e.nodeName_is( "run_time" ) )
-        { 
-            order->set_run_time( e );
-        }
-    }
+    order->set_dom( add_order_element );
 
 
     if( job_chain_name != "" )
@@ -699,6 +658,7 @@ xml::Element_ptr Command_processor::execute_register_remote_scheduler( const xml
     if( !remote_scheduler )  remote_scheduler = Z_NEW( Remote_scheduler );
 
     remote_scheduler->_host_and_port = host_and_port;
+    remote_scheduler->_host_and_port._host.set_name();
     remote_scheduler->set_dom( register_scheduler_element );
     
     xml_processor->_processor_channel->_remote_scheduler = remote_scheduler;        // Remote_scheduler mit TCP-Verbindung verknüpfen
@@ -998,7 +958,7 @@ ptr<Http_response> Command_processor::execute_http( Http_request* http_request )
                         // http://localhost:6310/jz ==> http://localhost:6310/jz/, http://localhost:6310/jz/details.html
                         // Ohne diesen Mechanismus würde http://localhost:6310/details.html, also das Oberverzeichnis gelesen
 
-                        ptr<Http_response> response = Z_NEW( Http_response( http_request, Z_NEW( String_chunk_reader( "" ) ), "" ) );
+                        ptr<Http_response> response = Z_NEW( Http_response( http_request, NULL, "" ) );
 
                         path += "/";
                         response->set_status( 301, "Slash appended" );
@@ -1146,6 +1106,8 @@ void Command_processor::set_host( Host* host )
 
 string Command_processor::execute( const string& xml_text_par, const Time& xml_mod_time, bool indent )
 {
+    begin_answer();
+
     try 
     {
         _error = NULL;
@@ -1158,12 +1120,14 @@ string Command_processor::execute( const string& xml_text_par, const Time& xml_m
     catch( const Xc& x )
     {
         _error = x;
-        append_error_element( _answer.documentElement().firstChild(), x );
+        if( _answer  &&  _answer.documentElement()  &&  _answer.documentElement().firstChild() ) 
+            append_error_element( _answer.documentElement().firstChild(), x );
     }
     catch( const exception& x )
     {
         _error = x;
-        append_error_element( _answer.documentElement().firstChild(), x );
+        if( _answer  &&  _answer.documentElement()  &&  _answer.documentElement().firstChild() ) 
+            append_error_element( _answer.documentElement().firstChild(), x );
     }
 
   //return _answer.xml;  //Bei save wird die encoding belassen. Eigenschaft xml verwendet stets unicode, was wir nicht wollen.
@@ -1188,6 +1152,8 @@ void Command_processor::execute_file( const string& filename )
 
 void Command_processor::execute_2( const string& xml_text, const Time& xml_mod_time )
 {
+    begin_answer();
+
     try 
     {
         Z_LOGI2( "scheduler.xml", "XML-Dokument wird gelesen ...\n" );
@@ -1206,7 +1172,6 @@ void Command_processor::execute_2( const string& xml_text, const Time& xml_mod_t
         Z_LOG2( "scheduler.xml", "XML-Dokument ist eingelesen\n" );
 
         execute_2( command_doc, xml_mod_time );
-
     }
     catch( const _com_error& com_error ) { throw_com_error( com_error, "DOM/XML" ); }
 }
@@ -1215,16 +1180,11 @@ void Command_processor::execute_2( const string& xml_text, const Time& xml_mod_t
 
 void Command_processor::execute_2( const xml::Document_ptr& command_doc, const Time& xml_mod_time )
 {
+    begin_answer();
+
     try 
     {
         command_doc.validate_against_dtd( _spooler->_dtd );
-
-        _answer.create();
-        _answer.appendChild( _answer.createProcessingInstruction( "xml", "version=\"1.0\" encoding=\"iso-8859-1\"" ) );
-        _answer.appendChild( _answer.createElement( "spooler" ) );
-
-        xml::Element_ptr answer_element = _answer.documentElement().appendChild( _answer.createElement( "answer" ) );
-        answer_element.setAttribute( "time", Time::now().as_string() );
 
 /*
         xml::DocumentType_ptr doctype = command_doc->doctype;
@@ -1251,18 +1211,31 @@ void Command_processor::execute_2( const xml::Document_ptr& command_doc, const T
                 {
                     //xml::Node_ptr node = node_list.item(i);
 
-                    answer_element.appendChild( execute_command( node, xml_mod_time ) );
+                    _answer.documentElement().firstChild().appendChild( execute_command( node, xml_mod_time ) );
                 }
             }
             else
             {
-                answer_element.appendChild( execute_command( e, xml_mod_time ) );
+                _answer.documentElement().firstChild().appendChild( execute_command( e, xml_mod_time ) );
             }
         }
-
-
     }
     catch( const _com_error& com_error ) { throw_com_error( com_error, "DOM/XML" ); }
+}
+
+//------------------------------------------------------------------Command_processor::begin_answer
+
+void Command_processor::begin_answer()
+{
+    if( !_answer )
+    {
+        _answer.create();
+        _answer.appendChild( _answer.createProcessingInstruction( "xml", "version=\"1.0\" encoding=\"iso-8859-1\"" ) );
+        _answer.appendChild( _answer.createElement( "spooler" ) );
+
+        xml::Element_ptr answer_element = _answer.documentElement().appendChild( _answer.createElement( "answer" ) );
+        answer_element.setAttribute( "time", Time::now().as_string() );
+    }
 }
 
 //-------------------------------------------------------------------------------------------------

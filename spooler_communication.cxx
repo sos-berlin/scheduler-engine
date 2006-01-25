@@ -1008,6 +1008,32 @@ void Communication::start_or_rebind()
     }
 }
 
+//-----------------------------------------------------------------------Communication::dom_element
+
+xml::Element_ptr Communication::dom_element( const xml::Document_ptr& document, const Show_what& ) const
+{
+    xml::Element_ptr channels_element = document.createElement( "connections" );
+
+    Z_FOR_EACH_CONST( Channel_list, _channel_list, c )
+    {
+        const Channel* channel = *c;
+
+        xml::Element_ptr channel_element = channels_element.append_new_element( "connection" );
+
+        xml::Element_ptr peer_element = channel_element.append_new_element( "peer" );
+        peer_element.setAttribute( "host_ip", channel->peer().host().ip_string() );
+        peer_element.setAttribute( "port"   , channel->peer().port() );
+
+        if( channel->peer().host().name() != "" )
+        peer_element.setAttribute( "host_name", channel->peer().host().name() );
+
+        if( channel->_processor_channel )
+        channel_element.setAttribute( "type", channel->_processor_channel->channel_type() );
+    }
+
+    return channels_element;
+}
+
 //-------------------------------------------------------------------------------------------------
 
 } //namespace spooler

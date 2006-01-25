@@ -348,6 +348,8 @@ void Process_class::notify_a_process_is_idle()
 
 void Process_class::set_dom( const xml::Element_ptr& e )
 {
+    if( !e )  return;
+
     if( _name.empty() )     // neu?
     {
         _name = e.getAttribute( "name" );

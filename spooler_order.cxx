@@ -199,6 +199,8 @@ string Job_chain::state_name( State state )
 
 void Job_chain::set_dom( const xml::Element_ptr& element )
 {
+    if( !element )  return;
+
     set_name( element.getAttribute( "name" ) );
     _visible = element.bool_getAttribute( "visible", _visible );
 
@@ -329,12 +331,22 @@ void Job_chain::load_orders_from_database()
         while( !sel.eof() )
         {
             Record record = sel.get_record();
-            ptr<Order> order = new Order( _spooler, record, 
-                                          _spooler->_db->read_payload_clob( record.as_string( "id" ) ), 
-                                          _spooler->_db->read_orders_runtime_clob( record.as_string( "id" ) ) );
-            order->_is_in_database = true;
-            order->add_to_job_chain( this );    // Einstieg nur über Order, damit Semaphoren stets in derselben Reihenfolge gesperrt werden.
-            count++;
+            string order_id = record.as_string( "id" );
+
+            try
+            {
+                ptr<Order> order = new Order( _spooler, record, 
+                                            _spooler->_db->read_payload_clob( order_id ), 
+                                            _spooler->_db->read_orders_runtime_clob( order_id ),
+                                            _spooler->_db->read_clob( _spooler->_orders_tablename, "order_xml", "id", order_id ) );
+                order->_is_in_database = true;
+                order->add_to_job_chain( this );    // Einstieg nur über Order, damit Semaphoren stets in derselben Reihenfolge gesperrt werden.
+                count++;
+            }
+            catch( exception& x )
+            {
+                _log.error( S() << "Auftrag " << order_id << " aus der Datenbank ist fehlerhaft: " << x.what() );
+            }
         }
     }
 
@@ -738,6 +750,8 @@ void Order_queue::add_order( Order* order, Do_log do_log )
 {
     // Wird von Order mit geperrtem order->_lock gerufen.
 
+    _job->set_visible( true );
+
     //THREAD_LOCK( _lock )
     {
         if( order->_setback )
@@ -992,7 +1006,7 @@ Order::Order( Spooler* spooler, const VARIANT& payload )
 
 //-------------------------------------------------------------------------------------Order::Order
 
-Order::Order( Spooler* spooler, const Record& record, const string& payload_string, const string& run_time_xml )
+Order::Order( Spooler* spooler, const Record& record, const string& payload_string, const string& run_time_xml, const string& xml )
 :
     Com_order(this),
     Scheduler_object( spooler, static_cast<IDispatch*>( this ), type_order ),
@@ -1032,6 +1046,8 @@ Order::Order( Spooler* spooler, const Record& record, const string& payload_stri
 
     //string run_time_xml = record.as_string( "run_time" );
     if( run_time_xml != "" )  set_run_time( xml::Document_ptr( run_time_xml ).documentElement() );
+
+    if( xml != "" )  set_dom( xml::Document_ptr( xml ).documentElement() );
 }
 
 //------------------------------------------------------------------------------------Order::~Order
@@ -1105,13 +1121,65 @@ void Order::close()
     remove_from_job_chain();
 }
 
+//-----------------------------------------------------------------------------------Order::set_dom
+
+void Order::set_dom( const xml::Element_ptr& element )
+{
+    if( !element )  return;
+
+    string priority         = element.getAttribute( "priority"  );
+    string id               = element.getAttribute( "id"        );
+    string title            = element.getAttribute( "title"     );
+    string state_name       = element.getAttribute( "state"     );
+    string web_service_name = element.getAttribute( "web_service" );
+
+
+    if( priority         != "" )  set_priority( as_int(priority) );
+    if( id               != "" )  set_id      ( id.c_str() );
+    if( title            != "" )  set_title   ( title );
+    if( state_name       != "" )  set_state   ( state_name.c_str() );
+    if( web_service_name != "" )  set_web_service( _spooler->_web_services.web_service_by_name( web_service_name ) );
+
+
+    DOM_FOR_EACH_ELEMENT( element, e )  
+    {
+        /*
+        if( e.nodeName_is( "payload" ) )
+        {
+            xml::Node_ptr node = e.firstChild();
+            while( node  &&  node.nodeType() == xml::COMMENT_NODE )  node = node.nextSibling();
+            
+            if( node )
+            {
+                if( node.nodeType() != xml::ELEMENT_NODE )  throw_xc( "SCHEDULER-239", node.nodeName() );
+                Variant payload = ((xml::Element_ptr)node).xml();
+                while( node  &&  node.nodeType() == xml::COMMENT_NODE )  node = node.nextSibling();
+                if( node )  throw_xc( "SCHEDULER-239", node.nodeName() );
+            }
+        }
+        else
+        */
+        if( e.nodeName_is( "params" ) )
+        { 
+            ptr<Com_variable_set> pars = new Com_variable_set;
+            pars->set_dom( e );  
+            set_payload( Variant( (IDispatch*)pars ) );
+        }
+        else
+        if( e.nodeName_is( "run_time" ) )
+        { 
+            set_run_time( e );
+        }
+    }
+}
+
 //-------------------------------------------------------------------------------Order::dom_element
 
 xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Show_what& show, const string* log ) const
 {
     xml::Element_ptr element = document.createElement( "order" );
 
-    //THREAD_LOCK( _lock )
+    if( show != show_for_database )
     {
         element.setAttribute( "order"     , debug_string_from_variant( _id ) );
         element.setAttribute( "id"        , debug_string_from_variant( _id ) );     // veraltet
@@ -1163,10 +1231,7 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
         if( _replacement_for )
         element.setAttribute( "replacement", "yes" );
 
-        if( _web_service )
-        element.setAttribute( "web_service", _web_service->name() );
-
-        if( !_payload.is_null_or_empty_string()  &&  !_payload.is_missing() )
+        if( show & show_payload  &&  !_payload.is_null_or_empty_string()  &&  !_payload.is_missing() )
         {
             xml::Element_ptr payload_element = element.append_new_element( "payload" );
             bool             ok              = false;
@@ -1191,15 +1256,11 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
 
         if( show & show_run_time )  element.appendChild( _run_time->dom_element( document ) );
 
-        if( show & show_log )
-        {
-            try
-            {
-                dom_append_text_element( element, "log", log? *log : _log->as_string() );
-            }
-            catch( const exception& x ) { _spooler->_log.warn( string("<show_order what=\"log\">: ") + x.what() ); }
-        }
+        element.appendChild( _log->dom_element( document, show ) );
     }
+
+    if( _web_service )
+    element.setAttribute( "web_service", _web_service->name() );
 
     return element;
 }
@@ -1257,6 +1318,25 @@ void Order::set_default_id()
 {
     set_id( _spooler->_db->get_order_id() );
     _is_users_id = false;
+}
+
+//---------------------------------------------------------------------------Order::set_web_service
+
+void Order::set_web_service( const string& name )
+{ 
+    if( _is_in_database )  throw_xc( "SCHEDULER-243", "web_service" );
+
+    set_web_service( name == ""? NULL 
+                               : _spooler->_web_services.web_service_by_name( name ) );
+}
+
+//---------------------------------------------------------------------------Order::set_web_service
+
+void Order::set_web_service( Web_service* web_service )                
+{ 
+    if( _is_in_database )  throw_xc( "SCHEDULER-243", "web_service" );
+
+    _web_service = web_service; 
 }
 
 //-----------------------------------------------------------------------------------Order::set_job
@@ -1499,10 +1579,11 @@ void Order::add_to_job_chain( Job_chain* job_chain )
 
 bool Order::try_add_to_job_chain( Job_chain* job_chain )
 {
-    if( job_chain->has_order_id( id() ) )  return false;
-
   //if( _remove_from_job_chain )  throw_xc( "SCHEDULER-228", obj_name() );
     if( job_chain->state() != Job_chain::s_ready )  throw_xc( "SCHEDULER-151" );
+    if( job_chain->has_order_id( id() ) )  return false;
+
+    job_chain->set_visible( true );
 
     ptr<Order> me = this;   // Halten
 
@@ -1602,6 +1683,8 @@ void Order::move_to_node( Job_chain_node* node )
 
 void Order::postprocessing( bool success )
 {
+    Job* last_job = _task? _task->job() : NULL;
+
     //THREAD_LOCK( _lock )
     {
         bool force_error_state = false;
@@ -1686,7 +1769,7 @@ void Order::postprocessing( bool success )
             }
         }
 
-        postprocessing2();
+        postprocessing2( last_job );
     }
 }
 
@@ -1696,15 +1779,17 @@ void Order::processing_error()
 {
     //THREAD_LOCK( _lock )
     {
+        Job* last_job = _task? _task->job() : NULL;
+
         _task = NULL;
 
-        postprocessing2();
+        postprocessing2( last_job );
     }
 }
 
 //---------------------------------------------------------------------------Order::postprocessing2
 
-void Order::postprocessing2()
+void Order::postprocessing2( Job* last_job )
 {
     Job* job = this->job();
 
@@ -1719,7 +1804,7 @@ void Order::postprocessing2()
 
     if( finished()  &&  _web_service )
     {
-        _web_service->forward_order( *this );
+        _web_service->forward_order( *this, last_job );
     }
 
     if( finished() )
