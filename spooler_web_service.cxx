@@ -6,9 +6,9 @@
 namespace sos {
 namespace spooler {
 
-const string forwarding_job_chain_name           = "scheduler_service_forwarding";
-const string forwarding_job_chain_forward_state  = "forward";
-const string forwarding_job_chain_finished_state = "finished";
+const string Web_service::forwarding_job_chain_name           = "scheduler_service_forwarding";
+const string Web_service::forwarding_job_chain_forward_state  = "forward";
+const string Web_service::forwarding_job_chain_finished_state = "finished";
 const string forwarder_job_name                  = "scheduler_service_forwarder";
 const string forwarder_job_title                 = "Web-service forwarder";
 const string forwarder_job_java_class_name       = "sos.spooler.jobs.Web_service_forwarder";
@@ -21,10 +21,10 @@ const string job_xml = "<job visible='no'\n"
                        "</job>";
 
 const string job_chain_xml = "<job_chain visible='no'\n"
-                             "           name='" + forwarding_job_chain_name + "'>\n" 
-                             "    <job_chain_node state='" + forwarding_job_chain_forward_state + "'"
+                             "           name='" + Web_service::forwarding_job_chain_name + "'>\n" 
+                             "    <job_chain_node state='" + Web_service::forwarding_job_chain_forward_state + "'"
                                                 " job='"   + forwarder_job_name + "'/>\n"
-                             "    <job_chain_node state='" + forwarding_job_chain_finished_state + "'/>\n"
+                             "    <job_chain_node state='" + Web_service::forwarding_job_chain_finished_state + "'/>\n"
                              "</job_chain>";
 
 //-------------------------------------------------------------------------------------------------
@@ -36,9 +36,9 @@ Web_service::Class_descriptor   Web_service::class_descriptor ( &typelib, "Spool
 const Com_method Web_service::_methods[] =
 { 
 #ifdef COM_METHOD
-    COM_PROPERTY_GET( Web_service,  1, Java_class_name               , VT_BSTR    , 0 ),
-    COM_PROPERTY_GET( Web_service,  2, Name                          , VT_BSTR    , 0 ),
-    COM_PROPERTY_GET( Web_service,  3, Forward_xslt_stylesheet_path  , VT_BSTR    , 0 ),
+    COM_PROPERTY_GET( Subprocess,  1, Java_class_name               , VT_BSTR    , 0 ),
+    COM_PROPERTY_GET( Subprocess,  2, Name                          , VT_BSTR    , 0 ),
+    COM_PROPERTY_GET( Subprocess,  3, Forward_xslt_stylesheet_path  , VT_BSTR    , 0 ),
 #endif
     {}
 };
@@ -259,21 +259,27 @@ void Web_service::forward( const xml::Document_ptr& payload_dom )
 {
     try
     {
-        xml::Document_ptr transformed_payload_dom = transform_forward( payload_dom );
+        xml::Document_ptr command_document = transform_forward( payload_dom );
 
         if( _debug )
         {
             _log->debug( "forward_xslt_stylesheet " + _forward_xslt_stylesheet_path + " liefert:\n" );
-            _log->debug( transformed_payload_dom.xml( true ) );
-            if( _log_xml )  File( _log_filename_prefix + ".command.xml", "w" ).print( transformed_payload_dom.xml() );
+            _log->debug( command_document.xml( true ) );
+            if( _log_xml )  File( _log_filename_prefix + ".command.xml", "w" ).print( command_document.xml() );
         }
 
-
+        
+        Command_processor command_processor ( _spooler );
+        command_processor.set_validate( false );            // <content> enthält unbekannte XML-Elemente <task> und <order>
+        command_processor.execute_2( command_document );
+        
+        /*
         ptr<Order> order = new Order( _spooler );
 
         order->set_state( forwarding_job_chain_forward_state );
         order->set_payload( Variant( transformed_payload_dom.xml() ) );
         order->add_to_job_chain( _spooler->job_chain( forwarding_job_chain_name ) );
+        */
     }
     catch( exception& x )
     {
@@ -316,7 +322,7 @@ string Web_service_transaction::obj_name() const
     return S() << _web_service->obj_name() << ":" << _transaction_number; 
 }
 
-//---------------------------------------------------------Web_service_transaction::process_request
+//------------------------------------------------------------Web_service_transaction::process_http
 
 ptr<Http_response> Web_service_transaction::process_http( Http_processor* http_processor )
 {
@@ -326,20 +332,8 @@ ptr<Http_response> Web_service_transaction::process_http( Http_processor* http_p
 
     if( _web_service->_debug  &&  http_processor->_http_parser )  _log->debug( "\n" "HTTP request:\n " ), _log->debug( http_processor->_http_parser->_text ), _log->debug( "" );;
 
-
-    try
-    {
-        response = process_request( http_request->_body );
-        http_response = Z_NEW( Http_response( http_request, Z_NEW( String_chunk_reader( response ) ), "text/xml" ) );
-    }
-    catch( exception& x )
-    {
-        _log->error( x.what() );
-
-        http_response = Z_NEW( Http_response( http_request, NULL, "" ) );
-        http_response->set_status( 500, "Internal Server Error" );
-    }
-
+    response = process_request( http_request->_body );
+    http_response = Z_NEW( Http_response( http_request, Z_NEW( String_chunk_reader( response ) ), "text/xml" ) );
 
     http_response->finish();
     if( _web_service->_debug )  _log->debug( "\n" "HTTP RESPONSE:" ), _log->debug( http_response->header_text() ), _log->debug( response );
@@ -361,14 +355,7 @@ string Web_service_transaction::process_request( const string& request_data )
     if( is_xml )
     {
         if( _web_service->_log_xml )  File( _log_filename_prefix + ".raw_request.xml", "w" ).print( request_data );
-
-        int ok = request_document.try_load_xml( request_data );
-        if( !ok )
-        {
-            string text = request_document.error_text();
-            _spooler->_log.error( text );       // Log ist möglicherweise noch nicht geöffnet
-            throw_xc( "XML-ERROR", text );
-        }
+        request_document.load_xml( request_data );
     }
 
 
@@ -388,11 +375,11 @@ string Web_service_transaction::process_request( const string& request_data )
     if( is_xml )
     {
         xml::Element_ptr data_element = request_document.replaceChild( service_request_element, request_document.documentElement() );
-        service_request_element.appendChild( data_element );      // request_data anhängen
+        content_element.appendChild( data_element );      // request_data anhängen
     }
     else
     {
-        service_request_element.appendChild( request_document.createTextNode( request_data ) );     // POST-Daten als Text anhängen (nicht spezifiziert)
+        content_element.appendChild( request_document.createTextNode( request_data ) );     // POST-Daten als Text anhängen (nicht spezifiziert)
     }
 
 

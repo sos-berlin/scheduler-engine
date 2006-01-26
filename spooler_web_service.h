@@ -19,6 +19,10 @@ struct Web_service: idispatch_implementation< Web_service, spooler_com::Iweb_ser
     static Class_descriptor     class_descriptor;
     static const Com_method     _methods[];
 
+    static const string Web_service::forwarding_job_chain_name;
+    static const string Web_service::forwarding_job_chain_forward_state;
+    static const string Web_service::forwarding_job_chain_finished_state;
+
 
                                 Web_service                 ( Spooler* );
     Z_GNU_ONLY(                 Web_service                 (); )

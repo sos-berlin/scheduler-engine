@@ -107,7 +107,8 @@ Command_processor::Command_processor( Spooler* spooler, Communication::Processor
 : 
     _zero_(this+1),
     _spooler(spooler),
-    _communication_processor( cp ) 
+    _communication_processor( cp ),
+    _validate(true)
 {
     set_host( NULL );
     _spooler->_executing_command = true;
@@ -667,6 +668,19 @@ xml::Element_ptr Command_processor::execute_register_remote_scheduler( const xml
     return _answer.createElement( "ok" );
 }
 
+//-------------------------------------------------------Command_processor::execute_service_request
+
+xml::Element_ptr Command_processor::execute_service_request( const xml::Element_ptr& service_request_element )
+{
+    ptr<Order> order = new Order( _spooler );
+
+    order->set_state( Web_service::forwarding_job_chain_forward_state );
+    order->set_payload( Variant( service_request_element.xml() ) );
+    order->add_to_job_chain( _spooler->job_chain( Web_service::forwarding_job_chain_name ) );
+    
+    return _answer.createElement( "ok" );
+}
+
 //---------------------------------------------------------------Command_processor::execute_command
 
 xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& element, const Time& xml_mod_time )
@@ -779,6 +793,8 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     if( element.nodeName_is( "remove_order"     ) )  return execute_remove_order( element );
     else
     if( element.nodeName_is( "remove_job_chain" ) )  return execute_remove_job_chain( element );
+    else
+    if( element.nodeName_is( "service_request"  ) )  return execute_service_request( element );
     else
     {
         throw_xc( "SCHEDULER-105", element.nodeName() ); return xml::Element_ptr();
@@ -1184,7 +1200,7 @@ void Command_processor::execute_2( const xml::Document_ptr& command_doc, const T
 
     try 
     {
-        command_doc.validate_against_dtd( _spooler->_dtd );
+        if( _validate )  command_doc.validate_against_dtd( _spooler->_dtd );
 
 /*
         xml::DocumentType_ptr doctype = command_doc->doctype;

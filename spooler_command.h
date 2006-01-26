@@ -78,8 +78,8 @@ struct Command_processor
     void                        execute_file                ( const string& xml_filename );
     ptr<Http_response>          execute_http                ( Http_request* );
     string                      execute                     ( const string& xml_text, const Time& xml_mod_time, bool indent = false );
-    void                        execute_2                   ( const string& xml_text, const Time& xml_mod_time );
-    void                        execute_2                   ( const xml::Document_ptr&, const Time& xml_mod_time );
+    void                        execute_2                   ( const string& xml_text, const Time& xml_mod_time = Time::now() );
+    void                        execute_2                   ( const xml::Document_ptr&, const Time& xml_mod_time = Time::now() );
     xml::Element_ptr            execute_command             ( const xml::Element_ptr&, const Time& xml_mod_time );
     void                        begin_answer                ();
     xml::Element_ptr            execute_config              ( const xml::Element_ptr&, const Time& xml_mod_time );
@@ -109,11 +109,13 @@ struct Command_processor
     xml::Element_ptr            execute_remove_order        ( const xml::Element_ptr& );
     xml::Element_ptr            execute_remove_job_chain    ( const xml::Element_ptr& );
     xml::Element_ptr            execute_register_remote_scheduler( const xml::Element_ptr& );
+    xml::Element_ptr            execute_service_request     ( const xml::Element_ptr& );
 
     void                        get_id_and_next             ( const xml::Element_ptr& element, int* id, int* next );
 
     void                        set_host                    ( Host* );
     void                        set_communication_processor ( Communication::Processor* p )         { _communication_processor = p; }
+    void                        set_validate                ( bool b )                              { _validate = b; }
     void                        abort_immediately           ( int exit_code = 1 );
 
     Fill_zero                  _zero_;
@@ -123,6 +125,7 @@ struct Command_processor
     xml::Document_ptr          _answer;
     Xc_copy                    _error;
     Host*                      _host;
+    bool                       _validate;
     Security::Level            _security_level;
     string                     _source_filename;            // Das Verzeichnis wird für <base file=".."> verwendet
 };

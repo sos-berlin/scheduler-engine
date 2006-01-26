@@ -134,6 +134,7 @@ public class Web_service_forwarder  extends sos.spooler.Job_impl
                 http_connection = (HttpURLConnection)connection;
                 http_connection.setRequestMethod( "POST" );
                 http_connection.setRequestProperty( "Content-Type", "text/xml; charset=" + encoding );  //TODO scheduler_http.cxx muss charset verstehen!
+                http_connection.setUseCaches( false );
                 http_connection.setDoOutput( true );
                 http_connection.connect();
     
@@ -158,11 +159,19 @@ public class Web_service_forwarder  extends sos.spooler.Job_impl
                     throw new Order_exception( "<content> enthält kein Element und keinen Text" );
                     
                 
-                writer.flush();
-                output_stream.flush();
+                writer.close();
+                output_stream.close();
+
+                spooler_log.debug3( "HTTP-output_stream closed" );
+
                 
-    
+                
+                // ANTWORT LESEN
+                
+                
                 int response_code = http_connection.getResponseCode();
+
+                spooler_log.debug3( "response_code=" + response_code );
                 
                 if( response_code != HttpURLConnection.HTTP_OK 
                  && response_code != HttpURLConnection.HTTP_ACCEPTED )

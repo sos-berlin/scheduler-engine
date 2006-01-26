@@ -709,22 +709,33 @@ void Http_processor::process()
     Z_LOG2( "scheduler.http", "HTTP: " << _http_parser->_text << "\n" );
     
 
-    if( Web_service* web_service = _spooler->_web_services.web_service_by_url_path_or_null( _http_request->_path ) )
+    try
     {
-        Z_LOG2( "scheduler.http", "    web_service=" << web_service->name() << "\n" );
+        if( Web_service* web_service = _spooler->_web_services.web_service_by_url_path_or_null( _http_request->_path ) )
+        {
+            Z_LOG2( "scheduler.http", "    web_service=" << web_service->name() << "\n" );
 
-        ptr<Web_service_transaction> web_service_transaction = web_service->new_transaction( this );
+            ptr<Web_service_transaction> web_service_transaction = web_service->new_transaction( this );
 
-        _http_response = web_service_transaction->process_http( this );
+            _http_response = web_service_transaction->process_http( this );
+        }
+        else
+        {
+            Command_processor command_processor ( _spooler );
+
+            command_processor.set_host( _host );
+
+            _http_response = command_processor.execute_http( _http_request );
+        }
     }
-    else
+    catch( exception& x )
     {
-        Command_processor command_processor ( _spooler );
+        if( _channel )  _channel->_log.error( x.what() );
 
-        command_processor.set_host( _host );
-
-        _http_response = command_processor.execute_http( _http_request );
+        _http_response = Z_NEW( Http_response( _http_request, NULL, "" ) );
+        _http_response->set_status( 500, "Internal Server Error" );
     }
+
 
     _http_response->set_event( &_channel->_socket_event );
     _http_response->recommend_block_size( 32768 );

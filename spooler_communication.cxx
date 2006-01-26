@@ -165,7 +165,6 @@ bool Communication::Udp_socket::async_continue_( Continue_flags )
             
             something_done = true;
         }
-
     }
 
     async_clear_signaled();
