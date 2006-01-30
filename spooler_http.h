@@ -257,12 +257,15 @@ struct Http_processor : Communication::Processor
 
     struct Http_exception : exception
     {
-        Http_exception( Response_code response_code ) : exception( response_messages[ response_code ].c_str() ), _response_code( response_code ) {}
+        Http_exception( Response_code response_code ) : _response_code( response_code ), _what( response_messages[ (int)response_code ] ) {}
+        ~Http_exception() throw () {}
+        const char*             what                        ()                                      { return _what.c_str(); }
         Response_code          _response_code;
+        string                 _what;
     };
 
 
-    static stdext::hash_map<Response_code,string>  response_messages;
+    static stdext::hash_map<int,string>  response_messages;
 
 
                                 Http_processor              ( Http_processor_channel* );

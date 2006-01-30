@@ -24,14 +24,14 @@ namespace spooler {
 
 //-------------------------------------------------------------------------------------------------
 
-stdext::hash_map<Http_processor::Response_code,string> Http_processor::response_messages;
+stdext::hash_map<int,string> Http_processor::response_messages;
 
 //-------------------------------------------------------------------------------------------Z_INIT
 
 Z_INIT( scheduler_http )
 {
-    Http_processor::response_messages[ Http_processor::code_bad_request           ] = "Bad Request";
-    Http_processor::response_messages[ Http_processor::code_internal_server_error ] = "Internal Server Error";
+    Http_processor::response_messages[ (int)Http_processor::code_bad_request           ] = "Bad Request";
+    Http_processor::response_messages[ (int)Http_processor::code_internal_server_error ] = "Internal Server Error";
 }
 
 //-------------------------------------------------------------------------Http_parser::Http_parser

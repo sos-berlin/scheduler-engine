@@ -59,7 +59,9 @@ java_classes=\
  sos/spooler/Spooler_program.class\
  sos/spooler/Subprocess.class\
  sos/spooler/Task.class\
- sos/spooler/Variable_set.class
+ sos/spooler/Variable_set.class\
+ sos/spooler/jobs/Web_service_forwarder.class\
+ sos/spooler/jobs/Test_web_service.class
 
 java_headers=$(patsubst %.class, %.h, $(java_classes) )
 
@@ -85,7 +87,7 @@ all:: documentation
 #	$(AR) $(ARFLAGS) $@ $(objects)
 
 $(BIN_DIR)/sos.spooler.jar: $(java_classes)
-	jar cfm $@ ../java_manifest sos/spooler/*.class
+	jar cfm $@ ../java_manifest sos/spooler/*.class sos/spooler/jobs/*.class
 
 
 $(objects): $(patsubst %, sos/spooler/%.h, Idispatch)
