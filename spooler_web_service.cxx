@@ -425,6 +425,12 @@ string Web_service_transaction::process_request( const string& request_data )
         command_processor.execute_2( command_document, Time::now() );
 
         response_document = _web_service->transform_response( command_processor._answer );
+
+        if( _web_service->_debug )
+        {
+            _log->debug( "Command response:\n" );
+            _log->debug( command_processor._answer.xml( true ) );
+        }
     }
     else
     {
@@ -432,12 +438,7 @@ string Web_service_transaction::process_request( const string& request_data )
     }
 
 
-    if( _web_service->_debug )
-    {
-        _log->debug( "Command response:\n" );
-        _log->debug( command_processor._answer.xml( true ) );
-        if( _web_service->_log_xml )  File( _log_filename_prefix + ".service_response.xml", "w" ).print( response_document.xml() );
-    }
+    if( _web_service->_log_xml )  File( _log_filename_prefix + ".service_response.xml", "w" ).print( response_document.xml() );
 
     //if( _web_service->_debug )
     //{
