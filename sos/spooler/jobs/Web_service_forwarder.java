@@ -36,7 +36,7 @@ import sos.spooler.Web_service;
 public class Web_service_forwarder  extends sos.spooler.Job_impl
 {
     //private String              current_url_string = null;
-    public final String encoding = "iso-8859-1";
+    public final String encoding = "utf-8"; //"iso-8859-1";
             
     TransformerFactory transformer_factory = TransformerFactory.newInstance();
     

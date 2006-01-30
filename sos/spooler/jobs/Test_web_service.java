@@ -24,7 +24,7 @@ import java.net.URLConnection;
 public class Test_web_service  extends sos.spooler.Job_impl
 {
     //private String              current_url_string = null;
-    public final String encoding = "iso-8859-1";
+    public final String encoding = "utf-8"; //"iso-8859-1";
             
 
     //---------------------------------------------------------------------------------------------
@@ -77,7 +77,7 @@ public class Test_web_service  extends sos.spooler.Job_impl
             OutputStreamWriter  writer        = new OutputStreamWriter( output_stream, encoding );
 
             writer.write( "<?xml version='1.0'?>\n" );
-            writer.write( "<my_request>bla</my_request>\n" );
+            writer.write( "<my_request>bla äöü </my_request>\n" );
             writer.flush();
             output_stream.flush();
             

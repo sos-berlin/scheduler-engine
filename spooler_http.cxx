@@ -265,6 +265,22 @@ string Http_request::url() const
     return result;
 }
 
+//-----------------------------------------------------------------------Http_request::charset_name
+
+string Http_request::charset_name() const
+{
+    String_map::const_iterator h = _header.find( "content-type" );
+    if( h == _header.end() )  return "";
+
+    size_t pos = h->second.find( "charset=" );
+    if( pos == string::npos )  return "";
+
+    string result = h->second.substr( pos + 8 );
+    pos = result.find( " " );
+
+    return pos == string::npos? result : result.substr( 0, pos );
+}
+
 //---------------------------------------------------------------------Http_response::Http_response
 
 Http_response::Http_response( Http_request* http_request, Chunk_reader* chunk_reader, const string& content_type )

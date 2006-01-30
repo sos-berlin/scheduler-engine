@@ -332,7 +332,7 @@ ptr<Http_response> Web_service_transaction::process_http( Http_processor* http_p
 
     if( _web_service->_debug  &&  http_processor->_http_parser )  _log->debug( "\n" "HTTP request:\n " ), _log->debug( http_processor->_http_parser->_text ), _log->debug( "" );;
 
-    response = process_request( http_request->_body );
+    response = process_request( http_request->_body, http_request->charset_name() );
     http_response = Z_NEW( Http_response( http_request, Z_NEW( String_chunk_reader( response ) ), "text/xml" ) );
 
     http_response->finish();
@@ -344,7 +344,7 @@ ptr<Http_response> Web_service_transaction::process_http( Http_processor* http_p
 
 //---------------------------------------------------------Web_service_transaction::process_request
 
-string Web_service_transaction::process_request( const string& request_data )
+string Web_service_transaction::process_request( const string& request_data, const string& encoding )
 {
     xml::Document_ptr request_document;
     request_document.create();
@@ -355,7 +355,7 @@ string Web_service_transaction::process_request( const string& request_data )
     //if( is_xml )
     {
         if( _web_service->_log_xml )  File( _log_filename_prefix + ".raw_request.xml", "w" ).print( request_data );
-        bool ok = request_document.try_load_xml( request_data );
+        bool ok = request_document.try_load_xml( request_data, encoding );
         if( !ok )
         {
             _log->error( request_document.error_text() );

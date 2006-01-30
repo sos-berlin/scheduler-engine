@@ -93,7 +93,7 @@ struct Web_service_transaction : zschimmer::Object,
 
 
     ptr<Http_response>          process_http                ( Http_processor* );
-    string                      process_request             ( const string& request_data );
+    string                      process_request             ( const string& request_data, const string& charset );
 
   private:
     Fill_zero                  _zero_;

@@ -30,6 +30,7 @@ struct Http_request : Object
     string                      url                         () const;
     string                      url_path                    () const                                { return _path; }
     string                      host_and_port_field         () const;
+    string                      charset_name                () const;
 
 
     Fill_zero                  _zero_;
