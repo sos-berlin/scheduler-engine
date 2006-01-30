@@ -229,6 +229,8 @@ struct Itask : IDispatch
     virtual HRESULT     get_Priority_class              ( BSTR* )                               = 0;
     virtual HRESULT     get_Step_count                  ( int* )                                = 0;
     virtual HRESULT         Set_error_code_and_text     ( BSTR code, BSTR text )                = 0;
+    virtual HRESULT     get_Web_service                 ( Iweb_service** )                      = 0;
+    virtual HRESULT     get_Web_service_or_null         ( Iweb_service** )                      = 0;
 };
 
 //--------------------------------------------------------------------------------------Itask_proxy
@@ -556,7 +558,7 @@ struct Iorder : IDispatch
 
     virtual HRESULT     get_Web_service             ( Iweb_service** )                              = 0;
 
-    virtual HRESULT     get_Has_web_service         ( VARIANT_BOOL* )                               = 0;
+    virtual HRESULT     get_Web_service_or_null     ( Iweb_service** )                              = 0;
 };
 
 //--------------------------------------------------------------------Remote_module_instance_server

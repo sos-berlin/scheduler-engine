@@ -135,8 +135,12 @@ sub read_file
             my $a_file    = get_attribute( $element, "file" );
             my $a_section = get_attribute( $element, "section" );
             my $a_entry   = get_attribute( $element, "entry" );
-            my $xml_line  = "<register_ini_entry register_file='$filename' register_title='$file_title' file='$a_file' section='$a_section' entry='$a_entry'/>\n";
-            add_keyword_reference( $a_entry, "<code>$a_entry=</code>", $xml_line );
+            
+            if( $a_entry )
+            {
+                my $xml_line  = "<register_ini_entry register_file='$filename' register_title='$file_title' file='$a_file' section='$a_section' entry='$a_entry'/>\n";
+                add_keyword_reference( $a_entry, "<code>$a_entry=</code>", $xml_line );
+            }
         }
 
         if( my $element = get_element( "scheduler_option" ) )

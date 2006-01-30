@@ -377,7 +377,7 @@
             liefert der Aufruf eine Exception.
         </p>
         <p>
-            Siehe auch <scheduler_method class="Order" property="has_web_service"/>.
+            Siehe auch <scheduler_method class="Order" property="web_service_or_null"/>.
         </p>
     </description>
     
@@ -385,18 +385,15 @@
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<property name="has_web_service" access="read">
+<property name="web_service_or_null" access="read">
     <com>
         <com.result>
-            <com.type type="bool"/>
-            <description>
-                <code>true</code>, wenn ein Webdienst zugeordnet ist.
-            </description>
+            <com.type class="Web_service"/>
         </com.result>
     </com>
 
     <title>
-        Ob der Auftrag einem Webdienst zugeordnet ist
+        Der Webdienst, der dem Auftrag zugeordnet ist, oder <api.null/>.
     </title>
     
     <description>

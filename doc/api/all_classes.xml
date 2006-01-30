@@ -25,5 +25,6 @@
     <class_reference class="Task"/>
     <class_reference class="Variable"/>
     <class_reference class="Variable_set"/>
+    <class_reference class="Web_service"/>
     <class_reference class="Xslt_stylesheet"/>
 </class_references>

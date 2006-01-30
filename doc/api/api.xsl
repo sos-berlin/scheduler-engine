@@ -465,56 +465,46 @@
     <xsl:param name="is_in_table" select="false()"/>
     <xsl:param name="show_title"  select="true()"/>
 
-    <xsl:choose>
-        <xsl:when test="$language_has_properties and false()">
-            <xsl:apply-templates select="com" mode="table_row">
-                <xsl:with-param name="is_in_table" select="$is_in_table"/>
-                <xsl:with-param name="show_title"  select="$show_title"/>
-            </xsl:apply-templates>
-        </xsl:when>
-        <xsl:otherwise>
-            <xsl:for-each select="com">
-                <xsl:choose>
-                    <xsl:when test="parent::property and ( @access='write' or parent::property/@access='write' )">
-                        <xsl:apply-templates select="." mode="table_row">
-                            <xsl:with-param name="access"      select="'write'"/>
-                            <xsl:with-param name="is_in_table" select="$is_in_table"/>
-                            <xsl:with-param name="show_title"  select="$show_title"/>
-                        </xsl:apply-templates>
-                    </xsl:when>
+    <xsl:for-each select="com">
+        <xsl:choose>
+            <xsl:when test="parent::property and ( @access='write' or parent::property/@access='write' )">
+                <xsl:apply-templates select="." mode="table_row">
+                    <xsl:with-param name="access"      select="'write'"/>
+                    <xsl:with-param name="is_in_table" select="$is_in_table"/>
+                    <xsl:with-param name="show_title"  select="$show_title"/>
+                </xsl:apply-templates>
+            </xsl:when>
 
-                    <xsl:when test="parent::property and ( @access='read' or parent::property/@access='read' )">
-                        <xsl:apply-templates select="." mode="table_row">
-                            <xsl:with-param name="access"      select="'read'"/>
-                            <xsl:with-param name="is_in_table" select="$is_in_table"/>
-                            <xsl:with-param name="show_title"  select="$show_title"/>
-                        </xsl:apply-templates>
-                    </xsl:when>
+            <xsl:when test="parent::property and ( @access='read' or parent::property/@access='read' )">
+                <xsl:apply-templates select="." mode="table_row">
+                    <xsl:with-param name="access"      select="'read'"/>
+                    <xsl:with-param name="is_in_table" select="$is_in_table"/>
+                    <xsl:with-param name="show_title"  select="$show_title"/>
+                </xsl:apply-templates>
+            </xsl:when>
 
-                    <xsl:when test="parent::property and not( parent::property/@access )">
-                        <xsl:apply-templates select="." mode="table_row">
-                            <xsl:with-param name="access"      select="'write'"/>
-                            <xsl:with-param name="is_in_table" select="$is_in_table"/>
-                            <xsl:with-param name="show_title"  select="$show_title"/>
-                        </xsl:apply-templates>
+            <xsl:when test="parent::property and not( parent::property/@access )">
+                <xsl:apply-templates select="." mode="table_row">
+                    <xsl:with-param name="access"      select="'write'"/>
+                    <xsl:with-param name="is_in_table" select="$is_in_table"/>
+                    <xsl:with-param name="show_title"  select="$show_title"/>
+                </xsl:apply-templates>
 
-                        <xsl:apply-templates select="." mode="table_row">
-                            <xsl:with-param name="access"      select="'read'"/>
-                            <xsl:with-param name="is_in_table" select="$is_in_table"/>
-                            <xsl:with-param name="show_title"  select="false()"/>
-                        </xsl:apply-templates>
-                    </xsl:when>
+                <xsl:apply-templates select="." mode="table_row">
+                    <xsl:with-param name="access"      select="'read'"/>
+                    <xsl:with-param name="is_in_table" select="$is_in_table"/>
+                    <xsl:with-param name="show_title"  select="false()"/>
+                </xsl:apply-templates>
+            </xsl:when>
 
-                    <xsl:otherwise>
-                        <xsl:apply-templates select="." mode="table_row">
-                            <xsl:with-param name="is_in_table" select="$is_in_table"/>
-                            <xsl:with-param name="show_title"  select="$show_title"/>
-                        </xsl:apply-templates>
-                    </xsl:otherwise>
-                </xsl:choose>
-            </xsl:for-each>
-        </xsl:otherwise>
-    </xsl:choose>
+            <xsl:otherwise>
+                <xsl:apply-templates select="." mode="table_row">
+                    <xsl:with-param name="is_in_table" select="$is_in_table"/>
+                    <xsl:with-param name="show_title"  select="$show_title"/>
+                </xsl:apply-templates>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:for-each>
 </xsl:template>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
@@ -733,7 +723,11 @@
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <xsl:template match="com.type">
-    <xsl:apply-templates select="." mode="no_array"/>
+    <xsl:param name="is_in_table"/>
+
+    <xsl:apply-templates select="." mode="no_array">
+        <xsl:with-param name="is_in_table" select="$is_in_table"/>
+    </xsl:apply-templates>
 
     <xsl:if test="@array">
         <span class="mono">[]</span>

@@ -464,6 +464,8 @@ struct Com_task : spooler_com::Itask,
     STDMETHODIMP            get_Priority_class              ( BSTR* );
     STDMETHODIMP            get_Step_count                  ( int* );
     STDMETHODIMP                Set_error_code_and_text     ( BSTR, BSTR );
+    STDMETHODIMP            get_Web_service                 ( spooler_com::Iweb_service** );
+    STDMETHODIMP            get_Web_service_or_null         ( spooler_com::Iweb_service** );
 
   private:
     Thread_semaphore           _lock;
@@ -757,8 +759,7 @@ struct Com_order : spooler_com::Iorder,
     STDMETHODIMP            get_Xml                     ( BSTR, BSTR* );
 
     STDMETHODIMP        get_Web_service                 ( spooler_com::Iweb_service** );
-
-    STDMETHODIMP        get_Has_web_service             ( VARIANT_BOOL* );
+    STDMETHODIMP        get_Web_service_or_null         ( spooler_com::Iweb_service** );
 
   private:
     Fill_zero                  _zero_;

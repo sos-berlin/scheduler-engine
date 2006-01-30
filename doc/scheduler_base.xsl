@@ -1249,21 +1249,24 @@
             <code><xsl:value-of select="$file"/></code>
 
             (Abschnitt
-            <code>[<xsl:value-of select="$section"/>]</code>,
+            <code>[<xsl:value-of select="$section"/>]</code>
 
-            Eintrag
-            <code>
-                <xsl:value-of select="$entry"/>
-                <xsl:text>=</xsl:text>
-                <xsl:choose>
-                    <xsl:when test="$value">
-                        <xsl:value-of select="$value"/>
-                    </xsl:when>
-                    <xsl:otherwise>
-                        <xsl:text>…</xsl:text>
-                    </xsl:otherwise>
-                </xsl:choose>
-            </code>
+            <xsl:if test="$entry">
+                <xsl:text>, Eintrag </xsl:text>
+                
+                <code>
+                    <xsl:value-of select="$entry"/>
+                    <xsl:text>=</xsl:text>
+                    <xsl:choose>
+                        <xsl:when test="$value">
+                            <xsl:value-of select="$value"/>
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:text>…</xsl:text>
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </code>
+            </xsl:if>
             
             <xsl:text>)</xsl:text>
         </xsl:element>

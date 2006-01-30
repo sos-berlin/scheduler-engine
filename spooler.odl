@@ -409,6 +409,12 @@ library Spooler
         HRESULT                 Step_count                  ( [out,retval] int* );                              // Für Joacim 2005-04-02
 
         HRESULT                 Set_error_code_and_text     ( [in] BSTR Code, [in] BSTR Text );                 // Für spooler_process_after()
+
+        [propget]
+        HRESULT                 Web_service                 ( [out,retval] Iweb_service** );
+
+        [propget]
+        HRESULT                 Web_service_or_null         ( [out,retval] Iweb_service** );
     }
 
     [
@@ -976,7 +982,7 @@ library Spooler
         HRESULT                 Web_service             ( [out,retval] Iweb_service** );
 
         [propget]
-        HRESULT                 Has_web_service         ( [out,retval] VARIANT_BOOL* );
+        HRESULT                 Web_service_or_null     ( [out,retval] Iweb_service** );
     }
 
     [
@@ -1324,6 +1330,7 @@ library Spooler
                                                                                                 // Für den Objectserver
         [propget]
         HRESULT                 Name                    ( [out,retval] BSTR* );
+
         [propget]
         HRESULT                 Forward_xslt_stylesheet_path( [out,retval] BSTR* );
     };

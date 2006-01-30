@@ -1978,6 +1978,8 @@ const Com_method Com_task::_methods[] =
     { DISPATCH_PROPERTYGET, 24, "Stderr_path"               , (Com_method_ptr)&Com_task::get_Stderr_path        , VT_BSTR       },
     { DISPATCH_PROPERTYGET, 25, "Stdout_path"               , (Com_method_ptr)&Com_task::get_Stdout_path        , VT_BSTR       },
     { DISPATCH_METHOD     , 26, "Set_error_code_and_text"   , (Com_method_ptr)&Com_task::Set_error_code_and_text, VT_EMPTY      , { VT_BSTR, VT_BSTR } },
+    { DISPATCH_PROPERTYGET, 27, "Web_service"               , (Com_method_ptr)&Com_task::get_Web_service        , VT_DISPATCH   },
+    { DISPATCH_PROPERTYGET, 28, "Web_service_or_null"       , (Com_method_ptr)&Com_task::get_Web_service_or_null,VT_DISPATCH   },
     {}
 };
 
@@ -2548,6 +2550,44 @@ STDMETHODIMP Com_task::Set_error_code_and_text( BSTR error_code, BSTR error_text
     catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
     
+    return hr;
+}
+
+//------------------------------------------------------------------------Com_task::get_Web_service
+
+STDMETHODIMP Com_task::get_Web_service( Iweb_service** result )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_task )  return E_POINTER;
+
+        *result = _task->web_service();
+        (*result)->AddRef();
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+
+//----------------------------------------------------------------Com_task::get_Web_service_or_null
+
+STDMETHODIMP Com_task::get_Web_service_or_null( Iweb_service** result )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_task )  return E_POINTER;
+
+        *result = _task->web_service_or_null();
+        (*result)->AddRef();
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+
     return hr;
 }
 
@@ -3833,7 +3873,7 @@ const Com_method Com_order::_methods[] =
   //{ DISPATCH_PROPERTYGET, 18, "Log"                       , (Com_method_ptr)&Com_order::get_Log               , VT_DISPATCH   },
     { DISPATCH_PROPERTYGET, 18, "Xml"                       , (Com_method_ptr)&Com_order::get_Xml               , VT_BSTR       , { VT_BSTR }, 1 },
     { DISPATCH_PROPERTYGET, 19, "Web_service"               , (Com_method_ptr)&Com_order::get_Web_service       , VT_DISPATCH   },
-    { DISPATCH_PROPERTYGET, 20, "Has_web_service"           , (Com_method_ptr)&Com_order::get_Has_web_service   , VT_BOOL       },
+    { DISPATCH_PROPERTYGET, 20, "Web_service_or_null"       , (Com_method_ptr)&Com_order::get_Web_service_or_null,VT_DISPATCH   },
     {}
 };
 
@@ -4439,9 +4479,9 @@ STDMETHODIMP Com_order::get_Web_service( Iweb_service** result )
     return hr;
 }
 
-//-------------------------------------------------------------------Com_order::get_Has_web_service
+//---------------------------------------------------------------Com_order::get_Web_service_or_null
 
-STDMETHODIMP Com_order::get_Has_web_service( VARIANT_BOOL* result )
+STDMETHODIMP Com_order::get_Web_service_or_null( Iweb_service** result )
 {
     HRESULT hr = NOERROR;
 
@@ -4450,7 +4490,8 @@ STDMETHODIMP Com_order::get_Has_web_service( VARIANT_BOOL* result )
     {
         if( !_order )  return E_POINTER;
 
-        *result = _order->web_service_or_null() != NULL? VARIANT_TRUE : VARIANT_FALSE;
+        *result = _order->web_service_or_null();
+        (*result)->AddRef();
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
 

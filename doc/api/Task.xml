@@ -578,6 +578,52 @@ $spooler_log->info( 'order.id=' . $order->id . ', order.title=' . $order->title 
         </description>
     </property>
 
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="web_service" access="read">
+        <com>
+            <com.result>
+                <com.type class="Web_service"/>
+            </com.result>
+        </com>
+
+        <title>
+            Der Webdienst, der der Task zugeordnet ist
+        </title>
+        
+        <description>
+            <p>
+                Wenn die Task keinem Webdienst zugeordnet ist, 
+                liefert der Aufruf eine Exception.
+            </p>
+            <p>
+                Siehe auch <scheduler_method class="Task" property="web_service_or_null"/>.
+            </p>
+        </description>
+        
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="web_service_or_null" access="read">
+        <com>
+            <com.result>
+                <com.type class="Web_service"/>
+            </com.result>
+        </com>
+
+        <title>
+            Der Webdienst, der der Task zugeordnet ist, oder <api.null/>.
+        </title>
+        
+        <description>
+            <p>
+                Siehe auch <scheduler_method class="Task" property="web_service"/>.
+            </p>
+        </description>
+        
+    </property>
+
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
     <description>
