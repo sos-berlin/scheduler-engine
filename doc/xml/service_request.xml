@@ -5,7 +5,6 @@
 
 <xml_element name     = "service_request"
              title    = "Web-Dienst-Anforderung"
-             category = "Kommando"
              base_dir = "../"
              parent_page = "../xml_commands.xml"
              author   = "$Author$"
@@ -24,6 +23,17 @@
     
     
     <xml_child_elements>
+
+        <xml_child_element name="web_service">
+            <description>
+                <p>
+                    Nur, wenn <code>&lt;service_request></code> die Eingabe
+                    für das Stylesheet aus 
+                    <scheduler_element name="web_service" attribute="request_xslt_stylesheet"/>
+                    ist.                    
+                </p>
+            </description>
+        </xml_child_element>
 
         <xml_child_element name="content">
             <description>
@@ -46,5 +56,20 @@
     &lt;/content>
 &lt;/service_request></pre>
     </example>
+    
+    
+    <description>
+        <p>
+            <code>&lt;service_request></code> tritt an zwei Stellen auf:
+            <ul>
+                <li>
+                    Als Eingabe einer XLST-Transformation mit <scheduler_element name="web_service" attribute="request_xslt_stylesheet"/>.
+                </li>
+                <li>
+                    Als Ergebnis einer XLST-Transformation mit <scheduler_element name="web_service" attribute="forward_xslt_stylesheet"/>.
+                </li>
+            </ul>
+        </p>
+    </description>
 
 </xml_element>

@@ -5,7 +5,6 @@
 
 <xml_element name     = "content"
              title    = "Inhalt einer Web-Dienst-Anforderung"
-             category = "Kommando"
              base_dir = "../"
              parent_page = "../xml_commands.xml"
              author   = "$Author$"

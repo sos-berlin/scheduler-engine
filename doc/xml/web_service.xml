@@ -17,24 +17,18 @@
 
 
     <xml_attributes>
-        <xml_attribute name="name" type="name">
-            <description>
-                <p>
-                    Name des Dienstes im Scheduler.
-                </p>
-            </description>
+        <xml_attribute name="name" type="name" title="Name des Dienstes im Scheduler">
         </xml_attribute>
 
-        <xml_attribute name="url_path" type="url_path">
+        <xml_attribute name="url_path" type="url_path" title="URL-Pfad, unter dem der Web-Dienst ansprechbar ist">
             <description>
                 <p>
-                    URL-Pfad, unter dem der Web-Dienst ansprechbar ist.
                     Er sollte mit einem Schrägstrich beginnen.
                 </p>
             </description>
         </xml_attribute>
 
-        <xml_attribute name="request_xslt_stylesheet" type="path">
+        <xml_attribute name="request_xslt_stylesheet" type="path" subst_env="yes" title="Transformiert die Anforderung in ein Scheduler-Kommando">
             <description>
                 <p>
                     Pfad des XSLT-Stylesheets, 
@@ -44,7 +38,7 @@
             </description>
         </xml_attribute>
 
-        <xml_attribute name="response_xslt_stylesheet" type="path">
+        <xml_attribute name="response_xslt_stylesheet" type="path" subst_env="yes" title="Transformiert die Antwort des Kommandos in die Antwort des Web-Dienstes">
             <description>
                 <p>
                     Pfad des XSLT-Stylesheets, 
@@ -54,7 +48,7 @@
             </description>
         </xml_attribute>
 
-        <xml_attribute name="forward_xslt_stylesheet" type="path">
+        <xml_attribute name="forward_xslt_stylesheet" type="path" subst_env="yes" title="Zur Weiterleitung am Ende des Auftrags bzw. der Task">
             <description>
                 <p>
                     Wenn ein mit <scheduler_element name="add_order" attribute="web_service"/> gestarter Auftrag
@@ -107,6 +101,17 @@
 
 
     <behavior_with_xml_element element="base" complete="yes"/>
+    
+    
+    <example>
+        <pre>&lt;web_service 
+    name                     = "my_web_service" 
+    url_path                 = "/webservice"
+    request_xslt_stylesheet  = "$SCHEDULER_CONFIG/web_service_request.xsl"
+    response_xslt_stylesheet = "$SCHEDULER_CONFIG/web_service_response.xsl"
+    forward_xslt_stylesheet  = "$SCHEDULER_CONFIG/web_service_forward.xsl"
+/></pre>
+    </example>
     
     
     <description>
@@ -219,6 +224,5 @@
             Implementiert ist der Job in Java.
         </p>
 
-        
     </description>
 </xml_element>

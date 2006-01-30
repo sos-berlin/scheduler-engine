@@ -30,4 +30,12 @@
     <example>
         <pre>&lt;show_jobs/></pre>
     </example>
+    
+    
+    <description>
+        <p>
+            Unsichtbare Jobs (<scheduler_element name="job" attribute="visible" value="no"/>)
+            werden nicht gezeigt.
+        </p>
+    </description>
 </xml_element>

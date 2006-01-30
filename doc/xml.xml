@@ -20,11 +20,14 @@
             <th>
                 <a href="konfiguration.xml">Konfiguration</a>
             </th>
-            <th>
+            <th style="padding-left: 2ex">
                 <a href="xml_commands.xml">Kommandos</a>
             </th>
-            <th>
+            <th style="padding-left: 2ex">
                 <a href="xml_commands.xml">Antworten</a>
+            </th>
+            <th style="padding-left: 2ex">
+                Weitere
             </th>
         </tr>
         <tr>
@@ -108,6 +111,7 @@
                 <scheduler_element directory="xml/answer/" name="order_queue"/><br/>
                 <scheduler_element directory="xml/answer/" name="param"/><br/>
                 <scheduler_element directory="xml/answer/" name="params"/><br/>
+                <scheduler_element directory="xml/answer/" name="payload"/><br/>
                 <scheduler_element directory="xml/answer/" name="process"/><br/>
                 <scheduler_element directory="xml/answer/" name="process_class"/><br/>
                 <scheduler_element directory="xml/answer/" name="process_classes"/><br/>
@@ -124,6 +128,10 @@
                 <scheduler_element directory="xml/answer/" name="task"/><br/>
                 <scheduler_element directory="xml/answer/" name="tasks"/><br/>
                 <scheduler_element directory="xml/answer/" name="waiting_jobs"/><br/>
+            </td>
+            <td valign="baseline" style="padding-left: 2ex">
+                <scheduler_element directory="xml/"        name="content"/><br/>
+                <scheduler_element directory="xml/"        name="service_request"/><br/>
             </td>
         </tr>
     </tbody>

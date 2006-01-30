@@ -25,6 +25,20 @@
                 </p>
             </description>
         </xml_attribute>
+
+
+        <xml_attribute name="visible" type="yes|no" initial="yes">
+            <description>
+                <p>
+                    <code>visible="no"</code> lässt die Jobkette im Ergebnis von 
+                    <scheduler_element name="show_job_chains"/> und 
+                    <scheduler_element name="show_state"/> unsichtbar.
+                </p>
+                <p>
+                    Der Scheduler setzt die Jobkette sichtbar, sobald ein Auftrag eingereiht wird.
+                </p>
+            </description>
+        </xml_attribute>
     </xml_attributes>
 
 

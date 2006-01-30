@@ -61,11 +61,11 @@
     <xsl:template match="scheduler_commands">
         <table cellspacing="0" cellpadding="0">
             <col valign="baseline"/>
-            <col valign="baseline" style="padding-top: 1ex; padding-left: 2ex"/>
+            <col valign="baseline"/>
             <thead>
                 <tr>
                     <td>Kommando</td>
-                    <td>Antwort (eingepackt in <code>&lt;spooler>&lt;answer></code>)</td>
+                    <td style="padding-top: 1ex; padding-left: 2ex">Antwort (eingepackt in <code>&lt;spooler>&lt;answer></code>)</td>
                 </tr>
                 <tr>
                     <td colspan="2">
@@ -82,7 +82,7 @@
                                 <xsl:with-param name="name" select="@name"/>
                             </xsl:call-template>
                         </td>
-                        <td>
+                        <td style="padding-left: 2ex">
                             <xsl:call-template name="scheduler_element">
                                 <xsl:with-param name="directory" select="'xml/answer/'"/>
                                 <xsl:with-param name="name" select="@answer"/>

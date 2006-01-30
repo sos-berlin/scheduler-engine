@@ -29,4 +29,12 @@
     <example>
         <pre>&lt;show_job_chains/></pre>
     </example>
+
+
+    <description>
+        <p>
+            Unsichtbare Jobketten (<scheduler_element name="job_chain" attribute="visible" value="no"/>)
+            werden nicht gezeigt.
+        </p>
+    </description>
 </xml_element>

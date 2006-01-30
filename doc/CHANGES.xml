@@ -13,9 +13,27 @@
     <change date="2006-01-30" version="2.0.146" subversion_revision="4061">
         <revision type="new" title="Web-Dienste">
             <description>
-                <p>
-                    Siehe <scheduler_element name="web_service"/>.
-                </p>
+                <p>Neue XML-Elemente, neue Attribute</p>
+                <ul>
+                    <li><scheduler_element name="web_services"/></li>
+                    <li><scheduler_element name="web_service"/></li>
+                    <li><scheduler_element name="add_order" attribute="web_service"/></li>
+                    <li><scheduler_element name="start_job" attribute="web_service"/></li>
+                    <li><scheduler_element directory="xml/answer/" name="order" attribute="web_service"/></li>
+                    <li><scheduler_element directory="xml/answer/" name="payload"/></li>
+                    <li><scheduler_element directory="xml/answer/" name="task" attribute="web_service"/></li>
+                    <li><scheduler_element name="service_request"/></li>
+                    <li><scheduler_element name="content"/></li>
+                    <li><scheduler_element name="job_chain" attribute="visible" value="no"/></li>
+                    <li><scheduler_element name="job"       attribute="visible" value="no"/></li>
+                </ul>
+                <p>Neue Klassen und Methoden:</p>
+                <ul>
+                    <li><scheduler_method class="Web_service"/></li>
+                    <li><scheduler_method class="Order" property="xml"/></li>
+                    <li><scheduler_method class="Order" property="web_service"/></li>
+                    <li><scheduler_method class="Task" property="web_service"/></li>
+                </ul>
             </description>
         </revision>
     </change>
