@@ -144,19 +144,20 @@ public class Web_service_forwarder  extends sos.spooler.Job_impl
 
                 Node data_node = get_data_node( service_request_element );
                 
-                if( data_node.getNodeType() == Node.TEXT_NODE 
-                 || data_node.getNodeType() == Node.CDATA_SECTION_NODE )
-                {
-                    writer.write( data_node.getTextContent() );
-                }
-                else
+              //if( data_node.getNodeType() == Node.TEXT_NODE 
+              // || data_node.getNodeType() == Node.CDATA_SECTION_NODE )
+              //{
+              //    writer.write( data_node.getTextContent() );
+              //}
+              //else
                 if( data_node.getNodeType() == Node.ELEMENT_NODE )
                 {
                     new XMLSerializer( output_stream, new OutputFormat( service_request_element.getOwnerDocument(), encoding, false ) )
                     .serialize( (Element)data_node );
                 }
                 else
-                    throw new Order_exception( "<content> enthält kein Element und keinen Text" );
+                    throw new Order_exception( "<content> enthält kein Element" );
+                    //throw new Order_exception( "<content> enthält kein Element und keinen Text" );
                     
                 
                 writer.close();
