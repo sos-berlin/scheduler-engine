@@ -22,6 +22,18 @@ using namespace std;
 namespace sos {
 namespace spooler {
 
+//-------------------------------------------------------------------------------------------------
+
+stdext::hash_map<Http_processor::Response_code,string> Http_processor::response_messages;
+
+//-------------------------------------------------------------------------------------------Z_INIT
+
+Z_INIT( scheduler_http )
+{
+    Http_processor::response_messages[ Http_processor::code_bad_request           ] = "Bad Request";
+    Http_processor::response_messages[ Http_processor::code_internal_server_error ] = "Internal Server Error";
+}
+
 //-------------------------------------------------------------------------Http_parser::Http_parser
     
 Http_parser::Http_parser( Http_request* http_request )
@@ -215,6 +227,9 @@ string Http_parser::eat_path()
     }
 
     eat_spaces();
+
+    if( !string_begins_with( path, "/" ) )  path = "/" + path;
+
     return path;
 }
 
@@ -222,7 +237,7 @@ string Http_parser::eat_path()
     
 string Http_request::parameter( const string& name ) const
 { 
-    map<string,string>::const_iterator it = _parameters.find( name );
+    String_map::const_iterator it = _parameters.find( name );
     return it == _parameters.end()? "" : it->second;
 }
 
@@ -231,6 +246,23 @@ string Http_request::parameter( const string& name ) const
 bool Http_request::is_http_1_1() const
 {
     return _protocol == "HTTP/1.1";
+}
+
+//----------------------------------------------------------------Http_request::host_and_port_field
+
+string Http_request::host_and_port_field() const
+{
+    String_map::const_iterator h = _header.find( "host" );
+    return h == _header.end()? "" : h->second;
+}
+
+//--------------------------------------------------------------------------------Http_request::url
+
+string Http_request::url() const
+{
+    S result;
+    result << "http://" << host_and_port_field() << url_path();
+    return result;
 }
 
 //---------------------------------------------------------------------Http_response::Http_response
@@ -727,6 +759,13 @@ void Http_processor::process()
 
             _http_response = command_processor.execute_http( _http_request );
         }
+    }
+    catch( Http_exception& x )
+    {
+        if( _channel )  _channel->_log.error( x.what() );
+
+        _http_response = Z_NEW( Http_response( _http_request, NULL, "" ) );
+        _http_response->set_status( (int)x._response_code, response_messages[ x._response_code ] );
     }
     catch( exception& x )
     {

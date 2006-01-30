@@ -10,6 +10,16 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2006-01-30" version="2.0.146" subversion_revision="4061">
+        <revision type="new" title="Web-Dienste">
+            <description>
+                <p>
+                    Siehe <scheduler_element name="web_service"/>.
+                </p>
+            </description>
+        </revision>
+    </change>
+
     <change date="2006-01-15" version="2.0.145" subversion_revision="4049">
         <revision type="new" title="Job_chain.remove()">
             <description>

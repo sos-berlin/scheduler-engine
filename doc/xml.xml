@@ -61,12 +61,15 @@
                 <scheduler_element name="process_classes"/><br/>
                 <scheduler_element name="run_time"/><br/>
                 <scheduler_element name="script"/><br/>
+                <scheduler_element name="service_request"/><br/>
                 <scheduler_element name="security"/><br/>
                 <scheduler_element name="sos.spooler.variable_set"/><br/>
                 <scheduler_element name="spooler"/><br/>
                 <scheduler_element name="start_when_directory_changed"/><br/>
                 <scheduler_element name="ultimos"/><br/>
                 <scheduler_element name="variable"/><br/>
+                <scheduler_element name="web_service"/><br/>
+                <scheduler_element name="web_services"/><br/>
                 <scheduler_element name="weekdays"/><br/>
             </td>
             <td valign="baseline" style="padding-left: 2ex">

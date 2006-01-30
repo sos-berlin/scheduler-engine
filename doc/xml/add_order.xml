@@ -89,6 +89,19 @@
             </description>
         </xml_attribute>
 
+
+        <xml_attribute name="web_service" type="name">
+            <description>
+                <p>
+                    Wenn der Auftrag ausgeführt worden ist (das Ende der Jobkette erreicht hat),
+                    wird er mit einem Stylesheet transformiert und einem Web-Dienst übergeben.
+                </p>
+                <p>
+                    Siehe <scheduler_element name="web_service"/>.
+                </p>
+            </description>
+        </xml_attribute>
+
     </xml_attributes>
 
 

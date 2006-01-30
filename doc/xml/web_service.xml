@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id$-->
+
+<xml_element name     = "web_service"
+             title    = "Web-Dienst"
+             category = "Konfiguration"
+             base_dir = "../"
+             parent_page = "../konfiguration.xml"
+             author   = "$Author$"
+             date     = "$Date$">
+
+    <xml_parent_elements>
+        <xml_parent_element name="web_services"/>
+    </xml_parent_elements>
+
+
+    <xml_attributes>
+        <xml_attribute name="name" type="name">
+            <description>
+                <p>
+                    Name des Dienstes im Scheduler.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="url_path" type="url_path">
+            <description>
+                <p>
+                    URL-Pfad, unter dem der Web-Dienst ansprechbar ist.
+                    Er sollte mit einem Schrägstrich beginnen.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="request_xslt_stylesheet" type="path">
+            <description>
+                <p>
+                    Pfad des XSLT-Stylesheets, 
+                    das das mit HTTP-POST übergebene XML-Dokument 
+                    in ein Scheduler-Kommando wandelt.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="response_xslt_stylesheet" type="path">
+            <description>
+                <p>
+                    Pfad des XSLT-Stylesheets, 
+                    das das XML-Ergebnis des Scheduler-Kommandos in ein XML-Dokument wandelt,
+                    mit der der Scheduler die Web-Dienst-Anfrage beantwortet.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="forward_xslt_stylesheet" type="path">
+            <description>
+                <p>
+                    Wenn ein mit <scheduler_element name="add_order" attribute="web_service"/> gestarter Auftrag
+                    oder eine mit <scheduler_element name="start_job" attribute="web_service"/> gestartete Task endet
+                    und ein <code>forward_xslt_stylesheet</code> angegeben ist,
+                    dann wird der Auftrag bzw. die Task mit dem Stylesheet zu einem
+                    <scheduler_element name="service_request"/> transformiert,
+                    das den Aufruf eines anderen Web-Dienstes auslöst.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="debug" type="yes|no" initial="no">
+            <description>
+                <p>
+                    <code>debug="yes"</code> lässt den Scheduler die intern erzeugten XML-Dokumente in Dateien im mit <scheduler_option name="log-dir"/> 
+                    festgelegten Verzeichnis ablegen:
+                </p>
+                
+                <table cellspacing="0" cellpadding="0" style="margin-top: 1em">
+                    <tr>
+                        <td><code><i>service_name</i>.<i>transaction_number</i>.raw_request.xml</code></td>
+                        <td style="padding-left: 2ex">Der mit HTTP-POST übergebene Text</td>
+                    </tr>
+                    <tr>
+                        <td><code><i>service_name</i>.<i>transaction_number</i>.service_request.xml</code></td>
+                        <td style="padding-left: 2ex">Das daraus erstellte <scheduler_element name="service_request"/></td>
+                    </tr>
+                    <tr>
+                        <td><code><i>service_name</i>.<i>transaction_number</i>.command.xml</code></td>
+                        <td style="padding-left: 2ex">Das mit <code>request_xslt_stylesheet</code> erstellte Kommando</td>
+                    </tr>
+                    <tr>
+                        <td><code><i>service_name</i>.<i>transaction_number</i>.service_response.xml</code></td>
+                        <td style="padding-left: 2ex">Die mit <code>response_xslt_stylesheet</code> transformierte Antwort des Web-Dienstes</td>
+                    </tr>
+                    <tr>
+                        <td><code><i>service_name</i>.forward.xml</code></td>
+                        <td style="padding-left: 2ex">Das mit <code>forward_xslt_stylesheet</code> erstellte <scheduler_element name="service_request"/>
+                        (ohne Transaktionsnummer, die ist hier nicht bekannt)</td>
+                    </tr>
+                </table>
+                <p>
+                    Der Scheduler räumt die Dateien nicht ab.
+                </p>
+            </description>
+        </xml_attribute>
+
+    </xml_attributes>
+
+
+    <behavior_with_xml_element element="base" complete="yes"/>
+    
+    
+    <description>
+        <p>
+            Web-Dienste lassen sich einrichten, um Aufträge oder Tasks zu erzeugen.
+            Die angenommene Anforderung wird sofort beantwortet.
+            Das Ergebnis des Auftrags oder der Task kann zu einen anderen Web-Dienst weiterleitet werden.
+        </p>
+        <p>
+            Der TCP-Port des HTTP-Servers wird mit <scheduler_element name="config" attribute="tcp_port"/> festgelegt.
+        </p>
+        
+        
+        
+        <h2>Ablauf</h2>
+        <p>
+            Ein HTTP-POST auf den URL-Pfad des Web-Dienstes löst folgende Schritte aus.
+        </p>
+
+        <ol>
+            <li>
+                Das mit HTTP-POST übergebene XML-Dokument packt der Scheduler in ein <scheduler_element name="service_request"/>. 
+                
+                <pre>&lt;service_request>
+    &lt;web_service name="<i>service_name</i>" url_path="<i>url_path</i>"/>
+    &lt;content><i>…data…</i>&lt;/content>
+&lt;/service_request></pre>
+            </li>
+            <li>
+                Das <code>&lt;service_request></code> wird mit dem Stylesheet <code>request_xslt_stylesheet</code> in ein XML-Kommando transformiert,
+                in der Regel <scheduler_element name="add_order"/> oder <scheduler_element name="start_job"/>.
+            </li>
+            <li>
+                Der Scheduler führt das XML-Kommando aus.
+            </li>
+            <li>
+                Die Antwort des XML-Kommandos (<code>&lt;spooler></code><scheduler_element name="answer" directory="xml/answer/"/>,
+                die auch eine Fehlermeldung <scheduler_element directory="xml/answer/" name="ERROR"/> enthalten kann) 
+                wird mit dem <code>response_xslt_stylesheet</code> zu einem <scheduler_element name="service_response"/> transformiert und
+                dem Aufrufer über HTTP zurückgeliefert.
+                
+                <pre>&lt;service_response>
+    &lt;content><i>…data…</i>&lt;/content>
+&lt;/service_response></pre>
+            </li>
+            <li>
+                Um eine ungültige Anforderung zu beantworten, kann das Stylesheet <code>request_xslt_stylesheet</code> sofort ein
+                <scheduler_element name="service_response"/> liefern.
+            </li>
+            <li>
+                Fehlerbehandlung:<br/>
+                Wenn mit POST kein XML-Dokument übergeben worden ist, führt das zum HTTP-Fehlercode "404 Bad Request".
+                <br/>
+                Ein Fehler in der Transformation führt zum HTTP-Fehlercode "500 Internal Server Error".
+            </li>
+        </ol>
+
+        
+
+
+        <h2>Ergebnis der Ausführung weiterleiten (Forwarding)</h2>
+        <p>
+            Aufträge und Tasks können einem Web-Dienst zugeordnet sein.
+            Die Kommandos <scheduler_element name="add_order"/> und <scheduler_element name="start_job"/> 
+            erhalten dazu das neue Attribut <code>service="<i>service_name</i>"</code>.
+        </p>
+        <p>
+            Solche Aufträge und Tasks werden, 
+            wenn dem Web-Dienst ein <code>forward_xslt_stylesheet</code> zugeordnet ist, 
+            mit diesem als 
+            <scheduler_element directory="xml/answer/" name="order"/> bzw. 
+            <scheduler_element directory="xml/answer/" name="task"/>
+            übergeben:
+        </p>
+        <pre>&lt;order service="<i>service_name</i>" last_job="<i>job_name</i>" …>
+    &lt;payload>&lt;params>…&lt;/params>&lt;/payload>
+    &lt;log last_error="…" last_warning="…"/>
+    …
+&lt;/order></pre>
+        <p>
+            bzw.
+        </p>
+        <pre>&lt;task job="…" …>
+    &lt;log last_error="…" last_warning="…"/>
+    …
+&lt;/task></pre>
+        <p>
+            Ergebnis der Transformation ist ein <scheduler_element name="service_request"/>:
+        </p>
+
+        <pre>&lt;service_request url="<i>url</i>">
+    &lt;content><i>…data…</i>&lt;/content>
+&lt;/service_request></pre>
+        
+        <p>
+            Der Scheduler packt das <scheduler_element name="service_request"/> in die Payload eines neuen Auftrags 
+            und übergibt diesen der vordefinierten Jobkette <code>scheduler_service_forwarding</code>.
+        </p>
+
+        <p>
+            Der einzige Job der Jobkette, <code>scheduler_service_forwarder</code>,
+            baut mit dem URL eine HTTP-Verbindung auf, überträgt mit POST die Daten, wartet die Antwort ab
+            und protokolliert sie.
+        </p>
+        <p>
+            Implementiert ist der Job in Java.
+        </p>
+
+        
+    </description>
+</xml_element>

@@ -25,15 +25,21 @@ struct Http_request : Object
     bool                        has_parameter               ( const string& name ) const            { return _parameters.find( name ) != _parameters.end(); }
     string                      parameter                   ( const string& name ) const;
     bool                        is_http_1_1                 () const;
-    string                      header_field                ( const string& name ) const            { map<string,string>::const_iterator it = _header.find( name );
+    string                      header_field                ( const string& name ) const            { String_map::const_iterator it = _header.find( name );
                                                                                                       return it == _header.end()? "" : it->second; }
+    string                      url                         () const;
+    string                      url_path                    () const                                { return _path; }
+    string                      host_and_port_field         () const;
+
 
     Fill_zero                  _zero_;
     string                     _http_cmd;
     string                     _protocol;
     string                     _path;
-    map<string,string>         _header;
-    map<string,string>         _parameters;
+
+    typedef stdext::hash_map<string,string>  String_map;
+    String_map                 _header;
+    String_map                 _parameters;
     string                     _body;
 };
 
@@ -242,6 +248,22 @@ struct Http_response : Object
 
 struct Http_processor : Communication::Processor
 {
+    enum Response_code
+    {
+        code_bad_request                = 404,
+        code_internal_server_error      = 500
+    };
+
+    struct Http_exception : exception
+    {
+        Http_exception( Response_code response_code ) : exception( response_messages[ response_code ].c_str() ), _response_code( response_code ) {}
+        Response_code          _response_code;
+    };
+
+
+    static stdext::hash_map<Response_code,string>  response_messages;
+
+
                                 Http_processor              ( Http_processor_channel* );
 
 

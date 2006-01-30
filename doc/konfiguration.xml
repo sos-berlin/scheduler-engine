@@ -123,6 +123,11 @@
             ]]&gt;
         &lt;/script>
 
+        &lt;<a class="silent" href="xml/web_services.xml">web_services</a>>
+            &lt;<a class="silent" href="xml/web_service.xml">web_service</a> name="…" …/>
+            …
+        &lt;/web_service>
+
         &lt;<a class="silent" href="xml/holidays.xml">holidays</a>>
             &lt;<a class="silent" href="xml/holiday.xml">holiday</a> day="…"/>
             …

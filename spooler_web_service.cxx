@@ -265,7 +265,7 @@ void Web_service::forward( const xml::Document_ptr& payload_dom )
         {
             _log->debug( "forward_xslt_stylesheet " + _forward_xslt_stylesheet_path + " liefert:\n" );
             _log->debug( command_document.xml( true ) );
-            if( _log_xml )  File( _log_filename_prefix + ".command.xml", "w" ).print( command_document.xml() );
+            if( _log_xml )  File( _log_filename_prefix + ".forward.xml", "w" ).print( command_document.xml() );
         }
 
         
@@ -350,12 +350,17 @@ string Web_service_transaction::process_request( const string& request_data )
     request_document.create();
 
 
-    bool is_xml = string_begins_with( request_data, "<" );
+    bool is_xml = true;  //string_begins_with( request_data, "<" );
 
-    if( is_xml )
+    //if( is_xml )
     {
         if( _web_service->_log_xml )  File( _log_filename_prefix + ".raw_request.xml", "w" ).print( request_data );
-        request_document.load_xml( request_data );
+        bool ok = request_document.try_load_xml( request_data );
+        if( !ok )
+        {
+            _log->error( request_document.error_text() );
+            throw Http_processor::Http_exception( Http_processor::code_bad_request );
+        }
     }
 
 
@@ -369,6 +374,7 @@ string Web_service_transaction::process_request( const string& request_data )
 
     xml::Element_ptr service_request_element = request_document.createElement( "service_request" );
     service_request_element.appendChild( _web_service->dom_element( request_document ) );           // <web_service> anhängen
+    service_request_element.setAttribute( "url", _http_processor->_http_request->url() );
 
     xml::Element_ptr content_element = service_request_element.append_new_element( "content" );
 
@@ -418,13 +424,6 @@ string Web_service_transaction::process_request( const string& request_data )
 
         command_processor.execute_2( command_document, Time::now() );
 
-        if( _web_service->_debug )
-        {
-            _log->debug( "Command response:\n" );
-            _log->debug( command_processor._answer.xml( true ) );
-            if( _web_service->_log_xml )  File( _log_filename_prefix + ".response.xml", "w" ).print( response_document.xml() );
-        }
-
         response_document = _web_service->transform_response( command_processor._answer );
     }
     else
@@ -432,6 +431,13 @@ string Web_service_transaction::process_request( const string& request_data )
         response_document = command_document;
     }
 
+
+    if( _web_service->_debug )
+    {
+        _log->debug( "Command response:\n" );
+        _log->debug( command_processor._answer.xml( true ) );
+        if( _web_service->_log_xml )  File( _log_filename_prefix + ".service_response.xml", "w" ).print( response_document.xml() );
+    }
 
     //if( _web_service->_debug )
     //{
