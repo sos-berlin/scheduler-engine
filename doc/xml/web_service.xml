@@ -113,7 +113,7 @@
         <p>
             Web-Dienste lassen sich einrichten, um Aufträge oder Tasks zu erzeugen.
             Die angenommene Anforderung wird sofort beantwortet.
-            Das Ergebnis des Auftrags oder der Task kann zu einen anderen Web-Dienst weiterleitet werden.
+            Das Ergebnis des Auftrags oder der Task kann zu einen anderen Web-Dienst weitergeleitet werden.
         </p>
         <p>
             Der TCP-Port des HTTP-Servers wird mit <scheduler_element name="config" attribute="tcp_port"/> festgelegt.
@@ -132,7 +132,7 @@
                 
                 <pre>&lt;service_request>
     &lt;web_service name="<i>service_name</i>" url_path="<i>url_path</i>"/>
-    &lt;content><i>…data…</i>&lt;/content>
+    &lt;content><i>…xmldata…</i>&lt;/content>
 &lt;/service_request></pre>
             </li>
             <li>
@@ -145,44 +145,48 @@
             <li>
                 Die Antwort des XML-Kommandos (<code>&lt;spooler></code><scheduler_element name="answer" directory="xml/answer/"/>,
                 die auch eine Fehlermeldung <scheduler_element directory="xml/answer/" name="ERROR"/> enthalten kann) 
-                wird mit dem <code>response_xslt_stylesheet</code> zu einem <scheduler_element name="service_response"/> transformiert und
-                dem Aufrufer über HTTP zurückgeliefert.
+                wird mit dem <code>response_xslt_stylesheet</code> zu einem <scheduler_element name="service_response"/> transformiert. 
+                Der Scheduler liefert den Inhalt von <scheduler_element name="content"/> über die offene HTTP-Verbindung zurück.
                 
                 <pre>&lt;service_response>
-    &lt;content><i>…data…</i>&lt;/content>
+    &lt;content><i>…xmldata…</i>&lt;/content>
 &lt;/service_response></pre>
             </li>
             <li>
                 Um eine ungültige Anforderung zu beantworten, kann das Stylesheet <code>request_xslt_stylesheet</code> sofort ein
                 <scheduler_element name="service_response"/> liefern.
             </li>
-            <li>
-                Fehlerbehandlung:<br/>
-                Wenn mit POST kein XML-Dokument übergeben worden ist, führt das zum HTTP-Fehlercode "404 Bad Request".
-                <br/>
-                Ein Fehler in der Transformation führt zum HTTP-Fehlercode "500 Internal Server Error".
-            </li>
         </ol>
 
         
+        <h2>Fehlerbehandlung</h2>
+        <p>
+            Wenn mit POST kein XML-Dokument übergeben worden ist, führt das zum HTTP-Fehlercode "404 Bad Request".
+            <br/>
+            Ein Fehler in der Transformation führt zum HTTP-Fehlercode "500 Internal Server Error".
+        </p>
 
 
         <h2>Ergebnis der Ausführung weiterleiten (Forwarding)</h2>
         <p>
             Aufträge und Tasks können einem Web-Dienst zugeordnet sein.
             Die Kommandos <scheduler_element name="add_order"/> und <scheduler_element name="start_job"/> 
-            erhalten dazu das neue Attribut <code>service="<i>service_name</i>"</code>.
+            erhalten dazu das neue Attribut <code>web_service="<i>service_name</i>"</code>.
         </p>
         <p>
             Solche Aufträge und Tasks werden, 
-            wenn dem Web-Dienst ein <code>forward_xslt_stylesheet</code> zugeordnet ist, 
+            wenn sie enden und dem Web-Dienst ein <code>forward_xslt_stylesheet</code> zugeordnet ist,
             mit diesem als 
             <scheduler_element directory="xml/answer/" name="order"/> bzw. 
             <scheduler_element directory="xml/answer/" name="task"/>
             übergeben:
         </p>
         <pre>&lt;order service="<i>service_name</i>" last_job="<i>job_name</i>" …>
-    &lt;payload>&lt;params>…&lt;/params>&lt;/payload>
+    &lt;payload>
+        &lt;sos.spooler.variable_set>
+            …
+        &lt;/sos.spooler.variable_set>
+    &lt;/payload>
     &lt;log last_error="…" last_warning="…"/>
     …
 &lt;/order></pre>

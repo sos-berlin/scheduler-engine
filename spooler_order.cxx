@@ -1235,12 +1235,14 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
         {
             xml::Element_ptr payload_element = element.append_new_element( "payload" );
             bool             ok              = false;
+            string           payload_string  = _payload.as_string();
 
-            if( _payload.vt == VT_BSTR  &&  wcsncmp( V_BSTR( &_payload ), L"<?xml", 5 ) == 0 )
+            if( string_begins_with( payload_string, "<?xml" ) )
+            //if( _payload.vt == VT_BSTR  &&  wcsncmp( V_BSTR( &_payload ), L"<?xml", 5 ) == 0 )
             {
                 try
                 {
-                    xml::Document_ptr doc ( V_BSTR( &_payload ) );
+                    xml::Document_ptr doc ( payload_string );
                     payload_element.appendChild( document.clone( doc.documentElement() ) );
                     ok = true;
                 }
@@ -1250,7 +1252,7 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
                 }
             }
 
-            if( !ok )  payload_element.appendChild( document.createTextNode( _payload.as_string() ) );
+            if( !ok )  payload_element.appendChild( document.createTextNode( payload_string ) );
         }
 
 

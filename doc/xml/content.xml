@@ -15,5 +15,13 @@
     <xml_parent_elements>
         <xml_parent_element name="service_request"/>
     </xml_parent_elements>
+    
+    
+
+    <example>
+        <pre>&lt;content>
+    &lt;my_answer>…&lt;/my_answer>
+&lt;/content></pre>
+    </example>    
 
 </xml_element>
