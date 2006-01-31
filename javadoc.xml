@@ -11,7 +11,7 @@
             noindex="false" 
             nonavbar="false" 
             notree="false" 
-            sourcefiles="sos/spooler/Log.java,sos/spooler/Order_queue.java,sos/spooler/Job_chain_node.java,sos/spooler/Job_impl.java,sos/spooler/Mail.java,sos/spooler/Variable_set.java,sos/spooler/Job.java,sos/spooler/Spooler_program.java,sos/spooler/Order.java,sos/spooler/Task.java,sos/spooler/Job_chain.java,sos/spooler/Subprocess.java,sos/spooler/Spooler.java,sos/spooler/Error.java,sos/spooler/Xslt_stylesheet.java,sos/spooler/Monitor_impl.java" 
+            sourcefiles="sos/spooler/Log.java,sos/spooler/Order_queue.java,sos/spooler/Job_chain_node.java,sos/spooler/Job_impl.java,sos/spooler/Mail.java,sos/spooler/Variable_set.java,sos/spooler/Job.java,sos/spooler/Spooler_program.java,sos/spooler/Order.java,sos/spooler/Task.java,sos/spooler/Job_chain.java,sos/spooler/Subprocess.java,sos/spooler/Spooler.java,sos/spooler/Error.java,sos/spooler/Xslt_stylesheet.java,sos/spooler/Monitor_impl.java,sos/spooler/Web_service.java" 
             sourcepath=".." 
             splitindex="true" 
             stylesheetfile="javadoc.css" 

@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+<!-- $Id$ -->
+
+<?xml-stylesheet href="api-default_language.xsl" type="text/xsl"?>
+
+
+<api.class
+    name        = "Web_service"
+    object_name = "web_service"
+    base_dir    = "../"
+    author      = "$Author$"
+    date        = "$Date$"
+>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="name" access="read">
+        <com>
+            <com.result>
+                <com.type type="BSTR"/>
+            </com.result>
+        </com>
+
+        <title>
+            Name des Web-Dienstes im Scheduler
+        </title>
+
+        <description>
+            <p>
+                Siehe auch <scheduler_element name="web_service" attribute="name"/>
+            </p>
+        </description>
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="forward_xslt_stylesheet_path" access="read">
+        <com>
+            <com.result>
+                <com.type type="BSTR"/>
+            </com.result>
+        </com>
+
+        <title>
+            Pfad des XSLT-Stylesheets fürs Forwarding
+        </title>
+        
+        <description>
+            <p>
+                Siehe auch <scheduler_element name="web_service" attribute="forward_xslt_stylesheet"/>
+            </p>
+        </description>
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <description>
+        <p>
+            Siehe auch <scheduler_element name="web_service"/>
+        </p>
+    </description>
+
+
+</api.class>

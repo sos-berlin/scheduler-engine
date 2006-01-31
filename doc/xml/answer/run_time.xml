@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id: param.xml 3623 2005-04-20 06:53:16Z jz $-->
+<!--$Id$-->
 
 <xml_element name          = "run_time"
              title         = "Laufzeiten"
@@ -9,8 +9,8 @@
              sub_directory = "answer/"
              base_dir      = "../../"
              parent_page   = "../../xml_commands.xml"
-             author        = "$Author: jz $"
-             date          = "$Date: 2005-04-20 08:53:16 +0200 (Mi, 20 Apr 2005) $">
+             author        = "$Author$"
+             date          = "$Date$">
 
     <xml_parent_elements>
         <xml_parent_element name="job"/>
