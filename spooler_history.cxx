@@ -249,8 +249,8 @@ void Spooler_db::open2( const string& db_name )
 
 
                     add_column( _spooler->_orders_tablename, "INITIAL_STATE", "add \"INITIAL_STATE\" varchar(100)" );
-                    add_column( _spooler->_orders_tablename, "RUN_TIME"     , "add \"RUN_TIME\"      clob )" );
-                    add_column( _spooler->_orders_tablename, "ORDER_XML"    , "add \"ORDER_XML\"     clob )" );
+                    add_column( _spooler->_orders_tablename, "RUN_TIME"     , "add \"RUN_TIME\"      clob" );
+                    add_column( _spooler->_orders_tablename, "ORDER_XML"    , "add \"ORDER_XML\"     clob" );
 
                     create_table_when_needed( _spooler->_order_history_tablename, 
                                             "\"HISTORY_ID\"  integer not null,"             // Primärschlüssel
@@ -275,7 +275,7 @@ void Spooler_db::open2( const string& db_name )
                                             "\"TASK_XML\"       clob,"
                                             "primary key( \"TASK_ID\" )" );
 
-                    add_column( _spooler->_tasks_tablename, "TASK_XML", " add ( \"TASK_XML\" clob )" );
+                    add_column( _spooler->_tasks_tablename, "TASK_XML", " add \"TASK_XML\" clob" );
 
                     commit();
                 }
