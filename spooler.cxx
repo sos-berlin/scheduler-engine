@@ -779,7 +779,7 @@ void Spooler::cmd_add_jobs( const xml::Element_ptr& element )
 
 void Spooler::cmd_job( const xml::Element_ptr& element )
 {
-    load_job_from_xml( element, Time::now(), _state >= s_running );
+    load_job_from_xml( element, Time::now(), _state >= s_starting );
 
     signal( "add_job" );
 }
@@ -1434,6 +1434,7 @@ string Spooler::state_name( State state )
     switch( state )
     {
         case s_stopped:             return "stopped";
+        case s_loading:             return "loading";
         case s_starting:            return "starting";
         case s_running:             return "running";
         case s_paused:              return "paused";
@@ -1877,7 +1878,7 @@ void Spooler::load()
     _log.init( this );              // Nochmal nach load_argv()
     _log.set_title( "Main log" );
 
-    set_state( s_starting );
+    set_state( s_loading );
     //_log ist noch nicht geöffnet   _log.info( "Spooler::load " + _config_filename );
 
 

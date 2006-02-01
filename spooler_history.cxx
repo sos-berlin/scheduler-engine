@@ -248,8 +248,9 @@ void Spooler_db::open2( const string& db_name )
                                             "primary key( \"JOB_CHAIN\", \"ID\" )" );
 
 
-                    add_column( _spooler->_orders_tablename, "INITIAL_STATE", "add ( \"INITIAL_STATE\" varchar(100), \"RUN_TIME\" clob )" );
-                    add_column( _spooler->_orders_tablename, "ORDER_XML"    , "add ( \"ORDER_XML\" clob )" );
+                    add_column( _spooler->_orders_tablename, "INITIAL_STATE", "add \"INITIAL_STATE\" varchar(100)" );
+                    add_column( _spooler->_orders_tablename, "RUN_TIME"     , "add \"RUN_TIME\"      clob )" );
+                    add_column( _spooler->_orders_tablename, "ORDER_XML"    , "add \"ORDER_XML\"     clob )" );
 
                     create_table_when_needed( _spooler->_order_history_tablename, 
                                             "\"HISTORY_ID\"  integer not null,"             // Primärschlüssel

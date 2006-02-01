@@ -167,6 +167,7 @@ struct Spooler : Object,
     {
         s_none,
         s_stopped,
+        s_loading,
         s_starting,
         s_running,
         s_paused,
