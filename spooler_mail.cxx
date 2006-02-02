@@ -110,6 +110,9 @@ void Com_mail::init()
     if( _msg == NULL )
     {
         _msg = mail::create_message( _spooler->_java_vm );
+
+        use_queue_defaults( _spooler->_mail_defaults );
+        use_smtp_default  ( _spooler->_mail_defaults );
     }
 }
 

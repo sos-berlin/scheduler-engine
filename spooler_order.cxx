@@ -446,7 +446,7 @@ void Job_chain::finish()
 
         if( zschimmer::Log_ptr log = "" )
         {
-            log << "Job_chain " << _name << " finished\n:";
+            log << "Job_chain " << _name << " finished:\n";
 
             for( Chain::iterator it = _chain.begin(); it != _chain.end(); it++ )
             {

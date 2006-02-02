@@ -354,7 +354,7 @@ string Web_service_transaction::process_request( const string& request_data, con
 
     //if( is_xml )
     {
-        if( _web_service->_log_xml )  File( _log_filename_prefix + ".raw_request.xml", "w" ).print( request_data );
+        if( _web_service->_log_xml )  File( _log_filename_prefix + ".raw_request.txt", "w" ).print( request_data );
         bool ok = request_document.try_load_xml( request_data, encoding );
         if( !ok )
         {

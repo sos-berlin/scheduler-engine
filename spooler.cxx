@@ -1914,6 +1914,9 @@ void Spooler::load()
     _process_class_list.push_back( process_class );         
 
 
+    _web_services.init();    // Ein Job und eine Jobkette einrichten, s. spooler_web_service.cxx
+
+
     Command_processor cp ( this );
     _executing_command = false;             // Command_processor() hat es true gesetzt, aber noch läuft der Scheduler nicht. 
                                             // spooler_history.cxx verweigert das Warten auf die Datenbank, wenn _executing_command gesetzt ist,
@@ -2723,9 +2726,6 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line )
 
     _communication.init();  // Für Windows
     //_communication.bind();  // Falls der Port belegt ist, gibt's hier einen Abbruch
-
-
-    _web_services.init();    // Ein Job und eine Jobkette einrichten, s. spooler_web_service.cxx
 
 
 

@@ -1002,6 +1002,7 @@ xml::Element_ptr Prefix_log::dom_element( const xml::Document_ptr& document, con
         if( _mail_on_success            )  log_element.setAttribute( "mail_on_success", "yes" );
         if( _mail_on_process            )  log_element.setAttribute( "mail_on_process", _mail_on_process );
 
+      //string queue_dir   = _mail_defaults[ "queue_dir" ];
         string smtp_server = _mail_defaults[ "smtp"    ];
         string from        = _mail_defaults[ "from"    ];
         string to          = _mail_defaults[ "to"      ];
@@ -1013,6 +1014,7 @@ xml::Element_ptr Prefix_log::dom_element( const xml::Document_ptr& document, con
         {
             HRESULT hr;
             Bstr bstr;
+          //hr = _mail->get_Queue_dir( &bstr );if( !FAILED(hr) )  queue_dir   = string_from_bstr( bstr );
             hr = _mail->get_Smtp   ( &bstr );  if( !FAILED(hr) )  smtp_server = string_from_bstr( bstr );
             hr = _mail->get_From   ( &bstr );  if( !FAILED(hr) )  from        = string_from_bstr( bstr );
             hr = _mail->get_To     ( &bstr );  if( !FAILED(hr) )  to          = string_from_bstr( bstr );
@@ -1021,6 +1023,7 @@ xml::Element_ptr Prefix_log::dom_element( const xml::Document_ptr& document, con
             hr = _mail->get_Subject( &bstr );  if( !FAILED(hr) )  subject     = string_from_bstr( bstr );
         }
 
+      //if( queue_dir   != "" )  log_element.setAttribute( "queue_dir"   , queue_dir );
         if( smtp_server != "" )  log_element.setAttribute( "smtp"        , smtp_server );
         if( from        != "" )  log_element.setAttribute( "mail_from"   , from );
         if( to          != "" )  log_element.setAttribute( "mail_to"     , to );

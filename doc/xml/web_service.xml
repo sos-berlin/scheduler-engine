@@ -70,7 +70,7 @@
                 
                 <table cellspacing="0" cellpadding="0" style="margin-top: 1em">
                     <tr>
-                        <td><code><i>service_name</i>.<i>transaction_number</i>.raw_request.xml</code></td>
+                        <td><code><i>service_name</i>.<i>transaction_number</i>.raw_request.txt</code></td>
                         <td style="padding-left: 2ex">Der mit HTTP-POST übergebene Text</td>
                     </tr>
                     <tr>
