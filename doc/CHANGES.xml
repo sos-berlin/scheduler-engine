@@ -14,8 +14,11 @@
         <revision type="correction" title="factory.ini queue_dir=">
             <description>
                 <p>
-                    queue_dir kann wieder in der Datei factory.ini eingestellt werden.
-                    Der allgemeine Stelle ist aber in der <scheduler_ini_entry file="sos.ini" section="mail" entry="queue_dir"/>.
+                    queue_dir kann wieder in der Datei factory.ini eingestellt werden. 
+                    Betrifft Scheduler ab 2.0.139.3889 (2005-09-15).
+                </p>
+                <p>
+                    Die beste Stelle für diese Einstellung bleibt in der Datei <scheduler_ini_entry file="sos.ini" section="mail" entry="queue_dir"/>.
                 </p>
             </description>
         </revision>

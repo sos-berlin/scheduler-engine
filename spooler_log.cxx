@@ -656,7 +656,10 @@ Com_mail* Prefix_log::imail()
         if( !_mail_defaults_set )  set_mail_defaults();
 
         ptr<Com_mail> mail = new Com_mail( _spooler );
+
         mail->init();
+        mail->use_queue_defaults( _mail_defaults );
+        mail->use_smtp_default  ( _mail_defaults );
 
         _mail = mail;   // Nur bei fehlerfreiem init() speichern
 /*

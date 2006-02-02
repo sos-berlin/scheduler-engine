@@ -110,9 +110,6 @@ void Com_mail::init()
     if( _msg == NULL )
     {
         _msg = mail::create_message( _spooler->_java_vm );
-
-        use_queue_defaults( _spooler->_mail_defaults );
-        use_smtp_default  ( _spooler->_mail_defaults );
     }
 }
 
@@ -737,14 +734,14 @@ void Com_mail::use_defaults( const Mail_defaults& defaults )
 
 void Com_mail::use_queue_defaults( const Mail_defaults& defaults )
 {
-    if( queue_dir()     == ""  &&  defaults.has_value( "queue_dir" )  &&  defaults[ "queue_dir" ] != "-" )  set_queue_dir( defaults[ "queue_dir" ] );
+    if( defaults.has_value( "queue_dir" )  &&  defaults[ "queue_dir" ] != "-" )  set_queue_dir( defaults[ "queue_dir" ] );
 }
 
 //-----------------------------------------------------------------------Com_mail::use_smtp_default
 
 void Com_mail::use_smtp_default( const Mail_defaults& defaults )
 {
-    if( _smtp           == ""  &&  defaults.has_value( "smtp"      )  &&  defaults[ "smtp"      ] != "-" )  set_smtp     ( defaults[ "smtp"      ] );
+    if( defaults.has_value( "smtp"      )  &&  defaults[ "smtp"      ] != "-" )  set_smtp     ( defaults[ "smtp"      ] );
 }
 
 
