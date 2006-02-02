@@ -571,6 +571,9 @@ db = odbc -db=factory_oracle -user=factory -password=factory
                 Um diese eMails später zu verschicken, muss ein Job geschrieben werden, der die
                 Methode <scheduler_method class="Mail" method="dequeue"/> aufruft.
             </p>
+            <p>
+                Der allgemeine Platz für diese Einstellung ist die Datei sos.ini.
+            </p>
         </description>
     </setting>
 
@@ -682,6 +685,7 @@ db = odbc -db=factory_oracle -user=factory -password=factory
              title   = "Hostname oder IP-Nummer des SMTP-Servers für eMail">
         <description>
             <p>
+                Der allgemeine Platz für diese Einstellung ist die Datei sos.ini.
             </p>
         </description>
     </setting>

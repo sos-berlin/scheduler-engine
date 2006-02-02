@@ -10,8 +10,9 @@
      date     = "$Date$">
 
     <ini_sections>
-        <ini_section name="licence"/>
         <ini_section name="java"/>
+        <ini_section name="licence"/>
+        <ini_section name="mail"/>
     </ini_sections>
 
     <description>

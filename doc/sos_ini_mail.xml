@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
+
+<!--$Id$-->
+
+<ini_section
+    file     = "sos.ini"
+    name     = "mail"
+    title    = ""
+    base_dir = ""
+    author   = "$Author$"
+    date     = "$Date$">
+
+    <ini_entries>
+
+        <ini_entry setting="smtp" />
+        <ini_entry name="queue_dir" setting="mail_queue_dir" />
+
+    </ini_entries>
+
+    <description>
+        <p>
+            Hier werden Einstellungen für eMail vorgenommen.
+        </p>
+    </description>
+</ini_section>
