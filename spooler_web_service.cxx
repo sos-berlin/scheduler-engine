@@ -333,6 +333,7 @@ ptr<Http_response> Web_service_transaction::process_http( Http_processor* http_p
     if( _web_service->_debug  &&  http_processor->_http_parser )  _log->debug( "\n" "HTTP request:\n " ), _log->debug( http_processor->_http_parser->_text ), _log->debug( "" );;
 
     response = process_request( http_request->_body, http_request->charset_name() );
+
     http_response = Z_NEW( Http_response( http_request, Z_NEW( String_chunk_reader( response ) ), "text/xml" ) );
 
     http_response->finish();
@@ -417,7 +418,11 @@ string Web_service_transaction::process_request( const string& request_data, con
     xml::Document_ptr response_document;
 
 
-    if( command_document.documentElement().nodeName() != "service_response" )
+    if( command_document.documentElement().nodeName() == "service_response" )
+    {
+        response_document = command_document;
+    }
+    else
     {
         Command_processor command_processor ( _spooler );
         command_processor.set_host( _http_processor->_host );
@@ -432,10 +437,6 @@ string Web_service_transaction::process_request( const string& request_data, con
             _log->debug( command_processor._answer.xml( true ) );
         }
     }
-    else
-    {
-        response_document = command_document;
-    }
 
 
     if( _web_service->_log_xml )  File( _log_filename_prefix + ".service_response.xml", "w" ).print( response_document.xml() );
@@ -447,7 +448,30 @@ string Web_service_transaction::process_request( const string& request_data, con
     //}
 
 
-    return response_document.xml();
+
+    string result;
+
+
+    xml::Node_ptr data_node = response_document.select_node( "/service_response/content/*" );
+    if( !data_node )  throw_xc( "SCHEDULER-244" );
+    //xml::Element_ptr content_element = response.select_node( "/service_response/content" );
+    //if( !content_element )  throw_xc( "SCHEDULER-244" );
+
+    //xml::Node_ptr data_node = content_element.firstChild();
+    //while( data_node  &&  data_node.nodeType() == COMMENT_NODE )  data_node = data_node.nextSibling();
+    //if( !data_node )  throw_xc( "SCHEDULER-244" );
+
+    //if( data_node.nodeType() != ELEMENT_NODE )  throw_xc( "SCHEDULER-244" );
+    {
+        result = data_node.xml();
+
+        // Es soll nur ein Element geben!
+        data_node = data_node.nextSibling();
+        while( data_node  &&  data_node.nodeType() == xml::COMMENT_NODE )  data_node = data_node.nextSibling();
+        if( data_node )  throw_xc( "SCHEDULER-245" );
+    }
+
+    return result;
 }
 
 //-------------------------------------------------------------------------------------------------
