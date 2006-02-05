@@ -6,6 +6,7 @@
 <ini_section
     name     = "spooler"
     file     = "factory.ini"
+    wheight  = "20"
     base_dir = ""
     author   = "$Author$"
     date     = "$Date$"

@@ -6,6 +6,7 @@
 <ini_section
     file     = "sos.ini"
     name     = "mail"
+    wheight  = "10"
     title    = ""
     base_dir = ""
     author   = "$Author$"

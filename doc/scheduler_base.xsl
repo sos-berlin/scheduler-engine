@@ -650,7 +650,10 @@
 
             
             <xsl:if test="true()">
-                <xsl:variable name="ini_entry" select="( document( 'factory_ini_job.xml' ) | document( 'factory_ini_spooler.xml' ) )/ini_section/ini_entries/ini_entry[ @setting = current()/@setting ]"/>
+                <xsl:variable name="ini_entry" select="( document( 'factory_ini_job.xml'     ) |
+                                                         document( 'factory_ini_spooler.xml' ) |
+                                                         document( 'sos_ini_mail.xml'        ) |
+                                                         document( 'sos_ini_java.xml'        )   )/ini_section/ini_entries/ini_entry[ @setting = current()/@setting ]"/>
                 <xsl:variable name="current_setting" select="."/>
 
                 <xsl:for-each select="$ini_entry">
@@ -664,7 +667,7 @@
 
                     <td style="padding-left: 1ex">
                         <xsl:call-template name="scheduler_ini_entry">
-                            <xsl:with-param name="file"    select="'factory.ini'"/>
+                            <xsl:with-param name="file"    select="ancestor::ini_section/@file"/>
                             <xsl:with-param name="section" select="ancestor::ini_section/@name"/>
                             <xsl:with-param name="entry"   select="@name | @setting"/>
                             <xsl:with-param name="value"   select="document( 'settings.xml' )/settings/setting[ @setting = current()/@setting ]/@initial"/>
@@ -673,13 +676,14 @@
 
                     <td style="padding-left: 1ex">
                         <xsl:choose>
-                            <xsl:when test="not( $current_setting/self::property       ) and
+                            <!--xsl:when test="not( $current_setting/self::property       ) and
                                             not( $current_setting/self::command_option ) and 
                                             not( $current_setting/self::ini_entry and $current_setting/ancestor::ini_section/@name='job' )">
                                 hat Vorrang.                                                            
-                            </xsl:when>
-                            <!--xsl:when test="$current_setting/self::command_option or $current_setting/self::property [ not( @access='read' ) ]">
                             </xsl:when-->
+                            <xsl:when test="$current_setting/ancestor::ini_section/@wheight &lt; ancestor::ini_section/@wheight">
+                                hat Vorrang.                                                            
+                            </xsl:when>
                             <xsl:otherwise>
                                 wird damit überschrieben.
                             </xsl:otherwise>
@@ -1547,7 +1551,7 @@
         <table cellspacing="0" cellpadding="0">
             <col valign="baseline"/>
             <col valign="baseline"/>
-            <col valign="baseline" style="padding-left: 4ex"/>
+            <col valign="baseline"/>
 
             <tr>
                 <td>
@@ -1603,7 +1607,7 @@
                     <td>
                         <code>= </code><span class="type"><xsl:value-of select="@type | $setting/@type"/></span>
                     </td>
-                    <td>
+                    <td style="padding-left: 4ex">
                         <span class="title">
                             <xsl:value-of select="@title | $setting/@title"/>
                         </span>

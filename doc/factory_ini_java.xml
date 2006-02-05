@@ -6,6 +6,7 @@
 <ini_section
     name     = "java"
     file     = "factory.ini"
+    wheight  = "20"
     title    = "Datei factory.ini, Abschnitt [java]"
     base_dir = ""
     author   = "$Author$"

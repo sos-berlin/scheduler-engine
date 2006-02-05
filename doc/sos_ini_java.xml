@@ -6,6 +6,7 @@
 <ini_section
     file     = "sos.ini"
     name     = "java"
+    wheight  = "10"
     title    = ""
     base_dir = ""
     author   = "$Author$"
@@ -24,18 +25,7 @@
             </description>
         </ini_entry-->
 
-        <ini_entry name="class_path" type="verzeichnisse" title="classpath">
-            <description>
-                <p>
-                    Das ist der <code>class_path</code> für Java.
-                    Sie geben hier Verzeichnisse oder Pfade von Jar-Dateien an.
-                    Die Namen trennen sie in Windows mit "<code>;</code>", sonst mit "<code>:</code>".
-                </p>
-            </description>
-            <example>
-                <pre>class_path = s:\prod\bind\sos.spooler.jar;s:\prod\bind\sos.hostware.jar;s:\prod\bind\sos.mail.jar</pre>
-            </example>
-        </ini_entry>
+        <ini_entry name="class_path" setting="java_class_path"/>
 
         <ini_entry name="options" type="text" title="Optionen für Java">
             <description>

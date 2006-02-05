@@ -572,7 +572,8 @@ db = odbc -db=factory_oracle -user=factory -password=factory
                 Methode <scheduler_method class="Mail" method="dequeue"/> aufruft.
             </p>
             <p>
-                Der allgemeine Platz für diese Einstellung ist die Datei sos.ini.
+                Der allgemeine Platz für diese Einstellung ist 
+                <scheduler_ini_entry file="sos.ini" section="mail" entry="queue_dir"/>.
             </p>
         </description>
     </setting>
@@ -596,11 +597,18 @@ db = odbc -db=factory_oracle -user=factory -password=factory
              prepend   = "yes"
              subst_env = "yes"
              title     = "Java-Classpath">
+        <example>
+            <pre>class_path = s:\prod\bind\sos.spooler.jar;s:\prod\bind\sos.hostware.jar;s:\prod\bind\sos.mail.jar</pre>
+        </example>
         <description>
             <p>
-                Wenn Jobs in Java implementiert sind, kann hier der <code>CLASS_PATH</code> eingestellt werden.
+                Für Java kann hier der <code>CLASS_PATH</code> eingestellt werden.
                 Das ist eine Liste von Verzeichnissen, in Windows durch Semikolons (;), in Unix
                 durch Doppelpunkte getrennt.
+            </p>
+            <p>
+                Der allgemeine Platz für diese Einstellung ist 
+                <scheduler_ini_entry file="sos.ini" section="java" entry="class_path"/>.
             </p>
         </description>
     </setting>
@@ -614,6 +622,10 @@ db = odbc -db=factory_oracle -user=factory -password=factory
         <description>
             <p>
                 Die Optionen werden der Java Virtual Machine übergeben.
+            </p>
+            <p>
+                Der allgemeine Platz für diese Einstellung ist 
+                <scheduler_ini_entry file="sos.ini" section="java" entry="options"/>.
             </p>
         </description>
     </setting>
@@ -685,7 +697,8 @@ db = odbc -db=factory_oracle -user=factory -password=factory
              title   = "Hostname oder IP-Nummer des SMTP-Servers für eMail">
         <description>
             <p>
-                Der allgemeine Platz für diese Einstellung ist die Datei sos.ini.
+                Der allgemeine Platz für diese Einstellung ist 
+                <scheduler_ini_entry file="sos.ini" section="mail" entry="smtp"/>.
             </p>
         </description>
     </setting>
