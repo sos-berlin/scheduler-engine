@@ -363,7 +363,7 @@ Prefix_log::Prefix_log( int )
 :
     _zero_(this+1),
     _file(-1),
-    _log_level(log_unknown),
+  //_log_level(log_unknown),
     _mail_defaults(NULL)
 {
 }
@@ -378,7 +378,7 @@ Prefix_log::Prefix_log( Scheduler_object* o, const string& prefix )
     _log(&o->_spooler->_base_log),
     _prefix(prefix),
     _file(-1),
-    _log_level(log_unknown),
+  //_log_level(log_unknown),
     _mail_defaults(NULL)
 {
     init( o, prefix );

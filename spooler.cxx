@@ -1787,6 +1787,8 @@ void Spooler::load_arg()
             else
             if( opt.with_value( "udp-port"         ) )  _udp_port = opt.as_int(),  _udp_port_as_option_set = true;
             else
+            if( opt.flag      ( "ignore-process-classes" ) )  _ignore_process_classes = opt.set();
+            else
                 throw_sos_option_error( opt );
         }
 

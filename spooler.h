@@ -499,6 +499,7 @@ struct Spooler : Object,
     Process_class_list         _process_class_list;
     Process_list               _process_list;
   //int                        _process_count_max;
+    bool                       _ignore_process_classes;
 
 
   //Job*                       _next_job;

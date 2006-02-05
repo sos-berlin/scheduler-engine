@@ -393,7 +393,7 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const Time& x
             else
             if( e.nodeName_is( "process_classes" ) )
             {
-                if( !e.bool_getAttribute( "ignore", false ) )
+                if( !e.bool_getAttribute( "ignore", false )  &&  !_ignore_process_classes )
                     load_process_classes_from_dom( e, xml_mod_time );
             }
             else
