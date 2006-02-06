@@ -1234,25 +1234,39 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
         if( show & show_payload  &&  !_payload.is_null_or_empty_string()  &&  !_payload.is_missing() )
         {
             xml::Element_ptr payload_element = element.append_new_element( "payload" );
-            bool             ok              = false;
-            string           payload_string  = _payload.as_string();
+            xml::Element_ptr payload_content;
 
-            if( string_begins_with( payload_string, "<?xml" ) )
-            //if( _payload.vt == VT_BSTR  &&  wcsncmp( V_BSTR( &_payload ), L"<?xml", 5 ) == 0 )
+            if( _payload.vt == VT_DISPATCH )
             {
-                try
+                if( Com_variable_set* variable_set = dynamic_cast<Com_variable_set*>( V_DISPATCH( &_payload ) ) )
                 {
-                    xml::Document_ptr doc ( payload_string );
-                    payload_element.appendChild( document.clone( doc.documentElement() ) );
-                    ok = true;
-                }
-                catch( exception& x )
-                {
-                    Z_LOG( obj_name() << ".payload enthält fehlerhaftes XML: " << x.what() );
+                    payload_content = variable_set->dom_element( document, "variable_set", "variable" );
                 }
             }
 
-            if( !ok )  payload_element.appendChild( document.createTextNode( payload_string ) );
+            if( !payload_content )
+            {
+                string payload_string = _payload.as_string();
+
+                /*
+                if( string_begins_with( payload_string, "<?xml" ) )
+                {
+                    try
+                    {
+                        xml::Document_ptr doc ( payload_string );
+                        payload_content = document.clone( doc.documentElement() );
+                    }
+                    catch( exception& x )
+                    {
+                        Z_LOG( obj_name() << ".payload enthält fehlerhaftes XML: " << x.what() );
+                    }
+                }
+                */
+
+                if( !payload_content )  payload_content = document.createTextNode( payload_string );
+            }
+
+            payload_element.appendChild( payload_content );
         }
 
 
