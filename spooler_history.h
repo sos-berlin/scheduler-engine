@@ -89,7 +89,8 @@ struct Spooler_db : Object, Scheduler_object
     friend struct Transaction;
 
     void                        open2                   ( const string& db_name );
-  //void                        open_history_table      ();
+    void                        open_history_table      ();
+    void                        get_history_table_table ();
     void                        create_table_when_needed( const string& tablename, const string& fields );
     void                        add_column              ( const string& table_name, const string& column_name, const string add_clause );
     int                         get_id                  ( const string& variable_name, Transaction* = NULL );
@@ -102,7 +103,7 @@ struct Spooler_db : Object, Scheduler_object
   //Any_file                   _job_id_update;
   //Any_file                   _job_id_select;
     map<string,long32>         _id_counters;
-  //Any_file                   _history_table;
+    Any_file                   _history_table;
   //Any_file                   _history_update;
     vector<Dyn_obj>            _history_update_params;
     int                        _id;

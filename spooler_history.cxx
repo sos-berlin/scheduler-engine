@@ -449,7 +449,7 @@ void Spooler_db::try_reopen_after_error( exception& x, bool wait_endless )
                 try
                 {
                     open2( _spooler->_db_name );
-                    open_history_table();
+                    //open_history_table();
                     THREAD_LOCK( _error_lock )  _error = "";
 
                     break;
@@ -1161,8 +1161,7 @@ void Job_history::open()
 
                 _spooler->_db->open_history_table();
 
-                const Record_type* type = _spooler->_db->_history_table.spec().field_type_ptr();
-                if( type ) 
+                if( const Record_type* type = _spooler->_db->_history_table.spec().field_type_ptr() ) 
                 {
                     _extra_type = SOS_NEW( Record_type );
 
@@ -1515,6 +1514,18 @@ void Task_history::write( bool start )
                 {
                     if( start )
                     {
+                        sql::Insert_stmt insert ( &_spooler->_db->_db_descr );
+                        
+                        insert.set_table_name( _spooler->_job_history_tablename );
+                        
+                        insert[ "id"         ] = _task->_id;
+                        insert[ "spooler_id" ] = _spooler->id_for_db();
+                        insert[ "job_name"   ] = _task->job()->name();
+                        insert[ "cause"      ] = start_cause_name( _task->_cause );
+                        insert.set_datetime( "start_time", start_time );
+
+                        _spooler->_db->execute( insert );
+                        /*
                         Record record = _spooler->_db->_history_table.create_record();
 
                         record.set_field( "id"             , _task->_id );
@@ -1526,6 +1537,7 @@ void Task_history::write( bool start )
                         //if( !parameters.empty()  &&  parameters.length() < blob_field_size )  record.set_field( "parameters", parameters ), parameters = "";
 
                         _spooler->_db->_history_table.insert( record );
+                        */
 
                         if( !parameters.empty() )
                         {

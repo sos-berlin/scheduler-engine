@@ -1381,7 +1381,7 @@ void Order::set_payload( const VARIANT& payload )
 {
     //THREAD_LOCK( _lock )
     {
-        Z_LOG2( "scheduler.order", "Order " << obj_name() << ".payload=" << debug_string_from_variant(payload) << "\n" );
+        Z_LOG2( "scheduler.order", obj_name() << ".payload=" << debug_string_from_variant(payload) << "\n" );
         _payload = payload;
         _payload_modified = true;
     }

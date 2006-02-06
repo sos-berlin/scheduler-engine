@@ -11,9 +11,12 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamSource;
+
+import org.w3c.dom.CDATASection;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.w3c.dom.Text;
 
 // xercesImpl.jar 
 import org.apache.xerces.dom.DocumentImpl;
@@ -101,6 +104,7 @@ public class Web_service_forwarder  extends sos.spooler.Job_impl
             try
             {
                 DOMParser parser = new DOMParser();
+                //parser.setIncludeIgnorableWhitespace( false );
                 //parser.setErrorHandler();
                 parser.parse( new org.xml.sax.InputSource( new StringReader( xml ) ) );
                     
@@ -163,7 +167,7 @@ public class Web_service_forwarder  extends sos.spooler.Job_impl
                 OutputStream        output_stream = http_connection.getOutputStream();
                 OutputStreamWriter  writer        = new OutputStreamWriter( output_stream, encoding );
 
-                Node data_node = get_data_node( service_request_element );
+                Element data_element = get_data_element( service_request_element );
                 
               //if( data_node.getNodeType() == Node.TEXT_NODE 
               // || data_node.getNodeType() == Node.CDATA_SECTION_NODE )
@@ -171,10 +175,10 @@ public class Web_service_forwarder  extends sos.spooler.Job_impl
               //    writer.write( data_node.getTextContent() );   // getTextContent() ist erst in einer neueren Version vorhanden
               //}
               //else
-                if( data_node.getNodeType() == Node.ELEMENT_NODE )
+                if( data_element != null ) //  &&  data_element.getNodeType() == Node.ELEMENT_NODE )
                 {
                     new XMLSerializer( output_stream, new OutputFormat( service_request_element.getOwnerDocument(), encoding, false ) )
-                    .serialize( (Element)data_node );
+                    .serialize( data_element );
                 }
                 else
                     throw new Order_exception( "<content> enthält kein Element" );
@@ -211,34 +215,39 @@ public class Web_service_forwarder  extends sos.spooler.Job_impl
 
         //-----------------------------------------------------------------------------------------
         
-        Node get_data_node( Element service_request_element )  throws Order_exception
+        Element get_data_element( Element service_request_element )  throws Order_exception
         {
-            Element content_element = null;
-                
-            for( Node node = service_request_element.getFirstChild(); node != null; node = content_element.getNextSibling() )
-            {
-                if( node.getNodeType() == Node.ELEMENT_NODE  &&  node.getNodeName().equals( "content" ) ) 
-                {
-                    content_element = (Element)node;
-                    break;
-                }
-            }
-            
+            Element content_element = element_after_comment_and_empty_text( service_request_element.getFirstChild() );
             if( content_element == null )  throw new Order_exception( "<service_request> ohne <content>" );
             
+            Element data_element = element_after_comment_and_empty_text( content_element.getFirstChild() );
+            if( data_element == null )  throw new Order_exception( "<content> ist leer" );
+            if( element_after_comment_and_empty_text( data_element.getNextSibling() ) != null )  throw new Order_exception( "<content> enthält mehr als einen Knoten" );
             
-            // Inhalt von <content> schreiben
+            //spooler_log.debug3( "data_node=" + data_node );
             
-            Node data_node = content_element.getFirstChild();
-            
-            if( data_node == null )  throw new Order_exception( "<content> ist leer" );
-            
-            
-            if( data_node.getNextSibling() != null )  throw new Order_exception( "<content> enthält mehr als einen Knoten" );
-            
-            return data_node;
+            return data_element;
         }        
         
+        //-----------------------------------------------------------------------------------------
+        
+        Element element_after_comment_and_empty_text( Node node )  throws Order_exception
+        {
+            for(; node != null; node = node.getNextSibling() )
+            {
+                if( node.getNodeType() == Node.COMMENT_NODE )  continue; 
+    
+                if( ( node.getNodeType() == Node.TEXT_NODE || node.getNodeType() == Node.CDATA_SECTION_NODE )
+                    &&  node.getNodeValue().trim().equals( "" ) )  continue;
+                
+                break;
+            }
+            
+            if( node != null  &&  node.getNodeType() != Node.ELEMENT_NODE )  throw new Order_exception( "Unzulässiger Knoten: " + node );
+            
+            return (Element)node;
+        }
+    
         //-----------------------------------------------------------------------------------------
         
     } //class
@@ -294,7 +303,12 @@ public class Web_service_forwarder  extends sos.spooler.Job_impl
         //catch( Order_exception x )
         catch( Exception x )
         {
-            spooler_log.warn( x.toString() );
+            //spooler_log.warn( x.toString() );   printStackTrace() gibt das auch aus
+
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+            x.printStackTrace( new PrintStream( buffer ) );
+            spooler_log.warn( buffer.toString() );
+            
             spooler_task.order().setback();
         }
 
