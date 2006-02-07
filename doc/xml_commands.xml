@@ -22,7 +22,7 @@
 
     <scheduler_commands>
         <scheduler_command name="add_jobs"           answer="ok"/>
-        <scheduler_command name="add_order"          answer="ok"/>
+        <scheduler_command name="add_order"          answer="ok"            answer2="order"/>
         <scheduler_command name="kill_task"          answer="ok"/>
         <scheduler_command name="modify_job"         answer="ok"/>
         <scheduler_command name="modify_order"       answer="ok"/>
@@ -36,7 +36,7 @@
         <scheduler_command name="show_order"         answer="order"/>
         <scheduler_command name="show_state"         answer="state"/>
         <scheduler_command name="show_task"          answer="task"/>
-        <scheduler_command name="start_job"          answer="ok"/>
+        <scheduler_command name="start_job"          answer="ok"            answer2="task"/>
         <scheduler_command name="terminate"          answer="ok"/>
     </scheduler_commands>
 

@@ -404,8 +404,9 @@ xml::Element_ptr Command_processor::execute_start_job( const xml::Element_ptr& e
     task->set_web_service( web_service_name );
     job->enqueue_task( task );
 
-
-    return _answer.createElement( "ok" );
+    xml::Element_ptr result = _answer.createElement( "ok" ); 
+    result.appendChild( task->dom_element( _answer, Show_what() ) );
+    return result;
 }
 
 //---------------------------------------------------------Command_processor::execute_signal_object
@@ -584,8 +585,10 @@ xml::Element_ptr Command_processor::execute_add_order( const xml::Element_ptr& a
         order->add_to_job( job_name );
     }
 
-    return _answer.createElement( "ok" );
-    //return order->dom_element( _answer, id_only );
+
+    xml::Element_ptr result = _answer.createElement( "ok" ); 
+    result.appendChild( order->dom_element( _answer, Show_what() ) );
+    return result;
 }
 
 //-----------------------------------------xml::Element_ptr Command_processor::execute_modify_order

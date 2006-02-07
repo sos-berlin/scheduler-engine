@@ -109,7 +109,13 @@
         <xml_child_element name="params"/>
     </xml_child_elements>
 
-    <xml_answer element="ok"/>
+    <xml_answer element="ok" element2="order">
+        <description>
+            <p>
+                Im Element <scheduler_element name="order" directory="xml/answer/"/> wird nur die Auftragskennung zurück geliefert.
+            </p>
+        </description>
+    </xml_answer>
 
     <example>
         <pre>&lt;add_order job_chain="jobkette" id="1234" title="Mein erster Auftrag" state="100">

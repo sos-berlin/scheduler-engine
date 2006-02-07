@@ -87,6 +87,13 @@
                                 <xsl:with-param name="directory" select="'xml/answer/'"/>
                                 <xsl:with-param name="name" select="@answer"/>
                             </xsl:call-template>
+                            
+                            <xsl:if test="@answer2">
+                                <xsl:call-template name="scheduler_element">
+                                    <xsl:with-param name="directory" select="'xml/answer/'"/>
+                                    <xsl:with-param name="name" select="@answer2"/>
+                                </xsl:call-template>
+                            </xsl:if>
                         </td>
                     </tr>
                 </xsl:for-each>
@@ -370,6 +377,10 @@
 
         <h2>
             Antwort&#160; &lt;<xsl:value-of select="@element"/>>
+            
+            <xsl:if test="@element2">
+                &lt;<xsl:value-of select="@element2"/>>
+            </xsl:if>
         </h2>
 
         <div class="example">
@@ -380,18 +391,19 @@
                 </xsl:call-template>
             </code>
             <br/>
-            <code>&#160; &#160;</code>
 
             <code>
+                &#160; &#160;
+
                 <xsl:call-template name="scheduler_element">
                     <xsl:with-param name="directory" select="'xml/answer/'"/>
                     <xsl:with-param name="name"      select="'answer'"/>
                 </xsl:call-template>
             </code>
             <br/>
-            <code>&#160; &#160; &#160; &#160;</code>
 
             <code>
+                &#160; &#160; &#160; &#160;
                 <xsl:call-template name="scheduler_element">
                     <xsl:with-param name="directory" select="'xml/answer/'"/>
                     <xsl:with-param name="name"      select="@element"/>
@@ -399,13 +411,36 @@
                 </xsl:call-template>
             </code>
             <br/>
-            <code>&#160; &#160;</code>
 
-            <code>&lt;/answer></code>
+            <xsl:if test="@element2">
+                <code>
+                    &#160; &#160; &#160; &#160; &#160; &#160;
+                    <xsl:call-template name="scheduler_element">
+                        <xsl:with-param name="directory" select="'xml/answer/'"/>
+                        <xsl:with-param name="name"      select="@element2"/>
+                        <xsl:with-param name="parameter" select="'…'"/>
+                    </xsl:call-template>
+                </code>
+                <br/>
+                
+                <code>
+                    &#160; &#160; &#160; &#160;
+                    &lt;/<xsl:value-of select="@element"/>>
+                </code>
+                <br/>
+            </xsl:if>            
+            
+
+            <code>
+                &#160; &#160;
+                &lt;/answer>
+            </code>
             <br/>
             <code>&lt;/spooler></code>
         </div>
 
+        <xsl:apply-templates select="description"/>
+        
     </xsl:template>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~log_categories-->
