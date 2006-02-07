@@ -522,13 +522,14 @@ STDMETHODIMP Com_variable_set::get_Dom( IXMLDOMDocument** doc )
 
 //----------------------------------------------------------------------------Com_variable_set::dom
 
-xml::Document_ptr Com_variable_set::dom()
+xml::Document_ptr Com_variable_set::dom( const string& element_name, const string& subelement_name )
 {
     xml::Document_ptr doc;
     
     doc.create();
-    doc.appendChild( doc.createProcessingInstruction( "xml", "version=\"1.0\" encoding=\"iso-8859-1\"" ) );
-    doc.appendChild( dom_element( doc, xml_element_name(), "variable" ) );
+    doc.appendChild( doc.createProcessingInstruction( "xml", "version=\"1.0\"" ) );
+  //doc.appendChild( dom_element( doc, xml_element_name(), "variable" ) );
+    doc.appendChild( dom_element( doc, element_name, subelement_name ) );
 
     return doc;
 }
@@ -688,7 +689,7 @@ STDMETHODIMP Com_variable_set::put_Xml( BSTR xml_text )
 
     try
     {
-        xml::Document_ptr doc = dom();
+        xml::Document_ptr doc; // = dom( "params", "param" );
         doc.load_xml( string_from_bstr( xml_text ) );
 
         DOM_FOR_EACH_ELEMENT( doc.documentElement(), e )
@@ -722,7 +723,7 @@ STDMETHODIMP Com_variable_set::get_Xml( BSTR* xml_doc  )
 
     try
     {
-        hr = String_to_bstr( dom().xml(), xml_doc );
+        hr = String_to_bstr( dom( "params", "param" ).xml(), xml_doc );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Variable_set::xml" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Variable_set::xml" ); }

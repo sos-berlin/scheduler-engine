@@ -23,5 +23,16 @@
 </pre>
 
     </example>
+    
+    <description>
+        <p>
+            <code>&lt;sos.spooler.variable_set></code> wird beim Speichern der 
+            <scheduler_method class="Order" property="payload"/> 
+            in der Datenbank verwendet.
+        </p>
+        <p>
+            Siehe auch <scheduler_element name="params"/>.
+        </p>
+    </description>
 
 </xml_element>

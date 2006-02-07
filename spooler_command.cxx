@@ -585,6 +585,7 @@ xml::Element_ptr Command_processor::execute_add_order( const xml::Element_ptr& a
     }
 
     return _answer.createElement( "ok" );
+    //return order->dom_element( _answer, id_only );
 }
 
 //-----------------------------------------xml::Element_ptr Command_processor::execute_modify_order

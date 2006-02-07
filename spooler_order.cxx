@@ -1163,7 +1163,19 @@ void Order::set_dom( const xml::Element_ptr& element )
         { 
             ptr<Com_variable_set> pars = new Com_variable_set;
             pars->set_dom( e );  
-            set_payload( Variant( (IDispatch*)pars ) );
+            set_payload( Variant( static_cast<IDispatch*>( pars ) ) );
+        }
+        if( e.nodeName_is( "payload" ) )
+        {
+            DOM_FOR_EACH_ELEMENT( e, ee )
+            {
+                if( ee.nodeName_is( "params"  ) )
+                {
+                    ptr<Com_variable_set> pars = new Com_variable_set;
+                    pars->set_dom( ee );  
+                    set_payload( Variant( static_cast<IDispatch*>( pars ) ) );
+                }
+            }
         }
         else
         if( e.nodeName_is( "run_time" ) )
@@ -1179,11 +1191,14 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
 {
     xml::Element_ptr element = document.createElement( "order" );
 
-    if( show != show_for_database )
+    if( show != show_for_database_only )
     {
         element.setAttribute( "order"     , debug_string_from_variant( _id ) );
         element.setAttribute( "id"        , debug_string_from_variant( _id ) );     // veraltet
+    }
 
+    if( show != show_for_database_only  &&  show != show_id_only )
+    {
         if( _setback )
         element.setAttribute( "next_start_time", _setback.as_string() );
 
@@ -1240,7 +1255,7 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
             {
                 if( Com_variable_set* variable_set = dynamic_cast<Com_variable_set*>( V_DISPATCH( &_payload ) ) )
                 {
-                    payload_content = variable_set->dom_element( document, "variable_set", "variable" );
+                    payload_content = variable_set->dom_element( document, "params", "param" );
                 }
             }
 

@@ -170,7 +170,7 @@ struct Task : Object,
     void                        set_history_field           ( const string& name, const Variant& value );
     virtual void                set_close_engine            ( bool )                                {}      // Für Module_task
     bool                        has_parameters              ();
-    xml::Document_ptr           parameters_as_dom           ()                                      { return _params->dom(); }
+    xml::Document_ptr           parameters_as_dom           ()                                      { return _params->dom( Com_variable_set::xml_element_name(), "variable" ); }
 
 
     bool                        check_timeout               ( const Time& now );

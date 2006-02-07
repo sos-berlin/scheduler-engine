@@ -115,7 +115,7 @@
 
     <description>
         <p>
-            Siehe <scheduler_element name="sos.spooler.variable_set"/>.
+            Siehe <scheduler_element name="params"/>.
         </p>
     </description>
 
@@ -123,9 +123,12 @@
         <pre>var variable_set = spooler.create_variable_set();
 spooler_log.info( variable_set );
 
-variable_set.xml= "&lt;?xml version='1.0'?>&lt;variable_set>&lt;variable name='nachname' value='Meier'/>" +
-                  "&lt;variable name='vorname' value='Hans'/>&lt;/variable_set>";
-spooler_log.info( variable_set );
+variable_set.xml= "&lt;?xml version='1.0'?>" +
+                  "&lt;params>" +
+                      "&lt;param name='nachname' value='Meier'/>" +
+                      "&lt;param name='vorname' value='Hans'/>" + 
+                  "&lt;/params>";
+spooler_log.info( variable_set.xml );
 spooler_log.info( "nachname=" + variable_set.value( "nachname" ) );
 spooler_log.info( "vorname =" + variable_set.value( "vorname" ) );</pre></example>
 
@@ -191,6 +194,9 @@ spooler_log.info( "vorname =" + variable_set.value( "vorname" ) );</pre></exampl
         wird beim Lesen der nach String konvertierte Wert zurückgegeben.
         <code>Null</code> und <code>Empty</code> werden als <api.null/> zurückgeliefert.
         Wenn ein Variant-Wert nicht konvertierbar ist, wird eine Exception ausgelöst.
+    </p>
+    <p>
+        Siehe auch <scheduler_element name="params"/> und <scheduler_element name="sos.spooler.variable_set"/>.
     </p>
 </description>
 

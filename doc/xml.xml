@@ -111,7 +111,6 @@
                 <scheduler_element directory="xml/answer/" name="order_queue"/><br/>
                 <scheduler_element directory="xml/answer/" name="param"/><br/>
                 <scheduler_element directory="xml/answer/" name="params"/><br/>
-                <scheduler_element directory="xml/answer/" name="payload"/><br/>
                 <scheduler_element directory="xml/answer/" name="process"/><br/>
                 <scheduler_element directory="xml/answer/" name="process_class"/><br/>
                 <scheduler_element directory="xml/answer/" name="process_classes"/><br/>
@@ -131,7 +130,9 @@
             </td>
             <td valign="baseline" style="padding-left: 2ex">
                 <scheduler_element directory="xml/"        name="content"/><br/>
+                <scheduler_element directory="xml/"        name="payload"/><br/>
                 <scheduler_element directory="xml/"        name="service_request"/><br/>
+                <scheduler_element directory="xml/"        name="sos.spooler.variable_set"/><br/>
             </td>
         </tr>
     </tbody>

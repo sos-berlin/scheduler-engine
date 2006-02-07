@@ -13,7 +13,7 @@
              date          = "$Date$">
 
     <xml_child_elements>
-        <xml_child_element directory="xml/answer" name="answer"/>
+        <xml_child_element name="answer"/>
     </xml_child_elements>
 
     <description>

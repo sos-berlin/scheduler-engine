@@ -303,7 +303,7 @@ xml::Element_ptr Task::dom_element( const xml::Document_ptr& document, const Sho
 {
     xml::Element_ptr task_element = document.createElement( "task" );
 
-    if( show != show_for_database )
+    if( show != show_for_database_only )
     {
         task_element.setAttribute( "id"              , _id );
         task_element.setAttribute( "task"            , _id );

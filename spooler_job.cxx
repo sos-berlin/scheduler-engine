@@ -676,7 +676,7 @@ void Job::Task_queue::enqueue_task( const ptr<Task>& task )
                     blob.close();
                 }
 
-                xml::Document_ptr task_document = task->dom( show_for_database );
+                xml::Document_ptr task_document = task->dom( show_for_database_only );
                 xml::Element_ptr  task_element  = task_document.documentElement();
                 if( task_element.hasAttributes()  ||  task_element.firstChild() )
                     _spooler->_db->update_clob( _spooler->_tasks_tablename, "task_xml", "task_id", task->id(), task_document.xml() );

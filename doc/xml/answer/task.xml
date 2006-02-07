@@ -25,7 +25,7 @@
                     Die Task-Id.
                 </p>
                 <p>
-                    (XML reservert das Attribut id, es sollte stattdessen <code>task</code> verwendet werden.)
+                    (XML reserviert das Attribut id, es sollte stattdessen <code>task</code> verwendet werden.)
                 </p>
             </description>
         </xml_attribute>

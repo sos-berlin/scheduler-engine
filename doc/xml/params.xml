@@ -5,7 +5,6 @@
 
 <xml_element name     = "params"
              title    = "Parameter"
-             category = "Konfiguration"
              base_dir = "../"
              parent_page = "../konfiguration.xml"
              author   = "$Author$"
@@ -14,6 +13,8 @@
     <xml_parent_elements>
         <xml_parent_element name="job" />
         <xml_parent_element name="add_order" />
+        <xml_parent_element name="payload"/>
+        <xml_parent_element name="queued_task" directory="xml/answer/"/>
     </xml_parent_elements>
 
 
@@ -36,7 +37,7 @@
             Parameter eines Auftrags können mit der Methode <scheduler_method class="Order" method="payload" /> abgerufen werden.
         </p>
         <p>
-            Siehe auch die Klasse <scheduler_method class="Variable_set" />.
+            Siehe auch die Klasse <scheduler_method class="Variable_set" /> und <scheduler_element name="sos.spooler.variable_set"/>.
         </p>
     </description>
 

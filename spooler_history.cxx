@@ -751,7 +751,7 @@ void Spooler_db::insert_order( Order* order )
                     if( payload_string != "" )  update_payload_clob( order->id().as_string(), payload_string );
                     order->_payload_modified = false;
 
-                    xml::Document_ptr order_document = order->dom( show_for_database );
+                    xml::Document_ptr order_document = order->dom( show_for_database_only );
                     xml::Element_ptr  order_element  = order_document.documentElement();
                     if( order_element.hasAttributes()  ||  order_element.firstChild() )
                         update_clob( _spooler->_orders_tablename, "order_xml", "id", order->id().as_string(), order_document.xml() );

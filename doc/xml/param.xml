@@ -5,7 +5,6 @@
 
 <xml_element name     = "param"
              title    = "Ein Parameter"
-             category = "Konfiguration"
              base_dir = "../"
              parent_page = "../konfiguration.xml"
              author   = "$Author$"

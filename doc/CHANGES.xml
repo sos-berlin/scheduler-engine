@@ -34,7 +34,7 @@
                     <li><scheduler_element name="add_order" attribute="web_service"/></li>
                     <li><scheduler_element name="start_job" attribute="web_service"/></li>
                     <li><scheduler_element directory="xml/answer/" name="order" attribute="web_service"/></li>
-                    <li><scheduler_element directory="xml/answer/" name="payload"/></li>
+                    <li><scheduler_element name="payload"/></li>
                     <li><scheduler_element directory="xml/answer/" name="task" attribute="web_service"/></li>
                     <li><scheduler_element name="service_request"/></li>
                     <li><scheduler_element name="content"/></li>
