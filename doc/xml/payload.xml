@@ -16,12 +16,26 @@
 
 
     <xml_child_elements>
-        <xml_child_element name="params"/>
+        <xml_child_element name="params">
+            <description>
+                <p>
+                    Wenn die Nutzlast ein <scheduler_method class="Variable_set"/> ist, 
+                    wird dieses als XML-Element <scheduler_element name="params"/> eingefügt.
+                </p>
+            </description>
+        </xml_child_element>
     </xml_child_elements>
 
-    <!--description>
+    <description>
         <p>
+            Wenn die Nutzlast kein <scheduler_method class="Variable_set"/> ist,
+            wird sie als Text eingefügt.
         </p>
-    </description-->
+        <p style="font-size: 8pt">
+            (Eine Erweiterung wäre denkbar: 
+            Wenn die Nutzlast ein String mit einem XML-Dokument ist, 
+            wird dessen Wurzelelement direkt eingefügt).
+        </p>
+    </description>
 
 </xml_element>
