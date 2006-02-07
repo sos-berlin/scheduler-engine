@@ -108,8 +108,6 @@
                 <scheduler_element directory="xml/answer/" name="ok"/><br/>
                 <scheduler_element directory="xml/answer/" name="order"/><br/>
                 <scheduler_element directory="xml/answer/" name="order_queue"/><br/>
-                <scheduler_element directory="xml/answer/" name="param"/><br/>
-                <scheduler_element directory="xml/answer/" name="params"/><br/>
                 <scheduler_element directory="xml/answer/" name="process"/><br/>
                 <scheduler_element directory="xml/answer/" name="process_class"/><br/>
                 <scheduler_element directory="xml/answer/" name="process_classes"/><br/>
