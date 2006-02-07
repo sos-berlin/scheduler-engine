@@ -723,7 +723,7 @@ STDMETHODIMP Com_variable_set::get_Xml( BSTR* xml_doc  )
 
     try
     {
-        hr = String_to_bstr( dom( "params", "param" ).xml(), xml_doc );
+        hr = String_to_bstr( dom( xml_element_name(), "variable" ).xml(), xml_doc );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Variable_set::xml" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Variable_set::xml" ); }

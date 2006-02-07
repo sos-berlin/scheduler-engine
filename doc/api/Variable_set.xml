@@ -104,9 +104,10 @@
 
             <description>
                 XML-Dokument als String.
-                Beim Setzen wird der Name des Wurzelelements 
-                (<scheduler_element name="params"/> oder <scheduler_element name="sos.spooler.Variable_set"/>) 
-                nicht beachtet.
+                Liefert <scheduler_element name="sos.spooler.variable_set"/>.
+                Beim Setzen wird der Name des Wurzelelements nicht beachtet, 
+                <scheduler_element name="params"/> oder <scheduler_element name="sos.spooler.variable_set"/>
+                kann übergeben werden.
             </description>
         </com.result>
     </com>
@@ -117,13 +118,13 @@
 
     <description>
         <p>
-            Siehe <scheduler_element name="params"/>.
+            Siehe <scheduler_element name="sos.spooler.variable_set"/>, <scheduler_element name="params"/>.
         </p>
     </description>
 
     <example programming_language="javascript">
         <pre>var variable_set = spooler.create_variable_set();
-spooler_log.info( variable_set );
+spooler_log.info( variable_set.xml );   // Liefert &lt;?xml version='1.0'?>&lt;sos.spooler.variable_set/>
 
 variable_set.xml= "&lt;?xml version='1.0'?>" +
                   "&lt;params>" +
@@ -198,7 +199,7 @@ spooler_log.info( "vorname =" + variable_set.value( "vorname" ) );</pre></exampl
         Wenn ein Variant-Wert nicht konvertierbar ist, wird eine Exception ausgelöst.
     </p>
     <p>
-        Siehe auch <scheduler_element name="params"/> und <scheduler_element name="sos.spooler.Variable_set"/>.
+        Siehe auch <scheduler_element name="params"/> und <scheduler_element name="sos.spooler.variable_set"/>.
     </p>
 </description>
 

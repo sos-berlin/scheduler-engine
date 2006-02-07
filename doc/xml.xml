@@ -129,7 +129,7 @@
                 <scheduler_element directory="xml/"        name="content"/><br/>
                 <scheduler_element directory="xml/"        name="payload"/><br/>
                 <scheduler_element directory="xml/"        name="service_request"/><br/>
-                <scheduler_element directory="xml/"        name="sos.spooler.Variable_set"/><br/>
+                <scheduler_element directory="xml/"        name="sos.spooler.variable_set"/><br/>
             </td>
         </tr>
     </tbody>

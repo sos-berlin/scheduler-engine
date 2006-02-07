@@ -37,7 +37,7 @@
             Parameter eines Auftrags können mit der Methode <scheduler_method class="Order" method="payload" /> abgerufen werden.
         </p>
         <p>
-            Siehe auch die Klasse <scheduler_method class="Variable_set" /> und <scheduler_element name="sos.spooler.Variable_set"/>.
+            Siehe auch die Klasse <scheduler_method class="Variable_set" /> und <scheduler_element name="sos.spooler.variable_set"/>.
         </p>
     </description>
 
