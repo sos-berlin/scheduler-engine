@@ -66,7 +66,6 @@
                 <scheduler_element name="script"/><br/>
                 <scheduler_element name="service_request"/><br/>
                 <scheduler_element name="security"/><br/>
-                <scheduler_element name="sos.spooler.variable_set"/><br/>
                 <scheduler_element name="spooler"/><br/>
                 <scheduler_element name="start_when_directory_changed"/><br/>
                 <scheduler_element name="ultimos"/><br/>
@@ -132,7 +131,7 @@
                 <scheduler_element directory="xml/"        name="content"/><br/>
                 <scheduler_element directory="xml/"        name="payload"/><br/>
                 <scheduler_element directory="xml/"        name="service_request"/><br/>
-                <scheduler_element directory="xml/"        name="sos.spooler.variable_set"/><br/>
+                <scheduler_element directory="xml/"        name="sos.spooler.Variable_set"/><br/>
             </td>
         </tr>
     </tbody>

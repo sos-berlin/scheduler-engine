@@ -104,7 +104,9 @@
 
             <description>
                 XML-Dokument als String.
-                Beim Setzen wird der Name des Wurzelelements (<code>&lt;sos.spooler.Variable_set></code>) nicht beachtet.
+                Beim Setzen wird der Name des Wurzelelements 
+                (<scheduler_element name="params"/> oder <scheduler_element name="sos.spooler.Variable_set"/>) 
+                nicht beachtet.
             </description>
         </com.result>
     </com>
@@ -196,7 +198,7 @@ spooler_log.info( "vorname =" + variable_set.value( "vorname" ) );</pre></exampl
         Wenn ein Variant-Wert nicht konvertierbar ist, wird eine Exception ausgelöst.
     </p>
     <p>
-        Siehe auch <scheduler_element name="params"/> und <scheduler_element name="sos.spooler.variable_set"/>.
+        Siehe auch <scheduler_element name="params"/> und <scheduler_element name="sos.spooler.Variable_set"/>.
     </p>
 </description>
 
