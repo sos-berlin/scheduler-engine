@@ -13,7 +13,7 @@
 
     <xml_parent_elements>
         <xml_parent_element name="environment"/>
-        <xml_parent_element name="sos.spooler.variable_set"/>
+        <xml_parent_element name="sos.spooler.Variable_set"/>
     </xml_parent_elements>
 
     <xml_attributes>

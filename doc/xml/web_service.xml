@@ -188,9 +188,9 @@
         </p>
         <pre>&lt;order service="<i>service_name</i>" last_job="<i>job_name</i>" …>
     &lt;payload>
-        &lt;sos.spooler.variable_set>
+        &lt;sos.spooler.Variable_set>
             …
-        &lt;/sos.spooler.variable_set>
+        &lt;/sos.spooler.Variable_set>
     &lt;/payload>
     &lt;log last_error="…" last_warning="…"/>
     …

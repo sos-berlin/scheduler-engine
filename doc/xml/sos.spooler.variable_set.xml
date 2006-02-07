@@ -3,7 +3,7 @@
 
 <!--$Id$-->
 
-<xml_element name     = "sos.spooler.variable_set"
+<xml_element name     = "sos.spooler.Variable_set"
              title    = "Variablenmenge"
              base_dir = "../"
              parent_page = "../konfiguration.xml"
@@ -15,18 +15,17 @@
     </xml_child_elements>
 
 
-    <example><pre>
-&lt;sos.spooler.variable_set>
+    <example><pre>&lt;sos.spooler.Variable_set>
     &lt;variable name="param1" value="11111">
     &lt;variable name="param2" value="2222">
-&lt;/sos.spooler.variable_set>
+&lt;/sos.spooler.Variable_set>
 </pre>
 
     </example>
     
     <description>
         <p>
-            <code>&lt;sos.spooler.variable_set></code> wird beim Speichern der 
+            <code>&lt;sos.spooler.Variable_set></code> wird beim Speichern der 
             <scheduler_method class="Order" property="payload"/> 
             in der Datenbank verwendet.
         </p>
