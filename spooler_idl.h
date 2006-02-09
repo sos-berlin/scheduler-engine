@@ -126,6 +126,8 @@ struct Ivariable_set : IDispatch
     virtual HRESULT         Clone                       ( Ivariable_set** result )              = 0;
     virtual HRESULT         Merge                       ( Ivariable_set* other)                 = 0;
     virtual HRESULT     get__NewEnum                    ( IUnknown** enumerator )               = 0;              
+  //virtual HRESULT     get_Names_array                 ( SAFEARRAY** );
+    virtual HRESULT     get_Names                       ( BSTR* )                               = 0;
 };
 
 //----------------------------------------------------------------------Variable_set_enumerator

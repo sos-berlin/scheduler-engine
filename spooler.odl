@@ -164,6 +164,9 @@ library Spooler
 
       //[propget]
       //HRESULT                 Names_array                 ( [out,retval] SAFEARRAY(VARIANT)* );
+
+        [propget]
+        HRESULT                 Names                       ( [out,retval] BSTR* );
     }
 
     [

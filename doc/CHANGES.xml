@@ -10,6 +10,17 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2006-02-09" version="2.0.147" subversion_revision="4091">
+        <revision type="new" title="Variable_set.names">
+            <description>
+                <p>
+                    <scheduler_method class="Variable_set" property="names"/>
+                    liefert die Variablennamen, durch Semikolon getrennt.
+                </p>
+            </description>
+        </revision>
+    </change>
+            
     <change date="2006-02-02" version="2.0.146" subversion_revision="4073">
         <revision type="correction" title="factory.ini queue_dir=">
             <description>

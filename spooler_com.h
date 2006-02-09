@@ -165,7 +165,8 @@ struct Com_variable_set: spooler_com::Ivariable_set,
     STDMETHODIMP            put_Xml                         ( BSTR xml_text );
     STDMETHODIMP            get_Xml                         ( BSTR* xml_text );
     void                    set_xml                         ( const string& xml_text );
-    STDMETHODIMP            get_Names_array                 ( SAFEARRAY** );
+  //STDMETHODIMP            get_Names_array                 ( SAFEARRAY** );
+    STDMETHODIMP            get_Names                       ( BSTR* );
 
 
     static const string         xml_element_name            ()                                      { return "sos.spooler.variable_set"; }

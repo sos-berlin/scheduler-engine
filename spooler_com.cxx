@@ -254,7 +254,8 @@ const Com_method Com_variable_set::_methods[] =
     { DISPATCH_PROPERTYPUT, 6, "xml"                , (Com_method_ptr)&Com_variable_set::put_Xml        , VT_EMPTY      , { VT_BSTR } },
     { DISPATCH_PROPERTYGET, 6, "xml"                , (Com_method_ptr)&Com_variable_set::get_Xml        , VT_BSTR       },
     { DISPATCH_PROPERTYGET, 7, "java_class_name"    , (Com_method_ptr)&Com_variable_set::get_Java_class_name, VT_BSTR   },
-    { DISPATCH_PROPERTYGET, 8, "Names_array"        , (Com_method_ptr)&Com_variable_set::get_Names_array, VT_ARRAY      },
+  //{ DISPATCH_PROPERTYGET, 8, "Names_array"        , (Com_method_ptr)&Com_variable_set::get_Names_array, VT_ARRAY      },
+    { DISPATCH_PROPERTYGET, 8, "Names"              , (Com_method_ptr)&Com_variable_set::get_Names      , VT_BSTR       },
     {}
 };
 
@@ -710,8 +711,8 @@ STDMETHODIMP Com_variable_set::put_Xml( BSTR xml_text )
         }
 
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Variable_set::xml" ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Variable_set::xml" ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
 
     return hr;
 }
@@ -726,14 +727,14 @@ STDMETHODIMP Com_variable_set::get_Xml( BSTR* xml_doc  )
     {
         hr = String_to_bstr( dom( xml_element_name(), "variable" ).xml(), xml_doc );
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Variable_set::xml" ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Variable_set::xml" ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
 
     return hr;
 }
 
 //----------------------------------------------------------------Com_variable_set::get_Names_array
-
+/*
 STDMETHODIMP Com_variable_set::get_Names_array( SAFEARRAY** result )
 {
     HRESULT hr = NOERROR;
@@ -752,8 +753,47 @@ STDMETHODIMP Com_variable_set::get_Names_array( SAFEARRAY** result )
             a[ i++ ] = m->first;
         }
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Variable_set::xml" ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Variable_set::xml" ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+*/
+//----------------------------------------------------------------------Com_variable_set::get_Names
+
+STDMETHODIMP Com_variable_set::get_Names( BSTR* result )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        int length = _map.size() - 1;  // Anzahl der Semikolons
+        
+        if( length < 0 )
+        {
+            *result = NULL;
+        }
+        else
+        {
+            Z_FOR_EACH( Map, _map, m )  length += m->first.length();
+            
+            OLECHAR* p = *result = SysAllocStringLen( NULL, length );
+            if( !*result )  return E_OUTOFMEMORY;
+
+            Z_FOR_EACH( Map, _map, m )
+            {
+                memcpy( p, m->first, m->first.length() * sizeof (OLECHAR) );
+                p += m->first.length();
+                *p++ = ';';
+            }
+
+            *p = '\0';      // Letztes Semikolon überschreiben, ist schon außerhalb des Strings
+            assert( p == *result + length + 1 );
+        }
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
 
     return hr;
 }

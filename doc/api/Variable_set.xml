@@ -6,7 +6,7 @@
 
 <api.class
     name        = "Variable_set"
-    object_name = "v"
+    object_name = "variable_set"
     base_dir    = "../"
     author      = "$Author$"
     date        = "$Date$"
@@ -134,6 +134,55 @@ variable_set.xml= "&lt;?xml version='1.0'?>" +
 spooler_log.info( variable_set.xml );
 spooler_log.info( "nachname=" + variable_set.value( "nachname" ) );
 spooler_log.info( "vorname =" + variable_set.value( "vorname" ) );</pre></example>
+
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="names" access="read">
+    <com>
+        <com.result>
+            <com.type type="BSTR"/>
+
+            <description>
+                Die Namen aller Variablen durch Semikolon getrennt.
+            </description>
+        </com.result>
+    </com>
+
+    <title>
+        Alle Variablennamen durch Semikolon getrennt
+    </title>
+    
+    <example programming_language="javascript">
+        <pre>var variable_set = spooler.create_variable_set();
+spooler_log.info( '"' + variable_set.names + '"' );        // ==> ""
+
+variable_set( "variable_1" ) = "edno";
+variable_set( "variable_2" ) = "dwa";
+
+spooler_log.info( '"' + variable_set.names + '"' );        // ==> "variable_1;variable_2"
+
+var names = variable_set.names.split( ";" );
+for( var i in names ) spooler_log.info( names[i] + "=" + variable_set( names[i] ) );</pre>
+    </example>
+
+    <example programming_language="java">
+        <pre>Variable_set variable_set = spooler.create_variable_set();
+spooler_log.info( "\"" + variable_set.names() + "\"" );    // ==> ""
+
+variable_set.set_var( "variable_1", "edno" );
+variable_set.set_var( "variable_2", "dwa" );
+
+spooler_log.info( "\"" + variable_set.names() + "\"" );    // ==> "variable_1;variable_2"
+
+java.util.StringTokenizer t = new java.util.StringTokenizer( variable_set.names(), ";" ); 
+while( t.hasMoreTokens() )
+{
+    String name = t.nextToken();
+    spooler_log.info( name + "=" + variable_set.var( name ) );
+}</pre>
+    </example>
 
 </property>
 
