@@ -253,7 +253,8 @@ const Com_method Com_variable_set::_methods[] =
     { DISPATCH_PROPERTYGET, DISPID_NEWENUM, "_NewEnum", (Com_method_ptr)&Com_variable_set::get__NewEnum , VT_DISPATCH   },
     { DISPATCH_PROPERTYPUT, 6, "xml"                , (Com_method_ptr)&Com_variable_set::put_Xml        , VT_EMPTY      , { VT_BSTR } },
     { DISPATCH_PROPERTYGET, 6, "xml"                , (Com_method_ptr)&Com_variable_set::get_Xml        , VT_BSTR       },
-    { DISPATCH_PROPERTYGET, 7, "java_class_name"    , (Com_method_ptr)&Com_variable_set::get_Java_class_name, VT_BSTR },
+    { DISPATCH_PROPERTYGET, 7, "java_class_name"    , (Com_method_ptr)&Com_variable_set::get_Java_class_name, VT_BSTR   },
+    { DISPATCH_PROPERTYGET, 8, "Names_array"        , (Com_method_ptr)&Com_variable_set::get_Names_array, VT_ARRAY      },
     {}
 };
 
@@ -724,6 +725,32 @@ STDMETHODIMP Com_variable_set::get_Xml( BSTR* xml_doc  )
     try
     {
         hr = String_to_bstr( dom( xml_element_name(), "variable" ).xml(), xml_doc );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Variable_set::xml" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Variable_set::xml" ); }
+
+    return hr;
+}
+
+//----------------------------------------------------------------Com_variable_set::get_Names_array
+
+STDMETHODIMP Com_variable_set::get_Names_array( SAFEARRAY** result )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        *result = SafeArrayCreateVector( VT_VARIANT, 0, _map.size() );
+        if( !*result )  return E_OUTOFMEMORY;
+
+        Locked_safearray a ( *result );
+
+        int i = 0;
+        Z_FOR_EACH( Map, _map, m )
+        {
+            a[ i++ ] = m->first;
+        }
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Variable_set::xml" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Variable_set::xml" ); }

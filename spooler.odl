@@ -161,6 +161,9 @@ library Spooler
 
         [propget]
         HRESULT                 Xml                         ( [out,retval] BSTR* xml_text );
+
+      //[propget]
+      //HRESULT                 Names_array                 ( [out,retval] SAFEARRAY(VARIANT)* );
     }
 
     [
