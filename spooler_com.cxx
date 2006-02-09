@@ -254,8 +254,8 @@ const Com_method Com_variable_set::_methods[] =
     { DISPATCH_PROPERTYPUT, 6, "xml"                , (Com_method_ptr)&Com_variable_set::put_Xml        , VT_EMPTY      , { VT_BSTR } },
     { DISPATCH_PROPERTYGET, 6, "xml"                , (Com_method_ptr)&Com_variable_set::get_Xml        , VT_BSTR       },
     { DISPATCH_PROPERTYGET, 7, "java_class_name"    , (Com_method_ptr)&Com_variable_set::get_Java_class_name, VT_BSTR   },
-  //{ DISPATCH_PROPERTYGET, 8, "Names_array"        , (Com_method_ptr)&Com_variable_set::get_Names_array, VT_ARRAY      },
-    { DISPATCH_PROPERTYGET, 8, "Names"              , (Com_method_ptr)&Com_variable_set::get_Names      , VT_BSTR       },
+  //{ DISPATCH_PROPERTYGET, 9, "Names_array"        , (Com_method_ptr)&Com_variable_set::get_Names_array, VT_ARRAY      },
+    { DISPATCH_PROPERTYGET, 9, "Names"              , (Com_method_ptr)&Com_variable_set::get_Names      , VT_BSTR       },
     {}
 };
 
