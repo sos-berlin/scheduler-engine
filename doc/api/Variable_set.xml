@@ -164,7 +164,7 @@ variable_set( "variable_2" ) = "dwa";
 spooler_log.info( '"' + variable_set.names + '"' );        // ==> "variable_1;variable_2"
 
 var names = variable_set.names.split( ";" );
-for( var i in names ) spooler_log.info( names[i] + "=" + variable_set( names[i] ) );</pre>
+for( var i in names )  spooler_log.info( names[i] + "=" + variable_set( names[i] ) );</pre>
     </example>
 
     <example programming_language="java">
