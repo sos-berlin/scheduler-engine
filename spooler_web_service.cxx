@@ -270,6 +270,9 @@ void Web_service::forward( const xml::Document_ptr& payload_dom )
 
         
         Command_processor command_processor ( _spooler );
+
+        _spooler->_executing_command = false;   // Command_processor() hat es true gesetzt. Trotzdem bei Datenbank-Fehler auf DB warten
+
         command_processor.set_validate( false );            // <content> enthält unbekannte XML-Elemente <task> und <order>
         command_processor.execute_2( command_document );
         
