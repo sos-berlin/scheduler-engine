@@ -427,7 +427,7 @@ string Web_service_transaction::process_request( const string& request_data, con
         Command_processor command_processor ( _spooler );
         command_processor.set_host( _http_processor->_host );
 
-        command_processor.execute_2( command_document, Time::now() );
+        command_processor.execute( command_document );
 
         response_document = _web_service->transform_response( command_processor._answer );
 

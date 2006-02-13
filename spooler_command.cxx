@@ -1137,22 +1137,27 @@ string Command_processor::execute( const string& xml_text_par, const Time& xml_m
 
         execute_2( xml_text, xml_mod_time );
     }
-    catch( const Xc& x )
-    {
-        _error = x;
-        if( _answer  &&  _answer.documentElement()  &&  _answer.documentElement().firstChild() ) 
-            append_error_element( _answer.documentElement().firstChild(), x );
-    }
-    catch( const exception& x )
-    {
-        _error = x;
-        if( _answer  &&  _answer.documentElement()  &&  _answer.documentElement().firstChild() ) 
-            append_error_element( _answer.documentElement().firstChild(), x );
-    }
+    catch( const Xc& x        ) { append_error_to_answer( x ); }
+    catch( const exception& x ) { append_error_to_answer( x ); }
 
-  //return _answer.xml;  //Bei save wird die encoding belassen. Eigenschaft xml verwendet stets unicode, was wir nicht wollen.
-    
     return xml_as_string( _answer, indent );
+}
+
+//------------------------------------------------------------------------Command_processor::execute
+
+xml::Document_ptr Command_processor::execute( const xml::Document_ptr& command_document, const Time& xml_mod_time )
+{
+    begin_answer();
+
+    try 
+    {
+        _error = NULL;
+        execute_2( command_document, xml_mod_time );
+    }
+    catch( const Xc& x        ) { append_error_to_answer( x ); }
+    catch( const exception& x ) { append_error_to_answer( x ); }
+
+    return _answer;
 }
 
 //------------------------------------------------------------------Command_processor::execute_file
@@ -1168,6 +1173,28 @@ void Command_processor::execute_file( const string& filename )
     execute_2( content, modification_time_of_file( filename ) );
 }
 
+//------------------------------------------------------------------Command_processor::dom_from_xml
+
+xml::Document_ptr Command_processor::dom_from_xml( const string& xml_text )
+{
+    Z_LOGI2( "scheduler.xml", "XML-Dokument wird gelesen ...\n" );
+
+    xml::Document_ptr command_doc;
+    command_doc.create();
+
+    int ok = command_doc.try_load_xml( xml_text );
+    if( !ok )
+    {
+        string text = command_doc.error_text();
+        _spooler->_log.error( text );       // Log ist möglicherweise noch nicht geöffnet
+        throw_xc( "XML-ERROR", text );
+    }
+
+    Z_LOG2( "scheduler.xml", "XML-Dokument ist eingelesen\n" );
+
+    return command_doc;
+}
+
 //----------------------------------------------------------------------Command_processor::execute_2
 
 void Command_processor::execute_2( const string& xml_text, const Time& xml_mod_time )
@@ -1176,22 +1203,7 @@ void Command_processor::execute_2( const string& xml_text, const Time& xml_mod_t
 
     try 
     {
-        Z_LOGI2( "scheduler.xml", "XML-Dokument wird gelesen ...\n" );
-
-        xml::Document_ptr command_doc;
-        command_doc.create();
-
-        int ok = command_doc.try_load_xml( xml_text );
-        if( !ok )
-        {
-            string text = command_doc.error_text();
-            _spooler->_log.error( text );       // Log ist möglicherweise noch nicht geöffnet
-            throw_xc( "XML-ERROR", text );
-        }
-
-        Z_LOG2( "scheduler.xml", "XML-Dokument ist eingelesen\n" );
-
-        execute_2( command_doc, xml_mod_time );
+        execute_2( dom_from_xml( xml_text ), xml_mod_time );
     }
     catch( const _com_error& com_error ) { throw_com_error( com_error, "DOM/XML" ); }
 }
@@ -1256,6 +1268,24 @@ void Command_processor::begin_answer()
         xml::Element_ptr answer_element = _answer.documentElement().appendChild( _answer.createElement( "answer" ) );
         answer_element.setAttribute( "time", Time::now().as_string() );
     }
+}
+
+//--------------------------------------------------------Command_processor::append_error_to_answer
+
+void Command_processor::append_error_to_answer( const exception& x )
+{
+    _error = x;
+    if( _answer  &&  _answer.documentElement()  &&  _answer.documentElement().firstChild() ) 
+        append_error_element( _answer.documentElement().firstChild(), x );
+}
+
+//--------------------------------------------------------Command_processor::append_error_to_answer
+
+void Command_processor::append_error_to_answer( const Xc& x )
+{
+    _error = x;
+    if( _answer  &&  _answer.documentElement()  &&  _answer.documentElement().firstChild() ) 
+        append_error_element( _answer.documentElement().firstChild(), x );
 }
 
 //-------------------------------------------------------------------------------------------------

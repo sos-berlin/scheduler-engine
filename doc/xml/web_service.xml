@@ -58,6 +58,12 @@
                     <scheduler_element name="service_request"/> transformiert,
                     das den Aufruf eines anderen Web-Dienstes auslöst.
                 </p>
+                <p>
+                    <scheduler_keyword keyword="java"/>
+                    <scheduler_keyword keyword="xercesImpl.jar"/>
+                    Benötigt Java und das Klassen-Archiv <code>xercesImpl.jar</code> im <code>CLASS_PATH</code> 
+                    (s. <scheduler_element name="config" attribute="java_class_path" value="…/xercesImpl.jar"/>).
+                </p>
             </description>
         </xml_attribute>
 

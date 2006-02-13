@@ -79,10 +79,14 @@ struct Command_processor
     void                        execute_file                ( const string& xml_filename );
     ptr<Http_response>          execute_http                ( Http_request* );
     string                      execute                     ( const string& xml_text, const Time& xml_mod_time, bool indent = false );
+    xml::Document_ptr           execute                     ( const xml::Document_ptr&, const Time& xml_mod_time = Time::now() );
     void                        execute_2                   ( const string& xml_text, const Time& xml_mod_time = Time::now() );
     void                        execute_2                   ( const xml::Document_ptr&, const Time& xml_mod_time = Time::now() );
+    xml::Document_ptr           dom_from_xml                ( const string& xml_text );
     xml::Element_ptr            execute_command             ( const xml::Element_ptr&, const Time& xml_mod_time );
     void                        begin_answer                ();
+    void                        append_error_to_answer      ( const exception& );
+    void                        append_error_to_answer      ( const Xc& );
     xml::Element_ptr            execute_config              ( const xml::Element_ptr&, const Time& xml_mod_time );
 
     xml::Element_ptr            execute_show_state          ( const xml::Element_ptr&, const Show_what& );
