@@ -418,7 +418,7 @@ const char dtd_string[] =
 "\n"
 "\n"
 "\n"
-"<!ELEMENT content              ANY >\n"
+"<!ELEMENT content              ( #PCDATA ) >\n"
 "\n"
 "\n"
 "\n"

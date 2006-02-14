@@ -170,7 +170,7 @@
         </ol>
 
         
-        <h2>Fehlerbehandlung</h2>
+        <h3>Fehlerbehandlung</h3>
         <p>
             Wenn mit POST kein XML-Dokument übergeben worden ist, führt das zum HTTP-Fehlercode "404 Bad Request".
             <br/>
@@ -216,19 +216,36 @@
     &lt;content><i>…data…</i>&lt;/content>
 &lt;/service_request></pre>
         
+        <h3>Jobkette scheduler_service_forwarding</h3>
         <p>
             Der Scheduler packt das <scheduler_element name="service_request"/> in die Payload eines neuen Auftrags 
             und übergibt diesen der vordefinierten Jobkette <code>scheduler_service_forwarding</code>.
         </p>
 
+        <h3>Job scheduler_service_forwarder</h3>
         <p>
             Der einzige Job der Jobkette, <code>scheduler_service_forwarder</code>,
             baut mit dem URL eine HTTP-Verbindung auf, überträgt mit POST die Daten, wartet die Antwort ab
             und protokolliert sie.
         </p>
         <p>
-            Implementiert ist der Job in Java.
+            Eigenschaften des Jobs können in der Konfigurationsdatei eingestellt werden, 
+            wie wenn der Job mit <scheduler_element name="base"/> bekannt gemacht worden wäre.
+            Ein Beispiel:
         </p>
-
+        <div class="example">
+            <pre>&lt;job name="scheduler_service_forwarder">
+    &lt;delay_order_after_setback setback_count="1" delay="00:01"/>
+    &lt;delay_order_after_setback setback_count="2" delay="01:00"/>
+    &lt;delay_order_after_setback setback_count="3" delay="24:00"/>
+    &lt;run_time>
+        &lt;period begin="07:00" end="17:00"/>
+    &lt;/run_time>
+&lt;/job></pre>
+        </div>
+        <p>
+            Implementiert ist der Job in Java (siehe auch <scheduler_element name="web_service" attribute="forward_xslt_stylesheet"/>).
+        </p>
+        
     </description>
 </xml_element>
