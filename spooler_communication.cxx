@@ -2,7 +2,7 @@
 /*
     Hier sind implementiert
 
-    Communication::Channer
+    Communication::Channel
     Communication
 */
 
@@ -322,6 +322,7 @@ bool Communication::Channel::do_recv()
 
         if( len > 0 )
         {
+            if( z::Log_ptr log = "socket.data" )  *log << "recv: ", log->write( p, len ), *log << endl;
             _processor->put_request_part( p, len );
         }
     }
@@ -425,6 +426,8 @@ bool Communication::Channel::async_continue_( Continue_flags )
             {
                 string data = _processor->get_response_part();
                 if( data == "" )  break;
+
+                Z_LOG2( "socket.data", "send: " << data << '\n' );
 
                 something_done = true;
 

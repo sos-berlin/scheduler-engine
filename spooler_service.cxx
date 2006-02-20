@@ -108,7 +108,10 @@ string make_service_display( const string& id )
 
 static void event_log( const exception& x, int argc, char** argv, Spooler* spooler = NULL )
 {
-    string msg = "*** SOS SCHEDULER *** " + string( x.what() );
+    string what = x.what();
+    Z_LOG( "event_log() ERROR  " << what << "\n" );
+
+    string msg = "*** SOS SCHEDULER *** " + what;
 
     HANDLE h = RegisterEventSource( NULL, "Application" );
     const char* m = msg.c_str();
@@ -262,6 +265,8 @@ void service_start( const string& service_name )
 
     manager_handle = OpenSCManager( NULL, SERVICES_ACTIVE_DATABASE, SC_MANAGER_CREATE_SERVICE );    if( !manager_handle )  throw_mswin_error( "OpenSCManager" );
     service_handle = OpenService( manager_handle, service_name.c_str(), SERVICE_START );            if( !service_handle )  throw_mswin_error( "OpenService" );
+
+    Z_LOG( "ServiceStart(\"" << service_name << "\")\n" );
     ok = StartService( service_handle, 0, NULL );                                                   if( !ok )  throw_mswin_error( "StartService" );
 }
 

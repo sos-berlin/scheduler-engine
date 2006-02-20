@@ -90,6 +90,7 @@
         <log_category name="send"       title="Systemaufruf send(): Daten senden"/>
         <log_category name="recv"       title="Systemaufruf send(): Daten empfangen"/>
         <log_category name="select"     title="Systemaufruf select(): TCP-Ereignis abwarten"/>
+        <log_category name="data"       local_default="off" title="Daten von recv() und send()"/>
     </log_category>
 
     <log_category name="spidermonkey"   title="JavaScript-Implementierung Spidermonkey">

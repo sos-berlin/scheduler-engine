@@ -316,7 +316,7 @@ void Http_response::finish()
     _header = _http_request->is_http_1_1()? "HTTP/1.1 " 
                                           : "HTTP/1.0 ";
 
-    _chunked = _http_request->is_http_1_1()  &&  _chunk_reader;
+    _chunked = _http_request->is_http_1_1();    // Funktioniert nicht mit Firefox 1.5:  &&  _chunk_reader;
 
     if( _status_code )
     {
@@ -382,8 +382,15 @@ string Http_response::read( int recommended_size )
 
     if( _chunk_offset == _chunk_size ) 
     {
-        if( _chunk_reader )  result += start_new_chunk();
-                      else  _eof = true;
+        if( _chunk_reader ) 
+        {
+            result += start_new_chunk();
+        }
+        else 
+        {
+            _eof = true;
+            if( _chunked )  result += "0\r\n\r\n";
+        }
     }
 
     if( _chunk_offset < _chunk_size )
@@ -754,7 +761,7 @@ Http_processor::Http_processor( Http_processor_channel* pc )
 
 void Http_processor::process()
 {
-    Z_LOG2( "scheduler.http", "HTTP: " << _http_parser->_text << "\n" );
+    Z_LOG2( "scheduler.http", "HTTP: " << _http_parser->_text << "\n" );    // Wird auch mit "socket.data" protokolliert (default aus)
     
 
     try

@@ -466,15 +466,15 @@
                 <p>
                     <table cellspacing="0" cellpadding="0">
                         <col valign="baseline"/>
-                        <col valign="baseline" style="padding-left: 2ex"/>
-                        <col valign="baseline" style="padding-left: 2ex"/>
+                        <col valign="baseline"/>
+                        <col valign="baseline"/>
 
                         <thead>
                             <tr>
                                 <td>
                                     Kategorie
                                 </td>
-                                <td>
+                                <td style="padding-left: 2ex">
                                     Default¹
                                 </td>
                             </tr>
@@ -533,7 +533,7 @@
                 </code>
             </td>
 
-            <td>
+            <td style="padding-left: 2ex">
                 <xsl:if test="@global_default='off'">
                 </xsl:if>
                 <xsl:if test="@global_default='on'">
@@ -547,7 +547,7 @@
                 </xsl:if>
             </td>
 
-            <td>
+            <td style="padding-left: 2ex">
                 <xsl:value-of select="@title"/>
                 <xsl:apply-templates select="description"/>
             </td>
