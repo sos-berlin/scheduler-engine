@@ -309,6 +309,8 @@ library Spooler
         HRESULT                 Clear_delay_after_error     ();
 
         HRESULT                 Remove                      ();
+
+        HRESULT                 Execute_command             ( [in] BSTR );                      // Für Joacim 2006-02-20
     }
 
     [

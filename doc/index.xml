@@ -144,9 +144,7 @@
         <a style="font-weight: bold" href="api/api-java.xml">Java</a>,
         <a style="font-weight: bold" href="api/api-javascript.xml">JavaScript</a>,
         <a style="font-weight: bold" href="api/api-vbscript.xml">VBScript</a> und
-        <a style="font-weight: bold" href="api/api-perl.xml">Perl</a>
-
-        (<a href="javadoc/index.html">und hier die bisherige Javadoc</a>).
+        <a style="font-weight: bold" href="api/api-perl.xml">Perl</a>.
     </dd>
 </dl>
 

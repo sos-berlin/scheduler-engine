@@ -14,7 +14,7 @@
 
     <xsl:template match="/spooler/answer">
 
-        <table cellspacing="0" cellpadding="0">
+        <table cellspacing="0" cellpadding="0" width="100%">
             <tr>
                 <td style="margin-top: 0px; padding-bottom: 2pt">
                     <b>
@@ -36,10 +36,10 @@
             </tr>
             
             <tr>
-                <td valign="middle" style="padding-left: 0px">
+                <td style="vertical-align: top; padding-left: 0px">
                     <xsl:call-template name="scheduler_info"/>
                 </td>
-                <td valign="middle" align="right">
+                <td style="vertical-align: top; text-align: right;">
                     <xsl:call-template name="update_button"/>
                 </td>
             </tr>

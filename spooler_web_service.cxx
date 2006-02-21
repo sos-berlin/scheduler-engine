@@ -308,7 +308,7 @@ Web_service_transaction::Web_service_transaction( Web_service* ws, Http_processo
 
     if( _web_service->_debug  &&  _log->log_level() > log_debug_spooler )  _log->set_log_level( log_debug_spooler );
 
-    if( !string_begins_with( _spooler->log_directory(), "*" ) )   
+    if( _web_service->_debug  &&  !string_begins_with( _spooler->log_directory(), "*" ) )   
     {
         _log_filename_prefix = S() << _spooler->log_directory() << "/web_service." << _web_service->_name << "." << _transaction_number;
 

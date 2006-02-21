@@ -400,6 +400,7 @@ struct Com_job : spooler_com::Ijob,
     STDMETHODIMP            put_Max_order_setbacks          ( int );
     STDMETHODIMP                Clear_delay_after_error     ();
     STDMETHODIMP                Remove                      ();
+    STDMETHODIMP                Execute_command             ( BSTR );
 
 
   private:

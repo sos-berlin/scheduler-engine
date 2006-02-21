@@ -195,6 +195,8 @@ struct Ijob : IDispatch
     virtual HRESULT     put_Delay_order_after_setback   ( int, VARIANT* time )                  = 0;
     virtual HRESULT     put_Max_order_setbacks          ( int )                                 = 0; 
     virtual HRESULT         Clear_delay_after_error     ()                                      = 0;
+    virtual HRESULT         Remove                      ()                                      = 0;
+    virtual HRESULT         Execute_command             ( BSTR )                                = 0;
 };
 
 //--------------------------------------------------------------------------------------------Itask
