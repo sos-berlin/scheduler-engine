@@ -10,7 +10,7 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2006-02-20" version="2.0.147" subversion_revision="4100">
+    <change date="2006-02-21" version="2.0.147" subversion_revision="4100">
         <revision type="correction" title="Dateityp jdbc löscht temporäre Dateien unter Windows">
             <description>
                 <p>

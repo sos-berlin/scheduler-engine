@@ -615,7 +615,10 @@ void Run_time::set_xml( const string& xml )
 {
     //_xml = xml;
 
-    set_dom( _spooler->_dtd.validate_xml( xml ).documentElement() );
+    //set_dom( _spooler->_dtd.validate_xml( xml ).documentElement() );
+    xml::Document_ptr doc ( xml );
+    if( _spooler->_validate_xml )  _spooler->_schema.validate( xml::Document_ptr( xml ) );
+    set_dom( doc.documentElement() );
 }
 
 //--------------------------------------------------------------------------------Run_time::set_dom

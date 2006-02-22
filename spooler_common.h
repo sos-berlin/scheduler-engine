@@ -3,6 +3,10 @@
 #ifndef __SPOOLER_COMMON_H
 #define __SPOOLER_COMMON_H
 
+
+#include "../zschimmer/embedded_files.h"
+
+
 namespace sos {
 namespace spooler {
 
@@ -15,6 +19,10 @@ namespace spooler {
 
 typedef zschimmer::Thread::Id   Thread_id;                  // _beginthreadex()
 typedef DWORD                   Process_id;
+
+//-------------------------------------------------------------------------------------------------
+
+extern const Embedded_files     embedded_files;             // spooler_embedded_files.cxx
 
 //-----------------------------------------------------------------------------------------FOR_EACH
 

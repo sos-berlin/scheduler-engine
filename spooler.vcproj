@@ -86,8 +86,8 @@ ant -f ../javadoc.xml
 				Name="VCPostBuildEventTool"/>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="cd html &amp;&amp; perl ../../make/files_to_c++.pl  -trim jz/*.html jz/*.js jz/*.xslt jz/*.css &gt;../spooler_http_files.cxx
-cd $(ProjectDir)
+				CommandLine="echo perl ../zschimmer/files_to_c++.pl  -trim html/jz/*.html html/jz/*.js html/jz/*.xslt html/jz/*.css scheduler.xsd -- spooler_embedded_files.cxx
+perl ../zschimmer/files_to_c++.pl  -trim html/jz/*.html html/jz/*.js html/jz/*.xslt html/jz/*.css scheduler.xsd&gt;spooler_embedded_files.cxx
 "/>
 			<Tool
 				Name="VCPreLinkEventTool"/>
@@ -175,8 +175,8 @@ ant -f ../javadoc.xml
 				Name="VCPostBuildEventTool"/>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="cd html &amp;&amp; perl ../../make/files_to_c++.pl  -trim jz/*.html jz/*.js jz/*.xslt jz/*.css &gt;../spooler_http_files.cxx
-cd $(ProjectDir)
+				CommandLine="echo perl ../zschimmer/files_to_c++.pl  -trim html/jz/*.html html/jz/*.js html/jz/*.xslt html/jz/*.css scheduler.xsd -- spooler_embedded_files.cxx
+perl ../zschimmer/files_to_c++.pl  -trim html/jz/*.html html/jz/*.js html/jz/*.xslt html/jz/*.css scheduler.xsd&gt;spooler_embedded_files.cxx
 "/>
 			<Tool
 				Name="VCPreLinkEventTool"/>
@@ -270,8 +270,8 @@ ant -f ../javadoc.xml
 				Name="VCPostBuildEventTool"/>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="cd html &amp;&amp; perl ../../make/files_to_c++.pl  -trim jz/*.html jz/*.js jz/*.xslt jz/*.css &gt;../spooler_http_files.cxx
-cd $(ProjectDir)
+				CommandLine="echo perl ../zschimmer/files_to_c++.pl  -trim html/jz/*.html html/jz/*.js html/jz/*.xslt html/jz/*.css scheduler.xsd -- spooler_embedded_files.cxx
+perl ../zschimmer/files_to_c++.pl  -trim html/jz/*.html html/jz/*.js html/jz/*.xslt html/jz/*.css scheduler.xsd&gt;spooler_embedded_files.cxx
 "/>
 			<Tool
 				Name="VCPreLinkEventTool"/>
@@ -438,6 +438,9 @@ cd $(ProjectDir)
 			</File>
 			<File
 				RelativePath=".\spooler_dtd.cxx">
+			</File>
+			<File
+				RelativePath=".\spooler_embedded_files.cxx">
 			</File>
 			<File
 				RelativePath=".\spooler_event.cxx">

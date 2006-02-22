@@ -97,15 +97,15 @@
         </command_option>
 
 
-        <command_option name="show-dtd" title="schreibt die DTD nach stdout">
+        <command_option name="show-xml-schema" title="schreibt das XML-Schema nach stdout">
             <description>
                 <p>
-                    Der Scheduler hat eine DTD,
-                    der die XML-Kommandos und die XML-Konfiguration entsprechen müssen.
+                    Der Scheduler hat ein XML-Schema,
+                    dem die XML-Kommandos und die XML-Konfiguration entsprechen müssen.
                 </p>
 
                 <p>
-                    Beispiel: <code>scheduler -show-dtd | less</code>
+                    Beispiel: <code>scheduler -show-xml-schema | less</code>
                 </p>
             </description>
         </command_option>
@@ -273,6 +273,15 @@
                 </p>
                 <p>
                     Diese Option kann wiederholt angegeben werden, wenn der Scheduler mehrere Dienste voraussetzt.
+                </p>
+            </description>
+        </command_option>
+
+        <command_option name="validate-xml" title="XML-Dokumente gegen eingebettetes Schema validieren">
+            <description>
+                <p>
+                    <code>-validate-xml-</code> schaltet die Validierung ab 
+                    (für den Fall, dass das Schema fehlerhaft ist).
                 </p>
             </description>
         </command_option>

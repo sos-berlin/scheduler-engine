@@ -10,6 +10,7 @@
 #include "spooler_version.h"
 #include "../file/anyfile.h"
 #include "../zschimmer/z_sql.h"
+#include "../zschimmer/embedded_files.h"
 
 // Für temporäre Datei:
 #include <sys/stat.h>               // S_IREAD, stat()
@@ -37,11 +38,13 @@ namespace spooler {
 using namespace std;
 
 //-------------------------------------------------------------------------------------------------
-//#ifdef Z_DEBUG
 
-#   include "spooler_http_files.cxx"     // Generiert mit:  cd html && perl ../make/files_to_cxx.pl jz/*.html jz/*.js jz/*.xslt jz/*.css
+//#include "spooler_http_files.cxx"     // Generiert mit:  cd html && perl ../make/files_to_cxx.pl jz/*.html jz/*.js jz/*.xslt jz/*.css
 
-//#endif
+//-------------------------------------------------------------------------------------------------
+
+const string default_filename = "index.html";
+
 //--------------------------------------------------------------------------dom_append_text_element
 
 void dom_append_text_element( const xml::Element_ptr& element, const char* element_name, const string& text )
@@ -986,7 +989,7 @@ ptr<Http_response> Command_processor::execute_http( Http_request* http_request )
                         return +response;
                     }
 
-                    path += "index.html";
+                    path += default_filename;
                 }
 
                 string extension = extension_of_path( path );
@@ -1028,15 +1031,32 @@ ptr<Http_response> Command_processor::execute_http( Http_request* http_request )
                 }
                 catch( exception& )
                 {                                                        
-//#                   ifdef Z_DEBUG
-                        string fn = filename.substr( 1 );    // '/' abschneiden
-                        const Inline_files* f;
-                        for( f = inline_files; f->filename &&  f->filename != fn; f++ );
-                        if( !f->filename )  throw;
-                        response_body.assign( f->content, f->length );
-//#                    else
-//                      throw;
-//#                   endif
+                    string fn = filename.substr( 1 );    // '/' abschneiden
+                    const Embedded_file* f = embedded_files.get_embedded_file_or_null( "html/" + fn );
+                    if( !f ) 
+                    {
+                        /*
+                        if( fn == default_filename )
+                        {
+                            fn = "jz/" + fn;
+                            for( f = inline_files; f->filename &&  f->filename != fn; f++ );
+                            if( f->filename ) 
+                            {
+                                ptr<Http_response> response = Z_NEW( Http_response( http_request, NULL, "" ) );
+
+                                path = "/" + fn;
+                                response->set_status( 301, "" );
+                                response->set_header_field( "Location", "http://" + http_request->header_field( "host" ) + path );
+                                return +response;
+                            }
+                        }
+                        */
+
+                        if( fn == xml_schema_path )  f = embedded_files.get_embedded_file_or_null( fn );
+                        if( !f )  throw;
+                    }
+
+                    response_body.assign( f->_content, f->_length );
                 }
             }
         }
@@ -1216,7 +1236,11 @@ void Command_processor::execute_2( const xml::Document_ptr& command_doc, const T
 
     try 
     {
-        if( _validate )  command_doc.validate_against_dtd( _spooler->_dtd );
+        if( _spooler->_validate_xml  &&  _validate )  
+        {
+            //command_doc.validate_against_dtd( _spooler->_dtd );
+            _spooler->_schema.validate( command_doc );
+        }
 
 /*
         xml::DocumentType_ptr doctype = command_doc->doctype;

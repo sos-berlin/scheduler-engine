@@ -129,6 +129,7 @@ namespace spooler {
 extern const char*              temporary_process_class_name;
 extern const char               dtd_string[];
 extern volatile int             ctrl_c_pressed;
+extern const string             xml_schema_path;            // "scheduler.xsd"
 
 
 #ifdef Z_WINDOWS
@@ -449,7 +450,9 @@ struct Spooler : Object,
     ptr<object_server::Connection_manager>  _connection_manager;
   //ptr<Async_manager>                      _async_manager;
 
-    xml::Dtd_ptr               _dtd;
+  //xml::Dtd_ptr               _dtd;
+    bool                       _validate_xml;
+    xml::Schema_ptr            _schema;
     string                     _config_filename;            // -config=
     string                     _html_directory;
     bool                       _executing_command;          // true: spooler_history wartet nicht auf Datenbank (damit Scheduler nicht blockiert)

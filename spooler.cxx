@@ -64,6 +64,7 @@ namespace spooler {
 
 
 const char*                     default_factory_ini                 = "factory.ini";
+const string                    xml_schema_path                     = "scheduler.xsd";
 const string                    new_suffix                          = "~new";  // Suffix für den neuen Spooler, der den bisherigen beim Neustart ersetzen soll
 const double                    renew_wait_interval                 = 0.25;
 const double                    renew_wait_time                     = 30;      // Wartezeit für Brückenspooler, bis der alte Spooler beendet ist und der neue gestartet werden kann.
@@ -518,8 +519,10 @@ Spooler::Spooler()
     _variables   = new Com_variable_set();
 
 
-    _dtd.read( dtd_string );
-        
+    //_dtd.read( dtd_string );
+    if( _validate_xml )  _schema.read( xml::Document_ptr( embedded_files.string_from_embedded_file( xml_schema_path ) ) );
+
+
 #   ifdef __GNUC__
 /*
         sigset_t sigset;
@@ -1789,6 +1792,8 @@ void Spooler::load_arg()
             else
             if( opt.flag      ( "ignore-process-classes" ) )  _ignore_process_classes = opt.set();
             else
+            if( opt.flag      ( "validate-xml"           ) )  _validate_xml = opt.set();
+            else
                 throw_sos_option_error( opt );
         }
 
@@ -1830,9 +1835,10 @@ void Spooler::load_arg()
             cerr << "\n"
                     "usage: " << _argv[0] << "\n"
                     "       [-config=]XMLFILE\n"
+                    "       -validate-xml-\n"
                     "\n"
                     "       -V\n"
-                    "       -show-dtd\n"
+                    "       -show-xml-schema\n"
                     "\n"
                     "       -cd=PATH\n"
                     "       -log=HOSTWARELOGFILE\n"
@@ -3140,7 +3146,9 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
         {
             //if( opt.flag      ( "renew-spooler"    ) )  renew_spooler = program_filename();
           //else
-            if( opt.flag      ( "show-dtd"         ) )  { if( opt.set() )  need_call_scheduler = false, fprintf( stdout, "%s", spooler::dtd_string ); }
+          //if( opt.flag      ( "show-dtd"         ) )  { if( opt.set() )  need_call_scheduler = false, fprintf( stdout, "%s", spooler::dtd_string ); }
+          //else
+            if( opt.flag      ( "show-xml-schema"  ) )  { if( opt.set() )  need_call_scheduler = false, fprintf( stdout, "%s", embedded_files.string_from_embedded_file( xml_schema_path ) ); }
             else
             if( opt.with_value( "renew-spooler"    ) )  renew_spooler = opt.value();
             else
