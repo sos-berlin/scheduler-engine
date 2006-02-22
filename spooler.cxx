@@ -499,7 +499,8 @@ Spooler::Spooler()
     _factory_ini( default_factory_ini ),
     _mail_defaults(NULL),
     _termination_gmtimeout_at(no_termination_timeout),
-    _web_services(this)
+    _web_services(this),
+    _validate_xml(true)
 {
     if( spooler_ptr )  throw_xc( "spooler_ptr" );
     spooler_ptr = this;
