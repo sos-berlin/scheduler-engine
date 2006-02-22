@@ -19,6 +19,7 @@ objects = \
  spooler_config.o\
  spooler_dtd.o\
  spooler_event.o\
+ spooler_embedded_files.o\
  spooler_history.o\
  spooler_http.o\
  spooler_job.o\
