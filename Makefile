@@ -60,8 +60,7 @@ java_classes=\
  sos/spooler/Subprocess.class\
  sos/spooler/Task.class\
  sos/spooler/Variable_set.class\
- sos/spooler/jobs/Web_service_forwarder.class\
- sos/spooler/jobs/Test_web_service.class
+ sos/spooler/jobs/Web_service_forwarder.class
 
 java_headers=$(patsubst %.class, %.h, $(java_classes) )
 
