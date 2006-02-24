@@ -36,9 +36,12 @@ function api_method_in_table__onmouse( method_id, class_name )
 }
 
 //-----------------------------------------------------------------------------position_all_classes
+// Für ie6
 
 function set_all_classes_position()
 {
+    all_classes_1_element.style.position = "relative";
+    all_classes_2_element.style.position = "relative";
     all_classes_1_element.style.top = document.documentElement.scrollTop + "px";
     all_classes_2_element.style.top = document.documentElement.scrollTop + "px";
 }

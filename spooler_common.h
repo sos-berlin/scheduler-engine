@@ -51,7 +51,9 @@ struct Scheduler_object
         type_job_chain,
         type_database,
         type_web_service,
-        type_web_service_transaction
+        type_web_service_operation,
+        type_web_service_request,
+        type_web_service_response
     };
 
 

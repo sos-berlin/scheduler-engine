@@ -749,7 +749,7 @@ void Spooler_db::insert_order( Order* order )
 
                     string payload_string = order->payload().as_string();
                     if( payload_string != "" )  update_payload_clob( order->id().as_string(), payload_string );
-                    order->_payload_modified = false;
+                    //order->_payload_modified = false;
 
                     xml::Document_ptr order_document = order->dom( show_for_database_only );
                     xml::Element_ptr  order_element  = order_document.documentElement();
@@ -1007,12 +1007,12 @@ void Spooler_db::update_order( Order* order )
 
                         update.set_datetime( "mod_time", Time::now().as_string(Time::without_ms) );
 
-                        if( order->_payload_modified )
+                        //if( order->_payload_modified )
                         {
                             string payload_string = order->payload().as_string();
                             if( payload_string == "" )  update[ "payload" ].set_direct( "null" );
                                                   else  update_payload_clob( order->id().as_string(), payload_string );
-                            order->_payload_modified = false;
+                            //order->_payload_modified = false;
                         }
     
 

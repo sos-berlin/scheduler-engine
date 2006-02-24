@@ -81,10 +81,16 @@ struct Order : Com_order,
     void                    set_payload                 ( const VARIANT& );
     Payload                     payload                 ()                                          { THREAD_LOCK_RETURN( _lock, Variant, _payload ); }
 
+    void                    set_xml_payload             ( const string& xml );
+    string                      xml_payload             () const                                    { return _xml_payload; }
+
     void                    set_web_service             ( const string& );
     void                    set_web_service             ( Web_service* );
     Web_service*                web_service             () const;
     Web_service*                web_service_or_null     () const                                    { return _web_service; }
+    void                    set_web_service_operation        ( Web_service_operation* op )          { _web_service_operation = op; }
+    Web_service_operation*      web_service_operation        () const;
+    Web_service_operation*      web_service_operation_or_null() const                               { return _web_service_operation; }
 
     Run_time*                   run_time                ()                                          { return _run_time; }
 
@@ -153,7 +159,10 @@ struct Order : Com_order,
   //bool                       _dont_close_log;
     Order_queue*               _order_queue;            // Auftrag ist in einer Auftragsliste, aber nicht in einer Jobkette. _job_chain == NULL, _job_chain_node == NULL!
     Payload                    _payload;
-    bool                       _payload_modified;       // (Bei einem Objekt wird nur bemerkt, dass die Referenz geändert wurde, nicht das Objekt selbst)
+  //bool                       _payload_modified;       // (Bei einem Objekt wird nur bemerkt, dass die Referenz geändert wurde, nicht das Objekt selbst)
+
+    string                     _xml_payload;
+    bool                       _order_xml_modified;     // Datenbankspalte xml neu schreiben!
 
     ptr<Order>                 _replaced_by;            // Nur wenn _task != NULL: _replaced_by soll this in der Jobkette ersetzen
     Order*                     _replacement_for;        // _replacement_for == NULL  ||  _replacement_for->_replaced_by == this && _replacement_for->_task != NULL
@@ -173,6 +182,7 @@ struct Order : Com_order,
     bool                       _is_in_database;
 
     ptr<Web_service>           _web_service;
+    ptr<Web_service_operation> _web_service_operation;
 };
 
 //-----------------------------------------------------------------------------------Job_chain_node

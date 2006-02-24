@@ -137,8 +137,11 @@
 
 <p style="margin-top: 2em">
     Siehe auch 
-    <a href="konfiguration.xml">XML-Konfiguration</a> und
-    <a href="xml_commands.xml">XML-Kommandos</a>.
+    <a href="konfiguration.xml">XML-Konfiguration</a>,
+    <a href="xml_commands.xml">XML-Kommandos</a> und
+    <scheduler_keyword keyword="Schema"/>
+    <scheduler_keyword keyword="XML-Schema"/>
+    <a href="xml/scheduler.xsd" type="text/plain" charset="utf-8">XML-Schema des Schedulers</a>.
 </p>
 
 

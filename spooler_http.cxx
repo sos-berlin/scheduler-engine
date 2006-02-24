@@ -24,14 +24,14 @@ namespace spooler {
 
 //-------------------------------------------------------------------------------------------------
 
-stdext::hash_map<int,string> Http_processor::response_messages;
+stdext::hash_map<int,string> Http_operation::response_messages;
 
 //-------------------------------------------------------------------------------------------Z_INIT
 
 Z_INIT( scheduler_http )
 {
-    Http_processor::response_messages[ (int)Http_processor::code_bad_request           ] = "Bad Request";
-    Http_processor::response_messages[ (int)Http_processor::code_internal_server_error ] = "Internal Server Error";
+    Http_operation::response_messages[ (int)Http_operation::code_bad_request           ] = "Bad Request";
+    Http_operation::response_messages[ (int)Http_operation::code_internal_server_error ] = "Internal Server Error";
 }
 
 //-------------------------------------------------------------------------Http_parser::Http_parser
@@ -265,9 +265,9 @@ string Http_request::url() const
     return result;
 }
 
-//-----------------------------------------------------------------------Http_request::charset_name
+//-----------------------------------------------------------------Http_request::character_encoding
 
-string Http_request::charset_name() const
+string Http_request::character_encoding() const
 {
     String_map::const_iterator h = _header.find( "content-type" );
     if( h == _header.end() )  return "";
@@ -746,20 +746,20 @@ string Html_chunk_reader::read_from_chunk( int recommended_size )
     return _chunk;
 }
 
-//-------------------------------------------------------------------Http_processor::Http_processor
+//-------------------------------------------------------------------Http_operation::Http_operation
 
-Http_processor::Http_processor( Http_processor_channel* pc )
+Http_operation::Http_operation( Http_processor_channel* pc )
 : 
-    Communication::Processor( pc ), 
+    Communication::Operation( pc ), 
     _zero_(this+1) 
 {
     _http_request = Z_NEW( Http_request() );
     _http_parser  = Z_NEW( Http_parser( _http_request ) );
 }
 
-//--------------------------------------------------------------------------Http_processor::process
+//----------------------------------------------------------------------------Http_operation::begin
 
-void Http_processor::process()
+void Http_operation::begin()
 {
     Z_LOG2( "scheduler.http", "HTTP: " << _http_parser->_text << "\n" );    // Wird auch mit "socket.data" protokolliert (default aus)
     
@@ -770,9 +770,9 @@ void Http_processor::process()
         {
             Z_LOG2( "scheduler.http", "    web_service=" << web_service->name() << "\n" );
 
-            ptr<Web_service_transaction> web_service_transaction = web_service->new_transaction( this );
+            _web_service_operation = web_service->new_operation( this );
 
-            _http_response = web_service_transaction->process_http( this );
+            _web_service_operation->process_http__begin( this );
         }
         else
         {
@@ -806,23 +806,39 @@ void Http_processor::process()
     _http_request = NULL;
 }
 
-//----------------------------------------------------------------------Http_processor::get_response
+//------------------------------------------------------------------Http_operation::async_continue_
 
-string Http_processor::get_response_part()
+bool Http_operation::async_continue_( Continue_flags )
+{
+    if( !_web_service_operation )  return true;
+
+    bool something_done = _web_service_operation->async_continue();
+    
+    if( something_done  &&  _web_service_operation->async_finished() )
+    {
+        _http_response = _web_service_operation->process_http__end();
+    }
+
+    return something_done;
+}
+
+//----------------------------------------------------------------------Http_operation::get_response
+
+string Http_operation::get_response_part()
 { 
     return _http_response->read( _http_response->recommended_block_size() );
 }
 
-//--------------------------------------------------------------Http_processor::response_is_complete
+//--------------------------------------------------------------Http_operation::response_is_complete
 
-bool Http_processor::response_is_complete()
+bool Http_operation::response_is_complete()
 { 
     return !_http_response || _http_response->eof(); 
 }
 
-//----------------------------------------------------------Http_processor::should_close_connection
+//----------------------------------------------------------Http_operation::should_close_connection
 
-bool Http_processor::should_close_connection()
+bool Http_operation::should_close_connection()
 { 
     return _http_response  &&  _http_response->close_connection_at_eof(); 
 }

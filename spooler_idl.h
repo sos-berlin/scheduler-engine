@@ -563,6 +563,9 @@ struct Iorder : IDispatch
     virtual HRESULT     get_Web_service             ( Iweb_service** )                              = 0;
 
     virtual HRESULT     get_Web_service_or_null     ( Iweb_service** )                              = 0;
+
+    virtual HRESULT     put_Xml_payload             ( BSTR value )                                  = 0;
+    virtual HRESULT     get_Xml_payload             ( BSTR* result )                                = 0;
 };
 
 //--------------------------------------------------------------------Remote_module_instance_server
@@ -632,6 +635,47 @@ struct Iweb_service: IDispatch
     virtual HRESULT     get_Java_class_name         ( BSTR* )                                       = 0;
     virtual HRESULT     get_Name                    ( BSTR* )                                       = 0;
     virtual HRESULT     get_Forward_xslt_stylesheet_path( BSTR* )                                   = 0;
+};
+
+//---------------------------------------------------------------------------Iweb_service_operation
+
+DEFINE_GUID( IID_Iweb_service_operation, 0xfeee47ae, 0x6c1b, 0x11d8, 0x81, 0x03, 0x00, 0x04, 0x76, 0xee, 0x8a, 0xfb );   // {feee47ae-6c1b-11d8-8103-000476ee8afb}
+                                                                                                                   
+struct Iweb_service_operation : IDispatch
+{
+    virtual HRESULT         get_Web_service                 ( IWeb_service** )                      = 0;
+    virtual HRESULT         get_Request                     ( IWeb_service_request** )              = 0;
+    virtual HRESULT         get_Response                    ( IWeb_service_response** )             = 0;
+};
+
+//-----------------------------------------------------------------------------Iweb_service_request
+
+DEFINE_GUID( IID_Iweb_service_request, 0xfeee47af, 0x6c1b, 0x11d8, 0x81, 0x03, 0x00, 0x04, 0x76, 0xee, 0x8a, 0xfb );   // {feee47af-6c1b-11d8-8103-000476ee8afb}
+                                                                                                                   
+struct Iweb_service_request: IDispatch
+{
+    virtual HRESULT         get_Url                         ( BSTR* )                               = 0;
+    virtual HRESULT         get_Header                      ( BSTR Name, BSTR* Result )             = 0;
+    virtual HRESULT         get_Character_encoding          ( BSTR* )                               = 0;
+    virtual HRESULT         get_Content_type                ( BSTR* )                               = 0;
+    virtual HRESULT         get_String_content              ( BSTR* )                               = 0;
+    virtual HRESULT         get_Binary_content              ( SAFEARRAY** )                         = 0;
+};
+
+//----------------------------------------------------------------------------Iweb_service_response
+
+DEFINE_GUID( IID_Iweb_service_response, 0xfeee47b0, 0x6c1b, 0x11d8, 0x81, 0x03, 0x00, 0x04, 0x76, 0xee, 0x8a, 0xfb );   // {feee47b0-6c1b-11d8-8103-000476ee8afb}
+                                                                                                                   
+struct Iweb_service_response: IDispatch
+{
+    virtual HRESULT         get_Header                      ( BSTR Name, BSTR* Result )             = 0;
+    virtual HRESULT         put_Header                      ( BSTR Name, BSTR )                     = 0;
+    virtual HRESULT         get_Character_encoding          ( BSTR* )                               = 0;
+    virtual HRESULT         put_Character_encoding          ( BSTR )                                = 0;
+    virtual HRESULT         get_Content_type                ( BSTR* )                               = 0;
+    virtual HRESULT         put_Content_type                ( BSTR )                                = 0;
+    virtual HRESULT         put_String_content              ( BSTR* )                               = 0;
+    virtual HRESULT         put_Binary_content              ( SAFEARRAY** )                         = 0;
 };
 
 //-------------------------------------------------------------------------------------------------

@@ -106,11 +106,11 @@ Xc_copy xc_from_dom_error( const xml::Element_ptr& element )
 
 //-------------------------------------------------------------Command_processor::Command_processor
 
-Command_processor::Command_processor( Spooler* spooler, Communication::Processor* cp )
+Command_processor::Command_processor( Spooler* spooler, Communication::Operation* cp )
 : 
     _zero_(this+1),
     _spooler(spooler),
-    _communication_processor( cp ),
+    _communication_operation( cp ),
     _validate(true)
 {
     set_host( NULL );
@@ -651,10 +651,10 @@ xml::Element_ptr Command_processor::execute_remove_job_chain( const xml::Element
 
 xml::Element_ptr Command_processor::execute_register_remote_scheduler( const xml::Element_ptr& register_scheduler_element )
 {
-    if( !_communication_processor )  throw_xc( "SCHEDULER-222" );
+    if( !_communication_operation )  throw_xc( "SCHEDULER-222" );
     if( !_host                    )  throw_xc( "SCHEDULER-222" );
 
-    Xml_processor* xml_processor = dynamic_cast<Xml_processor*>( _communication_processor );
+    Xml_operation* xml_processor = dynamic_cast<Xml_operation*>( _communication_operation );
     if( !xml_processor )  throw_xc( "SCHEDULER-222" );
 
     if( _security_level < Security::seclev_no_add )  throw_xc( "SCHEDULER-121" );
@@ -669,7 +669,7 @@ xml::Element_ptr Command_processor::execute_register_remote_scheduler( const xml
     remote_scheduler->_host_and_port._host.set_name();
     remote_scheduler->set_dom( register_scheduler_element );
     
-    xml_processor->_processor_channel->_remote_scheduler = remote_scheduler;        // Remote_scheduler mit TCP-Verbindung verknüpfen
+    xml_processor->_operation_channel->_remote_scheduler = remote_scheduler;        // Remote_scheduler mit TCP-Verbindung verknüpfen
     _spooler->_remote_scheduler_register.add( remote_scheduler );
     
     return _answer.createElement( "ok" );
@@ -1002,6 +1002,8 @@ ptr<Http_response> Command_processor::execute_http( Http_request* http_request )
                 if( extension == "xsl"  )  response_content_type = "text/xml";  // wie xslt?      "text/xsl";
                 else
                 if( extension == "xslt" )  response_content_type = "text/xml";  // Firefox und Netscape verlangen text/xml!      "text/xslt";
+                else
+                if( extension == "xsd"  )  response_content_type = "text/xml";
                 else
                 if( extension == "js"   )  response_content_type = "text/javascript";
                 else

@@ -144,7 +144,7 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
         string           java_options;
         string           job_name;
         int              task_id = 0;
-        Locked_safearray params ( safearray );
+        Locked_safearray<Variant> params ( safearray );
 
         for( int i = 0; i < params.count(); i++ )
         {
@@ -322,8 +322,8 @@ STDMETHODIMP Com_remote_module_instance_server::Begin( SAFEARRAY* objects_safear
     {
         if( !_server._module_instance )  throw_xc( "SCHEDULER-203", "begin" );
 
-        Locked_safearray objects ( objects_safearray );
-        Locked_safearray names   ( names_safearray );
+        Locked_safearray<Variant> objects ( objects_safearray );
+        Locked_safearray<Variant> names   ( names_safearray );
 
         for( int i = 0; i < objects.count(); i++ )  
         {

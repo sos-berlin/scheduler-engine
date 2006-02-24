@@ -185,7 +185,7 @@
             <table cellpadding="0" cellspacing="0" width="100%" style="padding-bottom: 4ex">
                 <tr>
                     <td style="vertical-align: top; padding-right: 3ex; padding-bottom: 4pt;">
-                        <div id="all_classes_1" style="position: relative">  <!-- Wird mit JavaScript positioniert -->
+                        <div id="all_classes_1" style="position: fixed">  <!-- ie6: Wird mit JavaScript positioniert -->
                             <xsl:call-template name="all_classes">   <!-- Übersicht -->
                                 <xsl:with-param name="class_references"  select="document( 'all_classes.xml' )/class_references/class_reference [ @class='api' ]"/>
                                 <xsl:with-param name="active_class"      select="/api.class/@name"/>
@@ -233,9 +233,15 @@
                 </tr>
 
                 <tr>
-                    <td style="vertical-align: top; padding-right: 3ex; width: 20pt;">
+                    <td style="vertical-align: top; padding-right: 3ex; width: 10ex;">
                         <!--p style="font-weight: bold; padding-bottom: 1em">Klassen:</p-->
-                        <div id="all_classes_2" style="position: relative">  <!-- Wird mit JavaScript positioniert -->
+                        <div id="all_classes_2" style="position: fixed">  <!-- ie6: Wird mit JavaScript positioniert -->
+                            <xsl:call-template name="all_classes">
+                                <xsl:with-param name="class_references"  select="document( 'all_classes.xml' )/class_references/class_reference [ @class != 'api' ]"/>
+                                <xsl:with-param name="active_class"      select="/api.class/@name"/>
+                            </xsl:call-template>
+                        </div>
+                        <div id="all_classes_hidden" style="visibility: hidden">  <!-- Wegen position: fixed, damit das Layout stimmt -->
                             <xsl:call-template name="all_classes">
                                 <xsl:with-param name="class_references"  select="document( 'all_classes.xml' )/class_references/class_reference [ @class != 'api' ]"/>
                                 <xsl:with-param name="active_class"      select="/api.class/@name"/>
@@ -304,8 +310,12 @@
 
                 <script defer="defer" type="text/javascript" for="window" event="onload">
 
-                    //window.onscroll = function() { set_all_classes_position(); };
-                    window.setInterval( set_all_classes_position, 1*1000, "JavaScript" );
+                    if( window.navigator.appName == "Microsoft Internet Explorer" )     // ie6 kennt nicht "fixed"
+                    {
+                        //window.onscroll = set_all_classes_position;
+                        document.getElementById( "all_classes_hidden" ).style.display = "none";
+                        window.setInterval( set_all_classes_position, 1*1000, "JavaScript" );
+                    }
 
                 </script>
             <!--

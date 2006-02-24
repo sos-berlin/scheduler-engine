@@ -14,7 +14,7 @@ const int                       recommended_chunk_size = 32768;
 //-------------------------------------------------------------------------------------------------
 
 struct Http_processor_channel;
-struct Http_processor;
+struct Http_operation;
 
 //-------------------------------------------------------------------------------------Http_request
 
@@ -30,7 +30,8 @@ struct Http_request : Object
     string                      url                         () const;
     string                      url_path                    () const                                { return _path; }
     string                      host_and_port_field         () const;
-    string                      charset_name                () const;
+    string                      character_encoding          () const;
+    string                      content_type                () const;
 
 
     Fill_zero                  _zero_;
@@ -212,6 +213,7 @@ struct Http_response : Object
 
     string                      content_type                ()                                      { return _content_type; }
     void                    set_content_type                ( const string& value )                 { _content_type = value; }
+    void                    set_character_encoding          ( const string& value );
     void                    set_header_field                ( const string& name, const string& value ) { _header_fields[ name ] = value; }
     void                    set_status                      ( int code, const string& text )        { _status_code = code; _status_text = text; }
     void                        finish                      ();
@@ -245,9 +247,9 @@ struct Http_response : Object
     bool                       _finished;
 };
 
-//-----------------------------------------------------------------------------------Http_processor
+//-----------------------------------------------------------------------------------Http_operation
 
-struct Http_processor : Communication::Processor
+struct Http_operation : Communication::Operation
 {
     enum Response_code
     {
@@ -268,13 +270,16 @@ struct Http_processor : Communication::Processor
     static stdext::hash_map<int,string>  response_messages;
 
 
-                                Http_processor              ( Http_processor_channel* );
+                                Http_operation              ( Http_processor_channel* );
 
 
     void                        put_request_part            ( const char* data, int length )        { _http_parser->add_text( data, length ); }
     bool                        request_is_complete         ()                                      { return !_http_parser  ||  _http_parser->is_complete(); }
 
-    void                        process                     ();
+    void                        begin                       ();
+    virtual bool                async_continue_             ( Continue_flags );
+    virtual bool                async_finished_             ()                                      { return _http_response != NULL; }
+    virtual string              async_state_text_           ()                                      { return "none"; }
 
     bool                        response_is_complete        ();
     string                      get_response_part           ();
@@ -285,15 +290,17 @@ struct Http_processor : Communication::Processor
     ptr<Http_request>          _http_request;
     ptr<Http_parser>           _http_parser;
     ptr<Http_response>         _http_response;
+    ptr<Web_service_operation> _web_service_operation;
+
 };
 
 //---------------------------------------------------------------------------Http_processor_channel
 
-struct Http_processor_channel : Communication::Processor_channel
+struct Http_processor_channel : Communication::Operation_channel
 {
-                                Http_processor_channel      ( Communication::Channel* ch )          : Communication::Processor_channel( ch ) {}
+                                Http_processor_channel      ( Communication::Channel* ch )          : Communication::Operation_channel( ch ) {}
 
-    ptr<Communication::Processor> processor                 ()                                      { ptr<Http_processor> result = Z_NEW( Http_processor( this ) ); 
+    ptr<Communication::Operation> new_operation             ()                                      { ptr<Http_operation> result = Z_NEW( Http_operation( this ) ); 
                                                                                                       return +result; }
 
     string                      channel_type                () const                                { return "HTTP"; }

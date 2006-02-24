@@ -12,16 +12,18 @@ string Scheduler_object::name_of_type_code( Scheduler_object::Type_code type_cod
 {
     switch( type_code )
     {
-        case type_none:             return "none";
-        case type_scheduler:        return "Scheduler";
-        case type_job:              return "Job";
-        case type_task:             return "Task";
-        case type_order:            return "Order";
-        case type_job_chain:        return "Job_chain";
-        case type_database:         return "Database";
-        case type_web_service:      return "Web_service";
-        case type_web_service_transaction: return "Web_service_transaction";
-        default:                    return S() << "Type_code(" << type_code << ")";
+        case type_none:                     return "none";
+        case type_scheduler:                return "Scheduler";
+        case type_job:                      return "Job";
+        case type_task:                     return "Task";
+        case type_order:                    return "Order";
+        case type_job_chain:                return "Job_chain";
+        case type_database:                 return "Database";
+        case type_web_service:              return "Web_service";
+        case type_web_service_operation:    return "Web_service_operation";
+        case type_web_service_request:      return "Web_service_request";
+        case type_web_service_response:     return "Web_service_response";
+        default:                            return S() << "Type_code(" << type_code << ")";
     }
 }
 

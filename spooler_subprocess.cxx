@@ -153,9 +153,9 @@ STDMETHODIMP Subprocess::Start( VARIANT* program_and_parameters )
         else
         if( program_and_parameters->vt == VT_ARRAY )
         {
-            string           command_line = "";
-            Locked_safearray params ( V_ARRAY( program_and_parameters ) );
-            vector<string>   args   ( params.count() );
+            string                    command_line = "";
+            Locked_safearray<Variant> params ( V_ARRAY( program_and_parameters ) );
+            vector<string>            args   ( params.count() );
 
             for( int i = 0; i < params.count(); i++ )
             {

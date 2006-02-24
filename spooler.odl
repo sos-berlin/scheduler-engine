@@ -26,6 +26,9 @@ library Spooler
     interface Iorder;
     interface Isubprocess;
     interface Iweb_service;
+    interface Iweb_service_operation;
+    interface Iweb_service_request;
+    interface Iweb_service_response;
     interface Ixslt_stylesheet;
 
     //------------------------------------------------------------------------------------Log_level
@@ -991,6 +994,19 @@ library Spooler
 
         [propget]
         HRESULT                 Web_service_or_null     ( [out,retval] Iweb_service** );
+
+        [propget]
+        HRESULT                 Web_service_operation   ( [out,retval] Iweb_service_operation** );
+
+        [propget]
+        HRESULT                 Web_service_operation_or_null( [out,retval] Iweb_service_operation** );
+
+        [propput]
+        HRESULT                 Xml_payload             ( [in] BSTR );
+
+        [propget]
+        HRESULT                 Xml_payload             ( [out,retval] BSTR* Result );
+
     }
 
     [
@@ -1342,15 +1358,105 @@ library Spooler
         [propget]
         HRESULT                 Forward_xslt_stylesheet_path( [out,retval] BSTR* );
     };
+
+    //-----------------------------------------------------------------------Iweb_service_operation
+    
+    [
+        uuid       ( feee47ae-6c1b-11d8-8103-000476ee8afb ),
+        odl,
+        dual
+    ]
+    interface Iweb_service_operation: IDispatch
+    {
+        [propget]
+        HRESULT                 Java_class_name         ( [out,retval] BSTR* );                 // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
+                                                                                                // Für den Objectserver
+        [propget]
+        HRESULT                 Web_service             ( [out,retval] Iweb_service** );
+
+        [propget]
+        HRESULT                 Request                 ( [out,retval] Iweb_service_request** );
+
+        [propget]
+        HRESULT                 Response                ( [out,retval] Iweb_service_response** );
+    };
+
+    //-------------------------------------------------------------------------Iweb_service_request
+    
+    [
+        uuid       ( feee47af-6c1b-11d8-8103-000476ee8afb ),
+        odl,
+        dual
+    ]
+    interface Iweb_service_request: IDispatch
+    {
+        [propget]
+        HRESULT                 Java_class_name         ( [out,retval] BSTR* );                 // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
+                                                                                                // Für den Objectserver
+        [propget]
+        HRESULT                 Url                     ( [out,retval] BSTR* );
+
+        [propget]
+        HRESULT                 Header                  ( [in] BSTR Name, [out,retval] BSTR* Result );
+
+        [propget]
+        HRESULT                 Character_encoding      ( [out,retval] BSTR* );
+
+        [propget]
+        HRESULT                 Content_type            ( [out,retval] BSTR* );
+
+        [propget]
+        HRESULT                 String_content          ( [out,retval] BSTR* );
+
+        [propget]
+        HRESULT                 Binary_content          ( [out,retval] SAFEARRAY(unsigned char)* );
+    };
+
+    //-------------------------------------------------------------------------Iweb_service_request
+    
+    [
+        uuid       ( feee47b0-6c1b-11d8-8103-000476ee8afb ),
+        odl,
+        dual
+    ]
+    interface Iweb_service_response: IDispatch
+    {
+        [propget]
+        HRESULT                 Java_class_name         ( [out,retval] BSTR* );                 // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
+                                                                                                // Für den Objectserver
+        [propput]
+        HRESULT                 Status_code             ( [in] int );
+
+        [propput]
+        HRESULT                 Header                  ( [in] BSTR Name, [in] BSTR Value );
+
+        [propget]
+        HRESULT                 Header                  ( [in] BSTR Name, [out,retval] BSTR* Result );
+
+        [propput]
+        HRESULT                 Character_encoding      ( [in] BSTR );
+
+        [propget]
+        HRESULT                 Character_encoding      ( [out,retval] BSTR* );
+
+        [propput]
+        HRESULT                 Content_type            ( [in] BSTR );
+
+        [propget]
+        HRESULT                 Content_type            ( [out,retval] BSTR* );
+
+        [propput]
+        HRESULT                 String_content          ( [in] BSTR );
+
+        [propput]
+        HRESULT                 Binary_content          ( [in] SAFEARRAY(unsigned char) );
+    };
 };
 
 //-------------------------------------------------------------------------------------------------
 /*
 Ein paar freie GUIDs:
 
-feee47ae-6c1b-11d8-8103-000476ee8afb
-feee47af-6c1b-11d8-8103-000476ee8afb
-feee47b0-6c1b-11d8-8103-000476ee8afb
 feee47b1-6c1b-11d8-8103-000476ee8afb
 feee47b2-6c1b-11d8-8103-000476ee8afb
 feee47b3-6c1b-11d8-8103-000476ee8afb

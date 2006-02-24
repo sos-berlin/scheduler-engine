@@ -505,7 +505,7 @@ AGAIN:
             Variant params ( Variant::vt_array, 17 );   // Wichtig: Größe anpassen!
 
             {
-                Locked_safearray params_array = V_ARRAY( &params );
+                Locked_safearray<Variant> params_array = V_ARRAY( &params );
                 int nr = 0;
 
                 params_array[ nr++ ] = "language="        + _module->_language;
@@ -566,8 +566,8 @@ AGAIN:
             Variant names   ( Variant::vt_array, _object_list.size() );
 
             {
-                Locked_safearray objects_array = V_ARRAY( &objects );
-                Locked_safearray names_array   = V_ARRAY( &names   );
+                Locked_safearray<Variant> objects_array = V_ARRAY( &objects );
+                Locked_safearray<Variant> names_array   = V_ARRAY( &names   );
 
                 int i = 0;
                 FOR_EACH_CONST( Object_list, _object_list, o )

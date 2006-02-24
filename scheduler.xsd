@@ -6,6 +6,7 @@
 
     <xsd:annotation>
         <xsd:documentation xml:lang="de">
+            $Id$
             Schema für die Scheduler-Konfiguration,
             s.a. http://www.zschimmer.com/sos/scheduler/konfiguration.xml.html.
         </xsd:documentation>
@@ -27,42 +28,6 @@
                             <xsd:element ref="security"         minOccurs="0"/>
                             <xsd:element ref="process_classes"  minOccurs="0"/>
                             <xsd:element ref="script"           minOccurs="0"/>
-
-                            <!--xsd:element name="object_set_classes" minOccurs="0">
-                                <xsd:complexType>
-                                    <xsd:sequence>
-                                        <xsd:element name="object_set_class" maxOccurs="unbounded">
-                                            <xsd:complexType>
-                                                <xsd:sequence>
-                                                    <xsd:element name="level_decls" minOccurs="0">
-                                                        <xsd:complexType>
-                                                            <xsd:sequence>
-                                                                <xsd:element name="level_decl" maxOccurs="unbounded">
-                                                                    <xsd:complexType>
-                                                                        <xsd:attribute name="level" type="xsd:string" use="required"/>
-                                                                        <xsd:attribute name="name" type="xsd:string" use="required"/>
-                                                                    </xsd:complexType>
-                                                                </xsd:element>
-                                                            </xsd:sequence>
-                                                        </xsd:complexType>
-                                                    </xsd:element>
-                                                    <xsd:element ref="script" minOccurs="0"/>
-                                                </xsd:sequence>
-                                                <xsd:attribute name="name" type="xsd:string" use="required"/>
-                                                <xsd:attribute name="script_interface">
-                                                    <xsd:simpleType>
-                                                        <xsd:restriction base="xsd:NMTOKEN">
-                                                            <xsd:enumeration value="oo"/>
-                                                            <xsd:enumeration value="procedural"/>
-                                                        </xsd:restriction>
-                                                    </xsd:simpleType>
-                                                </xsd:attribute>
-                                            </xsd:complexType>
-                                        </xsd:element>
-                                    </xsd:sequence>
-                                </xsd:complexType>
-                            </xsd:element-->
-
                             <xsd:element ref="web_services" minOccurs="0"/>
 
                             <xsd:choice>
@@ -186,16 +151,6 @@
     </xsd:element>
 
     
-    <!--xsd:element name="day">
-        <xsd:complexType>
-            <xsd:sequence>
-                <xsd:element ref="period" minOccurs="0" maxOccurs="unbounded"/>
-            </xsd:sequence>
-            <xsd:attribute name="day" type="Day" use="required"/>
-        </xsd:complexType>
-    </xsd:element-->
-
-    
     <xsd:element name="holiday">
         <xsd:complexType>
             <xsd:attribute name="date" type="xsd:string" use="required"/>
@@ -233,20 +188,6 @@
                 <xsd:element ref="params" minOccurs="0"/>
 
                 <xsd:choice minOccurs="0">
-                    <!--xsd:element name="object_set">
-                        <xsd:complexType>
-                            <xsd:sequence>
-                                <xsd:element name="levels" minOccurs="0">
-                                    <xsd:complexType>
-                                        <xsd:attribute name="low" type="xsd:string" use="required"/>
-                                        <xsd:attribute name="high" type="xsd:string" use="required"/>
-                                    </xsd:complexType>
-                                </xsd:element>
-                            </xsd:sequence>
-                            <xsd:attribute name="class" type="xsd:string" use="required"/>
-                        </xsd:complexType>
-                    </xsd:element-->
-
                     <xsd:element ref="script"/>
 
                     <xsd:element name="process">
@@ -312,7 +253,6 @@
             <xsd:attribute name="visible"               type="Yes_no"/>
             <xsd:attribute name="priority"              type="xsd:nonNegativeInteger"/>
             <xsd:attribute name="temporary"             type="Yes_no"/>
-         <!--xsd:attribute name="output_level"          type="xsd:string"/-->
             <xsd:attribute name="spooler_id"            type="Name"/>
             <xsd:attribute name="title"                 type="xsd:string"/>
             <xsd:attribute name="log_append"            type="Yes_no"/>
@@ -749,14 +689,6 @@
     </xsd:element>
 
     
-    <!--xsd:element name="signal_object">
-        <xsd:complexType>
-            <xsd:attribute name="class" type="xsd:string" use="required"/>
-            <xsd:attribute name="level" type="xsd:string" use="required"/>
-        </xsd:complexType>
-    </xsd:element-->
-
-    
     <xsd:element name="start_job">
         <xsd:complexType>
             <xsd:sequence>
@@ -798,35 +730,6 @@
 
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~TYPEN-->
-
-    <!--xsd:complexType name="Command">
-        <xsd:choice>
-            <xsd:element ref="add_jobs"/>
-            <xsd:element ref="add_order"/>
-            <xsd:element ref="kill_task"/>
-            <xsd:element ref="modify_job"/>
-            <xsd:element ref="modify_order"/>
-            <xsd:element ref="modify_spooler"/>
-            <xsd:element ref="register_remote_scheduler"/>
-            <xsd:element ref="remove_job_chain"/>
-            <xsd:element ref="remove_order"/>
-            <xsd:element ref="run_time"/>
-            <xsd:element ref="show_history"/>
-            <xsd:element ref="show_job"/>
-            <xsd:element ref="show_jobs"/>
-            <xsd:element ref="show_job_chains"/>
-            <xsd:element ref="show_job_chain"/>
-            <xsd:element ref="show_order"/>
-            <xsd:element ref="s"/>
-            <xsd:element ref="show_state"/>
-            <xsd:element ref="show_task"/>
-            <xsd:element ref="service_request"/>
-            <xsd:element ref="start_job"/>
-         <!- -xsd:element ref="signal_object"/- ->
-            <xsd:element ref="terminate"/>
-        </xsd:choice>
-    </xsd:complexType-->
-
 
     <xsd:simpleType name="Yes_no">
         <xsd:restriction base="xsd:NMTOKEN">
@@ -879,6 +782,5 @@
             <xsd:pattern value="(\d+)|(\d+:\d{2}(:\d\d)?)"/>
         </xsd:restriction>
     </xsd:simpleType>
-
 
 </xsd:schema>

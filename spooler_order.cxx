@@ -1022,9 +1022,6 @@ Order::Order( Spooler* spooler, const Record& record, const string& payload_stri
     _title      = record.as_string( "title"      );
     _priority   = record.as_int   ( "priority"   );
 
-    //string payload_string = record.as_string( "payload" );
-
-    //LOG( "db payload=" << payload_string << "\n" );
     if( payload_string.find( "<" + Com_variable_set::xml_element_name() ) != string::npos )
     {
         //LOG( "... payload ist ein Variable_set!\n" );
@@ -1165,6 +1162,7 @@ void Order::set_dom( const xml::Element_ptr& element )
             pars->set_dom( e );  
             set_payload( Variant( static_cast<IDispatch*>( pars ) ) );
         }
+        else
         if( e.nodeName_is( "payload" ) )
         {
             DOM_FOR_EACH_ELEMENT( e, ee )
@@ -1174,7 +1172,17 @@ void Order::set_dom( const xml::Element_ptr& element )
                     ptr<Com_variable_set> pars = new Com_variable_set;
                     pars->set_dom( ee );  
                     set_payload( Variant( static_cast<IDispatch*>( pars ) ) );
+                    break;
                 }
+            }
+        }
+        else
+        if( e.nodeName_is( "xml_payload" ) )
+        {
+            DOM_FOR_EACH_ELEMENT( e, ee )
+            {
+                set_xml_payload( ee.xml() );
+                break;
             }
         }
         else
@@ -1284,7 +1292,6 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
             payload_element.appendChild( payload_content );
         }
 
-
         if( show & show_run_time )  element.appendChild( _run_time->dom_element( document ) );
 
         element.appendChild( _log->dom_element( document, show ) );
@@ -1292,6 +1299,29 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
 
     if( _web_service )
     element.setAttribute( "web_service", _web_service->name() );
+
+    if( _web_service_operation )
+    element.setAttribute( "web_service_operation", _web_service_operation->id() );
+
+    if( show & show_payload  &&  _xml_payload != "" )
+    {
+        xml::Element_ptr xml_payload_element = element.append_new_element( "xml_payload" );
+
+        try
+        {
+            xml::Document_ptr doc ( _xml_payload );
+
+            if( doc.documentElement() )
+            {
+                xml_payload_element.appendChild( doc.documentElement().cloneNode( true ) );
+            }
+        }
+        catch( exception& x )   // Sollte nicht passieren
+        {
+            _log->error( "xml_payload ist nicht valide: " + string(x.what()) );
+            append_error_element( xml_payload_element, x );
+        }
+    }
 
     return element;
 }
@@ -1357,6 +1387,8 @@ void Order::set_web_service( const string& name )
 { 
     if( _is_in_database )  throw_xc( "SCHEDULER-243", "web_service" );
 
+    _order_xml_modified = true;
+
     set_web_service( name == ""? NULL 
                                : _spooler->_web_services.web_service_by_name( name ) );
 }
@@ -1412,8 +1444,20 @@ void Order::set_payload( const VARIANT& payload )
     {
         Z_LOG2( "scheduler.order", obj_name() << ".payload=" << debug_string_from_variant(payload) << "\n" );
         _payload = payload;
-        _payload_modified = true;
+        //_payload_modified = true;
     }
+}
+
+//---------------------------------------------------------------------------Order::set_xml_payload
+
+void Order::set_xml_payload( const string& xml_string )
+{ 
+    Z_LOGI2( "scheduler.order", obj_name() << ".xml_payload=" << xml_string << "\n" );
+    
+    xml::Document_ptr doc ( xml_string );       // Sicherstellen, dass xml_string valide ist
+
+    _xml_payload = xml_string;  
+    _order_xml_modified = true; 
 }
 
 //----------------------------------------------------------------------------------Order::finished
@@ -2013,6 +2057,15 @@ Web_service* Order::web_service() const
 {
     Web_service* result = web_service_or_null();
     if( !result )  throw_xc( "SCHEDULER-240" );
+    return result;
+}
+
+//---------------------------------------------------------------------Order::web_service_operation
+
+Web_service_operation* Order::web_service_operation() const
+{
+    Web_service_operation* result = web_service_operation_or_null();
+    if( !result )  throw_xc( "SCHEDULER-246" );
     return result;
 }
 

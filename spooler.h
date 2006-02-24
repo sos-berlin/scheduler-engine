@@ -88,6 +88,9 @@ namespace sos {
         struct Subprocess;
         struct Subprocess_register;
         struct Web_service;
+        struct Web_service_operation;
+        struct Web_service_request;
+        struct Web_service_response;
         struct Xslt_stylesheet;
     }
 }

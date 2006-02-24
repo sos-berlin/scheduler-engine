@@ -89,7 +89,7 @@ struct Xml_client_operation : Operation
 
 //--------------------------------------------------------------------------Object_server_processor
 /*
-struct Object_server_processor : Communication::Processor
+struct Object_server_processor : Communication::Operation
 {
                                 Object_server_processor     ( Object_server_processor_channel* );
 
@@ -105,7 +105,7 @@ struct Object_server_processor : Communication::Processor
 
 
     Fill_zero                          _zero_;
-    Object_server_processor_channel*      _processor_channel;
+    Object_server_processor_channel*      _operation_channel;
     object_server::Input_message          _input_message;
     object_server::Input_message::Builder _input_message_builder;
     object_server::Output_message         _output_message;
@@ -113,11 +113,11 @@ struct Object_server_processor : Communication::Processor
 
 //--------------------------------------------------------------------Object_server_processor_channel
 
-struct Object_server_processor_channel : Communication::Processor_channel
+struct Object_server_processor_channel : Communication::Operation_channel
 {
                                 Object_server_processor_channel( Communication::Channel* );
 
-    ptr<Communication::Processor> processor                 ()                                      { ptr<Object_server_processor> result = Z_NEW( Object_server_processor( this ) ); 
+    ptr<Communication::Operation> processor                 ()                                      { ptr<Object_server_processor> result = Z_NEW( Object_server_processor( this ) ); 
                                                                                                       return +result; }
 
     ptr<object_server::Session> _session;

@@ -36,18 +36,18 @@ const int wait_for_port_available = 2*60;   // Soviele Sekunden warten, bis TCP-
 #   define INADDR_NONE (-1)
 #endif
 
-//-----------------------------------------------------Xml_processor_channel::Xml_processor_channel
+//-----------------------------------------------------Http_operation_channel::Http_operation_channel
 
-Xml_processor_channel::Xml_processor_channel( Communication::Channel* channel )
+Http_operation_channel::Http_operation_channel( Communication::Channel* channel )
 : 
-    Communication::Processor_channel( channel ) 
+    Communication::Operation_channel( channel ) 
 {
     _indent = channel->_read_socket == STDIN_FILENO;
 }
 
-//-----------------------------------------------------Xml_processor_channel::connection_lost_event
+//-----------------------------------------------------Http_operation_channel::connection_lost_event
 
-void Xml_processor_channel::connection_lost_event( const exception* x )
+void Http_operation_channel::connection_lost_event( const exception* x )
 {
     if( _remote_scheduler )
     {
@@ -55,45 +55,45 @@ void Xml_processor_channel::connection_lost_event( const exception* x )
     }
 }
 
-//---------------------------------------------------------------------Xml_processor::Xml_processor
+//---------------------------------------------------------------------Xml_operation::Xml_operation
 
-Xml_processor::Xml_processor( Xml_processor_channel* processor_class )
+Xml_operation::Xml_operation( Http_operation_channel* operation_channel )
 : 
     _zero_(this+1), 
-    Processor( processor_class ),
-    _processor_channel( processor_class )
+    Operation( operation_channel ),
+    _operation_channel( operation_channel )
 {
 }
 
-//------------------------------------------------------------------Xml_processor::put_request_part
+//------------------------------------------------------------------Xml_operation::put_request_part
 
-void Xml_processor::put_request_part( const char* data, int length )
+void Xml_operation::put_request_part( const char* data, int length )
 {
     _request_is_complete = _xml_end_finder.is_complete( data, length );
 
     if( length >= 2  &&  data[ length - 2 ] == '\r' )
     {
-        _processor_channel->_indent = true;      // CR LF am Ende lässt Antwort einrücken. CR LF soll nur bei telnet-Eingabe kommen.
+        _operation_channel->_indent = true;      // CR LF am Ende lässt Antwort einrücken. CR LF soll nur bei telnet-Eingabe kommen.
     }
 
     _request.append( data, length );
 }
 
-//---------------------------------------------------------------------------Xml_processor::process
+//--------------------------------------------------------------------Xml_operation::begin
 
-void Xml_processor::process()
+void Xml_operation::begin()
 {
     Command_processor command_processor ( _spooler );
 
-    command_processor.set_communication_processor( this );
+    command_processor.set_communication_operation( this );
     command_processor.set_host( _host );
 
     if( string_begins_with( _request, " " ) )  _request = ltrim( _request );
 
     _channel->_log.info( "Kommando " + _request );
-    _response = command_processor.execute( _request, Time::now(), _processor_channel->_indent );
+    _response = command_processor.execute( _request, Time::now(), _operation_channel->_indent );
 
-    if( _processor_channel->_indent )  _response = replace_regex( _response, "\n", "\r\n" );      // Für Windows-telnet
+    if( _operation_channel->_indent )  _response = replace_regex( _response, "\n", "\r\n" );      // Für Windows-telnet
 
     _response += '\0';  // Null-Byte terminiert die XML-Antwort
 
@@ -180,7 +180,7 @@ Communication::Channel::Channel( Communication* communication )
     _communication(communication),
     _log(_spooler)
 {
-    _receive_at_start = true;
+    //_receive_at_start = true;
     //recv_clear();
 }
 
@@ -200,11 +200,27 @@ Communication::Channel::~Channel()
     _write_socket = SOCKET_ERROR;
 }
 
+//-------------------------------------------------------Communication::Channel::channel_state_name
+
+string Communication::Channel::channel_state_name( Channel_state state )
+{
+    switch( state )
+    {
+        case s_none:        return "none";
+        case s_ready:       return "ready";
+        case s_receiving:   return "receiving";
+        case s_processing:  return "processing";
+        case s_responding:  return "responding";
+        case s_closing:     return "closing";
+        default:            return S() << "Channel_state(" << (int)state << ")";
+    }
+}
+
 //----------------------------------------------------------------Communication::Channel::remove_me
 
 void Communication::Channel::remove_me( const exception* x )
 {
-    if( _processor_channel )  _processor_channel->connection_lost_event( x );
+    if( _operation_channel )  _operation_channel->connection_lost_event( x );
 
     _communication->remove_channel( this );
 }
@@ -289,41 +305,42 @@ bool Communication::Channel::do_recv()
 
         const char* p = buffer;
 
-        if( _receive_at_start ) 
+        if( _channel_state == s_ready )   // Das sind die ersten empfangen Bytes der Anforderung
         {
             if( len == 1  &&  buffer[0] == '\x04' )  { _eof = true; return true; }      // Einzelnes Ctrl-D beendet Sitzung
 
             if( len == 1  &&  buffer[0] == '\n'   
              || len == 2  &&  buffer[0] == '\r'  &&  buffer[1] == '\n' )  { _spooler->signal( "do_something!" );  _spooler->_last_time_enter_pressed = Time::now().as_time_t(); return true; }
 
-            _receive_at_start = false;
+            //_receive_at_start = false;
+            _channel_state = s_receiving;
 
-            if( !_processor_channel )
+            if( !_operation_channel )
             {
                 //if( buffer[ 0 ] == '\0' )   // Das erste von vier Längenbytes ist bei der ersten Nachricht auf jeden Fall 0
                 //{
-                //    _processor_channel = Z_NEW( Object_server_processor_channel( this ) );
+                //    _operation_channel = Z_NEW( Object_server_processor_channel( this ) );
                 //}
                 //else
                 if( string_begins_with( buffer, "GET /" )  ||  string_begins_with( buffer, "POST /" ) )     // Muss vollständig im ersten Datenblock enthalten sein!
                 {
-                    _processor_channel = Z_NEW( Http_processor_channel( this ) );
+                    _operation_channel = Z_NEW( Http_operation_channel( this ) );
                 }
                 else
                 {
-                    _processor_channel = Z_NEW( Xml_processor_channel( this ) );
+                    _operation_channel = Z_NEW( Http_operation_channel( this ) );
                 }
             }
 
-            _processor = _processor_channel->processor();
+            _operation = _operation_channel->new_operation();
         }
 
-        if( _read_socket != STDIN_FILENO )  _processor->set_host( &_peer_host_and_port._host );
+        if( _read_socket != STDIN_FILENO )  _operation->set_host( &_peer_host_and_port._host );
 
         if( len > 0 )
         {
             if( z::Log_ptr log = "socket.data" )  *log << "recv: ", log->write( p, len ), *log << endl;
-            _processor->put_request_part( p, len );
+            _operation->put_request_part( p, len );
         }
     }
 
@@ -399,9 +416,10 @@ bool Communication::Channel::async_continue_( Continue_flags )
 
     try
     {
-        if( _responding )  assert_no_recv_data();  //2005-10-25 wegen endloser read-Signalisierung zwischen Firefox und Linux-Scheduler (F5 im Protokollfenster)
+        if( _channel_state == s_responding )  assert_no_recv_data();  //2005-10-25 wegen endloser read-Signalisierung zwischen Firefox und Linux-Scheduler (F5 im Protokollfenster)
 
-        while( !_responding  &&  !_dont_receive )
+        while( _channel_state == s_ready  ||  _channel_state == s_receiving )
+        //while( _responding  &&  !_dont_receive )
         {
             bool ok = do_recv();
             if( !ok )  break;
@@ -410,21 +428,27 @@ bool Communication::Channel::async_continue_( Continue_flags )
 
             if( _eof )  break;
 
-            if( _processor  &&  _processor->request_is_complete() ) 
+            if( _operation  &&  _operation->request_is_complete() ) 
             {
-                _processor->process();
-                _responding = true;
+                _operation->begin();
+                //_operation->process();
+                //_responding = true;
+                _channel_state = s_processing;
             }
         }
 
+        if( _channel_state == s_processing )
+        {
+            if( _operation->async_continue()  &&  _operation->async_finished() )  _channel_state = s_responding;
+        }
 
-        if( _responding )
+        if( _channel_state == s_responding )
         {
             if( state() == s_sending )  something_done |= send__continue();
 
             while( state() == s_stand_by )
             {
-                string data = _processor->get_response_part();
+                string data = _operation->get_response_part();
                 if( data == "" )  break;
 
                 Z_LOG2( "socket.data", "send: " << data << '\n' );
@@ -435,13 +459,14 @@ bool Communication::Channel::async_continue_( Continue_flags )
             }
                 
 
-            if( state() == s_stand_by  &&  _processor->response_is_complete() )
+            if( state() == s_stand_by  &&  _operation->response_is_complete() )
             {
-                if( _processor->should_close_connection() )  _eof = true;   // Wir tun so, als ob der Client EOF geliefert hat. Das führt zum Schließen der Verbindung.
+                if( _operation->should_close_connection() )  _eof = true;   // Wir tun so, als ob der Client EOF geliefert hat. Das führt zum Schließen der Verbindung.
 
-                _processor        = NULL;
-                _responding       = false;
-                _receive_at_start = true; 
+                _operation        = NULL;
+                //_responding       = false;
+                //_receive_at_start = true; 
+                _channel_state = s_ready;
             }
         }
 
@@ -527,7 +552,7 @@ void Communication::close( double wait_time )
                                                 // Damit bleibt beim Neustart Windows-Schedulers der Browser nicht kleben (der kriegt den Verbindungsabbau nicht mit)
 
             //channel->terminate();    // Kann Channel aus _channel_list entfernen.
-            channel->_dont_receive = true;
+            channel->_channel_state = Channel::s_closing;
             channel->async_continue();
             //if( channel->_responding )
             //{
@@ -1022,14 +1047,12 @@ xml::Element_ptr Communication::dom_element( const xml::Document_ptr& document, 
 
         xml::Element_ptr channel_element = channels_element.append_new_element( "connection" );
 
-        if( channel->_processor_channel )
+        if( channel->_operation_channel )
         {
-            channel_element.setAttribute( "type", channel->_processor_channel->channel_type() );
+            channel_element.setAttribute( "type", channel->_operation_channel->channel_type() );
         }
 
-        if( channel->_responding )  channel_element.setAttribute( "state", "responding" );
-        else
-        if( !channel->_receive_at_start )  channel_element.setAttribute( "state", "receiving" );
+        channel_element.setAttribute( "state", channel->channel_state_name() + "/" + channel->state_name() );
 
 
         xml::Element_ptr peer_element = channel_element.append_new_element( "peer" );

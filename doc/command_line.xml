@@ -103,10 +103,15 @@
                     Der Scheduler hat ein XML-Schema,
                     dem die XML-Kommandos und die XML-Konfiguration entsprechen müssen.
                 </p>
+                <p>
+                    Siehe <a href="xml/scheduler.xsd" type="text/plain" charset="utf-8">XML-Schema des Schedulers</a>.
+                </p>
 
                 <p>
-                    Beispiel: <code>scheduler -show-xml-schema | less</code>
+                    Beispiel: 
                 </p>
+                
+                <pre><code>scheduler -show-xml-schema | less</code></pre>
             </description>
         </command_option>
 

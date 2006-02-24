@@ -10,6 +10,8 @@
       der die ersten beiden Zeilen interpretieren,
       also XSLT-Stylesheets ausführen kann,
       z.B. Firefox oder Microsoft Internet Explorer.
+      
+      Möglicherweise steht auch die Seite index.xml.html bereit.
       *************************************************************  -->
 
 
@@ -182,11 +184,11 @@
 
 
 
-<h2>Bedienung</h2>
+<h2>Kommunikation und Bedienung</h2>
 
 <dl>
     <a href="http.xml">
-        <dt>HTTP</dt>
+        <dt>HTTP und Web Services</dt>
         <dd>
             <p>
                 Der Scheduler verfügt über einen HTTP-Server und stellt HTML-Seiten zu seiner Bedienung bereit.

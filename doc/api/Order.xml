@@ -231,9 +231,15 @@
     </title>
 
     <description>
-        Neben der Auftragskennung <scheduler_method class="Order" property="id"/>,
-        die den Auftrag identifiziert,
-        können Sie hier zusätzliche Angaben machen.
+        <p>
+            Neben der Auftragskennung <scheduler_method class="Order" property="id"/>,
+            die den Auftrag identifiziert,
+            können Sie hier zusätzliche Angaben machen.
+        </p>
+        <p>
+            Siehe 
+            <scheduler_method class="Order" property="xml_payload"/>.
+        </p>
     </description>
 </property>
 
@@ -342,24 +348,6 @@
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<property name="xml" access="read">
-    <com>
-        <com.result>
-            <com.type type="BSTR"/>
-
-            <description>
-                Siehe <scheduler_element directory="xml/answer/" name="order"/>
-            </description>
-        </com.result>
-    </com>
-
-    <title>
-        Auftrag in XML: &lt;order>...&lt;/order>
-    </title>
-</property>
-
-<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
-
 <property name="web_service" access="read">
     <com>
         <com.result>
@@ -402,6 +390,45 @@
         </p>
     </description>
     
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="xml" access="read">
+    <com>
+        <com.result>
+            <com.type type="BSTR"/>
+
+            <description>
+                Siehe <scheduler_element directory="xml/answer/" name="order"/>
+            </description>
+        </com.result>
+    </com>
+
+    <title>
+        Auftrag in XML: &lt;order>...&lt;/order>
+    </title>
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="xml_payload">
+    <com>
+        <com.result name="payload">
+            <com.type type="BSTR"/>
+        </com.result>
+    </com>
+
+    <title>
+        XML-Nutzlast, also Parameter des Auftrags.
+    </title>
+
+    <description>
+        <p>
+            Zusätzlich zu <scheduler_method class="Order" property="payload"/> 
+            kann diese Eigenschaft ein XML-Dokument aufnehmen.
+        </p>
+    </description>
 </property>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->

@@ -3962,6 +3962,10 @@ const Com_method Com_order::_methods[] =
     { DISPATCH_PROPERTYGET, 18, "Xml"                       , (Com_method_ptr)&Com_order::get_Xml               , VT_BSTR       , { VT_BSTR }, 1 },
     { DISPATCH_PROPERTYGET, 19, "Web_service"               , (Com_method_ptr)&Com_order::get_Web_service       , VT_DISPATCH   },
     { DISPATCH_PROPERTYGET, 20, "Web_service_or_null"       , (Com_method_ptr)&Com_order::get_Web_service_or_null,VT_DISPATCH   },
+    { DISPATCH_PROPERTYGET, 21, "Web_service_operation"        , (Com_method_ptr)&Com_order::get_Web_service_operation        , VT_DISPATCH   },
+    { DISPATCH_PROPERTYGET, 22, "Web_service_operation_or_null", (Com_method_ptr)&Com_order::get_Web_service_operation_or_null, VT_DISPATCH   },
+    { DISPATCH_PROPERTYPUT, 23, "Xml_payload"               , (Com_method_ptr)&Com_order::put_Xml_payload       , VT_EMPTY      , { VT_BSTR } },
+    { DISPATCH_PROPERTYGET, 23, "Xml_payload"               , (Com_method_ptr)&Com_order::get_xml_payload       , VT_BSTR       },
     {}
 };
 
@@ -4586,6 +4590,44 @@ STDMETHODIMP Com_order::get_Web_service_or_null( Iweb_service** result )
     return hr;
 }
 
+//-------------------------------------------------------------Com_order::get_Web_service_operation
+
+STDMETHODIMP Com_order::get_Web_service_operation( Iweb_service_operation** result )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_order )  return E_POINTER;
+
+        *result = _order->web_service_operation();
+        (*result)->AddRef();
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+
+//-----------------------------------------------------Com_order::get_Web_service_operation_or_null
+
+STDMETHODIMP Com_order::get_Web_service_operation_or_null( Iweb_service_operation** result )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_order )  return E_POINTER;
+
+        *result = _order->web_service_operation_or_null();
+        (*result)->AddRef();
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+
 //-------------------------------------------------------------------------------Com_order::get_Log
 /*
 STDMETHODIMP Com_order::get_Log( Ilog** result )
@@ -4625,6 +4667,44 @@ STDMETHODIMP Com_order::add_to_job_chain( Ijob_chain* ijob_chain )
     return hr;
 }
 */
+//-----------------------------------------------------------------------Com_order::put_Xml_payload
+
+STDMETHODIMP Com_order::put_Xml_payload( BSTR xml_payload )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_order )  return E_POINTER;
+
+        _order->set_xml_payload( string_from_bstr( xml_payload ) );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+
+//-----------------------------------------------------------------------Com_order::get_Xml_payload
+
+STDMETHODIMP Com_order::get_Xml_payload( BSTR* result )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_order )  return E_POINTER;
+
+        hr = String_to_bstr( _order->xml_payload(), result );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+
 //-----------------------------------------------------------------------Com_order_queue::_methods
 #ifdef Z_COM
 

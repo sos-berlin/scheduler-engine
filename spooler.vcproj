@@ -48,12 +48,14 @@
 				DebugInformationFormat="2"/>
 			<Tool
 				Name="VCCustomBuildTool"
-				CommandLine="echo perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml api/*.xml
+				CommandLine="echo jar cvfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class
+cd $(IntDir) &amp;&amp; pwd &amp;&amp; jar cvfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class sos/spooler/jobs/*.class
+
+echo perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml api/*.xml
 cd doc &amp;&amp; bash -c &quot;perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml api/*.xml&quot;
 cd $(ProjectDir)
 
-echo jar cvfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class
-cd $(IntDir) &amp;&amp; pwd &amp;&amp; jar cvfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class sos/spooler/jobs/*.class
+copy scheduler.xsd doc\xml\
 
 echo ant -f ../javadoc.xml
 ant -f ../javadoc.xml
@@ -142,12 +144,14 @@ perl ../zschimmer/files_to_c++.pl  -trim html/jz/*.html html/jz/*.js html/jz/*.x
 				DebugInformationFormat="3"/>
 			<Tool
 				Name="VCCustomBuildTool"
-				CommandLine="echo perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml api/*.xml
+				CommandLine="echo jar cvfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class
+cd $(IntDir) &amp;&amp; pwd &amp;&amp; jar cvfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class sos/spooler/jobs/*.class
+
+echo perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml api/*.xml
 cd doc &amp;&amp; bash -c &quot;perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml api/*.xml&quot;
 cd $(ProjectDir)
 
-echo jar cvfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class
-cd $(IntDir) &amp;&amp; pwd &amp;&amp; jar cvfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class sos/spooler/jobs/*.class
+copy scheduler.xsd doc\xml\
 
 echo ant -f ../javadoc.xml
 ant -f ../javadoc.xml
@@ -232,12 +236,14 @@ perl ../zschimmer/files_to_c++.pl  -trim html/jz/*.html html/jz/*.js html/jz/*.x
 				DebugInformationFormat="2"/>
 			<Tool
 				Name="VCCustomBuildTool"
-				CommandLine="echo perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml api/*.xml
+				CommandLine="echo jar cvfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class
+cd $(IntDir) &amp;&amp; pwd &amp;&amp; jar cvfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class sos/spooler/jobs/*.class
+
+echo perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml api/*.xml
 cd doc &amp;&amp; bash -c &quot;perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml api/*.xml&quot;
 cd $(ProjectDir)
 
-echo jar cvfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class
-cd $(IntDir) &amp;&amp; pwd &amp;&amp; jar cvfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class sos/spooler/jobs/*.class
+copy scheduler.xsd doc\xml\
 
 echo ant -f ../javadoc.xml
 ant -f ../javadoc.xml

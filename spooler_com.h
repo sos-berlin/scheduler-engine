@@ -765,6 +765,13 @@ struct Com_order : spooler_com::Iorder,
     STDMETHODIMP        get_Web_service                 ( spooler_com::Iweb_service** );
     STDMETHODIMP        get_Web_service_or_null         ( spooler_com::Iweb_service** );
 
+    STDMETHODIMP        get_Web_service_operation        ( spooler_com::Iweb_service_operation** );
+    STDMETHODIMP        get_Web_service_operation_or_null( spooler_com::Iweb_service_operation** );
+
+    STDMETHODIMP            put_Xml_payload             ( BSTR );
+    STDMETHODIMP            get_Xml_payload             ( BSTR* );
+    
+
   private:
     Fill_zero                  _zero_;
     Thread_semaphore           _lock;

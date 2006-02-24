@@ -77,8 +77,9 @@
 <h2>Schema der Konfiguration</h2>
 
 <p>
-    Der Scheduler prüft die XML-Konfiguration gegen eine DTD.
-    Die DTD können Sie sich mit der Kommandozeilenoption <scheduler_option name="show-dtd"/> ausgeben lassen.
+    Der Scheduler prüft die XML-Konfiguration gegen das 
+    <a href="xml/scheduler.xsd" type="text/plain" charset="utf-8">XML-Schema des Schedulers</a>.
+    Das Schema können Sie sich mit der Kommandozeilenoption <scheduler_option name="show-xml-schema"/> ausgeben lassen.
 </p>
 
 <p>

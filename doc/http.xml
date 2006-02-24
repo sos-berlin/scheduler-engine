@@ -13,6 +13,13 @@
 <scheduler_keyword keyword="HTTP-Server"/>
 <scheduler_keyword keyword="HTML"/>
 
+
+<h2>Web-Services</h2>
+<p>
+    Mit <scheduler_element name="web_service"/> können Web-Services eingerichtet werden.
+</p>
+
+
 <h2>Bedienung über einen WWW-Browser</h2>
 <p>
     Der Scheduler verfügt über einen HTTP-Server und stellt HTML-Seiten zu seiner Bedienung bereit.

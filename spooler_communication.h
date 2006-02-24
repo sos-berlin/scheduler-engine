@@ -12,7 +12,7 @@ namespace spooler {
 
 //-------------------------------------------------------------------------------------------------
 
-struct Xml_processor_channel;
+struct Http_operation_channel;
 
 //inline bool operator < ( const in_addr& a, const in_addr& b )  { return a.s_addr < b.s_addr; }  // Für map<>
 
@@ -20,14 +20,29 @@ struct Xml_processor_channel;
 
 struct Communication
 {       
-    struct Processor_channel;
-    struct Processor;
+    struct Operation_channel;
+    struct Operation;
 
 
     struct Channel : zschimmer::Buffered_socket_operation
     {
+        enum Channel_state
+        {
+            s_none,
+            s_ready,
+            s_receiving,
+            s_processing,
+            s_responding,
+            s_closing
+        };
+
+
                                 Channel                     ( Communication* );
                                ~Channel                     ();
+
+        Channel_state           channel_state               () const                                { return _channel_state; }
+        string                  channel_state_name          () const                                { return channel_state_name( _channel_state ); }
+        static string           channel_state_name          ( Channel_state );
 
         void                    remove_me                   ( const exception* = NULL );
         void                    terminate                   ( double wait_time );
@@ -45,21 +60,19 @@ struct Communication
 
 
         Fill_zero              _zero_;
+        Channel_state          _channel_state;
         Spooler*               _spooler;
         Communication*         _communication;
-      //Host                   _host;
 
-        bool                   _responding;
-        bool                   _receive_at_start;
+        //bool                   _responding;
+        //bool                   _receive_at_start;
 
         int                    _socket_send_buffer_size;
-      //string                 _send_data;
-      //int                    _send_progress;
-        bool                   _dont_receive;               // Bei terminate() ist Empfang gesperrt
+        //bool                   _dont_receive;               // Bei terminate() ist Empfang gesperrt
         Prefix_log             _log;
 
-        ptr<Processor_channel> _processor_channel;
-        ptr<Processor>         _processor;
+        ptr<Operation_channel> _operation_channel;
+        ptr<Operation>         _operation;
     };
 
 
@@ -89,9 +102,9 @@ struct Communication
     };
 
 
-    struct Processor : Object
+    struct Operation : Async_operation
     {
-                                Processor                   ( Processor_channel* pc )               : _zero_(this+1), _channel(pc->_channel), _spooler(pc->_spooler), _processor_channel(pc) {}
+                                Operation                   ( Operation_channel* pc )               : _zero_(this+1), _channel(pc->_channel), _spooler(pc->_spooler), _operation_channel(pc) {}
 
 
         void                    set_host                    ( Host* host )                          { _host = host; }
@@ -99,28 +112,33 @@ struct Communication
         virtual void            put_request_part            ( const char*, int length )             = 0;
         virtual bool            request_is_complete         ()                                      = 0;
 
-        virtual void            process                     ()                                      = 0;
+      //virtual void            process                     ()                                      = 0;
+        virtual void            begin              ()                                      = 0;
 
         virtual bool            response_is_complete        ()                                      = 0;
         virtual string          get_response_part           ()                                      = 0;
         virtual bool            should_close_connection     ()                                      { return false; }
 
+        virtual bool            async_continue_             ( Continue_flags )                      { return true; }
+        virtual bool            async_finished_             ()                                      { return true; }
+        virtual string          async_state_text_           ()                                      { return "none"; }
+
 
         Fill_zero              _zero_;
         Spooler*               _spooler;
         Channel*               _channel;
-        Processor_channel*     _processor_channel;
+        Operation_channel*     _operation_channel;
         Host*                  _host;
     };
 
 
 
-    struct Processor_channel : Object
+    struct Operation_channel : Object
     {
-                                Processor_channel           ( Channel* ch )                         : _spooler(ch->_spooler), _channel(ch) {}
+                                Operation_channel           ( Channel* ch )                         : _spooler(ch->_spooler), _channel(ch) {}
 
 
-        virtual ptr<Processor>  processor                   ()                                      = 0;
+        virtual ptr<Operation>  new_operation               ()                                      = 0;
         virtual void            connection_lost_event       ( const exception* )                    {}
         virtual string          channel_type                () const                                = 0;
 
@@ -136,11 +154,11 @@ struct Communication
 
 
         accept();
-        ptr<Processor_channel> processor_channel;
+        ptr<Operation_channel> processor_channel;
 
         while(1)
         {
-            ptr<Processor> processor = processor_channel->processor();
+            ptr<Operation> processor = processor_channel->processor();
 
             while(1)
             {
@@ -204,36 +222,37 @@ struct Communication
     bool                       _started;
 };
 
-//------------------------------------------------------------------------------------Xml_processor
+//------------------------------------------------------------------------------------Xml_operation
 
-struct Xml_processor : Communication::Processor
+struct Xml_operation : Communication::Operation
 {
-                                Xml_processor               ( Xml_processor_channel* );
+                                Xml_operation               ( Http_operation_channel* );
 
     void                        put_request_part            ( const char*, int length );
     bool                        request_is_complete         ()                                      { return _request_is_complete; }
 
-    void                        process                     ();
+    void                        begin              ();
 
     bool                        response_is_complete        ()                                      { return true; }
     string                      get_response_part           ()                                      { string result = _response;  _response = "";  return result; }
 
+
     Fill_zero                  _zero_;
-    Xml_processor_channel*     _processor_channel;
+    Http_operation_channel*     _operation_channel;
     bool                       _request_is_complete;
     Xml_end_finder             _xml_end_finder;
     string                     _request;
     string                     _response;
 };
 
-//------------------------------------------------------------------------------Xml_processor_channel
+//------------------------------------------------------------------------------Http_operation_channel
 
-struct Xml_processor_channel : Communication::Processor_channel
+struct Http_operation_channel : Communication::Operation_channel
 {
-                                Xml_processor_channel       ( Communication::Channel* );
+                                Http_operation_channel       ( Communication::Channel* );
 
 
-    ptr<Communication::Processor> processor                 ()                                      { ptr<Xml_processor> result = Z_NEW( Xml_processor( this ) ); 
+    ptr<Communication::Operation> new_operation             ()                                      { ptr<Xml_operation> result = Z_NEW( Xml_operation( this ) ); 
                                                                                                       return +result; }
 
     virtual void                connection_lost_event       ( const exception* );
