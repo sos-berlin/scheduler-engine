@@ -89,7 +89,7 @@ xml::Element_ptr create_error_element( const xml::Document_ptr& document, const 
 
 void append_error_element( const xml::Element_ptr& element, const Xc_copy& x )
 {
-    element.appendChild( create_error_element( element.ownerDocument(), x, x.time() ) );
+    element.appendChild( create_error_element( element.ownerDocument(), x, (time_t)x.time() ) );
 }
 
 //--------------------------------------------------------------------------------xc_from_dom_error
@@ -669,7 +669,7 @@ xml::Element_ptr Command_processor::execute_register_remote_scheduler( const xml
     remote_scheduler->_host_and_port._host.set_name();
     remote_scheduler->set_dom( register_scheduler_element );
     
-    xml_processor->_operation_channel->_remote_scheduler = remote_scheduler;        // Remote_scheduler mit TCP-Verbindung verknüpfen
+    xml_processor->_operation_connection->_remote_scheduler = remote_scheduler;        // Remote_scheduler mit TCP-Verbindung verknüpfen
     _spooler->_remote_scheduler_register.add( remote_scheduler );
     
     return _answer.createElement( "ok" );
@@ -822,14 +822,14 @@ string xml_as_string( const xml::Document_ptr& document, bool indent )
 
 //-------------------------------------------------------------------Command_processor::execute_http
 
-ptr<Http_response> Command_processor::execute_http( Http_request* http_request )
+void Command_processor::execute_http( http::Operation* http_operation )
 {
-    string        path                    = http_request->_path;
-    string        response_body;
-    string        response_content_type;
-    int           http_status_code        = 0;
-    string        error_text;
-    string const  show_log_request        = "/show_log?";
+    http::Request*  http_request            = http_operation->request();
+    http::Response* http_response           = http_operation->response();
+    string          path                    = http_request->_path;
+    string          response_body;
+    string          response_content_type;
+    string const    show_log_request        = "/show_log?";
 
     try
     {
@@ -848,13 +848,16 @@ ptr<Http_response> Command_processor::execute_http( Http_request* http_request )
                     if( string_ends_with( path, ">" ) )  *xml.rbegin() = '/',  xml += ">";
                                                    else  xml += "/>";
                 }
-
+                
+                http_response->set_header( "Cache-Control", "no-cache" );
                 response_body = execute( xml, Time::now(), true );
                 response_content_type = "text/xml";
             }
             else
             if( string_ends_with( path, "?" ) )
             {
+                http_response->set_header( "Cache-Control", "no-cache" );
+
                 if( string_ends_with( path, show_log_request ) )
                 {
                     ptr<Prefix_log> log;
@@ -881,13 +884,13 @@ ptr<Http_response> Command_processor::execute_http( Http_request* http_request )
                                 if( e.nodeName_is( "log" ) )
                                 {
                                     //TODO Log wird im Speicher gehalten! Besser: In Datei schreiben, vielleicht sogar Task und Log anlegen
-                                    ptr<Http_response> response = Z_NEW( Http_response( http_request, Z_NEW( Html_chunk_reader( Z_NEW( String_chunk_reader( e.nodeValue() ) ), title ) ), "text/html" ) );
-                                    return +response;
+                                    http_response->set_chunk_reader( Z_NEW( http::Html_chunk_reader( Z_NEW( http::String_chunk_reader( e.nodeValue() ) ), title ) ) );
+                                    return;
                                 }
                             }
 
-                            ptr<Http_response> response = Z_NEW( Http_response( http_request, Z_NEW( Html_chunk_reader( Z_NEW( String_chunk_reader( "Das Protokoll ist nicht lesbar." ) ), title ) ), "text/html" ) );
-                            return +response;
+                            http_response->set_chunk_reader( Z_NEW( http::Html_chunk_reader( Z_NEW( http::String_chunk_reader( "Das Protokoll ist nicht lesbar." ) ), title ) ) );
+                            return;
                         }
                     }
                     else
@@ -919,8 +922,8 @@ ptr<Http_response> Command_processor::execute_http( Http_request* http_request )
                                                                     " where \"HISTORY_ID\"=" + history_id );
                                     string title = "Auftrag " + order_id;
                                     //TODO Log wird im Speicher gehalten! Besser: In Datei schreiben, vielleicht sogar Order und Log anlegen
-                                    ptr<Http_response> response = Z_NEW( Http_response( http_request, Z_NEW( Html_chunk_reader( Z_NEW( String_chunk_reader( log_text ) ), title ) ), "text/html" ) );
-                                    return +response;
+                                    http_response->set_chunk_reader( Z_NEW( http::Html_chunk_reader( Z_NEW( http::String_chunk_reader( log_text ) ), title ) ) );
+                                    return;
                                 }
                             }
                         }
@@ -932,8 +935,8 @@ ptr<Http_response> Command_processor::execute_http( Http_request* http_request )
 
                     if( log )
                     {
-                        ptr<Http_response> response = Z_NEW( Http_response( http_request, Z_NEW( Html_chunk_reader( Z_NEW( Log_chunk_reader( log ) ), log->title() ) ), "text/html" ) );
-                        return +response;
+                        http_response->set_chunk_reader( Z_NEW( http::Html_chunk_reader( Z_NEW( http::Log_chunk_reader( log ) ), log->title() ) ) );
+                        return;
                     }
                 }
                 else
@@ -941,21 +944,15 @@ ptr<Http_response> Command_processor::execute_http( Http_request* http_request )
                 {
                     Job* job = _spooler->get_job( http_request->parameter( "job" ) );;
                     
-                    if( job->_description == "" ) 
-                    {
-                        http_status_code = 404;
-                        error_text = "Der Job hat keine Beschreibung";
-                    }
-                    else
-                    {
-                        response_body = "<html><head><title>Scheduler-Job " + job->name() + "</title>";
-                        response_body += "<style type='text/css'> @import 'scheduler.css'; @import 'custom.css';</style>";
-                        response_body += "<body id='job_description'>";
-                        response_body += job->_description;
-                        response_body += "</body></html>";
+                    if( job->_description == "" )  throw new http::Http_exception( http::status_404_bad_request, "Der Job hat keine Beschreibung" );
 
-                        response_content_type = "text/html";
-                    }
+                    response_content_type = "text/html";
+
+                    response_body = "<html><head><title>Scheduler-Job " + job->name() + "</title>";
+                    response_body += "<style type='text/css'> @import 'scheduler.css'; @import 'custom.css';</style>";
+                    response_body += "<body id='job_description'>";
+                    response_body += job->_description;
+                    response_body += "</body></html>";
                 }
                 else
                 if( string_ends_with( path, "/show_config?" ) )
@@ -965,7 +962,7 @@ ptr<Http_response> Command_processor::execute_http( Http_request* http_request )
                     response_content_type = "text/xml";
                 }
                 else
-                    throw_xc( "SCHEDULER-216", path );
+                    throw new http::Http_exception( http::status_404_bad_request, "Ungültiger URL-Pfad: " + path );
             }
             else
             {
@@ -981,12 +978,10 @@ ptr<Http_response> Command_processor::execute_http( Http_request* http_request )
                         // http://localhost:6310/jz ==> http://localhost:6310/jz/, http://localhost:6310/jz/details.html
                         // Ohne diesen Mechanismus würde http://localhost:6310/details.html, also das Oberverzeichnis gelesen
 
-                        ptr<Http_response> response = Z_NEW( Http_response( http_request, NULL, "" ) );
-
                         path += "/";
-                        response->set_status( 301, "Slash appended" );
-                        response->set_header_field( "Location", "http://" + http_request->header_field( "host" ) + path );
-                        return +response;
+                        http_response->set_status( http::status_301_moved_permanently );
+                        http_response->set_header( "Location", "http://" + http_request->header( "host" ) + path );
+                        return;
                     }
 
                     path += default_filename;
@@ -1044,7 +1039,7 @@ ptr<Http_response> Command_processor::execute_http( Http_request* http_request )
                             for( f = inline_files; f->filename &&  f->filename != fn; f++ );
                             if( f->filename ) 
                             {
-                                ptr<Http_response> response = Z_NEW( Http_response( http_request, NULL, "" ) );
+                                ptr<http::Response> response = Z_NEW( http::Response( http_request, NULL, "" ) );
 
                                 path = "/" + fn;
                                 response->set_status( 301, "" );
@@ -1068,6 +1063,8 @@ ptr<Http_response> Command_processor::execute_http( Http_request* http_request )
             response_body = execute( http_request->_body, Time::now(), true );
             response_content_type = "text/xml";
         }
+        else
+            throw new http::Http_exception( http::status_501_not_implemented );
 
 
         if( response_body.empty() )
@@ -1080,58 +1077,10 @@ ptr<Http_response> Command_processor::execute_http( Http_request* http_request )
     {
         _spooler->log()->debug( "Fehler beim HTTP-Aufruf " + http_request->_http_cmd + " " + path + ": " + x.what() );
 
-        http_status_code = 404;
-        error_text = x.what();
-/*
-        response_body = "<html><head><title>Scheduler</title></head><body>";
-        
-        for( int i = 0; i < error_text.length(); i++ )
-        {
-            switch( char c = error_text[ i ] )
-            {
-                case '<' : response_body += "&lt;";   break;
-                case '&' : response_body += "&amp;";  break;
-                case '\r': break;
-                case '\n': response_body += "<br/>";  break;
-                default  : response_body += c;
-            }
-        }
-        
-        response_body += "<br/><p>Siehe auch das Hauptprotokoll des Schedulers</p></body></html>";
-*/
+        throw new http::Http_exception( http::status_404_bad_request, x.what() );
     }
 
-    ptr<Http_response> response = Z_NEW( Http_response( http_request, Z_NEW( String_chunk_reader( response_body ) ), response_content_type ) );
-    if( http_status_code )  response->set_status( http_status_code, error_text );
-    //if( path != http_request->_path )  response->set_header_field( "Content-Location", "http://" + http_request->header_field( "host" ) + path );
-    return +response;
-/*
-    time_t      t;
-    char        time_text[26];
-
-    ::time( &t );
-    memset( time_text, 0, sizeof time_text );
-
-#   ifdef Z_WINDOWS
-        strcpy( time_text, asctime( gmtime( &t ) ) );
-#    else
-        struct tm  tm;
-        asctime_r( gmtime_r( &t, &tm ), time_text );
-#   endif
-    
-    time_text[24] = '\0';
-
-    string response = "HTTP/1.1 200 OK\r\n"
-                      "Content-Type: " + response_content_type + "\r\n"
-                      "Transfer-Encoding: chunked\r\n"
-                      "Date: " + string(time_text) + " GMT\r\n"
-                      "Server: Scheduler " + string(VER_PRODUCTVERSION_STR) + "\r\n"
-                      "Cache-Control: no-cache\r\n"
-                      "\r\n";
-
-    response += as_hex_string( (int)response_body.length() ) + "\r\n";
-    return response + response_body + "\r\n0\r\n\r\n";
-*/
+    http_response->set_chunk_reader( Z_NEW( http::String_chunk_reader( response_body, response_content_type ) ) );
 }
 
 //----------------------------------------------------------------------Command_processor::set_host

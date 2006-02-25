@@ -6,6 +6,7 @@
 
 namespace sos {
 namespace spooler {
+namespace http {
 
 //--------------------------------------------------------------------------------------------const
 
@@ -13,66 +14,10 @@ const int                       recommended_chunk_size = 32768;
 
 //-------------------------------------------------------------------------------------------------
 
-struct Http_processor_channel;
-struct Http_operation;
-
-//-------------------------------------------------------------------------------------Http_request
-
-struct Http_request : Object
-{
-                                Http_request                ()                                     : _zero_(this+1){}
-
-    bool                        has_parameter               ( const string& name ) const            { return _parameters.find( name ) != _parameters.end(); }
-    string                      parameter                   ( const string& name ) const;
-    bool                        is_http_1_1                 () const;
-    string                      header_field                ( const string& name ) const            { String_map::const_iterator it = _header.find( name );
-                                                                                                      return it == _header.end()? "" : it->second; }
-    string                      url                         () const;
-    string                      url_path                    () const                                { return _path; }
-    string                      host_and_port_field         () const;
-    string                      character_encoding          () const;
-    string                      content_type                () const;
-
-
-    Fill_zero                  _zero_;
-    string                     _http_cmd;
-    string                     _protocol;
-    string                     _path;
-
-    typedef stdext::hash_map<string,string>  String_map;
-    String_map                 _header;
-    String_map                 _parameters;
-    string                     _body;
-};
-
-//---------------------------------------------------------------------------------------Http_parser
-
-struct Http_parser : Object
-{
-                                Http_parser                 ( Http_request* );
-
-
-    void                        add_text                    ( const char*, int len );
-    bool                        is_complete                 ();
-
-    void                        parse_header                ();
-    void                        eat_spaces                  ();
-    void                        eat                         ( const char* str );
-    string                      eat_word                    ();
-    string                      eat_until                   ( const char* character_set );
-    string                      eat_path                    ();
-    void                        eat_line_end                ();
-    char                        next_char                   ()                                      { return *_next_char; }
-
-
-    Fill_zero                  _zero_;
-    string                     _text;
-    bool                       _reading_body;
-    int                        _body_start;
-    int                        _content_length;
-    const char*                _next_char;
-    Http_request* const        _http_request;
-};
+struct Operation_connection;
+struct Operation;
+struct Request;
+struct Response;
 
 //-------------------------------------------------------------------------------------Chunk_reader
 /*
@@ -90,7 +35,8 @@ struct Http_parser : Object
 
 struct Chunk_reader : Object
 {
-                                Chunk_reader                ()                                      : _zero_(this+1), _recommended_block_size( recommended_chunk_size ) {}
+                                Chunk_reader                ( const string& content_type, const string& charset = "" ) 
+                                                                                                    : _zero_(this+1), _recommended_block_size( recommended_chunk_size ), _content_type(content_type), _charset(charset) {}
 
     virtual void                recommend_block_size        ( int size )                            { _recommended_block_size = size; }
     int                         recommended_block_size      () const                                { return _recommended_block_size; }
@@ -105,13 +51,15 @@ struct Chunk_reader : Object
 
     Fill_zero                  _zero_;
     int                        _recommended_block_size;
+    string                     _content_type;
+    string                     _charset;
 };
 
 //-----------------------------------------------------------------------------String_chunk_reader
 
 struct String_chunk_reader : Chunk_reader
 {
-                                String_chunk_reader         ( const string& text ) : _zero_(this+1), _text(text) {}
+                                String_chunk_reader         ( const string& text, const string& content_type = "text/plain" ) : Chunk_reader( content_type, "ISO-8859-1" ), _zero_(this+1), _text(text) {}
 
   protected:
     bool                        next_chunk_is_ready         ()                                      { return true; }
@@ -154,14 +102,14 @@ struct Log_chunk_reader : Chunk_reader
 
 struct Chunk_reader_filter : Chunk_reader
 {
-                                Chunk_reader_filter         ( Chunk_reader* r )                     : _chunk_reader(r) {}
+                                Chunk_reader_filter         ( Chunk_reader* r, const string& content_type, const string& charset = "" ) : Chunk_reader( content_type, charset ), _chunk_reader(r) {}
 
     void                        set_event                   ( Event_base* event )                   { _chunk_reader->set_event( event ); }
 
     ptr<Chunk_reader>          _chunk_reader;
 };
 
-//------------------------------------------------------------------------Html_chunk_reader
+//--------------------------------------------------------------------------------Html_chunk_reader
 // Konvertiert Text nach HTML
 
 struct Html_chunk_reader : Chunk_reader_filter
@@ -197,11 +145,133 @@ struct Html_chunk_reader : Chunk_reader_filter
     string                     _line_prefix;                // Zeilenanfang bis "[info"
 };
 
-//------------------------------------------------------------------------------------Http_response
+//--------------------------------------------------------------------------------------Status_code
 
-struct Http_response : Object
+enum Status_code
 {
-                                Http_response               ( Http_request*, Chunk_reader*, const string& content_type );
+    status_301_moved_permanently            = 301,
+    status_404_bad_request                  = 404,
+    status_500_internal_server_error        = 500,
+    status_501_not_implemented              = 501,
+    status_505_http_version_not_supported   = 505
+};
+
+//-------------------------------------------------------------------------------------------------
+
+struct Http_exception : exception
+{
+    Http_exception( Status_code status_code, const string& error_text = "" ) 
+    : 
+        _status_code( status_code ), 
+        _error_text( error_text )
+    {
+    }
+
+    ~Http_exception() throw () 
+    {
+    }
+
+
+    const char*             what                        ();
+    Status_code            _status_code;
+    string                 _what;
+    string                 _error_text;
+};
+
+//-------------------------------------------------------------------------------------------------
+
+extern stdext::hash_map<int,string>  http_status_messages;
+
+//-------------------------------------------------------------------------------------------------
+
+struct Headers
+{
+    struct Entry
+    {
+                                Entry                       ()                                          {}
+                                Entry                       ( const string& name, const string& value ) : _name(name), _value(value) {}
+        string _name;
+        string _value;
+    };
+
+    bool                        contains                    ( const string& name )                  { return _map.find( lcase( name ) ) != _map.end(); }
+    string                      operator[]                  ( const string& name ) const;
+    void                        set                         ( const string& name, const string& value );
+    void                        set_default                 ( const string& name, const string& value );
+
+
+    typedef stdext::hash_map<string,Entry>   Map;
+    Map                        _map;
+};
+
+//--------------------------------------------------------------------------------------------Parser
+
+struct Parser : Object
+{
+                                Parser                      ( Request* );
+
+
+    void                        add_text                    ( const char*, int len );
+    bool                        is_complete                 ();
+
+    void                        parse_header                ();
+    void                        eat_spaces                  ();
+    void                        eat                         ( const char* str );
+    string                      eat_word                    ();
+    string                      eat_until                   ( const char* character_set );
+    string                      eat_path                    ();
+    void                        eat_line_end                ();
+    char                        next_char                   ()                                      { return *_next_char; }
+    const string&               text                        () const                                { return _text; }               // Zum Debuggen
+
+  private:
+    Fill_zero                  _zero_;
+    string                     _text;
+    bool                       _reading_body;
+    int                        _body_start;
+    int                        _content_length;
+    const char*                _next_char;
+    Request* const             _request;
+};
+
+//------------------------------------------------------------------------------------------Request
+
+struct Request : Object
+{
+                                Request                     ()                                      : _zero_(this+1){}
+
+    bool                        has_parameter               ( const string& name ) const            { return _parameters.find( name ) != _parameters.end(); }
+    string                      parameter                   ( const string& name ) const;
+    bool                        is_http_1_1                 () const;
+    string                      header                      ( const string& name ) const            { return _headers[ name ]; }
+    string                      url                         () const;
+    string                      url_path                    () const                                { return _path; }
+    string                      character_encoding          () const;
+    string                      content_type                () const;
+    const string&               body                        () const                                { return _body; }
+
+
+  //private:
+    friend struct               Parser;
+    friend struct               Operation;
+    friend struct               Response;
+
+    Fill_zero                  _zero_;
+    string                     _http_cmd;
+    string                     _protocol;                                                      
+    string                     _path;
+
+    Headers                    _headers;
+    typedef stdext::hash_map<string,string>  String_map;
+    String_map                 _parameters;
+    string                     _body;
+};
+
+//-----------------------------------------------------------------------------------------Response
+
+struct Response : Object
+{
+                                Response                    ( Operation* );
     
     void                        recommend_block_size        ( int size )                            { if( _chunk_reader )  _chunk_reader->recommend_block_size( size ); }
     int                         recommended_block_size      () const                                { return _chunk_reader? _chunk_reader->_recommended_block_size : recommended_chunk_size; }
@@ -211,34 +281,36 @@ struct Http_response : Object
 
     void                    set_event                       ( Event_base* event )                   { if( _chunk_reader )  _chunk_reader->set_event( event ); }
 
-    string                      content_type                ()                                      { return _content_type; }
-    void                    set_content_type                ( const string& value )                 { _content_type = value; }
-    void                    set_character_encoding          ( const string& value );
-    void                    set_header_field                ( const string& name, const string& value ) { _header_fields[ name ] = value; }
-    void                    set_status                      ( int code, const string& text )        { _status_code = code; _status_text = text; }
+  //string                      content_type                ()                                      { return _content_type; }
+  //void                    set_content_type                ( const string& value )                 { set_header( "Content-Type", value ); }
+  //void                    set_character_encoding          ( const string& value );
+    void                    set_header                      ( const string& name, const string& value ) { _headers.set( name, value ); }
+    string                      header                      ( const string& name )                  { return _headers[ name ]; }
+    void                    set_status                      ( Status_code, const string& text = "" );
+    void                    set_chunk_reader                ( Chunk_reader* c )                     { _chunk_reader = c; }
     void                        finish                      ();
 
     bool                        eof                         ();
     string                      read                        ( int recommended_size );
-    string                      header_text                 () const                                { return _header; }
+  //string                      header_text                 () const                                { return _headers_stream; }
 
 
   protected:
+    friend struct               Operation;
+
     string                      start_new_chunk             ();
 
 
     Fill_zero                  _zero_;
-    ptr<Http_request>          _http_request;
+    Operation*                 _operation;
     bool                       _chunked;
     bool                       _close_connection_at_eof;
     ptr<Chunk_reader>          _chunk_reader;
-    string                     _content_type;
-    int                        _status_code;
-    string                     _status_text;
+  //string                     _content_type;
+    Status_code                _status_code;
 
-    typedef map<string,string>  Header_fields;
-    Header_fields              _header_fields;
-    string                     _header;
+    Headers                    _headers;
+    String_stream              _headers_stream;
     int                        _chunk_index;                // 0: Header
     uint                       _chunk_size;
     uint                       _chunk_offset;               // Bereits gelesene Bytes
@@ -247,67 +319,55 @@ struct Http_response : Object
     bool                       _finished;
 };
 
-//-----------------------------------------------------------------------------------Http_operation
+//-----------------------------------------------------------------------------------Operation
 
-struct Http_operation : Communication::Operation
+struct Operation : Communication::Operation
 {
-    enum Response_code
-    {
-        code_bad_request                = 404,
-        code_internal_server_error      = 500
-    };
-
-    struct Http_exception : exception
-    {
-        Http_exception( Response_code response_code ) : _response_code( response_code ), _what( response_messages[ (int)response_code ] ) {}
-        ~Http_exception() throw () {}
-        const char*             what                        ()                                      { return _what.c_str(); }
-        Response_code          _response_code;
-        string                 _what;
-    };
+                                Operation                   ( Operation_connection* );
 
 
-    static stdext::hash_map<int,string>  response_messages;
-
-
-                                Http_operation              ( Http_processor_channel* );
-
-
-    void                        put_request_part            ( const char* data, int length )        { _http_parser->add_text( data, length ); }
-    bool                        request_is_complete         ()                                      { return !_http_parser  ||  _http_parser->is_complete(); }
+    void                        put_request_part            ( const char* data, int length )        { _parser->add_text( data, length ); }
+    bool                        request_is_complete         ()                                      { return !_parser  ||  _parser->is_complete(); }
 
     void                        begin                       ();
     virtual bool                async_continue_             ( Continue_flags );
-    virtual bool                async_finished_             ()                                      { return _http_response != NULL; }
+    virtual bool                async_finished_             ()                                      { return _response != NULL; }
     virtual string              async_state_text_           ()                                      { return "none"; }
 
     bool                        response_is_complete        ();
     string                      get_response_part           ();
     bool                        should_close_connection     ();
 
+    Request*                    request                     () const                                { return _request; }
+    Response*                   response                    () const                                { return _response; }
+
+
+  private:
+    friend struct               Request;
+    friend struct               Response;
 
     Fill_zero                  _zero_;
-    ptr<Http_request>          _http_request;
-    ptr<Http_parser>           _http_parser;
-    ptr<Http_response>         _http_response;
+    ptr<Request>               _request;
+    ptr<Parser>                _parser;
+    ptr<Response>              _response;
     ptr<Web_service_operation> _web_service_operation;
-
 };
 
-//---------------------------------------------------------------------------Http_processor_channel
+//------------------------------------------------------------------------Operation_connection
 
-struct Http_processor_channel : Communication::Operation_channel
+struct Operation_connection : Communication::Operation_connection
 {
-                                Http_processor_channel      ( Communication::Channel* ch )          : Communication::Operation_channel( ch ) {}
+                                Operation_connection   ( Communication::Connection* c )        : Communication::Operation_connection( c ) {}
 
-    ptr<Communication::Operation> new_operation             ()                                      { ptr<Http_operation> result = Z_NEW( Http_operation( this ) ); 
+    ptr<Communication::Operation> new_operation             ()                                      { ptr<Operation> result = Z_NEW( Operation( this ) ); 
                                                                                                       return +result; }
 
-    string                      channel_type                () const                                { return "HTTP"; }
+    string                      connection_type             () const                                { return "HTTP"; }
 };
 
 //-------------------------------------------------------------------------------------------------
 
+} //namespace http
 } //namespace spooler
 } //namespace sos
 

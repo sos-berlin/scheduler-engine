@@ -19,7 +19,7 @@ Xml_client_connection::Xml_client_connection( Spooler* sp, const Host_and_port& 
     _host_and_port(host_and_port)
 {
     _log.set_prefix( S() << "Haupt-Scheduler " + _host_and_port );
-    set_async_next_gmtime( 0 );
+    set_async_next_gmtime( (time_t)0 );
     //set_async_child( &_socket_operation );
 }
 
@@ -36,7 +36,7 @@ void Xml_client_connection::set_socket_manager( Socket_manager* manager )
     _socket_manager = manager;
 
     set_async_manager( manager );
-    set_async_next_gmtime( 0 );     // Sofort starten!
+    set_async_next_gmtime( (time_t)0 );     // Sofort starten!
 }
 
 //---------------------------------------------------------Xml_client_connection::async_state_text_

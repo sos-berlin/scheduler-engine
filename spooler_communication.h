@@ -12,7 +12,7 @@ namespace spooler {
 
 //-------------------------------------------------------------------------------------------------
 
-struct Http_operation_channel;
+struct Xml_operation_connection;
 
 //inline bool operator < ( const in_addr& a, const in_addr& b )  { return a.s_addr < b.s_addr; }  // Für map<>
 
@@ -20,13 +20,13 @@ struct Http_operation_channel;
 
 struct Communication
 {       
-    struct Operation_channel;
+    struct Operation_connection;
     struct Operation;
 
 
-    struct Channel : zschimmer::Buffered_socket_operation
+    struct Connection : zschimmer::Buffered_socket_operation
     {
-        enum Channel_state
+        enum Connection_state
         {
             s_none,
             s_ready,
@@ -37,12 +37,12 @@ struct Communication
         };
 
 
-                                Channel                     ( Communication* );
-                               ~Channel                     ();
+                                Connection                     ( Communication* );
+                               ~Connection                     ();
 
-        Channel_state           channel_state               () const                                { return _channel_state; }
-        string                  channel_state_name          () const                                { return channel_state_name( _channel_state ); }
-        static string           channel_state_name          ( Channel_state );
+        Connection_state           connection_state               () const                                { return _connection_state; }
+        string                  connection_state_name          () const                                { return connection_state_name( _connection_state ); }
+        static string           connection_state_name          ( Connection_state );
 
         void                    remove_me                   ( const exception* = NULL );
         void                    terminate                   ( double wait_time );
@@ -56,11 +56,11 @@ struct Communication
 
         virtual bool            async_continue_             ( Continue_flags );
         virtual bool            async_finished_             ()                                      { return false; }
-        virtual string          async_state_text_           ()                                      { return "Spooler::Communication::Channel()"; }  // \"" + _named_host + "\"
+        virtual string          async_state_text_           ()                                      { return "Spooler::Communication::Connection()"; }  // \"" + _named_host + "\"
 
 
         Fill_zero              _zero_;
-        Channel_state          _channel_state;
+        Connection_state          _connection_state;
         Spooler*               _spooler;
         Communication*         _communication;
 
@@ -71,7 +71,7 @@ struct Communication
         //bool                   _dont_receive;               // Bei terminate() ist Empfang gesperrt
         Prefix_log             _log;
 
-        ptr<Operation_channel> _operation_channel;
+        ptr<Operation_connection> _operation_connection;
         ptr<Operation>         _operation;
     };
 
@@ -104,7 +104,7 @@ struct Communication
 
     struct Operation : Async_operation
     {
-                                Operation                   ( Operation_channel* pc )               : _zero_(this+1), _channel(pc->_channel), _spooler(pc->_spooler), _operation_channel(pc) {}
+                                Operation                   ( Operation_connection* pc )               : _zero_(this+1), _connection(pc->_connection), _spooler(pc->_spooler), _operation_connection(pc) {}
 
 
         void                    set_host                    ( Host* host )                          { _host = host; }
@@ -126,26 +126,26 @@ struct Communication
 
         Fill_zero              _zero_;
         Spooler*               _spooler;
-        Channel*               _channel;
-        Operation_channel*     _operation_channel;
+        Connection*               _connection;
+        Operation_connection*     _operation_connection;
         Host*                  _host;
     };
 
 
 
-    struct Operation_channel : Object
+    struct Operation_connection : Object
     {
-                                Operation_channel           ( Channel* ch )                         : _spooler(ch->_spooler), _channel(ch) {}
+                                Operation_connection           ( Connection* ch )                         : _spooler(ch->_spooler), _connection(ch) {}
 
 
         virtual ptr<Operation>  new_operation               ()                                      = 0;
         virtual void            connection_lost_event       ( const exception* )                    {}
-        virtual string          channel_type                () const                                = 0;
+        virtual string          connection_type                () const                                = 0;
 
 
 
         Spooler*               _spooler;
-        Channel*               _channel;
+        Connection*               _connection;
     };
 
 
@@ -154,11 +154,11 @@ struct Communication
 
 
         accept();
-        ptr<Operation_channel> processor_channel;
+        ptr<Operation_connection> processor_connection;
 
         while(1)
         {
-            ptr<Operation> processor = processor_channel->processor();
+            ptr<Operation> processor = processor_connection->processor();
 
             while(1)
             {
@@ -177,7 +177,7 @@ struct Communication
 
 
 
-    typedef list< ptr<Channel> >  Channel_list;
+    typedef list< ptr<Connection> >  Connection_list;
 
 
                                 Communication               ( Spooler* );
@@ -192,13 +192,13 @@ struct Communication
   //int                         thread_main                 ();
     bool                        started                     ()                                      { return _started; }
   //bool                        main_thread_exists          ();
-    void                        remove_channel              ( Channel* );
+    void                        remove_connection              ( Connection* );
 
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr& document, const Show_what& ) const;
 
   private:
   //int                         run                         ();
-  //bool                        handle_socket               ( Channel* );
+  //bool                        handle_socket               ( Connection* );
     int                         bind_socket                 ( SOCKET, struct sockaddr_in*, const string& tcp_or_udp );
   //void                       _fd_set                      ( SOCKET, fd_set* );
 
@@ -209,7 +209,7 @@ struct Communication
   private:
     Listen_socket              _listen_socket;
     Udp_socket                 _udp_socket;
-    Channel_list               _channel_list;
+    Connection_list               _connection_list;
   //int                        _nfds;
   //fd_set                     _read_fds;
   //fd_set                     _write_fds;
@@ -226,37 +226,37 @@ struct Communication
 
 struct Xml_operation : Communication::Operation
 {
-                                Xml_operation               ( Http_operation_channel* );
+                                Xml_operation               ( Xml_operation_connection* );
 
     void                        put_request_part            ( const char*, int length );
     bool                        request_is_complete         ()                                      { return _request_is_complete; }
 
-    void                        begin              ();
+    void                        begin                       ();
 
     bool                        response_is_complete        ()                                      { return true; }
     string                      get_response_part           ()                                      { string result = _response;  _response = "";  return result; }
 
 
     Fill_zero                  _zero_;
-    Http_operation_channel*     _operation_channel;
+    Xml_operation_connection*  _operation_connection;
     bool                       _request_is_complete;
     Xml_end_finder             _xml_end_finder;
     string                     _request;
     string                     _response;
 };
 
-//------------------------------------------------------------------------------Http_operation_channel
+//-------------------------------------------------------------------------Xml_operation_connection
 
-struct Http_operation_channel : Communication::Operation_channel
+struct Xml_operation_connection : Communication::Operation_connection
 {
-                                Http_operation_channel       ( Communication::Channel* );
+                                Xml_operation_connection    ( Communication::Connection* );
 
 
     ptr<Communication::Operation> new_operation             ()                                      { ptr<Xml_operation> result = Z_NEW( Xml_operation( this ) ); 
                                                                                                       return +result; }
 
     virtual void                connection_lost_event       ( const exception* );
-    string                      channel_type                () const                                { return "TCP"; }
+    string                      connection_type             () const                                { return "TCP"; }
 
 
     bool                       _indent;
@@ -271,7 +271,7 @@ inline bool is_communication_operation( Async_operation* op )
 
     return dynamic_cast<Communication::Listen_socket*>( op ) ||
            dynamic_cast<Communication::Udp_socket*   >( op ) ||
-           dynamic_cast<Communication::Channel*      >( op );
+           dynamic_cast<Communication::Connection*   >( op );
 }
 
 //-------------------------------------------------------------------------------------------------

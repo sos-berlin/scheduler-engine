@@ -77,7 +77,7 @@ struct Command_processor
                                ~Command_processor           ();
 
     void                        execute_file                ( const string& xml_filename );
-    ptr<Http_response>          execute_http                ( Http_request* );
+    void                        execute_http                ( http::Operation* );
     string                      execute                     ( const string& xml_text, const Time& xml_mod_time, bool indent = false );
     xml::Document_ptr           execute                     ( const xml::Document_ptr&, const Time& xml_mod_time = Time::now() );
     void                        execute_2                   ( const string& xml_text, const Time& xml_mod_time = Time::now() );

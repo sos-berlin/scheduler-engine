@@ -2,9 +2,9 @@
 /*
     Hier sind implementiert
 
-    Http_parser
-    Http_request
-    Http_response
+    Parser
+    Request
+    Response
     Log_chunk_reader
     Html_chunk_reader
 
@@ -21,32 +21,78 @@ using namespace std;
 
 namespace sos {
 namespace spooler {
+namespace http {
 
-//-------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------static
 
-stdext::hash_map<int,string> Http_operation::response_messages;
+stdext::hash_map<int,string>  http_status_messages;
+
+//--------------------------------------------------------------------------------------------const
+
+struct Http_status_code_table 
+{   
+    Status_code                _code; 
+    const char*                _text;
+};
+
+const Http_status_code_table http_status_code_table[]  =
+{
+    { status_301_moved_permanently             , "Moved Permanently" },
+    { status_404_bad_request                   , "Bad Request" },
+    { status_500_internal_server_error         , "Internal Server Error" },
+    { status_505_http_version_not_supported    , "HTTP Version Not Supported" },
+    { status_501_not_implemented               , "Not Implemented" },
+    {}
+};
 
 //-------------------------------------------------------------------------------------------Z_INIT
 
 Z_INIT( scheduler_http )
 {
-    Http_operation::response_messages[ (int)Http_operation::code_bad_request           ] = "Bad Request";
-    Http_operation::response_messages[ (int)Http_operation::code_internal_server_error ] = "Internal Server Error";
+    for( const Http_status_code_table* p = http_status_code_table; p->_code; p++ )
+    {
+        http_status_messages[ (int)p->_code ] = p->_text;
+    }
 }
 
-//-------------------------------------------------------------------------Http_parser::Http_parser
+//------------------------------------------------------------------------------Headers::operator[]
+
+string Headers::operator[]( const string& name ) const
+{
+    Map::const_iterator it = _map.find( lcase( name ) );
+    return it == _map.end()? "" : it->second._value;
+}
+
+//-------------------------------------------------------------------------------------Headers::set
+
+void Headers::set( const string& name, const string& value )
+{
+    _map[ lcase( name ) ] = Entry( name, value );
+}
+
+//-----------------------------------------------------------------------------Headers::set_default
+
+void Headers::set_default( const string& name, const string& value )
+{
+    string        lname = lcase( name );
+    Map::iterator it    = _map.find( lname );
+
+    if( it == _map.end() )  _map[ name ] = Entry( name, value );
+}
+
+//-----------------------------------------------------------------------------------Parser::Parser
     
-Http_parser::Http_parser( Http_request* http_request )
+Parser::Parser( Request* request )
 :
     _zero_(this+1),
-    _http_request( http_request )
+    _request( request )
 {
     _text.reserve( 1000 );
 }
 
-//----------------------------------------------------------------------------Http_parser::add_text
+//---------------------------------------------------------------------------------Parser::add_text
     
-void Http_parser::add_text( const char* text, int len )
+void Parser::add_text( const char* text, int len )
 {
     _text.append( text, len );
 
@@ -64,7 +110,7 @@ void Http_parser::add_text( const char* text, int len )
             _reading_body = true;
 
             parse_header();
-            string content_length = _http_request->_header[ "content-length" ];
+            string content_length = _request->_headers[ "content-length" ];
             if( !content_length.empty() )
             {
                 _content_length = as_uint( content_length );
@@ -81,21 +127,21 @@ void Http_parser::add_text( const char* text, int len )
                                                               else  throw_xc( "SPOOLER-HTTP toomuchdata" );
         }
 
-        _http_request->_body.assign( _text.data() + _body_start, _content_length ); 
+        _request->_body.assign( _text.data() + _body_start, _content_length ); 
     }
 }
 
-//-------------------------------------------------------------------------Http_parser::is_complete
+//------------------------------------------------------------------------------Parser::is_complete
 
-bool Http_parser::is_complete()
+bool Parser::is_complete()
 {
     return _reading_body  &&  (    _text.length() == _body_start + _content_length
                                 || _text.length() == _body_start + _content_length + 2 );  // Firefox hängt noch ein \r\n an
 }
 
-//------------------------------------------------------------------------Http_parser::parse_header
+//-----------------------------------------------------------------------------Parser::parse_header
 
-void Http_parser::parse_header()
+void Parser::parse_header()
 {
     /*if( z::Log_ptr log = "http" )
     {
@@ -107,9 +153,9 @@ void Http_parser::parse_header()
 
     _next_char = _text.c_str();
 
-    _http_request->_http_cmd = eat_word();
-    _http_request->_path     = eat_path();
-    _http_request->_protocol = eat_word();
+    _request->_http_cmd = eat_word();
+    _request->_path     = eat_path();
+    _request->_protocol = eat_word();
                                eat_line_end();
 
     while( next_char() > ' ' )
@@ -117,23 +163,23 @@ void Http_parser::parse_header()
         string name = eat_until( ":" );
                       eat( ":" );
         string value = eat_until( "" );
-        _http_request->_header[ lcase( name ) ] = value;
+        _request->_headers.set( name, value );
         eat_line_end();
     }
 
     eat_line_end();
 }
 
-//--------------------------------------------------------------------------Http_parser::eat_spaces
+//-------------------------------------------------------------------------------Parser::eat_spaces
 
-void Http_parser::eat_spaces()
+void Parser::eat_spaces()
 { 
     while( *_next_char == ' ' )  _next_char++; 
 }
 
-//---------------------------------------------------------------------------------Http_parser::eat
+//--------------------------------------------------------------------------------------Parser::eat
 
-void Http_parser::eat( const char* what )
+void Parser::eat( const char* what )
 {
     const char* w = what;
     while( *w  &&  *_next_char == *w )  w++, _next_char++;
@@ -146,9 +192,9 @@ void Http_parser::eat( const char* what )
     eat_spaces();
 }
 
-//------------------------------------------------------------------------Http_parser::eat_line_end
+//-----------------------------------------------------------------------------Parser::eat_line_end
 
-void Http_parser::eat_line_end()
+void Parser::eat_line_end()
 {
     eat_spaces();
 
@@ -156,9 +202,9 @@ void Http_parser::eat_line_end()
     eat( "\n" );
 }
 
-//----------------------------------------------------------------------------Http_parser::eat_word
+//---------------------------------------------------------------------------------Parser::eat_word
 
-string Http_parser::eat_word()
+string Parser::eat_word()
 {
     string word;
     while( *_next_char > ' ' )  word += *_next_char++;
@@ -167,9 +213,9 @@ string Http_parser::eat_word()
     return word;
 }
 
-//---------------------------------------------------------------------------Http_parser::eat_until
+//--------------------------------------------------------------------------------Parser::eat_until
 
-string Http_parser::eat_until( const char* character_set )
+string Parser::eat_until( const char* character_set )
 {
     string word;
     while( *_next_char >= ' '  &&  strchr( character_set, *_next_char ) == NULL )  word += *_next_char++;
@@ -178,9 +224,9 @@ string Http_parser::eat_until( const char* character_set )
     return rtrim( word );
 }
 
-//----------------------------------------------------------------------------Http_parser::eat_path
+//---------------------------------------------------------------------------------Parser::eat_path
 
-string Http_parser::eat_path()
+string Parser::eat_path()
 {
     eat_spaces();
 
@@ -202,7 +248,7 @@ string Http_parser::eat_path()
         if( state == in_parameter  &&  _next_char[0] == '&'  ||  (Byte)_next_char[0] <= (Byte)' ' )
         {
             if( state == in_path )  path = word;
-                              else  _http_request->_parameters[ parameter_name ] = word;
+                              else  _request->_parameters[ parameter_name ] = word;
             state = in_parameter;
             if( (Byte)_next_char[0] <= (Byte)' ' )  break;
             word = "";
@@ -233,135 +279,269 @@ string Http_parser::eat_path()
     return path;
 }
 
-//--------------------------------------------------------------------------Http_request::parameter
+//-----------------------------------------------------------------------------Operation::Operation
+
+Operation::Operation( Operation_connection* pc )
+: 
+    Communication::Operation( pc ), 
+    _zero_(this+1) 
+{
+    _request  = Z_NEW( Request() );
+    _parser   = Z_NEW( Parser( _request ) );
+    _response = Z_NEW( Response( this ) );
+}
+
+//---------------------------------------------------------------------------------Operation::begin
+
+void Operation::begin()
+{
+    Z_LOG2( "scheduler.http", "HTTP: " << _parser->text() << "\n" );    // Wird auch mit "socket.data" protokolliert (default aus)
     
-string Http_request::parameter( const string& name ) const
+    try
+    {
+        if( _request->_protocol != ""  
+         && _request->_protocol != "HTTP/1.0"  
+         && _request->_protocol != "HTTP/1.1" )  throw Http_exception( status_505_http_version_not_supported );
+
+        if( Web_service* web_service = _spooler->_web_services.web_service_by_url_path_or_null( _request->_path ) )
+        {
+            Z_LOG2( "scheduler.http", "    web_service=" << web_service->name() << "\n" );
+
+            _web_service_operation = web_service->new_operation( this );
+            _web_service_operation->begin();
+        }
+        else
+        {
+            Command_processor command_processor ( _spooler );
+
+            command_processor.set_host( _host );
+            command_processor.execute_http( this );
+        }
+    }
+    catch( Http_exception& x )
+    {
+        if( _connection )  _connection->_log.error( x.what() );
+        _response->set_status( x._status_code, x.what() );
+    }
+    catch( exception& x )
+    {
+        if( _connection )  _connection->_log.error( x.what() );
+        _response->set_status( status_500_internal_server_error, x.what() );
+    }
+
+
+    _response->set_event( &_connection->_socket_event );
+    _response->recommend_block_size( 32768 );
+
+    _parser  = NULL;
+    _request = NULL;
+}
+
+//-----------------------------------------------------------------------Operation::async_continue_
+
+bool Operation::async_continue_( Continue_flags )
+{
+    if( !_web_service_operation )  return true;
+
+    bool something_done = _web_service_operation->async_continue();
+    
+    /*
+    if( something_done  &&  _web_service_operation->async_finished() )
+    {
+        _response = _web_service_operation->process_http__end();
+    }
+    */
+
+    return something_done;
+}
+
+//----------------------------------------------------------------------Operation::get_response_part
+
+string Operation::get_response_part()
+{ 
+    return _response->read( _response->recommended_block_size() );
+}
+
+//--------------------------------------------------------------Operation::response_is_complete
+
+bool Operation::response_is_complete()
+{ 
+    return !_response || _response->eof(); 
+}
+
+//----------------------------------------------------------Operation::should_close_connection
+
+bool Operation::should_close_connection()
+{ 
+    return _response  &&  _response->close_connection_at_eof(); 
+}
+
+//-------------------------------------------------------------------------------Request::parameter
+    
+string Request::parameter( const string& name ) const
 { 
     String_map::const_iterator it = _parameters.find( name );
     return it == _parameters.end()? "" : it->second;
 }
 
-//--------------------------------------------------------------------Http_request::keep_connection
+//-------------------------------------------------------------------------Request::keep_connection
 
-bool Http_request::is_http_1_1() const
+bool Request::is_http_1_1() const
 {
     return _protocol == "HTTP/1.1";
 }
 
-//----------------------------------------------------------------Http_request::host_and_port_field
+//-------------------------------------------------------------------------------------Request::url
 
-string Http_request::host_and_port_field() const
-{
-    String_map::const_iterator h = _header.find( "host" );
-    return h == _header.end()? "" : h->second;
-}
-
-//--------------------------------------------------------------------------------Http_request::url
-
-string Http_request::url() const
+string Request::url() const
 {
     S result;
-    result << "http://" << host_and_port_field() << url_path();
+    result << "http://" << _headers[ "host" ] << url_path();        // Zum Beispiel "Host: hostname:80"
     return result;
 }
 
-//-----------------------------------------------------------------Http_request::character_encoding
+//----------------------------------------------------------------------------Request::content_type
 
-string Http_request::character_encoding() const
+string Request::content_type() const
 {
-    String_map::const_iterator h = _header.find( "content-type" );
-    if( h == _header.end() )  return "";
+    string content_type = _headers[ "content-type" ];
+    if( content_type == "" )  return "";
 
-    size_t pos = h->second.find( "charset=" );
+    size_t pos = content_type.find( ";" );
+    if( pos == string::npos )  pos = content_type.length();
+
+    return rtrim( content_type.substr( 0, pos ) );
+}
+
+//----------------------------------------------------------------------Request::character_encoding
+
+string Request::character_encoding() const
+{
+    string content_type = _headers[ "content-type" ];
+    if( content_type == "" )  return "";
+
+    size_t pos = content_type.find( "charset=" );
     if( pos == string::npos )  return "";
 
-    string result = h->second.substr( pos + 8 );
+    string result = content_type.substr( pos + 8 );
     pos = result.find( " " );
 
     return pos == string::npos? result : result.substr( 0, pos );
 }
 
-//---------------------------------------------------------------------Http_response::Http_response
+//-----------------------------------------------------------------------------Http_exception::what
 
-Http_response::Http_response( Http_request* http_request, Chunk_reader* chunk_reader, const string& content_type )
-: 
-    _zero_(this+1), 
-    _chunk_reader( chunk_reader ),
-    _chunked( http_request->is_http_1_1() ),
-    _close_connection_at_eof( !http_request->is_http_1_1() ),
-    _http_request(http_request)
+const char* Http_exception::what()
 { 
-    set_content_type(content_type); 
+    return http_status_messages[ _status_code ].c_str();
 }
 
-//----------------------------------------------------------------------------Http_response::finish
+//-------------------------------------------------------------------------------Response::Response
 
-void Http_response::finish()
-{
-    time_t      t;
-    char        time_text[26];
+Response::Response( Operation* operation )
+: 
+    _zero_(this+1), 
+  //_chunk_reader( chunk_reader ),
+    _chunked( operation->request()->is_http_1_1() ),
+    _close_connection_at_eof( !operation->request()->is_http_1_1() ),
+    _operation(operation)
+{ 
+  //set_content_type(content_type); 
+}
 
-    ::time( &t );
-    memset( time_text, 0, sizeof time_text );
-
-#   ifdef Z_WINDOWS
-        strcpy( time_text, asctime( gmtime( &t ) ) );
-#    else
-        struct tm  tm;
-        asctime_r( gmtime_r( &t, &tm ), time_text );
-#   endif
+//-----------------------------------------------------------------------------Response::set_status
     
-    time_text[24] = '\0';
+void Response::set_status( Status_code code, const string& text )
+{ 
+    _status_code = code; 
 
-    _header = _http_request->is_http_1_1()? "HTTP/1.1 " 
-                                          : "HTTP/1.0 ";
+    if( text != "" )
+    {
+        S body;
+        body << "<html><body><p style='color: red'";
 
-    _chunked = _http_request->is_http_1_1();    // Funktioniert nicht mit Firefox 1.5:  &&  _chunk_reader;
+        for( const char* p = text.c_str(); *p; p++ )
+        {
+            switch( *p )
+            {
+                case '&': body << "&amp;";  break;
+                case '<': body << "&lt;" ;  break;
+                case '>': body << "&gt;" ;  break;
+                default: body << *p;
+            }
+        }
+
+        body << "</p></body></html>";
+        
+        set_chunk_reader( Z_NEW( String_chunk_reader( body, "text/html" ) ) );
+    }
+}
+
+//---------------------------------------------------------------------------------Response::finish
+
+void Response::finish()
+{
+    _headers_stream << _operation->request()->_protocol;
+
+    _chunked = _operation->request()->is_http_1_1();
 
     if( _status_code )
     {
-        _header += as_string( _status_code );
-        _header += " ";
-
-        for( int i = 0; i < _status_text.length(); i++ )  if( (uint)_status_text[i] < ' ' )  _status_text[i] = ' ';
-        _header += _status_text;
-        _header += "\r\n";
+        _headers_stream << _status_code << ' ' << http_status_messages[ _status_code ] << "\n";
     }
     else
     {
-        _header += "200 OK\r\n";
+        _headers_stream << "200 OK\r\n";
     }
 
-    _header += "Date: " + string(time_text) + " GMT\r\n"
-               "Server: Scheduler " + string(VER_PRODUCTVERSION_STR) + "\r\n";
+    if( !_headers.contains( "Date" ) )
+    {
+        time_t      t;
+        char        time_text[26];
 
-    if( _content_type != "" )  _header += "Content-Type: "  + _content_type + "\r\n";
+        ::time( &t );
+        memset( time_text, 0, sizeof time_text );
 
-    //if( _http_request->_header[ "cache-control" ] == "no-cache" )
-        _header += "Cache-Control: no-cache\r\n";   // Sonst bleibt z.B. die scheduler.xslt im Browser kleben und ein Wechsel der Datei wirkt nicht.
+    #   ifdef Z_WINDOWS
+            strcpy( time_text, asctime( gmtime( &t ) ) );
+    #    else
+            struct tm  tm;
+            asctime_r( gmtime_r( &t, &tm ), time_text );
+    #   endif
+        
+        time_text[24] = '\0';
+        _headers.set( "Date", string(time_text) + " GMT" );
+    }
+
+    _headers_stream << "Server: Scheduler " VER_PRODUCTVERSION_STR "\r\n";
+
+    //if( _content_type != "" )  _headers_stream << "Content-Type: " << _content_type << "\r\n";
+
+    //if( _request->_header[ "cache-control" ] == "no-cache" )
+    //  _header += "Cache-Control: no-cache\r\n";   // Sonst bleibt z.B. die scheduler.xslt im Browser kleben und ein Wechsel der Datei wirkt nicht.
                                                     // Gut wäre eine Frist, z.B. 10s
 
-    if( _chunked                 )  _header += "Transfer-Encoding: chunked\r\n";
-    if( _close_connection_at_eof )  _header += "Connection: close\r\n";
+    if( _chunked                 )  _headers_stream << "Transfer-Encoding: chunked\r\n";
+    if( _close_connection_at_eof )  _headers_stream << "Connection: close\r\n";
 
-    Z_FOR_EACH( Header_fields, _header_fields, h )  _header += h->first + ": " + h->second + "\r\n";
+    Z_FOR_EACH( Headers::Map, _headers._map, h )  _headers_stream << h->second._name << ": " << h->second._value << "\r\n";
 
-    _header += "\r\n";
+    _headers_stream << "\r\n";
 
-    _chunk_size = _header.length();
+    _chunk_size = _headers_stream.length();
     _finished = true;
 }
 
-//-------------------------------------------------------------------------------Http_response::eof
+//------------------------------------------------------------------------------------Response::eof
 
-bool Http_response::eof()
+bool Response::eof()
 {
     return _eof;
 }
 
-//------------------------------------------------------------------------------Http_response::read
+//-----------------------------------------------------------------------------------Response::read
 
-string Http_response::read( int recommended_size )                           
+string Response::read( int recommended_size )                           
 {
     if( !_finished )  finish();
 
@@ -372,12 +552,7 @@ string Http_response::read( int recommended_size )
 
     if( _chunk_index == 0  &&  _chunk_offset < _chunk_size )
     {
-        //uint length = min( recommended_size, _header.length() - _chunk_offset );
-        //uint r      = _chunk_offset;
-        //_chunk_offset += length;
-        //return _header.substr( r, length );
-        _chunk_offset = _chunk_size;
-        result = _header;
+        result = _headers_stream;
     }
 
     if( _chunk_offset == _chunk_size ) 
@@ -411,9 +586,9 @@ string Http_response::read( int recommended_size )
     return result;
 }
 
-//-------------------------------------------------------------------Http_response::start_new_chunk
+//------------------------------------------------------------------------Response::start_new_chunk
 
-string Http_response::start_new_chunk()
+string Response::start_new_chunk()
 {
     if( !_chunk_reader->next_chunk_is_ready() )  return "";
 
@@ -466,6 +641,7 @@ string String_chunk_reader::read_from_chunk( int recommended_size )
 
 Log_chunk_reader::Log_chunk_reader( Prefix_log* log )
 : 
+    Chunk_reader( "text/html" ),
     _zero_(this+1), 
     _log(log) 
 {
@@ -552,7 +728,7 @@ string Log_chunk_reader::html_insertion()
 
 Html_chunk_reader::Html_chunk_reader( Chunk_reader* chunk_reader, const string& title )
 : 
-    Chunk_reader_filter(chunk_reader),
+    Chunk_reader_filter( chunk_reader, "text/html" ),
     _zero_(this+1), 
     _state(reading_prefix),
     _awaiting_class(true)
@@ -746,104 +922,8 @@ string Html_chunk_reader::read_from_chunk( int recommended_size )
     return _chunk;
 }
 
-//-------------------------------------------------------------------Http_operation::Http_operation
-
-Http_operation::Http_operation( Http_processor_channel* pc )
-: 
-    Communication::Operation( pc ), 
-    _zero_(this+1) 
-{
-    _http_request = Z_NEW( Http_request() );
-    _http_parser  = Z_NEW( Http_parser( _http_request ) );
-}
-
-//----------------------------------------------------------------------------Http_operation::begin
-
-void Http_operation::begin()
-{
-    Z_LOG2( "scheduler.http", "HTTP: " << _http_parser->_text << "\n" );    // Wird auch mit "socket.data" protokolliert (default aus)
-    
-
-    try
-    {
-        if( Web_service* web_service = _spooler->_web_services.web_service_by_url_path_or_null( _http_request->_path ) )
-        {
-            Z_LOG2( "scheduler.http", "    web_service=" << web_service->name() << "\n" );
-
-            _web_service_operation = web_service->new_operation( this );
-
-            _web_service_operation->process_http__begin( this );
-        }
-        else
-        {
-            Command_processor command_processor ( _spooler );
-
-            command_processor.set_host( _host );
-
-            _http_response = command_processor.execute_http( _http_request );
-        }
-    }
-    catch( Http_exception& x )
-    {
-        if( _channel )  _channel->_log.error( x.what() );
-
-        _http_response = Z_NEW( Http_response( _http_request, NULL, "" ) );
-        _http_response->set_status( (int)x._response_code, response_messages[ x._response_code ] );
-    }
-    catch( exception& x )
-    {
-        if( _channel )  _channel->_log.error( x.what() );
-
-        _http_response = Z_NEW( Http_response( _http_request, NULL, "" ) );
-        _http_response->set_status( 500, "Internal Server Error" );
-    }
-
-
-    _http_response->set_event( &_channel->_socket_event );
-    _http_response->recommend_block_size( 32768 );
-
-    _http_parser  = NULL;
-    _http_request = NULL;
-}
-
-//------------------------------------------------------------------Http_operation::async_continue_
-
-bool Http_operation::async_continue_( Continue_flags )
-{
-    if( !_web_service_operation )  return true;
-
-    bool something_done = _web_service_operation->async_continue();
-    
-    if( something_done  &&  _web_service_operation->async_finished() )
-    {
-        _http_response = _web_service_operation->process_http__end();
-    }
-
-    return something_done;
-}
-
-//----------------------------------------------------------------------Http_operation::get_response
-
-string Http_operation::get_response_part()
-{ 
-    return _http_response->read( _http_response->recommended_block_size() );
-}
-
-//--------------------------------------------------------------Http_operation::response_is_complete
-
-bool Http_operation::response_is_complete()
-{ 
-    return !_http_response || _http_response->eof(); 
-}
-
-//----------------------------------------------------------Http_operation::should_close_connection
-
-bool Http_operation::should_close_connection()
-{ 
-    return _http_response  &&  _http_response->close_connection_at_eof(); 
-}
-
 //-------------------------------------------------------------------------------------------------
 
+} //namespace http
 } //namespace spooler
 } //namespace sos

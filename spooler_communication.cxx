@@ -2,7 +2,7 @@
 /*
     Hier sind implementiert
 
-    Communication::Channel
+    Communication::Connection
     Communication
 */
 
@@ -36,18 +36,18 @@ const int wait_for_port_available = 2*60;   // Soviele Sekunden warten, bis TCP-
 #   define INADDR_NONE (-1)
 #endif
 
-//-----------------------------------------------------Http_operation_channel::Http_operation_channel
+//-----------------------------------------------Xml_operation_connection::Xml_operation_connection
 
-Http_operation_channel::Http_operation_channel( Communication::Channel* channel )
+Xml_operation_connection::Xml_operation_connection( Communication::Connection* connection )
 : 
-    Communication::Operation_channel( channel ) 
+    Communication::Operation_connection( connection ) 
 {
-    _indent = channel->_read_socket == STDIN_FILENO;
+    _indent = connection->_read_socket == STDIN_FILENO;
 }
 
-//-----------------------------------------------------Http_operation_channel::connection_lost_event
+//--------------------------------------------------Xml_operation_connection::connection_lost_event
 
-void Http_operation_channel::connection_lost_event( const exception* x )
+void Xml_operation_connection::connection_lost_event( const exception* x )
 {
     if( _remote_scheduler )
     {
@@ -57,11 +57,11 @@ void Http_operation_channel::connection_lost_event( const exception* x )
 
 //---------------------------------------------------------------------Xml_operation::Xml_operation
 
-Xml_operation::Xml_operation( Http_operation_channel* operation_channel )
+Xml_operation::Xml_operation( Xml_operation_connection* operation_connection )
 : 
     _zero_(this+1), 
-    Operation( operation_channel ),
-    _operation_channel( operation_channel )
+    Operation( operation_connection ),
+    _operation_connection( operation_connection )
 {
 }
 
@@ -73,7 +73,7 @@ void Xml_operation::put_request_part( const char* data, int length )
 
     if( length >= 2  &&  data[ length - 2 ] == '\r' )
     {
-        _operation_channel->_indent = true;      // CR LF am Ende lässt Antwort einrücken. CR LF soll nur bei telnet-Eingabe kommen.
+        _operation_connection->_indent = true;      // CR LF am Ende lässt Antwort einrücken. CR LF soll nur bei telnet-Eingabe kommen.
     }
 
     _request.append( data, length );
@@ -90,14 +90,14 @@ void Xml_operation::begin()
 
     if( string_begins_with( _request, " " ) )  _request = ltrim( _request );
 
-    _channel->_log.info( "Kommando " + _request );
-    _response = command_processor.execute( _request, Time::now(), _operation_channel->_indent );
+    _connection->_log.info( "Kommando " + _request );
+    _response = command_processor.execute( _request, Time::now(), _operation_connection->_indent );
 
-    if( _operation_channel->_indent )  _response = replace_regex( _response, "\n", "\r\n" );      // Für Windows-telnet
+    if( _operation_connection->_indent )  _response = replace_regex( _response, "\n", "\r\n" );      // Für Windows-telnet
 
     _response += '\0';  // Null-Byte terminiert die XML-Antwort
 
-    if( command_processor._error )  _channel->_log.error( command_processor._error->what() );
+    if( command_processor._error )  _connection->_log.error( command_processor._error->what() );
 }
 
 //----------------------------------------------------Communication::Listen_socket::async_continue_
@@ -108,21 +108,21 @@ bool Communication::Listen_socket::async_continue_( Continue_flags flags )
 
     //if( socket_read_signaled() )
     {
-        ptr<Channel> new_channel = Z_NEW( Channel( _communication ) );
+        ptr<Connection> new_connection = Z_NEW( Connection( _communication ) );
 
-        bool ok = new_channel->do_accept( _read_socket );
+        bool ok = new_connection->do_accept( _read_socket );
         if( ok )
         {
-            if( _communication->_channel_list.size() >= max_communication_channels )
+            if( _communication->_connection_list.size() >= max_communication_connections )
             {
-                _spooler->_log.error( S() << "Mehr als " << max_communication_channels << " Kommunikationskanäle. Verbindung abgelehnt.\n" );
+                _spooler->_log.error( S() << "Mehr als " << max_communication_connections << " Kommunikationskanäle. Verbindung abgelehnt.\n" );
             }
             else
             {
-                _communication->_channel_list.push_back( new_channel );
+                _communication->_connection_list.push_back( new_connection );
 
-                new_channel->add_to_socket_manager( _spooler->_connection_manager );
-                new_channel->socket_expect_signals( Socket_operation::sig_read | Socket_operation::sig_write | Socket_operation::sig_except );
+                new_connection->add_to_socket_manager( _spooler->_connection_manager );
+                new_connection->socket_expect_signals( Socket_operation::sig_read | Socket_operation::sig_write | Socket_operation::sig_except );
             }
 
             something_done = true;
@@ -171,9 +171,9 @@ bool Communication::Udp_socket::async_continue_( Continue_flags )
     return something_done;
 }
 
-//------------------------------------------------------------------Communication::Channel::Channel
+//------------------------------------------------------------------Communication::Connection::Connection
 
-Communication::Channel::Channel( Communication* communication )
+Communication::Connection::Connection( Communication* communication )
 :
     _zero_(this+1),
     _spooler(communication->_spooler),
@@ -184,9 +184,9 @@ Communication::Channel::Channel( Communication* communication )
     //recv_clear();
 }
 
-//-----------------------------------------------------------------Communication::Channel::~Channel
+//-----------------------------------------------------------------Communication::Connection::~Connection
 
-Communication::Channel::~Channel()
+Communication::Connection::~Connection()
 {
     remove_from_socket_manager();
 
@@ -200,9 +200,9 @@ Communication::Channel::~Channel()
     _write_socket = SOCKET_ERROR;
 }
 
-//-------------------------------------------------------Communication::Channel::channel_state_name
+//-------------------------------------------------------Communication::Connection::connection_state_name
 
-string Communication::Channel::channel_state_name( Channel_state state )
+string Communication::Connection::connection_state_name( Connection_state state )
 {
     switch( state )
     {
@@ -212,30 +212,30 @@ string Communication::Channel::channel_state_name( Channel_state state )
         case s_processing:  return "processing";
         case s_responding:  return "responding";
         case s_closing:     return "closing";
-        default:            return S() << "Channel_state(" << (int)state << ")";
+        default:            return S() << "Connection_state(" << (int)state << ")";
     }
 }
 
-//----------------------------------------------------------------Communication::Channel::remove_me
+//----------------------------------------------------------------Communication::Connection::remove_me
 
-void Communication::Channel::remove_me( const exception* x )
+void Communication::Connection::remove_me( const exception* x )
 {
-    if( _operation_channel )  _operation_channel->connection_lost_event( x );
+    if( _operation_connection )  _operation_connection->connection_lost_event( x );
 
-    _communication->remove_channel( this );
+    _communication->remove_connection( this );
 }
 
-//----------------------------------------------------------------Communication::Channel::terminate
+//----------------------------------------------------------------Communication::Connection::terminate
 /*
-void Communication::Channel::terminate()
+void Communication::Connection::terminate()
 {
     _dont_receive = true;
     async_continue( false );  // Wir warten nicht. Was nicht sofort gesendet werden kann, geht verloren (nur bei sehr vollem Puffer)
 }
 */
-//----------------------------------------------------------------Communication::Channel::do_accept
+//----------------------------------------------------------------Communication::Connection::do_accept
 
-bool Communication::Channel::do_accept( SOCKET listen_socket )
+bool Communication::Connection::do_accept( SOCKET listen_socket )
 {
     try
     {
@@ -268,9 +268,9 @@ bool Communication::Channel::do_accept( SOCKET listen_socket )
     return true;
 }
 
-//-----------------------------------------------------------------Communication::Channel::do_close
+//-----------------------------------------------------------------Communication::Connection::do_close
 
-void Communication::Channel::do_close()
+void Communication::Connection::do_close()
 {
     remove_from_socket_manager();
 
@@ -286,9 +286,9 @@ void Communication::Channel::do_close()
     _write_socket = SOCKET_ERROR;
 }
 
-//------------------------------------------------------------------Communication::Channel::do_recv
+//------------------------------------------------------------------Communication::Connection::do_recv
 
-bool Communication::Channel::do_recv()
+bool Communication::Connection::do_recv()
 {
     bool something_done = false;
 
@@ -305,7 +305,7 @@ bool Communication::Channel::do_recv()
 
         const char* p = buffer;
 
-        if( _channel_state == s_ready )   // Das sind die ersten empfangen Bytes der Anforderung
+        if( _connection_state == s_ready )   // Das sind die ersten empfangen Bytes der Anforderung
         {
             if( len == 1  &&  buffer[0] == '\x04' )  { _eof = true; return true; }      // Einzelnes Ctrl-D beendet Sitzung
 
@@ -313,26 +313,27 @@ bool Communication::Channel::do_recv()
              || len == 2  &&  buffer[0] == '\r'  &&  buffer[1] == '\n' )  { _spooler->signal( "do_something!" );  _spooler->_last_time_enter_pressed = Time::now().as_time_t(); return true; }
 
             //_receive_at_start = false;
-            _channel_state = s_receiving;
+            _connection_state = s_receiving;
 
-            if( !_operation_channel )
+            if( !_operation_connection )
             {
                 //if( buffer[ 0 ] == '\0' )   // Das erste von vier Längenbytes ist bei der ersten Nachricht auf jeden Fall 0
                 //{
-                //    _operation_channel = Z_NEW( Object_server_processor_channel( this ) );
+                //    _operation_connection = Z_NEW( Object_server_processor_connection( this ) );
                 //}
                 //else
-                if( string_begins_with( buffer, "GET /" )  ||  string_begins_with( buffer, "POST /" ) )     // Muss vollständig im ersten Datenblock enthalten sein!
+                //if( string_begins_with( buffer, "GET /" )  ||  string_begins_with( buffer, "POST /" ) )     // Muss vollständig im ersten Datenblock enthalten sein!
+                if( isupper( (unsigned char)buffer[ 0 ] ) )  // CONNECT, DELETE, GET, HEAD, OPTIONS, POST, PUT, TRACE 
                 {
-                    _operation_channel = Z_NEW( Http_operation_channel( this ) );
+                    _operation_connection = Z_NEW( http::Operation_connection( this ) );
                 }
                 else
                 {
-                    _operation_channel = Z_NEW( Http_operation_channel( this ) );
+                    _operation_connection = Z_NEW( Xml_operation_connection( this ) );
                 }
             }
 
-            _operation = _operation_channel->new_operation();
+            _operation = _operation_connection->new_operation();
         }
 
         if( _read_socket != STDIN_FILENO )  _operation->set_host( &_peer_host_and_port._host );
@@ -347,68 +348,9 @@ bool Communication::Channel::do_recv()
     return something_done;
 }
 
-//------------------------------------------------------------------Communication::Channel::do_send
-/*
-bool Communication::Channel::do_send()
-{
-    bool something_done = false;
+//----------------------------------------------------------Communication::Connection::async_continue_
 
-    while(1)
-    {
-        int count = _send_data.length() - _send_progress; 
-        if( count <= 0 )  break;
-
-        int c   = min( _socket_send_buffer_size, count );
-        int err = 0;
-
-      //do
-      //{
-            int len = _write_socket == STDOUT_FILENO? write ( _write_socket, _send_data.data() + _send_progress, c )
-                                                    : ::send( _write_socket, _send_data.data() + _send_progress, c, 0 );
-            err = len < 0? socket_errno() : 0;
-            Z_LOG2( "socket.send", "send/write(" << _write_socket << "," << c << " bytes) ==> " << len << "  errno=" << err << "\n" );
-            if( len == 0 )  break;   // Vorsichtshalber
-            if( len < 0 ) 
-            {
-                if( err == EWOULDBLOCK )  break;
-              //{
-              //    _socket_manager->set_fd( Socket_manager::write_fd, _write_socket );
-              //    return false;
-              //}
-              //else
-              //if( err == ENOBUFS  &&  c > 1000 )      // Windows XP meldet bei c==34MB ENOBUFS. 
-              //{
-              //    c /= 2;
-              //}
-                else
-                    throw_sos_socket_error( err, "send" );
-            }
-            else 
-                _send_progress += len;
-      //}
-      //while( err == ENOBUFS );
-
-        something_done = true;
-    }
-
-
-    if( _send_progress < _send_data.length() )
-    {
-        _socket_manager->set_fd( Socket_manager::write_fd, _write_socket );
-    }
-    else
-    {
-        _send_data = "";
-        _send_progress = 0;
-        _socket_manager->clear_fd( Socket_manager::write_fd, _write_socket );
-    }
-
-    return something_done;
-}
-*/
-//----------------------------------------------------------Communication::Channel::async_continue_
-
-bool Communication::Channel::async_continue_( Continue_flags )
+bool Communication::Connection::async_continue_( Continue_flags )
 {
     //Z_LOG2( "joacim", __FUNCTION__ << state() << "\n" );
 
@@ -416,9 +358,9 @@ bool Communication::Channel::async_continue_( Continue_flags )
 
     try
     {
-        if( _channel_state == s_responding )  assert_no_recv_data();  //2005-10-25 wegen endloser read-Signalisierung zwischen Firefox und Linux-Scheduler (F5 im Protokollfenster)
+        if( _connection_state == s_responding )  assert_no_recv_data();  //2005-10-25 wegen endloser read-Signalisierung zwischen Firefox und Linux-Scheduler (F5 im Protokollfenster)
 
-        while( _channel_state == s_ready  ||  _channel_state == s_receiving )
+        while( _connection_state == s_ready  ||  _connection_state == s_receiving )
         //while( _responding  &&  !_dont_receive )
         {
             bool ok = do_recv();
@@ -433,16 +375,16 @@ bool Communication::Channel::async_continue_( Continue_flags )
                 _operation->begin();
                 //_operation->process();
                 //_responding = true;
-                _channel_state = s_processing;
+                _connection_state = s_processing;
             }
         }
 
-        if( _channel_state == s_processing )
+        if( _connection_state == s_processing )
         {
-            if( _operation->async_continue()  &&  _operation->async_finished() )  _channel_state = s_responding;
+            if( _operation->async_continue()  &&  _operation->async_finished() )  _connection_state = s_responding;
         }
 
-        if( _channel_state == s_responding )
+        if( _connection_state == s_responding )
         {
             if( state() == s_sending )  something_done |= send__continue();
 
@@ -466,7 +408,7 @@ bool Communication::Channel::async_continue_( Continue_flags )
                 _operation        = NULL;
                 //_responding       = false;
                 //_receive_at_start = true; 
-                _channel_state = s_ready;
+                _connection_state = s_ready;
             }
         }
 
@@ -541,23 +483,23 @@ void Communication::close( double wait_time )
     {
         //bool responding = false;
 
-        Channel_list::iterator c = _channel_list.begin();
-        while( c != _channel_list.end() )
+        Connection_list::iterator c = _connection_list.begin();
+        while( c != _connection_list.end() )
         {
-            ptr<Channel> channel = *c;
+            ptr<Connection> connection = *c;
             c++;
             
-            channel->set_linger( true, 1 );     // 1: Eine Sekunde Zeit, um asynchron (non-blocking) die Verbindung abzubauen. sleep(2) in spooler.cxx!
+            connection->set_linger( true, 1 );     // 1: Eine Sekunde Zeit, um asynchron (non-blocking) die Verbindung abzubauen. sleep(2) in spooler.cxx!
                                                 // 0: close() bricht Verbindung ab (jedenfalls unter Unix). Schickt RST. D
                                                 // Damit bleibt beim Neustart Windows-Schedulers der Browser nicht kleben (der kriegt den Verbindungsabbau nicht mit)
 
-            //channel->terminate();    // Kann Channel aus _channel_list entfernen.
-            channel->_channel_state = Channel::s_closing;
-            channel->async_continue();
-            //if( channel->_responding )
+            //connection->terminate();    // Kann Connection aus _connection_list entfernen.
+            connection->_connection_state = Connection::s_closing;
+            connection->async_continue();
+            //if( connection->_responding )
             //{
             //    responding = true;
-            //    Z_LOG( "Warten auf " << *channel << '\n' );
+            //    Z_LOG( "Warten auf " << *connection << '\n' );
             //}
         }
 
@@ -568,24 +510,24 @@ void Communication::close( double wait_time )
     }
 
 
-    //c = _channel_list.begin();
-    //while( c != _channel_list.end() )  remove_channel( *c );
+    //c = _connection_list.begin();
+    //while( c != _connection_list.end() )  remove_connection( *c );
 
-    _channel_list.clear();
+    _connection_list.clear();
 
     _terminate = true;
 }
 
-//--------------------------------------------------------------------Communication::remove_channel
+//--------------------------------------------------------------------Communication::remove_connection
 
-void Communication::remove_channel( Channel* channel )
+void Communication::remove_connection( Connection* connection )
 {
-    FOR_EACH( Channel_list, _channel_list, it )
+    FOR_EACH( Connection_list, _connection_list, it )
     {
-        if( *it == channel )  
+        if( *it == connection )  
         {
-            ptr<Channel> c = *it;
-            _channel_list.erase( it ); 
+            ptr<Connection> c = *it;
+            _connection_list.erase( it ); 
             c->do_close(); 
             break;
         }
@@ -767,18 +709,18 @@ void Communication::bind()
             ret = ioctl( STDIN_FILENO, FIONBIO, &on );   // In Windows nicht möglich
             if( ret == 0 )
             {
-                ptr<Channel> new_channel = Z_NEW( Channel( this ) );
+                ptr<Connection> new_connection = Z_NEW( Connection( this ) );
         
-                new_channel->_read_socket  = STDIN_FILENO;
-                new_channel->_write_socket = STDOUT_FILENO;
-                new_channel->_socket_send_buffer_size = 1024;
+                new_connection->_read_socket  = STDIN_FILENO;
+                new_connection->_write_socket = STDOUT_FILENO;
+                new_connection->_socket_send_buffer_size = 1024;
 
-                new_channel->add_to_socket_manager( _spooler->_connection_manager );
-                new_channel->socket_expect_signals( Socket_operation::sig_read );
+                new_connection->add_to_socket_manager( _spooler->_connection_manager );
+                new_connection->socket_expect_signals( Socket_operation::sig_read );
 
-                new_channel->set_event_name( "stdin" );
+                new_connection->set_event_name( "stdin" );
 
-                _channel_list.push_back( new_channel );
+                _connection_list.push_back( new_connection );
             }
         }
 #   endif
@@ -799,227 +741,6 @@ void Communication::init()
     _initialized = true;
 }
 
-//---------------------------------------------------------------------Communication::handle_socket
-/*
-bool Communication::handle_socket( Channel* channel )
-{
-    bool ok;
-
-    if( FD_ISSET( channel->_write_socket, &_write_fds ) ) 
-    {
-        ok = channel->do_send();
-        if( !ok )  return false;
-    }
-
-    if( FD_ISSET( channel->_read_socket, &_read_fds ) )
-    {
-        ok = channel->do_recv();
-        if( !ok )  return false;
-        
-        if( channel->_receive_is_complete ) 
-        {
-            Command_processor cp = _spooler;;
-            
-            if( channel->_read_socket != STDIN_FILENO )  cp.set_host( &channel->_host );
-
-            string cmd = channel->_text;
-            channel->recv_clear();
-            channel->_log.info( "Kommando " + cmd );
-            channel->_text = cp.execute( cmd, Time::now(), channel->_indent );
-          //if( channel->_indent )  channel->_text = channel->_text.replace( "\n", "\r\n" );
-            if( cp._error )  channel->_log.error( cp._error->what() );
-            ok = channel->do_send();
-            if( !ok )  return false;
-        }
-
-        if( channel->_eof && channel->_send_is_complete )  return false;
-    }
-
-    return true;
-}
-*/
-//---------------------------------------------------------------------------Communication::_fd_set
-/*
-void Communication::_fd_set( SOCKET socket, fd_set* fdset )
-{
-    if( socket != SOCKET_ERROR )
-    {
-        FD_SET( socket, fdset );
-        if( _nfds <= socket )  _nfds = socket + 1;
-    }
-}
-*/
-//-------------------------------------------------------------------------------Communication::run
-/*
-int Communication::run()
-{
-    bool ok;
-
-    if( get_java_vm(false)->running() )  get_java_vm(false)->attach_thread( thread_name() );
-
-    while(1) 
-    {
-        _nfds = 0;
-
-        Z_MUTEX( _semaphore );
-        {
-
-            FD_ZERO( &_read_fds );      
-            FD_ZERO( &_write_fds );
-
-            _fd_set( _udp_socket   , &_read_fds );
-            _fd_set( _listen_socket, &_read_fds );
-
-            FOR_EACH( Channel_list, _channel_list, it )
-            {
-                Channel* channel = *it;
-                if( channel->_send_is_complete    )  _fd_set( channel->_read_socket , &_read_fds );
-                if( channel->_receive_is_complete )  _fd_set( channel->_write_socket, &_write_fds  );
-            }
-
-            if( _nfds == 0 )  { _started = false; break; }
-        }
-
-
-        int n;
-
-#       ifdef Z_WINDOWS
-            n = ::select( _nfds, &_read_fds, &_write_fds, NULL, NULL );
-#        else
-            timeval tv;
-            tv.tv_sec = 1, tv.tv_usec = 0;
-
-            n = ::select( _nfds, &_read_fds, &_write_fds, NULL, &tv );
-            
-            if( !main_thread_exists() )  return 0;  //?  Thread bleibt sonst hängen, wenn Java sich bei Ctrl-C sofort verabschiedet. Java lässt SIGINT zu, dieser Thread aber nicht.
-#       endif
-
-        THREAD_LOCK( _semaphore )
-        {
-            if( _terminate )  break;
-            if( _rebound )  { _rebound = false; continue; }
-
-            if( n < 0 )  
-            {
-                if( socket_errno() == EINTR )  continue;
-                throw_sos_socket_error( socket_errno(), "select" );
-            }
-
-
-            if( n > 0 )
-            {
-                // UDP
-                if( _udp_socket != SOCKET_ERROR  &&  FD_ISSET( _udp_socket, &_read_fds ) )
-                {
-                    char buffer [4096];
-                    sockaddr_in addr;     
-                    socklen_t   addr_len = sizeof addr;
-
-                    addr.sin_addr.s_addr = 0;
-                    int len = recvfrom( _udp_socket, buffer, sizeof buffer, 0, (sockaddr*)&addr, &addr_len );
-                    if( len > 0 ) 
-                    {
-                        Host host = addr.sin_addr;
-                        if( _spooler->security_level( host ) < Security::seclev_signal )
-                        {
-                            _spooler->log()->error( "UDP-Nachricht von " + host.as_string() + " nicht zugelassen." );
-                        }
-                        else
-                        {
-                            Command_processor cp = _spooler;
-                            cp.set_host( &host );
-                            string cmd ( buffer, len );
-                            _spooler->log()->info( "UDP-Nachricht von " + host.as_string() + ": " + cmd );
-                            cp.execute( cmd, Time::now() );
-                        }
-                    }
-                }
-
-                // Neue TCP-Verbindung
-                if( _listen_socket != SOCKET_ERROR  &&  FD_ISSET( _listen_socket, &_read_fds ) )
-                {
-                    Sos_ptr<Channel> new_channel = SOS_NEW( Channel( _spooler ) );
-            
-                    ok = new_channel->do_accept( _listen_socket );
-                    if( ok )
-                    {
-                        _channel_list.push_back( new_channel );
-                    }
-                }
-
-
-                // TCP-Nachricht
-                FOR_EACH( Channel_list, _channel_list, it )
-                {
-                    Channel* channel = *it;
-
-                    ok = handle_socket( channel );
-                    if( !ok ) { channel->do_close(); it = _channel_list.erase( it ); }
-                }
-            }
-        }
-    }
-
-    if( current_thread_id() == thread_id() 
-     && current_thread_id() != _spooler->thread_id()  
-     && java_is_running()                            )  get_java_vm(false)->detach_thread();
-      
-    return 0;
-}
-*/
-//---------------------------------------------------------------------------------------is_started
-/*
-bool Communication::is_started()
-{
-    if( !_thread )  return;
-
-    DWORD exit_code;
-
-    BOOL ok = GetExitCodeThread( _thread, exit_code );
-    if( !ok )  throw_mswin_error( "GetExitCodeThread" );
-
-    return exit_code == STILL_ACTIVE;
-}
-*/
-//-----------------------------------------------------------------------Communication::thread_main
-/*
-int Communication::thread_main()
-{
-    int result;
-
-    Z_WINDOWS_ONLY( SetThreadPriority( GetCurrentThread(), THREAD_PRIORITY_HIGHEST ) );
-
-    Ole_initialize ole;
-
-    try 
-    {
-        result = run();
-    }
-    catch( const Xc& x )
-    {
-        _spooler->log()->error( string("Communication::thread: ") + x.what() );
-        result = 1;
-    }
-
-    _started = false;
-
-    return result;
-}
-*/
-//----------------------------------------------------------------------Communication::start_thread
-/*
-void Communication::start_thread()
-{
-    init();
-    bind();
-
-    set_thread_name( "Communication" );
-
-    thread_start();
-
-    _started = true;
-}
-*/
 //-------------------------------------------------------------------Communication::start_or_rebind
 
 void Communication::start_or_rebind()
@@ -1039,31 +760,31 @@ void Communication::start_or_rebind()
 
 xml::Element_ptr Communication::dom_element( const xml::Document_ptr& document, const Show_what& ) const
 {
-    xml::Element_ptr channels_element = document.createElement( "connections" );
+    xml::Element_ptr connections_element = document.createElement( "connections" );
 
-    Z_FOR_EACH_CONST( Channel_list, _channel_list, c )
+    Z_FOR_EACH_CONST( Connection_list, _connection_list, c )
     {
-        const Channel* channel = *c;
+        const Connection* connection = *c;
 
-        xml::Element_ptr channel_element = channels_element.append_new_element( "connection" );
+        xml::Element_ptr connection_element = connections_element.append_new_element( "connection" );
 
-        if( channel->_operation_channel )
+        if( connection->_operation_connection )
         {
-            channel_element.setAttribute( "type", channel->_operation_channel->channel_type() );
+            connection_element.setAttribute( "type", connection->_operation_connection->connection_type() );
         }
 
-        channel_element.setAttribute( "state", channel->channel_state_name() + "/" + channel->state_name() );
+        connection_element.setAttribute( "state", connection->connection_state_name() + "/" + connection->state_name() );
 
 
-        xml::Element_ptr peer_element = channel_element.append_new_element( "peer" );
-        peer_element.setAttribute( "host_ip", channel->peer().host().ip_string() );
-        peer_element.setAttribute( "port"   , channel->peer().port() );
+        xml::Element_ptr peer_element = connection_element.append_new_element( "peer" );
+        peer_element.setAttribute( "host_ip", connection->peer().host().ip_string() );
+        peer_element.setAttribute( "port"   , connection->peer().port() );
 
-        if( channel->peer().host().name() != "" )
-        peer_element.setAttribute( "host_name", channel->peer().host().name() );
+        if( connection->peer().host().name() != "" )
+        peer_element.setAttribute( "host_name", connection->peer().host().name() );
     }
 
-    return channels_element;
+    return connections_element;
 }
 
 //-------------------------------------------------------------------------------------------------

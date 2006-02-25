@@ -93,6 +93,10 @@ namespace sos {
         struct Web_service_response;
         struct Xslt_stylesheet;
     }
+
+    namespace http
+    {
+    };
 }
 
 #include "spooler_com.h"
@@ -136,11 +140,11 @@ extern const string             xml_schema_path;            // "scheduler.xsd"
 
 
 #ifdef Z_WINDOWS
-    const int                   max_processes               =    30;    // Summe aller Handles darf MAXIMUM_WAIT_OBJECTS-1=63 nicht überschreiten
-    const int                   max_communication_channels  =    28;    // Summe aller Handles darf MAXIMUM_WAIT_OBJECTS-1=63 nicht überschreiten
+    const int                   max_processes                 =    30;    // Summe aller Handles darf MAXIMUM_WAIT_OBJECTS-1=63 nicht überschreiten
+    const int                   max_communication_connections =    28;    // Summe aller Handles darf MAXIMUM_WAIT_OBJECTS-1=63 nicht überschreiten, inkl. udp und listen()
 #else
-    const int                   max_processes               =   200;    // kein Limit (HP-UX erlaubt 64 aktive fork())
-    const int                   max_communication_channels  =   800;    // Limit ist FD_SETSIZE
+    const int                   max_processes                 =   200;    // kein Limit (HP-UX erlaubt 64 aktive fork())
+    const int                   max_communication_connections =   800;    // Limit ist FD_SETSIZE, inkl. udp und listen()
 #endif
 
 //-------------------------------------------------------------------------------------------------

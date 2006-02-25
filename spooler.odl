@@ -717,7 +717,7 @@ library Spooler
         [propget]
         HRESULT                 Body                    ( [out,retval] BSTR* body );
 
-        HRESULT                 Add_file                ( [in] BSTR real_filename, [in,defaultvalue("")] BSTR mail_filename, [in,defaultvalue("")] BSTR content_type, [in,defaultvalue("")] BSTR encoding );
+        HRESULT                 Add_file                ( [in] BSTR real_filename, [in,defaultvalue("")] BSTR mail_filename, [in,defaultvalue("")] BSTR Content_type, [in,defaultvalue("")] BSTR encoding );
 
         [propput]
         HRESULT                 Smtp                    ( [in] BSTR hostname );
