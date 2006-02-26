@@ -261,6 +261,7 @@ bool Communication::Connection::do_accept( SOCKET listen_socket )
         //set_event_name( S() << "TCP:" << _host.as_string() << ":" << ntohs( _peer_addr.sin_port ) );
 
         _log.info( "TCP-Verbindung angenommen" );
+        _connection_state = s_ready;
 
     }
     catch( const exception& x ) { _log.error(x.what()); return false; }
@@ -373,8 +374,6 @@ bool Communication::Connection::async_continue_( Continue_flags )
             if( _operation  &&  _operation->request_is_complete() ) 
             {
                 _operation->begin();
-                //_operation->process();
-                //_responding = true;
                 _connection_state = s_processing;
             }
         }

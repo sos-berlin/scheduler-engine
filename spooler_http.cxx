@@ -55,6 +55,44 @@ Z_INIT( scheduler_http )
     }
 }
 
+//--------------------------------------------------------------------------param_from_content_type
+
+string param_from_content_type( const string& content_type, const string& param_name )
+{
+    const char* p = content_type.c_str();
+    
+    while(1)
+    {
+        p = strchr( p, ';' );
+        if( !p )  break;
+
+        p++;
+        while( isspace( (unsigned char)*p ) )  p++;
+
+        const char* n = param_name.c_str();
+
+        while( *p  &&  *n  &&  tolower( (unsigned char)*p ) == tolower( (unsigned char)*n ) )  p++, n++;
+        if( *n == 0 &&  *p == '=' )
+        {
+            p++;
+            string result;
+            while( *p  &&  *p != ';' )  result += *p++;
+            return rtrim( result );
+        }
+    }
+
+    return "";
+/*
+    size_t pos = content_type.find( "charset=" );
+    if( pos == string::npos )  return "";
+
+    string result = content_type.substr( pos + 8 );
+    pos = result.find( " " );
+
+    return pos == string::npos? result : result.substr( 0, pos );
+*/
+}
+
 //------------------------------------------------------------------------------Headers::operator[]
 
 string Headers::operator[]( const string& name ) const
@@ -305,7 +343,7 @@ void Operation::begin()
 
         if( Web_service* web_service = _spooler->_web_services.web_service_by_url_path_or_null( _request->_path ) )
         {
-            Z_LOG2( "scheduler.http", "    web_service=" << web_service->name() << "\n" );
+            Z_LOG2( "scheduler.http", "web_service=" << web_service->name() << "\n" );
 
             _web_service_operation = web_service->new_operation( this );
             _web_service_operation->begin();
@@ -333,8 +371,8 @@ void Operation::begin()
     _response->set_event( &_connection->_socket_event );
     _response->recommend_block_size( 32768 );
 
-    _parser  = NULL;
-    _request = NULL;
+    //_parser  = NULL;
+    //_request = NULL;
 }
 
 //-----------------------------------------------------------------------Operation::async_continue_
@@ -417,16 +455,7 @@ string Request::content_type() const
 
 string Request::character_encoding() const
 {
-    string content_type = _headers[ "content-type" ];
-    if( content_type == "" )  return "";
-
-    size_t pos = content_type.find( "charset=" );
-    if( pos == string::npos )  return "";
-
-    string result = content_type.substr( pos + 8 );
-    pos = result.find( " " );
-
-    return pos == string::npos? result : result.substr( 0, pos );
+    return param_from_content_type( _headers[ "content-type" ], "charset" );
 }
 
 //-----------------------------------------------------------------------------Http_exception::what
@@ -530,6 +559,14 @@ void Response::finish()
 
     _chunk_size = _headers_stream.length();
     _finished = true;
+}
+
+//-----------------------------------------------------------------------------------Response::send
+
+void Response::send()
+{
+    finish();
+    //Communication::Connection::async_continue_() wird sowieso gerufen.   _operation->_operation_connection->_connection->async_signal();
 }
 
 //------------------------------------------------------------------------------------Response::eof

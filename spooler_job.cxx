@@ -1269,7 +1269,7 @@ void Job::calculate_next_time( Time now )
                 }
             }
 
-            if( ( _state == s_pending || _state == s_running )  &&  _order_queue )
+            if( ( _state == s_pending || ( _state == s_running &&  _running_tasks.size() < _max_tasks ) ) &&  _order_queue )
             {
                 Time next_order_time = _order_queue->next_time();
                 if( next_order_time < _period.begin() )  next_order_time = _period.begin();

@@ -19,6 +19,10 @@ struct Operation;
 struct Request;
 struct Response;
 
+//-------------------------------------------------------------------------------------------------
+
+string                          param_from_content_type     ( const string& content_type, const string& param_name );
+
 //-------------------------------------------------------------------------------------Chunk_reader
 /*
     Verwendung:
@@ -59,7 +63,8 @@ struct Chunk_reader : Object
 
 struct String_chunk_reader : Chunk_reader
 {
-                                String_chunk_reader         ( const string& text, const string& content_type = "text/plain" ) : Chunk_reader( content_type, "ISO-8859-1" ), _zero_(this+1), _text(text) {}
+                                String_chunk_reader         ( const string& text, const string& content_type = "text/plain" ) 
+                                                                                                    : Chunk_reader( content_type, "ISO-8859-1" ), _zero_(this+1), _text(text) {}
 
   protected:
     bool                        next_chunk_is_ready         ()                                      { return true; }
@@ -73,6 +78,41 @@ struct String_chunk_reader : Chunk_reader
     uint                       _offset;                     // Bereits gelesene Bytes
 };
 
+//-------------------------------------------------------------------------------Byte_chunk_reader
+
+struct Byte_chunk_reader : String_chunk_reader
+{
+                                Byte_chunk_reader           ( const Byte* bytes, size_t length, const string& content_type ) 
+                                                                                                    : String_chunk_reader( string( (const char*)bytes, length ), content_type ) {}
+};
+
+//-------------------------------------------------------------------------------Byte_chunk_reader
+/*
+struct Byte_chunk_reader : String_chunk_reader
+{
+                                Byte_chunk_reader           ( const Byte* bytes, size_t length, const Charset& charset ) 
+                                                                                                    : String_chunk_reader( string( (const char*)bytes, length ), conent_type ) {}
+};
+*/
+//-----------------------------------------------------------------------------String_chunk_reader
+/*
+struct Olechar_chunk_reader : Chunk_reader
+{
+                                Olechar_chunk_reader        ( const OLECHAR* text, size_t length, const string& content_type = "text/plain; charset=UTF-8" ) 
+                                                                                                    : Chunk_reader( content_type ), _zero_(this+1), _text(text) {}
+
+  protected:
+    bool                        next_chunk_is_ready         ()                                      { return true; }
+    int                         get_next_chunk_size         ();
+    string                      read_from_chunk             ( int size );
+
+
+    Fill_zero                  _zero_;
+    Bstr                       _text;
+    bool                       _get_next_chunk_size_called;
+    uint                       _offset;                     // Bereits gelesene Bytes
+};
+*/
 //--------------------------------------------------------------------------------Log_chunk_reader
 
 struct Log_chunk_reader : Chunk_reader
@@ -276,7 +316,6 @@ struct Response : Object
     void                        recommend_block_size        ( int size )                            { if( _chunk_reader )  _chunk_reader->recommend_block_size( size ); }
     int                         recommended_block_size      () const                                { return _chunk_reader? _chunk_reader->_recommended_block_size : recommended_chunk_size; }
 
-  //bool                        is_http_1_1                 ()                                      { return _http_1_1; }
     bool                        close_connection_at_eof     ()                                      { return _close_connection_at_eof; }
 
     void                    set_event                       ( Event_base* event )                   { if( _chunk_reader )  _chunk_reader->set_event( event ); }
@@ -287,12 +326,14 @@ struct Response : Object
     void                    set_header                      ( const string& name, const string& value ) { _headers.set( name, value ); }
     string                      header                      ( const string& name )                  { return _headers[ name ]; }
     void                    set_status                      ( Status_code, const string& text = "" );
-    void                    set_chunk_reader                ( Chunk_reader* c )                     { _chunk_reader = c; }
+    void                    set_chunk_reader                ( Chunk_reader* c )                     { _chunk_reader = c; set_ready(); }
     void                        finish                      ();
+    void                        send                        ();
+    bool                     is_ready                       () const                                { return _ready; }
+    void                    set_ready                       ()                                      { _ready = true; }
 
     bool                        eof                         ();
     string                      read                        ( int recommended_size );
-  //string                      header_text                 () const                                { return _headers_stream; }
 
 
   protected:
@@ -303,20 +344,19 @@ struct Response : Object
 
     Fill_zero                  _zero_;
     Operation*                 _operation;
+    Headers                    _headers;
     bool                       _chunked;
     bool                       _close_connection_at_eof;
-    ptr<Chunk_reader>          _chunk_reader;
-  //string                     _content_type;
     Status_code                _status_code;
-
-    Headers                    _headers;
+    ptr<Chunk_reader>          _chunk_reader;
+    bool                       _ready;                      // Antwort kann versendet werden
+    bool                       _finished;                   // read() ist vorbereitet
     String_stream              _headers_stream;
     int                        _chunk_index;                // 0: Header
     uint                       _chunk_size;
     uint                       _chunk_offset;               // Bereits gelesene Bytes
     bool                       _chunk_eof;
     bool                       _eof;
-    bool                       _finished;
 };
 
 //-----------------------------------------------------------------------------------Operation
@@ -331,7 +371,7 @@ struct Operation : Communication::Operation
 
     void                        begin                       ();
     virtual bool                async_continue_             ( Continue_flags );
-    virtual bool                async_finished_             ()                                      { return _response != NULL; }
+    virtual bool                async_finished_             ()                                      { return _response->is_ready(); }
     virtual string              async_state_text_           ()                                      { return "none"; }
 
     bool                        response_is_complete        ();

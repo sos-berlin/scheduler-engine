@@ -7,14 +7,14 @@
 namespace sos {
 namespace spooler {
 
-
 using namespace zschimmer::com;
-using namespace sos::spooler::http;
 
+//--------------------------------------------------------------------------------------------const
 
 const string Web_service::forwarding_job_chain_name           = "scheduler_service_forwarding";
 const string Web_service::forwarding_job_chain_forward_state  = "forward";
 const string Web_service::forwarding_job_chain_finished_state = "finished";
+
 const string forwarder_job_name                  = "scheduler_service_forwarder";
 const string forwarder_job_title                 = "Web-service forwarder";
 const string forwarder_job_java_class_name       = "sos.spooler.jobs.Web_service_forwarder";
@@ -96,6 +96,12 @@ void Web_services::init()
 
     command_processor.execute_2( job_xml      , Time::now() );
     command_processor.execute_2( job_chain_xml, Time::now() );
+
+
+    Z_FOR_EACH( Url_web_service_map, _url_web_service_map, ws )
+    {
+        ws->second->check();
+    }
 }
 
 //----------------------------------------------------Web_services::web_service_by_url_path_or_null
@@ -171,6 +177,13 @@ void Web_service::load()
         _forward_xslt_stylesheet.load_file( _forward_xslt_stylesheet_path );
 }
 
+//-------------------------------------------------------------------------------Web_service::check
+
+void Web_service::check()
+{
+    if( _job_chain_name != "" )  _spooler->job_chain( _job_chain_name );  // Jobkette ist bekannt?
+}
+
 //-----------------------------------------------------------------------------Web_service::set_dom
     
 void Web_service::set_dom( const xml::Element_ptr& element, const Time& )
@@ -182,6 +195,7 @@ void Web_service::set_dom( const xml::Element_ptr& element, const Time& )
     _request_xslt_stylesheet_path  = subst_env( element.     getAttribute( "request_xslt_stylesheet" , _request_xslt_stylesheet_path  ) );
     _response_xslt_stylesheet_path = subst_env( element.     getAttribute( "response_xslt_stylesheet", _response_xslt_stylesheet_path ) );
     _forward_xslt_stylesheet_path  = subst_env( element.     getAttribute( "forward_xslt_stylesheet" , _forward_xslt_stylesheet_path  ) );
+    _job_chain_name                =            element.     getAttribute( "job_chain"               , _job_chain_name                );
     _debug                         =            element.bool_getAttribute( "debug"                   , _debug                         );
 
 
@@ -207,6 +221,7 @@ xml::Element_ptr Web_service::dom_element( const xml::Document_ptr& document, co
     web_service_element.setAttribute_optional( "request_xslt_stylesheet" , _request_xslt_stylesheet_path  );
     web_service_element.setAttribute_optional( "response_xslt_stylesheet", _response_xslt_stylesheet_path );
     web_service_element.setAttribute_optional( "forward_xslt_stylesheet" , _forward_xslt_stylesheet_path  );
+    web_service_element.setAttribute_optional( "job_chain"               , _job_chain_name                );
 
     if( _debug )
     web_service_element.setAttribute         ( "debug"                   , _debug );
@@ -216,7 +231,7 @@ xml::Element_ptr Web_service::dom_element( const xml::Document_ptr& document, co
 
 //-----------------------------------------------------------------------Web_service::new_operation
 
-ptr<Web_service_operation> Web_service::new_operation( Operation* http_operation )
+ptr<Web_service_operation> Web_service::new_operation( http::Operation* http_operation )
 {
     return Z_NEW( Web_service_operation( this, http_operation, _next_operation_id++ ) );
 }
@@ -326,7 +341,7 @@ const Com_method Web_service_operation::_methods[] =
 
 //-----------------------------------------------------Web_service_operation::Web_service_operation
 
-Web_service_operation::Web_service_operation( Web_service* ws, Operation* ht, int operation_id ) 
+Web_service_operation::Web_service_operation( Web_service* ws, http::Operation* ht, int operation_id ) 
 : 
     _zero_(this+1), 
     Idispatch_implementation( &class_descriptor ),
@@ -404,8 +419,22 @@ bool Web_service_operation::async_continue()
 
 bool Web_service_operation::async_finished()
 {
-    return _response->_ready;
+    return http_response()->is_ready();
     //    response->finish();
+}
+
+//--------------------------------------------------------------------Web_service_operation::cancel
+
+void Web_service_operation::cancel()
+{
+    if( http_response()->is_ready() )
+    {
+        _log->warn( "cancel() ignoriert, weil die Antwort schon übertragen wird" );
+        return;
+    }
+
+    http_response()->set_status( http::status_500_internal_server_error );
+    http_response()->set_ready();
 }
 
 //---------------------------------------------------------Web_service_operation::process_http__end
@@ -422,10 +451,9 @@ ptr<Http_response> Web_service_operation::process_http__end()
     return _http_response;
 }
 */
-//-----------------------------------------------------------Web_service_operation::process_request
-#if 0   // Verarbeitung im Hauptprozess mit zwei XSLT-Stylesheets für request und response
-
-string Web_service_operation::process_request__old_style( const string& request_data, const string& character_encoding )
+//----------------------------------------------------------Web_service_stylesheet_operation::begin
+/*
+string Web_service_stylesheet_operation::begin()
 {
     xml::Document_ptr request_document;
     request_document.create();
@@ -553,8 +581,7 @@ string Web_service_operation::process_request__old_style( const string& request_
 
     return result;
 }
-
-#endif
+*/
 //---------------------------------------------------------------Web_service_operation::get_Request
 
 STDMETHODIMP Web_service_operation::get_Request( spooler_com::Iweb_service_request** result )
@@ -603,7 +630,7 @@ STDMETHODIMP Web_service_request::get_String_content( BSTR* result )
     
     try
     {
-        hr = Charset::for_name( http_request()->character_encoding() ).Encoded_to_bstr( http_request()->body(), result );
+        hr = Charset::for_name( http_request()->character_encoding() )->Encoded_to_bstr( http_request()->body(), result );
     }
     catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
 
@@ -697,7 +724,7 @@ STDMETHODIMP Web_service_response::get_Header( BSTR name, BSTR* result )
 }
 
 //-----------------------------------------------------Web_service_response::put_Character_encoding
-
+/*
 STDMETHODIMP Web_service_response::put_Character_encoding( BSTR encoding )
 { 
     HRESULT hr = S_OK;
@@ -783,6 +810,53 @@ STDMETHODIMP Web_service_response::put_Binary_content( SAFEARRAY* safearray )
     try
     {
         return E_NOTIMPL;
+    }
+    catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+*/
+//-----------------------------------------------------------------------Web_service_response::Send
+
+STDMETHODIMP Web_service_response::Send( VARIANT* content, BSTR content_type_bstr )
+{
+    HRESULT hr = S_OK;
+    
+    if( !content )  return E_POINTER;
+
+    try
+    {
+        string                  content_type = string_from_bstr( content_type_bstr );
+        ptr<http::Chunk_reader> chunk_reader;
+
+
+        if( content->vt == VT_BSTR )
+        {
+            const Charset*  charset      = Charset::for_name( http::param_from_content_type( content_type, "charset" ) );
+            const BSTR      content_bstr = V_BSTR( content );
+
+            chunk_reader = Z_NEW( http::String_chunk_reader( charset->encoded_from_bstr( content_bstr ), content_type ) );
+        }
+        else
+        if( content->vt == VT_ARRAY )
+        {
+            SAFEARRAY* safearray = V_ARRAY( content );
+            VARTYPE    vartype   = 0;
+
+            hr = SafeArrayGetVartype( safearray, &vartype );
+            if( FAILED(hr) )  return hr;
+            if( vartype != VT_UI1 )  return DISP_E_TYPEMISMATCH;
+
+            Locked_safearray<Byte> a ( safearray );
+
+            chunk_reader = Z_NEW( http::Byte_chunk_reader( &a[0], a.count(), content_type ) );
+        }
+        else
+            return DISP_E_TYPEMISMATCH;
+
+
+        http_response()->set_chunk_reader( chunk_reader );
+        http_response()->send();
     }
     catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
 

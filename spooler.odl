@@ -1399,11 +1399,11 @@ library Spooler
         [propget]
         HRESULT                 Header                  ( [in] BSTR Name, [out,retval] BSTR* Result );
 
-        [propget]
-        HRESULT                 Character_encoding      ( [out,retval] BSTR* );
+      //[propget]
+      //HRESULT                 Character_encoding      ( [out,retval] BSTR* );
 
-        [propget]
-        HRESULT                 Content_type            ( [out,retval] BSTR* );
+      //[propget]
+      //HRESULT                 Content_type            ( [out,retval] BSTR* );
 
         [propget]
         HRESULT                 String_content          ( [out,retval] BSTR* );
@@ -1433,6 +1433,7 @@ library Spooler
         [propget]
         HRESULT                 Header                  ( [in] BSTR Name, [out,retval] BSTR* Result );
 
+        /*
         [propput]
         HRESULT                 Character_encoding      ( [in] BSTR );
 
@@ -1450,6 +1451,8 @@ library Spooler
 
         [propput]
         HRESULT                 Binary_content          ( [in] SAFEARRAY(unsigned char) );
+        */
+        HRESULT                 Send                    ( [in] VARIANT*, [in] BSTR content_type );       // BSTR oder SAFEARRAY(unsigned char)
     };
 };
 

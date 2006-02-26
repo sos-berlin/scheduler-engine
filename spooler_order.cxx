@@ -1110,12 +1110,28 @@ void Order::close()
         }
     }
 */
+    if( _web_service_operation )
+    {
+        try
+        {
+            if( !_web_service_operation->http_response()->is_ready() )
+            {
+                _log->error( "web_service_operation.send() fehlt, Operation wird abgebrochen" );
+                _web_service_operation->cancel();
+                _web_service_operation = NULL;
+            }
+        }
+        catch( exception& x ) { _log->error( x.what() ); }
+    }
+
 
     _task = NULL;
     _removed_from_job_chain = NULL;
     if( _replaced_by )  _replaced_by->_replacement_for = NULL, _replaced_by = NULL;
 
     remove_from_job_chain();
+
+    _log->close();
 }
 
 //-----------------------------------------------------------------------------------Order::set_dom
@@ -1858,6 +1874,11 @@ void Order::processing_error()
 
         _task = NULL;
 
+        if( _web_service_operation )      
+        {
+            _job_chain_node = NULL;         // Nicht auf Neustart des Jobs warten, sondern Auftrag beenden, damit die Web-Service-Operation abgeschlossen werden kann
+        }
+
         postprocessing2( last_job );
     }
 }
@@ -1877,16 +1898,24 @@ void Order::postprocessing2( Job* last_job )
 
 
 
-    if( finished()  &&  _web_service )
+    if( finished() )
     {
-        _web_service->forward_order( *this, last_job );
+        try
+        {
+            if( _web_service  &&  !_web_service_operation )
+            {
+                _web_service->forward_order( *this, last_job );
+            }
+        }
+        catch( exception x )  { _log->error( x.what() ); }
     }
+
 
     if( finished() )
     {
         _end_time = Time::now();
         //if( !_dont_close_log )
-        _log->close();
+        //_log->close();
     }
 
     if( _job_chain  &&  ( _is_in_database || finished() ) )  _spooler->_db->update_order( this );

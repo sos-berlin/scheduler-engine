@@ -670,12 +670,14 @@ struct Iweb_service_response: IDispatch
 {
     virtual HRESULT         get_Header                      ( BSTR Name, BSTR* Result )             = 0;
     virtual HRESULT         put_Header                      ( BSTR Name, BSTR )                     = 0;
-    virtual HRESULT         get_Character_encoding          ( BSTR* )                               = 0;
-    virtual HRESULT         put_Character_encoding          ( BSTR )                                = 0;
-    virtual HRESULT         get_Content_type                ( BSTR* )                               = 0;
-    virtual HRESULT         put_Content_type                ( BSTR )                                = 0;
-    virtual HRESULT         put_String_content              ( BSTR* )                               = 0;
-    virtual HRESULT         put_Binary_content              ( SAFEARRAY** )                         = 0;
+  //virtual HRESULT         get_Character_encoding          ( BSTR* )                               = 0;
+  //virtual HRESULT         put_Character_encoding          ( BSTR )                                = 0;
+  //virtual HRESULT         get_Content_type                ( BSTR* )                               = 0;
+  //virtual HRESULT         put_Content_type                ( BSTR )                                = 0;
+  //virtual HRESULT         put_String_content              ( BSTR* )                               = 0;
+  //virtual HRESULT         put_Binary_content              ( SAFEARRAY** )                         = 0;
+    virtual HRESULT             Send                        ( [in] VARIANT*, [in] BSTR content_type );       // BSTR oder SAFEARRAY(unsigned char)
+
 };
 
 //-------------------------------------------------------------------------------------------------

@@ -269,8 +269,8 @@ void Wait_handles::remove( System_event* event )
                 return;
             }
 
-            _events.erase( it );
             Z_WINDOWS_ONLY( _handles.erase( _handles.begin() + ( it - _events.begin() )  ) );
+            _events.erase( it );
         }
 
 //#   endif
