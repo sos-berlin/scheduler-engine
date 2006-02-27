@@ -37,12 +37,14 @@ struct Communication
         };
 
 
-                                Connection                     ( Communication* );
-                               ~Connection                     ();
+                                Connection                  ( Communication* );
+                               ~Connection                  ();
 
-        Connection_state           connection_state               () const                                { return _connection_state; }
-        string                  connection_state_name          () const                                { return connection_state_name( _connection_state ); }
-        static string           connection_state_name          ( Connection_state );
+        xml::Element_ptr        dom_element                 ( const xml::Document_ptr&, const Show_what& ) const;
+
+        Connection_state        connection_state            () const                                { return _connection_state; }
+        string                  connection_state_name       () const                                { return connection_state_name( _connection_state ); }
+        static string           connection_state_name       ( Connection_state );
 
         void                    remove_me                   ( const exception* = NULL );
         void                    terminate                   ( double wait_time );
@@ -60,15 +62,11 @@ struct Communication
 
 
         Fill_zero              _zero_;
-        Connection_state          _connection_state;
+        Connection_state       _connection_state;
         Spooler*               _spooler;
         Communication*         _communication;
 
-        //bool                   _responding;
-        //bool                   _receive_at_start;
-
         int                    _socket_send_buffer_size;
-        //bool                   _dont_receive;               // Bei terminate() ist Empfang gesperrt
         Prefix_log             _log;
 
         ptr<Operation_connection> _operation_connection;
@@ -104,16 +102,17 @@ struct Communication
 
     struct Operation : Async_operation
     {
-                                Operation                   ( Operation_connection* pc )               : _zero_(this+1), _connection(pc->_connection), _spooler(pc->_spooler), _operation_connection(pc) {}
+                                Operation                   ( Operation_connection* pc )            : _zero_(this+1), _connection(pc->_connection), _spooler(pc->_spooler), _operation_connection(pc) {}
 
 
         void                    set_host                    ( Host* host )                          { _host = host; }
 
+        virtual void            close                       ()                                      { _connection = NULL, _operation_connection = NULL, _host = NULL; }
         virtual void            put_request_part            ( const char*, int length )             = 0;
         virtual bool            request_is_complete         ()                                      = 0;
 
       //virtual void            process                     ()                                      = 0;
-        virtual void            begin              ()                                      = 0;
+        virtual void            begin                       ()                                      = 0;
 
         virtual bool            response_is_complete        ()                                      = 0;
         virtual string          get_response_part           ()                                      = 0;
@@ -123,11 +122,13 @@ struct Communication
         virtual bool            async_finished_             ()                                      { return true; }
         virtual string          async_state_text_           ()                                      { return "none"; }
 
+        virtual xml::Element_ptr dom_element                ( const xml::Document_ptr&, const Show_what& ) const = 0;
+
 
         Fill_zero              _zero_;
         Spooler*               _spooler;
-        Connection*               _connection;
-        Operation_connection*     _operation_connection;
+        Connection*            _connection;
+        Operation_connection*  _operation_connection;
         Host*                  _host;
     };
 
@@ -135,12 +136,12 @@ struct Communication
 
     struct Operation_connection : Object
     {
-                                Operation_connection           ( Connection* ch )                         : _spooler(ch->_spooler), _connection(ch) {}
+                                Operation_connection        ( Connection* ch )                      : _spooler(ch->_spooler), _connection(ch) {}
 
 
         virtual ptr<Operation>  new_operation               ()                                      = 0;
         virtual void            connection_lost_event       ( const exception* )                    {}
-        virtual string          connection_type                () const                                = 0;
+        virtual string          connection_type             () const                                = 0;
 
 
 
@@ -192,7 +193,7 @@ struct Communication
   //int                         thread_main                 ();
     bool                        started                     ()                                      { return _started; }
   //bool                        main_thread_exists          ();
-    void                        remove_connection              ( Connection* );
+    void                        remove_connection           ( Connection* );
 
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr& document, const Show_what& ) const;
 
@@ -209,7 +210,7 @@ struct Communication
   private:
     Listen_socket              _listen_socket;
     Udp_socket                 _udp_socket;
-    Connection_list               _connection_list;
+    Connection_list            _connection_list;
   //int                        _nfds;
   //fd_set                     _read_fds;
   //fd_set                     _write_fds;
@@ -227,6 +228,9 @@ struct Communication
 struct Xml_operation : Communication::Operation
 {
                                 Xml_operation               ( Xml_operation_connection* );
+
+    void                        close                       ()                                      { _operation_connection = NULL; Communication::Operation::close(); }
+    xml::Element_ptr            dom_element                 ( const xml::Document_ptr& doc, const Show_what& ) const { return doc.createElement( "xml_operation" ); }
 
     void                        put_request_part            ( const char*, int length );
     bool                        request_is_complete         ()                                      { return _request_is_complete; }

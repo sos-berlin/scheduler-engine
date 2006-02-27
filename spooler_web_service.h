@@ -95,6 +95,8 @@ struct Web_services
 
                                 Web_services                ( Spooler* sp )                         : _spooler(sp), _zero_(this+1) {}
 
+    xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& ) const;
+
     void                        add_web_services            ( const xml::Element_ptr& web_services_element );
     void                        add_web_service             ( Web_service* );
     void                        init                        ();
@@ -131,6 +133,7 @@ struct Web_service_operation : idispatch_implementation< Web_service_operation, 
     // Scheduler_object
     Prefix_log*                 log                         ()                                      { return _log; }
     string                      obj_name                    () const;
+    xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& ) const;
 
     // interface Ihas_java_class_name
     STDMETHODIMP            get_Java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
@@ -142,6 +145,8 @@ struct Web_service_operation : idispatch_implementation< Web_service_operation, 
     STDMETHODIMP            get_Request                     ( spooler_com::Iweb_service_request** );
     STDMETHODIMP            get_Response                    ( spooler_com::Iweb_service_response** );
 
+
+    virtual void                close                       ();
     virtual void                begin                       ();
     virtual bool                async_continue              ();
     virtual bool                async_finished              ();

@@ -84,13 +84,14 @@ void Web_services::add_web_service( Web_service* web_service )
 
 void Web_services::init()
 {
+    /*
     ptr<Web_service> default_web_service = Z_NEW( Web_service( _spooler ) );
 
     default_web_service->set_name( "scheduler_default" );
     default_web_service->set_url_path( "/" );
 
     add_web_service( default_web_service );
-
+    */
 
     Command_processor command_processor ( _spooler );
 
@@ -128,6 +129,20 @@ Web_service* Web_services::web_service_by_name_or_null( const string& name )
 {
     Name_web_service_map::iterator ws = _name_web_service_map.find( name );
     return ws != _name_web_service_map.end()? ws->second : NULL;
+}
+
+//------------------------------------------------------------------------Web_services::dom_element
+
+xml::Element_ptr Web_services::dom_element( const xml::Document_ptr& document, const Show_what& what ) const
+{
+    xml::Element_ptr result = document.createElement( "web_services" );
+
+    Z_FOR_EACH_CONST( Name_web_service_map, _name_web_service_map, ws )
+    {
+        result.appendChild( ws->second->dom_element( document, what ) );
+    }
+
+    return result;
 }
 
 //-------------------------------------------------------------------------Web_service::Web_service
@@ -212,7 +227,7 @@ void Web_service::set_dom( const xml::Element_ptr& element, const Time& )
 
 //-------------------------------------------------------------------------Web_service::dom_element
 
-xml::Element_ptr Web_service::dom_element( const xml::Document_ptr& document, const Show_what& )
+xml::Element_ptr Web_service::dom_element( const xml::Document_ptr& document, const Show_what& what )
 {
     xml::Element_ptr web_service_element = document.createElement( "web_service" );
 
@@ -225,6 +240,13 @@ xml::Element_ptr Web_service::dom_element( const xml::Document_ptr& document, co
 
     if( _debug )
     web_service_element.setAttribute         ( "debug"                   , _debug );
+
+    /*
+    if( what & show_web_service_operations )
+    {
+
+    }
+    */
     
     return web_service_element;
 }
@@ -374,11 +396,7 @@ Web_service_operation::Web_service_operation( Web_service* ws, http::Operation* 
 
 Web_service_operation::~Web_service_operation()
 {
-    if( _order )
-    {
-        _order->set_web_service_operation( NULL );
-        _order = NULL;
-    }
+    close();
 }
 
 //------------------------------------------------------------------Web_service_operation::obj_name
@@ -451,6 +469,36 @@ ptr<Http_response> Web_service_operation::process_http__end()
     return _http_response;
 }
 */
+//---------------------------------------------------------------Web_service_operation::dom_element
+
+xml::Element_ptr Web_service_operation::dom_element( const xml::Document_ptr& document, const Show_what& what ) const
+{
+    xml::Element_ptr result = document.createElement( "web_service_operation" );
+
+    result.setAttribute( "web_service", _web_service->name() );
+
+    if( _order )
+    result.setAttribute( "order", _order->obj_name() );
+
+    return result;
+}
+
+//---------------------------------------------------------------Web_service_operation::get_Request
+
+STDMETHODIMP Web_service_operation::get_Request( spooler_com::Iweb_service_request** result )
+{ 
+    *result = _request.copy(); 
+    return S_OK; 
+}
+
+//--------------------------------------------------------------Web_service_operation::get_Response
+
+STDMETHODIMP Web_service_operation::get_Response( spooler_com::Iweb_service_response** result )  
+{ 
+    *result = _response.copy();
+    return S_OK; 
+}
+
 //----------------------------------------------------------Web_service_stylesheet_operation::begin
 /*
 string Web_service_stylesheet_operation::begin()
@@ -582,22 +630,6 @@ string Web_service_stylesheet_operation::begin()
     return result;
 }
 */
-//---------------------------------------------------------------Web_service_operation::get_Request
-
-STDMETHODIMP Web_service_operation::get_Request( spooler_com::Iweb_service_request** result )
-{ 
-    *result = _request.copy(); 
-    return S_OK; 
-}
-
-//--------------------------------------------------------------Web_service_operation::get_Response
-
-STDMETHODIMP Web_service_operation::get_Response( spooler_com::Iweb_service_response** result )  
-{ 
-    *result = _response.copy();
-    return S_OK; 
-}
-
 //--------------------------------------------------------------------Web_service_request::_methods
 
 const Com_method Web_service_request::_methods[] =
@@ -620,6 +652,17 @@ Web_service_request::Web_service_request( Web_service_operation* web_service_ope
     Scheduler_object( web_service_operation->_spooler, (Iweb_service_request*)this, Scheduler_object::type_web_service_request ),
     _web_service_operation(web_service_operation)
 {
+}
+
+//---------------------------------------------------------------------Web_service_operation::close
+    
+void Web_service_operation::close()
+{ 
+    if( _order )  _order->set_web_service_operation( NULL ), _order = NULL;
+    _http_operation = NULL;
+    _response       = NULL;
+    _request        = NULL;
+    _web_service    = NULL;
 }
 
 //----------------------------------------------------------Web_service_request::get_String_content

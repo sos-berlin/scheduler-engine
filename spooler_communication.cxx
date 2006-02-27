@@ -404,6 +404,7 @@ bool Communication::Connection::async_continue_( Continue_flags )
             {
                 if( _operation->should_close_connection() )  _eof = true;   // Wir tun so, als ob der Client EOF geliefert hat. Das führt zum Schließen der Verbindung.
 
+                _operation->close();
                 _operation        = NULL;
                 //_responding       = false;
                 //_receive_at_start = true; 
@@ -438,6 +439,37 @@ bool Communication::Connection::async_continue_( Continue_flags )
 
     async_clear_signaled();
     return something_done;
+}
+
+//-----------------------------------------------------------Communication::Connection::dom_element
+
+xml::Element_ptr Communication::Connection::dom_element( const xml::Document_ptr& document, const Show_what& what ) const
+{
+    xml::Element_ptr result = document.createElement( "connection" );
+
+    result.setAttribute( "state", connection_state_name() + "/" + state_name() );
+
+
+    xml::Element_ptr peer_element = result.append_new_element( "peer" );
+    peer_element.setAttribute( "host_ip", peer().host().ip_string() );
+    peer_element.setAttribute( "port"   , peer().port() );
+
+    if( peer().host().name() != "" )
+    peer_element.setAttribute( "host_name", peer().host().name() );
+
+    if( _operation_connection )
+    {
+        result.setAttribute( "operation_type", _operation_connection->connection_type() );
+    }
+
+    if( _operation )
+    {
+        //result.setAttribute( "operation", _operation->obj_name() );
+        xml::Element_ptr operation_element = result.append_new_element( "operation" );
+        operation_element.appendChild( _operation->dom_element( document, what ) );
+    }
+
+    return result;
 }
 
 //--------------------------------------------------------------------Communication::Communication
@@ -757,7 +789,7 @@ void Communication::start_or_rebind()
 
 //-----------------------------------------------------------------------Communication::dom_element
 
-xml::Element_ptr Communication::dom_element( const xml::Document_ptr& document, const Show_what& ) const
+xml::Element_ptr Communication::dom_element( const xml::Document_ptr& document, const Show_what& what ) const
 {
     xml::Element_ptr connections_element = document.createElement( "connections" );
 
@@ -765,22 +797,7 @@ xml::Element_ptr Communication::dom_element( const xml::Document_ptr& document, 
     {
         const Connection* connection = *c;
 
-        xml::Element_ptr connection_element = connections_element.append_new_element( "connection" );
-
-        if( connection->_operation_connection )
-        {
-            connection_element.setAttribute( "type", connection->_operation_connection->connection_type() );
-        }
-
-        connection_element.setAttribute( "state", connection->connection_state_name() + "/" + connection->state_name() );
-
-
-        xml::Element_ptr peer_element = connection_element.append_new_element( "peer" );
-        peer_element.setAttribute( "host_ip", connection->peer().host().ip_string() );
-        peer_element.setAttribute( "port"   , connection->peer().port() );
-
-        if( connection->peer().host().name() != "" )
-        peer_element.setAttribute( "host_name", connection->peer().host().name() );
+        connections_element.appendChild( (*c)->dom_element( document, what ) );
     }
 
     return connections_element;

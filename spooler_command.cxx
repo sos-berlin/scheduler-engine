@@ -944,7 +944,7 @@ void Command_processor::execute_http( http::Operation* http_operation )
                 {
                     Job* job = _spooler->get_job( http_request->parameter( "job" ) );;
                     
-                    if( job->_description == "" )  throw new http::Http_exception( http::status_404_bad_request, "Der Job hat keine Beschreibung" );
+                    if( job->_description == "" )  throw http::Http_exception( http::status_404_bad_request, "Der Job hat keine Beschreibung" );
 
                     response_content_type = "text/html";
 
@@ -962,7 +962,7 @@ void Command_processor::execute_http( http::Operation* http_operation )
                     response_content_type = "text/xml";
                 }
                 else
-                    throw new http::Http_exception( http::status_404_bad_request, "Ungültiger URL-Pfad: " + path );
+                    throw http::Http_exception( http::status_404_bad_request, "Ungültiger URL-Pfad: " + path );
             }
             else
             {
@@ -1064,7 +1064,7 @@ void Command_processor::execute_http( http::Operation* http_operation )
             response_content_type = "text/xml";
         }
         else
-            throw new http::Http_exception( http::status_501_not_implemented );
+            throw http::Http_exception( http::status_501_not_implemented );
 
 
         if( response_body.empty() )
@@ -1077,7 +1077,7 @@ void Command_processor::execute_http( http::Operation* http_operation )
     {
         _spooler->log()->debug( "Fehler beim HTTP-Aufruf " + http_request->_http_cmd + " " + path + ": " + x.what() );
 
-        throw new http::Http_exception( http::status_404_bad_request, x.what() );
+        throw http::Http_exception( http::status_404_bad_request, x.what() );
     }
 
     http_response->set_chunk_reader( Z_NEW( http::String_chunk_reader( response_body, response_content_type ) ) );

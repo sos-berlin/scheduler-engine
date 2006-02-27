@@ -194,7 +194,7 @@ void Parser::parse_header()
     _request->_http_cmd = eat_word();
     _request->_path     = eat_path();
     _request->_protocol = eat_word();
-                               eat_line_end();
+    eat_line_end();
 
     while( next_char() > ' ' )
     {
@@ -326,7 +326,19 @@ Operation::Operation( Operation_connection* pc )
 {
     _request  = Z_NEW( Request() );
     _parser   = Z_NEW( Parser( _request ) );
-    _response = Z_NEW( Response( this ) );
+}
+
+//---------------------------------------------------------------------------------Operation::close
+    
+void Operation::close()
+{ 
+    if( _web_service_operation )  _web_service_operation->close(),  _web_service_operation = NULL;
+
+    _response = NULL;
+    _parser   = NULL;
+    _request  = NULL;
+
+    Communication::Operation::close(); 
 }
 
 //---------------------------------------------------------------------------------Operation::begin
@@ -334,7 +346,9 @@ Operation::Operation( Operation_connection* pc )
 void Operation::begin()
 {
     Z_LOG2( "scheduler.http", "HTTP: " << _parser->text() << "\n" );    // Wird auch mit "socket.data" protokolliert (default aus)
-    
+
+    _response = Z_NEW( Response( this ) );
+
     try
     {
         if( _request->_protocol != ""  
@@ -400,18 +414,32 @@ string Operation::get_response_part()
     return _response->read( _response->recommended_block_size() );
 }
 
-//--------------------------------------------------------------Operation::response_is_complete
+//----------------------------------------------------------.....----Operation::response_is_complete
 
 bool Operation::response_is_complete()
 { 
     return !_response || _response->eof(); 
 }
 
-//----------------------------------------------------------Operation::should_close_connection
+//---------------------------------------------------------------Operation::should_close_connection
 
 bool Operation::should_close_connection()
 { 
     return _response  &&  _response->close_connection_at_eof(); 
+}
+
+//---------------------------------------------------------------------------Operation::dom_element
+
+xml::Element_ptr Operation::dom_element( const xml::Document_ptr& document, const Show_what& what ) const
+{
+    xml::Element_ptr result = document.createElement( "http_operation" );
+
+    if( _web_service_operation )
+    {
+        result.appendChild( _web_service_operation->dom_element( document, what ) );
+    }
+
+    return result;
 }
 
 //-------------------------------------------------------------------------------Request::parameter
@@ -462,7 +490,13 @@ string Request::character_encoding() const
 
 const char* Http_exception::what()
 { 
-    return http_status_messages[ _status_code ].c_str();
+    S result;
+    
+    result << "HTTP " << (int)_status_code << ' ' << http_status_messages[ _status_code ].c_str();
+    if( _error_text != "" )  result << ": " << _error_text;
+    
+    _what = result;
+    return _what.c_str();
 }
 
 //-------------------------------------------------------------------------------Response::Response
@@ -480,14 +514,15 @@ Response::Response( Operation* operation )
 
 //-----------------------------------------------------------------------------Response::set_status
     
-void Response::set_status( Status_code code, const string& text )
+void Response::set_status( Status_code code, const string& )
 { 
     _status_code = code; 
 
+    /* Die Fehlermeldung sollte nicht dem Benutzer gezeigt werden. Sie kann Pfadnamen enthalten, z.B. bei ERRNO-2
     if( text != "" )
     {
         S body;
-        body << "<html><body><p style='color: red'";
+        body << "<html><body><p style='color: red; font-weight: bold;'>";
 
         for( const char* p = text.c_str(); *p; p++ )
         {
@@ -504,13 +539,22 @@ void Response::set_status( Status_code code, const string& text )
         
         set_chunk_reader( Z_NEW( String_chunk_reader( body, "text/html" ) ) );
     }
+    */
+}
+
+//------------------------------------------------------------------------------Response::set_ready
+
+void Response::set_ready()
+{ 
+    _ready = true; 
+    _operation->_connection->signal( "http response is ready" );
 }
 
 //---------------------------------------------------------------------------------Response::finish
 
 void Response::finish()
 {
-    _headers_stream << _operation->request()->_protocol;
+    _headers_stream << _operation->request()->_protocol << ' ';
 
     _chunked = _operation->request()->is_http_1_1();
 
@@ -590,6 +634,7 @@ string Response::read( int recommended_size )
     if( _chunk_index == 0  &&  _chunk_offset < _chunk_size )
     {
         result = _headers_stream;
+        _chunk_offset += _headers_stream.length();
     }
 
     if( _chunk_offset == _chunk_size ) 
@@ -666,7 +711,7 @@ int String_chunk_reader::get_next_chunk_size()
 
 string String_chunk_reader::read_from_chunk( int recommended_size )
 { 
-    int length = min( recommended_size, (int)_text.length() );
+    int length = min( recommended_size, (int)( _text.length() - _offset ) );
 
     int offset = _offset;
     _offset += length;

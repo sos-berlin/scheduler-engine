@@ -33,6 +33,8 @@ enum Show_what_enum
     show_payload            = 0x4000,
     show_for_database_only  = 0x8000,   // XML-Element nur für Datenbank
     show_id_only            = 0x10000,
+  //show_web_services       = 0x20000,
+  //show_web_service_operations = 0x40000,
 
     show_all_               = 0x8000,
     show_all                = 0xFFFF    // Alle Flags und show_all_ (Bei <show_state> ist z.B. show_orders nicht in show_all enthalten)

@@ -4080,7 +4080,7 @@ const char file_scheduler_xsd[] =
     "\n"
     "<xsd:annotation>\n"
     "<xsd:documentation xml:lang=\"de\">\n"
-    "$Id: scheduler.xsd 4107 2006-02-24 00:08:43Z jz $\n"
+    "$Id: scheduler.xsd 4110 2006-02-26 23:23:30Z jz $\n"
     "Schema f\xc3" "\xbc" "r die Scheduler-Konfiguration,\n"
     "s.a. http://www.zschimmer.com/sos/scheduler/konfiguration.xml.html.\n"
     "</xsd:documentation>\n"

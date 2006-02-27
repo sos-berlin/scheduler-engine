@@ -253,7 +253,7 @@ void Remote_scheduler::set_dom( const xml::Element_ptr& register_scheduler_eleme
 
 //--------------------------------------------------------------------Remote_scheduler::dom_element
 
-xml::Element_ptr Remote_scheduler::dom_element( const xml::Document_ptr& document, const Show_what& show )
+xml::Element_ptr Remote_scheduler::dom_element( const xml::Document_ptr& document, const Show_what& )
 {
     xml::Element_ptr result = document.createElement( "remote_scheduler" );
 

@@ -212,10 +212,10 @@ struct Http_exception : exception
     }
 
 
-    const char*             what                        ();
-    Status_code            _status_code;
-    string                 _what;
-    string                 _error_text;
+    const char*                 what                        ();
+    Status_code                _status_code;
+    string                     _error_text;
+    string                     _what;
 };
 
 //-------------------------------------------------------------------------------------------------
@@ -330,7 +330,7 @@ struct Response : Object
     void                        finish                      ();
     void                        send                        ();
     bool                     is_ready                       () const                                { return _ready; }
-    void                    set_ready                       ()                                      { _ready = true; }
+    void                    set_ready                       ();
 
     bool                        eof                         ();
     string                      read                        ( int recommended_size );
@@ -365,6 +365,8 @@ struct Operation : Communication::Operation
 {
                                 Operation                   ( Operation_connection* );
 
+    void                        close                       ();
+    xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& ) const;
 
     void                        put_request_part            ( const char* data, int length )        { _parser->add_text( data, length ); }
     bool                        request_is_complete         ()                                      { return !_parser  ||  _parser->is_complete(); }
@@ -380,7 +382,6 @@ struct Operation : Communication::Operation
 
     Request*                    request                     () const                                { return _request; }
     Response*                   response                    () const                                { return _response; }
-
 
   private:
     friend struct               Request;

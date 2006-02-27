@@ -243,7 +243,7 @@ struct Ultimo_set : Day_set
 
 //-------------------------------------------------------------------------------------Holiday_set
 
-typedef set<uint>               Holiday_set;
+typedef set<time_t>             Holiday_set;
 
 /*
 inline Holiday_set& operator += ( Holiday_set& a, const Holiday_set& b )

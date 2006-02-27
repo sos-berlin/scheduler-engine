@@ -1114,11 +1114,14 @@ void Order::close()
     {
         try
         {
-            if( !_web_service_operation->http_response()->is_ready() )
+            if( http::Response* http_response = _web_service_operation->http_response() )
             {
-                _log->error( "web_service_operation.send() fehlt, Operation wird abgebrochen" );
-                _web_service_operation->cancel();
-                _web_service_operation = NULL;
+                if( !http_response->is_ready() )
+                {
+                    _log->error( "web_service_operation.send() fehlt, Operation wird abgebrochen" );
+                    _web_service_operation->cancel();
+                    _web_service_operation = NULL;
+                }
             }
         }
         catch( exception& x ) { _log->error( x.what() ); }
