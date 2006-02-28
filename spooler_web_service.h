@@ -141,15 +141,15 @@ struct Web_service_operation : idispatch_implementation< Web_service_operation, 
     STDMETHODIMP            get_Web_service                 ( spooler_com::Iweb_service** result )  { *result = _web_service.copy();  return S_OK; }
     STDMETHODIMP            get_Request                     ( spooler_com::Iweb_service_request** );
     STDMETHODIMP            get_Response                    ( spooler_com::Iweb_service_response** );
-
+    STDMETHODIMP                Execute_stylesheets         ();
 
     virtual void                close                       ();
     virtual void                begin                       ();
   //virtual bool                async_continue              ( Async_operation::Continue_flags );
   //virtual bool                async_finished              ();
-
     void                    set_host                        ( Host* );
     void                        cancel                      ();
+    void                        execute_stylesheets         ();                                     // Führt _web_service->_request_xslt_stylesheet usw. aus
 
     int                         id                          () const                                { return _id; }
 
@@ -208,7 +208,7 @@ struct Web_service_request : idispatch_implementation< Web_service_request, spoo
   //STDMETHODIMP            get_Character_encoding          ( BSTR* result )                        { return String_to_bstr( http_request()->character_encoding(), result ); }
   //STDMETHODIMP            get_Content_type                ( BSTR* result )                        { return String_to_bstr( http_request()->content_type(), result ); }
     STDMETHODIMP            get_String_content              ( BSTR* );
-    STDMETHODIMP            get_Binary_content              ( SAFEARRAY** );
+    STDMETHODIMP            get_Binary_content              ( SAFEARRAY* );
 
     http::Request*              http_request                () const                                { return _web_service_operation->http_request(); }
 

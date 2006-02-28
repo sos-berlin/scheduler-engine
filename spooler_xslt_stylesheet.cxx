@@ -25,6 +25,20 @@ const Com_method Xslt_stylesheet::_methods[] =
     {}
 };
 
+//-----------------------------------------------------------------Xslt_stylesheet::Create_instance
+    
+HRESULT Xslt_stylesheet::Create_instance( const IID& iid, ptr<IUnknown>* result )
+{
+    if( iid == spooler_com::IID_Ixslt_stylesheet )
+    {
+        ptr<Ixslt_stylesheet> instance = Z_NEW( Xslt_stylesheet );
+        *result = +instance;
+        return S_OK;
+    }
+
+    return E_NOINTERFACE;
+}
+
 //-----------------------------------------------------------------Xslt_stylesheet::Xslt_stylesheet
 
 Xslt_stylesheet::Xslt_stylesheet() 
@@ -32,8 +46,23 @@ Xslt_stylesheet::Xslt_stylesheet()
     Idispatch_implementation( &class_descriptor ),
     _zero_(this+1)
 {
+    Z_LOG2( "joacim", __FUNCTION__ << "\n" );
 }
 
+//------------------------------------------------------------------Com_task_proxy::Create_instance
+/*
+HRESULT Xslt_stylesheet::Create_instance( const IID& iid, ptr<IUnknown>* result )
+{
+    if( iid == spooler_com::IID_Ixslt_stylesheetproxy )
+    {
+        ptr<Xslt_stlyesheet> instance = Z_NEW( Xslt_stylesheet );
+        *result = static_cast<IDispatch*>( static_cast<Proxy*>( +instance ) );
+        return S_OK;
+    }
+
+    return E_NOINTERFACE;
+}
+*/
 //-----------------------------------------------------------------Xslt_stylesheet::Xslt_stylesheet
 /*
 Xslt_stylesheet::Xslt_stylesheet( const string& xml_or_filename ) 
@@ -58,6 +87,7 @@ Xslt_stylesheet::Xslt_stylesheet( const BSTR xml_or_filename_bstr )
 
 Xslt_stylesheet::~Xslt_stylesheet() 
 {
+    Z_LOG2( "joacim", __FUNCTION__ << "\n" );
 }
 
 //------------------------------------------------------------------Xslt_stylesheet::QueryInterface
@@ -92,6 +122,8 @@ STDMETHODIMP Xslt_stylesheet::Load_xml( BSTR xml_bstr, Ixslt_stylesheet** result
 {
     HRESULT hr = S_OK;
 
+    Z_LOG2( "joacim", __FUNCTION__ << "\n" );
+
     try
     {
         load( xml::Document_ptr( xml_bstr ) );
@@ -110,6 +142,8 @@ STDMETHODIMP Xslt_stylesheet::Load_file( BSTR filename_bstr, Ixslt_stylesheet** 
 {
     HRESULT hr = S_OK;
 
+    Z_LOG2( "joacim", __FUNCTION__ << "\n" );
+
     try
     {
         load_file( string_from_bstr( filename_bstr ) );
@@ -127,6 +161,8 @@ STDMETHODIMP Xslt_stylesheet::Load_file( BSTR filename_bstr, Ixslt_stylesheet** 
 STDMETHODIMP Xslt_stylesheet::Apply_xml( BSTR xml_or_file_bstr, BSTR* result )
 {
     HRESULT hr = S_OK;
+
+    Z_LOG2( "joacim", __FUNCTION__ << "\n" );
 
     try
     {

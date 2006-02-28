@@ -3091,6 +3091,7 @@ int object_server( int argc, char** argv )
     server.register_class( spooler_com::CLSID_Remote_module_instance_server, Com_remote_module_instance_server::Create_instance );
     server.register_class(              CLSID_Com_log_proxy                , Com_log_proxy                    ::Create_instance );
     server.register_class( spooler_com::CLSID_Task_proxy                   , Com_task_proxy                   ::Create_instance );
+    server.register_class( spooler_com::CLSID_Xslt_stylesheet              , Xslt_stylesheet                  ::Create_instance );
 
     return server.main( argc, argv, true );
 }

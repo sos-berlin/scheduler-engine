@@ -1329,17 +1329,38 @@ library Spooler
       //HRESULT                 Apply_file              ( [in] BSTR input_filename, [in] BSTR output_filename );
     };
 
-    /*
     [
-        uuid       ( feee47ad-6c1b-11d8-8103-000476ee8afb )
+        uuid       ( feee47b1-6c1b-11d8-8103-000476ee8afb )
     ]
-    coclass Xslt_stylesheeet
+    coclass Xslt_stylesheet
     {
         interface Ixslt_stylesheet;
         interface Ihas_java_class_name;
     }
-    */    
-    
+
+    //-----------------------------------------------------------------------Ixslt_stylesheet_proxy
+    /*
+    [
+        uuid       (  ),
+        odl,
+        dual
+    ]
+    interface Ixslt_stylesheet_proxy : IDispatch
+    {
+        [propget]
+        HRESULT                 Java_class_name         ( [out,retval] BSTR* );                 // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
+                                                                                                // Für den Objectserver
+        HRESULT                 Close                   ();
+
+        HRESULT                 Load_xml                ( [in] BSTR Xml, [out,retval] Ixslt_stylesheet** );
+
+        HRESULT                 Load_file               ( [in] BSTR Filename, [out,retval] Ixslt_stylesheet** );
+
+        HRESULT                 Apply_xml               ( [in] BSTR Xml, [out,retval] BSTR* );
+
+      //HRESULT                 Apply_file              ( [in] BSTR input_filename, [in] BSTR output_filename );
+    };
+    */
     //---------------------------------------------------------------------------------Iweb_service
     
     [
@@ -1415,7 +1436,7 @@ library Spooler
         HRESULT                 String_content          ( [out,retval] BSTR* );
 
         [propget]
-        HRESULT                 Binary_content          ( [out,retval] SAFEARRAY(unsigned char)* );
+        HRESULT                 Binary_content          ( [out,retval] SAFEARRAY(unsigned char) );
     };
 
     //-------------------------------------------------------------------------Iweb_service_request
@@ -1468,7 +1489,6 @@ library Spooler
 /*
 Ein paar freie GUIDs:
 
-feee47b1-6c1b-11d8-8103-000476ee8afb
 feee47b2-6c1b-11d8-8103-000476ee8afb
 feee47b3-6c1b-11d8-8103-000476ee8afb
 feee47b4-6c1b-11d8-8103-000476ee8afb

@@ -9,8 +9,6 @@
 namespace sos {
 namespace spooler {
 
-
-
 //----------------------------------------------------------------------------------Xslt_stylesheet
 
 struct Xslt_stylesheet : idispatch_implementation< Xslt_stylesheet, spooler_com::Ixslt_stylesheet >, 
@@ -25,6 +23,8 @@ struct Xslt_stylesheet : idispatch_implementation< Xslt_stylesheet, spooler_com:
                               //Xslt_stylesheet             ( const string& xml_or_filename );
                               //Xslt_stylesheet             ( const BSTR xml_or_filename );
                                ~Xslt_stylesheet             ();
+
+    static HRESULT              Create_instance             ( const IID&, ptr<IUnknown>* result );  // Für Proxy
 
 
     STDMETHODIMP_(ULONG)        AddRef                      ()                                      { return Idispatch_implementation::AddRef(); }
@@ -43,11 +43,34 @@ struct Xslt_stylesheet : idispatch_implementation< Xslt_stylesheet, spooler_com:
     STDMETHODIMP                Apply_xml                   ( BSTR, BSTR* );
   //STDMETHODIMP                Transform_xml_to_file       ( BSTR, BSTR );
 
-
   private:
     Fill_zero                  _zero_;
 };
 
+//----------------------------------------------------------------------------Xslt_stylesheet_proxy
+/*
+struct Xslt_stylesheet_proxy : object_server::proxy_with_local_methods< Xslt_stylesheet_proxy, spooler_com::Ixslt_stylesheet >
+{
+    static Class_descriptor     class_descriptor;
+    static const com::Com_method _methods[];
+
+
+    static HRESULT              Create_instance             ( const IID& iid, ptr<IUnknown>* result );
+
+
+                                Com_task_proxy              ();
+
+
+    STDMETHODIMP                Create_subprocess           ( VARIANT* program_and_parameters, spooler_com::Isubprocess** result );
+    STDMETHODIMP            put_Priority_class              ( VARIANT* );
+    STDMETHODIMP            get_Priority_class              ( BSTR* );
+
+    void                        wait_for_subprocesses       ();
+
+
+    ptr<Subprocess_register>   _subprocess_register;
+};
+*/
 //-------------------------------------------------------------------------------------------------
 
 } //namespace spooler

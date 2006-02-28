@@ -179,6 +179,7 @@ struct Order : Com_order,
   //bool                       _period_once;
     Time                       _setback;                // Bis wann der Auftrag zurückgestellt ist
     int                        _setback_count;
+  //bool                       _recoverable;            // In Datenbank halten
     bool                       _is_in_database;
 
     ptr<Web_service>           _web_service;

@@ -1057,6 +1057,8 @@ Order::~Order()
 
 void Order::init()
 {
+    //_recoverable = true;
+
     _log = Z_NEW( Prefix_log( this ) );
     _log->set_prefix( obj_name() );
     _created = Time::now();

@@ -28,12 +28,34 @@
             </description>
         </xml_attribute>
 
+        <xml_attribute name="job_chain" type="job_chain" title="Jobkette, die Web-Service-Operationen ausführt">
+            <description>
+                <p>
+                    Eine Web-Service-Anforderung erzeugt einen Auftrag, 
+                    der in diese Jobkette eingereiht wird.
+                </p>
+                <p>
+                    Nicht zusammen mit den Attributen
+                    <code>request_xslt_stylesheet</code>,
+                    <code>response_xslt_stylesheet</code> und
+                    <code>forward_xslt_stylesheet</code>
+                    verwendbar.
+                </p>
+                <p>
+                    Siehe <scheduler_method class="Order" property="web_service_operation"/>.
+                </p>
+            </description>
+        </xml_attribute>
+
         <xml_attribute name="request_xslt_stylesheet" type="path" subst_env="yes" title="Transformiert die Anforderung in ein Scheduler-Kommando">
             <description>
                 <p>
-                    Pfad des XSLT-Stylesheets, 
-                    das das mit HTTP-POST übergebene XML-Dokument 
+                    Pfad des XSLT-Stylesheets,
+                    das das mit HTTP-POST übergebene XML-Dokument
                     in ein Scheduler-Kommando wandelt.
+                </p>
+                <p>
+                    Nicht zusammen mit dem Attribut <code>job_chain</code> verwendbar.
                 </p>
             </description>
         </xml_attribute>
@@ -44,6 +66,9 @@
                     Pfad des XSLT-Stylesheets, 
                     das das XML-Ergebnis des Scheduler-Kommandos in ein XML-Dokument wandelt,
                     mit der der Scheduler die Web-Dienst-Anfrage beantwortet.
+                </p>
+                <p>
+                    Nicht zusammen mit dem Attribut <code>job_chain</code> verwendbar.
                 </p>
             </description>
         </xml_attribute>
@@ -59,6 +84,9 @@
                     das den Aufruf eines anderen Web-Dienstes auslöst.
                 </p>
                 <p>
+                    Nicht zusammen mit dem Attribut <code>job_chain</code> verwendbar.
+                </p>
+                <p>
                     <scheduler_keyword keyword="java"/>
                     <scheduler_keyword keyword="xercesImpl.jar"/>
                     Benötigt Java und das Klassen-Archiv <code>xercesImpl.jar</code> im <code>CLASS_PATH</code> 
@@ -69,6 +97,9 @@
 
         <xml_attribute name="debug" type="yes|no" initial="no">
             <description>
+                <p>
+                    Nur, wenn <code>request_xslt_stylesheet</code> angegeben ist:
+                </p>
                 <p>
                     <code>debug="yes"</code> lässt den Scheduler die intern erzeugten XML-Dokumente in Dateien im mit <scheduler_option name="log-dir"/> 
                     festgelegten Verzeichnis ablegen:

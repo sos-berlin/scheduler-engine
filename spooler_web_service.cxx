@@ -359,6 +359,7 @@ const Com_method Web_service_operation::_methods[] =
     COM_PROPERTY_GET( Web_service_operation,  1, Java_class_name               , VT_BSTR    , 0 ),
     COM_PROPERTY_GET( Web_service_operation,  2, Request                       , VT_DISPATCH, 0 ),
     COM_PROPERTY_GET( Web_service_operation,  3, Response                      , VT_DISPATCH, 0 ),
+  //COM_PROPERTY_GET( Web_service_operation,  4, Execute_stylesheets           , VT_DISPATCH, 0 ),
 #endif
     {}
 };
@@ -423,7 +424,7 @@ void Web_service_operation::begin()
     _order->set_web_service_operation( this );
     _order->add_to_job_chain( _spooler->job_chain( _web_service->_job_chain_name ) );
 
-    _http_operation->set_gmtimeout( ::time(NULL) + _web_service->_timeout );
+    _http_operation->set_gmtimeout( (double)( ::time(NULL) + _web_service->_timeout ) );
 }
 
 //------------------------------------------------------------Web_service_operation::async_continue
@@ -499,25 +500,47 @@ STDMETHODIMP Web_service_operation::get_Response( spooler_com::Iweb_service_resp
     return S_OK; 
 }
 
-//----------------------------------------------------------Web_service_stylesheet_operation::begin
-#if 0
+//-------------------------------------------------------Web_service_operation::execute_stylesheets
 
-string Web_service_stylesheet_operation::begin()
+STDMETHODIMP Web_service_operation::Execute_stylesheets()
 {
+    HRESULT hr = S_OK;
+    
+    try
+    {
+        execute_stylesheets();
+    }
+    catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+
+//-------------------------------------------------------Web_service_operation::execute_stylesheets
+
+void Web_service_operation::execute_stylesheets()
+{
+    // Erstmal nicht: Die Operation wird im Task-Prozess ausgeführt.
+    // Erstmal nicht: Scheduler-Methoden, die im Hauptprozess ausgeführt werden sollen, nur über Invoke() aufrufen!
+
+
     xml::Document_ptr request_document;
     request_document.create();
 
-
-    bool is_xml = true;  //string_begins_with( request_data, "<" );
+    //bool is_xml = true;  //string_begins_with( request_data, "<" );
 
     //if( is_xml )
     {
-        if( _web_service->_log_xml )  File( _log_filename_prefix + ".raw_request.txt", "w" ).print( request_data );
-        bool ok = request_document.try_load_xml( request_data, character_encoding );
+        Variant request_data_variant;
+
+        //hr = com_invoke( DISPATCH_PROPERTYGET, this, "String_content", &request_data_variant );
+        //if( FAILED(hr) )  return hr;
+
+        if( _web_service->_log_xml )  File( _log_filename_prefix + ".raw_request.txt", "w" ).print( http_request()->body() );
+        bool ok = request_document.try_load_xml( http_request()->body(), http_request()->character_encoding() );
         if( !ok )
         {
             _log->error( request_document.error_text() );
-            throw Operation::Http_exception( Operation::code_bad_request );
+            throw http::Http_exception( http::status_404_bad_request );
         }
     }
 
@@ -532,19 +555,19 @@ string Web_service_stylesheet_operation::begin()
 
     xml::Element_ptr service_request_element = request_document.createElement( "service_request" );
     service_request_element.appendChild( _web_service->dom_element( request_document ) );           // <web_service> anhängen
-    service_request_element.setAttribute( "url", _http_operation->_http_request->url() );
+    service_request_element.setAttribute( "url", http_request()->url() );
 
     xml::Element_ptr content_element = service_request_element.append_new_element( "content" );
 
-    if( is_xml )
+    //if( is_xml )
     {
         xml::Element_ptr data_element = request_document.replaceChild( service_request_element, request_document.documentElement() );
         content_element.appendChild( data_element );      // request_data anhängen
     }
-    else
-    {
-        content_element.appendChild( request_document.createTextNode( request_data ) );     // POST-Daten als Text anhängen (nicht spezifiziert)
-    }
+    //else
+    //{
+    //    content_element.appendChild( request_document.createTextNode( request_data ) );     // POST-Daten als Text anhängen (nicht spezifiziert)
+    //}
 
 
     if( _web_service->_debug )
@@ -582,7 +605,7 @@ string Web_service_stylesheet_operation::begin()
     else
     {
         Command_processor command_processor ( _spooler );
-        command_processor.set_host( _http_operation->_host );
+        command_processor.set_host( _http_operation->_connection->peer_host() );
 
         command_processor.execute( command_document );
 
@@ -605,33 +628,19 @@ string Web_service_stylesheet_operation::begin()
     //}
 
 
-
-    string result;
-
-
     xml::Node_ptr data_node = response_document.select_node( "/service_response/content/*" );
     if( !data_node )  throw_xc( "SCHEDULER-244" );
-    //xml::Element_ptr content_element = response.select_node( "/service_response/content" );
-    //if( !content_element )  throw_xc( "SCHEDULER-244" );
 
-    //xml::Node_ptr data_node = content_element.firstChild();
-    //while( data_node  &&  data_node.nodeType() == COMMENT_NODE )  data_node = data_node.nextSibling();
-    //if( !data_node )  throw_xc( "SCHEDULER-244" );
+    http_response()->set_chunk_reader( Z_NEW( http::String_chunk_reader( data_node.xml(), "text/xml" ) ) );
 
-    //if( data_node.nodeType() != ELEMENT_NODE )  throw_xc( "SCHEDULER-244" );
-    {
-        result = data_node.xml();
+    // Es soll nur ein Element geben!
+    data_node = data_node.nextSibling();
+    while( data_node  &&  data_node.nodeType() == xml::COMMENT_NODE )  data_node = data_node.nextSibling();
+    if( data_node )  throw_xc( "SCHEDULER-245" );
 
-        // Es soll nur ein Element geben!
-        data_node = data_node.nextSibling();
-        while( data_node  &&  data_node.nodeType() == xml::COMMENT_NODE )  data_node = data_node.nextSibling();
-        if( data_node )  throw_xc( "SCHEDULER-245" );
-    }
-
-    return result;
+    http_response()->set_ready();
 }
 
-#endif
 //--------------------------------------------------------------------Web_service_request::_methods
 
 const Com_method Web_service_request::_methods[] =
@@ -685,7 +694,7 @@ STDMETHODIMP Web_service_request::get_String_content( BSTR* result )
 
 //----------------------------------------------------------Web_service_request::get_Binary_content
 
-STDMETHODIMP Web_service_request::get_Binary_content( SAFEARRAY** result )
+STDMETHODIMP Web_service_request::get_Binary_content( SAFEARRAY* result )
 {
     HRESULT hr = S_OK;
     
