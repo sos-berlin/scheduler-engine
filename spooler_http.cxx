@@ -17,6 +17,7 @@
     Mögliche Verbesserungen:
 
     HTTP 1.1 ist nur dürftig implementiert.
+    Pipelining ist derzeit nicht möglich. Dazu muss ein signalisiertes recv während send() möglich sein --> Async_socket umarbeiten, getrenntes _state für recv() und send()
     "Transfer-Encoding: chunked" nicht, wenn nur ein oder kein Chunk da ist (z.B.String_chunk_reader)
     Mehrere Chunks mit einem send-scattered() senden
     "Date:" der Datei senden
@@ -50,9 +51,11 @@ const Http_status_code_table http_status_code_table[]  =
 {
     { status_200_ok                            , "OK" },
     { status_301_moved_permanently             , "Moved Permanently" },
+    { status_403_forbidden                     , "Forbidden" },
     { status_404_bad_request                   , "Bad Request" },
     { status_500_internal_server_error         , "Internal Server Error" },
     { status_501_not_implemented               , "Not Implemented" },
+    { status_504_gateway_timeout               , "Gateway Timeout" },
     { status_505_http_version_not_supported    , "HTTP Version Not Supported" },
     {}
 };
@@ -409,7 +412,7 @@ void Operation::begin()
         {
             Command_processor command_processor ( _spooler );
 
-            command_processor.set_host( _host );
+            command_processor.set_host( _connection->peer_host() );
             command_processor.execute_http( this );
 
             _response->set_ready();
@@ -438,16 +441,27 @@ void Operation::begin()
 
 //-----------------------------------------------------------------------Operation::async_continue_
 
-bool Operation::async_continue_( Continue_flags )
+bool Operation::async_continue_( Continue_flags flags )
 {
-    if( !_web_service_operation )  return true;
+    bool something_done = false;
 
-    bool something_done = _web_service_operation->async_continue();
-    
-    /*
-    if( something_done  &&  _web_service_operation->async_finished() )
+    if( flags & cont_next_gmtime_reached )
     {
-        _response = _web_service_operation->process_http__end();
+        if( _response &&  !_response->is_ready() ) 
+        {
+            _connection->_log.error( "HTTP-Operation wird nach Fristablauf abgebrochen" );
+            _response->set_status( status_504_gateway_timeout );
+            _response->set_ready();
+            something_done = true;
+        }
+    }
+    /*
+    else
+    {
+        if( _web_service_operation ) 
+        {
+            something_done |= _web_service_operation->async_continue( flags );  // Da passiert nix
+        }
     }
     */
 
@@ -461,7 +475,7 @@ string Operation::get_response_part()
     return _response->read( _response->recommended_block_size() );
 }
 
-//----------------------------------------------------------.....----Operation::response_is_complete
+//-------------------------------------------------------------------Operation::response_is_complete
 
 bool Operation::response_is_complete()
 { 

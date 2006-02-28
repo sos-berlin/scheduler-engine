@@ -48,6 +48,7 @@ struct Communication
 
         void                    remove_me                   ( const exception* = NULL );
         void                    terminate                   ( double wait_time );
+        void                    remove_operation            ();
 
         bool                    do_accept                   ( SOCKET listen_socket );
         void                    do_close                    ();
@@ -65,6 +66,7 @@ struct Communication
         Connection_state       _connection_state;
         Spooler*               _spooler;
         Communication*         _communication;
+        Security::Level        _security_level;
 
         int                    _socket_send_buffer_size;
         Prefix_log             _log;
@@ -105,9 +107,11 @@ struct Communication
                                 Operation                   ( Operation_connection* pc )            : _zero_(this+1), _connection(pc->_connection), _spooler(pc->_spooler), _operation_connection(pc) {}
 
 
-        void                    set_host                    ( Host* host )                          { _host = host; }
+      //void                    set_host                    ( Host* host )                          { _host = host; }
+        void                set_gmtimeout                   ( double gmtime )                       { set_async_next_gmtime( gmtime ); }
+        double                  gmtimeout                   () const                                { return async_next_gmtime(); }
 
-        virtual void            close                       ()                                      { _connection = NULL, _operation_connection = NULL, _host = NULL; }
+        virtual void            close                       ()                                      { _connection = NULL, _operation_connection = NULL; }
         virtual void            put_request_part            ( const char*, int length )             = 0;
         virtual bool            request_is_complete         ()                                      = 0;
 
@@ -129,7 +133,6 @@ struct Communication
         Spooler*               _spooler;
         Connection*            _connection;
         Operation_connection*  _operation_connection;
-        Host*                  _host;
     };
 
 
@@ -159,20 +162,20 @@ struct Communication
 
         while(1)
         {
-            ptr<Operation> processor = processor_connection->processor();
+            ptr<Operation> operation = processor_connection->operation();
 
             while(1)
             {
                 recv( &data, length );
-                processor->put_request_part( data, length );
-                if( processor->request_is_complete() )  break;
+                operation->put_request_part( data, length );
+                if( operation->request_is_complete() )  break;
             }
 
-            processor->process();
+            operation->process();
 
-            while( !processor->response_is_complete() )  send( processor->get_response_part() );
+            while( !operation->response_is_complete() )  send( operation->get_response_part() );
 
-            if( processor->should_close_connection() )  break;
+            if( operation->should_close_connection() )  break;
         }
     */
 

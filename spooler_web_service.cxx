@@ -213,6 +213,7 @@ void Web_service::set_dom( const xml::Element_ptr& element, const Time& )
     _response_xslt_stylesheet_path = subst_env( element.     getAttribute( "response_xslt_stylesheet", _response_xslt_stylesheet_path ) );
     _forward_xslt_stylesheet_path  = subst_env( element.     getAttribute( "forward_xslt_stylesheet" , _forward_xslt_stylesheet_path  ) );
     _job_chain_name                =            element.     getAttribute( "job_chain"               , _job_chain_name                );
+    _timeout                       =            element. int_getAttribute( "timeout"                 , _timeout                       );
     _debug                         =            element.bool_getAttribute( "debug"                   , _debug                         );
 
 
@@ -411,9 +412,9 @@ string Web_service_operation::obj_name() const
 
 void Web_service_operation::begin()
 {
-    string response;
-
     //if( _web_service->_debug  &&  http_operation->_parser )  _log->debug( "\n" "HTTP request:\n " ), _log->debug( http_operation->_parser->_text ), _log->debug( "" );;
+
+    if( this->_http_operation->_connection->_security_level <= Security::seclev_no_add )  throw http::Http_exception( http::status_403_forbidden );
 
 
     _order = new Order( _spooler );
@@ -422,26 +423,24 @@ void Web_service_operation::begin()
     _order->set_web_service_operation( this );
     _order->add_to_job_chain( _spooler->job_chain( _web_service->_job_chain_name ) );
 
-
-    //TODO async_set_timeout( now + _web_service->_timeout );
+    _http_operation->set_gmtimeout( ::time(NULL) + _web_service->_timeout );
 }
 
 //------------------------------------------------------------Web_service_operation::async_continue
-
-bool Web_service_operation::async_continue()
+/*
+bool Web_service_operation::async_continue( Async_operation::Continue_flags )
 {
-    //?
     return true;
 }
-
+*/
 //------------------------------------------------------------Web_service_operation::async_finished
-
+/*
 bool Web_service_operation::async_finished()
 {
     return http_response()->is_ready();
     //    response->finish();
 }
-
+*/
 //--------------------------------------------------------------------Web_service_operation::cancel
 
 void Web_service_operation::cancel()

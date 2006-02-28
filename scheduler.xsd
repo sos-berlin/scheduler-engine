@@ -596,7 +596,7 @@
     <xsd:element name="service_request">
         <xsd:complexType>
             <xsd:sequence>
-                <xsd:element name="web_service" type="Web_service" minOccurs="0"/>
+                <xsd:element name="web_service" type="web_service" minOccurs="0"/>
 
                 <xsd:element name="content">
                     <xsd:complexType>
@@ -711,7 +711,7 @@
     <xsd:element name="web_services">
         <xsd:complexType>
             <xsd:sequence>
-                <xsd:element name="web_service" type="Web_service" minOccurs="0" maxOccurs="unbounded"/>
+                <xsd:element name="web_service" type="web_service" minOccurs="0" maxOccurs="unbounded"/>
             </xsd:sequence>
         </xsd:complexType>
     </xsd:element>
@@ -719,7 +719,7 @@
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ELEMENT-TYPEN-->
 
-    <xsd:complexType name="Web_service">
+    <xsd:complexType name="web_service">
         <xsd:attribute name="name"                      type="Name"             use="required"/>
         <xsd:attribute name="url_path"                  type="xsd:string"       use="required"/>
 
@@ -728,6 +728,7 @@
         <xsd:attribute name="forward_xslt_stylesheet"   type="File"/>
 
         <xsd:attribute name="job_chain"                 type="Name"/>
+        <xsd:attribute name="timeout"                   type="xsd:positiveInteger"/>
         <xsd:attribute name="debug"                     type="Yes_no"/>
     </xsd:complexType>
 

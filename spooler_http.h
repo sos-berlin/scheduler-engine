@@ -191,9 +191,11 @@ enum Status_code
 {
     status_200_ok                           = 200,
     status_301_moved_permanently            = 301,
+    status_403_forbidden                    = 403,
     status_404_bad_request                  = 404,
     status_500_internal_server_error        = 500,
     status_501_not_implemented              = 501,
+    status_504_gateway_timeout              = 504,
     status_505_http_version_not_supported   = 505
 };
 
@@ -381,7 +383,7 @@ struct Operation : Communication::Operation
 
     void                        begin                       ();
     virtual bool                async_continue_             ( Continue_flags );
-    virtual bool                async_finished_             ()                                      { return _response->is_ready(); }
+    virtual bool                async_finished_             ()                                      { return _response  &&  _response->is_ready(); }
     virtual string              async_state_text_           ()                                      { return "none"; }
 
     bool                        response_is_complete        ();

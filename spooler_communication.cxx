@@ -86,7 +86,7 @@ void Xml_operation::begin()
     Command_processor command_processor ( _spooler );
 
     command_processor.set_communication_operation( this );
-    command_processor.set_host( _host );
+    command_processor.set_host( _connection->peer_host() );
 
     if( string_begins_with( _request, " " ) )  _request = ltrim( _request );
 
@@ -157,7 +157,7 @@ bool Communication::Udp_socket::async_continue_( Continue_flags )
             else
             {
                 Command_processor command_processor ( _spooler );
-                command_processor.set_host( &host );
+                command_processor.set_host( host );
                 string cmd ( buffer, len );
                 _spooler->log()->info( "UDP-Nachricht von " + host.as_string() + ": " + cmd );
                 command_processor.execute( cmd, Time::now() );
@@ -220,6 +220,7 @@ string Communication::Connection::connection_state_name( Connection_state state 
 
 void Communication::Connection::remove_me( const exception* x )
 {
+    remove_operation();
     if( _operation_connection )  _operation_connection->connection_lost_event( x );
 
     _communication->remove_connection( this );
@@ -247,11 +248,12 @@ bool Communication::Connection::do_accept( SOCKET listen_socket )
 
         set_buffer_size();
 
-      //_host = _peer_addr.sin_addr;
-        _log.set_prefix( "TCP-Verbindung mit " + _peer_host_and_port._host.as_string() );
+        _security_level = _spooler->security_level( peer_host() );
+
+        _log.set_prefix( "TCP-Verbindung mit " + _peer_host_and_port.as_string() );
 
 
-        if( _spooler->security_level( _peer_host_and_port._host ) <= Security::seclev_signal )
+        if( _security_level <= Security::seclev_signal )
         {
             _log.warn( "TCP-Verbindung nicht zugelassen" );
             do_close();
@@ -273,8 +275,7 @@ bool Communication::Connection::do_accept( SOCKET listen_socket )
 
 void Communication::Connection::do_close()
 {
-    if( _operation )  _operation->close(), _operation = NULL;
-
+    remove_operation();
     remove_from_socket_manager();
 
     if( _read_socket == STDIN_FILENO  &&  _eof  &&  isatty(STDIN_FILENO) )  _spooler->cmd_terminate();  // Ctrl-D (auch wenn Terminal-Sitzung beendet?)
@@ -287,6 +288,18 @@ void Communication::Connection::do_close()
     
     _read_socket  = SOCKET_ERROR;
     _write_socket = SOCKET_ERROR;
+}
+
+//------------------------------------------------------Communication::Connection::remove_operation
+
+void Communication::Connection::remove_operation()
+{
+    if( _operation )
+    {
+        _operation->set_async_manager( NULL );
+        _operation->close();
+        _operation = NULL;
+    }
 }
 
 //------------------------------------------------------------------Communication::Connection::do_recv
@@ -337,9 +350,10 @@ bool Communication::Connection::do_recv()
             }
 
             _operation = _operation_connection->new_operation();
+            _operation->set_async_manager( _spooler->_connection_manager );     // Für set_async_next_gmtime()
         }
 
-        if( _read_socket != STDIN_FILENO )  _operation->set_host( &_peer_host_and_port._host );
+        //if( _read_socket != STDIN_FILENO )  _operation->set_host( &_peer_host_and_port._host );
 
         if( len > 0 )
         {
@@ -382,7 +396,7 @@ bool Communication::Connection::async_continue_( Continue_flags )
 
         if( _connection_state == s_processing )
         {
-            if( _operation->async_continue()  &&  _operation->async_finished() )  _connection_state = s_responding;
+            if( _operation->async_finished() )  _connection_state = s_responding;
         }
 
         if( _connection_state == s_responding )
@@ -406,7 +420,7 @@ bool Communication::Connection::async_continue_( Continue_flags )
             {
                 if( _operation->should_close_connection() )  _eof = true;   // Wir tun so, als ob der Client EOF geliefert hat. Das führt zum Schließen der Verbindung.
 
-                _operation->close(), _operation = NULL;
+                remove_operation();
                 _connection_state = s_ready;
             }
         }
@@ -465,6 +479,10 @@ xml::Element_ptr Communication::Connection::dom_element( const xml::Document_ptr
     {
         //result.setAttribute( "operation", _operation->obj_name() );
         xml::Element_ptr operation_element = result.append_new_element( "operation" );
+        
+        double gmtimeout_at = _operation->gmtimeout();
+        if( gmtimeout_at < double_time_max )  operation_element.setAttribute( "timeout_at", Time( localtime_from_gmtime( gmtimeout_at ) ).as_string() );
+
         operation_element.appendChild( _operation->dom_element( document, what ) );
     }
 

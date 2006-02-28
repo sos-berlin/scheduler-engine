@@ -69,6 +69,7 @@ struct Web_service: idispatch_implementation< Web_service, spooler_com::Iweb_ser
     string                     _name;
     string                     _url_path;
     int                        _next_operation_id;
+    int                        _timeout;
 
     string                     _log_filename_prefix;
     ptr<Prefix_log>            _log;
@@ -144,9 +145,10 @@ struct Web_service_operation : idispatch_implementation< Web_service_operation, 
 
     virtual void                close                       ();
     virtual void                begin                       ();
-    virtual bool                async_continue              ();
-    virtual bool                async_finished              ();
+  //virtual bool                async_continue              ( Async_operation::Continue_flags );
+  //virtual bool                async_finished              ();
 
+    void                    set_host                        ( Host* );
     void                        cancel                      ();
 
     int                         id                          () const                                { return _id; }
@@ -165,6 +167,7 @@ struct Web_service_operation : idispatch_implementation< Web_service_operation, 
     ptr<Web_service_response>  _response;
     http::Operation*           _http_operation;
     ptr<Order>                 _order;
+    Time                       _timeout_at;
     string                     _log_filename_prefix;
     ptr<Prefix_log>            _log;
 };

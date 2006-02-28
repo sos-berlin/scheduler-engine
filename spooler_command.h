@@ -120,7 +120,7 @@ struct Command_processor
 
     void                        get_id_and_next             ( const xml::Element_ptr& element, int* id, int* next );
 
-    void                        set_host                    ( Host* );
+    void                        set_host                    ( const Host& );
     void                        set_communication_operation ( Communication::Operation* p )         { _communication_operation = p; }
     void                        set_validate                ( bool b )                              { _validate = b; }
     void                        abort_immediately           ( int exit_code = 1 );
@@ -131,7 +131,7 @@ struct Command_processor
     bool                       _load_config_immediately;
     xml::Document_ptr          _answer;
     Xc_copy                    _error;
-    Host*                      _host;
+    Host                       _host;
     bool                       _validate;
     Security::Level            _security_level;
     string                     _source_filename;            // Das Verzeichnis wird für <base file=".."> verwendet

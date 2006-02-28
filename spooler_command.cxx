@@ -659,7 +659,7 @@ xml::Element_ptr Command_processor::execute_register_remote_scheduler( const xml
 
     if( _security_level < Security::seclev_no_add )  throw_xc( "SCHEDULER-121" );
 
-    Host_and_port host_and_port ( *_host, register_scheduler_element.int_getAttribute( "tcp_port" ) );
+    Host_and_port host_and_port ( _host, register_scheduler_element.int_getAttribute( "tcp_port" ) );
 
     ptr<Remote_scheduler> remote_scheduler = _spooler->_remote_scheduler_register.get_or_null( host_and_port );
 
@@ -1085,11 +1085,11 @@ void Command_processor::execute_http( http::Operation* http_operation )
 
 //----------------------------------------------------------------------Command_processor::set_host
 
-void Command_processor::set_host( Host* host )
+void Command_processor::set_host( const Host& host )
 { 
     _host = host; 
 
-    _security_level = _host? _spooler->security_level( *_host ) 
+    _security_level = _host? _spooler->security_level( _host ) 
                             : Security::seclev_all;
 }
 
