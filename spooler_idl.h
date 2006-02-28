@@ -33,6 +33,9 @@ struct Iorder_queue;
 struct Iorder;
 struct Isubprocess;
 struct Iweb_service;
+struct Iweb_service_operation;
+struct Iweb_service_request;
+struct Iweb_service_response;
 struct Ixslt_stylesheet;
 
 //------------------------------------------------------------------------------------Log_level
@@ -645,9 +648,9 @@ DEFINE_GUID( IID_Iweb_service_operation, 0xfeee47ae, 0x6c1b, 0x11d8, 0x81, 0x03,
                                                                                                                    
 struct Iweb_service_operation : IDispatch
 {
-    virtual HRESULT         get_Web_service                 ( IWeb_service** )                      = 0;
-    virtual HRESULT         get_Request                     ( IWeb_service_request** )              = 0;
-    virtual HRESULT         get_Response                    ( IWeb_service_response** )             = 0;
+    virtual HRESULT         get_Web_service                 ( Iweb_service** )                      = 0;
+    virtual HRESULT         get_Request                     ( Iweb_service_request** )              = 0;
+    virtual HRESULT         get_Response                    ( Iweb_service_response** )             = 0;
 };
 
 //-----------------------------------------------------------------------------Iweb_service_request
@@ -678,7 +681,7 @@ struct Iweb_service_response: IDispatch
   //virtual HRESULT         put_Content_type                ( BSTR )                                = 0;
   //virtual HRESULT         put_String_content              ( BSTR* )                               = 0;
   //virtual HRESULT         put_Binary_content              ( SAFEARRAY** )                         = 0;
-    virtual HRESULT             Send                        ( [in] VARIANT*, [in] BSTR content_type );       // BSTR oder SAFEARRAY(unsigned char)
+    virtual HRESULT             Send                        ( VARIANT*, BSTR content_type )         = 0;
 };
 
 //-------------------------------------------------------------------------------------------------

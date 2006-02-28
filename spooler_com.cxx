@@ -3965,7 +3965,7 @@ const Com_method Com_order::_methods[] =
     { DISPATCH_PROPERTYGET, 21, "Web_service_operation"        , (Com_method_ptr)&Com_order::get_Web_service_operation        , VT_DISPATCH   },
     { DISPATCH_PROPERTYGET, 22, "Web_service_operation_or_null", (Com_method_ptr)&Com_order::get_Web_service_operation_or_null, VT_DISPATCH   },
     { DISPATCH_PROPERTYPUT, 23, "Xml_payload"               , (Com_method_ptr)&Com_order::put_Xml_payload       , VT_EMPTY      , { VT_BSTR } },
-    { DISPATCH_PROPERTYGET, 23, "Xml_payload"               , (Com_method_ptr)&Com_order::get_xml_payload       , VT_BSTR       },
+    { DISPATCH_PROPERTYGET, 23, "Xml_payload"               , (Com_method_ptr)&Com_order::get_Xml_payload       , VT_BSTR       },
     {}
 };
 
