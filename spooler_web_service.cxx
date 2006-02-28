@@ -229,7 +229,7 @@ void Web_service::set_dom( const xml::Element_ptr& element, const Time& )
 
 //-------------------------------------------------------------------------Web_service::dom_element
 
-xml::Element_ptr Web_service::dom_element( const xml::Document_ptr& document, const Show_what& what )
+xml::Element_ptr Web_service::dom_element( const xml::Document_ptr& document, const Show_what& )
 {
     xml::Element_ptr web_service_element = document.createElement( "web_service" );
 
@@ -472,7 +472,7 @@ ptr<Http_response> Web_service_operation::process_http__end()
 */
 //---------------------------------------------------------------Web_service_operation::dom_element
 
-xml::Element_ptr Web_service_operation::dom_element( const xml::Document_ptr& document, const Show_what& what ) const
+xml::Element_ptr Web_service_operation::dom_element( const xml::Document_ptr& document, const Show_what& ) const
 {
     xml::Element_ptr result = document.createElement( "web_service_operation" );
 
@@ -639,7 +639,7 @@ const Com_method Web_service_request::_methods[] =
 { 
 #ifdef COM_METHOD
     COM_PROPERTY_GET( Web_service_response,  1, Java_class_name               , VT_BSTR    , 0 ),
-    COM_PROPERTY_GET( Web_service_response,  3, Header                        , VT_EMPTY   , 0 , { VT_BSTR, VT_BSTR } ),
+    COM_PROPERTY_GET( Web_service_response,  3, Header                        , VT_EMPTY   , 0, VT_BSTR, VT_BSTR ),
     COM_PROPERTY_GET( Web_service_response,  4, String_content                , VT_BSTR    , 0 ),
     COM_PROPERTY_GET( Web_service_response,  5, Binary_content                , VT_ARRAY   , 0 ),
     COM_METHOD      ( Web_service_response,  6, Send                          , VT_EMPTY   ),
@@ -708,11 +708,11 @@ const Com_method Web_service_response::_methods[] =
 { 
 #ifdef COM_METHOD
     COM_PROPERTY_GET( Web_service_response,  1, Java_class_name               , VT_BSTR    , 0 ),
-    COM_PROPERTY_PUT( Web_service_response,  2, Status_code                   , VT_EMPTY   , 0, { VT_INT } ),
-    COM_PROPERTY_PUT( Web_service_response,  3, Header                        , VT_EMPTY   , 0, { VT_BSTR, VT_BSTR } ),
-    COM_PROPERTY_PUT( Web_service_response,  4, String_content                , VT_EMPTY   , 0, { VT_BSTR } ),
-    COM_PROPERTY_PUT( Web_service_response,  5, Binary_content                , VT_EMPTY   , 0, { VT_ARRAY } ),
-    COM_METHOD      ( Web_service_response,  6, Send                          , VT_EMPTY   ),
+    COM_PROPERTY_PUT( Web_service_response,  2, Status_code                   , VT_EMPTY   , 0, VT_INT ),
+    COM_PROPERTY_PUT( Web_service_response,  3, Header                        , VT_EMPTY   , 0, VT_BSTR, VT_BSTR ),
+    COM_PROPERTY_PUT( Web_service_response,  4, String_content                , VT_EMPTY   , 0, VT_BSTR ),
+    COM_PROPERTY_PUT( Web_service_response,  5, Binary_content                , VT_EMPTY   , 0, VT_ARRAY ),
+    COM_METHOD      ( Web_service_response,  6, Send                          , VT_EMPTY   , 0 ),
 #endif
     {}
 };

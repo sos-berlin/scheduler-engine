@@ -37,8 +37,8 @@ Subprocess::Class_descriptor    Subprocess::class_descriptor ( &typelib, "Spoole
 const Com_method Subprocess::_methods[] =
 { 
 #ifdef COM_METHOD
-    COM_PROPERTY_GET( Subprocess,  1, Java_class_name, VT_BSTR    , 0 ),
-    COM_METHOD      ( Subprocess,  2, Close          , VT_EMPTY   , 0 ),
+    COM_PROPERTY_GET( Subprocess,  1, Java_class_name, VT_BSTR    , 0  ),
+    COM_METHOD      ( Subprocess,  2, Close          , VT_EMPTY   , 0,  ),
     COM_METHOD      ( Subprocess,  3, Start          , VT_EMPTY   , 0, VT_BYREF|VT_VARIANT  ),
   //COM_PROPERTY_PUT( Subprocess,  4, Priority       ,              0, VT_BYREF|VT_VARIANT }  ),
   //COM_PROPERTY_GET( Subprocess,  4, Priority       , VT_VARIANT , 0 ),
