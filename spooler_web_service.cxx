@@ -355,10 +355,9 @@ void Web_service::forward( const xml::Document_ptr& payload_dom )
 const Com_method Web_service_operation::_methods[] =
 { 
 #ifdef COM_METHOD
-    COM_PROPERTY_GET( Web_service_respond,  1, Java_class_name               , VT_BSTR    , 0 ),
-    COM_PROPERTY_PUT( Web_service_respond,  2, Status_code                   , VT_BSTR    , 0 ),
-    COM_PROPERTY_PUT( Web_service_respond,  3, Header                        , VT_BSTR    , 0 ),
-    COM_PROPERTY_PUT( Web_service_respond,  4, Character_encoding            , VT_BSTR    , 0 ),
+    COM_PROPERTY_GET( Web_service_operation,  1, Java_class_name               , VT_BSTR    , 0 ),
+    COM_PROPERTY_GET( Web_service_operation,  2, Request                       , VT_DISPATCH, 0 ),
+    COM_PROPERTY_GET( Web_service_operation,  3, Response                      , VT_DISPATCH, 0 ),
 #endif
     {}
 };
@@ -502,7 +501,8 @@ STDMETHODIMP Web_service_operation::get_Response( spooler_com::Iweb_service_resp
 }
 
 //----------------------------------------------------------Web_service_stylesheet_operation::begin
-/*
+#if 0
+
 string Web_service_stylesheet_operation::begin()
 {
     xml::Document_ptr request_document;
@@ -631,16 +631,18 @@ string Web_service_stylesheet_operation::begin()
 
     return result;
 }
-*/
+
+#endif
 //--------------------------------------------------------------------Web_service_request::_methods
 
 const Com_method Web_service_request::_methods[] =
 { 
 #ifdef COM_METHOD
-    COM_PROPERTY_GET( Web_service_respond,  1, Java_class_name               , VT_BSTR    , 0 ),
-    COM_PROPERTY_PUT( Web_service_respond,  2, Status_code                   , VT_BSTR    , 0 ),
-    COM_PROPERTY_PUT( Web_service_respond,  3, Header                        , VT_BSTR    , 0 ),
-    COM_PROPERTY_PUT( Web_service_respond,  4, Character_encoding            , VT_BSTR    , 0 ),
+    COM_PROPERTY_GET( Web_service_response,  1, Java_class_name               , VT_BSTR    , 0 ),
+    COM_PROPERTY_GET( Web_service_response,  3, Header                        , VT_EMPTY   , 0 , { VT_BSTR, VT_BSTR } ),
+    COM_PROPERTY_GET( Web_service_response,  4, String_content                , VT_BSTR    , 0 ),
+    COM_PROPERTY_GET( Web_service_response,  5, Binary_content                , VT_ARRAY   , 0 ),
+    COM_METHOD      ( Web_service_response,  6, Send                          , VT_EMPTY   ),
 #endif
     {}
 };
@@ -705,10 +707,12 @@ STDMETHODIMP Web_service_request::get_Binary_content( SAFEARRAY** result )
 const Com_method Web_service_response::_methods[] =
 { 
 #ifdef COM_METHOD
-    COM_PROPERTY_GET( Web_service_respond,  1, Java_class_name               , VT_BSTR    , 0 ),
-    COM_PROPERTY_PUT( Web_service_respond,  2, Status_code                   , VT_BSTR    , 0 ),
-    COM_PROPERTY_PUT( Web_service_respond,  3, Header                        , VT_BSTR    , 0 ),
-    COM_PROPERTY_PUT( Web_service_respond,  4, Character_encoding            , VT_BSTR    , 0 ),
+    COM_PROPERTY_GET( Web_service_response,  1, Java_class_name               , VT_BSTR    , 0 ),
+    COM_PROPERTY_PUT( Web_service_response,  2, Status_code                   , VT_EMPTY   , 0, { VT_INT } ),
+    COM_PROPERTY_PUT( Web_service_response,  3, Header                        , VT_EMPTY   , 0, { VT_BSTR, VT_BSTR } ),
+    COM_PROPERTY_PUT( Web_service_response,  4, String_content                , VT_EMPTY   , 0, { VT_BSTR } ),
+    COM_PROPERTY_PUT( Web_service_response,  5, Binary_content                , VT_EMPTY   , 0, { VT_ARRAY } ),
+    COM_METHOD      ( Web_service_response,  6, Send                          , VT_EMPTY   ),
 #endif
     {}
 };

@@ -679,9 +679,9 @@ struct Iweb_service_response: IDispatch
   //virtual HRESULT         put_Character_encoding          ( BSTR )                                = 0;
   //virtual HRESULT         get_Content_type                ( BSTR* )                               = 0;
   //virtual HRESULT         put_Content_type                ( BSTR )                                = 0;
-  //virtual HRESULT         put_String_content              ( BSTR* )                               = 0;
-  //virtual HRESULT         put_Binary_content              ( SAFEARRAY** )                         = 0;
-    virtual HRESULT             Send                        ( VARIANT*, BSTR content_type )         = 0;
+    virtual HRESULT         put_String_content              ( BSTR* )                               = 0;
+    virtual HRESULT         put_Binary_content              ( SAFEARRAY** )                         = 0;
+    virtual HRESULT             Send                        ()                                      = 0;
 };
 
 //-------------------------------------------------------------------------------------------------
