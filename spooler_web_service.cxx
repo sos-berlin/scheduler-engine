@@ -638,11 +638,10 @@ string Web_service_stylesheet_operation::begin()
 const Com_method Web_service_request::_methods[] =
 { 
 #ifdef COM_METHOD
-    COM_PROPERTY_GET( Web_service_response,  1, Java_class_name               , VT_BSTR    , 0 ),
-    COM_PROPERTY_GET( Web_service_response,  3, Header                        , VT_EMPTY   , 0, VT_BSTR, VT_BSTR ),
-    COM_PROPERTY_GET( Web_service_response,  4, String_content                , VT_BSTR    , 0 ),
-    COM_PROPERTY_GET( Web_service_response,  5, Binary_content                , VT_ARRAY   , 0 ),
-    COM_METHOD      ( Web_service_response,  6, Send                          , VT_EMPTY   ),
+    COM_PROPERTY_GET( Web_service_request,  1, Java_class_name               , VT_BSTR    , 0 ),
+    COM_PROPERTY_GET( Web_service_request,  3, Header                        , VT_EMPTY   , 0, VT_BSTR, VT_BSTR ),
+    COM_PROPERTY_GET( Web_service_request,  4, String_content                , VT_BSTR    , 0 ),
+    COM_PROPERTY_GET( Web_service_request,  5, Binary_content                , VT_ARRAY   , 0 ),
 #endif
     {}
 };
