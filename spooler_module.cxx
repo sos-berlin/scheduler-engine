@@ -80,7 +80,7 @@ xml::Document_ptr Source_with_parts::dom_document() const
     xml::Document_ptr doc;
 
     doc.create();
-    doc.appendChild( doc.createProcessingInstruction( "xml", "version=\"1.0\" encoding=\"iso-8859-1\"" ) );
+    doc.appendChild( doc.createProcessingInstruction( "xml", "version=\"1.0\" encoding=\"" + scheduler_character_encoding + "\"" ) );
     doc.appendChild( dom_element(doc) );
 
     return doc;

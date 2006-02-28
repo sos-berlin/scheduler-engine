@@ -21,7 +21,7 @@ struct Response;
 
 //-------------------------------------------------------------------------------------------------
 
-string                          param_from_content_type     ( const string& content_type, const string& param_name );
+string                          get_content_type_parameter     ( const string& content_type, const string& param_name );
 
 //-------------------------------------------------------------------------------------Chunk_reader
 /*
@@ -39,8 +39,9 @@ string                          param_from_content_type     ( const string& cont
 
 struct Chunk_reader : Object
 {
-                                Chunk_reader                ( const string& content_type, const string& charset = "" ) 
-                                                                                                    : _zero_(this+1), _recommended_block_size( recommended_chunk_size ), _content_type(content_type), _charset(charset) {}
+                                Chunk_reader                ( const string& content_type )          : _zero_(this+1), _recommended_block_size( recommended_chunk_size ), _content_type(content_type) {}
+
+    string                      content_type                () const                                { return _content_type; }
 
     virtual void                recommend_block_size        ( int size )                            { _recommended_block_size = size; }
     int                         recommended_block_size      () const                                { return _recommended_block_size; }
@@ -56,15 +57,14 @@ struct Chunk_reader : Object
     Fill_zero                  _zero_;
     int                        _recommended_block_size;
     string                     _content_type;
-    string                     _charset;
 };
 
 //-----------------------------------------------------------------------------String_chunk_reader
 
 struct String_chunk_reader : Chunk_reader
 {
-                                String_chunk_reader         ( const string& text, const string& content_type = "text/plain" ) 
-                                                                                                    : Chunk_reader( content_type, "ISO-8859-1" ), _zero_(this+1), _text(text) {}
+                                String_chunk_reader         ( const string& text, const string& content_type = "text/plain; charset=" + scheduler_character_encoding ) 
+                                                                                                    : Chunk_reader( content_type ), _zero_(this+1), _text(text) {}
 
   protected:
     bool                        next_chunk_is_ready         ()                                      { return true; }
@@ -142,7 +142,7 @@ struct Log_chunk_reader : Chunk_reader
 
 struct Chunk_reader_filter : Chunk_reader
 {
-                                Chunk_reader_filter         ( Chunk_reader* r, const string& content_type, const string& charset = "" ) : Chunk_reader( content_type, charset ), _chunk_reader(r) {}
+                                Chunk_reader_filter         ( Chunk_reader* r, const string& content_type ) : Chunk_reader( content_type ), _chunk_reader(r) {}
 
     void                        set_event                   ( Event_base* event )                   { _chunk_reader->set_event( event ); }
 
@@ -189,6 +189,7 @@ struct Html_chunk_reader : Chunk_reader_filter
 
 enum Status_code
 {
+    status_200_ok                           = 200,
     status_301_moved_permanently            = 301,
     status_404_bad_request                  = 404,
     status_500_internal_server_error        = 500,
@@ -234,13 +235,19 @@ struct Headers
         string _value;
     };
 
+    typedef stdext::hash_map<string,Entry>   Map;
+
+
     bool                        contains                    ( const string& name )                  { return _map.find( lcase( name ) ) != _map.end(); }
     string                      operator[]                  ( const string& name ) const;
     void                        set                         ( const string& name, const string& value );
     void                        set_default                 ( const string& name, const string& value );
+    void                        print                       ( ostream* ) const;
+    void                        print                       ( ostream*, const Map::const_iterator& ) const;
+    void                        print                       ( ostream*, const string& header_name ) const;
+    void                        print_and_remove            ( ostream*, const string& header_name );
 
 
-    typedef stdext::hash_map<string,Entry>   Map;
     Map                        _map;
 };
 

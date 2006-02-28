@@ -72,32 +72,55 @@ using namespace zschimmer;
 using namespace zschimmer::com;
 
 namespace sos {
-    namespace spooler {
-        using namespace std;
-        struct Communication;
-        struct Spooler;
-        struct Spooler_thread;
-        struct Job;
-        struct Task;
-        struct Job_chain;
-        struct Order_queue;
-        struct Order;
-        struct Process_class;
-        struct Remote_scheduler;
-        struct Show_what;
-        struct Subprocess;
-        struct Subprocess_register;
-        struct Web_service;
-        struct Web_service_operation;
-        struct Web_service_request;
-        struct Web_service_response;
-        struct Xslt_stylesheet;
-    }
+namespace spooler {
 
-    namespace http
-    {
-    };
-}
+//--------------------------------------------------------------------------------------------const
+    
+extern const char*              temporary_process_class_name;
+extern const char               dtd_string[];
+extern volatile int             ctrl_c_pressed;
+extern const string             xml_schema_path;            // "scheduler.xsd"
+extern const string             scheduler_character_encoding;
+
+
+#ifdef Z_WINDOWS
+    const int                   max_processes                 =    30;    // Summe aller Handles darf MAXIMUM_WAIT_OBJECTS-1=63 nicht überschreiten
+    const int                   max_communication_connections =    28;    // Summe aller Handles darf MAXIMUM_WAIT_OBJECTS-1=63 nicht überschreiten, inkl. udp und listen()
+#else
+    const int                   max_processes                 =   200;    // kein Limit (HP-UX erlaubt 64 aktive fork())
+    const int                   max_communication_connections =   800;    // Limit ist FD_SETSIZE, inkl. udp und listen()
+#endif
+
+//-------------------------------------------------------------------------------------------------
+
+using namespace std;
+struct Communication;
+struct Spooler;
+struct Spooler_thread;
+struct Job;
+struct Task;
+struct Job_chain;
+struct Order_queue;
+struct Order;
+struct Process_class;
+struct Remote_scheduler;
+struct Show_what;
+struct Subprocess;
+struct Subprocess_register;
+struct Web_service;
+struct Web_service_operation;
+struct Web_service_request;
+struct Web_service_response;
+struct Xslt_stylesheet;
+
+} //namespace spooler
+
+namespace http
+{
+} //namespace http
+} //namespace sos
+
+//-------------------------------------------------------------------------------------------------
 
 #include "spooler_com.h"
 #include "spooler_xslt_stylesheet.h"
@@ -131,21 +154,6 @@ namespace sos {
 
 namespace sos {
 namespace spooler {
-
-
-extern const char*              temporary_process_class_name;
-extern const char               dtd_string[];
-extern volatile int             ctrl_c_pressed;
-extern const string             xml_schema_path;            // "scheduler.xsd"
-
-
-#ifdef Z_WINDOWS
-    const int                   max_processes                 =    30;    // Summe aller Handles darf MAXIMUM_WAIT_OBJECTS-1=63 nicht überschreiten
-    const int                   max_communication_connections =    28;    // Summe aller Handles darf MAXIMUM_WAIT_OBJECTS-1=63 nicht überschreiten, inkl. udp und listen()
-#else
-    const int                   max_processes                 =   200;    // kein Limit (HP-UX erlaubt 64 aktive fork())
-    const int                   max_communication_connections =   800;    // Limit ist FD_SETSIZE, inkl. udp und listen()
-#endif
 
 //-------------------------------------------------------------------------------------------------
 

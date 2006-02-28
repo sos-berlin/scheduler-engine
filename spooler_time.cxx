@@ -664,7 +664,7 @@ void Run_time::set_dom( const xml::Element_ptr& element )
             dt.assign( e.getAttribute( "date" ) );
             if( !dt.time_is_zero() )  throw_xc( "SCHEDULER-208", e.getAttribute( "date" ) );
             Date date;
-            date._day_nr = dt.as_time_t() / (24*60*60);
+            date._day_nr = (int)( dt.as_time_t() / (24*60*60) );
             date._day.set_dom( e, &default_day, &default_period );
             _date_set._date_set.insert( date );
         }

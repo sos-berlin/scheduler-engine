@@ -273,6 +273,8 @@ bool Communication::Connection::do_accept( SOCKET listen_socket )
 
 void Communication::Connection::do_close()
 {
+    if( _operation )  _operation->close(), _operation = NULL;
+
     remove_from_socket_manager();
 
     if( _read_socket == STDIN_FILENO  &&  _eof  &&  isatty(STDIN_FILENO) )  _spooler->cmd_terminate();  // Ctrl-D (auch wenn Terminal-Sitzung beendet?)
@@ -373,8 +375,8 @@ bool Communication::Connection::async_continue_( Continue_flags )
 
             if( _operation  &&  _operation->request_is_complete() ) 
             {
-                _operation->begin();
                 _connection_state = s_processing;
+                _operation->begin();
             }
         }
 
@@ -387,7 +389,7 @@ bool Communication::Connection::async_continue_( Continue_flags )
         {
             if( state() == s_sending )  something_done |= send__continue();
 
-            while( state() == s_stand_by )
+            while( state() == Buffered_socket_operation::s_ready )
             {
                 string data = _operation->get_response_part();
                 if( data == "" )  break;
@@ -400,14 +402,11 @@ bool Communication::Connection::async_continue_( Continue_flags )
             }
                 
 
-            if( state() == s_stand_by  &&  _operation->response_is_complete() )
+            if( state() == Buffered_socket_operation::s_ready  &&  _operation->response_is_complete() )
             {
                 if( _operation->should_close_connection() )  _eof = true;   // Wir tun so, als ob der Client EOF geliefert hat. Das führt zum Schließen der Verbindung.
 
-                _operation->close();
-                _operation        = NULL;
-                //_responding       = false;
-                //_receive_at_start = true; 
+                _operation->close(), _operation = NULL;
                 _connection_state = s_ready;
             }
         }

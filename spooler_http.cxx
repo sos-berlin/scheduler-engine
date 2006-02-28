@@ -37,11 +37,12 @@ struct Http_status_code_table
 
 const Http_status_code_table http_status_code_table[]  =
 {
+    { status_200_ok                            , "OK" },
     { status_301_moved_permanently             , "Moved Permanently" },
     { status_404_bad_request                   , "Bad Request" },
     { status_500_internal_server_error         , "Internal Server Error" },
-    { status_505_http_version_not_supported    , "HTTP Version Not Supported" },
     { status_501_not_implemented               , "Not Implemented" },
+    { status_505_http_version_not_supported    , "HTTP Version Not Supported" },
     {}
 };
 
@@ -55,9 +56,9 @@ Z_INIT( scheduler_http )
     }
 }
 
-//--------------------------------------------------------------------------param_from_content_type
+//--------------------------------------------------------------------------get_content_type_parameter
 
-string param_from_content_type( const string& content_type, const string& param_name )
+string get_content_type_parameter( const string& content_type, const string& param_name )
 {
     const char* p = content_type.c_str();
     
@@ -82,15 +83,6 @@ string param_from_content_type( const string& content_type, const string& param_
     }
 
     return "";
-/*
-    size_t pos = content_type.find( "charset=" );
-    if( pos == string::npos )  return "";
-
-    string result = content_type.substr( pos + 8 );
-    pos = result.find( " " );
-
-    return pos == string::npos? result : result.substr( 0, pos );
-*/
 }
 
 //------------------------------------------------------------------------------Headers::operator[]
@@ -118,6 +110,46 @@ void Headers::set_default( const string& name, const string& value )
     if( it == _map.end() )  _map[ name ] = Entry( name, value );
 }
 
+//-----------------------------------------------------------------------------------Headers::print
+
+void Headers::print( ostream* s ) const
+{
+    Z_FOR_EACH_CONST( Map, _map, h )
+    {
+        *s << h->second._name << ": " << h->second._value << "\r\n";
+    }
+}
+
+//-----------------------------------------------------------------------------------Headers::print
+
+void Headers::print( ostream* s, const string& header_name ) const
+{
+    Map::const_iterator it = _map.find( lcase( header_name ) );
+    if( it != _map.end() )  print( s, it );
+}
+
+//-----------------------------------------------------------------------------------Headers::print
+
+void Headers::print( ostream* s, const Headers::Map::const_iterator& it ) const
+{
+    if( it != _map.end() )
+    {
+        *s << it->second._name << ": " << it->second._value << "\r\n";
+    }
+}
+
+//------------------------------------------------------------------------Headers::print_and_remove
+
+void Headers::print_and_remove( ostream* s, const string& header_name )
+{
+    Map::iterator it = _map.find( lcase( header_name ) );
+    if( it != _map.end() )
+    {
+        print( s, it );
+        _map.erase( it );
+    }
+}
+
 //-----------------------------------------------------------------------------------Parser::Parser
     
 Parser::Parser( Request* request )
@@ -125,7 +157,7 @@ Parser::Parser( Request* request )
     _zero_(this+1),
     _request( request )
 {
-    _text.reserve( 1000 );
+    _text.reserve( 2000 );
 }
 
 //---------------------------------------------------------------------------------Parser::add_text
@@ -368,17 +400,21 @@ void Operation::begin()
 
             command_processor.set_host( _host );
             command_processor.execute_http( this );
+
+            _response->set_ready();
         }
     }
     catch( Http_exception& x )
     {
         if( _connection )  _connection->_log.error( x.what() );
         _response->set_status( x._status_code, x.what() );
+        _response->set_ready();
     }
     catch( exception& x )
     {
         if( _connection )  _connection->_log.error( x.what() );
         _response->set_status( status_500_internal_server_error, x.what() );
+        _response->set_ready();
     }
 
 
@@ -483,7 +519,7 @@ string Request::content_type() const
 
 string Request::character_encoding() const
 {
-    return param_from_content_type( _headers[ "content-type" ], "charset" );
+    return get_content_type_parameter( _headers[ "content-type" ], "charset" );
 }
 
 //-----------------------------------------------------------------------------Http_exception::what
@@ -504,12 +540,15 @@ const char* Http_exception::what()
 Response::Response( Operation* operation )
 : 
     _zero_(this+1), 
-  //_chunk_reader( chunk_reader ),
     _chunked( operation->request()->is_http_1_1() ),
     _close_connection_at_eof( !operation->request()->is_http_1_1() ),
     _operation(operation)
 { 
-  //set_content_type(content_type); 
+    if( _close_connection_at_eof )  _headers.set_default( "Connection", "close" );
+
+    if( _operation->_request->_headers[ "cache-control" ] == "no-cache" )
+        _headers.set( "Cache-Control", "no-cache" );   // Sonst bleibt z.B. die scheduler.xslt im Browser kleben und ein Wechsel der Datei wirkt nicht.
+                                                       // Gut wäre eine Frist, z.B. 10s
 }
 
 //-----------------------------------------------------------------------------Response::set_status
@@ -550,22 +589,18 @@ void Response::set_ready()
     _operation->_connection->signal( "http response is ready" );
 }
 
+//-----------------------------------------------------------------------------------Response::send
+
+void Response::send()
+{
+    set_ready();
+}
+
 //---------------------------------------------------------------------------------Response::finish
 
 void Response::finish()
 {
-    _headers_stream << _operation->request()->_protocol << ' ';
-
-    _chunked = _operation->request()->is_http_1_1();
-
-    if( _status_code )
-    {
-        _headers_stream << _status_code << ' ' << http_status_messages[ _status_code ] << "\n";
-    }
-    else
-    {
-        _headers_stream << "200 OK\r\n";
-    }
+    // _headers füllen
 
     if( !_headers.contains( "Date" ) )
     {
@@ -586,31 +621,26 @@ void Response::finish()
         _headers.set( "Date", string(time_text) + " GMT" );
     }
 
+    if( _chunk_reader )  _headers.set_default( "Content-Type", _chunk_reader->_content_type );
+
+
+    _chunked = _operation->request()->is_http_1_1();
+
+
+    if( !_status_code )  _status_code = status_200_ok;
+
+
+    _headers_stream << _operation->request()->_protocol << ' ' << _status_code << ' ' << http_status_messages[ _status_code ] << "\r\n";
+    _headers.print_and_remove( &_headers_stream, "Date" );
+    _headers.print( &_headers_stream );
+
+    if( _chunked )  _headers_stream << "Transfer-Encoding: chunked\r\n";
     _headers_stream << "Server: Scheduler " VER_PRODUCTVERSION_STR "\r\n";
-
-    //if( _content_type != "" )  _headers_stream << "Content-Type: " << _content_type << "\r\n";
-
-    //if( _request->_header[ "cache-control" ] == "no-cache" )
-    //  _header += "Cache-Control: no-cache\r\n";   // Sonst bleibt z.B. die scheduler.xslt im Browser kleben und ein Wechsel der Datei wirkt nicht.
-                                                    // Gut wäre eine Frist, z.B. 10s
-
-    if( _chunked                 )  _headers_stream << "Transfer-Encoding: chunked\r\n";
-    if( _close_connection_at_eof )  _headers_stream << "Connection: close\r\n";
-
-    Z_FOR_EACH( Headers::Map, _headers._map, h )  _headers_stream << h->second._name << ": " << h->second._value << "\r\n";
 
     _headers_stream << "\r\n";
 
     _chunk_size = _headers_stream.length();
     _finished = true;
-}
-
-//-----------------------------------------------------------------------------------Response::send
-
-void Response::send()
-{
-    finish();
-    //Communication::Connection::async_continue_() wird sowieso gerufen.   _operation->_operation_connection->_connection->async_signal();
 }
 
 //------------------------------------------------------------------------------------Response::eof
@@ -723,7 +753,7 @@ string String_chunk_reader::read_from_chunk( int recommended_size )
 
 Log_chunk_reader::Log_chunk_reader( Prefix_log* log )
 : 
-    Chunk_reader( "text/html" ),
+    Chunk_reader( "text/html; charset=" + scheduler_character_encoding ),
     _zero_(this+1), 
     _log(log) 
 {
@@ -810,7 +840,7 @@ string Log_chunk_reader::html_insertion()
 
 Html_chunk_reader::Html_chunk_reader( Chunk_reader* chunk_reader, const string& title )
 : 
-    Chunk_reader_filter( chunk_reader, "text/html" ),
+    Chunk_reader_filter( chunk_reader, "text/html; charset=" + get_content_type_parameter( chunk_reader->content_type(), "charset" ) ),
     _zero_(this+1), 
     _state(reading_prefix),
     _awaiting_class(true)
@@ -992,7 +1022,7 @@ bool Html_chunk_reader::try_fill_chunk()
 
 //---------------------------------------------------------------Html_chunk_reader::read_from_chunk
 
-string Html_chunk_reader::read_from_chunk( int recommended_size )
+string Html_chunk_reader::read_from_chunk( int )
 { 
     switch( _state )
     {

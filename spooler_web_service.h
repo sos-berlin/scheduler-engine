@@ -36,6 +36,8 @@ struct Web_service: idispatch_implementation< Web_service, spooler_com::Iweb_ser
 
     // interface Iweb_service
     STDMETHODIMP            get_Name                        ( BSTR* result )                        { return String_to_bstr( _name, result ); }
+    STDMETHODIMP            get_Request_xslt_stylesheet_path( BSTR* result )                        { return String_to_bstr( _request_xslt_stylesheet_path, result ); }
+    STDMETHODIMP            get_Response_xslt_stylesheet_path( BSTR* result )                       { return String_to_bstr( _response_xslt_stylesheet_path, result ); }
     STDMETHODIMP            get_Forward_xslt_stylesheet_path( BSTR* result )                        { return String_to_bstr( _forward_xslt_stylesheet_path, result ); }
 
 
@@ -43,15 +45,12 @@ struct Web_service: idispatch_implementation< Web_service, spooler_com::Iweb_ser
     Prefix_log*                 log                         ()                                      { return _log; }
     string                      obj_name                    () const                                { return "Web_service " + _name; }
 
-
     void                        load                        ();
     void                        check                       ();
     void                    set_url_path                    ( const string& url_path )              { _url_path = url_path; }
     string                      url_path                    () const                                { return _url_path; }
-
     void                    set_dom                         ( const xml::Element_ptr&, const Time& xml_mod_time = Time() );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& = Show_what() );
-
     void                    set_name                        ( const string& name )                  { _name = name; }
     string                      name                        () const                                { return _name; }
     ptr<Web_service_operation>  new_operation               ( http::Operation* );
@@ -65,7 +64,6 @@ struct Web_service: idispatch_implementation< Web_service, spooler_com::Iweb_ser
     
   private:
     friend struct               Web_service_operation;
-  //friend Web_service*         Spooler::web_service_by_url_path_or_null( const string& url_path );
 
     Fill_zero                  _zero_;
     string                     _name;
@@ -104,8 +102,6 @@ struct Web_services
     Web_service*                web_service_by_url_path_or_null( const string& url_path );
     Web_service*                web_service_by_name         ( const string& name );
     Web_service*                web_service_by_name_or_null ( const string& name );
-
-
 
   private:
     Spooler*                   _spooler;
@@ -173,7 +169,6 @@ struct Web_service_operation : idispatch_implementation< Web_service_operation, 
     ptr<Prefix_log>            _log;
 };
 
-
 //----------------------------------------------------------------Web_service_stylesheet_operation 
 /*
 struct Web_service_stylesheet_operation : Web_service_operation
@@ -196,7 +191,6 @@ struct Web_service_request : idispatch_implementation< Web_service_request, spoo
 
                                 Web_service_request         ( Web_service_operation* );
 
-
     // Scheduler_object
     Prefix_log*                 log                         ()                                      { return _web_service_operation->log(); }
     string                      obj_name                    () const;
@@ -204,7 +198,6 @@ struct Web_service_request : idispatch_implementation< Web_service_request, spoo
     // interface Ihas_java_class_name
     STDMETHODIMP            get_Java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
     STDMETHODIMP_(char*)  const_java_class_name             ()                                      { return (char*)"sos.spooler.Web_service_request"; }
-
 
     // Iweb_service_request
     STDMETHODIMP            get_Url                         ( BSTR* result )                        { return String_to_bstr( http_request()->url(), result ); }
@@ -215,6 +208,7 @@ struct Web_service_request : idispatch_implementation< Web_service_request, spoo
     STDMETHODIMP            get_Binary_content              ( SAFEARRAY** );
 
     http::Request*              http_request                () const                                { return _web_service_operation->http_request(); }
+
 
   private:
     friend struct               Web_service_operation;
@@ -234,7 +228,6 @@ struct Web_service_response : idispatch_implementation< Web_service_response, sp
 
                                 Web_service_response        ( Web_service_operation* );
 
-
     // Scheduler_object
     Prefix_log*                 log                         ()                                      { return _web_service_operation->log(); }
     string                      obj_name                    () const;
@@ -242,7 +235,6 @@ struct Web_service_response : idispatch_implementation< Web_service_response, sp
     // interface Ihas_java_class_name
     STDMETHODIMP            get_Java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
     STDMETHODIMP_(char*)  const_java_class_name             ()                                      { return (char*)"sos.spooler.Web_service_response"; }
-
 
     // Iweb_service_response
     STDMETHODIMP            put_Status_code                 ( int code );
@@ -252,9 +244,10 @@ struct Web_service_response : idispatch_implementation< Web_service_response, sp
   //STDMETHODIMP            get_Character_encoding          ( BSTR* result );
   //STDMETHODIMP            put_Content_type                ( BSTR content_type );
   //STDMETHODIMP            get_Content_type                ( BSTR* result );
-  //STDMETHODIMP            put_String_content              ( BSTR );
-  //STDMETHODIMP            put_Binary_content              ( SAFEARRAY* );
-    STDMETHODIMP                Send                        ( VARIANT*, BSTR );
+    STDMETHODIMP            put_String_content              ( BSTR );
+    STDMETHODIMP            put_Binary_content              ( SAFEARRAY* );
+    STDMETHODIMP                Send                        ();
+  //STDMETHODIMP                Send                        ( VARIANT*, BSTR );
 
     http::Response*             http_response               () const                                { return _web_service_operation->http_response(); }
 

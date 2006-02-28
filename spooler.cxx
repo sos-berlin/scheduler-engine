@@ -65,12 +65,13 @@ namespace spooler {
 
 const char*                     default_factory_ini                 = "factory.ini";
 const string                    xml_schema_path                     = "scheduler.xsd";
-const string                    new_suffix                          = "~new";  // Suffix für den neuen Spooler, der den bisherigen beim Neustart ersetzen soll
+const string                    scheduler_character_encoding        = "ISO-8859-1";     // Eigentlich Windows-1252, aber das ist weniger bekannt und wir sollten die Zeichen 0xA0..0xBF nicht benutzen.
+const string                    new_suffix                          = "~new";           // Suffix für den neuen Spooler, der den bisherigen beim Neustart ersetzen soll
 const double                    renew_wait_interval                 = 0.25;
-const double                    renew_wait_time                     = 30;      // Wartezeit für Brückenspooler, bis der alte Spooler beendet ist und der neue gestartet werden kann.
-const int                       kill_timeout_1                      = 10;          // < kill_timeout_total
-const int                       kill_timeout_total                  = 30;          // terminate mit timeout: Nach timeout und kill noch soviele Sekunden warten
-const double                    wait_for_thread_termination         = latter_day;  // Haltbarkeit des Geduldfadens
+const double                    renew_wait_time                     = 30;               // Wartezeit für Brückenspooler, bis der alte Spooler beendet ist und der neue gestartet werden kann.
+const int                       kill_timeout_1                      = 10;               // < kill_timeout_total
+const int                       kill_timeout_total                  = 30;               // terminate mit timeout: Nach timeout und kill noch soviele Sekunden warten
+const double                    wait_for_thread_termination         = latter_day;       // Haltbarkeit des Geduldfadens
 //const double                    wait_step_for_thread_termination    = 5.0;         // 1. Nörgelabstand
 //const double                    wait_step_for_thread_termination2   = 600.0;       // 2. Nörgelabstand
 //const double wait_for_thread_termination_after_interrupt = 1.0;
@@ -2543,7 +2544,7 @@ void Spooler::run()
             _connection_manager->wait( 0.0 );       // select() rufen, damit die Signale der Kommunikations-Sockets gesetzt werden.
         }
 
-        _next_time = 0;
+        _next_time = (time_t)0;
 
         if( ctrl_c_pressed )
         {

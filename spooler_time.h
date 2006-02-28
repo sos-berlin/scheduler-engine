@@ -32,14 +32,15 @@ struct Time
 
                                 Time                        ( double t = 0.0 )              { set(t); }
                                 Time                        ( time_t t )                    { set((double)t); }
-                                Time                        ( int t )                       { set(t); }
-                                Time                        ( uint t )                      { set(t); }
+                                Time                        ( int t )                       { set((double)t); }
+                                Time                        ( uint t )                      { set((double)t); }
                                 Time                        ( const string& t )             { set(t); }
                                 Time                        ( const char* t   )             { set(t); }
                                 Time                        ( const Sos_optional_date_time& dt ) { *this = dt; }
 
     void                        operator =                  ( double t )                    { set(t); }
-    void                        operator =                  ( int t )                       { set(t); }
+    void                        operator =                  ( time_t t )                    { set((double)t); }
+    void                        operator =                  ( int t )                       { set((double)t); }
     void                        operator =                  ( const string& t )             { set(t); }
     void                        operator =                  ( const char* t )               { set(t); }
     void                        operator =                  ( const Sos_optional_date_time& );
@@ -79,6 +80,8 @@ struct Time
     bool                        operator !                  () const                        { return _time == 0; }
 
     static double               round                       ( double t )                    { return floor( t * 1000.0 + 0.5 ) / 1000.0; }
+    void                        set                         ( int t )                       { set( (double)t ); }
+    void                        set                         ( time_t t )                    { set( (double)t ); }
     void                        set                         ( double );
     void                        set                         ( const string& );
     void                        set_datetime                ( const string& );

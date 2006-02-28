@@ -47,7 +47,9 @@ const Com_method Web_service::_methods[] =
 #ifdef COM_METHOD
     COM_PROPERTY_GET( Web_service,  1, Java_class_name               , VT_BSTR    , 0 ),
     COM_PROPERTY_GET( Web_service,  2, Name                          , VT_BSTR    , 0 ),
-    COM_PROPERTY_GET( Web_service,  3, Forward_xslt_stylesheet_path  , VT_BSTR    , 0 ),
+    COM_PROPERTY_GET( Web_service,  3, Request_xslt_stylesheet_path  , VT_BSTR    , 0 ),
+    COM_PROPERTY_GET( Web_service,  4, Response_xslt_stylesheet_path , VT_BSTR    , 0 ),
+    COM_PROPERTY_GET( Web_service,  5, Forward_xslt_stylesheet_path  , VT_BSTR    , 0 ),
 #endif
     {}
 };
@@ -659,6 +661,7 @@ Web_service_request::Web_service_request( Web_service_operation* web_service_ope
 void Web_service_operation::close()
 { 
     if( _order )  _order->set_web_service_operation( NULL ), _order = NULL;
+
     _http_operation = NULL;
     _response       = NULL;
     _request        = NULL;
@@ -828,16 +831,20 @@ STDMETHODIMP Web_service_response::get_Content_type( BSTR* result )
 
     return hr;
 }
-
+*/
 //---------------------------------------------------------Web_service_response::put_String_content
 
-STDMETHODIMP Web_service_response::put_String_content( BSTR bstr )
+STDMETHODIMP Web_service_response::put_String_content( BSTR content_bstr )
 {
     HRESULT hr = S_OK;
     
+    if( !http_response() )  return E_FAIL;
+
     try
     {
-        return E_NOTIMPL;
+        const Charset* charset = Charset::for_name( http::get_content_type_parameter( http_response()->header( "content_type" ), "charset" ) );
+
+        http_response()->set_chunk_reader( Z_NEW( http::String_chunk_reader( charset->encoded_from_bstr( content_bstr ), "" ) ) );
     }
     catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
 
@@ -849,33 +856,45 @@ STDMETHODIMP Web_service_response::put_String_content( BSTR bstr )
 STDMETHODIMP Web_service_response::put_Binary_content( SAFEARRAY* safearray )
 {
     HRESULT hr = S_OK;
+
+    if( !http_response() )  return E_FAIL;
     
     try
     {
-        return E_NOTIMPL;
+        VARTYPE vartype = 0;
+
+        hr = SafeArrayGetVartype( safearray, &vartype );  
+        if( FAILED(hr) )  return hr;
+        if( vartype != VT_UI1 )  return DISP_E_TYPEMISMATCH;
+
+        Locked_safearray<Byte> a ( safearray );
+
+        http_response()->set_chunk_reader( Z_NEW( http::Byte_chunk_reader( &a[0], a.count(), "" ) ) );
     }
     catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
 
     return hr;
 }
-*/
+
 //-----------------------------------------------------------------------Web_service_response::Send
 
-STDMETHODIMP Web_service_response::Send( VARIANT* content, BSTR content_type_bstr )
+STDMETHODIMP Web_service_response::Send() // VARIANT* content, BSTR content_type_bstr )
 {
     HRESULT hr = S_OK;
     
-    if( !content )  return E_POINTER;
+    //if( !content )  return E_POINTER;
+    if( !http_response() )  return E_FAIL;
 
     try
     {
+        /*
         string                  content_type = string_from_bstr( content_type_bstr );
         ptr<http::Chunk_reader> chunk_reader;
 
 
         if( content->vt == VT_BSTR )
         {
-            const Charset*  charset      = Charset::for_name( http::param_from_content_type( content_type, "charset" ) );
+            const Charset*  charset      = Charset::for_name( http::get_content_type_parameter( content_type, "charset" ) );
             const BSTR      content_bstr = V_BSTR( content );
 
             chunk_reader = Z_NEW( http::String_chunk_reader( charset->encoded_from_bstr( content_bstr ), content_type ) );
@@ -899,6 +918,7 @@ STDMETHODIMP Web_service_response::Send( VARIANT* content, BSTR content_type_bst
 
 
         http_response()->set_chunk_reader( chunk_reader );
+        */
         http_response()->send();
     }
     catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }

@@ -884,7 +884,7 @@ void Command_processor::execute_http( http::Operation* http_operation )
                                 if( e.nodeName_is( "log" ) )
                                 {
                                     //TODO Log wird im Speicher gehalten! Besser: In Datei schreiben, vielleicht sogar Task und Log anlegen
-                                    http_response->set_chunk_reader( Z_NEW( http::Html_chunk_reader( Z_NEW( http::String_chunk_reader( e.nodeValue() ) ), title ) ) );
+                                    http_response->set_chunk_reader( Z_NEW( http::Html_chunk_reader( Z_NEW( http::String_chunk_reader( e.nodeValue(), "text/plain; charset=" + scheduler_character_encoding ) ), title ) ) );
                                     return;
                                 }
                             }
@@ -1237,7 +1237,7 @@ void Command_processor::begin_answer()
     if( !_answer )
     {
         _answer.create();
-        _answer.appendChild( _answer.createProcessingInstruction( "xml", "version=\"1.0\" encoding=\"iso-8859-1\"" ) );
+        _answer.appendChild( _answer.createProcessingInstruction( "xml", "version=\"1.0\" encoding=\"" + scheduler_character_encoding + "\"" ) );
         _answer.appendChild( _answer.createElement( "spooler" ) );
 
         xml::Element_ptr answer_element = _answer.documentElement().appendChild( _answer.createElement( "answer" ) );

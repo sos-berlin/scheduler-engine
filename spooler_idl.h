@@ -632,9 +632,11 @@ DEFINE_GUID( IID_Iweb_service, 0xfeee47ad, 0x6c1b, 0x11d8, 0x81, 0x03, 0x00, 0x0
                                                                                                                    
 struct Iweb_service: IDispatch
 {
-    virtual HRESULT     get_Java_class_name         ( BSTR* )                                       = 0;
-    virtual HRESULT     get_Name                    ( BSTR* )                                       = 0;
-    virtual HRESULT     get_Forward_xslt_stylesheet_path( BSTR* )                                   = 0;
+    virtual HRESULT     get_Java_class_name                 ( BSTR* )                               = 0;
+    virtual HRESULT     get_Name                            ( BSTR* )                               = 0;
+    virtual HRESULT     get_Request_xslt_stylesheet_path    ( BSTR* )                               = 0;
+    virtual HRESULT     get_Response_xslt_stylesheet_path   ( BSTR* )                               = 0;
+    virtual HRESULT     get_Forward_xslt_stylesheet_path    ( BSTR* )                               = 0;
 };
 
 //---------------------------------------------------------------------------Iweb_service_operation
@@ -656,8 +658,8 @@ struct Iweb_service_request: IDispatch
 {
     virtual HRESULT         get_Url                         ( BSTR* )                               = 0;
     virtual HRESULT         get_Header                      ( BSTR Name, BSTR* Result )             = 0;
-    virtual HRESULT         get_Character_encoding          ( BSTR* )                               = 0;
-    virtual HRESULT         get_Content_type                ( BSTR* )                               = 0;
+  //virtual HRESULT         get_Character_encoding          ( BSTR* )                               = 0;
+  //virtual HRESULT         get_Content_type                ( BSTR* )                               = 0;
     virtual HRESULT         get_String_content              ( BSTR* )                               = 0;
     virtual HRESULT         get_Binary_content              ( SAFEARRAY** )                         = 0;
 };
@@ -677,7 +679,6 @@ struct Iweb_service_response: IDispatch
   //virtual HRESULT         put_String_content              ( BSTR* )                               = 0;
   //virtual HRESULT         put_Binary_content              ( SAFEARRAY** )                         = 0;
     virtual HRESULT             Send                        ( [in] VARIANT*, [in] BSTR content_type );       // BSTR oder SAFEARRAY(unsigned char)
-
 };
 
 //-------------------------------------------------------------------------------------------------

@@ -1356,6 +1356,12 @@ library Spooler
         HRESULT                 Name                    ( [out,retval] BSTR* );
 
         [propget]
+        HRESULT                 Request_xslt_stylesheet_path( [out,retval] BSTR* );
+
+        [propget]
+        HRESULT                 Response_xslt_stylesheet_path( [out,retval] BSTR* );
+
+        [propget]
         HRESULT                 Forward_xslt_stylesheet_path( [out,retval] BSTR* );
     };
 
@@ -1445,14 +1451,16 @@ library Spooler
 
         [propget]
         HRESULT                 Content_type            ( [out,retval] BSTR* );
+        */
 
         [propput]
         HRESULT                 String_content          ( [in] BSTR );
 
         [propput]
         HRESULT                 Binary_content          ( [in] SAFEARRAY(unsigned char) );
-        */
-        HRESULT                 Send                    ( [in] VARIANT*, [in] BSTR content_type );       // BSTR oder SAFEARRAY(unsigned char)
+        
+        //HRESULT                 Send                    ( [in] VARIANT*, [in] BSTR content_type );       // BSTR oder SAFEARRAY(unsigned char)
+        HRESULT                 Send                    ();
     };
 };
 
