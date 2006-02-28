@@ -13,6 +13,17 @@
 */
 
 
+/*
+    Mögliche Verbesserungen:
+
+    HTTP 1.1 ist nur dürftig implementiert.
+    "Transfer-Encoding: chunked" nicht, wenn nur ein oder kein Chunk da ist (z.B.String_chunk_reader)
+    Mehrere Chunks mit einem send-scattered() senden
+    "Date:" der Datei senden
+
+*/
+
+
 #include "spooler.h"
 #include "spooler_version.h"
 
@@ -600,47 +611,66 @@ void Response::send()
 
 void Response::finish()
 {
-    // _headers füllen
+    if( !_status_code )  _status_code = status_200_ok;
 
-    if( !_headers.contains( "Date" ) )
+    if( (int)_status_code >= 100  &&  (int)_status_code <= 199  ||  (int)_status_code == 204  || (int)_status_code == 304 )       // RFC 2617 4.4
     {
-        time_t      t;
-        char        time_text[26];
-
-        ::time( &t );
-        memset( time_text, 0, sizeof time_text );
-
-    #   ifdef Z_WINDOWS
-            strcpy( time_text, asctime( gmtime( &t ) ) );
-    #    else
-            struct tm  tm;
-            asctime_r( gmtime_r( &t, &tm ), time_text );
-    #   endif
-        
-        time_text[24] = '\0';
-        _headers.set( "Date", string(time_text) + " GMT" );
+        if( _chunk_reader )
+        {
+            Z_LOG( "_chunk_reader entfernt\n" ); 
+            _chunk_reader = NULL;
+        }
     }
-
-    if( _chunk_reader )  _headers.set_default( "Content-Type", _chunk_reader->_content_type );
-
 
     _chunked = _operation->request()->is_http_1_1();
 
 
-    if( !_status_code )  _status_code = status_200_ok;
+    // _headers füllen
 
+    if( !_headers.contains( "Date" ) )  _headers.set( "Date", date_string() );
+    if( _chunk_reader )  _headers.set_default( "Content-Type", _chunk_reader->_content_type );
+
+
+    // _headers_stream schreiben
 
     _headers_stream << _operation->request()->_protocol << ' ' << _status_code << ' ' << http_status_messages[ _status_code ] << "\r\n";
-    _headers.print_and_remove( &_headers_stream, "Date" );
+    //_headers.print_and_remove( &_headers_stream, "Date" );
     _headers.print( &_headers_stream );
 
     if( _chunked )  _headers_stream << "Transfer-Encoding: chunked\r\n";
-    _headers_stream << "Server: Scheduler " VER_PRODUCTVERSION_STR "\r\n";
+          //  else  _headers_stream << "Content-Length: ???\r\n";
+
+    _headers_stream << "Server: Scheduler " VER_PRODUCTVERSION_STR;
+    //if( Web_service_operation* wso = _operation->_web_service_operation )
+    //    _headers_stream << wso->_web_service->obj_name();
+    _headers_stream << "\r\n";
 
     _headers_stream << "\r\n";
 
+
     _chunk_size = _headers_stream.length();
     _finished = true;
+}
+
+//----------------------------------------------------------------------------Response::date_string
+
+string Response::date_string()
+{
+    time_t      t;
+    char        time_text[26];
+
+    ::time( &t );
+    memset( time_text, 0, sizeof time_text );
+
+#   ifdef Z_WINDOWS
+        strcpy( time_text, asctime( gmtime( &t ) ) );
+#    else
+        struct tm  tm;
+        asctime_r( gmtime_r( &t, &tm ), time_text );
+#   endif
+    
+    time_text[24] = '\0';
+    return string(time_text) + " GMT";
 }
 
 //------------------------------------------------------------------------------------Response::eof

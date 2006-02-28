@@ -434,7 +434,7 @@ STDMETHODIMP Com_variable_set::put_Var( BSTR name, VARIANT* value )
         {
             Bstr lname = name;
 
-            if( _ignore_case )  bstr_to_lower( &lname._bstr );
+            if( _ignore_case )  lname.to_lower();
 
             Map::iterator it = _map.find( lname );
             if( it != _map.end()  &&  it->second )
@@ -463,7 +463,7 @@ void Com_variable_set::get_var( BSTR name, VARIANT* value ) const
         VariantInit( value );
 
         Bstr lname = name;
-        if( _ignore_case )  bstr_to_lower( &lname._bstr );
+        if( _ignore_case )  lname.to_lower();
 
         Map::const_iterator it = _map.find( lname );
         if( it != _map.end()  &&  it->second )
@@ -652,7 +652,7 @@ STDMETHODIMP Com_variable_set::Merge( Ivariable_set* other )
                 hr = it->second->Clone( (Ivariable**)&v );
 
                 Bstr name = v->_name;
-                if( _ignore_case )  bstr_to_lower( &name );
+                if( _ignore_case )  name.to_lower();
                 _map[ name ] = v;
             }
         }

@@ -335,6 +335,7 @@ struct Response : Object
     void                    set_status                      ( Status_code, const string& text = "" );
     void                    set_chunk_reader                ( Chunk_reader* c )                     { _chunk_reader = c; set_ready(); }
     void                        finish                      ();
+    static string               date_string                 ();
     void                        send                        ();
     bool                     is_ready                       () const                                { return _ready; }
     void                    set_ready                       ();
