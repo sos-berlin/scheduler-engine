@@ -131,6 +131,7 @@ struct Web_service_operation : idispatch_implementation< Web_service_operation, 
     Prefix_log*                 log                         ()                                      { return _log; }
     string                      obj_name                    () const;
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& ) const;
+    bool                        closed                      () const                                { return _http_operation == NULL; }
 
     // interface Ihas_java_class_name
     STDMETHODIMP            get_Java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
@@ -197,18 +198,19 @@ struct Web_service_request : idispatch_implementation< Web_service_request, spoo
     // Scheduler_object
     Prefix_log*                 log                         ()                                      { return _web_service_operation->log(); }
     string                      obj_name                    () const;
+    bool                        closed                      () const                                { return _web_service_operation == NULL; }
 
     // interface Ihas_java_class_name
     STDMETHODIMP            get_Java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
     STDMETHODIMP_(char*)  const_java_class_name             ()                                      { return (char*)"sos.spooler.Web_service_request"; }
 
     // Iweb_service_request
-    STDMETHODIMP            get_Url                         ( BSTR* result )                        { return String_to_bstr( http_request()->url(), result ); }
-    STDMETHODIMP            get_Header                      ( BSTR name, BSTR* result )             { return String_to_bstr( http_request()->header( string_from_bstr( name ) ), result ); }
+    STDMETHODIMP            get_Url                         ( BSTR* );
+    STDMETHODIMP            get_Header                      ( BSTR name, BSTR* );
   //STDMETHODIMP            get_Character_encoding          ( BSTR* result )                        { return String_to_bstr( http_request()->character_encoding(), result ); }
   //STDMETHODIMP            get_Content_type                ( BSTR* result )                        { return String_to_bstr( http_request()->content_type(), result ); }
     STDMETHODIMP            get_String_content              ( BSTR* );
-    STDMETHODIMP            get_Binary_content              ( SAFEARRAY* );
+    STDMETHODIMP            get_Binary_content              ( SAFEARRAY** );
 
     http::Request*              http_request                () const                                { return _web_service_operation->http_request(); }
 
@@ -234,6 +236,7 @@ struct Web_service_response : idispatch_implementation< Web_service_response, sp
     // Scheduler_object
     Prefix_log*                 log                         ()                                      { return _web_service_operation->log(); }
     string                      obj_name                    () const;
+    bool                        closed                      () const                                { return _web_service_operation == NULL; }
 
     // interface Ihas_java_class_name
     STDMETHODIMP            get_Java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }

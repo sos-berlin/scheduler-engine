@@ -14,7 +14,7 @@ public class Web_service_operation  extends Idispatch
     private                     Web_service_operation   ( long idispatch )          { super(idispatch); }
 
     
-    public Web_service          web_service             ()                          { return (Web_service         )   com_call( "<web_service"          ); }
-    public Web_service_request  web_service_request     ()                          { return (Web_service_request )   com_call( "<web_service_request"  ); }
-    public Web_service_response web_service_response    ()                          { return (Web_service_response)   com_call( "<web_service_response" ); }
+    public Web_service          web_service             ()                          { return (Web_service         )   com_call( "<web_service" ); }
+    public Web_service_request  request                 ()                          { return (Web_service_request )   com_call( "<request"     ); }
+    public Web_service_response response                ()                          { return (Web_service_response)   com_call( "<response"    ); }
 }

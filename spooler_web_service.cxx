@@ -685,36 +685,40 @@ void Web_service_operation::close()
     _web_service    = NULL;
 }
 
+//---------------------------------------------------------------------Web_service_request::get_Url
+
+STDMETHODIMP Web_service_request::get_Url( BSTR* result )
+{ 
+    if( closed() )  return E_POINTER;
+
+    return String_to_bstr( http_request()->url(), result ); 
+}
+
+//------------------------------------------------------------------Web_service_request::get_Header
+
+STDMETHODIMP Web_service_request::get_Header( BSTR name, BSTR* result ) 
+{ 
+    if( closed() )  return E_POINTER;
+
+    return String_to_bstr( http_request()->header( string_from_bstr( name ) ), result ); 
+}
+
 //----------------------------------------------------------Web_service_request::get_String_content
 
 STDMETHODIMP Web_service_request::get_String_content( BSTR* result )
 {
-    HRESULT hr = S_OK;
-    
-    try
-    {
-        hr = Charset::for_name( http_request()->character_encoding() )->Encoded_to_bstr( http_request()->body(), result );
-    }
-    catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
-
-    return hr;
+    if( closed() )  return E_POINTER;
+   
+    return http_request()->get_String_content( result ); 
 }
 
 //----------------------------------------------------------Web_service_request::get_Binary_content
 
-STDMETHODIMP Web_service_request::get_Binary_content( SAFEARRAY* result )
+STDMETHODIMP Web_service_request::get_Binary_content( SAFEARRAY** result )
 {
-    HRESULT hr = S_OK;
+    if( closed() )  return E_POINTER;
     
-    try
-    {
-        Locked_safearray<unsigned char> safearray ( http_request()->body().length() );
-        memcpy( &safearray[0], http_request()->body().data(), http_request()->body().length() );
-        *result = safearray.take_safearray();
-    }
-    catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
-
-    return hr;
+    return http_request()->get_Binary_content( result ); 
 }
 
 //-------------------------------------------------------------------Web_service_response::_methods
@@ -747,45 +751,27 @@ Web_service_response::Web_service_response( Web_service_operation* web_service_o
     
 STDMETHODIMP Web_service_response::put_Status_code( int code )
 { 
-    HRESULT hr = S_OK;
-    
-    try
-    {
-        http_response()->set_status( (http::Status_code)code );  
-    }
-    catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    if( closed() )  return E_POINTER;
 
-    return hr;
+    return http_response()->put_Status_code( code );
 }
 
 //-----------------------------------------------------------------Web_service_response::put_Header
     
 STDMETHODIMP Web_service_response::put_Header( BSTR name, BSTR value )
 { 
-    HRESULT hr = S_OK;
-    
-    try
-    {
-        http_response()->set_header( string_from_bstr( name ), string_from_bstr( value ) );  
-    }
-    catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    if( closed() )  return E_POINTER;
 
-    return hr;
+    return http_response()->put_Header( name, value );
 }
 
 //-----------------------------------------------------------------Web_service_response::get_Header
 
 STDMETHODIMP Web_service_response::get_Header( BSTR name, BSTR* result )
 { 
-    HRESULT hr = S_OK;
-    
-    try
-    {
-        hr = String_to_bstr( http_response()->header( string_from_bstr( name ) ), result );
-    }
-    catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    if( closed() )  return E_POINTER;
 
-    return hr;
+    return http_response()->get_Header( name, result );
 }
 
 //-----------------------------------------------------Web_service_response::put_Character_encoding
@@ -855,94 +841,27 @@ STDMETHODIMP Web_service_response::get_Content_type( BSTR* result )
 
 STDMETHODIMP Web_service_response::put_String_content( BSTR content_bstr )
 {
-    HRESULT hr = S_OK;
-    
-    if( !http_response() )  return E_FAIL;
+    if( closed() )  return E_POINTER;
 
-    try
-    {
-        const Charset* charset = Charset::for_name( http::get_content_type_parameter( http_response()->header( "content_type" ), "charset" ) );
-
-        http_response()->set_chunk_reader( Z_NEW( http::String_chunk_reader( charset->encoded_from_bstr( content_bstr ), "" ) ) );
-    }
-    catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
-
-    return hr;
+    return http_response()->put_String_content( content_bstr );
 }
 
 //---------------------------------------------------------Web_service_response::put_Binary_content
 
 STDMETHODIMP Web_service_response::put_Binary_content( SAFEARRAY* safearray )
 {
-    HRESULT hr = S_OK;
+    if( closed() )  return E_POINTER;
 
-    if( !http_response() )  return E_FAIL;
-    
-    try
-    {
-        VARTYPE vartype = 0;
-
-        hr = SafeArrayGetVartype( safearray, &vartype );  
-        if( FAILED(hr) )  return hr;
-        if( vartype != VT_UI1 )  return DISP_E_TYPEMISMATCH;
-
-        Locked_safearray<Byte> a ( safearray );
-
-        http_response()->set_chunk_reader( Z_NEW( http::Byte_chunk_reader( &a[0], a.count(), "" ) ) );
-    }
-    catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
-
-    return hr;
+    return http_response()->put_Binary_content( safearray );
 }
 
 //-----------------------------------------------------------------------Web_service_response::Send
 
 STDMETHODIMP Web_service_response::Send() // VARIANT* content, BSTR content_type_bstr )
 {
-    HRESULT hr = S_OK;
-    
-    //if( !content )  return E_POINTER;
-    if( !http_response() )  return E_FAIL;
+    if( closed() )  return E_POINTER;
 
-    try
-    {
-        /*
-        string                  content_type = string_from_bstr( content_type_bstr );
-        ptr<http::Chunk_reader> chunk_reader;
-
-
-        if( content->vt == VT_BSTR )
-        {
-            const Charset*  charset      = Charset::for_name( http::get_content_type_parameter( content_type, "charset" ) );
-            const BSTR      content_bstr = V_BSTR( content );
-
-            chunk_reader = Z_NEW( http::String_chunk_reader( charset->encoded_from_bstr( content_bstr ), content_type ) );
-        }
-        else
-        if( content->vt == VT_ARRAY )
-        {
-            SAFEARRAY* safearray = V_ARRAY( content );
-            VARTYPE    vartype   = 0;
-
-            hr = SafeArrayGetVartype( safearray, &vartype );
-            if( FAILED(hr) )  return hr;
-            if( vartype != VT_UI1 )  return DISP_E_TYPEMISMATCH;
-
-            Locked_safearray<Byte> a ( safearray );
-
-            chunk_reader = Z_NEW( http::Byte_chunk_reader( &a[0], a.count(), content_type ) );
-        }
-        else
-            return DISP_E_TYPEMISMATCH;
-
-
-        http_response()->set_chunk_reader( chunk_reader );
-        */
-        http_response()->send();
-    }
-    catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
-
-    return hr;
+    return http_response()->Send();
 }
 
 //-------------------------------------------------------------------------------------------------

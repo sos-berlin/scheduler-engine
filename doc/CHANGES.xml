@@ -11,12 +11,32 @@
     <scheduler_keyword keyword="Change log"/>
 
     <change date="2006-03-01" version="2.0.148" subversion_revision="4126">
-        <revision type="new" title="Neue Eigenschaft order.xml_payload">
+        <revision type="new" title="&lt;web_service job_chain=''&gt;">
             <description>
                 <p>
-                    Zustätzlich zur payload kann <scheduler_method class="Order" property="xml_payload"/> ein XML-Dokument aufnehmen.
-                    Siehe auch <scheduler_element name="xml_payload"/>.
+                    Ein Web-Service kann mit einer Jobkette implementiert werden.
                 </p>
+                <p>Neue XML-Elemente, neue Attribute</p>
+                <ul>
+                    <li>
+                        <scheduler_element name="web_service" attribute="job_chain"/>
+                    </li>
+                </ul>
+                <p>Neue Klassen und Methoden:</p>
+                <ul>
+                    <li>
+                        <scheduler_method class="Order" property="web_service_operation"/>
+                    </li>
+                    <li>
+                        <scheduler_method class="Web_service_operation"/>
+                    </li>
+                    <li>
+                        <scheduler_method class="Web_service_request"/>
+                    </li>
+                    <li>
+                        <scheduler_method class="Web_service_response"/>
+                    </li>
+                </ul>
             </description>
         </revision>
 

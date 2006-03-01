@@ -47,6 +47,17 @@
             </description>
         </xml_attribute>
 
+        <xml_attribute name="timeout" type="seconds" title="Frist">
+            <description>
+                <p>
+                    Wenn innerhalb der Frist nicht 
+                    <scheduler_method class="Web_service_response" method="send"/>
+                    gerufen wird, 
+                    beantwortet der Scheduler die HTTP-Operation mit "<code>504 Gateway Timeout</code>".
+                </p>
+            </description>
+        </xml_attribute>
+
         <xml_attribute name="request_xslt_stylesheet" type="path" subst_env="yes" title="Transformiert die Anforderung in ein Scheduler-Kommando">
             <description>
                 <p>

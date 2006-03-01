@@ -1436,7 +1436,7 @@ library Spooler
         HRESULT                 String_content          ( [out,retval] BSTR* );
 
         [propget]
-        HRESULT                 Binary_content          ( [out,retval] SAFEARRAY(unsigned char) );
+        HRESULT                 Binary_content          ( [out,retval] SAFEARRAY(unsigned char)* );
     };
 
     //-------------------------------------------------------------------------Iweb_service_request

@@ -27,7 +27,7 @@
 
 #include "spooler.h"
 #include "spooler_version.h"
-
+#include "../zschimmer/charset.h"
 
 using namespace std;
 
@@ -178,6 +178,13 @@ Parser::Parser( Request* request )
     _request( request )
 {
     _text.reserve( 2000 );
+}
+
+//------------------------------------------------------------------------------------Parser::close
+    
+    void Parser::close()
+{
+    _request = NULL;
 }
 
 //---------------------------------------------------------------------------------Parser::add_text
@@ -385,10 +392,9 @@ Operation::Operation( Operation_connection* pc )
 void Operation::close()
 { 
     if( _web_service_operation )  _web_service_operation->close(),  _web_service_operation = NULL;
-
-    _response = NULL;
-    _parser   = NULL;
-    _request  = NULL;
+    if( _response )  _response->close(),  _response = NULL;
+    if( _parser   )  _parser  ->close(),  _parser   = NULL;
+    if( _request  )  _request ->close(),  _request  = NULL;
 
     Communication::Operation::close(); 
 }
@@ -509,6 +515,12 @@ xml::Element_ptr Operation::dom_element( const xml::Document_ptr& document, cons
     return result;
 }
 
+//-----------------------------------------------------------------------------------Request::close
+
+void Request::close()
+{
+}
+
 //-------------------------------------------------------------------------------Request::parameter
     
 string Request::parameter( const string& name ) const
@@ -553,6 +565,38 @@ string Request::character_encoding() const
     return get_content_type_parameter( _headers[ "content-type" ], "charset" );
 }
 
+//----------------------------------------------------------------------Request::get_String_content
+
+STDMETHODIMP Request::get_String_content( BSTR* result )
+{
+    HRESULT hr = S_OK;
+    
+    try
+    {
+        hr = Charset::for_name( character_encoding() )->Encoded_to_bstr( _body, result );
+    }
+    catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+
+//----------------------------------------------------------------------Request::get_Binary_content
+
+STDMETHODIMP Request::get_Binary_content( SAFEARRAY** result )
+{
+    HRESULT hr = S_OK;
+    
+    try
+    {
+        Locked_safearray<unsigned char> safearray ( _body.length() );
+        memcpy( &safearray[0], _body.data(), _body.length() );
+        *result = safearray.take_safearray();
+    }
+    catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+
 //-----------------------------------------------------------------------------Http_exception::what
 
 const char* Http_exception::what()
@@ -580,6 +624,14 @@ Response::Response( Operation* operation )
     if( _operation->_request->_headers[ "cache-control" ] == "no-cache" )
         _headers.set( "Cache-Control", "no-cache" );   // Sonst bleibt z.B. die scheduler.xslt im Browser kleben und ein Wechsel der Datei wirkt nicht.
                                                        // Gut wäre eine Frist, z.B. 10s
+}
+
+//-----------------------------------------------------------------------------------esponse::close
+    
+void Response::close()
+{
+    _operation = NULL;
+    _chunk_reader = NULL;
 }
 
 //-----------------------------------------------------------------------------Response::set_status
@@ -624,6 +676,8 @@ void Response::set_ready()
 
 void Response::send()
 {
+    if( is_ready() )  throw_xc( "SCHEDULER-247" );
+
     set_ready();
 }
 
@@ -775,6 +829,206 @@ string Response::start_new_chunk()
     }
     
     return result;
+}
+
+//------------------------------------------------------------------------Response::put_Status_code
+
+STDMETHODIMP Response::put_Status_code( int code )
+{ 
+    HRESULT hr = S_OK;
+    
+    try
+    {
+        set_status( (Status_code)code );  
+    }
+    catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+
+//-----------------------------------------------------------------------------Response::put_Header
+
+STDMETHODIMP Response::put_Header( BSTR name, BSTR value )
+{ 
+    HRESULT hr = S_OK;
+    
+    try
+    {
+        set_header( string_from_bstr( name ), string_from_bstr( value ) );  
+    }
+    catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+
+//-----------------------------------------------------------------------------Response::get_Header
+
+STDMETHODIMP Response::get_Header( BSTR name, BSTR* result )
+{ 
+    HRESULT hr = S_OK;
+    
+    try
+    {
+        hr = String_to_bstr( header( string_from_bstr( name ) ), result );
+    }
+    catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+
+//-----------------------------------------------------Web_service_response::put_Character_encoding
+/*
+STDMETHODIMP Web_service_response::put_Character_encoding( BSTR encoding )
+{ 
+    HRESULT hr = S_OK;
+    
+    try
+    {
+        return E_NOTIMPL;
+        //_http_response->set_character_encoding( string_from_bstr( encoding ) );  
+    }
+    catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+
+//-----------------------------------------------------Web_service_response::get_Character_encoding
+
+STDMETHODIMP Web_service_response::get_Character_encoding( BSTR* result )
+{ 
+    HRESULT hr = S_OK;
+    
+    try
+    {
+        return E_NOTIMPL;
+        //_http_response->set_character_encoding( string_from_bstr( encoding ) );  
+    }
+    catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+
+//-----------------------------------------------------------Web_service_response::put_Content_type
+
+STDMETHODIMP Web_service_response::put_Content_type( BSTR content_type )
+{ 
+    HRESULT hr = S_OK;
+    
+    try
+    {
+        //http_response()->set_content_type( string_from_bstr( content_type ) ); 
+    }
+    catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+
+//-----------------------------------------------------------Web_service_response::get_Content_type
+
+STDMETHODIMP Web_service_response::get_Content_type( BSTR* result )
+{
+    HRESULT hr = S_OK;
+    
+    try
+    {
+        return E_NOTIMPL;
+        //_http_response->set_content_type( string_from_bstr( content_type ) );  
+    }
+    catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+*/
+//---------------------------------------------------------------------Response::put_String_content
+
+STDMETHODIMP Response::put_String_content( BSTR content_bstr )
+{
+    HRESULT hr = S_OK;
+    
+    try
+    {
+        const Charset* charset = Charset::for_name( get_content_type_parameter( header( "content-type" ), "charset" ) );
+
+        set_chunk_reader( Z_NEW( String_chunk_reader( charset->encoded_from_bstr( content_bstr ), "" ) ) );
+    }
+    catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+
+//---------------------------------------------------------------------Response::put_Binary_content
+
+STDMETHODIMP Response::put_Binary_content( SAFEARRAY* safearray )
+{
+    HRESULT hr = S_OK;
+    
+    try
+    {
+        VARTYPE vartype = 0;
+
+        hr = SafeArrayGetVartype( safearray, &vartype );  
+        if( FAILED(hr) )  return hr;
+        if( vartype != VT_UI1 )  return DISP_E_TYPEMISMATCH;
+
+        Locked_safearray<Byte> a ( safearray );
+
+        set_chunk_reader( Z_NEW( Byte_chunk_reader( &a[0], a.count(), "" ) ) );
+    }
+    catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+
+//-----------------------------------------------------------------------------------Response::Send
+
+STDMETHODIMP Response::Send() // VARIANT* content, BSTR content_type_bstr )
+{
+    if( closed() )  return E_FAIL;
+
+    HRESULT hr = S_OK;
+    
+    //if( !content )  return E_POINTER;
+
+    try
+    {
+        send();
+
+        /*
+        string                  content_type = string_from_bstr( content_type_bstr );
+        ptr<http::Chunk_reader> chunk_reader;
+
+
+        if( content->vt == VT_BSTR )
+        {
+            const Charset*  charset      = Charset::for_name( http::get_content_type_parameter( content_type, "charset" ) );
+            const BSTR      content_bstr = V_BSTR( content );
+
+            chunk_reader = Z_NEW( http::String_chunk_reader( charset->encoded_from_bstr( content_bstr ), content_type ) );
+        }
+        else
+        if( content->vt == VT_ARRAY )
+        {
+            SAFEARRAY* safearray = V_ARRAY( content );
+            VARTYPE    vartype   = 0;
+
+            hr = SafeArrayGetVartype( safearray, &vartype );
+            if( FAILED(hr) )  return hr;
+            if( vartype != VT_UI1 )  return DISP_E_TYPEMISMATCH;
+
+            Locked_safearray<Byte> a ( safearray );
+
+            chunk_reader = Z_NEW( http::Byte_chunk_reader( &a[0], a.count(), content_type ) );
+        }
+        else
+            return DISP_E_TYPEMISMATCH;
+
+
+        http_response()->set_chunk_reader( chunk_reader );
+        */
+    }
+    catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
 }
 
 //---------------------------------------------------------String_chunk_reader::get_next_chunk_size

@@ -233,8 +233,9 @@ struct Headers
     {
                                 Entry                       ()                                          {}
                                 Entry                       ( const string& name, const string& value ) : _name(name), _value(value) {}
-        string _name;
-        string _value;
+
+        string                 _name;
+        string                 _value;
     };
 
     typedef stdext::hash_map<string,Entry>   Map;
@@ -259,7 +260,7 @@ struct Parser : Object
 {
                                 Parser                      ( Request* );
 
-
+    void                        close                       ();
     void                        add_text                    ( const char*, int len );
     bool                        is_complete                 ();
 
@@ -280,7 +281,7 @@ struct Parser : Object
     int                        _body_start;
     int                        _content_length;
     const char*                _next_char;
-    Request* const             _request;
+    Request*                   _request;
 };
 
 //------------------------------------------------------------------------------------------Request
@@ -289,6 +290,7 @@ struct Request : Object
 {
                                 Request                     ()                                      : _zero_(this+1){}
 
+    void                        close                       ();
     bool                        has_parameter               ( const string& name ) const            { return _parameters.find( name ) != _parameters.end(); }
     string                      parameter                   ( const string& name ) const;
     bool                        is_http_1_1                 () const;
@@ -298,6 +300,11 @@ struct Request : Object
     string                      character_encoding          () const;
     string                      content_type                () const;
     const string&               body                        () const                                { return _body; }
+
+    STDMETHODIMP            get_Url                         ( BSTR* result )                        { return String_to_bstr( url(), result ); }
+    STDMETHODIMP            get_Header                      ( BSTR name, BSTR* result )             { return String_to_bstr( header( string_from_bstr( name ) ), result ); }
+    STDMETHODIMP            get_Binary_content              ( SAFEARRAY** result );
+    STDMETHODIMP            get_String_content              ( BSTR* result );
 
 
   //private:
@@ -321,7 +328,10 @@ struct Request : Object
 struct Response : Object
 {
                                 Response                    ( Operation* );
-    
+
+
+    void                        close                       ();
+    bool                        closed                      () const                                { return _operation == NULL; }
     void                        recommend_block_size        ( int size )                            { if( _chunk_reader )  _chunk_reader->recommend_block_size( size ); }
     int                         recommended_block_size      () const                                { return _chunk_reader? _chunk_reader->_recommended_block_size : recommended_chunk_size; }
 
@@ -335,7 +345,7 @@ struct Response : Object
     void                    set_header                      ( const string& name, const string& value ) { _headers.set( name, value ); }
     string                      header                      ( const string& name )                  { return _headers[ name ]; }
     void                    set_status                      ( Status_code, const string& text = "" );
-    void                    set_chunk_reader                ( Chunk_reader* c )                     { _chunk_reader = c; set_ready(); }
+    void                    set_chunk_reader                ( Chunk_reader* c )                     { _chunk_reader = c; }
     void                        finish                      ();
     static string               date_string                 ();
     void                        send                        ();
@@ -345,6 +355,12 @@ struct Response : Object
     bool                        eof                         ();
     string                      read                        ( int recommended_size );
 
+    STDMETHODIMP            put_Status_code                 ( int code );
+    STDMETHODIMP            put_Header                      ( BSTR name, BSTR value );
+    STDMETHODIMP            get_Header                      ( BSTR name, BSTR* result );
+    STDMETHODIMP            put_String_content              ( BSTR );
+    STDMETHODIMP            put_Binary_content              ( SAFEARRAY* );
+    STDMETHODIMP                Send                        ();
 
   protected:
     friend struct               Operation;
@@ -376,6 +392,7 @@ struct Operation : Communication::Operation
                                 Operation                   ( Operation_connection* );
 
     void                        close                       ();
+    bool                        closed                      () const                                { return _response == NULL; }
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& ) const;
 
     void                        put_request_part            ( const char* data, int length )        { _parser->add_text( data, length ); }

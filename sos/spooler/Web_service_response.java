@@ -19,4 +19,5 @@ public class Web_service_response  extends Idispatch
     public void         set_status_code              ( int code )                   {                   com_call( ">status_code", code ); }
     public void         set_string_content           ( String content )             {                   com_call( ">string_content", content ); }
     public void         set_binary_content           ( byte[] content )             {                   com_call( ">binary_content", content ); }
+    public void              send                    ()                             {                   com_call( "send"         ); }
 }
