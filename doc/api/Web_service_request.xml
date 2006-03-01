@@ -30,7 +30,7 @@
 
         <description>
             <p>
-                <code>= "http:" + header( "Host" ) + </code><i>url_pfad</i>
+                <code>url = "http://" + header( "Host" ) + </code><i>url_pfad</i>
             </p>
         </description>
     </property>
@@ -64,7 +64,7 @@
         </description>
 
         <example programming_language="javascript">
-            <pre>spooler_log.info( "Content-Type: " + spooler_task.order.web_service_operation.header( "Content-Type" ) );</pre>
+            <pre>spooler_log.info( "Content-Type: " + spooler_task.order.web_service_operation.request.header( "Content-Type" ) );</pre>
         </example>
     </property>
 

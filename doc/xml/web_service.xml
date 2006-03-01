@@ -36,9 +36,8 @@
                 </p>
                 <p>
                     Nicht zusammen mit den Attributen
-                    <code>request_xslt_stylesheet</code>,
-                    <code>response_xslt_stylesheet</code> und
-                    <code>forward_xslt_stylesheet</code>
+                    <code>request_xslt_stylesheet</code> und
+                    <code>response_xslt_stylesheet</code>
                     verwendbar.
                 </p>
                 <p>
@@ -153,6 +152,14 @@
     
     <example>
         <pre>&lt;web_service 
+    name      = "my_web_service" 
+    url_path  = "/webservice"
+    job_chain = "my_service_job_chain"
+/></pre>
+    </example>
+
+    <example>
+        <pre>&lt;web_service 
     name                     = "my_web_service" 
     url_path                 = "/webservice"
     request_xslt_stylesheet  = "$SCHEDULER_CONFIG/web_service_request.xsl"
@@ -171,10 +178,19 @@
         <p>
             Der TCP-Port des HTTP-Servers wird mit <scheduler_element name="config" attribute="tcp_port"/> festgelegt.
         </p>
-        
-        
-        
-        <h2>Ablauf</h2>
+
+
+
+        <h2>Ablauf mit job_chain</h2>
+        <p>
+            Ein HTTP-POST auf den URL-Pfad des Web-Dienstes lässt den Scheduler einen Auftrag
+            erzeugen und ihn in die angegebene Jobkette einreihen.
+            Die Jobs haben Zugriff auf die HTTP-Daten über <scheduler_method class="Order" property="web_service_operation"/>.
+            Die HTTP-Anfrage wird mit <scheduler_method class="Web_service_response" method="send"/> beantwortet.
+        </p>
+
+
+        <h2>Ablauf mit request_xslt_stylesheet</h2>
         <p>
             Ein HTTP-POST auf den URL-Pfad des Web-Dienstes löst folgende Schritte aus.
         </p>
