@@ -1,0 +1,126 @@
+<?xml version="1.0"?>
+<!-- $Id$ -->
+
+<?xml-stylesheet href="api-default_language.xsl" type="text/xsl"?>
+
+
+<api.class
+    xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:noNamespaceSchemaLocation = "../scheduler_doc.xsd"
+
+    name        = "Web_service_response"
+    object_name = "web_service_response"
+    base_dir    = "../"
+    author      = "$Author$"
+    date        = "$Date$"
+>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="status_code" access="write">
+        <com>
+            <com.result>
+                <com.type type="int"/>
+            </com.result>
+        </com>
+
+        <title>
+            HTTP-Status-Code
+        </title>
+
+        <description>
+            <p>
+                Voreingestellt ist 200 (OK).
+            </p>
+        </description>
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="header">
+        <com>
+            <com.result name="value">
+                <com.type type="BSTR" />
+                <description>
+                    Für einen umbekannten Eintrag wird <code>""</code> verwendet
+                </description>
+            </com.result>
+
+            <com.parameter name="name">
+                <com.type type="BSTR"/>
+                <description>
+                    Die Großschreibung spielt keine Rolle.
+                </description>
+            </com.parameter>
+        </com>
+
+        <title>
+            Eintrag im Kopf
+        </title>
+
+        <description>
+            <p>
+            </p>
+        </description>
+
+        <example programming_language="javascript">
+            <pre>spooler_log.info( "Content-Type: " + spooler_task.order.web_service_operation.header( "Content-Type" ) );</pre>
+        </example>
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="string_content" access="write">
+        <com>
+            <com.result name="text">
+                <com.type type="BSTR"/>
+            </com.result>
+        </com>
+
+        <title>
+            Nutzdaten als Text
+        </title>
+
+        <description>
+            <p>
+                Zuvor muss <code>header( "Content-Type" )</code> mit dem Parameter <code>charset</code> gesetzt sein,
+                zum Beispiel <code>header( "Content-Type" ) = "text/plain; charset=iso-8859-1"</code>.
+                Der Text wird nach dem Parameter <code>charset</code> codiert.
+            </p>
+        </description>
+
+        <example programming_language="javascript">
+            <pre>var response = spooler_task.order.web_service_operation.response;
+response.header( "Content-Type" ) = "text/plain; charset=iso-8859-1";
+response.string_content = "This is the answer";</pre>
+        </example>
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="binary_content" access="write">
+        <java>
+            <java.result>
+                <java.type type="byte[]"/>
+            </java.result>
+        </java>
+
+        <title>
+            Nutzdaten als Byte-Array
+        </title>
+
+        <description>
+            <p>
+            </p>
+        </description>
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <description>
+        <p>
+            Siehe auch <scheduler_element name="web_service"/>
+        </p>
+    </description>
+
+</api.class>

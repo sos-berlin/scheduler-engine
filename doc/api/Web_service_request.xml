@@ -1,0 +1,117 @@
+<?xml version="1.0"?>
+<!-- $Id$ -->
+
+<?xml-stylesheet href="api-default_language.xsl" type="text/xsl"?>
+
+
+<api.class
+    xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:noNamespaceSchemaLocation = "../scheduler_doc.xsd"
+
+    name        = "Web_service_request"
+    object_name = "web_service_request"
+    base_dir    = "../"
+    author      = "$Author$"
+    date        = "$Date$"
+>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="url" access="read">
+        <com>
+            <com.result>
+                <com.type type="BSTR"/>
+            </com.result>
+        </com>
+
+        <title>
+            Uniform Resource Locator            
+        </title>
+
+        <description>
+            <p>
+                <code>= "http:" + header( "Host" ) + </code><i>url_pfad</i>
+            </p>
+        </description>
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="header" access="read">
+        <com>
+            <com.result>
+                <com.type type="BSTR"/>
+                <description>
+                    Für einen unbekannten Eintrag wird <code>""</code> geliefert
+                </description>
+            </com.result>
+
+            <com.parameter name="name">
+                <com.type type="BSTR"/>
+                <description>
+                    Die Großschreibung spielt keine Rolle.
+                </description>
+            </com.parameter>
+        </com>
+
+        <title>
+            Eintrag im Kopf
+        </title>
+
+        <description>
+            <p>
+            </p>
+        </description>
+
+        <example programming_language="javascript">
+            <pre>spooler_log.info( "Content-Type: " + spooler_task.order.web_service_operation.header( "Content-Type" ) );</pre>
+        </example>
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="string_content" access="read">
+        <com>
+            <com.result>
+                <com.type type="BSTR"/>
+            </com.result>
+        </com>
+
+        <title>
+            Nutzdaten als Text
+        </title>
+
+        <description>
+            <p>
+            </p>
+        </description>
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="binary_content" access="read">
+        <java>
+            <java.result>
+                <java.type type="byte[]"/>
+            </java.result>
+        </java>
+
+        <title>
+            Nutzdaten als Byte-Array
+        </title>
+
+        <description>
+            <p>
+            </p>
+        </description>
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <description>
+        <p>
+            Siehe auch <scheduler_element name="web_service"/>
+        </p>
+    </description>
+
+</api.class>

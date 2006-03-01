@@ -4545,7 +4545,7 @@ STDMETHODIMP Com_order::get_Xml( BSTR show_what_bstr, BSTR* result )
     {
         if( !_order )  return E_POINTER;
 
-        hr = String_to_bstr( _order->dom( Show_what( show_run_time | show_log ) ).xml(), result );
+        hr = String_to_bstr( _order->dom( Show_what( show_payload | show_run_time | show_log ) ).xml(), result );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
 

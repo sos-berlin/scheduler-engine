@@ -1222,8 +1222,11 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
 
     if( show != show_for_database_only )
     {
-        element.setAttribute( "order"     , debug_string_from_variant( _id ) );
-        element.setAttribute( "id"        , debug_string_from_variant( _id ) );     // veraltet
+        if( !_id.is_empty() )
+        {
+            element.setAttribute( "order"     , debug_string_from_variant( _id ) );
+            element.setAttribute( "id"        , debug_string_from_variant( _id ) );     // veraltet
+        }
     }
 
     if( show != show_for_database_only  &&  show != show_id_only )
@@ -1234,8 +1237,10 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
         if( _title != "" )
         element.setAttribute( "title"     , _title );
 
+        if( !_state.is_empty() )
         element.setAttribute( "state"     , debug_string_from_variant( _state ) );
 
+        if( !_initial_state.is_empty() )
         element.setAttribute( "initial_state", debug_string_from_variant( _initial_state ) );
 
         if( Job_chain* job_chain = this->job_chain() )
@@ -1278,7 +1283,7 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
         if( show & show_payload  &&  !_payload.is_null_or_empty_string()  &&  !_payload.is_missing() )
         {
             xml::Element_ptr payload_element = element.append_new_element( "payload" );
-            xml::Element_ptr payload_content;
+            xml::Node_ptr    payload_content;
 
             if( _payload.vt == VT_DISPATCH )
             {
@@ -1318,13 +1323,7 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
         element.appendChild( _log->dom_element( document, show ) );
     }
 
-    if( _web_service )
-    element.setAttribute( "web_service", _web_service->name() );
-
-    if( _web_service_operation )
-    element.setAttribute( "web_service_operation", _web_service_operation->id() );
-
-    if( show & show_payload  &&  _xml_payload != "" )
+    if( show & ( show_payload | show_for_database_only )  &&  _xml_payload != "" )
     {
         xml::Element_ptr xml_payload_element = element.append_new_element( "xml_payload" );
 
@@ -1343,6 +1342,12 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
             append_error_element( xml_payload_element, x );
         }
     }
+
+    if( _web_service )
+    element.setAttribute( "web_service", _web_service->name() );
+
+    if( _web_service_operation )
+    element.setAttribute( "web_service_operation", _web_service_operation->id() );
 
     return element;
 }

@@ -107,6 +107,7 @@
 
     <xml_child_elements>
         <xml_child_element name="params"/>
+        <xml_child_element name="xml_payload"/>
     </xml_child_elements>
 
     <xml_answer element="ok" element2="order">

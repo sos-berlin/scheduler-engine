@@ -415,16 +415,24 @@ void Web_service_operation::begin()
 {
     //if( _web_service->_debug  &&  http_operation->_parser )  _log->debug( "\n" "HTTP request:\n " ), _log->debug( http_operation->_parser->_text ), _log->debug( "" );;
 
-    if( this->_http_operation->_connection->_security_level <= Security::seclev_no_add )  throw http::Http_exception( http::status_403_forbidden );
+    
+    if( _web_service->_job_chain_name == "" )
+    {
+        execute_stylesheets();
+    }
+    else
+    {
+        if( _http_operation->_connection->_security_level <= Security::seclev_no_add )  throw http::Http_exception( http::status_403_forbidden );
 
 
-    _order = new Order( _spooler );
+        _order = new Order( _spooler );
 
-    //order->_store_in_database = _web_service->_store_order_in_database;
-    _order->set_web_service_operation( this );
-    _order->add_to_job_chain( _spooler->job_chain( _web_service->_job_chain_name ) );
+        //order->_store_in_database = _web_service->_store_order_in_database;
+        _order->set_web_service_operation( this );
+        _order->add_to_job_chain( _spooler->job_chain( _web_service->_job_chain_name ) );
 
-    _http_operation->set_gmtimeout( (double)( ::time(NULL) + _web_service->_timeout ) );
+        _http_operation->set_gmtimeout( (double)( ::time(NULL) + _web_service->_timeout ) );
+    }
 }
 
 //------------------------------------------------------------Web_service_operation::async_continue

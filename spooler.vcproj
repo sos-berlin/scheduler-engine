@@ -1859,6 +1859,117 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\sos\spooler\Web_service_operation.java"
+				>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description=""
+						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
+						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description=""
+						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
+						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release-DLL|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description=""
+						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
+						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\sos\spooler\Web_service_request.java"
+				>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description=""
+						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
+						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description=""
+						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
+						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release-DLL|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description=""
+						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
+						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\sos\spooler\Web_service_response.java"
+				>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description=""
+						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
+						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description=""
+						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
+						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release-DLL|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description=""
+						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
+						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath=".\sos\spooler\Xslt_stylesheet.java"
 				>
 				<FileConfiguration
@@ -1971,3 +2082,4 @@
 	<Globals>
 	</Globals>
 </VisualStudioProject>
+          

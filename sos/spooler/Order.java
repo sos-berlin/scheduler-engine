@@ -214,6 +214,10 @@ public class Order extends Idispatch
 
     public Web_service      web_service_or_null ()                                  { return (Web_service)com_call( "<web_service_or_null" ); }
 
+    public Web_service_operation web_service_operation()                            { return (Web_service_operation)com_call( "<web_service_operation" ); }
+
+    public Web_service_operation web_service_operation_or_null ()                   { return (Web_service_operation)com_call( "<web_service_operation_or_null" ); }
+
     public void         set_xml_payload         ( String xml )                      {                   com_call( ">xml_payload", xml   ); }
 
     public String           xml_payload         ()                                  { return (String)   com_call( "<xml_payload"        ); }

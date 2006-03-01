@@ -10,6 +10,17 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2006-03-01" version="2.0.148" subversion_revision="4126">
+        <revision type="new" title="Neue Eigenschaft order.xml_payload">
+            <description>
+                <p>
+                    Zustätzlich zur payload kann <scheduler_method class="Order" property="xml_payload"/> ein XML-Dokument aufnehmen.
+                    Siehe auch <scheduler_element name="xml_payload"/>.
+                </p>
+            </description>
+        </revision>
+    </change>
+
     <change date="2006-02-21" version="2.0.147" subversion_revision="4100">
         <revision type="correction" title="Dateityp jdbc löscht temporäre Dateien unter Windows">
             <description>

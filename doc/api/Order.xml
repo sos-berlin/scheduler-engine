@@ -381,7 +381,7 @@
     </com>
 
     <title>
-        Der Webdienst, der dem Auftrag zugeordnet ist, oder <api.null/>.
+        Der Web-Dienst, der dem Auftrag zugeordnet ist, oder <api.null/>.
     </title>
     
     <description>
@@ -390,6 +390,57 @@
         </p>
     </description>
     
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="web_service_operation" access="read">
+    <com>
+        <com.result>
+            <com.type class="Web_service_operation"/>
+        </com.result>
+    </com>
+
+    <title>
+        Die Web-Dienst-Operation, die dem Auftrag zugeordnet ist
+    </title>
+    
+    <description>
+        <p>
+            Wenn der Auftrag keinem Webdienst zugeordnet ist, 
+            liefert der Aufruf eine Exception.
+        </p>
+        <p>
+            Siehe 
+            <scheduler_element name="web_service"/> 
+            <scheduler_method class="Web_service_operation"/> und
+            <scheduler_method class="Order" property="web_service_operation_or_null"/>,
+        </p>
+    </description>
+    
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="web_service_operation_or_null" access="read">
+    <com>
+        <com.result>
+            <com.type class="Web_service_operation"/>
+        </com.result>
+    </com>
+
+    <title>
+        Die Web-Dienst-Operation, die dem Auftrag zugeordnet ist, oder <api.null/>
+    </title>
+    
+    <description>
+        <p>
+            Siehe 
+            <scheduler_method class="Order" property="web_service_operation"/>,
+            <scheduler_method class="Web_service_operation"/> und
+            <scheduler_element name="web_service"/>.
+        </p>
+    </description>
 </property>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
@@ -427,6 +478,10 @@
         <p>
             Zusätzlich zu <scheduler_method class="Order" property="payload"/> 
             kann diese Eigenschaft ein XML-Dokument aufnehmen.
+        </p>
+        <p>
+            <scheduler_element name="xml_payload"/> enthält das Wurzelelement des XML-Dokuments 
+            (statt in <code>#PCDATA</code>-codierter Form).
         </p>
     </description>
 </property>

@@ -111,17 +111,23 @@ string Headers::operator[]( const string& name ) const
 
 void Headers::set( const string& name, const string& value )
 {
-    _map[ lcase( name ) ] = Entry( name, value );
+    string lname = lcase( name );
+
+    if( value != "" )  _map[ lname ] = Entry( name, value );
+                 else  _map.erase( lname );
 }
 
 //-----------------------------------------------------------------------------Headers::set_default
 
 void Headers::set_default( const string& name, const string& value )
 {
-    string        lname = lcase( name );
-    Map::iterator it    = _map.find( lname );
+    if( value != "" )
+    {
+        string        lname = lcase( name );
+        Map::iterator it    = _map.find( lname );
 
-    if( it == _map.end() )  _map[ name ] = Entry( name, value );
+        if( it == _map.end() )  _map[ name ] = Entry( name, value );
+    }
 }
 
 //-----------------------------------------------------------------------------------Headers::print

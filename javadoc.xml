@@ -28,6 +28,9 @@
                          sos/spooler/Task.java,
                          sos/spooler/Variable_set.java,                         
                          sos/spooler/Web_service.java,
+                         sos/spooler/Web_service_operation.java,
+                         sos/spooler/Web_service_request.java,
+                         sos/spooler/Web_service_response.java,
                          sos/spooler/Xslt_stylesheet.java"
             sourcepath=".." 
             splitindex="true" 

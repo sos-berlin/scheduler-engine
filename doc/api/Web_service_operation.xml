@@ -1,0 +1,80 @@
+<?xml version="1.0"?>
+<!-- $Id$ -->
+
+<?xml-stylesheet href="api-default_language.xsl" type="text/xsl"?>
+
+
+<api.class
+    name        = "Web_service_operation"
+    object_name = "web_service_operation"
+    base_dir    = "../"
+    author      = "$Author$"
+    date        = "$Date$"
+>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="web_service" access="read">
+        <com>
+            <com.result>
+                <com.type class="Web_service"/>
+            </com.result>
+        </com>
+
+        <title>
+            
+        </title>
+
+        <description>
+            <p>
+            </p>
+        </description>
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="request" access="read">
+        <com>
+            <com.result>
+                <com.type class="Web_service_request"/>
+            </com.result>
+        </com>
+
+        <title>
+            Anforderung
+        </title>
+
+        <description>
+            <p>
+            </p>
+        </description>
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="response" access="read">
+        <com>
+            <com.result>
+                <com.type class="Web_service_response"/>
+            </com.result>
+        </com>
+
+        <title>
+            Antwort
+        </title>
+
+        <description>
+            <p>
+            </p>
+        </description>
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <description>
+        <p>
+            Siehe auch <scheduler_element name="web_service"/>
+        </p>
+    </description>
+
+</api.class>

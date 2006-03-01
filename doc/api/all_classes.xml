@@ -26,5 +26,8 @@
     <class_reference class="Variable"/>
     <class_reference class="Variable_set"/>
     <class_reference class="Web_service"/>
+    <class_reference class="Web_service_operation"/>
+    <class_reference class="Web_service_request"/>
+    <class_reference class="Web_service_response"/>
     <class_reference class="Xslt_stylesheet"/>
 </class_references>
