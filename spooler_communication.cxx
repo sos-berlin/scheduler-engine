@@ -83,10 +83,10 @@ void Xml_operation::put_request_part( const char* data, int length )
 
 void Xml_operation::begin()
 {
-    Command_processor command_processor ( _spooler );
+    Command_processor command_processor ( _spooler, _connection->_security_level, this );
 
-    command_processor.set_communication_operation( this );
-    command_processor.set_host( _connection->peer_host() );
+    //command_processor.set_communication_operation( this );
+    //command_processor.set_host( _connection->peer_host() );
 
     if( string_begins_with( _request, " " ) )  _request = ltrim( _request );
 
@@ -156,8 +156,8 @@ bool Communication::Udp_socket::async_continue_( Continue_flags )
             }
             else
             {
-                Command_processor command_processor ( _spooler );
-                command_processor.set_host( host );
+                Command_processor command_processor ( _spooler, _spooler->security_level( host ) );
+                //command_processor.set_host( host );
                 string cmd ( buffer, len );
                 _spooler->log()->info( "UDP-Nachricht von " + host.as_string() + ": " + cmd );
                 command_processor.execute( cmd, Time::now() );

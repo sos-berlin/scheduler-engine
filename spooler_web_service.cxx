@@ -95,7 +95,7 @@ void Web_services::init()
     add_web_service( default_web_service );
     */
 
-    Command_processor command_processor ( _spooler );
+    Command_processor command_processor ( _spooler, Security::seclev_all );
 
     command_processor.execute_2( job_xml      , Time::now() );
     command_processor.execute_2( job_chain_xml, Time::now() );
@@ -329,7 +329,7 @@ void Web_service::forward( const xml::Document_ptr& payload_dom )
         }
 
         
-        Command_processor command_processor ( _spooler );
+        Command_processor command_processor ( _spooler, Security::seclev_all );
 
         _spooler->_executing_command = false;   // Command_processor() hat es true gesetzt. Trotzdem bei Datenbank-Fehler auf DB warten
 
@@ -612,8 +612,8 @@ void Web_service_operation::execute_stylesheets()
     }
     else
     {
-        Command_processor command_processor ( _spooler );
-        command_processor.set_host( _http_operation->_connection->peer_host() );
+        Command_processor command_processor ( _spooler, Security::seclev_all );
+        //command_processor.set_host( _http_operation->_connection->peer_host() );
 
         command_processor.execute( command_document );
 

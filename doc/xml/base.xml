@@ -19,10 +19,18 @@
     <xml_attributes>
         <xml_attribute name="file" type="filename">
             <description>
-                <i>filename</i> gibt den Dateinamen der Basiskonfiguration an.
-                <p/>
-                Wenn der Dateiname nicht absolut ist, geht der Scheduler vom Verzeichnis der Konfigurationsdatei aus,
-                die das <code>&lt;base></code>-Element enthält.
+                <p>
+                    <i>filename</i> gibt den Dateinamen der Basiskonfiguration an.
+                </p>
+                <p>
+                    Wenn der Dateiname nicht absolut ist, geht der Scheduler vom Verzeichnis der Konfigurationsdatei aus,
+                    die das <code>&lt;base></code>-Element enthält.
+                </p>
+                <p>
+                    Die XML-Elemente in der Basiskonfiguration werden mit dem Recht 
+                    <scheduler_element name="allowed_host" attribute="level" value="all"/>
+                    ausgeführt.
+                </p>
             </description>
         </xml_attribute>
     </xml_attributes>

@@ -1928,7 +1928,7 @@ void Spooler::load()
     _web_services.init();    // Ein Job und eine Jobkette einrichten, s. spooler_web_service.cxx
 
 
-    Command_processor cp ( this );
+    Command_processor cp ( this, Security::seclev_all );
     _executing_command = false;             // Command_processor() hat es true gesetzt, aber noch läuft der Scheduler nicht. 
                                             // spooler_history.cxx verweigert das Warten auf die Datenbank, wenn _executing_command gesetzt ist,
                                             // damit der Scheduler nicht in einem TCP-Kommando blockiert.
@@ -2314,7 +2314,7 @@ void Spooler::run()
 
     if( !_xml_cmd.empty() )
     {
-        Command_processor cp ( this );
+        Command_processor cp ( this, Security::seclev_all );
         cout << cp.execute( _xml_cmd, Time::now(), true );                 // Bei einem Fehler Abbruch
         _xml_cmd = "";
     }
@@ -2794,7 +2794,7 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line )
             { 
                 try
                 {
-                    Command_processor cp ( this );
+                    Command_processor cp ( this, Security::seclev_all );
                     bool indent = true;
                     string xml = cp.execute( "<show_state what='task_queue orders remote_schedulers' />", Time::now(), indent );
                     try

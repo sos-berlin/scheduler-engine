@@ -16,9 +16,18 @@
                 <p>
                     Die XML-Konfiguration und die XML-Kommandos werden gegen ein eingebautes XML-Schema geprüft.
                     Die neue Option <scheduler_option name="show-xml-schema"/> liefert das XML-Schema.
-                    Eine aktuelle Version ist übers Internet erreichbar:
+                    Zum Test ist eine aktuelle Version übers Internet erreichbar:
                     <a href="http://www.zschimmer.com/2006/scheduler.xsd">http://www.zschimmer.com/2006/scheduler.xsd</a>.
                 </p>
+                <p>Neue Kommandozeilen-Optionen:</p>
+                <ul>
+                    <li>
+                        <scheduler_option name="show-xml-schema"/>
+                    </li>
+                    <li>
+                        <scheduler_option name="validate-xml"/>
+                    </li>
+                </ul>
             </description>
         </revision>
 
@@ -26,8 +35,16 @@
             <description>
                 <p>
                     Zusätzlich zur payload kann <scheduler_method class="Order" property="xml_payload"/> ein XML-Dokument aufnehmen.
-                    Siehe auch <scheduler_element name="xml_payload"/>.
                 </p>
+                <p>Eine neue Eigenschaft und ein neues XML-Element:</p>
+                <ul>
+                    <li>
+                        <scheduler_method class="Order" property="xml_payload"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="xml_payload"/>
+                    </li>
+                </ul>
             </description>
         </revision>
 

@@ -106,14 +106,14 @@ Xc_copy xc_from_dom_error( const xml::Element_ptr& element )
 
 //-------------------------------------------------------------Command_processor::Command_processor
 
-Command_processor::Command_processor( Spooler* spooler, Communication::Operation* cp )
+Command_processor::Command_processor( Spooler* spooler, Security::Level security_level, Communication::Operation* cp )
 : 
     _zero_(this+1),
     _spooler(spooler),
     _communication_operation( cp ),
-    _validate(true)
+    _validate(true),
+    _security_level( security_level )
 {
-    set_host( NULL );
     _spooler->_executing_command = true;
 }
 
@@ -652,14 +652,13 @@ xml::Element_ptr Command_processor::execute_remove_job_chain( const xml::Element
 xml::Element_ptr Command_processor::execute_register_remote_scheduler( const xml::Element_ptr& register_scheduler_element )
 {
     if( !_communication_operation )  throw_xc( "SCHEDULER-222" );
-    if( !_host                    )  throw_xc( "SCHEDULER-222" );
 
     Xml_operation* xml_processor = dynamic_cast<Xml_operation*>( _communication_operation );
     if( !xml_processor )  throw_xc( "SCHEDULER-222" );
 
     if( _security_level < Security::seclev_no_add )  throw_xc( "SCHEDULER-121" );
 
-    Host_and_port host_and_port ( _host, register_scheduler_element.int_getAttribute( "tcp_port" ) );
+    Host_and_port host_and_port ( _communication_operation->_connection->peer_host(), register_scheduler_element.int_getAttribute( "tcp_port" ) );
 
     ptr<Remote_scheduler> remote_scheduler = _spooler->_remote_scheduler_register.get_or_null( host_and_port );
 
@@ -1087,16 +1086,6 @@ void Command_processor::execute_http( http::Operation* http_operation )
     }
 
     http_response->set_chunk_reader( Z_NEW( http::String_chunk_reader( response_body, response_content_type ) ) );
-}
-
-//----------------------------------------------------------------------Command_processor::set_host
-
-void Command_processor::set_host( const Host& host )
-{ 
-    _host = host; 
-
-    _security_level = _host? _spooler->security_level( _host ) 
-                            : Security::seclev_all;
 }
 
 //------------------------------------------------------------------------Command_processor::execute

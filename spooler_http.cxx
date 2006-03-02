@@ -448,9 +448,7 @@ void Operation::begin()
         }
         else
         {
-            Command_processor command_processor ( _spooler );
-
-            command_processor.set_host( _connection->peer_host() );
+            Command_processor command_processor ( _spooler, _connection->_security_level, this );
             command_processor.execute_http( this );
 
             _response->set_ready();

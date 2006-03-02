@@ -292,7 +292,7 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const Time& x
             {
                 string config_filename = make_absolute_filename( directory_of_path( source_filename ), e.getAttribute( "file" ) ) ;
                 
-                Command_processor cp ( this );
+                Command_processor cp ( this, Security::seclev_all );
                 cp._load_config_immediately = true;
                 cp.execute_file( config_filename );
 

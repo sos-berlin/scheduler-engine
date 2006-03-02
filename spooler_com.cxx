@@ -3389,7 +3389,7 @@ STDMETHODIMP Com_spooler::Execute_xml( BSTR xml, BSTR* result )
 
     try
     {
-        Command_processor cp ( _spooler );
+        Command_processor cp ( _spooler, Security::seclev_all );
         hr = String_to_bstr( cp.execute( string_from_bstr( xml ), Time::now() ), result );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
