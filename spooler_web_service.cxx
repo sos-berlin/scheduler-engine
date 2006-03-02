@@ -357,7 +357,7 @@ const Com_method Web_service_operation::_methods[] =
 { 
 #ifdef COM_METHOD
     COM_PROPERTY_GET( Web_service_operation,  1, Java_class_name               , VT_BSTR    , 0 ),
-    COM_PROPERTY_GET( Web_service_operation,  2, Web_Service                   , VT_DISPATCH, 0 ),
+    COM_PROPERTY_GET( Web_service_operation,  2, Web_service                   , VT_DISPATCH, 0 ),
     COM_PROPERTY_GET( Web_service_operation,  3, Request                       , VT_DISPATCH, 0 ),
     COM_PROPERTY_GET( Web_service_operation,  4, Response                      , VT_DISPATCH, 0 ),
   //COM_PROPERTY_GET( Web_service_operation,  5, Execute_stylesheets           , VT_DISPATCH, 0 ),
@@ -656,7 +656,7 @@ const Com_method Web_service_request::_methods[] =
 { 
 #ifdef COM_METHOD
     COM_PROPERTY_GET( Web_service_request,  1, Java_class_name               , VT_BSTR    , 0 ),
-    COM_PROPERTY_GET( Web_service_request,  3, Header                        , VT_EMPTY   , 0, VT_BSTR, VT_BSTR ),
+    COM_PROPERTY_GET( Web_service_request,  3, Header                        , VT_BSTR    , 0, VT_BSTR ),
     COM_PROPERTY_GET( Web_service_request,  4, String_content                , VT_BSTR    , 0 ),
     COM_PROPERTY_GET( Web_service_request,  5, Binary_content                , VT_ARRAY   , 0 ),
     COM_PROPERTY_GET( Web_service_request,  6, Url                           , VT_BSTR    , 0 ),
