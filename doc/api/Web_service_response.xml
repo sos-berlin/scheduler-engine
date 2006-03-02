@@ -87,6 +87,9 @@
                 zum Beispiel <code>header( "Content-Type" ) = "text/plain; charset=iso-8859-1"</code>.
                 Der Text wird nach dem Parameter <code>charset</code> codiert.
             </p>
+            <p>
+                Zu den hier zulässigen Zeichen-Codierungen (Charset) siehe <scheduler_method class="Web_service_request" property="string_content"/>
+            </p>
         </description>
 
         <example programming_language="javascript">
@@ -99,6 +102,8 @@ response.string_content = "This is the answer";</pre>
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
     <property name="binary_content" access="write">
+        <com/>
+        
         <java>
             <java.result>
                 <java.type type="byte[]"/>
@@ -106,13 +111,34 @@ response.string_content = "This is the answer";</pre>
         </java>
 
         <title>
-            Nutzdaten als Byte-Array
+            Nutzdaten als Byte-Array (nur Java)
         </title>
 
         <description>
             <p>
+                Die Eigenschaft steht nur unter Java zur Verfügung.
+            </p>
+            <p>
+                Der Typ des binären Inhalts sollte mit <code>headers( "Content-Type" )</code> festgelegt werden
+                (siehe <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.17">HTTP/1.1 14.17 Content-Type</a>)
             </p>
         </description>
+
+        <example programming_language="java">
+            <pre>String               text         = "This is my response";
+String               charset_name = "ISO-8859-1";
+Web_service_response response     = spooler_task.order().web_service_operation().response();
+
+response.set_header( "Content-Type", "text/plain; charset=" + charset_name );
+
+ByteArrayOutputStream byos = new ByteArrayOutputStream();
+Writer writer = new OutputStreamWriter( byos, charset_name );
+writer.write( text );
+writer.close();
+
+response.set_binary_content( byos.toByteArray() );
+response.send();</pre>
+        </example>
     </property>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
@@ -134,6 +160,9 @@ response.string_content = "This is the answer";</pre>
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
     <description>
+        <p>
+            Die Eigenschaft <code>binary_content</code> steht nur unter Java zur Verfügung.
+        </p>
         <p>
             Siehe auch <scheduler_element name="web_service"/>
         </p>

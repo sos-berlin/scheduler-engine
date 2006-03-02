@@ -53,6 +53,7 @@
                     <scheduler_method class="Web_service_response" method="send"/>
                     gerufen wird, 
                     beantwortet der Scheduler die HTTP-Operation mit "<code>504 Gateway Timeout</code>".
+                    Nachfolgendes <code>send()</code> liefert eine Exception.
                 </p>
             </description>
         </xml_attribute>

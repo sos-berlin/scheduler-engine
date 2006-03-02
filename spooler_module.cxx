@@ -262,7 +262,7 @@ void Module::init()
                                         break;
 #       endif
 
-        default:                        throw_xc( __FUNCTION__ );
+        default:                        z::throw_xc( __FUNCTION__ );
     }
 
     _initialized = true;

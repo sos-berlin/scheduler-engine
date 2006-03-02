@@ -83,6 +83,18 @@
 
         <description>
             <p>
+                Die Zeichen-Codierung wird dem Parameter <code>charset</code> aus <code>headers( "Content-Type" )</code> entnommen
+                (siehe <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.17">HTTP/1.1 14.17 Content-Type</a>).
+            </p>
+            <p>
+                Folgende Zeichen-Coderierungen (Charset) werden erkannt:
+            </p>
+            <ul>
+                <li>ISO-8859-1</li>
+                <li>UTF-8 (nur Windows und beschränkt auf den Zeichenvorrat von ISO-8859-1)</li>
+            </ul>
+            <p>
+                Siehe auch <scheduler_method class="Web_service_request" property="binary_content"/>.
             </p>
         </description>
     </property>
@@ -90,6 +102,8 @@
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
     <property name="binary_content" access="read">
+        <com/>
+        
         <java>
             <java.result>
                 <java.type type="byte[]"/>
@@ -97,11 +111,17 @@
         </java>
 
         <title>
-            Nutzdaten als Byte-Array
+            Nutzdaten als Byte-Array (nur Java)
         </title>
 
         <description>
             <p>
+                Die Eigenschaft steht nur unter Java zur Verfügung.
+            </p>
+            <p>
+                Wie der binäre Inhalt zu interpretieren ist, 
+                sollte der Client in <code>headers( "Content-Type" )</code> mitgeteilt haben
+                (siehe <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.17">HTTP/1.1 14.17 Content-Type</a>).
             </p>
         </description>
     </property>
@@ -110,7 +130,7 @@
 
     <description>
         <p>
-            Siehe auch <scheduler_element name="web_service"/>
+            Siehe <scheduler_method class="Web_service_operation"/>.
         </p>
     </description>
 

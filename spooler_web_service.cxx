@@ -470,7 +470,7 @@ ptr<Http_response> Web_service_operation::process_http__end()
 {
     ptr<Http_response>  response;
     string              response;
-    response = process_request__end( request->body(), request->character_encoding() );
+    response = process_request__end( request->body(), request->charset_name() );
 
     if( _web_service->_debug )  _log->debug( "\n" "HTTP RESPONSE:" ), _log->debug( http_response->header_text() ), _log->debug( response );
 
@@ -509,7 +509,7 @@ STDMETHODIMP Web_service_operation::get_Response( spooler_com::Iweb_service_resp
 }
 
 //-------------------------------------------------------Web_service_operation::execute_stylesheets
-
+/*
 STDMETHODIMP Web_service_operation::Execute_stylesheets()
 {
     HRESULT hr = S_OK;
@@ -522,7 +522,7 @@ STDMETHODIMP Web_service_operation::Execute_stylesheets()
 
     return hr;
 }
-
+*/
 //-------------------------------------------------------Web_service_operation::execute_stylesheets
 
 void Web_service_operation::execute_stylesheets()
@@ -544,7 +544,7 @@ void Web_service_operation::execute_stylesheets()
         //if( FAILED(hr) )  return hr;
 
         if( _web_service->_log_xml )  File( _log_filename_prefix + ".raw_request.txt", "w" ).print( http_request()->body() );
-        bool ok = request_document.try_load_xml( http_request()->body(), http_request()->character_encoding() );
+        bool ok = request_document.try_load_xml( http_request()->body(), http_request()->charset_name() );
         if( !ok )
         {
             _log->error( request_document.error_text() );

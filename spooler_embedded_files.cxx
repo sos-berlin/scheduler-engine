@@ -4872,17 +4872,17 @@ namespace spooler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "html/jz/details_frame.html", file_html_jz_details_frame_html, sizeof file_html_jz_details_frame_html - 1 },
-    { "html/jz/index.html", file_html_jz_index_html, sizeof file_html_jz_index_html - 1 },
-    { "html/jz/left_frame.html", file_html_jz_left_frame_html, sizeof file_html_jz_left_frame_html - 1 },
-    { "html/jz/browser_dependencies.js", file_html_jz_browser_dependencies_js, sizeof file_html_jz_browser_dependencies_js - 1 },
-    { "html/jz/popup_menu.js", file_html_jz_popup_menu_js, sizeof file_html_jz_popup_menu_js - 1 },
-    { "html/jz/scheduler.js", file_html_jz_scheduler_js, sizeof file_html_jz_scheduler_js - 1 },
-    { "html/jz/show_log.js", file_html_jz_show_log_js, sizeof file_html_jz_show_log_js - 1 },
-    { "html/jz/translation_de.js", file_html_jz_translation_de_js, sizeof file_html_jz_translation_de_js - 1 },
-    { "html/jz/scheduler.xslt", file_html_jz_scheduler_xslt, sizeof file_html_jz_scheduler_xslt - 1 },
-    { "html/jz/scheduler.css", file_html_jz_scheduler_css, sizeof file_html_jz_scheduler_css - 1 },
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1 },
+    { "html/jz/details_frame.html", file_html_jz_details_frame_html, sizeof file_html_jz_details_frame_html - 1, 1137323206 },
+    { "html/jz/index.html", file_html_jz_index_html, sizeof file_html_jz_index_html - 1, 1113976395 },
+    { "html/jz/left_frame.html", file_html_jz_left_frame_html, sizeof file_html_jz_left_frame_html - 1, 1137323283 },
+    { "html/jz/browser_dependencies.js", file_html_jz_browser_dependencies_js, sizeof file_html_jz_browser_dependencies_js - 1, 1130346743 },
+    { "html/jz/popup_menu.js", file_html_jz_popup_menu_js, sizeof file_html_jz_popup_menu_js - 1, 1113976395 },
+    { "html/jz/scheduler.js", file_html_jz_scheduler_js, sizeof file_html_jz_scheduler_js - 1, 1130346743 },
+    { "html/jz/show_log.js", file_html_jz_show_log_js, sizeof file_html_jz_show_log_js - 1, 1113976395 },
+    { "html/jz/translation_de.js", file_html_jz_translation_de_js, sizeof file_html_jz_translation_de_js - 1, 1113976395 },
+    { "html/jz/scheduler.xslt", file_html_jz_scheduler_xslt, sizeof file_html_jz_scheduler_xslt - 1, 1140518353 },
+    { "html/jz/scheduler.css", file_html_jz_scheduler_css, sizeof file_html_jz_scheduler_css - 1, 1137323283 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1141167758 },
     { NULL, NULL, 0 }
 };
 

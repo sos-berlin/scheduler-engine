@@ -16,10 +16,13 @@
                 <p>
                     Ein Web-Service kann mit einer Jobkette implementiert werden.
                 </p>
-                <p>Neue XML-Elemente, neue Attribute</p>
+                <p>Neue XML-Elemente, neue Attribute:</p>
                 <ul>
                     <li>
                         <scheduler_element name="web_service" attribute="job_chain"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="web_service" attribute="timeout"/>
                     </li>
                 </ul>
                 <p>Neue Klassen und Methoden:</p>
@@ -96,7 +99,7 @@
     <change date="2006-01-30" version="2.0.146" subversion_revision="4061">
         <revision type="new" title="Web-Dienste">
             <description>
-                <p>Neue XML-Elemente, neue Attribute</p>
+                <p>Neue XML-Elemente, neue Attribute:</p>
                 <ul>
                     <li><scheduler_element name="web_services"/></li>
                     <li><scheduler_element name="web_service"/></li>

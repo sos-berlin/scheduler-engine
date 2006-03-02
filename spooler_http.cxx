@@ -7,6 +7,7 @@
     Response
     Log_chunk_reader
     Html_chunk_reader
+    String_chunk_reader
 
     Notdürftige Implementierung von HTTP 1.1
     Siehe http://www.w3.org/Protocols/rfc2616/rfc2616.html
@@ -20,7 +21,8 @@
     Pipelining ist derzeit nicht möglich. Dazu muss ein signalisiertes recv während send() möglich sein --> Async_socket umarbeiten, getrenntes _state für recv() und send()
     "Transfer-Encoding: chunked" nicht, wenn nur ein oder kein Chunk da ist (z.B.String_chunk_reader)
     Mehrere Chunks mit einem send-scattered() senden
-    "Date:" der Datei senden
+    _operation->begin() schon wenn Kopf empfangen. Antworten und Anfrage empfangen gleichzeitig!  Request->get_part()
+    "Last-Modified:" der Datei senden
 
 */
 
@@ -70,6 +72,24 @@ Z_INIT( scheduler_http )
     }
 }
 
+//--------------------------------------------------------------------------------------date_string
+
+string date_string( time_t t )
+{
+    char time_text[] = "Sun Jan 01 00:00:00 1900 GMT";
+    //                  ^^^^^^^^^^^^^^^^^^^^^^^^^ wird von asctime() überschrieben
+
+#   ifdef Z_WINDOWS
+        asctime_s( time_text, sizeof time_text, gmtime( &t ) );
+#    else
+        struct tm  tm;
+        asctime_r( gmtime_r( &t, &tm ), time_text );
+#   endif
+    
+    strcpy( time_text + sizeof time_text - 5, " GMT" );   // asctime() hat das überschrieben
+    return time_text;
+}
+
 //--------------------------------------------------------------------------get_content_type_parameter
 
 string get_content_type_parameter( const string& content_type, const string& param_name )
@@ -111,6 +131,16 @@ string Headers::operator[]( const string& name ) const
 
 void Headers::set( const string& name, const string& value )
 {
+    if( name == "" )  z::throw_xc( __FUNCTION__, "Name is empty" );
+    if( value.find( '\n' ) != string::npos )  z::throw_xc( __FUNCTION__, "Value has multiple lines" );
+
+    set_unchecked( name, value );
+}
+
+//---------------------------------------------------------------------------Headers::set_unchecked
+
+void Headers::set_unchecked( const string& name, const string& value )
+{
     string lname = lcase( name );
 
     if( value != "" )  _map[ lname ] = Entry( name, value );
@@ -126,7 +156,7 @@ void Headers::set_default( const string& name, const string& value )
         string        lname = lcase( name );
         Map::iterator it    = _map.find( lname );
 
-        if( it == _map.end() )  _map[ name ] = Entry( name, value );
+        if( it == _map.end() )  set( lname, value );
     }
 }
 
@@ -260,7 +290,7 @@ void Parser::parse_header()
         string name = eat_until( ":" );
                       eat( ":" );
         string value = eat_until( "" );
-        _request->_headers.set( name, value );
+        _request->_headers.set_unchecked( name, value );
         eat_line_end();
     }
 
@@ -381,7 +411,7 @@ string Parser::eat_path()
 Operation::Operation( Operation_connection* pc )
 : 
     Communication::Operation( pc ), 
-    _zero_(this+1) 
+    _zero_(this+1)
 {
     _request  = Z_NEW( Request() );
     _parser   = Z_NEW( Parser( _request ) );
@@ -409,14 +439,10 @@ void Operation::begin()
 
     try
     {
-        if( _request->_protocol != ""  
-         && _request->_protocol != "HTTP/1.0"  
-         && _request->_protocol != "HTTP/1.1" )  throw Http_exception( status_505_http_version_not_supported );
+        _request->check();
 
         if( Web_service* web_service = _spooler->_web_services.web_service_by_url_path_or_null( _request->_path ) )
         {
-            Z_LOG2( "scheduler.http", "web_service=" << web_service->name() << "\n" );
-
             _web_service_operation = web_service->new_operation( this );
             _web_service_operation->begin();
         }
@@ -432,13 +458,13 @@ void Operation::begin()
     }
     catch( Http_exception& x )
     {
-        if( _connection )  _connection->_log.error( x.what() );
+        _connection->_log.error( x.what() );
         _response->set_status( x._status_code, x.what() );
         _response->set_ready();
     }
     catch( exception& x )
     {
-        if( _connection )  _connection->_log.error( x.what() );
+        _connection->_log.error( x.what() );
         _response->set_status( status_500_internal_server_error, x.what() );
         _response->set_ready();
     }
@@ -461,9 +487,14 @@ bool Operation::async_continue_( Continue_flags flags )
     {
         if( _response &&  !_response->is_ready() ) 
         {
-            _connection->_log.error( "HTTP-Operation wird nach Fristablauf abgebrochen" );
-            _response->set_status( status_504_gateway_timeout );
-            _response->set_ready();
+            if( _connection )  _connection->_log.error( "HTTP-Operation wird nach Fristablauf abgebrochen" );
+            
+            if( _response )
+            {
+                _response->set_status( status_504_gateway_timeout );
+                _response->set_ready();
+            }
+
             something_done = true;
         }
     }
@@ -558,11 +589,22 @@ string Request::content_type() const
     return rtrim( content_type.substr( 0, pos ) );
 }
 
-//----------------------------------------------------------------------Request::character_encoding
+//----------------------------------------------------------------------Request::charset_name
 
-string Request::character_encoding() const
+string Request::charset_name() const
 {
     return get_content_type_parameter( _headers[ "content-type" ], "charset" );
+}
+
+//-----------------------------------------------------------------------------------Request::check
+
+void Request::check()
+{
+    if( _protocol != ""  
+     && _protocol != "HTTP/1.0"  
+     && _protocol != "HTTP/1.1" )  throw Http_exception( status_505_http_version_not_supported );
+
+    if( !string_begins_with( _path, "/" ) )  throw Http_exception( status_404_bad_request );
 }
 
 //----------------------------------------------------------------------Request::get_String_content
@@ -573,7 +615,7 @@ STDMETHODIMP Request::get_String_content( BSTR* result )
     
     try
     {
-        hr = Charset::for_name( character_encoding() )->Encoded_to_bstr( _body, result );
+        hr = Charset::for_name( charset_name() )->Encoded_to_bstr( _body, result );
     }
     catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
 
@@ -701,14 +743,13 @@ void Response::finish()
 
     // _headers füllen
 
-    if( !_headers.contains( "Date" ) )  _headers.set( "Date", date_string() );
+    if( !_headers.contains( "Date" ) )  _headers.set( "Date", date_string( ::time(NULL) ) );
     if( _chunk_reader )  _headers.set_default( "Content-Type", _chunk_reader->_content_type );
 
 
     // _headers_stream schreiben
 
     _headers_stream << _operation->request()->_protocol << ' ' << _status_code << ' ' << http_status_messages[ _status_code ] << "\r\n";
-    //_headers.print_and_remove( &_headers_stream, "Date" );
     _headers.print( &_headers_stream );
 
     if( _chunked )  _headers_stream << "Transfer-Encoding: chunked\r\n";
@@ -717,34 +758,10 @@ void Response::finish()
     _headers_stream << "Server: Scheduler " VER_PRODUCTVERSION_STR;
     //if( Web_service_operation* wso = _operation->_web_service_operation )
     //    _headers_stream << wso->_web_service->obj_name();
-    _headers_stream << "\r\n";
-
-    _headers_stream << "\r\n";
-
+    _headers_stream << "\r\n\r\n";
 
     _chunk_size = _headers_stream.length();
     _finished = true;
-}
-
-//----------------------------------------------------------------------------Response::date_string
-
-string Response::date_string()
-{
-    time_t      t;
-    char        time_text[26];
-
-    ::time( &t );
-    memset( time_text, 0, sizeof time_text );
-
-#   ifdef Z_WINDOWS
-        strcpy( time_text, asctime( gmtime( &t ) ) );
-#    else
-        struct tm  tm;
-        asctime_r( gmtime_r( &t, &tm ), time_text );
-#   endif
-    
-    time_text[24] = '\0';
-    return string(time_text) + " GMT";
 }
 
 //------------------------------------------------------------------------------------Response::eof
@@ -964,15 +981,9 @@ STDMETHODIMP Response::put_Binary_content( SAFEARRAY* safearray )
     
     try
     {
-        VARTYPE vartype = 0;
-
-        hr = SafeArrayGetVartype( safearray, &vartype );  
-        if( FAILED(hr) )  return hr;
-        if( vartype != VT_UI1 )  return DISP_E_TYPEMISMATCH;
-
         Locked_safearray<Byte> a ( safearray );
 
-        set_chunk_reader( Z_NEW( Byte_chunk_reader( &a[0], a.count(), "" ) ) );
+        set_chunk_reader( Z_NEW( Byte_chunk_reader( a.data(), a.count(), "" ) ) );
     }
     catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
 

@@ -821,6 +821,7 @@ string xml_as_string( const xml::Document_ptr& document, bool indent )
 }
 
 //-------------------------------------------------------------------Command_processor::execute_http
+// Könnte als Unterklasse von Web_service_operation implementiert werden
 
 void Command_processor::execute_http( http::Operation* http_operation )
 {
@@ -1024,7 +1025,11 @@ void Command_processor::execute_http( http::Operation* http_operation )
 
                 try
                 {
-                    response_body = zschimmer::string_from_file( absolute_filename );
+                    File file ( absolute_filename, "r" );
+                    //struct stat s;                                                   
+                    //if( fstat( file, &s ) == 0 )  http_response->set_header( "Last-Modified", http::date_string( s.st_mtime ) );
+                    response_body = string_from_fileno( file );
+                    //response_body = zschimmer::string_from_file( absolute_filename );
                 }
                 catch( exception& )
                 {                                                        
@@ -1053,6 +1058,7 @@ void Command_processor::execute_http( http::Operation* http_operation )
                         if( !f )  throw;
                     }
 
+                    //http_response->set_header( "Last-Modified", http::date_string( f->_last_modified_time ) );
                     response_body.assign( f->_content, f->_length );
                 }
             }

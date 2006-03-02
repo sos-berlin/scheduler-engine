@@ -21,7 +21,8 @@ struct Response;
 
 //-------------------------------------------------------------------------------------------------
 
-string                          get_content_type_parameter     ( const string& content_type, const string& param_name );
+string                          get_content_type_parameter  ( const string& content_type, const string& param_name );
+string                          date_string                 ( time_t );
 
 //-------------------------------------------------------------------------------------Chunk_reader
 /*
@@ -244,6 +245,7 @@ struct Headers
     bool                        contains                    ( const string& name )                  { return _map.find( lcase( name ) ) != _map.end(); }
     string                      operator[]                  ( const string& name ) const;
     void                        set                         ( const string& name, const string& value );
+    void                        set_unchecked               ( const string& name, const string& value );
     void                        set_default                 ( const string& name, const string& value );
     void                        print                       ( ostream* ) const;
     void                        print                       ( ostream*, const Map::const_iterator& ) const;
@@ -291,13 +293,14 @@ struct Request : Object
                                 Request                     ()                                      : _zero_(this+1){}
 
     void                        close                       ();
+    void                        check                       ();
     bool                        has_parameter               ( const string& name ) const            { return _parameters.find( name ) != _parameters.end(); }
     string                      parameter                   ( const string& name ) const;
     bool                        is_http_1_1                 () const;
     string                      header                      ( const string& name ) const            { return _headers[ name ]; }
     string                      url                         () const;
     string                      url_path                    () const                                { return _path; }
-    string                      character_encoding          () const;
+    string                      charset_name                () const;
     string                      content_type                () const;
     const string&               body                        () const                                { return _body; }
 
@@ -347,7 +350,6 @@ struct Response : Object
     void                    set_status                      ( Status_code, const string& text = "" );
     void                    set_chunk_reader                ( Chunk_reader* c )                     { _chunk_reader = c; }
     void                        finish                      ();
-    static string               date_string                 ();
     void                        send                        ();
     bool                     is_ready                       () const                                { return _ready; }
     void                    set_ready                       ();
