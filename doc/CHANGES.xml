@@ -11,6 +11,26 @@
     <scheduler_keyword keyword="Change log"/>
 
     <change date="2006-03-01" version="2.0.148" subversion_revision="4126">
+        <revision type="new" title="XML-Schema eingeführt">
+            <description>
+                <p>
+                    Die XML-Konfiguration und die XML-Kommandos werden gegen ein eingebautes XML-Schema geprüft.
+                    Die neue Option <scheduler_option name="show-xml-schema"/> liefert das XML-Schema.
+                    Eine aktuelle Version ist übers Internet erreichbar:
+                    <a href="http://www.zschimmer.com/2006/scheduler.xsd">http://www.zschimmer.com/2006/scheduler.xsd</a>.
+                </p>
+            </description>
+        </revision>
+
+        <revision type="new" title="Neue Eigenschaft order.xml_payload">
+            <description>
+                <p>
+                    Zusätzlich zur payload kann <scheduler_method class="Order" property="xml_payload"/> ein XML-Dokument aufnehmen.
+                    Siehe auch <scheduler_element name="xml_payload"/>.
+                </p>
+            </description>
+        </revision>
+
         <revision type="new" title="&lt;web_service job_chain=''&gt;">
             <description>
                 <p>
@@ -40,15 +60,6 @@
                         <scheduler_method class="Web_service_response"/>
                     </li>
                 </ul>
-            </description>
-        </revision>
-
-        <revision type="new" title="Neue Eigenschaft order.xml_payload">
-            <description>
-                <p>
-                    Zustätzlich zur payload kann <scheduler_method class="Order" property="xml_payload"/> ein XML-Dokument aufnehmen.
-                    Siehe auch <scheduler_element name="xml_payload"/>.
-                </p>
             </description>
         </revision>
     </change>

@@ -629,6 +629,26 @@ library Spooler
         interface Ihas_java_class_name;
     }
 
+    //--------------------------------------------------------------------------------Spooler_proxy
+
+    [
+        uuid       ( feee47b2-6c1b-11d8-8103-000476ee8afb ),
+        odl,
+        dual
+    ]
+    interface Ispooler_proxy : IDispatch
+    {
+        HRESULT                 Create_xslt_stylesheet  ( [out,retval] Ixslt_stylesheet** );
+    }
+
+    [
+        uuid       ( feee47b3-6c1b-11d8-8103-000476ee8afb )
+    ]
+    coclass Spooler_proxy
+    {
+        interface Ispooler;
+    }
+
     //------------------------------------------------------------------------------Spooler_context
 
     [
@@ -1329,6 +1349,7 @@ library Spooler
       //HRESULT                 Apply_file              ( [in] BSTR input_filename, [in] BSTR output_filename );
     };
 
+    /*
     [
         uuid       ( feee47b1-6c1b-11d8-8103-000476ee8afb )
     ]
@@ -1337,7 +1358,7 @@ library Spooler
         interface Ixslt_stylesheet;
         interface Ihas_java_class_name;
     }
-
+    */
     //-----------------------------------------------------------------------Ixslt_stylesheet_proxy
     /*
     [
@@ -1489,8 +1510,6 @@ library Spooler
 /*
 Ein paar freie GUIDs:
 
-feee47b2-6c1b-11d8-8103-000476ee8afb
-feee47b3-6c1b-11d8-8103-000476ee8afb
 feee47b4-6c1b-11d8-8103-000476ee8afb
 feee47b5-6c1b-11d8-8103-000476ee8afb
 feee47b6-6c1b-11d8-8103-000476ee8afb

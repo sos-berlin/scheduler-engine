@@ -533,14 +533,18 @@ struct Com_thread : spooler_com::Ithread,
 
 struct Com_spooler : spooler_com::Ispooler, 
                      spooler_com::Ihas_java_class_name, 
+                     z::com::object_server::Ihas_reference_with_properties,
                      Sos_ole_object               
 {
                                 Com_spooler                 ();                                     // Für gcc 3.2. Nicht implementiert.
                                 Com_spooler                 ( Spooler* ); 
 
     STDMETHODIMP                QueryInterface              ( const IID&, void** );
-
+    
     USE_SOS_OLE_OBJECT_WITHOUT_QI
+
+    // Interface Ihas_reference_with_properties
+    ptr<object_server::Reference_with_properties> get_reference_with_properties();
 
 
     // interface Ihas_java_class_name
@@ -594,6 +598,23 @@ struct Com_spooler : spooler_com::Ispooler,
   protected:
     Thread_semaphore           _lock;
     Spooler*                   _spooler;                    // Es gibt nur einen Com_spooler
+};
+
+//-----------------------------------------------------------------------------------Com_task_proxy
+
+struct Com_spooler_proxy : object_server::proxy_with_local_methods< Com_spooler_proxy, spooler_com::Ispooler_proxy >
+{
+    static Class_descriptor     class_descriptor;
+    static const com::Com_method _methods[];
+
+
+    static HRESULT              Create_instance             ( const IID& iid, ptr<IUnknown>* result );
+
+
+                                Com_spooler_proxy           ();
+
+
+    STDMETHODIMP                Create_xslt_stylesheet      ( spooler_com::Ixslt_stylesheet** );
 };
 
 //--------------------------------------------------------------------------------------Com_context

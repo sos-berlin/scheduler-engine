@@ -49,7 +49,7 @@ Xslt_stylesheet::Xslt_stylesheet()
     Z_LOG2( "joacim", __FUNCTION__ << "\n" );
 }
 
-//------------------------------------------------------------------Com_task_proxy::Create_instance
+//-----------------------------------------------------------------Xslt_stylesheet::Create_instance
 /*
 HRESULT Xslt_stylesheet::Create_instance( const IID& iid, ptr<IUnknown>* result )
 {

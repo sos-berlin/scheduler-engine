@@ -87,7 +87,7 @@
         <xml_attribute name="forward_xslt_stylesheet" type="path" subst_env="yes" title="Zur Weiterleitung am Ende des Auftrags bzw. der Task">
             <description>
                 <p>
-                    Wenn ein mit <scheduler_element name="add_order" attribute="web_service"/> gestarter Auftrag
+                    Wenn ein mit <scheduler_element name="add_order" attribute="web_service"/> gestarteter Auftrag
                     oder eine mit <scheduler_element name="start_job" attribute="web_service"/> gestartete Task endet
                     und ein <code>forward_xslt_stylesheet</code> angegeben ist,
                     dann wird der Auftrag bzw. die Task mit dem Stylesheet zu einem
@@ -174,7 +174,7 @@
         <p>
             Web-Dienste lassen sich einrichten, um Aufträge oder Tasks zu erzeugen.
             Die angenommene Anforderung wird sofort beantwortet.
-            Das Ergebnis des Auftrags oder der Task kann zu einen anderen Web-Dienst weitergeleitet werden.
+            Das Ergebnis des Auftrags oder der Task kann zu einem anderen Web-Dienst weitergeleitet werden.
         </p>
         <p>
             Der TCP-Port des HTTP-Servers wird mit <scheduler_element name="config" attribute="tcp_port"/> festgelegt.

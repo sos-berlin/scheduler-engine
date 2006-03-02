@@ -616,7 +616,8 @@ struct Isubprocess : IDispatch
 };
 
 //--------------------------------------------------------------------------------Ixslt_stylesheet 
-
+                                    
+//DEFINE_GUID( CLSID_Xslt_stylesheet , 0xfeee47b1, 0x6c1b, 0x11d8, 0x81, 0x03, 0x00, 0x04, 0x76, 0xee, 0x8a, 0xfb );   // {feee47b1-6c1b-11d8-8103-000476ee8afb}
 DEFINE_GUID(   IID_Ixslt_stylesheet, 0xfeee47ac, 0x6c1b, 0x11d8, 0x81, 0x03, 0x00, 0x04, 0x76, 0xee, 0x8a, 0xfb );   // {feee47ac-6c1b-11d8-8103-000476ee8afb}
 
 struct Ixslt_stylesheet : IDispatch

@@ -52,7 +52,6 @@
 				StringPooling="true"
 				RuntimeLibrary="0"
 				BufferSecurityCheck="true"
-				EnableFunctionLevelLinking="true"
 				ForceConformanceInForLoopScope="true"
 				RuntimeTypeInfo="true"
 				UsePrecompiledHeader="2"
@@ -93,6 +92,7 @@
 				SubSystem="1"
 				OptimizeReferences="2"
 				OptimizeForWindows98="1"
+				LinkTimeCodeGeneration="0"
 				ImportLibrary="$(OutDir)/scheduler.lib"
 				TargetMachine="1"
 			/>

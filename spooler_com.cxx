@@ -52,7 +52,8 @@ DESCRIBE_CLASS( &spooler_typelib, Com_order_queue    , order_queue    , CLSID_Or
 
 Typelib_ref                         typelib;  
 
-Com_task_proxy::Class_descriptor    Com_task_proxy::class_descriptor ( &typelib, "Spooler.Task_proxy", Com_task_proxy::_methods );
+Com_spooler_proxy::Class_descriptor Com_spooler_proxy::class_descriptor ( &typelib, "Spooler.Spooler_proxy", Com_spooler_proxy::_methods );
+Com_task_proxy   ::Class_descriptor Com_task_proxy   ::class_descriptor ( &typelib, "Spooler.Task_proxy"   , Com_task_proxy   ::_methods );
 
 //-----------------------------------------------------------------------------IID_Ihostware_dynobj
 
@@ -2091,6 +2092,22 @@ STDMETHODIMP Com_task::QueryInterface( const IID& iid, void** result )
     return Sos_ole_object::QueryInterface( iid, result );
 }
 
+//-------------------------------------------------------Com_spooler::get_reference_with_properties
+
+ptr<object_server::Reference_with_properties> Com_spooler::get_reference_with_properties()
+{
+    ptr<object_server::Reference_with_properties> result;
+
+    THREAD_LOCK( _lock )
+    {
+        if( !_spooler )  throw_com( E_POINTER, "Com_spooler::get_reference_with_properties" );
+
+        result = Z_NEW( object_server::Reference_with_properties( CLSID_Spooler_proxy, static_cast<Ispooler*>( this ) ) );
+    }
+
+    return result;
+}
+
 //----------------------------------------------------------Com_task::get_reference_with_properties
 
 ptr<object_server::Reference_with_properties> Com_task::get_reference_with_properties()
@@ -2901,6 +2918,7 @@ Com_spooler::Com_spooler( Spooler* spooler )
 STDMETHODIMP Com_spooler::QueryInterface( const IID& iid, void** result )
 {
     Z_IMPLEMENT_QUERY_INTERFACE( this, iid, Ihas_java_class_name          , result );
+    Z_IMPLEMENT_QUERY_INTERFACE( this, iid, Ihas_reference_with_properties, result );
 
     return Sos_ole_object::QueryInterface( iid, result );
 }
@@ -3405,10 +3423,68 @@ STDMETHODIMP Com_spooler::get_Udp_port( int* result )
 
 HRESULT Com_spooler::Create_xslt_stylesheet( Ixslt_stylesheet** result )
 {
-    HRESULT               hr         = S_OK;
-    ptr<Xslt_stylesheet>  stylesheet = Z_NEW( Xslt_stylesheet );
-    
-    *result = stylesheet.take();
+    HRESULT hr = S_OK;
+
+    if( !_spooler )  return E_POINTER;
+
+    try
+    {
+        ptr<Xslt_stylesheet>  stylesheet = Z_NEW( Xslt_stylesheet );
+        *result = stylesheet.take();
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+
+//----------------------------------------------------------------------Com_spooler_proxy::_methods
+
+// dispids wie bei Com_spooler::_methods!
+
+const Com_method Com_spooler_proxy::_methods[] =
+{ 
+#ifdef Z_COM
+   // _flags         , dispid, _name                        , _method                                           , _result_type  , _types        , _default_arg_count
+    { DISPATCH_METHOD     , 33, "Create_xslt_stylesheet"    , (Com_method_ptr)&Com_spooler_proxy::Create_xslt_stylesheet, VT_DISPATCH },
+#endif
+    {}
+};
+
+//---------------------------------------------------------------Com_spooler_proxy::Create_instance
+
+HRESULT Com_spooler_proxy::Create_instance( const IID& iid, ptr<IUnknown>* result )
+{
+    if( iid == object_server::IID_Iproxy )
+    {
+        ptr<Com_spooler_proxy> instance = Z_NEW( Com_spooler_proxy );
+        *result = static_cast<IDispatch*>( static_cast<Proxy*>( +instance ) );
+        return S_OK;
+    }
+
+    return E_NOINTERFACE;
+}
+
+//-------------------------------------------------------------Com_spooler_proxy::Com_spooler_proxy
+
+Com_spooler_proxy::Com_spooler_proxy()
+: 
+    Proxy_with_local_methods( &class_descriptor )
+{
+}
+
+//----------------------------------------------------------------Com_task_proxy::Create_subprocess
+
+STDMETHODIMP Com_spooler_proxy::Create_xslt_stylesheet( spooler_com::Ixslt_stylesheet** result )
+{
+    HRESULT hr = S_OK;
+
+    try
+    {
+        ptr<Xslt_stylesheet>  stylesheet = Z_NEW( Xslt_stylesheet );
+        *result = stylesheet.take();
+    }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+
     return hr;
 }
 
