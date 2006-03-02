@@ -312,6 +312,16 @@ struct Ispooler : IDispatch
 
 };
 
+//-------------------------------------------------------------------------------Ispooler_proxy 
+
+DEFINE_GUID( IID_Ispooler_proxy,  0xfeee47b2, 0x6c1b, 0x11d8, 0x81, 0x03, 0x00, 0x04, 0x76, 0xee, 0x8a, 0xfb );
+DEFINE_GUID( CLSID_Spooler_proxy, 0xfeee47b3, 0x6c1b, 0x11d8, 0x81, 0x03, 0x00, 0x04, 0x76, 0xee, 0x8a, 0xfb );
+
+struct Ispooler_proxy : IDispatch
+{
+    virtual HRESULT         Create_xslt_stylesheet      ( Ixslt_stylesheet** )                  = 0;
+};
+
 //------------------------------------------------------------------------------------------Log
 
 DEFINE_GUID( IID_Ilog,  0x3B6C8A62, 0xB511, 0x445d, 0xA2, 0xA2, 0xE8, 0x52, 0xBC, 0x2E, 0x05, 0xA0 );
