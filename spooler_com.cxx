@@ -3390,7 +3390,6 @@ STDMETHODIMP Com_spooler::Execute_xml( BSTR xml, BSTR* result )
     try
     {
         Command_processor cp ( _spooler );
-        cp.set_host( NULL );
         hr = String_to_bstr( cp.execute( string_from_bstr( xml ), Time::now() ), result );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
@@ -3444,8 +3443,7 @@ HRESULT Com_spooler::Create_xslt_stylesheet( Ixslt_stylesheet** result )
 const Com_method Com_spooler_proxy::_methods[] =
 { 
 #ifdef Z_COM
-   // _flags         , dispid, _name                        , _method                                           , _result_type  , _types        , _default_arg_count
-    { DISPATCH_METHOD     , 33, "Create_xslt_stylesheet"    , (Com_method_ptr)&Com_spooler_proxy::Create_xslt_stylesheet, VT_DISPATCH },
+    COM_METHOD      ( Com_spooler_proxy, 33, Create_xslt_stylesheet, VT_DISPATCH , 0 ),
 #endif
     {}
 };
