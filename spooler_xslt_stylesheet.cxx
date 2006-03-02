@@ -31,8 +31,8 @@ HRESULT Xslt_stylesheet::Create_instance( const IID& iid, ptr<IUnknown>* result 
 {
     if( iid == spooler_com::IID_Ixslt_stylesheet )
     {
-        ptr<Ixslt_stylesheet> instance = Z_NEW( Xslt_stylesheet );
-        *result = +instance;
+        ptr<Xslt_stylesheet> instance = Z_NEW( Xslt_stylesheet );
+        *result = static_cast<Ixslt_stylesheet*>( +instance );
         return S_OK;
     }
 
