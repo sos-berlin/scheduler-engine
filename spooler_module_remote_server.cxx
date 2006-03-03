@@ -195,7 +195,7 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
                 else
                 if( key_word == "monitor.script"     )  _server._module->_monitor->_source          = xml::Document_ptr( value ).documentElement();
                 else
-                    throw_xc( "server::construct" );
+                    throw_xc( "server::construct", as_string(i), key_word );
             }
         }
 
