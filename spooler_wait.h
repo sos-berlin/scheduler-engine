@@ -90,6 +90,8 @@ struct Wait_handles : Non_cloneable
 
     typedef vector<z::Event_base*>   Event_vector;
     Event_vector               _events;
+    bool                       _print_time_every_second;
+
 
   public:
     Thread_semaphore           _lock;

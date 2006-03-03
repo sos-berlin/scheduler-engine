@@ -456,13 +456,13 @@ void Operation::begin()
     }
     catch( Http_exception& x )
     {
-        _connection->_log.error( x.what() );
+        _connection->_log.warn( x.what() );
         _response->set_status( x._status_code, x.what() );
         _response->set_ready();
     }
     catch( exception& x )
     {
-        _connection->_log.error( x.what() );
+        _connection->_log.warn( x.what() );
         _response->set_status( status_500_internal_server_error, x.what() );
         _response->set_ready();
     }

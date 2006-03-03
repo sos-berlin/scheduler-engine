@@ -104,6 +104,7 @@ Wait_handles::Wait_handles( const Wait_handles& o )
    ,_handles ( o._handles )
 #endif
 {
+    _print_time_every_second = _spooler->log_directory() == "*stderr"  &&  isatty( fileno( stderr ) );
 }
 
 //----------------------------------------------------------------------Wait_handles::~Wait_handles
@@ -370,15 +371,9 @@ bool Wait_handles::wait_until_2( Time until )
         }
 
 
-#       ifdef Z_DEBUG
-            bool print_time_every_second = _spooler->log_directory() == "*stderr";
-#       else
-            bool print_time_every_second = false;
-#       endif
-
         DWORD ret;
 
-        if( print_time_every_second )
+        if( _print_time_every_second )
         {
             double step = 1.0;
             while( Time::now() < until - step )

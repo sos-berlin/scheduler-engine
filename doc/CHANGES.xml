@@ -11,6 +11,15 @@
     <scheduler_keyword keyword="Change log"/>
 
     <change date="2006-03-01" version="2.0.148" subversion_revision="4126">
+        <revision type="new" title="Neuer C++-Compiler für Windows">
+            <description>
+                <p>
+                    Ab Revision 4126 ist alle Software für Windows mit Microsoft Visual Studio 2005 C++ übersetzt.
+                    Es sollte keine Änderung bemerkbar sein.
+                </p>
+            </description>
+        </revision>
+
         <revision type="new" title="XML-Schema eingeführt">
             <description>
                 <p>
