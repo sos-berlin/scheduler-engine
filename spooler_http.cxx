@@ -629,7 +629,7 @@ STDMETHODIMP Request::get_Binary_content( SAFEARRAY** result )
     try
     {
         Locked_safearray<unsigned char> safearray ( _body.length() );
-        memcpy( &safearray[0], _body.data(), _body.length() );
+        memcpy( safearray.data(), _body.data(), _body.length() );
         *result = safearray.take_safearray();
     }
     catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }

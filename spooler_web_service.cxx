@@ -732,7 +732,7 @@ const Com_method Web_service_response::_methods[] =
     COM_PROPERTY_PUT( Web_service_response,  2, Status_code                   , VT_EMPTY   , 0, VT_INT ),
     COM_PROPERTY_PUT( Web_service_response,  3, Header                        , VT_EMPTY   , 0, VT_BSTR, VT_BSTR ),
     COM_PROPERTY_PUT( Web_service_response,  4, String_content                , VT_EMPTY   , 0, VT_BSTR ),
-    COM_PROPERTY_PUT( Web_service_response,  5, Binary_content                , VT_EMPTY   , 0, VT_ARRAY ),
+    COM_PROPERTY_PUT( Web_service_response,  5, Binary_content                , VT_EMPTY   , 0, VT_ARRAY|VT_UI1 ),
     COM_METHOD      ( Web_service_response,  6, Send                          , VT_EMPTY   , 0 ),
 #endif
     {}
