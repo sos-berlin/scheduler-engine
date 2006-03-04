@@ -658,7 +658,7 @@ const Com_method Web_service_request::_methods[] =
     COM_PROPERTY_GET( Web_service_request,  1, Java_class_name               , VT_BSTR    , 0 ),
     COM_PROPERTY_GET( Web_service_request,  3, Header                        , VT_BSTR    , 0, VT_BSTR ),
     COM_PROPERTY_GET( Web_service_request,  4, String_content                , VT_BSTR    , 0 ),
-    COM_PROPERTY_GET( Web_service_request,  5, Binary_content                , VT_ARRAY   , 0 ),
+    COM_PROPERTY_GET( Web_service_request,  5, Binary_content                , (VARENUM)(VT_ARRAY|VT_I1), 0 ),
     COM_PROPERTY_GET( Web_service_request,  6, Url                           , VT_BSTR    , 0 ),
 #endif
     {}
