@@ -1003,7 +1003,8 @@ void Command_processor::execute_http( http::Operation* http_operation )
                 if( extension == "js"   )  response_content_type = "text/javascript";
                 else
                 if( extension == "css"  )  response_content_type = "text/css";
-
+                else
+                if( extension == "ico"  )  response_content_type = "image/x-ico";
 
                 string filename = path;
 

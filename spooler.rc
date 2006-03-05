@@ -8,3 +8,5 @@
 
 #include "spooler_version.h"
 #include "../kram/sosvers.rc"
+
+//? 2  ICON "scheduler.ico"
