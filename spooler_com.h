@@ -685,8 +685,8 @@ struct Com_job_chain : spooler_com::Ijob_chain,
 
     STDMETHODIMP                Try_add_order           ( spooler_com::Iorder* order_or_payload, VARIANT_BOOL* );
 
-    STDMETHODIMP            put_Store_orders_in_database( VARIANT_BOOL );
-    STDMETHODIMP            get_Store_orders_in_database( VARIANT_BOOL* );
+    STDMETHODIMP            put_Orders_recoverable      ( VARIANT_BOOL );
+    STDMETHODIMP            get_Orders_recoverable      ( VARIANT_BOOL* );
 
     STDMETHODIMP                Remove_all_pending_orders( int* result );
 

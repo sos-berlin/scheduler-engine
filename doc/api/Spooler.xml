@@ -71,6 +71,10 @@
 
     <description>
         <p>
+            Bei <scheduler_method class="Job_chain" property="orders_recoverable"/><code>=true</code>
+            lädt der Scheduler die Aufträge der Jobkette aus der Datenbank.
+        </p>
+        <p>
             Siehe <scheduler_method class="Spooler" method="create_job_chain"/>
             und <scheduler_element name="job_chain"/>.
         </p>

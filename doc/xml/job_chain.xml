@@ -30,12 +30,45 @@
         <xml_attribute name="visible" type="yes|no" initial="yes">
             <description>
                 <p>
-                    <code>visible="no"</code> lässt die Jobkette im Ergebnis von 
-                    <scheduler_element name="show_job_chains"/> und 
+                    <code>visible="no"</code> lässt die Jobkette im Ergebnis von
+                    <scheduler_element name="show_job_chains"/> und
                     <scheduler_element name="show_state"/> unsichtbar.
                 </p>
                 <p>
                     Der Scheduler setzt die Jobkette sichtbar, sobald ein Auftrag eingereiht wird.
+                </p>
+            </description>
+        </xml_attribute>
+
+        
+        <xml_attribute name="orders_recoverable" type="yes|no" initial="yes">
+            <description>
+                <p>
+                    <code>orders_recoverable="yes"</code>
+                </p>
+                <div class="indent">
+                    <p style="margin-top: 0pt;">
+                        Der Scheduler hält die Aufträge in der Datenbank.
+                        Sobald ein Auftrag in die Auftragswarteschlange eines Jobs eingereiht wird,
+                        speichert der Scheduler ihn auch in der Datenbank.
+                        Wenn der Auftrag die Jobkette durchlaufen hat, wird er aus der Datenbank entfernt.
+                    </p>
+                    <p>
+                        Beim Einrichten der Jobkette (beim Start des Schedulers) lädt der Scheduler die Aufträge aus der Datenbank.
+                        Siehe <scheduler_method class="Spooler" method="add_job_chain"/>.
+                    </p>
+                    <p>
+                        Wirkungslos, wenn der Scheduler ohne Datenbank arbeitet, siehe <scheduler_ini_entry file="factory.ini" section="spooler" entry="db"/>.
+                    </p>
+                </div>
+                <p>
+                    <code>orders_recoverable="no"</code>
+                </p>
+                <p class="indent" style="margin-top: 0pt;">
+                    Der Scheduler hält nicht die Aufträge in der Datenbank und lädt sie auch nicht daraus.
+                </p>
+                <p>
+                    Siehe <a href="http://lillerud:6310/doc/datenbank.xml">Datenbank</a>.
                 </p>
             </description>
         </xml_attribute>

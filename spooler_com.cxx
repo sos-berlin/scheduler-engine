@@ -3525,7 +3525,7 @@ void Com_context::close()
 }
 
 //--------------------------------------------------------------------------Com_job_chain::_methods
-#ifdef Z_COM
+#ifdef COM_METHOD
 
 const Com_method Com_job_chain::_methods[] =
 { 
@@ -3539,8 +3539,8 @@ const Com_method Com_job_chain::_methods[] =
     { DISPATCH_PROPERTYGET,  6, "node"                      , (Com_method_ptr)&Com_job_chain::get_Node           , VT_DISPATCH   , { VT_VARIANT|VT_BYREF } },
     { DISPATCH_PROPERTYGET,  7, "order_queue"               , (Com_method_ptr)&Com_job_chain::get_Order_queue    , VT_DISPATCH   , { VT_VARIANT|VT_BYREF } },
     { DISPATCH_PROPERTYGET,  8, "java_class_name"           , (Com_method_ptr)&Com_job_chain::get_Java_class_name, VT_BSTR },
-    { DISPATCH_PROPERTYPUT,  9, "store_orders_in_database"  , (Com_method_ptr)&Com_job_chain::put_Store_orders_in_database, VT_EMPTY, { VT_BOOL } },
-    { DISPATCH_PROPERTYGET,  9, "store_orders_in_database"  , (Com_method_ptr)&Com_job_chain::get_Store_orders_in_database, VT_BOOL },
+    { DISPATCH_PROPERTYPUT,  9, "Orders_recoverable"        , (Com_method_ptr)&Com_job_chain::put_Orders_recoverable, VT_EMPTY, { VT_BOOL } },
+    { DISPATCH_PROPERTYGET,  9, "Orders_recoverable"        , (Com_method_ptr)&Com_job_chain::get_Orders_recoverable, VT_BOOL },
     { DISPATCH_METHOD     , 10, "remove_all_pending_orders" , (Com_method_ptr)&Com_job_chain::Remove_all_pending_orders   , VT_INT  },
     { DISPATCH_METHOD     , 11, "Try_add_order"             , (Com_method_ptr)&Com_job_chain::Try_add_order      , VT_BOOL       , { VT_DISPATCH } },
     { DISPATCH_METHOD     , 12, "Add_or_replace_order"      , (Com_method_ptr)&Com_job_chain::Add_or_replace_order, VT_EMPTY     , { VT_DISPATCH } },
@@ -3852,9 +3852,9 @@ STDMETHODIMP Com_job_chain::get_Node( VARIANT* state, Ijob_chain_node** result )
     return hr;
 }
 
-//------------------------------------------------------Com_job_chain::put_Store_orders_in_database
+//------------------------------------------------------------Com_job_chain::put_Orders_recoverable
 
-STDMETHODIMP Com_job_chain::put_Store_orders_in_database( VARIANT_BOOL b )
+STDMETHODIMP Com_job_chain::put_Orders_recoverable( VARIANT_BOOL b )
 {
     HRESULT hr = NOERROR;
 
@@ -3862,7 +3862,7 @@ STDMETHODIMP Com_job_chain::put_Store_orders_in_database( VARIANT_BOOL b )
     {
         if( !_job_chain )  return E_POINTER;
 
-        _job_chain->set_store_orders_in_database( b != VARIANT_FALSE );
+        _job_chain->set_orders_recoverable( b != VARIANT_FALSE );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Job_chain.node" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Job_chain.node" ); }
@@ -3870,13 +3870,13 @@ STDMETHODIMP Com_job_chain::put_Store_orders_in_database( VARIANT_BOOL b )
     return hr;
 }
 
-//------------------------------------------------------Com_job_chain::get_Store_orders_in_database
+//------------------------------------------------------------Com_job_chain::get_Orders_recoverable
 
-STDMETHODIMP Com_job_chain::get_Store_orders_in_database( VARIANT_BOOL* result )
+STDMETHODIMP Com_job_chain::get_Orders_recoverable( VARIANT_BOOL* result )
 {
     if( !_job_chain )  return E_POINTER;
 
-    *result = _job_chain->_store_orders_in_database? VARIANT_TRUE : VARIANT_FALSE;
+    *result = _job_chain->_orders_recoverable? VARIANT_TRUE : VARIANT_FALSE;
 
     return S_OK;
 }

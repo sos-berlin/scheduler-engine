@@ -861,13 +861,13 @@ library Spooler
         HRESULT                 Order_queue             ( [in] VARIANT* State, [out,retval] Iorder_queue** Result );
 
         [propput]
-        HRESULT                 Store_orders_in_database( [in] VARIANT_BOOL );              // Für Joacim, 2005-02-27
+        HRESULT                 Orders_recoverable      ( [in] VARIANT_BOOL );
 
         [propget]
-        HRESULT                 Store_orders_in_database( [out,retval] VARIANT_BOOL* );     // Für Joacim, 2005-02-27
+        HRESULT                 Orders_recoverable      ( [out,retval] VARIANT_BOOL* );
 
         HRESULT                 Remove_all_pending_orders( [out,retval] int* count );       // Für Joacim, 2005-02-27 (was fehlt: Werden alle Aufträge in DB gelöscht? Wird eine Historie geschieben? 
-                                                                                            // Besser mit Store_orders_in_database=false!
+                                                                                            // Besser mit Orders_recoverable=false!
                                                                                             // Vielleicht besser so:
                                                                                             // Begin_refresh_all_orders()
                                                                                             //    job_chain.add_order(order): Ersetzt Auftrag (nur wenn er hängt)

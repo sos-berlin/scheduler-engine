@@ -156,7 +156,7 @@ Job_chain::Job_chain( Spooler* spooler )
     _spooler(spooler),
     _log(_spooler),
     _lock("Job_chain"),
-    _store_orders_in_database(true),
+    _orders_recoverable(true),
     _visible(true)
 {
     set_name( "" );     // Ruft _log.set_prefix()
@@ -202,7 +202,8 @@ void Job_chain::set_dom( const xml::Element_ptr& element )
     if( !element )  return;
 
     set_name( element.getAttribute( "name" ) );
-    _visible = element.bool_getAttribute( "visible", _visible );
+    _visible            = element.bool_getAttribute( "visible"           , _visible );
+    _orders_recoverable = element.bool_getAttribute( "orders_recoverable", _orders_recoverable );
 
     DOM_FOR_EACH_ELEMENT( element, e )
     {
@@ -235,6 +236,8 @@ xml::Element_ptr Job_chain::dom_element( const xml::Document_ptr& document, cons
         element.setAttribute( "name"  , _name );
         element.setAttribute( "orders", order_count() );
         element.setAttribute( "state" , state_name( state() ) );
+        if( !_visible ) element.setAttribute( "visible", _visible );
+        element.setAttribute( "orders_recoverable", _orders_recoverable );
 
         if( _state >= s_ready )
         {
@@ -305,7 +308,7 @@ static Order::State normalized_state( const Order::State& state )
 
 void Job_chain::load_orders_from_database()
 {
-    if( !_store_orders_in_database )  return;
+    if( !_orders_recoverable )  return;
     
     if( !_spooler->_db  ||  !_spooler->_db->opened() )  
     {
@@ -1715,7 +1718,7 @@ bool Order::try_add_to_job_chain( Job_chain* job_chain )
             node->_job->order_queue()->add_order( this );
 
 
-            if( !_is_in_database  &&  job_chain->_store_orders_in_database )
+            if( !_is_in_database  &&  job_chain->_orders_recoverable )
             {
                 _spooler->_db->insert_order( this );
             }

@@ -127,14 +127,14 @@ static void check_unchanged_attribute( const xml::Element_ptr& element, const st
 */
 //----------------------------------------------------------------------------set_checked_attribute
 
-void Module::set_checked_attribute( string* variable, const xml::Element_ptr& element, const string& attribute_name )
+void Module::set_checked_attribute( string* variable, const xml::Element_ptr& element, const string& attribute_name, bool modify_allowed )
 {
-    if( !_initialized ) 
+    if( !_initialized  ||  ( modify_allowed && *variable != "" ) ) 
     {
         *variable = element.getAttribute( attribute_name, *variable );
     }
     else
-    if( element.hasAttribute( attribute_name  )  &&  element.getAttribute( attribute_name ) != *variable )  
+    if( element.hasAttribute( attribute_name )  &&  element.getAttribute( attribute_name ) != *variable )  
         throw_xc( "SCHEDULER-234", attribute_name + "=\"" + *variable + '"' );
 }
 
@@ -152,10 +152,10 @@ void Module::set_dom_without_source( const xml::Element_ptr& element, const Time
 
     _recompile = element.bool_getAttribute( "recompile", true );
 
-    set_checked_attribute( &_language          , element, "language"      );
-    set_checked_attribute( &_com_class_name    , element, "com_class"     );
-    set_checked_attribute( &_filename          , element, "filename"      );
-    set_checked_attribute( &_java_class_name   , element, "java_class"    );
+    set_checked_attribute( &_language          , element, "language"         );
+    set_checked_attribute( &_com_class_name    , element, "com_class" , true );
+    set_checked_attribute( &_filename          , element, "filename"         );
+    set_checked_attribute( &_java_class_name   , element, "java_class", true );
     set_checked_attribute( &_process_class_name, element, "process_class" );
 
     bool separate_process_default = false;

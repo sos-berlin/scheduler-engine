@@ -8,7 +8,7 @@ namespace spooler {
 
 //-------------------------------------------------------------------------------------------------
 
-xml::Element_ptr                create_error_element        ( const xml::Document_ptr&, const Xc_copy&, time_t = 0 );
+xml::Element_ptr                create_error_element        ( const xml::Document_ptr&, const Xc_copy&, time_t gmt = 0 );
 
 //-----------------------------------------------------------------------------------Show_what_enum
 

@@ -246,7 +246,7 @@ struct Job_chain : Com_job_chain
     void                    set_visible                 ( bool b )                                  { _visible = b; }
     bool                        visible                 () const                                    { return _visible; }
 
-    void                    set_store_orders_in_database( bool b )                                  { _store_orders_in_database = b; }
+    void                    set_orders_recoverable      ( bool b )                                  { _orders_recoverable = b; }
     void                        load_orders_from_database();
     int                         remove_all_pending_orders( bool leave_in_database = false );
 
@@ -276,7 +276,7 @@ struct Job_chain : Com_job_chain
 
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
-    bool                       _store_orders_in_database;
+    bool                       _orders_recoverable;
     bool                       _load_orders_from_database;      // load_orders_from_database() muss noch gerufen werden.
 
   private:

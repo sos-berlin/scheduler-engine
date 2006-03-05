@@ -99,6 +99,10 @@
                 <p>
                     Wenn der Job als Java-Klasse realisiert ist, dann geben Sie mit diesem Attribut deren Namen an.
                 </p>
+                <p>
+                    Ein in einer Basiskonfiguration angegebener Name kann überschrieben werden.
+                    Die nächste Task (die in einem eigenen Prozess läuft) verwendet die neue Klasse.
+                </p>
             </description>
         </xml_attribute>
 

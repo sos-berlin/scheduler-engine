@@ -232,7 +232,21 @@ job_chain.name = "Jobkette";</pre>
         </p>
     </description>
 </method>
-    
+
+
+<property name="orders_recoverable">
+    <com>
+        <com.result>
+            <com.type type="bool"/>
+        </com.result>
+    </com>
+
+    <description>
+        <p>
+            Siehe <scheduler_element name="job_chain" attribute="orders_recoverable"/>.
+        </p>
+    </description>
+</property>
 
 
 <title>

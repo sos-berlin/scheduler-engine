@@ -10,6 +10,31 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2006-03-05" version="2.0.148" subversion_revision="4155">
+        <revision type="new" title="&lt;job_chain orders_recoverable=&quot;no&quot;&gt;">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_element name="job_chain" attribute="orders_recoverable" value="no"/>
+                    </li>
+                    <li>
+                        <scheduler_method class="job_chain" property="orders_recoverable"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+
+        <revision type="new" title="&lt;script java_class=&quot;–&quot;&gt; ist überschreibbar">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_element name="script" attribute="java_class"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+    </change>
+    
     <change date="2006-03-01" version="2.0.148" subversion_revision="4126">
         <revision type="new" title="Neuer C++-Compiler für Windows">
             <description>
