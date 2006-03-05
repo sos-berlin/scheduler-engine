@@ -6,7 +6,7 @@
 
     <xsd:annotation>
         <xsd:documentation xml:lang="de">
-            $Id: scheduler.xsd 4125 2006-02-28 23:02:36Z jz $
+            $Id: scheduler.xsd 4155 2006-03-05 10:06:27Z jz $
             Schema für die Scheduler-Konfiguration,
             s.a. http://www.zschimmer.com/sos/scheduler/konfiguration.xml.html.
         </xsd:documentation>
@@ -280,9 +280,9 @@
                     </xsd:complexType>
                 </xsd:element>
             </xsd:sequence>
-            <xsd:attribute name="name"              type="Name"     use="required"/>
-            <xsd:attribute name="visible"           type="Yes_no"/>
-            <xsd:attribute name="persistent_orders" type="Yes_no"/>
+            <xsd:attribute name="name"               type="Name"     use="required"/>
+            <xsd:attribute name="visible"            type="Yes_no"/>
+            <xsd:attribute name="orders_recoverable" type="Yes_no"/>
         </xsd:complexType>
     </xsd:element>
 
