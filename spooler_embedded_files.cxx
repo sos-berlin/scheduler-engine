@@ -1962,7 +1962,7 @@ const char file_html_jz_translation_de_js[] =
 
 const char file_html_jz_scheduler_xslt[] = 
     "<?xml version='1.0' encoding=\"utf-8\"?>\r\n"
-    "<!-- $Id: scheduler.xslt 4100 2006-02-21 10:39:09Z jz $ -->\r\n"
+    "<!-- $Id: scheduler.xslt 4154 2006-03-05 08:36:35Z jz $ -->\r\n"
     "\r\n"
     "<xsl:stylesheet xmlns:xsl   = \"http://www.w3.org/1999/XSL/Transform\"\r\n"
     "xmlns:msxsl = \"urn:schemas-microsoft-com:xslt\"\r\n"
@@ -4083,7 +4083,7 @@ const char file_scheduler_xsd[] =
     "\r\n"
     "<xsd:annotation>\r\n"
     "<xsd:documentation xml:lang=\"de\">\r\n"
-    "$Id: scheduler.xsd 4125 2006-02-28 23:02:36Z jz $\r\n"
+    "$Id: scheduler.xsd 4155 2006-03-05 10:06:27Z jz $\r\n"
     "Schema f\xc3" "\xbc" "r die Scheduler-Konfiguration,\r\n"
     "s.a. http://www.zschimmer.com/sos/scheduler/konfiguration.xml.html.\r\n"
     "</xsd:documentation>\r\n"
@@ -4357,9 +4357,9 @@ const char file_scheduler_xsd[] =
     "</xsd:complexType>\r\n"
     "</xsd:element>\r\n"
     "</xsd:sequence>\r\n"
-    "<xsd:attribute name=\"name\"              type=\"Name\"     use=\"required\"/>\r\n"
-    "<xsd:attribute name=\"visible\"           type=\"Yes_no\"/>\r\n"
-    "<xsd:attribute name=\"persistent_orders\" type=\"Yes_no\"/>\r\n"
+    "<xsd:attribute name=\"name\"               type=\"Name\"     use=\"required\"/>\r\n"
+    "<xsd:attribute name=\"visible\"            type=\"Yes_no\"/>\r\n"
+    "<xsd:attribute name=\"orders_recoverable\" type=\"Yes_no\"/>\r\n"
     "</xsd:complexType>\r\n"
     "</xsd:element>\r\n"
     "\r\n"
@@ -4884,9 +4884,9 @@ static const Embedded_file embedded_files_array[] =
     { "html/jz/scheduler.js", file_html_jz_scheduler_js, sizeof file_html_jz_scheduler_js - 1, 1130346743 },
     { "html/jz/show_log.js", file_html_jz_show_log_js, sizeof file_html_jz_show_log_js - 1, 1113976395 },
     { "html/jz/translation_de.js", file_html_jz_translation_de_js, sizeof file_html_jz_translation_de_js - 1, 1113976395 },
-    { "html/jz/scheduler.xslt", file_html_jz_scheduler_xslt, sizeof file_html_jz_scheduler_xslt - 1, 1141543205 },
+    { "html/jz/scheduler.xslt", file_html_jz_scheduler_xslt, sizeof file_html_jz_scheduler_xslt - 1, 1141547799 },
     { "html/jz/scheduler.css", file_html_jz_scheduler_css, sizeof file_html_jz_scheduler_css - 1, 1137323283 },
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1141167758 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1141553192 },
     { NULL, NULL, 0 }
 };
 

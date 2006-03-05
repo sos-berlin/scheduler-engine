@@ -71,7 +71,7 @@ xml::Element_ptr create_error_element( const xml::Document_ptr& document, const 
     //timeb  tm;     // Ob die Sommerzeitverschiebung bei der Fehlerzeit berücksichtigt wird, hängt von der _aktuellen_ Zeit ab.
     //ftime( &tm );  // Nicht schön, aber es funktioniert, weil der Spooler sowieso nicht während der Zeitumstellung laufen soll.
     //e.setAttribute( "time", Sos_optional_date_time( (time_t)x.time() - timezone - ( tm.dstflag? _dstbias : 0 ) ).as_string() );
-    if( time )  e.setAttribute( "time", Sos_optional_date_time( localtime_from_gmtime ( gm_time ) ).as_string() );
+    if( gm_time )  e.setAttribute( "time", Sos_optional_date_time( localtime_from_gmtime( gm_time ) ).as_string() );
 
     if( !empty( x->name() )          )  e.setAttribute( "class" , x->name()          );
 
