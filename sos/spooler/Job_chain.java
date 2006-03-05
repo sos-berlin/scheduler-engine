@@ -170,4 +170,7 @@ public class Job_chain extends Idispatch
     public Order_queue      order_queue         ( String state )                    { return (Order_queue)      com_call( "<order_queue", state ); }
     
     public void             remove              ()                                  {                           com_call( "remove" );              }
+    
+    public void         set_orders_recoverable  ( bool b )                          {                           com_call( ">orders_recoverable", b ); }
+    public boolean          orders_recoverable  ()                                  { return               bool_com_call( "<orders_recoverable" ); }
 }
