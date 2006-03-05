@@ -658,7 +658,7 @@ const Com_method Web_service_request::_methods[] =
     COM_PROPERTY_GET( Web_service_request,  1, Java_class_name               , VT_BSTR    , 0 ),
     COM_PROPERTY_GET( Web_service_request,  3, Header                        , VT_BSTR    , 0, VT_BSTR ),
     COM_PROPERTY_GET( Web_service_request,  4, String_content                , VT_BSTR    , 0 ),
-    COM_PROPERTY_GET( Web_service_request,  5, Binary_content                , (VARENUM)(VT_ARRAY|VT_I1), 0 ),
+    COM_PROPERTY_GET( Web_service_request,  5, Binary_content                , (VARENUM)(VT_ARRAY|VT_UI1), 0 ),
     COM_PROPERTY_GET( Web_service_request,  6, Url                           , VT_BSTR    , 0 ),
 #endif
     {}
@@ -729,10 +729,10 @@ const Com_method Web_service_response::_methods[] =
 { 
 #ifdef COM_METHOD
     COM_PROPERTY_GET( Web_service_response,  1, Java_class_name               , VT_BSTR    , 0 ),
-    COM_PROPERTY_PUT( Web_service_response,  2, Status_code                   , VT_EMPTY   , 0, VT_INT ),
-    COM_PROPERTY_PUT( Web_service_response,  3, Header                        , VT_EMPTY   , 0, VT_BSTR, VT_BSTR ),
-    COM_PROPERTY_PUT( Web_service_response,  4, String_content                , VT_EMPTY   , 0, VT_BSTR ),
-    COM_PROPERTY_PUT( Web_service_response,  5, Binary_content                , VT_EMPTY   , 0, VT_ARRAY|VT_UI1 ),
+    COM_PROPERTY_PUT( Web_service_response,  2, Status_code                                , 0, VT_INT ),
+    COM_PROPERTY_PUT( Web_service_response,  3, Header                                     , 0, VT_BSTR, VT_BSTR ),
+    COM_PROPERTY_PUT( Web_service_response,  4, String_content                             , 0, VT_BSTR  ),
+    COM_PROPERTY_PUT( Web_service_response,  5, Binary_content                             , 0, (VARENUM)(VT_ARRAY|VT_UI1), 0 ),
     COM_METHOD      ( Web_service_response,  6, Send                          , VT_EMPTY   , 0 ),
 #endif
     {}
