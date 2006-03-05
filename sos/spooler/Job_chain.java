@@ -171,6 +171,6 @@ public class Job_chain extends Idispatch
     
     public void             remove              ()                                  {                           com_call( "remove" );              }
     
-    public void         set_orders_recoverable  ( bool b )                          {                           com_call( ">orders_recoverable", b ); }
-    public boolean          orders_recoverable  ()                                  { return               bool_com_call( "<orders_recoverable" ); }
+    public void         set_orders_recoverable  ( boolean b )                       {                           com_call( ">orders_recoverable", b ); }
+    public boolean          orders_recoverable  ()                                  { return            boolean_com_call( "<orders_recoverable" ); }
 }
