@@ -62,6 +62,7 @@ struct Prefix_log : Object, Has_log
     bool                        started                     () const                            { return _started; }        // open() gerufen
     bool                        opened                      () const                            { return _file != -1; }
     bool                        closed                      () const                            { return _closed; }
+    bool                        is_stderr                   () const                            { return _file == fileno(stderr); }
 
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
 

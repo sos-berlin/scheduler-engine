@@ -45,6 +45,7 @@
 
 #ifdef Z_WINDOWS
 #   include "../zschimmer/z_windows.h"
+#   define _CRTDBG_MAPALLOC
 #   include <crtdbg.h>
 #endif
         

@@ -92,19 +92,30 @@ void Event::remove_from( Wait_handles* w )
     }
 }
 
+//------------------------------------------------------------------------ait_handles::Wait_handles
+
+Wait_handles::Wait_handles( Spooler* spooler, Prefix_log* log )
+: 
+    _spooler(spooler),
+    _log(log),
+    _lock("Wait_handles") 
+{
+    _print_time_every_second = _spooler->log_directory() == "*stderr"  &&  isatty( fileno( stderr ) );
+}
+
 //-----------------------------------------------------------------------Wait_handles::Wait_handles
 
 Wait_handles::Wait_handles( const Wait_handles& o )
 : 
     _spooler ( o._spooler ),
     _log     ( o._log ),
+    _print_time_every_second(o._print_time_every_second),
     _lock    ( "Wait_handles" ),
     _events  ( o._events )
 #ifdef Z_WINDOWS
    ,_handles ( o._handles )
 #endif
 {
-    _print_time_every_second = _spooler->log_directory() == "*stderr"  &&  isatty( fileno( stderr ) );
 }
 
 //----------------------------------------------------------------------Wait_handles::~Wait_handles

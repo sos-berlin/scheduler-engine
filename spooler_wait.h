@@ -48,7 +48,7 @@ struct Event : System_event
 
 struct Wait_handles : Non_cloneable
 {
-                                Wait_handles                ( Spooler* spooler, Prefix_log* log )     : _spooler(spooler),_log(log),_lock("Wait_handles") {}
+                                Wait_handles                ( Spooler*, Prefix_log* );
                                 Wait_handles                ( const Wait_handles& );
                                ~Wait_handles                ();
 

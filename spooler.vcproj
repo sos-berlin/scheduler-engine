@@ -85,9 +85,9 @@
 				SuppressStartupBanner="true"
 				DelayLoadDLLs="winspool.drv;ws2_32.dll;ole32.dll;oleaut32.dll;advapi32.dll;odbc32.dll;libctleasy.dll"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(TargetDir)/pdb/$(TargetName).pdb"
+				ProgramDatabaseFile="$(TargetDir)/$(TargetFilename).pdb"
 				GenerateMapFile="true"
-				MapFileName="$(TargetDir)/pdb/$(TargetName).map"
+				MapFileName="$(TargetDir)/$(TargetFilename).map"
 				MapExports="true"
 				SubSystem="1"
 				OptimizeReferences="2"
@@ -107,6 +107,7 @@
 			/>
 			<Tool
 				Name="VCBscMakeTool"
+				OutputFile="$(IntDir)/$(ProjectName).bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -197,7 +198,9 @@
 				SuppressStartupBanner="true"
 				DelayLoadDLLs="winspool.drv;ws2_32.dll;ole32.dll;oleaut32.dll;advapi32.dll;odbc32.dll;libctleasy.dll"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="../bind/spooler.pdb"
+				ProgramDatabaseFile="$(TargetDir)/$(TargetFilename).pdb"
+				GenerateMapFile="true"
+				MapFileName="$(TargetDir)/$(TargetFilename).map"
 				SubSystem="1"
 				OptimizeForWindows98="1"
 				ImportLibrary=""
@@ -214,6 +217,7 @@
 			/>
 			<Tool
 				Name="VCBscMakeTool"
+				OutputFile="$(IntDir)/$(ProjectName).bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -303,9 +307,9 @@
 				SuppressStartupBanner="true"
 				DelayLoadDLLs="winspool.drv;ws2_32.dll;ole32.dll;oleaut32.dll;advapi32.dll;odbc32.dll;libctleasy.dll"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(TargetDir)/pdb/$(TargetName).pdb"
+				ProgramDatabaseFile="$(TargetDir)/$(TargetFilename).pdb"
 				GenerateMapFile="true"
-				MapFileName="$(TargetDir)/pdb/$(TargetName).map"
+				MapFileName="$(TargetDir)/$(TargetFilename).map"
 				MapExports="true"
 				SubSystem="1"
 				OptimizeReferences="2"
@@ -324,6 +328,7 @@
 			/>
 			<Tool
 				Name="VCBscMakeTool"
+				OutputFile="$(IntDir)/$(ProjectName).bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
