@@ -142,8 +142,7 @@ void install_service( const string& service_name, const string& service_display,
     if( !manager_handle )  throw_mswin_error( "OpenSCManager" );
 
 
-    string command_line = program_filename();
-    if( command_line.find(" ") != string::npos )  command_line = quoted_string( command_line, '"', '"' );
+    string command_line = quoted_command_parameter( program_filename() );
     if( !params.empty() )  command_line += " " + params;
 
     LOG( "CreateService(,\"" << service_name << "\", \"" << service_display << "\",,SERVICE_WIN32_OWN_PROCESS,SERVICE_DEMAND_START,"

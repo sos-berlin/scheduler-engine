@@ -2187,10 +2187,7 @@ bool Process_task::do_begin__end()
         hr = vt.ChangeType( VT_BSTR );
         if( FAILED(hr) )  throw_ole( hr, "VariantChangeType", nr.c_str() );
 
-        string param = bstr_as_string( vt.bstrVal );
-        if( param.find_first_of(' ') != string::npos )  param = quoted_string( param, '"', '"' );  // Ist Verdoppeln richtig?
-
-        command_line += " " + param;
+        command_line += " " + quoted_windows_command_parameter( bstr_as_string( vt.bstrVal ) );
     }
 
 

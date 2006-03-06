@@ -160,7 +160,7 @@ STDMETHODIMP Subprocess::Start( VARIANT* program_and_parameters )
             for( int i = 0; i < params.count(); i++ )
             {
                 args[ i ] = string_from_variant( params[ i ] );
-                command_line += quoted_string( args[ i ] ) + " ";
+                command_line += quoted_command_parameter( args[ i ] ) + " ";
             }
                 
             //com_invoke( DISPATCH_METHOD, _task, "log.debug3", commandline );

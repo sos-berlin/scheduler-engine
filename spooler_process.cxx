@@ -76,10 +76,10 @@ void Process::start()
         parameters.push_back( Parameter( "param", "-O" ) );
 
         if( !_job_name.empty() )
-        parameters.push_back( Parameter( "param", "-job=" + quoted_string( _job_name ) ) );
+        parameters.push_back( Parameter( "param", "-job=" + _job_name ) );
 
         if( _task_id )
-        parameters.push_back( Parameter( "param", "-task-id=" + as_string( _task_id ) ) );
+        parameters.push_back( Parameter( "param", "-task-id=" + as_string(_task_id) ) );
 
         if( !log_filename().empty() )
         parameters.push_back( Parameter( "param", "-log=" + /*quoted_string*/( log_categories_as_string() + " >+" + log_filename() ) ) );   // -log="+xxx" funktioniert in Linux nicht, die Anführungszeichen kommen in log.cxx an

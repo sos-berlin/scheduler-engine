@@ -2908,7 +2908,7 @@ void spooler_restart( Log* log, bool is_service )
 
         if( is_service )  command_line += " -renew-service";
 
-        command_line += " -renew-spooler=" + quoted_string(this_spooler,'"','"');
+        command_line += " " + quoted_command_parameter( "-renew-spooler=" + this_spooler );
         if( log )  log->info( "Restart Scheduler " + command_line );
         start_process( command_line );
 
@@ -2987,7 +2987,7 @@ static void spooler_renew( const string& service_name, const string& renew_spool
     }
 
     if( is_service )  spooler::service_start( service_name );
-                else  start_process( quoted_string(renew_spooler,'"','"') + " " + command_line );
+                else  start_process( quoted_command_parameter( renew_spooler ) + " " + command_line );
 }
 
 #endif
