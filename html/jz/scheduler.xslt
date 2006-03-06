@@ -829,12 +829,35 @@
                                     <xsl:apply-templates select="$job/@state"/>
 
                                     <xsl:choose>
-                                        <xsl:when test="$job/tasks/@count>0">
+                                        <xsl:when test="$job/tasks/@count &gt; 0">
                                             <xsl:text>, </xsl:text>
-                                            <xsl:call-template name="bold_counter">
-                                                <xsl:with-param name="counter" select="count( $job/tasks/task[ order/@job_chain=$job_chain_name ] )" />
-                                                <xsl:with-param name="suffix" select="'tasks'" />
-                                            </xsl:call-template>
+                                            <span class="task" style="padding-left: 2pt; padding-right: 2pt; padding-bottom: 2pt;">
+                                                <xsl:variable name="job_chain_task_count" select="count( $job/tasks/task[ order/@job_chain=$job_chain_name ] )"/>
+                                                <xsl:element name="span">
+                                                    <xsl:attribute name="style">white-space: nowrap</xsl:attribute>
+                                                    <xsl:attribute name="title"><xsl:value-of select="$job_chain_task_count"/> tasks processing orders from job chain <xsl:value-of select="$job_chain_name"/></xsl:attribute>
+                                                    <xsl:call-template name="bold_counter">
+                                                        <xsl:with-param name="counter" select="$job_chain_task_count" />
+                                                        <xsl:with-param name="suffix" select="'tasks'" />
+                                                    </xsl:call-template>
+                                                </xsl:element>
+
+                                                <xsl:variable name="waiting_task_count" select="count( $job/tasks/task[ @state='running_waiting_for_order' ] )"/>
+                                                <xsl:if test="$waiting_task_count &gt; 0">
+                                                    <xsl:text>, </xsl:text>
+                                                    <span style="white-space: nowrap">
+                                                        <xsl:value-of select="$waiting_task_count"/> idle
+                                                    </span>
+                                                </xsl:if>
+
+                                                <xsl:variable name="rest" select="$job/tasks/@count - $job_chain_task_count - $waiting_task_count"/>
+                                                <xsl:if test="$rest &gt; 0">
+                                                    <xsl:text>, </xsl:text>
+                                                    <span style="white-space: nowrap">
+                                                        <xsl:value-of select="$rest"/> for other job chains
+                                                    </span>
+                                                </xsl:if>
+                                            </span>
                                         </xsl:when>
                                         <xsl:otherwise>
                                             <xsl:if test="$job/@next_start_time">
