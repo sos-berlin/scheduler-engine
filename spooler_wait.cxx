@@ -100,7 +100,7 @@ Wait_handles::Wait_handles( Spooler* spooler, Prefix_log* log )
     _log(log),
     _lock("Wait_handles") 
 {
-    _print_time_every_second = _spooler->log_directory() == "*stderr"  &&  isatty( fileno( stderr ) );
+    _print_time_every_second = _spooler  &&  _spooler->log_directory() == "*stderr"  &&  isatty( fileno( stderr ) );
 }
 
 //-----------------------------------------------------------------------Wait_handles::Wait_handles
