@@ -501,7 +501,7 @@ void Prefix_log::open()
     //2005-09-22  reset_highest_level();
     //2005-09-22  _highest_msg = "";
     
-    if( _file != -1 )  return; //throw_xc( "SCHEDULER-134", _filename );
+    if( _file != -1 )  return; //z::throw_xc( "SCHEDULER-134", _filename );
 
     if( !_filename.empty() )
     {
@@ -722,7 +722,7 @@ void Prefix_log::start_new_file()
      || _file != -1 
      || _order_log )
     {
-        throw_xc( "SCHEDULER-225" );
+        z::throw_xc( "SCHEDULER-225" );
     }
 
     _log->start_new_file();

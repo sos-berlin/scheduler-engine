@@ -75,8 +75,10 @@ void Web_services::add_web_services( const xml::Element_ptr& web_services_elemen
 
 void Web_services::add_web_service( Web_service* web_service )
 {
-    if( web_service_by_name_or_null    ( web_service->name()     ) )  throw_xc( "SCHEDULER-236", web_service->name()     );
-    if( web_service_by_url_path_or_null( web_service->url_path() ) )  throw_xc( "SCHEDULER-238", web_service->url_path() );
+    if( !string_begins_with( web_service->url_path(), "/" ) )  z::throw_xc( "SCHEDULER-252", web_service->url_path(), web_service->name() );   // siehe auch Web_service::add_web_service
+
+    if( web_service_by_name_or_null    ( web_service->name()     ) )  z::throw_xc( "SCHEDULER-236", web_service->name()     );
+    if( web_service_by_url_path_or_null( web_service->url_path() ) )  z::throw_xc( "SCHEDULER-238", web_service->url_path() );
 
     _name_web_service_map[ web_service->name() ] = web_service;
     _url_web_service_map[ web_service->url_path() ] = web_service;
@@ -120,7 +122,7 @@ Web_service* Web_services::web_service_by_url_path_or_null( const string& url_pa
 Web_service* Web_services::web_service_by_name( const string& name )
 {
     Web_service* result = web_service_by_name_or_null( name );
-    if( !result )  throw_xc( "SCHEDULER-235", name );
+    if( !result )  z::throw_xc( "SCHEDULER-235", name );
 
     return result;
 }
@@ -208,14 +210,17 @@ void Web_service::set_dom( const xml::Element_ptr& element, const Time& )
 {
     if( !element )  return;
 
+    string url_path = subst_env( element.getAttribute( "url_path" ) );
+    if( url_path != ""  &&  !string_begins_with( url_path, "/" ) )  z::throw_xc( "SCHEDULER-252", url_path );   // siehe auch Web_service::add_web_service
+
     _name                          =            element.     getAttribute( "name" );
-    _url_path                      = subst_env( element.     getAttribute( "url_path"                , _url_path                      ) );
     _request_xslt_stylesheet_path  = subst_env( element.     getAttribute( "request_xslt_stylesheet" , _request_xslt_stylesheet_path  ) );
     _response_xslt_stylesheet_path = subst_env( element.     getAttribute( "response_xslt_stylesheet", _response_xslt_stylesheet_path ) );
     _forward_xslt_stylesheet_path  = subst_env( element.     getAttribute( "forward_xslt_stylesheet" , _forward_xslt_stylesheet_path  ) );
     _job_chain_name                =            element.     getAttribute( "job_chain"               , _job_chain_name                );
     _timeout                       =            element. int_getAttribute( "timeout"                 , _timeout                       );
     _debug                         =            element.bool_getAttribute( "debug"                   , _debug                         );
+    if( url_path != "" )  _url_path = url_path;
 
 
     if( _forward_xslt_stylesheet_path != "" )
@@ -267,7 +272,7 @@ ptr<Web_service_operation> Web_service::new_operation( http::Operation* http_ope
 xml::Document_ptr Web_service::transform_request( const xml::Document_ptr& request_document )
 {
     xml::Document_ptr result = _request_xslt_stylesheet.apply( request_document );
-    if( !result.documentElement() )  throw_xc( "SCHEDULER-237", _request_xslt_stylesheet_path );
+    if( !result.documentElement() )  z::throw_xc( "SCHEDULER-237", _request_xslt_stylesheet_path );
     return result;
 }
 
@@ -276,7 +281,7 @@ xml::Document_ptr Web_service::transform_request( const xml::Document_ptr& reque
 xml::Document_ptr Web_service::transform_response( const xml::Document_ptr& command_answer_document )
 {
     xml::Document_ptr result = _response_xslt_stylesheet.apply( command_answer_document );
-    if( !result.documentElement() )  throw_xc( "SCHEDULER-237", _response_xslt_stylesheet_path );
+    if( !result.documentElement() )  z::throw_xc( "SCHEDULER-237", _response_xslt_stylesheet_path );
     return result;
 }
 
@@ -285,9 +290,9 @@ xml::Document_ptr Web_service::transform_response( const xml::Document_ptr& comm
 xml::Document_ptr Web_service::transform_forward( const xml::Document_ptr& order_or_task_document )
 {
     xml::Document_ptr result = _forward_xslt_stylesheet.apply( order_or_task_document );
-    if( !result.documentElement() )  throw_xc( "SCHEDULER-237", _forward_xslt_stylesheet_path );
+    if( !result.documentElement() )  z::throw_xc( "SCHEDULER-237", _forward_xslt_stylesheet_path );
 
-    if( result.documentElement().nodeName() != "service_request" )  throw_xc( "SCHEDULER-242", _forward_xslt_stylesheet_path );
+    if( result.documentElement().nodeName() != "service_request" )  z::throw_xc( "SCHEDULER-242", _forward_xslt_stylesheet_path );
 
     return result;
 }
@@ -630,14 +635,14 @@ void Web_service_operation::execute_stylesheets()
 
 
     xml::Node_ptr data_node = response_document.select_node( "/service_response/content/*" );
-    if( !data_node )  throw_xc( "SCHEDULER-244" );
+    if( !data_node )  z::throw_xc( "SCHEDULER-244" );
 
     http_response()->set_chunk_reader( Z_NEW( http::String_chunk_reader( data_node.xml(), "text/xml" ) ) );
 
     // Es soll nur ein Element geben!
     data_node = data_node.nextSibling();
     while( data_node  &&  data_node.nodeType() == xml::COMMENT_NODE )  data_node = data_node.nextSibling();
-    if( data_node )  throw_xc( "SCHEDULER-245" );
+    if( data_node )  z::throw_xc( "SCHEDULER-245" );
 
     http_response()->set_ready();
 }
@@ -646,7 +651,7 @@ void Web_service_operation::execute_stylesheets()
 
 void Web_service_operation::assert_usable()
 {
-    if( !_http_operation )  throw_xc( "SCHEDULER-248" );
+    if( !_http_operation )  z::throw_xc( "SCHEDULER-248" );
 }
 
 //-------------------------------------------------------------Web_service_operation::Assert_usable
@@ -707,7 +712,7 @@ void Web_service_operation::close()
 
 void Web_service_request::assert_usable()
 {
-    if( !_web_service_operation )  throw_xc( "SCHEDULER-248" );
+    if( !_web_service_operation )  z::throw_xc( "SCHEDULER-248" );
     _web_service_operation->assert_usable();
 }
 
@@ -796,7 +801,7 @@ Web_service_response::Web_service_response( Web_service_operation* web_service_o
     
 void Web_service_response::assert_usable()
 {
-    if( !_web_service_operation )  throw_xc( "SCHEDULER-248" );
+    if( !_web_service_operation )  z::throw_xc( "SCHEDULER-248" );
     _web_service_operation->assert_usable();
 }
 

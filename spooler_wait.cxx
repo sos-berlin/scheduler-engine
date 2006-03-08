@@ -217,7 +217,7 @@ void Wait_handles::add_handle( HANDLE handle ) //, System_event* event )
     //THREAD_LOCK( _lock )
     {
         // Nützt nicht viel, denn spooler.exe fügt mehrere Wait_handles zusammen (mit operator +=).
-        if( _handles.size() >= MAXIMUM_WAIT_OBJECTS-1 )  throw_xc( "SCHEDULER-209", MAXIMUM_WAIT_OBJECTS-1 );   // Grenze für MsgWaitForMultipleObjects() ist 64
+        if( _handles.size() >= MAXIMUM_WAIT_OBJECTS-1 )  z::throw_xc( "SCHEDULER-209", MAXIMUM_WAIT_OBJECTS-1 );   // Grenze für MsgWaitForMultipleObjects() ist 64
 
         _handles.push_back( handle );
         _events.push_back( NULL );  //event );

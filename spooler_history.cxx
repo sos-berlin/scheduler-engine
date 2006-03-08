@@ -180,7 +180,7 @@ void Spooler_db::open2( const string& db_name )
             {
                 if( !is_absolute_filename( _db_name  )  &&  (_spooler->log_directory() + " ")[0] == '*' ) 
                 {
-                    if( _spooler->_need_db )  throw_xc( "SCHEDULER-142", _db_name );
+                    if( _spooler->_need_db )  z::throw_xc( "SCHEDULER-142", _db_name );
                     return;
                 }
 
@@ -615,7 +615,7 @@ int Spooler_db::get_id_( const string& variable_name, Transaction* outer_transac
         else
         if( _waiting )
         {
-            throw_xc( "SCHEDULER-184" );
+            z::throw_xc( "SCHEDULER-184" );
         }
         else
         {
@@ -1048,7 +1048,7 @@ void Spooler_db::update_order( Order* order )
 
 xml::Element_ptr Spooler_db::read_task( const xml::Document_ptr& doc, int task_id, const Show_what& show )
 {
-    if( !opened() )  throw_xc( "SCHEDULER-184" );
+    if( !opened() )  z::throw_xc( "SCHEDULER-184" );
 
     xml::Element_ptr task_element = doc.createElement( "task" );
 
@@ -1060,7 +1060,7 @@ xml::Element_ptr Spooler_db::read_task( const xml::Document_ptr& doc, int task_i
                             "select \"SPOOLER_ID\", \"JOB_NAME\", \"START_TIME\", \"END_TIME\", \"CAUSE\", \"STEPS\", \"ERROR\", \"ERROR_CODE\", \"ERROR_TEXT\" " +
                             "  from " + _spooler->_job_history_tablename  +
                             "  where \"ID\"=" + as_string(task_id) );
-            if( sel.eof() )  throw_xc( "SCHEDULER-207", task_id );
+            if( sel.eof() )  z::throw_xc( "SCHEDULER-207", task_id );
 
             Record record = sel.get_record();
 
@@ -1289,9 +1289,9 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
         {
             try
             {
-                if( !_history_yes )  throw_xc( "SCHEDULER-141", _job_name );
+                if( !_history_yes )  z::throw_xc( "SCHEDULER-141", _job_name );
 
-                if( _use_db  &&  !_spooler->_db->opened() )  throw_xc( "SCHEDULER-184" );     // Wenn die DB verübergegehen (wegen Nichterreichbarkeit) geschlossen ist, s. get_task_id()
+                if( _use_db  &&  !_spooler->_db->opened() )  z::throw_xc( "SCHEDULER-184" );     // Wenn die DB verübergegehen (wegen Nichterreichbarkeit) geschlossen ist, s. get_task_id()
 
                 Transaction ta ( +_spooler->_db );
                 {
@@ -1299,7 +1299,7 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
 
                     if( _use_file )
                     {
-                        if( id != -1  ||  next >= 0 )  throw_xc( "SCHEDULER-139" );
+                        if( id != -1  ||  next >= 0 )  z::throw_xc( "SCHEDULER-139" );
                         sel.open( "-in -seq tab -field-names | tail -head=1 -reverse -" + as_string(-next) + " | " + _filename );
                     }
                     else
@@ -1331,7 +1331,7 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
                                 clause );
                     }
                     else
-                        throw_xc( "SCHEDULER-136" );
+                        z::throw_xc( "SCHEDULER-136" );
 
                     const Record_type* type = sel.spec().field_type_ptr();
                     Dynamic_area rec ( type->field_size() );

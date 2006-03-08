@@ -208,7 +208,7 @@ void Period::set_dom( const xml::Element_ptr& element, const Period* deflt )
 
     if( deflt )  *this = *deflt;
 
-    //if( _application == application_order  &&  element.getAttribute( "let_run" ) != "" )  throw_xc( "SCHEDULER-220", "let_run='yes'" );
+    //if( _application == application_order  &&  element.getAttribute( "let_run" ) != "" )  z::throw_xc( "SCHEDULER-220", "let_run='yes'" );
     _let_run = element.bool_getAttribute( "let_run", _let_run );
 
     string single_start = element.getAttribute( "single_start" );
@@ -259,7 +259,7 @@ void Period::check() const
     return;
 
   FEHLER:
-    throw_xc( "SCHEDULER-104", _begin.as_string(), _end.as_string() );
+    z::throw_xc( "SCHEDULER-104", _begin.as_string(), _end.as_string() );
 }
 
 //-------------------------------------------------------------------------------Period::is_comming
@@ -529,8 +529,8 @@ void Day_set::set_dom( const xml::Element_ptr& element, const Day* default_day, 
                 day = e.int_getAttribute( "day" );
 
 
-            if( day < _minimum  ||  day > _maximum )  throw_xc( "SCHEDULER-221", day, _minimum, _maximum );
-            if( (uint)day >= NO_OF(_days) )  throw_xc( "SCHEDULER-INVALID-DAY", day );
+            if( day < _minimum  ||  day > _maximum )  z::throw_xc( "SCHEDULER-221", as_string( day ), as_string( _minimum ), as_string( _maximum ) );
+            if( (uint)day >= NO_OF(_days) )  z::throw_xc( "SCHEDULER-INVALID-DAY", day );
 
             _days[day].set_dom( e, &my_default_day, default_period );
         }
@@ -642,7 +642,7 @@ void Run_time::set_dom( const xml::Element_ptr& element )
     _set = true;
 
     _once = element.bool_getAttribute( "once", _once );
-    if( _application == application_order  &&  !_once )  throw_xc( "SCHEDULER-220", "once='yes'" );
+    if( _application == application_order  &&  !_once )  z::throw_xc( "SCHEDULER-220", "once='yes'" );
 
     default_period.set_dom( element, NULL );
     default_day = default_period;
@@ -662,7 +662,7 @@ void Run_time::set_dom( const xml::Element_ptr& element )
         {
             a_day_set = true;
             dt.assign( e.getAttribute( "date" ) );
-            if( !dt.time_is_zero() )  throw_xc( "SCHEDULER-208", e.getAttribute( "date" ) );
+            if( !dt.time_is_zero() )  z::throw_xc( "SCHEDULER-208", e.getAttribute( "date" ) );
             Date date;
             date._day_nr = (int)( dt.as_time_t() / (24*60*60) );
             date._day.set_dom( e, &default_day, &default_period );

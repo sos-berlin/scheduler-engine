@@ -123,8 +123,8 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
 
         if( order )
         {
-            if( _temporary )  throw_xc( "SCHEDULER-155" );
-            if( element.getAttributeNode( "priority" ) )  throw_xc( "SCHEDULER-165" );
+            if( _temporary )  z::throw_xc( "SCHEDULER-155" );
+            if( element.getAttributeNode( "priority" ) )  z::throw_xc( "SCHEDULER-165" );
             if( !_order_queue )  _order_queue = new Order_queue( this, _log );
         }
 
@@ -153,7 +153,7 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
             else
             if( e.nodeName_is( "script"     ) )  
             {
-                if( _process_filename != "" )  throw_xc( "SCHEDULER-234", obj_name() );
+                if( _process_filename != "" )  z::throw_xc( "SCHEDULER-234", obj_name() );
 
                 _module.set_dom_without_source( e, xml_mod_time );
                 if( _init0_called )  _module.set_dom_source_only( include_path() );
@@ -165,7 +165,7 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
             else
             if( e.nodeName_is( "process"    ) )
             {
-                if( _module.set() )  throw_xc( "SCHEDULER-234", obj_name() );
+                if( _module.set() )  z::throw_xc( "SCHEDULER-234", obj_name() );
 
                 //_module_xml_document  = NULL;
                 //_module_xml_element   = NULL;
@@ -224,7 +224,7 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
                     set_max_order_setbacks( e.int_getAttribute( "setback_count" ) );
                 }
                 else
-                    if( !e.hasAttribute( "delay" ) )  throw_xc( "SCHEDULER-231", "delay_order_after_setback", "delay" );
+                    if( !e.hasAttribute( "delay" ) )  z::throw_xc( "SCHEDULER-231", "delay_order_after_setback", "delay" );
 
                 if( e.hasAttribute( "delay" ) )
                 {
@@ -424,7 +424,7 @@ void Job::set_remove( bool remove )
         return;
     }
 
-    if( order_controlled() )  throw_xc( "SCHEDULER-229", obj_name() );   // _prioritized_order_job_array und Job_chain_node enthalten Job*!
+    if( order_controlled() )  z::throw_xc( "SCHEDULER-229", obj_name() );   // _prioritized_order_job_array und Job_chain_node enthalten Job*!
 
     _remove = true; 
     stop( true );
@@ -540,12 +540,12 @@ void Job::signal( const string& signal_name )
 
 ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, const string& name, const Time& start_at, int id )
 {
-    if( _remove )  throw_xc( "SCHEDULER-230", obj_name() );
+    if( _remove )  z::throw_xc( "SCHEDULER-230", obj_name() );
 
     switch( _state )
     {
-        case s_read_error:  throw_xc( "SCHEDULER-132", _name, _error? _error->what() : "" );
-        case s_error:       throw_xc( "SCHEDULER-204", _name, _error.what() );
+        case s_read_error:  z::throw_xc( "SCHEDULER-132", _name, _error? _error->what() : "" );
+        case s_error:       z::throw_xc( "SCHEDULER-204", _name, _error.what() );
         case s_stopped:     set_state( s_pending );  break;
         default: ;
     }
@@ -625,7 +625,7 @@ void Job::load_tasks_from_db()
 
             if( !start_at  &&  !_run_time->period_follows( now ) ) 
             {
-                try{ throw_xc( "SCHEDULER-143" ); } catch( const exception& x ) { _log->warn( x.what() ); }
+                try{ z::throw_xc( "SCHEDULER-143" ); } catch( const exception& x ) { _log->warn( x.what() ); }
             }
 
             _task_queue.enqueue_task( task );
@@ -855,7 +855,7 @@ ptr<Task> Job::start( const ptr<spooler_com::Ivariable_set>& params, const strin
 
 ptr<Task> Job::start( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, const Time& start_at )
 {
-    if( _remove )  throw_xc( "SCHEDULER-230", obj_name() );
+    if( _remove )  z::throw_xc( "SCHEDULER-230", obj_name() );
     
     ptr<Task> task = create_task( params, task_name, start_at );
     enqueue_task( task );
@@ -871,7 +871,7 @@ void Job::enqueue_task( Task* task )
 
     if( _spooler->_debug )  _log->debug( "start(at=" + task->_start_at.as_string() + ( task->_name == ""? "" : ",name=\"" + task->_name + '"' ) + ")" );
 
-    if( !task->_start_at  &&  !_run_time->period_follows( now ) )   throw_xc( "SCHEDULER-143" );
+    if( !task->_start_at  &&  !_run_time->period_follows( now ) )   z::throw_xc( "SCHEDULER-143" );
 
     task->_let_run = true;
 
@@ -1742,7 +1742,7 @@ Job::State Job::as_state( const string& name )
         state = (State)( state - 1 );
     }
 
-    if( !name.empty() )  throw_xc( "SCHEDULER-110", name );
+    if( !name.empty() )  z::throw_xc( "SCHEDULER-110", name );
     return s_none;
 }
 
@@ -1758,7 +1758,7 @@ Job::State_cmd Job::as_state_cmd( const string& name )
         cmd = (State_cmd)( cmd - 1 );
     }
 
-    if( !name.empty() )  throw_xc( "SCHEDULER-106", name );
+    if( !name.empty() )  z::throw_xc( "SCHEDULER-106", name );
     return sc_none;
 }
 
@@ -2041,8 +2041,8 @@ ptr<Module_instance> Job::create_module_instance()
 
     THREAD_LOCK_DUMMY( _lock )
     {
-        if( _state == s_read_error )  throw_xc( "SCHEDULER-190" );
-        if( _state == s_error      )  throw_xc( "SCHEDULER-204", _name, _error.what() );
+        if( _state == s_read_error )  z::throw_xc( "SCHEDULER-190" );
+        if( _state == s_error      )  z::throw_xc( "SCHEDULER-204", _name, _error.what() );
 
         result = _module_ptr->create_instance();
 

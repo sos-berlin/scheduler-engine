@@ -122,7 +122,7 @@ void Source_with_parts::add( int linenr, const string& text, const Time& mod_tim
 static void check_unchanged_attribute( const xml::Element_ptr& element, const string& attribute_name, const string& current_value )
 {
     if( element.hasAttribute( attribute_name  )  &&  element.getAttribute( attribute_name ) != current_value )  
-        throw_xc( "SCHEDULER-234", attribute_name + "+" + current_value );
+        z::throw_xc( "SCHEDULER-234", attribute_name + "+" + current_value );
 }
 */
 //----------------------------------------------------------------------------set_checked_attribute
@@ -135,7 +135,7 @@ void Module::set_checked_attribute( string* variable, const xml::Element_ptr& el
     }
     else
     if( element.hasAttribute( attribute_name )  &&  element.getAttribute( attribute_name ) != *variable )  
-        throw_xc( "SCHEDULER-234", attribute_name + "=\"" + *variable + '"' );
+        z::throw_xc( "SCHEDULER-234", attribute_name + "=\"" + *variable + '"' );
 }
 
 //-------------------------------------------------------------------Module::set_dom_without_source
@@ -167,7 +167,7 @@ void Module::set_dom_without_source( const xml::Element_ptr& element, const Time
     if( use_engine == ""
      || use_engine == "task" )  _reuse = reuse_task;
     else
-        throw_xc( "SCHEDULER-196", use_engine );
+        z::throw_xc( "SCHEDULER-196", use_engine );
   //if( use_engine == "job"  )  _reuse = reuse_job;
 }
 
@@ -204,7 +204,7 @@ void Module::init()
 
     if( _separate_process )
     {
-        if( _process_class_name != "" )  throw_xc( "SCHEDULER-194" );
+        if( _process_class_name != "" )  z::throw_xc( "SCHEDULER-194" );
         //_process_class_name = temporary_process_class_name;
     }
 
@@ -220,8 +220,8 @@ void Module::init()
     {
         _kind = kind_com;
     
-        if( _language        != "" )  throw_xc( "SCHEDULER-145" );
-        if( _java_class_name != "" )  throw_xc( "SCHEDULER-168" );
+        if( _language        != "" )  z::throw_xc( "SCHEDULER-145" );
+        if( _java_class_name != "" )  z::throw_xc( "SCHEDULER-168" );
     }
     else
 # endif
@@ -231,8 +231,8 @@ void Module::init()
     
         if( _language == "" )  _language = "Java";
 
-        if( lcase(_language) != "java" )  throw_xc( "SCHEDULER-166" );
-        if( _com_class_name  != ""     )  throw_xc( "SCHEDULER-168" );
+        if( lcase(_language) != "java" )  z::throw_xc( "SCHEDULER-166" );
+        if( _com_class_name  != ""     )  z::throw_xc( "SCHEDULER-168" );
     }
     else
     {
@@ -254,11 +254,11 @@ void Module::init()
     {
         case kind_remote:               break;
         case kind_java:                 break;
-        case kind_scripting_engine:     if( _source.empty() )  throw_xc( "SCHEDULER-173" );
+        case kind_scripting_engine:     if( _source.empty() )  z::throw_xc( "SCHEDULER-173" );
                                         break;
 
 #       ifdef Z_WINDOWS
-            case kind_com:              if( !_source.empty() )  throw_xc( "SCHEDULER-167" );
+            case kind_com:              if( !_source.empty() )  z::throw_xc( "SCHEDULER-167" );
                                         break;
 #       endif
 
@@ -280,7 +280,7 @@ ptr<Module_instance> Module::create_instance()
     {
         case kind_java:              
         {
-            if( _spooler )  if( !_spooler->_java_vm  ||  !_spooler->_java_vm->running() )  throw_xc( "SCHEDULER-177" );
+            if( _spooler )  if( !_spooler->_java_vm  ||  !_spooler->_java_vm->running() )  z::throw_xc( "SCHEDULER-177" );
 
             _java_vm = get_java_vm( false );
             _java_vm->set_destroy_vm( false );   //  Nicht DestroyJavaVM() rufen, denn das hängt manchmal
@@ -319,7 +319,7 @@ ptr<Module_instance> Module::create_instance()
         }
 
         default:                     
-            throw_xc( "SCHEDULER-173" );
+            z::throw_xc( "SCHEDULER-173" );
     }
 
 
@@ -401,7 +401,7 @@ void Module_instance::init()
     _initialized = true;
     _spooler = _module->_spooler;
 
-    if( !_module->set() )  throw_xc( "SCHEDULER-146" );
+    if( !_module->set() )  z::throw_xc( "SCHEDULER-146" );
 
     if( _monitor_instance  &&  !_monitor_instance->_initialized )  _monitor_instance->init();
 }

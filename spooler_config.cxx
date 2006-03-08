@@ -247,7 +247,7 @@ void Spooler_thread::set_dom( const xml::Element_ptr& element, const Time& xml_m
     _name = element.getAttribute( "name" );
 
     str = element.getAttribute( "free_threading" );
-    if( !str.empty() )  throw_xc( "SCHEDULER-189", "free_threading" );    //_free_threading = as_bool( str );
+    if( !str.empty() )  z::throw_xc( "SCHEDULER-189", "free_threading" );    //_free_threading = as_bool( str );
 
 #   ifdef Z_WINDOWS
         str = element.getAttribute( "priority" );
@@ -264,11 +264,11 @@ void Spooler_thread::set_dom( const xml::Element_ptr& element, const Time& xml_m
         }
 #   endif
 
-    if( element.getAttributeNode( "include_path" ) )  throw_xc( "SCHEDULER-189", "<thread include_path=>" );  //_include_path = element.getAttribute( "include_path" );
+    if( element.getAttributeNode( "include_path" ) )  z::throw_xc( "SCHEDULER-189", "<thread include_path=>" );  //_include_path = element.getAttribute( "include_path" );
 
     DOM_FOR_EACH_ELEMENT( element, e )
     {
-        if( e.nodeName_is( "script" ) )  throw_xc( "SCHEDULER-189", "<script in thread>" );  //_module.set_dom( e, xml_mod_time, include_path() );
+        if( e.nodeName_is( "script" ) )  z::throw_xc( "SCHEDULER-189", "<script in thread>" );  //_module.set_dom( e, xml_mod_time, include_path() );
         else
         if( e.nodeName_is( "jobs"   ) )  _spooler->load_jobs_from_xml( e, xml_mod_time );   // Zur Kompatibilität
     }

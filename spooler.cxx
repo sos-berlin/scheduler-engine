@@ -955,7 +955,7 @@ Process_class* Spooler::process_class_or_null( const string& name )
 Process_class* Spooler::process_class( const string& name )
 {
     Process_class* pc = process_class_or_null( name );
-    if( !pc )  throw_xc( "SCHEDULER-195", name );
+    if( !pc )  z::throw_xc( "SCHEDULER-195", name );
     return pc;
 }
 
@@ -1204,7 +1204,7 @@ void Spooler::signal_threads( const string& signal_name )
 Spooler_thread* Spooler::get_thread( const string& thread_name )
 {
     Spooler_thread* thread = get_thread_or_null( thread_name );
-    if( !thread )  throw_xc( "SCHEDULER-128", thread_name );
+    if( !thread )  z::throw_xc( "SCHEDULER-128", thread_name );
 
     return thread;
 }
@@ -1228,7 +1228,7 @@ Spooler_thread* Spooler::get_thread_or_null( const string& thread_name )
 Object_set_class* Spooler::get_object_set_class( const string& name )
 {
     Object_set_class* c = get_object_set_class_or_null( name );
-    if( !c )  throw_xc( "SCHEDULER-101", name );
+    if( !c )  z::throw_xc( "SCHEDULER-101", name );
     return c;
 }
 
@@ -1255,7 +1255,7 @@ void Spooler::add_job( const ptr<Job>& job )
     THREAD_LOCK( _lock )
     {
         Job* j = get_job_or_null( job->name() );
-        if( j )  throw_xc( "SCHEDULER-130", j->name() );
+        if( j )  z::throw_xc( "SCHEDULER-130", j->name() );
 
         _job_list.push_back( job );
     }
@@ -1267,7 +1267,7 @@ void Spooler::add_job( const ptr<Job>& job )
 Job* Spooler::get_job( const string& job_name, bool can_be_not_initialized )
 {
     Job* job = get_job_or_null( job_name );
-    if( !job  ||  ( !can_be_not_initialized && !job->state() ) )  throw_xc( "SCHEDULER-108", job_name );
+    if( !job  ||  ( !can_be_not_initialized && !job->state() ) )  z::throw_xc( "SCHEDULER-108", job_name );
     return job;
 }
 
@@ -1336,7 +1336,7 @@ Job* Spooler::get_next_job_to_start()
 ptr<Task> Spooler::get_task( int task_id )
 {
     ptr<Task> task = get_task_or_null( task_id );
-    if( !task )  throw_xc( "SCHEDULER-215", task_id );
+    if( !task )  z::throw_xc( "SCHEDULER-215", task_id );
     return task;
 }
 
@@ -1701,7 +1701,7 @@ void Spooler::load_arg()
     else
     {
         try{ _wait_endless_for_db_open = _need_db = as_bool( need_db_str ); }
-        catch( const exception& x ) { throw_xc( "SCHEDULER-206", need_db_str, x.what() ); }
+        catch( const exception& x ) { z::throw_xc( "SCHEDULER-206", need_db_str, x.what() ); }
     }
 
     _max_db_errors              =            read_profile_int       ( _factory_ini, "spooler", "max_db_errors"         , 5 );
@@ -1827,7 +1827,7 @@ void Spooler::load_arg()
         _log_level = make_log_level( log_level );
 
         if( _log_level <= log_debug_spooler )  _debug = true;
-        if( _config_filename.empty() )  throw_xc( "SCHEDULER-115" );
+        if( _config_filename.empty() )  z::throw_xc( "SCHEDULER-115" );
 
         if( _html_directory == "" )  _html_directory = directory_of_path( _config_filename ) + "/html";
     }
@@ -2034,7 +2034,7 @@ void Spooler::start()
 
     THREAD_LOCK( _lock )
     {
-        if( _need_db  && _db_name.empty() )  throw_xc( "SCHEDULER-205" );
+        if( _need_db  && _db_name.empty() )  z::throw_xc( "SCHEDULER-205" );
 
         _db = Z_NEW( Spooler_db( this ) );
         _db->open( _db_name );
@@ -2114,7 +2114,7 @@ void Spooler::start()
             catch( exception& x )  { _log.warn( S() << "Fehler beim eMail-Versand: " << x.what() ); }
         }
 
-        if( !ok )  throw_xc( "SCHEDULER-183" );
+        if( !ok )  z::throw_xc( "SCHEDULER-183" );
 
         LOG( "Startskript ist gelaufen\n" );
     }
@@ -2746,7 +2746,7 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line )
 
         THREAD_LOCK( _lock )  
         {
-            if( _config_element_to_load == NULL )  throw_xc( "SCHEDULER-116", _spooler_id );
+            if( _config_element_to_load == NULL )  z::throw_xc( "SCHEDULER-116", _spooler_id );
 
             load_config( _config_element_to_load, _config_element_mod_time, _config_source_filename );
 
@@ -2890,12 +2890,12 @@ void spooler_restart( Log* log, bool is_service )
         {
             // Programmdateinamen aus command_line ersetzen
             int pos;
-            if( command_line.length() == 0 )  throw_xc( "SCHEDULER-COMMANDLINE" );
+            if( command_line.length() == 0 )  z::throw_xc( "SCHEDULER-COMMANDLINE" );
             if( command_line[0] == '"' ) {
-                pos = command_line.find( '"', 1 );  if( pos == string::npos )  throw_xc( "SCHEDULER-COMMANDLINE" );
+                pos = command_line.find( '"', 1 );  if( pos == string::npos )  z::throw_xc( "SCHEDULER-COMMANDLINE" );
                 pos++;                
             } else {
-                pos = command_line.find( ' ' );  if( pos == string::npos )  throw_xc( "SCHEDULER-COMMANDLINE" );
+                pos = command_line.find( ' ' );  if( pos == string::npos )  z::throw_xc( "SCHEDULER-COMMANDLINE" );
             }
 
             command_line = new_spooler + command_line.substr(pos);

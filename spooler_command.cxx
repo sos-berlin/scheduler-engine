@@ -128,9 +128,9 @@ Command_processor::~Command_processor()
 
 xml::Element_ptr Command_processor::execute_config( const xml::Element_ptr& config_element, const Time& xml_mod_time )
 {
-    if( _security_level < Security::seclev_all )  throw_xc( "SCHEDULER-121" );
+    if( _security_level < Security::seclev_all )  z::throw_xc( "SCHEDULER-121" );
 
-    if( !config_element.nodeName_is( "config" ) )  throw_xc( "SCHEDULER-113", config_element.nodeName() );
+    if( !config_element.nodeName_is( "config" ) )  z::throw_xc( "SCHEDULER-113", config_element.nodeName() );
 
     string spooler_id = config_element.getAttribute( "spooler_id" );
     if( spooler_id.empty()  ||  spooler_id == _spooler->id()  ||  _spooler->_manual )
@@ -146,7 +146,7 @@ xml::Element_ptr Command_processor::execute_config( const xml::Element_ptr& conf
 
 xml::Element_ptr Command_processor::execute_show_jobs( const Show_what& show )
 {
-    if( _security_level < Security::seclev_info )  throw_xc( "SCHEDULER-121" );
+    if( _security_level < Security::seclev_info )  z::throw_xc( "SCHEDULER-121" );
 
     return _spooler->jobs_dom_element( _answer, show );
 }
@@ -155,7 +155,7 @@ xml::Element_ptr Command_processor::execute_show_jobs( const Show_what& show )
 /*
 xml::Element_ptr Command_processor::execute_show_threads( const Show_what& show )
 {
-    if( _security_level < Security::seclev_info )  throw_xc( "SCHEDULER-121" );
+    if( _security_level < Security::seclev_info )  z::throw_xc( "SCHEDULER-121" );
 
     return _spooler->threads_as_xml( _answer, show );
 }
@@ -164,7 +164,7 @@ xml::Element_ptr Command_processor::execute_show_threads( const Show_what& show 
 
 xml::Element_ptr Command_processor::execute_show_process_classes( const Show_what& show )
 {
-    if( _security_level < Security::seclev_info )  throw_xc( "SCHEDULER-121" );
+    if( _security_level < Security::seclev_info )  z::throw_xc( "SCHEDULER-121" );
 
     return _spooler->process_classes_dom_element( _answer, show );
 }
@@ -173,7 +173,7 @@ xml::Element_ptr Command_processor::execute_show_process_classes( const Show_wha
 
 xml::Element_ptr Command_processor::execute_show_state( const xml::Element_ptr&, const Show_what& show_ )
 {
-    if( _security_level < Security::seclev_info )  throw_xc( "SCHEDULER-121" );
+    if( _security_level < Security::seclev_info )  z::throw_xc( "SCHEDULER-121" );
 
     Show_what show = show_;
     if( show & show_all_ )  show |= Show_what_enum( show_task_queue | show_description | show_remote_schedulers );
@@ -205,7 +205,7 @@ void Command_processor::get_id_and_next( const xml::Element_ptr& element, int* i
 
 xml::Element_ptr Command_processor::execute_show_history( const xml::Element_ptr& element, const Show_what& show_ )
 {
-    if( _security_level < Security::seclev_info )  throw_xc( "SCHEDULER-121" );
+    if( _security_level < Security::seclev_info )  z::throw_xc( "SCHEDULER-121" );
 
     Show_what show = show_;
     if( show & show_all_ )  show |= show_log;
@@ -224,7 +224,7 @@ xml::Element_ptr Command_processor::execute_show_history( const xml::Element_ptr
 /*
 xml::Element_ptr Command_processor::execute_show_order_history( const xml::Element_ptr& element, const Show_what& show )
 {
-    if( _security_level < Security::seclev_info )  throw_xc( "SCHEDULER-121" );
+    if( _security_level < Security::seclev_info )  z::throw_xc( "SCHEDULER-121" );
 
     if( show & show_all_ )  show = Show_what_enum( show | show_log );
 
@@ -256,7 +256,7 @@ void Command_processor::abort_immediately( int exit_code )
 
 xml::Element_ptr Command_processor::execute_modify_spooler( const xml::Element_ptr& element )
 {
-    if( _security_level < Security::seclev_no_add )  throw_xc( "SCHEDULER-121" );
+    if( _security_level < Security::seclev_no_add )  z::throw_xc( "SCHEDULER-121" );
 
     int timeout = element.int_getAttribute( "timeout", 999999999 );
 
@@ -281,7 +281,7 @@ xml::Element_ptr Command_processor::execute_modify_spooler( const xml::Element_p
         else
         if( cmd == "abort_immediately_and_restart" )  _spooler->abort_immediately( true );
         else
-            throw_xc( "SCHEDULER-105", cmd );
+            z::throw_xc( "SCHEDULER-105", cmd );
     }
     
     return _answer.createElement( "ok" );
@@ -291,7 +291,7 @@ xml::Element_ptr Command_processor::execute_modify_spooler( const xml::Element_p
 
 xml::Element_ptr Command_processor::execute_terminate( const xml::Element_ptr& )
 {
-    if( _security_level < Security::seclev_no_add )  throw_xc( "SCHEDULER-121" );
+    if( _security_level < Security::seclev_no_add )  z::throw_xc( "SCHEDULER-121" );
 
     _spooler->cmd_terminate();
     
@@ -301,7 +301,7 @@ xml::Element_ptr Command_processor::execute_terminate( const xml::Element_ptr& )
 
 xml::Element_ptr Command_processor::execute_show_job( const xml::Element_ptr& element, const Show_what& show_ )
 {
-    if( _security_level < Security::seclev_info )  throw_xc( "SCHEDULER-121" );
+    if( _security_level < Security::seclev_info )  z::throw_xc( "SCHEDULER-121" );
 
     Show_what show = show_;
     if( show & show_all_ )  show |= show_description | show_task_queue | show_orders;
@@ -318,7 +318,7 @@ xml::Element_ptr Command_processor::execute_show_job( const xml::Element_ptr& el
 
 xml::Element_ptr Command_processor::execute_modify_job( const xml::Element_ptr& element )
 {
-    if( _security_level < Security::seclev_no_add )  throw_xc( "SCHEDULER-121" );
+    if( _security_level < Security::seclev_no_add )  z::throw_xc( "SCHEDULER-121" );
 
     string job_name = element.getAttribute( "job" );
     string cmd_name = element.getAttribute( "cmd" );
@@ -344,7 +344,7 @@ xml::Element_ptr Command_processor::execute_modify_job( const xml::Element_ptr& 
 
 xml::Element_ptr Command_processor::execute_show_task( const xml::Element_ptr& element, const Show_what& show )
 {
-    if( _security_level < Security::seclev_info )  throw_xc( "SCHEDULER-121" );
+    if( _security_level < Security::seclev_info )  z::throw_xc( "SCHEDULER-121" );
 
     int task_id = element.int_getAttribute( "id" );
 
@@ -363,7 +363,7 @@ xml::Element_ptr Command_processor::execute_show_task( const xml::Element_ptr& e
 
 xml::Element_ptr Command_processor::execute_kill_task( const xml::Element_ptr& element )
 {
-    if( _security_level < Security::seclev_no_add )  throw_xc( "SCHEDULER-121" );
+    if( _security_level < Security::seclev_no_add )  z::throw_xc( "SCHEDULER-121" );
 
     int    id          = element. int_getAttribute( "id" );
     string job_name    = element.     getAttribute( "job" );              // Hilfsweise
@@ -379,7 +379,7 @@ xml::Element_ptr Command_processor::execute_kill_task( const xml::Element_ptr& e
 
 xml::Element_ptr Command_processor::execute_start_job( const xml::Element_ptr& element )
 {
-    if( _security_level < Security::seclev_no_add )  throw_xc( "SCHEDULER-121" );
+    if( _security_level < Security::seclev_no_add )  z::throw_xc( "SCHEDULER-121" );
 
     string job_name        = element.getAttribute( "job"   );
     string task_name       = element.getAttribute( "name"  );
@@ -416,7 +416,7 @@ xml::Element_ptr Command_processor::execute_start_job( const xml::Element_ptr& e
 
 xml::Element_ptr Command_processor::execute_signal_object( const xml::Element_ptr& element )
 {
-    if( _security_level < Security::seclev_signal )  throw_xc( "SCHEDULER-121" );
+    if( _security_level < Security::seclev_signal )  z::throw_xc( "SCHEDULER-121" );
 
     string class_name = element.getAttribute( "class" );
     Level  level      = as_int( element.getAttribute( "level" ) );
@@ -432,7 +432,7 @@ xml::Element_ptr Command_processor::execute_signal_object( const xml::Element_pt
 
 xml::Element_ptr Command_processor::execute_add_jobs( const xml::Element_ptr& add_jobs_element )
 {
-    if( _security_level < Security::seclev_all )  throw_xc( "SCHEDULER-121" );
+    if( _security_level < Security::seclev_all )  z::throw_xc( "SCHEDULER-121" );
 
     //ptr<Spooler_thread> thread = _spooler->get_thread( add_jobs_element.getAttribute( "thread" ) );
     _spooler->cmd_add_jobs( add_jobs_element );
@@ -444,7 +444,7 @@ xml::Element_ptr Command_processor::execute_add_jobs( const xml::Element_ptr& ad
 
 xml::Element_ptr Command_processor::execute_job( const xml::Element_ptr& job_element )
 {
-    if( _security_level < Security::seclev_all )  throw_xc( "SCHEDULER-121" );
+    if( _security_level < Security::seclev_all )  z::throw_xc( "SCHEDULER-121" );
 
     _spooler->cmd_job( job_element );
 
@@ -455,7 +455,7 @@ xml::Element_ptr Command_processor::execute_job( const xml::Element_ptr& job_ele
 
 xml::Element_ptr Command_processor::execute_job_chain( const xml::Element_ptr& job_chain_element )
 {
-    if( _security_level < Security::seclev_all )  throw_xc( "SCHEDULER-121" );
+    if( _security_level < Security::seclev_all )  z::throw_xc( "SCHEDULER-121" );
 
 
     // Siehe auch Spooler::load_job_chains_from_xml()
@@ -471,7 +471,7 @@ xml::Element_ptr Command_processor::execute_job_chain( const xml::Element_ptr& j
 
 xml::Element_ptr Command_processor::execute_show_job_chains( const xml::Element_ptr&, const Show_what& show_ )
 {
-    if( _security_level < Security::seclev_info )  throw_xc( "SCHEDULER-121" );
+    if( _security_level < Security::seclev_info )  z::throw_xc( "SCHEDULER-121" );
 
     Show_what show = show_;
     if( show & show_all_   )  show |= show | show_description | show_orders;
@@ -484,7 +484,7 @@ xml::Element_ptr Command_processor::execute_show_job_chains( const xml::Element_
 
 xml::Element_ptr Command_processor::execute_show_job_chain( const xml::Element_ptr& show_job_chain_element, const Show_what& show_ )
 {
-    if( _security_level < Security::seclev_info )  throw_xc( "SCHEDULER-121" );
+    if( _security_level < Security::seclev_info )  z::throw_xc( "SCHEDULER-121" );
 
     Show_what show = show_;
     if( show & show_all_   )  show |= show | show_description | show_orders;
@@ -499,7 +499,7 @@ xml::Element_ptr Command_processor::execute_show_job_chain( const xml::Element_p
 
 xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& show_order_element, const Show_what& show_ )
 {
-    if( _security_level < Security::seclev_info )  throw_xc( "SCHEDULER-121" );
+    if( _security_level < Security::seclev_info )  z::throw_xc( "SCHEDULER-121" );
 
     Show_what show = show_;
     if( show == show_all_ )  show = Show_what( show_standard );
@@ -560,14 +560,14 @@ xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& 
 
 
 NO_ORDER:
-    throw_xc( "SCHEDULER-162", id_string, job_chain_name );
+    z::throw_xc( "SCHEDULER-162", id_string, job_chain_name );
 }
 
 //-------------------------------------------------------------Command_processor::execute_add_order
 
 xml::Element_ptr Command_processor::execute_add_order( const xml::Element_ptr& add_order_element )
 {
-    if( _security_level < Security::seclev_all )  throw_xc( "SCHEDULER-121" );
+    if( _security_level < Security::seclev_all )  z::throw_xc( "SCHEDULER-121" );
 
     string job_name         = add_order_element.getAttribute( "job"       );
     string job_chain_name   = add_order_element.getAttribute( "job_chain" );
@@ -598,7 +598,7 @@ xml::Element_ptr Command_processor::execute_add_order( const xml::Element_ptr& a
 
 xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr& modify_order_element )
 {
-    if( _security_level < Security::seclev_no_add )  throw_xc( "SCHEDULER-121" );
+    if( _security_level < Security::seclev_no_add )  z::throw_xc( "SCHEDULER-121" );
 
     string    job_chain_name = modify_order_element.getAttribute( "job_chain" );
     Order::Id id             = modify_order_element.getAttribute( "order"     );
@@ -621,7 +621,7 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
 
 xml::Element_ptr Command_processor::execute_remove_order( const xml::Element_ptr& modify_order_element )
 {
-    if( _security_level < Security::seclev_no_add )  throw_xc( "SCHEDULER-121" );
+    if( _security_level < Security::seclev_no_add )  z::throw_xc( "SCHEDULER-121" );
 
     string    job_chain_name = modify_order_element.getAttribute( "job_chain" );
     Order::Id id             = modify_order_element.getAttribute( "order"     );
@@ -638,7 +638,7 @@ xml::Element_ptr Command_processor::execute_remove_order( const xml::Element_ptr
 
 xml::Element_ptr Command_processor::execute_remove_job_chain( const xml::Element_ptr& modify_order_element )
 {
-    if( _security_level < Security::seclev_no_add )  throw_xc( "SCHEDULER-121" );
+    if( _security_level < Security::seclev_no_add )  z::throw_xc( "SCHEDULER-121" );
 
     string job_chain_name = modify_order_element.getAttribute( "job_chain" );
 
@@ -651,12 +651,12 @@ xml::Element_ptr Command_processor::execute_remove_job_chain( const xml::Element
 
 xml::Element_ptr Command_processor::execute_register_remote_scheduler( const xml::Element_ptr& register_scheduler_element )
 {
-    if( !_communication_operation )  throw_xc( "SCHEDULER-222" );
+    if( !_communication_operation )  z::throw_xc( "SCHEDULER-222" );
 
     Xml_operation* xml_processor = dynamic_cast<Xml_operation*>( _communication_operation );
-    if( !xml_processor )  throw_xc( "SCHEDULER-222" );
+    if( !xml_processor )  z::throw_xc( "SCHEDULER-222" );
 
-    if( _security_level < Security::seclev_no_add )  throw_xc( "SCHEDULER-121" );
+    if( _security_level < Security::seclev_no_add )  z::throw_xc( "SCHEDULER-121" );
 
     Host_and_port host_and_port ( _communication_operation->_connection->peer_host(), register_scheduler_element.int_getAttribute( "tcp_port" ) );
 
@@ -742,9 +742,9 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
         else
         if( string_equals_prefix_then_skip( &p, "standard"         ) )  ;
         else
-            throw_xc( "SCHEDULER-164", what );
+            z::throw_xc( "SCHEDULER-164", what );
 
-        if( *p != ','  &&  *p != ' '  &&  *p != '\0' )  throw_xc( "SCHEDULER-164", what );
+        if( *p != ','  &&  *p != ' '  &&  *p != '\0' )  z::throw_xc( "SCHEDULER-164", what );
 
         while( *p == ' '  ||  *p == ',' )  p++;
 
@@ -803,7 +803,7 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     if( element.nodeName_is( "service_request"  ) )  return execute_service_request( element );
     else
     {
-        throw_xc( "SCHEDULER-105", element.nodeName() ); return xml::Element_ptr();
+        z::throw_xc( "SCHEDULER-105", element.nodeName() ); return xml::Element_ptr();
     }
 }
 
@@ -833,10 +833,10 @@ void Command_processor::execute_http( http::Operation* http_operation )
 
     try
     {
-        if( _security_level < Security::seclev_info )  throw_xc( "SCHEDULER-121" );
+        if( _security_level < Security::seclev_info )  z::throw_xc( "SCHEDULER-121" );
 
-        if( path.find( ".." ) != string::npos )  throw_xc( "SCHEDULER-214", path );
-        if( path.find( ":" )  != string::npos )  throw_xc( "SCHEDULER-214", path );
+        if( path.find( ".." ) != string::npos )  z::throw_xc( "SCHEDULER-214", path );
+        if( path.find( ":" )  != string::npos )  z::throw_xc( "SCHEDULER-214", path );
 
         if( http_request->_http_cmd == "GET" )
         {
@@ -966,7 +966,7 @@ void Command_processor::execute_http( http::Operation* http_operation )
             }
             else
             {
-                if( _spooler->_html_directory.empty() )  throw_xc( "SCHEDULER-212" );
+                if( _spooler->_html_directory.empty() )  z::throw_xc( "SCHEDULER-212" );
                 if( !string_begins_with( path, "/" ) )  path = "/" + path;
 
                 if( filename_of_path( path ).find( '.' ) == string::npos )      // Kein Punkt: Es muss ein Verzeichnis sein!

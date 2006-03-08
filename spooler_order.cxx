@@ -28,7 +28,7 @@ void Spooler::add_job_chain( Job_chain* job_chain )
         job_chain->finish();   // Jobkette prüfen und in Ordnung bringen
 
         string lname = lcase( job_chain->name() );
-        if( _job_chain_map.find( lname ) != _job_chain_map.end() )  throw_xc( "SCHEDULER-160", lname );
+        if( _job_chain_map.find( lname ) != _job_chain_map.end() )  z::throw_xc( "SCHEDULER-160", lname );
 
         _job_chain_map[lname] = job_chain;
 
@@ -76,7 +76,7 @@ Job_chain* Spooler::job_chain_or_null( const string& name )
 Job_chain* Spooler::job_chain( const string& name )
 {
     Job_chain* result = job_chain_or_null( name );
-    if( !result )  throw_xc( "SCHEDULER-161", name );
+    if( !result )  z::throw_xc( "SCHEDULER-161", name );
 
     return result;
 }
@@ -214,7 +214,7 @@ void Job_chain::set_dom( const xml::Element_ptr& element )
 
             bool can_be_not_initialized = true;
             Job* job = job_name == ""? NULL : _spooler->get_job( job_name, can_be_not_initialized  );
-            if( state == "" )  throw_xc( "SCHEDULER-231", "job_chain_node", "state" );
+            if( state == "" )  z::throw_xc( "SCHEDULER-231", "job_chain_node", "state" );
 
             add_job( job, state, e.getAttribute( "next_state" ), e.getAttribute( "error_state" ) );
         }
@@ -391,9 +391,9 @@ void Job_chain::add_job( Job* job, const Order::State& state, const Order::State
     if( !next_state.is_missing() )  Order::check_state( next_state );
     if( !error_state.is_missing() )  Order::check_state( error_state );
 
-    if( job  &&  !job->order_queue() )  throw_xc( "SCHEDULER-147", job->name() );
+    if( job  &&  !job->order_queue() )  z::throw_xc( "SCHEDULER-147", job->name() );
 
-    if( _state != s_under_construction )  throw_xc( "SCHEDULER-148" );
+    if( _state != s_under_construction )  z::throw_xc( "SCHEDULER-148" );
 
     ptr<Job_chain_node> node = new Job_chain_node;
 
@@ -413,7 +413,7 @@ void Job_chain::add_job( Job* job, const Order::State& state, const Order::State
         if( node_from_state_or_null( node->_state ) )
         {
             if( !job  &&  next_state.is_error()  &&  error_state.is_error() )  return;     // job_chain.add_end_state() darf mehrfach gerufen werden.
-            throw_xc( "SCHEDULER-150", debug_string_from_variant(node->_state), name() );
+            z::throw_xc( "SCHEDULER-150", debug_string_from_variant(node->_state), name() );
         }
 
         _chain.push_back( node );
@@ -482,7 +482,7 @@ Job_chain_node* Job_chain::node_from_job( Job* job )
         }
     }
 
-    throw_xc( "SCHEDULER-152", job->name(), name() );
+    z::throw_xc( "SCHEDULER-152", job->name(), name() );
     return NULL;
 }
 
@@ -491,7 +491,7 @@ Job_chain_node* Job_chain::node_from_job( Job* job )
 Job_chain_node* Job_chain::node_from_state( const Order::State& state )
 {
     Job_chain_node* result = node_from_state_or_null( state );
-    if( !result )  throw_xc( "SCHEDULER-149", name(), debug_string_from_variant(state) );
+    if( !result )  z::throw_xc( "SCHEDULER-149", name(), debug_string_from_variant(state) );
     return result;
 }
 
@@ -517,7 +517,7 @@ ptr<Order> Job_chain::order( const Order::Id& id )
 {
     ptr<Order> result = order_or_null( id );
 
-    if( !result )  throw_xc( "SCHEDULER-162", debug_string_from_variant(id), _name );
+    if( !result )  z::throw_xc( "SCHEDULER-162", debug_string_from_variant(id), _name );
 
     return result;
 }
@@ -590,7 +590,7 @@ void Job_chain::register_order( Order* order )
     {
         string id_string = order->string_id();
         Order_map::iterator it = _order_map.find( id_string );
-        if( it != _order_map.end() )  throw_xc( "SCHEDULER-186", id_string, _name );
+        if( it != _order_map.end() )  z::throw_xc( "SCHEDULER-186", id_string, _name );
         _order_map[ id_string ] = order;
     }
 }
@@ -611,7 +611,7 @@ void Job_chain::unregister_order( Order* order )
 
 void Job_chain::remove()
 {
-    if( _state < s_ready )  throw_xc( "SCHEDULER-151" );
+    if( _state < s_ready )  z::throw_xc( "SCHEDULER-151" );
 
     remove_all_pending_orders( true );
     
@@ -850,7 +850,7 @@ void Order_queue::remove_order( Order* order )
             Queue::iterator it;
             for( it = _setback_queue.begin(); it != _setback_queue.end(); it++ )  if( *it == order )  break;
 
-            if( it == _setback_queue.end() )  throw_xc( "SCHEDULER-156", order->obj_name(), _job->name() );
+            if( it == _setback_queue.end() )  z::throw_xc( "SCHEDULER-156", order->obj_name(), _job->name() );
 
             order->_setback = 0;
             order->_in_job_queue = false;
@@ -865,7 +865,7 @@ void Order_queue::remove_order( Order* order )
             Queue::iterator it;
             for( it = _queue.begin(); it != _queue.end(); it++ )  if( *it == order )  break;
 
-            if( it == _queue.end() )  throw_xc( "SCHEDULER-156", order->obj_name(), _job->name() );
+            if( it == _queue.end() )  z::throw_xc( "SCHEDULER-156", order->obj_name(), _job->name() );
 
             order->_in_job_queue = false;
 
@@ -947,7 +947,7 @@ ptr<Order> Order_queue::get_order_for_processing( const Time& now )
         {
             order->_start_time = now;
             order->_setback = 0;
-            if( order->_moved )  throw_xc( "SCHEDULER-0", order->obj_name() + " _moved=true?" );
+            if( order->_moved )  z::throw_xc( "SCHEDULER-0", order->obj_name() + " _moved=true?" );
             //order->_moved = false;
         }
     }
@@ -1089,7 +1089,7 @@ string Order::string_id( const Id& id )
     }
     catch( exception& x ) 
     { 
-        throw_xc( "SCHEDULER-249", x.what() ); 
+        z::throw_xc( "SCHEDULER-249", x.what() ); 
     }
 }
 
@@ -1107,7 +1107,7 @@ void Order::attach_task( Task* task )
 
 void Order::assert_no_task()
 {
-    if( _task )  throw_xc( "SCHEDULER-217", obj_name(), _task->obj_name() );
+    if( _task )  z::throw_xc( "SCHEDULER-217", obj_name(), _task->obj_name() );
 }
 
 //----------------------------------------------------------------------------------Order::open_log
@@ -1198,10 +1198,10 @@ void Order::set_dom( const xml::Element_ptr& element )
             
             if( node )
             {
-                if( node.nodeType() != xml::ELEMENT_NODE )  throw_xc( "SCHEDULER-239", node.nodeName() );
+                if( node.nodeType() != xml::ELEMENT_NODE )  z::throw_xc( "SCHEDULER-239", node.nodeName() );
                 Variant payload = ((xml::Element_ptr)node).xml();
                 while( node  &&  node.nodeType() == xml::COMMENT_NODE )  node = node.nextSibling();
-                if( node )  throw_xc( "SCHEDULER-239", node.nodeName() );
+                if( node )  z::throw_xc( "SCHEDULER-239", node.nodeName() );
             }
         }
         else
@@ -1399,7 +1399,7 @@ Order_queue* Order::order_queue()
 {
     Job* job = this->job();
 
-    if( !job )  throw_xc( "SCHEDULER-163" );
+    if( !job )  z::throw_xc( "SCHEDULER-163" );
 
     return job->order_queue();
 }
@@ -1417,7 +1417,7 @@ void Order::set_id( const Order::Id& id )
 {
     //THREAD_LOCK(_lock)
     {
-        if( _id_locked )  throw_xc( "SCHEDULER-159" );
+        if( _id_locked )  z::throw_xc( "SCHEDULER-159" );
 
         string_id();    // Sicherstellen, das id in einen String wandelbar ist
 
@@ -1449,7 +1449,7 @@ string Order::string_payload() const
     }
     catch( exception& x )
     {
-        throw_xc( "SCHEDULER-251", x.what() );
+        z::throw_xc( "SCHEDULER-251", x.what() );
     }
 }
 
@@ -1457,7 +1457,7 @@ string Order::string_payload() const
 
 void Order::set_web_service( const string& name )
 { 
-    if( _is_in_database )  throw_xc( "SCHEDULER-243", "web_service" );
+    if( _is_in_database )  z::throw_xc( "SCHEDULER-243", "web_service" );
 
     _order_xml_modified = true;
 
@@ -1469,7 +1469,7 @@ void Order::set_web_service( const string& name )
 
 void Order::set_web_service( Web_service* web_service )                
 { 
-    if( _is_in_database )  throw_xc( "SCHEDULER-243", "web_service" );
+    if( _is_in_database )  z::throw_xc( "SCHEDULER-243", "web_service" );
 
     _web_service = web_service; 
 }
@@ -1486,7 +1486,7 @@ void Order::set_job( Job* job )
             return;
         }
 
-        if( !_job_chain )  throw_xc( "SCHEDULER-157", obj_name() );
+        if( !_job_chain )  z::throw_xc( "SCHEDULER-157", obj_name() );
 
         move_to_node( _job_chain->node_from_job( job ) );       // Fehler, wenn Job nicht in der Jobkette
     }
@@ -1549,7 +1549,7 @@ void Order::check_state( const State& state )
     }
     catch( exception& x )
     {
-        throw_xc( "SCHEDULER-250", x.what() );
+        z::throw_xc( "SCHEDULER-250", x.what() );
     }
 }
 
@@ -1646,7 +1646,7 @@ void Order::add_to_job( const string& job_name )
     //THREAD_LOCK( _lock )
     {
         ptr<Order_queue> order_queue = _spooler->get_job( job_name )->order_queue();
-        if( !order_queue )  throw_xc( "SCHEDULER-147", job_name );
+        if( !order_queue )  z::throw_xc( "SCHEDULER-147", job_name );
         add_to_order_queue( order_queue );
     }
 }
@@ -1655,7 +1655,7 @@ void Order::add_to_job( const string& job_name )
 
 void Order::add_to_order_queue( Order_queue* order_queue )
 {
-    if( !order_queue )  throw_xc( "SCHEDULER-147", "?" );
+    if( !order_queue )  z::throw_xc( "SCHEDULER-147", "?" );
 
     ptr<Order> me = this;   // Halten
 
@@ -1733,15 +1733,15 @@ void Order::remove_from_job_chain( bool leave_in_database )
 void Order::add_to_job_chain( Job_chain* job_chain )
 {
     bool ok = try_add_to_job_chain( job_chain );
-    if( !ok )  throw_xc( "SCHEDULER-186", obj_name(), job_chain->name() );
+    if( !ok )  z::throw_xc( "SCHEDULER-186", obj_name(), job_chain->name() );
 }
 
 //--------------------------------------------------------------------------Order::add_to_job_chain
 
 bool Order::try_add_to_job_chain( Job_chain* job_chain )
 {
-  //if( _remove_from_job_chain )  throw_xc( "SCHEDULER-228", obj_name() );
-    if( job_chain->state() != Job_chain::s_ready )  throw_xc( "SCHEDULER-151" );
+  //if( _remove_from_job_chain )  z::throw_xc( "SCHEDULER-228", obj_name() );
+    if( job_chain->state() != Job_chain::s_ready )  z::throw_xc( "SCHEDULER-151" );
     if( job_chain->has_order_id( id() ) )  return false;
 
     job_chain->set_visible( true );
@@ -1759,7 +1759,7 @@ bool Order::try_add_to_job_chain( Job_chain* job_chain )
             //Z_DEBUG_ONLY( LOG( "job_chain->node_from_state()\n" ); )
             Job_chain_node* node = job_chain->node_from_state( _state );
 
-            if( !node->_job  || !node->_job->order_queue() )  throw_xc( "SCHEDULER-149", job_chain->name(), debug_string_from_variant(_state) );
+            if( !node->_job  || !node->_job->order_queue() )  z::throw_xc( "SCHEDULER-149", job_chain->name(), debug_string_from_variant(_state) );
 
             if( _id.vt == VT_EMPTY )  set_default_id();
             _id_locked = true;
@@ -1825,7 +1825,7 @@ void Order::move_to_node( Job_chain_node* node )
 {
     //THREAD_LOCK( _lock )
     {
-        if( !_job_chain )  throw_xc( "SCHEDULER-157", obj_name() );
+        if( !_job_chain )  z::throw_xc( "SCHEDULER-157", obj_name() );
 
         if( _task )  _moved = true;
         //§1495  _task = NULL;
@@ -1999,10 +1999,10 @@ void Order::setback_()
 {
     //THREAD_LOCK( _lock )
     {
-        if( !_task      )  throw_xc( "SCHEDULER-187" );
-        if( _moved      )  throw_xc( "SCHEDULER-188", obj_name() );
-        if( !_job_chain )  throw_xc( "SCHEDULER-157", obj_name() );
-        if( !order_queue() )  throw_xc( "SCHEDULER-163", obj_name() );
+        if( !_task      )  z::throw_xc( "SCHEDULER-187" );
+        if( _moved      )  z::throw_xc( "SCHEDULER-188", obj_name() );
+        if( !_job_chain )  z::throw_xc( "SCHEDULER-157", obj_name() );
+        if( !order_queue() )  z::throw_xc( "SCHEDULER-163", obj_name() );
 
         order_queue()->remove_order( this );
 
@@ -2055,8 +2055,8 @@ void Order::setback( const Time& start_time_ )
 void Order::set_at( const Time& time )
 {
     assert_no_task();
-    if( _moved      )  throw_xc( "SCHEDULER-188", obj_name() );
-  //if( _job_chain  )  throw_xc( "SCHEDULER-186", obj_name(), _job_chain->name() );
+    if( _moved      )  z::throw_xc( "SCHEDULER-188", obj_name() );
+  //if( _job_chain  )  z::throw_xc( "SCHEDULER-186", obj_name(), _job_chain->name() );
 
 
     xml::Document_ptr run_time_dom;
@@ -2127,9 +2127,9 @@ Time Order::next_start_time( bool first_call )
 
 void Order::before_modify_event()
 {
-  //if( _task       )  throw_xc( "SCHEDULER-217", obj_name(), _task->obj_name() );
-  //if( _moved      )  throw_xc( "SCHEDULER-188", obj_name() );
-  //if( _job_chain  )  throw_xc( "SCHEDULER-186", obj_name(), _job_chain->name() );
+  //if( _task       )  z::throw_xc( "SCHEDULER-217", obj_name(), _task->obj_name() );
+  //if( _moved      )  z::throw_xc( "SCHEDULER-188", obj_name() );
+  //if( _job_chain  )  z::throw_xc( "SCHEDULER-186", obj_name(), _job_chain->name() );
 }
 
 //----------------------------------------------------------------------------Order::modified_event
@@ -2155,7 +2155,7 @@ void Order::set_run_time( const xml::Element_ptr& e )
 Web_service* Order::web_service() const
 {
     Web_service* result = web_service_or_null();
-    if( !result )  throw_xc( "SCHEDULER-240" );
+    if( !result )  z::throw_xc( "SCHEDULER-240" );
     return result;
 }
 
@@ -2164,7 +2164,7 @@ Web_service* Order::web_service() const
 Web_service_operation* Order::web_service_operation() const
 {
     Web_service_operation* result = web_service_operation_or_null();
-    if( !result )  throw_xc( "SCHEDULER-246" );
+    if( !result )  z::throw_xc( "SCHEDULER-246" );
     return result;
 }
 

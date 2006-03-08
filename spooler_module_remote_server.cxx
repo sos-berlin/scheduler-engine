@@ -250,7 +250,7 @@ STDMETHODIMP Com_remote_module_instance_server::Add_obj( IDispatch* object, BSTR
 
     try
     {
-        if( !_server._module_instance )  throw_xc( "SCHEDULER-203", "add_obj", string_from_bstr(name) );
+        if( !_server._module_instance )  z::throw_xc( "SCHEDULER-203", "add_obj", string_from_bstr(name) );
         _server._module_instance->add_obj( object, string_from_bstr(name) );
     }
     catch( const exception& x ) { hr = Com_set_error( x, "Remote_module_instance_server::add_obj" ); }
@@ -266,7 +266,7 @@ STDMETHODIMP Com_remote_module_instance_server::Name_exists( BSTR name, VARIANT_
 
     try
     {
-        if( !_server._module_instance )  throw_xc( "SCHEDULER-203", "name_exists", string_from_bstr(name) );
+        if( !_server._module_instance )  z::throw_xc( "SCHEDULER-203", "name_exists", string_from_bstr(name) );
       //_server.load_implicitly();
         *result = _server._module_instance->name_exists( string_from_bstr(name) );
     }
@@ -301,7 +301,7 @@ STDMETHODIMP Com_remote_module_instance_server::Call( BSTR name_bstr, VARIANT* r
                 return hr;
             }
 
-            throw_xc( "SCHEDULER-203", "call", name );
+            z::throw_xc( "SCHEDULER-203", "call", name );
         }
 
         _server._module_instance->call__start( name ) -> async_finish();
@@ -320,7 +320,7 @@ STDMETHODIMP Com_remote_module_instance_server::Begin( SAFEARRAY* objects_safear
 
     try
     {
-        if( !_server._module_instance )  throw_xc( "SCHEDULER-203", "begin" );
+        if( !_server._module_instance )  z::throw_xc( "SCHEDULER-203", "begin" );
 
         Locked_safearray<Variant> objects ( objects_safearray );
         Locked_safearray<Variant> names   ( names_safearray );
@@ -371,7 +371,7 @@ STDMETHODIMP Com_remote_module_instance_server::Step( VARIANT* result )
 
     try
     {
-        if( !_server._module_instance )  throw_xc( "SCHEDULER-203", "step" );
+        if( !_server._module_instance )  z::throw_xc( "SCHEDULER-203", "step" );
 
         _server._module_instance->step__start() -> async_finish();
         _server._module_instance->step__end().move_to( result );

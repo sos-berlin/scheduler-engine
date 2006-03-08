@@ -258,7 +258,7 @@ bool Scripting_engine_module_instance::load()
     bool ok = Com_module_instance_base::load();
     if( !ok )  return false;
 
-    if( _script_site->_engine_name != _module->_language )  throw_xc( "SCHEDULER-117" );
+    if( _script_site->_engine_name != _module->_language )  z::throw_xc( "SCHEDULER-117" );
 
     HRESULT hr = _script_site->_script->SetScriptState( SCRIPTSTATE_INITIALIZED );
     if( FAILED( hr ) )  throw_ole( hr, "IActiveScript::SetScriptState", "SCRIPTSTATE_INITIALIZED" );

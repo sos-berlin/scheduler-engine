@@ -108,7 +108,7 @@ void Module::clear_java()
 
 bool Module::make_java_class( bool force )
 {
-    if( _java_vm->work_dir().empty() )  throw_xc( "SCHEDULER-201" );    // Vorsichtshalber, sollte nicht passieren.
+    if( _java_vm->work_dir().empty() )  z::throw_xc( "SCHEDULER-201" );    // Vorsichtshalber, sollte nicht passieren.
 
     string filename = _java_vm->work_dir() + Z_DIR_SEPARATOR + replace_regex( _java_class_name, "\\.", "/" );
     string java_filename  = filename + ".java";
@@ -190,7 +190,7 @@ jmethodID Module::java_method_id( const string& name )
         int pos = name.find( '(' );
         if( pos == string::npos )  pos = name.length();
         
-        if( !_java_class )  throw_xc( "SCHEDULER-197", name );
+        if( !_java_class )  z::throw_xc( "SCHEDULER-197", name );
         method_id = env->GetMethodID( _java_class, name.substr(0,pos).c_str(), name.c_str()+pos );
         if( env->ExceptionCheck() ) env->ExceptionDescribe(), env->ExceptionClear();
 
@@ -418,7 +418,7 @@ Variant Java_module_instance::call( const string& name_par )
     if( !method_id )  
     {
         if( is_optional )  return Variant();
-        throw_xc( "SCHEDULER-174", name, _module->_java_class_name.c_str() );
+        z::throw_xc( "SCHEDULER-174", name, _module->_java_class_name.c_str() );
     }
 
     Variant result;
@@ -447,7 +447,7 @@ Variant Java_module_instance::call( const string& name, bool param )
     Java_idispatch_stack_frame stack_frame;
 
     jmethodID method_id = _module->java_method_id( name );
-    if( !method_id )  throw_xc( "SCHEDULER-174", name, _module->_java_class_name.c_str() );
+    if( !method_id )  z::throw_xc( "SCHEDULER-174", name, _module->_java_class_name.c_str() );
 
     bool result;
     

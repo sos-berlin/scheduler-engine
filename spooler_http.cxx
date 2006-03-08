@@ -312,8 +312,8 @@ void Parser::eat( const char* what )
     while( *w  &&  *_next_char == *w )  w++, _next_char++;
     if( *w != '\0' )  
     {
-        if( what[0] == '\n' )  throw_xc( "SCHEDULER-213", "Zeilenende" );
-                         else  throw_xc( "SCHEDULER-213", what );
+        if( what[0] == '\n' )  z::throw_xc( "SCHEDULER-213", "Zeilenende" );
+                         else  z::throw_xc( "SCHEDULER-213", what );
     }
 
     eat_spaces();
@@ -697,7 +697,7 @@ void Response::close()
     
 void Response::set_status( Status_code code, const string& )
 { 
-    if( is_ready() )  throw_xc( "SCHEDULER-247" );
+    if( is_ready() )  z::throw_xc( "SCHEDULER-247" );
 
     _status_code = code; 
 
@@ -729,7 +729,7 @@ void Response::set_status( Status_code code, const string& )
 
 void Response::set_header( const string& name, const string& value ) 
 { 
-    if( is_ready() )  throw_xc( "SCHEDULER-247" );
+    if( is_ready() )  z::throw_xc( "SCHEDULER-247" );
 
     _headers.set( name, value ); 
 }
@@ -738,7 +738,7 @@ void Response::set_header( const string& name, const string& value )
 
 void Response::set_chunk_reader( Chunk_reader* c )
 { 
-    if( is_ready() )  throw_xc( "SCHEDULER-247" );
+    if( is_ready() )  z::throw_xc( "SCHEDULER-247" );
 
     _chunk_reader = c; 
 }
@@ -757,7 +757,7 @@ void Response::set_ready()
 
 void Response::send()
 {
-    if( is_ready() )  throw_xc( "SCHEDULER-247" );
+    if( is_ready() )  z::throw_xc( "SCHEDULER-247" );
 
     set_ready();
 }
@@ -910,7 +910,7 @@ STDMETHODIMP Response::put_Header( BSTR name, BSTR value )
     
     try
     {
-        if( is_ready() )  throw_xc( "SCHEDULER-247" );
+        if( is_ready() )  z::throw_xc( "SCHEDULER-247" );
 
         set_header( string_from_bstr( name ), string_from_bstr( value ) );  
     }
@@ -1005,7 +1005,7 @@ STDMETHODIMP Response::put_String_content( BSTR content_bstr )
     
     try
     {
-        if( is_ready() )  throw_xc( "SCHEDULER-247" );
+        if( is_ready() )  z::throw_xc( "SCHEDULER-247" );
 
         const Charset* charset = Charset::for_name( get_content_type_parameter( header( "content-type" ), "charset" ) );
 
@@ -1024,7 +1024,7 @@ STDMETHODIMP Response::put_Binary_content( SAFEARRAY* safearray )
     
     try
     {
-        if( is_ready() )  throw_xc( "SCHEDULER-247" );
+        if( is_ready() )  z::throw_xc( "SCHEDULER-247" );
 
         Locked_safearray<Byte> a ( safearray );
 

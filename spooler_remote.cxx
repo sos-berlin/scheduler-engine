@@ -75,7 +75,7 @@ bool Xml_client_connection::async_continue_( Continue_flags flags )
             if( !_socket_operation->async_finished() )  return false;
             _socket_operation->async_check_error();
 
-            if( _socket_operation->_eof )  throw_xc( "SCHEDULER-224" );
+            if( _socket_operation->_eof )  z::throw_xc( "SCHEDULER-224" );
         }
 
 
@@ -124,7 +124,7 @@ bool Xml_client_connection::async_continue_( Continue_flags flags )
             case s_receiving:
             {
                 _socket_operation->recv__continue();
-                if( _socket_operation->_eof )  throw_xc( "SCHEDULER-224" );
+                if( _socket_operation->_eof )  z::throw_xc( "SCHEDULER-224" );
 
                 string data = _socket_operation->recv_data();
                 if( data.length() == 0 )  break;
@@ -151,7 +151,7 @@ bool Xml_client_connection::async_continue_( Continue_flags flags )
                 DOM_FOR_EACH_ELEMENT( response_document.documentElement(), e1 )
                     if( e1.nodeName_is( "answer" ) )
                         DOM_FOR_EACH_ELEMENT( e1, e2 )
-                            if( e2.nodeName_is( "ERROR" ) )  throw_xc( "SCHEDULER-223", e2.getAttribute( "text" ) );
+                            if( e2.nodeName_is( "ERROR" ) )  z::throw_xc( "SCHEDULER-223", e2.getAttribute( "text" ) );
 
                 _log.info( S() << "Scheduler ist registriert" );
                 break;

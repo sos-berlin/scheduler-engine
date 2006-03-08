@@ -78,7 +78,7 @@ bool Object_set::open()
         object_set_vt = _task->_module_instance->call( "spooler_make_object_set" );
 
         if( object_set_vt.vt != VT_DISPATCH
-         || object_set_vt.pdispVal == NULL  )  throw_xc( "SCHEDULER-103", _object_set_descr->_class_name );
+         || object_set_vt.pdispVal == NULL  )  z::throw_xc( "SCHEDULER-103", _object_set_descr->_class_name );
 
         _idispatch = object_set_vt.pdispVal;
     }
@@ -125,7 +125,7 @@ Spooler_object Object_set::get()
 
         if( obj.vt == VT_EMPTY    )  return Spooler_object(NULL);
         if( obj.vt != VT_DISPATCH
-         || obj.pdispVal == NULL  )  throw_xc( "SCHEDULER-102", _object_set_descr->_class_name );
+         || obj.pdispVal == NULL  )  z::throw_xc( "SCHEDULER-102", _object_set_descr->_class_name );
 
         object = obj.pdispVal;
 
@@ -698,7 +698,7 @@ bool Task::has_parameters()
 
 void Task::set_history_field( const string& name, const Variant& value )
 {
-  //if( !_job->its_current_task(this) )  throw_xc( "SCHEDULER-138" );
+  //if( !_job->its_current_task(this) )  z::throw_xc( "SCHEDULER-138" );
 
     _history.set_extra_field( name, value );
 }
@@ -967,7 +967,7 @@ bool Task::do_something()
                             catch( exception& x )
                             {
                                 _module_instance_async_error = true;
-                                throw_xc( "SCHEDULER-202", x.what() );
+                                z::throw_xc( "SCHEDULER-202", x.what() );
                             }
                         }
 
@@ -1683,10 +1683,10 @@ void Task::trigger_event( Scheduler_event* scheduler_event )
 bool Task::wait_until_terminated( double wait_time )
 {
     Thread_id my_thread_id = current_thread_id();
-    if( my_thread_id == _thread->thread_id() )  throw_xc( "SCHEDULER-125" );     // Deadlock
+    if( my_thread_id == _thread->thread_id() )  z::throw_xc( "SCHEDULER-125" );     // Deadlock
 
   //Spooler_thread* calling_thread = _spooler->thread_by_thread_id( my_thread_id );
-  //if( calling_thread &&  !calling_thread->_free_threading )  throw_xc( "SCHEDULER-131" );
+  //if( calling_thread &&  !calling_thread->_free_threading )  z::throw_xc( "SCHEDULER-131" );
 
     Event event ( obj_name() + " wait_until_terminated" );
 
@@ -1765,7 +1765,7 @@ void Task::clear_mail()
 
 void Task::set_web_service( const string& name )
 { 
-    if( _is_in_database )  throw_xc( "SCHEDULER-243", "web_service" );
+    if( _is_in_database )  z::throw_xc( "SCHEDULER-243", "web_service" );
 
     set_web_service( name == ""? NULL 
                                : _spooler->_web_services.web_service_by_name( name ) );
@@ -1775,7 +1775,7 @@ void Task::set_web_service( const string& name )
 
 void Task::set_web_service( Web_service* web_service )                
 { 
-    if( _is_in_database )  throw_xc( "SCHEDULER-243", "web_service" );
+    if( _is_in_database )  z::throw_xc( "SCHEDULER-243", "web_service" );
 
     _web_service = web_service; 
 }
@@ -1785,7 +1785,7 @@ void Task::set_web_service( Web_service* web_service )
 Web_service* Task::web_service() const
 {
     Web_service* result = web_service_or_null();
-    if( !result )  throw_xc( "SCHEDULER-241" );
+    if( !result )  z::throw_xc( "SCHEDULER-241" );
     return result;
 }
 
@@ -1979,7 +1979,7 @@ bool Job_module_task::do_load()
 
 Async_operation* Job_module_task::do_begin__start()
 {
-    if( !_module_instance )  throw_xc( "SCHEDULER-199" );
+    if( !_module_instance )  z::throw_xc( "SCHEDULER-199" );
 
     return _module_instance->begin__start();
 }
@@ -1990,7 +1990,7 @@ bool Job_module_task::do_begin__end()
 {
     bool ok;
 
-    if( !_module_instance )  throw_xc( "SCHEDULER-199" );
+    if( !_module_instance )  z::throw_xc( "SCHEDULER-199" );
 
     ok = _module_instance->begin__end();
 
@@ -2019,7 +2019,7 @@ void Job_module_task::do_end__end()
 
 Async_operation* Job_module_task::do_step__start()
 {
-    if( !_module_instance )  throw_xc( "SCHEDULER-199" );
+    if( !_module_instance )  z::throw_xc( "SCHEDULER-199" );
 
     return _module_instance->step__start();
 }
@@ -2028,7 +2028,7 @@ Async_operation* Job_module_task::do_step__start()
 
 Variant Job_module_task::do_step__end()
 {
-    if( !_module_instance )  throw_xc( "SCHEDULER-199" );
+    if( !_module_instance )  z::throw_xc( "SCHEDULER-199" );
 
     return _module_instance->step__end();
 }
@@ -2037,7 +2037,7 @@ Variant Job_module_task::do_step__end()
 
 Async_operation* Job_module_task::do_call__start( const string& method )
 {
-    if( !_module_instance )  throw_xc( "SCHEDULER-199" );
+    if( !_module_instance )  z::throw_xc( "SCHEDULER-199" );
 
     return _module_instance->call__start( method );
 }
@@ -2046,7 +2046,7 @@ Async_operation* Job_module_task::do_call__start( const string& method )
 
 bool Job_module_task::do_call__end()
 {
-    if( !_module_instance )  throw_xc( "SCHEDULER-199" );
+    if( !_module_instance )  z::throw_xc( "SCHEDULER-199" );
 
     return check_result( _module_instance->call__end() );
 }
@@ -2055,7 +2055,7 @@ bool Job_module_task::do_call__end()
 
 Async_operation* Job_module_task::do_release__start()
 {
-    if( !_module_instance )  return &dummy_sync_operation; //throw_xc( "SCHEDULER-199" );
+    if( !_module_instance )  return &dummy_sync_operation; //z::throw_xc( "SCHEDULER-199" );
 
     return _module_instance->release__start();
 }
@@ -2064,7 +2064,7 @@ Async_operation* Job_module_task::do_release__start()
 
 void Job_module_task::do_release__end()
 {
-    if( !_module_instance )  return;  //throw_xc( "SCHEDULER-199" );
+    if( !_module_instance )  return;  //z::throw_xc( "SCHEDULER-199" );
 
     _module_instance->release__end();
 }
@@ -2155,7 +2155,7 @@ void Process_task::do_close__end()
 
 bool Process_task::do_begin__end()
 {
-    if( _spooler->_process_count == max_processes )  throw_xc( "SCHEDULER-210", max_processes );
+    if( _spooler->_process_count == max_processes )  z::throw_xc( "SCHEDULER-210", max_processes );
 
     PROCESS_INFORMATION process_info;
     STARTUPINFO         startup_info;
@@ -2369,7 +2369,7 @@ bool Process_event::wait( double seconds )
 
 bool Process_task::do_begin__end()
 {
-    if( _spooler->_process_count == max_processes )  throw_xc( "SCHEDULER-210", max_processes );
+    if( _spooler->_process_count == max_processes )  z::throw_xc( "SCHEDULER-210", max_processes );
 
     vector<string> string_args;
 
@@ -2517,7 +2517,7 @@ void Process_task::do_end__end()
         if( _process_handle._pid )
         {
             do_step__end();      // waitpid() sollte schon gerufen sein.
-            if( _process_handle._pid )   throw_xc( "SCHEDULER-179", _process_handle._pid );       // Sollte nicht passieren (ein Zombie wird stehen bleiben)
+            if( _process_handle._pid )   z::throw_xc( "SCHEDULER-179", _process_handle._pid );       // Sollte nicht passieren (ein Zombie wird stehen bleiben)
         }
 
         close_handle();
@@ -2526,7 +2526,7 @@ void Process_task::do_end__end()
         {
             try
             {
-                throw_xc( "SCHEDULER-181", _process_handle._process_signaled );
+                z::throw_xc( "SCHEDULER-181", _process_handle._process_signaled );
             }
             catch( const exception& x )
             {
@@ -2547,7 +2547,7 @@ void Process_task::do_end__end()
     {
         try
         {
-            throw_xc( "SCHEDULER-126", exit_code );
+            z::throw_xc( "SCHEDULER-126", exit_code );
         }
         catch( const exception& x )
         {
