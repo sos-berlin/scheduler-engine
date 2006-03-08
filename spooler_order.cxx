@@ -387,6 +387,10 @@ int Job_chain::remove_all_pending_orders( bool leave_in_database )
 
 void Job_chain::add_job( Job* job, const Order::State& state, const Order::State& next_state, const Order::State& error_state )
 {
+    Order::check_state( state );
+    if( !next_state.is_missing() )  Order::check_state( next_state );
+    if( !error_state.is_missing() )  Order::check_state( error_state );
+
     if( job  &&  !job->order_queue() )  throw_xc( "SCHEDULER-147", job->name() );
 
     if( _state != s_under_construction )  throw_xc( "SCHEDULER-148" );
@@ -574,8 +578,7 @@ int Job_chain::order_count()
 
 bool Job_chain::has_order_id( const Order::Id& order_id )
 {
-    string id_string = string_from_variant( order_id );
-    Order_map::iterator it = _order_map.find( id_string );
+    Order_map::iterator it = _order_map.find( Order::string_id( order_id ) );
     return it != _order_map.end();
 }
 
@@ -585,7 +588,7 @@ void Job_chain::register_order( Order* order )
 {
     //THREAD_LOCK( _lock )
     {
-        string id_string = string_from_variant( order->id() );
+        string id_string = order->string_id();
         Order_map::iterator it = _order_map.find( id_string );
         if( it != _order_map.end() )  throw_xc( "SCHEDULER-186", id_string, _name );
         _order_map[ id_string ] = order;
@@ -598,8 +601,7 @@ void Job_chain::unregister_order( Order* order )
 {
     //THREAD_LOCK( _lock )
     {
-        string id_string = string_from_variant( order->id() );
-        Order_map::iterator it = _order_map.find( id_string );
+        Order_map::iterator it = _order_map.find( order->string_id() );
         if( it != _order_map.end() )  _order_map.erase( it );
                                 else  Z_LOG( __FUNCTION__ << " " << order->obj_name() << " ist nicht registriert!?\n" );
     }
@@ -1054,6 +1056,7 @@ Order::Order( Spooler* spooler, const Record& record, const string& payload_stri
 
 Order::~Order()
 {
+    if( _http_operation )  _http_operation->unlink_order();
 }
 
 //--------------------------------------------------------------------------------------Order::init
@@ -1067,6 +1070,27 @@ void Order::init()
     _created = Time::now();
 
     set_run_time( NULL );
+}
+
+//---------------------------------------------------------------------------------Order::string_id
+
+string Order::string_id() 
+{
+    return string_id( _id );
+}
+
+//---------------------------------------------------------------------------------Order::string_id
+
+string Order::string_id( const Id& id ) 
+{
+    try
+    {
+        return string_from_variant( id );
+    }
+    catch( exception& x ) 
+    { 
+        throw_xc( "SCHEDULER-249", x.what() ); 
+    }
 }
 
 //-------------------------------------------------------------------------------Order::attach_task
@@ -1115,21 +1139,23 @@ void Order::close()
         }
     }
 */
-    if( _web_service_operation )
+    if( _http_operation )
     {
         try
         {
-            if( http::Response* http_response = _web_service_operation->http_response() )
+            if( http::Response* http_response = _http_operation->response() )
             {
                 if( !http_response->is_ready() )
                 {
                     _log->error( "web_service_operation.send() fehlt, Operation wird abgebrochen" );
-                    _web_service_operation->cancel();
-                    _web_service_operation = NULL;
+                    _http_operation->cancel();
                 }
             }
         }
         catch( exception& x ) { _log->error( x.what() ); }
+
+        _http_operation->unlink_order();
+        _http_operation = NULL;
     }
 
 
@@ -1298,7 +1324,7 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
 
             if( !payload_content )
             {
-                string payload_string = _payload.as_string();
+                string payload_string = string_payload();
 
                 /*
                 if( string_begins_with( payload_string, "<?xml" ) )
@@ -1349,8 +1375,8 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
     if( _web_service )
     element.setAttribute( "web_service", _web_service->name() );
 
-    if( _web_service_operation )
-    element.setAttribute( "web_service_operation", _web_service_operation->id() );
+    if( _http_operation  &&  _http_operation->web_service_operation_or_null() )
+    element.setAttribute( "web_service_operation", _http_operation->web_service_operation_or_null()->id() );
 
     return element;
 }
@@ -1393,6 +1419,8 @@ void Order::set_id( const Order::Id& id )
     {
         if( _id_locked )  throw_xc( "SCHEDULER-159" );
 
+        string_id();    // Sicherstellen, das id in einen String wandelbar ist
+
         _id = id;
         _is_users_id = true;
 
@@ -1408,6 +1436,21 @@ void Order::set_default_id()
 {
     set_id( _spooler->_db->get_order_id() );
     _is_users_id = false;
+}
+
+//----------------------------------------------------------------------------Order::string_payload
+
+string Order::string_payload() const
+{
+    try
+    {
+        return !_payload.is_null_or_empty_string()  &&  !_payload.is_missing()? _payload.as_string() 
+                                                                              : "";
+    }
+    catch( exception& x )
+    {
+        throw_xc( "SCHEDULER-251", x.what() );
+    }
 }
 
 //---------------------------------------------------------------------------Order::set_web_service
@@ -1496,6 +1539,20 @@ bool Order::finished()
     return !_job_chain_node  ||  !_job_chain_node->_job;
 }
 
+//-------------------------------------------------------------------------------Order::check_state
+
+void Order::check_state( const State& state )
+{
+    try
+    {
+        string_from_variant( state );
+    }
+    catch( exception& x )
+    {
+        throw_xc( "SCHEDULER-250", x.what() );
+    }
+}
+
 //---------------------------------------------------------------------------------Order::set_state
 
 void Order::set_state( const State& state )
@@ -1505,7 +1562,7 @@ void Order::set_state( const State& state )
     //    _log->warn( S() << "state=" << debug_string_from_variant( state ) << " wird ignoriert, weil Auftrag bereits aus der Jobkette entfernt ist" );
     //    return;
     //}
-
+    check_state( state );
 
     if( state != _state )
     {
@@ -1887,7 +1944,7 @@ void Order::processing_error()
 
         _task = NULL;
 
-        if( _web_service_operation )      
+        if( _http_operation )      
         {
             _job_chain_node = NULL;         // Nicht auf Neustart des Jobs warten, sondern Auftrag beenden, damit die Web-Service-Operation abgeschlossen werden kann
         }
@@ -1915,7 +1972,7 @@ void Order::postprocessing2( Job* last_job )
     {
         try
         {
-            if( _web_service  &&  !_web_service_operation )
+            if( _web_service  &&  !_http_operation )
             {
                 _web_service->forward_order( *this, last_job );
             }

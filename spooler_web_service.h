@@ -132,6 +132,7 @@ struct Web_service_operation : idispatch_implementation< Web_service_operation, 
     string                      obj_name                    () const;
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& ) const;
     bool                        closed                      () const                                { return _http_operation == NULL; }
+    void                        assert_usable               ();
 
     // interface Ihas_java_class_name
     STDMETHODIMP            get_Java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
@@ -142,6 +143,7 @@ struct Web_service_operation : idispatch_implementation< Web_service_operation, 
     STDMETHODIMP            get_Web_service                 ( spooler_com::Iweb_service** result )  { *result = _web_service.copy();  return S_OK; }
     STDMETHODIMP            get_Request                     ( spooler_com::Iweb_service_request** );
     STDMETHODIMP            get_Response                    ( spooler_com::Iweb_service_response** );
+    STDMETHODIMP                Assert_usable               ();
   //STDMETHODIMP                Execute_stylesheets         ();
 
     virtual void                close                       ();
@@ -149,7 +151,6 @@ struct Web_service_operation : idispatch_implementation< Web_service_operation, 
   //virtual bool                async_continue              ( Async_operation::Continue_flags );
   //virtual bool                async_finished              ();
     void                    set_host                        ( Host* );
-    void                        cancel                      ();
     void                        execute_stylesheets         ();                                     // Führt _web_service->_request_xslt_stylesheet usw. aus
 
     int                         id                          () const                                { return _id; }
@@ -166,8 +167,7 @@ struct Web_service_operation : idispatch_implementation< Web_service_operation, 
     ptr<Web_service>           _web_service;
     ptr<Web_service_request>   _request;
     ptr<Web_service_response>  _response;
-    http::Operation*           _http_operation;
-    ptr<Order>                 _order;
+    ptr<http::Operation>       _http_operation;             // Achtung: Zirkel _http_operation -> _web_service_operation (Connection und Order können Eigentümer sein)
     Time                       _timeout_at;
     string                     _log_filename_prefix;
     ptr<Prefix_log>            _log;
@@ -199,6 +199,7 @@ struct Web_service_request : idispatch_implementation< Web_service_request, spoo
     Prefix_log*                 log                         ()                                      { return _web_service_operation->log(); }
     string                      obj_name                    () const;
     bool                        closed                      () const                                { return _web_service_operation == NULL; }
+    void                        assert_usable               ();
 
     // interface Ihas_java_class_name
     STDMETHODIMP            get_Java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
@@ -211,6 +212,8 @@ struct Web_service_request : idispatch_implementation< Web_service_request, spoo
   //STDMETHODIMP            get_Content_type                ( BSTR* result )                        { return String_to_bstr( http_request()->content_type(), result ); }
     STDMETHODIMP            get_String_content              ( BSTR* );
     STDMETHODIMP            get_Binary_content              ( SAFEARRAY** );
+
+    STDMETHODIMP                Assert_usable               ();
 
     http::Request*              http_request                () const                                { return _web_service_operation->http_request(); }
 
@@ -237,6 +240,7 @@ struct Web_service_response : idispatch_implementation< Web_service_response, sp
     Prefix_log*                 log                         ()                                      { return _web_service_operation->log(); }
     string                      obj_name                    () const;
     bool                        closed                      () const                                { return _web_service_operation == NULL; }
+    void                        assert_usable               ();
 
     // interface Ihas_java_class_name
     STDMETHODIMP            get_Java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
@@ -254,6 +258,8 @@ struct Web_service_response : idispatch_implementation< Web_service_response, sp
     STDMETHODIMP            put_Binary_content              ( SAFEARRAY* );
     STDMETHODIMP                Send                        ();
   //STDMETHODIMP                Send                        ( VARIANT*, BSTR );
+
+    STDMETHODIMP                Assert_usable               ();
 
     http::Response*             http_response               () const                                { return _web_service_operation->http_response(); }
 

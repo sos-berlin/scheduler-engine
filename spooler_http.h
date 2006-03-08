@@ -292,7 +292,7 @@ struct Request : Object
 {
                                 Request                     ()                                      : _zero_(this+1){}
 
-    void                        close                       ();
+  //void                        close                       ();
     void                        check                       ();
     bool                        has_parameter               ( const string& name ) const            { return _parameters.find( name ) != _parameters.end(); }
     string                      parameter                   ( const string& name ) const;
@@ -333,7 +333,7 @@ struct Response : Object
                                 Response                    ( Operation* );
 
 
-    void                        close                       ();
+  //void                        close                       ();
     bool                        closed                      () const                                { return _operation == NULL; }
     void                        recommend_block_size        ( int size )                            { if( _chunk_reader )  _chunk_reader->recommend_block_size( size ); }
     int                         recommended_block_size      () const                                { return _chunk_reader? _chunk_reader->_recommended_block_size : recommended_chunk_size; }
@@ -345,10 +345,10 @@ struct Response : Object
   //string                      content_type                ()                                      { return _content_type; }
   //void                    set_content_type                ( const string& value )                 { set_header( "Content-Type", value ); }
   //void                    set_character_encoding          ( const string& value );
-    void                    set_header                      ( const string& name, const string& value ) { _headers.set( name, value ); }
+    void                    set_header                      ( const string& name, const string& value );
     string                      header                      ( const string& name )                  { return _headers[ name ]; }
     void                    set_status                      ( Status_code, const string& text = "" );
-    void                    set_chunk_reader                ( Chunk_reader* c )                     { _chunk_reader = c; }
+    void                    set_chunk_reader                ( Chunk_reader* );
     void                        finish                      ();
     void                        send                        ();
     bool                     is_ready                       () const                                { return _ready; }
@@ -378,7 +378,7 @@ struct Response : Object
     Status_code                _status_code;
     ptr<Chunk_reader>          _chunk_reader;
     bool                       _ready;                      // Antwort kann versendet werden
-    bool                       _finished;                   // read() ist vorbereitet
+    bool                       _finished;                   // read() ist vorbereitet, eigentlich dasselbe wie _ready
     String_stream              _headers_stream;
     int                        _chunk_index;                // 0: Header
     uint                       _chunk_size;
@@ -401,13 +401,17 @@ struct Operation : Communication::Operation
     bool                        request_is_complete         ()                                      { return !_parser  ||  _parser->is_complete(); }
 
     void                        begin                       ();
+    void                        cancel                      ();
     virtual bool                async_continue_             ( Continue_flags );
     virtual bool                async_finished_             ()                                      { return _response  &&  _response->is_ready(); }
     virtual string              async_state_text_           ()                                      { return "none"; }
 
+    void                    set_order                       ( Order* o )                            { _order = o; }         // Für Web_service_operation::begin()
+    void                        unlink_order                ()                                      { _order = NULL; }      // Für Order::close()
     bool                        response_is_complete        ();
     string                      get_response_part           ();
     bool                        should_close_connection     ();
+    Web_service_operation*      web_service_operation_or_null()                                     { return _web_service_operation; }
 
     Request*                    request                     () const                                { return _request; }
     Response*                   response                    () const                                { return _response; }
@@ -421,6 +425,7 @@ struct Operation : Communication::Operation
     ptr<Parser>                _parser;
     ptr<Response>              _response;
     ptr<Web_service_operation> _web_service_operation;
+    Order*                     _order;
 };
 
 //------------------------------------------------------------------------Operation_connection

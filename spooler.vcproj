@@ -2052,6 +2052,10 @@
 			</Filter>
 		</Filter>
 		<File
+			RelativePath=".\messages.xml"
+			>
+		</File>
+		<File
 			RelativePath="..\kram\sosmain.cxx"
 			>
 			<FileConfiguration

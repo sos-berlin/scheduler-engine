@@ -46,7 +46,6 @@ Xslt_stylesheet::Xslt_stylesheet()
     Idispatch_implementation( &class_descriptor ),
     _zero_(this+1)
 {
-    Z_LOG2( "joacim", __FUNCTION__ << "\n" );
 }
 
 //-----------------------------------------------------------------Xslt_stylesheet::Create_instance

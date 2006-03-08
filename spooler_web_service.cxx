@@ -154,7 +154,8 @@ Web_service::Web_service( Spooler* sp )
     Idispatch_implementation( &class_descriptor ),
     Scheduler_object( sp, (Iweb_service*)this, Scheduler_object::type_web_service ),
     _zero_(this+1),
-    _next_operation_id(1)
+    _next_operation_id(1),
+    _timeout( INT_MAX )
 {
     _log = Z_NEW( Prefix_log( this, "Web_service" ) );
 }
@@ -400,6 +401,7 @@ Web_service_operation::Web_service_operation( Web_service* ws, http::Operation* 
 
 Web_service_operation::~Web_service_operation()
 {
+    Z_LOG2( "joacim", __FUNCTION__ << "\n" );
     close();
 }
 
@@ -423,16 +425,19 @@ void Web_service_operation::begin()
     }
     else
     {
-        if( _http_operation->_connection->_security_level <= Security::seclev_no_add )  throw http::Http_exception( http::status_403_forbidden );
+        if( _http_operation->_connection->_security_level < Security::seclev_all )  throw http::Http_exception( http::status_403_forbidden );
 
 
-        _order = new Order( _spooler );
+        ptr<Order> order = new Order( _spooler );
 
         //order->_store_in_database = _web_service->_store_order_in_database;
-        _order->set_web_service_operation( this );
-        _order->add_to_job_chain( _spooler->job_chain( _web_service->_job_chain_name ) );
+        order->set_http_operation( _http_operation );      // Order wird Eigentümer von Web_service_operation
+        order->add_to_job_chain( _spooler->job_chain( _web_service->_job_chain_name ) );
+        _http_operation->set_order( order );     // ~Order ruft Http_operation::unlink_order(), der setzt _order = NULL
+        _log->info( "Created " + order->obj_name() );
 
-        _http_operation->set_gmtimeout( (double)( ::time(NULL) + _web_service->_timeout ) );
+        if( _web_service->_timeout != INT_MAX )
+            _http_operation->set_gmtimeout( (double)( ::time(NULL) + _web_service->_timeout ) );
     }
 }
 
@@ -451,20 +456,6 @@ bool Web_service_operation::async_finished()
     //    response->finish();
 }
 */
-//--------------------------------------------------------------------Web_service_operation::cancel
-
-void Web_service_operation::cancel()
-{
-    if( http_response()->is_ready() )
-    {
-        _log->warn( "cancel() ignoriert, weil die Antwort schon übertragen wird" );
-        return;
-    }
-
-    http_response()->set_status( http::status_500_internal_server_error );
-    http_response()->set_ready();
-}
-
 //---------------------------------------------------------Web_service_operation::process_http__end
 /*
 ptr<Http_response> Web_service_operation::process_http__end()
@@ -487,9 +478,6 @@ xml::Element_ptr Web_service_operation::dom_element( const xml::Document_ptr& do
 
     result.setAttribute( "web_service", _web_service->name() );
 
-    if( _order )
-    result.setAttribute( "order", _order->obj_name() );
-
     return result;
 }
 
@@ -497,7 +485,9 @@ xml::Element_ptr Web_service_operation::dom_element( const xml::Document_ptr& do
 
 STDMETHODIMP Web_service_operation::get_Request( spooler_com::Iweb_service_request** result )
 { 
-    *result = _request.copy(); 
+    *result = _request.copy();
+    if( !*result )  return E_POINTER;
+
     return S_OK; 
 }
 
@@ -506,6 +496,8 @@ STDMETHODIMP Web_service_operation::get_Request( spooler_com::Iweb_service_reque
 STDMETHODIMP Web_service_operation::get_Response( spooler_com::Iweb_service_response** result )  
 { 
     *result = _response.copy();
+    if( !*result )  return E_POINTER;
+
     return S_OK; 
 }
 
@@ -650,6 +642,28 @@ void Web_service_operation::execute_stylesheets()
     http_response()->set_ready();
 }
 
+//-------------------------------------------------------------Web_service_operation::assert_usable
+
+void Web_service_operation::assert_usable()
+{
+    if( !_http_operation )  throw_xc( "SCHEDULER-248" );
+}
+
+//-------------------------------------------------------------Web_service_operation::Assert_usable
+
+STDMETHODIMP Web_service_operation::Assert_usable()
+{
+    HRESULT hr = S_OK;
+    
+    try
+    {
+        assert_usable();
+    }
+    catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+
 //--------------------------------------------------------------------Web_service_request::_methods
 
 const Com_method Web_service_request::_methods[] =
@@ -679,19 +693,45 @@ Web_service_request::Web_service_request( Web_service_operation* web_service_ope
     
 void Web_service_operation::close()
 { 
-    if( _order )  _order->set_web_service_operation( NULL ), _order = NULL;
+    /*
+    _order = NULL;
 
     _http_operation = NULL;
     _response       = NULL;
     _request        = NULL;
     _web_service    = NULL;
+    */
+}
+
+//---------------------------------------------------------------Web_service_request::assert_usable
+
+void Web_service_request::assert_usable()
+{
+    if( !_web_service_operation )  throw_xc( "SCHEDULER-248" );
+    _web_service_operation->assert_usable();
+}
+
+//---------------------------------------------------------------Web_service_request::Assert_usable
+
+STDMETHODIMP Web_service_request::Assert_usable()
+{
+    HRESULT hr = S_OK;
+    
+    try
+    {
+        assert_usable();
+    }
+    catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
 }
 
 //---------------------------------------------------------------------Web_service_request::get_Url
 
 STDMETHODIMP Web_service_request::get_Url( BSTR* result )
 { 
-    if( closed() )  return E_POINTER;
+    HRESULT hr = Assert_usable();
+    if( FAILED(hr) )  return hr;
 
     return String_to_bstr( http_request()->url(), result ); 
 }
@@ -700,7 +740,8 @@ STDMETHODIMP Web_service_request::get_Url( BSTR* result )
 
 STDMETHODIMP Web_service_request::get_Header( BSTR name, BSTR* result ) 
 { 
-    if( closed() )  return E_POINTER;
+    HRESULT hr = Assert_usable();
+    if( FAILED(hr) )  return hr;
 
     return String_to_bstr( http_request()->header( string_from_bstr( name ) ), result ); 
 }
@@ -709,8 +750,9 @@ STDMETHODIMP Web_service_request::get_Header( BSTR name, BSTR* result )
 
 STDMETHODIMP Web_service_request::get_String_content( BSTR* result )
 {
-    if( closed() )  return E_POINTER;
-   
+    HRESULT hr = Assert_usable();
+    if( FAILED(hr) )  return hr;
+
     return http_request()->get_String_content( result ); 
 }
 
@@ -718,8 +760,9 @@ STDMETHODIMP Web_service_request::get_String_content( BSTR* result )
 
 STDMETHODIMP Web_service_request::get_Binary_content( SAFEARRAY** result )
 {
-    if( closed() )  return E_POINTER;
-    
+    HRESULT hr = Assert_usable();
+    if( FAILED(hr) )  return hr;
+
     return http_request()->get_Binary_content( result ); 
 }
 
@@ -749,11 +792,35 @@ Web_service_response::Web_service_response( Web_service_operation* web_service_o
 {
 }
 
+//--------------------------------------------------------------Web_response_request::assert_usable
+    
+void Web_service_response::assert_usable()
+{
+    if( !_web_service_operation )  throw_xc( "SCHEDULER-248" );
+    _web_service_operation->assert_usable();
+}
+
+//--------------------------------------------------------------Web_response_request::Assert_usable
+
+STDMETHODIMP Web_service_response::Assert_usable()
+{
+    HRESULT hr = S_OK;
+    
+    try
+    {
+        assert_usable();
+    }
+    catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+
 //------------------------------------------------------------Web_service_response::put_Status_code
     
 STDMETHODIMP Web_service_response::put_Status_code( int code )
 { 
-    if( closed() )  return E_POINTER;
+    HRESULT hr = Assert_usable();
+    if( FAILED(hr) )  return hr;
 
     return http_response()->put_Status_code( code );
 }
@@ -762,7 +829,8 @@ STDMETHODIMP Web_service_response::put_Status_code( int code )
     
 STDMETHODIMP Web_service_response::put_Header( BSTR name, BSTR value )
 { 
-    if( closed() )  return E_POINTER;
+    HRESULT hr = Assert_usable();
+    if( FAILED(hr) )  return hr;
 
     return http_response()->put_Header( name, value );
 }
@@ -771,7 +839,8 @@ STDMETHODIMP Web_service_response::put_Header( BSTR name, BSTR value )
 
 STDMETHODIMP Web_service_response::get_Header( BSTR name, BSTR* result )
 { 
-    if( closed() )  return E_POINTER;
+    HRESULT hr = Assert_usable();
+    if( FAILED(hr) )  return hr;
 
     return http_response()->get_Header( name, result );
 }
@@ -843,7 +912,8 @@ STDMETHODIMP Web_service_response::get_Content_type( BSTR* result )
 
 STDMETHODIMP Web_service_response::put_String_content( BSTR content_bstr )
 {
-    if( closed() )  return E_POINTER;
+    HRESULT hr = Assert_usable();
+    if( FAILED(hr) )  return hr;
 
     return http_response()->put_String_content( content_bstr );
 }
@@ -852,7 +922,8 @@ STDMETHODIMP Web_service_response::put_String_content( BSTR content_bstr )
 
 STDMETHODIMP Web_service_response::put_Binary_content( SAFEARRAY* safearray )
 {
-    if( closed() )  return E_POINTER;
+    HRESULT hr = Assert_usable();
+    if( FAILED(hr) )  return hr;
 
     return http_response()->put_Binary_content( safearray );
 }
@@ -861,7 +932,8 @@ STDMETHODIMP Web_service_response::put_Binary_content( SAFEARRAY* safearray )
 
 STDMETHODIMP Web_service_response::Send() // VARIANT* content, BSTR content_type_bstr )
 {
-    if( closed() )  return E_POINTER;
+    HRESULT hr = Assert_usable();
+    if( FAILED(hr) )  return hr;
 
     return http_response()->Send();
 }

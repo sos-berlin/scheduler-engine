@@ -306,6 +306,7 @@ Variant Remote_module_instance_proxy::step__end()
     if( !_remote_instance )  throw_xc( "SCHEDULER-200", "step__end" );
 
   //if( _call_state != c_finished )  throw_xc( "SCHEDULER-191", "step__end", (int)_call_state );
+    if( !_operation )  throw_xc( "SCHEDULER-191", "step__end", "_operation==NULL" );
     if( !_operation->async_finished() )  throw_xc( "SCHEDULER-191", "step__end", _operation->async_state_text() );
 
     _operation = NULL;

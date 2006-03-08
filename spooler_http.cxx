@@ -212,7 +212,7 @@ Parser::Parser( Request* request )
 
 //------------------------------------------------------------------------------------Parser::close
     
-    void Parser::close()
+void Parser::close()
 {
     _request = NULL;
 }
@@ -421,10 +421,12 @@ Operation::Operation( Operation_connection* pc )
     
 void Operation::close()
 { 
+    /* Für Order alles am Leben lassen:
     if( _web_service_operation )  _web_service_operation->close(),  _web_service_operation = NULL;
     if( _response )  _response->close(),  _response = NULL;
     if( _parser   )  _parser  ->close(),  _parser   = NULL;
     if( _request  )  _request ->close(),  _request  = NULL;
+    */
 
     Communication::Operation::close(); 
 }
@@ -509,6 +511,20 @@ bool Operation::async_continue_( Continue_flags flags )
     return something_done;
 }
 
+//--------------------------------------------------------------------------------Operation::cancel
+
+void Operation::cancel()
+{
+    if( !_response  ||  _response->is_ready() )
+    {
+        if( _web_service_operation ) _web_service_operation->log()->warn( "cancel() ignoriert, weil die Antwort schon übertragen wird" );
+        return;
+    }
+
+    _response->set_status( http::status_500_internal_server_error );
+    _response->set_ready();
+}
+
 //----------------------------------------------------------------------Operation::get_response_part
 
 string Operation::get_response_part()
@@ -536,6 +552,9 @@ xml::Element_ptr Operation::dom_element( const xml::Document_ptr& document, cons
 {
     xml::Element_ptr result = document.createElement( "http_operation" );
 
+    if( _order )
+    result.setAttribute( "order", _order->obj_name() );
+
     if( _web_service_operation )
     {
         result.appendChild( _web_service_operation->dom_element( document, what ) );
@@ -545,11 +564,11 @@ xml::Element_ptr Operation::dom_element( const xml::Document_ptr& document, cons
 }
 
 //-----------------------------------------------------------------------------------Request::close
-
+/*
 void Request::close()
 {
 }
-
+*/
 //-------------------------------------------------------------------------------Request::parameter
     
 string Request::parameter( const string& name ) const
@@ -666,18 +685,20 @@ Response::Response( Operation* operation )
                                                        // Gut wäre eine Frist, z.B. 10s
 }
 
-//-----------------------------------------------------------------------------------esponse::close
-    
+//----------------------------------------------------------------------------------Response::close
+/*    
 void Response::close()
 {
     _operation = NULL;
     _chunk_reader = NULL;
 }
-
+*/
 //-----------------------------------------------------------------------------Response::set_status
     
 void Response::set_status( Status_code code, const string& )
 { 
+    if( is_ready() )  throw_xc( "SCHEDULER-247" );
+
     _status_code = code; 
 
     /* Die Fehlermeldung sollte nicht dem Benutzer gezeigt werden. Sie kann Pfadnamen enthalten, z.B. bei ERRNO-2
@@ -704,10 +725,30 @@ void Response::set_status( Status_code code, const string& )
     */
 }
 
+//-----------------------------------------------------------------------------Response::set_header
+
+void Response::set_header( const string& name, const string& value ) 
+{ 
+    if( is_ready() )  throw_xc( "SCHEDULER-247" );
+
+    _headers.set( name, value ); 
+}
+
+//-----------------------------------------------------------------------Response::set_chunk_reader
+
+void Response::set_chunk_reader( Chunk_reader* c )
+{ 
+    if( is_ready() )  throw_xc( "SCHEDULER-247" );
+
+    _chunk_reader = c; 
+}
+
 //------------------------------------------------------------------------------Response::set_ready
 
 void Response::set_ready()
 { 
+    finish();
+
     _ready = true; 
     _operation->_connection->signal( "http response is ready" );
 }
@@ -869,6 +910,8 @@ STDMETHODIMP Response::put_Header( BSTR name, BSTR value )
     
     try
     {
+        if( is_ready() )  throw_xc( "SCHEDULER-247" );
+
         set_header( string_from_bstr( name ), string_from_bstr( value ) );  
     }
     catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
@@ -962,6 +1005,8 @@ STDMETHODIMP Response::put_String_content( BSTR content_bstr )
     
     try
     {
+        if( is_ready() )  throw_xc( "SCHEDULER-247" );
+
         const Charset* charset = Charset::for_name( get_content_type_parameter( header( "content-type" ), "charset" ) );
 
         set_chunk_reader( Z_NEW( String_chunk_reader( charset->encoded_from_bstr( content_bstr ), "" ) ) );
@@ -979,6 +1024,8 @@ STDMETHODIMP Response::put_Binary_content( SAFEARRAY* safearray )
     
     try
     {
+        if( is_ready() )  throw_xc( "SCHEDULER-247" );
+
         Locked_safearray<Byte> a ( safearray );
 
         set_chunk_reader( Z_NEW( Byte_chunk_reader( a.data(), a.count(), "" ) ) );

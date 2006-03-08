@@ -1962,7 +1962,7 @@ const char file_html_jz_translation_de_js[] =
 
 const char file_html_jz_scheduler_xslt[] = 
     "<?xml version='1.0' encoding=\"utf-8\"?>\r\n"
-    "<!-- $Id: scheduler.xslt 4154 2006-03-05 08:36:35Z jz $ -->\r\n"
+    "<!-- $Id: scheduler.xslt 4166 2006-03-06 17:10:05Z jz $ -->\r\n"
     "\r\n"
     "<xsl:stylesheet xmlns:xsl   = \"http://www.w3.org/1999/XSL/Transform\"\r\n"
     "xmlns:msxsl = \"urn:schemas-microsoft-com:xslt\"\r\n"
@@ -2792,12 +2792,35 @@ const char file_html_jz_scheduler_xslt[] =
     "<xsl:apply-templates select=\"$job/@state\"/>\r\n"
     "\r\n"
     "<xsl:choose>\r\n"
-    "<xsl:when test=\"$job/tasks/@count>0\">\r\n"
+    "<xsl:when test=\"$job/tasks/@count &gt; 0\">\r\n"
     "<xsl:text>, </xsl:text>\r\n"
+    "<span class=\"task\" style=\"padding-left: 2pt; padding-right: 2pt; padding-bottom: 2pt;\">\r\n"
+    "<xsl:variable name=\"job_chain_task_count\" select=\"count( $job/tasks/task[ order/@job_chain=$job_chain_name ] )\"/>\r\n"
+    "<xsl:element name=\"span\">\r\n"
+    "<xsl:attribute name=\"style\">white-space: nowrap</xsl:attribute>\r\n"
+    "<xsl:attribute name=\"title\"><xsl:value-of select=\"$job_chain_task_count\"/> tasks processing orders from job chain <xsl:value-of select=\"$job_chain_name\"/></xsl:attribute>\r\n"
     "<xsl:call-template name=\"bold_counter\">\r\n"
-    "<xsl:with-param name=\"counter\" select=\"count( $job/tasks/task[ order/@job_chain=$job_chain_name ] )\" />\r\n"
+    "<xsl:with-param name=\"counter\" select=\"$job_chain_task_count\" />\r\n"
     "<xsl:with-param name=\"suffix\" select=\"'tasks'\" />\r\n"
     "</xsl:call-template>\r\n"
+    "</xsl:element>\r\n"
+    "\r\n"
+    "<xsl:variable name=\"waiting_task_count\" select=\"count( $job/tasks/task[ @state='running_waiting_for_order' ] )\"/>\r\n"
+    "<xsl:if test=\"$waiting_task_count &gt; 0\">\r\n"
+    "<xsl:text>, </xsl:text>\r\n"
+    "<span style=\"white-space: nowrap\">\r\n"
+    "<xsl:value-of select=\"$waiting_task_count\"/> idle\r\n"
+    "</span>\r\n"
+    "</xsl:if>\r\n"
+    "\r\n"
+    "<xsl:variable name=\"rest\" select=\"$job/tasks/@count - $job_chain_task_count - $waiting_task_count\"/>\r\n"
+    "<xsl:if test=\"$rest &gt; 0\">\r\n"
+    "<xsl:text>, </xsl:text>\r\n"
+    "<span style=\"white-space: nowrap\">\r\n"
+    "<xsl:value-of select=\"$rest\"/> for other job chains\r\n"
+    "</span>\r\n"
+    "</xsl:if>\r\n"
+    "</span>\r\n"
     "</xsl:when>\r\n"
     "<xsl:otherwise>\r\n"
     "<xsl:if test=\"$job/@next_start_time\">\r\n"
@@ -4884,7 +4907,7 @@ static const Embedded_file embedded_files_array[] =
     { "html/jz/scheduler.js", file_html_jz_scheduler_js, sizeof file_html_jz_scheduler_js - 1, 1130346743 },
     { "html/jz/show_log.js", file_html_jz_show_log_js, sizeof file_html_jz_show_log_js - 1, 1113976395 },
     { "html/jz/translation_de.js", file_html_jz_translation_de_js, sizeof file_html_jz_translation_de_js - 1, 1113976395 },
-    { "html/jz/scheduler.xslt", file_html_jz_scheduler_xslt, sizeof file_html_jz_scheduler_xslt - 1, 1141547799 },
+    { "html/jz/scheduler.xslt", file_html_jz_scheduler_xslt, sizeof file_html_jz_scheduler_xslt - 1, 1141665008 },
     { "html/jz/scheduler.css", file_html_jz_scheduler_css, sizeof file_html_jz_scheduler_css - 1, 1137323283 },
     { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1141553192 },
     { NULL, NULL, 0 }

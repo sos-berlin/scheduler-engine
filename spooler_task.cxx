@@ -1302,7 +1302,7 @@ bool Task::do_something()
                 {
                     remove_order_after_error();
                 }
-                catch( exception& x ) { _log->error( x.what() ); }
+                catch( exception& x ) { _log->error( "remove_order_after_error: " + string(x.what()) ); }
 
                 if( error_count == 0  &&  _state < s_ending )
                 {
@@ -1318,7 +1318,13 @@ bool Task::do_something()
                     {
                         finish();
                     }
-                    catch( exception& x ) { _log->error( x.what() ); }
+                    catch( exception& x ) { _log->error( "finish():" + string( x.what() ) ); }
+
+                    try
+                    {
+                        if( _job )  _job->stop( false );
+                    }
+                    catch( exception& x ) { _log->error( "Job->stop(): " + string( x.what() ) ); }
 
                     set_state( s_closed );
                 }

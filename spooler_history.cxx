@@ -974,6 +974,9 @@ void Spooler_db::write_order_history( Order* order, Transaction* outer_transacti
 
 void Spooler_db::update_order( Order* order )
 {
+    string payload_string = order->string_payload();
+    string state_string   = order->state().as_string();
+
     try
     {
         while(1)
@@ -994,7 +997,7 @@ void Spooler_db::update_order( Order* order )
 
                         update.set_table_name( _spooler->_orders_tablename );
 
-                        update[ "state" ] = order->state().as_string();
+                        update[ "state" ] = state_string;
                         
                         if( order->_priority_modified   )  update[ "priority"   ] = order->priority()           ,  order->_state_text_modified = false;
                         if( order->_title_modified      )  update[ "title"      ] = order->title()              ,  order->_title_modified      = false;
@@ -1009,7 +1012,6 @@ void Spooler_db::update_order( Order* order )
 
                         //if( order->_payload_modified )
                         {
-                            string payload_string = order->payload().as_string();
                             if( payload_string == "" )  update[ "payload" ].set_direct( "null" );
                                                   else  update_payload_clob( order->id().as_string(), payload_string );
                             //order->_payload_modified = false;

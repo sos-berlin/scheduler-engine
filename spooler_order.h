@@ -42,6 +42,8 @@ struct Order : Com_order,
     
     void                    set_id                      ( const Variant& );
     Id                          id                      ()                                          { THREAD_LOCK_RETURN( _lock, Variant, _id ); }
+    string                      string_id               ();
+    static string               string_id               ( const Id& );
     void                    set_default_id              ();
     bool                        id_is_equal             ( const Id& id )                            { if( _id_locked ) return _id == id; else THREAD_LOCK_RETURN( _lock, bool, _id == id ); }
 
@@ -69,6 +71,7 @@ struct Order : Com_order,
     void                    set_state2                  ( const State&, bool is_error_state = false );
     State                       state                   ()                                          { THREAD_LOCK_RETURN( _lock, State, _state ); }
     bool                        state_is_equal          ( const State& state )                      { THREAD_LOCK_RETURN( _lock, bool, _state == state ); }
+    static void                 check_state             ( const State& );
     State                       initial_state           ()                                          { THREAD_LOCK_RETURN( _lock, State, _initial_state ); }
 
 
@@ -80,6 +83,7 @@ struct Order : Com_order,
 
     void                    set_payload                 ( const VARIANT& );
     Payload                     payload                 ()                                          { THREAD_LOCK_RETURN( _lock, Variant, _payload ); }
+    string                      string_payload          () const;
 
     void                    set_xml_payload             ( const string& xml );
     string                      xml_payload             () const                                    { return _xml_payload; }
@@ -88,9 +92,9 @@ struct Order : Com_order,
     void                    set_web_service             ( Web_service* );
     Web_service*                web_service             () const;
     Web_service*                web_service_or_null     () const                                    { return _web_service; }
-    void                    set_web_service_operation        ( Web_service_operation* op )          { _web_service_operation = op; }
-    Web_service_operation*      web_service_operation        () const;
-    Web_service_operation*      web_service_operation_or_null() const                               { return _web_service_operation; }
+    void                    set_http_operation          ( http::Operation* op )                     { _http_operation = op; }
+    Web_service_operation*      web_service_operation          () const;
+    Web_service_operation*      web_service_operation_or_null  () const                             { return _http_operation? _http_operation->web_service_operation_or_null() : NULL; }
 
     Run_time*                   run_time                ()                                          { return _run_time; }
 
@@ -183,7 +187,7 @@ struct Order : Com_order,
     bool                       _is_in_database;
 
     ptr<Web_service>           _web_service;
-    ptr<Web_service_operation> _web_service_operation;
+    ptr<http::Operation>       _http_operation;
 };
 
 //-----------------------------------------------------------------------------------Job_chain_node
