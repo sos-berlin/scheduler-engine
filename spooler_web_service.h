@@ -167,7 +167,7 @@ struct Web_service_operation : idispatch_implementation< Web_service_operation, 
     ptr<Web_service>           _web_service;
     ptr<Web_service_request>   _request;
     ptr<Web_service_response>  _response;
-    ptr<http::Operation>       _http_operation;             // Achtung: Zirkel _http_operation -> _web_service_operation (Connection und Order können Eigentümer sein)
+    http::Operation*           _http_operation;
     Time                       _timeout_at;
     string                     _log_filename_prefix;
     ptr<Prefix_log>            _log;
