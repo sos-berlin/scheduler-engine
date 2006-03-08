@@ -651,10 +651,10 @@ xml::Element_ptr Command_processor::execute_remove_job_chain( const xml::Element
 
 xml::Element_ptr Command_processor::execute_register_remote_scheduler( const xml::Element_ptr& register_scheduler_element )
 {
-    if( !_communication_operation )  z::throw_xc( "SCHEDULER-222" );
+    if( !_communication_operation )  z::throw_xc( "SCHEDULER-222", register_scheduler_element.nodeName() );
 
     Xml_operation* xml_processor = dynamic_cast<Xml_operation*>( _communication_operation );
-    if( !xml_processor )  z::throw_xc( "SCHEDULER-222" );
+    if( !xml_processor )  z::throw_xc( "SCHEDULER-222", register_scheduler_element.nodeName() );
 
     if( _security_level < Security::seclev_no_add )  z::throw_xc( "SCHEDULER-121" );
 

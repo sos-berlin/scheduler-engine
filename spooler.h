@@ -254,7 +254,7 @@ struct Spooler : Object,
     Spooler_thread*             get_thread_or_null          ( const string& thread_name );
     Spooler_thread*             select_thread_for_task      ( Task* );
 
-    Object_set_class*           get_object_set_class        ( const string& name );
+  //Object_set_class*           get_object_set_class        ( const string& name );
     Object_set_class*           get_object_set_class_or_null( const string& name );
 
     bool                        has_any_order               ();
@@ -296,14 +296,14 @@ struct Spooler : Object,
     void                        create_window               ();
     void                        start                       ();
     void                        stop                        ( const exception* = NULL );
-    void                        signal_threads              ( const string& signal_name );
-    void                        wait_until_threads_stopped  ( Time until );
+  //void                        signal_threads              ( const string& signal_name );
+  //void                        wait_until_threads_stopped  ( Time until );
     void                        reload                      ();
     void                        nichts_getan                ( Spooler_thread*, int anzahl );
     void                        run                         ();
   //void                        start_threads               ();
     Spooler_thread*             new_thread                  ( bool free_threading = true );
-    void                        close_threads               ();
+  //void                        close_threads               ();
   //bool                        run_single_thread           ();
 
   //void                        single_thread_step          ();

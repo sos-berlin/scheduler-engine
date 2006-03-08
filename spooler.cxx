@@ -84,6 +84,10 @@ static bool                     is_daemon                           = false;
 volatile int                    ctrl_c_pressed                      = 0;
 Spooler*                        spooler_ptr                         = NULL;
 
+//-------------------------------------------------------------------------------------------------
+
+extern zschimmer::Error_code_text  scheduler_messages[];            // messages.cxx, generiert aus messages.xml
+
 //-----------------------------------------------------------------------------------Error_settings
 
 struct Error_settings
@@ -558,7 +562,7 @@ Spooler::~Spooler()
 
     if( !_thread_list.empty() )  
     {
-        close_threads();
+        //close_threads();
         _thread_list.clear();
     }
 
@@ -1052,14 +1056,14 @@ void Spooler::unregister_pid( int pid )
 }
 
 //--------------------------------------------------------------Spooler::wait_until_threads_stopped
-
+/*
 void Spooler::wait_until_threads_stopped( Time until )
 {
     assert( current_thread_id() == _thread_id );
 
     return;
     
-/* Threads sind nicht implementiert    
+/ * Threads sind nicht implementiert    
 
 #   ifdef Z_WINDOWS
 
@@ -1186,21 +1190,21 @@ void Spooler::wait_until_threads_stopped( Time until )
         }
 
 #   endif
-*/
+* /
 }
 
 //--------------------------------------------------------------------------Spooler::signal_threads
-
+/*
 void Spooler::signal_threads( const string& signal_name )
 {
     assert( current_thread_id() == _thread_id );
 
     FOR_EACH( Thread_list, _thread_list, it )  if( (*it)->_free_threading )  (*it)->signal( signal_name );
 }
-
+*/
 //------------------------------------------------------------------------------Spooler::get_thread
 // Anderer Thread
-
+/*
 Spooler_thread* Spooler::get_thread( const string& thread_name )
 {
     Spooler_thread* thread = get_thread_or_null( thread_name );
@@ -1208,10 +1212,10 @@ Spooler_thread* Spooler::get_thread( const string& thread_name )
 
     return thread;
 }
-
+*/
 //----------------------------------------------------------------------Spooler::get_thread_or_null
 // Anderer Thread
-
+/*
 Spooler_thread* Spooler::get_thread_or_null( const string& thread_name )
 {
     THREAD_LOCK( _lock )
@@ -1221,20 +1225,20 @@ Spooler_thread* Spooler::get_thread_or_null( const string& thread_name )
 
     return NULL;
 }
-
+*/
 //--------------------------------------------------------------------Spooler::get_object_set_class
 // Anderer Thread
-
+/*
 Object_set_class* Spooler::get_object_set_class( const string& name )
 {
     Object_set_class* c = get_object_set_class_or_null( name );
     if( !c )  z::throw_xc( "SCHEDULER-101", name );
     return c;
 }
-
+*/
 //-------------------------------------------------------------Spooler::get_object_set_class_or_null
 // Anderer Thread
-
+/*
 Object_set_class* Spooler::get_object_set_class_or_null( const string& name )
 {
     THREAD_LOCK( _lock )
@@ -1247,7 +1251,7 @@ Object_set_class* Spooler::get_object_set_class_or_null( const string& name )
 
     return NULL;
 }
-
+*/
 //---------------------------------------------------------------------------------Spooler::add_job
 
 void Spooler::add_job( const ptr<Job>& job )
@@ -1541,14 +1545,14 @@ void Spooler::start_threads()
 }
 */
 //---------------------------------------------------------------------------Spooler::close_threads
-
+/*
 void Spooler::close_threads()
 {
     signal_threads( "stop" );
 
     wait_until_threads_stopped( latter_day );
 
-/*  Wir müssen warten, bis alle Threads beendet sind, denn sie benutzen _spooler. Also: Kein Timeout!
+/ *  Wir müssen warten, bis alle Threads beendet sind, denn sie benutzen _spooler. Also: Kein Timeout!
     wait_until_threads_stopped( Time::now() + wait_for_thread_termination );
 *
     FOR_EACH( Thread_list, _thread_list, it )  
@@ -1559,9 +1563,9 @@ void Spooler::close_threads()
             thread->close1();
         }
     }
-*/
+* /
 }
-
+*/
 //-----------------------------------------------------------------------Spooler::run_single_thread
 /*
 bool Spooler::run_single_thread()
@@ -2173,7 +2177,7 @@ void Spooler::stop( const exception* )
     }
     _job_chain_map.clear();
 
-    close_threads();
+    //close_threads();
     close_jobs();
 
     if( _shutdown_ignore_running_tasks )  _spooler->kill_all_processes();   // Übriggebliebene Prozesse killen
@@ -2244,8 +2248,8 @@ void Spooler::execute_state_cmd()
 {
     if( _state_cmd )
     {
-        if( _state_cmd == sc_pause )     if( _state == s_running )  set_state( s_paused  ), signal_threads( "pause" );
-        if( _state_cmd == sc_continue )  if( _state == s_paused  )  set_state( s_running ), signal_threads( "continue" );
+        if( _state_cmd == sc_pause )     if( _state == s_running )  set_state( s_paused  ); //, signal_threads( "pause" );
+        if( _state_cmd == sc_continue )  if( _state == s_paused  )  set_state( s_running ); //, signal_threads( "continue" );
 
         if( _state_cmd == sc_load_config  
          || _state_cmd == sc_reload       
@@ -3105,6 +3109,8 @@ int object_server( int argc, char** argv )
 
 int spooler_main( int argc, char** argv, const string& parameter_line )
 {
+    add_error_code_texts( sos::spooler::scheduler_messages );
+
     set_log_category_default( "scheduler"     , true );
   //set_log_category_default( "scheduler.*"   , true );
   //set_log_category_default( "scheduler.wait", false );

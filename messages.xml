@@ -1,36 +1,49 @@
 <?xml version="1.0"?>
 <messages 
     xmlns:xsi = "http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation = "../zschimmer/messages.xsd"
     name = "scheduler_messages"
     include = "spooler.h"
 >
+    <!--xmlns = "http://www.zschimmer.com/2006/program_messages"-->
+    <!--xsi:schemaLocation = "http://www.zschimmer.com/2006/messages.xsd ../zschimmer/messages.xsd"-->
+
+    <!-- <title> ohne Zeilenwechsel schreiben!  Also: <title>text ...</title> -->
 
     <cplusplus namespace="sos"/>
     <cplusplus namespace="spooler"/>
 
-    <!--xmlns = "http://www.zschimmer.com/2006/program_messages"-->
-    <!--xsi:schemaLocation = "http://www.zschimmer.com/2006/messages.xsd ../zschimmer/messages.xsd"-->
-    <message code="SCHEDULER-101">
+
+    <!--message code="SCHEDULER-101">
         <text xml:lang="de">
             <title>Objektemengenklasse <parameter number="1"/> ist nicht bekannt</title>
         </text>
-    </message>
+    </message-->
 
-    <message code="SCHEDULER-102">
+    <!--message code="SCHEDULER-102">
         <text xml:lang="de">
             <title>Methode spooler_get() der Objektemengenklasse <parameter number="1"/> liefert kein Objekt</title>
         </text>
-    </message>
+        <text xml:lang="en">
+            <title></title>
+        </text>
+    </message-->
 
-    <message code="SCHEDULER-103">
+    <!--message code="SCHEDULER-103">
         <text xml:lang="de">
             <title>Methode spooler_make_object_set() der Objektemengenklasse <parameter number="1"/> liefert kein Objekt</title>
         </text>
-    </message>
+        <text xml:lang="en">
+            <title></title>
+        </text>
+    </message-->
 
     <message code="SCHEDULER-104">
         <text xml:lang="de">
-            <title>Beginnzeit <parameter number="1"/> liegt nach der Endezeit <parameter number="2"/>, oder anderer Fehler bei Attributen begin und end</title>
+            <title>Beginnzeit <parameter number="1"/> liegt nach der Endezeit <parameter number="2"/>, oder anderer Fehler bei Attributen begin= und end=</title>
+        </text>
+        <text xml:lang="en">
+            <title>Begin time <parameter number="1"/> is after end time <parameter number="2"/>, or any other error in attributes begin= and end=</title>
         </text>
     </message>
 
@@ -38,11 +51,17 @@
         <text xml:lang="de">
             <title>Unbekanntes Kommando: &lt;<parameter number="1"/>></title>
         </text>
+        <text xml:lang="en">
+            <title>Unknown command: &lt;<parameter number="1"/>></title>
+        </text>
     </message>
 
     <message code="SCHEDULER-106">
         <text xml:lang="de">
             <title>Unbekanntes Kommando an eine Task: <parameter number="1"/></title>
+        </text>
+        <text xml:lang="en">
+            <title>Unknown command for a task: <parameter number="1"/></title>
         </text>
     </message>
 
@@ -50,59 +69,91 @@
         <text xml:lang="de">
             <title>Skript fehlt</title>
         </text>
+        <text xml:lang="en">
+            <title>Script missing</title>
+        </text>
     </message>
 
     <message code="SCHEDULER-108">
         <text xml:lang="de">
             <title>Job <parameter number="1"/> ist nicht bekannt</title>
         </text>
-    </message>
-
-    <message code="SCHEDULER-109">
-        <text xml:lang="de">
-            <title>Aktion <parameter number="1"/> im Zustand <parameter number="2"/> nicht möglich</title>
+        <text xml:lang="en">
+            <title>Unknown job <parameter number="1"/></title>
         </text>
     </message>
+
+    <!--message code="SCHEDULER-109">
+        <text xml:lang="de">
+            <title>
+                Aktion <parameter number="1"/> im Zustand <parameter number="2"/> nicht möglich
+            </title>
+        </text>
+        <text xml:lang="en">
+            <title></title>
+        </text>
+    </message-->
 
     <message code="SCHEDULER-110">
         <text xml:lang="de">
             <title>Unbekannter Zustand einer Task: <parameter number="1"/></title>
         </text>
+        <text xml:lang="en">
+            <title>Unknown state of a task: <parameter number="1"/></title>
+        </text>
     </message>
 
-    <message code="SCHEDULER-111">
+    <!--message code="SCHEDULER-111">
         <text xml:lang="de">
             <title>Task hat kein Skript</title>
         </text>
-    </message>
+        <text xml:lang="en">
+            <title>Task has no script</title>
+        </text>
+    </message-->
 
-    <message code="SCHEDULER-112">
+    <!--message code="SCHEDULER-112">
         <text xml:lang="de">
             <title>Funktion <parameter number="1"/> ist nicht implementiert</title>
         </text>
-    </message>
+        <text xml:lang="en">
+            <title></title>
+        </text>
+    </message-->
 
     <message code="SCHEDULER-113">
         <text xml:lang="de">
             <title>XML-Tag <parameter number="1"/> ist hier falsch</title>
         </text>
+        <text xml:lang="en">
+            <title>Unexpected XML tag <parameter number="1"/></title>
+        </text>
     </message>
 
-    <message code="SCHEDULER-114">
+    <!--message code="SCHEDULER-114">
         <text xml:lang="de">
             <title>Der Scheduler läuft als NT-Dienst, der sich nicht selbst neu starten kann. Verwenden Sie die Diensteverwaltung von Windows</title>
         </text>
-    </message>
+        <text xml:lang="en">
+            <title></title>
+        </text>
+    </message-->
 
     <message code="SCHEDULER-115">
         <text xml:lang="de">
             <title>Die XML-Konfigurationsdatei ist nicht angegeben. Option -config=DATEINAME.XML</title>
         </text>
+        <text xml:lang="en">
+            <title>Missing XML configuration file, option -config=FILENAME.XML</title>
+        </text>
     </message>
 
     <message code="SCHEDULER-116">
         <text xml:lang="de">
-            <title>XML-Konfigurationsdatei enthält keine Konfiguration für diesen Scheduler mit -spooler-id=<parameter number="1"/></title>
+            <title>XML-Konfiguration enthält kein &lt;config -spooler-id=<parameter number="1"/>></title>
+        </text>
+        <text xml:lang="en">
+            <title>XML configuration contains no &lt;config -spooler-id=<parameter number="1"/>></title>
         </text>
     </message>
 
@@ -110,17 +161,26 @@
         <text xml:lang="de">
             <title>Verschiedene Skriptsprachen können nicht in derselben Scripting Engine verwendet werden</title>
         </text>
-    </message>
-
-    <message code="SCHEDULER-118">
-        <text xml:lang="de">
-            <title>Task <parameter number="1"/> ist im Zustand <parameter number="2"/> und kann nicht gestartet werden</title>
+        <text xml:lang="en">
+            <title>Cannot use different scripting languages in the same scripting engine</title>
         </text>
     </message>
 
+    <!--message code="SCHEDULER-118">
+        <text xml:lang="de">
+            <title>Task <parameter number="1"/> ist im Zustand <parameter number="2"/> und kann nicht gestartet werden</title>
+        </text>
+        <text xml:lang="en">
+            <title></title>
+        </text>
+    </message-->
+
     <message code="SCHEDULER-119">
         <text xml:lang="de">
-            <title>Sicherheitsstufe <parameter number="1"/> gibt es nicht</title>
+            <title>Security level "<parameter number="1"/>" gibt es nicht</title>
+        </text>
+        <text xml:lang="en">
+            <title>There is no security level "<parameter number="1"/>"</title>
         </text>
     </message>
 
@@ -128,11 +188,17 @@
         <text xml:lang="de">
             <title>Skript meldet Fehler: <parameter number="1"/></title>
         </text>
+        <text xml:lang="en">
+            <title>Script has set an error: <parameter number="1"/></title>
+        </text>
     </message>
 
     <message code="SCHEDULER-121">
         <text xml:lang="de">
             <title>Die Sicherheitseinstellungen lassen die Operation nicht zu</title>
+        </text>
+        <text xml:lang="en">
+            <title>The security settings do not allow this operation</title>
         </text>
     </message>
 
@@ -140,23 +206,35 @@
         <text xml:lang="de">
             <title>Task ist beendet</title>
         </text>
+        <text xml:lang="en">
+            <title>Task terminated</title>
+        </text>
     </message>
 
-    <message code="SCHEDULER-123">
+    <!--message code="SCHEDULER-123">
         <text xml:lang="de">
             <title>Operation <parameter number="1"/> ist nur bei use_threads="yes" möglich</title>
         </text>
-    </message>
+        <text xml:lang="en">
+            <title></title>
+        </text>
+    </message-->
 
-    <message code="SCHEDULER-124">
+    <!--message code="SCHEDULER-124">
         <text xml:lang="de">
             <title>Operation <parameter number="1"/> ist nur bei use_engine="task" möglich</title>
         </text>
-    </message>
+        <text xml:lang="en">
+            <title></title>
+        </text>
+    </message-->
 
     <message code="SCHEDULER-125">
         <text xml:lang="de">
             <title>task.wait_until_terminated() kann nicht im selben Thread verwendet werden. Deadlock.</title>
+        </text>
+        <text xml:lang="en">
+            <title>task.wait_until_terminated() cannot called in the same thread. Deadlock.</title>
         </text>
     </message>
 
@@ -164,83 +242,125 @@
         <text xml:lang="de">
             <title>Prozess mit Code <parameter number="1"/> beendet</title>
         </text>
+        <text xml:lang="en">
+            <title>Process terminated with exit code <parameter number="1"/></title>
+        </text>
     </message>
 
-    <message code="SCHEDULER-127">
+    <!--message code="SCHEDULER-127">
         <text xml:lang="de">
             <title>Thread wird nicht gestartet, weil spooler_init() false liefert</title>
         </text>
-    </message>
+        <text xml:lang="en">
+            <title></title>
+        </text>
+    </message-->
 
-    <message code="SCHEDULER-128">
+    <!--message code="SCHEDULER-128">
         <text xml:lang="de">
             <title>Thread <parameter number="1"/> ist nicht bekannt</title>
         </text>
-    </message>
+        <text xml:lang="en">
+            <title></title>
+        </text>
+    </message-->
 
-    <message code="SCHEDULER-129">
+    <!--message code="SCHEDULER-129">
         <text xml:lang="de">
             <title>Vorangegangenes Kommando &lt;add_jobs> auf den Thread <parameter number="1"/> ist noch nicht abgeschlossen</title>
         </text>
-    </message>
+        <text xml:lang="en">
+            <title></title>
+        </text>
+    </message-->
 
     <message code="SCHEDULER-130">
         <text xml:lang="de">
             <title>Job <parameter number="1"/> ist bereits definiert</title>
         </text>
+        <text xml:lang="en">
+            <title>Job <parameter number="1"/> is defined already</title>
+        </text>
     </message>
 
-    <message code="SCHEDULER-131">
+    <!--message code="SCHEDULER-131">
         <text xml:lang="de">
             <title>task.wait_until_terminated() erfordert free_threading="yes". Deadlock.</title>
         </text>
-    </message>
+        <text xml:lang="en">
+            <title></title>
+        </text>
+    </message-->
 
     <message code="SCHEDULER-132">
         <text xml:lang="de">
-            <title>Job <parameter number="1"/> wird nicht gestartet, weil Einlesen oder Laden des Skripts fehlschlug: <parameter number="2"/></title>
+            <title>Job <parameter number="1"/> wird nicht gestartet, weil das Laden des Skripts fehlschlug: <parameter number="2"/></title>
+        </text>
+        <text xml:lang="en">
+            <title>Job <parameter number="1"/> is not startet, because loading the script failed: <parameter number="2"/></title>
         </text>
     </message>
 
-    <message code="SCHEDULER-133">
+    <!--message code="SCHEDULER-133">
         <text xml:lang="de">
             <title>Option log-level=<parameter number="1"/>: Nur error, warn, info und debug1 bis debug9 sind möglich</title>
         </text>
-    </message>
+        <text xml:lang="en">
+            <title></title>
+        </text>
+    </message-->
 
-    <message code="SCHEDULER-134">
+    <!--message code="SCHEDULER-134">
         <text xml:lang="de">
             <title>Logdatei ist schon geöffnet: <parameter number="1"/></title>
         </text>
-    </message>
+        <text xml:lang="en">
+            <title></title>
+        </text>
+    </message-->
 
-    <message code="SCHEDULER-135">
+    <!--message code="SCHEDULER-135">
         <text xml:lang="de">
             <title>eMail-Empfängerliste ist nicht korrekt aufgebaut</title>
         </text>
-    </message>
+        <text xml:lang="en">
+            <title></title>
+        </text>
+    </message-->
 
     <message code="SCHEDULER-136">
         <text xml:lang="de">
             <title>Keine Historie</title>
         </text>
+        <text xml:lang="en">
+            <title>No history</title>
+        </text>
     </message>
 
-    <message code="SCHEDULER-137">
+    <!--message code="SCHEDULER-137">
         <text xml:lang="de">
             <title>Historienfeld <parameter number="1"/> ist nicht deklariert</title>
         </text>
-    </message>
+        <text xml:lang="en">
+            <title></title>
+        </text>
+    </message-->
 
-    <message code="SCHEDULER-138">
+    <!--message code="SCHEDULER-138">
         <text xml:lang="de">
             <title>Task ist nicht aktiv</title>
         </text>
-    </message>
+        <text xml:lang="en">
+            <title></title>
+        </text>
+    </message-->
 
     <message code="SCHEDULER-139">
         <text xml:lang="de">
-            <title>Funktion bei Historie in Textdatei nicht möglich</title>
+            <title>Operation bei Historie in Textdatei nicht möglich</title>
+        </text>
+        <text xml:lang="en">
+            <title>Operation is not possible when using a plain text file for history</title>
         </text>
     </message>
 
@@ -248,17 +368,26 @@
         <text xml:lang="de">
             <title>Task hat Fehler protokolliert: <parameter number="1"/></title>
         </text>
+        <text xml:lang="en">
+            <title>Task logged error: <parameter number="1"/></title>
+        </text>
     </message>
 
     <message code="SCHEDULER-141">
         <text xml:lang="de">
             <title>Die Historie für Job <parameter number="1"/> ist ausgeschaltet (history=no)</title>
         </text>
+        <text xml:lang="en">
+            <title>History is suppressed for job <parameter number="1"/> (history=no)</title>
+        </text>
     </message>
 
     <message code="SCHEDULER-142">
         <text xml:lang="de">
-            <title>Der relative Datenbankdateiname kann bei need_db=yes und log_dir=*stderr nicht verwendet werden</title>
+            <title>Relativer Datenbankdateiname kann bei need_db=yes und log_dir=*stderr nicht verwendet werden</title>
+        </text>
+        <text xml:lang="en">
+            <title>Relative data base file path cannot be use with need_db=yes and log_dir=*stderr</title>
         </text>
     </message>
 
@@ -266,17 +395,23 @@
         <text xml:lang="de">
             <title>&lt;run_time> sieht keine Periode für eine Task ohne Startzeit vor</title>
         </text>
+        <text xml:lang="en">
+            <title>&lt;run_time> contains no &lt;period> for a task without start time</title>
+        </text>
     </message>
 
-    <message code="SCHEDULER-144">
+    <!--message code="SCHEDULER-144">
         <text xml:lang="de">
             <title>Bei language="<parameter number="1"/>" kann die Quelle nicht direkt angegeben werden</title>
         </text>
-    </message>
+    </message-->
 
     <message code="SCHEDULER-145">
         <text xml:lang="de">
             <title>&lt;script> com_class= und language= können nicht zugleich angegeben werden</title>
+        </text>
+        <text xml:lang="en">
+            <title>&lt;script> com_class= and language= cannot be combined</title>
         </text>
     </message>
 
@@ -284,17 +419,26 @@
         <text xml:lang="de">
             <title>Das Skript fehlt</title>
         </text>
+        <text xml:lang="en">
+            <title>Missing script</title>
+        </text>
     </message>
 
     <message code="SCHEDULER-147">
         <text xml:lang="de">
             <title>Job <parameter number="1"/> nimmt keine Aufträge an, er ist nicht mit &lt;job order="yes"> deklariert.</title>
         </text>
+        <text xml:lang="en">
+            <title>Job <parameter number="1"/> accepts no orders, because it is not declared with &lt;job order="yes">.</title>
+        </text>
     </message>
 
     <message code="SCHEDULER-148">
         <text xml:lang="de">
-            <title>Jobkette ist abgeschlossen (mit add_job_chain) und kann nicht mehr erweitert werden</title>
+            <title>Jobkette ist abgeschlossen (mit add_job_chain()) und kann nicht mehr erweitert werden</title>
+        </text>
+        <text xml:lang="en">
+            <title>Job chain is finished (with add_job_chain()) and cannot be modified</title>
         </text>
     </message>
 
@@ -302,11 +446,17 @@
         <text xml:lang="de">
             <title>Für den Zustand "<parameter number="2"/>" ist kein Job in der Jobkette <parameter number="1"/> definiert</title>
         </text>
+        <text xml:lang="en">
+            <title>There is no job in job chain "<parameter number="1"/>" for the state "<parameter number="2"/>"</title>
+        </text>
     </message>
 
     <message code="SCHEDULER-150">
         <text xml:lang="de">
             <title>Für den Zustand "<parameter number="1"/>" ist bereits ein Job in der Jobkette <parameter number="2"/> definiert</title>
+        </text>
+        <text xml:lang="en">
+            <title>In job chain <parameter number="2"/>, the state "<parameter number="1"/>" has assigned already a job</title>
         </text>
     </message>
 
@@ -314,35 +464,53 @@
         <text xml:lang="de">
             <title>Jobkette ist außer Betrieb (add_job_chain() fehlt oder Jobkette wird entfernt)</title>
         </text>
+        <text xml:lang="en">
+            <title>Job chain is not in use (missing add_job_chain() or job chain is to be removed)</title>
+        </text>
     </message>
 
     <message code="SCHEDULER-152">
         <text xml:lang="de">
-            <title>Job <parameter number="1"/> ist nicht in der Jobkette <parameter number="2"/></title>
+            <title>Job "<parameter number="1"/>" ist nicht in der Jobkette "<parameter number="2"/>"</title>
+        </text>
+        <text xml:lang="en">
+            <title>Job "<parameter number="1"/>" is not in job chain "<parameter number="2"/>"</title>
         </text>
     </message>
 
-    <message code="SCHEDULER-153">
+    <!--message code="SCHEDULER-153">
         <text xml:lang="de">
-            <title>Auftragsliste des Jobs <parameter number="2"/> hat schon einen Auftrag mit der Kennung <parameter number="1"/></title>
+            <title>Auftragswarteschlange des Jobs "<parameter number="2"/>" hat schon einen Auftrag mit der Kennung "<parameter number="1"/>"</title>
         </text>
-    </message>
+        <text xml:lang="en">
+            <title>Order queue of job <parameter number="2"/> has already an order with the id "<parameter number="1"/>"</title>
+        </text>
+    </message-->
 
-    <message code="SCHEDULER-154">
+    <!--message code="SCHEDULER-154">
         <text xml:lang="de">
             <title>Auftrag <parameter number="1"/> ist bereits in der Auftragsliste des Jobs <parameter number="2"/></title>
         </text>
-    </message>
+        <text xml:lang="en">
+            <title></title>
+        </text>
+    </message-->
 
     <message code="SCHEDULER-155">
         <text xml:lang="de">
             <title>Ein temporärer Job kann keine Aufträge annehmen</title>
         </text>
+        <text xml:lang="en">
+            <title>A temporary job do not accept orders</title>
+        </text>
     </message>
 
     <message code="SCHEDULER-156">
         <text xml:lang="de">
-            <title><parameter number="1"/> ist nicht in der Auftragsliste des Jobs <parameter number="2"/></title>
+            <title><parameter number="1"/> ist nicht in der Auftragswarteschlange des Jobs "<parameter number="2"/>"</title>
+        </text>
+        <text xml:lang="en">
+            <title><parameter number="1"/> is not in order queue of job "<parameter number="2"/>"</title>
         </text>
     </message>
 
@@ -350,17 +518,26 @@
         <text xml:lang="de">
             <title><parameter number="1"/> ist nicht in einer Jobkette</title>
         </text>
+        <text xml:lang="en">
+            <title><parameter number="1"/> is not in a job chain</title>
+        </text>
     </message>
 
-    <message code="SCHEDULER-158">
+    <!--message code="SCHEDULER-158">
         <text xml:lang="de">
             <title>Id <parameter number="1"/> ist schon für Auftrag <parameter number="2"/> vergeben</title>
         </text>
-    </message>
+        <text xml:lang="en">
+            <title></title>
+        </text>
+    </message-->
 
     <message code="SCHEDULER-159">
         <text xml:lang="de">
             <title>Id und Priorität eines Auftrags können nicht mehr geändert werden, wenn er in einer Auftragsliste steht</title>
+        </text>
+        <text xml:lang="en">
+            <title>Id and priority of an order sitting in an order queue cannot be changed</title>
         </text>
     </message>
 
@@ -368,11 +545,17 @@
         <text xml:lang="de">
             <title>Jobkette <parameter number="1"/> gibt es bereits</title>
         </text>
+        <text xml:lang="en">
+            <title>There is already a job chain "<parameter number="1"/>"</title>
+        </text>
     </message>
 
     <message code="SCHEDULER-161">
         <text xml:lang="de">
             <title>Jobkette <parameter number="1"/> gibt es nicht</title>
+        </text>
+        <text xml:lang="en">
+            <title>There is no job chain "<parameter number="1"/>"</title>
         </text>
     </message>
 
@@ -380,11 +563,17 @@
         <text xml:lang="de">
             <title>Auftrag <parameter number="1"/> ist nicht in der Jobkette <parameter number="2"/></title>
         </text>
+        <text xml:lang="en">
+            <title>There is no order <parameter number="1"/> in job chain "<parameter number="2"/>"</title>
+        </text>
     </message>
 
     <message code="SCHEDULER-163">
         <text xml:lang="de">
-            <title><parameter number="1"/> ist nicht einer Auftragsliste</title>
+            <title><parameter number="1"/> ist nicht einer Auftragswarteschlange</title>
+        </text>
+        <text xml:lang="en">
+            <title><parameter number="1"/> is not in an order queue</title>
         </text>
     </message>
 
@@ -392,11 +581,17 @@
         <text xml:lang="de">
             <title>&lt;show_... what="<parameter number="1"/>">: Ungültige Angabe für Attribut what</title>
         </text>
+        <text xml:lang="en">
+            <title>&lt;show_... what="<parameter number="1"/>">: Invalid value for attribute what=</title>
+        </text>
     </message>
 
     <message code="SCHEDULER-165">
         <text xml:lang="de">
             <title>Attribut priority kann bei &lt;job order="yes"> nicht verwendet werden</title>
+        </text>
+        <text xml:lang="en">
+            <title>Attribute priority cannot be used with &lt;job order="yes"></title>
         </text>
     </message>
 
@@ -404,11 +599,17 @@
         <text xml:lang="de">
             <title>&lt;script> java_class= und language= können nicht zugleich angegeben werden</title>
         </text>
+        <text xml:lang="en">
+            <title>&lt;script> java_class= and language= cannot be combined</title>
+        </text>
     </message>
 
     <message code="SCHEDULER-167">
         <text xml:lang="de">
             <title>Bei &lt;script> com_class= oder java_class= kann die Programmquelle nicht angegeben werden</title>
+        </text>
+        <text xml:lang="en">
+            <title>With &lt;script> com_class= or java_class=, a program source cannot be set</title>
         </text>
     </message>
 
@@ -416,29 +617,41 @@
         <text xml:lang="de">
             <title>In &lt;script> ist com_class= und java_class= zusammen angegeben</title>
         </text>
+        <text xml:lang="en">
+            <title>In &lt;script>, com_class= and java_class= cannot combined</title>
+        </text>
     </message>
 
-    <message code="SCHEDULER-169">
+    <!--message code="SCHEDULER-169">
         <text xml:lang="de">
             <title>Fehler beim Aufruf von Java</title>
         </text>
-    </message>
+        <text xml:lang="en">
+            <title>Error when calling Java</title>
+        </text>
+    </message-->
 
-    <message code="SCHEDULER-170">
+    <!--message code="SCHEDULER-170">
         <text xml:lang="de">
             <title>Der Eintrag java_vm fehlt in der factory.ini</title>
         </text>
-    </message>
+        <text xml:lang="en">
+            <title>Der Eintrag java_vm fehlt in der factory.ini</title>
+        </text>
+    </message-->
 
-    <message code="SCHEDULER-171">
+    <!--message code="SCHEDULER-171">
         <text xml:lang="de">
             <title>Die Java Virtual Machine kann nicht geladen werden.</title>
         </text>
-    </message>
+    </message-->
 
     <message code="SCHEDULER-172">
         <text xml:lang="de">
             <title>Die Skriptart (Scripting Engine, Perl, COM oder Java) ist hier nicht möglich</title>
+        </text>
+        <text xml:lang="en">
+            <title>This kind of script (scripting engine, Perl, COM or Java) is not possible here</title>
         </text>
     </message>
 
@@ -446,59 +659,74 @@
         <text xml:lang="de">
             <title>Skript fehlt</title>
         </text>
+        <text xml:lang="en">
+            <title>Missing script</title>
+        </text>
     </message>
 
     <message code="SCHEDULER-174">
         <text xml:lang="de">
             <title>Methode <parameter number="1"/> der Klasse <parameter number="2"/> fehlt</title>
         </text>
+        <text xml:lang="en">
+            <title>Missing method "<parameter number="1"/>" in class "<parameter number="2"/>"</title>
+        </text>
     </message>
 
-    <message code="SCHEDULER-175">
+    <!--message code="SCHEDULER-175">
         <text xml:lang="de">
             <title>Fehler in Java aufgetreten</title>
         </text>
-    </message>
+    </message-->
 
-    <message code="SCHEDULER-176">
+    <!--message code="SCHEDULER-176">
         <text xml:lang="de">
             <title>Objekt-Verweis ist nicht mehr gültig (der Verweis ist möglicherweise in einer globalen Variablen gespeichert worden)</title>
         </text>
-    </message>
+    </message-->
 
     <message code="SCHEDULER-177">
         <text xml:lang="de">
-            <title>Java steht nicht zur Verfügung (s. Fehler beim Start des Spoolers)</title>
+            <title>Java steht nicht zur Verfügung (siehe Fehler beim Start des Schedulers)</title>
+        </text>
+        <text xml:lang="en">
+            <title>Java is not available (see error message when Scheduler started)</title>
         </text>
     </message>
 
-    <message code="SCHEDULER-178">
+    <!--message code="SCHEDULER-178">
         <text xml:lang="de">
             <title>Der <parameter number="1"/>. Parameter ist von unbekanntem Typ</title>
         </text>
-    </message>
+    </message-->
 
     <message code="SCHEDULER-179">
         <text xml:lang="de">
-            <title>Prozess-Job hat sich nicht beendet. pid=<parameter number="1"/></title>
+            <title>&lt;process>-Task hat sich nicht beendet. pid=<parameter number="1"/></title>
+        </text>
+        <text xml:lang="en">
+            <title>&lt;process> task did not terminate. pid=<parameter number="1"/></title>
         </text>
     </message>
 
-    <message code="SCHEDULER-180">
+    <!--message code="SCHEDULER-180">
         <text xml:lang="de">
             <title>'<parameter number="1"/>' ist auf dieser Plattform nicht implementiert</title>
         </text>
-    </message>
+    </message-->
 
-    <message code="SCHEDULER-181">
+    <!--message code="SCHEDULER-181">
         <text xml:lang="de">
             <title>Prozess-Job ist mit Signal <parameter number="1"/> abgebrochen worden</title>
         </text>
-    </message>
+    </message-->
 
     <message code="SCHEDULER-182">
         <text xml:lang="de">
             <title>XML-Element &lt;variable> erwartet</title>
+        </text>
+        <text xml:lang="en">
+            <title>Expecting XML element &lt;variable></title>
         </text>
     </message>
 
@@ -506,29 +734,41 @@
         <text xml:lang="de">
             <title>Scheduler wird nicht gestartet, weil spooler_init() false liefert</title>
         </text>
+        <text xml:lang="en">
+            <title>Scheduler do not start, because spooler_init() returned false</title>
+        </text>
     </message>
 
     <message code="SCHEDULER-184">
         <text xml:lang="de">
-            <title>Die Scheduler-Datenbank ist gerade nicht geöffnet</title>
+            <title>Die Scheduler-Datenbank ist wegen eines Datenbankproblems gerade nicht geöffnet</title>
+        </text>
+        <text xml:lang="en">
+            <title>Scheduler data base is currently not opened due to a database problem</title>
         </text>
     </message>
 
-    <message code="SCHEDULER-185">
+    <!--message code="SCHEDULER-185">
         <text xml:lang="de">
             <title>Das Skript wird wegen vorausgehenden Ladefehlers nicht ausgeführt</title>
         </text>
-    </message>
+    </message-->
 
     <message code="SCHEDULER-186">
         <text xml:lang="de">
+            <title><parameter number="1"/> ist bereits in der Jobkette <parameter number="2"/></title>
+        </text>
+        <text xml:lang="en">
             <title><parameter number="1"/> ist bereits in der Jobkette <parameter number="2"/></title>
         </text>
     </message>
 
     <message code="SCHEDULER-187">
         <text xml:lang="de">
-            <title>Der Auftrag ist nicht in Bearbeitung, kann nicht zurückgestellt werden</title>
+            <title>Order.setback(): Ein Auftrag kann nur zurückgestellt werden, während eine Task ihn ausführt</title>
+        </text>
+        <text xml:lang="en">
+            <title>Order.setback(): An order can be set back only while a task is executing it</title>
         </text>
     </message>
 
@@ -536,17 +776,26 @@
         <text xml:lang="de">
             <title>Order.setback() und Order.state= können nicht zusammen gerufen werden, das ist Unsinn</title>
         </text>
+        <text xml:lang="en">
+            <title>Order.setback() and Order.state= cannot be combined</title>
+        </text>
     </message>
 
-    <message code="SCHEDULER-189">
+    <!--message code="SCHEDULER-189">
         <text xml:lang="de">
             <title>Eintrag <parameter number="1"/> in der XML-Konfiguration ist veraltet</title>
         </text>
-    </message>
+        <text xml:lang="en">
+            <title>Eintrag <parameter number="1"/> in der XML-Konfiguration ist veraltet</title>
+        </text>
+    </message-->
 
     <message code="SCHEDULER-190">
         <text xml:lang="de">
             <title>Das Skript steht nach Ladefehler nicht zur Verfügung</title>
+        </text>
+        <text xml:lang="en">
+            <title>Script is not available after a loading error</title>
         </text>
     </message>
 
@@ -554,23 +803,35 @@
         <text xml:lang="de">
             <title>separate_process: Unerwarteter Zustand <parameter number="2"/> in <parameter number="1"/></title>
         </text>
+        <text xml:lang="en">
+            <title>separate_process: Unexpected state <parameter number="2"/> in <parameter number="1"/></title>
+        </text>
     </message>
 
     <message code="SCHEDULER-192">
         <text xml:lang="de">
             <title>Ein separater Prozess ist nur mit use_engine="task" möglich</title>
         </text>
+        <text xml:lang="en">
+            <title>A separate process is possible only with use_engine="task"</title>
+        </text>
     </message>
 
-    <message code="SCHEDULER-193">
+    <!--message code="SCHEDULER-193">
         <text xml:lang="de">
             <title>Prozess <parameter number="1"/> gibt es bereits</title>
         </text>
-    </message>
+        <text xml:lang="en">
+            <title>Prozess <parameter number="1"/> gibt es bereits</title>
+        </text>
+    </message-->
 
     <message code="SCHEDULER-194">
         <text xml:lang="de">
             <title>process_class und separate_process können nicht kombiniert werden</title>
+        </text>
+        <text xml:lang="en">
+            <title>process_class and separate_process cannot be combined</title>
         </text>
     </message>
 
@@ -578,11 +839,17 @@
         <text xml:lang="de">
             <title>Prozessklasse <parameter number="1"/> ist unbekannt</title>
         </text>
+        <text xml:lang="en">
+            <title>Unknown process class "<parameter number="1"/>"</title>
+        </text>
     </message>
 
     <message code="SCHEDULER-196">
         <text xml:lang="de">
             <title>use_engine="<parameter number="1"/>" ist veraltet</title>
+        </text>
+        <text xml:lang="en">
+            <title>use_engine="<parameter number="1"/>" is deprecated</title>
         </text>
     </message>
 
@@ -590,11 +857,17 @@
         <text xml:lang="de">
             <title>Module::java_method_id(<parameter number="1"/>): Java-Klasse ist unbekannt</title>
         </text>
+        <text xml:lang="en">
+            <title>Module::java_method_id(<parameter number="1"/>): Unknown Java class</title>
+        </text>
     </message>
 
     <message code="SCHEDULER-198">
         <text xml:lang="de">
             <title>Variablenname fehlt</title>
+        </text>
+        <text xml:lang="en">
+            <title>Missing variable name</title>
         </text>
     </message>
 
@@ -602,11 +875,17 @@
         <text xml:lang="de">
             <title>Die Modulinstanz ist geschlossen</title>
         </text>
+        <text xml:lang="en">
+            <title>Module instance is closed</title>
+        </text>
     </message>
 
     <message code="SCHEDULER-200">
         <text xml:lang="de">
             <title>Die Remoteinstanz ist geschlossen</title>
+        </text>
+        <text xml:lang="en">
+            <title>Remote instance is closed</title>
         </text>
     </message>
 
@@ -614,11 +893,17 @@
         <text xml:lang="de">
             <title>Das Arbeitsverzeichnis zum Aufruf des Java-Compilers fehlt</title>
         </text>
+        <text xml:lang="en">
+            <title>Missing working directory when calling Java compiler</title>
+        </text>
     </message>
 
     <message code="SCHEDULER-202">
         <text xml:lang="de">
-            <title>Verbindung zur Task verloren.</title>
+            <title>Verbindung zur Task verloren</title>
+        </text>
+        <text xml:lang="en">
+            <title>Connection to task lost</title>
         </text>
     </message>
 
@@ -626,11 +911,17 @@
         <text xml:lang="de">
             <title>Die Modulinstanz im Server ist geschlossen</title>
         </text>
+        <text xml:lang="en">
+            <title>Module instance in the server is closed</title>
+        </text>
     </message>
 
     <message code="SCHEDULER-204">
         <text xml:lang="de">
-            <title>Der Job <parameter number="1"/> ist im Fehlerzustand. <parameter number="2"/></title>
+            <title>Der Job "<parameter number="1"/>" ist im Fehlerzustand. <parameter number="2"/></title>
+        </text>
+        <text xml:lang="en">
+            <title>Job "<parameter number="1"/>" is in error state. <parameter number="2"/></title>
         </text>
     </message>
 
@@ -638,16 +929,25 @@
         <text xml:lang="de">
             <title>need_db=yes, aber db= fehlt</title>
         </text>
+        <text xml:lang="en">
+            <title>need_db=yes, but missing db=</title>
+        </text>
     </message>
 
     <message code="SCHEDULER-206">
         <text xml:lang="de">
             <title>need_db=<parameter number="1"/>, erlaubt sind aber nur yes, no, strict</title>
         </text>
+        <text xml:lang="en">
+            <title>need_db=<parameter number="1"/>, only "yes", "no" and "strict" allowed</title>
+        </text>
     </message>
 
     <message code="SCHEDULER-207">
         <text xml:lang="de">
+            <title>Task <parameter number="1"/> unbekannt (auch in der Historie)</title>
+        </text>
+        <text xml:lang="en">
             <title>Task <parameter number="1"/> unbekannt (auch in der Historie)</title>
         </text>
     </message>
@@ -656,29 +956,44 @@
         <text xml:lang="de">
             <title>Hier ist nur ein Datum ohne Uhrzeit möglich</title>
         </text>
+        <text xml:lang="en">
+            <title>Only a date without time is possible</title>
+        </text>
     </message>
 
     <message code="SCHEDULER-209">
         <text xml:lang="de">
-            <title>Das Windows-Limit der Objekte, auf die gewartet werden kann (TCP-Verbindungen, beobachteten Verzeichnisse etc.) von MAXIMUM_WAIT_OBJECTS-1=<parameter number="1"/> ist erreicht. Die Operation ist nicht ausführbar.</title>
+            <title>Das Microsoft Windows-Limit der Objekte, auf die gewartet werden kann (TCP-Verbindungen, beobachteten Verzeichnisse etc.) von MAXIMUM_WAIT_OBJECTS-1=<parameter number="1"/> ist erreicht. Die Operation ist nicht ausführbar.</title>
+        </text>
+        <text xml:lang="en">
+            <title>To much objects for Microsoft Windows MsgWaitForMultipleObjects(). MAXIMUM_WAIT_OBJECTS-1=<parameter number="1"/> reached. Operation is not executable</title>
         </text>
     </message>
 
     <message code="SCHEDULER-210">
         <text xml:lang="de">
-            <title>Zuviele Prozesse. Die Zahl der Prozesse ist auf <parameter number="1"/> begrenzt.</title>
+            <title>Zuviele Prozesse. Die Zahl der Prozesse ist auf <parameter number="1"/> begrenzt</title>
+        </text>
+        <text xml:lang="en">
+            <title>To much processes. The number of processes is limited to <parameter number="1"/></title>
         </text>
     </message>
 
-    <message code="SCHEDULER-211">
+    <!--message code="SCHEDULER-211">
         <text xml:lang="de">
             <title>Problem beim Entfernen des Auftrags: <parameter number="1"/> != <parameter number="2"/></title>
         </text>
-    </message>
+        <text xml:lang="en">
+            <title>Problem beim Entfernen des Auftrags: <parameter number="1"/> != <parameter number="2"/></title>
+        </text>
+    </message-->
 
     <message code="SCHEDULER-212">
         <text xml:lang="de">
-            <title>Eintrag [spooler] html_dir fehlt</title>
+            <title>Eintrag [spooler] html_dir= fehlt in der Datei factory.ini</title>
+        </text>
+        <text xml:lang="en">
+            <title>Missing entry [spooler] html_dir= in file factory.ini</title>
         </text>
     </message>
 
@@ -686,11 +1001,17 @@
         <text xml:lang="de">
             <title>Fehler beim Lesen des HTTP-Kopfs: <parameter number="1"/> erwartet</title>
         </text>
+        <text xml:lang="en">
+            <title>Error in HTTP head: Expecting <parameter number="1"/></title>
+        </text>
     </message>
 
     <message code="SCHEDULER-214">
         <text xml:lang="de">
-            <title>Unzulässiger Pfad</title>
+            <title>Unzulässiger Pfad in HTTP-Anforderung</title>
+        </text>
+        <text xml:lang="en">
+            <title>Forbidden path in HTTP request</title>
         </text>
     </message>
 
@@ -698,11 +1019,17 @@
         <text xml:lang="de">
             <title>Task <parameter number="1"/> unbekannt oder beendet</title>
         </text>
+        <text xml:lang="en">
+            <title>Unknown or terminated task <parameter number="1"/></title>
+        </text>
     </message>
 
     <message code="SCHEDULER-217">
         <text xml:lang="de">
             <title><parameter number="1"/> ist in Bearbeitung durch <parameter number="2"/></title>
+        </text>
+        <text xml:lang="en">
+            <title><parameter number="1"/> is processed by <parameter number="2"/></title>
         </text>
     </message>
 
@@ -710,11 +1037,17 @@
         <text xml:lang="de">
             <title>Subprocess pid=<parameter number="2"/> hat sich mit exit code=<parameter number="1"/> beendet. Command=<parameter number="3"/></title>
         </text>
+        <text xml:lang="en">
+            <title>Subprocess pid=<parameter number="2"/> terminated with exit code=<parameter number="1"/>. Command=<parameter number="3"/></title>
+        </text>
     </message>
 
     <message code="SCHEDULER-219">
         <text xml:lang="de">
             <title>Subprocess pid=<parameter number="2"/> hat sich mit Signal <parameter number="1"/> beendet. Command=<parameter number="3"/></title>
+        </text>
+        <text xml:lang="en">
+            <title>Subprocess pid=<parameter number="2"/> terminated with signal <parameter number="1"/>. Command=<parameter number="3"/></title>
         </text>
     </message>
 
@@ -722,17 +1055,26 @@
         <text xml:lang="de">
             <title>&lt;run_time <parameter number="1"/> ist für einen Auftrag nicht möglich</title>
         </text>
+        <text xml:lang="en">
+            <title>&lt;run_time <parameter number="1"/> is not possible for an order</title>
+        </text>
     </message>
 
     <message code="SCHEDULER-221">
         <text xml:lang="de">
             <title>&lt;day day="<parameter number="1"/>">: Nur die Tage <parameter number="2"/> bis <parameter number="3"/> sind möglich</title>
         </text>
+        <text xml:lang="en">
+            <title>&lt;day day="<parameter number="1"/>">: Only days from <parameter number="2"/> to <parameter number="3"/> are possible</title>
+        </text>
     </message>
 
     <message code="SCHEDULER-222">
         <text xml:lang="de">
-            <title>Das Kommando kann nur über eine TCP-Verbindung gegeben werden</title>
+            <title>Das Kommando &lt;<parameter number="1"/>> kann nur über eine TCP-Verbindung gegeben werden</title>
+        </text>
+        <text xml:lang="en">
+            <title>This command &lt;<parameter number="1"/>> is executable only over a TCP connection</title>
         </text>
     </message>
 
@@ -740,17 +1082,26 @@
         <text xml:lang="de">
             <title>Anmelden beim Haupt-Scheduler gescheitert: <parameter number="1"/></title>
         </text>
+        <text xml:lang="en">
+            <title>Logon at main Scheduler failed: <parameter number="1"/></title>
+        </text>
     </message>
 
     <message code="SCHEDULER-224">
         <text xml:lang="de">
             <title>Haupt-Scheduler hat Verbindung geschlossen</title>
         </text>
+        <text xml:lang="en">
+            <title>Main Scheduler closed connection</title>
+        </text>
     </message>
 
     <message code="SCHEDULER-225">
         <text xml:lang="de">
-            <title>start_new_file() ist nur fürs Hauptprotokoll (spooler.log) möglich</title>
+            <title>start_new_file() ist nur fürs Hauptprotokoll möglich</title>
+        </text>
+        <text xml:lang="en">
+            <title>start_new_file() is applicable only for the main protocol</title>
         </text>
     </message>
 
@@ -758,29 +1109,44 @@
         <text xml:lang="de">
             <title>Der Auftrag ist nicht verarbeitet worden ist (spooler_init() oder spooler_open() lieferte false)</title>
         </text>
+        <text xml:lang="en">
+            <title>Order is not processed, because spooler_init() or spooler_open() has delivered false</title>
+        </text>
     </message>
 
     <message code="SCHEDULER-227">
         <text xml:lang="de">
             <title>Scheduler-Skript hat Fehler protokolliert: <parameter number="1"/></title>
         </text>
+        <text xml:lang="en">
+            <title>Scheduler script logged an error: <parameter number="1"/></title>
+        </text>
     </message>
 
-    <message code="SCHEDULER-228">
+    <!--message code="SCHEDULER-228">
         <text xml:lang="de">
             <title>Auftrag <parameter number="1"/> wird nach spooler_process() gelöscht</title>
         </text>
-    </message>
+        <text xml:lang="en">
+            <title>Order <parameter number="1"/> will be removed after spooler_process()</title>
+        </text>
+    </message-->
 
     <message code="SCHEDULER-229">
         <text xml:lang="de">
             <title>Ein auftragsgesteuerter Job kann nicht entfernt werden</title>
         </text>
+        <text xml:lang="en">
+            <title>An order controlled job &lt;job order="yes"> cannot be removedtitle></title>
+        </text>
     </message>
 
     <message code="SCHEDULER-230">
         <text xml:lang="de">
-            <title>Der Job <parameter number="1"/> wird entfernt, er kann nicht mehr verwendet werden</title>
+            <title>Der Job "<parameter number="1"/>" wird entfernt, er kann nicht mehr verwendet werden</title>
+        </text>
+        <text xml:lang="en">
+            <title>Job "<parameter number="1"/>" is to be removed, it is not longer usable</title>
         </text>
     </message>
 
@@ -788,73 +1154,88 @@
         <text xml:lang="de">
             <title>Attribut <parameter number="2"/> fehlt im XML-Element &lt;<parameter number="1"/>></title>
         </text>
+        <text xml:lang="en">
+            <title>Missing attribute <parameter number="2"/> in XML element &lt;<parameter number="1"/>></title>
+        </text>
     </message>
 
-    <message code="SCHEDULER-232">
+    <!--message code="SCHEDULER-232">
         <text xml:lang="de">
             <title>Attribut <parameter number="1"/>= kann ohne job= nicht angegeben werden</title>
         </text>
-    </message>
+        <text xml:lang="en">
+            <title>Attribute <parameter number="1"/>= needs attribute job=</title>
+        </text>
+    </message-->
 
-    <message code="SCHEDULER-233">
+    <!--message code="SCHEDULER-233">
         <text xml:lang="de">
             <title>XML-Attribut <parameter number="1"/> kann nicht zusammen mit Attribut <parameter number="2"/> angegeben werden</title>
         </text>
-    </message>
+        <text xml:lang="en">
+            <title>XML attribute <parameter number="1"/> cannot be used together with attribute <parameter number="2"/></title>
+        </text>
+    </message-->
 
     <message code="SCHEDULER-234">
         <text xml:lang="de">
             <title>&lt;job <parameter number="1"/>="..."> Attribut kann nicht überschrieben werden</title>
         </text>
+        <text xml:lang="en">
+            <title>&lt;job <parameter number="1"/>="..."> attribute cannnot be overwritten</title>
+        </text>
     </message>
 
     <message code="SCHEDULER-235">
         <text xml:lang="de">
-            <title>Web-Dienst <parameter number="1"/> ist unbekannt</title>
+            <title>Web-Dienst "<parameter number="1"/>" ist unbekannt</title>
+        </text>
+        <text xml:lang="en">
+            <title>Web service "<parameter number="1"/>" is unknown</title>
         </text>
     </message>
 
     <message code="SCHEDULER-236">
         <text xml:lang="de">
-            <title>Web-Dienst <parameter number="1"/> ist bereits bekannt</title>
+            <title>Web-Dienst "<parameter number="1"/>" ist bereits bekannt</title>
         </text>
-        <text xml:lang="de">
-            <title>Web service <parameter number="1"/> is declared already</title>
+        <text xml:lang="en">
+            <title>Web service "<parameter number="1"/>" is declared already</title>
         </text>
     </message>
 
     <message code="SCHEDULER-237">
         <text xml:lang="de">
-            <title>XSLT-Stylesheet <parameter number="1"/> liefert kein Ergebnis</title>
+            <title>XSLT-Stylesheet "<parameter number="1"/>" liefert kein Ergebnis</title>
         </text>
         <text xml:lang="en">
-            <title>XSLT stylesheet <parameter number="1"/> delivers no result</title>
+            <title>XSLT stylesheet "<parameter number="1"/>" delivers no result</title>
         </text>
     </message>
 
     <message code="SCHEDULER-238">
         <text xml:lang="de">
-            <title>Web-Dienst für url_path=<parameter number="1"/> ist bereits bekannt</title>
+            <title>Web-Dienst für url_path="<parameter number="1"/>" ist bereits bekannt</title>
         </text>
         <text xml:lang="en">
-            <title>Web service for url_path=<parameter number="1"/> is declared already</title>
+            <title>Web service for url_path="<parameter number="1"/>" is declared already</title>
         </text>
     </message>
 
-    <message code="SCHEDULER-239">
+    <!--message code="SCHEDULER-239">
         <text xml:lang="de">
             <title>&lt;payload> darf nur ein Element enthalten</title>
         </text>
-        <text xml:lang="de">
+        <text xml:lang="en">
             <title>&lt;payload> contains no more then one element</title>
         </text>
-    </message>
+    </message-->
 
     <message code="SCHEDULER-240">
         <text xml:lang="de">
             <title>Auftrag ist keinem Webdienst zugeordnet</title>
         </text>
-        <text xml:lang="de">
+        <text xml:lang="en">
             <title>Order is not assigned to a web service</title>
         </text>
     </message>
@@ -873,7 +1254,7 @@
             <title>forward_xslt_stylesheet <parameter number="1"/> liefert nicht &lt;service_request></title>
         </text>
         <text xml:lang="en">
-            <title>forward_xslt_stylesheet <parameter number="1"/> don't deliver &lt;service_request></title>
+            <title>forward_xslt_stylesheet <parameter number="1"/> doesn't deliver &lt;service_request></title>
         </text>
     </message>
 
@@ -882,7 +1263,7 @@
             <title>Eigenschaft <parameter number="1"/> ist fixiert, sie kann nicht mehr geändert werden</title>
         </text>
         <text xml:lang="en">
-            <title>Property <parameter number="1"/> is fixed, is not longer modifiable</title>
+            <title>Property <parameter number="1"/> is fixed, not longer modifiable</title>
         </text>
     </message>
 
@@ -927,7 +1308,7 @@
             </description>
         </text>
         <text xml:lang="en">
-            <title>HTTP-Antwort is already sent</title>
+            <title>HTTP-Antwort is sent already</title>
         </text>
 
         <api_method class="sos.spooler.Web_service_response"/>

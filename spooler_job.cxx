@@ -238,7 +238,7 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
         if( !_run_time->set() )  _run_time->set_default();
         if( _spooler->_manual )  init_run_time(),  _run_time->set_default_days(),  _run_time->set_once();
 
-        if( _object_set_descr )  _object_set_descr->_class = _spooler->get_object_set_class( _object_set_descr->_class_name );
+      //if( _object_set_descr )  _object_set_descr->_class = _spooler->get_object_set_class( _object_set_descr->_class_name );
     }
 }
 
