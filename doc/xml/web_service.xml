@@ -148,6 +148,15 @@
     </xml_attributes>
 
 
+    <xml_child_elements>
+        <xml_child_element name="params" title="Parameter zur freien Verwendung">
+            <description>
+                Die Parameter können mit <scheduler_method class="Web_service" property="params"/> ausgelesen werden.
+            </description>
+        </xml_child_element>
+    </xml_child_elements>
+        
+    
     <behavior_with_xml_element element="base" complete="yes"/>
     
     

@@ -181,7 +181,14 @@
                                             </td>
                                             <td valign="baseline" style="padding-left: 4ex">
                                                 <span class="title">
-                                                    <xsl:value-of select="@title | $element/@title"/>
+                                                    <xsl:choose>
+                                                        <xsl:when test="@title">
+                                                            <xsl:value-of select="@title"/>
+                                                        </xsl:when>
+                                                        <xsl:otherwise>
+                                                            <xsl:value-of select="$element/@title"/>
+                                                        </xsl:otherwise>
+                                                    </xsl:choose>
                                                 </span>
                                             </td>
                                         </tr>
@@ -316,7 +323,14 @@
                     &#160;
                     –
                     <span class="title">
-                        <xsl:value-of select="@title | $element/@title"/>
+                        <xsl:choose>
+                            <xsl:when test="@title">
+                                <xsl:value-of select="@title"/>
+                            </xsl:when>
+                            <xsl:otherwise>
+                                <xsl:value-of select="$element/@title"/>
+                            </xsl:otherwise>
+                        </xsl:choose>
                     </span>
                     </p>
                 </td>

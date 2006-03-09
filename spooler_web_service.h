@@ -39,6 +39,8 @@ struct Web_service: idispatch_implementation< Web_service, spooler_com::Iweb_ser
     STDMETHODIMP            get_Request_xslt_stylesheet_path( BSTR* result )                        { return String_to_bstr( _request_xslt_stylesheet_path, result ); }
     STDMETHODIMP            get_Response_xslt_stylesheet_path( BSTR* result )                       { return String_to_bstr( _response_xslt_stylesheet_path, result ); }
     STDMETHODIMP            get_Forward_xslt_stylesheet_path( BSTR* result )                        { return String_to_bstr( _forward_xslt_stylesheet_path, result ); }
+    STDMETHODIMP            get_Params                      ( spooler_com::Ivariable_set** result ) { *result = _parameters.copy();  return S_OK; }
+
 
 
     // Scheduler_object
@@ -84,6 +86,7 @@ struct Web_service: idispatch_implementation< Web_service, spooler_com::Iweb_ser
     Xslt_stylesheet            _response_xslt_stylesheet;
     string                     _forward_xslt_stylesheet_path;
     Xslt_stylesheet            _forward_xslt_stylesheet;
+    ptr<Com_variable_set>      _parameters;
 };
 
 //-------------------------------------------------------------------------------------Web_services

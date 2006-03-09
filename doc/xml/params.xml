@@ -15,6 +15,7 @@
         <xml_parent_element name="add_order" />
         <xml_parent_element name="payload"/>
         <xml_parent_element name="queued_task" directory="xml/answer/"/>
+        <xml_parent_element name="web_service"/>
     </xml_parent_elements>
 
 

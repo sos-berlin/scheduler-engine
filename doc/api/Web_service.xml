@@ -54,6 +54,26 @@
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
+    <property name="params" access="read">
+        <com>
+            <com.result>
+                <com.type class="Variable_set"/>
+            </com.result>
+        </com>
+
+        <title>
+            Parameter zur freien Verwendung
+        </title>
+
+        <description>
+            <p>
+                Die Parameter des Web-Services können mit <scheduler_element name="web_service"/> eingestellt werden.
+            </p>
+        </description>
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
     <description>
         <p>
             Siehe auch <scheduler_element name="web_service"/>

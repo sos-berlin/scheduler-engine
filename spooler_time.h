@@ -107,6 +107,9 @@ struct Time
     double                     _time;                       // wie time_t: Anzahl Sekunden seit 1.1.1970 oder seit Mitternacht
 };      
 
+void                            insert_into_message         ( Message_string*, int index, const Time& ) throw();
+
+
 extern const int                latter_day_int;
 extern const Time               latter_day;
 

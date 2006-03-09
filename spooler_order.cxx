@@ -348,12 +348,12 @@ void Job_chain::load_orders_from_database()
             }
             catch( exception& x )
             {
-                _log.error( S() << "Auftrag " << order_id << " aus der Datenbank ist fehlerhaft: " << x.what() );
+                _log.error( message_string( "SCHEDULER-295", order_id, x ) ); 
             }
         }
     }
 
-    _log.debug( as_string(count) + " Aufträge aus der Datenbank gelesen" );
+    _log.debug( message_string( "SCHEDULER-935", count ) );
 }
 
 //-------------------------------------------------------------Job_chain::remove_all_pending_orders
@@ -636,7 +636,7 @@ void Job_chain::check_for_removing()
 {
     if( state() == s_removing &&  !has_order() )
     {
-        _log.info( "Removing" );
+        _log.info( message_string( "SCHEDULER-936" ) );     // "Removing"
         remove();
     }
 }
@@ -677,7 +677,7 @@ void Order_queue::close()
         for( Queue::iterator it = (*q)->begin(); it != (*q)->end(); it = (*q)->erase( it ) )
         {
             Order* order = *it;
-            _log->info( S() << "Removing " << order->obj_name() );
+            _log->info( message_string( "SCHEDULER-937", order ) );
         }
     }
 
@@ -761,8 +761,8 @@ void Order_queue::add_order( Order* order, Do_log do_log )
     {
         if( order->_setback )
         {
-            if( order->_setback < latter_day )  order->_log->log( do_log? log_info : log_debug3, S() << "Auftrag wird gestartet um " << order->_setback );
-                                          else  order->_log->log( do_log? log_warn : log_debug3, "Die <run_time> des Auftrags hat keine nächste Startzeit" );
+            if( order->_setback < latter_day )  order->_log->log( do_log? log_info : log_debug3, message_string( "SCHEDULER-938", order->_setback ) );
+                                          else  order->_log->log( do_log? log_warn : log_debug3, message_string( "SCHEDULER-296" ) );       // "Die <run_time> des Auftrags hat keine nächste Startzeit" );
 
           //_log->debug( "add_order (setback queue) " + order->obj_name() );
 
@@ -813,7 +813,7 @@ void Order_queue::add_order( Order* order, Do_log do_log )
 
                     if( !id_found  &&  o->id_is_equal( order->_id ) )
                     {
-                        _log->debug( "Auftrag mit gleicher Id wird ersetzt: " + order->obj_name() );
+                        _log->debug( message_string( "SCHEDULER-939", order ) );      // "Auftrag mit gleicher Id wird ersetzt: " 
                         if( ins == it )  { ins = _queue.erase( it ); break; }
                                    else  it = _queue.erase( it );
                         id_found = true;
@@ -1141,19 +1141,6 @@ void Order::close()
 */
     if( _http_operation )
     {
-        try
-        {
-            if( http::Response* http_response = _http_operation->response() )
-            {
-                if( !http_response->is_ready() )
-                {
-                    _log->error( "web_service_operation.send() fehlt, Operation wird abgebrochen" );
-                    _http_operation->cancel();
-                }
-            }
-        }
-        catch( exception& x ) { _log->error( x.what() ); }
-
         _http_operation->unlink_order();
         _http_operation = NULL;
     }
@@ -1367,7 +1354,7 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
         }
         catch( exception& x )   // Sollte nicht passieren
         {
-            _log->error( "xml_payload ist nicht valide: " + string(x.what()) );
+            _log->error( "xml_payload: " + string(x.what()) );
             append_error_element( xml_payload_element, x );
         }
     }
@@ -1482,7 +1469,7 @@ void Order::set_job( Job* job )
     {
         if( _removed_from_job_chain )
         {
-            _log->warn( S() << "job=" << job->name() << " wird ignoriert, weil Auftrag bereits aus der Jobkette entfernt ist" );
+            _log->warn( message_string( "SCHEDULER-298", job->name() ) );   //S() << "job=" << job->name() << " wird ignoriert, weil Auftrag bereits aus der Jobkette entfernt ist" );
             return;
         }
 
@@ -1590,7 +1577,7 @@ void Order::set_state2( const State& state, bool is_error_state )
         string log_line = "set_state " + state.as_string();
 
         if( _job_chain_node && _job_chain_node->_job )  log_line += ", " + _job_chain_node->_job->obj_name();
-        if( is_error_state                           )  log_line += ", Fehlerzustand";
+        if( is_error_state                           )  log_line += ", error state";
 
         if( _setback )  log_line += ", at=" + _setback.as_string();
 
@@ -1721,8 +1708,8 @@ void Order::remove_from_job_chain( bool leave_in_database )
     {
         S log_line;
         log_line << "Auftrag ist aus Jobkette " << job_chain->name() << " entfernt";
-        if( _task )  log_line << ", wird aber weiter von " << _task->obj_name() << " ausgeführt";
-        _log->info( log_line );
+        _log->info( _task? message_string( "SCHEDULER-941", job_chain->name(), _task  ) 
+                         : message_string( "SCHEDULER-940", job_chain->name() ) );
 
         job_chain->check_for_removing();
     }
@@ -1810,7 +1797,7 @@ void Order::add_to_or_replace_in_job_chain( Job_chain* job_chain )
             //_log = other_order->_log;
             //other_order->_dont_close_log = true;
 
-            _log->info( S() << "add_or_replace_order(): Auftrag wird verzögert bis " << other_order->_task->obj_name() << "  " << other_order->obj_name() << " ausgeführt hat" );
+            _log->info( message_string( "SCHEDULER-942", other_order->_task->obj_name(), other_order->obj_name() ) );       // add_or_replace_order(): Auftrag wird verzögert bis <p1/> <p2/> ausgeführt hat
         }
     }
     else
@@ -1853,7 +1840,7 @@ void Order::postprocessing( bool success )
       //if( _setback == latter_day )
         if( _setback == latter_day  &&  _setback_count > _task->job()->max_order_setbacks() )
         {
-            _log->info( as_string(_setback_count) + " mal zurückgestellt. Der Auftrag wechselt in den Fehlerzustand" );
+            _log->info( message_string( "SCHEDULER-943", _setback_count ) );   // " mal zurückgestellt. Der Auftrag wechselt in den Fehlerzustand"
             success = false;
             force_error_state = true;
         }
@@ -1870,7 +1857,7 @@ void Order::postprocessing( bool success )
             {
                 if( _job_chain_node->_job )
                 {
-                    if( !_job_chain_node->_job->order_queue() )  _log->warn( "Job " + _job_chain_node->_job->obj_name() + " ohne Auftragswarteschlange (§1495)" );  // Problem §1495
+                    if( !_job_chain_node->_job->order_queue() )  _log->warn( "Job " + _job_chain_node->_job->obj_name() + " without order queue (§1495)" );  // Problem §1495
                     else  _job_chain_node->_job->order_queue()->remove_order( this );
                 }
 
@@ -1900,7 +1887,7 @@ void Order::postprocessing( bool success )
                     Time next_start = next_start_time();
                     if( next_start != latter_day )
                     {
-                        _log->info( S() << "Kein weiterer Job in der Jobkette, der Auftrag wird mit state=" << _initial_state << " wiederholt um " << next_start );
+                        _log->info( message_string( "SCHEDULER-944", _initial_state, next_start ) );        // "Kein weiterer Job in der Jobkette, der Auftrag wird mit state=<p1/> wiederholt um <p2/>"
 
                         _end_time = Time::now();
                         _log->close();
@@ -1916,11 +1903,11 @@ void Order::postprocessing( bool success )
                         }
                         catch( exception& x )
                         {
-                            _log->error( S() << "Fehler beim Setzen des Initialzustands nach Wiederholung wegen <run_time>:\n" << x );
+                            _log->error( x.what() );
                         }
                     }
                     else
-                        _log->info( "Kein weiterer Job in der Jobkette, der Auftrag ist erledigt" );
+                        _log->info( message_string( "SCHEDULER-945" ) );     // "Kein weiterer Job in der Jobkette, der Auftrag ist erledigt"
                 }
             }
             else
@@ -2012,13 +1999,12 @@ void Order::setback_()
         if( _setback_count <= maximum )
         {
             _setback = Time::now() + _task->job()->get_delay_order_after_setback( _setback_count );
-            _log->info( "setback(): Auftrag zum " + as_string(_setback_count) + ". Mal zurückgestellt, bis " + _setback.as_string() );
+            _log->info( message_string( "SCHEDULER-946", _setback_count, _setback ) );   // "setback(): Auftrag zum $1. Mal zurückgestellt, bis $2"
         }
         else
         {
             _setback = latter_day;  // Das heißt: Der Auftrag kommt in den Fehlerzustand
-            _log->warn( "setback(): Auftrag zum " + as_string(_setback_count) + ". Mal zurückgestellt, "
-                        "das ist über dem Maximum " + as_string(maximum) + " des Jobs" );
+            _log->warn( message_string( "SCHEDULER-947", _setback_count, maximum ) );   // "setback(): Auftrag zum " + as_string(_setback_count) + ". Mal zurückgestellt, ""das ist über dem Maximum " + as_string(maximum) + " des Jobs" );
         }
 
         order_queue()->add_order( this, Order_queue::dont_log );

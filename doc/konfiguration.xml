@@ -125,9 +125,14 @@
         &lt;/script>
 
         &lt;<a class="silent" href="xml/web_services.xml">web_services</a>>
-            &lt;<a class="silent" href="xml/web_service.xml">web_service</a> name="…" …/>
+            &lt;<a class="silent" href="xml/web_service.xml">web_service</a> name="…" …>
+                 &lt;<a class="silent" href="xml/params.xml">params</a>>
+                     &lt;<a class="silent" href="xml/param.xml">param</a> name="…" value="…"/>
+                     …
+                 &lt;/params>
+            &lt;/web_service>
             …
-        &lt;/web_service>
+        &lt;/web_services>
 
         &lt;<a class="silent" href="xml/holidays.xml">holidays</a>>
             &lt;<a class="silent" href="xml/holiday.xml">holiday</a> day="…"/>

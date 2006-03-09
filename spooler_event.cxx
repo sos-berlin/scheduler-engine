@@ -285,7 +285,7 @@ int Scheduler_event::send_mail( const Mail_defaults& mail_defaults )
     catch( exception& x )
     {
         Z_LOG( __FUNCTION__ << ": " << x.what() );
-        _spooler->log()->warn( "Fehler beim eMail-Versand: " + string( x.what() ) );
+        _spooler->log()->warn( message_string( "SCHEDULER-302", x ) );
     }
 
     return 0; //?

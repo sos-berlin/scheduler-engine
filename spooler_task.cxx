@@ -443,9 +443,9 @@ void Task::cmd_end( bool kill_immediately )
 {
     THREAD_LOCK_DUMMY( _lock )
     {
-        if( kill_immediately )  _log->warn( "end(), kill" );
+        if( kill_immediately )  _log->warn( message_string( "SCHEDULER-282" ) );
         else
-        if( _state < s_ending )  _log->info( "end()" );
+        if( _state < s_ending )  _log->info( message_string( "SCHEDULER-914" ) );
 
         _end = true;
         _kill_immediately = kill_immediately;
@@ -464,7 +464,7 @@ void Task::cmd_end( bool kill_immediately )
 
 void Task::cmd_nice_end( Job* for_job )
 {
-    _log->info( "Task wird dem Job " + for_job->name() + " zugunsten beendet" );
+    _log->info( message_string( "SCHEDULER-271", for_job->name() ) );   //"Task wird dem Job " + for_job->name() + " zugunsten beendet" );
 
     cmd_end();
 }
@@ -601,36 +601,18 @@ void Task::set_state( State new_state )
 
 
             if( is_idle()  &&  _job->_module._process_class )  _job->_module._process_class->notify_a_process_is_idle();
-        //if( is_idle()  &&  _job->_module._process_class  &&  _job->_module._process_class->need_process() )  cmd_nice_end();
 
 
             Log_level log_level = new_state == s_starting || new_state == s_closed? log_info : log_debug9;
             if( log_level >= log_info || _spooler->_debug )
             {
-                string msg = "state=" + state_name();
-                if( _next_time )  msg += " (" + _next_time.as_string() + ")";
-                if( new_state == s_starting  &&  _start_at )  msg += " (at=" + _start_at.as_string() + ")";
-            //if( new_state == s_starting  &&  _thread->_free_threading )  msg += ", dem Thread " + _thread->name() + " zugeordnet";
-                if( new_state == s_starting  &&  _module_instance && _module_instance->pid() )  msg += ", pid=" + as_string( _module_instance->pid() );
+                S details;
+                if( _next_time )  details << " (" << _next_time << ")";
+                if( new_state == s_starting  &&  _start_at )  details << " (at=" << _start_at << ")";
+                if( new_state == s_starting  &&  _module_instance && _module_instance->pid() )  details << ", pid=" << _module_instance->pid();
 
-                _log->log( log_level, msg );
+                _log->log( log_level, message_string( "SCHEDULER-918", state_name(), details ) );
             }
-
-/*
-            if( _state == s_closed )
-            {
-                try
-                {
-                    set_mail_defaults();
-                    //_log->send( has_error() || _log->highest_level() >= log_error? -1 : _step_count );
-
-                    Scheduler_event event ( Scheduler_event::evt_task_state, _log->highest_level(), this );
-                    event.set_mail( _log->imail() );
-                    event.send_mail();
-                }
-                catch( exception& x ) { _log->error( S() << "Fehler beim eMail-Versand: " << x ); }
-            }
-*/
         }
     }
 }
@@ -738,7 +720,7 @@ bool Task::check_timeout( const Time& now )
 {
     if( _timeout < latter_day  &&  now > _last_operation_time + _timeout  &&  !_kill_tried )
     {
-        _log->error( "Task wird nach nach Zeitablauf abgebrochen" );
+        _log->error( message_string( "SCHEDULER-272" ) );   // "Task wird nach nach Zeitablauf abgebrochen"
         return try_kill();
     }
 
@@ -754,7 +736,7 @@ void Task::add_pid( int pid, const Time& timeout_period )
     if( timeout_period != latter_day )
     {
         timeout_at = Time::now() + timeout_period;
-        _log->debug9( S() << "add_pid(" << pid << ")  Frist endet " << timeout_at );
+        _log->debug9( message_string( "SCHEDULER-912", pid, timeout_at ) );
     }
 
     _registered_pids[ pid ] = Z_NEW( Registered_pid( this, pid, timeout_at, false, false, false, "" ) );
@@ -828,11 +810,11 @@ void Task::Registered_pid::try_kill()
         try
         {
             kill_process_immediately( _pid );
-            _task->_log->warn( S() << "Subprozess " << _pid << " abgebrochen" );
+            _task->_log->warn( message_string( "SCHEDULER-273", _pid ) );   // "Subprozess " << _pid << " abgebrochen" 
         }
         catch( exception& x )
         {
-            _task->_log->warn( S() << "Subprozess " << _pid << " lässt sich nicht abbrechen: " << x );
+            _task->_log->warn( message_string( "SCHEDULER-274", _pid ) );   // "Subprozess " << _pid << " lässt sich nicht abbrechen: " << x
         }
 
         _killed = true;
@@ -867,7 +849,7 @@ bool Task::check_subprocess_timeout( const Time& now )
 
             if( subprocess->_timeout_at < now )
             {
-                _log->warn( S() << "Subprozess " << subprocess->_pid << " wird abgebrochen, weil seine Frist überschritten ist" );
+                _log->warn( message_string( "SCHEDULER-275", subprocess->_pid ) );
                 subprocess->try_kill();
                 something_done = true;
             }
@@ -891,7 +873,7 @@ bool Task::try_kill()
 
         FOR_EACH( Registered_pids, _registered_pids, p )  p->second->try_kill();
 
-        if( !_killed ) _log->warn( "Task konnte nicht abgebrochen werden" );
+        if( !_killed ) _log->warn( message_string( "SCHEDULER-276" ) );
     }
     catch( const exception& x ) { _log->warn( x.what() ); }
 
@@ -913,7 +895,7 @@ bool Task::do_something()
 
     if( _kill_immediately  &&  !_kill_tried )
     {
-        _log->error( "Task wird nach Anforderung abgebrochen" );
+        _log->error( message_string( "SCHEDULER-277" ) );
         return try_kill();
     }
 
@@ -937,7 +919,7 @@ bool Task::do_something()
 
                 if( !let_run )
                 {
-                    _log->info( "Laufzeitperiode ist abgelaufen, Task wird beendet" );
+                    _log->info( message_string( "SCHEDULER-278" ) );   // "Laufzeitperiode ist abgelaufen, Task wird beendet"
                     set_state( s_ending );
                 }
             }
@@ -1039,7 +1021,7 @@ bool Task::do_something()
                         case s_running_process:
                             if( ((Process_task*)this)->signaled() )
                             {
-                                _log->info( "signaled!" );
+                                _log->info( message_string( "SCHEDULER-915" ) );
                                 postprocess_order( true );
                                 set_state( s_ending );
                                 loop = true;
@@ -1103,7 +1085,7 @@ bool Task::do_something()
                             {
                                 if( now >= _idle_since + _job->_idle_timeout )
                                 {
-                                    _log->debug9( "idle_timeout ist abgelaufen, Task beendet sich" );
+                                    _log->debug9( message_string( "SCHEDULER-916" ) );   // "idle_timeout ist abgelaufen, Task beendet sich" 
                                     _end = true;
                                     loop = true;
                                 }
@@ -1809,10 +1791,10 @@ void Module_task::do_close__end()
         _module_instance->close__end();
 
         int exit_code = _module_instance->exit_code();
-        if( exit_code != 0 )  _log->warn( "Prozess hat mit Exit code " + as_string(exit_code) + " (0x" + printf_string( "%X", exit_code ) + ") geendet" );
+        if( exit_code != 0 )  _log->warn( message_string( "SCHEDULER-280", exit_code, printf_string( "%X", exit_code ) ) );
 
         int termination_signal = _module_instance->termination_signal();
-        if( termination_signal != 0 )  _log->warn( "Prozess hat mit Signal " + as_string( termination_signal ) + " geendet" );
+        if( termination_signal != 0 )  _log->warn( message_string( "SCHEDULER-279", termination_signal ) );
 
         _log->log_file( _module_instance->stdout_filename(), "stdout:" );
         _log->log_file( _module_instance->stderr_filename(), "stderr:" );
@@ -2240,7 +2222,7 @@ bool Process_task::do_kill()
 {
     if( !_process_handle )  return false;
 
-    _log->warn( "Prozess wird abgebrochen" );
+    _log->warn( message_string( "SCHEDULER-281" ) );   
 
     LOG( "TerminateProcess(" <<  _process_handle << ",255)\n" );
     BOOL ok = TerminateProcess( _process_handle, 255 );
@@ -2480,7 +2462,7 @@ bool Process_task::do_kill()
 {
     if( _process_handle._pid )
     {
-        _log->warn( "Prozess wird abgebrochen" );
+        _log->warn( message_string( "SCHEDULER-281" ) );   
 
         LOG( "kill(" << _process_handle._pid << ",SIGTERM)\n" );
         int err = kill( _process_handle._pid, SIGTERM );

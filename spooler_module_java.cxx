@@ -160,7 +160,7 @@ bool Module::make_java_class( bool force )
         //utime( java_filename.c_str(), &utimbuf );
 
         string cmd = '"' + _java_vm->javac_filename() + "\" -g -classpath " + _java_vm->class_path() + ' ' + java_filename;     // + " -verbose"
-        _log.info( cmd );
+        _log.info( message_string( "SCHEDULER-934", cmd ) );
         
         System_command c;
         c.set_throw( false );
@@ -349,7 +349,7 @@ void Java_module_instance::init()
                 catch( const exception& x )
                 {
                     _java_vm->_log.warn( x.what() );
-                    _java_vm->_log.warn( "Die Java-Klasse " + class_name + " konnte nicht geladen werden. Die Java-Quelle wird neu übersetzt, mal sehen, ob's dann geht" );
+                    _java_vm->_log.warn( message_string( "SCHEDULER-294", class_name ) );     // "Die Java-Klasse " + class_name + " konnte nicht geladen werden. Die Java-Quelle wird neu übersetzt, mal sehen, ob's dann geht"
                     _module->make_java_class( true );       // force=true, Mod_time nicht berücksichtigen und auf jeden Fall kompilieren
                 }
             }

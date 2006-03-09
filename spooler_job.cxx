@@ -614,7 +614,7 @@ void Job::load_tasks_from_db()
             if( !xml.empty() )  set_dom( xml::Document_ptr( xml ).documentElement(), Time::now() );
 
 
-            _log->info( "Zu startende Task aus Datenbank geladen: id=" + as_string(task_id) + " start_at=" + start_at.as_string() );
+            _log->info( message_string( "SCHEDULER-917", task_id, start_at.as_string() ) );
 
 
             ptr<Task> task = create_task( +parameters, "", start_at, task_id );
@@ -632,7 +632,7 @@ void Job::load_tasks_from_db()
         }
         catch( exception& x )
         {
-            _log->error( S() << "Task " << task_id << " aus der Datenbank ist fehlerhaft: " << x.what() );
+            _log->error( message_string( "SCHEDULER-283", task_id, x ) );
         }
     }
 }
@@ -698,7 +698,7 @@ void Job::Task_queue::enqueue_task( const ptr<Task>& task )
     while( it != _queue.end()  &&  (*it)->_start_at <= task->_start_at )  it++;
     _queue.insert( it, task );
 
-    _job->_log->info( S() << "Task " << task->id() << " in Warteschlange eingereiht" );
+    _job->_log->info( message_string( "SCHEDULER-919", task->id() ) );
 }
 
 //-------------------------------------------------------------Job::Task_queue::remove_task_from_db
@@ -933,7 +933,7 @@ void Job::stop( bool end_all_tasks )
 
 void Job::reread()
 {
-    _log->info( "Skript wird erneut gelesen (<include> wird erneut ausgeführt)" );
+    _log->info( message_string( "SCHEDULER-920" ) );
     read_script( &_module );
     if( _module._monitor )  read_script( _module._monitor );
 }
@@ -964,7 +964,7 @@ bool Job::execute_state_cmd()
                                     {
                                         if( _remove )
                                         {
-                                            _log->error( "cmd='unstop' wird ignoriert, weil Job entfernt wird" );
+                                            _log->error( message_string( "SCHEDULER-284", "unstop" ) );
                                         }
                                         else
                                         {
@@ -1033,7 +1033,7 @@ bool Job::execute_state_cmd()
                     {
                         if( _remove )
                         {
-                            _log->error( "cmd='wake' wird ignoriert, weil Job entfernt wird" );
+                            _log->error( message_string( "SCHEDULER-284", "wake" ) );
                         }
                         else
                         {
@@ -1122,10 +1122,10 @@ void Job::select_period( Time now )
         if( _period.begin() != latter_day )
         {
             string rep; if( _period._repeat != latter_day )  rep = _period._repeat.as_string();
-            _log->debug( "Nächste Periode ist <period begin=\"" + _period.begin().as_string() + "\" end=\"" + _period.end().as_string() + "\" repeat=\"" + rep + "\">" );
+            _log->debug( message_string( "SCHEDULER-921", _period.begin(), _period.end(), rep ) );
         }
         else 
-            _log->debug( "Keine weitere Periode" );
+            _log->debug( message_string( "SCHEDULER-922" ) );
     }
 }
 
@@ -1152,7 +1152,7 @@ void Job::set_next_start_time( Time now, bool repeat )
         if( _delay_until )
         {
             next_start_time = _period.next_try( _delay_until );
-            if( _spooler->_debug )  msg = "Wiederholung wegen delay_after_error: " + next_start_time.as_string();
+            if( _spooler->_debug )  msg = message_string( "SCHEDULER-923", next_start_time );   // "Wiederholung wegen delay_after_error"
         }
         else
         if( order_controlled() ) 
@@ -1172,7 +1172,7 @@ void Job::set_next_start_time( Time now, bool repeat )
                     if( _period.begin() > now )
                     {
                         next_start_time = _period.begin();
-                        if( _spooler->_debug )  msg = "Erster Start zu Beginn der Periode " + next_start_time.as_string();
+                        if( _spooler->_debug )  msg = message_string( "SCHEDULER-924", next_start_time );   // "Erster Start zu Beginn der Periode "
                     }
                     else
                     {
@@ -1185,7 +1185,7 @@ void Job::set_next_start_time( Time now, bool repeat )
                     if( _repeat > 0 )       // spooler_task.repeat
                     {
                         next_start_time = _period.next_try( now + _repeat );
-                        if( _spooler->_debug )  msg = "Wiederholung wegen spooler_job.repeat=" + as_string(_repeat) + ": " + next_start_time.as_string();
+                        if( _spooler->_debug )  msg = message_string( "SCHEDULER-925", _repeat, next_start_time );   // "Wiederholung wegen spooler_job.repeat="
                         _repeat = 0;
                     }
                     else
@@ -1193,19 +1193,20 @@ void Job::set_next_start_time( Time now, bool repeat )
                     {
                         next_start_time = now + _period.repeat();
 
-                        if( _spooler->_debug && next_start_time != latter_day )  msg = "Nächste Wiederholung wegen <period repeat=\"" + as_string((double)_period._repeat) + "\">: " + next_start_time.as_string();
+                        if( _spooler->_debug && next_start_time != latter_day )  msg = message_string( "SCHEDULER-926", _period._repeat, next_start_time );   // "Nächste Wiederholung wegen <period repeat=\""
 
                         if( next_start_time >= _period.end() )
                         {
                             Period next_period = _run_time->next_period( _period.end() );
                             if( _period.end() == next_period.begin()  &&  _period.repeat() == next_period.repeat() )
                             {
-                                if( _spooler->_debug )  msg += " (in der anschließenden Periode)";
+                                if( _spooler->_debug )  msg += " (in the following period)";
                             }
                             else
                             {
                                 next_start_time = latter_day;
-                                if( _spooler->_debug )  msg = "Nächste Startzeit wird bestimmt zu Beginn der nächsten Periode " + next_period.begin().as_string();
+                                if( _spooler->_debug )  msg = message_string( "SCHEDULER-927" );    // "Nächste Startzeit wird bestimmt zu Beginn der nächsten Periode "
+                                                  else  msg = "";
                             }
                         }
                     }
@@ -1219,7 +1220,7 @@ void Job::set_next_start_time( Time now, bool repeat )
 
         if( _spooler->_debug )
         {
-            if( _next_single_start < next_start_time )  msg = "Nächster single_start " + _next_single_start.as_string();
+            if( _next_single_start < next_start_time )  msg = message_string( "SCHEDULER-928", _next_single_start );
             if( !msg.empty() )  _log->debug( msg );
         }
 
@@ -1362,21 +1363,21 @@ ptr<Task> Job::task_to_start()
         
     if( _state == s_pending  &&  now >= _next_single_start )  
     {
-                                           cause = cause_period_single,                         log_line += "Task startet wegen <period single_start=\"...\">\n";
+                                           cause = cause_period_single,                         log_line += "Task starts due to <period single_start=\"...\">\n";
     }
     else
     if( is_in_period(now) )
     {
         if( _state == s_pending )
         {
-            if( _start_once )              cause = cause_period_once,                           log_line += "Task startet wegen <run_time once=\"yes\">\n";
+            if( _start_once )              cause = cause_period_once,                           log_line += "Task starts due to <run_time once=\"yes\">\n";
             else
             if( now >= _next_start_time )  
                 if( _delay_until && now >= _delay_until )
-                                           cause = cause_delay_after_error,                     log_line += "Task startet wegen delay_after_error\n";
-                                      else cause = cause_period_repeat,                         log_line += "Task startet, weil Job-Startzeit erreicht: " + _next_start_time.as_string();
+                                           cause = cause_delay_after_error,                     log_line += "Task starts due to delay_after_error\n";
+                                      else cause = cause_period_repeat,                         log_line += "Task starts, because start time is reached: " + _next_start_time.as_string();
 
-            if( _directory_changed  )      cause = cause_directory,                             log_line += "Task startet wegen eines Ereignisses für Verzeichnis " + _changed_directories;
+            if( _directory_changed  )      cause = cause_directory,                             log_line += "Task starts due to an event for watched directory " + _changed_directories;
         }
 
         if( !cause  &&  _order_queue )
@@ -1427,7 +1428,7 @@ ptr<Task> Job::task_to_start()
             if( order )  // Ist der Auftrag noch da? (Muss bei Ein-Thread-Betrieb immer da sein!)
             {
                 cause = cause_order;
-                log_line += "Task startet wegen " + order->obj_name();
+                log_line += "Task starts for order " + order->obj_name();
             }
         }
 
@@ -1547,7 +1548,7 @@ bool Job::do_something()
                                 init_start_when_directory_changed( s_stopping );  // Bei Fehler: Job stoppen, aber Task noch laufen lassen
 
                                 task->attach_to_a_thread();
-                                _log->info( S() << "Task " << task->id() << " gestartet" );
+                                _log->info( message_string( "SCHEDULER-930", task->id() ) );
 
                                 task->do_something();           // Damit die Task den Prozess startet und die Prozessklasse davon weiß
                             }
@@ -1624,8 +1625,8 @@ void Job::set_state( State new_state )
             if( new_state == s_stopping
              || new_state == s_stopped
              || new_state == s_read_error
-             || new_state == s_error      )  _log->info  ( "state=" + state_name() ); 
-                                       else  _log->debug9( "state=" + state_name() );
+             || new_state == s_error      )  _log->info  ( message_string( "SCHEDULER-931", state_name() ) ); 
+                                       else  _log->debug9( message_string( "SCHEDULER-931", state_name() ) );
         }
 
         if( _waiting_for_process  &&  ( _state != s_pending  ||  _state != s_running ) )

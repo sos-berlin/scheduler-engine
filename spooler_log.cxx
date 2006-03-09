@@ -402,7 +402,7 @@ Prefix_log::~Prefix_log()
             int ret = unlink( _filename.c_str() );
             if( ret == -1 )  throw_errno( errno, "unlink", _filename.c_str() );
         }
-        catch( const exception&  x ) { _spooler->_log.error( string("FEHLER BEIM LÖSCHEN DER PROTOKOLLDATEI ") + x.what() ); }
+        catch( const exception&  x ) { _spooler->_log.error( message_string( "SCHEDULER-291", x ) ); }
     }
 }
 

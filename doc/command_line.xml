@@ -52,7 +52,7 @@
         <command_option name="port"         setting="port">
             <description>
                 <p>
-                    Siehe auch <scheduler_option name="tcp-port"/> und
+                    Siehe auch <scheduler_option name="tcp-port"/> 
                     und <scheduler_option name="udp-port"/>.
                 </p>
             </description>
@@ -300,7 +300,7 @@
             (warum? weil der Scheduler den vollständigen Dateinamen braucht, um einen Job oder sich selbst neu zu starten).
         </p>
         <p>
-            Die Parameter (rechts vom Gleichheitszeichen) können in Anführungszeichen oder in Aprostrophe
+            Die Parameter (rechts vom Gleichheitszeichen) können in Anführungszeichen oder in Apostrophe
             gesetzt werden.
         </p>
     </description>

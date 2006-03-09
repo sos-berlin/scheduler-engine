@@ -4821,6 +4821,10 @@ const char file_scheduler_xsd[] =
     "<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ELEMENT-TYPEN-->\r\n"
     "\r\n"
     "<xsd:complexType name=\"web_service\">\r\n"
+    "<xsd:sequence>\r\n"
+    "<xsd:element ref=\"params\" minOccurs=\"0\"/>\r\n"
+    "</xsd:sequence>\r\n"
+    "\r\n"
     "<xsd:attribute name=\"name\"                      type=\"Name\"             use=\"required\"/>\r\n"
     "<xsd:attribute name=\"url_path\"                  type=\"xsd:string\"       use=\"required\"/>\r\n"
     "\r\n"
@@ -4909,7 +4913,7 @@ static const Embedded_file embedded_files_array[] =
     { "html/jz/translation_de.js", file_html_jz_translation_de_js, sizeof file_html_jz_translation_de_js - 1, 1113976395 },
     { "html/jz/scheduler.xslt", file_html_jz_scheduler_xslt, sizeof file_html_jz_scheduler_xslt - 1, 1141665008 },
     { "html/jz/scheduler.css", file_html_jz_scheduler_css, sizeof file_html_jz_scheduler_css - 1, 1137323283 },
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1141553192 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1141915993 },
     { NULL, NULL, 0 }
 };
 

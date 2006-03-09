@@ -196,7 +196,7 @@ void Spooler_db::open2( const string& db_name )
             {
                 string stmt;
 
-                _log->info( "Datenbank wird geöffnet: " + my_db_name );
+                _log->info( message_string( "SCHEDULER-907", my_db_name ) );     // Datenbank wird geöffnet
 
                 _db.open( "-in -out " + my_db_name );   // -create
 
@@ -288,7 +288,7 @@ void Spooler_db::open2( const string& db_name )
 
                 if( _spooler->_need_db )  throw;
             
-                _log->warn( string("FEHLER BEIM ÖFFNEN DER HISTORIENDATENBANK: ") + x.what() ); 
+                _log->warn( message_string( "SCHEDULER-263", x ) );         // "FEHLER BEIM ÖFFNEN DER HISTORIENDATENBANK: "
             }
         }
     }
@@ -309,7 +309,7 @@ void Spooler_db::add_column( const string& table_name, const string& column_name
         
         _log->warn( x.what() );
         string cmd = "ALTER TABLE " + table_name + " " + add_clause;
-        _log->info( S() << "Tabelle " << table_name << " wird um die Spalte " << column_name << " erweitert: " << cmd );
+        _log->info( message_string( "SCHEDULER-908", table_name, column_name, cmd ) );
         
         _db.put( cmd );
         ta.commit();
@@ -334,7 +334,7 @@ void Spooler_db::close()
         {
             _db.close();  // odbc.cxx und jdbc.cxx unterdrücken selbst Fehler.
         }
-        catch( exception& x ) { _log->warn( S() << "FEHLER BEIM SCHLIESSEN DER DATENBANK: " << x ); }
+        catch( exception& x ) { _log->warn( message_string( "SCHEDULER-264", x ) ); }
 
         _db.destroy();
     }
@@ -372,7 +372,7 @@ void Spooler_db::create_table_when_needed( const string& tablename, const string
     catch( exception& x )
     {
         _log->warn( x.what() );
-        _log->info( "Tabelle " + tablename + " wird eingerichtet" );
+        _log->info( message_string( "SCHEDULER-909", tablename ) );
 
         Transaction ta ( this );
             _db.put( "CREATE TABLE " + tablename + " (" + fields + ") " );
@@ -396,14 +396,14 @@ void Spooler_db::try_reopen_after_error( exception& x, bool wait_endless )
     {
         THREAD_LOCK( _error_lock )  _error = x.what();
 
-        _spooler->log()->error( string("FEHLER BEIM ZUGRIFF AUF DATENBANK: ") + x.what() );
+        _spooler->log()->error( message_string( "SCHEDULER-303", x ) );
 
-        if( _db.opened() )  _spooler->log()->info( "Datenbank wird geschlossen" );
+        if( _db.opened() )  _spooler->log()->info( message_string( "SCHEDULER-957" ) );   // "Datenbank wird geschlossen"
         try
         {
             close();
         }
-        catch( exception& x ) { _log->warn( string("FEHLER BEIM SCHLIESSEN DER DATENBANK: ") + x.what() ); }
+        catch( exception& x ) { _log->warn( message_string( "SCHEDULER-264", x ) ); }       // Fehler beim Schließen der Datenbank
 
 
         while( !_db.opened()  &&  !too_much_errors )
@@ -471,7 +471,7 @@ void Spooler_db::try_reopen_after_error( exception& x, bool wait_endless )
                         break;
                     }
 
-                    _spooler->log()->warn( "Eine Minute warten bevor Datenbank erneut geöffnet wird ..." );
+                    _spooler->log()->warn( message_string( "SCHEDULER-958" ) );   // "Eine Minute warten bevor Datenbank erneut geöffnet wird ..."
                     _spooler->_connection_manager->async_continue_selected( is_communication_operation, 60 );
                 }
             }
@@ -500,7 +500,7 @@ void Spooler_db::try_reopen_after_error( exception& x, bool wait_endless )
                 
                 if( _spooler->_need_db ) 
                 {
-                    string msg = string("SCHEDULER WIRD BEENDET WEGEN FEHLERS BEIM ZUGRIFF AUF DATENBANK: ") + x.what();
+                    string msg = message_string( "SCHEDULER-265", x );     // "SCHEDULER WIRD BEENDET WEGEN FEHLERS BEIM ZUGRIFF AUF DATENBANK"
                     _log->error( msg );
 
                     Scheduler_event scheduler_event ( Scheduler_event::evt_database_error_abort, log_error, this );
@@ -519,7 +519,7 @@ void Spooler_db::try_reopen_after_error( exception& x, bool wait_endless )
                 }
             }
 
-            _spooler->log()->info( "Historie wird von Datenbank auf Dateien umgeschaltet" );
+            _spooler->log()->info( message_string( "SCHEDULER-959" ) );   // "Historie wird von Datenbank auf Dateien umgeschaltet" );
 
             Scheduler_event scheduler_event ( Scheduler_event::evt_database_error_switch_to_file, log_warn, this );
             scheduler_event.set_error( x );
@@ -560,7 +560,7 @@ int Spooler_db::get_id( const string& variable_name, Transaction* outer_transact
     }
     catch( exception& x ) 
     { 
-        _spooler->log()->error( string("FEHLER BEIM LESEN DER NÄCHSTEN ID: ") + x.what() ); 
+        _spooler->log()->error( message_string( "SCHEDULER-304", x ) );   // "FEHLER BEIM LESEN DER NÄCHSTEN ID: "
         throw;
     }
 
@@ -703,7 +703,7 @@ void Spooler_db::spooler_stop()
         }
         catch( exception& x )  
         { 
-            _log->warn( string("FEHLER BEIM SCHREIBEN DER HISTORIE: ") + x.what() ); 
+            _log->warn( message_string( "SCHEDULER-266", x ) ); 
         }
     }
 }
@@ -771,7 +771,7 @@ void Spooler_db::insert_order( Order* order )
     }
     catch( exception& x ) 
     { 
-        _spooler->log()->error( "FEHLER BEIM EINFÜGEN IN DIE TABELLE " + _spooler->_orders_tablename + ": " + x.what() ); 
+        _spooler->log()->error( message_string( "SCHEDULER-305", _spooler->_orders_tablename, x ) );        // "FEHLER BEIM EINFÜGEN IN DIE TABELLE "
         throw;
     }
 }
@@ -955,7 +955,7 @@ void Spooler_db::write_order_history( Order* order, Transaction* outer_transacti
                 }
                 catch( exception& x ) 
                 { 
-                    _log->warn( "FEHLER BEIM SCHREIBEN DES LOGS IN DIE TABELLE " + _spooler->_order_history_tablename + ": " + x.what() ); 
+                    _log->warn( message_string( "SCHEDULER-267", _spooler->_order_history_tablename, x.what() ) );      // "FEHLER BEIM SCHREIBEN DES LOGS IN DIE TABELLE "
                 }
             }
 
@@ -1038,7 +1038,7 @@ void Spooler_db::update_order( Order* order )
     }
     catch( exception& x ) 
     { 
-        _spooler->log()->error( "FEHLER BEIM UPDATE DER TABELLE " + _spooler->_orders_tablename + ": " + x.what() ); 
+        _spooler->log()->error( message_string( "SCHEDULER-306", _spooler->_orders_tablename, x ) );      // "FEHLER BEIM UPDATE DER TABELLE "
         throw;
     }
 }
@@ -1107,7 +1107,7 @@ xml::Element_ptr Spooler_db::read_task( const xml::Document_ptr& doc, int task_i
                                                 " where \"ID\"=" + as_string(task_id) );
                     dom_append_text_element( task_element, "log", log );
                 }
-                catch( exception& x ) { _log->warn( "FEHLER BEIM LESEN DES LOGS FÜR TASK " + as_string(task_id) + " AUS DER DATENBANK: " + x.what() ); }
+                catch( exception& x ) { _log->warn( message_string( "SCHEDULER-268", task_id, x ) ); }  // "FEHLER BEIM LESEN DES LOGS FÜR TASK "
             }
         }
     }
@@ -1134,7 +1134,7 @@ Job_history::~Job_history()
     {
         close();
     }
-    catch( exception& x ) { _job->_log->warn( string("FEHLER BEIM SCHLIESSEN DER JOB-HISTORIE: ") + x.what() ); }
+    catch( exception& x ) { _job->_log->warn( message_string( "SCHEDULER-269", x ) ); }  // "FEHLER BEIM SCHLIESSEN DER JOB-HISTORIE: "
 }
 
 //--------------------------------------------------------------------------------Job_history::open
@@ -1209,7 +1209,7 @@ void Job_history::open()
             _file.open( _filename, O_BINARY | O_RDWR | O_CREAT | O_TRUNC, 0600 );
             _file.print( replace_regex( _type_string, "(:[^,]+)?,", "\t" ) + SYSTEM_NL );
 
-            _job->_log->debug( "Neue Historiendatei eröffnet: " +  _filename );
+            _job->_log->debug( message_string( "SCHEDULER-910", _filename ) );
             _use_file = true;
         }
 
@@ -1217,7 +1217,7 @@ void Job_history::open()
     }
     catch( exception& x )  
     { 
-        _job->_log->warn( string("FEHLER BEIM ÖFFNEN DER HISTORIE: ") + x.what() ); 
+        _job->_log->warn( message_string( "SCHEDULER-270", x ) );   // "FEHLER BEIM ÖFFNEN DER HISTORIE: "
         _error = true;
     }
 }
@@ -1236,7 +1236,7 @@ void Job_history::close()
     }
     catch( exception& x )  
     { 
-        _job->_log->warn( string("FEHLER BEIM SCHLIESSEN DER HISTORIE: ") + x.what() ); 
+        _job->_log->warn( message_string( "SCHEDULER-269", x ) );   //"FEHLER BEIM SCHLIESSEN DER HISTORIE: "
     }
 }
 
@@ -1264,7 +1264,7 @@ void Job_history::archive( Archive_switch arc, const string& filename )
             rename_file( filename, arc_filename );
         }
 
-        _job->_log->info( "Bisherige Historie ist archiviert worden unter " + arc_filename );
+        _job->_log->info( message_string( "SCHEDULER-913", arc_filename ) );    // "Bisherige Historie ist archiviert worden unter "
     }
 }
 
@@ -1402,8 +1402,8 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
                                 par_doc.load_xml( param_xml );
                                 if( par_doc.documentElement() )  history_entry.appendChild( par_doc.documentElement() );
                             }
-                            catch( exception&  x ) { _log->warn( string("Historie: ") + x.what() ); }
-                            catch( const _com_error& x ) { _log->warn( string("Historie: ") + w_as_string(x.Description() )) ; }
+                            catch( exception&  x ) { _log->warn( string("History: ") + x.what() ); }
+                            catch( const _com_error& x ) { _log->warn( string("History: ") + w_as_string(x.Description() )) ; }
                         }
 #endif
                         if( with_log )
@@ -1413,7 +1413,7 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
                                 string log = file_as_string( GZIP_AUTO + _spooler->_db->_db_name + "-table=" + _spooler->_job_history_tablename + " -blob=log where \"ID\"=" + as_string(id), "" );
                                 if( !log.empty() ) dom_append_text_element( history_entry, "log", log );
                             }
-                            catch( exception&  x ) { _job->_log->warn( string("Historie: ") + x.what() ); }
+                            catch( exception&  x ) { _job->_log->warn( string("History: ") + x.what() ); }
                         }
 
                         history_element.appendChild( history_entry );
@@ -1504,7 +1504,7 @@ void Task_history::write( bool start )
                     
                     if( !start )  
                     {
-                        _spooler->log()->info( "Historiensatz wird wegen vorausgegangen Datenbankfehlers nicht geschrieben" );
+                        _spooler->log()->info( message_string( "SCHEDULER-307" ) );   // "Historiensatz wird wegen vorausgegangen Datenbankfehlers nicht geschrieben"
                         return;
                     }
                 }
@@ -1594,7 +1594,7 @@ void Task_history::write( bool start )
                                 if( _job_history->_with_log == arc_gzip )  blob_filename = GZIP + blob_filename;
                                 copy_file( "file -b " + log_filename, blob_filename );
                             }
-                            catch( exception& x ) { _task->_log->warn( string("Historie: ") + x.what() ); }
+                            catch( exception& x ) { _task->_log->warn( string("History: ") + x.what() ); }
                         }
                     }
                 }
@@ -1660,7 +1660,7 @@ void Task_history::start()
     }
     catch( exception& x )  
     { 
-        _task->_log->warn( string("FEHLER BEIM SCHREIBEN DER HISTORIE: ") + x.what() );
+        _task->_log->warn( message_string( "SCHEDULER-266", x ) );      // "FEHLER BEIM SCHREIBEN DER HISTORIE: "
         //_error = true;
     }
 }
@@ -1703,7 +1703,7 @@ void Task_history::end()
     }
     catch( exception& x )  
     { 
-        _task->_log->warn( string("FEHLER BEIM SCHREIBEN DER HISTORIE: ") + x.what() ); 
+        _task->_log->warn( message_string( "SCHEDULER-266", x ) );      // "FEHLER BEIM SCHREIBEN DER HISTORIE: "
         //_error = true;
     }
 

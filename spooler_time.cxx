@@ -63,6 +63,13 @@ Time time_from_string( const string& str )
         return as_double( str );
 }
 
+//------------------------------------------------------------------------------insert_into_message
+
+void insert_into_message( Message_string* m, int index, const Time& time ) throw()
+{
+    m->insert( index, time.as_string() );
+}
+
 //---------------------------------------------------------------------------------Time::operator =
 
 void Time::operator = ( const Sos_optional_date_time& dt )

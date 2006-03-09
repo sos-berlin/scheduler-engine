@@ -90,7 +90,7 @@ void Xml_operation::begin()
 
     if( string_begins_with( _request, " " ) )  _request = ltrim( _request );
 
-    _connection->_log.info( "Kommando " + _request );
+    _connection->_log.info( message_string( "SCHEDULER-932", _request ) );
     _response = command_processor.execute( _request, Time::now(), _operation_connection->_indent );
 
     if( _operation_connection->_indent )  _response = replace_regex( _response, "\n", "\r\n" );      // Für Windows-telnet
@@ -115,7 +115,7 @@ bool Communication::Listen_socket::async_continue_( Continue_flags flags )
         {
             if( _communication->_connection_list.size() >= max_communication_connections )
             {
-                _spooler->_log.error( S() << "Mehr als " << max_communication_connections << " Kommunikationskanäle. Verbindung abgelehnt.\n" );
+                _spooler->_log.error( message_string( "SCHEDULER-286", max_communication_connections ) );
             }
             else
             {
@@ -152,14 +152,14 @@ bool Communication::Udp_socket::async_continue_( Continue_flags )
             Host host = addr.sin_addr;
             if( _spooler->security_level( host ) < Security::seclev_signal )
             {
-                _spooler->log()->error( "UDP-Nachricht von " + host.as_string() + " nicht zugelassen." );
+                _spooler->log()->error( message_string( "SCHEDULER-301", host.as_string() ) );   //"UDP-Nachricht von " + host.as_string() + " nicht zugelassen." );
             }
             else
             {
                 Command_processor command_processor ( _spooler, _spooler->security_level( host ) );
                 //command_processor.set_host( host );
                 string cmd ( buffer, len );
-                _spooler->log()->info( "UDP-Nachricht von " + host.as_string() + ": " + cmd );
+                _spooler->log()->info( message_string( "SCHEDULER-955", host.as_string(), cmd ) );
                 command_processor.execute( cmd, Time::now() );
             }
             
@@ -250,19 +250,19 @@ bool Communication::Connection::do_accept( SOCKET listen_socket )
 
         _security_level = _spooler->security_level( peer_host() );
 
-        _log.set_prefix( "TCP-Verbindung mit " + _peer_host_and_port.as_string() );
+        _log.set_prefix( "TCP connection to " + _peer_host_and_port.as_string() );
 
 
         if( _security_level <= Security::seclev_signal )
         {
-            _log.warn( "TCP-Verbindung nicht zugelassen" );
+            _log.warn( message_string( "SCHEDULER-287" ) );
             do_close();
             return false;
         }
 
         //set_event_name( S() << "TCP:" << _host.as_string() << ":" << ntohs( _peer_addr.sin_port ) );
 
-        _log.info( "TCP-Verbindung angenommen" );
+        _log.info( message_string( "SCHEDULER-933" ) );
         _connection_state = s_ready;
 
     }
@@ -613,11 +613,11 @@ int Communication::bind_socket( SOCKET socket, struct sockaddr_in* sa, const str
     int ret;
     int true_ = 1;
 
-    string port_name = tcp_or_udp + "-Port " + as_string( ntohs( sa->sin_port ) );
+    string port_name = tcp_or_udp + "-port " + as_string( ntohs( sa->sin_port ) );
 
     if( _spooler->_reuse_port )     // War für Suse 8 nötig. Und für Windows XP, wenn Scheduler zuvor abgestürzt ist (mit Debugger), denn dann bleibt der Port ewig blockiert
     {
-        _spooler->_log.warn( S() << "-reuse-port: " << port_name << " wird verwendet, auch wenn er schon von einer anderen Anwendung belegt ist\n" );
+        _spooler->_log.warn( message_string( "SCHEDULER-288", port_name ) );
         LOG( "setsockopt(" << socket << ",SOL_SOCKET,SO_REUSEADDR,1)  " );
         ret = setsockopt( socket, SOL_SOCKET, SO_REUSEADDR, (const char*)&true_, sizeof true_ );
         LOG( "ret=" << ret );  if( ret == SOCKET_ERROR )  LOG( "errno=" << errno << "  "  << strerror(errno) );
@@ -632,7 +632,7 @@ int Communication::bind_socket( SOCKET socket, struct sockaddr_in* sa, const str
     {
         int my_errno = errno;  // Nur für Unix
 
-        _spooler->_log.warn( port_name + " ist blockiert. Wir probieren es " + as_string(wait_for_port_available) + " Sekunden" );
+        _spooler->_log.warn( message_string( "SCHEDULER-289", port_name, wait_for_port_available ) );
 
         for( int i = 1; i <= wait_for_port_available; i++ )
         {
@@ -698,7 +698,7 @@ void Communication::bind()
 
                 _udp_socket.set_event_name( S() << "UDP:" << ntohs( sa.sin_port ) );
 
-                _spooler->log()->info( "Scheduler erwartet Kommandos über UDP-Port " + sos::as_string(_udp_port) );
+                _spooler->log()->info( message_string( "SCHEDULER-956", "UDP", _udp_port ) );    // "Scheduler erwartet Kommandos über UDP-Port " + sos::as_string(_udp_port) );
             }
         }
 
@@ -742,7 +742,7 @@ void Communication::bind()
                 _tcp_port = _spooler->tcp_port();
                 _rebound = true;
 
-                _spooler->log()->info( "Scheduler erwartet Kommandos über TCP-Port " + sos::as_string(_tcp_port) );
+                _spooler->log()->info( message_string( "SCHEDULER-956", "TCP", _tcp_port ) );    // "Scheduler erwartet Kommandos über $1-Port " 
             }
         }
 

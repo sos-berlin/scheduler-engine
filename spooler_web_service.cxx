@@ -157,7 +157,8 @@ Web_service::Web_service( Spooler* sp )
     Scheduler_object( sp, (Iweb_service*)this, Scheduler_object::type_web_service ),
     _zero_(this+1),
     _next_operation_id(1),
-    _timeout( INT_MAX )
+    _timeout( INT_MAX ),
+    _parameters( new Com_variable_set )
 {
     _log = Z_NEW( Prefix_log( this, "Web_service" ) );
 }
@@ -221,6 +222,12 @@ void Web_service::set_dom( const xml::Element_ptr& element, const Time& )
     _timeout                       =            element. int_getAttribute( "timeout"                 , _timeout                       );
     _debug                         =            element.bool_getAttribute( "debug"                   , _debug                         );
     if( url_path != "" )  _url_path = url_path;
+
+
+    DOM_FOR_EACH_ELEMENT( element, e )
+    {
+        if( e.nodeName_is( "params" ) )  _parameters->set_dom( e );  
+    }
 
 
     if( _forward_xslt_stylesheet_path != "" )
@@ -329,7 +336,7 @@ void Web_service::forward( const xml::Document_ptr& payload_dom )
 
         if( _debug )
         {
-            _log->debug( "forward_xslt_stylesheet " + _forward_xslt_stylesheet_path + " liefert:\n" );
+            _log->debug( message_string( "SCHEDULER-954","forward_xslt_stylesheet", _forward_xslt_stylesheet_path ) );
             _log->debug( command_document.xml( true ) );
             if( _log_xml )  File( _log_filename_prefix + ".forward.xml", "w" ).print( command_document.xml() );
         }
@@ -592,7 +599,7 @@ void Web_service_operation::execute_stylesheets()
     
     if( _web_service->_debug )
     {
-        _log->debug( "request_xslt_stylesheet " + _web_service->_request_xslt_stylesheet_path + " liefert:\n" );
+        _log->debug( message_string( "SCHEDULER-954","request_xslt_stylesheet", _web_service->_request_xslt_stylesheet_path ) );
         _log->debug( command_document.xml( true ) );
         if( _web_service->_log_xml )  File( _log_filename_prefix + ".command.xml", "w" ).print( command_document.xml() );
     }

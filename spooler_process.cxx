@@ -109,7 +109,7 @@ void Process::start()
 
     _running_since = Time::now();
 
-    _spooler->_log.debug9( "Prozess pid=" + as_string( pid() ) + " gestartet" );     // pid wird auch von Task::set_state(s_starting) mit log_info protokolliert
+    _spooler->_log.debug9( message_string( "SCHEDULER-948", pid() ) );  // pid wird auch von Task::set_state(s_starting) mit log_info protokolliert
 }
 
 //--------------------------------------------------------------------------Process::async_continue
@@ -276,7 +276,7 @@ Process* Process_class::select_process_if_available()
         {
             if( process->_connection && process->_connection->has_error() )
             {
-                _spooler->_log.warn( "Prozess pid=" + as_string( process->pid() ) + " wird nach Fehler entfernt" );
+                _spooler->_log.warn( message_string( "SCHEDULER-299", process->pid() ) );   // "Prozess pid=$1 wird nach Fehler entfernt"
 
                 process->kill();
                 remove_process( process );
@@ -313,7 +313,7 @@ bool Process_class::process_available( Job* for_job )
 void Process_class::enqueue_waiting_job( Job* job )
 {
     _waiting_jobs.push_back( job );
-    _spooler->_log.debug9( job->obj_name() + " ist für einen verfügbaren Prozess vorgemerkt" );
+    _spooler->_log.debug9( message_string( "SCHEDULER-949", job->obj_name() ) );   // " ist für einen verfügbaren Prozess vorgemerkt" );
 }
 
 //----------------------------------------------------------------Process_class::remove_waiting_job

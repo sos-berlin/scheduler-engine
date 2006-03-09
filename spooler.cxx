@@ -1432,7 +1432,7 @@ void Spooler::set_state( State state )
 
     try
     {
-        _log.info( message_string( "SCHEDULER-002", state_name() ) );      // Nach _state = s_stopping aufrufen, damit's nicht blockiert!
+        _log.info( message_string( "SCHEDULER-902", state_name() ) );      // Nach _state = s_stopping aufrufen, damit's nicht blockiert!
     }
     catch( exception& ) {}      // ENOSPC bei s_stopping ignorieren wir
 
@@ -2008,7 +2008,7 @@ void Spooler::start()
     _base_log.open_new();
     
     //_log.info( "Scheduler " + _version + " startet mit " + _config_filename + ", pid=" + as_string( getpid() ) );
-    _log.info( message_string( "SCHEDULER-001", _version, _config_filename, getpid() ) );
+    _log.info( message_string( "SCHEDULER-900", _version, _config_filename, getpid() ) );
     _spooler_start_time = Time::now();
 
     FOR_EACH_JOB( job )  (*job)->init0();
@@ -2269,7 +2269,7 @@ void Spooler::execute_state_cmd()
                     Z_FOR_EACH( Job_list, _job_list, j )
                     {
                         Job* job = *j;
-                        _log.info( message_string( "SCHEDULER-003", job->obj_name() ) );
+                        _log.info( message_string( "SCHEDULER-903", job->obj_name() ) );
                         //_log.info( S() << "stop " << job->obj_name() );
                         bool end_all_tasks = true;
                         job->stop( end_all_tasks );
@@ -2298,7 +2298,7 @@ void Spooler::execute_state_cmd()
 
                 if( _termination_gmtimeout_at != no_termination_timeout ) 
                 {
-                    _log.info( message_string( "SCHEDULER-004", ( _termination_gmtimeout_at - ::time(NULL) ) ) );
+                    _log.info( message_string( "SCHEDULER-904", ( _termination_gmtimeout_at - ::time(NULL) ) ) );
                     //_log.info( S() << "Die Frist zum Beenden der Tasks endet in " << ( _termination_gmtimeout_at - ::time(NULL) ) << "s" );
                     _termination_async_operation = Z_NEW( Termination_async_operation( this, _termination_gmtimeout_at ) );
                     _termination_async_operation->set_async_manager( _connection_manager );
@@ -2826,7 +2826,7 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line )
     }// while( _shutdown_cmd == sc_reload  ||  _shutdown_cmd == sc_load_config );
 
 
-    _log.info( message_string( "SCHEDULER-005" ) );  // "Scheduler ordentlich beendet"
+    _log.info( message_string( "SCHEDULER-999" ) );  // "Scheduler ordentlich beendet"
     //_log.info( "Scheduler ordentlich beendet." );
     _log.close();
 
@@ -2919,7 +2919,7 @@ void spooler_restart( Log* log, bool is_service )
         if( is_service )  command_line += " -renew-service";
 
         command_line += " " + quoted_command_parameter( "-renew-spooler=" + this_spooler );
-        if( log )  log->info( message_string( "SCHEDULER-006", command_line ) );        // "Restart Scheduler "
+        if( log )  log->info( message_string( "SCHEDULER-906", command_line ) );        // "Restart Scheduler "
         start_process( command_line );
 
 #   else

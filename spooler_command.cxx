@@ -198,7 +198,7 @@ void Command_processor::get_id_and_next( const xml::Element_ptr& element, int* i
     if( next_str != "" )  *next = as_uint(next_str);
 
     const int max_n = 1000;
-    if( abs(*next) > max_n )  *next = sgn(*next) * max_n,  _spooler->_log.warn( "Max. " + as_string(max_n) + " Historiensätze werden gelesen" );
+    if( abs(*next) > max_n )  *next = sgn(*next) * max_n,  _spooler->_log.warn( message_string( "SCHEDULER-285", max_n ) );
 }
 
 //----------------------------------------------------------Command_processor::execute_show_history
@@ -1081,7 +1081,7 @@ void Command_processor::execute_http( http::Operation* http_operation )
     }
     catch( const exception& x )
     {
-        _spooler->log()->debug( "Fehler beim HTTP-Aufruf " + http_request->_http_cmd + " " + path + ": " + x.what() );
+        _spooler->log()->debug( "HTTP request " + http_request->_http_cmd + " " + path + ": " + x.what() );
 
         throw http::Http_exception( http::status_404_bad_request, x.what() );
     }

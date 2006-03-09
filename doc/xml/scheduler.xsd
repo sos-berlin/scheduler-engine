@@ -721,6 +721,10 @@
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ELEMENT-TYPEN-->
 
     <xsd:complexType name="web_service">
+        <xsd:sequence>
+            <xsd:element ref="params" minOccurs="0"/>
+        </xsd:sequence>
+        
         <xsd:attribute name="name"                      type="Name"             use="required"/>
         <xsd:attribute name="url_path"                  type="xsd:string"       use="required"/>
 

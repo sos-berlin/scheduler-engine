@@ -591,6 +591,23 @@ void Operation::close()
     Communication::Operation::close(); 
 }
 
+//--------------------------------------------------------------------------Operation::unlink_order
+
+void Operation::unlink_order()
+{
+    _order = NULL;
+
+    try
+    {
+        if( _response  &&  !_response->is_ready() )
+        {
+            if( _connection )  _connection->_log.error( message_string( "SCHEDULER-297" ) );
+            cancel();
+        }
+    }
+    catch( exception& x ) { _spooler->_log.error( x.what() ); }
+}
+
 //---------------------------------------------------------------------------------Operation::begin
 
 void Operation::begin()
@@ -647,7 +664,7 @@ bool Operation::async_continue_( Continue_flags flags )
     {
         if( _response &&  !_response->is_ready() ) 
         {
-            if( _connection )  _connection->_log.error( "HTTP-Operation wird nach Fristablauf abgebrochen" );
+            if( _connection )  _connection->_log.error( message_string( "SCHEDULER-290" ) );   // "HTTP-Operation wird nach Fristablauf abgebrochen" );
             
             if( _response )
             {
@@ -677,7 +694,7 @@ void Operation::cancel()
 {
     if( !_response  ||  _response->is_ready() )
     {
-        if( _web_service_operation ) _web_service_operation->log()->warn( "cancel() ignoriert, weil die Antwort schon übertragen wird" );
+        if( _web_service_operation ) _web_service_operation->log()->warn( message_string( "SCHEDULER-308" ) );  // "cancel() ignoriert, weil die Antwort schon übertragen wird"
         return;
     }
 

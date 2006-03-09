@@ -133,7 +133,7 @@ void Wait_handles::close()
     {
         FOR_EACH( Event_vector, _events, it )  
         {
-            if( *it )  _log->warn( "Wait_handles wird vor " + (*it)->as_text() + " geschlossen" );
+            if( *it )  _log->warn( "Closing Wait_handles before " + (*it)->as_text() );
         }
     }
 }
@@ -277,7 +277,7 @@ void Wait_handles::remove( System_event* event )
             }
 
             if( it == _events.end() ) {
-                _log->error( "Wait_handles::remove(" + event->as_text() + "): Ereignis ist nicht eingetragen" );     // Keine Exception. Das wäre nicht gut in einem Destruktor
+                _log->error( "Wait_handles::remove(" + event->as_text() + "): Unknown event" );     // Keine Exception. Das wäre nicht gut in einem Destruktor
                 return;
             }
 
@@ -339,7 +339,7 @@ bool Wait_handles::wait_until( Time until )
         //ftime( &tm2 );
         t = ::time(NULL);
         localtime_r( &t, &tm2 );
-        if( tm1.tm_isdst != tm2.tm_isdst )  _log->info( tm2.tm_isdst? "Sommerzeit" : "Winterzeit" );
+        if( tm1.tm_isdst != tm2.tm_isdst )  _log->info( message_string( tm2.tm_isdst? "SCHEDULER-951" : "SCHEDULER-952" ) );
                                       else  Z_DEBUG_ONLY( _log->debug9( "Keine Sommerzeitumschaltung" ) );
     }
 
@@ -369,7 +369,7 @@ bool Wait_handles::wait_until_2( Time until )
         
         if( again ) {
             if( t > 1800 )  return false;  // Um mehr als eine halbe Stunde verrechnet? Das muss an der Sommerzeitumstellung liegen
-            if( wait_time >= 1.0 )  _log->debug9( "Noch " + sos::as_string(wait_time) + "s warten ..." );
+            if( wait_time >= 1.0 )  _log->debug9( message_string( "SCHEDULER-953", wait_time )  );
         }
 
         //THREAD_LOCK( _lock )
@@ -727,7 +727,7 @@ bool Directory_watcher::has_changed_2( bool throw_error )
 
             if( throw_error )  throw;
 
-            _log->error( "Überwachung des Verzeichnisses " + _directory + " wird nach Fehler beendet: " + x.what() ); 
+            _log->error( message_string( "SCHEDULER-300", _directory, x ) );   // "Überwachung des Verzeichnisses " + _directory + " wird nach Fehler beendet: " + x.what() ); 
             _directory = "";   // Damit erneutes start_when_directory_changed() diese (tote) Überwachung nicht erkennt.
             Event::set_signaled();
             close();
@@ -778,7 +778,7 @@ void Directory_watcher::set_signaled()
         {
             // S.a. has_changed() für Unix
 
-            _log->error( "Überwachung des Verzeichnisses " + _directory + " wird nach Fehler beendet: " + x.what() ); 
+            _log->error( message_string( "SCHEDULER-300", _directory, x ) );   // "Überwachung des Verzeichnisses " + _directory + " wird nach Fehler beendet: " + x.what() ); 
             _directory = "";   // Damit erneutes start_when_directory_changed() diese (tote) Überwachung nicht erkennt.
             Event::set_signaled();
             close();

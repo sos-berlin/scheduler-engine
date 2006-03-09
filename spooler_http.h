@@ -426,7 +426,7 @@ struct Operation : Communication::Operation
     virtual string              async_state_text_           ()                                      { return "none"; }
 
     void                    set_order                       ( Order* o )                            { _order = o; }         // Für Web_service_operation::begin()
-    void                        unlink_order                ()                                      { _order = NULL; }      // Für Order::close()
+    void                        unlink_order                ();                                     // Für Order::close()
     bool                        response_is_complete        ();
     string                      get_response_part           ();
     bool                        should_close_connection     ();

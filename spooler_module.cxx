@@ -560,7 +560,7 @@ Variant Module_instance::call_if_exists( const string& name, bool param )
 void Module_instance::close()
 {
     Async_operation* op = close__start();
-    if( !op->async_finished() )  _log.warn( "Warten auf Schlieﬂen der Modulinstanz ..." );
+    if( !op->async_finished() )  _log.warn( message_string( "SCHEDULER-293" ) );        // "Warten auf Schlieﬂen der Modulinstanz ..."
     close__end();
 }
 

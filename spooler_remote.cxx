@@ -153,7 +153,7 @@ bool Xml_client_connection::async_continue_( Continue_flags flags )
                         DOM_FOR_EACH_ELEMENT( e1, e2 )
                             if( e2.nodeName_is( "ERROR" ) )  z::throw_xc( "SCHEDULER-223", e2.getAttribute( "text" ) );
 
-                _log.info( S() << "Scheduler ist registriert" );
+                _log.info( message_string( "SCHEDULER-950" ) );   // "Scheduler ist registriert"
                 break;
             }
 

@@ -1405,6 +1405,9 @@ library Spooler
 
         [propget]
         HRESULT                 Forward_xslt_stylesheet_path( [out,retval] BSTR* );
+
+        [propget]
+        HRESULT                 Params                      ( [out,retval] Ivariable_set** parameters );
     };
 
     //-----------------------------------------------------------------------Iweb_service_operation
