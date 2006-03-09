@@ -70,6 +70,55 @@
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
+    <property name="content_type" access="read">
+        <com>
+            <com.result>
+                <com.type type="BSTR"/>
+            </com.result>
+        </com>
+
+        <title>
+            Content-Type (ohne Parameter)
+        </title>
+
+        <description>
+            <p>
+                Zugriff auf den den Kopfeintrag <code>Content-Type:</code> ohne Parameter.
+            </p>
+        </description>
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="charset" access="read">
+        <com>
+            <com.result>
+                <com.type type="BSTR"/>
+            </com.result>
+        </com>
+
+        <title>
+            Zeichencodierung
+        </title>
+
+        <description>
+            <p>
+                Zugriff auf den Parameter <code>charset=</code> aus dem Kopfeintrag <code>Content-Type:</code>.
+            </p>
+        </description>
+        
+        <example programming_language="javascript">
+            <pre>var request = spooler_task.order.web_service_operation.request;
+
+spooler_log.info( request.header( "Content-Type" ) );   // ==> text/xml; charset=utf-8
+spooler_log.info( request.content_type );               // ==> text/xml
+spooler_log.info( request.charset_name );               // ==> utf-8</pre>
+        </example>
+
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
     <property name="string_content" access="write">
         <com>
             <com.result name="text">
@@ -86,15 +135,20 @@
                 Zuvor muss <code>header( "Content-Type" )</code> mit dem Parameter <code>charset</code> gesetzt sein,
                 zum Beispiel <code>header( "Content-Type" ) = "text/plain; charset=iso-8859-1"</code>.
                 Der Text wird nach dem Parameter <code>charset</code> codiert.
+                Fehlt der Parameter, wird ISO-8859-1 angenommen.
             </p>
             <p>
                 Zu den hier zulässigen Zeichen-Codierungen (Charset) siehe <scheduler_method class="Web_service_request" property="string_content"/>
+            </p>
+            <p>
+                Siehe <scheduler_method class="Web_service_operation" property="charset_name"/>.
             </p>
         </description>
 
         <example programming_language="javascript">
             <pre>var response = spooler_task.order.web_service_operation.response;
-response.header( "Content-Type" ) = "text/plain; charset=iso-8859-1";
+response.content_type = "text/plain";
+response.charset_name = "iso-8859-1";
 response.string_content = "This is the answer";</pre>
         </example>
     </property>

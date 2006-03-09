@@ -70,6 +70,54 @@
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
+    <property name="content_type" access="read">
+        <com>
+            <com.result>
+                <com.type type="BSTR"/>
+            </com.result>
+        </com>
+
+        <title>
+            Content-Type (ohne Parameter)
+        </title>
+
+        <description>
+            <p>
+                Liefert den Kopfeintrag <code>Content-Type:</code> ohne Parameter, z.B. <code>"text/plain"</code>.
+        </p>
+        </description>
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="charset" access="read">
+        <com>
+            <com.result>
+                <com.type type="BSTR"/>
+            </com.result>
+        </com>
+
+        <title>
+            Zeichencodierung
+        </title>
+
+        <description>
+            <p>
+                Liefert den Parameter <code>charset=</code> aus dem Kopfeintrag <code>Content-Type:</code>.
+            </p>
+        </description>
+        
+        <example programming_language="javascript">
+            <pre>var request = spooler_task.order.web_service_operation.request;
+
+spooler_log.info( request.header( "Content-Type" ) );   // ==> text/xml; charset=utf-8
+spooler_log.info( request.content_type );               // ==> text/xml
+spooler_log.info( request.charset_name );               // ==> utf-8</pre>
+        </example>
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
     <property name="string_content" access="read">
         <com>
             <com.result>
@@ -85,6 +133,7 @@
             <p>
                 Die Zeichen-Codierung wird dem Parameter <code>charset</code> aus <code>headers( "Content-Type" )</code> entnommen
                 (siehe <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.17">HTTP/1.1 14.17 Content-Type</a>).
+                Fehlt der Parameter, wird ISO-8859-1 angenommen.
             </p>
             <p>
                 Folgende Zeichen-Coderierungen (Charset) werden erkannt:
