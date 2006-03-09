@@ -369,6 +369,21 @@ struct Spooler : Object,
 
   public:
     Thread_semaphore           _lock;                       // Command_processor::execute_show_state() sperrt auch, für Zugriff auf _db.
+    string                     _spooler_id;                 // -id=
+    string                     _log_directory;              // -log-dir=
+    bool                       _log_directory_as_option_set;// -log-dir= als Option gesetzt, überschreibt Angabe in spooler.xml
+    string                     _log_filename;
+    string                     _include_path;
+    bool                       _include_path_as_option_set; // -include-path= als Option gesetzt, überschreibt Angabe in spooler.xml
+    string                     _temp_dir;
+    string                     _spooler_param;              // -param= Parameter für Skripten
+    bool                       _spooler_param_as_option_set;// -param= als Option gesetzt, überschreibt Angabe in spooler.xml
+    int                        _priority_max;               // <config priority_max=...>
+    int                        _tcp_port;                   // <config tcp=...>
+    bool                       _tcp_port_as_option_set;
+    int                        _udp_port;                   // <config udp=...>
+    bool                       _udp_port_as_option_set;
+    bool                       _reuse_port;
     string                     _version;
     Log                        _base_log;
     Prefix_log                 _log;
@@ -477,21 +492,6 @@ struct Spooler : Object,
     Process_handle             _process_handles[ max_processes ];   // Für abort_immediately(), mutex-frei alle abhängigen Prozesse
     int                        _pids[ max_processes ];              // Für abort_immediately(), mutex-frei alle Task.add_pid(), Subprozesse der Tasks
 //private:
-    string                     _spooler_id;                 // -id=
-    string                     _log_directory;              // -log-dir=
-    bool                       _log_directory_as_option_set;// -log-dir= als Option gesetzt, überschreibt Angabe in spooler.xml
-    string                     _log_filename;
-    string                     _include_path;
-    bool                       _include_path_as_option_set; // -include-path= als Option gesetzt, überschreibt Angabe in spooler.xml
-    string                     _temp_dir;
-    string                     _spooler_param;              // -param= Parameter für Skripten
-    bool                       _spooler_param_as_option_set;// -param= als Option gesetzt, überschreibt Angabe in spooler.xml
-    int                        _priority_max;               // <config priority_max=...>
-    int                        _tcp_port;                   // <config tcp=...>
-    bool                       _tcp_port_as_option_set;
-    int                        _udp_port;                   // <config udp=...>
-    bool                       _udp_port_as_option_set;
-    bool                       _reuse_port;
   //bool                       _free_threading_default;
     time::Holiday_set          _holiday_set;                // Feiertage für alle Jobs
 
