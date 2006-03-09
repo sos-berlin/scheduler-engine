@@ -1803,6 +1803,87 @@
 
     </xsl:template>
 
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~messages-->
+
+    <xsl:template match="messages">
+
+        <html>
+            <xsl:call-template name="html_head">
+                <xsl:with-param name="title" select="Meldungen"/>
+            </xsl:call-template>
+
+            <body>
+                <xsl:call-template name="body_start">
+                    <xsl:with-param name="title"       select="Meldungen"/>
+                    <!--xsl:with-param name="parent_page" select="@parent_page"/-->
+                </xsl:call-template>
+
+                <table cellpadding="0" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <td>Code</td>
+                            <td style="padding-left: 2ex"></td>
+                            <td style="padding-left: 1ex">Text</td>
+                        </tr>
+                        <tr>
+                            <td colspan="99" style="border-bottom: 1px solid black; line-height: 1pt">
+                                &#160;
+                            </td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <xsl:for-each select=".//message">
+                            <tr>
+                                <td rowspan="2">
+                                    <code>
+                                        <xsl:value-of select="@code"/>
+                                    </code>
+                                </td>
+                                <td style="padding-left: 2ex">en:</td>
+                                <td style="padding-left: 1ex">
+                                    <xsl:apply-templates select="text[ @xml:lang='en' ]/title" mode="message"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding-left: 2ex; color: #808080;">de:</td>
+                                <td style="padding-left: 1ex; color: #808080;">
+                                    <xsl:apply-templates select="text[ @xml:lang='de' ]/title" mode="message"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="99" style="border-bottom: 1px solid lightgrey; line-height: 1pt">
+                                    &#160;
+                                </td>
+                            </tr>
+                        </xsl:for-each>
+                    </tbody>
+                </table>
+
+                <xsl:call-template name="bottom">
+                    <xsl:with-param name="title"       select="@title"/>
+                    <xsl:with-param name="parent_page" select="@parent_page"/>
+                </xsl:call-template>
+            </body>
+        </html>
+
+    </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~message/title-->
+
+    <xsl:template match="message/text/title" mode="message">
+        <xsl:for-each select="node()">
+            <xsl:choose>
+                <xsl:when test="self::p1"><i>(1)</i></xsl:when>
+                <xsl:when test="self::p2"><i>(2)</i></xsl:when>
+                <xsl:when test="self::p3"><i>(3)</i></xsl:when>
+                <xsl:when test="self::p4"><i>(4)</i></xsl:when>
+                <xsl:otherwise>
+                    <xsl:value-of select="."/>
+                </xsl:otherwise>
+            </xsl:choose>
+        </xsl:for-each>
+    </xsl:template>
+
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~html_head-->
 
     <xsl:template name="html_head">

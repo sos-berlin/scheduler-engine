@@ -4106,7 +4106,7 @@ const char file_scheduler_xsd[] =
     "\r\n"
     "<xsd:annotation>\r\n"
     "<xsd:documentation xml:lang=\"de\">\r\n"
-    "$Id: scheduler.xsd 4155 2006-03-05 10:06:27Z jz $\r\n"
+    "$Id: scheduler.xsd 4177 2006-03-09 21:50:31Z jz $\r\n"
     "Schema f\xc3" "\xbc" "r die Scheduler-Konfiguration,\r\n"
     "s.a. http://www.zschimmer.com/sos/scheduler/konfiguration.xml.html.\r\n"
     "</xsd:documentation>\r\n"
@@ -4913,7 +4913,7 @@ static const Embedded_file embedded_files_array[] =
     { "html/jz/translation_de.js", file_html_jz_translation_de_js, sizeof file_html_jz_translation_de_js - 1, 1113976395 },
     { "html/jz/scheduler.xslt", file_html_jz_scheduler_xslt, sizeof file_html_jz_scheduler_xslt - 1, 1141665008 },
     { "html/jz/scheduler.css", file_html_jz_scheduler_css, sizeof file_html_jz_scheduler_css - 1, 1137323283 },
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1141915993 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1141941038 },
     { NULL, NULL, 0 }
 };
 

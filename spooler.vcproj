@@ -30,7 +30,7 @@
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
-				CommandLine="&#x0D;&#x0A;&#x0D;&#x0A;echo jar cvfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class&#x0D;&#x0A;cd $(IntDir) &amp;&amp; pwd &amp;&amp; jar cvfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class sos/spooler/jobs/*.class&#x0D;&#x0A;&#x0D;&#x0A;echo perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml api/*.xml&#x0D;&#x0A;cd $(ProjectDir)/doc &amp;&amp; pwd &amp;&amp; bash -c &quot;perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml api/*.xml&quot;&#x0D;&#x0A;copy ..\scheduler.xsd xml\&#x0D;&#x0A;&#x0D;&#x0A;cd $(ProjectDir)&#x0D;&#x0A;cd $(IntDir)&#x0D;&#x0A;echo ant -f ../javadoc.xml&#x0D;&#x0A;ant -f ../javadoc.xml&#x0D;&#x0A;"
+				CommandLine="echo jar cvfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class&#x0D;&#x0A;cd $(IntDir) &amp;&amp; jar cvfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class sos/spooler/jobs/*.class&#x0D;&#x0A;&#x0D;&#x0A;cd $(ProjectDir)/doc&#x0D;&#x0A;copy ..\scheduler.xsd xml\&#x0D;&#x0A;copy ..\messages.xml &#x0D;&#x0A;echo perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml api/*.xml&#x0D;&#x0A;bash -c &quot;perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml api/*.xml&quot;&#x0D;&#x0A;&#x0D;&#x0A;cd $(ProjectDir)&#x0D;&#x0A;cd $(IntDir)&#x0D;&#x0A;echo ant -f ../javadoc.xml&#x0D;&#x0A;ant -f ../javadoc.xml&#x0D;&#x0A;"
 				AdditionalDependencies=""
 				Outputs="$(TargetDir)sos.spooler.jar"
 			/>
@@ -138,7 +138,7 @@
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
-				CommandLine="&#x0D;&#x0A;&#x0D;&#x0A;echo jar cvfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class&#x0D;&#x0A;cd $(IntDir) &amp;&amp; pwd &amp;&amp; jar cvfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class sos/spooler/jobs/*.class&#x0D;&#x0A;&#x0D;&#x0A;echo perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml api/*.xml&#x0D;&#x0A;cd $(ProjectDir)/doc &amp;&amp; pwd &amp;&amp; bash -c &quot;perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml api/*.xml&quot;&#x0D;&#x0A;copy ..\scheduler.xsd xml\&#x0D;&#x0A;&#x0D;&#x0A;cd $(ProjectDir)&#x0D;&#x0A;cd $(IntDir)&#x0D;&#x0A;echo ant -f ../javadoc.xml&#x0D;&#x0A;ant -f ../javadoc.xml&#x0D;&#x0A;"
+				CommandLine="echo jar cvfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class&#x0D;&#x0A;cd $(IntDir) &amp;&amp; jar cvfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class sos/spooler/jobs/*.class&#x0D;&#x0A;&#x0D;&#x0A;cd $(ProjectDir)/doc&#x0D;&#x0A;copy ..\scheduler.xsd xml\&#x0D;&#x0A;copy ..\messages.xml &#x0D;&#x0A;echo perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml api/*.xml&#x0D;&#x0A;bash -c &quot;perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml api/*.xml&quot;&#x0D;&#x0A;&#x0D;&#x0A;cd $(ProjectDir)&#x0D;&#x0A;cd $(IntDir)&#x0D;&#x0A;echo ant -f ../javadoc.xml&#x0D;&#x0A;ant -f ../javadoc.xml&#x0D;&#x0A;"
 				AdditionalDependencies=""
 				Outputs="$(TargetDir)sos.spooler.jar"
 			/>
@@ -248,7 +248,7 @@
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
-				CommandLine="&#x0D;&#x0A;&#x0D;&#x0A;echo jar cvfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class&#x0D;&#x0A;cd $(IntDir) &amp;&amp; pwd &amp;&amp; jar cvfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class sos/spooler/jobs/*.class&#x0D;&#x0A;&#x0D;&#x0A;echo perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml api/*.xml&#x0D;&#x0A;cd $(ProjectDir)/doc &amp;&amp; pwd &amp;&amp; bash -c &quot;perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml api/*.xml&quot;&#x0D;&#x0A;copy ..\scheduler.xsd xml\&#x0D;&#x0A;&#x0D;&#x0A;cd $(ProjectDir)&#x0D;&#x0A;cd $(IntDir)&#x0D;&#x0A;echo ant -f ../javadoc.xml&#x0D;&#x0A;ant -f ../javadoc.xml&#x0D;&#x0A;"
+				CommandLine="echo jar cvfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class&#x0D;&#x0A;cd $(IntDir) &amp;&amp; jar cvfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class sos/spooler/jobs/*.class&#x0D;&#x0A;&#x0D;&#x0A;cd $(ProjectDir)/doc&#x0D;&#x0A;copy ..\scheduler.xsd xml\&#x0D;&#x0A;copy ..\messages.xml &#x0D;&#x0A;echo perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml api/*.xml&#x0D;&#x0A;bash -c &quot;perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml api/*.xml&quot;&#x0D;&#x0A;&#x0D;&#x0A;cd $(ProjectDir)&#x0D;&#x0A;cd $(IntDir)&#x0D;&#x0A;echo ant -f ../javadoc.xml&#x0D;&#x0A;ant -f ../javadoc.xml&#x0D;&#x0A;"
 				AdditionalDependencies=""
 				Outputs="$(TargetDir)sos.spooler.jar"
 			/>

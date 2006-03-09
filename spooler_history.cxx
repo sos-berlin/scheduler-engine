@@ -288,7 +288,7 @@ void Spooler_db::open2( const string& db_name )
 
                 if( _spooler->_need_db )  throw;
             
-                _log->warn( message_string( "SCHEDULER-263", x ) );         // "FEHLER BEIM ÷FFNEN DER HISTORIENDATENBANK: "
+                _log->warn( message_string( "SCHEDULER-309", x ) );         // "FEHLER BEIM ÷FFNEN DER HISTORIENDATENBANK: "
             }
         }
     }
@@ -334,7 +334,7 @@ void Spooler_db::close()
         {
             _db.close();  // odbc.cxx und jdbc.cxx unterdr¸cken selbst Fehler.
         }
-        catch( exception& x ) { _log->warn( message_string( "SCHEDULER-264", x ) ); }
+        catch( exception& x ) { _log->warn( message_string( "SCHEDULER-310", x ) ); }
 
         _db.destroy();
     }
@@ -403,7 +403,7 @@ void Spooler_db::try_reopen_after_error( exception& x, bool wait_endless )
         {
             close();
         }
-        catch( exception& x ) { _log->warn( message_string( "SCHEDULER-264", x ) ); }       // Fehler beim Schlieﬂen der Datenbank
+        catch( exception& x ) { _log->warn( message_string( "SCHEDULER-310", x ) ); }       // Fehler beim Schlieﬂen der Datenbank
 
 
         while( !_db.opened()  &&  !too_much_errors )

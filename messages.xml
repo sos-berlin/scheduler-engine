@@ -1,4 +1,6 @@
 <?xml version="1.0"?>
+<?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
+
 <messages 
     xmlns:xsi = "http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation = "../zschimmer/messages.xsd"
@@ -1462,24 +1464,6 @@
             </text>
         </message>
 
-        <message code="SCHEDULER-263">
-            <text xml:lang="de">
-                <title>Fehler beim Öffnen der Datenbank: <p1/></title>
-            </text>
-            <text xml:lang="en">
-                <title>Error when opening the data base: <p1/></title>
-            </text>
-        </message>
-
-        <message code="SCHEDULER-264">
-            <text xml:lang="de">
-                <title>Fehler beim Schließen der Datenbank</title>
-            </text>
-            <text xml:lang="en">
-                <title></title>
-            </text>
-        </message>
-
         <message code="SCHEDULER-265">
             <text xml:lang="de">
                 <title>SCHEDULER WIRD BEENDET WEGEN FEHLERS BEIM ZUGRIFF AUF DATENBANK</title>
@@ -1620,7 +1604,7 @@
                 <title>Prozess hat mit Exit code <p1/> (0x<p2/>) geendet</title>
             </text>
             <text xml:lang="en">
-                <title></title>
+                <title>Process terminated with exit code <p1/> (0x<p2/>)</title>
             </text>
         </message>
 
@@ -1833,7 +1817,7 @@
 
         <message code="SCHEDULER-304">
             <text xml:lang="de">
-                <title>Fehler beim Lesen der n�chsten Id: <p1/></title>
+                <title>Fehler beim Lesen der nächsten Id: <p1/></title>
             </text>
             <text xml:lang="en">
                 <title>When reading next id: <p1/></title>
@@ -1876,9 +1860,22 @@
             </text>
         </message>
 
-        <message code="SCHEDULER-">
+        <message code="SCHEDULER-309">
             <text xml:lang="de">
-                <title></title>
+                <title>
+                    Fehler beim Öffnen der Datenbank: <p1/>
+                </title>
+            </text>
+            <text xml:lang="en">
+                <title>
+                    Error when opening the data base: <p1/>
+                </title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-310">
+            <text xml:lang="de">
+                <title>Fehler beim Schließen der Datenbank</title>
             </text>
             <text xml:lang="en">
                 <title></title>
@@ -1896,7 +1893,7 @@
                 <title>Scheduler <p1/> startet mit <p2/>, pid=<p3/></title>
             </text>
             <text xml:lang="en">
-                <title>Scheduler <p1/> starting with <p2/>, pid=<p3/></title>
+                <title>Scheduler <p1/> starts with <p2/>, pid=<p3/></title>
             </text>
         </message>
 
@@ -2107,14 +2104,14 @@
             </text>
         </message>
 
-        <message code="SCHEDULER-929">
+        <!--message code="SCHEDULER-929">
             <text xml:lang="de">
                 <title></title>
             </text>
             <text xml:lang="en">
                 <title></title>
             </text>
-        </message>
+        </message-->
 
         <message code="SCHEDULER-930">
             <text xml:lang="de">

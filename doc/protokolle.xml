@@ -88,6 +88,15 @@
     <scheduler_method class="Log" property="level" access="write" java_signature="int"/>
     kann die Stufe (error, warn, info, debug bis debug9) eingestellt werden, ab der Protokollzeilen gelten.
 </p>
+    
+    
+    
+<h2>Meldungs-Codes</h2>
+<p>
+    Die Meldungen sind mit Codes versehen, z.B. <code>SCHEDULER-900</code>.
+    Hier ist eine <a href="messages.xml">Liste der Meldungs-Codes</a> des Schedulers.
+</p>
+    
 
 
 <h2>Plattenplatzmangel</h2>
