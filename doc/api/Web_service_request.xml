@@ -90,7 +90,7 @@
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-    <property name="charset" access="read">
+    <property name="charset_name" access="read">
         <com>
             <com.result>
                 <com.type type="BSTR"/>

@@ -6,6 +6,9 @@
     xsi:noNamespaceSchemaLocation = "../zschimmer/messages.xsd"
     name = "scheduler_messages"
     include = "spooler.h"
+    title    = "Protokolle"
+    author   = "$Author$"
+    date     = "$Date$"
 >
     <!--xmlns = "http://www.zschimmer.com/2006/program_messages"-->
     <!--xsi:schemaLocation = "http://www.zschimmer.com/2006/messages.xsd ../zschimmer/messages.xsd"-->
@@ -1893,7 +1896,7 @@
                 <title>Scheduler <p1/> startet mit <p2/>, pid=<p3/></title>
             </text>
             <text xml:lang="en">
-                <title>Scheduler <p1/> starts with <p2/>, pid=<p3/></title>
+                <title>Scheduler <p1/> is starting with <p2/>, pid=<p3/></title>
             </text>
         </message>
 

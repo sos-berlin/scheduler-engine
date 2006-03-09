@@ -10,6 +10,38 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2006-03-10" version="2.0.148" subversion_revision="4178">
+        <revision type="new" title="Meldungen ins Englische übesetzt und mit Codes versehen">
+            <description>
+                Die Meldungen (außer einige Debug-Meldungen) sind jetzt codiert, wie z.B. "<code>SCHEDULER-900 Scheduler is starting ...</code>".
+                <ul>
+                    <li>
+                        <a href="messages.xml">Liste der Meldungs-Codes</a>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+
+        <revision type="new" title="Neue Eigenschaften Request|Response.content_type und .charset_name">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_method class="Web_service_request" property="content_type"/>
+                    </li>
+                    <li>
+                        <scheduler_method class="Web_service_request" property="charset_name"/>
+                    </li>
+                    <li>
+                        <scheduler_method class="Web_service_response" property="content_type"/>
+                    </li>
+                    <li>
+                        <scheduler_method class="Web_service_response" property="charset_name"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+    </change>
+
     <change date="2006-03-05" version="2.0.148" subversion_revision="4155">
         <revision type="new" title="&lt;job_chain orders_recoverable=&quot;no&quot;&gt;">
             <description>
