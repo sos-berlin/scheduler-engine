@@ -7,8 +7,14 @@
 namespace sos { 
 namespace spooler { 
         
-extern Error_code_text scheduler_messages[] =
+extern Message_code_text scheduler_messages[] =
 {
+    { "SCHEDULER-001", "Scheduler $1 starting with $2, pid=$3" },
+    { "SCHEDULER-002", "state=$1" },
+    { "SCHEDULER-003", "Stopping $1" },
+    { "SCHEDULER-004", "Tasks have $1s to terminate" },
+    { "SCHEDULER-005", "Scheduler terminated properly" },
+    { "SCHEDULER-006", "Restarting Scheduler: $1" },
     { "SCHEDULER-104", "Begin time $1 is after end time $2, or any other error in attributes begin= and end=" },
     { "SCHEDULER-105", "Unknown command: <$1>" },
     { "SCHEDULER-106", "Unknown command for a task: $1" },
@@ -121,6 +127,18 @@ extern Error_code_text scheduler_messages[] =
     { "SCHEDULER-250", "Order state cannot be represented as a character string: $1" },
     { "SCHEDULER-251", "Order payload cannot be represented as character string: $1" },
     { "SCHEDULER-252", "Invalid url path, it has to begin with '/': $1" },
+    { "SCHEDULER-253", "Deadline for terminating Scheduler reached and $1 tasks are still running" },
+    { "SCHEDULER-254", "$1 tasks did not terminate in spite of kill $2s ago. Second deadline of $3s continues" },
+    { "SCHEDULER-255", "$1 tasks did not terminate in spite of kill $2s ago. Scheduler aborts" },
+    { "SCHEDULER-256", "Deadline for terminating Scheduler reached, but $1 tasks are still running" },
+    { "SCHEDULER-257", "Job is removed now" },
+    { "SCHEDULER-258", "Job will be removed after all its tasks have terminated" },
+    { "SCHEDULER-259", "Java didn't start. Scheduler starts without Java" },
+    { "SCHEDULER-260", "Error in Scheduler script, spooler_exit(): $1" },
+    { "SCHEDULER-261", "Nothing done, state=$1, wait_handles=$2" },
+    { "SCHEDULER-262", "Kill signal (ctrl-C) received. Scheduler terminates" },
+    { "SCHEDULER-263", "Kill signal (ctrl-C) received while terminating Scheduler. Scheduler aborts immediately" },
+    { "SCHEDULER-264", "SCHEDULER TERMINATES AFTER SERIOUS ERROR" },
     {}
 };
 } //namespace sos

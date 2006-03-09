@@ -30,6 +30,7 @@
 #include "spooler.h"
 #include "spooler_version.h"
 #include "../zschimmer/charset.h"
+#include "../zschimmer/regex_class.h"
 
 using namespace std;
 
@@ -39,9 +40,12 @@ namespace http {
 
 //-------------------------------------------------------------------------------------------static
 
-stdext::hash_map<int,string>  http_status_messages;
+stdext::hash_map<int,string>    http_status_messages;
 
 //--------------------------------------------------------------------------------------------const
+
+const string                    default_charset_name = "ISO-8859-1";
+
 
 struct Http_status_code_table 
 {   
@@ -119,9 +123,9 @@ string get_content_type_parameter( const string& content_type, const string& par
     return "";
 }
 
-//------------------------------------------------------------------------------Headers::operator[]
+//-------------------------------------------------------------------------------------Headers::get
 
-string Headers::operator[]( const string& name ) const
+string Headers::get( const string& name ) const
 {
     Map::const_iterator it = _map.find( lcase( name ) );
     return it == _map.end()? "" : it->second._value;
@@ -158,6 +162,72 @@ void Headers::set_default( const string& name, const string& value )
 
         if( it == _map.end() )  set( lname, value );
     }
+}
+
+//------------------------------------------------------------------------Headers::set_content_type
+
+void Headers::set_content_type( const string& content_type ) 
+{
+    string e = get( "Content-Type" );
+
+    size_t s = e.find( ';' );
+    if( s == string::npos )  s = e.length();
+
+    if( s > 0  &&  e[ s ] == ' ' )  s--;
+
+    set( "Content-Type", content_type + e.substr( s ) );
+}
+
+//----------------------------------------------------------------------------Headers::content_type
+
+string Headers::content_type() const
+{
+    string result = get( "Content-Type" );
+
+    size_t s = result.find( ';' );
+    if( s == string::npos )  s = result.length();
+
+    return rtrim( result.substr( 0, s ) );
+}
+
+//--------------------------------------------------------------Headers::set_content_type_parameter
+
+void Headers::set_content_type_parameter( const string& name, const string& value )
+{
+    string result;
+    string content_type       = get( "Content-Type" );
+    string lcase_content_type = lcase( content_type );
+    Regex  regex ( "; *" + lcase(name) + "=[^;]*(;|$)" );
+
+
+    if( Regex_match m = regex.match( lcase_content_type ) )
+    {
+        result = content_type.substr( 0, m.offset() );
+        if( value != "" )  result += "; " + name + "=" + value;
+        result += content_type.substr( m.end() );
+    }
+    /*
+    string result;
+    string content_type       = get( "Content-Type" );
+    string lcase_content_type = lcase( content_type );
+
+    size_t pos = lcase_content_type.find( lcase( name ) + "=" );
+    if( pos != string::npos )
+    {
+        int vor = pos;
+        while( vor > 0  &&  content_type[ vor ] != ";" )  pos--;
+
+        int nach = pos;
+        while( nach < content_type.length()  && 
+        result = content_type.substr( 0, vor ) + "; " + name + "=" + value + " " + content_type.substr( nach );
+    */
+    else
+    {
+        if( value != "" )  result = content_type + "; " + name + "=" + value;
+                     else  result = content_type;
+    }
+
+    set( "Content-Type", result );
 }
 
 //-----------------------------------------------------------------------------------Headers::print
@@ -198,6 +268,96 @@ void Headers::print_and_remove( ostream* s, const string& header_name )
         print( s, it );
         _map.erase( it );
     }
+}
+
+//------------------------------------------------------------------------------Headers::put_Header
+
+STDMETHODIMP Headers::put_Header( BSTR name, BSTR value )
+{ 
+    HRESULT hr = S_OK;
+    
+    try
+    {
+        set( string_from_bstr( name ), string_from_bstr( value ) );
+    }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    
+    return hr;
+}
+
+//------------------------------------------------------------------------------Headers::get_Header
+
+STDMETHODIMP Headers::get_Header( BSTR name, BSTR* result )
+{ 
+    HRESULT hr = S_OK;
+    
+    try
+    {
+        hr = String_to_bstr( get( string_from_bstr( name ) ), result ); 
+    }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    
+    return hr;
+}
+
+//------------------------------------------------------------------------Headers::put_Content_type
+
+STDMETHODIMP Headers::put_Content_type( BSTR value )
+{
+    HRESULT hr = S_OK;
+    
+    try
+    {
+        set_content_type( string_from_bstr( value ) );
+    }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    
+    return hr;
+}
+
+//------------------------------------------------------------------------Headers::get_Content_type
+
+STDMETHODIMP Headers::get_Content_type( BSTR* result )
+{
+    HRESULT hr = S_OK;
+    
+    try
+    {
+        hr = String_to_bstr( content_type(), result );
+    }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    
+    return hr;
+}
+
+//------------------------------------------------------------------------Headers::put_Charset_name
+
+STDMETHODIMP Headers::put_Charset_name( BSTR value )
+{
+    HRESULT hr = S_OK;
+    
+    try
+    {
+        set_content_type_parameter( "charset", string_from_bstr( value ) );
+    }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    
+    return hr;
+}
+
+//------------------------------------------------------------------------Headers::get_Charset_name
+
+STDMETHODIMP Headers::get_Charset_name( BSTR* result )
+{
+    HRESULT hr = S_OK;
+    
+    try
+    {
+        hr = String_to_bstr( charset_name(), result );
+    }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    
+    return hr;
 }
 
 //-----------------------------------------------------------------------------------Parser::Parser
@@ -593,24 +753,11 @@ string Request::url() const
     return result;
 }
 
-//----------------------------------------------------------------------------Request::content_type
-
-string Request::content_type() const
-{
-    string content_type = _headers[ "content-type" ];
-    if( content_type == "" )  return "";
-
-    size_t pos = content_type.find( ";" );
-    if( pos == string::npos )  pos = content_type.length();
-
-    return rtrim( content_type.substr( 0, pos ) );
-}
-
-//----------------------------------------------------------------------Request::charset_name
+//----------------------------------------------------------------------------Request::charset_name
 
 string Request::charset_name() const
 {
-    return get_content_type_parameter( _headers[ "content-type" ], "charset" );
+    return _headers.charset_name();
 }
 
 //-----------------------------------------------------------------------------------Request::check
@@ -632,7 +779,12 @@ STDMETHODIMP Request::get_String_content( BSTR* result )
     
     try
     {
-        hr = Charset::for_name( charset_name() )->Encoded_to_bstr( _body, result );
+        string charset_name = this->charset_name();
+        if( charset_name == "" )  charset_name = default_charset_name;
+
+        const Charset* charset = Charset::for_name( charset_name );
+
+        charset->Encoded_to_bstr( _body, result );
     }
     catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
 
@@ -887,6 +1039,21 @@ string Response::start_new_chunk()
     return result;
 }
 
+//--------------------------------------------------------------------Response::Assert_is_not_ready
+
+STDMETHODIMP Response::Assert_is_not_ready()
+{
+    HRESULT hr = S_OK;
+    
+    try
+    {
+        if( is_ready() )  z::throw_xc( "SCHEDULER-247" );
+    }
+    catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+
 //------------------------------------------------------------------------Response::put_Status_code
 
 STDMETHODIMP Response::put_Status_code( int code )
@@ -906,97 +1073,34 @@ STDMETHODIMP Response::put_Status_code( int code )
 
 STDMETHODIMP Response::put_Header( BSTR name, BSTR value )
 { 
-    HRESULT hr = S_OK;
-    
-    try
-    {
-        if( is_ready() )  z::throw_xc( "SCHEDULER-247" );
+    HRESULT hr = Assert_is_not_ready();
+    if( FAILED( hr ) )  return hr;
 
-        set_header( string_from_bstr( name ), string_from_bstr( value ) );  
-    }
-    catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    hr = _headers.put_Header( name, value );
 
     return hr;
 }
 
-//-----------------------------------------------------------------------------Response::get_Header
+//-----------------------------------------------------------------------Response::put_Content_type
 
-STDMETHODIMP Response::get_Header( BSTR name, BSTR* result )
+STDMETHODIMP Response::put_Content_type( BSTR content_type )
 { 
-    HRESULT hr = S_OK;
-    
-    try
-    {
-        hr = String_to_bstr( header( string_from_bstr( name ) ), result );
-    }
-    catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    HRESULT hr = Assert_is_not_ready();
+    if( FAILED( hr ) )  return hr;
 
-    return hr;
+    return _headers.put_Content_type( content_type ); 
 }
 
-//-----------------------------------------------------Web_service_response::put_Character_encoding
-/*
-STDMETHODIMP Web_service_response::put_Character_encoding( BSTR encoding )
+//-----------------------------------------------------------------------Response::put_Charset_name
+
+STDMETHODIMP Response::put_Charset_name( BSTR charset_name )
 { 
-    HRESULT hr = S_OK;
-    
-    try
-    {
-        return E_NOTIMPL;
-        //_http_response->set_character_encoding( string_from_bstr( encoding ) );  
-    }
-    catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    HRESULT hr = Assert_is_not_ready();
+    if( FAILED( hr ) )  return hr;
 
-    return hr;
+    return _headers.put_Charset_name( charset_name ); 
 }
 
-//-----------------------------------------------------Web_service_response::get_Character_encoding
-
-STDMETHODIMP Web_service_response::get_Character_encoding( BSTR* result )
-{ 
-    HRESULT hr = S_OK;
-    
-    try
-    {
-        return E_NOTIMPL;
-        //_http_response->set_character_encoding( string_from_bstr( encoding ) );  
-    }
-    catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
-
-    return hr;
-}
-
-//-----------------------------------------------------------Web_service_response::put_Content_type
-
-STDMETHODIMP Web_service_response::put_Content_type( BSTR content_type )
-{ 
-    HRESULT hr = S_OK;
-    
-    try
-    {
-        //http_response()->set_content_type( string_from_bstr( content_type ) ); 
-    }
-    catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
-
-    return hr;
-}
-
-//-----------------------------------------------------------Web_service_response::get_Content_type
-
-STDMETHODIMP Web_service_response::get_Content_type( BSTR* result )
-{
-    HRESULT hr = S_OK;
-    
-    try
-    {
-        return E_NOTIMPL;
-        //_http_response->set_content_type( string_from_bstr( content_type ) );  
-    }
-    catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
-
-    return hr;
-}
-*/
 //---------------------------------------------------------------------Response::put_String_content
 
 STDMETHODIMP Response::put_String_content( BSTR content_bstr )
@@ -1007,7 +1111,10 @@ STDMETHODIMP Response::put_String_content( BSTR content_bstr )
     {
         if( is_ready() )  z::throw_xc( "SCHEDULER-247" );
 
-        const Charset* charset = Charset::for_name( get_content_type_parameter( header( "content-type" ), "charset" ) );
+        string charset_name = _headers.charset_name();
+        if( charset_name == "" )  charset_name = default_charset_name;
+
+        const Charset* charset = Charset::for_name( charset_name );
 
         set_chunk_reader( Z_NEW( String_chunk_reader( charset->encoded_from_bstr( content_bstr ), "" ) ) );
     }

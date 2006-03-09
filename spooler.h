@@ -68,6 +68,7 @@
 #include "../zschimmer/com_remote.h"
 #include "../zschimmer/java.h"
 #include "../zschimmer/z_sql.h"
+#include "../zschimmer/message.h"
 
 using namespace zschimmer;
 using namespace zschimmer::com;

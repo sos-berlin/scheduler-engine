@@ -654,9 +654,9 @@ void Web_service_operation::assert_usable()
     if( !_http_operation )  z::throw_xc( "SCHEDULER-248" );
 }
 
-//-------------------------------------------------------------Web_service_operation::Assert_usable
+//-------------------------------------------------------------Web_service_operation::Assert_is_usable
 
-STDMETHODIMP Web_service_operation::Assert_usable()
+STDMETHODIMP Web_service_operation::Assert_is_usable()
 {
     HRESULT hr = S_OK;
     
@@ -716,9 +716,9 @@ void Web_service_request::assert_usable()
     _web_service_operation->assert_usable();
 }
 
-//---------------------------------------------------------------Web_service_request::Assert_usable
+//---------------------------------------------------------------Web_service_request::Assert_is_usable
 
-STDMETHODIMP Web_service_request::Assert_usable()
+STDMETHODIMP Web_service_request::Assert_is_usable()
 {
     HRESULT hr = S_OK;
     
@@ -735,7 +735,7 @@ STDMETHODIMP Web_service_request::Assert_usable()
 
 STDMETHODIMP Web_service_request::get_Url( BSTR* result )
 { 
-    HRESULT hr = Assert_usable();
+    HRESULT hr = Assert_is_usable();
     if( FAILED(hr) )  return hr;
 
     return String_to_bstr( http_request()->url(), result ); 
@@ -745,17 +745,37 @@ STDMETHODIMP Web_service_request::get_Url( BSTR* result )
 
 STDMETHODIMP Web_service_request::get_Header( BSTR name, BSTR* result ) 
 { 
-    HRESULT hr = Assert_usable();
+    HRESULT hr = Assert_is_usable();
     if( FAILED(hr) )  return hr;
 
     return String_to_bstr( http_request()->header( string_from_bstr( name ) ), result ); 
+}
+
+//------------------------------------------------------------Web_service_request::get_Charset_name
+
+STDMETHODIMP Web_service_request::get_Charset_name( BSTR* result )
+{ 
+    HRESULT hr = Assert_is_usable();
+    if( FAILED(hr) )  return hr;
+
+    return http_request()->get_Charset_name( result );
+}
+
+//------------------------------------------------------------Web_service_request::get_Content_type
+
+STDMETHODIMP Web_service_request::get_Content_type( BSTR* result )
+{
+    HRESULT hr = Assert_is_usable();
+    if( FAILED(hr) )  return hr;
+
+    return http_request()->get_Content_type( result );
 }
 
 //----------------------------------------------------------Web_service_request::get_String_content
 
 STDMETHODIMP Web_service_request::get_String_content( BSTR* result )
 {
-    HRESULT hr = Assert_usable();
+    HRESULT hr = Assert_is_usable();
     if( FAILED(hr) )  return hr;
 
     return http_request()->get_String_content( result ); 
@@ -765,7 +785,7 @@ STDMETHODIMP Web_service_request::get_String_content( BSTR* result )
 
 STDMETHODIMP Web_service_request::get_Binary_content( SAFEARRAY** result )
 {
-    HRESULT hr = Assert_usable();
+    HRESULT hr = Assert_is_usable();
     if( FAILED(hr) )  return hr;
 
     return http_request()->get_Binary_content( result ); 
@@ -805,9 +825,9 @@ void Web_service_response::assert_usable()
     _web_service_operation->assert_usable();
 }
 
-//--------------------------------------------------------------Web_response_request::Assert_usable
+//--------------------------------------------------------------Web_response_request::Assert_is_usable
 
-STDMETHODIMP Web_service_response::Assert_usable()
+STDMETHODIMP Web_service_response::Assert_is_usable()
 {
     HRESULT hr = S_OK;
     
@@ -824,7 +844,7 @@ STDMETHODIMP Web_service_response::Assert_usable()
     
 STDMETHODIMP Web_service_response::put_Status_code( int code )
 { 
-    HRESULT hr = Assert_usable();
+    HRESULT hr = Assert_is_usable();
     if( FAILED(hr) )  return hr;
 
     return http_response()->put_Status_code( code );
@@ -834,7 +854,7 @@ STDMETHODIMP Web_service_response::put_Status_code( int code )
     
 STDMETHODIMP Web_service_response::put_Header( BSTR name, BSTR value )
 { 
-    HRESULT hr = Assert_usable();
+    HRESULT hr = Assert_is_usable();
     if( FAILED(hr) )  return hr;
 
     return http_response()->put_Header( name, value );
@@ -844,80 +864,57 @@ STDMETHODIMP Web_service_response::put_Header( BSTR name, BSTR value )
 
 STDMETHODIMP Web_service_response::get_Header( BSTR name, BSTR* result )
 { 
-    HRESULT hr = Assert_usable();
+    HRESULT hr = Assert_is_usable();
     if( FAILED(hr) )  return hr;
 
     return http_response()->get_Header( name, result );
 }
 
-//-----------------------------------------------------Web_service_response::put_Character_encoding
-/*
-STDMETHODIMP Web_service_response::put_Character_encoding( BSTR encoding )
-{ 
-    HRESULT hr = S_OK;
-    
-    try
-    {
-        return E_NOTIMPL;
-        //_http_response->set_character_encoding( string_from_bstr( encoding ) );  
-    }
-    catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+//-----------------------------------------------------------Web_service_response::put_Charset_name
 
-    return hr;
+STDMETHODIMP Web_service_response::put_Charset_name( BSTR name )
+{ 
+    HRESULT hr = Assert_is_usable();
+    if( FAILED(hr) )  return hr;
+
+    return http_response()->put_Charset_name( name );
 }
 
-//-----------------------------------------------------Web_service_response::get_Character_encoding
+//-----------------------------------------------------Web_service_response::get_Charset_name
 
-STDMETHODIMP Web_service_response::get_Character_encoding( BSTR* result )
+STDMETHODIMP Web_service_response::get_Charset_name( BSTR* result )
 { 
-    HRESULT hr = S_OK;
-    
-    try
-    {
-        return E_NOTIMPL;
-        //_http_response->set_character_encoding( string_from_bstr( encoding ) );  
-    }
-    catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    HRESULT hr = Assert_is_usable();
+    if( FAILED(hr) )  return hr;
 
-    return hr;
+    return http_response()->get_Charset_name( result );
 }
 
 //-----------------------------------------------------------Web_service_response::put_Content_type
 
 STDMETHODIMP Web_service_response::put_Content_type( BSTR content_type )
 { 
-    HRESULT hr = S_OK;
-    
-    try
-    {
-        //http_response()->set_content_type( string_from_bstr( content_type ) ); 
-    }
-    catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    HRESULT hr = Assert_is_usable();
+    if( FAILED(hr) )  return hr;
 
-    return hr;
+    return http_response()->put_Content_type( content_type );
 }
 
 //-----------------------------------------------------------Web_service_response::get_Content_type
 
 STDMETHODIMP Web_service_response::get_Content_type( BSTR* result )
 {
-    HRESULT hr = S_OK;
-    
-    try
-    {
-        return E_NOTIMPL;
-        //_http_response->set_content_type( string_from_bstr( content_type ) );  
-    }
-    catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    HRESULT hr = Assert_is_usable();
+    if( FAILED(hr) )  return hr;
 
-    return hr;
+    return http_response()->get_Content_type( result );
 }
-*/
+
 //---------------------------------------------------------Web_service_response::put_String_content
 
 STDMETHODIMP Web_service_response::put_String_content( BSTR content_bstr )
 {
-    HRESULT hr = Assert_usable();
+    HRESULT hr = Assert_is_usable();
     if( FAILED(hr) )  return hr;
 
     return http_response()->put_String_content( content_bstr );
@@ -927,7 +924,7 @@ STDMETHODIMP Web_service_response::put_String_content( BSTR content_bstr )
 
 STDMETHODIMP Web_service_response::put_Binary_content( SAFEARRAY* safearray )
 {
-    HRESULT hr = Assert_usable();
+    HRESULT hr = Assert_is_usable();
     if( FAILED(hr) )  return hr;
 
     return http_response()->put_Binary_content( safearray );
@@ -937,7 +934,7 @@ STDMETHODIMP Web_service_response::put_Binary_content( SAFEARRAY* safearray )
 
 STDMETHODIMP Web_service_response::Send() // VARIANT* content, BSTR content_type_bstr )
 {
-    HRESULT hr = Assert_usable();
+    HRESULT hr = Assert_is_usable();
     if( FAILED(hr) )  return hr;
 
     return http_response()->Send();

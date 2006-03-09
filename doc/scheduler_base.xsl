@@ -717,7 +717,7 @@
                                             not( $current_setting/self::ini_entry and $current_setting/ancestor::ini_section/@name='job' )">
                                 hat Vorrang.                                                            
                             </xsl:when-->
-                            <xsl:when test="$current_setting/ancestor::ini_section/@wheight &lt; ancestor::ini_section/@wheight">
+                            <xsl:when test="$current_setting/ancestor::ini_section/@weight &lt; ancestor::ini_section/@weight">
                                 hat Vorrang.                                                            
                             </xsl:when>
                             <xsl:otherwise>

@@ -243,7 +243,8 @@ struct Headers
 
 
     bool                        contains                    ( const string& name )                  { return _map.find( lcase( name ) ) != _map.end(); }
-    string                      operator[]                  ( const string& name ) const;
+    string                      operator[]                  ( const string& name ) const            { return get( name ); }
+    string                      get                         ( const string& name ) const;
     void                        set                         ( const string& name, const string& value );
     void                        set_unchecked               ( const string& name, const string& value );
     void                        set_default                 ( const string& name, const string& value );
@@ -251,7 +252,18 @@ struct Headers
     void                        print                       ( ostream*, const Map::const_iterator& ) const;
     void                        print                       ( ostream*, const string& header_name ) const;
     void                        print_and_remove            ( ostream*, const string& header_name );
+    void                    set_content_type_parameter      ( const string& name, const string& value );
+    void                    set_charset_name                ( const string& value )                 { set_content_type_parameter( "charset", value ); }
+    string                      charset_name                () const                                { return get_content_type_parameter( get( "Content-Type" ), "charset" ); }
+    void                    set_content_type                ( const string& );
+    string                      content_type                () const;
 
+    STDMETHODIMP            put_Header                      ( BSTR name, BSTR value );
+    STDMETHODIMP            get_Header                      ( BSTR name, BSTR* result );
+    STDMETHODIMP            get_Content_type                ( BSTR* result );
+    STDMETHODIMP            get_Charset_name                ( BSTR* result );
+    STDMETHODIMP            put_Content_type                ( BSTR );
+    STDMETHODIMP            put_Charset_name                ( BSTR );
 
     Map                        _map;
 };
@@ -306,6 +318,8 @@ struct Request : Object
 
     STDMETHODIMP            get_Url                         ( BSTR* result )                        { return String_to_bstr( url(), result ); }
     STDMETHODIMP            get_Header                      ( BSTR name, BSTR* result )             { return String_to_bstr( header( string_from_bstr( name ) ), result ); }
+    STDMETHODIMP            get_Content_type                ( BSTR* result )                        { return _headers.get_Content_type( result ); }
+    STDMETHODIMP            get_Charset_name                ( BSTR* result )                        { return _headers.get_Charset_name( result ); }
     STDMETHODIMP            get_Binary_content              ( SAFEARRAY** result );
     STDMETHODIMP            get_String_content              ( BSTR* result );
 
@@ -357,9 +371,14 @@ struct Response : Object
     bool                        eof                         ();
     string                      read                        ( int recommended_size );
 
+    STDMETHODIMP                Assert_is_not_ready         ();
     STDMETHODIMP            put_Status_code                 ( int code );
     STDMETHODIMP            put_Header                      ( BSTR name, BSTR value );
-    STDMETHODIMP            get_Header                      ( BSTR name, BSTR* result );
+    STDMETHODIMP            get_Header                      ( BSTR name, BSTR* result )             { return _headers.get_Header( name, result ); }
+    STDMETHODIMP            put_Content_type                ( BSTR );
+    STDMETHODIMP            get_Content_type                ( BSTR* result )                        { return _headers.get_Content_type( result ); }
+    STDMETHODIMP            put_Charset_name                ( BSTR );
+    STDMETHODIMP            get_Charset_name                ( BSTR* result )                        { return _headers.get_Charset_name( result ); }
     STDMETHODIMP            put_String_content              ( BSTR );
     STDMETHODIMP            put_Binary_content              ( SAFEARRAY* );
     STDMETHODIMP                Send                        ();

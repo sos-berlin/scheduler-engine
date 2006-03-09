@@ -11,11 +11,13 @@ package sos.spooler;
 
 public class Web_service_request  extends Idispatch
 {
-    private                 Web_service_request      ( long idispatch )                  { super(idispatch); }
+    private                 Web_service_request     ( long idispatch )                  { super(idispatch); }
 
     
-    public String           url                      ()                                  { return (String)   com_call( "<Url" ); }
-    public String           header                   ( String name )                     { return (String)   com_call( "<Header", name ); }
-    public String           string_content           ()                                  { return (String)   com_call( "<String_content" ); }
-    public byte[]           binary_content           ()                                  { return (byte[])   com_call( "<Binary_content" ); }
+    public String           url                     ()                                  { return (String)   com_call( "<Url" ); }
+    public String           header                  ( String name )                     { return (String)   com_call( "<Header", name ); }
+    public String           content_type            ()                                  { return (String)   com_call( "<content_type" ); }
+    public String           charset_name            ()                                  { return (String)   com_call( "<charset_name" ); }
+    public String           string_content          ()                                  { return (String)   com_call( "<String_content" ); }
+    public byte[]           binary_content          ()                                  { return (byte[])   com_call( "<Binary_content" ); }
 }

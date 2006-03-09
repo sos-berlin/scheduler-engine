@@ -1447,11 +1447,11 @@ library Spooler
         [propget]
         HRESULT                 Header                  ( [in] BSTR Name, [out,retval] BSTR* Result );
 
-      //[propget]
-      //HRESULT                 Character_encoding      ( [out,retval] BSTR* );
+        [propget]
+        HRESULT                 Charset_name            ( [out,retval] BSTR* );
 
-      //[propget]
-      //HRESULT                 Content_type            ( [out,retval] BSTR* );
+        [propget]
+        HRESULT                 Content_type            ( [out,retval] BSTR* );
 
         [propget]
         HRESULT                 String_content          ( [out,retval] BSTR* );
@@ -1481,19 +1481,17 @@ library Spooler
         [propget]
         HRESULT                 Header                  ( [in] BSTR Name, [out,retval] BSTR* Result );
 
-        /*
         [propput]
-        HRESULT                 Character_encoding      ( [in] BSTR );
+        HRESULT                 Charset_name            ( [in] BSTR );
 
         [propget]
-        HRESULT                 Character_encoding      ( [out,retval] BSTR* );
+        HRESULT                 Charset_name            ( [out,retval] BSTR* );
 
         [propput]
         HRESULT                 Content_type            ( [in] BSTR );
 
         [propget]
         HRESULT                 Content_type            ( [out,retval] BSTR* );
-        */
 
         [propput]
         HRESULT                 String_content          ( [in] BSTR );

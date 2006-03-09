@@ -143,7 +143,7 @@ struct Web_service_operation : idispatch_implementation< Web_service_operation, 
     STDMETHODIMP            get_Web_service                 ( spooler_com::Iweb_service** result )  { *result = _web_service.copy();  return S_OK; }
     STDMETHODIMP            get_Request                     ( spooler_com::Iweb_service_request** );
     STDMETHODIMP            get_Response                    ( spooler_com::Iweb_service_response** );
-    STDMETHODIMP                Assert_usable               ();
+    STDMETHODIMP                Assert_is_usable               ();
   //STDMETHODIMP                Execute_stylesheets         ();
 
     virtual void                close                       ();
@@ -208,12 +208,12 @@ struct Web_service_request : idispatch_implementation< Web_service_request, spoo
     // Iweb_service_request
     STDMETHODIMP            get_Url                         ( BSTR* );
     STDMETHODIMP            get_Header                      ( BSTR name, BSTR* );
-  //STDMETHODIMP            get_Charset_name                ( BSTR* result )                        { return String_to_bstr( http_request()->charset_name(), result ); }
-  //STDMETHODIMP            get_Content_type                ( BSTR* result )                        { return String_to_bstr( http_request()->content_type(), result ); }
+    STDMETHODIMP            get_Charset_name                ( BSTR* );
+    STDMETHODIMP            get_Content_type                ( BSTR* );
     STDMETHODIMP            get_String_content              ( BSTR* );
     STDMETHODIMP            get_Binary_content              ( SAFEARRAY** );
 
-    STDMETHODIMP                Assert_usable               ();
+    STDMETHODIMP                Assert_is_usable            ();
 
     http::Request*              http_request                () const                                { return _web_service_operation->http_request(); }
 
@@ -250,16 +250,16 @@ struct Web_service_response : idispatch_implementation< Web_service_response, sp
     STDMETHODIMP            put_Status_code                 ( int code );
     STDMETHODIMP            put_Header                      ( BSTR name, BSTR value );
     STDMETHODIMP            get_Header                      ( BSTR name, BSTR* result );
-  //STDMETHODIMP            put_Character_encoding          ( BSTR encoding );
-  //STDMETHODIMP            get_Charset_name                ( BSTR* result );
-  //STDMETHODIMP            put_Content_type                ( BSTR content_type );
-  //STDMETHODIMP            get_Content_type                ( BSTR* result );
+    STDMETHODIMP            put_Charset_name                ( BSTR );
+    STDMETHODIMP            get_Charset_name                ( BSTR* );
+    STDMETHODIMP            put_Content_type                ( BSTR );
+    STDMETHODIMP            get_Content_type                ( BSTR* );
     STDMETHODIMP            put_String_content              ( BSTR );
     STDMETHODIMP            put_Binary_content              ( SAFEARRAY* );
     STDMETHODIMP                Send                        ();
   //STDMETHODIMP                Send                        ( VARIANT*, BSTR );
 
-    STDMETHODIMP                Assert_usable               ();
+    STDMETHODIMP                Assert_is_usable            ();
 
     http::Response*             http_response               () const                                { return _web_service_operation->http_response(); }
 

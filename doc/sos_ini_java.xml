@@ -6,14 +6,14 @@
 <ini_section
     file     = "sos.ini"
     name     = "java"
-    wheight  = "10"
+    weight   = "10"
     title    = ""
     base_dir = ""
     author   = "$Author$"
     date     = "$Date$">
 
     <ini_entries>
-        <!--ini_entry name="vm" type="dateiname" title="Dateiname der Java virtual machine">
+        <ini_entry name="vm" type="dateiname" title="Dateiname der Java virtual machine">
             <description>
                 <p>
                     Voreingestellt ist für Windows <code>jvm.dll</code>, für HP-UX <code>jvm.sl</code> und sonst <code>jvm.so</code>.
@@ -23,7 +23,7 @@
                     können Sie hier den vollständigen Pfad angeben.
                 </p>
             </description>
-        </ini_entry-->
+        </ini_entry>
 
         <ini_entry name="class_path" setting="java_class_path"/>
 

@@ -14,6 +14,51 @@
     <cplusplus namespace="spooler"/>
 
 
+    <message code="SCHEDULER-001" weight="info">
+        <text xml:lang="de">
+            <title>Scheduler <parameter number="1"/> startet mit <parameter number="2"/>, pid=<parameter number="3"/></title>
+        </text>
+        <text xml:lang="en">
+            <title>Scheduler <parameter number="1"/> starting with <parameter number="2"/>, pid=<parameter number="3"/></title>
+        </text>
+    </message>
+    
+    <message code="SCHEDULER-002" weight="info">
+        <text xml:lang="en">
+            <title>state=<parameter number="1"/></title>
+        </text>
+    </message>
+    
+    <message code="SCHEDULER-003" weight="info">
+        <text xml:lang="en">
+            <title>Stopping <parameter number="1"/></title>
+        </text>
+    </message>
+    
+    <message code="SCHEDULER-004" weight="info">
+        <text xml:lang="de">
+            <title>Die Tasks haben <parameter number="1"/>s sich zu beenden</title>
+        </text>
+        <text xml:lang="en">
+            <title>Tasks have <parameter number="1"/>s to terminate</title>
+        </text>
+    </message>
+    
+    <message code="SCHEDULER-005" weight="info">
+        <text xml:lang="de">
+            <title>Scheduler ordentlich beendet</title>
+        </text>
+        <text xml:lang="en">
+            <title>Scheduler terminated properly</title>
+        </text>
+    </message>
+
+    <message code="SCHEDULER-006" weight="info">
+        <text xml:lang="en">
+            <title>Restarting Scheduler: <parameter number="1"/></title>
+        </text>
+    </message>
+
     <!--message code="SCHEDULER-101">
         <text xml:lang="de">
             <title>Objektemengenklasse <parameter number="1"/> ist nicht bekannt</title>
@@ -1356,6 +1401,105 @@
         </text>
         <text xml:lang="en">
             <title>Invalid url path, it has to begin with '/': <parameter number="1"/></title>
+        </text>
+    </message>
+
+    <message code="SCHEDULER-253">
+        <text xml:lang="de">
+            <title>Frist zur Beendigung des Schedulers ist abgelaufen, aber <parameter number="1"/> Tasks laufen noch</title>
+        </text>
+        <text xml:lang="en">
+            <title>Deadline for terminating Scheduler reached and <parameter number="1"/> tasks are still running</title>
+        </text>
+    </message>
+
+    <message code="SCHEDULER-254">
+        <text xml:lang="de">
+            <title><parameter number="1"/> Tasks haben sich nicht beendet trotz kill vor <parameter number="2"/>s. Die <parameter number="3"/>s lange Nachfrist läuft weiter</title>
+        </text>
+        <text xml:lang="en">
+            <title><parameter number="1"/> tasks did not terminate in spite of kill <parameter number="2"/>s ago. Second deadline of <parameter number="3"/>s continues</title>
+        </text>
+    </message>
+    
+    <message code="SCHEDULER-255">
+        <text xml:lang="de">
+            <title><parameter number="1"/> Tasks haben sich nicht beendet trotz kill vor <parameter number="2"/>s. Scheduler bricht ab</title>
+        </text>
+        <text xml:lang="en">
+            <title><parameter number="1"/> tasks did not terminate in spite of kill <parameter number="2"/>s ago. Scheduler aborts</title>
+        </text>
+    </message>
+
+    <message code="SCHEDULER-256">
+        <text xml:lang="de">
+            <title>Frist zur Beendigung des Schedulers ist abgelaufen, aber <parameter number="1"/> Tasks haben sich nicht beendet</title>
+        </text>
+        <text xml:lang="en">
+            <title>Deadline for terminating Scheduler reached, but <parameter number="1"/> tasks are still running</title>
+        </text>
+    </message>
+
+    <message code="SCHEDULER-257">
+        <text xml:lang="de">
+            <title>Job wird jetzt entfernt</title>
+        </text>
+        <text xml:lang="en">
+            <title>Job is removed now</title>
+        </text>
+    </message>
+
+    <message code="SCHEDULER-258">
+        <text xml:lang="de">
+            <title>Job wird entfernt sobald alle Tasks beendet sind</title>
+        </text>
+        <text xml:lang="en">
+            <title>Job will be removed after all its tasks have terminated</title>
+        </text>
+    </message>
+
+    <message code="SCHEDULER-259">
+        <text xml:lang="de">
+            <title>Java kann nicht gestartet werden. Scheduler startet ohne Java</title>
+        </text>
+        <text xml:lang="en">
+            <title>Java didn't start. Scheduler starts without Java</title>
+        </text>
+    </message>
+
+    <message code="SCHEDULER-260">
+        <text xml:lang="en">
+            <title>Error in Scheduler script, spooler_exit(): <parameter number="1"/></title>
+        </text>
+    </message>
+
+    <message code="SCHEDULER-261">
+        <text xml:lang="en">
+            <title>Nothing done, state=<parameter number="1"/>, wait_handles=<parameter number="2"/></title>
+        </text>
+    </message>
+
+    <message code="SCHEDULER-262">
+        <text xml:lang="de">
+            <title>Abbruch-Signal (Ctrl-C) empfangen. Der Scheduler wird beendet</title>
+        </text>
+        <text xml:lang="en">
+            <title>Kill signal (ctrl-C) received. Scheduler terminates</title>
+        </text>
+    </message>
+
+    <message code="SCHEDULER-263">
+        <text xml:lang="de">
+            <title>Abbruch-Signal (Ctrl-C) beim Beenden des Schedulers empfangen. Der Scheduler wird abgebrochen, sofort.</title>
+        </text>
+        <text xml:lang="en">
+            <title>Kill signal (ctrl-C) received while terminating Scheduler. Scheduler aborts immediately</title>
+        </text>
+    </message>
+
+    <message code="SCHEDULER-264">
+        <text xml:lang="en">
+            <title>SCHEDULER TERMINATES AFTER SERIOUS ERROR</title>
         </text>
     </message>
 

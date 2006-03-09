@@ -98,21 +98,21 @@ struct Prefix_log : Object, Has_log
     void                        remove_event                ( Event_base* );
     void                        signal_events               ();
 
-    void                        operator()                  ( const string& line )              { info( line ); }
-    void                        debug9                      ( const string& line )              { log( log_debug9, line ); }
-    void                        debug8                      ( const string& line )              { log( log_debug8, line ); }
-    void                        debug7                      ( const string& line )              { log( log_debug7, line ); }
-    void                        debug6                      ( const string& line )              { log( log_debug6, line ); }
-    void                        debug5                      ( const string& line )              { log( log_debug5, line ); }
-    void                        debug4                      ( const string& line )              { log( log_debug4, line ); }
-    void                        debug3                      ( const string& line )              { log( log_debug3, line ); }
-    void                        debug2                      ( const string& line )              { log( log_debug2, line ); }
-    void                        debug1                      ( const string& line )              { log( log_debug1, line ); }
+  //void                        operator()                  ( const string& line )              { info( line ); }
+  //void                        debug9                      ( const string& line )              { log( log_debug9, line ); }
+  //void                        debug8                      ( const string& line )              { log( log_debug8, line ); }
+  //void                        debug7                      ( const string& line )              { log( log_debug7, line ); }
+  //void                        debug6                      ( const string& line )              { log( log_debug6, line ); }
+  //void                        debug5                      ( const string& line )              { log( log_debug5, line ); }
+  //void                        debug4                      ( const string& line )              { log( log_debug4, line ); }
+  //void                        debug3                      ( const string& line )              { log( log_debug3, line ); }
+  //void                        debug2                      ( const string& line )              { log( log_debug2, line ); }
+  //void                        debug1                      ( const string& line )              { log( log_debug1, line ); }
     void                        debug                       ( const string& line )              { log( log_debug_spooler, line ); }
-    void                        info                        ( const string& line )              { log( log_info  , line ); }
-    void                        warn                        ( const string& line )              { log( log_warn  , line ); }
-    void                        error                       ( const string& line )              { log( log_error , line ); }
-    void                        log                         ( Log_level level, const string& line )  { Has_log::log( level, line ); }
+  //void                        info                        ( const string& line )              { log( log_info  , line ); }
+  //void                        warn                        ( const string& line )              { log( log_warn  , line ); }
+  //void                        error                       ( const string& line )              { log( log_error , line ); }
+  //void                        log                         ( Log_level level, const string& line )  { Has_log::log( level, line ); }
     void                        log2                        ( Log_level, const string& prefix, const string& line, Has_log* );
 
     void                        log_file                    ( const string& filename, const string& title = "" );
