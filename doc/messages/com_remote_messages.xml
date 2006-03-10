@@ -23,10 +23,10 @@
     <messages>
         <message code="Z-REMOTE-100">
             <text xml:lang="en">
-                <title>Separate process: </title>
+                <title>Separate process: <p1/></title>
             </text>
             <text xml:lang="de">
-                <title>Objectserver: Fehler: </title>
+                <title>Objectserver: Fehler: <p1/></title>
             </text>
         </message>
         <message code="Z-REMOTE-101">

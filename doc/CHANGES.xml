@@ -50,7 +50,7 @@
                         <scheduler_element name="job_chain" attribute="orders_recoverable" value="no"/>
                     </li>
                     <li>
-                        <scheduler_method class="job_chain" property="orders_recoverable"/>
+                        <scheduler_method class="Job_chain" property="orders_recoverable"/>
                     </li>
                 </ul>
             </description>

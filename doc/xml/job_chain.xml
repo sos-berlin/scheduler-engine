@@ -68,7 +68,7 @@
                     Der Scheduler hält nicht die Aufträge in der Datenbank und lädt sie auch nicht daraus.
                 </p>
                 <p>
-                    Siehe <a href="http://lillerud:6310/doc/datenbank.xml">Datenbank</a>.
+                    Siehe <a href="../datenbank.xml">Datenbank</a>.
                 </p>
             </description>
         </xml_attribute>

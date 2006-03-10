@@ -814,7 +814,7 @@ xml::Element_ptr Communication::dom_element( const xml::Document_ptr& document, 
     {
         const Connection* connection = *c;
 
-        connections_element.appendChild( (*c)->dom_element( document, what ) );
+        connections_element.appendChild( connection->dom_element( document, what ) );
     }
 
     return connections_element;
