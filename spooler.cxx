@@ -1192,7 +1192,7 @@ void Spooler::wait_until_threads_stopped( Time until )
 #   endif
 * /
 }
-
+*/
 //--------------------------------------------------------------------------Spooler::signal_threads
 /*
 void Spooler::signal_threads( const string& signal_name )
