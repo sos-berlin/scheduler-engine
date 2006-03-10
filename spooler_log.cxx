@@ -556,7 +556,7 @@ void Prefix_log::open()
             _file = ::open( _filename.c_str(), O_CREAT | ( _append? O_APPEND : O_TRUNC ) | O_WRONLY | O_NOINHERIT, 0666 );
             if( _file != -1 )  break;
             
-            if( !is_stop_errno( _spooler, errno ) ) throw_errno( errno, _filename.c_str(), "Protokolldatei" );
+            if( !is_stop_errno( _spooler, errno ) ) throw_errno( errno, _filename.c_str(), "protocol file" );
             io_error( _spooler, _filename );
         }
 
@@ -568,7 +568,7 @@ void Prefix_log::open()
 
         string msg = "\n";
         if( _title != "" )  msg += _title + " - ";
-        log( log_info, msg + "Protokoll beginnt in " + _filename );
+        log( log_info, msg + "Protocol starts in " + _filename );       // "SCHEDULER-961"
     }
 
     _started = true;
@@ -611,7 +611,7 @@ void Prefix_log::close2()
     if( _file != -1 )  
     {
         try {
-            log( log_info, "Protokoll endet in " + _filename );
+            log( log_info, message_string( "SCHEDULER-962", _filename ) );      // "Protokol ends in " 
         }
         catch( const exception& ) {}
 
@@ -622,13 +622,13 @@ void Prefix_log::close2()
             int ret = ::close( _file );
             if( ret == -1 )  throw_errno( errno, "close", _filename.c_str() );
         }
-        catch( const exception& x ) { _spooler->_log.error( string("FEHLER BEIM SCHLIEßEN DER PROTOKOLLDATEI: ") + x.what() ); }
+        catch( const exception& x ) { _spooler->_log.error( string("Error when closing protocol file: ") + x.what() ); }
 
         _file = -1;
 
         if( !_new_filename.empty() )
         {
-            log( log_info, "Protokolldatei wird kopiert in " + _new_filename );
+            log( log_info, message_string( "SCHEDULER-963", _new_filename ) );
             copy_file( _filename, _new_filename );
             //int ret = rename( _filename.c_str(), _new_filename.c_str() );
             //if( ret == -1 )  throw_errno( errno, "rename", _new_filename.c_str() );

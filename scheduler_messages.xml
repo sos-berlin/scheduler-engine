@@ -2415,6 +2415,24 @@
             </text>
         </message>
 
+        <message code="SCHEDULER-961">
+            <text xml:lang="en">
+                <title>Protocol starts in <p1/></title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-962">
+            <text xml:lang="en">
+                <title>Protocol ends in <p1/></title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-963">
+            <text xml:lang="en">
+                <title>Copying protocol file to <p1/></title>
+            </text>
+        </message>
+
         <message code="SCHEDULER-999">
             <text xml:lang="de">
                 <title>Scheduler ordentlich beendet</title>
