@@ -407,9 +407,7 @@ bool Termination_async_operation::async_continue_( Continue_flags flags )
     {
         case s_ending:
         {
-            int count = _spooler->_single_thread->_task_list.size();
-            string error_line = message_string( "SCHEDULER-256", count );  // "Frist zur Beendigung des Schedulers ist abgelaufen, aber $1 Tasks haben sich nicht beendet
-            //error_line << "Frist zur Beendigung des Schedulers ist abgelaufen, aber " << count << " Tasks haben sich nicht beendet";
+            string error_line = message_string( "SCHEDULER-256", _spooler->_single_thread->_task_list.size() );  // "Frist zur Beendigung des Schedulers ist abgelaufen, aber $1 Tasks haben sich nicht beendet
             
             _spooler->_log.error( error_line );
 
@@ -2269,7 +2267,7 @@ void Spooler::execute_state_cmd()
                     Z_FOR_EACH( Job_list, _job_list, j )
                     {
                         Job* job = *j;
-                        _log.info( message_string( "SCHEDULER-903", job->obj_name() ) );
+                        _log.info( message_string( "SCHEDULER-903", job->obj_name() ) );        // "Stopping"
                         //_log.info( S() << "stop " << job->obj_name() );
                         bool end_all_tasks = true;
                         job->stop( end_all_tasks );

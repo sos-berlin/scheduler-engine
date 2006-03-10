@@ -1325,7 +1325,7 @@
 
         <message code="SCHEDULER-248">
             <text xml:lang="de">
-                <title>web_service_operation ist beendet und nicht mehr gültig</title>
+                <title>web_service_operation ist abgeschlossen und nicht mehr gültig</title>
             </text>
             <text xml:lang="en">
                 <title>web_service_operation has finished and is not longer valid</title>
@@ -1382,7 +1382,7 @@
                 <title><p1/> Tasks haben sich nicht beendet trotz kill vor <p2/>s. Die <p3/>s lange Nachfrist läuft weiter</title>
             </text>
             <text xml:lang="en">
-                <title><p1/> tasks did not terminate in spite of kill <p2/>s ago. Second deadline of <p3/>s continues</title>
+                <title><p1/> tasks did not terminate in spite of kill <p2/>s ago. Deadline is extended for <p3/>s</title>
             </text>
         </message>
         
@@ -1409,7 +1409,7 @@
                 <title>Job wird jetzt entfernt</title>
             </text>
             <text xml:lang="en">
-                <title>Job is removed now</title>
+                <title>Removing job</title>
             </text>
         </message>
 
@@ -1427,7 +1427,7 @@
                 <title>Java kann nicht gestartet werden. Scheduler startet ohne Java</title>
             </text>
             <text xml:lang="en">
-                <title>Java didn't start. Scheduler starts without Java</title>
+                <title>Java did not start. Scheduler starts without Java</title>
             </text>
         </message>
 
@@ -1454,10 +1454,10 @@
 
         <message code="SCHEDULER-263">
             <text xml:lang="de">
-                <title>Abbruch-Signal (Ctrl-C) beim Beenden des Schedulers empfangen. Der Scheduler wird abgebrochen, sofort.</title>
+                <title>Abbruch-Signal (Ctrl-C) beim Beenden des Schedulers empfangen. DER SCHEDULER WIRD ABGEBROCHEN, SOFORT.</title>
             </text>
             <text xml:lang="en">
-                <title>Kill signal (ctrl-C) received while terminating Scheduler. Scheduler aborts immediately</title>
+                <title>Kill signal (ctrl-C) received while terminating Scheduler. ABORTING IMMEDIATELY SCHEDULER.</title>
             </text>
         </message>
 
@@ -1472,7 +1472,7 @@
                 <title>SCHEDULER WIRD BEENDET WEGEN FEHLERS BEIM ZUGRIFF AUF DATENBANK</title>
             </text>
             <text xml:lang="en">
-                <title>SCHEDULER TERMINATES DUE TO A PROBLEM WITH THE DATABASE: <p1/></title>
+                <title>ABORTING SCHEDULER DUE TO A PROBLEM WITH THE DATABASE: <p1/></title>
             </text>
         </message>
 
@@ -1526,7 +1526,7 @@
                 <title>Zugunsten des Jobs <p1/> wird die Task beendet</title>
             </text>
             <text xml:lang="en">
-                <title>In favour of job <p1/> the task is terminated</title>
+                <title>Terminating task to get process for job <p1/></title>
             </text>
         </message>
 
@@ -1535,7 +1535,7 @@
                 <title>Task wird nach nach Fristablauf abgebrochen</title>
             </text>
             <text xml:lang="en">
-                <title>Terminating task after reaching deadline</title>
+                <title>Terminating task after reaching deadline &lt;job timeout=""></title>
             </text>
         </message>
 
@@ -1562,7 +1562,7 @@
                 <title>Subprozess <p1/> wird abgebrochen, weil seine Frist überschritten ist</title>
             </text>
             <text xml:lang="en">
-                <title>Killing subprocess after reaching deadline</title>
+                <title>Deadline reached, killing subprocess <p1/></title>
             </text>
         </message>
 
@@ -1625,7 +1625,7 @@
                 <title></title>
             </text>
             <text xml:lang="en">
-                <title>end(kill_immediately=true) called, task will be killed</title>
+                <title>end(kill_immediately) called, task will be killed</title>
             </text>
         </message>
 
@@ -1661,7 +1661,7 @@
                 <title>Mehr als <p1/> Kommunikationskanäle. Verbindung abgelehnt</title>
             </text>
             <text xml:lang="en">
-                <title>More than <p2/> communication channels. Connection denied</title>
+                <title>More than <p1/> communication channels. Connection denied</title>
             </text>
         </message>
 
@@ -1676,10 +1676,10 @@
 
         <message code="SCHEDULER-288">
             <text xml:lang="de">
-                <title>-reuse-port: <p1/> wird verwendet, auch wenn er schon von einer anderen Anwendung belegt ist</title>
+                <title>-reuse-port (SO_REUSEADDR): <p1/> wird verwendet, auch wenn er schon von einer anderen Anwendung belegt ist</title>
             </text>
             <text xml:lang="en">
-                <title>-reuse-port: Using <p1/>, but another application can use it too</title>
+                <title>-reuse-port (SO_REUSEADDR): <p1/> can be used by another application too</title>
             </text>
         </message>
 
@@ -1688,7 +1688,7 @@
                 <title><p1/> ist blockiert. Wir probieren es <p2/> Sekunden</title>
             </text>
             <text xml:lang="en">
-                <title><p1/> is blocked. Trying <p2/> seconds</title>
+                <title><p1/> is blocked. Trying <p2/> seconds before giving up</title>
             </text>
         </message>
 
@@ -1715,7 +1715,7 @@
                 <title>Email unterdrückt, weil From, To, Subject oder der Nachrichtentext fehlt</title>
             </text>
             <text xml:lang="en">
-                <title>Missing from, to, subject or body. Supressing email</title>
+                <title>Missing from, to, subject or body. Suppressing email</title>
             </text>
         </message>
 
@@ -1742,7 +1742,7 @@
                 <title>Auftrag <p1/> aus der Datenbank ist fehlerhaft: <p2/></title>
             </text>
             <text xml:lang="en">
-                <title>When loading Order <p1/> from database: <p2/></title>
+                <title>When loading order <p1/> from database: <p2/></title>
             </text>
         </message>
 
@@ -1751,16 +1751,16 @@
                 <title>Die &lt;run_time> des Auftrags hat keine nächste Startzeit</title>
             </text>
             <text xml:lang="en">
-                <title>Order's &lt;run_time> do not have a new start time</title>
+                <title>Order's &lt;run_time> do not have a next start time</title>
             </text>
         </message>
 
         <message code="SCHEDULER-297">
             <text xml:lang="de">
-                <title>web_service_operation.send() fehlt, Operation wird abgebrochen</title>
+                <title>Auftrag erledigt ohne web_service_operation.send(), Operation wird abgebrochen</title>
             </text>
             <text xml:lang="en">
-                <title>Missing web_service_operation.send(), operation cancelled</title>
+                <title>Order carried out without web_service_operation.send(), operation cancelled</title>
             </text>
         </message>
 
@@ -1787,7 +1787,7 @@
                 <title>Überwachung des Verzeichnisses <p1/> wird nach Fehler beendet: <p2/></title>
             </text>
             <text xml:lang="en">
-                <title>Terminating watching directory <p1/> after error: <p2/></title>
+                <title>Watching directory <p1/> ends after error: <p2/></title>
             </text>
         </message>
 
@@ -1820,10 +1820,10 @@
 
         <message code="SCHEDULER-304">
             <text xml:lang="de">
-                <title>Fehler beim Lesen der nächsten Id: <p1/></title>
+                <title>Fehler beim Lesen der nächsten Id (Spalte "<p2/>"): <p1/></title>
             </text>
             <text xml:lang="en">
-                <title>When reading next id: <p1/></title>
+                <title>When reading next id (column "<p2/>"): <p1/></title>
             </text>
         </message>
 
@@ -1871,17 +1871,17 @@
             </text>
             <text xml:lang="en">
                 <title>
-                    Error when opening the data base: <p1/>
+                    Error when opening data base: <p1/>
                 </title>
             </text>
         </message>
 
         <message code="SCHEDULER-310">
             <text xml:lang="de">
-                <title>Fehler beim Schließen der Datenbank</title>
+                <title>Fehler beim Schließen der Datenbank: <p1/></title>
             </text>
             <text xml:lang="en">
-                <title></title>
+                <title>Error when closing database: <p1/></title>
             </text>
         </message>
 
@@ -1950,7 +1950,7 @@
                 <title>Datenbank-Tabelle <p1/> wird eingerichtet</title>
             </text>
             <text xml:lang="en">
-                <title>Creating database table <p2/></title>
+                <title>Creating database table <p1/></title>
             </text>
         </message>
 
@@ -1965,7 +1965,7 @@
 
         <message code="SCHEDULER-912" weight="debug">
             <text xml:lang="en">
-                <title>add_pid(<p1/>), deadline is <p2/></title>
+                <title>add_pid(<p1/>), deadline for process is <p2/></title>
             </text>
         </message>
 
@@ -2247,7 +2247,7 @@
                 <title>Kein weiterer Job in der Jobkette, der Auftrag ist erledigt</title>
             </text>
             <text xml:lang="en">
-                <title>End state reached, order finished</title>
+                <title>End state reached, order is carried out</title>
             </text>
         </message>
 
@@ -2301,7 +2301,7 @@
                 <title>Sommerzeit beginnt</title>
             </text>
             <text xml:lang="en">
-                <title>Daylight saving time starts</title>
+                <title>Switching to daylight saving time</title>
             </text>
         </message>
 
@@ -2310,7 +2310,7 @@
                 <title>Winterzeit beginnt</title>
             </text>
             <text xml:lang="en">
-                <title>Daylight saving time ends</title>
+                <title>Switching back from daylight saving time</title>
             </text>
         </message>
 
@@ -2325,10 +2325,10 @@
 
         <message code="SCHEDULER-954">
             <text xml:lang="de">
-                <title>XSLT-Stylesheet <p1/> <p2/> liefert:</title>
+                <title>XSLT-Stylesheet <p1/>="<p2/>" liefert:</title>
             </text>
             <text xml:lang="en">
-                <title>XSLT stylesheet <p1/> <p1/> returns:</title>
+                <title>XSLT stylesheet <p1/>="<p2/>" returns:</title>
             </text>
         </message>
 
@@ -2361,10 +2361,10 @@
 
         <message code="SCHEDULER-958">
             <text xml:lang="de">
-                <title>Eine Minute warten bevor Datenbank erneut geöffnet wird ...</title>
+                <title><p1/> Sekunden warten bevor Datenbank erneut geöffnet wird ...</title>
             </text>
             <text xml:lang="en">
-                <title>Waiting a minute before opening the database again</title>
+                <title>Waiting <p1/> seconds before opening the database again</title>
             </text>
         </message>
 

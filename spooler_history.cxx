@@ -30,6 +30,7 @@ const char history_column_names_db[] = "log";    // Spalten zusätzlich in der Da
 const int max_field_length = 1024;      // Das ist die Feldgröße von Any_file -type=(...) für tabulierte Datei.
 const int blob_field_size  = 1900;      // Bis zu dieser Größe wird ein Blob im Datensatz geschrieben. ODBC erlaubt nur 2000 Zeichen lange Strings
 const int db_error_retry_max = 0;       // Nach DB-Fehler max. so oft die Datenbank neu eröffnen und Operation wiederholen.
+const int seconds_before_reopen = 60;   // Solange warten, bis Datenbank nach Fehler erneut geöffnet wird
 
 //---------------------------------------------------------------------------------------------test
 /*
@@ -471,8 +472,8 @@ void Spooler_db::try_reopen_after_error( exception& x, bool wait_endless )
                         break;
                     }
 
-                    _spooler->log()->warn( message_string( "SCHEDULER-958" ) );   // "Eine Minute warten bevor Datenbank erneut geöffnet wird ..."
-                    _spooler->_connection_manager->async_continue_selected( is_communication_operation, 60 );
+                    _spooler->log()->warn( message_string( "SCHEDULER-958" ), seconds_before_reopen );   // "Eine Minute warten bevor Datenbank erneut geöffnet wird ..."
+                    _spooler->_connection_manager->async_continue_selected( is_communication_operation, seconds_before_reopen );
                 }
             }
         }
@@ -560,7 +561,7 @@ int Spooler_db::get_id( const string& variable_name, Transaction* outer_transact
     }
     catch( exception& x ) 
     { 
-        _spooler->log()->error( message_string( "SCHEDULER-304", x ) );   // "FEHLER BEIM LESEN DER NÄCHSTEN ID: "
+        _spooler->log()->error( message_string( "SCHEDULER-304", x, variable_name ) );   // "FEHLER BEIM LESEN DER NÄCHSTEN ID: "
         throw;
     }
 
@@ -703,7 +704,7 @@ void Spooler_db::spooler_stop()
         }
         catch( exception& x )  
         { 
-            _log->warn( message_string( "SCHEDULER-266", x ) ); 
+            _log->warn( message_string( "SCHEDULER-306", _spooler->_job_history_tablename, x ) ); 
         }
     }
 }
