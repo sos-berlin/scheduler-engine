@@ -11,6 +11,7 @@ endif
 
 
 objects = \
+ scheduler_messages.o\
  spooler.o\
  spooler_com.o\
  spooler_common.o\
