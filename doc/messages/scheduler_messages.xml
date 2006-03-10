@@ -51,9 +51,23 @@
         <message code="SCHEDULER-104">
             <text xml:lang="de">
                 <title>Beginnzeit <p1/> liegt nach der Endezeit <p2/>, oder anderer Fehler bei Attributen begin= und end=</title>
+                <description>
+                    <p>
+                        <i>- Beispiel für eine nähere Beschreibung -</i>
+                    </p>
+                    <p>
+                        Fehlerhaft ist zum Beispiel <code>&lt;period begin="23:00" end="01:00"/></code>. 
+                        Eine Periode muss innerhalb eines Kalendertages liegen, zwischen 00:00 und 24:00.
+                    </p>
+                    <p>
+                        Siehe <scheduler_element name="period"/>.
+                    </p>
+                </description>
             </text>
             <text xml:lang="en">
-                <title>Begin time <p1/> is after end time <p2/>, or any other error in attributes begin= and end=</title>
+                <title>
+                    Begin time <p1/> is after end time <p2/>, or any other error in attributes begin= and end=
+                </title>
             </text>
         </message>
 
@@ -63,6 +77,11 @@
             </text>
             <text xml:lang="en">
                 <title>Unknown command: &lt;<p1/>></title>
+                <description>
+                    <p>
+                        See <a href="../xml_commands.xml">XML-Kommandos</a>.
+                    </p>
+                </description>
             </text>
         </message>
 
@@ -160,10 +179,10 @@
 
         <message code="SCHEDULER-116">
             <text xml:lang="de">
-                <title>XML-Konfiguration enthält kein &lt;config -spooler-id=<p1/>></title>
+                <title>XML-Konfiguration enthält kein Element &lt;config -spooler-id=<p1/>></title>
             </text>
             <text xml:lang="en">
-                <title>XML configuration contains no &lt;config -spooler-id=<p1/>></title>
+                <title>XML configuration contains no element &lt;config -spooler-id=<p1/>></title>
             </text>
         </message>
 
@@ -307,7 +326,7 @@
                 <title>Job <p1/> wird nicht gestartet, weil das Laden des Skripts fehlschlug: <p2/></title>
             </text>
             <text xml:lang="en">
-                <title>Job <p1/> is not startet, because loading the script failed: <p2/></title>
+                <title>Job <p1/> is not started, because loading the script failed: <p2/></title>
             </text>
         </message>
 
@@ -1886,6 +1905,18 @@
             </text>
         </message>
 
+        <message code="SCHEDULER-311">
+            <text xml:lang="en">
+                <title>Error when processing HTTP request <p1/>: <p2/></title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-312">
+            <text xml:lang="en">
+                <title>Error when processing HTTP request <p1/>: <p2/></title>
+            </text>
+        </message>
+
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->
@@ -2293,7 +2324,7 @@
                 <title>Scheduler ist registriert</title>
             </text>
             <text xml:lang="en">
-                <title>Scheduler ist registered</title>
+                <title>Scheduler is registered</title>
             </text>
         </message>
 
@@ -2375,6 +2406,12 @@
             </text>
             <text xml:lang="en">
                 <title>Switching history from database to plain files</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-960">
+            <text xml:lang="en">
+                <title>Service handler: dwControl=<p1/></title>
             </text>
         </message>
 

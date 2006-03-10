@@ -153,7 +153,7 @@ xml::Document_ptr Scheduler_event::mail_dom( const xml::Document_ptr& event_dom_
         }
         catch( exception& x )
         {
-            _object->log()->warn( S() << "XSLT-Stylesheet: " << x );
+            _object->log()->warn( x.what() );
         }    
     }
 
@@ -166,7 +166,7 @@ xml::Document_ptr Scheduler_event::mail_dom( const xml::Document_ptr& event_dom_
         }
         catch( exception& x )
         {
-            _object->log()->warn( S() << "XSLT-Stylesheet: " << x );
+            _object->log()->warn( x.what() );
         }    
     }
 

@@ -484,7 +484,7 @@ static void __stdcall Handler( DWORD dwControl )
         if( dwControl == SERVICE_CONTROL_STOP 
          || dwControl == SERVICE_CONTROL_SHUTDOWN )  start_self_destruction();      // Vorsichtshalber vor info()!
 
-        spooler_ptr->log()->info( "Service Handler " + string_from_handler_control(dwControl) );
+        spooler_ptr->log()->info( message_string( "SCHEDULER-960", string_from_handler_control(dwControl) ) );
 
         switch( dwControl )
         {

@@ -323,24 +323,30 @@ void Log::log2( Log_level level, const string& prefix, const string& line_, Pref
                 restore_console = true;
                 GetConsoleScreenBufferInfo( GetStdHandle(STD_ERROR_HANDLE), &console_screen_buffer_info );
 
-                WORD attributes = BACKGROUND_BLUE | BACKGROUND_RED | BACKGROUND_GREEN | BACKGROUND_INTENSITY;
-                switch( level )
+                WORD attributes = console_screen_buffer_info.wAttributes;   //BACKGROUND_BLUE | BACKGROUND_RED | BACKGROUND_GREEN | BACKGROUND_INTENSITY;
+                if( attributes & BACKGROUND_INTENSITY
+                 && attributes & BACKGROUND_RED 
+                 && attributes & BACKGROUND_GREEN )       // Hintergrund ist hell und weiﬂ oder gelb
                 {
-                    case log_error:     attributes |= FOREGROUND_INTENSITY | FOREGROUND_RED; break;
-                    case log_warn:      attributes |= FOREGROUND_RED; break;
-                    case log_info:      attributes |= FOREGROUND_INTENSITY | FOREGROUND_BLUE; break;
-                    case log_debug1:    attributes |= FOREGROUND_BLUE; break;
-                    case log_debug2:    
-                    case log_debug3:    attributes |= FOREGROUND_GREEN; break;
-                    case log_debug4:
-                    case log_debug5:
-                    case log_debug6:
-                    case log_debug7:
-                    case log_debug8:    attributes |= FOREGROUND_GREEN; break;
-                    case log_debug9:
-                    default:            attributes |= FOREGROUND_GREEN; break;
+                    switch( level )
+                    {
+                        case log_error:     attributes |= FOREGROUND_INTENSITY | FOREGROUND_RED; break;
+                        case log_warn:      attributes |= FOREGROUND_RED; break;
+                        case log_info:      attributes |= FOREGROUND_INTENSITY | FOREGROUND_BLUE; break;
+                        case log_debug1:    attributes |= FOREGROUND_BLUE; break;
+                        case log_debug2:    
+                        case log_debug3:    attributes |= FOREGROUND_GREEN; break;
+                        case log_debug4:
+                        case log_debug5:
+                        case log_debug6:
+                        case log_debug7:
+                        case log_debug8:    attributes |= FOREGROUND_GREEN; break;
+                        case log_debug9:
+                        default:            attributes |= FOREGROUND_GREEN; break;
+                    }
+
+                    SetConsoleTextAttribute( GetStdHandle(STD_ERROR_HANDLE), attributes );
                 }
-                SetConsoleTextAttribute( GetStdHandle(STD_ERROR_HANDLE), attributes );
             }
 #       endif
 

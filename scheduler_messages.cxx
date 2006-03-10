@@ -12,7 +12,7 @@ namespace spooler {
         
 Message_code_text scheduler_messages[] =
 {
-    { "SCHEDULER-104", "Begin time $1 is after end time $2, or any other error in attributes begin= and end=" },
+    { "SCHEDULER-104", "                     Begin time $1 is after end time $2, or any other error in attributes begin= and end=                 " },
     { "SCHEDULER-105", "Unknown command: <$1>" },
     { "SCHEDULER-106", "Unknown command for a task: $1" },
     { "SCHEDULER-107", "Script missing" },
@@ -20,7 +20,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-110", "Unknown state of a task: $1" },
     { "SCHEDULER-113", "Unexpected XML tag $1" },
     { "SCHEDULER-115", "Missing XML configuration file, option -config=FILENAME.XML" },
-    { "SCHEDULER-116", "XML configuration contains no <config -spooler-id=$1>" },
+    { "SCHEDULER-116", "XML configuration contains no element <config -spooler-id=$1>" },
     { "SCHEDULER-117", "Cannot use different scripting languages in the same scripting engine" },
     { "SCHEDULER-119", "There is no security level \"$1\"" },
     { "SCHEDULER-120", "Script has set an error: $1" },
@@ -29,7 +29,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-125", "task.wait_until_terminated() cannot called in the same thread. Deadlock." },
     { "SCHEDULER-126", "Process terminated with exit code $1" },
     { "SCHEDULER-130", "Job $1 is defined already" },
-    { "SCHEDULER-132", "Job $1 is not startet, because loading the script failed: $2" },
+    { "SCHEDULER-132", "Job $1 is not started, because loading the script failed: $2" },
     { "SCHEDULER-136", "No history" },
     { "SCHEDULER-139", "Operation is not possible when using a plain text file for history" },
     { "SCHEDULER-140", "Task logged error: $1" },
@@ -182,6 +182,8 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-308", "Ignoring cancel(), because response is being sent already" },
     { "SCHEDULER-309", "                     Error when opening data base: $1                 " },
     { "SCHEDULER-310", "Error when closing database: $1" },
+    { "SCHEDULER-311", "Error when processing HTTP request $1: $2" },
+    { "SCHEDULER-312", "Error when processing HTTP request $1: $2" },
     { "SCHEDULER-900", "Scheduler $1 is starting with $2, pid=$3" },
     { "SCHEDULER-902", "state=$1" },
     { "SCHEDULER-903", "Stopping $1" },
@@ -228,7 +230,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-947", "setback(): Order is set back the $1 time. This is more than the job's maximum $2" },
     { "SCHEDULER-948", "Process pid=$1 started" },
     { "SCHEDULER-949", "$1 will be executed by an available process" },
-    { "SCHEDULER-950", "Scheduler ist registered" },
+    { "SCHEDULER-950", "Scheduler is registered" },
     { "SCHEDULER-951", "Switching to daylight saving time" },
     { "SCHEDULER-952", "Switching back from daylight saving time" },
     { "SCHEDULER-953", "Still waiting $1 seconds ..." },
@@ -238,6 +240,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-957", "Closing database" },
     { "SCHEDULER-958", "Waiting $1 seconds before opening the database again" },
     { "SCHEDULER-959", "Switching history from database to plain files" },
+    { "SCHEDULER-960", "Service handler: dwControl=$1" },
     { "SCHEDULER-999", "Scheduler terminated properly" },
     {}
 };

@@ -1081,7 +1081,7 @@ void Command_processor::execute_http( http::Operation* http_operation )
     }
     catch( const exception& x )
     {
-        _spooler->log()->debug( "HTTP request " + http_request->_http_cmd + " " + path + ": " + x.what() );
+        _spooler->log()->debug( message_string( "SCHEDULER-311", http_request->_http_cmd + " " + path, x ) );
 
         throw http::Http_exception( http::status_404_bad_request, x.what() );
     }

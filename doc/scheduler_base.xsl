@@ -12,7 +12,7 @@
 <xsl:stylesheet xmlns:xsl = "http://www.w3.org/1999/XSL/Transform"
                 version   = "1.0">
 
-    <xsl:param name="programming_language"/>
+    <!--xsl:param name="programming_language"/-->
     <xsl:output doctype-public="-//W3C//DTD HTML 4.01//EN" />  <!--"http://www.w3.org/TR/html4/strict.dtd"-->
 
 
@@ -1865,9 +1865,9 @@
         <table cellpadding="0" cellspacing="0">
             <thead>
                 <tr>
-                    <td>Code</td>
-                    <td style="padding-left: 2ex"></td>
-                    <td style="padding-left: 1ex">Text</td>
+                    <td style="padding-right: 1ex;">Code</td>
+                    <td style="padding-left: 1ex; padding-right: 1ex;"></td>
+                    <td style="padding-left: 1ex; padding-right: 1ex;">Text</td>
                 </tr>
                 <tr>
                     <td colspan="99" style="border-bottom: 1px solid black; line-height: 1pt">
@@ -1886,27 +1886,31 @@
     <xsl:template match="messages/message">
 
         <tr>
-            <td rowspan="2">
-                <code>
+            <td rowspan="2" style="padding-right: 1ex;">
+                <code style="white-space: nowrap">
                     <xsl:value-of select="@code"/>
                 </code>
             </td>
-            <td style="padding-left: 2ex">en:</td>
-            <td style="padding-left: 1ex">
-                <xsl:apply-templates select="text[ @xml:lang='en' ]/title" mode="message"/>
+            <td style="padding-left: 1ex; padding-right: 1ex;">
+                en:
+            </td>
+            <td style="padding-left: 1ex; padding-right: 1ex;">
+                <xsl:apply-templates select="text[ @xml:lang='en' ]"/>
             </td>
         </tr>
         
         <tr>
-            <td style="padding-left: 2ex; color: #808080;">de:</td>
-            <td style="padding-left: 1ex; color: #808080;">
-                <xsl:apply-templates select="text[ @xml:lang='de' ]/title" mode="message"/>
+            <td style="padding-left: 1ex; padding-right: 1ex; background-color: #f8f8ff;">
+                de:
+            </td>
+            <td style="padding-left: 1ex; padding-right: 1ex; background-color: #f8f8ff;">
+                <xsl:apply-templates select="text[ @xml:lang='de' ]"/>
             </td>
         </tr>
         
         <xsl:if test="position() != last()">
             <tr>
-                <td colspan="99" style="border-bottom: 1px solid lightgrey; line-height: 1pt">
+                <td colspan="99" style="border-bottom: 1px solid white; line-height: 4pt">
                     &#160;
                 </td>
             </tr>
@@ -1914,9 +1918,21 @@
 
     </xsl:template>
 
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~message/text-->
+
+    <xsl:template match="message/text">
+        <xsl:apply-templates select="title"/>
+
+        <xsl:if test="description">
+            <div style="margin-top: 6pt;">
+                <xsl:apply-templates select="description"/>
+            </div>
+        </xsl:if>
+    </xsl:template>
+
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~message/title-->
 
-    <xsl:template match="message/text/title" mode="message">
+    <xsl:template match="message/text/title">
         <xsl:for-each select="node()">
             <xsl:choose>
                 <xsl:when test="self::p1"><i>(1)</i></xsl:when>
