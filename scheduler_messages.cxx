@@ -10,7 +10,7 @@
 namespace sos { 
 namespace spooler { 
         
-extern Message_code_text scheduler_messages[] =
+Message_code_text scheduler_messages[] =
 {
     { "SCHEDULER-104", "Begin time $1 is after end time $2, or any other error in attributes begin= and end=" },
     { "SCHEDULER-105", "Unknown command: <$1>" },

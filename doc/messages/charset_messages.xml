@@ -23,7 +23,7 @@
     <messages>
         <message code="Z-CHARSET-001">
             <text xml:lang="en">
-                <title>Unknown character encoding: </title>
+                <title>Unknown character encoding: <p1/></title>
             </text>
             <text xml:lang="de">
                 <title>Unbekannte Zeichen-Codierung: <p1/></title>
@@ -32,10 +32,10 @@
 
         <message code="Z-CHARSET-002">
             <text xml:lang="en">
-                <title>Missing character encoding: <p1/></title>
+                <title>Missing character encoding</title>
             </text>
             <text xml:lang="de">
-                <title>Zeichen-Codierung ist nicht angegeben: <p1/></title>
+                <title>Zeichen-Codierung ist nicht angegeben</title>
             </text>
         </message>
     </messages>
