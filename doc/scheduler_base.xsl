@@ -12,6 +12,7 @@
 <xsl:stylesheet xmlns:xsl = "http://www.w3.org/1999/XSL/Transform"
                 version   = "1.0">
 
+    <xsl:param name="programming_language"/>
     <xsl:output doctype-public="-//W3C//DTD HTML 4.01//EN" />  <!--"http://www.w3.org/TR/html4/strict.dtd"-->
 
 
@@ -1803,61 +1804,24 @@
 
     </xsl:template>
 
-    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~messages-->
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_all_messages-->
 
-    <xsl:template match="messages">
+    <xsl:template match="/scheduler_all_messages">
 
         <html>
             <xsl:call-template name="html_head">
-                <xsl:with-param name="title" select="Meldungen"/>
+                <xsl:with-param name="title" select="@title"/>
             </xsl:call-template>
 
             <body>
                 <xsl:call-template name="body_start">
-                    <xsl:with-param name="title"       select="Meldungen"/>
+                    <xsl:with-param name="title"       select="@title"/>
                     <!--xsl:with-param name="parent_page" select="@parent_page"/-->
                 </xsl:call-template>
 
-                <table cellpadding="0" cellspacing="0">
-                    <thead>
-                        <tr>
-                            <td>Code</td>
-                            <td style="padding-left: 2ex"></td>
-                            <td style="padding-left: 1ex">Text</td>
-                        </tr>
-                        <tr>
-                            <td colspan="99" style="border-bottom: 1px solid black; line-height: 1pt">
-                                &#160;
-                            </td>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <xsl:for-each select=".//message">
-                            <tr>
-                                <td rowspan="2">
-                                    <code>
-                                        <xsl:value-of select="@code"/>
-                                    </code>
-                                </td>
-                                <td style="padding-left: 2ex">en:</td>
-                                <td style="padding-left: 1ex">
-                                    <xsl:apply-templates select="text[ @xml:lang='en' ]/title" mode="message"/>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td style="padding-left: 2ex; color: #808080;">de:</td>
-                                <td style="padding-left: 1ex; color: #808080;">
-                                    <xsl:apply-templates select="text[ @xml:lang='de' ]/title" mode="message"/>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td colspan="99" style="border-bottom: 1px solid lightgrey; line-height: 1pt">
-                                    &#160;
-                                </td>
-                            </tr>
-                        </xsl:for-each>
-                    </tbody>
-                </table>
+                <xsl:for-each select="scheduler_messages">
+                    <xsl:apply-templates select="document(@path)/messages" mode="inner"/>
+                </xsl:for-each>
 
                 <xsl:call-template name="bottom">
                     <xsl:with-param name="title"       select="@title"/>
@@ -1865,6 +1829,88 @@
                 </xsl:call-template>
             </body>
         </html>
+        
+    </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~messages-->
+
+    <xsl:template match="/messages">
+
+        <html>
+            <xsl:call-template name="html_head">
+                <xsl:with-param name="title" select="concat( 'Messages of package ', @package )"/>
+            </xsl:call-template>
+
+            <body>
+                <xsl:call-template name="body_start">
+                </xsl:call-template>
+
+                <xsl:apply-templates select="." mode="inner"/>
+                
+                <xsl:call-template name="bottom">
+                    <xsl:with-param name="title"       select="@title"/>
+                    <xsl:with-param name="parent_page" select="@parent_page"/>
+                </xsl:call-template>
+            </body>
+        </html>
+
+    </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~messages-->
+
+    <xsl:template match="messages" mode="inner">
+
+        <h2>Messages of package <xsl:value-of select="@package"/></h2>
+        
+        <table cellpadding="0" cellspacing="0">
+            <thead>
+                <tr>
+                    <td>Code</td>
+                    <td style="padding-left: 2ex"></td>
+                    <td style="padding-left: 1ex">Text</td>
+                </tr>
+                <tr>
+                    <td colspan="99" style="border-bottom: 1px solid black; line-height: 1pt">
+                        &#160;
+                    </td>
+                </tr>
+            </thead>
+            <tbody>
+                <xsl:apply-templates select=".//message"/>
+            </tbody>
+        </table>
+    </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~message-->
+
+    <xsl:template match="messages/message">
+
+        <tr>
+            <td rowspan="2">
+                <code>
+                    <xsl:value-of select="@code"/>
+                </code>
+            </td>
+            <td style="padding-left: 2ex">en:</td>
+            <td style="padding-left: 1ex">
+                <xsl:apply-templates select="text[ @xml:lang='en' ]/title" mode="message"/>
+            </td>
+        </tr>
+        
+        <tr>
+            <td style="padding-left: 2ex; color: #808080;">de:</td>
+            <td style="padding-left: 1ex; color: #808080;">
+                <xsl:apply-templates select="text[ @xml:lang='de' ]/title" mode="message"/>
+            </td>
+        </tr>
+        
+        <xsl:if test="position() != last()">
+            <tr>
+                <td colspan="99" style="border-bottom: 1px solid lightgrey; line-height: 1pt">
+                    &#160;
+                </td>
+            </tr>
+        </xsl:if>
 
     </xsl:template>
 

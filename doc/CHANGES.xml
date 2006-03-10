@@ -16,7 +16,7 @@
                 Die Meldungen (außer einige Debug-Meldungen) sind jetzt codiert, wie z.B. "<code>SCHEDULER-900 Scheduler is starting ...</code>".
                 <ul>
                     <li>
-                        <a href="messages.xml">Liste der Meldungs-Codes</a>
+                        <a href="messages/index.xml">Liste der Meldungs-Codes</a>
                     </li>
                 </ul>
             </description>

@@ -472,7 +472,7 @@ void Spooler_db::try_reopen_after_error( exception& x, bool wait_endless )
                         break;
                     }
 
-                    _spooler->log()->warn( message_string( "SCHEDULER-958" ), seconds_before_reopen );   // "Eine Minute warten bevor Datenbank erneut geöffnet wird ..."
+                    _spooler->log()->warn( message_string( "SCHEDULER-958", seconds_before_reopen ) );   // "Eine Minute warten bevor Datenbank erneut geöffnet wird ..."
                     _spooler->_connection_manager->async_continue_selected( is_communication_operation, seconds_before_reopen );
                 }
             }
