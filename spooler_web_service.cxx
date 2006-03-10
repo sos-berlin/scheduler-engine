@@ -686,6 +686,8 @@ const Com_method Web_service_request::_methods[] =
     COM_PROPERTY_GET( Web_service_request,  4, String_content                , VT_BSTR    , 0 ),
     COM_PROPERTY_GET( Web_service_request,  5, Binary_content                , (VARENUM)(VT_ARRAY|VT_UI1), 0 ),
     COM_PROPERTY_GET( Web_service_request,  6, Url                           , VT_BSTR    , 0 ),
+    COM_PROPERTY_GET( Web_service_request,  7, Content_type                  , VT_BSTR    , 0 ),
+    COM_PROPERTY_GET( Web_service_request,  8, Charset_name                  , VT_BSTR    , 0 ),
 #endif
     {}
 };
@@ -809,6 +811,10 @@ const Com_method Web_service_response::_methods[] =
     COM_PROPERTY_PUT( Web_service_response,  4, String_content                             , 0, VT_BSTR  ),
     COM_PROPERTY_PUT( Web_service_response,  5, Binary_content                             , 0, (VARENUM)(VT_ARRAY|VT_UI1), 0 ),
     COM_METHOD      ( Web_service_response,  6, Send                          , VT_EMPTY   , 0 ),
+    COM_PROPERTY_PUT( Web_service_response,  7, Content_type                               , 0, VT_BSTR ),
+    COM_PROPERTY_GET( Web_service_response,  7, Content_type                  , VT_BSTR    , 0 ),
+    COM_PROPERTY_PUT( Web_service_response,  8, Charset_name                               , 0, VT_BSTR ),
+    COM_PROPERTY_GET( Web_service_response,  8, Charset_name                  , VT_BSTR    , 0 ),
 #endif
     {}
 };
