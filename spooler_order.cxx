@@ -1068,6 +1068,7 @@ void Order::init()
     _log = Z_NEW( Prefix_log( this ) );
     _log->set_prefix( obj_name() );
     _created = Time::now();
+    _is_virgin = true;
 
     set_run_time( NULL );
 }
@@ -1097,10 +1098,23 @@ string Order::string_id( const Id& id )
 
 void Order::attach_task( Task* task )
 {
+    assert( task );
     assert_no_task();   // Vorsichtshalber
 
-    _task = task;
+
     if( !_log->opened() )  open_log();
+
+    if( _delay_storing_until_processing  &&  _job_chain->_orders_recoverable  &&  !_is_in_database )
+    {
+        _spooler->_db->insert_order( this );
+        _delay_storing_until_processing = false;
+    }
+
+    _task = task;
+
+    if( _is_virgin  &&  _http_operation )  _http_operation->on_first_order_processing( task );
+
+    _is_virgin = false;
 }
 
 //----------------------------------------------------------------------------Order::assert_no_task
@@ -1687,6 +1701,9 @@ void Order::remove_from_job_chain( bool leave_in_database )
 
     if( _job_chain )
     {
+        _log->info( _task? message_string( "SCHEDULER-941", _task  ) 
+                         : message_string( "SCHEDULER-940" ) );
+
         if( _task )  _removed_from_job_chain = _job_chain;      // Für die Task merken, in welcher Jobkette wir waren
 
         _job_chain = NULL;
@@ -1706,11 +1723,6 @@ void Order::remove_from_job_chain( bool leave_in_database )
 
     if( job_chain )
     {
-        S log_line;
-        log_line << "Auftrag ist aus Jobkette " << job_chain->name() << " entfernt";
-        _log->info( _task? message_string( "SCHEDULER-941", job_chain->name(), _task  ) 
-                         : message_string( "SCHEDULER-940", job_chain->name() ) );
-
         job_chain->check_for_removing();
     }
 }
@@ -1762,7 +1774,7 @@ bool Order::try_add_to_job_chain( Job_chain* job_chain )
             node->_job->order_queue()->add_order( this );
 
 
-            if( !_is_in_database  &&  job_chain->_orders_recoverable )
+            if( !_delay_storing_until_processing  &&  job_chain->_orders_recoverable  &&  !_is_in_database )
             {
                 _spooler->_db->insert_order( this );
             }

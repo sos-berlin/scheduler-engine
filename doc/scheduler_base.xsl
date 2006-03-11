@@ -12,7 +12,7 @@
 <xsl:stylesheet xmlns:xsl = "http://www.w3.org/1999/XSL/Transform"
                 version   = "1.0">
 
-    <!--xsl:param name="programming_language"/-->
+    <!--xsl:param name="programming_language"/   verhindert in ie6 die Transformation -->
     <xsl:output doctype-public="-//W3C//DTD HTML 4.01//EN" />  <!--"http://www.w3.org/TR/html4/strict.dtd"-->
 
 
@@ -1167,6 +1167,30 @@
         <!-- Der Text wird von einem Browser, der nicht XSLT kann, anzeigt -->
     </xsl:template>
 
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_message-->
+
+    <xsl:template match="scheduler_message" mode="description">
+        <xsl:call-template name="scheduler_message">
+            <xsl:with-param name="code" select="@code"/>
+        </xsl:call-template>
+    </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_message-->
+
+    <xsl:template name="scheduler_message">
+        <xsl:param name="code"/>
+
+        <xsl:element name="a">
+            <xsl:attribute name="href">
+                <xsl:value-of select="/*/@base_dir"/>
+                <xsl:text>messages/index.xml#message_</xsl:text>
+                <xsl:value-of select="@code"/>
+            </xsl:attribute>
+            <code><xsl:value-of select="@code"/></code>
+        </xsl:element>
+        
+    </xsl:template>
+    
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_ignore-->
     <!--
     <xsl:template match="scheduler_see" mode="description">
@@ -1186,12 +1210,6 @@
             <xsl:with-param name="value"     select="@value"    />
             <xsl:with-param name="parameter" select="@parameter"/>
         </xsl:call-template>
-        <!--
-        <xsl:element name="a">
-            <xsl:attribute name="href"><xsl:value-of select="@name"/>.xml</xsl:attribute>
-            <code>&lt;<xsl:value-of select="@name"/>></code>
-        </xsl:element>
-        -->
     </xsl:template>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_element-->
@@ -1887,6 +1905,10 @@
 
         <tr>
             <td rowspan="2" style="padding-right: 1ex;">
+                <xsl:element name="a">
+                    <xsl:attribute name="name">message_<xsl:value-of select="@code"/></xsl:attribute>
+                </xsl:element>
+
                 <code style="white-space: nowrap">
                     <xsl:value-of select="@code"/>
                 </code>

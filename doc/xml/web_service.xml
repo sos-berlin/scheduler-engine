@@ -49,11 +49,16 @@
         <xml_attribute name="timeout" type="seconds" title="Frist">
             <description>
                 <p>
+                    Wenn innerhalb der Frist der Auftrag nicht dem ersten Job zur Ausführung übergeben wird,
+                    lehnt der Scheduler die HTTP-Anforderung mit "<code>504 Gateway Timeout</code>" ab
+                    und zieht den Auftrag mit der Meldung <scheduler_message code="SCHEDULER-290"/> zurück.
+                    <!--
                     Wenn innerhalb der Frist nicht 
                     <scheduler_method class="Web_service_response" method="send"/>
                     gerufen wird, 
                     beantwortet der Scheduler die HTTP-Operation mit "<code>504 Gateway Timeout</code>".
                     Nachfolgendes <code>send()</code> liefert eine Exception.
+                    -->
                 </p>
             </description>
         </xml_attribute>

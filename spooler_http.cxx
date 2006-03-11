@@ -591,6 +591,16 @@ void Operation::close()
     Communication::Operation::close(); 
 }
 
+//----------------------------------------------------------------------------Operation::link_order
+
+void Operation::link_order( Order* order )
+{
+    _order = order;
+    order->set_http_operation( this );       // Order wird zweiter Eigentümer von Web_service_operation, neben Http_operation
+
+    if( _web_service_operation )  order->set_web_service( _web_service_operation->web_service() );
+}
+
 //--------------------------------------------------------------------------Operation::unlink_order
 
 void Operation::unlink_order()
@@ -606,6 +616,15 @@ void Operation::unlink_order()
         }
     }
     catch( exception& x ) { _spooler->_log.error( x.what() ); }
+}
+
+//-------------------------------------------------------------------Operation::on_order_processing
+
+void Operation::on_first_order_processing( Task* task )
+{
+    // <web_service timeout="">: Die Frist gilt nur bis zur ersten Ausführung
+
+    set_gmtimeout( double_time_max );      // Timeout abschalten
 }
 
 //---------------------------------------------------------------------------------Operation::begin
@@ -662,15 +681,15 @@ bool Operation::async_continue_( Continue_flags flags )
 
     if( flags & cont_next_gmtime_reached )
     {
-        if( _response &&  !_response->is_ready() ) 
+        if( _response &&  !_response->is_ready()  &&  _order  &&  _order->is_virgin() )         // is_virgin() sollte immer true sein
         {
-            if( _connection )  _connection->_log.error( message_string( "SCHEDULER-290" ) );   // "HTTP-Operation wird nach Fristablauf abgebrochen" );
+            if( _connection )  _connection->_log.error( message_string( "SCHEDULER-290", _order->obj_name() ) );   // "HTTP-Operation wird nach Fristablauf abgebrochen"
             
-            if( _response )
-            {
-                _response->set_status( status_504_gateway_timeout );
-                _response->set_ready();
-            }
+            _response->set_status( status_504_gateway_timeout );
+            _response->set_ready();
+
+            _order->remove_from_job_chain();
+            _order = NULL;
 
             something_done = true;
         }
@@ -920,6 +939,8 @@ void Response::set_ready()
 
     _ready = true; 
     _operation->_connection->signal( "http response is ready" );
+
+    // Nicht sofort senden
 }
 
 //-----------------------------------------------------------------------------------Response::send
@@ -929,6 +950,8 @@ void Response::send()
     if( is_ready() )  z::throw_xc( "SCHEDULER-247" );
 
     set_ready();
+
+    // Evtl. sofort send() aufrufen? Nicht nötig.
 }
 
 //---------------------------------------------------------------------------------Response::finish

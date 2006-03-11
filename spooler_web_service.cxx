@@ -442,46 +442,20 @@ void Web_service_operation::begin()
 
         ptr<Order> order = new Order( _spooler );
 
-        //order->_store_in_database = _web_service->_store_order_in_database;
-        order->set_http_operation( _http_operation );      // Order wird Eigentümer von Web_service_operation
+        order->set_delay_storing_until_processing( true );  // Erst speichern, wenn eine Task den Auftrag ausführt
         order->add_to_job_chain( _spooler->job_chain( _web_service->_job_chain_name ) );
-        _http_operation->set_order( order );     // ~Order ruft Http_operation::unlink_order(), der setzt _order = NULL
-        _log->info( "Created " + order->obj_name() );
+        _http_operation->link_order( order );                // ~Order ruft Http_operation::unlink_order()
+        
+        _log->info( message_string( "SCHEDULER-964", order->obj_name() ) );
 
         if( _web_service->_timeout != INT_MAX )
+        {
             _http_operation->set_gmtimeout( (double)( ::time(NULL) + _web_service->_timeout ) );
+            // Auftrag ruft vor der Entjungferung http::Operation::on_order_processing() auf, der den Timeout zurücksetzt
+        }
     }
 }
 
-//------------------------------------------------------------Web_service_operation::async_continue
-/*
-bool Web_service_operation::async_continue( Async_operation::Continue_flags )
-{
-    return true;
-}
-*/
-//------------------------------------------------------------Web_service_operation::async_finished
-/*
-bool Web_service_operation::async_finished()
-{
-    return http_response()->is_ready();
-    //    response->finish();
-}
-*/
-//---------------------------------------------------------Web_service_operation::process_http__end
-/*
-ptr<Http_response> Web_service_operation::process_http__end()
-{
-    ptr<Http_response>  response;
-    string              response;
-    response = process_request__end( request->body(), request->charset_name() );
-
-    if( _web_service->_debug )  _log->debug( "\n" "HTTP RESPONSE:" ), _log->debug( http_response->header_text() ), _log->debug( response );
-
-
-    return _http_response;
-}
-*/
 //---------------------------------------------------------------Web_service_operation::dom_element
 
 xml::Element_ptr Web_service_operation::dom_element( const xml::Document_ptr& document, const Show_what& ) const

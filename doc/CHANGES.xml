@@ -10,7 +10,38 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2006-03-11" version="2.0.148" subversion_revision="4192">
+        <revision type="new" title="&lt;web_service> mit timeout=">
+            <description>
+                <p>
+                    Die Frist läuft, solange kein Job den Auftrag anrührt.
+                    Nach Ablauf wird der Auftrag zurückgenommen und die HTTP-Operation mit Fehler beendet.
+                </p>
+                
+                <ul>
+                    <li>
+                        <scheduler_element name="web_service" attribute="timeout"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+    </change>
+    
     <change date="2006-03-10" version="2.0.148" subversion_revision="4178">
+        <revision type="new" title="&lt;web_service> mit &lt;params>">
+            <description>
+                Einem Web-Service lassen sich Parameter geben, die in den Jobs gelesen werden können.
+                <ul>
+                    <li>
+                        <scheduler_element name="web_service"/>
+                    </li>
+                    <li>
+                        <scheduler_method class="Web_service" property="params"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+
         <revision type="new" title="Meldungen ins Englische übesetzt und mit Codes versehen">
             <description>
                 Die Meldungen (außer einige Debug-Meldungen) sind jetzt codiert, wie z.B. "<code>SCHEDULER-900 Scheduler is starting ...</code>".

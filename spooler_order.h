@@ -54,6 +54,9 @@ struct Order : Com_order,
     void                    set_priority                ( Priority );
     Priority                    priority                () const                                    { return _priority; }
 
+    bool                        is_virgin               () const                                    { return _is_virgin; }
+    void                    set_delay_storing_until_processing( bool b )                            { _delay_storing_until_processing = b; }
+
     Job_chain*                  job_chain               () const                                    { return _job_chain? _job_chain : _removed_from_job_chain; }
     Job_chain_node*             job_chain_node          () const                                    { return _job_chain_node; }
   //Job_chain*                  removed_from_job_chain  () const                                    { return _removed_from_job_chain; }
@@ -185,6 +188,8 @@ struct Order : Com_order,
     int                        _setback_count;
   //bool                       _recoverable;            // In Datenbank halten
     bool                       _is_in_database;
+    bool                       _delay_storing_until_processing;  // Erst in die Datenbank schreiben, wenn die erste Task die Verarbeitung beginnt
+    bool                       _is_virgin;              // Noch von keiner Task berührt
 
     ptr<Web_service>           _web_service;
     ptr<http::Operation>       _http_operation;

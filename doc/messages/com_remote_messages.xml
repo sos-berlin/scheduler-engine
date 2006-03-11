@@ -31,7 +31,7 @@
         </message>
         <message code="Z-REMOTE-101">
             <text xml:lang="en">
-                <title>Separate process: pid=<p1/>: TCP disconnected</title>
+                <title>Separate process: pid=<p1/>: Connection lost</title>
             </text>
             <text xml:lang="de">
                 <title>Objectserver pid=<p1/>: TCP-Verbindung ist abgebrochen</title>
@@ -95,7 +95,7 @@
         </message>
         <message code="Z-REMOTE-109">
             <text xml:lang="en">
-                <title>Separate process: Failure in communication, message too short</title>
+                <title>Separate process: Failure in communication (message is too short)</title>
             </text>
             <text xml:lang="de">
                 <title>Objectserver: Fehler in der Kommunikation (Nachricht ist zu kurz)</title>
@@ -135,7 +135,7 @@
         </message>
         <message code="Z-REMOTE-115">
             <text xml:lang="en">
-                <title>Separate process pid=<p1/>: Message length <p2/> to big or invalid</title>
+                <title>Separate process pid=<p1/>: Message length <p2/> too big or invalid</title>
             </text>
             <text xml:lang="de">
                 <title>Objectserver pid=<p1/>: Nachricht mit zu großer oder ungültiger Länge <p2/></title>

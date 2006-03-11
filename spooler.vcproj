@@ -2056,7 +2056,7 @@
 			>
 		</File>
 		<File
-			RelativePath=".\scheduler_messages.xml"
+			RelativePath=".\doc\messages\scheduler_messages.xml"
 			>
 			<FileConfiguration
 				Name="Release|Win32"

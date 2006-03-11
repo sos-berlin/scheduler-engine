@@ -425,8 +425,10 @@ struct Operation : Communication::Operation
     virtual bool                async_finished_             ()                                      { return _response  &&  _response->is_ready(); }
     virtual string              async_state_text_           ()                                      { return "none"; }
 
-    void                    set_order                       ( Order* o )                            { _order = o; }         // Für Web_service_operation::begin()
+    void                        link_order                  ( Order* );                             // Für Web_service_operation::begin()
     void                        unlink_order                ();                                     // Für Order::close()
+    void                        on_first_order_processing   ( Task* );
+
     bool                        response_is_complete        ();
     string                      get_response_part           ();
     bool                        should_close_connection     ();
