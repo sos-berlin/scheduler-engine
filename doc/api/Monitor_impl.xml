@@ -242,7 +242,7 @@
         <com.parameter name="spooler_process_result">
             <com.type type="bool"/>
             <description>
-                Rückgabewert von <scheduler_method class="Job_impl" method="spooler_process"/>.
+                Rückgabewert von <scheduler_method class="Job_impl" method="spooler_process"/> oder
                 <code>false</code>, wenn <code>spooler_process()</code> mit einer Exception geendet hat.
             </description>
         </com.parameter>

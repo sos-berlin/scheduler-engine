@@ -1851,7 +1851,7 @@
     </xsl:template>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~messages-->
-
+    <!--
     <xsl:template match="/messages">
 
         <html>
@@ -1873,7 +1873,7 @@
         </html>
 
     </xsl:template>
-
+    -->
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~messages-->
 
     <xsl:template match="messages" mode="inner">
@@ -1894,14 +1894,54 @@
                 </tr>
             </thead>
             <tbody>
-                <xsl:apply-templates select=".//message"/>
+                <xsl:apply-templates select=".//message" mode="tr"/>
             </tbody>
         </table>
     </xsl:template>
 
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~messages-->
+
+    <xsl:template match="/message">
+
+        <html>
+            <xsl:call-template name="html_head">
+                <xsl:with-param name="title" select="concat( 'Message ', @code )"/>
+            </xsl:call-template>
+
+            <body>
+                <xsl:call-template name="body_start">
+                </xsl:call-template>
+
+                <table cellpadding="0" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <td style="padding-right: 1ex;">Code</td>
+                            <td style="padding-left: 1ex; padding-right: 1ex;"></td>
+                            <td style="padding-left: 1ex; padding-right: 1ex;">Text</td>
+                        </tr>
+                        <tr>
+                            <td colspan="99" style="border-bottom: 1px solid black; line-height: 1pt">
+                                &#160;
+                            </td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <xsl:apply-templates select="." mode="tr"/>
+                    </tbody>
+                </table>
+
+                <xsl:call-template name="bottom">
+                    <xsl:with-param name="title"       select="@title"/>
+                    <xsl:with-param name="parent_page" select="@parent_page"/>
+                </xsl:call-template>
+            </body>
+        </html>
+
+    </xsl:template>
+
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~message-->
 
-    <xsl:template match="messages/message">
+    <xsl:template match="message" mode="tr">
 
         <tr>
             <td rowspan="2" style="padding-right: 1ex;">

@@ -169,8 +169,9 @@ spooler_log.info( request.charset_name );               // ==> utf-8</pre>
             </p>
             <p>
                 Wie der binäre Inhalt zu interpretieren ist, 
-                sollte der Client in <code>headers( "Content-Type" )</code> mitgeteilt haben
-                (siehe <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.17">HTTP/1.1 14.17 Content-Type</a>).
+                sollte der Client in im Header-Feld <code>Content-Type</code> mitgeteilt haben
+                (siehe <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.17">HTTP/1.1 14.17 Content-Type</a> und 
+                <scheduler_method class="Web_service_request" property="charset_name"/>).
             </p>
         </description>
     </property>

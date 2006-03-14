@@ -3,7 +3,7 @@
 
 <messages 
     xmlns:xsi = "http://www.w3.org/2001/XMLSchema-instance"
-    xsi:noNamespaceSchemaLocation = "../zschimmer/messages.xsd"
+    xsi:noNamespaceSchemaLocation = "../../../zschimmer/messages.xsd"
     name     = "scheduler_messages"
     include  = "spooler.h"
     base_dir = "../" 
@@ -1321,7 +1321,7 @@
                 <title>Order doesn't belong to a web service operation</title>
             </text>
 
-            <scheduler_method class="sos.spooler.Order" property="web_service_operation"/>
+            <scheduler_method class="Order" property="web_service_operation"/>
 
         </message>
 
@@ -1329,8 +1329,8 @@
             <text xml:lang="de">
                 <title>HTTP-Antwort wird bereits versendet</title>
                 <description>
-                    Nach <scheduler_method class="sos.spooler.Web_service_response" method="send"/> 
-                    kann <scheduler_method class="sos.spooler.Web_service_response"/> 
+                    Nach <scheduler_method class="Web_service_response" method="send"/> 
+                    kann <scheduler_method class="Web_service_response"/> 
                     nicht mehr geändert werden.
                 </description>
             </text>
@@ -1338,7 +1338,7 @@
                 <title>HTTP response is already sent</title>
             </text>
 
-            <scheduler_method class="sos.spooler.Web_service_response"/>
+            <scheduler_method class="Web_service_response"/>
         </message>
 
         <message code="SCHEDULER-248">
