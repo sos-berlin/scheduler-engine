@@ -83,7 +83,7 @@
 
         <description>
             <p>
-                Zugriff auf den den Kopfeintrag <code>Content-Type:</code> ohne Parameter.
+                Zugriff auf den Kopfeintrag <code>Content-Type:</code> ohne dazugehörige Parameter (z.B. <code>charset=</code>).
             </p>
         </description>
     </property>

@@ -65,7 +65,7 @@
                 </description>
             </text>
             <text xml:lang="en">
-                <title>Begin time <p1/> is after end time <p2/>, or any other error in attributes begin= and end=</title>
+                <title>There is an error such as start time is later than end time in the begin="<p1/>" and end="<p2/>" attributes</title>
             </text>
         </message>
 
@@ -126,7 +126,7 @@
                 <title>Unbekannter Zustand einer Task: <p1/></title>
             </text>
             <text xml:lang="en">
-                <title>Unknown state of a task: <p1/></title>
+                <title>Unknown task state: <p1/></title>
             </text>
         </message>
 
@@ -216,7 +216,7 @@
                 <title>Skript meldet Fehler: <p1/></title>
             </text>
             <text xml:lang="en">
-                <title>Script has set an error: <p1/></title>
+                <title>Script has reported an error: <p1/></title>
             </text>
         </message>
 
@@ -306,7 +306,7 @@
                 <title>Job <p1/> ist bereits definiert</title>
             </text>
             <text xml:lang="en">
-                <title>Job <p1/> is already defined</title>
+                <title>Job <p1/> has already been defined</title>
             </text>
         </message>
 
@@ -324,7 +324,7 @@
                 <title>Job <p1/> wird nicht gestartet, weil das Laden des Skripts fehlschlug: <p2/></title>
             </text>
             <text xml:lang="en">
-                <title>Job <p1/> is not started, because loading the script failed: <p2/></title>
+                <title>Job <p1/> has not started because the script could not be loaded: <p2/></title>
             </text>
         </message>
 
@@ -405,7 +405,7 @@
                 <title>Die Historie für Job <p1/> ist ausgeschaltet (history=no)</title>
             </text>
             <text xml:lang="en">
-                <title>History is suppressed for job <p1/> (history=no)</title>
+                <title>History has been suppressed for job <p1/> (history=no)</title>
             </text>
         </message>
 
@@ -414,7 +414,7 @@
                 <title>Relativer Datenbankdateiname kann bei need_db=yes und log_dir=*stderr nicht verwendet werden</title>
             </text>
             <text xml:lang="en">
-                <title>Relative data base file path cannot be used with need_db=yes and log_dir=*stderr</title>
+                <title>Relative database file path cannot be used with need_db=yes and log_dir=*stderr</title>
             </text>
         </message>
 
@@ -423,7 +423,7 @@
                 <title>Element &lt;run_time> sieht keine Periode für eine Task ohne Startzeit vor</title>
             </text>
             <text xml:lang="en">
-                <title>Task would never start, because it has no start time and no period follows</title>
+                <title>Task would never start because it has no start time and the job's &lt;run_time> has no further period</title>
             </text>
         </message>
 
@@ -456,7 +456,7 @@
                 <title>Job <p1/> nimmt keine Aufträge an, er ist nicht mit &lt;job order="yes"> deklariert.</title>
             </text>
             <text xml:lang="en">
-                <title>Job <p1/> accepts no orders, because it is not declared with &lt;job order="yes">.</title>
+                <title>Job <p1/> accepts no orders because it has not been declared with &lt;job order="yes">.</title>
             </text>
         </message>
 
@@ -465,7 +465,7 @@
                 <title>Jobkette ist abgeschlossen (mit add_job_chain()) und kann nicht mehr erweitert werden</title>
             </text>
             <text xml:lang="en">
-                <title>Job chain is finished (with add_job_chain()) and cannot be modified</title>
+                <title>Job chain has finished (with add_job_chain()) and cannot be modified</title>
             </text>
         </message>
 
@@ -483,7 +483,7 @@
                 <title>Für den Zustand "<p1/>" ist bereits ein Job in der Jobkette <p2/> definiert</title>
             </text>
             <text xml:lang="en">
-                <title>In job chain <p2/>, the state "<p1/>" has already assigned a job</title>
+                <title>The state "<p1/>" has already assigned a job in job chain <p2/></title>
             </text>
         </message>
 
@@ -564,7 +564,7 @@
                 <title>Id und Priorität eines Auftrags können nicht mehr geändert werden, wenn er in einer Auftragsliste steht</title>
             </text>
             <text xml:lang="en">
-                <title>Id and priority of an order being in an order queue cannot be changed</title>
+                <title>Id and priority of an order placed in an order queue cannot be changed</title>
             </text>
         </message>
 
@@ -636,7 +636,7 @@
                 <title>Bei &lt;script> com_class= oder java_class= kann die Programmquelle nicht angegeben werden</title>
             </text>
             <text xml:lang="en">
-                <title>With &lt;script> com_class= or java_class=, a program source cannot be set</title>
+                <title>A program source cannot be set with &lt;script> com_class= or java_class=</title>
             </text>
         </message>
 
@@ -645,7 +645,7 @@
                 <title>In &lt;script> ist com_class= und java_class= zusammen angegeben</title>
             </text>
             <text xml:lang="en">
-                <title>In &lt;script>, com_class= and java_class= cannot be combined</title>
+                <title>com_class= and java_class= cannot be combined in &lt;script></title>
             </text>
         </message>
 
@@ -696,7 +696,7 @@
                 <title>Methode <p1/> der Klasse <p2/> fehlt</title>
             </text>
             <text xml:lang="en">
-                <title>Missing method "<p1/>" in class "<p2/>"</title>
+                <title>Method "<p1/>" is missing in class "<p2/>"</title>
             </text>
         </message>
 
@@ -762,7 +762,7 @@
                 <title>Scheduler wird nicht gestartet, weil spooler_init() false liefert</title>
             </text>
             <text xml:lang="en">
-                <title>Scheduler does not start, because spooler_init() returned false</title>
+                <title>Scheduler does not start because spooler_init() returned false</title>
             </text>
         </message>
 
@@ -771,7 +771,7 @@
                 <title>Die Scheduler-Datenbank ist wegen eines Datenbankproblems gerade nicht geöffnet</title>
             </text>
             <text xml:lang="en">
-                <title>Scheduler data base is currently not opened due to a database problem</title>
+                <title>Scheduler database is currently not accessible due to a database problem</title>
             </text>
         </message>
 
@@ -783,10 +783,10 @@
 
         <message code="SCHEDULER-186">
             <text xml:lang="de">
-                <title><p1/> is already in job chain <p2/></title>
+                <title><p1/> ist bereits in der Jobkette <p2/></title>
             </text>
             <text xml:lang="en">
-                <title><p1/> ist bereits in der Jobkette <p2/></title>
+                <title><p1/> is already in job chain <p2/></title>
             </text>
         </message>
 
@@ -795,7 +795,7 @@
                 <title>Order.setback(): Ein Auftrag kann nur zurückgestellt werden, während eine Task ihn ausführt</title>
             </text>
             <text xml:lang="en">
-                <title>Order.setback(): An order can be set back only while a task is executing it</title>
+                <title>Order.setback(): An order can only be set back when it is being executed by a task it</title>
             </text>
         </message>
 
@@ -822,7 +822,7 @@
                 <title>Das Skript steht nach Ladefehler nicht zur Verfügung</title>
             </text>
             <text xml:lang="en">
-                <title>Script is not available after a loading error</title>
+                <title>Script is not available because of a loading error</title>
             </text>
         </message>
 
@@ -840,7 +840,7 @@
                 <title>Ein separater Prozess ist nur mit use_engine="task" möglich</title>
             </text>
             <text xml:lang="en">
-                <title>A separate process is possible only with use_engine="task"</title>
+                <title>A separate process is only possible with use_engine="task"</title>
             </text>
         </message>
 
@@ -930,7 +930,7 @@
                 <title>Verbindung zur Task verloren</title>
             </text>
             <text xml:lang="en">
-                <title>Connection to task is lost</title>
+                <title>Connection to task has been lost</title>
             </text>
         </message>
 
@@ -939,7 +939,7 @@
                 <title>Die Modulinstanz im Server ist geschlossen</title>
             </text>
             <text xml:lang="en">
-                <title>Module instance in the server is closed</title>
+                <title>Module instance in the server has been closed</title>
             </text>
         </message>
 
@@ -966,16 +966,16 @@
                 <title>need_db=<p1/>, erlaubt sind aber nur yes, no, strict</title>
             </text>
             <text xml:lang="en">
-                <title>need_db=<p1/>, only "yes", "no" and "strict" allowed</title>
+                <title>With need_db=<p1/>, only "yes", "no" and "strict" are allowed</title>
             </text>
         </message>
 
         <message code="SCHEDULER-207">
             <text xml:lang="de">
-                <title>Unknown task <p1/> (also in history)</title>
+                <title>Task <p1/> unbekannt (auch in der Historie)</title>
             </text>
             <text xml:lang="en">
-                <title>Task <p1/> unbekannt (auch in der Historie)</title>
+                <title>Task <p1/> is unknown (and not noted in the history)</title>
             </text>
         </message>
 
@@ -984,7 +984,7 @@
                 <title>Hier ist nur ein Datum ohne Uhrzeit möglich</title>
             </text>
             <text xml:lang="en">
-                <title>Only a date without time is possible</title>
+                <title>Only a date without time is allowed</title>
             </text>
         </message>
 
@@ -993,7 +993,7 @@
                 <title>Das Microsoft Windows-Limit der Objekte, auf die gewartet werden kann (TCP-Verbindungen, beobachteten Verzeichnisse etc.) von MAXIMUM_WAIT_OBJECTS-1=<p1/> ist erreicht. Die Operation ist nicht ausführbar.</title>
             </text>
             <text xml:lang="en">
-                <title>Too much objects for Microsoft Windows MsgWaitForMultipleObjects(). MAXIMUM_WAIT_OBJECTS-1=<p1/> reached. Operation is not executable</title>
+                <title>Too many objects for Microsoft Windows MsgWaitForMultipleObjects(). MAXIMUM_WAIT_OBJECTS-1=<p1/> has been reached. Operation is not executable</title>
             </text>
         </message>
 
@@ -1002,7 +1002,7 @@
                 <title>Zuviele Prozesse. Die Zahl der Prozesse ist auf <p1/> begrenzt</title>
             </text>
             <text xml:lang="en">
-                <title>Too much processes. The number of processes is limited to <p1/></title>
+                <title>Too many processes. The number of processes is limited to <p1/></title>
             </text>
         </message>
 
@@ -1029,7 +1029,7 @@
                 <title>Fehler beim Lesen des HTTP-Kopfs: <p1/> erwartet</title>
             </text>
             <text xml:lang="en">
-                <title>Error in HTTP head: Expecting <p1/></title>
+                <title>Error in HTTP head: expecting <p1/></title>
             </text>
         </message>
 
@@ -1056,7 +1056,7 @@
                 <title><p1/> ist in Bearbeitung durch <p2/></title>
             </text>
             <text xml:lang="en">
-                <title><p1/> is processed by <p2/></title>
+                <title><p1/> is being processed by <p2/></title>
             </text>
         </message>
 
@@ -1092,7 +1092,7 @@
                 <title>&lt;day day="<p1/>">: Nur die Tage <p2/> bis <p3/> sind möglich</title>
             </text>
             <text xml:lang="en">
-                <title>&lt;day day="<p1/>">: Only days from <p2/> to <p3/> are possible</title>
+                <title>&lt;day day="<p1/>">: only the days from <p2/> to <p3/> are possible</title>
             </text>
         </message>
 
@@ -1101,7 +1101,7 @@
                 <title>Das Kommando &lt;<p1/>> kann nur über eine TCP-Verbindung gegeben werden</title>
             </text>
             <text xml:lang="en">
-                <title>This command &lt;<p1/>> is executable only over a TCP connection</title>
+                <title>This command &lt;<p1/>> is only executable via a TCP connection</title>
             </text>
         </message>
 
@@ -1137,7 +1137,7 @@
                 <title>Der Auftrag ist nicht verarbeitet worden ist (spooler_init() oder spooler_open() lieferte false)</title>
             </text>
             <text xml:lang="en">
-                <title>Order is not processed, because spooler_init() or spooler_open() returned false</title>
+                <title>Order has not been processed because spooler_init() or spooler_open() returned false</title>
             </text>
         </message>
 
@@ -1173,7 +1173,7 @@
                 <title>Der Job "<p1/>" wird entfernt, er kann nicht mehr verwendet werden</title>
             </text>
             <text xml:lang="en">
-                <title>Job "<p1/>" is to be removed, it is not longer usable</title>
+                <title>Job "<p1/>" is to be removed - it is not longer usable</title>
             </text>
         </message>
 
@@ -1227,7 +1227,7 @@
                 <title>Web-Dienst "<p1/>" ist bereits bekannt</title>
             </text>
             <text xml:lang="en">
-                <title>Web service "<p1/>" is already declared</title>
+                <title>Web service "<p1/>" has already been declared</title>
             </text>
         </message>
 
@@ -1236,7 +1236,7 @@
                 <title>XSLT-Stylesheet "<p1/>" liefert kein Ergebnis</title>
             </text>
             <text xml:lang="en">
-                <title>XSLT stylesheet "<p1/>" delivers no result</title>
+                <title>XSLT stylesheet "<p1/>" does not deliver a result</title>
             </text>
         </message>
 
@@ -1245,7 +1245,7 @@
                 <title>Web-Dienst für url_path="<p1/>" ist bereits bekannt</title>
             </text>
             <text xml:lang="en">
-                <title>Web service for url_path="<p1/>" is declared already</title>
+                <title>Web service for url_path="<p1/>" has already been declared</title>
             </text>
         </message>
 
@@ -1263,7 +1263,7 @@
                 <title>Auftrag ist keinem Webdienst zugeordnet</title>
             </text>
             <text xml:lang="en">
-                <title>Order is not assigned to a web service</title>
+                <title>Order has not been assigned to a web service</title>
             </text>
         </message>
 
@@ -1272,7 +1272,7 @@
                 <title>Task ist keinem Webdienst zugeordnet</title>
             </text>
             <text xml:lang="en">
-                <title>Task is not assigned to a web service</title>
+                <title>Task has not been assigned to a web service</title>
             </text>
         </message>
 
@@ -1281,7 +1281,7 @@
                 <title>forward_xslt_stylesheet <p1/> liefert nicht &lt;service_request></title>
             </text>
             <text xml:lang="en">
-                <title>forward_xslt_stylesheet <p1/> doesn't deliver &lt;service_request></title>
+                <title>forward_xslt_stylesheet <p1/> does not deliver &lt;service_request></title>
             </text>
         </message>
 
@@ -1290,7 +1290,7 @@
                 <title>Eigenschaft <p1/> ist fixiert, sie kann nicht mehr geändert werden</title>
             </text>
             <text xml:lang="en">
-                <title>Property <p1/> is fixed, not longer modifiable</title>
+                <title>Property <p1/> is fixed and is no longer modifiable</title>
             </text>
         </message>
 
@@ -1299,7 +1299,7 @@
                 <title>Element &lt;content> fehlt oder ist leer</title>
             </text>
             <text xml:lang="en">
-                <title>Missing or empty element &lt;content></title>
+                <title>Element &lt;content> is missing or empty</title>
             </text>
         </message>
 
@@ -1318,7 +1318,7 @@
             </text>
             
             <text xml:lang="en">
-                <title>Order doesn't belong to a web service operation</title>
+                <title>Order does not belong to a web service operation</title>
             </text>
 
             <scheduler_method class="Order" property="web_service_operation"/>
@@ -1382,7 +1382,7 @@
                 <title>Ungültiger Url-Pfad, er muss mit '/' beginnen: <p1/></title>
             </text>
             <text xml:lang="en">
-                <title>Invalid url path, it has to begin with '/': <p1/></title>
+                <title>Invalid url path - it has to begin with '/': <p1/></title>
             </text>
         </message>
 
@@ -1400,7 +1400,7 @@
                 <title><p1/> Tasks haben sich nicht beendet trotz kill vor <p2/>s. Die <p3/>s lange Nachfrist läuft weiter</title>
             </text>
             <text xml:lang="en">
-                <title><p1/> tasks did not terminate in spite of kill <p2/>s ago. Deadline is extended for <p3/>s</title>
+                <title><p1/> tasks did not terminate in spite of kill <p2/>s ago. Extending deadline for <p3/>s</title>
             </text>
         </message>
         
@@ -1427,7 +1427,7 @@
                 <title>Job wird jetzt entfernt</title>
             </text>
             <text xml:lang="en">
-                <title>Removing job now</title>
+                <title>Job is being removed now</title>
             </text>
         </message>
 
@@ -1445,7 +1445,7 @@
                 <title>Java kann nicht gestartet werden. Scheduler startet ohne Java</title>
             </text>
             <text xml:lang="en">
-                <title>Java did not start. Scheduler starts without Java</title>
+                <title>Java did not start. Scheduler is starting without Java</title>
             </text>
         </message>
 
@@ -1475,13 +1475,13 @@
                 <title>Abbruch-Signal (Ctrl-C) beim Beenden des Schedulers empfangen. DER SCHEDULER WIRD ABGEBROCHEN, SOFORT.</title>
             </text>
             <text xml:lang="en">
-                <title>Kill signal (ctrl-C) received while terminating Scheduler. ABORTING IMMEDIATELY SCHEDULER.</title>
+                <title>Kill signal (ctrl-C) received while terminating Scheduler. SCHEDULER IS ABORTING IMMEDIATELY.</title>
             </text>
         </message>
 
         <message code="SCHEDULER-264">
             <text xml:lang="en">
-                <title>SCHEDULER TERMINATES AFTER SERIOUS ERROR</title>
+                <title>SCHEDULER IS TERMINATING AFTER SERIOUS ERROR</title>
             </text>
         </message>
 
@@ -1490,7 +1490,7 @@
                 <title>SCHEDULER WIRD BEENDET WEGEN FEHLERS BEIM ZUGRIFF AUF DATENBANK</title>
             </text>
             <text xml:lang="en">
-                <title>ABORTING SCHEDULER DUE TO A PROBLEM WITH THE DATABASE: <p1/></title>
+                <title>SCHEDULER IS ABORTING DUE TO A PROBLEM WITH THE DATABASE: <p1/></title>
             </text>
         </message>
 
@@ -1508,7 +1508,7 @@
                 <title>Fehler beim Schreiben des Protokolls in die Tabelle <p1/>: <p2/></title>
             </text>
             <text xml:lang="en">
-                <title>Error when storing the protocol into table <p1/>: <p2/></title>
+                <title>Error when storing the protocol in table <p1/>: <p2/></title>
             </text>
         </message>
 
@@ -1544,7 +1544,7 @@
                 <title>Zugunsten des Jobs <p1/> wird die Task beendet</title>
             </text>
             <text xml:lang="en">
-                <title>Terminating task to get process for job <p1/></title>
+                <title>The task is being terminated in favour of job <p1/></title>
             </text>
         </message>
 
@@ -1661,7 +1661,7 @@
                 <title>cmd='<p1/>' wird ignoriert, weil Job entfernt wird</title>
             </text>
             <text xml:lang="en">
-                <title>Ignoring cmd='<p1/>', because job is to be removed</title>
+                <title>Ignoring cmd='<p1/>' because job is to be removed</title>
             </text>
         </message>
 
@@ -1670,7 +1670,7 @@
                 <title>Max. <p1/> Historiensätze werden gelesen</title>
             </text>
             <text xml:lang="en">
-                <title>Max. <p1/> history records are read</title>
+                <title>Max. <p1/> history records are being read</title>
             </text>
         </message>
 
@@ -1697,7 +1697,7 @@
                 <title>-reuse-port (SO_REUSEADDR): <p1/> wird verwendet, auch wenn er schon von einer anderen Anwendung belegt ist</title>
             </text>
             <text xml:lang="en">
-                <title>-reuse-port (SO_REUSEADDR): <p1/> can be used by another application too</title>
+                <title>-reuse-port (SO_REUSEADDR): Using <p1/>, but another application can use it too</title>
             </text>
         </message>
 
@@ -1729,7 +1729,7 @@
                 <title>Fehler beim Löschen der Protokolldatei: <p1/></title>
             </text>
             <text xml:lang="en">
-                <title>When removing protocol file: <p1/></title>
+                <title>Error when removing protocol file: <p1/></title>
             </text>
         </message>
 
@@ -1765,7 +1765,7 @@
                 <title>Auftrag <p1/> aus der Datenbank ist fehlerhaft: <p2/></title>
             </text>
             <text xml:lang="en">
-                <title>When loading order <p1/> from database: <p2/></title>
+                <title>Error when loading order <p1/> from database: <p2/></title>
             </text>
         </message>
 
@@ -1774,7 +1774,7 @@
                 <title>Die &lt;run_time> des Auftrags hat keine nächste Startzeit</title>
             </text>
             <text xml:lang="en">
-                <title>Order's &lt;run_time> do not have a next start time</title>
+                <title>Order's &lt;run_time> does not have a next start time</title>
             </text>
         </message>
 
@@ -1783,7 +1783,7 @@
                 <title>Auftrag erledigt ohne web_service_operation.send(), Operation wird abgebrochen</title>
             </text>
             <text xml:lang="en">
-                <title>Order carried out without web_service_operation.send(), operation cancelled</title>
+                <title>Order has been carried out without web_service_operation.send(), operation cancelled</title>
             </text>
         </message>
 
@@ -1792,7 +1792,7 @@
                 <title>job=<p1/> wird ignoriert, weil Auftrag bereits aus der Jobkette entfernt ist</title>
             </text>
             <text xml:lang="en">
-                <title>Ignoring job=<p1/>, because order is removed from job chain</title>
+                <title>Ignoring job=<p1/> because order is removed from job chain</title>
             </text>
         </message>
 
@@ -1810,7 +1810,7 @@
                 <title>Überwachung des Verzeichnisses <p1/> wird nach Fehler beendet: <p2/></title>
             </text>
             <text xml:lang="en">
-                <title>Watching directory <p1/> ends after error: <p2/></title>
+                <title>Watching the directory <p1/> ends after error: <p2/></title>
             </text>
         </message>
 
@@ -1819,7 +1819,7 @@
                 <title>UDP-Nachricht von <p1/> nicht zugelassen</title>
             </text>
             <text xml:lang="en">
-                <title>UDP message from <p1/> not allowed</title>
+                <title>UDP message from <p1/> is not allowed</title>
             </text>
         </message>
 
@@ -1846,7 +1846,7 @@
                 <title>Fehler beim Lesen der nächsten Id (Spalte "<p2/>"): <p1/></title>
             </text>
             <text xml:lang="en">
-                <title>When reading next id (column "<p2/>"): <p1/></title>
+                <title>Error when reading next id (column "<p2/>"): <p1/></title>
             </text>
         </message>
 
@@ -1855,7 +1855,7 @@
                 <title>Fehler beim Einfügen in die Tabelle <p1/>: <p2/></title>
             </text>
             <text xml:lang="en">
-                <title>When inserting into table <p1/>: <p2/></title>
+                <title>Error when inserting into table <p1/>: <p2/></title>
             </text>
         </message>
 
@@ -1864,7 +1864,7 @@
                 <title>Fehler beim Update der Tabelle <p1/>: <p2/></title>
             </text>
             <text xml:lang="en">
-                <title>When updating table <p1/>: <p2/></title>
+                <title>Error when updating table <p1/>: <p2/></title>
             </text>
         </message>
 
@@ -1873,7 +1873,7 @@
                 <title>Historiensatz wird wegen vorausgegangenen Datenbankfehlers nicht geschrieben</title>
             </text>
             <text xml:lang="en">
-                <title>Not writing history record, because of previous database problem</title>
+                <title>Not writing history record because of previous database problem</title>
             </text>
         </message>
 
@@ -1882,7 +1882,7 @@
                 <title>cancel() ignoriert, weil die Antwort schon übertragen wird</title>
             </text>
             <text xml:lang="en">
-                <title>Ignoring cancel(), because response is being sent already</title>
+                <title>Ignoring cancel() because response has already been sent</title>
             </text>
         </message>
 
@@ -1893,7 +1893,7 @@
                 </title>
             </text>
             <text xml:lang="en">
-                <title>Error when opening data base: <p1/></title>
+                <title>Error when opening database: <p1/></title>
             </text>
         </message>
 
@@ -1902,7 +1902,7 @@
                 <title>Fehler beim Schließen der Datenbank: <p1/></title>
             </text>
             <text xml:lang="en">
-                <title>Error when closing database: <p1/></title>
+                <title>Error when closing the database: <p1/></title>
             </text>
         </message>
 
@@ -1992,7 +1992,7 @@
 
         <message code="SCHEDULER-912" weight="debug">
             <text xml:lang="en">
-                <title>add_pid(<p1/>), deadline for process is <p2/></title>
+                <title>add_pid(<p1/>), deadline for the process is <p2/></title>
             </text>
         </message>
 
@@ -2076,7 +2076,7 @@
                 <title>Keine weitere Periode</title>
             </text>
             <text xml:lang="en">
-                <title>No more period</title>
+                <title>No further period</title>
             </text>
         </message>
 
@@ -2094,7 +2094,7 @@
                 <title>Erster Start zu Beginn der Periode: <p1/></title>
             </text>
             <text xml:lang="en">
-                <title>First start at <p1/>, the beginning of a period</title>
+                <title>First start at <p1/> - the beginning of a period</title>
             </text>
         </message>
 
@@ -2247,7 +2247,7 @@
                 <title>Auftrag ist aus Jobkette <p1/> entfernt</title>
             </text>
             <text xml:lang="en">
-                <title>Order is removed from job chain <p1/></title>
+                <title>Order has been removed from job chain <p1/></title>
             </text>
         </message>
 
@@ -2256,7 +2256,7 @@
                 <title>Auftrag ist aus Jobkette <p1/> entfernt und wird weiterhin von <p2/> ausgeführt</title>
             </text>
             <text xml:lang="en">
-                <title>Order is removed from job chain <p1/> and <p2/> is continuing executing it</title>
+                <title>Order has been removed from job chain <p1/> but is being executed by <p2/></title>
             </text>
         </message-->
 
@@ -2265,7 +2265,7 @@
                 <title>add_or_replace_order(): Auftrag wird verzögert bis <p1/> <p2/> ausgeführt hat</title>
             </text>
             <text xml:lang="en">
-                <title>add_or_replace_order(): Order delayed until <p1/> has executed <p2/></title>
+                <title>add_or_replace_order(): order delayed until <p1/> has executed <p2/></title>
             </text>
         </message>
 
@@ -2274,7 +2274,7 @@
                 <title><p1/> mal zurückgestellt. Der Auftrag wechselt in den Fehlerzustand</title>
             </text>
             <text xml:lang="en">
-                <title>setback() <p1/> times called. Setting order to error state</title>
+                <title>setback() called <p1/> times. Setting order to error state</title>
             </text>
         </message>
 
@@ -2283,7 +2283,7 @@
                 <title>Kein weiterer Job in der Jobkette, der Auftrag wird mit state=<p1/> wiederholt um <p2/></title>
             </text>
             <text xml:lang="en">
-                <title>End state reached, job will be repeated at <p2/> with state=<p1/></title>
+                <title>End state reached - job will be repeated at <p2/> with state=<p1/></title>
             </text>
         </message>
 
@@ -2292,7 +2292,7 @@
                 <title>Kein weiterer Job in der Jobkette, der Auftrag ist erledigt</title>
             </text>
             <text xml:lang="en">
-                <title>End state reached, order is carried out</title>
+                <title>End state reached, order has been carried out</title>
             </text>
         </message>
 
@@ -2301,7 +2301,7 @@
                 <title>setback(): Auftrag zum <p1/>. Mal zurückgestellt, bis <p2/></title>
             </text>
             <text xml:lang="en">
-                <title>setback(): Order is set back the <p1/> time, until <p2/></title>
+                <title>setback(): order has been set back <p1/> times, until <p2/></title>
             </text>
         </message>
 
@@ -2310,7 +2310,7 @@
                 <title>setback(): Auftrag zum <p1/>. Mal zurückgestellt, das ist über dem Maximum <p2/> des Jobs</title>
             </text>
             <text xml:lang="en">
-                <title>setback(): Order is set back the <p1/>. time. This is more than the job's maximum <p2/></title>
+                <title>setback(): order has been set back <p1/> times. This is more than the job's maximum <p2/></title>
             </text>
         </message>
 
@@ -2337,7 +2337,7 @@
                 <title>Scheduler ist registriert</title>
             </text>
             <text xml:lang="en">
-                <title>Scheduler is registered</title>
+                <title>Scheduler has been registered</title>
             </text>
         </message>
 

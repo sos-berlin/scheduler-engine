@@ -55,6 +55,9 @@
                     Siehe auch <scheduler_option name="tcp-port"/> 
                     und <scheduler_option name="udp-port"/>.
                 </p>
+                <p>
+                    Wenn der Port blockiert ist, versucht der Scheduler zwei Minuten lang, ihn zu belegen, bevor er aufgibt.
+                </p>
             </description>
         </command_option>
         
@@ -77,6 +80,9 @@
         <command_option name="reuse-port" title="TCP- und UDP-Port wiederverwenden (im Notfall)">
             <description>
                 <p>
+                    Die Option sollte nicht benutzt werden.
+                </p>
+                <p>
                     Ruft <code>setsockopt(socket,SOL_SOCKET,SO_REUSEADDR,true)</code>.
                 </p>
                 <p>
@@ -89,9 +95,6 @@
                 <p>
 		    U.U. ist der Scheduler mit <code>-reuse-port</code> über TCP oder UDP nicht erreichbar,
 		    weil statt dessen der Port der anderen Anwendung angesprochen wird.
-                </p>
-                <p>
-		    Wenn ein Port blockiert ist, versucht der Scheduler eine Minute lang, ihn zu belegen, bevor er aufgibt.
                 </p>
             </description>
         </command_option>
@@ -287,6 +290,9 @@
                 <p>
                     <code>-validate-xml-</code> schaltet die Validierung ab 
                     (für den Fall, dass das Schema fehlerhaft ist).
+                </p>
+                <p>
+                    Siehe <scheduler_option name="show-xml-schema"/>.
                 </p>
             </description>
         </command_option>
