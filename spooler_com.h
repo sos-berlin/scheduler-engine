@@ -113,6 +113,8 @@ struct Com_variable: spooler_com::Ivariable,
     STDMETHODIMP            get_Name                        ( BSTR* result )                        { return _name.CopyTo(result); }
     STDMETHODIMP                Clone                       ( spooler_com::Ivariable** );
 
+    string                      string_value                () const;
+
 //private:
     Thread_semaphore           _lock;
     Bstr                       _name;

@@ -1987,7 +1987,17 @@ void Order::postprocessing2( Job* last_job )
         //_log->close();
     }
 
-    if( _job_chain  &&  ( _is_in_database || finished() ) )  _spooler->_db->update_order( this );
+    if( _job_chain  &&  ( _is_in_database || finished() ) )
+    {
+        try
+        {
+            _spooler->_db->update_order( this );
+        }
+        catch( exception& x )
+        {
+            _log->error( message_string( "SCHEDULER-313", x ) );
+        }
+    }
 
     if( finished() )  close();
 }

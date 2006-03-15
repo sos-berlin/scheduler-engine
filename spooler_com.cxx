@@ -212,6 +212,20 @@ Com_variable::Com_variable( const BSTR name, const VARIANT& value )
     }
 }
 
+//-----------------------------------------------------------------------Com_variable::string_value
+    
+string Com_variable::string_value() const
+{
+    try
+    {
+        return string_from_variant( _value );
+    }
+    catch( exception& x )
+    {
+        z::throw_xc( "SCHEDULER-312", _name, vartype_name( _value.vt ), x.what() );
+    }
+}
+
 //---------------------------------------------------------------------Com_variable::QueryInterface
 
 STDMETHODIMP Com_variable::QueryInterface( const IID& iid, void** result )
@@ -397,7 +411,6 @@ string Com_variable_set::get_string( const string& name )
 
     return string_from_variant( result );
 }
-
 
 //-------------------------------------------------------------Com_variable_set::get_string_by_name
 
@@ -601,7 +614,7 @@ xml::Element_ptr Com_variable_set::dom_element( const xml::Document_ptr& doc, co
                 if( vt != (VARTYPE)-1 )  var.setAttribute( "vt", vt );
                                    else  {} // Andere Typen sind nicht rückkonvertierbar. Die werden dann zum String.  
 
-                var.setAttribute( "value", string_from_variant( value ) );
+                var.setAttribute( "value", v->string_value() );
 
                 varset.appendChild( var );
             }
@@ -3075,16 +3088,18 @@ STDMETHODIMP Com_spooler::get_Variables( Ivariable_set** result )
 
 STDMETHODIMP Com_spooler::put_Var( BSTR name, VARIANT* value )
 {
-    HRESULT     hr;
-    const char* crash_string = "*CRASH SCHEDULER*";
-    static int  dummy;
+    HRESULT  hr;
 
+#   ifdef _DEBUG
+        const char* crash_string = "*CRASH SCHEDULER*";
+        static int  dummy;
 
-    if( ( name == NULL || SysStringLen(name) == 0 )  &&  string_from_variant(*value) == crash_string )
-    {
-        _spooler->_log.error( "spooler.var(\"\")=\"" + string(crash_string) + "\"  lässt Scheduler jetzt abbrechen." );
-        dummy = *(int*)NULL;
-    }
+        if( ( name == NULL || SysStringLen(name) == 0 )  &&  string_from_variant(*value) == crash_string )
+        {
+            _spooler->_log.error( "spooler.var(\"\")=\"" + string(crash_string) + "\"  lässt Scheduler jetzt abbrechen." );
+            dummy = *(int*)NULL;
+        }
+#   endif
 
     ptr<Ivariable_set> variables;
 

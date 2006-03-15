@@ -261,7 +261,7 @@
                 <title>task.wait_until_terminated() kann nicht im selben Thread verwendet werden. Deadlock.</title>
             </text>
             <text xml:lang="en">
-                <title>task.wait_until_terminated() cannot be called in the same thread. Deadlock.</title>
+                <title>task.wait_until_terminated() cannot be called in its own thread. Deadlock.</title>
             </text>
         </message>
 
@@ -1912,6 +1912,24 @@
             </text>
         </message>
 
+        <message code="SCHEDULER-312">
+            <text xml:lang="en">
+                <title>Variable "<p1/>" (vt=<p2/>) cannot be converted to Text: <p3/></title>
+                <p2>
+                    <description>Variantentyp der Variablen</description>
+                </p2>
+                <p3>
+                    <description>Der Fehler, der bei der Konvertierung aufgetreten ist</description>
+                </p3>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-313">
+            <text xml:lang="en">
+                <title>Cannot store order in database: <p1/></title>
+            </text>
+        </message>
+
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->
@@ -2211,7 +2229,7 @@
                 <title>Auftrag wird ausgeführt um <p1/></title>
             </text>
             <text xml:lang="en">
-                <title>Order will be processed at <p2/></title>
+                <title>Order will be processed at <p1/></title>
             </text>
         </message>
 

@@ -141,7 +141,7 @@ spooler_log.info( request.charset_name );               // ==> utf-8</pre>
                 Zu den hier zulässigen Zeichen-Codierungen (Charset) siehe <scheduler_method class="Web_service_request" property="string_content"/>
             </p>
             <p>
-                Siehe <scheduler_method class="Web_service_operation" property="charset_name"/>.
+                Siehe <scheduler_method class="Web_service_response" property="charset_name"/>.
             </p>
         </description>
 
@@ -149,7 +149,8 @@ spooler_log.info( request.charset_name );               // ==> utf-8</pre>
             <pre>var response = spooler_task.order.web_service_operation.response;
 response.content_type = "text/plain";
 response.charset_name = "iso-8859-1";
-response.string_content = "This is the answer";</pre>
+response.string_content = "This is the answer";
+response.send();</pre>
         </example>
     </property>
 

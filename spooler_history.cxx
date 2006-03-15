@@ -894,7 +894,7 @@ void Spooler_db::finish_order( Order* order, Transaction* outer_transaction )
                     order->_is_in_database = false;
                 }
 
-                write_order_history( order, outer_transaction );
+                write_order_history( order, &ta );
             }
 
             ta.commit();
@@ -975,24 +975,24 @@ void Spooler_db::write_order_history( Order* order, Transaction* outer_transacti
 
 void Spooler_db::update_order( Order* order )
 {
-    string payload_string = order->string_payload();
-    string state_string   = order->state().as_string();
-
-    try
+    if( order->finished() )  
     {
-        while(1)
-        {
-            if( !_db.opened() )  return;
+        finish_order( order );
+    }
+    else
+    {
+        string payload_string = order->string_payload();
+        string state_string   = order->state().as_string();
 
-            try
+        try
+        {
+            while(1)
             {
-                Transaction ta ( this );
+                if( !_db.opened() )  return;
+
+                try
                 {
-                    if( order->finished() )  
-                    {
-                        finish_order( order, &ta );
-                    }
-                    else
+                    Transaction ta ( this );
                     {
                         sql::Update_stmt update ( &_db_descr );
 
@@ -1024,23 +1024,22 @@ void Spooler_db::update_order( Order* order )
 
                         execute( update );
 
+                        ta.commit();
                     }
 
-                    ta.commit();
+                    break;
                 }
-
-                break;
-            }
-            catch( exception& x )  
-            { 
-                try_reopen_after_error( x );
+                catch( exception& x )  
+                { 
+                    try_reopen_after_error( x );
+                }
             }
         }
-    }
-    catch( exception& x ) 
-    { 
-        _spooler->log()->error( message_string( "SCHEDULER-306", _spooler->_orders_tablename, x ) );      // "FEHLER BEIM UPDATE DER TABELLE "
-        throw;
+        catch( exception& x ) 
+        { 
+            _spooler->log()->error( message_string( "SCHEDULER-306", _spooler->_orders_tablename, x ) );      // "FEHLER BEIM UPDATE DER TABELLE "
+            throw;
+        }
     }
 }
 

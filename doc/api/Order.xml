@@ -362,7 +362,7 @@
     <description>
         <p>
             Wenn der Auftrag keinem Webdienst zugeordnet ist, 
-            liefert der Aufruf eine Exception.
+            liefert der Aufruf den Fehler <scheduler_message code="SCHEDULER-240"/>.
         </p>
         <p>
             Siehe auch <scheduler_method class="Order" property="web_service_or_null"/>.
@@ -408,7 +408,7 @@
     <description>
         <p>
             Wenn der Auftrag keinem Webdienst zugeordnet ist, 
-            liefert der Aufruf eine Exception.
+            liefert der Aufruf den Fehler <scheduler_message code="SCHEDULER-246"/>.
         </p>
         <p>
             Siehe 
