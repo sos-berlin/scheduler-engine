@@ -702,9 +702,9 @@ db = odbc -db=factory_oracle -user=factory -password=factory
             </p>
         </description>
     </setting>
-    
-    
-<!--
+
+
+    <!--
     <setting setting = "run_time_begin"
              type    = "hh:mm[:ss]"
              initial = "00:00">

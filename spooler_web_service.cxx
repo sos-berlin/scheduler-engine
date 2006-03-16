@@ -50,6 +50,7 @@ const Com_method Web_service::_methods[] =
     COM_PROPERTY_GET( Web_service,  3, Request_xslt_stylesheet_path  , VT_BSTR    , 0 ),
     COM_PROPERTY_GET( Web_service,  4, Response_xslt_stylesheet_path , VT_BSTR    , 0 ),
     COM_PROPERTY_GET( Web_service,  5, Forward_xslt_stylesheet_path  , VT_BSTR    , 0 ),
+    COM_PROPERTY_GET( Web_service,  6, Params                        , VT_DISPATCH, 0 ),
 #endif
     {}
 };

@@ -19,6 +19,8 @@
         </command_option>
 
 
+        <command_option name="log" setting="scheduler_log"/>
+        
         <command_option name="log-dir" setting="log_dir"/>
 
 
