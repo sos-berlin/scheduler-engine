@@ -105,10 +105,7 @@
             </description>
         </xml_attribute>
 
-        <xml_attribute name="next_start_time" type="yyyy-mm-dd hh:mm:ss.mmm" title="Voraussichtliche nächste Startzeit">
-            Zur Ermittlung der nächsten Startzeit prüft der Scheduler die nächsten hundert Perioden,
-            bis er eine Periode mit <code>single_start</code> oder <code>repeat</code> erreicht.
-        </xml_attribute>
+        <xml_attribute name="next_start_time" type="yyyy-mm-dd hh:mm:ss.mmm" title="Voraussichtliche nächste Startzeit"/>
 
         <xml_attribute name="delay_after_error" type="yyyy-mm-dd hh:mm:ss.mmm" title="delay_after_error ist nach einem Fehler wirksam" />
 

@@ -10,19 +10,12 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2006-03-11" version="2.0.148" subversion_revision="4192">
-        <revision type="new" title="&lt;web_service> mit timeout=">
+    <change date="2006-03-17" version="2.0.148" subversion_revision="4199">
+        <revision type="correction" title="Der Scheduler läuft wieder unter Windows 2000">
             <description>
                 <p>
-                    Die Frist läuft, solange kein Job den Auftrag anrührt.
-                    Nach Ablauf wird der Auftrag zurückgenommen und die HTTP-Operation mit Fehler beendet.
+                    Die fehlerhafte Routine SafeArrayGetVartype() in Windows 2000 wird umgegangen.
                 </p>
-                
-                <ul>
-                    <li>
-                        <scheduler_element name="web_service" attribute="timeout"/>
-                    </li>
-                </ul>
             </description>
         </revision>
     </change>

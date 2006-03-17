@@ -1214,7 +1214,7 @@ STDMETHODIMP Response::Send() // VARIANT* content, BSTR content_type_bstr )
             SAFEARRAY* safearray = V_ARRAY( content );
             VARTYPE    vartype   = 0;
 
-            hr = SafeArrayGetVartype( safearray, &vartype );
+            hr = z_SafeArrayGetVartype( safearray, &vartype );
             if( FAILED(hr) )  return hr;
             if( vartype != VT_UI1 )  return DISP_E_TYPEMISMATCH;
 
