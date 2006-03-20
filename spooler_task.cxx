@@ -2175,7 +2175,7 @@ bool Process_task::do_begin__end()
         hr = vt.ChangeType( VT_BSTR );
         if( FAILED(hr) )  throw_ole( hr, "VariantChangeType", nr.c_str() );
 
-        command_line += " " + quoted_windows_command_parameter( bstr_as_string( vt.bstrVal ) );
+        command_line += " " + quoted_windows_process_parameter( bstr_as_string( vt.bstrVal ) );
     }
 
 

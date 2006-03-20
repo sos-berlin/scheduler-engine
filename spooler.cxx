@@ -1280,6 +1280,8 @@ Job* Spooler::get_job( const string& job_name, bool can_be_not_initialized )
 
 Job* Spooler::get_job_or_null( const string& job_name )
 {
+    if( job_name == "" )  return NULL;
+
     THREAD_LOCK( _lock )
     {
         FOR_EACH( Job_list, _job_list, it )
@@ -2916,7 +2918,7 @@ void spooler_restart( Log* log, bool is_service )
 
         if( is_service )  command_line += " -renew-service";
 
-        command_line += " " + quoted_command_parameter( "-renew-spooler=" + this_spooler );
+        command_line += " " + quoted_windows_process_parameter( "-renew-spooler=" + this_spooler );
         if( log )  log->info( message_string( "SCHEDULER-906", command_line ) );        // "Restart Scheduler "
         start_process( command_line );
 
@@ -2995,7 +2997,7 @@ static void spooler_renew( const string& service_name, const string& renew_spool
     }
 
     if( is_service )  spooler::service_start( service_name );
-                else  start_process( quoted_command_parameter( renew_spooler ) + " " + command_line );
+                else  start_process( quoted_windows_process_parameter( renew_spooler ) + " " + command_line );
 }
 
 #endif

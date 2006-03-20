@@ -51,6 +51,16 @@
             </description>
         </xml_attribute>
 
+        <xml_attribute name="repeat" type="hh:mm[:ss] oder sekunden">
+            <description>
+                <p>
+                    Wenn das Element leer ist (also kein <code>&lt;period></code> enthält),
+                    generiert der Scheduler eine Periode mit dieser Einstellung,
+                    anderfalls ist es die Voreinstellung für die Kind-Elemente.
+                </p>
+            </description>
+        </xml_attribute>
+
         <xml_attribute name="single_start" type="hh:mm[:ss]">
             <description>
                 <p>
