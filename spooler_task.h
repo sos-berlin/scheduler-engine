@@ -374,24 +374,6 @@ struct Job_module_task : Module_task
 */
 };
 
-//------------------------------------------------------------------------------------Process_event
-#ifndef Z_WINDOWS
-
-struct Process_event : Event
-{
-                                Process_event               ( const string& name )                  : Event(name) {}
-
-    virtual void                close                       ();
-    bool                        signaled                    ();
-    virtual bool                wait                        ( double seconds );
-                                operator bool               ()                                      { return _pid != 0; }
-
-    int                        _pid;
-    int                        _process_signaled;
-    int                        _process_exit_code;
-};
-
-#endif
 //-------------------------------------------------------------------------------------Process_task
 /*
 struct Process_task : Task      // Job ist irgendein Prozess (z.B. durch ein Shell-Skript implementiert)

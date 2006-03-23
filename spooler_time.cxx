@@ -710,8 +710,10 @@ void Run_time::set_dom( const xml::Element_ptr& element )
         if( e.nodeName_is( "at" ) )
         {
             a_day_set = true;
-            string at_time = e.getAttribute( "at" );
-            if( at_time == "now" )  _once = true;   // "now" wirkt nicht in _at_set, weil der Zeitpunkt gleich verstrichen sein wird
+            string at = e.getAttribute( "at" );
+            if( at == "now" )  _once = true;   // "now" wirkt nicht in _at_set, weil der Zeitpunkt gleich verstrichen sein wird
+            Time at_time;
+            at_time.set_datetime( at );
             _at_set.add( at_time ); 
         }
         else

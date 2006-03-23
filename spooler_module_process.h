@@ -10,6 +10,23 @@ namespace spooler {
 
 struct Process_module_instance : Module_instance
 {
+#   ifndef Z_WINDOWS
+        struct Process_event : Event
+        {
+                                        Process_event               ( const string& name )                  : Event(name) {}
+
+            virtual void                close                       ();
+            bool                        signaled                    ();
+            virtual bool                wait                        ( double seconds );
+                                        operator bool               ()                                      { return _pid != 0; }
+
+            int                        _pid;
+            int                        _process_signaled;
+            int                        _process_exit_code;
+        };
+#   endif
+
+
                                 Process_module_instance     ( Module* );
                                ~Process_module_instance     ();
 

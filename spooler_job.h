@@ -258,6 +258,8 @@ struct Job : Object,
     void                        calculate_next_time         ( Time now = Time::now() );
 
     Time                        next_time                   ()                                      { THREAD_LOCK_RETURN( _lock, Time, _next_time ); }
+    Time                        next_start_time             ();
+    bool                        has_next_start_time         ()                                      { return next_start_time() < latter_day; }
 
     bool                        execute_state_cmd           ();
     void                        reread                      ();

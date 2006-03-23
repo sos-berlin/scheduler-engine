@@ -297,7 +297,7 @@ Variant Process_module_instance::step__end()
 //-----------------------------------------------------------------------------Process_event::close
 #ifndef Z_WINDOWS
 
-void Process_event::close()
+void Process_module_instance::Process_event::close()
 {
     // waitpid() rufen, falls noch nicht geschehen (um Zombie zu schlieﬂen)
 
@@ -318,7 +318,7 @@ void Process_event::close()
 
 //--------------------------------------------------------------------------Process_event::signaled
 
-bool Process_event::signaled()
+bool Process_module_instance::Process_event::signaled()
 {
     //LOG2( "joacim", "Process_event::signaled()   _signaled=" << _signaled << "\n" );
     if( _signaled )  return true;
@@ -327,7 +327,7 @@ bool Process_event::signaled()
 
 //------------------------------------------------------------------------------Process_event::wait
 
-bool Process_event::wait( double seconds )
+bool Process_module_instance::Process_event::wait( double seconds )
 {
     if( !_pid )  return true;
 

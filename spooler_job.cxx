@@ -436,26 +436,28 @@ void Job::set_remove( bool remove )
 
 bool Job::should_removed()
 { 
-    if( !_remove  &&  !_temporary )  return false;
-
-    if( _running_tasks.size() > 0  ||  _task_queue.size() > 0 )
+    if( _remove  ||  _temporary )
     {
-        //Z_DEBUG_ONLY( if( _state != s_stopping )  _log->error( "??? Laufende Tasks, aber _state != s_stopping ???" ) );
-        return false;
-    }
+        if( _temporary  &&  !_remove  &&  has_next_start_time() )  return false;
 
-    if( _order_queue )
-    {
-        // _prioritized_order_job_array und Job_chain_node enthalten Job*!
-        Z_DEBUG_ONLY( _log->error( "??? _remove, aber _order_queue != NULL ???" ) );
-        return false;
-    }
+        if( _running_tasks.size() > 0  ||  _task_queue.size() > 0 )
+        {
+            return false;
+        }
 
-    if( _state == s_none       )  return true;
-    if( _state == s_stopped    )  return true;
-  //if( _state == s_read_error )  return true;  Läuft jetzt keine Task?
-  //if( _state == s_error      )  return true;  Diesen Zustand sollte es nicht geben
-    if( _state == s_pending    )  return true;
+        if( _order_queue )
+        {
+            // _prioritized_order_job_array und Job_chain_node enthalten Job*!
+            Z_DEBUG_ONLY( _log->error( "??? _remove, aber _order_queue != NULL ???" ) );
+            return false;
+        }
+
+        if( _state == s_none       )  return true;
+        if( _state == s_stopped    )  return true;
+      //if( _state == s_read_error )  return true;  Läuft jetzt keine Task?
+      //if( _state == s_error      )  return true;  Diesen Zustand sollte es nicht geben
+        if( _state == s_pending    )  return true;
+    }
 
     return false;
 }
@@ -1231,6 +1233,16 @@ void Job::set_next_start_time( Time now, bool repeat )
     }
 }
 
+//-----------------------------------------------------------------------------Job::next_start_time
+
+Time Job::next_start_time()
+{
+    Time result = min( _next_start_time, _next_single_start );
+    if( _order_queue )  result = min( result, _order_queue->next_time() );
+
+    return result;
+}
+
 //-------------------------------------------------------------------------Job::calculate_next_time
 // Für Spooler_thread
 
@@ -1848,9 +1860,7 @@ xml::Element_ptr Job::dom_element( const xml::Document_ptr& document, const Show
 
         if( _state_cmd         )  job_element.setAttribute( "cmd"    , state_cmd_name()  );
 
-        Time next = min( _next_start_time, _next_single_start );
-        if( _order_queue )  next = min( next, _order_queue->next_time() );
-
+        Time next = next_start_time();
         if( next < latter_day )
         job_element.setAttribute( "next_start_time", next.as_string() );
 
