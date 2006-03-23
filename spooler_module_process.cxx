@@ -15,6 +15,9 @@ Process_module_instance::Process_module_instance( Module* module )
     _zero_(this+1),
     _process_handle( "process_handle" )
 {
+#   ifndef Z_WINDOWS
+        _process_environment->_ignore_case = false;
+#   endif
 }
 
 //-------------------------------------------------rocess_module_instance::~Process_module_instance
