@@ -620,7 +620,7 @@ int Communication::bind_socket( SOCKET socket, struct sockaddr_in* sa, const str
         _spooler->_log.warn( message_string( "SCHEDULER-288", port_name ) );
         LOG( "setsockopt(" << socket << ",SOL_SOCKET,SO_REUSEADDR,1)  " );
         ret = setsockopt( socket, SOL_SOCKET, SO_REUSEADDR, (const char*)&true_, sizeof true_ );
-        LOG( "ret=" << ret );  if( ret == SOCKET_ERROR )  LOG( "errno=" << errno << "  "  << strerror(errno) );
+        LOG( "ret=" << ret );  if( ret == SOCKET_ERROR )  LOG( "errno=" << errno << "  "  << z_strerror(errno) );
         LOG( "\n" );
     }
 

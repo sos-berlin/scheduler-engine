@@ -1104,7 +1104,7 @@ void Order::attach_task( Task* task )
 
     if( !_log->opened() )  open_log();
 
-    if( _delay_storing_until_processing  &&  _job_chain->_orders_recoverable  &&  !_is_in_database )
+    if( _delay_storing_until_processing  &&  _job_chain  &&  _job_chain->_orders_recoverable  &&  !_is_in_database )
     {
         _spooler->_db->insert_order( this );
         _delay_storing_until_processing = false;

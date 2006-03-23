@@ -299,7 +299,7 @@
     <xsd:element name="jobs">
         <xsd:complexType>
             <xsd:sequence>
-                <xsd:element ref="job" maxOccurs="unbounded"/>
+                <xsd:element ref="job" minOccurs="0" maxOccurs="unbounded"/>
             </xsd:sequence>
         </xsd:complexType>
     </xsd:element>
@@ -405,6 +405,7 @@
                     <xsd:complexType>
                         <xsd:attribute name="name"              type="Name"/>
                         <xsd:attribute name="max_processes"     type="xsd:nonNegativeInteger"/>
+                        <xsd:attribute name="spooler_id"        type="Name"/>
                     </xsd:complexType>
                 </xsd:element>
             </xsd:sequence>
@@ -448,7 +449,13 @@
         <xsd:complexType>
             <xsd:sequence>
                 <xsd:element ref="period" minOccurs="0" maxOccurs="unbounded"/>
-                
+
+                <xsd:element name="at" minOccurs="0" maxOccurs="unbounded">
+                    <xsd:complexType>
+                        <xsd:attribute name="at" type="Date_time"/>
+                    </xsd:complexType>
+                </xsd:element>
+
                 <xsd:element name="date" minOccurs="0" maxOccurs="unbounded">
                     <xsd:complexType>
                         <xsd:sequence>
@@ -775,6 +782,12 @@
 
     <xsd:simpleType name="File">
         <xsd:restriction base="xsd:string"/>
+    </xsd:simpleType>
+
+
+    <xsd:simpleType name="Date_time">
+        <xsd:restriction base="xsd:string">
+        </xsd:restriction>
     </xsd:simpleType>
 
 

@@ -505,6 +505,48 @@ void Date_set::print( ostream& s ) const
     s << ")";
 }
 
+//------------------------------------------------------------------------------At_set::next_period
+
+Period At_set::next_period( Time tim, With_single_start single_start )
+{
+    if( single_start & wss_next_single_start )
+    {
+        FOR_EACH( set<Time>, _at_set, it )
+        {
+            const Time& time = *it;
+
+            if( time >= tim )
+            {
+                Period result;
+                
+                result._begin        = time;
+                result._end          = time;
+                result._single_start = true;
+                result._let_run      = true;
+                result._repeat       = latter_day;
+
+                return result;
+            }
+        }
+    }
+
+    return Period();
+}
+
+//---------------------------------------------------------------------------------Date_set::print
+
+void At_set::print( ostream& s ) const
+{
+    s << "At_set(";
+
+    FOR_EACH_CONST( set<Time>, _at_set, it )
+    {
+        s << *it << " ";
+    }
+
+    s << ")";
+}
+
 //---------------------------------------------------------------------------------Day_set::set_dom
 
 void Day_set::set_dom( const xml::Element_ptr& element, const Day* default_day, const Period* default_period )
@@ -665,6 +707,14 @@ void Run_time::set_dom( const xml::Element_ptr& element )
             default_day.add( Period( e, &default_period ) );
         }
         else
+        if( e.nodeName_is( "at" ) )
+        {
+            a_day_set = true;
+            string at_time = e.getAttribute( "at" );
+            if( at_time == "now" )  _once = true;   // "now" wirkt nicht in _at_set, weil der Zeitpunkt gleich verstrichen sein wird
+            _at_set.add( at_time ); 
+        }
+        else
         if( e.nodeName_is( "date" ) )
         {
             a_day_set = true;
@@ -764,6 +814,7 @@ Period Run_time::next_period( Time tim_par, With_single_start single_start )
     {
         next = Period();
 
+        next = min( next, _at_set      .next_period( tim, single_start ) );
         next = min( next, _date_set    .next_period( tim, single_start ) );
         next = min( next, _weekday_set .next_period( tim, single_start ) );
         next = min( next, _monthday_set.next_period( tim, single_start ) );

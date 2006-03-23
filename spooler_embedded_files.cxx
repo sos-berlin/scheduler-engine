@@ -4399,7 +4399,7 @@ const char file_scheduler_xsd[] =
     "<xsd:element name=\"jobs\">\r\n"
     "<xsd:complexType>\r\n"
     "<xsd:sequence>\r\n"
-    "<xsd:element ref=\"job\" maxOccurs=\"unbounded\"/>\r\n"
+    "<xsd:element ref=\"job\" minOccurs=\"0\" maxOccurs=\"unbounded\"/>\r\n"
     "</xsd:sequence>\r\n"
     "</xsd:complexType>\r\n"
     "</xsd:element>\r\n"
@@ -4505,6 +4505,7 @@ const char file_scheduler_xsd[] =
     "<xsd:complexType>\r\n"
     "<xsd:attribute name=\"name\"              type=\"Name\"/>\r\n"
     "<xsd:attribute name=\"max_processes\"     type=\"xsd:nonNegativeInteger\"/>\r\n"
+    "<xsd:attribute name=\"spooler_id\"        type=\"Name\"/>\r\n"
     "</xsd:complexType>\r\n"
     "</xsd:element>\r\n"
     "</xsd:sequence>\r\n"
@@ -4548,6 +4549,12 @@ const char file_scheduler_xsd[] =
     "<xsd:complexType>\r\n"
     "<xsd:sequence>\r\n"
     "<xsd:element ref=\"period\" minOccurs=\"0\" maxOccurs=\"unbounded\"/>\r\n"
+    "\r\n"
+    "<xsd:element name=\"at\" minOccurs=\"0\" maxOccurs=\"unbounded\">\r\n"
+    "<xsd:complexType>\r\n"
+    "<xsd:attribute name=\"at\" type=\"Date_time\"/>\r\n"
+    "</xsd:complexType>\r\n"
+    "</xsd:element>\r\n"
     "\r\n"
     "<xsd:element name=\"date\" minOccurs=\"0\" maxOccurs=\"unbounded\">\r\n"
     "<xsd:complexType>\r\n"
@@ -4878,6 +4885,12 @@ const char file_scheduler_xsd[] =
     "</xsd:simpleType>\r\n"
     "\r\n"
     "\r\n"
+    "<xsd:simpleType name=\"Date_time\">\r\n"
+    "<xsd:restriction base=\"xsd:string\">\r\n"
+    "</xsd:restriction>\r\n"
+    "</xsd:simpleType>\r\n"
+    "\r\n"
+    "\r\n"
     "<xsd:simpleType name=\"Time_of_day\">\r\n"
     "<xsd:restriction base=\"xsd:string\">\r\n"
     "<xsd:pattern value=\"\\d{1,2}:\\d{2}(:\\d\\d)?\"/>\r\n"
@@ -4913,7 +4926,7 @@ static const Embedded_file embedded_files_array[] =
     { "html/jz/translation_de.js", file_html_jz_translation_de_js, sizeof file_html_jz_translation_de_js - 1, 1113976395 },
     { "html/jz/scheduler.xslt", file_html_jz_scheduler_xslt, sizeof file_html_jz_scheduler_xslt - 1, 1141665008 },
     { "html/jz/scheduler.css", file_html_jz_scheduler_css, sizeof file_html_jz_scheduler_css - 1, 1137323283 },
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1141941038 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1143020430 },
     { NULL, NULL, 0 }
 };
 

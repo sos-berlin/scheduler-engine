@@ -139,6 +139,7 @@ namespace http
 #include "spooler_module.h"
 #include "spooler_module_com.h"
 #include "spooler_module_java.h"
+#include "spooler_module_process.h"
 #include "spooler_history.h"
 #include "spooler_order.h"
 #include "spooler_remote.h"

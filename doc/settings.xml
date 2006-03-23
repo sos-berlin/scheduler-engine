@@ -621,13 +621,20 @@ db = odbc -db=factory_oracle -user=factory -password=factory
              title     = "Java-Optionen">
         <description>
             <p>
+                Hier können Sie z.B. mit <code>-Djava.library.path=</code> das Verzeichnis angeben,
+                in dem Hostjava installiert ist.
+            </p>
+            <p>
                 Die Optionen werden der Java Virtual Machine übergeben.
             </p>
             <p>
-                Der allgemeine Platz für diese Einstellung ist 
+                Der allgemeine Platz für diese Einstellung ist
                 <scheduler_ini_entry file="sos.ini" section="java" entry="options"/>.
             </p>
         </description>
+        <example>
+            <pre>options = -Xdebug -Djava.library.path=s:/prod/bind</pre>
+        </example>
     </setting>
 
 

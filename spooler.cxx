@@ -664,7 +664,7 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
     if( _waiting_errno )
     {
         state_element.setAttribute( "waiting_errno"         , _waiting_errno );
-        state_element.setAttribute( "waiting_errno_text"    , "ERRNO-" + as_string( _waiting_errno ) + "  " + strerror( _waiting_errno ) );
+        state_element.setAttribute( "waiting_errno_text"    , "ERRNO-" + as_string( _waiting_errno ) + "  " + z_strerror( _waiting_errno ) );
         state_element.setAttribute( "waiting_errno_filename", _waiting_errno_filename );
     }
 
@@ -1922,7 +1922,7 @@ void Spooler::load()
     _log.open();
 
     char hostname[200];  // Nach _communication.init() und nach _prefix_log.init()!
-    if( gethostname( hostname, sizeof hostname ) == SOCKET_ERROR )  hostname[0] = '\0',  _log.warn( string("gethostname(): ") + strerror( errno ) );
+    if( gethostname( hostname, sizeof hostname ) == SOCKET_ERROR )  hostname[0] = '\0',  _log.warn( "gethostname(): " + z_strerror( errno ) );
     _hostname = hostname;
 
 
@@ -3043,7 +3043,7 @@ void __cdecl delete_new_spooler( void* )
             int ret = _unlink( copied_spooler.c_str() );
             if( ret == 0  || errno != EACCES ) break;
 
-            msg = "errno=" + as_string(errno) + ' ' + strerror(errno) + '\n';
+            msg = "errno=" + as_string(errno) + ' ' + z_strerror(errno) + '\n';
             fprintf( stderr, "%s", msg.c_str() );
             LOG( msg.c_str() );
             

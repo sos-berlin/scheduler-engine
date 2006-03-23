@@ -814,7 +814,7 @@ void Task::Registered_pid::try_kill()
         }
         catch( exception& x )
         {
-            _task->_log->warn( message_string( "SCHEDULER-274", _pid ) );   // "Subprozess " << _pid << " lässt sich nicht abbrechen: " << x
+            _task->_log->warn( message_string( "SCHEDULER-274", _pid, x ) );   // "Subprozess " << _pid << " lässt sich nicht abbrechen: " << x
         }
 
         _killed = true;
@@ -1008,7 +1008,10 @@ bool Task::do_something()
                             else
                             {
                                 ok = operation__end();
-                                if( _state != s_running_process )  set_state( ok? s_running : s_ending );
+
+                                set_state( ok? _module_instance->_module->_kind == Module::kind_process? s_running_process 
+                                                                                                       : s_running 
+                                             : s_ending );
                                 loop = true;
                             }
 
@@ -1019,7 +1022,8 @@ bool Task::do_something()
 
 
                         case s_running_process:
-                            if( ((Process_task*)this)->signaled() )
+                            //if( ((Process_task*)this)->signaled() )
+                            if( _module_instance->process_has_signaled() )
                             {
                                 _log->info( message_string( "SCHEDULER-915" ) );
                                 postprocess_order( true );
@@ -1300,7 +1304,7 @@ bool Task::do_something()
                     {
                         finish();
                     }
-                    catch( exception& x ) { _log->error( "finish():" + string( x.what() ) ); }
+                    catch( exception& x ) { _log->error( "finish(): " + string( x.what() ) ); }
 
                     try
                     {
@@ -1421,7 +1425,7 @@ bool Task::step__end()
             if( _job->order_queue() )  continue_task = true;           // Auftragsgesteuerte Task immer fortsetzen ( _order kann wieder null sein wegen set_state(), §1495 )
         }
 
-        if( has_step_count()  ||  _step_count == 0 )        // Bei Process_task nur einen Schritt zählen
+        if( has_step_count()  ||  _step_count == 0 )        // Bei kind_process nur einen Schritt zählen
         {
             _thread->count_step();
             _job->count_step();
@@ -1790,11 +1794,23 @@ void Module_task::do_close__end()
     {
         _module_instance->close__end();
 
-        int exit_code = _module_instance->exit_code();
-        if( exit_code != 0 )  _log->warn( message_string( "SCHEDULER-280", exit_code, printf_string( "%X", exit_code ) ) );
-
-        int termination_signal = _module_instance->termination_signal();
-        if( termination_signal != 0 )  _log->warn( message_string( "SCHEDULER-279", termination_signal ) );
+        if( int exit_code = _module_instance->exit_code() )
+        {
+            z::Xc x ( "SCHEDULER-280", exit_code, printf_string( "%X", exit_code ) );
+            if( _module_instance->_module->_kind == Module::kind_process  &&  !_module_instance->_module->_process_ignore_error )  
+                set_error( x );
+            else  
+                _log->warn( x.what() );
+        }
+                                          
+        if( int termination_signal = _module_instance->termination_signal() )
+        {
+            z::Xc x ( "SCHEDULER-279", termination_signal );
+            if( _module_instance->_module->_kind == Module::kind_process  &&  !_module_instance->_module->_process_ignore_signal )  
+                set_error( x );
+            else  
+                _log->warn( x.what() );
+        }
 
         _log->log_file( _module_instance->stdout_filename(), "stdout:" );
         _log->log_file( _module_instance->stderr_filename(), "stderr:" );
@@ -1938,6 +1954,8 @@ bool Job_module_task::do_load()
     _module_instance = module_instance;
     _module_instance->attach_task( this, _log );
 
+    _module_instance->set_params( _params );
+
     if( !module_instance->loaded() )
     {
         module_instance->init();
@@ -2052,6 +2070,7 @@ void Job_module_task::do_release__end()
 }
 
 //-----------------------------------------------------------------------Process_task::Process_task
+#if 0  // Jetzt in spooler_module_process.cxx
 
 Process_task::Process_task( Job* job )
 :
@@ -2294,7 +2313,7 @@ bool Process_event::wait( double seconds )
         int ret = waitpid( _pid, &status, WNOHANG | WUNTRACED );    // WUNTRACED: "which means to also return for children which are stopped, and whose status has not been reported."
         if( ret == -1 )
         {
-            LOG( "waitpid(" << _pid << ") ==> ERRNO-" << errno << "  " << strerror(errno) << "\n" );
+            LOG( "waitpid(" << _pid << ") ==> ERRNO-" << errno << "  " << z_strerror(errno) << "\n" );
             //int pid = _pid;
             _pid = 0;
             //throw_errno( errno, "waitpid", as_string(pid).c_str() );
@@ -2430,7 +2449,7 @@ bool Process_task::do_begin__end()
             execvp( _job->_process_filename.c_str(), args );
 
             int e = errno;
-            Z_LOG( "execvp()  errno-" << e << "  " << strerror(e) << "\n" );
+            Z_LOG( "execvp()  errno-" << e << "  " << z_strerror(e) << "\n" );
             fprintf( stderr, "ERRNO-%d  %s, bei execlp(\"%s\")\n", e, strerror(e), _job->_process_filename.c_str() );
             _exit( e? e : 250 );  // Wie melden wir den Fehler an den rufenden Prozess?
         }
@@ -2551,6 +2570,7 @@ bool Process_task::signaled()
 
 #endif
 */
+#endif
 //-------------------------------------------------------------------------------------------------
 
 } //namespace spoooler

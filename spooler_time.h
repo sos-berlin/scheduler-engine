@@ -150,8 +150,8 @@ struct Period
 
 //private:
     Fill_zero                  _zero_;
-    Time                       _begin;                      // Sekunden seit Mitternacht
-    Time                       _end;                        // Sekunden seit Mitternacht
+    Time                       _begin;                      // Sekunden seit Mitternacht, manchmal auch mit Datum
+    Time                       _end;                        // Sekunden seit Mitternacht, manchmal auch mit Datum
     Time                       _repeat;
     bool                       _single_start;
     bool                       _let_run;                    // Task zuende laufen lassen, nicht bei _next_end_time beenden
@@ -287,6 +287,19 @@ struct Date_set
     set<Date>                  _date_set;
 };
 
+//------------------------------------------------------------------------------------------At_set
+
+struct At_set
+{
+    Period                      next_period                 ( Time, With_single_start single_start );
+
+    void                        add                         ( const Time& at )                      { _at_set.insert( at ); }
+    void                        print                       ( ostream& ) const;
+    friend ostream&             operator <<                 ( ostream& s, const At_set& o )         { o.print(s); return s; }
+
+    set<Time>                  _at_set;
+};
+
 //----------------------------------------------------------------------------------------Run_time
 
 struct Run_time : idispatch_implementation< Run_time, spooler_com::Irun_time >, 
@@ -357,6 +370,7 @@ struct Run_time : idispatch_implementation< Run_time, spooler_com::Irun_time >,
     Modified_event_handler*    _modified_event_handler;
     bool                       _set;
     bool                       _once;
+    At_set                     _at_set;
     Date_set                   _date_set;
     Weekday_set                _weekday_set;
     Monthday_set               _monthday_set;

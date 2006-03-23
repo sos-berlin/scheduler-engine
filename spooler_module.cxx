@@ -35,6 +35,8 @@ const string spooler_task_after_name     = "spooler_task_after()V";
 const string spooler_process_before_name = "spooler_process_before()Z";    
 const string spooler_process_after_name  = "spooler_process_after(Z)Z";    
 
+const string shell_language_name         = "shell";
+
 //-------------------------------------------------------------------------Source_part::Source_part
 
 Source_part::Source_part( int linenr, const string& text, const Time& mod_time )
@@ -125,6 +127,28 @@ static void check_unchanged_attribute( const xml::Element_ptr& element, const st
         z::throw_xc( "SCHEDULER-234", attribute_name + "+" + current_value );
 }
 */
+//------------------------------------------------------------------------------------odule::Module
+
+Module::Module( Spooler* sp, Prefix_log* log )
+: 
+    _zero_(_end_), 
+    _spooler(sp), 
+    _log(log),
+    _process_environment( new Com_variable_set() )
+{
+}
+
+//------------------------------------------------------------------------------------odule::Module
+    
+Module::Module( Spooler* sp, const xml::Element_ptr& e, const Time& xml_mod_time, const string& include_path )  
+: 
+    _zero_(_end_),
+    _spooler(sp),
+    _process_environment( new Com_variable_set() )
+{ 
+    set_dom(e,xml_mod_time,include_path); 
+}
+
 //----------------------------------------------------------------------------set_checked_attribute
 
 void Module::set_checked_attribute( string* variable, const xml::Element_ptr& element, const string& attribute_name, bool modify_allowed )
@@ -136,6 +160,17 @@ void Module::set_checked_attribute( string* variable, const xml::Element_ptr& el
     else
     if( element.hasAttribute( attribute_name )  &&  element.getAttribute( attribute_name ) != *variable )  
         z::throw_xc( "SCHEDULER-234", attribute_name + "=\"" + *variable + '"' );
+}
+
+//------------------------------------------------------------------------------Module::set_process
+// <process> hat kein <script>, deshalb dieser Aufruf
+// Besser wäre, <process> durch <script language="shell"> zu ersetzen
+
+void Module::set_process()
+{
+    _language = shell_language_name;
+    _source.clear();
+    _set = true;
 }
 
 //-------------------------------------------------------------------Module::set_dom_without_source
@@ -198,22 +233,6 @@ void Module::init()
     
     if( _monitor )  _monitor->init();
 
-    if( _spooler )  _use_process_class = _spooler->has_process_classes();
-
-    if( _dont_remote )  _separate_process = false, _use_process_class = false, _process_class_name = "";
-
-    if( _separate_process )
-    {
-        if( _process_class_name != "" )  z::throw_xc( "SCHEDULER-194" );
-        //_process_class_name = temporary_process_class_name;
-    }
-
-    if( _use_process_class )  
-    {
-        _process_class = _spooler->process_class( _process_class_name );     // Fehler, wenn der Name nicht bekannt ist.
-        _process_class->_module_use_count++;
-    }
-
 
 # ifdef Z_WINDOWS
     if( _com_class_name != "" )
@@ -235,6 +254,11 @@ void Module::init()
         if( _com_class_name  != ""     )  z::throw_xc( "SCHEDULER-168" );
     }
     else
+    if( _process_filename != ""  || _language == shell_language_name )  //   Z_POSIX_ONLY( || _language == ""  &&  string_begins_with( _source, "#!" ) ) )
+    {
+        _kind = kind_process;
+    }
+    else
     {
         _kind = kind_scripting_engine;
         if( _language == "" )  _language = SPOOLER_DEFAULT_LANGUAGE;
@@ -245,6 +269,26 @@ void Module::init()
 
     if( _real_kind == kind_java  &&  !_source.empty()  &&  _spooler )  _spooler->_has_java_source = true;       // work_dir zum Compilieren bereitstellen
 
+
+    if( _kind != kind_process )
+    {
+        if( _spooler )  _use_process_class = _spooler->has_process_classes();
+
+        if( _dont_remote )  _separate_process = false, _use_process_class = false, _process_class_name = "";
+
+        if( _separate_process )
+        {
+            if( _process_class_name != "" )  z::throw_xc( "SCHEDULER-194" );
+            //_process_class_name = temporary_process_class_name;
+        }
+
+        if( _use_process_class )  
+        {
+            _process_class = _spooler->process_class( _process_class_name );     // Fehler, wenn der Name nicht bekannt ist.
+            _process_class->_module_use_count++;
+        }
+    }
+
     if( _separate_process  ||  _use_process_class )   _kind = kind_remote;
 
     if( _kind == kind_java  &&  _spooler )  _spooler->_has_java = true;
@@ -254,7 +298,11 @@ void Module::init()
     {
         case kind_remote:               break;
         case kind_java:                 break;
+        
         case kind_scripting_engine:     if( _source.empty() )  z::throw_xc( "SCHEDULER-173" );
+                                        break;
+
+        case kind_process:              if( _source.empty()  &&  _process_filename.empty() )  z::throw_xc( "SCHEDULER-173" );
                                         break;
 
 #       ifdef Z_WINDOWS
@@ -310,6 +358,13 @@ ptr<Module_instance> Module::create_instance()
             break;
         }
 #     endif
+
+        case kind_process:
+        {
+            ptr<Process_module_instance> p = Z_NEW( Process_module_instance( this ) );
+            result = +p;
+            break;
+        }
 
         case kind_remote:
         {

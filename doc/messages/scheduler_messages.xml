@@ -265,14 +265,14 @@
             </text>
         </message>
 
-        <message code="SCHEDULER-126">
+        <!--message code="SCHEDULER-126">
             <text xml:lang="de">
                 <title>Prozess mit Code <p1/> beendet</title>
             </text>
             <text xml:lang="en">
                 <title>Process terminated with exit code <p1/></title>
             </text>
-        </message>
+        </message-->
 
         <!--message code="SCHEDULER-127">
             <text xml:lang="de">

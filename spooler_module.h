@@ -90,6 +90,7 @@ struct Module : Object
     enum Kind
     {
         kind_none,
+        kind_process,
         kind_java,
         kind_scripting_engine,
         kind_com,
@@ -98,14 +99,15 @@ struct Module : Object
 
     Z_GNU_ONLY(                 Module                      (); )
 
-                                Module                      ( Spooler* sp, Prefix_log* log )        : _zero_(_end_), _spooler(sp), _log(log) {}
-    explicit                    Module                      ( Spooler* sp, const xml::Element_ptr& e, const Time& xml_mod_time, const string& include_path )  : _zero_(_end_), _spooler(sp) { set_dom(e,xml_mod_time,include_path); }
+                                Module                      ( Spooler*, Prefix_log* );
+    explicit                    Module                      ( Spooler*, const xml::Element_ptr&, const Time& xml_mod_time, const string& include_path );
                                ~Module                      ()                                      {}
 
     void                        set_dom                     ( const xml::Element_ptr& e, const Time& xml_mod_time, const string& include_path )  { set_dom_without_source(e,xml_mod_time); set_dom_source_only(include_path); }
     void                        set_dom_without_source      ( const xml::Element_ptr&, const Time& xml_mod_time );
     void                        set_dom_source_only         ( const string& include_path );
     void                        set_source_only             ( const Source_with_parts& );
+    void                        set_process                 ();                                     // Für <process>
     void                        init                        ();
 
     ptr<Module_instance>        create_instance             ();
@@ -150,6 +152,14 @@ struct Module : Object
     jclass                     _java_class;
     typedef map<string,jmethodID>  Method_map;
     Method_map                 _method_map;
+
+    // Process
+    string                     _process_filename;           // Job ist ein externes Programm
+    string                     _process_param;              // Parameter für das Programm
+    string                     _process_log_filename;
+    bool                       _process_ignore_error;
+    bool                       _process_ignore_signal;
+    ptr<Com_variable_set>      _process_environment;
 
     bool                       _dont_remote;
 
@@ -215,6 +225,7 @@ struct Module_instance : Object
     void                    set_log                         ( Prefix_log* );
     void                    set_in_call                     ( In_call* in_call, const string& extra = "" );
     void                    set_close_instance_at_end       ( bool )                                {} // veraltet: _close_instance_at_end = b; }   // Nach spooler_close() Instanz schließen
+    void                    set_params                      ( Com_variable_set* params )            { _params = params; }
 
     void                        attach_task                 ( Task*, Prefix_log* );
     void                        detach_task                 ();
@@ -261,6 +272,7 @@ struct Module_instance : Object
     virtual int                 termination_signal          ()                                      { return 0; }
     virtual string              stdout_filename             ()                                      { return ""; }
     virtual string              stderr_filename             ()                                      { return ""; }
+    virtual bool                process_has_signaled        ()                                      { return false; }       // Für Process_module_instance
 
     virtual string              obj_name                    () const                                { return "Module_instance(" + _job_name + " " + as_string(_task_id) + ")"; }
 
@@ -291,6 +303,7 @@ struct Module_instance : Object
     ptr<Com_log>               _com_log;                    // spooler_log
 
     ptr<Module_instance>       _monitor_instance;
+    ptr<Com_variable_set>      _params;
 
     Fill_end                   _end_;
 };

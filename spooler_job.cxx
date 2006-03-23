@@ -63,7 +63,7 @@ Job::Job( Spooler* spooler )
     _idle_timeout   = latter_day;
     _max_tasks      = 1;
 
-    _process_environment = new Com_variable_set();
+    
 
 #ifndef Z_WINDOWS
         _process_environment->_ignore_case = false;
@@ -102,8 +102,8 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
         order       = element.bool_getAttribute( "order"        );
         _module._process_class_name 
                     = element.     getAttribute( "process_class", _module._process_class_name );
-        _module._java_options += " " +
-                      element.     getAttribute( "java_options" );
+        _module._java_options += " " + subst_env( 
+                      element.     getAttribute( "java_options" ) );
         _max_tasks  = element.uint_getAttribute( "tasks"        , _max_tasks );
         string t    = element.     getAttribute( "timeout"      );
         if( t != "" )  
@@ -153,14 +153,14 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
             else
             if( e.nodeName_is( "script"     ) )  
             {
-                if( _process_filename != "" )  z::throw_xc( "SCHEDULER-234", obj_name() );
+                if( _module._process_filename != "" )  z::throw_xc( "SCHEDULER-234", obj_name() );
 
                 _module.set_dom_without_source( e, xml_mod_time );
                 if( _init0_called )  _module.set_dom_source_only( include_path() );
 
-                _process_filename     = "";
-                _process_param        = "";
-                _process_log_filename = "";
+                _module._process_filename     = "";
+                _module._process_param        = "";
+                _module._process_log_filename = "";
             }
             else
             if( e.nodeName_is( "process"    ) )
@@ -170,11 +170,11 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
                 //_module_xml_document  = NULL;
                 //_module_xml_element   = NULL;
 
-                _process_filename     = subst_env( e.     getAttribute( "file"         , _process_filename      ) );
-                _process_param        = subst_env( e.     getAttribute( "param"        , _process_param         ) );
-                _process_log_filename = subst_env( e.     getAttribute( "log_file"     , _process_log_filename  ) );
-                _process_ignore_error = e.bool_getAttribute( "ignore_error" , _process_ignore_error  );
-                _process_ignore_signal= e.bool_getAttribute( "ignore_signal", _process_ignore_signal );
+                _module._process_filename     = subst_env( e.     getAttribute( "file"         , _module._process_filename      ) );
+                _module._process_param        = subst_env( e.     getAttribute( "param"        , _module._process_param         ) );
+                _module._process_log_filename = subst_env( e.     getAttribute( "log_file"     , _module._process_log_filename  ) );
+                _module._process_ignore_error = e.bool_getAttribute( "ignore_error" , _module._process_ignore_error  );
+                _module._process_ignore_signal= e.bool_getAttribute( "ignore_signal", _module._process_ignore_signal );
 
                 DOM_FOR_EACH_ELEMENT( e, ee )
                 {
@@ -184,12 +184,14 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
                         {
                             if( eee.nodeName_is( "variable" ) ) 
                             {
-                                _process_environment->set_var( eee.getAttribute( "name" ), 
-                                                               subst_env( eee.getAttribute( "value" ), _process_environment ) );
+                                _module._process_environment->set_var( eee.getAttribute( "name" ), 
+                                                                       subst_env( eee.getAttribute( "value" ), _module._process_environment ) );
                             }
                         }
                     }
                 }
+
+                _module.set_process();
             }
             else
             if( e.nodeName_is( "monitor" ) )
@@ -436,9 +438,9 @@ bool Job::should_removed()
 { 
     if( !_remove  &&  !_temporary )  return false;
 
-    if( _running_tasks.size() > 0 )
+    if( _running_tasks.size() > 0  ||  _task_queue.size() > 0 )
     {
-        Z_DEBUG_ONLY( if( _state != s_stopping )  _log->error( "??? Laufende Tasks, aber _state != s_stopping ???" ) );
+        //Z_DEBUG_ONLY( if( _state != s_stopping )  _log->error( "??? Laufende Tasks, aber _state != s_stopping ???" ) );
         return false;
     }
 
@@ -552,8 +554,8 @@ ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, const
 
     ptr<Task> task;
 
-    if( !_process_filename.empty() )   task = Z_NEW( Process_task   ( this ) );
-    else
+  //if( !_module._process_filename.empty() )   task = Z_NEW( Process_task   ( this ) );
+  //else
   //if( _object_set_descr          )   task = Z_NEW( Object_set_task( this ) );
   //else                             
                                        task = Z_NEW( Job_module_task( this ) );

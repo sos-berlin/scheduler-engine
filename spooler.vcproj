@@ -717,6 +717,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\spooler_module_process.cxx"
+				>
+			</File>
+			<File
 				RelativePath="spooler_module_remote.cxx"
 				>
 				<FileConfiguration
@@ -1058,6 +1062,10 @@
 			</File>
 			<File
 				RelativePath="spooler_module_java.h"
+				>
+			</File>
+			<File
+				RelativePath=".\spooler_module_process.h"
 				>
 			</File>
 			<File

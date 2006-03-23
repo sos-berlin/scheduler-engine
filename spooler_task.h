@@ -393,7 +393,7 @@ struct Process_event : Event
 
 #endif
 //-------------------------------------------------------------------------------------Process_task
-
+/*
 struct Process_task : Task      // Job ist irgendein Prozess (z.B. durch ein Shell-Skript implementiert)
 {
     Fill_zero _zero_;
@@ -412,15 +412,6 @@ struct Process_task : Task      // Job ist irgendein Prozess (z.B. durch ein She
     virtual void                do_end__end                 ();
   //virtual void                do_step__start              ();
     virtual Variant             do_step__end                ();
-/*        
-  //virtual bool                loaded                      ();
-    bool                        do_start                    ();
-    void                        do_kill                     ();
-    void                        do_end                      ();
-    bool                        do_step                     ();
-    void                        do_on_success               ()                                      {}
-    void                        do_on_error                 ()                                      {}
-*/
 
     virtual bool                has_step_count              ()                                      { return false; }
     bool                        signaled                    ();
@@ -437,7 +428,7 @@ struct Process_task : Task      // Job ist irgendein Prozess (z.B. durch ein She
         int                    _pid_to_unregister;
 #   endif
 };
-
+*/
 //-------------------------------------------------------------------------------------------------
 
 } //namespace spooler

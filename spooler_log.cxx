@@ -1096,47 +1096,6 @@ xml::Element_ptr Prefix_log::dom_element( const xml::Document_ptr& document, con
     return log_element;
 }
 
-//-----------------------------------------------------------------------------Prefix_log::log_file
-
-void Prefix_log::log_file( const string& filename, const string& title )
-{
-    if( !filename.empty() ) 
-    {
-        try
-        {
-            Mapped_file file            ( filename, "rS" );        // read sequential
-            const char* p             = (const char*)file.map();
-            const char* p_end         = p + file.map_length();
-
-            if( file.map_length() > 0 )  info( title == ""? filename + ":" 
-                                                          : title );
-
-            while( p < p_end )
-            {
-                const char* q = (const char*)memchr( p, '\n', p_end - p );
-                if( !q )  q = p_end;
-
-                info( "    " + string( p, q - p ) );
-                p = q + 1;
-            }
-
-            /*
-            Any_file file ( "-in -seq " + filename );
-            while( !file.eof() ) 
-            {
-                if( !title_printed && !title.empty() )  info( title );
-                title_printed = true;
-                info( file.get_string() );
-            }
-            */
-        }
-        catch( exception& x ) 
-        { 
-            warn( filename + ": " + x.what() ); 
-        }
-    }
-}
-
 //----------------------------------------------------------------------------Prefix_log::as_string
 
 string Prefix_log::as_string()

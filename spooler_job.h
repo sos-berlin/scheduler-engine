@@ -321,7 +321,7 @@ struct Job : Object,
     friend struct               Module_task;
     friend struct               Job_module_task;
     friend struct               Object_set_task;
-    friend struct               Process_task;
+  //friend struct               Process_task;
     friend struct               Com_job;
     friend struct               Spooler_thread;
 
@@ -339,13 +339,6 @@ struct Job : Object,
 
     string                     _title;                      // <job title="">
     string                     _state_text;                 // spooler_job.state_text = "..."
-
-    string                     _process_filename;           // Job ist ein externes Programm
-    string                     _process_param;              // Parameter für das Programm
-    string                     _process_log_filename;
-    bool                       _process_ignore_error;
-    bool                       _process_ignore_signal;
-    ptr<Com_variable_set>      _process_environment;
 
     long32                     _tasks_count;                // Anzahl gestarteter Tasks seit Spooler-Start
     long32                     _step_count;                 // Anzahl spooler_process() aller Tasks

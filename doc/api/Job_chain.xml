@@ -133,7 +133,7 @@ job_chain.name = "Jobkette";</pre>
         <p>
             Wenn die Jobkette bereits einen Auftrag mit gleicher <scheduler_method class="Order" property="id"/>
             enthält,
-            wird eine Exception mit Fehlercode <code>SCHEDULER-186</code> geliefert.
+            wird eine Exception mit Fehlercode <scheduler_message code="SCHEDULER-186"/> geliefert.
         </p>
     </description>
 </method>

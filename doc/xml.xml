@@ -83,7 +83,6 @@
                 <scheduler_element name="modify_spooler"/><br/>
                 <scheduler_element name="remove_order"/><br/>
                 <scheduler_element name="remove_job_chain"/><br/>
-                <scheduler_element name="start_job"/><br/>
                 <scheduler_element name="show_history"/><br/>
                 <scheduler_element name="show_job"/><br/>
                 <scheduler_element name="show_job_chains"/><br/>
@@ -91,6 +90,7 @@
                 <scheduler_element name="show_order"/><br/>
                 <scheduler_element name="show_state"/><br/>
                 <scheduler_element name="show_task"/><br/>
+                <scheduler_element name="start_job"/><br/>
                 <scheduler_element name="terminate"/><br/>
             </td>
             <td valign="baseline" style="padding-left: 2ex">

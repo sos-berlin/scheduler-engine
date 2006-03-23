@@ -27,18 +27,7 @@
 
         <ini_entry name="class_path" setting="java_class_path"/>
 
-        <ini_entry name="options" type="text" title="Optionen für Java">
-            <description>
-                <p>
-                    Hier können Sie z.B. mit <code>-Djava.library.path=</code> das Verzeichnis angeben,
-                    in dem Hostjava installiert ist.
-                </p>
-            </description>
-
-            <example>
-                <pre>options = -Xdebug -Djava.library.path=s:/prod/bind</pre>
-            </example>
-        </ini_entry>
+        <ini_entry name="options" type="text" setting="java_options"/>
 
     </ini_entries>
 

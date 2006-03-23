@@ -27,7 +27,6 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-121", "The security settings do not allow this operation" },
     { "SCHEDULER-122", "Task terminated" },
     { "SCHEDULER-125", "task.wait_until_terminated() cannot be called in its own thread. Deadlock." },
-    { "SCHEDULER-126", "Process terminated with exit code $1" },
     { "SCHEDULER-130", "Job $1 has already been defined" },
     { "SCHEDULER-132", "Job $1 has not started because the script could not be loaded: $2" },
     { "SCHEDULER-136", "No history" },

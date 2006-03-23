@@ -30,7 +30,7 @@
         <xml_attribute name="name" type="name">
             <description>
                 <p>
-                    Hier kann er Task ein Name gegeben werden.
+                    Hier kann der Task ein Name gegeben werden.
                 </p>
             </description>
         </xml_attribute>
