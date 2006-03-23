@@ -62,12 +62,6 @@ Job::Job( Spooler* spooler )
     _task_timeout   = latter_day;
     _idle_timeout   = latter_day;
     _max_tasks      = 1;
-
-    
-
-#ifndef Z_WINDOWS
-        _process_environment->_ignore_case = false;
-#endif
 }
 
 //----------------------------------------------------------------------------------------Job::~Job
