@@ -274,7 +274,7 @@ struct Module_instance : Object
     virtual string              stderr_filename             ()                                      { return ""; }
     virtual bool                process_has_signaled        ()                                      { return false; }       // Für Process_module_instance
 
-    virtual string              obj_name                    () const                                { return "Module_instance(" + _job_name + " " + as_string(_task_id) + ")"; }
+    virtual string              obj_name                    () const                                { return "Module_instance(" + _job_name + ":" + as_string(_task_id) + ")"; }
 
 
     Fill_zero                  _zero_;

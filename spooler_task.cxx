@@ -920,7 +920,7 @@ bool Task::do_something()
                 if( !let_run )
                 {
                     _log->info( message_string( "SCHEDULER-278" ) );   // "Laufzeitperiode ist abgelaufen, Task wird beendet"
-                    set_state( s_ending );
+                    cmd_end();// set_state( s_ending );
                 }
             }
         }

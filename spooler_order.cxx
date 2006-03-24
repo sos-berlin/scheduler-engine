@@ -590,7 +590,7 @@ void Job_chain::register_order( Order* order )
     {
         string id_string = order->string_id();
         Order_map::iterator it = _order_map.find( id_string );
-        if( it != _order_map.end() )  z::throw_xc( "SCHEDULER-186", id_string, _name );
+        if( it != _order_map.end() )  z::throw_xc( "SCHEDULER-186", order->obj_name(), _name );
         _order_map[ id_string ] = order;
     }
 }
