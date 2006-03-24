@@ -2494,7 +2494,7 @@ void Spooler::run()
                             if( next_time < _next_time )
                             {
                                 _next_time = next_time;
-                                if( log_wait )  msg = S() << "Warten bis " << _next_time << " für pid=" << (*p)->pid();
+                                if( log_wait )  wait_for_string = S() << "pid=" << (*p)->pid();
                             }
 
 #                       endif
