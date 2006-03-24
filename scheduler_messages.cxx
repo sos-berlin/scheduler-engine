@@ -185,7 +185,6 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-313", "Cannot store order in database: $1" },
     { "SCHEDULER-900", "Scheduler $1 is starting with $2, pid=$3" },
     { "SCHEDULER-902", "state=$1" },
-    { "SCHEDULER-903", "Stopping $1" },
     { "SCHEDULER-904", "Tasks have $1s to terminate" },
     { "SCHEDULER-906", "Restarting Scheduler: $1" },
     { "SCHEDULER-907", "Opening database: $1" },

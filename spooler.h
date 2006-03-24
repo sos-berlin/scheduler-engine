@@ -526,6 +526,7 @@ struct Spooler : Object,
   //Job*                       _next_job;
     Time                       _next_time;
     Time                       _next_start_time;
+    bool                       _print_time_every_second;
 
     Thread_list                _thread_list;                // Alle Threads
     int                        _max_threads;

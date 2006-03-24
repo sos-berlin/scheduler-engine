@@ -68,8 +68,8 @@ struct Wait_handles : Non_cloneable
     HANDLE                      operator []                 ( int index )                           { return _handles[index]; }
 #endif
 
-    bool                        wait_until                  ( Time );                               // Berücksichtigt Sommerzeitumstellung
-    bool                        wait_until_2                ( Time );
+    bool                        wait_until                  ( Time, const string& debug_string );   // Berücksichtigt Sommerzeitumstellung
+    bool                        wait_until_2                ( Time, const string& debug_string );
     bool                        wait                        ( double time );
 
     bool                        signaled                    ();
@@ -90,8 +90,6 @@ struct Wait_handles : Non_cloneable
 
     typedef vector<z::Event_base*>   Event_vector;
     Event_vector               _events;
-    bool                       _print_time_every_second;
-
 
   public:
     Thread_semaphore           _lock;

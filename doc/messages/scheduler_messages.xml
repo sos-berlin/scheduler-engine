@@ -1951,11 +1951,11 @@
             </text>
         </message>
 
-        <message code="SCHEDULER-903" weight="info">
+        <!--message code="SCHEDULER-903" weight="info">
             <text xml:lang="en">
                 <title>Stopping <p1/></title>
             </text>
-        </message>
+        </message-->
 
         <message code="SCHEDULER-904" weight="info">
             <text xml:lang="de">

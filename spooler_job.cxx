@@ -908,6 +908,8 @@ void Job::stop( bool end_all_tasks )
 {
     THREAD_LOCK_DUMMY( _lock )
     {
+        set_state( _running_tasks.size() > 0? s_stopping : s_stopped );
+
         if( end_all_tasks )
         {
             Z_FOR_EACH( Task_list, _running_tasks, t )
@@ -920,8 +922,6 @@ void Job::stop( bool end_all_tasks )
                 }
             }
         }
-
-        set_state( _running_tasks.size() > 0? s_stopping : s_stopped );
 
         clear_when_directory_changed();
     }
@@ -1475,7 +1475,7 @@ ptr<Task> Job::task_to_start()
         {
             bool notify = _waiting_for_process_try_again;                           // Sind wir mit notify_a_process_is_idle() benachrichtigt worden?
             remove_waiting_job_from_process_list();
-            //test 18.5.04 calculate_next_time( now );
+
             if( notify )  _module._process_class->notify_a_process_is_idle();       // Dieser Job braucht den Prozess nicht mehr. Also nächsten Job benachrichtigen!
         }
     }

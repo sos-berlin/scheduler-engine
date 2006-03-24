@@ -32,6 +32,7 @@
 #ifdef Z_WINDOWS
 #   include <process.h>
 #   include <direct.h>
+#   include <io.h>
 #endif
 
 #include "../kram/sosprof.h"
@@ -2270,8 +2271,7 @@ void Spooler::execute_state_cmd()
                     Z_FOR_EACH( Job_list, _job_list, j )
                     {
                         Job* job = *j;
-                        _log.info( message_string( "SCHEDULER-903", job->obj_name() ) );        // "Stopping"
-                        //_log.info( S() << "stop " << job->obj_name() );
+                        //_log.info( message_string( "SCHEDULER-903", job->obj_name() ) );        // "Stopping"
                         bool end_all_tasks = true;
                         job->stop( end_all_tasks );
                     }
@@ -2321,6 +2321,7 @@ void Spooler::run()
 {
     set_state( s_running );
 
+    _print_time_every_second = log_directory() == "*stderr"  &&  isatty( fileno( stderr ) );
 
     if( !_xml_cmd.empty() )
     {
@@ -2340,7 +2341,7 @@ void Spooler::run()
   //int             throttle_loop_count  = 0;
 
   //bool            log_wait = _log.log_level() <= log_debug9;
-    bool            log_wait = log_category_is_set( "scheduler.wait" );
+    bool            log_wait = _print_time_every_second || log_category_is_set( "scheduler.wait" );
 
 
     while(1)
@@ -2374,7 +2375,7 @@ void Spooler::run()
         _next_time = latter_day;
       //_next_job  = NULL;
 
-        string msg = "Warten";
+        string wait_for_string;
 
 
         if( _state != Spooler::s_paused )
@@ -2417,7 +2418,7 @@ void Spooler::run()
                     if( next_time < _next_time )
                     {
                         _next_time = next_time;
-                        if( log_wait )  msg = "Warten bis " + _next_time.as_string() + " für Task " + task->name();
+                        if( log_wait )  wait_for_string = task->obj_name();
                     }
                 }
 
@@ -2429,7 +2430,7 @@ void Spooler::run()
             if( job  &&  _next_time > job->next_time() )  
             {
                 _next_time = job->next_time();
-                if( log_wait )  msg = "Warten bis " + _next_time.as_string() + " für Job " + job->name();
+                if( log_wait )  wait_for_string = job->obj_name();
             }
         }
 
@@ -2515,7 +2516,7 @@ void Spooler::run()
                 if( next_time < _next_time )
                 {
                     _next_time = next_time;
-                    if( log_wait )  msg = S() << "Warten bis " << _next_time << " für " + operation->async_state_text();
+                    if( log_wait )  wait_for_string = operation->async_state_text();
                 }
             }
 
@@ -2533,11 +2534,15 @@ void Spooler::run()
 
                     if( log_wait )  
                     {
-                        if( !wait_handles.wait(0) )  { LOG( msg << "\n" ); wait_handles.wait_until( _next_time ); }    // Debug-Ausgabe der Wartezeit nur, wenn kein Ergebnis vorliegt
+                        if( !wait_handles.wait(0) )     // Debug-Ausgabe der Wartezeit nur, wenn kein Ergebnis vorliegt
+                        { 
+                            LOG( "Warten bis " << _next_time << " auf " << wait_for_string << "\n" ); 
+                            wait_handles.wait_until( _next_time, wait_for_string );  
+                        }
                     }
                     else
                     {
-                        wait_handles.wait_until( _next_time );
+                        wait_handles.wait_until( _next_time, wait_for_string );
                     }
                 }
             }

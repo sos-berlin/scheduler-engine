@@ -15,9 +15,6 @@ Process_module_instance::Process_module_instance( Module* module )
     _zero_(this+1),
     _process_handle( "process_handle" )
 {
-#   ifndef Z_WINDOWS
-        _process_environment->_ignore_case = false;
-#   endif
 }
 
 //-------------------------------------------------rocess_module_instance::~Process_module_instance
@@ -404,9 +401,9 @@ bool Process_module_instance::begin__end()
 
     vector<string> string_args;
 
-    if( _job->_process_param != "" )
+    if( _module->_process_param != "" )
     {
-        string_args = posix::argv_from_command_line( _job->_process_param );
+        string_args = posix::argv_from_command_line( _module->_process_param );
         string_args.insert( string_args.begin(), program_path() );   // argv[0]
     }
     else
@@ -467,7 +464,7 @@ bool Process_module_instance::begin__end()
 
             // Environment
 
-            Z_FOR_EACH( Com_variable_set::Map, _job->_process_environment->_map, m )
+            Z_FOR_EACH( Com_variable_set::Map, _module->_process_environment->_map, m )
             {
 #               if defined Z_HPUX || defined Z_SOLARIS
                     string e = string_from_bstr ( m->first ) + "=" + m->second->_value.as_string();
@@ -501,7 +498,7 @@ bool Process_module_instance::begin__end()
     _process_handle.set_name( "Process " + program_path() );
     _process_handle.add_to( &_spooler->_wait_handles );
 
-    _job->_spooler->register_process_handle( _process_handle._pid );
+    _spooler->register_process_handle( _process_handle._pid );
     _pid_to_unregister = _process_handle._pid;
 
     _operation = &dummy_sync_operation;
@@ -569,7 +566,7 @@ void Process_module_instance::end__end()
             }
             catch( const exception& x )
             {
-                if( !_job->_process_ignore_signal )  throw;
+                if( !_module->_process_ignore_signal )  throw;
                 _log->warn( x.what() );
             }
         }

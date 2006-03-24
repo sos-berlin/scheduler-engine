@@ -100,7 +100,6 @@ Wait_handles::Wait_handles( Spooler* spooler, Prefix_log* log )
     _log(log),
     _lock("Wait_handles") 
 {
-    _print_time_every_second = _spooler  &&  _spooler->log_directory() == "*stderr"  &&  isatty( fileno( stderr ) );
 }
 
 //-----------------------------------------------------------------------Wait_handles::Wait_handles
@@ -109,7 +108,6 @@ Wait_handles::Wait_handles( const Wait_handles& o )
 : 
     _spooler ( o._spooler ),
     _log     ( o._log ),
-    _print_time_every_second(o._print_time_every_second),
     _lock    ( "Wait_handles" ),
     _events  ( o._events )
 #ifdef Z_WINDOWS
@@ -292,12 +290,12 @@ void Wait_handles::remove( System_event* event )
 
 bool Wait_handles::wait( double wait_time )
 {
-    return wait_until( Time::now() + wait_time );
+    return wait_until( Time::now() + wait_time, "" );
 }
 
 //-------------------------------------------------------------------------Wait_handles::wait_until
 
-bool Wait_handles::wait_until( Time until )
+bool Wait_handles::wait_until( Time until, const string& debug_string )
 {
     time_t t;
     tm     tm1, tm2;
@@ -316,9 +314,9 @@ bool Wait_handles::wait_until( Time until )
             Time today3    = now.midnight() + 3*3600;            // Heute 3:00 Uhr (für Winterzeitbeginn: Uhr springt von 3 Uhr auf 2 Uhr)
             Time tomorrow3 = now.midnight() + 3*3600 + 24*3600;  // Morgen 3:00
 
-            if( now < today3  &&  until >= today3 )    signaled = wait_until_2( today3 + 0.01 );
+            if( now < today3  &&  until >= today3 )    signaled = wait_until_2( today3 + 0.01, "checking end of daylight saving time" );
             else 
-            if( until >= tomorrow3 )                   signaled = wait_until_2( tomorrow3 + 0.01 );
+            if( until >= tomorrow3 )                   signaled = wait_until_2( tomorrow3 + 0.01, "checking end of daylight saving time" );
             else
                 break;
         }
@@ -327,9 +325,9 @@ bool Wait_handles::wait_until( Time until )
             Time today2    = now.midnight() + 2*3600;            // Heute 2:00 Uhr (für Sommerzeitbeginn: Uhr springt von 2 Uhr auf 3 Uhr)
             Time tomorrow2 = now.midnight() + 2*3600 + 24*3600;  // Morgen 3:00
 
-            if( now < today2  &&  until >= today2 )    signaled = wait_until_2( today2 + 0.01 );
-            else 
-            if( until >= tomorrow2 )                   signaled = wait_until_2( tomorrow2 + 0.01 );
+            if( now < today2  &&  until >= today2 )    signaled = wait_until_2( today2 + 0.01, "checking begin of daylight saving time" );
+            else                                                                                      
+            if( until >= tomorrow2 )                   signaled = wait_until_2( tomorrow2 + 0.01, "checking begin of daylight saving time" );
             else
                 break;
         }
@@ -343,18 +341,19 @@ bool Wait_handles::wait_until( Time until )
                                       else  Z_DEBUG_ONLY( _log->debug9( "Keine Sommerzeitumschaltung" ) );
     }
 
-    return wait_until_2(  until );
+    return wait_until_2( until, debug_string );
 }
 
 //-----------------------------------------------------------------------Wait_handles::wait_until_2
 // Liefert Nummer des Events (0..n-1) oder -1 bei Zeitablauf
 
-bool Wait_handles::wait_until_2( Time until )
+bool Wait_handles::wait_until_2( Time until, const string& debug_string )
 {
     if( signaled() )  return true;
 
 #ifdef Z_WINDOWS
 
+    string  result;
     bool    again   = false;
     HANDLE* handles = NULL;
 
@@ -384,7 +383,7 @@ bool Wait_handles::wait_until_2( Time until )
 
         DWORD ret;
 
-        if( _print_time_every_second )
+        if( _spooler  &&  _spooler->_print_time_every_second )
         {
             double step = 1.0;
             while( Time::now() < until - step )
@@ -393,10 +392,14 @@ bool Wait_handles::wait_until_2( Time until )
                 if( ret != WAIT_TIMEOUT )  goto WAIT_OK;
                 Time now = Time::now();
                 t = (int)ceil( ( until - now ) * 1000 );
-                cerr << Time::now().as_string( Time::without_ms ) << " (" << ( -t / 1000 ) << "s)   \r";
+                cerr << Time::now().as_string( Time::without_ms ) << " (" << ( -t / 1000 ) << "s";
+                if( debug_string != "" )  cerr << " until " << debug_string.substr( 0, 55 );
+                cerr << ")  \r";
             }
 
             ret = MsgWaitForMultipleObjects( _handles.size(), handles, FALSE, max( 0, t ), QS_ALLINPUT ); 
+
+            if( _spooler  &&  _spooler->_print_time_every_second )  cerr << string( 79, ' ' ) << '\r';  // Zeile löschen
         }
         else
         {
