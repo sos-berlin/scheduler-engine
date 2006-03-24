@@ -79,6 +79,8 @@ bool Process_module_instance::load()
             }
 #       else
             _shell_file.open_temporary( File::open_unlink_later );
+            int ret = fchmod( _shell_file, 0x700 );
+            if( ret )  throw_errno( errno, "fchmod", _shell_file.filename().c_str() );
 #       endif
 
         //_shell_file.create_temporary();
