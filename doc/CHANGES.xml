@@ -10,6 +10,72 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2006-03-25" version="2.0.148" subversion_revision="4213">
+        <revision type="new" title="scheduler_client">
+            <description>
+                <p>
+                    Das neue Programm <code>scheduler_client</code> kann dem Scheduler Jobs und Aufträge übergeben.
+                </p>
+                <p>
+                    Start eines Jobs, dessen Skript über <code>stdin</code> übergeben wird:
+                </p>
+                <div class="indent">
+                    <code>scheduler_client </code>
+                    <code>-scheduler=</code><i>host</i><code>:</code><i>port</i> &#160;
+                    <code>-script-language=</code><i>script_language</i> &#160;
+                    <code>-process_class=</code><i>process_class</i> &#160;
+                    <code>-at=</code>"<i>yyyy-mm-dd HH:MM</i>" &#160;
+                </div>
+                <p>
+                    Übergabe eines Auftrags:
+                </p>
+                <div class="indent">
+                    <code>scheduler_client </code>
+                    <code>-scheduler=</code><i>host</i><code>:</code><i>port</i> &#160;
+                    <code>-job-chain=</code><i>job_chain</i> &#160;
+                    <code>-order-id=</code><i>order_id</i> &#160;
+                    <code>-at=</code>"<i>yyyy-mm-dd HH:MM</i>" &#160;
+                    <i>parameter</i><code>=</code><i>value</i> …
+                </div>
+            </description>
+        </revision>
+
+        <revision type="modification" title="&lt;job temporary=&quot;true&quot;&gt;">
+            <description>
+                <p>
+                    Ein temporärer Job wird erst gelöscht, 
+                    wenn die <scheduler_element name="run_time"/> keine Startzeit mehr vorsieht
+                    und die Task-Warteschlange leer ist.
+                </p>
+            </description>
+        </revision>
+
+        <revision type="new" title="&lt;script language=&quot;shell&quot;&gt;">
+            <description>
+                <p>
+                    Neue Skript-Sprache "shell" erlaubt es, 
+                    Shell-Jobs in der XML-Konfiguration anzugeben.
+                    (Für scheduler_client)
+                </p>
+                <ul>
+                    <li>
+                        <scheduler_element name="script" attribute="language" value="shell"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+
+        <revision type="new" title="Neue Angabe für &lt;run_time&gt;: &lt;at&gt;">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_element name="at" attribute="at" value="2006-03-24 12:00"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+    </change>
+
     <change date="2006-03-17" version="2.0.148" subversion_revision="4199">
         <revision type="correction" title="Der Scheduler läuft wieder unter Windows 2000">
             <description>

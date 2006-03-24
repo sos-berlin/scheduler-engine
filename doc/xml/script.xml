@@ -72,6 +72,12 @@
                         In Windows wird PerlScript verwendet, wenn es installiert ist.
                         In Unix wird Perl direkt verwendet.
                     </dd>
+
+                    <dt><code>language="shell"</code></dt>
+                    <dd>
+                        Unter Windows übergibt der Scheduler das Skript <code>cmd.exe</code>. 
+                        Unter Unix wird das Skript aufgerufen wie ein <i>executable</i>.
+                    </dd>
                 </dl>
             </description>
         </xml_attribute>

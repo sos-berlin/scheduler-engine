@@ -229,6 +229,8 @@
                          &lt;<a class="silent" href="xml/holiday.xml">holiday</a> date="yyyy-mm-dd"/>
                          …
                      &lt;/holidays>
+                     
+                     &lt;<a class="silent" href="xml/at.xml">at</a> at="yyyy-mm-dd HH:MM:SS"/>
                  &lt;/runtime>
              &lt;/job>
              …

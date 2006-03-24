@@ -41,6 +41,9 @@
         <p>
             setzt die Perioden für einen bestimmten Tag fest.
         </p>
+        <p>
+            Siehe auch <scheduler_element name="at"/>.
+        </p>
     </description>
 
     <behavior_with_xml_element element="base" replace_attribute="date"/>
