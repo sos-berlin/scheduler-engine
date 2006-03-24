@@ -551,7 +551,7 @@ void Process_module_instance::end__end()
 
         if( _process_handle._pid )
         {
-            do_step__end();      // waitpid() sollte schon gerufen sein.
+            step__end();      // waitpid() sollte schon gerufen sein.
             if( _process_handle._pid )   z::throw_xc( "SCHEDULER-179", _process_handle._pid );       // Sollte nicht passieren (ein Zombie wird stehen bleiben)
         }
 
