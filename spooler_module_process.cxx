@@ -476,7 +476,7 @@ bool Process_module_instance::begin__end()
 
 
             Z_LOG( "execvp(\"" << program_path() << "\")\n" );
-            execvp( program_path(), args );
+            execvp( program_path().c_str(), args );
 
             int e = errno;
             Z_LOG( "execvp()  errno-" << e << "  " << z_strerror(e) << "\n" );
@@ -501,7 +501,7 @@ bool Process_module_instance::begin__end()
     _spooler->register_process_handle( _process_handle._pid );
     _pid_to_unregister = _process_handle._pid;
 
-    _operation = &dummy_sync_operation;
+    //_operation = &dummy_sync_operation;
 
     return true;
 }
@@ -514,10 +514,10 @@ bool Process_module_instance::kill()
 
     if( _process_handle._pid )
     {
-        _log->warn( message_string( "SCHEDULER-281" ) );   
+        _log.warn( message_string( "SCHEDULER-281" ) );   
 
         LOG( "kill(" << _process_handle._pid << ",SIGTERM)\n" );
-        int err = kill( _process_handle._pid, SIGTERM );
+        int err = ::kill( _process_handle._pid, SIGTERM );
         if( err )  throw_errno( errno, "killpid" );
 
         //? _process_handle._pid = 0;
