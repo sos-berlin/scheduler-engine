@@ -117,7 +117,7 @@ $(BIN_DIR)/setuid: setuid.o
 	-$(CC) $(DEBUG) $(LINK_FLAGS) $^ $(LIBPATH)  -o $@  -s
 	chmod a+rx $@
 
-$(BIN_DIR)/scheduler_client: scheduler_client.o  $(PROD_DIR)/zschimmer/$(O_DIR)/libzschimmer.a
+$(BIN_DIR)/scheduler_client: scheduler_client.o  $(PROD_DIR)/zschimmer/$(O_DIR)/libzschimmer.a  $(PROD_DIR)/3rd_party/libxml2/$(O_DIR)/libxml2.a
 	-$(CCPP) $(DEBUG) $(LINK_FLAGS) $^ $(LIBPATH) $(LIBS) -o $@ 
 	chmod a+rx $@
 
