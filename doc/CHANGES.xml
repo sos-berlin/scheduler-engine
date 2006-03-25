@@ -10,7 +10,7 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2006-03-25" version="2.0.148" subversion_revision="4213">
+    <change date="2006-03-25" version="2.0.149" subversion_revision="4218">
         <revision type="new" title="scheduler_client">
             <description>
                 <p>
@@ -32,7 +32,7 @@
                 <div class="indent">
                     <code>scheduler_client </code>
                     <code>-scheduler=</code><i>host</i><code>:</code><i>port</i> &#160;
-                    <code>-job-chain=</code><i>job_chain</i> &#160;
+                    <code>-job-chain=</code><i>job_chain</i> &#160;sch
                     <code>-order-id=</code><i>order_id</i> &#160;
                     <code>-at=</code>"<i>yyyy-mm-dd HH:MM</i>" &#160;
                     <i>parameter</i><code>=</code><i>value</i> …
