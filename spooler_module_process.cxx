@@ -22,6 +22,9 @@ Process_module_instance::Process_module_instance( Module* module )
 Process_module_instance::~Process_module_instance()
 {
     close_handle();
+
+    _stdout_file.try_unlink( &_log );
+    _stderr_file.try_unlink( &_log );
 }
 
 //-----------------------------------------------------------------------Process_module_instance::close_handle
