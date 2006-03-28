@@ -32,7 +32,7 @@
                 <div class="indent">
                     <code>scheduler_client </code>
                     <code>-scheduler=</code><i>host</i><code>:</code><i>port</i> &#160;
-                    <code>-job-chain=</code><i>job_chain</i> &#160;sch
+                    <code>-job-chain=</code><i>job_chain</i> &#160;
                     <code>-order-id=</code><i>order_id</i> &#160;
                     <code>-at=</code>"<i>yyyy-mm-dd HH:MM</i>" &#160;
                     <i>parameter</i><code>=</code><i>value</i> …

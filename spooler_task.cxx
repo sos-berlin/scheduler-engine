@@ -312,9 +312,6 @@ xml::Element_ptr Task::dom_element( const xml::Document_ptr& document, const Sho
         if( _delayed_after_error_task_id )
         task_element.setAttribute( "delayed_after_error_task", _delayed_after_error_task_id );
 
-        if( _thread )
-        task_element.setAttribute( "thread"          , _thread->name() );
-
         task_element.setAttribute( "name"            , _name );
 
         if( _running_since )
@@ -720,7 +717,7 @@ bool Task::check_timeout( const Time& now )
 {
     if( _timeout < latter_day  &&  now > _last_operation_time + _timeout  &&  !_kill_tried )
     {
-        _log->error( message_string( "SCHEDULER-272" ) );   // "Task wird nach nach Zeitablauf abgebrochen"
+        _log->error( message_string( "SCHEDULER-272", _timeout ) );   // "Task wird nach nach Zeitablauf abgebrochen"
         return try_kill();
     }
 
