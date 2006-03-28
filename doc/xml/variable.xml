@@ -33,7 +33,7 @@
             <description>
                 <p>
                     Mit '$' kann der Wert einer Umgebungsvariablen abgerufen werden,
-                    die auch eine vorher mit <code>&lt;variable></code> gesetze sein kann.
+                    die auch eine vorher mit <code>&lt;variable></code> gesetzte sein kann.
                 </p>
             </description>
         </xml_attribute>
@@ -47,8 +47,7 @@
     &lt;variable name="LD_LIBRARY_PATH" value="$HOME/lib">
     &lt;variable name="PATH" value="$PATH:$HOME/bin">
     &lt;variable name="PATH" value="$PATH:$JAVAHOME/bin">
-&lt;/environment>
-</pre>
+&lt;/environment></pre>
 
     </example>
 

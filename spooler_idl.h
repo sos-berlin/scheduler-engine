@@ -232,6 +232,8 @@ struct Itask : IDispatch
     virtual HRESULT     get_Stdout_text                 ( BSTR* )                               = 0;
     virtual HRESULT         Create_subprocess           ( VARIANT*, Isubprocess** )             = 0;
     virtual HRESULT         Add_subprocess              ( int, double, VARIANT_BOOL, VARIANT_BOOL, BSTR ) = 0;
+    virtual HRESULT     put_Priority                    ( VARIANT* )                            = 0;
+    virtual HRESULT     get_Priority                    ( int* )                                = 0;
     virtual HRESULT     put_Priority_class              ( VARIANT* )                            = 0;
     virtual HRESULT     get_Priority_class              ( BSTR* )                               = 0;
     virtual HRESULT     get_Step_count                  ( int* )                                = 0;
@@ -607,8 +609,10 @@ struct Isubprocess : IDispatch
     virtual HRESULT     get_Java_class_name         ( BSTR* )                                       = 0;
     virtual HRESULT         Close                   ()                                              = 0;
     virtual HRESULT         Start                   ( VARIANT* command_line )                       = 0;
-  //virtual HRESULT     put_Priority                ( VARIANT* )                                    = 0;
-  //virtual HRESULT     get_Priority                ( VARIANT* )                                    = 0;
+    virtual HRESULT     put_Priority                ( int )                                         = 0;
+    virtual HRESULT     get_Priority                ( int* )                                        = 0;
+    virtual HRESULT     put_Priority_class          ( BSTR )                                        = 0;
+    virtual HRESULT     get_Priority_class          ( BSTR* )                                       = 0;
   //virtual HRESULT         Raise_priority          ( int, VARIANT_BOOL* )                          = 0;
   //virtual HRESULT         Lower_priority          ( int, VARIANT_BOOL* )                          = 0;
     virtual HRESULT     get_Pid                     ( int* )                                        = 0;

@@ -6,7 +6,7 @@
 
     <xsd:annotation>
         <xsd:documentation xml:lang="de">
-            $Id: scheduler.xsd 4201 2006-03-23 10:16:57Z jz $
+            $Id: scheduler.xsd 4219 2006-03-28 08:07:11Z jz $
             Schema für die Scheduler-Konfiguration,
             s.a. http://www.zschimmer.com/sos/scheduler/konfiguration.xml.html.
         </xsd:documentation>
@@ -259,7 +259,7 @@
             <xsd:attribute name="order"                 type="Yes_no"/>
             <xsd:attribute name="separate_process"      type="Yes_no"/>
             <xsd:attribute name="tasks"                 type="xsd:nonNegativeInteger"/>
-            <xsd:attribute name="timeout"               type="Duration"/>
+            <xsd:attribute name="timeout"               type="Positive_duration"/>
             <xsd:attribute name="idle_timeout"          type="Duration"/>
             <xsd:attribute name="process_class"         type="Name"/>
             <xsd:attribute name="mail_xslt_stylesheet"  type="File"/>
@@ -393,7 +393,7 @@
             <xsd:attribute name="begin"         type="Time_of_day"/>
             <xsd:attribute name="end"           type="Time_of_day"/>
             <xsd:attribute name="let_run"       type="Yes_no"/>
-            <xsd:attribute name="repeat"        type="Duration"/>
+            <xsd:attribute name="repeat"        type="Positive_duration"/>
         </xsd:complexType>
     </xsd:element>
 
@@ -540,7 +540,7 @@
             <xsd:attribute name="begin"             type="Time_of_day"/>
             <xsd:attribute name="end"               type="Time_of_day"/>
             <xsd:attribute name="let_run"           type="Yes_no"/>
-            <xsd:attribute name="repeat"            type="Duration"/>
+            <xsd:attribute name="repeat"            type="Positive_duration"/>
             <xsd:attribute name="once"              type="Yes_no"/>
         </xsd:complexType>
     </xsd:element>
@@ -799,8 +799,32 @@
 
 
     <xsd:simpleType name="Duration">
-        <xsd:restriction base="xsd:string">
-            <xsd:pattern value="(\d+)|(\d+:\d{2}(:\d\d)?)"/>
+        <xsd:union>
+            <xsd:simpleType>
+                <xsd:restriction base="xsd:nonNegativeInteger">
+                    <xsd:annotation>
+                        <xsd:documentation xml:lang="de">
+                            Dauer in Sekunden
+                        </xsd:documentation>
+                    </xsd:annotation>
+                </xsd:restriction>
+            </xsd:simpleType>
+            <xsd:simpleType>
+                <xsd:restriction base="xsd:string">
+                    <xsd:annotation>
+                        <xsd:documentation xml:lang="de">
+                            Dauer im Format HH:MM[:SS]
+                        </xsd:documentation>
+                    </xsd:annotation>
+                    <xsd:pattern value="(\d+)|(\d+:\d{2}(:\d\d)?)"/>
+                </xsd:restriction>
+            </xsd:simpleType>
+        </xsd:union>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="Positive_duration">
+        <xsd:restriction base="Duration">
+            <xsd:pattern value=".*[123456789].*"/>
         </xsd:restriction>
     </xsd:simpleType>
 

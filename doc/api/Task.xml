@@ -414,6 +414,122 @@ my $value2 = $parameters->var( "parameter2" );</pre>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
+    <property name="priority">
+        <com>
+            <com.result>
+                <com.type type="int"/>
+            </com.result>
+        </com>
+
+        <title>
+            Prozess-Priorität
+        </title>
+
+        <description>
+            <p>
+                Unix: Die höchste Priorität ist -20, die niedrigste 20.
+                Üblicherweise kann die Priorität nur gesenkt, nicht erhöht werden.
+            </p>
+            <p>
+                Windows kennt die Prioritätsklassen
+                4 <code>"idle"</code>,
+                6 <code>"below_normal"</code>,
+                8 <code>"normal"</code>,
+                10 <code>"above_normal"</code> und
+                13 <code>"high"</code>
+                (andere Werte werden abgerundet).
+                Siehe auch <scheduler_method class="Task" property="priority_class"/>.
+            </p>
+            <p>
+                Ein Prozess mit hoher Priorität kann Ihren Rechner blockieren.
+            </p>
+            <p>
+                Siehe auch
+                <scheduler_method class="Subprocess" property="priority"/> und
+                <scheduler_method class="Task" property="priority_class"/>.
+            </p>
+        </description>
+
+        <example programming_language="javascript">
+            <pre>spooler_task.priority = +5;    // Unix: Priorität etwas verschlechtern</pre>
+        </example>
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="priority_class">
+        <com>
+            <com.result>
+                <com.type type="BSTR"/>
+            </com.result>
+        </com>
+
+        <title>
+            Prozess-Priorität unter Windows
+        </title>
+
+        <description>
+            <p>
+                Microsoft Windows kennt die Prioritätsklassen
+                <code>"idle"</code>,
+                <code>"below_normal"</code>,
+                <code>"normal"</code>,
+                <code>"above_normal"</code> und
+                <code>"high"</code>.
+            </p>
+            <p>
+                Ein Prozess mit hoher Priorität kann Ihren Rechner blockieren.
+            </p>
+            <!--table cellspacing="0" cellpadding="0" style="padding-top: 1em">
+                <tr>
+                    <td>
+                        <code>"idle"</code>
+                    </td>
+                    <td style="padding-left: 2ex"></td>
+                </tr>
+                <tr>
+                    <td>
+                        <code>"below_normal"</code>
+                    </td>
+                    <td style="padding-left: 2ex"></td>
+                </tr>
+                <tr>
+                    <td>
+                        <code>"normal"</code>
+                    </td>
+                    <td style="padding-left: 2ex"></td>
+                </tr>
+                <tr>
+                    <td>
+                        <code>"above_normal"</code>
+                    </td>
+                    <td style="padding-left: 2ex"></td>
+                </tr>
+                <tr>
+                    <td>
+                        <code>"high"</code>
+                    </td>
+                    <td style="padding-left: 2ex"></td>
+                </tr>
+            </table-->
+            <p>
+                Die Implementierung für Unix ignoriert den Schreib-Aufruf und liefert <code>""</code>.
+            </p>
+            <p>
+                Siehe auch
+                <scheduler_method class="Subprocess" property="priority"/>,
+                <scheduler_method class="Task" property="priority_class"/> und
+                <a href="http://msdn.microsoft.com/library/en-us/dllproc/base/scheduling_priorities.asp">Microsoft® Windows® Scheduling Priorities</a>.
+            </p>
+        </description>
+
+        <example programming_language="javascript">
+            <pre>spooler_task.priority_class = "below_normal";</pre>
+        </example>
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
     <property name="repeat" access="write">
         <com>
             <com.result>

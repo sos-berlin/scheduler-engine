@@ -4106,7 +4106,7 @@ const char file_scheduler_xsd[] =
     "\r\n"
     "<xsd:annotation>\r\n"
     "<xsd:documentation xml:lang=\"de\">\r\n"
-    "$Id: scheduler.xsd 4201 2006-03-23 10:16:57Z jz $\r\n"
+    "$Id: scheduler.xsd 4219 2006-03-28 08:07:11Z jz $\r\n"
     "Schema f\xc3" "\xbc" "r die Scheduler-Konfiguration,\r\n"
     "s.a. http://www.zschimmer.com/sos/scheduler/konfiguration.xml.html.\r\n"
     "</xsd:documentation>\r\n"
@@ -4359,7 +4359,7 @@ const char file_scheduler_xsd[] =
     "<xsd:attribute name=\"order\"                 type=\"Yes_no\"/>\r\n"
     "<xsd:attribute name=\"separate_process\"      type=\"Yes_no\"/>\r\n"
     "<xsd:attribute name=\"tasks\"                 type=\"xsd:nonNegativeInteger\"/>\r\n"
-    "<xsd:attribute name=\"timeout\"               type=\"Duration\"/>\r\n"
+    "<xsd:attribute name=\"timeout\"               type=\"Positive_duration\"/>\r\n"
     "<xsd:attribute name=\"idle_timeout\"          type=\"Duration\"/>\r\n"
     "<xsd:attribute name=\"process_class\"         type=\"Name\"/>\r\n"
     "<xsd:attribute name=\"mail_xslt_stylesheet\"  type=\"File\"/>\r\n"
@@ -4493,7 +4493,7 @@ const char file_scheduler_xsd[] =
     "<xsd:attribute name=\"begin\"         type=\"Time_of_day\"/>\r\n"
     "<xsd:attribute name=\"end\"           type=\"Time_of_day\"/>\r\n"
     "<xsd:attribute name=\"let_run\"       type=\"Yes_no\"/>\r\n"
-    "<xsd:attribute name=\"repeat\"        type=\"Duration\"/>\r\n"
+    "<xsd:attribute name=\"repeat\"        type=\"Positive_duration\"/>\r\n"
     "</xsd:complexType>\r\n"
     "</xsd:element>\r\n"
     "\r\n"
@@ -4640,7 +4640,7 @@ const char file_scheduler_xsd[] =
     "<xsd:attribute name=\"begin\"             type=\"Time_of_day\"/>\r\n"
     "<xsd:attribute name=\"end\"               type=\"Time_of_day\"/>\r\n"
     "<xsd:attribute name=\"let_run\"           type=\"Yes_no\"/>\r\n"
-    "<xsd:attribute name=\"repeat\"            type=\"Duration\"/>\r\n"
+    "<xsd:attribute name=\"repeat\"            type=\"Positive_duration\"/>\r\n"
     "<xsd:attribute name=\"once\"              type=\"Yes_no\"/>\r\n"
     "</xsd:complexType>\r\n"
     "</xsd:element>\r\n"
@@ -4899,8 +4899,32 @@ const char file_scheduler_xsd[] =
     "\r\n"
     "\r\n"
     "<xsd:simpleType name=\"Duration\">\r\n"
+    "<xsd:union>\r\n"
+    "<xsd:simpleType>\r\n"
+    "<xsd:restriction base=\"xsd:nonNegativeInteger\">\r\n"
+    "<xsd:annotation>\r\n"
+    "<xsd:documentation xml:lang=\"de\">\r\n"
+    "Dauer in Sekunden\r\n"
+    "</xsd:documentation>\r\n"
+    "</xsd:annotation>\r\n"
+    "</xsd:restriction>\r\n"
+    "</xsd:simpleType>\r\n"
+    "<xsd:simpleType>\r\n"
     "<xsd:restriction base=\"xsd:string\">\r\n"
+    "<xsd:annotation>\r\n"
+    "<xsd:documentation xml:lang=\"de\">\r\n"
+    "Dauer im Format HH:MM[:SS]\r\n"
+    "</xsd:documentation>\r\n"
+    "</xsd:annotation>\r\n"
     "<xsd:pattern value=\"(\\d+)|(\\d+:\\d{2}(:\\d\\d)?)\"/>\r\n"
+    "</xsd:restriction>\r\n"
+    "</xsd:simpleType>\r\n"
+    "</xsd:union>\r\n"
+    "</xsd:simpleType>\r\n"
+    "\r\n"
+    "<xsd:simpleType name=\"Positive_duration\">\r\n"
+    "<xsd:restriction base=\"Duration\">\r\n"
+    "<xsd:pattern value=\".*[123456789].*\"/>\r\n"
     "</xsd:restriction>\r\n"
     "</xsd:simpleType>\r\n"
     "\r\n"
@@ -4915,18 +4939,18 @@ namespace spooler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "html/favicon.ico", file_html_favicon_ico, sizeof file_html_favicon_ico - 1, 1111077427 },
-    { "html/jz/details_frame.html", file_html_jz_details_frame_html, sizeof file_html_jz_details_frame_html - 1, 1137323206 },
-    { "html/jz/index.html", file_html_jz_index_html, sizeof file_html_jz_index_html - 1, 1113976395 },
-    { "html/jz/left_frame.html", file_html_jz_left_frame_html, sizeof file_html_jz_left_frame_html - 1, 1137323283 },
-    { "html/jz/browser_dependencies.js", file_html_jz_browser_dependencies_js, sizeof file_html_jz_browser_dependencies_js - 1, 1130346743 },
-    { "html/jz/popup_menu.js", file_html_jz_popup_menu_js, sizeof file_html_jz_popup_menu_js - 1, 1113976395 },
-    { "html/jz/scheduler.js", file_html_jz_scheduler_js, sizeof file_html_jz_scheduler_js - 1, 1130346743 },
-    { "html/jz/show_log.js", file_html_jz_show_log_js, sizeof file_html_jz_show_log_js - 1, 1113976395 },
-    { "html/jz/translation_de.js", file_html_jz_translation_de_js, sizeof file_html_jz_translation_de_js - 1, 1113976395 },
-    { "html/jz/scheduler.xslt", file_html_jz_scheduler_xslt, sizeof file_html_jz_scheduler_xslt - 1, 1141665008 },
-    { "html/jz/scheduler.css", file_html_jz_scheduler_css, sizeof file_html_jz_scheduler_css - 1, 1137323283 },
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1143109024 },
+    { "html/favicon.ico", file_html_favicon_ico, sizeof file_html_favicon_ico - 1, 1111081027 },
+    { "html/jz/details_frame.html", file_html_jz_details_frame_html, sizeof file_html_jz_details_frame_html - 1, 1137326806 },
+    { "html/jz/index.html", file_html_jz_index_html, sizeof file_html_jz_index_html - 1, 1113979995 },
+    { "html/jz/left_frame.html", file_html_jz_left_frame_html, sizeof file_html_jz_left_frame_html - 1, 1137326883 },
+    { "html/jz/browser_dependencies.js", file_html_jz_browser_dependencies_js, sizeof file_html_jz_browser_dependencies_js - 1, 1130350343 },
+    { "html/jz/popup_menu.js", file_html_jz_popup_menu_js, sizeof file_html_jz_popup_menu_js - 1, 1113979995 },
+    { "html/jz/scheduler.js", file_html_jz_scheduler_js, sizeof file_html_jz_scheduler_js - 1, 1130350343 },
+    { "html/jz/show_log.js", file_html_jz_show_log_js, sizeof file_html_jz_show_log_js - 1, 1113979995 },
+    { "html/jz/translation_de.js", file_html_jz_translation_de_js, sizeof file_html_jz_translation_de_js - 1, 1113979995 },
+    { "html/jz/scheduler.xslt", file_html_jz_scheduler_xslt, sizeof file_html_jz_scheduler_xslt - 1, 1141668608 },
+    { "html/jz/scheduler.css", file_html_jz_scheduler_css, sizeof file_html_jz_scheduler_css - 1, 1137326883 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1143533233 },
     { NULL, NULL, 0 }
 };
 

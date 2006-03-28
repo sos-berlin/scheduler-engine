@@ -25,7 +25,7 @@
                 <p>
                     Der Name der Datei, deren Inhalt eingefügt werden soll.
                     Wenn der Dateiname nicht absolut ist,
-                    dann gibt die Option <scheduler_option name="include"/> das Verzeichnis an.
+                    dann gibt die Option <scheduler_option name="include-path"/> das Verzeichnis an.
                 </p>
             </description>
         </xml_attribute>

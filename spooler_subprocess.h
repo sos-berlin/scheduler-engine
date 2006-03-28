@@ -40,7 +40,7 @@ struct Subprocess : idispatch_implementation< Subprocess, spooler_com::Isubproce
     STDMETHODIMP            get_Priority                    ( int* result )                         { return _process.get_Priority( result ); }
 
 #ifdef Z_WINDOWS
-    STDMETHODIMP            put_Priority_class              ( VARIANT* priority )                   { return _process.put_Priority_class( priority ); }
+    STDMETHODIMP            put_Priority_class              ( BSTR priority )                       { return _process.put_Priority_class( priority ); }
     STDMETHODIMP            get_Priority_class              ( BSTR* result )                        { return _process.get_Priority_class( result ); }
 # else
     STDMETHODIMP            put_Priority_class              ( VARIANT* priority )                   { return E_NOTIMPL; }

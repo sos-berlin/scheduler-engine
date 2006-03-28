@@ -236,7 +236,7 @@
              …
         &lt;/jobs>
 
-        &lt;<a class="silent" href="xml/job_chains.xml">job_chains></a>
+        &lt;<a class="silent" href="xml/job_chains.xml">job_chains</a>>
             &lt;<a class="silent" href="xml/job_chain.xml">job_chain</a> name="…"/>
                 &lt;<a class="silent" href="xml/job_chain_node.xml">job_chain_node</a>  state="…"  name="…"  job="…"  next_state="…"  error_state="…"/>
                 …

@@ -410,11 +410,17 @@ library Spooler
         [id(21)]
         HRESULT                 Add_subprocess              ( [in] int Pid, [in] double timeout, [in] VARIANT_BOOL Ignore_error, [in] VARIANT_BOOL Ignore_signal, [in,defaultvalue("")] BSTR Title );
 
+        [propput]
+        HRESULT                 Priority                    ( [in] int );
+
+        [propget]
+        HRESULT                 Priority                    ( [out,retval] int* );
+
         [id(22),propput]
-        HRESULT                 Priority_class              ( [in] VARIANT* );                                  // Für Joacim 2005-04-02
+        HRESULT                 Priority_class              ( [in] BSTR );
 
         [id(22),propget]
-        HRESULT                 Priority_class              ( [out,retval] BSTR* );                             // Für Joacim 2005-04-02
+        HRESULT                 Priority_class              ( [out,retval] BSTR* );
 
         [id(23),propget]
         HRESULT                 Step_count                  ( [out,retval] int* );                              // Für Joacim 2005-04-02
@@ -451,11 +457,17 @@ library Spooler
         [id(20)]
         HRESULT                 Create_subprocess           ( [in,optional] VARIANT* program_and_parameters, [out,retval] Isubprocess** );
 
+        [propput]
+        HRESULT                 Priority                    ( [in] int );
+
+        [propget]
+        HRESULT                 Priority                    ( [out,retval] int* );
+
         [id(22),propput]
-        HRESULT                 Priority_class              ( [in] VARIANT* );                                  // Für Joacim 2005-04-02
+        HRESULT                 Priority_class              ( [in] BSTR );
 
         [id(22),propget]
-        HRESULT                 Priority_class              ( [out,retval] BSTR* );                             // Für Joacim 2005-04-02
+        HRESULT                 Priority_class              ( [out,retval] BSTR* );
     }
 
     [
@@ -1248,17 +1260,17 @@ library Spooler
 
         HRESULT                 Start                   ( [in] VARIANT* command_line );         // BSTR oder Array
 
-      //[propput]
-      //HRESULT                 Priority                ( [in] VARIANT* );
-
-      //[propget]
-      //HRESULT                 Priority                ( [out,retval] VARIANT* );
-
         [propput]
-        HRESULT                 Priority_class          ( [in] VARIANT* );                      // Für Joacim, 2005-04-02
+        HRESULT                 Priority                ( [in] int );
 
         [propget]
-        HRESULT                 Priority_class          ( [out,retval] BSTR* );                 // Für Joacim, 2005-04-02
+        HRESULT                 Priority                ( [out,retval] int* );
+
+        [propput]
+        HRESULT                 Priority_class          ( [in] BSTR );                      
+
+        [propget]
+        HRESULT                 Priority_class          ( [out,retval] BSTR* );             
 
       //HRESULT                 Raise_priority          ( [in] int, [out,retval] VARIANT_BOOL* );
 

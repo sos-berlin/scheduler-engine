@@ -2074,7 +2074,7 @@ const Com_method Com_task::_methods[] =
     { DISPATCH_PROPERTYGET, 19, "stdout_text"               , (Com_method_ptr)&Com_task::get_Stdout_text        , VT_BSTR       },
     { DISPATCH_METHOD     , 20, "Create_subprocess"         , (Com_method_ptr)&Com_task::Create_subprocess      , VT_DISPATCH   , { VT_BYREF|VT_VARIANT }, 1 },
     { DISPATCH_METHOD     , 21, "Add_subprocess"            , (Com_method_ptr)&Com_task::Add_subprocess         , VT_EMPTY      , { VT_INT, VT_R8, VT_BOOL, VT_BOOL, VT_BSTR }, 1 },
-    { DISPATCH_PROPERTYPUT, 22, "Priority_class"            , (Com_method_ptr)&Com_task::put_Priority_class     , VT_EMPTY      , { VT_BYREF|VT_VARIANT } },
+    { DISPATCH_PROPERTYPUT, 22, "Priority_class"            , (Com_method_ptr)&Com_task::put_Priority_class     , VT_EMPTY      , { VT_BSTR } },
     { DISPATCH_PROPERTYGET, 22, "Priority_class"            , (Com_method_ptr)&Com_task::get_Priority_class     , VT_BSTR       },
     { DISPATCH_PROPERTYGET, 23, "Step_count"                , (Com_method_ptr)&Com_task::get_Step_count         , VT_INT        },
     { DISPATCH_PROPERTYGET, 24, "Stderr_path"               , (Com_method_ptr)&Com_task::get_Stderr_path        , VT_BSTR       },
@@ -2082,6 +2082,8 @@ const Com_method Com_task::_methods[] =
     { DISPATCH_METHOD     , 26, "Set_error_code_and_text"   , (Com_method_ptr)&Com_task::Set_error_code_and_text, VT_EMPTY      , { VT_BSTR, VT_BSTR } },
     { DISPATCH_PROPERTYGET, 27, "Web_service"               , (Com_method_ptr)&Com_task::get_Web_service        , VT_DISPATCH   },
     { DISPATCH_PROPERTYGET, 28, "Web_service_or_null"       , (Com_method_ptr)&Com_task::get_Web_service_or_null,VT_DISPATCH   },
+    { DISPATCH_PROPERTYPUT, 29, "Priority"                  , (Com_method_ptr)&Com_task::put_Priority           , VT_EMPTY      , { VT_INT } },
+    { DISPATCH_PROPERTYGET, 29, "Priority"                  , (Com_method_ptr)&Com_task::get_Priority           , VT_INT        },
     {}
 };
 
@@ -2612,12 +2614,37 @@ STDMETHODIMP Com_task::Add_subprocess( int pid, double timeout, VARIANT_BOOL ign
     return hr;
 }
 
+//---------------------------------------------------------------------Com_task::put_Priority_class
+
+STDMETHODIMP Com_task::put_Priority_class( BSTR )
+{
+    // Siehe Com_task_proxy::put_Priority_class()
+    //Z_COM_IMPLEMENT( hr = zschimmer::Process( getpid() ).put_Priority_class( priority_class_bstr ) );
+    return FALSE;
+}
+
 //---------------------------------------------------------------------Com_task::get_Priority_class
 
-STDMETHODIMP Com_task::get_Priority_class( BSTR* )
+STDMETHODIMP Com_task::get_Priority_class( BSTR* result )
 {
-    //Z_COM_IMPLEMENT( hr = zschimmer::Process( getpid() ).get_Priority_class( result ) );
-    return E_NOTIMPL;
+    // Siehe Com_task_proxy::get_Priority_class()
+    Z_COM_IMPLEMENT( hr = zschimmer::Process( getpid() ).get_Priority_class( result ) );
+}
+
+//---------------------------------------------------------------------------Com_task::put_Priority
+
+STDMETHODIMP Com_task::put_Priority( int )
+{
+    // Siehe Com_task_proxy::put_Priority_class()
+    return FALSE;
+}
+
+//---------------------------------------------------------------------------Com_task::get_Priority
+
+STDMETHODIMP Com_task::get_Priority( int* result )
+{
+    // Siehe Com_task_proxy::get_Priority_class()
+    Z_COM_IMPLEMENT( hr = zschimmer::Process( getpid() ).get_Priority( result ) );
 }
 
 //-------------------------------------------------------------------------Com_task::get_Step_count
@@ -2716,8 +2743,10 @@ const Com_method Com_task_proxy::_methods[] =
 { 
 #if defined COM_METHOD
     COM_METHOD      ( Com_task_proxy, 20, Create_subprocess     , VT_DISPATCH , 1, VT_BYREF|VT_VARIANT ),
-    COM_PROPERTY_PUT( Com_task_proxy, 22, Priority_class        ,               0, VT_BYREF|VT_VARIANT ),
+    COM_PROPERTY_PUT( Com_task_proxy, 22, Priority_class        ,               0, VT_BSTR ),
     COM_PROPERTY_GET( Com_task_proxy, 22, Priority_class        , VT_BSTR     , 0 ),
+    COM_PROPERTY_PUT( Com_task_proxy, 29, Priority              ,               0, VT_INT ),
+    COM_PROPERTY_GET( Com_task_proxy, 29, Priority              , VT_INT      , 0 ),
 #endif
     {}
 };
@@ -2754,9 +2783,9 @@ STDMETHODIMP Com_task_proxy::Create_subprocess( VARIANT* program_and_parameters,
 
 //---------------------------------------------------------------Com_task_proxy::put_Priority_class
 
-STDMETHODIMP Com_task_proxy::put_Priority_class( VARIANT* priority )
+STDMETHODIMP Com_task_proxy::put_Priority_class( BSTR priority_class_bstr )
 {
-    Z_COM_IMPLEMENT( hr = zschimmer::Process( getpid() ).put_Priority_class( priority ) );
+    Z_COM_IMPLEMENT( hr = zschimmer::Process( getpid() ).put_Priority_class( priority_class_bstr ) );
 }
 
 //---------------------------------------------------------------Com_task_proxy::get_Priority_class
@@ -2764,6 +2793,20 @@ STDMETHODIMP Com_task_proxy::put_Priority_class( VARIANT* priority )
 STDMETHODIMP Com_task_proxy::get_Priority_class( BSTR* result )
 {
     Z_COM_IMPLEMENT( hr = zschimmer::Process( getpid() ).get_Priority_class( result ) );
+}
+
+//---------------------------------------------------------------------Com_task_proxy::put_Priority
+
+STDMETHODIMP Com_task_proxy::put_Priority( int priority )
+{
+    Z_COM_IMPLEMENT( hr = zschimmer::Process( getpid() ).put_Priority( priority ) );
+}
+
+//---------------------------------------------------------------------Com_task_proxy::get_Priority
+
+STDMETHODIMP Com_task_proxy::get_Priority( int* result )
+{
+    Z_COM_IMPLEMENT( hr = zschimmer::Process( getpid() ).get_Priority( result ) );
 }
 
 //------------------------------------------------------------Com_task_proxy::wait_for_subprocesses

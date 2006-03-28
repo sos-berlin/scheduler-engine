@@ -466,7 +466,9 @@ struct Com_task : spooler_com::Itask,
     STDMETHODIMP            get_Stderr_or_stdout_text_or_path( BSTR*, bool get_stderr, bool get_text );
     STDMETHODIMP                Create_subprocess           ( VARIANT*, spooler_com::Isubprocess** );
     STDMETHODIMP                Add_subprocess              ( int, double, VARIANT_BOOL, VARIANT_BOOL, BSTR );
-    STDMETHODIMP            put_Priority_class              ( VARIANT* )                            { return FALSE; }
+    STDMETHODIMP            put_Priority                    ( int );
+    STDMETHODIMP            get_Priority                    ( int* );
+    STDMETHODIMP            put_Priority_class              ( BSTR );
     STDMETHODIMP            get_Priority_class              ( BSTR* );
     STDMETHODIMP            get_Step_count                  ( int* );
     STDMETHODIMP                Set_error_code_and_text     ( BSTR, BSTR );
@@ -495,7 +497,9 @@ struct Com_task_proxy : object_server::proxy_with_local_methods< Com_task_proxy,
 
 
     STDMETHODIMP                Create_subprocess           ( VARIANT* program_and_parameters, spooler_com::Isubprocess** result );
-    STDMETHODIMP            put_Priority_class              ( VARIANT* );
+    STDMETHODIMP            put_Priority                    ( int );
+    STDMETHODIMP            get_Priority                    ( int* );
+    STDMETHODIMP            put_Priority_class              ( BSTR );
     STDMETHODIMP            get_Priority_class              ( BSTR* );
 
     void                        wait_for_subprocesses       ();
