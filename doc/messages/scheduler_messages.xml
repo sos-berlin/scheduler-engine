@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+﻿<?xml version="1.0"?>
 <?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
 
 <messages 
@@ -66,18 +66,35 @@
             </text>
             <text xml:lang="en">
                 <title>There is an error such as start time is later than end time in the begin="<p1/>" and end="<p2/>" attributes</title>
+                <description>
+                    <p>
+                        <i>- Example -</i>
+                    </p>
+                    <p>
+                        An error results from, for example <code>&lt;period begin="23:00" end="01:00"/></code> 
+                        as the start and end times must lie within the same day, i.e. between 00:00 und 24:00.
+                    </p>
+                    <p>
+                        See <scheduler_element name="period"/>.
+                    </p>
+                </description>
             </text>
         </message>
 
         <message code="SCHEDULER-105">
             <text xml:lang="de">
                 <title>Unbekanntes Kommando: &lt;<p1/>></title>
+                <description>
+                    <p>
+                        Siehe <a href="../xml_commands.xml">XML-Kommandos</a>.
+                    </p>
+                </description>
             </text>
             <text xml:lang="en">
                 <title>Unknown command: &lt;<p1/>></title>
                 <description>
                     <p>
-                        See <a href="../xml_commands.xml">XML-Kommandos</a>.
+                        See <a href="../xml_commands.xml">XML commands</a>.
                     </p>
                 </description>
             </text>
@@ -106,7 +123,7 @@
                 <title>Job <p1/> ist nicht bekannt</title>
             </text>
             <text xml:lang="en">
-                <title>Unknown job <p1/></title>
+                <title>Unknown job: <p1/></title>
             </text>
         </message>
 
@@ -153,7 +170,7 @@
                 <title>XML-Tag <p1/> ist hier falsch</title>
             </text>
             <text xml:lang="en">
-                <title>Unexpected XML tag <p1/></title>
+                <title>Unexpected XML tag: <p1/></title>
             </text>
         </message>
 
@@ -180,7 +197,7 @@
                 <title>XML-Konfiguration enthält kein Element &lt;config -spooler-id=<p1/>></title>
             </text>
             <text xml:lang="en">
-                <title>XML configuration contains no element &lt;config -spooler-id=<p1/>></title>
+                <title>XML configuration contains no &lt;config -spooler-id=<p1/>> element</title>
             </text>
         </message>
 
@@ -270,7 +287,7 @@
                 <title>Prozess mit Code <p1/> beendet</title>
             </text>
             <text xml:lang="en">
-                <title>Process terminated with exit code <p1/></title>
+                <title>Process terminated with exit code: <p1/></title>
             </text>
         </message-->
 
@@ -423,7 +440,7 @@
                 <title>Element &lt;run_time> sieht keine Periode für eine Task ohne Startzeit vor</title>
             </text>
             <text xml:lang="en">
-                <title>Task would never start because it has no start time and the job's &lt;run_time> has no further period</title>
+                <title>Task cannot start because it has no start time and no valid &lt;run_time></title>
             </text>
         </message>
 
@@ -456,7 +473,7 @@
                 <title>Job <p1/> nimmt keine Aufträge an, er ist nicht mit &lt;job order="yes"> deklariert.</title>
             </text>
             <text xml:lang="en">
-                <title>Job <p1/> accepts no orders because it has not been declared with &lt;job order="yes">.</title>
+                <title>Job <p1/> cannot accept orders because it has not been declared with &lt;job order="yes">.</title>
             </text>
         </message>
 
@@ -528,7 +545,7 @@
                 <title>Ein temporärer Job kann keine Aufträge annehmen</title>
             </text>
             <text xml:lang="en">
-                <title>A temporary job does not accept orders</title>
+                <title>A temporary job cannot accept orders</title>
             </text>
         </message>
 
@@ -537,7 +554,7 @@
                 <title><p1/> ist nicht in der Auftragswarteschlange des Jobs "<p2/>"</title>
             </text>
             <text xml:lang="en">
-                <title><p1/> is not in order queue of job "<p2/>"</title>
+                <title><p1/> is not in the order queue of job "<p2/>"</title>
             </text>
         </message>
 
@@ -618,7 +635,7 @@
                 <title>Attribut priority= kann bei &lt;job order="yes"> nicht verwendet werden</title>
             </text>
             <text xml:lang="en">
-                <title>Attribute priority cannot be used with &lt;job order="yes"></title>
+                <title>The priority= attribute cannot be used with &lt;job order="yes"></title>
             </text>
         </message>
 
@@ -762,7 +779,7 @@
                 <title>Scheduler wird nicht gestartet, weil spooler_init() false liefert</title>
             </text>
             <text xml:lang="en">
-                <title>Scheduler does not start because spooler_init() returned false</title>
+                <title>Scheduler cannot start because spooler_init() returned false</title>
             </text>
         </message>
 
@@ -771,7 +788,7 @@
                 <title>Die Scheduler-Datenbank ist wegen eines Datenbankproblems gerade nicht geöffnet</title>
             </text>
             <text xml:lang="en">
-                <title>Scheduler database is currently not accessible due to a database problem</title>
+                <title>Scheduler database cannot be accessed due to a database problem</title>
             </text>
         </message>
 
@@ -795,7 +812,7 @@
                 <title>Order.setback(): Ein Auftrag kann nur zurückgestellt werden, während eine Task ihn ausführt</title>
             </text>
             <text xml:lang="en">
-                <title>Order.setback(): An order can only be set back when it is being executed by a task it</title>
+                <title>Order.setback(): An order can only be set back when it is being executed by a task</title>
             </text>
         </message>
 
@@ -885,7 +902,7 @@
                 <title>Module::java_method_id(<p1/>): Java-Klasse ist unbekannt</title>
             </text>
             <text xml:lang="en">
-                <title>Module::java_method_id(<p1/>): Unknown Java class</title>
+                <title>Module::java_method_id(<p1/>): unknown Java class</title>
             </text>
         </message>
 
@@ -903,7 +920,7 @@
                 <title>Die Modulinstanz ist geschlossen</title>
             </text>
             <text xml:lang="en">
-                <title>Module instance is closed</title>
+                <title>Module instance has been closed</title>
             </text>
         </message>
 
@@ -912,7 +929,7 @@
                 <title>Die Remoteinstanz ist geschlossen</title>
             </text>
             <text xml:lang="en">
-                <title>Remote instance is closed</title>
+                <title>Remote instance has been closed</title>
             </text>
         </message>
 
@@ -984,7 +1001,7 @@
                 <title>Hier ist nur ein Datum ohne Uhrzeit möglich</title>
             </text>
             <text xml:lang="en">
-                <title>Only a date without time is allowed</title>
+                <title>Only a date without a time is allowed</title>
             </text>
         </message>
 
@@ -1029,7 +1046,7 @@
                 <title>Fehler beim Lesen des HTTP-Kopfs: <p1/> erwartet</title>
             </text>
             <text xml:lang="en">
-                <title>Error in HTTP head: expecting <p1/></title>
+                <title>Error in HTTP header: expecting <p1/></title>
             </text>
         </message>
 
@@ -1065,7 +1082,7 @@
                 <title>Subprocess pid=<p2/> hat sich mit exit code=<p1/> beendet. Command=<p3/></title>
             </text>
             <text xml:lang="en">
-                <title>Subprocess pid=<p2/> terminated with exit code=<p1/>. Command=<p3/></title>
+                <title>Subprocess pid=<p2/> has been terminated with exit code=<p1/>. Command=<p3/></title>
             </text>
         </message>
 
@@ -1074,7 +1091,7 @@
                 <title>Subprocess pid=<p2/> hat sich mit Signal <p1/> beendet. Command=<p3/></title>
             </text>
             <text xml:lang="en">
-                <title>Subprocess pid=<p2/> terminated with signal <p1/>. Command=<p3/></title>
+                <title>Subprocess pid=<p2/> has been terminated with signal <p1/>. Command=<p3/></title>
             </text>
         </message>
 
@@ -1101,7 +1118,7 @@
                 <title>Das Kommando &lt;<p1/>> kann nur über eine TCP-Verbindung gegeben werden</title>
             </text>
             <text xml:lang="en">
-                <title>This command &lt;<p1/>> is only executable via a TCP connection</title>
+                <title>This command &lt;<p1/>> is only executable by way of a TCP connection</title>
             </text>
         </message>
 
@@ -1119,7 +1136,7 @@
                 <title>Haupt-Scheduler hat Verbindung geschlossen</title>
             </text>
             <text xml:lang="en">
-                <title>Main Scheduler closed connection</title>
+                <title>The main Job Scheduler has closed connection</title>
             </text>
         </message>
 
@@ -1128,7 +1145,7 @@
                 <title>start_new_file() ist nur fürs Hauptprotokoll möglich</title>
             </text>
             <text xml:lang="en">
-                <title>start_new_file() is applicable only for the main protocol</title>
+                <title>start_new_file() is only applicable for the main protocol</title>
             </text>
         </message>
 
@@ -1146,7 +1163,7 @@
                 <title>Scheduler-Skript hat Fehler protokolliert: <p1/></title>
             </text>
             <text xml:lang="en">
-                <title>Scheduler script logged an error: <p1/></title>
+                <title>Scheduler script has logged an error: <p1/></title>
             </text>
         </message>
 
@@ -1209,7 +1226,7 @@
                 <title>&lt;job <p1/>="..."> Attribut kann nicht überschrieben werden</title>
             </text>
             <text xml:lang="en">
-                <title>&lt;job <p1/>="..."> attribute cannot be overwritten</title>
+                <title>The &lt;job <p1/>="..."> attribute cannot be overwritten</title>
             </text>
         </message>
 
@@ -1218,7 +1235,7 @@
                 <title>Web-Dienst "<p1/>" ist unbekannt</title>
             </text>
             <text xml:lang="en">
-                <title>Unknown web service "<p1/>"</title>
+                <title>Unknown web service: "<p1/>"</title>
             </text>
         </message>
 
@@ -1335,7 +1352,12 @@
                 </description>
             </text>
             <text xml:lang="en">
-                <title>HTTP response is already sent</title>
+                <title>HTTP response has already been sent</title>
+                <description>
+                    <scheduler_method class="Web_service_response"/> 
+                    cannot be changed after 
+                    <scheduler_method class="Web_service_response" method="send"/>.
+                </description>
             </text>
 
             <scheduler_method class="Web_service_response"/>
@@ -1409,7 +1431,7 @@
                 <title><p1/> Tasks haben sich nicht beendet trotz kill vor <p2/>s. Scheduler bricht ab</title>
             </text>
             <text xml:lang="en">
-                <title><p1/> tasks did not terminate in spite of kill <p2/>s ago. Scheduler aborts</title>
+                <title><p1/> tasks did not terminate in spite of kill <p2/>s ago. Scheduler is aborting</title>
             </text>
         </message>
 
@@ -1418,7 +1440,7 @@
                 <title>Frist zur Beendigung des Schedulers ist abgelaufen, aber <p1/> Tasks haben sich nicht beendet</title>
             </text>
             <text xml:lang="en">
-                <title>Deadline for terminating Scheduler reached, but <p1/> tasks are still running</title>
+                <title>Deadline for terminating Scheduler has been reached, but <p1/> tasks are still running</title>
             </text>
         </message>
 
@@ -1451,6 +1473,9 @@
 
         <message code="SCHEDULER-260">
             <text xml:lang="en">
+                <title>Error in Scheduler Skript, spooler_exit(): <p1/></title>
+            </text>
+            <text xml:lang="en">
                 <title>Error in Scheduler script, spooler_exit(): <p1/></title>
             </text>
         </message>
@@ -1466,7 +1491,7 @@
                 <title>Abbruch-Signal (Ctrl-C) empfangen. Der Scheduler wird beendet</title>
             </text>
             <text xml:lang="en">
-                <title>Kill signal (ctrl-C) received. Scheduler terminates</title>
+                <title>Kill signal (ctrl-C) received. Scheduler is terminating</title>
             </text>
         </message>
 
@@ -1544,7 +1569,7 @@
                 <title>Zugunsten des Jobs <p1/> wird die Task beendet</title>
             </text>
             <text xml:lang="en">
-                <title>The task is being terminated in favour of job <p1/></title>
+                <title>Task is being terminated in favour of job <p1/></title>
             </text>
         </message>
 
@@ -1652,7 +1677,7 @@
                 <title>Task <p1/> aus der Datenbank ist fehlerhaft: <p2/></title>
             </text>
             <text xml:lang="en">
-                <title>When loading task <p1/> from database: <p2/></title>
+                <title>Error when loading task <p1/> from database: <p2/></title>
             </text>
         </message>
 
@@ -1706,7 +1731,7 @@
                 <title><p1/> ist blockiert. Wir probieren es <p2/> Sekunden</title>
             </text>
             <text xml:lang="en">
-                <title><p1/> is blocked. Trying <p2/> seconds before giving up</title>
+                <title><p1/> is blocked. Trying a further <p2/> seconds before giving up</title>
             </text>
         </message>
 
@@ -1721,6 +1746,11 @@
             </text>
             <text xml:lang="en">
                 <title>Timeout: No job started to execute <p1/>, cancelling order and HTTP operation</title>
+                <description>
+                    <p>
+                        See <scheduler_element name="web_service" attribute="timeout"/>
+                    </p>
+                </description>
             </text>
         </message>
 
@@ -1756,7 +1786,7 @@
                 <title>Die Java-Klasse <p1/> konnte nicht geladen werden. Die Java-Quelle wird neu übersetzt, mal sehen, ob's dann geht</title>
             </text>
             <text xml:lang="en">
-                <title>Trying again: Compiling Java class <p1/></title>
+                <title>Java class <p1/> could not be loaded. Java source is being recompiled before retrying </title>
             </text>
         </message>
 
@@ -1828,7 +1858,7 @@
                 <title>Fehler beim eMail-Versand: <p1/></title>
             </text>
             <text xml:lang="en">
-                <title>Sending email failed: <p1/></title>
+                <title>Error sending e-mail: <p1/></title>
             </text>
         </message>
 
@@ -1873,7 +1903,7 @@
                 <title>Historiensatz wird wegen vorausgegangenen Datenbankfehlers nicht geschrieben</title>
             </text>
             <text xml:lang="en">
-                <title>Not writing history record because of previous database problem</title>
+                <title>Not writing history record because of already existing database problem</title>
             </text>
         </message>
 
@@ -1909,24 +1939,6 @@
         <message code="SCHEDULER-311">
             <text xml:lang="en">
                 <title>Error when processing HTTP request <p1/>: <p2/></title>
-            </text>
-        </message>
-
-        <message code="SCHEDULER-312">
-            <text xml:lang="en">
-                <title>Variable "<p1/>" (vt=<p2/>) cannot be converted to Text: <p3/></title>
-                <p2>
-                    <description>Variantentyp der Variablen</description>
-                </p2>
-                <p3>
-                    <description>Der Fehler, der bei der Konvertierung aufgetreten ist</description>
-                </p3>
-            </text>
-        </message>
-
-        <message code="SCHEDULER-313">
-            <text xml:lang="en">
-                <title>Cannot store order in database: <p1/></title>
             </text>
         </message>
 
@@ -1986,7 +1998,7 @@
                 <title>Datenbank-Tabelle <p1/> wird um die Spalte <p2/> erweitert: <p3/></title>
             </text>
             <text xml:lang="en">
-                <title>Database table <p1/> gets the new column <p2/>: <p3/></title>
+                <title>Column <p2/> is being added to database table <p1/>: <p3/></title>
             </text>
         </message>
 
@@ -2010,7 +2022,7 @@
 
         <message code="SCHEDULER-912" weight="debug">
             <text xml:lang="en">
-                <title>add_pid(<p1/>), deadline for the process is <p2/></title>
+                <title>add_pid(<p1/>), process deadline is <p2/></title>
             </text>
         </message>
 
@@ -2052,7 +2064,7 @@
                 <title>Zu startende Task aus Datenbank geladen: id=<p1/> start_at=<p2/></title>
             </text>
             <text xml:lang="en">
-                <title>Enqueued task loaded from database: id=<p1/> start_at=<p2/></title>
+                <title>Enqueued task has been loaded from database: id=<p1/> start_at=<p2/></title>
             </text>
         </message>
 
@@ -2112,7 +2124,7 @@
                 <title>Erster Start zu Beginn der Periode: <p1/></title>
             </text>
             <text xml:lang="en">
-                <title>First start at <p1/> - the beginning of a period</title>
+                <title>First start at the start of the period: <p1/></title>
             </text>
         </message>
 
@@ -2139,7 +2151,7 @@
                 <title>Nächste Startzeit wird bestimmt zu Beginn der nächsten Periode: <p1/></title>
             </text>
             <text xml:lang="en">
-                <title>Next start time will be determined at beginning of the next period at <p1/></title>
+                <title>Next start time will be determined at beginning of the next period. This is at <p1/></title>
             </text>
         </message>
 
@@ -2229,7 +2241,7 @@
                 <title>Auftrag wird ausgeführt um <p1/></title>
             </text>
             <text xml:lang="en">
-                <title>Order will be processed at <p1/></title>
+                <title>Order will be processed at <p2/></title>
             </text>
         </message>
 
@@ -2256,7 +2268,7 @@
                 <title>Auftrag wird aus der Jobkette entfernt, aber weiterhin von <p1/> ausgeführt</title>
             </text>
             <text xml:lang="en">
-                <title>Removing order from job chain. <p1/> is continuing to execute it</title>
+                <title>Removing order from job chain. Order is still being executed by <p1/></title>
             </text>
         </message>
         
@@ -2310,7 +2322,7 @@
                 <title>Kein weiterer Job in der Jobkette, der Auftrag ist erledigt</title>
             </text>
             <text xml:lang="en">
-                <title>End state reached, order has been carried out</title>
+                <title>No further job in job chain - order has been carried out</title>
             </text>
         </message>
 
@@ -2328,7 +2340,7 @@
                 <title>setback(): Auftrag zum <p1/>. Mal zurückgestellt, das ist über dem Maximum <p2/> des Jobs</title>
             </text>
             <text xml:lang="en">
-                <title>setback(): order has been set back <p1/> times. This is more than the job's maximum <p2/></title>
+                <title>setback(): order has been set back <p1/> times. This is more than <p2/> - the maximum for this job</title>
             </text>
         </message>
 
@@ -2427,7 +2439,7 @@
                 <title><p1/> Sekunden warten bevor Datenbank erneut geöffnet wird ...</title>
             </text>
             <text xml:lang="en">
-                <title>Waiting <p1/> seconds before opening the database again</title>
+                <title>Waiting <p1/> seconds before reopening the database</title>
             </text>
         </message>
 
@@ -2448,13 +2460,13 @@
 
         <message code="SCHEDULER-961">
             <text xml:lang="en">
-                <title>Protocol starts in <p1/></title>
+                <title>Protocol starts in <p1/> seconds</title>
             </text>
         </message>
 
         <message code="SCHEDULER-962">
             <text xml:lang="en">
-                <title>Protocol ends in <p1/></title>
+                <title>Protocol ends in <p1/> seconds</title>
             </text>
         </message>
 
@@ -2475,6 +2487,11 @@
             </text>
             <text xml:lang="en">
                 <title>New <p1/></title>
+                <description>
+                    <p>
+                        The web service has created a new order and handed it over to the job chain.
+                    </p>
+                </description>
             </text>
         </message>
 
@@ -2484,7 +2501,7 @@
                 <title>Scheduler ordentlich beendet</title>
             </text>
             <text xml:lang="en">
-                <title>Scheduler terminated properly</title>
+                <title>Scheduler has been terminated properly</title>
             </text>
         </message>
 
