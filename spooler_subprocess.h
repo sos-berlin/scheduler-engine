@@ -41,11 +41,10 @@ struct Subprocess : idispatch_implementation< Subprocess, spooler_com::Isubproce
 
 #ifdef Z_WINDOWS
     STDMETHODIMP            put_Priority_class              ( BSTR priority )                       { return _process.put_Priority_class( priority ); }
-    STDMETHODIMP            get_Priority_class              ( BSTR* result )                        { return _process.get_Priority_class( result ); }
 # else
-    STDMETHODIMP            put_Priority_class              ( VARIANT* priority )                   { return E_NOTIMPL; }
-    STDMETHODIMP            get_Priority_class              ( BSTR* result )                        { return E_NOTIMPL; }
+    STDMETHODIMP            put_Priority_class              ( BSTR priority )                       { return E_NOTIMPL; }
 #endif
+    STDMETHODIMP            get_Priority_class              ( BSTR* result )                        { return _process.get_Priority_class( result ); }
 
   //STDMETHODIMP            put_With_console_window         ( VARIANT_BOOL b )                      { _process.set_with_console_window( b != 0 );  return S_OK; }
 
