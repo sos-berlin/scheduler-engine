@@ -279,7 +279,6 @@
         </title>
 
         <description>
-
             <p>
                 Unix: Die höchste Priorität ist -20, die niedrigste 20.
                 Üblicherweise kann die Priorität nur gesenkt, nicht erhöht werden.
@@ -293,6 +292,9 @@
                 13 <code>"high"</code>
                 (andere Werte werden abgerundet).
                 Siehe auch <scheduler_method class="Task" property="priority_class"/>.
+            </p>
+            <p>
+                Wenn die Priorität nicht gesetzt werden kann, führt das nicht zu einem Fehler.
             </p>
             <p>
                 Ein Prozess mit hoher Priorität kann Ihren Rechner blockieren.
@@ -330,6 +332,9 @@
                 <code>"normal"</code>,
                 <code>"above_normal"</code> und
                 <code>"high"</code>.
+            </p>
+            <p>
+                Wenn die Priorität nicht gesetzt werden kann, führt das nicht zu einem Fehler.
             </p>
             <p>
                 Ein Prozess mit hoher Priorität kann Ihren Rechner blockieren.

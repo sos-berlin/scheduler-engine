@@ -10,6 +10,36 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2006-03-31" version="2.0.150" subversion_revision="4225">
+        <revision type="new" title="scheduler.xsd auf ISO-8859-1 begrenzt">
+            <description>
+                XML-Kommandos können nur Zeichen aus ISO-8859-1 enthalten.
+            </description>
+        </revision>
+
+        <revision type="new" title="Prozess-Prioritäten">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_element name="job" attribute="priority" value="below_normal"/>
+                    </li>
+                    <li>
+                        <scheduler_method class="Task" property="priority"/>
+                    </li>
+                    <li>
+                        <scheduler_method class="Task" property="priority_class"/>
+                    </li>
+                    <li>
+                        <scheduler_method class="Subprocess" property="priority"/>
+                    </li>
+                    <li>
+                        <scheduler_method class="Subprocess" property="priority_class"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+    </change>
+
     <change date="2006-03-25" version="2.0.149" subversion_revision="4218">
         <revision type="new" title="scheduler_client">
             <description>
@@ -101,7 +131,7 @@
             </description>
         </revision>
 
-        <revision type="new" title="Meldungen ins Englische übesetzt und mit Codes versehen">
+        <revision type="new" title="Meldungen ins Englische übersetzt und mit Codes versehen">
             <description>
                 Die Meldungen (außer einige Debug-Meldungen) sind jetzt codiert, wie z.B. "<code>SCHEDULER-900 Scheduler is starting ...</code>".
                 <ul>

@@ -441,6 +441,9 @@ my $value2 = $parameters->var( "parameter2" );</pre>
                 Siehe auch <scheduler_method class="Task" property="priority_class"/>.
             </p>
             <p>
+                Wenn die Priorität nicht gesetzt werden kann, führt das nicht zu einem Fehler.
+            </p>
+            <p>
                 Ein Prozess mit hoher Priorität kann Ihren Rechner blockieren.
             </p>
             <p>
@@ -476,6 +479,9 @@ my $value2 = $parameters->var( "parameter2" );</pre>
                 <code>"normal"</code>,
                 <code>"above_normal"</code> und
                 <code>"high"</code>.
+            </p>
+            <p>
+                Wenn die Priorität nicht gesetzt werden kann, führt das nicht zu einem Fehler.
             </p>
             <p>
                 Ein Prozess mit hoher Priorität kann Ihren Rechner blockieren.

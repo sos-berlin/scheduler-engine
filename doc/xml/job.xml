@@ -95,18 +95,30 @@
         </xml_attribute>
 
 
-        <xml_attribute name="priority" type="zahl">
+        <xml_attribute name="priority" type="process_priority">
             <description>
                 <p>
-                    Gibt die Priorität des Jobs an. Eine Zahl zwischen 0 und der Einstellung von <code>&lt;config max_priority="..."></code>.
+                    Unter Unix sind die Werte -20 bis 20 zulässig.
                 </p>
                 <p>
-                    Eine höhere Zahl bezeichnet eine höhere Priorität.
-                    Die niedrigste und die höchste Priorität haben besondere
-                    Bedeutungen: Priorität 0 lässt eine Task nur ausgeführen, wenn keine Task
-                    mit höherer Priorität läuft, wenn also sonst nichts zu tun ist. Die höchste
-                    Priorität gibt absoluten Vorrang. Tasks mit niedriger Priorität werden solange
-                    angehalten, bis keine Task mit der höchsten Priorität mehr läuft.
+                    Unter Windows sind die Werte
+                    <code>idle</code>,
+                    <code>below_normal</code>,
+                    <code>normal</code>,
+                    <code>above_normal</code> und
+                    <code>high</code>
+                    zulässig.
+                </p>
+                <p>
+                    Wenn die Priorität nicht gesetzt werden kann, führt das nicht zu einem Fehler.
+                </p>
+                <p>
+                    Ein Prozess mit hoher Priorität kann Ihren Rechner blockieren.
+                </p>
+                <p>
+                    Siehe
+                    <scheduler_method class="Task" property="priority"/> (für Unix) und
+                    <scheduler_method class="Task" property="priority_class"/> (für Windows).
                 </p>
             </description>
         </xml_attribute>
