@@ -238,13 +238,15 @@ bool Process_module_instance::begin__end()
         env << string_from_bstr ( m->first ) << "=" << string_from_variant( m->second->_value ) << '\0';
     env << '\0';
 
+    DWORD creation_flags = 0;
+    if( _module->_priority != "" )  creation_flags |= windows::windows_priority_class( _module->_priority );        // Liefert 0 bei Fehler
 
     ok = CreateProcess( executable_path.c_str(),    // application name
                         (char*)command_line.c_str(),      // command line
                         NULL,                       // process security attributes
                         NULL,                       // primary thread security attributes
                         TRUE,                       // handles are inherited?
-                        0,                          // creation flags
+                        creation_flags,
                         (char*)((string)env).c_str(),      // use parent's environment
                         NULL,                       // use parent's current directory
                         &startup_info,              // STARTUPINFO pointer
@@ -449,6 +451,16 @@ bool Process_module_instance::begin__end()
 
         case 0:
         {
+            if( _module->_priority != "" ) 
+            {
+                try
+                {
+                    int error = setpriority( PRIO_PROCESS, getpid(), as_int( _module->_priority ) );
+                    if( error )  throw_errno( errno, "setpriority" );
+                }
+                catch( exception& x ) { Z_LOG( "setpriority(" << _priority << ") ==> ERROR " << x.what() << "\n" ); }
+            }
+
             dup2( _stdout_file._file, STDOUT_FILENO );
             dup2( _stderr_file._file, STDERR_FILENO );
 
