@@ -1,4 +1,4 @@
-// $Id: spooler_subprocess.cxx 3668 2005-05-17 10:47:25Z jz $
+// $Id$
 
 #include "spooler.h"
 

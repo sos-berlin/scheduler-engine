@@ -160,6 +160,7 @@ struct Module : Object
     bool                       _process_ignore_error;
     bool                       _process_ignore_signal;
     ptr<Com_variable_set>      _process_environment;
+    string                     _priority;                   // "", "-20" bis "+20" oder "idle", "below_normal" etc.
 
     bool                       _dont_remote;
 
@@ -270,8 +271,8 @@ struct Module_instance : Object
     virtual void                check_connection_error      ()                                      {}
     virtual int                 exit_code                   ()                                      { return 0; }
     virtual int                 termination_signal          ()                                      { return 0; }
-    virtual string              stdout_filename             ()                                      { return ""; }
-    virtual string              stderr_filename             ()                                      { return ""; }
+    virtual string              stdout_path                 ()                                      { return ""; }
+    virtual string              stderr_path                 ()                                      { return ""; }
     virtual bool                process_has_signaled        ()                                      { return false; }       // Für Process_module_instance
 
     virtual string              obj_name                    () const                                { return "Module_instance(" + _job_name + ":" + as_string(_task_id) + ")"; }

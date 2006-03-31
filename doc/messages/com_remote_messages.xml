@@ -1,4 +1,4 @@
-﻿<?xml version="1.0"?>
+<?xml version="1.0"?>
 <?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
 
 <messages 
@@ -31,7 +31,7 @@
         </message>
         <message code="Z-REMOTE-101">
             <text xml:lang="en">
-                <title>Separate process: pid=<p1/>: TCP Connection lost</title>
+                <title>Separate process: pid=<p1/>: Connection lost</title>
             </text>
             <text xml:lang="de">
                 <title>Objectserver pid=<p1/>: TCP-Verbindung ist abgebrochen</title>
@@ -39,7 +39,7 @@
         </message>
         <message code="Z-REMOTE-102">
             <text xml:lang="en">
-                <title>Separate process: unknown proxy id <p1/></title>
+                <title>Separate process: Unknown proxy id <p1/></title>
             </text>
             <text xml:lang="de">
                 <title>Objectserver: Unbekannte Proxy-Id <p1/></title>
@@ -47,7 +47,7 @@
         </message>
         <message code="Z-REMOTE-103">
             <text xml:lang="en">
-                <title>Separate process: not a registered object: <p1/></title>
+                <title>Separate process: Not a registered object: <p1/></title>
             </text>
             <text xml:lang="de">
                 <title>Objectserver: Nicht registriertes Objekt <p1/></title>
@@ -55,7 +55,7 @@
         </message>
         <message code="Z-REMOTE-104">
             <text xml:lang="en">
-                <title>Separate process: invalid session id <p1/></title>
+                <title>Separate process: Invalid session id <p1/></title>
             </text>
             <text xml:lang="de">
                 <title>Objectserver: Session-Id ist nicht korrekt</title>
@@ -63,7 +63,7 @@
         </message>
         <message code="Z-REMOTE-105">
             <text xml:lang="en">
-                <title>Separate process: unknown session command, communication error</title>
+                <title>Separate process: Unknown session command, failure in communication</title>
             </text>
             <text xml:lang="de">
                 <title>Objectserver: Session-Kommando unbekannt (Fehler in der Kommunikation)</title>
@@ -71,7 +71,7 @@
         </message>
         <message code="Z-REMOTE-106">
             <text xml:lang="en">
-                <title>Separate process: Unknown session class, communication error</title>
+                <title>Separate process: Unknown session class, failure in communication</title>
             </text>
             <text xml:lang="de">
                 <title>Objectserver: Session-Klasse unbekannt (Fehler in der Kommunikation)</title>
@@ -79,7 +79,7 @@
         </message>
         <message code="Z-REMOTE-107">
             <text xml:lang="en">
-                <title>Separate process pid=<p1/>: invalid response</title>
+                <title>Separate process pid=<p1/>: Invalid response</title>
             </text>
             <text xml:lang="de">
                 <title>Objectserver pid=<p1/>: Ungültige Antwort</title>
@@ -87,7 +87,7 @@
         </message>
         <message code="Z-REMOTE-108">
             <text xml:lang="en">
-                <title>Separate process: variant type <p1/> cannot be transmitted</title>
+                <title>Separate process: Variant type <p1/> is not transmittable</title>
             </text>
             <text xml:lang="de">
                 <title>Objectserver: Variant-Typ <p1/> ist nicht übertragbar</title>
@@ -95,7 +95,7 @@
         </message>
         <message code="Z-REMOTE-109">
             <text xml:lang="en">
-                <title>Separate process: communication error (message is too short)</title>
+                <title>Separate process: Failure in communication (message is too short)</title>
             </text>
             <text xml:lang="de">
                 <title>Objectserver: Fehler in der Kommunikation (Nachricht ist zu kurz)</title>
@@ -103,7 +103,7 @@
         </message>
         <message code="Z-REMOTE-111">
             <text xml:lang="en">
-                <title>Separate process: thread <p1/> is trying to use a connection owned by thread <p2/></title>
+                <title>Separate process: Thread <p1/> tries to use connection owned by thread <p2/></title>
             </text>
             <text xml:lang="de">
                 <title>Objectserver: Zwei Operationen gleichzeitig</title>
@@ -111,7 +111,7 @@
         </message>
         <message code="Z-REMOTE-112">
             <text xml:lang="en">
-                <title>Separate process: program did not fetch operation's result: <p1/></title>
+                <title>Separate process: Program did not fetch operation's result: <p1/></title>
             </text>
             <text xml:lang="de">
                 <title>Objectserver: Programm hat Ergebnis der Operation nicht übernommen: <p1/></title>
@@ -127,7 +127,7 @@
         </message>
         <message code="Z-REMOTE-114">
             <text xml:lang="en">
-                <title>Separate process: program did not fetch result of a finished operation, method=<p1/></title>
+                <title>Separate process: Program did not fetch result of an finished operation, method=<p1/></title>
             </text>
             <text xml:lang="de">
                 <title>Objectserver: Programm will Ergebnis einer nicht abgeschlossenen Operation übernehmen</title>
@@ -135,7 +135,7 @@
         </message>
         <message code="Z-REMOTE-115">
             <text xml:lang="en">
-                <title>Separate process pid=<p1/>: message length <p2/> too large or invalid</title>
+                <title>Separate process pid=<p1/>: Message length <p2/> too big or invalid</title>
             </text>
             <text xml:lang="de">
                 <title>Objectserver pid=<p1/>: Nachricht mit zu großer oder ungültiger Länge <p2/></title>
@@ -151,7 +151,7 @@
         </message>
         <message code="Z-REMOTE-119">
             <text xml:lang="en">
-                <title>Separate process: two operations on the same connection. First: <p1/>, second: <p2/></title>
+                <title>Separate process: Two operations on the same connection. First: <p1/>, second: <p2/></title>
             </text>
             <text xml:lang="de">
                 <title>Objectserver: Gleichzeitige Operationen auf derselben Verbindung. Erste Operation: <p1/>; Zweite Operation: <p2/></title>
@@ -159,7 +159,7 @@
         </message>
         <message code="Z-REMOTE-120">
             <text xml:lang="en">
-                <title>Separate process: unknown object id <p1/></title>
+                <title>Separate process: Unknown object id <p1/></title>
             </text>
             <text xml:lang="de">
                 <title>Objectserver: Objekt-Id ist unbekannt</title>
@@ -175,7 +175,7 @@
         </message>
         <message code="Z-REMOTE-122">
             <text xml:lang="en">
-                <title>Separate process pid=<p1/>: caller has killed process</title>
+                <title>Separate process pid=<p1/>: Caller has killed process</title>
             </text>
             <text xml:lang="de">
                 <title>Objectserver pid=<p1/>: Der Prozess ist (vom Aufrufer) abgebrochen worden</title>
@@ -183,7 +183,7 @@
         </message>
         <message code="Z-REMOTE-123">
             <text xml:lang="en">
-                <title>Separate process pid=<p1/>: process lost</title>
+                <title>Separate process pid=<p1/>: Process lost</title>
             </text>
             <text xml:lang="de">
                 <title>Objectserver pid=<p1/>: Der Prozess hat sich unerwartet beendet</title>
@@ -191,7 +191,7 @@
         </message>
         <message code="Z-REMOTE-124">
             <text xml:lang="en">
-                <title>Separate process: named arguments not implemented</title>
+                <title>Separate process: Named arguments not implemented</title>
             </text>
             <text xml:lang="de">
                 <title>Objectserver: Benannte Parameter sind nicht möglich</title>
@@ -207,7 +207,7 @@
         </message>
         <message code="Z-REMOTE-126">
             <text xml:lang="en">
-                <title>Separate process: default proxy for <p1/> has no properties</title>
+                <title>Separate process: Default proxy for <p1/> has no properties</title>
             </text>
             <text xml:lang="de">
                 <title>Objectserver: Default-Proxy für <p1/> kennt keine Eigenschaften</title>
@@ -215,7 +215,7 @@
         </message>
         <message code="Z-REMOTE-127">
             <text xml:lang="en">
-                <title>Separate process: more data as announced received. Communication error</title>
+                <title>Separate process: More data as announced received. Failure in communication</title>
             </text>
             <text xml:lang="de">
                 <title>Objectserver: Mehr Daten empfangen als angekündigt. Fehlerhafte Daten empfangen.</title>

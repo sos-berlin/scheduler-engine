@@ -57,7 +57,6 @@ Job::Job( Spooler* spooler )
 
     _next_time      = latter_day;
     _directory_watcher_next_time = latter_day;
-    _priority       = 1;
     _default_params = new Com_variable_set;
     _task_timeout   = latter_day;
     _idle_timeout   = latter_day;
@@ -90,7 +89,7 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
 
         _visible    = element.bool_getAttribute( "visible"      , _visible    );
         _temporary  = element.bool_getAttribute( "temporary"    , _temporary  );
-        _priority   = element. int_getAttribute( "priority"     , _priority   );
+        _module._priority = element.getAttribute( "priority"     , _module._priority   );
         _title      = element.     getAttribute( "title"        , _title      );
         _log_append = element.bool_getAttribute( "log_append"   , _log_append );
         order       = element.bool_getAttribute( "order"        );

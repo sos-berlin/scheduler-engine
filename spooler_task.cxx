@@ -1809,8 +1809,8 @@ void Module_task::do_close__end()
                 _log->warn( x.what() );
         }
 
-        _log->log_file( _module_instance->stdout_filename(), "stdout:" );
-        _log->log_file( _module_instance->stderr_filename(), "stderr:" );
+        _log->log_file( _module_instance->stdout_path(), "stdout:" );
+        _log->log_file( _module_instance->stderr_path(), "stderr:" );
 
       //if( _job->_module_ptr->_reuse == Module::reuse_job )  _job->release_module_instance( _module_instance );
 

@@ -1,4 +1,4 @@
-// $Id: spooler_module_com.h 3978 2005-10-26 21:03:35Z jz $
+// $Id$
 
 #ifndef __SPOOLER_MODULE_PROCESS_H
 #define __SPOOLER_MODULE_PROCESS_H
@@ -46,8 +46,8 @@ struct Process_module_instance : Module_instance
     bool                        process_has_signaled        ();
     int                         exit_code                   ()                                      { return _exit_code; }
     int                         termination_signal          ();
-    string                      stdout_filename             ()                                      { return _stdout_file.filename(); }
-    string                      stderr_filename             ()                                      { return _stderr_file.filename(); }
+    string                      stdout_path                 ()                                      { return _stdout_file.path(); }
+    string                      stderr_path                 ()                                      { return _stderr_file.path(); }
 
   private:
     void                        close_handle                ();

@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx 3714 2005-06-16 08:30:05Z jz $
+// $Id$
 
 
 #include "spooler.h"

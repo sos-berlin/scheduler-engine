@@ -93,8 +93,8 @@ struct Remote_module_instance_proxy : Com_module_instance_base
     void                        check_connection_error      ();
     int                         exit_code                   ();
     int                         termination_signal          ();
-    string                      stdout_filename             ();
-    string                      stderr_filename             ();
+    string                      stdout_path                 ();
+    string                      stderr_path                 ();
 
     Fill_zero                  _zero_;
 

@@ -1301,7 +1301,7 @@ OPEN:
             return true;
         }
         else
-        if( _log->filename() != _file.filename() )  // Dateiname gewechselt (Log.start_new_file)? Dann beenden wir das Protokoll
+        if( _log->filename() != _file.path() )  // Dateiname gewechselt (Log.start_new_file)? Dann beenden wir das Protokoll
         {
             _file.close();
             _html_insertion = "<hr size='1'/>";

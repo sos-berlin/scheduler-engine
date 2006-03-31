@@ -254,7 +254,13 @@ public class Task extends Idispatch
 
     public Subprocess       create_subprocess   ( String filename_and_arguments[] ) { return (Subprocess)   com_call( "create_subprocess", filename_and_arguments ); }
     
-    public Web_service      web_service         ()                                  { return (Web_service)com_call( "<web_service" ); }
+    public Web_service      web_service         ()                                  { return (Web_service)  com_call( "<web_service" ); }
 
-    public Web_service      web_service_or_null ()                                  { return (Web_service)com_call( "<web_service_or_null" ); }
+    public Web_service      web_service_or_null ()                                  { return (Web_service)  com_call( "<web_service_or_null" ); }
+    
+    public void         set_priority            ( int priority )                    {                       com_call( ">priority", priority ); }
+    public int              priority            ()                                  { return            int_com_call( "<priority" ); }
+    
+    public void         set_priority_class      ( String priority_class )           {                       com_call( ">priority_class", priority_class ); }
+    public String           priority_class      ()                                  { return (String)       com_call( "<priority_class" ); }
 }

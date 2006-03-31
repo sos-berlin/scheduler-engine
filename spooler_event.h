@@ -1,4 +1,4 @@
-// $Id: spooler_task.h 3681 2005-06-02 05:57:42Z jz $
+// $Id$
 
 #ifndef __SPOOLER_EVENT_H
 #define __SPOOLER_EVENT_H

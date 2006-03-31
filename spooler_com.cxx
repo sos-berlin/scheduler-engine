@@ -2531,8 +2531,8 @@ STDMETHODIMP Com_task::get_Stderr_or_stdout_text_or_path( BSTR* result, bool get
         if( !_task->thread()  ||  current_thread_id() != _task->thread()->thread_id() )  return E_ACCESSDENIED;
         if( !_task->_module_instance )  return S_FALSE;
 
-        string filename = get_stderr? _task->_module_instance->stderr_filename() 
-                                    : _task->_module_instance->stdout_filename();
+        string filename = get_stderr? _task->_module_instance->stderr_path() 
+                                    : _task->_module_instance->stdout_path();
         if( filename == "" )  return S_FALSE;
 
         if( get_text )  hr = String_to_bstr( string_from_file( filename ), result );

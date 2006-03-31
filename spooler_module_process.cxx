@@ -7,7 +7,7 @@ using namespace std;
 namespace sos {
 namespace spooler {
 
-//--------------------------------------------------rocess_module_instance::Process_module_instance
+//-------------------------------------------------Process_module_instance::Process_module_instance
 
 Process_module_instance::Process_module_instance( Module* module )
 : 
@@ -17,7 +17,7 @@ Process_module_instance::Process_module_instance( Module* module )
 {
 }
 
-//-------------------------------------------------rocess_module_instance::~Process_module_instance
+//------------------------------------------------Process_module_instance::~Process_module_instance
     
 Process_module_instance::~Process_module_instance()
 {
@@ -27,7 +27,7 @@ Process_module_instance::~Process_module_instance()
     _stderr_file.try_unlink( &_log );
 }
 
-//-----------------------------------------------------------------------Process_module_instance::close_handle
+//------------------------------------------------------------Process_module_instance::close_handle
 
 void Process_module_instance::close_handle()
 {
@@ -127,7 +127,7 @@ Variant Process_module_instance::call( const string& name, bool param )
 
 string Process_module_instance::program_path()
 {
-    return _shell_file.filename() != ""? _shell_file.filename() :  _module->_process_filename;
+    return _shell_file.path() != ""? _shell_file.path() :  _module->_process_filename;
 }
 
 //-------------------------------------------Process_module_instance::variable_set_from_environment
@@ -204,9 +204,9 @@ bool Process_module_instance::begin__end()
     string command_line = quoted_windows_process_parameter( executable_path );
     if( !_module->_process_param.empty() )  command_line += " " + _module->_process_param;
 
-    if( _shell_file.filename() != "" )
+    if( _shell_file.path() != "" )
     {
-        command_line = quoted_windows_process_parameter( _shell_file.filename() );
+        command_line = quoted_windows_process_parameter( _shell_file.path() );
     }
 
     if( _params )

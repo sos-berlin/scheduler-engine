@@ -374,7 +374,7 @@ bool Spooler_thread::step()
 {
     bool something_done = false;
 
-
+    /*
     // Erst die Tasks mit höchster Priorität. Die haben absoluten Vorrang:
 
 
@@ -398,7 +398,7 @@ bool Spooler_thread::step()
     }
 
     remove_ended_tasks();
-
+    */
 
 
     // Jetzt sehen wir zu, dass die Jobs, die hinten in einer Jobkette stehen, ihre Aufträge los werden.
@@ -487,7 +487,7 @@ bool Spooler_thread::step()
 
             if( !job->order_controlled() )
             {
-                for( int i = 0; i < job->priority(); i++ )
+                //for( int i = 0; i < job->priority(); i++ )
                 {
                   //if( _my_event.signaled_then_reset() )  return true;
                     if( _event  ->signaled()            )  return true;      // Das ist _my_event oder _spooler->_event
@@ -503,7 +503,7 @@ bool Spooler_thread::step()
     }
 
 
-
+    /*
     // Wenn immer noch keine Task ausgeführt worden ist, dann die Tasks mit Priorität 0 nehmen:
 
     if( !something_done )
@@ -523,7 +523,7 @@ bool Spooler_thread::step()
 
         remove_ended_tasks();
     }
-
+    */
 
     return something_done;
 }

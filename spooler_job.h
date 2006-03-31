@@ -206,7 +206,7 @@ struct Job : Object,
     State_cmd                   state_cmd                   () const                                { return _state_cmd; }
     State                       state                       () const                                { return _state; }
     Object_set_descr*           object_set_descr            () const                                { return _object_set_descr; }
-    int                         priority                    () const                                { return _priority; }
+  //string                      priority                    () const                                { return _priority; }
   //Spooler_thread*             thread                      () const                                { return _thread; }
     string                      job_state                   ();
     string                      include_path                () const;
@@ -357,7 +357,7 @@ struct Job : Object,
     Time                       _repeat;                     // spooler_task.repeat
     Time                       _task_timeout;               // Frist für einen Schritt einer Task
     Time                       _idle_timeout;               // Frist für den Zustand Task::s_running_waiting_for_order
-    int                        _priority;
+  //string                     _priority;                   // "", "-20" bis "+20" oder "idle", "below_normal" etc.
     bool                       _visible;
     bool                       _temporary;                  // Job nach einem Lauf entfernen
     bool                       _remove;                     // Job enfernen sobald möglich. _state == s_stopping, dann s_stopped

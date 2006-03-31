@@ -121,18 +121,18 @@ int Remote_module_instance_proxy::termination_signal()
     return _termination_signal;
 }
 
-//----------------------------------------------------Remote_module_instance_proxy::stdout_filename
+//--------------------------------------------------------Remote_module_instance_proxy::stdout_path
 
-string Remote_module_instance_proxy::stdout_filename()                                      
+string Remote_module_instance_proxy::stdout_path()                                      
 { 
-    return _process? _process->stdout_filename() : "";
+    return _process? _process->stdout_path() : "";
 }
 
-//----------------------------------------------------Remote_module_instance_proxy::stderr_filename
+//--------------------------------------------------------Remote_module_instance_proxy::stderr_path
 
-string Remote_module_instance_proxy::stderr_filename()
+string Remote_module_instance_proxy::stderr_path()
 { 
-    return _process? _process->stderr_filename() : "";
+    return _process? _process->stderr_path() : "";
 }
 
 //------------------------------------------------------------Remote_module_instance_proxy::add_obj
@@ -435,6 +435,7 @@ bool Remote_module_instance_proxy::try_to_get_process()
 
         _process->set_job_name( _job_name );
         _process->set_task_id ( _task_id  );
+        if( _module->_priority != "" )  _process->set_priority( _module->_priority );
         _process->start();
     }
 

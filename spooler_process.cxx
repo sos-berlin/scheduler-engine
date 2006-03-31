@@ -87,7 +87,7 @@ void Process::start()
         parameters.push_back( Parameter( "program", _spooler->_my_program_filename ) );
 
 
-        _connection = _spooler->_connection_manager->start_process( parameters );
+        _connection = _spooler->_connection_manager->start_process( parameters, _priority );
 
         _process_handle_copy = _connection->process_handle();
         _spooler->register_process_handle( _process_handle_copy );
@@ -146,20 +146,20 @@ int Process::termination_signal()
     return _termination_signal;
 }
 
-//-------------------------------------------------------------------------Process::stdout_filename
+//-----------------------------------------------------------------------------Process::stdout_path
 
-string Process::stdout_filename()
+string Process::stdout_path()
 {
     object_server::Connection_to_own_server* c = dynamic_cast< object_server::Connection_to_own_server* >( +_connection );
-    return c? c->stdout_filename() : "";
+    return c? c->stdout_path() : "";
 }
 
-//-------------------------------------------------------------------------Process::stderr_filename
+//-----------------------------------------------------------------------------Process::stderr_path
 
-string Process::stderr_filename()
+string Process::stderr_path()
 {
     object_server::Connection_to_own_server* c = dynamic_cast< object_server::Connection_to_own_server* >( +_connection );
-    return c? c->stderr_filename() : "";
+    return c? c->stderr_path() : "";
 }
 
 //-----------------------------------------------------------------------------Process::dom_element

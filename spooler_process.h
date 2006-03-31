@@ -39,12 +39,13 @@ struct Process : zschimmer::Object
     void                    set_job_name                    ( const string& job_name )              { _job_name = job_name; }
     void                    set_task_id                     ( int id )                              { _task_id = id; }
     void                    set_server                      ( const string& hostname, int port )    { _server_hostname = hostname;  _server_port = port; }
+    void                    set_priority                    ( const string& priority )              { _priority = priority; }
     int                         pid                         ()                                      { return _connection? _connection->pid() : 0; }
     bool                        kill                        ();
     int                         exit_code                   ();
     int                         termination_signal          ();
-    string                      stderr_filename             ();
-    string                      stdout_filename             ();
+    string                      stderr_path                 ();
+    string                      stdout_path                 ();
 
     void                    set_dom                         ( const xml::Element_ptr&, const Time& xml_mod_time );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
@@ -68,6 +69,7 @@ struct Process : zschimmer::Object
     long32                     _module_instance_count;
     Module_instance*           _module_instance;
     Process_class*             _process_class;
+    string                     _priority;
 };
 
 //-------------------------------------------------------------------------------------Process_list

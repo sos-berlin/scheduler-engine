@@ -390,6 +390,7 @@ bool Wait_handles::wait_until_2( Time until, const string& debug_string )
             {
                 ret = MsgWaitForMultipleObjects( _handles.size(), handles, FALSE, (int)( ceil( step * 1000 ) ), QS_ALLINPUT ); 
                 if( ret != WAIT_TIMEOUT )  goto WAIT_OK;
+
                 Time now = Time::now();
                 t = (int)ceil( ( until - now ) * 1000 );
                 cerr << Time::now().as_string( Time::without_ms ) << " (" << ( -t / 1000 ) << "s";
@@ -399,7 +400,7 @@ bool Wait_handles::wait_until_2( Time until, const string& debug_string )
 
             ret = MsgWaitForMultipleObjects( _handles.size(), handles, FALSE, max( 0, t ), QS_ALLINPUT ); 
 
-            if( _spooler  &&  _spooler->_print_time_every_second )  cerr << string( 79, ' ' ) << '\r';  // Zeile löschen
+            cerr << string( 79, ' ' ) << '\r' << flush;  // Zeile löschen
         }
         else
         {

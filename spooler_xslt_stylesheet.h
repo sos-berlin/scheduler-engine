@@ -1,4 +1,4 @@
-// $Id: spooler_subprocess.h 3668 2005-05-17 10:47:25Z jz $
+// $Id$
 
 #ifndef __SPOOLER_XSLT_STYLESHEET_H
 #define __SPOOLER_XSLT_STYLESHEET_H

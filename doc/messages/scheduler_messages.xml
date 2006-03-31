@@ -1,4 +1,4 @@
-﻿<?xml version="1.0"?>
+<?xml version="1.0"?>
 <?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
 
 <messages 
@@ -1939,6 +1939,24 @@
         <message code="SCHEDULER-311">
             <text xml:lang="en">
                 <title>Error when processing HTTP request <p1/>: <p2/></title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-312">
+            <text xml:lang="en">
+                <title>Variable "<p1/>" (vt=<p2/>) cannot be converted to Text: <p3/></title>
+                <p2>
+                    <description>Variantentyp der Variablen</description>
+                </p2>
+                <p3>
+                    <description>Der Fehler, der bei der Konvertierung aufgetreten ist</description>
+                </p3>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-313">
+            <text xml:lang="en">
+                <title>Cannot store order in database: <p1/></title>
             </text>
         </message>
 
