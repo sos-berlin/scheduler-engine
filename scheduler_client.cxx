@@ -263,6 +263,10 @@ struct Socket_stream : Buffered_socket_operation, Input_stream, Output_stream
 using namespace std;
 using namespace zschimmer;
 
+namespace sos {
+namespace spooler {
+
+//-------------------------------------------------------------------------------------------------
 
 struct Client
 {
@@ -485,9 +489,9 @@ struct Client
     ptr<Xml_writer>            _xml_writer;
 };
 
-//---------------------------------------------------------------------------------------------main
+//----------------------------------------------------------------------------scheduler_client_main
 
-int main( int argc, char** argv )
+int scheduler_client_main( int argc, char** argv )
 {
     int ret = 0;
 
@@ -505,3 +509,15 @@ int main( int argc, char** argv )
 
     return ret;
 }
+
+//---------------------------------------------------------------------------------------------main
+
+int main( int argc, char** argv )
+{
+    return scheduler_client_main( argc, argv );
+}
+
+//-------------------------------------------------------------------------------------------------
+
+} //namespace spooler
+} //namespace sos

@@ -22,6 +22,7 @@
 
 #include "spooler.h"
 #include "spooler_version.h"
+//#include "scheduler_client.h"
 
 #include <time.h>
 #include <signal.h>
