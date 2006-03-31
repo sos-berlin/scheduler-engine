@@ -519,5 +519,5 @@ int scheduler_client_main( int argc, char** argv )
 
 int main( int argc, char** argv )
 {
-    return scheduler_client_main( argc, argv );
+    return sos::spooler::scheduler_client_main( argc, argv );
 }
