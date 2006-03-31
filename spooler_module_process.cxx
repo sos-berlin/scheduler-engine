@@ -458,7 +458,7 @@ bool Process_module_instance::begin__end()
                     int error = setpriority( PRIO_PROCESS, getpid(), as_int( _module->_priority ) );
                     if( error )  throw_errno( errno, "setpriority" );
                 }
-                catch( exception& x ) { Z_LOG( "setpriority(" << _priority << ") ==> ERROR " << x.what() << "\n" ); }
+                catch( exception& x ) { Z_LOG( "setpriority(" << _module->_priority << ") ==> ERROR " << x.what() << "\n" ); }
             }
 
             dup2( _stdout_file._file, STDOUT_FILENO );
