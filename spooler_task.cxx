@@ -344,7 +344,11 @@ xml::Element_ptr Task::dom_element( const xml::Document_ptr& document, const Sho
                 task_element.setAttribute( "calling"         , t->_module_instance->_in_call->name() );
 
                 int pid = t->_module_instance->pid();
-                if( pid )  task_element.setAttribute( "pid", pid );       // separate_process="yes", Remote_module_instance_proxy
+                if( pid )
+                {
+                    task_element.setAttribute( "pid", pid );       // separate_process="yes", Remote_module_instance_proxy
+                    task_element.setAttribute( "priority", zschimmer::Process( pid ).priority_class() );
+                }
             }
         }
 
@@ -362,6 +366,8 @@ xml::Element_ptr Task::dom_element( const xml::Document_ptr& document, const Sho
                 {
                     xml::Element_ptr subprocess_element = document.createElement( "subprocess" );
                     subprocess_element.setAttribute( "pid", p->_pid );
+
+                    subprocess_element.setAttribute( "priority", zschimmer::Process( p->_pid ).priority_class() );
 
                     if( p->_timeout_at != latter_day )
                     subprocess_element.setAttribute( "timeout_at", p->_timeout_at.as_string() );
