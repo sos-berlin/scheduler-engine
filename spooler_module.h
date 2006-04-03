@@ -117,6 +117,7 @@ struct Module : Object
     bool                        make_java_class             ( bool force = false );                 // in spooler_module_java.cxx
     jmethodID                   java_method_id              ( const string& name );                 // in spooler_module_java.cxx
     void                        set_checked_attribute       ( string*, const xml::Element_ptr&, const string&, bool modify_allowed = false );
+    void                        set_priority                ( const string& );
 
 
     Fill_zero                  _zero_;

@@ -141,7 +141,7 @@ Module::Module( Spooler* sp, Prefix_log* log )
 #   endif
 }
 
-//------------------------------------------------------------------------------------odule::Module
+//-----------------------------------------------------------------------------------Module::Module
     
 Module::Module( Spooler* sp, const xml::Element_ptr& e, const Time& xml_mod_time, const string& include_path )  
 : 
@@ -154,6 +154,22 @@ Module::Module( Spooler* sp, const xml::Element_ptr& e, const Time& xml_mod_time
 #   endif
 
     set_dom(e,xml_mod_time,include_path); 
+}
+
+//-----------------------------------------------------------------------------Module::set_priority
+    
+void Module::set_priority( const string& priority )
+{
+    if( priority != "" )
+    {
+#       ifdef Z_WINDOWS
+            windows::priority_class_from_string( priority );    // Prüfen
+#        else
+            posix::priority_from_string( priority );            // Prüfen
+#       endif
+    }
+
+    _priority = priority;
 }
 
 //----------------------------------------------------------------------------set_checked_attribute

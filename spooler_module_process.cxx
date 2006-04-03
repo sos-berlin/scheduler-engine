@@ -239,7 +239,7 @@ bool Process_module_instance::begin__end()
     env << '\0';
 
     DWORD creation_flags = 0;
-    if( _module->_priority != "" )  creation_flags |= windows::windows_priority_class( _module->_priority );        // Liefert 0 bei Fehler
+    if( _module->_priority != "" )  creation_flags |= windows::priority_class_from_string( _module->_priority );        // Liefert 0 bei Fehler
 
     ok = CreateProcess( executable_path.c_str(),    // application name
                         (char*)command_line.c_str(),      // command line
@@ -455,7 +455,7 @@ bool Process_module_instance::begin__end()
             {
                 try
                 {
-                    int error = setpriority( PRIO_PROCESS, getpid(), as_int( _module->_priority ) );
+                    int error = setpriority( PRIO_PROCESS, getpid(), posix::priority_from_string( _module->_priority ) );
                     if( error )  throw_errno( errno, "setpriority" );
                 }
                 catch( exception& x ) { Z_LOG( "setpriority(" << _module->_priority << ") ==> ERROR " << x.what() << "\n" ); }
