@@ -300,9 +300,9 @@
                 Ein Prozess mit hoher Priorität kann Ihren Rechner blockieren.
             </p>
             <p>
-                Siehe auch
-                <scheduler_method class="Subprocess" property="priority_class"/> und
-                <scheduler_method class="Task" property="priority"/>.
+                Die Priorität kann betriebsystem-unabhängig eingestellt werden mit 
+                <scheduler_method class="Subprocess" property="priority_class"/>.
+                Siehe auch <scheduler_method class="Task" property="priority"/>.
             </p>
         </description>
 
@@ -321,7 +321,7 @@
         </com>
 
         <title>
-            Prozess-Priorität unter Windows
+            Prioritätsklasse
         </title>
 
         <description>

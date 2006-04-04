@@ -440,7 +440,7 @@ xml::Element_ptr Command_processor::execute_add_jobs( const xml::Element_ptr& ad
     return _answer.createElement( "ok" );
 }
 
-//--------------------------------------------------------------Command_processor::execute_add_jobs
+//-------------------------------------------------------------------Command_processor::execute_job
 
 xml::Element_ptr Command_processor::execute_job( const xml::Element_ptr& job_element )
 {

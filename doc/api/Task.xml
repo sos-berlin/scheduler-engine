@@ -422,7 +422,7 @@ my $value2 = $parameters->var( "parameter2" );</pre>
         </com>
 
         <title>
-            Prozess-Priorität
+            Priorität der laufenden Task
         </title>
 
         <description>
@@ -447,8 +447,9 @@ my $value2 = $parameters->var( "parameter2" );</pre>
                 Ein Prozess mit hoher Priorität kann Ihren Rechner blockieren.
             </p>
             <p>
+                Die Priorität kann betriebsystem-unabhängig eingestellt werden mit
+                <scheduler_method class="Subprocess" property="priority"/>.
                 Siehe auch
-                <scheduler_method class="Subprocess" property="priority"/> und
                 <scheduler_method class="Task" property="priority_class"/>.
             </p>
         </description>
@@ -468,7 +469,7 @@ my $value2 = $parameters->var( "parameter2" );</pre>
         </com>
 
         <title>
-            Prozess-Priorität unter Windows
+            Prioritätsklasse der laufenden Task
         </title>
 
         <description>
