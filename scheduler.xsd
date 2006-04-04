@@ -834,19 +834,7 @@
     <xsd:simpleType name="String">
         <xsd:annotation>
             <xsd:documentation>
-                Only characters out of ISO-8859-1 can be used:
-                !"#$%&amp;'()*+,-./
-                0123456789:;&lt;=>?
-                @ABCDEFGHIJKLMNO
-                PQRSTUVWXYZ[\]^_
-                `abcdefghijklmno
-                pqrstuvwxyz{|}~
-                &#xa0;¡¢£¤¥¦§¨©ª«¬­®¯
-                °±²³´µ¶·¸¹º»¼½¾¿
-                ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏ
-                ÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞß
-                àáâãäåæçèéêëìíîï
-                ðñòóôõö÷øùúûüýþÿ
+                Only characters out of ISO-8859-1 can be used.
             </xsd:documentation>
         </xsd:annotation>
         <xsd:restriction base="xsd:string">
