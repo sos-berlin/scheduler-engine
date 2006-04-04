@@ -336,7 +336,8 @@ struct Client
     {
         _xml_writer->begin_element( "add_order" );
         _xml_writer->set_attribute( "job_chain", _job_chain );
-        _xml_writer->set_attribute_optional( "id"       , _order_id );
+        _xml_writer->set_attribute_optional( "id"   , _order_id );
+        _xml_writer->set_attribute_optional( "title", _title );
 
         if( _variables.size() > 0 )
         {
@@ -437,6 +438,8 @@ struct Client
             else
             if( get_argv_option( arg, "-order-id=", &_order_id ) );
             else
+            if( get_argv_option( arg, "-title=", &_title ) );
+            else
             //if( get_argv_option( arg, "-job-name=", &_job_name ) );
             //else
             if( get_argv_option( arg, "-at=", &_at ) );
@@ -484,6 +487,7 @@ struct Client
     string                     _process_class;
     string                     _job_chain;
     string                     _order_id;
+    string                     _title;
     string                     _at;
 
     typedef list< pair<string,string> >  Variables_list;
