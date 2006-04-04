@@ -1575,10 +1575,10 @@
 
         <message code="SCHEDULER-272">
             <text xml:lang="de">
-                <title>Task wird nach nach Fristablauf abgebrochen</title>
+                <title>Task wird nach nach Fristablauf von &lt;job timeout="<p1/>"> abgebrochen</title>
             </text>
             <text xml:lang="en">
-                <title>Terminating task after reaching deadline &lt;job timeout=""></title>
+                <title>Terminating task after reaching deadline &lt;job timeout="<p1/>"></title>
             </text>
         </message>
 

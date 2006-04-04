@@ -19,6 +19,20 @@
     <xml_attributes>
         <xml_attribute name="pid" type="zahl" title="Prozess-Id vom Betriebssystems"/>
 
+        <xml_attribute name="priority" type="priority">
+            <description>
+                <p>
+                    Priorität des Prozesses:
+                    Unter Unix -20 bis 20, unter Windows
+                    <code>idle</code>,
+                    <code>below_normal</code>,
+                    <code>normal</code>,
+                    <code>above_normal</code> oder
+                    <code>high</code>.
+                </p>
+            </description>
+        </xml_attribute>
+
         <xml_attribute name="timeout_at" type="yyyy-mm-dd hh:mm:ss.mmm" title="Frist des Prozesses">
             <description>
                 <p>

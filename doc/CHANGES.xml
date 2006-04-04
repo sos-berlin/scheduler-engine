@@ -52,7 +52,7 @@
                 <div class="indent">
                     <code>scheduler_client </code>
                     <code>-scheduler=</code><i>host</i><code>:</code><i>port</i> &#160;
-                    <code>-script-language=</code><i>script_language</i> &#160;
+                    <code>-language=</code><i>script_language</i> &#160;
                     <code>-process_class=</code><i>process_class</i> &#160;
                     <code>-at=</code>"<i>yyyy-mm-dd HH:MM</i>" &#160;
                 </div>

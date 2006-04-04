@@ -98,7 +98,7 @@
 
         <xml_attribute setting="include_path"/>
 
-        <xml_attribute name="priority_max" type="zahl" initial="1000">
+        <!-- Veraltet: xml_attribute name="priority_max" type="zahl" initial="1000">
             <description>
                 <p>
                     Höchste Priorität, die eine Task haben kann.
@@ -108,7 +108,7 @@
             <example>
                 <pre>&lt;config priority_max="10"></pre>
             </example>
-        </xml_attribute>
+        </xml_attribute-->
 
         <xml_attribute setting="mail_xslt_stylesheet"/>
 

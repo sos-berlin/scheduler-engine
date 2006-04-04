@@ -352,6 +352,10 @@
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 			>
 			<File
+				RelativePath=".\scheduler_client.cxx"
+				>
+			</File>
+			<File
 				RelativePath="spooler.cxx"
 				>
 				<FileConfiguration

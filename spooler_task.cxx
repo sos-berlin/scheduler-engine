@@ -723,7 +723,7 @@ bool Task::check_timeout( const Time& now )
 {
     if( _timeout < latter_day  &&  now > _last_operation_time + _timeout  &&  !_kill_tried )
     {
-        _log->error( message_string( "SCHEDULER-272", _timeout ) );   // "Task wird nach nach Zeitablauf abgebrochen"
+        _log->error( message_string( "SCHEDULER-272", _timeout.as_time_t() ) );   // "Task wird nach nach Zeitablauf abgebrochen"
         return try_kill();
     }
 

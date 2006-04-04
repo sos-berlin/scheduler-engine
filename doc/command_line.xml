@@ -9,7 +9,15 @@
               author   = "$Author$"
               date     = "$Date$">
 
-    <command_options>
+    <command_options name="run" title="Start des Schedulers">
+        <description>
+            <p>
+                Der Programmdateiname <code>scheduler</code> muss absolut und vollständig angegeben werden.
+                In Windows mit der Endung "<code>.exe</code>"
+                (warum? weil der Scheduler den vollständigen Dateinamen braucht, um einen Job oder sich selbst neu zu starten).
+            </p>
+        </description>
+
         <command_option name="config" setting="config">
             <description>
                 <p>
@@ -22,15 +30,6 @@
         <command_option name="log" setting="scheduler_log"/>
         
         <command_option name="log-dir" setting="log_dir"/>
-
-
-        <command_option name="V" title="Versionsnummer zeigen">
-            <description>
-                <p>
-                    Lässt den Scheduler beim Start Versionsnummer und Versionsdatum ausgeben.
-                </p>
-            </description>
-        </command_option>
 
 
         <command_option name="id" setting="option_id"/>
@@ -102,42 +101,11 @@
         </command_option>
 
 
-        <command_option name="show-xml-schema" title="schreibt das XML-Schema nach stdout">
-            <description>
-                <p>
-                    Der Scheduler hat ein XML-Schema,
-                    dem die XML-Kommandos und die XML-Konfiguration entsprechen müssen.
-                </p>
-                <p>
-                    Siehe <a href="xml/scheduler.xsd" type="text/plain" charset="utf-8">XML-Schema des Schedulers</a>.
-                </p>
-
-                <p>
-                    Beispiel: 
-                </p>
-                
-                <pre><code>scheduler -show-xml-schema | less</code></pre>
-            </description>
-        </command_option>
-
-
         <command_option name="cmd" type="xmlkommando" title="Sofort auszuführendes Kommando">
             <description>
                 <p>
                     Der Scheduler führt beim Start das XML-Kommando aus.
                     Das kann z.B. ein <scheduler_element name="start_job"/> sein.
-                </p>
-            </description>
-        </command_option>
-
-
-        <command_option name="send-cmd" type="xmlkommando" title="Anderem Scheduler zu schickendes Kommando">
-            <description>
-                <p>
-                    Mit dieser Option startet der Scheduler nicht,
-                    sondern schickt einem anderen Scheduler mit gleicher Option <code>-tcp-port=</code>
-                    auf demselben Rechner das XML-Kommando.
-                    Das kann z.B. ein <scheduler_element name="terminate"/> sein: <code>-send-cmd="&lt;terminate/>"</code>
                 </p>
             </description>
         </command_option>
@@ -189,6 +157,38 @@
         </command_option>
 
 
+<!-- funktioniert nicht 2005-01-22
+        <command_option name="renew-service" type="name" title="Windows-Dienst entfernen und erneut installieren">
+            <description>
+                <scheduler_keyword keyword="Service"/>
+                <scheduler_keyword keyword="Dienst"/>
+                <p>
+                    <code>-renew-service=</code><i>name</i> ist dasselbe wie
+                    <code>-renew-service -service-name=</code><i>name</i>.
+                </p>
+            </description>
+        </command_option>
+-->
+
+        <command_option name="validate-xml" title="XML-Dokumente gegen eingebettetes Schema validieren">
+            <description>
+                <p>
+                    <code>-validate-xml-</code> schaltet die Validierung ab 
+                    (für den Fall, dass das Schema fehlerhaft ist).
+                </p>
+                <p>
+                    Siehe <scheduler_option name="show-xml-schema"/>.
+                </p>
+            </description>
+        </command_option>
+
+        <example>
+            <pre>c:\bin\scheduler.exe c:\scheduler\config.xml -log-dir=c:\scheduler\logs</pre>
+        </example>
+    </command_options>
+
+    
+    <command_options name="install_service" title="Installation eines Windows-Dienstes">
         <command_option name="install-service" type="name" title="Als Windows-Dienst installieren">
             <description>
                 <scheduler_keyword keyword="Service"/>
@@ -199,13 +199,20 @@
                     Dabei werden folgende Optionen aus der Kommandozeile übernommen:
                 </p>
                 <p>
-                    <scheduler_option name="cd"/><br/>
-                    <scheduler_option name="config"/><br/>
-                    <scheduler_option name="id"/><br/>
-                    <scheduler_option name="ini"/><br/>
-                    <scheduler_option name="log"/><br/>
-                    <scheduler_option name="pid-file"/><br/>
-                    <scheduler_option name="sos.ini"/><br/>
+                    <scheduler_option name="cd"/>
+                    <br/>
+                    <scheduler_option name="config"/>
+                    <br/>
+                    <scheduler_option name="id"/>
+                    <br/>
+                    <scheduler_option name="ini"/>
+                    <br/>
+                    <scheduler_option name="log"/>
+                    <br/>
+                    <scheduler_option name="pid-file"/>
+                    <br/>
+                    <scheduler_option name="sos.ini"/>
+                    <br/>
                 </p>
                 <p>
                     <code>-install-service=</code><i>name</i> ist dasselbe wie
@@ -213,7 +220,6 @@
                 </p>
             </description>
         </command_option>
-
 
         <command_option name="remove-service" type="name" title="Windows-Dienst entfernen">
             <description>
@@ -228,19 +234,6 @@
                 </p>
             </description>
         </command_option>
-
-<!-- funktioniert nicht 2005-01-22
-        <command_option name="renew-service" type="name" title="Windows-Dienst entfernen und erneut installieren">
-            <description>
-                <scheduler_keyword keyword="Service"/>
-                <scheduler_keyword keyword="Dienst"/>
-                <p>
-                    <code>-renew-service=</code><i>name</i> ist dasselbe wie
-                    <code>-renew-service -service-name=</code><i>name</i>.
-                </p>
-            </description>
-        </command_option>
--->
 
         <command_option name="service-name" type="name" initial="sos_scheduler" title="Interner Name des Windows-Dienstes">
             <description>
@@ -287,26 +280,176 @@
             </description>
         </command_option>
 
-        <command_option name="validate-xml" title="XML-Dokumente gegen eingebettetes Schema validieren">
+    </command_options>
+
+
+    
+    <command_options name="start_job" title="Laufendem Scheduler einen Job übergeben">
+        <command_option name="scheduler" type="host:port" title="TCP-Adresse des Schedulers">
             <description>
                 <p>
-                    <code>-validate-xml-</code> schaltet die Validierung ab 
-                    (für den Fall, dass das Schema fehlerhaft ist).
-                </p>
-                <p>
-                    Siehe <scheduler_option name="show-xml-schema"/>.
+                    Rechnername (oder IP-Nummer) und Portnummer des anzusprechenden Schedulers.
                 </p>
             </description>
         </command_option>
 
+
+        <command_option name="log" setting="scheduler_log"/>
+
+        <command_option name="process-class" type="name">
+            <description>
+                <p>
+                    Name der Prozessklasse für den temporären Job,
+                    siehe <scheduler_element name="job" attribute="process_class"/>.
+                </p>
+            </description>
+        </command_option>
+
+        <command_option name="language" initial="shell" title="Skriptsprache des Jobs">
+            <description>
+                <p>
+                    Skriptsprache,
+                    siehe <scheduler_element name="script" attribute="language"/>.
+                </p>
+            </description>
+        </command_option>
+
+        <command_option name="at" title="Startzeitpunkt">
+            <description>
+                <p>
+                    Startzeitpunkt in der Form "yyyy-mm-dd HH:MM[:SS]".
+                    Siehe <scheduler_element name="at" attribute="at"/>.
+                </p>
+            </description>
+        </command_option>
+
+        <description>
+            <p>
+                Dem mit <scheduler_option name="scheduler" value="host:port"/> adressierten Scheduler
+                wird ein Job übergeben.
+            </p>
+        </description>
+
+        <example>
+            <pre>cat job.sh | scheduler -scheduler=localhost:4444 -at="2006-04-04 12:00"</pre>
+        </example>
     </command_options>
 
+    
+    <command_options name="add_order" title="Laufendem Scheduler einen Auftrag übergeben">
+        <command_option name="scheduler" reference="true"/>
+        <command_option name="log" reference="true"/>
+
+        <command_option name="job-chain" type="name" title="Jobkette">
+            <description>
+                <p>
+                    Name der Jobkette für den Auftrag,
+                    siehe <scheduler_element name="add_order" attribute="job_chain"/>.
+                </p>
+            </description>
+        </command_option>
+
+        <command_option name="order-id" type="id" title="Kennung des Auftrags">
+            <description>
+                <p>
+                    Kennung des Auftrags,
+                    siehe <scheduler_element name="add_order" attribute="id"/>.
+                </p>
+            </description>
+        </command_option>
+
+        <description>
+            <p>
+                Dem mit <scheduler_option name="scheduler" value="host:port"/> adressierten Scheduler
+                wird ein Auftrag übergeben.
+            </p>
+            <p>
+                Die Parameter des Auftrags (s. <scheduler_method class="Order" property="payload"/>) können
+                an der Kommandozeile in der Form <i>name</i><code>=</code><i>value</i> übergeben werden.
+            </p>
+        </description>
+
+        <example>
+            <pre>scheduler -scheduler=localhost:4444 -job-chain=my_job_chain -order-id=123 city=Berlin phone="+4930 864790-0" </pre>
+        </example>
+    </command_options>    
+
+    <command_options name="send_cmd" title="XML-Kommando an laufenden Scheduler übergeben">
+        <command_option name="tcp-port" reference="true"/>
+
+        <command_option name="send-cmd" type="xmlkommando" title="Anderem Scheduler zu schickendes Kommando">
+            <description>
+                <p>
+                    Mit dieser Option startet der Scheduler nicht,
+                    sondern schickt einem anderen Scheduler mit gleicher Option <code>-tcp-port=</code>
+                    auf demselben Rechner das XML-Kommando.
+                    Das kann z.B. ein <scheduler_element name="terminate"/> sein: <code>-send-cmd="&lt;terminate/>"</code>
+                </p>
+            </description>
+        </command_option>
+    </command_options>
+
+    
+
+    <command_options name="kill" title="Laufenden Scheduler mit kill abbrechen">
+        <command_option name="kill" title="Laufenden Scheduler mit kill abbrechen">
+            <description>
+                <p>
+                    Bricht den Scheduler mit <code>kill&#160;-SIGKILL</code> ab, 
+                    dessen Prozess-Id in der mit <scheduler_option name="pid-file"/> angegebenen Datei steht.
+                </p>
+            </description>
+        </command_option>
+
+        <command_option name="kill" type="pid" title="Laufenden Scheduler mit kill abbrechen">
+            <description>
+                <p>
+                    Bricht den Prozess mit der Pid mit <code>kill&#160;-SIGKILL</code> ab.
+                </p>
+            </description>
+        </command_option>
+
+        <command_option name="pid-file"/>
+
+        <example>
+            <pre>scheduler -kill -pid-file=/home/scheduler/scheduler.pid</pre>
+        </example>
+    </command_options>
+
+    
+
+    <command_options name="xml_schema" title="XML-Schema zeigen">
+        <command_option name="show-xml-schema" title="schreibt das XML-Schema nach stdout">
+            <description>
+                <p>
+                    Der Scheduler hat ein XML-Schema,
+                    dem die XML-Kommandos und die XML-Konfiguration entsprechen müssen.
+                </p>
+                <p>
+                    Siehe <a href="xml/scheduler.xsd" type="text/plain" charset="utf-8">XML-Schema des Schedulers</a>.
+                </p>
+            </description>
+        </command_option>
+
+        <example>
+            <pre>scheduler -show-xml-schema | less</pre>
+        </example>
+    </command_options>
+
+
+    <command_options name="version" title="Versionsnummer zeigen">
+        <command_option name="V" title="Versionsnummer zeigen">
+            <description>
+                <p>
+                    Lässt den Scheduler beim Start Versionsnummer und Versionsdatum ausgeben.
+                </p>
+            </description>
+        </command_option>
+    </command_options>
+
+    
+    
     <description>
-        <p>
-            Der Programmdateiname <code>scheduler</code> muss absolut und vollständig angegeben werden.
-            In Windows mit der Endung "<code>.exe</code>"
-            (warum? weil der Scheduler den vollständigen Dateinamen braucht, um einen Job oder sich selbst neu zu starten).
-        </p>
         <p>
             Die Parameter (rechts vom Gleichheitszeichen) können in Anführungszeichen oder in Apostrophe
             gesetzt werden.

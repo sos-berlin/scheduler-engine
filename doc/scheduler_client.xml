@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
+
+<!--$Id$-->
+
+<!--
+<description
+    title               = "Scheduler Client"
+    base_dir            = ""
+    author              = "$Author$"
+    date                = "$Date$"
+>
+
+    <h2>Scheduler über die Kommandozeile steuern</h2>
+
+    <p>
+        Der Scheduler Cl
+    </p>
+
+</description>
+-->
+
+
+<command_line program  = "scheduler"
+              title    = "Kommandozeile"
+              base_dir = ""
+              author   = "$Author$"
+              date     = "$Date$">
+
+    <command_options>
+
+    </command_options>
+
+    <description>
+        <p>
+            
+        </p>
+    </description>
+
+    <scheduler_keyword keyword="Kommandozeile"/>
+    <scheduler_keyword keyword="Optionen"/>
+
+</command_line>

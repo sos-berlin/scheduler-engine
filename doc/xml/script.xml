@@ -75,7 +75,10 @@
 
                     <dt><code>language="shell"</code></dt>
                     <dd>
-                        Unter Windows übergibt der Scheduler das Skript <code>cmd.exe</code>. 
+                        Unter Windows übergibt der Scheduler das Skript <code>cmd.exe</code>
+                        (das Skript wird in einer temporären Datei mit der Namensendung <code>.cmd</code> gespeichert).
+                    </dd>
+                    <dd>
                         Unter Unix wird das Skript aufgerufen wie ein <i>executable</i>.
                     </dd>
                 </dl>

@@ -1,5 +1,6 @@
 // $Id$
 
+#include "spooler.h"        // Das ist für vorkompilierte Header, sonst sind wir unabhängig von spooler.h
 #include "../zschimmer/zschimmer.h"
 #include "../zschimmer/log.h"
 #include "../zschimmer/argv.h"
@@ -301,7 +302,7 @@ struct Client
     {
         _xml_writer->begin_element( "job" );
             _xml_writer->set_attribute( "temporary", "true" );
-            _xml_writer->set_attribute( "name", "temporary_" + hex_from_int( (int)( time(NULL) ) ^ rand() ) );
+            _xml_writer->set_attribute( "name", "temporary_" + hex_from_int( (int)( ::time(NULL) ) ^ rand() ) );
             _xml_writer->set_attribute_optional( "process_class", _process_class );
 
             if( _variables.size() > 0 )
@@ -371,7 +372,7 @@ struct Client
 
         if( xml::Element_ptr error_element = response_document.select_node( "/spooler/answer/ERROR" ) )
         {
-            Xc x;
+            zschimmer::Xc x;
             x.set_code( error_element.getAttribute( "code" ) );
             x.set_name( error_element.getAttribute( "class" ) );
             x.set_what( error_element.getAttribute( "text" ) );
@@ -421,7 +422,10 @@ struct Client
     {
         for( int i = 1; i < argc; i++ )
         {
-            const char* arg = argv[i];
+            const char* arg         = argv[i];
+            string      log_dummy;
+
+            // Die Optionen hier müssen auch von spooler_main() in spooler.cxx geprüft werden:
 
             if( get_argv_option( arg, "-scheduler=", &_scheduler_address ) );
             else
@@ -436,6 +440,8 @@ struct Client
             //if( get_argv_option( arg, "-job-name=", &_job_name ) );
             //else
             if( get_argv_option( arg, "-at=", &_at ) );
+            else
+            if( get_argv_option( arg, "-log=", &log_dummy ) );      // Bereits von spooler_main() ausgewertet
             else
             if( arg[0] != '-' )
             {
@@ -503,7 +509,7 @@ int scheduler_client_main( int argc, char** argv )
     }
     catch( exception& x )
     {
-        cerr << "ERROR " << x << "\n";
+        cerr << "ERROR " << x.what() << "\n";
         ret = 1;
     }
 
@@ -516,8 +522,9 @@ int scheduler_client_main( int argc, char** argv )
 } //namespace sos
 
 //---------------------------------------------------------------------------------------------main
-
+/*
 int main( int argc, char** argv )
 {
     return sos::spooler::scheduler_client_main( argc, argv );
 }
+*/

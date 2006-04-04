@@ -22,7 +22,7 @@
 
 #include "spooler.h"
 #include "spooler_version.h"
-//#include "scheduler_client.h"
+#include "scheduler_client.h"
 
 #include <time.h>
 #include <signal.h>
@@ -1882,6 +1882,14 @@ void Spooler::load_arg()
                     "       -install-descr=STRING\n"
                     "       -need-service=SERVICE\n"
 #               endif
+                    "\n"
+                    "SCHEDULER CLIENT\n"
+                    "       -scheduler=HOST:PORT\n"
+                    "       -language=shell|javascript|vbscript|perlscript\n"
+                    "       -process-class=NAME\n"
+                    "       -at='DATE TIME'\n"
+                    "       -job-chain=NAME\n"
+                    "       -order-id=ID\n"
                     "\n";
         }
 
@@ -3137,6 +3145,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
     int     ret                = 0;
     bool    is_service         = false;
     bool    is_object_server   = false;
+    bool    is_scheduler_client= false;
     bool    kill_pid_file      = false;
     int     kill_pid           = 0;
     string  pid_filename;
@@ -3168,6 +3177,12 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
 
         for( Sos_option_iterator opt ( argc, argv, parameter_line ); !opt.end(); opt.next() )
         {
+            if( opt.with_value( "scheduler" ) )     // Stichwort für scheduler_client
+            {
+                is_scheduler_client = true;
+                break;  // scheduler_client wertet argc und argv erneut aus, deshalb brechen wir hier ab.
+            }
+            else
             //if( opt.flag      ( "renew-spooler"    ) )  renew_spooler = program_filename();
           //else
           //if( opt.flag      ( "show-dtd"         ) )  { if( opt.set() )  need_call_scheduler = false, fprintf( stdout, "%s", spooler::dtd_string ); }
@@ -3225,7 +3240,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
                 else
                 if( opt.with_value( "pid-file"         ) )  pid_filename = opt.value();
                 else
-                    call_scheduler = true;
+                    call_scheduler = true;     // Aber is_scheduler_client hat Vorrang!
 
                 if( !command_line.empty() )  command_line += " ";
                 command_line += opt.complete_parameter( '"', '"' );
@@ -3238,26 +3253,30 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
         if( !log_filename.empty() )  log_start( log_filename );
 
 
-        if( kill_pid )
+        if( is_scheduler_client )
         {
-            kill_process_immediately( kill_pid );
-            need_call_scheduler = false;
+            ret = spooler::scheduler_client_main( argc, argv );
         }
-
-        if( kill_pid_file )
-        {
-            int pid = as_int( replace_regex( string_from_file( pid_filename ), "[\r\n]", "" ) ); 
-            kill_process_immediately( pid, true );   // kill_childs = true
-            need_call_scheduler = false;
-        }            
-
-
+        else
         if( is_object_server )
         {
             ret = spooler::object_server( argc, argv );
         }
         else
         {
+            if( kill_pid )
+            {
+                kill_process_immediately( kill_pid );
+                need_call_scheduler = false;
+            }
+
+            if( kill_pid_file )
+            {
+                int pid = as_int( replace_regex( string_from_file( pid_filename ), "[\r\n]", "" ) ); 
+                kill_process_immediately( pid, true );   // kill_childs = true
+                need_call_scheduler = false;
+            }            
+
 
 #           ifdef Z_WINDOWS
                 if( service_name != "" ) 
@@ -3269,10 +3288,6 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
                     service_name = spooler::make_service_name(id);
                     if( service_display == "" )  service_display = spooler::make_service_display(id);
                 }
-#           endif
-
-
-#           ifdef Z_WINDOWS
 
                 if( !renew_spooler.empty() )  
                 { 

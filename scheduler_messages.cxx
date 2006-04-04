@@ -141,7 +141,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-269", "Error when closing the job history: $1" },
     { "SCHEDULER-270", "Cannot open history: $1" },
     { "SCHEDULER-271", "Task is being terminated in favour of job $1" },
-    { "SCHEDULER-272", "Terminating task after reaching deadline <job timeout=\"\">" },
+    { "SCHEDULER-272", "Terminating task after reaching deadline <job timeout=\"$1\">" },
     { "SCHEDULER-273", "Killing subprocess $1" },
     { "SCHEDULER-274", "Error when killing subprocess $1: $2" },
     { "SCHEDULER-275", "Deadline reached, killing subprocess $1" },

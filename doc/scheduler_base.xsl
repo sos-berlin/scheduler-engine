@@ -1487,9 +1487,31 @@
                     <xsl:with-param name="title" select="@title"/>
                 </xsl:call-template>
 
-                <xsl:apply-templates select="command_options" mode="table"/>
                 <xsl:apply-templates select="description"/>
-                <xsl:apply-templates select="command_options"/>
+
+                <xsl:if test="count( command_options ) &gt; 1">
+                    <p>
+                        Folgende Varianten des Aufrufs werden unterschieden:
+                    </p>
+                    <ul>
+                        <xsl:for-each select="command_options">
+                            <li>
+                                <xsl:element name="a">
+                                    <xsl:attribute name="href">#options__<xsl:value-of select="@name"/></xsl:attribute>
+                                    <xsl:value-of select="@title"/>
+                                </xsl:element>
+                            </li>
+                        </xsl:for-each>
+                    </ul>
+                </xsl:if>
+
+                <xsl:apply-templates select="command_options" mode="table"/>
+
+                <h2>Optionen</h2>
+                <xsl:apply-templates select="command_options/command_option">
+                    <xsl:sort select="@name | @setting"/>
+                </xsl:apply-templates>
+
                 <xsl:call-template name="bottom"/>
             </body>
         </html>
@@ -1500,16 +1522,29 @@
 
     <xsl:template match="command_options" mode="table">
 
+        <xsl:if test="@title">
+            <h2>
+                <xsl:element name="a">
+                    <xsl:attribute name="name">options__<xsl:value-of select="@name"/></xsl:attribute>
+                </xsl:element>
+
+                <xsl:value-of select="@title"/>
+            </h2>
+        </xsl:if>
+        
         <p>
-            <code><xsl:value-of select="parent::*/@program"/></code>
+            <code>
+                <xsl:value-of select="parent::*/@program"/>
+            </code>
         </p>
 
         <div class="indent">
             <table cellspacing="0" cellpadding="0">
                 <col/>
-                <col style="padding-left: 4ex"/>
+                <col/>
                 <xsl:for-each select="command_option">
-                    <xsl:variable name="setting" select="document( 'settings.xml' )/settings/setting[ @setting = current()/@setting ]"/>
+                    <xsl:variable name="command_option" select="parent::command_options/parent::*/command_options/command_option [ @name = current()/@name and not( @reference='false' ) ]"/>
+                    <xsl:variable name="setting" select="document( 'settings.xml' )/settings/setting[ @setting = $command_option/@setting ]"/>
 
                     <tr>
                         <td valign="baseline">
@@ -1519,37 +1554,29 @@
                                 <code>-<xsl:value-of select="@name"/></code>
                             </xsl:element>
 
-                            <xsl:if test="@type | $setting/@type">
-                                <code>=</code><span class="type"><xsl:value-of select="@type | $setting/@type"/></span>
+                            <xsl:if test="$command_option/@type | $setting/@type">
+                                <code>=</code><span class="type"><xsl:value-of select="$command_option/@type | $setting/@type"/></span>
                             </xsl:if>
                         </td>
-                        <td valign="baseline">
+                        <td valign="baseline" style="padding-left: 4ex">
                             <span class="title">
-                                <xsl:value-of select="@title | $setting/@title"/>
+                                <xsl:value-of select="$command_option/@title | $setting/@title"/>
                             </span>
                         </td>
                     </tr>
                 </xsl:for-each>
             </table>
         </div>
+        
         <p>&#160;</p>
-
-    </xsl:template>
-
-    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~command_options-->
-
-    <xsl:template match="command_options">
-
-        <h2>Optionen</h2>
-        <xsl:apply-templates select="command_option">
-            <xsl:sort select="@name | @setting"/>
-        </xsl:apply-templates>
+        <xsl:apply-templates select="description"/>
+        <xsl:apply-templates select="example"/>
 
     </xsl:template>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~command_option-->
 
-    <xsl:template match="command_option">
+    <xsl:template match="command_option [ not( @reference='false') ]">
 
         <xsl:variable name="setting" select="document( 'settings.xml' )/settings/setting[ @setting = current()/@setting ]"/>
 

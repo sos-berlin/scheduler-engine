@@ -4359,7 +4359,7 @@ const char file_scheduler_xsd[] =
     "<xsd:attribute name=\"order\"                 type=\"Yes_no\"/>\r\n"
     "<xsd:attribute name=\"separate_process\"      type=\"Yes_no\"/>\r\n"
     "<xsd:attribute name=\"tasks\"                 type=\"xsd:nonNegativeInteger\"/>\r\n"
-    "<xsd:attribute name=\"timeout\"               type=\"Positive_duration\"/>\r\n"
+    "<xsd:attribute name=\"timeout\"               type=\"Duration\"/>                   <!-- F\xc3" "\xbc" "r ap, 1.4.06 timeout=\"0\" soll erlaubt sein (kein Aprilscherz) -->\r\n"
     "<xsd:attribute name=\"idle_timeout\"          type=\"Duration\"/>\r\n"
     "<xsd:attribute name=\"process_class\"         type=\"Name\"/>\r\n"
     "<xsd:attribute name=\"mail_xslt_stylesheet\"  type=\"File\"/>\r\n"
@@ -4493,7 +4493,7 @@ const char file_scheduler_xsd[] =
     "<xsd:attribute name=\"begin\"         type=\"Time_of_day\"/>\r\n"
     "<xsd:attribute name=\"end\"           type=\"Time_of_day\"/>\r\n"
     "<xsd:attribute name=\"let_run\"       type=\"Yes_no\"/>\r\n"
-    "<xsd:attribute name=\"repeat\"        type=\"Positive_duration\"/>\r\n"
+    "<xsd:attribute name=\"repeat\"        type=\"Duration\"/>\r\n"
     "</xsd:complexType>\r\n"
     "</xsd:element>\r\n"
     "\r\n"
@@ -4640,7 +4640,7 @@ const char file_scheduler_xsd[] =
     "<xsd:attribute name=\"begin\"             type=\"Time_of_day\"/>\r\n"
     "<xsd:attribute name=\"end\"               type=\"Time_of_day\"/>\r\n"
     "<xsd:attribute name=\"let_run\"           type=\"Yes_no\"/>\r\n"
-    "<xsd:attribute name=\"repeat\"            type=\"Positive_duration\"/>\r\n"
+    "<xsd:attribute name=\"repeat\"            type=\"Duration\"/>\r\n"
     "<xsd:attribute name=\"once\"              type=\"Yes_no\"/>\r\n"
     "</xsd:complexType>\r\n"
     "</xsd:element>\r\n"
@@ -5011,7 +5011,7 @@ static const Embedded_file embedded_files_array[] =
     { "html/jz/translation_de.js", file_html_jz_translation_de_js, sizeof file_html_jz_translation_de_js - 1, 1113979995 },
     { "html/jz/scheduler.xslt", file_html_jz_scheduler_xslt, sizeof file_html_jz_scheduler_xslt - 1, 1141668608 },
     { "html/jz/scheduler.css", file_html_jz_scheduler_css, sizeof file_html_jz_scheduler_css - 1, 1137326883 },
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1143804773 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1144055871 },
     { NULL, NULL, 0 }
 };
 
