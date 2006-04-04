@@ -6,7 +6,7 @@
 
     <xsd:annotation>
         <xsd:documentation xml:lang="de">
-            $Id: scheduler.xsd 4222 2006-03-31 11:32:45Z jz $
+            $Id: scheduler.xsd 4232 2006-04-04 06:06:21Z jz $
             Schema für die Scheduler-Konfiguration,
             s.a. http://www.zschimmer.com/sos/scheduler/konfiguration.xml.html.
         </xsd:documentation>

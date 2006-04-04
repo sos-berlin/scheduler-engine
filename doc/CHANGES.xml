@@ -10,6 +10,17 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2006-04-04" version="2.0.150" subversion_revision="4233">
+        <revision type="new" title="command_line.xml neu strukturiert">
+            <description>
+                scheduler_client entfällt wieder. 
+                Die Optionen sind im Programm scheduler integriert.
+                Die verschiedenen Aufrufe des Schedulers sind jetzt dokumentiert,
+                siehe z.B. <a href="command_line.xml#options__start_job">"Laufendem Scheduler einen Job übergeben"</a>.
+            </description>
+        </revision>
+    </change>
+
     <change date="2006-03-31" version="2.0.150" subversion_revision="4225">
         <revision type="new" title="scheduler.xsd auf ISO-8859-1 begrenzt">
             <description>

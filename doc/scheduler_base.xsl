@@ -1543,7 +1543,7 @@
                 <col/>
                 <col/>
                 <xsl:for-each select="command_option">
-                    <xsl:variable name="command_option" select="parent::command_options/parent::*/command_options/command_option [ @name = current()/@name and not( @reference='false' ) ]"/>
+                    <xsl:variable name="command_option" select="parent::command_options/parent::*/command_options/command_option [ @name = current()/@name and not( @reference='true' ) ]"/>
                     <xsl:variable name="setting" select="document( 'settings.xml' )/settings/setting[ @setting = $command_option/@setting ]"/>
 
                     <tr>
@@ -1576,7 +1576,7 @@
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~command_option-->
 
-    <xsl:template match="command_option [ not( @reference='false') ]">
+    <xsl:template match="command_option [ not( @reference='true') ]">
 
         <xsl:variable name="setting" select="document( 'settings.xml' )/settings/setting[ @setting = current()/@setting ]"/>
 

@@ -326,53 +326,57 @@
 
         <description>
             <p>
-                Microsoft Windows kennt die Prioritätsklassen
-                <code>"idle"</code>,
-                <code>"below_normal"</code>,
-                <code>"normal"</code>,
-                <code>"above_normal"</code> und
-                <code>"high"</code>.
+                Gesetzt werden können folgende Prioritätsklassen, die verschiedenen Prioritäten unter Windows und Unix entsprechen:
             </p>
-            <p>
-                Wenn die Priorität nicht gesetzt werden kann, führt das nicht zu einem Fehler.
-            </p>
-            <p>
-                Ein Prozess mit hoher Priorität kann Ihren Rechner blockieren.
-            </p>
-            <!--table cellspacing="0" cellpadding="0" style="padding-top: 1em">
+
+            <table cellspacing="0" cellpadding="0" style="margin-top: 1em; margin-left: 3ex">
+                <tr>
+                    <td style="border-bottom: black 1pt solid">Prioritätsklasse</td>
+                    <td style="border-bottom: black 1pt solid; padding-left: 2ex">Windows</td>
+                    <td style="border-bottom: black 1pt solid; padding-left: 2ex">Unix</td>
+                </tr>
                 <tr>
                     <td>
                         <code>"idle"</code>
                     </td>
-                    <td style="padding-left: 2ex"></td>
+                    <td style="padding-left: 2ex; text-align: right">4</td>
+                    <td style="padding-left: 2ex; text-align: right">16</td>
                 </tr>
                 <tr>
                     <td>
                         <code>"below_normal"</code>
                     </td>
-                    <td style="padding-left: 2ex"></td>
+                    <td style="padding-left: 2ex; text-align: right">6</td>
+                    <td style="padding-left: 2ex; text-align: right">6</td>
                 </tr>
                 <tr>
                     <td>
                         <code>"normal"</code>
                     </td>
-                    <td style="padding-left: 2ex"></td>
+                    <td style="padding-left: 2ex; text-align: right">8</td>
+                    <td style="padding-left: 2ex; text-align: right">0</td>
                 </tr>
                 <tr>
                     <td>
                         <code>"above_normal"</code>
                     </td>
-                    <td style="padding-left: 2ex"></td>
+                    <td style="padding-left: 2ex; text-align: right">10</td>
+                    <td style="padding-left: 2ex; text-align: right">-6</td>
                 </tr>
                 <tr>
                     <td>
                         <code>"high"</code>
                     </td>
-                    <td style="padding-left: 2ex"></td>
+                    <td style="padding-left: 2ex; text-align: right">13</td>
+                    <td style="padding-left: 2ex; text-align: right">-16</td>
                 </tr>
-            </table-->
+            </table>
             <p>
-                Die Implementierung für Unix ignoriert den Schreib-Aufruf und liefert <code>""</code>.
+                Wenn die Priorität nicht gesetzt werden kann, z.B. wegen mangelndem Recht, führt das nicht zu einem Fehler.
+                Dagegen führt das Setzen einer nicht hier aufgeführten Prioritätsklasse zu einem Fehler.
+            </p>
+            <p>
+                Ein Prozess mit hoher Priorität kann Ihren Rechner blockieren.
             </p>
             <p>
                 Siehe auch

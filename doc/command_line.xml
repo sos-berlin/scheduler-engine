@@ -305,7 +305,7 @@
             </description>
         </command_option>
 
-        <command_option name="language" initial="shell" title="Skriptsprache des Jobs">
+        <command_option name="language" type="script_language" initial="shell" title="Skriptsprache des Jobs">
             <description>
                 <p>
                     Skriptsprache,
@@ -314,11 +314,20 @@
             </description>
         </command_option>
 
-        <command_option name="at" title="Startzeitpunkt">
+        <command_option name="at" type="yyyy-mm-dd HH:MM" initial="now" title="Startzeitpunkt">
             <description>
                 <p>
                     Startzeitpunkt in der Form "yyyy-mm-dd HH:MM[:SS]".
                     Siehe <scheduler_element name="at" attribute="at"/>.
+                </p>
+                <p>
+                    Der Job wird nicht gestartet, wenn der Startzeitpunkt in der Vergangenheit liegt.
+                </p>
+                <p>
+                    Maßgeblich ist die Uhr des Rechners, auf dem der Scheduler läuft.
+                </p>
+                <p>
+                    <code>-at=now</code> ist voreingestellt und lässt den Job sofort starten.
                 </p>
             </description>
         </command_option>
@@ -331,7 +340,7 @@
         </description>
 
         <example>
-            <pre>cat job.sh | scheduler -scheduler=localhost:4444 -at="2006-04-04 12:00"</pre>
+            <pre>echo ls -l | scheduler -scheduler=localhost:4444 -at="2006-04-04 12:00"</pre>
         </example>
     </command_options>
 
@@ -354,6 +363,15 @@
                 <p>
                     Kennung des Auftrags,
                     siehe <scheduler_element name="add_order" attribute="id"/>.
+                </p>
+            </description>
+        </command_option>
+
+        <command_option name="title" type="text" title="Titel des Auftrags">
+            <description>
+                <p>
+                    Dem Auftrag kann ein Titel gegeben werden.
+                    Siehe <scheduler_element name="add_order" attribute="title"/>.
                 </p>
             </description>
         </command_option>
