@@ -411,7 +411,7 @@ void Spooler_db::try_reopen_after_error( exception& x, bool wait_endless )
         {
             if( !_spooler->_executing_command )
             {
-                warn_msg = "Nach max_db_errors=" + as_string(_spooler->_max_db_errors) + " Problemen mit der Datenbank wird sie nicht weiter verwendet";
+                warn_msg = "After max_db_errors=" + as_string(_spooler->_max_db_errors) + " Problems with the database it is no longer used";
 
                 if( !wait_endless || _error_count == 0 )  ++_error_count;
                 
@@ -424,9 +424,9 @@ void Spooler_db::try_reopen_after_error( exception& x, bool wait_endless )
 
                 if( !_email_sent_after_db_error )
                 {
-                    string body = "Dies ist das " + as_string(_error_count) + ". Problem mit der Datenbank.";
+                    string body = "This is the " + as_string(_error_count) + ". problem with the database.";
                     if( !_spooler->_wait_endless_for_db_open )  body += "\n(" + warn_msg + ")";
-                    body += "\ndb=" + _spooler->_db_name + "\r\n\r\n" + x.what() + "\r\n\r\nDer Scheduler versucht, die Datenbank erneut zu oeffnen.";
+                    body += "\ndb=" + _spooler->_db_name + "\r\n\r\n" + x.what() + "\r\n\r\nThe Scheduler is trying to open the database again.";
                     //if( !_spooler->_need_db )  body += "\r\nWenn das nicht geht, schreibt der Scheduler die Historie in Textdateien.";
 
                     Scheduler_event scheduler_event ( Scheduler_event::evt_database_error, log_warn, this );
@@ -434,7 +434,7 @@ void Spooler_db::try_reopen_after_error( exception& x, bool wait_endless )
                     scheduler_event.set_count( _error_count );
 
                     Mail_defaults mail_defaults ( _spooler );
-                    mail_defaults.set( "subject", S() << "FEHLER BEIM ZUGRIFF AUF DATENBANK: " << x.what() );
+                    mail_defaults.set( "subject", S() << "ERROR ON DATABASE ACCESS: " << x.what() );
                     mail_defaults.set( "body"   , body );
 
                     scheduler_event.send_mail( mail_defaults );
@@ -468,7 +468,7 @@ void Spooler_db::try_reopen_after_error( exception& x, bool wait_endless )
                     if( !_spooler->_wait_endless_for_db_open )  // need_db=strict?
                     {
                         too_much_errors = true;
-                        warn_msg = "Datenbank lässt sich nicht öffnen. Wegen need_db=strict wird der Scheduler sofort beendet.";
+                        warn_msg = message_string( "SCHEDULER-314" );   // "Datenbank lässt sich nicht öffnen. Wegen need_db=strict wird der Scheduler sofort beendet.";
                         break;
                     }
 
@@ -487,8 +487,8 @@ void Spooler_db::try_reopen_after_error( exception& x, bool wait_endless )
 
                 Mail_defaults mail_defaults ( _spooler );
 
-                mail_defaults.set( "subject", "Scheduler ist wieder mit der Datenbank verbunden" );
-                mail_defaults.set( "body"   , "Der Scheduler setzt den Betrieb fort.\n\ndb=" + _spooler->_db_name );
+                mail_defaults.set( "subject", "Scheduler is connected again with the database" );
+                mail_defaults.set( "body"   , "Scheduler continues processing.\n\ndb=" + _spooler->_db_name );
 
                 scheduler_event.send_mail( mail_defaults );
             }
@@ -526,8 +526,8 @@ void Spooler_db::try_reopen_after_error( exception& x, bool wait_endless )
             scheduler_event.set_error( x );
 
             Mail_defaults mail_defaults( _spooler );
-            mail_defaults.set( "subject", string("SCHEDULER ARBEITET NACH FEHLERN OHNE DATENBANK: ") + x.what() );
-            mail_defaults.set( "body"   , S() << "Wegen need_db=no\n" "db=" << _spooler->_db_name << "\r\n\r\n" << x.what() << "\r\n\r\n" << warn_msg );
+            mail_defaults.set( "subject", string("SCHEDULER CONTINUES WITHOUT DATABASE AFTER ERRORS: ") + x.what() );
+            mail_defaults.set( "body"   , S() << "Because of need_db=no\n" "db=" << _spooler->_db_name << "\r\n\r\n" << x.what() << "\r\n\r\n" << warn_msg );
             
             scheduler_event.send_mail( mail_defaults );
 

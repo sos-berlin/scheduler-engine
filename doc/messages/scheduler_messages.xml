@@ -1960,6 +1960,12 @@
             </text>
         </message>
 
+        <message code="SCHEDULER-314">
+            <text xml:lang="en">
+                <title>Cannot open database. Scheduler is aborting immediately because of need_db=yes</title>
+            </text>
+        </message>
+
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->

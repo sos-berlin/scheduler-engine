@@ -185,20 +185,20 @@ static void send_error_email( const string& subject, const string& text )
 
 void send_error_email( const exception& x, int argc, char** argv, const string& parameter_line, Spooler* spooler )
 {
-    string body = "Der Scheduler konnte nicht gestartet werden.\n"
+    string body = "Scheduler could not start.\n"
                   "\n"
                   "\n"
-                  "Der Aufruf war:\n"
+                  "The command line was:\n"
                   "\n";
                    
     for( int i = 0; i < argc; i++ )  body += argv[i], body += ' ';
     body += parameter_line;
 
     body += "\n\n\n"
-            "Fehlermeldung:\n";
+            "Error message:\n";
     body += x.what();
 
-    string subject = "FEHLER BEI SCHEDULER-START: " + string( x.what() );
+    string subject = "ERROR ON SCHEDULER START: " + string( x.what() );
 
     if( spooler )
     {
@@ -419,7 +419,7 @@ bool Termination_async_operation::async_continue_( Continue_flags flags )
 
                 Mail_defaults mail_defaults( _spooler );
                 mail_defaults.set( "subject", error_line );
-                mail_defaults.set( "body"   , "Die Tasks werden abgebrochen, damit der Scheduler sich beenden kann." );
+                mail_defaults.set( "body"   , "The tasks will be killed before the Scheduler terminates" );  // "Die Tasks werden abgebrochen, damit der Scheduler sich beenden kann."
 
                 scheduler_event.send_mail( mail_defaults );
             }
@@ -1737,7 +1737,7 @@ void Spooler::load_arg()
     _log_collect_within = read_profile_uint  ( _factory_ini, "spooler", "log_collect_within", 0 );
     _log_collect_max    = read_profile_uint  ( _factory_ini, "spooler", "log_collect_max"   , 900 );
 
-    _my_program_filename = _argv? _argv[0] : "(Programmdateiname fehlt)";
+    _my_program_filename = _argv? _argv[0] : "(missing program path)";
 
     //if( !_java_vm->running() )  // Für javac ist's egal, ob Java läuft (für scheduler.dll)
     {
@@ -2129,7 +2129,7 @@ void Spooler::start()
                 _log.set_mail_default( "body"     , body );
                 _log.send( -1, &scheduler_event );
             }
-            catch( exception& x )  { _log.warn( S() << "Fehler beim eMail-Versand: " << x.what() ); }
+            catch( exception& x )  { _log.warn( S() << "Error on sending mail: " << x.what() ); }
         }
 
         if( !ok )  z::throw_xc( "SCHEDULER-183" );

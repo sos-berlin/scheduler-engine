@@ -1622,7 +1622,7 @@ void Task::trigger_event( Scheduler_event* scheduler_event )
         bool is_error = has_error();
 
         string body = Sos_optional_date_time::now().as_string() + "\n\nJob " + _job->name() + "  " + _job->title() + "\n";
-        body += "Task-Id " + as_string(id()) + ", " + as_string(_step_count) + " Schritte\n";
+        body += "Task-Id " + as_string(id()) + ", " + as_string(_step_count) + " steps\n";
         body += "Scheduler -id=" + _spooler->id() + "  host=" + _spooler->_hostname + "\n\n";
 
         if( !is_error )
@@ -1631,12 +1631,12 @@ void Task::trigger_event( Scheduler_event* scheduler_event )
 
             if( _log->highest_level() == log_warn )
             {
-                subject += " mit Warnung beendet";
+                subject += " ended with warning";
                 body += _log->highest_msg() + "\n\n";
             }
             else
             {
-                subject += " gelungen";
+                subject += " succeeded";
             }
 
             _log->set_mail_default( "subject", subject, false );
@@ -1644,12 +1644,12 @@ void Task::trigger_event( Scheduler_event* scheduler_event )
         else
         {
             string errmsg = _error? _error->what() : _log->highest_msg();
-            _log->set_mail_default( "subject", string("FEHLER ") + errmsg, true );
+            _log->set_mail_default( "subject", string("ERROR ") + errmsg, true );
 
             body += errmsg + "\n\n";
         }
 
-        _log->set_mail_default( "body", body + "Das Jobprotokoll liegt dieser Nachricht bei." );   //, is_error );
+        _log->set_mail_default( "body", body + "This Message contains the job protocol." );   //, is_error );
 
         _log->send( has_error() || _log->highest_level() >= log_error? -1 : _step_count, scheduler_event );
 
