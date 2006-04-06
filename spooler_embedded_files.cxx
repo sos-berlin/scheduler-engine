@@ -4336,6 +4336,8 @@ const char file_scheduler_xsd[] =
     "<xsd:attribute name=\"error_count\"   type=\"xsd:positiveInteger\"  use=\"required\"/>\r\n"
     "<xsd:attribute name=\"delay\"         use=\"required\">\r\n"
     "<xsd:simpleType>\r\n"
+    "<xsd:restriction base=\"String\"/>\r\n"
+    "<!-- Das l\xc3" "\xa4" "sst libxslt abst\xc3" "\xbc" "rzen: \r\n"
     "<xsd:union>\r\n"
     "<xsd:simpleType>\r\n"
     "<xsd:restriction base=\"Duration\"/>\r\n"
@@ -4343,10 +4345,10 @@ const char file_scheduler_xsd[] =
     "<xsd:simpleType>\r\n"
     "<xsd:restriction base=\"xsd:NMTOKEN\">\r\n"
     "<xsd:enumeration value=\"stop\"/>\r\n"
-    "<xsd:enumeration value=\"STOP\"/>\r\n"
+    "<xsd:enumeration value=\"stop\"/>\r\n"
     "</xsd:restriction>\r\n"
     "</xsd:simpleType>\r\n"
-    "</xsd:union>\r\n"
+    "</xsd:union-->\r\n"
     "</xsd:simpleType>\r\n"
     "</xsd:attribute>\r\n"
     "\r\n"
@@ -5014,7 +5016,7 @@ static const Embedded_file embedded_files_array[] =
     { "html/jz/translation_de.js", file_html_jz_translation_de_js, sizeof file_html_jz_translation_de_js - 1, 1113979995 },
     { "html/jz/scheduler.xslt", file_html_jz_scheduler_xslt, sizeof file_html_jz_scheduler_xslt - 1, 1141668608 },
     { "html/jz/scheduler.css", file_html_jz_scheduler_css, sizeof file_html_jz_scheduler_css - 1, 1137326883 },
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1144323029 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1144338076 },
     { NULL, NULL, 0 }
 };
 

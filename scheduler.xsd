@@ -236,6 +236,8 @@
                         <xsd:attribute name="error_count"   type="xsd:positiveInteger"  use="required"/>
                         <xsd:attribute name="delay"         use="required">
                             <xsd:simpleType>
+                                <xsd:restriction base="String"/>
+                                <!-- Das lässt libxslt abstürzen: 
                                 <xsd:union>
                                     <xsd:simpleType>
                                         <xsd:restriction base="Duration"/>
@@ -243,10 +245,10 @@
                                     <xsd:simpleType>
                                         <xsd:restriction base="xsd:NMTOKEN">
                                             <xsd:enumeration value="stop"/>
-                                            <xsd:enumeration value="STOP"/>
+                                            <xsd:enumeration value="stop"/>
                                         </xsd:restriction>
                                     </xsd:simpleType>
-                                </xsd:union>
+                                </xsd:union-->
                             </xsd:simpleType>
                         </xsd:attribute>
                         
