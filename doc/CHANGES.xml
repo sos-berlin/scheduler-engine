@@ -10,7 +10,7 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2006-04-06" version="2.0.150" subversion_revision="4237">
+    <change date="2006-04-06" version="2.0.150" subversion_revision="4240">
         <revision type="correction" title="Schema erlaubt wieder &lt;delay_after_error delay=&quot;stop&quot;&gt;">
             <description>
                 <ul>
