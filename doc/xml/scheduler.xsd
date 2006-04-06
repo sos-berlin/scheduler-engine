@@ -6,7 +6,7 @@
 
     <xsd:annotation>
         <xsd:documentation xml:lang="de">
-            $Id: scheduler.xsd 4234 2006-04-04 09:57:36Z jz $
+            $Id: scheduler.xsd 4237 2006-04-06 11:30:19Z jz $
             Schema für die Scheduler-Konfiguration,
             s.a. http://www.zschimmer.com/sos/scheduler/konfiguration.xml.html.
         </xsd:documentation>
@@ -234,7 +234,22 @@
                 <xsd:element name="delay_after_error" minOccurs="0" maxOccurs="unbounded">
                     <xsd:complexType>
                         <xsd:attribute name="error_count"   type="xsd:positiveInteger"  use="required"/>
-                        <xsd:attribute name="delay"         type="Duration"             use="required"/>
+                        <xsd:attribute name="delay"         use="required">
+                            <xsd:simpleType>
+                                <xsd:union>
+                                    <xsd:simpleType>
+                                        <xsd:restriction base="Duration"/>
+                                    </xsd:simpleType>
+                                    <xsd:simpleType>
+                                        <xsd:restriction base="xsd:NMTOKEN">
+                                            <xsd:enumeration value="stop"/>
+                                            <xsd:enumeration value="STOP"/>
+                                        </xsd:restriction>
+                                    </xsd:simpleType>
+                                </xsd:union>
+                            </xsd:simpleType>
+                        </xsd:attribute>
+                        
                     </xsd:complexType>
                 </xsd:element>
 
