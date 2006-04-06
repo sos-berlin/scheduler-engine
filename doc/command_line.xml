@@ -188,6 +188,7 @@
     </command_options>
 
     
+
     <command_options name="install_service" title="Installation eines Windows-Dienstes">
         <command_option name="install-service" type="name" title="Als Windows-Dienst installieren">
             <description>
@@ -285,6 +286,7 @@
 
     
     <command_options name="start_job" title="Laufendem Scheduler einen Job übergeben">
+
         <command_option name="scheduler" type="host:port" title="TCP-Adresse des Schedulers">
             <description>
                 <p>
@@ -293,8 +295,7 @@
             </description>
         </command_option>
 
-
-        <command_option name="log" setting="scheduler_log"/>
+        <command_option name="log" setting="scheduler_log" reference="true"/>
 
         <command_option name="process-class" type="name">
             <description>
@@ -335,7 +336,10 @@
         <description>
             <p>
                 Dem mit <scheduler_option name="scheduler" value="host:port"/> adressierten Scheduler
-                wird ein Job übergeben.
+                wird ein temporärer Job übergeben.
+            </p>
+            <p>
+                Bei einem Neustart des Schedulers geht der Job verloren.                
             </p>
         </description>
 
@@ -343,6 +347,7 @@
             <pre>echo ls -l | scheduler -scheduler=localhost:4444 -at="2006-04-04 12:00"</pre>
         </example>
     </command_options>
+
 
     
     <command_options name="add_order" title="Laufendem Scheduler einen Auftrag übergeben">

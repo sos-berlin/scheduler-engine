@@ -234,7 +234,22 @@
                 <xsd:element name="delay_after_error" minOccurs="0" maxOccurs="unbounded">
                     <xsd:complexType>
                         <xsd:attribute name="error_count"   type="xsd:positiveInteger"  use="required"/>
-                        <xsd:attribute name="delay"         type="Duration"             use="required"/>
+                        <xsd:attribute name="delay"         use="required">
+                            <xsd:simpleType>
+                                <xsd:union>
+                                    <xsd:simpleType>
+                                        <xsd:restriction base="Duration"/>
+                                    </xsd:simpleType>
+                                    <xsd:simpleType>
+                                        <xsd:restriction base="xsd:NMTOKEN">
+                                            <xsd:enumeration value="stop"/>
+                                            <xsd:enumeration value="STOP"/>
+                                        </xsd:restriction>
+                                    </xsd:simpleType>
+                                </xsd:union>
+                            </xsd:simpleType>
+                        </xsd:attribute>
+                        
                     </xsd:complexType>
                 </xsd:element>
 

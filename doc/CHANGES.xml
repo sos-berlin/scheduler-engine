@@ -10,6 +10,18 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2006-04-06" version="2.0.150" subversion_revision="4237">
+        <revision type="correction" title="Schema erlaubt wieder &lt;delay_after_error delay=&quot;stop&quot;&gt;">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_element name="delay_after_error" attribute="delay" value="stop"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+    </change>
+
     <change date="2006-04-04" version="2.0.150" subversion_revision="4233">
         <revision type="new" title="command_line.xml neu strukturiert">
             <description>
