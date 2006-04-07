@@ -23,8 +23,11 @@ Process_module_instance::~Process_module_instance()
 {
     close_handle();
 
-    _stdout_file.try_unlink( &_log );
-    _stderr_file.try_unlink( &_log );
+    if( _stdout_file.is_to_be_unlinked() )
+        _stdout_file.try_unlink( _module? &_module->_log : NULL );      // Nicht ins _log, also Task-Log protokollieren, damit mail_on_warning nicht greift. 
+                                                                        // Das soll kein Task-Problem sein!
+    if( _stderr_file.is_to_be_unlinked() )
+        _stderr_file.try_unlink( _module? &_module->_log : NULL );      
 }
 
 //------------------------------------------------------------Process_module_instance::close_handle

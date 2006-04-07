@@ -103,6 +103,7 @@ struct Module : Object
     explicit                    Module                      ( Spooler*, const xml::Element_ptr&, const Time& xml_mod_time, const string& include_path );
                                ~Module                      ()                                      {}
 
+    void                        set_log                     ( Prefix_log* log )                     { _log.set_log( log ); }
     void                        set_dom                     ( const xml::Element_ptr& e, const Time& xml_mod_time, const string& include_path )  { set_dom_without_source(e,xml_mod_time); set_dom_source_only(include_path); }
     void                        set_dom_without_source      ( const xml::Element_ptr&, const Time& xml_mod_time );
     void                        set_dom_source_only         ( const string& include_path );

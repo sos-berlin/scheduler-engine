@@ -401,9 +401,11 @@ ptr<Module_instance> Module::create_instance()
     }
 
 
-    if( _monitor  &&  _kind != kind_remote )  result->_monitor_instance = _monitor->create_instance();
-
-
+    if( _monitor )
+    {
+        if( _kind == kind_process )  z::throw_xc( "SCHEDULER-315" );
+        if( _kind != kind_remote )  result->_monitor_instance = _monitor->create_instance();
+    }
 
     return result;
 }

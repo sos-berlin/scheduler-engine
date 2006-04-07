@@ -53,6 +53,7 @@ Job::Job( Spooler* spooler )
     init_run_time();
 
     _log            = Z_NEW( Prefix_log( this ) );
+    _module.set_log( _log );
   //_log->set_job( this );
 
     _next_time      = latter_day;

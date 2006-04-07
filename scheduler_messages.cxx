@@ -184,6 +184,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-312", "Variable \"$1\" (vt=$2) cannot be converted to Text: $3" },
     { "SCHEDULER-313", "Cannot store order in database: $1" },
     { "SCHEDULER-314", "Cannot open database. Scheduler is aborting immediately because of need_db=yes" },
+    { "SCHEDULER-315", "<monitor> cannot be used with <process> or language=\"shell\"" },
     { "SCHEDULER-900", "Scheduler $1 is starting with $2, pid=$3" },
     { "SCHEDULER-902", "state=$1" },
     { "SCHEDULER-904", "Tasks have $1s to terminate" },

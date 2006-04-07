@@ -1966,6 +1966,12 @@
             </text>
         </message>
 
+        <message code="SCHEDULER-315">
+            <text xml:lang="en">
+                <title>&lt;monitor&gt; cannot be used with &lt;process&gt; or language="shell"</title>
+            </text>
+        </message>
+
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->

@@ -1219,7 +1219,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -1230,7 +1230,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -1241,7 +1241,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -1256,7 +1256,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -1267,7 +1267,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -1278,7 +1278,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -1293,7 +1293,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -1304,7 +1304,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -1315,7 +1315,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -1330,7 +1330,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -1341,7 +1341,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -1352,7 +1352,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -1367,7 +1367,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -1378,7 +1378,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -1389,7 +1389,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -1404,7 +1404,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -1415,7 +1415,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -1426,7 +1426,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -1441,7 +1441,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -1452,7 +1452,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -1463,7 +1463,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -1478,7 +1478,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -1489,7 +1489,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -1500,7 +1500,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -1515,7 +1515,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -1526,7 +1526,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -1537,7 +1537,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -1552,7 +1552,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -1563,7 +1563,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -1574,7 +1574,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -1589,7 +1589,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -1600,7 +1600,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -1611,7 +1611,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -1626,7 +1626,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -1637,7 +1637,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -1648,7 +1648,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -1663,7 +1663,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -1674,7 +1674,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -1685,7 +1685,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -1700,7 +1700,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -1711,7 +1711,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -1722,7 +1722,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -1737,7 +1737,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -1748,7 +1748,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -1759,7 +1759,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -1774,7 +1774,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -1785,7 +1785,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -1796,7 +1796,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -1811,7 +1811,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -1822,7 +1822,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -1833,7 +1833,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -1848,7 +1848,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -1859,7 +1859,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -1870,7 +1870,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -1885,7 +1885,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -1896,7 +1896,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -1907,7 +1907,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -1922,7 +1922,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -1933,7 +1933,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -1944,7 +1944,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -1959,7 +1959,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -1970,7 +1970,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -1981,7 +1981,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -1996,7 +1996,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -2007,7 +2007,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
@@ -2018,7 +2018,7 @@
 						Name="VCCustomBuildTool"
 						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;&#x0D;&#x0A;echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)&#x0D;&#x0A;"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"
 					/>
 				</FileConfiguration>
