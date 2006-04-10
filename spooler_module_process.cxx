@@ -244,7 +244,7 @@ bool Process_module_instance::begin__end()
     DWORD creation_flags = 0;
     if( _module->_priority != "" )  creation_flags |= windows::priority_class_from_string( _module->_priority );        // Liefert 0 bei Fehler
 
-    ok = CreateProcess( executable_path.c_str(),    // application name
+    ok = CreateProcess( NULL, //executable_path.c_str(),    // application name
                         (char*)command_line.c_str(),      // command line
                         NULL,                       // process security attributes
                         NULL,                       // primary thread security attributes
@@ -265,6 +265,11 @@ bool Process_module_instance::begin__end()
     _process_handle.add_to( &_spooler->_wait_handles );
 
     _spooler->register_process_handle( _process_handle );
+
+#   ifdef Z_WINDOWS
+        _stdout_file.close();       // Schließen, damit nicht ein anderer Prozess die Handles erbt und damit das Löschen verhindet (ERRNO-13 Permission denied)
+        _stderr_file.close();
+#   endif
 
     return true;
 }
