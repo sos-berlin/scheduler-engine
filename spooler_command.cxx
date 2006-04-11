@@ -577,7 +577,7 @@ xml::Element_ptr Command_processor::execute_add_order( const xml::Element_ptr& a
     order->set_dom( add_order_element );
 
 
-    if( job_chain_name != "" )
+    if( job_name == "" )
     {
         Job_chain* job_chain = _spooler->job_chain( job_chain_name );
         if( replace )  order->add_to_or_replace_in_job_chain( job_chain );
@@ -1104,8 +1104,8 @@ string Command_processor::execute( const string& xml_text_par, const Time& xml_m
 
         execute_2( xml_text, xml_mod_time );
     }
-    catch( const Xc& x        ) { append_error_to_answer( x ); }
-    catch( const exception& x ) { append_error_to_answer( x ); }
+    catch( const Xc& x        ) { append_error_to_answer( x );  if( _log ) _log->error( x.what() ); }
+    catch( const exception& x ) { append_error_to_answer( x );  if( _log ) _log->error( x.what() ); }
 
     return xml_as_string( _answer, indent );
 }
@@ -1121,8 +1121,8 @@ xml::Document_ptr Command_processor::execute( const xml::Document_ptr& command_d
         _error = NULL;
         execute_2( command_document, xml_mod_time );
     }
-    catch( const Xc& x        ) { append_error_to_answer( x ); }
-    catch( const exception& x ) { append_error_to_answer( x ); }
+    catch( const Xc& x        ) { append_error_to_answer( x );  if( _log ) _log->error( x.what() ); }
+    catch( const exception& x ) { append_error_to_answer( x );  if( _log ) _log->error( x.what() ); }
 
     return _answer;
 }

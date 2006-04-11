@@ -624,6 +624,36 @@ xml::Element_ptr Com_variable_set::dom_element( const xml::Document_ptr& doc, co
     return varset;
 }
 
+//-------------------------------------------------------------Com_variable_set::to_xslt_parameters
+
+void Com_variable_set::to_xslt_parameters( xml::Xslt_parameters* result, Has_log* warning_log )
+{
+    THREAD_LOCK( _lock )
+    {
+        result->allocate( _map.size() );
+
+        int i = 0;
+        for( Map::iterator it = _map.begin(); it != _map.end(); it++ )
+        {
+            if( Com_variable* v = it->second )
+            {
+                string name  = string_from_bstr   ( v->_name );
+                string value = string_from_variant( v->_value );
+
+                try
+                {
+                    result->set_string( i++, name, value );
+                }
+                catch( exception& x )
+                {
+                    if( !warning_log )  throw;
+                    warning_log->warn( x.what() );
+                }
+            }
+        }
+    }
+}
+
 //--------------------------------------------------------------------------Com_variable_set::Clone
 
 STDMETHODIMP Com_variable_set::Clone( Ivariable_set** result )

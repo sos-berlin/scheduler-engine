@@ -1972,6 +1972,12 @@
             </text>
         </message>
 
+        <message code="SCHEDULER-316">
+            <text xml:lang="en">
+                <title>&lt;web_service name="<p1/>"/>: attributes job_chain=/timeout= and request/response/forward_xslt_stylesheet= cannot be combined</title>
+            </text>
+        </message>
+
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->
@@ -2490,13 +2496,13 @@
 
         <message code="SCHEDULER-961">
             <text xml:lang="en">
-                <title>Protocol starts in <p1/> seconds</title>
+                <title>Protocol starts in <p1/></title>
             </text>
         </message>
 
         <message code="SCHEDULER-962">
             <text xml:lang="en">
-                <title>Protocol ends in <p1/> seconds</title>
+                <title>Protocol ends in <p1/></title>
             </text>
         </message>
 

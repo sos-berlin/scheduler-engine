@@ -90,6 +90,7 @@ struct Command_processor
     void                        append_error_to_answer      ( const exception& );
     void                        append_error_to_answer      ( const Xc& );
     xml::Element_ptr            execute_config              ( const xml::Element_ptr&, const Time& xml_mod_time );
+    void                        set_log                     ( Has_log* log )                        { _log = log; }     // Optional
 
     xml::Element_ptr            execute_show_state          ( const xml::Element_ptr&, const Show_what& );
     xml::Element_ptr            execute_show_history        ( const xml::Element_ptr&, const Show_what& );
@@ -133,6 +134,7 @@ struct Command_processor
     bool                       _validate;
     Security::Level            _security_level;
     string                     _source_filename;            // Das Verzeichnis wird für <base file=".."> verwendet
+    Has_log*                   _log;
 };
 
 //-------------------------------------------------------------------------------------------------

@@ -189,14 +189,26 @@ void Web_service::load()
         if( _debug )  _log_xml = true;
     }
 
-    if( _request_xslt_stylesheet_path != "" )
-        _request_xslt_stylesheet .load_file( _request_xslt_stylesheet_path  );
+    if( _job_chain_name != ""  ||  _timeout != INT_MAX )
+    {
+        if( _request_xslt_stylesheet_path != "" 
+         || _response_xslt_stylesheet_path != "" 
+         || _forward_xslt_stylesheet_path != "" )  z::throw_xc( "SCHEDULER-316", _name );
+    }
 
-    if( _response_xslt_stylesheet_path != "" )
-        _response_xslt_stylesheet.load_file( _response_xslt_stylesheet_path );
+    load_xslt_stylesheet( &_request_xslt_stylesheet, _request_xslt_stylesheet_path );
+    load_xslt_stylesheet( &_response_xslt_stylesheet, _response_xslt_stylesheet_path );
+    load_xslt_stylesheet( &_forward_xslt_stylesheet, _forward_xslt_stylesheet_path );
+}
 
-    if( _forward_xslt_stylesheet_path != "" )
-        _forward_xslt_stylesheet.load_file( _forward_xslt_stylesheet_path );
+//----------------------------------------------------------------Web_service::load_xslt_stylesheet
+
+void Web_service::load_xslt_stylesheet( Xslt_stylesheet* stylesheet, const string& path )
+{
+    if( path != "" )
+    {
+        stylesheet->load_file( path );
+    }
 }
 
 //-------------------------------------------------------------------------------Web_service::check
@@ -279,7 +291,10 @@ ptr<Web_service_operation> Web_service::new_operation( http::Operation* http_ope
 
 xml::Document_ptr Web_service::transform_request( const xml::Document_ptr& request_document )
 {
-    xml::Document_ptr result = _request_xslt_stylesheet.apply( request_document );
+    xml::Xslt_parameters xslt_parameters;
+    _parameters->to_xslt_parameters( &xslt_parameters, _log );
+
+    xml::Document_ptr result = _request_xslt_stylesheet.apply( request_document, xslt_parameters );
     if( !result.documentElement() )  z::throw_xc( "SCHEDULER-237", _request_xslt_stylesheet_path );
     return result;
 }
@@ -288,7 +303,10 @@ xml::Document_ptr Web_service::transform_request( const xml::Document_ptr& reque
 
 xml::Document_ptr Web_service::transform_response( const xml::Document_ptr& command_answer_document )
 {
-    xml::Document_ptr result = _response_xslt_stylesheet.apply( command_answer_document );
+    xml::Xslt_parameters xslt_parameters;
+    _parameters->to_xslt_parameters( &xslt_parameters, _log );
+
+    xml::Document_ptr result = _response_xslt_stylesheet.apply( command_answer_document, xslt_parameters );
     if( !result.documentElement() )  z::throw_xc( "SCHEDULER-237", _response_xslt_stylesheet_path );
     return result;
 }
@@ -297,7 +315,10 @@ xml::Document_ptr Web_service::transform_response( const xml::Document_ptr& comm
 
 xml::Document_ptr Web_service::transform_forward( const xml::Document_ptr& order_or_task_document )
 {
-    xml::Document_ptr result = _forward_xslt_stylesheet.apply( order_or_task_document );
+    xml::Xslt_parameters xslt_parameters;
+    _parameters->to_xslt_parameters( &xslt_parameters, _log );
+
+    xml::Document_ptr result = _forward_xslt_stylesheet.apply( order_or_task_document, xslt_parameters );
     if( !result.documentElement() )  z::throw_xc( "SCHEDULER-237", _forward_xslt_stylesheet_path );
 
     if( result.documentElement().nodeName() != "service_request" )  z::throw_xc( "SCHEDULER-242", _forward_xslt_stylesheet_path );
@@ -344,6 +365,7 @@ void Web_service::forward( const xml::Document_ptr& payload_dom )
 
         
         Command_processor command_processor ( _spooler, Security::seclev_all );
+        command_processor.set_log( _log );
 
         _spooler->_executing_command = false;   // Command_processor() hat es true gesetzt. Trotzdem bei Datenbank-Fehler auf DB warten
 
@@ -431,6 +453,7 @@ void Web_service_operation::begin()
 {
     //if( _web_service->_debug  &&  http_operation->_parser )  _log->debug( "\n" "HTTP request:\n " ), _log->debug( http_operation->_parser->_text ), _log->debug( "" );;
 
+    if( _web_service->_log_xml )  File( _log_filename_prefix + ".raw_request.txt", "w" ).print( http_request()->body() );
     
     if( _web_service->_job_chain_name == "" )
     {
@@ -523,7 +546,6 @@ void Web_service_operation::execute_stylesheets()
         //hr = com_invoke( DISPATCH_PROPERTYGET, this, "String_content", &request_data_variant );
         //if( FAILED(hr) )  return hr;
 
-        if( _web_service->_log_xml )  File( _log_filename_prefix + ".raw_request.txt", "w" ).print( http_request()->body() );
         bool ok = request_document.try_load_xml( http_request()->body(), http_request()->charset_name() );
         if( !ok )
         {
@@ -593,6 +615,7 @@ void Web_service_operation::execute_stylesheets()
     else
     {
         Command_processor command_processor ( _spooler, Security::seclev_all );
+        command_processor.set_log( _log );
         //command_processor.set_host( _http_operation->_connection->peer_host() );
 
         command_processor.execute( command_document );

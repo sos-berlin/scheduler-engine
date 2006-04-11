@@ -65,9 +65,10 @@ struct Web_service: idispatch_implementation< Web_service, spooler_com::Iweb_ser
     void                        forward                     ( const xml::Document_ptr& payload );
     
   private:
-    friend struct               Web_service_operation;
-
     Fill_zero                  _zero_;
+    friend struct               Web_service_operation;
+    void                        load_xslt_stylesheet        ( Xslt_stylesheet*, const string& path );
+
     string                     _name;
     string                     _url_path;
     int                        _next_operation_id;
