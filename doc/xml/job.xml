@@ -98,9 +98,6 @@
         <xml_attribute name="priority" type="process_priority">
             <description>
                 <p>
-                    Unter Unix sind die Werte -20 bis 20 zulässig.
-                </p>
-                <p>
                     Eingestellt können die Werte 
                     <code>idle</code>,
                     <code>below_normal</code>,

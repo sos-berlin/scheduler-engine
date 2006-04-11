@@ -36,7 +36,8 @@
                 <p>
                     Wenn das Element leer ist (also kein <code>&lt;period></code> enthält),
                     generiert der Scheduler eine Periode mit dieser Einstellung,
-                    anderfalls ist es die Voreinstellung für die Kind-Elemente.
+                    andernfalls ist es die Voreinstellung für die Kind-Elemente
+                    (siehe oben <a href="#defaults">Verkürzte Schreibweise</a>).
                 </p>
             </description>
         </xml_attribute>
@@ -46,7 +47,8 @@
                 <p>
                     Wenn das Element leer ist (also kein <code>&lt;period></code> enthält),
                     generiert der Scheduler eine Periode mit dieser Einstellung,
-                    anderfalls ist es die Voreinstellung für die Kind-Elemente.
+                    andernfalls ist es die Voreinstellung für die Kind-Elemente
+                    (siehe oben <a href="#defaults">Verkürzte Schreibweise</a>).
                 </p>
             </description>
         </xml_attribute>
@@ -56,7 +58,8 @@
                 <p>
                     Wenn das Element leer ist (also kein <code>&lt;period></code> enthält),
                     generiert der Scheduler eine Periode mit dieser Einstellung,
-                    anderfalls ist es die Voreinstellung für die Kind-Elemente.
+                    andernfalls ist es die Voreinstellung für die Kind-Elemente
+                    (siehe oben <a href="#defaults">Verkürzte Schreibweise</a>).
                 </p>
             </description>
         </xml_attribute>
@@ -65,7 +68,9 @@
             <description>
                 <p>
                     Wenn das Element leer ist (also kein <code>&lt;period></code> enthält),
-                    generiert der Scheduler eine Periode mit dieser Einstellung.
+                    generiert der Scheduler eine Periode mit dieser Einstellung,
+                    andernfalls ist es die Voreinstellung für die Kind-Elemente
+                    (siehe oben <a href="#defaults">Verkürzte Schreibweise</a>).
                 </p>
             </description>
         </xml_attribute>
@@ -73,7 +78,10 @@
         <xml_attribute name="let_run" type="yes_no">
             <description>
                 <p>
-                    Voreinstellung für <scheduler_element name="period"/>
+                    Wenn das Element leer ist (also kein <code>&lt;period></code> enthält),
+                    generiert der Scheduler eine Periode mit dieser Einstellung,
+                    andernfalls ist es die Voreinstellung für die Kind-Elemente
+                    (siehe oben <a href="#defaults">Verkürzte Schreibweise</a>).
                 </p>
             </description>
         </xml_attribute>
@@ -92,6 +100,7 @@
                     <code>&lt;ultimos></code>.
                     Diese Elemente können weitere Perioden hinzufügen.
                     Wenn keines dieser Elemente angegeben ist, gelten die Perioden für jeden Tag.
+                    (Siehe oben <a href="#defaults">Verkürzte Schreibweise</a>).
                 </p>
             </description>
         </xml_child_element>
@@ -156,6 +165,65 @@
             Ein Job, der eine Startzeit zwischen 2 und 3 Uhr hat, kann zum Ende
             der Sommerzeit zweimal gestartet werden.
         </p>
+
+        
+        <h3>
+            <a name="defaults"/>
+            Verkürzte Schreibweise mit &lt;period> und den Attributen begin=, end=, repeat=, let_run= und single_start=
+        </h3>
+        <p>
+            <scheduler_element name="period"/> innerhalb von <code>&lt;run_time></code> werden verwendet für
+            die Elemente
+            <scheduler_element name="date"/>,
+            <scheduler_element name="weekdays"/>,
+            <scheduler_element name="monthdays"/> und
+            <scheduler_element name="ultimos"/>,
+            wenn diese keine eigenen <scheduler_element name="period"/> haben.
+        </p>
+        <pre>&lt;run_time>
+    &lt;period begin="07:00" end="09:00"/>
+    &lt;monthdays>
+        &lt;day day="1"/>
+        &lt;day day="2">
+            &lt;period begin="22:00" end="23:00"/>
+        &lt;/day>
+    &lt;/monthdays>
+&lt;/run_time></pre>
+        <p>wird zu</p>
+        <pre>&lt;run_time>
+    &lt;monthdays>
+        &lt;day day="1">
+            &lt;period begin="07:00" end="09:00"/>
+        &lt;/day>
+        &lt;day day="2">
+            &lt;period begin="22:00" end="23:00"/>
+        &lt;/day>
+    &lt;/monthdays>
+&lt;/run_time></pre>
+        <p>
+            Wenn dagegen keins der Elemente
+            <scheduler_element name="date"/>,
+            <scheduler_element name="weekdays"/>,
+            <scheduler_element name="monthdays"/> und
+            <scheduler_element name="ultimos"/>
+            aufgeführt ist,
+            gelten die <scheduler_element name="period"/> für jeden Tag der Woche.
+        </p>
+        <p>
+            Die Attribute
+            <code>begin=</code>,
+            <code>end=</code>,
+            <code>repeat=</code>,
+            <code>let_run=</code> und
+            <code>single_start=</code>
+            wirken, wenn kein <scheduler_element name="period"/> angegeben ist,
+            und lassen den Scheduler eins mit denselben Attributen erzeugen.
+        </p>
+        <pre>&lt;run_time begin="07:00" end="09:00"/></pre>
+        <p>wird zu</p>
+        <pre>&lt;run_time>
+    &lt;period begin="07:00" end="09:00"/>
+&lt;run_time></pre>
     </description>
 
     <example>
