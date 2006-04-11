@@ -799,6 +799,8 @@ struct Com_order : spooler_com::Iorder,
     STDMETHODIMP            put_Xml_payload             ( BSTR );
     STDMETHODIMP            get_Xml_payload             ( BSTR* );
     
+    STDMETHODIMP            put_Params                  ( spooler_com::Ivariable_set* );
+    STDMETHODIMP            get_Params                  ( spooler_com::Ivariable_set** );
 
   private:
     Fill_zero                  _zero_;

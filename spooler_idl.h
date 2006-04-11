@@ -581,6 +581,9 @@ struct Iorder : IDispatch
 
     virtual HRESULT     put_Xml_payload             ( BSTR value )                                  = 0;
     virtual HRESULT     get_Xml_payload             ( BSTR* result )                                = 0;
+
+    virtual HRESULT     put_Params                  ( Ivariable_set* )                              = 0;
+    virtual HRESULT     get_Params                  ( Ivariable_set** )                             = 0;
 };
 
 //--------------------------------------------------------------------Remote_module_instance_server

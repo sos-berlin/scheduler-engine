@@ -1978,6 +1978,12 @@
             </text>
         </message>
 
+        <message code="SCHEDULER-317">
+            <text xml:lang="en">
+                <title>Order.payload is not a Variable_set and not null</title>
+            </text>
+        </message>
+
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->

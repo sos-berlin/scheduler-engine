@@ -10,6 +10,23 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2006-04-12" version="2.0.151" subversion_revision="4250">
+        <revision type="new" title="Neue Eigenschaft Order.params">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_method class="Order" property="params"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+
+        <revision type="new" title="Web-Service-Parameter werden in XSLT-Stylesheets übernommen">
+            <description>
+            </description>
+        </revision>
+    </change>
+
     <change date="2006-04-06" version="2.0.150" subversion_revision="4240">
         <revision type="correction" title="Schema erlaubt wieder &lt;delay_after_error delay=&quot;stop&quot;&gt;">
             <description>

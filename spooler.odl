@@ -1039,6 +1039,11 @@ library Spooler
         [propget]
         HRESULT                 Xml_payload             ( [out,retval] BSTR* Result );
 
+        [propput]
+        HRESULT                 Params                  ( [in] Ivariable_set* );
+
+        [propget]
+        HRESULT                 Params                  ( [out,retval] Ivariable_set** );
     }
 
     [

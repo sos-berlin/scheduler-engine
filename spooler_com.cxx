@@ -4867,6 +4867,58 @@ STDMETHODIMP Com_order::get_Xml_payload( BSTR* result )
     return hr;
 }
 
+//----------------------------------------------------------------------------Com_order::put_Params
+
+STDMETHODIMP Com_order::put_Params( Ivariable_set* variable_set )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_order )  return E_POINTER;
+
+        Variant v = variable_set;
+        _order->set_payload( v );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+
+//-----------------------------------------------------------------------Com_order::get_Xml_payload
+
+STDMETHODIMP Com_order::get_Params( Ivariable_set** result )
+{
+    HRESULT hr = NOERROR;
+
+    *result = NULL;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_order )  return E_POINTER;
+
+        Variant variant = _order->payload();
+        if( !variant.is_null_or_empty_string() )
+        {
+            if( variant.vt != VT_DISPATCH  &&  variant.vt != VT_UNKNOWN )  z::throw_xc( "SCHEDULER-317" );
+            
+            IUnknown*          iunknown = V_UNKNOWN( &variant );
+            ptr<Ivariable_set> ivariable_set;
+            hr = iunknown->QueryInterface( IID_Ivariable_set, ivariable_set.void_pp() );
+            if( FAILED(hr) )  return hr;
+
+            *result = ivariable_set.take();
+        }
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+
 //-----------------------------------------------------------------------Com_order_queue::_methods
 #ifdef Z_COM
 

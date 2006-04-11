@@ -176,9 +176,8 @@ public class Order extends Idispatch
      * @return true, wenn die Nutzlast vom angegebenen COM-Typ ist. 
      */
     public boolean          payload_is_type     ( String type )                     { return    boolean_com_call( "payload_is_type", type ); }
-    
-    
-    
+
+
     /*+ Liefert die &lt;run_time> (zur periodischen Wiederholung des Auftrags).
      * 
      */
@@ -187,12 +186,12 @@ public class Order extends Idispatch
 
     /*+ Entfernt den Auftrag aus seiner Jobkette.
       * <p>
-      * Wenn der Auftrag gerade von einer Task ausgef�hrt wird,
+      * Wenn der Auftrag gerade von einer Task ausgeführt wird,
       * liefert die Eigenschaft {@link #job_chain}
       * weiterhin die Jobkette, aus der der Auftrag gerade entfernt wird.
-      * Erst wenn die Ausf�hrung beendet ist, liefert die Eigenschaft null
-      * (au�er der Auftrag ist wieder in eine Jobkette eingetragen worden).
-      * Damit bleibt die Eigenschaft job_chain w�hrend der Ausf�hrung durch die Task stabil.
+      * Erst wenn die Ausführung beendet ist, liefert die Eigenschaft null
+      * (außer der Auftrag ist wieder in eine Jobkette eingetragen worden).
+      * Damit bleibt die Eigenschaft job_chain während der Ausführung durch die Task stabil.
       */
     public void             remove_from_job_chain()                                 {                   com_call( "remove_from_job_chain" ); }
     
@@ -219,6 +218,8 @@ public class Order extends Idispatch
     public Web_service_operation web_service_operation_or_null ()                   { return (Web_service_operation)com_call( "<web_service_operation_or_null" ); }
 
     public void         set_xml_payload         ( String xml )                      {                   com_call( ">xml_payload", xml   ); }
-
     public String           xml_payload         ()                                  { return (String)   com_call( "<xml_payload"        ); }
+    
+    public void         set_params              ( Variable_set v )                  {                      com_call( ">params", v ); }
+    public Variable_set     params              ()                                  { return (Variable_set)com_call( "<params" ); }
 }

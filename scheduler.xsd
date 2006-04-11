@@ -133,6 +133,15 @@
                 <xsd:element ref="run_time" minOccurs="0"/>
                 
                 <xsd:element name="payload" minOccurs="0">
+                    <!--xsd:element ref="params" minOccurs="0"/-->
+                    <xsd:complexType>
+                        <xsd:sequence>
+                            <xsd:any namespace="##any"/>
+                        </xsd:sequence>
+                    </xsd:complexType>
+                </xsd:element>
+                
+                <xsd:element name="xml_payload" minOccurs="0">
                     <xsd:complexType>
                         <xsd:sequence>
                             <xsd:any namespace="##any"/>
