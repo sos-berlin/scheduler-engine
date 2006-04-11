@@ -432,7 +432,7 @@
             </description>
         </command_option>
 
-        <command_option name="pid-file"/>
+        <command_option name="pid-file" type="dateiname" reference="true"/>
 
         <example>
             <pre>scheduler -kill -pid-file=/home/scheduler/scheduler.pid</pre>
