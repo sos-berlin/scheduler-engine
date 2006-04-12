@@ -232,12 +232,17 @@
 
     <description>
         <p>
+            Statt dieser Eigenschaft wird die Verwendung von <scheduler_method class="Order" property="params"/> empfohlen
+            (was <code>(Variable_set)order.payload</code> entspricht).
+        </p>
+        <p>
             Neben der Auftragskennung <scheduler_method class="Order" property="id"/>,
             die den Auftrag identifiziert,
             können Sie hier zusätzliche Angaben machen.
         </p>
         <p>
-            Siehe 
+            Siehe
+            <scheduler_method class="Order" property="params"/> und
             <scheduler_method class="Order" property="xml_payload"/>.
         </p>
     </description>
@@ -465,7 +470,7 @@
 
 <property name="xml_payload">
     <com>
-        <com.result name="payload">
+        <com.result name="xml">
             <com.type type="BSTR"/>
         </com.result>
     </com>
@@ -476,12 +481,32 @@
 
     <description>
         <p>
-            Zusätzlich zu <scheduler_method class="Order" property="payload"/> 
+            Zusätzlich zur Eigenschaft <scheduler_method class="Order" property="params"/> 
             kann diese Eigenschaft ein XML-Dokument aufnehmen.
         </p>
         <p>
             <scheduler_element name="xml_payload"/> enthält das Wurzelelement des XML-Dokuments 
             (statt in <code>#PCDATA</code>-codierter Form).
+        </p>
+    </description>
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="params">
+    <com>
+        <com.result>
+            <com.type class="Variable_set"/>
+        </com.result>
+    </com>
+
+    <title>
+        Parameter des Auftrags
+    </title>
+
+    <description>
+        <p>
+            Siehe <scheduler_element name="add_order" child="params"/>.
         </p>
     </description>
 </property>
