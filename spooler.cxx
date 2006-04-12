@@ -2088,7 +2088,29 @@ void Spooler::start()
 
     init_jobs();
 
+/*
+    if( _is_service || is_daemon )
+    {
+        if( _log.fd() > 2 )   // Nicht -1, stdin, stdout, stderr?
+        {
+            FILE* new_stderr = fdopen( _log.fd(), "w" );
+            if( !new_stderr )  throw_errno( errno, "fdopen stderr" );
+            {
+                _log.info( "stdout und stderr werden in diese Protokolldatei geleitet" ); 
+                fclose( stderr ); stderr = new_stderr;
+                fclose( stdout ); stdout = fdopen( _log.fd(), "w" );
+            }
+            //else  
+            //    _log.error( string("stderr = fdopen(log): ") + strerror(errno) );
+        }
+    }
+*/
+}
 
+//--------------------------------------------------------------------Spooler::run_scheduler_script
+
+void Spooler::run_scheduler_script()
+{
     if( _module.set() )
     {
         LOGI( "Startskript wird geladen und gestartet\n" );
@@ -2136,27 +2158,6 @@ void Spooler::start()
 
         LOG( "Startskript ist gelaufen\n" );
     }
-
-
-    if( _main_scheduler_connection )  _main_scheduler_connection->set_socket_manager( _connection_manager );
-    
-/*
-    if( _is_service || is_daemon )
-    {
-        if( _log.fd() > 2 )   // Nicht -1, stdin, stdout, stderr?
-        {
-            FILE* new_stderr = fdopen( _log.fd(), "w" );
-            if( !new_stderr )  throw_errno( errno, "fdopen stderr" );
-            {
-                _log.info( "stdout und stderr werden in diese Protokolldatei geleitet" ); 
-                fclose( stderr ); stderr = new_stderr;
-                fclose( stdout ); stdout = fdopen( _log.fd(), "w" );
-            }
-            //else  
-            //    _log.error( string("stderr = fdopen(log): ") + strerror(errno) );
-        }
-    }
-*/
 }
 
 //------------------------------------------------------------------------------------Spooler::stop
@@ -2774,8 +2775,8 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line )
 
             load_config( _config_element_to_load, _config_element_mod_time, _config_source_filename );
 
-            _config_element_to_load = NULL;
-            _config_document_to_load = NULL;
+            //Erst muss noch _config_commands_element ausgeführt werden: _config_element_to_load = NULL;
+            //Erst muss noch _config_commands_element ausgeführt werden: _config_document_to_load = NULL;
         }
 
 
@@ -2797,6 +2798,23 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line )
         if( _send_cmd != "" )  { send_cmd();  return 0; }
 
         start();
+
+        // <command> aus <config> ausführen:
+        if( xml::Element_ptr commands_element = _config_element_to_load.select_node( "command" ) )
+        {
+            Command_processor command_processor ( this, Security::seclev_all );
+            command_processor.set_log( &_log );
+            command_processor.execute_commands( commands_element, _config_element_mod_time );
+        }
+
+        _config_element_to_load = NULL;
+        _config_document_to_load = NULL;
+
+
+        run_scheduler_script();
+
+        if( _main_scheduler_connection )  _main_scheduler_connection->set_socket_manager( _connection_manager );
+
 
         try
         {

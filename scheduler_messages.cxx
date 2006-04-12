@@ -247,6 +247,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-962", "Protocol ends in $1" },
     { "SCHEDULER-963", "Copying protocol file to $1" },
     { "SCHEDULER-964", "New $1" },
+    { "SCHEDULER-965", "Executing command $1" },
     { "SCHEDULER-999", "Scheduler has been terminated properly" },
     {}
 };

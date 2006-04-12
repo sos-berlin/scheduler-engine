@@ -2536,8 +2536,14 @@
                 </description>
             </text>
         </message>
-
         
+        <message code="SCHEDULER-965">
+            <text xml:lang="en">
+                <title>Executing command <p1/></title>
+            </text>
+        </message>
+
+
         <message code="SCHEDULER-999">
             <text xml:lang="de">
                 <title>Scheduler ordentlich beendet</title>

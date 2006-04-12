@@ -85,6 +85,7 @@ struct Command_processor
     void                        execute_2                   ( const string& xml_text, const Time& xml_mod_time = Time::now() );
     void                        execute_2                   ( const xml::Document_ptr&, const Time& xml_mod_time = Time::now() );
     xml::Document_ptr           dom_from_xml                ( const string& xml_text );
+    void                        execute_commands            ( const xml::Element_ptr&, const Time& xml_mod_time );
     xml::Element_ptr            execute_command             ( const xml::Element_ptr&, const Time& xml_mod_time );
     void                        begin_answer                ();
     void                        append_error_to_answer      ( const exception& );

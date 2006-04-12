@@ -297,6 +297,7 @@ struct Spooler : Object,
 
     void                        create_window               ();
     void                        start                       ();
+    void                        run_scheduler_script        ();
     void                        stop                        ( const exception* = NULL );
   //void                        signal_threads              ( const string& signal_name );
   //void                        wait_until_threads_stopped  ( Time until );

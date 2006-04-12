@@ -23,6 +23,15 @@
 
         <revision type="new" title="Web-Service-Parameter werden in XSLT-Stylesheets übernommen">
             <description>
+                <p>
+                    Parameter, die Apostroph und Anführungszeichen enthalten, werden mit Warnung abgewiesen, 
+                    da offenbar solche Werte <a href="http://xmlsoft.org/XSLT/">libxslt</a> nicht übergeben werden können.
+                </p>
+                <ul>
+                    <li>
+                        <scheduler_element name="web_service" child="params"/>
+                    </li>
+                </ul>
             </description>
         </revision>
     </change>

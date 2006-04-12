@@ -411,6 +411,11 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const Time& x
             {
                 load_job_chains_from_xml( e );
             }
+            else
+            if( e.nodeName_is( "command" ) )
+            {
+                // Ignorieren, wird nach start() von spooler.cxx ausgeführt.
+            }
         }
     }
     catch( const _com_error& com_error ) { throw_com_error(com_error);  }

@@ -38,6 +38,7 @@
 
                             <xsd:element ref="jobs"             minOccurs="0"/>
                             <xsd:element ref="job_chains"       minOccurs="0"/>
+                            <xsd:element ref="command"          minOccurs="0"/>
                         </xsd:sequence>
                         
                         <xsd:attribute name="spooler_id"            type="Name"/>
@@ -55,35 +56,7 @@
                     </xsd:complexType>
                 </xsd:element>
 
-                <xsd:element name="command">
-                    <xsd:complexType>
-                        <xsd:choice maxOccurs="unbounded">
-                            <xsd:element ref="add_jobs"/>
-                            <xsd:element ref="add_order"/>
-                            <xsd:element ref="kill_task"/>
-                            <xsd:element ref="modify_job"/>
-                            <xsd:element ref="modify_order"/>
-                            <xsd:element ref="modify_spooler"/>
-                            <xsd:element ref="register_remote_scheduler"/>
-                            <xsd:element ref="remove_job_chain"/>
-                            <xsd:element ref="remove_order"/>
-                            <xsd:element ref="run_time"/>
-                            <xsd:element ref="show_history"/>
-                            <xsd:element ref="show_job"/>
-                            <xsd:element ref="show_jobs"/>
-                            <xsd:element ref="show_job_chains"/>
-                            <xsd:element ref="show_job_chain"/>
-                            <xsd:element ref="show_order"/>
-                            <xsd:element ref="s"/>
-                            <xsd:element ref="show_state"/>
-                            <xsd:element ref="show_task"/>
-                            <xsd:element ref="service_request"/>
-                            <xsd:element ref="start_job"/>
-                            <!--xsd:element ref="signal_object"/-->
-                            <xsd:element ref="terminate"/>
-                        </xsd:choice>
-                    </xsd:complexType>
-                </xsd:element>
+                <xsd:element ref="command"/>
                 
                 <xsd:element name="answer">
                     <xsd:complexType/>
@@ -116,6 +89,37 @@
         </xsd:complexType>
     </xsd:element>
 
+
+    <xsd:element name="command">
+        <xsd:complexType>
+            <xsd:choice maxOccurs="unbounded">
+                <xsd:element ref="add_jobs"/>
+                <xsd:element ref="add_order"/>
+                <xsd:element ref="kill_task"/>
+                <xsd:element ref="modify_job"/>
+                <xsd:element ref="modify_order"/>
+                <xsd:element ref="modify_spooler"/>
+                <xsd:element ref="register_remote_scheduler"/>
+                <xsd:element ref="remove_job_chain"/>
+                <xsd:element ref="remove_order"/>
+                <xsd:element ref="run_time"/>
+                <xsd:element ref="show_history"/>
+                <xsd:element ref="show_job"/>
+                <xsd:element ref="show_jobs"/>
+                <xsd:element ref="show_job_chains"/>
+                <xsd:element ref="show_job_chain"/>
+                <xsd:element ref="show_order"/>
+                <xsd:element ref="s"/>
+                <xsd:element ref="show_state"/>
+                <xsd:element ref="show_task"/>
+                <xsd:element ref="service_request"/>
+                <xsd:element ref="start_job"/>
+                <!--xsd:element ref="signal_object"/-->
+                <xsd:element ref="terminate"/>
+            </xsd:choice>
+        </xsd:complexType>
+    </xsd:element>
+
     
     <xsd:element name="add_jobs">
         <xsd:complexType>
@@ -136,7 +140,7 @@
                     <!--xsd:element ref="params" minOccurs="0"/-->
                     <xsd:complexType>
                         <xsd:sequence>
-                            <xsd:any namespace="##any"/>
+                            <xsd:any processContents="skip"/>
                         </xsd:sequence>
                     </xsd:complexType>
                 </xsd:element>
@@ -144,7 +148,7 @@
                 <xsd:element name="xml_payload" minOccurs="0">
                     <xsd:complexType>
                         <xsd:sequence>
-                            <xsd:any namespace="##any"/>
+                            <xsd:any processContents="skip"/>
                         </xsd:sequence>
                     </xsd:complexType>
                 </xsd:element>

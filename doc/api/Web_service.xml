@@ -67,7 +67,7 @@
 
         <description>
             <p>
-                Die Parameter des Web-Services können mit <scheduler_element name="web_service"/> eingestellt werden.
+                Die Parameter des Web-Services können mit <scheduler_element name="web_service" child="params"/> eingestellt werden.
             </p>
         </description>
     </property>

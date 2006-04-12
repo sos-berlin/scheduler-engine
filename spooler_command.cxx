@@ -115,6 +115,8 @@ Command_processor::Command_processor( Spooler* spooler, Security::Level security
     _security_level( security_level )
 {
     _spooler->_executing_command = true;
+
+    begin_answer();
 }
 
 //------------------------------------------------------------Command_processor::~Command_processor
@@ -1093,7 +1095,7 @@ void Command_processor::execute_http( http::Operation* http_operation )
 
 string Command_processor::execute( const string& xml_text_par, const Time& xml_mod_time, bool indent )
 {
-    begin_answer();
+    //begin_answer();
 
     try 
     {
@@ -1114,7 +1116,7 @@ string Command_processor::execute( const string& xml_text_par, const Time& xml_m
 
 xml::Document_ptr Command_processor::execute( const xml::Document_ptr& command_document, const Time& xml_mod_time )
 {
-    begin_answer();
+    //begin_answer();
 
     try 
     {
@@ -1166,7 +1168,7 @@ xml::Document_ptr Command_processor::dom_from_xml( const string& xml_text )
 
 void Command_processor::execute_2( const string& xml_text, const Time& xml_mod_time )
 {
-    begin_answer();
+    //begin_answer();
 
     try 
     {
@@ -1179,7 +1181,7 @@ void Command_processor::execute_2( const string& xml_text, const Time& xml_mod_t
 
 void Command_processor::execute_2( const xml::Document_ptr& command_doc, const Time& xml_mod_time )
 {
-    begin_answer();
+    //begin_answer();
 
     try 
     {
@@ -1208,14 +1210,7 @@ void Command_processor::execute_2( const xml::Document_ptr& command_doc, const T
         {
             if( e.nodeName_is( "command" ) )
             {
-                DOM_FOR_EACH_ELEMENT( e, node )
-                //xml::NodeList_ptr node_list = e.childNodes();
-                //for( int i = 0; i < node_list.length(); i++ )
-                {
-                    //xml::Node_ptr node = node_list.item(i);
-
-                    _answer.documentElement().firstChild().appendChild( execute_command( node, xml_mod_time ) );
-                }
+                execute_commands( e, xml_mod_time );
             }
             else
             {
@@ -1224,6 +1219,24 @@ void Command_processor::execute_2( const xml::Document_ptr& command_doc, const T
         }
     }
     catch( const _com_error& com_error ) { throw_com_error( com_error, "DOM/XML" ); }
+}
+
+//--------------------------------------------------------------Command_processor::execute_commands
+
+void Command_processor::execute_commands( const xml::Element_ptr& commands_element, const Time& xml_mod_time )
+{
+    DOM_FOR_EACH_ELEMENT( commands_element, node )
+    {
+        if( _log ) 
+        {
+            Message_string m ( "SCHEDULER-965" );
+            m.set_max_insertion_length( INT_MAX );
+            m.insert( 1, node.xml() );
+            _log->info( m );
+        }
+
+        _answer.documentElement().firstChild().appendChild( execute_command( node, xml_mod_time ) );
+    }
 }
 
 //------------------------------------------------------------------Command_processor::begin_answer

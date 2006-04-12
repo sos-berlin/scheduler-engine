@@ -175,8 +175,14 @@
                                             <td valign="baseline">
                                                 <xsl:element name="a">
                                                     <xsl:attribute name="class">silent</xsl:attribute>
-                                                    <!--xsl:attribute name="href">#element_<xsl:value-of select="@name"/></xsl:attribute-->
-                                                    <xsl:attribute name="href"><xsl:value-of select="concat( /*/@base_dir, $path )"/></xsl:attribute>
+                                                    <xsl:choose>
+                                                        <xsl:when test="* | @multiple">
+                                                            <xsl:attribute name="href">#element_<xsl:value-of select="@name"/></xsl:attribute>
+                                                        </xsl:when>
+                                                        <xsl:otherwise>
+                                                            <xsl:attribute name="href"><xsl:value-of select="concat( /*/@base_dir, $path )"/></xsl:attribute>
+                                                        </xsl:otherwise>
+                                                    </xsl:choose>
                                                     <code>&lt;<xsl:value-of select="@name"/></code> ...<code>></code><br/>
                                                 </xsl:element>
                                             </td>
@@ -348,6 +354,8 @@
                 </p>
                 <br/>
             </xsl:if>
+            
+            <xsl:apply-templates select="example"/>
         </div>
     </xsl:template>
 
@@ -1209,6 +1217,7 @@
             <xsl:with-param name="attribute" select="@attribute"/>
             <xsl:with-param name="value"     select="@value"    />
             <xsl:with-param name="parameter" select="@parameter"/>
+            <xsl:with-param name="child"     select="@child"/>
         </xsl:call-template>
     </xsl:template>
 
@@ -1220,6 +1229,7 @@
         <xsl:param name="attribute"/>
         <xsl:param name="value"     select="'…'"/>
         <xsl:param name="parameter"/>
+        <xsl:param name="child"/>
 
         <xsl:element name="a">
             <xsl:attribute name="name">use_element__<xsl:value-of select="$name"/></xsl:attribute>
@@ -1229,7 +1239,10 @@
             <xsl:attribute name="class">silent</xsl:attribute>
 
             <xsl:variable name="href2">
-                <xsl:if test="$attribute">#attribute_<xsl:value-of select="$attribute"/></xsl:if>
+                <xsl:choose>
+                    <xsl:when test="$attribute">#attribute_<xsl:value-of select="$attribute"/></xsl:when>
+                    <xsl:when test="$child">#element_<xsl:value-of select="$child"/></xsl:when>
+                </xsl:choose>
             </xsl:variable>
 
             <xsl:if test="$directory">
@@ -1257,6 +1270,12 @@
                 </xsl:if>
 
                 <xsl:text>></xsl:text>
+
+                <xsl:if test="$child">
+                    <xsl:text>&lt;</xsl:text>
+                    <xsl:value-of select="$child"/>
+                    <xsl:text>></xsl:text>
+                </xsl:if>
             </code>
         </xsl:element>
     </xsl:template>
