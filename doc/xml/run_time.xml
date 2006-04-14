@@ -140,7 +140,7 @@
             </description>
         </xml_child_element>
         
-        <xml_child_element name="at"/>
+        <xml_child_element name="at" multiple="yes"/>
     </xml_child_elements>
 
 

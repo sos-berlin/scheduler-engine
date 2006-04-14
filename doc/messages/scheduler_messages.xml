@@ -1984,6 +1984,12 @@
             </text>
         </message>
 
+        <message code="SCHEDULER-318">
+            <text xml:lang="en">
+                <title>Option -env=NAME=VALUE: missing '=' between name and value: -env="<p1/>"</title>
+            </text>
+        </message>
+
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->
@@ -2540,6 +2546,12 @@
         <message code="SCHEDULER-965">
             <text xml:lang="en">
                 <title>Executing command <p1/></title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-966">
+            <text xml:lang="en">
+                <title>Command answer: <p1/></title>
             </text>
         </message>
 

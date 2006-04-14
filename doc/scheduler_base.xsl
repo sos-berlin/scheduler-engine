@@ -12,6 +12,9 @@
 <xsl:stylesheet xmlns:xsl = "http://www.w3.org/1999/XSL/Transform"
                 version   = "1.0">
 
+    <xsl:import href="scheduler-phrases.xsl"/>
+    <xsl:variable name="phrases" select="document( 'scheduler-phrases.xsl' )/xsl:stylesheet/xsl:template [ @name='this_is_a_container_only_for_phrases' ]/phrases" />
+    
     <!--xsl:param name="programming_language"/   verhindert in ie6 die Transformation -->
     <xsl:output doctype-public="-//W3C//DTD HTML 4.01//EN" />  <!--"http://www.w3.org/TR/html4/strict.dtd"-->
 
@@ -25,6 +28,32 @@
 
     <xsl:variable name="start_page" select="'index.xml'"/>
     <xsl:variable name="base_dir"   select="/*/@base_dir"/>
+    <xsl:variable name="debug_phrases" select="$phrases [ @style and @style!='' ]"/>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~phrase-->
+
+    <xsl:template name="phrase">
+        <xsl:param name="id"/>
+
+        <xsl:element name="span">
+            <xsl:attribute name="style"><xsl:value-of select="$phrases/@style"/></xsl:attribute>
+
+            <xsl:variable name="phrase" select="$phrases/phrase [ @id = $id ]"/>
+            
+            <xsl:choose>
+                <xsl:when test="$phrase/node()">
+                    <xsl:copy-of select="$phrase/node()"/>
+                </xsl:when>
+                <xsl:otherwise>
+                    <span style="background-color: red; color: black; font-weight: bold" title="Dokumentationsfehler: Text ist nicht in der scheduler.xsl.phrases.xml eingetragen">
+                        &lt;phrase id="<xsl:value-of select="$id"/>"/>
+                    </span>
+                    <xsl:message>*** &lt;phrase id="<xsl:value-of select="$id"/>"/> ist nicht definiert</xsl:message>
+                </xsl:otherwise>
+            </xsl:choose>
+
+        </xsl:element>
+    </xsl:template>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~xml_commands-->
     <!-- Für xml_commands.xml -->
@@ -65,8 +94,16 @@
             <col valign="baseline"/>
             <thead>
                 <tr>
-                    <td>Kommando</td>
-                    <td style="padding-top: 1ex; padding-left: 2ex">Antwort (eingepackt in <code>&lt;spooler>&lt;answer></code>)</td>
+                    <td>
+                        <xsl:call-template name="phrase">
+                            <xsl:with-param name="id" select="'xml.command_table.title.command'"/>
+                        </xsl:call-template>
+                    </td>
+                    <td style="padding-top: 1ex; padding-left: 2ex">
+                        <xsl:call-template name="phrase">
+                            <xsl:with-param name="id" select="'xml.command_table.title.answer'"/>
+                        </xsl:call-template>
+                    </td>
                 </tr>
                 <tr>
                     <td colspan="2">
@@ -106,7 +143,7 @@
 
     <xsl:template match="xml_element">
 
-        <xsl:variable name="title">XML-Element&#160; &lt;<xsl:value-of select="@name"/>><!-- &#160; – &#160; <xsl:value-of select="@title"/>--><xsl:if test="@category">&#160; &#160; (<xsl:value-of select="@category"/>)</xsl:if></xsl:variable>
+        <xsl:variable name="title"><xsl:value-of select="$phrases/phrase [ @id='xml_element.chapter_title.prefix' ]"/>&#160; &lt;<xsl:value-of select="@name"/>><xsl:if test="@category">&#160; &#160; (<xsl:value-of select="@category"/>)</xsl:if></xsl:variable>
 
         <html>
             <xsl:call-template name="html_head">
@@ -120,7 +157,6 @@
                     <xsl:with-param name="parent_page" select="@parent_page"/>
                 </xsl:call-template>
 
-                <!--<h2>Schema</h2>-->
                 <div class="example">
                     <code>&lt;<xsl:value-of select="@name"/></code>
 
@@ -219,47 +255,23 @@
 
                 <xsl:for-each select="behavior_with_xml_element">
                     <h2>
-                        Verhalten mit&#160;
+                        <xsl:call-template name="phrase">
+                            <xsl:with-param name="id" select="'xml_element.behaviour_with'"/>
+                        </xsl:call-template>
+                        
+                        <xsl:text>&#160;</xsl:text>
+                        
                         <xsl:call-template name="scheduler_element">
                             <xsl:with-param name="name" select="@element"/>
                         </xsl:call-template>
                     </h2>
 
                     <div class="indent">
-                        <xsl:if test="@replace_attribute">
-                            Ersetzt ein Element <code>&lt;<xsl:value-of select="parent::*/@name"/>></code>
-                            an der entsprechenden Stelle
-                            mit gleichem Attribut <code><xsl:value-of select="@replace_attribute"/>=</code>
-                            aus der Basiskonfiguration.
-                        </xsl:if>
-
-                        <xsl:if test="@replace='yes'">
-                            Ersetzt ein Element <code>&lt;<xsl:value-of select="parent::*/@name"/>></code>
-                            an der entsprechenden Stelle
-                            aus der Basiskonfiguration.
-                        </xsl:if>
-
-                        <xsl:if test="@complete_attribute">
-                            Ergänzt ein Element <code>&lt;<xsl:value-of select="parent::*/@name"/>></code>
-                            an der entsprechenden Stelle
-                            mit gleichem Attribut <code><xsl:value-of select="@complete_attribute"/>=</code>
-                            aus der Basiskonfiguration.
-                            Hier angegebene Attribute überschreiben die aus der Basiskonfiguration.
-                        </xsl:if>
-
-                        <xsl:if test="@complete='yes'">
-                            Ergänzt ein Element <code>&lt;<xsl:value-of select="parent::*/@name"/>></code>
-                            an der entsprechenden Stelle
-                            aus der Basiskonfiguration.
-                            In <code>&lt;<xsl:value-of select="parent::*/@name"/>></code> 
-                            angegebene Attribute überschreiben die aus der Basiskonfiguration.
-                        </xsl:if>
-
-                        <xsl:if test="@allowed='no'">
-                            <code>&lt;<xsl:value-of select="parent::*/@name"/>></code> darf nicht angegeben werden, 
-                            wenn es bereits in der Basiskonfiguration steht.
-                        </xsl:if>
-
+                        <xsl:apply-templates select="." mode="phrase">
+                            <xsl:with-param name="element">
+                                <code><xsl:value-of select="parent::*/@name"/></code>
+                            </xsl:with-param>
+                        </xsl:apply-templates>
                         <xsl:apply-templates select="description"/>
                     </div>
                 </xsl:for-each>
@@ -281,14 +293,24 @@
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~xml_parent_elements-->
 
     <xsl:template match="xml_parent_elements">
-        <h2>Eltern-Elemente</h2>
+        <h2>
+            <xsl:call-template name="phrase">
+                <xsl:with-param name="id" select="'xml_element.parent_elements.title'"/>
+            </xsl:call-template>
+        </h2>
+        
         <xsl:apply-templates select="xml_parent_element"/>
     </xsl:template>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~xml_child_elements-->
 
     <xsl:template match="xml_child_elements">
-        <h2>Kind-Elemente</h2>
+        <h2>
+            <xsl:call-template name="phrase">
+                <xsl:with-param name="id" select="'xml_element.child_elements.title'"/>
+            </xsl:call-template>
+        </h2>
+
         <xsl:apply-templates select="xml_child_element"/>
     </xsl:template>
 
@@ -350,9 +372,12 @@
 
             <xsl:if test="self::xml_child_element/@multiple='yes'">
                 <p>
-                    <code>&lt;<xsl:value-of select="@name"/>></code> kann wiederholt werden.
+                    <xsl:apply-templates select="." mode="phrase">
+                        <xsl:with-param name="element">
+                            <code>&lt;<xsl:value-of select="@name"/>></code>
+                        </xsl:with-param>
+                    </xsl:apply-templates>
                 </p>
-                <br/>
             </xsl:if>
             
             <xsl:apply-templates select="example"/>
@@ -362,7 +387,12 @@
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~xml_attributes-->
 
     <xsl:template match="xml_attributes">
-        <h2>Attribute</h2>
+        <h2>
+            <xsl:call-template name="phrase">
+                <xsl:with-param name="id" select="'xml_element.attributes.title'"/>
+            </xsl:call-template>
+        </h2>
+        
         <xsl:apply-templates select="xml_attribute"/>
     </xsl:template>
 
@@ -399,7 +429,12 @@
     <xsl:template match="xml_answer">
 
         <h2>
-            Antwort&#160; &lt;<xsl:value-of select="@element"/>>
+            <xsl:call-template name="phrase">
+                <xsl:with-param name="id" select="'xml_element.answer.title.prefix'"/>
+            </xsl:call-template>
+            
+            <xsl:text>&#160;</xsl:text>
+            &lt;<xsl:value-of select="@element"/>>
             
             <xsl:if test="@element2">
                 &lt;<xsl:value-of select="@element2"/>>
@@ -495,10 +530,16 @@
                         <thead>
                             <tr>
                                 <td>
-                                    Kategorie
+                                    <xsl:call-template name="phrase">
+                                        <xsl:with-param name="id" select="'log_categories.table.categories.title'"/>
+                                    </xsl:call-template>
                                 </td>
                                 <td style="padding-left: 2ex">
-                                    Default¹
+                                    <xsl:call-template name="phrase">
+                                        <xsl:with-param name="id" select="'log_categories.table.default.title'"/>
+                                    </xsl:call-template>
+                                    
+                                    <xsl:text>¹</xsl:text>
                                 </td>
                             </tr>
                             <tr>
@@ -517,12 +558,9 @@
                 </p>
 
                 <p class="small">
-                    ¹) "default" bedeutet, dass diese Kategorie voreingestellt ist.
-                    <br/>
-                    "implizit" bedeutet, dass diese Kategorie ausgewählt wird, wenn Sie die Mutterkategorie angeben.
-                    <br/>
-                    "nur explizit" bedeutet, dass die Kategorie explizt angegeben werden muss.
-                    <code>all</code> oder die Mutterkategorie mit oder ohne "<code>.*</code>" schalten dieses Kategorie nicht ein.
+                    <xsl:call-template name="phrase">
+                        <xsl:with-param name="id" select="'log_categories.footnotes'"/>
+                    </xsl:call-template>
                 </p>
 
                 <xsl:call-template name="bottom">
@@ -598,7 +636,16 @@
         <xsl:variable name="setting" select="document( 'settings.xml' )/settings/setting[ @setting = current()/@setting ]"/>
 
         <xsl:if test="@initial | $setting/@initial">
-            (Initialwert: <code><xsl:value-of select="@initial | $setting/@initial"/></code>)
+            <xsl:text>(</xsl:text>
+
+            <xsl:call-template name="phrase">
+                <xsl:with-param name="id" select="'setting.initial_value'"/>
+            </xsl:call-template>
+
+            <xsl:text>: </xsl:text>
+            <code><xsl:value-of select="@initial | $setting/@initial"/></code>
+            
+            <xsl:text>)</xsl:text>
             &#160; &#160;
         </xsl:if>
 
@@ -625,13 +672,20 @@
 
             <xsl:if test="@subst_env='yes' or $setting/@subst_env='yes'">
                 <p>
-                    Umgebungsvariablen (z.B. <code>$HOME</code>) werden ersetzt
-                    (s.
+                    <xsl:call-template name="phrase">
+                        <xsl:with-param name="id" select="'setting.subst_env'"/>
+                    </xsl:call-template>
+                    
                     <xsl:element name="a">
                         <xsl:attribute name="class">silent</xsl:attribute>
                         <xsl:attribute name="href"><xsl:value-of select="$base_dir"/>ersetzung_von_umgebungsvariablen.xml</xsl:attribute>
-                        <xsl:text>hier</xsl:text>
-                    </xsl:element>).
+                        <xsl:text> </xsl:text>
+                        <xsl:call-template name="phrase">
+                            <xsl:with-param name="id" select="'setting.subst_env.here'"/>
+                        </xsl:call-template>
+                    </xsl:element>
+                    
+                    <xsl:text>).</xsl:text>
                 </p>
             </xsl:if>
 
@@ -652,133 +706,233 @@
                                                       document( 'api/Log.xml'     )/api.class/property [ @setting = current()/@setting ] |
                                                       document( 'api/Mail.xml'    )/api.class/property [ @setting = current()/@setting ] "/>
                 <xsl:if test="$property">
-                  <tr>
-                    <td>
-                        Die Eigenschaft
-                    </td>
+                    <tr>
+                        <xsl:variable name="has_priority" select="count( $property [ not( @access ) or @access='write' ] ) > 0"/>
 
-                    <td style="padding-left: 1ex">
-                        <xsl:call-template name="scheduler_method">
-                            <xsl:with-param name="class"    select="$property/parent::api.class/@name"/>
-                            <xsl:with-param name="property" select="$property/@name"/>
-                        </xsl:call-template>
-                    </td>
+                        <td>
+                            <xsl:call-template name="phrase">
+                                <xsl:with-param name="id" select="concat( 'setting_references.api_property_has_priority=', $has_priority, '.prefix' )"/>
+                            </xsl:call-template>
+                        </td>
 
-                    <td style="padding-left: 1ex">
-                        <xsl:choose>
-                            <xsl:when test="$property [ not( @access ) or @access='write' ]">
-                                hat Vorrang.
-                            </xsl:when>
-                            <xsl:otherwise>
-                                liest die Einstellung.
-                            </xsl:otherwise>
-                        </xsl:choose>
-                    </td>
-                  </tr>  
+                        <td style="padding-left: 1ex">
+                            <xsl:call-template name="scheduler_method">
+                                <xsl:with-param name="class"    select="$property/parent::api.class/@name"/>
+                                <xsl:with-param name="property" select="$property/@name"/>
+                            </xsl:call-template>
+                        </td>
+
+                        <td style="padding-left: 1ex">
+                            <xsl:call-template name="phrase">
+                                <xsl:with-param name="id" select="concat( 'setting_references.api_property_has_priority=', $has_priority, '.suffix' )"/>
+                            </xsl:call-template>
+                        </td>
+                    </tr>
+                    
+                    <xsl:if test="$debug_phrases">
+                        <tr style="text-decoration: line-through">
+                            <td>
+                                Die Eigenschaft
+                            </td>
+
+                            <td style="padding-left: 1ex">
+                                <xsl:call-template name="scheduler_method">
+                                    <xsl:with-param name="class"    select="$property/parent::api.class/@name"/>
+                                    <xsl:with-param name="property" select="$property/@name"/>
+                                </xsl:call-template>
+                            </td>
+
+                            <td style="padding-left: 1ex">
+                                <xsl:choose>
+                                    <xsl:when test="$property [ not( @access ) or @access='write' ]">
+                                        hat Vorrang.
+                                    </xsl:when>
+                                    <xsl:otherwise>
+                                        liest die Einstellung.
+                                    </xsl:otherwise>
+                                </xsl:choose>
+                            </td>
+                        </tr>
+                    </xsl:if>
                 </xsl:if>
             </xsl:if>
 
             <xsl:if test="not( self::command_option )">
                 <xsl:variable name="command_option" select="document( 'command_line.xml' )/command_line/command_options/command_option[ @setting = current()/@setting ]"/>
                 <xsl:if test="$command_option">
-                 <tr>
-                    <td>
-                        Die Option
-                    </td>
-                    
-                    <td style="padding-left: 1ex">
-                        <xsl:call-template name="scheduler_option">
-                            <xsl:with-param name="name"  select="$command_option/@name"/>
-                            <xsl:with-param name="value" select="document( 'settings.xml' )/settings/setting[ @setting = current()/@setting ]/@initial"/>
-                        </xsl:call-template>
-                    </td>
+                    <tr>
+                        <xsl:variable name="has_priority" select="not( self::property )"/>
 
-                    <td style="padding-left: 1ex">
-                        <xsl:choose>
-                            <xsl:when test="not( self::property )">
-                                hat Vorrang.
-                            </xsl:when>
-                            <xsl:otherwise>
-                                wird damit überschrieben.
-                            </xsl:otherwise>
-                        </xsl:choose>
-                    </td>
-                  </tr>
+                        <td>
+                            <xsl:call-template name="phrase">
+                                <xsl:with-param name="id" select="concat( 'setting_references.option_has_priority=', $has_priority, '.prefix' )"/>
+                            </xsl:call-template>
+                        </td>
+
+                        <td style="padding-left: 1ex">
+                            <xsl:call-template name="scheduler_option">
+                                <xsl:with-param name="name"  select="$command_option/@name"/>
+                                <xsl:with-param name="value" select="document( 'settings.xml' )/settings/setting[ @setting = current()/@setting ]/@initial"/>
+                            </xsl:call-template>
+                        </td>
+
+                        <td style="padding-left: 1ex">
+                            <xsl:call-template name="phrase">
+                                <xsl:with-param name="id" select="concat( 'setting_references.option_has_priority=', $has_priority, '.suffix' )"/>
+                            </xsl:call-template>
+                        </td>
+                    </tr>
+
+                    <xsl:if test="$debug_phrases">
+                        <tr style="text-decoration: line-through">
+                            <td>
+                                Die Option
+                            </td>
+                            
+                            <td style="padding-left: 1ex">
+                                <xsl:call-template name="scheduler_option">
+                                    <xsl:with-param name="name"  select="$command_option/@name"/>
+                                    <xsl:with-param name="value" select="document( 'settings.xml' )/settings/setting[ @setting = current()/@setting ]/@initial"/>
+                                </xsl:call-template>
+                            </td>
+
+                            <td style="padding-left: 1ex">
+                                <xsl:choose>
+                                    <xsl:when test="not( self::property )">
+                                        hat Vorrang.
+                                    </xsl:when>
+                                    <xsl:otherwise>
+                                        wird damit überschrieben.
+                                    </xsl:otherwise>
+                                </xsl:choose>
+                            </td>
+                        </tr>
+                    </xsl:if>
                 </xsl:if>
             </xsl:if>
 
             
-            <xsl:if test="true()">
-                <xsl:variable name="ini_entry" select="( document( 'factory_ini_job.xml'     ) |
-                                                         document( 'factory_ini_spooler.xml' ) |
-                                                         document( 'sos_ini_mail.xml'        ) |
-                                                         document( 'sos_ini_java.xml'        )   )/ini_section/ini_entries/ini_entry[ @setting = current()/@setting ]"/>
-                <xsl:variable name="current_setting" select="."/>
+            <xsl:variable name="ini_entry" select="( document( 'factory_ini_job.xml'     ) |
+                                                     document( 'factory_ini_spooler.xml' ) |
+                                                     document( 'sos_ini_mail.xml'        ) |
+                                                     document( 'sos_ini_java.xml'        )   )/ini_section/ini_entries/ini_entry[ @setting = current()/@setting ]"/>
+            <xsl:variable name="current_setting" select="."/>
 
-                <xsl:for-each select="$ini_entry">
+            <xsl:for-each select="$ini_entry">
                  <xsl:if test="not( $current_setting [ self::ini_entry ] ) or 
                                ancestor::ini_section/@file != $current_setting/ancestor::ini_section/@file  or  
                                ancestor::ini_section/@name != $current_setting/ancestor::ini_section/@name">
-                  <tr>
-                    <td>
-                        Die Einstellung
-                    </td>
+                     <tr>
+                         <xsl:variable name="has_priority" select="$current_setting/ancestor::ini_section/@weight &lt; ancestor::ini_section/@weight"/>
 
-                    <td style="padding-left: 1ex">
-                        <xsl:call-template name="scheduler_ini_entry">
-                            <xsl:with-param name="file"    select="ancestor::ini_section/@file"/>
-                            <xsl:with-param name="section" select="ancestor::ini_section/@name"/>
-                            <xsl:with-param name="entry"   select="@name | @setting"/>
-                            <xsl:with-param name="value"   select="document( 'settings.xml' )/settings/setting[ @setting = current()/@setting ]/@initial"/>
-                        </xsl:call-template>
-                    </td>
+                         <td>
+                             <xsl:call-template name="phrase">
+                                 <xsl:with-param name="id" select="concat( 'setting_references.ini_has_priority=', $has_priority, '.prefix' )"/>
+                             </xsl:call-template>
+                         </td>
 
-                    <td style="padding-left: 1ex">
-                        <xsl:choose>
-                            <!--xsl:when test="not( $current_setting/self::property       ) and
-                                            not( $current_setting/self::command_option ) and 
-                                            not( $current_setting/self::ini_entry and $current_setting/ancestor::ini_section/@name='job' )">
-                                hat Vorrang.                                                            
-                            </xsl:when-->
-                            <xsl:when test="$current_setting/ancestor::ini_section/@weight &lt; ancestor::ini_section/@weight">
-                                hat Vorrang.                                                            
-                            </xsl:when>
-                            <xsl:otherwise>
-                                wird damit überschrieben.
-                            </xsl:otherwise>
-                        </xsl:choose>
-                    </td>
-                   </tr>
-                  </xsl:if>
-                 </xsl:for-each>
-            </xsl:if>
+                         <td style="padding-left: 1ex">
+                             <xsl:call-template name="scheduler_ini_entry">
+                                 <xsl:with-param name="file"    select="ancestor::ini_section/@file"/>
+                                 <xsl:with-param name="section" select="ancestor::ini_section/@name"/>
+                                 <xsl:with-param name="entry"   select="@name | @setting"/>
+                                 <xsl:with-param name="value"   select="document( 'settings.xml' )/settings/setting[ @setting = current()/@setting ]/@initial"/>
+                             </xsl:call-template>
+                         </td>
+
+                         <td style="padding-left: 1ex">
+                             <xsl:call-template name="phrase">
+                                 <xsl:with-param name="id" select="concat( 'setting_references.ini_has_priority=', $has_priority, '.suffix' )"/>
+                             </xsl:call-template>
+                         </td>
+                     </tr>
+
+                     <xsl:if test="$debug_phrases">
+                         <tr style="text-decoration: line-through">
+                            <td>
+                                Die Einstellung
+                            </td>
+
+                            <td style="padding-left: 1ex">
+                                <xsl:call-template name="scheduler_ini_entry">
+                                    <xsl:with-param name="file"    select="ancestor::ini_section/@file"/>
+                                    <xsl:with-param name="section" select="ancestor::ini_section/@name"/>
+                                    <xsl:with-param name="entry"   select="@name | @setting"/>
+                                    <xsl:with-param name="value"   select="document( 'settings.xml' )/settings/setting[ @setting = current()/@setting ]/@initial"/>
+                                </xsl:call-template>
+                            </td>
+
+                            <td style="padding-left: 1ex">
+                                <xsl:choose>
+                                    <!--xsl:when test="not( $current_setting/self::property       ) and
+                                                    not( $current_setting/self::command_option ) and 
+                                                    not( $current_setting/self::ini_entry and $current_setting/ancestor::ini_section/@name='job' )">
+                                        hat Vorrang.                                                            
+                                    </xsl:when-->
+                                    <xsl:when test="$current_setting/ancestor::ini_section/@weight &lt; ancestor::ini_section/@weight">
+                                        hat Vorrang.                                                            
+                                    </xsl:when>
+                                    <xsl:otherwise>
+                                        wird damit überschrieben.
+                                    </xsl:otherwise>
+                                </xsl:choose>
+                            </td>
+                        </tr>
+                    </xsl:if>
+                </xsl:if>
+            </xsl:for-each>
 
 
             <xsl:if test="not( self::xml_attribute )">
                 <xsl:variable name="config_attribute" select="document( 'xml/config.xml' )/xml_element/xml_attributes/xml_attribute[ @setting = current()/@setting ]"/>
-                <xsl:variable name="current_setting" select="."/>
 
                 <xsl:if test="$config_attribute">
-                  <tr>
-                    <td>
-                        Das XML-Attribut
-                    </td>
+                    <tr>
+                        <xsl:variable name="has_priority" select="false()"/>
 
-                    <td style="padding-left: 1ex">
-                        <xsl:call-template name="scheduler_element">
-                            <xsl:with-param name="name"      select="'config'"/>
-                            <xsl:with-param name="attribute" select="$config_attribute/@name | $config_attribute/@setting"/>
-                        </xsl:call-template>
-                    </td>
+                        <td>
+                            <xsl:call-template name="phrase">
+                                <xsl:with-param name="id" select="concat( 'setting_references.xml_has_priority=', $has_priority, '.prefix' )"/>
+                            </xsl:call-template>
+                        </td>
 
-                    <td style="padding-left: 1ex">
-                        <!--xsl:choose>
-                            <xsl:when test="$current_setting/self::ini_entry or $current_setting/self::command_option or $current_setting/self::property [ not( @access='read' ) ]">
-                            </xsl:when>
-                        </xsl:choose-->
-                        wird damit überschrieben.
-                    </td>
-                  </tr>
+                        <td style="padding-left: 1ex">
+                            <xsl:call-template name="scheduler_element">
+                                <xsl:with-param name="name"      select="'config'"/>
+                                <xsl:with-param name="attribute" select="$config_attribute/@name | $config_attribute/@setting"/>
+                            </xsl:call-template>
+                        </td>
+
+                        <td style="padding-left: 1ex">
+                            <xsl:call-template name="phrase">
+                                <xsl:with-param name="id" select="concat( 'setting_references.xml_has_priority=', $has_priority, '.suffix' )"/>
+                            </xsl:call-template>
+                        </td>
+                    </tr>
+
+                    <xsl:if test="$debug_phrases">
+                        <tr style="text-decoration: line-through">
+
+                            <td>
+                                Das XML-Attribut
+                            </td>
+
+                            <td style="padding-left: 1ex">
+                                <xsl:call-template name="scheduler_element">
+                                    <xsl:with-param name="name"      select="'config'"/>
+                                    <xsl:with-param name="attribute" select="$config_attribute/@name | $config_attribute/@setting"/>
+                                </xsl:call-template>
+                            </td>
+
+                            <td style="padding-left: 1ex">
+                                <!--xsl:choose>
+                                    <xsl:when test="$current_setting/self::ini_entry or $current_setting/self::command_option or $current_setting/self::property [ not( @access='read' ) ]">
+                                    </xsl:when>
+                                </xsl:choose-->
+                                wird damit überschrieben.
+                            </td>
+                        </tr>
+                    </xsl:if>
                 </xsl:if>
             </xsl:if>
         </table>
@@ -789,10 +943,25 @@
     <xsl:template match="example">
         <xsl:param name="programming_language"/>
 
+        <xsl:call-template name="example">
+            <xsl:with-param name="programming_language" select="$programming_language"/>
+        </xsl:call-template>
+
+    </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~example-->
+
+    <xsl:template name="example">
+        <xsl:param name="programming_language"/>
+
         <h3>
-            Beispiel&#160;&#160;
+            <xsl:call-template name="phrase">
+                <xsl:with-param name="id" select="'example.title'"/>
+            </xsl:call-template>
+
 
             <span style="font-weight: normal">
+                <xsl:text>&#160;&#160;</xsl:text>
                 <xsl:value-of select="@title"/>
 
                 <xsl:if test="$programming_language">
@@ -800,13 +969,19 @@
                         <xsl:text>, </xsl:text>
                     </xsl:if>
 
-                    in <xsl:value-of select="$programming_language"/>
+                    <xsl:call-template name="phrase">
+                        <xsl:with-param name="id" select="'in_programming_language'"/>
+                    </xsl:call-template>
+
+                    <xsl:text> </xsl:text>
+                    
+                    <xsl:value-of select="$programming_language"/>
                 </xsl:if>
             </span>
         </h3>
 
         <!--xsl:copy-of select="* | text()"/-->
-        <xsl:apply-templates select="* | text()" mode="description"/>        
+        <xsl:apply-templates select="* | text()" mode="description"/>
     </xsl:template>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~/register-->
@@ -1154,6 +1329,12 @@
 	<!-- style gehört ins <head>, s. html_head -->
     </xsl:template>
 
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_example-->
+
+    <xsl:template match="scheduler_example" mode="description">
+        <xsl:call-template name="example"/>
+    </xsl:template>
+
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_comment-->
     <!-- Für Bemerkungen und Anregungen, die nicht für die Anwender gedacht sind -->
 
@@ -1340,12 +1521,23 @@
 
             <code><xsl:value-of select="$file"/></code>
 
-            (Abschnitt
+            <xsl:text>(</xsl:text>
+            
+            <xsl:call-template name="phrase">
+                <xsl:with-param name="id" select="'ini.section'"/>
+            </xsl:call-template> 
+            
             <code>[<xsl:value-of select="$section"/>]</code>
 
             <xsl:if test="$entry">
-                <xsl:text>, Eintrag </xsl:text>
-                
+                <xsl:text>, </xsl:text>
+
+                <xsl:call-template name="phrase">
+                    <xsl:with-param name="id" select="'ini.entry'"/>
+                </xsl:call-template>
+
+                <xsl:text> </xsl:text>
+
                 <code>
                     <xsl:value-of select="$entry"/>
                     <xsl:text>=</xsl:text>
@@ -1509,9 +1701,11 @@
                 <xsl:apply-templates select="description"/>
 
                 <xsl:if test="count( command_options ) &gt; 1">
-                    <p>
-                        Folgende Varianten des Aufrufs werden unterschieden:
-                    </p>
+                    <h2>
+                        <xsl:call-template name="phrase">
+                            <xsl:with-param name="id" select="'command_line.variants.title'"/>
+                        </xsl:call-template>
+                    </h2>
                     <ul>
                         <xsl:for-each select="command_options">
                             <li>
@@ -1526,7 +1720,12 @@
 
                 <xsl:apply-templates select="command_options" mode="table"/>
 
-                <h2>Optionen</h2>
+                <h2>
+                    <xsl:call-template name="phrase">
+                        <xsl:with-param name="id" select="'command_line.options.title'"/>
+                    </xsl:call-template>
+                </h2>
+                
                 <xsl:apply-templates select="command_options/command_option">
                     <xsl:sort select="@name | @setting"/>
                 </xsl:apply-templates>
@@ -1562,7 +1761,7 @@
                 <col/>
                 <col/>
                 <xsl:for-each select="command_option">
-                    <xsl:variable name="command_option" select="parent::command_options/parent::*/command_options/command_option [ @name = current()/@name and ( @type=current()/@type or not(@type) and not(current()/@type) ) and not( @reference='true' ) ]"/>
+                    <xsl:variable name="command_option" select="parent::command_options/parent::*/command_options/command_option [ @name = current()/@name and ( @type=current()/@type or not(@type) and not(current()/@type) ) and not( @reference='yes' ) ]"/>
                     <xsl:variable name="setting" select="document( 'settings.xml' )/settings/setting[ @setting = $command_option/@setting ]"/>
 
                     <tr>
@@ -1595,7 +1794,7 @@
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~command_option-->
 
-    <xsl:template match="command_option [ not( @reference='true') ]">
+    <xsl:template match="command_option [ not( @reference='yes') ]">
 
         <xsl:variable name="setting" select="document( 'settings.xml' )/settings/setting[ @setting = current()/@setting ]"/>
 
@@ -1615,6 +1814,16 @@
         </p>
 
         <xsl:apply-templates mode="setting_description" select="."/>
+
+        <xsl:if test="@multiple='yes'">
+            <div class="indent">
+                <p>
+                    <xsl:call-template name="phrase">
+                        <xsl:with-param name="id" select="'command_line.option.multiple'"/>
+                    </xsl:call-template>
+                </p>
+            </div>
+        </xsl:if>
 
     </xsl:template>
 
@@ -1636,13 +1845,15 @@
 
                 <xsl:apply-templates mode="description" select="description/*"/>
 
-                <p>
-                    Unter Windows wird sollte die Datei dort angelegt werden, wo Windows seine <code>.ini</code>-Dateien erwartet.
-                    Das ist normalerweise im Verzeichnis <code>c:\windows</code>.
-                    Sonst wird die Datei im Heimverzeichnis des Benutzers erwartet.
-                </p>
+                <xsl:call-template name="phrase">
+                    <xsl:with-param name="id" select="'ini.file.location_remark'"/>
+                </xsl:call-template>
 
-                <h2>Abschnitte</h2>
+                <h2>
+                    <xsl:call-template name="phrase">
+                        <xsl:with-param name="id" select="'ini.sections.title'"/>
+                    </xsl:call-template>
+                </h2>
 
                 <xsl:for-each select="ini_sections/ini_section">
                     <xsl:variable name="section_filename" select="concat( translate( ancestor::ini/@file, '.', '_' ), '_', @name, '.xml' )"/>
@@ -1738,7 +1949,7 @@
 
     <xsl:template match="ini_section">
 
-        <xsl:variable name="title"       select="concat( 'Datei ', @file, ',&#160; Abschnitt&#160; [', @name, ']' )"/>
+        <xsl:variable name="title"       select="concat( $phrases/phrase [ @id='ini.file.title' ]/text(), ' ', @file, ',&#160; ', $phrases/phrase [ @id='ini.section' ]/text(), '&#160; [', @name, ']' )"/>
         <xsl:variable name="parent_page" select="concat( translate( @file, '.', '_' ), '.xml' )"/>
 
         <html>
@@ -1754,7 +1965,12 @@
 
                 <xsl:apply-templates select="." mode="table"/>
 
-                <h2>Einträge</h2>
+                <h2>
+                    <xsl:call-template name="phrase">
+                        <xsl:with-param name="id" select="'ini.sections.title'"/>
+                    </xsl:call-template>
+                </h2>
+                
                 <xsl:apply-templates select="." mode="details"/>
 
                 <xsl:call-template name="bottom">
@@ -2090,7 +2306,11 @@
                             <xsl:with-param name="parent_page" select="$parent_page"/>
                         </xsl:call-template>
 
-                        <a href="http://www.sos-berlin.com">Software- und Organisations-Service GmbH</a>
+                        <a href="http://www.sos-berlin.com">
+                            <xsl:call-template name="phrase">
+                                <xsl:with-param name="id" select="'head.link_to_sos'"/>
+                            </xsl:call-template>
+                        </a>
                     </p>
                 </td>
             </tr>
@@ -2124,7 +2344,10 @@
                             <xsl:with-param name="parent_page" select="$parent_page"/>
                         </xsl:call-template>
 
-                        Zuletzt geändert von
+                        <xsl:call-template name="phrase">
+                            <xsl:with-param name="id" select="'head.last_updated_by'"/>
+                        </xsl:call-template>
+                        <xsl:text> </xsl:text>
                         <xsl:variable name="name" select="substring-before( substring-after( /*/@author, 'Author: ' ), ' $' )"/>
                         <xsl:choose>
                             <xsl:when test="$name = 'jz'">Joacim Zschimmer</xsl:when>
@@ -2151,7 +2374,10 @@
                     <xsl:attribute name="class">silent</xsl:attribute>
                     <xsl:attribute name="href"><xsl:value-of select="concat( $base_dir, $start_page )"/></xsl:attribute>
                     <xsl:attribute name="rel">start</xsl:attribute>
-                    <xsl:text>Erste Seite</xsl:text>
+                    
+                    <xsl:call-template name="phrase">
+                        <xsl:with-param name="id" select="'head.link_to_first_page'"/>
+                    </xsl:call-template>
                 </xsl:element>
 
                 <xsl:if test="$parent_page">
@@ -2176,20 +2402,26 @@
 
         <xsl:element name="a">
             <xsl:attribute name="href"><xsl:value-of select="$base_dir"/>api/api.xml</xsl:attribute>
-            <xsl:text>API</xsl:text>
+            <xsl:call-template name="phrase">
+                <xsl:with-param name="id" select="'head.link_to_api'"/>
+            </xsl:call-template>
         </xsl:element>
         &#160; &#160; &#160;
 
         <xsl:element name="a">
             <xsl:attribute name="href"><xsl:value-of select="$base_dir"/>xml.xml</xsl:attribute>
-            <xsl:text>XML</xsl:text>
+            <xsl:call-template name="phrase">
+                <xsl:with-param name="id" select="'head.link_to_xml'"/>
+            </xsl:call-template>
         </xsl:element>
         &#160; &#160; &#160;
 
         <xsl:element name="a">
             <xsl:attribute name="href"><xsl:value-of select="$base_dir"/>register.xml</xsl:attribute>
             <xsl:attribute name="rel">index</xsl:attribute>
-            <xsl:text>Register</xsl:text>
+            <xsl:call-template name="phrase">
+                <xsl:with-param name="id" select="'head.link_to_index'"/>
+            </xsl:call-template>
         </xsl:element>
         &#160; &#160; &#160;
 

@@ -31,6 +31,13 @@
                 <dl>
                     <dt>In <scheduler_element name="weekdays"/>:</dt>
                     <dd>
+                        <code>"monday"</code>,
+                        <code>"tuesday"</code>,
+                        <code>"wednesday"</code>,
+                        <code>"thursday"</code>,
+                        <code>"friday"</code>,
+                        <code>"saturday"</code> und
+                        <code>"sunday"</code> oder
                         0 für Sonntag, 1 für Montag usw. bis 6 für Samstag.
                     </dd>
 

@@ -182,6 +182,15 @@
             </description>
         </command_option>
 
+
+        <command_option name="env" multiple="yes" type="name=value" title="Umgebungsvariable setzen">
+            <description>
+                <p>
+                    <code>-env=NAME=VALUE</code> setzt die Umgebungsvariable NAME.
+                </p>
+            </description>
+        </command_option>
+
         <example>
             <pre>c:\bin\scheduler.exe c:\scheduler\config.xml -log-dir=c:\scheduler\logs</pre>
         </example>
@@ -213,6 +222,8 @@
                     <scheduler_option name="pid-file"/>
                     <br/>
                     <scheduler_option name="sos.ini"/>
+                    <br/>
+                    <scheduler_option name="env"/>
                     <br/>
                 </p>
                 <p>
@@ -295,7 +306,7 @@
             </description>
         </command_option>
 
-        <command_option name="log" setting="scheduler_log" reference="true"/>
+        <command_option name="log" setting="scheduler_log" reference="yes"/>
 
         <command_option name="process-class" type="name">
             <description>
@@ -351,8 +362,8 @@
 
     
     <command_options name="add_order" title="Laufendem Scheduler einen Auftrag übergeben">
-        <command_option name="scheduler" reference="true"/>
-        <command_option name="log" reference="true"/>
+        <command_option name="scheduler" reference="yes"/>
+        <command_option name="log" reference="yes"/>
 
         <command_option name="job-chain" type="name" title="Jobkette">
             <description>
@@ -398,7 +409,7 @@
     </command_options>    
 
     <command_options name="send_cmd" title="XML-Kommando an laufenden Scheduler übergeben">
-        <command_option name="tcp-port" reference="true"/>
+        <command_option name="tcp-port" reference="yes"/>
 
         <command_option name="send-cmd" type="xmlkommando" title="Anderem Scheduler zu schickendes Kommando">
             <description>
@@ -432,7 +443,7 @@
             </description>
         </command_option>
 
-        <command_option name="pid-file" type="dateiname" reference="true"/>
+        <command_option name="pid-file" type="dateiname" reference="yes"/>
 
         <example>
             <pre>scheduler -kill -pid-file=/home/scheduler/scheduler.pid</pre>

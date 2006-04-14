@@ -10,7 +10,58 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2006-04-12" version="2.0.151" subversion_revision="4250">
+    <change date="2006-04-13" version="2.0.151" subversion_revision="4254">
+        <revision type="new" title="Option -env=NAME=WERT">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_option name="env" value="NAME=VALUE"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+
+        <revision type="modification" title="Verhalten bei Fehler von &lt;start_when_directory_changed&gt; geändert">
+            <description>
+                <p>
+                    Bisher wurde die Verzeichnisüberwachung beim Start jeder Task wiederholt.
+                    Bei einem Fehler in der Verzeichnisüberwachung 
+                    (z.B. weil das Verzeichnis entfernt worden war)
+                    wurde der Job gestoppt, während die Task zuende laufen konnte,
+                    und keine weitere Task wurde mehr gestartet.
+                </p>
+                <p>
+                    Jetzt stopp der Scheduler den Job nicht mehr direkt.
+                    Die Verzeichnisüberwachung wird am Ende der Task 
+                    (nach <scheduler_method class="Job_impl" method="spooler_exit"/>)
+                    wiederholt.
+                    Ein Fehler dabei führt zum Stopp des Jobs, 
+                    der aber mit <scheduler_element name="delay_after_error"/> abgefangen werden kann.
+                </p>
+                <ul>
+                    <li>
+                        <scheduler_element name="start_when_directory_changed"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+
+        <revision type="new" title="Web-Service-Parameter werden in XSLT-Stylesheets übernommen">
+            <description>
+                <p>
+                    Parameter, die Apostroph und Anführungszeichen enthalten, werden mit Warnung abgewiesen, 
+                    da offenbar solche Werte <a href="http://xmlsoft.org/XSLT/">libxslt</a> nicht übergeben werden können.
+                </p>
+                <ul>
+                    <li>
+                        <scheduler_element name="web_service" child="params"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+    </change>
+
+    <change date="2006-04-12" version="2.0.151" subversion_revision="4253">
         <revision type="new" title="Neue Eigenschaft Order.params">
             <description>
                 <ul>

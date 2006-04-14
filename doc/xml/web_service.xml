@@ -195,7 +195,7 @@ Das Stylesheet <code>…/web_service_request.xsl</code> benutzt den Parameter <c
     <behavior_with_xml_element element="base" complete="yes"/>
     
     
-    <example>
+    <!--example>
         <pre>&lt;web_service 
     name      = "my_web_service" 
     url_path  = "/webservice"
@@ -211,7 +211,7 @@ Das Stylesheet <code>…/web_service_request.xsl</code> benutzt den Parameter <c
     response_xslt_stylesheet = "$SCHEDULER_CONFIG/web_service_response.xsl"
     forward_xslt_stylesheet  = "$SCHEDULER_CONFIG/web_service_forward.xsl"
 /></pre>
-    </example>
+    </example-->
     
     
     <description>
@@ -223,10 +223,30 @@ Das Stylesheet <code>…/web_service_request.xsl</code> benutzt den Parameter <c
         <p>
             Der TCP-Port des HTTP-Servers wird mit <scheduler_element name="config" attribute="tcp_port"/> festgelegt.
         </p>
+        <p>
+            Zwei Arten von Web-Services werden unterschieden:
+        </p>
+        <ul>
+            <li>
+                Web-Service mit <code>job_chain</code>
+            </li>
+            <li>
+                Web-Service mit <code>request_xslt_stylesheet</code>
+            </li>
+        </ul>
 
 
 
-        <h2>Ablauf mit job_chain</h2>
+        <h2>Web-Service mit job_chain</h2>
+        
+        <scheduler_example>
+            <pre>&lt;web_service 
+   name      = "my_web_service" 
+   url_path  = "/web_service"
+   job_chain = "web_service" 
+   timeout   = "900"
+/&gt;</pre>
+        </scheduler_example>
         <p>
             Ein HTTP-POST auf den URL-Pfad des Web-Dienstes lässt den Scheduler einen Auftrag
             erzeugen und ihn in die angegebene Jobkette einreihen.
@@ -235,7 +255,17 @@ Das Stylesheet <code>…/web_service_request.xsl</code> benutzt den Parameter <c
         </p>
 
 
-        <h2>Ablauf mit request_xslt_stylesheet</h2>
+        <h2>Web-Service mit request_xslt_stylesheet</h2>
+        
+        <scheduler_example>
+            <pre>&lt;web_service 
+   name                     = "my_web_service" 
+   url_path                 = "/web_service"
+   request_xslt_stylesheet  = "$SCHEDULER_DIR/web_service_request.xsl"
+   response_xslt_stylesheet = "$SCHEDULER_DIR/web_service_response.xsl"
+   forward_xslt_stylesheet  = "$SCHEDULER_DIR/web_service_forward.xsl"
+/></pre>
+        </scheduler_example>
         <p>
             Ein HTTP-POST auf den URL-Pfad des Web-Dienstes löst folgende Schritte aus.
         </p>
@@ -281,7 +311,7 @@ Das Stylesheet <code>…/web_service_request.xsl</code> benutzt den Parameter <c
         </p>
 
 
-        <h2>Ergebnis der Ausführung weiterleiten (Forwarding)</h2>
+        <h3>Ergebnis der Ausführung weiterleiten (Forwarding)</h3>
         <p>
             Aufträge und Tasks können einem Web-Dienst zugeordnet sein.
             Die Kommandos <scheduler_element name="add_order"/> und <scheduler_element name="start_job"/> 

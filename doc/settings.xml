@@ -178,7 +178,7 @@ log = scheduler.wait com_server.* >scheduler.log</pre>
                 65535. In dieser Dokumentation verwenden wir 4444.
             </p>
             <p>
-                Über denselben Port betreibt der Scheduler auch einen HTTP/HTML-Server, sodass er über einen Browswer ansprechbar ist,
+                Über denselben Port betreibt der Scheduler auch einen HTTP/HTML-Server, sodass er über einen Browser ansprechbar ist,
                 z.B.: http://localhost:4444.
             </p>
             <p>
