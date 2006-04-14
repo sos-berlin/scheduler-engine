@@ -313,12 +313,12 @@ void Job::init2()
     
     _delay_until   = 0;
     set_next_start_time( Time::now() );
-    init_start_when_directory_changed( s_stopped );
+    init_start_when_directory_changed();
 }
 
 //-----------------------------------------------------------Job::init_start_when_directory_changed
 
-void Job::init_start_when_directory_changed( State error_state )
+void Job::init_start_when_directory_changed( Task* task )
 {
     for( Start_when_directory_changed_list::iterator it = _start_when_directory_changed_list.begin(); 
          it != _start_when_directory_changed_list.end();
@@ -331,8 +331,9 @@ void Job::init_start_when_directory_changed( State error_state )
         catch( exception& x )
         {
             _error = x;
-            _log->log( error_state? log_error : log_warn, string( "<start_when_directory_changed>  " ) + x.what() );
-            if( error_state )  set_state( error_state );
+            if( task )  task->set_error_xc_only( x );
+            ( task? task->log() : _log )->log( log_error, string( "<start_when_directory_changed>  " ) + x.what() );
+            //if( error_state )  set_state( error_state );
         }
     }
 }
@@ -1553,7 +1554,7 @@ bool Job::do_something()
 
                                 _next_start_time = latter_day;
                                 calculate_next_time();
-                                init_start_when_directory_changed( s_stopping );  // Bei Fehler: Job stoppen, aber Task noch laufen lassen
+                                //init_start_when_directory_changed( task ); // Bei Fehler: Ein delay_after_error sollte Job wiederholen
 
                                 task->attach_to_a_thread();
                                 _log->info( message_string( "SCHEDULER-930", task->id() ) );

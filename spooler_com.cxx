@@ -4783,7 +4783,7 @@ STDMETHODIMP Com_order::get_Web_service_operation_or_null( Iweb_service_operatio
         if( !_order )  return E_POINTER;
 
         *result = _order->web_service_operation_or_null();
-        (*result)->AddRef();
+        if( *result )  (*result)->AddRef();
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
 

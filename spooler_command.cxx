@@ -693,6 +693,14 @@ xml::Element_ptr Command_processor::execute_service_request( const xml::Element_
 
 xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& element, const Time& xml_mod_time )
 {
+    if( _log ) 
+    {
+        Message_string m ( "SCHEDULER-965" );
+        //m.set_max_insertion_length( INT_MAX );
+        m.insert( 1, element.xml() );
+        _log->info( m );
+    }
+
     Show_what show = show_jobs | show_tasks;        // Zur Kompatibilität. Besser: <show_state what="jobs,tasks"/>
 
     string max_orders = element.getAttribute( "max_orders" );
@@ -1208,7 +1216,7 @@ void Command_processor::execute_2( const xml::Document_ptr& command_doc, const T
 
         if( e )
         {
-            if( e.nodeName_is( "command" ) )
+            if( e.nodeName_is( "commands" )  ||  e.nodeName_is( "command" ) )
             {
                 execute_commands( e, xml_mod_time );
             }
@@ -1227,14 +1235,6 @@ void Command_processor::execute_commands( const xml::Element_ptr& commands_eleme
 {
     DOM_FOR_EACH_ELEMENT( commands_element, node )
     {
-        if( _log ) 
-        {
-            Message_string m ( "SCHEDULER-965" );
-            m.set_max_insertion_length( INT_MAX );
-            m.insert( 1, node.xml() );
-            _log->info( m );
-        }
-
         _answer.documentElement().firstChild().appendChild( execute_command( node, xml_mod_time ) );
     }
 }

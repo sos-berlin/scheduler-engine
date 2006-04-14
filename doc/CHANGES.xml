@@ -11,11 +11,14 @@
     <scheduler_keyword keyword="Change log"/>
 
     <change date="2006-04-13" version="2.0.151" subversion_revision="4254">
-        <revision type="new" title="Option -env=NAME=WERT">
+        <revision type="new" title="Neue Option -env=NAME=WERT">
             <description>
                 <ul>
                     <li>
                         <scheduler_option name="env" value="NAME=VALUE"/>
+                    </li>
+                    <li>
+                        <scheduler_option name="sos.ini"/> setzt die Umgebungsvariable <code>SOS_INI</code>.
                     </li>
                 </ul>
             </description>

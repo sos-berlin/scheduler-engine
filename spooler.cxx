@@ -1806,6 +1806,8 @@ void Spooler::load_arg()
             else
             if( opt.flag      ( "validate-xml"           ) )  _validate_xml = opt.set();
             else
+            if( opt.with_value( "env"                    ) )  ;  // Bereits von spooler_main() erledigt
+            else
                 throw_sos_option_error( opt );
         }
 
@@ -2799,12 +2801,24 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line )
 
         start();
 
-        // <command> aus <config> ausführen:
-        if( xml::Element_ptr commands_element = _config_element_to_load.select_node( "command" ) )
+        // <commands> aus <config> ausführen:
+        if( xml::Element_ptr commands_element = _config_element_to_load.select_node( "commands" ) )
         {
             Command_processor command_processor ( this, Security::seclev_all );
             command_processor.set_log( &_log );
-            command_processor.execute_commands( commands_element, _config_element_mod_time );
+            
+            DOM_FOR_EACH_ELEMENT( commands_element, command_element )
+            {
+                xml::Element_ptr result = command_processor.execute_command( command_element, _config_element_mod_time );
+                if( !result.select_node( "ok [ count(*) = 0  and  count(@*) = 0 ]" ) )
+                {
+                    Message_string m ( "SCHEDULER-966" );
+                    m.set_max_insertion_length( INT_MAX );
+                    m.insert( 1, result.xml( true ) );
+                    _log.info( m );
+                }
+            }
+            //command_processor.execute_commands( commands_element, _config_element_mod_time );
         }
 
         _config_element_to_load = NULL;
@@ -3257,6 +3271,13 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
                 if( opt.with_value( "log"              ) )  log_filename = opt.value();
                 else
                 if( opt.with_value( "pid-file"         ) )  pid_filename = opt.value();
+                else
+                if( opt.with_value( "env"              ) )  
+                {
+                    string value = opt.value();
+                    size_t eq = value.find( '=' ); if( eq == string::npos )  z::throw_xc( "SCHEDULER-318", value );
+                    set_environment_variable( value.substr( 0, eq ), value.substr( eq + 1 ) );
+                }
                 else
                     call_scheduler = true;     // Aber is_scheduler_client hat Vorrang!
 

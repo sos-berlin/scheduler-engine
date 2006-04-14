@@ -197,7 +197,7 @@ struct Job : Object,
     void                        init0                       ();                                     // Wird vor Spooler-Skript gerufen
     void                        init                        ();                                     // Wird nach Spooler-Skript gerufen, ruft auch init2()
     void                        init2                       ();                                     // Wird nach reread() gerufen
-    void                        init_start_when_directory_changed( State error_state = s_none );
+    void                        init_start_when_directory_changed( Task* = NULL );
     void                        set_log                     ();
     void                        init_run_time               ();
     void                        set_run_time                ( const xml::Element_ptr& );

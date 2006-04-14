@@ -187,6 +187,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-315", "<monitor> cannot be used with <process> or language=\"shell\"" },
     { "SCHEDULER-316", "<web_service name=\"$1\"/>: attributes job_chain=/timeout= and request/response/forward_xslt_stylesheet= cannot be combined" },
     { "SCHEDULER-317", "Order.payload is not a Variable_set and not null" },
+    { "SCHEDULER-318", "Option -env=NAME=VALUE: missing '=' between name and value: -env=\"$1\"" },
     { "SCHEDULER-900", "Scheduler $1 is starting with $2, pid=$3" },
     { "SCHEDULER-902", "state=$1" },
     { "SCHEDULER-904", "Tasks have $1s to terminate" },
@@ -248,6 +249,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-963", "Copying protocol file to $1" },
     { "SCHEDULER-964", "New $1" },
     { "SCHEDULER-965", "Executing command $1" },
+    { "SCHEDULER-966", "Command answer: $1" },
     { "SCHEDULER-999", "Scheduler has been terminated properly" },
     {}
 };

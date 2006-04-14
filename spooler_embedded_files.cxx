@@ -4138,7 +4138,7 @@ const char file_scheduler_xsd[] =
     "\r\n"
     "<xsd:element ref=\"jobs\"             minOccurs=\"0\"/>\r\n"
     "<xsd:element ref=\"job_chains\"       minOccurs=\"0\"/>\r\n"
-    "<xsd:element ref=\"command\"          minOccurs=\"0\"/>\r\n"
+    "<xsd:element ref=\"commands\"         minOccurs=\"0\"/>\r\n"
     "</xsd:sequence>\r\n"
     "\r\n"
     "<xsd:attribute name=\"spooler_id\"            type=\"Name\"/>\r\n"
@@ -4156,7 +4156,11 @@ const char file_scheduler_xsd[] =
     "</xsd:complexType>\r\n"
     "</xsd:element>\r\n"
     "\r\n"
-    "<xsd:element ref=\"command\"/>\r\n"
+    "<xsd:element ref=\"commands\"/>\r\n"
+    "\r\n"
+    "<xsd:element name=\"command\" type=\"Commands\">\r\n"
+    "<xsd:annotation><xsd:documentation>Deprecated. Use &lt;commands></xsd:documentation></xsd:annotation>\r\n"
+    "</xsd:element>\r\n"
     "\r\n"
     "<xsd:element name=\"answer\">\r\n"
     "<xsd:complexType/>\r\n"
@@ -4189,9 +4193,9 @@ const char file_scheduler_xsd[] =
     "</xsd:complexType>\r\n"
     "</xsd:element>\r\n"
     "\r\n"
+    "<xsd:element name=\"commands\" type=\"Commands\"/>\r\n"
     "\r\n"
-    "<xsd:element name=\"command\">\r\n"
-    "<xsd:complexType>\r\n"
+    "<xsd:complexType name=\"Commands\">\r\n"
     "<xsd:choice maxOccurs=\"unbounded\">\r\n"
     "<xsd:element ref=\"add_jobs\"/>\r\n"
     "<xsd:element ref=\"add_order\"/>\r\n"
@@ -4218,7 +4222,6 @@ const char file_scheduler_xsd[] =
     "<xsd:element ref=\"terminate\"/>\r\n"
     "</xsd:choice>\r\n"
     "</xsd:complexType>\r\n"
-    "</xsd:element>\r\n"
     "\r\n"
     "\r\n"
     "<xsd:element name=\"add_jobs\">\r\n"
@@ -4607,7 +4610,7 @@ const char file_scheduler_xsd[] =
     "<xsd:attribute name=\"day\" use=\"required\">\r\n"
     "<xsd:simpleType>\r\n"
     "<xsd:restriction base=\"xsd:NMTOKEN\">\r\n"
-    "<xsd:pattern value=\"[01234567]|(so(nntag)?)|(mo(ntag)?)|(di(enstag)?)|(mi(ttwoch)?)|(do(nnerstag)?)|(fr(eitag)?)|(sa(mstag)?)|(sun(day?))|(mon(day?))|(tue(sday?))|(wed(nesday?))|(thu(rsday?))|(fri(day?))|(sat(urday?))\"/>\r\n"
+    "<xsd:pattern value=\"[01234567]|(so(nntag)?)|(mo(ntag)?)|(di(enstag)?)|(mi(ttwoch)?)|(do(nnerstag)?)|(fr(eitag)?)|(sa(mstag)?)|(sun(day)?)|(mon(day)?)|(tue(sday)?)|(wed(nesday)?)|(thu(rsday)?)|(fri(day)?)|(sat(urday)?)\"/>\r\n"
     "</xsd:restriction>\r\n"
     "</xsd:simpleType>\r\n"
     "</xsd:attribute>\r\n"
@@ -4865,14 +4868,15 @@ const char file_scheduler_xsd[] =
     "\r\n"
     "<xsd:attribute name=\"name\"                      type=\"Name\"             use=\"required\"/>\r\n"
     "<xsd:attribute name=\"url_path\"                  type=\"String\"           use=\"required\"/>\r\n"
+    "<xsd:attribute name=\"debug\"                     type=\"Yes_no\"/>\r\n"
     "\r\n"
+    "<!-- Diese Attribute und die folgenden Attribute schlie\xc3" "\x9f" "en einander aus -->\r\n"
     "<xsd:attribute name=\"request_xslt_stylesheet\"   type=\"File\"             />\r\n"
     "<xsd:attribute name=\"response_xslt_stylesheet\"  type=\"File\"             />\r\n"
     "<xsd:attribute name=\"forward_xslt_stylesheet\"   type=\"File\"/>\r\n"
     "\r\n"
     "<xsd:attribute name=\"job_chain\"                 type=\"Name\"/>\r\n"
     "<xsd:attribute name=\"timeout\"                   type=\"xsd:positiveInteger\"/>\r\n"
-    "<xsd:attribute name=\"debug\"                     type=\"Yes_no\"/>\r\n"
     "</xsd:complexType>\r\n"
     "\r\n"
     "<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ATTRIBUT-TYPEN-->\r\n"
@@ -5030,7 +5034,7 @@ static const Embedded_file embedded_files_array[] =
     { "html/jz/translation_de.js", file_html_jz_translation_de_js, sizeof file_html_jz_translation_de_js - 1, 1113979995 },
     { "html/jz/scheduler.xslt", file_html_jz_scheduler_xslt, sizeof file_html_jz_scheduler_xslt - 1, 1141668608 },
     { "html/jz/scheduler.css", file_html_jz_scheduler_css, sizeof file_html_jz_scheduler_css - 1, 1137326883 },
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1144847047 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1145004791 },
     { NULL, NULL, 0 }
 };
 

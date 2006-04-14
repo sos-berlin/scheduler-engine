@@ -1392,7 +1392,7 @@ bool Task::load()
     {
         _job->count_task();
         _thread->count_task();
-        reset_error();
+        //(nur für altes use_engine="job", löscht Fehlermeldung von Job::do_somethin() init_start_when_directory_changed: reset_error();
         _running_since = Time::now();
     }
 
@@ -1527,6 +1527,8 @@ void Task::remove_order_after_error()
 
 void Task::finish()
 {
+    _job->init_start_when_directory_changed( this );
+
     if( _order )    // Auftrag nicht verarbeitet? spooler_init() oder spooler_open() lieferte false
     {
         if( !has_error() )  set_error( Xc( "SCHEDULER-226" ) );

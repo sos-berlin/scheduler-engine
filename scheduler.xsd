@@ -38,7 +38,7 @@
 
                             <xsd:element ref="jobs"             minOccurs="0"/>
                             <xsd:element ref="job_chains"       minOccurs="0"/>
-                            <xsd:element ref="command"          minOccurs="0"/>
+                            <xsd:element ref="commands"         minOccurs="0"/>
                         </xsd:sequence>
                         
                         <xsd:attribute name="spooler_id"            type="Name"/>
@@ -56,8 +56,12 @@
                     </xsd:complexType>
                 </xsd:element>
 
-                <xsd:element ref="command"/>
-                
+                <xsd:element ref="commands"/>
+
+                <xsd:element name="command" type="Commands">
+                    <xsd:annotation><xsd:documentation>Deprecated. Use &lt;commands></xsd:documentation></xsd:annotation>
+                </xsd:element>
+
                 <xsd:element name="answer">
                     <xsd:complexType/>
                 </xsd:element>
@@ -89,36 +93,35 @@
         </xsd:complexType>
     </xsd:element>
 
+    <xsd:element name="commands" type="Commands"/>
 
-    <xsd:element name="command">
-        <xsd:complexType>
-            <xsd:choice maxOccurs="unbounded">
-                <xsd:element ref="add_jobs"/>
-                <xsd:element ref="add_order"/>
-                <xsd:element ref="kill_task"/>
-                <xsd:element ref="modify_job"/>
-                <xsd:element ref="modify_order"/>
-                <xsd:element ref="modify_spooler"/>
-                <xsd:element ref="register_remote_scheduler"/>
-                <xsd:element ref="remove_job_chain"/>
-                <xsd:element ref="remove_order"/>
-                <xsd:element ref="run_time"/>
-                <xsd:element ref="show_history"/>
-                <xsd:element ref="show_job"/>
-                <xsd:element ref="show_jobs"/>
-                <xsd:element ref="show_job_chains"/>
-                <xsd:element ref="show_job_chain"/>
-                <xsd:element ref="show_order"/>
-                <xsd:element ref="s"/>
-                <xsd:element ref="show_state"/>
-                <xsd:element ref="show_task"/>
-                <xsd:element ref="service_request"/>
-                <xsd:element ref="start_job"/>
-                <!--xsd:element ref="signal_object"/-->
-                <xsd:element ref="terminate"/>
-            </xsd:choice>
-        </xsd:complexType>
-    </xsd:element>
+    <xsd:complexType name="Commands">
+        <xsd:choice maxOccurs="unbounded">
+            <xsd:element ref="add_jobs"/>
+            <xsd:element ref="add_order"/>
+            <xsd:element ref="kill_task"/>
+            <xsd:element ref="modify_job"/>
+            <xsd:element ref="modify_order"/>
+            <xsd:element ref="modify_spooler"/>
+            <xsd:element ref="register_remote_scheduler"/>
+            <xsd:element ref="remove_job_chain"/>
+            <xsd:element ref="remove_order"/>
+            <xsd:element ref="run_time"/>
+            <xsd:element ref="show_history"/>
+            <xsd:element ref="show_job"/>
+            <xsd:element ref="show_jobs"/>
+            <xsd:element ref="show_job_chains"/>
+            <xsd:element ref="show_job_chain"/>
+            <xsd:element ref="show_order"/>
+            <xsd:element ref="s"/>
+            <xsd:element ref="show_state"/>
+            <xsd:element ref="show_task"/>
+            <xsd:element ref="service_request"/>
+            <xsd:element ref="start_job"/>
+            <!--xsd:element ref="signal_object"/-->
+            <xsd:element ref="terminate"/>
+        </xsd:choice>
+    </xsd:complexType>
 
     
     <xsd:element name="add_jobs">
@@ -507,7 +510,7 @@
                                     <xsd:attribute name="day" use="required">
                                         <xsd:simpleType>
                                             <xsd:restriction base="xsd:NMTOKEN">
-                                                <xsd:pattern value="[01234567]|(so(nntag)?)|(mo(ntag)?)|(di(enstag)?)|(mi(ttwoch)?)|(do(nnerstag)?)|(fr(eitag)?)|(sa(mstag)?)|(sun(day?))|(mon(day?))|(tue(sday?))|(wed(nesday?))|(thu(rsday?))|(fri(day?))|(sat(urday?))"/>
+                                                <xsd:pattern value="[01234567]|(so(nntag)?)|(mo(ntag)?)|(di(enstag)?)|(mi(ttwoch)?)|(do(nnerstag)?)|(fr(eitag)?)|(sa(mstag)?)|(sun(day)?)|(mon(day)?)|(tue(sday)?)|(wed(nesday)?)|(thu(rsday)?)|(fri(day)?)|(sat(urday)?)"/>
                                             </xsd:restriction>
                                         </xsd:simpleType>
                                     </xsd:attribute>
@@ -765,14 +768,15 @@
         
         <xsd:attribute name="name"                      type="Name"             use="required"/>
         <xsd:attribute name="url_path"                  type="String"           use="required"/>
+        <xsd:attribute name="debug"                     type="Yes_no"/>
 
+        <!-- Diese Attribute und die folgenden Attribute schließen einander aus -->
         <xsd:attribute name="request_xslt_stylesheet"   type="File"             />
         <xsd:attribute name="response_xslt_stylesheet"  type="File"             />
         <xsd:attribute name="forward_xslt_stylesheet"   type="File"/>
 
         <xsd:attribute name="job_chain"                 type="Name"/>
         <xsd:attribute name="timeout"                   type="xsd:positiveInteger"/>
-        <xsd:attribute name="debug"                     type="Yes_no"/>
     </xsd:complexType>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ATTRIBUT-TYPEN-->

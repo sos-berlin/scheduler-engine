@@ -1525,8 +1525,9 @@
             
             <xsl:call-template name="phrase">
                 <xsl:with-param name="id" select="'ini.section'"/>
-            </xsl:call-template> 
+            </xsl:call-template>
             
+            <xsl:text> </xsl:text>
             <code>[<xsl:value-of select="$section"/>]</code>
 
             <xsl:if test="$entry">
