@@ -332,7 +332,7 @@ void Job::init_start_when_directory_changed( Task* task )
         {
             _error = x;
             if( task )  task->set_error_xc_only( x );
-            ( task? task->log() : _log )->log( log_error, string( "<start_when_directory_changed>  " ) + x.what() );
+            ( task? task->log() : +_log )->log( log_error, string( "<start_when_directory_changed>  " ) + x.what() );
             //if( error_state )  set_state( error_state );
         }
     }
