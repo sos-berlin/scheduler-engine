@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- $Id: scheduler.xsd 4252 2006-04-12 14:37:41Z jz $ -->
+<!-- $Id: scheduler.xsd 4255 2006-04-14 13:41:06Z jz $ -->
 
 <xsd:schema 
     xmlns:xsd          = "http://www.w3.org/2001/XMLSchema" 
@@ -7,7 +7,7 @@
 
     <xsd:annotation>
         <xsd:documentation xml:lang="de">
-            $Id: scheduler.xsd 4252 2006-04-12 14:37:41Z jz $
+            $Id: scheduler.xsd 4255 2006-04-14 13:41:06Z jz $
             Schema für die Scheduler-Konfiguration,
             s.a. http://www.zschimmer.com/sos/scheduler/konfiguration.xml.html.
         </xsd:documentation>

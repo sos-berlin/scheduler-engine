@@ -34,7 +34,7 @@
                     und keine weitere Task wurde mehr gestartet.
                 </p>
                 <p>
-                    Jetzt stopp der Scheduler den Job nicht mehr direkt.
+                    Jetzt stoppt der Scheduler den Job nicht mehr direkt.
                     Die Verzeichnisüberwachung wird am Ende der Task 
                     (nach <scheduler_method class="Job_impl" method="spooler_exit"/>)
                     wiederholt.

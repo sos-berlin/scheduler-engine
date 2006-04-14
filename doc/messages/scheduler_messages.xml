@@ -1990,6 +1990,12 @@
             </text>
         </message>
 
+        <message code="SCHEDULER-319">
+            <text xml:lang="en">
+                <title>XML-Element &lt;<p1/>> is not possible here</title>
+            </text>
+        </message>
+
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->

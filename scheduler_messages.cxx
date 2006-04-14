@@ -188,6 +188,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-316", "<web_service name=\"$1\"/>: attributes job_chain=/timeout= and request/response/forward_xslt_stylesheet= cannot be combined" },
     { "SCHEDULER-317", "Order.payload is not a Variable_set and not null" },
     { "SCHEDULER-318", "Option -env=NAME=VALUE: missing '=' between name and value: -env=\"$1\"" },
+    { "SCHEDULER-319", "XML-Element <$1> is not possible here" },
     { "SCHEDULER-900", "Scheduler $1 is starting with $2, pid=$3" },
     { "SCHEDULER-902", "state=$1" },
     { "SCHEDULER-904", "Tasks have $1s to terminate" },

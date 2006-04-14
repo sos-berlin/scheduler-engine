@@ -1224,6 +1224,11 @@ void Command_processor::execute_2( const xml::Document_ptr& command_doc, const T
             {
                 _answer.documentElement().firstChild().appendChild( execute_command( e, xml_mod_time ) );
             }
+            
+            xml::Node_ptr n = e.nextSibling(); 
+            while( n  &&  n.nodeType() != xml::ELEMENT_NODE )  n = n.nextSibling();
+            e = n;
+            if( e )  z::throw_xc( "SCHEDULER-319", e.nodeName() ); 
         }
     }
     catch( const _com_error& com_error ) { throw_com_error( com_error, "DOM/XML" ); }

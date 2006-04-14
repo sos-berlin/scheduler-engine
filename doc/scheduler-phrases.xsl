@@ -9,6 +9,8 @@
     <xsl:template name="this_is_a_container_only_for_phrases">
         
         <phrases style="">     <!-- style nur zum Debuggen -->
+            
+            <!-- Kopf- und Fußzeilen der HTML-Seiten -->
             <phrase id="head.link_to_first_page">Erste Seite</phrase>
             <phrase id="head.link_to_api">API</phrase>
             <phrase id="head.link_to_xml">XML</phrase>
@@ -21,12 +23,18 @@
             <phrase id="see">siehe</phrase>
             <phrase id="See">Siehe</phrase>
 
+            <phrase id="api.title">Programmschnittstelle (API)</phrase>
+            <phrase id="api.overview.title">Übersicht</phrase>
+            <phrase id="api.method.deprecated">Der Aufruf sollte nicht mehr verwendet werden</phrase>
+            <phrase id="api.method.parameters.title">Parameter</phrase>
+            <phrase id="api.method.return.title">Rückgabe</phrase>
+
             <phrase id="command_line.variants.title">Aufrufvarianten</phrase>
             <phrase id="command_line.options.title">Optionen</phrase>
             <phrase id="command_line.option.multiple">Die Option kann mehrfach angegeben werden.</phrase>
             
-            <phrase id="xml_command_table.title.command">Kommando</phrase>
-            <phrase id="xml_command_table.title.answer">Antwort (eingepackt in <code>&lt;spooler>&lt;answer></code>)</phrase>
+            <phrase id="xml.command_table.title.command">Kommando</phrase>
+            <phrase id="xml.command_table.title.answer">Antwort (eingepackt in <code>&lt;spooler>&lt;answer></code>)</phrase>
 
             
             <phrase id="xml_element.chapter_title.prefix">XML-Element</phrase>

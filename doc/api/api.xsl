@@ -129,7 +129,9 @@
                         <xsl:value-of select="@class"/>
                     </xsl:when>
                     <xsl:otherwise>
-                        <xsl:text xml:lang="de">Übersicht</xsl:text>
+                        <xsl:call-template name="phrase">
+                            <xsl:with-param name="id" select="'api.overview.title'"/>
+                        </xsl:call-template>
                     </xsl:otherwise>
                 </xsl:choose>
             </xsl:element>
@@ -166,10 +168,11 @@
 <xsl:template match="api.class">
     <html>
         <xsl:variable name="title">
-            <xsl:choose>
-                <xsl:when test="@name='api'">Programmschnittstelle (API)</xsl:when>
-                <xsl:otherwise><xsl:value-of select="@name"/> - Programmschnittstelle (API)</xsl:otherwise>
-            </xsl:choose>
+            <xsl:if test="@name!='api'">
+                <xsl:value-of select="@name"/> 
+                - 
+            </xsl:if>
+            <xsl:value-of select="$phrases/phrase [ @id='api.title' ]"/>
         </xsl:variable>
 
         <xsl:call-template name="html_head">
@@ -883,7 +886,11 @@
 
     <xsl:if test="@deprecated">
         <p>
-            *** Der Aufruf sollte nicht mehr verwendet werden ***
+            *** 
+            <xsl:call-template name="phrase">
+                <xsl:with-param name="id" select="'api.method.deprecated'"/>
+            </xsl:call-template>"
+            ***
         </p>
     </xsl:if>
 
@@ -914,7 +921,11 @@
     <xsl:variable name="write_result" select="com [ not ( parent::method ) ] [ @access='write' or not( @access ) and ( not( parent::property/@access ) or parent::property/@access='write' ) ]/com.result"/>
 
     <xsl:if test="com/com.parameter [ description ] | $write_result [ description ]">
-        <h3>Parameter</h3>
+        <h3>
+            <xsl:call-template name="phrase">
+                <xsl:with-param name="id" select="'api.method.parameters.title'"/>
+            </xsl:call-template>
+        </h3>
 
         <table cellpadding="0" cellspacing="0">
             <xsl:for-each select="com/com.parameter | $write_result">
@@ -933,7 +944,11 @@
 
 
     <xsl:if test="$read_result/com.type [ @class or parent::*/description ]">
-        <h3>Rückgabe</h3>
+        <h3>
+            <xsl:call-template name="phrase">
+                <xsl:with-param name="id" select="'api.method.return.title'"/>
+            </xsl:call-template>
+        </h3>
 
         <xsl:apply-templates select="$read_result/com.type"/>&#160;&#160;
         <xsl:apply-templates select="com/com.result/description"/>
