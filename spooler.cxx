@@ -2024,7 +2024,7 @@ void Spooler::start()
     _log.info( message_string( "SCHEDULER-900", _version, _config_filename, getpid() ) );
     _spooler_start_time = Time::now();
 
-    _web_services.load();
+    _web_services.load();   // Nicht in Spooler::load(), denn es öffet schon -log-dir-Dateien (das ist nicht gut für -send-cmd=)
 
     FOR_EACH_JOB( job )  (*job)->init0();
 
