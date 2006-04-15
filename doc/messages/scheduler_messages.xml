@@ -1996,6 +1996,17 @@
             </text>
         </message>
 
+        <message code="SCHEDULER-320">
+            <text xml:lang="en">
+                <title>Could not send mail</title>
+            </text>
+        </message>
+        
+        <message code="SCHEDULER-321">
+            <text xml:lang="en">
+                <title>Mail has been sent, but an error occurred when processing then mail queue: <p1/></title>
+            </text>
+        </message>
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->

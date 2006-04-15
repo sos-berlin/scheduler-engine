@@ -940,10 +940,10 @@ void Prefix_log::send_really( Scheduler_event* scheduler_event )
         {
             imail()->auto_dequeue();
         }
-        catch( const Xc& x ) { warn( string("eMail versendet, aber Fehler beim Verarbeiten der eMail-Warteschlange: ") + x.what() ); }
+        catch( const Xc& x ) { warn( message_string( "SCHEDULER-321", x ) ); }   // "eMail versendet, aber Fehler beim Verarbeiten der eMail-Warteschlange: "
     }
     else
-        warn( "eMail konnte nicht versendet werden" );
+        warn( message_string( "SCHEDULER-320" ) );   //"eMail konnte nicht versendet werden" );
 
     _mail = NULL;
 }
