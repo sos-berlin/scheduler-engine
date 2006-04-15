@@ -103,6 +103,7 @@ struct Web_services
     void                        add_web_services            ( const xml::Element_ptr& web_services_element );
     void                        add_web_service             ( Web_service* );
     void                        init                        ();
+    void                        load                        ();
 
     Web_service*                web_service_by_url_path_or_null( const string& url_path );
     Web_service*                web_service_by_name         ( const string& name );

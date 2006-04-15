@@ -110,6 +110,17 @@ void Web_services::init()
     }
 }
 
+//-------------------------------------------------------------------------------Web_services::load
+
+void Web_services::load()
+{
+    Z_FOR_EACH( Url_web_service_map, _url_web_service_map, ws )
+    {
+        Web_service* web_service = ws->second;
+        web_service->load();
+    }
+}
+
 //----------------------------------------------------Web_services::web_service_by_url_path_or_null
 
 Web_service* Web_services::web_service_by_url_path_or_null( const string& url_path )
@@ -250,8 +261,6 @@ void Web_service::set_dom( const xml::Element_ptr& element, const Time& )
         _spooler->job_chain( forwarding_job_chain_name )->set_visible( true );
         _spooler->get_job( forwarder_job_name, true )->set_visible( true );
     }
-
-    load();
 }
 
 //-------------------------------------------------------------------------Web_service::dom_element
