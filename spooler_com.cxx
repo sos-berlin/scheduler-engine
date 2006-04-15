@@ -642,7 +642,8 @@ void Com_variable_set::to_xslt_parameters( xml::Xslt_parameters* result, Has_log
 
                 try
                 {
-                    result->set_string( i++, name, value );
+                    result->set_string( i, name, value );
+                    i++;  // Nur, wenn kein Fehler aufgetreten ist (z.B. wegen " und ' im String).
                 }
                 catch( exception& x )
                 {
