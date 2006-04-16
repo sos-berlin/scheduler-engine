@@ -189,6 +189,8 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-317", "Order.payload is not a Variable_set and not null" },
     { "SCHEDULER-318", "Option -env=NAME=VALUE: missing '=' between name and value: -env=\"$1\"" },
     { "SCHEDULER-319", "XML-Element <$1> is not possible here" },
+    { "SCHEDULER-320", "Could not send mail" },
+    { "SCHEDULER-321", "Mail has been sent, but an error occurred when processing then mail queue: $1" },
     { "SCHEDULER-900", "Scheduler $1 is starting with $2, pid=$3" },
     { "SCHEDULER-902", "state=$1" },
     { "SCHEDULER-904", "Tasks have $1s to terminate" },

@@ -611,7 +611,7 @@ void Operation::unlink_order()
     {
         if( _response  &&  !_response->is_ready() )
         {
-            if( _connection )  _connection->_log.error( message_string( "SCHEDULER-297" ) );
+            if( _connection )  _connection->_log.error( message_string( "SCHEDULER-297" ) );    // "Auftrag erledigt ohne web_service_operation.send(), Operation wird abgebrochen"
             cancel();
         }
     }

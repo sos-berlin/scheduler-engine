@@ -412,17 +412,17 @@
     
     <description>
         <p>
-            Wenn der Auftrag keinem Webdienst zugeordnet ist, 
-            liefert der Aufruf den Fehler <scheduler_message code="SCHEDULER-246"/>.
-        </p>
-        <p>
             Siehe 
-            <scheduler_element name="web_service"/> 
+            <scheduler_element name="web_service"/>,
             <scheduler_method class="Web_service_operation"/> und
             <scheduler_method class="Order" property="web_service_operation_or_null"/>,
         </p>
     </description>
-    
+
+    <messages>
+        <message code="SCHEDULER-246" level="error"/>
+    </messages>
+
 </property>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->

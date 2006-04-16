@@ -99,3 +99,7 @@ td.api_title                    { padding-left: 3mm; }
 
 
 .api_programming_language_selector { margin-right: 2ex; }
+
+.message_info                   {}
+.message_warn                   { color: #800000; }
+.message_error                  { color: red; }

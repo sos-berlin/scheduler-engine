@@ -953,11 +953,39 @@
         <xsl:apply-templates select="$read_result/com.type"/>&#160;&#160;
         <xsl:apply-templates select="com/com.result/description"/>
     </xsl:if>
-    
 
+
+    <xsl:if test="messages/message">
+        <xsl:if test="messages [ message/@level='error' ]">
+            <h3>
+                <xsl:call-template name="phrase">
+                    <xsl:with-param name="id" select="'api.exceptions.title'"/>
+                </xsl:call-template>
+            </h3>
+            
+            <xsl:apply-templates select="messages [ message/@level='error' ]" mode="without_title"/>
+        </xsl:if >
+
+        <xsl:if test="messages [ message/@level != 'error' ]">
+            <h3>
+                <xsl:call-template name="phrase">
+                    <xsl:with-param name="id" select="'messages.title'"/>
+                </xsl:call-template>
+            </h3>
+            <xsl:apply-templates select="messages [ @level != 'error' ]">
+                <xsl:with-param name="h" select="'h3'"/>
+            </xsl:apply-templates>
+        </xsl:if>
+    </xsl:if>
+
+    
     <xsl:if test="@setting">
         <div class="see_also">
-            <h3 style="margin-bottom: 0em">Siehe auch</h3>
+            <h3 style="margin-bottom: 0em">
+                <xsl:call-template name="phrase">
+                    <xsl:with-param name="id" select="'common.See'"/>
+                </xsl:call-template>
+            </h3>
             <xsl:apply-templates mode="setting_references" select="."/>
         </div>  
     </xsl:if>

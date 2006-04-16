@@ -210,6 +210,10 @@ response.send();</pre>
                 
             </p>
         </description>
+
+        <messages>
+            <message code="SCHEDULER-247" level="error"/>
+        </messages>
     </method>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->

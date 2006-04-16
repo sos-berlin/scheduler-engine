@@ -381,4 +381,18 @@ Das Stylesheet <code>…/web_service_request.xsl</code> benutzt den Parameter <c
         </p>
         
     </description>
+
+    <messages>
+        <message code="SCHEDULER-237" level="error"/>
+        <message code="SCHEDULER-244" level="error"/>
+        <message code="SCHEDULER-245" level="error"/>
+        <message code="SCHEDULER-248" level="error"/>
+        <message code="SCHEDULER-252" level="error"/>
+        <message code="SCHEDULER-290" level="error"/>
+        <message code="SCHEDULER-297" level="error"/>
+        <message code="SCHEDULER-308" level="warn"/>
+        <message code="SCHEDULER-316" level="error"/>
+        <message code="SCHEDULER-954" level="debug3"/>
+        <message code="SCHEDULER-964" level="info"/>
+    </messages>
 </xml_element>

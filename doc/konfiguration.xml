@@ -244,6 +244,10 @@
             …
         &lt;/job_chains>
 
+        &lt;<a class="silent" href="xml/commands.xml">commands</a>>
+            …
+        &lt;/commands>
+
     &lt;/config>
 &lt;/spooler></pre>
 

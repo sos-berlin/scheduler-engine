@@ -5,6 +5,8 @@
 <xsl:stylesheet xmlns:xsl = "http://www.w3.org/1999/XSL/Transform"
                 version   = "1.0">
 
+    <xsl:variable name="lang" select="'de'"/>
+    
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~PHRASES-->
 
     <xsl:template name="this_is_a_container_only_for_phrases">
@@ -16,6 +18,7 @@
             <phrase id="api.method.deprecated">Der Aufruf sollte nicht mehr verwendet werden</phrase>
             <phrase id="api.method.parameters.title">Parameter</phrase>
             <phrase id="api.method.return.title">Rückgabe</phrase>
+            <phrase id="api.exceptions.title">Exceptions</phrase>
 
 
             <phrase id="command_line.variants.title">Aufrufvarianten</phrase>
@@ -52,7 +55,9 @@
                 </p>
             </phrase>
 
-            
+
+            <phrase id="messages.title">Meldungen</phrase>
+
             <phrase id="log_categories.table.categories.title">Kategorie</phrase>
             <phrase id="log_categories.table.default.title">Default</phrase>
 

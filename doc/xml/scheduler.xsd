@@ -281,6 +281,7 @@
                 </xsd:element>
                 
                 <xsd:element ref="run_time" minOccurs="0"/>
+
             </xsd:sequence>
 
             <xsd:attribute name="name"                  type="Name"             use="required"/>
@@ -299,6 +300,16 @@
             <xsd:attribute name="mail_xslt_stylesheet"  type="File"/>
             <xsd:attribute name="java_options"          type="String"/>
         </xsd:complexType>
+
+        <xsd:key name="delay_after_error">
+            <xsd:selector xpath="delay_after_error"/>
+            <xsd:field xpath="@error_count"/>
+        </xsd:key>
+
+        <xsd:key name="delay_order_after_setback">
+            <xsd:selector xpath="delay_order_after_setback"/>
+            <xsd:field xpath="@setback_count"/>
+        </xsd:key>
     </xsd:element>
 
 
@@ -318,6 +329,21 @@
             <xsd:attribute name="visible"            type="Yes_no"/>
             <xsd:attribute name="orders_recoverable" type="Yes_no"/>
         </xsd:complexType>
+
+        <xsd:key name="job_chain_node">
+            <xsd:selector xpath="job_chain_node"/>
+            <xsd:field xpath="@state"/>
+        </xsd:key>
+
+        <xsd:keyref name="job_chain_node.next_state" refer="job_chain_node">
+            <xsd:selector xpath="job_chain_node"/>
+            <xsd:field xpath="@next_state"/>
+        </xsd:keyref>
+
+        <xsd:keyref name="job_chain_node.error_state" refer="job_chain_node">
+            <xsd:selector xpath="job_chain_node"/>
+            <xsd:field xpath="@error_state"/>
+        </xsd:keyref>
     </xsd:element>
 
     
@@ -335,7 +361,13 @@
             <xsd:sequence>
                 <xsd:element ref="job" minOccurs="0" maxOccurs="unbounded"/>
             </xsd:sequence>
+
         </xsd:complexType>
+
+        <xsd:key name="job">
+            <xsd:selector xpath="job"/>
+            <xsd:field xpath="@name"/>
+        </xsd:key>
     </xsd:element>
 
     
@@ -445,6 +477,12 @@
             </xsd:sequence>
             <xsd:attribute name="ignore"        type="Yes_no"/>
         </xsd:complexType>
+
+        <xsd:key name="process_class">
+            <xsd:selector xpath="process_class"/>
+            <xsd:field xpath="@name"/>
+        </xsd:key>
+
     </xsd:element>
 
     
@@ -518,6 +556,11 @@
                             </xsd:element>
                         </xsd:sequence>
                     </xsd:complexType>
+
+                    <xsd:key name="weekdays">
+                        <xsd:selector xpath="day"/>
+                        <xsd:field xpath="@day"/>
+                    </xsd:key>
                 </xsd:element>
                 
                 <xsd:element name="monthdays" minOccurs="0">
@@ -540,6 +583,11 @@
                             </xsd:element>
                         </xsd:sequence>
                     </xsd:complexType>
+
+                    <xsd:key name="monthdays">
+                        <xsd:selector xpath="day"/>
+                        <xsd:field xpath="@day"/>
+                    </xsd:key>
                 </xsd:element>
                 
                 <xsd:element name="ultimos" minOccurs="0">
@@ -562,6 +610,11 @@
                             </xsd:element>
                         </xsd:sequence>
                     </xsd:complexType>
+
+                    <xsd:key name="ultimos">
+                        <xsd:selector xpath="day"/>
+                        <xsd:field xpath="@day"/>
+                    </xsd:key>
                 </xsd:element>
                 
                 <xsd:choice>
@@ -577,6 +630,16 @@
             <xsd:attribute name="repeat"            type="Duration"/>
             <xsd:attribute name="once"              type="Yes_no"/>
         </xsd:complexType>
+
+        <xsd:key name="at">
+            <xsd:selector xpath="date"/>
+            <xsd:field xpath="@date"/>
+        </xsd:key>
+
+        <xsd:key name="date">
+            <xsd:selector xpath="date"/>
+            <xsd:field xpath="@date"/>
+        </xsd:key>
     </xsd:element>
 
     
@@ -756,6 +819,17 @@
                 <xsd:element name="web_service" type="web_service" minOccurs="0" maxOccurs="unbounded"/>
             </xsd:sequence>
         </xsd:complexType>
+
+        <xsd:key name="web_service">
+            <xsd:selector xpath="web_service"/>
+            <xsd:field xpath="@name"/>
+        </xsd:key>
+
+        <xsd:key name="web_service.url_path">
+            <xsd:selector xpath="web_service"/>
+            <xsd:field xpath="@url_path"/>
+        </xsd:key>
+
     </xsd:element>
 
 
@@ -767,7 +841,7 @@
         </xsd:sequence>
         
         <xsd:attribute name="name"                      type="Name"             use="required"/>
-        <xsd:attribute name="url_path"                  type="String"           use="required"/>
+        <xsd:attribute name="url_path"                  type="Url_path"         use="required"/>
         <xsd:attribute name="debug"                     type="Yes_no"/>
 
         <!-- Diese Attribute und die folgenden Attribute schließen einander aus -->
@@ -862,6 +936,13 @@
     <xsd:simpleType name="Positive_duration">
         <xsd:restriction base="Duration">
             <xsd:pattern value=".*[123456789].*"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+
+    <xsd:simpleType name="Url_path">
+        <xsd:restriction base="String">
+            <xsd:pattern value="/.*"/>
         </xsd:restriction>
     </xsd:simpleType>
 
