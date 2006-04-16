@@ -1651,7 +1651,7 @@ void Task::trigger_event( Scheduler_event* scheduler_event )
             body += errmsg + "\n\n";
         }
 
-        _log->set_mail_default( "body", body + "This Message contains the job protocol." );   //, is_error );
+        _log->set_mail_default( "body", body + "This message contains the job protocol." );   //, is_error );
 
         _log->send( has_error() || _log->highest_level() >= log_error? -1 : _step_count, scheduler_event );
 

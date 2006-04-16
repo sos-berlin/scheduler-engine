@@ -45,10 +45,10 @@
                     <xsl:copy-of select="$phrase/node()"/>
                 </xsl:when>
                 <xsl:otherwise>
-                    <span style="background-color: red; color: black; font-weight: bold" title="Dokumentationsfehler: Text ist nicht in der scheduler.xsl.phrases.xml eingetragen">
+                    <span style="background-color: red; color: white" title="Missing translation in scheduler-phrases.xsl">
                         &lt;phrase id="<xsl:value-of select="$id"/>"/>
                     </span>
-                    <xsl:message>*** &lt;phrase id="<xsl:value-of select="$id"/>"/> ist nicht definiert</xsl:message>
+                    <xsl:message>*** Übersetzung &lt;phrase id="<xsl:value-of select="$id"/>"/> fehlt ***</xsl:message>
                 </xsl:otherwise>
             </xsl:choose>
 
@@ -970,7 +970,7 @@
                     </xsl:if>
 
                     <xsl:call-template name="phrase">
-                        <xsl:with-param name="id" select="'in_programming_language'"/>
+                        <xsl:with-param name="id" select="'common.in_programming_language'"/>
                     </xsl:call-template>
 
                     <xsl:text> </xsl:text>

@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
-<!-- Texte für scheduler.xsl und scheduler_base.xsl -->
+<!-- $Id$ -->
+<!-- Texte für XSLT-Stylesheets der Dokumentation: scheduler.xsl, scheduler_base.xsl, api/api.xsl -->
 
 <xsl:stylesheet xmlns:xsl = "http://www.w3.org/1999/XSL/Transform"
                 version   = "1.0">
@@ -9,6 +10,26 @@
     <xsl:template name="this_is_a_container_only_for_phrases">
         
         <phrases style="">     <!-- style nur zum Debuggen -->
+
+            <phrase id="api.title">Programmschnittstelle (API)</phrase>
+            <phrase id="api.overview.title">Übersicht</phrase>
+            <phrase id="api.method.deprecated">Der Aufruf sollte nicht mehr verwendet werden</phrase>
+            <phrase id="api.method.parameters.title">Parameter</phrase>
+            <phrase id="api.method.return.title">Rückgabe</phrase>
+
+
+            <phrase id="command_line.variants.title">Aufrufvarianten</phrase>
+            <phrase id="command_line.options.title">Optionen</phrase>
+            <phrase id="command_line.option.multiple">Die Option kann mehrfach angegeben werden.</phrase>
+
+            
+            <phrase id="common.in_programming_language">in</phrase>
+            <phrase id="common.see">siehe</phrase>
+            <phrase id="common.See">Siehe</phrase>
+
+
+            <phrase id="example.title">Beispiel</phrase>
+
             
             <!-- Kopf- und Fußzeilen der HTML-Seiten -->
             <phrase id="head.link_to_first_page">Erste Seite</phrase>
@@ -18,32 +39,7 @@
             <phrase id="head.link_to_sos">Software- und Organisations-Service GmbH</phrase>
             <phrase id="head.last_updated_by">Zuletzt geändert von</phrase>
 
-            <phrase id="example.title">Beispiel</phrase>
-            <phrase id="in_programming_language">in</phrase>
-            <phrase id="see">siehe</phrase>
-            <phrase id="See">Siehe</phrase>
-
-            <phrase id="api.title">Programmschnittstelle (API)</phrase>
-            <phrase id="api.overview.title">Übersicht</phrase>
-            <phrase id="api.method.deprecated">Der Aufruf sollte nicht mehr verwendet werden</phrase>
-            <phrase id="api.method.parameters.title">Parameter</phrase>
-            <phrase id="api.method.return.title">Rückgabe</phrase>
-
-            <phrase id="command_line.variants.title">Aufrufvarianten</phrase>
-            <phrase id="command_line.options.title">Optionen</phrase>
-            <phrase id="command_line.option.multiple">Die Option kann mehrfach angegeben werden.</phrase>
             
-            <phrase id="xml.command_table.title.command">Kommando</phrase>
-            <phrase id="xml.command_table.title.answer">Antwort (eingepackt in <code>&lt;spooler>&lt;answer></code>)</phrase>
-
-            
-            <phrase id="xml_element.chapter_title.prefix">XML-Element</phrase>
-            <phrase id="xml_element.behaviour_with">Verhalten mit</phrase>
-            <phrase id="xml_element.parent_elements.title">Eltern-Elemente</phrase>
-            <phrase id="xml_element.child_elements.title">Kind-Elemente</phrase>
-            <phrase id="xml_element.attributes.title">Attribute</phrase>
-            <phrase id="xml_element.answer.title.prefix">Anwort</phrase>
-
             <phrase id="ini.file.title">Die Datei</phrase>
             <phrase id="ini.sections.title">Die Abschnitte</phrase>
             <phrase id="ini.section">Abschnitt</phrase>
@@ -56,9 +52,25 @@
                 </p>
             </phrase>
 
+            
+            <phrase id="log_categories.table.categories.title">Kategorie</phrase>
+            <phrase id="log_categories.table.default.title">Default</phrase>
+
+            <phrase id="log_categories.footnotes">
+                ¹) "default" bedeutet, dass diese Kategorie voreingestellt ist.
+                <br/>
+                "implizit" bedeutet, dass diese Kategorie ausgewählt wird, wenn Sie die Mutterkategorie angeben.
+                <br/>
+                "nur explizit" bedeutet, dass die Kategorie explizt angegeben werden muss.
+                <code>all</code> oder die Mutterkategorie mit oder ohne "<code>.*</code>" schalten dieses Kategorie nicht ein.
+            </phrase>
+
+            
             <phrase id="setting.initial_value">Initialwert</phrase>
             <phrase id="setting.subst_env">Umgebungsvariablen (z.B. <code>$HOME</code>) werden ersetzt (siehe</phrase>
             <phrase id="setting.subst_env.here">hier</phrase>
+            
+            
             <phrase id="setting_references.api_property_has_priority=false.prefix">Die Eigenschaft</phrase>
             <phrase id="setting_references.api_property_has_priority=false.suffix">liest die Einstellung</phrase>
             <phrase id="setting_references.api_property_has_priority=true.prefix">Die Eigenschaft</phrase>
@@ -79,17 +91,18 @@
             <phrase id="setting_references.xml_has_priority=true.prefix">Das XML-Attribut</phrase>
             <phrase id="setting_references.xml_has_priority=true.suffix">hat Vorrang</phrase>
 
-            <phrase id="log_categories.table.categories.title">Kategorie</phrase>
-            <phrase id="log_categories.table.default.title">Default</phrase>
+            
+            <phrase id="xml.command_table.title.command">Kommando</phrase>
+            <phrase id="xml.command_table.title.answer">Antwort (eingepackt in <code>&lt;spooler>&lt;answer></code>)</phrase>
 
-            <phrase id="log_categories.footnotes">
-                ¹) "default" bedeutet, dass diese Kategorie voreingestellt ist.
-                <br/>
-                "implizit" bedeutet, dass diese Kategorie ausgewählt wird, wenn Sie die Mutterkategorie angeben.
-                <br/>
-                "nur explizit" bedeutet, dass die Kategorie explizt angegeben werden muss.
-                <code>all</code> oder die Mutterkategorie mit oder ohne "<code>.*</code>" schalten dieses Kategorie nicht ein.
-            </phrase>
+            
+            <phrase id="xml_element.chapter_title.prefix">XML-Element</phrase>
+            <phrase id="xml_element.behaviour_with">Verhalten mit</phrase>
+            <phrase id="xml_element.parent_elements.title">Eltern-Elemente</phrase>
+            <phrase id="xml_element.child_elements.title">Kind-Elemente</phrase>
+            <phrase id="xml_element.attributes.title">Attribute</phrase>
+            <phrase id="xml_element.answer.title.prefix">Anwort</phrase>
+
         </phrases>
 
     </xsl:template>
@@ -134,7 +147,7 @@
         </xsl:if>
     </xsl:template>
 
-    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~xml_child_element-->
 
     <xsl:template match="xml_child_element [ @multiple='yes' ]" mode="phrase">
         <xsl:param name="element"/>

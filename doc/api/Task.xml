@@ -448,8 +448,6 @@ my $value2 = $parameters->var( "parameter2" );</pre>
             </p>
             <p>
                 Die Priorität kann betriebsystem-unabhängig eingestellt werden mit
-                <scheduler_method class="Subprocess" property="priority"/>.
-                Siehe auch
                 <scheduler_method class="Task" property="priority_class"/>.
             </p>
         </description>
@@ -510,7 +508,7 @@ my $value2 = $parameters->var( "parameter2" );</pre>
                 </tr>
             </table>
             <p>
-                Wenn die Priorität nicht gesetzt werden kann, z.B. wegen mangelndem Recht, führt das nicht zu einem Fehler.
+                Wenn die Priorität nicht gesetzt werden kann, z.B. wegen mangelnden Rechts, führt das nicht zu einem Fehler.
                 Dagegen führt das Setzen einer nicht hier aufgeführten Prioritätsklasse zu einem Fehler.
             </p>
             <p>
