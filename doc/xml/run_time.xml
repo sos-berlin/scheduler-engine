@@ -23,7 +23,7 @@
                 <p>
                     Bei <code>once="yes"</code> startet der <span class="sos_name">Scheduler</span>
                     den Job einmal nach Start des <span class="sos_name">Schedulers</span>,
-                    sobald die <code>&lt;run_time</code> dies zulässt.
+                    sobald die <code>&lt;run_time></code> dies zulässt.
                 </p>
             </description>
         </xml_attribute>
@@ -112,21 +112,21 @@
             </description>
         </xml_child_element>
 
-        <xml_child_element name="weekdays" multiple="yes">
+        <xml_child_element name="weekdays">
             <description>
                 <p>
                 </p>
             </description>
         </xml_child_element>
 
-        <xml_child_element name="monthdays" multiple="yes">
+        <xml_child_element name="monthdays">
             <description>
                 <p>
                 </p>
             </description>
         </xml_child_element>
 
-        <xml_child_element name="ultimos" multiple="yes">
+        <xml_child_element name="ultimos">
             <description>
                 <p>
                 </p>
