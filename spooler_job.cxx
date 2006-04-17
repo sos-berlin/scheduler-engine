@@ -118,7 +118,6 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
         if( order )
         {
             if( _temporary )  z::throw_xc( "SCHEDULER-155" );
-            if( element.getAttributeNode( "priority" ) )  z::throw_xc( "SCHEDULER-165" );
             if( !_order_queue )  _order_queue = new Order_queue( this, _log );
         }
 

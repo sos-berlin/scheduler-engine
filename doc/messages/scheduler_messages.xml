@@ -630,15 +630,6 @@
             </text>
         </message>
 
-        <message code="SCHEDULER-165">
-            <text xml:lang="de">
-                <title>Attribut priority= kann bei &lt;job order="yes"> nicht verwendet werden</title>
-            </text>
-            <text xml:lang="en">
-                <title>The priority= attribute cannot be used with &lt;job order="yes"></title>
-            </text>
-        </message>
-
         <message code="SCHEDULER-166">
             <text xml:lang="de">
                 <title>&lt;script> java_class= und language= können nicht zugleich angegeben werden</title>
