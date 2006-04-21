@@ -1,0 +1,72 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id$-->
+
+<description
+    head_title          = "Vorschläge zur weiteren Entwicklung"
+    base_dir            = "../"
+    author              = "$Author$"
+    date                = "$Date$"
+>
+    <h1>Vorschläge zur weiteren Entwicklung</h1>
+
+    <p>
+        <a href="run_time.xml"><code>&lt;run_time></code></a>
+    </p>
+    <p class="indent" style="margin-top: 0px">
+        Vereinfachte Dokumentation von <code>&lt;run_time></code> samt einiger Erweiterungen
+    </p>
+    
+
+    <p>
+        <a href="javascript_xml.xml">
+            XML in JavaScript
+        </a>
+    </p>
+    <p class="indent" style="margin-top: 0px">
+        JavaScript mit vereinfachten XML-Zugriff über COM
+    </p>
+
+    <p>
+        <a href="external_api.xml">
+            Externes Scheduler-API
+        </a>
+    </p>
+    <p class="indent" style="margin-top: 0px">
+        Scheduler-API außerhalb des Schedulers zu dessen Fernsteuerung
+    </p>
+
+    <p>
+        <a href="windows_job_objects.xml">
+            Job-Objekte
+        </a>
+    </p>
+    <p class="indent" style="margin-top: 0px">
+        Prozesse in Windows-Job-Objekte zusammenfassen
+    </p>
+
+    <p>
+        <a href="events.xml">Ereignisse</a>
+    </p>
+    <p class="indent" style="margin-top: 0px">
+        Scheduler-weite Ereignisse, z.B. Job-Start und leere Auftragswarteschlange
+    </p>
+
+    <p>
+        HTTP-Server
+    </p>
+    <p class="indent" style="margin-top: 0px">
+        Pipelining implementieren:
+        Bislang verträgt der Scheduler kein zweites <code>GET</code>, solange er nicht das erste beantwortet hat.
+    </p>
+
+    <p>
+        Reguläre Ausdrücke (Verzeichnisüberwachung)
+    </p>
+    <p class="indent" style="margin-top: 0px">
+        Algorithmus von Spencer verarbeitet nur <code>ASCII</code>-Zeichen, also z.B. keine Umlaute.
+        Er sollte ersetzt werden.
+    </p>
+
+</description>

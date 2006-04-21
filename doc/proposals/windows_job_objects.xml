@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id$-->
+
+<description
+    head_title          = "Windows Job-Objekte für Scheduler nutzen"
+    base_dir            = "../"
+    author              = "$Author$"
+    date                = "$Date$"
+>
+    <h2>Windows Job-Objekte für Scheduler nutzen</h2>
+    <p>
+        Windows kennt Job-Objekte, die aus Prozessen gebildet
+        werden und die abgefragt und beschränkt werden können. Im Scheduler könnte aus
+        einer Task ein Job-Objekt gebildet werden. Alle von der Task direkt oder
+        indirekt gestarteten Prozesse (auch die, die der Scheduler nicht kennt), gehören
+        dann zum Job-Objekt.
+    </p>
+    <p>
+        Das wäre für Tasks interessant, die selbst fremde Programme starten.
+    </p>
+    <p>
+        <br/>
+        Einem Job-Objekt (also der Summe aller Prozesse) können einige Beschränkungen auferlegt werden:
+    </p>
+    <ul>
+        <li>
+            CPU-Zeit per Job und per einzelnen Prozess
+        </li>
+        <li>
+            Hauptspeicherbedarf per Job und per einzelnem Prozess
+        </li>
+        <li>
+            Anzahl der Prozesse
+        </li>
+        <li>
+            Alle Prozesse haben dieselbe Priorität
+        </li>
+        <li>
+            Alle Prozesse nutzen dieselbe CPU (bei einem Mehrprozessorrechner
+            oder Hyperthreading macht ein Job nicht mehr den Rechner dicht)
+        </li>
+        <li>
+            Abstürzende
+            Prozesse zeigen keine Messagebox (bei einem Scheduler-Dienst mit Zugriff auf den
+            Desktop)
+        </li>
+    </ul>
+    
+    <p>
+        <br/>
+        Und Informationen über den ganzen Job lassen sich abfragen:
+    </p>
+    <ul>
+        <li>
+            CPU-Zeit
+        </li>
+        <li>
+            Spitzen-Hauptspeicherbedarf
+        </li>
+        <li>
+            Anzahl der Ein- und Ausgaben
+        </li>
+    </ul>
+    <p>
+        Die Informationen können bei Task-Ende in einer Zeile protokolliert und im laufenden Betrieb mit &lt;show_task&gt; im Browser gezeigt werden.
+    </p>
+    <p>
+        Und ein Job kann als Ganzes gekillt werden (das wäre eine Lösung für die Serienkillerfunktion gewesen).
+    </p>
+    <p>
+        Hier sind einige der möglichen Beschränkungen beschrieben:
+        <br/>
+        <A href="http://msdn.microsoft.com/library/default.asp?url=/library/en-us/dllproc/base/jobobject_basic_limit_information_str.asp">http://msdn.microsoft.com/library/default.asp?url=/library/en-us/dllproc/base/jobobject_basic_limit_information_str.asp</A>
+    </p>
+    <p>
+        
+    </p>
+</description>

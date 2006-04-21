@@ -1,0 +1,111 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id$-->
+
+<description
+    head_title          = "Javascript mit vereinfachten XML-Zugriff über COM"
+    base_dir            = "../"
+    author              = "$Author$"
+    date                = "$Date$"
+>
+    <h1>Javascript mit vereinfachten XML-Zugriff über COM</h1>
+
+    <p>
+        Einen einfachen lesenden Zugriff auf XML-Dokumente stelle ich mir vor wie den Zugriff auf Objekte.
+    </p>
+
+    <scheduler_example>
+        <pre>xml = "&lt;a>
+           &lt;b>
+               &lt;c/>
+               &lt;c attribut="123"/>
+           &lt;/b>
+           &lt;d>text&lt;/d>
+           &lt;d id='7'>sieben&lt;/d>
+       &lt;/a>"
+       
+var x = spooler.create_dom_document( xml );
+
+x.a.b.c.count() ==> 2
+x.a.b.c(1)._attribut ==> "123"
+x.a.d ==> "text"
+
+x.a.b.c(0)._unbekanntes_attribut ==> undefined (Javascript), Empty (Vbscript)
+x.a.b.c(0).unbekanntes_element   ==> undefined (Javascript), Empty (Vbscript)
+
+x.a.d[0].xml() ==> "&lt;d>text&lt;/d>"
+
+
+var nodes_array = x.a.childNodes();
+nodes_array(0) ist dasselbe wie x.a.b
+nodes_array(1) ist dasselbe wie x.a.d(0)
+nodes_array(2) ist dasselbe wie x.a.d(1)
+
+nodes_array[0].nodeName() ==> "a"</pre>
+    </scheduler_example>
+
+
+    <h2>XPath</h2>
+    <pre>x.a.d( "@id='7'" ) ==> "sieben"</pre>
+
+    <h2>Regeln</h2>
+    <ul>
+        <li>
+            XML-Elemente sind COM-Eigenschaften: variable.elementname
+        </li>
+        <li>         
+            Attribute sind COM-Eigenschaften, deren Namen mit "_" beginnt: element._attribut
+        </li>
+        <li>
+            Gleichnamige XML-Elemente können mit einem Index element(index) angesprochen werden.
+            element.child ist dasselbe wie element(0).child
+        </li>
+        <li>
+            XPath-Bedingung mit element(xpath-string)
+        </li>
+        <li>
+            Einige parameterlose DOM-Funktionen: function(), z.B.
+            <ul>
+                <li>
+                    .count()
+                </li>
+                <li>
+                    .firstChild()
+                </li>
+                <li>
+                    .nextSibling()
+                </li>
+                <li>
+                    .xml()
+                </li>
+            </ul>
+        </li>
+        <li>
+            DOM-Funktionen mit mehreren Parametern:
+            <ul>
+                <li>
+                    .insertBefore( "&lt;xml ...=''/>", element );
+                </li>
+            </ul>
+        </li>
+        <li>
+            DOM-Funktionen mit genau einem Parameter sind nicht so leicht möglich,
+            die kollidieren mit element(index) und element("xpath").
+            [Vielleicht, wenn die Parameter keine Zahl und kein String ist, sondern ein Object:
+            element.appendChild( element ), aber das ist ziemlich weich.]
+        </li>
+    </ul>
+
+    <h2>Ändern geht auch</h2>
+
+    <pre>x.a._neues_attribut = "neu"
+x.a.d = "ersetzter text"
+x.a.neu = "neues Element" (wird hinten angehängt)</pre>
+
+    <p>
+        Eine Deluxe-Variante würde das Schema heranziehen, um den genauen Platz des neuen Elements zu bestimmen.
+    </p>
+    <pre>x.a.insertBefore( "&lt;neu/>", x.a.d );</pre>
+
+</description>

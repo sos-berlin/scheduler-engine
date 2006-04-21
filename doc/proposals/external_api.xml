@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id$-->
+
+<description
+    head_title          = "Externes API"
+    base_dir            = "../"
+    author              = "$Author$"
+    date                = "$Date$"
+>
+    <h1>Externes API</h1>
+
+    <p>
+        Die Scheduler-API könnte außerhalb des Schedulers zur Verfügung stehen?
+        Die Scheduler-Klassen können dann benutzt werden in
+    </p>
+
+    <ul>
+        <li>
+            Java-Programmen, z.B. einer Tomcat-Anwendung,
+        </li>
+        <li>
+            PHP-Anwendungen,
+        </li>
+        <li>
+            Javascript-Batchs (auch Linux),
+        </li>
+        <li>
+            Perl-Skripten.
+        </li>
+    </ul>
+
+
+    <scheduler_example scripting_language="javascript">
+        <pre>var scheduler = new ActiveXObject( "sos.scheduler" );
+scheduler.connect( "host:4444" );
+
+// scheduler ist jetzt das Objekt spooler des verbundenen Schedulers
+
+scheduler.log( "Eine Zeile im Hauptprotokoll" );
+
+var variable_set = scheduler.create_variable_set();
+variable_set.set_var( "a", 1 );
+var task = scheduler.job( "my_job" ).start( variable_set );
+
+scheduler.terminate_and_restart();</pre>
+    </scheduler_example>
+
+</description>
