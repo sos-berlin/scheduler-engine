@@ -52,7 +52,6 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-162", "There is no order $1 in job chain \"$2\"" },
     { "SCHEDULER-163", "$1 is not in an order queue" },
     { "SCHEDULER-164", "<show_... what=\"$1\">: Invalid value for attribute what=" },
-    { "SCHEDULER-165", "The priority= attribute cannot be used with <job order=\"yes\">" },
     { "SCHEDULER-166", "<script> java_class= and language= cannot be combined" },
     { "SCHEDULER-167", "A program source cannot be set with <script> com_class= or java_class=" },
     { "SCHEDULER-168", "com_class= and java_class= cannot be combined in <script>" },
@@ -253,6 +252,8 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-964", "New $1" },
     { "SCHEDULER-965", "Executing command $1" },
     { "SCHEDULER-966", "Command answer: $1" },
+    { "SCHEDULER-967", "start_new_file(): protocol file is being closed now" },
+    { "SCHEDULER-968", "start_new_file(): intermediate protocol file is: $1" },
     { "SCHEDULER-999", "Scheduler has been terminated properly" },
     {}
 };

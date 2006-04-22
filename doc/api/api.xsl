@@ -313,10 +313,12 @@
 
                 <script defer="defer" type="text/javascript" for="window" event="onload">
 
-                    if( window.navigator.appName == "Microsoft Internet Explorer" )     // ie6 kennt nicht "fixed"
+                    if( window.navigator.appName == "Microsoft Internet Explorer"           // ie6 kennt nicht "fixed"
+                     &amp;&amp; window.navigator.appVersion.indexOf( "MSIE 7" ) &lt; 0 )    // TODO: Browser-Erkennung auslagern, zukünftiges ie8 wird nicht geprüft
                     {
                         //window.onscroll = set_all_classes_position;
                         document.getElementById( "all_classes_hidden" ).style.display = "none";
+                        set_all_classes_position();
                         window.setInterval( set_all_classes_position, 1*1000, "JavaScript" );
                     }
 

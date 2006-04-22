@@ -2563,6 +2563,17 @@
             </text>
         </message>
 
+        <message code="SCHEDULER-967">
+            <text xml:lang="en">
+                <title>start_new_file(): protocol file is being closed now</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-968">
+            <text xml:lang="en">
+                <title>start_new_file(): intermediate protocol file is: <p1/></title>
+            </text>
+        </message>
 
         <message code="SCHEDULER-999">
             <text xml:lang="de">

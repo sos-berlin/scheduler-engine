@@ -65,8 +65,29 @@
         Reguläre Ausdrücke (Verzeichnisüberwachung)
     </p>
     <p class="indent" style="margin-top: 0px">
-        Algorithmus von Spencer verarbeitet nur <code>ASCII</code>-Zeichen, also z.B. keine Umlaute.
+        Der Algorithmus von Spencer verarbeitet nur <code>ASCII</code>-Zeichen, also z.B. keine Umlaute.
         Er sollte ersetzt werden.
     </p>
+
+
+    <h1 style="margin-top: 3em">Dokumentation</h1>
+
+    <p>
+        Ausführlicher
+    </p>
+    <p class="indent" style="margin-top: 0px">
+        Vieles ist nur kurz erwähnt und könnte ausführlicher beschrieben werden.
+    </p>
+
+    <p>
+        Meldungen
+    </p>
+    <p class="indent" style="margin-top: 0px">
+        Beschreibung der Meldungen.
+        Welche Operation (API, XML) erzeugt welche Meldung?
+        Anklickbare Meldungs-Codes im Scheduler-Protokoll der HTML-Oberfläche.
+    </p>
+
+
 
 </description>

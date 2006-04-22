@@ -136,7 +136,7 @@ spooler_log.info( request.charset_name );               // ==> utf-8</pre>
                 Fehlt der Parameter, wird ISO-8859-1 angenommen.
             </p>
             <p>
-                Folgende Zeichen-Coderierungen (Charset) werden erkannt:
+                Folgende Zeichen-Codierungen (Charset) werden erkannt:
             </p>
             <ul>
                 <li>ISO-8859-1</li>

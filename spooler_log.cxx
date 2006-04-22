@@ -237,7 +237,7 @@ void Log::open_new()
 void Log::start_new_file()
 {
     string old_filename = _filename;
-    info( "start_new_file(): Die Protokolldatei wird geschlossen" );
+    info( message_string( "SCHEDULER-967" ) );   // "start_new_file(): Die Protokolldatei wird geschlossen"
 
     string old_log_filename = log_filename();
     log_stop();
@@ -245,7 +245,7 @@ void Log::start_new_file()
 
     open_new();
 
-    info( "start_new_file(): Vorhergehende Protokolldatei ist " + old_filename );
+    info( message_string( "SCHEDULER-968", old_filename ) );   //"start_new_file(): Vorhergehende Protokolldatei ist "
 }
 
 //---------------------------------------------------------------------------------------Log::write

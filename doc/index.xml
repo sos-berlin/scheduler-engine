@@ -173,6 +173,13 @@
         </dd>
     </a>
 
+    <a href="messages/index.xml">
+        <dt>Meldungs-Codes</dt>
+        <dd>
+            Hier die Liste der Scheduler-Meldungs-Codes.
+        </dd>
+    </a>
+
     <a href="email.xml">
         <dt>eMail-Versand</dt>
         <dd>
