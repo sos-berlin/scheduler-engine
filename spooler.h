@@ -279,7 +279,7 @@ struct Spooler : Object,
 
     Job*                        get_job                     ( const string& job_name, bool can_be_not_initialized = false );
     Job*                        get_job_or_null             ( const string& job_name );
-    Job*                        get_next_job_to_start       ();
+  //Job*                        get_next_job_to_start       ();
     ptr<Task>                   get_task                    ( int task_id );
     ptr<Task>                   get_task_or_null            ( int task_id );
 

@@ -139,7 +139,7 @@ string Time::as_string( With_ms with ) const
         if( _time < 100*(24*60*60) )
         {
             char hhmmss [30];
-            sprintf( hhmmss, "%02d:%02d:%02d%s", (int)(_time/(60*60)), (int)(_time/60) % 60, (int)_time % 60, bruch );
+            sprintf( hhmmss, "%02d:%02d:%02d%s", (int)(_time/(60*60)), abs( (int)(_time/60) ) % 60, (int)abs( (int64)_time % 60 ), bruch );
             return hhmmss;
         }
         else

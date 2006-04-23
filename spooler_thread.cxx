@@ -28,7 +28,7 @@ Spooler_thread::Spooler_thread( Spooler* spooler )
 {
     Z_WINDOWS_ONLY( _thread_priority = THREAD_PRIORITY_NORMAL; )
 
-    _prioritized_order_job_array_time = 1;  // Irgendeine Zeit, damit der Vergleich mit der spooler->job_chain_time() verschieden ausfällt
+  //_prioritized_order_job_array_time = 1;  // Irgendeine Zeit, damit der Vergleich mit der spooler->job_chain_time() verschieden ausfällt
 
   //_com_thread     = new Com_thread( this );
   //_free_threading = _spooler->free_threading_default();
@@ -63,7 +63,7 @@ void Spooler_thread::init()
 }
 
 //----------------------------------------------------------------------Spooler_thread::dom_element
-
+/*
 xml::Element_ptr Spooler_thread::dom_element( const xml::Document_ptr& document, const Show_what& )
 {
     xml::Element_ptr thread_element = document.createElement( "thread" );
@@ -93,7 +93,7 @@ xml::Element_ptr Spooler_thread::dom_element( const xml::Document_ptr& document,
 
     return thread_element;
 }
-
+*/
 //---------------------------------------------------------------------------Spooler_thread::close1
 
 void Spooler_thread::close1()
@@ -210,21 +210,26 @@ void Spooler_thread::cmd_shutdown()
 }
 */
 //------------------------------------------------Spooler_thread::build_prioritized_order_job_array
-
+/*
 void Spooler_thread::build_prioritized_order_job_array()
 {
-    _prioritized_order_job_array.clear();
-
-    for( Job_list::iterator j = _spooler->_job_list.begin(); j != _spooler->_job_list.end(); j++ )
+    Time t = _spooler->job_chain_time();
+    if( _prioritized_order_job_array_time != t )        // Ist eine neue Jobkette hinzugekommen?
     {
-        if( (*j)->order_controlled() )  _prioritized_order_job_array.push_back( *j );
+        _prioritized_order_job_array.clear();
+
+        for( Job_list::iterator j = _spooler->_job_list.begin(); j != _spooler->_job_list.end(); j++ )
+        {
+            if( (*j)->order_controlled() )  _prioritized_order_job_array.push_back( *j );
+        }
+
+        sort( _prioritized_order_job_array.begin(), _prioritized_order_job_array.end(), Job::higher_job_chain_priority );
+
+        _prioritized_order_job_array_time = t;
+        //FOR_EACH( vector<Job*>, _prioritized_order_job_array, i )  _log.debug( "build_prioritized_order_job_array: Job " + (*i)->name() );
     }
-
-    sort( _prioritized_order_job_array.begin(), _prioritized_order_job_array.end(), Job::higher_job_chain_priority );
-
-    //FOR_EACH( vector<Job*>, _prioritized_order_job_array, i )  _log.debug( "build_prioritized_order_job_array: Job " + (*i)->name() );
 }
-
+*/
 //-----------------------------------------------------------------Spooler_thread::get_task_or_null
 
 ptr<Task> Spooler_thread::get_task_or_null( int task_id )
@@ -240,7 +245,7 @@ ptr<Task> Spooler_thread::get_task_or_null( int task_id )
 }
 
 //-------------------------------------------------------------Spooler_thread::get_next_task_to_run
-
+/*
 Task* Spooler_thread::get_next_task_to_run()
 {
     Task* next_task = NULL;
@@ -269,7 +274,7 @@ Task* Spooler_thread::get_next_task()
 
     return task;
 }
-
+*/
 //-----------------------------------------------------------------------------Spooler_thread::wait
 /*
 void Spooler_thread::wait()
@@ -374,6 +379,36 @@ bool Spooler_thread::step()
 {
     bool something_done = false;
 
+
+    if( !something_done )
+    {
+        Z_FOR_EACH( Job_list, _spooler->_job_list, j )
+        {
+            something_done = (*j)->do_something();
+            if( something_done )  break;
+        }
+    }
+
+
+    if( !something_done )
+    {
+        FOR_EACH_TASK( it, task )
+        {
+          //if( _my_event.signaled_then_reset() )  return true;
+            if( _event  ->signaled()            )  return true;      // Das ist _my_event oder _spooler->_event
+
+            something_done |= do_something( task );
+
+            if( something_done )  break;
+        }
+
+        remove_ended_tasks();
+    }
+
+
+
+
+
     /*
     // Erst die Tasks mit höchster Priorität. Die haben absoluten Vorrang:
 
@@ -398,7 +433,6 @@ bool Spooler_thread::step()
     }
 
     remove_ended_tasks();
-    */
 
 
     // Jetzt sehen wir zu, dass die Jobs, die hinten in einer Jobkette stehen, ihre Aufträge los werden.
@@ -503,7 +537,6 @@ bool Spooler_thread::step()
     }
 
 
-    /*
     // Wenn immer noch keine Task ausgeführt worden ist, dann die Tasks mit Priorität 0 nehmen:
 
     if( !something_done )
@@ -870,7 +903,17 @@ bool Spooler_thread::try_to_free_process( Job* for_job, Process_class* process_c
         }
     }
 */
-    Z_FOR_EACH_REVERSE( vector<Job*>, _prioritized_order_job_array, it )
+    vector<Job*> prioritized_order_job_array;
+
+    for( Job_list::iterator j = _spooler->_job_list.begin(); j != _spooler->_job_list.end(); j++ )
+    {
+        if( (*j)->order_controlled() )  prioritized_order_job_array.push_back( *j );
+    }
+
+    sort( prioritized_order_job_array.begin(), prioritized_order_job_array.end(), Job::higher_job_chain_priority );
+
+
+    Z_FOR_EACH_REVERSE( vector<Job*>, prioritized_order_job_array, it )
     {
         Job* job = *it;
         if( job->_module._process_class == process_class )

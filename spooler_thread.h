@@ -79,7 +79,7 @@ struct Spooler_thread : zschimmer::Thread
     void                        wait                        ();
     Task*                       get_next_task_to_run        ();
     void                        remove_ended_tasks          ();
-    void                        build_prioritized_order_job_array();
+  //void                        build_prioritized_order_job_array();
 
 
 
@@ -108,14 +108,14 @@ struct Spooler_thread : zschimmer::Thread
     Task_list                  _task_list;
     bool                       _task_closed;
 
-    vector<Job*>               _prioritized_order_job_array;        // Jobs am Ende einer Jobkette priorisieren
-    Time                       _prioritized_order_job_array_time;
+  //vector<Job*>               _prioritized_order_job_array;        // Jobs am Ende einer Jobkette priorisieren
+  //Time                       _prioritized_order_job_array_time;
 
     typedef list<object_server::Session*>   Session_list;
     Session_list               _session_list;
 
  //?Task*                      _next_task;
-    Time                       _next_time;
+  //Time                       _next_time;
 
     long32                     _running_tasks_count;        // Wenn 0, dann warten
                                                             // Statistik

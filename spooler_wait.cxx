@@ -393,7 +393,7 @@ bool Wait_handles::wait_until_2( Time until, const string& debug_string )
 
                 Time now = Time::now();
                 t = (int)ceil( ( until - now ) * 1000 );
-                cerr << Time::now().as_string( Time::without_ms ) << " (" << ( -t / 1000 ) << "s";
+                cerr << Time::now().as_string( Time::without_ms ) << " (" << Time( -t / 1000 ).as_string( Time::without_ms ) << "s";
                 if( debug_string != "" )  cerr << " until " << debug_string.substr( 0, 55 );
                 cerr << ")  \r";
             }

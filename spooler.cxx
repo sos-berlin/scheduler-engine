@@ -839,6 +839,7 @@ int Spooler::remove_temporary_jobs( Job* which_job )
                     catch( exception &x )  { _log.warn( x.what() ); }   // Kann das überhaupt passieren?
 
                     it = _job_list.erase( it );
+
                     count++;
 
                     // Bei Auftragsjobs: _single_thread->build_prioritized_order_job_array();
@@ -1298,7 +1299,7 @@ Job* Spooler::get_job_or_null( const string& job_name )
 }
 
 //-------------------------------------------------------------------Spooler::get_next_job_to_start
-
+/*
 Job* Spooler::get_next_job_to_start()
 {
     Job* next_job = NULL;
@@ -1311,34 +1312,19 @@ Job* Spooler::get_next_job_to_start()
         {
             Job* job = *it;
 
-            if( next_time > job->next_time() ) 
+            Time next_job_time = job->next_time();
+            if( next_time > next_job_time ) 
             {
                 next_job = job; 
-                next_time = next_job->next_time();
+                next_time = next_job_time;
                 if( next_time == 0 )  break;
             }
-
-/*
-            if( job->_state == Job::s_pending )
-            {
-                Time now = Time::now();
-
-                if( job->_order_queue  
-                 &&  job->_order_queue->has_order( now ) 
-                 && ( job->_state != Job::s_pending || job->is_in_period(now) ) )
-                {
-                    next_job = job; 
-                    next_time = 0; 
-                    break; 
-                }
-            }
-*/
         }
     }
 
     return next_job;
 }
-
+*/
 //--------------------------------------------------------------------------------Spooler::get_task
 // Anderer Thread
 
@@ -2416,35 +2402,40 @@ void Spooler::run()
 
         if( _state != Spooler::s_paused )
         {
-            if( _single_thread )
+            something_done |= _single_thread->process();
+
+            if( _single_thread->is_ready_for_termination() )  break;
+
+
+            FOR_EACH( Task_list, _single_thread->_task_list, t )
             {
-                something_done |= _single_thread->process();
-
-                //LOG( "spooler.cxx: something_done=" << something_done << "   _single_thread->process()\n" );
-
-                if( _single_thread->is_ready_for_termination() )  break;
-
-                Task* task = _single_thread->get_next_task();
-                if( task ) 
+                Task* task = *t;
+                Time  task_next_time = task->next_time();
+                if( _next_time > task_next_time )
                 {
-                    //_next_time = min( _next_time, task->next_time() );
-                    Time next_time = task->next_time();
-                    if( next_time < _next_time )
-                    {
-                        _next_time = next_time;
-                        if( log_wait )  wait_for_string = task->obj_name();
-                    }
+                    _next_time = task_next_time; 
+                    if( log_wait )  wait_for_string = task->obj_name();
+                    if( _next_time == 0 )  break;
                 }
-
-                nothing_done_max += _single_thread->task_count() * 3 + 3;    // Statt der Prozesse zählen wir die Tasks einmal mehr
             }
 
+            nothing_done_max += _single_thread->task_count() * 3 + 3;    // Statt der Prozesse zählen wir die Tasks einmal mehr
 
-            Job* job = get_next_job_to_start();
-            if( job  &&  _next_time > job->next_time() )  
+
+            if( _next_time > 0 )
             {
-                _next_time = job->next_time();
-                if( log_wait )  wait_for_string = job->obj_name();
+                FOR_EACH_JOB( it )
+                {
+                    Job* job = *it;
+
+                    Time next_job_time = job->next_time();
+                    if( _next_time > next_job_time ) 
+                    {
+                        _next_time = next_job_time;
+                        if( log_wait )  wait_for_string = job->obj_name();
+                        if( _next_time == 0 )  break;
+                    }
+                }
             }
         }
 
