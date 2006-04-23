@@ -754,22 +754,21 @@ void Communication::bind()
 #   ifndef Z_WINDOWS
         if( _spooler->_interactive )
         {
-            ret = ioctl( STDIN_FILENO, FIONBIO, &on );   // In Windows nicht möglich
-            if( ret == 0 )
-            {
-                ptr<Connection> new_connection = Z_NEW( Connection( this ) );
-        
-                new_connection->_read_socket  = STDIN_FILENO;
-                new_connection->_write_socket = STDOUT_FILENO;
-                new_connection->_socket_send_buffer_size = 1024;
+            ptr<Connection> new_connection = Z_NEW( Connection( this ) );
+    
+            new_connection->_read_socket  = STDIN_FILENO;
+            new_connection->_write_socket = STDOUT_FILENO;
+            new_connection->_socket_send_buffer_size = 1024;
 
-                new_connection->add_to_socket_manager( _spooler->_connection_manager );
-                new_connection->socket_expect_signals( Socket_operation::sig_read );
+            new_connection->call_ioctl( FIONBIO, on );   // In Windows nicht möglich
+            new_connection->add_to_socket_manager( _spooler->_connection_manager );
+            new_connection->socket_expect_signals( Socket_operation::sig_read );
 
-                new_connection->set_event_name( "stdin" );
+            new_connection->set_event_name( "stdin" );
+            new_connection->_connection_state = Connection::s_ready;
+            new_connection->_security_level = Security::seclev_all;
 
-                _connection_list.push_back( new_connection );
-            }
+            _connection_list.push_back( new_connection );
         }
 #   endif
 }
