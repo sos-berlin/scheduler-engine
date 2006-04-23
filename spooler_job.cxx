@@ -1868,6 +1868,9 @@ xml::Element_ptr Job::dom_element( const xml::Document_ptr& document, const Show
 
         if( _temporary )
         job_element.setAttribute( "temporary", "yes" );
+
+        if( order_controlled() )
+        job_element.setAttribute( "job_chain_priority", _job_chain_priority );
 /*
         if( _state == s_pending )
         {
