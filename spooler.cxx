@@ -325,7 +325,8 @@ With_log_switch read_profile_with_log( const string& profile, const string& sect
                 if( !is_daemon && spooler_ptr )  spooler_ptr->async_signal( "Ctrl+C" );
             }
 
-            default: ;
+            default: 
+                fprintf( stderr, "Unknown signal %d\n", sig );
         }
 
         set_ctrl_c_handler( ctrl_c_pressed < 2 );
