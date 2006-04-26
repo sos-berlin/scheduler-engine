@@ -12,6 +12,17 @@
     <h1>Vorschläge zur weiteren Entwicklung</h1>
 
     <p>
+        HTTP-Protokoll
+    </p>
+    <p class="indent" style="margin-top: 0px">
+        HTTP-Protokoll in eigene Datei schreiben. 
+        Vielleicht wie Apache. 
+        Oder die Web-Service-Protokolle auf alle TCP-Verbindungen erweitern.
+        Wenig ins Hauptprotokoll schreiben, um es nicht aufzublähen.
+    </p>
+    
+
+    <p>
         <a href="run_time.xml"><code>&lt;run_time></code></a>
     </p>
     <p class="indent" style="margin-top: 0px">

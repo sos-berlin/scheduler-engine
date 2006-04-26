@@ -328,6 +328,8 @@ void Log::log2( Log_level level, const string& prefix, const string& line_, Pref
                  && attributes & BACKGROUND_RED 
                  && attributes & BACKGROUND_GREEN )       // Hintergrund ist hell und weiﬂ oder gelb
                 {
+                    attributes &= ~( FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE );
+
                     switch( level )
                     {
                         case log_error:     attributes |= FOREGROUND_INTENSITY | FOREGROUND_RED; break;
