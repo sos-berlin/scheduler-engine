@@ -1015,6 +1015,8 @@ void Command_processor::execute_http( http::Operation* http_operation )
                 if( extension == "css"  )  response_content_type = "text/css";
                 else
                 if( extension == "ico"  )  response_content_type = "image/x-ico";
+              //else
+              //if( extension == "jar"  )  response_content_type = "application/x-java-archive";
 
                 string filename = path;
 

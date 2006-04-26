@@ -462,6 +462,8 @@ xml::Element_ptr Communication::Connection::dom_element( const xml::Document_ptr
 
     result.setAttribute( "state", connection_state_name() + "/" + state_name() );
 
+    result.setAttribute( "received_bytes", recv_total_byte_count() );
+    result.setAttribute( "sent_bytes"    , send_total_byte_count() );
 
     xml::Element_ptr peer_element = result.append_new_element( "peer" );
     peer_element.setAttribute( "host_ip", peer().host().ip_string() );

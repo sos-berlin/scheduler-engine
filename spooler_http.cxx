@@ -620,7 +620,7 @@ void Operation::unlink_order()
 
 //-------------------------------------------------------------------Operation::on_order_processing
 
-void Operation::on_first_order_processing( Task* task )
+void Operation::on_first_order_processing( Task* )
 {
     // <web_service timeout="">: Die Frist gilt nur bis zur ersten Ausführung
 
@@ -631,7 +631,7 @@ void Operation::on_first_order_processing( Task* task )
 
 void Operation::begin()
 {
-    Z_LOG2( "scheduler.http", "HTTP: " << _parser->text() << "\n" );    // Wird auch mit "socket.data" protokolliert (default aus)
+    Z_LOG2( "scheduler.http", "HTTP: " << _parser->text() );    // Wird auch mit "socket.data" protokolliert (default aus)
 
     _response = Z_NEW( Response( this ) );
 
@@ -958,6 +958,7 @@ void Response::send()
 
 void Response::finish()
 {
+    if( _finished )  return;
     if( !_status_code )  _status_code = status_200_ok;
 
     if( (int)_status_code >= 100  &&  (int)_status_code <= 199  ||  (int)_status_code == 204  || (int)_status_code == 304 )       // RFC 2617 4.4
@@ -989,10 +990,13 @@ void Response::finish()
     _headers_stream << "Server: Scheduler " VER_PRODUCTVERSION_STR;
     //if( Web_service_operation* wso = _operation->_web_service_operation )
     //    _headers_stream << wso->_web_service->obj_name();
+
     _headers_stream << "\r\n\r\n";
 
     _chunk_size = _headers_stream.length();
     _finished = true;
+
+    Z_LOG2( "scheduler.http", "HTTP response: " << _headers_stream );    // Wird auch mit "socket.data" protokolliert (default aus)
 }
 
 //------------------------------------------------------------------------------------Response::eof
