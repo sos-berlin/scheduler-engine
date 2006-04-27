@@ -520,6 +520,7 @@
             </xsl:otherwise>
         </xsl:choose>
     </xsl:for-each>
+    
 </xsl:template>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
@@ -634,6 +635,8 @@
                 <xsl:if test="$show_title and $title_rowspan &gt; 0 and position() = 1">
                     <xsl:apply-templates select="parent::*/title"/>
                 </xsl:if>
+
+                <xsl:apply-templates select="parent::method | parent::property" mode="comment"/>
             </td>
         </xsl:if>
 
@@ -806,7 +809,7 @@
 
     <xsl:choose>
         <xsl:when test="com.type [ @type ]">
-            <xsl:for-each select="com.type [ @type or @class ]">
+            <xsl:for-each select="com.type">
                 <xsl:if test="position() &gt; 1">|</xsl:if>
                 <xsl:apply-templates select=".">
                     <xsl:with-param name="is_in_table" select="$is_in_table"/>
@@ -897,6 +900,9 @@
     </xsl:if>
 
 
+    <xsl:apply-templates select="." mode="detailed_comment"/>
+
+
     <p style="margin-top: 0em">&#160;</p>
 
 
@@ -922,7 +928,7 @@
     <xsl:variable name="read_result"  select="com                            [ @access='read'  or not( @access ) and ( not( parent::*/@access        ) or parent::property/@access='read'  ) ]/com.result"/>
     <xsl:variable name="write_result" select="com [ not ( parent::method ) ] [ @access='write' or not( @access ) and ( not( parent::property/@access ) or parent::property/@access='write' ) ]/com.result"/>
 
-    <xsl:if test="com/com.parameter [ description ] | $write_result [ description ]">
+    <xsl:if test="com/com.parameter | $write_result ">
         <h3>
             <xsl:call-template name="phrase">
                 <xsl:with-param name="id" select="'api.method.parameters.title'"/>
@@ -933,9 +939,39 @@
             <xsl:for-each select="com/com.parameter | $write_result">
                 <tr>
                     <td>
-                        <span class="mono"><xsl:value-of select="@name"/></span>
+                        <span class="mono">
+                            <xsl:choose>
+                                <xsl:when test="@name">
+                                    <xsl:value-of select="@name"/>
+                                </xsl:when>
+                                <xsl:otherwise>
+                                    <xsl:value-of select="com.type/@type | com.type/@class"/>
+                                </xsl:otherwise>
+                            </xsl:choose>
+                        </span>
+                        <xsl:if test="@optional">
+                            &#160;<span style="font-size: 8pt">(optional)</span>
+                        </xsl:if>
                     </td>
+                    
                     <td style="padding-left: 2ex">
+                        <xsl:choose>
+                            <xsl:when test="$programming_language='perl' and com.type [ @class or @array ]">
+                                <span class="not_for_unix_perl">
+                                    <xsl:call-template name="phrase">
+                                        <xsl:with-param name="id" select="'api.parameter.not_for_unix_perl'"/>
+                                    </xsl:call-template>
+                                </span>
+                            </xsl:when>
+                            <xsl:when test="$programming_language='perl' and .//com.type [ @class or @array ]">
+                                <span class="not_for_unix_perl">
+                                    <xsl:call-template name="phrase">
+                                        <xsl:with-param name="id" select="'api.parameter.restricted_for_unix_perl'"/>
+                                    </xsl:call-template>
+                                </span>
+                            </xsl:when>
+                        </xsl:choose>
+
                         <xsl:apply-templates select="title"/>
                         <xsl:apply-templates select="description"/>
                     </td>
@@ -1015,6 +1051,18 @@
     </xsl:choose>
 </xsl:template>
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<xsl:template match="method | property" mode="comment">
+    <!-- Default -->
+</xsl:template>
+    
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<xsl:template match="method | property" mode="detailed_comment">
+    <!-- Default -->
+</xsl:template>
+    
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 </xsl:stylesheet>

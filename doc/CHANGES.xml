@@ -10,6 +10,11 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2006-04-17" version="2.0.151" subversion_revision="4277">
+        <revision type="correction" title="Dokumentation geändert: Objekte und Arrays können in Perl unter Unix nicht als Parameter übergeben werden">
+        </revision>
+    </change>
+    
     <change date="2006-04-13" version="2.0.151" subversion_revision="4254">
         <revision type="new" title="Neue Option -env=NAME=WERT">
             <description>

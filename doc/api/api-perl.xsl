@@ -76,5 +76,53 @@
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
+<xsl:template match="method [ com/com.parameter//com.type [ @class or @array ] ] | property [ com/com.parameter//com.type [ @class or @array ] ]" mode="comment">
+    <br/>
+    <span class="not_for_unix_perl">
+        –
+        <xsl:choose>
+            <xsl:when test="com/com.parameter[ not( @optional ) ]/com.type [ @class or @array ]">
+                <span class="not_for_unix_perl">
+                    <xsl:call-template name="phrase">
+                        <xsl:with-param name="id" select="'api.method.not_for_unix_perl'"/>
+                    </xsl:call-template>
+                </span>
+            </xsl:when>
+            <xsl:otherwise>
+                <span class="not_for_unix_perl">
+                    <xsl:call-template name="phrase">
+                        <xsl:with-param name="id" select="'api.method.restricted_for_unix_perl'"/>
+                    </xsl:call-template>
+                </span>
+            </xsl:otherwise>
+        </xsl:choose>
+    </span>
+</xsl:template>
+    
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<xsl:template match="method [ com/com.parameter//com.type [ @class or @array ] ] | property [ com/com.parameter//com.type [ @class or @array ] ]" mode="detailed_comment">
+    <p class="not_for_unix_perl">
+        <xsl:choose>
+            <xsl:when test="com/com.parameter[ not( @optional ) ]/com.type [ @class or @array ]">
+                <span class="not_for_unix_perl">
+                    <xsl:call-template name="phrase">
+                        <xsl:with-param name="id" select="'api.method.not_for_unix_perl.detailed'"/>
+                    </xsl:call-template>
+                </span>
+            </xsl:when>
+            <xsl:otherwise>
+                <span class="not_for_unix_perl">
+                    <xsl:call-template name="phrase">
+                        <xsl:with-param name="id" select="'api.method.restricted_for_unix_perl.detailed'"/>
+                    </xsl:call-template>
+                </span>
+            </xsl:otherwise>
+        </xsl:choose>
+    </p>
+</xsl:template>
+    
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
 
 </xsl:stylesheet>

@@ -99,7 +99,16 @@ job_chain.name = "Jobkette";</pre>
 <method name="add_order">
     <com>
         <com.parameter name="order_or_payload">
-            <com.type type="BSTR"/>
+            <com.type type="VARIANT">
+                <com.type class="Order"/>
+                <com.type type="BSTR"/>
+            </com.type>
+            <description>
+                <i>
+                    In Perl unter Unix kann nur die Payload übergeben werden.
+                    Ein ganzer Auftrag <scheduler_method class="Order"/> kann nicht übergeben werden.
+                </i>
+            </description>
         </com.parameter>
 
         <com.result>
@@ -136,6 +145,84 @@ job_chain.name = "Jobkette";</pre>
             wird eine Exception mit Fehlercode <scheduler_message code="SCHEDULER-186"/> geliefert.
         </p>
     </description>
+
+    <example programming_language="perl">
+        <pre><![CDATA[# The Scheduler/Perl interface under Unix does not accept objects as parameters, 
+# so we implement our own add_order().
+        
+my $job_chain_name = 'my_job_chain';
+my $order_id       = '123';
+my $order_title    = 'My title';
+my %params;
+$params{'input'} = 'input value';
+$params{'other'} = 'another value';
+
+add_order( $job_chain_name, $order_id, $order_title, \%params );
+
+#-----------------------------------------------------------------------------------------add_order
+
+sub add_order
+{
+    my $job_chain   = shift;
+    my $order_id    = shift;
+    my $order_title = shift;
+    my $params      = shift;
+
+    my $order_xml = "<?xml version='1.0'?>";
+    $order_xml .= "<add_order";
+    $order_xml .= xml_attribute( 'job_chain', $job_chain );
+    $order_xml .= xml_attribute( 'id'       , $order_id )     if $order_id;
+    $order_xml .= xml_attribute( 'title'    , $order_title )  if $order_title;
+    $order_xml .= ">";
+
+    $order_xml .= "<params>";
+    
+    while( ( my $name, my $value ) = each( %$params ) )
+    {
+        $order_xml .= "<param" . xml_attribute( 'name', $name ) . xml_attribute( 'value', $value ) . "/>";
+    }
+    
+    $order_xml .= "</params>";
+    $order_xml .= "</add_order>";
+
+    execute_xml( $order_xml );
+}
+
+#---------------------------------------------------------------------------------------execute_xml
+# Excecute XML command and die on error
+
+sub execute_xml
+{
+    my $xml = shift;
+    
+    my $result_xml = $spooler->execute_xml( $xml );
+    
+    if( $result_xml =~ /<ERROR/ )
+    {
+        $spooler_log->error( "Error in XML command $xml" );
+        $spooler_log->error( $result_xml );
+        die $result_xml;
+    }
+}
+
+#-------------------------------------------------------------------------------------xml_attribute
+# xml_attribut( 'name', 'value' ) returns ' name="value"'
+
+sub xml_attribute
+{
+    my $name  = shift;
+    my $value = shift;
+
+    return ""  unless $value;
+    
+    $value =~ s/&/&amp;/g;
+    $value =~ s/</&lt;/g;
+    $value =~ s/>/&gt;/g;
+    $value =~ s/"/&quot;/g;
+    
+    return " $name=\"$value\"";
+}]]></pre>
+    </example>
 </method>
 
 

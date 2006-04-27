@@ -31,10 +31,10 @@
             (innerhalb der Jobkette oder der Auftragswarteschlange des Jobs eindeutige)
             Kennung.
             Diese Kennung sollte den zu verarbeitenden Daten entsprechen.
-            Überlicherweise wird der Schlüssel eines Datenbanksatzes verwendet.
+            Üblicherweise wird der Schlüssel eines Datenbanksatzes verwendet.
         </p>
         <p>
-            Wenn Sie die <code>id</code> nicht setzten, vergibt
+            Wenn Sie die <code>id</code> nicht setzen, vergibt
             <scheduler_method class="Job_chain" method="add_order"/> eine Kennung.
         </p>
     </description>
@@ -141,7 +141,7 @@
 
     <description>
         <p>
-            Sie können den Job auch setzen.
+            Sie können den Job auch direkt setzen.
             Dann stellt der Scheduler den Zustand des Auftrags auf den Zustand des Jobs in der Jobkette ein.
             In der Regel wird man aber <scheduler_method class="Order" property="state"/> verwenden.
         </p>

@@ -405,6 +405,28 @@
 </description>
 
 
+    <example programming_language="javascript" title="system() - Einfache Ausführung eines Kommandos">
+        <pre>exit_code = system( "backup /" );            
+            
+function system( cmd, timeout )
+{
+    var subprocess = spooler_task.create_subprocess();
+    
+    try
+    {
+        if( timeout )  subprocess.timeout = timeout;
+        subprocess.start( cmd );
+        subprocess.wait_for_termination();
+        return subprocess.exit_code;
+    }
+    finally
+    {
+        subprocess.close();
+    }
+}</pre>
+    </example>    
+    
+    
 <example programming_language="javascript">
     <pre>var subprocess = spooler_task.create_subprocess();
 

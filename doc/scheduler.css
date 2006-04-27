@@ -103,3 +103,5 @@ td.api_title                    { padding-left: 3mm; }
 .message_info                   {}
 .message_warn                   { color: #800000; }
 .message_error                  { color: red; }
+
+.not_for_unix_perl              { font-style: italic; }
