@@ -323,6 +323,7 @@ With_log_switch read_profile_with_log( const string& profile, const string& sect
                 // or pthread_mutex_unlock from a signal handler may deadlock the calling thread.
 
                 if( !is_daemon && spooler_ptr )  spooler_ptr->async_signal( "Ctrl+C" );
+                break;
             }
 
             default: 
