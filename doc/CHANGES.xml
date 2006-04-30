@@ -12,6 +12,22 @@
 
     <change date="2006-04-17" version="2.0.151" subversion_revision="4277">
         <revision type="correction" title="Dokumentation geändert: Objekte und Arrays können in Perl unter Unix nicht als Parameter übergeben werden">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_method class="Job_chain" method="add_order"/>
+                    </li>
+                    <li>
+                        <scheduler_method class="Spooler" method="add_job_chain"/>
+                    </li>
+                    <li>
+                        <scheduler_method class="Order" property="params"/>
+                    </li>
+                </ul>
+                <p>
+                    (Klick auf der API-Seite oben auf Perl!)
+                </p>
+            </description>
         </revision>
     </change>
     
