@@ -356,6 +356,9 @@ sub xml_attribute
         Wenn der Jobschritt (spooler_process) true liefert, stellt der Scheduler den Folgezustand,
         sonst den Fehlerzustand ein.
         Der Auftrag rutscht damit an eine andere Stelle der Jobkette, die dem neuen Zustand zugeordnet ist.
+
+        Das gilt nicht, wenn der Zustand während der Ausführung mit
+        <scheduler_method class="Order" property="state"/> verändert worden ist.
     </p>
     <p>
         Sie erzeugen eine Jobkette mit <scheduler_method class="Spooler" method="create_job_chain"/>,

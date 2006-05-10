@@ -2297,7 +2297,7 @@
                 <title>Auftrag wird ausgeführt um <p1/></title>
             </text>
             <text xml:lang="en">
-                <title>Order will be processed at <p2/></title>
+                <title>Order will be processed at <p1/></title>
             </text>
         </message>
 
@@ -2369,7 +2369,7 @@
                 <title>Kein weiterer Job in der Jobkette, der Auftrag wird mit state=<p1/> wiederholt um <p2/></title>
             </text>
             <text xml:lang="en">
-                <title>End state reached - job will be repeated at <p2/> with state=<p1/></title>
+                <title>End state reached - order will be repeated at <p2/> with state=<p1/></title>
             </text>
         </message>
 

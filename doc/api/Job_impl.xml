@@ -219,6 +219,9 @@
                     Bei <scheduler_element name="job" attribute="order" value="yes"/>:
                     <code>false</code> versetzt den Auftrag in den Fehlerzustand
                     (s. <scheduler_method class="Job_chain_node"/> und <scheduler_element name="job_chain_node"/>).
+                    
+                    Das gilt nicht, wenn der Zustand während der Ausführung mit
+                    <scheduler_method class="Order" property="state"/> verändert worden ist.                    
                 </p>
             </description>
         </com.result>

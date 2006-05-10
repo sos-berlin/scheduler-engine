@@ -166,6 +166,24 @@
             Wenn der Auftrag in einer Jobkette ist,
             muss der Zustand in der Jobkette vorhanden sein.
         </p>
+        <p>
+            Während der Ausführung des Auftrags durch einen Job
+            macht die Änderung des Zustands den in der Jobkette festgelegten Folgezustand 
+            (<scheduler_element name="job_chain_node"/>)
+            wirkungslos.
+            Ebenso sind dann die Rückgabewerte von
+            <scheduler_method class="Job_impl" method="spooler_process"/> und
+            <scheduler_method class="Monitor_impl" method="spooler_process_after"/>
+            ohne Bedeutung.
+        </p>
+        <p>
+            Der Auftrag wird in die Auftragswarteschlange des Jobs eingereiht,
+            der dem Zustand zugeordnet ist
+            (s. <scheduler_element name="job_chain_node"/>).
+            
+            Die Ausführung durch diesen Job wird solange verzögert, 
+            bis der jetzt ausführende Job den Auftrag ausgeführt hat.
+        </p>
     </description>
 </property>
 
