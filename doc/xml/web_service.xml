@@ -33,6 +33,7 @@
                 <p>
                     Eine Web-Service-Anforderung erzeugt einen Auftrag, 
                     der in diese Jobkette eingereiht wird.
+                    Die Nutzdaten der Anforderung stehen in <code>spooler_task.order.web_service_operation.request.binary_content</code>.
                 </p>
                 <p>
                     Nicht zusammen mit den Attributen
@@ -41,7 +42,8 @@
                     verwendbar.
                 </p>
                 <p>
-                    Siehe <scheduler_method class="Order" property="web_service_operation"/>.
+                    Für den Zugriff auf die Web-Anforderung siehe 
+                    <scheduler_method class="Order" property="web_service_operation"/>.
                 </p>
             </description>
         </xml_attribute>

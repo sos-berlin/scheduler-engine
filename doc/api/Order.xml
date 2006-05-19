@@ -437,6 +437,43 @@
         </p>
     </description>
 
+    <example programming_language="java">
+        <pre>public boolean spooler_process()  throws Exception
+{
+    Order                 order                 = spooler_task.order();
+    Web_service_operation web_service_operation = order.web_service_operation();
+    Web_service_request   request               = web_service_operation.request();
+
+    // Decode request data
+    String request_string = new String( request.binary_content(), request.charset_name() );
+    
+    
+    process request_string ...;
+    
+    
+    String                response_string = "This is my response";
+    String                charset_name    = "UTF-8";
+    ByteArrayOutputStream byos            = new ByteArrayOutputStream();
+    
+    // Encode response data
+    Writer writer = new OutputStreamWriter( byos, charset_name );
+    writer.write( response_string );
+    writer.close();
+
+    // Respond
+    Web_service_response response = web_service_operation.response();
+
+    response.set_content_type( "text/plain" );
+    response.set_charset_name( charset_name );
+    response.set_binary_content( byos.toByteArray() );
+    response.send();
+
+    // Web service operation has finished
+
+    return true;
+}</pre>
+    </example>
+
     <messages>
         <message code="SCHEDULER-246" level="error"/>
     </messages>
