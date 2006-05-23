@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<spooler>
+    <config 
+        tcp_port="4444" 
+        main_scheduler="lillerud.zschimmer:6310"
+    >
+
+        <security>
+            <allowed_host host="0.0.0.0" level="all"/>
+        </security>
+
+        <process_classes/>
+    </config>
+</spooler>
