@@ -27,6 +27,18 @@
                         <scheduler_method class="Order" property="params" programming_language="perl"/>
                     </li>
                 </ul>
+                <p>
+                    Betrifft die Datei <code>libsosperlscript.so</code>.
+                </p>
+            </description>
+        </revision>
+
+        <revision type="correction" title="Neuer Auftrag mit Startzeit weckt schlafende Task">
+            <description>
+                <p>
+                    Ein Auftrag mit Startzeit weckt jetzt eine schlafende Task (im Zustand running_waiting_for_order),
+                    sodass der Auftrag sofort zur Startzeit ausgeführt wird.
+                </p>
             </description>
         </revision>
     </change>
