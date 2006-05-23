@@ -256,6 +256,7 @@ struct Job : Object,
     void                        set_next_start_time         ( Time now, bool repeat = false );
     void                        set_next_time               ( Time );
     void                        calculate_next_time         ( Time now = Time::now() );
+    void                        calculate_next_time_after_modified_order_queue();
 
     Time                        next_time                   ()                                      { THREAD_LOCK_RETURN( _lock, Time, _next_time ); }
     Time                        next_start_time             ();

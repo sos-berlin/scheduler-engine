@@ -1297,6 +1297,27 @@ void Job::calculate_next_time( Time now )
     }
 }
 
+//----------------------------------------------Job::calculate_next_time_after_modified_order_queue
+
+void Job::calculate_next_time_after_modified_order_queue()
+{
+    // Auftragswarteschlange hat einen neuen Auftrag bekommen (s. spooler_order.cxx)
+    // _next_time einer Task in s_running_waiting_for_order berechnen
+    // oder _next_time des Jobs berechnen
+
+    FOR_EACH( Task_queue, _task_queue, it )
+    {
+        Task* task = *it;
+        if( task->state() == Task::s_running_waiting_for_order )
+        {
+            task->calculate_next_time_after_modified_order_queue();
+            return;
+        }
+    }
+   
+    calculate_next_time();
+}
+
 //-------------------------------------------------------------------Job::notify_a_process_is_idle
 
 void Job::notify_a_process_is_idle()

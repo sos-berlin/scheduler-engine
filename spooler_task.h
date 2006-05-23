@@ -113,6 +113,7 @@ struct Task : Object,
     Job*                        job                         ();
     Prefix_log*                 log                         ()                                      { return _log; }
     Time                        next_time                   ();
+    void                        calculate_next_time_after_modified_order_queue();
     Spooler_thread*             thread                      ()                                      { return _thread; }
     string                      name                        () const                                { return obj_name(); }
     virtual string              obj_name                    () const                                { return _obj_name; }

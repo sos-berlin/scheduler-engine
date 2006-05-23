@@ -778,7 +778,7 @@ void Order_queue::add_order( Order* order, Do_log do_log )
 
             _setback_queue.insert( it, order );
 
-            _job->calculate_next_time();
+            _job->calculate_next_time_after_modified_order_queue();
         }
         else
         {
