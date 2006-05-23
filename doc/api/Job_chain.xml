@@ -103,12 +103,6 @@ job_chain.name = "Jobkette";</pre>
                 <com.type class="Order"/>
                 <com.type type="BSTR"/>
             </com.type>
-            <description>
-                <i>
-                    In Perl unter Unix kann nur die Payload übergeben werden.
-                    Ein ganzer Auftrag <scheduler_method class="Order"/> kann nicht übergeben werden.
-                </i>
-            </description>
         </com.parameter>
 
         <com.result>
@@ -146,7 +140,7 @@ job_chain.name = "Jobkette";</pre>
         </p>
     </description>
 
-    <example programming_language="perl">
+    <!--example programming_language="perl">
         <pre><![CDATA[# The Scheduler/Perl interface under Unix does not accept objects as parameters, 
 # so we implement our own add_order().
         
@@ -159,7 +153,7 @@ $params{'other'} = 'another value';
 
 add_order( $job_chain_name, $order_id, $order_title, \%params );
 
-#-----------------------------------------------------------------------------------------add_order
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-add_order
 
 sub add_order
 {
@@ -188,7 +182,7 @@ sub add_order
     execute_xml( $order_xml );
 }
 
-#---------------------------------------------------------------------------------------execute_xml
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-execute_xml
 # Excecute XML command and die on error
 
 sub execute_xml
@@ -205,7 +199,7 @@ sub execute_xml
     }
 }
 
-#-------------------------------------------------------------------------------------xml_attribute
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-xml_attribute
 # xml_attribut( 'name', 'value' ) returns ' name="value"'
 
 sub xml_attribute
@@ -222,7 +216,7 @@ sub xml_attribute
     
     return " $name=\"$value\"";
 }]]></pre>
-    </example>
+    </example-->
 </method>
 
 

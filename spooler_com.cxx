@@ -2985,8 +2985,8 @@ const Com_method Com_spooler::_methods[] =
     { DISPATCH_PROPERTYGET, 31, "Tcp_port"                  , (Com_method_ptr)&Com_spooler::get_Tcp_port         , VT_INT       },
     { DISPATCH_PROPERTYGET, 32, "Udp_port"                  , (Com_method_ptr)&Com_spooler::get_Udp_port         , VT_INT       },
     { DISPATCH_METHOD     , 33, "Create_xslt_stylesheet"    , (Com_method_ptr)&Com_spooler::Create_xslt_stylesheet, VT_DISPATCH },
-    { DISPATCH_METHOD     , 34, "Terminate"                 , (Com_method_ptr)&Com_spooler::Terminate            , VT_EMPTY     , { VT_INT }, 1 },
-    { DISPATCH_METHOD     , 35, "Terminate_and_restart"     , (Com_method_ptr)&Com_spooler::Terminate_and_restart, VT_EMPTY     , { VT_INT }, 1 },
+    { DISPATCH_METHOD     , 34, "Terminate"                 , (Com_method_ptr)&Com_spooler::Terminate            , VT_EMPTY     , { VT_BYREF|VT_VARIANT }, 1 },
+    { DISPATCH_METHOD     , 35, "Terminate_and_restart"     , (Com_method_ptr)&Com_spooler::Terminate_and_restart, VT_EMPTY     , { VT_BYREF|VT_VARIANT }, 1 },
     {}
 };
 
@@ -3348,9 +3348,23 @@ STDMETHODIMP Com_spooler::Job_chain_exists( BSTR name, VARIANT_BOOL* result )
     return hr;
 }
 
+//-----------------------------------------------------------------------------------Variant_to_int
+// Liefert min(v,INT_MAX)
+
+static HRESULT Variant_to_int( const VARIANT& v, int* result )
+{
+    if( !variant_is_missing( v ) )
+    {
+        if( !variant_is_int64( v ) )  return DISP_E_BADVARTYPE;
+        *result = (int)min( int64_from_variant( v ), (int64)INT_MAX );
+    }
+
+    return S_OK;
+}
+
 //---------------------------------------------------------------------------Com_spooler::Terminate
 
-STDMETHODIMP Com_spooler::Terminate( int timeout )
+STDMETHODIMP Com_spooler::Terminate( VARIANT* timeout_vt )
 {
     HRESULT hr = S_OK;
 
@@ -3358,6 +3372,10 @@ STDMETHODIMP Com_spooler::Terminate( int timeout )
 
     try
     {
+        int timeout = INT_MAX;
+        hr = Variant_to_int( *timeout_vt, &timeout );
+        if( FAILED(hr) )  return hr;
+
         _spooler->cmd_terminate( timeout );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
@@ -3368,7 +3386,7 @@ STDMETHODIMP Com_spooler::Terminate( int timeout )
 
 //---------------------------------------------------------------Com_spooler::Terminate_and_restart
 
-STDMETHODIMP Com_spooler::Terminate_and_restart( int timeout )
+STDMETHODIMP Com_spooler::Terminate_and_restart( VARIANT* timeout_vt )
 {
     HRESULT hr = S_OK;
 
@@ -3376,6 +3394,10 @@ STDMETHODIMP Com_spooler::Terminate_and_restart( int timeout )
 
     try
     {
+        int timeout = INT_MAX;
+        hr = Variant_to_int( *timeout_vt, &timeout );
+        if( FAILED(hr) )  return hr;
+
         _spooler->cmd_terminate_and_restart( timeout );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
