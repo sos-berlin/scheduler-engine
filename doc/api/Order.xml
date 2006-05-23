@@ -326,6 +326,10 @@
     <description>
         Siehe <scheduler_element name="run_time"/>.
     </description>
+
+    <example programming_language="javascript">
+        <pre><![CDATA[order.run_time.xml = "<run_time><at at='2006-05-23 11:43:00'/></run_time>";]]></pre>
+    </example>
 </property>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
