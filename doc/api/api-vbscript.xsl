@@ -6,8 +6,8 @@
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<xsl:variable name="programming_language"    select="'vbscript'"/>
-<xsl:variable name="language_has_properties" select="true()"/>
+<xsl:variable name="selected_programming_language" select="'vbscript'"/>
+<xsl:variable name="language_has_properties"       select="true()"/>
 
 <xsl:include href="api.xsl" />
 

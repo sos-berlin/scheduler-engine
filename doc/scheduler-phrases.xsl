@@ -19,13 +19,14 @@
             <phrase id="api.method.parameters.title">Parameter</phrase>
             <phrase id="api.method.return.title">Rückgabe</phrase>
             <phrase id="api.exceptions.title">Exceptions</phrase>
+            <!--
             <phrase id="api.method.not_for_unix_perl">Nicht für Perl unter Unix</phrase>
             <phrase id="api.method.restricted_for_unix_perl">Für Perl unter Unix sind Objekt- und Array-Parameter nicht verwendbar</phrase>
             <phrase id="api.method.not_for_unix_perl.detailed">Dieser Aufruf steht in Perl unter Unix nicht zur Verfügung.</phrase>
             <phrase id="api.method.restricted_for_unix_perl.detailed">Für Perl unter Unix sind Objekt- und Array-Parameter nicht verwendbar.</phrase>
             <phrase id="api.parameter.not_for_unix_perl">Der Parameter kann in Perl unter Unix nicht gesetzt werden.</phrase>
             <phrase id="api.parameter.restricted_for_unix_perl">Für Perl unter Unix sind Objekt- und Array-Parameter nicht verwendbar.</phrase>
-
+            -->
 
             <phrase id="command_line.variants.title">Aufrufvarianten</phrase>
             <phrase id="command_line.options.title">Optionen</phrase>

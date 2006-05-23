@@ -6,8 +6,8 @@
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<xsl:variable name="programming_language"    select="'perl'"/>
-<xsl:variable name="language_has_properties" select="false()"/>
+<xsl:variable name="selected_programming_language" select="'perl'"/>
+<xsl:variable name="language_has_properties"       select="false()"/>
 
 <xsl:include href="api.xsl" />
 
@@ -75,7 +75,7 @@
 </xsl:template>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
-
+<!--
 <xsl:template match="method [ com/com.parameter//com.type [ @class or @array ] ] | property [ com/com.parameter//com.type [ @class or @array ] ]" mode="comment">
     <br/>
     <span class="not_for_unix_perl">
@@ -98,9 +98,9 @@
         </xsl:choose>
     </span>
 </xsl:template>
-    
+-->    
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
-
+<!--
 <xsl:template match="method [ com/com.parameter//com.type [ @class or @array ] ] | property [ com/com.parameter//com.type [ @class or @array ] ]" mode="detailed_comment">
     <p class="not_for_unix_perl">
         <xsl:choose>
@@ -121,7 +121,7 @@
         </xsl:choose>
     </p>
 </xsl:template>
-    
+-->    
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 

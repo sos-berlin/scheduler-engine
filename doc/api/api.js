@@ -46,4 +46,18 @@ function set_all_classes_position()
     all_classes_2_element.style.top = document.documentElement.scrollTop + "px";
 }
 
+//-----------------------------------------------------------------------------------window__onload
+
+window.onload = function window__onload()
+{
+    if( window.navigator.appName == "Microsoft Internet Explorer"       // ie6 kennt nicht "fixed"
+     && window.navigator.appVersion.indexOf( "MSIE 7" ) < 0 )           // TODO: Browser-Erkennung auslagern, zukünftiges ie8 wird nicht geprüft
+    {
+        //window.onscroll = set_all_classes_position;
+        document.getElementById( "all_classes_hidden" ).style.display = "none";
+        set_all_classes_position();
+        window.setInterval( set_all_classes_position, 1*1000, "JavaScript" );
+    }
+}
+
 //-------------------------------------------------------------------------------------------------

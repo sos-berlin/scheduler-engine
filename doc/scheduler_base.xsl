@@ -6,6 +6,9 @@
 
     @same_as_element sollte durch setting ersetzt werden.
     Zentrale Einstellung nur noch in settings.xml dokumentieren.
+    
+    
+    <a name="use_element__...">, <a name="use_entry__..."> (fürs Register) können mehrfach vorkommen, das ist nicht valide.
 -->
 
 
@@ -15,16 +18,15 @@
     <xsl:import href="scheduler-phrases.xsl"/>
     <xsl:variable name="phrases" select="document( 'scheduler-phrases.xsl' )/xsl:stylesheet/xsl:template [ @name='this_is_a_container_only_for_phrases' ]/phrases" />
     
-    <!--xsl:param name="programming_language"/   verhindert in ie6 die Transformation -->
-    <xsl:output doctype-public="-//W3C//DTD HTML 4.01//EN" />  <!--"http://www.w3.org/TR/html4/strict.dtd"-->
-
-
-    <!-- Nicht für Firefox 1.0.6:
-    <xsl:output method="xml"
-                media-type="application/xhtml+xml"
-                doctype-public="-//W3C//DTD XHTML 1.0 Strict//EN"
-                doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"/-->
-    <!--xsl:output doctype-public="-//W3C//DTD HTML 4.01 Transitional//EN"/> <!- - "http://www.w3.org/TR/html4/loose.dtd"-->
+    <!--xsl:param name="selected_programming_language"/   verhindert in ie6 die Transformation -->
+    
+    <xsl:output 
+        method               = "html" 
+        doctype-public       = "-//W3C//DTD XHTML 1.0 Strict//EN" 
+        doctype-system       = "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"/>
+    <!-- omit-xml-declaration="yes" für Firefox 1.5.3 -->
+    <!--xsl:output doctype-public="-//W3C//DTD HTML 4.01//EN" />  <!- -"http://www.w3.org/TR/html4/strict.dtd"-->
+    <!-- Nicht für Firefox 1.0.6: media-type="application/xhtml+xml" -->
 
     <xsl:variable name="start_page" select="'index.xml'"/>
     <xsl:variable name="base_dir"   select="/*/@base_dir"/>
@@ -1622,6 +1624,7 @@
             <xsl:with-param name="property"         select="@property"/>
             <xsl:with-param name="java_signature"   select="@java_signature"/>
             <xsl:with-param name="access"           select="@access"/>
+            <xsl:with-param name="programming_language" select="@programming_language"/>
         </xsl:call-template>
     </xsl:template>
 
@@ -1633,6 +1636,18 @@
         <xsl:param name="property"       select="/.."/>
         <xsl:param name="java_signature" select="/.."/>
         <xsl:param name="access"         select="/.."/>          <!-- "read" (default), "write" -->
+        <xsl:param name="programming_language" select="$selected_programming_language"/>
+
+        <xsl:variable name="plang">
+            <xsl:choose>
+                <xsl:when test="$programming_language">
+                    <xsl:value-of select="$programming_language"/>
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:value-of select="$selected_programming_language"/>
+                </xsl:otherwise>
+            </xsl:choose>
+        </xsl:variable>
 <!--
         <xsl:variable name="java_method">
             <xsl:choose>
@@ -1646,7 +1661,7 @@
 
             <xsl:variable name="href_local"><xsl:if test="$method or $property">#method__<xsl:value-of select="$method | $property"/></xsl:if></xsl:variable>
 
-            <xsl:attribute name="href"><xsl:value-of select="concat( $base_dir, 'api/', $class, '-', $programming_language, '.xml', $href_local )"/></xsl:attribute>
+            <xsl:attribute name="href"><xsl:value-of select="concat( $base_dir, 'api/', $class, '-', $plang, '.xml', $href_local )"/></xsl:attribute>
             <!--xsl:attribute name="href"><xsl:value-of select="$base_dir"/>javadoc/sos/spooler/<xsl:value-of select="$class"/>.html#<xsl:value-of select="$java_method"/>(<xsl:value-of select="$java_signature"/>)</xsl:attribute-->
 
             <code>

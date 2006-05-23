@@ -46,7 +46,7 @@
         <xsl:attribute name="class">api_programming_language_selector</xsl:attribute>
 
         <xsl:choose>
-            <xsl:when test="$programming_language=$plang">
+            <xsl:when test="$selected_programming_language=$plang">
                 <xsl:attribute name="style">font-weight: bold;</xsl:attribute>
             </xsl:when>
             <xsl:when test="$href">
@@ -109,7 +109,7 @@
 
     <xsl:for-each select="$class_references">
         <xsl:variable name="href">
-            <xsl:value-of select="/*/@base_dir"/>api/<xsl:value-of select="@class"/>-<xsl:value-of select="$programming_language"/>.xml
+            <xsl:value-of select="/*/@base_dir"/>api/<xsl:value-of select="@class"/>-<xsl:value-of select="$selected_programming_language"/>.xml
         </xsl:variable>
 
         <p style="margin-top: 0px;">
@@ -279,9 +279,9 @@
                             <xsl:apply-templates select="description [ not ( @programming_language ) ]"/>
                         </xsl:if>
 
-                        <xsl:if test="description [ @programming_language = $programming_language ]">
+                        <xsl:if test="description [ @programming_language = $selected_programming_language ]">
                             <p style="margin-top: 0em">&#160;</p>
-                            <xsl:apply-templates select="description [ @programming_language = $programming_language ]"/>
+                            <xsl:apply-templates select="description [ @programming_language = $selected_programming_language ]"/>
                         </xsl:if>
 
                         <p style="margin-top: 0em">&#160;</p>
@@ -292,53 +292,11 @@
                 </tr>
             </table>
 
-            <!--
-                <xsl:element name="script">
-                    <xsl:attribute name="defer">defer</xsl:attribute>
-                    <xsl:attribute name="type">text/javascript</xsl:attribute>
-                    <xsl:attribute name="src"><xsl:value-of select="/*/@base_dir"/>scripts/browser_dependencies.js</xsl:attribute>
-                </xsl:element>
-
-                <xsl:element name="script">
-                    <xsl:attribute name="defer">defer</xsl:attribute>
-                    <xsl:attribute name="type">text/javascript</xsl:attribute>
-                    <xsl:attribute name="src"><xsl:value-of select="/*/@base_dir"/>scripts/sarissa.js</xsl:attribute>
-                </xsl:element>
-            -->
-                <xsl:element name="script">
-                    <xsl:attribute name="defer">defer</xsl:attribute>
-                    <xsl:attribute name="type">text/javascript</xsl:attribute>
-                    <xsl:attribute name="src"><xsl:value-of select="/*/@base_dir"/>api/api.js</xsl:attribute>
-                </xsl:element>
-
-                <script defer="defer" type="text/javascript" for="window" event="onload">
-
-                    if( window.navigator.appName == "Microsoft Internet Explorer"           // ie6 kennt nicht "fixed"
-                     &amp;&amp; window.navigator.appVersion.indexOf( "MSIE 7" ) &lt; 0 )    // TODO: Browser-Erkennung auslagern, zukünftiges ie8 wird nicht geprüft
-                    {
-                        //window.onscroll = set_all_classes_position;
-                        document.getElementById( "all_classes_hidden" ).style.display = "none";
-                        set_all_classes_position();
-                        window.setInterval( set_all_classes_position, 1*1000, "JavaScript" );
-                    }
-
-                </script>
-            <!--
-                <script defer="defer" type="text/javascript" for="window" event="onload">
-
-
-                    href_base = document.location.href.replace( /\/[^\/]*$/, "/" );   // Alles bis zum letzten Schräger
-                    base_dir = href_base + "<xsl:value-of select="/*/@base_dir"/>";
-
-                    api = new Api();
-
-                    api._class_name = "<xsl:value-of select="/api.class/@name"/>";
-
-                    api.show();
-                    api.highlight_html_selectors( true );
-
-                </script>
-            -->
+            <xsl:element name="script">
+                <xsl:attribute name="defer">defer</xsl:attribute>
+                <xsl:attribute name="type">text/javascript</xsl:attribute>
+                <xsl:attribute name="src"><xsl:value-of select="/*/@base_dir"/>api/api.js</xsl:attribute>
+            </xsl:element>
 
             <xsl:call-template name="bottom"/>
         </body>
@@ -387,9 +345,9 @@
         <xsl:apply-templates select="description [ not ( @programming_language ) ]"/>
     </xsl:if>
 
-    <xsl:if test="description [ @programming_language = $programming_language ]">
+    <xsl:if test="description [ @programming_language = $selected_programming_language ]">
         <p style="margin-top: 0em">&#160;</p>
-        <xsl:apply-templates select="description [ @programming_language = $programming_language ]"/>
+        <xsl:apply-templates select="description [ @programming_language = $selected_programming_language ]"/>
     </xsl:if>
 
     <p style="margin-top: 0em">&#160;</p>
@@ -435,9 +393,9 @@
         </tr>
         -->
 
-        <xsl:if test="not( not_implemented/@programming_language=$programming_language )">
-            <xsl:apply-templates select="  property [ not( not_implemented/@programming_language=$programming_language ) ]
-                                        | method   [ not( not_implemented/@programming_language=$programming_language ) ]" mode="table">
+        <xsl:if test="not( not_implemented/@programming_language=$selected_programming_language )">
+            <xsl:apply-templates select="  property [ not( not_implemented/@programming_language=$selected_programming_language ) ]
+                                        | method   [ not( not_implemented/@programming_language=$selected_programming_language ) ]" mode="table">
                 <xsl:sort select="@name"/>
             </xsl:apply-templates>
         </xsl:if>
@@ -544,7 +502,8 @@
     <xsl:param name="is_in_table"   select="false()"/>
 
     <xsl:variable name="method_tr_id" select="concat( 'tr_', generate-id(parent::*) )"/>
-    <xsl:variable name="tr_id"        select="concat( $method_tr_id, '.', position(), $access )"/>
+    <xsl:variable name="tr_id"        select="concat( $method_tr_id, '.', generate-id(.), $access )"/>
+    <!--xsl:variable name="tr_id"        select="concat( $method_tr_id, '.', position(), $access )"/-->
 
     <xsl:element name="tr">
 
@@ -572,7 +531,7 @@
                 </xsl:when>
                 <xsl:when test="parent::property and $language_has_properties and $access='write'">
                 </xsl:when>
-                <xsl:when test="not( $programming_language='java' )">
+                <xsl:when test="not( $selected_programming_language='java' )">
                 </xsl:when>
                 <xsl:otherwise>
                     <span class="mono">void&#160;</span>
@@ -677,7 +636,7 @@
     <xsl:param name="parameters"/>
     <xsl:param name="is_in_table"/>
 
-    <xsl:if test="not( $programming_language='perl' )">
+    <xsl:if test="not( $selected_programming_language='perl' )">
         <span class="mono"><xsl:text>(</xsl:text></span>
     </xsl:if>
 
@@ -710,7 +669,7 @@
         <span class="mono"><xsl:text> </xsl:text></span>
     </xsl:if>
 
-    <xsl:if test="not( $programming_language='perl' ) or $parameters or parent::method">
+    <xsl:if test="not( $selected_programming_language='perl' ) or $parameters or parent::method">
         <span class="mono"><xsl:text>)</xsl:text></span>
     </xsl:if>
 
@@ -771,9 +730,9 @@
     </xsl:choose>
 
     <!--
-    <xsl:if test="$programming_language!='java'">
+    <xsl:if test="$selected_programming_language!='java'">
         <xsl:element name="span">
-            <xsl:attribute name="title">A Scheduler class name, not a real class name in <xsl:value-of select="$programming_language"/></xsl:attribute>
+            <xsl:attribute name="title">A Scheduler class name, not a real class name in <xsl:value-of select="$selected_programming_language"/></xsl:attribute>
             <xsl:attribute name="style">cursor: default</xsl:attribute>
             <xsl:text>¹</xsl:text>
         </xsl:element>
@@ -848,10 +807,10 @@
 
 <xsl:template match="api.class" mode="detailed_methods">
 
-    <xsl:if test="not( not_implemented/@programming_language=$programming_language )">
+    <xsl:if test="not( not_implemented/@programming_language=$selected_programming_language )">
 
-        <xsl:apply-templates select="  method   [ com and not( not_implemented/@programming_language=$programming_language ) ]
-                                    | property [ com and not( not_implemented/@programming_language=$programming_language ) ]"
+        <xsl:apply-templates select="  method   [ com and not( not_implemented/@programming_language=$selected_programming_language ) ]
+                                    | property [ com and not( not_implemented/@programming_language=$selected_programming_language ) ]"
                             mode="detailed_methods">
             <xsl:sort select="@name"/>
         </xsl:apply-templates>
@@ -955,22 +914,22 @@
                     </td>
                     
                     <td style="padding-left: 2ex">
-                        <xsl:choose>
-                            <xsl:when test="$programming_language='perl' and com.type [ @class or @array ]">
+                        <!--xsl:choose>
+                            <xsl:when test="$selected_programming_language='perl' and com.type [ @class or @array ]">
                                 <span class="not_for_unix_perl">
                                     <xsl:call-template name="phrase">
                                         <xsl:with-param name="id" select="'api.parameter.not_for_unix_perl'"/>
                                     </xsl:call-template>
                                 </span>
                             </xsl:when>
-                            <xsl:when test="$programming_language='perl' and .//com.type [ @class or @array ]">
+                            <xsl:when test="$selected_programming_language='perl' and .//com.type [ @class or @array ]">
                                 <span class="not_for_unix_perl">
                                     <xsl:call-template name="phrase">
                                         <xsl:with-param name="id" select="'api.parameter.restricted_for_unix_perl'"/>
                                     </xsl:call-template>
                                 </span>
                             </xsl:when>
-                        </xsl:choose>
+                        </xsl:choose-->
 
                         <xsl:apply-templates select="title"/>
                         <xsl:apply-templates select="description"/>
@@ -1035,8 +994,8 @@
 
 <xsl:template match="*" mode="example">
     <xsl:choose>
-        <xsl:when test="example [ not( @programming_language )  or  @programming_language=$programming_language ]">
-            <xsl:apply-templates select="example [ not( @programming_language )  or  @programming_language=$programming_language ]"/>
+        <xsl:when test="example [ not( @programming_language )  or  @programming_language=$selected_programming_language ]">
+            <xsl:apply-templates select="example [ not( @programming_language )  or  @programming_language=$selected_programming_language ]"/>
         </xsl:when>
         <xsl:when test="example [ @programming_language=$default_programming_language ]">
             <xsl:apply-templates select="example [ @programming_language=$default_programming_language ]">

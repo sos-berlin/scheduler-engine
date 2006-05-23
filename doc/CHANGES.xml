@@ -10,7 +10,28 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2006-04-17" version="2.0.151" subversion_revision="4277">
+    <change date="2006-05-23" version="2.0.151" subversion_revision="4278">
+        <revision type="new" title="Perl-Schnittstelle unter Unix um Objekt-Parameter erweitert">
+            <description>
+                <p>
+                    Die Perl-Schnittstelle nimmt damit auch unter Unix das folgende Aufrufe an:
+                </p>
+                <ul>
+                    <li>
+                        <scheduler_method class="Spooler" method="add_job_chain" programming_language="perl"/>
+                    </li>
+                    <li>
+                        <scheduler_method class="Job_chain" method="add_order" programming_language="perl"/>
+                    </li>
+                    <li>
+                        <scheduler_method class="Order" property="params" programming_language="perl"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+    </change>
+
+    <!--change date="2006-04-17" version="2.0.151" subversion_revision="4277">
         <revision type="correction" title="Dokumentation geändert: Objekte und Arrays können in Perl unter Unix nicht als Parameter übergeben werden">
             <description>
                 <ul>
@@ -29,7 +50,7 @@
                 </p>
             </description>
         </revision>
-    </change>
+    </change-->
     
     <change date="2006-04-13" version="2.0.151" subversion_revision="4254">
         <revision type="new" title="Neue Option -env=NAME=WERT">

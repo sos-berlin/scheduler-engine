@@ -199,9 +199,9 @@ spooler.job( "job_a" ).start( parameters )</pre>
             <pre>$spooler->job( 'job_a' )->start();</pre>
 
             <pre>my $parameters = $spooler->create_variable_set();
-parameter->LetProperty( 'var', 'my_parameter', 'my_value' );
-parameter->LetProperty( 'var', 'other_parameter', 'other_value' );
-$spooler->job( 'job_a' )->start( parameters );</pre>
+$parameters->LetProperty( 'var', 'my_parameter', 'my_value' );
+$parameters->LetProperty( 'var', 'other_parameter', 'other_value' );
+$spooler->job( 'job_a' )->start( $parameters );</pre>
         </example>
     </method>
 

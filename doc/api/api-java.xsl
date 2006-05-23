@@ -6,8 +6,8 @@
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<xsl:variable name="programming_language"    select="'java'"/>
-<xsl:variable name="language_has_properties" select="false()"/>
+<xsl:variable name="selected_programming_language" select="'java'"/>
+<xsl:variable name="language_has_properties"       select="false()"/>
 
 <xsl:include href="api.xsl" />
 
