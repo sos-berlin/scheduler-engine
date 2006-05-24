@@ -11,9 +11,14 @@
         <jobs>
             <job name="start">
                 <script language="perl">
+                    <include file="expect.pl"/>
                     <![CDATA[
 use strict;
 use warnings FATAL => "all";
+
+my $order;
+my $x;
+my $v;
 
 my $job_chain = $spooler->create_job_chain();
 $job_chain->LetProperty( 'name', 'Kette_A' );
@@ -30,7 +35,7 @@ if( $job_chain->order_count > 0 )
 }
 else
 {
-    my $order = $spooler->create_order();
+    $order = $spooler->create_order();
     $order->LetProperty( 'id', 1111 );
     $order->LetProperty( 'title', 'Wir haben einen Auftrag!' );
     $order->LetProperty( 'state_text', 'STATE_TEXT' );
@@ -57,6 +62,24 @@ else
 
     $spooler->job_chain( 'Kette_A' )->add_order( $order );
 }
+
+#--------------------------------------------------------------------------------------------------
+
+# Prüfen, ob Perl-Schnittstelle undefined für ein Objekt annimmt
+$order = $spooler->create_order();
+if( defined $order->payload )  { $spooler_log->error( '$order->payload is defined: ' . $order->payload . ", xml=" . $order->xml ); }
+
+# PerlScript liefert Win32::OLE::Variant=SCALAR(0xab0cc8)
+my $undef;
+undef $undef;
+$order->LetProperty( 'payload', $undef );
+if( defined $order->payload )  { $spooler_log->warn( '$order->payload is defined: ' . $order->payload . ", xml=" . $order->xml ); }
+
+#--------------------------------------------------------------------------------------------------
+
+if( defined $spooler_job->order_queue )  { $spooler_log->error( '$spooler_job->order_queue is defined: ' . $spooler_job->order_queue ); }
+
+#--------------------------------------------------------------------------------------------------
 
         ]]>
                 </script>
@@ -105,7 +128,8 @@ sub spooler_process()
 
             <job name="check" order="yes">
                 <script language="perl">
-        <![CDATA[
+                    <include file="expect.pl"/>
+                    <![CDATA[
 use strict;
 use warnings FATAL => "all";
 
@@ -146,17 +170,6 @@ sub spooler_process()
     
     if( $order->job_chain->order_count == 1 ) { $spooler->terminate(); }
     return 1;
-}
-
-
-sub expect()
-{
-    my $expr = shift;
-    my $real_value = shift;
-    my $expected_value = shift;
-    
-    #my $real_value = eval( $expr );
-    if( $real_value ne $expected_value )  { $spooler_log->error( "$expr == '$real_value', erwartet wird aber '$expected_value'" ); }
 }
 
                 ]]></script>
