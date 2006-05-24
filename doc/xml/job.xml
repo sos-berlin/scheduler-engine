@@ -48,7 +48,7 @@
             </description>
         </xml_attribute>
 
-        <xml_attribute name="order" type="yes_no">
+        <xml_attribute name="order" type="yes_no" title="Auftragsgesteuerter Job">
             <description>
                 <p>
                     Bei <code>order="yes"</code> ist der Job auftragsgesteuert. Der Scheduler startet diesen Job nur, wenn ein Auftrag vorliegt.
@@ -63,33 +63,122 @@
             </description>
         </xml_attribute>
 
-        <xml_attribute name="tasks" type="zahl" initial="1">
+        <xml_attribute name="tasks" type="zahl" initial="1" title="Maximale Anzahl Tasks">
             <description>
                 Von einem Job können mehrere Tasks gleichzeitig laufen. Dieses Attribut begrenzt deren Anzahl.
             </description>
         </xml_attribute>
 
-        <xml_attribute name="timeout" type="dauer">
+        <xml_attribute name="min_tasks" type="zahl" initial="0" title="Mindeste Anzahl der stets zu laufenden Tasks">
             <description>
                 <p>
-                    Befristet eine Task-Opertion (spooler_open, spooler_process etc.).
-                    Nach Ablauf der Frist bricht der Scheduler die Task ab.
+                    Der Scheduler sorgt dafür, das wenigstens die angegebene Anzahl Tasks läuft.
+                    Der Scheduler startet weitere Tasks, wenn
                 </p>
+                <ul>
+                    <li>
+                        der Scheduler startet
+                    </li>
+                    <li>
+                        oder eine Task sich beendet hat
+                    </li>
+                    <li>
+                        oder der Job entstoppt wird
+                    </li>
+                    <li>
+                        oder die <scheduler_element name="run_time"/> nach einer Auszeit wieder Tasks erlaubt
+                    </li>
+                </ul>
+
+                <ul>
+                    <li>
+                        und weniger Tasks laufen als mit <code>min_tasks</code> verlangt
+                    </li>
+                    <li>
+                        und die <scheduler_element name="run_time"/> mit einer Periode den Start zulässt
+                    </li>
+                    <li>
+                        und der Job im Zustand <code>pending</code> oder <code>running</code> ist 
+                        (also nicht gestoppt wird oder gestoppt ist).
+                    </li>
+                </ul>
                 <p>
-                    <i>dauer</i> kann als Sekunden oder im Format HH:MM oder HH:MM:SS angegeben werden.
+                    Um ein Heißlaufen zu verhindern,
+                    führt das Ende einer Task nur in folgenden Fällen zum Start einer neuen:
+                </p>
+                <ul>
+                    <li>
+                        <scheduler_method class="Job_impl" method="spooler_process"/> wurde aufgerufen.
+                    </li>
+                    <li>
+                        Die Task wartete eine Zeitlang auf einen Auftrag 
+                        (Zustand <code>running_waiting_for_order</code>, 
+                        nicht wenn <scheduler_element name="job" attribute="idle_timeout" value="0"/>).
+                    </li>
+                    <li>
+                        Die Task startete, wurde aber mit
+                        <scheduler_method class="task" property="delay_spooler_process"/> verzögert.
+                    </li>
+                    <li>
+                        Die Task ist ein Prozess 
+                        (<scheduler_element name="process"/> oder 
+                        <scheduler_element name="script" attribute="language" value="shell"/>)
+                        und der Prozess hat sich nicht sofort nach Start beendet.
+                    </li>
+                </ul>
+
+                <p>
+                    So lassen sich auftragsgesteuerte Tasks in Bereitschaft bringen,
+                    die sehr lange für ihre Initialisierung brauchen.
                 </p>
             </description>
         </xml_attribute>
 
-        <xml_attribute name="idle_timeout" type="dauer">
+        <xml_attribute name="timeout" type="dauer" title="Frist für eine Operation">
+            <description>
+                <p>
+                    Befristet eine Task-Operation (spooler_open, spooler_process etc.).
+                    Nach Ablauf der Frist bricht der Scheduler die Task ab.
+                </p>
+                <p>
+                    <i>dauer</i> kann in Sekunden oder im Format <code>HH:MM</code> oder <code>HH:MM:SS</code> angegeben werden.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="idle_timeout" type="dauer" title="Frist für den Zustand waiting_for_order">
             <description>
                 <p>
                     Begrenzt den Leerlauf eines auftragsgesteuerten Jobs (<code>order="yes"</code>).
-                    Wenn eine Task auf den nächsten Auftrag wartet, und in der Frist kein Auftrag
+                    Wenn eine Task auf den nächsten Auftrag wartet und in der Frist kein Auftrag
                     eintrifft, beendet der Scheduler sie.
                 </p>
                 <p>
-                    <i>dauer</i> kann als Sekunden oder im Format HH:MM oder HH:MM:SS angegeben werden.
+                    <i>dauer</i> kann in Sekunden oder im Format <code>HH:MM</code> oder <code>HH:MM:SS</code> angegeben werden.
+                </p>
+                <p>
+                    Siehe auch <scheduler_element name="job" attribute="force_idle_timeout"/>.
+                </p>
+            </description>
+        </xml_attribute>
+
+
+        <xml_attribute name="force_idle_timeout" type="yes_no" initial="no" title="idle_timeout beendet Task trotz min_task">
+            <description>
+                <p>
+                    Nur wirksam mit <scheduler_element name="job" attribute="min_tasks" value="0" relation="≥"/>
+                    und <scheduler_element name="job" attribute="idle_timeout"/>.
+                </p>
+                <p>
+                    <code>force_idle_timeout="yes"</code> beendet nach Ablauf von 
+                    <code>idle_timeout</code> die Task,
+                    auch wenn daraufhin <code>min_tasks</code> unterschritten wird.
+                    Erst anschließend führt <code>min_tasks</code> zum Start einer neuen Task.
+                </p>
+                <p>
+                    Damit lassen sich Tasks beenden,
+                    die im Leerlauf eine Ressource (z.B. eine Datenbank) nicht zu lange belegen dürfen,
+                    weil diese sich sonst abkoppelt.
                 </p>
             </description>
         </xml_attribute>

@@ -241,6 +241,9 @@ struct Job : Object,
     void                        select_period               ( Time = Time::now() );
     bool                        is_in_period                ( Time = Time::now() );
     bool                        queue_filled                ()                                      { return !_task_queue.empty(); }
+    
+    void                        on_task_finished            ( Task* );                              // Task::finished() ruft das
+    void                        check_min_tasks             ();                                     // Setzt _start_min_tasks
 
     ptr<Task>                   create_task                 ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, const Time& = latter_day );
     ptr<Task>                   create_task                 ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, const Time&, int id );
@@ -358,6 +361,7 @@ struct Job : Object,
     Time                       _repeat;                     // spooler_task.repeat
     Time                       _task_timeout;               // Frist für einen Schritt einer Task
     Time                       _idle_timeout;               // Frist für den Zustand Task::s_running_waiting_for_order
+    bool                       _force_idle_timeout;         // _idle_timeout wirkt beendet auch Tasks, wenn _min_tasks unterschritten wird
   //string                     _priority;                   // "", "-20" bis "+20" oder "idle", "below_normal" etc.
     bool                       _visible;
     bool                       _temporary;                  // Job nach einem Lauf entfernen
@@ -394,6 +398,8 @@ struct Job : Object,
     Task_queue                 _task_queue;                 // Warteschlange der nächsten zu startenden Tasks
     Task_list                  _running_tasks;              // Alle laufenden Tasks (auch die gestarteten, aber wartenden, z.B. s_running_waiting_for_order)
     long32                     _running_tasks_count;        // Anzahl der Tasks, die tatsächlich laufen (und nicht gerade warten)
+    int                        _min_tasks;                  // Min. Anzahl Tasks, die der Scheduler stets laufen lassen soll
+    bool                       _start_min_tasks;            // Starte Tasks solange _running_tasks.count() < _min_tasks
     int                        _max_tasks;                  // Max. Anzahl gleichzeitig laufender Tasks. _running_tasks.size() <= _max_tasks!
 
     Job_history                _history;

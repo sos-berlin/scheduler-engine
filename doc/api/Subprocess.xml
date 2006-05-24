@@ -59,6 +59,14 @@
     <title>
         Startet den Prozess
     </title>
+
+    <description>
+        <p>
+            Shell-Operatoren wie <code>|</code>, <code>&amp;&amp;</code> und <code>></code> werden nicht interpretiert.
+            Verwenden Sie dazu die Programme <code>/bin/sh</code> bzw. <code>c:\windows\system32\cmd.exe</code> 
+            (das Verzeichnis ist installationsabhängig).
+        </p>
+    </description>
 </method>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
@@ -233,13 +241,19 @@
 
     <com>
         <com.parameter name="seconds">
-            <com.type type="VARIANT"/>
+            <com.type type="double"/>
+            <description>
+                Wartezeit.
+                Fehlt der Parameter, dann wartet der Aufruf bis der Subprozess geendet hat.
+            </description>
         </com.parameter>
 
         <com.result name="terminated">
             <com.type type="bool"/>
             <description>
                 <code>true</code>, wenn der Subprozess geendet hat.
+                <br/>
+                <code>false</code>, wenn der Subprozess nach Ablauf der Wartezeit noch läuft.
             </description>
         </com.result>
     </com>

@@ -22,7 +22,8 @@ enum Start_cause
     cause_signal                = 8,
     cause_delay_after_error     = 9,
     cause_order                 = 10,
-    cause_wake                  = 11    // sc_wake
+    cause_wake                  = 11,   // sc_wake
+    cause_min_tasks             = 12
 };
 
 string                          start_cause_name            ( Start_cause );
@@ -125,6 +126,7 @@ struct Task : Object,
     bool                        ending                      ()                                      { return _end  ||  _state >= s_ending; }
     bool                        is_idle                     ()                                      { return _state == s_running_waiting_for_order  &&  !_end; }
 
+    bool                        running_state_reached       () const                                { return _running_state_reached; }
     Time                        last_process_start_time     ()                                      { THREAD_LOCK_RETURN( _lock, Time, _last_process_start_time ); }
     Time                        ending_since                ()                                      { THREAD_LOCK_RETURN( _lock, Time, _ending_since ); }
 
@@ -277,6 +279,7 @@ struct Task : Object,
     bool                       _kill_tried;
     bool                       _module_instance_async_error;    // SCHEDULER-202
     bool                       _is_in_database;                   // Datensatz für diese Task ist in der Datenbank
+    bool                       _running_state_reached;      // Zustand s_running... erreicht
 
     ptr<Async_operation>       _operation;
     ptr<Com_variable_set>      _params;

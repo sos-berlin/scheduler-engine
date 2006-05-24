@@ -1409,6 +1409,7 @@
             <xsl:with-param name="directory" select="@directory"/>
             <xsl:with-param name="name"      select="@name"     />
             <xsl:with-param name="attribute" select="@attribute"/>
+            <xsl:with-param name="relation"  select="@relation"/>
             <xsl:with-param name="value"     select="@value"    />
             <xsl:with-param name="parameter" select="@parameter"/>
             <xsl:with-param name="child"     select="@child"/>
@@ -1421,6 +1422,7 @@
         <xsl:param name="name"/>
         <xsl:param name="directory"/>
         <xsl:param name="attribute"/>
+        <xsl:param name="relation"/>
         <xsl:param name="value"     select="'…'"/>
         <xsl:param name="parameter"/>
         <xsl:param name="child"/>
@@ -1453,8 +1455,15 @@
                 <xsl:if test="$attribute">
                     <xsl:text> </xsl:text>
                     <xsl:value-of select="$attribute"/>
-                    <xsl:text>="</xsl:text>
-                    <xsl:value-of select="$value"/>
+                    <xsl:choose>
+                        <xsl:when test="$relation">&#x2005;<xsl:value-of select="$relation"/>&#x2005;</xsl:when>
+                        <xsl:otherwise>=</xsl:otherwise>
+                    </xsl:choose>
+                    <xsl:text>"</xsl:text>
+                    <xsl:choose>
+                        <xsl:when test="$value"><xsl:value-of select="$value"/></xsl:when>
+                        <xsl:otherwise>…</xsl:otherwise>
+                    </xsl:choose>
                     <xsl:text>"</xsl:text>
                 </xsl:if>
 

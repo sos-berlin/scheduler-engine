@@ -98,6 +98,7 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
                     = element.     getAttribute( "process_class", _module._process_class_name );
         _module._java_options += " " + subst_env( 
                       element.     getAttribute( "java_options" ) );
+        _min_tasks  = element.uint_getAttribute( "min_tasks"    , _min_tasks );
         _max_tasks  = element.uint_getAttribute( "tasks"        , _max_tasks );
         string t    = element.     getAttribute( "timeout"      );
         if( t != "" )  
@@ -112,6 +113,8 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
             _idle_timeout = time::time_from_string( t );
             if( _idle_timeout > max_task_time_out )  _idle_timeout = max_task_time_out;   // Begrenzen, damit's beim Addieren mit now() keinen Überlauf gibt
         }
+        
+        _force_idle_timeout = element.bool_getAttribute( "force_idle_timeout", _force_idle_timeout );
 
         set_mail_xslt_stylesheet_path( element.getAttribute( "mail_xslt_stylesheet" ) );
 
@@ -924,6 +927,7 @@ void Job::stop( bool end_all_tasks )
         }
 
         clear_when_directory_changed();
+        _start_min_task = false;
     }
 }
 
@@ -1422,6 +1426,12 @@ ptr<Task> Job::task_to_start()
                 if( there_is_another_task_ready )  order = NULL;  // Soll sich doch die bereits laufende Task um den Auftrag kümmern!
             }
         }
+
+        if( _start_min_tasks )
+        {
+            assert( _running_tasks.count() < _min_tasks );
+            cause = cause_min_tasks;
+        }
     }
 
 
@@ -1431,7 +1441,8 @@ ptr<Task> Job::task_to_start()
 
         if( _module._process_class  &&  !_module._process_class->process_available( this ) )
         {
-            if( !_waiting_for_process  ||  _waiting_for_process_try_again )
+            if( cause != cause_min_task  
+             &&  ( !_waiting_for_process  ||  _waiting_for_process_try_again ) )
             {
                 if( !_waiting_for_process )
                 {
@@ -1579,6 +1590,8 @@ bool Job::do_something()
                                 task->attach_to_a_thread();
                                 _log->info( message_string( "SCHEDULER-930", task->id() ) );
 
+                                if( _running_tasks.count() >= _min_tasks )  _start_min_task = false;
+
                                 task->do_something();           // Damit die Task den Prozess startet und die Prozessklasse davon weiß
                             }
 
@@ -1610,6 +1623,32 @@ bool Job::do_something()
     catch( const exception&  x ) { set_error( x );  set_job_error( x );  sos_sleep(1); }     // Bremsen, falls sich der Fehler sofort wiederholt
 
     return something_done;
+}
+
+//----------------------------------------------------------------------------Job::on_task_finished
+
+void Job::on_task_finished( Task* task )
+{
+    init_start_when_directory_changed( this );
+
+    if( !task->spooler_init_open_ok() )
+    {
+    }
+
+    check_min_tasks();
+}
+
+//-----------------------------------------------------------------------------Job::check_min_tasks
+
+void Job::check_min_tasks()
+{
+    if( ( _state == s_pending || _state == s_running )  
+     &&  _task_queue.count() < _min_tasks )
+    {
+        _start_min_tasks = true;
+    }
+    else
+        _start_min_tasks = false;
 }
 
 //-------------------------------------------------------------------------------Job::set_job_error

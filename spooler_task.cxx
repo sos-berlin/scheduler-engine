@@ -190,6 +190,7 @@ string start_cause_name( Start_cause cause )
         case cause_delay_after_error  : return "delay_after_error";
         case cause_order              : return "order";
         case cause_wake               : return "wake";
+        case cause_min_tasks          : return "min_tasks";
         default                       : return as_string( (int)cause );
     }
 }
@@ -1024,6 +1025,7 @@ bool Task::do_something()
                                 set_state( ok? _module_instance->_module->_kind == Module::kind_process? s_running_process 
                                                                                                        : s_running 
                                              : s_ending );
+
                                 loop = true;
                             }
 
@@ -1042,6 +1044,9 @@ bool Task::do_something()
                                 set_state( s_ending );
                                 loop = true;
                             }
+                            else
+                                _running_state_reached = true;   // Also nicht, wenn der Prozess sich sofort beendet hat (um _min_tasks-Schleife zu vermeiden)
+
                             break;
 
 
@@ -1066,6 +1071,7 @@ bool Task::do_something()
                                         _log->set_order_log( _order->_log );
                                     }
 
+                                    _running_state_reached = true;
                                     _last_process_start_time = now;
 
                                     _operation = do_step__start();
@@ -1105,7 +1111,10 @@ bool Task::do_something()
                                     _end = true;
                                     loop = true;
                                 }
+                                else
+                                    _running_state_reached = true;   // Also nicht bei idle_timeout="0"
                             }
+
                             break;
                         }
 
@@ -1118,6 +1127,7 @@ bool Task::do_something()
                                 set_state( s_running ), loop = true;
                             }
 
+                            _running_state_reached = true;
                             break;
                         }
 
@@ -1536,8 +1546,6 @@ void Task::remove_order_after_error()
 
 void Task::finish()
 {
-    _job->init_start_when_directory_changed( this );
-
     if( _order )    // Auftrag nicht verarbeitet? spooler_init() oder spooler_open() lieferte false
     {
         if( !has_error() )  set_error( Xc( "SCHEDULER-226" ) );
@@ -1605,6 +1613,9 @@ void Task::finish()
     {
         _web_service->forward_task( *this );
     }
+
+
+    _job->on_task_finished( this );
 
 
     // eMail versenden

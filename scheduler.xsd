@@ -296,8 +296,10 @@
             <xsd:attribute name="order"                 type="Yes_no"/>
             <xsd:attribute name="separate_process"      type="Yes_no"/>
             <xsd:attribute name="tasks"                 type="xsd:nonNegativeInteger"/>
+            <xsd:attribute name="min_tasks"             type="xsd:positiveInteger"/>
             <xsd:attribute name="timeout"               type="Duration"/>                   <!-- Für ap, 1.4.06 timeout="0" soll erlaubt sein (kein Aprilscherz) -->
             <xsd:attribute name="idle_timeout"          type="Duration"/>
+            <xsd:attribute name="force_idle_timeout"    type="Yes_no"/>
             <xsd:attribute name="process_class"         type="Name"/>
             <xsd:attribute name="mail_xslt_stylesheet"  type="File"/>
             <xsd:attribute name="java_options"          type="String"/>

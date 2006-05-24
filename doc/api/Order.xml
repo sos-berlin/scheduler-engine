@@ -296,7 +296,7 @@
     <com/>
 
     <title>
-        Stellt den Auftrag eine Zeit lang zurück
+        Stellt den Auftrag eine Zeitlang zurück
     </title>
 
     <description>
@@ -330,6 +330,12 @@
     <example programming_language="javascript">
         <pre><![CDATA[order.run_time.xml = "<run_time><at at='2006-05-23 11:43:00'/></run_time>";]]></pre>
     </example>
+
+    <example programming_language="perl">
+        <pre><![CDATA[$order->run_time->LetProperty( "xml", "<run_time><at at='2006-05-23 11:43:00'/></run_time>" );]]></pre>
+    </example>
+    $order->run_time->LetProperty( 'xml', '<run_time><period repeat="10"/>
+    </run_time>' );
 </property>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
