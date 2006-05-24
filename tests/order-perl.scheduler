@@ -19,6 +19,8 @@ use warnings FATAL => "all";
 my $order;
 my $x;
 my $v;
+my $undef;
+undef $undef;
 
 my $job_chain = $spooler->create_job_chain();
 $job_chain->LetProperty( 'name', 'Kette_A' );
@@ -39,7 +41,7 @@ else
     $order->LetProperty( 'id', 1111 );
     $order->LetProperty( 'title', 'Wir haben einen Auftrag!' );
     $order->LetProperty( 'state_text', 'STATE_TEXT' );
-    #$order->run_time->LetProperty( 'xml', '<run_time><period repeat="10"/></run_time>' );
+    #$order->run_time->LetProperty( "xml", "<run_time><at at='2006-05-24 15:47:59'/></run_time>" );    
 
     my $params = $spooler->create_variable_set();
     $params->set_var( 'a', 'AA' );
@@ -70,10 +72,26 @@ $order = $spooler->create_order();
 if( defined $order->payload )  { $spooler_log->error( '$order->payload is defined: ' . $order->payload . ", xml=" . $order->xml ); }
 
 # PerlScript liefert Win32::OLE::Variant=SCALAR(0xab0cc8)
-my $undef;
-undef $undef;
 $order->LetProperty( 'payload', $undef );
 if( defined $order->payload )  { $spooler_log->warn( '$order->payload is defined: ' . $order->payload . ", xml=" . $order->xml ); }
+
+#--------------------------------------------------------------------------------------------------
+# Variable_set
+
+# PerlScript liefert "Win32::OLE::Variant=SCALAR(0xacba70)"
+my $variable_set = $spooler->create_variable_set();
+$variable_set->LetProperty( "value", "undefined", $undef );
+if( defined $variable_set->value( "undefined" ) )  { $spooler_log->warn( '$variable_set->{undefined} is defined: ' . $variable_set->{undefined} ); }
+
+$variable_set->LetProperty( "value", "a", "a" );
+$x = '$variable_set->value( "a" )';
+$v = "a";
+expect( $x, eval( $x ), $v );
+
+$variable_set->LetProperty( "value", "1", 1 );
+$x = '$variable_set->value( "1" )';
+$v = 1;
+expect( $x, eval( $x ), $v );
 
 #--------------------------------------------------------------------------------------------------
 
