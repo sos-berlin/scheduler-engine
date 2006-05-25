@@ -17,11 +17,11 @@ use strict;
 use warnings FATAL => "all";
 use vars qw($spooler $spooler_log $spooler_job $spooler_task);
 
-#{
-#    my @args = [ "echo", "mit", "array" ];
-#    my $subprocess = $spooler_task->create_subprocess( @args );
-#    $subprocess->wait_for_termination();
-#}
+{
+    my @args = [ "echo", "mit", "array" ];
+    my $subprocess = $spooler_task->create_subprocess( @args );
+    $subprocess->wait_for_termination();
+}
 
 {
     my @args = [ "echo", "mit", "array" ];
