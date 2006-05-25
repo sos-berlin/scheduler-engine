@@ -10,8 +10,34 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2006-05-23" version="2.0.151" subversion_revision="4278">
-        <revision type="new" title="Perl-Schnittstelle unter Unix um Objekt-Parameter erweitert">
+    <change date="2006-05-26" version="2.0.151" subversion_revision="4298">
+        <revision type="new" title="&lt;job min_tasks=...>">
+            <description>
+                <p>
+                    Der Scheduler kann dafür sorgen, dass eine minimale Anzahl Tasks läuft.
+                </p>
+                <ul>
+                    <li>
+                        <scheduler_element name="job" attribute="min_tasks"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+
+        <revision type="correction" title="Subprocess.wait_for_termination(int) funktioniert jetzt unter UNix">
+            <description>
+                <p>
+                    Unter Unix wurde der Parameter für die Wartezeit ignoriert. Das ist behoben.
+                </p>
+                <ul>
+                    <li>
+                        <scheduler_method class="Subprocess" method="wait_for_termination"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+
+        <revision type="new" title="Perl-Schnittstelle unter Unix um Objekt- und Array-Parameter erweitert">
             <description>
                 <p>
                     Die Perl-Schnittstelle nimmt damit auch unter Unix das folgende Aufrufe an:
@@ -25,6 +51,12 @@
                     </li>
                     <li>
                         <scheduler_method class="Order" property="params" programming_language="perl"/>
+                    </li>
+                    <li>
+                        <scheduler_method class="Task" method="create_subprocess" programming_language="perl"/>
+                    </li>
+                    <li>
+                        <scheduler_method class="Subprocess" method="start" programming_language="perl"/>
                     </li>
                 </ul>
                 <p>
