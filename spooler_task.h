@@ -273,6 +273,7 @@ struct Task : Object,
     Time                       _next_time;
     Time                       _timeout;                    // Frist für eine Operation (oder INT_MAX)
     Time                       _idle_since;
+    Time                       _idle_timeout_at;
     Time                       _subprocess_timeout;
 
     bool                       _killed;                     // Task abgebrochen (nach do_kill/timeout)

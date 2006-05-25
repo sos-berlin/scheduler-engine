@@ -262,6 +262,8 @@ void Job::init0()
     _period._begin = 0;
     _period._end   = 0;
 
+    if( _max_tasks < _min_tasks )  z::throw_xc( "SCHEDULER-322", _min_tasks, _max_tasks );
+
     _init0_called = true;
 }
 
@@ -316,6 +318,7 @@ void Job::init2()
     _delay_until   = 0;
     set_next_start_time( Time::now() );
     init_start_when_directory_changed();
+    check_min_tasks( "job initialization" );
 }
 
 //-----------------------------------------------------------Job::init_start_when_directory_changed
@@ -927,7 +930,7 @@ void Job::stop( bool end_all_tasks )
         }
 
         clear_when_directory_changed();
-        _start_min_task = false;
+        _start_min_tasks = false;
     }
 }
 
@@ -971,8 +974,9 @@ bool Job::execute_state_cmd()
                                         else
                                         {
                                             set_state( s_pending );
-                                            something_done = true;
+                                            check_min_tasks( "job has been unstopped" );
                                             set_next_start_time( Time::now() );
+                                            something_done = true;
                                         }
                                     }
                                     break;
@@ -1429,7 +1433,7 @@ ptr<Task> Job::task_to_start()
 
         if( _start_min_tasks )
         {
-            assert( _running_tasks.count() < _min_tasks );
+            assert( not_ending_tasks_count() < _min_tasks );
             cause = cause_min_tasks;
         }
     }
@@ -1441,7 +1445,7 @@ ptr<Task> Job::task_to_start()
 
         if( _module._process_class  &&  !_module._process_class->process_available( this ) )
         {
-            if( cause != cause_min_task  
+            if( cause != cause_min_tasks  
              &&  ( !_waiting_for_process  ||  _waiting_for_process_try_again ) )
             {
                 if( !_waiting_for_process )
@@ -1548,6 +1552,7 @@ bool Job::do_something()
                 {
                     select_period();
                     if( !_period.is_in_time( _next_start_time ) )  set_next_start_time( now );
+                    if( is_in_period( now ) )  check_min_tasks( "a new period has begun" );
                 }
 
 
@@ -1590,7 +1595,7 @@ bool Job::do_something()
                                 task->attach_to_a_thread();
                                 _log->info( message_string( "SCHEDULER-930", task->id() ) );
 
-                                if( _running_tasks.count() >= _min_tasks )  _start_min_task = false;
+                                if( _min_tasks <= not_ending_tasks_count() )  _start_min_tasks = false;
 
                                 task->do_something();           // Damit die Task den Prozess startet und die Prozessklasse davon weiß
                             }
@@ -1629,26 +1634,75 @@ bool Job::do_something()
 
 void Job::on_task_finished( Task* task )
 {
-    init_start_when_directory_changed( this );
+    init_start_when_directory_changed( task );
 
-    if( !task->spooler_init_open_ok() )
+    if( _state == s_pending  ||  _state == s_running )
     {
+        if( task->running_state_reached() )
+        {
+            check_min_tasks( task->obj_name() + " has finished" );
+        }
+        else
+        {
+            if( !_start_min_tasks  &&  should_start_task_because_of_min_tasks() )
+            {
+                _log->warn( message_string( "SCHEDULER-970", task->obj_name(), _min_tasks ) );   // Task hat sich zu schnell beendet, wir starten keine neue
+            }
+        }
     }
-
-    check_min_tasks();
 }
 
 //-----------------------------------------------------------------------------Job::check_min_tasks
 
-void Job::check_min_tasks()
+void Job::check_min_tasks( const string& cause )
 {
-    if( ( _state == s_pending || _state == s_running )  
-     &&  _task_queue.count() < _min_tasks )
+    if( !_start_min_tasks  &&  should_start_task_because_of_min_tasks() )
     {
+        _log->debug( message_string( "SCHEDULER-969", _min_tasks, cause ) );
         _start_min_tasks = true;
+        signal( "min_tasks" );
     }
     else
+    {
         _start_min_tasks = false;
+    }
+}
+
+//------------------------------------------------------Job::should_start_task_because_of_min_tasks
+
+bool Job::should_start_task_because_of_min_tasks()
+{
+    return ( _state == s_pending || _state == s_running )  
+       &&  below_min_tasks()
+       &&  is_in_period( Time::now() );
+}
+
+//-----------------------------------------------------------------------------Job::above_min_tasks
+
+bool Job::above_min_tasks() const
+{
+    return not_ending_tasks_count() > _min_tasks;       // Nur Tasks zählen, die nicht beendet werden
+}
+
+//-----------------------------------------------------------------------------Job::below_min_tasks
+
+bool Job::below_min_tasks() const
+{
+    return not_ending_tasks_count() < _min_tasks;       // Nur Tasks zählen, die nicht beendet werden
+}
+
+//----------------------------------------------------------------------Job::not_ending_tasks_count
+
+int Job::not_ending_tasks_count() const
+{
+    int result = 0;
+
+    Z_FOR_EACH_CONST( Task_list, _running_tasks, t )
+    {
+        if( !(*t)->ending() )  result++;
+    }
+
+    return result;
 }
 
 //-------------------------------------------------------------------------------Job::set_job_error
@@ -1658,9 +1712,9 @@ void Job::set_job_error( const exception& x )
     set_state( s_error );
 
     S body;
-    body << "Scheduler: Der Job " << _name << " ist nach dem Fehler\n" <<
+    body << "Scheduler: Job " << _name << " is in now error state after the error\n" <<
             x.what() << "\n"
-            "in den Fehlerzustand versetzt worden. Keine Task wird mehr gestartet.";
+            "No more task will be started.";
 
     Scheduler_event scheduler_event ( Scheduler_event::evt_job_error, log_error, this );
     scheduler_event.set_error( x );
@@ -1908,6 +1962,9 @@ xml::Element_ptr Job::dom_element( const xml::Document_ptr& document, const Show
         job_element.setAttribute( "log_file"  , _log->filename()         );
         job_element.setAttribute( "order"     , order_controlled()? "yes" : "no" );
         job_element.setAttribute( "tasks"     , _max_tasks              );
+
+        if( _min_tasks )
+        job_element.setAttribute( "min_tasks" , _min_tasks              );
 
 
         if( _description != "" )  job_element.setAttribute( "has_description", "yes" );

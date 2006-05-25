@@ -243,7 +243,11 @@ struct Job : Object,
     bool                        queue_filled                ()                                      { return !_task_queue.empty(); }
     
     void                        on_task_finished            ( Task* );                              // Task::finished() ruft das
-    void                        check_min_tasks             ();                                     // Setzt _start_min_tasks
+    void                        check_min_tasks             ( const string& cause );                // Setzt _start_min_tasks
+    bool                        above_min_tasks             () const;
+    bool                        below_min_tasks             () const;
+    bool                        should_start_task_because_of_min_tasks();
+    int                         not_ending_tasks_count      () const;
 
     ptr<Task>                   create_task                 ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, const Time& = latter_day );
     ptr<Task>                   create_task                 ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, const Time&, int id );

@@ -838,7 +838,7 @@
                                                     <xsl:attribute name="title"><xsl:value-of select="$job_chain_task_count"/> tasks processing orders from job chain <xsl:value-of select="$job_chain_name"/></xsl:attribute>
                                                     <xsl:call-template name="bold_counter">
                                                         <xsl:with-param name="counter" select="$job_chain_task_count" />
-                                                        <xsl:with-param name="suffix" select="'tasks'" />
+                                                        <xsl:with-param name="suffix" select="'tasks working'" />
                                                     </xsl:call-template>
                                                 </xsl:element>
 
@@ -846,7 +846,8 @@
                                                 <xsl:if test="$waiting_task_count &gt; 0">
                                                     <xsl:text>, </xsl:text>
                                                     <span style="white-space: nowrap">
-                                                        <xsl:value-of select="$waiting_task_count"/> idle
+                                                        <xsl:value-of select="$waiting_task_count"/>
+                                                        <xsl:text> idle</xsl:text>
                                                     </span>
                                                 </xsl:if>
 
@@ -854,7 +855,7 @@
                                                 <xsl:if test="$rest &gt; 0">
                                                     <xsl:text>, </xsl:text>
                                                     <span style="white-space: nowrap">
-                                                        <xsl:value-of select="$rest"/> for other job chains
+                                                        <xsl:value-of select="$rest"/> others
                                                     </span>
                                                 </xsl:if>
                                             </span>
@@ -952,7 +953,7 @@
                                     <xsl:when test="$job/tasks/@count>0">
                                         <xsl:text>, </xsl:text>
                                         <xsl:call-template name="bold_counter">
-                                            <xsl:with-param name="counter" select="count( $job [ @state='running' ] )" />
+                                            <xsl:with-param name="counter" select="$job/tasks/@count" />
                                             <xsl:with-param name="suffix" select="'tasks'" />
                                         </xsl:call-template>
                                     </xsl:when>

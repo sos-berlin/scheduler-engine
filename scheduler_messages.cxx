@@ -190,6 +190,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-319", "XML-Element <$1> is not possible here" },
     { "SCHEDULER-320", "Could not send mail" },
     { "SCHEDULER-321", "Mail has been sent, but an error occurred when processing then mail queue: $1" },
+    { "SCHEDULER-322", "min_tasks=$1 is greater than max_tasks=$2" },
     { "SCHEDULER-900", "Scheduler $1 is starting with $2, pid=$3" },
     { "SCHEDULER-902", "state=$1" },
     { "SCHEDULER-904", "Tasks have $1s to terminate" },
@@ -254,6 +255,8 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-966", "Command answer: $1" },
     { "SCHEDULER-967", "start_new_file(): protocol file is being closed now" },
     { "SCHEDULER-968", "start_new_file(): intermediate protocol file is: $1" },
+    { "SCHEDULER-969", "Less than min_tasks=$1 are running. New tasks will be started. Cause: $2" },
+    { "SCHEDULER-970", "$1 ended immediately after start, so min_tasks=$2 doesn't lead to new tasks" },
     { "SCHEDULER-999", "Scheduler has been terminated properly" },
     {}
 };

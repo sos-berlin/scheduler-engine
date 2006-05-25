@@ -1998,6 +1998,17 @@
                 <title>Mail has been sent, but an error occurred when processing then mail queue: <p1/></title>
             </text>
         </message>
+        
+        <message code="SCHEDULER-322">
+            <text xml:lang="en">
+                <title><code>min_tasks=</code><p1/> is greater than <code>max_tasks=</code><p2/></title>
+                <description>
+                    <p>
+                        See <scheduler_element name="job" attribute="min_tasks"/>.
+                    </p>
+                </description>
+            </text>
+        </message>
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->
@@ -2574,6 +2585,24 @@
                 <title>start_new_file(): intermediate protocol file is: <p1/></title>
             </text>
         </message>
+
+        <message code="SCHEDULER-969">
+            <text xml:lang="en">
+                <title>Less than <code>min_tasks</code>=<p1/> are running. New tasks will be started. Cause: <p2/></title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-970">
+            <text xml:lang="en">
+                <title><p1 what="task"/> ended immediately after start, so <code>min_tasks</code>=<p2/> doesn't lead to new tasks</title>
+            </text>
+        </message>
+
+        <!--message code="SCHEDULER-971">
+            <text xml:lang="en">
+                <title><code>idle_timeout</code> is over, but not more than <code>min_tasks</code> tasks are running and <code>force_idle_timeout="no"</title>
+            </text>
+        </message-->
 
         <message code="SCHEDULER-999">
             <text xml:lang="de">

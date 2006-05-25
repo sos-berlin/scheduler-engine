@@ -73,6 +73,13 @@
             <description>
                 <p>
                     Der Scheduler sorgt dafür, das wenigstens die angegebene Anzahl Tasks läuft.
+                    So lassen sich auftragsgesteuerte Tasks in Bereitschaft bringen,
+                    die sehr lange für ihre Initialisierung brauchen.
+                </p>
+                <p>
+                    <scheduler_element name="job" attribute="tasks"/> muss groß genug sein.
+                </p>
+                <p>
                     Der Scheduler startet weitere Tasks, wenn
                 </p>
                 <ul>
@@ -83,13 +90,12 @@
                         oder eine Task sich beendet hat
                     </li>
                     <li>
-                        oder der Job entstoppt wird
+                        oder eine neue Periode (<scheduler_element name="run_time"/>) beginnt
                     </li>
                     <li>
-                        oder die <scheduler_element name="run_time"/> nach einer Auszeit wieder Tasks erlaubt
+                        oder der Job entstoppt wird
                     </li>
                 </ul>
-
                 <ul>
                     <li>
                         und weniger Tasks laufen als mit <code>min_tasks</code> verlangt
@@ -103,8 +109,9 @@
                     </li>
                 </ul>
                 <p>
-                    Um ein Heißlaufen zu verhindern,
-                    führt das Ende einer Task nur in folgenden Fällen zum Start einer neuen:
+                    Um ein Heißlaufen zu verhindern, startet der Scheduler keine neuen Tasks,
+                    nachdem sich eine sofort beendet hat.
+                    Nur in folgenden Fällen führt das Ende einer Task zum Start einer neuen:
                 </p>
                 <ul>
                     <li>
@@ -126,12 +133,14 @@
                         und der Prozess hat sich nicht sofort nach Start beendet.
                     </li>
                 </ul>
-
-                <p>
-                    So lassen sich auftragsgesteuerte Tasks in Bereitschaft bringen,
-                    die sehr lange für ihre Initialisierung brauchen.
-                </p>
             </description>
+
+            <messages>
+                <message code="SCHEDULER-322" level="error"/>
+                <message code="SCHEDULER-969" level="debug3"/>
+                <message code="SCHEDULER-970" level="warn"/>
+            </messages>
+
         </xml_attribute>
 
         <xml_attribute name="timeout" type="dauer" title="Frist für eine Operation">

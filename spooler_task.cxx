@@ -216,6 +216,7 @@ Task::Task( Job* job )
     _log->inherit_settings( *_job->_log );
     _log->set_mail_defaults();
 
+    _idle_timeout_at = latter_day;
     set_subprocess_timeout();
 
     Z_DEBUG_ONLY( _job_name = job->name(); )
@@ -555,7 +556,7 @@ void Task::set_state( State new_state )
 {
     THREAD_LOCK_DUMMY( _lock )
     {
-        _idle_since = 0;
+        if( new_state != s_running_waiting_for_order )  _idle_since = 0;
 
         switch( new_state )
         {
@@ -577,9 +578,9 @@ void Task::set_state( State new_state )
 
                 if( _state != s_running_waiting_for_order )  _idle_since = Time::now();
 
-                if( _job->_idle_timeout != latter_day )
+                if( _idle_timeout_at != latter_day )
                 {
-                    _next_time = min( _next_time, _idle_since + _job->_idle_timeout );
+                    _next_time = min( _next_time, _idle_timeout_at );
                 }
 
                 break;
@@ -1064,6 +1065,7 @@ bool Task::do_something()
                                     {
                                         if( !take_order( now ) )
                                         {
+                                            _idle_timeout_at = _job->_idle_timeout == latter_day? latter_day : now + _job->_idle_timeout;
                                             set_state( s_running_waiting_for_order );
                                             break;
                                         }
@@ -1103,17 +1105,24 @@ bool Task::do_something()
                                 loop = true;                // _order wird in step__end() wieder abgeräumt
                             }
                             else
-                            if( _job->_idle_timeout != latter_day )
+                            if( now >= _idle_timeout_at )
                             {
-                                if( now >= _idle_since + _job->_idle_timeout )
+                                if( _job->_force_idle_timeout  ||  _job->above_min_tasks() )
                                 {
                                     _log->debug9( message_string( "SCHEDULER-916" ) );   // "idle_timeout ist abgelaufen, Task beendet sich" 
                                     _end = true;
                                     loop = true;
                                 }
                                 else
-                                    _running_state_reached = true;   // Also nicht bei idle_timeout="0"
+                                {
+                                    _idle_timeout_at = _job->_idle_timeout == latter_day? latter_day : now + _job->_idle_timeout;
+                                    set_state( s_running_waiting_for_order );   // _next_time neu setzen
+                                    Z_LOG( obj_name() << ": idle_timeout ist abgelaufen, aber force_idle_timeout=\"no\" und nicht mehr als min_tasks Tasks laufen  now=" << now << ", _next_time=" << _next_time << "\n" );
+                                    //_log->debug9( message_string( "SCHEDULER-916" ) );   // "idle_timeout ist abgelaufen, Task beendet sich" 
+                                }
                             }
+                            else
+                                _running_state_reached = true;   // Also nicht bei idle_timeout="0"
 
                             break;
                         }
