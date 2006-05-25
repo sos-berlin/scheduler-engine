@@ -24,7 +24,7 @@
             </description>
         </revision>
 
-        <revision type="correction" title="Subprocess.wait_for_termination(int) funktioniert jetzt unter UNix">
+        <revision type="correction" title="Subprocess.wait_for_termination(int) funktioniert jetzt unter Unix">
             <description>
                 <p>
                     Unter Unix wurde der Parameter für die Wartezeit ignoriert. Das ist behoben.
