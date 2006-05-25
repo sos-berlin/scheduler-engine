@@ -1,0 +1,93 @@
+<?xml version="1.0"?>
+<spooler
+    xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
+>
+    <config>
+
+        <base file="base.scheduler"/>
+
+
+        <jobs>
+            <job name="start">
+                <script language="perl">
+                    <include file="expect.pl"/>
+                    <![CDATA[
+use strict;
+use warnings FATAL => "all";
+use vars qw($spooler $spooler_log $spooler_job $spooler_task);
+
+#{
+#    my @args = [ "echo", "mit", "array" ];
+#    my $subprocess = $spooler_task->create_subprocess( @args );
+#    $subprocess->wait_for_termination();
+#}
+
+{
+    my @args = [ "echo", "mit", "array" ];
+    my $subprocess = $spooler_task->create_subprocess();
+    $subprocess->start( @args );
+    $subprocess->wait_for_termination();
+}
+
+{
+    my $subprocess = $spooler_task->create_subprocess( "echo als Kommandozeile" );
+    $subprocess->wait_for_termination();
+}
+
+{
+    my $subprocess = $spooler_task->create_subprocess();
+    $subprocess->start( "echo als Kommandozeile" );
+    $subprocess->wait_for_termination();
+}
+
+{
+    my $subprocess = $spooler_task->create_subprocess();
+
+    $subprocess->LetProperty( "environment", "test1", "ETT" );
+    $subprocess->LetProperty( "environment", "test2", "TVÅ" );
+    $subprocess->LetProperty( "ignore_error", 1 );
+    $subprocess->start( "sleep 30" );
+
+    $spooler_log->info( "pid=" . $subprocess->pid );
+    $subprocess->LetProperty( "timeout", 20 );
+
+    sleep( 1 );
+    $spooler_log->info( "wait_for_termination ..." );
+    my $ok = $subprocess->wait_for_termination( 5 );
+    $spooler_log->info( "wait_for_termination ok=$ok" );
+
+    if( ! $subprocess->terminated ) 
+    {
+        $subprocess->kill();
+        $subprocess->wait_for_termination();
+    }
+
+    $spooler_log->info( "exit code=" . $subprocess->exit_code );
+    $spooler_log->info( "termination signal=" . $subprocess->termination_signal );
+}
+
+
+#my $cmd = "sleep 6";
+#my $exit_code = my_system( $cmd, 5 );
+#$spooler_log->info( "$cmd ==> $exit_code" );
+#
+#function my_system()
+#{
+#    my $cmd = shift;
+#    my $timeout = shift;
+#    
+#    my $subprocess = $spooler_task->create_subprocess();
+#    
+#    $subprocess->LetProperty( "timeout", $timeout )  if $timeout;
+#    $subprocess->start( $cmd );
+#    $subprocess->wait_for_termination();
+#    return $subprocess->exit_code;
+#}
+
+                    ]]></script>
+                <run_time once="yes"/>
+            </job>
+        </jobs>
+    </config>
+</spooler>

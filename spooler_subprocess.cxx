@@ -153,7 +153,7 @@ STDMETHODIMP Subprocess::Start( VARIANT* program_and_parameters )
             _process.start( string_from_variant( *program_and_parameters ) );
         }
         else
-        if( program_and_parameters->vt == VT_ARRAY )
+        if( ( program_and_parameters->vt & ~VT_TYPEMASK ) == VT_ARRAY )
         {
             //string                    command_line = "";
             Locked_safearray<Variant> params ( V_ARRAY( program_and_parameters ) );

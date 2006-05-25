@@ -1,0 +1,133 @@
+<?xml version="1.0"?>
+<spooler
+    xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
+>
+    <config>
+
+        <base file="base.scheduler"/>
+
+        <!--script language="javascript">
+            <![CDATA[
+
+var order = spooler.create_order();
+spooler.job_chain( "my_job_chain" ).add_order( order );
+
+var order = spooler.create_order();
+spooler.job_chain( "my_job_chain_with_forced_timeout" ).add_order( order );
+            
+            ]]>
+        </script-->
+
+        
+        <jobs>
+
+            <job name="my_job" min_tasks="2" tasks="3">
+                <script language="javascript">
+                    <![CDATA[
+
+// Job ohne spooler_process()
+spooler_log.info( "Dieser Job soll alle 15s zweimal gestartet werden" );
+
+var hostware = new ActiveXObject( "hostware.global" );
+hostware.sleep( 15 );
+
+                    ]]>
+                </script>
+            </job>
+
+            <job name="my_quick_job" min_tasks="2" tasks="3">
+                <script language="javascript">
+                    <![CDATA[
+
+spooler_log.info( "Dieser Job soll insgesamt zweimal gestartet werden" );
+
+function spooler_open()
+{
+    return false;
+}
+
+                    ]]>
+                </script>
+            </job>
+
+            <job name="my_shell" min_tasks="1" tasks="3">
+                <script language="shell">
+                    <![CDATA[
+sleep 10
+echo Hallo
+                    ]]>
+                </script>
+            </job>
+
+            <job name="my_periodical_job" min_tasks="2" tasks="3">
+                <script language="javascript">
+                    <![CDATA[
+
+var hostware = new ActiveXObject( "hostware.global" );
+hostware.sleep( 15 );
+//spooler_task.end();
+
+                    ]]>
+                </script>
+
+                <run_time>
+                    <period begin="16:50" end="16:50:30"/>
+                    <period begin="16:51" end="16:51:30"/>
+                    <period begin="16:52" end="16:52:30"/>
+                    <period begin="16:53" end="16:53:30"/>
+                    <period begin="16:54" end="16:54:30"/>
+                    <period begin="16:55" end="16:55:30"/>
+                    <period begin="16:56" end="16:56:30"/>
+                    <period begin="16:57" end="16:57:30"/>
+                    <period begin="16:58" end="16:58:30"/>
+                    <period begin="16:59" end="16:59:30"/>
+                </run_time>
+            </job>
+
+            <job name="job_a" order="yes" min_tasks="2" tasks="3" idle_timeout="10">
+                <script language="javascript">
+                    <![CDATA[
+
+function spooler_process()
+{
+    return true;
+}
+
+                    ]]>
+                </script>
+            </job>
+
+            
+            <job name="job_a_force" order="yes" min_tasks="2" tasks="3" idle_timeout="10" force_idle_timeout="yes">
+                <script language="javascript">
+                    <![CDATA[
+
+function spooler_process()
+{
+    var hostware = new ActiveXObject( "hostware.global" );
+    hostware.sleep( 3 );
+    spooler_task.delay_spooler_process = 15;
+    return true;
+}
+
+                    ]]>
+                </script>
+            </job>
+
+        </jobs>
+
+        <job_chains>
+            <job_chain name="my_job_chain" orders_recoverable="no">
+                <job_chain_node state="a" job="job_a" next_state="end"/>
+                <job_chain_node state="end"/>
+            </job_chain>
+
+            <job_chain name="my_job_chain_with_forced_timeout" orders_recoverable="no">
+                <job_chain_node state="a" job="job_a_force" next_state="end"/>
+                <job_chain_node state="end"/>
+            </job_chain>
+        </job_chains>
+
+    </config>
+</spooler>

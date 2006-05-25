@@ -1,0 +1,127 @@
+<?xml version="1.0"?>
+<spooler> 
+    <config port="4444">
+        <security ignore_unknown_hosts="yes">
+            <allowed_host host="0.0.0.0" level="all"/>
+        </security>
+                
+        <process_classes ignore="no"/>
+        
+        <script language="javascript"><![CDATA[
+            
+spooler.job( "javascript" ).start();            
+//spooler.job( "java" ).start();            
+            
+        ]]></script>        
+                              
+                              
+        <jobs>
+
+            <job name="javascript">
+       
+                <script language="JavaScript">
+    <![CDATA[
+
+var subprocess = spooler_task.create_subprocess();
+
+subprocess.environment( "test1" ) = "ETT";
+subprocess.environment( "test2" ) = "TVÅ";
+subprocess.ignore_error = true;
+
+subprocess.start( "sleep 30" );
+
+spooler_log.info( "pid=" + subprocess.pid );
+subprocess.timeout = 20;
+
+new ActiveXObject( "hostware.global" ).sleep( 1 );
+//subprocess.kill();
+spooler_log.info( "wait_for_termination ..." );
+var ok = subprocess.wait_for_termination( 5 );
+spooler_log.info( "wait_for_termination ok=" + ok );
+
+if( subprocess.terminated )  spooler_log.info( "exit code=" + subprocess.exit_code ), spooler_log.info( "termination signal=" + subprocess.termination_signal );
+
+
+var cmd = "sleep 6";
+var exit_code = system( cmd, 5 );
+spooler_log.info( cmd + " ==> " + exit_code );
+
+
+function system( cmd, timeout )
+{
+    var subprocess = spooler_task.create_subprocess();
+    
+    try
+    {
+        if( timeout )  subprocess.timeout = timeout;
+        subprocess.start( cmd );
+        subprocess.wait_for_termination();
+        return subprocess.exit_code;
+    }
+    finally
+    {
+        subprocess.close();
+    }
+}
+
+
+
+
+                ]]></script>
+
+                <run_time/>
+            </job>
+
+
+            <job name="java">
+        
+                <script java_class="spooler_job.My_job"><![CDATA[
+
+package spooler_job;
+
+import sos.spooler.*;
+
+public class My_job  extends sos.spooler.Job_impl
+{   
+    Subprocess subprocess;
+                     
+    public boolean spooler_open()  throws Exception
+    {                     
+        //subprocess = spooler_task.create_subprocess( "/tmp/test.cmd EINS ZWEI" );
+        return true;
+    }
+    
+    public boolean spooler_process()  throws Exception
+    {
+        subprocess = spooler_task.create_subprocess();
+        
+        subprocess.set_ignore_error( false );
+        subprocess.set_environment( "test1", "ETT" );
+        subprocess.set_environment( "test2", "TVÅ" );
+
+        subprocess.start( "sleep 20" );
+
+        spooler_log.info( "pid=" + subprocess.pid() );
+        //subprocess.set_timeout( 10 );
+
+        spooler_log.info( "wait_for_termination ..." );
+        boolean ok = subprocess.wait_for_termination( 5 );
+        spooler_log.info( "wait_for_termination ok=" + ok );
+
+        if( subprocess.terminated() ) 
+        {
+            spooler_log.info( "exit code=" + subprocess.exit_code() );
+            spooler_log.info( "termination_signal=" + subprocess.termination_signal() );
+        }
+
+        return false;
+    }
+}
+                ]]></script>
+
+                <run_time/>
+            </job>
+        
+        </jobs>
+    </config>
+</spooler>
