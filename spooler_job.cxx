@@ -316,9 +316,9 @@ void Job::init2()
     set_state( s_pending );
     
     _delay_until   = 0;
-    set_next_start_time( Time::now() );
     init_start_when_directory_changed();
     check_min_tasks( "job initialization" );
+    set_next_start_time( Time::now() );
 }
 
 //-----------------------------------------------------------Job::init_start_when_directory_changed
@@ -1161,7 +1161,7 @@ void Job::set_next_start_time( Time now, bool repeat )
             if( _spooler->_debug )  msg = message_string( "SCHEDULER-923", next_start_time );   // "Wiederholung wegen delay_after_error"
         }
         else
-        if( order_controlled() ) 
+        if( order_controlled()  &&  !_start_min_tasks  ) 
         {
             next_start_time = latter_day;
         }
@@ -1172,9 +1172,8 @@ void Job::set_next_start_time( Time now, bool repeat )
             {
                 if( !_repeat )  _next_single_start = _run_time->next_single_start( now );
 
-                if( _start_once  ||  !repeat && _period._repeat < latter_day )
+                if( _start_once  ||  _start_min_tasks  ||  !repeat && _period._repeat < latter_day )
                 {
-                //select_period();
                     if( _period.begin() > now )
                     {
                         next_start_time = _period.begin();
@@ -1218,6 +1217,11 @@ void Job::set_next_start_time( Time now, bool repeat )
                     }
                 }
             }
+        }
+        else
+        if( _state == s_running )
+        {
+            if( _start_min_tasks )  next_start_time = min( now, _period.begin() );
         }
         else
         {
@@ -1552,7 +1556,7 @@ bool Job::do_something()
                 {
                     select_period();
                     if( !_period.is_in_time( _next_start_time ) )  set_next_start_time( now );
-                    if( is_in_period( now ) )  check_min_tasks( "a new period has begun" );
+                    //if( is_in_period( now ) )  check_min_tasks( "a new period has begun" );
                 }
 
 
@@ -1593,7 +1597,7 @@ bool Job::do_something()
                                 //init_start_when_directory_changed( task ); // Bei Fehler: Ein delay_after_error sollte Job wiederholen
 
                                 task->attach_to_a_thread();
-                                _log->info( message_string( "SCHEDULER-930", task->id() ) );
+                                _log->info( message_string( "SCHEDULER-930", task->id(), task->string_cause() ) );
 
                                 if( _min_tasks <= not_ending_tasks_count() )  _start_min_tasks = false;
 
@@ -1636,18 +1640,16 @@ void Job::on_task_finished( Task* task )
 {
     init_start_when_directory_changed( task );
 
-    if( _state == s_pending  ||  _state == s_running )
+    if( !_start_min_tasks  &&  ( _state == s_pending  ||  _state == s_running ) )
     {
         if( task->running_state_reached() )
         {
             check_min_tasks( task->obj_name() + " has finished" );
         }
         else
+        if( should_start_task_because_of_min_tasks() )
         {
-            if( !_start_min_tasks  &&  should_start_task_because_of_min_tasks() )
-            {
-                _log->warn( message_string( "SCHEDULER-970", task->obj_name(), _min_tasks ) );   // Task hat sich zu schnell beendet, wir starten keine neue
-            }
+            _log->warn( message_string( "SCHEDULER-970", task->obj_name(), _min_tasks ) );   // Task hat sich zu schnell beendet, wir starten keine neue
         }
     }
 }
@@ -1673,8 +1675,8 @@ void Job::check_min_tasks( const string& cause )
 bool Job::should_start_task_because_of_min_tasks()
 {
     return ( _state == s_pending || _state == s_running )  
-       &&  below_min_tasks()
-       &&  is_in_period( Time::now() );
+       &&  below_min_tasks();
+     //&&  is_in_period( Time::now() );
 }
 
 //-----------------------------------------------------------------------------Job::above_min_tasks
@@ -1688,7 +1690,7 @@ bool Job::above_min_tasks() const
 
 bool Job::below_min_tasks() const
 {
-    return not_ending_tasks_count() < _min_tasks;       // Nur Tasks zählen, die nicht beendet werden
+    return _min_tasks > 0  &&  not_ending_tasks_count() < _min_tasks;       // Nur Tasks zählen, die nicht beendet werden
 }
 
 //----------------------------------------------------------------------Job::not_ending_tasks_count

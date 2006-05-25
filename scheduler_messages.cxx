@@ -216,7 +216,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-926", "Next start at $2 due to <period repeat=\"$1\">" },
     { "SCHEDULER-927", "Next start time will be determined at beginning of the next period. This is at $1" },
     { "SCHEDULER-928", "Next single_start at $1" },
-    { "SCHEDULER-930", "Task $1 started" },
+    { "SCHEDULER-930", "Task $1 started, cause: $2" },
     { "SCHEDULER-931", "state=$1" },
     { "SCHEDULER-932", "Executing command $1" },
     { "SCHEDULER-933", "TCP connection accepted" },

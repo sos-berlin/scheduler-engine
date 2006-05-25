@@ -2242,10 +2242,10 @@
 
         <message code="SCHEDULER-930">
             <text xml:lang="de">
-                <title>Task <p1/> gestartet</title>
+                <title>Task <p1/> gestartet, Anlass: <p2/></title>
             </text>
             <text xml:lang="en">
-                <title>Task <p1/> started</title>
+                <title>Task <p1/> started, cause: <p2/></title>
             </text>
         </message>
 

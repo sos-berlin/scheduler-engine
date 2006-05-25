@@ -35,6 +35,7 @@ td.after_head_space     { margin-top: 0; margin-bottom: 0pt; line-height: 4pt; }
 /* Allgemeiner Scheduler-Zustand */
 .scheduler              { background-color: #F0F0F0 }
 .scheduler_error        { color: #e00000; font-weight: bold }
+.scheduler_warning      { color: #800000; font-weight: bold }
 
 .job                    { font-size: 10pt; background-color: #00c8ff } /*#fff000*/
 .job_hover              { font-size: 10pt; background-color: #80ecff }

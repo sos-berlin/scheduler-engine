@@ -838,7 +838,7 @@
                                                     <xsl:attribute name="title"><xsl:value-of select="$job_chain_task_count"/> tasks processing orders from job chain <xsl:value-of select="$job_chain_name"/></xsl:attribute>
                                                     <xsl:call-template name="bold_counter">
                                                         <xsl:with-param name="counter" select="$job_chain_task_count" />
-                                                        <xsl:with-param name="suffix" select="'tasks working'" />
+                                                        <xsl:with-param name="suffix" select="'working tasks'" />
                                                     </xsl:call-template>
                                                 </xsl:element>
 
@@ -1924,7 +1924,7 @@
                 <td>
                     <span class="label">last error: </span>
                 </td>
-                <td colspan="99">
+                <td colspan="99" class="scheduler_error">
                     <xsl:value-of select="@last_error"/>
                 </td>
             </tr>
@@ -1935,7 +1935,7 @@
                 <td>
                     <span class="label">last warning: </span>
                 </td>
-                <td colspan="99">
+                <td colspan="99" class="scheduler_warning">
                     <xsl:value-of select="@last_warning"/>
                 </td>
             </tr>

@@ -125,6 +125,7 @@
                     <li>
                         Die Task startete, wurde aber mit
                         <scheduler_method class="task" property="delay_spooler_process"/> verzögert.
+                        <!-- Diesen Fall gibt es nicht, weil delay_spooler_process nur im spooler_process() wirkt, also spooler_process() gerufen worden ist. Stand 25.5.2006 -->
                     </li>
                     <li>
                         Die Task ist ein Prozess 
