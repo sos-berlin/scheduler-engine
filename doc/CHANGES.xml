@@ -10,7 +10,7 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2006-05-26" version="2.0.151" subversion_revision="4298">
+    <change date="2006-05-26" version="2.0.151" subversion_revision="4300">
         <revision type="new" title="&lt;job min_tasks=...>">
             <description>
                 <p>
