@@ -2801,7 +2801,7 @@ const char file_html_jz_scheduler_xslt[] =
     "<xsl:attribute name=\"title\"><xsl:value-of select=\"$job_chain_task_count\"/> tasks processing orders from job chain <xsl:value-of select=\"$job_chain_name\"/></xsl:attribute>\r\n"
     "<xsl:call-template name=\"bold_counter\">\r\n"
     "<xsl:with-param name=\"counter\" select=\"$job_chain_task_count\" />\r\n"
-    "<xsl:with-param name=\"suffix\" select=\"'tasks working'\" />\r\n"
+    "<xsl:with-param name=\"suffix\" select=\"'working tasks'\" />\r\n"
     "</xsl:call-template>\r\n"
     "</xsl:element>\r\n"
     "\r\n"
@@ -3887,7 +3887,7 @@ const char file_html_jz_scheduler_xslt[] =
     "<td>\r\n"
     "<span class=\"label\">last error: </span>\r\n"
     "</td>\r\n"
-    "<td colspan=\"99\">\r\n"
+    "<td colspan=\"99\" class=\"scheduler_error\">\r\n"
     "<xsl:value-of select=\"@last_error\"/>\r\n"
     "</td>\r\n"
     "</tr>\r\n"
@@ -3898,7 +3898,7 @@ const char file_html_jz_scheduler_xslt[] =
     "<td>\r\n"
     "<span class=\"label\">last warning: </span>\r\n"
     "</td>\r\n"
-    "<td colspan=\"99\">\r\n"
+    "<td colspan=\"99\" class=\"scheduler_warning\">\r\n"
     "<xsl:value-of select=\"@last_warning\"/>\r\n"
     "</td>\r\n"
     "</tr>\r\n"
@@ -4051,6 +4051,7 @@ const char file_html_jz_scheduler_css[] =
     "/* Allgemeiner Scheduler-Zustand */\r\n"
     ".scheduler              { background-color: #F0F0F0 }\r\n"
     ".scheduler_error        { color: #e00000; font-weight: bold }\r\n"
+    ".scheduler_warning      { color: #800000; font-weight: bold }\r\n"
     "\r\n"
     ".job                    { font-size: 10pt; background-color: #00c8ff } /*#fff000*/\r\n"
     ".job_hover              { font-size: 10pt; background-color: #80ecff }\r\n"
@@ -5119,8 +5120,8 @@ static const Embedded_file embedded_files_array[] =
     { "html/jz/scheduler.js", file_html_jz_scheduler_js, sizeof file_html_jz_scheduler_js - 1, 1130350343 },
     { "html/jz/show_log.js", file_html_jz_show_log_js, sizeof file_html_jz_show_log_js - 1, 1113979995 },
     { "html/jz/translation_de.js", file_html_jz_translation_de_js, sizeof file_html_jz_translation_de_js - 1, 1113979995 },
-    { "html/jz/scheduler.xslt", file_html_jz_scheduler_xslt, sizeof file_html_jz_scheduler_xslt - 1, 1148558977 },
-    { "html/jz/scheduler.css", file_html_jz_scheduler_css, sizeof file_html_jz_scheduler_css - 1, 1137326883 },
+    { "html/jz/scheduler.xslt", file_html_jz_scheduler_xslt, sizeof file_html_jz_scheduler_xslt - 1, 1148569750 },
+    { "html/jz/scheduler.css", file_html_jz_scheduler_css, sizeof file_html_jz_scheduler_css - 1, 1148569750 },
     { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1148494380 },
     { NULL, NULL, 0 }
 };
