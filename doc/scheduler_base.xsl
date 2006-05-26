@@ -178,7 +178,10 @@
                                         <td valign="baseline">
                                             <xsl:element name="a">
                                                 <xsl:attribute name="class">silent</xsl:attribute>
-                                                <xsl:attribute name="href">#attribute_<xsl:value-of select="@name | @setting"/></xsl:attribute>
+                                                <xsl:attribute name="href">
+                                                    <xsl:text>#attribute_</xsl:text>
+                                                    <xsl:value-of select="@name | @setting"/>
+                                                </xsl:attribute>
                                                 <code><xsl:value-of select="@name | @setting"/></code>&#160;
                                             </xsl:element>
                                         </td>
@@ -215,7 +218,10 @@
                                                     <xsl:attribute name="class">silent</xsl:attribute>
                                                     <xsl:choose>
                                                         <xsl:when test="* | @multiple">
-                                                            <xsl:attribute name="href">#element_<xsl:value-of select="@name"/></xsl:attribute>
+                                                            <xsl:attribute name="href">
+                                                                <xsl:text>#element_</xsl:text>
+                                                                <xsl:value-of select="@name"/>
+                                                            </xsl:attribute>
                                                         </xsl:when>
                                                         <xsl:otherwise>
                                                             <xsl:attribute name="href"><xsl:value-of select="concat( /*/@base_dir, $path )"/></xsl:attribute>
@@ -1472,10 +1478,12 @@
             <xsl:variable name="href2">
                 <xsl:choose>
                     <xsl:when test="$attribute">
-                        #attribute_<xsl:value-of select="$attribute"/>
+                        <xsl:text>#attribute_</xsl:text>
+                        <xsl:value-of select="$attribute"/>
                     </xsl:when>
                     <xsl:when test="$child">
-                        #element_<xsl:value-of select="$child"/>
+                        <xsl:text>#element_</xsl:text>
+                        <xsl:value-of select="$child"/>
                     </xsl:when>
                 </xsl:choose>
             </xsl:variable>
@@ -1500,7 +1508,9 @@
                     <xsl:value-of select="$attribute"/>
                     <xsl:choose>
                         <xsl:when test="$relation">
-                            &#x2005;<xsl:value-of select="$relation"/>&#x2005;
+                            <xsl:text>&#x2005;</xsl:text>
+                            <xsl:value-of select="$relation"/>
+                            <xsl:text>&#x2005;</xsl:text>
                         </xsl:when>
                         <xsl:otherwise>=</xsl:otherwise>
                     </xsl:choose>
@@ -1536,7 +1546,8 @@
 
         <xsl:element name="a">
             <xsl:attribute name="href">
-                settings.xml#option_<xsl:value-of select="@setting | @name"/>
+                <xsl:text>settings.xml#option_</xsl:text>
+                <xsl:value-of select="@setting | @name"/>
             </xsl:attribute>
 
             <xsl:choose>
@@ -1746,7 +1757,8 @@
 
             <xsl:variable name="href_local">
                 <xsl:if test="$method or $property">
-                    #method__<xsl:value-of select="$method | $property"/>
+                    <xsl:text>#method__</xsl:text>
+                    <xsl:value-of select="$method | $property"/>
                 </xsl:if>
             </xsl:variable>
 

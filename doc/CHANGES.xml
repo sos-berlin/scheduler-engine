@@ -10,6 +10,54 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2006-05-26" version="2.0.151" subversion_revision="4305">
+        <revision type="new" title="Umgebungsvariablen mit ${name}">
+            <description>
+                <p>
+                    Dort, wo Umgebungsvariablen mit <code>$</code><i>name</i> aufgerufen werden können,
+                    kann jetzt auch <code>${</code><i>name</i><code>}</code> geschrieben werden.
+                    Damit ist die Trennung zum anschließenden Text deutlicher.
+                </p>
+            </description>
+        </revision>
+
+        <revision type="modification" title="In &lt;base file=&quot;&quot;> und &lt;include file=&quot;&quot;> lassen sich Umgebungsvariablen nutzen">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_element name="base" attribute="file"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="include" attribute="file"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+
+        <revision type="new" title="Umgebungsvariablen mit ${name}">
+            <description>
+                <p>
+                    Dort, wo bisher Umgebungsvariablen mit <code>$</code><i>name</i> aufgerufen werden können,
+                    kann jetzt auch <code>${</code><i>name</i><code>}</code> geschrieben werden.
+                    Damit ist die Trennung zum anschließenden Text deutlicher.
+                </p>
+            </description>
+        </revision>
+
+        <revision type="correction" title="spooler_task.params korrigiert">
+            <description>
+                <p>
+                    Der Aufruf konnte zum Abbruch des Schedulers führen.
+                </p>
+                <ul>
+                    <li>
+                        <scheduler_method class="Task" property="params"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+    </change>
+
     <change date="2006-05-26" version="2.0.151" subversion_revision="4304">
         <revision type="new" title="&lt;job min_tasks=...>">
             <description>

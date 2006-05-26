@@ -9,6 +9,15 @@
     base_dir             = "../"
 >
 
-Sorry, you need a browser which can process XML files with XSLT stylesheets.
+    Sorry, you need a browser which can process XML files with XSLT stylesheets.
+
+
+
+    <!--description>
+        <pre>package main;
+use vars qw($spooler $spooler_log $spooler_job $spooler_task);</pre>
+    </description-->
+
+
 
 </api.class>

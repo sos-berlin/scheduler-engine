@@ -17,7 +17,7 @@
     </xml_parent_elements>
 
     <xml_attributes>
-        <xml_attribute name="file" type="filename">
+        <xml_attribute name="file" type="filename" subst_env="yes">
             <description>
                 <p>
                     <i>filename</i> gibt den Dateinamen der Basiskonfiguration an.

@@ -20,8 +20,13 @@
     Alle folgenden alphanumerischen Zeichen und Unterstriche werden zum Variablennamen gerechnet.
     In Unix ist die Großschreibung relevant.
 </p>
+    <p>
+        Die Syntax <code>${</code><i>name</i><code>}</code> ist ebenfalls möglich.
+    </p>
 
 <p class="example">Beispiel</p>
-<pre>html_dir = $HOME/scheduler/html</pre>
+<pre>html_dir = $HOME/scheduler/html
+html_dir = ${HOME}/scheduler/html
+</pre>
 
 </description>

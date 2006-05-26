@@ -124,7 +124,7 @@ Source_with_parts text_from_xml_with_include( const xml::Element_ptr& element, c
             case xml::ELEMENT_NODE:     // <include file="..."/>
             {
                 xml::Element_ptr e = n;
-                string filename = e.getAttribute( "file" );
+                string filename = subst_env( e.getAttribute( "file" ) );
 
                 if( filename.length() >= 1 ) 
                 {
@@ -290,7 +290,7 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const Time& x
         {
             if( e.nodeName_is( "base" ) )
             {
-                string config_filename = make_absolute_filename( directory_of_path( source_filename ), e.getAttribute( "file" ) ) ;
+                string config_filename = make_absolute_filename( directory_of_path( source_filename ), subst_env( e.getAttribute( "file" )  ) );
                 
                 Command_processor cp ( this, Security::seclev_all );
                 cp._load_config_immediately = true;
