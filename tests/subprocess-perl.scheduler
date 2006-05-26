@@ -13,39 +13,47 @@
                 <script language="perl">
                     <include file="expect.pl"/>
                     <![CDATA[
+package main;
+use vars qw($spooler $spooler_log $spooler_job $spooler_task);
 use strict;
 use warnings FATAL => "all";
-use vars qw($spooler $spooler_log $spooler_job $spooler_task);
+
+my @subprocess_args = [ "echo", "-mit", "array-" ];
+my $subprocess_string = "echo -als Kommandozeile-";
 
 {
-    my @args = [ "echo", "mit", "array" ];
-    my $subprocess = $spooler_task->create_subprocess( @args );
-    $subprocess->wait_for_termination();
-}
-
-{
-    my @args = [ "echo", "mit", "array" ];
-    my $subprocess = $spooler_task->create_subprocess();
-    $subprocess->start( @args );
-    $subprocess->wait_for_termination();
-}
-
-{
-    my $subprocess = $spooler_task->create_subprocess( "echo als Kommandozeile" );
+    my $subprocess = $spooler_task->create_subprocess( @subprocess_args );
     $subprocess->wait_for_termination();
 }
 
 {
     my $subprocess = $spooler_task->create_subprocess();
-    $subprocess->start( "echo als Kommandozeile" );
+    $subprocess->start( @subprocess_args );
+    $subprocess->wait_for_termination();
+}
+
+{
+    my $subprocess = $spooler_task->create_subprocess( $subprocess_string );
+    $subprocess->wait_for_termination();
+}
+
+{
+    my $subprocess = $spooler_task->create_subprocess();
+    $subprocess->start( $subprocess_string );
     $subprocess->wait_for_termination();
 }
 
 {
     my $subprocess = $spooler_task->create_subprocess();
 
-    $subprocess->LetProperty( "environment", "test1", "ETT" );
-    $subprocess->LetProperty( "environment", "test2", "TVÅ" );
+    $subprocess->LetProperty( "environment", "SCHEDULER_EINS", "eins" );
+    $subprocess->LetProperty( "environment", "SCHEDULER_ZWEI", "zwei" );
+    $subprocess->start( "env" );
+}
+
+{
+    my $subprocess = $spooler_task->create_subprocess();
+
     $subprocess->LetProperty( "ignore_error", 1 );
     $subprocess->start( "sleep 30" );
 
@@ -67,6 +75,14 @@ use vars qw($spooler $spooler_log $spooler_job $spooler_task);
     $spooler_log->info( "termination signal=" . $subprocess->termination_signal );
 }
 
+my $stdout = $spooler_task->stdout_text;
+
+if( !( $stdout =~ /-mit array-/ ) )             { $spooler_log->error( "'-als Kommandozeile-' erwartet" ); }
+if( !( $stdout =~ /-als Kommandozeile-/ ) )     { $spooler_log->error( "'-als Kommandozeile-' erwartet" ); } 
+if( !( $stdout =~ /SCHEDULER_EINS=eins/ ) )     { $spooler_log->error( "'scheduler_eins=eins' erwartet" ); }
+if( !( $stdout =~ /SCHEDULER_ZWEI=zwei/ ) )     { $spooler_log->error( "'scheduler_zwei=zwei' erwartet" ); }
+
+$spooler->terminate();
 
 #my $cmd = "sleep 6";
 #my $exit_code = my_system( $cmd, 5 );

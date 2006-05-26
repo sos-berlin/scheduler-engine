@@ -53,7 +53,7 @@ const Com_method Subprocess::_methods[] =
   //COM_PROPERTY_GET( Subprocess, 10, Stderr_path    , VT_BSTR    , 0 ),
     COM_PROPERTY_PUT( Subprocess, 11, Ignore_error   ,              0, VT_BOOL ),
     COM_PROPERTY_GET( Subprocess, 11, Ignore_error   , VT_BOOL    , 0 ),
-    COM_PROPERTY_PUT( Subprocess, 12, Ignore_signal  ,              0, VT_BSTR ),
+    COM_PROPERTY_PUT( Subprocess, 12, Ignore_signal  ,              0, VT_BOOL ),
     COM_PROPERTY_GET( Subprocess, 12, Ignore_signal  , VT_BOOL    , 0 ),
     COM_PROPERTY_PUT( Subprocess, 13, Timeout        ,              0, VT_R8 ),
     COM_METHOD      ( Subprocess, 14, Wait_for_termination, VT_BOOL   , 1, VT_BYREF|VT_VARIANT ),

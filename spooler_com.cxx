@@ -833,7 +833,7 @@ STDMETHODIMP Com_variable_set::get_Names( BSTR* result )
                 *p++ = ';';
             }
 
-            *p = '\0';      // Letztes Semikolon überschreiben, ist schon außerhalb des Strings
+            p[ -1 ] = '\0';      // Letztes Semikolon überschreiben, ist schon außerhalb des Strings
             assert( p == *result + length + 1 );
         }
     }
