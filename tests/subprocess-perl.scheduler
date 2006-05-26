@@ -5,13 +5,13 @@
 >
     <config>
 
-        <base file="base.scheduler"/>
+        <base file="$SCHEDULER_TEST/base.scheduler"/>
 
 
         <jobs>
             <job name="start">
                 <script language="perl">
-                    <include file="expect.pl"/>
+                    <include file="${SCHEDULER_TEST}/expect.pl"/>
                     <![CDATA[
 package main;
 use vars qw($spooler $spooler_log $spooler_job $spooler_task);
