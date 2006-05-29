@@ -10,6 +10,76 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2006-05-28" version="9999" subversion_revision="99999">
+        <revision type="new" title="Joker im Java-Classpath">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_ini_entry file="sos.ini" section="java" entry="class_path"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+                   
+        <revision type="new" title="&lt;commands on_exit_code=&quot;0&quot;>">
+            <description>
+                <ul>
+                    <li>
+                        Neue Eigenschaft <scheduler_method class="Task" property="exit_code"/> (int), anfänglich 0.
+                        <scheduler_method class="Log" object="spooler_log" method="error"/>,
+                        <scheduler_method class="Task" object="spooler_task" method="error"/> oder
+                        eine Exception der Task setzen
+                        <scheduler_method class="Log" object="spooler_task" method="exit_code"/><code>=1</code>.
+                        <code>exit_code</code> kann auch vom Job selbst gesetzt werden,
+                        wird aber unter den oben aufgeführten Bedingungen vom Scheduler überschrieben.
+                        Damit liefert jede im Scheduler mögliche Task am Ende einen <code>exit_code</code>.
+                    </li>
+                    <li>
+                        Der <code>exit_code</code> wird in die Datenbanktabelle <code>scheduler_history</code> 
+                        in die neue Spalte <code>exit_code</code> geschrieben.
+                    </li>
+                    <li>
+                        Der Scheduler legt die Datenbankspalte automatisch an.
+                    </li>
+                    <li>
+                        Unter Unix liefert ein abgebrochener Prozess die Nummer des Signals negativ als <code>exit_code</code>.
+                    </li>
+                    <li>
+                        <scheduler_element name="job"/> wird um <scheduler_element name="commands"/> erweitert.
+                        Attribute: <code>on_exit_codes</code> und <code>on_exit_codes_not</code>.
+                        Die Kommandos werden nach Task-Ende abhängig von der mit den Attributen formulierten Bedingung ausgeführt.
+                        Ein Fehler im Kommando führt zum Job-Fehler: 
+                        Der Job wird gestoppt, außer <scheduler_element name="delay_after_error"/> ist gesetzt
+                        (<scheduler_element name="process" attribute="ignore_error" value="yes"/> wirkt hier nicht, sondern nur auf Exitcodes).
+                    </li>
+                    <li>
+                        Wirkt <scheduler_element name="delay_after_error"/> eigentlich für Kommandos und Shell-Skripte?
+                    </li>
+                    <li>
+                        <scheduler_element name="params"/> erhält das neue Kind-Element: 
+                        <scheduler_element name="copy_params" attribute="from"/>.
+                        Es kann in <scheduler_element name="start_job"/> und 
+                        <scheduler_element name="add_order"/> verwendet werden und 
+                        kopiert an der Stelle die Parameter der Task oder des Auftrags.
+                        <copy_params from="order"/> ist ein Fehler, wenn es keinen Auftrag gibt.
+                        Dazu wird der Kommandoprozessor um einen Kontext erweitert, 
+                        der Verweise auf die beiden Variablenmengen aufnimmt und das bisherige Attribute <code>what=</code>.
+                    </li>
+                    <li>
+                        Zeitangaben in 
+                        <scheduler_element name="start_job"/> und 
+                        <scheduler_element name="add_order"/> können relativ angegeben werden: 
+                        <code>now + </code><i>seconds</i>, <code>now + </code><i>hh:mm</i> oder <code>now + </code><i>hh:mm:ss</i>.
+                        In <scheduler_element name="start_job" attribute="at"/> und
+                        in <scheduler_element name="add_order"/>,
+                        Kind-Element <scheduler_element name="run_time"/>,
+                        Kind-Element <scheduler_element name="at" attribute="at"/>.
+                    </li>
+                </ul>
+            </description>
+        </revision>
+    </change>
+    
     <change date="2006-05-26" version="2.0.151" subversion_revision="4305">
         <revision type="new" title="Umgebungsvariablen mit ${name}">
             <description>
@@ -51,7 +121,7 @@
                 </p>
                 <ul>
                     <li>
-                        <scheduler_method class="Task" property="params"/>
+                        <scheduler_method class="Variable_set" property="names"/>
                     </li>
                 </ul>
             </description>

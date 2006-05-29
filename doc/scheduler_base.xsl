@@ -1619,7 +1619,7 @@
                 <xsl:value-of select="$file"/>
             </code>
 
-            <xsl:text>(</xsl:text>
+            <xsl:text> (</xsl:text>
 
             <xsl:call-template name="phrase">
                 <xsl:with-param name="id" select="'ini.section'"/>
@@ -1627,7 +1627,9 @@
 
             <xsl:text> </xsl:text>
             <code>
-                [<xsl:value-of select="$section"/>]
+                <xsl:text>[</xsl:text>
+                <xsl:value-of select="$section"/>
+                <xsl:text>]</xsl:text>
             </code>
 
             <xsl:if test="$entry">
@@ -2224,7 +2226,7 @@
 
                 <h2>
                     <xsl:call-template name="phrase">
-                        <xsl:with-param name="id" select="'ini.sections.title'"/>
+                        <xsl:with-param name="id" select="'ini.entries.title'"/>
                     </xsl:call-template>
                 </h2>
                 

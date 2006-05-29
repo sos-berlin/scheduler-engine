@@ -598,14 +598,39 @@ db = odbc -db=factory_oracle -user=factory -password=factory
              subst_env = "yes"
              title     = "Java-Classpath">
         <example>
-            <pre>class_path = s:\prod\bind\sos.spooler.jar;s:\prod\bind\sos.hostware.jar;s:\prod\bind\sos.mail.jar</pre>
+            <pre>class_path = s:\prod\bind\sos.*.jar;c:\jar\my.jar;c:\jar\*</pre>
         </example>
         <description>
             <p>
                 Für Java kann hier der <code>CLASS_PATH</code> eingestellt werden.
-                Das ist eine Liste von Verzeichnissen, in Windows durch Semikolons (;), in Unix
+                Das ist eine Liste von Pfaden, in Windows durch Semikolons (;), in Unix
                 durch Doppelpunkte getrennt.
             </p>
+            <p>
+                Joker können benutzt werden:
+            </p>
+            <ul>
+                <li>
+                    Unter Windows hinter dem letzten Verzeichnisstrich die Zeichen <code>*</code> und <code>?</code>
+                    (wie z.B. der Befehl <code>dir</code> von Windows XP).
+                </li>
+                <li>
+                    Unter Unix außerdem die Zeichen <code>[</code> und <code>]</code>;
+                    die Joker können in jedem Bestandteil des Pfads auftreten
+                    (wie in der Shell <code>csh</code>).
+                </li>
+            </ul>
+            <p>
+                Dabei gilt für jeden Pfad:
+            </p>
+            <ul>
+                <li>
+                    Ein Pfad ohne Joker wird unverändert an Java übergeben.
+                </li>
+                <li>
+                    Ein Pfad mit Joker wird in die tatsächlichen, im Dateisystem vorhandenen Pfade aufgelöst.
+                </li>
+            </ul>
             <p>
                 Der allgemeine Platz für diese Einstellung ist 
                 <scheduler_ini_entry file="sos.ini" section="java" entry="class_path"/>.

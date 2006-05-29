@@ -90,6 +90,20 @@
         Vieles ist nur kurz erwähnt und könnte ausführlicher beschrieben werden.
     </p>
 
+
+    <p>
+        Layout
+    </p>
+    <p class="indent" style="margin-top: 0px">
+        Die erste Seite kürzen, sie sollte in ein Browser-Fenster passen.
+        Zweispaltig ausführen.
+        Und die zentrierten Überschriften nerven.
+    </p>
+    <p class="indent">
+        Zeilenlänge beschränken auf nicht mehr als 100, vielleicht 65 Zeichen.
+    </p>
+
+
     <p>
         Meldungen
     </p>

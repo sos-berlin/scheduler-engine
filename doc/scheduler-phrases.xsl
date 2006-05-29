@@ -53,6 +53,7 @@
             <phrase id="ini.file.title">Die Datei</phrase>
             <phrase id="ini.sections.title">Die Abschnitte</phrase>
             <phrase id="ini.section">Abschnitt</phrase>
+            <phrase id="ini.entries.title">Die Einträge</phrase>
             <phrase id="ini.entry">Eintrag</phrase>
             <phrase id="ini.file.location_remark">
                 <p>
