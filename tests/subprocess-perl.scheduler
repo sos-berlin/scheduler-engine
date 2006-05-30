@@ -82,24 +82,29 @@ if( !( $stdout =~ /-als Kommandozeile-/ ) )     { $spooler_log->error( "'-als Ko
 if( !( $stdout =~ /SCHEDULER_EINS=eins/ ) )     { $spooler_log->error( "'scheduler_eins=eins' erwartet" ); }
 if( !( $stdout =~ /SCHEDULER_ZWEI=zwei/ ) )     { $spooler_log->error( "'scheduler_zwei=zwei' erwartet" ); }
 
+#if( my_system( "xxxxxxexit 3" ) != 3 )  { $spooler_log->error( "exit_code != 3" ); }
+#if( my_system( "sleep 5", 3 ) != 99 )  { $spooler_log->error( "exit_code != 99" ); }
+
 $spooler->terminate();
 
 #my $cmd = "sleep 6";
 #my $exit_code = my_system( $cmd, 5 );
 #$spooler_log->info( "$cmd ==> $exit_code" );
 #
-#function my_system()
-#{
-#    my $cmd = shift;
-#    my $timeout = shift;
-#    
-#    my $subprocess = $spooler_task->create_subprocess();
-#    
-#    $subprocess->LetProperty( "timeout", $timeout )  if $timeout;
-#    $subprocess->start( $cmd );
-#    $subprocess->wait_for_termination();
-#    return $subprocess->exit_code;
-#}
+sub my_system
+{
+    my $cmd     = shift;
+    my $timeout = shift;
+    
+    my $subprocess = $spooler_task->create_subprocess();
+    
+    $subprocess->LetProperty( "timeout", $timeout )  if $timeout;
+    $subprocess->start( $cmd );
+    $subprocess->wait_for_termination();            
+    my $x = $subprocess->exit_code;
+    $spooler_log->info( "exit_code=" . $x );
+    return $subprocess->exit_code;
+}
 
                     ]]></script>
                 <run_time once="yes"/>
