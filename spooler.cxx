@@ -684,6 +684,15 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
     state_element.setAttribute( "loop"                 , _loop_counter );
     state_element.setAttribute( "waits"                , _wait_counter );
 
+    {
+        // Offene file descriptors ermitteln. Zum Debuggen, weil das Gerücht geht, Dateien würden offen bleiben.
+        S s;
+        int n = sysconf( _SC_OPEN_MAX );
+        for( int fd = 0; fd < n; fd++ )  if( fcntl( fd, F_GETFD ) != -1  ||  errno != EBADF )  s << ' ' << fd;
+        state_element.setAttribute( "file_descriptors", s.str().substr( 1 ) );
+    }
+
+
     if( show & show_jobs )  state_element.appendChild( jobs_dom_element( dom, show ) );
                       else  state_element.append_new_comment( "<jobs> suppressed. Use what=\"jobs\"." );
 
