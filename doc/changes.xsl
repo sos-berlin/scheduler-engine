@@ -68,9 +68,9 @@
 
     <xsl:template match="revision">
 
-        <!--xsl:if test="position() &gt; 1">
-            <p style="margin-top: 1ex">&#160;</p>
-        </xsl:if-->
+        <xsl:if test="position() > 1">
+            <p style="margin-top: 0em; font-size: 50%">&#160;</p>
+        </xsl:if>
 
         <xsl:element name="p">
             <xsl:attribute name="style">

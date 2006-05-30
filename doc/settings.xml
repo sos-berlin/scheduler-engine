@@ -607,21 +607,27 @@ db = odbc -db=factory_oracle -user=factory -password=factory
                 durch Doppelpunkte getrennt.
             </p>
             <p>
-                Joker können benutzt werden:
+                In den einzelnen Pfaden können Joker benutzt werden.  
+                Der Scheduler ersetzt diese Pfade durch die tatsächlichen, im Dateisystem vorhandenen.
             </p>
             <ul>
                 <li>
-                    Unter Windows hinter dem letzten Verzeichnisstrich die Zeichen <code>*</code> und <code>?</code>
+                    Unter Windows sind hinter dem letzten Verzeichnisstrich die Zeichen <code>*</code> und <code>?</code> möglich
                     (wie z.B. der Befehl <code>dir</code> von Windows XP).
                 </li>
                 <li>
                     Unter Unix außerdem die Zeichen <code>[</code> und <code>]</code>;
-                    die Joker können in jedem Bestandteil des Pfads auftreten
+                    die Joker können auch in jedem Verzeichnis des Pfads auftreten
                     (wie in der Shell <code>csh</code>).
+                </li>
+                <li>
+                    Linux (Gnu) kennt außerdem die Zeichen <code>{,}</code> in der Syntax 
+                    "<i>xxx</i><code>{</code><i>alternative1</i><code>,</code><i>alternative2</i><code>,</code>...<code>}</code><i>xxx</i>",
+                    z.B. <code>/dir/sos.{hostware,mail.spooler}.jar</code>.
                 </li>
             </ul>
             <p>
-                Dabei gilt für jeden Pfad:
+                Dabei gilt für jeden Pfad in <code>class_path</code>:
             </p>
             <ul>
                 <li>
@@ -629,6 +635,25 @@ db = odbc -db=factory_oracle -user=factory -password=factory
                 </li>
                 <li>
                     Ein Pfad mit Joker wird in die tatsächlichen, im Dateisystem vorhandenen Pfade aufgelöst.
+                </li>
+                <li>
+                    Wenn auf den Pfad mit Joker kein tatsächlicher Pfad passt, 
+                    wird er ignoriert.
+                </li>
+                <li>
+                    Wenn ein Pfad mit ein nicht lesbareres Verzeichnis bezeichnet, 
+                    wird es ignoriert.
+                </li>
+                <!--li>
+                    Unter Linux sind die generierenden Zeichen <code>{</code> und <code>}</code> möglich.
+                    Sie erzeugen Pfade, unabhängig davon, ob es sie wirklich gibt.
+                    Beispiel: 
+                    "<code>/dir/sos.{hostware,mail.spooler}.jar</code>"
+                    wird zu
+                    "<code>/dir/sos.hostware.jar:/dir/sos.mail.jar:/dir/sos.spooler.jar</code>".
+                </li-->
+                <li>
+                    Umgebungsvariablen (z.B. <code>${HOME}</code>) werden vorher ersetzt.
                 </li>
             </ul>
             <p>

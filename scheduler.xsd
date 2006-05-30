@@ -98,7 +98,7 @@
     <xsd:element name="commands" type="Commands"/>
 
     <xsd:complexType name="Commands">
-        <xsd:choice maxOccurs="unbounded">
+        <xsd:choice minOccurs="0" maxOccurs="unbounded">
             <xsd:element ref="add_jobs"/>
             <xsd:element ref="add_order"/>
             <xsd:element ref="kill_task"/>
@@ -123,6 +123,33 @@
             <!--xsd:element ref="signal_object"/-->
             <xsd:element ref="terminate"/>
         </xsd:choice>
+        
+        <xsd:attribute name="on_exit_code">
+            <xsd:annotation>
+                <xsd:documentation>Only valid in element job!</xsd:documentation>
+            </xsd:annotation>
+            <xsd:simpleType>
+                <xsd:union>
+                    <xsd:simpleType>
+                        <xsd:restriction base="xsd:NMTOKEN">
+                            <xsd:enumeration value="success">
+                                <xsd:annotation>
+                                    <xsd:documentation>This is exit code 0</xsd:documentation>
+                                </xsd:annotation>
+                            </xsd:enumeration>
+                            <xsd:enumeration value="error">
+                                <xsd:annotation>
+                                    <xsd:documentation>This is all other exit codes but 0</xsd:documentation>
+                                </xsd:annotation>
+                            </xsd:enumeration>
+                        </xsd:restriction>
+                    </xsd:simpleType>
+                    <xsd:simpleType>
+                        <xsd:list itemType="xsd:integer"/>
+                    </xsd:simpleType>
+                </xsd:union>
+            </xsd:simpleType>
+        </xsd:attribute>
     </xsd:complexType>
 
     
@@ -166,6 +193,7 @@
             <xsd:attribute name="state"             type="String"/>
             <xsd:attribute name="job"               type="Name"/>
             <xsd:attribute name="web_service"       type="Name"/>
+            <xsd:attribute name="replace"           type="Yes_no"/>
         </xsd:complexType>
     </xsd:element>
 
@@ -249,6 +277,8 @@
                         <xsd:attribute name="regex"         type="String"/>
                     </xsd:complexType>
                 </xsd:element>
+
+                <xsd:element name="commands" type="Commands" minOccurs="0" maxOccurs="unbounded"/>
 
                 <xsd:element name="delay_after_error" minOccurs="0" maxOccurs="unbounded">
                     <xsd:complexType>
@@ -446,12 +476,29 @@
     <xsd:element name="params">
         <xsd:complexType>
             <xsd:sequence>
-                <xsd:element name="param" minOccurs="0" maxOccurs="unbounded">
-                    <xsd:complexType>
-                        <xsd:attribute name="name"  type="String" use="required"/>
-                        <xsd:attribute name="value" type="String" use="required"/>
-                    </xsd:complexType>
-                </xsd:element>
+                <xsd:choice  minOccurs="0" maxOccurs="unbounded">
+                    <xsd:element name="param">
+                        <xsd:complexType>
+                            <xsd:attribute name="name"  type="String" use="required"/>
+                            <xsd:attribute name="value" type="String" use="required"/>
+                        </xsd:complexType>
+                    </xsd:element>
+                    <xsd:element name="copy_params">
+                        <xsd:complexType>
+                            <xsd:attribute name="from"  use="required">
+                                <xsd:annotation>
+                                    <xsd:documentation>Only valid in element job/commands/start_job and job/commands/add_order</xsd:documentation>
+                                </xsd:annotation>
+                                <xsd:simpleType>
+                                    <xsd:restriction base="xsd:NMTOKEN">
+                                        <xsd:enumeration value="task"/>
+                                        <xsd:enumeration value="order"/>
+                                    </xsd:restriction>
+                                </xsd:simpleType>
+                            </xsd:attribute>
+                        </xsd:complexType>
+                    </xsd:element>
+                </xsd:choice>
             </xsd:sequence>
         </xsd:complexType>
     </xsd:element>
