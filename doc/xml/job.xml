@@ -263,6 +263,7 @@
         <xml_child_element name="params"/>
         <xml_child_element name="script"/>
         <xml_child_element name="process"/>
+        <xml_child_element name="commands"                     multiple="yes" title="Nach Ende der Task auszuführende Kommandos"/>
         <xml_child_element name="start_when_directory_changed" multiple="yes"/>
         <xml_child_element name="delay_after_error"            multiple="yes"/>
         <xml_child_element name="delay_order_after_setback"    multiple="yes"/>

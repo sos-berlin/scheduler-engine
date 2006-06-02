@@ -81,6 +81,9 @@
                     <dd>
                         Unter Unix wird das Skript aufgerufen wie ein <i>executable</i>.
                     </dd>
+                    <dd>
+                        Das Verhalten ist dasselbe wie von <scheduler_element name="process"/>.
+                    </dd>
                 </dl>
             </description>
         </xml_attribute>

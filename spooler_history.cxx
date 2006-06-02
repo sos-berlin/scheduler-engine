@@ -223,6 +223,7 @@ void Spooler_db::open2( const string& db_name )
                                             "\"END_TIME\"    datetime,"
                                             "\"CAUSE\"       varchar(50),"
                                             "\"STEPS\"       integer,"
+                                            "\"EXIT_CODE\"   integer,"
                                             "\"ERROR\"       boolean,"
                                             "\"ERROR_CODE\"  varchar(50),"
                                             "\"ERROR_TEXT\"  varchar(250),"
@@ -249,9 +250,10 @@ void Spooler_db::open2( const string& db_name )
                                             "primary key( \"JOB_CHAIN\", \"ID\" )" );
 
 
-                    add_column( _spooler->_orders_tablename, "INITIAL_STATE", "add \"INITIAL_STATE\" varchar(100)" );
-                    add_column( _spooler->_orders_tablename, "RUN_TIME"     , "add \"RUN_TIME\"      clob" );
-                    add_column( _spooler->_orders_tablename, "ORDER_XML"    , "add \"ORDER_XML\"     clob" );
+                    add_column( _spooler->_orders_tablename, "INITIAL_STATE" , "add \"INITIAL_STATE\" varchar(100)" );
+                    add_column( _spooler->_orders_tablename, "RUN_TIME"      , "add \"RUN_TIME\"      clob" );
+                    add_column( _spooler->_orders_tablename, "ORDER_XML"     , "add \"ORDER_XML\"     clob" );
+                    add_column( _spooler->_job_history_tablename, "EXIT_CODE", "add \"EXIT_CODE\"     integer" );
 
                     create_table_when_needed( _spooler->_order_history_tablename, 
                                             "\"HISTORY_ID\"  integer not null,"             // Primärschlüssel
@@ -1564,6 +1566,7 @@ void Task_history::write( bool start )
                         stmt +=   "\"START_TIME\"={ts'" + start_time + "'}";
                         stmt += ", \"END_TIME\"={ts'" + Time::now().as_string(Time::without_ms) + "'}";
                         stmt += ", \"STEPS\"=" + as_string( _task->_step_count );
+                        stmt += ", \"EXIT_CODE\"=" + as_string( _task->_exit_code );
                         stmt += ", \"ERROR\"=" + as_string( _task->has_error() );
                         if( !_task->_error.code().empty() ) stmt += ", \"ERROR_CODE\"=" + sql_quoted( _task->_error.code() );
                         if( !_task->_error.what().empty() ) stmt += ", \"ERROR_TEXT\"=" + sql_quoted( _task->_error.what().substr( 0, 249 ) );    // Für MySQL 249 statt 250. jz 7.1.04

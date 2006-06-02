@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- $Id: scheduler.xsd 4294 2006-05-24 18:13:16Z jz $ -->
+<!-- $Id: scheduler.xsd 4314 2006-05-30 16:10:12Z jz $ -->
 
 <xsd:schema 
     xmlns:xsd          = "http://www.w3.org/2001/XMLSchema" 
@@ -9,7 +9,7 @@
 
     <xsd:annotation>
         <xsd:documentation xml:lang="de">
-            $Id: scheduler.xsd 4294 2006-05-24 18:13:16Z jz $
+            $Id: scheduler.xsd 4314 2006-05-30 16:10:12Z jz $
             Schema für die Scheduler-Konfiguration,
             s.a. http://www.zschimmer.com/sos/scheduler/konfiguration.xml.html.
         </xsd:documentation>
@@ -271,14 +271,14 @@
                     </xsd:complexType>
                 </xsd:element>
 
+                <xsd:element name="commands" type="Commands" minOccurs="0" maxOccurs="unbounded"/>
+
                 <xsd:element name="start_when_directory_changed" minOccurs="0" maxOccurs="unbounded">
                     <xsd:complexType>
                         <xsd:attribute name="directory"     type="File"                 use="required"/>
                         <xsd:attribute name="regex"         type="String"/>
                     </xsd:complexType>
                 </xsd:element>
-
-                <xsd:element name="commands" type="Commands" minOccurs="0" maxOccurs="unbounded"/>
 
                 <xsd:element name="delay_after_error" minOccurs="0" maxOccurs="unbounded">
                     <xsd:complexType>

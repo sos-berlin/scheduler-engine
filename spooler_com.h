@@ -475,6 +475,8 @@ struct Com_task : spooler_com::Itask,
     STDMETHODIMP                Set_error_code_and_text     ( BSTR, BSTR );
     STDMETHODIMP            get_Web_service                 ( spooler_com::Iweb_service** );
     STDMETHODIMP            get_Web_service_or_null         ( spooler_com::Iweb_service** );
+    STDMETHODIMP            put_Exit_code                   ( int );
+    STDMETHODIMP            get_Exit_code                   ( int* );
 
   private:
     Thread_semaphore           _lock;

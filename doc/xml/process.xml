@@ -94,9 +94,23 @@
         <p>
             Beim Start des Jobs, also zu Beginn einer Task, wird ein Prozess eingerichtet.
             Der Spooler überwacht den Prozess und beendet die Task nachdem der Prozess sich beendet hat.
-            Ein Exit code verschieden von 0 wird als Fehler interpretiert.
-            Der Exit code ist das Ergebnis der Task und steht in <code>task.result</code> bereit.
         </p>
+        
+        <h3>Exit-Code</h3>
+        <ul>
+            <li>
+                Ein Exit-Code verschieden von 0 wird als Fehler (<scheduler_message code="SCHEDULER-280"/>) interpretiert.
+            </li>
+            <li>
+                Unter Unix setzt der Scheduler den Exit-Codes eines mit Signal abgebrochenen Prozesses auf den negativen Wert des Signals.
+            </li>
+            <li>
+                Der Exit-Code wird in <scheduler_method class="Task" property="exit_code"/> bereitgestellt
+                und entscheidet über die anschließend auszuführenden Kommandos.
+                Siehe hierzu <code>&lt;job></code><scheduler_element name="commands" attribute="on_exit_code"/>.
+                <!--Der Exit code ist das Ergebnis der Task und steht in <code>task.result</code> bereit.-->
+            </li>
+        </ul>
     </description>
 
     <behavior_with_xml_element element="base" allowed="no"/>

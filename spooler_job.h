@@ -192,9 +192,11 @@ struct Job : Object,
                                ~Job                         (); 
 
     void                    set_dom                         ( const xml::Element_ptr&, const Time& mod_time );
+    void                        add_on_exit_commands_element( const xml::Element_ptr& commands_element, const Time& mod_time );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what&, Job_chain* = NULL );
 
     void                        init0                       ();                                     // Wird vor Spooler-Skript gerufen
+    void                        prepare_on_exit_commands    ();
     void                        init                        ();                                     // Wird nach Spooler-Skript gerufen, ruft auch init2()
     void                        init2                       ();                                     // Wird nach reread() gerufen
     void                        init_start_when_directory_changed( Task* = NULL );
@@ -376,6 +378,10 @@ struct Job : Object,
 
     ptr<Run_time>              _run_time;
     Period                     _period;                     // Derzeitige oder nächste Period
+    xml::Document_ptr          _commands_document;          // <commands>...
+    Time                       _commands_document_time;
+    typedef map<int,xml::Element_ptr>  Exit_code_commands_map;
+    Exit_code_commands_map     _exit_code_commands_map;
     Delay_after_error          _delay_after_error;
     long32                     _error_steps;                // Zahl aufeinanderfolgender Fehler
 

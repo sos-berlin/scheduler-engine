@@ -240,6 +240,8 @@ struct Itask : IDispatch
     virtual HRESULT         Set_error_code_and_text     ( BSTR code, BSTR text )                = 0;
     virtual HRESULT     get_Web_service                 ( Iweb_service** )                      = 0;
     virtual HRESULT     get_Web_service_or_null         ( Iweb_service** )                      = 0;
+    virtual HRESULT     put_Exit_code                   ( int )                                 = 0;
+    virtual HRESULT     get_Exit_code                   ( int* )                                = 0;
 };
 
 //--------------------------------------------------------------------------------------Itask_proxy

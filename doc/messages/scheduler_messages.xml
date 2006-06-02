@@ -2009,6 +2009,73 @@
                 </description>
             </text>
         </message>
+        
+        <message code="SCHEDULER-323">
+            <text xml:lang="en">
+                <title><code>exit_code</code> is available only when task module is loaded</title>
+                <description>
+                    <p>
+                        See <scheduler_method class="Task" property="exit_code"/>.
+                    </p>
+                </description>
+            </text>
+        </message>
+        
+        <message code="SCHEDULER-324">
+            <text xml:lang="en">
+                <title>Invalid value for attribute <code>exit_code="<p1/>"</code> in &lt;commands></title>
+                <description>
+                    <p>
+                        See <scheduler_element name="job" child="commands"/>.
+                    </p>
+                </description>
+            </text>
+        </message>
+        
+        <message code="SCHEDULER-325">
+            <text xml:lang="en">
+                <title>Attribute <code>exit_code</code> is not applicable here</title>
+                <description>
+                    <p>
+                        See <scheduler_element name="commands"/>.
+                    </p>
+                </description>
+            </text>
+        </message>
+        
+        <message code="SCHEDULER-326">
+            <text xml:lang="en">
+                <title><code>&lt;commands on_exit_code="<p1/>"></code>: <code>&lt;commands></code> for exit code <p2/> is already defined</title>
+                <description>
+                    <p>
+                        See <scheduler_element name="job" child="commands"/>.
+                    </p>
+                </description>
+            </text>
+        </message>
+        
+        <message code="SCHEDULER-327">
+            <text xml:lang="en">
+                <title>Error when executing command <p1 what="xml_command"/>: <p2/></title>
+                <description>
+                    <p>
+                        See <scheduler_element name="job" child="commands"/>.
+                    </p>
+                </description>
+            </text>
+        </message>
+        
+        
+        <message code="SCHEDULER-328">
+            <text xml:lang="en">
+                <title>Executing &lt;commands on_exit_code="<p1/>">:</title>
+                <description>
+                    <p>
+                        See <scheduler_element name="job" child="commands"/>.
+                    </p>
+                </description>
+            </text>
+        </message>
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->

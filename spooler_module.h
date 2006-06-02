@@ -271,7 +271,8 @@ struct Module_instance : Object
     virtual void                release__end                ();
 
     virtual void                check_connection_error      ()                                      {}
-    virtual int                 exit_code                   ()                                      { return 0; }
+    virtual int                 exit_code                   ()                                      { return _exit_code; }
+    void                    set_exit_code                   ( int exit_code )                       { _exit_code = exit_code; }
     virtual int                 termination_signal          ()                                      { return 0; }
     virtual string              stdout_path                 ()                                      { return ""; }
     virtual string              stderr_path                 ()                                      { return ""; }
@@ -288,6 +289,7 @@ struct Module_instance : Object
     Delegated_log              _log;
     ptr<Module>                _module;
     int                        _pid;                        // Wird von Remote_module_instance_proxy gesetzt
+    int                        _exit_code;
     bool                       _initialized;
     bool                       _load_called;
 

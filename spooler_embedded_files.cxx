@@ -4373,14 +4373,14 @@ const char file_scheduler_xsd[] =
     "</xsd:complexType>\r\n"
     "</xsd:element>\r\n"
     "\r\n"
+    "<xsd:element name=\"commands\" type=\"Commands\" minOccurs=\"0\" maxOccurs=\"unbounded\"/>\r\n"
+    "\r\n"
     "<xsd:element name=\"start_when_directory_changed\" minOccurs=\"0\" maxOccurs=\"unbounded\">\r\n"
     "<xsd:complexType>\r\n"
     "<xsd:attribute name=\"directory\"     type=\"File\"                 use=\"required\"/>\r\n"
     "<xsd:attribute name=\"regex\"         type=\"String\"/>\r\n"
     "</xsd:complexType>\r\n"
     "</xsd:element>\r\n"
-    "\r\n"
-    "<xsd:element name=\"commands\" type=\"Commands\" minOccurs=\"0\" maxOccurs=\"unbounded\"/>\r\n"
     "\r\n"
     "<xsd:element name=\"delay_after_error\" minOccurs=\"0\" maxOccurs=\"unbounded\">\r\n"
     "<xsd:complexType>\r\n"
@@ -5169,7 +5169,7 @@ static const Embedded_file embedded_files_array[] =
     { "html/jz/translation_de.js", file_html_jz_translation_de_js, sizeof file_html_jz_translation_de_js - 1, 1113979995 },
     { "html/jz/scheduler.xslt", file_html_jz_scheduler_xslt, sizeof file_html_jz_scheduler_xslt - 1, 1148569750 },
     { "html/jz/scheduler.css", file_html_jz_scheduler_css, sizeof file_html_jz_scheduler_css - 1, 1148569750 },
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1148987132 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1149243969 },
     { NULL, NULL, 0 }
 };
 

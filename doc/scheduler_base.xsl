@@ -1717,6 +1717,7 @@
     <xsl:template match="scheduler_method" mode="description">
         <xsl:call-template name="scheduler_method">
             <xsl:with-param name="class"            select="@class"/>
+            <xsl:with-param name="object"           select="@object"/>
             <xsl:with-param name="method"           select="@method"/>
             <xsl:with-param name="property"         select="@property"/>
             <xsl:with-param name="java_signature"   select="@java_signature"/>
@@ -1729,6 +1730,7 @@
 
     <xsl:template name="scheduler_method">
         <xsl:param name="class"          select="/.."/>
+        <xsl:param name="object"/>
         <xsl:param name="method"         select="/.."/>
         <xsl:param name="property"       select="/.."/>
         <xsl:param name="java_signature" select="/.."/>
@@ -1770,9 +1772,14 @@
             <!--xsl:attribute name="href"><xsl:value-of select="$base_dir"/>javadoc/sos/spooler/<xsl:value-of select="$class"/>.html#<xsl:value-of select="$java_method"/>(<xsl:value-of select="$java_signature"/>)</xsl:attribute-->
 
             <code>
-                <xsl:if test="$class != 'Job_impl' or not( $method or $property )">
-                    <xsl:value-of select="$class"/>
-                </xsl:if>
+                <xsl:choose>
+                    <xsl:when test="$object">
+                        <xsl:value-of select="$object"/>
+                    </xsl:when>
+                    <xsl:when test="$class != 'Job_impl' or not( $method or $property )">
+                        <xsl:value-of select="$class"/>
+                    </xsl:when>
+                </xsl:choose>
 
                 <xsl:if test="$class != 'Job_impl' and ( $method or $property )">
                     <xsl:text>.</xsl:text>

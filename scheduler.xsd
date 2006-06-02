@@ -271,14 +271,14 @@
                     </xsd:complexType>
                 </xsd:element>
 
+                <xsd:element name="commands" type="Commands" minOccurs="0" maxOccurs="unbounded"/>
+
                 <xsd:element name="start_when_directory_changed" minOccurs="0" maxOccurs="unbounded">
                     <xsd:complexType>
                         <xsd:attribute name="directory"     type="File"                 use="required"/>
                         <xsd:attribute name="regex"         type="String"/>
                     </xsd:complexType>
                 </xsd:element>
-
-                <xsd:element name="commands" type="Commands" minOccurs="0" maxOccurs="unbounded"/>
 
                 <xsd:element name="delay_after_error" minOccurs="0" maxOccurs="unbounded">
                     <xsd:complexType>

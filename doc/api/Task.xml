@@ -277,6 +277,100 @@
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
+    <property name="exit_code">
+        <com>
+            <com.result>
+                <com.type type="int"/>
+            </com.result>
+        </com>
+
+        <title>
+            Exit-Code
+        </title>
+
+        <description>
+            <p>
+                Der Exit-Code ist anfänglich 0 und 
+                wird bei einem Fehler auf 1 gesetzt.
+                Das ist, wenn der Scheduler eine Zeile mit <code>[ERROR]</code> ins Task-Protokoll schreibt:
+            </p>
+            <ul>
+                <li>
+                    Aufruf von <scheduler_method class="Log" object="spooler_log" method="error"/>
+                </li>
+                <li>
+                    Setzen von <scheduler_method class="Task" object="spooler_task" property="error"/>
+                </li>
+                <li>
+                    Das Skript liefert eine Exception.
+                </li>
+            </ul>
+            <p>
+                Der Job kann anschließend, z.B. in <scheduler_method class="Job_impl" method="spooler_on_error"/>,
+                den <scheduler_method class="Task" object="spooler_task" property="exit_code"/> neu setzen.
+            </p>
+            <p>
+                Der Exit-Codes des (Betriebssystem-)Prozesses, der die Task ausführt, ist ohne Belang und wird nicht übernommen,
+                im Gegensatz zu Jobs mit <scheduler_element name="process"/> oder
+                <scheduler_element name="script" attribute="language" value="shell"/>.
+            </p>
+            <!--ul>
+                <li>
+                    Jobs mit <scheduler_element name="process"/> oder 
+                    <scheduler_element name="script" attribute="language" value="shell"/>:
+                    Der Exit-Code des Prozesses ist der Exit-Code der (Scheduler-)Task.
+                    Wenn der Prozess mit Signal endet (nur Unix), wird der negative Wert des Signals zum Exit-Code.
+                </li>
+                <li>
+                    Andere Jobs, also solche, die Zugriff auf die API haben:
+                    Der Exit-Codes des Prozesses, der die Task ausführt, ist ohne Belang und wird nicht übernommen.
+                </li>
+            </ul-->
+            <!--p>
+                Wenn der Prozess der Task endet mit Exit-Code ungleich 0 (Fehler <scheduler_message code="SCHEDULER-280"/>).
+                Der Scheduler setzt <scheduler_method class="Task" object="spooler_task" property="exit_code"/><code>=1</code>.
+                Das ist unter Windows der Fall, wenn der Prozess mit
+                <a href="http://msdn.microsoft.com/library/default.asp?url=/library/en-us/dllproc/base/terminateprocess.asp"><code>TerminateProcess(,</code><i class="small">exitcode</i><code>)</code></a>
+                abgebrochen wird.
+            </p-->
+            <!--p>
+                Außerdem setzt der Scheduler den Exit-Code, wenn der Prozess, in dem die Task läuft, mit Fehler endet.
+            </p-->
+            <!--ul>
+                <li>
+                    Nur Unix: Wenn der Prozess mit einem Signal endet, übernimmt der Scheduler den negativen Wert des Signals als Exit-Code.
+                </li>
+                <!- -li>
+                    <!- -Wenn der Prozess mit einem Exit-Code ungleich 0 ist, übernimmt der Scheduler den Exit-Code.- ->
+                    Der Exit-Code des Prozesses einer API-Task wird dagegen nicht übernommen, sondern nur mit <scheduler_message code="SCHEDULER-280"/> protokolliert.
+                    Das ist unter Windows der Fall, wenn der Prozess mit
+                    <a href="http://msdn.microsoft.com/library/default.asp?url=/library/en-us/dllproc/base/terminateprocess.asp"><code>TerminateProcess(,</code><i class="small">exitcode</i><code>)</code></a>
+                    abgebrochen wird.
+                </li- ->
+                <!- -li>
+                    Der Exit-Code einer Nicht-API-Task 
+                    (<scheduler_element name="process"/> oder <scheduler_element name="script" language="shell"/>, 
+                    wo diese Methode allerdings nicht benutzt werden kann) wird übernommen,
+                    wenn er nicht 0 ist.
+                </li- ->
+            </ul-->
+            <p>
+                Der Exit-Code entscheidet über die anschließend auszuführenden Kommandos.
+                Siehe hierzu <code>&lt;job></code><scheduler_element name="commands" attribute="on_exit_code"/>.
+            </p>
+            <!--p>
+                Für Tasks ohne API siehe <scheduler_element name="process"/>.
+            </p-->
+        </description>
+
+        <example programming_language="javascript">
+            <pre>spooler_log.error( "This call of spooler_log.error() sets the exit code to 1" );
+spooler_task.exit_code = 0;   // Reset the exit code</pre>
+        </example>
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
     <property name="history_field" access="write">
         <com>
             <com.parameter name="name">

@@ -12,8 +12,48 @@
 
     <xml_parent_elements>
         <xml_parent_element directory="xml/" name="config"/>
+        <xml_parent_element directory="xml/" name="job"/>
     </xml_parent_elements>
 
+    <xml_attributes>
+        <xml_attribute name="on_exit_code" type="exitcodes">
+            <description>
+                <p>
+                    Innerhalb von <scheduler_element name="job"/> ist dieses Attribut Pflicht,
+                    woanders kann es nicht verwendet werden.
+                </p>
+                <p>
+                    Gibt die Exit-Codes an, die zur Ausführung der hier aufgeführten Kommandos führen sollen.
+                    Als Wert kann angegeben werden:
+                </p>
+                <ul>
+                    <li>
+                        Eine Liste von Exit-Codes, die einzelnen Zahlen durch Blanks getrennt.
+                    </li>
+                    <li>
+                        <code>on_exit_code="success"</code> ist dasselbe wie <code>on_exit_code="0"</code>.
+                    </li>
+                    <li>
+                        <code>on_exit_code="error"</code> gilt für alle Exit-Codes außer 0 und außer der bereits in 
+                        anderen <scheduler_element name="commands" attribute="exit_code"/> angegeben Exit-Codes.
+                    </li>
+                </ul>
+            </description>
+            
+            <example>
+                <pre>on_exit_code="0"
+on_exit_code="1 2 3 99"
+on_exit_code="error"</pre>
+            </example>
+            
+            <messages>
+                <message code="SCHEDULER-324" level="error"/>
+                <message code="SCHEDULER-325" level="error"/>
+                <message code="SCHEDULER-326" level="error"/>
+            </messages>
+        </xml_attribute>
+    </xml_attributes>
+    
     <xml_child_elements>
         <xml_child_element directory="xml/" name="add_jobs" multiple="yes"/>
         <xml_child_element directory="xml/" name="add_order" multiple="yes"/>

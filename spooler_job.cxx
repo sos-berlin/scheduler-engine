@@ -204,6 +204,11 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
                 }
             }
             else
+            if( e.nodeName_is( "commands" ) )
+            {
+                add_on_exit_commands_element( e, xml_mod_time );
+            }
+            else
             if( e.nodeName_is( "start_when_directory_changed" ) )
             {
                 _start_when_directory_changed_list.push_back( pair<string,string>( subst_env( e.getAttribute( "directory" ) ), e.getAttribute( "regex" ) ) );
@@ -240,6 +245,78 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
     }
 }
 
+//----------------------------------------------------------------Job::add_on_exit_commands_element
+
+void Job::add_on_exit_commands_element( const xml::Element_ptr& commands_element, const Time& xml_mod_time )
+{
+    if( !_commands_document )
+    {
+        _commands_document.create();
+        _commands_document.create_root_element( "all_commands" );       // Name ist egal
+        _commands_document_time = xml_mod_time;
+    }
+
+    xml::Element_ptr my_commands_element = _commands_document.clone( commands_element );
+    _commands_document.documentElement().appendChild( my_commands_element );
+}
+
+//--------------------------------------------------------------------Job::prepare_on_exit_commands
+
+void Job::prepare_on_exit_commands()
+{
+    if( _commands_document )
+    {
+        //xml::Element_ptr error_commands_element = NULL;
+        bool passed_error_commands = false;
+
+        for( xml::Element_ptr commands_element = _commands_document.documentElement().firstChild(); 
+             commands_element; 
+             commands_element = commands_element.nextSibling() )
+        {
+            string on_exit_code = commands_element.getAttribute( "on_exit_code" );
+            if( on_exit_code == "" )  throw_xc( "SCHEDULER-324", on_exit_code );
+
+            if( on_exit_code == "error" )
+            {
+                if( passed_error_commands )  throw_xc( "SCHEDULER-326", on_exit_code, on_exit_code );
+                passed_error_commands = true;
+                //if( _error_commands_element )  throw_xc( "SCHEDULER-326", on_exit_code, on_exit_code );
+                //_error_commands_element = commands_element;  // Das behandeln wir am Ende
+            }
+            else
+            {
+                vector<int> exit_codes;
+
+                if( on_exit_code == "success" )
+                {
+                    exit_codes.push_back( 0 );      // on_exit_code="success" ist dasselbe wie on_exit_code="0"
+                }
+                else
+                {
+                    vector<string> values = vector_split( " +", on_exit_code );
+                    exit_codes.reserve( values.size() );
+
+                    for( int i = 0; i < values.size(); i++ )
+                    {
+                        try
+                        {
+                            exit_codes.push_back( as_int( values[ i ] ) );
+                        }
+                        catch( exception& x ) { throw_xc( "SCHEDULER-324", on_exit_code, x.what() ); }
+                    }
+                }
+
+                for( int i = 0; i < exit_codes.size(); i++ )
+                {
+                    int exit_code = exit_codes[ i ];
+                    if( _exit_code_commands_map.find( exit_code ) != _exit_code_commands_map.end() )  throw_xc( "SCHEDULER-326", on_exit_code, exit_code );
+                    _exit_code_commands_map[ exit_code ] = commands_element;
+                }
+            }
+        }
+    }
+}
+
 //---------------------------------------------------------------------------------------Job::init0
 // Bei <add_jobs> von einem anderen Thread gerufen.
 
@@ -263,6 +340,8 @@ void Job::init0()
     _period._end   = 0;
 
     if( _max_tasks < _min_tasks )  z::throw_xc( "SCHEDULER-322", _min_tasks, _max_tasks );
+
+    prepare_on_exit_commands();
 
     _init0_called = true;
 }

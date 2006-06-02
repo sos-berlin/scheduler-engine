@@ -1,10 +1,10 @@
-// $Id$
+ï»¿// $Id$
 
 var all_classes_1_element = document.getElementById( 'all_classes_1' );
 var all_classes_2_element = document.getElementById( 'all_classes_2' );
 
 //-----------------------------------------------------------------api_method_in_table__onmouseover
-// Alle Varianten einer Methode in der Übersicht werden gemeinsam selektiert
+// Alle Varianten einer Methode in der Ãœbersicht werden gemeinsam selektiert
 
 function api_method_in_table__onmouseover( method_id )
 {
@@ -12,7 +12,7 @@ function api_method_in_table__onmouseover( method_id )
 }
 
 //------------------------------------------------------------------api_method_in_table__onmouseout
-// Alle Varianten einer Methode in der Übersicht werden gemeinsam selektiert
+// Alle Varianten einer Methode in der Ãœbersicht werden gemeinsam selektiert
 
 function api_method_in_table__onmouseout( method_id )
 {
@@ -20,7 +20,7 @@ function api_method_in_table__onmouseout( method_id )
 }
 
 //---------------------------------------------------------------------api_method_in_table__onmouse
-// Alle Varianten einer Methode in der Übersicht werden gemeinsam selektiert
+// Alle Varianten einer Methode in der Ãœbersicht werden gemeinsam selektiert
 
 function api_method_in_table__onmouse( method_id, class_name )
 {
@@ -36,7 +36,7 @@ function api_method_in_table__onmouse( method_id, class_name )
 }
 
 //-----------------------------------------------------------------------------position_all_classes
-// Für ie6
+// FÃ¼r ie6
 
 function set_all_classes_position()
 {
@@ -51,7 +51,7 @@ function set_all_classes_position()
 window.onload = function window__onload()
 {
     if( window.navigator.appName == "Microsoft Internet Explorer"       // ie6 kennt nicht "fixed"
-     && window.navigator.appVersion.indexOf( "MSIE 7" ) < 0 )           // TODO: Browser-Erkennung auslagern, zukünftiges ie8 wird nicht geprüft
+     && window.navigator.appVersion.indexOf( "MSIE 7" ) < 0 )           // TODO: Browser-Erkennung auslagern, zukÃ¼nftiges ie8 wird nicht geprÃ¼ft
     {
         //window.onscroll = set_all_classes_position;
         document.getElementById( "all_classes_hidden" ).style.display = "none";

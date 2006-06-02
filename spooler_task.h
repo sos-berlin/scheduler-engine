@@ -134,6 +134,9 @@ struct Task : Object,
     bool                        has_error                   ()                                      { return _error != NULL; }
     void                    set_error_xc_only               ( const Xc& );
 
+    void                    set_exit_code                   ( int exit_code )                       { _exit_code = exit_code; }
+    int                         exit_code                   ()                                      { return _exit_code; }
+
     void                    set_web_service                 ( Web_service* );
     void                    set_web_service                 ( const string& name );
     Web_service*                web_service                 () const;
@@ -155,6 +158,7 @@ struct Task : Object,
     void                        remove_order_after_error    ();
 
     void                        finish                      ();
+    void                        process_on_exit_commands    ();
     bool                        load                        ();
     Async_operation*            begin__start                ();
   //bool                        begin__end                  ();
@@ -256,6 +260,7 @@ struct Task : Object,
     Start_cause                _cause;
     double                     _cpu_time;
     int                        _step_count;
+    int                        _exit_code;
 
     bool                       _let_run;                    // Task zuende laufen lassen, nicht bei _job._period.end() beenden
     bool                       _begin_called;

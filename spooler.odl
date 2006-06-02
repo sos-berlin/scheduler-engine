@@ -432,6 +432,12 @@ library Spooler
 
         [propget]
         HRESULT                 Web_service_or_null         ( [out,retval] Iweb_service** );
+
+        [propput]
+        HRESULT                 Exit_code                   ( [in] int );
+
+        [propget]
+        HRESULT                 Exit_code                   ( [out,retval] int* );
     }
 
     [

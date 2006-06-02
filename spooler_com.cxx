@@ -2115,6 +2115,8 @@ const Com_method Com_task::_methods[] =
     { DISPATCH_PROPERTYGET, 28, "Web_service_or_null"       , (Com_method_ptr)&Com_task::get_Web_service_or_null,VT_DISPATCH   },
     { DISPATCH_PROPERTYPUT, 29, "Priority"                  , (Com_method_ptr)&Com_task::put_Priority           , VT_EMPTY      , { VT_INT } },
     { DISPATCH_PROPERTYGET, 29, "Priority"                  , (Com_method_ptr)&Com_task::get_Priority           , VT_INT        },
+    { DISPATCH_PROPERTYPUT, 30, "Exit_code"                 , (Com_method_ptr)&Com_task::put_Exit_code          , VT_EMPTY      , { VT_INT } },
+    { DISPATCH_PROPERTYGET, 30, "Exit_code"                 , (Com_method_ptr)&Com_task::get_Exit_code          , VT_INT        },
     {}
 };
 
@@ -2676,6 +2678,42 @@ STDMETHODIMP Com_task::get_Priority( int* result )
 {
     // Siehe Com_task_proxy::get_Priority_class()
     Z_COM_IMPLEMENT( hr = zschimmer::Process( getpid() ).get_Priority( result ) );
+}
+
+//--------------------------------------------------------------------------Com_task::put_Exit_code
+
+STDMETHODIMP Com_task::put_Exit_code( int exit_code )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_task )  return E_POINTER;
+
+        _task->set_exit_code( exit_code );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+
+//--------------------------------------------------------------------------Com_task::get_Exit_code
+
+STDMETHODIMP Com_task::get_Exit_code( int* result )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_task )  return E_POINTER;
+
+        *result = _task->exit_code();
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
 }
 
 //-------------------------------------------------------------------------Com_task::get_Step_count

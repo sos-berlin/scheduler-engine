@@ -59,7 +59,6 @@ struct Process_module_instance : Module_instance
     File                       _stdout_file;
     File                       _stderr_file;
   //bool                       _stdout_logged;
-    int                        _exit_code;
     bool                       _is_killed;
     File                       _shell_file;
 

@@ -498,6 +498,8 @@ void Task::set_error_xc_only( const Xc& x )
 {
     THREAD_LOCK_DUMMY( _lock )  _error = x;
     if( _job )  _job->set_error_xc_only( x );
+
+    _exit_code = 1;
 }
 
 //-------------------------------------------------------------------------------Task::set_error_xc
@@ -550,6 +552,25 @@ void Task::set_error( const _com_error& x )
 }
 
 #endif
+
+//------------------------------------------------------------------------------Task::set_exit_code
+/*
+void Task::set_exit_code( int exit_code )
+{
+    if( !_module_instance )  z::throw_xc( message_string( "SCHEDULER-323" ) );
+
+    _module_instance->set_exit_code( exit_code );
+}
+
+//----------------------------------------------------------------------------------Task::exit_code
+
+int Task::exit_code()
+{
+    if( !_module_instance )  z::throw_xc( message_string( "SCHEDULER-323" ) );
+
+    return _module_instance->exit_code( exit_code );
+}
+*/
 //----------------------------------------------------------------------------------Task::set_state
 
 void Task::set_state( State new_state )
@@ -1555,6 +1576,8 @@ void Task::remove_order_after_error()
 
 void Task::finish()
 {
+    process_on_exit_commands();
+
     if( _order )    // Auftrag nicht verarbeitet? spooler_init() oder spooler_open() lieferte false
     {
         if( !has_error() )  set_error( Xc( "SCHEDULER-226" ) );
@@ -1637,6 +1660,46 @@ void Task::finish()
 
     close();
     leave_thread();
+}
+
+//-------------------------------------------------------------------Task::process_on_exit_commands
+
+void Task::process_on_exit_commands()
+{
+    if( _job->_commands_document )
+    {
+        xml::Element_ptr commands_element = NULL;
+
+        Job::Exit_code_commands_map::iterator it = _job->_exit_code_commands_map.find( _exit_code );
+        if( it != _job->_exit_code_commands_map.end() )
+        {
+            commands_element = it->second;
+        }
+        else
+        {
+            commands_element = _job->_commands_document.select_node( "/*/commands [ @on_exit_code='error' ]" );
+        }
+
+        if( commands_element )
+        {
+            _log->debug( message_string( "SCHEDULER-328", commands_element.getAttribute( "on_exit_code" ) ) );
+
+            Command_processor cp ( _spooler, Security::seclev_all );
+            cp.set_log( _log );
+
+            DOM_FOR_EACH_ELEMENT( commands_element, c )
+            {
+                try
+                {
+                    cp.execute_command( c, _job->_commands_document_time );
+                }
+                catch( exception& x )
+                {
+                    _log->error( message_string( "SCHEDULER-327", c.xml(), x ) );
+                }
+            }
+        }
+    }
 }
 
 //------------------------------------------------------------------------------Task::trigger_event
@@ -1828,13 +1891,17 @@ void Module_task::do_close__end()
     {
         _module_instance->close__end();
 
-        if( int exit_code = _module_instance->exit_code() )
+        int exit_code = _module_instance->exit_code();
+        //if( !_exit_code_set )  _exit_code = exit_code;
+        if( exit_code )
         {
             z::Xc x ( "SCHEDULER-280", exit_code, printf_string( "%X", exit_code ) );
             if( _module_instance->_module->_kind == Module::kind_process  &&  !_module_instance->_module->_process_ignore_error )  
                 set_error( x );
             else  
                 _log->warn( x.what() );
+
+            if( _module_instance->_module->_kind == Module::kind_process )  _exit_code = exit_code;  // Nach set_error(), weil set_error() _exit_code auf 1 setzt
         }
                                           
         if( int termination_signal = _module_instance->termination_signal() )
@@ -1844,6 +1911,8 @@ void Module_task::do_close__end()
                 set_error( x );
             else  
                 _log->warn( x.what() );
+
+            if( _module_instance->_module->_kind == Module::kind_process )  _exit_code = -termination_signal;
         }
 
         _log->log_file( _module_instance->stdout_path(), "stdout:" );
@@ -1851,7 +1920,7 @@ void Module_task::do_close__end()
 
       //if( _job->_module_ptr->_reuse == Module::reuse_job )  _job->release_module_instance( _module_instance );
 
-        _module_instance = NULL;
+        _module_instance = NULL;    // Nach set_error(), weil set_error() _exit_code auf 1 setzt
     }
 }
 
