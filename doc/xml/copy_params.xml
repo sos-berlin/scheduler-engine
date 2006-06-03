@@ -15,18 +15,11 @@
             Das Element übernimmt die Parameter der Task oder oder des Auftrags.
             Es kann nur in folgender Hierarchie verwendet werden:
         </p>
-        <p>
-            <scheduler_element name="job"/>
-        </p>
-        <p style="margin-top: 0em; padding-left: 4ex">
-            <scheduler_element name="commands" attribute="on_exit_value"/>
-        </p>
-        <p style="margin-top: 0em; padding-left: 8ex">
-            <scheduler_element name="start_job"/>&#160; oder &#160;<scheduler_element name="add_order"/>
-        </p>
-        <p style="margin-top: 0em; padding-left: 12ex">
-            <scheduler_element name="params"/>
-        </p>
+        <pre><scheduler_element name="job"/> …
+    <scheduler_element name="commands" attribute="on_exit_value"/> …
+        <scheduler_element name="start_job"/>&#160; oder &#160;<scheduler_element name="add_order"/> …
+            <scheduler_element name="params"/> …
+                <scheduler_element name="copy_params" attribute="from" value="order"/></pre>
         <p>
             Die Reihenfolge von <code>&lt;copy_params></code> und <scheduler_element name="param"/> entscheidet,
             welcher Parameterwert bei doppelten Parameternamen verwendet wird.
@@ -49,9 +42,28 @@
                     </dd>
                     <dt><code>from="order"</code></dt>
                     <dd>
-                        Die Parameter des zuletzt ausgeführten Auftrags 
-                        (<scheduler_method class="Order" object="spooler_task.order" property="params"/>) 
-                        werden übernommen.
+                        <p>
+                            Die Parameter des zuletzt ausgeführten Auftrags
+                            (<scheduler_method class="Order" object="spooler_task.order" property="params"/>)
+                            werden übernommen.
+                        </p>
+                        <p>
+                            Es ist ein Fehler (<scheduler_message code="SCHEDULER-329"/>), 
+                            wenn die Task keinen Auftrag hat.
+                            Das kann auch bei Auftragsjobs (<scheduler_element name="job" attribute="order" value="yes"/>) passieren,
+                            wenn eine Task ohne Auftrag gestartet 
+                            (z.B. automatisch durch <scheduler_element name="job" attribute="min_tasks" value="1"/>) 
+                            und beendet wird, ohne einen Auftrag ausgeführt zu haben.
+                            Damit ist bei 
+                            <scheduler_element name="job"/><scheduler_element name="commands" attribute="on_exit_code" value="0"/>
+                            zu rechnen.
+                        </p>
+                        <pre><scheduler_element name="job" attribute="order" value="yes"/> …
+    <scheduler_element name="commands" attribute="on_exit_value" value="0"/> …
+        <scheduler_element name="start_job"/>&#160; oder &#160;<scheduler_element name="add_order"/> …
+            <scheduler_element name="params"/> …
+                <scheduler_element name="copy_params" attribute="from" value="order"/>
+                    &lt;!-- Das kann zum Fehler <scheduler_message code="SCHEDULER-329"/> führen. --></pre>
                     </dd>
                 </dl>
             </description>
