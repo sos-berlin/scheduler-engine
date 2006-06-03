@@ -1171,7 +1171,7 @@ void Order::close()
 
 //-----------------------------------------------------------------------------------Order::set_dom
 
-void Order::set_dom( const xml::Element_ptr& element )
+void Order::set_dom( const xml::Element_ptr& element, Variable_set_map* variable_set_map )
 {
     if( !element )  return;
 
@@ -1210,7 +1210,7 @@ void Order::set_dom( const xml::Element_ptr& element )
         if( e.nodeName_is( "params" ) )
         { 
             ptr<Com_variable_set> pars = new Com_variable_set;
-            pars->set_dom( e );  
+            pars->set_dom( e, variable_set_map );  
             set_payload( Variant( static_cast<IDispatch*>( pars ) ) );
         }
         else
@@ -1221,7 +1221,7 @@ void Order::set_dom( const xml::Element_ptr& element )
                 if( ee.nodeName_is( "params"  ) )
                 {
                     ptr<Com_variable_set> pars = new Com_variable_set;
-                    pars->set_dom( ee );  
+                    pars->set_dom( ee, variable_set_map );  
                     set_payload( Variant( static_cast<IDispatch*>( pars ) ) );
                     break;
                 }
@@ -1452,6 +1452,22 @@ string Order::string_payload() const
     {
         z::throw_xc( "SCHEDULER-251", x.what() );
     }
+}
+
+//-------------------------------------------------------------------------------------------------
+
+ptr<spooler_com::Ivariable_set> Order::params_or_null() const
+{
+    ptr<spooler_com::Ivariable_set> result;
+
+    if( _payload.vt != VT_DISPATCH  &&  _payload.vt != VT_UNKNOWN )  return NULL;
+    
+    IUnknown* iunknown = V_UNKNOWN( &_payload );
+
+    HRESULT hr = iunknown->QueryInterface( spooler_com::IID_Ivariable_set, result.void_pp() );
+    if( FAILED(hr) )  return NULL;
+
+    return result;
 }
 
 //---------------------------------------------------------------------------Order::set_web_service

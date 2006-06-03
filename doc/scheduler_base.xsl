@@ -696,7 +696,8 @@
                     <xsl:element name="a">
                         <xsl:attribute name="class">silent</xsl:attribute>
                         <xsl:attribute name="href">
-                            <xsl:value-of select="$base_dir"/>ersetzung_von_umgebungsvariablen.xml
+                            <xsl:value-of select="$base_dir"/>
+                            <xsl:text>ersetzung_von_umgebungsvariablen.xml</xsl:text>
                         </xsl:attribute>
                         <xsl:text> </xsl:text>
                         <xsl:call-template name="phrase">

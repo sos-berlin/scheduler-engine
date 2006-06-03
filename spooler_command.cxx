@@ -401,7 +401,7 @@ xml::Element_ptr Command_processor::execute_start_job( const xml::Element_ptr& e
 
     DOM_FOR_EACH_ELEMENT( element, e )
     {
-        if( e.nodeName_is( "params" ) )  { pars->set_dom( e );  break; }
+        if( e.nodeName_is( "params" ) )  { pars->set_dom( e, &_variable_set_map );  break; }
     }
 
     Job* job = _spooler->get_job( job_name );

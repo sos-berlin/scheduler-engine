@@ -12,17 +12,18 @@
 
     <description>
         <p>
-            Das Element übernimmt die Parameter der Task oder oder des Auftrags.
+            Das Element übernimmt die Parameter der Task oder des Auftrags.
             Es kann nur in folgender Hierarchie verwendet werden:
         </p>
         <pre><scheduler_element name="job"/> …
-    <scheduler_element name="commands" attribute="on_exit_value"/> …
-        <scheduler_element name="start_job"/>&#160; oder &#160;<scheduler_element name="add_order"/> …
-            <scheduler_element name="params"/> …
-                <scheduler_element name="copy_params" attribute="from" value="order"/></pre>
+  <scheduler_element name="commands" attribute="on_exit_value"/> …
+    <scheduler_element name="start_job"/>&#160; oder &#160;<scheduler_element name="add_order"/> …
+       <scheduler_element name="params"/> …
+          <scheduler_element name="copy_params" attribute="from" value="order"/></pre>
         <p>
-            Die Reihenfolge von <code>&lt;copy_params></code> und <scheduler_element name="param"/> entscheidet,
-            welcher Parameterwert bei doppelten Parameternamen verwendet wird.
+            Bei doppelten Parameternamen entscheidet
+            die Reihenfolge von <code>&lt;copy_params></code> und <scheduler_element name="param"/>,
+            welcher Parameterwert verwendet wird.
             Ein nachfolgender Parameter überschreibt einen vorangehenden mit gleichen Namen.
         </p>
     </description>
@@ -33,7 +34,7 @@
     </xml_parent_elements>
 
     <xml_attributes>
-        <xml_attribute name="from" title="Von Task oder Auftrag übernehmen">
+        <xml_attribute name="from" title="Quelle der Parameter">
             <description>
                 <dl>
                     <dt><code>from="task"</code></dt>
@@ -59,11 +60,11 @@
                             zu rechnen.
                         </p>
                         <pre><scheduler_element name="job" attribute="order" value="yes"/> …
-    <scheduler_element name="commands" attribute="on_exit_value" value="0"/> …
-        <scheduler_element name="start_job"/>&#160; oder &#160;<scheduler_element name="add_order"/> …
-            <scheduler_element name="params"/> …
-                <scheduler_element name="copy_params" attribute="from" value="order"/>
-                    &lt;!-- Das kann zum Fehler <scheduler_message code="SCHEDULER-329"/> führen. --></pre>
+  <scheduler_element name="commands" attribute="on_exit_value" value="0"/> …
+    <scheduler_element name="start_job"/>&#160; oder &#160;<scheduler_element name="add_order"/> …
+      <scheduler_element name="params"/> …
+        <scheduler_element name="copy_params" attribute="from" value="order"/>
+            &lt;!-- Das kann zum Fehler <scheduler_message code="SCHEDULER-329"/> führen. --></pre>
                     </dd>
                 </dl>
             </description>

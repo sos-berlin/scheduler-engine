@@ -2065,13 +2065,23 @@
             </text>
         </message>
         
-        
         <message code="SCHEDULER-328">
             <text xml:lang="en">
                 <title>Executing &lt;commands on_exit_code="<p1/>">:</title>
                 <description>
                     <p>
                         See <scheduler_element name="job" child="commands"/>.
+                    </p>
+                </description>
+            </text>
+        </message>
+        
+        <message code="SCHEDULER-329">
+            <text xml:lang="en">
+                <title><code>&lt;copy_params from="<p1/>"/></code>: requested parameters are not available</title>
+                <description>
+                    <p>
+                        See <scheduler_element name="copy_params" attribute="from" value="order"/>.
                     </p>
                 </description>
             </text>

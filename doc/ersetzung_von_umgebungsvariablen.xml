@@ -24,9 +24,9 @@
         Die Syntax <code>${</code><i>name</i><code>}</code> ist ebenfalls möglich.
     </p>
 
-<p class="example">Beispiel</p>
-<pre>html_dir = $HOME/scheduler/html
-html_dir = ${HOME}/scheduler/html
-</pre>
+    <scheduler_example>
+        <pre>html_dir = $HOME/scheduler/html
+html_dir = ${HOME}/scheduler/html</pre>
+    </scheduler_example>
 
 </description>

@@ -87,6 +87,7 @@ struct Order : Com_order,
     void                    set_payload                 ( const VARIANT& );
     Payload                     payload                 ()                                          { THREAD_LOCK_RETURN( _lock, Variant, _payload ); }
     string                      string_payload          () const;
+    ptr<spooler_com::Ivariable_set> params_or_null      () const;
 
     void                    set_xml_payload             ( const string& xml );
     string                      xml_payload             () const                                    { return _xml_payload; }
@@ -123,7 +124,7 @@ struct Order : Com_order,
     void                        postprocessing          ( bool success );                           // Verarbeitung nach spooler_process()
     void                        processing_error        ();
 
-    void                    set_dom                     ( const xml::Element_ptr& );
+    void                    set_dom                     ( const xml::Element_ptr&, Variable_set_map* = NULL );
     xml::Element_ptr            dom_element             ( const xml::Document_ptr&, const Show_what&, const string* log = NULL ) const;
     xml::Document_ptr           dom                     ( const Show_what& ) const;
 

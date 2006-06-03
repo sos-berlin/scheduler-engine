@@ -197,6 +197,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-326", "<commands on_exit_code=\"$1\">: <commands> for exit code $2 is already defined" },
     { "SCHEDULER-327", "Error when executing command $1: $2" },
     { "SCHEDULER-328", "Executing <commands on_exit_code=\"$1\">:" },
+    { "SCHEDULER-329", "<copy_params from=\"$1\"/>: requested parameters are not available" },
     { "SCHEDULER-900", "Scheduler $1 is starting with $2, pid=$3" },
     { "SCHEDULER-902", "state=$1" },
     { "SCHEDULER-904", "Tasks have $1s to terminate" },

@@ -293,7 +293,7 @@ Com_variable_set::Com_variable_set( const xml::Element_ptr& element, const strin
     _lock("Com_variable_set"),
     _ignore_case(true)
 {
-    set_dom( element, variable_element_name );
+    set_dom( element, NULL, variable_element_name );
 }
 
 //---------------------------------------------------------------Com_variable_set::Com_variable_set
@@ -330,7 +330,7 @@ STDMETHODIMP Com_variable_set::QueryInterface( const IID& iid, void** result )
 
 //------------------------------------------------------------------------Com_variable_set::set_dom
 
-void Com_variable_set::set_dom( const xml::Element_ptr& params, const string& variable_element_name )
+void Com_variable_set::set_dom( const xml::Element_ptr& params, Variable_set_map* variable_sets, const string& variable_element_name )
 {
     if( !params)  return;
 
@@ -346,6 +346,16 @@ void Com_variable_set::set_dom( const xml::Element_ptr& params, const string& va
                 Variant value = e.getAttribute( "value" );
 
                 hr = put_Var( name, &value );                       if( FAILED(hr) )  throw_ole( hr, "Ivariable_set::put_var" );
+            }
+            else
+            if( e.nodeName_is( "copy_params" ) )
+            {
+                string from = e.getAttribute( "from" );
+                if( !variable_sets )  throw_xc( "SCHEDULER-329", from );
+                Variable_set_map::iterator it = variable_sets->find( from );
+                if( it == variable_sets->end() )  throw_xc( "SCHEDULER-329", from );
+
+                merge( it->second );
             }
         }
     }
@@ -427,9 +437,9 @@ string Com_variable_set::get_string_by_name( const string& name, bool* name_foun
 
 //--------------------------------------------------------------------------Com_variable_set::merge
 
-void Com_variable_set::merge( const Com_variable_set* other )
+void Com_variable_set::merge( const Ivariable_set* other )
 {
-    HRESULT hr = Merge( const_cast<Com_variable_set*>( other ) );
+    HRESULT hr = Merge( const_cast<Ivariable_set*>( other ) );
     if( FAILED(hr) )  throw_com( hr, "Com_variable_set::merge" );
 }
 

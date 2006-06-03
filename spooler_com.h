@@ -62,6 +62,8 @@ struct Spooler;
 
 extern Typelib_ref              typelib;
 
+typedef map< string, ptr<spooler_com::Ivariable_set> >   Variable_set_map;
+
 //----------------------------------------------------------------------------------------Com_error
 
 struct Com_error: spooler_com::Ierror, 
@@ -140,7 +142,7 @@ struct Com_variable_set: spooler_com::Ivariable_set,
     STDMETHODIMP_(char*)  const_java_class_name             ()                                      { return (char*)"sos.spooler.Variable_set"; }
 
     STDMETHODIMP            get_Dom                         ( IXMLDOMDocument** );
-    void                    set_dom                         ( const xml::Element_ptr&, const string& variable_element_name = "param" );
+    void                    set_dom                         ( const xml::Element_ptr&, Variable_set_map* = NULL, const string& variable_element_name = "param" );
 
     xml::Document_ptr           dom                         ( const string& element_name, const string& subelement_name );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const string& element_name, const string& subelement_name );
@@ -149,7 +151,7 @@ struct Com_variable_set: spooler_com::Ivariable_set,
     void                        get_var                     ( BSTR name, VARIANT* value ) const;
     string                      get_string                  ( const string& name );
     string                      get_string_by_name          ( const string& name, bool* name_found ) const;
-    void                        merge                       ( const Com_variable_set* );
+    void                        merge                       ( const Ivariable_set* );
     void                        to_xslt_parameters          ( xml::Xslt_parameters*, Has_log* warning_log = NULL );
 
     STDMETHODIMP                Set_var                     ( BSTR name, VARIANT* value )           { return put_Var( name, value ); }

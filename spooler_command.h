@@ -124,7 +124,8 @@ struct Command_processor
 
   //void                        set_communication_operation ( Communication::Operation* p )         { _communication_operation = p; }
     void                        set_validate                ( bool b )                              { _validate = b; }
-    void                        abort_immediately           ( int exit_code = 1 );
+    void                        set_variable_set            ( const string& name, spooler_com::Ivariable_set* v ) { _variable_set_map[ name ] = v; }
+  //void                        abort_immediately           ( int exit_code = 1 );
 
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
@@ -136,6 +137,7 @@ struct Command_processor
     Security::Level            _security_level;
     string                     _source_filename;            // Das Verzeichnis wird für <base file=".."> verwendet
     Has_log*                   _log;
+    Variable_set_map           _variable_set_map;
 };
 
 //-------------------------------------------------------------------------------------------------
