@@ -773,7 +773,7 @@ void Spooler::load_job_from_xml( const xml::Element_ptr& e, const Time& xml_mod_
         if( job )
         {
             job->set_dom( e, xml_mod_time );
-            if( init )  job->init0(),  job->init();
+            if( init )  init_job( job, true );
         }
         else
         {
@@ -781,12 +781,27 @@ void Spooler::load_job_from_xml( const xml::Element_ptr& e, const Time& xml_mod_
             job->set_dom( e, xml_mod_time );
             if( init )
             {
-                job->init0();
-                if( _jobs_initialized )  job->init();   // Falls Job im Startskript über execute_xml() hingefügt wird: jetzt noch kein init()!
+                init_job( job, _jobs_initialized );     // Falls Job im Startskript über execute_xml() hingefügt wird: jetzt noch kein init()!
             }
 
             add_job( job );
         }
+    }
+}
+
+//--------------------------------------------------------------------------------Spooler::init_job
+
+void Spooler::init_job( Job* job, bool call_init_too )
+{
+    try
+    {
+        job->init0();
+        if( call_init_too )  job->init();
+    }
+    catch( exception& )
+    {
+        _log.error( message_string( "SCHEDULER-330", job->obj_name() ) );
+        throw;
     }
 }
 
@@ -1462,7 +1477,7 @@ string Spooler::state_name( State state )
 
 void Spooler::init_jobs()
 {
-    FOR_EACH_JOB( job )  (*job)->init();
+    FOR_EACH_JOB( job )  init_job( *job, true );
     _jobs_initialized = true;
 }
 
@@ -2023,9 +2038,9 @@ void Spooler::start()
     _log.info( message_string( "SCHEDULER-900", _version, _config_filename, getpid() ) );
     _spooler_start_time = Time::now();
 
-    _web_services.load();   // Nicht in Spooler::load(), denn es öffet schon -log-dir-Dateien (das ist nicht gut für -send-cmd=)
+    _web_services.load();   // Nicht in Spooler::load(), denn es öffnet schon -log-dir-Dateien (das ist nicht gut für -send-cmd=)
 
-    FOR_EACH_JOB( job )  (*job)->init0();
+    FOR_EACH_JOB( job )  init_job( *job, false );
 
     try
     {
@@ -2114,52 +2129,60 @@ void Spooler::start()
 
 void Spooler::run_scheduler_script()
 {
-    if( _module.set() )
+    try
     {
-        LOGI( "Startskript wird geladen und gestartet\n" );
-    
-        _module_instance = _module.create_instance();
-      //_module_instance->_title = "Scheduler-Script";
-        _module_instance->init();
-
-        _module_instance->add_obj( (IDispatch*)_com_spooler, "spooler"     );
-        _module_instance->add_obj( (IDispatch*)_com_log    , "spooler_log" );
-
-        _module_instance->load();
-        _module_instance->start();
-
-
-        bool ok = check_result( _module_instance->call_if_exists( spooler_init_name ) );
-
-        if( _log.highest_level() >= log_warn ) // &&  _log.mail_to() != ""  &&  _log.mail_from() != "" )
+        if( _module.set() )
         {
-            try
+            LOGI( "Startskript wird geladen und gestartet\n" );
+        
+            _module_instance = _module.create_instance();
+          //_module_instance->_title = "Scheduler-Script";
+            _module_instance->init();
+
+            _module_instance->add_obj( (IDispatch*)_com_spooler, "spooler"     );
+            _module_instance->add_obj( (IDispatch*)_com_log    , "spooler_log" );
+
+            _module_instance->load();
+            _module_instance->start();
+
+
+            bool ok = check_result( _module_instance->call_if_exists( spooler_init_name ) );
+
+            if( _log.highest_level() >= log_warn ) // &&  _log.mail_to() != ""  &&  _log.mail_from() != "" )
             {
-                string subject = name_of_log_level( _log.highest_level() ) + ": " + _log.highest_msg();
-                S      body;
+                try
+                {
+                    string subject = name_of_log_level( _log.highest_level() ) + ": " + _log.highest_msg();
+                    S      body;
 
-                body << Sos_optional_date_time::now().as_string() << "  " << name() << "\n\n";
-                body << "Scheduler started with ";
-                body << ( _log.highest_level() == log_warn? "warning" : "error" ) << ":\n\n";
-                body << subject << "\n\n";
+                    body << Sos_optional_date_time::now().as_string() << "  " << name() << "\n\n";
+                    body << "Scheduler started with ";
+                    body << ( _log.highest_level() == log_warn? "warning" : "error" ) << ":\n\n";
+                    body << subject << "\n\n";
 
-                Scheduler_event scheduler_event ( Scheduler_event::evt_scheduler_started, _log.highest_level(), this );
+                    Scheduler_event scheduler_event ( Scheduler_event::evt_scheduler_started, _log.highest_level(), this );
 
-                if( _log.highest_level() >= log_error )  scheduler_event.set_error( Xc( "SCHEDULER-227", _log.last( _log.highest_level() ).c_str() ) );
-                else
-                if( _log.highest_level() == log_warn )   scheduler_event.set_message( _log.last( log_warn ) );
-                
+                    if( _log.highest_level() >= log_error )  scheduler_event.set_error( Xc( "SCHEDULER-227", _log.last( _log.highest_level() ).c_str() ) );
+                    else
+                    if( _log.highest_level() == log_warn )   scheduler_event.set_message( _log.last( log_warn ) );
+                    
 
-                _log.set_mail_default( "subject"  , subject );
-                _log.set_mail_default( "body"     , body );
-                _log.send( -1, &scheduler_event );
+                    _log.set_mail_default( "subject"  , subject );
+                    _log.set_mail_default( "body"     , body );
+                    _log.send( -1, &scheduler_event );
+                }
+                catch( exception& x )  { _log.warn( S() << "Error on sending mail: " << x.what() ); }
             }
-            catch( exception& x )  { _log.warn( S() << "Error on sending mail: " << x.what() ); }
+
+            if( !ok )  z::throw_xc( "SCHEDULER-183" );
+
+            LOG( "Startskript ist gelaufen\n" );
         }
-
-        if( !ok )  z::throw_xc( "SCHEDULER-183" );
-
-        LOG( "Startskript ist gelaufen\n" );
+    }
+    catch( exception& )
+    {
+        _log.error( message_string( "SCHEDULER-332" ) );
+        throw;
     }
 }
 
@@ -3133,6 +3156,10 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
         }
         catch( const exception& x )
         {
+            //my_spooler._log ist vielleicht noch nicht geöffnet oder schon geschlossen
+            my_spooler._log.error( x.what() );
+            my_spooler._log.error( message_string( "SCHEDULER-331" ) );
+
             SHOW_ERR( "Fehler " << x.what() );     // Fehlermeldung vor ~Spooler ausgeben
             if( my_spooler.is_service() )  send_error_email( x, argc, argv, parameter_line, &my_spooler );
             ret = 1;

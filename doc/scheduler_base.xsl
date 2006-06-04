@@ -9,6 +9,7 @@
     
     
     <a name="use_element__...">, <a name="use_entry__..."> (fürs Register) können mehrfach vorkommen, das ist nicht valide.
+    <a name=".."> soll in XHTML 1.1 <a id="..."> heißen
 -->
 
 
@@ -343,7 +344,7 @@
                     <xsl:if test="count( ../* ) &gt; 1  and  not( ../*/description )">
                         <xsl:attribute name="style">width: 150px</xsl:attribute>
                     </xsl:if>
-                    <p class="xml_element">
+                    <p>
                         <b>
                             <code>
                                 <xsl:element name="a">
@@ -353,6 +354,7 @@
                                 </xsl:element>
                             </code>
                         </b>
+                        &#160;
                     </p>
                 </xsl:element>
                 <td>
@@ -2525,7 +2527,9 @@
 
     <xsl:template match="message/text/title">
 
-        <xsl:for-each select="node()">
+        <xsl:apply-templates match="node()" mode="message"/>
+
+        <!--xsl:for-each select="node()">
             <xsl:choose>
                 <xsl:when test="self::p1"><i style="font-size: 9pt"><xsl:value-of select="@what"/>(1)</i></xsl:when>
                 <xsl:when test="self::p2"><i style="font-size: 9pt"><xsl:value-of select="@what"/>(2)</i></xsl:when>
@@ -2535,8 +2539,39 @@
                     <xsl:copy-of select="."/>
                 </xsl:otherwise>
             </xsl:choose>
-        </xsl:for-each>
+        </xsl:for-each-->
         
+    </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~mode="message"-->
+
+    <xsl:template match="node()" mode="message">
+        <xsl:copy>
+            <xsl:for-each select="@*">
+                <xsl:copy>
+                    <xsl:value-of select="."/>
+                </xsl:copy>
+            </xsl:for-each>
+            <xsl:apply-templates mode="message"/>
+        </xsl:copy>
+    </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~p1-->
+    
+    <xsl:template match="p1" mode="message">
+        <span class="message_insertion"><xsl:copy-of select="node()"/>(1)</span>
+    </xsl:template>
+
+    <xsl:template match="p2" mode="message">
+        <span class="message_insertion"><xsl:copy-of select="node()"/>(2)</span>
+    </xsl:template>
+
+    <xsl:template match="p3" mode="message">
+        <span class="message_insertion"><xsl:copy-of select="node()"/>(3)</span>
+    </xsl:template>
+
+    <xsl:template match="p4" mode="message">
+        <span class="message_insertion"><xsl:copy-of select="node()"/>(4)</span>
     </xsl:template>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~html_head-->

@@ -1699,7 +1699,8 @@ void Task::process_on_exit_commands()
                 }
                 catch( exception& x )
                 {
-                    _log->error( message_string( "SCHEDULER-327", c.xml(), x ) );
+                    _log->error( x.what() );
+                    _log->error( message_string( "SCHEDULER-327", c.xml() ) );
                 }
             }
         }

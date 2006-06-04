@@ -34,6 +34,7 @@ code            { font-family: "Lucida Console", monospace; font-size: 9pt; }
 .code           { font-family: "Lucida Console", monospace; font-size: 9pt; }
 .small          { font-size: 8pt; }
 .comment        { background-color: #FFFF00 }
+.message_insertion { font-family: Arial, sans-serif; font-size: 9pt; font-style: italic; }
 /*.standard_in_code { font-family: Arial, sans-serif; }   Um in <code> wieder zurück zur normalen Schrift zu kommen */
 
 a.silent        { text-decoration: none; color: #0000A0 }

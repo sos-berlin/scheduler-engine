@@ -69,7 +69,7 @@
     <xsl:template match="revision">
 
         <xsl:if test="position() > 1">
-            <p style="margin-top: 0em; font-size: 50%">&#160;</p>
+            <p style="margin-top: 0em">&#160;</p>
         </xsl:if>
 
         <xsl:element name="p">

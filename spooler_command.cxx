@@ -393,7 +393,7 @@ xml::Element_ptr Command_processor::execute_start_job( const xml::Element_ptr& e
 
     if( at_str == ""       )  at_str = "now";
     if( at_str == "period" )  start_at = 0;                                     // start="period" => start_at = 0 (sobald eine Periode es zulässt)
-                        else  start_at = (Sos_optional_date_time) at_str;       // 
+                        else  start_at.set_datetime( at_str );       // 
 
     if( !after_str.empty() )  start_at = Time::now() + Time( as_int( after_str ) );     // Entweder at= oder after=
 
@@ -576,7 +576,7 @@ xml::Element_ptr Command_processor::execute_add_order( const xml::Element_ptr& a
     bool   replace          = add_order_element.bool_getAttribute( "replace", false );
 
     ptr<Order> order = new Order( _spooler );
-    order->set_dom( add_order_element );
+    order->set_dom( add_order_element, &_variable_set_map );
 
 
     if( job_name == "" )

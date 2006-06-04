@@ -114,7 +114,51 @@ void Time::set( double t )
 
 void Time::set_datetime( const string& t )
 {
-    set( Sos_optional_date_time(t).as_time_t() );
+    const char* p = t.c_str();
+    
+    while( *p == ' ' )  p++;
+    
+    if( string_begins_with( p, "now" ) )
+    {
+        p += 3;
+        set( now() );
+
+        while( *p == ' ' )  p++;
+
+        time_t seconds = 0;
+        
+        if( *p == '+' )
+        {
+            p++;
+            while( *p == ' ' )  p++;
+
+            if( strchr( p, ':' ) )
+            {
+                Sos_optional_date_time dt;
+                dt.set_time( p );
+                seconds = dt.time_as_int();
+                p += strlen( p );
+            }
+            else
+            {
+                try
+                {
+                    seconds = as_int( p );
+                    p += strlen( p );
+                }
+                catch( exception& x ) { z::throw_xc( "SCHEDULER-333", t, x ); }
+            }
+        }
+
+        while( *p == ' ' )  p++;
+        if( *p )  z::throw_xc( "SCHEDULER-333", t );
+
+        set( _time + seconds );
+    }
+    else
+    {
+        set( Sos_optional_date_time(t).as_time_t() );
+    }
 }
 
 //----------------------------------------------------------------------------------Time::as_string

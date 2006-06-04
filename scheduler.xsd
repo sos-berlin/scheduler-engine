@@ -126,7 +126,10 @@
         
         <xsd:attribute name="on_exit_code">
             <xsd:annotation>
-                <xsd:documentation>Only valid in element job!</xsd:documentation>
+                <xsd:documentation>
+                    Only valid in element job!
+                    examples: on_exit_code="success" on_exit_code="error" on_exit_code="1 2 3"
+                </xsd:documentation>
             </xsd:annotation>
             <xsd:simpleType>
                 <xsd:union>
@@ -483,6 +486,7 @@
                             <xsd:attribute name="value" type="String" use="required"/>
                         </xsd:complexType>
                     </xsd:element>
+                    
                     <xsd:element name="copy_params">
                         <xsd:complexType>
                             <xsd:attribute name="from"  use="required">

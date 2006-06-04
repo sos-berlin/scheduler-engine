@@ -4228,7 +4228,10 @@ const char file_scheduler_xsd[] =
     "\r\n"
     "<xsd:attribute name=\"on_exit_code\">\r\n"
     "<xsd:annotation>\r\n"
-    "<xsd:documentation>Only valid in element job!</xsd:documentation>\r\n"
+    "<xsd:documentation>\r\n"
+    "Only valid in element job!\r\n"
+    "examples: on_exit_code=\"success\" on_exit_code=\"error\" on_exit_code=\"1 2 3\"\r\n"
+    "</xsd:documentation>\r\n"
     "</xsd:annotation>\r\n"
     "<xsd:simpleType>\r\n"
     "<xsd:union>\r\n"
@@ -4585,6 +4588,7 @@ const char file_scheduler_xsd[] =
     "<xsd:attribute name=\"value\" type=\"String\" use=\"required\"/>\r\n"
     "</xsd:complexType>\r\n"
     "</xsd:element>\r\n"
+    "\r\n"
     "<xsd:element name=\"copy_params\">\r\n"
     "<xsd:complexType>\r\n"
     "<xsd:attribute name=\"from\"  use=\"required\">\r\n"
@@ -5169,7 +5173,7 @@ static const Embedded_file embedded_files_array[] =
     { "html/jz/translation_de.js", file_html_jz_translation_de_js, sizeof file_html_jz_translation_de_js - 1, 1113979995 },
     { "html/jz/scheduler.xslt", file_html_jz_scheduler_xslt, sizeof file_html_jz_scheduler_xslt - 1, 1148569750 },
     { "html/jz/scheduler.css", file_html_jz_scheduler_css, sizeof file_html_jz_scheduler_css - 1, 1148569750 },
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1149247193 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1149399637 },
     { NULL, NULL, 0 }
 };
 

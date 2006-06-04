@@ -2056,7 +2056,7 @@
         
         <message code="SCHEDULER-327">
             <text xml:lang="en">
-                <title>Error when executing command <p1 what="xml_command"/>: <p2/></title>
+                <title>Last error occurred when executing command: <p1>xml_command</p1></title>
                 <description>
                     <p>
                         See <scheduler_element name="job" child="commands"/>.
@@ -2086,6 +2086,31 @@
                 </description>
             </text>
         </message>
+        
+        <message code="SCHEDULER-330">
+            <text xml:lang="en">
+                <title><p1>job</p1> could not be initialized</title>
+            </text>
+        </message>
+        
+        <message code="SCHEDULER-331">
+            <text xml:lang="en">
+                <title>Scheduler is terminating after error (see last error line)</title>
+            </text>
+        </message>
+        
+        <message code="SCHEDULER-332">
+            <text xml:lang="en">
+                <title>Error in Scheduler script</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-333">
+            <text xml:lang="en">
+                <title>"now+SECONDS" expected in "<p1/>"</title>
+            </text>
+        </message>
+
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->
@@ -2671,7 +2696,7 @@
 
         <message code="SCHEDULER-970">
             <text xml:lang="en">
-                <title><p1 what="task"/> ended immediately after start, so <code>min_tasks</code>=<p2/> doesn't lead to new tasks</title>
+                <title><p1>task</p1> ended immediately after start, so <code>min_tasks</code>=<p2/> doesn't lead to new tasks</title>
             </text>
         </message>
 

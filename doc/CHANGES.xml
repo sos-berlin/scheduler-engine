@@ -11,6 +11,15 @@
     <scheduler_keyword keyword="Change log"/>
 
     <change date="2006-05-30" version="2.0.154" subversion_revision="99999">
+
+        <revision type="new" title="Anlässe zum Start einer Task 'queue' und 'queue_at'">
+            <description>
+                <p>
+                    Diese Anlässe werden jetzt auch protokolliert.
+                </p>
+            </description>
+        </revision>
+
         <revision type="new" title="&lt;commands on_exit_code=&quot;0&quot;> (in Arbeit)">
             <description>
                 <ul>
@@ -38,7 +47,7 @@
                         Für das Attribut <code>on_exit_code</code> kann eine Folge von Exit-Codes,
                         <code>"success"</code> (dasselbe wie <code>0</code>) oder
                         <code>"error"</code> angegeben werden.
-                        Letztere Einstellung gilt für alle Exit_codes außer 0, die nicht in anderen
+                        Letztere Einstellung gilt für alle Exit-Codes außer 0, die nicht in anderen
                         <scheduler_element name="commands" attribute="on_exit_code"/> aufgeführt sind.
                         Jedem Exit-Code ist damit nicht mehr als ein <scheduler_element name="commands"/> zugeordnet.
                     </li>
@@ -53,9 +62,6 @@
                     </li>
                     <li>
                         <scheduler_element name="commands"/> darf leer sein.
-                    </li>
-                    <li>
-                        Nebenfrage: Wirkt <scheduler_element name="delay_after_error"/> eigentlich für Kommandos und Shell-Skripte?
                     </li>
                 </ul>
             </description>

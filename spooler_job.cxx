@@ -313,6 +313,18 @@ void Job::prepare_on_exit_commands()
                     _exit_code_commands_map[ exit_code ] = commands_element;
                 }
             }
+
+            {
+                // Vorabprüfung von <copy_params what="order"/>:
+
+                string from_condition = "@from='task'";
+                if( order_controlled() )  from_condition += " or @from='order'";
+            
+                if( xml::Element_ptr wrong_copy_params_element = commands_element.select_node( 
+                        "( start_job/params/copy_params | add_order/params/copy_params | add_order/payload/params/copy_params ) [ not( " + from_condition + ") ]" 
+                  ) )  
+                  throw_xc( "SCHEDULER-329", wrong_copy_params_element.getAttribute( "from" ) );
+            }
         }
     }
 }
@@ -322,9 +334,9 @@ void Job::prepare_on_exit_commands()
 
 void Job::init0()
 {
-    LOGI( obj_name() << ".init0()\n" );
-
     if( _init0_called )  return;
+
+    LOGI( obj_name() << ".init0()\n" );
 
     _state = s_none;
 
@@ -1575,10 +1587,10 @@ ptr<Task> Job::task_to_start()
                 task = create_task( NULL, "", 0 );     // create_task() nicht mit gesperrten _lock rufen, denn get_id() in DB blockieren.
 
                 task->set_order( order );
-                task->_cause = cause;
                 task->_let_run |= ( cause == cause_period_single );
             }
 
+            task->_cause = cause;
             task->_changed_directories = _changed_directories;
             _changed_directories = "";
             _directory_changed = false;

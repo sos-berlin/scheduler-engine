@@ -47,24 +47,38 @@
                             Die Parameter des zuletzt ausgeführten Auftrags
                             (<scheduler_method class="Order" object="spooler_task.order" property="params"/>)
                             werden übernommen.
+                            Der Auftrag steht am Ende der Task nur zur Verfügung, wenn
                         </p>
+                        <ul>
+                            <li>
+                                der Job mit <scheduler_element name="process"/> oder
+                                <scheduler_element name="script" attribute="language" value="shell"/> implementiert ist,
+                            </li>
+                            <li>
+                                während der Ausführung <scheduler_method class="Task" method="end"/> aufgerufen worden ist oder
+                            </li>
+                            <li>
+                                während der Ausführung ein Fehler aufgetreten ist.
+                            </li>
+                        </ul>
                         <p>
-                            Es ist ein Fehler (<scheduler_message code="SCHEDULER-329"/>), 
+                            Es ist ein Fehler (<scheduler_message code="SCHEDULER-329"/>),
                             wenn die Task keinen Auftrag hat.
-                            Das kann auch bei Auftragsjobs (<scheduler_element name="job" attribute="order" value="yes"/>) passieren,
-                            wenn eine Task ohne Auftrag gestartet 
-                            (z.B. automatisch durch <scheduler_element name="job" attribute="min_tasks" value="1"/>) 
+                        </p>
+                        <!--p>
+                            wenn eine Task ohne Auftrag gestartet
+                            (z.B. automatisch durch <scheduler_element name="job" attribute="min_tasks" value="1"/>)
                             und beendet wird, ohne einen Auftrag ausgeführt zu haben.
-                            Damit ist bei 
+                            Damit ist bei
                             <scheduler_element name="job"/><scheduler_element name="commands" attribute="on_exit_code" value="0"/>
                             zu rechnen.
-                        </p>
-                        <pre><scheduler_element name="job" attribute="order" value="yes"/> …
+                        </p-->
+                        <!--pre><scheduler_element name="job" attribute="order" value="yes"/> …
   <scheduler_element name="commands" attribute="on_exit_value" value="0"/> …
     <scheduler_element name="start_job"/>&#160; oder &#160;<scheduler_element name="add_order"/> …
       <scheduler_element name="params"/> …
         <scheduler_element name="copy_params" attribute="from" value="order"/>
-            &lt;!-- Das kann zum Fehler <scheduler_message code="SCHEDULER-329"/> führen. --></pre>
+            &lt;!- - Das kann zum Fehler <scheduler_message code="SCHEDULER-329"/> führen. - -></pre-->
                     </dd>
                 </dl>
             </description>
