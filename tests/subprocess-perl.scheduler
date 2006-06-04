@@ -124,9 +124,12 @@ if( my_system( "exit 3" ) != 3 )  { $spooler_log->error( "exit_code != 3" ); }
 
 $spooler->terminate();
 
+
 #my $cmd = "sleep 6";
 #my $exit_code = my_system( $cmd, 5 );
-#$spooler_log->info( "$cmd ==> $exit_code" );
+my $cmd = "ls | grep mp3";
+my $exit_code = shell( $cmd, 5 );
+$spooler_log->info( "$cmd ==> $exit_code" );
 #
 sub my_system
 {
@@ -135,8 +138,20 @@ sub my_system
     
     my $subprocess = $spooler_task->create_subprocess();
     
-    $subprocess->LetProperty( "timeout", $timeout )  if $timeout;
+    $subprocess->LetProperty( "timeout", $timeout )  if defined $timeout;
     $subprocess->start( $cmd );
+    $subprocess->wait_for_termination();            
+    return $subprocess->exit_code;
+}
+
+sub shell
+{
+    my $cmd     = shift;
+    my $timeout = shift;
+    my $subprocess = $spooler_task->create_subprocess();
+    
+    $subprocess->LetProperty( "timeout", $timeout )  if defined $timeout;
+    $subprocess->start( [ "/bin/sh", "-c", $cmd ] );
     $subprocess->wait_for_termination();            
     return $subprocess->exit_code;
 }
