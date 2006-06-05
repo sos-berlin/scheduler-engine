@@ -484,7 +484,7 @@
                 </p>
             </description>
             <example>
-                <pre>export CLASSPATH="`scheduler -expand-class-path='/opt/java/lib/*.jar'`"</pre>
+                <pre>export CLASSPATH="`scheduler -expand-classpath='/opt/java/lib/*.jar'`"</pre>
             </example>
         </command_option>
     </command_options>
