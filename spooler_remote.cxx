@@ -18,7 +18,7 @@ Xml_client_connection::Xml_client_connection( Spooler* sp, const Host_and_port& 
     _log( sp->_log ),
     _host_and_port(host_and_port)
 {
-    _log.set_prefix( S() << "Haupt-Scheduler " + _host_and_port );
+    _log.set_prefix( S() << "Haupt-Scheduler " + _host_and_port.to_string() );
     set_async_next_gmtime( (time_t)0 );
     //set_async_child( &_socket_operation );
 }
