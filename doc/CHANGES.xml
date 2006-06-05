@@ -12,6 +12,20 @@
 
     <change date="2006-06-05" version="2.0.154" subversion_revision="4321">
 
+        <revision type="new" title="Neue Option -expand-classpath=">
+            <description>
+                <p>
+                    Expandiert den als Parameter angegebenen Java-Classpath,
+                    d.h. die Joker werden verarbeitet wie in <scheduler_ini_entry file="sos.ini" section="java" entry="class_path"/>.
+                </p>
+                <ul>
+                    <li>
+                        <scheduler_option name="expand-classpath"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+
         <revision type="new" title="Anlässe zum Start einer Task 'queue' und 'queue_at'">
             <description>
                 <p>

@@ -470,7 +470,26 @@
         </example>
     </command_options>
 
+    
+    <command_options name="classpath" title="Java-Classpath expandieren">
+        <command_option name="expand-classpath" title="Java-Classpath expandieren">
+            <description>
+                <p>
+                    Expandiert den als Parameter angegebenen Java-Classpath,
+                    d.h. die Joker werden verarbeitet wie <scheduler_ini_entry file="sos.ini" section="java" entry="class_path"/>.
+                </p>
+                <p>
+                    Das Ergebnis schreibt der Scheduler nach <code>stdout</code>.
+                    Wenn keine weiteren Optionen es verlangen, beendet sich der Scheduler ohne weitere Ausgaben.
+                </p>
+            </description>
+            <example>
+                <pre>export CLASSPATH="`scheduler -expand-class-path='/opt/java/lib/*.jar'`"</pre>
+            </example>
+        </command_option>
+    </command_options>
 
+    
     <command_options name="version" title="Versionsnummer zeigen">
         <command_option name="V" title="Versionsnummer zeigen">
             <description>
