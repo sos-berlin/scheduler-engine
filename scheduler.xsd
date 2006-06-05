@@ -197,6 +197,7 @@
             <xsd:attribute name="job"               type="Name"/>
             <xsd:attribute name="web_service"       type="Name"/>
             <xsd:attribute name="replace"           type="Yes_no"/>
+            <xsd:attribute name="at"                type="Date_time_with_now"/>
         </xsd:complexType>
     </xsd:element>
 
@@ -952,6 +953,18 @@
 
 
     <xsd:simpleType name="Date_time">
+        <xsd:annotation>
+            <xsd:documentation>"yyyy-mm-dd HH:MM[:SS]"</xsd:documentation>
+        </xsd:annotation>
+        <xsd:restriction base="String">
+        </xsd:restriction>
+    </xsd:simpleType>
+
+
+    <xsd:simpleType name="Date_time_with_now">
+        <xsd:annotation>
+            <xsd:documentation>"yyyy-mm-dd HH:MM[:SS]", "now + HH:MM[:SS]" or "now+SECONDS"</xsd:documentation>
+        </xsd:annotation>
         <xsd:restriction base="String">
         </xsd:restriction>
     </xsd:simpleType>

@@ -78,6 +78,46 @@ void Time::operator = ( const Sos_optional_date_time& dt )
                    else  set( dt.hour() * 60*60 + dt.minute() * 60 + dt.second() );
 }
 
+//------------------------------------------------------------------------------Time::time_with_now
+
+Time Time::time_with_now( const string& time_string )
+{
+    Time result;
+
+    if( Regex_submatches matches = Regex( "^ *now *(\\+ *([^ ].*))?$" ).match_subresults( time_string ) )    // " now + HH:MM"
+    {
+        result = now();
+
+        if( matches.count() > 0 )
+        {
+            if( matches.count() != 2 )  z::throw_xc( "SCHEDULER-333", time_string );
+
+            string time = matches[ 2 ];
+            
+            if( time.find( ':' ) != string::npos )
+            {
+                Time t ( time );
+                if( t > 24*60*60 )  z::throw_xc( "SCHEDULER-333", time_string );   // Sollte nicht vorkommen
+                result += t;
+            }
+            else
+            {
+                try
+                {
+                    result += as_int( time );
+                }
+                catch( exception& x ) { z::throw_xc( "SCHEDULER-333", time_string, x ); }
+            }
+        }
+    }
+    else
+    {
+        result.set_datetime( time_string );
+    }
+
+    return result;
+}
+
 //----------------------------------------------------------------------------------------Time::set
 
 void Time::set( const string& t )
@@ -88,9 +128,13 @@ void Time::set( const string& t )
     }
     else
     {
+        string my_t = t;
+
+        double fraction = cut_fraction( &my_t );
+
         Sos_optional_date_time dt;
-        dt.set_time( t );
-        set( dt.time_as_double() );
+        dt.set_time( my_t);
+        set( dt.time_as_double() + fraction );
     }
 }
 
@@ -114,51 +158,32 @@ void Time::set( double t )
 
 void Time::set_datetime( const string& t )
 {
-    const char* p = t.c_str();
-    
-    while( *p == ' ' )  p++;
-    
-    if( string_begins_with( p, "now" ) )
+    string my_t = t;
+
+    double fraction = cut_fraction( &my_t );
+    set( Sos_optional_date_time( my_t ).as_time_t() + fraction );
+}
+
+//-------------------------------------------------------------------------------Time::cut_fraction
+
+double Time::cut_fraction( string* datetime_string )
+{
+    double      result = 0;
+    const char* p0     = datetime_string->c_str();
+    const char* p      = p0 + datetime_string->length();
+
+    while( p > p0  &&  p[-1] == ' ' )  p--;
+
+    int digit_count = 0;
+    while( p > p0  &&  isdigit( (int)p[-1] ) )  p--, digit_count++;
+    if( p > p0  &&  digit_count > 0  &&  p[-1] == '.' )
     {
-        p += 3;
-        set( now() );
-
-        while( *p == ' ' )  p++;
-
-        time_t seconds = 0;
-        
-        if( *p == '+' )
-        {
-            p++;
-            while( *p == ' ' )  p++;
-
-            if( strchr( p, ':' ) )
-            {
-                Sos_optional_date_time dt;
-                dt.set_time( p );
-                seconds = dt.time_as_int();
-                p += strlen( p );
-            }
-            else
-            {
-                try
-                {
-                    seconds = as_int( p );
-                    p += strlen( p );
-                }
-                catch( exception& x ) { z::throw_xc( "SCHEDULER-333", t, x ); }
-            }
-        }
-
-        while( *p == ' ' )  p++;
-        if( *p )  z::throw_xc( "SCHEDULER-333", t );
-
-        set( _time + seconds );
+        p--;
+        result = as_double( p );
+        datetime_string->erase( p - p0 );
     }
-    else
-    {
-        set( Sos_optional_date_time(t).as_time_t() );
-    }
+
+    return result;
 }
 
 //----------------------------------------------------------------------------------Time::as_string
@@ -720,7 +745,7 @@ void Run_time::set_dom( const xml::Element_ptr& element )
 {
     if( !element )  return;
 
-    if( _modified_event_handler )  _modified_event_handler->before_modify_event();
+    if( _modified_event_handler )  _modified_event_handler->before_modify_run_time_event();
 
 
     Sos_optional_date_time  dt;
@@ -814,7 +839,7 @@ void Run_time::set_dom( const xml::Element_ptr& element )
     if( !a_day_set )  for( int i = 0; i < 7; i++ )  _weekday_set._days[i] = default_day;
 
 
-    if( _modified_event_handler )  _modified_event_handler->modified_event();
+    if( _modified_event_handler )  _modified_event_handler->run_time_modified_event();
 }
 
 //----------------------------------------------------------------------------Run_time::dom_element

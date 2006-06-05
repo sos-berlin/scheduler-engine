@@ -1180,6 +1180,9 @@ void Order::set_dom( const xml::Element_ptr& element, Variable_set_map* variable
     string title            = element.getAttribute( "title"     );
     string state_name       = element.getAttribute( "state"     );
     string web_service_name = element.getAttribute( "web_service" );
+    string setback_string   = element.getAttribute( "at" );
+    //if( setback_string == "" )  
+    //    setback_string      = element.getAttribute( "setback" );        // So kommt's aus der Datenbank, siehe dom_element()
 
 
     if( priority         != "" )  set_priority( as_int(priority) );
@@ -1187,6 +1190,7 @@ void Order::set_dom( const xml::Element_ptr& element, Variable_set_map* variable
     if( title            != "" )  set_title   ( title );
     if( state_name       != "" )  set_state   ( state_name.c_str() );
     if( web_service_name != "" )  set_web_service( _spooler->_web_services.web_service_by_name( web_service_name ) );
+    if( setback_string   != "" )  setback( Time::time_with_now( setback_string ) );
 
 
     DOM_FOR_EACH_ELEMENT( element, e )  
@@ -1304,7 +1308,7 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
         if( _log->opened() )
         element.setAttribute( "log_file"  , _log->filename() );
 
-        if( _setback )
+        if( _setback  &&  _setback_count > 0 )
         element.setAttribute( "setback"   , _setback.as_string() );
 
         if( _replacement_for )
@@ -1372,6 +1376,9 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
             append_error_element( xml_payload_element, x );
         }
     }
+
+    if( _setback && _setback_count == 0 )
+    element.setAttribute( "at"        , _setback.as_string() );
 
     if( _web_service )
     element.setAttribute( "web_service", _web_service->name() );
@@ -1797,7 +1804,7 @@ bool Order::try_add_to_job_chain( Job_chain* job_chain )
         }
 
 
-        setback( _state == _initial_state  &&  _run_time->set()? next_start_time( true ) : Time(0) );
+        setback( _state == _initial_state  &&  !_setback  &&  _run_time->set()? next_start_time( true ) : _setback );
     }
 
     return true;
@@ -2082,7 +2089,7 @@ void Order::set_at( const Time& time )
     if( _moved      )  z::throw_xc( "SCHEDULER-188", obj_name() );
   //if( _job_chain  )  z::throw_xc( "SCHEDULER-186", obj_name(), _job_chain->name() );
 
-
+    /*
     xml::Document_ptr run_time_dom;
     run_time_dom.create();
 
@@ -2094,8 +2101,8 @@ void Order::set_at( const Time& time )
     day_element .setAttribute( "begin", time.as_string().substr( 11 ) );
 
     set_run_time( run_time_element );
-
-    //setback( time );
+    */
+    setback( time );
 }
 
 //---------------------------------------------------------------------------Order::next_start_time
@@ -2147,18 +2154,18 @@ Time Order::next_start_time( bool first_call )
     return result;
 }
 
-//-----------------------------------------------------------------------Order::before_modify_event
+//--------------------------------------------------------------Order::before_modify_run_time_event
 
-void Order::before_modify_event()
+void Order::before_modify_run_time_event()
 {
   //if( _task       )  z::throw_xc( "SCHEDULER-217", obj_name(), _task->obj_name() );
   //if( _moved      )  z::throw_xc( "SCHEDULER-188", obj_name() );
   //if( _job_chain  )  z::throw_xc( "SCHEDULER-186", obj_name(), _job_chain->name() );
 }
 
-//----------------------------------------------------------------------------Order::modified_event
+//-------------------------------------------------------------------Order::run_time_modified_event
 
-void Order::modified_event()
+void Order::run_time_modified_event()
 {
     if( _state == _initial_state  &&  !_task )  setback( _run_time->set()? next_start_time( true ) : Time(0) );
 }
@@ -2171,7 +2178,7 @@ void Order::set_run_time( const xml::Element_ptr& e )
     _run_time->set_modified_event_handler( this );
 
     if( e )  _run_time->set_dom( e );       // Ruft setback() über modify_event()
-       else  modified_event();
+       else  run_time_modified_event();
 }
 
 //-------------------------------------------------------------------------------Order::web_service

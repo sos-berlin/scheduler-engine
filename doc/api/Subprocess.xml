@@ -67,12 +67,19 @@
         </p>
         <p>
             Unter Unix wird stattdessen <scheduler_method class="Subprocess" property="exit_code"/> auf 99 gesetzt.
-            Vor muss das Ende des Prozesses abgewartet werden mit <scheduler_method class="Subprocess" property="wait_for_termination"/>.
+            Vorher muss das Ende des Prozesses abgewartet werden mit <scheduler_method class="Subprocess" method="wait_for_termination"/>.
         </p>
         <p>
             Shell-Operatoren wie <code>|</code>, <code>&amp;&amp;</code> und <code>></code> werden nicht interpretiert.
-            Verwenden Sie dazu die Programme <code>/bin/sh</code> bzw. <code>c:\windows\system32\cmd.exe</code> 
-            (das Verzeichnis ist installationsabhängig).
+            Verwenden Sie dazu die Programme <code>/bin/sh</code> bzw. <code>c:\windows\system32\cmd.exe</code>
+            (das Verzeichnis ist installations-abhängig).
+        </p>
+        <p>
+            Der Prozess wird 
+            unter Unix mit <code>execvp()</code> und
+            unter Windows mit 
+            <a href="http://msdn.microsoft.com/library/default.asp?url=/library/en-us/dllproc/base/createprocess.asp"><code>CreateProcess()</code></a>
+            gestartet.
         </p>
     </description>
 </method>

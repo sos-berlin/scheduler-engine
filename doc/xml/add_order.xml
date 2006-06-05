@@ -102,6 +102,19 @@
             </description>
         </xml_attribute>
 
+        
+        <xml_attribute name="at" type="timestamp" initial="now" title="Startzeit des Auftrags">
+            <description>
+                <p>
+                    <code>"now"</code>,
+                    <code>"yyyy-mm-dd HH:MM</code>[<code>:SS</code>]<code>"</code>,
+                    <code>"now + HH:MM</code>[<code>:SS</code>]<code>"</code> und
+                    <code>"now + SECONDS"</code> 
+                    sind möglich.
+                </p>
+            </description>
+        </xml_attribute>
+
     </xml_attributes>
 
 
@@ -119,7 +132,7 @@
     </xml_answer>
 
     <example>
-        <pre>&lt;add_order job_chain="jobkette" id="1234" title="Mein erster Auftrag" state="100">
+        <pre>&lt;add_order job_chain="jobkette" id="1234" title="Mein erster Auftrag" state="100" at="now+3:00">
     &lt;params>
         &lt;param name="ein_parameter" value="ein Wert"/>
     &lt;/params>

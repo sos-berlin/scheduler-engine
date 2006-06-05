@@ -4299,6 +4299,7 @@ const char file_scheduler_xsd[] =
     "<xsd:attribute name=\"job\"               type=\"Name\"/>\r\n"
     "<xsd:attribute name=\"web_service\"       type=\"Name\"/>\r\n"
     "<xsd:attribute name=\"replace\"           type=\"Yes_no\"/>\r\n"
+    "<xsd:attribute name=\"at\"                type=\"Date_time_with_now\"/>\r\n"
     "</xsd:complexType>\r\n"
     "</xsd:element>\r\n"
     "\r\n"
@@ -5054,6 +5055,18 @@ const char file_scheduler_xsd[] =
     "\r\n"
     "\r\n"
     "<xsd:simpleType name=\"Date_time\">\r\n"
+    "<xsd:annotation>\r\n"
+    "<xsd:documentation>\"yyyy-mm-dd HH:MM[:SS]\"</xsd:documentation>\r\n"
+    "</xsd:annotation>\r\n"
+    "<xsd:restriction base=\"String\">\r\n"
+    "</xsd:restriction>\r\n"
+    "</xsd:simpleType>\r\n"
+    "\r\n"
+    "\r\n"
+    "<xsd:simpleType name=\"Date_time_with_now\">\r\n"
+    "<xsd:annotation>\r\n"
+    "<xsd:documentation>\"yyyy-mm-dd HH:MM[:SS]\", \"now + HH:MM[:SS]\" or \"now+SECONDS\"</xsd:documentation>\r\n"
+    "</xsd:annotation>\r\n"
     "<xsd:restriction base=\"String\">\r\n"
     "</xsd:restriction>\r\n"
     "</xsd:simpleType>\r\n"
@@ -5173,7 +5186,7 @@ static const Embedded_file embedded_files_array[] =
     { "html/jz/translation_de.js", file_html_jz_translation_de_js, sizeof file_html_jz_translation_de_js - 1, 1113979995 },
     { "html/jz/scheduler.xslt", file_html_jz_scheduler_xslt, sizeof file_html_jz_scheduler_xslt - 1, 1148569750 },
     { "html/jz/scheduler.css", file_html_jz_scheduler_css, sizeof file_html_jz_scheduler_css - 1, 1148569750 },
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1149399637 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1149505542 },
     { NULL, NULL, 0 }
 };
 

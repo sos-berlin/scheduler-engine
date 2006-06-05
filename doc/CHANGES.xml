@@ -10,17 +10,17 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2006-05-30" version="2.0.154" subversion_revision="99999">
+    <change date="2006-06-05" version="2.0.154" subversion_revision="4321">
 
         <revision type="new" title="Anlässe zum Start einer Task 'queue' und 'queue_at'">
             <description>
                 <p>
-                    Diese Anlässe werden jetzt auch protokolliert.
+                    Diese Anlässe werden jetzt auch protokolliert (mit <scheduler_message code="SCHEDULER-930"/>).
                 </p>
             </description>
         </revision>
 
-        <revision type="new" title="&lt;commands on_exit_code=&quot;0&quot;> (in Arbeit)">
+        <revision type="new" title="&lt;commands on_exit_code=&quot;0&quot;>">
             <description>
                 <ul>
                     <li>
@@ -67,21 +67,7 @@
             </description>
         </revision>
 
-        <revision type="correction" title="language=&quot;perl&quot; unter Windows">
-            <description>
-                <p>
-                    Unter Windows übergab der Scheduler nur bei 
-                    <scheduler_element name="script" attribute="language" value="perlscript"/> die folgende Anweisung:
-                </p>
-                <pre>Win32::OLE->Option( Warn => 3 );</pre>
-                <p>
-                    <scheduler_element name="script" attribute="language" value="perl"/> hat jetzt dasselbe Verhalten.
-                    Damit ignoriert Perl nicht länger einen Fehler bei einem Aufruf einer Scheduler-Methode.
-                </p>
-            </description>
-        </revision>
-
-        <revision type="new" title="&lt;copy_params> (in Arbeit)">
+        <revision type="new" title="&lt;copy_params>">
             <description>
                 <p>
                     <scheduler_element name="params"/> erhält das neue Kind-Element
@@ -97,25 +83,29 @@
             </description>
         </revision>
 
-        <revision type="new" title="Relative Zeitangabe mit now+HH:MM (in Arbeit)">
+        <revision type="new" title="Aufträge mit Startzeit, relative Zeitangabe mit now+HH:MM">
             <description>
                 <p>
-                    Zeitangaben in
-                    <scheduler_element name="start_job"/> und
-                    <scheduler_element name="add_order"/> können relativ angegeben werden in
+                    Aufträge können einen Startzeit haben, 
+                    die in der Datenbank gespeichert wird und somit bei Scheduler-Neustart erhalten bleibt.
+                    Ein noch nicht ausgeführter Auftrag mit verstrichener Startzeit wird sofort gestartet
+                    (sofern die <scheduler_element name="run_time"/> des Jobs dies erlaubt).
                 </p>
                 <ul>
                     <li>
-                        <scheduler_element name="start_job" attribute="at"/> 
+                        <scheduler_element name="start_job" attribute="at" value="now+..."/> 
                     </li>
                     <li>
-                       <scheduler_element name="add_order"/><scheduler_element name="run_time"/><scheduler_element name="at" attribute="at"/> 
+                        <scheduler_element name="add_order" attribute="at" value="now+..."/>
                     </li>
                 </ul>
                 <p>
                     Mögliche Angaben sind:
                 </p>
                 <ul>
+                    <li>
+                        <code>now</code>
+                    </li>
                     <li>
                         <code>now + </code><i>seconds</i>
                     </li>
@@ -125,10 +115,29 @@
                     <li>
                         <code>now + </code><i>hh:mm:ss</i>
                     </li>
+                    <li>
+                        <code>yyyy-mm-dd HH:MM</code>
+                    </li>
+                    <li>
+                        <code>yyyy-mm-dd HH:MM:SS</code>
+                    </li>
                 </ul>
             </description>
         </revision>
 
+        <revision type="correction" title="language=&quot;perl&quot; unter Windows">
+            <description>
+                <p>
+                    Unter Windows übergab der Scheduler nur bei
+                    <scheduler_element name="script" attribute="language" value="perlscript"/> die folgende Anweisung:
+                </p>
+                <pre>Win32::OLE->Option( Warn => 3 );</pre>
+                <p>
+                    <scheduler_element name="script" attribute="language" value="perl"/> hat jetzt dasselbe Verhalten.
+                    Damit ignoriert Perl nicht länger einen Fehler bei einem Aufruf einer Scheduler-Methode.
+                </p>
+            </description>
+        </revision>
     </change>
 
     <change date="2006-05-29" version="2.0.153" subversion_revision="4313">

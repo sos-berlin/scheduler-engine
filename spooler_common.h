@@ -20,6 +20,11 @@ namespace spooler {
 typedef zschimmer::Thread::Id   Thread_id;                  // _beginthreadex()
 typedef DWORD                   Process_id;
 
+namespace time
+{
+    struct Time;
+};
+
 //-------------------------------------------------------------------------------------------------
 
 extern const Embedded_files     embedded_files;             // spooler_embedded_files.cxx
@@ -33,8 +38,8 @@ extern const Embedded_files     embedded_files;             // spooler_embedded_
 
 struct Modified_event_handler
 {
-    virtual void                before_modify_event         ()                                      {}
-    virtual void                modified_event              () = 0;
+    virtual void                before_modify_run_time_event()                                      {}
+    virtual void                run_time_modified_event     () = 0;
 };
 
 //---------------------------------------------------------------------------------Scheduler_object

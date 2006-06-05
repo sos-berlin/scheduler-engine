@@ -129,8 +129,8 @@ struct Order : Com_order,
     xml::Document_ptr           dom                     ( const Show_what& ) const;
 
     void                    set_run_time                ( const xml::Element_ptr& );
-    void                        before_modify_event     ();
-    void                        modified_event          ();
+    void                        before_modify_run_time_event();
+    void                        run_time_modified_event ();
 
     ptr<Prefix_log>            _log;
 
@@ -185,7 +185,7 @@ struct Order : Com_order,
     ptr<Run_time>              _run_time;
     Period                     _period;                 // Bei _run_time.set(): Aktuelle oder nächste Periode
   //bool                       _period_once;
-    Time                       _setback;                // Bis wann der Auftrag zurückgestellt ist
+    Time                       _setback;                // Bis wann der Auftrag zurückgestellt ist (bei _setback_count > 0, sonst Startzeitpunkt "at")
     int                        _setback_count;
   //bool                       _recoverable;            // In Datenbank halten
     bool                       _is_in_database;

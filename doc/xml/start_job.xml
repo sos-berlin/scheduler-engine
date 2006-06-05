@@ -43,16 +43,22 @@
             </description>
         </xml_attribute>
 
-        <xml_attribute name="at" type="yyyy-mm-dd hh:mm:ss | now | repeat">
+        <xml_attribute name="at" type="yyyy-mm-dd hh:mm:ss | now | period" initial="now">
             <description>
                 <p>
                     Zeitpunkt, zu dem die Task gestartet werden soll.
                     <scheduler_element name="run_time"/> ist außer Kraft.
                 </p>
                 <p>
+                    Relative Zeitangaben <code>"now"</code>,
+                    <code>"now + HH:MM</code>[<code>:SS</code>]<code>"</code> und
+                    <code>"now + SECONDS"</code>
+                    sind möglich.
+                </p>
+                <!--p>
                     Statt eines Zeitpunkts kann auch <code>at="now"</code> angeben werden, um den Job sofort zu starten.
                     <code>"now"</code> ist voreingestellt.
-                </p>
+                </p-->
                 <p>
                     <code>at="period"</code> lässt den Job erst Starten, wenn die <scheduler_element name="run_time"/> dies zulässt
                     (also in der laufenden oder der nächsten Periode).

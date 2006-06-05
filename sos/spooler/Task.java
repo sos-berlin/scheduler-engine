@@ -263,4 +263,7 @@ public class Task extends Idispatch
     
     public void         set_priority_class      ( String priority_class )           {                       com_call( ">priority_class", priority_class ); }
     public String           priority_class      ()                                  { return (String)       com_call( "<priority_class" ); }
+    
+    public void         set_exit_code           ( int exit_code )                   {                       com_call( ">exit_code", exit_code ); }
+    public int              exit_code           ()                                  { return            int_com_call( "<exit_code" ); }
 }
