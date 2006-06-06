@@ -18,6 +18,12 @@
         </p>
     </description>
 
+
+    <xml_parent_elements>
+        <xml_parent_element name="commands"/>
+    </xml_parent_elements>
+
+
     <xml_attributes>
         <xml_attribute name="what"       same_as_element="show_state"/>
         <xml_attribute name="max_orders" same_as_element="show_state"/>

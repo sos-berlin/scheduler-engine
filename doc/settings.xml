@@ -612,8 +612,7 @@ db = odbc -db=factory_oracle -user=factory -password=factory
             </p>
             <ul>
                 <li>
-                    Unter Windows sind hinter dem letzten Verzeichnisstrich die Zeichen <code>*</code> und <code>?</code> möglich
-                    (wie z.B. der Befehl <code>dir</code> von Windows XP).
+                    Unter Windows sind hinter dem letzten Verzeichnisstrich die Zeichen <code>*</code> und <code>?</code> möglich.
                 </li>
                 <li>
                     Unter Unix außerdem die Zeichen <code>[</code> und <code>]</code>;
@@ -641,7 +640,7 @@ db = odbc -db=factory_oracle -user=factory -password=factory
                     wird er ignoriert.
                 </li>
                 <li>
-                    Wenn ein Pfad mit ein nicht lesbareres Verzeichnis bezeichnet, 
+                    Wenn ein Pfad mit ein nicht lesbares Verzeichnis bezeichnet, 
                     wird es ignoriert.
                 </li>
                 <!--li>

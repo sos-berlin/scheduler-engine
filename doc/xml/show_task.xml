@@ -20,12 +20,16 @@
     </description>
 
 
+    <xml_parent_elements>
+        <xml_parent_element name="commands"/>
+    </xml_parent_elements>
+
+
     <xml_attributes>
         <xml_attribute name="id" type="zahl">
             <description>
                 <p>
                     Die Task-Id.
-                    (<i>Das Attribut sollte nicht <code>id</code> heißen, das Wort ist in XML reserviert.</i>)
                 </p>
             </description>
         </xml_attribute>

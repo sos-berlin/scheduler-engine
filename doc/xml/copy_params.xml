@@ -14,7 +14,26 @@
         <p>
             Das Element übernimmt die Parameter der Task oder des Auftrags.
             Es kann nur in folgender Hierarchie verwendet werden:
-        </p>
+        </p>            
+        
+        <!--pre>&lt;<a href="job.xml">job</a> name="…">
+    …      
+    &lt;<a href="commands.xml">commands</a> on_exit_code="…">
+        &lt;<a href="start_job">start_job</a> job="…">
+            &lt;<a href="params.xml">params</a>>
+                &lt;copy_params from="task"/>
+                &lt;copy_params from="order"/>
+            &lt;/params>
+        &lt;/start_job>
+        &lt;<a href="start_job">add_order</a> job_chain="…">
+            &lt;<a href="params.xml">params</a>>
+                &lt;copy_params from="task"/>
+                &lt;copy_params from="order"/>
+            &lt;/params>
+        &lt;/add_order>
+    &lt;commands>
+&lt;job></pre-->
+        
         <pre><scheduler_element name="job"/> …
   <scheduler_element name="commands" attribute="on_exit_value"/> …
     <scheduler_element name="start_job"/>&#160; oder &#160;<scheduler_element name="add_order"/> …

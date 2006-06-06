@@ -231,7 +231,26 @@
                      &lt;/holidays>
                      
                      &lt;<a class="silent" href="xml/at.xml">at</a> at="yyyy-mm-dd HH:MM:SS"/>
-                 &lt;/runtime>
+                 &lt;/run_time>
+                 
+                 &lt;<a class="silent" href="xml/commands.xml">commands on_exit_code="…"</a>>
+                     &lt;<a href="xml/start_job.xml">start_job</a> job="…">
+                         &lt;<a href="xml/params.xml">params</a>>
+                             &lt;<a href="xml/copy_params.xml">copy_params</a> from="task"/>
+                             &lt;<a href="xml/copy_params.xml">copy_params</a> from="order"/>
+                             …
+                         &lt;/params>
+                     &lt;/start_job>    
+                     
+                     &lt;<a href="xml/add_order.xml">add_order</a> job_chain="…">
+                         &lt;<a href="xml/params.xml">params</a>>
+                             &lt;<a href="xml/copy_params.xml">copy_params</a> from="task"/>
+                             &lt;<a href="xml/copy_params.xml">copy_params</a> from="order"/>
+                             …
+                         &lt;/params>
+                     &lt;/add_order>
+                     …
+                 &lt;/commands>
              &lt;/job>
              …
         &lt;/jobs>

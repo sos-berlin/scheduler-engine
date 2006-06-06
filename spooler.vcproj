@@ -203,7 +203,7 @@
 				MapFileName="$(TargetDir)/$(ProjectName).map"
 				SubSystem="1"
 				OptimizeForWindows98="1"
-				ImportLibrary=""
+				ImportLibrary="scheduler.lib"
 				TargetMachine="1"
 			/>
 			<Tool

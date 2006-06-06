@@ -332,7 +332,10 @@
 
         <xsl:if test="self::xml_child_element">
             <xsl:element name="a">
-                <xsl:attribute name="name">element_<xsl:value-of select="@name"/></xsl:attribute>
+                <xsl:attribute name="name">
+                    <xsl:text>element_</xsl:text>
+                    <xsl:value-of select="@name"/>
+                </xsl:attribute>
             </xsl:element>
         </xsl:if>
 
@@ -350,7 +353,9 @@
                                 <xsl:element name="a">
                                     <xsl:attribute name="class">silent</xsl:attribute>
                                     <xsl:attribute name="href"><xsl:value-of select="concat( /*/@base_dir, $path )"/></xsl:attribute>
-                                    &lt;<xsl:value-of select="@name"/>>
+                                    <xsl:text>&lt;</xsl:text>
+                                    <xsl:value-of select="@name"/>
+                                    <xsl:text>></xsl:text>
                                 </xsl:element>
                             </code>
                         </b>
@@ -2527,7 +2532,7 @@
 
     <xsl:template match="message/text/title">
 
-        <xsl:apply-templates match="node()" mode="message"/>
+        <xsl:apply-templates select="node()" mode="message"/>
 
         <!--xsl:for-each select="node()">
             <xsl:choose>

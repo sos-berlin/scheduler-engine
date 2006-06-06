@@ -12,14 +12,6 @@
 
     <change date="2006-06-06" version="2.0.154" subversion_revision="4334">
 
-        <revision type="correction" title="Speicherlecks beim Aufruf von Spidermonkey abgedichtet">
-            <description>
-                <p>
-                    Betrifft <code>spidermonkey.dll</code> und <code>libspidermmonkey.so</code>.
-                </p>
-            </description>
-        </revision>
-
         <revision type="correction" title="&lt;add_order replace=&quot;yes&quot;>">
             <description>
                 <p>
@@ -44,14 +36,6 @@
                         <scheduler_option name="expand-classpath"/>
                     </li>
                 </ul>
-            </description>
-        </revision>
-
-        <revision type="new" title="Anlässe zum Start einer Task 'queue' und 'queue_at'">
-            <description>
-                <p>
-                    Diese Anlässe werden jetzt auch protokolliert (mit <scheduler_message code="SCHEDULER-930"/>).
-                </p>
             </description>
         </revision>
 
@@ -100,6 +84,23 @@
                     </li>
                 </ul>
             </description>
+
+            <revision type="new" title="Anlässe zum Start einer Task 'queue' und 'queue_at'">
+                <description>
+                    <p>
+                        Diese Anlässe werden jetzt auch protokolliert (mit <scheduler_message code="SCHEDULER-930"/>).
+                    </p>
+                </description>
+            </revision>
+
+            <revision type="correction" title="Speicherlecks beim Aufruf von Spidermonkey abgedichtet">
+                <description>
+                    <p>
+                        Betrifft <code>spidermonkey.dll</code> und <code>libspidermmonkey.so</code>.
+                    </p>
+                </description>
+            </revision>
+
         </revision>
 
         <revision type="new" title="&lt;copy_params>">

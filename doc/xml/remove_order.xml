@@ -22,6 +22,12 @@
         </p>
     </description>
 
+
+    <xml_parent_elements>
+        <xml_parent_element name="commands"/>
+    </xml_parent_elements>
+
+
     <xml_attributes>
         <xml_attribute name="job_chain" type="name">
             <description>

@@ -24,6 +24,12 @@
         </p>
     </description>
 
+
+    <xml_parent_elements>
+        <xml_parent_element name="commands"/>
+    </xml_parent_elements>
+
+
     <xml_attributes>
         <xml_attribute name="job_chain" type="state">
             <description>
@@ -119,7 +125,41 @@
 
 
     <xml_child_elements>
-        <xml_child_element name="params"/>
+        <xml_child_element name="params">
+            <description>
+                <h3 style="margin-top: 1em">Verwendung von &lt;copy_params></h3>
+                <p>
+                    Wenn <code>&lt;add_order></code> in <scheduler_element name="job" child="commands"/> steht,
+                    können hier
+                </p>
+                <ul>
+                    <li>
+                        die Parameter der beendeten Task mit <scheduler_element name="copy_params" attribute="from" value="task"/>
+                    </li>
+                    <li>
+                        die Parameter des ausgeführten Auftrags mit
+                        <scheduler_element name="copy_params" attribute="from" value="order"/>
+                    </li>
+                </ul>
+                <p>
+                    übernommen werden.
+                </p>
+            </description>
+
+            <example>
+                <pre>&lt;<a href="job.xml">job</a> name="…">
+    …      
+    &lt;<a href="commands.xml">commands</a> on_exit_code="…">
+        &lt;add_order job_chain="…">
+            &lt;<a href="params.xml">params</a>>
+                &lt;<a href="copy_params.xml">copy_params</a> from="task"/>
+            &lt;/params>
+        &lt;add_prder/>
+    &lt;commands>
+&lt;job></pre>
+            </example>
+        </xml_child_element>
+
         <xml_child_element name="xml_payload"/>
     </xml_child_elements>
 

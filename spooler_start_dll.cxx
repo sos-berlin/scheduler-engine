@@ -3,6 +3,9 @@
 #include "spooler.h"
 
 
+//#pragma comment( lib, "scheduler" )
+
+
 int main( int argc, char** argv )
 {
     //sos::_argc = argc;
