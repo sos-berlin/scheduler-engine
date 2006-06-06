@@ -3252,7 +3252,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
           //else
           //if( opt.flag      ( "show-dtd"         ) )  { if( opt.set() )  need_call_scheduler = false, fprintf( stdout, "%s", spooler::dtd_string ); }
           //else
-            if( opt.with_value( "expand-classpath" ) )  { cout << java::expand_class_path( opt.value() ); need_call_scheduler = false; }
+            if( opt.with_value( "expand-classpath" ) )  { cout << java::expand_class_path( opt.value() ) << '\n'; need_call_scheduler = false; }
             else
             if( opt.flag      ( "show-xml-schema"  ) )  { if( opt.set() )  need_call_scheduler = false, fprintf( stdout, "%s", spooler::embedded_files.string_from_embedded_file( spooler::xml_schema_path ).c_str() ); }
             else
