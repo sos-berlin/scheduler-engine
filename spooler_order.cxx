@@ -677,7 +677,7 @@ void Order_queue::close()
         for( Queue::iterator it = (*q)->begin(); it != (*q)->end(); it = (*q)->erase( it ) )
         {
             Order* order = *it;
-            _log->info( message_string( "SCHEDULER-937", order ) );
+            _log->info( message_string( "SCHEDULER-937", order->obj_name() ) );
         }
     }
 
@@ -813,7 +813,7 @@ void Order_queue::add_order( Order* order, Do_log do_log )
 
                     if( !id_found  &&  o->id_is_equal( order->_id ) )
                     {
-                        _log->debug( message_string( "SCHEDULER-939", order ) );      // "Auftrag mit gleicher Id wird ersetzt: " 
+                        _log->debug( message_string( "SCHEDULER-939", order->obj_name() ) );      // "Auftrag mit gleicher Id wird ersetzt: " 
                         if( ins == it )  { ins = _queue.erase( it ); break; }
                                    else  it = _queue.erase( it );
                         id_found = true;
@@ -1724,7 +1724,7 @@ void Order::remove_from_job_chain( bool leave_in_database )
 
     if( _job_chain )
     {
-        _log->info( _task? message_string( "SCHEDULER-941", _task  ) 
+        _log->info( _task? message_string( "SCHEDULER-941", _task->obj_name() ) 
                          : message_string( "SCHEDULER-940" ) );
 
         if( _task )  _removed_from_job_chain = _job_chain;      // Für die Task merken, in welcher Jobkette wir waren

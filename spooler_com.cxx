@@ -222,7 +222,7 @@ string Com_variable::string_value() const
     }
     catch( exception& x )
     {
-        z::throw_xc( "SCHEDULER-312", _name, vartype_name( _value.vt ), x.what() );
+        z::throw_xc( "SCHEDULER-312", _name, vartype_name( _value.vt ), x );
     }
 }
 

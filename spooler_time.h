@@ -392,6 +392,12 @@ Time                            time_from_string            ( const string& );
 
 } //namespace time
 
+//-------------------------------------------------------------------------------------------------
+
+inline void insert_into_message( Message_string* m, int index, const time::Time& t ) throw()        { m->insert( index, t.as_string() ); }
+
+//-------------------------------------------------------------------------------------------------
+
 using time::Time;
 using time::Period;
 using time::Run_time;
