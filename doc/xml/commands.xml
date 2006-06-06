@@ -11,8 +11,28 @@
              date          = "$Date$">
 
     <xml_parent_elements>
-        <xml_parent_element directory="xml/" name="config"/>
-        <xml_parent_element directory="xml/" name="job"/>
+        <xml_parent_element directory="xml/" name="config">
+            <description>
+                <p>
+                    Der Scheduler führt die Kommandos nach dem Laden der Konfiguration
+                    und vor dem Scheduler-Skript aus.
+                </p>
+                <p>
+                    Ein Fehler beendet den Scheduler.
+                </p>
+            </description>
+        </xml_parent_element>
+
+        <xml_parent_element directory="xml/" name="job">
+            <description>
+                <p>
+                    Der Scheduler führt die Kommandos aus, wenn eine Task sich beendet.
+                </p>
+                <p>
+                    Ein Fehler stoppt den Job (siehe aber <scheduler_element name="delay_after_error"/>).
+                </p>
+            </description>
+        </xml_parent_element>
     </xml_parent_elements>
 
     <xml_attributes>
@@ -72,11 +92,9 @@ on_exit_code="error"</pre>
 
     <description>
         <p>
-            Die Kommandos führt der Scheduler nach dem Laden der Konfiguration
-            und vor dem Scheduler-Skript aus.
-        </p>
-        <p>
-            Ein Fehler beendet den Scheduler.
+            Das Element fasst eine Folge von Kommandos zusammen.
+            Wann die Kommandos ausgeführt werden, 
+            hängt vom Eltern-Element ab.
         </p>
     </description>
 
