@@ -189,6 +189,9 @@
                     <code>-env=NAME=VALUE</code> setzt die Umgebungsvariable NAME.
                 </p>
             </description>
+            <messages>
+                <message level="error" code="SCHEDULER-318"/>
+            </messages>
         </command_option>
 
         <example>

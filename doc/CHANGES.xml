@@ -10,7 +10,21 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2006-06-06" version="2.0.154" subversion_revision="4334">
+    <change date="2006-06-06" version="2.0.154" subversion_revision="4339">
+
+        <revision type="correction" title="-env= korrigiert (Windows)">
+            <description>
+                <p>
+                    <code>-env=</code> hat die Variablen für Kindprozesse gesetzt, aber nicht für den eigenen.
+                    (Das wird nämlich von Microsofts C unterschieden.)
+                </p>
+                <ul>
+                    <li>
+                        <scheduler_option name="env"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
 
         <revision type="correction" title="&lt;add_order replace=&quot;yes&quot;>">
             <description>

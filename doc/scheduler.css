@@ -6,6 +6,7 @@ h2              { font-size: 12pt; font-weight: bold; margin-top: 2em; border-to
 h2.bar          { font-size: 12pt; font-weight: bold; margin-top: 2em; border-top: 1px solid #f0f0f0; padding-top: 3ex; }
 h3              { font-size: 10pt; font-weight: bold; margin-top: 3em; }
 h3.bar          { font-size: 10pt; font-weight: bold; margin-top: 3em; border-top: 1px solid #f0f0f0; padding-top: 3ex; }
+h4              { margin-bottom: 1em; }
 .zwischentitel  { font-weight: bold; margin-top: 6ex }
 
 hr              { height: 1px; font-size: 1px; border: 0px; color: gray; background-color: gray; }
