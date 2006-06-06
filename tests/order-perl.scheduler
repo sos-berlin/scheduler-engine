@@ -5,14 +5,16 @@
 >
     <config>
 
-        <base file="base.scheduler"/>
+        <base file="$SCHEDULER_TEST/base.scheduler"/>
         
 
         <jobs>
             <job name="start">
                 <script language="perl">
-                    <include file="expect.pl"/>
+                    <include file="$SCHEDULER_TEST/expect.pl"/>
                     <![CDATA[
+package main;
+use vars qw($spooler $spooler_log $spooler_job $spooler_task);
 use strict;
 use warnings FATAL => "all";
 
@@ -21,6 +23,8 @@ my $x;
 my $v;
 my $undef;
 undef $undef;
+
+$spooler_log->info( 'order=' . ( defined $spooler_job->order_queue? "yes" : "no" ) );
 
 my $job_chain = $spooler->create_job_chain();
 $job_chain->LetProperty( 'name', 'Kette_A' );
@@ -107,8 +111,12 @@ if( defined $spooler_job->order_queue )  { $spooler_log->error( '$spooler_job->o
             <job name="job_a" order="yes">
                 <script language="perl">
                     <![CDATA[
+package main;
+use vars qw($spooler $spooler_log $spooler_job $spooler_task);
 use strict;
 use warnings FATAL => "all";
+
+$spooler_log->info( 'order=' . ( defined $spooler_job->order_queue? "yes" : "no" ) );
 
 sub spooler_process()
 {
@@ -127,6 +135,8 @@ sub spooler_process()
             <job name="job_b" order="yes">
                 <script language="perl">
                     <![CDATA[
+package main;
+use vars qw($spooler $spooler_log $spooler_job $spooler_task);
 use strict;
 use warnings FATAL => "all";
 
@@ -146,8 +156,10 @@ sub spooler_process()
 
             <job name="check" order="yes">
                 <script language="perl">
-                    <include file="expect.pl"/>
+                    <include file="$SCHEDULER_TEST/expect.pl"/>
                     <![CDATA[
+package main;
+use vars qw($spooler $spooler_log $spooler_job $spooler_task);
 use strict;
 use warnings FATAL => "all";
 
