@@ -394,7 +394,7 @@ Time                            time_from_string            ( const string& );
 
 //-------------------------------------------------------------------------------------------------
 
-inline void insert_into_message( Message_string* m, int index, const time::Time& t ) throw()        { m->insert( index, t.as_string() ); }
+inline void insert_into_message( Message_string* m, int index, const time::Time& t ) throw()        { m->insert_string( index, t.as_string() ); }
 
 //-------------------------------------------------------------------------------------------------
 
