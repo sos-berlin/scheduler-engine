@@ -53,6 +53,9 @@
                 <p>
                     Bei <code>order="yes"</code> ist der Job auftragsgesteuert. Der Scheduler startet diesen Job nur, wenn ein Auftrag vorliegt.
                 </p>
+                <p>
+                    Ein Skript kann mit <scheduler_method class="Job" property="order_queue"/> das Attribut prüfen.
+                </p>
             </description>
         </xml_attribute>
 

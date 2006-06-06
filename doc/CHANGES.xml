@@ -10,7 +10,28 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2006-06-05" version="2.0.154" subversion_revision="4321">
+    <change date="2006-06-06" version="2.0.154" subversion_revision="4334">
+
+        <revision type="correction" title="Speicherlecks beim Aufruf von Spidermonkey abgedichtet">
+            <description>
+                <p>
+                    Betrifft <code>spidermonkey.dll</code> und <code>libspidermmonkey.so</code>.
+                </p>
+            </description>
+        </revision>
+
+        <revision type="correction" title="&lt;add_order replace=&quot;yes&quot;>">
+            <description>
+                <p>
+                    Das XML-Schema erlaubt jetzt replace="yes".
+                </p>
+                <ul>
+                    <li>
+                        <scheduler_element name="add_order" attribute="replace"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
 
         <revision type="new" title="Neue Option -expand-classpath=">
             <description>
@@ -97,7 +118,7 @@
             </description>
         </revision>
 
-        <revision type="new" title="Aufträge mit Startzeit, relative Zeitangabe mit now+HH:MM">
+        <revision type="new" title="Aufträge mit Startzeit">
             <description>
                 <p>
                     Aufträge können einen Startzeit haben, 
@@ -105,9 +126,22 @@
                     Ein noch nicht ausgeführter Auftrag mit verstrichener Startzeit wird sofort gestartet
                     (sofern die <scheduler_element name="run_time"/> des Jobs dies erlaubt).
                 </p>
+                <p>
+                    Das entspricht dem Verhalten von <scheduler_element name="start_job" attribute="at"/>.
+                </p>
                 <ul>
                     <li>
-                        <scheduler_element name="start_job" attribute="at" value="now+..."/> 
+                        <scheduler_element name="add_order" attribute="at"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+
+        <revision type="new" title="Relative Zeitangabe mit now+HH:MM">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_element name="start_job" attribute="at" value="now+..."/>
                     </li>
                     <li>
                         <scheduler_element name="add_order" attribute="at" value="now+..."/>
@@ -121,13 +155,16 @@
                         <code>now</code>
                     </li>
                     <li>
-                        <code>now + </code><i>seconds</i>
+                        <code>now + </code>
+                        <i>seconds</i>
                     </li>
                     <li>
-                         <code>now + </code><i>hh:mm</i>
+                        <code>now + </code>
+                        <i>hh:mm</i>
                     </li>
                     <li>
-                        <code>now + </code><i>hh:mm:ss</i>
+                        <code>now + </code>
+                        <i>hh:mm:ss</i>
                     </li>
                     <li>
                         <code>yyyy-mm-dd HH:MM</code>

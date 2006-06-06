@@ -275,8 +275,6 @@
                     </xsd:complexType>
                 </xsd:element>
 
-                <xsd:element name="commands" type="Commands" minOccurs="0" maxOccurs="unbounded"/>
-
                 <xsd:element name="start_when_directory_changed" minOccurs="0" maxOccurs="unbounded">
                     <xsd:complexType>
                         <xsd:attribute name="directory"     type="File"                 use="required"/>
@@ -317,6 +315,8 @@
                 </xsd:element>
                 
                 <xsd:element ref="run_time" minOccurs="0"/>
+
+                <xsd:element name="commands" type="Commands" minOccurs="0" maxOccurs="unbounded"/>
 
             </xsd:sequence>
 

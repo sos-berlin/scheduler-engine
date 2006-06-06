@@ -458,6 +458,14 @@ spooler_job.delay_after_error( 20 ) = "STOP";       // Beim 20. aufeinanderfolge
                 <scheduler_method class="Job_chain" method="add_job"/>.
             </p>
         </description>
+
+        <example programming_language="perl">
+            <pre>$spooler_log->info( 'order=' . ( defined $spooler_job->order_queue? "yes" : "no" ) );</pre>
+        </example>
+
+        <example programming_language="javascript">
+            <pre>spooler_log.info( 'order=' + ( spooler_job.order_queue? "yes" : "no" ) );</pre>
+        </example>
     </property>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
