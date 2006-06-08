@@ -130,7 +130,7 @@
             <com.type type="bool"/>
             <description>
                 <code>false</code> lässt die Task nicht starten. 
-                <scheduler_method class="Job_impl" method="spooler_task_after"/> wird nicht gerufen.
+                <scheduler_method class="Monitor_impl" method="spooler_task_after"/> wird nicht gerufen.
             </description>
         </com.result>
     </com>
