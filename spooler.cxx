@@ -3175,6 +3175,10 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
 
 int object_server( int argc, char** argv )
 {
+#   ifdef Z_WINDOWS
+        SetConsoleCtrlHandler( NULL, true );    // Wir sind ein Kind-Prozess und Ctrl-C soll ignoriert werden (darum kümmert sich der Hauptprozess, wie unter Unix)
+#   endif
+
 //show_msg("object_server");
     zschimmer::com::object_server::Server server;
 

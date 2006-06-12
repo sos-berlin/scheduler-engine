@@ -1113,7 +1113,9 @@ bool Job::execute_state_cmd()
                                  || task->_state == Task::s_running_delayed
                                  || task->_state == Task::s_running_waiting_for_order )  task->set_state( Task::s_running );
                             }
+                            
                             set_state( _running_tasks.size() > 0? s_running : s_pending );
+                            check_min_tasks( "job has been unstopped with cmd=\"continue\"" );
                             something_done = true;
                         }
                     }
@@ -1137,6 +1139,7 @@ bool Job::execute_state_cmd()
                             ptr<Task> task = create_task( NULL, "", 0 );      // create_task() nicht mit gesperrten _lock rufen, denn get_id() in DB blockieren.
                             
                             set_state( s_pending );
+                            check_min_tasks( "job has been unstopped with cmd=\"wake\"" );
 
                             task->_cause = cause_wake;
                             task->_let_run = true;

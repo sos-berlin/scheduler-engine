@@ -10,6 +10,21 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2006-06-12" version="2.0.154" subversion_revision="999999">
+
+        <revision type="new" title="Nur Windows: Ctrl-C bricht nicht mehr die Prozesse ab">
+            <description>
+                <p>
+                    Wenn unter Windows der Scheduler an einer Console gestartet wird,
+                    wirkt Ctrl-C nur noch auf den Scheduler-Prozess, 
+                    aber nicht mehr auf die Task-Prozesse 
+                    (außer <scheduler_element name="process"/> und <scheduler_element name="script" language="shell" />).
+                    Damit kann der Scheduler nach Ctrl-C wie unter Unix ordentlich herunterfahren.
+                </p>
+            </description>
+        </revision>
+    </change>
+
     <change date="2006-06-06" version="2.0.154" subversion_revision="4339">
 
         <revision type="correction" title="-env= korrigiert (Windows)">

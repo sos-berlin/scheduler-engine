@@ -96,7 +96,13 @@
                         oder eine neue Periode (<scheduler_element name="run_time"/>) beginnt
                     </li>
                     <li>
-                        oder der Job entstoppt wird
+                        oder bei <scheduler_element name="modify_job" attribute="cmd" value="unstop"/>: der Job wird entstoppt
+                    </li>
+                    <li>
+                        oder bei <scheduler_element name="modify_job" attribute="cmd" value="continue"/>: alle Tasks des Jobs werden fortgesetzt
+                    </li>
+                    <li>
+                        oder bei <scheduler_element name="modify_job" attribute="cmd" value="wake"/>: der Job wird geweckt
                     </li>
                 </ul>
                 <ul>
