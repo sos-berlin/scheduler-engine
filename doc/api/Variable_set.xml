@@ -43,8 +43,6 @@
         </com.result>
     </com>
 
-    <not_implemented programming_language="java"/>
-
     <title>
         Eine Variable
     </title>
@@ -72,6 +70,13 @@
     <title>
         Eine Variable
     </title>
+
+    <description>
+        <p>
+            Verwenden Sie <scheduler_method class="Variable_set" property="value"/>, 
+            das ist in allen Sprachen verfügbar.
+        </p>
+    </description>
 
 </property>
 
