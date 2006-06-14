@@ -769,7 +769,7 @@
     <xsl:choose>
         <xsl:when test="com.type [ @type ]">
             <xsl:for-each select="com.type">
-                <xsl:if test="position() &gt; 1">|</xsl:if>
+                <xsl:if test="position() &gt; 1">&#x2009;|&#x2009;</xsl:if>
                 <xsl:apply-templates select=".">
                     <xsl:with-param name="is_in_table" select="$is_in_table"/>
                 </xsl:apply-templates>
@@ -904,7 +904,8 @@
                                     <xsl:value-of select="@name"/>
                                 </xsl:when>
                                 <xsl:otherwise>
-                                    <xsl:value-of select="com.type/@type | com.type/@class"/>
+                                    <!--xsl:value-of select="com.type/@type | com.type/@class"/-->
+                                    <xsl:apply-templates select="com.type"/>
                                 </xsl:otherwise>
                             </xsl:choose>
                         </span>
@@ -959,8 +960,10 @@
                     <xsl:with-param name="id" select="'api.exceptions.title'"/>
                 </xsl:call-template>
             </h3>
-            
-            <xsl:apply-templates select="messages [ message/@level='error' ]" mode="without_title"/>
+
+            <xsl:call-template name="messages">
+                <xsl:with-param name="message_set" select="messages/message[ @level='error' ]"/>
+            </xsl:call-template>
         </xsl:if >
 
         <xsl:if test="messages [ message/@level != 'error' ]">
@@ -969,9 +972,10 @@
                     <xsl:with-param name="id" select="'messages.title'"/>
                 </xsl:call-template>
             </h3>
-            <xsl:apply-templates select="messages [ @level != 'error' ]">
-                <xsl:with-param name="h" select="'h3'"/>
-            </xsl:apply-templates>
+            <xsl:call-template name="messages">
+                <xsl:with-param name="message_set" select="messages/message[ @level != 'error' ]"/>
+                <xsl:with-param name="show_level"  select="true()"/>
+            </xsl:call-template>
         </xsl:if>
     </xsl:if>
 

@@ -21,6 +21,10 @@
     <span class="mono">boolean</span>
 </xsl:template>
 
+<xsl:template match="com.type [ @type='DATE' ]" mode="no_array">
+    <span class="mono">Date</span>
+</xsl:template>
+
 <xsl:template match="com.type [ @type='BSTR' ]" mode="no_array">
     <span class="mono">string</span>
 </xsl:template>

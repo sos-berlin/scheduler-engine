@@ -1880,32 +1880,46 @@
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~messages-->
 
     <xsl:template match="messages [ message ]" mode="without_title">
-        
+
         <xsl:param name="show_level"/>
 
+        <xsl:call-template name="messages">
+            <xsl:with-param name="message_set" select="message"/>
+            <xsl:with-param name="show_level" select="$show_level"/>
+        </xsl:call-template>
+
+    </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~messages-->
+
+    <xsl:template name="messages">
+
+        <xsl:param name="show_level"/>
+        <xsl:param name="message_set"/>
+
         <table cellspacing="0" cellpadding="0">
-            <xsl:apply-templates select="message[ @level='error' ]">
+            <xsl:apply-templates select="$message_set[ @level='error' ]">
                 <xsl:sort select="@code"/>
                 <xsl:with-param name="show_level" select="$show_level"/>
             </xsl:apply-templates>
 
-            <xsl:apply-templates select="message[ @level='warn' ]">
+            <xsl:apply-templates select="$message_set[ @level='warn' ]">
                 <xsl:sort select="@code"/>
                 <xsl:with-param name="show_level" select="$show_level"/>
             </xsl:apply-templates>
 
-            <xsl:apply-templates select="message[ @level='info' ]">
+            <xsl:apply-templates select="$message_set[ @level='info' ]">
                 <xsl:sort select="@code"/>
                 <xsl:with-param name="show_level" select="$show_level"/>
             </xsl:apply-templates>
 
-            <xsl:apply-templates select="message[ starts-with( @level, 'debug') ]">
+            <xsl:apply-templates select="$message_set[ starts-with( @level, 'debug') ]">
                 <xsl:sort select="@level"/>
                 <xsl:sort select="@code"/>
                 <xsl:with-param name="show_level" select="$show_level"/>
             </xsl:apply-templates>
         </table>
-        
+
     </xsl:template>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~message-->

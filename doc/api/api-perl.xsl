@@ -58,9 +58,9 @@
     <span class="mono">Boolean</span>
 </xsl:template>
 
-<!--xsl:template match="com.type [ @class and /*/@programming_language='java' ]">
-    <span class="mono"><xsl:value-of select="concat( 'sos.spooler.', @class )"/></span>
-</xsl:template-->
+<xsl:template match="com.type [ @type='DATE' ]" mode="no_array">
+    <span class="mono">Datestring</span>
+</xsl:template>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 

@@ -27,6 +27,9 @@
             <description>
                 <p>
                     Der Scheduler führt die Kommandos aus, wenn eine Task sich beendet.
+                    Für manche Kommandos lassen sich die Parameter der beendeten Task 
+                    oder (unter bestimmten Bedingungen) des zuletzt ausgeführten Auftrags
+                    mit <scheduler_element name="copy_params"/> übernehmen.
                 </p>
                 <p>
                     Ein Fehler stoppt den Job (siehe aber <scheduler_element name="delay_after_error"/>).
@@ -67,9 +70,13 @@ on_exit_code="error"</pre>
             </example>
             
             <messages>
+                <!-- Beim Scheduler-Start: -->
                 <message code="SCHEDULER-324" level="error"/>
                 <message code="SCHEDULER-325" level="error"/>
                 <message code="SCHEDULER-326" level="error"/>
+                <!-- Während der Ausführung: -->
+                <message code="SCHEDULER-328" level="info"/>
+                <message code="SCHEDULER-327" level="error"/>
             </messages>
         </xml_attribute>
     </xml_attributes>

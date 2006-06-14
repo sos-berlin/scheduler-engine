@@ -13,7 +13,8 @@
     <description>
         <p>
             Das Element übernimmt die Parameter der Task oder des Auftrags.
-            Es kann nur in folgender Hierarchie verwendet werden:
+            Es kann in <scheduler_element name="start_job"/> und <scheduler_element name="add_order"/>
+            in folgender Hierarchie verwendet werden:
         </p>            
         
         <!--pre>&lt;<a href="job.xml">job</a> name="…">

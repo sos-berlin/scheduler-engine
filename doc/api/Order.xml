@@ -308,6 +308,15 @@
             Die Rückgabe von <scheduler_method class="Job_impl" method="spooler_process"/> bleibt ohne Wirkung.
         </p>
     </description>
+
+    <messages>
+        <message code="SCHEDULER-157" level="error"/>
+        <message code="SCHEDULER-163" level="error"/>
+        <message code="SCHEDULER-187" level="error"/>
+        <message code="SCHEDULER-188" level="error"/>
+        <message code="SCHEDULER-946" level="info"/>
+        <message code="SCHEDULER-947" level="warn"/>
+    </messages>
 </method>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
@@ -574,6 +583,51 @@
             Siehe <scheduler_element name="add_order" child="params"/>.
         </p>
     </description>
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="at" access="write">
+    <com>
+        <com.result>
+            <com.type type="VARIANT">
+                <com.type type="BSTR"/>
+                <com.type type="DATE"/>
+            </com.type>
+        </com.result>
+    </com>
+
+    <title>
+        Start-Zeitpunkt des Auftrags
+    </title>
+
+    <description>
+        <p>
+            Setzt den Start-Zeitpunkt bevor der Auftrag in eine Auftragswarteschlange eingereiht wird.
+            Als String kann angegeben werden:
+        </p>
+        <ul>
+            <li>
+                <code>"now"</code>
+            </li>
+            <li>
+                <code>"</code><i>yyyy</i><code>-</code><i>mm</i><code>-</code><i>dd</i> <i>HH</i><code>:</code><i>MM</i>[<code>:</code><i>SS</i>]<code>"</code>
+            </li>
+            <li>
+                <code>"now + </code><i>HH</i><code>:</code>:<i>MM</i>[<code>:</code><i>SS</i>]<code>"</code>
+            </li>
+            <li>
+                <code>"now + </code><i>seconds</i><code>"</code>
+            </li>
+        </ul>
+        <p>
+            Siehe <scheduler_element name="add_order" attribute="at"/>.
+        </p>
+    </description>
+
+    <messages>
+        <message code="SCHEDULER-217" level="error"/>
+    </messages>
 </property>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->

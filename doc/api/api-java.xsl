@@ -65,6 +65,10 @@
     <span class="mono" title="java.lang.String">String</span>
 </xsl:template>
 
+<xsl:template match="com.type [ @type='DATE' ]" mode="no_array">
+    <span class="mono">java.util.Date</span>
+</xsl:template>
+
 <xsl:template match="com.type [ @type='VARIANT' and not( com.type ) ]" mode="no_array">
     <span class="mono" title="java.lang.String">String</span>
 </xsl:template>

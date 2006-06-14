@@ -222,4 +222,8 @@ public class Order extends Idispatch
     
     public void         set_params              ( Variable_set v )                  {                      com_call( ">params", v ); }
     public Variable_set     params              ()                                  { return (Variable_set)com_call( "<params" ); }
+    
+    public void         set_at                  ( String date_time )                { com_call( ">at", date_time ); }
+  //public void         set_at                  ( java.util.Date date )             { com_call( ">at", date ); }
+    public void         set_at                  ( java.util.Date date )             { set_at( new java.text.SimpleDateFormat( "yyyy-MM-dd HH:mm:ss.SSS" ).format( date ) ); }
 }

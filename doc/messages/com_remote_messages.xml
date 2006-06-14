@@ -229,6 +229,11 @@
                 <title>Objectserver: v.vt stimmt nicht mit SafeArrayGetVartype() überein</title>
             </text>
         </message>
+        <message code="Z-REMOTE-129">
+            <text xml:lang="en">
+                <title>Separate process: Blocking invocation on asynchronous connection rejected. Object=<p1/>, dispid=<p2/></title>
+            </text>
+        </message>
     </messages>
     
 </messages>

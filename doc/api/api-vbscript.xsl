@@ -29,6 +29,10 @@
     <span class="mono">String</span>
 </xsl:template>
 
+<xsl:template match="com.type [ @type='DATE' ]" mode="no_array">
+    <span class="mono">Date</span>
+</xsl:template>
+
 <!--xsl:template match="com.type [ @type='BSTR' and @array ]">
     <span class="mono" title="Array of strings">String[]</span>
 </xsl:template-->

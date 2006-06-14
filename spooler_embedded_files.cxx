@@ -4960,7 +4960,7 @@ const char file_scheduler_xsd[] =
     "</xsd:sequence>\r\n"
     "<xsd:attribute name=\"job\"               type=\"Name\"                     use=\"required\"/>\r\n"
     "<xsd:attribute name=\"name\"              type=\"Name\"/>\r\n"
-    "<xsd:attribute name=\"at\"                type=\"String\"/>\r\n"
+    "<xsd:attribute name=\"at\"                type=\"Date_time_with_now_or_period\"/>\r\n"
     "<xsd:attribute name=\"after\"             type=\"xsd:nonNegativeInteger\"/>\r\n"
     "<xsd:attribute name=\"web_service\"       type=\"Name\"/>\r\n"
     "</xsd:complexType>\r\n"
@@ -5072,6 +5072,20 @@ const char file_scheduler_xsd[] =
     "</xsd:simpleType>\r\n"
     "\r\n"
     "\r\n"
+    "<xsd:simpleType name=\"Date_time_with_now_or_period\">\r\n"
+    "<xsd:union>\r\n"
+    "<xsd:simpleType>\r\n"
+    "<xsd:restriction base=\"Date_time_with_now\"/>\r\n"
+    "</xsd:simpleType>\r\n"
+    "<xsd:simpleType>\r\n"
+    "<xsd:restriction base=\"xsd:NMTOKEN\">\r\n"
+    "<xsd:enumeration value=\"period\"/>\r\n"
+    "</xsd:restriction>\r\n"
+    "</xsd:simpleType>\r\n"
+    "</xsd:union>\r\n"
+    "</xsd:simpleType>\r\n"
+    "\r\n"
+    "\r\n"
     "<xsd:simpleType name=\"Time_of_day\">\r\n"
     "<xsd:restriction base=\"String\">\r\n"
     "<xsd:pattern value=\"\\d{1,2}:\\d{2}(:\\d\\d)?\"/>\r\n"
@@ -5085,7 +5099,7 @@ const char file_scheduler_xsd[] =
     "<xsd:restriction base=\"xsd:nonNegativeInteger\">\r\n"
     "<xsd:annotation>\r\n"
     "<xsd:documentation xml:lang=\"de\">\r\n"
-    "Dauer in Sekunden\r\n"
+    "Duration in seconds\r\n"
     "</xsd:documentation>\r\n"
     "</xsd:annotation>\r\n"
     "</xsd:restriction>\r\n"
@@ -5094,7 +5108,7 @@ const char file_scheduler_xsd[] =
     "<xsd:restriction base=\"String\">\r\n"
     "<xsd:annotation>\r\n"
     "<xsd:documentation xml:lang=\"de\">\r\n"
-    "Dauer im Format HH:MM[:SS]\r\n"
+    "Duration in format HH:MM[:SS]\r\n"
     "</xsd:documentation>\r\n"
     "</xsd:annotation>\r\n"
     "<xsd:pattern value=\"(\\d+)|(\\d+:\\d{2}(:\\d\\d)?)\"/>\r\n"
@@ -5186,7 +5200,7 @@ static const Embedded_file embedded_files_array[] =
     { "html/jz/translation_de.js", file_html_jz_translation_de_js, sizeof file_html_jz_translation_de_js - 1, 1113979995 },
     { "html/jz/scheduler.xslt", file_html_jz_scheduler_xslt, sizeof file_html_jz_scheduler_xslt - 1, 1148569750 },
     { "html/jz/scheduler.css", file_html_jz_scheduler_css, sizeof file_html_jz_scheduler_css - 1, 1148569750 },
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1149582344 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1150258054 },
     { NULL, NULL, 0 }
 };
 

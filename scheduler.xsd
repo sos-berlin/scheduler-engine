@@ -858,7 +858,7 @@
             </xsd:sequence>
             <xsd:attribute name="job"               type="Name"                     use="required"/>
             <xsd:attribute name="name"              type="Name"/>
-            <xsd:attribute name="at"                type="String"/>
+            <xsd:attribute name="at"                type="Date_time_with_now_or_period"/>
             <xsd:attribute name="after"             type="xsd:nonNegativeInteger"/>
             <xsd:attribute name="web_service"       type="Name"/>
         </xsd:complexType>
@@ -970,6 +970,20 @@
     </xsd:simpleType>
 
 
+    <xsd:simpleType name="Date_time_with_now_or_period">
+        <xsd:union>
+            <xsd:simpleType>
+                <xsd:restriction base="Date_time_with_now"/>
+            </xsd:simpleType>
+            <xsd:simpleType>
+                <xsd:restriction base="xsd:NMTOKEN">
+                    <xsd:enumeration value="period"/>
+                </xsd:restriction>
+            </xsd:simpleType>
+        </xsd:union>
+    </xsd:simpleType>
+
+
     <xsd:simpleType name="Time_of_day">
         <xsd:restriction base="String">
             <xsd:pattern value="\d{1,2}:\d{2}(:\d\d)?"/>
@@ -983,7 +997,7 @@
                 <xsd:restriction base="xsd:nonNegativeInteger">
                     <xsd:annotation>
                         <xsd:documentation xml:lang="de">
-                            Dauer in Sekunden
+                            Duration in seconds
                         </xsd:documentation>
                     </xsd:annotation>
                 </xsd:restriction>
@@ -992,7 +1006,7 @@
                 <xsd:restriction base="String">
                     <xsd:annotation>
                         <xsd:documentation xml:lang="de">
-                            Dauer im Format HH:MM[:SS]
+                            Duration in format HH:MM[:SS]
                         </xsd:documentation>
                     </xsd:annotation>
                     <xsd:pattern value="(\d+)|(\d+:\d{2}(:\d\d)?)"/>

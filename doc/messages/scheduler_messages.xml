@@ -812,7 +812,7 @@
                 <title>Order.setback() und Order.state= können nicht zusammen gerufen werden, das ist Unsinn</title>
             </text>
             <text xml:lang="en">
-                <title>Order.setback() and Order.state= cannot be combined</title>
+                <title><code>Order.setback()</code> and <code>Order.state=</code> cannot be combined</title>
             </text>
         </message>
 
