@@ -469,6 +469,8 @@ bool Process_module_instance::begin__end()
                 catch( exception& x ) { Z_LOG( "setpriority(" << _module->_priority << ") ==> ERROR " << x.what() << "\n" ); }
             }
 
+            ::signal( SIGINT, SIG_IGN );    // Ctrl-C ignorieren (Darum kümmert sich der Haupt-Prozess)
+
             dup2( _stdout_file._file, STDOUT_FILENO );
             dup2( _stderr_file._file, STDERR_FILENO );
 

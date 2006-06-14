@@ -2780,9 +2780,9 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line )
 
     _thread_id = current_thread_id();
 
-#   ifdef Z_WINDOWS
-        SetThreadPriority( GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL );
-#   endif
+//#   ifdef Z_WINDOWS
+//        SetThreadPriority( GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL );
+//#   endif
 
     //spooler_is_running = true;
 
@@ -3177,6 +3177,8 @@ int object_server( int argc, char** argv )
 {
 #   ifdef Z_WINDOWS
         SetConsoleCtrlHandler( NULL, true );    // Wir sind ein Kind-Prozess und Ctrl-C soll ignoriert werden (darum kümmert sich der Hauptprozess, wie unter Unix)
+#    else
+        ::signal( SIGINT, SIG_IGN );            // Ctrl-C ignorieren
 #   endif
 
 //show_msg("object_server");
