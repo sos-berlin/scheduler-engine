@@ -1738,8 +1738,6 @@ bool Job::do_something()
 
 void Job::on_task_finished( Task* task )
 {
-    init_start_when_directory_changed( task );
-
     if( !_start_min_tasks  &&  ( _state == s_pending  ||  _state == s_running ) )
     {
         if( task->running_state_reached() )
