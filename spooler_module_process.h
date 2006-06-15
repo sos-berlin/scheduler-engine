@@ -16,7 +16,7 @@ struct Process_module_instance : Module_instance
                                         Process_event               ( const string& name )                  : Event(name) {}
 
             virtual void                close                       ();
-            bool                        signaled                    ();
+            bool                        signaled                    () const;
             virtual bool                wait                        ( double seconds );
                                         operator bool               ()                                      { return _pid != 0; }
 
