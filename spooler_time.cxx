@@ -155,6 +155,7 @@ void Time::set( double t )
 }
 
 //----------------------------------------------------------------------------------------Time::set
+#ifdef Z_WINDOWS
 
 void Time::set( const SYSTEMTIME& systemtime )
 {
@@ -167,7 +168,9 @@ void Time::set( const SYSTEMTIME& systemtime )
     set( filetime );
 }
 
+#endif
 //----------------------------------------------------------------------------------------Time::set
+#ifdef Z_WINDOWS
 
 void Time::set( const FILETIME& filetime )
 {
@@ -189,6 +192,7 @@ void Time::set( const FILETIME& filetime )
     set( (double)( *(int64*)&filetime - base_filetime ) / 10000000.0 );
 }
 
+#endif
 //-------------------------------------------------------------------------------Time::set_datetime
 
 void Time::set_datetime( const string& t )

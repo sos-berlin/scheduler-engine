@@ -2523,7 +2523,6 @@ void Spooler::run()
                             {
                                 wait_until = next_time;
                                 wait_for = *p;
-                                if( log_wait )  wait_for_string = S() << "pid=" << (*p)->pid();
                             }
 
 #                       endif
