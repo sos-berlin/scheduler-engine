@@ -26,12 +26,28 @@
             </description>
         </xml_attribute>
 
-        <xml_attribute name="param" type="text">
+        <xml_attribute name="param" type="text" subst_env="yes">
             <description>
                 <p>
                     Gibt den Parameterstring an, der dem Prozess übergeben wird.
+                    Außer den Umgebungsvariablen werden können auch die Task-Parameter mit
+                    <code>$</code><i>name</i> oder 
+                    <code>${</code><i>name</i><code>}</code>
+                    abgerufen werden.
                 </p>
             </description>
+            <example>
+                <pre><![CDATA[<process file="/tmp/test.cmd" param="EINS=$EINS ZWEI=$ZWEI HOME=$HOME LOG=$LOG PATH=$PATH">
+    <environment>
+        <variable name="PATH" value="$PATH;/extra"/>
+    </environment>
+</process>]]></pre>
+                <pre>var params = spooler.create_variable_set();
+params.value( "EINS" ) = "1";
+params.value( "ZWEI" ) = "2";
+spooler.job( "process" ).start( params );
+</pre>
+            </example>
         </xml_attribute>
 
 

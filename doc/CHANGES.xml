@@ -12,6 +12,21 @@
 
     <change date="2006-06-16" version="2.0.154" subversion_revision="999999">
 
+        <revision type="new" title="&lt;process param=&quot;&quot;>: Task-Parameter werden ersetzt">
+            <description>
+                <p>
+                    Im Attribut <code>param=</code> ersetzt der Scheduler jetzt auch Task-Parameter.
+                    Die haben Vorrang vor den Umgebungsvariablen.
+                    Damit kann für jede Task eine andere Parameterzeile übergeben werden.
+                </p>
+                <ul>
+                    <li>
+                        <scheduler_element name="process" attribute="param"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+
         <revision type="new" title="Neue Eigenschaft Order.at">
             <description>
                 <ul>
