@@ -1473,7 +1473,7 @@
 
         <message code="SCHEDULER-261">
             <text xml:lang="en">
-                <title>Nothing done, state=<p1/>, wait_handles=<p2/></title>
+                <title>Nothing done, event=<p1/>, operations=<p2/></title>
             </text>
         </message>
 

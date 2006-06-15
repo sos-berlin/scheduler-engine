@@ -10,6 +10,17 @@ namespace spooler {
 
 using namespace object_server;
 
+//---------------------------------------------------------------------------------Process::Process
+
+Process::Process( Spooler* sp )
+: 
+    Scheduler_object( sp, this, type_process ), 
+    _zero_(this+1), 
+    _lock("Process"),
+    _log( Z_NEW( Prefix_log( this, "Process" ) ) )
+{
+}
+
 //--------------------------------------------------------------------------------Process::~Process
 
 Process::~Process()
@@ -88,6 +99,7 @@ void Process::start()
 
 
         _connection = _spooler->_connection_manager->start_process( parameters, _priority );
+        _log->set_prefix( obj_name() );
 
         _process_handle_copy = _connection->process_handle();
         _spooler->register_process_handle( _process_handle_copy );

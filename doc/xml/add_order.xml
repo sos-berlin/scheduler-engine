@@ -118,6 +118,9 @@
                     <code>"now + SECONDS"</code> 
                     sind möglich.
                 </p>
+                <p>
+                    Siehe auch <scheduler_method class="Order" property="at"/>.
+                </p>
             </description>
         </xml_attribute>
 

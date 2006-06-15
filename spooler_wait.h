@@ -48,6 +48,8 @@ struct Event : System_event
 
 struct Wait_handles : Non_cloneable
 {
+    Fill_zero _zero_;
+
                                 Wait_handles                ( Spooler*, Prefix_log* );
                                 Wait_handles                ( const Wait_handles& );
                                ~Wait_handles                ();
@@ -63,14 +65,14 @@ struct Wait_handles : Non_cloneable
     void                        remove                      ( System_event* );
 
 #ifdef Z_WINDOWS
-    void                        add_handle                  ( HANDLE ); //, System_event* = NULL );
-  //void                        remove_handle               ( HANDLE, zschimmer::Event* for_internal_use_only = NULL );
+  //void                        add_handle                  ( HANDLE ); //, System_event* = NULL );
     HANDLE                      operator []                 ( int index )                           { return _handles[index]; }
 #endif
 
-    bool                        wait_until                  ( Time, const string& debug_string );   // Berücksichtigt Sommerzeitumstellung
-    bool                        wait_until_2                ( Time, const string& debug_string );
-    bool                        wait                        ( double time );
+    bool                        wait_until                  ( const Time&  , const Object* debug_wait_for_object );   // Berücksichtigt Sommerzeitumstellung
+    bool                        wait_until_2                ( const Time& t, const Object& debug_wait_for_object )    { return wait_until_2( t, &debug_wait_for_object ); }
+    bool                        wait_until_2                ( const Time&  , const Object* debug_wait_for_object );
+  //bool                        wait                        ( double time );
 
     bool                        signaled                    ();
     int                         length                      ()                                      { return _events.size(); }
@@ -79,6 +81,8 @@ struct Wait_handles : Non_cloneable
     string                      as_string                   ();
     friend ostream&             operator <<                 ( ostream& s, Wait_handles& w )         { return s << w.as_string(); }
 
+
+    z::Event_base*             _catched_event;              // Ereignis, das wait_until() beendete. Nur unmittelbar nach wait_until() oder signaled() gültig.
 
   protected:
     Spooler*                   _spooler;

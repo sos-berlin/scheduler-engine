@@ -659,7 +659,7 @@ AGAIN:
 
 //-----------------------------------------Remote_module_instance_proxy::Operation::async_finished_
 
-bool Remote_module_instance_proxy::Operation::async_finished_()
+bool Remote_module_instance_proxy::Operation::async_finished_() const
 { 
 
     if( _call_state == c_begin  &&  !_proxy->_process ) 
@@ -673,7 +673,7 @@ bool Remote_module_instance_proxy::Operation::async_finished_()
 
         // S.a. begin__end(): async_check_error() bei _state == c_connect
 
-        async_continue();
+        const_cast<Operation*>( this ) -> async_continue();
     }
 
     return _call_state == c_finished;  //  ||  _operation && _operation->async_has_error();
@@ -681,7 +681,7 @@ bool Remote_module_instance_proxy::Operation::async_finished_()
 
 //---------------------------------------Remote_module_instance_proxy::Operation::async_state_text_
 
-string Remote_module_instance_proxy::Operation::async_state_text_()
+string Remote_module_instance_proxy::Operation::async_state_text_() const
 { 
     string text = "Remote_module_instance_proxy(state=" + state_name();
     if( _call_state == c_begin  &&  !_proxy->_process )  text += ",Warten auf verfügbaren Prozess der Prozessklasse";
@@ -693,7 +693,7 @@ string Remote_module_instance_proxy::Operation::async_state_text_()
 
 //----------------------------------------------Remote_module_instance_proxy::Operation::state_name
 
-string Remote_module_instance_proxy::Operation::state_name()
+string Remote_module_instance_proxy::Operation::state_name() const
 {
     switch( _call_state )
     {

@@ -96,6 +96,7 @@ void Event::remove_from( Wait_handles* w )
 
 Wait_handles::Wait_handles( Spooler* spooler, Prefix_log* log )
 : 
+    _zero_(this+1),
     _spooler(spooler),
     _log(log),
     _lock("Wait_handles") 
@@ -106,6 +107,7 @@ Wait_handles::Wait_handles( Spooler* spooler, Prefix_log* log )
 
 Wait_handles::Wait_handles( const Wait_handles& o )
 : 
+    _zero_(this+1),
     _spooler ( o._spooler ),
     _log     ( o._log ),
     _lock    ( "Wait_handles" ),
@@ -158,7 +160,12 @@ bool Wait_handles::signaled()
     {
         FOR_EACH( Event_vector, _events, it )  
         {
-            if( *it  &&  (*it)->signaled() )  { Z_LOG2( "scheduler.wait", **it << " signaled!\n" );  return true; }
+            if( *it  &&  (*it)->signaled() )  
+            { 
+                _catched_event = *it;
+                //Z_LOG2( "scheduler.wait", **it << " signaled!\n" );  
+                return true; 
+            }
         }
     }
 
@@ -208,7 +215,7 @@ void Wait_handles::add( System_event* event )
 }
 
 //--------------------------------------------------------------------------Wait_handles::add_handle
-#ifdef Z_WINDOWS
+/*#ifdef Z_WINDOWS
 
 void Wait_handles::add_handle( HANDLE handle ) //, System_event* event )
 {
@@ -222,7 +229,7 @@ void Wait_handles::add_handle( HANDLE handle ) //, System_event* event )
     }
 }
 
-#endif
+#endif*/
 //-----------------------------------------------------------------------Wait_handles::remove_handle
 #ifdef Z_WINDOWS
 /*
@@ -287,68 +294,87 @@ void Wait_handles::remove( System_event* event )
 }
 
 //-------------------------------------------------------------------------------Wait_handles::wait
-
+/*
 bool Wait_handles::wait( double wait_time )
 {
     return wait_until( Time::now() + wait_time, "" );
 }
-
+*/
 //-------------------------------------------------------------------------Wait_handles::wait_until
 
-bool Wait_handles::wait_until( Time until, const string& debug_string )
+bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object )
 {
-    time_t t;
-    tm     tm1, tm2;
-
-    t = ::time(NULL);
-    localtime_r( &t, &tm1 );
-        
-
-    while(1)
+    if( until )
     {
-        Time now       = Time::now();
-        bool signaled  = false;
-
-        if( tm1.tm_isdst )  // Wir haben Sommerzeit?
+        if( _spooler->_zschimmer_mode  &&  _spooler->_next_daylight_saving_transition_time )
         {
-            Time today3    = now.midnight() + 3*3600;            // Heute 3:00 Uhr (für Winterzeitbeginn: Uhr springt von 3 Uhr auf 2 Uhr)
-            Time tomorrow3 = now.midnight() + 3*3600 + 24*3600;  // Morgen 3:00
+            // Noch zu testen: Scheduler am Zeitpunkt der Umschaltung (Sommer u. Winter) laufen lassen.
+            // Kann der Scheduler in einer Zeitzone ohne Sommerzeit arbeiten? Die Wartezeit ist dann ewig.
 
-            if( now < today3  &&  until >= today3 )    signaled = wait_until_2( today3 + 0.01, "checking end of daylight saving time" );
-            else 
-            if( until >= tomorrow3 )                   signaled = wait_until_2( tomorrow3 + 0.01, "checking end of daylight saving time" );
-            else
-                break;
+            if( _spooler->_next_daylight_saving_transition_time < until )
+            {
+                wait_until_2( _spooler->_next_daylight_saving_transition_time, String_object( _spooler->_next_daylight_saving_transition_name ) );
+            }
         }
-        else                // Wir haben Winterzeit?
+        else
         {
-            Time today2    = now.midnight() + 2*3600;            // Heute 2:00 Uhr (für Sommerzeitbeginn: Uhr springt von 2 Uhr auf 3 Uhr)
-            Time tomorrow2 = now.midnight() + 2*3600 + 24*3600;  // Morgen 3:00
+            time_t t;
+            tm     tm1, tm2;
 
-            if( now < today2  &&  until >= today2 )    signaled = wait_until_2( today2 + 0.01, "checking begin of daylight saving time" );
-            else                                                                                      
-            if( until >= tomorrow2 )                   signaled = wait_until_2( tomorrow2 + 0.01, "checking begin of daylight saving time" );
-            else
-                break;
+            t = ::time(NULL);
+            localtime_r( &t, &tm1 );
+                
+
+            while(1)
+            {
+                Time now       = Time::now();
+                bool signaled  = false;
+
+                if( tm1.tm_isdst )  // Wir haben Sommerzeit?
+                {
+                    Time today3    = now.midnight() + 3*3600;            // Heute 3:00 Uhr (für Winterzeitbeginn: Uhr springt von 3 Uhr auf 2 Uhr)
+                    Time tomorrow3 = now.midnight() + 3*3600 + 24*3600;  // Morgen 3:00
+
+                    if( now < today3  &&  until >= today3 )    signaled = wait_until_2( today3 + 0.01, String_object( "checking end of daylight saving time" ) );
+                    else 
+                    if( until >= tomorrow3 )                   signaled = wait_until_2( tomorrow3 + 0.01, String_object( "checking end of daylight saving time" ) );
+                    else
+                        break;
+                }
+                else                // Wir haben Winterzeit?
+                {
+                    Time today2    = now.midnight() + 2*3600;            // Heute 2:00 Uhr (für Sommerzeitbeginn: Uhr springt von 2 Uhr auf 3 Uhr)
+                    Time tomorrow2 = now.midnight() + 2*3600 + 24*3600;  // Morgen 3:00
+
+                    if( now < today2  &&  until >= today2 )    signaled = wait_until_2( today2 + 0.01, String_object( "checking begin of daylight saving time" ) );
+                    else                                                                                      
+                    if( until >= tomorrow2 )                   signaled = wait_until_2( tomorrow2 + 0.01, String_object( "checking begin of daylight saving time" ) );
+                    else
+                        break;
+                }
+
+                if( signaled )  return signaled;
+
+                //ftime( &tm2 );
+                t = ::time(NULL);
+                localtime_r( &t, &tm2 );
+                if( tm1.tm_isdst != tm2.tm_isdst )  _log->info( message_string( tm2.tm_isdst? "SCHEDULER-951" : "SCHEDULER-952" ) );
+                                              else  Z_DEBUG_ONLY( _log->debug9( "Keine Sommerzeitumschaltung" ) );
+            }
         }
-
-        if( signaled )  return signaled;
-
-        //ftime( &tm2 );
-        t = ::time(NULL);
-        localtime_r( &t, &tm2 );
-        if( tm1.tm_isdst != tm2.tm_isdst )  _log->info( message_string( tm2.tm_isdst? "SCHEDULER-951" : "SCHEDULER-952" ) );
-                                      else  Z_DEBUG_ONLY( _log->debug9( "Keine Sommerzeitumschaltung" ) );
     }
 
-    return wait_until_2( until, debug_string );
+    return wait_until_2( until, wait_for_object );
 }
 
 //-----------------------------------------------------------------------Wait_handles::wait_until_2
 // Liefert Nummer des Events (0..n-1) oder -1 bei Zeitablauf
 
-bool Wait_handles::wait_until_2( Time until, const string& debug_string )
+bool Wait_handles::wait_until_2( const Time& until, const Object* wait_for_object )
 {
+    // until kann 0 sein
+    _catched_event = NULL;
+
     if( signaled() )  return true;
 
 #ifdef Z_WINDOWS
@@ -360,7 +386,7 @@ bool Wait_handles::wait_until_2( Time until, const string& debug_string )
     while(1)
     {
         double wait_time = until - Time::now();
-        int    sleep_time_ms = INT_MAX;
+        int    sleep_time_ms = INT_MAX-1;
         int    t = (int)ceil( min( (double)sleep_time_ms, wait_time * 1000.0 ) );
 
         if( t <= 0 )  if( again )  break;
@@ -392,9 +418,16 @@ bool Wait_handles::wait_until_2( Time until, const string& debug_string )
                 if( ret != WAIT_TIMEOUT )  goto WAIT_OK;
 
                 Time now = Time::now();
-                t = (int)ceil( ( until - now ) * 1000 );
-                cerr << Time::now().as_string( Time::without_ms ) << " (" << Time( -t / 1000 ).as_string( Time::without_ms ) << "s";
-                if( debug_string != "" )  cerr << " until " << debug_string.substr( 0, 55 );
+                Time rest = until - now;
+                cerr << Time::now().as_string( Time::without_ms ) << " (";
+                if( until < latter_day ) 
+                {
+                    int days = rest.day_nr();
+                    if( days > 0 )  cerr << days << "d+";
+                    cerr << rest.time_of_day().as_string( Time::without_ms ) << "s";
+                    if( days > 0 )  cerr << " until " << Time( until ).as_string();
+                }
+                if( wait_for_object )  cerr << " for " << wait_for_object->obj_name().substr( 0, 55 );
                 cerr << ")  \r";
             }
 
@@ -422,10 +455,12 @@ WAIT_OK:
                 if( event )
                 {
                     if( t > 0 )  Z_LOG2( "scheduler.wait", "... Event " << event->as_text() << "\n" );
-                    event->set_signaled();
+                    event->set_signaled( "MsgWaitForMultipleObjects" );
                 }
                 else
                     if( t > 0 )  Z_LOG2( "scheduler.wait", "... Event " << index << "\n" );
+
+                _catched_event = event;
 
                 return true; //index;
             }
@@ -774,7 +809,7 @@ void Directory_watcher::set_signaled()
 
         try
         {
-            if( _filename_pattern.empty()  ||  match() )  Event::set_signaled();
+            if( _filename_pattern.empty()  ||  match() )  Event::set_signaled( "Directory_watcher::set_signaled" );
                                                     else  Event::set_signaled( false );    // Signal von _event zurücknehmen
 
             Z_LOG( "FindNextChangeNotification()\n" );
@@ -787,7 +822,7 @@ void Directory_watcher::set_signaled()
 
             _log->error( message_string( "SCHEDULER-300", _directory, x ) );   // "Überwachung des Verzeichnisses " + _directory + " wird nach Fehler beendet: " + x.what() ); 
             _directory = "";   // Damit erneutes start_when_directory_changed() diese (tote) Überwachung nicht erkennt.
-            Event::set_signaled();
+            Event::set_signaled( "Directory_watcher::set_signaled" );
             close();
         }
 

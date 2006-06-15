@@ -129,7 +129,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-258", "Job will be removed after all its tasks have terminated" },
     { "SCHEDULER-259", "Java did not start. Scheduler is starting without Java" },
     { "SCHEDULER-260", "Error in Scheduler Skript, spooler_exit(): $1Error in Scheduler script, spooler_exit(): $1" },
-    { "SCHEDULER-261", "Nothing done, state=$1, wait_handles=$2" },
+    { "SCHEDULER-261", "Nothing done, event=$1, operations=$2" },
     { "SCHEDULER-262", "Kill signal (ctrl-C) received. Scheduler is terminating" },
     { "SCHEDULER-263", "Kill signal (ctrl-C) received while terminating Scheduler. SCHEDULER IS ABORTING IMMEDIATELY." },
     { "SCHEDULER-264", "SCHEDULER IS TERMINATING AFTER SERIOUS ERROR" },

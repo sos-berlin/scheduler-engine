@@ -40,6 +40,8 @@ struct Time
                                 Time                        ( const string& t )             { set(t); }
                                 Time                        ( const char* t   )             { set(t); }
                                 Time                        ( const Sos_optional_date_time& dt ) { *this = dt; }
+    Z_WINDOWS_ONLY(             Time                        ( const FILETIME& t )           { set(t); } )
+    Z_WINDOWS_ONLY(             Time                        ( const SYSTEMTIME& t )         { set(t); } )
 
     void                        operator =                  ( double t )                    { set(t); }
     void                        operator =                  ( time_t t )                    { set((double)t); }
@@ -87,6 +89,8 @@ struct Time
     void                        set                         ( time_t t )                    { set( (double)t ); }
     void                        set                         ( double );
     void                        set                         ( const string& );
+    Z_WINDOWS_ONLY( void        set                         ( const FILETIME& ); )
+    Z_WINDOWS_ONLY( void        set                         ( const SYSTEMTIME& ); )
     void                        set_datetime                ( const string& );
     Time                        time_of_day                 () const                        { return _time - midnight(); }
     Time                        midnight                    () const                        { return day_nr() * 24*60*60; }

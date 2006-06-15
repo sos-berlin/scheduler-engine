@@ -16,11 +16,11 @@ struct Process_class;
 //------------------------------------------------------------------------------------------Process
 // Ein Prozess, in dem ein Module oder eine Task ablaufen kann.
 
-struct Process : zschimmer::Object
+struct Process : zschimmer::Object, Scheduler_object
 {
     //typedef object_server::Session Session;
 
-                                Process                     ( Spooler* sp )                         : _spooler(sp), _zero_(this+1), _lock("Process") {}
+                                Process                     ( Spooler* );
     Z_GNU_ONLY(                 Process                     (); )
                                ~Process                     ();
 
@@ -40,7 +40,7 @@ struct Process : zschimmer::Object
     void                    set_task_id                     ( int id )                              { _task_id = id; }
     void                    set_server                      ( const string& hostname, int port )    { _server_hostname = hostname;  _server_port = port; }
     void                    set_priority                    ( const string& priority )              { _priority = priority; }
-    int                         pid                         ()                                      { return _connection? _connection->pid() : 0; }
+    int                         pid                         () const                                { return _connection? _connection->pid() : 0; }
     bool                        kill                        ();
     int                         exit_code                   ();
     int                         termination_signal          ();
@@ -49,6 +49,8 @@ struct Process : zschimmer::Object
 
     void                    set_dom                         ( const xml::Element_ptr&, const Time& xml_mod_time );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
+    Prefix_log*                 log                         ()                                      { return _log; }
+    string                      obj_name                    () const                                { return "Process " + as_string( pid() ); }
 
     
 //private:
@@ -56,7 +58,7 @@ struct Process : zschimmer::Object
     string                     _job_name;
     int                        _task_id;
     Thread_semaphore           _lock;
-    Spooler*                   _spooler;
+    ptr<Prefix_log>            _log;
     string                     _server_hostname;
     int                        _server_port;
     ptr<object_server::Connection> _connection;             // Verbindung zum Prozess

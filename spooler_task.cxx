@@ -1026,8 +1026,10 @@ bool Task::do_something()
                         case s_waiting_for_process:
                         {
                             bool ok = !_module_instance || _module_instance->try_to_get_process();
-                            if( ok )  something_done = true, set_state( s_starting ), loop = true;
+                            if( ok )  set_state( s_starting ), loop = true;
                                 else  set_state( s_waiting_for_process );
+                            
+                            something_done = true;
                             break;
                         }
 
@@ -1052,7 +1054,6 @@ bool Task::do_something()
                             }
 
                             something_done = true;
-
                             break;
                         }
 
@@ -1079,6 +1080,7 @@ bool Task::do_something()
                                 if( _next_spooler_process )
                                 {
                                     set_state( s_running_delayed );
+                                    something_done = true;
                                 }
                                 else
                                 {
@@ -1140,6 +1142,7 @@ bool Task::do_something()
                                     set_state( s_running_waiting_for_order );   // _next_time neu setzen
                                     Z_LOG( obj_name() << ": idle_timeout ist abgelaufen, aber force_idle_timeout=\"no\" und nicht mehr als min_tasks Tasks laufen  now=" << now << ", _next_time=" << _next_time << "\n" );
                                     //_log->debug9( message_string( "SCHEDULER-916" ) );   // "idle_timeout ist abgelaufen, Task beendet sich" 
+                                    something_done = true;
                                 }
                             }
                             else
@@ -1297,10 +1300,10 @@ bool Task::do_something()
 
                                 set_state( s_closed );
 				
-                                something_done = true;
                                 loop = true;
                             }
 
+                            something_done = true;
                             break;
                         }
 

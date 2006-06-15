@@ -58,8 +58,8 @@ struct Communication
         void                    recv_clear                  ();
 
         virtual bool            async_continue_             ( Continue_flags );
-        virtual bool            async_finished_             ()                                      { return false; }
-        virtual string          async_state_text_           ()                                      { return "Spooler::Communication::Connection()"; }  // \"" + _named_host + "\"
+        virtual bool            async_finished_             () const                                { return false; }
+        virtual string          async_state_text_           () const                                { return "Spooler::Communication::Connection()"; }  // \"" + _named_host + "\"
 
 
         Fill_zero              _zero_;
@@ -81,8 +81,8 @@ struct Communication
                                 Listen_socket               ( Communication* c )                    : _communication(c), _spooler(c->_spooler) {}
 
         virtual bool            async_continue_             ( Continue_flags );
-        virtual bool            async_finished_             ()                                      { return false; }
-        virtual string          async_state_text_           ()                                      { return "Spooler::Communication::Listen_socket()"; }
+        virtual bool            async_finished_             () const                                { return false; }
+        virtual string          async_state_text_           () const                                { return "Spooler::Communication::Listen_socket()"; }
 
         Spooler*               _spooler;
         Communication*         _communication;
@@ -94,8 +94,8 @@ struct Communication
                                 Udp_socket                  ( Communication* c )                    : _communication(c), _spooler(c->_spooler) {}
 
         virtual bool            async_continue_             ( Continue_flags );
-        virtual bool            async_finished_             ()                                      { return false; }
-        virtual string          async_state_text_           ()                                      { return "Spooler::Communication::Udp_socket()"; }
+        virtual bool            async_finished_             () const                                { return false; }
+        virtual string          async_state_text_           () const                                { return "Spooler::Communication::Udp_socket()"; }
 
         Spooler*               _spooler;
         Communication*         _communication;
@@ -123,8 +123,8 @@ struct Communication
         virtual bool            should_close_connection     ()                                      { return false; }
 
         virtual bool            async_continue_             ( Continue_flags )                      { return true; }
-        virtual bool            async_finished_             ()                                      { return true; }
-        virtual string          async_state_text_           ()                                      { return "none"; }
+        virtual bool            async_finished_             () const                                { return true; }
+        virtual string          async_state_text_           () const                                { return "none"; }
 
         virtual xml::Element_ptr dom_element                ( const xml::Document_ptr&, const Show_what& ) const = 0;
 

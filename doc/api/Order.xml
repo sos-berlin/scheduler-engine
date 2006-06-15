@@ -625,6 +625,22 @@
         </p>
     </description>
 
+    <example programming_language="javascript">
+        <pre>order.at = "now+65";
+spooler.job_chain( "my_job_chain" ).add_order( order );</pre>
+    </example>
+
+    <example programming_language="java">
+        <pre>order.set_at( "now+60" );                                      // set_at( String )
+order.set_at( new Date( new Date().getTime() + 60 * 1000 ) );  // set_at( java.util.Date )
+spooler.job_chain( "my_job_chain" ).add_order( order );</pre>
+    </example>
+
+    <example programming_language="perl">
+        <pre>$order->LetProperty( 'at', "now+60" );
+$spooler->job_chain( "my_job_chain" )->add_order( $order );</pre>
+    </example>
+
     <messages>
         <message code="SCHEDULER-217" level="error"/>
     </messages>

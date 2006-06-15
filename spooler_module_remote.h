@@ -38,13 +38,13 @@ struct Remote_module_instance_proxy : Com_module_instance_base
         Async_operation*        begin__start                ();
         bool                    begin__end                  ();
 
-        virtual bool            async_finished_             ();
+        virtual bool            async_finished_             () const;
         virtual bool            async_continue_             ( Continue_flags flags )                    { return _proxy->continue_async_operation( this, flags ); }
       //virtual bool            async_has_error_            ();
       //virtual void            async_check_error_          ();
-        virtual string          async_state_text_           ();
+        virtual string          async_state_text_           () const;
 
-        string                  state_name                  ();
+        string                  state_name                  () const;
 
 
         Fill_zero              _zero_;

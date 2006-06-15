@@ -10,19 +10,30 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2006-06-12" version="2.0.154" subversion_revision="999999">
+    <change date="2006-06-16" version="2.0.154" subversion_revision="999999">
 
-        <revision type="new" title="Nur Windows: Ctrl-C bricht nicht mehr die Prozesse ab">
+        <revision type="new" title="Neue Eigenschaft Order.at">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_method class="Order" property="at"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+
+        <revision type="new" title="Strg-C bricht nicht mehr die Prozesse ab">
             <description>
                 <p>
-                    Wenn unter Windows der Scheduler an einer Console gestartet wird,
-                    wirkt Ctrl-C nur noch auf den Scheduler-Prozess, 
+                    Strg-C wirkt nur noch auf den Scheduler-Prozess, 
                     aber nicht mehr auf die Task-Prozesse 
-                    (außer <scheduler_element name="process"/> und <scheduler_element name="script" language="shell" />).
-                    Damit kann der Scheduler nach Ctrl-C wie unter Unix ordentlich herunterfahren.
+                    (außer unter Windows <scheduler_element name="process"/> und <scheduler_element name="script" language="shell" />).
+                    Damit kann der Scheduler nach Strg-C die Tasks ordentlich beenden.
+                    Ein zweites Strg-C führt nach wie vor zum sofortigen Ende aller Tasks und des Schedulers.
                 </p>
             </description>
         </revision>
+
     </change>
 
     <change date="2006-06-06" version="2.0.154" subversion_revision="4339">
@@ -312,7 +323,7 @@
         <revision type="new" title="Perl-Schnittstelle unter Unix um Objekt- und Array-Parameter erweitert">
             <description>
                 <p>
-                    Die Perl-Schnittstelle nimmt damit auch unter Unix das folgende Aufrufe an:
+                    Die Perl-Schnittstelle nimmt damit auch unter Unix die folgenden Aufrufe an:
                 </p>
                 <ul>
                     <li>

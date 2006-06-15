@@ -288,6 +288,7 @@ struct Spooler : Object,
     void                        load_arg                    ();
     void                        load                        ();
     void                        load_config                 ( const xml::Element_ptr& config, const Time& xml_mod_time, const string& source_filename );
+    void                        set_next_daylight_saving_transition();
 
     void                        load_object_set_classes_from_xml( Object_set_class_list*, const xml::Element_ptr&, const Time& xml_mod_time );
 
@@ -298,12 +299,14 @@ struct Spooler : Object,
     void                        create_window               ();
     void                        start                       ();
     void                        run_scheduler_script        ();
+    void                        run_check_ctrl_c            ();
     void                        stop                        ( const exception* = NULL );
   //void                        signal_threads              ( const string& signal_name );
   //void                        wait_until_threads_stopped  ( Time until );
     void                        reload                      ();
-    void                        nichts_getan                ( Spooler_thread*, int anzahl );
+    void                        nichts_getan                ( int anzahl, const string& );
     void                        run                         ();
+    bool                        run_continue                ();
   //void                        start_threads               ();
     Spooler_thread*             new_thread                  ( bool free_threading = true );
   //void                        close_threads               ();
@@ -312,7 +315,7 @@ struct Spooler : Object,
   //void                        single_thread_step          ();
     void                        wait                        ();
 
-    void                        signal                      ( const string& signal_name )       { _log.debug9( "Signal \"" + signal_name + "\"" ); _event.signal( signal_name ); }
+    void                        signal                      ( const string& signal_name )       { if( _log.log_level() <= log_debug9 )  _log.debug9( "Signal \"" + signal_name + "\"" ); _event.signal( signal_name ); }
     void                        async_signal                ( const char* signal_name = "" )    { _event.async_signal( signal_name ); }
     bool                        signaled                    ()                                  { return _event.signaled(); }
 
@@ -526,7 +529,6 @@ struct Spooler : Object,
 
 
   //Job*                       _next_job;
-    Time                       _next_time;
     Time                       _next_start_time;
     bool                       _print_time_every_second;
 
@@ -556,6 +558,9 @@ struct Spooler : Object,
 
     string                     _directory;
     File                       _pid_file;
+    bool                       _zschimmer_mode;
+    Time                       _next_daylight_saving_transition_time;
+    string                     _next_daylight_saving_transition_name;
 };
 
 //-------------------------------------------------------------------------------------------------

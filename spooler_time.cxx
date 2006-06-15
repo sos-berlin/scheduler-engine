@@ -154,6 +154,41 @@ void Time::set( double t )
 #   endif
 }
 
+//----------------------------------------------------------------------------------------Time::set
+
+void Time::set( const SYSTEMTIME& systemtime )
+{
+    BOOL     ok;
+    FILETIME filetime;
+
+    ok = SystemTimeToFileTime( &systemtime, &filetime );
+    if( !ok )  z::throw_mswin( "SystemTimeToFileTime" );
+
+    set( filetime );
+}
+
+//----------------------------------------------------------------------------------------Time::set
+
+void Time::set( const FILETIME& filetime )
+{
+    /*
+    BOOL       ok;
+    int64      base_filetime;
+    SYSTEMTIME base_systemtime;
+    memset( &base_systemtime, 0, sizeof base_systemtime );
+
+    base_systemtime.wYear  = 1970;
+    base_systemtime.wMonth = 1;
+    base_systemtime.wDay   = 1;
+
+    ok = SystemTimeToFileTime( &base_systemtime, (FILETIME*)&base_filetime );    // ==> 116444736000000000
+    if( !ok )  z::throw_mswin( "SystemTimeToFileTime" );
+    */
+    int64 base_filetime = 116444736000000000LL;
+
+    set( (double)( *(int64*)&filetime - base_filetime ) / 10000000.0 );
+}
+
 //-------------------------------------------------------------------------------Time::set_datetime
 
 void Time::set_datetime( const string& t )

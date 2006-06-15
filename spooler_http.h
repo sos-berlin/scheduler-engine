@@ -422,8 +422,8 @@ struct Operation : Communication::Operation
     void                        begin                       ();
     void                        cancel                      ();
     virtual bool                async_continue_             ( Continue_flags );
-    virtual bool                async_finished_             ()                                      { return _response  &&  _response->is_ready(); }
-    virtual string              async_state_text_           ()                                      { return "none"; }
+    virtual bool                async_finished_             () const                                { return _response  &&  _response->is_ready(); }
+    virtual string              async_state_text_           () const                                { return "none"; }
 
     void                        link_order                  ( Order* );                             // Für Web_service_operation::begin()
     void                        unlink_order                ();                                     // Für Order::close()

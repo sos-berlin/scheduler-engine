@@ -32,11 +32,11 @@ struct Xml_client_connection : Async_operation
 
 
   protected:
-    string                      async_state_text_           ()                                      { return obj_name(); }
+    string                      async_state_text_           () const                                { return obj_name(); }
     bool                        async_continue_             ( Continue_flags );
-    bool                        async_finished_             ()                                      { return _state == s_initial  
+    bool                        async_finished_             () const                                { return _state == s_initial  
                                                                                                           || _state == s_finished; }
-    bool                        async_signaled_             ()                                      { return _socket_operation && _socket_operation->async_signaled(); }
+    bool                        async_signaled_             () const                                { return _socket_operation && _socket_operation->async_signaled(); }
 
   private:
     Fill_zero                  _zero_;

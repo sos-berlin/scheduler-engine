@@ -625,7 +625,8 @@ void Job::set_error( const exception& x )
 void Job::signal( const string& signal_name )
 { 
     THREAD_LOCK_DUMMY( _lock )  _next_time = 0;
-
+    
+    Z_LOG2( "joacim", __FUNCTION__ << " " << signal_name << "\n" );
     _spooler->signal( signal_name ); 
 }
 
@@ -1397,7 +1398,12 @@ void Job::calculate_next_time( Time now )
 #           endif
         }
          
-        if( next_time > _period.end() )  next_time = _period.end();          // Das ist, wenn die Periode weder repeat noch single_start hat, also keinen automatischen Start
+        if( _spooler->_zschimmer_mode )
+        {
+            if( next_time > _next_start_time )  next_time = _next_start_time;
+        }
+        else
+            if( next_time > _period.end() )  next_time = _period.end();          // Das ist, wenn die Periode weder repeat noch single_start hat, also keinen automatischen Start
 
         _next_time = next_time;
     }
