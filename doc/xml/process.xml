@@ -35,11 +35,15 @@
                     <code>${</code><i>name</i><code>}</code>
                     abgerufen werden.
                 </p>
+                <p>
+                    Die in <scheduler_element name="environment"/> aufgeführten Variablen
+                    haben keinen Einfluss auf die Ersetzung.
+                </p>
             </description>
             <example>
                 <pre><![CDATA[<process file="/tmp/test.cmd" param="EINS=$EINS ZWEI=$ZWEI HOME=$HOME LOG=$LOG PATH=$PATH">
     <environment>
-        <variable name="PATH" value="$PATH;/extra"/>
+        <variable name="PATH" value="$PATH;/extra"/>   <!-- not used for param="" -->
     </environment>
 </process>]]></pre>
                 <pre>var params = spooler.create_variable_set();
