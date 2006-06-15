@@ -10,7 +10,7 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2006-06-16" version="2.0.154" subversion_revision="999999">
+    <change date="2006-06-16" version="2.0.154" subversion_revision="4352">
 
         <revision type="new" title="&lt;process param=&quot;&quot;>: Task-Parameter werden ersetzt">
             <description>
