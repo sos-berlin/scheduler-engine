@@ -418,9 +418,9 @@ bool Process_module_instance::begin__end()
 
     vector<string> string_args;
 
-    if( _module->_process_param != "" )
+    if( _process_param != "" )
     {
-        string_args = posix::argv_from_command_line( _module->_process_param );
+        string_args = posix::argv_from_command_line( _process_param );
         string_args.insert( string_args.begin(), program_path() );   // argv[0]
     }
     else

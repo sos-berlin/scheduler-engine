@@ -387,43 +387,6 @@ struct Job_module_task : Module_task
 */
 };
 
-//-------------------------------------------------------------------------------------Process_task
-/*
-struct Process_task : Task      // Job ist irgendein Prozess (z.B. durch ein Shell-Skript implementiert)
-{
-    Fill_zero _zero_;
-
-                                Process_task                ( Job* j );
-                               ~Process_task                ();
-
-    void                        close_handle                ();
-    ptr<Com_variable_set>       variable_set_from_environment();
-
-    virtual bool                do_kill                     ();
-    virtual void                do_close__end               ();
-  //virtual void                do_begin__start             ();
-    virtual bool                do_begin__end               ();
-  //virtual void                do_end__start               ();
-    virtual void                do_end__end                 ();
-  //virtual void                do_step__start              ();
-    virtual Variant             do_step__end                ();
-
-    virtual bool                has_step_count              ()                                      { return false; }
-    bool                        signaled                    ();
-
-    File                       _stdout_file;
-    File                       _stderr_file;
-    bool                       _stdout_logged;
-
-#   ifdef Z_WINDOWS
-        Process_id             _process_id;
-        Event                  _process_handle;
-#    else
-        Process_event          _process_handle;
-        int                    _pid_to_unregister;
-#   endif
-};
-*/
 //-------------------------------------------------------------------------------------------------
 
 } //namespace spooler
