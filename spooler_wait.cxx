@@ -419,6 +419,7 @@ bool Wait_handles::wait_until_2( const Time& until, const Object* wait_for_objec
 
                 Time now = Time::now();
                 Time rest = until - now;
+                t = rest.as_time_t() * 1000;
                 cerr << Time::now().as_string( Time::without_ms ) << " (";
                 if( until < latter_day ) 
                 {
