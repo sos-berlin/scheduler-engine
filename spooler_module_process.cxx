@@ -58,6 +58,8 @@ void Process_module_instance::close_handle()
 void Process_module_instance::init()
 {
     Module_instance::init();
+
+    _process_param = subst_env( _module->_process_param_raw, _params );
 }
 
 //----------------------------------------------------------------------Process_module_instance::load
@@ -205,7 +207,7 @@ bool Process_module_instance::begin__end()
 
     string executable_path = program_path();
     string command_line = quoted_windows_process_parameter( executable_path );
-    if( !_module->_process_param.empty() )  command_line += " " + _module->_process_param;
+    if( !_process_param.empty() )  command_line += " " + _process_param;
 
     if( _shell_file.path() != "" )
     {

@@ -155,7 +155,7 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
                 if( _init0_called )  _module.set_dom_source_only( include_path() );
 
                 _module._process_filename     = "";
-                _module._process_param        = "";
+                _module._process_param_raw    = "";
                 _module._process_log_filename = "";
             }
             else
@@ -167,7 +167,7 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
                 //_module_xml_element   = NULL;
 
                 _module._process_filename     = subst_env( e.     getAttribute( "file"         , _module._process_filename      ) );
-                _module._process_param        = subst_env( e.     getAttribute( "param"        , _module._process_param         ) );
+                _module._process_param_raw    =            e.     getAttribute( "param"        , _module._process_param_raw     );
                 _module._process_log_filename = subst_env( e.     getAttribute( "log_file"     , _module._process_log_filename  ) );
                 _module._process_ignore_error = e.bool_getAttribute( "ignore_error" , _module._process_ignore_error  );
                 _module._process_ignore_signal= e.bool_getAttribute( "ignore_signal", _module._process_ignore_signal );

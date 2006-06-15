@@ -157,7 +157,7 @@ struct Module : Object
 
     // Process
     string                     _process_filename;           // Job ist ein externes Programm
-    string                     _process_param;              // Parameter für das Programm
+    string                     _process_param_raw;          // Parameter für das Programm, vor der Variablenersetzung
     string                     _process_log_filename;
     bool                       _process_ignore_error;
     bool                       _process_ignore_signal;

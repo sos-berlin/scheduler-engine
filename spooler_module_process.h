@@ -61,6 +61,7 @@ struct Process_module_instance : Module_instance
   //bool                       _stdout_logged;
     bool                       _is_killed;
     File                       _shell_file;
+    string                     _process_param;
 
 #   ifdef Z_WINDOWS
         //Process_id             _pid;
