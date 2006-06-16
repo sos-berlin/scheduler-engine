@@ -89,15 +89,19 @@ struct Time
     void                        set                         ( time_t t )                    { set( (double)t ); }
     void                        set                         ( double );
     void                        set                         ( const string& );
-    Z_WINDOWS_ONLY( void        set                         ( const FILETIME& ); )
-    Z_WINDOWS_ONLY( void        set                         ( const SYSTEMTIME& ); )
+
+#ifdef Z_WINDOWS
+    void                        set                         ( const FILETIME& ); 
+    void                        set                         ( const SYSTEMTIME& );
+    FILETIME                    filetime                    () const;
+#endif
+
     void                        set_datetime                ( const string& );
     Time                        time_of_day                 () const                        { return _time - midnight(); }
     Time                        midnight                    () const                        { return day_nr() * 24*60*60; }
     int                         day_nr                      () const                        { return uint(_time) / (24*60*60); }
     time_t                      as_time_t                   () const                        { return (time_t)( _time + 0.0001 ); }
     DATE                        as_local_com_date           () const                        { return com_date_from_seconds_since_1970( round( _time ) ); }
-    FILETIME                    filetime                    () const;
     int64                       int64_filetime              () const;
     double                      cut_fraction                ( string* datetime_string );
 
