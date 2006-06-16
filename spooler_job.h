@@ -238,7 +238,7 @@ struct Job : Object,
     void                        enqueue_task                ( Task* );
     void                        start_when_directory_changed( const string& directory_name, const string& filename_pattern );
     void                        clear_when_directory_changed();
-    void                        check_for_changed_directory ( const Time& now );
+    bool                        check_for_changed_directory ( const Time& now );
     void                        interrupt_script            ();
     void                        select_period               ( Time = Time::now() );
     bool                        is_in_period                ( Time = Time::now() );

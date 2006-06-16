@@ -195,6 +195,7 @@ void Time::set( const FILETIME& filetime )
 #endif
 
 //-----------------------------------------------------------------------------------Time::filetime
+#ifdef Z_WINDOWS
 
 FILETIME Time::filetime() const
 {
@@ -211,6 +212,7 @@ int64 Time::int64_filetime() const
     return (int64)( _time * 10000000.0 + 0.5 ) + base_filetime;
 }
 
+#endif
 //-------------------------------------------------------------------------------Time::set_datetime
 
 void Time::set_datetime( const string& t )

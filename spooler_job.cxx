@@ -1454,19 +1454,26 @@ void Job::remove_waiting_job_from_process_list()
 
 //----------------------------------------------------------------------check_for_changed_directory
 
-void Job::check_for_changed_directory( const Time& now )
+bool Job::check_for_changed_directory( const Time& now )
 {
+    bool something_done = false;
+
 #   ifdef Z_UNIX
-        if( now < _directory_watcher_next_time )  return;
+        if( now < _directory_watcher_next_time )  return false;
 #   endif
 
 
     //Z_LOG2( "joacim", "Job::task_to_start(): Verzeichnisüberwachung _directory_watcher_next_time=" << _directory_watcher_next_time << ", now=" << now << "\n" );
-    _directory_watcher_next_time = now + directory_watcher_intervall;
+    _directory_watcher_next_time = _directory_watcher_list.size() > 0? Time( now + directory_watcher_intervall )
+                                                                     : latter_day;
 
     Directory_watcher_list::iterator it = _directory_watcher_list.begin();
     while( it != _directory_watcher_list.end() )
     {
+#       ifdef Z_UNIX
+            something_done = true;    // Unter Unix lassen wir do_something() periodisch aufrufen, um has_changed() ausführen können. Also: something done!
+#       endif   
+
         (*it)->has_changed();                        // has_changed() für Unix (und seit 22.3.04 für Windows, siehe dort).
         if( (*it)->signaled_then_reset() )        
         {
@@ -1484,6 +1491,8 @@ void Job::check_for_changed_directory( const Time& now )
 
         it++;
     }
+
+    return something_done;
 }
 
 //-------------------------------------------------------------------------------Job::task_to_start
@@ -1635,7 +1644,7 @@ bool Job::do_something()
     bool something_done     = false;       
     Time now                = Time::now();
 
-    check_for_changed_directory( now );         // Hier prüfen, damit Signal zurückgesetzt wird
+    something_done |= check_for_changed_directory( now );         // Hier prüfen, damit Signal zurückgesetzt wird
 
 
     if( _state == s_read_error )  return false;
@@ -1649,7 +1658,7 @@ bool Job::do_something()
 
             if( _state )  
             {
-                something_done = execute_state_cmd();
+                something_done |= execute_state_cmd();
 
                 if( _reread )  _reread = false,  reread(),  something_done = true;
 
