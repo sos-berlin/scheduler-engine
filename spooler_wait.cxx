@@ -46,6 +46,11 @@ void windows_message_step()
         if( !ret )  break;
         if( msg.message == WM_NULL )  break;
 
+        Z_LOG2( "windows.PeekMessage", "message=" << hex_from_int( msg.message ) <<
+                                      " wParam=" << hex_from_int16( msg.wParam )  <<
+                                      " lParam=" << hex_from_int( msg.lParam ) << "\n" );
+
+
         //TranslateMessage( &msg ); 
         DispatchMessage( &msg ); 
     }
@@ -302,7 +307,7 @@ bool Wait_handles::wait( double wait_time )
 */
 //-------------------------------------------------------------------------Wait_handles::wait_until
 
-bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object, const Time& resume_until )
+bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object, const Time& resume_until, const Object* resume_object )
 {
     if( until  &&  until < latter_day )
     {
@@ -364,13 +369,13 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
         }
     }
 
-    return wait_until_2( until, wait_for_object, resume_until );
+    return wait_until_2( until, wait_for_object, resume_until, resume_object );
 }
 
 //-----------------------------------------------------------------------Wait_handles::wait_until_2
 // Liefert Nummer des Events (0..n-1) oder -1 bei Zeitablauf
 
-bool Wait_handles::wait_until_2( const Time& until, const Object* wait_for_object, const Time& resume_until )
+bool Wait_handles::wait_until_2( const Time& until, const Object* wait_for_object, const Time& resume_until, const Object* resume_object )
 {
     // until kann 0 sein
     _catched_event = NULL;
@@ -390,17 +395,18 @@ bool Wait_handles::wait_until_2( const Time& until, const Object* wait_for_objec
     {
         if( resume_until > 0  &&  resume_until < latter_day )
         {
-            //FILETIME      local_time = resume_until.filetime();
             LARGE_INTEGER gmtime;
             bool          resume_suspended_machine = true;
 
+            //FILETIME      local_time = resume_until.filetime();
             //ok = LocalFileTimeToFileTime( &local_time, (FILETIME*)&gmtime );   Das könnte zum Beginn der Winterzeit eine Stunde zu früh sein
             //if( !ok )  z::throw_mswin( "LocalFileTimeToFileTime" );
 
             gmtime.QuadPart = -Time( until - Time::now() ).int64_filetime();  // Negativer Wert bedeutet relative Angabe
             if( gmtime.QuadPart < 0 )
             {
-                Z_LOG2( "scheduler.wait", "SetWaitableTimer(" << resume_until.as_string() << " => " << gmtime.QuadPart << ")\n" );
+                Z_LOG2( "scheduler.wait", "SetWaitableTimer(" << resume_until.as_string() << " => " << gmtime.QuadPart << ")"  
+                        << ( resume_object? " for " + resume_object->obj_name() : "" ) << "\n" );
 
                 ok = SetWaitableTimer( _spooler->_waitable_timer, &gmtime, 0, NULL, NULL, resume_suspended_machine ); 
                 if( !ok )  z::throw_mswin( "SetWaitableTimer" );
@@ -408,11 +414,6 @@ bool Wait_handles::wait_until_2( const Time& until, const Object* wait_for_objec
                 waitable_timer_set = true;
             }
         }
-        //else
-        //{
-        //    ok = CancelWaitableTimer( _spooler->_waitable_timer );
-        //    if( !ok )  z::throw_mswin( "CancelWaitableTimer" );
-        //}
     }
 
 
@@ -421,6 +422,8 @@ bool Wait_handles::wait_until_2( const Time& until, const Object* wait_for_objec
         double wait_time = until - Time::now();
         int    sleep_time_ms = INT_MAX-1;
         int    t = (int)ceil( min( (double)sleep_time_ms, wait_time * 1000.0 ) );
+        DWORD  ret;
+
 
         if( t <= 0 )  if( again )  break;
                              else  t = 0;  //break;
@@ -430,18 +433,10 @@ bool Wait_handles::wait_until_2( const Time& until, const Object* wait_for_objec
             //if( wait_time >= 1.0 )  _log->debug9( message_string( "SCHEDULER-953", wait_time )  );
         }
 
+        if( t > 0 )  Z_LOG2( "scheduler.wait", "MsgWaitForMultipleObjects " << sos::as_string(t/1000.0) << "s (bis " << until << ")  " << as_string() << "\n" );
 
-        //THREAD_LOCK( _lock )
-        {
-          //if( _log->log_level() <= log_debug9 )
-            if( t > 0 )  Z_LOG2( "scheduler.wait", "MsgWaitForMultipleObjects " << sos::as_string(t/1000.0) << "s (bis " << until << ")  " << as_string() << "\n" );
-
-            handles = new HANDLE [ _handles.size()+1 ];
-            for( int i = 0; i < _handles.size(); i++ )  handles[i] = _handles[i];
-        }
-
-
-        DWORD ret;
+        handles = new HANDLE [ _handles.size()+1 ];
+        for( int i = 0; i < _handles.size(); i++ )  handles[i] = _handles[i];
 
         if( _spooler  &&  _spooler->_print_time_every_second )
         {

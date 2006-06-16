@@ -48,7 +48,8 @@ Job::Job( Spooler* spooler )
     _task_queue(this),
     _history(this),
     _lock( "Job" ),
-    _visible(true)
+    _visible(true),
+    _is_machine_suspendable(true)
 {
     init_run_time();
 

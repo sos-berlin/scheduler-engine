@@ -2086,6 +2086,26 @@ STDMETHODIMP Com_job::put_Max_order_setbacks( int count )
     return hr;
 }
 
+//-----------------------------------------------------------------Com_job::put_Machine_suspendable
+
+STDMETHODIMP Com_job::put_Machine_suspendable( VARIANT_BOOL machine_suspendable )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_job )  z::throw_xc( "SCHEDULER-122" );
+        if( !_job->_spooler->_zschimmer_mode )  return FALSE;  // E_ACCESSDENIED
+
+        _job->set_machine_suspendable( machine_suspendable != 0 );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+
 //-------------------------------------------------------------------------------Com_task::_methods
 #ifdef Z_COM
 

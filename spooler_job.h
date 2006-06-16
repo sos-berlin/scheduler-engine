@@ -270,6 +270,8 @@ struct Job : Object,
     Time                        next_time                   ()                                      { THREAD_LOCK_RETURN( _lock, Time, _next_time ); }
     Time                        next_start_time             ();
     bool                        has_next_start_time         ()                                      { return next_start_time() < latter_day; }
+    bool                     is_machine_suspendable         () const                                { return _is_machine_suspendable; }
+    void                    set_machine_suspendable         ( bool b )                              { _is_machine_suspendable = b; }
 
     bool                        execute_state_cmd           ();
     void                        reread                      ();
@@ -373,6 +375,7 @@ struct Job : Object,
     bool                       _temporary;                  // Job nach einem Lauf entfernen
     bool                       _remove;                     // Job enfernen sobald möglich. _state == s_stopping, dann s_stopped
     bool                       _start_once;                 // <run_time start_once="">, wird false nach Start
+    bool                       _is_machine_suspendable;     // Test
 
     bool                       _log_append;                 // Jobprotokoll fortschreiben <job log_append=(yes|no)>
 

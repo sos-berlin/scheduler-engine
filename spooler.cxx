@@ -2431,6 +2431,8 @@ void Spooler::run()
         bool    log_wait          = _print_time_every_second || log_categories.update_flag_if_modified( "scheduler.wait", &log_wait_0, &log_wait_id );
         Time    wait_until        = latter_day;
         Object* wait_until_object = NULL;    
+        Time    resume_until      = latter_day;
+        Object* resume_until_object = NULL;
 
 
         if( _thread_list.size() > 0 )       // Beim Start gibt es noch keinen Thread.
@@ -2487,6 +2489,7 @@ void Spooler::run()
                     {
                         wait_until = task_next_time; 
                         wait_until_object = task;
+                        if( !task->job()->is_machine_suspendable() )  resume_until = wait_until,  resume_until_object = wait_until_object;
                         if( wait_until == 0 )  break;
                     }
                 }
@@ -2506,6 +2509,7 @@ void Spooler::run()
                     {
                         wait_until = next_job_time;
                         wait_until_object = job;
+                        if( !job->is_machine_suspendable() )  resume_until = wait_until,  resume_until_object = wait_until_object;
                         if( wait_until == 0 )  break;
                     }
                 }
@@ -2584,31 +2588,29 @@ void Spooler::run()
             {
                 if( wait_until == 0 )
                 {
-                    wait_handles.wait_until( 0, wait_until_object, 0 );   // Signale checken
+                    wait_handles.wait_until( 0, wait_until_object, 0, NULL );   // Signale checken
                 }
                 else
                 {
-                    Time resume_until = wait_until;
-
                     _wait_counter++;
 
                     if( log_wait )  
                     {
-                        if( !wait_handles.wait_until( 0, wait_until_object, 0 ) )     // Debug-Ausgabe der Wartezeit nur, wenn kein Ergebnis vorliegt
+                        if( !wait_handles.wait_until( 0, wait_until_object, 0, NULL ) )     // Debug-Ausgabe der Wartezeit nur, wenn kein Ergebnis vorliegt
                         { 
                             Z_LOG2( "scheduler.wait", "Warten bis " << wait_until << ( wait_until_object? " auf " + wait_until_object->obj_name() : "" ) << "\n" ); 
-                            wait_handles.wait_until( wait_until, wait_until_object, resume_until );  
+                            wait_handles.wait_until( wait_until, wait_until_object, resume_until, resume_until_object );  
                         }
                     }
                     else
                     {
                         Time first_wait_time = _log.log_level() <= log_debug3? show_message_after_seconds_debug : show_message_after_seconds;
-                        bool signaled = wait_handles.wait_until( min( Time::now() + first_wait_time, wait_until ), wait_until_object, resume_until );
+                        bool signaled = wait_handles.wait_until( min( Time::now() + first_wait_time, wait_until ), wait_until_object, resume_until, resume_until_object );
                         
                         if( !signaled )
                         {
                             _log.info( message_string( "SCHEDULER-972", wait_until.as_string(), wait_until_object->obj_name() ) );
-                            wait_handles.wait_until( wait_until, wait_until_object, resume_until );
+                            wait_handles.wait_until( wait_until, wait_until_object, resume_until, resume_until_object );
                         }
                     }
                 }

@@ -314,6 +314,10 @@ library Spooler
         HRESULT                 Remove                      ();
 
         HRESULT                 Execute_command             ( [in] BSTR );                      // Für Joacim 2006-02-20
+
+        [propput]                                                                               
+        HRESULT                 Machine_suspendable         ( [in] VARIANT_BOOL );              // Für Joacim 2006-06-15
+
     }
 
     [

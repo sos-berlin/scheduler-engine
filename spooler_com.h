@@ -406,6 +406,7 @@ struct Com_job : spooler_com::Ijob,
     STDMETHODIMP                Clear_delay_after_error     ();
     STDMETHODIMP                Remove                      ();
     STDMETHODIMP                Execute_command             ( BSTR );
+    STDMETHODIMP            put_Machine_suspendable         ( VARIANT_BOOL );
 
 
   private:
