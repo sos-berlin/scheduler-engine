@@ -44,6 +44,7 @@ const char* weekday_names[] = { "so"     , "mo"    , "di"      , "mi"       , "d
                                 "sunday" , "monday", "tuesday" , "wednesday", "thursday"  , "friday" , "saturday",
                                 NULL };
 
+int64 base_filetime = 116444736000000000LL;
 
 //-------------------------------------------------------------------------------------------------
 
@@ -187,12 +188,29 @@ void Time::set( const FILETIME& filetime )
     ok = SystemTimeToFileTime( &base_systemtime, (FILETIME*)&base_filetime );    // ==> 116444736000000000
     if( !ok )  z::throw_mswin( "SystemTimeToFileTime" );
     */
-    int64 base_filetime = 116444736000000000LL;
 
     set( (double)( *(int64*)&filetime - base_filetime ) / 10000000.0 );
 }
 
 #endif
+
+//-----------------------------------------------------------------------------------Time::filetime
+
+FILETIME Time::filetime() const
+{
+    FILETIME result;
+
+    *(int64*)&result = int64_filetime();
+    return result;
+}
+
+//-----------------------------------------------------------------------------------Time::filetime
+
+int64 Time::int64_filetime() const
+{
+    return (int64)( _time * 10000000.0 + 0.5 ) + base_filetime;
+}
+
 //-------------------------------------------------------------------------------Time::set_datetime
 
 void Time::set_datetime( const string& t )

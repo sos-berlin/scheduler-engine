@@ -97,6 +97,8 @@ struct Time
     int                         day_nr                      () const                        { return uint(_time) / (24*60*60); }
     time_t                      as_time_t                   () const                        { return (time_t)( _time + 0.0001 ); }
     DATE                        as_local_com_date           () const                        { return com_date_from_seconds_since_1970( round( _time ) ); }
+    FILETIME                    filetime                    () const;
+    int64                       int64_filetime              () const;
     double                      cut_fraction                ( string* datetime_string );
 
     string                      as_string                   ( With_ms = with_ms ) const;                        

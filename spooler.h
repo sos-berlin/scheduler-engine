@@ -4,6 +4,7 @@
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
 
+#include "../zschimmer/zschimmer.h"
 #include "../kram/sos.h"
 #include "../kram/sysxcept.h"
 #include "../kram/sosopt.h"
@@ -559,8 +560,10 @@ struct Spooler : Object,
     string                     _directory;
     File                       _pid_file;
     bool                       _zschimmer_mode;
+
     Time                       _next_daylight_saving_transition_time;
     string                     _next_daylight_saving_transition_name;
+    Event                      _waitable_timer;
 };
 
 //-------------------------------------------------------------------------------------------------

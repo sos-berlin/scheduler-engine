@@ -71,6 +71,8 @@ const string                    scheduler_character_encoding        = "ISO-8859-
 const string                    new_suffix                          = "~new";           // Suffix für den neuen Spooler, der den bisherigen beim Neustart ersetzen soll
 const double                    renew_wait_interval                 = 0.25;
 const double                    renew_wait_time                     = 30;               // Wartezeit für Brückenspooler, bis der alte Spooler beendet ist und der neue gestartet werden kann.
+const int                       show_message_after_seconds          = 15*60;            // Nach dieser Wartezeit eine Meldung ausgeben
+const int                       show_message_after_seconds_debug    = 60;               // Nach dieser Wartezeit eine Meldung ausgeben
 const int                       kill_timeout_1                      = 10;               // < kill_timeout_total
 const int                       kill_timeout_total                  = 30;               // terminate mit timeout: Nach timeout und kill noch soviele Sekunden warten
 const double                    wait_for_thread_termination         = latter_day;       // Haltbarkeit des Geduldfadens
@@ -509,6 +511,7 @@ Spooler::Spooler()
     _mail_defaults(NULL),
     _termination_gmtimeout_at(no_termination_timeout),
     _web_services(this),
+    _waitable_timer( "waitable_timer" ),
     _validate_xml(true)
 {
     if( spooler_ptr )  throw_xc( "spooler_ptr" );
@@ -577,6 +580,8 @@ Spooler::~Spooler()
 
     _security.clear();
 
+
+    _waitable_timer.close();
     _event.close();
     _wait_handles.close();
 
@@ -1877,7 +1882,16 @@ void Spooler::load()
 
 
 #   ifdef Z_WINDOWS
-        if( _zschimmer_mode )  set_next_daylight_saving_transition();
+        if( _zschimmer_mode )
+        {
+            _waitable_timer.set_handle( CreateWaitableTimer( NULL, FALSE, NULL ) );
+            if( !_waitable_timer )  z::throw_mswin( "CreateWaitableTimer" );
+
+            _waitable_timer.add_to( &_wait_handles );
+
+
+            set_next_daylight_saving_transition();
+        }
 #   endif
 }
 
@@ -2315,9 +2329,7 @@ void Spooler::nichts_getan( int anzahl, const string& str )
     }
 
     //sos_sleep( min( 30, 1 << anzahl ) );
-#   ifndef Z_DEBUG
-        sos_sleep( 1 );
-#   endif
+    sos_sleep( 1 );
 }
 
 //-----------------------------------------------------------------------Spooler::execute_state_cmd
@@ -2416,9 +2428,9 @@ void Spooler::run()
 
     while(1)  // Die große Haupt-Schleife
     {
-        bool    log_wait         = _print_time_every_second || log_categories.update_flag_if_modified( "scheduler.wait", &log_wait_0, &log_wait_id );
-        Time    wait_until       = latter_day;
-        Object* wait_for         = NULL;
+        bool    log_wait          = _print_time_every_second || log_categories.update_flag_if_modified( "scheduler.wait", &log_wait_0, &log_wait_id );
+        Time    wait_until        = latter_day;
+        Object* wait_until_object = NULL;    
 
 
         if( _thread_list.size() > 0 )       // Beim Start gibt es noch keinen Thread.
@@ -2439,17 +2451,16 @@ void Spooler::run()
         bool something_done = run_continue();
         if( _single_thread->is_ready_for_termination() )  break;
 
+        if( something_done )  wait_until = 0;   // Nicht warten, wir drehen noch eine Runde
+
         //----------------------------------------------------------------------------NICHTS GETAN?
 
-//#       ifdef Z_DEBUG
-            int     nothing_done_max = 2;   // Ein überflüssiges Signal wird toleriert wegen Race condition, und dann gibt es manch voreiliges Signal (vor allem zu Beginn einer Operation)
-//#        else
-//          int     nothing_done_max = _job_list.size() * 2 + _single_thread->task_count() * 3 + 6;  // Seien wir großzügig
-//#       endif
+        int nothing_done_max = 2;   // Ein überflüssiges Signal wird toleriert wegen Race condition, und dann gibt es manch voreiliges Signal (vor allem zu Beginn einer Operation)
+//      int nothing_done_max = _job_list.size() * 2 + _single_thread->task_count() * 3 + 6;  // Seien wir großzügig
 
         if( something_done )
         {
-            Z_DEBUG_ONLY( if( nichts_getan_zaehler )  _log.warn( S() << "nichts_getan_zaehler=" << nichts_getan_zaehler ); )
+            Z_DEBUG_ONLY( if( nichts_getan_zaehler )  Z_LOG( "nichts_getan_zaehler=" << nichts_getan_zaehler << "\n" ); )
             nothing_done_count = 0;
             nichts_getan_zaehler = 0;
         }
@@ -2457,6 +2468,7 @@ void Spooler::run()
         if( ++nothing_done_count > nothing_done_max )
         {
             nichts_getan( ++nichts_getan_zaehler, catched_event_string );
+            if( wait_until == 0 )  wait_until = Time::now() + 1;
         }
 
         //----------------------------------------------------------------------WARTEZEIT ERMITTELN
@@ -2465,15 +2477,18 @@ void Spooler::run()
         {
             // NÄCHSTE (JETZT NOCH WARTENDE) TASK ERMITTELN
 
-            FOR_EACH( Task_list, _single_thread->_task_list, t )
+            if( wait_until > 0 )
             {
-                Task* task = *t;
-                Time  task_next_time = task->next_time();
-                if( wait_until > task_next_time )
+                FOR_EACH( Task_list, _single_thread->_task_list, t )
                 {
-                    wait_until = task_next_time; 
-                    wait_for   = task;
-                    if( wait_until == 0 )  break;
+                    Task* task = *t;
+                    Time  task_next_time = task->next_time();
+                    if( wait_until > task_next_time )
+                    {
+                        wait_until = task_next_time; 
+                        wait_until_object = task;
+                        if( wait_until == 0 )  break;
+                    }
                 }
             }
 
@@ -2490,7 +2505,7 @@ void Spooler::run()
                     if( wait_until > next_job_time ) 
                     {
                         wait_until = next_job_time;
-                        wait_for = job;
+                        wait_until_object = job;
                         if( wait_until == 0 )  break;
                     }
                 }
@@ -2506,11 +2521,14 @@ void Spooler::run()
             {
                 // PROCESS-HANDLES EINSAMMELN
     
+#               ifndef Z_WINDOWS
+                    if( wait_until > 0 )
+#               endif 
                 FOR_EACH( Process_class_list, _process_class_list, pc )
                 {
                     FOR_EACH( Process_list, (*pc)->_process_list, p )
                     {
-#                       ifdef SYSTEM_WIN
+#                       ifdef Z_WINDOWS
 
                             object_server::Connection_to_own_server* server = dynamic_cast<object_server::Connection_to_own_server*>( +(*p)->_connection );
                             if( server  &&  server->_process_handle )  wait_handles.add( &server->_process_handle );        // Signalisiert Prozessende
@@ -2522,11 +2540,14 @@ void Spooler::run()
                             if( next_time < wait_until )
                             {
                                 wait_until = next_time;
-                                wait_for = *p;
+                                wait_until_object = *p;
+                                if( wait_until == 0 )  break;
                             }
 
 #                       endif
                     }
+ 
+                    if( wait_until == 0 )  break;
                 }
             }
             
@@ -2540,15 +2561,18 @@ void Spooler::run()
 
             // Termination_async_operation etc.
 
-            if( ptr<Async_operation> operation = _connection_manager->async_next_operation() )
+            if( wait_until > 0 )
             {
-                Time next_time = Time( localtime_from_gmtime( operation->async_next_gmtime() ) );
-                //Z_LOG( **p << "->async_next_gmtime() => " << next_time << "\n" );
-                if( next_time < wait_until )
+                if( ptr<Async_operation> operation = _connection_manager->async_next_operation() )
                 {
-                    wait_until = next_time;
-                    wait_for   = operation;
-                    //if( log_wait )  wait_for_string = operation->async_state_text();
+                    Time next_time = Time( localtime_from_gmtime( operation->async_next_gmtime() ) );
+                    //Z_LOG( **p << "->async_next_gmtime() => " << next_time << "\n" );
+                    if( next_time < wait_until )
+                    {
+                        wait_until = next_time;
+                        wait_until_object = operation;
+                        //if( log_wait )  wait_for_string = operation->async_state_text();
+                    }
                 }
             }
 
@@ -2558,25 +2582,34 @@ void Spooler::run()
 
             if( !wait_handles.signaled() )
             {
-                if( something_done )
+                if( wait_until == 0 )
                 {
-                    wait_handles.wait_until( 0, wait_for );   // Signale checken
+                    wait_handles.wait_until( 0, wait_until_object, 0 );   // Signale checken
                 }
                 else
                 {
+                    Time resume_until = wait_until;
+
                     _wait_counter++;
 
                     if( log_wait )  
                     {
-                        if( !wait_handles.wait_until( 0, wait_for ) )     // Debug-Ausgabe der Wartezeit nur, wenn kein Ergebnis vorliegt
+                        if( !wait_handles.wait_until( 0, wait_until_object, 0 ) )     // Debug-Ausgabe der Wartezeit nur, wenn kein Ergebnis vorliegt
                         { 
-                            Z_LOG2( "scheduler.wait", "Warten bis " << wait_until << ( wait_for? " auf " + wait_for->obj_name() : "" ) << "\n" ); 
-                            wait_handles.wait_until( wait_until, wait_for );  
+                            Z_LOG2( "scheduler.wait", "Warten bis " << wait_until << ( wait_until_object? " auf " + wait_until_object->obj_name() : "" ) << "\n" ); 
+                            wait_handles.wait_until( wait_until, wait_until_object, resume_until );  
                         }
                     }
                     else
                     {
-                        wait_handles.wait_until( wait_until, wait_for );
+                        Time first_wait_time = _log.log_level() <= log_debug3? show_message_after_seconds_debug : show_message_after_seconds;
+                        bool signaled = wait_handles.wait_until( min( Time::now() + first_wait_time, wait_until ), wait_until_object, resume_until );
+                        
+                        if( !signaled )
+                        {
+                            _log.info( message_string( "SCHEDULER-972", wait_until.as_string(), wait_until_object->obj_name() ) );
+                            wait_handles.wait_until( wait_until, wait_until_object, resume_until );
+                        }
                     }
                 }
             }

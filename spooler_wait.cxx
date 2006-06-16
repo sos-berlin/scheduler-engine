@@ -302,9 +302,9 @@ bool Wait_handles::wait( double wait_time )
 */
 //-------------------------------------------------------------------------Wait_handles::wait_until
 
-bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object )
+bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object, const Time& resume_until )
 {
-    if( until )
+    if( until  &&  until < latter_day )
     {
         if( _spooler->_zschimmer_mode  &&  _spooler->_next_daylight_saving_transition_time )
         {
@@ -364,13 +364,13 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object 
         }
     }
 
-    return wait_until_2( until, wait_for_object );
+    return wait_until_2( until, wait_for_object, resume_until );
 }
 
 //-----------------------------------------------------------------------Wait_handles::wait_until_2
 // Liefert Nummer des Events (0..n-1) oder -1 bei Zeitablauf
 
-bool Wait_handles::wait_until_2( const Time& until, const Object* wait_for_object )
+bool Wait_handles::wait_until_2( const Time& until, const Object* wait_for_object, const Time& resume_until )
 {
     // until kann 0 sein
     _catched_event = NULL;
@@ -379,9 +379,42 @@ bool Wait_handles::wait_until_2( const Time& until, const Object* wait_for_objec
 
 #ifdef Z_WINDOWS
 
-    string  result;
+    bool    result  = false;
     bool    again   = false;
     HANDLE* handles = NULL;
+    BOOL    ok;
+    bool    waitable_timer_set = false;
+
+
+    if( _spooler->_waitable_timer )
+    {
+        if( resume_until > 0  &&  resume_until < latter_day )
+        {
+            //FILETIME      local_time = resume_until.filetime();
+            LARGE_INTEGER gmtime;
+            bool          resume_suspended_machine = true;
+
+            //ok = LocalFileTimeToFileTime( &local_time, (FILETIME*)&gmtime );   Das könnte zum Beginn der Winterzeit eine Stunde zu früh sein
+            //if( !ok )  z::throw_mswin( "LocalFileTimeToFileTime" );
+
+            gmtime.QuadPart = -Time( until - Time::now() ).int64_filetime();  // Negativer Wert bedeutet relative Angabe
+            if( gmtime.QuadPart < 0 )
+            {
+                Z_LOG2( "scheduler.wait", "SetWaitableTimer(" << resume_until.as_string() << " => " << gmtime.QuadPart << ")\n" );
+
+                ok = SetWaitableTimer( _spooler->_waitable_timer, &gmtime, 0, NULL, NULL, resume_suspended_machine ); 
+                if( !ok )  z::throw_mswin( "SetWaitableTimer" );
+
+                waitable_timer_set = true;
+            }
+        }
+        //else
+        //{
+        //    ok = CancelWaitableTimer( _spooler->_waitable_timer );
+        //    if( !ok )  z::throw_mswin( "CancelWaitableTimer" );
+        //}
+    }
+
 
     while(1)
     {
@@ -393,9 +426,10 @@ bool Wait_handles::wait_until_2( const Time& until, const Object* wait_for_objec
                              else  t = 0;  //break;
         
         if( again ) {
-            if( t > 1800 )  return false;  // Um mehr als eine halbe Stunde verrechnet? Das muss an der Sommerzeitumstellung liegen
-            if( wait_time >= 1.0 )  _log->debug9( message_string( "SCHEDULER-953", wait_time )  );
+            if( t > 1800 )  { result = false; break; }  // Um mehr als eine halbe Stunde verrechnet? Das muss an der Sommerzeitumstellung liegen
+            //if( wait_time >= 1.0 )  _log->debug9( message_string( "SCHEDULER-953", wait_time )  );
         }
+
 
         //THREAD_LOCK( _lock )
         {
@@ -419,7 +453,7 @@ bool Wait_handles::wait_until_2( const Time& until, const Object* wait_for_objec
 
                 Time now = Time::now();
                 Time rest = until - now;
-                t = rest.as_time_t() * 1000;
+                t = (int)ceil( min( (double)sleep_time_ms, rest * 1000.0 ) );
                 cerr << Time::now().as_string( Time::without_ms ) << " (";
                 if( until < latter_day ) 
                 {
@@ -463,7 +497,8 @@ WAIT_OK:
 
                 _catched_event = event;
 
-                return true; //index;
+                if( event!= &_spooler->_waitable_timer )  result = true;
+                break;
             }
         }
         else
@@ -480,7 +515,13 @@ WAIT_OK:
             throw_mswin_error( "MsgWaitForMultipleObjects" );
     }
 
-    return false;
+    if( waitable_timer_set )
+    {
+        ok = CancelWaitableTimer( _spooler->_waitable_timer );
+        if( !ok )  z::throw_mswin( "CancelWaitableTimer" );
+    }
+
+    return result;
 
 #else
 

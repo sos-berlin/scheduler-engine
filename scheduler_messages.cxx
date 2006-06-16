@@ -268,6 +268,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-968", "start_new_file(): intermediate protocol file is: $1" },
     { "SCHEDULER-969", "Less than min_tasks=$1 are running. New tasks will be started. Cause: $2" },
     { "SCHEDULER-970", "$1 ended immediately after start, so min_tasks=$2 doesn't lead to new tasks" },
+    { "SCHEDULER-972", "Still waiting until $1 ($2) ..." },
     { "SCHEDULER-999", "Scheduler has been terminated properly" },
     {}
 };
