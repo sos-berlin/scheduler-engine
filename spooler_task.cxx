@@ -258,7 +258,13 @@ void Task::close()
             // Was machen wir jetzt?
             // _operation->kill()?
             LOG( *this << ".close(): Operation aktiv: " << _operation->async_state_text() << "\n" );
-            _operation->async_kill();  // do_kill() macht nachher das gleiche
+
+            try
+            {
+                _operation->async_kill();  // do_kill() macht nachher das gleiche
+            }
+            catch( exception& x )  { Z_LOG( "Task::close() _operation->async_kill() ==> " << x.what() << "\n" ); }
+
             _operation = NULL;
         }
 
@@ -268,7 +274,12 @@ void Task::close()
 
         if( _module_instance )
         {
-            do_kill();
+            try
+            {
+                do_kill();
+            }
+            catch( exception& x )  { Z_LOG( "Task::close() do_kill() ==> " << x.what() << "\n" ); }
+
             _module_instance->detach_task();
         }
 
@@ -349,7 +360,16 @@ xml::Element_ptr Task::dom_element( const xml::Document_ptr& document, const Sho
                 if( pid )
                 {
                     task_element.setAttribute( "pid", pid );       // separate_process="yes", Remote_module_instance_proxy
-                    task_element.setAttribute( "priority", zschimmer::Process( pid ).priority_class() );
+
+                    try
+                    {
+                        zschimmer::Process process ( pid );
+                        task_element.setAttribute( "priority", process.priority_class() );
+                    }
+                    catch( exception& x )
+                    {
+                        Z_LOG( __FUNCTION__ << " priority_class() ==> " << x.what() << "\n" );
+                    }
                 }
             }
         }
@@ -369,7 +389,16 @@ xml::Element_ptr Task::dom_element( const xml::Document_ptr& document, const Sho
                     xml::Element_ptr subprocess_element = document.createElement( "subprocess" );
                     subprocess_element.setAttribute( "pid", p->_pid );
 
-                    subprocess_element.setAttribute( "priority", zschimmer::Process( p->_pid ).priority_class() );
+                    try
+                    {
+                        zschimmer::Process process ( p->_pid );
+                        subprocess_element.setAttribute( "priority", process.priority_class() );
+                    }
+                    catch( exception& x )
+                    {
+                        Z_LOG( __FUNCTION__ << " priority_class() ==> " << x.what() << "\n" );
+                    }
+
 
                     if( p->_timeout_at != latter_day )
                     subprocess_element.setAttribute( "timeout_at", p->_timeout_at.as_string() );

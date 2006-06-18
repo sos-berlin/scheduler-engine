@@ -1223,7 +1223,7 @@ void Job::select_period( Time now )
 
         if( _period.begin() != latter_day )
         {
-            string rep; if( _period._repeat != latter_day )  rep = _period._repeat.as_string();
+            string rep; if( _period.has_repeat_or_once() )  rep = _period._repeat.as_string();
             _log->debug( message_string( "SCHEDULER-921", _period.begin(), _period.end(), rep ) );
         }
         else 
@@ -1268,7 +1268,7 @@ void Job::set_next_start_time( Time now, bool repeat )
             {
                 if( !_repeat )  _next_single_start = _run_time->next_single_start( now );
 
-                if( _start_once  ||  _start_min_tasks  ||  !repeat && _period._repeat < latter_day )
+                if( _start_once  ||  _start_min_tasks  ||  !repeat && _period.has_repeat_or_once() )
                 {
                     if( _period.begin() > now )
                     {

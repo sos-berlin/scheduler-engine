@@ -380,7 +380,7 @@ bool Wait_handles::wait_until_2( const Time& until, const Object* wait_for_objec
     // until kann 0 sein
     _catched_event = NULL;
 
-    if( signaled() )  return true;
+    //2006-06-18: Nicht gut bei "nichts_getan": Wir brauchen auch neue Ereignisse, v.a. TCP.    if( signaled() )  return true;
 
 #ifdef Z_WINDOWS
 

@@ -154,6 +154,7 @@ struct Period
     Time                        repeat                      () const                                { return _repeat; }
     bool                        is_single_start             () const                                { return _single_start; }
     bool                        let_run                     () const                                { return _let_run; }
+    bool                        has_repeat_or_once          () const                                { return _repeat < latter_day || _start_once; }
 
   //void                        set_next_start_time         ( const Time& );
 
@@ -169,6 +170,7 @@ struct Period
     Time                       _repeat;
     bool                       _single_start;
     bool                       _let_run;                    // Task zuende laufen lassen, nicht bei _next_end_time beenden
+    bool                       _start_once;                 // Für Joacim Zschimmer
 };
 
 //extern Period                   empty_period;               // gcc 3.2.1: Nicht const, weil gcc diese Variable nicht initialisiert. Das macht spooler.cxx.

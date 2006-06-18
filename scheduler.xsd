@@ -516,6 +516,11 @@
             <xsd:attribute name="end"           type="Time_of_day"/>
             <xsd:attribute name="let_run"       type="Yes_no"/>
             <xsd:attribute name="repeat"        type="Duration"/>
+            <xsd:attribute name="start_once"    type="Yes_no" default="no">
+                <xsd:annotation>
+                    <xsd:documentation>Test only for Joacim Zschimmer</xsd:documentation>
+                </xsd:annotation>
+            </xsd:attribute>
         </xsd:complexType>
     </xsd:element>
 

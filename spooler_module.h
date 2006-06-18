@@ -231,7 +231,7 @@ struct Module_instance : Object
     void                    set_params                      ( Com_variable_set* params )            { _params = params; }
 
     void                        attach_task                 ( Task*, Prefix_log* );
-    void                        detach_task                 ();
+    virtual void                detach_task                 ();
     virtual void                add_obj                     ( IDispatch*, const string& name );
   //virtual void                add_log_obj                 ( Com_log* log, const string& name )    { add_obj( log, name ); }
     IDispatch*                  object                      ( const string& name );

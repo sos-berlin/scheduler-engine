@@ -20,12 +20,7 @@ using namespace zschimmer::com::object_server;
 Remote_module_instance_proxy::~Remote_module_instance_proxy()
 {
     close();
-
-    if( _process )
-    {
-        _process->remove_module_instance( this );
-        _process = NULL;
-    }
+    detach_process();
 }
 
 //---------------------------------------------------------------Remote_module_instance_proxy::init
@@ -43,6 +38,25 @@ void Remote_module_instance_proxy::init()
     Module_instance::init();
 
     if( _module->_reuse != Module::reuse_task )  z::throw_xc( "SCHEDULER-192" );         // Problem u.a.: synchrones Release(), wenn Job gestoppt wird
+}
+
+//-----------------------------------------------------Remote_module_instance_proxy::detach_process
+
+void Remote_module_instance_proxy::detach_process()
+{
+    if( _process )
+    {
+        _process->remove_module_instance( this );
+        _process = NULL;
+    }
+}
+
+//--------------------------------------------------------Remote_module_instance_proxy::detach_task
+
+void Remote_module_instance_proxy::detach_task()
+{
+    Com_module_instance_base::detach_task();
+    detach_process();
 }
 
 //---------------------------------------------------------------Remote_module_instance_proxy::load

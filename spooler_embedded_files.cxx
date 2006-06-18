@@ -4618,6 +4618,11 @@ const char file_scheduler_xsd[] =
     "<xsd:attribute name=\"end\"           type=\"Time_of_day\"/>\r\n"
     "<xsd:attribute name=\"let_run\"       type=\"Yes_no\"/>\r\n"
     "<xsd:attribute name=\"repeat\"        type=\"Duration\"/>\r\n"
+    "<xsd:attribute name=\"start_once\"    type=\"Yes_no\" default=\"no\">\r\n"
+    "<xsd:annotation>\r\n"
+    "<xsd:documentation>Test only for Joacim Zschimmer</xsd:documentation>\r\n"
+    "</xsd:annotation>\r\n"
+    "</xsd:attribute>\r\n"
     "</xsd:complexType>\r\n"
     "</xsd:element>\r\n"
     "\r\n"
@@ -5200,7 +5205,7 @@ static const Embedded_file embedded_files_array[] =
     { "html/jz/translation_de.js", file_html_jz_translation_de_js, sizeof file_html_jz_translation_de_js - 1, 1113979995 },
     { "html/jz/scheduler.xslt", file_html_jz_scheduler_xslt, sizeof file_html_jz_scheduler_xslt - 1, 1148569750 },
     { "html/jz/scheduler.css", file_html_jz_scheduler_css, sizeof file_html_jz_scheduler_css - 1, 1148569750 },
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1150286511 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1150611509 },
     { NULL, NULL, 0 }
 };
 

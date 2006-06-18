@@ -381,6 +381,8 @@ void Period::set_dom( const xml::Element_ptr& element, const Period* deflt )
     string end = element.getAttribute( "end" , "24:00:00" );
     if( !end.empty() )  dt.set_time( end ), _end = dt;
 
+    _start_once = element.bool_getAttribute( "start_once", _start_once );
+
     check();
 }
 

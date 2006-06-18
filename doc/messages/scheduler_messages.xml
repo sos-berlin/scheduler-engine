@@ -2111,6 +2111,12 @@
             </text>
         </message>
 
+        <message code="SCHEDULER-334">
+            <text xml:lang="en">
+                <title>Error when building mail: <p1/></title>
+            </text>
+        </message>
+        
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->

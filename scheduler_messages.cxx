@@ -202,6 +202,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-331", "Scheduler is terminating after error (see last error line)" },
     { "SCHEDULER-332", "Error in Scheduler script" },
     { "SCHEDULER-333", "\"now+SECONDS\" expected in \"$1\"" },
+    { "SCHEDULER-334", "Error when building mail: $1" },
     { "SCHEDULER-900", "Scheduler $1 is starting with $2, pid=$3" },
     { "SCHEDULER-902", "state=$1" },
     { "SCHEDULER-904", "Tasks have $1s to terminate" },

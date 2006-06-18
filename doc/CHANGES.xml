@@ -10,6 +10,36 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2006-06-18" version="2.0.154" subversion_revision="4364">
+
+        <revision type="correction" title="&lt;show_state> lieferte Fehler bei beendeten Subprozess, deshalb evt. keine eMail">
+            <description>
+                <p>
+                    <scheduler_element name="show_state"/> und andere Kommandos, die den Task-Zustand zeigen,
+                    lieferte einen Fehler, wenn ein Subprozess oder der Task-Prozess selbst beendet war
+                    und der Scheduler dies noch nicht zur Kenntnis genommmen hatte.
+                    Grund: Der Systemaufruf zum Lesen der Priorität liefert einen Fehler.
+                </p>
+                <p>
+                    Das konnte insbesondere bei <scheduler_element name="kill_task"/> mit Subprozess dazu führen, 
+                    dass die eMail am Ende der Task nicht versendet und 
+                    statt dessen der Fehler <scheduler_message code="SCHEDULER-302"/> ausgegeben wird.
+                </p>
+                <ul>
+                    <li>
+                        <scheduler_element name="kill_task"/>
+                    </li>
+                    <li>
+                        <scheduler_element directory="xml/answer/" name="subprocess" attribute="priority"/>
+                    </li>
+                    <li>
+                        <scheduler_method class="Log" property="mail_on_error"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+    </change>
+    
     <change date="2006-06-16" version="2.0.154" subversion_revision="4352">
 
         <revision type="new" title="&lt;process param=&quot;&quot;>: Task-Parameter werden ersetzt">

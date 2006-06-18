@@ -243,8 +243,15 @@ int Scheduler_event::send_mail( const Mail_defaults& mail_defaults )
 
         if( !mail_dom )
         {
-            event_dom = this->dom();
-            mail_dom = this->mail_dom( event_dom );
+            try
+            {
+                event_dom = this->dom();
+                mail_dom = this->mail_dom( event_dom );
+            }
+            catch( exception& x )
+            {
+                _object->log()->warn( message_string( "SCHEDULER-334", x.what() ) );
+            }
         }
 
 
@@ -284,7 +291,7 @@ int Scheduler_event::send_mail( const Mail_defaults& mail_defaults )
     }
     catch( exception& x )
     {
-        Z_LOG( __FUNCTION__ << ": " << x.what() );
+        Z_LOG( __FUNCTION__ << ":\n" );
         _spooler->log()->warn( message_string( "SCHEDULER-302", x ) );
     }
 

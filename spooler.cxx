@@ -71,8 +71,19 @@ const string                    scheduler_character_encoding        = "ISO-8859-
 const string                    new_suffix                          = "~new";           // Suffix für den neuen Spooler, der den bisherigen beim Neustart ersetzen soll
 const double                    renew_wait_interval                 = 0.25;
 const double                    renew_wait_time                     = 30;               // Wartezeit für Brückenspooler, bis der alte Spooler beendet ist und der neue gestartet werden kann.
+
 const int                       show_message_after_seconds          = 15*60;            // Nach dieser Wartezeit eine Meldung ausgeben
 const int                       show_message_after_seconds_debug    = 60;               // Nach dieser Wartezeit eine Meldung ausgeben
+
+const double                    nichts_getan_bremse                 = 1.0;              // Wartezeit in nichts_getan(), Meldung SCHEDULER-261
+#ifdef Z_DEBUG
+    const int                   scheduler_261_second                = 5;                // Nach sovielen leeren Schleifendurchläufen SCHEDULER-261 wiederholen
+    const int                   scheduler_261_intervall             = 10;               // Meldung SCHEDULER-261 wiederholen (s.a. nichts_getan_bremse), sonst unterdrücken
+#else
+    const int                   scheduler_261_second                = 10;               // Nach sovielen leeren Schleifendurchläufen SCHEDULER-261 wiederholen
+    const int                   scheduler_261_intervall             = 1000;             // ca. 20 Minuten
+#endif
+
 const int                       kill_timeout_1                      = 10;               // < kill_timeout_total
 const int                       kill_timeout_total                  = 30;               // terminate mit timeout: Nach timeout und kill noch soviele Sekunden warten
 const double                    wait_for_thread_termination         = latter_day;       // Haltbarkeit des Geduldfadens
@@ -2300,7 +2311,8 @@ void Spooler::stop( const exception* )
 
 void Spooler::nichts_getan( int anzahl, const string& str )
 {
-    if( anzahl == 1 )
+    if( anzahl == 1  
+     || anzahl >= scheduler_261_second &&  ( anzahl - scheduler_261_second ) % scheduler_261_intervall == 0 )
     {
         S tasks;
         S jobs;
@@ -2584,7 +2596,7 @@ void Spooler::run()
 
             wait_handles += _wait_handles;
 
-            if( !wait_handles.signaled() )
+            if( !wait_handles.signaled()  ||  nichts_getan_zaehler > 0 )   // Wenn "nichts_getan" (das ist schlecht), dann wenigstens alle Ereignisse abfragen, damit z.B. ein TCP-Verbindungsaufbau erkannt wird.
             {
                 if( wait_until == 0 )
                 {
@@ -2615,10 +2627,6 @@ void Spooler::run()
                     }
                 }
             }
-          //else
-          //{
-          //    Z_LOG2( "scheduler.wait", "wait_handles.signaled()!  " << wait_handles << "\n" );
-          //}
 
             catched_event_string = "";
             if( wait_handles._catched_event )
