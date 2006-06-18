@@ -3,12 +3,9 @@
     xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
     xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
 >
-    <config port="4444">
-        <security ignore_unknown_hosts="yes">
-            <allowed_host host="0.0.0.0" level="all"/>
-        </security>
-                
-        <process_classes ignore="no"/>
+    <config>
+
+        <base file="$SCHEDULER_TEST/base.scheduler"/>
         
         <script language="javascript"><![CDATA[
             
@@ -25,6 +22,8 @@ spooler.job( "javascript" ).start();
                 <script language="JavaScript">
     <![CDATA[
 
+spooler_log.mail_on_error = true;  // <kill_task> kann zu einem Fehler in Process.priority() führen, das Verhalten prüfen wir
+
 var subprocess = spooler_task.create_subprocess();
 
 subprocess.environment( "test1" ) = "ETT";
@@ -39,7 +38,7 @@ subprocess.timeout = 20;
 new ActiveXObject( "hostware.global" ).sleep( 1 );
 //subprocess.kill();
 spooler_log.info( "wait_for_termination ..." );
-var ok = subprocess.wait_for_termination( 5 );
+var ok = subprocess.wait_for_termination( 10 );
 spooler_log.info( "wait_for_termination ok=" + ok );
 
 if( subprocess.terminated )  spooler_log.info( "exit code=" + subprocess.exit_code ), spooler_log.info( "termination signal=" + subprocess.termination_signal );
@@ -66,9 +65,6 @@ function system( cmd, timeout )
         subprocess.close();
     }
 }
-
-
-
 
                 ]]></script>
 
