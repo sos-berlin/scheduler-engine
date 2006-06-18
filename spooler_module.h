@@ -221,7 +221,7 @@ struct Module_instance : Object
     void                    set_task_id                     ( int );
 
     void                        clear                       ();
-    void                        close                       ();
+    virtual void                close                       ();
     void                        close_monitor               ();
     virtual void                init                        ();
     virtual bool                kill                        ()                                      { return false; }

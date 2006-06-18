@@ -2340,8 +2340,9 @@ void Spooler::nichts_getan( int anzahl, const string& str )
         _log.warn( message_string( "SCHEDULER-261", str, _connection_manager->string_from_operations(), tasks, jobs ) );  // "Nichts getan, state=$1, _wait_handles=$2"
     }
 
-    //sos_sleep( min( 30, 1 << anzahl ) );
-    sos_sleep( 1 );
+    double t = 1;
+    Z_LOG( "sleep(" << t << ")...\n" );
+    sos_sleep( t );
 }
 
 //-----------------------------------------------------------------------Spooler::execute_state_cmd

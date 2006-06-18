@@ -61,9 +61,8 @@ struct Remote_module_instance_proxy : Com_module_instance_base
 
     void                        init                        ();
     bool                        load                        ();
-  //void                        close                       ();
+    void                        close                       ();
     bool                        kill                        ();
-    void                        detach_task                 ();
     void                        detach_process              ();
   
     void                        add_obj                     ( IDispatch*, const string& name );

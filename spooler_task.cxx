@@ -281,6 +281,7 @@ void Task::close()
             catch( exception& x )  { Z_LOG( "Task::close() do_kill() ==> " << x.what() << "\n" ); }
 
             _module_instance->detach_task();
+            _module_instance->close();
         }
 
 /* 2005-09-24 nicht blockieren. Scheduler kann sich beenden (nach timeout), auch wenn Tasks laufen
@@ -905,13 +906,13 @@ bool Task::check_subprocess_timeout( const Time& now )
 {
     bool something_done = false;
 
-    if( _subprocess_timeout < now )
+    if( _subprocess_timeout <= now )
     {
         FOR_EACH( Registered_pids, _registered_pids, p )
         {
             Registered_pid* subprocess = p->second;
 
-            if( subprocess->_timeout_at < now )
+            if( subprocess->_timeout_at <= now )
             {
                 _log->warn( message_string( "SCHEDULER-275", subprocess->_pid ) );
                 subprocess->try_kill();
@@ -1963,20 +1964,6 @@ void Module_task::do_close__end()
     }
 }
 
-//------------------------------------------------------------------------Module_task::close_engine
-/*
-void Module_task::close_engine()
-{
-    try
-    {
-      //_log->debug3( "close scripting engine" );
-        _module_instance->close();
-        _module_instance->_com_task = new Com_task();
-      //_module_instance = NULL;
-    }
-    catch( const exception& x ) { set_error(x); }
-}
-*/
 //------------------------------------------------------------------------Object_set_task::do_close
 // Kann von anderem Thread gerufen werden, wenn der noch eine COM-Referenz hat
 /*
