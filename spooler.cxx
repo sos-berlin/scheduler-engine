@@ -743,6 +743,7 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
 
     state_element.appendChild( _remote_scheduler_register.dom_element( dom, show ) );
     state_element.appendChild( _communication.dom_element( dom, show ) );
+    state_element.append_new_text_element( "operations", "\n" + _connection_manager->string_from_operations( "\n" ) + "\n" );
     state_element.appendChild( _web_services.dom_element( dom, show ) );
 
     return state_element;
@@ -2558,7 +2559,8 @@ void Spooler::run()
 
 #                        else
 
-                            Time next_time = Time( localtime_from_gmtime( (*p)->async_next_gmtime() ) );
+                            double t = (*p)->async_next_gmtime();
+                            Time next_time = Time( t == 0? 0 : localtime_from_gmtime( t ) );
                             //Z_LOG( **p << "->async_next_gmtime() => " << next_time << "\n" );
                             if( next_time < wait_until )
                             {
