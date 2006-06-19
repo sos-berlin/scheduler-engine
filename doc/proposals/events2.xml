@@ -5,6 +5,7 @@
 
 <events title    = "Ereignisse"
         base_dir = ""
+        parent_page         = "index.xml"
         author   = "$Author$"
         date     = "$Date$">
 

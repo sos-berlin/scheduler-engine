@@ -6,6 +6,7 @@
 <description
     head_title          = "Windows Job-Objekte für Scheduler nutzen"
     base_dir            = "../"
+    parent_page         = "index.xml"
     author              = "$Author$"
     date                = "$Date$"
 >

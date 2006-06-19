@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: windows_job_objects.xml 4270 2006-04-21 08:26:33Z jz $-->
+
+<description
+    title               = "Verzeichnisüberwachung"
+    base_dir            = "../"
+    parent_page         = "index.xml"
+    author              = "$Author: jz $"
+    date                = "$Date: 2006-04-21 10:26:33 +0200 (Fr, 21 Apr 2006) $"
+>
+
+    <h2>Verzeichnisse als Auftragswarteschlange</h2>
+
+    <dl>
+        <dt>
+            Dateinamen sind Aufträge
+        </dt>
+        <dd>
+            Die Dateien eines Verzeichnises sind Aufträge für den Scheduler.
+            Der Umfang kann mit einem Regulären Ausdrück eingeschränkt werden.
+            Jede gelöschte Datei lässt den Scheduler den dazugehörigen Auftrag entfernen,
+            wenn er noch nicht einem Job übergeben worden ist.
+            Wenn eine Datei eines in Ausführung stehenden Auftrags gelöscht und wieder angelegt wird,
+            gibt der Scheduler eine Warnung aus. (Eine Eigenschaft des Auftrags könnte darauf hinweisen.)
+        </dd>
+
+        <dt>Unverarbeitete Dateien</dt>
+        <dd>
+            Wenn zu einem zu Ende ausgeführten Auftrag die Datei noch vorhanden ist,
+            dann erzeugt der Scheduler mit Verzögerung einen neuen Auftrag.
+            Außerdem schreibt er eine Fehlermeldung.
+            Vielleicht ist aber gewünscht, dass der Scheduler die Datei selbst löscht.
+        </dd>
+
+        <dt>Anlieferung der Dateien, Tilde-Verfahren</dt>
+        <dd>
+            Dateien, die nicht atomar angeliefert werden, also nicht den Umbenennungs-Mechanismus nutzen,
+            können unter Windows erkannt werden.
+            Dort lässt sich eine Datei solange nicht öffnen, wie sie beschrieben wird.
+            Wenn das Schließen der Datei durch den Schreiber bedeutet,
+            dass die Datei fertig ist, kann der Scheduler das erkennen.
+            Unter Linux geht das möglicherweise auch.
+            Ansonsten könnte ein Job die Erkennung übernehmen und selbst die Aufträge erzeugen.
+            Die Jobkette wäre dann trotzdem dem Verzeichnis zugeordnet,
+            so dass der Scheduler einen Auftrag löschen kann, wenn dessen Datei verschwunden ist,
+            und alle übrigen hier beschriebenen Mechanismen greifen.
+            
+            <pre>spooler.job_chain( "my_jobchain" ).add_file( path );</pre>
+            
+            Doppelte Dateinamen ignoriert der Scheduler.
+        </dd>
+
+        <dt>Verzeichnis-Fehler</dt>
+        <dd>
+            Wenn die Verzeichnisüberwachung auf einen Fehler läuft, weil einer das Verzeichnis abgehängt hat, 
+            dann protokolliert der Scheduler das und erzeugt einen Auftrag ohne Dateinamen, 
+            aber mit der Fehlermeldung, 
+            so dass die Jobs darauf reagieren können. 
+            Der Scheduler versucht periodisch die Überwachung erneut zu starten. 
+            Fehlermeldungen dabei werden ignoriert (kein Auftrag, nur Protokollzeile). 
+            Die Periode wäre einstellbar, Default vielleicht 1 Minute, 
+            oder es gibt einen delay_after_error-Mechanismus.
+        </dd>
+
+        <dt>Datenbank</dt>
+        <dd>
+            Die Aufträge brauchen (sollten) nicht in der Datenbank gespeichert werden. 
+            Das kann mit <scheduler_element name="job_chain" attribute="orders_recoverable" value="no"/> eingestellt werden.
+        </dd>
+
+        <dt>Reihenfolge der Aufträge</dt>
+        <dd>
+            Die Reihenfolge der Aufträge könnte einstellbar sein: 
+            nach Eingangsdatum (default), alphabetisch, nach Datum der Anlage oder der letzten Änderung.
+        </dd>
+
+        <dt>Beschränkung Auftragsanzahl</dt>
+        <dd>
+            Die Anzahl der gleichzeitig in einer Jobkette wartenden Aufträge könnte begrenzt werden.
+            (Besser, falls der Scheduler nicht so viele Aufträge halten kann, dieses Problem lösen.)
+        </dd>
+    </dl>
+
+    <scheduler_example>
+        <pre>&lt;job_chain name="my_jobchain" orders_recoverable="no" error_delay="60">
+    &lt;job_chain_node directory="<i>path</i>" regex="<i>regex</i>">
+    &lt;job_chain_node directory="<i>other_path</i>">
+    &lt;job_chain_node state="new" job="first_job"/>
+    …
+    &lt;job_chain_node state="finished" remove_file="yes"/>
+    &lt;job_chain_node state="error" move_file_to="c:/bad-files/"/>
+&lt;job_chain></pre>
+    </scheduler_example>
+
+    <p>
+        Mit verschachtelbaren Jobketten können die Verzeichnisnamen von der eigentlichen Jobkette getrennt werden:
+        (das müsste noch ausgetüftelt werden; alternativ kann ein weiteres XML-Element zur Verzeichnisüberwachung eingeführt werden).
+    </p>
+        <pre>&lt;job_chain name="my_big_jobchain" orders_recoverable="no">
+    &lt;job_chain_node directory="<i>path</i>" regex="<i>regex</i>>
+    &lt;job_chain_node directory="<i>other_path</i>">
+    &lt;job_chain_node job_chain="my_job_chain" next_state="finished" error_state="error"/>
+    &lt;job_chain_node state="finished" remove_file="yes"/>
+    &lt;job_chain_node state="error" move_file_to="c:/bad-files/"/>
+&lt;job_chain></pre>
+
+    <h2>Besonderheiten im bisherigen Verfahren</h2>
+    <ul>
+        <li>
+            <scheduler_element name="start_when_directory_changed"/>
+        </li>
+        <li>
+            <scheduler_element name="delay_after_error"/>
+        </li>
+    </ul>
+    <p>
+        Bei einem Verzeichnisfehler gibt's einen Fehler und
+        <scheduler_element name="delay_after_error"/> wirkt.
+        Das führt zum Job-Start, damit sodass der Job mitbekommt, dass das Verzeichnis nicht lesbar ist.
+        Er muss dies selbst prüfen, der Scheduler macht keine Mitteilung dazu.
+    </p>
+    
+    <ul>
+        <li>
+            <scheduler_method class="Job" method="start_when_directory_changed"/>
+        </li>
+    </ul>
+    <p>
+        Wäre schön, wenn diese Methode und <scheduler_element name="start_when_directory_changed"/> 
+        sich gleich verhalten würden. 
+    </p>
+</description>

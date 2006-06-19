@@ -4,13 +4,12 @@
 <!--$Id$-->
 
 <description
-    head_title          = "Vorschläge zur weiteren Entwicklung"
+    title               = "Vorschläge zur weiteren Entwicklung"
     base_dir            = "../"
+    parent_page         = "index.xml"
     author              = "$Author$"
     date                = "$Date$"
 >
-    <h1>Vorschläge zur weiteren Entwicklung</h1>
-
     <p>
         HTTP-Protokoll
     </p>
@@ -70,6 +69,8 @@
     <p class="indent" style="margin-top: 0px">
         Pipelining implementieren:
         Bislang verträgt der Scheduler kein zweites <code>GET</code>, solange er nicht das erste beantwortet hat.
+        Die Browser scheinen darauf Rücksicht zu nehmen. In Firefox ist das angeblich einschaltbar.
+        Der Aufwand wäre gering.
     </p>
 
     <p>
@@ -80,6 +81,39 @@
         Er sollte ersetzt werden.
     </p>
 
+    <p>
+        DNS-Zugriffe
+    </p>
+    <div class="indent">
+        <p style="margin-top: 0px">
+            Die sollten in eine asynchrone Operation ausgelagert werden, die in einem Thread (oder mehreren) abläuft.
+            Oder wir verzichten drauf. Denn die Operationen blockieren jetzt.
+            Das betrifft u.a.:
+        </p>
+        <ul>
+            <li>
+                &lt;security>: Die Hostnamen sollten erst augelöst werden, wenn sie gebraucht werden.
+                Sonst arbeitet der Scheduler, wenn er lange läuft, vielleicht mit veralteten IP-Adresse,
+            </li>
+            <li>
+                Anzeige des Rechnernamens beim Verbindungsaufbau über TCP und UDP
+            </li>
+            <li>
+                <scheduler_element name="config" attribute="main_scheduler"/>.
+                Bei jeder erneuten Verbindung den Hostnamen auflösen.
+            </li>
+        </ul>
+    </div>
+
+    <p>
+        <a href="start_when_directory_changed.xml"> Verzeichnisüberwachung</a>
+    </p>
+    <div class="indent">
+        <p style="margin-top: 0px">
+            Der Scheduler synchronisiert die Aufträge mit den Dateinamen im Verzeichnis.
+            Jede Änderung im Verzeichnis lässt den Scheduler die Auftragswarteschlangen auf den neuesten Stand bringen.
+        </p>
+    </div>
 
     <h1 style="margin-top: 3em">Dokumentation</h1>
 
@@ -112,5 +146,6 @@
         Welche Operation (API, XML) erzeugt welche Meldung?
         Anklickbare Meldungs-Codes im Scheduler-Protokoll der HTML-Oberfläche.
     </p>
+
 
 </description>

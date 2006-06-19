@@ -6,6 +6,7 @@
 <description
     head_title          = "Scheduler-weite Parameter"
     base_dir            = "../"
+    parent_page         = "index.xml"
     author              = "$Author$"
     date                = "$Date$"
 >

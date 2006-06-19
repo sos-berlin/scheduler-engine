@@ -7,7 +7,7 @@
              title    = "Vorschlag für geglättetes &lt;run_time>"
              category = "Konfiguration"
              base_dir = "../"
-             parent_page = "../konfiguration.xml"
+             parent_page = "index.xml"
              author   = "$Author$"
              date     = "$Date$">
 
