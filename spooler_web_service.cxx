@@ -483,7 +483,7 @@ void Web_service_operation::begin()
 
         if( _web_service->_timeout != INT_MAX )
         {
-            _http_operation->set_gmtimeout( (double)( ::time(NULL) + _web_service->_timeout ) );
+            _http_operation->set_gmtimeout( (double)( ::time(NULL) + 0.999 + _web_service->_timeout ) );
             // Auftrag ruft vor der Entjungferung http::Operation::on_order_processing() auf, der den Timeout zurücksetzt
         }
     }
