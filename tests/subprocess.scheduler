@@ -3,24 +3,32 @@
     xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
     xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
 >
-    <config>
+    <config
+        tcp_port="4444" 
+        main_scheduler="lillerud.zschimmer:6310"
+    >
+        <security>
+            <allowed_host host="0.0.0.0" level="all"/>
+        </security>
 
-        <base file="$SCHEDULER_TEST/base.scheduler"/>
-        
-        <script language="javascript"><![CDATA[
+        <process_classes/>
+
+        <script language="javascript">
+            <![CDATA[
             
 spooler.job( "javascript" ).start();            
 //spooler.job( "java" ).start();            
             
-        ]]></script>        
-                              
-                              
+        ]]>
+        </script>
+
+
         <jobs>
 
             <job name="javascript">
-       
+
                 <script language="JavaScript">
-    <![CDATA[
+                    <![CDATA[
 
 spooler_log.mail_on_error = true;  // <kill_task> kann zu einem Fehler in Process.priority() führen, das Verhalten prüfen wir
 
@@ -66,15 +74,17 @@ function system( cmd, timeout )
     }
 }
 
-                ]]></script>
+                ]]>
+                </script>
 
                 <run_time/>
             </job>
 
 
             <job name="java">
-        
-                <script java_class="spooler_job.My_job"><![CDATA[
+
+                <script java_class="spooler_job.My_job">
+                    <![CDATA[
 
 package spooler_job;
 
@@ -116,11 +126,12 @@ public class My_job  extends sos.spooler.Job_impl
         return false;
     }
 }
-                ]]></script>
+                ]]>
+                </script>
 
                 <run_time/>
             </job>
-        
+
         </jobs>
     </config>
 </spooler>

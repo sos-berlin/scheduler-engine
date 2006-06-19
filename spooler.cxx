@@ -2724,8 +2724,10 @@ void Spooler::begin_dont_suspend_machine()
 {
     if( _dont_suspend_machine_counter == 0 )
     {
-        Z_LOG( "SetThreadExecutionState(ES_CONTINUOUS|ES_SYSTEM_REQUIRED);\n" );
-        SetThreadExecutionState( ES_CONTINUOUS | ES_SYSTEM_REQUIRED );
+#       ifdef Z_WINDOWS
+            Z_LOG( "SetThreadExecutionState(ES_CONTINUOUS|ES_SYSTEM_REQUIRED);\n" );
+            SetThreadExecutionState( ES_CONTINUOUS | ES_SYSTEM_REQUIRED );
+#       endif
     }
 
     _dont_suspend_machine_counter++;
@@ -2739,8 +2741,10 @@ void Spooler::end_dont_suspend_machine()
 
     if( _dont_suspend_machine_counter == 0 )
     {
-        Z_LOG( "SetThreadExecutionState(ES_CONTINUOUS);\n" );
-        SetThreadExecutionState( ES_CONTINUOUS );
+#       ifdef Z_WINDOWS
+            Z_LOG( "SetThreadExecutionState(ES_CONTINUOUS);\n" );
+            SetThreadExecutionState( ES_CONTINUOUS );
+#       endif
     }
 }
 
