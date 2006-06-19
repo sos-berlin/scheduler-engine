@@ -172,8 +172,36 @@
                             <xsl:value-of select="state/@spooler_running_since__xslt_datetime_diff"  disable-output-escaping="yes"/>
                         <xsl:text>)</xsl:text>
                     </span>
-                    &#160; &#160;
+
+                    <xsl:text>&#160;</xsl:text>
                     <xsl:apply-templates select="state/@state"/>
+
+                    <xsl:choose>
+                        <xsl:when test="state/@wait_until">
+                            <xsl:element name="span">
+                                <xsl:attribute name="style">
+                                    <xsl:text>cursor: default;</xsl:text>
+                                </xsl:attribute>
+                                <xsl:attribute name="class"></xsl:attribute>
+                                <xsl:attribute name="title">
+                                    <xsl:text>Waiting until </xsl:text>
+                                    <xsl:value-of select="state/@wait_until__xslt_datetime_with_diff"/>
+                                    <xsl:if test="state/@resume_at">
+                                        <xsl:text>, resuming at </xsl:text>
+                                        <xsl:value-of select="state/@resume_at__xslt_datetime_with_diff"/>
+                                    </xsl:if>
+                                </xsl:attribute>
+                                <xsl:text>, next: </xsl:text>
+                                <span style="white-space: nowrap">
+                                    <xsl:value-of select="state/@wait_until__xslt_date_or_time"/>
+                                </span>
+                            </xsl:element>
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <span>, processing...</span>
+                        </xsl:otherwise>
+                    </xsl:choose>
+                    <xsl:text>&#160;</xsl:text>
                 </td>
 
                 <td valign="top" align="right">

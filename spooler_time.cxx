@@ -414,6 +414,9 @@ bool Period::is_comming( Time time_of_day, With_single_start single_start ) cons
     if( single_start & wss_next_single_start  &&  _single_start  &&  time_of_day <= _begin )  result = true;
                                                                               // ^ Falls _begin == 00:00 und time_of_day == 00:00 (Beginn des nächsten Tags)
     else
+    if( single_start & wss_next_any_start  &&  ( ( _single_start || _start_once || _repeat < latter_day ) && time_of_day <= _begin ) )  result = true;
+                                                                                                                      // ^ Falls _begin == 00:00 und time_of_day == 00:00 (Beginn des nächsten Tags)
+    else
         result = false;
 
     //Z_LOG2( "joacim", *this << ".is_comming(" << time_of_day << ',' << (int)single_start << ") ==> " << result << "\n" );

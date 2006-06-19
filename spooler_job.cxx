@@ -1266,7 +1266,7 @@ void Job::set_next_start_time( Time now, bool repeat )
         {
             if( !_period.is_in_time( _next_start_time ) )
             {
-                if( !_repeat )  _next_single_start = _run_time->next_single_start( now );
+                if( !_repeat )  _next_single_start = _spooler->_zschimmer_mode? _run_time->next_any_start( now ) : _run_time->next_single_start( now );
 
                 if( _start_once  ||  _start_min_tasks  ||  !repeat && _period.has_repeat_or_once() )
                 {

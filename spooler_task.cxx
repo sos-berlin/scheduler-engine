@@ -1470,13 +1470,12 @@ bool Task::load()
     }
 
 
-    THREAD_LOCK_DUMMY( _lock )
-    {
-        _job->count_task();
-        _thread->count_task();
-        //(nur für altes use_engine="job", löscht Fehlermeldung von Job::do_somethin() init_start_when_directory_changed: reset_error();
-        _running_since = Time::now();
-    }
+    _job->count_task();
+    _thread->count_task();
+    //(nur für altes use_engine="job", löscht Fehlermeldung von Job::do_somethin() init_start_when_directory_changed: reset_error();
+    _running_since = Time::now();
+
+    if( !_job->is_machine_suspendable() )  _spooler->begin_dont_suspend_machine();
 
     return do_load();
 }
@@ -1695,6 +1694,8 @@ void Task::finish()
 
     close();
     leave_thread();
+
+    if( !_job->is_machine_suspendable() )  _spooler->end_dont_suspend_machine();
 }
 
 //-------------------------------------------------------------------Task::process_on_exit_commands

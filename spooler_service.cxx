@@ -311,7 +311,8 @@ static void set_service_status( int spooler_error, int state = 0 )
                                                                                                          : SERVICE_START_PENDING; 
         service_status.dwControlsAccepted           = SERVICE_ACCEPT_STOP 
                                                     | SERVICE_ACCEPT_PAUSE_CONTINUE 
-                                                    | SERVICE_ACCEPT_SHUTDOWN;
+                                                    | SERVICE_ACCEPT_SHUTDOWN
+                                                    | SERVICE_ACCEPT_POWEREVENT;
                                  // Nicht für NT 4: | SERVICE_ACCEPT_PARAMCHANGE; 
     
         service_status.dwWin32ExitCode              = spooler_error? ERROR_SERVICE_SPECIFIC_ERROR : NO_ERROR;              
@@ -455,7 +456,7 @@ static void start_self_destruction()
 
 //----------------------------------------------------------------------string_from_handler_control
 
-string string_from_handler_control( DWORD c )
+static string string_from_handler_control( DWORD c )
 {
     switch( c )
     {
@@ -469,22 +470,47 @@ string string_from_handler_control( DWORD c )
         case SERVICE_CONTROL_NETBINDREMOVE:     return "SERVICE_CONTROL_NETBINDREMOVE";
         case SERVICE_CONTROL_NETBINDENABLE:     return "SERVICE_CONTROL_NETBINDENABLE";
         case SERVICE_CONTROL_NETBINDDISABLE:    return "SERVICE_CONTROL_NETBINDDISABLE";
+        case SERVICE_CONTROL_POWEREVENT:        return "SERVICE_CONTROL_POWEREVENT";
         default:                                return "SERVICE_CONTROL_" + as_string( c );
     }
 }
 
-//------------------------------------------------------------------------------------------Handler
+//--------------------------------------------------------------------------string_from_power_event
 
-static void __stdcall Handler( DWORD dwControl )
+static string string_from_power_event( DWORD e )
 {
-    LOGI( "\nService Handler(" << string_from_handler_control(dwControl) << ")\n" )
+    switch( e )
+    {
+        case PBT_APMBATTERYLOW:         return "PBT_APMBATTERYLOW";
+        case PBT_APMOEMEVENT:           return "PBT_APMOEMEVENT";
+        case PBT_APMPOWERSTATUSCHANGE:  return "PBT_APMPOWERSTATUSCHANGE";
+        case PBT_APMQUERYSUSPEND:       return "PBT_APMQUERYSUSPEND";
+        case PBT_APMQUERYSUSPENDFAILED: return "PBT_APMQUERYSUSPENDFAILED";
+        case PBT_APMSUSPEND:            return "PBT_APMSUSPEND";
+        case PBT_APMRESUMEAUTOMATIC:    return "PBT_APMRESUMEAUTOMATIC";
+        case PBT_APMRESUMECRITICAL:     return "PBT_APMRESUMECRITICAL";
+        case PBT_APMRESUMESUSPEND:      return "PBT_APMRESUMESUSPEND";
+        default:                        return "PBT_" + as_string( e );
+    }
+}
+
+//----------------------------------------------------------------------------------------HandlerEx
+
+static DWORD WINAPI HandlerEx( DWORD dwControl, DWORD event, void* event_data, void* )
+{
+    LOGI( "\nService HandlerEx(" << string_from_handler_control(dwControl) << "," << 
+          ( dwControl == SERVICE_CONTROL_POWEREVENT? string_from_power_event( event ) : as_string( event ) ) << "," <<
+          event_data << ")\n" )
+
+    DWORD result = ERROR_CALL_NOT_IMPLEMENTED;
 
     if( spooler_ptr )
     {
         if( dwControl == SERVICE_CONTROL_STOP 
          || dwControl == SERVICE_CONTROL_SHUTDOWN )  start_self_destruction();      // Vorsichtshalber vor info()!
 
-        spooler_ptr->log()->info( message_string( "SCHEDULER-960", string_from_handler_control(dwControl) ) );
+        spooler_ptr->log()->info( message_string( "SCHEDULER-960", string_from_handler_control(dwControl),
+                                                                   ( dwControl == SERVICE_CONTROL_POWEREVENT? string_from_power_event( event ) : as_string( event ) ) ) );
 
         switch( dwControl )
         {
@@ -494,7 +520,7 @@ static void __stdcall Handler( DWORD dwControl )
                 service_stop = true;
                 spooler_ptr->cmd_terminate( terminate_timeout );
                 set_service_status( 0, SERVICE_STOP_PENDING );
-
+                result = NO_ERROR;  
                 break;
             }
 
@@ -502,25 +528,31 @@ static void __stdcall Handler( DWORD dwControl )
                 pending_timed_out = false;
                 service_stop = false;
                 spooler_ptr->cmd_pause();
+                result = NO_ERROR;  
                 break;
 
             case SERVICE_CONTROL_CONTINUE:          // Requests the paused service to resume.  
                 pending_timed_out = false;
                 service_stop = false;
                 spooler_ptr->cmd_continue();
+                result = NO_ERROR;  
                 break;
 
             case SERVICE_CONTROL_INTERROGATE:       // Requests the service to update immediately its current status information to the service control manager.  
+                result = NO_ERROR;  
                 break;
 
             case SERVICE_CONTROL_SHUTDOWN:          // Requests the service to perform cleanup tasks, because the system is shutting down. 
+                // Wir haben nicht mehr als 20s: Das ist eigentlich zu kurz. STOP_PENDING gibt eine kleine Gnadenfrist. 2006-06-19
                 pending_timed_out = false;
                 spooler_ptr->cmd_terminate();
                 set_service_status( 0, SERVICE_STOP_PENDING );
+                result = NO_ERROR;  
                 break;
 
             case SERVICE_CONTROL_PARAMCHANGE:       // Windows 2000: Notifies the service that service-specific startup parameters have changed. The service should reread its startup parameters. 
-                spooler_ptr->cmd_reload();
+                //spooler_ptr->cmd_reload();
+                //result = NO_ERROR;  
                 break;
 /*
             case SERVICE_CONTROL_NETBINDADD:        // Windows 2000: Notifies a network service that there is a new component for binding. The service should bind to the new component.  
@@ -528,6 +560,52 @@ static void __stdcall Handler( DWORD dwControl )
             case SERVICE_CONTROL_NETBINDENABLE:     // Windows 2000: Notifies a network service that a disabled binding has been enabled. The service should reread its binding information and add the new binding.  
             case SERVICE_CONTROL_NETBINDDISABLE:    // Windows 2000: Notifies a network service that one of its bindings has been disabled. The service should reread its binding information and remove the binding. 
 */
+
+            case SERVICE_CONTROL_POWEREVENT:
+            {
+                result = NO_ERROR;  
+
+                // Reihenfolge:
+                // 1) PBT_APMQUERYSUSPEND
+                // 2) PBT_APMSUSPEND
+                // 3) suspended
+                // 4) PBT_APMRESUMESUSPEND und PBT_APMRESUMEAUTOMATIC (Reihenfolge vertauschbar)
+
+                if( spooler_ptr )
+                {
+                    switch( event )
+                    {
+                        case PBT_APMQUERYSUSPEND:
+                        {
+                            // Das verhindert das Schlafenlegen durch den Benutzer (ist das gut? Ein Kennzeichen im System Tray wäre gut)
+                            //? result = spooler_ptr->is_machine_suspendable()? NO_ERROR : BROADCAST_QUERY_DENY;
+                            break;
+                        }
+
+                        //case PBT_APMQUERYSUSPENDFAILED:
+                        //case PBT_APMBATTERYLOW:     // Vorsichtshalber?
+                        //case PBT_APMSUSPEND:        // Keine Zeit mehr
+                        //{
+                        //    result = NO_ERROR;  
+                        //    break;
+                        //}
+
+                        //case PBT_APMQUERYSUSPENDFAILED: // Suspend hat nicht geklappt, also alles wieder starten:
+                        //case PBT_APMRESUMEAUTOMATIC:    // Erwachen ohne Benutzer (z.B. durch Netzwerkkarte)
+                        //case PBT_APMRESUMESUSPEND:
+                        //case PBT_APMRESUMECRITICAL:
+                        //{
+                        //    result = NO_ERROR;  
+                        //    break;
+                        //}
+
+                        default: ;
+                    }
+                }
+
+                break;
+            }
+
             default:
                 break;
         }
@@ -535,6 +613,7 @@ static void __stdcall Handler( DWORD dwControl )
 
 
     //set_service_status( 0 );
+    return result;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -617,8 +696,9 @@ static void __stdcall ServiceMain( DWORD argc, char** argv )
             if( argc > 1 )  param._argc = argc, param._argv = argv;                 // Parameter des Dienstes (die sind wohl nur zum Test)
                       else  param._argc = process_argc, param._argv = process_argv; // Parameter des Programmaufrufs
 
-            LOG( "RegisterServiceCtrlHandler\n" );
-            service_status_handle = RegisterServiceCtrlHandler( spooler_service_name.c_str(), &Handler );
+
+            LOG( "RegisterServiceCtrlHandlerEx\n" );
+            service_status_handle = RegisterServiceCtrlHandlerEx( spooler_service_name.c_str(), &HandlerEx, NULL );
             if( !service_status_handle )  throw_mswin_error( "RegisterServiceCtrlHandler" );
 
             LOG( "CreateThread\n" );

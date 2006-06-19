@@ -17,7 +17,8 @@ enum With_single_start
     wss_next_single_start           = 0x02,
     wss_next_period_or_single_start = 0x03,
     wss_next_begin                  = 0x04,                 // Nächste <period> mit begin ab einem Zeitpunkt
-    wss_next_begin_or_single_start  = 0x06
+    wss_next_begin_or_single_start  = 0x06,
+    wss_next_any_start              = 0x08                  // Nächster Start: single_start, start_once, repeat (nur erster Start in der Periode)
 };
 
 //---------------------------------------------------------------------------------------------Time
@@ -370,6 +371,7 @@ struct Run_time : idispatch_implementation< Run_time, spooler_com::Irun_time >,
     bool                        period_follows              ( Time time )                           { return next_period(time).begin() != latter_day; }
 
     Time                        next_single_start           ( Time time )                           { return next_period(time,wss_next_single_start).begin(); }
+    Time                        next_any_start              ( Time time )                           { return next_period(time,wss_next_any_start).begin(); }
 
     void                        print                       ( ostream& ) const;
     friend ostream&             operator <<                 ( ostream& s, const Run_time& o )       { o.print(s); return s; }

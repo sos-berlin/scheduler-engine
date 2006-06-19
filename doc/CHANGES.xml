@@ -10,8 +10,28 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2006-06-18" version="2.0.154" subversion_revision="4364">
+    <change date="2006-06-19" version="2.0.154" subversion_revision="4366">
 
+
+        <revision type="new" title="Ein paar Verbesserungen in der internen Ereignisverarbeitung">
+            <description>
+                <p>
+                    Neues Attribut <code>wait_until</code> liefert den Zeitpunkt der nächsten geplanten Aktion.
+                    Nach etwa 20 Minuten Nichtstun gibt der Scheduler eine Meldung aus, 
+                    bis wann und worauf er wartet.
+                </p>
+
+                <ul>
+                    <li>
+                        <scheduler_element directory="xml/answer/" name="state" attribute="wait_until"/>
+                    </li>
+                    <li>
+                        <scheduler_message code="SCHEDULER-972"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+        
         <revision type="correction" title="&lt;show_state> lieferte Fehler bei beendeten Subprozess, deshalb evt. keine eMail">
             <description>
                 <p>

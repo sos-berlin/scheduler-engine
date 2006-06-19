@@ -2629,7 +2629,7 @@
 
         <message code="SCHEDULER-960">
             <text xml:lang="en">
-                <title>Service handler: dwControl=<p1/></title>
+                <title>Windows service handler: control=<p1/> event=<p2/></title>
             </text>
         </message>
 

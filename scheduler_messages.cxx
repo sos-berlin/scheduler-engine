@@ -258,7 +258,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-957", "Closing database" },
     { "SCHEDULER-958", "Waiting $1 seconds before reopening the database" },
     { "SCHEDULER-959", "Switching history from database to plain files" },
-    { "SCHEDULER-960", "Service handler: dwControl=$1" },
+    { "SCHEDULER-960", "Windows service handler: control=$1 event=$2" },
     { "SCHEDULER-961", "Protocol starts in $1" },
     { "SCHEDULER-962", "Protocol ends in $1" },
     { "SCHEDULER-963", "Copying protocol file to $1" },

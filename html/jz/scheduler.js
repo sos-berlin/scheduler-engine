@@ -230,6 +230,8 @@ Scheduler.prototype.modify_datetime_for_xslt = function( response )
     this.add_datetime_attributes_for_xslt( response, now, "end_time"              );
     this.add_datetime_attributes_for_xslt( response, now, "connected_at"          );
     this.add_datetime_attributes_for_xslt( response, now, "disconnected_at"       );
+    this.add_datetime_attributes_for_xslt( response, now, "wait_until"            );
+    this.add_datetime_attributes_for_xslt( response, now, "resume_at"             );
 }
 
 //---------------------------------------------------------------------Scheduler.call_error_checked
@@ -307,10 +309,12 @@ function xslt_format_datetime( datetime )
 function xslt_format_date_or_time( datetime )
 {
     if( !datetime )  return "";
+    if( datetime == "never" )  return datetime;
+    if( datetime == "now"   )  return datetime;
 
     var now = new Date();
 
-    if(    1*datetime.substr( 0, 4 ) == now.getYear()
+    if(    1*datetime.substr( 0, 4 ) == now.getYear() + 1900
         && 1*datetime.substr( 5, 2 ) == now.getMonth() + 1
         && 1*datetime.substr( 8, 2 ) == now.getDate()  )
     {
@@ -320,8 +324,8 @@ function xslt_format_date_or_time( datetime )
     {
         var tomorrow = new Date( now );
         tomorrow.setDate( tomorrow.getDate() + 1 );
-        
-        if(    1*datetime.substr( 0, 4 ) == tomorrow.getYear()
+
+        if(    1*datetime.substr( 0, 4 ) == tomorrow.getYear() + 1900
             && 1*datetime.substr( 5, 2 ) == tomorrow.getMonth() + 1
             && 1*datetime.substr( 8, 2 ) == tomorrow.getDate()  )
         {

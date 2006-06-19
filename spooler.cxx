@@ -700,6 +700,12 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
     state_element.setAttribute( "loop"                 , _loop_counter );
     state_element.setAttribute( "waits"                , _wait_counter );
 
+    if( _last_wait_until )
+    state_element.setAttribute( "wait_until", _last_wait_until.as_string() );
+
+    if( _last_resume_until  &&  _last_resume_until != latter_day )
+    state_element.setAttribute( "resume_at", _last_resume_until.as_string() );
+
 #   ifdef Z_UNIX
     {
         // Offene file descriptors ermitteln. Zum Debuggen, weil das Gerücht geht, Dateien würden offen bleiben.
@@ -2606,6 +2612,8 @@ void Spooler::run()
                 else
                 {
                     _wait_counter++;
+                    _last_wait_until   = wait_until;
+                    _last_resume_until = resume_until;
 
                     if( log_wait )  
                     {
@@ -2673,15 +2681,17 @@ bool Spooler::run_continue()
         }
     }
 
-    // TCP- UND UDP-VERBINDUNGEN IN SPOOLER_COMMUNICATION.CXX FORTSETZEN
-    something_done |= _connection_manager->async_continue();
-
     if( _state != Spooler::s_paused )
     {
         // TASKS FORTSETZEN
 
         something_done |= _single_thread->process();    
     }
+
+    if( something_done )  _last_wait_until = 0, _last_resume_until = 0;
+
+    // TCP- UND UDP-VERBINDUNGEN IN SPOOLER_COMMUNICATION.CXX FORTSETZEN
+    something_done |= _connection_manager->async_continue();
 
     return something_done;
 }
@@ -2705,6 +2715,32 @@ void Spooler::run_check_ctrl_c()
             _log.warn( message_string( "SCHEDULER-263" ) );  // "Abbruch-Signal (Ctrl-C) beim Beenden des Schedulers empfangen. Der Scheduler wird abgebrochen, sofort.\n" );
             abort_now();
         }
+    }
+}
+
+//--------------------------------------------------------------Spooler::begin_dont_suspend_machine
+
+void Spooler::begin_dont_suspend_machine()
+{
+    if( _dont_suspend_machine_counter == 0 )
+    {
+        Z_LOG( "SetThreadExecutionState(ES_CONTINUOUS|ES_SYSTEM_REQUIRED);\n" );
+        SetThreadExecutionState( ES_CONTINUOUS | ES_SYSTEM_REQUIRED );
+    }
+
+    _dont_suspend_machine_counter++;
+}
+
+//----------------------------------------------------------------Spooler::end_dont_suspend_machine
+
+void Spooler::end_dont_suspend_machine()
+{
+    _dont_suspend_machine_counter--;
+
+    if( _dont_suspend_machine_counter == 0 )
+    {
+        Z_LOG( "SetThreadExecutionState(ES_CONTINUOUS);\n" );
+        SetThreadExecutionState( ES_CONTINUOUS );
     }
 }
 

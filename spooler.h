@@ -366,6 +366,9 @@ struct Spooler : Object,
     void                        register_pid                ( int );                            // Für abort_immediately()
     void                        unregister_pid              ( int );                            // Für abort_immediately()
 
+    bool                        is_machine_suspendable      () const                            { return _dont_suspend_machine_counter == 0; }
+    void                        begin_dont_suspend_machine  ();
+    void                        end_dont_suspend_machine    ();
 
   private:
     Fill_zero                  _zero_;
@@ -529,8 +532,9 @@ struct Spooler : Object,
     bool                       _ignore_process_classes;
 
 
-  //Job*                       _next_job;
-    Time                       _next_start_time;
+    //Time                       _next_start_time;
+    Time                       _last_wait_until;            // Für <show_state>
+    Time                       _last_resume_until;          // Für <show_state>
     bool                       _print_time_every_second;
 
     Thread_list                _thread_list;                // Alle Threads
@@ -560,6 +564,7 @@ struct Spooler : Object,
     string                     _directory;
     File                       _pid_file;
     bool                       _zschimmer_mode;
+    int                        _dont_suspend_machine_counter;   // >0: Kein suspend
 
     Time                       _next_daylight_saving_transition_time;
     string                     _next_daylight_saving_transition_name;

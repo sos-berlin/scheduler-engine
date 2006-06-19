@@ -1170,6 +1170,8 @@ const char file_html_jz_scheduler_js[] =
     "this.add_datetime_attributes_for_xslt( response, now, \"end_time\"              );\r\n"
     "this.add_datetime_attributes_for_xslt( response, now, \"connected_at\"          );\r\n"
     "this.add_datetime_attributes_for_xslt( response, now, \"disconnected_at\"       );\r\n"
+    "this.add_datetime_attributes_for_xslt( response, now, \"wait_until\"            );\r\n"
+    "this.add_datetime_attributes_for_xslt( response, now, \"resume_at\"             );\r\n"
     "}\r\n"
     "\r\n"
     "//---------------------------------------------------------------------Scheduler.call_error_checked\r\n"
@@ -1247,10 +1249,12 @@ const char file_html_jz_scheduler_js[] =
     "function xslt_format_date_or_time( datetime )\r\n"
     "{\r\n"
     "if( !datetime )  return \"\";\r\n"
+    "if( datetime == \"never\" )  return datetime;\r\n"
+    "if( datetime == \"now\"   )  return datetime;\r\n"
     "\r\n"
     "var now = new Date();\r\n"
     "\r\n"
-    "if(    1*datetime.substr( 0, 4 ) == now.getYear()\r\n"
+    "if(    1*datetime.substr( 0, 4 ) == now.getYear() + 1900\r\n"
     "&& 1*datetime.substr( 5, 2 ) == now.getMonth() + 1\r\n"
     "&& 1*datetime.substr( 8, 2 ) == now.getDate()  )\r\n"
     "{\r\n"
@@ -1261,7 +1265,7 @@ const char file_html_jz_scheduler_js[] =
     "var tomorrow = new Date( now );\r\n"
     "tomorrow.setDate( tomorrow.getDate() + 1 );\r\n"
     "\r\n"
-    "if(    1*datetime.substr( 0, 4 ) == tomorrow.getYear()\r\n"
+    "if(    1*datetime.substr( 0, 4 ) == tomorrow.getYear() + 1900\r\n"
     "&& 1*datetime.substr( 5, 2 ) == tomorrow.getMonth() + 1\r\n"
     "&& 1*datetime.substr( 8, 2 ) == tomorrow.getDate()  )\r\n"
     "{\r\n"
@@ -2135,8 +2139,36 @@ const char file_html_jz_scheduler_xslt[] =
     "<xsl:value-of select=\"state/@spooler_running_since__xslt_datetime_diff\"  disable-output-escaping=\"yes\"/>\r\n"
     "<xsl:text>)</xsl:text>\r\n"
     "</span>\r\n"
-    "&#160; &#160;\r\n"
+    "\r\n"
+    "<xsl:text>&#160;</xsl:text>\r\n"
     "<xsl:apply-templates select=\"state/@state\"/>\r\n"
+    "\r\n"
+    "<xsl:choose>\r\n"
+    "<xsl:when test=\"state/@wait_until\">\r\n"
+    "<xsl:element name=\"span\">\r\n"
+    "<xsl:attribute name=\"style\">\r\n"
+    "<xsl:text>cursor: default;</xsl:text>\r\n"
+    "</xsl:attribute>\r\n"
+    "<xsl:attribute name=\"class\"></xsl:attribute>\r\n"
+    "<xsl:attribute name=\"title\">\r\n"
+    "<xsl:text>Waiting until </xsl:text>\r\n"
+    "<xsl:value-of select=\"state/@wait_until__xslt_datetime_with_diff\"/>\r\n"
+    "<xsl:if test=\"state/@resume_at\">\r\n"
+    "<xsl:text>, resuming at </xsl:text>\r\n"
+    "<xsl:value-of select=\"state/@resume_at__xslt_datetime_with_diff\"/>\r\n"
+    "</xsl:if>\r\n"
+    "</xsl:attribute>\r\n"
+    "<xsl:text>, next: </xsl:text>\r\n"
+    "<span style=\"white-space: nowrap\">\r\n"
+    "<xsl:value-of select=\"state/@wait_until__xslt_date_or_time\"/>\r\n"
+    "</span>\r\n"
+    "</xsl:element>\r\n"
+    "</xsl:when>\r\n"
+    "<xsl:otherwise>\r\n"
+    "<span>, processing...</span>\r\n"
+    "</xsl:otherwise>\r\n"
+    "</xsl:choose>\r\n"
+    "<xsl:text>&#160;</xsl:text>\r\n"
     "</td>\r\n"
     "\r\n"
     "<td valign=\"top\" align=\"right\">\r\n"
@@ -5200,10 +5232,10 @@ static const Embedded_file embedded_files_array[] =
     { "html/jz/left_frame.html", file_html_jz_left_frame_html, sizeof file_html_jz_left_frame_html - 1, 1137326883 },
     { "html/jz/browser_dependencies.js", file_html_jz_browser_dependencies_js, sizeof file_html_jz_browser_dependencies_js - 1, 1130350343 },
     { "html/jz/popup_menu.js", file_html_jz_popup_menu_js, sizeof file_html_jz_popup_menu_js - 1, 1113979995 },
-    { "html/jz/scheduler.js", file_html_jz_scheduler_js, sizeof file_html_jz_scheduler_js - 1, 1130350343 },
+    { "html/jz/scheduler.js", file_html_jz_scheduler_js, sizeof file_html_jz_scheduler_js - 1, 1150700898 },
     { "html/jz/show_log.js", file_html_jz_show_log_js, sizeof file_html_jz_show_log_js - 1, 1113979995 },
     { "html/jz/translation_de.js", file_html_jz_translation_de_js, sizeof file_html_jz_translation_de_js - 1, 1113979995 },
-    { "html/jz/scheduler.xslt", file_html_jz_scheduler_xslt, sizeof file_html_jz_scheduler_xslt - 1, 1148569750 },
+    { "html/jz/scheduler.xslt", file_html_jz_scheduler_xslt, sizeof file_html_jz_scheduler_xslt - 1, 1150700695 },
     { "html/jz/scheduler.css", file_html_jz_scheduler_css, sizeof file_html_jz_scheduler_css - 1, 1148569750 },
     { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1150612288 },
     { NULL, NULL, 0 }

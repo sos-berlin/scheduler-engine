@@ -49,6 +49,8 @@
             </description>
         </xml_attribute>
 
+        <xml_attribute name="wait_until" type="yyyy-mm-dd hh:mm:ss|never" title="Nächste Aktion des Schedulers"/>
+
         <xml_attribute name="state" type="state" title="Zustand des Schedulers">
             <description>
                 <table cellspacing="0" cellpadding="0">
