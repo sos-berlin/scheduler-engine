@@ -5232,10 +5232,10 @@ static const Embedded_file embedded_files_array[] =
     { "html/jz/left_frame.html", file_html_jz_left_frame_html, sizeof file_html_jz_left_frame_html - 1, 1137326883 },
     { "html/jz/browser_dependencies.js", file_html_jz_browser_dependencies_js, sizeof file_html_jz_browser_dependencies_js - 1, 1130350343 },
     { "html/jz/popup_menu.js", file_html_jz_popup_menu_js, sizeof file_html_jz_popup_menu_js - 1, 1113979995 },
-    { "html/jz/scheduler.js", file_html_jz_scheduler_js, sizeof file_html_jz_scheduler_js - 1, 1150700898 },
+    { "html/jz/scheduler.js", file_html_jz_scheduler_js, sizeof file_html_jz_scheduler_js - 1, 1150703826 },
     { "html/jz/show_log.js", file_html_jz_show_log_js, sizeof file_html_jz_show_log_js - 1, 1113979995 },
     { "html/jz/translation_de.js", file_html_jz_translation_de_js, sizeof file_html_jz_translation_de_js - 1, 1113979995 },
-    { "html/jz/scheduler.xslt", file_html_jz_scheduler_xslt, sizeof file_html_jz_scheduler_xslt - 1, 1150700695 },
+    { "html/jz/scheduler.xslt", file_html_jz_scheduler_xslt, sizeof file_html_jz_scheduler_xslt - 1, 1150703826 },
     { "html/jz/scheduler.css", file_html_jz_scheduler_css, sizeof file_html_jz_scheduler_css - 1, 1148569750 },
     { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1150612288 },
     { NULL, NULL, 0 }
