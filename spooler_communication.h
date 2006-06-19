@@ -59,7 +59,7 @@ struct Communication
 
         virtual bool            async_continue_             ( Continue_flags );
         virtual bool            async_finished_             () const                                { return false; }
-        virtual string          async_state_text_           () const                                { return "Spooler::Communication::Connection()"; }  // \"" + _named_host + "\"
+        virtual string          async_state_text_           () const                                { return "connection " + zschimmer::Buffered_socket_operation::async_state_text_(); }
 
 
         Fill_zero              _zero_;
@@ -82,7 +82,7 @@ struct Communication
 
         virtual bool            async_continue_             ( Continue_flags );
         virtual bool            async_finished_             () const                                { return false; }
-        virtual string          async_state_text_           () const                                { return "Spooler::Communication::Listen_socket()"; }
+        virtual string          async_state_text_           () const                                { return "TCP listen " + Socket_operation::async_state_text_();  }
 
         Spooler*               _spooler;
         Communication*         _communication;
@@ -95,7 +95,7 @@ struct Communication
 
         virtual bool            async_continue_             ( Continue_flags );
         virtual bool            async_finished_             () const                                { return false; }
-        virtual string          async_state_text_           () const                                { return "Spooler::Communication::Udp_socket()"; }
+        virtual string          async_state_text_           () const                                { return "UDP " + Socket_operation::async_state_text_();  }
 
         Spooler*               _spooler;
         Communication*         _communication;
@@ -124,7 +124,7 @@ struct Communication
 
         virtual bool            async_continue_             ( Continue_flags )                      { return true; }
         virtual bool            async_finished_             () const                                { return true; }
-        virtual string          async_state_text_           () const                                { return "none"; }
+        virtual string          async_state_text_           () const;
 
         virtual xml::Element_ptr dom_element                ( const xml::Document_ptr&, const Show_what& ) const = 0;
 
@@ -149,7 +149,7 @@ struct Communication
 
 
         Spooler*               _spooler;
-        Connection*               _connection;
+        Connection*            _connection;
     };
 
 
@@ -243,6 +243,7 @@ struct Xml_operation : Communication::Operation
     bool                        response_is_complete        ()                                      { return true; }
     string                      get_response_part           ()                                      { string result = _response;  _response = "";  return result; }
 
+    virtual string              async_state_text_           () const;
 
     Fill_zero                  _zero_;
     Xml_operation_connection*  _operation_connection;

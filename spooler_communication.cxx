@@ -65,6 +65,13 @@ Xml_operation::Xml_operation( Xml_operation_connection* operation_connection )
 {
 }
 
+//-----------------------------------------------------------------Xml_operation::async_state_text_
+    
+string Xml_operation::async_state_text_() const
+{ 
+    return "Xml_operation " + Operation::async_state_text_();
+}
+
 //------------------------------------------------------------------Xml_operation::put_request_part
 
 void Xml_operation::put_request_part( const char* data, int length )
@@ -169,6 +176,17 @@ bool Communication::Udp_socket::async_continue_( Continue_flags )
 
     async_clear_signaled();
     return something_done;
+}
+
+//------------------------------------------------------Communication::Operation::async_state_text_
+
+string Communication::Operation::async_state_text_() const
+{
+    S result;
+    result << "Operation on ";
+    result << ( _operation_connection  &&  _operation_connection->_connection? _operation_connection->_connection->async_state_text()
+                                                                             : result << "null" );
+    return result;
 }
 
 //------------------------------------------------------------------Communication::Connection::Connection
