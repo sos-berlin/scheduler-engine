@@ -13,6 +13,11 @@
 
     <h2>Verzeichnisse als Auftragswarteschlange</h2>
 
+    <p>
+        Bisher liest ein Job die Verzeichnisse und erzeugt die Aufträge. 
+        Das kann der Scheduler übernehmen, wobei er mit gelöschten und unfertigen Dateien und mit Verzeichnisfehlern umgehen kann.
+    </p>
+
     <dl>
         <dt>
             Dateinamen sind Aufträge

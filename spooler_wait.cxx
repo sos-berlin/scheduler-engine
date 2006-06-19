@@ -393,7 +393,7 @@ bool Wait_handles::wait_until_2( const Time& until, const Object* wait_for_objec
 
     if( _spooler->_waitable_timer )
     {
-        if( resume_until > 0  &&  resume_until < latter_day )
+        if( resume_until > 0  &&  resume_until < latter_day  &&  _spooler->is_machine_suspendable() )
         {
             LARGE_INTEGER gmtime;
             bool          resume_suspended_machine = true;
@@ -492,7 +492,7 @@ WAIT_OK:
 
                 _catched_event = event;
 
-                if( event!= &_spooler->_waitable_timer )  result = true;
+                if( event != &_spooler->_waitable_timer )  result = true;
                 break;
             }
         }

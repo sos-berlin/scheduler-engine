@@ -534,7 +534,7 @@ struct Spooler : Object,
 
     //Time                       _next_start_time;
     Time                       _last_wait_until;            // Für <show_state>
-    Time                       _last_resume_until;          // Für <show_state>
+    Time                       _last_resume_at;             // Für <show_state>
     bool                       _print_time_every_second;
 
     Thread_list                _thread_list;                // Alle Threads

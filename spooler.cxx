@@ -703,8 +703,8 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
     if( _last_wait_until )
     state_element.setAttribute( "wait_until", _last_wait_until.as_string() );
 
-    if( _last_resume_until  &&  _last_resume_until != latter_day )
-    state_element.setAttribute( "resume_at", _last_resume_until.as_string() );
+    if( _last_resume_at  &&  _last_resume_at != latter_day )
+    state_element.setAttribute( "resume_at", _last_resume_at.as_string() );
 
 #   ifdef Z_UNIX
     {
@@ -2451,8 +2451,8 @@ void Spooler::run()
         bool    log_wait          = _print_time_every_second || log_categories.update_flag_if_modified( "scheduler.wait", &log_wait_0, &log_wait_id );
         Time    wait_until        = latter_day;
         Object* wait_until_object = NULL;    
-        Time    resume_until      = latter_day;
-        Object* resume_until_object = NULL;
+        Time    resume_at         = latter_day;
+        Object* resume_at_object  = NULL;
 
 
         if( _thread_list.size() > 0 )       // Beim Start gibt es noch keinen Thread.
@@ -2505,11 +2505,13 @@ void Spooler::run()
                 {
                     Task* task = *t;
                     Time  task_next_time = task->next_time();
+
+                    if( !task->job()->is_machine_suspendable()  &&  resume_at > task_next_time )  resume_at = task_next_time,  resume_at_object = task;
+
                     if( wait_until > task_next_time )
                     {
                         wait_until = task_next_time; 
                         wait_until_object = task;
-                        if( !task->job()->is_machine_suspendable() )  resume_until = wait_until,  resume_until_object = wait_until_object;
                         if( wait_until == 0 )  break;
                     }
                 }
@@ -2525,11 +2527,13 @@ void Spooler::run()
                     Job* job = *it;
 
                     Time next_job_time = job->next_time();
+
+                    if( !job->is_machine_suspendable()  &&  resume_at > next_job_time )  resume_at = next_job_time,  resume_at_object = job;
+
                     if( wait_until > next_job_time ) 
                     {
                         wait_until = next_job_time;
                         wait_until_object = job;
-                        if( !job->is_machine_suspendable() )  resume_until = wait_until,  resume_until_object = wait_until_object;
                         if( wait_until == 0 )  break;
                     }
                 }
@@ -2614,26 +2618,26 @@ void Spooler::run()
                 else
                 {
                     _wait_counter++;
-                    _last_wait_until   = wait_until;
-                    _last_resume_until = resume_until;
+                    _last_wait_until = wait_until;
+                    _last_resume_at  = resume_at;
 
                     if( log_wait )  
                     {
                         if( !wait_handles.wait_until( 0, wait_until_object, 0, NULL ) )     // Debug-Ausgabe der Wartezeit nur, wenn kein Ergebnis vorliegt
                         { 
                             Z_LOG2( "scheduler.wait", "Warten bis " << wait_until << ( wait_until_object? " auf " + wait_until_object->obj_name() : "" ) << "\n" ); 
-                            wait_handles.wait_until( wait_until, wait_until_object, resume_until, resume_until_object );  
+                            wait_handles.wait_until( wait_until, wait_until_object, resume_at, resume_at_object );  
                         }
                     }
                     else
                     {
                         Time first_wait_time = _log.log_level() <= log_debug3? show_message_after_seconds_debug : show_message_after_seconds;
-                        bool signaled = wait_handles.wait_until( min( Time::now() + first_wait_time, wait_until ), wait_until_object, resume_until, resume_until_object );
+                        bool signaled = wait_handles.wait_until( min( Time::now() + first_wait_time, wait_until ), wait_until_object, resume_at, resume_at_object );
                         
                         if( !signaled )
                         {
                             _log.info( message_string( "SCHEDULER-972", wait_until.as_string(), wait_until_object->obj_name() ) );
-                            wait_handles.wait_until( wait_until, wait_until_object, resume_until, resume_until_object );
+                            wait_handles.wait_until( wait_until, wait_until_object, resume_at, resume_at_object );
                         }
                     }
                 }
@@ -2690,7 +2694,7 @@ bool Spooler::run_continue()
         something_done |= _single_thread->process();    
     }
 
-    if( something_done )  _last_wait_until = 0, _last_resume_until = 0;
+    if( something_done )  _last_wait_until = 0, _last_resume_at = 0;
 
     // TCP- UND UDP-VERBINDUNGEN IN SPOOLER_COMMUNICATION.CXX FORTSETZEN
     something_done |= _connection_manager->async_continue();
