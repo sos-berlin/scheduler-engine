@@ -115,6 +115,19 @@
         </p>
     </div>
 
+
+    <p>
+        <a href="semaphore.xml">Sperren</a>
+    </p>
+    <div class="indent">
+        <p style="margin-top: 0px">
+            Zwei Jobs dürfen gleichzeitig laufen, aber nicht zusammen mit einem dritten.
+            Dafür gibt es Semaphore oder Sperren.            
+        </p>
+    </div>
+
+
+
     <h1 style="margin-top: 3em">Dokumentation</h1>
 
     <p>
