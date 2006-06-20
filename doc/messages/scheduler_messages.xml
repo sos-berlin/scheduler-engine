@@ -2119,7 +2119,7 @@
 
         <message code="SCHEDULER-335">
             <text xml:lang="en">
-                <title>With <p1/>="<p2/>", only "yes", "no" and a number are allowed: <p3>error</p3></title>
+                <title>Only "yes", "no" and a number are allowed with <p1/>="<p2/>": <p3>error</p3></title>
             </text>
         </message>
         

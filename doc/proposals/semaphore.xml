@@ -70,12 +70,18 @@
         "read" und "write" werden hier anders gebraucht, als unsere Jobs das nahelegen).
     </p>
 
+
+    <h2>Variante: Verwendung aller Sperren an einer Stelle beschreiben</h2>
+    <p>
+        Vielleicht ist es übersichtlicher, die Verwendung einer Sperre an nur einer Stelle zu beschreiben.
+    </p>
+    <pre>&lt;lock name="<i>lock_name</i>" non_exclusive_locks="2"
+    &lt;apply_lock job="replicate_from_adabase" exclusive="no"/>
+    &lt;apply_lock job="replicate_from_as400"   exclusive="no"/>
+    &lt;apply_lock job="switch_database">
+&lt;/lock></pre>
     
-    <h2>Nur einen Jobschritt schützen</h2>
-
-    <pre>&lt;job …>&lt;lock lock="<i>lock_name</i>" for="spooler_process"/></pre>
-
-
+    
     <h2>Wirkung auf Prozesse</h2>
     <p>
         <code>sqlldr</code> zum Beispiel läuft in einem eigenen Prozess.
@@ -93,6 +99,19 @@
         Sperre des Betriebsystems nutzen, die auch bei einem Neustart des Schedulers bestehen bleibt.
     </p>
     
+
+    <h2>Nur einen Jobschritt schützen</h2>
+
+    <pre>&lt;job …>&lt;lock lock="<i>lock_name</i>" for="spooler_process"/></pre>
+
+
+    <h2>Aufträge?</h2>
+
+    <p>
+        Auch einzelne Aufträge könnten Sperren zugeordnet werden. 
+        Die Sperren wirken auf <scheduler_method class="Job_impl" method="spooler_process"/> oder die ganze Task.
+    </p>
+
 
     <h2>API (nicht ausgereift)</h2>
 
