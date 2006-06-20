@@ -718,7 +718,12 @@
 
             <xsl:apply-templates select="." mode="setting_references"/>
             <xsl:apply-templates select="$setting/example"/>
-            <xsl:apply-templates select="example"/>
+            
+            <xsl:apply-templates select="$setting/messages">
+                <xsl:with-param name="h" select="'h4'"/>
+            </xsl:apply-templates>
+            
+        <xsl:apply-templates select="example"/>
         </div>
     </xsl:template>
 
@@ -963,6 +968,7 @@
                 </xsl:if>
             </xsl:if>
         </table>
+
     </xsl:template>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~example-->

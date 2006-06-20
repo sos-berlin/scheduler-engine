@@ -335,14 +335,24 @@ log = scheduler.wait com_server.* >scheduler.log</pre>
              title  = "Nach spooler_process() Historiensatz schreiben?">
         <description>
             <p>
-                Bei <code>history_on_process=yes</code> oder <code>=1</code> schreibt der Scheduler beim Start der Task
+                Bei <code>history_on_process=no</code> oder <code>=0</code> schreibt der Scheduler beim Start der Task
                 einen Satz in die Historie (wenn eine geführt wird).
             </p>
             <p>
+                Bei <code>history_on_process=yes</code> oder <code>=1</code> schreibt der Scheduler erst beim ersten Aufruf
+                von <scheduler_method class="Job_impl" method="spooler_process"/> den Satz.
+                Damit wird kein Satz geschrieben, wenn <scheduler_method class="Job_impl" method="spooler_open"/>
+                <code>false</code> liefert.
+            </p>
+            <p>
                 Wenn eine Zahl angegeben ist, schreibt der Scheduler erst vor dem
-                soundsovielten Aufruf von <code>spooler_process()</code> einen Satz in die Historie.
+                soundsovielten Aufruf von <scheduler_method class="Job_impl" method="spooler_process"/> einen Satz in die Historie.
             </p>
         </description>
+        
+        <messages>
+            <message code="SCHEDULER-335" level="error"/>
+        </messages>   
     </setting>
 
 

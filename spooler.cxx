@@ -257,9 +257,9 @@ int read_profile_history_on_process( const string& profile, const string& sectio
     try
     {
         if( isdigit( (unsigned char)v[0] ) )  return as_int(v);
-                                        else  return as_bool(v);
+                                        else  return as_bool(v)? 1 : 0;
     }
-    catch( const exception& ) { return deflt; }
+    catch( exception& x ) { z::throw_xc( "SCHEDULER-335", profile + " [" + section + "] " + entry, v, x ); }
 }
 
 //-----------------------------------------------------------------------------read_profile_archive

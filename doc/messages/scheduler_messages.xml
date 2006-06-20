@@ -2116,6 +2116,12 @@
                 <title>Error when building mail: <p1/></title>
             </text>
         </message>
+
+        <message code="SCHEDULER-335">
+            <text xml:lang="en">
+                <title>With <p1/>="<p2/>", only "yes", "no" and a number are allowed: <p3>error</p3></title>
+            </text>
+        </message>
         
     </messages>
 

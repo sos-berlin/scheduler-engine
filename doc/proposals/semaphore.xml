@@ -16,6 +16,8 @@
         Ein dritter Job schaltet die Datenbank um.
         Er darf das nur tun, wenn die ersten beiden Jobs nicht laufen.
     </p>
+
+    
     <h2>Exklusives Sperren</h2>
 
     <p>

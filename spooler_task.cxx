@@ -1026,16 +1026,6 @@ bool Task::do_something()
                             else
                                                     set_state( s_ending );
                         }
-
-                        // Historie beginnen?
-                        if( _state == s_starting
-                         || _state == s_running
-                         || _state == s_running_delayed
-                         || _state == s_running_waiting_for_order
-                         || _state == s_running_process           )
-                        {
-                            if( _step_count == _job->_history.min_steps() )  _history.start();
-                        }
                     }
 
 
@@ -1070,6 +1060,7 @@ bool Task::do_something()
 
                             if( !_operation )
                             {
+                                if( _job->_history.min_steps() == 0 )  _history.start();
                                 _operation = begin__start();
                             }
                             else
@@ -1128,6 +1119,9 @@ bool Task::do_something()
 
                                     _running_state_reached = true;
                                     _last_process_start_time = now;
+
+                                    
+                                    if( _step_count + 1 == _job->_history.min_steps() )  _history.start();
 
                                     _operation = do_step__start();
 

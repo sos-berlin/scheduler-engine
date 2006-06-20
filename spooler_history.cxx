@@ -1147,12 +1147,12 @@ void Job_history::open()
 
     _job_name = _job->name();            // Damit read_tail() nicht mehr auf Job zugreift (das ist ein anderer Thread)
 
+    _filename   = read_profile_string            ( _spooler->_factory_ini, section, "history_file" );
+    _history_yes= read_profile_bool              ( _spooler->_factory_ini, section, "history"           , _spooler->_job_history_yes );
+    _on_process = read_profile_history_on_process( _spooler->_factory_ini, section, "history_on_process", _spooler->_job_history_on_process );
+
     try
     {
-        _filename   = read_profile_string            ( _spooler->_factory_ini, section, "history_file" );
-        _history_yes= read_profile_bool              ( _spooler->_factory_ini, section, "history"           , _spooler->_job_history_yes );
-        _on_process = read_profile_history_on_process( _spooler->_factory_ini, section, "history_on_process", _spooler->_job_history_on_process );
-
         if( !_history_yes )  return;
 
         if( _spooler->_db->opened()  &&  _filename == "" )

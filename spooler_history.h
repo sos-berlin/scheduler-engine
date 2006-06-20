@@ -154,7 +154,7 @@ struct Job_history
     Task*                      _last_task;              // Wem gehört der zuletzt geschriebene Satz?
     string                     _job_name;
     bool                       _history_yes;
-    int                        _on_process;
+    int                        _on_process;             // Beim soundsovieltem _on_process Historiensazt schreiben
     With_log_switch            _with_log;
     bool                       _use_db;
     bool                       _use_file;
