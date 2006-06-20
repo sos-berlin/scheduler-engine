@@ -427,7 +427,8 @@ Prefix_log::Prefix_log( Scheduler_object* o, const string& prefix )
     _prefix(prefix),
     _file(-1),
   //_log_level(log_unknown),
-    _mail_defaults(NULL)
+    _mail_defaults(NULL),
+    _last_level( log_unknown )
 {
     init( o, prefix );
 }
@@ -990,7 +991,7 @@ void Prefix_log::log2( Log_level level, const string& prefix, const string& line
     if( _highest_level < level )  _highest_level = level, _highest_msg = line;
     if( level < log_level() )  return;
 
-    //if( level == log_error )  _last_error_line = line;
+    _last_level = level;
     _last[ level ] = line;
 
     if( _log )  _log->log2( level, _task? _task->obj_name() : _prefix, line, this, _order_log );

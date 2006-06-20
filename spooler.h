@@ -569,6 +569,7 @@ struct Spooler : Object,
     Time                       _next_daylight_saving_transition_time;
     string                     _next_daylight_saving_transition_name;
     Event                      _waitable_timer;
+    bool                       _is_waitable_timer_set;
 };
 
 //-------------------------------------------------------------------------------------------------

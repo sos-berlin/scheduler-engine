@@ -384,44 +384,52 @@ bool Wait_handles::wait_until_2( const Time& until, const Object* wait_for_objec
 
 #ifdef Z_WINDOWS
 
-    bool    result  = false;
-    bool    again   = false;
-    HANDLE* handles = NULL;
+    bool    result    = false;
+    bool    again     = false;
+    HANDLE* handles   = NULL;
+    //bool    waitable_timer_set = false;
     BOOL    ok;
-    bool    waitable_timer_set = false;
+    Time    now       = Time::now();
 
 
-    if( _spooler->_waitable_timer )
+    if( now < until  &&  _spooler->_waitable_timer )
     {
-        if( resume_until > 0  &&  resume_until < latter_day  &&  _spooler->is_machine_suspendable() )
+        if( resume_until < latter_day )
         {
             LARGE_INTEGER gmtime;
-            bool          resume_suspended_machine = true;
 
             //FILETIME      local_time = resume_until.filetime();
             //ok = LocalFileTimeToFileTime( &local_time, (FILETIME*)&gmtime );   Das könnte zum Beginn der Winterzeit eine Stunde zu früh sein
             //if( !ok )  z::throw_mswin( "LocalFileTimeToFileTime" );
 
-            gmtime.QuadPart = -Time( until - Time::now() ).int64_filetime();  // Negativer Wert bedeutet relative Angabe
+            gmtime.QuadPart = -(int64)( ( resume_until - now ) * 10000000 );  // Negativer Wert bedeutet relative Angabe in 100ns.
             if( gmtime.QuadPart < 0 )
             {
-                Z_LOG2( "scheduler.wait", "SetWaitableTimer(" << resume_until.as_string() << " => " << gmtime.QuadPart << ")"  
+                Z_LOG2( "scheduler.wait", "SetWaitableTimer(" << ( gmtime.QuadPart / 10000000.0 ) << "s: " << resume_until.as_string() << ")"  
                         << ( resume_object? " for " + resume_object->obj_name() : "" ) << "\n" );
 
-                ok = SetWaitableTimer( _spooler->_waitable_timer, &gmtime, 0, NULL, NULL, resume_suspended_machine ); 
+                ok = SetWaitableTimer( _spooler->_waitable_timer, &gmtime, 0, NULL, NULL, TRUE );   // Weckt den Rechner
                 if( !ok )  z::throw_mswin( "SetWaitableTimer" );
 
-                waitable_timer_set = true;
+                _spooler->_is_waitable_timer_set = true;
             }
+        }
+        else
+        if( _spooler->_is_waitable_timer_set )
+        {
+            ok = CancelWaitableTimer( _spooler->_waitable_timer );
+            if( !ok )  z::throw_mswin( "CancelWaitableTimer" );
+
+            _spooler->_is_waitable_timer_set = false;
         }
     }
 
 
     while(1)
     {
-        double wait_time = until - Time::now();
-        int    sleep_time_ms = INT_MAX-1;
-        int    t = (int)ceil( min( (double)sleep_time_ms, wait_time * 1000.0 ) );
+        double wait_time         = until - now;
+        int    max_sleep_time_ms = INT_MAX-1;
+        int    t                 = (int)ceil( min( (double)max_sleep_time_ms, wait_time * 1000.0 ) );
         DWORD  ret;
 
 
@@ -430,10 +438,10 @@ bool Wait_handles::wait_until_2( const Time& until, const Object* wait_for_objec
         
         if( again ) {
             if( t > 1800 )  { result = false; break; }  // Um mehr als eine halbe Stunde verrechnet? Das muss an der Sommerzeitumstellung liegen
-            //if( wait_time >= 1.0 )  _log->debug9( message_string( "SCHEDULER-953", wait_time )  );
         }
 
-        if( t > 0 )  Z_LOG2( "scheduler.wait", "MsgWaitForMultipleObjects " << sos::as_string(t/1000.0) << "s (bis " << until << ")  " << as_string() << "\n" );
+        if( t > 0 )  Z_LOG2( "scheduler.wait", "MsgWaitForMultipleObjects " << sos::as_string(t/1000.0) << "s (bis " << until << ( wait_for_object? " auf " + wait_for_object->obj_name() : "" ) << ")  " << as_string() << "\n" );
+
 
         handles = new HANDLE [ _handles.size()+1 ];
         for( int i = 0; i < _handles.size(); i++ )  handles[i] = _handles[i];
@@ -448,7 +456,7 @@ bool Wait_handles::wait_until_2( const Time& until, const Object* wait_for_objec
 
                 Time now = Time::now();
                 Time rest = until - now;
-                t = (int)ceil( min( (double)sleep_time_ms, rest * 1000.0 ) );
+                t = (int)ceil( min( (double)max_sleep_time_ms, rest * 1000.0 ) );
                 cerr << Time::now().as_string( Time::without_ms ) << " (";
                 if( until < latter_day ) 
                 {
@@ -484,7 +492,7 @@ WAIT_OK:
             
                 if( event )
                 {
-                    if( t > 0 )  Z_LOG2( "scheduler.wait", "... Event " << event->as_text() << "\n" );
+                    if( t > 0 )  Z_LOG2( "scheduler.wait", "... " << event->as_text() << "\n" );
                     event->set_signaled( "MsgWaitForMultipleObjects" );
                 }
                 else
@@ -508,13 +516,17 @@ WAIT_OK:
         }
         else
             throw_mswin_error( "MsgWaitForMultipleObjects" );
+
+
+        now = Time::now();
     }
 
-    if( waitable_timer_set )
-    {
-        ok = CancelWaitableTimer( _spooler->_waitable_timer );
-        if( !ok )  z::throw_mswin( "CancelWaitableTimer" );
-    }
+
+    //if( waitable_timer_set )
+    //{
+    //    ok = CancelWaitableTimer( _spooler->_waitable_timer );
+    //    if( !ok )  z::throw_mswin( "CancelWaitableTimer" );
+    //}
 
     return result;
 
@@ -523,8 +535,7 @@ WAIT_OK:
     {
         Time now = Time::now();
 
-      //if( _log->log_level() <= log_debug9  &&  until > now )   LOG( "wait_until " << until.as_string() << " " << as_string() << "\n" );
-        if( until > now )   Z_LOG2( "scheduler.wait", "wait_until " << until.as_string() << " " << as_string() << "\n" );
+        if( until > now )   Z_LOG2( "scheduler.wait", "wait_until " << until.as_string() << ( wait_for_object? " auf " + wait_for_object->obj_name() : "" ) << " " << as_string() << "\n" );
 
         ptr<Socket_wait> wait = _spooler->_connection_manager->create_wait();
 

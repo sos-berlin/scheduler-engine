@@ -116,8 +116,9 @@ struct Prefix_log : Object, Has_log
     void                        log2                        ( Log_level, const string& prefix, const string& line, Has_log* );
 
     string                      last_error_line             ()                                  { return last( log_error ); }
-    string                      last                        ( Log_level level )                 { Last::iterator it = _last.find( level );
+    string                      last                        ( Log_level level ) const           { Last::const_iterator it = _last.find( level );
                                                                                                   return it == _last.end()? "" : it->second; }
+    string                      last_line                   () const                            { return last( _last_level ); }
 
     string                      as_string                   ();
 
@@ -172,6 +173,7 @@ struct Prefix_log : Object, Has_log
     string                     _section;
   //Log_level                  _log_level;                  // Ab diesem Level protokollieren, sonst nicht
     Log_level                  _highest_level;
+    Log_level                  _last_level;
     string                     _highest_msg;
     
     typedef stdext::hash_map< Log_level, string >   Last;

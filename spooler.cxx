@@ -2345,6 +2345,11 @@ void Spooler::nichts_getan( int anzahl, const string& str )
         if( jobs.length() == 0 )  jobs << "no jobs";
 
         _log.warn( message_string( "SCHEDULER-261", str, _connection_manager->string_from_operations(), tasks, jobs ) );  // "Nichts getan, state=$1, _wait_handles=$2"
+
+        // Wenn's ein System-Ereignis ist, das, jedenfalls unter Windows, immer wieder signalisiert wird,
+        // dann kommen die anderen Ereignisse, insbesondere der TCP-Verbindungen, nicht zum Zuge.
+        // Gut wäre, in einer Schleife alle Ereignisse zu prüfen und dann Event::_signaled zu setzen.
+        // Aber das ganze sollte nicht vorkommen.
     }
 
     double t = 1;
@@ -2454,6 +2459,7 @@ void Spooler::run()
         Time    resume_at         = latter_day;
         Object* resume_at_object  = NULL;
 
+        _loop_counter++;
 
         if( _thread_list.size() > 0 )       // Beim Start gibt es noch keinen Thread.
         {
@@ -2600,7 +2606,6 @@ void Spooler::run()
                     {
                         wait_until = next_time;
                         wait_until_object = operation;
-                        //if( log_wait )  wait_for_string = operation->async_state_text();
                     }
                 }
             }
@@ -2618,27 +2623,19 @@ void Spooler::run()
                 else
                 {
                     _wait_counter++;
+                    if( !_spooler->is_machine_suspendable() )  resume_at = latter_day, resume_at_object = NULL;
                     _last_wait_until = wait_until;
                     _last_resume_at  = resume_at;
 
-                    if( log_wait )  
+                    Time first_wait_time = _log.log_level() <= log_debug3? show_message_after_seconds_debug : show_message_after_seconds;
+                    bool signaled = wait_handles.wait_until( min( Time::now() + first_wait_time, wait_until ), wait_until_object, resume_at, resume_at_object );
+                    
+                    if( !signaled )
                     {
-                        if( !wait_handles.wait_until( 0, wait_until_object, 0, NULL ) )     // Debug-Ausgabe der Wartezeit nur, wenn kein Ergebnis vorliegt
-                        { 
-                            Z_LOG2( "scheduler.wait", "Warten bis " << wait_until << ( wait_until_object? " auf " + wait_until_object->obj_name() : "" ) << "\n" ); 
-                            wait_handles.wait_until( wait_until, wait_until_object, resume_at, resume_at_object );  
-                        }
-                    }
-                    else
-                    {
-                        Time first_wait_time = _log.log_level() <= log_debug3? show_message_after_seconds_debug : show_message_after_seconds;
-                        bool signaled = wait_handles.wait_until( min( Time::now() + first_wait_time, wait_until ), wait_until_object, resume_at, resume_at_object );
-                        
-                        if( !signaled )
-                        {
+                        if( wait_until - Time::now() >= 10  &&  !string_begins_with( _log.last_line(), "SCHEDULER-972" ) ) 
                             _log.info( message_string( "SCHEDULER-972", wait_until.as_string(), wait_until_object->obj_name() ) );
-                            wait_handles.wait_until( wait_until, wait_until_object, resume_at, resume_at_object );
-                        }
+
+                        wait_handles.wait_until( wait_until, wait_until_object, resume_at, resume_at_object );
                     }
                 }
             }
@@ -2655,7 +2652,7 @@ void Spooler::run()
                 }
             }
 
-            if( log_wait )  Z_LOG2( "scheduler.wait", "------------------scheduler-loop----- " << catched_event_string << "\n" );  
+            if( log_wait )  Z_LOG2( "scheduler.wait", "-------------scheduler loop " << _loop_counter << "-------------> " << catched_event_string << "\n" );  
 
             wait_handles.clear();
         }
@@ -2663,8 +2660,6 @@ void Spooler::run()
         //-----------------------------------------------------------------------------------CTRL-C
 
         run_check_ctrl_c();
-
-        _loop_counter++;
     }
 }
 
@@ -2685,16 +2680,14 @@ bool Spooler::run_continue()
                 something_done |= (*p)->async_continue();
             }
         }
-    }
 
-    if( _state != Spooler::s_paused )
-    {
         // TASKS FORTSETZEN
 
         something_done |= _single_thread->process();    
     }
 
     if( something_done )  _last_wait_until = 0, _last_resume_at = 0;
+
 
     // TCP- UND UDP-VERBINDUNGEN IN SPOOLER_COMMUNICATION.CXX FORTSETZEN
     something_done |= _connection_manager->async_continue();
