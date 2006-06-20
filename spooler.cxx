@@ -2353,7 +2353,7 @@ void Spooler::nichts_getan( int anzahl, const string& str )
     }
 
     double t = 1;
-    Z_LOG( "sleep(" << t << ")...\n" );
+    Z_LOG2( "scheduler", "sleep(" << t << ")...\n" );
     sos_sleep( t );
 }
 
@@ -2488,7 +2488,7 @@ void Spooler::run()
 
         if( something_done )
         {
-            Z_DEBUG_ONLY( if( nichts_getan_zaehler )  Z_LOG( "nichts_getan_zaehler=" << nichts_getan_zaehler << "\n" ); )
+            Z_DEBUG_ONLY( if( nichts_getan_zaehler )  Z_LOG2( "scheduler", "nichts_getan_zaehler=" << nichts_getan_zaehler << "\n" ); )
             nothing_done_count = 0;
             nichts_getan_zaehler = 0;
         }
@@ -2632,8 +2632,11 @@ void Spooler::run()
                     
                     if( !signaled )
                     {
-                        if( wait_until - Time::now() >= 10  &&  !string_begins_with( _log.last_line(), "SCHEDULER-972" ) ) 
-                            _log.info( message_string( "SCHEDULER-972", wait_until.as_string(), wait_until_object->obj_name() ) );
+                        if( wait_until - Time::now() >= 10 )
+                        {
+                            string msg = message_string( "SCHEDULER-972", wait_until.as_string(), wait_until_object->obj_name() );
+                            if( msg != _log.last_line() )  _log.info( msg );
+                        }
 
                         wait_handles.wait_until( wait_until, wait_until_object, resume_at, resume_at_object );
                     }
@@ -2652,7 +2655,7 @@ void Spooler::run()
                 }
             }
 
-            if( log_wait )  Z_LOG2( "scheduler.wait", "-------------scheduler loop " << _loop_counter << "-------------> " << catched_event_string << "\n" );  
+            if( log_wait )  Z_LOG2( "scheduler.loop", "-------------scheduler loop " << _loop_counter << "-------------> " << catched_event_string << "\n" );  
 
             wait_handles.clear();
         }
@@ -2724,7 +2727,7 @@ void Spooler::begin_dont_suspend_machine()
     if( _dont_suspend_machine_counter == 0 )
     {
 #       ifdef Z_WINDOWS
-            Z_LOG( "SetThreadExecutionState(ES_CONTINUOUS|ES_SYSTEM_REQUIRED);\n" );
+            Z_LOG2( "scheduler", "SetThreadExecutionState(ES_CONTINUOUS|ES_SYSTEM_REQUIRED);\n" );
             SetThreadExecutionState( ES_CONTINUOUS | ES_SYSTEM_REQUIRED );
 #       endif
     }
@@ -2741,7 +2744,7 @@ void Spooler::end_dont_suspend_machine()
     if( _dont_suspend_machine_counter == 0 )
     {
 #       ifdef Z_WINDOWS
-            Z_LOG( "SetThreadExecutionState(ES_CONTINUOUS);\n" );
+            Z_LOG2( "scheduler", "SetThreadExecutionState(ES_CONTINUOUS);\n" );
             SetThreadExecutionState( ES_CONTINUOUS );
 #       endif
     }
@@ -3330,6 +3333,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
     set_log_category_default( "scheduler"     , true );
   //set_log_category_default( "scheduler.*"   , true );
   //set_log_category_default( "scheduler.wait", false );
+    set_log_category_default( "scheduler.loop", false );
     set_log_category_default( "scheduler.call", true );   // Aufrufe von spooler_process() etc. protokollieren (Beginn und Ende)
     set_log_category_default( "scheduler.order", true );
 

@@ -493,7 +493,7 @@ WAIT_OK:
                 if( event )
                 {
                     if( t > 0 )  Z_LOG2( "scheduler.wait", "... " << event->as_text() << "\n" );
-                    event->set_signaled( "MsgWaitForMultipleObjects" );
+                    if( event != &_spooler->_waitable_timer )  event->set_signaled( "MsgWaitForMultipleObjects" );
                 }
                 else
                     if( t > 0 )  Z_LOG2( "scheduler.wait", "... Event " << index << "\n" );
