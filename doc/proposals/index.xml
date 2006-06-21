@@ -11,15 +11,47 @@
     date                = "$Date$"
 >
     <p>
-        HTTP-Protokoll
+        <a href="mail.xml">Eigene eMails verschicken</a>
+    </p>
+    <div class="indent">
+        <p style="margin-top: 0px">
+            Mit nur zwei neuen Methoden kann die Klasse <scheduler_method class="Mail"/> für eigene Nachrichten verwendet werden.
+        </p>
+    </div>
+
+
+    <p>
+        Ausgabe des Java-Stacks im Fehlerfall
     </p>
     <p class="indent" style="margin-top: 0px">
-        HTTP-Protokoll in eigene Datei schreiben. 
-        Vielleicht wie Apache. 
-        Oder die Web-Service-Protokolle auf alle TCP-Verbindungen erweitern.
-        Wenig ins Hauptprotokoll schreiben, um es nicht aufzublähen.
+        Der Scheduler könnte bei einer Exception immer den Java-Stack ausgeben,
+        damit man nicht mit einer nichts sagenden NullPointerException dasteht.
+        Jetzt kann man das mit [java]debug=yes einschalten, allerdings gibt Java dann noch allerhand mehr aus,
+        was man meist nicht sehen will.
     </p>
+
+
+    <p>
+        <a href="semaphore.xml">Sperren</a>
+    </p>
+    <div class="indent">
+        <p style="margin-top: 0px">
+            Zwei Jobs dürfen gleichzeitig laufen, aber nicht zusammen mit einem dritten.
+            Dafür gibt es Semaphore oder Sperren.
+        </p>
+    </div>
+
     
+    <p>
+        <a href="start_when_directory_changed.xml"> Verzeichnisüberwachung</a>
+    </p>
+    <div class="indent">
+        <p style="margin-top: 0px">
+            Der Scheduler synchronisiert die Aufträge mit den Dateinamen im Verzeichnis.
+            Jede Änderung im Verzeichnis lässt den Scheduler die Auftragswarteschlangen auf den neuesten Stand bringen.
+        </p>
+    </div>
+
 
     <p>
         <a href="run_time.xml"><code>&lt;run_time></code></a>
@@ -72,6 +104,12 @@
         Die Browser scheinen darauf Rücksicht zu nehmen. In Firefox ist das angeblich einschaltbar.
         Der Aufwand wäre gering.
     </p>
+    <p class="indent">
+        HTTP-Protokoll in eigene Datei schreiben.
+        Vielleicht wie Apache.
+        Oder die Web-Service-Protokolle auf alle TCP-Verbindungen erweitern.
+        Wenig ins Hauptprotokoll schreiben, um es nicht aufzublähen.
+    </p>
 
     <p>
         Reguläre Ausdrücke (Verzeichnisüberwachung)
@@ -87,7 +125,7 @@
     <div class="indent">
         <p style="margin-top: 0px">
             Die sollten in eine asynchrone Operation ausgelagert werden, die in einem Thread (oder mehreren) abläuft.
-            Oder wir verzichten drauf. Denn die Operationen blockieren jetzt.
+            Oder wir verzichten drauf. Denn die Operationen blockieren jetzt, was den Scheduler einige Sekunden anhalten kann.
             Das betrifft u.a.:
         </p>
         <ul>
@@ -104,28 +142,6 @@
             </li>
         </ul>
     </div>
-
-    <p>
-        <a href="start_when_directory_changed.xml"> Verzeichnisüberwachung</a>
-    </p>
-    <div class="indent">
-        <p style="margin-top: 0px">
-            Der Scheduler synchronisiert die Aufträge mit den Dateinamen im Verzeichnis.
-            Jede Änderung im Verzeichnis lässt den Scheduler die Auftragswarteschlangen auf den neuesten Stand bringen.
-        </p>
-    </div>
-
-
-    <p>
-        <a href="semaphore.xml">Sperren</a>
-    </p>
-    <div class="indent">
-        <p style="margin-top: 0px">
-            Zwei Jobs dürfen gleichzeitig laufen, aber nicht zusammen mit einem dritten.
-            Dafür gibt es Semaphore oder Sperren.            
-        </p>
-    </div>
-
 
 
     <h1 style="margin-top: 3em">Dokumentation</h1>

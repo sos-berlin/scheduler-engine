@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id$-->
+
+<description
+    title               = "eMail ohne Protokoll verschicken"
+    base_dir            = "../"
+    parent_page         = "index.xml"
+    author              = "$Author$"
+    date                = "$Date$"
+>
+    <p>
+        Mit nur zwei neuen Methoden kann die Klasse <scheduler_method class="Mail"/> für eigene Nachrichten verwendet werden.
+    </p>
+    <ul>
+        <li>
+            <code>Spooler.create_mail()</code>
+        </li>
+        <li>
+            <code>Mail.send()</code>
+        </li>
+    </ul>
+    <scheduler_example>
+        <pre>var mail = spooler.create_mail();
+//mail.from übernehmen wir vom Scheduler        
+mail.to = "meier@example.com";
+mail.subject = "Hallo";
+mail.body = "Hallo ...";
+mail.send();</pre>
+    </scheduler_example>
+    
+
+</description>

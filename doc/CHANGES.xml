@@ -10,8 +10,24 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2006-06-19" version="2.0.154" subversion_revision="4366">
+    
+    <change date="2006-06-20" version="2.0.154" subversion_revision="4379">
 
+        <revision type="correction" title="history_on_process verhält sich jetzt wie dokumentiert">
+            <description>
+                <p>
+                    Eine falsche Angabe wird nicht mehr ignoriert, sondern führt zum Fehler.
+                </p>
+                <ul>
+                    <li>
+                        <scheduler_ini_entry file="factory.ini" section="job" entry="history_on_process"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+    </change >
+        
+    <change date="2006-06-19" version="2.0.154" subversion_revision="4366">
 
         <revision type="new" title="Ein paar Verbesserungen in der internen Ereignisverarbeitung">
             <description>

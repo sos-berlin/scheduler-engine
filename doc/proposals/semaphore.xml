@@ -56,8 +56,7 @@
     …
 &lt;job name="switch_database">
     &lt;lock lock="<i>lock_name</i>"/>
-    …
-    </pre>
+    …</pre>
 
     <p>
         Die ersten beiden Jobs können gleichzeitig laufen, 
@@ -68,6 +67,7 @@
     <p>
         (Das ist ein Read-Write-Lock, s. <a href="http://de.wikipedia.org/wiki/Lock">Wikipedia</a>;
         "read" und "write" werden hier anders gebraucht, als unsere Jobs das nahelegen).
+        <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/concurrent/locks/ReadWriteLock.html">java.util.concurrent.ReadWriteLock</a>
     </p>
 
 
