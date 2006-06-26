@@ -90,7 +90,7 @@ all:: documentation
 #	$(AR) $(ARFLAGS) $@ $(objects)
 
 $(BIN_DIR)/sos.spooler.jar: $(java_classes)
-	jar cfm $@ ../java_manifest sos/spooler/*.class sos/spooler/jobs/*.class
+	$(PROD_DIR)/LINKS/java/bin/jar cfm $@ ../java_manifest sos/spooler/*.class sos/spooler/jobs/*.class
 
 
 $(objects): $(patsubst %, sos/spooler/%.h, Idispatch)
