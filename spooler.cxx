@@ -1859,10 +1859,8 @@ void Spooler::load()
     tzset();
 
     _security.clear();             
-
-    include_java();                     // Java-Schnittstelle einbinden
     _java_vm = get_java_vm( false );
-    _java_vm->set_destroy_vm( false );  //  Nicht DestroyJavaVM() rufen, denn das hängt manchmal (auch für Dateityp jdbc)
+    _java_vm->set_destroy_vm( false );   //  Nicht DestroyJavaVM() rufen, denn das hängt manchmal (auch für Dateityp jdbc)
 
 
     load_arg();
