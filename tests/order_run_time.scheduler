@@ -1,0 +1,136 @@
+<?xml version="1.0"?>
+<spooler> 
+    <config>
+
+        <base file="$SCHEDULER_TEST/base.scheduler"/>
+
+        <process_classes/>
+    
+        <script language="javascript"><![CDATA[
+
+var hostware = new ActiveXObject( "hostware.Global" );
+                        
+                        
+var job_chain = spooler.create_job_chain();
+job_chain.name = "Kette";
+job_chain.add_job( "javascript", 1,   2, 999 );
+job_chain.add_job( "java"      , 2, 100, 999 );
+job_chain.add_end_state( 100 );
+job_chain.add_end_state( 999 );
+
+
+//var db = hostware.open( "odbc c:/tmp/scheduler/scheduler.mdb" );
+//db.db_execute( "delete from scheduler_orders where job_chain='" + job_chain.name + "'" );
+//db.db_execute( "commit" );
+
+spooler.add_job_chain( job_chain );
+
+var order = spooler.create_order();
+order.id = 12345678;
+order.title = "Ein ganz ganz langer Titel, um zu sehen, wie die HTML-Oberfläche reagiert";
+//job_chain.add_order( order );
+
+var order = spooler.create_order();
+order.id = 1;
+order.title = "Wir haben einen Auftrag!";
+order.run_time.xml = "<run_time><period single_start='12:37:20'/></run_time>";
+
+if(0)
+order.run_time.xml = "<run_time>" +
+                        "<date date='2005-08-05'>" +
+                            "<period begin='10:29:00' end='23:25:30' />" +
+                            "<period single_start='10:30' />" +
+                        "</date>" +             
+                        "<date date='2005-08-06'>" +
+                            "<period begin='1:34:40' end='1:34:50' />" +
+                        "</date>" +
+                        "<weekdays>" + 
+                            "<day day='7'>" +
+                                "<period begin='07:00' end='08:00' />" +
+                            "</day>" +
+                        "</weekdays>" + 
+                     "</run_time>";
+
+spooler_log.info( order.run_time.xml );
+
+try
+{                     
+    job_chain.add_order( order );
+}
+catch( x ) { spooler_log.warn( x.toString() ); }
+
+spooler_log.info( "---------------------------------------------------------------------------" );
+        
+        ]]></script>
+
+
+        <jobs>
+
+            <job name="javascript" order="yes" idle_timeout="30" title="Das ist der Titel von javascript">
+        
+                <script language="JavaScript"><![CDATA[
+
+function spooler_process() 
+{               
+    spooler_log.info( "order.title=" + spooler_task.order.title );
+    spooler_log.info( "order.string_next_start_time=" + spooler_task.order.string_next_start_time );               
+
+    spooler_task.order.run_time.xml = '<run_time><period single_start="12:37:30"/></run_time>';
+    //var order2 = spooler.create_order();
+    //order2.run_time.xml = "<run_time><period begin='10:21:20'/></run_time>";
+    //spooler_log.info( "order2.string_next_start_time=" + order2.string_next_start_time );
+
+    //new ActiveXObject("hostware.Global").sleep(9999);
+    return true;
+}
+
+
+                ]]></script>
+
+            </job>
+        
+        
+            <job name="java" order="yes" idle_timeout="30">
+                <script java_class="spooler_job.Test"><![CDATA[
+
+                    package spooler_job;
+
+                    public class Test  extends sos.spooler.Job_impl
+                    {
+                        public boolean spooler_process()
+                        {     
+                            spooler_log.info( "order.title=" + spooler_task.order().title() );               
+                            spooler_log.info( "order.string_next_start_time=" + spooler_task.order().string_next_start_time() );
+                            
+                            //sos.spooler.Order order2 = spooler.create_order();
+                            //order2.run_time().set_xml( "<run_time><period begin='23:45:56'/></run_time>" );                            
+                            //spooler_log.info( "order2.string_next_start_time=" + order2.string_next_start_time() );
+                            
+                            return true;
+                        }
+                    }
+
+                ]]></script>
+               
+            </job>
+            
+            
+            <job name="normal">
+                <script language="JavaScript"><![CDATA[
+               
+function spooler_process() 
+{               
+    spooler_log.info( "order.title=" + spooler_task.order.title );               
+    spooler.delay_spooler_process = 5;
+    return true;
+}
+
+                ]]></script>
+
+                <run_time> 
+                    <period begin="12:00" end="13:00"/>
+                </run_time>
+            </job>
+        </jobs>
+    </config>
+</spooler>

@@ -1,0 +1,80 @@
+<?xml version="1.0"?>
+<spooler
+    xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
+>
+    <config
+        tcp_port="4444" 
+        main_scheduler="lillerud.zschimmer:6310"
+    >
+        <security>
+            <allowed_host host="0.0.0.0" level="all"/>
+        </security>
+
+        <process_classes/>
+
+        <script language="javascript">
+            <![CDATA[
+
+var java_string = new java.lang.String( "Java-String" );
+spooler_log.info( "java_string=" + java_string );
+
+spooler.job( "javascript" ).start();            
+//spooler.job( "java" ).start();            
+           
+        ]]>
+        </script>
+
+
+        <jobs>
+
+            <job name="javascript">
+
+                <script language="JavaScript">
+                    <![CDATA[
+
+var hostware = new ActiveXObject( "hostware.global" );
+var file = new ActiveXObject( "hostware.File" );
+file.open( "-out mail -to=test@zsch.de -from=scheduler@zsch.de -subject=test" );
+file.put_line( "Hallo" );
+file.close();
+
+                ]]>
+                </script>
+
+                <run_time/>
+            </job>
+
+
+            <job name="java">
+
+                <script java_class="spooler_job.My_job">
+                    <![CDATA[
+
+package spooler_job;
+
+import sos.spooler.*;
+
+public class My_job  extends sos.spooler.Job_impl
+{   
+    Subprocess subprocess;
+                     
+    public boolean spooler_open()  throws Exception
+    {                     
+        return true;
+    }
+    
+    public boolean spooler_process()  throws Exception
+    {
+        return false;
+    }
+}
+                ]]>
+                </script>
+
+                <run_time/>
+            </job>
+
+        </jobs>
+    </config>
+</spooler>

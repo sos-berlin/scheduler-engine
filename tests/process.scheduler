@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<spooler
+    xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:noNamespaceSchemaLocation = "http://www.zschimmer.com/2006/scheduler.xsd"
+>
+    <config>
+        <base file="$SCHEDULER_TEST/base.scheduler"/>
+
+        <script language="javascript">
+            <![CDATA[
+
+var params = spooler.create_variable_set();
+params.value( "EINS" ) = "1";
+params.value( "ZWEI" ) = "2";
+params.value( "HOME" ) = "Heimat";
+spooler.job( "process" ).start( params );
+
+
+        ]]></script>                   
+
+
+        <jobs>
+            <job name="process" title="Aufruf von /tmp/test.cmd">
+                
+                <process file="/tmp/test.cmd" param="Mein Parameter EINS=$EINS ZWEI=$ZWEI HOME=$HOME LOG=$LOG PATH=$PATH">
+                    <environment>
+                        <variable name="var1" value="111"/>
+                        <variable name="PATH" value="$PATH;***"/>
+                        <variable name="PATH" value="$PATH;222"/>
+                    </environment>
+                </process>
+                
+                <run_time/>
+            </job>
+        </jobs>
+    </config>
+</spooler>

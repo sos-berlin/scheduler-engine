@@ -1,0 +1,120 @@
+<?xml version="1.0"?>
+<spooler
+    xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:noNamespaceSchemaLocation = "http://www.zschimmer.com/2006/scheduler.xsd"
+>
+    <config>
+
+        <base file="$SCHEDULER_TEST/base.scheduler"/>
+
+        <process_classes/>
+    
+        <script language="javascript">
+        <![CDATA[
+
+if( spooler.job_chain( "my_job_chain" ).order_count == 0 )
+{
+    // Auftrag soll mit at="" in der Datenbank gehalten werden und bei Scheduler-Neustart berücksichtigt werden
+    var x = spooler.execute_xml( '<add_order id="xml" job_chain="my_job_chain" at="now+60" title="Auftrag per XML"/>' );
+    spooler_log.info( x );
+  
+    var order = spooler.create_order();
+    order.id    = "javascript";
+    order.title = "Order aus JavaScript";
+    order.at    = "now+65";
+    spooler.job_chain( "my_job_chain" ).add_order( order );
+    
+    spooler.job( "perl" ).start();
+    spooler.job( "java" ).start();
+    
+    if( spooler.db_name == "" )  spooler_log.warn( "Der Test funktioniert nur mit Datenbank" );
+    else x = spooler.execute_xml( '<modify_spooler cmd="terminate_and_restart"/>' );
+}
+else
+{
+}
+    spooler_log.info( "---------------------------------------------------------------------------" );
+        
+        ]]></script>
+
+
+        <jobs>
+
+            <job name="perl">
+                <script language="perl">
+                    <include file="$SCHEDULER_TEST/expect.pl"/>
+                    <![CDATA[
+package main;
+use vars qw($spooler $spooler_log $spooler_job $spooler_task);
+use strict;
+use warnings FATAL => "all";
+
+my $order = $spooler->create_order();
+$order->LetProperty( 'id'   , "perl" );
+$order->LetProperty( 'title', "Order aus Perl" );
+$order->LetProperty( 'at'   , "now+70" );
+$spooler->job_chain( "my_job_chain" )->add_order( $order );
+
+                    ]]>
+                </script>
+            </job>
+
+
+            <job name="java">
+                <script java_class="spooler_job.My_job">
+                    <![CDATA[
+package spooler_job;
+import sos.spooler.*;
+import java.util.Date;
+
+public class My_job  extends sos.spooler.Job_impl
+{   
+    public boolean spooler_process()  throws Exception
+    {
+        Order order = spooler.create_order();
+        order.set_id   ( "java string" );
+        order.set_title( "Order aus Java, String" );
+        order.set_at   ( "now+75" );
+        spooler.job_chain( "my_job_chain" ).add_order( order );
+
+        order = spooler.create_order();
+        order.set_id   ( "java date" );
+        order.set_title( "Order aus Java, Date" );
+        order.set_at   ( new Date( new Date().getTime() + 80 * 1000 ) );
+        spooler.job_chain( "my_job_chain" ).add_order( order );
+
+        return false;
+    }
+}
+                ]]>
+                </script>
+
+                <commands on_exit_code="9">
+                    <show_state/>
+                </commands>
+            </job>
+
+
+            <job name="javascript" order="yes">
+        
+                <script language="JavaScript"><![CDATA[
+
+function spooler_process() 
+{               
+    spooler_log.info( "order.xml=" + spooler_task.order.xml );
+    return true;
+}
+
+                ]]></script>
+
+            </job>
+        
+        </jobs>
+        <job_chains>
+            <job_chain name="my_job_chain">
+                <job_chain_node state="first" job="javascript"/>
+                <job_chain_node state="finished"/>
+            </job_chain>
+        </job_chains>        
+    </config>
+</spooler>

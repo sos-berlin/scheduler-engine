@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<spooler
+    xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
+>
+    <config port="4444"
+            main_scheduler="lillerud.zschimmer:6310">
+    
+        <security ignore_unknown_hosts="yes">
+            <allowed_host host="0.0.0.0" level="all"/>
+        </security>
+        
+        <process_classes/>
+    
+        <jobs>
+
+            <job name="test">
+
+                <script language="JavaScript">
+                    <![CDATA[
+
+spooler_log.info( "hallo" );
+
+                ]]>
+                </script>
+
+                <run_time begin="07:00">
+                    <period begin="02:00" end="02:01"/>
+                    <period begin="02:02" end="02:03"/>
+                    <weekdays>
+                        <day day="monday"/>
+                        <day day="tuesday"/>
+                        <day day="wednesday"/>
+                        <day day="thursday"/>
+                        <day day="friday"/>
+                        <day day="saturday"/>
+                        <day day="sunday"/>
+                        <day day="mon"/>
+                        <day day="tue"/>
+                        <day day="wed"/>
+                        <day day="thu"/>
+                        <day day="fri"/>
+                        <day day="sat"/>
+                        <day day="sun"/>
+                        <day day="mo"/>
+                        <day day="di"/>
+                        <day day="mi"/>
+                        <day day="do"/>
+                        <day day="fr"/>
+                        <day day="sa"/>
+                        <day day="so"/>
+                        <day day="montag"/>
+                        <day day="dienstag"/>
+                        <day day="mittwoch"/>
+                        <day day="donnerstag"/>
+                        <day day="freitag"/>
+                        <day day="samstag"/>
+                        <day day="sonntag"/>
+                    </weekdays>
+                    <monthdays>
+                        <day day="7">
+                            <period single_start="12:00"/>
+                        </day>
+                    </monthdays>
+                    <ultimos>
+                        <day day="0">
+                            <period single_start="00:00"/>
+                        </day>
+                        <day day="3">
+                            <period single_start="03:00"/>
+                        </day>
+                    </ultimos>
+                </run_time>
+            </job>
+
+            
+            <job name="set_run_time_1">
+        
+                <script language="JavaScript"><![CDATA[
+
+
+spooler_log.info( spooler.execute_xml( "<modify_job job='job_b'>" +
+                                         "<run_time once='yes'>" +
+                                            "<date date='2005-05-06'>" +
+                                                "<period begin='14:54:10' end='14:54:30' />" +
+                                                "<period begin='14:54:40' end='14:54:50' />" +
+                                            "</date>" +             
+                                         "</run_time>" + 
+                                       "</modify_job>" ) );
+
+                ]]></script>
+
+                <run_time>
+                    <period begin="07:00" end="08:00" repeat="60"/>
+                    <period begin="09:00" end="10:00" repeat="60"/>
+                </run_time>
+
+            </job>
+        
+        
+            <job name="set_run_time_2">
+        
+                <script language="JavaScript"><![CDATA[
+
+
+spooler_log.info( spooler.execute_xml( "<modify_job job='job_b'>" +
+                                         "<run_time><period begin='00:00' end='00:00'/></run_time>" + 
+                                       "</modify_job>" ) );
+
+                ]]></script>
+
+                <run_time/>
+
+            </job>
+        
+        
+            <job name="job_b">
+                <script language="JavaScript"><![CDATA[
+    
+var hostware = new ActiveXObject( "hostware.global" );
+               
+function spooler_process() 
+{               
+    spooler_log.info( "spooler_process()" );
+    hostware.sleep( 3 );
+    
+    return true;
+}
+
+                ]]></script>
+     
+                <run_time/>
+                
+            </job>
+            
+        </jobs>
+    </config>
+</spooler>
