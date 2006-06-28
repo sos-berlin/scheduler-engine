@@ -578,7 +578,7 @@ static DWORD WINAPI HandlerEx( DWORD dwControl, DWORD event, void* event_data, v
                         case PBT_APMQUERYSUSPEND:
                         {
                             // Das verhindert das Schlafenlegen durch den Benutzer (ist das gut? Ein Kennzeichen im System Tray wäre gut)
-                            //? result = spooler_ptr->is_machine_suspendable()? NO_ERROR : BROADCAST_QUERY_DENY;
+                            result = spooler_ptr->is_machine_suspendable()? NO_ERROR : BROADCAST_QUERY_DENY;
                             break;
                         }
 

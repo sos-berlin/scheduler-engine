@@ -2086,9 +2086,9 @@ STDMETHODIMP Com_job::put_Max_order_setbacks( int count )
     return hr;
 }
 
-//-----------------------------------------------------------------Com_job::put_Machine_suspendable
+//-------------------------------------------------------------------Com_job::put_Machine_resumable
 
-STDMETHODIMP Com_job::put_Machine_suspendable( VARIANT_BOOL machine_suspendable )
+STDMETHODIMP Com_job::put_Machine_resumable( VARIANT_BOOL machine_resumable )
 {
     HRESULT hr = NOERROR;
 
@@ -2098,7 +2098,7 @@ STDMETHODIMP Com_job::put_Machine_suspendable( VARIANT_BOOL machine_suspendable 
         if( !_job )  z::throw_xc( "SCHEDULER-122" );
         if( !_job->_spooler->_zschimmer_mode )  return FALSE;  // E_ACCESSDENIED
 
-        _job->set_machine_suspendable( machine_suspendable != 0 );
+        _job->set_machine_resumable( machine_resumable != 0 );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
@@ -3609,6 +3609,23 @@ HRESULT Com_spooler::Create_xslt_stylesheet( Ixslt_stylesheet** result )
     {
         ptr<Xslt_stylesheet>  stylesheet = Z_NEW( Xslt_stylesheet );
         *result = stylesheet.take();
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+
+//------------------------------------------------------------Com_spooler::put_Suspend_after_resume
+
+HRESULT Com_spooler::put_Suspend_after_resume( VARIANT_BOOL b )
+{
+    HRESULT hr = S_OK;
+
+    if( !_spooler )  return E_POINTER;
+
+    try
+    {
+        if( _spooler->_zschimmer_mode )  _spooler->_suspend_after_resume = b != 0;
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
 

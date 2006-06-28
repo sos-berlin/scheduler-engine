@@ -2512,7 +2512,7 @@ void Spooler::run()
                     Task* task = *t;
                     Time  task_next_time = task->next_time();
 
-                    if( !task->job()->is_machine_suspendable()  &&  resume_at > task_next_time )  resume_at = task_next_time,  resume_at_object = task;
+                    if( task->job()->is_machine_resumable()  &&  resume_at > task_next_time )  resume_at = task_next_time,  resume_at_object = task;
 
                     if( wait_until > task_next_time )
                     {
@@ -2534,7 +2534,7 @@ void Spooler::run()
 
                     Time next_job_time = job->next_time();
 
-                    if( !job->is_machine_suspendable()  &&  resume_at > next_job_time )  resume_at = next_job_time,  resume_at_object = job;
+                    if( job->is_machine_resumable()  &&  resume_at > next_job_time )  resume_at = next_job_time,  resume_at_object = job;
 
                     if( wait_until > next_job_time ) 
                     {
@@ -2623,7 +2623,7 @@ void Spooler::run()
                 else
                 {
                     _wait_counter++;
-                    if( !_spooler->is_machine_suspendable() )  resume_at = latter_day, resume_at_object = NULL;
+                    //if( !_spooler->is_machine_suspendable() )  resume_at = latter_day, resume_at_object = NULL;
                     _last_wait_until = wait_until;
                     _last_resume_at  = resume_at;
 
@@ -2746,6 +2746,14 @@ void Spooler::end_dont_suspend_machine()
 #       ifdef Z_WINDOWS
             Z_LOG2( "scheduler", "SetThreadExecutionState(ES_CONTINUOUS);\n" );
             SetThreadExecutionState( ES_CONTINUOUS );
+
+            if( _suspend_after_resume && IsSystemResumeAutomatic() )
+            {
+                Z_LOG2( "scheduler", "SetSystemPowerState(TRUE,FALSE) ...\n" );
+                BOOL ok = SetSystemPowerState( TRUE, FALSE );
+                //SetSuspendState( FALSE, FALSE, FALSE );  // powrprof.h, powrprof.dll
+                Z_LOG2( "scheduler", "SetSystemPowerState(TRUE,FALSE) => " << (ok? "ok" : get_mswin_msg_text( GetLastError() ) ) << "\n" );
+            }
 #       endif
     }
 }

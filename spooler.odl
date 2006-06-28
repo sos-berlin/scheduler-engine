@@ -316,7 +316,7 @@ library Spooler
         HRESULT                 Execute_command             ( [in] BSTR );                      // Für Joacim 2006-02-20
 
         [propput]                                                                               
-        HRESULT                 Machine_suspendable         ( [in] VARIANT_BOOL );              // Für Joacim 2006-06-15
+        HRESULT                 Machine_resumable           ( [in] VARIANT_BOOL );              // Für Joacim 2006-06-15
 
     }
 
@@ -640,6 +640,9 @@ library Spooler
         HRESULT                 Udp_port                ( [out,retval] int* );
 
         HRESULT                 Create_xslt_stylesheet  ( [out,retval] Ixslt_stylesheet** );
+
+        [propput]
+        HRESULT                 Suspend_after_resume    ( [in] VARIANT_BOOL );
     }
 
     [

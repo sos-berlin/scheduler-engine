@@ -406,7 +406,7 @@ struct Com_job : spooler_com::Ijob,
     STDMETHODIMP                Clear_delay_after_error     ();
     STDMETHODIMP                Remove                      ();
     STDMETHODIMP                Execute_command             ( BSTR );
-    STDMETHODIMP            put_Machine_suspendable         ( VARIANT_BOOL );
+    STDMETHODIMP            put_Machine_resumable           ( VARIANT_BOOL );
 
 
   private:
@@ -600,6 +600,7 @@ struct Com_spooler : spooler_com::Ispooler,
     STDMETHODIMP            get_Tcp_port                    ( int* );
     STDMETHODIMP            get_Udp_port                    ( int* );
     STDMETHODIMP                Create_xslt_stylesheet      ( spooler_com::Ixslt_stylesheet** );
+    STDMETHODIMP            put_Suspend_after_resume        ( VARIANT_BOOL );
 
 
     void                        close                       ()                                      { THREAD_LOCK(_lock)  _spooler = NULL; }

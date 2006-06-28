@@ -565,6 +565,7 @@ struct Spooler : Object,
     File                       _pid_file;
     bool                       _zschimmer_mode;
     int                        _dont_suspend_machine_counter;   // >0: Kein suspend
+    bool                       _suspend_after_resume;
 
     Time                       _next_daylight_saving_transition_time;
     string                     _next_daylight_saving_transition_name;
