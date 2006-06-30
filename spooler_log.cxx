@@ -354,7 +354,8 @@ void Log::log2( Log_level level, const string& prefix, const string& line_, Pref
 #       endif
 
 
-        string now = Time::now().as_string();
+        _last_time = Time::now();
+        string now = _last_time.as_string();
         strcpy( buffer1, now.c_str() );
 
         switch( level )

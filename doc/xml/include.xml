@@ -35,7 +35,7 @@
     <description>
         <p>
             Dieses Element kann in den Text gestreut werden
-            (aber außerhalb von <code>&lt;[CDATA[</code>&#160; und&#160; <code>]]&gt;</code>),
+            (aber außerhalb von <code>&lt;![CDATA[</code>&#160; und&#160; <code>]]&gt;</code>),
             um Quell-Code, der in anderen Dateien steht, einzuziehen.
         </p>
 

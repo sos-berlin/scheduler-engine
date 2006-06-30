@@ -104,7 +104,7 @@
 
 Das ist dasselbe wie folgendes Scheduler-Skript:
 
-<pre>&lt;script language="javascript">&lt;[CDATA[
+<pre>&lt;script language="javascript">&lt;![CDATA[
     var job_chain = spooler.create_job_chain();
         job_chain.name = "Kette_A";
         job_chain.add_job( "job_a", 1,   2, 999 );

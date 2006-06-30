@@ -305,6 +305,7 @@ struct Spooler : Object,
   //void                        signal_threads              ( const string& signal_name );
   //void                        wait_until_threads_stopped  ( Time until );
     void                        reload                      ();
+    void                        end_waiting_tasks           ();
     void                        nichts_getan                ( int anzahl, const string& );
     void                        run                         ();
     bool                        run_continue                ();
@@ -369,6 +370,7 @@ struct Spooler : Object,
     bool                        is_machine_suspendable      () const                            { return _dont_suspend_machine_counter == 0; }
     void                        begin_dont_suspend_machine  ();
     void                        end_dont_suspend_machine    ();
+    void                        suspend_machine             ();
 
   private:
     Fill_zero                  _zero_;
@@ -563,9 +565,11 @@ struct Spooler : Object,
 
     string                     _directory;
     File                       _pid_file;
+
     bool                       _zschimmer_mode;
     int                        _dont_suspend_machine_counter;   // >0: Kein suspend
     bool                       _suspend_after_resume;
+    bool                       _should_suspend_machine;
 
     Time                       _next_daylight_saving_transition_time;
     string                     _next_daylight_saving_transition_name;

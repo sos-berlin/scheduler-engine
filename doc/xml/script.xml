@@ -164,7 +164,7 @@
             Hier wird der auszuführende Programm-Code angegeben, entweder direkt als Text oder indirekt als Verweis auf Binär-Code.
         </p>
         <p>
-            <code>&lt;script></code> kann den Quell-Code als Text enthalten. Er kann in <code>&lt;[CDATA[</code>&#160; und&#160; <code>]]&gt;</code>
+            <code>&lt;script></code> kann den Quell-Code als Text enthalten. Er kann in <code>&lt;![CDATA[</code>&#160; und&#160; <code>]]&gt;</code>
             eingeschlossen sein.
         </p>
     </description>

@@ -29,6 +29,7 @@ struct Log
     string                      filename                    () const                            { return _filename; }
     int                         fd                          ()                                  { return _file; }
     void                        start_new_file              ();
+    Time                        last_time                   () const                            { return _last_time; }
 
   protected:
     void                        write                       ( Prefix_log* extra, Prefix_log* order, const char*, int len, bool log = true );
@@ -43,6 +44,7 @@ struct Log
     int                        _err_no;
     Thread_semaphore           _semaphore;
     string                     _log_line;
+    Time                       _last_time;
 };
 
 //---------------------------------------------------------------------------------------Prefix_log

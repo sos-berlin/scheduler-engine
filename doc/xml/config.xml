@@ -161,7 +161,7 @@
                 </p>
             </description>
             <example>
-                <pre>&lt;script language="javascript">&lt;[CDATA[
+                <pre>&lt;script language="javascript">&lt;![CDATA[
 
     spooler.variables( "database_name" ) = "db7";
 
@@ -181,7 +181,7 @@
             </description>
 
             <example>
-                <pre>&lt;script language="javascript">&lt;[CDATA[
+                <pre>&lt;script language="javascript">&lt;![CDATA[
 
     spooler.variables( "database_name" ) = "db7";
 

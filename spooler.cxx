@@ -72,6 +72,8 @@ const string                    new_suffix                          = "~new";   
 const double                    renew_wait_interval                 = 0.25;
 const double                    renew_wait_time                     = 30;               // Wartezeit für Brückenspooler, bis der alte Spooler beendet ist und der neue gestartet werden kann.
 
+const int                       before_suspend_wait_time            = 5;                // Diese Zeit vor Suspend auf Ereignis warten (eigentlich so kurz wie möglich)
+const int                       inhibit_suspend_wait_time           = 10*60;            // Nur Suspend, wenn Wartezeit länger ist
 const int                       show_message_after_seconds          = 15*60;            // Nach dieser Wartezeit eine Meldung ausgeben
 const int                       show_message_after_seconds_debug    = 60;               // Nach dieser Wartezeit eine Meldung ausgeben
 
@@ -2389,16 +2391,7 @@ void Spooler::execute_state_cmd()
 
                 if( _state == s_stopping_let_run )
                 {
-                    FOR_EACH( Task_list, _single_thread->_task_list, t )
-                    {
-                        Task* task = *t;
-
-                        if( task->state() == Task::s_running_waiting_for_order ) 
-                        {
-                            //_log.info( S() << "end " << task->obj_name() );
-                            task->cmd_end();
-                        }
-                    }
+                    end_waiting_tasks();
                 }
 
                 if( _termination_async_operation )
@@ -2422,6 +2415,22 @@ void Spooler::execute_state_cmd()
         }
 
         _state_cmd = sc_none;
+    }
+}
+
+//-----------------------------------------------------------------------Spooler::end_waiting_tasks
+
+void Spooler::end_waiting_tasks()
+{
+    FOR_EACH( Task_list, _single_thread->_task_list, t )
+    {
+        Task* task = *t;
+
+        if( task->state() == Task::s_running_waiting_for_order ) 
+        {
+            //_log.info( S() << "end " << task->obj_name() );
+            task->cmd_end();
+        }
     }
 }
 
@@ -2622,22 +2631,57 @@ void Spooler::run()
                 }
                 else
                 {
+                    bool signaled = false;
+
                     _wait_counter++;
                     //if( !_spooler->is_machine_suspendable() )  resume_at = latter_day, resume_at_object = NULL;
                     _last_wait_until = wait_until;
                     _last_resume_at  = resume_at;
 
-                    Time first_wait_time = _log.log_level() <= log_debug3? show_message_after_seconds_debug : show_message_after_seconds;
-                    bool signaled = wait_handles.wait_until( min( Time::now() + first_wait_time, wait_until ), wait_until_object, resume_at, resume_at_object );
-                    
-                    if( !signaled )
+
+                    if( _zschimmer_mode  &&  _should_suspend_machine  &&  is_machine_suspendable()  &&  !_single_thread->has_tasks() )
                     {
-                        if( wait_until - Time::now() >= 10 )
+#                       ifdef Z_WINDOWS
+                            if( !IsSystemResumeAutomatic() )  _should_suspend_machine = false;  // Rechner ist nicht automatisch gestartet, sondern durch Benutzer? Dann kein Suspend
+
+                            if( _should_suspend_machine )
+                            {
+                                Time now = Time::now();
+                                if( now + inhibit_suspend_wait_time < resume_at )
+                                {
+                                    signaled = wait_handles.wait_until( min( now + before_suspend_wait_time, wait_until ), wait_until_object, resume_at, resume_at_object );
+                                    if( !signaled )   // Nichts passiert?
+                                    {
+                                        if( IsSystemResumeAutomatic() )   // Benutzer schläft noch?
+                                        {
+                                            suspend_machine();
+                                        }
+
+                                        _should_suspend_machine = false;
+                                    }
+                                }
+                            }
+#                       endif
+                    }
+
+
+                    if( !signaled  &&  !_print_time_every_second )  //!string_begins_with( _log.last_line(), "SCHEDULER-972" ) )
+                    {
+                        Time first_wait_until = _base_log.last_time() + ( _log.log_level() <= log_debug3? show_message_after_seconds_debug : show_message_after_seconds );
+                        if( first_wait_until < wait_until )
                         {
                             string msg = message_string( "SCHEDULER-972", wait_until.as_string(), wait_until_object->obj_name() );
-                            if( msg != _log.last_line() )  _log.info( msg );
+                            if( msg != _log.last_line() ) 
+                            {
+                                String_object o ( msg );
+                                signaled = wait_handles.wait_until( first_wait_until, &o, resume_at, resume_at_object );
+                                if( !signaled  &&  msg != _log.last_line() )  _log.info( msg );
+                            }
                         }
+                    }
 
+                    if( !signaled )
+                    {
                         wait_handles.wait_until( wait_until, wait_until_object, resume_at, resume_at_object );
                     }
                 }
@@ -2733,6 +2777,8 @@ void Spooler::begin_dont_suspend_machine()
     }
 
     _dont_suspend_machine_counter++;
+
+    _should_suspend_machine = false;
 }
 
 //----------------------------------------------------------------Spooler::end_dont_suspend_machine
@@ -2746,16 +2792,56 @@ void Spooler::end_dont_suspend_machine()
 #       ifdef Z_WINDOWS
             Z_LOG2( "scheduler", "SetThreadExecutionState(ES_CONTINUOUS);\n" );
             SetThreadExecutionState( ES_CONTINUOUS );
-
-            if( _suspend_after_resume && IsSystemResumeAutomatic() )
-            {
-                Z_LOG2( "scheduler", "SetSystemPowerState(TRUE,FALSE) ...\n" );
-                BOOL ok = SetSystemPowerState( TRUE, FALSE );
-                //SetSuspendState( FALSE, FALSE, FALSE );  // powrprof.h, powrprof.dll
-                Z_LOG2( "scheduler", "SetSystemPowerState(TRUE,FALSE) => " << (ok? "ok" : get_mswin_msg_text( GetLastError() ) ) << "\n" );
-            }
 #       endif
+
+        if( _suspend_after_resume )  _should_suspend_machine = true;
     }
+}
+
+//-------------------------------------------------------------------------Spooler::suspend_machine
+
+void Spooler::suspend_machine()
+{
+#   ifdef Z_WINDOWS
+
+        BOOL ok;
+
+
+        Z_LOG2( "scheduler", "SetSystemPowerState(TRUE,FALSE) ...\n" );
+
+        bool suspend_flag = true;
+        bool force_flag   = false;
+        ok = SetSystemPowerState( suspend_flag, force_flag );  // Dazu brauchen wir ein Recht
+
+        int error = GetLastError();
+        if( !ok  &&  error == ERROR_PRIVILEGE_NOT_HELD )
+        {
+            // Erlaubnis für SetSystemPowerState() einholen
+        
+            windows::Handle process_token;
+
+            ok = OpenProcessToken( GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, process_token.addr_of() );
+            if( ok )
+            {
+                TOKEN_PRIVILEGES token_privileges;
+
+                token_privileges.PrivilegeCount = 1;
+                token_privileges.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
+
+                ok = LookupPrivilegeValue( "", SE_SHUTDOWN_NAME, &token_privileges.Privileges[0].Luid );
+                if( ok )
+                {
+                    ok = AdjustTokenPrivileges( process_token, FALSE, &token_privileges, 0, NULL, NULL );
+                }
+            }
+
+            ok = SetSystemPowerState( suspend_flag, force_flag );
+            int error = GetLastError();
+        }
+
+        Z_LOG2( "scheduler", "SetSystemPowerState(TRUE,FALSE) => " << (ok? "ok" : message_string( printf_string( "MSWIN-%08lX", error ) ) ) << "\n" );
+
+#   endif
 }
 
 //-------------------------------------------------------------------------Spooler::cmd_load_config
