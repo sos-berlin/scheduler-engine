@@ -2440,7 +2440,9 @@ void Spooler::run()
 {
     set_state( s_running );
 
-    _print_time_every_second = log_directory() == "*stderr"  &&  isatty( fileno( stderr ) );
+#   ifdef Z_WINDOWS
+        _print_time_every_second = log_directory() == "*stderr"  &&  isatty( fileno( stderr ) );
+#   endif
 
     if( !_xml_cmd.empty() )
     {
