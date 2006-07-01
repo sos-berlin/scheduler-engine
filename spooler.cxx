@@ -2101,6 +2101,10 @@ void Spooler::start()
 
     try
     {
+        _java_vm->set_log( &_log );
+        _java_vm->prepend_class_path( _config_java_class_path );        // Nicht so gut hier. Bei jedem Reload wird der Pfad verlängert. Aber Reload lässt Java sowieso nicht neu starten.
+        _java_vm->set_options( _config_java_options );
+
         if( _has_java_source )
         {
             string java_work_dir = temp_dir() + Z_DIR_SEPARATOR "java";
@@ -2110,11 +2114,6 @@ void Spooler::start()
 
         if( _has_java )     // Nur True, wenn Java-Job nicht in separatem Prozess ausgeführt wird.
         {
-            _java_vm->set_log( &_log );
-
-            _java_vm->prepend_class_path( _config_java_class_path );        // Nicht so gut hier. Bei jedem Reload wird der Pfad verlängert. Aber Reload lässt Java sowieso nicht neu starten.
-            _java_vm->set_options( _config_java_options );
-
             Java_module_instance::init_java_vm( _java_vm );
         }
     }

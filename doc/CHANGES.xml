@@ -10,7 +10,19 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    
+
+    <change date="2006-06-30" version="2.0.154" subversion_revision="4390">
+
+        <revision type="correction" title="Java-Job ohne Konstruktor">
+            <description>
+                <p>
+                    Ein Java-Job ohne parameterlosen Konstruktor führte zum Abbruch des Prozesses
+                    statt zur Exception <code>java.lang.NoSuchMethodError</code>.
+                </p>
+            </description>
+        </revision>
+    </change >
+
     <change date="2006-06-20" version="2.0.154" subversion_revision="4379">
 
         <revision type="correction" title="history_on_process verhält sich jetzt wie dokumentiert">

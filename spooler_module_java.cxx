@@ -192,7 +192,7 @@ jmethodID Module::java_method_id( const string& name )
         
         if( !_java_class )  z::throw_xc( "SCHEDULER-197", name );
         method_id = env->GetMethodID( _java_class, name.substr(0,pos).c_str(), name.c_str()+pos );
-        if( env->ExceptionCheck() ) env->ExceptionDescribe(), env->ExceptionClear();
+        //if( env->ExceptionCheck() )  env->ExceptionDescribe(), env->ExceptionClear();
 
         _method_map[name] = method_id;
     }
@@ -359,6 +359,7 @@ void Java_module_instance::init()
     }
 
     jmethodID method_id = _module->java_method_id( "<init>()V" );   // Konstruktor
+    if( !method_id )  _java_vm->env().throw_java( "GetMethodID" );
     
     assert( _jobject == NULL );
     _jobject = e->NewObject( _module->_java_class, method_id );
