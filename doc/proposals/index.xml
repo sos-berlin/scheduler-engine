@@ -11,6 +11,16 @@
     date                = "$Date$"
 >
     <p>
+        <a href="single_java.xml">Nur eine Java Virtual Machine für alle Java-Tasks</a>
+    </p>
+    <div class="indent">
+        <p style="margin-top: 0px">
+            Damit kann der Speicherbedarf bei vielen Tasks deutlich verringert werden.
+        </p>
+    </div>
+
+
+    <p>
         <a href="mail.xml">Eigene eMails verschicken</a>
     </p>
     <div class="indent">
