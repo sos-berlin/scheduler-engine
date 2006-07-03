@@ -9,7 +9,7 @@ namespace spooler {
     
 const int main_scheduler_retry_time = 60;
 
-//------------------------------------------------------ml_client_connection::Xml_client_connection
+//-----------------------------------------------------Xml_client_connection::Xml_client_connection
     
 Xml_client_connection::Xml_client_connection( Spooler* sp, const Host_and_port& host_and_port )
 : 

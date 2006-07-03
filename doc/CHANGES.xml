@@ -12,13 +12,24 @@
 
 
     <change date="2006-06-30" version="2.0.154" subversion_revision="4390">
-
         <revision type="correction" title="Java-Job ohne Konstruktor">
             <description>
                 <p>
                     Ein Java-Job ohne parameterlosen Konstruktor führte zum Abbruch des Prozesses
                     statt zur Exception <code>java.lang.NoSuchMethodError</code>.
                 </p>
+            </description>
+        </revision>
+        <revision type="correction" title="&lt;config java_class_path=&quot;&quot;>">
+            <description>
+                <p>
+                    Das Attribut <code>java_class_path</code> wurde im Betrieb mit Prozessklassen nicht ausgewertet.
+                </p>
+                <ul>
+                    <li>
+                        <scheduler_element name="config" attribute="java_class_path"/>
+                    </li>
+                </ul>
             </description>
         </revision>
     </change >

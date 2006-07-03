@@ -2635,12 +2635,11 @@ void Spooler::run()
                     bool signaled = false;
 
                     _wait_counter++;
-                    //if( !_spooler->is_machine_suspendable() )  resume_at = latter_day, resume_at_object = NULL;
                     _last_wait_until = wait_until;
                     _last_resume_at  = resume_at;
 
 
-                    if( _zschimmer_mode  &&  _should_suspend_machine  &&  is_machine_suspendable()  &&  !_single_thread->has_tasks() )
+                    if( _zschimmer_mode  &&  _should_suspend_machine  &&  is_machine_suspendable() )  // &&  !_single_thread->has_tasks() )
                     {
 #                       ifdef Z_WINDOWS
                             if( !IsSystemResumeAutomatic() )  _should_suspend_machine = false;  // Rechner ist nicht automatisch gestartet, sondern durch Benutzer? Dann kein Suspend
@@ -2671,7 +2670,7 @@ void Spooler::run()
                         Time first_wait_until = _base_log.last_time() + ( _log.log_level() <= log_debug3? show_message_after_seconds_debug : show_message_after_seconds );
                         if( first_wait_until < wait_until )
                         {
-                            string msg = message_string( "SCHEDULER-972", wait_until.as_string(), wait_until_object->obj_name() );
+                            string msg = message_string( "SCHEDULER-972", wait_until.as_string(), wait_until_object );
                             if( msg != _log.last_line() ) 
                             {
                                 String_object o ( msg );

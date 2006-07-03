@@ -28,4 +28,34 @@
     <pre>&lt;process_class name="one_process" separate_process="no" max_threads="10"/></pre>
     <pre>&lt;job name="my_job" process_class="one_process"></pre>
 
+    <h3>Vorteile</h3>
+    <ul>
+        <li>
+            Nur eine Java Virtual Machine für alle Prozesse, die sonst wenigstens 200MB pro Prozess belegt.
+        </li>
+        <li>
+            Schnellere Kommunikation zwischen Task und Scheduler.
+        </li>
+    </ul>
+
+    <h3>Nachteile</h3>
+    <ul>
+        <li>
+            <scheduler_element name="kill_task"/> ist nicht möglich.
+            Hilfsweise kann der nächste Aufruf einer Scheduler-Methode,
+            z.B. <scheduler_method class="Log" object="spooler_log"/>,
+            zu einer <code>Exception</code> oder einem <code>Error</code> führen.
+        </li>
+        <li>
+            Sollte nicht für Java-Jobs verwendet werden, 
+            die nicht ganz zuverlässige native Implementierungen nutzen.
+            Das sollte der Scheduler mit einer Java-Option oder Security-Einstellung verhindern können.
+        </li>
+        <li>
+            <scheduler_method class="Task" object="spooler_task" property="stdout_text"/> und
+            <scheduler_method class="Task" object="spooler_task" property="stderr_text"/> stehen nicht zur Verfügung.
+            Für <scheduler_method class="Subprocess"/> könnten aber die gleichen Eigenschaften implementiert werden.
+        </li>
+    </ul>
+
 </description>

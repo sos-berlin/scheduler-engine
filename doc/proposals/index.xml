@@ -10,6 +10,50 @@
     author              = "$Author$"
     date                = "$Date$"
 >
+    <!-- Siehe prod/scheduler/perl.xml.scheduler: 
+         Was führt zum Abbruch? Die API oder der riskante Verweis von @INC auf eine neuerere Perl-Version?
+         
+    <p>
+        Zusammenarbeit mit den verschiedenen Perl-Versionen
+    </p>
+    <div class="indent">
+        <p style="margin-top: 0px">
+            Die Perl-API ändert sich zwischen den Perl-Versionen. 
+            Verschiedene <code>libsosperlscript.so</code> sollten bereitgestellt werden, z.B. <code>libsosperlscript-5.8.7.so</code>.
+            Der Scheduler kann die Version von Perl und bei der Gelegenheit den Pfad von <code>libperl.so</code> mit
+            einem Aufruf des Kommandos <code>perl</code> herausfinden und dann die passenden Module laden.
+        </p>
+        <p>
+            Der Scheduler sollte bei einer inkompatiblen Perl-Version den Aufruf abbrechen, 
+            statt einen Programmabbruch zu riskieren.
+        </p>
+    </div>
+    -->
+
+    <p>
+        &lt;base>
+    </p>
+    <div class="indent">
+        <p style="margin-top: 0px">
+            Manche Attribute werden nicht vom Element <scheduler_element name="base"/> übernommen.
+        </p>
+        <ul>
+            <li>
+                <scheduler_element name="base" attribute="java_class_path"/>
+            </li>
+            <li>
+                <scheduler_element name="base" attribute="java_options"/>
+            </li>
+            <li>
+                <scheduler_element name="base" attribute="mail_xslt_stylesheet"/>
+            </li>
+            <li>
+                <scheduler_element name="base" attribute="log-dir"/>
+            </li>
+        </ul>
+    </div>
+
+
     <p>
         <a href="single_java.xml">Nur eine Java Virtual Machine für alle Java-Tasks</a>
     </p>

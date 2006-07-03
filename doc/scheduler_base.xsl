@@ -1783,9 +1783,24 @@
             <xsl:attribute name="href">
                 <xsl:value-of select="concat( $base_dir, 'api/', $class, '-', $plang, '.xml', $href_local )"/>
             </xsl:attribute>
-            <!--xsl:attribute name="href"><xsl:value-of select="$base_dir"/>javadoc/sos/spooler/<xsl:value-of select="$class"/>.html#<xsl:value-of select="$java_method"/>(<xsl:value-of select="$java_signature"/>)</xsl:attribute-->
 
-            <code>
+            <xsl:element name="code">
+                <xsl:variable name="class_element" select="document( concat( 'api/', $class, '.xml' ) )/api.class"/>
+
+                <xsl:attribute name="title">
+                    <xsl:choose>
+                        <xsl:when test="$method">
+                            <xsl:value-of select="normalize-space( $class_element/method [ @name=$method ]/title )"/>
+                        </xsl:when>
+                        <xsl:when test="$property">
+                            <xsl:value-of select="normalize-space( $class_element/property [ @name=$property ]/title )"/>
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:value-of select="normalize-space( $class_element/title )"/>
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </xsl:attribute>
+
                 <xsl:choose>
                     <xsl:when test="$object">
                         <xsl:value-of select="$object"/>
@@ -1814,7 +1829,7 @@
                     <xsl:value-of select="$property"/>
                 </xsl:if>
 
-            </code>
+            </xsl:element>
         </xsl:element>
 
     </xsl:template>
