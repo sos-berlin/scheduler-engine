@@ -10,6 +10,19 @@
     author              = "$Author$"
     date                = "$Date$"
 >
+    
+    <p>
+        Java-Interface für sos.spooler.Log
+    </p>
+    <div class="indent">
+        <p style="margin-top: 0px">
+            Ein Java-Interface für <scheduler_method class="Log"/> würde es ermöglichen,
+            Java-Klassen mit einer Protokollierung zu schreiben, 
+            die mit und ohne Scheduler benutzbar wäre.
+        </p>
+        <pre>class sos.spooler.Log  implements sos.spooler.Log_interface {...}</pre>
+    </div>
+
     <!-- Siehe prod/scheduler/perl.xml.scheduler: 
          Was führt zum Abbruch? Die API oder der riskante Verweis von @INC auf eine neuerere Perl-Version?
          
