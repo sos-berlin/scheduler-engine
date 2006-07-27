@@ -10,6 +10,37 @@
     author              = "$Author$"
     date                = "$Date$"
 >
+
+    <p>
+        Scheduler-API thread-fähig
+    </p>
+    <div class="indent">
+        <p style="margin-top: 0px">
+            Besonders <scheduler_method class="Log" method="info"/> sollte aus einem beliebigen Thread heraus aufrufbar sein
+            (bisher lehnt der Scheduler das mit einer Exception ab).
+        </p>
+        <p>
+            Erweiterung: Die Scheduler-API steht auch zur Verfügung, 
+            wenn die Task nicht gerade in <scheduler_method class="Job_impl" method="spooler_process"/> o.dgl. steckt
+            (zum Beispiel im Zustand running_delayed).
+            Dann kann die Task in einem anderen Thread kontinuierlich arbeiten
+            und trotzdem mit <scheduler_method class="Job_impl" method="spooler_close"/> beendet werden
+            (bei geeigneter Thread-Synchronisation).
+            Kleiner Nachteil: An der Oberfläche ist nicht erkennbar, das die Task einen Thread zu laufen hat.
+        </p>
+    </div>
+
+    
+    <p>
+        Farbige Ausgabe bei -log-dir=*stderr
+    </p>
+    <div class="indent">
+        <p style="margin-top: 0px">
+            Die Zeilen werden nach Meldungsgewicht gefärbt wie bei der Ausgabe im HTML-Browser,
+            vor allem um Fehlermeldungen besser erkennen zu können.
+        </p>
+    </div>
+
     
     <p>
         Java-Interface für sos.spooler.Log
@@ -148,7 +179,7 @@
 
     <p>
         <a href="windows_job_objects.xml">
-            Job-Objekte
+            Job-Objekte von Windows
         </a>
     </p>
     <p class="indent" style="margin-top: 0px">

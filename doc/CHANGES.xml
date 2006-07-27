@@ -11,6 +11,19 @@
     <scheduler_keyword keyword="Change log"/>
 
 
+    <change date="2006-07-27" version="2.0.154" subversion_revision="4393">
+        <revision type="correction" title="Datenbankzugriffe auf die Tabelle scheduler_orders">
+            <description>
+                <p>
+                    Der Primärschlüssel der Tabelle <code>SCHEDULER_ORDERS</code> 
+                    ist um <code>SPOOLER_ID</code> erweitert.
+                    Alle Where-Klauseln auf diese Tabelle sind um <code>SPOOLER_ID</code> und <code>JOB_CHAIN</code> ergänzt worden.
+                </p>
+            </description>
+        </revision>
+    </change >
+
+
     <change date="2006-06-30" version="2.0.154" subversion_revision="4390">
         <revision type="correction" title="Java-Job ohne Konstruktor">
             <description>
@@ -20,6 +33,7 @@
                 </p>
             </description>
         </revision>
+
         <revision type="correction" title="&lt;config java_class_path=&quot;&quot;>">
             <description>
                 <p>

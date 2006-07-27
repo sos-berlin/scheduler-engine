@@ -16,7 +16,7 @@
         Jede Task läuft unabhängig in einem eigenen Java-Thread.
     </p>
     <p>
-        Mit getrennten Classloadern könnten die Tasks weiter voneinander getrennt werden.
+        Mit getrennten Classloadern könnten die Tasks (die statischen Variablen) weiter voneinander getrennt werden.
     </p>
     <p>
         Das bisherige Verfahren mit eigenen Prozessen bleibt bestehen.
@@ -34,7 +34,10 @@
             Nur eine Java Virtual Machine für alle Prozesse, die sonst wenigstens 200MB pro Prozess belegt.
         </li>
         <li>
-            Schnellere Kommunikation zwischen Task und Scheduler.
+            Schneller Start der Tasks, weil Ladezeit der VM entfällt.
+        </li>
+        <li>
+            Schnellere Kommunikation zwischen Task und Scheduler, wenn VM im Prozess des Schedulers läuft.
         </li>
     </ul>
 

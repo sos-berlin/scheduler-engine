@@ -247,7 +247,7 @@ void Spooler_db::open2( const string& db_name )
                                             "\"INITIAL_STATE\" varchar(100),"               
                                             "\"RUN_TIME\"    clob,"
                                             "\"ORDER_XML\"   clob,"
-                                            "primary key( \"JOB_CHAIN\", \"ID\" )" );
+                                            "primary key( \"SPOOLER_ID\", \"JOB_CHAIN\", \"ID\" )" );
 
 
                     add_column( _spooler->_orders_tablename, "INITIAL_STATE" , "add \"INITIAL_STATE\" varchar(100)" );
@@ -751,13 +751,13 @@ void Spooler_db::insert_order( Order* order )
 
 
                     string payload_string = order->payload().as_string();
-                    if( payload_string != "" )  update_payload_clob( order->id().as_string(), payload_string );
+                    if( payload_string != "" )  update_orders_clob( order, "payload", payload_string );
                     //order->_payload_modified = false;
 
                     xml::Document_ptr order_document = order->dom( show_for_database_only );
                     xml::Element_ptr  order_element  = order_document.documentElement();
                     if( order_element.hasAttributes()  ||  order_element.firstChild() )
-                        update_clob( _spooler->_orders_tablename, "order_xml", "id", order->id().as_string(), order_document.xml() );
+                        update_orders_clob( order, "order_xml", order_document.xml() );
 
                     ta.commit();
                 }
@@ -779,43 +779,62 @@ void Spooler_db::insert_order( Order* order )
     }
 }
 
-//------------------------------------------------------------------Spooler_db::update_payload_clob
+//--------------------------------------------------------------------Spooler_db::read_payload_clob
 
-void Spooler_db::update_payload_clob( const string& order_id, const string& payload_string )
+string Spooler_db::read_orders_clob( Order* order, const string& column_name )
 {
-    if( payload_string == "" )
-    {
-        sql::Update_stmt update ( &_db_descr );
-        update.set_table_name( _spooler->_orders_tablename );
-        update[ "payload" ].set_direct( "null" );
-        update.and_where_condition( "id", order_id );
-        execute( update );
-    }
-    else
-    {
-        Any_file clob ( "-out " + _db_name + " -table=" + _spooler->_orders_tablename + " -clob=payload  where `id`=" + sql::quoted( order_id ) );
-        clob.put( payload_string );
-        clob.close();
-    }
+    if( !order )  throw_xc( __FUNCTION__ );
+    if( !order->job_chain() )  throw_xc( __FUNCTION__ );
+
+    return read_orders_clob( order->job_chain()->name(), order->id().as_string(), column_name );
 }
 
 //--------------------------------------------------------------------Spooler_db::read_payload_clob
 
-string Spooler_db::read_payload_clob( const string& order_id )
+string Spooler_db::read_orders_clob( const string& job_chain_name, const string& order_id, const string& column_name )
 {
-    return file_as_string( _db_name + " -table=" + _spooler->_orders_tablename + " -clob=payload"
-                           "  where `id`=" + sql::quoted( order_id ) );
+    return file_as_string( _db_name + " -table=" + _spooler->_orders_tablename + " -clob=" + column_name +
+        " where `spooler_id`=" + sql::quoted( _spooler->id_for_db() ) + 
+          " and `job_chain`="  + sql::quoted( job_chain_name ) + 
+          " and `id`="         + sql::quoted( order_id ) );
 }
 
-//-------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------Spooler_db::update_orders_clob
 
-string Spooler_db::read_orders_runtime_clob( const string& order_id )
+void Spooler_db::update_orders_clob( Order* order, const string& column_name, const string& value )
 {
-    return file_as_string( _db_name + " -table=" + _spooler->_orders_tablename + " -clob=run_time"
-                           "  where `id`=" + sql::quoted( order_id ) );
+    if( !order )  throw_xc( __FUNCTION__ );
+    if( !order->job_chain() )  throw_xc( __FUNCTION__ );
+
+    update_orders_clob( order->job_chain()->name(), order->id().as_string(), column_name, value );
 }
 
-//---------------------------------------------------------------Spooler_db::update_orders_xml_clob
+//--------------------------------------------------------------------Spooler_db::update_orders_clob
+
+void Spooler_db::update_orders_clob( const string& job_chain_name, const string& order_id, const string& column_name, const string& value )
+{
+    if( value == "" )
+    {
+        sql::Update_stmt update ( &_db_descr );
+        update.set_table_name( _spooler->_orders_tablename );
+        update[ column_name ].set_direct( "null" );
+        update.and_where_condition( "spooler_id", _spooler->id_for_db() );
+        update.and_where_condition( "job_chain" , job_chain_name );
+        update.and_where_condition( "id"        , order_id );
+        execute( update );
+    }
+    else
+    {
+        Any_file clob ( "-out " + _db_name + " -table=" + _spooler->_orders_tablename + " -clob=" + column_name + 
+            " where `spooler_id`=" + sql::quoted( _spooler->id_for_db() ) +
+              " and `job_chain`="  + sql::quoted( job_chain_name ) + 
+              " and `id`="         + sql::quoted( order_id ) );
+        clob.put( value );
+        clob.close();
+    }
+}
+
+//--------------------------------------------------------------------------Spooler_db::update_clob
 
 void Spooler_db::update_clob( const string& table_name, const string& column_name, const string& key_name, int key_value, const string& value )
 {
@@ -835,7 +854,7 @@ void Spooler_db::update_clob( const string& table_name, const string& column_nam
     }
 }
 
-//---------------------------------------------------------------Spooler_db::update_orders_xml_clob
+//--------------------------------------------------------------------------Spooler_db::update_clob
 
 void Spooler_db::update_clob( const string& table_name, const string& column_name, const string& key_name, const string& key_value, const string& value )
 {
@@ -1016,13 +1035,14 @@ void Spooler_db::update_order( Order* order )
                         //if( order->_payload_modified )
                         {
                             if( payload_string == "" )  update[ "payload" ].set_direct( "null" );
-                                                  else  update_payload_clob( order->id().as_string(), payload_string );
+                                                  else  update_orders_clob( order, "payload", payload_string );
                             //order->_payload_modified = false;
                         }
     
 
                         update.and_where_condition( "job_chain", order->job_chain()->name() );
                         update.and_where_condition( "id"       , order->id().as_string()    );
+                        update.and_where_condition( "spooler_id", _spooler->id_for_db() );
 
                         execute( update );
 

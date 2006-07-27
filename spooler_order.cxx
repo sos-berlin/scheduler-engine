@@ -328,7 +328,7 @@ void Job_chain::load_orders_from_database()
                     " select \"ID\", \"PRIORITY\", \"STATE\", \"STATE_TEXT\", \"TITLE\", \"CREATED_TIME\", \"INITIAL_STATE\""
                     " from " + _spooler->_orders_tablename +
                     " where \"SPOOLER_ID\"=" + sql::quoted(_spooler->id_for_db()) +
-                    " and \"JOB_CHAIN\"=" + sql::quoted(_name) +
+                      " and \"JOB_CHAIN\"="  + sql::quoted(_name) +
                     " order by \"ORDERING\"" );
 
         while( !sel.eof() )
@@ -339,9 +339,9 @@ void Job_chain::load_orders_from_database()
             try
             {
                 ptr<Order> order = new Order( _spooler, record, 
-                                            _spooler->_db->read_payload_clob( order_id ), 
-                                            _spooler->_db->read_orders_runtime_clob( order_id ),
-                                            _spooler->_db->read_clob( _spooler->_orders_tablename, "order_xml", "id", order_id ) );
+                                              _spooler->_db->read_orders_clob( _name, order_id, "payload"   ), 
+                                              _spooler->_db->read_orders_clob( _name, order_id, "run_time"  ),
+                                              _spooler->_db->read_orders_clob( _name, order_id, "order_xml" ) );
                 order->_is_in_database = true;
                 order->add_to_job_chain( this );    // Einstieg nur über Order, damit Semaphoren stets in derselben Reihenfolge gesperrt werden.
                 count++;
