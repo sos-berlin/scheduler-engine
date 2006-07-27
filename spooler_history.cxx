@@ -742,8 +742,6 @@ void Spooler_db::insert_order( Order* order )
                     insert.set_datetime( "created_time", order->_created.as_string(Time::without_ms) );
                     insert.set_datetime( "mod_time", Time::now().as_string(Time::without_ms) );
 
-                    if( order->run_time() )
-                    insert[ "run_time"      ] = order->run_time()->dom_document().xml();     //, order->_run_time_modified    = false;
 
                     insert[ "initial_state" ] = order->initial_state().as_string();
 
@@ -758,6 +756,12 @@ void Spooler_db::insert_order( Order* order )
                     xml::Element_ptr  order_element  = order_document.documentElement();
                     if( order_element.hasAttributes()  ||  order_element.firstChild() )
                         update_orders_clob( order, "order_xml", order_document.xml() );
+
+                    if( order->run_time() )
+                    {
+                        xml::Document_ptr doc = order->run_time()->dom_document();
+                        if( doc.documentElement().hasAttributes()  ||  doc.documentElement().hasChildNodes() )  update_orders_clob( order, "run_time", doc.xml() );
+                    }
 
                     ta.commit();
                 }
@@ -1025,8 +1029,15 @@ void Spooler_db::update_order( Order* order )
                         if( order->_title_modified      )  update[ "title"      ] = order->title()              ,  order->_title_modified      = false;
                         if( order->_state_text_modified )  update[ "state_text" ] = order->state_text()         ,  order->_state_text_modified = false;
 
-                        if( order->run_time() )  update[ "run_time" ] = order->run_time()->dom_document().xml();
-                                           else  update[ "run_time" ].set_direct( "null" );
+                        if( order->run_time() ) 
+                        {
+                            xml::Document_ptr doc = order->run_time()->dom_document();
+                            if( doc.documentElement().hasAttributes()  ||  doc.documentElement().hasChildNodes() )  update_orders_clob( order, "run_time", doc.xml() );
+                                                                                                              else  update[ "run_time" ].set_direct( "null" );
+                        }
+                        else
+                            update[ "run_time" ].set_direct( "null" );
+                            
 
                         update[ "initial_state" ] = order->initial_state().as_string();
 

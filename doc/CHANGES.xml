@@ -19,6 +19,9 @@
                     ist um <code>SPOOLER_ID</code> erweitert.
                     Alle Where-Klauseln auf diese Tabelle sind um <code>SPOOLER_ID</code> und <code>JOB_CHAIN</code> ergänzt worden.
                 </p>
+                <p>
+                    Clob <code>RUN_TIME</code> wird nur noch bei gefüllter <code>run_time</code> gesetzt.
+                </p>
             </description>
         </revision>
     </change >
