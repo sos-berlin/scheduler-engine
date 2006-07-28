@@ -59,7 +59,8 @@ struct Scheduler_object
         type_web_service_operation,
         type_web_service_request,
         type_web_service_response,
-        type_process
+        type_process,
+      //type_subprocess_register
     };
 
 
