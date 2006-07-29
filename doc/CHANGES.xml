@@ -11,6 +11,33 @@
     <scheduler_keyword keyword="Change log"/>
 
 
+    <change date="2006-07-27" version="2.0.155" subversion_revision="4396">
+        <revision type="new" title="&lt;show_job what=&quot;job_commands&quot;&gt;">
+            <description>
+                <p>
+                    Mit dem Attribut <code>what="job_commands"</code> liefern die Kommandos,
+                    die das Element <scheduler_element directory="xml/answer/" name="job"/> zeigen,
+                    auch das Element <scheduler_element name="commands"/> der Job-Konfiguration.
+                </p>
+                <ul>
+                    <li>
+                        <scheduler_element name="show_job" attribute="what" value="job_commands"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="show_jobs" attribute="what" value="job_commands"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="show_job_chains" attribute="what" value="job_commands"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="show_state" attribute="what" value="job_commands"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+    </change >
+
+
     <change date="2006-07-27" version="2.0.154" subversion_revision="4393">
         <revision type="correction" title="Datenbankzugriffe auf die Tabelle scheduler_orders">
             <description>

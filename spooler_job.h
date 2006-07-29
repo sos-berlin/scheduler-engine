@@ -194,6 +194,8 @@ struct Job : Object,
     void                    set_dom                         ( const xml::Element_ptr&, const Time& mod_time );
     void                        add_on_exit_commands_element( const xml::Element_ptr& commands_element, const Time& mod_time );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what&, Job_chain* = NULL );
+    xml::Element_ptr            commands_dom_element        ( const xml::Document_ptr&, const Show_what& );
+
 
     void                        init0                       ();                                     // Wird vor Spooler-Skript gerufen
     void                        prepare_on_exit_commands    ();

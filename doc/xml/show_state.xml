@@ -72,6 +72,11 @@
                         (<scheduler_element name="order_queue" directory="xml/answer/"/>).
                     </dd>
 
+                    <dt><code>job_commands</code></dt>
+                    <dd>
+                        Liefert auch <scheduler_element name="commands"/> der Job-Konfiguration.
+                    </dd>
+
                     <dt><code>description</code></dt>
                     <dd>
                         Liefert auch die
