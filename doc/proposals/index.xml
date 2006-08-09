@@ -12,6 +12,18 @@
 >
 
     <p>
+        &lt;command on_exit_code="..."> mit Signal-Namen 
+    </p>
+    <div class="indent">
+        <p style="margin-top: 0px">
+            <code>on_exit_code="KILL"</code> statt <code>on_exit_code="-9"</code> etc.
+            Die Zuordnung der Namen zu den Nummern ist möglicherweise abhängig vom Betriebssystem.
+            Im Betriebssystem unbekannte Namen werden ignoriert.
+        </p>
+    </div>
+
+
+    <p>
         Scheduler-API thread-fähig
     </p>
     <div class="indent">

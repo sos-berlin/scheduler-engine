@@ -9,6 +9,7 @@
 
 
 #include "spooler.h"
+#include "../zschimmer/z_signals.h"
 #include "../zschimmer/z_sql.h"
 #include "../kram/sleep.h"
 
@@ -26,6 +27,7 @@ namespace spooler {
 
 using namespace zschimmer::sql;
 
+//-------------------------------------------------------------------------------------------------
 
 const int    max_task_time_out             = 365*24*3600;
 const double directory_watcher_intervall   = 1.0;              // Nur für Unix (Windows gibt ein asynchrones Signal)
@@ -113,7 +115,31 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
             _idle_timeout = time::time_from_string( t );
             if( _idle_timeout > max_task_time_out )  _idle_timeout = max_task_time_out;   // Begrenzen, damit's beim Addieren mit now() keinen Überlauf gibt
         }
-        
+
+        {
+            string s = element.getAttribute( "ignore_signals" );
+            if( !s.empty() )
+            {
+                if( s == "all" )
+                {
+                    _ignore_every_signal = true;
+                    _ignore_signal_set.clear();
+                }
+                else
+                {
+                    _ignore_every_signal = false;
+                    vector<string> signals = vector_split( " +", s );
+                    for( int i = 0; i < signals.size(); i++ )
+                    {
+                        bool unknown_in_this_os_only = false;
+                        int signal = signal_code_from_name( signals[ i ], &unknown_in_this_os_only );
+                        if( unknown_in_this_os_only )  _log->warn( message_string( "SCHEDULER-337", signals[ i ] ) );
+                                                 else  _ignore_signal_set.insert( signal );
+                    }
+                }
+            }
+        }
+
         _force_idle_timeout = element.bool_getAttribute( "force_idle_timeout", _force_idle_timeout );
 
         set_mail_xslt_stylesheet_path( element.getAttribute( "mail_xslt_stylesheet" ) );
@@ -300,7 +326,13 @@ void Job::prepare_on_exit_commands()
                     {
                         try
                         {
-                            exit_codes.push_back( as_int( values[ i ] ) );
+                            string v = values[ i ];
+                            if( v.empty() )  throw_xc( "SCHEDULER-324", on_exit_code, "(missing value)" );
+                            
+                            if( v == "signal" )                                        _exit_code_commands_on_signal = commands_element;
+                            else
+                            if( isdigit( (unsigned char)v[ 0 ] )  ||  v[ 0 ] == '-' )  exit_codes.push_back( as_int( values[ i ] ) );
+                                                                                 else  exit_codes.push_back( -signal_code_from_name( v ) );
                         }
                         catch( exception& x ) { throw_xc( "SCHEDULER-324", on_exit_code, x.what() ); }
                     }
@@ -1400,7 +1432,7 @@ void Job::calculate_next_time( Time now )
          
         if( _spooler->_zschimmer_mode )
         {
-            if( next_time > _next_start_time )  next_time = _next_start_time;
+            if( next_time > _next_start_time  &&  _waiting_for_process )  next_time = _next_start_time;
         }
         else
             if( next_time > _period.end() )  next_time = _period.end();          // Das ist, wenn die Periode weder repeat noch single_start hat, also keinen automatischen Start

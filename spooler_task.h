@@ -196,8 +196,8 @@ struct Task : Object,
     void                        set_error                   ( const z::Xc& x )                      { set_error_xc( x ); }
     void                        set_error                   ( const exception& );
     void                        set_error                   ( const _com_error& );
-    Xc_copy                     error                       ()                                      { Xc_copy result; THREAD_LOCK( _lock )  result = _error;  return result; }
-    void                        reset_error                 ()                                      { THREAD_LOCK( _lock )  _error = NULL,  _log->reset_highest_level(); }
+    Xc_copy                     error                       ()                                     { Xc_copy result; THREAD_LOCK( _lock )  result = _error;  return result; }
+    void                        reset_error                 ()                                      { THREAD_LOCK( _lock )  _error = NULL,  _non_connection_lost_error = NULL,  _non_connection_lost_error_filled = false,  _log->reset_highest_level(); }
 
     void                    set_next_time                   ( const Time& );
 
@@ -302,6 +302,8 @@ struct Task : Object,
     Subprocess_register        _subprocess_register;        // Fall Task im Scheduler-Prozess läuft
     Call_state                 _call_state;
     Xc_copy                    _error;
+    Xc_copy                    _non_connection_lost_error;  // Der Fehler vor einem Verbindungsfehler wird hier aufgehoben, falls er wegen ignore_signals=".." wiederhergestellt werden muss
+    bool                       _non_connection_lost_error_filled;
 
     ptr<Module_instance>       _module_instance;            // Nur für Module_task. Hier, damit wir nicht immer wieder casten müssen.
     ptr<Web_service>           _web_service;

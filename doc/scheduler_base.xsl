@@ -437,13 +437,6 @@
         </p>
 
         <xsl:apply-templates mode="setting_description" select="."/>
-
-        <div class="indent">
-            <xsl:apply-templates select="messages">
-                <xsl:with-param name="h" select="'h4'"/>
-                <xsl:with-param name="show_level" select="true()"/>
-            </xsl:apply-templates>
-        </div>
     </xsl:template>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~xml_answer-->
@@ -722,8 +715,14 @@
             <xsl:apply-templates select="$setting/messages">
                 <xsl:with-param name="h" select="'h4'"/>
             </xsl:apply-templates>
-            
-        <xsl:apply-templates select="example"/>
+
+
+            <xsl:apply-templates select="messages">
+                <xsl:with-param name="h" select="'h4'"/>
+                <xsl:with-param name="show_level" select="true()"/>
+            </xsl:apply-templates>
+
+            <xsl:apply-templates select="example"/>
         </div>
     </xsl:template>
 
@@ -1126,7 +1125,8 @@
                         <td colspan="9">
                             <xsl:element name="a">
                                 <xsl:attribute name="name">
-                                    letter__<xsl:value-of select="$first_letter"/>
+                                    <xsl:text>letter__</xsl:text>
+                                    <xsl:value-of select="$first_letter"/>
                                 </xsl:attribute>
                             </xsl:element>
                             <xsl:if test="position() > 1">
@@ -1482,7 +1482,8 @@
 
         <xsl:element name="a">
             <xsl:attribute name="name">
-                use_element__<xsl:value-of select="$name"/>
+                <xsl:text>use_element__</xsl:text>
+                <xsl:value-of select="$name"/>
             </xsl:attribute>
         </xsl:element>
 
@@ -1619,7 +1620,8 @@
 
         <xsl:element name="a">
             <xsl:attribute name="name">
-                use_entry__<xsl:value-of select="$file"/>__<xsl:value-of select="$section"/>__<xsl:value-of select="$entry"/>
+                <xsl:text>use_entry__</xsl:text>
+                <xsl:value-of select="$file"/>__<xsl:value-of select="$section"/>__<xsl:value-of select="$entry"/>
             </xsl:attribute>
         </xsl:element>
 
@@ -1697,7 +1699,8 @@
 
         <xsl:element name="a">
             <xsl:attribute name="name">
-                use_option__<xsl:value-of select="$name"/>
+                <xsl:text>use_option__</xsl:text>
+                <xsl:value-of select="$name"/>
             </xsl:attribute>
         </xsl:element>
 
@@ -1850,7 +1853,8 @@
 
         <xsl:element name="a">
             <xsl:attribute name="name">
-                keyword__<xsl:value-of select="@keyword"/>
+                <xsl:text>keyword__</xsl:text>
+                <xsl:value-of select="@keyword"/>
             </xsl:attribute>
         </xsl:element>
 

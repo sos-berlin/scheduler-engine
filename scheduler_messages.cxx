@@ -147,7 +147,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-276", "Could not kill task" },
     { "SCHEDULER-277", "Killing task after request" },
     { "SCHEDULER-278", "<period> ended, terminating task" },
-    { "SCHEDULER-279", "Process terminated with signal $1" },
+    { "SCHEDULER-279", "Process terminated with signal $1 ($2)" },
     { "SCHEDULER-280", "Process terminated with exit code $1 (0x$2)" },
     { "SCHEDULER-281", "Killing process" },
     { "SCHEDULER-282", "end(kill_immediately) called, task will be killed" },
@@ -204,6 +204,8 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-333", "\"now+SECONDS\" expected in \"$1\"" },
     { "SCHEDULER-334", "Error when building mail: $1" },
     { "SCHEDULER-335", "Only \"yes\", \"no\" and a number are allowed with $1=\"$2\": $3" },
+    { "SCHEDULER-336", "Only \"yes\", \"no\" and a list of signal names are allowed with $1=\"$2\": $3" },
+    { "SCHEDULER-337", "Signal $1 is unknown on this operating system and is ignored" },
     { "SCHEDULER-900", "Scheduler $1 is starting with $2, pid=$3" },
     { "SCHEDULER-902", "state=$1" },
     { "SCHEDULER-904", "Tasks have $1s to terminate" },
@@ -271,6 +273,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-969", "Less than min_tasks=$1 are running. New tasks will be started. Cause: $2" },
     { "SCHEDULER-970", "$1 ended immediately after start, so min_tasks=$2 doesn't lead to new tasks" },
     { "SCHEDULER-972", "Still waiting until $1 ($2) ..." },
+    { "SCHEDULER-973", "Killed task doesn't stops the job because of ignore_signals=\"$1\"" },
     { "SCHEDULER-999", "Scheduler has been terminated properly" },
     {}
 };

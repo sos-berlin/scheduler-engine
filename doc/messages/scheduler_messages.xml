@@ -1629,10 +1629,10 @@
 
         <message code="SCHEDULER-279">
             <text xml:lang="de">
-                <title>Prozess hat mit Signal <p1/> geendet</title>
+                <title>Prozess hat mit Signal <p1/> (<p2>name</p2>) geendet</title>
             </text>
             <text xml:lang="en">
-                <title>Process terminated with signal <p1/></title>
+                <title>Process terminated with signal <p1/> (<p2>name</p2>)</title>
             </text>
         </message>
 
@@ -2120,6 +2120,18 @@
         <message code="SCHEDULER-335">
             <text xml:lang="en">
                 <title>Only "yes", "no" and a number are allowed with <p1/>="<p2/>": <p3>error</p3></title>
+            </text>
+        </message>
+        
+        <message code="SCHEDULER-336">
+            <text xml:lang="en">
+                <title>Only "yes", "no" and a list of signal names are allowed with <p1/>="<p2/>": <p3>error</p3></title>
+            </text>
+        </message>
+        
+        <message code="SCHEDULER-337">
+            <text xml:lang="en">
+                <title>Signal <p1/> is unknown on this operating system and is ignored</title>
             </text>
         </message>
         
@@ -2721,6 +2733,12 @@
         <message code="SCHEDULER-972">
             <text xml:lang="en">
                 <title>Still waiting until <p1>time</p1> (<p2>object</p2>) ...</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-973">
+            <text xml:lang="en">
+                <title>Killed task doesn't stops the job because of <code>ignore_signals="<p1/>"</code></title>
             </text>
         </message>
 

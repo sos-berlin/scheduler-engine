@@ -378,6 +378,8 @@ struct Job : Object,
     bool                       _remove;                     // Job enfernen sobald möglich. _state == s_stopping, dann s_stopped
     bool                       _start_once;                 // <run_time start_once="">, wird false nach Start
     bool                       _machine_resumable;          // Test
+    bool                       _ignore_every_signal;        // Nur Unix: Nach Beendigung mit Signal (kill, Absturz) den Job nicht stoppen 
+    std::set<int>              _ignore_signal_set;
 
     bool                       _log_append;                 // Jobprotokoll fortschreiben <job log_append=(yes|no)>
 
@@ -387,6 +389,7 @@ struct Job : Object,
     Time                       _commands_document_time;
     typedef map<int,xml::Element_ptr>  Exit_code_commands_map;
     Exit_code_commands_map     _exit_code_commands_map;
+    xml::Element_ptr           _exit_code_commands_on_signal;
     Delay_after_error          _delay_after_error;
     long32                     _error_steps;                // Zahl aufeinanderfolgender Fehler
 

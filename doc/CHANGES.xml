@@ -11,6 +11,23 @@
     <scheduler_keyword keyword="Change log"/>
 
 
+    <change date="2006-08-09" version="2.0.156" subversion_revision="4397">
+        <revision type="new" title="&lt;job ignore_signal=&quot;...&quot;&gt;">
+            <description>
+                <p>
+                    Eine Task, die mit Signal endet (durch <code>kill</code> oder Absturz),
+                    muss nicht mehr zum Stopp des Jobs führen.
+                </p>
+                <ul>
+                    <li>
+                        <scheduler_element name="job" attribute="ignore_signal" value="SIGTERM SIGKILL"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+    </change >
+
+
     <change date="2006-07-27" version="2.0.155" subversion_revision="4396">
         <revision type="new" title="&lt;show_job what=&quot;job_commands&quot;&gt;">
             <description>

@@ -654,7 +654,7 @@ void Prefix_log::write( const char* text, int len )
 
     if( _file == -1 )
     {
-        //if( !_filename.empty() )                // Datei wird noch geöffnet?
+        if( this == &_spooler->_log  ||  _spooler->log_directory() != "*stderr" )        // Datei wird noch geöffnet?
         {
             _log_buffer.append( text, len );
         }

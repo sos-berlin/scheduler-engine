@@ -337,6 +337,21 @@
             <xsd:attribute name="process_class"         type="Name"/>
             <xsd:attribute name="mail_xslt_stylesheet"  type="File"/>
             <xsd:attribute name="java_options"          type="String"/>
+            
+            <xsd:attribute name="ignore_signals">
+                <xsd:simpleType>
+                    <xsd:union>
+                        <xsd:simpleType>
+                            <xsd:restriction base="xsd:NMTOKEN">
+                                <xsd:enumeration value="all"/>
+                            </xsd:restriction>
+                        </xsd:simpleType>
+                        <xsd:simpleType>
+                            <xsd:list itemType="Unix_signal"/>
+                        </xsd:simpleType>
+                    </xsd:union>
+                </xsd:simpleType>
+            </xsd:attribute>
         </xsd:complexType>
 
         <!--libxslt xsd:key name="delay_after_error">
@@ -1079,6 +1094,57 @@
                 </xsd:restriction>
             </xsd:simpleType>
         </xsd:union>
+    </xsd:simpleType>
+
+    
+    <xsd:simpleType name="Unix_signal">
+        <xsd:union>
+            <xsd:simpleType>
+                <xsd:restriction base="Unix_signal_name"/>
+            </xsd:simpleType>
+            <xsd:simpleType>
+                <xsd:restriction base="xsd:positiveInteger"/>
+            </xsd:simpleType>
+        </xsd:union>
+    </xsd:simpleType>
+    
+    
+    <xsd:simpleType name="Unix_signal_name">
+        <xsd:restriction base="xsd:NMTOKEN">
+            <xsd:enumeration value="SIGHUP"/>
+            <xsd:enumeration value="SIGINT"/>
+            <xsd:enumeration value="SIGQUIT"/>
+            <xsd:enumeration value="SIGILL"/>
+            <xsd:enumeration value="SIGTRAP"/>
+            <xsd:enumeration value="SIGABRT"/>
+            <xsd:enumeration value="SIGIOT"/>
+            <xsd:enumeration value="SIGBUS"/>
+            <xsd:enumeration value="SIGFPE"/>
+            <xsd:enumeration value="SIGKILL"/>
+            <xsd:enumeration value="SIGUSR1"/>
+            <xsd:enumeration value="SIGSEGV"/>
+            <xsd:enumeration value="SIGUSR2"/>
+            <xsd:enumeration value="SIGPIPE"/>
+            <xsd:enumeration value="SIGALRM"/>
+            <xsd:enumeration value="SIGTERM"/>
+            <xsd:enumeration value="SIGSTKFLT"/>
+            <xsd:enumeration value="SIGCHLD"/>
+            <xsd:enumeration value="SIGCONT"/>
+            <xsd:enumeration value="SIGSTOP"/>
+            <xsd:enumeration value="SIGTSTP"/>
+            <xsd:enumeration value="SIGTTIN"/>
+            <xsd:enumeration value="SIGTTOU"/>
+            <xsd:enumeration value="SIGURG"/>
+            <xsd:enumeration value="SIGXCPU"/>
+            <xsd:enumeration value="SIGXFSZ"/>
+            <xsd:enumeration value="SIGVTALRM"/>
+            <xsd:enumeration value="SIGPROF"/>
+            <xsd:enumeration value="SIGWINCH"/>
+            <xsd:enumeration value="SIGPOLL"/>
+            <xsd:enumeration value="SIGIO"/>
+            <xsd:enumeration value="SIGPWR"/>
+            <xsd:enumeration value="SIGSYS"/>
+        </xsd:restriction>
     </xsd:simpleType>
 
 </xsd:schema>

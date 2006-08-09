@@ -22,7 +22,7 @@
             Job-Parameter können mit der Methode <scheduler_method class="Task" method="params" /> abgerufen werden.
         </p>
         <p>
-            Parameter eines Auftrags können mit der Methode <scheduler_method class="Order" method="payload" /> abgerufen werden.
+            Parameter eines Auftrags können mit der Methode <scheduler_method class="Order" method="params" /> abgerufen werden.
         </p>
         <p>
             Siehe auch die Klasse <scheduler_method class="Variable_set" />.

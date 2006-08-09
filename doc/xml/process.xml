@@ -92,6 +92,10 @@ spooler.job( "process" ).start( params );
                 <p>
                     Bei <code>ignore_signal="yes"</code> führt ein Signal nicht zu einem Jobfehler.
                 </p>
+                <p>
+                    Siehe auch das gleiche Atttribut in <scheduler_element name="job" attribute="ignore_signal"/>.
+                    Es genügt, wenn eine der beiden Einstellung <code>"yes"</code> ist, um den Stopp zu verhindern.
+                </p>
             </description>
         </xml_attribute>
     </xml_attributes>

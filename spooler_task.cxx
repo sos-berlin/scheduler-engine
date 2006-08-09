@@ -12,6 +12,7 @@
 
 #include "spooler.h"
 #include "../kram/sleep.h"
+#include "../zschimmer/z_signals.h"
 
 #ifndef Z_WINDOWS
 #   include <signal.h>
@@ -526,7 +527,29 @@ void Task::attach_to_a_thread()
 
 void Task::set_error_xc_only( const Xc& x )
 {
-    THREAD_LOCK_DUMMY( _lock )  _error = x;
+    string code = x.code();
+    
+    if( code == "WINSOCK-10054"     // Connection reset
+#   ifdef Z_UNIX
+     || code == "ERRNO-" + as_int( ECONNRESET )
+#   endif     
+     || code == "Z-REMOTE-122"      // Separate process pid=(1): Caller has killed process
+     || code == "Z-REMOTE-123"      // Separate process pid=(1): Process lost
+     || code == "SCHEDULER-202" )   // Connection to task has been lost
+    {
+        if( !_non_connection_lost_error_filled )
+        {
+            _non_connection_lost_error = _error;  // Bisherigen Fehler (evtl. NULL) merken, falls Verbindungsverlust wegen ignore_signals=".." ignoriert wird
+            _non_connection_lost_error_filled = true;
+        }
+    }
+    else
+    {
+        _non_connection_lost_error = NULL;
+        _non_connection_lost_error_filled = false;
+    }
+     
+    _error = x;
     if( _job )  _job->set_error_xc_only( x );
 
     _exit_code = 1;
@@ -541,9 +564,8 @@ void Task::set_error_xc( const Xc& x )
     //Module_task* t = dynamic_cast<Module_task*>( this );
     //Ist nie in _in_call: if( t  &&  t->_module_instance  &&  t->_module_instance->_in_call )  msg = "In " + t->_module_instance->_in_call->name() + "(): ";
 
-    _log->error( msg + x.what() );
-
     set_error_xc_only( x );
+    _log->error( msg + x.what() );
 }
 
 //----------------------------------------------------------------------------------Task::set_error
@@ -1705,6 +1727,13 @@ void Task::process_on_exit_commands()
         {
             commands_element = it->second;
         }
+#       ifdef Z_UNIX
+            else
+            if( _exit_code < 0  &&  _job->_exit_code_commands_on_signal )  // Signal?
+            {
+                commands_element = _job->_exit_code_commands_on_signal;
+            }
+#       endif
         else
         {
             commands_element = _job->_commands_document.select_node( "/*/commands [ @on_exit_code='error' ]" );
@@ -1941,11 +1970,24 @@ void Module_task::do_close__end()
                                           
         if( int termination_signal = _module_instance->termination_signal() )
         {
-            z::Xc x ( "SCHEDULER-279", termination_signal );
-            if( _module_instance->_module->_kind == Module::kind_process  &&  !_module_instance->_module->_process_ignore_signal )  
+            z::Xc x ( "SCHEDULER-279", termination_signal, signal_name_from_code( termination_signal ) );
+            if( !_job->_ignore_every_signal  &&  _job->_ignore_signal_set.find( termination_signal ) == _job->_ignore_signal_set.end()
+             && _module_instance->_module->_kind == Module::kind_process  &&  !_module_instance->_module->_process_ignore_signal ) 
+            {
                 set_error( x );
+            }
             else  
+            {
                 _log->warn( x.what() );
+                _log->debug( message_string( "SCHEDULER-973", signal_name_from_code( termination_signal ) ) );
+                
+                if( _non_connection_lost_error_filled )
+                {
+                    _error = _non_connection_lost_error;    // Vorherigen Fehler (vor dem Verbindungsverlust) wiederherstellen
+                    _non_connection_lost_error = NULL;
+                    _non_connection_lost_error_filled = false;
+                }
+            }
 
             if( _module_instance->_module->_kind == Module::kind_process )  _exit_code = -termination_signal;
         }

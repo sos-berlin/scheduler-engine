@@ -265,6 +265,73 @@
                 </p>
             </description>
         </xml_attribute>
+
+        
+        <xml_attribute name="ignore_signal" type="yes|no|signalnames" initial="no">
+            <description>
+                <p>
+                    Wirksam nur unter Unix.
+                </p>
+                <p>
+                    Ein Job, dessen Task-Prozess mit Signal endet, führt zum Stopp des Jobs.
+                    Ursache eines Signals ist ein Abbruch der Task durch das System-Kommando <code>kill</code> oder
+                    durch einen Fehler im Job.
+                </p>
+                <p>
+                    <code>ignore_signal="yes"</code> lässt den Scheduler den Job nicht stoppen,
+                    wenn eine Task mit Signal endet.
+                </p>
+                <p>
+                    Statt <code>"yes"</code> (jedes Signal) kann auch eine durch Leerzeichen getrennte Liste von Signalnamen angegeben werden.
+                    Dabei sind, abhängig vom Betriebssystem, diese Signalnamen bekannt:
+                    <code>SIGHUP</code>
+                    <code>SIGINT</code>
+                    <code>SIGQUIT</code>
+                    <code>SIGILL</code>
+                    <code>SIGTRAP</code>
+                    <code>SIGABRT</code>
+                    <code>SIGIOT</code>
+                    <code>SIGBUS</code>
+                    <code>SIGFPE</code>
+                    <code>SIGKILL</code>
+                    <code>SIGUSR1</code>
+                    <code>SIGSEGV</code>
+                    <code>SIGUSR2</code>
+                    <code>SIGPIPE</code>
+                    <code>SIGALRM</code>
+                    <code>SIGTERM</code>
+                    <code>SIGSTKFLT</code>
+                    <code>SIGCHLD</code>
+                    <code>SIGCONT</code>
+                    <code>SIGSTOP</code>
+                    <code>SIGTSTP</code>
+                    <code>SIGTTIN</code>
+                    <code>SIGTTOU</code>
+                    <code>SIGURG</code>
+                    <code>SIGXCPU</code>
+                    <code>SIGXFSZ</code>
+                    <code>SIGVTALRM</code>
+                    <code>SIGPROF</code>
+                    <code>SIGWINCH</code>
+                    <code>SIGPOLL</code>
+                    <code>SIGIO</code>
+                    <code>SIGPWR</code>
+                    <code>SIGSYS</code>.
+                </p>
+                <p>
+                    Siehe auch das Gnu-Kommando <code>man 7 signal</code>.
+                </p>
+            </description>
+
+            <example>
+                <pre>&lt;job name="my_job" ignore_signal="SIGTERM SIGKILL"></pre>
+            </example>
+
+            <messages>
+                <message level="warn" code="SCHEDULER-279"/>
+            </messages>
+        </xml_attribute>
+
     </xml_attributes>
 
     <xml_child_elements>
