@@ -533,6 +533,7 @@ void Task::set_error_xc_only( const Xc& x )
 #   ifdef Z_UNIX
      || code == "ERRNO-" + as_int( ECONNRESET )
 #   endif     
+     || code == "Z-REMOTE-101"      // Separate process: pid=<p1/>: Connection lost
      || code == "Z-REMOTE-122"      // Separate process pid=(1): Caller has killed process
      || code == "Z-REMOTE-123"      // Separate process pid=(1): Process lost
      || code == "SCHEDULER-202" )   // Connection to task has been lost
@@ -1036,7 +1037,9 @@ bool Task::do_something()
                             catch( exception& x )
                             {
                                 _module_instance_async_error = true;
-                                z::throw_xc( "SCHEDULER-202", x.what() );
+                                //z::throw_xc( "SCHEDULER-202", x.what() );
+                                set_error( Xc( "SCHEDULER-202", x.what() ) );
+                                set_state( s_ended );
                             }
                         }
 
@@ -1989,9 +1992,10 @@ void Module_task::do_close__end()
                 }
             }
 
-            if( _module_instance->_module->_kind == Module::kind_process )  _exit_code = -termination_signal;
+            //if( _module_instance->_module->_kind == Module::kind_process )  
+            _exit_code = -termination_signal;
         }
-
+ 
         _log->log_file( _module_instance->stdout_path(), "stdout:" );
         _log->log_file( _module_instance->stderr_path(), "stderr:" );
 

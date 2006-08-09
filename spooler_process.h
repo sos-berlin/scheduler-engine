@@ -46,6 +46,7 @@ struct Process : zschimmer::Object, Scheduler_object
     int                         termination_signal          ();
     string                      stderr_path                 ();
     string                      stdout_path                 ();
+    bool                        connected                   ()                                      { return _connection? _connection->connected() : false; }
 
     void                    set_dom                         ( const xml::Element_ptr&, const Time& xml_mod_time );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );

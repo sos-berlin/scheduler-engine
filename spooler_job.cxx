@@ -331,8 +331,14 @@ void Job::prepare_on_exit_commands()
                             
                             if( v == "signal" )                                        _exit_code_commands_on_signal = commands_element;
                             else
-                            if( isdigit( (unsigned char)v[ 0 ] )  ||  v[ 0 ] == '-' )  exit_codes.push_back( as_int( values[ i ] ) );
-                                                                                 else  exit_codes.push_back( -signal_code_from_name( v ) );
+                            if( isdigit( (unsigned char)v[ 0 ] )  ||  v[ 0 ] == '-' )  exit_codes.push_back( as_int( v ) );
+                            else  
+                            {
+                                bool unknown_in_this_os_only = false;
+                                int signal = signal_code_from_name( v, &unknown_in_this_os_only );
+                                if( unknown_in_this_os_only )  _log->warn( message_string( "SCHEDULER-337", v ) );
+                                                         else  exit_codes.push_back( -signal );
+                            }
                         }
                         catch( exception& x ) { throw_xc( "SCHEDULER-324", on_exit_code, x.what() ); }
                     }
