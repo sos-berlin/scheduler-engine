@@ -46,7 +46,7 @@ start_job( "java"      , 9 );
 
         <jobs>
 
-            <job name="shell" timeout="1">
+            <job name="shell" timeout="1" ignore_signals="SIGINT SIGHUP 7">
                 <process file="/tmp/test.cmd"/>
                 
                 <commands on_exit_code="success">
@@ -72,6 +72,8 @@ start_job( "java"      , 9 );
             <job name="javascript">
                 <script language="JavaScript">
                     <![CDATA[
+
+new ActiveXObject( "hostware.global" ).sleep( 10 );
 
 spooler_log.info( 'order=' + ( spooler_job.order_queue? "yes" : "no" ) );
 
