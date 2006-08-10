@@ -60,13 +60,57 @@
                         <code>on_exit_code="error"</code> gilt für alle Exit-Codes außer 0 und außer der bereits in 
                         anderen <scheduler_element name="commands" attribute="exit_code"/> angegeben Exit-Codes.
                     </li>
+                    <li>
+                        Nur Unix: 
+                        Eine mit Signal beendete Task (durch <code>kill</code> oder Programmfehler) hat
+                        einen Exit-Code mit dem negativen Wert des Signals.
+                        Bei dem Betriebssystem-Kommando <code>kill</code> auf die Task wäre das -15.
+                    </li>
+                    <li>
+                        Die Signalnamen können angegeben werden:
+                        <code>SIGHUP</code>
+                        <code>SIGINT</code>
+                        <code>SIGQUIT</code>
+                        <code>SIGILL</code>
+                        <code>SIGTRAP</code>
+                        <code>SIGABRT</code>
+                        <code>SIGIOT</code>
+                        <code>SIGBUS</code>
+                        <code>SIGFPE</code>
+                        <code>SIGKILL</code>
+                        <code>SIGUSR1</code>
+                        <code>SIGSEGV</code>
+                        <code>SIGUSR2</code>
+                        <code>SIGPIPE</code>
+                        <code>SIGALRM</code>
+                        <code>SIGTERM</code>
+                        <code>SIGSTKFLT</code>
+                        <code>SIGCHLD</code>
+                        <code>SIGCONT</code>
+                        <code>SIGSTOP</code>
+                        <code>SIGTSTP</code>
+                        <code>SIGTTIN</code>
+                        <code>SIGTTOU</code>
+                        <code>SIGURG</code>
+                        <code>SIGXCPU</code>
+                        <code>SIGXFSZ</code>
+                        <code>SIGVTALRM</code>
+                        <code>SIGPROF</code>
+                        <code>SIGWINCH</code>
+                        <code>SIGPOLL</code>
+                        <code>SIGIO</code>
+                        <code>SIGPWR</code>
+                        <code>SIGSYS</code>.
+                        Signal-Namen, die das Betriebsystem nicht kennt, werden mit Warnung ignoriert.
+                    </li>
                 </ul>
             </description>
             
             <example>
                 <pre>on_exit_code="0"
 on_exit_code="1 2 3 99"
-on_exit_code="error"</pre>
+on_exit_code="error"
+on_exit_code="SIGTERM SIGKILL"</pre>
             </example>
             
             <messages>
@@ -77,6 +121,7 @@ on_exit_code="error"</pre>
                 <!-- Während der Ausführung: -->
                 <message code="SCHEDULER-328" level="info"/>
                 <message code="SCHEDULER-327" level="error"/>
+                <message code="SCHEDULER-337" level="warn"/>
             </messages>
         </xml_attribute>
     </xml_attributes>

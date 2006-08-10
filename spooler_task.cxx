@@ -529,25 +529,18 @@ void Task::set_error_xc_only( const Xc& x )
 {
     string code = x.code();
     
-    if( code == "WINSOCK-10054"     // Connection reset
-#   ifdef Z_UNIX
-     || code == "ERRNO-" + as_int( ECONNRESET )
-#   endif     
-     || code == "Z-REMOTE-101"      // Separate process: pid=<p1/>: Connection lost
-     || code == "Z-REMOTE-122"      // Separate process pid=(1): Caller has killed process
-     || code == "Z-REMOTE-123"      // Separate process pid=(1): Process lost
-     || code == "SCHEDULER-202" )   // Connection to task has been lost
+    if( const com::object_server::Connection_reset_exception*  xx = dynamic_cast<const com::object_server::Connection_reset_exception*>( &x ) )
     {
-        if( !_non_connection_lost_error_filled )
+        if( !_is_connection_reset_error )  // Bisheriger _error ist kein Connection_reset_error?
         {
-            _non_connection_lost_error = _error;  // Bisherigen Fehler (evtl. NULL) merken, falls Verbindungsverlust wegen ignore_signals=".." ignoriert wird
-            _non_connection_lost_error_filled = true;
+            _non_connection_reset_error = _error;  // Bisherigen Fehler (evtl. NULL) merken, falls Verbindungsverlust wegen ignore_signals=".." ignoriert wird
+            _is_connection_reset_error = true;
         }
     }
     else
     {
-        _non_connection_lost_error = NULL;
-        _non_connection_lost_error_filled = false;
+        _non_connection_reset_error = NULL;
+        _is_connection_reset_error = false;
     }
      
     _error = x;
@@ -567,6 +560,24 @@ void Task::set_error_xc( const Xc& x )
 
     set_error_xc_only( x );
     _log->error( msg + x.what() );
+
+
+    if( _is_connection_reset_error )  
+    {
+        S s;
+        if( _job->_ignore_every_signal )  
+            s << "all";
+        else
+        {
+            Z_FOR_EACH( set<int>, _job->_ignore_signals_set, it )
+            {
+                if( s.length() > 0 )  s << " ";
+                s << signal_name_from_code( *it );
+            }
+        }
+
+        if( s.length() > 0 )  _log->info( message_string( "SCHEDULER-974", s ) );
+    }
 }
 
 //----------------------------------------------------------------------------------Task::set_error
@@ -1974,7 +1985,7 @@ void Module_task::do_close__end()
         if( int termination_signal = _module_instance->termination_signal() )
         {
             z::Xc x ( "SCHEDULER-279", termination_signal, signal_name_from_code( termination_signal ) );
-            if( !_job->_ignore_every_signal  &&  _job->_ignore_signal_set.find( termination_signal ) == _job->_ignore_signal_set.end()
+            if( !_job->_ignore_every_signal  &&  _job->_ignore_signals_set.find( termination_signal ) == _job->_ignore_signals_set.end()
              && _module_instance->_module->_kind == Module::kind_process  &&  !_module_instance->_module->_process_ignore_signal ) 
             {
                 set_error( x );
@@ -1984,11 +1995,11 @@ void Module_task::do_close__end()
                 _log->warn( x.what() );
                 _log->debug( message_string( "SCHEDULER-973", signal_name_from_code( termination_signal ) ) );
                 
-                if( _non_connection_lost_error_filled )
+                if( _is_connection_reset_error )
                 {
-                    _error = _non_connection_lost_error;    // Vorherigen Fehler (vor dem Verbindungsverlust) wiederherstellen
-                    _non_connection_lost_error = NULL;
-                    _non_connection_lost_error_filled = false;
+                    _error = _non_connection_reset_error;    // Vorherigen Fehler (vor dem Verbindungsverlust) wiederherstellen
+                    _non_connection_reset_error = NULL;
+                    _is_connection_reset_error = false;
                 }
             }
 

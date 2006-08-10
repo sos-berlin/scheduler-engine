@@ -12,7 +12,18 @@
 
 
     <change date="2006-08-09" version="2.0.156" subversion_revision="4397">
-        <revision type="new" title="&lt;job ignore_signal=&quot;...&quot;&gt;">
+        <revision type="modification" title="Signal einer abgebrochenen Task wird auch bei nicht &lt;process&gt;-Jobs zum negativen Exit code">
+            <description>
+                <p>
+                    Nur Unix:
+                    Bisher ist das Signal einer abgebrochenen Task nur bei <scheduler_element name="process"/>-Jobs als 
+                    negativer Exit-Code übernommen worden.
+                    Jetzt gilt das für alle Jobs.
+                </p>
+            </description>
+        </revision>
+        
+        <revision type="new" title="&lt;job ignore_signals=&quot;...&quot;&gt;">
             <description>
                 <p>
                     Eine Task, die mit Signal endet (durch <code>kill</code> oder Absturz),
@@ -20,12 +31,28 @@
                 </p>
                 <ul>
                     <li>
-                        <scheduler_element name="job" attribute="ignore_signal" value="SIGTERM SIGKILL"/>
+                        <scheduler_element name="job" attribute="ignore_signals" value="SIGTERM SIGKILL ..."/>
                     </li>
                 </ul>
             </description>
         </revision>
-    </change >
+
+        <revision type="new" title="&lt;commands on_exit_code=&quot;SIGTERM&quot;&gt;">
+            <description>
+                <p>
+                    Nur Unix: Die Signalnamen können aufgeführt werden.
+                </p>
+                <ul>
+                    <li>
+                        <scheduler_element name="commands" attribute="on_exit_code" value="SIGTERM SIGKILL ..."/>
+                    </li>
+                    <li>
+                        <scheduler_element name="commands" attribute="on_exit_code" value="signal"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+    </change>
 
 
     <change date="2006-07-27" version="2.0.155" subversion_revision="4396">
@@ -52,7 +79,7 @@
                 </ul>
             </description>
         </revision>
-    </change >
+    </change>
 
 
     <change date="2006-07-27" version="2.0.154" subversion_revision="4393">
@@ -68,7 +95,7 @@
                 </p>
             </description>
         </revision>
-    </change >
+    </change>
 
 
     <change date="2006-06-30" version="2.0.154" subversion_revision="4390">
@@ -93,7 +120,7 @@
                 </ul>
             </description>
         </revision>
-    </change >
+    </change>
 
     <change date="2006-06-20" version="2.0.154" subversion_revision="4379">
 
@@ -109,7 +136,7 @@
                 </ul>
             </description>
         </revision>
-    </change >
+    </change>
         
     <change date="2006-06-19" version="2.0.154" subversion_revision="4366">
 

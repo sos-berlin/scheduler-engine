@@ -267,22 +267,25 @@
         </xml_attribute>
 
         
-        <xml_attribute name="ignore_signal" type="yes|no|signalnames" initial="no">
+        <xml_attribute name="ignore_signals" type="yes|no|signalnames" initial="no">
             <description>
                 <p>
                     Wirksam nur unter Unix.
                 </p>
                 <p>
-                    Ein Job, dessen Task-Prozess mit Signal endet, führt zum Stopp des Jobs.
+                    Ein Job, dessen Task-Prozess mit Signal abbricht, führt zum Stopp des Jobs.
                     Ursache eines Signals ist ein Abbruch der Task durch das System-Kommando <code>kill</code> oder
-                    durch einen Fehler im Job.
+                    durch einen Programmabbruch.
                 </p>
                 <p>
-                    <code>ignore_signal="yes"</code> lässt den Scheduler den Job nicht stoppen,
-                    wenn eine Task mit Signal endet.
+                    <code>ignore_signals="no"</code> (voreingestellt) lässt den Job stoppen,
+                    wenn eine Task mit Signal abbricht.
                 </p>
                 <p>
-                    Statt <code>"yes"</code> (jedes Signal) kann auch eine durch Leerzeichen getrennte Liste von Signalnamen angegeben werden.
+                    <code>ignore_signals="yes"</code> lässt den Job nicht stoppen.
+                </p>
+                <p>
+                    Statt <code>"yes"</code> können Sie auch eine Liste von Signalnamen angeben (durch Leerzeichen getrennt).
                     Dabei sind, abhängig vom Betriebssystem, diese Signalnamen bekannt:
                     <code>SIGHUP</code>
                     <code>SIGINT</code>
@@ -317,18 +320,29 @@
                     <code>SIGIO</code>
                     <code>SIGPWR</code>
                     <code>SIGSYS</code>.
+                    Signal-Namen, die das Betriebsystem nicht kennt, werden mit Warnung ignoriert.
                 </p>
                 <p>
-                    Siehe auch das Gnu-Kommando <code>man 7 signal</code>.
+                    Weil eine mit einem zu ignorierenden Signal abbrechende Task 
+                    trotzdem zuerst einen TCP-Verbindungsfehler (<code>ECONNRESET</code>) hervorruft,
+                    führen TCP-Verbindungsfehler nur dann zum Stopp des Jobs, wenn
+                    <code>ignore_signals="…"</code> nicht zutrifft.
+                    Der Scheduler weist mit <scheduler_message code="SCHEDULER-974"/> darauf hin.
+                </p>
+                <p>
+                    Siehe auch <scheduler_element name="commands" attribute="on_exit_code" value="SIGTERM"/> 
+                    und das Gnu-Kommando <code>man 7 signal</code>.
                 </p>
             </description>
 
             <example>
-                <pre>&lt;job name="my_job" ignore_signal="SIGTERM SIGKILL"></pre>
+                <pre>&lt;job name="my_job" ignore_signals="SIGTERM SIGKILL"></pre>
             </example>
 
             <messages>
                 <message level="warn" code="SCHEDULER-279"/>
+                <message level="warn" code="SCHEDULER-337"/>
+                <message level="info" code="SCHEDULER-974"/>
             </messages>
         </xml_attribute>
 

@@ -3228,7 +3228,7 @@ void spooler_restart( Log* log, bool is_service )
                  int n = sysconf( _SC_OPEN_MAX );
                  for( int i = 3; i < n; i++ )  close(i);
                  execv( _argv[0], _argv ); 
-                 fprintf( stderr, "Fehler bei execv %s: %s\n", _argv[0], strerror(errno) ); 
+                 fprintf( stderr, "Error in execv %s: %s\n", _argv[0], strerror(errno) ); 
                  _exit(99);
             }
 
@@ -3381,7 +3381,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
             my_spooler._log.error( x.what() );
             my_spooler._log.error( message_string( "SCHEDULER-331" ) );
 
-            SHOW_ERR( "Fehler " << x.what() );     // Fehlermeldung vor ~Spooler ausgeben
+            SHOW_ERR( "Error " << x.what() );     // Fehlermeldung vor ~Spooler ausgeben
             if( my_spooler.is_service() )  send_error_email( x, argc, argv, parameter_line, &my_spooler );
             ret = 1;
         }

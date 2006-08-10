@@ -379,7 +379,7 @@ struct Job : Object,
     bool                       _start_once;                 // <run_time start_once="">, wird false nach Start
     bool                       _machine_resumable;          // Test
     bool                       _ignore_every_signal;        // Nur Unix: Nach Beendigung mit Signal (kill, Absturz) den Job nicht stoppen 
-    std::set<int>              _ignore_signal_set;
+    std::set<int>              _ignore_signals_set;
 
     bool                       _log_append;                 // Jobprotokoll fortschreiben <job log_append=(yes|no)>
 

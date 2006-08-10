@@ -123,7 +123,7 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
                 if( s == "all" )
                 {
                     _ignore_every_signal = true;
-                    _ignore_signal_set.clear();
+                    _ignore_signals_set.clear();
                 }
                 else
                 {
@@ -134,7 +134,7 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
                         bool unknown_in_this_os_only = false;
                         int signal = signal_code_from_name( signals[ i ], &unknown_in_this_os_only );
                         if( unknown_in_this_os_only )  _log->warn( message_string( "SCHEDULER-337", signals[ i ] ) );
-                                                 else  _ignore_signal_set.insert( signal );
+                                                 else  _ignore_signals_set.insert( signal );
                     }
                 }
             }
