@@ -529,7 +529,7 @@ void Task::set_error_xc_only( const Xc& x )
 {
     string code = x.code();
     
-    if( const com::object_server::Connection_reset_exception*  xx = dynamic_cast<const com::object_server::Connection_reset_exception*>( &x ) )
+    if( dynamic_cast<const com::object_server::Connection_reset_exception*>( &x ) )
     {
         if( !_is_connection_reset_error )  // Bisheriger _error ist kein Connection_reset_error?
         {
@@ -576,7 +576,9 @@ void Task::set_error_xc( const Xc& x )
             }
         }
 
-        if( s.length() > 0 )  _log->info( message_string( "SCHEDULER-974", s ) );
+fprintf(stderr,"%s length=%d\n", __FUNCTION__, s.length() );
+        //if( s.length() > 0 )
+            _log->info( message_string( "SCHEDULER-974", s ) );
     }
 }
 

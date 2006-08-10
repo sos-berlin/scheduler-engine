@@ -11,7 +11,7 @@
     <scheduler_keyword keyword="Change log"/>
 
 
-    <change date="2006-08-09" version="2.0.156" subversion_revision="4397">
+    <change date="2006-08-09" version="2.0.156" subversion_revision="4406">
         <revision type="modification" title="Signal einer abgebrochenen Task wird auch bei nicht &lt;process&gt;-Jobs zum negativen Exit code">
             <description>
                 <p>

@@ -140,18 +140,24 @@
         &lt;/holiday>
 
         &lt;<a class="silent" href="xml/jobs.xml">jobs</a>
-            &lt;<a class="silent" href="xml/job.xml">job</a> name          = "…"
-                 spooler_id    = "…"
-                 title         = "…"
-                 log_append    = "no"
-                 order         = "no"
-                 process_class = "…"
-                 tasks         = "1"
-                 timeout       = "…"
-                 idle_timeout  = "…"
-                 priority      = "1"   >
+            &lt;<a class="silent" href="xml/job.xml">job</a>
+                force_idle_timeout = "yes|no"
+                idle_timeout   = "…"
+                ignore_signals = "…"
+                java_options   = "…"
+                min_tasks      = "…"
+                name           = "…"
+                order          = "no"
+                priority       = "…"
+                process_class  = "…"
+                spooler_id     = "…"
+                tasks          = "1"
+                timeout        = "…"
+                title          = "…"
+                visible        = "no"
+            >
 
-                 &lt;<a class="silent" href="xml/description.xml">description</a>> … &lt;/description>
+                &lt;<a class="silent" href="xml/description.xml">description</a>> … &lt;/description>
 
                  &lt;<a class="silent" href="xml/params.xml">params</a>>
                      &lt;<a class="silent" href="xml/param.xml">param</a> name="…" value="…"/>

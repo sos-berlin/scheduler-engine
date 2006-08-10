@@ -104,6 +104,9 @@
                         Signal-Namen, die das Betriebsystem nicht kennt, werden mit Warnung ignoriert.
                     </li>
                 </ul>
+                <p>
+                    Siehe auch <scheduler_element name="job" attribute="ignore_signals"/>.
+                </p>
             </description>
             
             <example>

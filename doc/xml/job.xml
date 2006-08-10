@@ -267,7 +267,7 @@
         </xml_attribute>
 
         
-        <xml_attribute name="ignore_signals" type="yes|no|signalnames" initial="no">
+        <xml_attribute name="ignore_signals" type="all|signalnames" initial="no">
             <description>
                 <p>
                     Wirksam nur unter Unix.
@@ -327,7 +327,7 @@
                     trotzdem zuerst einen TCP-Verbindungsfehler (<code>ECONNRESET</code>) hervorruft,
                     führen TCP-Verbindungsfehler nur dann zum Stopp des Jobs, wenn
                     <code>ignore_signals="…"</code> nicht zutrifft.
-                    Der Scheduler weist mit <scheduler_message code="SCHEDULER-974"/> darauf hin.
+                    Der Scheduler weist mit der Meldung <scheduler_message code="SCHEDULER-974"/> darauf hin.
                 </p>
                 <p>
                     Siehe auch <scheduler_element name="commands" attribute="on_exit_code" value="SIGTERM"/> 
