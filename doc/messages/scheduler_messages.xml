@@ -2738,7 +2738,7 @@
 
         <message code="SCHEDULER-973">
             <text xml:lang="en">
-                <title>Killed task does not stop the job because of <code>ignore_signals="<p1/>"</code></title>
+                <title>Killed task does not stop the job because of <code>ignore_signals="..."</code></title>
             </text>
         </message>
 
