@@ -229,6 +229,18 @@ void Log::open_new()
             ::write( old_file, line.c_str(), line.length() );
             ::close( old_file );
         }
+
+        if( _log_buffer.length() > 0  &&  _file != -1 )
+        {
+            int ret = my_write( _spooler, _filename, _file, _log_buffer.c_str(), _log_buffer.length() );
+            if( ret != _log_buffer.length() )  
+            {
+                _err_no = errno;
+                throw_errno( errno, "write", _filename.c_str() );
+            }
+
+            _log_buffer = "";
+        }
     }
 }
 
@@ -269,6 +281,10 @@ void Log::write( Prefix_log* extra_log, Prefix_log* order_log, const char* text,
                 _err_no = errno;
                 throw_errno( errno, "write", _filename.c_str() );
             }
+        }
+        else
+        {
+            _log_buffer.append( text, len );  // Das ist derselbe Mechanismus wie in Prefix_log. Das könnte man zusammenfassen.
         }
 
         if( extra_log )  extra_log->write( text, len );

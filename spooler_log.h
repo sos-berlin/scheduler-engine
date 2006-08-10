@@ -44,6 +44,7 @@ struct Log
     int                        _err_no;
     Thread_semaphore           _semaphore;
     string                     _log_line;
+    string                     _log_buffer;                 // Bis Ausgabedatei geöffnet ist
     Time                       _last_time;
 };
 

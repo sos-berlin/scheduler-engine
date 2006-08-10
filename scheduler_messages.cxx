@@ -274,7 +274,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-970", "$1 ended immediately after start, so min_tasks=$2 doesn't lead to new tasks" },
     { "SCHEDULER-972", "Still waiting until $1 ($2) ..." },
     { "SCHEDULER-973", "Killed task does not stop the job because of ignore_signals=\"$1\"" },
-    { "SCHEDULER-974", "Last error does not stop the job if the (possibly killed) task ends with any signal listed in ignore_signals=\"$1\". In this case, expect message SCHEDULER-279" },
+    { "SCHEDULER-974", "Last error does not stop the job if the task aborts (after kill or crash) with any signal listed in ignore_signals=\"$1\". In this case, expect warning SCHEDULER-279" },
     { "SCHEDULER-999", "Scheduler has been terminated properly" },
     {}
 };

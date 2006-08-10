@@ -1447,7 +1447,7 @@ void Spooler::set_state( State state )
 
     try
     {
-        _log.info( message_string( "SCHEDULER-902", state_name() ) );      // Nach _state = s_stopping aufrufen, damit's nicht blockiert!
+        _log.log( state == s_loading || state == s_starting? log_debug3 : log_info, message_string( "SCHEDULER-902", state_name() ) );      // Nach _state = s_stopping aufrufen, damit's nicht blockiert!
     }
     catch( exception& ) {}      // ENOSPC bei s_stopping ignorieren wir
 
