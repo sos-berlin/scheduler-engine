@@ -278,14 +278,14 @@
                     durch einen Programmabbruch.
                 </p>
                 <p>
-                    <code>ignore_signals="no"</code> (voreingestellt) lässt den Job stoppen,
-                    wenn eine Task mit Signal abbricht.
+                    Wenn <code>ignore_signals</code> nicht angegeben ist, 
+                    stoppt eine mit Signal abbrechene Task den Job (mit Meldung <scheduler_message code="SCHEDULER-279"/>).
                 </p>
                 <p>
-                    <code>ignore_signals="yes"</code> lässt den Job nicht stoppen.
+                    <code>ignore_signals="all"</code> lässt den Job nicht stoppen.
                 </p>
                 <p>
-                    Statt <code>"yes"</code> können Sie auch eine Liste von Signalnamen angeben (durch Leerzeichen getrennt).
+                    Statt <code>"all"</code> können Sie auch eine Liste von Signalnamen angeben (durch Leerzeichen getrennt).
                     Dabei sind, abhängig vom Betriebssystem, diese Signalnamen bekannt:
                     <code>SIGHUP</code>
                     <code>SIGINT</code>
