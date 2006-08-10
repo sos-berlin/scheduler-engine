@@ -525,11 +525,13 @@ void Task::attach_to_a_thread()
 
 //--------------------------------------------------------------------------Task::set_error_xc_only
 
-void Task::set_error_xc_only( const Xc& x )
+void Task::set_error_xc_only( const zschimmer::Xc& x )
 {
     string code = x.code();
     
-    if( dynamic_cast<const com::object_server::Connection_reset_exception*>( &x ) )
+    //if( dynamic_cast<const com::object_server::Connection_reset_exception*>( &x )    Funktioniert nicht mit gcc 3.4.3
+    if( x.name() == com::object_server::Connection_reset_exception::exception_name 
+     || x.code() == "SCHEDULER-202" )
     {
         if( !_is_connection_reset_error )  // Bisheriger _error ist kein Connection_reset_error?
         {
@@ -542,7 +544,24 @@ void Task::set_error_xc_only( const Xc& x )
         _non_connection_reset_error = NULL;
         _is_connection_reset_error = false;
     }
-     
+
+    set_error_xc_only_base( x );
+}
+
+//--------------------------------------------------------------------------Task::set_error_xc_only
+
+void Task::set_error_xc_only( const Xc& x )
+{
+    _non_connection_reset_error = NULL;
+    _is_connection_reset_error = false;
+
+    set_error_xc_only_base( x );
+}
+
+//---------------------------------------------------------------------Task::set_error_xc_only_base
+
+void Task::set_error_xc_only_base( const Xc& x )
+{
     _error = x;
     if( _job )  _job->set_error_xc_only( x );
 
@@ -550,19 +569,15 @@ void Task::set_error_xc_only( const Xc& x )
 }
 
 //-------------------------------------------------------------------------------Task::set_error_xc
+// Siehe auch set_error_xc( const Xc& )
 
-void Task::set_error_xc( const Xc& x )
+void Task::set_error_xc( const zschimmer::Xc& x )
 {
-    string msg;
-
-    //Module_task* t = dynamic_cast<Module_task*>( this );
-    //Ist nie in _in_call: if( t  &&  t->_module_instance  &&  t->_module_instance->_in_call )  msg = "In " + t->_module_instance->_in_call->name() + "(): ";
-
     set_error_xc_only( x );
-    _log->error( msg + x.what() );
+    _log->error( x.what() );
 
 
-    if( _is_connection_reset_error )  
+    if( _is_connection_reset_error  &&  !_non_connection_reset_error )  
     {
         S s;
         if( _job->_ignore_every_signal )  
@@ -576,10 +591,17 @@ void Task::set_error_xc( const Xc& x )
             }
         }
 
-fprintf(stderr,"%s length=%d\n", __FUNCTION__, s.length() );
-        //if( s.length() > 0 )
-            _log->info( message_string( "SCHEDULER-974", s ) );
+        if( s.length() > 0 )  _log->info( message_string( "SCHEDULER-974", s ) );
     }
+}
+
+//-------------------------------------------------------------------------------Task::set_error_xc
+// Siehe auch set_error_xc( const zschimmer::Xc& )
+
+void Task::set_error_xc( const Xc& x )
+{
+    set_error_xc_only( x );
+    _log->error( x.what() );
 }
 
 //----------------------------------------------------------------------------------Task::set_error
@@ -1051,7 +1073,7 @@ bool Task::do_something()
                             {
                                 _module_instance_async_error = true;
                                 //z::throw_xc( "SCHEDULER-202", x.what() );
-                                set_error( Xc( "SCHEDULER-202", x.what() ) );
+                                set_error( z::Xc( "SCHEDULER-202", x.what() ) );
                                 set_state( s_ended );
                             }
                         }
@@ -1987,15 +2009,17 @@ void Module_task::do_close__end()
         if( int termination_signal = _module_instance->termination_signal() )
         {
             z::Xc x ( "SCHEDULER-279", termination_signal, signal_name_from_code( termination_signal ) );
-            if( !_job->_ignore_every_signal  &&  _job->_ignore_signals_set.find( termination_signal ) == _job->_ignore_signals_set.end()
-             && _module_instance->_module->_kind == Module::kind_process  &&  !_module_instance->_module->_process_ignore_signal ) 
+
+            if( !_job->_ignore_every_signal 
+             && _job->_ignore_signals_set.find( termination_signal ) == _job->_ignore_signals_set.end()
+             && ( _module_instance->_module->_kind != Module::kind_process  ||  !_module_instance->_module->_process_ignore_signal ) )
             {
                 set_error( x );
             }
             else  
             {
                 _log->warn( x.what() );
-                _log->debug( message_string( "SCHEDULER-973", signal_name_from_code( termination_signal ) ) );
+                _log->debug( message_string( "SCHEDULER-973" ) ); //, signal_name_from_code( termination_signal ) ) );
                 
                 if( _is_connection_reset_error )
                 {

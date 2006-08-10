@@ -132,7 +132,9 @@ struct Task : Object,
 
     void                        signal                      ( const string& signal_name );
     bool                        has_error                   ()                                      { return _error != NULL; }
+    void                    set_error_xc_only               ( const zschimmer::Xc& );
     void                    set_error_xc_only               ( const Xc& );
+    void                    set_error_xc_only_base          ( const Xc& );
 
     void                    set_exit_code                   ( int exit_code )                       { _exit_code = exit_code; }
     int                         exit_code                   ()                                      { return _exit_code; }
@@ -192,6 +194,7 @@ struct Task : Object,
     void                        set_state                   ( State );
 
     void                        set_error_xc                ( const Xc& );
+    void                        set_error_xc                ( const z::Xc& );
     void                        set_error                   ( const Xc& x )                         { set_error_xc( x ); }
     void                        set_error                   ( const z::Xc& x )                      { set_error_xc( x ); }
     void                        set_error                   ( const exception& );

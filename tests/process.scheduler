@@ -22,7 +22,7 @@ spooler.job( "process" ).start( params );
         <jobs>
             <job name="process" title="Aufruf von /tmp/test.cmd">
                 
-                <process file="/tmp/test.cmd" param="Mein Parameter EINS=$EINS ZWEI=$ZWEI HOME=$HOME LOG=$LOG PATH=$PATH">
+                <process file="/tmp/test.cmd" ignore_signal="yes" param="Mein Parameter EINS=$EINS ZWEI=$ZWEI HOME=$HOME LOG=$LOG PATH=$PATH">
                     <environment>
                         <variable name="var1" value="111"/>
                         <variable name="PATH" value="$PATH;***"/>
