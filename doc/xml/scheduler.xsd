@@ -145,6 +145,11 @@
                                     <xsd:documentation>This is all other exit codes but 0</xsd:documentation>
                                 </xsd:annotation>
                             </xsd:enumeration>
+                            <xsd:enumeration value="signal">
+                                <xsd:annotation>
+                                    <xsd:documentation>exit codes less than 0 (a signal under Unix)</xsd:documentation>
+                                </xsd:annotation>
+                            </xsd:enumeration>
                         </xsd:restriction>
                     </xsd:simpleType>
                     <xsd:simpleType>

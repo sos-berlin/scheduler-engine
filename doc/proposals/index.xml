@@ -115,7 +115,7 @@
     </p>
     <div class="indent">
         <p style="margin-top: 0px">
-            Damit kann der Speicherbedarf bei vielen Tasks deutlich verringert werden.
+            Damit kann der Speicherbedarf vieler gleichzeitiger Tasks deutlich verringert werden.
         </p>
     </div>
 
