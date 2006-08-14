@@ -479,7 +479,7 @@ void Task::cmd_end( bool kill_immediately )
 {
     THREAD_LOCK_DUMMY( _lock )
     {
-        if( kill_immediately )  _log->warn( message_string( "SCHEDULER-282" ) );
+        if( kill_immediately )  _log->warn( message_string( "SCHEDULER-282" ) );    // Kein Fehler, damit ignore_signals="SIGKILL" den Stopp verhindern kann
         else
         if( _state < s_ending )  _log->info( message_string( "SCHEDULER-914" ) );
 
@@ -1018,7 +1018,7 @@ bool Task::do_something()
 
     if( _kill_immediately  &&  !_kill_tried )
     {
-        _log->error( message_string( "SCHEDULER-277" ) );
+        _log->warn( message_string( "SCHEDULER-277" ) );   // Kein Fehler, damit ignore_signals="SIGKILL" den Stopp verhindern kann
         return try_kill();
     }
 
@@ -1825,6 +1825,12 @@ void Task::trigger_event( Scheduler_event* scheduler_event )
         {
             string subject = obj_name();
 
+            if( _log->highest_level() == log_error )
+            {
+                subject += " ended with error";
+                body += _log->highest_msg() + "\n\n";
+            }
+            else
             if( _log->highest_level() == log_warn )
             {
                 subject += " ended with warning";
