@@ -2638,11 +2638,13 @@ void Spooler::run()
                 }
                 else
                 {
-                    bool signaled = false;
+                    Time now_before_wait = nothing_done_count == nothing_done_max? Time::now() : Time(0);
+                    bool signaled        = false;
 
                     _wait_counter++;
                     _last_wait_until = wait_until;
                     _last_resume_at  = resume_at;
+
 
                     if( _zschimmer_mode  &&  _should_suspend_machine  &&  is_machine_suspendable() )  // &&  !_single_thread->has_tasks() )
                     {
@@ -2690,7 +2692,8 @@ void Spooler::run()
                         wait_handles.wait_until( wait_until, wait_until_object, resume_at, resume_at_object );
                     }
 
-                    //vielleicht: if( Time::now() - time_before_wait >= 0.001 )  nothing_done_count = 0, nichts_getan_zaehler = 0;
+
+                    if( nothing_done_count == nothing_done_max  &&  Time::now() - now_before_wait >= 0.010 )  nothing_done_count = 0, nichts_getan_zaehler = 0;
                 }
             }
 

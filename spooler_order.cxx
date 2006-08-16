@@ -2127,8 +2127,7 @@ Time Order::next_start_time( bool first_call )
             if( result >= _period.end() )       // Periode abgelaufen?
             {
                 Period next_period = _run_time->next_period( _period.end(), time::wss_next_begin );
-                //Period next_period = _run_time->next_period( result == latter_day? _period.is_single_start()? now : _period.end() : result, time::wss_next_begin );
-Z_DEBUG_ONLY( fprintf(stderr,"%s %s\n", __FUNCTION__, next_period.obj_name().c_str() ) );
+                //Z_DEBUG_ONLY( fprintf(stderr,"%s %s\n", __FUNCTION__, next_period.obj_name().c_str() ) );
                 
                 if( _period.repeat() == latter_day
                  || _period.end()    != next_period.begin()
