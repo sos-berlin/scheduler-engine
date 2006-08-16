@@ -78,6 +78,9 @@
         <xml_attribute name="let_run" type="yes_no">
             <description>
                 <p>
+                    Das Attribut kann nur für Jobs, nicht für Aufträge angegeben werden.
+                </p>
+                <p>
                     Wenn das Element leer ist (also kein <code>&lt;period></code> enthält),
                     generiert der Scheduler eine Periode mit dieser Einstellung,
                     andernfalls ist es die Voreinstellung für die Kind-Elemente

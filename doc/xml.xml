@@ -42,6 +42,7 @@
                 <scheduler_element name="base"/><br/>
                 <scheduler_element name="commands"/><br/>
                 <scheduler_element name="config"/><br/>
+                <scheduler_element name="copy_params"/><br/>
                 <scheduler_element name="date"/><br/>
                 <scheduler_element name="day"/><br/>
                 <scheduler_element name="delay_after_error"/><br/>

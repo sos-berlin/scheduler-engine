@@ -575,6 +575,8 @@ struct Spooler : Object,
     string                     _next_daylight_saving_transition_name;
     Event                      _waitable_timer;
     bool                       _is_waitable_timer_set;
+
+  //double                     _clock_difference;           // -now="..."   Zum Debuggen: Mit dieser Differenz zur tatsächlichen Uhrzeit arbeiten
 };
 
 //-------------------------------------------------------------------------------------------------

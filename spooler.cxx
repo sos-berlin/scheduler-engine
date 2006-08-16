@@ -1753,6 +1753,8 @@ void Spooler::load_arg()
             if( opt.with_value( "env"                    ) )  ;  // Bereits von spooler_main() erledigt
             else
             if( opt.flag      ( 'z', "zschimmer"         ) )  _zschimmer_mode = opt.set();
+          //else
+          //if( opt.with_value( "now"                    ) )  _clock_difference = Time( Sos_date_time( opt.value() ) ) - Time::now();
             else
                 throw_sos_option_error( opt );
         }
@@ -2508,6 +2510,10 @@ void Spooler::run()
             nichts_getan( ++nichts_getan_zaehler, catched_event_string );
             if( wait_until == 0 )  wait_until = Time::now() + 1;
         }
+        else
+        {
+            Z_DEBUG_ONLY( Z_LOG2( "scheduler.nothing_done", "nothing_done_count=" << nothing_done_count << " nichts_getan_zaehler=" << nichts_getan_zaehler << "\n" ); )
+        }
 
         //----------------------------------------------------------------------WARTEZEIT ERMITTELN
 
@@ -2624,7 +2630,7 @@ void Spooler::run()
 
             wait_handles += _wait_handles;
 
-            if( !wait_handles.signaled()  ||  nichts_getan_zaehler > 0 )   // Wenn "nichts_getan" (das ist schlecht), dann wenigstens alle Ereignisse abfragen, damit z.B. ein TCP-Verbindungsaufbau erkannt wird.
+            if( nothing_done_count > 0  ||  !wait_handles.signaled() )   // Wenn "nichts_getan" (das ist schlecht), dann wenigstens alle Ereignisse abfragen, damit z.B. ein TCP-Verbindungsaufbau erkannt wird.
             {
                 if( wait_until == 0 )
                 {
@@ -2637,7 +2643,6 @@ void Spooler::run()
                     _wait_counter++;
                     _last_wait_until = wait_until;
                     _last_resume_at  = resume_at;
-
 
                     if( _zschimmer_mode  &&  _should_suspend_machine  &&  is_machine_suspendable() )  // &&  !_single_thread->has_tasks() )
                     {
@@ -2684,6 +2689,8 @@ void Spooler::run()
                     {
                         wait_handles.wait_until( wait_until, wait_until_object, resume_at, resume_at_object );
                     }
+
+                    //vielleicht: if( Time::now() - time_before_wait >= 0.001 )  nothing_done_count = 0, nichts_getan_zaehler = 0;
                 }
             }
 

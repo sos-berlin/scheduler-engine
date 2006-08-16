@@ -85,7 +85,8 @@ struct Time
                                 operator double             () const                        { return _time; }
     bool                        operator !                  () const                        { return _time == 0; }
 
-    static double               round                       ( double t )                    { return floor( t * 1000.0 + 0.5 ) / 1000.0; }
+    static double               round                       ( double t );
+    static double               normalize                   ( double t );
     void                        set                         ( int t )                       { set( (double)t ); }
     void                        set                         ( time_t t )                    { set( (double)t ); }
     void                        set                         ( double );
@@ -161,6 +162,7 @@ struct Period
 
     void                        check                       () const;
     void                        print                       ( ostream& ) const;
+    string                      obj_name                    () const;
     friend ostream&             operator <<                 ( ostream& s, const Period& o )         { o.print(s); return s; }
 
 

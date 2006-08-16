@@ -71,6 +71,22 @@ void insert_into_message( Message_string* m, int index, const Time& time ) throw
     m->insert( index, time.as_string() );
 }
 
+//--------------------------------------------------------------------------------------Time::round
+
+double Time::round( double t )
+{ 
+    return floor( t * 1000.0 + 0.5 ) / 1000.0; 
+}
+
+//----------------------------------------------------------------------------------Time::normalize
+
+double Time::normalize( double t )
+{ 
+    return t < 0?                0 :
+           t > latter_day._time? latter_day._time 
+                               : t;
+}
+
 //---------------------------------------------------------------------------------Time::operator =
 
 void Time::operator = ( const Sos_optional_date_time& dt )
@@ -453,6 +469,16 @@ void Period::print( ostream& s ) const
                    else  s << " repeat=" << _repeat;
     if( _let_run )  s << " let_run";
     s << ")";
+}
+
+//---------------------------------------------------------------------------------Period::obj_name
+
+string Period::obj_name() const
+{
+    ostrstream s;
+    print( s );
+    s << '\0';
+    return s.str();
 }
 
 //-------------------------------------------------------------------------------------Day::set_dom

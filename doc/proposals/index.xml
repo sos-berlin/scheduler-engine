@@ -12,6 +12,17 @@
 >
 
     <p>
+        <a href="process_order.xml">Auftragsgesteuerte &lt;process>-Jobs</a>
+    </p>
+    <div class="indent">
+        <p style="margin-top: 0px">
+            Weil <scheduler_element name="process"/>-Jobs kein <scheduler_method class="Job_impl" method="spooler_process"/> kennen,
+            wird der Job für jeden Auftrag erneut gestartet.
+        </p>
+    </div>
+
+
+    <p>
         &lt;command on_exit_code="..."> mit Signal-Namen 
     </p>
     <div class="indent">
@@ -44,7 +55,7 @@
 
     
     <p>
-        Farbige Ausgabe bei -log-dir=*stderr
+        Farbige Konsol-Ausgabe bei -log-dir=*stderr
     </p>
     <div class="indent">
         <p style="margin-top: 0px">

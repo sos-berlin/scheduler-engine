@@ -67,13 +67,16 @@
         <xml_attribute name="let_run" type="yes_no">
             <description>
                 <p>
+                    Das Attribut kann nur für Jobs, nicht für Aufträge angegeben werden.
+                </p>
+                <p>
                     <code>let_run="yes"</code> gibt an, dass der Scheduler die Task weiterlaufen lassen soll,
-                    auch wenn die <code>&lt;run_time</code> das eigentlich nicht mehr zulässt.
+                    auch wenn die <code>&lt;run_time></code> das eigentlich nicht mehr zulässt.
                 </p>
                 <p>
                     Bei <code>let_run="no"</code> beendet der Scheduler die Task
                     (ruft also nicht mehr spooler_process, sondern spooler_close auf),
-                    sobald die <code>&lt;run_time</code> nicht mehr gilt.
+                    sobald die <code>&lt;run_time></code> nicht mehr gilt.
                 </p>
             </description>
         </xml_attribute>
