@@ -358,6 +358,10 @@
                 Der Exit-Code entscheidet über die anschließend auszuführenden Kommandos.
                 Siehe hierzu <code>&lt;job></code><scheduler_element name="commands" attribute="on_exit_code"/>.
             </p>
+            <p>
+                Der Exit-Codes hat keinen Einfluss darauf, ob der Job gestoppt wird
+                (eine Fehlermeldung der Task lässt den Job stoppen).
+            </p>
             <!--p>
                 Für Tasks ohne API siehe <scheduler_element name="process"/>.
             </p-->

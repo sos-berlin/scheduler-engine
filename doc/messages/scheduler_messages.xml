@@ -2754,6 +2754,18 @@
             </text>
         </message-->
 
+        <message code="SCHEDULER-975">
+            <text xml:lang="en">
+                <title>This file path with ';' will not be included in <code>changed_directory</code>: <p1/></title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-976">
+            <text xml:lang="en">
+                <title>This directory path with ';' will not be included in <code>triggered_files</code>: <p1/></title>
+            </text>
+        </message>
+
         <message code="SCHEDULER-999">
             <text xml:lang="de">
                 <title>Scheduler ordentlich beendet</title>
