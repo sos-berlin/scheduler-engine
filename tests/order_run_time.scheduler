@@ -6,15 +6,17 @@
 
         <process_classes/>
     
-        <script language="javascript"><![CDATA[
+        <script language="javascript">
+            <![CDATA[
 
-var hostware = new ActiveXObject( "hostware.Global" );
+//var hostware = new ActiveXObject( "hostware.Global" );
                         
                         
 var job_chain = spooler.create_job_chain();
 job_chain.name = "Kette";
 job_chain.add_job( "javascript", 1,   2, 999 );
-job_chain.add_job( "java"      , 2, 100, 999 );
+//job_chain.add_job( "java"      , 2, 100, 999 );
+job_chain.add_end_state( 2 );
 job_chain.add_end_state( 100 );
 job_chain.add_end_state( 999 );
 
@@ -33,16 +35,17 @@ order.title = "Ein ganz ganz langer Titel, um zu sehen, wie die HTML-Oberfläche
 var order = spooler.create_order();
 order.id = 1;
 order.title = "Wir haben einen Auftrag!";
-order.run_time.xml = "<run_time><period single_start='12:37:20'/></run_time>";
+//order.run_time.xml = '<run_time let_run="no" repeat="20"/>';  // let_run ist unsinn, nur zum test
 
-if(0)
+//if(0)
 order.run_time.xml = "<run_time>" +
-                        "<date date='2005-08-05'>" +
-                            "<period begin='10:29:00' end='23:25:30' />" +
-                            "<period single_start='10:30' />" +
+                        "<date date='2006-08-16'>" +
+                            "<period begin='09:21:00' end='23:25:30' />" +
+                            "<period single_start='09:21:20' />" +
+                            "<period begin='09:21:30' end='11:34:50' />" +
                         "</date>" +             
-                        "<date date='2005-08-06'>" +
-                            "<period begin='1:34:40' end='1:34:50' />" +
+                        "<date date='2006-08-17'>" +
+                            "<period begin='12:20:30' end='21:34:50' />" +
                         "</date>" +
                         "<weekdays>" + 
                             "<day day='7'>" +
@@ -75,7 +78,7 @@ function spooler_process()
     spooler_log.info( "order.title=" + spooler_task.order.title );
     spooler_log.info( "order.string_next_start_time=" + spooler_task.order.string_next_start_time );               
 
-    spooler_task.order.run_time.xml = '<run_time><period single_start="12:37:30"/></run_time>';
+    //spooler_task.order.run_time.xml = '<run_time><period single_start="12:37:30"/></run_time>';
     //var order2 = spooler.create_order();
     //order2.run_time.xml = "<run_time><period begin='10:21:20'/></run_time>";
     //spooler_log.info( "order2.string_next_start_time=" + order2.string_next_start_time );

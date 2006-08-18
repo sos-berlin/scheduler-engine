@@ -1,0 +1,129 @@
+<?xml version="1.0"?><!-- $Id$ -->
+
+<spooler
+    xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
+>
+    <config 
+        main_scheduler="lillerud.zschimmer:6310"
+        tcp_port="4444"
+    >
+
+        <security>
+            <allowed_host host="0.0.0.0" level="all"/>
+        </security>
+        
+        <process_classes/>
+
+        <jobs>
+
+            <job name="start">
+                <script language="javascript">
+                    <![CDATA[ 
+
+dir = "c:\\tmp\\testfiles\\";
+
+spooler_log.info( "changed_directories=" + spooler_task.changed_directories );
+spooler_log.info( "triggered_files=" + spooler_task.trigger_files );
+
+//sys( "mkdir -p " + dir );
+//sys( "rm " + dir + "*" );
+sys( "touch " + dir + "a1" );
+sys( "touch " + dir + "a2" );
+sys( "touch " + dir + "b3" );
+
+
+function sys( cmd, timeout )
+{
+    var subprocess = spooler_task.create_subprocess();
+    
+    try
+    {
+        if( timeout )  subprocess.timeout = timeout;
+        spooler_log.debug( cmd );
+        subprocess.start( cmd );
+        subprocess.wait_for_termination();
+        if( subprocess.exit_code != 0 )  throw Error( "Exitcode=" + subprocess.exit_code + ": " + cmd );
+        if( subprocess.termination_signal != 0 )  throw Error( "Signal=" + subprocess.exit_code + ": " + cmd );
+    }
+    finally
+    {
+        subprocess.close();
+    }
+}
+
+                ]]>
+                </script>
+                <run_time once="yes"/>
+            </job>
+            
+            <job name="import2">
+                <script language="javascript">
+                    <![CDATA[ 
+
+function spooler_init()
+{
+    spooler_log.info( "changed_directories=" + spooler_task.changed_directories );
+    spooler_log.info( "triggered_files=" + spooler_task.trigger_files );
+    
+    return true;
+}
+
+function spooler_process()
+{
+    spooler_log.info( "SPOOLER_PROCESS" );
+    return false;
+}
+            
+                ]]></script>
+                <start_when_directory_changed directory="/tmp/testfiles\" regex="^a"/>
+                <run_time once="yes"/>
+            </job>
+
+            
+            <job name="java">
+
+                <script java_class="spooler_job.Import">
+
+                    <![CDATA[
+
+package spooler_job;
+                     
+import java.io.File;
+import sos.spooler.*;
+
+public class Import  extends sos.spooler.Job_impl
+{
+    public boolean spooler_init()
+    {
+        spooler_log.info( "changed_directories=" + spooler_task.changed_directories() );
+        spooler_log.info( "trigger_files=" + spooler_task.trigger_files() );
+        
+        return true;
+    }
+    
+}
+
+                ]]>
+                </script>
+
+                <start_when_directory_changed directory="/tmp/testfiles" regex="^a" />
+            </job>
+
+            
+            <job name="shell">
+                <script language="shell">
+                    <![CDATA[ 
+
+echo "%SCHEDULER_TASK_TRIGGER_FILES%"
+echo "-->$SCHEDULER_TASK_TRIGGER_FILES<--"
+
+                ]]>
+                </script>
+                <start_when_directory_changed directory="/tmp/testfiles\" regex="^a"/>
+                <run_time once="yes"/>
+            </job>
+
+        </jobs>
+    </config>
+</spooler>
