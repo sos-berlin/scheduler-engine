@@ -21,7 +21,8 @@
                 <script language="javascript">
                     <![CDATA[ 
 
-dir = "c:\\tmp\\testfiles\\";
+//dir = "c:\\tmp\\testfiles\\";
+dir = "/tmp/testfiles/";
 
 spooler_log.info( "changed_directories=" + spooler_task.changed_directories );
 spooler_log.info( "triggered_files=" + spooler_task.trigger_files );
@@ -76,7 +77,7 @@ function spooler_process()
 }
             
                 ]]></script>
-                <start_when_directory_changed directory="/tmp/testfiles\" regex="^a"/>
+                <start_when_directory_changed directory="/tmp/testfiles/" regex="^a"/>
                 <run_time once="yes"/>
             </job>
 
@@ -120,7 +121,7 @@ echo "-->$SCHEDULER_TASK_TRIGGER_FILES<--"
 
                 ]]>
                 </script>
-                <start_when_directory_changed directory="/tmp/testfiles\" regex="^a"/>
+                <start_when_directory_changed directory="/tmp/testfiles" regex="^a"/>
                 <run_time once="yes"/>
             </job>
 

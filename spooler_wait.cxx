@@ -719,7 +719,7 @@ Directory_watcher::Directory_reader::Directory_reader( Directory_watcher* w )
 : 
     _zero_(this+1),
     _directory_path( w->_directory),
-    _regex( _filename_pattern == ""? NULL : &_filename_regexdirectory_path ),
+    _regex( w->_filename_pattern == ""? NULL : &w->_filename_regex ),
     _handle(NULL)
 {
 }
@@ -850,11 +850,11 @@ bool Directory_watcher::has_changed_2( bool throw_error )
                 if( filename == "" )  break;
 
                 new_f->push_back( filename ); 
-                if( !changed )  if( o == old_f->end()  ||  *o != filename )  { changed = true; LOG( "Directory_watcher::has_changed: " << filename << "\n" ); }
+                if( !changed )  if( o == old_f->end()  ||  *o != filename )  { changed = true; Z_LOG( "Directory_watcher::has_changed: " << filename << "\n" ); }
                 if( o != old_f->end() )  o++;
             }
 
-            if( !changed )  if( o != old_f->end() )  { changed = true; LOG( "Directory_watcher::has_changed: " << filename << "\n" ); }
+            if( !changed )  if( o != old_f->end() )  { changed = true; Z_LOG( "Directory_watcher::has_changed\n" ); }
 
             dir.close();
 

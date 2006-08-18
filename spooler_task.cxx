@@ -2014,7 +2014,7 @@ void Module_task::do_close__end()
                                           
         if( int termination_signal = _module_instance->termination_signal() )
         {
-            z::Xc x ( "SCHEDULER-279", termination_signal, signal_name_from_code( termination_signal ) );
+            z::Xc x ( "SCHEDULER-279", termination_signal, signal_name_from_code( termination_signal ) + " " + signal_name_from_code( termination_signal ) );
 
             if( !_job->_ignore_every_signal 
              && _job->_ignore_signals_set.find( termination_signal ) == _job->_ignore_signals_set.end()
