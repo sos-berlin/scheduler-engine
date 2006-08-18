@@ -154,6 +154,7 @@ struct Task : Object,
     void                        set_subprocess_timeout      ();
     bool                        check_subprocess_timeout    ( const Time& now );
     bool                        shall_wait_for_registered_pid();
+    string                      trigger_files               () const                                { return _trigger_files; }
     
 
   protected:
@@ -300,6 +301,7 @@ struct Task : Object,
     ptr<Order>                 _order;
     ptr<Order>                 _order_for_task_end;         // Wird später als _order auf NULL gesetzt, damit im Fehlerfall XSLT-eMail mit <order> verschickt wird. Und für <commands on_exit_code=""/>
     string                     _changed_directories;        // Durch Semikolon getrennt
+    string                     _trigger_files;              // Durch Semikolon getrennt
 
     Registered_pids            _registered_pids;            // Für add_pid() und remove_pid(). kill_task immediately_yes soll auch diese Prozesse abbrechen.
     Subprocess_register        _subprocess_register;        // Fall Task im Scheduler-Prozess läuft

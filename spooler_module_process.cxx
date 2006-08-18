@@ -13,7 +13,8 @@ Process_module_instance::Process_module_instance( Module* module )
 : 
     Module_instance(module),
     _zero_(this+1),
-    _process_handle( "process_handle" )
+    _process_handle( "process_handle" ),
+    _process_environment( new Com_variable_set  )
 {
 }
 
@@ -60,6 +61,15 @@ void Process_module_instance::init()
     Module_instance::init();
 
     _process_param = subst_env( _module->_process_param_raw, _params );
+}
+
+//-------------------------------------------------------------Process_module_instance::attach_task
+
+void Process_module_instance::attach_task( Task* task, Prefix_log* log )
+{
+    Module_instance::attach_task( task, log );
+    
+    _process_environment->set_var( "SCHEDULER_TASK_TRIGGER_FILES", task->trigger_files() );
 }
 
 //----------------------------------------------------------------------Process_module_instance::load
@@ -238,6 +248,7 @@ bool Process_module_instance::begin__end()
 
     ptr<Com_variable_set> v = variable_set_from_environment();
     v->merge( _module->_process_environment );
+    v->merge( _process_environment );
     S env;
     Z_FOR_EACH( Com_variable_set::Map, v->_map, m )
         env << string_from_bstr ( m->first ) << "=" << string_from_variant( m->second->_value ) << '\0';
@@ -493,7 +504,11 @@ bool Process_module_instance::begin__end()
 
             // Environment
 
-            Z_FOR_EACH( Com_variable_set::Map, _module->_process_environment->_map, m )
+            ptr<Com_variable_set> v; // Warum das nicht wie unter Windows?  = variable_set_from_environment();
+            v->merge( _module->_process_environment );
+            v->merge( _process_environment );
+
+            Z_FOR_EACH( Com_variable_set::Map, v->_map, m )
             {
 #               if defined Z_HPUX || defined Z_SOLARIS
                     string e = string_from_bstr ( m->first ) + "=" + m->second->_value.as_string();

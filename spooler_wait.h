@@ -7,6 +7,10 @@
 #include "../zschimmer/regex_class.h"
 #include "../zschimmer/threads.h"
 
+#ifdef Z_UNIX
+#   include <dirent.h>
+#endif
+
 namespace sos {
 namespace spooler {
 
@@ -104,6 +108,33 @@ struct Wait_handles : Non_cloneable
 
 struct Directory_watcher : Event  //, Async_operation
 {
+    struct Directory_reader
+    {
+        Fill_zero _zero_;
+
+                                Directory_reader            ( Directory_watcher* );
+                               ~Directory_reader            ();
+
+        void                    close                       ();
+        string                  get                         ();
+        string                  get_path                    ();
+
+      private:
+        string                  first                       ();
+        string                  next                        ();
+
+        string                 _directory_path;
+        z::Regex*              _regex;
+        bool                   _first_read;
+
+#       ifdef Z_WINDOWS
+            int                _handle;
+#        else
+            DIR*               _handle;
+#       endif
+    };
+
+
     Fill_zero                  _zero_;
 
     Z_GNU_ONLY(                 Directory_watcher           (); )

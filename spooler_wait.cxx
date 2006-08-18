@@ -16,7 +16,6 @@
 #   include <io.h>         // findfirst()
 #else
 #   include <sys/time.h>
-#   include <dirent.h>
 #endif
 
 #include "../kram/sleep.h"
@@ -616,84 +615,141 @@ string Wait_handles::as_string()
     return result;
 }
 
-//---------------------------------------------------------------------------------Directory_reader
+//--------------------------------------------------------------Directory_reader::~Directory_reader
+    
+Directory_watcher::Directory_reader::~Directory_reader()
+{ 
+    close(); 
+}
+
+//----------------------------------------------------------------------------Directory_reader::get
+
+string Directory_watcher::Directory_reader::get() 
+{ 
+    string result;
+
+    while(1)
+    {
+        if( !_first_read )  result = first(),  _first_read = true;
+                      else  result = next();
+
+        if( result == ""   )  break;    // Ende                      
+        if( result == "."  )  continue;
+        if( result == ".." )  continue;
+        if( !_regex || _regex->match( result ) )  break;
+
+        Z_DEBUG_ONLY( Z_LOG2( "joacim", __FUNCTION__ << "    " << result << " nicht übernommen\n" ); ) 
+    }
+
+    Z_DEBUG_ONLY( Z_LOG2( "joacim", __FUNCTION__ << " => " << result << "\n" ); ) 
+
+    return result;
+}
+
+//-----------------------------------------------------------------------Directory_reader::get_path
+
+string Directory_watcher::Directory_reader::get_path()
+{
+    string filename = get();
+    if( filename == "" )  return "";
+                                   
+    string result = _directory_path;
+    
+    if( !string_ends_with( result, Z_DIR_SEPARATOR )
+     && !string_ends_with( result, "/"             ) )  result += Z_DIR_SEPARATOR;
+
+    result += filename;
+
+    return result;
+}
+
+//---------------------------------------------------------------Directory_reader::Directory_reader
 #ifdef Z_WINDOWS
 
-struct Directory_reader
+Directory_watcher::Directory_reader::Directory_reader( Directory_watcher* w ) 
+: 
+    _zero_(this+1),
+    _directory_path( w->_directory),
+    _regex( w->_filename_pattern == ""? NULL : &w->_filename_regex ),
+    _handle(-1) 
 {
-    Directory_reader() : _handle(-1) {}
+}
     
-    ~Directory_reader()
-    { 
-        close(); 
-    }
-    
-    void close() 
-    { 
-        if( _handle != -1 )  _findclose( _handle ),  _handle = -1; 
-    }
+//--------------------------------------------------------------------------Directory_reader::close
 
-    string first( const string& dirname ) 
-    { 
-        string pattern = dirname + "/*";
-        _finddata_t data;
-        _handle = _findfirst( pattern.c_str(), &data ); 
-      //if( data.attrib &  ...dir... )  return data.name + Z_DIR_SEPARATOR;
-        if( _handle == -1 )  throw_errno( errno, "_findfirst", dirname.c_str() );  
-        return data.name; 
-    }
+void Directory_watcher::Directory_reader::close() 
+{ 
+    if( _handle != -1 )  _findclose( _handle ),  _handle = -1; 
+}
 
-    string next() 
-    { 
-        _finddata_t data;
-        int ret = _findnext( _handle, &data ); 
-        if( ret == -1 )  
-        {
-            if( errno == ENOENT )  return "";
-            throw_errno( errno, "_findnext" ); 
-        }
+//--------------------------------------------------------------------------Directory_reader::first
 
-      //if( data.attrib &  ...dir... )  return data.name + Z_DIR_SEPARATOR;
-        return data.name; 
+string Directory_watcher::Directory_reader::first() 
+{ 
+    string pattern = _directory_path + "/*";
+    _finddata_t data;
+    _handle = _findfirst( pattern.c_str(), &data ); 
+  //if( data.attrib &  ...dir... )  return data.name + Z_DIR_SEPARATOR;
+    if( _handle == -1 )  throw_errno( errno, "_findfirst", _directory_path.c_str() );  
+    return data.name; 
+}
+
+//---------------------------------------------------------------------------Directory_reader::next
+
+string Directory_watcher::Directory_reader::next() 
+{ 
+    _finddata_t data;
+    int ret = _findnext( _handle, &data ); 
+    if( ret == -1 )  
+    {
+        if( errno == ENOENT )  return "";
+        throw_errno( errno, "_findnext" ); 
     }
 
-    int  _handle;
-};
+  //if( data.attrib &  ...dir... )  return data.name + Z_DIR_SEPARATOR;
+    return data.name; 
+}
+
 
 #else
 
-struct Directory_reader
+//--------------------------------------------Directory_watcher::Directory_reader::Directory_reader
+
+Directory_watcher::Directory_reader::Directory_reader( Directory_watcher* w ) 
+: 
+    _zero_(this+1),
+    _directory_path( w->_directory),
+    _regex( _filename_pattern == ""? NULL : &_filename_regexdirectory_path ),
+    _handle(NULL)
 {
-    Directory_reader() : _handle(NULL) {}
+}
     
-    ~Directory_reader()
-    { 
-        close(); 
-    }
+//-------------------------------------------------------Directory_watcher::Directory_reader::close
     
-    void close() 
-    { 
-        if( _handle )  closedir( _handle ), _handle = NULL;
-    }
+    void Directory_watcher::Directory_reader::close() 
+{ 
+    if( _handle )  closedir( _handle ), _handle = NULL;
+}
 
-    string first( const string& dirname ) 
-    { 
-        _handle = opendir( dirname.c_str() );
-        if( !_handle )  throw_errno( errno, "opendir", dirname.c_str() );
+//-------------------------------------------------------Directory_watcher::Directory_reader::first
 
-        return next();
-    }
+string Directory_watcher::Directory_reader::first() 
+{ 
+    _handle = opendir( _directory_path.c_str() );
+    if( !_handle )  throw_errno( errno, "opendir", _directory_path.c_str() );
 
-    string next() 
-    { 
-        struct dirent* entry = readdir( _handle );
-        if( !entry )  return "";
+    return next();
+}
 
-        return entry->d_name;
-    }
+//--------------------------------------------------------Directory_watcher::Directory_reader::next
 
-    DIR* _handle;
-};
+string Directory_watcher::Directory_reader::next() 
+{ 
+    struct dirent* entry = readdir( _handle );
+    if( !entry )  return "";
+
+    return entry->d_name;
+}
 
 #endif
 //------------------------------------------------------------------Directory_watcher::close_handle
@@ -786,22 +842,16 @@ bool Directory_watcher::has_changed_2( bool throw_error )
 
             new_f->clear();
 
-            Directory_reader dir;
+            Directory_reader dir ( this );
         
-            string filename = dir.first( _directory.c_str() );
-            while( filename != "" )
+            while(1)
             {
-                if( filename != "."  &&  filename != ".." )
-                {
-                    if( _filename_pattern.empty()  ||  _filename_regex.match( filename ) )
-                    {
-                        new_f->push_back( filename ); 
-                        if( !changed )  if( o == old_f->end()  ||  *o != filename )  { changed = true; LOG( "Directory_watcher::has_changed: " << filename << "\n" ); }
-                        if( o != old_f->end() )  o++;
-                    }
-                }
+                string filename = dir.get(); 
+                if( filename == "" )  break;
 
-                filename = dir.next();
+                new_f->push_back( filename ); 
+                if( !changed )  if( o == old_f->end()  ||  *o != filename )  { changed = true; LOG( "Directory_watcher::has_changed: " << filename << "\n" ); }
+                if( o != old_f->end() )  o++;
             }
 
             if( !changed )  if( o != old_f->end() )  { changed = true; LOG( "Directory_watcher::has_changed: " << filename << "\n" ); }
@@ -832,24 +882,10 @@ bool Directory_watcher::has_changed_2( bool throw_error )
 
 bool Directory_watcher::match()
 {
-    Directory_reader dir;
-
-    string filename = dir.first( _directory );
-
-    while( !filename.empty() )
-    {
-        if( filename != "."  &&  filename != ".." )
-        {
-            if( _filename_regex.match( filename ) )  { Z_LOG2( "joacim", "Directory_watcher.match()  " << filename << " matches\n" ); return true; }
-        }
-
-        filename = dir.next();
-    }
-
-    return false;
+    return Directory_reader( this ).get() != "";
 }
 
-//--------------------------------------------------------------------Directory_watcher::set_signaled
+//------------------------------------------------------------------Directory_watcher::set_signaled
 
 void Directory_watcher::set_signaled()
 {

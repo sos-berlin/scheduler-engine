@@ -480,6 +480,7 @@ struct Com_task : spooler_com::Itask,
     STDMETHODIMP            get_Web_service_or_null         ( spooler_com::Iweb_service** );
     STDMETHODIMP            put_Exit_code                   ( int );
     STDMETHODIMP            get_Exit_code                   ( int* );
+    STDMETHODIMP            get_Trigger_files               ( BSTR* );
 
   private:
     Thread_semaphore           _lock;

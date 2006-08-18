@@ -266,4 +266,6 @@ public class Task extends Idispatch
     
     public void         set_exit_code           ( int exit_code )                   {                       com_call( ">exit_code", exit_code ); }
     public int              exit_code           ()                                  { return            int_com_call( "<exit_code" ); }
+    
+    public String           trigger_files       ()                                  { return (String)       com_call( "<trigger_files" ); }
 }

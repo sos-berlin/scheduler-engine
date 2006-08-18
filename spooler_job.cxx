@@ -1489,7 +1489,7 @@ void Job::remove_waiting_job_from_process_list()
     _waiting_for_process_try_again = false;
 }
 
-//----------------------------------------------------------------------check_for_changed_directory
+//-----------------------------------------------------------------Job::check_for_changed_directory
 
 bool Job::check_for_changed_directory( const Time& now )
 {
@@ -1511,25 +1511,63 @@ bool Job::check_for_changed_directory( const Time& now )
             something_done = true;    // Unter Unix lassen wir do_something() periodisch aufrufen, um has_changed() ausführen können. Also: something done!
 #       endif   
 
-        (*it)->has_changed();                        // has_changed() für Unix (und seit 22.3.04 für Windows, siehe dort).
-        if( (*it)->signaled_then_reset() )        
+        Directory_watcher* directory_watcher = *it;
+
+        directory_watcher->has_changed();                        // has_changed() für Unix (und seit 22.3.04 für Windows, siehe dort).
+
+        if( directory_watcher->signaled_then_reset() )
         {
             _directory_changed = true;
 
-            if( !_changed_directories.empty() )  _changed_directories += ";";
-            _changed_directories += (*it)->directory();
-            
-            if( !(*it)->valid() )
+            if( directory_watcher->directory().find( ';' ) != string::npos )  _log->warn( message_string( "SCHEDULER-976", directory_watcher->directory() ) );
+            else
+            {
+                if( !_changed_directories.empty() )  _changed_directories += ";";
+                _changed_directories += directory_watcher->directory();
+            }
+
+            if( !directory_watcher->valid() )
             {
                 it = _directory_watcher_list.erase( it );  // Folge eines Fehlers, s. Directory_watcher::set_signal
                 continue;
             }
-        }
+        }            
 
         it++;
     }
 
     return something_done;
+}
+
+//-------------------------------------------------------------------------------Job::trigger_files
+
+string Job::trigger_files()
+{
+    S result;
+
+    Z_FOR_EACH( Directory_watcher_list, _directory_watcher_list, it )
+    {
+        Directory_watcher* directory_watcher = *it;
+
+        if( directory_watcher->filename_pattern() != "" )   // Nur mit regex= überwachte Verzeichnisse sollen berücksichtigt werden
+        {
+            Directory_watcher::Directory_reader dir ( directory_watcher );
+            while(1)
+            {
+                string path = dir.get_path();
+                if( path == "" )  break;
+
+                if( path.find( ';' ) != string::npos )  _log->warn( message_string( "SCHEDULER-975", path ) );
+                else
+                {
+                    if( result.length() > 0 )  result << ";";
+                    result << path;
+                }
+            }
+        }
+    }
+
+    return result;
 }
 
 //-------------------------------------------------------------------------------Job::task_to_start
@@ -1543,7 +1581,6 @@ ptr<Task> Job::task_to_start()
     Start_cause     cause = cause_none;
     ptr<Task>       task  = NULL;
     ptr<Order>      order;
-    string          changed_directories;
     string          log_line;
 
     task = get_task_from_queue( now );
@@ -1647,8 +1684,8 @@ ptr<Task> Job::task_to_start()
             }
 
             task->_cause = cause;
-            task->_changed_directories = _changed_directories;
-            _changed_directories = "";
+            task->_changed_directories = _changed_directories;  _changed_directories = "";
+            task->_trigger_files       = trigger_files();
             _directory_changed = false;
 
             if( now >= _next_single_start )  _next_single_start = latter_day;  // Vorsichtshalber, 26.9.03

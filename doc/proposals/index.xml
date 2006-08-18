@@ -12,6 +12,16 @@
 >
 
     <p>
+        <a href="subprocess.xml">Erweiterungen der Subprozesse</a>
+    </p>
+    <div class="indent">
+        <p style="margin-top: 0px">
+            <code>stdout</code> und <code>stderr</code> lesen; <code>system()</code>
+        </p>
+    </div>
+
+
+    <p>
         <a href="process_order.xml">Auftragsgesteuerte &lt;process>-Jobs</a>
     </p>
     <div class="indent">

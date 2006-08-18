@@ -230,7 +230,7 @@ struct Module_instance : Object
     void                    set_close_instance_at_end       ( bool )                                {} // veraltet: _close_instance_at_end = b; }   // Nach spooler_close() Instanz schlieﬂen
     void                    set_params                      ( Com_variable_set* params )            { _params = params; }
 
-    void                        attach_task                 ( Task*, Prefix_log* );
+    virtual void                attach_task                 ( Task*, Prefix_log* );
     virtual void                detach_task                 ();
     virtual void                add_obj                     ( IDispatch*, const string& name );
   //virtual void                add_log_obj                 ( Com_log* log, const string& name )    { add_obj( log, name ); }

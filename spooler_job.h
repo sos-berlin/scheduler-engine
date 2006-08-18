@@ -241,6 +241,7 @@ struct Job : Object,
     void                        start_when_directory_changed( const string& directory_name, const string& filename_pattern );
     void                        clear_when_directory_changed();
     bool                        check_for_changed_directory ( const Time& now );
+    string                      trigger_files               ();
     void                        interrupt_script            ();
     void                        select_period               ( Time = Time::now() );
     bool                        is_in_period                ( Time = Time::now() );

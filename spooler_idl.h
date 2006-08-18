@@ -242,6 +242,7 @@ struct Itask : IDispatch
     virtual HRESULT     get_Web_service_or_null         ( Iweb_service** )                      = 0;
     virtual HRESULT     put_Exit_code                   ( int )                                 = 0;
     virtual HRESULT     get_Exit_code                   ( int* )                                = 0;
+    virtual HRESULT     get_Trigger_files               ( BSTR* )                               = 0;
 };
 
 //--------------------------------------------------------------------------------------Itask_proxy

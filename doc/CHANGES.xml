@@ -10,6 +10,35 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2006-08-18" version="2.0.157" subversion_revision="4414">
+        <revision type="new" title="spooler_task.trigger_files">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_method class="Task" property="trigger_files"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="process"/>: 
+                        Dem Prozess wird die Umgebungsvariable <code>SCHEDULER_TASK_TRIGGER_FILES</code> übergeben.
+                    </li>
+                </ul>
+            </description>
+        </revision>
+        
+        <revision type="correction" title="Aufträge mit &lt;period repeat=&quot;...&quot;>: jeder zweite Tag wurde ausgelassen">
+            <description>
+                Wenn der Scheduler als nächsten Startzeit mit <code>repeat=</code> eine Startzeit errechnete,
+                die außerhalb der Periode lag (immer nach Mitternacht), dann nahm er die auf die errechnete Startzeit folgende Periode,
+                die aber nicht die nächste, sondern die übernächste ist.
+
+                Bei einem einfachen <scheduler_element name="run_time" attribute="period" value="300"/>
+                führte das um Mitternacht zum Überspringen des folgenden Tags.
+                Das ist korrigiert.
+                Der Scheduler ermittelt die folgende Periode aus der Endzeit der aktuellen Periode.
+            </description>
+        </revision>
+
+        </change>        
 
     <change date="2006-08-09" version="2.0.156" subversion_revision="4406">
         <revision type="modification" title="Signal einer abgebrochenen Task wird auch bei nicht &lt;process&gt;-Jobs zum negativen Exit code">

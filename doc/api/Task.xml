@@ -168,9 +168,14 @@
 
         <description>
             <p>
-                Siehe <scheduler_method class="Job" method="start_when_directory_changed"/>.
+                Siehe <scheduler_method class="Job" method="start_when_directory_changed"/>,
+                <scheduler_method class="Task" property="trigger_files"/>.
             </p>
         </description>
+
+        <messages>
+            <message level="warn" code="SCHEDULER-976"/>
+        </messages>
     </property>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
@@ -789,6 +794,54 @@ $spooler_log->info( 'order.id=' . $order->id . ', order.title=' . $order->title 
                 Der Text in <code>stderr</code> wird derzeit im Zeichensatz ISO-8859-1 interpretiert.
             </p>
         </description>
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="trigger_files" access="read">
+        <com>
+            <com.result name="file paths">
+                <com.type type="BSTR"/>
+
+                <description>
+                    <p>
+                        Die Dateipfade durch Semikolon getrennt.
+                    </p>
+                    <p>
+                        <code>""</code> sonst
+                    </p>
+                </description>
+            </com.result>
+        </com>
+
+        <title>
+            Pfade der Dateien in mit regex überwachten Verzeichnissen
+        </title>
+
+        <description>
+            <p>
+                Liefert die Pfade der Dateien aus überwachten Verzeichnissen
+                (<scheduler_method class="Job" method="start_when_directory_changed"/> oder 
+                <scheduler_element name="start_when_directory_changed"/>)
+                zum Zeitpunkt des Starts der Task.
+                Nur die Verzeichnisse, für die ein Regulärer Ausdruck (<code>regex</code>) angegeben ist,
+                werden berücksichtigt.
+            </p>
+            <p>
+                Die Pfade werden aus dem Verzeichnispfad, wie er in
+                <scheduler_method class="Job" method="start_when_directory_changed"/> oder
+                <scheduler_element name="start_when_directory_changed"/>
+                angegeben ist und dem Dateinamen zusammengesetzt.
+            </p>
+            <p>
+                Siehe <scheduler_method class="Job" method="start_when_directory_changed"/>,
+                <scheduler_method class="Task" method="changed_directories"/>.
+            </p>
+        </description>
+
+        <messages>
+            <message level="warn" code="SCHEDULER-975"/>
+        </messages>
     </property>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->

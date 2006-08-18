@@ -275,6 +275,8 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-972", "Still waiting until $1 ($2) ..." },
     { "SCHEDULER-973", "Killed task does not stop the job because of ignore_signals=\"...\"" },
     { "SCHEDULER-974", "Last error does not stop the job if the task aborts (after kill or crash) with any signal listed in ignore_signals=\"$1\". In this case, expect warning SCHEDULER-279" },
+    { "SCHEDULER-975", "This file path with ';' will not be included in changed_directory: $1" },
+    { "SCHEDULER-976", "This directory path with ';' will not be included in triggered_files: $1" },
     { "SCHEDULER-999", "Scheduler has been terminated properly" },
     {}
 };

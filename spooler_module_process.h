@@ -30,6 +30,8 @@ struct Process_module_instance : Module_instance
                                 Process_module_instance     ( Module* );
                                ~Process_module_instance     ();
 
+    virtual void                attach_task                 ( Task*, Prefix_log* );
+
     void                        init                        ();
     bool                        load                        ();
     void                        start                       ();
@@ -62,6 +64,7 @@ struct Process_module_instance : Module_instance
     bool                       _is_killed;
     File                       _shell_file;
     string                     _process_param;
+    ptr<Com_variable_set>      _process_environment;
 
 #   ifdef Z_WINDOWS
         //Process_id             _pid;

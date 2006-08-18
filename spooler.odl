@@ -442,6 +442,9 @@ library Spooler
 
         [propget]
         HRESULT                 Exit_code                   ( [out,retval] int* );
+
+        [propget]
+        HRESULT                 Trigger_files               ( [out,retval] BSTR* Result );
     }
 
     [

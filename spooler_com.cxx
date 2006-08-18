@@ -2147,6 +2147,7 @@ const Com_method Com_task::_methods[] =
     { DISPATCH_PROPERTYGET, 29, "Priority"                  , (Com_method_ptr)&Com_task::get_Priority           , VT_INT        },
     { DISPATCH_PROPERTYPUT, 30, "Exit_code"                 , (Com_method_ptr)&Com_task::put_Exit_code          , VT_EMPTY      , { VT_INT } },
     { DISPATCH_PROPERTYGET, 30, "Exit_code"                 , (Com_method_ptr)&Com_task::get_Exit_code          , VT_INT        },
+    { DISPATCH_PROPERTYGET, 31, "Trigger_files"             , (Com_method_ptr)&Com_task::get_Trigger_files      , VT_BSTR       },
     {}
 };
 
@@ -2529,6 +2530,25 @@ STDMETHODIMP Com_task::get_Changed_directories( BSTR* result )
         if( !_task->thread()  ||  current_thread_id() != _task->thread()->thread_id() )  return E_ACCESSDENIED;
 
         hr = String_to_bstr( _task->_changed_directories, result );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+
+//----------------------------------------------------------------------Com_task::get_Trigger_files
+
+STDMETHODIMP Com_task::get_Trigger_files( BSTR* result )
+{
+    HRESULT hr = S_OK;
+
+    try
+    {
+        if( !_task )  z::throw_xc( "SCHEDULER-122" );
+        if( !_task->thread()  ||  current_thread_id() != _task->thread()->thread_id() )  return E_ACCESSDENIED;
+
+        hr = String_to_bstr( _task->_trigger_files, result );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
