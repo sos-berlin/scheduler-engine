@@ -664,7 +664,7 @@ void Job::signal( const string& signal_name )
 { 
     THREAD_LOCK_DUMMY( _lock )  _next_time = 0;
     
-    Z_LOG2( "joacim", __FUNCTION__ << " " << signal_name << "\n" );
+    //Z_LOG2( "joacim", __FUNCTION__ << " " << signal_name << "\n" );
     _spooler->signal( signal_name ); 
 }
 
@@ -1496,13 +1496,19 @@ bool Job::check_for_changed_directory( const Time& now )
     bool something_done = false;
 
 #   ifdef Z_UNIX
-        if( now < _directory_watcher_next_time )  return false;
+        if( now < _directory_watcher_next_time )  
+        { 
+            //Z_LOG2( "joacim", obj_name() << " " << __FUNCTION__ << " " << now << "<" << _directory_watcher_next_time << "\n" ); 
+            return false; 
+        }
 #   endif
 
 
     //Z_LOG2( "joacim", "Job::task_to_start(): Verzeichnisüberwachung _directory_watcher_next_time=" << _directory_watcher_next_time << ", now=" << now << "\n" );
     _directory_watcher_next_time = _directory_watcher_list.size() > 0? Time( now + directory_watcher_intervall )
                                                                      : latter_day;
+    calculate_next_time();
+
 
     Directory_watcher_list::iterator it = _directory_watcher_list.begin();
     while( it != _directory_watcher_list.end() )
@@ -1536,6 +1542,7 @@ bool Job::check_for_changed_directory( const Time& now )
         it++;
     }
 
+    //Z_LOG2( "joacim", obj_name() << " " << __FUNCTION__ << " something_done=" << something_done << "\n" ); 
     return something_done;
 }
 
@@ -1806,7 +1813,15 @@ bool Job::do_something()
                 }
                 else
                 {
-                    Z_LOG2( "scheduler.nothing_done", obj_name() << ".do_something()  Nichts getan. state=" << state_name() << ", _next_time war " << next_time_at_begin << "\n" );
+                    Z_LOG2( "scheduler.nothing_done", obj_name() << ".do_something()  Nichts getan. state=" << state_name() << ", _next_time war " << next_time_at_begin <<
+                            " _next_time=" << _next_time <<
+                            " _next_start_time=" << _next_start_time <<
+                            " _next_single_start=" << _next_single_start <<
+                            " _directory_watcher_next_time=" << _directory_watcher_next_time <<
+                            " _period=" << _period.obj_name() <<
+                            " _repeat=" << _repeat <<
+                            " _waiting_for_process=" << _waiting_for_process <<
+                            "\n" );
                 }
             }
         }

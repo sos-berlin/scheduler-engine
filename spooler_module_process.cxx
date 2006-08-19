@@ -54,7 +54,7 @@ void Process_module_instance::close_handle()
     }
 }
 
-//----------------------------------------------------------------------Process_module_instance::init
+//--------------------------------------------------------------------Process_module_instance::init
     
 void Process_module_instance::init()
 {
@@ -72,7 +72,7 @@ void Process_module_instance::attach_task( Task* task, Prefix_log* log )
     _process_environment->set_var( "SCHEDULER_TASK_TRIGGER_FILES", task->trigger_files() );
 }
 
-//----------------------------------------------------------------------Process_module_instance::load
+//--------------------------------------------------------------------Process_module_instance::load
 
 bool Process_module_instance::load()
 {
@@ -504,17 +504,18 @@ bool Process_module_instance::begin__end()
 
             // Environment
 
-            ptr<Com_variable_set> v; // Warum das nicht wie unter Windows?  = variable_set_from_environment();
+            ptr<Com_variable_set> v = new Com_variable_set();
             v->merge( _module->_process_environment );
             v->merge( _process_environment );
 
             Z_FOR_EACH( Com_variable_set::Map, v->_map, m )
             {
+                fprintf(stderr,"%s %s=%s\n", __FUNCTION__, string_from_bstr( m->first ).c_str(), m->second->_value.as_string().c_str() );
 #               if defined Z_HPUX || defined Z_SOLARIS
-                    string e = string_from_bstr ( m->first ) + "=" + m->second->_value.as_string();
+                    string e = string_from_bstr( m->first ) + "=" + m->second->_value.as_string();
                     putenv( strdup( e.c_str() ) );
 #                else
-                    setenv( string_from_bstr ( m->first ).c_str(), m->second->_value.as_string().c_str(), true );
+                    setenv( string_from_bstr( m->first ).c_str(), m->second->_value.as_string().c_str(), true );
 #               endif
             }
 
