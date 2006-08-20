@@ -2672,6 +2672,7 @@ void Spooler::run()
                     }
 
 
+#                 ifndef Z_UNIX   // Unter Unix mit Verzeichnisüberwachung gibt der Scheduler alle show_message_after_seconds Sekunden die Meldung SCHEDULER-972 aus
                     if( !signaled  &&  !_print_time_every_second )  //!string_begins_with( _log.last_line(), "SCHEDULER-972" ) )
                     {
                         Time first_wait_until = _base_log.last_time() + ( _log.log_level() <= log_debug3? show_message_after_seconds_debug : show_message_after_seconds );
@@ -2686,6 +2687,7 @@ void Spooler::run()
                             }
                         }
                     }
+#                 endif
 
                     if( !signaled )
                     {

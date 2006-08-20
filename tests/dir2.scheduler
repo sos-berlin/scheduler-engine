@@ -110,7 +110,7 @@ public class Import  extends sos.spooler.Job_impl
                 <start_when_directory_changed directory="/tmp/testfiles" regex="^a" />
             </job>
 
-            
+
             <job name="shell">
                 <script language="shell">
                     <![CDATA[ 

@@ -251,7 +251,7 @@ bool Process_module_instance::begin__end()
     v->merge( _process_environment );
     S env;
     Z_FOR_EACH( Com_variable_set::Map, v->_map, m )
-        env << string_from_bstr ( m->first ) << "=" << string_from_variant( m->second->_value ) << '\0';
+        env << string_from_bstr ( m->second->_name ) << "=" << string_from_variant( m->second->_value ) << '\0';
     env << '\0';
 
     DWORD creation_flags = 0;
@@ -510,12 +510,11 @@ bool Process_module_instance::begin__end()
 
             Z_FOR_EACH( Com_variable_set::Map, v->_map, m )
             {
-                fprintf(stderr,"%s %s=%s\n", __FUNCTION__, string_from_bstr( m->first ).c_str(), m->second->_value.as_string().c_str() );
 #               if defined Z_HPUX || defined Z_SOLARIS
-                    string e = string_from_bstr( m->first ) + "=" + m->second->_value.as_string();
+                    string e = string_from_bstr( m->second->_name ) + "=" + m->second->_value.as_string();
                     putenv( strdup( e.c_str() ) );
 #                else
-                    setenv( string_from_bstr( m->first ).c_str(), m->second->_value.as_string().c_str(), true );
+                    setenv( string_from_bstr( m->second->_name ).c_str(), m->second->_value.as_string().c_str(), true );
 #               endif
             }
 
