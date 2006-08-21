@@ -1687,7 +1687,7 @@ void Task::finish()
 
     // Bei mehreren aufeinanderfolgenden Fehlern Wiederholung verzögern?
 
-    if( has_error() )
+    if( has_error()  &&  _job->_delay_after_error.size() > 0 )
     {
         InterlockedIncrement( &_job->_error_steps );
 
