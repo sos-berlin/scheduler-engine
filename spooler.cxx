@@ -1556,7 +1556,7 @@ void Spooler::send_cmd()
 
 
     SOCKET sock = socket( PF_INET, SOCK_STREAM, 0 );
-    if( sock == SOCKET_ERROR ) throw_sos_socket_error( "socket" );
+    if( sock == SOCKET_ERROR )  z::throw_socket( socket_errno(), "socket" );
 
     struct linger l; 
     l.l_onoff  = 1; 
@@ -1572,7 +1572,7 @@ void Spooler::send_cmd()
     addr.sin_port = htons( _tcp_port );
 
     int ret = connect( sock, (sockaddr*)&addr, sizeof addr );
-    if( ret == -1 )  throw_sos_socket_error( "connect" );
+    if( ret == -1 )  z::throw_socket( socket_errno(), "connect" );
 
     const char* p     = _send_cmd.data();
     const char* p_end = p + _send_cmd.length();
@@ -1580,7 +1580,7 @@ void Spooler::send_cmd()
     while( p < p_end )
     {
         ret = send( sock, p, p_end - p, 0 );
-        if( ret == -1 )  throw_sos_socket_error( "send" );
+        if( ret == -1 )  z::throw_socket( socket_errno(), "send" );
 
         p += ret;
     }
@@ -1595,7 +1595,7 @@ void Spooler::send_cmd()
 
         int ret = recv( sock, buffer, sizeof buffer, 0 );
         if( ret == 0 )  break;
-        if( ret < 0 )  throw_sos_socket_error( "recv" );
+        if( ret < 0 )  z::throw_socket( socket_errno(), "recv" );
         fwrite( buffer, ret, 1, stdout );
         last_was_nl = buffer[ret-1] == '\n';
         if( xml_end_finder.is_complete( buffer, ret ) )  break;

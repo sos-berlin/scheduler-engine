@@ -39,7 +39,9 @@
     
     <description>
         <p>
-            Anschließend stoppt der Job.
+            Wenn die Fehlermeldung ins Task-Protokoll (<scheduler_method class="Job_impl" property="spooler_log"/>) geschrieben wird
+            und nicht <scheduler_element name="job" attribute="stop_on_error" value="no"/> eingestellt ist,
+            stoppt der Job nach Ende der Task.
         </p>
     </description>
 </method>

@@ -265,6 +265,7 @@ struct Job : Object,
     bool                        read_script                 ( Module* );
   //void                        end                         ();
     void                        stop                        ( bool end_all_tasks );
+    void                        stop_after_error            ( bool end_all_tasks );                 // _ignore_error verhindert stop()
     void                        set_next_start_time         ( Time now, bool repeat = false );
     void                        set_next_time               ( Time );
     void                        calculate_next_time         ( Time now = Time::now() );
@@ -379,6 +380,7 @@ struct Job : Object,
     bool                       _remove;                     // Job enfernen sobald möglich. _state == s_stopping, dann s_stopped
     bool                       _start_once;                 // <run_time start_once="">, wird false nach Start
     bool                       _machine_resumable;          // Test
+    bool                       _stop_on_error;              // Nach Task-Fehler Job stoppen (default)
     bool                       _ignore_every_signal;        // Nur Unix: Nach Beendigung mit Signal (kill, Absturz) den Job nicht stoppen 
     std::set<int>              _ignore_signals_set;
 

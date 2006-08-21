@@ -11,6 +11,17 @@
     <scheduler_keyword keyword="Change log"/>
 
     <change date="2006-08-18" version="2.0.157" subversion_revision="4414">
+        <revision type="new" title="&lt;job stop_on_error=&quot;no&quot;>">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_element name="job" attribute="stop_on_error" value="no"/>
+                        verhindert den Stopp des Jobs wegen einer Fehlermeldung einer Task.
+                    </li>
+                </ul>
+            </description>
+        </revision>
+
         <revision type="new" title="spooler_task.trigger_files">
             <description>
                 <ul>
@@ -24,7 +35,15 @@
                 </ul>
             </description>
         </revision>
-        
+
+        <revision type="correction" title="&lt;environment>: Originalgroßschreibung der Umgebungsvariablennamen">
+            <description>
+                Der Scheduler setzte die Umgebungsvariablennamen in Kleinschreibung.
+                Jetzt verwendet er die Schreibung wie in <scheduler_element name="environment"/> angegeben.
+                Unter Windows hat das keine Auswirkung, weil die Schreibung keine Rolle spielt.
+            </description>
+        </revision>
+
         <revision type="correction" title="Aufträge mit &lt;period repeat=&quot;...&quot;>: jeder zweite Tag wurde ausgelassen">
             <description>
                 Wenn der Scheduler als nächsten Startzeit mit <code>repeat=</code> eine Startzeit errechnete,
@@ -38,7 +57,7 @@
             </description>
         </revision>
 
-        </change>        
+    </change>        
 
     <change date="2006-08-09" version="2.0.156" subversion_revision="4406">
         <revision type="modification" title="Signal einer abgebrochenen Task wird auch bei nicht &lt;process&gt;-Jobs zum negativen Exit code">

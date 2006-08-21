@@ -277,6 +277,10 @@
                 Wenn kein Fehler vorliegt, wird ein <scheduler_method class="Error"/>-Objekt zurückgeliefert,
                 dessen Eigenschaft <code>is_error </code> <code>false</code> liefert.
             </p>
+            <p>
+                Sie können eine Fehlermeldung auch mit
+                <scheduler_method class="Log" object="spooler_log" method="error"/> ins Task-Protokoll schreiben.
+            </p>
         </description>
     </property>
 

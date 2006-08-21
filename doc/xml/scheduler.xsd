@@ -353,7 +353,8 @@
             <xsd:attribute name="process_class"         type="Name"/>
             <xsd:attribute name="mail_xslt_stylesheet"  type="File"/>
             <xsd:attribute name="java_options"          type="String"/>
-            
+            <xsd:attribute name="ignore_error"          type="Yes_no"/>
+
             <xsd:attribute name="ignore_signals">
                 <xsd:simpleType>
                     <xsd:union>

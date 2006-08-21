@@ -50,7 +50,8 @@ Job::Job( Spooler* spooler )
     _task_queue(this),
     _history(this),
     _lock( "Job" ),
-    _visible(true)
+    _visible(true),
+    _stop_on_error(true)
 {
     init_run_time();
 
@@ -139,6 +140,8 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
                 }
             }
         }
+
+        _stop_on_error = element.bool_getAttribute( "stop_on_error", _stop_on_error );
 
         _force_idle_timeout = element.bool_getAttribute( "force_idle_timeout", _force_idle_timeout );
 
@@ -1036,6 +1039,19 @@ bool Job::read_script( Module* module )
     }
 
     return true;
+}
+
+//----------------------------------------------------------------------------Job::stop_after_error
+
+void Job::stop_after_error( bool end_all_tasks )
+{
+    if( _stop_on_error )
+    {
+        _log->debug3( message_string( "SCHEDULER-978" ) );
+        stop( end_all_tasks );
+    }
+    else  
+        _log->debug3( message_string( "SCHEDULER-977" ) );
 }
 
 //----------------------------------------------------------------------------------------Job::stop
