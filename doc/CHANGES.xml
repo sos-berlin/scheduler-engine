@@ -10,7 +10,7 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2006-08-18" version="2.0.157" subversion_revision="4414">
+    <change date="2006-08-18" version="2.0.157" subversion_revision="4424">
         <revision type="new" title="&lt;job stop_on_error=&quot;no&quot;>">
             <description>
                 <ul>
