@@ -83,8 +83,10 @@
                     <tr>
                         <td><code>cmd="start"</code></td>
                         <td>
-                            Erzeugt eine neue Task und reiht sie in die Task-Warteschlange ein.
-                            Dasselbe wie <scheduler_element name="start_job" parameter="job=&quot;jobname&quot;"/>.
+                            <p>
+                                Erzeugt eine neue Task und reiht sie in die Task-Warteschlange ein.
+                                Dasselbe wie <scheduler_element name="start_job" parameter="job=&quot;jobname&quot;"/>.
+                            </p>
                         </td>
                     </tr>
                     <tr>
@@ -108,18 +110,22 @@
                     <tr>
                         <td><code>cmd="suspend"</code></td>
                         <td>
-                            Auf alle laufenden Tasks, die im Zustand <code>running</code>, <code>running_delayed</code> oder
-                            <code>running_waiting_for_order</code> sind,
-                            wird das Kommando <code>suspend</code> angewendet,
-                            d.h. der Scheduler ruft keine weitere Methode des Jobs auf.
+                            <p>
+                                Auf alle laufenden Tasks, die im Zustand <code>running</code>, <code>running_delayed</code> oder
+                                <code>running_waiting_for_order</code> sind,
+                                wird das Kommando <code>suspend</code> angewendet,
+                                d.h. der Scheduler ruft keine weitere Methode des Jobs auf.
+                            </p>
                         </td>
                     </tr>
                     <tr>
                         <td><code>cmd="continue"</code></td>
                         <td>
-                            Auf alle suspendierten Tasks, die im Zustand <code>suspended</code>, <code>running_delayed</code> oder
-                            <code>running_waiting_for_order</code> sind,
-                            wird das Kommando <code>continue</code> angewendet.
+                            <p>
+                                Auf alle suspendierten Tasks, die im Zustand <code>suspended</code>, <code>running_delayed</code> oder
+                                <code>running_waiting_for_order</code> sind,
+                                wird das Kommando <code>continue</code> angewendet.
+                            </p>
                         </td>
                     </tr>
                     <tr>

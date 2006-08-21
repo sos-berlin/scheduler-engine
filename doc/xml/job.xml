@@ -358,6 +358,11 @@
                     <code>stop_on_error="no"</code> lässt den Job nicht stoppen, wenn das Task-Protokoll eine Fehlermeldung enthält.
                 </p>
             </description>
+            
+            <messages>
+                <message level="debug3" code="SCHEDULER-977"/>
+                <message level="debug3" code="SCHEDULER-978"/>
+            </messages>
         </xml_attribute>
 
     </xml_attributes>

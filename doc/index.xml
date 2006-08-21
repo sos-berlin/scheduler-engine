@@ -36,12 +36,12 @@
 </scheduler_ignore>
 
 <description.style type="text/css">
-    h2 { text-align: center; }
+    h2 { text-align: left; }
     dt { margin-top: 4ex; font-weight: bold; }
     dd { color: black }
 </description.style>
 
-<h1 style="text-align: center; font-size: 18pt; margin-bottom: 2ex">Der Scheduler</h1>
+<h1 style="text-align: left; font-size: 18pt; margin-bottom: 2ex">Der Scheduler</h1>
 
 <p>
     Der <span class="sos_name">Scheduler</span> startet Jobs und überwacht sie.

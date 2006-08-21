@@ -133,7 +133,10 @@ spooler_log.info( request.charset_name );               // ==> utf-8</pre>
         <description>
             <p>
                 Zuvor muss <code>header( "Content-Type" )</code> mit dem Parameter <code>charset</code> gesetzt sein,
-                zum Beispiel <code>header( "Content-Type" ) = "text/plain; charset=iso-8859-1"</code>.
+                zum Beispiel
+            </p>
+            <pre>header( "Content-Type" ) = "text/plain; charset=iso-8859-1";</pre>
+            <p>
                 Der Text wird nach dem Parameter <code>charset</code> codiert.
                 Fehlt der Parameter, wird ISO-8859-1 angenommen.
             </p>

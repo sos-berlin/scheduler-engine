@@ -4487,7 +4487,7 @@ const char file_scheduler_xsd[] =
     "<xsd:attribute name=\"process_class\"         type=\"Name\"/>\r\n"
     "<xsd:attribute name=\"mail_xslt_stylesheet\"  type=\"File\"/>\r\n"
     "<xsd:attribute name=\"java_options\"          type=\"String\"/>\r\n"
-    "<xsd:attribute name=\"ignore_error\"          type=\"Yes_no\"/>\r\n"
+    "<xsd:attribute name=\"stop_on_error\"         type=\"Yes_no\"/>\r\n"
     "\r\n"
     "<xsd:attribute name=\"ignore_signals\">\r\n"
     "<xsd:simpleType>\r\n"
@@ -5320,7 +5320,7 @@ static const Embedded_file embedded_files_array[] =
     { "html/jz/translation_de.js", file_html_jz_translation_de_js, sizeof file_html_jz_translation_de_js - 1, 1113979995 },
     { "html/jz/scheduler.xslt", file_html_jz_scheduler_xslt, sizeof file_html_jz_scheduler_xslt - 1, 1150703826 },
     { "html/jz/scheduler.css", file_html_jz_scheduler_css, sizeof file_html_jz_scheduler_css - 1, 1148569750 },
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1156036450 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1156141716 },
     { NULL, NULL, 0 }
 };
 

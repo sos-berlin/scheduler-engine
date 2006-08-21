@@ -17,6 +17,9 @@
                     <li>
                         <scheduler_element name="job" attribute="stop_on_error" value="no"/>
                         verhindert den Stopp des Jobs wegen einer Fehlermeldung einer Task.
+                        Bei <scheduler_option name="log-level" value="debug3"/> gibt der Scheduler am
+                        Ende einer fehlerhaften Task die Meldungen 
+                        <scheduler_message code="SCHEDULER-977"/> oder <scheduler_message code="SCHEDULER-978"/> aus.
                     </li>
                 </ul>
             </description>
@@ -38,22 +41,27 @@
 
         <revision type="correction" title="&lt;environment>: Originalgroßschreibung der Umgebungsvariablennamen">
             <description>
-                Der Scheduler setzte die Umgebungsvariablennamen in Kleinschreibung.
-                Jetzt verwendet er die Schreibung wie in <scheduler_element name="environment"/> angegeben.
-                Unter Windows hat das keine Auswirkung, weil die Schreibung keine Rolle spielt.
+                <p>
+                    Der Scheduler setzte die Umgebungsvariablennamen in Kleinschreibung.
+                    Jetzt verwendet er die Schreibung wie in <scheduler_element name="environment"/> angegeben.
+                    Unter Windows hat das keine Auswirkung, weil die Schreibung keine Rolle spielt.
+                </p>
             </description>
         </revision>
 
         <revision type="correction" title="Aufträge mit &lt;period repeat=&quot;...&quot;>: jeder zweite Tag wurde ausgelassen">
             <description>
+                <p>
                 Wenn der Scheduler als nächsten Startzeit mit <code>repeat=</code> eine Startzeit errechnete,
-                die außerhalb der Periode lag (immer nach Mitternacht), dann nahm er die auf die errechnete Startzeit folgende Periode,
-                die aber nicht die nächste, sondern die übernächste ist.
-
-                Bei einem einfachen <scheduler_element name="run_time" attribute="period" value="300"/>
-                führte das um Mitternacht zum Überspringen des folgenden Tags.
-                Das ist korrigiert.
-                Der Scheduler ermittelt die folgende Periode aus der Endzeit der aktuellen Periode.
+                    die außerhalb der Periode lag (immer nach Mitternacht), dann nahm er die auf die errechnete Startzeit folgende Periode,
+                    die aber nicht die nächste, sondern die übernächste ist.
+                </p>
+                <p>
+                    Bei einem einfachen <scheduler_element name="run_time" attribute="period" value="300"/>
+                    führte das um Mitternacht zum Überspringen des folgenden Tags.
+                    Das ist korrigiert.
+                    Der Scheduler ermittelt die folgende Periode aus der Endzeit der aktuellen Periode.
+                </p>
             </description>
         </revision>
 

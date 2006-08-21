@@ -265,7 +265,7 @@ struct Job : Object,
     bool                        read_script                 ( Module* );
   //void                        end                         ();
     void                        stop                        ( bool end_all_tasks );
-    void                        stop_after_error            ( bool end_all_tasks );                 // _ignore_error verhindert stop()
+    void                        stop_after_task_error       ( bool end_all_tasks, const string& error_message );   // _ignore_error verhindert stop()
     void                        set_next_start_time         ( Time now, bool repeat = false );
     void                        set_next_time               ( Time );
     void                        calculate_next_time         ( Time now = Time::now() );

@@ -1041,17 +1041,17 @@ bool Job::read_script( Module* module )
     return true;
 }
 
-//----------------------------------------------------------------------------Job::stop_after_error
+//-----------------------------------------------------------------------Job::stop_after_task_error
 
-void Job::stop_after_error( bool end_all_tasks )
+void Job::stop_after_task_error( bool end_all_tasks, const string& error_message )
 {
     if( _stop_on_error )
     {
-        _log->debug3( message_string( "SCHEDULER-978" ) );
+        _log->debug3( message_string( "SCHEDULER-978", error_message ) );
         stop( end_all_tasks );
     }
     else  
-        _log->debug3( message_string( "SCHEDULER-977" ) );
+        _log->debug3( message_string( "SCHEDULER-977", error_message ) );
 }
 
 //----------------------------------------------------------------------------------------Job::stop

@@ -2767,13 +2767,13 @@
 
         <message code="SCHEDULER-977">
             <text xml:lang="en">
-                <title>Job continues because of <code>&lt;job stop_on_error="no"></code></title>
+                <title>Job does not stop because of <code>&lt;job stop_on_error="no"></code>. Task error was: <p1/></title>
             </text>
         </message>
         
         <message code="SCHEDULER-978">
             <text xml:lang="en">
-                <title>Job stops because of <code>&lt;job stop_on_error="yes"></code></title>
+                <title>Job stops because of <code>&lt;job stop_on_error="yes"></code>. Task error was: <p1/></title>
             </text>
         </message>
         

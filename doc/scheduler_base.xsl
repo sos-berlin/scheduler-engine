@@ -275,14 +275,14 @@
                         </xsl:call-template>
                     </h2>
 
-                    <div class="indent">
+                    <p class="indent">
                         <xsl:apply-templates select="." mode="phrase">
                             <xsl:with-param name="element">
                                 <code><xsl:value-of select="parent::*/@name"/></code>
                             </xsl:with-param>
                         </xsl:apply-templates>
                         <xsl:apply-templates select="description"/>
-                    </div>
+                    </p>
                 </xsl:for-each>
 
                 <xsl:apply-templates select="xml_parent_elements"/>
@@ -1331,18 +1331,27 @@
 
     </xsl:template>
 
-    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~description-->
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~title-->
 
-    <xsl:template match="description | title">
+    <xsl:template match="title">
         <xsl:apply-templates select="node()" mode="description"/>
     </xsl:template>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~description-->
-    <!--
-    <xsl:template match="text()" mode="description">
-        <xsl:value-of select="."/>
+
+    <xsl:template match="description">
+        <xsl:choose>
+            <xsl:when test="not( p )">    <!-- <p> vergessen hinzuschreiben? -->
+                <p class="first">
+                    <xsl:apply-templates select="node()" mode="description"/>
+                </p>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:apply-templates select="node()" mode="description"/>
+            </xsl:otherwise>
+        </xsl:choose>
     </xsl:template>
-    -->
+
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~description-->
 
     <!-- Alles kopieren, außer <scheduler_element> usw. -->
@@ -1357,6 +1366,15 @@
         </xsl:copy>
     </xsl:template>
 
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~text()-->
+    <!-- <description>TEXT</description> ==> <description><p>TEXT</p><description> -->
+    <!--
+    <xsl:template match="text() [ parent::description ]" mode="description">
+        <p>
+            <xsl:copy-of select="."/>
+        </p>
+    </xsl:template>
+    -->
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~p-->
     <!-- Das erste <p> in einem <description> bekommt class="first"
          Damit fällt die Leerzeile am Anfang weg. -->
@@ -1710,12 +1728,14 @@
                 <xsl:value-of select="concat( $base_dir, 'command_line.xml#option_', $name )"/>
             </xsl:attribute>
             <code>
-                -<xsl:value-of select="$name"/>
+                <xsl:text>-</xsl:text>
+                <xsl:value-of select="$name"/>
             </code>
 
             <xsl:if test="$value">
                 <code>
-                    =<xsl:value-of select="$value"/>
+                    <xsl:text>=</xsl:text>
+                    <xsl:value-of select="$value"/>
                 </code>
             </xsl:if>
 

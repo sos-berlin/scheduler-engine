@@ -1447,9 +1447,9 @@ bool Task::do_something()
 
                     try
                     {
-                        if( _job )  _job->stop_after_error( false );
+                        if( _job )  _job->stop_after_task_error( false, x.what() );
                     }
-                    catch( exception& x ) { _log->error( "Job->stop_after_error(): " + string( x.what() ) ); }
+                    catch( exception& x ) { _log->error( "Job->stop_after_task_error(): " + string( x.what() ) ); }
 
                     set_state( s_closed );
                 }
@@ -1674,7 +1674,7 @@ void Task::finish()
 
     if( has_error()  &&  _job->repeat() == 0  &&  _job->_delay_after_error.empty() )
     {
-        _job->stop_after_error( false );
+        _job->stop_after_task_error( false, _error.what() );
     }
     else
     if( _job->_temporary  &&  _job->repeat() == 0 )
@@ -1717,7 +1717,7 @@ void Task::finish()
                     {
                         _log->error( x.what() );
                         _job->_delay_until = 0;
-                        _job->stop_after_error( false );
+                        _job->stop_after_task_error( false, x.what() );
                     }
                 }
             }
