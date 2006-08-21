@@ -287,38 +287,38 @@
                 <p>
                     Statt <code>"all"</code> können Sie auch eine Liste von Signalnamen angeben (durch Leerzeichen getrennt).
                     Dabei sind, abhängig vom Betriebssystem, diese Signalnamen bekannt:
-                    <code>SIGHUP</code>
-                    <code>SIGINT</code>
-                    <code>SIGQUIT</code>
-                    <code>SIGILL</code>
-                    <code>SIGTRAP</code>
-                    <code>SIGABRT</code>
-                    <code>SIGIOT</code>
-                    <code>SIGBUS</code>
-                    <code>SIGFPE</code>
-                    <code>SIGKILL</code>
-                    <code>SIGUSR1</code>
-                    <code>SIGSEGV</code>
-                    <code>SIGUSR2</code>
-                    <code>SIGPIPE</code>
-                    <code>SIGALRM</code>
-                    <code>SIGTERM</code>
-                    <code>SIGSTKFLT</code>
-                    <code>SIGCHLD</code>
-                    <code>SIGCONT</code>
-                    <code>SIGSTOP</code>
-                    <code>SIGTSTP</code>
-                    <code>SIGTTIN</code>
-                    <code>SIGTTOU</code>
-                    <code>SIGURG</code>
-                    <code>SIGXCPU</code>
-                    <code>SIGXFSZ</code>
-                    <code>SIGVTALRM</code>
-                    <code>SIGPROF</code>
-                    <code>SIGWINCH</code>
-                    <code>SIGPOLL</code>
-                    <code>SIGIO</code>
-                    <code>SIGPWR</code>
+                    <code>SIGHUP</code>,
+                    <code>SIGINT</code>,
+                    <code>SIGQUIT</code>,
+                    <code>SIGILL</code>,
+                    <code>SIGTRAP</code>,
+                    <code>SIGABRT</code>,
+                    <code>SIGIOT</code>,
+                    <code>SIGBUS</code>,
+                    <code>SIGFPE</code>,
+                    <code>SIGKILL</code>,
+                    <code>SIGUSR1</code>,
+                    <code>SIGSEGV</code>,
+                    <code>SIGUSR2</code>,
+                    <code>SIGPIPE</code>,
+                    <code>SIGALRM</code>,
+                    <code>SIGTERM</code>,
+                    <code>SIGSTKFLT</code>,
+                    <code>SIGCHLD</code>,
+                    <code>SIGCONT</code>,
+                    <code>SIGSTOP</code>,
+                    <code>SIGTSTP</code>,
+                    <code>SIGTTIN</code>,
+                    <code>SIGTTOU</code>,
+                    <code>SIGURG</code>,
+                    <code>SIGXCPU</code>,
+                    <code>SIGXFSZ</code>,
+                    <code>SIGVTALRM</code>,
+                    <code>SIGPROF</code>,
+                    <code>SIGWINCH</code>,
+                    <code>SIGPOLL</code>,
+                    <code>SIGIO</code>,
+                    <code>SIGPWR</code> und
                     <code>SIGSYS</code>.
                     Signal-Namen, die das Betriebsystem nicht kennt, werden mit Warnung ignoriert.
                 </p>
