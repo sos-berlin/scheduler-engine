@@ -21,6 +21,20 @@
                 <script language="javascript">
                     <![CDATA[ 
 
+spooler_log.info( "job_exists(unbekannt)=" + job_exists( "unbekannt" ) );
+spooler_log.info( "job_exists(start)=" + job_exists( "start" ) );
+function job_exists( job_name )
+{
+    try
+    {
+       spooler.job( job_name );
+       return true;
+    }
+    catch( x ) { return false; }
+}
+
+                    
+
 //dir = "c:\\tmp\\testfiles\\";
 dir = "/tmp/testfiles/";
 
