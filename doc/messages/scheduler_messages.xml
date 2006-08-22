@@ -1479,19 +1479,19 @@
 
         <message code="SCHEDULER-262">
             <text xml:lang="de">
-                <title>Abbruch-Signal (Ctrl-C) empfangen. Der Scheduler wird beendet</title>
+                <title>Abbruch-Signal (<p1/>) empfangen. Der Scheduler wird beendet</title>
             </text>
             <text xml:lang="en">
-                <title>Kill signal (ctrl-C) received. Scheduler is terminating</title>
+                <title>Kill signal (<p1/>) received. Scheduler is terminating</title>
             </text>
         </message>
 
         <message code="SCHEDULER-263">
             <text xml:lang="de">
-                <title>Abbruch-Signal (Ctrl-C) beim Beenden des Schedulers empfangen. DER SCHEDULER WIRD ABGEBROCHEN, SOFORT.</title>
+                <title>Abbruch-Signal (<p1/>) beim Beenden des Schedulers empfangen. DER SCHEDULER WIRD ABGEBROCHEN, SOFORT.</title>
             </text>
             <text xml:lang="en">
-                <title>Kill signal (ctrl-C) received while terminating Scheduler. SCHEDULER IS ABORTING IMMEDIATELY.</title>
+                <title>Kill signal (<p1/>) received while terminating Scheduler. SCHEDULER IS ABORTING IMMEDIATELY.</title>
             </text>
         </message>
 

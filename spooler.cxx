@@ -47,6 +47,7 @@
 #include "../kram/sos_java.h"
 #include "../zschimmer/com_remote.h"
 #include "../zschimmer/xml_end_finder.h"
+#include "../zschimmer/z_signals.h"
 
 
 
@@ -98,7 +99,12 @@ const int                       no_termination_timeout              = UINT_MAX;
 static bool                     is_daemon                           = false;
 //static t                      daemon_starter_pid;
 //bool                          spooler_is_running      = false;
-volatile int                    ctrl_c_pressed                      = 0;
+
+volatile int                    ctrl_c_pressed                      = 0;                // Tatsächliches Signal ist in last_signal
+#ifndef Z_WINDOWS
+    volatile int                last_signal                         = 0;                // Signal für ctrl_c_pressed
+#endif
+
 Spooler*                        spooler_ptr                         = NULL;
 
 //-------------------------------------------------------------------------------------------------
@@ -324,6 +330,7 @@ With_log_switch read_profile_with_log( const string& profile, const string& sect
             case SIGTERM:       // Normales kill
             {
                 ctrl_c_pressed++;
+                last_signal = sig;
 
                 if( ctrl_c_pressed >= 2  &&  spooler_ptr )  spooler_ptr->abort_now();  // Unter Linux ist ctrl_c_pressed meisten > 2, weil 
                                                                                        // jeder Thread diese Routine durchlaufen lässt. Lösung: sigaction()
@@ -2347,7 +2354,8 @@ void Spooler::nichts_getan( int anzahl, const string& str )
         }
         if( jobs.length() == 0 )  jobs << "no jobs";
 
-        _log.warn( message_string( "SCHEDULER-261", str, _connection_manager->string_from_operations(), tasks, jobs ) );  // "Nichts getan, state=$1, _wait_handles=$2"
+        _log.log( anzahl <= 1? log_info : log_warn,
+                  message_string( "SCHEDULER-261", str, _connection_manager->string_from_operations(), tasks, jobs ) );  // "Nichts getan, state=$1, _wait_handles=$2"
 
         // Wenn's ein System-Ereignis ist, das, jedenfalls unter Windows, immer wieder signalisiert wird,
         // dann kommen die anderen Ereignisse, insbesondere der TCP-Verbindungen, nicht zum Zuge.
@@ -2760,9 +2768,15 @@ void Spooler::run_check_ctrl_c()
 {
     if( ctrl_c_pressed )
     {
+#       ifdef Z_WINDOWS
+            string signal_text = "ctrl-C";
+#        else
+            string signal_text = S() << "signal " << last_signal << " " << signal_name_from_code( last_signal ) << " " << signal_title_from_code( last_signal );
+#       endif
+
         if( _state != s_stopping )
         {
-            _log.warn( message_string( "SCHEDULER-262" ) );   // "Abbruch-Signal (Ctrl-C) empfangen. Der Scheduler wird beendet.\n" );
+            _log.warn( message_string( "SCHEDULER-262", signal_text ) );   // "Abbruch-Signal (Ctrl-C) empfangen. Der Scheduler wird beendet.\n" );
             cmd_terminate();
 
             ctrl_c_pressed = 0;
@@ -2770,7 +2784,7 @@ void Spooler::run_check_ctrl_c()
         }
         else
         {
-            _log.warn( message_string( "SCHEDULER-263" ) );  // "Abbruch-Signal (Ctrl-C) beim Beenden des Schedulers empfangen. Der Scheduler wird abgebrochen, sofort.\n" );
+            _log.warn( message_string( "SCHEDULER-263", signal_text ) );  // "Abbruch-Signal (Ctrl-C) beim Beenden des Schedulers empfangen. Der Scheduler wird abgebrochen, sofort.\n" );
             abort_now();
         }
     }

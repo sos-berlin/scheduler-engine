@@ -187,8 +187,13 @@
 
             <table cellpadding="0" cellspacing="0" width="100%" style="padding-bottom: 4ex">
                 <tr>
-                    <td style="vertical-align: top; padding-right: 3ex; padding-bottom: 4pt;">
-                        <div id="all_classes_1" style="position: fixed">  <!-- ie6: Wird mit JavaScript positioniert -->
+                    <td style="vertical-align: top; padding-right: 3ex; padding-bottom: 4pt; width: 20ex;">
+                        <!-- Besser mit rowspan="2" mit der unteren Zelle im selben <div> zusammenfassen 
+                             position: fixed sollte nur vertical gelten, leider bleibt es auch bei horizontaler Verschiebung stehen,
+                             deshalb background-color: window, damit wenigstens die Zeichen nicht überblendet werden.
+                             2006-08-22 Zschimmer
+                        -->
+                        <div id="all_classes_1" style="position: fixed; width: 20ex; background-color: window; padding-right: 1em;">  <!-- ie6: Wird mit JavaScript positioniert -->
                             <xsl:call-template name="all_classes">   <!-- Übersicht -->
                                 <xsl:with-param name="class_references"  select="document( 'all_classes.xml' )/class_references/class_reference [ @class='api' ]"/>
                                 <xsl:with-param name="active_class"      select="/api.class/@name"/>
@@ -236,9 +241,9 @@
                 </tr>
 
                 <tr>
-                    <td style="vertical-align: top; padding-right: 3ex; width: 10ex;">
+                    <td style="vertical-align: top; padding-right: 3ex; width: 20ex;">
                         <!--p style="font-weight: bold; padding-bottom: 1em">Klassen:</p-->
-                        <div id="all_classes_2" style="position: fixed">  <!-- ie6: Wird mit JavaScript positioniert -->
+                        <div id="all_classes_2" style="position: fixed; width: 20ex; background-color: window; padding-right: 1em; padding-bottom: 1em;">  <!-- ie6: Wird mit JavaScript positioniert -->
                             <xsl:call-template name="all_classes">
                                 <xsl:with-param name="class_references"  select="document( 'all_classes.xml' )/class_references/class_reference [ @class != 'api' ]"/>
                                 <xsl:with-param name="active_class"      select="/api.class/@name"/>
@@ -769,7 +774,10 @@
     <xsl:choose>
         <xsl:when test="com.type [ @type ]">
             <xsl:for-each select="com.type">
-                <xsl:if test="position() &gt; 1">&#x2009;|&#x2009;</xsl:if>
+                <xsl:if test="position() &gt; 1">
+                    <span style="padding: 2pt">|</span>
+                    <!--xsl:text>&#x2009;|&#x2009;</xsl:text>     ie stellt U+2009 "thin space" als Kästchen dar :-( -->
+                </xsl:if>
                 <xsl:apply-templates select=".">
                     <xsl:with-param name="is_in_table" select="$is_in_table"/>
                 </xsl:apply-templates>
