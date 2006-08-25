@@ -4,7 +4,7 @@
 <!--$Id$-->
 
 <description
-    title               = "Verzeichnisüberwachung"
+    title               = "Verzeichnisüberwachung mit Aufträgen"
     base_dir            = "../"
     parent_page         = "index.xml"
     author              = "$Author$"
@@ -27,8 +27,15 @@
             Der Umfang kann mit einem Regulären Ausdrück eingeschränkt werden.
             Jede gelöschte Datei lässt den Scheduler den dazugehörigen Auftrag entfernen,
             wenn er noch nicht einem Job übergeben worden ist.
-            Wenn eine Datei eines in Ausführung stehenden Auftrags gelöscht und wieder angelegt wird,
-            gibt der Scheduler eine Warnung aus. (Eine Eigenschaft des Auftrags könnte darauf hinweisen.)
+            
+            <span style="text-decoration: line-through">
+                Wenn eine Datei eines in Ausführung stehenden Auftrags gelöscht und wieder angelegt wird,
+                gibt der Scheduler eine Warnung aus. (Eine Eigenschaft des Auftrags könnte darauf hinweisen.)
+            </span>
+
+            Löschen einer Datei, dessen Auftrag bereits einem Job übergeben worden ist,
+            führt zu einer Warnung.
+            Anschließendes Wiederhinzufügung führt zu einem neuen Auftrag (?).
         </dd>
 
         <dt>Unverarbeitete Dateien</dt>
@@ -45,7 +52,7 @@
             können unter Windows erkannt werden.
             Dort lässt sich eine Datei solange nicht öffnen, wie sie beschrieben wird.
             Wenn das Schließen der Datei durch den Schreiber bedeutet,
-            dass die Datei fertig ist, kann der Scheduler das erkennen.
+            dass die Datei fertig ist, könnte der Scheduler das erkennen.
             Unter Linux geht das möglicherweise auch.
             Ansonsten könnte ein Job die Erkennung übernehmen und selbst die Aufträge erzeugen.
             Die Jobkette wäre dann trotzdem dem Verzeichnis zugeordnet,
@@ -111,6 +118,197 @@
     &lt;job_chain_node state="error" move_file_to="c:/bad-files/"/>
 &lt;job_chain></pre>
 
+
+
+    <h1 class="nonfirst">Realisierung</h1>
+
+    <h2>Dateiname eines Verzeichnisses sind Aufträge</h2>
+
+    <p>
+        Einer Jobkette können Verzeichnisse hinzugefügt werden.
+        Die mit einem Regulären Ausdruck ausgewählten Dateinamen 
+        sieht der Scheduler als Aufträge an.
+        Der anfängliche Status der Aufträge ist der des ersten Jobs der Jobkette.
+    </p>
+    <p>
+        Sobald der erste Job der Jobkette einen Auftrag verarbeiten kann,
+        und seine (bisherige) Auftragswarteschlange leer ist,
+        nimmt der Scheduler den alphabetisch ersten Dateinamen aus einen der Verzeichnisse,
+        macht daraus einen ordentlichen Auftrag und übergibt ihn dem Job.
+    </p>
+    <p>
+        Bei mehreren Verzeichnissen nimmt der Scheduler zunächst das erste,
+        und erst, wenn kein Dateiname mehr vorliegt, das nächste.
+    </p>
+    <p>
+         
+    </p>
+    
+    
+    
+    
+    
+    
+    
+
+    <h2>Spiegelung der Dateinamen eines Verzeichnisses in Aufträgen</h2>
+    <p>
+        Der bisherige Mechanismus der Verzeichnisüberwachung
+        (unter Windows durch Ereignisse, unter Linux durch periodisches Auslesen)
+        wird dazu verwendet,
+        den mit einem Regulären Ausdruck gefilterten Inhalt eines Verzeichnisses
+        in Aufträgen spiegeln.
+    </p>
+    <p>
+        Dazu hält der Scheduler ständig den gefilterten und aktualisierten Inhalt des Verzeichnisses vor.
+        Jeder Eintrag ist einem Auftrag zugeordnet.
+        Der Auftrag kann an beliebiger Stelle der Jobkette stehen.
+    </p>
+
+    <h3>Automatische Erkennung hinzugefügter Dateien</h3>
+    <p>
+        Beim Start der Jobkette liest der Scheduler das gefilterte Verzeichnis. 
+        Außerdem bemerkt er jede nachträglich hinzugefügte Datei.
+        Für jede Datei erzeugt erzeugt der Scheduler einen Auftrag mit folgenden Eigenschaften:
+    </p>
+    <ul>
+        <li>...</li>
+    </ul>
+    <p>
+        Wenn der Name einer hinzugefügten Datei bereits 
+        einem noch nicht abgeschlossenen Auftrag zugeordnet ist,
+        die Datei also während der Ausführung dieses Auftrags entfernt wurde,
+        dann wird die wieder hinzugefügte Datei mit Warnung ignoriert
+        (sie ist ja bereits einem Auftrag zugeordnet).
+        <i>Das ist problematisch, wenn Dateien mit gleichen Namen
+        nacheinander eintreffen und jeweils zu einem neuen Auftrag führen sollen.
+        Wenn der Auftragsjob die Datei entfernt, 
+        und vor Ende der Task eine neue Datei gleichen Namens eintrifft,
+        dann wird der Scheduler diese neue Datei mit Warnung ignorieren.
+        Aber siehe unten, "Stehengebliebene Dateien".
+        </i>
+    </p>
+
+
+    <h3>Dateien programmiert hinzufügen</h3>
+    <p>
+        Wenn die Auswahl der Dateien, die zu einem Auftrag führen sollen, von einem Job vorgenommen werden soll,
+        z.B. weil die Kriterien komplexer sind,
+        können die Aufträge statt automatisch vom Scheduler auch progammiert vom Job erzeugt werden:
+    </p>
+    <pre>spooler.job_chain( "my_jobchain" ).add_file( path );</pre>
+    <p>
+        Der Zustand des Auftrags ist der des ersten Jobs der Jobkette.
+        Das Verzeichnis kann für jeden Auftrag ein anderes sein.
+        Bereits hinzugefügte Dateien ignoriert der Scheduler (mit debug3-Meldung).
+    </p>
+    <p>
+        Der Scheduler erkennt weiterhin, wenn die Datei entfernt wird.
+        Dazu richtet er intern eine Überwachung auf das Verzeichnis der Datei ein.
+    </p>
+
+    
+    <h3>Entfernte Datei</h3>
+    <p>
+        Der Scheduler entfernt den dazugehörigen Auftrag 
+        (wie mit <scheduler_method class="Order" method="remove_from_job_chain"/>),
+        wenn der Auftrag noch nicht einem Job übergeben worden ist.
+        Andernfalls gibt der Scheduler eine Warnung aus,
+        erhält den Dateinamenseintrag und markiert ihn mit "Datei entfernt".
+        Der Eintrag bleibt mit dem Auftrag verbunden, bis dieser erledigt ist.
+        Erst dann wird der Dateinamenseintrag entfernt.
+        Wenn inzwischen der Dateiname wieder im Verzeichnis aufgetaucht ist,
+        erzeugt der Scheduler einen neuen Auftrag, sobald der letzte ausgeführt ist.
+    </p>
+    <p>
+        Wenn eine Datei entfernt und kurz darauf wieder hinzugefügt wird,
+        erkennt der Scheduler das nicht unbedingt, 
+        vor allem wenn nur wenige Sekunden dazwischen liegen.  
+    </p>
+
+    
+    <h3>Stehengebliebene Dateien</h3>
+    <p>
+        Wenn nach der Ausführung eines Auftrags die Datei noch besteht,
+        gibt es zwei Möglichkeiten:        
+    </p>
+    <ul>
+        <li>
+            Der Scheduler markiert den Verzeichniseintrag als "erledigt", 
+            gibt eine Warnung oder Fehlermeldung aus 
+            und beachtet die Datei nicht mehr.
+            Die Fehlermeldung würde den letzten Job stoppen,
+            in der Annahme, das es ein Fehler des Jobs ist, die Datei nicht zu löschen.
+            <i>Warnung oder Fehler?</i>
+        </li>
+        <li>
+            Der Scheduler erzeugt einen neuen Auftrag,
+            der mit einstellbarer Verzögerung gestartet wird,
+            um für den Fall, das der Job die Datei irrtümlich nicht entfernt hat,
+            eine Überlastung des Rechners zu vermeiden.
+        </li>
+    </ul>
+
+
+    <h3>Verzeichnis-Fehler</h3>
+    <p>
+        Wenn die Verzeichnisüberwachung auf einen Fehler läuft,
+        zum Beispiel weil das Verzeichnis abgehängt worden ist,
+        dann protokolliert der Scheduler das und
+        erzeugt einen besonderen Auftrag, so dass die Jobs der Jobkette darauf reagieren können.
+        Wenn das Verzeichnis wieder überwachbar ist bevor der Auftrag dem ersten Job übergeben werden konnte,
+        dann wird der Auftrag entfernt.
+        Der Auftrag hat folgende Einstellungen:
+    </p>
+    <ul>
+        <li>...</li>
+    </ul>
+    <p>
+        Der Scheduler versucht periodisch die Überwachung erneut zu starten. 
+        Fehlermeldungen dabei werden ignoriert (kein Auftrag, nur Protokollzeile). 
+        Die Periode ist an der Jobkette für alle Verzeichnisse
+        (also auch die mit <code>Job_chain.add_file()</code> implizit überwachten) 
+        einstellbar, Default 1 Minute.
+    </p>
+    <pre>&lt;job_chain … directory_error_delay="60"/></pre>
+
+
+    <h3>Datenbank</h3>
+    <p>
+        Die Aufträge solten nicht in der Datenbank gespeichert werden.
+        Das kann mit <scheduler_element name="job_chain" attribute="orders_recoverable" value="no"/> eingestellt werden.
+        Aufträge, die beim Start des Scheduler aus der Datenbank gelanden werden, 
+        sind ebenso wie mit <scheduler_method class="Job_chain" method="add_order"/> hinzugefügte Aufträge nicht 
+        mit den Dateien verknüpft.
+        <i>Manche Einstellung fehlt, welche?</i>
+    </p>
+
+    
+    
+    <h3>Beschränkung Auftragsanzahl</h3>
+    <p>
+        Weil Verzeichnisse sehr groß sein können, 
+        beschränkt der Scheduler die Anzahl der Aufträge.
+        Die weiteren Aufträge werden erzeugt, sobald von den ersten einige erledigt sind.
+    </p>
+    
+    <table cellspacing="0" cellpadding="0">
+        <tbody>
+            <tr>
+                <td>
+                </td>
+                <td></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td></td>
+            </tr>
+        </tbody>
+    </table>
+    
+    
+    
+    
     <h2>Besonderheiten im bisherigen Verfahren</h2>
     <ul>
         <li>

@@ -2708,12 +2708,12 @@
         <hr style="margin-top: 30pt"/>
         <table cellspacing="0" cellpadding="0" width="100%">
             <tr>
-                <td>
+                <td style="vertical-align: top;">
                     <xsl:call-template name="browse_bar">
                         <xsl:with-param name="parent_page" select="$parent_page"/>
                     </xsl:call-template>
                 </td>
-                <td align="right">
+                <td style="vertical-align: top;" align="right">
                     <p style="font-size: 8pt; margin-top: 0">
                         <xsl:call-template name="browse_bar_register">
                             <xsl:with-param name="parent_page" select="$parent_page"/>
