@@ -24,7 +24,7 @@
     
     <p>
         Jobketten werden Auftragsquellen kennen.
-        Ein Verzeichnis kann eíne Auftragsquelle sein.
+        Ein Verzeichnis kann eine Auftragsquelle sein.
     </p>
 
         <pre>&lt;job_chain name="<i>my_job_chain</i>" orders_recoverable="no">
@@ -92,10 +92,6 @@
         <scheduler_method class="Variable_set" property="value"/> wird erweitert,
         so dass es den Punkt für verschachtelte Variablenmengen erkennt.
     </p>
-    <p>
-        <scheduler_element name="process"/>-Jobs erhalten die Auftragsparameter wie in 
-        "<a href="process_order.xml">Auftragsgesteuerte &lt;process>-Jobs</a>" beschrieben.
-    </p>
 
 
 
@@ -115,9 +111,9 @@ spooler_process();</pre-->
     <h3>Auftragsgesteuerte &lt;process>-Jobs</h3>
 
     <p>
-        Ein <scheduler_element name="process"/>-Job mit
-        <scheduler_element name="job" attribute="order" value="yes"/> ist
-        auftragsgesteuert.
+        Ein <scheduler_element name="process"/>-Job kann mit
+        <scheduler_element name="job" attribute="order" value="yes"/> 
+        auftragsgesteuert gemacht werden.
         Er wird einzeln für jeden Auftrag gestartet.
         Auf die Auftragsparameter kann er nicht zugreifen, 
         aber ihm steht die Umgebungsvariable <code>SCHEDULER_TASK_TRIGGER_FILES</code> zur Verfügung.
@@ -207,13 +203,9 @@ spooler_process();</pre-->
         Wenn der Versuch fehlschlägt, ist anzunehmen, dass die Datei noch beschrieben wird.
         Der Scheduler ignoriert die Datei dann und geht zur nächsten über.
         (<i>Klären, ob das auch für Unix gilt!)</i>
+        Das ist abschaltbar mit
     </p>
-    <p>
-        <i>Sollte das optional sein? Gibt es einen Fall, in dem das Öffnen schädlich ist
-        oder die Datei aus anderen Gründen (mangelndes Zugriffsrecht) nicht lesbar ist?
-        <code>&lt;order_source directory="…" check_open="yes"/></code>
-        </i>
-    </p>
+    <pre>&lt;order_source directory="…" check_open="no"/></pre>
 
 
 
@@ -315,110 +307,12 @@ spooler_process();</pre-->
 
 
 
-    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
-
-    <h2>Dateien programmiert hinzufügen</h2>
+    <h3>Programmierte Auftragsquelle</h3>
     <p>
-        Wenn die Auswahl der zu Aufträgen führenden Dateien programmierbar sein soll,
-        z.B. weil die Kriterien komplexer sind,
-        ruft der Scheduler bei Bedarf einen Job auf, der einen Dateinamen liefert.
-    </p>
-    <pre>&lt;job_chain name="<i>my_job_chain</i>" orders_recoverable="no">
-    &lt;order_source job="<i>my_file_source</i>"/>
-    …
-&lt;/job_chain></pre>
-    <p>
-        Der Scheduler lässt den Job einen Schritt mit
-        <scheduler_method class="Job_impl" method="spooler_process"/>
-        ausführen.
-        Der Job liefert einen Dateinamen mit
-    </p>
-    <pre>spooler.job_chain( "<i>my_job_chain</i>" ).add_file( path );</pre>
-    <p>
-        Die Operation packt den Dateinamen in einen Auftrag im Zustand des ersten Jobs der Jobkette.
-        Das Verzeichnis ist beliebig.
-        <!--Bereits hinzugefügte Dateien ignoriert der Scheduler (mit debug3-Meldung).-->
-        Die Methode liefert <code>false</code>, wenn die Datei bereits hinzugefügt war.
-    </p>
-    <p>
-        Ein solcher Job könnte so aussehen:
-    </p>
-    <pre>var dir = new <i>My_special_directory_reader</i>( … );
-
-function spooler_process()
-{
-    while( dir.has_next_path() )
-    {
-        var path = dir.read_next_path();
-        var is_new = spooler.job_chain( "<i>my_job_chain</i>" ).add_file( path ) );
-        if( is_new )  break;
-    }
-
-    return true;
-}</pre>
-
-    <p>
-        Der Scheduler ruft <scheduler_method class="Job_impl" method="spooler_process"/> 
-        der Auftragsquelle auf, 
-        wenn der erste auftragsgesteuerte Job der Jobkette auf einen Auftrag wartet.
+        Zu einer möglichen Erweiterung siehe <a href="order_source.xml">"Programmierte Auftragsquellen"</a>.
     </p>
 
 
-    <h3>Dateien programmmiert hinzufügen, mit Verzeichnisüberwachung</h3>
-    <p>
-        Der Job soll nur nach Start des Schedulers und
-        bei einer vom Scheduler bemerkten Verzeichnisänderung
-        aufgerufen werden.
-    </p>
-    <p>
-        Dazu wird in <scheduler_element name="job"/> das neue Element
-        <code>&lt;process_when_directory_changed></code> genutzt,
-        das wie
-        <scheduler_element name="start_when_directory_changed"/> wirkt,
-        mit folgenden Abweichungen:
-        <!--wenn der Job mit einem <code>&lt;order_source job="…"/></code> verknüpft ist:-->
-    </p>
-    <ul>
-        <li>
-            Der Scheduler ruft für jeden verlangten Auftrag einmal
-            <scheduler_method class="Job_impl" method="spooler_process"/> auf.
-        </li>
-        <li>
-            Der Scheduler beendet die Task nicht selbst.
-            <scheduler_element name="job" attribute="idle_timeout"/>
-            und <scheduler_method class="Task" object="spooler_task" method="end"/>
-            können verwendet werden.
-        </li>
-        <li>
-            Der Job startet nur, wenn der erste auftragsgesteuerte Job der Jobkette einen neuen Auftrag verlangt.
-        </li>
-    </ul>
-
-
-
-    <h3>Verzeichnisüberwachung im Job</h3>
-    <p>
-        Die Verzeichnisüberwachung wird derzeit vom Scheduler-Prozess durchgeführt.
-        Wenn das Verzeichnis extern (z.B. NFS) und nicht erreichbar ist,
-        kann der ganze Scheduler hängen.
-        Das neue <code>&lt;process_when_directory_changed></code> sollte also besser im
-        Task-Prozess ausgeführt werden.
-        Die Task müsste dazu ständig laufen.
-        <scheduler_method class="Job_impl" method="spooler_process"/> bekommt ein Tor,
-        dass sich nur öffnet, wenn eins der Verzeichnisse sich geändert hat.
-    </p>
-    <p>
-        <i>
-            Wie beendet man die Task, wenn sie im <code>spooler_process</code> hängt?
-        </i>
-    </p>
-    <p>
-        <code>&lt;order_source directory="..."/></code> könnte auch auf diese Lösung zurückgreifen.
-        Dazu würde der Job einen internen Job bereitstellen, 
-        der <code>&lt;order_source></code> implementiert.
-    </p>
-
-    
     <!--h2>Besonderheiten im bisherigen Verfahren</h2>
     <ul>
         <li>

@@ -23,7 +23,8 @@ ol              { margin-left: 24pt; padding-left: 0pt; }
 ul              { margin-top: 0.5em; margin-left: 12pt; padding-left: 0pt; }
 .example        { background-color: #ffffe0; }
 pre             { background-color: #ffffe0; font-family: "Lucida Console", monospace; font-size: 9pt; 
-                  padding-left: 0ex; margin-top: 1em; margin-bottom: 1em; line-height: 1.2em; }
+                  padding-left: 0ex; margin-top: 1em; margin-bottom: 1em; line-height: 12pt;  }
+pre i           { font-size: 9pt; font-family: Arial, Sans-Serif; line-height: 10pt; }
 col             { padding-bottom: 1pt; padding-right: 2pt }
 caption         { font-size: 10pt; padding-bottom: 5pt; padding-left: 3pt; padding-right: 2pt; padding-top: 2pt }
 
@@ -32,9 +33,11 @@ dd              { margin-left: 4ex; max-width: 78ex; }
 
 p.first         { margin-top: 0ex; }
 p.mono          { font-family: "Lucida Console", monospace; font-size: 9pt; margin-left: 4ex }
-.mono           { font-family: "Lucida Console", monospace; font-size: 9pt; }
-code            { font-family: "Lucida Console", monospace; font-size: 9pt; }
-.code           { font-family: "Lucida Console", monospace; font-size: 9pt; }
+
+.mono           { font-family: "Lucida Console", monospace; font-size: 9pt; line-height: 10pt; }
+code            { font-family: "Lucida Console", monospace; font-size: 9pt; line-height: 10pt; }
+.code           { font-family: "Lucida Console", monospace; font-size: 9pt; line-height: 10pt; }
+
 .small          { font-size: 8pt; }
 .comment        { background-color: #FFFF00 }
 .message_insertion { font-family: Arial, sans-serif; font-size: 9pt; font-style: italic; }

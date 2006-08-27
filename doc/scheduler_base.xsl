@@ -1498,6 +1498,17 @@
         <xsl:param name="parameter"/>
         <xsl:param name="child"/>
 
+        <xsl:variable name="my_directory">
+            <xsl:choose>
+                <xsl:when test="$directory">
+                    <xsl:value-of select="$directory"/>
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:text>xml/</xsl:text>
+                </xsl:otherwise>
+            </xsl:choose>
+        </xsl:variable>
+
         <xsl:element name="a">
             <xsl:attribute name="name">
                 <xsl:text>use_element__</xsl:text>
@@ -1521,16 +1532,14 @@
                 </xsl:choose>
             </xsl:variable>
 
-            <xsl:if test="$directory">
-                <xsl:attribute name="href">
-                    <xsl:value-of select="concat( $base_dir, $directory, $name, '.xml', $href2 )"/>
-                </xsl:attribute>
-            </xsl:if>
-            <xsl:if test="not( $directory )">
-                <xsl:attribute name="href">
-                    <xsl:value-of select="concat( $base_dir, 'xml/', $name, '.xml', $href2 )"/>
-                </xsl:attribute>
-            </xsl:if>
+            <xsl:attribute name="href">
+                <xsl:value-of select="concat( $base_dir, $my_directory, $name, '.xml', $href2 )"/>
+            </xsl:attribute>
+
+            <xsl:attribute name="title">
+                <xsl:variable name="xml_element" select="document( concat( $my_directory, $name, '.xml' ) )/xml_element"/>
+                <xsl:value-of select="normalize-space( $xml_element/@title )"/>
+            </xsl:attribute>
 
             <code>
                 <xsl:text>&lt;</xsl:text>

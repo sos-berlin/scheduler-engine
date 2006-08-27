@@ -201,15 +201,14 @@
                             begin        = "00:00"
                             end          = "24:00"
                             single_start = "…"
-                            repeat       = "…"     >
-                    &lt;/period>
+                            repeat       = "…"     />
 
                     &lt;<a class="silent" href="xml/date.xml">date</a> date="yyyy-mm-dd"/>
                     …
 
                     &lt;<a class="silent" href="xml/weekdays.xml">weekdays</a>>
                         &lt;<a class="silent" href="xml/day.xml">day</a> day="…">
-                           &lt;<a class="silent" href="xml/period.xml">period></a>…&lt;/period>
+                           &lt;<a class="silent" href="xml/period.xml">period …/></a>
                             …
                         &lt;/day>
                         …
@@ -217,7 +216,7 @@
 
                     &lt;<a class="silent" href="xml/monthdays.xml">monthdays</a>>
                         &lt;<a class="silent" href="xml/day.xml">day</a> day="…">
-                            &lt;<a class="silent" href="xml/period.xml">period></a>…&lt;/period>
+                            &lt;<a class="silent" href="xml/period.xml">period …/></a>
                             …
                         &lt;/day>
                         …
@@ -225,7 +224,7 @@
 
                     &lt;<a class="silent" href="xml/ultimos.xml">ultimos</a>>
                         &lt;<a class="silent" href="xml/day.xml">day</a> day="…">
-                            &lt;<a class="silent" href="xml/period.xml">period></a>…&lt;/period>
+                            &lt;<a class="silent" href="xml/period.xml">period …/></a>
                             …
                         &lt;/day>
                         …
