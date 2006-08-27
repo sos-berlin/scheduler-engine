@@ -49,7 +49,7 @@
     </p>
     <p>
         Es ist ein Fehler (<scheduler_message code="SCHEDULER-329"/>), 
-        wenn bei <scheduler_element name="copy_param" attribute="from" value="order"/>
+        wenn bei <code>&lt;copy_param" from="order"/></code>
         oder <scheduler_element name="copy_params" attribute="from" value="order"/>
         der Job ohne Auftrag gestartet wird.
         <i>So haben wir es für <scheduler_element name="commands" attribute="on_exit_code"/> implementiert;
