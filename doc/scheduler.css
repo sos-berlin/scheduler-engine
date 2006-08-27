@@ -12,13 +12,13 @@ h4              { margin-bottom: 1em; }
 
 hr              { height: 1px; font-size: 1px; border: 0px; color: gray; background-color: gray; }
 
-p               { font-size: 10pt; margin-bottom: 0px; max-width: 80ex; }
+p               { font-size: 10pt; margin-bottom: 0px; max-width: 90ex; }
 p.ini_entry     { font-size: 10pt; margin-bottom: 0px; max-width: 150ex; }
 th              { font-size: 10pt; vertical-align: baseline; text-align: left; border-bottom: 1px solid black; font-weight: normal; }
 td              { font-size: 10pt; vertical-align: baseline; }
 div             { font-size: 10pt; }
 /*p:first-child   { font-size: 10pt; margin-top: 0px; margin-bottom: 0px }   Wirkt in ie6 nicht */
-li              { font-size: 10pt; max-width: 78ex; }
+li              { font-size: 10pt; max-width: 88ex; }
 ol              { margin-left: 24pt; padding-left: 0pt; }
 ul              { margin-top: 0.5em; margin-left: 12pt; padding-left: 0pt; }
 .example        { background-color: #ffffe0; }
@@ -29,7 +29,7 @@ col             { padding-bottom: 1pt; padding-right: 2pt }
 caption         { font-size: 10pt; padding-bottom: 5pt; padding-left: 3pt; padding-right: 2pt; padding-top: 2pt }
 
 dt              { margin-top: 2ex; }
-dd              { margin-left: 4ex; max-width: 78ex; }
+dd              { margin-left: 4ex; max-width: 88ex; }
 
 p.first         { margin-top: 0ex; }
 p.mono          { font-family: "Lucida Console", monospace; font-size: 9pt; margin-left: 4ex }
