@@ -358,7 +358,7 @@
                     <code>stop_on_error="no"</code> lässt den Job nicht stoppen, wenn das Task-Protokoll eine Fehlermeldung enthält.
                 </p>
                 <p>
-                    Die Einstellung kat keine Wirkung, wenn 
+                    Die Einstellung hat keine Wirkung, wenn 
                     <scheduler_element name="delay_after_error"/> oder
                     <scheduler_method class="Job" property="delay_after_error"/> verwendet wird.
                 </p>
