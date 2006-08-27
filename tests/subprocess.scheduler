@@ -18,8 +18,8 @@
         <script language="javascript">
             <![CDATA[
             
-spooler.job( "javascript" ).start();            
-//spooler.job( "java" ).start();            
+//spooler.job( "javascript" ).start();            
+spooler.job( "java" ).start();            
             
         ]]>
         </script>
@@ -108,9 +108,11 @@ public class My_job  extends sos.spooler.Job_impl
         
         subprocess.set_ignore_error( false );
         subprocess.set_environment( "test1", "ETT" );
-        subprocess.set_environment( "test2", "TVÅ" );
+        subprocess.set_environment( "test2", "TV" );
+        subprocess.set_timeout( 0 );
 
-        subprocess.start( "sleep 20" );
+        subprocess.start( new String[]{ "sleep", "20"} );
+        //subprocess.start( "sleep 20" );
 
         spooler_log.info( "pid=" + subprocess.pid() );
         //subprocess.set_timeout( 10 );

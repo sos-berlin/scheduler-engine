@@ -31,6 +31,8 @@ spooler.job( "process" ).start( params );
                         <variable name="var1" value="111"/>
                         <variable name="PATH" value="$PATH;***"/>
                         <variable name="PATH" value="$PATH;222"/>
+                        <!--Nur Windows: variable name="var.mit.punkt0" value="Eine Variable mit Punkt"/>
+                        <variable name="var.mit.punkt" value="${var.mit.punkt} Eine Variable mit Punkt"/-->
                     </environment>
                 </process>
                 
