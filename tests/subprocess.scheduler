@@ -109,7 +109,7 @@ public class My_job  extends sos.spooler.Job_impl
         subprocess.set_ignore_error( false );
         subprocess.set_environment( "test1", "ETT" );
         subprocess.set_environment( "test2", "TV" );
-        subprocess.set_timeout( 0 );
+        subprocess.set_timeout( 300 );
 
         subprocess.start( new String[]{ "sleep", "20"} );
         //subprocess.start( "sleep 20" );
