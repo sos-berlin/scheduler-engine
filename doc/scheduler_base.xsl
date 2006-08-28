@@ -2813,6 +2813,7 @@
 
 </xsl:stylesheet>
 
-<!-- Das ist ein Gedankenstrich: – -->
+<!-- Das ist ein Gedankenstrich: — -->
+<!-- Das ist ein langer Strich: – -->
 <!-- Das ist drei Punkte: … -->
 <!-- Das ist ein Pfeil: → -->

@@ -10,12 +10,17 @@
     author              = "$Author$"
     date                = "$Date$"
 >
+    <p style="color: red">
+        <i>— Dieser Text ist noch in Arbeit —</i>
+    </p>
     
     <h2>Dateien programmiert hinzufügen</h2>
     <p>
         Wenn die Auswahl der zu Aufträgen führenden Dateien programmierbar sein soll,
         z.B. weil die Kriterien komplexer sind,
         ruft der Scheduler bei Bedarf einen Job auf, der einen Dateinamen liefert.
+        Die Anforderung eines Auftrags ist selbst ein Auftrag.
+        Der Job ist also auftragsgesteuert, aber in keiner Jobkette.
     </p>
     <pre>&lt;job_chain name="<i>my_job_chain</i>" orders_recoverable="no">
     &lt;order_source job="<i>my_file_source</i>"/>
@@ -25,9 +30,11 @@
         Der Scheduler lässt den Job einen Schritt mit
         <scheduler_method class="Job_impl" method="spooler_process"/>
         ausführen.
-        Der Job liefert einen Dateinamen mit
+        Der Job liefert einen gewöhnlichen Auftrag oder einen Dateinamen mit
     </p>
-    <pre>spooler.job_chain( "<i>my_job_chain</i>" ).add_file( path );</pre>
+    <pre>var order_request = spooler_task.order;
+var job_chain_name = order_request.params( "job_chain_name" );
+spooler.job_chain( job_chain_name ).add_file( path );</pre>
     <p>
         Die Operation packt den Dateinamen in einen Auftrag im Zustand des ersten Jobs der Jobkette.
         Das Verzeichnis ist beliebig.
@@ -41,10 +48,12 @@
 
 function spooler_process()
 {
+    var job_chain = spooler.job_chain( spooler_task.order.params( "job_chain_name" ) );
+    
     while( dir.has_next_path() )
     {
         var path = dir.read_next_path();
-        var is_new = spooler.job_chain( "<i>my_job_chain</i>" ).add_file( path ) );
+        var is_new = job_chain.add_file( path ) );
         if( is_new )  break;
     }
 
@@ -55,6 +64,13 @@ function spooler_process()
         Der Scheduler ruft <scheduler_method class="Job_impl" method="spooler_process"/> 
         der Auftragsquelle auf, 
         wenn der erste auftragsgesteuerte Job der Jobkette auf einen Auftrag wartet.
+    </p>
+    <p>
+        Wenn der Job keinen Auftrag liefert, 
+        stellt der Scheduler den Anforderungsauftrag wie mit <scheduler_method class="Order" method="setback"/>
+        zurück. 
+        In diesem Fall sollte <scheduler_element name="delay_order_after_setback"/> eingestellt sein,
+        damit nicht <i>...was?</i>.
     </p>
 
 
@@ -110,6 +126,39 @@ function spooler_process()
         <code>&lt;order_source directory="..."/></code> könnte auch auf diese Lösung zurückgreifen.
         Dazu würde der Job einen internen Job bereitstellen, 
         der <code>&lt;order_source></code> implementiert.
+    </p>
+    <pre>spooler_job.wait_for_changed_directory(<i>timeout</i>);</pre>
+    <p>
+        Die neue Methode <code>spooler_job.wait_for_changed_directory()</code>,
+        explizit vom Job oder implizit vom Scheduler aufgerufen,
+        wartet bis sich eins der Verzeichnisse ändert.
+        Der Aufruf wird im Task-Prozess durchgeführt, 
+        damit bei einem abgehängten Verzeichnis nicht der Hauptprozess in einem Systemaufruf hängen bleibt.
+    </p>
+    
+    
+    
+    <h3>Task beenden, während sie auf eine Verzeichnisänderung wartet</h3>
+    <p>
+        Bisher kann eine Task nicht beendet werden, 
+        während sie in <scheduler_method class="Job_impl" method="spooler_process"/> ist.
+        Sie kann nur mit <code>kill</code> abgebrochen werden.
+    </p>
+    <p>
+        Der Scheduler könnte einen Abbruch der Task mit <code>kill</code> bzw. <code>TerminateProcess()</code>
+        während des Aufrufs tolerieren.
+    </p>
+    <p>
+        Wenn die Task aber ordentlich beendet werden soll 
+        (Aufruf von <scheduler_method class="Job_impl" method="spooler_close"/> etc.),
+        können wir die TCP-Schnittstelle erweitern.
+    </p>
+    <p>
+        Die TCP-Kommunikation des Task-Prozesses mit dem Schedulers wird in einen eigenen Thread verlagert,
+        der normalerweise streng mit dem ausführenden Thread synchronisiert ist.
+        In einem eigenen Thread kann eine unerwartete Nachricht vom Scheduler empfangen werden, 
+        die den aktuellen Aufruf beendet, 
+        z.B. indem er die neue prozess-lokale Eigenschaft <code>spooler_task.end_called</code> setzt.
     </p>
 
 </description>

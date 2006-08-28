@@ -44,8 +44,8 @@
         Sobald der erste Job der Jobkette einen Auftrag verarbeiten kann,
         <!--und seine Auftragswarteschlange leer ist,-->
         entnimmt der Scheduler einem der Verzeichnisse 
-        den alphabetisch ersten Dateinamen,
-        der noch nicht einem Auftrag zugeordnet ist,
+        den Namen der Datei, die am längsten nicht geändert worden 
+        und noch nicht einem Auftrag zugeordnet ist,
         macht daraus einen ordentlichen Auftrag und übergibt ihn dem Job.
         Kennung des Auftrag ist der Dateipfad.
     </p>
@@ -68,26 +68,26 @@
     <table cellspacing="0" cellpadding="0" style="margin-top: 1em">
         <tr>
             <td style="padding-right: 2ex;">
-                <code>scheduler_file.name</code>
+                <code>scheduler.file.name</code>
             </td>
             <td>Der Dateiname</td>
         </tr>
         <tr>
             <td style="padding-right: 2ex;">
-                <code>scheduler_file.path</code>
+                <code>scheduler.file.path</code>
             </td>
             <td>Dateiname mit vorangestelltem Verzeichnis</td>
         </tr>
         <tr>
             <td style="padding-right: 2ex;">
-                <code>scheduler_file.directory</code>
+                <code>scheduler.file.directory</code>
             </td>
             <td>Verzeichnis</td>
         </tr>
     </table>
 
     <p>
-        <code>scheduler_file</code> ist selbst eine Variablenmenge
+        <code>scheduler.file</code> ist selbst eine Variablenmenge
         (der Scheduler kennt verschachtelte Variablenmengen).
         <scheduler_method class="Variable_set" property="value"/> wird erweitert,
         so dass es den Punkt für verschachtelte Variablenmengen erkennt.
@@ -99,11 +99,11 @@
     <p>
         Als Besonderheit setzt der Scheduler
         <scheduler_method class="Task" object="spooler_task" property="trigger_files"/>
-        auf den Wert des Auftragsparameters <code>scheduler_file.path</code>.
+        auf den Wert des Auftragsparameters <code>scheduler.file.path</code>.
     </p>
     <!--pre>// Algorithmus im Scheduler:
 if( spooler_task.trigger_files == ""  &amp;&amp;  spooler_task.order != null )
-    spooler_task.trigger_files = spooler_task.order.params( "scheduler_file.path" );
+    spooler_task.trigger_files = spooler_task.order.params( "scheduler.file.path" );
 spooler_process();</pre-->
 
 
@@ -133,7 +133,7 @@ spooler_process();</pre-->
     &lt;process file="<i>/home/me/my_external_job.sh</i> params="some parameters">
         &lt;environment>
             &lt;variable name="<i>name</i>" value="<i>value</i>"/>
-            &lt;copy_param name="MY_PATH" from="order" from_name="scheduler_file.path"/>
+            &lt;copy_param name="MY_PATH" from="order" from_name="scheduler.file.path"/>
             …
         &lt;/environment>
     &lt;/process>
@@ -189,7 +189,7 @@ spooler_process();</pre-->
     </p>
     <pre>&lt;environment>
     &lt;variable name="<i>name</i>" value="<i>value</i>"/>
-    &lt;variable name="MY_PATH" from="order" from_name="scheduler_file.path"/>
+    &lt;variable name="MY_PATH" from="order" from_name="scheduler.file.path"/>
 &lt;/environment></pre>
     <p>
         Dem Job steht dann die Umgebungsvariable <code>MY_PATH</code> zur Verfügung.
@@ -197,7 +197,7 @@ spooler_process();</pre-->
     -->
     
     
-    <h3>Beschränkung auf Dateien, die sich exklusiv zum Lesen öffnen lassen</h3>
+    <h3>Eine spätere Erweiterung: Beschränkung auf Dateien, die sich exklusiv zum Lesen öffnen lassen</h3>
     <p>
         Der Scheduler übergibt eine Datei nur, wenn sie sich zum Lesen öffnen lässt.
         Wenn der Versuch fehlschlägt, ist anzunehmen, dass die Datei noch beschrieben wird.
@@ -264,6 +264,13 @@ spooler_process();</pre-->
     <p>
         Wenn die Verzeichnisüberwachung auf einen Fehler läuft,
         zum Beispiel weil das Verzeichnis abgehängt worden ist,
+        dann gibt der Scheduler eine Warnung aus 
+        und erzeugt eine eMail
+        (Einstellung aus <scheduler_ini_entry file="factory.ini" section="spooler"/> gelten).
+    </p>
+    <!--p>
+        Wenn die Verzeichnisüberwachung auf einen Fehler läuft,
+        zum Beispiel weil das Verzeichnis abgehängt worden ist,
         dann protokolliert der Scheduler das und
         erzeugt einen besonderen Auftrag, damit die Jobs der Jobkette darauf reagieren können.
         Wenn das Verzeichnis wieder überwachbar ist bevor der Auftrag dem ersten Job übergeben werden konnte,
@@ -274,34 +281,35 @@ spooler_process();</pre-->
     <table cellspacing="0" cellpadding="0" style="margin-top: 1em">
         <tr>
             <td style="padding-right: 2ex;">
-                <code>scheduler_file.name</code>
+                <code>scheduler.file.name</code>
             </td>
             <td>leer</td>
         </tr>
         <tr>
             <td style="padding-right: 2ex;">
-                <code>scheduler_file.path</code>
+                <code>scheduler.file.path</code>
             </td>
             <td>leer</td>
         </tr>
         <tr>
             <td style="padding-right: 2ex;">
-                <code>scheduler_file.directory</code>
+                <code>scheduler.file.directory</code>
             </td>
             <td>Verzeichnis</td>
         </tr>
         <tr>
             <td style="padding-right: 2ex;">
-                <code>scheduler_file.error</code>
+                <code>scheduler.file.error</code>
             </td>
             <td>Fehlermeldung</td>
         </tr>
-    </table>
+    </table-->
     <p>
         Der Scheduler versucht periodisch die Überwachung erneut zu starten.
-        Fehlermeldungen dabei werden ignoriert (kein Auftrag, nur Protokollzeile).
+        Fehlermeldungen dabei werden ignoriert (nur debug3-Meldung).
         Die Periode ist an der Jobkette für alle Verzeichnisse
         einstellbar, Default 1 Minute.
+        Sobald das Verzeichnis wieder lesbar ist, gibt der Scheduler eine info-Meldung aus.
     </p>
     <pre>&lt;order_source … delay_after_error="60"/></pre>
 
