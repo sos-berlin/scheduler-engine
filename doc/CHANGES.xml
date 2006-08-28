@@ -10,6 +10,20 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2006-08-25" version="2.0.157" subversion_revision="4439">
+        <revision type="modification" title="-send-cmd=... liefert Ausgabe ohne Null-Byte">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_option name="send-cmd"/> gibt die Antwort des Schedulers ohne das über TCP übertragene Nullbyte aus.
+                        Damit wird nach stdout ein wohlgeformtes XML-Dokument geschrieben.
+                    </li>
+                </ul>
+            </description>
+        </revision>
+    </change>
+
+
     <change date="2006-08-25" version="2.0.157" subversion_revision="4436">
         <revision type="correction" title="Subprocess.start( String[] ) für Java funktioniert">
             <description>

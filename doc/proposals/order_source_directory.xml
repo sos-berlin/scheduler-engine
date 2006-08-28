@@ -196,19 +196,8 @@ spooler_process();</pre-->
     </p>
     -->
     
+
     
-    <h3>Eine spätere Erweiterung: Beschränkung auf Dateien, die sich exklusiv zum Lesen öffnen lassen</h3>
-    <p>
-        Der Scheduler übergibt eine Datei nur, wenn sie sich zum Lesen öffnen lässt.
-        Wenn der Versuch fehlschlägt, ist anzunehmen, dass die Datei noch beschrieben wird.
-        Der Scheduler ignoriert die Datei dann und geht zur nächsten über.
-        (<i>Klären, ob das auch für Unix gilt!)</i>
-        Das ist abschaltbar mit
-    </p>
-    <pre>&lt;order_source directory="…" check_open="no"/></pre>
-
-
-
     <h3>Vor Ausführung entfernte Dateien</h3>
     <p>
         Wenn ein Auftrag dem ersten Job übergeben werden soll,
@@ -315,9 +304,48 @@ spooler_process();</pre-->
 
 
 
-    <h3>Programmierte Auftragsquelle</h3>
+    <h2>Zukünftige Erweiterungen</h2>
+
+
+    <h3>Beschränkung auf Dateien, die sich exklusiv zum Lesen öffnen lassen</h3>
+    <pre>&lt;order_source directory="…" check_open="yes"/></pre>
     <p>
-        Zu einer möglichen Erweiterung siehe "<a href="order_source.xml">Programmierte Auftragsquellen</a>".
+        Mit dieser Einstellung übergibt der Scheduler eine Datei nur, 
+        wenn sie sich zum Lesen öffnen lässt.
+        Wenn der Versuch fehlschlägt, ist anzunehmen, dass die Datei noch beschrieben wird.
+        Der Scheduler ignoriert die Datei dann und geht zur nächsten über.
+        (<i>Klären, ob das auch für Unix gilt!)</i>
+    </p>
+
+    
+    <h2>Dateien programmiert hinzufügen mit add_file()</h2>
+    
+    <p>
+        Wenn die Auswahl der zu Aufträgen führenden Dateien programmierbar sein soll, z.B. weil die Kriterien komplexer sind,
+        kann dieser Aufruf verwendet werden:
+        </p>
+    <pre>spooler.job_chain( "<i>my_job_chain</i>" ).add_file( <i>path</i> );</pre>
+    <p>
+        Der Aufruf erzeugt einen Auftrag, der mit einer Datei verbunden ist.
+        <i>path</i> wird die Kennung <scheduler_method class="Order" property="id"/>.
+        Der Aufruf liefert false, wenn bereits ein Auftrag mit derselben Kennung vorhanden ist.
+        Das kann dann so verwendet werden:
+    </p>
+    <pre>var dir = new <i>My_special_directory_reader</i>( … );
+
+while( dir.has_next_path() )
+{
+    var is_new = job_chain.add_file( dir.read_next_path() );
+    if( is_new )  break;
+}</pre>
+
+    
+
+    <h3>Job als Auftragsquelle</h3>
+    <p>
+        Hier ein Vorschlag, wie ein Job, der Aufträge erzeugt,
+        vom Scheduler bei Bedarf aufgerufen wird:
+        "<a href="order_source.xml">Programmierte Auftragsquellen</a>".
     </p>
 
 

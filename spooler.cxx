@@ -1595,16 +1595,18 @@ void Spooler::send_cmd()
 
     Xml_end_finder xml_end_finder;
     bool           last_was_nl = true;
+    bool           end = false;
 
-    while(1)
+    while( !end )
     {
         char buffer [2000];
 
         int ret = recv( sock, buffer, sizeof buffer, 0 );
         if( ret == 0 )  break;
         if( ret < 0 )  z::throw_socket( socket_errno(), "recv" );
+        if( buffer[ret-1] == '\0' )  ret--, end = true;
         fwrite( buffer, ret, 1, stdout );
-        last_was_nl = buffer[ret-1] == '\n';
+        last_was_nl = ret > 0  &&  buffer[ret-1] == '\n';
         if( xml_end_finder.is_complete( buffer, ret ) )  break;
     }
 

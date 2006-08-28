@@ -13,24 +13,24 @@
     <p style="color: red">
         <i>— Dieser Text ist noch in Arbeit —</i>
     </p>
-    
-    <h2>Dateien programmiert hinzufügen</h2>
+
+
+    <h2>Auftragsquelle, Aforderungsauftrage</h2>
     <p>
         Wenn die Auswahl der zu Aufträgen führenden Dateien programmierbar sein soll,
         z.B. weil die Kriterien komplexer sind,
         ruft der Scheduler bei Bedarf einen Job auf, der einen Dateinamen liefert.
         Die Anforderung eines Auftrags ist selbst ein Auftrag.
-        Der Job ist also auftragsgesteuert, aber in keiner Jobkette.
+        Der Job ist auftragsgesteuert, aber in keiner Jobkette.
     </p>
     <pre>&lt;job_chain name="<i>my_job_chain</i>" orders_recoverable="no">
     &lt;order_source job="<i>my_file_source</i>"/>
     …
 &lt;/job_chain></pre>
     <p>
-        Der Scheduler lässt den Job einen Schritt mit
-        <scheduler_method class="Job_impl" method="spooler_process"/>
-        ausführen.
-        Der Job liefert einen gewöhnlichen Auftrag oder einen Dateinamen mit
+        Im Anforderungsauftrag wird der Name der Jobkette als Parameter übergeben.
+        Die neue Methode <code>add_file()</code> fügt einer Jobkette einen Auftrag,
+        der mit einer Datei verbunden ist, hinzu:
     </p>
     <pre>var order_request = spooler_task.order;
 var job_chain_name = order_request.params( "job_chain_name" );
@@ -42,7 +42,7 @@ spooler.job_chain( job_chain_name ).add_file( path );</pre>
         Die Methode liefert <code>false</code>, wenn die Datei bereits hinzugefügt war.
     </p>
     <p>
-        Ein solcher Job könnte so aussehen:
+        Die Implementierung von <scheduler_method class="Job_impl" method="spooler_process"/> kann so aussehen:
     </p>
     <pre>var dir = new <i>My_special_directory_reader</i>( … );
 
@@ -61,9 +61,9 @@ function spooler_process()
 }</pre>
 
     <p>
-        Der Scheduler ruft <scheduler_method class="Job_impl" method="spooler_process"/> 
-        der Auftragsquelle auf, 
-        wenn der erste auftragsgesteuerte Job der Jobkette auf einen Auftrag wartet.
+        Der Scheduler erzeugt eine Anforderung (verpackt in einem Auftrag), 
+        wenn der erst auftragsgesteuerte Job der Jobkette auf einen Auftrag wartet,
+        und nicht bereits eine Anforderung erzeugt worden ist.
     </p>
     <p>
         Wenn der Job keinen Auftrag liefert, 
