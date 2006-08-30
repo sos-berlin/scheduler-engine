@@ -90,7 +90,7 @@
             (Vorsicht beim Test! Der Job löscht wirklich!)
         </p>
 
-        <pre>&lt;?xml version="1.0" encoding="iso-8859-1"?>
+        <pre>&lt;?xml version="1.0"?>
 &lt;spooler>
     &lt;config>
         &lt;process_classes/>
@@ -98,7 +98,7 @@
         &lt;jobs>
             &lt;job name="import">
 
-                &lt;script java_class="spooler_job.Import"><![CDATA[&lt;![CDATA[
+                &lt;script java_class="spooler_job.Import">&lt;![CDATA[<![CDATA[
 
                     package spooler_job;
                                          
@@ -131,8 +131,7 @@
                         }
                     }
                 ]]>]]&gt;&lt;/script>
-
-                &lt;run_time once="yes"/>
+                
             &lt;/job>
         &lt;/jobs>
     &lt;/config>

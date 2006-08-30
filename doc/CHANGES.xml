@@ -11,7 +11,7 @@
     <scheduler_keyword keyword="Change log"/>
 
     <change date="2006-08-30" version="2.0.157" subversion_revision="4442">
-        <revision type="correction" title="&lt;show_state what=&quot;job_commands&quote; liefert alle &lt;commands>">
+        <revision type="correction" title="&lt;show_state what=&quot;job_commands&quot; liefert alle &lt;commands>">
             <description>
                 Bisher lieferte der Scheduler nur das erste <scheduler_element name="commands"/> eines Jobs.
             </description>
