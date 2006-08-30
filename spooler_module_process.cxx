@@ -14,7 +14,13 @@ Process_module_instance::Process_module_instance( Module* module )
     Module_instance(module),
     _zero_(this+1),
     _process_handle( "process_handle" ),
-    _process_environment( variable_set_from_environment() )
+
+#   ifdef Z_WINDOWS
+        _process_environment( variable_set_from_environment() )   
+#    else
+        _process_environment( new Com_variable_set() )            // Unix vererbt automatisch die Umgebungsvariablen
+#   endif
+
 {
     assert( _module );
     _process_environment->merge( _module->_process_environment );
