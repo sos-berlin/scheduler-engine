@@ -2272,7 +2272,15 @@ xml::Element_ptr Job::dom_element( const xml::Document_ptr& document, const Show
 
 
         if( show & show_description )  dom_append_text_element( job_element, "description", _description );
-        if( show & show_job_commands )  job_element.appendChild_if( commands_dom_element( document, show ) );
+
+        if( ( show & show_job_commands ) && _commands_document )  
+        {
+            for( xml::Node_ptr n = _commands_document.documentElement().firstChild(); n = n.nextSibling(); n )
+            {
+                if( n.is_type( xml::ELEMENT_NODE ) ) 
+                    job_element.appendChild( document.clone( n ) );;
+            }
+        }
 
         xml::Element_ptr queue_element = document.createElement( "queued_tasks" );
         queue_element.setAttribute( "length", as_string( _task_queue.size() ) );
@@ -2323,7 +2331,7 @@ xml::Element_ptr Job::dom_element( const xml::Document_ptr& document, const Show
 }
 
 //------------------------------------------------------------------------Job::commands_dom_element
-
+/*
 xml::Element_ptr Job::commands_dom_element(  const xml::Document_ptr& document, const Show_what& show )
 {
     xml::Element_ptr result;
@@ -2335,7 +2343,7 @@ xml::Element_ptr Job::commands_dom_element(  const xml::Document_ptr& document, 
 
     return result;
 }
-
+*/
 //---------------------------------------------------------------------------------kill_queued_task
 
 void Job::kill_queued_task( int task_id )
