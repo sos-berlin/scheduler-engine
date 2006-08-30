@@ -74,6 +74,7 @@ function sys( cmd, timeout )
                 <run_time once="yes"/>
             </job>
             
+            
             <job name="import2">
                 <script language="javascript">
                     <![CDATA[ 
@@ -93,7 +94,7 @@ function spooler_process()
 }
             
                 ]]></script>
-                <start_when_directory_changed directory="/tmp/testfiles/" regex="^a"/>
+                <start_when_directory_changed directory="\\gibtsnicht\gibtsnicht" regex="^a"/>
                 <run_time once="yes"/>
             </job>
 

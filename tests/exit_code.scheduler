@@ -50,6 +50,7 @@ start_job( "java"      , 9 );
                 <process file="/tmp/test.cmd"/>
                 
                 <commands on_exit_code="success">
+                    <show_state/>
                     <start_job job="following">
                         <params>
                             <param name="param" value="SUCCESS"/>

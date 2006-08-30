@@ -17,6 +17,18 @@
 
         <jobs>
 
+            <job name="shell">
+                <params>
+                    <param name="ZWEI" value="dwa"/>
+                </params>
+                <process file="/tmp/test.cmd" param="trigger_files=${SCHEDULER_TASK_TRIGGER_FILES} $TEST $ZWEI">
+                    <environment>
+                        <variable name="TEST" value="test"/>
+                    </environment>
+                </process>
+                <start_when_directory_changed directory="/tmp/z/" regex="."/>
+            </job>
+
 <!--
         <job name="java">
 
@@ -87,54 +99,43 @@ public class Test extends sos.spooler.Job_impl
 
         <job name="import">
 
-            <script java_class="spooler_job.Import">
+               <script java_class="spooler_job.Import"><![CDATA[
 
-<![CDATA[
+                    package spooler_job;
+                                         
+                    import java.io.File;
+                    import sos.spooler.*;
 
-package spooler_job;
-                     
-import java.io.File;
-import sos.spooler.*;
+                    public class Import  extends sos.spooler.Job_impl
+                    {
+                        String[]  paths;
+                        int       index;
 
-public class Import  extends sos.spooler.Job_impl
-{
-    File      directory = new File( "/tmp/1" );
-    File[]    files;
-    int       index;
-              
-              
-    public boolean spooler_init()
-    {
-        spooler_log.info( "changed_directories=" + spooler_task.changed_directories() );
-        //spooler_job.start_when_directory_changed( directory );
-        
-        return true;
-    }
-    
-    
-    public boolean spooler_open()
-    {
-        files = directory.listFiles();
-        index = 0;
-        return files != null  &&  files.length > 0;
-    }
-        
 
-    public boolean spooler_process()
-    {     
-        File file = files[ index++ ];
-        
-        spooler_log.info( "Verarbeite Datei " + file );
-        
-        return index < files.length;
-    }
-}
+                        public boolean spooler_open()
+                        {
+                            spooler_log.info( "changed_directories=" + spooler_task.changed_directories() );
+                            spooler_log.info( "trigger_files=" + spooler_task.trigger_files() );
 
-]]>
-            </script>
+                            paths = spooler_task.trigger_files().split( ";" );
+                            index = 0;
+                            return index < paths.length;
+                        }
+                            
+
+                        public boolean spooler_process()
+                        {     
+                            File file = new File( paths[ index++ ] );
+                            spooler_log.info( "Processing file " + file );
+                            file.delete();
+                            return index < paths.length;
+                        }
+                    }
+                ]]></script>
+
+                                                         
             
-            
-            <start_when_directory_changed directory="/tmp/1" regex="x" />
+            <start_when_directory_changed directory="/tmp/1" regex="\.data$" />
             <delay_after_error error_count="1" delay="30"/>            
 
             <run_time/>
