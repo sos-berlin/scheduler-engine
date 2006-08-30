@@ -2167,7 +2167,7 @@ bool Job_module_task::do_load()
     _module_instance = module_instance;
     _module_instance->attach_task( this, _log );
 
-    _module_instance->set_params( _params );
+    //_module_instance->set_params( _params );
 
     if( !module_instance->loaded() )
     {

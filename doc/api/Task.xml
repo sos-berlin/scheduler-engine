@@ -838,6 +838,11 @@ $spooler_log->info( 'order.id=' . $order->id . ', order.title=' . $order->title 
                 angegeben ist und dem Dateinamen zusammengesetzt.
             </p>
             <p>
+                <scheduler_element name="process"/>-Jobs steht der Inhalt von
+                <scheduler_method class="Task" property="trigger_files"/>
+                in der Umgebungsvariablen <code>SCHEDULER_TASK_TRIGGER_FILES</code> zur Verfügung.
+            </p>
+            <p>
                 Siehe <scheduler_method class="Job" method="start_when_directory_changed"/>,
                 <scheduler_method class="Task" method="changed_directories"/>.
             </p>

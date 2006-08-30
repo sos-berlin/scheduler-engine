@@ -56,6 +56,20 @@
         </p>
 
 
+    <h2>Welche Dateien stehen im Verzeichnis?</h2>
+
+        <p>
+            <scheduler_method class="Task" property="trigger_files"/>
+            liefert die aus Verzeichnis und Dateinamen zusammengesetzten Pfade, 
+            auf die der Reguläre Ausdruck (wenn vorhanden) zutrifft.
+        </p>
+        <p>
+            <scheduler_element name="process"/>-Jobs steht der Inhalt von 
+            <scheduler_method class="Task" property="trigger_files"/>
+            in der Umgebungsvariablen <code>SCHEDULER_TASK_TRIGGER_FILES</code> zur Verfügung.
+        </p>
+
+
     <h2>Fehler bei der Verzeichnisüberwachung</h2>
 
         <p>
@@ -84,34 +98,39 @@
         &lt;jobs>
             &lt;job name="import">
 
-                &lt;script java_class="spooler_job.Import">&lt;![CDATA[
+                &lt;script java_class="spooler_job.Import"><![CDATA[&lt;![CDATA[
 
                     package spooler_job;
+                                         
                     import java.io.File;
+                    import sos.spooler.*;
 
                     public class Import  extends sos.spooler.Job_impl
                     {
-                        File      directory = new File( "/tmp/test-import" );   // Vorsicht! Dateien werden gelöscht!
-                        File[]    files;
-                        int       index = 0;
+                        String[]  paths;
+                        int       index;
 
-                        public boolean spooler_init()
+
+                        public boolean spooler_open()
                         {
-                            spooler_job.start_when_directory_changed( directory );
-                            files = directory.listFiles();
-                            return files.length > 0;
+                            spooler_log.info( "changed_directories=" + spooler_task.changed_directories() );
+                            spooler_log.info( "trigger_files=" + spooler_task.trigger_files() );
+
+                            paths = spooler_task.trigger_files().split( ";" );
+                            index = 0;
+                            return index < paths.length;
                         }
+                            
 
                         public boolean spooler_process()
-                        {
-                            File file = files[ index++ ];
-                            spooler_log.info( "Verarbeite Datei " + file );
+                        {     
+                            File file = new File( paths[ index++ ] );
+                            spooler_log.info( "Processing file " + file );
                             file.delete();
-                            return index &lt; files.length;
+                            return index < paths.length;
                         }
                     }
-
-                ]]&gt;&lt;/script>
+                ]]>]]&gt;&lt;/script>
 
                 &lt;run_time once="yes"/>
             &lt;/job>

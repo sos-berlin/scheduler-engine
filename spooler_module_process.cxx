@@ -14,8 +14,10 @@ Process_module_instance::Process_module_instance( Module* module )
     Module_instance(module),
     _zero_(this+1),
     _process_handle( "process_handle" ),
-    _process_environment( new Com_variable_set  )
+    _process_environment( variable_set_from_environment() )
 {
+    assert( _module );
+    _process_environment->merge( _module->_process_environment );
 }
 
 //------------------------------------------------Process_module_instance::~Process_module_instance
@@ -59,8 +61,6 @@ void Process_module_instance::close_handle()
 void Process_module_instance::init()
 {
     Module_instance::init();
-
-    _process_param = subst_env( _module->_process_param_raw, _params );
 }
 
 //-------------------------------------------------------------Process_module_instance::attach_task
@@ -69,6 +69,7 @@ void Process_module_instance::attach_task( Task* task, Prefix_log* log )
 {
     Module_instance::attach_task( task, log );
     
+    _process_environment->merge( task->params() );
     _process_environment->set_var( "SCHEDULER_TASK_TRIGGER_FILES", task->trigger_files() );
 }
 
@@ -114,7 +115,8 @@ bool Process_module_instance::load()
 
 void Process_module_instance::start()
 {
-    return Module_instance::start();
+    Module_instance::start();
+    _process_param = subst_env( _module->_process_param_raw, _process_environment );
 }
 
 //---------------------------------------------------------------Process_module_instance::name_exists
@@ -224,7 +226,7 @@ bool Process_module_instance::begin__end()
         command_line = quoted_windows_process_parameter( _shell_file.path() );
     }
 
-    if( _params )
+    if( _process_environment )
     {
         for( int i = 1;; i++ )
         {
@@ -232,7 +234,7 @@ bool Process_module_instance::begin__end()
             Variant vt;
             HRESULT hr;
 
-            hr = _params->get_Var( Bstr(nr), &vt );
+            hr = _process_environment->get_Var( Bstr(nr), &vt );
             if( FAILED(hr) )  throw_ole( hr, "Variable_set.var", nr.c_str() );
 
             if( vt.vt == VT_EMPTY )  break;
@@ -245,12 +247,8 @@ bool Process_module_instance::begin__end()
     }
 
     // Environment
-
-    ptr<Com_variable_set> v = variable_set_from_environment();
-    v->merge( _module->_process_environment );
-    v->merge( _process_environment );
     S env;
-    Z_FOR_EACH( Com_variable_set::Map, v->_map, m )
+    Z_FOR_EACH( Com_variable_set::Map, _process_environment->_map, m )
         env << string_from_bstr ( m->second->_name ) << "=" << string_from_variant( m->second->_value ) << '\0';
     env << '\0';
 
@@ -438,7 +436,7 @@ bool Process_module_instance::begin__end()
     {
         string_args.push_back( program_path() );   // argv[0]
 
-        if( _params )
+        if( _process_environment )
         {
             for( int i = 1;; i++ )
             {
@@ -446,7 +444,7 @@ bool Process_module_instance::begin__end()
                 Variant vt;
                 HRESULT hr;
 
-                hr = _params->get_Var( Bstr(nr), &vt );
+                hr = _process_environment->get_Var( Bstr(nr), &vt );
                 if( FAILED(hr) )  throw_ole( hr, "Variable_set.var", nr.c_str() );
 
                 if( vt.vt == VT_EMPTY )  break;
@@ -504,11 +502,7 @@ bool Process_module_instance::begin__end()
 
             // Environment
 
-            ptr<Com_variable_set> v = new Com_variable_set();
-            v->merge( _module->_process_environment );
-            v->merge( _process_environment );
-
-            Z_FOR_EACH( Com_variable_set::Map, v->_map, m )
+            Z_FOR_EACH( Com_variable_set::Map, _process_environment->_map, m )
             {
 #               if defined Z_HPUX || defined Z_SOLARIS
                     string e = string_from_bstr( m->second->_name ) + "=" + m->second->_value.as_string();

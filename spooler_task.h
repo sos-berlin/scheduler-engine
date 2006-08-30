@@ -130,6 +130,8 @@ struct Task : Object,
     Time                        last_process_start_time     ()                                      { THREAD_LOCK_RETURN( _lock, Time, _last_process_start_time ); }
     Time                        ending_since                ()                                      { THREAD_LOCK_RETURN( _lock, Time, _ending_since ); }
 
+    ptr<Com_variable_set>       params                      ()                                      { return _params; }
+
     void                        signal                      ( const string& signal_name );
     bool                        has_error                   ()                                      { return _error != NULL; }
     void                    set_error_xc_only               ( const zschimmer::Xc& );

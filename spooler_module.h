@@ -228,7 +228,7 @@ struct Module_instance : Object
     void                    set_log                         ( Prefix_log* );
     void                    set_in_call                     ( In_call* in_call, const string& extra = "" );
     void                    set_close_instance_at_end       ( bool )                                {} // veraltet: _close_instance_at_end = b; }   // Nach spooler_close() Instanz schlieﬂen
-    void                    set_params                      ( Com_variable_set* params )            { _params = params; }
+  //void                    set_params                      ( Com_variable_set* params )            { _params = params; }
 
     virtual void                attach_task                 ( Task*, Prefix_log* );
     virtual void                detach_task                 ();
@@ -308,7 +308,7 @@ struct Module_instance : Object
     ptr<Com_log>               _com_log;                    // spooler_log
 
     ptr<Module_instance>       _monitor_instance;
-    ptr<Com_variable_set>      _params;
+  //ptr<Com_variable_set>      _params;
 
     Fill_end                   _end_;
 };
