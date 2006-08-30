@@ -2275,9 +2275,9 @@ xml::Element_ptr Job::dom_element( const xml::Document_ptr& document, const Show
 
         if( ( show & show_job_commands ) && _commands_document )  
         {
-            for( xml::Node_ptr n = _commands_document.documentElement().firstChild(); n = n.nextSibling(); n )
+            for( xml::Node_ptr n = _commands_document.documentElement().firstChild(); n; n = n.nextSibling() )
             {
-                if( n.is_type( xml::ELEMENT_NODE ) ) 
+                if( n.nodeType() == xml::ELEMENT_NODE ) 
                     job_element.appendChild( document.clone( n ) );;
             }
         }
