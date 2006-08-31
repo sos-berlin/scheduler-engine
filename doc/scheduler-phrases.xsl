@@ -49,6 +49,7 @@
             <phrase id="head.link_to_sos">Software- und Organisations-Service GmbH</phrase>
             <phrase id="head.last_updated_by">Zuletzt geändert von</phrase>
 
+            <phrase id="index.title">Register</phrase>
             
             <phrase id="ini.file.title">Die Datei</phrase>
             <phrase id="ini.sections.title">Die Abschnitte</phrase>
