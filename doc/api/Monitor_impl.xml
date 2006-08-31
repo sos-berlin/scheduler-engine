@@ -266,7 +266,7 @@
 <pre>public boolean spooler_task_after( boolean spooler_process_result )  throws Exception
 {
     spooler_log.info( "SPOOLER_TASK_BEFORE()" );
-    spooler_log.info( "spooler_process() didn't threw an exception and delivered " + spooler_process_result );
+    spooler_log.info( "spooler_process() didn't throw an exception and delivered " + spooler_process_result );
     return spooler_process_result;   // Unchanged result
 }</pre>
     </example>    

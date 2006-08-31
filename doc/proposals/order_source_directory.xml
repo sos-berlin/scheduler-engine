@@ -11,11 +11,11 @@
     date                = "$Date$"
 >
     
-    <h2>Dateinamen eines Verzeichnisses sind Aufträge</h2>
+    <h2>Dateinamen eines Verzeichnisses sind Aufträge — Dateinamensaufträge</h2>
 
     <p>
         Jeder Dateiname eines Verzeichnisses, der einem Regulären Ausdruck entspricht,
-        ist ein Auftrag.
+        ist ein Auftrag: ein Dateinamensauftrag.
     </p>
 
     
@@ -27,9 +27,9 @@
         Ein Verzeichnis kann eine Auftragsquelle sein.
     </p>
 
-        <pre>&lt;job_chain name="<i>my_job_chain</i>" orders_recoverable="no">
-    &lt;order_source directory="<i>path</i>" regex="<i>regex</i>"/>
-    &lt;order_source directory="<i>other_path</i>"/>
+    <pre>&lt;job_chain name="<i>my_job_chain</i>" orders_recoverable="no">
+    &lt;file_order_source directory="<i>path</i>" regex="<i>regex</i>"/>
+    &lt;file_order_source directory="<i>other_path</i>"/>
     &lt;job_chain_node state="1" job="<i>job_1</i>"/>
     &lt;job_chain_node state="2" job="<i>job_2</i>"/>
     &lt;job_chain_node state="finished"/>
@@ -62,36 +62,36 @@
         Kennung des Auftrags (<scheduler_method class="Order" property="id"/>)
         ist der Dateipfad, gebildet aus dem Verzeichnis- und dem Dateinamen.
         In <scheduler_method class="Order" property="params"/>
-        sind einige Variablen gesetzt:
+        ist eine Variable gesetzt:
     </p>
     
     <table cellspacing="0" cellpadding="0" style="margin-top: 1em">
-        <tr>
+        <!--tr>
             <td style="padding-right: 2ex;">
                 <code>scheduler.file.name</code>
             </td>
             <td>Der Dateiname</td>
-        </tr>
+        </tr-->
         <tr>
             <td style="padding-right: 2ex;">
-                <code>scheduler.file.path</code>
+                <code>scheduler_file_path</code>
             </td>
             <td>Dateiname mit vorangestelltem Verzeichnis</td>
         </tr>
-        <tr>
+        <!--tr>
             <td style="padding-right: 2ex;">
                 <code>scheduler.file.directory</code>
             </td>
             <td>Verzeichnis</td>
-        </tr>
+        </tr-->
     </table>
 
-    <p>
+    <!--p>
         <code>scheduler.file</code> ist selbst eine Variablenmenge
         (der Scheduler kennt verschachtelte Variablenmengen).
         <scheduler_method class="Variable_set" property="value"/> wird erweitert,
         so dass es den Punkt für verschachtelte Variablenmengen erkennt.
-    </p>
+    </p-->
 
 
 
@@ -99,7 +99,7 @@
     <p>
         Als Besonderheit setzt der Scheduler
         <scheduler_method class="Task" object="spooler_task" property="trigger_files"/>
-        auf den Wert des Auftragsparameters <code>scheduler.file.path</code>.
+        auf den Wert des Auftragsparameters <code>scheduler_file_path</code>.
     </p>
     <!--pre>// Algorithmus im Scheduler:
 if( spooler_task.trigger_files == ""  &amp;&amp;  spooler_task.order != null )
@@ -231,20 +231,45 @@ spooler_process();</pre-->
 
 
 
+    <h3>Auftragssenke: Datei entfernen oder verschieben</h3>
+    <p>
+        Am Ende der Ausführung des Auftrags kann die zugehörige Datei entfernt werden.
+        Die mit <code>&lt;file_order_sink></code> definierten Zustände sind Endzustände.
+    </p>
+    <pre>&lt;file_order_sink state="" remove="yes"></pre>
+    <p>
+        Wenn die Datei nicht vorhanden ist, wird das ignoriert.
+        Wenn die Datei sich nicht entfernen lässt, bleibt der Auftrag in dem Zustand erhalten,
+        und wird gesperrt 
+        (das ist neu: gesperrte Aufträge werden nicht verarbeitet; diese Eigenschaft wird nicht in die Datenbank übertragen).
+    </p>
+    <p>
+        Die Datei kann auch in ein anderes Verzeichnis verschoben werden:
+    </p>
+    <pre>&lt;file_order_sink state="" move_to="<i>directory_path</i>"></pre>
+    <p>
+        Wenn die Datei nicht vorhanden ist, ist das ein Fehler, der im Auftragsprotokoll festgehalten wird.
+        Das ist ohne weitere Wirkung, der Auftrag ist anschließend erledigt.
+        Eine Datei gleichen Namens im Zielverzeichnis wird ohne Warnung überschrieben.
+    </p>
+    <p>
+        Wenn ein gewöhnlicher Auftrag eine Dateiauftragssenke erreicht,
+        ist das ein Fehler des Auftrags ohne weitere Wirkung.
+        Der Auftrag ist anschließend erledigt.
+    </p>
+    <p>
+        Der Scheduler erkennt, wenn die Datei dauerhaft gelöscht ist und
+        entfernt dann den Auftrag.
+    </p>
+
+
     <h3>Stehengebliebene Dateien</h3>
     <p>
         Nach der Ausführung eines Auftrags sollte die Datei entfernt sein.
         Wenn die Datei noch vorhanden ist, 
-        führt das zu einem neuen Auftrag und damit zu einer Schleife.
-        Deshalb wiederholt der Scheduler den Auftrag nach dem letzten Jobschritt
-        nach einer einstellbaren Frist (default: 60s),
-        wenn die Datei dann noch vorhanden ist (s.o. "Vor Ausführung entfernte Dateien").
-    </p>
-    <pre>&lt;job_chain name="…" remaining_file_delay="60"></pre>
-    <p>
-        Für den Scheduler ist eine Datei, 
-        die während der Ausführung entfernt und wieder angelegt worden ist,
-        eine stehengebliebene Datei.
+        bleibt der Auftrag im Endzustand stehen.
+        Der Scheduler erkennt, wenn die Datei dauerhaft gelöscht ist und 
+        entfernt dann den Auftrag.
     </p>
 
 
@@ -300,7 +325,7 @@ spooler_process();</pre-->
         einstellbar, Default 1 Minute.
         Sobald das Verzeichnis wieder lesbar ist, gibt der Scheduler eine info-Meldung aus.
     </p>
-    <pre>&lt;order_source … delay_after_error="60"/></pre>
+    <pre>&lt;file_order_source … delay_after_error="60"/></pre>
 
 
 
@@ -308,7 +333,7 @@ spooler_process();</pre-->
 
 
     <h3>Beschränkung auf Dateien, die sich exklusiv zum Lesen öffnen lassen</h3>
-    <pre>&lt;order_source directory="…" check_open="yes"/></pre>
+    <pre>&lt;file_order_source directory="…" check_open="yes"/></pre>
     <p>
         Mit dieser Einstellung übergibt der Scheduler eine Datei nur, 
         wenn sie sich zum Lesen öffnen lässt.

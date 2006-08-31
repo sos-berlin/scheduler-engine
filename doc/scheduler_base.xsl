@@ -1020,7 +1020,7 @@
 
     <xsl:template match="/register">
 
-        <xsl:variable name="title"       select="'Register'"/>
+        <xsl:variable name="title" select="'Register'"/>
 
         <html>
             <xsl:call-template name="html_head">

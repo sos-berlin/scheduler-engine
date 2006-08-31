@@ -1061,10 +1061,10 @@
 
         <message code="SCHEDULER-217">
             <text xml:lang="de">
-                <title><p1/> ist in Bearbeitung durch <p2/></title>
+                <title><p1>auftrag</p1> ist in Bearbeitung durch <p2>task</p2></title>
             </text>
             <text xml:lang="en">
-                <title><p1/> is being processed by <p2/></title>
+                <title><p1>order</p1> is being processed by <p2>task</p2></title>
             </text>
         </message>
 
@@ -2134,6 +2134,13 @@
                 <title>Signal <p1/> is unknown on this operating system and is ignored</title>
             </text>
         </message>
+        
+        <message code="SCHEDULER-338">
+            <text xml:lang="en">
+                <title>Order.payload is not a Variable_set</title>
+            </text>
+        </message>
+
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->
