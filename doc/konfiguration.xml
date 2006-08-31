@@ -151,6 +151,7 @@
                 priority       = "…"
                 process_class  = "…"
                 spooler_id     = "…"
+                stop_on_error  = "yes"
                 tasks          = "1"
                 timeout        = "…"
                 title          = "…"
