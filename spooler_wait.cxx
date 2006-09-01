@@ -624,30 +624,32 @@ Directory_watcher::Directory_reader::~Directory_reader()
 
 //----------------------------------------------------------------------------Directory_reader::get
 
-string Directory_watcher::Directory_reader::get() 
+ptr<zschimmer::File_info> Directory_watcher::Directory_reader::get() 
 { 
-    string result;
+    ptr<zschimmer::File_info> result;
 
     while(1)
     {
-        if( !_first_read )  result = first(),  _first_read = true;
-                      else  result = next();
+        if( !_first_read )  result = read_first(),  _first_read = true;
+                      else  result = read_next();
+        if( !result )  break;
 
-        if( result == ""   )  break;    // Ende                      
-        if( result == "."  )  continue;
-        if( result == ".." )  continue;
-        if( !_regex || _regex->match( result ) )  break;
+        string name = result->path().name();
+        if( name == "."  )  continue;
+        if( name == ".." )  continue;
+        if( !_regex || _regex->match( name ) )  break;
 
-        Z_DEBUG_ONLY( Z_LOG2( "joacim", __FUNCTION__ << "    " << result << " nicht übernommen\n" ); ) 
+        Z_DEBUG_ONLY( Z_LOG2( "joacim", __FUNCTION__ << "    " << name << " nicht übernommen\n" ); ) 
     }
 
-    Z_DEBUG_ONLY( Z_LOG2( "joacim", __FUNCTION__ << " => " << result << "\n" ); ) 
+    //Z_DEBUG_ONLY( Z_LOG2( "joacim", __FUNCTION__ << " => " << result << "\n" ); ) 
 
+    if( result )  result->path().set_directory( _directory_path );
     return result;
 }
 
 //-----------------------------------------------------------------------Directory_reader::get_path
-
+/*
 string Directory_watcher::Directory_reader::get_path()
 {
     string filename = get();
@@ -662,7 +664,7 @@ string Directory_watcher::Directory_reader::get_path()
 
     return result;
 }
-
+*/
 //---------------------------------------------------------------Directory_reader::Directory_reader
 #ifdef Z_WINDOWS
 
@@ -674,6 +676,17 @@ Directory_watcher::Directory_reader::Directory_reader( Directory_watcher* w )
     _handle(-1) 
 {
 }
+
+//---------------------------------------------------------------Directory_reader::Directory_reader
+    
+Directory_watcher::Directory_reader::Directory_reader( const File_path& directory, Regex* regex ) 
+: 
+    _zero_(this+1),
+    _directory_path( directory.path() ),
+    _regex( regex ),
+    _handle(-1) 
+{
+}
     
 //--------------------------------------------------------------------------Directory_reader::close
 
@@ -682,32 +695,50 @@ void Directory_watcher::Directory_reader::close()
     if( _handle != -1 )  _findclose( _handle ),  _handle = -1; 
 }
 
-//--------------------------------------------------------------------------Directory_reader::first
+//--------------------------------------------------Directory_watcher::Directory_reader::read_first
 
-string Directory_watcher::Directory_reader::first() 
+ptr<zschimmer::File_info> Directory_watcher::Directory_reader::read_first() 
 { 
+    ptr<zschimmer::File_info> result = Z_NEW( zschimmer::File_info );
+
     string pattern = _directory_path + "/*";
     _finddata_t data;
+
+    memset( &data, 0, sizeof data );
     _handle = _findfirst( pattern.c_str(), &data ); 
   //if( data.attrib &  ...dir... )  return data.name + Z_DIR_SEPARATOR;
     if( _handle == -1 )  throw_errno( errno, "_findfirst", _directory_path.c_str() );  
-    return data.name; 
+
+
+    result->path().set_name( data.name );
+    result->set_create_time     ( data.time_create == -1? 0 : data.time_create );
+    result->set_last_access_time( data.time_access == -1? 0 : data.time_access );
+    result->set_last_write_time ( data.time_write  == -1? 0 : data.time_write  );
+
+    return result;
 }
 
 //---------------------------------------------------------------------------Directory_reader::next
 
-string Directory_watcher::Directory_reader::next() 
+ptr<zschimmer::File_info> Directory_watcher::Directory_reader::read_next() 
 { 
     _finddata_t data;
     int ret = _findnext( _handle, &data ); 
     if( ret == -1 )  
     {
-        if( errno == ENOENT )  return "";
+        if( errno == ENOENT )  return NULL;
         throw_errno( errno, "_findnext" ); 
     }
 
-  //if( data.attrib &  ...dir... )  return data.name + Z_DIR_SEPARATOR;
-    return data.name; 
+
+    ptr<zschimmer::File_info> result = Z_NEW( zschimmer::File_info );
+
+    result->path().set_name( data.name );
+    result->set_create_time     ( data.time_create == -1? 0 : data.time_create );
+    result->set_last_access_time( data.time_access == -1? 0 : data.time_access );
+    result->set_last_write_time ( data.time_write  == -1? 0 : data.time_write  );
+
+    return result;
 }
 
 
@@ -726,29 +757,33 @@ Directory_watcher::Directory_reader::Directory_reader( Directory_watcher* w )
     
 //-------------------------------------------------------Directory_watcher::Directory_reader::close
     
-    void Directory_watcher::Directory_reader::close() 
+void Directory_watcher::Directory_reader::close() 
 { 
     if( _handle )  closedir( _handle ), _handle = NULL;
 }
 
-//-------------------------------------------------------Directory_watcher::Directory_reader::first
-
-string Directory_watcher::Directory_reader::first() 
+//--------------------------------------------------Directory_watcher::Directory_reader::read_first
+    
+ptr<zschimmer::File_info> Directory_watcher::Directory_reader::read_first() 
 { 
     _handle = opendir( _directory_path.c_str() );
     if( !_handle )  throw_errno( errno, "opendir", _directory_path.c_str() );
 
-    return next();
+    ptr<zschimmer::File_info> result = Z_NEW( zschimmer::File_info );
+    result->path().set_name( entry->d_name );
+    return result;
 }
 
-//--------------------------------------------------------Directory_watcher::Directory_reader::next
+//---------------------------------------------------Directory_watcher::Directory_reader::read_next
 
-string Directory_watcher::Directory_reader::next() 
+ptr<zschimmer::File_info> Directory_watcher::Directory_reader::read_next() 
 { 
     struct dirent* entry = readdir( _handle );
     if( !entry )  return "";
 
-    return entry->d_name;
+    ptr<zschimmer::File_info> result = Z_NEW( zschimmer::File_info );
+    result->path().set_name( entry->d_name );
+    return result;
 }
 
 #endif
@@ -882,7 +917,7 @@ bool Directory_watcher::has_changed_2( bool throw_error )
 
 bool Directory_watcher::match()
 {
-    return Directory_reader( this ).get() != "";
+    return Directory_reader( this ).get() != NULL;
 }
 
 //------------------------------------------------------------------Directory_watcher::set_signaled

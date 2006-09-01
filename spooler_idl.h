@@ -460,6 +460,14 @@ struct Imail : IDispatch
     virtual HRESULT     get_Xslt_stylesheet         ( spooler_com::Ixslt_stylesheet** ) = 0;
 };
 
+//---------------------------------------------------------------------Idirectory_file_order_source
+
+DEFINE_GUID( IID_Idirectory_file_order_source, 0xfeee47b4, 0x6c1b, 0x11d8, 0x81, 0x03, 0x00, 0x04, 0x76, 0xee, 0x8a, 0xfb );
+
+struct Idirectory_file_order_source : IDispatch
+{
+};
+
 //--------------------------------------------------------------------------------Job_chain_node
 
 DEFINE_GUID( IID_Ijob_chain_node,  0x5CC81C2F, 0xF015, 0x4591, 0xB9, 0x73, 0xB8, 0xB4, 0x96, 0x98, 0x09, 0xC4 );

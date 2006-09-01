@@ -12,6 +12,10 @@ struct Job_chain_node;
 struct Order_queue;
 struct Order;
 
+//-------------------------------------------------------------------------------------------------
+
+extern const string             scheduler_file_path_variable_name;
+
 //--------------------------------------------------------------------------------------------Order
 
 struct Order : Com_order,
@@ -35,6 +39,7 @@ struct Order : Com_order,
     void                        init                    ();
     void                        attach_task             ( Task* );
     void                        assert_no_task          ();
+    bool                        is_immediately_processable( const Time& now = Time() );
     void                        open_log                ();
     void                        close                   ();
 
@@ -84,10 +89,17 @@ struct Order : Com_order,
     Time                        start_time              () const                                    { return _start_time; }
     Time                        end_time                () const                                    { return _end_time; }
 
+    void                    set_file_path               ( const File_path& );                       // Für einen Dateiauftrag (file order)
+    File_path                   file_path               () const;
+    bool                        is_file_order           () const;
+    
     void                    set_payload                 ( const VARIANT& );
     Payload                     payload                 ()                                          { THREAD_LOCK_RETURN( _lock, Variant, _payload ); }
     string                      string_payload          () const;
     ptr<spooler_com::Ivariable_set> params_or_null      () const;
+    ptr<spooler_com::Ivariable_set> params              () const;
+    void                    set_param                   ( const string& name, const Variant& value );
+    Variant                     param                   ( const string& name ) const;
 
     void                    set_xml_payload             ( const string& xml );
     string                      xml_payload             () const                                    { return _xml_payload; }
@@ -187,6 +199,7 @@ struct Order : Com_order,
   //bool                       _period_once;
     Time                       _setback;                // Bis wann der Auftrag zurückgestellt ist (bei _setback_count > 0, sonst Startzeitpunkt "at")
     int                        _setback_count;
+    bool                       _suspended;
   //bool                       _recoverable;            // In Datenbank halten
     bool                       _is_in_database;
     bool                       _delay_storing_until_processing;  // Erst in die Datenbank schreiben, wenn die erste Task die Verarbeitung beginnt
@@ -194,6 +207,57 @@ struct Order : Com_order,
 
     ptr<Web_service>           _web_service;
     ptr<http::Operation>       _http_operation;
+};
+
+//----------------------------------------------------------------------Directory_file_order_source
+
+struct Directory_file_order_source : //idispatch_implementation< Directory_file_order_source, spooler_com::Idirectory_file_order_source >,
+                                     Async_operation, Scheduler_object
+{
+    enum State
+    {
+        s_none,
+        s_order_requested
+    };
+
+
+    explicit                    Directory_file_order_source( Job_chain*, const xml::Element_ptr& );
+                               ~Directory_file_order_source();
+
+    virtual Prefix_log*         log                     ();
+    void                        start                   ();
+    Order*                      request_order           ();
+
+    // Async_operation:
+    virtual bool                async_continue_         ( Continue_flags );
+    virtual bool                async_finished_         () const                                    { return false; }
+    virtual string              async_state_text_       () const                                    { return "Directory_file_order_source"; }
+
+  private:
+    Fill_zero                  _zero_;
+    File_path                  _path;
+    string                     _regex_string;
+    Regex                      _regex;
+    ptr<Directory_watcher>     _directory_watcher;
+    Job_chain*                 _job_chain;
+    bool                       _order_requested;
+};
+
+//------------------------------------------------------------------------------------Order_sources
+
+struct Order_sources //: Async_operation
+{
+    void                        start                   ();
+    Order*                      request_order           ();
+
+    // Async_operation:
+  //virtual bool                async_continue_         ( Continue_flags );
+  //virtual bool                async_finished_         () const                                    { return false; }
+  //virtual string              async_state_text_       () const                                    { return "Order_sources"; }
+
+
+    typedef list< ptr<Directory_file_order_source> >  Order_source_list;
+    Order_source_list          _order_source_list;
 };
 
 //-----------------------------------------------------------------------------------Job_chain_node
@@ -204,11 +268,14 @@ struct Job_chain_node : Com_job_chain_node
 
     xml::Element_ptr            dom_element             ( const xml::Document_ptr&, const Show_what&, Job_chain* );
     int                         order_count             ( Job_chain* = NULL );
+    bool                        is_file_order_sink      ()                                          { return _file_order_sink_remove || _file_order_sink_move_to != ""; }
 
 
     Fill_zero                  _zero_;
 
     ptr<Job>                   _job;                    // NULL: Kein Job, Auftrag endet
+    bool                       _file_order_sink_remove;  // <file_order_sink remove="yes"/>
+    string                     _file_order_sink_move_to; // <file_order_sink move_to="..."/>
 
     Order::State               _state;                  // Bezeichnung des Zustands
 
@@ -219,11 +286,12 @@ struct Job_chain_node : Com_job_chain_node
     Job_chain_node*            _error_node;             // Fehlerknoten
 
     int                        _priority;               // Das ist die Entfernung zum letzten Knoten + 1, negativ (also -1, -2, -3, ...)
+    bool                       _suspended;
 };
 
 //----------------------------------------------------------------------------------------Job_chain
 
-struct Job_chain : Com_job_chain
+struct Job_chain : Com_job_chain, Scheduler_object
 {
     //typedef Variant             State;
 
@@ -244,6 +312,7 @@ struct Job_chain : Com_job_chain
     void                        close                   ();
     void                        remove                  ();
     void                        check_for_removing      ();
+    Prefix_log*                 log                     ()                                          { return &_log; }
 
     void                    set_name                    ( const string& name )                      { THREAD_LOCK( _lock )  _name = name,  _log.set_prefix( "Job_chain " + _name ); }
     string                      name                    ()                                          { THREAD_LOCK_RETURN( _lock, string, _name ); }
@@ -263,6 +332,7 @@ struct Job_chain : Com_job_chain
     void                        add_job                 ( Job*, const Order::State& input_state, const Order::State& output_state = error_variant, const Order::State& error_state = error_variant );
     void                        finish                  ();
 
+    Job_chain_node*             first_node             ();
     Job_chain_node*             node_from_state         ( const Order::State& );
     Job_chain_node*             node_from_state_or_null ( const Order::State& );
     Job_chain_node*             node_from_job           ( Job* );
@@ -283,9 +353,15 @@ struct Job_chain : Com_job_chain
     void                    set_dom                     ( const xml::Element_ptr& );
     xml::Element_ptr            dom_element             ( const xml::Document_ptr&, const Show_what& );
 
+    Order*                      request_order           ()                                          { return _order_sources.request_order(); }
+
+    // Async_operation:
+    //virtual bool                async_continue_         ( Continue_flags );
+    //virtual bool                async_finished_         () const                                    { return false; }   // nie
+    //virtual string              async_state_text_       () const                                    { return "Job_chain " + _name; }
+
 
     Fill_zero                  _zero_;
-    Spooler*                   _spooler;
     bool                       _orders_recoverable;
     bool                       _load_orders_from_database;      // load_orders_from_database() muss noch gerufen werden.
 
@@ -296,6 +372,8 @@ struct Job_chain : Com_job_chain
     string                     _name;
     State                      _state;
     bool                       _visible;
+
+    Order_sources              _order_sources;
 
     typedef list< ptr<Job_chain_node> >  Chain;
     Chain                      _chain;

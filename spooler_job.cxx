@@ -559,6 +559,7 @@ void Job::set_remove( bool remove )
     }
 
     if( order_controlled() )  z::throw_xc( "SCHEDULER-229", obj_name() );   // _prioritized_order_job_array und Job_chain_node enthalten Job*!
+    if( !_first_in_job_chain_list.empty() )  z::throw_xc( "SCHEDULER-229", obj_name() );
 
     _remove = true; 
     stop( true );
@@ -1484,6 +1485,48 @@ void Job::calculate_next_time_after_modified_order_queue()
     calculate_next_time();
 }
 
+//-----------------------------------------------------------------Job::register_first_in_job_chain
+
+void Job::register_first_in_job_chain( Job_chain* job_chain )
+{
+#   if defined _DEBUG
+        Z_FOR_EACH( Job_chain_list, _first_in_job_chain_list, it )  assert( *it != job_chain );
+#   endif
+
+    _first_in_job_chain_list.push_back( job_chain );
+}
+
+//---------------------------------------------------------------Job::unregister_first_in_job_chain
+
+void Job::unregister_first_in_job_chain( Job_chain* job_chain )
+{
+    Z_FOR_EACH( Job_chain_list, _first_in_job_chain_list, it )
+    {
+        if( *it == job_chain )
+        {
+            it = _first_in_job_chain_list.erase( it );
+            return;
+        }
+    }
+}
+
+//-------------------------------------------------------------------------------Job::request_order
+
+Order* Job::request_order()
+{
+    Order* result = NULL;
+
+    Z_FOR_EACH( Job_chain_list, _first_in_job_chain_list, it )
+    {
+        Job_chain* job_chain = *it;
+        result = job_chain->request_order();
+        if( result )  break;
+    }
+
+    if( result )  assert( result->is_immediately_processable() );
+    return result;
+}
+
 //-------------------------------------------------------------------Job::notify_a_process_is_idle
 
 void Job::notify_a_process_is_idle()
@@ -1577,8 +1620,10 @@ string Job::trigger_files()
             Directory_watcher::Directory_reader dir ( directory_watcher );
             while(1)
             {
-                string path = dir.get_path();
-                if( path == "" )  break;
+                ptr<z::File_info> file_info = dir.get();
+                if( !file_info )  break;
+                
+                string path = file_info->path().path();
 
                 if( path.find( ';' ) != string::npos )  _log->warn( message_string( "SCHEDULER-975", path ) );
                 else
@@ -1631,6 +1676,7 @@ ptr<Task> Job::task_to_start()
         if( !cause  &&  _order_queue )
         {
             order = _order_queue->first_order( now );
+            if( !order )  order = request_order();
             if( order )
             {
                 bool there_is_another_task_ready = false;

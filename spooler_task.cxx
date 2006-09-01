@@ -1169,9 +1169,16 @@ bool Task::do_something()
                                     {
                                         if( !take_order( now ) )
                                         {
-                                            _idle_timeout_at = _job->_idle_timeout == latter_day? latter_day : now + _job->_idle_timeout;
-                                            set_state( s_running_waiting_for_order );
-                                            break;
+                                            if( Order* order = _job->request_order() )
+                                            {
+                                                set_order( order );
+                                            }
+                                            else
+                                            {
+                                                _idle_timeout_at = _job->_idle_timeout == latter_day? latter_day : now + _job->_idle_timeout;
+                                                set_state( s_running_waiting_for_order );
+                                                break;
+                                            }
                                         }
 
                                         _log->set_order_log( _order->_log );
@@ -1622,7 +1629,22 @@ void Task::set_order( Order* order )
 
     _order = order;
     _order_for_task_end = order;                // Damit bei Task-Ende im Fehlerfall noch der Auftrag gezeigt wird, s. dom_element()
-    if( _order )  _order->attach_task( this );  // Auftrag war schon bereitgestellt
+    
+    if( _order ) 
+    {
+        _order->attach_task( this );            // Auftrag war schon bereitgestellt
+
+        try
+        {
+            if( ptr<spooler_com::Ivariable_set> order_params = _order->params_or_null() )
+            {
+                Variant path;
+                order_params->get_Var( Bstr( scheduler_file_path_variable_name ), &path );
+                _trigger_files = string_from_variant( path );
+            }
+        }
+        catch( exception& x )  { Z_LOG( __FUNCTION__ << " " << x.what() << "\n" ); }
+    }
 }
 
 //---------------------------------------------------------------------------------Task::take_order

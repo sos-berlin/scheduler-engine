@@ -70,6 +70,7 @@
 #include "../zschimmer/java.h"
 #include "../zschimmer/z_sql.h"
 #include "../zschimmer/message.h"
+#include "../zschimmer/file_path.h"
 
 using namespace zschimmer;
 using namespace zschimmer::com;
@@ -139,6 +140,7 @@ namespace http
 #include "spooler_command.h"
 #include "spooler_module.h"
 #include "spooler_module_com.h"
+#include "spooler_module_internal.h"
 #include "spooler_module_java.h"
 #include "spooler_module_process.h"
 #include "spooler_history.h"

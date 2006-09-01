@@ -157,6 +157,7 @@ struct Task : Object,
     bool                        check_subprocess_timeout    ( const Time& now );
     bool                        shall_wait_for_registered_pid();
     string                      trigger_files               () const                                { return _trigger_files; }
+    Order*                      order                       ()                                      { return _order; }
     
 
   protected:
@@ -211,7 +212,6 @@ struct Task : Object,
     void                        enter_thread                ( Spooler_thread* );
     void                        leave_thread                ();
 
-    Order*                      order                       ()                                      { return _order; }
 
   
     friend struct               Job;

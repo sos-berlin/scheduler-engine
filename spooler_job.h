@@ -194,7 +194,6 @@ struct Job : Object,
     void                    set_dom                         ( const xml::Element_ptr&, const Time& mod_time );
     void                        add_on_exit_commands_element( const xml::Element_ptr& commands_element, const Time& mod_time );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what&, Job_chain* = NULL );
-    xml::Element_ptr            commands_dom_element        ( const xml::Document_ptr&, const Show_what& );
 
 
     void                        init0                       ();                                     // Wird vor Spooler-Skript gerufen
@@ -230,6 +229,9 @@ struct Job : Object,
     Time                        get_delay_order_after_setback( int setback_count );
     void                        set_max_order_setbacks      ( int n )                               { _log->debug9( "max_order_setbacks"+as_string(n) ); _max_order_setbacks = n; }
     int                         max_order_setbacks          () const                                { return _max_order_setbacks; }
+    Order*                      request_order               ();                                     // Fordert einen Auftrag für die _order_queue an
+    void                        register_first_in_job_chain ( Job_chain* );
+    void                        unregister_first_in_job_chain( Job_chain* );
     void                        load_tasks_from_db          ();
     xml::Element_ptr            read_history                ( const xml::Document_ptr& doc, int id, int n, const Show_what& show ) { return _history.read_tail( doc, id, n, show ); }
 
@@ -430,6 +432,9 @@ struct Job : Object,
 
     Delay_order_after_setback  _delay_order_after_setback;
     int                        _max_order_setbacks;
+
+    typedef list< Job_chain* >  Job_chain_list;
+    Job_chain_list             _first_in_job_chain_list;    // Muss leer sein bei ~Job!
 
     typedef list< pair<string,string> > Start_when_directory_changed_list;  
     Start_when_directory_changed_list  _start_when_directory_changed_list;      // Für <start_when_directory_changed>

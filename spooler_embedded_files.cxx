@@ -4520,6 +4520,14 @@ const char file_scheduler_xsd[] =
     "<xsd:element name=\"job_chain\">\r\n"
     "<xsd:complexType>\r\n"
     "<xsd:sequence>\r\n"
+    "<xsd:element name=\"file_order_source\" minOccurs=\"0\" maxOccurs=\"unbounded\">\r\n"
+    "<xsd:complexType>\r\n"
+    "<xsd:attribute name=\"directory\"     type=\"String\" use=\"required\"/>\r\n"
+    "<xsd:attribute name=\"regex\"         type=\"Name\"/>\r\n"
+    "</xsd:complexType>\r\n"
+    "</xsd:element>\r\n"
+    "\r\n"
+    "<xsd:choice maxOccurs=\"unbounded\">\r\n"
     "<xsd:element name=\"job_chain_node\" maxOccurs=\"unbounded\">\r\n"
     "<xsd:complexType>\r\n"
     "<xsd:attribute name=\"state\"         type=\"String\" use=\"required\"/>\r\n"
@@ -4528,7 +4536,16 @@ const char file_scheduler_xsd[] =
     "<xsd:attribute name=\"error_state\"   type=\"String\"/>\r\n"
     "</xsd:complexType>\r\n"
     "</xsd:element>\r\n"
+    "<xsd:element name=\"file_order_sink\" maxOccurs=\"unbounded\">\r\n"
+    "<xsd:complexType>\r\n"
+    "<xsd:attribute name=\"state\"         type=\"String\" use=\"required\"/>\r\n"
+    "<xsd:attribute name=\"remove\"        type=\"Yes_no\"/>\r\n"
+    "<xsd:attribute name=\"move_to\"       type=\"File\"/>\r\n"
+    "</xsd:complexType>\r\n"
+    "</xsd:element>\r\n"
+    "</xsd:choice>\r\n"
     "</xsd:sequence>\r\n"
+    "\r\n"
     "<xsd:attribute name=\"name\"               type=\"Name\"     use=\"required\"/>\r\n"
     "<xsd:attribute name=\"visible\"            type=\"Yes_no\"/>\r\n"
     "<xsd:attribute name=\"orders_recoverable\" type=\"Yes_no\"/>\r\n"
@@ -5309,18 +5326,18 @@ namespace spooler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "html/favicon.ico", file_html_favicon_ico, sizeof file_html_favicon_ico - 1, 1156946987 },
-    { "html/jz/details_frame.html", file_html_jz_details_frame_html, sizeof file_html_jz_details_frame_html - 1, 1156946986 },
-    { "html/jz/index.html", file_html_jz_index_html, sizeof file_html_jz_index_html - 1, 1156946986 },
-    { "html/jz/left_frame.html", file_html_jz_left_frame_html, sizeof file_html_jz_left_frame_html - 1, 1156946986 },
-    { "html/jz/browser_dependencies.js", file_html_jz_browser_dependencies_js, sizeof file_html_jz_browser_dependencies_js - 1, 1156946986 },
-    { "html/jz/popup_menu.js", file_html_jz_popup_menu_js, sizeof file_html_jz_popup_menu_js - 1, 1156946986 },
-    { "html/jz/scheduler.js", file_html_jz_scheduler_js, sizeof file_html_jz_scheduler_js - 1, 1156946986 },
-    { "html/jz/show_log.js", file_html_jz_show_log_js, sizeof file_html_jz_show_log_js - 1, 1156946986 },
-    { "html/jz/translation_de.js", file_html_jz_translation_de_js, sizeof file_html_jz_translation_de_js - 1, 1156946986 },
-    { "html/jz/scheduler.xslt", file_html_jz_scheduler_xslt, sizeof file_html_jz_scheduler_xslt - 1, 1156946986 },
-    { "html/jz/scheduler.css", file_html_jz_scheduler_css, sizeof file_html_jz_scheduler_css - 1, 1156946986 },
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1156946988 },
+    { "html/favicon.ico", file_html_favicon_ico, sizeof file_html_favicon_ico - 1, 1111081027 },
+    { "html/jz/details_frame.html", file_html_jz_details_frame_html, sizeof file_html_jz_details_frame_html - 1, 1137326806 },
+    { "html/jz/index.html", file_html_jz_index_html, sizeof file_html_jz_index_html - 1, 1113979995 },
+    { "html/jz/left_frame.html", file_html_jz_left_frame_html, sizeof file_html_jz_left_frame_html - 1, 1137326883 },
+    { "html/jz/browser_dependencies.js", file_html_jz_browser_dependencies_js, sizeof file_html_jz_browser_dependencies_js - 1, 1130350343 },
+    { "html/jz/popup_menu.js", file_html_jz_popup_menu_js, sizeof file_html_jz_popup_menu_js - 1, 1113979995 },
+    { "html/jz/scheduler.js", file_html_jz_scheduler_js, sizeof file_html_jz_scheduler_js - 1, 1150703826 },
+    { "html/jz/show_log.js", file_html_jz_show_log_js, sizeof file_html_jz_show_log_js - 1, 1113979995 },
+    { "html/jz/translation_de.js", file_html_jz_translation_de_js, sizeof file_html_jz_translation_de_js - 1, 1113979995 },
+    { "html/jz/scheduler.xslt", file_html_jz_scheduler_xslt, sizeof file_html_jz_scheduler_xslt - 1, 1150703826 },
+    { "html/jz/scheduler.css", file_html_jz_scheduler_css, sizeof file_html_jz_scheduler_css - 1, 1148569750 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1156833369 },
     { NULL, NULL, 0 }
 };
 

@@ -113,15 +113,15 @@ struct Directory_watcher : Event  //, Async_operation
         Fill_zero _zero_;
 
                                 Directory_reader            ( Directory_watcher* );
+                                Directory_reader            ( const File_path& directory, Regex* );
                                ~Directory_reader            ();
 
         void                    close                       ();
-        string                  get                         ();
-        string                  get_path                    ();
+        ptr<zschimmer::File_info> get                       ();
 
       private:
-        string                  first                       ();
-        string                  next                        ();
+        ptr<zschimmer::File_info> read_first                 ();
+        ptr<zschimmer::File_info> read_next                  ();
 
         string                 _directory_path;
         z::Regex*              _regex;

@@ -82,7 +82,6 @@ p.ini_entry         { margin-top: 2ex; border-top: 1px solid #f0f0f0; padding-to
 
 .api_headline                   { margin-top: 0ex; font-size: 14pt; font-weight: bold; }
 
-
 tr.api_method_clickable:active  { background-color: #0000A0; }
 tr.api_method_clickable:visited { background-color: #0000A0 }
 tr.api_method_clickable:hover   { background-color: #e0e0FF; cursor: pointer; }

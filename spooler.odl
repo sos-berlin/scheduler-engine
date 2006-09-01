@@ -808,6 +808,19 @@ library Spooler
         interface Ihas_java_class_name;
     }
 
+    //-----------------------------------------------------------------Idirectory_file_order_source
+
+    [
+        uuid       ( feee47b4-6c1b-11d8-8103-000476ee8afb ),
+        odl,
+        dual
+    ]
+    interface Idirectory_file_order_source : IDispatch
+    {
+        //[propget]
+        //HRESULT                 Java_class_name             ( [out,retval] BSTR* Result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
+    }
+    
     //--------------------------------------------------------------------------------Job_chain_node
 
     [
@@ -1544,7 +1557,6 @@ library Spooler
 /*
 Ein paar freie GUIDs:
 
-feee47b4-6c1b-11d8-8103-000476ee8afb
 feee47b5-6c1b-11d8-8103-000476ee8afb
 feee47b6-6c1b-11d8-8103-000476ee8afb
 feee47b7-6c1b-11d8-8103-000476ee8afb

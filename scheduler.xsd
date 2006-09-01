@@ -386,15 +386,32 @@
     <xsd:element name="job_chain">
         <xsd:complexType>
             <xsd:sequence>
-                <xsd:element name="job_chain_node" maxOccurs="unbounded">
+                <xsd:element name="file_order_source" minOccurs="0" maxOccurs="unbounded">
                     <xsd:complexType>
-                        <xsd:attribute name="state"         type="String" use="required"/>
-                        <xsd:attribute name="job"           type="Name"/>
-                        <xsd:attribute name="next_state"    type="String"/>
-                        <xsd:attribute name="error_state"   type="String"/>
+                        <xsd:attribute name="directory"     type="String" use="required"/>
+                        <xsd:attribute name="regex"         type="Name"/>
                     </xsd:complexType>
                 </xsd:element>
+
+                <xsd:choice maxOccurs="unbounded">
+                    <xsd:element name="job_chain_node" maxOccurs="unbounded">
+                        <xsd:complexType>
+                            <xsd:attribute name="state"         type="String" use="required"/>
+                            <xsd:attribute name="job"           type="Name"/>
+                            <xsd:attribute name="next_state"    type="String"/>
+                            <xsd:attribute name="error_state"   type="String"/>
+                        </xsd:complexType>
+                    </xsd:element>
+                    <xsd:element name="file_order_sink" maxOccurs="unbounded">
+                        <xsd:complexType>
+                            <xsd:attribute name="state"         type="String" use="required"/>
+                            <xsd:attribute name="remove"        type="Yes_no"/>
+                            <xsd:attribute name="move_to"       type="File"/>
+                        </xsd:complexType>
+                    </xsd:element>
+                </xsd:choice>
             </xsd:sequence>
+
             <xsd:attribute name="name"               type="Name"     use="required"/>
             <xsd:attribute name="visible"            type="Yes_no"/>
             <xsd:attribute name="orders_recoverable" type="Yes_no"/>

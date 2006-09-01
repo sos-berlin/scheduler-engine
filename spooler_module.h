@@ -244,7 +244,7 @@ struct Module_instance : Object
     Variant                     call_if_exists              ( const string& name );
     Variant                     call_if_exists              ( const string& name, bool param );
     virtual Variant             call                        ( const string& name )                  = 0;
-    virtual Variant             call                        ( const string& name, bool param ) = 0;
+    virtual Variant             call                        ( const string& name, bool param )      = 0;
     virtual bool                name_exists                 ( const string& name )                  = 0;
     virtual bool                loaded                      ()                                      = 0;
     virtual bool                callable                    ()                                      = 0;

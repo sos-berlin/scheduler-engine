@@ -206,6 +206,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-335", "Only \"yes\", \"no\" and a number are allowed with $1=\"$2\": $3" },
     { "SCHEDULER-336", "Only \"yes\", \"no\" and a list of signal names are allowed with $1=\"$2\": $3" },
     { "SCHEDULER-337", "Signal $1 is unknown on this operating system and is ignored" },
+    { "SCHEDULER-338", "Order.payload is not a Variable_set" },
     { "SCHEDULER-900", "Scheduler $1 is starting with $2, pid=$3" },
     { "SCHEDULER-902", "state=$1" },
     { "SCHEDULER-904", "Tasks have $1s to terminate" },

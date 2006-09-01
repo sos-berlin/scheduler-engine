@@ -293,6 +293,8 @@ struct Com_log : spooler_com::Ilog,
 
     STDMETHODIMP                Start_new_file              ();
     
+    Prefix_log*                 log                         ()                                      { return _log; }
+
   private:
     Fill_zero                  _zero_;
     Thread_semaphore           _lock;
@@ -481,6 +483,8 @@ struct Com_task : spooler_com::Itask,
     STDMETHODIMP            put_Exit_code                   ( int );
     STDMETHODIMP            get_Exit_code                   ( int* );
     STDMETHODIMP            get_Trigger_files               ( BSTR* );
+
+    ptr<Task>                   task                        () const                                { return _task; }
 
   private:
     Thread_semaphore           _lock;
