@@ -31,33 +31,45 @@ struct File_order_sink_job : Internal_module_instance
 {
     bool spooler_process()
     {
-        Order* order = _task->order();
+        bool   result       = false;
+        bool   remove_order = false;
+        Order* order        = _task->order();
+
         if( !order )  return false;         // Fehler
 
         File_path path = string_from_variant( order->param( scheduler_file_path_variable_name ) );
         if( path != "" )
         {
-            if( file_exists( path ) )  return true;
-
             if( Job_chain_node* job_chain_node = order->job_chain_node() )
             {
+                if( !file_exists( path ) )
+                {
+                    _log->warn( "Missing file " + path );
+                    result = false;
+                }
+                else
                 if( job_chain_node->_file_order_sink_move_to != "" ) 
                 {
                     _log->info( "Moving file  " + path + " --> " + job_chain_node->_file_order_sink_move_to );
                     path.move_to( job_chain_node->_file_order_sink_move_to );
-                    return true;
+                    result = true;
                 }
                 else
                 if( job_chain_node->_file_order_sink_remove )                
                 {
                     _log->info( "Removing file " + path );
                     path.unlink();
-                    return true;
+                    result = true;
                 }
+
+                remove_order = job_chain_node->_state == Variant( result )? job_chain_node->_next_state 
+                                                                          : job_chain_node->_error_state;
             }
         }
 
-        return false;
+        if( remove_order )  order->remove_from_job_chain();
+
+        return result;
     }
 };
 
