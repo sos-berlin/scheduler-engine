@@ -23,12 +23,21 @@ namespace spooler {
 
 const string scheduler_file_path_variable_name = "scheduler_file_path";
 const string default_end_state_name            = "<END_STATE>";
+const string file_order_sink_job_name          = "scheduler_file_order_sink";
 //Directory_file_order_source::Class_descriptor    Directory_file_order_source::class_descriptor ( &typelib, "Spooler.Directory_file_order_source", Directory_file_order_source::_methods );
 
-//------------------------------------------------------------------------------File_order_sink_job
+//------------------------------------------------------------------File_order_sink_module_instance
 
-struct File_order_sink_job : Internal_module_instance
+struct File_order_sink_module_instance : Internal_module_instance
 {
+    File_order_sink_module_instance( Module* m ) 
+    : 
+        Internal_module_instance( m ) 
+    {
+    }
+
+
+
     bool spooler_process()
     {
         bool   result       = false;
@@ -40,38 +49,92 @@ struct File_order_sink_job : Internal_module_instance
         File_path path = string_from_variant( order->param( scheduler_file_path_variable_name ) );
         if( path != "" )
         {
-            if( Job_chain_node* job_chain_node = order->job_chain_node() )
+            Job_chain_node* job_chain_node = order->job_chain_node();
+            if( !job_chain_node )  z::throw_xc( __FUNCTION__ );
+
+            if( !file_exists( path ) )
             {
-                if( !file_exists( path ) )
-                {
-                    _log->warn( "Missing file " + path );
-                    result = false;
-                }
-                else
-                if( job_chain_node->_file_order_sink_move_to != "" ) 
-                {
-                    _log->info( "Moving file  " + path + " --> " + job_chain_node->_file_order_sink_move_to );
-                    path.move_to( job_chain_node->_file_order_sink_move_to );
-                    result = true;
-                }
-                else
-                if( job_chain_node->_file_order_sink_remove )                
-                {
-                    _log->info( "Removing file " + path );
-                    path.unlink();
-                    result = true;
-                }
-
-                remove_order = job_chain_node->_state == Variant( result )? job_chain_node->_next_state 
-                                                                          : job_chain_node->_error_state;
+                _log->warn( message_string( "SCHEDULER-339", path ) );
+                result = false;
             }
-        }
+            else
+            {
+                try
+                {
+                    if( job_chain_node->_file_order_sink_move_to != "" ) 
+                    {
+                        _log->info( message_string( "SCHEDULER-980", path, job_chain_node->_file_order_sink_move_to ) );
 
-        if( remove_order )  order->remove_from_job_chain();
+                        path.move_to( job_chain_node->_file_order_sink_move_to );
+
+                        result = true;
+                    }
+                    else
+                    if( job_chain_node->_file_order_sink_remove )                
+                    {
+                        _log->info( message_string( "SCHEDULER-979", path ) );
+
+                        path.unlink();
+
+                        result = true;
+                    }
+                    else
+                        z::throw_xc( __FUNCTION__ );
+                }
+                catch( exception& x )
+                {
+                    _log->error( x.what() );
+                }
+
+                if( result == false  &&  job_chain_node->_error_state == job_chain_node->_state )  order->add_to_blacklist();
+            }
+
+            if( result == true  &&  job_chain_node->_next_state == job_chain_node->_state )  order->remove_from_job_chain();
+        }
 
         return result;
     }
 };
+
+//---------------------------------------------------------------------------File_order_sink_module
+
+struct File_order_sink_module : Internal_module
+{
+    File_order_sink_module( Spooler* spooler )
+    :
+        Internal_module( spooler )
+    {
+    }
+
+
+    ptr<Module_instance> create_instance_impl()
+    { 
+        ptr<File_order_sink_module_instance> result = Z_NEW( File_order_sink_module_instance( this ) );  
+        return +result;
+    }
+};
+
+//------------------------------------------------------------------------------File_order_sink_job
+
+struct File_order_sink_job : Internal_job
+{
+    File_order_sink_job( Spooler* spooler )
+    :
+        Internal_job( file_order_sink_job_name, +Z_NEW( File_order_sink_module( spooler ) ) )
+    {
+    }
+};
+
+//-------------------------------------------------------------------------Spooler::init_job_chains
+
+void Spooler::init_job_chains()
+{
+    ptr<File_order_sink_job> file_order_sink_job = Z_NEW( File_order_sink_job( _spooler ) );
+    file_order_sink_job->set_visible( false );
+    file_order_sink_job->set_order_controlled();
+    file_order_sink_job->set_idle_timeout( 60 );
+    add_job( +file_order_sink_job, true );
+}
 
 //---------------------------------------------------------------------------Spooler::add_job_chain
 
@@ -182,7 +245,7 @@ Directory_file_order_source::Directory_file_order_source( Job_chain* job_chain, 
     
 Directory_file_order_source::~Directory_file_order_source()
 {
-    if( _spooler->_connection_manager )  _spooler->_connection_manager->remove_operation( this );
+    //if( _spooler->_connection_manager )  _spooler->_connection_manager->remove_operation( this );
 }
 
 //-----------------------------------------------------------------Directory_file_order_source::log
@@ -207,7 +270,8 @@ void Directory_file_order_source::start()
         //? _directory_watcher->add_to( &_spooler->_wait_handles );
 #   endif
 
-    _spooler->_connection_manager->add_operation( this );
+    //_spooler->_connection_manager->add_operation( this );
+    set_async_manager( _spooler->_connection_manager );
 }
 
 //-------------------------------------------------------Directory_file_order_source::request_order
@@ -218,10 +282,16 @@ Order* Directory_file_order_source::request_order()
 
     try
     {
-        if( !_order_requested )
+        //if( !_order_requested )
         {
+            set<string>                 removed_files;
             vector< ptr<z::File_info> > file_infos;
+
+            log()->info( "Watching " + _path );   // TEST
+
             file_infos.reserve( 1000 );
+
+            Z_FOR_EACH( Job_chain::Blacklist, _job_chain->_blacklist, it )  removed_files.insert( (*it)->string_id() );
 
             Directory_watcher::Directory_reader dir ( _path, _regex_string == ""? NULL : &_regex );
             while(1)
@@ -229,14 +299,29 @@ Order* Directory_file_order_source::request_order()
                 ptr<z::File_info> file_info = dir.get();
                 if( !file_info )  break;
                 file_infos.push_back( file_info );
-                file_info->last_write_time();     // last_write_time füllen für quick_compare_last_write()
+                file_info->last_write_time();     // last_write_time füllen für sort, quick_compare_last_write()
+                removed_files.erase( file_info->path() );
             }
 
-            sort( file_infos.begin(), file_infos.end(), zschimmer::File_info::quick_compare_last_write );
+            Z_FOR_EACH( set<string>, removed_files, it ) 
+            {
+                Z_FOR_EACH( Job_chain::Blacklist, _job_chain->_blacklist, it )  
+                {
+                    if( Order* removed_file_order = *it )
+                    {
+                        removed_file_order->log()->info( message_string( "SCHEDULER-981" ) );   // "File has been removed"
+                        removed_file_order->remove_from_job_chain();   
+                        break;
+                    }
+                }
+            }
+
+            sort( file_infos.begin(), file_infos.end(), zschimmer::File_info::quick_last_write_less );
 
             for( size_t i = 0; i < file_infos.size(); i++ )
             {
                 string path = file_infos[ i ]->path();
+
                 if( !_job_chain->has_order_id( path ) ) 
                 {
                     ptr<Order> order = new Order( _spooler );
@@ -410,6 +495,7 @@ void Job_chain::close()
 {
     Z_LOGI2( "scheduler", *this << ".close()\n" );
     remove_all_pending_orders( true );
+    _blacklist.erase( _blacklist.begin(), _blacklist.end() );
     set_state( s_closed );
 }
 
@@ -447,10 +533,11 @@ void Job_chain::set_dom( const xml::Element_ptr& element )
         if( e.nodeName_is( "file_order_sink" ) )
         {
             string state   = e.getAttribute( "state" );
-            string move_to = e.getAttribute( "move_to" );
-            bool   remove  = e.bool_getAttribute( "remove" );
 
-            add_job( _spooler->get_job( "scheduler_file_order_sink" ), state, state, state );
+            Job_chain_node* node = add_job( _spooler->get_job_or_null( file_order_sink_job_name ), state, state, state );
+
+            node->_file_order_sink_move_to = e.getAttribute( "move_to" );
+            node->_file_order_sink_remove  = e.bool_getAttribute( "remove" );
         }
         else
         if( e.nodeName_is( "job_chain_node" ) )
@@ -646,7 +733,7 @@ int Job_chain::remove_all_pending_orders( bool leave_in_database )
 
 //-------------------------------------------------------------------------------Job_chain::add_job
 
-void Job_chain::add_job( Job* job, const Order::State& state, const Order::State& next_state, const Order::State& error_state )
+Job_chain_node* Job_chain::add_job( Job* job, const Order::State& state, const Order::State& next_state, const Order::State& error_state )
 {
     Order::check_state( state );
     if( !next_state.is_missing() )  Order::check_state( next_state );
@@ -671,9 +758,9 @@ void Job_chain::add_job( Job* job, const Order::State& state, const Order::State
 
     //THREAD_LOCK( _lock )
     {
-        if( node_from_state_or_null( node->_state ) )
+        if( Job_chain_node* n = node_from_state_or_null( node->_state ) )
         {
-            if( !job  &&  next_state.is_error()  &&  error_state.is_error() )  return;     // job_chain.add_end_state() darf mehrfach gerufen werden.
+            if( !job  &&  next_state.is_error()  &&  error_state.is_error() )  return n;     // job_chain.add_end_state() darf mehrfach gerufen werden.
             z::throw_xc( "SCHEDULER-150", debug_string_from_variant(node->_state), name() );
         }
 
@@ -681,6 +768,8 @@ void Job_chain::add_job( Job* job, const Order::State& state, const Order::State
 
         if( job )  job->set_job_chain_priority( _chain.size() );   // Weiter hinten stehende Jobs werden vorrangig ausgeführt
     }
+
+    return node;
 }
 
 //--------------------------------------------------------------------------------Job_chain::finish
@@ -862,11 +951,40 @@ void Job_chain::register_order( Order* order )
 
 void Job_chain::unregister_order( Order* order )
 {
+    remove_from_blacklist( order );
+
     //THREAD_LOCK( _lock )
     {
         Order_map::iterator it = _order_map.find( order->string_id() );
         if( it != _order_map.end() )  _order_map.erase( it );
                                 else  Z_LOG( __FUNCTION__ << " " << order->obj_name() << " ist nicht registriert!?\n" );
+    }
+}
+
+//----------------------------------------------------------------------Job_chain::add_to_blacklist
+
+void Job_chain::add_to_blacklist( Order* order )
+{
+    _blacklist.push_back( order );
+    order->_on_blacklist = true;
+}
+
+//-----------------------------------------------------------------Job_chain::remove_from_blacklist
+
+void Job_chain::remove_from_blacklist( Order* order )
+{
+    if( order->_on_blacklist )
+    {
+        Z_FOR_EACH( Blacklist, _blacklist, it )
+        {
+            if( *it == order )  
+            {
+                _blacklist.erase( it );
+                break;
+            }
+        }
+
+        order->_on_blacklist = false;
     }
 }
 
@@ -1363,7 +1481,7 @@ string Order::string_id( const Id& id )
 
 bool Order::is_immediately_processable( const Time& now )
 {
-    if( _suspended )        return false;
+    if( _on_blacklist )     return false;  
     if( _setback > now )    return false;
     if( _task )             return false;               // Schon in Verarbeitung
     if( _replacement_for )  return false;
@@ -1925,7 +2043,7 @@ void Order::set_xml_payload( const string& xml_string )
 
 bool Order::finished()
 {
-    if( _suspended )  return false;
+    //if( _on_blacklist )  return false;
     return !_job_chain_node  ||  !_job_chain_node->_job;
 }
 
@@ -2188,7 +2306,7 @@ void Order::add_to_or_replace_in_job_chain( Job_chain* job_chain )
 
         //if( other_order->_run_time == _run_time  &&  other_order->_setback_count == 0 )
         {
-            // FÜr Andreas Liebert: repeat-Intervall beibehalten
+            // Für Andreas Liebert: repeat-Intervall beibehalten
         }
 
         if( other_order->_task )
@@ -2207,10 +2325,20 @@ void Order::add_to_or_replace_in_job_chain( Job_chain* job_chain )
     }
 }
 
+//--------------------------------------------------------------------------Order::add_to_blacklist
+
+void Order::add_to_blacklist()
+{ 
+    assert( _job_chain );
+    _job_chain->add_to_blacklist( this ); 
+}
+
 //------------------------------------------------------------------------------Order::move_to_node
 
 void Order::move_to_node( Job_chain_node* node )
 {
+    if( _on_blacklist )  _job_chain->remove_from_blacklist( this );
+
     //THREAD_LOCK( _lock )
     {
         if( !_job_chain )  z::throw_xc( "SCHEDULER-157", obj_name() );
@@ -2338,7 +2466,7 @@ void Order::processing_error()
         }
 
         postprocessing2( last_job );
-    }
+    } 
 }
 
 //---------------------------------------------------------------------------Order::postprocessing2
@@ -2357,9 +2485,19 @@ void Order::postprocessing2( Job* last_job )
 
     //if( _job_chain_node  &&  _job_chain_node->is_file_order_sink() )  process_file_order_sink();
 
-
     if( finished() )
     {
+        try
+        {
+            if( is_file_order()  &&  file_exists( file_path() ) )  z::throw_xc( message_string( "SCHEDULER-340", obj_name() ) );
+        }
+        catch( exception& x )
+        {
+            _log->error( x.what() );
+            if( _job_chain )  add_to_blacklist();
+        }
+
+
         try
         {
             if( _web_service  &&  !_http_operation )
@@ -2388,7 +2526,8 @@ void Order::postprocessing2( Job* last_job )
         }
     }
 
-    if( finished() )  close();
+
+    if( finished()  &&  !_on_blacklist )  close();
 }
 
 //-------------------------------------------------------------------Order::process_file_order_sink

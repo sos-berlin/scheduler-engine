@@ -916,7 +916,7 @@ bool Spooler_thread::try_to_free_process( Job* for_job, Process_class* process_c
     Z_FOR_EACH_REVERSE( vector<Job*>, prioritized_order_job_array, it )
     {
         Job* job = *it;
-        if( job->_module._process_class == process_class )
+        if( job->_module->_process_class == process_class )
         {
             FOR_EACH_TASK( it, task )
             {

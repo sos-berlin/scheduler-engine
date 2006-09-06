@@ -42,21 +42,22 @@ void Job::Delay_after_error::set( int error_steps, const Time& delay )
 */
 //-----------------------------------------------------------------------------------------Job::Job
 
-Job::Job( Spooler* spooler )
+Job::Job( Spooler* spooler, const ptr<Module>& module )
 : 
     Scheduler_object( spooler, this, Scheduler_object::type_job ),
     _zero_(this+1),
-    _module(spooler,_log),
     _task_queue(this),
     _history(this),
     _lock( "Job" ),
     _visible(true),
     _stop_on_error(true)
 {
+    _module = module? module : Z_NEW( Module( spooler ) );
+
     init_run_time();
 
     _log            = Z_NEW( Prefix_log( this ) );
-    _module.set_log( _log );
+    _module->set_log( _log );
   //_log->set_job( this );
 
     _next_time      = latter_day;
@@ -93,13 +94,13 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
 
         _visible    = element.bool_getAttribute( "visible"      , _visible    );
         _temporary  = element.bool_getAttribute( "temporary"    , _temporary  );
-        _module.set_priority( element.getAttribute( "priority"     , _module._priority   ) );
+        _module->set_priority( element.getAttribute( "priority"     , _module->_priority   ) );
         _title      = element.     getAttribute( "title"        , _title      );
         _log_append = element.bool_getAttribute( "log_append"   , _log_append );
         order       = element.bool_getAttribute( "order"        );
-        _module._process_class_name 
-                    = element.     getAttribute( "process_class", _module._process_class_name );
-        _module._java_options += " " + subst_env( 
+        _module->_process_class_name 
+                    = element.     getAttribute( "process_class", _module->_process_class_name );
+        _module->_java_options += " " + subst_env( 
                       element.     getAttribute( "java_options" ) );
         _min_tasks  = element.uint_getAttribute( "min_tasks"    , _min_tasks );
         _max_tasks  = element.uint_getAttribute( "tasks"        , _max_tasks );
@@ -113,8 +114,7 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
         t           = element.     getAttribute( "idle_timeout"    );
         if( t != "" )  
         {
-            _idle_timeout = time::time_from_string( t );
-            if( _idle_timeout > max_task_time_out )  _idle_timeout = max_task_time_out;   // Begrenzen, damit's beim Addieren mit now() keinen Überlauf gibt
+            set_idle_timeout( time::time_from_string( t ) );
         }
 
         {
@@ -147,11 +147,7 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
 
         set_mail_xslt_stylesheet_path( element.getAttribute( "mail_xslt_stylesheet" ) );
 
-        if( order )
-        {
-            if( _temporary )  z::throw_xc( "SCHEDULER-155" );
-            if( !_order_queue )  _order_queue = new Order_queue( this, _log );
-        }
+        if( order )  set_order_controlled();
 
 
         string text;
@@ -178,28 +174,28 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
             else
             if( e.nodeName_is( "script"     ) )  
             {
-                if( _module._process_filename != "" )  z::throw_xc( "SCHEDULER-234", obj_name() );
+                if( _module->_process_filename != "" )  z::throw_xc( "SCHEDULER-234", obj_name() );
 
-                _module.set_dom_without_source( e, xml_mod_time );
-                if( _init0_called )  _module.set_dom_source_only( include_path() );
+                _module->set_dom_without_source( e, xml_mod_time );
+                if( _init0_called )  _module->set_dom_source_only( include_path() );
 
-                _module._process_filename     = "";
-                _module._process_param_raw    = "";
-                _module._process_log_filename = "";
+                _module->_process_filename     = "";
+                _module->_process_param_raw    = "";
+                _module->_process_log_filename = "";
             }
             else
             if( e.nodeName_is( "process"    ) )
             {
-                if( _module.set() )  z::throw_xc( "SCHEDULER-234", obj_name() );
+                if( _module->set() )  z::throw_xc( "SCHEDULER-234", obj_name() );
 
                 //_module_xml_document  = NULL;
                 //_module_xml_element   = NULL;
 
-                _module._process_filename     = subst_env( e.     getAttribute( "file"         , _module._process_filename      ) );
-                _module._process_param_raw    =            e.     getAttribute( "param"        , _module._process_param_raw     );
-                _module._process_log_filename = subst_env( e.     getAttribute( "log_file"     , _module._process_log_filename  ) );
-                _module._process_ignore_error = e.bool_getAttribute( "ignore_error" , _module._process_ignore_error  );
-                _module._process_ignore_signal= e.bool_getAttribute( "ignore_signal", _module._process_ignore_signal );
+                _module->_process_filename     = subst_env( e.     getAttribute( "file"         , _module->_process_filename      ) );
+                _module->_process_param_raw    =            e.     getAttribute( "param"        , _module->_process_param_raw     );
+                _module->_process_log_filename = subst_env( e.     getAttribute( "log_file"     , _module->_process_log_filename  ) );
+                _module->_process_ignore_error = e.bool_getAttribute( "ignore_error" , _module->_process_ignore_error  );
+                _module->_process_ignore_signal= e.bool_getAttribute( "ignore_signal", _module->_process_ignore_signal );
 
                 DOM_FOR_EACH_ELEMENT( e, ee )
                 {
@@ -209,26 +205,26 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
                         {
                             if( eee.nodeName_is( "variable" ) ) 
                             {
-                                _module._process_environment->set_var( eee.getAttribute( "name" ), 
-                                                                       subst_env( eee.getAttribute( "value" ), _module._process_environment ) );
+                                _module->_process_environment->set_var( eee.getAttribute( "name" ), 
+                                                                       subst_env( eee.getAttribute( "value" ), _module->_process_environment ) );
                             }
                         }
                     }
                 }
 
-                _module.set_process();
+                _module->set_process();
             }
             else
             if( e.nodeName_is( "monitor" ) )
             {
-                if( !_module._monitor )  _module._monitor = Z_NEW( Module( _spooler, _log ) );
+                if( !_module->_monitor )  _module->_monitor = Z_NEW( Module( _spooler, _log ) );
 
                 DOM_FOR_EACH_ELEMENT( e, ee )
                 {
                     if( ee.nodeName_is( "script" ) )  
                     {
-                        _module._monitor->set_dom_without_source( ee, xml_mod_time );
-                        if( _init0_called )  _module._monitor->set_dom_source_only( include_path() );
+                        _module->_monitor->set_dom_without_source( ee, xml_mod_time );
+                        if( _init0_called )  _module->_monitor->set_dom_source_only( include_path() );
                     }
                 }
             }
@@ -267,11 +263,24 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
             if( e.nodeName_is( "run_time" ) &&  !_spooler->_manual )  set_run_time( e );
         }
 
-        if( !_run_time->set() )  _run_time->set_default();
-        if( _spooler->_manual )  init_run_time(),  _run_time->set_default_days(),  _run_time->set_once();
-
       //if( _object_set_descr )  _object_set_descr->_class = _spooler->get_object_set_class( _object_set_descr->_class_name );
     }
+}
+
+//------------------------------------------------------------------------Job::set_order_controlled
+
+void Job::set_order_controlled()
+{
+    if( _temporary )  z::throw_xc( "SCHEDULER-155" );
+    if( !_order_queue )  _order_queue = new Order_queue( this, _log );
+}
+
+//----------------------------------------------------------------------------Job::set_idle_timeout
+
+void Job::set_idle_timeout( const Time& t )
+{ 
+    _idle_timeout = t; 
+    if( _idle_timeout > max_task_time_out )  _idle_timeout = max_task_time_out;   // Begrenzen, damit's beim Addieren mit now() keinen Überlauf gibt
 }
 
 //----------------------------------------------------------------Job::add_on_exit_commands_element
@@ -381,12 +390,15 @@ void Job::init0()
 
     _state = s_none;
 
+    if( !_run_time->set() )  _run_time->set_default();
+    if( _spooler->_manual )  init_run_time(),  _run_time->set_default_days(),  _run_time->set_once();
+
     _com_job  = new Com_job( this );
   //_com_log  = new Com_log( &_log );
 
-    if( _module._dom_element )  read_script( &_module );
-    if( _module._monitor  &&  _module._monitor->_dom_element )  read_script( _module._monitor );
-    if( _module.set() )  _module.init();
+    if( _module->_dom_element )  read_script( _module );
+    if( _module->_monitor  &&  _module->_monitor->_dom_element )  read_script( _module->_monitor );
+    if( _module->set() )  _module->init();
 
     _next_start_time = latter_day;
     _period._begin = 0;
@@ -422,7 +434,7 @@ void Job::init()
         _history.open();
 
         _module_ptr = _object_set_descr? &_object_set_descr->_class->_module
-                                       : &_module;
+                                       : _module;
 
         if( !_spooler->log_directory().empty()  &&  _spooler->log_directory()[0] != '*' )
         {
@@ -690,7 +702,7 @@ ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, const
 
     ptr<Task> task;
 
-  //if( !_module._process_filename.empty() )   task = Z_NEW( Process_task   ( this ) );
+  //if( !_module->_process_filename.empty() )   task = Z_NEW( Process_task   ( this ) );
   //else
   //if( _object_set_descr          )   task = Z_NEW( Object_set_task( this ) );
   //else                             
@@ -1086,8 +1098,8 @@ void Job::stop( bool end_all_tasks )
 void Job::reread()
 {
     _log->info( message_string( "SCHEDULER-920" ) );
-    read_script( &_module );
-    if( _module._monitor )  read_script( _module._monitor );
+    read_script( _module );
+    if( _module->_monitor )  read_script( _module->_monitor );
 }
 
 //---------------------------------------------------------------------------Job::execute_state_cmd
@@ -1542,7 +1554,7 @@ void Job::remove_waiting_job_from_process_list()
     if( _waiting_for_process )
     {
         _waiting_for_process = false;
-        _module._process_class->remove_waiting_job( this );
+        _module->_process_class->remove_waiting_job( this );
     }
 
     _waiting_for_process_try_again = false;
@@ -1700,19 +1712,19 @@ ptr<Task> Job::task_to_start()
     {
         // Ist denn ein Prozess verfügbar?
 
-        if( _module._process_class  &&  !_module._process_class->process_available( this ) )
+        if( _module->_process_class  &&  !_module->_process_class->process_available( this ) )
         {
             if( cause != cause_min_tasks  
              &&  ( !_waiting_for_process  ||  _waiting_for_process_try_again ) )
             {
                 if( !_waiting_for_process )
                 {
-                    _module._process_class->enqueue_waiting_job( this );
+                    _module->_process_class->enqueue_waiting_job( this );
                     _waiting_for_process = true;
                 }
 
                 _waiting_for_process_try_again = false;
-                _spooler->try_to_free_process( this, _module._process_class, now );     // Beendet eine Task in s_running_waiting_for_order
+                _spooler->try_to_free_process( this, _module->_process_class, now );     // Beendet eine Task in s_running_waiting_for_order
             }
 
             cause = cause_none;   // Wir können die Task nicht starten, denn kein Prozess ist verfügbar
@@ -1769,7 +1781,7 @@ ptr<Task> Job::task_to_start()
             bool notify = _waiting_for_process_try_again;                           // Sind wir mit notify_a_process_is_idle() benachrichtigt worden?
             remove_waiting_job_from_process_list();
 
-            if( notify )  _module._process_class->notify_a_process_is_idle();       // Dieser Job braucht den Prozess nicht mehr. Also nächsten Job benachrichtigen!
+            if( notify )  _module->_process_class->notify_a_process_is_idle();       // Dieser Job braucht den Prozess nicht mehr. Also nächsten Job benachrichtigen!
         }
     }
 
@@ -1829,7 +1841,7 @@ bool Job::do_something()
                 if( _state == s_pending 
                  || _state == s_running  &&  _running_tasks.size() < _max_tasks )
                 {
-                    if( !_waiting_for_process  ||  _waiting_for_process_try_again  ||  _module._process_class->process_available( this ) )    // Optimierung
+                    if( !_waiting_for_process  ||  _waiting_for_process_try_again  ||  _module->_process_class->process_available( this ) )    // Optimierung
                     {
                         ptr<Task> task = task_to_start();
                         if( task )
@@ -2510,6 +2522,17 @@ void Job::release_module_instance( Module_instance* module_instance )
     throw_xc( "release_module_instance" );
 }
 */
+
+//------------------------------------------------------------------------nternal_job::Internal_job
+
+Internal_job::Internal_job( const string& name, const ptr<Module>& module )
+:
+    Job( module->_spooler, module )
+{
+    _name = name;
+}
+
+//-------------------------------------------------------------------------------------------------
 
 } //namespace spooler
 } //namespace sos

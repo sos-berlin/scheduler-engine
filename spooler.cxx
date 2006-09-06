@@ -811,12 +811,7 @@ void Spooler::load_job_from_xml( const xml::Element_ptr& e, const Time& xml_mod_
         {
             job = Z_NEW( Job( this ) );
             job->set_dom( e, xml_mod_time );
-            if( init )
-            {
-                init_job( job, _jobs_initialized );     // Falls Job im Startskript über execute_xml() hingefügt wird: jetzt noch kein init()!
-            }
-
-            add_job( job );
+            add_job( job, init );
         }
     }
 }
@@ -1318,15 +1313,17 @@ Object_set_class* Spooler::get_object_set_class_or_null( const string& name )
 */
 //---------------------------------------------------------------------------------Spooler::add_job
 
-void Spooler::add_job( const ptr<Job>& job )
+void Spooler::add_job( const ptr<Job>& job, bool init )
 {
-    THREAD_LOCK( _lock )
-    {
-        Job* j = get_job_or_null( job->name() );
-        if( j )  z::throw_xc( "SCHEDULER-130", j->name() );
+    Job* j = get_job_or_null( job->name() );
+    if( j )  z::throw_xc( "SCHEDULER-130", j->name() );
 
-        _job_list.push_back( job );
+    if( init )
+    {
+        init_job( job, _jobs_initialized );     // Falls Job im Startskript über execute_xml() hingefügt wird: jetzt noch kein init()!
     }
+
+    _job_list.push_back( job );
 }
 
 //---------------------------------------------------------------------------------Spooler::get_job
@@ -1901,6 +1898,7 @@ void Spooler::load()
     _process_class_list.push_back( process_class );         
 
 
+    init_job_chains();
     _web_services.init();    // Ein Job und eine Jobkette einrichten, s. spooler_web_service.cxx
 
 

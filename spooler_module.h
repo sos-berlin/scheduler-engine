@@ -94,12 +94,13 @@ struct Module : Object
         kind_java,
         kind_scripting_engine,
         kind_com,
-        kind_remote
+        kind_remote,
+        kind_internal
     };
 
     Z_GNU_ONLY(                 Module                      (); )
 
-                                Module                      ( Spooler*, Prefix_log* );
+                                Module                      ( Spooler*, Prefix_log* = NULL );
     explicit                    Module                      ( Spooler*, const xml::Element_ptr&, const Time& xml_mod_time, const string& include_path );
                                ~Module                      ()                                      {}
 
@@ -112,6 +113,7 @@ struct Module : Object
     void                        init                        ();
 
     ptr<Module_instance>        create_instance             ();
+    virtual ptr<Module_instance> create_instance_impl       ();
     bool                        set                         ()                                      { return _set; }
     Kind                        kind                        () const                                { return _kind; }
     void                        clear_java                  ();

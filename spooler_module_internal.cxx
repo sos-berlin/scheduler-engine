@@ -5,7 +5,17 @@
 namespace sos {
 namespace spooler {
 
-//----------------------------------------------------nternal_instance_base::Internal_module_instance
+//-----------------------------------------------------------------Internal_module::Internal_module
+    
+Internal_module::Internal_module( Spooler* spooler, Prefix_log* log )
+:
+    Module( spooler, log )
+{
+    _kind = kind_internal;
+    _set = true;
+}
+
+//---------------------------------------------------Internal_instance_base::Internal_module_instance
     
 Internal_module_instance::Internal_module_instance( Module* module )             
 : 

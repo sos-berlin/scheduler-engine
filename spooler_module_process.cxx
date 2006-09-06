@@ -127,7 +127,7 @@ void Process_module_instance::start()
 
 //---------------------------------------------------------------Process_module_instance::name_exists
 
-bool Process_module_instance::name_exists( const string& name )
+bool Process_module_instance::name_exists( const string& )
 { 
     return false;
 }
@@ -136,14 +136,14 @@ bool Process_module_instance::name_exists( const string& name )
 
 Variant Process_module_instance::call( const string& name )
 {
-    z::throw_xc( __FUNCTION__ );
+    z::throw_xc( __FUNCTION__, name );
 }
 
 //----------------------------------------------------------------------Process_module_instance::call
 
-Variant Process_module_instance::call( const string& name, bool param )
+Variant Process_module_instance::call( const string& name, bool )
 {
-    z::throw_xc( __FUNCTION__ );
+    z::throw_xc( __FUNCTION__, name );
 }
 
 //------------------------------------------------------------Process_module_instance::program_path

@@ -188,8 +188,8 @@ struct Job : Object,
     typedef map< int, Time >                    Delay_after_error;
     typedef map< int, Time >                    Delay_order_after_setback;
 
-                                Job                         ( Spooler* );
-                               ~Job                         (); 
+                                Job                         ( Spooler*, const ptr<Module>& = NULL );
+    virtual                    ~Job                         (); 
 
     void                    set_dom                         ( const xml::Element_ptr&, const Time& mod_time );
     void                        add_on_exit_commands_element( const xml::Element_ptr& commands_element, const Time& mod_time );
@@ -318,6 +318,8 @@ struct Job : Object,
 
     Order_queue*                order_queue                 () const                                { return _order_queue; }
     bool                        order_controlled            () const                                { return _order_queue != NULL; }
+    void                    set_order_controlled            ();
+    void                    set_idle_timeout                ( const Time& );
 
     void                        set_job_chain_priority      ( int pri )                             { THREAD_LOCK(_lock) if( _job_chain_priority < pri )  _job_chain_priority = pri; }
     static bool                 higher_job_chain_priority   ( const Job* a, const Job* b )          { return a->_job_chain_priority > b->_job_chain_priority; }
@@ -407,7 +409,7 @@ struct Job : Object,
     ptr<Com_variable_set>      _default_params;
 
 
-    Module                     _module;                     // Job hat ein eigenes Skript
+    ptr<Module>                _module;                     // Job hat ein eigenes Skript
     xml::Element_ptr           _script_element;             // <script> (mit <include>) für <modify_job cmd="reload"/>
 
     Module*                    _module_ptr;
@@ -438,6 +440,13 @@ struct Job : Object,
 
     typedef list< pair<string,string> > Start_when_directory_changed_list;  
     Start_when_directory_changed_list  _start_when_directory_changed_list;      // Für <start_when_directory_changed>
+};
+
+//--------------------------------------------------------------------------------------Internal_job
+
+struct Internal_job : Job
+{
+                                Internal_job                ( const string& name, const ptr<Module>& );
 };
 
 //------------------------------------------------------------------------------------------Job_list

@@ -132,6 +132,7 @@ struct Order : Com_order,
     void                        add_to_or_replace_in_job_chain( Job_chain* );
     bool                        try_add_to_job_chain    ( Job_chain* );
     void                        remove_from_job_chain   ( bool leave_in_database = false );
+    void                        add_to_blacklist        ();
     void                        move_to_node            ( Job_chain_node* );
     void                        postprocessing          ( bool success );                           // Verarbeitung nach spooler_process()
     void                        processing_error        ();
@@ -199,7 +200,7 @@ struct Order : Com_order,
   //bool                       _period_once;
     Time                       _setback;                // Bis wann der Auftrag zurückgestellt ist (bei _setback_count > 0, sonst Startzeitpunkt "at")
     int                        _setback_count;
-    bool                       _suspended;
+    bool                       _on_blacklist;           // assert( _job_chain )
   //bool                       _recoverable;            // In Datenbank halten
     bool                       _is_in_database;
     bool                       _delay_storing_until_processing;  // Erst in die Datenbank schreiben, wenn die erste Task die Verarbeitung beginnt
@@ -286,7 +287,6 @@ struct Job_chain_node : Com_job_chain_node
     Job_chain_node*            _error_node;             // Fehlerknoten
 
     int                        _priority;               // Das ist die Entfernung zum letzten Knoten + 1, negativ (also -1, -2, -3, ...)
-    bool                       _suspended;
 };
 
 //----------------------------------------------------------------------------------------Job_chain
@@ -329,7 +329,7 @@ struct Job_chain : Com_job_chain, Scheduler_object
     void                        load_orders_from_database();
     int                         remove_all_pending_orders( bool leave_in_database = false );
 
-    void                        add_job                 ( Job*, const Order::State& input_state, const Order::State& output_state = error_variant, const Order::State& error_state = error_variant );
+    Job_chain_node*             add_job                 ( Job*, const Order::State& input_state, const Order::State& output_state = error_variant, const Order::State& error_state = error_variant );
     void                        finish                  ();
 
     Job_chain_node*             first_node             ();
@@ -346,6 +346,8 @@ struct Job_chain : Com_job_chain, Scheduler_object
     bool                        has_order_id            ( const Order::Id& );
     void                        register_order          ( Order* );                                 // Um doppelte Auftragskennungen zu entdecken: Fehler SCHEDULER-186
     void                        unregister_order        ( Order* );
+    void                        add_to_blacklist        ( Order* );
+    void                        remove_from_blacklist   ( Order* );
 
     int                         order_count             ();
     bool                        has_order               () const;
@@ -364,6 +366,9 @@ struct Job_chain : Com_job_chain, Scheduler_object
     Fill_zero                  _zero_;
     bool                       _orders_recoverable;
     bool                       _load_orders_from_database;      // load_orders_from_database() muss noch gerufen werden.
+
+    typedef list <ptr<Order> >  Blacklist;
+    Blacklist                  _blacklist;
 
   private:
     friend struct               Order;

@@ -2141,6 +2141,18 @@
             </text>
         </message>
 
+        <message code="SCHEDULER-339">
+            <text xml:lang="en">
+                <title>Missing file <p1/></title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-340">
+            <text xml:lang="en">
+                <title>File still exists. Order has been set on the blacklist</title>
+            </text>
+        </message>
+
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->
@@ -2781,6 +2793,24 @@
         <message code="SCHEDULER-978">
             <text xml:lang="en">
                 <title>Job stops because of <code>&lt;job stop_on_error="yes"></code>. Task error was: <p1/></title>
+            </text>
+        </message>
+        
+        <message code="SCHEDULER-979">
+            <text xml:lang="en">
+                <title>Removing file <p1/></title>
+            </text>
+        </message>
+        
+        <message code="SCHEDULER-980">
+            <text xml:lang="en">
+                <title>Moving file <p1/> to <p2/></title>
+            </text>
+        </message>
+        
+        <message code="SCHEDULER-981">
+            <text xml:lang="en">
+                <title>File has been removed</title>
             </text>
         </message>
         

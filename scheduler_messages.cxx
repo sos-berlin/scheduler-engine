@@ -207,6 +207,8 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-336", "Only \"yes\", \"no\" and a list of signal names are allowed with $1=\"$2\": $3" },
     { "SCHEDULER-337", "Signal $1 is unknown on this operating system and is ignored" },
     { "SCHEDULER-338", "Order.payload is not a Variable_set" },
+    { "SCHEDULER-339", "Missing file $1" },
+    { "SCHEDULER-340", "File still exists. Order has been set on the blacklist" },
     { "SCHEDULER-900", "Scheduler $1 is starting with $2, pid=$3" },
     { "SCHEDULER-902", "state=$1" },
     { "SCHEDULER-904", "Tasks have $1s to terminate" },
@@ -280,6 +282,9 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-976", "This directory path with ';' will not be included in triggered_files: $1" },
     { "SCHEDULER-977", "Job does not stop because of <job stop_on_error=\"no\">. Task error was: $1" },
     { "SCHEDULER-978", "Job stops because of <job stop_on_error=\"yes\">. Task error was: $1" },
+    { "SCHEDULER-979", "Removing file $1" },
+    { "SCHEDULER-980", "Moving file $1 to $2" },
+    { "SCHEDULER-981", "File has been removed" },
     { "SCHEDULER-999", "Scheduler has been terminated properly" },
     {}
 };

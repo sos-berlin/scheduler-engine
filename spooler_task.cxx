@@ -714,7 +714,7 @@ void Task::set_state( State new_state )
             _state = new_state;
 
 
-            if( is_idle()  &&  _job->_module._process_class )  _job->_module._process_class->notify_a_process_is_idle();
+            if( is_idle()  &&  _job->_module->_process_class )  _job->_module->_process_class->notify_a_process_is_idle();
 
 
             Log_level log_level = new_state == s_starting || new_state == s_closed? log_info : log_debug9;
@@ -1348,7 +1348,7 @@ bool Task::do_something()
 
                         case s_exit:
                         {
-                            if( _job->_module._reuse == Module::reuse_task )
+                            if( _job->_module->_reuse == Module::reuse_task )
                             {
                                 if( !_operation )  _operation = do_call__start( spooler_exit_name );
                                              else  operation__end(), set_state( s_release ), loop = true;

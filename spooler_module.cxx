@@ -257,43 +257,45 @@ void Module::init()
     if( _monitor )  _monitor->init();
 
 
-# ifdef Z_WINDOWS
-    if( _com_class_name != "" )
+    if( _kind == kind_none )    // Wenn nicht, dann kind_internal
     {
-        _kind = kind_com;
-    
-        if( _language        != "" )  z::throw_xc( "SCHEDULER-145" );
-        if( _java_class_name != "" )  z::throw_xc( "SCHEDULER-168" );
-    }
-    else
-# endif
-    if( _java_class_name != ""  ||  lcase(_language) == "java" )
-    {
-        _kind = kind_java;
-    
-        if( _language == "" )  _language = "Java";
+#       ifdef Z_WINDOWS
+        if( _com_class_name != "" )
+        {
+            _kind = kind_com;
+        
+            if( _language        != "" )  z::throw_xc( "SCHEDULER-145" );
+            if( _java_class_name != "" )  z::throw_xc( "SCHEDULER-168" );
+        }
+        else
+#       endif
+        if( _java_class_name != ""  ||  lcase(_language) == "java" )
+        {
+            _kind = kind_java;
+        
+            if( _language == "" )  _language = "Java";
 
-        if( lcase(_language) != "java" )  z::throw_xc( "SCHEDULER-166" );
-        if( _com_class_name  != ""     )  z::throw_xc( "SCHEDULER-168" );
+            if( lcase(_language) != "java" )  z::throw_xc( "SCHEDULER-166" );
+            if( _com_class_name  != ""     )  z::throw_xc( "SCHEDULER-168" );
+        }
+        else
+        if( _process_filename != ""  || _language == shell_language_name )  //   Z_POSIX_ONLY( || _language == ""  &&  string_begins_with( _source, "#!" ) ) )
+        {
+            _kind = kind_process;
+        }
+        else
+        {
+            _kind = kind_scripting_engine;
+            if( _language == "" )  _language = SPOOLER_DEFAULT_LANGUAGE;
+        }
     }
-    else
-    if( _process_filename != ""  || _language == shell_language_name )  //   Z_POSIX_ONLY( || _language == ""  &&  string_begins_with( _source, "#!" ) ) )
-    {
-        _kind = kind_process;
-    }
-    else
-    {
-        _kind = kind_scripting_engine;
-        if( _language == "" )  _language = SPOOLER_DEFAULT_LANGUAGE;
-    }
-
 
     _real_kind = _kind;
 
     if( _real_kind == kind_java  &&  !_source.empty()  &&  _spooler )  _spooler->_has_java_source = true;       // work_dir zum Compilieren bereitstellen
 
 
-    if( _kind != kind_process )
+    if( _kind != kind_process  &&  _kind != kind_internal )
     {
         if( _spooler )  _use_process_class = _spooler->has_process_classes();
 
@@ -312,13 +314,14 @@ void Module::init()
         }
     }
 
-    if( _separate_process  ||  _use_process_class )   _kind = kind_remote;
+    if( _kind != kind_internal )  if( _separate_process  ||  _use_process_class )   _kind = kind_remote;
 
     if( _kind == kind_java  &&  _spooler )  _spooler->_has_java = true;
 
 
     switch( _kind )
     {
+        case kind_internal:             break;
         case kind_remote:               break;
         case kind_java:                 break;
         
@@ -343,8 +346,27 @@ void Module::init()
 
 ptr<Module_instance> Module::create_instance()
 {
+    ptr<Module_instance> result = create_instance_impl();
+
+    if( _monitor )
+    {
+        if( _kind == kind_process )  z::throw_xc( "SCHEDULER-315" );
+        if( _kind == kind_internal )  z::throw_xc( "SCHEDULER-315", "Internal job" );
+        
+        if( _kind != kind_remote )  
+        {
+            result->_monitor_instance = _monitor->create_instance();
+        }
+    }
+
+    return result;
+}
+
+//---------------------------------------------------------------------Module::create_instance_impl
+
+ptr<Module_instance> Module::create_instance_impl()
+{
     ptr<Module_instance> result;
-    ptr<Module_instance> monitor_instance;
 
 
     switch( _kind )
@@ -396,15 +418,15 @@ ptr<Module_instance> Module::create_instance()
             break;
         }
 
+        case kind_internal:
+        {
+            ptr<Internal_module_instance> p = Z_NEW( Internal_module_instance( this ) );
+            result = +p;
+            break;
+        }
+
         default:                     
             z::throw_xc( "SCHEDULER-173" );
-    }
-
-
-    if( _monitor )
-    {
-        if( _kind == kind_process )  z::throw_xc( "SCHEDULER-315" );
-        if( _kind != kind_remote )  result->_monitor_instance = _monitor->create_instance();
     }
 
     return result;

@@ -329,7 +329,7 @@ struct Spooler : Object,
     void                        send_cmd                    ();
 
     // Jobs
-    void                        add_job                     ( const ptr<Job>& );
+    void                        add_job                     ( const ptr<Job>&, bool init );
     void                        cmd_add_jobs                ( const xml::Element_ptr& );
     void                        cmd_job                     ( const xml::Element_ptr& );
   //void                        do_add_jobs                 ();
@@ -344,6 +344,7 @@ struct Spooler : Object,
     void                        init_job                    ( Job*, bool call_init_too = true );
     xml::Element_ptr            jobs_dom_element            ( const xml::Document_ptr&, const Show_what& );
 
+    void                        init_job_chains             ();                                 // In spooler_order.cxx
     void                        load_job_chains_from_xml    ( const xml::Element_ptr& );
     void                        add_job_chain               ( Job_chain* );
     Job_chain*                  job_chain                   ( const string& name );
