@@ -764,7 +764,7 @@ void Directory_watcher::Directory_reader::close()
     
 ptr<zschimmer::File_info> Directory_watcher::Directory_reader::read() 
 { 
-    if( !_read_first )
+    if( !_first_read )
     {
         _handle = opendir( _directory_path.c_str() );
         if( !_handle )  throw_errno( errno, "opendir", _directory_path.c_str() );
