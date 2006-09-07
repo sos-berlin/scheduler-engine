@@ -29,6 +29,7 @@ objects = \
  spooler_mail.o\
  spooler_module.o\
  spooler_module_com.o\
+ spooler_module_internal.o\
  spooler_module_java.o\
  spooler_module_process.o\
  spooler_module_remote.o\

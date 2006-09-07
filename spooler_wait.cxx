@@ -749,8 +749,19 @@ ptr<zschimmer::File_info> Directory_watcher::Directory_reader::read_next()
 Directory_watcher::Directory_reader::Directory_reader( Directory_watcher* w ) 
 : 
     _zero_(this+1),
-    _directory_path( w->_directory),
+    _directory_path( w->_directory ),
     _regex( w->_filename_pattern == ""? NULL : &w->_filename_regex ),
+    _handle(NULL)
+{
+}
+    
+//--------------------------------------------Directory_watcher::Directory_reader::Directory_reader
+
+Directory_watcher::Directory_reader::Directory_reader( const File_path& path, Regex* regex ) 
+: 
+    _zero_(this+1),
+    _directory_path( path ),
+    _regex( regex ),
     _handle(NULL)
 {
 }
@@ -769,9 +780,7 @@ ptr<zschimmer::File_info> Directory_watcher::Directory_reader::read_first()
     _handle = opendir( _directory_path.c_str() );
     if( !_handle )  throw_errno( errno, "opendir", _directory_path.c_str() );
 
-    ptr<zschimmer::File_info> result = Z_NEW( zschimmer::File_info );
-    result->path().set_name( entry->d_name );
-    return result;
+    return read_next();
 }
 
 //---------------------------------------------------Directory_watcher::Directory_reader::read_next
@@ -779,7 +788,7 @@ ptr<zschimmer::File_info> Directory_watcher::Directory_reader::read_first()
 ptr<zschimmer::File_info> Directory_watcher::Directory_reader::read_next() 
 { 
     struct dirent* entry = readdir( _handle );
-    if( !entry )  return "";
+    if( !entry )  return NULL;
 
     ptr<zschimmer::File_info> result = Z_NEW( zschimmer::File_info );
     result->path().set_name( entry->d_name );
@@ -881,7 +890,7 @@ bool Directory_watcher::has_changed_2( bool throw_error )
         
             while(1)
             {
-                string filename = dir.get(); 
+                string filename = dir.get()->path().name(); 
                 if( filename == "" )  break;
 
                 new_f->push_back( filename ); 

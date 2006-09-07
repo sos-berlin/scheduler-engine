@@ -42,9 +42,8 @@ struct File_order_sink_module_instance : Internal_module_instance
 
     bool spooler_process()
     {
-        bool   result       = false;
-        bool   remove_order = false;
-        Order* order        = _task->order();
+        bool   result = false;
+        Order* order  = _task->order();
 
         if( !order )  return false;         // Fehler
 
@@ -381,9 +380,10 @@ Order* Directory_file_order_source::request_order()
             }
 
 
-#           ifdef Z_WINDOWS
-                if( need_event )
-                {
+            if( need_event )
+            {
+#               ifdef Z_WINDOWS
+
                     if( !_notification_event.handle() )
                     {
                         Z_LOG( "FindFirstChangeNotification( \"" << _path.path() << "\", FALSE, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME );\n" );
@@ -404,11 +404,14 @@ Order* Directory_file_order_source::request_order()
                         BOOL ok = FindNextChangeNotification( _notification_event.handle() );
                         if( !ok )  throw_mswin_error( "FindNextChangeNotification" );
                     }
-                }
 
-#            else
-                set_async_next_gmtime( double_from_gmtime() + 60 );     // Erstmal alle 10 Sekunden
-#           endif
+#                else
+
+                    log()->info( "set_async_next_gmtime()" );
+                    set_async_next_gmtime( double_from_gmtime() + 10 );     // Erstmal alle 10 Sekunden
+
+#               endif
+            }
         }
         catch( exception& x )
         {
@@ -1077,8 +1080,8 @@ bool Job_chain::has_order() const
 
 int Job_chain::order_count()
 {
-    int            result = 0;
-    hash_set<Job*> jobs;             // Jobs können (theoretisch) doppelt vorkommen, sollen aber nicht doppelt gezählt werden.
+    int       result = 0;
+    set<Job*> jobs;             // Jobs können (theoretisch) doppelt vorkommen, sollen aber nicht doppelt gezählt werden.
 
     //THREAD_LOCK( _lock )
     {

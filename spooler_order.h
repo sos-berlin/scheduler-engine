@@ -245,12 +245,9 @@ struct Directory_file_order_source : //idispatch_implementation< Directory_file_
     Job_chain*                 _job_chain;
     //bool                       _order_requested;
     bool                       _directory_error;
-    bool                       _wait_for_notification_event;     // Nur Windows. Verzeichnis erst lesen, wenn _notification_event signalisiert
     bool                       _first;
-
-#   ifdef Z_WINDOWS
-        Event                  _notification_event;
-#   endif
+    Event                      _notification_event;             // Nur Windows
+    bool                       _wait_for_notification_event;    // Nur Windows. Verzeichnis erst lesen, wenn _notification_event signalisiert
 };
 
 //------------------------------------------------------------------------------------Order_sources
