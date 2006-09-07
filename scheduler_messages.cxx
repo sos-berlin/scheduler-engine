@@ -287,7 +287,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-980", "Moving file $1 to $2" },
     { "SCHEDULER-981", "File on blacklist has been removed" },
     { "SCHEDULER-982", "File has been removed, so the waiting file order is being removed too." },
-    { "SCHEDULER-983", "Adding new file order. $2, $1" },
+    { "SCHEDULER-983", "New file, $2: adding $1" },
     { "SCHEDULER-984", "Recovered from previous error on directory $1" },
     { "SCHEDULER-999", "Scheduler has been terminated properly" },
     {}

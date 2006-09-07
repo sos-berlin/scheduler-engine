@@ -67,6 +67,7 @@ struct Order : Com_order,
   //Job_chain*                  removed_from_job_chain  () const                                    { return _removed_from_job_chain; }
     Order_queue*                order_queue             ();
 
+    void                    set_finished                ()                                          { _finished = true; }
     bool                        finished                ();
 
     void                    set_job                     ( Job* );
@@ -205,6 +206,7 @@ struct Order : Com_order,
     bool                       _is_in_database;
     bool                       _delay_storing_until_processing;  // Erst in die Datenbank schreiben, wenn die erste Task die Verarbeitung beginnt
     bool                       _is_virgin;              // Noch von keiner Task berührt
+    bool                       _finished;               // Auftrag nach spooler_process() beenden
 
     ptr<Web_service>           _web_service;
     ptr<http::Operation>       _http_operation;

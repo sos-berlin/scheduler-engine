@@ -1775,7 +1775,7 @@ void Order::set_xml_payload( const string& xml_string )
 bool Order::finished()
 {
     //if( _on_blacklist )  return false;
-    return !_job_chain_node  ||  !_job_chain_node->_job;
+    return _finished  ||  !_job_chain_node  ||  !_job_chain_node->_job;
 }
 
 //-------------------------------------------------------------------------------Order::check_state
@@ -2109,7 +2109,7 @@ void Order::postprocessing( bool success )
 
 
 
-        if( !_setback && !_moved  ||  force_error_state )
+        if( !_setback && !_moved && !_finished  ||  force_error_state )
         {
             _setback_count = 0;
 

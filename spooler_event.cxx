@@ -231,12 +231,7 @@ int Scheduler_event::send_mail( const Mail_defaults& mail_defaults )
 {
     try
     {
-        //if( !_mail )
-        {
-            mail();
-            //_mail->set_from_name( _spooler->name() );
-            //_mail->add_header_field( "X-SOS-Spooler", "" );
-        }
+        mail();
 
         xml::Document_ptr mail_dom;
         xml::Document_ptr event_dom;

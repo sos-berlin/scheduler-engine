@@ -61,7 +61,7 @@ struct File_order_sink_module_instance : Internal_module_instance
                 {
                     if( job_chain_node->_file_order_sink_move_to != "" ) 
                     {
-                        _log->info( message_string( "SCHEDULER-980", path, job_chain_node->_file_order_sink_move_to ) );
+                        order->log()->info( message_string( "SCHEDULER-980", path, job_chain_node->_file_order_sink_move_to ) );
 
                         path.move_to( job_chain_node->_file_order_sink_move_to );
 
@@ -70,7 +70,7 @@ struct File_order_sink_module_instance : Internal_module_instance
                     else
                     if( job_chain_node->_file_order_sink_remove )                
                     {
-                        _log->info( message_string( "SCHEDULER-979", path ) );
+                        order->log()->info( message_string( "SCHEDULER-979", path ) );
 
                         path.unlink();
 
@@ -87,7 +87,8 @@ struct File_order_sink_module_instance : Internal_module_instance
                 if( result == false  &&  job_chain_node->_error_state == job_chain_node->_state )  order->add_to_blacklist();
             }
 
-            if( result == true  &&  job_chain_node->_next_state == job_chain_node->_state )  order->remove_from_job_chain();
+            //if( result == true  &&  job_chain_node->_next_state == job_chain_node->_state )  
+            order->set_finished();  //remove_from_job_chain();
         }
 
         return result;
@@ -287,8 +288,8 @@ Order* Directory_file_order_source::read_directory( const string& cause )
             hash_set<string>            virgin_known_files;
             vector< ptr<z::File_info> > new_files;
 
-            Z_LOG( __FUNCTION__ << "Reading directory because of " << cause << "\n" );
-            log()->info( "******* WATCHING " + _path + " ******* " + cause );   // TEST
+            Z_LOG( __FUNCTION__ << "  Reading directory because of " << cause << "\n" );
+            //log()->info( "******* WATCHING " + _path + " ******* " + cause );   // TEST
 
             new_files.reserve( 1000 );
 
@@ -368,7 +369,9 @@ Order* Directory_file_order_source::read_directory( const string& cause )
 
                 order->set_file_path( path );
     
-                log()->info( message_string( "SCHEDULER-983", order->obj_name(), "file written at " + Time( new_file->last_write_time() ).as_string( Time::without_ms ) ) );
+                string date = Time( localtime_from_gmtime( new_file->last_write_time() ) ).as_string( Time::without_ms );
+                log()->info( message_string( "SCHEDULER-983", order->obj_name(), "written at " + date ) );
+
                 order->add_to_job_chain( _job_chain );
 
                 if( !result )  result = order;      // Der erste, sofort ausführbare Auftrag
@@ -421,9 +424,10 @@ void Directory_file_order_source::send_mail( Scheduler_event::Event_code event_c
                 body << _job_chain->obj_name() << "\n";
                 body << "Scheduler -id=" << _spooler->id() << "  host=" << _spooler->_hostname << "\n";
                 body << "\n";
-                body << "\n&lt;file_order_source directory=\"" << _path << "\"/> doesn't work because of following error:\n";
+                body << "<file_order_source directory=\"" << _path << "\"/> doesn't work because of following error:\n";
                 body << x->what() << "\n";
                 body << "\n";
+                body << "Retrying every " << _delay_after_error << " seconds.\n";
                 body << "You will be notified when the directory is accessible again\n";
 
                 scheduler_event.mail()->set_body( body );
@@ -439,7 +443,7 @@ void Directory_file_order_source::send_mail( Scheduler_event::Event_code event_c
 
                 scheduler_event.set_message( msg );
                 scheduler_event.mail()->set_from_name( _spooler->name() + ", " + _job_chain->obj_name() );    // "Scheduler host:port -id=xxx Job chain ..."
-                //scheduler_event.mail()->set_subject( ... );
+                scheduler_event.mail()->set_subject( msg );
 
                 S body;
                 body << Sos_optional_date_time::now().as_string() << "\n\n" << _job_chain->obj_name() << "\n";

@@ -120,8 +120,7 @@ struct Directory_watcher : Event  //, Async_operation
         ptr<zschimmer::File_info> get                       ();
 
       private:
-        ptr<zschimmer::File_info> read_first                 ();
-        ptr<zschimmer::File_info> read_next                  ();
+        ptr<zschimmer::File_info> read                      ();
 
         string                 _directory_path;
         z::Regex*              _regex;

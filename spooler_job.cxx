@@ -1748,7 +1748,7 @@ ptr<Task> Job::task_to_start()
             if( order )  // Ist der Auftrag noch da? (Muss bei Ein-Thread-Betrieb immer da sein!)
             {
                 cause = cause_order;
-                log_line += "Task starts for order " + order->obj_name();
+                log_line += "Task starts for " + order->obj_name();
             }
         }
 

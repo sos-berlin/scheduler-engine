@@ -416,15 +416,6 @@ struct Spooler : Object,
     string                     _mail_encoding;
 
     Mail_defaults              _mail_defaults;
-    /*
-    string                     _mail_queue_dir;
-    string                     _smtp_server;                // Für Job-Protokolle
-    string                     _log_mail_from;
-    string                     _log_mail_to;
-    string                     _log_mail_cc;
-    string                     _log_mail_bcc;
-    string                     _log_mail_subject;
-    */
 
     int                        _log_collect_within;
     int                        _log_collect_max;

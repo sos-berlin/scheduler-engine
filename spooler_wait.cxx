@@ -630,8 +630,8 @@ ptr<zschimmer::File_info> Directory_watcher::Directory_reader::get()
 
     while(1)
     {
-        if( !_first_read )  result = read_first(),  _first_read = true;
-                      else  result = read_next();
+        result = read();
+        _first_read = true;
         if( !result )  break;
 
         string name = result->path().name();
@@ -695,43 +695,30 @@ void Directory_watcher::Directory_reader::close()
     if( _handle != -1 )  _findclose( _handle ),  _handle = -1; 
 }
 
-//--------------------------------------------------Directory_watcher::Directory_reader::read_first
+//--------------------------------------------------------Directory_watcher::Directory_reader::read
 
-ptr<zschimmer::File_info> Directory_watcher::Directory_reader::read_first() 
+ptr<zschimmer::File_info> Directory_watcher::Directory_reader::read() 
 { 
-    ptr<zschimmer::File_info> result = Z_NEW( zschimmer::File_info );
+    ptr<zschimmer::File_info>   result = Z_NEW( zschimmer::File_info );
+    _finddata_t                 data;
 
-    string pattern = _directory_path + "/*";
-    _finddata_t data;
-
-    memset( &data, 0, sizeof data );
-    _handle = _findfirst( pattern.c_str(), &data ); 
-  //if( data.attrib &  ...dir... )  return data.name + Z_DIR_SEPARATOR;
-    if( _handle == -1 )  throw_errno( errno, "_findfirst", _directory_path.c_str() );  
-
-
-    result->path().set_name( data.name );
-    result->set_create_time     ( data.time_create == -1? 0 : data.time_create );
-    result->set_last_access_time( data.time_access == -1? 0 : data.time_access );
-    result->set_last_write_time ( data.time_write  == -1? 0 : data.time_write  );
-
-    return result;
-}
-
-//---------------------------------------------------------------------------Directory_reader::next
-
-ptr<zschimmer::File_info> Directory_watcher::Directory_reader::read_next() 
-{ 
-    _finddata_t data;
-    int ret = _findnext( _handle, &data ); 
-    if( ret == -1 )  
+    if( !_first_read )
     {
-        if( errno == ENOENT )  return NULL;
-        throw_errno( errno, "_findnext" ); 
+        string pattern = _directory_path + "/*";
+
+        memset( &data, 0, sizeof data );
+        _handle = _findfirst( pattern.c_str(), &data ); 
+        if( _handle == -1 )  throw_errno( errno, "_findfirst", _directory_path.c_str() );  
     }
-
-
-    ptr<zschimmer::File_info> result = Z_NEW( zschimmer::File_info );
+    else
+    {
+        int ret = _findnext( _handle, &data ); 
+        if( ret == -1 )  
+        {
+            if( errno == ENOENT )  return NULL;
+            throw_errno( errno, "_findnext" ); 
+        }
+    }
 
     result->path().set_name( data.name );
     result->set_create_time     ( data.time_create == -1? 0 : data.time_create );
@@ -775,18 +762,14 @@ void Directory_watcher::Directory_reader::close()
 
 //--------------------------------------------------Directory_watcher::Directory_reader::read_first
     
-ptr<zschimmer::File_info> Directory_watcher::Directory_reader::read_first() 
+ptr<zschimmer::File_info> Directory_watcher::Directory_reader::read() 
 { 
-    _handle = opendir( _directory_path.c_str() );
-    if( !_handle )  throw_errno( errno, "opendir", _directory_path.c_str() );
+    if( !_read_first )
+    {
+        _handle = opendir( _directory_path.c_str() );
+        if( !_handle )  throw_errno( errno, "opendir", _directory_path.c_str() );
+    }
 
-    return read_next();
-}
-
-//---------------------------------------------------Directory_watcher::Directory_reader::read_next
-
-ptr<zschimmer::File_info> Directory_watcher::Directory_reader::read_next() 
-{ 
     struct dirent* entry = readdir( _handle );
     if( !entry )  return NULL;
 
