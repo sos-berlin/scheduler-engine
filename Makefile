@@ -35,6 +35,7 @@ objects = \
  spooler_module_remote.o\
  spooler_module_remote_server.o\
  spooler_order.o\
+ spooler_order_file.o\
  spooler_remote.o\
  spooler_process.o\
  spooler_security.o\
