@@ -1634,16 +1634,7 @@ void Task::set_order( Order* order )
     {
         _order->attach_task( this );            // Auftrag war schon bereitgestellt
 
-        try
-        {
-            if( ptr<spooler_com::Ivariable_set> order_params = _order->params_or_null() )
-            {
-                Variant path;
-                order_params->get_Var( Bstr( scheduler_file_path_variable_name ), &path );
-                _trigger_files = string_from_variant( path );
-            }
-        }
-        catch( exception& x )  { Z_LOG( __FUNCTION__ << " " << x.what() << "\n" ); }
+        if( _order->is_file_order() )  _trigger_files = order->file_path();
     }
 }
 

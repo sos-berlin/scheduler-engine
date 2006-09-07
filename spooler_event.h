@@ -26,6 +26,8 @@ struct Scheduler_event
         evt_database_error_abort,
         evt_database_continue,
         evt_task_start_error,
+        evt_file_order_source_error,
+        evt_file_order_source_recovered
     };
 
 

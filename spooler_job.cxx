@@ -89,9 +89,7 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
     {
         bool order;
 
-        _name       = element.     getAttribute( "name"         , _name       );
-        set_log();
-
+        set_name(     element.     getAttribute( "name"         , _name       ) );
         _visible    = element.bool_getAttribute( "visible"      , _visible    );
         _temporary  = element.bool_getAttribute( "temporary"    , _temporary  );
         _module->set_priority( element.getAttribute( "priority"     , _module->_priority   ) );
@@ -411,6 +409,15 @@ void Job::init0()
     _init0_called = true;
 }
 
+//------------------------------------------------------------------------------------Job::set_name
+
+void Job::set_name( const string& name )
+{
+    if( _name != "" )  z::throw_xc( __FUNCTION__ );
+    _name  = name;
+    set_log();
+}
+
 //-------------------------------------------------------------------------------------Job::set_log
 
 void Job::set_log()
@@ -571,7 +578,7 @@ void Job::set_remove( bool remove )
     }
 
     if( order_controlled() )  z::throw_xc( "SCHEDULER-229", obj_name() );   // _prioritized_order_job_array und Job_chain_node enthalten Job*!
-    if( !_first_in_job_chain_list.empty() )  z::throw_xc( "SCHEDULER-229", obj_name() );
+    if( !_order_source_job_chain_list.empty() )  z::throw_xc( "SCHEDULER-229", obj_name() );
 
     _remove = true; 
     stop( true );
@@ -1497,26 +1504,26 @@ void Job::calculate_next_time_after_modified_order_queue()
     calculate_next_time();
 }
 
-//-----------------------------------------------------------------Job::register_first_in_job_chain
+//---------------------------------------------------------------Job::register_job_for_order_source
 
-void Job::register_first_in_job_chain( Job_chain* job_chain )
+void Job::register_job_for_order_source( Job_chain* job_chain )
 {
 #   if defined _DEBUG
-        Z_FOR_EACH( Job_chain_list, _first_in_job_chain_list, it )  assert( *it != job_chain );
+        Z_FOR_EACH( Job_chain_list, _order_source_job_chain_list, it )  assert( *it != job_chain );
 #   endif
 
-    _first_in_job_chain_list.push_back( job_chain );
+    _order_source_job_chain_list.push_back( job_chain );
 }
 
-//---------------------------------------------------------------Job::unregister_first_in_job_chain
+//-------------------------------------------------------------Job::unregister_job_for_order_source
 
-void Job::unregister_first_in_job_chain( Job_chain* job_chain )
+void Job::unregister_job_for_order_source( Job_chain* job_chain )
 {
-    Z_FOR_EACH( Job_chain_list, _first_in_job_chain_list, it )
+    Z_FOR_EACH( Job_chain_list, _order_source_job_chain_list, it )
     {
         if( *it == job_chain )
         {
-            it = _first_in_job_chain_list.erase( it );
+            it = _order_source_job_chain_list.erase( it );
             return;
         }
     }
@@ -1528,7 +1535,7 @@ Order* Job::request_order()
 {
     Order* result = NULL;
 
-    Z_FOR_EACH( Job_chain_list, _first_in_job_chain_list, it )
+    Z_FOR_EACH( Job_chain_list, _order_source_job_chain_list, it )
     {
         Job_chain* job_chain = *it;
         result = job_chain->request_order();
@@ -2529,7 +2536,7 @@ Internal_job::Internal_job( const string& name, const ptr<Module>& module )
 :
     Job( module->_spooler, module )
 {
-    _name = name;
+    set_name( name );
 }
 
 //-------------------------------------------------------------------------------------------------

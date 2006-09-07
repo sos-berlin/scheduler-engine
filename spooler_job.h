@@ -205,6 +205,7 @@ struct Job : Object,
     void                        init_run_time               ();
     void                        set_run_time                ( const xml::Element_ptr& );
 
+    void                    set_name                        ( const string& );
     const string&               name                        () const                                { return _name; }
     State_cmd                   state_cmd                   () const                                { return _state_cmd; }
     State                       state                       () const                                { return _state; }
@@ -230,8 +231,8 @@ struct Job : Object,
     void                        set_max_order_setbacks      ( int n )                               { _log->debug9( "max_order_setbacks"+as_string(n) ); _max_order_setbacks = n; }
     int                         max_order_setbacks          () const                                { return _max_order_setbacks; }
     Order*                      request_order               ();                                     // Fordert einen Auftrag für die _order_queue an
-    void                        register_first_in_job_chain ( Job_chain* );
-    void                        unregister_first_in_job_chain( Job_chain* );
+    void                        register_job_for_order_source ( Job_chain* );
+    void                        unregister_job_for_order_source( Job_chain* );
     void                        load_tasks_from_db          ();
     xml::Element_ptr            read_history                ( const xml::Document_ptr& doc, int id, int n, const Show_what& show ) { return _history.read_tail( doc, id, n, show ); }
 
@@ -436,7 +437,7 @@ struct Job : Object,
     int                        _max_order_setbacks;
 
     typedef list< Job_chain* >  Job_chain_list;
-    Job_chain_list             _first_in_job_chain_list;    // Muss leer sein bei ~Job!
+    Job_chain_list             _order_source_job_chain_list;    // Muss leer sein bei ~Job!
 
     typedef list< pair<string,string> > Start_when_directory_changed_list;  
     Start_when_directory_changed_list  _start_when_directory_changed_list;      // Für <start_when_directory_changed>

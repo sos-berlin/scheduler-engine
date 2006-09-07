@@ -2153,6 +2153,12 @@
             </text>
         </message>
 
+        <message code="SCHEDULER-341">
+            <text xml:lang="en">
+                <title>Missing job to process orders</title>
+            </text>
+        </message>
+
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->
@@ -2823,6 +2829,12 @@
         <message code="SCHEDULER-983">
             <text xml:lang="en">
                 <title>Adding new file order</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-984">
+            <text xml:lang="en">
+                <title>Recovered from previous error on directory <p1/></title>
             </text>
         </message>
 

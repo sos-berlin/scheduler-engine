@@ -209,6 +209,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-338", "Order.payload is not a Variable_set" },
     { "SCHEDULER-339", "Missing file $1" },
     { "SCHEDULER-340", "File still exists. Order has been set on the blacklist" },
+    { "SCHEDULER-341", "Missing job to process orders" },
     { "SCHEDULER-900", "Scheduler $1 is starting with $2, pid=$3" },
     { "SCHEDULER-902", "state=$1" },
     { "SCHEDULER-904", "Tasks have $1s to terminate" },
@@ -287,6 +288,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-981", "File on blacklist has been removed" },
     { "SCHEDULER-982", "File has been removed, so the waiting file order is being removed too." },
     { "SCHEDULER-983", "Adding new file order" },
+    { "SCHEDULER-984", "Recovered from previous error on directory $1" },
     { "SCHEDULER-999", "Scheduler has been terminated properly" },
     {}
 };

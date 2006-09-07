@@ -236,6 +236,8 @@ struct Directory_file_order_source : //idispatch_implementation< Directory_file_
     virtual string              async_state_text_       () const                                    { return "Directory_file_order_source"; }
 
   private:
+    void                        send_mail               ( Scheduler_event::Event_code, exception* );
+
     Fill_zero                  _zero_;
     File_path                  _path;
     string                     _regex_string;
@@ -255,6 +257,7 @@ struct Directory_file_order_source : //idispatch_implementation< Directory_file_
 
 struct Order_sources //: Async_operation
 {
+    void                        finish                  ();
     void                        start                   ();
     Order*                      request_order           ();
 
@@ -321,7 +324,7 @@ struct Job_chain : Com_job_chain, Scheduler_object
     void                        check_for_removing      ();
     Prefix_log*                 log                     ()                                          { return &_log; }
 
-    void                    set_name                    ( const string& name )                      { THREAD_LOCK( _lock )  _name = name,  _log.set_prefix( "Job_chain " + _name ); }
+    void                    set_name                    ( const string& name )                      { THREAD_LOCK( _lock )  _name = name,  _log.set_prefix( obj_name() ); }
     string                      name                    ()                                          { THREAD_LOCK_RETURN( _lock, string, _name ); }
 
     void                    set_state                   ( State state )                             { _state = state; }
@@ -339,6 +342,7 @@ struct Job_chain : Com_job_chain, Scheduler_object
     Job_chain_node*             add_job                 ( Job*, const Order::State& input_state, const Order::State& output_state = error_variant, const Order::State& error_state = error_variant );
     void                        finish                  ();
 
+    Job*                        first_job               ();
     Job_chain_node*             first_node             ();
     Job_chain_node*             node_from_state         ( const Order::State& );
     Job_chain_node*             node_from_state_or_null ( const Order::State& );
@@ -364,15 +368,14 @@ struct Job_chain : Com_job_chain, Scheduler_object
 
     Order*                      request_order           ()                                          { return _order_sources.request_order(); }
 
-    // Async_operation:
-    //virtual bool                async_continue_         ( Continue_flags );
-    //virtual bool                async_finished_         () const                                    { return false; }   // nie
-    //virtual string              async_state_text_       () const                                    { return "Job_chain " + _name; }
+    string                      obj_name                ()                                          { return "Job_chain " + _name; }
 
 
     Fill_zero                  _zero_;
     bool                       _orders_recoverable;
     bool                       _load_orders_from_database;      // load_orders_from_database() muss noch gerufen werden.
+
+    Order_sources              _order_sources;
 
     typedef stdext::hash_map< string, ptr<Order> >   Blacklist_map;
     Blacklist_map              _blacklist_map;
@@ -385,7 +388,6 @@ struct Job_chain : Com_job_chain, Scheduler_object
     State                      _state;
     bool                       _visible;
 
-    Order_sources              _order_sources;
 
     typedef list< ptr<Job_chain_node> >  Chain;
     Chain                      _chain;

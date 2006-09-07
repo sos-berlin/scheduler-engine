@@ -350,8 +350,8 @@ struct Spooler : Object,
     Job_chain*                  job_chain                   ( const string& name );
     Job_chain*                  job_chain_or_null           ( const string& name );
     xml::Element_ptr            job_chains_dom_element      ( const xml::Document_ptr&, const Show_what& );
-    void                        set_job_chain_time          ( const Time& t )                   { THREAD_LOCK( _job_chain_lock )  _job_chain_time = t; }
-    Time                        job_chain_time              ()                                  { THREAD_LOCK_RETURN( _job_chain_lock, Time, _job_chain_time ); }
+  //void                        set_job_chain_time          ( const Time& t )                   { THREAD_LOCK( _job_chain_lock )  _job_chain_time = t; }
+  //Time                        job_chain_time              ()                                  { THREAD_LOCK_RETURN( _job_chain_lock, Time, _job_chain_time ); }
 
     // Prozesse
     void                        load_process_classes_from_dom( const xml::Element_ptr&, const Time& xml_mod_time );
@@ -554,7 +554,7 @@ struct Spooler : Object,
     Thread_semaphore           _job_chain_lock;
     typedef map< string, ptr<Job_chain> >  Job_chain_map;
     Job_chain_map              _job_chain_map;
-    Time                       _job_chain_time;             // Zeitstempel der letzten Änderung (letzter Aufruf von Spooler::add_job_chain()), 
+  //Time                       _job_chain_time;             // Zeitstempel der letzten Änderung (letzter Aufruf von Spooler::add_job_chain()), 
     long32                     _next_free_order_id;
 
     Thread_id                  _thread_id;                  // Haupt-Thread
