@@ -23,118 +23,13 @@ namespace spooler {
 
 //-------------------------------------------------------------------------------------------------
 
-const string scheduler_file_path_variable_name = "scheduler_file_path";
 const string default_end_state_name            = "<END_STATE>";
-const string file_order_sink_job_name          = "scheduler_file_order_sink";
-//Directory_file_order_source::Class_descriptor    Directory_file_order_source::class_descriptor ( &typelib, "Spooler.Directory_file_order_source", Directory_file_order_source::_methods );
-
-//------------------------------------------------------------------File_order_sink_module_instance
-
-struct File_order_sink_module_instance : Internal_module_instance
-{
-    File_order_sink_module_instance( Module* m ) 
-    : 
-        Internal_module_instance( m ) 
-    {
-    }
-
-
-
-    bool spooler_process()
-    {
-        bool   result = false;
-        Order* order  = _task->order();
-
-        if( !order )  return false;         // Fehler
-
-        File_path path = string_from_variant( order->param( scheduler_file_path_variable_name ) );
-        if( path != "" )
-        {
-            Job_chain_node* job_chain_node = order->job_chain_node();
-            if( !job_chain_node )  z::throw_xc( __FUNCTION__ );
-
-            if( !file_exists( path ) )
-            {
-                _log->warn( message_string( "SCHEDULER-339", path ) );
-                result = false;
-            }
-            else
-            {
-                try
-                {
-                    if( job_chain_node->_file_order_sink_move_to != "" ) 
-                    {
-                        _log->info( message_string( "SCHEDULER-980", path, job_chain_node->_file_order_sink_move_to ) );
-
-                        path.move_to( job_chain_node->_file_order_sink_move_to );
-
-                        result = true;
-                    }
-                    else
-                    if( job_chain_node->_file_order_sink_remove )                
-                    {
-                        _log->info( message_string( "SCHEDULER-979", path ) );
-
-                        path.unlink();
-
-                        result = true;
-                    }
-                    else
-                        z::throw_xc( __FUNCTION__ );
-                }
-                catch( exception& x )
-                {
-                    _log->error( x.what() );
-                }
-
-                if( result == false  &&  job_chain_node->_error_state == job_chain_node->_state )  order->add_to_blacklist();
-            }
-
-            if( result == true  &&  job_chain_node->_next_state == job_chain_node->_state )  order->remove_from_job_chain();
-        }
-
-        return result;
-    }
-};
-
-//---------------------------------------------------------------------------File_order_sink_module
-
-struct File_order_sink_module : Internal_module
-{
-    File_order_sink_module( Spooler* spooler )
-    :
-        Internal_module( spooler )
-    {
-    }
-
-
-    ptr<Module_instance> create_instance_impl()
-    { 
-        ptr<File_order_sink_module_instance> result = Z_NEW( File_order_sink_module_instance( this ) );  
-        return +result;
-    }
-};
-
-//------------------------------------------------------------------------------File_order_sink_job
-
-struct File_order_sink_job : Internal_job
-{
-    File_order_sink_job( Spooler* spooler )
-    :
-        Internal_job( file_order_sink_job_name, +Z_NEW( File_order_sink_module( spooler ) ) )
-    {
-    }
-};
 
 //-------------------------------------------------------------------------Spooler::init_job_chains
 
 void Spooler::init_job_chains()
 {
-    ptr<File_order_sink_job> file_order_sink_job = Z_NEW( File_order_sink_job( _spooler ) );
-    file_order_sink_job->set_visible( false );
-    file_order_sink_job->set_order_controlled();
-    file_order_sink_job->set_idle_timeout( 60 );
-    add_job( +file_order_sink_job, true );
+    init_file_order_sink();
 }
 
 //---------------------------------------------------------------------------Spooler::add_job_chain
@@ -150,7 +45,7 @@ void Spooler::add_job_chain( Job_chain* job_chain )
 
         _job_chain_map[lname] = job_chain;
 
-        if( !job_chain->_order_sources._order_source_list.empty() )
+        if( job_chain->_order_sources.has_order_source() )
             job_chain->first_job()->register_job_for_order_source( job_chain );  // first_job() stellt sicher, dass die Jobkette einen Job hat!
 
         job_chain->set_state( Job_chain::s_ready );
@@ -226,335 +121,27 @@ xml::Element_ptr Spooler::job_chains_dom_element( const xml::Document_ptr& docum
     return job_chains_element;
 }
 
-//-----------------------------------------Directory_file_order_source::Directory_file_order_source
-
-Directory_file_order_source::Directory_file_order_source( Job_chain* job_chain, const xml::Element_ptr& element )
-:
-    //Idispatch_implementation( &class_descriptor ),
-    Scheduler_object( job_chain->_spooler, this, type_directory_file_order_source ),
-    _zero_(this+1),
-    _job_chain(job_chain)
-{
-    _path = element.getAttribute( "directory" );
-
-    _regex_string = element.getAttribute( "regex" );
-    if( _regex_string != "" )
-    {
-        _regex.compile( _regex_string );
-    }
-}
-
-//----------------------------------------Directory_file_order_source::~Directory_file_order_source
-    
-Directory_file_order_source::~Directory_file_order_source()
-{
-    //if( _spooler->_connection_manager )  _spooler->_connection_manager->remove_operation( this );
-
-#   ifdef Z_WINDOWS
-        if( _notification_event.handle() )
-        {
-            Z_LOG( "FindCloseChangeNotification()\n" );
-            FindCloseChangeNotification( _notification_event.handle() );
-            _notification_event._handle = NULL;   // set_handle() ruft CloseHandle(), das wäre nicht gut
-        }
-#   endif
-}
-
-//-----------------------------------------------------------------Directory_file_order_source::log
-    
-Prefix_log* Directory_file_order_source::log()
-{ 
-    return _job_chain->log(); 
-}
-
-//---------------------------------------------------------------Directory_file_order_source::start
-
-void Directory_file_order_source::start()
-{
-    _job_chain->first_job();  // Sicherstellen, das sich ein Job anschließt
-
-    // Verzeichnisüberwachung starten
-
-    set_async_manager( _spooler->_connection_manager );
-}
-
-//-------------------------------------------------------Directory_file_order_source::request_order
-
-Order* Directory_file_order_source::request_order()
-{
-    Order*       result            = NULL;
-    Order_queue* first_order_queue = _job_chain->first_job()->order_queue();
-
-    if( !first_order_queue->has_order( Time(0) )  &&  ( _first || !_wait_for_notification_event ) )
-    {
-        _first = false;
-
-        try
-        {
-            hash_set<string>            removed_blacklist_files;
-            hash_set<string>            virgin_known_files;
-            vector< ptr<z::File_info> > new_files;
-            bool                        need_event = true;
-
-            log()->info( "Watching " + _path );   // TEST
-
-            new_files.reserve( 1000 );
-
-            Z_FOR_EACH( Job_chain::Blacklist_map, _job_chain->_blacklist_map, it )  removed_blacklist_files.insert( it->first );
-
-            for( Directory_watcher::Directory_reader dir ( _path, _regex_string == ""? NULL : &_regex );; )
-            {
-                ptr<z::File_info> file_info = dir.get();
-                if( !file_info )  break;
-
-                string path = file_info->path();
-
-                if( Order* order = _job_chain->order_or_null( path ) ) 
-                {
-                    removed_blacklist_files.erase( path );
-                    if( order->is_virgin() )  virgin_known_files.insert( path );
-                }
-                else
-                {
-                    file_info->last_write_time();     // last_write_time füllen für sort, quick_last_write_less()
-                    new_files.push_back( file_info );
-                }
-            }
-
-
-            if( _directory_error  &&  _spooler->_mail_on_error )
-            {
-                log()->info( message_string( "SCHEDULER-984" ) );
-                send_mail( Scheduler_event::evt_file_order_source_recovered, NULL );
-            }
-
-            _directory_error = false;
-
-
-            // removed_blacklist_files: 
-            // Aufträge in der Blacklist, deren Dateien nicht mehr da sind, entfernen
-
-            Z_FOR_EACH( hash_set<string>, removed_blacklist_files, it ) 
-            {
-                Job_chain::Blacklist_map::iterator it2 = _job_chain->_blacklist_map.find( *it );
-                if( it2 != _job_chain->_blacklist_map.end() )
-                {
-                    Order* removed_file_order = it2->second;
-                    removed_file_order->log()->info( message_string( "SCHEDULER-981" ) );   // "File has been removed"
-                    removed_file_order->remove_from_job_chain();   
-                }
-            }
-
-
-            // virgin_known_files:
-            // Jungfräuliche Aufträge, denen die Datei abhanden gekommen sind, entfernen
-
-            Order_queue::Queue* queue = &first_order_queue->_queue;    // Zugriff mit Ausnahmegenehmigung. In _setback_queue verzögerte werden nicht beachtet
-            for( Order_queue::Queue::iterator it = queue->begin(); it != queue->end(); )
-            {
-                Order* order = *it++;  // Hier schon weiterschalten, bevor it durch remove_from_job_chain ungültig wird
-
-                if( order->is_virgin()  &&  virgin_known_files.find( order->string_id() ) == virgin_known_files.end()  &&  order->is_file_order() )
-                {
-                    order->log()->info( message_string( "SCHEDULER-982" ) );
-                    order->remove_from_job_chain();
-                }
-            }
-
-
-            // new_files:
-            // Neue Dateien als Aufträge einfügen. Die ältesten zuerst
-
-            sort( new_files.begin(), new_files.end(), zschimmer::File_info::quick_last_write_less );
-
-            for( size_t i = 0; i < new_files.size(); i++ )
-            {
-                string path = new_files[ i ]->path();
-
-                ptr<Order> order = new Order( _spooler );
-                order->set_file_path( new_files[ i ]->path() );
-                log()->info( message_string( "SCHEDULER-983", order->obj_name() ) );
-                order->add_to_job_chain( _job_chain );
-                need_event = false;
-                if( !result )  result = order;      // Der erste, sofort ausführbare Auftrag
-            }
-
-
-            if( need_event )
-            {
-#               ifdef Z_WINDOWS
-
-                    if( !_notification_event.handle() )
-                    {
-                        Z_LOG( "FindFirstChangeNotification( \"" << _path.path() << "\", FALSE, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME );\n" );
-                        HANDLE h = FindFirstChangeNotification( _path.path().c_str(), FALSE, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME );
-
-                        if( h == INVALID_HANDLE_VALUE )  z::throw_mswin( "FindFirstChangeNotification", _path.path() );
-
-                        _notification_event.set_handle( h );
-                        _notification_event.set_name( "FindFirstChangeNotification " + _path );
-                        add_to_event_manager( _spooler->_connection_manager );
-
-                        _wait_for_notification_event = true;
-                        _first = true;    // Am Start das Verzeichnis auslesen
-                    }
-                    else
-                    {
-                        Z_LOG( "FindNextChangeNotification()\n" );
-                        BOOL ok = FindNextChangeNotification( _notification_event.handle() );
-                        if( !ok )  throw_mswin_error( "FindNextChangeNotification" );
-                    }
-
-#                else
-
-                    log()->info( "set_async_next_gmtime()" );
-                    set_async_next_gmtime( double_from_gmtime() + 10 );     // Erstmal alle 10 Sekunden
-
-#               endif
-            }
-        }
-        catch( exception& x )
-        {
-            log()->error( x.what() );
-
-            if( !_directory_error  &&  _spooler->_mail_on_error )  send_mail( Scheduler_event::evt_file_order_source_error, &x );
-            _directory_error = true;
-
-            set_async_next_gmtime( double_from_gmtime() + 10 );     // Erstmal alle 10 Sekunden
-        }
-
-
-        if( result )  assert( result->is_immediately_processable() );
-    }
-
-    return result;
-}
-
-//-----------------------------------------------------------Directory_file_order_source::send_mail
-
-void Directory_file_order_source::send_mail( Scheduler_event::Event_code event_code, exception* x )
-{
-    try
-    {                                   
-        switch( event_code )
-        {
-            case Scheduler_event::evt_file_order_source_error:
-            {
-                assert( x );
-
-                Scheduler_event scheduler_event ( event_code, log_error, this );
-
-                scheduler_event.set_message( x->what() );
-                scheduler_event.set_error( *x );
-                scheduler_event.mail()->set_from_name( _spooler->name() + ", " + _job_chain->obj_name() );    // "Scheduler host:port -id=xxx Job chain ..."
-                scheduler_event.mail()->set_subject( string("ERROR ") + x->what() );
-
-                S body;
-                body << Sos_optional_date_time::now().as_string() << "\n";
-                body << "\n";
-                body << _job_chain->obj_name() << "\n";
-                body << "Scheduler -id=" << _spooler->id() << "  host=" << _spooler->_hostname << "\n";
-                body << "\n";
-                body << "\n&lt;file_order_source directory=\"" << _path << "\"/> doesn't work because of following error:\n";
-                body << x->what() << "\n";
-                body << "\n";
-                body << "After the directory is accessible again, you will be notified\n";
-
-                scheduler_event.mail()->set_body( body );
-                scheduler_event.send_mail( _spooler->_mail_defaults );
-
-                break;
-            }
-
-            case Scheduler_event::evt_file_order_source_recovered:
-            {
-                string msg = message_string( "SCHEDULER-984" );
-                Scheduler_event scheduler_event ( event_code, log_info, this );
-
-                scheduler_event.set_message( msg );
-                scheduler_event.mail()->set_from_name( _spooler->name() + ", " + _job_chain->obj_name() );    // "Scheduler host:port -id=xxx Job chain ..."
-                //scheduler_event.mail()->set_subject( ... );
-
-                S body;
-                body << Sos_optional_date_time::now().as_string() << "\n\n" << _job_chain->obj_name() << "\n";
-                body << "Scheduler -id=" << _spooler->id() << "  host=" << _spooler->_hostname << "\n\n";
-                body << msg << "\n";
-
-                scheduler_event.mail()->set_body( body );
-                scheduler_event.send_mail( _spooler->_mail_defaults );
-
-                break;
-            }
-
-            default: z::throw_xc( __FUNCTION__ );
-        }
-    }
-    catch( const exception& x  ) { log()->warn( x.what() ); }
-}
-
-//-----------------------------------------------------Directory_file_order_source::async_continue_
-
-bool Directory_file_order_source::async_continue_( Async_operation::Continue_flags flags )
-{
-#   ifdef Z_WINDOWS
-        _notification_event.reset();
-        _wait_for_notification_event = false;
-#   endif
-
-
-    request_order();
-
-
-/*#   ifdef Z_WINDOWS
-        if( !this->_directory_error )
-        {
-            try
-            {
-                Z_LOG( "FindNextChangeNotification()\n" );
-                BOOL ok = FindNextChangeNotification( _notification_event.handle() );
-                if( !ok )  throw_mswin_error( "FindNextChangeNotification" );
-
-                _wait_for_notification_event = true;
-            }
-            catch( exception& x )
-            {
-                log()->error( x.what() );
-                // TODO TODO TODO TODO
-                //handle_watch_error( x );
-            }
-        }
-#   endif*/
-
-    return true;
-}
-
-//----------------------------------------------------------------------------Order_sources::finish
-
-void Order_sources::finish()
-{
-}
-
 //-----------------------------------------------------------------------------Order_sources::start
 
 void Order_sources::start()
 {
     Z_FOR_EACH( Order_source_list, _order_source_list, it )
     {
-        Directory_file_order_source* order_source = *it;
+        Order_source* order_source = *it;
         order_source->start();
     }
 }
 
 //---------------------------------------------------------------------Order_sources::request_order
 
-Order* Order_sources::request_order()
+Order* Order_sources::request_order( const string& cause )
 {
     Order* result = NULL;
 
     Z_FOR_EACH( Order_source_list, _order_source_list, it )
     {
-        Directory_file_order_source* order_source = *it;
-        result = order_source->request_order();
+        Order_source* order_source = *it;
+        result = order_source->request_order( cause );
         if( result )  break;
     }
 
@@ -563,24 +150,6 @@ Order* Order_sources::request_order()
     return result;
 }
 
-//-------------------------------------------------------------------Order_sources::async_continue_
-/*
-bool Order_sources::async_continue_( Async_operation::Continue_flags flags )
-{
-    Z_FOR_EACH( Order_source_list, _order_source_list, it )
-    {
-        Directory_file_order_source* order_source = *it;
-        order_source->read_path();
-        if( ok ) 
-        {
-            _job_chain->add_order( path );
-            return true;
-        }
-    }
-
-    return false;
-}
-*/
 //-------------------------------------------------------------xml::Element_ptr Job_chain_node::xml
 
 xml::Element_ptr Job_chain_node::dom_element( const xml::Document_ptr& document, const Show_what& show, Job_chain* job_chain )
@@ -688,7 +257,8 @@ void Job_chain::set_dom( const xml::Element_ptr& element )
 
         if( e.nodeName_is( "file_order_source" ) )
         {
-            _order_sources._order_source_list.push_back( Z_NEW( Directory_file_order_source( this, e ) ) );
+            ptr<Directory_file_order_source> d = Z_NEW( Directory_file_order_source( this, e ) );
+            _order_sources._order_source_list.push_back( +d );
         }
         else
         if( e.nodeName_is( "file_order_sink" ) )
@@ -969,8 +539,6 @@ void Job_chain::finish()
             if( !n->_error_state.is_error() )  n->_error_node  = node_from_state( n->_error_state );
                                          else  n->_error_state = empty_variant;
         }
-
-        _order_sources.finish();
 
         if( zschimmer::Log_ptr log = "" )
         {

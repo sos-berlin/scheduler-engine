@@ -388,8 +388,10 @@
             <xsd:sequence>
                 <xsd:element name="file_order_source" minOccurs="0" maxOccurs="unbounded">
                     <xsd:complexType>
-                        <xsd:attribute name="directory"     type="String" use="required"/>
-                        <xsd:attribute name="regex"         type="Name"/>
+                        <xsd:attribute name="directory"         type="String" use="required"/>
+                        <xsd:attribute name="regex"             type="Name"/>
+                        <xsd:attribute name="delay_after_error" type="xsd:positiveInteger"/>
+                        <xsd:attribute name="repeat"            type="xsd:positiveInteger"/>
                     </xsd:complexType>
                 </xsd:element>
 

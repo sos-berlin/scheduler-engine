@@ -210,61 +210,27 @@ struct Order : Com_order,
     ptr<http::Operation>       _http_operation;
 };
 
-//----------------------------------------------------------------------Directory_file_order_source
 
-struct Directory_file_order_source : //idispatch_implementation< Directory_file_order_source, spooler_com::Idirectory_file_order_source >,
-                                     Event_operation, Scheduler_object
+//-------------------------------------------------------------------------------------Order_source
+
+struct Order_source : Scheduler_object, Event_operation
 {
-    enum State
-    {
-        s_none,
-        s_order_requested
-    };
+                                Order_source            ( Spooler* sp, Scheduler_object::Type_code t ) : Scheduler_object(sp,static_cast<Object*>(this),t) {}
 
-
-    explicit                    Directory_file_order_source( Job_chain*, const xml::Element_ptr& );
-                               ~Directory_file_order_source();
-
-    virtual Prefix_log*         log                     ();
-    void                        start                   ();
-    Order*                      request_order           ();
-
-    // Async_operation:
-    virtual Socket_event*       async_event             ()                                          { return &_notification_event; }
-    virtual bool                async_continue_         ( Continue_flags );
-    virtual bool                async_finished_         () const                                    { return false; }
-    virtual string              async_state_text_       () const                                    { return "Directory_file_order_source"; }
-
-  private:
-    void                        send_mail               ( Scheduler_event::Event_code, exception* );
-
-    Fill_zero                  _zero_;
-    File_path                  _path;
-    string                     _regex_string;
-    Regex                      _regex;
-    Job_chain*                 _job_chain;
-    //bool                       _order_requested;
-    bool                       _directory_error;
-    bool                       _first;
-    Event                      _notification_event;             // Nur Windows
-    bool                       _wait_for_notification_event;    // Nur Windows. Verzeichnis erst lesen, wenn _notification_event signalisiert
+    virtual void                start                   ()                                          = 0;
+    virtual Order*              request_order           ( const string& cause )                     = 0;
 };
 
 //------------------------------------------------------------------------------------Order_sources
 
-struct Order_sources //: Async_operation
+struct Order_sources 
 {
-    void                        finish                  ();
     void                        start                   ();
-    Order*                      request_order           ();
-
-    // Async_operation:
-  //virtual bool                async_continue_         ( Continue_flags );
-  //virtual bool                async_finished_         () const                                    { return false; }
-  //virtual string              async_state_text_       () const                                    { return "Order_sources"; }
+    Order*                      request_order           ( const string& cause );
+    bool                        has_order_source        ()                                          { return !_order_source_list.empty(); }
 
 
-    typedef list< ptr<Directory_file_order_source> >  Order_source_list;
+    typedef list< ptr<Order_source> >  Order_source_list;
     Order_source_list          _order_source_list;
 };
 
@@ -363,7 +329,7 @@ struct Job_chain : Com_job_chain, Scheduler_object
     void                    set_dom                     ( const xml::Element_ptr& );
     xml::Element_ptr            dom_element             ( const xml::Document_ptr&, const Show_what& );
 
-    Order*                      request_order           ()                                          { return _order_sources.request_order(); }
+    Order*                      request_order           ( const string& cause )                     { return _order_sources.request_order( cause ); }
 
     string                      obj_name                ()                                          { return "Job_chain " + _name; }
 
@@ -426,7 +392,6 @@ struct Order_queue : Com_order_queue
 
     void                        close                   ();
     void                        add_order               ( Order*, Do_log = do_log );
-  //Order*                      add_order               ( const Order::Payload& );
     void                        remove_order            ( Order* );
     int                         order_count             ( const Job_chain* = NULL );
     bool                        empty                   ()                                          { return _queue.empty(); }
@@ -459,11 +424,6 @@ struct Order_queue : Com_order_queue
     int                        _lowest_priority;        // Zur Optimierung
     int                        _highest_priority;       // Zur Optimierung
     bool                       _has_users_id;           // D.h. id auf Eindeutigkeit prüfen. Bei selbst generierten Ids überflüssig. Zur Optimierung.
-
-
-  //typedef map<Order::Id, Queue::iterator >   Id_map;
-  //Id_map                                    _id_map;
-
 };
 
 //-------------------------------------------------------------------------------------------------

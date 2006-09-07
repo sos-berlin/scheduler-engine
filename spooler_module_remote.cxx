@@ -74,7 +74,7 @@ Async_operation* Remote_module_instance_proxy::close__start()
     
     if( _remote_instance )
     {
-        if( _process->connected() )
+        if( _process  &&  _process->connected() )
         {
             LOGI( "*** Remote_module_instance_proxy::close(): _remote_instance->release()\n" );
 

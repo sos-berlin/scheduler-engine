@@ -790,6 +790,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\spooler_order_file.cxx"
+				>
+			</File>
+			<File
 				RelativePath=".\spooler_process.cxx"
 				>
 			</File>

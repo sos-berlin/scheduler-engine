@@ -230,7 +230,7 @@ struct Job : Object,
     Time                        get_delay_order_after_setback( int setback_count );
     void                        set_max_order_setbacks      ( int n )                               { _log->debug9( "max_order_setbacks"+as_string(n) ); _max_order_setbacks = n; }
     int                         max_order_setbacks          () const                                { return _max_order_setbacks; }
-    Order*                      request_order               ();                                     // Fordert einen Auftrag für die _order_queue an
+    Order*                      request_order               ( const string& cause );                // Fordert einen Auftrag für die _order_queue an
     void                        register_job_for_order_source ( Job_chain* );
     void                        unregister_job_for_order_source( Job_chain* );
     void                        load_tasks_from_db          ();

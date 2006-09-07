@@ -1169,7 +1169,7 @@ bool Task::do_something()
                                     {
                                         if( !take_order( now ) )
                                         {
-                                            if( Order* order = _job->request_order() )
+                                            if( Order* order = _job->request_order( obj_name() ) )
                                             {
                                                 set_order( order );
                                             }

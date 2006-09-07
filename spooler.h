@@ -145,6 +145,7 @@ namespace http
 #include "spooler_module_process.h"
 #include "spooler_history.h"
 #include "spooler_order.h"
+#include "spooler_order_file.h"
 #include "spooler_remote.h"
 #include "spooler_job.h"
 #include "spooler_subprocess.h"
@@ -345,6 +346,7 @@ struct Spooler : Object,
     xml::Element_ptr            jobs_dom_element            ( const xml::Document_ptr&, const Show_what& );
 
     void                        init_job_chains             ();                                 // In spooler_order.cxx
+    void                        init_file_order_sink        ();                                 // In spooler_order_file.cxx
     void                        load_job_chains_from_xml    ( const xml::Element_ptr& );
     void                        add_job_chain               ( Job_chain* );
     Job_chain*                  job_chain                   ( const string& name );

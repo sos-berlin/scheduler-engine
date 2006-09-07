@@ -1531,14 +1531,14 @@ void Job::unregister_job_for_order_source( Job_chain* job_chain )
 
 //-------------------------------------------------------------------------------Job::request_order
 
-Order* Job::request_order()
+Order* Job::request_order( const string& cause )
 {
     Order* result = NULL;
 
     Z_FOR_EACH( Job_chain_list, _order_source_job_chain_list, it )
     {
         Job_chain* job_chain = *it;
-        result = job_chain->request_order();
+        result = job_chain->request_order( cause );
         if( result )  break;
     }
 
@@ -1695,7 +1695,7 @@ ptr<Task> Job::task_to_start()
         if( !cause  &&  _order_queue )
         {
             order = _order_queue->first_order( now );
-            if( !order )  order = request_order();
+            if( !order )  order = request_order( obj_name() );
             if( order )
             {
                 bool there_is_another_task_ready = false;
