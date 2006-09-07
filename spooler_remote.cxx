@@ -84,10 +84,10 @@ bool Xml_client_connection::async_continue_( Continue_flags flags )
             case s_initial:
                 if( !( flags & cont_next_gmtime_reached ) )  return false;
 
-                _socket_operation = Z_NEW( Buffered_socket_operation( _socket_manager ) );
+                _socket_operation = Z_NEW( Buffered_socket_operation );
 
+                _socket_operation->add_to_socket_manager( _socket_manager );
                 _socket_operation->set_async_parent( this );
-                //_socket_operation->add_to_socket_manager( _socket_manager );
 
                 _socket_operation->connect__start( _host_and_port );
                 _socket_operation->set_keepalive( true );

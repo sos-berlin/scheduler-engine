@@ -2810,10 +2810,22 @@
         
         <message code="SCHEDULER-981">
             <text xml:lang="en">
-                <title>File has been removed</title>
+                <title>File on blacklist has been removed</title>
             </text>
         </message>
-        
+
+        <message code="SCHEDULER-982">
+            <text xml:lang="en">
+                <title>File has been removed, so the waiting file order is being removed too.</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-983">
+            <text xml:lang="en">
+                <title>Adding new file order</title>
+            </text>
+        </message>
+
         <message code="SCHEDULER-999">
             <text xml:lang="de">
                 <title>Scheduler ordentlich beendet</title>

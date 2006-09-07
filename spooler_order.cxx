@@ -15,6 +15,8 @@
 #include "spooler.h"
 #include "../zschimmer/z_sql.h"
 
+using stdext::hash_set;
+using stdext::hash_map;
 
 namespace sos {
 namespace spooler {
@@ -246,6 +248,15 @@ Directory_file_order_source::Directory_file_order_source( Job_chain* job_chain, 
 Directory_file_order_source::~Directory_file_order_source()
 {
     //if( _spooler->_connection_manager )  _spooler->_connection_manager->remove_operation( this );
+
+#   ifdef Z_WINDOWS
+        if( _notification_event.handle() )
+        {
+            Z_LOG( "FindCloseChangeNotification()\n" );
+            FindCloseChangeNotification( _notification_event.handle() );
+            _notification_event._handle = NULL;   // set_handle() ruft CloseHandle(), das wäre nicht gut
+        }
+#   endif
 }
 
 //-----------------------------------------------------------------Directory_file_order_source::log
@@ -262,16 +273,25 @@ void Directory_file_order_source::start()
     // Verzeichnisüberwachung starten
 
 #   ifdef Z_WINDOWS
-        _directory_watcher = Z_NEW( Directory_watcher( _job_chain->log() ) );
 
-        _directory_watcher->watch_directory( _path.path() );
-        _directory_watcher->set_name( "<file_order_source directory=\"" + _path + "\" regex=\"" + _regex_string + "\"/>" );
+        Z_LOG( "FindFirstChangeNotification( \"" << _path.path() << "\", FALSE, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME );\n" );
+        HANDLE h = FindFirstChangeNotification( _path.path().c_str(), FALSE, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME );
 
-        //? _directory_watcher->add_to( &_spooler->_wait_handles );
+        if( h == INVALID_HANDLE_VALUE )  z::throw_mswin( "FindFirstChangeNotification", _path.path() );
+
+        _notification_event.set_handle( h );
+        _notification_event.set_name( "FindFirstChangeNotification " + _path );
+        add_to_event_manager( _spooler->_connection_manager );
+
+        _wait_for_notification_event = true;
+        _first = true;    // Am Start das Verzeichnis auslesen
+
+#    else
+
+        set_async_manager( _spooler->_connection_manager );
+
 #   endif
 
-    //_spooler->_connection_manager->add_operation( this );
-    set_async_manager( _spooler->_connection_manager );
 }
 
 //-------------------------------------------------------Directory_file_order_source::request_order
@@ -280,74 +300,115 @@ Order* Directory_file_order_source::request_order()
 {
     Order* result = NULL;
 
-    try
+    if( !_wait_for_notification_event || _first )   // Unix: Immer
     {
-        //if( !_order_requested )
+        _first = false;
+
+        try
         {
-            set<string>                 removed_files;
-            vector< ptr<z::File_info> > file_infos;
+            hash_set<string>            removed_blacklist_files;
+            hash_set<string>            virgin_known_files;
+            vector< ptr<z::File_info> > new_files;
 
             log()->info( "Watching " + _path );   // TEST
 
-            file_infos.reserve( 1000 );
+            new_files.reserve( 1000 );
 
-            Z_FOR_EACH( Job_chain::Blacklist, _job_chain->_blacklist, it )  removed_files.insert( (*it)->string_id() );
+            Z_FOR_EACH( Job_chain::Blacklist_map, _job_chain->_blacklist_map, it )  removed_blacklist_files.insert( it->first );
 
-            Directory_watcher::Directory_reader dir ( _path, _regex_string == ""? NULL : &_regex );
-            while(1)
+            for( Directory_watcher::Directory_reader dir ( _path, _regex_string == ""? NULL : &_regex );; )
             {
                 ptr<z::File_info> file_info = dir.get();
                 if( !file_info )  break;
-                file_infos.push_back( file_info );
-                file_info->last_write_time();     // last_write_time füllen für sort, quick_compare_last_write()
-                removed_files.erase( file_info->path() );
+
+                string path = file_info->path();
+
+                if( Order* order = _job_chain->order_or_null( path ) ) 
+                {
+                    removed_blacklist_files.erase( path );
+                    if( order->is_virgin() )  virgin_known_files.insert( path );
+                }
+                else
+                {
+                    file_info->last_write_time();     // last_write_time füllen für sort, quick_last_write_less()
+                    new_files.push_back( file_info );
+                }
             }
 
-            Z_FOR_EACH( set<string>, removed_files, it ) 
+
+            if( _directory_error )
             {
-                Z_FOR_EACH( Job_chain::Blacklist, _job_chain->_blacklist, it )  
+                _directory_error = false;
+                // Hier eMail senden!
+            }
+
+
+            // removed_blacklist_files: 
+            // Aufträge in der Blacklist, deren Dateien nicht mehr da sind, entfernen
+
+            Z_FOR_EACH( hash_set<string>, removed_blacklist_files, it ) 
+            {
+                Job_chain::Blacklist_map::iterator it2 = _job_chain->_blacklist_map.find( *it );
+                if( it2 != _job_chain->_blacklist_map.end() )
                 {
-                    if( Order* removed_file_order = *it )
+                    Order* removed_file_order = it2->second;
+                    removed_file_order->log()->info( message_string( "SCHEDULER-981" ) );   // "File has been removed"
+                    removed_file_order->remove_from_job_chain();   
+                }
+            }
+
+
+            // virgin_known_files:
+            // Jungfräuliche Aufträge, denen die Datei abhanden gekommen sind, entfernen
+
+            if( Job* first_job = _job_chain->first_node()->_job )
+            {
+                Order_queue::Queue* order_queue = &first_job->order_queue()->_queue;    // Zugriff mit Ausnahmegenehmigung. In _setback_queue verzögerte werden nicht beachtet
+                for( Order_queue::Queue::iterator it = order_queue->begin(); it != order_queue->end(); )
+                {
+                    Order* order = *it++;  // Hier schon weiterschalten, bevor it durch remove_from_job_chain ungültig wird
+
+                    if( order->is_virgin()  &&  virgin_known_files.find( order->string_id() ) == virgin_known_files.end()  &&  order->is_file_order() )
                     {
-                        removed_file_order->log()->info( message_string( "SCHEDULER-981" ) );   // "File has been removed"
-                        removed_file_order->remove_from_job_chain();   
-                        break;
+                        order->log()->info( message_string( "SCHEDULER-982" ) );
+                        order->remove_from_job_chain();
                     }
                 }
             }
 
-            sort( file_infos.begin(), file_infos.end(), zschimmer::File_info::quick_last_write_less );
 
-            for( size_t i = 0; i < file_infos.size(); i++ )
+            // new_files:
+            // Neue Dateien als Aufträge einfügen. Die ältesten zuerst
+
+            sort( new_files.begin(), new_files.end(), zschimmer::File_info::quick_last_write_less );
+
+            for( size_t i = 0; i < new_files.size(); i++ )
             {
-                string path = file_infos[ i ]->path();
+                string path = new_files[ i ]->path();
 
-                if( !_job_chain->has_order_id( path ) ) 
-                {
-                    ptr<Order> order = new Order( _spooler );
-                    order->set_file_path( file_infos[ i ]->path() );
-                    order->add_to_job_chain( _job_chain );
-                    if( !result )  result = order;      // Der erste, sofort ausführbare Auftrag
-                }
+                ptr<Order> order = new Order( _spooler );
+                order->set_file_path( new_files[ i ]->path() );
+                log()->info( message_string( "SCHEDULER-983", order->obj_name() ) );
+                order->add_to_job_chain( _job_chain );
+                if( !result )  result = order;      // Der erste, sofort ausführbare Auftrag
+            }
+        }
+        catch( exception& x )
+        {
+            log()->error( x.what() );
+
+            if( !_directory_error )
+            {
+                // Hier eMail verschicken!
+                _directory_error = true;
             }
         }
 
-        if( result )
-        {
-            _order_requested = false;
-            assert( result->is_immediately_processable() );
-        }
-        else
-        {
-            _order_requested = true;
-            set_async_next_gmtime( double_from_gmtime() + 10 );     // Erstmal alle 10 Sekunden
-        }
-    }
-    catch( exception& x )
-    {
-        log()->error( x.what() );
-        // _error_text = x.what();
-        // Hier eMail verschicken!
+#       ifndef Z_WINDOWS
+            set_async_next_gmtime( double_from_gmtime() + 60 );     // Erstmal alle 10 Sekunden
+#       endif
+
+        if( result )  assert( result->is_immediately_processable() );
     }
 
     return result;
@@ -357,20 +418,36 @@ Order* Directory_file_order_source::request_order()
 
 bool Directory_file_order_source::async_continue_( Async_operation::Continue_flags flags )
 {
-    bool result;
+#   ifdef Z_WINDOWS
+        _notification_event.reset();
+        _wait_for_notification_event = false;
+#   endif
 
-    if( _order_requested )
-    {
-        request_order();
-        result = true;
-    }
-    else
-    {
-        set_async_next_gmtime( double_time_max );      // Das sollte nicht passieren
-        result = false;
-    }
 
-    return result;
+    request_order();
+
+
+#   ifdef Z_WINDOWS
+        if( !this->_directory_error )
+        {
+            try
+            {
+                Z_LOG( "FindNextChangeNotification()\n" );
+                BOOL ok = FindNextChangeNotification( _notification_event.handle() );
+                if( !ok )  throw_mswin_error( "FindNextChangeNotification" );
+
+                _wait_for_notification_event = true;
+            }
+            catch( exception& x )
+            {
+                log()->error( x.what() );
+                // TODO TODO TODO TODO
+                //handle_watch_error( x );
+            }
+        }
+#   endif
+
+    return true;
 }
 
 //-----------------------------------------------------------------------------Order_sources::start
@@ -495,7 +572,7 @@ void Job_chain::close()
 {
     Z_LOGI2( "scheduler", *this << ".close()\n" );
     remove_all_pending_orders( true );
-    _blacklist.erase( _blacklist.begin(), _blacklist.end() );
+    _blacklist_map.clear();
     set_state( s_closed );
 }
 
@@ -876,10 +953,12 @@ ptr<Order> Job_chain::order( const Order::Id& id )
 
 //-------------------------------------------------------------------------Job_chain::order_or_null
 
-ptr<Order> Job_chain::order_or_null( const Order::Id& id )
+ptr<Order> Job_chain::order_or_null( const Order::Id& order_id )
 {
-    //THREAD_LOCK( _lock )
-    {
+    Order_map::iterator it = _order_map.find( Order::string_id( order_id ) );
+    return it != _order_map.end()? it->second : NULL;
+
+    /*
         for( Chain::iterator it = _chain.begin(); it != _chain.end(); it++ )
         {
             Job* job = (*it)->_job;
@@ -889,9 +968,7 @@ ptr<Order> Job_chain::order_or_null( const Order::Id& id )
                 if( result )  return result;
             }
         }
-    }
-
-    return NULL;
+    */
 }
 
 //-----------------------------------------------------------------------------Job_chain::has_order
@@ -911,8 +988,8 @@ bool Job_chain::has_order() const
 
 int Job_chain::order_count()
 {
-    int       result = 0;
-    set<Job*> jobs;             // Jobs können (theoretisch) doppelt vorkommen, sollen aber nicht doppelt gezählt werden.
+    int            result = 0;
+    hash_set<Job*> jobs;             // Jobs können (theoretisch) doppelt vorkommen, sollen aber nicht doppelt gezählt werden.
 
     //THREAD_LOCK( _lock )
     {
@@ -965,7 +1042,8 @@ void Job_chain::unregister_order( Order* order )
 
 void Job_chain::add_to_blacklist( Order* order )
 {
-    _blacklist.push_back( order );
+    _blacklist_map[ order->string_id() ] = order;
+    //_blacklist.push_back( order );
     order->_on_blacklist = true;
 }
 
@@ -975,15 +1053,7 @@ void Job_chain::remove_from_blacklist( Order* order )
 {
     if( order->_on_blacklist )
     {
-        Z_FOR_EACH( Blacklist, _blacklist, it )
-        {
-            if( *it == order )  
-            {
-                _blacklist.erase( it );
-                break;
-            }
-        }
-
+        _blacklist_map.erase( order->string_id() );
         order->_on_blacklist = false;
     }
 }

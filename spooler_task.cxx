@@ -584,7 +584,7 @@ void Task::set_error_xc( const zschimmer::Xc& x )
             s << "all";
         else
         {
-            Z_FOR_EACH( set<int>, _job->_ignore_signals_set, it )
+            Z_FOR_EACH( stdext::hash_set<int>, _job->_ignore_signals_set, it )
             {
                 if( s.length() > 0 )  s << " ";
                 s << signal_name_from_code( *it );

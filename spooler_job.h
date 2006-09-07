@@ -386,7 +386,7 @@ struct Job : Object,
     bool                       _machine_resumable;          // Test
     bool                       _stop_on_error;              // Nach Task-Fehler Job stoppen (default)
     bool                       _ignore_every_signal;        // Nur Unix: Nach Beendigung mit Signal (kill, Absturz) den Job nicht stoppen 
-    std::set<int>              _ignore_signals_set;
+    stdext::hash_set<int>      _ignore_signals_set;
 
     bool                       _log_append;                 // Jobprotokoll fortschreiben <job log_append=(yes|no)>
 

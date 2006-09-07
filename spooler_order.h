@@ -213,7 +213,7 @@ struct Order : Com_order,
 //----------------------------------------------------------------------Directory_file_order_source
 
 struct Directory_file_order_source : //idispatch_implementation< Directory_file_order_source, spooler_com::Idirectory_file_order_source >,
-                                     Async_operation, Scheduler_object
+                                     Event_operation, Scheduler_object
 {
     enum State
     {
@@ -230,6 +230,7 @@ struct Directory_file_order_source : //idispatch_implementation< Directory_file_
     Order*                      request_order           ();
 
     // Async_operation:
+    virtual Socket_event*       async_event             ()                                          { return &_notification_event; }
     virtual bool                async_continue_         ( Continue_flags );
     virtual bool                async_finished_         () const                                    { return false; }
     virtual string              async_state_text_       () const                                    { return "Directory_file_order_source"; }
@@ -239,9 +240,15 @@ struct Directory_file_order_source : //idispatch_implementation< Directory_file_
     File_path                  _path;
     string                     _regex_string;
     Regex                      _regex;
-    ptr<Directory_watcher>     _directory_watcher;
     Job_chain*                 _job_chain;
-    bool                       _order_requested;
+    //bool                       _order_requested;
+    bool                       _directory_error;
+    bool                       _wait_for_notification_event;     // Nur Windows. Verzeichnis erst lesen, wenn _notification_event signalisiert
+    bool                       _first;
+
+#   ifdef Z_WINDOWS
+        Event                  _notification_event;
+#   endif
 };
 
 //------------------------------------------------------------------------------------Order_sources
@@ -367,8 +374,8 @@ struct Job_chain : Com_job_chain, Scheduler_object
     bool                       _orders_recoverable;
     bool                       _load_orders_from_database;      // load_orders_from_database() muss noch gerufen werden.
 
-    typedef list <ptr<Order> >  Blacklist;
-    Blacklist                  _blacklist;
+    typedef stdext::hash_map< string, ptr<Order> >   Blacklist_map;
+    Blacklist_map              _blacklist_map;
 
   private:
     friend struct               Order;
@@ -439,6 +446,8 @@ struct Order_queue : Com_order_queue
     Spooler*                   _spooler;
 
   private:
+    friend struct               Directory_file_order_source;        // Darf _queue lesen
+
     Thread_semaphore           _lock;
     Job*                       _job;
     Prefix_log*                _log;
