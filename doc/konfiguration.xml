@@ -263,7 +263,26 @@
 
         &lt;<a class="silent" href="xml/job_chains.xml">job_chains</a>>
             &lt;<a class="silent" href="xml/job_chain.xml">job_chain</a> name="…"/>
-                &lt;<a class="silent" href="xml/job_chain_node.xml">job_chain_node</a>  state="…"  name="…"  job="…"  next_state="…"  error_state="…"/>
+                &lt;<a class="silent" href="xml/file_order_source.xml">file_order_source</a> 
+                    directory         = "…"  
+                    regex             = "…"  
+                    max               = "…"  
+                    repeat            = "…"  
+                    delay_after_error = "…"
+                />
+                …
+                &lt;<a class="silent" href="xml/job_chain_node.xml">job_chain_node</a>
+                    state       = "…"  
+                    name        = "…"  
+                    job         = "…"  
+                    next_state  = "…"  
+                    error_state = "…"
+                />
+                …
+                &lt;<a class="silent" href="xml/file_order_sink.xml">file_order_sink</a> 
+                    remove      = "yes"
+                    move_to     = "…"
+                />
                 …
             &lt;/job_chain>
             …

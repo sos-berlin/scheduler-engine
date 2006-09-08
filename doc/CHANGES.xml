@@ -10,6 +10,24 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2006-09-08" version="2.0.158" subversion_revision="4470">
+        <revision type="new" title="Dateiaufträge">
+            <description>
+                In <scheduler_element name="job_chain"/> können zwei neue XML-Elemente angegeben werden:
+
+                <ul>
+                    <li>
+                        <scheduler_element name="file_order_source"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="file_order_sink"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+    </change>
+
+
     <change date="2006-08-30" version="2.0.157" subversion_revision="4442">
         <revision type="correction" title="&lt;show_state what=&quot;job_commands&quot; liefert alle &lt;commands>">
             <description>

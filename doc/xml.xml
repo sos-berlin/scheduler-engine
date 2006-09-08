@@ -49,6 +49,8 @@
                 <scheduler_element name="delay_order_after_setback"/><br/>
                 <scheduler_element name="description"/><br/>
                 <scheduler_element name="environment"/><br/>
+                <scheduler_element name="file_order_source"/><br/>
+                <scheduler_element name="file_order_sink"/><br/>
                 <scheduler_element name="holiday"/><br/>
                 <scheduler_element name="holidays"/><br/>
                 <scheduler_element name="include"/><br/>

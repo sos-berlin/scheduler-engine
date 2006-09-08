@@ -76,7 +76,9 @@
 
 
     <xml_child_elements>
+        <xml_child_element name="file_order_source" multiple="yes"/>
         <xml_child_element name="job_chain_node" multiple="yes"/>
+        <xml_child_element name="file_order_sink" multiple="yes"/>
     </xml_child_elements>
 
 

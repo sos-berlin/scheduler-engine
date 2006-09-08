@@ -2155,7 +2155,7 @@
 
         <message code="SCHEDULER-341">
             <text xml:lang="en">
-                <title>Missing job to process orders</title>
+                <title>Cannot process orders as a job is missing</title>
             </text>
         </message>
 
@@ -2822,7 +2822,7 @@
 
         <message code="SCHEDULER-982">
             <text xml:lang="en">
-                <title>File has been removed, so the waiting file order is being removed too.</title>
+                <title>File has been removed, so the file order is being removed too.</title>
             </text>
         </message>
 
@@ -2834,13 +2834,13 @@
 
         <message code="SCHEDULER-984">
             <text xml:lang="en">
-                <title>Recovered from previous error on directory <p1/></title>
+                <title>Recovered from previous error in directory<p1/></title>
             </text>
         </message>
 
         <message code="SCHEDULER-985">
             <text xml:lang="en">
-                <title><p1>number</p1> more file orders will be added later when previous orders has been processed</title>
+                <title><p1>number</p1> more file orders will be added later, after previous orders has been processed</title>
             </text>
         </message>
         
