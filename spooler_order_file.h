@@ -37,12 +37,13 @@ struct Directory_file_order_source : //idispatch_implementation< Directory_file_
 
     void                        start                   ();
     Order*                      request_order           ( const string& cause );
-    Order*                      read_directory          ( const string& cause );
 
   private:
     void                        send_mail               ( Scheduler_event::Event_code, const exception* );
     void                        start_or_continue_notification();
     void                        close_notification      ();
+    Order*                      read_directory          ( const string& cause );
+    void                        read_new_files_and_handle_deleted_files( const string& cause );
 
     Fill_zero                  _zero_;
     File_path                  _path;
@@ -57,7 +58,8 @@ struct Directory_file_order_source : //idispatch_implementation< Directory_file_
     bool                       _wait_for_notification_event;    // Nur Windows. Verzeichnis erst lesen, wenn _notification_event.signaled()
     int                        _max_orders;
     vector< ptr<z::File_info> > _new_files;
-    int                         _new_files_index;
+    int                        _new_files_index;
+    Time                       _new_files_time;
 };
 
 //-------------------------------------------------------------------------------------------------

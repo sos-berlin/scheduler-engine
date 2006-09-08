@@ -292,88 +292,15 @@ Order* Directory_file_order_source::read_directory( const string& cause )
     {
         try
         {
-            hash_set<string>            removed_blacklist_files;
-            hash_set<string>            virgin_known_files;
-
-            Z_LOG( __FUNCTION__ << "  Reading directory because of " << cause << "\n" );
-            //log()->info( "******* WATCHING " + _path + " ******* " + cause );   // TEST
-
-            if( _new_files_index >= _new_files.size() )
+            if( _new_files_index < _new_files.size() )     // Noch Dateien im Puffer
             {
-                _new_files.clear();
-                _new_files.reserve( 1000 );
-                _new_files_index = 0;
-
-
-                Z_FOR_EACH( Job_chain::Blacklist_map, _job_chain->_blacklist_map, it )  removed_blacklist_files.insert( it->first );
-
-                for( Directory_watcher::Directory_reader dir ( _path, _regex_string == ""? NULL : &_regex );; )
-                {
-                    ptr<z::File_info> file_info = dir.get();
-                    if( !file_info )  break;
-
-                    string path = file_info->path();
-
-                    if( Order* order = _job_chain->order_or_null( path ) ) 
-                    {
-                        removed_blacklist_files.erase( path );
-                        if( order->is_virgin() )  virgin_known_files.insert( path );
-                    }
-                    else
-                    {
-                        file_info->last_write_time();     // last_write_time füllen für sort, quick_last_write_less()
-                        _new_files.push_back( file_info );
-                    }
-                }
-
-
-                if( _directory_error  &&  _spooler->_mail_on_error )
-                {
-                    log()->info( message_string( "SCHEDULER-984", _path ) );
-                    send_mail( Scheduler_event::evt_file_order_source_recovered, NULL );
-                }
-
-                _directory_error = false;
-
-
-                // removed_blacklist_files: 
-                // Aufträge in der Blacklist, deren Dateien nicht mehr da sind, entfernen
-
-                Z_FOR_EACH( hash_set<string>, removed_blacklist_files, it ) 
-                {
-                    Job_chain::Blacklist_map::iterator it2 = _job_chain->_blacklist_map.find( *it );
-                    if( it2 != _job_chain->_blacklist_map.end() )
-                    {
-                        Order* removed_file_order = it2->second;
-                        removed_file_order->log()->info( message_string( "SCHEDULER-981" ) );   // "File has been removed"
-                        removed_file_order->remove_from_job_chain();   
-                    }
-                }
-
-
-                // virgin_known_files:
-                // Jungfräuliche Aufträge, denen die Datei abhanden gekommen sind, entfernen
-
-                Order_queue::Queue* queue = &first_order_queue->_queue;    // Zugriff mit Ausnahmegenehmigung. In _setback_queue verzögerte werden nicht beachtet
-                for( Order_queue::Queue::iterator it = queue->begin(); it != queue->end(); )
-                {
-                    Order* order = *it++;  // Hier schon weiterschalten, bevor it durch remove_from_job_chain ungültig wird
-
-                    if( order->is_virgin()  &&  virgin_known_files.find( order->string_id() ) == virgin_known_files.end()  &&  order->is_file_order() )
-                    {
-                        order->log()->warn( message_string( "SCHEDULER-982" ) );
-                        order->remove_from_job_chain();
-                    }
-                }
+                log()->info( message_string( "SCHEDULER-986", _new_files_time.as_string( Time::without_ms ) ) );
+            }
+            else
+            {
+                read_new_files_and_handle_deleted_files( cause );
             }
 
-            // _new_files:
-            // Neue Dateien als Aufträge einfügen. Die ältesten zuerst
-
-            if( _new_files_index == 0 )     // Noch nicht geordnet?
-            {
-                sort( _new_files.begin(), _new_files.end(), zschimmer::File_info::quick_last_write_less );
-            }
 
             int n = min( _new_files_index + _max_orders, (int)_new_files.size() );
             for(; _new_files_index < n; _new_files_index++ )
@@ -390,6 +317,8 @@ Order* Directory_file_order_source::read_directory( const string& cause )
                 order->add_to_job_chain( _job_chain );
 
                 if( !result )  result = order;      // Der erste, sofort ausführbare Auftrag
+
+                _new_files[ _new_files_index ] = NULL;
             }
 
             if( n < _new_files.size() )  log()->info( message_string( "SCHEDULER-985", _new_files.size() - n ) );
@@ -414,6 +343,88 @@ Order* Directory_file_order_source::read_directory( const string& cause )
                                           : double_time_max              );
 
     return result;
+}
+
+//-----------------------------Directory_file_order_source::read_new_files_and_handle_deleted_files
+
+void Directory_file_order_source::read_new_files_and_handle_deleted_files( const string& cause )
+{
+    hash_set<string>            removed_blacklist_files;
+    hash_set<string>            virgin_known_files;
+
+    Z_LOG( __FUNCTION__ << "  Reading directory because of " << cause << "\n" );
+    //log()->info( "******* WATCHING " + _path + " ******* " + cause );   // TEST
+
+    _new_files.clear();
+    _new_files.reserve( 1000 );
+    _new_files_index = 0;
+
+    Z_FOR_EACH( Job_chain::Blacklist_map, _job_chain->_blacklist_map, it )  removed_blacklist_files.insert( it->first );
+
+
+    _new_files_time = Time::now();
+
+    for( Directory_watcher::Directory_reader dir ( _path, _regex_string == ""? NULL : &_regex );; )
+    {
+        ptr<z::File_info> file_info = dir.get();
+        if( !file_info )  break;
+
+        string path = file_info->path();
+
+        if( Order* order = _job_chain->order_or_null( path ) ) 
+        {
+            removed_blacklist_files.erase( path );
+            if( order->is_virgin() )  virgin_known_files.insert( path );
+        }
+        else
+        {
+            file_info->last_write_time();     // last_write_time füllen für sort, quick_last_write_less()
+            _new_files.push_back( file_info );
+        }
+    }
+
+
+    if( _directory_error  &&  _spooler->_mail_on_error )
+    {
+        log()->info( message_string( "SCHEDULER-984", _path ) );
+        send_mail( Scheduler_event::evt_file_order_source_recovered, NULL );
+    }
+
+    _directory_error = false;
+
+
+    sort( _new_files.begin(), _new_files.end(), zschimmer::File_info::quick_last_write_less );
+
+
+    // removed_blacklist_files: 
+    // Aufträge in der Blacklist, deren Dateien nicht mehr da sind, entfernen
+
+    Z_FOR_EACH( hash_set<string>, removed_blacklist_files, it ) 
+    {
+        Job_chain::Blacklist_map::iterator it2 = _job_chain->_blacklist_map.find( *it );
+        if( it2 != _job_chain->_blacklist_map.end() )
+        {
+            Order* removed_file_order = it2->second;
+            removed_file_order->log()->info( message_string( "SCHEDULER-981" ) );   // "File has been removed"
+            removed_file_order->remove_from_job_chain();   
+        }
+    }
+
+
+    // virgin_known_files:
+    // Jungfräuliche Aufträge, denen die Datei abhanden gekommen sind, entfernen
+
+    Order_queue::Queue* queue = &_job_chain->first_job()->order_queue()->_queue;    // Zugriff mit Ausnahmegenehmigung. In _setback_queue verzögerte werden nicht beachtet
+    for( Order_queue::Queue::iterator it = queue->begin(); it != queue->end(); )
+    {
+        Order* order = *it++;  // Hier schon weiterschalten, bevor it durch remove_from_job_chain ungültig wird
+
+        if( order->is_virgin()  &&  virgin_known_files.find( order->string_id() ) == virgin_known_files.end()  &&  order->is_file_order() )
+        {
+            order->log()->warn( message_string( "SCHEDULER-982" ) );
+            order->remove_from_job_chain();
+        }
+    }
 }
 
 //-----------------------------------------------------------Directory_file_order_source::send_mail

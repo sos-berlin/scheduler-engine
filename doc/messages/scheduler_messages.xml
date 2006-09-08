@@ -2844,6 +2844,12 @@
             </text>
         </message>
         
+        <message code="SCHEDULER-986">
+            <text xml:lang="en">
+                <title>Continuing reading buffered directory (as of <p1>clock</p1>)</title>
+            </text>
+        </message>
+        
         <message code="SCHEDULER-999">
             <text xml:lang="de">
                 <title>Scheduler ordentlich beendet</title>
