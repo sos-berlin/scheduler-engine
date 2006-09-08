@@ -1,0 +1,79 @@
+<?xml version="1.0"?>
+<spooler
+    xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
+>
+    <config>
+
+        <base file="$SCHEDULER_TEST/base.scheduler"/>
+
+        <process_classes/>
+    
+        <script language="javascript">
+        <![CDATA[
+
+//
+        
+        ]]></script>
+
+
+        <jobs>
+
+            <job name="javascript" order="yes">
+        
+                <script language="JavaScript"><![CDATA[
+
+function spooler_process() 
+{               
+    spooler_log.info( "order.xml=" + spooler_task.order.xml );
+    spooler_log.info( "spooler_task.trigger_files=" + spooler_task.trigger_files );
+    return true;
+}
+
+                ]]></script>
+
+            </job>
+        
+            <job name="java">
+                <script java_class="spooler_job.My_job">
+                    <![CDATA[
+package spooler_job;
+import sos.spooler.*;
+import java.util.Date;
+
+public class My_job  extends sos.spooler.Job_impl
+{   
+    public boolean spooler_process()  throws Exception
+    {
+        Order order = spooler.create_order();
+        order.set_id   ( "java string" );
+        order.set_title( "Order aus Java, String" );
+        order.set_at   ( "now+75" );
+        spooler.job_chain( "my_job_chain" ).add_order( order );
+
+        order = spooler.create_order();
+        order.set_id   ( "java date" );
+        order.set_title( "Order aus Java, Date" );
+        order.set_at   ( new Date( new Date().getTime() + 80 * 1000 ) );
+        spooler.job_chain( "my_job_chain" ).add_order( order );
+
+        return false;
+    }
+}
+                ]]>
+                </script>
+            </job>
+
+
+        </jobs>
+
+        <job_chains>
+            <job_chain name="my_job_chain">
+                <file_order_source directory="/tmp/x"/>
+                <job_chain_node state="first" job="javascript" />
+                <file_order_sink state="remove" remove="yes"/>
+                <!--job_chain_node state="finished"/-->
+            </job_chain>
+        </job_chains>        
+    </config>
+</spooler>

@@ -94,7 +94,7 @@ function spooler_process()
 }
             
                 ]]></script>
-                <start_when_directory_changed directory="\\gibtsnicht\gibtsnicht" regex="^a"/>
+                <start_when_directory_changed directory="/tmp/testfiles/" regex="^a"/>
                 <run_time once="yes"/>
             </job>
 

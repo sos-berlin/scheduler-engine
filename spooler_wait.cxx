@@ -873,8 +873,9 @@ bool Directory_watcher::has_changed_2( bool throw_error )
         
             while(1)
             {
-                string filename = dir.get()->path().name(); 
-                if( filename == "" )  break;
+                ptr<z::File_info> f = dir.get();
+                if( !f )  break;
+                string filename = f->path().name(); 
 
                 new_f->push_back( filename ); 
                 if( !changed )  if( o == old_f->end()  ||  *o != filename )  { changed = true; Z_LOG( "Directory_watcher::has_changed: " << filename << "\n" ); }
