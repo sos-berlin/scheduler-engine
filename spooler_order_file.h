@@ -56,6 +56,8 @@ struct Directory_file_order_source : //idispatch_implementation< Directory_file_
     Event                      _notification_event;             // Nur Windows
     bool                       _wait_for_notification_event;    // Nur Windows. Verzeichnis erst lesen, wenn _notification_event.signaled()
     int                        _max_orders;
+    vector< ptr<z::File_info> > _new_files;
+    int                         _new_files_index;
 };
 
 //-------------------------------------------------------------------------------------------------

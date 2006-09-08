@@ -1745,7 +1745,7 @@ ptr<Task> Job::task_to_start()
         if( order )
         {
             order = order_queue()->get_order_for_processing( now );  // Jetzt aus der Warteschlange nehmen und nicht verlieren!
-            if( order )  // Ist der Auftrag noch da? (Muss bei Ein-Thread-Betrieb immer da sein!)
+            if( order )  // Ist der Auftrag noch da?
             {
                 cause = cause_order;
                 log_line += "Task starts for " + order->obj_name();

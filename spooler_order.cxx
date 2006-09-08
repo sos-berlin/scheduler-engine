@@ -1046,17 +1046,25 @@ ptr<Order> Order_queue::get_order_for_processing( const Time& now )
 
     ptr<Order> order;
 
-    //THREAD_LOCK( _lock )
+    while(1)
     {
         order = first_order( now );
+        if( !order )  break;
 
-        if( order )
-        {
-            order->_start_time = now;
-            order->_setback = 0;
-            if( order->_moved )  z::throw_xc( "SCHEDULER-0", order->obj_name() + " _moved=true?" );
-            //order->_moved = false;
-        }
+        if( !order->is_virgin()     )  break;
+        if( !order->is_file_order() )  break;
+        if( !order->job_chain()     )  break;
+        if( file_exists( order->file_path() ) )  break;
+        
+        order->log()->info( message_string( "SCHEDULER-982" ) );  // Datei ist entfernt worden
+        order->remove_from_job_chain();
+    }
+
+    if( order )
+    {
+        order->_start_time = now;
+        order->_setback = 0;
+        if( order->_moved )  z::throw_xc( "SCHEDULER-0", order->obj_name() + " _moved=true?" );
     }
 
     return order;
