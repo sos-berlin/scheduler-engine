@@ -492,7 +492,8 @@ bool Directory_file_order_source::async_continue_( Async_operation::Continue_fla
 
     Order* order = read_directory( cause );
 
-    return order != NULL;
+    //return order != NULL;
+    return true;
 }
 
 //-------------------------------------------------------------------------------------------------

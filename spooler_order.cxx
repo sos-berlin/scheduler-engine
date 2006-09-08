@@ -1250,7 +1250,23 @@ void Order::open_log()
 {
     if( _job_chain && _spooler->_order_history_with_log && !string_begins_with( _spooler->log_directory(), "*" ) )
     {
-        _log->set_filename( _spooler->log_directory() + "/order." + _job_chain->name() + "." + _id.as_string() + ".log" );      // Jobprotokoll
+        string name = _id.as_string();
+        
+        for( int i = 0; i < name.length(); i++ )        // Ungültige Zeichen in '_' ändern. DAS KANN MEHRDEUTIG WERDEN!
+        {
+            char& c = name[i];
+            switch( c )
+            {
+                case '/':
+                Z_WINDOWS_ONLY( case '\\': )
+                Z_WINDOWS_ONLY( case ':' : )
+                {
+                    c = '_';
+                }
+            }
+        }
+
+        _log->set_filename( _spooler->log_directory() + "/order." + _job_chain->name() + "." + name + ".log" );      // Jobprotokoll
         _log->set_remove_after_close( true );
         _log->open();
     }
