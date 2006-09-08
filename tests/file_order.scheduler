@@ -11,13 +11,43 @@
     
         <script language="javascript">
         <![CDATA[
+/*
+var n = 10000;
+var hostware = new ActiveXObject( "hostware.global" );
 
-//
-        
+for( var i = 1; i <= n; i++ )
+{
+    hostware.open( "-out /tmp/x/gen" + i ).close();
+}
+*/        
         ]]></script>
 
 
         <jobs>
+
+            <job name="generator">
+                <script language="JavaScript">
+                    <![CDATA[
+                    
+var i = 0;
+var n = 10000;
+var hostware = new ActiveXObject( "hostware.global" );
+
+function spooler_process() 
+{     
+    for( var j = 1; j <= 100; j++ )
+    {
+        if( ++i == n )  return false;
+        hostware.open( "-out /tmp/x/gen" + i ).close();
+    }
+    
+    return true;
+}
+
+                ]]>
+                </script>
+                <run_time once="yes"/>
+            </job>
 
             <job name="javascript" order="yes">
         
@@ -25,8 +55,10 @@
 
 function spooler_process() 
 {               
-    spooler_log.info( "order.xml=" + spooler_task.order.xml );
-    spooler_log.info( "spooler_task.trigger_files=" + spooler_task.trigger_files );
+    //spooler_log.info( "order.xml=" + spooler_task.order.xml );
+    //spooler_log.info( "spooler_task.trigger_files=" + spooler_task.trigger_files );
+    //new ActiveXObject( "hostware.global" ).sleep( 10 );
+    //spooler.terminate();
     return true;
 }
 
@@ -45,18 +77,6 @@ public class My_job  extends sos.spooler.Job_impl
 {   
     public boolean spooler_process()  throws Exception
     {
-        Order order = spooler.create_order();
-        order.set_id   ( "java string" );
-        order.set_title( "Order aus Java, String" );
-        order.set_at   ( "now+75" );
-        spooler.job_chain( "my_job_chain" ).add_order( order );
-
-        order = spooler.create_order();
-        order.set_id   ( "java date" );
-        order.set_title( "Order aus Java, Date" );
-        order.set_at   ( new Date( new Date().getTime() + 80 * 1000 ) );
-        spooler.job_chain( "my_job_chain" ).add_order( order );
-
         return false;
     }
 }
@@ -69,7 +89,7 @@ public class My_job  extends sos.spooler.Job_impl
 
         <job_chains>
             <job_chain name="my_job_chain">
-                <file_order_source directory="/tmp/x"/>
+                <file_order_source directory="/tmp/x" max="100"/>
                 <job_chain_node state="first" job="javascript" />
                 <file_order_sink state="remove" remove="yes"/>
                 <!--job_chain_node state="finished"/-->

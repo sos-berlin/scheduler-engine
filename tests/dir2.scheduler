@@ -138,7 +138,7 @@ set | grep SCHEDULER_TASK_TRIGGER_FILES
 
                 ]]>
                 </script>
-                <start_when_directory_changed directory="/tmp/testfiles" regex="^a"/>
+                <start_when_directory_changed directory="/tmp/testfiles/" regex="^a"/>
                 <run_time once="yes"/>
             </job>
 
