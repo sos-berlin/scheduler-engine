@@ -55,6 +55,7 @@ struct Directory_file_order_source : //idispatch_implementation< Directory_file_
   //bool                       _first;
     Event                      _notification_event;             // Nur Windows
     bool                       _wait_for_notification_event;    // Nur Windows. Verzeichnis erst lesen, wenn _notification_event.signaled()
+    int                        _max_orders;
 };
 
 //-------------------------------------------------------------------------------------------------

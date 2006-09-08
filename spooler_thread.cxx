@@ -390,6 +390,18 @@ bool Spooler_thread::step()
     }
 
 
+    if( Job* file_order_sink_job = _spooler->get_job_or_null( file_order_sink_job_name ) )
+    {
+        // Internen Job scheduler_file_order_sink nicht vernachlässigen, damit sich die Aufträge nicht stauen!
+        // (Die alte Lösung, Tasks am Ende der Jobkette zu bevorzugen, wäre gut: _prioritized_order_job_array)
+
+        Z_FOR_EACH( Job::Task_list, file_order_sink_job->_running_tasks, it )
+        {
+            something_done |= do_something( *it );          // Es sollte nur eine Task sein
+        }
+    }
+
+
     if( !something_done )
     {
         FOR_EACH_TASK( it, task )

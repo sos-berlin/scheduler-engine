@@ -289,6 +289,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-982", "File has been removed, so the waiting file order is being removed too." },
     { "SCHEDULER-983", "New file, $2: adding $1" },
     { "SCHEDULER-984", "Recovered from previous error on directory $1" },
+    { "SCHEDULER-985", "$1 more file orders will be added later when previous orders has been processed" },
     { "SCHEDULER-999", "Scheduler has been terminated properly" },
     {}
 };

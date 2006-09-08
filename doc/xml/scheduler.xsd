@@ -392,6 +392,7 @@
                         <xsd:attribute name="regex"             type="Name"/>
                         <xsd:attribute name="delay_after_error" type="xsd:positiveInteger"/>
                         <xsd:attribute name="repeat"            type="xsd:positiveInteger"/>
+                        <xsd:attribute name="max"               type="xsd:positiveInteger"/>
                     </xsd:complexType>
                 </xsd:element>
 

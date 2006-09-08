@@ -14,6 +14,7 @@ const string    scheduler_file_path_variable_name           = "scheduler_file_pa
 const string    file_order_sink_job_name                    = "scheduler_file_order_sink";
 const int       delay_after_error_default                   = 60;
 const int       file_order_sink_job_idle_timeout_default    = 60;
+const int       directory_file_order_source_max_default     = 10;
 
 #ifdef Z_WINDOWS
     const int   directory_file_order_source_repeat_default  = INT_MAX;
@@ -133,6 +134,10 @@ void Spooler::init_file_order_sink()
     file_order_sink_job->set_order_controlled();
     file_order_sink_job->set_idle_timeout( file_order_sink_job_idle_timeout_default );
     add_job( +file_order_sink_job, true );
+
+    // Der Scheduler führt Tasks des Jobs scheduler_file_order_sink in jedem Scheduler-Schritt aus,
+    // damit sich die Aufträge nicht stauen (Der interne Job läuft nicht in einem eigenen Prozess)
+    // Siehe Spooler_thread::step().
 }
 
 //-----------------------------------------Directory_file_order_source::Directory_file_order_source
@@ -144,7 +149,8 @@ Directory_file_order_source::Directory_file_order_source( Job_chain* job_chain, 
     _zero_(this+1),
     _job_chain(job_chain),
     _delay_after_error(delay_after_error_default),
-    _repeat(directory_file_order_source_repeat_default)
+    _repeat(directory_file_order_source_repeat_default),
+    _max_orders(directory_file_order_source_max_default)
 {
     _path = element.getAttribute( "directory" );
 
@@ -155,7 +161,8 @@ Directory_file_order_source::Directory_file_order_source( Job_chain* job_chain, 
     }
 
     _delay_after_error = element.int_getAttribute( "delay_after_error", _delay_after_error );
-    _repeat = element.int_getAttribute( "repeat", _repeat );
+    _repeat            = element.int_getAttribute( "repeat", _repeat );
+    _max_orders        = element.int_getAttribute( "max", _max_orders );
 }
 
 //----------------------------------------Directory_file_order_source::~Directory_file_order_source
@@ -277,11 +284,11 @@ Order* Directory_file_order_source::read_directory( const string& cause )
 #   endif
 
 
-    //if( first_order_queue->has_order( Time(0) ) )      // Auftragswarteschlange ist nicht leer?
-    //{
-    //    // Erst die vorhandenen Aufträge abarbeiten lassen und nächsten Aufruf von request_order() abwarten
-    //}
-    //else
+    if( first_order_queue->has_order( Time(0) ) )      // Auftragswarteschlange ist nicht leer?
+    {
+        // Erst die vorhandenen Aufträge abarbeiten lassen und nächsten Aufruf von request_order() abwarten
+    }
+    else
     {
         try
         {
@@ -357,25 +364,31 @@ Order* Directory_file_order_source::read_directory( const string& cause )
             }
 
 
-            // new_files:
-            // Neue Dateien als Aufträge einfügen. Die ältesten zuerst
-
-            sort( new_files.begin(), new_files.end(), zschimmer::File_info::quick_last_write_less );
-
-            for( size_t i = 0; i < new_files.size(); i++ )
+            if( !first_order_queue->has_order( Time(0) ) )      // Nur, wenn nicht bereits Aufträge da sind (damit's nicht zuviele werden)
             {
-                z::File_info* new_file = new_files[ i ];
-                string        path     = new_file->path();
-                ptr<Order>    order    = new Order( _spooler );
+                // new_files:
+                // Neue Dateien als Aufträge einfügen. Die ältesten zuerst
 
-                order->set_file_path( path );
-    
-                string date = Time( new_file->last_write_time() ).as_string( Time::without_ms ) + " GMT";   // localtime_from_gmtime() rechnet alte Sommerzeit-Daten in Winterzeit um
-                log()->info( message_string( "SCHEDULER-983", order->obj_name(), "written at " + date ) );
+                sort( new_files.begin(), new_files.end(), zschimmer::File_info::quick_last_write_less );
 
-                order->add_to_job_chain( _job_chain );
+                int n = min( _max_orders, (int)new_files.size() );
+                for( size_t i = 0; i < n; i++ )
+                {
+                    z::File_info* new_file = new_files[ i ];
+                    string        path     = new_file->path();
+                    ptr<Order>    order    = new Order( _spooler );
 
-                if( !result )  result = order;      // Der erste, sofort ausführbare Auftrag
+                    order->set_file_path( path );
+        
+                    string date = Time( new_file->last_write_time() ).as_string( Time::without_ms ) + " GMT";   // localtime_from_gmtime() rechnet alte Sommerzeit-Daten in Winterzeit um
+                    log()->info( message_string( "SCHEDULER-983", order->obj_name(), "written at " + date ) );
+
+                    order->add_to_job_chain( _job_chain );
+
+                    if( !result )  result = order;      // Der erste, sofort ausführbare Auftrag
+                }
+
+                if( n < new_files.size() )  log()->info( message_string( "SCHEDULER-985", new_files.size() - n ) );
             }
         }
         catch( exception& x )
