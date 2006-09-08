@@ -1762,18 +1762,19 @@ ptr<Task> Job::task_to_start()
             {
                 //remove_from_task_queue( task, log_none );
                 _task_queue.remove_task( task->id(), Task_queue::w_task_started );
+                task->_trigger_files = trigger_files();     // Ebenso im else-Zweig
             }
             else
             {
                 task = create_task( NULL, "", 0 );     // create_task() nicht mit gesperrten _lock rufen, denn get_id() in DB blockieren.
-
+    
+                task->_trigger_files = trigger_files();     // Vor set_order()!
                 task->set_order( order );
                 task->_let_run |= ( cause == cause_period_single );
             }
 
             task->_cause = cause;
             task->_changed_directories = _changed_directories;  _changed_directories = "";
-            task->_trigger_files       = trigger_files();
             _directory_changed = false;
 
             if( now >= _next_single_start )  _next_single_start = latter_day;  // Vorsichtshalber, 26.9.03

@@ -251,7 +251,7 @@ struct Job_chain_node : Com_job_chain_node
 
     ptr<Job>                   _job;                    // NULL: Kein Job, Auftrag endet
     bool                       _file_order_sink_remove;  // <file_order_sink remove="yes"/>
-    string                     _file_order_sink_move_to; // <file_order_sink move_to="..."/>
+    File_path                  _file_order_sink_move_to; // <file_order_sink move_to="..."/>
 
     Order::State               _state;                  // Bezeichnung des Zustands
 

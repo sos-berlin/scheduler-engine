@@ -266,24 +266,25 @@ Order* Directory_file_order_source::read_directory( const string& cause )
     Order*          result              = NULL;
     Order_queue*    first_order_queue   = _job_chain->first_job()->order_queue();
 
-    if( first_order_queue->has_order( Time(0) ) )      // Auftragswarteschlange ist nicht leer?
-    {
-        // Erst die vorhandenen Aufträge abarbeiten lassen und nächsten Aufruf von request_order() abwarten
-    }
-    else
+
+#   ifdef Z_WINDOWS
+        // Verzeichnisüberwachung starten oder fortsetzen,
+        // bevor die Dateinamen gelesen werden, damit Änderungen während oder kurz nach dem Lesen bemerkt werden.
+        // Das kann ein Ereignis zu viel geben. Aber besser als eins zu wenig.
+
+        start_or_continue_notification();
+        _wait_for_notification_event = true;
+#   endif
+
+
+    //if( first_order_queue->has_order( Time(0) ) )      // Auftragswarteschlange ist nicht leer?
+    //{
+    //    // Erst die vorhandenen Aufträge abarbeiten lassen und nächsten Aufruf von request_order() abwarten
+    //}
+    //else
     {
         try
         {
-#           ifdef Z_WINDOWS
-                // Verzeichnisüberwachung starten oder fortsetzen,
-                // bevor die Dateinamen gelesen werden, damit Änderungen während oder kurz nach dem Lesen bemerkt werden.
-                // Das kann ein Ereignis zu viel geben. Aber besser als eins zu wenig.
-
-                start_or_continue_notification();
-                _wait_for_notification_event = true;
-#           endif
-
-
             hash_set<string>            removed_blacklist_files;
             hash_set<string>            virgin_known_files;
             vector< ptr<z::File_info> > new_files;
@@ -369,7 +370,7 @@ Order* Directory_file_order_source::read_directory( const string& cause )
 
                 order->set_file_path( path );
     
-                string date = Time( localtime_from_gmtime( new_file->last_write_time() ) ).as_string( Time::without_ms );
+                string date = Time( new_file->last_write_time() ).as_string( Time::without_ms ) + " GMT";   // localtime_from_gmtime() rechnet alte Sommerzeit-Daten in Winterzeit um
                 log()->info( message_string( "SCHEDULER-983", order->obj_name(), "written at " + date ) );
 
                 order->add_to_job_chain( _job_chain );
@@ -473,16 +474,12 @@ bool Directory_file_order_source::async_continue_( Async_operation::Continue_fla
                     flags & cont_next_gmtime_reached? "Wartezeit abgelaufen"   // Das Flag ist doch immer gesetzt, oder?
                                                     : __FUNCTION__;
 
-#   ifdef Z_WINDOWS
-        _notification_event.reset();
-        _wait_for_notification_event = false;
-#   endif
+    _notification_event.reset();
+    _wait_for_notification_event = false;
 
-    //_signaled = true;
-    //request_order( cause );
-    read_directory( cause );
+    Order* order = read_directory( cause );
 
-    return true;
+    return order != NULL;
 }
 
 //-------------------------------------------------------------------------------------------------

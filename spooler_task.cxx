@@ -1627,14 +1627,15 @@ void Task::set_order( Order* order )
 {
     // Wird von Job gerufen, wenn Task wegen neuen Auftrags startet
 
+    if( _order  &&  _order->is_file_order() )  _trigger_files = "";
+
     _order = order;
     _order_for_task_end = order;                // Damit bei Task-Ende im Fehlerfall noch der Auftrag gezeigt wird, s. dom_element()
     
     if( _order ) 
     {
         _order->attach_task( this );            // Auftrag war schon bereitgestellt
-
-        if( _order->is_file_order() )  _trigger_files = order->file_path();
+        if( order->is_file_order() )  _trigger_files = order->file_path();
     }
 }
 

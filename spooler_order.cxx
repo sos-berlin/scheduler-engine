@@ -267,7 +267,7 @@ void Job_chain::set_dom( const xml::Element_ptr& element )
 
             Job_chain_node* node = add_job( _spooler->get_job_or_null( file_order_sink_job_name ), state, state, state );
 
-            node->_file_order_sink_move_to = e.getAttribute( "move_to" );
+            node->_file_order_sink_move_to.set_directory( e.getAttribute( "move_to" ) );
             node->_file_order_sink_remove  = e.bool_getAttribute( "remove" );
         }
         else
@@ -353,13 +353,6 @@ xml::Element_ptr Job_chain::dom_element( const xml::Document_ptr& document, cons
 
     return element;
 }
-
-//-----------------------------------------------------------------------Job_chain::async_continue_
-
-//bool Job_chain::async_continue_( Async_operaton::Continue_flags flags )
-//{
-//    return _order_sources.async_continue_( flags );
-//}
 
 //-----------------------------------------------------------------------------Job_chain::first_job
 
@@ -1607,20 +1600,7 @@ File_path Order::file_path() const
 
 bool Order::is_file_order() const
 {
-    bool result = false;
-
-    try
-    {
-        if( ptr<spooler_com::Ivariable_set> order_params = params_or_null() )
-        {
-            Variant path;
-            order_params->get_Var( Bstr( scheduler_file_path_variable_name ), &path );
-            result = !path.is_empty();
-        }
-    }
-    catch( exception& x )  { Z_LOG( __FUNCTION__ << " " << x.what() << "\n" ); }
-
-    return result;
+    return file_path() != "";
 }
 
 //----------------------------------------------------------------------------Order::string_payload
@@ -2097,7 +2077,6 @@ void Order::postprocessing( bool success )
     {
         bool force_error_state = false;
 
-      //if( _setback == latter_day )
         if( _setback == latter_day  &&  _setback_count > _task->job()->max_order_setbacks() )
         {
             _log->info( message_string( "SCHEDULER-943", _setback_count ) );   // " mal zurückgestellt. Der Auftrag wechselt in den Fehlerzustand"
@@ -2218,16 +2197,11 @@ void Order::postprocessing2( Job* last_job )
 
     if( finished() )
     {
-        try
+        if( is_file_order()  &&  file_exists( file_path() ) )
         {
-            if( is_file_order()  &&  file_exists( file_path() ) )  z::throw_xc( message_string( "SCHEDULER-340", obj_name() ) );
-        }
-        catch( exception& x )
-        {
-            _log->error( x.what() );
+            _log->error( message_string( "SCHEDULER-340", obj_name() ) );
             if( _job_chain )  add_to_blacklist();
         }
-
 
         try
         {
@@ -2261,40 +2235,6 @@ void Order::postprocessing2( Job* last_job )
     if( finished()  &&  !_on_blacklist )  close();
 }
 
-//-------------------------------------------------------------------Order::process_file_order_sink
-/*
-void Order::process_file_order_sink()
-{
-    if( !_job_chain_node )  return;
-        
-    try
-    {
-        if( _job_chain_node->_remove_file  ||  _job_chain_node->_move_to != "" )
-        {
-            File_path path = order->file_path();
-
-            if( file_exists( path ) )
-            {
-                if( _job_chain_node->_remove_file )
-                {
-                    _log.info( "Removing file " + path );
-                    path.unlink();
-                }
-                else
-                if( _job_chain_node->_move_to != "" )
-                {
-                    path.move_to( File_path( _job_chain_node->_move_to, path.name() ) );
-                }
-            }
-        }
-    }
-    catch( exception& x )
-    {
-        _log->error( x.what() );
-        _suspended = true;
-    }
-}
-*/
 //----------------------------------------------------------------------------------Order::setback_
 
 void Order::setback_()
