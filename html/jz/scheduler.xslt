@@ -655,7 +655,7 @@
         <xsl:variable name="max_orders">
             <xsl:choose>
                 <xsl:when test="$single">
-                    999999999
+                    <xsl:text>100</xsl:text>
                 </xsl:when>
                 <xsl:otherwise>
                     <xsl:value-of select="/spooler/@my_max_orders"/>
@@ -1023,7 +1023,7 @@
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Order in Job chain list-->
 
     <xsl:template match="order_queue" mode="job_chain_list">
-        <xsl:param name="max_orders" select="999999999"/>
+        <xsl:param name="max_orders" select="100"/>
 
         <table cellspacing="0" cellpadding="0" width="100%">
             <col valign="top"/>

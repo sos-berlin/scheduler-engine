@@ -2622,7 +2622,7 @@ const char file_html_jz_scheduler_xslt[] =
     "<xsl:variable name=\"max_orders\">\r\n"
     "<xsl:choose>\r\n"
     "<xsl:when test=\"$single\">\r\n"
-    "999999999\r\n"
+    "<xsl:text>100</xsl:text>\r\n"
     "</xsl:when>\r\n"
     "<xsl:otherwise>\r\n"
     "<xsl:value-of select=\"/spooler/@my_max_orders\"/>\r\n"
@@ -2990,7 +2990,7 @@ const char file_html_jz_scheduler_xslt[] =
     "<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Order in Job chain list-->\r\n"
     "\r\n"
     "<xsl:template match=\"order_queue\" mode=\"job_chain_list\">\r\n"
-    "<xsl:param name=\"max_orders\" select=\"999999999\"/>\r\n"
+    "<xsl:param name=\"max_orders\" select=\"100\"/>\r\n"
     "\r\n"
     "<table cellspacing=\"0\" cellpadding=\"0\" width=\"100%\">\r\n"
     "<col valign=\"top\"/>\r\n"
@@ -5338,7 +5338,7 @@ static const Embedded_file embedded_files_array[] =
     { "html/jz/scheduler.js", file_html_jz_scheduler_js, sizeof file_html_jz_scheduler_js - 1, 1150703826 },
     { "html/jz/show_log.js", file_html_jz_show_log_js, sizeof file_html_jz_show_log_js - 1, 1113979995 },
     { "html/jz/translation_de.js", file_html_jz_translation_de_js, sizeof file_html_jz_translation_de_js - 1, 1113979995 },
-    { "html/jz/scheduler.xslt", file_html_jz_scheduler_xslt, sizeof file_html_jz_scheduler_xslt - 1, 1150703826 },
+    { "html/jz/scheduler.xslt", file_html_jz_scheduler_xslt, sizeof file_html_jz_scheduler_xslt - 1, 1157780532 },
     { "html/jz/scheduler.css", file_html_jz_scheduler_css, sizeof file_html_jz_scheduler_css - 1, 1148569750 },
     { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1157699736 },
     { NULL, NULL, 0 }

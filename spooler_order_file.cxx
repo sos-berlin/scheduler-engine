@@ -214,7 +214,7 @@ void Directory_file_order_source::start_or_continue_notification()
     }
     else
     {
-        Z_LOG( "FindNextChangeNotification()\n" );
+        Z_LOG( "FindNextChangeNotification(\"" << _path << "\")\n" );
         BOOL ok = FindNextChangeNotification( _notification_event.handle() );
         if( !ok )  throw_mswin_error( "FindNextChangeNotification" );
     }
@@ -352,17 +352,17 @@ void Directory_file_order_source::read_new_files_and_handle_deleted_files( const
     hash_set<string>            removed_blacklist_files;
     hash_set<string>            virgin_known_files;
 
-    Z_LOG( __FUNCTION__ << "  Reading directory because of " << cause << "\n" );
-    //log()->info( "******* WATCHING " + _path + " ******* " + cause );   // TEST
+
+    Z_LOG( __FUNCTION__ << "  " << _path << " wird gelesen wegen \"" << cause << "\" ...\n" );
+
 
     _new_files.clear();
     _new_files.reserve( 1000 );
     _new_files_index = 0;
+    _new_files_time = Time::now();
 
     Z_FOR_EACH( Job_chain::Blacklist_map, _job_chain->_blacklist_map, it )  removed_blacklist_files.insert( it->first );
 
-
-    _new_files_time = Time::now();
 
     for( Directory_watcher::Directory_reader dir ( _path, _regex_string == ""? NULL : &_regex );; )
     {
@@ -382,6 +382,9 @@ void Directory_file_order_source::read_new_files_and_handle_deleted_files( const
             _new_files.push_back( file_info );
         }
     }
+
+    Z_LOG( __FUNCTION__ << "  " << _path << "  " << _new_files.size() << " Dateinamen gelesen\n" );
+    //log()->info( "******* WATCHING " + _path + " ******* " + cause );   // TEST
 
 
     if( _directory_error  &&  _spooler->_mail_on_error )

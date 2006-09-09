@@ -1,0 +1,423 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id$-->
+
+<description
+    title               = "Verzeichnisüberwachung mit Dateiaufträgen"
+    base_dir            = "../"
+    parent_page         = "index.xml"
+    author              = "$Author$"
+    date                = "$Date$"
+>
+    
+    <h2>Dateinamen eines Verzeichnisses werden Aufträge: Dateiaufträge</h2>
+
+    <p>
+        Wenn eine Jobkette Dateien aus einem Verzeichnis verarbeiten soll,
+        können Sie Dateiaufträge verwenden.
+        Ein Dateiauftrag ist ein Auftrag, der einen Verweis auf eine Datei enthält.
+        Der Scheduler überwacht die Datei des Dateiauftrags.
+    </p>
+    
+    <h3>Dateiauftragsquellen</h3>
+    
+    <p>
+        Eine Dateiauftragsquelle überwacht ein Verzeichnis.
+        Wenn diesem ein Dateiname hinzugefügt wird, 
+        der dem optionalen Regulären Ausdruck entspricht,
+        führt das zu einem Dateiauftrag.
+        Der Auftrag hat folgende Eigenschaften:
+        
+    </p>
+    <ul>
+        <li>
+            <scheduler_method class="Order" object="order" property="state"/>:
+            Status des Auftrags ist der des ersten Jobkettenknotens <scheduler_element name="job_chain_node"/>.
+        </li>
+        <li>
+            <scheduler_method class="Order" object="order" property="id"/>:
+            Kennung des Auftrags ist der Pfad, zusammengesetzt aus Verzeichnisname,
+            wie er in der Auftragsquelle angegeben ist,
+            und dem Dateinamen.
+        </li>
+        <li>
+            <code>order.params.value( "scheduler_file_path" )</code>
+            enthält den Pfad, derselbe Wert wie <scheduler_method class="Order" object="order" property="id"/>.
+            Das Vorhandensein dieser für den Scheduler reservierten Variablen macht einen Auftrag zum Dateiauftrag.
+        </li>
+    </ul>
+
+    <pre>&lt;job_chain name="<i>my_job_chain</i>">
+    &lt;file_order_source directory="<i>path</i>"/>
+    &lt;file_order_source directory="<i>other_path</i>" regex="<i>regex</i>"/>
+    &lt;job_chain_node state="1" job="<i>job_1</i>"/>
+    &lt;job_chain_node state="2" job="<i>job_2</i>"/>
+    &lt;job_chain_node state="finished"/>
+&lt;/job_chain></pre>
+    
+    <p>
+        Die mit einem Regulären Ausdruck ausgewählten Dateinamen 
+        sieht der Scheduler als Aufträge an.
+        Der anfängliche Status der Aufträge ist der des ersten Jobs der Jobkette.
+    </p>
+    <p>
+        Sobald der erste Job der Jobkette einen Auftrag verarbeiten kann,
+        <!--und seine Auftragswarteschlange leer ist,-->
+        entnimmt der Scheduler einem der Verzeichnisse 
+        den Namen der Datei, die am längsten nicht geändert worden 
+        und noch nicht einem Auftrag zugeordnet ist,
+        macht daraus einen ordentlichen Auftrag und übergibt ihn dem Job.
+        Kennung des Auftrag ist der Dateipfad.
+    </p>
+    <p>
+        Bei mehreren Verzeichnissen liest der Scheduler zunächst das erste aus,
+        bevor er zum nächsten übergeht.
+    </p>
+
+
+    
+    <h3>Inhalt des Auftrags</h3>
+
+    <p>
+        Kennung des Auftrags (<scheduler_method class="Order" property="id"/>)
+        ist der Dateipfad, gebildet aus dem Verzeichnis- und dem Dateinamen.
+        In <scheduler_method class="Order" property="params"/>
+        ist eine Variable gesetzt:
+    </p>
+    
+    <table cellspacing="0" cellpadding="0" style="margin-top: 1em">
+        <!--tr>
+            <td style="padding-right: 2ex;">
+                <code>scheduler.file.name</code>
+            </td>
+            <td>Der Dateiname</td>
+        </tr-->
+        <tr>
+            <td style="padding-right: 2ex;">
+                <code>scheduler_file_path</code>
+            </td>
+            <td>Dateiname mit vorangestelltem Verzeichnis</td>
+        </tr>
+        <!--tr>
+            <td style="padding-right: 2ex;">
+                <code>scheduler.file.directory</code>
+            </td>
+            <td>Verzeichnis</td>
+        </tr-->
+    </table>
+
+    <!--p>
+        <code>scheduler.file</code> ist selbst eine Variablenmenge
+        (der Scheduler kennt verschachtelte Variablenmengen).
+        <scheduler_method class="Variable_set" property="value"/> wird erweitert,
+        so dass es den Punkt für verschachtelte Variablenmengen erkennt.
+    </p-->
+
+
+
+    <h3>spooler_task.trigger_files</h3>
+    <p>
+        Als Besonderheit setzt der Scheduler
+        <scheduler_method class="Task" object="spooler_task" property="trigger_files"/>
+        auf den Wert des Auftragsparameters <code>scheduler_file_path</code>.
+    </p>
+    <!--pre>// Algorithmus im Scheduler:
+if( spooler_task.trigger_files == ""  &amp;&amp;  spooler_task.order != null )
+    spooler_task.trigger_files = spooler_task.order.params( "scheduler.file.path" );
+spooler_process();</pre-->
+
+
+    
+    <h3>Auftragsgesteuerte &lt;process>-Jobs</h3>
+
+    <p>
+        Ein <scheduler_element name="process"/>-Job kann mit
+        <scheduler_element name="job" attribute="order" value="yes"/> 
+        auftragsgesteuert gemacht werden.
+        Er wird einzeln für jeden Auftrag gestartet.
+        Auf die Auftragsparameter kann er nicht zugreifen, 
+        aber ihm steht die Umgebungsvariable <code>SCHEDULER_TASK_TRIGGER_FILES</code> zur Verfügung.
+    </p>
+
+    <p>
+        Hier ein Vorschlag zur Übergabe weiterer Auftragsparameter: "<a href="process_order.xml">Auftragsgesteuerte &lt;process>-Jobs</a>".
+    </p>
+
+    <!--p>
+        Einem auftragsgesteuerten <scheduler_element name="process"/>-Job
+        kann der Dateipfad mit den neuen XML-Element <code>&lt;copy_param></code>
+        (analog <scheduler_element name="copy_params"/>) übergeben werden:
+    </p>
+
+    <pre>&lt;job name="<i>my_external_job</i>" order="yes">
+    &lt;process file="<i>/home/me/my_external_job.sh</i> params="some parameters">
+        &lt;environment>
+            &lt;variable name="<i>name</i>" value="<i>value</i>"/>
+            &lt;copy_param name="MY_PATH" from="order" from_name="scheduler.file.path"/>
+            …
+        &lt;/environment>
+    &lt;/process>
+&lt;/job></pre>
+
+    <p>
+        Dem Job steht dann die Umgebungsvariable <code>MY_PATH</code> zur Verfügung.
+    </p-->
+
+
+
+    <!--
+    <p>
+        Wie in
+        "<a href="process_order.xml">Auftragsgesteuerte &lt;process>-Jobs</a>" 
+        beschrieben,
+        können einem auftragsgesteuerten <scheduler_element name="process"/>-Job 
+        die Auftragsparameter so übergeben werden:
+    </p>
+
+    <pre>&lt;job name="<i>my_external_job</i>" order="yes">
+    &lt;process file="<i>/home/me/my_external_job.sh</i> params="some parameters">
+        &lt;environment>
+            &lt;variable name="<i>name</i>" value="<i>value</i>"/>
+            &lt;copy_params prefix="scheduler_order_" from="order"/>
+        &lt;/environment>
+    &lt;/process>
+&lt;/job></pre>
+
+    <p>
+        Dem Job stehen dann die Umgebungsvariablen
+    </p>
+    <ul>
+        <li>
+            <code>scheduler_order_scheduler_file__name</code>,
+        </li>
+
+        <li>
+            <code>scheduler_order_scheduler_file__path</code> und
+        </li>
+        <li>
+            <code>scheduler_order_scheduler_file__directory</code>
+        </li>
+    </ul>
+    <p>
+        zur Verfügung (der Punkt wird ersetzt zu "<code>__</code>").
+    </p>
+
+    <p>
+        <i>Diese Namen sind schrecklich lang.
+        Sollten wir besondere, kürzere Namen nehmen?</i>
+        Wir könnten die Variablen einzeln übergeben und dann umbenennen:
+    </p>
+    <pre>&lt;environment>
+    &lt;variable name="<i>name</i>" value="<i>value</i>"/>
+    &lt;variable name="MY_PATH" from="order" from_name="scheduler.file.path"/>
+&lt;/environment></pre>
+    <p>
+        Dem Job steht dann die Umgebungsvariable <code>MY_PATH</code> zur Verfügung.
+    </p>
+    -->
+    
+
+    
+    <h3>Vor Ausführung entfernte Dateien</h3>
+    <p>
+        Wenn ein Auftrag dem ersten Job übergeben werden soll,
+        prüft der Scheduler, ob die Datei noch vorhanden ist.
+        Wenn nicht, entfernt er den Auftrag mit einer Warnung.
+    </p>
+    <p>
+        Dieser Mechanismus kann für stehengebliebene Dateien (s.u.) genutzt werden,
+        die später manuell entfernt werden,
+        und für nach Scheduler-Start aus der Datenbank geladene, inzwischen veraltete Aufträge.
+    </p>
+
+
+
+    <!--h3>Optional: Reihenfolge der Dateien</h3>
+    <p>
+        Alphabetisch (Ordnung durch binären Vergleich der Dateinamen),
+        nach Erstellungsdatum,
+        nach 
+    </p-->
+
+
+    <h3>&lt;show_job what="job_orders"></h3>
+    <p>
+        Das Kommandos <scheduler_element name="show_job" attribute="what" value="job_orders"/>
+        (und vergleichbare) zeigt Aufträge aus dem Verzeichnis nicht an, 
+        solange sie noch nicht dem Job übergeben worden sind, 
+        denn sie sind im Scheduler noch nicht bekannt.
+        <!--i>Das Kommando lässt sich aber erweitern, so dass es die Dateinamen liest und als Aufträge zeigt.</i-->
+    </p>
+
+
+
+    <h3>Auftragssenke: Datei entfernen oder verschieben</h3>
+    <p>
+        Am Ende der Ausführung des Auftrags kann die zugehörige Datei entfernt werden.
+        Die mit <code>&lt;file_order_sink></code> definierten Zustände sind Endzustände.
+    </p>
+    <pre>&lt;file_order_sink state="" remove="yes"></pre>
+    <p>
+        Wenn die Datei nicht vorhanden ist, wird das ignoriert.
+        Wenn die Datei sich nicht entfernen lässt, bleibt der Auftrag in dem Zustand erhalten,
+        und wird gesperrt 
+        (das ist neu: gesperrte Aufträge werden nicht verarbeitet; diese Eigenschaft wird nicht in die Datenbank übertragen).
+    </p>
+    <p>
+        Die Datei kann auch in ein anderes Verzeichnis verschoben werden:
+    </p>
+    <pre>&lt;file_order_sink state="" move_to="<i>directory_path</i>"></pre>
+    <p>
+        Wenn die Datei nicht vorhanden ist, ist das ein Fehler, der im Auftragsprotokoll festgehalten wird.
+        Das ist ohne weitere Wirkung, der Auftrag ist anschließend erledigt.
+        Eine Datei gleichen Namens im Zielverzeichnis wird ohne Warnung überschrieben.
+    </p>
+    <p>
+        Wenn ein gewöhnlicher Auftrag eine Dateiauftragssenke erreicht,
+        ist das ein Fehler des Auftrags ohne weitere Wirkung.
+        Der Auftrag ist anschließend erledigt.
+    </p>
+    <p>
+        Der Scheduler erkennt, wenn die Datei dauerhaft gelöscht ist und
+        entfernt dann den Auftrag.
+    </p>
+
+
+    <h3>Stehengebliebene Dateien</h3>
+    <p>
+        Nach der Ausführung eines Auftrags sollte die Datei entfernt sein.
+        Wenn die Datei noch vorhanden ist, 
+        bleibt der Auftrag im Endzustand stehen.
+        Der Scheduler erkennt, wenn die Datei dauerhaft gelöscht ist und 
+        entfernt dann den Auftrag.
+    </p>
+
+
+
+    <h3>Verzeichnis-Fehler</h3>
+    <p>
+        Wenn die Verzeichnisüberwachung auf einen Fehler läuft,
+        zum Beispiel weil das Verzeichnis abgehängt worden ist,
+        dann gibt der Scheduler eine Warnung aus 
+        und erzeugt eine eMail
+        (Einstellung aus <scheduler_ini_entry file="factory.ini" section="spooler"/> gelten).
+    </p>
+    <!--p>
+        Wenn die Verzeichnisüberwachung auf einen Fehler läuft,
+        zum Beispiel weil das Verzeichnis abgehängt worden ist,
+        dann protokolliert der Scheduler das und
+        erzeugt einen besonderen Auftrag, damit die Jobs der Jobkette darauf reagieren können.
+        Wenn das Verzeichnis wieder überwachbar ist bevor der Auftrag dem ersten Job übergeben werden konnte,
+        dann wird der Auftrag entfernt.
+        Der Auftrag hat folgende Parameter:
+    </p>
+
+    <table cellspacing="0" cellpadding="0" style="margin-top: 1em">
+        <tr>
+            <td style="padding-right: 2ex;">
+                <code>scheduler.file.name</code>
+            </td>
+            <td>leer</td>
+        </tr>
+        <tr>
+            <td style="padding-right: 2ex;">
+                <code>scheduler.file.path</code>
+            </td>
+            <td>leer</td>
+        </tr>
+        <tr>
+            <td style="padding-right: 2ex;">
+                <code>scheduler.file.directory</code>
+            </td>
+            <td>Verzeichnis</td>
+        </tr>
+        <tr>
+            <td style="padding-right: 2ex;">
+                <code>scheduler.file.error</code>
+            </td>
+            <td>Fehlermeldung</td>
+        </tr>
+    </table-->
+    <p>
+        Der Scheduler versucht periodisch die Überwachung erneut zu starten.
+        Fehlermeldungen dabei werden ignoriert (nur debug3-Meldung).
+        Die Periode ist an der Jobkette für alle Verzeichnisse
+        einstellbar, Default 1 Minute.
+        Sobald das Verzeichnis wieder lesbar ist, gibt der Scheduler eine info-Meldung aus.
+    </p>
+    <pre>&lt;file_order_source … delay_after_error="60"/></pre>
+
+
+
+    <h2>Zukünftige Erweiterungen</h2>
+
+
+    <h3>Beschränkung auf Dateien, die sich exklusiv zum Lesen öffnen lassen</h3>
+    <pre>&lt;file_order_source directory="…" check_open="yes"/></pre>
+    <p>
+        Mit dieser Einstellung übergibt der Scheduler eine Datei nur, 
+        wenn sie sich zum Lesen öffnen lässt.
+        Wenn der Versuch fehlschlägt, ist anzunehmen, dass die Datei noch beschrieben wird.
+        Der Scheduler ignoriert die Datei dann und geht zur nächsten über.
+        (<i>Klären, ob das auch für Unix gilt!)</i>
+    </p>
+
+    
+    <h2>Dateien programmiert hinzufügen mit add_file()</h2>
+    
+    <p>
+        Wenn die Auswahl der zu Aufträgen führenden Dateien programmierbar sein soll, z.B. weil die Kriterien komplexer sind,
+        kann dieser Aufruf verwendet werden:
+        </p>
+    <pre>spooler.job_chain( "<i>my_job_chain</i>" ).add_file( <i>path</i> );</pre>
+    <p>
+        Der Aufruf erzeugt einen Auftrag, der mit einer Datei verbunden ist.
+        <i>path</i> wird die Kennung <scheduler_method class="Order" property="id"/>.
+        Der Aufruf liefert false, wenn bereits ein Auftrag mit derselben Kennung vorhanden ist.
+        Das kann dann so verwendet werden:
+    </p>
+    <pre>var dir = new <i>My_special_directory_reader</i>( … );
+
+while( dir.has_next_path() )
+{
+    var is_new = job_chain.add_file( dir.read_next_path() );
+    if( is_new )  break;
+}</pre>
+
+    
+
+    <h3>Job als Auftragsquelle</h3>
+    <p>
+        Hier ein Vorschlag, wie ein Job, der Aufträge erzeugt,
+        vom Scheduler bei Bedarf aufgerufen wird:
+        "<a href="order_source.xml">Programmierte Auftragsquellen</a>".
+    </p>
+
+
+    <!--h2>Besonderheiten im bisherigen Verfahren</h2>
+    <ul>
+        <li>
+            <scheduler_element name="start_when_directory_changed"/>
+        </li>
+        <li>
+            <scheduler_element name="delay_after_error"/>
+        </li>
+    </ul>
+    <p>
+        Bei einem Verzeichnisfehler gibt's einen Fehler und
+        <scheduler_element name="delay_after_error"/> wirkt.
+        Das führt zum Job-Start, damit sodass der Job mitbekommt, dass das Verzeichnis nicht lesbar ist.
+        Er muss dies selbst prüfen, der Scheduler macht keine Mitteilung dazu.
+    </p>
+    
+    <ul>
+        <li>
+            <scheduler_method class="Job" method="start_when_directory_changed"/>
+        </li>
+    </ul>
+    <p>
+        Wäre schön, wenn diese Methode und <scheduler_element name="start_when_directory_changed"/> 
+        sich gleich verhalten würden. 
+    </p-->
+</description>
