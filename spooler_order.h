@@ -425,7 +425,7 @@ struct Order_queue : Com_order_queue
 
     int                        _lowest_priority;        // Zur Optimierung
     int                        _highest_priority;       // Zur Optimierung
-    bool                       _has_users_id;           // D.h. id auf Eindeutigkeit prüfen. Bei selbst generierten Ids überflüssig. Zur Optimierung.
+    //bool                       _has_users_id;           // D.h. id auf Eindeutigkeit prüfen. Bei selbst generierten Ids überflüssig. Zur Optimierung.
 };
 
 //-------------------------------------------------------------------------------------------------

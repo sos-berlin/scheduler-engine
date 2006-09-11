@@ -469,6 +469,16 @@ void Job::init2()
     _delay_until   = 0;
     init_start_when_directory_changed();
     check_min_tasks( "job initialization" );
+
+    for( Directory_watcher_list::iterator it = _directory_watcher_list.begin(); it != _directory_watcher_list.end(); it++ )
+    {
+        if( (*it)->filename_pattern() != "" )  
+        {
+            _start_once_for_directory = true;
+            break;
+        }
+    }
+
     set_next_start_time( Time::now() );
 }
 
@@ -1437,7 +1447,7 @@ void Job::calculate_next_time( Time now )
             {
                 bool in_period = is_in_period(now);
 
-                if( _start_once && in_period ) 
+                if( ( _start_once || _start_once_for_directory ) && in_period ) 
                 {
                     next_time = now;
                 }
@@ -1689,7 +1699,13 @@ ptr<Task> Job::task_to_start()
                                            cause = cause_delay_after_error,                     log_line += "Task starts due to delay_after_error\n";
                                       else cause = cause_period_repeat,                         log_line += "Task starts, because start time is reached: " + _next_start_time.as_string();
 
-            if( _directory_changed  )      cause = cause_directory,                             log_line += "Task starts due to an event for watched directory " + _changed_directories;
+            if( _start_once_for_directory )
+            {
+                _start_once_for_directory = false;
+                if( !_directory_changed  &&  trigger_files() != "" )  _directory_changed = true;   // Einmal starten, wenn bereits Dateien vorhanden sind 2006-09-11
+            }
+                
+            if( _directory_changed )       cause = cause_directory,                             log_line += "Task starts due to an event for watched directory " + _changed_directories;
         }
 
         if( !cause  &&  _order_queue )
@@ -1760,13 +1776,12 @@ ptr<Task> Job::task_to_start()
 
             if( task )
             {
-                //remove_from_task_queue( task, log_none );
                 _task_queue.remove_task( task->id(), Task_queue::w_task_started );
                 task->_trigger_files = trigger_files();     // Ebenso im else-Zweig
             }
             else
             {
-                task = create_task( NULL, "", 0 );     // create_task() nicht mit gesperrten _lock rufen, denn get_id() in DB blockieren.
+                task = create_task( NULL, "", 0 ); 
     
                 task->_trigger_files = trigger_files();     // Vor set_order()!
                 task->set_order( order );

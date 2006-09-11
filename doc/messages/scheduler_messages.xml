@@ -2143,7 +2143,7 @@
 
         <message code="SCHEDULER-339">
             <text xml:lang="en">
-                <title>Missing file <p1/></title>
+                <title>Someone has removed file <p1/></title>
             </text>
         </message>
 
@@ -2847,6 +2847,12 @@
         <message code="SCHEDULER-986">
             <text xml:lang="en">
                 <title>Continuing reading buffered directory (as of <p1>clock</p1>)</title>
+            </text>
+        </message>
+        
+        <message code="SCHEDULER-987">
+            <text xml:lang="en">
+                <title>Starting process: <p1>program and arguments</p1></title>
             </text>
         </message>
         

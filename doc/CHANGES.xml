@@ -10,6 +10,24 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2006-09-11" version="2.0.158" subversion_revision="4474">
+        <revision type="new" title="Web_service_operation.peer_ip und .peer_hostname">
+            <description>
+                Zwei neue Aufrufe:
+
+                <ul>
+                    <li>
+                        <scheduler_method class="Web_service_operation" property="peer_ip"/>
+                    </li>
+                    <li>
+                        <scheduler_method class="Web_service_operation" property="peer_hostname"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+    </change>
+
+
     <change date="2006-09-08" version="2.0.158" subversion_revision="4470">
         <revision type="new" title="Dateiaufträge">
             <description>

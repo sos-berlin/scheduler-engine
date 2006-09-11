@@ -149,12 +149,11 @@ struct Web_service_operation : idispatch_implementation< Web_service_operation, 
     STDMETHODIMP            get_Request                     ( spooler_com::Iweb_service_request** );
     STDMETHODIMP            get_Response                    ( spooler_com::Iweb_service_response** );
     STDMETHODIMP                Assert_is_usable               ();
-  //STDMETHODIMP                Execute_stylesheets         ();
+    STDMETHODIMP            get_Peer_ip                     ( BSTR* );
+    STDMETHODIMP            get_Peer_hostname               ( BSTR* );
 
     virtual void                close                       ();
     virtual void                begin                       ();
-  //virtual bool                async_continue              ( Async_operation::Continue_flags );
-  //virtual bool                async_finished              ();
     void                    set_host                        ( Host* );
     void                        execute_stylesheets         ();                                     // Führt _web_service->_request_xslt_stylesheet usw. aus
 

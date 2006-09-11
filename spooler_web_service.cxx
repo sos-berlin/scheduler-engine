@@ -405,6 +405,8 @@ const Com_method Web_service_operation::_methods[] =
     COM_PROPERTY_GET( Web_service_operation,  2, Web_service                   , VT_DISPATCH, 0 ),
     COM_PROPERTY_GET( Web_service_operation,  3, Request                       , VT_DISPATCH, 0 ),
     COM_PROPERTY_GET( Web_service_operation,  4, Response                      , VT_DISPATCH, 0 ),
+    COM_PROPERTY_GET( Web_service_operation,  5, Peer_ip                       , VT_BSTR    , 0 ),
+    COM_PROPERTY_GET( Web_service_operation,  6, Peer_hostname                 , VT_BSTR    , 0 ),
   //COM_PROPERTY_GET( Web_service_operation,  5, Execute_stylesheets           , VT_DISPATCH, 0 ),
 #endif
     {}
@@ -518,6 +520,42 @@ STDMETHODIMP Web_service_operation::get_Response( spooler_com::Iweb_service_resp
     if( !*result )  return E_POINTER;
 
     return S_OK; 
+}
+
+//---------------------------------------------------------------Web_service_operation::get_Peer_ip
+
+STDMETHODIMP Web_service_operation::get_Peer_ip( BSTR* result )
+{
+    HRESULT hr = S_OK;
+    
+    try
+    {
+        if( !_http_operation )  return E_POINTER;
+        if( !_http_operation->_connection )  return E_POINTER;
+
+        hr = String_to_bstr( _http_operation->_connection->_peer_host_and_port.host().get_name(), result );
+    }
+    catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+
+//---------------------------------------------------------Web_service_operation::get_Peer_Hostname
+
+STDMETHODIMP Web_service_operation::get_Peer_hostname( BSTR* result )
+{
+    HRESULT hr = S_OK;
+    
+    try
+    {
+        if( !_http_operation )  return E_POINTER;
+        if( !_http_operation->_connection )  return E_POINTER;
+
+        hr = String_to_bstr( _http_operation->_connection->_peer_host_and_port.host().ip_string(), result );
+    }
+    catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
 }
 
 //-------------------------------------------------------Web_service_operation::execute_stylesheets

@@ -71,6 +71,47 @@
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
+    <property name="peer_ip" access="read">
+        <com>
+            <com.result>
+                <com.type type="BSTR"/>
+            </com.result>
+        </com>
+
+        <title>
+            IP-Adresse der Gegenstelle
+        </title>
+
+        <description>
+            <p>
+            </p>
+        </description>
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="peer_hostname" access="read">
+        <com>
+            <com.result>
+                <com.type type="BSTR"/>
+                <description>
+                    <code>""</code>, wenn der Name nicht ermittelt werden kann.
+                </description>
+            </com.result>
+        </com>
+
+        <title>
+            Hostname der Gegenstelle 
+        </title>
+
+        <description>
+            <p>
+            </p>
+        </description>
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
     <description>
         <p>
             Siehe auch <scheduler_element name="web_service"/>

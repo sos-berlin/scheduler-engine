@@ -1476,6 +1476,12 @@ library Spooler
 
         [propget]
         HRESULT                 Response                ( [out,retval] Iweb_service_response** );
+
+        [propget]
+        HRESULT                 Peer_ip                 ( [out,retval] BSTR* );
+
+        [propget]
+        HRESULT                 Peer_hostname           ( [out,retval] BSTR* );
     };
 
     //-------------------------------------------------------------------------Iweb_service_request

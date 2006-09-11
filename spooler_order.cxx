@@ -263,7 +263,7 @@ void Job_chain::set_dom( const xml::Element_ptr& element )
         else
         if( e.nodeName_is( "file_order_sink" ) )
         {
-            string state   = e.getAttribute( "state" );
+            string state = e.getAttribute( "state" );
 
             Job_chain_node* node = add_job( _spooler->get_job_or_null( file_order_sink_job_name ), state, state, state );
 
@@ -273,8 +273,8 @@ void Job_chain::set_dom( const xml::Element_ptr& element )
         else
         if( e.nodeName_is( "job_chain_node" ) )
         {
-            string job_name    = e.getAttribute( "job" );
-            string state       = e.getAttribute( "state" );
+            string job_name = e.getAttribute( "job" );
+            string state    = e.getAttribute( "state" );
 
             bool can_be_not_initialized = true;
             Job* job = job_name == ""? NULL : _spooler->get_job( job_name, can_be_not_initialized  );
@@ -789,7 +789,7 @@ void Order_queue::close()
     }
 
     update_priorities();
-    _has_users_id = false;
+    //_has_users_id = false;
 }
 
 //-------------------------------------------------------------------------Order_queue::dom_element
@@ -902,11 +902,11 @@ void Order_queue::add_order( Order* order, Do_log do_log )
             Queue::iterator ins       = _queue.end();
             bool            ins_set   = false;
             bool            wake_up   = !order->_task  &&  !has_order( Time::now() );  //_queue.empty();
-            bool            id_found  = false;
+          //bool            id_found  = false;
 
-            _has_users_id |= order->_is_users_id;
+            //_has_users_id |= order->_is_users_id;
 
-            if( _has_users_id  ||  order->priority() > _lowest_priority  &&  order->priority() <= _highest_priority )     // Optimierung
+            if( /*_has_users_id  ||*/  order->priority() > _lowest_priority  &&  order->priority() <= _highest_priority )     // Optimierung
             {
                 for( Queue::iterator it = _queue.begin(); it != _queue.end(); it++ )
                 {
@@ -915,16 +915,17 @@ void Order_queue::add_order( Order* order, Do_log do_log )
                     {
                         ins = it;
                         ins_set = true;
-                        if( id_found )  break;
+                        //if( id_found )
+                            break;
                     }
 
-                    if( !id_found  &&  o->id_is_equal( order->_id ) )
-                    {
-                        _log->debug( message_string( "SCHEDULER-939", order->obj_name() ) );      // "Auftrag mit gleicher Id wird ersetzt: " 
-                        if( ins == it )  { ins = _queue.erase( it ); break; }
-                                   else  it = _queue.erase( it );
-                        id_found = true;
-                    }
+                    //if( !id_found  &&  o->id_is_equal( order->_id ) )
+                    //{
+                    //    _log->debug( message_string( "SCHEDULER-939", order->obj_name() ) );      // "Auftrag mit gleicher Id wird ersetzt: " 
+                    //    if( ins == it )  { ins = _queue.erase( it ); break; }
+                    //               else  it = _queue.erase( it );    Nachfolgendes it++ ist falsch
+                    //    id_found = true;
+                    //}
                 }
             }
 
@@ -2223,7 +2224,7 @@ void Order::postprocessing2( Job* last_job )
     {
         if( is_file_order()  &&  file_exists( file_path() ) )
         {
-            _log->error( message_string( "SCHEDULER-340", obj_name() ) );
+            _log->error( message_string( "SCHEDULER-340" ) );
             if( _job_chain )  add_to_blacklist();
         }
 

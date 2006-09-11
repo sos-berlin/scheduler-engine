@@ -207,7 +207,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-336", "Only \"yes\", \"no\" and a list of signal names are allowed with $1=\"$2\": $3" },
     { "SCHEDULER-337", "Signal $1 is unknown on this operating system and is ignored" },
     { "SCHEDULER-338", "Order.payload is not a Variable_set" },
-    { "SCHEDULER-339", "Missing file $1" },
+    { "SCHEDULER-339", "Someone has removed file $1" },
     { "SCHEDULER-340", "File still exists. Order has been set on the blacklist" },
     { "SCHEDULER-341", "Cannot process orders as a job is missing" },
     { "SCHEDULER-900", "Scheduler $1 is starting with $2, pid=$3" },
@@ -291,6 +291,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-984", "Recovered from previous error in directory$1" },
     { "SCHEDULER-985", "$1 more file orders will be added later, after previous orders has been processed" },
     { "SCHEDULER-986", "Continuing reading buffered directory (as of $1)" },
+    { "SCHEDULER-987", "Starting process: $1" },
     { "SCHEDULER-999", "Scheduler has been terminated properly" },
     {}
 };

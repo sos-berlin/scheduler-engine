@@ -384,6 +384,7 @@ struct Job : Object,
     bool                       _temporary;                  // Job nach einem Lauf entfernen
     bool                       _remove;                     // Job enfernen sobald möglich. _state == s_stopping, dann s_stopped
     bool                       _start_once;                 // <run_time start_once="">, wird false nach Start
+    bool                       _start_once_for_directory;
     bool                       _machine_resumable;          // Test
     bool                       _stop_on_error;              // Nach Task-Fehler Job stoppen (default)
     bool                       _ignore_every_signal;        // Nur Unix: Nach Beendigung mit Signal (kill, Absturz) den Job nicht stoppen 
