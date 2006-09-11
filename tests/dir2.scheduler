@@ -69,8 +69,6 @@ function sys( cmd, timeout )
 
                 ]]>
                 </script>
-                <delay_after_error error_count="1" delay="5"/>
-                <delay_after_error error_count="2" delay="stop"/>
                 <run_time once="yes"/>
             </job>
             
@@ -95,7 +93,6 @@ function spooler_process()
             
                 ]]></script>
                 <start_when_directory_changed directory="/tmp/testfiles/" regex="^a"/>
-                <run_time once="yes"/>
             </job>
 
             
@@ -139,7 +136,6 @@ set | grep SCHEDULER_TASK_TRIGGER_FILES
                 ]]>
                 </script>
                 <start_when_directory_changed directory="/tmp/testfiles/" regex="^a"/>
-                <run_time once="yes"/>
             </job>
 
         </jobs>
