@@ -383,7 +383,17 @@ bool Spooler_thread::step()
     {
         Z_FOR_EACH( Job_list, _spooler->_job_list, j )
         {
-            something_done = (*j)->do_something();
+            Job* job = *j;
+            
+            if( job->order_controlled() )
+            {
+                // Dieser Job ist in _prioritized_order_job_array und wird unten fortgesetzt.
+            }
+            else
+            {
+                something_done = job->do_something();
+            }
+
             if( something_done )  break;
         }
     }

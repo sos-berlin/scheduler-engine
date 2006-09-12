@@ -317,8 +317,8 @@ Order* Directory_file_order_source::request_order( const string& cause )
 {
     Order* result = NULL;
 
-    if( !_wait_for_notification_event       // Nur, wenn wir nicht auf FindNextChangeNotification warten
-     || async_next_gmtime_reached()   )     // Das, weil die Jobs bei jeder Gelegenheit do_something() durchlaufen, auch wenn nichts anliegt (z.B. bei TCP-Verkehr)
+    //if( !_wait_for_notification_event       // Nur, wenn wir nicht auf FindNextChangeNotification warten
+    if( async_next_gmtime_reached() )       // Das, weil die Jobs bei jeder Gelegenheit do_something() durchlaufen, auch wenn nichts anliegt (z.B. bei TCP-Verkehr)
     {
         result = read_directory( cause );
         if( result )  assert( result->is_immediately_processable() );
@@ -335,23 +335,23 @@ Order* Directory_file_order_source::read_directory( const string& cause )
     Order_queue*    first_order_queue   = _next_job->order_queue();
 
 
-#   ifdef Z_WINDOWS
-        // Verzeichnis¸berwachung starten oder fortsetzen,
-        // bevor die Dateinamen gelesen werden, damit ƒnderungen w‰hrend oder kurz nach dem Lesen bemerkt werden.
-        // Das kann ein Ereignis zu viel geben. Aber besser als eins zu wenig.
-
-        start_or_continue_notification();
-        _wait_for_notification_event = true;
-#   endif
-
-
-    if( first_order_queue->has_order( Time(0) ) )      // Auftragswarteschlange ist nicht leer?
+    try
     {
-        // Erst die vorhandenen Auftr‰ge abarbeiten lassen und n‰chsten Aufruf von request_order() abwarten
-    }
-    else
-    {
-        try
+#       ifdef Z_WINDOWS
+            // Verzeichnis¸berwachung starten oder fortsetzen,
+            // bevor die Dateinamen gelesen werden, damit ƒnderungen w‰hrend oder kurz nach dem Lesen bemerkt werden.
+            // Das kann ein Ereignis zu viel geben. Aber besser als eins zu wenig.
+
+            start_or_continue_notification();
+            _wait_for_notification_event = true;
+#       endif
+
+
+        if( first_order_queue->has_order( Time(0) ) )      // Auftragswarteschlange ist nicht leer?
+        {
+            // Erst die vorhandenen Auftr‰ge abarbeiten lassen und n‰chsten Aufruf von request_order() abwarten
+        }
+        else
         {
             if( _new_files_index < _new_files.size() )     // Noch Dateien im Puffer
             {
@@ -385,15 +385,15 @@ Order* Directory_file_order_source::read_directory( const string& cause )
 
             if( n < _new_files.size() )  log()->info( message_string( "SCHEDULER-985", _new_files.size() - n ) );
         }
-        catch( exception& x )
-        {
-            log()->warn( x.what() );
+    }
+    catch( exception& x )
+    {
+        log()->warn( x.what() );
 
-            if( !_directory_error  &&  _spooler->_mail_on_error )  send_mail( Scheduler_event::evt_file_order_source_error, &x );
-            _directory_error = x;
+        if( !_directory_error  &&  _spooler->_mail_on_error )  send_mail( Scheduler_event::evt_file_order_source_error, &x );
+        _directory_error = x;
 
-            close_notification();  // Schlieﬂen, sonst kann ein entferntes Verzeichnis nicht wieder angelegt werden (Windows blockiert den Namen)
-        }
+        close_notification();  // Schlieﬂen, sonst kann ein entferntes Verzeichnis nicht wieder angelegt werden (Windows blockiert den Namen)
     }
     
 
@@ -531,7 +531,7 @@ void Directory_file_order_source::send_mail( Scheduler_event::Event_code event_c
 
             case Scheduler_event::evt_file_order_source_recovered:
             {
-                string msg = message_string( "SCHEDULER-984" );
+                string msg = message_string( "SCHEDULER-984", _path );
                 Scheduler_event scheduler_event ( event_code, log_info, this );
 
                 scheduler_event.set_message( msg );

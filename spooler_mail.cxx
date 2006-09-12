@@ -43,6 +43,14 @@ string Mail_defaults::operator[] ( const string& name ) const
     return it == _map.end()? "" : it->second; 
 }
 
+//-----------------------------------------------------------------------------Mail_defaults::value
+
+string Mail_defaults::value( const string& name ) const
+{ 
+    string result = (*this)[ name ];
+    return result == "-"? "" : result;
+}
+
 //-------------------------------------------------------------------------------Com_mail::_methods
 #ifdef Z_COM
 
@@ -216,6 +224,15 @@ void Com_mail::set_dom( const xml::Element_ptr& mail_element )
     }
 }
 
+//---------------------------------------------------------------------Com_mail::value_with_default
+
+string Com_mail::value_with_default( const string& value, const string& default_name )
+{
+    if( value != "" )  return value;
+    
+    return _defaults.value( default_name );
+}
+
 //----------------------------------------------------------------------------Com_mail::set_subject
 
 void Com_mail::set_subject( const string& subject )
@@ -252,7 +269,7 @@ void Com_mail::set_to( const string& to )
 
 string Com_mail::to() 
 {
-    return _to != ""? _to : _defaults[ "to" ];
+    return value_with_default( _to, "to" );
 }
 
 //---------------------------------------------------------------------------------Com_mail::set_cc
@@ -268,7 +285,7 @@ void Com_mail::set_cc( const string& cc )
 
 string Com_mail::cc() 
 {
-    return _cc_set? _cc : _defaults[ "cc" ];
+    return _cc_set? _cc : _defaults.value( "cc" );
 }
 
 //--------------------------------------------------------------------------------Com_mail::set_bcc
@@ -284,7 +301,7 @@ void Com_mail::set_bcc( const string& bcc )
 
 string Com_mail::bcc() 
 {
-    return _bcc_set? _bcc : _defaults[ "bcc" ];
+    return _bcc_set? _bcc : _defaults.value( "bcc" );
 }
 
 //-------------------------------------------------------------------------------Com_mail::set_body
@@ -299,7 +316,7 @@ void Com_mail::set_body( const string& body )
 
 string Com_mail::body() 
 {
-    return _body != ""? _body : _defaults[ "body" ];
+    return value_with_default( _body, "body" );
 }
 
 //-------------------------------------------------------------------------------Com_mail::set_smtp
@@ -314,7 +331,7 @@ void Com_mail::set_smtp( const string& smtp )
 
 string Com_mail::smtp() 
 {
-    return _smtp != ""? _smtp : _defaults[ "smtp" ];
+    return value_with_default( _smtp, "smtp" );
 }
 
 //--------------------------------------------------------------------------Com_mail::set_queue_dir
@@ -328,9 +345,7 @@ void Com_mail::set_queue_dir( const string& queue_dir )
 
 string Com_mail::queue_dir()
 {
-    string result = _msg->queue_dir();
-    if( result == "" )  result = _defaults[ "queue_dir" ];
-    return result;
+    return value_with_default( _msg->queue_dir(), "queue_dir" );
 }
 
 //-----------------------------------------------------------------------Com_mail::add_header_field
@@ -454,9 +469,7 @@ STDMETHODIMP Com_mail::get_From( BSTR* result )
 
     try
     {
-        string r = _msg->from();
-        if( r == "" )  r = _defaults[ "from" ];
-        hr = String_to_bstr( r, result );
+        hr = String_to_bstr( value_with_default( _msg->body(), "from" ), result );
     }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Mail.from" ); }
     catch( const exception & x )  { hr = _set_excepinfo( x, "Spooler.Mail.from" ); }
@@ -492,9 +505,7 @@ STDMETHODIMP Com_mail::get_Subject( BSTR* result )
 
     try
     {
-        string r = _msg->subject();
-        if( r == "" )  r = _defaults[ "subject" ];
-        hr = String_to_bstr( r, result );
+        hr = String_to_bstr( value_with_default( _msg->subject(), "subject" ), result );
     }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Mail.subject" ); }
     catch( const exception& x )  { hr = _set_excepinfo( x, "Spooler.Mail.subject" ); }
@@ -530,9 +541,7 @@ STDMETHODIMP Com_mail::get_Body( BSTR* result )
 
     try
     {
-        string r = _msg->body();
-        if( r == "" )  r = _defaults[ "body" ];
-        *result = SysAllocString_string( r );
+        *result = SysAllocString_string( value_with_default( _msg->body(), "body" ) );
     }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Mail.body" ); }
     catch( const exception & x )  { hr = _set_excepinfo( x, "Spooler.Mail.body" ); }

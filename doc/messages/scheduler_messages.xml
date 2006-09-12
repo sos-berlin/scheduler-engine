@@ -2840,7 +2840,7 @@
 
         <message code="SCHEDULER-984">
             <text xml:lang="en">
-                <title>Recovered from previous error in directory<p1/></title>
+                <title>Recovered from previous error in directory <p1/></title>
             </text>
         </message>
 

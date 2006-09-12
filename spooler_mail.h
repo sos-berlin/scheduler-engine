@@ -26,6 +26,7 @@ struct Mail_defaults
 
     bool                        has_value                   ( const string& name ) const;
     string                      operator[]                  ( const string& name ) const;
+    string                      value                       ( const string& name ) const;               // Liefert nicht "-", sondern ""
     void                        set                         ( const string& name, const string& value )  { _map[ name ] = value; }
 
     typedef map<string,string>  Map;
@@ -149,6 +150,8 @@ struct Com_mail : spooler_com::Imail,
     ptr<Xslt_stylesheet>        xslt_stylesheet             ();
 
   private:
+    string                      value_with_default          ( const string& value, const string& default_name );
+
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
 
