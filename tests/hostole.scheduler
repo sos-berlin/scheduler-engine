@@ -53,9 +53,10 @@ hostware = new ActiveXObject( "hostware.global");
 processor = new ActiveXObject( "hostware.Factory_processor" );
 
 processor.document_filename = "/home/joacim/tmp/doc.rtf";
-processor.param = "-suppress-script";
+//processor.param = "-suppress-script";
 processor.Language = "perl";
-processor.template_filename = "/home/joacim/tmp/Auftragsbestaetigung_template.rtf";
+//processor.template_filename = "/home/joacim/tmp/Auftragsbestaetigung_template.rtf";
+processor.template_filename = "/home/joacim/tmp/perl.rtf";
 processor.process();
 processor.close();
 
@@ -83,9 +84,10 @@ public class My_job  extends sos.spooler.Job_impl
         Factory_processor processor = new Factory_processor();
 
         processor.set_document_filename( "/home/joacim/tmp/doc.rtf" );
-        processor.set_param( "-suppress-script" );
+      //processor.set_param( "-suppress-script" );
         processor.set_language( "perl" );
-        processor.set_template_filename( "/home/joacim/tmp/Auftragsbestaetigung_template.rtf" );
+      //processor.set_template_filename( "/home/joacim/tmp/Auftragsbestaetigung_template.rtf" );
+        processor.set_template_filename( "/home/joacim/tmp/perl.rtf" );
         processor.process();
         processor.close();
 
