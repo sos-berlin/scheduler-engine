@@ -231,8 +231,8 @@ struct Job : Object,
     void                        set_max_order_setbacks      ( int n )                               { _log->debug9( "max_order_setbacks"+as_string(n) ); _max_order_setbacks = n; }
     int                         max_order_setbacks          () const                                { return _max_order_setbacks; }
     Order*                      request_order               ( const string& cause );                // Fordert einen Auftrag für die _order_queue an
-    void                        register_job_for_order_source ( Job_chain* );
-    void                        unregister_job_for_order_source( Job_chain* );
+    void                        register_order_source       ( Order_source* );
+    void                        unregister_order_source     ( Order_source* );
     void                        load_tasks_from_db          ();
     xml::Element_ptr            read_history                ( const xml::Document_ptr& doc, int id, int n, const Show_what& show ) { return _history.read_tail( doc, id, n, show ); }
 
@@ -437,8 +437,8 @@ struct Job : Object,
     Delay_order_after_setback  _delay_order_after_setback;
     int                        _max_order_setbacks;
 
-    typedef list< Job_chain* >  Job_chain_list;
-    Job_chain_list             _order_source_job_chain_list;    // Muss leer sein bei ~Job!
+    typedef list< Order_source* >  Order_source_list;
+    Order_source_list             _order_source_list;    // Muss leer sein bei ~Job!
 
     typedef list< pair<string,string> > Start_when_directory_changed_list;  
     Start_when_directory_changed_list  _start_when_directory_changed_list;      // Für <start_when_directory_changed>

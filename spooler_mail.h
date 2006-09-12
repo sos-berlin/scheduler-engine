@@ -38,7 +38,7 @@ struct Com_mail : spooler_com::Imail,
                   spooler_com::Ihas_java_class_name, 
                   Sos_ole_object               
 {
-    typedef map<string,string>  Defaults_map;
+    typedef stdext::hash_map<string,string>  Defaults_map;
 
     struct File
     {
@@ -67,13 +67,13 @@ struct Com_mail : spooler_com::Imail,
     STDMETHODIMP_(char*)  const_java_class_name             ()                                      { return (char*)"sos.spooler.Mail"; }
 
     STDMETHODIMP            put_To                          ( BSTR );
-    STDMETHODIMP            get_To                          ( BSTR* result )                        { return String_to_bstr( _to, result ); }
+    STDMETHODIMP            get_To                          ( BSTR* result )                        { return String_to_bstr( to(), result ); }
 
     STDMETHODIMP            put_Cc                          ( BSTR );
-    STDMETHODIMP            get_Cc                          ( BSTR* result )                        { return String_to_bstr( _cc, result ); }
+    STDMETHODIMP            get_Cc                          ( BSTR* result )                        { return String_to_bstr( cc(), result ); }
 
     STDMETHODIMP            put_Bcc                         ( BSTR );
-    STDMETHODIMP            get_Bcc                         ( BSTR* result )                        { return String_to_bstr( _bcc, result ); }
+    STDMETHODIMP            get_Bcc                         ( BSTR* result )                        { return String_to_bstr( bcc(), result ); }
 
     STDMETHODIMP            put_From                        ( BSTR );
     STDMETHODIMP            get_From                        ( BSTR* );
@@ -107,21 +107,35 @@ struct Com_mail : spooler_com::Imail,
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr& dom );
     void                    set_dom                         ( const xml::Element_ptr& );
 
-  //void                    set_defaults                    ( const Defaults_map& defaults          ) { _defaults = defaults; }
+    void                    set_mail_defaults               ( const Mail_defaults& defaults          ) { _defaults = defaults; }
   //void                    set_default                     ( const string& what, const string& value ) { _defaults[ what ] = value; }
   //Defaults_map*               defaults                    ()                                      { return &_defaults; }
 
     void                    set_subject                     ( const string& );
+    string                      subject                     ();
+
     void                    set_from                        ( const string& );
     void                    set_from_name                   ( const string& );
+    string                      from                        ();
+
     void                    set_to                          ( const string& );
+    string                      to                          ();
+
     void                    set_cc                          ( const string& );
+    string                      cc                          ();
+
     void                    set_bcc                         ( const string& );
+    string                      bcc                         ();
+
     void                    set_body                        ( const string& );
+    string                      body                        ();
+
     void                    set_smtp                        ( const string& );
+    string                      smtp                        ();
+
     void                    set_queue_dir                   ( const string& );
     string                      queue_dir                   ();
-    string                      smtp                        ()                                      { return _smtp; }
+
     void                        add_header_field            ( const string& name, const string& value );
     void                        add_file                    ( const string& real_filename, const string& mail_filename, const string& content_type, const string& encoding );
     void                        add_attachment              ( const string& data         , const string& mail_filename, const string& content_type, const string& encoding );
@@ -154,7 +168,7 @@ struct Com_mail : spooler_com::Imail,
     typedef list< pair<string,string> >  Header_fields;
     Header_fields              _header_fields;
 
-  //Mail_defaults              _defaults;
+    Mail_defaults              _defaults;
 
     string                     _xslt_stylesheet_path;
     ptr<Xslt_stylesheet>       _xslt_stylesheet;

@@ -36,7 +36,7 @@ void Spooler::init_job_chains()
 
 void Spooler::add_job_chain( Job_chain* job_chain )
 {
-    //THREAD_LOCK( _job_chain_lock )
+    try
     {
         job_chain->finish();   // Jobkette prüfen und in Ordnung bringen
 
@@ -45,29 +45,31 @@ void Spooler::add_job_chain( Job_chain* job_chain )
 
         _job_chain_map[lname] = job_chain;
 
-        if( job_chain->_order_sources.has_order_source() )
-            job_chain->first_job()->register_job_for_order_source( job_chain );  // first_job() stellt sicher, dass die Jobkette einen Job hat!
-
         job_chain->set_state( Job_chain::s_ready );
-    }
 
-/*
-    THREAD_LOCK( _prioritized_order_job_array )
+        /*
+        THREAD_LOCK( _prioritized_order_job_array )
+        {
+            // In _prioritized_order_job_array stehen Jobs, die am Ende einer Jobkette sind, am Anfang, so dass sie vorrangig ausgeführt werden können.
+            // Ein Aufträg in einer Jobkette soll so schnell wie möglich durchgeschleust werden, bevor andere Aufträge in die Jobkette gelangen.
+            // Damit sind weniger Aufträge gleichzeitig in einer Jobkette.
+
+            _prioritized_order_job_array.clear();
+            FOR_EACH_JOB( it )  if( (*it)->order_controlled() )  _prioritized_order_job_array.push_back( *it );
+            sort( _prioritized_order_job_array.begin(), _prioritized_order_job_array.end(), Job::higher_job_chain_priority );
+        }
+        */
+
+        job_chain->load_orders_from_database();
+        job_chain->_order_sources.start();
+
+        //_job_chain_time = Time::now();
+    }
+    catch( exception&x )
     {
-        // In _prioritized_order_job_array stehen Jobs, die am Ende einer Jobkette sind, am Anfang, so dass sie vorrangig ausgeführt werden können.
-        // Ein Aufträg in einer Jobkette soll so schnell wie möglich durchgeschleust werden, bevor andere Aufträge in die Jobkette gelangen.
-        // Damit sind weniger Aufträge gleichzeitig in einer Jobkette.
-
-        _prioritized_order_job_array.clear();
-        FOR_EACH_JOB( it )  if( (*it)->order_controlled() )  _prioritized_order_job_array.push_back( *it );
-        sort( _prioritized_order_job_array.begin(), _prioritized_order_job_array.end(), Job::higher_job_chain_priority );
+        _log.error( x.what() );
+        throw;
     }
-*/
-
-    job_chain->load_orders_from_database();
-    job_chain->_order_sources.start();
-
-  //_job_chain_time = Time::now();
 }
 
 //------------------------------------------------------------------------Spooler::job_chain_or_null
@@ -121,6 +123,55 @@ xml::Element_ptr Spooler::job_chains_dom_element( const xml::Document_ptr& docum
     return job_chains_element;
 }
 
+//-----------------------------------------------------------------------Order_source::Order_source
+
+Order_source::Order_source( Job_chain* job_chain, Scheduler_object::Type_code t ) 
+: 
+    Scheduler_object( job_chain->_spooler, static_cast<Object*>(this), t ),
+    _job_chain( job_chain )
+{
+}
+
+//--------------------------------------------------------------------------------Order_source::log
+    
+Prefix_log* Order_source::log()
+{ 
+    assert( _job_chain );
+    return _job_chain->log(); 
+}
+
+//-----------------------------------------------------------------------------Order_source::finish
+
+void Order_source::finish()
+{
+    if( !_job_chain )  z::throw_xc( __FUNCTION__ );
+
+    if( _next_state.is_error() )  _next_state = _job_chain->first_node()->_state;
+    _next_job = _job_chain->node_from_state( _next_state )->_job;    // Ist nicht NULL
+}
+
+//-----------------------------------------------------------------------------Order_sources::close
+
+void Order_sources::close()
+{
+    Z_FOR_EACH( Order_source_list, _order_source_list, it )
+    {
+        Order_source* order_source = *it;
+        order_source->close();
+    }
+}
+
+//----------------------------------------------------------------------------Order_sources::finish
+
+void Order_sources::finish()
+{
+    Z_FOR_EACH( Order_source_list, _order_source_list, it )
+    {
+        Order_source* order_source = *it;
+        order_source->finish();
+    }
+}
+
 //-----------------------------------------------------------------------------Order_sources::start
 
 void Order_sources::start()
@@ -134,27 +185,27 @@ void Order_sources::start()
 
 //---------------------------------------------------------------------Order_sources::request_order
 
-Order* Order_sources::request_order( const string& cause )
-{
-    Order* result = NULL;
-
-    Z_FOR_EACH( Order_source_list, _order_source_list, it )
-    {
-        Order_source* order_source = *it;
-        result = order_source->request_order( cause );
-        if( result )  break;
-    }
-
-    if( result )  assert( result->is_immediately_processable() );
-
-    return result;
-}
+//Order* Order_sources::request_order( const string& cause )
+//{
+//    Order* result = NULL;
+//
+//    Z_FOR_EACH( Order_source_list, _order_source_list, it )
+//    {
+//        Order_source* order_source = *it;
+//        result = order_source->request_order( cause );
+//        if( result )  break;
+//    }
+//
+//    if( result )  assert( result->is_immediately_processable() );
+//
+//    return result;
+//}
 
 //-------------------------------------------------------------xml::Element_ptr Job_chain_node::xml
 
 xml::Element_ptr Job_chain_node::dom_element( const xml::Document_ptr& document, const Show_what& show, Job_chain* job_chain )
 {
-    xml::Element_ptr element = document.createElement( "job_chain_node" );
+    xml::Element_ptr element = document.createElement( is_file_order_sink()? "file_order_sink" : "job_chain_node" );
 
                                         element.setAttribute( "state"      , debug_string_from_variant( _state       ) );
         if( !_next_state.is_empty()  )  element.setAttribute( "next_state" , debug_string_from_variant( _next_state  ) );
@@ -181,6 +232,12 @@ xml::Element_ptr Job_chain_node::dom_element( const xml::Document_ptr& document,
                 element.appendChild( job_element );
                 job_element.appendChild( _job->order_queue()->dom_element( document, show | show_orders, job_chain ) );
             }
+        }
+
+        if( is_file_order_sink() )
+        {
+            if( _file_order_sink_remove )  element.setAttribute( "remove", "yes" );
+            element.setAttribute_optional( "move_to", _file_order_sink_move_to );
         }
 
     return element;
@@ -226,6 +283,7 @@ void Job_chain::close()
     Z_LOGI2( "scheduler", *this << ".close()\n" );
     remove_all_pending_orders( true );
     _blacklist_map.clear();
+    _order_sources.close();
     set_state( s_closed );
 }
 
@@ -248,7 +306,7 @@ void Job_chain::set_dom( const xml::Element_ptr& element )
 {
     if( !element )  return;
 
-    set_name( element.getAttribute( "name" ) );
+    set_name(             element.     getAttribute( "name" ) );
     _visible            = element.bool_getAttribute( "visible"           , _visible );
     _orders_recoverable = element.bool_getAttribute( "orders_recoverable", _orders_recoverable );
 
@@ -305,6 +363,12 @@ xml::Element_ptr Job_chain::dom_element( const xml::Document_ptr& document, cons
 
         if( _state >= s_ready )
         {
+            FOR_EACH( Order_sources::Order_source_list, _order_sources._order_source_list, it )
+            {
+                Order_source* order_source = *it;
+                element.appendChild( order_source->dom_element( document, modified_show ) );
+            }
+
             FOR_EACH( Chain, _chain, it )
             {
                 Job_chain_node* node = *it;
@@ -355,17 +419,17 @@ xml::Element_ptr Job_chain::dom_element( const xml::Document_ptr& document, cons
 }
 
 //-----------------------------------------------------------------------------Job_chain::first_job
-
+/*
 Job* Job_chain::first_job()
 {
     Job* result = first_node()->_job;
     if( !result )  z::throw_xc( "SCHEDULER-341" );
     return result;
 }
-
+*/
 //---------------------------------------------------------------------------------normalized_state
 
-static Order::State normalized_state( const Order::State& state )
+Order::State normalized_state( const Order::State& state )
 {
     if( state.vt == VT_BSTR  &&  ( state.bstrVal == NULL || SysStringLen( state.bstrVal ) == 0 ) )
     {
@@ -532,6 +596,8 @@ void Job_chain::finish()
             if( !n->_error_state.is_error() )  n->_error_node  = node_from_state( n->_error_state );
                                          else  n->_error_state = empty_variant;
         }
+
+        _order_sources.finish();
 
         if( zschimmer::Log_ptr log = "" )
         {
@@ -732,8 +798,11 @@ void Job_chain::remove()
             if( j->second == this )  { _spooler->_job_chain_map.erase( j );  break; }
         }
 
-        if( !_order_sources._order_source_list.empty() )
-            if( Job* first_job = first_node()->_job )  first_job->unregister_job_for_order_source( this );
+        Z_FOR_EACH( Order_sources::Order_source_list, _order_sources._order_source_list, it )
+        {
+            Order_source* order_source = *it;
+            order_source->close();
+        }
     }
 }
 

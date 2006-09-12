@@ -83,7 +83,8 @@ Com_mail::Com_mail( Spooler* spooler )
 :
     Sos_ole_object( mail_class_ptr, (Imail*)this ),
     _zero_(this+1),
-    _spooler(spooler)
+    _spooler(spooler),
+    _defaults(spooler)
 {
 }
 
@@ -247,6 +248,13 @@ void Com_mail::set_to( const string& to )
     _to = _msg->to();
 }
 
+//-------------------------------------------------------------------------------------Com_mail::to
+
+string Com_mail::to() 
+{
+    return _to != ""? _to : _defaults[ "to" ];
+}
+
 //---------------------------------------------------------------------------------Com_mail::set_cc
 
 void Com_mail::set_cc( const string& cc )
@@ -254,6 +262,13 @@ void Com_mail::set_cc( const string& cc )
     _msg->set_cc( cc );
     _cc = _msg->cc();
     _cc_set = true;
+}
+
+//-------------------------------------------------------------------------------------Com_mail::cc
+
+string Com_mail::cc() 
+{
+    return _cc_set? _cc : _defaults[ "cc" ];
 }
 
 //--------------------------------------------------------------------------------Com_mail::set_bcc
@@ -265,6 +280,13 @@ void Com_mail::set_bcc( const string& bcc )
     _bcc_set = true;
 }
 
+//------------------------------------------------------------------------------------Com_mail::bcc
+
+string Com_mail::bcc() 
+{
+    return _bcc_set? _bcc : _defaults[ "bcc" ];
+}
+
 //-------------------------------------------------------------------------------Com_mail::set_body
 
 void Com_mail::set_body( const string& body )
@@ -273,12 +295,26 @@ void Com_mail::set_body( const string& body )
     _body = body;
 }
 
+//-----------------------------------------------------------------------------------Com_mail::body
+
+string Com_mail::body() 
+{
+    return _body != ""? _body : _defaults[ "body" ];
+}
+
 //-------------------------------------------------------------------------------Com_mail::set_smtp
 
 void Com_mail::set_smtp( const string& smtp )
 {
     _smtp = smtp;
     _msg->set_smtp( smtp );
+}
+
+//-----------------------------------------------------------------------------------Com_mail::smtp
+
+string Com_mail::smtp() 
+{
+    return _smtp != ""? _smtp : _defaults[ "smtp" ];
 }
 
 //--------------------------------------------------------------------------Com_mail::set_queue_dir
@@ -292,7 +328,9 @@ void Com_mail::set_queue_dir( const string& queue_dir )
 
 string Com_mail::queue_dir()
 {
-    return _msg->queue_dir();
+    string result = _msg->queue_dir();
+    if( result == "" )  result = _defaults[ "queue_dir" ];
+    return result;
 }
 
 //-----------------------------------------------------------------------Com_mail::add_header_field
@@ -416,7 +454,9 @@ STDMETHODIMP Com_mail::get_From( BSTR* result )
 
     try
     {
-        hr = String_to_bstr( _msg->from(), result );
+        string r = _msg->from();
+        if( r == "" )  r = _defaults[ "from" ];
+        hr = String_to_bstr( r, result );
     }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Mail.from" ); }
     catch( const exception & x )  { hr = _set_excepinfo( x, "Spooler.Mail.from" ); }
@@ -452,7 +492,9 @@ STDMETHODIMP Com_mail::get_Subject( BSTR* result )
 
     try
     {
-        hr = String_to_bstr( _msg->subject(), result );
+        string r = _msg->subject();
+        if( r == "" )  r = _defaults[ "subject" ];
+        hr = String_to_bstr( r, result );
     }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Mail.subject" ); }
     catch( const exception& x )  { hr = _set_excepinfo( x, "Spooler.Mail.subject" ); }
@@ -488,7 +530,9 @@ STDMETHODIMP Com_mail::get_Body( BSTR* result )
 
     try
     {
-        *result = SysAllocString_string( _msg->body() );
+        string r = _msg->body();
+        if( r == "" )  r = _defaults[ "body" ];
+        *result = SysAllocString_string( r );
     }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Mail.body" ); }
     catch( const exception & x )  { hr = _set_excepinfo( x, "Spooler.Mail.body" ); }
@@ -560,7 +604,7 @@ STDMETHODIMP Com_mail::get_Smtp( BSTR* smtp )
 
     try
     {
-        *smtp = SysAllocString_string( _msg->smtp() );
+        *smtp = SysAllocString_string( this->smtp() );
     }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Mail.smtp" ); }
     catch( const exception & x )  { hr = _set_excepinfo( x, "Spooler.Mail.smtp" ); }

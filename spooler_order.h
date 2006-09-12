@@ -212,21 +212,37 @@ struct Order : Com_order,
     ptr<http::Operation>       _http_operation;
 };
 
+//-------------------------------------------------------------------------------------------------
+
+Order::State                    normalized_state        ( const Order::State& );
 
 //-------------------------------------------------------------------------------------Order_source
 
 struct Order_source : Scheduler_object, Event_operation
 {
-                                Order_source            ( Spooler* sp, Scheduler_object::Type_code t ) : Scheduler_object(sp,static_cast<Object*>(this),t) {}
+                                Order_source            ( Job_chain*, Scheduler_object::Type_code );
 
+    // Scheduler_object:
+    virtual Prefix_log*         log                     ();
+
+    virtual void                close                   ()                                          = 0;
+    virtual void                finish                  ();
     virtual void                start                   ()                                          = 0;
     virtual Order*              request_order           ( const string& cause )                     = 0;
+    virtual xml::Element_ptr    dom_element             ( const xml::Document_ptr&, const Show_what& ) = 0;
+
+  protected:
+    Job_chain*                 _job_chain;
+    Order::State               _next_state;
+    Job*                       _next_job;
 };
 
 //------------------------------------------------------------------------------------Order_sources
 
 struct Order_sources 
 {
+    void                        close                   ();
+    void                        finish                  ();
     void                        start                   ();
     Order*                      request_order           ( const string& cause );
     bool                        has_order_source        ()                                          { return !_order_source_list.empty(); }
@@ -289,7 +305,7 @@ struct Job_chain : Com_job_chain, Scheduler_object
     void                        check_for_removing      ();
     Prefix_log*                 log                     ()                                          { return &_log; }
 
-    void                    set_name                    ( const string& name )                      { THREAD_LOCK( _lock )  _name = name,  _log.set_prefix( obj_name() ); }
+    void                    set_name                    ( const string& name )                      { _name = name,  _log.set_prefix( obj_name() ); }
     string                      name                    ()                                          { THREAD_LOCK_RETURN( _lock, string, _name ); }
 
     void                    set_state                   ( State state )                             { _state = state; }
@@ -307,7 +323,7 @@ struct Job_chain : Com_job_chain, Scheduler_object
     Job_chain_node*             add_job                 ( Job*, const Order::State& input_state, const Order::State& output_state = error_variant, const Order::State& error_state = error_variant );
     void                        finish                  ();
 
-    Job*                        first_job               ();
+  //Job*                        first_job               ();
     Job_chain_node*             first_node             ();
     Job_chain_node*             node_from_state         ( const Order::State& );
     Job_chain_node*             node_from_state_or_null ( const Order::State& );
@@ -330,8 +346,6 @@ struct Job_chain : Com_job_chain, Scheduler_object
 
     void                    set_dom                     ( const xml::Element_ptr& );
     xml::Element_ptr            dom_element             ( const xml::Document_ptr&, const Show_what& );
-
-    Order*                      request_order           ( const string& cause )                     { return _order_sources.request_order( cause ); }
 
     string                      obj_name                ()                                          { return "Job_chain " + _name; }
 

@@ -2159,6 +2159,12 @@
             </text>
         </message>
 
+        <message code="SCHEDULER-342">
+            <text xml:lang="en">
+                <title>There is no job between order source and order sink</title>
+            </text>
+        </message>
+
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->

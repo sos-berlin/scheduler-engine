@@ -588,7 +588,7 @@ void Job::set_remove( bool remove )
     }
 
     if( order_controlled() )  z::throw_xc( "SCHEDULER-229", obj_name() );   // _prioritized_order_job_array und Job_chain_node enthalten Job*!
-    if( !_order_source_job_chain_list.empty() )  z::throw_xc( "SCHEDULER-229", obj_name() );
+    if( !_order_source_list.empty() )  z::throw_xc( "SCHEDULER-229", obj_name() );
 
     _remove = true; 
     stop( true );
@@ -1514,26 +1514,26 @@ void Job::calculate_next_time_after_modified_order_queue()
     calculate_next_time();
 }
 
-//---------------------------------------------------------------Job::register_job_for_order_source
+//-----------------------------------------------------------------------Job::register_order_source
 
-void Job::register_job_for_order_source( Job_chain* job_chain )
+void Job::register_order_source( Order_source* order_source )
 {
 #   if defined _DEBUG
-        Z_FOR_EACH( Job_chain_list, _order_source_job_chain_list, it )  assert( *it != job_chain );
+        Z_FOR_EACH( Order_source_list, _order_source_list, it )  assert( *it != order_source );
 #   endif
 
-    _order_source_job_chain_list.push_back( job_chain );
+    _order_source_list.push_back( order_source);
 }
 
-//-------------------------------------------------------------Job::unregister_job_for_order_source
+//---------------------------------------------------------------------Job::unregister_order_source
 
-void Job::unregister_job_for_order_source( Job_chain* job_chain )
+void Job::unregister_order_source( Order_source* order_source )
 {
-    Z_FOR_EACH( Job_chain_list, _order_source_job_chain_list, it )
+    Z_FOR_EACH( Order_source_list, _order_source_list, it )
     {
-        if( *it == job_chain )
+        if( *it == order_source )
         {
-            it = _order_source_job_chain_list.erase( it );
+            it = _order_source_list.erase( it );
             return;
         }
     }
@@ -1545,10 +1545,10 @@ Order* Job::request_order( const string& cause )
 {
     Order* result = NULL;
 
-    Z_FOR_EACH( Job_chain_list, _order_source_job_chain_list, it )
+    Z_FOR_EACH( Order_source_list, _order_source_list, it )
     {
-        Job_chain* job_chain = *it;
-        result = job_chain->request_order( cause );
+        Order_source* order_source = *it;
+        result = order_source->request_order( cause );
         if( result )  break;
     }
 

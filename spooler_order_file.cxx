@@ -145,9 +145,8 @@ void Spooler::init_file_order_sink()
 Directory_file_order_source::Directory_file_order_source( Job_chain* job_chain, const xml::Element_ptr& element )
 :
     //Idispatch_implementation( &class_descriptor ),
-    Order_source( job_chain->_spooler, type_directory_file_order_source ),
+    Order_source( job_chain, type_directory_file_order_source ),
     _zero_(this+1),
-    _job_chain(job_chain),
     _delay_after_error(delay_after_error_default),
     _repeat(directory_file_order_source_repeat_default),
     _max_orders(directory_file_order_source_max_default)
@@ -163,6 +162,7 @@ Directory_file_order_source::Directory_file_order_source( Job_chain* job_chain, 
     _delay_after_error = element.int_getAttribute( "delay_after_error", _delay_after_error );
     _repeat            = element.int_getAttribute( "repeat", _repeat );
     _max_orders        = element.int_getAttribute( "max", _max_orders );
+    _next_state        = normalized_state( element.getAttribute( "next_state", _next_state.as_string() ) );
 }
 
 //----------------------------------------Directory_file_order_source::~Directory_file_order_source
@@ -171,7 +171,61 @@ Directory_file_order_source::~Directory_file_order_source()
 {
     //if( _spooler->_connection_manager )  _spooler->_connection_manager->remove_operation( this );
 
+    close();
+}
+
+//--------------------------------------------------------------Directory_file_order_source::finish
+
+void Directory_file_order_source::close()
+{
     close_notification();
+
+    if( _next_job ) 
+    {
+        _next_job->unregister_order_source( this );
+        _next_job = NULL;
+    }
+
+    _job_chain = NULL;   // close() wird von ~Job_chain gerufen, also kann Job_chain ungültig sein
+}
+
+//-------------------------------------------------------------xml::Element_ptr Job_chain_node::xml
+
+xml::Element_ptr Directory_file_order_source::dom_element( const xml::Document_ptr& document, const Show_what& show )
+{
+    xml::Element_ptr element = document.createElement( "file_order_source" );
+
+                                             element.setAttribute         ( "directory"  , _path );
+                                             element.setAttribute_optional( "regex", _regex_string );
+        if( _notification_event._signaled )  element.setAttribute         ( "signaled", "yes" );
+        if( _max_orders < INT_MAX )          element.setAttribute         ( "max", _max_orders );
+        if( !_next_state.is_empty() )        element.setAttribute         ( "next_state", debug_string_from_variant( _next_state ) );
+
+        if( _delay_after_error < INT_MAX )  element.setAttribute( "delay_after_error", _delay_after_error );
+        if( _repeat            < INT_MAX )  element.setAttribute( "repeat"           , _repeat);
+        
+        if( _directory_error )  append_error_element( element, _directory_error );
+
+        if( _new_files_index < _new_files.size() )
+        {
+            xml::Element_ptr files_element = document.createElement( "files" );
+            files_element.setAttribute( "snapshot_time", _new_files_time.as_string() );
+
+            for( int i = _new_files_index; i < _new_files.size(); i++ )
+            {
+                z::File_info* f = _new_files[ i ];
+
+                xml::Element_ptr file_element = document.createElement( "file" );
+                file_element.setAttribute( "last_write", Time( f->last_write_time() ).xml_value( Time::without_ms ) + "Z" );
+                file_element.setAttribute( "path"      , f->path() );
+
+                files_element.appendChild( file_element );
+            }
+
+            element.appendChild( files_element );
+        }
+
+    return element;
 }
 
 //---------------------------------------------------Directory_file_order_source::async_state_text_
@@ -186,13 +240,6 @@ string Directory_file_order_source::async_state_text_() const
     result << ")";
 
     return result;
-}
-
-//-----------------------------------------------------------------Directory_file_order_source::log
-    
-Prefix_log* Directory_file_order_source::log()
-{ 
-    return _job_chain->log(); 
 }
 
 //--------------------------------------Directory_file_order_source::start_or_continue_notification
@@ -240,11 +287,21 @@ void Directory_file_order_source::close_notification()
 #   endif
 }
 
+//--------------------------------------------------------------Directory_file_order_source::finish
+
+void Directory_file_order_source::finish()
+{
+    Order_source::finish();     // Setzt _next_job
+    assert( _next_job );
+
+    _next_job->register_order_source( this );
+}
+
 //---------------------------------------------------------------Directory_file_order_source::start
 
 void Directory_file_order_source::start()
 {
-    _job_chain->first_job();  // Sicherstellen, dass sich ein Job anschließt
+    if( _next_job->name() == file_order_sink_job_name )  z::throw_xc( "SCHEDULER-342" );
 
     set_async_manager( _spooler->_connection_manager );
     set_async_next_gmtime( (time_t)0 );     // Am Start das Verzeichnis auslesen
@@ -271,7 +328,7 @@ Order* Directory_file_order_source::request_order( const string& cause )
 Order* Directory_file_order_source::read_directory( const string& cause )
 {
     Order*          result              = NULL;
-    Order_queue*    first_order_queue   = _job_chain->first_job()->order_queue();
+    Order_queue*    first_order_queue   = _next_job->order_queue();
 
 
 #   ifdef Z_WINDOWS
@@ -328,7 +385,7 @@ Order* Directory_file_order_source::read_directory( const string& cause )
             log()->warn( x.what() );
 
             if( !_directory_error  &&  _spooler->_mail_on_error )  send_mail( Scheduler_event::evt_file_order_source_error, &x );
-            _directory_error = true;
+            _directory_error = x;
 
             close_notification();  // Schließen, sonst kann ein entferntes Verzeichnis nicht wieder angelegt werden (Windows blockiert den Namen)
         }
@@ -393,7 +450,7 @@ void Directory_file_order_source::read_new_files_and_handle_deleted_files( const
         send_mail( Scheduler_event::evt_file_order_source_recovered, NULL );
     }
 
-    _directory_error = false;
+    _directory_error = NULL;
 
 
     sort( _new_files.begin(), _new_files.end(), zschimmer::File_info::quick_last_write_less );
@@ -417,7 +474,7 @@ void Directory_file_order_source::read_new_files_and_handle_deleted_files( const
     // virgin_known_files:
     // Jungfräuliche Aufträge, denen die Datei abhanden gekommen sind, entfernen
 
-    Order_queue::Queue* queue = &_job_chain->first_job()->order_queue()->_queue;    // Zugriff mit Ausnahmegenehmigung. In _setback_queue verzögerte werden nicht beachtet
+    Order_queue::Queue* queue = &_next_job->order_queue()->_queue;    // Zugriff mit Ausnahmegenehmigung. In _setback_queue verzögerte werden nicht beachtet
     for( Order_queue::Queue::iterator it = queue->begin(); it != queue->end(); )
     {
         Order* order = *it++;  // Hier schon weiterschalten, bevor it durch remove_from_job_chain ungültig wird

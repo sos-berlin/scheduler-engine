@@ -26,15 +26,16 @@ struct Directory_file_order_source : //idispatch_implementation< Directory_file_
     explicit                    Directory_file_order_source( Job_chain*, const xml::Element_ptr& );
                                ~Directory_file_order_source();
 
-    // Scheduler_object:
-    virtual Prefix_log*         log                     ();
-
     // Async_operation:
     virtual Socket_event*       async_event             ()                                          { return &_notification_event; }
     virtual bool                async_continue_         ( Continue_flags );
     virtual bool                async_finished_         () const                                    { return false; }
     virtual string              async_state_text_       () const;
 
+    // Order_source:
+    void                        close                   ();
+    xml::Element_ptr            dom_element             ( const xml::Document_ptr&, const Show_what& );
+    void                        finish                  ();
     void                        start                   ();
     Order*                      request_order           ( const string& cause );
 
@@ -49,10 +50,9 @@ struct Directory_file_order_source : //idispatch_implementation< Directory_file_
     File_path                  _path;
     string                     _regex_string;
     Regex                      _regex;
-    Job_chain*                 _job_chain;
     int                        _delay_after_error;
     int                        _repeat;
-    bool                       _directory_error;
+    Xc_copy                    _directory_error;
   //bool                       _first;
     Event                      _notification_event;             // Nur Windows
     bool                       _wait_for_notification_event;    // Nur Windows. Verzeichnis erst lesen, wenn _notification_event.signaled()

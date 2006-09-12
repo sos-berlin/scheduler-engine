@@ -542,6 +542,7 @@ void Prefix_log::inherit_settings( const Prefix_log& other )
   //_bcc             = other._bcc;
 
     _mail_defaults = other._mail_defaults;
+    if( _mail )  _mail->set_mail_defaults( _mail_defaults );
 }
 
 //-------------------------------------------------------------------------Prefix_log::set_filename
@@ -699,6 +700,8 @@ void Prefix_log::set_mail_defaults()
         _mail_defaults.set( "cc"       , read_profile_string ( _spooler->_factory_ini, _section, "log_mail_cc"       , _mail_defaults[ "cc"        ] ) );
         _mail_defaults.set( "bcc"      , read_profile_string ( _spooler->_factory_ini, _section, "log_mail_bcc"      , _mail_defaults[ "bcc"       ] ) );
         _mail_defaults.set( "subject"  , read_profile_string ( _spooler->_factory_ini, _section, "log_mail_subject"  , _mail_defaults[ "subject"   ] ) );
+    
+        if( _mail )  _mail->set_mail_defaults( _mail_defaults );
     }
 
     _mail_defaults_set = true;
@@ -708,7 +711,11 @@ void Prefix_log::set_mail_defaults()
 
 void Prefix_log::set_mail_default( const string& field_name, const string& value, bool overwrite )
 { 
-    if( overwrite  ||  !_mail_defaults.has_value( field_name ) )   _mail_defaults.set( field_name, value ); 
+    if( overwrite  ||  !_mail_defaults.has_value( field_name ) )   
+    {
+        _mail_defaults.set( field_name, value ); 
+        if( _mail )  _mail->set_mail_defaults( _mail_defaults );
+    }
 }
 
 //--------------------------------------------------------------------------------Prefix_log::imail
