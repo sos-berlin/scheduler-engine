@@ -53,8 +53,9 @@ function spooler_process()
             </job>
 
             <job name="javascript" order="yes" tasks="2">
-        
-                <script language="JavaScript"><![CDATA[
+
+                <script language="JavaScript">
+                    <![CDATA[
 
 counter = 1*spooler.variables( "n" );
 
@@ -66,6 +67,24 @@ function spooler_process()
     //spooler.terminate();
     if( --counter == 0 )  spooler.terminate();
     //if( spooler_task.order.params( "scheduler_file_order" ) == "/tmp/x/gen9" )  spooler.terminate();
+    return true;
+}
+
+                ]]>
+                </script>
+
+            </job>
+
+            
+            <job name="javascript2" order="yes" tasks="2">
+        
+                <script language="JavaScript"><![CDATA[
+
+counter = 1*spooler.variables( "n" );
+
+function spooler_process() 
+{               
+    spooler_log.info( "ZWEI" );
     return true;
 }
 
@@ -98,14 +117,7 @@ public class My_job  extends sos.spooler.Job_impl
             <job_chain name="my_job_chain">
                 <file_order_source directory="/tmp/x" regex="^gen" max="100"/>
                 <file_order_source directory="/tmp/y" regex="^gen" max="100"/>
-                <job_chain_node state="first" job="javascript" />
-                <file_order_sink state="remove" remove="yes"/>
-                <!--job_chain_node state="finished"/-->
-            </job_chain>
-            <job_chain name="my_job_chain2">
-                <file_order_source directory="/tmp/x" regex="^gen" max="100"/>
-                <file_order_source directory="/tmp/y" regex="^gen" max="100"/>
-                <job_chain_node state="first" job="javascript" />
+                <job_chain_node state="first" job="javascript"/>
                 <file_order_sink state="remove" remove="yes"/>
                 <!--job_chain_node state="finished"/-->
             </job_chain>

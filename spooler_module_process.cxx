@@ -465,7 +465,7 @@ bool Process_module_instance::begin__end()
     _stdout_file.open_temporary( File::open_unlink_later | File::open_inheritable );
     _stderr_file.open_temporary( File::open_unlink_later | File::open_inheritable );
 
-    _log.info( message_string( "SCHEDULER-987", shell_command_line_from_argv( string_args ) );
+    _log.info( message_string( "SCHEDULER-987", posix::shell_command_line_from_argv( string_args ) ) );
 
     LOG( "signal(SIGCHLD,SIG_DFL)\n" );
     ::signal( SIGCHLD, SIG_DFL );                 // Java verändert das Signal-Verhalten, so dass waitpid() ohne diesen Aufruf versagte.

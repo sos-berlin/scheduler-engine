@@ -564,9 +564,8 @@ bool Directory_file_order_source::async_continue_( Async_operation::Continue_fla
     _notification_event.reset();
     _wait_for_notification_event = false;
 
-    Order* order = read_directory( cause );
+    read_directory( cause );
 
-    //return order != NULL;
     return true;
 }
 
