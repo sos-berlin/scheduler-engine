@@ -393,6 +393,7 @@
                         <xsd:attribute name="delay_after_error" type="xsd:positiveInteger"/>
                         <xsd:attribute name="repeat"            type="xsd:positiveInteger"/>
                         <xsd:attribute name="max"               type="xsd:positiveInteger"/>
+                        <xsd:attribute name="next_state"        type="String"/>
                     </xsd:complexType>
                 </xsd:element>
 

@@ -82,10 +82,10 @@ struct File_order_sink_module_instance : Internal_module_instance
                 }
                 catch( exception& x )
                 {
-                    _log->error( x.what() );
+                    order->log()->warn( x.what() );     // Nicht error(), damit der Job nicht stoppt
                 }
 
-                if( result == false  &&  job_chain_node->_error_state == job_chain_node->_state )  order->add_to_blacklist();
+                if( result == false )  order->add_to_blacklist();
             }
 
             //if( result == true  &&  job_chain_node->_next_state == job_chain_node->_state )  
@@ -199,7 +199,7 @@ xml::Element_ptr Directory_file_order_source::dom_element( const xml::Document_p
                                              element.setAttribute_optional( "regex", _regex_string );
         if( _notification_event._signaled )  element.setAttribute         ( "signaled", "yes" );
         if( _max_orders < INT_MAX )          element.setAttribute         ( "max", _max_orders );
-        if( !_next_state.is_empty() )        element.setAttribute         ( "next_state", debug_string_from_variant( _next_state ) );
+        if( !_next_state.is_missing() )      element.setAttribute         ( "next_state", debug_string_from_variant( _next_state ) );
 
         if( _delay_after_error < INT_MAX )  element.setAttribute( "delay_after_error", _delay_after_error );
         if( _repeat            < INT_MAX )  element.setAttribute( "repeat"           , _repeat);
@@ -210,16 +210,20 @@ xml::Element_ptr Directory_file_order_source::dom_element( const xml::Document_p
         {
             xml::Element_ptr files_element = document.createElement( "files" );
             files_element.setAttribute( "snapshot_time", _new_files_time.as_string() );
+            files_element.setAttribute( "count"        , (int)_new_files.size() );
 
-            for( int i = _new_files_index; i < _new_files.size(); i++ )
+            if( show & show_order_source_files )
             {
-                z::File_info* f = _new_files[ i ];
+                for( int i = _new_files_index; i < _new_files.size(); i++ )
+                {
+                    z::File_info* f = _new_files[ i ];
 
-                xml::Element_ptr file_element = document.createElement( "file" );
-                file_element.setAttribute( "last_write", Time( f->last_write_time() ).xml_value( Time::without_ms ) + "Z" );
-                file_element.setAttribute( "path"      , f->path() );
+                    xml::Element_ptr file_element = document.createElement( "file" );
+                    file_element.setAttribute( "last_write", Time( f->last_write_time() ).xml_value( Time::without_ms ) + "Z" );
+                    file_element.setAttribute( "path"      , f->path() );
 
-                files_element.appendChild( file_element );
+                    files_element.appendChild( file_element );
+                }
             }
 
             element.appendChild( files_element );
@@ -301,7 +305,7 @@ void Directory_file_order_source::finish()
 
 void Directory_file_order_source::start()
 {
-    if( _next_job->name() == file_order_sink_job_name )  z::throw_xc( "SCHEDULER-342" );
+    if( _next_job->name() == file_order_sink_job_name )  z::throw_xc( "SCHEDULER-342", _job_chain->obj_name() );
 
     set_async_manager( _spooler->_connection_manager );
     set_async_next_gmtime( (time_t)0 );     // Am Start das Verzeichnis auslesen
@@ -367,6 +371,7 @@ Order* Directory_file_order_source::read_directory( const string& cause )
                 ptr<Order>    order    = new Order( _spooler );
 
                 order->set_file_path( path );
+                order->set_state( _next_state );
     
                 string date = Time( new_file->last_write_time() ).as_string( Time::without_ms ) + " GMT";   // localtime_from_gmtime() rechnet alte Sommerzeit-Daten in Winterzeit um
                 log()->info( message_string( "SCHEDULER-983", order->obj_name(), "written at " + date ) );

@@ -44,6 +44,7 @@ void Spooler::add_job_chain( Job_chain* job_chain )
         if( _job_chain_map.find( lname ) != _job_chain_map.end() )  z::throw_xc( "SCHEDULER-160", lname );
 
         _job_chain_map[lname] = job_chain;
+        _job_chain_map_version++;
 
         job_chain->set_state( Job_chain::s_ready );
 
@@ -62,8 +63,6 @@ void Spooler::add_job_chain( Job_chain* job_chain )
 
         job_chain->load_orders_from_database();
         job_chain->_order_sources.start();
-
-        //_job_chain_time = Time::now();
     }
     catch( exception&x )
     {
@@ -128,6 +127,7 @@ xml::Element_ptr Spooler::job_chains_dom_element( const xml::Document_ptr& docum
 Order_source::Order_source( Job_chain* job_chain, Scheduler_object::Type_code t ) 
 : 
     Scheduler_object( job_chain->_spooler, static_cast<Object*>(this), t ),
+    _zero_(this+1),
     _job_chain( job_chain )
 {
 }
@@ -146,7 +146,7 @@ void Order_source::finish()
 {
     if( !_job_chain )  z::throw_xc( __FUNCTION__ );
 
-    if( _next_state.is_error() )  _next_state = _job_chain->first_node()->_state;
+    if( _next_state.is_missing() )  _next_state = _job_chain->first_node()->_state;
     _next_job = _job_chain->node_from_state( _next_state )->_job;    // Ist nicht NULL
 }
 
@@ -205,15 +205,29 @@ void Order_sources::start()
 
 xml::Element_ptr Job_chain_node::dom_element( const xml::Document_ptr& document, const Show_what& show, Job_chain* job_chain )
 {
-    xml::Element_ptr element = document.createElement( is_file_order_sink()? "file_order_sink" : "job_chain_node" );
+    xml::Element_ptr element = document.createElement( "job_chain_node" );
 
-                                        element.setAttribute( "state"      , debug_string_from_variant( _state       ) );
-        if( !_next_state.is_empty()  )  element.setAttribute( "next_state" , debug_string_from_variant( _next_state  ) );
-        if( !_error_state.is_empty() )  element.setAttribute( "error_state", debug_string_from_variant( _error_state ) );
-        if( _job )                      element.setAttribute( "orders"     , order_count( job_chain ) );
+        element.setAttribute( "state", debug_string_from_variant( _state ) );
+
+        if( !is_file_order_sink() )
+        {
+            if( !_next_state.is_empty()  )  element.setAttribute( "next_state" , debug_string_from_variant( _next_state  ) );
+            if( !_error_state.is_empty() )  element.setAttribute( "error_state", debug_string_from_variant( _error_state ) );
+        }
+
+        if( is_file_order_sink() )
+        {
+            xml::Element_ptr file_order_sink_element = document.createElement( "file_order_sink" );
+
+            if( _file_order_sink_remove )  file_order_sink_element.setAttribute( "remove", "yes" );
+            file_order_sink_element.setAttribute_optional( "move_to", _file_order_sink_move_to );
+
+            element.appendChild( file_order_sink_element );
+        }
 
         if( _job )
         {
+            element.setAttribute( "orders", order_count( job_chain ) );
             element.setAttribute( "job", _job->name() );
 
             if( show & show_job_chain_jobs )
@@ -232,12 +246,6 @@ xml::Element_ptr Job_chain_node::dom_element( const xml::Document_ptr& document,
                 element.appendChild( job_element );
                 job_element.appendChild( _job->order_queue()->dom_element( document, show | show_orders, job_chain ) );
             }
-        }
-
-        if( is_file_order_sink() )
-        {
-            if( _file_order_sink_remove )  element.setAttribute( "remove", "yes" );
-            element.setAttribute_optional( "move_to", _file_order_sink_move_to );
         }
 
     return element;
@@ -323,7 +331,11 @@ void Job_chain::set_dom( const xml::Element_ptr& element )
         {
             string state = e.getAttribute( "state" );
 
-            Job_chain_node* node = add_job( _spooler->get_job_or_null( file_order_sink_job_name ), state, state, state );
+            bool can_be_not_initialized = true;
+            Job* job = _spooler->get_job( file_order_sink_job_name, can_be_not_initialized );
+            job->set_visible( true );
+
+            Job_chain_node* node = add_job( job, state, Variant(Variant::vt_missing), Variant(Variant::vt_missing) );
 
             node->_file_order_sink_move_to.set_directory( e.getAttribute( "move_to" ) );
             node->_file_order_sink_remove  = e.bool_getAttribute( "remove" );
@@ -335,7 +347,7 @@ void Job_chain::set_dom( const xml::Element_ptr& element )
             string state    = e.getAttribute( "state" );
 
             bool can_be_not_initialized = true;
-            Job* job = job_name == ""? NULL : _spooler->get_job( job_name, can_be_not_initialized  );
+            Job* job = job_name == ""? NULL : _spooler->get_job( job_name, can_be_not_initialized );
             if( state == "" )  z::throw_xc( "SCHEDULER-231", "job_chain_node", "state" );
 
             add_job( job, state, e.getAttribute( "next_state" ), e.getAttribute( "error_state" ) );
@@ -413,6 +425,24 @@ xml::Element_ptr Job_chain::dom_element( const xml::Document_ptr& document, cons
 
             element.appendChild( order_history_element );
         }
+
+
+        if( !_blacklist_map.empty() )
+        {
+            xml::Element_ptr blacklist_element = document.createElement( "blacklist" );
+            blacklist_element.setAttribute( "count", (int)_blacklist_map.size() );
+
+            if( show & show_blacklist )
+            {
+                Z_FOR_EACH( Blacklist_map, _blacklist_map, it )
+                {
+                    Order* order = it->second;
+                    blacklist_element.appendChild( order->dom_element( document, modified_show ) );
+                }
+            }
+
+            element.appendChild( blacklist_element );
+        }
     }
 
     return element;
@@ -433,7 +463,7 @@ Order::State normalized_state( const Order::State& state )
 {
     if( state.vt == VT_BSTR  &&  ( state.bstrVal == NULL || SysStringLen( state.bstrVal ) == 0 ) )
     {
-        return Variant( Variant::vt_error, DISP_E_PARAMNOTFOUND );      // F¸r Java
+        return Variant( Variant::vt_missing );      // F¸r Java
     }
     else
     {
@@ -545,19 +575,19 @@ Job_chain_node* Job_chain::add_job( Job* job, const Order::State& state, const O
     node->_job   = job;
     node->_state = state;
 
-    if( node->_state.is_error() )  node->_state = job->name();      // Parameter state nicht angegeben? Default ist der Jobname
+    if( node->_state.is_missing() )  node->_state = job->name();      // Parameter state nicht angegeben? Default ist der Jobname
 
     node->_next_state  = normalized_state( next_state );
     node->_error_state = normalized_state( error_state );
 
-    // Bis finish() bleibt nicht angegebener Zustand als VT_ERROR/is_error (fehlender Parameter) stehen.
-    // finish() unterscheidet dann die nicht angegebenen Zust‰nde von VT_ERROR und setzt Defaults oder VT_EMPTY.
+    // Bis finish() bleibt nicht angegebener Zustand als VT_ERROR/is_missing() (fehlender Parameter) stehen.
+    // finish() unterscheidet dann die nicht angegebenen Zust‰nde von VT_ERROR und setzt Defaults oder VT_EMPTY (auﬂer <file_order_sink>)
 
     //THREAD_LOCK( _lock )
     {
         if( Job_chain_node* n = node_from_state_or_null( node->_state ) )
         {
-            if( !job  &&  next_state.is_error()  &&  error_state.is_error() )  return n;     // job_chain.add_end_state() darf mehrfach gerufen werden.
+            if( !job  &&  next_state.is_missing()  &&  error_state.is_missing() )  return n;     // job_chain.add_end_state() darf mehrfach gerufen werden.
             z::throw_xc( "SCHEDULER-150", debug_string_from_variant(node->_state), name() );
         }
 
@@ -580,7 +610,7 @@ void Job_chain::finish()
         if( !_chain.empty() )
         {
             Job_chain_node* n = *_chain.rbegin();
-            if( n->_job  &&  n->_next_state.is_error() )  add_job( NULL, default_end_state_name );    // Endzustand fehlt? Dann hinzuf¸gen
+            if( n->_job  &&  n->_next_state.is_missing() )  add_job( NULL, default_end_state_name );    // Endzustand fehlt? Dann hinzuf¸gen
         }
 
         for( Chain::iterator it = _chain.begin(); it != _chain.end(); it++ )
@@ -588,13 +618,20 @@ void Job_chain::finish()
             Job_chain_node* n = *it;
             Chain::iterator next = it;  next++;
 
-            if( n->_next_state.is_error()  &&  next != _chain.end()  &&  n->_job )  n->_next_state = (*next)->_state;
+            if( n->is_file_order_sink() )
+            {
+                // _next_state und _error_state unver‰ndert lassen
+            }
+            else
+            {
+                if( n->_next_state.is_missing()  &&  next != _chain.end()  &&  n->_job )  n->_next_state = (*next)->_state;
 
-            if( !n->_next_state.is_error() )  n->_next_node  = node_from_state( n->_next_state );
-                                        else  n->_next_state = empty_variant;
+                if( !n->_next_state.is_missing() )  n->_next_node  = node_from_state( n->_next_state );
+                                              else  n->_next_state = empty_variant;
 
-            if( !n->_error_state.is_error() )  n->_error_node  = node_from_state( n->_error_state );
-                                         else  n->_error_state = empty_variant;
+                if( !n->_error_state.is_missing() )  n->_error_node  = node_from_state( n->_error_state );
+                                               else  n->_error_state = empty_variant;
+            }
         }
 
         _order_sources.finish();
@@ -795,7 +832,12 @@ void Job_chain::remove()
 
         for( Spooler::Job_chain_map::iterator j = _spooler->_job_chain_map.begin(); j != _spooler->_job_chain_map.end(); j++ )
         {
-            if( j->second == this )  { _spooler->_job_chain_map.erase( j );  break; }
+            if( j->second == this )  
+            { 
+                _spooler->_job_chain_map.erase( j );  
+                _spooler->_job_chain_map_version++;
+                break; 
+            }
         }
 
         Z_FOR_EACH( Order_sources::Order_source_list, _order_sources._order_source_list, it )

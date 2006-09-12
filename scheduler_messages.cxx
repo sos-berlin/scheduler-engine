@@ -210,7 +210,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-339", "Someone has removed file $1" },
     { "SCHEDULER-340", "File still exists. Order has been set on the blacklist" },
     { "SCHEDULER-341", "Cannot process orders as a job is missing" },
-    { "SCHEDULER-342", "There is no job between order source and order sink" },
+    { "SCHEDULER-342", "There is no job between order source and order sink in $1" },
     { "SCHEDULER-900", "Scheduler $1 is starting with $2, pid=$3" },
     { "SCHEDULER-902", "state=$1" },
     { "SCHEDULER-904", "Tasks have $1s to terminate" },

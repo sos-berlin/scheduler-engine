@@ -34,6 +34,8 @@ enum Show_what_enum
     show_for_database_only  = 0x8000,   // XML-Element nur für Datenbank
     show_id_only            = 0x10000,
     show_job_commands       = 0x20000,
+    show_blacklist          = 0x40000,
+    show_order_source_files = 0x80000,
   //show_web_services       = 0x20000,
   //show_web_service_operations = 0x40000,
 

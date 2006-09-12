@@ -232,6 +232,7 @@ struct Order_source : Scheduler_object, Event_operation
     virtual xml::Element_ptr    dom_element             ( const xml::Document_ptr&, const Show_what& ) = 0;
 
   protected:
+    Fill_zero                  _zero_;
     Job_chain*                 _job_chain;
     Order::State               _next_state;
     Job*                       _next_job;
@@ -320,7 +321,9 @@ struct Job_chain : Com_job_chain, Scheduler_object
     void                        load_orders_from_database();
     int                         remove_all_pending_orders( bool leave_in_database = false );
 
-    Job_chain_node*             add_job                 ( Job*, const Order::State& input_state, const Order::State& output_state = error_variant, const Order::State& error_state = error_variant );
+    Job_chain_node*             add_job                 ( Job*, const Order::State& input_state, 
+                                                          const Order::State& next_state  = Variant(Variant::vt_missing), 
+                                                          const Order::State& error_state = Variant(Variant::vt_missing) );
     void                        finish                  ();
 
   //Job*                        first_job               ();

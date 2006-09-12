@@ -752,6 +752,10 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
         else
         if( string_equals_prefix_then_skip( &p, "job_commands"     ) )  show |= show_job_commands;
         else
+        if( string_equals_prefix_then_skip( &p, "blacklist"        ) )  show |= show_blacklist;
+        else
+        if( string_equals_prefix_then_skip( &p, "order_source_files") )  show |= show_order_source_files;
+        else
         if( string_equals_prefix_then_skip( &p, "standard"         ) )  ;
         else
             z::throw_xc( "SCHEDULER-164", what );

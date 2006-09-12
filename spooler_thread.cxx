@@ -210,11 +210,10 @@ void Spooler_thread::cmd_shutdown()
 }
 */
 //------------------------------------------------Spooler_thread::build_prioritized_order_job_array
-/*
+
 void Spooler_thread::build_prioritized_order_job_array()
 {
-    Time t = _spooler->job_chain_time();
-    if( _prioritized_order_job_array_time != t )        // Ist eine neue Jobkette hinzugekommen?
+    if( _prioritized_order_job_array_version != _spooler->_job_chain_map_version )        // Ist eine neue Jobkette hinzugekommen?
     {
         _prioritized_order_job_array.clear();
 
@@ -225,11 +224,11 @@ void Spooler_thread::build_prioritized_order_job_array()
 
         sort( _prioritized_order_job_array.begin(), _prioritized_order_job_array.end(), Job::higher_job_chain_priority );
 
-        _prioritized_order_job_array_time = t;
+        _prioritized_order_job_array_version = _spooler->_job_chain_map_version;
         //FOR_EACH( vector<Job*>, _prioritized_order_job_array, i )  _log.debug( "build_prioritized_order_job_array: Job " + (*i)->name() );
     }
 }
-*/
+
 //-----------------------------------------------------------------Spooler_thread::get_task_or_null
 
 ptr<Task> Spooler_thread::get_task_or_null( int task_id )
@@ -389,7 +388,7 @@ bool Spooler_thread::step()
         }
     }
 
-
+/*
     if( Job* file_order_sink_job = _spooler->get_job_or_null( file_order_sink_job_name ) )
     {
         // Internen Job scheduler_file_order_sink nicht vernachlässigen, damit sich die Aufträge nicht stauen!
@@ -400,51 +399,7 @@ bool Spooler_thread::step()
             something_done |= do_something( *it );          // Es sollte nur eine Task sein
         }
     }
-
-
-    if( !something_done )
-    {
-        FOR_EACH_TASK( it, task )
-        {
-          //if( _my_event.signaled_then_reset() )  return true;
-            if( _event  ->signaled()            )  return true;      // Das ist _my_event oder _spooler->_event
-
-            something_done |= do_something( task );
-
-            if( something_done )  break;
-        }
-
-        remove_ended_tasks();
-    }
-
-
-
-
-
-    /*
-    // Erst die Tasks mit höchster Priorität. Die haben absoluten Vorrang:
-
-
-    FOR_EACH_TASK( it, task )
-    {
-        Job* job = task->job();
-
-        if( !job->order_controlled() )
-        {
-            if( job->priority() >= _spooler->priority_max() )
-            {
-              //if( _my_event.signaled_then_reset() )  return true;
-                if( _event  ->signaled()            )  return true;      // Das ist _event oder _spooler->_event
-                if( _spooler->signaled()            )  return true;
-
-                something_done |= do_something( task );
-
-                if( !something_done )  break;
-            }
-        }
-    }
-
-    remove_ended_tasks();
+*/
 
 
     // Jetzt sehen wir zu, dass die Jobs, die hinten in einer Jobkette stehen, ihre Aufträge los werden.
@@ -453,12 +408,7 @@ bool Spooler_thread::step()
 
     if( !something_done )
     {
-        Time t = _spooler->job_chain_time();
-        if( _prioritized_order_job_array_time != t )        // Ist eine neue Jobkette hinzugekommen?
-        {
-            build_prioritized_order_job_array();
-            _prioritized_order_job_array_time = t;
-        }
+        build_prioritized_order_job_array();
 
 
         // ERSTMAL DIE ORDER-JOBS
@@ -506,8 +456,55 @@ bool Spooler_thread::step()
     }
 
 
+    if( !something_done )
+    {
+        FOR_EACH_TASK( it, task )
+        {
+          //if( _my_event.signaled_then_reset() )  return true;
+            if( _event  ->signaled()            )  return true;      // Das ist _my_event oder _spooler->_event
+
+            something_done |= do_something( task );
+
+            if( something_done )  break;
+        }
+
+        remove_ended_tasks();
+    }
 
 
+
+
+
+    /*
+    // Erst die Tasks mit höchster Priorität. Die haben absoluten Vorrang:
+
+
+    FOR_EACH_TASK( it, task )
+    {
+        Job* job = task->job();
+
+        if( !job->order_controlled() )
+        {
+            if( job->priority() >= _spooler->priority_max() )
+            {
+              //if( _my_event.signaled_then_reset() )  return true;
+                if( _event  ->signaled()            )  return true;      // Das ist _event oder _spooler->_event
+                if( _spooler->signaled()            )  return true;
+
+                something_done |= do_something( task );
+
+                if( !something_done )  break;
+            }
+        }
+    }
+
+    remove_ended_tasks();
+    */
+
+
+
+
+    /*
     // Wenn keine Task höchste Priorität hat, dann die Tasks relativ zu ihrer Priorität, außer Priorität 0:
 
     // ERSTMAL DIE NICHT-ORDER-JOBS
