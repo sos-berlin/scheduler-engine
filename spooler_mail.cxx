@@ -331,7 +331,9 @@ void Com_mail::set_smtp( const string& smtp )
 
 string Com_mail::smtp() 
 {
-    return value_with_default( _smtp, "smtp" );
+    string result = value_with_default( _smtp, "smtp" );
+    if( result == "" )  result = _msg->smtp();
+    return result;
 }
 
 //--------------------------------------------------------------------------Com_mail::set_queue_dir
