@@ -924,7 +924,7 @@ void Directory_watcher::set_signaled()
             if( _filename_pattern.empty()  ||  match() )  Event::set_signaled( "Directory_watcher::set_signaled" );
                                                     else  Event::set_signaled( false );    // Signal von _event zurücknehmen
 
-            Z_LOG( "FindNextChangeNotification()\n" );
+            Z_LOG( "FindNextChangeNotification(\"" << _directory << "\")\n" );
             BOOL ok = FindNextChangeNotification( _handle );
             if( !ok )  throw_mswin_error( "FindNextChangeNotification" );
         }

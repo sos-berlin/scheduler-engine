@@ -1252,15 +1252,20 @@ void Job::start_when_directory_changed( const string& directory_name, const stri
 
         for( Directory_watcher_list::iterator it = _directory_watcher_list.begin(); it != _directory_watcher_list.end(); it++ )
         {
-            if( (*it)->directory()        == directory_name 
-             && (*it)->filename_pattern() == filename_pattern )  
+            Directory_watcher* directory_watcher = *it;
+
+            if( directory_watcher->directory()        == directory_name 
+             && directory_watcher->filename_pattern() == filename_pattern )  
             {
 #               ifdef Z_WINDOWS
+                    //return;
+
+                    // Ein Signal der überschriebenen Überwachung geht verloren: 2006-09-13
                     // Windows: Überwachung erneuern
                     // Wenn das Verzeichnis bereits überwacht war, aber inzwischen gelöscht, und das noch nicht bemerkt worden ist
                     // (weil Spooler_thread::wait vor lauter Jobaktivität nicht gerufen wurde), dann ist es besser, die Überwachung 
                     // hier zu erneuern. Besonders, wenn das Verzeichnis wieder angelegt ist.
-
+                    //
                     _directory_watcher_list.erase( it );
                     break;
 #               else
@@ -1294,6 +1299,109 @@ void Job::clear_when_directory_changed()
 
         _directory_watcher_next_time = latter_day;
     }
+}
+
+//------------------------------------------------------------------Job::update_changed_directories
+
+void Job::update_changed_directories( Directory_watcher* directory_watcher )
+{
+    _directory_changed = true;
+
+    if( directory_watcher->directory().find( ';' ) != string::npos )  _log->warn( message_string( "SCHEDULER-976", directory_watcher->directory() ) );
+    else
+    {
+        if( ( ";" + _changed_directories + ";" ).find( ";" + directory_watcher->directory() + ";" ) == string::npos )  // Noch nicht drin?
+        {
+            if( !_changed_directories.empty() )  _changed_directories += ";";
+            _changed_directories += directory_watcher->directory();
+        }
+    }
+}
+
+//-----------------------------------------------------------------Job::check_for_changed_directory
+
+bool Job::check_for_changed_directory( const Time& now )
+{
+    bool something_done = false;
+
+#   ifdef Z_UNIX
+        if( now < _directory_watcher_next_time )  
+        { 
+            //Z_LOG2( "joacim", obj_name() << " " << __FUNCTION__ << " " << now << "<" << _directory_watcher_next_time << "\n" ); 
+            return false; 
+        }
+#   endif
+
+
+    //Z_LOG2( "joacim", "Job::task_to_start(): Verzeichnisüberwachung _directory_watcher_next_time=" << _directory_watcher_next_time << ", now=" << now << "\n" );
+    _directory_watcher_next_time = _directory_watcher_list.size() > 0? Time( now + directory_watcher_intervall )
+                                                                     : latter_day;
+    calculate_next_time();
+
+
+    Directory_watcher_list::iterator it = _directory_watcher_list.begin();
+    while( it != _directory_watcher_list.end() )
+    {
+#       ifdef Z_UNIX
+            something_done = true;    // Unter Unix lassen wir do_something() periodisch aufrufen, um has_changed() ausführen können. Also: something done!
+#       endif   
+
+        Directory_watcher* directory_watcher = *it;
+
+        directory_watcher->has_changed();                        // has_changed() für Unix (und seit 22.3.04 für Windows, siehe dort).
+
+        if( directory_watcher->signaled_then_reset() )
+        {
+            Z_LOG2( "joacim", __FUNCTION__ << " something_done=true\n" );
+            something_done = true;
+
+            update_changed_directories( directory_watcher );
+
+            if( !directory_watcher->valid() )
+            {
+                it = _directory_watcher_list.erase( it );  // Folge eines Fehlers, s. Directory_watcher::set_signal
+                continue;
+            }
+        }            
+
+        it++;
+    }
+
+    //Z_LOG2( "joacim", obj_name() << " " << __FUNCTION__ << " something_done=" << something_done << "  _changed_directories="  << _changed_directories << "\n" ); 
+    return something_done;
+}
+
+//-------------------------------------------------------------------------------Job::trigger_files
+
+string Job::trigger_files()
+{
+    S result;
+
+    Z_FOR_EACH( Directory_watcher_list, _directory_watcher_list, it )
+    {
+        Directory_watcher* directory_watcher = *it;
+
+        if( directory_watcher->filename_pattern() != "" )   // Nur mit regex= überwachte Verzeichnisse sollen berücksichtigt werden
+        {
+            Directory_watcher::Directory_reader dir ( directory_watcher );
+            while(1)
+            {
+                ptr<z::File_info> file_info = dir.get();
+                if( !file_info )  break;
+                
+                string path = file_info->path().path();
+
+                if( path.find( ';' ) != string::npos )  _log->warn( message_string( "SCHEDULER-975", path ) );
+                else
+                {
+                    if( result.length() > 0 )  result << ";";
+                    result << path;
+                }
+            }
+        }
+    }
+
+    return result;
 }
 
 //-------------------------------------------------------------------------------Job::select_period
@@ -1575,100 +1683,6 @@ void Job::remove_waiting_job_from_process_list()
     }
 
     _waiting_for_process_try_again = false;
-}
-
-//-----------------------------------------------------------------Job::check_for_changed_directory
-
-bool Job::check_for_changed_directory( const Time& now )
-{
-    bool something_done = false;
-
-#   ifdef Z_UNIX
-        if( now < _directory_watcher_next_time )  
-        { 
-            //Z_LOG2( "joacim", obj_name() << " " << __FUNCTION__ << " " << now << "<" << _directory_watcher_next_time << "\n" ); 
-            return false; 
-        }
-#   endif
-
-
-    //Z_LOG2( "joacim", "Job::task_to_start(): Verzeichnisüberwachung _directory_watcher_next_time=" << _directory_watcher_next_time << ", now=" << now << "\n" );
-    _directory_watcher_next_time = _directory_watcher_list.size() > 0? Time( now + directory_watcher_intervall )
-                                                                     : latter_day;
-    calculate_next_time();
-
-
-    Directory_watcher_list::iterator it = _directory_watcher_list.begin();
-    while( it != _directory_watcher_list.end() )
-    {
-#       ifdef Z_UNIX
-            something_done = true;    // Unter Unix lassen wir do_something() periodisch aufrufen, um has_changed() ausführen können. Also: something done!
-#       endif   
-
-        Directory_watcher* directory_watcher = *it;
-
-        directory_watcher->has_changed();                        // has_changed() für Unix (und seit 22.3.04 für Windows, siehe dort).
-
-        if( directory_watcher->signaled_then_reset() )
-        {
-            something_done = true;
-            _directory_changed = true;
-
-            if( directory_watcher->directory().find( ';' ) != string::npos )  _log->warn( message_string( "SCHEDULER-976", directory_watcher->directory() ) );
-            else
-            {
-                if( ( ";" + _changed_directories + ";" ).find( ";" + directory_watcher->directory() + ";" ) == string::npos )  // Noch nicht drin?
-                {
-                    if( !_changed_directories.empty() )  _changed_directories += ";";
-                    _changed_directories += directory_watcher->directory();
-                }
-            }
-
-            if( !directory_watcher->valid() )
-            {
-                it = _directory_watcher_list.erase( it );  // Folge eines Fehlers, s. Directory_watcher::set_signal
-                continue;
-            }
-        }            
-
-        it++;
-    }
-
-    //Z_LOG2( "joacim", obj_name() << " " << __FUNCTION__ << " something_done=" << something_done << "\n" ); 
-    return something_done;
-}
-
-//-------------------------------------------------------------------------------Job::trigger_files
-
-string Job::trigger_files()
-{
-    S result;
-
-    Z_FOR_EACH( Directory_watcher_list, _directory_watcher_list, it )
-    {
-        Directory_watcher* directory_watcher = *it;
-
-        if( directory_watcher->filename_pattern() != "" )   // Nur mit regex= überwachte Verzeichnisse sollen berücksichtigt werden
-        {
-            Directory_watcher::Directory_reader dir ( directory_watcher );
-            while(1)
-            {
-                ptr<z::File_info> file_info = dir.get();
-                if( !file_info )  break;
-                
-                string path = file_info->path().path();
-
-                if( path.find( ';' ) != string::npos )  _log->warn( message_string( "SCHEDULER-975", path ) );
-                else
-                {
-                    if( result.length() > 0 )  result << ";";
-                    result << path;
-                }
-            }
-        }
-    }
-
-    return result;
 }
 
 //-------------------------------------------------------------------------------Job::task_to_start

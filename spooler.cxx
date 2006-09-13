@@ -2351,6 +2351,8 @@ void Spooler::nichts_getan( int anzahl, const string& str )
             jobs << job->obj_name() << " " << job->state_name();
             Time next_time = job->next_time();
             if( next_time < latter_day )  jobs << " until " << next_time; 
+            if( !job->is_in_period( Time::now() ) )  jobs << " (not in period)";
+            if( job->_waiting_for_process )  jobs << " (waiting for process)";
         }
         if( jobs.length() == 0 )  jobs << "no jobs";
 
