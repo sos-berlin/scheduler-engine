@@ -540,6 +540,7 @@ void Module_instance::set_task_id( int id )
 void Module_instance::set_log( Prefix_log* log )
 { 
     _log = log; 
+    _com_log->set_log ( log );
 
     if( _monitor_instance )  _monitor_instance->set_log( log );
 }
@@ -562,8 +563,8 @@ void Module_instance::attach_task( Task* task, Prefix_log* log )
 {
   //_task = task;
 
+    set_log( log );
     _com_task->set_task( task );
-    _com_log ->set_log ( log );
 
     _task_id = task->id();
     //_title = task->obj_name();          // Titel für Prozess
