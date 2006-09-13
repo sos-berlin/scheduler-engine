@@ -681,7 +681,7 @@ struct Iweb_service_operation : IDispatch
     virtual HRESULT         get_Request                     ( Iweb_service_request** )              = 0;
     virtual HRESULT         get_Response                    ( Iweb_service_response** )             = 0;
     virtual HRESULT         get_Peer_ip                     ( BSTR* )                               = 0;
-    virtual HRESULT         get_Peer_Hostname               ( BSTR* )                               = 0;
+    virtual HRESULT         get_Peer_hostname               ( BSTR* )                               = 0;
 };
 
 //-----------------------------------------------------------------------------Iweb_service_request
