@@ -1429,7 +1429,8 @@
 
     <xsl:template match="scheduler_message" mode="description">
         <xsl:call-template name="scheduler_message">
-            <xsl:with-param name="code" select="@code"/>
+            <xsl:with-param name="code"      select="@code"/>
+            <xsl:with-param name="show_text" select="@show_text"/>
         </xsl:call-template>
     </xsl:template>
 
@@ -1437,6 +1438,7 @@
 
     <xsl:template name="scheduler_message">
         <xsl:param name="code"/>
+        <xsl:param name="show_text" select="false()"/>
 
         <xsl:element name="a">
             <xsl:attribute name="href">
@@ -1454,6 +1456,15 @@
                 <xsl:value-of select="$code"/>
             </xsl:element>
         </xsl:element>
+
+        <xsl:if test="@show_text">
+            <code>
+                <xsl:text>&#160; </xsl:text>
+                <xsl:call-template name="show_message_text">
+                    <xsl:with-param name="code" select="$code"/>
+                </xsl:call-template>
+            </code>
+        </xsl:if>
 
     </xsl:template>
 

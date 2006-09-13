@@ -1611,13 +1611,17 @@ bool Job::check_for_changed_directory( const Time& now )
 
         if( directory_watcher->signaled_then_reset() )
         {
+            something_done = true;
             _directory_changed = true;
 
             if( directory_watcher->directory().find( ';' ) != string::npos )  _log->warn( message_string( "SCHEDULER-976", directory_watcher->directory() ) );
             else
             {
-                if( !_changed_directories.empty() )  _changed_directories += ";";
-                _changed_directories += directory_watcher->directory();
+                if( ( ";" + _changed_directories + ";" ).find( ";" + directory_watcher->directory() + ";" ) == string::npos )  // Noch nicht drin?
+                {
+                    if( !_changed_directories.empty() )  _changed_directories += ";";
+                    _changed_directories += directory_watcher->directory();
+                }
             }
 
             if( !directory_watcher->valid() )
@@ -1789,7 +1793,8 @@ ptr<Task> Job::task_to_start()
             }
 
             task->_cause = cause;
-            task->_changed_directories = _changed_directories;  _changed_directories = "";
+            task->_changed_directories = _changed_directories;  
+            _changed_directories = "";
             _directory_changed = false;
 
             if( now >= _next_single_start )  _next_single_start = latter_day;  // Vorsichtshalber, 26.9.03

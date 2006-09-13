@@ -10,7 +10,64 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2006-09-11" version="2.0.158" subversion_revision="4474">
+    <change date="2006-09-13" version="2.0.158" subversion_revision="4484">
+
+        <revision type="correction" title="Doppelte Einträge in spooler_task.changed_directories">
+            <description>
+                <p>
+                    <scheduler_method class="Task" properties="changed_directories"/>
+                    konnte mehrfache Einträge enthalten, 
+                    wenn der Scheduler mehrfache Änderungen desselben Verzeichnisses bemerkte,
+                    Verzeichnisänderungen bemerkt, bevor die Task gestartet werden konnte.
+                    Jetzt wird jedes Verzeichnis nur einmal eingetragen.
+                </p>
+            </description>
+        </revision>
+
+        <revision type="new" title="&lt;process> gibt bei Prozessstart Kommandozeile aus">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_element name="process"/>
+                    </li>
+                    <li>
+                        <scheduler_message level="info" code="SCHEDULER-987" show_text="yes"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+
+        <revision type="new" title="spooler_log.mail.to etc. liefern Default-Werte">
+            <description>
+                <p>
+                    Folgende Aufruf liefern die Default-Werte aus den .ini-Dateien:
+                </p>
+                <ul>
+                    <li>
+                        <scheduler_method class="Mail" object="spooler_log.mail" property="from"/>
+                    </li>
+                    <li>
+                        <scheduler_method class="Mail" object="spooler_log.mail" property="to"/>
+                    </li>
+                    <li>
+                        <scheduler_method class="Mail" object="spooler_log.mail" property="cc"/>
+                    </li>
+                    <li>
+                        <scheduler_method class="Mail" object="spooler_log.mail" property="bcc"/>
+                    </li>
+                    <li>
+                        <scheduler_method class="Mail" object="spooler_log.mail" property="subject"/>
+                    </li>
+                    <li>
+                        <scheduler_method class="Mail" object="spooler_log.mail" property="smtp"/>
+                    </li>
+                    <li>
+                        <scheduler_method class="Mail" object="spooler_log.mail" property="queue_dir"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+        
         <revision type="new" title="Web_service_operation.peer_ip und .peer_hostname">
             <description>
                 Zwei neue Aufrufe:
@@ -25,10 +82,7 @@
                 </ul>
             </description>
         </revision>
-    </change>
 
-
-    <change date="2006-09-08" version="2.0.158" subversion_revision="4470">
         <revision type="new" title="Dateiaufträge">
             <description>
                 In <scheduler_element name="job_chain"/> können zwei neue XML-Elemente angegeben werden:
@@ -39,6 +93,9 @@
                     </li>
                     <li>
                         <scheduler_element name="file_order_sink"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="show_job_chains" attribut="what" value="blacklist"/>
                     </li>
                 </ul>
             </description>

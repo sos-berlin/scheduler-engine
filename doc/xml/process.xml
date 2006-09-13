@@ -156,5 +156,9 @@ spooler.job( "process" ).start( params );
         
     </description>
 
+    <messages>
+        <message level="info" code="SCHEDULER-987"/>
+    </messages>
+
     <behavior_with_xml_element element="base" allowed="no"/>
 </xml_element>
