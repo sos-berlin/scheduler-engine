@@ -261,7 +261,10 @@ bool Process_module_instance::begin__end()
     DWORD creation_flags = 0;
     if( _module->_priority != "" )  creation_flags |= windows::priority_class_from_string( _module->_priority );        // Liefert 0 bei Fehler
 
-    _log.info( message_string( "SCHEDULER-987", command_line ) );
+    Message_string m ( "SCHEDULER-987" );
+    m.set_max_insertion_length( INT_MAX );
+    m.insert( 1, command_line );
+    _log.info( m );
 
     ok = CreateProcess( NULL, //executable_path.c_str(),    // application name
                         (char*)command_line.c_str(),      // command line
@@ -465,7 +468,10 @@ bool Process_module_instance::begin__end()
     _stdout_file.open_temporary( File::open_unlink_later | File::open_inheritable );
     _stderr_file.open_temporary( File::open_unlink_later | File::open_inheritable );
 
-    _log.info( message_string( "SCHEDULER-987", posix::shell_command_line_from_argv( string_args ) ) );
+    Message_string m ( "SCHEDULER-987" );
+    m.set_max_insertion_length( INT_MAX );
+    m.insert( 1, posix::shell_command_line_from_argv( string_args ) );
+    _log.info( m );
 
     LOG( "signal(SIGCHLD,SIG_DFL)\n" );
     ::signal( SIGCHLD, SIG_DFL );                 // Java verändert das Signal-Verhalten, so dass waitpid() ohne diesen Aufruf versagte.
