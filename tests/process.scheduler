@@ -25,7 +25,7 @@ spooler.job( "process" ).start( params );
                 <process 
                     file="/tmp/test.cmd" 
                     ignore_error="no" 
-                    param="Mein Parameter 'ab' &quot;ab&quot; \ $ {} () EINS=$EINS ZWEI=$ZWEI HOME=$HOME LOG=$LOG PATH=$PATH"
+                    param="Mein Parameter 'ab' &quot;ab&quot; &quot;'&quot; \ $ {} () EINS=$EINS ZWEI=$ZWEI HOME=$HOME LOG=$LOG PATH=$PATH"
                 >
                     <environment>
                         <variable name="var1" value="111"/>
