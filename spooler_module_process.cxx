@@ -570,7 +570,7 @@ bool Process_module_instance::kill()
     {
         _log.warn( message_string( "SCHEDULER-281" ) );   
 
-        kill_process_immediately( _process_handle._pid, kill_descendants_too );
+        kill_process_immediately( _process_handle._pid, const_kill_descendants_too );
 
         //? _process_handle._pid = 0;
         _is_killed = true;

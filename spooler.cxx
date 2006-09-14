@@ -3015,7 +3015,7 @@ void Spooler::abort_now( bool restart )
         TerminateProcess( GetCurrentProcess(), exit_code );
         _exit( exit_code );
 #    else
-        try_kill_process_immediately( _pid, kill_descendants_too );
+        try_kill_process_immediately( _pid, const_kill_descendants_too );
         _exit( exit_code );
 #   endif
 }

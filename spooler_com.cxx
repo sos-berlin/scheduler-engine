@@ -2678,7 +2678,7 @@ STDMETHODIMP Com_task::Create_subprocess( VARIANT* program_and_parameters, Isubp
 
 STDMETHODIMP Com_task::Add_subprocess( int pid, double timeout, VARIANT_BOOL ignore_error, VARIANT_BOOL ignore_signal, VARIANT_BOOL kill_descendants_too, BSTR title )
 {
-    Z_LOG( __PRETTY_FUNCTION__ << "(" << pid << ',' << timeout << ',' << ignore_error << ',' << ignore_signal << ',' << Bstr(title) << ")\n" );
+    Z_LOG( __PRETTY_FUNCTION__ << "(" << pid << ',' << timeout << ',' << ignore_error << ',' << ignore_signal << ',' << kill_descendants_too << ',' << string_from_bstr(title) << ")\n" );
     HRESULT hr = S_OK;
     
     try
