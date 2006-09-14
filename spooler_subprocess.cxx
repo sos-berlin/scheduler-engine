@@ -148,6 +148,8 @@ STDMETHODIMP Subprocess::Start( VARIANT* program_and_parameters )
 #   endif
 
 
+    if( _process.kill_descendants_too() )  _process.set_call_setsid( true );
+
     try
     {
         if( program_and_parameters->vt == VT_BSTR )
