@@ -340,7 +340,7 @@
         </example>
     </property>
 
-    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+    !--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
     <property name="priority_class">
         <com>
@@ -418,6 +418,29 @@
         <example programming_language="javascript">
             <pre>subprocess.priority_class = "below_normal";</pre>
         </example>
+    </property>
+
+    !--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="kill_descendants_too">
+        <com>
+            <com.result>
+                <com.type type="bool"/>
+            </com.result>
+        </com>
+
+        <title>
+            Bei kill auf einen Prozess auch die Kind-Prozesse abbrechen
+        </title>
+
+        <description>
+            <p>
+                Nur unter Unix.
+            </p>
+            <p>
+                Default ist <code>true</code>, dass heißt die Kind-Prozesse werden im Falle eines <code>kill</code> ebenfalls abgebrochen.
+            </p>
+        </description>
     </property>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->

@@ -10,16 +10,26 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <!--change date="2006-09-14" version="2.0.158" subversion_revision="4494">
-        <description>
-            <ul>
+    <change date="2006-09-14" version="2.0.158" subversion_revision="4494">
+        <revision type="new" title="kill_descendants_too">
+            <description>
+                <p>
+                    Unter Unix wird der <code>kill()</code> auf Prozesse jetzt zusätzlich mit negativer Pid ausgeführt,
+                    um die ganze Prozessgruppe zu beenden.
+                </p>
+                <ul>
+                    <li>
+                        <scheduler_method class="Subprocess" property="kill_descendants_too"/>
+                    </li>
+                </ul>
+                <!--ul>
                 <li>
                     <scheduler_ini_entry file="sos.ini" section="mail" entry="queue_only"/>
                 </li>
-            </ul>
-        </description>
-
-    </change-->
+            </ul-->
+            </description>
+        </revision>
+    </change>
     
     <change date="2006-09-13" version="2.0.158" subversion_revision="4484">
 

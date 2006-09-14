@@ -413,7 +413,6 @@ void Job::init0()
 
 void Job::set_name( const string& name )
 {
-    if( _name != "" )  z::throw_xc( __FUNCTION__ );
     _name  = name;
     set_log();
 }
