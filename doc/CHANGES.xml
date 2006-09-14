@@ -10,6 +10,17 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <!--change date="2006-09-14" version="2.0.158" subversion_revision="4494">
+        <description>
+            <ul>
+                <li>
+                    <scheduler_ini_entry file="sos.ini" section="mail" entry="queue_only"/>
+                </li>
+            </ul>
+        </description>
+
+    </change-->
+    
     <change date="2006-09-13" version="2.0.158" subversion_revision="4484">
 
         <revision type="correction" title="Doppelte Einträge in spooler_task.changed_directories">

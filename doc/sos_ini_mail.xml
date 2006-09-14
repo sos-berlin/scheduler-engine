@@ -16,6 +16,7 @@
 
         <ini_entry setting="smtp" />
         <ini_entry name="queue_dir" setting="mail_queue_dir" />
+        <!--ini_entry name="queue_only" setting="mail_queue_only" /-->
 
     </ini_entries>
 
