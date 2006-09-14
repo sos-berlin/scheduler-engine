@@ -117,4 +117,7 @@ public class Subprocess  extends Idispatch
     
     public void         set_priority_class      ( String priority_class )           {                       com_call( ">priority_class", priority_class ); }
     public String           priority_class      ()                                  { return (String)       com_call( "<priority_class" ); }
+    
+    public void         set_kill_descendants_too( boolean b)                        {                       com_call( ">kill_descendants_too", b ); }
+    public boolean          kill_descendants_too()                                  { return        boolean_com_call( "<kill_descendants_too" ); }
 }
