@@ -412,7 +412,8 @@ library Spooler
 
         // Nur für Itask_proxy
         [id(21)]
-        HRESULT                 Add_subprocess              ( [in] int Pid, [in] double timeout, [in] VARIANT_BOOL Ignore_error, [in] VARIANT_BOOL Ignore_signal, [in,defaultvalue("")] BSTR Title );
+        HRESULT                 Add_subprocess              ( [in] int Pid, [in] double timeout, [in] VARIANT_BOOL Ignore_error, [in] VARIANT_BOOL Ignore_signal, 
+                                                              [in] VARIANT_BOOL kill_dependants_too, [in,defaultvalue("")] BSTR Title );
 
         [propput]
         HRESULT                 Priority                    ( [in] int );
@@ -1361,6 +1362,12 @@ library Spooler
 
         [propput]
         HRESULT                 Environment             ( [in] BSTR Name, [in] BSTR Value );
+
+        [propput]
+        HRESULT                 Kill_descendants_too    ( [in] VARIANT_BOOL );
+
+        [propget]
+        HRESULT                 Kill_descendants_too    ( [out,retval] VARIANT_BOOL* );
     };
 
     [

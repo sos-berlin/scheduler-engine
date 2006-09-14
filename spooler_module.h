@@ -110,6 +110,7 @@ struct Module : Object
     void                        set_dom_source_only         ( const string& include_path );
     void                        set_source_only             ( const Source_with_parts& );
     void                        set_process                 ();                                     // Für <process>
+    void                        init0                       ();
     void                        init                        ();
 
     ptr<Module_instance>        create_instance             ();

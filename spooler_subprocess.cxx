@@ -60,6 +60,8 @@ const Com_method Subprocess::_methods[] =
     COM_METHOD      ( Subprocess, 15, Kill           , VT_EMPTY   , 1, VT_INT  ),
     COM_PROPERTY_PUT( Subprocess, 16, Environment    ,              0, VT_BSTR, VT_BSTR ),
     COM_PROPERTY_GET( Subprocess, 17, Termination_signal, VT_INT  , 0 ),
+    COM_PROPERTY_PUT( Subprocess, 18, Kill_descendants_too, VT_EMPTY, 0, VT_BOOL ),
+    COM_PROPERTY_GET( Subprocess, 18, Kill_descendants_too, VT_BOOL ),
   //COM_PROPERTY_PUT( Subprocess, 17, Show_window    ,              0, VT_BYREF|VT_VARIANT ),
 #endif
     {}
@@ -75,6 +77,7 @@ Subprocess::Subprocess( Subprocess_register* subprocess_register, IDispatch* tas
     _task(task),                // Itask oder Itask_proxy
     _timeout( INT_MAX )
 {
+    _process.set_kill_descendants_too( const_kill_descendants_too );
 }
 
 //--------------------------------------------------------------------------Subprocess::~Subprocess
@@ -331,6 +334,7 @@ HRESULT Subprocess::Update_register_entry()
 
                 // Rückwärts!
                 variant_array.push_back( _process.command_line() );
+                variant_array.push_back( _process.kill_descendants_too() );
                 variant_array.push_back( ignore_signal() );
                 variant_array.push_back( ignore_error() );
                 variant_array.push_back( (int)( _timeout + 0.999 ) );

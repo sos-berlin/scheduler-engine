@@ -2134,7 +2134,7 @@ const Com_method Com_task::_methods[] =
     { DISPATCH_PROPERTYGET, 18, "stderr_text"               , (Com_method_ptr)&Com_task::get_Stderr_text        , VT_BSTR       },
     { DISPATCH_PROPERTYGET, 19, "stdout_text"               , (Com_method_ptr)&Com_task::get_Stdout_text        , VT_BSTR       },
     { DISPATCH_METHOD     , 20, "Create_subprocess"         , (Com_method_ptr)&Com_task::Create_subprocess      , VT_DISPATCH   , { VT_BYREF|VT_VARIANT }, 1 },
-    { DISPATCH_METHOD     , 21, "Add_subprocess"            , (Com_method_ptr)&Com_task::Add_subprocess         , VT_EMPTY      , { VT_INT, VT_R8, VT_BOOL, VT_BOOL, VT_BSTR }, 1 },
+    { DISPATCH_METHOD     , 21, "Add_subprocess"            , (Com_method_ptr)&Com_task::Add_subprocess         , VT_EMPTY      , { VT_INT, VT_R8, VT_BOOL, VT_BOOL, VT_BOOL, VT_BSTR }, 1 },
     { DISPATCH_PROPERTYPUT, 22, "Priority_class"            , (Com_method_ptr)&Com_task::put_Priority_class     , VT_EMPTY      , { VT_BSTR } },
     { DISPATCH_PROPERTYGET, 22, "Priority_class"            , (Com_method_ptr)&Com_task::get_Priority_class     , VT_BSTR       },
     { DISPATCH_PROPERTYGET, 23, "Step_count"                , (Com_method_ptr)&Com_task::get_Step_count         , VT_INT        },
@@ -2676,7 +2676,7 @@ STDMETHODIMP Com_task::Create_subprocess( VARIANT* program_and_parameters, Isubp
 //--------------------------------------------------------------------Com_task::Register_subprocess
 // Wird aufgerufen von Com_task_proxy
 
-STDMETHODIMP Com_task::Add_subprocess( int pid, double timeout, VARIANT_BOOL ignore_error, VARIANT_BOOL ignore_signal, BSTR title  )
+STDMETHODIMP Com_task::Add_subprocess( int pid, double timeout, VARIANT_BOOL ignore_error, VARIANT_BOOL ignore_signal, VARIANT_BOOL kill_descendants_too, BSTR title )
 {
     Z_LOG( __PRETTY_FUNCTION__ << "(" << pid << ',' << timeout << ',' << ignore_error << ',' << ignore_signal << ',' << Bstr(title) << ")\n" );
     HRESULT hr = S_OK;
@@ -2689,6 +2689,7 @@ STDMETHODIMP Com_task::Add_subprocess( int pid, double timeout, VARIANT_BOOL ign
                                timeout, 
                                ignore_error? true : false, 
                                ignore_signal? true : false, 
+                               kill_descendants_too != 0,
                                string_from_bstr( title ) );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }

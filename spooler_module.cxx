@@ -136,9 +136,7 @@ Module::Module( Spooler* sp, Prefix_log* log )
     _log(log),
     _process_environment( new Com_variable_set() )
 {
-#   ifndef Z_WINDOWS
-        _process_environment->_ignore_case = false;
-#   endif
+    init0();
 }
 
 //-----------------------------------------------------------------------------------Module::Module
@@ -149,11 +147,17 @@ Module::Module( Spooler* sp, const xml::Element_ptr& e, const Time& xml_mod_time
     _spooler(sp),
     _process_environment( new Com_variable_set() )
 { 
+    init0();
+    set_dom(e,xml_mod_time,include_path); 
+}
+
+//-------------------------------------------------------------------------------------------------
+
+void Module::init0()
+{
 #   ifndef Z_WINDOWS
         _process_environment->_ignore_case = false;
 #   endif
-
-    set_dom(e,xml_mod_time,include_path); 
 }
 
 //-----------------------------------------------------------------------------Module::set_priority

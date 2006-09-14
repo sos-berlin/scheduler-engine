@@ -69,6 +69,7 @@ namespace spooler {
 const char*                     default_factory_ini                 = "factory.ini";
 const string                    xml_schema_path                     = "scheduler.xsd";
 const string                    scheduler_character_encoding        = "ISO-8859-1";     // Eigentlich Windows-1252, aber das ist weniger bekannt und wir sollten die Zeichen 0xA0..0xBF nicht benutzen.
+const bool                      const_kill_descendants_too          = true;
 const string                    new_suffix                          = "~new";           // Suffix für den neuen Spooler, der den bisherigen beim Neustart ersetzen soll
 const double                    renew_wait_interval                 = 0.25;
 const double                    renew_wait_time                     = 30;               // Wartezeit für Brückenspooler, bis der alte Spooler beendet ist und der neue gestartet werden kann.
@@ -737,7 +738,7 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
         xml::Element_ptr subprocesses_element = dom.createElement( "subprocesses" );
         for( int i = 0; i < NO_OF( _pids ); i++ )
         {
-            int pid = _pids[ i ];
+            int pid = _pids[ i ]._pid;
             if( pid )
             {
                 xml::Element_ptr subprocess_element = dom.createElement( "subprocess" );
@@ -1058,12 +1059,12 @@ bool Spooler::try_to_free_process( Job* for_job, Process_class* process_class, c
 
 //-----------------------------------------------------------------Spooler::register_process_handle
 
-void Spooler::register_process_handle( Process_handle p )
+void Spooler::register_process_handle( Process_handle p, bool kill_descendants_too )
 {
 #   ifdef _DEBUG
         for( int i = 0; i < NO_OF( _process_handles ); i++ )
         {
-            if( _process_handles[i] == p )  throw_xc( "register_process_handle" );              // Bereits registriert
+            if( _process_handles[i]._handle == p )  throw_xc( "register_process_handle" );              // Bereits registriert
         }
 #   endif
 
@@ -1071,7 +1072,12 @@ void Spooler::register_process_handle( Process_handle p )
 
     for( int i = 0; i < NO_OF( _process_handles ); i++ )
     {
-        if( _process_handles[i] == 0 )  { _process_handles[i] = p;  return; }
+        if( _process_handles[i]._handle == 0 )  
+        { 
+            _process_handles[i]._handle = p;  
+            _process_handles[i]._kill_descendants_too = kill_descendants_too;
+            return; 
+        }
     }
 }
 
@@ -1085,7 +1091,7 @@ void Spooler::unregister_process_handle( Process_handle p )
 
         for( int i = 0; i < NO_OF( _process_handles ); i++ )
         {
-            if( _process_handles[i] == p )  { _process_handles[i] = 0;  return; }
+            if( _process_handles[i]._handle == p )  { _process_handles[i]._handle = 0;  return; }
         }
     }
 
@@ -1096,11 +1102,18 @@ void Spooler::unregister_process_handle( Process_handle p )
 
 //-------------------------------------------------------------------------------Task::register_pid
 
-void Spooler::register_pid( int pid )
+void Spooler::register_pid( int pid, bool kill_descendants_too )
 { 
     for( int i = 0; i < NO_OF( _pids ); i++ )
     {
-        if( _pids[i] == 0 )  { _pids[i] = pid;  return; }
+        Killpid* p = &_pids[i];
+
+        if( p->_pid == 0  ||  p->_pid == pid )
+        { 
+            p->_pid = pid;
+            p->_kill_descendants_too = kill_descendants_too;
+            return; 
+        }
     }
 }
 
@@ -1110,7 +1123,9 @@ void Spooler::unregister_pid( int pid )
 { 
     for( int i = 0; i < NO_OF( _pids); i++ )
     {
-        if( _pids[i] == pid )  { _pids[i] = 0;  return; }
+        Killpid* p = &_pids[i];
+
+        if( p->_pid == pid )  { _pids[i]._pid = 0;  return; }
     }
 }
 
@@ -3000,8 +3015,7 @@ void Spooler::abort_now( bool restart )
         TerminateProcess( GetCurrentProcess(), exit_code );
         _exit( exit_code );
 #    else
-        LOG( "kill(" << _pid << ",SIGKILL);\n" );
-        kill( _pid, SIGKILL );
+        try_kill_process_immediately( _pid, kill_descendants_too );
         _exit( exit_code );
 #   endif
 }
@@ -3010,8 +3024,13 @@ void Spooler::abort_now( bool restart )
 
 void Spooler::kill_all_processes()
 {
-    for( int i = 0; i < NO_OF( _process_handles ); i++ )  if( _process_handles[i] )  try_kill_process_immediately( _process_handles[i] );
-    for( int i = 0; i < NO_OF( _pids            ); i++ )  if( _pids[i]            )  try_kill_process_immediately( _pids[i]            );
+    for( int i = 0; i < NO_OF( _process_handles ); i++ )  
+        if( _process_handles[i]._handle )  
+            try_kill_process_immediately( _process_handles[i]._handle, _process_handles[i]._kill_descendants_too );
+
+    for( int i = 0; i < NO_OF( _pids ); i++ )
+        if( _pids[i]._pid )  
+            try_kill_process_immediately( _pids[i]._pid, _pids[i]._kill_descendants_too );
 }
 
 //----------------------------------------------------------------------------------Spooler::launch
@@ -3596,7 +3615,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
         {
             if( kill_pid )
             {
-                kill_process_immediately( kill_pid );
+                kill_process_immediately( kill_pid, true );
                 need_call_scheduler = false;
             }
 

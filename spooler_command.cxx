@@ -238,22 +238,6 @@ xml::Element_ptr Command_processor::execute_show_order_history( const xml::Eleme
     return job_chain->read_order_history( _answer, id, next, show );
 }
 */
-//-------------------------------------------------------------Command_processor::abort_immediately
-/*
-void Command_processor::abort_immediately( int exit_code )
-{
-#   ifdef Z_WINDOWS
-
-        TerminateProcess( GetCurrentProcess(), exit_code );  // _exit() lässt noch Delphi-Code ausführen.
-
-#    else
-        //kill( 0, SIGKILL );   // Das killt auch den neuen Spooler.  signal is sent to every process in the process group of the current process.
-        kill( _spooler->_pid, SIGKILL );
-        _exit( exit_code );
-
-#   endif
-}
-*/
 //--------------------------------------------------------Command_processor::execute_modify_spooler
 
 xml::Element_ptr Command_processor::execute_modify_spooler( const xml::Element_ptr& element )

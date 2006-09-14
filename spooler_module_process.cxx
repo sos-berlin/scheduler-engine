@@ -286,7 +286,7 @@ bool Process_module_instance::begin__end()
   //_process_handle.add_to( &_thread->_wait_handles );
     _process_handle.add_to( &_spooler->_wait_handles );
 
-    _spooler->register_process_handle( _process_handle );
+    _spooler->register_process_handle( _process_handle, const_kill_descendants_too );
 
 #   ifdef Z_WINDOWS
         _stdout_file.close();       // Schließen, damit nicht ein anderer Prozess die Handles erbt und damit das Löschen verhindet (ERRNO-13 Permission denied)
@@ -552,7 +552,7 @@ bool Process_module_instance::begin__end()
     _process_handle.set_name( "Process " + program_path() );
     _process_handle.add_to( &_spooler->_wait_handles );
 
-    _spooler->register_process_handle( _process_handle._pid );
+    _spooler->register_process_handle( _process_handle._pid, const_kill_descendants_too );
     _pid_to_unregister = _process_handle._pid;
 
     //_operation = &dummy_sync_operation;
@@ -570,9 +570,7 @@ bool Process_module_instance::kill()
     {
         _log.warn( message_string( "SCHEDULER-281" ) );   
 
-        LOG( "kill(" << _process_handle._pid << ",SIGTERM)\n" );
-        int err = ::kill( _process_handle._pid, SIGTERM );
-        if( err )  throw_errno( errno, "killpid" );
+        kill_process_immediately( _process_handle._pid, kill_descendants_too );
 
         //? _process_handle._pid = 0;
         _is_killed = true;
