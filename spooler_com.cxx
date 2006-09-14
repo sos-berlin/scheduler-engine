@@ -3910,7 +3910,7 @@ STDMETHODIMP Com_job_chain::Add_end_state( VARIANT* state )
     {
         if( !_job_chain )  return E_POINTER;
 
-        VARIANT error; VariantInit( &error );  error.vt = VT_ERROR;
+        VARIANT error; VariantInit( &error );  error.vt = VT_ERROR;  error.scode = DISP_E_PARAMNOTFOUND;
         _job_chain->add_job( NULL, *state, error, error );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Job_chain.add_end_state" ); }
