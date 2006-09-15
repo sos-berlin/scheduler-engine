@@ -102,6 +102,8 @@ function spooler_process()
 
     spooler_log.info( "web_service.params=" + order.web_service.params.xml );
     spooler_log.info( "request.url=" + request.url );
+    spooler_log.info( "request.peer_ip=" + web_service_operation.peer_ip );
+    spooler_log.info( "request.peer_hostname=" + web_service_operation.peer_hostname );
     spooler_log.info( "request.Content-Type=" + request.header( "Content-Type" ) );
     spooler_log.info( "request.content_type=" + request.content_type );
     spooler_log.info( "request.charset_name=" + request.charset_name );
@@ -121,7 +123,7 @@ function spooler_process()
                 </script>
 
                 <run_time>
-                    <period begin="23:00"/>
+                    <period begin="00:00"/>
                 </run_time>
             </job>
 
