@@ -519,7 +519,7 @@ struct Com_task_proxy : object_server::proxy_with_local_methods< Com_task_proxy,
 
 
     ptr<Subprocess_register>   _subprocess_register;
-    bool                       _subprocess_new_process_group_default;
+    bool                       _subprocess_own_process_group_default;
 };
 
 //---------------------------------------------------------------------------------------Com_thread

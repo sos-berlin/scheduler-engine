@@ -2198,7 +2198,7 @@ ptr<object_server::Reference_with_properties> Com_task::get_reference_with_prope
         if( !_task )  throw_com( E_POINTER, "Com_task::get_reference_with_properties" );
 
         result = Z_NEW( object_server::Reference_with_properties( CLSID_Task_proxy, static_cast<Itask*>( this ) ) );
-        result->set_property( "subprocess_new_process_group_default", _task->_spooler->_subprocess_new_process_group_default );
+        result->set_property( "subprocess_own_process_group_default", _task->_spooler->_subprocess_own_process_group_default );
     }
 
     return result;
@@ -2899,7 +2899,7 @@ Com_task_proxy::Com_task_proxy()
     
 void Com_task_proxy::set_property( const string& name, const Variant& value )
 {
-    if( name == "subprocess_new_process_group_default" )  _subprocess_new_process_group_default = value.as_bool();
+    if( name == "subprocess_own_process_group_default" )  _subprocess_own_process_group_default = value.as_bool();
     else  
         z::throw_xc( __FUNCTION__, name );
 }

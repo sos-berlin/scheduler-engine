@@ -422,7 +422,7 @@
 
     !--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-    <property name="kill_descendants_too">
+    <property name="own_process_group">
         <com>
             <com.result>
                 <com.type type="bool"/>
@@ -430,7 +430,7 @@
         </com>
 
         <title>
-            Bei kill auf einen Prozess auch die Kind-Prozesse abbrechen
+            Subprozess als Prozessgruppe
         </title>
 
         <description>
@@ -438,8 +438,15 @@
                 Nur unter Unix.
             </p>
             <p>
-                Default ist <code>true</code>, dass heißt die Kind-Prozesse werden im Falle eines <code>kill</code> ebenfalls abgebrochen.
+                Der Default kann mit <scheduler_ini_entry file="factory.ini" section="spooler" entry="subprocess.own_process_group"/>
+                eingestellt werden.
             </p>
+            <p>
+                <code>own_process_group</code> lässt den Subprozess in einer eigenen Prozessgruppe starten,
+                indem der Systemaufruf <code>setpgid(0,0)</code> ausgeführt wird.
+                Wenn der Scheduler den Subprozess abbricht, bricht er die ganze Prozessgruppe ab.
+            </p>
+            
         </description>
     </property>
 

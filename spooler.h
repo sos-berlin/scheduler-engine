@@ -496,7 +496,7 @@ struct Spooler : Object,
     bool                       _executing_command;          // true: spooler_history wartet nicht auf Datenbank (damit Scheduler nicht blockiert)
     int                        _process_count;
 
-    bool                       _subprocess_new_process_group_default;
+    bool                       _subprocess_own_process_group_default;
     Process_handle             _process_handles[ max_processes ];   // Für abort_immediately(), mutex-frei alle abhängigen Prozesse
     struct Killpid { int _pid; bool _is_process_group; };
     Killpid                    _pids[ max_processes ];              // Für abort_immediately(), mutex-frei alle Task.add_pid(), Subprozesse der Tasks

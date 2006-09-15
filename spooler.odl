@@ -1364,10 +1364,10 @@ library Spooler
         HRESULT                 Environment             ( [in] BSTR Name, [in] BSTR Value );
 
         [propput]
-        HRESULT                 New_process_group       ( [in] VARIANT_BOOL );
+        HRESULT                 Own_process_group       ( [in] VARIANT_BOOL );
 
         [propget]
-        HRESULT                 New_process_group       ( [out,retval] VARIANT_BOOL* );
+        HRESULT                 Own_process_group       ( [out,retval] VARIANT_BOOL* );
     };
 
     [
