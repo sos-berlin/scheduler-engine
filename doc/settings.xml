@@ -791,7 +791,19 @@ db = odbc -db=factory_oracle -user=factory -password=factory
         </description>
     </setting>
 
+    <setting setting = "subprocess.own_process_group"
+             type    = "yes|no"
+             title   = "Subprozesse in eigener Prozessgruppe starten"
+             initial = "no">
+        <description>
+            <p>
+                Voreinstellung für 
+                <scheduler_method class="Subprocess" property="own_process_group"/>
+            </p>
+        </description>
+    </setting>
 
+    
     <!--
     <setting setting = "run_time_begin"
              type    = "hh:mm[:ss]"

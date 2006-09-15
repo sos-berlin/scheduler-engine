@@ -40,6 +40,8 @@
         <ini_entry setting="order_history" />
         <ini_entry setting="order_history_with_log" />
 
+        <ini_entry setting="subprocess.own_process_group"/>
+        
         <ini_entry setting="smtp" />
         <ini_entry setting="log_mail_subject" />
         <ini_entry setting="log_mail_from" />

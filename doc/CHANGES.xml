@@ -10,8 +10,8 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2006-09-14" version="2.0.158" subversion_revision="4494">
-        <revision type="new" title="kill_descendants_too">
+    <change date="2006-09-14" version="2.0.158" subversion_revision="4505">
+        <revision type="new" title="Subprocess.own_process_group">
             <description>
                 <p>
                     Unter Unix wird der <code>kill()</code> auf Prozesse jetzt zusätzlich mit negativer Pid ausgeführt,
@@ -19,7 +19,10 @@
                 </p>
                 <ul>
                     <li>
-                        <scheduler_method class="Subprocess" property="new_process_group"/>
+                        <scheduler_method class="Subprocess" property="own_process_group"/>
+                    </li>
+                    <li>
+                        <scheduler_ini_entry file="factory.ini" section="spooler" entry="subprocess.own_process_group"/>
                     </li>
                 </ul>
             </description>
