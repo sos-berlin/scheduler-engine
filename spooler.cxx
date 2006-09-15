@@ -3634,8 +3634,8 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
 #               ifdef Z_WINDOWS
                     kill_process_with_descendants_immediately( pid );
 #                else
-                    if( !try_kill_process_group_immediately( kill_pid ) )
-                        kill_process_immediately( kill_pid );
+                    if( !try_kill_process_group_immediately( pid ) )
+                        kill_process_immediately( pid );
 #               endif
 
                 need_call_scheduler = false;
