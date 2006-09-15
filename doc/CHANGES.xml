@@ -40,7 +40,7 @@
                         <scheduler_ini_entry file="factory.ini" section="spooler" entry="smtp"/>
                     </li>
                     <li>
-                        <scheduler_ini_entry file="sos.ini" section="spooler" entry="smtp"/>
+                        <scheduler_ini_entry file="sos.ini" section="mail" entry="smtp"/>
                     </li>
                 </ul>
             </description>

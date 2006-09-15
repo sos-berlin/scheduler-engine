@@ -112,12 +112,12 @@ public class Subprocess  extends Idispatch
     /*+ Bricht den Subprocess ab. */
     public void             kill                ()                                  {                com_call( "kill" ); }
     
-    public void         set_priority            ( int priority )                    {                       com_call( ">priority", priority ); }
-    public int              priority            ()                                  { return            int_com_call( "<priority" ); }
+    public void         set_priority            ( int priority )                    {                com_call( ">priority", priority ); }
+    public int              priority            ()                                  { return     int_com_call( "<priority" ); }
     
-    public void         set_priority_class      ( String priority_class )           {                       com_call( ">priority_class", priority_class ); }
-    public String           priority_class      ()                                  { return (String)       com_call( "<priority_class" ); }
+    public void         set_priority_class      ( String priority_class )           {                com_call( ">priority_class", priority_class ); }
+    public String           priority_class      ()                                  { return (String)com_call( "<priority_class" ); }
     
-    public void         set_kill_descendants_too( boolean b)                        {                       com_call( ">kill_descendants_too", b ); }
-    public boolean          kill_descendants_too()                                  { return        boolean_com_call( "<kill_descendants_too" ); }
+    public void         set_own_process_group   ( boolean b)                        {                com_call( ">own_process_group", b ); }
+    public boolean          own_process_group   ()                                  { return boolean_com_call( "<own_process_group" ); }
 }
