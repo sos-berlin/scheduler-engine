@@ -2182,6 +2182,7 @@ ptr<object_server::Reference_with_properties> Com_spooler::get_reference_with_pr
         if( !_spooler )  throw_com( E_POINTER, "Com_spooler::get_reference_with_properties" );
 
         result = Z_NEW( object_server::Reference_with_properties( CLSID_Spooler_proxy, static_cast<Ispooler*>( this ) ) );
+        result->set_property( "subprocess_new_process_group_default", _spooler->_subprocess_new_process_group_default );
     }
 
     return result;
@@ -2676,9 +2677,9 @@ STDMETHODIMP Com_task::Create_subprocess( VARIANT* program_and_parameters, Isubp
 //--------------------------------------------------------------------Com_task::Register_subprocess
 // Wird aufgerufen von Com_task_proxy
 
-STDMETHODIMP Com_task::Add_subprocess( int pid, double timeout, VARIANT_BOOL ignore_error, VARIANT_BOOL ignore_signal, VARIANT_BOOL kill_descendants_too, BSTR title )
+STDMETHODIMP Com_task::Add_subprocess( int pid, double timeout, VARIANT_BOOL ignore_error, VARIANT_BOOL ignore_signal, VARIANT_BOOL is_process_group, BSTR title )
 {
-    Z_LOG( __PRETTY_FUNCTION__ << "(" << pid << ',' << timeout << ',' << ignore_error << ',' << ignore_signal << ',' << kill_descendants_too << ',' << string_from_bstr(title) << ")\n" );
+    Z_LOG( __PRETTY_FUNCTION__ << "(" << pid << ',' << timeout << ',' << ignore_error << ',' << ignore_signal << ',' << is_process_group << ',' << string_from_bstr(title) << ")\n" );
     HRESULT hr = S_OK;
     
     try
@@ -2689,7 +2690,7 @@ STDMETHODIMP Com_task::Add_subprocess( int pid, double timeout, VARIANT_BOOL ign
                                timeout, 
                                ignore_error? true : false, 
                                ignore_signal? true : false, 
-                               kill_descendants_too != 0,
+                               is_process_group != 0,
                                string_from_bstr( title ) );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
@@ -2892,6 +2893,15 @@ Com_task_proxy::Com_task_proxy()
     Proxy_with_local_methods( &class_descriptor ),
     _subprocess_register( Z_NEW( Subprocess_register ) )
 {
+}
+
+//---------------------------------------------------------------------Com_task_proxy::set_property
+    
+void Com_task_proxy::set_property( const string& name, const Variant& value )
+{
+    if( name == "subprocess_new_process_group_default" )  _subprocess_new_process_group_default = value.as_bool();
+    else  
+        z::throw_xc( __FUNCTION__, name );
 }
 
 //----------------------------------------------------------------Com_task_proxy::Create_subprocess

@@ -69,7 +69,6 @@ namespace spooler {
 const char*                     default_factory_ini                 = "factory.ini";
 const string                    xml_schema_path                     = "scheduler.xsd";
 const string                    scheduler_character_encoding        = "ISO-8859-1";     // Eigentlich Windows-1252, aber das ist weniger bekannt und wir sollten die Zeichen 0xA0..0xBF nicht benutzen.
-const bool                      const_kill_descendants_too          = true;
 const string                    new_suffix                          = "~new";           // Suffix für den neuen Spooler, der den bisherigen beim Neustart ersetzen soll
 const double                    renew_wait_interval                 = 0.25;
 const double                    renew_wait_time                     = 30;               // Wartezeit für Brückenspooler, bis der alte Spooler beendet ist und der neue gestartet werden kann.
@@ -1059,12 +1058,12 @@ bool Spooler::try_to_free_process( Job* for_job, Process_class* process_class, c
 
 //-----------------------------------------------------------------Spooler::register_process_handle
 
-void Spooler::register_process_handle( Process_handle p, bool kill_descendants_too )
+void Spooler::register_process_handle( Process_handle p )
 {
 #   ifdef _DEBUG
         for( int i = 0; i < NO_OF( _process_handles ); i++ )
         {
-            if( _process_handles[i]._handle == p )  throw_xc( "register_process_handle" );              // Bereits registriert
+            if( _process_handles[i] == p )  throw_xc( "register_process_handle" );              // Bereits registriert
         }
 #   endif
 
@@ -1072,10 +1071,9 @@ void Spooler::register_process_handle( Process_handle p, bool kill_descendants_t
 
     for( int i = 0; i < NO_OF( _process_handles ); i++ )
     {
-        if( _process_handles[i]._handle == 0 )  
+        if( _process_handles[i] == 0 )  
         { 
-            _process_handles[i]._handle = p;  
-            _process_handles[i]._kill_descendants_too = kill_descendants_too;
+            _process_handles[i] = p;  
             return; 
         }
     }
@@ -1091,7 +1089,7 @@ void Spooler::unregister_process_handle( Process_handle p )
 
         for( int i = 0; i < NO_OF( _process_handles ); i++ )
         {
-            if( _process_handles[i]._handle == p )  { _process_handles[i]._handle = 0;  return; }
+            if( _process_handles[i] == p )  { _process_handles[i] = 0;  return; }
         }
     }
 
@@ -1102,7 +1100,7 @@ void Spooler::unregister_process_handle( Process_handle p )
 
 //-------------------------------------------------------------------------------Task::register_pid
 
-void Spooler::register_pid( int pid, bool kill_descendants_too )
+void Spooler::register_pid( int pid, bool is_process_group )
 { 
     for( int i = 0; i < NO_OF( _pids ); i++ )
     {
@@ -1111,7 +1109,7 @@ void Spooler::register_pid( int pid, bool kill_descendants_too )
         if( p->_pid == 0  ||  p->_pid == pid )
         { 
             p->_pid = pid;
-            p->_kill_descendants_too = kill_descendants_too;
+            p->_is_process_group = is_process_group;
             return; 
         }
     }
@@ -1698,6 +1696,7 @@ void Spooler::load_arg()
     _mail_defaults.set( "bcc"      ,            read_profile_string( _factory_ini, "spooler", "log_mail_bcc"     ) );
     _mail_defaults.set( "subject"  ,            read_profile_string( _factory_ini, "spooler", "log_mail_subject" ) );
 
+    _subprocess_new_process_group_default = read_profile_bool( _factory_ini, "spooler", "subprocess.new_process_group", _subprocess_new_process_group_default );
     _log_collect_within = read_profile_uint  ( _factory_ini, "spooler", "log_collect_within", 0 );
     _log_collect_max    = read_profile_uint  ( _factory_ini, "spooler", "log_collect_max"   , 900 );
     _zschimmer_mode     = read_profile_bool  ( _factory_ini, "spooler", "zschimmer", _zschimmer_mode );
@@ -3015,7 +3014,8 @@ void Spooler::abort_now( bool restart )
         TerminateProcess( GetCurrentProcess(), exit_code );
         _exit( exit_code );
 #    else
-        try_kill_process_immediately( _pid, const_kill_descendants_too );
+        try_kill_process_group_immediately( _pid );
+        try_kill_process_immediately( _pid );
         _exit( exit_code );
 #   endif
 }
@@ -3025,12 +3025,20 @@ void Spooler::abort_now( bool restart )
 void Spooler::kill_all_processes()
 {
     for( int i = 0; i < NO_OF( _process_handles ); i++ )  
-        if( _process_handles[i]._handle )  
-            try_kill_process_immediately( _process_handles[i]._handle, _process_handles[i]._kill_descendants_too );
+        if( _process_handles[i] )  
+            try_kill_process_immediately( _process_handles[i] );
 
     for( int i = 0; i < NO_OF( _pids ); i++ )
+    {
         if( _pids[i]._pid )  
-            try_kill_process_immediately( _pids[i]._pid, _pids[i]._kill_descendants_too );
+        {
+#           ifdef Z_UNIX
+                if( _pid[i]._is_process_group )  try_kill_process_group_immediately( _pids[i]._pid );
+                else  
+#           endif
+                try_kill_process_immediately( _pids[i]._pid );
+        }
+    }
 }
 
 //----------------------------------------------------------------------------------Spooler::launch
@@ -3615,14 +3623,21 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
         {
             if( kill_pid )
             {
-                kill_process_immediately( kill_pid, true );
+                kill_process_immediately( kill_pid );
                 need_call_scheduler = false;
             }
 
             if( kill_pid_file )
             {
                 int pid = as_int( replace_regex( string_from_file( pid_filename ), "[\r\n]", "" ) ); 
-                kill_process_immediately( pid, true );   // kill_childs = true
+
+#               ifdef Z_WINDOWS
+                    kill_process_with_descendants_immediately( pid );
+#                else
+                    if( !try_kill_process_group_immediately( kill_pid ) )
+                        kill_process_immediately( kill_pid );
+#               endif
+
                 need_call_scheduler = false;
             }            
 

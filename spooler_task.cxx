@@ -863,7 +863,7 @@ void Task::add_pid( int pid, const Time& timeout_period )
         _log->debug9( message_string( "SCHEDULER-912", pid, timeout_at ) );
     }
 
-    _registered_pids[ pid ] = Z_NEW( Registered_pid( this, pid, timeout_at, false, false, false, const_kill_descendants_too, "" ) );
+    _registered_pids[ pid ] = Z_NEW( Registered_pid( this, pid, timeout_at, false, false, false, false, "" ) );
 
     set_subprocess_timeout();
 }
@@ -879,12 +879,12 @@ void Task::remove_pid( int pid )
 
 //-----------------------------------------------------------------------------Task::add_subprocess
 
-void Task::add_subprocess( int pid, double timeout, bool ignore_exitcode, bool ignore_signal, bool kill_descendants_too, const string& title )
+void Task::add_subprocess( int pid, double timeout, bool ignore_exitcode, bool ignore_signal, bool is_process_group, const string& title )
 {
     Time timeout_at = timeout < INT_MAX - 1? Time::now() + timeout
                                            : latter_day;
 
-    _registered_pids[ pid ] = Z_NEW( Registered_pid( this, pid, timeout_at, true, ignore_exitcode, ignore_signal, kill_descendants_too, title ) );
+    _registered_pids[ pid ] = Z_NEW( Registered_pid( this, pid, timeout_at, true, ignore_exitcode, ignore_signal, is_process_group, title ) );
 
     set_subprocess_timeout();
 }
@@ -900,7 +900,7 @@ bool Task::shall_wait_for_registered_pid()
 //-------------------------------------------------------------Task::Registered_pid::Registered_pid
 
 Task::Registered_pid::Registered_pid( Task* task, int pid, const Time& timeout_at, bool wait, bool ignore_error, bool ignore_signal, 
-                                      bool kill_descendants_too, const string& title )
+                                      bool is_process_group, const string& title )
 :
     _spooler(task->_spooler),
     _task(task),
@@ -909,11 +909,11 @@ Task::Registered_pid::Registered_pid( Task* task, int pid, const Time& timeout_a
     _wait(wait),
     _ignore_error(ignore_error),
     _ignore_signal(ignore_signal),
-    _kill_descendants_too(kill_descendants_too),
+    _is_process_group(is_process_group),
     _title(title),
     _killed(false)
 {
-    _spooler->register_pid( pid, kill_descendants_too );
+    _spooler->register_pid( pid, is_process_group );
 }
 
 //----------------------------------------------------------------------Task::Registered_pid::close
@@ -935,7 +935,12 @@ void Task::Registered_pid::try_kill()
     {
         try
         {
-            kill_process_immediately( _pid, _kill_descendants_too );
+#           ifdef Z_UNIX
+              if( _is_process_group )  kill_process_group_immediately( _pid );
+              else
+#           endif
+                kill_process_immediately( _pid );
+
             _task->_log->warn( message_string( "SCHEDULER-273", _pid ) );   // "Subprozess " << _pid << " abgebrochen" 
         }
         catch( exception& x )

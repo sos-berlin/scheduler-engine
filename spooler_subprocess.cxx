@@ -60,8 +60,8 @@ const Com_method Subprocess::_methods[] =
     COM_METHOD      ( Subprocess, 15, Kill           , VT_EMPTY   , 1, VT_INT  ),
     COM_PROPERTY_PUT( Subprocess, 16, Environment    ,              0, VT_BSTR, VT_BSTR ),
     COM_PROPERTY_GET( Subprocess, 17, Termination_signal, VT_INT  , 0 ),
-    COM_PROPERTY_PUT( Subprocess, 18, Kill_descendants_too,         0, VT_BOOL ),
-    COM_PROPERTY_GET( Subprocess, 18, Kill_descendants_too, VT_BOOL, 0 ),
+    COM_PROPERTY_PUT( Subprocess, 18, New_process_group,            0, VT_BOOL ),
+    COM_PROPERTY_GET( Subprocess, 18, New_process_group, VT_BOOL  , 0 ),
   //COM_PROPERTY_PUT( Subprocess, 17, Show_window    ,              0, VT_BYREF|VT_VARIANT ),
 #endif
     {}
@@ -77,7 +77,15 @@ Subprocess::Subprocess( Subprocess_register* subprocess_register, IDispatch* tas
     _task(task),                // Itask oder Itask_proxy
     _timeout( INT_MAX )
 {
-    _process.set_kill_descendants_too( const_kill_descendants_too );
+    if( Com_task* com_task = dynamic_cast<Com_task*>( task ) )
+    {
+        _process.set_new_process_group( com_task->task()->_spooler->_subprocess_new_process_group_default );
+    }
+    else
+    if( Com_task_proxy* com_task_proxy = dynamic_cast<Com_task_proxy*>( task ) )
+    {
+        _process.set_new_process_group( com_task_proxy->_subprocess_new_process_group_default );
+    }
 }
 
 //--------------------------------------------------------------------------Subprocess::~Subprocess
@@ -147,8 +155,6 @@ STDMETHODIMP Subprocess::Start( VARIANT* program_and_parameters )
         }
 #   endif
 
-
-    if( _process.kill_descendants_too() )  _process.set_call_setsid( true );
 
     try
     {
@@ -336,7 +342,7 @@ HRESULT Subprocess::Update_register_entry()
 
                 // Rückwärts!
                 variant_array.push_back( _process.command_line() );
-                variant_array.push_back( _process.kill_descendants_too() );
+                variant_array.push_back( _process.new_process_group() );
                 variant_array.push_back( ignore_signal() );
                 variant_array.push_back( ignore_error() );
                 variant_array.push_back( (int)( _timeout + 0.999 ) );

@@ -85,7 +85,6 @@ extern const char               dtd_string[];
 extern volatile int             ctrl_c_pressed;
 extern const string             xml_schema_path;            // "scheduler.xsd"
 extern const string             scheduler_character_encoding;
-extern const bool               const_kill_descendants_too;
 
 
 #ifdef Z_WINDOWS
@@ -366,9 +365,9 @@ struct Spooler : Object,
     bool                        has_process_classes         ()                                  { return _process_class_list.size() > 1; }   // Die erste ist nur für temporäre Prozesse
     bool                        try_to_free_process         ( Job* for_job, Process_class*, const Time& now );
 
-    void                        register_process_handle     ( Process_handle, bool kill_descendants_too );  // Für abort_immediately()
+    void                        register_process_handle     ( Process_handle );                 // Für abort_immediately()
     void                        unregister_process_handle   ( Process_handle );                 // Für abort_immediately()
-    void                        register_pid                ( int, bool kill_descendants_too ); // Für abort_immediately()
+    void                        register_pid                ( int, bool is_process_group = false ); // Für abort_immediately()
     void                        unregister_pid              ( int );                            // Für abort_immediately()
 
     bool                        is_machine_suspendable      () const                            { return _dont_suspend_machine_counter == 0; }
@@ -497,11 +496,11 @@ struct Spooler : Object,
     bool                       _executing_command;          // true: spooler_history wartet nicht auf Datenbank (damit Scheduler nicht blockiert)
     int                        _process_count;
 
-    struct Kill_process_handle { Process_handle _handle; bool _kill_descendants_too; };
-    Kill_process_handle        _process_handles[ max_processes ];   // Für abort_immediately(), mutex-frei alle abhängigen Prozesse
-
-    struct Killpid { int _pid; bool _kill_descendants_too; };
+    bool                       _subprocess_new_process_group_default;
+    Process_handle             _process_handles[ max_processes ];   // Für abort_immediately(), mutex-frei alle abhängigen Prozesse
+    struct Killpid { int _pid; bool _is_process_group; };
     Killpid                    _pids[ max_processes ];              // Für abort_immediately(), mutex-frei alle Task.add_pid(), Subprozesse der Tasks
+  //Process_group_handle       _process_groups[ max_processes ];    // Für abort_immediately(), mutex-frei alle Task.add_pid(), Subprozesse der Tasks
 //private:
   //bool                       _free_threading_default;
     time::Holiday_set          _holiday_set;                // Feiertage für alle Jobs

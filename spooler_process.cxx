@@ -99,11 +99,10 @@ void Process::start()
 
 
         _connection = _spooler->_connection_manager->start_process( parameters, _priority );
-        _connection->set_kill_descendants_too( const_kill_descendants_too );
         _log->set_prefix( obj_name() );
 
         _process_handle_copy = _connection->process_handle();
-        _spooler->register_process_handle( _process_handle_copy, const_kill_descendants_too );
+        _spooler->register_process_handle( _process_handle_copy );
     }
     else
     {

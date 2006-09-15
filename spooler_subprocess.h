@@ -61,8 +61,8 @@ struct Subprocess : idispatch_implementation< Subprocess, spooler_com::Isubproce
     STDMETHODIMP            get_Ignore_signal               ( VARIANT_BOOL* );
     STDMETHODIMP            put_Timeout                     ( double );
     STDMETHODIMP            put_Show_window                 ( VARIANT* );
-    STDMETHODIMP            put_Kill_descendants_too        ( VARIANT_BOOL b )                      { _process.set_kill_descendants_too( b != 0 );  return S_OK; }
-    STDMETHODIMP            get_Kill_descendants_too        ( VARIANT_BOOL* result )                { *result = _process.kill_descendants_too()? VARIANT_TRUE : VARIANT_FALSE; return S_OK; }
+    STDMETHODIMP            put_New_process_group           ( VARIANT_BOOL b )                      { return _process.put_New_process_group( b ); }
+    STDMETHODIMP            get_New_process_group           ( VARIANT_BOOL* result )                { return _process.get_New_process_group( result );}
     STDMETHODIMP                Wait_for_termination        ( VARIANT* seconds, VARIANT_BOOL* );
     STDMETHODIMP                Kill                        ( int signal )                          { return _process.Kill( signal ); }
 

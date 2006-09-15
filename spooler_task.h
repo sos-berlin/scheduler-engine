@@ -72,7 +72,7 @@ struct Task : Object,
     struct Registered_pid : z::Object, Non_cloneable
     {
                                 Registered_pid              ( Task*, int pid, const Time& timeout, bool wait, bool ignore_error, bool ignore_signal, 
-                                                              bool kill_descendants_too, const string& title );
+                                                              bool is_process_group, const string& title );
                                ~Registered_pid              ()                                      { close(); }
 
         void                    close                       ();
@@ -86,7 +86,7 @@ struct Task : Object,
         bool                   _wait;                       // Auf Ende der Task warten und Exitcode und Signal auswerten (-> Task-Error)
         bool                   _ignore_error;
         bool                   _ignore_signal;
-        bool                   _kill_descendants_too;
+        bool                   _is_process_group;           // kill auf die ganze Prozessgruppe (Unix)
         string                 _title;                      // Kann die Kommandozeile sein
         bool                   _killed;
     };
@@ -154,7 +154,7 @@ struct Task : Object,
 
     void                        add_pid                     ( int pid, const Time& timeout = latter_day );
     void                        remove_pid                  ( int pid );
-    void                        add_subprocess              ( int pid, double timeout, bool ignore_error, bool ignore_signal, bool kill_descendants_too, const string& title );
+    void                        add_subprocess              ( int pid, double timeout, bool ignore_error, bool ignore_signal, bool is_process_group, const string& title );
     void                        set_subprocess_timeout      ();
     bool                        check_subprocess_timeout    ( const Time& now );
     bool                        shall_wait_for_registered_pid();

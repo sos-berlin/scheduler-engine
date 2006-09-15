@@ -506,6 +506,8 @@ struct Com_task_proxy : object_server::proxy_with_local_methods< Com_task_proxy,
 
                                 Com_task_proxy              ();
 
+    // object_server:
+    void                    set_property                    ( const string& name, const Variant& value );
 
     STDMETHODIMP                Create_subprocess           ( VARIANT* program_and_parameters, spooler_com::Isubprocess** result );
     STDMETHODIMP            put_Priority                    ( int );
@@ -517,6 +519,7 @@ struct Com_task_proxy : object_server::proxy_with_local_methods< Com_task_proxy,
 
 
     ptr<Subprocess_register>   _subprocess_register;
+    bool                       _subprocess_new_process_group_default;
 };
 
 //---------------------------------------------------------------------------------------Com_thread
