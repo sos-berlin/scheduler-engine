@@ -973,6 +973,11 @@ void Order_queue::add_order( Order* order, Do_log do_log )
 {
     // Wird von Order mit geperrtem order->_lock gerufen.
 
+#   ifdef Z_DEBUG
+        Z_FOR_EACH( Queue, _queue        , it )  assert( *it != order );
+        Z_FOR_EACH( Queue, _setback_queue, it )  assert( *it != order );
+#   endif
+
     _job->set_visible( true );
 
     //THREAD_LOCK( _lock )
@@ -2253,7 +2258,7 @@ void Order::postprocessing( bool success )
 
                 set_state2( new_state, !success );
 
-                if( _job_chain_node->_job )
+                if( _job_chain_node  &&  _job_chain_node->_job )
                 {
                     _job_chain_node->_job->order_queue()->add_order( this );
                 }

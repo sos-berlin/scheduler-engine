@@ -533,7 +533,7 @@ STDMETHODIMP Web_service_operation::get_Peer_ip( BSTR* result )
         if( !_http_operation )  return E_POINTER;
         if( !_http_operation->_connection )  return E_POINTER;
 
-        hr = String_to_bstr( _http_operation->_connection->_peer_host_and_port.host().get_name(), result );
+        hr = String_to_bstr( _http_operation->_connection->_peer_host_and_port.host().ip_string(), result );
     }
     catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
 
@@ -551,7 +551,7 @@ STDMETHODIMP Web_service_operation::get_Peer_hostname( BSTR* result )
         if( !_http_operation )  return E_POINTER;
         if( !_http_operation->_connection )  return E_POINTER;
 
-        hr = String_to_bstr( _http_operation->_connection->_peer_host_and_port.host().ip_string(), result );
+        hr = String_to_bstr( _http_operation->_connection->_peer_host_and_port.host().get_name(), result );
     }
     catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
 
