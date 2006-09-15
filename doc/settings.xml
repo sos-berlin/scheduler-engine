@@ -783,6 +783,11 @@ db = odbc -db=factory_oracle -user=factory -password=factory
                 Der allgemeine Platz für diese Einstellung ist 
                 <scheduler_ini_entry file="sos.ini" section="mail" entry="smtp"/>.
             </p>
+            <p>
+                <code>smtp=-queue</code> verhindert den eMail-Versand und
+                schreibt die Nachrichten stattdessen in die mit
+                <code>queue_dir</code> eingestellte Datei.
+            </p>
         </description>
     </setting>
 

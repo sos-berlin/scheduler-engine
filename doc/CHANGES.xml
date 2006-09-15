@@ -19,14 +19,27 @@
                 </p>
                 <ul>
                     <li>
-                        <scheduler_method class="Subprocess" property="kill_descendants_too"/>
+                        <scheduler_method class="Subprocess" property="new_process_group"/>
                     </li>
                 </ul>
-                <!--ul>
-                <li>
-                    <scheduler_ini_entry file="sos.ini" section="mail" entry="queue_only"/>
-                </li>
-            </ul-->
+            </description>
+        </revision>
+
+        <revision type="new" title="Mail-Versand nur in Dateiverzeichnis">
+            <description>
+                <p>
+                    <code>smtp=-queue</code> verhindert den Versand und stellt die Nachricht in das mit
+                    <scheduler_ini_entry file="sos.ini" section="spooler" entry="queue_dir"/>                    
+                    eingestellte Verzeichnis.
+                </p>
+                <ul>
+                    <li>
+                        <scheduler_ini_entry file="factory.ini" section="spooler" entry="smtp"/>
+                    </li>
+                    <li>
+                        <scheduler_ini_entry file="sos.ini" section="spooler" entry="smtp"/>
+                    </li>
+                </ul>
             </description>
         </revision>
     </change>

@@ -2182,7 +2182,6 @@ ptr<object_server::Reference_with_properties> Com_spooler::get_reference_with_pr
         if( !_spooler )  throw_com( E_POINTER, "Com_spooler::get_reference_with_properties" );
 
         result = Z_NEW( object_server::Reference_with_properties( CLSID_Spooler_proxy, static_cast<Ispooler*>( this ) ) );
-        result->set_property( "subprocess_new_process_group_default", _spooler->_subprocess_new_process_group_default );
     }
 
     return result;
@@ -2199,6 +2198,7 @@ ptr<object_server::Reference_with_properties> Com_task::get_reference_with_prope
         if( !_task )  throw_com( E_POINTER, "Com_task::get_reference_with_properties" );
 
         result = Z_NEW( object_server::Reference_with_properties( CLSID_Task_proxy, static_cast<Itask*>( this ) ) );
+        result->set_property( "subprocess_new_process_group_default", _task->_spooler->_subprocess_new_process_group_default );
     }
 
     return result;
