@@ -660,6 +660,15 @@ $spooler->job_chain( "my_job_chain" )->add_order( $order );</pre>
         <scheduler_method class="Job_chain" method="add_order"/>,
         <scheduler_method class="Task" property="order"/>.
     </p>
+
+    <h3>Dateiauftrag</h3>
+    <p>
+        Ein Dateiauftrag ist ein Auftrag mit dem Parameter <code>scheduler_file_path</code>:
+        <scheduler_method class="Order" object="order" property="params"/><code>.<scheduler_method class="Variable_set" object="" method="value" value='"scheduler_file_path"'/>.</code>
+    </p>
+    <p>
+        Siehe <scheduler_a href="../file_orders.xml"/>.
+    </p>
 </description>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
