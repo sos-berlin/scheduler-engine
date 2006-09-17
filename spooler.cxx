@@ -78,6 +78,8 @@ const int                       inhibit_suspend_wait_time           = 10*60;    
 const int                       show_message_after_seconds          = 15*60;            // Nach dieser Wartezeit eine Meldung ausgeben
 const int                       show_message_after_seconds_debug    = 60;               // Nach dieser Wartezeit eine Meldung ausgeben
 
+const int                       nothing_done_max                    = 2+1;              // Ein überflüssiges Signal wird toleriert wegen Race condition, und dann gibt es manch voreiliges Signal (vor allem zu Beginn einer Operation)
+                                                                                        // +1 für Job::start_when_directory_changed() unter Windows    
 const double                    nichts_getan_bremse                 = 1.0;              // Wartezeit in nichts_getan(), Meldung SCHEDULER-261
 #ifdef Z_DEBUG
     const int                   scheduler_261_second                = 5;                // Nach sovielen leeren Schleifendurchläufen SCHEDULER-261 wiederholen
@@ -2519,7 +2521,6 @@ void Spooler::run()
 
         //----------------------------------------------------------------------------NICHTS GETAN?
 
-        int nothing_done_max = 2;   // Ein überflüssiges Signal wird toleriert wegen Race condition, und dann gibt es manch voreiliges Signal (vor allem zu Beginn einer Operation)
 //      int nothing_done_max = _job_list.size() * 2 + _single_thread->task_count() * 3 + 6;  // Seien wir großzügig
 
         if( something_done )
