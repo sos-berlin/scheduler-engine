@@ -1259,30 +1259,38 @@ void Job::start_when_directory_changed( const string& directory_name, const stri
 #               ifdef Z_WINDOWS
                     //return;
 
-                    // Ein Signal der überschriebenen Überwachung geht verloren: 2006-09-13
                     // Windows: Überwachung erneuern
                     // Wenn das Verzeichnis bereits überwacht war, aber inzwischen gelöscht, und das noch nicht bemerkt worden ist
                     // (weil Spooler_thread::wait vor lauter Jobaktivität nicht gerufen wurde), dann ist es besser, die Überwachung 
                     // hier zu erneuern. Besonders, wenn das Verzeichnis wieder angelegt ist.
-                    //
+                    // Das ist bei lokalen Verzeichnissen nicht möglich, weil mkdir auf einen Fehler läuft, solange die Überwachung noch aktiv ist.
+                    // Aber bei Netzwerkverzeichnissen gibt es keinen Fehler, und die Überwachung schweigt.
+
+                    ptr<Directory_watcher> new_dw = Z_NEW( Directory_watcher( _log ) );
+
+                    directory_watcher->wait( 0 );
+                    if( directory_watcher->signaled() ) 
+                    {
+                        new_dw->set_signaled();   // Ist gerade etwas passiert? Dann in die neue Überwachung hinüberretten
+                        Z_LOG( "Signal der alten Überwachung auf die neue übertragen.\n" );
+                    }
+
+                    new_dw->watch_directory( directory_name, filename_pattern );
+                    new_dw->set_name( "job(\"" + _name + "\").start_when_directory_changed(\"" + directory_name + "\",\"" + filename_pattern + "\")" );
                     _directory_watcher_list.erase( it );
+                    _directory_watcher_list.push_back( new_dw );
+                    new_dw->add_to( &_spooler->_wait_handles );
+
+                    _directory_watcher_next_time = 0;
+                    calculate_next_time();
+
                     break;
 #               else
                     (*it)->renew();
-                    return;   // Unix: Alles in Ordnung
+                    break;   // Unix: Alles in Ordnung
 #               endif
             }
         }
-
-        ptr<Directory_watcher> dw = Z_NEW( Directory_watcher( _log ) );
-
-        dw->watch_directory( directory_name, filename_pattern );
-        dw->set_name( "job(\"" + _name + "\").start_when_directory_changed(\"" + directory_name + "\",\"" + filename_pattern + "\")" );
-        _directory_watcher_list.push_back( dw );
-        dw->add_to( &_spooler->_wait_handles );
-
-        _directory_watcher_next_time = 0;
-        calculate_next_time();
     }
 }
 

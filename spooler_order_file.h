@@ -41,9 +41,9 @@ struct Directory_file_order_source : //idispatch_implementation< Directory_file_
 
   private:
     void                        send_mail               ( Scheduler_event::Event_code, const exception* );
-    void                        start_or_continue_notification();
+    void                        start_or_continue_notification( bool was_notified );
     void                        close_notification      ();
-    Order*                      read_directory          ( const string& cause );
+    Order*                      read_directory          ( bool was_notified, const string& cause );
     void                        read_new_files_and_handle_deleted_files( const string& cause );
 
     Fill_zero                  _zero_;
@@ -53,9 +53,10 @@ struct Directory_file_order_source : //idispatch_implementation< Directory_file_
     int                        _delay_after_error;
     int                        _repeat;
     Xc_copy                    _directory_error;
+    bool                       _send_recovered_mail;
   //bool                       _first;
     Event                      _notification_event;             // Nur Windows
-    bool                       _wait_for_notification_event;    // Nur Windows. Verzeichnis erst lesen, wenn _notification_event.signaled()
+    Time                       _notification_event_time;        // Wann wir zuletzt die Benachrichtigung bestellt haben
     int                        _max_orders;
     vector< ptr<z::File_info> > _new_files;
     int                        _new_files_index;

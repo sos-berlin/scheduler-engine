@@ -15,6 +15,7 @@ const string    file_order_sink_job_name                    = "scheduler_file_or
 const int       delay_after_error_default                   = 60;
 const int       file_order_sink_job_idle_timeout_default    = 60;
 const int       directory_file_order_source_max_default     = 100;      // Nicht zuviele Aufträge, sonst wird der Scheduler langsam (in remove_order?)
+const int       max_tries                                 = 2;        // Nach Fehler machen wie sofort einen zweiten Versuch
 
 #ifdef Z_WINDOWS
     const int   directory_file_order_source_repeat_default  = INT_MAX;
@@ -48,7 +49,7 @@ struct File_order_sink_module_instance : Internal_module_instance
         File_path path = string_from_variant( order->param( scheduler_file_path_variable_name ) );
         if( path == "" )
         {
-            _log->warn( message_string( "SCHEDULER-343", order->obj_name() );
+            _log->warn( message_string( "SCHEDULER-343", order->obj_name() ) );
             result = false;
         }
         else
@@ -254,8 +255,49 @@ string Directory_file_order_source::async_state_text_() const
 //--------------------------------------Directory_file_order_source::start_or_continue_notification
 #ifdef Z_WINDOWS
 
-void Directory_file_order_source::start_or_continue_notification()
+void Directory_file_order_source::start_or_continue_notification( bool was_notified )
 {
+    // Windows XP:
+    // Ein überwachtes lokales Verzeichnis kann entfernt (rd), aber nicht angelegt (mkdir) werden. Der Name ist gesperrt.
+    // Aber ein überwachtes Verzeichnis im Netzwerk kann entfernt und wieder angelegt werden, 
+    // ohne dass die Überwachung das mitbekommt. Sie signaliert keine Veränderung im neuen Verzeichnis, ist also nutzlos.
+    // Deshalb erneuern wir die Verzeichnisüberwachung, wenn seit _repeat Sekunde kein Signal gekommen ist.
+
+    Time now = Time::now();
+    
+    if( !_notification_event.handle()  ||  Time::now() >= _notification_event_time + _repeat )
+    {
+        Z_LOG( "FindFirstChangeNotification( \"" << _path.path() << "\", FALSE, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME );\n" );
+        HANDLE h = FindFirstChangeNotification( _path.path().c_str(), FALSE, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME );
+
+        if( h == INVALID_HANDLE_VALUE )  z::throw_mswin( "FindFirstChangeNotification", _path.path() );
+
+        _notification_event.set_handle( h );
+        _notification_event.set_name( "FindFirstChangeNotification " + _path );
+        
+        if( _notification_event.handle() )  _notification_event.wait( 0 );
+        if( _notification_event.signaled() )      // Signal retten. Eigentlich überflüssig, weil wir hiernach sowieso das Verzeichnis lesen
+        {
+            _notification_event.set_signaled();     
+            Z_LOG( "Signal der alten Überwachung auf die neue übertragen.\n" );
+        }
+
+        close_notification();
+        add_to_event_manager( _spooler->_connection_manager );
+
+        _notification_event_time = now;
+    }
+    else
+    if( was_notified )
+    {
+        Z_LOG( "FindNextChangeNotification(\"" << _path << "\")\n" );
+        BOOL ok = FindNextChangeNotification( _notification_event.handle() );
+        if( !ok )  throw_mswin_error( "FindNextChangeNotification" );
+
+        _notification_event_time = now;
+    }
+
+    /*
     if( !_notification_event.handle() )
     {
         Z_LOG( "FindFirstChangeNotification( \"" << _path.path() << "\", FALSE, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME );\n" );
@@ -270,10 +312,14 @@ void Directory_file_order_source::start_or_continue_notification()
     }
     else
     {
-        Z_LOG( "FindNextChangeNotification(\"" << _path << "\")\n" );
-        BOOL ok = FindNextChangeNotification( _notification_event.handle() );
-        if( !ok )  throw_mswin_error( "FindNextChangeNotification" );
+        if( was_notified )
+        {
+            Z_LOG( "FindNextChangeNotification(\"" << _path << "\")\n" );
+            BOOL ok = FindNextChangeNotification( _notification_event.handle() );
+            if( !ok )  throw_mswin_error( "FindNextChangeNotification" );
+        }
     }
+    */
 }
 
 #endif
@@ -290,8 +336,6 @@ void Directory_file_order_source::close_notification()
             Z_LOG( "FindCloseChangeNotification()\n" );
             FindCloseChangeNotification( _notification_event.handle() );
             _notification_event._handle = NULL;   // set_handle() ruft CloseHandle(), das wäre nicht gut
-
-            _wait_for_notification_event = false;
         }
 #   endif
 }
@@ -322,10 +366,9 @@ Order* Directory_file_order_source::request_order( const string& cause )
 {
     Order* result = NULL;
 
-    //if( !_wait_for_notification_event       // Nur, wenn wir nicht auf FindNextChangeNotification warten
     if( async_next_gmtime_reached() )       // Das, weil die Jobs bei jeder Gelegenheit do_something() durchlaufen, auch wenn nichts anliegt (z.B. bei TCP-Verkehr)
     {
-        result = read_directory( cause );
+        result = read_directory( false, cause );
         if( result )  assert( result->is_immediately_processable() );
     }
 
@@ -334,73 +377,98 @@ Order* Directory_file_order_source::request_order( const string& cause )
 
 //------------------------------------------------------Directory_file_order_source::read_directory
 
-Order* Directory_file_order_source::read_directory( const string& cause )
+Order* Directory_file_order_source::read_directory( bool was_notified, const string& cause )
 {
     Order*          result              = NULL;
     Order_queue*    first_order_queue   = _next_job->order_queue();
 
 
-    try
+    for( int try_index = 1;; try_index++ )           // Nach einem Fehler machen wir einen zweiten Versuch, bevor wir eine eMail schicken
     {
-#       ifdef Z_WINDOWS
-            // Verzeichnisüberwachung starten oder fortsetzen,
-            // bevor die Dateinamen gelesen werden, damit Änderungen während oder kurz nach dem Lesen bemerkt werden.
-            // Das kann ein Ereignis zu viel geben. Aber besser als eins zu wenig.
-
-            start_or_continue_notification();
-            _wait_for_notification_event = true;
-#       endif
-
-
-        if( first_order_queue->has_order( Time(0) ) )      // Auftragswarteschlange ist nicht leer?
+        try
         {
-            // Erst die vorhandenen Aufträge abarbeiten lassen und nächsten Aufruf von request_order() abwarten
-        }
-        else
-        {
-            if( _new_files_index < _new_files.size() )     // Noch Dateien im Puffer
+#           ifdef Z_WINDOWS
+                // Verzeichnisüberwachung starten oder fortsetzen,
+                // bevor die Dateinamen gelesen werden, damit Änderungen während oder kurz nach dem Lesen bemerkt werden.
+                // Das kann ein Ereignis zu viel geben. Aber besser als eins zu wenig.
+
+                start_or_continue_notification( was_notified );
+#           endif
+
+
+            if( first_order_queue->has_order( Time(0) ) )      // Auftragswarteschlange ist nicht leer?
             {
-                log()->info( message_string( "SCHEDULER-986", _new_files_time.as_string( Time::without_ms ) ) );
+                // Erst die vorhandenen Aufträge abarbeiten lassen und nächsten Aufruf von request_order() abwarten
             }
             else
             {
-                read_new_files_and_handle_deleted_files( cause );
+                if( _new_files_index < _new_files.size() )     // Noch Dateien im Puffer
+                {
+                    log()->info( message_string( "SCHEDULER-986", _new_files_time.as_string( Time::without_ms ) ) );
+                }
+                else
+                {
+                    read_new_files_and_handle_deleted_files( cause );
+                }
+
+                int n = min( _new_files_index + _max_orders, (int)_new_files.size() );
+                for(; _new_files_index < n; _new_files_index++ )
+                {
+                    z::File_info* new_file = _new_files[ _new_files_index ];
+                    string        path     = new_file->path();
+                    ptr<Order>    order    = new Order( _spooler );
+
+                    order->set_file_path( path );
+                    order->set_state( _next_state );
+
+                    string date = Time( new_file->last_write_time() ).as_string( Time::without_ms ) + " GMT";   // localtime_from_gmtime() rechnet alte Sommerzeit-Daten in Winterzeit um
+                    log()->info( message_string( "SCHEDULER-983", order->obj_name(), "written at " + date ) );
+
+                    order->add_to_job_chain( _job_chain );
+
+                    if( !result )  result = order;      // Der erste, sofort ausführbare Auftrag
+
+                    _new_files[ _new_files_index ] = NULL;
+                }
+
+                if( n < _new_files.size() )  log()->info( message_string( "SCHEDULER-985", _new_files.size() - n ) );
             }
-
-
-            int n = min( _new_files_index + _max_orders, (int)_new_files.size() );
-            for(; _new_files_index < n; _new_files_index++ )
-            {
-                z::File_info* new_file = _new_files[ _new_files_index ];
-                string        path     = new_file->path();
-                ptr<Order>    order    = new Order( _spooler );
-
-                order->set_file_path( path );
-                order->set_state( _next_state );
-    
-                string date = Time( new_file->last_write_time() ).as_string( Time::without_ms ) + " GMT";   // localtime_from_gmtime() rechnet alte Sommerzeit-Daten in Winterzeit um
-                log()->info( message_string( "SCHEDULER-983", order->obj_name(), "written at " + date ) );
-
-                order->add_to_job_chain( _job_chain );
-
-                if( !result )  result = order;      // Der erste, sofort ausführbare Auftrag
-
-                _new_files[ _new_files_index ] = NULL;
-            }
-
-            if( n < _new_files.size() )  log()->info( message_string( "SCHEDULER-985", _new_files.size() - n ) );
         }
-    }
-    catch( exception& x )
-    {
-        log()->warn( x.what() );
+        catch( exception& x )
+        {
+            _new_files.clear();
+            _new_files_index = 0;
 
-        if( !_directory_error  &&  _spooler->_mail_on_error )  send_mail( Scheduler_event::evt_file_order_source_error, &x );
-        _directory_error = x;
+            if( try_index < max_tries )
+            {
+                log()->warn( x.what() ); 
+                close_notification();
+                continue;
+            }
 
-        close_notification();  // Schließen, sonst kann ein entferntes Verzeichnis nicht wieder angelegt werden (Windows blockiert den Namen)
+            if( _directory_error )
+            {
+                log()->debug( x.what() );      // Nur beim ersten Mal eine Warnung
+            }
+            else
+            {
+                log()->warn( x.what() ); 
+
+                if( _spooler->_mail_on_error )
+                {
+                    _send_recovered_mail = true; 
+                    send_mail( Scheduler_event::evt_file_order_source_error, &x );
+                }
+            }
+
+            _directory_error = x;
+
+            close_notification();  // Schließen, sonst kann ein entferntes Verzeichnis nicht wieder angelegt werden (Windows blockiert den Namen)
+        }
+
+        break;
     }
-    
+
 
     int delay = _directory_error? _delay_after_error :
                 !result?          max( 1, _repeat )       // Unter Unix funktioniert's _nur_ durch wiederkehrendes Nachsehen
@@ -454,10 +522,15 @@ void Directory_file_order_source::read_new_files_and_handle_deleted_files( const
     //log()->info( "******* WATCHING " + _path + " ******* " + cause );   // TEST
 
 
-    if( _directory_error  &&  _spooler->_mail_on_error )
+    if( _directory_error )
     {
         log()->info( message_string( "SCHEDULER-984", _path ) );
-        send_mail( Scheduler_event::evt_file_order_source_recovered, NULL );
+
+        if( _send_recovered_mail )
+        {
+            _send_recovered_mail = false;
+            send_mail( Scheduler_event::evt_file_order_source_recovered, NULL );
+        }
     }
 
     _directory_error = NULL;
@@ -565,16 +638,15 @@ void Directory_file_order_source::send_mail( Scheduler_event::Event_code event_c
 
 bool Directory_file_order_source::async_continue_( Async_operation::Continue_flags flags )
 {
-    bool    was_signaled = _notification_event.signaled_flag();
+    bool    was_notified = _notification_event.signaled_flag();
 
-    string  cause = was_signaled                    ? "Notification" :
+    string  cause = was_notified                    ? "Notification" :
                     flags & cont_next_gmtime_reached? "Wartezeit abgelaufen"   // Das Flag ist doch immer gesetzt, oder?
                                                     : __FUNCTION__;
 
     _notification_event.reset();
-    _wait_for_notification_event = false;
 
-    read_directory( cause );
+    read_directory( was_notified, cause );
 
     return true;
 }

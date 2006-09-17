@@ -9,7 +9,9 @@
     author              = "$Author$"
     date                = "$Date$"
 >
-    
+    <scheduler_keyword keyword="Verzeichnis"/>
+    <scheduler_keyword keyword="Datei"/>
+
     <p>
         Wenn eine Jobkette Dateien aus einem Verzeichnis verarbeiten soll,
         können Sie Dateiaufträge verwenden.
@@ -34,6 +36,8 @@
     </p>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <scheduler_keyword keyword="Dateiauftragsquelle"/>
     
     <h2>Dateiauftragsquelle</h2>
     
@@ -131,6 +135,8 @@
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
+    <scheduler_keyword keyword="Dateiauftragssenke"/>
+
     <h2>Auftragssenke: Datei verschieben oder entfernen </h2>
     <p>
         Am Ende der Ausführung des Auftrags kann die zugehörige Datei entfernt oder verschoben werden.
@@ -160,6 +166,8 @@
     <pre>&lt;file_order_sink state="…" remove="yes"></pre>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <scheduler_keyword keyword="Schwarze Liste"/>
 
     <h2>Schwarze Liste</h2>
 
@@ -244,11 +252,26 @@
             einstellte Periode abgelaufen ist.
         </li>
     </ul>
+
+
+    <h3>Verzeichnisüberwachung durch Windows</h3>
+
     <p>
         Unter Windows lässt der Scheduler außerdem das Verzeichnis vom Betriebssystem überwachen.
-        Eine Signalisierung veranlasst den Scheduler, 
+        Eine Signalisierung veranlasst den Scheduler,
         das Verzeichnis vor Ablauf der Periode zu lesen.
         Damit reagiert der Scheduler sofort auf eine neue Datei.
+    </p>
+    <p>
+        Trotzdem sollte für ein Verzeichnis auf einem anderen Rechner ein Wiederholungsintervall mit 
+        <scheduler_element name="file_order_source" attribute="repeat"/> eingestellt werden.
+        Die Verzeichnisüberwachung verstummt, 
+        wenn das Verzeichnis entfernt und wieder angelegt wird.
+        Siehe außerdem Microsofts 
+        <!--dass die Überwachung eines Verzeichnisses auf einem anderen Rechner nicht korrekt funktioniert,
+        wenn das Verzeichnis mehrfach geöffnet ist:-->
+        <a href="http://support.microsoft.com/?scid=kb%3Ben-us%3B188321&amp;x=8&amp;y=13">Article 188321: 
+        FindFirstChangeNotification May Not Notify All Processes on File Changes</a>.
     </p>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
