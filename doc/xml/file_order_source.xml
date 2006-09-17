@@ -83,15 +83,10 @@
         <xml_attribute name="next_state" type="string">
             <description>
                 <p>
-                    Wenn die Aufträge nicht in den ersten Job gespeist werden sollen,
+                    Wenn die Aufträge nicht in den ersten Job der Jobkette gespeist werden sollen,
                     kann hier der anfängliche Zustand der Aufträge angegeben werden.
                 </p>
             </description>
-
-            <messages>
-                <message level="info" code="SCHEDULER-985"/>
-                <message level="info" code="SCHEDULER-986"/>
-            </messages>
         </xml_attribute>
 
     </xml_attributes>
@@ -100,13 +95,14 @@
 
     <description>
         <p>
-            Fügt einer Jobkette einen Dateiauftragsquelle hinzu.
+            Fügt einer Jobkette eine Dateiauftragsquelle hinzu.
             Jeder Dateiname in dem Verzeichnis, der dem Regulären entspricht,
             wird der Jobkette als Dateiauftrag hinzugefügt.
         </p>
         <p>
-            Ein Dateiauftrag ist ein Auftrag mit dem Parameter <code>scheduler_file_path</code>,
-            der den Pfad der Datei enthält.
+            Siehe auch
+            <scheduler_a href="../file_orders.xml"/> und
+            <scheduler_element name="file_order_sink"/>.
         </p>
     </description>
 
@@ -119,5 +115,14 @@
     &lt;file_order_sink state="ERROR" move_to=/tmp/input.error"/>
 &lt;/job_chain></pre>
     </example>
-    
+
+    <messages>
+        <message level="error" code="SCHEDULER-342"/>
+        <message level="info" code="SCHEDULER-981"/>
+        <message level="info" code="SCHEDULER-982"/>
+        <message level="info" code="SCHEDULER-983"/>
+        <message level="info" code="SCHEDULER-984"/>
+        <message level="info" code="SCHEDULER-985"/>
+        <message level="info" code="SCHEDULER-986"/>
+    </messages>
 </xml_element>

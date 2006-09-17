@@ -6,7 +6,6 @@
 <description
     title               = "Verzeichnisüberwachung mit Dateiaufträgen"
     base_dir            = ""
-    parent_page         = "index.xml"
     author              = "$Author$"
     date                = "$Date$"
 >
@@ -14,26 +13,51 @@
     <p>
         Wenn eine Jobkette Dateien aus einem Verzeichnis verarbeiten soll,
         können Sie Dateiaufträge verwenden.
-        Ein Dateiauftrag ist ein Auftrag, der einen Verweis auf eine Datei enthält.
-        Der Scheduler überwacht die Datei des Dateiauftrags.
+        Ein Dateiauftrag ist ein Auftrag mit einem Verweis auf eine Datei.
+        Der Scheduler überwacht das Verzeichnis und erzeugt zu jeder neuen Datei einen Dateiauftrag.
     </p>
     
-    <h2>Eine neue Datei erscheint im Verzeichnis</h2>
+    <pre>&lt;job_chain name="<i>my_job_chain</i>">
+    &lt;file_order_source directory="<i>path</i>"/>
+    &lt;file_order_source directory="<i>other_path</i>" regex="<i>regex</i>"/>
+    &lt;job_chain_node  state="<i>100</i>" job="<i>job_1</i> error_state="<i>error</i>"/>
+    &lt;job_chain_node  state="<i>200</i>" job="<i>job_2</i> error_state="<i>error</i>"/>
+    &lt;file_order_sink state="<i>ok</i>" remove="yes"/>
+    &lt;file_order_sink state="<i>error</i>" move_to="<i>/errorpath.../ </i>"/>
+&lt;/job_chain></pre>
+
+    <p>
+        Siehe
+        <scheduler_element name="job_chain"/>,
+        <scheduler_element name="file_order_source"/> und
+        <scheduler_element name="file_order_sink"/>.
+    </p>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+    
+    <h2>Dateiauftragsquelle</h2>
     
     <p>
-        Eine Dateiauftragsquelle überwacht ein Verzeichnis.
-        Wenn diesem ein Dateiname hinzugefügt wird, 
+        Eine Dateiauftragsquelle <scheduler_element name="file_order_source"/>
+        überwacht ein Verzeichnis.
+        Wenn diesem ein Dateiname hinzugefügt wird,
         der dem optionalen Regulären Ausdruck entspricht,
         führt das zu einem Dateiauftrag.
-        Der Auftrag hat folgende Eigenschaften:
-        
+    </p>
+    <pre>&lt;job_chain …>
+    &lt;file_order_source directory="…" regex="…"/>
+    …</pre>
+
+    <p>
+        Ein Dateiauftrag ist ein Auftrag <scheduler_method class="Order"/> mit folgenden Eigenschaften:
     </p>
     <dl>
         <dt>
             <scheduler_method class="Order" object="order" property="state"/>
         </dt>
         <dd>
-            Status des Auftrags ist der des ersten Jobkettenknotens <scheduler_element name="job_chain_node"/>.
+            Status des Auftrags ist der des ersten Jobs der Jobkette
+            oder der mit <scheduler_element name="file_order_source" attribute="next_state"/> eingestellte Zustand.
         </dd>
         <dt>
             <scheduler_method class="Order" object="order" property="id"/>
@@ -44,49 +68,110 @@
             und dem Dateinamen.
         </dd>
         <dt>
-            <scheduler_method class="Order" object="order" property="params"/><code>.value( "scheduler_file_path" )</code>
+            <scheduler_method class="Order" object="order" property="params"/><code>.<scheduler_method class="Variable_set" object="" method="value" value='"scheduler_file_path"'/></code>
         </dt>
         <dd>
             enthält den Pfad, derselbe Wert wie <scheduler_method class="Order" object="order" property="id"/>.
-            Das Vorhandensein dieser für den Scheduler reservierten Variablen macht einen Auftrag zum Dateiauftrag.
+            Diese für den Scheduler reservierte Variable macht einen Auftrag zum Dateiauftrag.
         </dd>
-    
     </dl>
 
+    <h3>Reihenfolge der Dateiaufträge</h3>
+    <p>
+        Die ältesten Dateien (die mit der am weitesten zurückliegenden letzten Änderung)
+        werden zuerst berücksichtigt.
+    </p>
     
-    <h2>Eine Datei ist nicht mehr vorhanden</h2>
+    <h3>Mehrere Auftragsquellen</h3>
+    <p>
+        Eine Jobkette kann mehrere Auftragsquellen haben. 
+        Der Scheduler berücksichtigt sie in der angegebenen Reihenfolge.
+    </p>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <h2>Der Dateiauftrag überwacht die Datei</h2>
 
     <p>
-        Wenn die Datei zu einem Dateiauftrag nicht mehr vorhanden nist,
-        dann entfernt der Scheduler den Dateiauftrag bei folgenden Gelegenheiten:
+        Der Scheduler entfernt einen Dateiauftrag,
+        wenn die dazugehörige Datei nicht mehr im Verzeichnis steht
+        und
+    </p>
+    <ul class="big">
+        <li>
+            <p>
+                der Dateiauftrag noch nicht einem Job übergeben wurde
+                <br/>
+                <scheduler_message level="warn" code="SCHEDULER-982" show_text="yes"/>
+            </p>
+        </li>
+        <li>
+            <p>
+                der Dateiauftrag auf der Schwarzen Liste steht
+                <br/>
+                <scheduler_message level="info" code="SCHEDULER-981" show_text="yes"/>
+            </p>
+        </li>
+    </ul>
+    <p>
+        Dateiaufträge, die in Ausführung sind, sind nicht betroffen.
+    </p>
+
+    <p>
+        Dieser Abgleich wird durchgeführt,
     </p>
     <ul>
         <li>
-            Bei der Übergabe eines neuen Auftrags an den ersten Job
-            prüft der Scheduler die Datei und entfernt,
-            wenn diese nicht mehr vorhanden ist,
-            den Auftrag mit der Warnung <scheduler_message code="SCHEDULER-982"/>.
+            wenn der Scheduler das Verzeichnis liest,
         </li>
         <li>
-            Mit derselben Warnung                     
-            werden solche Aufträge entfernt,
-            wenn der Scheduler beim Lesen des Verzeichnisses feststellt,
-            dass die zugeordnete Datei fehlt.
-        </li>
-        <li>
-            Ebenso beim Lesen des Verzeichnisses prüft der Scheduler
-            Aufträge auf der Schwarzen Liste
-            und entfernt sie ggfs. mit der Meldung <scheduler_message code="SCHEDULER-981"/>.
+            wenn der Scheduler den Dateiauftrag zum ersten Mal einem Job übergibt.
         </li>
     </ul>
 
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <h2>Auftragssenke: Datei verschieben oder entfernen </h2>
+    <p>
+        Am Ende der Ausführung des Auftrags kann die zugehörige Datei entfernt oder verschoben werden.
+        Die mit <scheduler_element name="file_order_sink"/> definierten Zustände sind Endzustände.
+    </p>
+    <p>
+        Wenn aber die Datei bereits entfernt worden ist,
+        gibt der Scheduler eine Warnung aus und der Dateiauftrag ist erledigt.
+    </p>
+    <p>
+        <scheduler_message level="warn" code="SCHEDULER-339" show_text="yes"/>
+    </p>
+
+    <p>
+        Wenn die Datei sich nicht entfernen bzw. verschieben lässt, 
+        gelangt der Auftrag auf die Schwarze Liste.
+    </p>
+    
+    <h3>Datei verschieben</h3>
+    <pre>&lt;file_order_sink state="…" move_to="<i>directory_path</i>"></pre>
+    <p>
+        Eine Datei gleichen Namens im Zielverzeichnis wird ohne Warnung überschrieben.
+    </p>
+
+    <h3>Datei entfernen</h3>
+
+    <pre>&lt;file_order_sink state="…" remove="yes"></pre>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
     <h2>Schwarze Liste</h2>
 
     <p>
-        Wenn ein Dateiauftrag ausgeführt (einen Endzustand erreicht), 
+        Wenn ein Dateiauftrag ausgeführt ist (einen Endzustand erreicht hat),
         aber die Datei noch vorhanden ist,
-        dann setzt der Scheduler den Auftrag mit der Warnung <scheduler_message code="SCHEDULER-340"/> auf die Schwarze Liste.
+        dann setzt der Scheduler den Auftrag  auf die Schwarze Liste.
+    </p>
+    <p>
+        <scheduler_message level="warn" code="SCHEDULER-340" show_text="yes"/>
+    </p>
+    <p>
         Dort bleibt er bis
     </p>
     <ul>
@@ -103,174 +188,80 @@
         Damit wird verhindert, dass die Datei sofort zu einem neuen Dateiauftrag führt.
     </p>
 
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-    
-    <h2>Verzeichnisüberwachung</h2>
-    
-    <p>
-    </p>
-    <ul>
-        <li>
-        </li>
-        <li>
-            
-        </li>
-    </ul>
-
-
-    <h2>...</h2>
-    
-    <pre>&lt;job_chain name="<i>my_job_chain</i>">
-    &lt;file_order_source directory="<i>path</i>"/>
-    &lt;file_order_source directory="<i>other_path</i>" regex="<i>regex</i>"/>
-    &lt;job_chain_node state="1" job="<i>job_1</i>"/>
-    &lt;job_chain_node state="2" job="<i>job_2</i>"/>
-    &lt;job_chain_node state="finished"/>
-&lt;/job_chain></pre>
-    
-    <p>
-        Die mit einem Regulären Ausdruck ausgewählten Dateinamen 
-        sieht der Scheduler als Aufträge an.
-        Der anfängliche Status der Aufträge ist der des ersten Jobs der Jobkette.
-    </p>
-    <p>
-        Sobald der erste Job der Jobkette einen Auftrag verarbeiten kann,
-        <!--und seine Auftragswarteschlange leer ist,-->
-        entnimmt der Scheduler einem der Verzeichnisse 
-        den Namen der Datei, die am längsten nicht geändert worden 
-        und noch nicht einem Auftrag zugeordnet ist,
-        macht daraus einen ordentlichen Auftrag und übergibt ihn dem Job.
-        Kennung des Auftrag ist der Dateipfad.
-    </p>
-    <p>
-        Bei mehreren Verzeichnissen liest der Scheduler zunächst das erste aus,
-        bevor er zum nächsten übergeht.
-    </p>
-
-
-    
-
-    <h3>spooler_task.trigger_files</h3>
-    <p>
-        Als Besonderheit setzt der Scheduler
-        <scheduler_method class="Task" object="spooler_task" property="trigger_files"/>
-        auf den Wert des Auftragsparameters <code>scheduler_file_path</code>.
-    </p>
-    <!--pre>// Algorithmus im Scheduler:
-if( spooler_task.trigger_files == ""  &amp;&amp;  spooler_task.order != null )
-    spooler_task.trigger_files = spooler_task.order.params( "scheduler.file.path" );
-spooler_process();</pre-->
-
-
-    
-    <h3>Auftragsgesteuerte &lt;process>-Jobs</h3>
-
-    <p>
-        Ein <scheduler_element name="process"/>-Job kann mit
-        <scheduler_element name="job" attribute="order" value="yes"/> 
-        auftragsgesteuert gemacht werden.
-        Er wird einzeln für jeden Auftrag gestartet.
-        Auf die Auftragsparameter kann er nicht zugreifen, 
-        aber ihm steht die Umgebungsvariable <code>SCHEDULER_TASK_TRIGGER_FILES</code> zur Verfügung.
-    </p>
-
-
-    
-    <h3>Vor Ausführung entfernte Dateien</h3>
-    <p>
-        Wenn ein Auftrag dem ersten Job übergeben werden soll,
-        prüft der Scheduler, ob die Datei noch vorhanden ist.
-        Wenn nicht, entfernt er den Auftrag mit einer Warnung.
-    </p>
-    <p>
-        Dieser Mechanismus kann für stehengebliebene Dateien (s.u.) genutzt werden,
-        die später manuell entfernt werden,
-        und für nach Scheduler-Start aus der Datenbank geladene, inzwischen veraltete Aufträge.
-    </p>
-
-
-
-    <h3>Optional: Reihenfolge der Dateien</h3>
-    <p>
-        Alphabetisch (Ordnung durch binären Vergleich der Dateinamen),
-        nach Erstellungsdatum,
-        nach 
-    </p>
-
-
-    <h3>&lt;show_job what="job_orders"></h3>
-    <p>
-        Das Kommandos <scheduler_element name="show_job" attribute="what" value="job_orders"/>
-        (und vergleichbare) zeigt Aufträge aus dem Verzeichnis nicht an, 
-        solange sie noch nicht dem Job übergeben worden sind, 
-        denn sie sind im Scheduler noch nicht bekannt.
-        <!--i>Das Kommando lässt sich aber erweitern, so dass es die Dateinamen liest und als Aufträge zeigt.</i-->
-    </p>
-
-
-
-    <h3>Auftragssenke: Datei entfernen oder verschieben</h3>
-    <p>
-        Am Ende der Ausführung des Auftrags kann die zugehörige Datei entfernt werden.
-        Die mit <code>&lt;file_order_sink></code> definierten Zustände sind Endzustände.
-    </p>
-    <pre>&lt;file_order_sink state="" remove="yes"></pre>
-    <p>
-        Wenn die Datei nicht vorhanden ist, wird das ignoriert.
-        Wenn die Datei sich nicht entfernen lässt, bleibt der Auftrag in dem Zustand erhalten,
-        und wird gesperrt 
-        (das ist neu: gesperrte Aufträge werden nicht verarbeitet; diese Eigenschaft wird nicht in die Datenbank übertragen).
-    </p>
-    <p>
-        Die Datei kann auch in ein anderes Verzeichnis verschoben werden:
-    </p>
-    <pre>&lt;file_order_sink state="" move_to="<i>directory_path</i>"></pre>
-    <p>
-        Wenn die Datei nicht vorhanden ist, ist das ein Fehler, der im Auftragsprotokoll festgehalten wird.
-        Das ist ohne weitere Wirkung, der Auftrag ist anschließend erledigt.
-        Eine Datei gleichen Namens im Zielverzeichnis wird ohne Warnung überschrieben.
-    </p>
-    <p>
-        Wenn ein gewöhnlicher Auftrag eine Dateiauftragssenke erreicht,
-        ist das ein Fehler des Auftrags ohne weitere Wirkung.
-        Der Auftrag ist anschließend erledigt.
-    </p>
-    <p>
-        Der Scheduler erkennt, wenn die Datei dauerhaft gelöscht ist und
-        entfernt dann den Auftrag.
-    </p>
-
-
-    <h3>Stehengebliebene Dateien</h3>
-    <p>
-        Nach der Ausführung eines Auftrags sollte die Datei entfernt sein.
-        Wenn die Datei noch vorhanden ist, 
-        bleibt der Auftrag im Endzustand stehen.
-        Der Scheduler erkennt, wenn die Datei dauerhaft gelöscht ist und 
-        entfernt dann den Auftrag.
-    </p>
-
-
-
-    <h3>Verzeichnis-Fehler</h3>
+    <h2>Verzeichnis-Fehler</h2>
     <p>
         Wenn die Verzeichnisüberwachung auf einen Fehler läuft,
         zum Beispiel weil das Verzeichnis abgehängt worden ist,
-        dann gibt der Scheduler eine Warnung aus 
+        dann gibt der Scheduler eine Warnung aus
         und erzeugt eine eMail
-        (Einstellung aus <scheduler_ini_entry file="factory.ini" section="spooler"/> gelten).
+        (die Einstellungen aus <scheduler_ini_entry file="factory.ini" section="spooler"/> gelten).
     </p>
 
     <p>
         Der Scheduler versucht periodisch die Überwachung erneut zu starten.
-        Fehlermeldungen dabei werden ignoriert (nur debug3-Meldung).
-        Die Periode ist an der Jobkette für alle Verzeichnisse
-        einstellbar, Default 1 Minute.
-        Sobald das Verzeichnis wieder lesbar ist, gibt der Scheduler eine info-Meldung aus.
+        Fehlermeldungen dabei werden ignoriert.
+        Die Periode ist einstellbar mit <scheduler_element name="file_order_source" attribute="delay_after_error"/>. 
+        Sobald das Verzeichnis wieder lesbar ist, gibt der Scheduler diese Meldung aus:
     </p>
-    <pre>&lt;file_order_source … delay_after_error="60"/></pre>
+    <p>
+        <scheduler_message level="info" code="SCHEDULER-984" show_text="yes"/>
+    </p>
 
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
+    <h2>Wann wird das Verzeichnis gelesen?</h2>
 
+    <p>
+        Sobald der erste Job zum ersten Mal bereit ist, einen Auftrag auszuführen, 
+        liest der Scheduler das Verzeichnis (mit der Beschränkung durch den Regulären Ausdruck)
+        und erzeugt daraus Dateiaufträge.
+    </p>
+    <p>
+        Wenn das Verzeichnis viele Dateien enthält
+        (mehr als mit <scheduler_element name="file_order_source" attribute="max"/> eingestellt),
+        dann verbleibt eine Liste der übrigen Dateien im Speicher,
+        aus der der Scheduler später die weiteren Dateiaufträge erzeugt.
+        Die Meldungen dazu sind:
+    </p>
+
+    <scheduler_message level="info" code="SCHEDULER-985" show_text="yes"/>
+    <scheduler_message level="info" code="SCHEDULER-986" show_text="yes"/>
+
+    <p>
+        Der Scheduler liest das Verzeichnis erneut, wenn
+    </p>
+    <ul>
+        <li>
+            alle Dateien dem ersten Job übergeben worden sind,
+        </li>
+        <li>
+            dieser für einen weiteren Auftrag bereit ist,
+        </li>
+        <li>
+            und die mit <scheduler_element name="file_order_source" attribute="repeat"/>
+            einstellte Periode abgelaufen ist.
+        </li>
+    </ul>
+    <p>
+        Unter Windows lässt der Scheduler außerdem das Verzeichnis vom Betriebssystem überwachen.
+        Eine Signalisierung veranlasst den Scheduler, 
+        das Verzeichnis vor Ablauf der Periode zu lesen.
+        Damit reagiert der Scheduler sofort auf eine neue Datei.
+    </p>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <h2>Auftragsgesteuerte &lt;process>-Jobs</h2>
+    <p>
+        Einen auftragsgesteuerter <scheduler_element name="process"/>-Job 
+        startet der Scheduler für jeden Dateiauftrag.
+    </p>
+    <p>
+        Die Umgebungsvariable <code>SCHEDULER_TASK_TRIGGER_FILES</code> enthält den Dateipfad.
+    </p>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
     
 </description>

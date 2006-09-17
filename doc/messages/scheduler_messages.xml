@@ -2153,15 +2153,21 @@
             </text>
         </message>
 
-        <message code="SCHEDULER-341">
+        <!--message code="SCHEDULER-341">
             <text xml:lang="en">
-                <title>Cannot process orders as a job is missing</title>
+                <title></title>
             </text>
-        </message>
-
+        </message-->
+        
         <message code="SCHEDULER-342">
             <text xml:lang="en">
                 <title>There is no job between order source and order sink in <p1>job_chain</p1></title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-343">
+            <text xml:lang="en">
+                <title>This is no file order: <p1>order</p1></title>
             </text>
         </message>
 
@@ -2828,7 +2834,7 @@
 
         <message code="SCHEDULER-982">
             <text xml:lang="en">
-                <title>File has been removed, so the file order is being removed too.</title>
+                <title>File has been removed, so the file order is being removed too</title>
             </text>
         </message>
 
@@ -2852,7 +2858,7 @@
         
         <message code="SCHEDULER-986">
             <text xml:lang="en">
-                <title>Continuing reading buffered directory (as of <p1>clock</p1>)</title>
+                <title>Continuing reading buffered directory (as of <p1>time</p1>)</title>
             </text>
         </message>
         

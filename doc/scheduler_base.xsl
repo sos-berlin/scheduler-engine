@@ -1428,44 +1428,84 @@
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_message-->
 
     <xsl:template match="scheduler_message" mode="description">
-        <xsl:call-template name="scheduler_message">
-            <xsl:with-param name="code"      select="@code"/>
-            <xsl:with-param name="show_text" select="@show_text"/>
-        </xsl:call-template>
+
+        <xsl:choose>
+            <xsl:when test="ancestor::p or ancestor::li">
+                <xsl:call-template name="scheduler_message">
+                    <xsl:with-param name="level"     select="@level"/>
+                    <xsl:with-param name="code"      select="@code"/>
+                    <xsl:with-param name="show_text" select="@show_text"/>
+                </xsl:call-template>
+            </xsl:when>
+            
+            <xsl:otherwise>
+                <xsl:element name="p">
+                    <xsl:attribute name="class">message</xsl:attribute>
+                    
+                    <xsl:if test="preceding-sibling::*[1] [ local-name() = 'scheduler_message' ]">
+                        <xsl:attribute name="style">margin-top: 0em;</xsl:attribute>
+                    </xsl:if>
+
+                    <xsl:call-template name="scheduler_message">
+                        <xsl:with-param name="level"     select="@level"/>
+                        <xsl:with-param name="code"      select="@code"/>
+                        <xsl:with-param name="show_text" select="@show_text"/>
+                    </xsl:call-template>
+                </xsl:element>
+            </xsl:otherwise>
+        </xsl:choose>
+
     </xsl:template>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_message-->
 
     <xsl:template name="scheduler_message">
+        <xsl:param name="level"/>
         <xsl:param name="code"/>
         <xsl:param name="show_text" select="false()"/>
 
-        <xsl:element name="a">
-            <xsl:attribute name="href">
-                <xsl:value-of select="/*/@base_dir"/>
-                <xsl:text>messages/index.xml#message_</xsl:text>
-                <xsl:value-of select="$code"/>
-            </xsl:attribute>
-            <xsl:element name="code">
-                <xsl:attribute name="style">white-space: nowrap</xsl:attribute>
-                <xsl:attribute name="title">
+        <xsl:element name="span">
+            <!--xsl:if test="$show_text">
+                <xsl:attribute name="class">message_text</xsl:attribute>
+            </xsl:if-->
+
+            <xsl:if test="$level">
+                <xsl:call-template name="message_level">
+                    <xsl:with-param name="level" select="@level"/>
+                </xsl:call-template>
+                
+                <code>
+                    <xsl:text> </xsl:text>
+                </code>
+            </xsl:if>
+
+            <xsl:element name="a">
+                <xsl:attribute name="href">
+                    <xsl:value-of select="/*/@base_dir"/>
+                    <xsl:text>messages/index.xml#message_</xsl:text>
+                    <xsl:value-of select="$code"/>
+                </xsl:attribute>
+                <xsl:element name="code">
+                    <xsl:attribute name="style">white-space: nowrap</xsl:attribute>
+                    <xsl:attribute name="title">
+                        <xsl:call-template name="show_message_text">
+                            <xsl:with-param name="code" select="$code"/>
+                        </xsl:call-template>
+                    </xsl:attribute>
+                    <xsl:value-of select="$code"/>
+                </xsl:element>
+            </xsl:element>
+
+            <xsl:if test="@show_text">
+                <code>
+                    <xsl:text>&#160; </xsl:text>
                     <xsl:call-template name="show_message_text">
                         <xsl:with-param name="code" select="$code"/>
                     </xsl:call-template>
-                </xsl:attribute>
-                <xsl:value-of select="$code"/>
-            </xsl:element>
+                </code>
+            </xsl:if>
         </xsl:element>
-
-        <xsl:if test="@show_text">
-            <code>
-                <xsl:text>&#160; </xsl:text>
-                <xsl:call-template name="show_message_text">
-                    <xsl:with-param name="code" select="$code"/>
-                </xsl:call-template>
-            </code>
-        </xsl:if>
-
+    
     </xsl:template>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~show_message_text-->
@@ -1779,6 +1819,7 @@
             <xsl:with-param name="property"         select="@property"/>
             <xsl:with-param name="java_signature"   select="@java_signature"/>
             <xsl:with-param name="access"           select="@access"/>
+            <xsl:with-param name="value"            select="@value"/>
             <xsl:with-param name="programming_language" select="@programming_language"/>
         </xsl:call-template>
     </xsl:template>
@@ -1793,6 +1834,7 @@
         <xsl:param name="java_signature" select="/.."/>
         <xsl:param name="access"         select="/.."/>
         <!-- "read" (default), "write" -->
+        <xsl:param name="value"          select="/.."/>
         <xsl:param name="programming_language" select="$selected_programming_language"/>
 
         <xsl:variable name="plang">
@@ -1853,19 +1895,19 @@
                     </xsl:when>
                 </xsl:choose>
 
-                <xsl:if test="$class != 'Job_impl' and ( $method or $property )">
+                <xsl:if test="$class != 'Job_impl' and ( $method or $property ) and not( $object = '' )">
                     <xsl:text>.</xsl:text>
                 </xsl:if>
-                <!--
-                <xsl:if test="$method | $property">
-                    <xsl:text>.</xsl:text>
-                    <xsl:value-of select="$java_method"/>
-                    <xsl:text>()</xsl:text>
-                </xsl:if>
--->
+
                 <xsl:if test="$method">
                     <xsl:value-of select="$method"/>
-                    <xsl:text>()</xsl:text>
+                    <xsl:text>(</xsl:text>
+                    <xsl:if test="$value">
+                        <xsl:text> </xsl:text>
+                        <xsl:value-of select="$value"/>
+                        <xsl:text> </xsl:text>
+                    </xsl:if>
+                    <xsl:text>)</xsl:text>
                 </xsl:if>
 
                 <xsl:if test="$property">
@@ -1874,6 +1916,34 @@
 
             </xsl:element>
         </xsl:element>
+
+    </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_element-->
+
+    <xsl:template match="scheduler_a" mode="description">
+        <xsl:call-template name="scheduler_a">
+            <xsl:with-param name="href" select="@href"/>
+        </xsl:call-template>
+    </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_element-->
+
+    <xsl:template name="scheduler_a">
+        <xsl:param name="href"/>
+
+        <xsl:text>»</xsl:text>
+
+        <xsl:element name="a">
+            <xsl:attribute name="href">
+                <xsl:value-of select="$href"/>
+            </xsl:attribute>
+            
+            <xsl:variable name="root_element" select="document( $href )/*"/>
+            <xsl:copy-of select="normalize-space( $root_element/@title )"/>
+        </xsl:element>
+
+        <xsl:text>«</xsl:text>
 
     </xsl:template>
 
@@ -1995,26 +2065,9 @@
         <tr>
             <xsl:if test="$show_level">
                 <td style="padding-right: 1ex">
-                    <xsl:if test="@level">
-                        <code>
-                            <xsl:choose>
-                                <xsl:when test="@level='info'">
-                                    <code class="message_info">[info]</code>
-                                </xsl:when>
-                                <xsl:when test="@level='warn'">
-                                    <code class="message_warn">[warn]</code>
-                                </xsl:when>
-                                <xsl:when test="@level='error'">
-                                    <code class="message_error">[ERROR]</code>
-                                </xsl:when>
-                                <xsl:otherwise>
-                                    <code>
-                                        [<xsl:value-of select="@level"/>]
-                                    </code>
-                                </xsl:otherwise>
-                            </xsl:choose>
-                        </code>
-                    </xsl:if>
+                    <xsl:call-template name="message_level">
+                        <xsl:with-param name="level" select="@level"/>
+                    </xsl:call-template>
                 </td>
             </xsl:if>
 
@@ -2036,7 +2089,34 @@
             </td>
         </tr>
     </xsl:template>
-    
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~message_level-->
+
+    <xsl:template name="message_level">
+        <xsl:param name="level"/>
+                  
+        <xsl:if test="@level">
+            <code>
+                <xsl:choose>
+                    <xsl:when test="@level='info'">
+                        <code class="message_info">[info]</code>
+                    </xsl:when>
+                    <xsl:when test="@level='warn'">
+                        <code class="message_warn">[warn]</code>
+                    </xsl:when>
+                    <xsl:when test="@level='error'">
+                        <code class="message_error">[ERROR]</code>
+                    </xsl:when>
+                    <xsl:otherwise>
+                        <code>
+                            [<xsl:value-of select="@level"/>]
+                        </code>
+                    </xsl:otherwise>
+                </xsl:choose>
+            </code>
+        </xsl:if>
+    </xsl:template>
+
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~command_line-->
 
     <xsl:template match="command_line">
@@ -2828,3 +2908,4 @@
 <!-- Das ist ein langer Strich: – -->
 <!-- Das ist drei Punkte: … -->
 <!-- Das ist ein Pfeil: → -->
+<!-- »« -->

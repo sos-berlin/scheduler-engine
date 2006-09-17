@@ -18,9 +18,11 @@ th              { font-size: 10pt; vertical-align: baseline; text-align: left; b
 td              { font-size: 10pt; vertical-align: baseline; }
 div             { font-size: 10pt; }
 /*p:first-child   { font-size: 10pt; margin-top: 0px; margin-bottom: 0px }   Wirkt in ie6 nicht */
-li              { font-size: 10pt; max-width: 88ex; }
-ol              { margin-left: 24pt; padding-left: 0pt; }
 ul              { margin-top: 0.5em; margin-left: 12pt; padding-left: 0pt; }
+ul.big          { margin-top: 0em; margin-left: 12pt; padding-left: 0pt; }
+li              { font-size: 10pt; max-width: 88ex; }
+ul.big li       { margin-top: 1em; font-size: 10pt; max-width: 88ex; }
+ol              { margin-left: 24pt; padding-left: 0pt; }
 .example        { background-color: #ffffe0; }
 pre             { background-color: #ffffe0; font-family: "Lucida Console", monospace; font-size: 9pt; 
                   padding-left: 0ex; margin-top: 1em; margin-bottom: 1em; line-height: 12pt;  }
@@ -108,6 +110,7 @@ td.api_title                    { padding-left: 3mm; }
 
 .api_programming_language_selector { margin-right: 2ex; }
 
+.message                        { background-color: #f8f8f8; max-width: 999ex; }
 .message_info                   {}
 .message_warn                   { color: #800000; }
 .message_error                  { color: red; }

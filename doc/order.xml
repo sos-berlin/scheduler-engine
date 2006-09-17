@@ -64,15 +64,25 @@
     was über die nächste Stelle in der Jobkette entscheidet (s. <scheduler_method class="Job_chain"/>).
 </p>
 
-<h2>Erkennung doppelter Aufträge</h2>
+<!--h2>Erkennung doppelter Aufträge</h2>
 <p>
     Wenn ein Auftrag hinzugefügt wird, prüft der Scheduler, ob ein Auftrag mit derselben <code>id</code>
     schon eingetragen ist (nur, wenn <code>id</code> gesetzt ist).
     Hat die Auftragswarteschlange oder die Jobkette bereits einen Auftrag mit derselben <code>id</code>,
     dann wird er ersetzt.
     Wenn der neue Auftrag eine andere Priorität hat, wird diese vom Scheduler berücksichtigt.
-</p>
+</p-->
 
+    
+    
+    <h2>Verzeichnisüberwachung mit Dateiaufträgen</h2>
+    <p>
+        Zu Aufträgen, die aus Dateien eines Verzeichnisses entstehen,
+        siehe <scheduler_a href="file_orders.xml"/>.
+    </p>
+    
+    
+    
 <h2>Priorität</h2>
 <p>
     Aufträge mit höherer Priorität <scheduler_method class="Order" property="priority"/>
@@ -126,9 +136,6 @@
 <p>
     <scheduler_keyword keyword="Priorität"/>
     Auftragsgesteuerte Jobs haben Vorrang vor nicht auftragsgesteuerten Jobs.
-    <br/>
-    Ausnahme: Jobs mit höchster Priorität haben absoluten Vorrang,
-    sogar vor auftragsgesteuerten Jobs.
 </p>
 
 

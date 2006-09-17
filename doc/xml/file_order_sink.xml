@@ -33,6 +33,9 @@
                     <code>remove="yes"</code> entfernt die Datei.
                 </p>
             </description>
+            <messages>
+                <message level="info" code="SCHEDULER-979"/>
+            </messages>
         </xml_attribute>
 
         <xml_attribute name="move_to" type="directory_path">
@@ -45,6 +48,9 @@
                     Unter Unix wird die Datei nur im selben Dateisystem verschoben.
                 </p>
             </description>
+            <messages>
+                <message level="info" code="SCHEDULER-980"/>
+            </messages>
         </xml_attribute>
 
     </xml_attributes>
@@ -69,6 +75,11 @@
             Wenn der Scheduler bemerkt, dass die Datei entfernt worden ist, 
             streicht er den Auftrag von der Schwarzen Liste.
             Die Datei kann dann erneut ins Verzeichnis gestellt werden.
+        </p>
+        <p>
+            Siehe auch
+            <scheduler_a href="../file_orders.xml"/> und
+            <scheduler_element name="file_order_source"/>.
         </p>
     </description>
 </xml_element>

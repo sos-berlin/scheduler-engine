@@ -46,7 +46,12 @@ struct File_order_sink_module_instance : Internal_module_instance
         if( !order )  return false;         // Fehler
 
         File_path path = string_from_variant( order->param( scheduler_file_path_variable_name ) );
-        if( path != "" )
+        if( path == "" )
+        {
+            _log->warn( message_string( "SCHEDULER-343", order->obj_name() );
+            result = false;
+        }
+        else
         {
             Job_chain_node* job_chain_node = order->job_chain_node();
             if( !job_chain_node )  z::throw_xc( __FUNCTION__ );

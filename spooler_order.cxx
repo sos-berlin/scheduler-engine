@@ -448,15 +448,6 @@ xml::Element_ptr Job_chain::dom_element( const xml::Document_ptr& document, cons
     return element;
 }
 
-//-----------------------------------------------------------------------------Job_chain::first_job
-/*
-Job* Job_chain::first_job()
-{
-    Job* result = first_node()->_job;
-    if( !result )  z::throw_xc( "SCHEDULER-341" );
-    return result;
-}
-*/
 //---------------------------------------------------------------------------------normalized_state
 
 Order::State normalized_state( const Order::State& state )

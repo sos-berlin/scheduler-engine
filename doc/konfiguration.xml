@@ -269,6 +269,7 @@
                     max               = "…"  
                     repeat            = "…"  
                     delay_after_error = "…"
+                    next_state        = "…"
                 />
                 …
                 &lt;<a class="silent" href="xml/job_chain_node.xml">job_chain_node</a>
