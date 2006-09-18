@@ -1096,7 +1096,11 @@
 
                     <td>
                         <xsl:call-template name="command_menu">
-                            <xsl:with-param name="onclick" select="concat( 'order_menu__onclick( &quot;', @job_chain, '&quot;, &quot;', @id, '&quot;, mouse_x() - 20, mouse_y() - 1 )' )"/>
+                            <xsl:with-param name="onclick_call"         select="'order_menu__onclick'"/>
+                            <xsl:with-param name="onclick_param1_str"   select="@job_chain"/>
+                            <xsl:with-param name="onclick_param2_str"   select="@id"/>
+                            <xsl:with-param name="onclick_param3"       select="'mouse_x() - 20'"/>
+                            <xsl:with-param name="onclick_param4"       select="'mouse_y() - 1'"/>
                         </xsl:call-template>
                     </td>
 
@@ -1282,7 +1286,10 @@
 
                             <td align="right" style="padding-right: 0pt">
                                 <xsl:call-template name="command_menu">
-                                    <xsl:with-param name="onclick" select="concat( 'job_menu__onclick(  &quot;', @job, '&quot;, mouse_x() - 90, mouse_y() - 1 )' )"/>
+                                    <xsl:with-param name="onclick_call"       select="'job_menu__onclick'"/>
+                                    <xsl:with-param name="onclick_param1_str" select="@job"/>
+                                    <xsl:with-param name="onclick_param2"     select="'mouse_x() - 90'"/>
+                                    <xsl:with-param name="onclick_param3"     select="'mouse_y() - 1'"/>
                                 </xsl:call-template>
                             </td>
                         </tr>
@@ -1512,7 +1519,10 @@
                             <xsl:if test="@id">
                                 <td align="right" valign="top" style="padding-right: 0pt">
                                     <xsl:call-template name="command_menu">
-                                        <xsl:with-param name="onclick" select="concat( 'task_menu__onclick(  ', @id, ', mouse_x() - 70, mouse_y() - 1 )' )"/>
+                                        <xsl:with-param name="onclick_call"       select="'task_menu__onclick'"/>
+                                        <xsl:with-param name="onclick_param1_str" select="@id"/>
+                                        <xsl:with-param name="onclick_param2"     select="'mouse_x() - 70'"/>
+                                        <xsl:with-param name="onclick_param3"     select="'mouse_y() - 1'"/>
                                     </xsl:call-template>
                                 </td>
                             </xsl:if>
@@ -1858,7 +1868,11 @@
                             
                             <td align="right">
                                 <xsl:call-template name="command_menu">
-                                    <xsl:with-param name="onclick" select="concat( 'order_menu__onclick( &quot;', @job_chain, '&quot;, &quot;', @id, '&quot;, mouse_x() - 70, mouse_y() - 1 )' )"/>
+                                    <xsl:with-param name="onclick_call"       select="'order_menu__onclick'"/>
+                                    <xsl:with-param name="onclick_param1_str" select="@job_chain"/>
+                                    <xsl:with-param name="onclick_param2_str" select="@id"/>
+                                    <xsl:with-param name="onclick_param3"     select="'mouse_x() - 70'"/>
+                                    <xsl:with-param name="onclick_param4"     select="'mouse_y() - 1'"/>
                                 </xsl:call-template>
                             </td>
                         </xsl:element>
@@ -2055,22 +2069,130 @@
 
     <xsl:template name="command_menu">
         <xsl:param name="onclick"/>
-        
+        <xsl:param name="onclick_call"/>
+        <xsl:param name="onclick_param1"/>
+        <xsl:param name="onclick_param1_str"/>
+        <xsl:param name="onclick_param2"/>
+        <xsl:param name="onclick_param2_str"/>
+        <xsl:param name="onclick_param3"/>
+        <xsl:param name="onclick_param3_str"/>
+        <xsl:param name="onclick_param4"/>
+        <xsl:param name="onclick_param4_str"/>
+        <xsl:param name="onclick_param5"/>
+        <xsl:param name="onclick_param5_str"/>
+
         <xsl:element name="span">
             <xsl:attribute name="class">
                 small
             </xsl:attribute>
+            
             <xsl:attribute name="style">
                 cursor: pointer; text-decoration: underline; padding-left: 4pt; font-weight: normal;
             </xsl:attribute>
+
             <xsl:attribute name="onclick">
-                <xsl:value-of select="$onclick"/>
+                <xsl:choose>
+                    <xsl:when test="$onclick">
+                        <xsl:value-of select="$onclick"/>
+                    </xsl:when>
+
+                    <xsl:otherwise>
+                        <xsl:value-of select="$onclick_call"/>
+                        <xsl:text>( </xsl:text>
+
+                        <xsl:call-template name="command_menu_param">
+                            <xsl:with-param name="first"     select="true()"/>
+                            <xsl:with-param name="param"     select="$onclick_param1"/>
+                            <xsl:with-param name="param_str" select="$onclick_param1_str"/>
+                        </xsl:call-template>
+
+                        <xsl:call-template name="command_menu_param">
+                            <xsl:with-param name="param"     select="$onclick_param2"/>
+                            <xsl:with-param name="param_str" select="$onclick_param2_str"/>
+                        </xsl:call-template>
+
+                        <xsl:call-template name="command_menu_param">
+                            <xsl:with-param name="param"     select="$onclick_param3"/>
+                            <xsl:with-param name="param_str" select="$onclick_param3_str"/>
+                        </xsl:call-template>
+
+                        <xsl:call-template name="command_menu_param">
+                            <xsl:with-param name="param"     select="$onclick_param4"/>
+                            <xsl:with-param name="param_str" select="$onclick_param4_str"/>
+                        </xsl:call-template>
+
+                        <xsl:call-template name="command_menu_param">
+                            <xsl:with-param name="param"     select="$onclick_param5"/>
+                            <xsl:with-param name="param_str" select="$onclick_param5_str"/>
+                        </xsl:call-template>
+
+
+                        <xsl:text> )</xsl:text>
+                    </xsl:otherwise>
+                </xsl:choose>
             </xsl:attribute>
 
             <xsl:text>Menu</xsl:text>
 
         </xsl:element>
     </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~command_menu_param-->
+
+    <xsl:template name="command_menu_param">
+        <xsl:param name="param"/>
+        <xsl:param name="param_str"/>
+        <xsl:param name="first" select="false()"/>
+
+        <xsl:if test="not( $first ) and ( $param or $param_str )">
+            <xsl:text>,</xsl:text>
+        </xsl:if>
+        
+        <xsl:choose>
+            <xsl:when test="$param">
+                <xsl:value-of select="$param"/>
+            </xsl:when>
+            <xsl:when test="$param_str">
+                <xsl:text>"</xsl:text>
+                <!-- Anführungszeichen in $param_str werden nicht ersetzt -->
+                <xsl:call-template name="replace">
+                    <xsl:with-param name="string" select="$param_str"/>
+                    <xsl:with-param name="old"    select="'\'"/>
+                    <xsl:with-param name="new"    select="'\\'"/>
+                </xsl:call-template>
+                <xsl:text>"</xsl:text>
+            </xsl:when>
+        </xsl:choose>
+
+    </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~replace-->
+
+    <xsl:template name="replace">
+        <xsl:param name="string"/>
+        <xsl:param name="old"/>
+        <xsl:param name="new"/>
+        <xsl:param name="old2"/>
+        <xsl:param name="new2"/>
+
+        <xsl:choose>
+            <xsl:when test="contains( $string, $old )">
+                <xsl:value-of select="concat( substring-before( $string, $old ), $new )"/>
+                
+                <xsl:call-template name="replace">
+                    <xsl:with-param name="string" select="substring-after( $string, $old)"/>
+                    <xsl:with-param name="old" select="$old"/>
+                    <xsl:with-param name="new" select="$new"/>
+                </xsl:call-template>
+            </xsl:when>
+            
+            <xsl:otherwise>
+                <xsl:value-of select="$string"/>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 </xsl:stylesheet>
 

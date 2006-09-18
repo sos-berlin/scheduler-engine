@@ -633,7 +633,7 @@ function show_order_history_checkbox__onclick()
 
 function Popup_menu_builder__add_command( html, xml_command, is_active )
 {
-    this.add_entry( html, "call_error_checked( popup_menu__execute, &quot;" + xml_command + "&quot; )", is_active );
+    this.add_entry( html, "call_error_checked( popup_menu__execute, &quot;" + xml_command.replace( /\\/g, "\\\\" ) + "&quot; )", is_active );
 }
 
 //-------------------------------------------------------------------------------popup_menu.execute
@@ -653,7 +653,9 @@ function popup_menu__execute( xml_command )
 
 function Popup_menu_builder__add_show_log( html, show_log_command, window_name, is_active )
 {
-    this.add_entry( html, "popup_menu__show_log__onclick( &quot;" + show_log_command + "&quot;, &quot;" + window_name + "&quot; )", is_active );
+    var cmd = show_log_command.replace( /\\/g, "\\\\" ).replace( /"/g, "\\&quot;" );
+    var w = window_name.replace( /\\/g, "\\\\" ).replace( /"/g, "\\&quot;" );
+    this.add_entry( html, "popup_menu__show_log__onclick( &quot;" + cmd + "&quot;, &quot;" + w + "&quot; )", is_active );
 }
 
 //--------------------------------------------------------------------popup_menu__show_log__onclick

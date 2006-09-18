@@ -844,17 +844,25 @@ STDMETHODIMP Request::get_Binary_content( SAFEARRAY** result )
     return hr;
 }
 
-//-----------------------------------------------------------------------------Http_exception::what
+//-------------------------------------------------------------------Http_exception::Http_exception
 
-const char* Http_exception::what()
-{ 
+Http_exception::Http_exception( Status_code status_code, const string& error_text ) 
+: 
+    _status_code( status_code ), 
+    _error_text( error_text )
+{
     S result;
     
     result << "HTTP " << (int)_status_code << ' ' << http_status_messages[ _status_code ].c_str();
     if( _error_text != "" )  result << ": " << _error_text;
     
     _what = result;
-    return _what.c_str();
+}
+
+//------------------------------------------------------------------Http_exception::~Http_exception
+
+Http_exception::~Http_exception() 
+{
 }
 
 //-------------------------------------------------------------------------------Response::Response

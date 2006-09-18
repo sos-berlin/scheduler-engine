@@ -275,17 +275,21 @@ void Directory_file_order_source::start_or_continue_notification( bool was_notif
 
         if( h == INVALID_HANDLE_VALUE )  z::throw_mswin( "FindFirstChangeNotification", _path.path() );
 
+        if( _notification_event.handle() )      // Signal retten. Eigentlich überflüssig, weil wir hiernach sowieso das Verzeichnis lesen
+        {
+            _notification_event.wait( 0 );
+            if( _notification_event.signaled() )      
+            {
+                _notification_event.set_signaled();     
+                Z_LOG2( "scheduler", __FUNCTION__ << " Signal der alten Überwachung auf die neue übertragen.\n" );
+            }
+
+            close_notification();
+        }
+
         _notification_event.set_handle( h );
         _notification_event.set_name( "FindFirstChangeNotification " + _path );
         
-        if( _notification_event.handle() )  _notification_event.wait( 0 );
-        if( _notification_event.signaled() )      // Signal retten. Eigentlich überflüssig, weil wir hiernach sowieso das Verzeichnis lesen
-        {
-            _notification_event.set_signaled();     
-            Z_LOG2( "scheduler", __FUNCTION__ << " Signal der alten Überwachung auf die neue übertragen.\n" );
-        }
-
-        close_notification();
         add_to_event_manager( _spooler->_connection_manager );
 
         _notification_event_time = now;

@@ -204,19 +204,11 @@ enum Status_code
 
 struct Http_exception : exception
 {
-    Http_exception( Status_code status_code, const string& error_text = "" ) 
-    : 
-        _status_code( status_code ), 
-        _error_text( error_text )
-    {
-    }
-
-    ~Http_exception() throw () 
-    {
-    }
+                                Http_exception              ( Status_code, const string& error_text = "" );
+                               ~Http_exception              () throw ();
 
 
-    const char*                 what                        ();
+    const char*                 what                        () const throw()                        { return _what.c_str(); }
     Status_code                _status_code;
     string                     _error_text;
     string                     _what;
