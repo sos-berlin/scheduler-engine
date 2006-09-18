@@ -913,7 +913,7 @@ void Command_processor::execute_http( http::Operation* http_operation )
                                              " and \"JOB_CHAIN\"="  + sql::quoted( job_chain_name ) +
                                              " and \"ORDER_ID\"="   + sql::quoted( order_id ) );
 
-                            if( sel.eof() )
+                            if( !sel.eof() )
                             {
                                 string history_id = sel.get_record().as_string( "history_id_max" );
                                 if( history_id != "" )
