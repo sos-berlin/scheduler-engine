@@ -35,12 +35,18 @@
                     <scheduler_ini_entry file="sos.ini" section="spooler" entry="queue_dir"/>                    
                     eingestellte Verzeichnis.
                 </p>
+                <p>
+                    Ebenso <code>queue_only</code> in der Datei <code>sos.ini</code>.
+                </p>
                 <ul>
                     <li>
-                        <scheduler_ini_entry file="factory.ini" section="spooler" entry="smtp"/>
+                        <scheduler_ini_entry file="sos.ini" section="mail" entry="queue_only"/>
                     </li>
                     <li>
                         <scheduler_ini_entry file="sos.ini" section="mail" entry="smtp"/>
+                    </li>
+                    <li>
+                        <scheduler_ini_entry file="factory.ini" section="spooler" entry="smtp"/>
                     </li>
                 </ul>
             </description>

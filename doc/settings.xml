@@ -589,7 +589,7 @@ db = odbc -db=factory_oracle -user=factory -password=factory
     </setting>
 
 
-    <!--setting setting = "mail_queue_only"
+    <setting setting = "mail_queue_only"
              type    = "yes|no"
              title   = "Mail nicht versenden, nur in die eMail-Warteschlange hängen">
         <description>
@@ -603,7 +603,7 @@ db = odbc -db=factory_oracle -user=factory -password=factory
                 <scheduler_ini_entry file="sos.ini" section="mail" entry="queue_only"/>.
             </p>
         </description>
-    </setting-->
+    </setting>
 
 
     <setting setting = "mail_xslt_stylesheet"
@@ -787,6 +787,7 @@ db = odbc -db=factory_oracle -user=factory -password=factory
                 <code>smtp=-queue</code> verhindert den eMail-Versand und
                 schreibt die Nachrichten stattdessen in die mit
                 <code>queue_dir</code> eingestellte Datei.
+                Siehe auch <scheduler_ini_entry file="sos.ini" section="mail" entry="queue_only"/>.
             </p>
         </description>
     </setting>

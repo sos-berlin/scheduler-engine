@@ -289,8 +289,9 @@ void Job::add_on_exit_commands_element( const xml::Element_ptr& commands_element
     {
         _commands_document.create();
         _commands_document.create_root_element( "all_commands" );       // Name ist egal
-        _commands_document_time = xml_mod_time;
     }
+
+    _commands_document_time = xml_mod_time;
 
     xml::Element_ptr my_commands_element = _commands_document.clone( commands_element );
     _commands_document.documentElement().appendChild( my_commands_element );
