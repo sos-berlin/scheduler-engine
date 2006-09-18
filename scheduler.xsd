@@ -391,7 +391,22 @@
                         <xsd:attribute name="directory"         type="String" use="required"/>
                         <xsd:attribute name="regex"             type="Name"/>
                         <xsd:attribute name="delay_after_error" type="xsd:positiveInteger"/>
-                        <xsd:attribute name="repeat"            type="xsd:positiveInteger"/>
+                        
+                        <xsd:attribute name="repeat">
+                            <xsd:simpleType>
+                                <xsd:union>
+                                    <xsd:simpleType>
+                                        <xsd:restriction base="xsd:NMTOKEN">
+                                            <xsd:enumeration value="no"/>
+                                        </xsd:restriction>
+                                    </xsd:simpleType>
+                                    <xsd:simpleType>
+                                        <xsd:restriction base="xsd:positiveInteger"/>
+                                    </xsd:simpleType>
+                                </xsd:union>
+                            </xsd:simpleType>
+                        </xsd:attribute>
+                        
                         <xsd:attribute name="max"               type="xsd:positiveInteger"/>
                         <xsd:attribute name="next_state"        type="String"/>
                     </xsd:complexType>

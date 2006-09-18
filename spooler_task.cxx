@@ -265,7 +265,7 @@ void Task::close()
             {
                 _operation->async_kill();  // do_kill() macht nachher das gleiche
             }
-            catch( exception& x )  { Z_LOG( "Task::close() _operation->async_kill() ==> " << x.what() << "\n" ); }
+            catch( exception& x )  { Z_LOG2( "scheduler", "Task::close() _operation->async_kill() ==> " << x.what() << "\n" ); }
 
             _operation = NULL;
         }
@@ -280,7 +280,7 @@ void Task::close()
             {
                 do_kill();
             }
-            catch( exception& x )  { Z_LOG( "Task::close() do_kill() ==> " << x.what() << "\n" ); }
+            catch( exception& x )  { Z_LOG2( "scheduler", "Task::close() do_kill() ==> " << x.what() << "\n" ); }
 
             _module_instance->detach_task();
             _module_instance->close();
@@ -371,7 +371,7 @@ xml::Element_ptr Task::dom_element( const xml::Document_ptr& document, const Sho
                     }
                     catch( exception& x )
                     {
-                        Z_LOG( __FUNCTION__ << " priority_class() ==> " << x.what() << "\n" );
+                        Z_LOG2( "scheduler", __FUNCTION__ << " priority_class() ==> " << x.what() << "\n" );
                     }
                 }
             }
@@ -399,7 +399,7 @@ xml::Element_ptr Task::dom_element( const xml::Document_ptr& document, const Sho
                     }
                     catch( exception& x )
                     {
-                        Z_LOG( __FUNCTION__ << " priority_class() ==> " << x.what() << "\n" );
+                        Z_LOG2( "scheduler", __FUNCTION__ << " priority_class() ==> " << x.what() << "\n" );
                     }
 
 
@@ -1239,7 +1239,7 @@ bool Task::do_something()
                                 {
                                     _idle_timeout_at = _job->_idle_timeout == latter_day? latter_day : now + _job->_idle_timeout;
                                     set_state( s_running_waiting_for_order );   // _next_time neu setzen
-                                    Z_LOG( obj_name() << ": idle_timeout ist abgelaufen, aber force_idle_timeout=\"no\" und nicht mehr als min_tasks Tasks laufen  now=" << now << ", _next_time=" << _next_time << "\n" );
+                                    Z_LOG2( "scheduler", obj_name() << ": idle_timeout ist abgelaufen, aber force_idle_timeout=\"no\" und nicht mehr als min_tasks Tasks laufen  now=" << now << ", _next_time=" << _next_time << "\n" );
                                     //_log->debug9( message_string( "SCHEDULER-916" ) );   // "idle_timeout ist abgelaufen, Task beendet sich" 
                                     something_done = true;
                                 }

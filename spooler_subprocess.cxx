@@ -98,7 +98,7 @@ Subprocess::~Subprocess()
     {
         close();
     }
-    catch( exception& x )  { Z_LOG( "Subprocess::close():  " << x.what() << "\n" ); }
+    catch( exception& x )  { Z_LOG2( "scheduler", "Subprocess::close():  " << x.what() << "\n" ); }
 }
 
 //--------------------------------------------------------------------------------Subprocess::close
@@ -150,7 +150,7 @@ STDMETHODIMP Subprocess::Start( VARIANT* program_and_parameters )
         if( _ignore_error ) 
         {
             // Das System soll sich Messageboxen verkneifen
-            Z_LOG( "SetErrorMode( SEM_FAILCRITICALERRORS | SEM_NOOPENFILEERRORBOX | SEM_NOGPFAULTERRORBOX )\n" );
+            Z_LOG2( "scheduler", "SetErrorMode( SEM_FAILCRITICALERRORS | SEM_NOOPENFILEERRORBOX | SEM_NOGPFAULTERRORBOX )\n" );
             previous_error_mode = SetErrorMode( SEM_FAILCRITICALERRORS | SEM_NOOPENFILEERRORBOX | SEM_NOGPFAULTERRORBOX );    
         }
 #   endif
@@ -206,7 +206,7 @@ STDMETHODIMP Subprocess::Start( VARIANT* program_and_parameters )
 #   ifdef Z_WINDOWSxxx // Test
         if( _ignore_error )
         {
-            Z_LOG( "SetErrorMode(" << previous_error_mode << ")\n" );
+            Z_LOG2( "scheduler", "SetErrorMode(" << previous_error_mode << ")\n" );
             SetErrorMode( previous_error_mode );
         }
 #   endif
@@ -405,7 +405,7 @@ void Subprocess_register::add( Subprocess* subprocess )
 
     if( entry )
     {
-        Z_LOG( "Subprocess_register::add(" << subprocess->_process.pid() << "): Prozess mit gleicher Pid wird entfernt: " << subprocess->_process.obj_name() << "\n" );
+        Z_LOG2( "scheduler", "Subprocess_register::add(" << subprocess->_process.pid() << "): Prozess mit gleicher Pid wird entfernt: " << subprocess->_process.obj_name() << "\n" );
         entry->_registered = false;
     }
 

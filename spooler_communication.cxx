@@ -567,7 +567,7 @@ void Communication::close( double wait_time )
             //if( connection->_responding )
             //{
             //    responding = true;
-            //    Z_LOG( "Warten auf " << *connection << '\n' );
+            //    Z_LOG2( "scheduler", "Warten auf " << *connection << '\n' );
             //}
         }
 

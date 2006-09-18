@@ -296,7 +296,7 @@ void Java_module_instance::init_java_vm( java::Vm* java_vm )
 
 
 #   ifdef SCHEDULER_WITH_HOSTJAVA
-        Z_LOG( "init_hostjava()\n" );
+        Z_LOG2( "scheduler", "init_hostjava()\n" );
         hostjava::init_hostjava( java_vm );     // Weil gcc 3.2 in libhostjava.sl die statischen Variablen nicht initialisiert, bin wir das Module ein.
 #   endif
 }

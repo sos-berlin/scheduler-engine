@@ -2561,7 +2561,7 @@ STDMETHODIMP Com_task::get_Trigger_files( BSTR* result )
 
 STDMETHODIMP Com_task::Add_pid( int pid, VARIANT* timeout )
 {
-    Z_LOG( __PRETTY_FUNCTION__ << "(" << pid << "," << debug_string_from_variant( *timeout ) << ")\n" );
+    Z_LOG2( "scheduler", __PRETTY_FUNCTION__ << "(" << pid << "," << debug_string_from_variant( *timeout ) << ")\n" );
     
     HRESULT hr = S_OK;
     
@@ -2584,7 +2584,7 @@ STDMETHODIMP Com_task::Add_pid( int pid, VARIANT* timeout )
 
 STDMETHODIMP Com_task::Remove_pid( int pid )
 {
-    Z_LOG( __PRETTY_FUNCTION__ << "(" << pid << ")\n" );
+    Z_LOG2( "scheduler", __PRETTY_FUNCTION__ << "(" << pid << ")\n" );
     
     HRESULT hr = S_OK;
     
@@ -2632,7 +2632,7 @@ STDMETHODIMP Com_task::get_Stderr_or_stdout_text_or_path( BSTR* result, bool get
 
 STDMETHODIMP Com_task::get_Stderr_text( BSTR* result )
 {
-    Z_LOG( __PRETTY_FUNCTION__ << "()\n" );
+    Z_LOG2( "scheduler", __PRETTY_FUNCTION__ << "()\n" );
 
     return get_Stderr_or_stdout_text_or_path( result, true, true );
 }
@@ -2641,7 +2641,7 @@ STDMETHODIMP Com_task::get_Stderr_text( BSTR* result )
 
 STDMETHODIMP Com_task::get_Stderr_path( BSTR* result )
 {
-    Z_LOG( __PRETTY_FUNCTION__ << "()\n" );
+    Z_LOG2( "scheduler", __PRETTY_FUNCTION__ << "()\n" );
 
     return get_Stderr_or_stdout_text_or_path( result, true, false );
 }
@@ -2650,7 +2650,7 @@ STDMETHODIMP Com_task::get_Stderr_path( BSTR* result )
 
 STDMETHODIMP Com_task::get_Stdout_text( BSTR* result )
 {
-    Z_LOG( __PRETTY_FUNCTION__ << "()\n" );
+    Z_LOG2( "scheduler", __PRETTY_FUNCTION__ << "()\n" );
     
     return get_Stderr_or_stdout_text_or_path( result, false, true );
 }
@@ -2659,7 +2659,7 @@ STDMETHODIMP Com_task::get_Stdout_text( BSTR* result )
 
 STDMETHODIMP Com_task::get_Stdout_path( BSTR* result )
 {
-    Z_LOG( __PRETTY_FUNCTION__ << "()\n" );
+    Z_LOG2( "scheduler", __PRETTY_FUNCTION__ << "()\n" );
     
     return get_Stderr_or_stdout_text_or_path( result, false, false );
 }
@@ -2668,7 +2668,7 @@ STDMETHODIMP Com_task::get_Stdout_path( BSTR* result )
 
 STDMETHODIMP Com_task::Create_subprocess( VARIANT* program_and_parameters, Isubprocess** result )
 {
-    Z_LOG( __PRETTY_FUNCTION__ << "(" << debug_string_from_variant( *program_and_parameters ) << "\n" );
+    Z_LOG2( "scheduler", __PRETTY_FUNCTION__ << "(" << debug_string_from_variant( *program_and_parameters ) << "\n" );
     if( !_task )  return E_POINTER;
 
     return _task->_subprocess_register.Create_subprocess( program_and_parameters, result, this );
@@ -2679,7 +2679,7 @@ STDMETHODIMP Com_task::Create_subprocess( VARIANT* program_and_parameters, Isubp
 
 STDMETHODIMP Com_task::Add_subprocess( int pid, double timeout, VARIANT_BOOL ignore_error, VARIANT_BOOL ignore_signal, VARIANT_BOOL is_process_group, BSTR title )
 {
-    Z_LOG( __PRETTY_FUNCTION__ << "(" << pid << ',' << timeout << ',' << ignore_error << ',' << ignore_signal << ',' << is_process_group << ',' << string_from_bstr(title) << ")\n" );
+    Z_LOG2( "scheduler", __PRETTY_FUNCTION__ << "(" << pid << ',' << timeout << ',' << ignore_error << ',' << ignore_signal << ',' << is_process_group << ',' << string_from_bstr(title) << ")\n" );
     HRESULT hr = S_OK;
     
     try

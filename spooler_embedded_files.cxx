@@ -4525,7 +4525,22 @@ const char file_scheduler_xsd[] =
     "<xsd:attribute name=\"directory\"         type=\"String\" use=\"required\"/>\r\n"
     "<xsd:attribute name=\"regex\"             type=\"Name\"/>\r\n"
     "<xsd:attribute name=\"delay_after_error\" type=\"xsd:positiveInteger\"/>\r\n"
-    "<xsd:attribute name=\"repeat\"            type=\"xsd:positiveInteger\"/>\r\n"
+    "\r\n"
+    "<xsd:attribute name=\"repeat\">\r\n"
+    "<xsd:simpleType>\r\n"
+    "<xsd:union>\r\n"
+    "<xsd:simpleType>\r\n"
+    "<xsd:restriction base=\"xsd:NMTOKEN\">\r\n"
+    "<xsd:enumeration value=\"no\"/>\r\n"
+    "</xsd:restriction>\r\n"
+    "</xsd:simpleType>\r\n"
+    "<xsd:simpleType>\r\n"
+    "<xsd:restriction base=\"xsd:positiveInteger\"/>\r\n"
+    "</xsd:simpleType>\r\n"
+    "</xsd:union>\r\n"
+    "</xsd:simpleType>\r\n"
+    "</xsd:attribute>\r\n"
+    "\r\n"
     "<xsd:attribute name=\"max\"               type=\"xsd:positiveInteger\"/>\r\n"
     "<xsd:attribute name=\"next_state\"        type=\"String\"/>\r\n"
     "</xsd:complexType>\r\n"
@@ -5341,7 +5356,7 @@ static const Embedded_file embedded_files_array[] =
     { "html/jz/translation_de.js", file_html_jz_translation_de_js, sizeof file_html_jz_translation_de_js - 1, 1113979995 },
     { "html/jz/scheduler.xslt", file_html_jz_scheduler_xslt, sizeof file_html_jz_scheduler_xslt - 1, 1158071992 },
     { "html/jz/scheduler.css", file_html_jz_scheduler_css, sizeof file_html_jz_scheduler_css - 1, 1148569750 },
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1158077150 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1158564350 },
     { NULL, NULL, 0 }
 };
 

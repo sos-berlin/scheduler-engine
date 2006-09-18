@@ -190,7 +190,7 @@ struct Buffered_writer : Writer
         {
             flush();
         }
-        catch( exception& x ) { Z_LOG( "~Buffered_writer: " << x << '\n' ); }
+        catch( exception& x ) { Z_LOG2( "scheduler", "~Buffered_writer: " << x << '\n' ); }
     }
 
 

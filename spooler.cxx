@@ -3163,7 +3163,7 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line )
                     {
                         _log.info( xml );  // Blockiert bei ENOSPC nicht wegen _state == s_stopping
                     }
-                    catch( exception& ) { Z_LOG( "\n\n" << xml << "\n\n" ); }
+                    catch( exception& ) { Z_LOG2( "scheduler", "\n\n" << xml << "\n\n" ); }
                 } 
                 catch( exception& ) {}
 
@@ -3743,7 +3743,7 @@ int sos_main( int argc, char** argv )
         // HP-UX und eingebundenes Hostjava: Irgendein atexit() stürzt in InterlockedIncrement() (AddRef()?") ab.
         // Deshalb beenden wir den Scheduler hier mit _exit(), schließen aber alle Dateien vorher
 
-        Z_LOG( "_exit(" << ret << ") für Hostjava\n" );
+        Z_LOG2( "scheduler", "_exit(" << ret << ") für Hostjava\n" );
 
         int n = sysconf( _SC_OPEN_MAX );
         for( int i = 0; i < n; i++ )  ::close(i);

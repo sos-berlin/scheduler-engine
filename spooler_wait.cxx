@@ -786,7 +786,7 @@ void Directory_watcher::close_handle()
 #   ifdef Z_WINDOWS
         if( _handle )
         {
-            Z_LOG( "FindCloseChangeNotification()\n" );
+            Z_LOG2( "scheduler", "FindCloseChangeNotification()\n" );
             FindCloseChangeNotification( _handle );
             _handle = NULL;
         }
@@ -809,7 +809,7 @@ void Directory_watcher::watch_directory( const string& directory, const string& 
 
 #   ifdef Z_WINDOWS
 
-        Z_LOG( "FindFirstChangeNotification( \"" << directory << "\", FALSE, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME );\n" );
+        Z_LOG2( "scheduler", "FindFirstChangeNotification( \"" << directory << "\", FALSE, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME );\n" );
         _handle = FindFirstChangeNotification( directory.c_str(), FALSE, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME );
         if( !_handle  ||  _handle == INVALID_HANDLE_VALUE )  _handle = NULL, throw_mswin_error( "FindFirstChangeNotification", directory.c_str() );
 
@@ -878,11 +878,11 @@ bool Directory_watcher::has_changed_2( bool throw_error )
                 string filename = f->path().name(); 
 
                 new_f->push_back( filename ); 
-                if( !changed )  if( o == old_f->end()  ||  *o != filename )  { changed = true; Z_LOG( "Directory_watcher::has_changed: " << filename << "\n" ); }
+                if( !changed )  if( o == old_f->end()  ||  *o != filename )  { changed = true; Z_LOG2( "scheduler", "Directory_watcher::has_changed: " << filename << "\n" ); }
                 if( o != old_f->end() )  o++;
             }
 
-            if( !changed )  if( o != old_f->end() )  { changed = true; Z_LOG( "Directory_watcher::has_changed\n" ); }
+            if( !changed )  if( o != old_f->end() )  { changed = true; Z_LOG2( "scheduler", "Directory_watcher::has_changed\n" ); }
 
             dir.close();
 
@@ -924,7 +924,7 @@ void Directory_watcher::set_signaled()
             if( _filename_pattern.empty()  ||  match() )  Event::set_signaled( "Directory_watcher::set_signaled" );
                                                     else  Event::set_signaled( false );    // Signal von _event zurücknehmen
 
-            Z_LOG( "FindNextChangeNotification(\"" << _directory << "\")\n" );
+            Z_LOG2( "scheduler", "FindNextChangeNotification(\"" << _directory << "\")\n" );
             BOOL ok = FindNextChangeNotification( _handle );
             if( !ok )  throw_mswin_error( "FindNextChangeNotification" );
         }

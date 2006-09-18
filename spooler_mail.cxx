@@ -715,7 +715,7 @@ int Com_mail::send( const Mail_defaults& defaults )
     const double throttle = 1.0;
     if( _spooler->_last_mail_timestamp + throttle > Time::now() )    // eMail-Drossel
     {
-        Z_LOG( "eMail-Drossel " << throttle << "s\n" );
+        Z_LOG2( "scheduler", "eMail-Drossel " << throttle << "s\n" );
         sleep( throttle );
     }
 

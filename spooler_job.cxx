@@ -496,7 +496,7 @@ void Job::init_start_when_directory_changed( Task* task )
         }
         catch( exception& x )
         {
-            _error = x;
+            set_error( x );
             if( task )  task->set_error_xc_only( x );
             ( task? task->log() : +_log )->log( log_error, string( "<start_when_directory_changed>  " ) + x.what() );
             //if( error_state )  set_state( error_state );
@@ -663,10 +663,7 @@ void Job::set_error_xc_only( const Xc& x )
 
 void Job::set_error_xc( const Xc& x )
 {
-    string msg; 
-  //if( !_in_call.empty() )  msg = "In " + _in_call + "(): ";
-    
-    _log->error( msg + x.what() );
+    _log->error( x.what() );
 
     set_error_xc_only( x );
 }
@@ -1282,22 +1279,31 @@ void Job::start_when_directory_changed( const string& directory_name, const stri
 
         ptr<Directory_watcher> new_dw = Z_NEW( Directory_watcher( _log ) );
 
-        if( old_directory_watcher )
-        {
-            old_directory_watcher->wait( 0 );
-            if( old_directory_watcher->signaled() ) 
-            {
-                new_dw->_signaled = true;  // Ist gerade etwas passiert? Dann in die neue Überwachung hinüberretten
-                Z_LOG( "Signal der alten Überwachung auf die neue übertragen.\n" );
-            }
-
-            _directory_watcher_list.erase( it );
-        }
-
         new_dw->watch_directory( directory_name, filename_pattern );
         new_dw->set_name( "job(\"" + _name + "\").start_when_directory_changed(\"" + directory_name + "\",\"" + filename_pattern + "\")" );
-        _directory_watcher_list.push_back( new_dw );
         new_dw->add_to( &_spooler->_wait_handles );
+
+        if( old_directory_watcher )
+        {
+            try
+            {
+                old_directory_watcher->wait( 0 );
+
+                if( old_directory_watcher->signaled() ) 
+                {
+                    new_dw->_signaled = true;  // Ist gerade etwas passiert? Dann in die neue Überwachung hinüberretten
+                    Z_LOG2( "scheduler",  __FUNCTION__ << " Signal der alten Überwachung auf die neue übertragen.\n" );
+                }
+            }
+            catch( exception& x ) { log()->warn( string(x.what()) + ", in old_directory_watcher->wait(0)" ); }      // Vorsichtshalber
+
+            // Nicht aus der Liste löschen, das bringt init_start_when_directory_changed() durcheinander! _directory_watcher_list.erase( it );
+            *it = new_dw;       // Alte durch neue Überwachung ersetzen
+        }
+        else
+        {
+            _directory_watcher_list.push_back( new_dw );
+        }
 
         _directory_watcher_next_time = 0;
         calculate_next_time();
@@ -1391,7 +1397,7 @@ bool Job::check_for_changed_directory( const Time& now )
 
 //-------------------------------------------------------------------------------Job::trigger_files
 
-string Job::trigger_files()
+string Job::trigger_files( Task* task )
 {
     S result;
 
@@ -1401,23 +1407,32 @@ string Job::trigger_files()
 
         if( directory_watcher->filename_pattern() != "" )   // Nur mit regex= überwachte Verzeichnisse sollen berücksichtigt werden
         {
-            Directory_watcher::Directory_reader dir ( directory_watcher );
-            while(1)
+            try
             {
-                ptr<z::File_info> file_info = dir.get();
-                if( !file_info )  break;
-                
-                string path = file_info->path().path();
-
-                if( path.find( ';' ) != string::npos )  _log->warn( message_string( "SCHEDULER-975", path ) );
-                else
+                Directory_watcher::Directory_reader dir ( directory_watcher );
+                while(1)
                 {
-                    if( result.length() > 0 )  result << ";";
-                    result << path;
+                    ptr<z::File_info> file_info = dir.get();
+                    if( !file_info )  break;
+                    
+                    string path = file_info->path().path();
+
+                    if( path.find( ';' ) != string::npos )  _log->warn( message_string( "SCHEDULER-975", path ) );
+                    else
+                    {
+                        if( result.length() > 0 )  result << ";";
+                        result << path;
+                    }
                 }
+            }
+            catch( exception& x )
+            {
+                set_error( x );
+                if( task )  task->log()->warn( x.what() );   // Kein Fehler, sonst endet die Task bevor sie startet
             }
         }
     }
+
 
     return result;
 }
@@ -1813,13 +1828,13 @@ ptr<Task> Job::task_to_start()
             if( task )
             {
                 _task_queue.remove_task( task->id(), Task_queue::w_task_started );
-                task->_trigger_files = trigger_files();     // Ebenso im else-Zweig
+                task->_trigger_files = trigger_files( task );     // Ebenso im else-Zweig
             }
             else
             {
                 task = create_task( NULL, "", 0 ); 
     
-                task->_trigger_files = trigger_files();     // Vor set_order()!
+                task->_trigger_files = trigger_files( task );     // Vor set_order()!
                 task->set_order( order );
                 task->_let_run |= ( cause == cause_period_single );
             }
@@ -1919,7 +1934,6 @@ bool Job::do_something()
 
                                 _next_start_time = latter_day;
                                 calculate_next_time();
-                                //init_start_when_directory_changed( task ); // Bei Fehler: Ein delay_after_error sollte Job wiederholen
 
                                 task->attach_to_a_thread();
                                 _log->info( message_string( "SCHEDULER-930", task->id(), task->string_cause() ) );

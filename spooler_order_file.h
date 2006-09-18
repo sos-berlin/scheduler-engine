@@ -45,6 +45,7 @@ struct Directory_file_order_source : //idispatch_implementation< Directory_file_
     void                        close_notification      ();
     Order*                      read_directory          ( bool was_notified, const string& cause );
     void                        read_new_files_and_handle_deleted_files( const string& cause );
+    int                         delay_after_error       ();
 
     Fill_zero                  _zero_;
     File_path                  _path;

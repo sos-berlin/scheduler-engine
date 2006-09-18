@@ -166,7 +166,10 @@ Directory_file_order_source::Directory_file_order_source( Job_chain* job_chain, 
     }
 
     _delay_after_error = element.int_getAttribute( "delay_after_error", _delay_after_error );
-    _repeat            = element.int_getAttribute( "repeat", _repeat );
+
+    if( element.getAttribute( "repeat" ) == "no" )  _repeat = INT_MAX;
+                                              else  _repeat = element.int_getAttribute( "repeat", _repeat );
+
     _max_orders        = element.int_getAttribute( "max", _max_orders );
     _next_state        = normalized_state( element.getAttribute( "next_state", _next_state.as_string() ) );
 }
@@ -207,8 +210,8 @@ xml::Element_ptr Directory_file_order_source::dom_element( const xml::Document_p
         if( _max_orders < INT_MAX )          element.setAttribute         ( "max", _max_orders );
         if( !_next_state.is_missing() )      element.setAttribute         ( "next_state", debug_string_from_variant( _next_state ) );
 
-        if( _delay_after_error < INT_MAX )  element.setAttribute( "delay_after_error", _delay_after_error );
-        if( _repeat            < INT_MAX )  element.setAttribute( "repeat"           , _repeat);
+        if( delay_after_error() < INT_MAX )  element.setAttribute( "delay_after_error", delay_after_error() );
+        if( _repeat             < INT_MAX )  element.setAttribute( "repeat"           , _repeat);
         
         if( _directory_error )  append_error_element( element, _directory_error );
 
@@ -267,7 +270,7 @@ void Directory_file_order_source::start_or_continue_notification( bool was_notif
     
     if( !_notification_event.handle()  ||  Time::now() >= _notification_event_time + _repeat )
     {
-        Z_LOG( "FindFirstChangeNotification( \"" << _path.path() << "\", FALSE, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME );\n" );
+        Z_LOG2( "scheduler", "FindFirstChangeNotification( \"" << _path.path() << "\", FALSE, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME );\n" );
         HANDLE h = FindFirstChangeNotification( _path.path().c_str(), FALSE, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME );
 
         if( h == INVALID_HANDLE_VALUE )  z::throw_mswin( "FindFirstChangeNotification", _path.path() );
@@ -279,7 +282,7 @@ void Directory_file_order_source::start_or_continue_notification( bool was_notif
         if( _notification_event.signaled() )      // Signal retten. Eigentlich überflüssig, weil wir hiernach sowieso das Verzeichnis lesen
         {
             _notification_event.set_signaled();     
-            Z_LOG( "Signal der alten Überwachung auf die neue übertragen.\n" );
+            Z_LOG2( "scheduler", __FUNCTION__ << " Signal der alten Überwachung auf die neue übertragen.\n" );
         }
 
         close_notification();
@@ -290,7 +293,7 @@ void Directory_file_order_source::start_or_continue_notification( bool was_notif
     else
     if( was_notified )
     {
-        Z_LOG( "FindNextChangeNotification(\"" << _path << "\")\n" );
+        Z_LOG2( "scheduler", "FindNextChangeNotification(\"" << _path << "\")\n" );
         BOOL ok = FindNextChangeNotification( _notification_event.handle() );
         if( !ok )  throw_mswin_error( "FindNextChangeNotification" );
 
@@ -300,7 +303,7 @@ void Directory_file_order_source::start_or_continue_notification( bool was_notif
     /*
     if( !_notification_event.handle() )
     {
-        Z_LOG( "FindFirstChangeNotification( \"" << _path.path() << "\", FALSE, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME );\n" );
+        Z_LOG2( "scheduler", "FindFirstChangeNotification( \"" << _path.path() << "\", FALSE, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME );\n" );
         HANDLE h = FindFirstChangeNotification( _path.path().c_str(), FALSE, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME );
 
         if( h == INVALID_HANDLE_VALUE )  z::throw_mswin( "FindFirstChangeNotification", _path.path() );
@@ -314,7 +317,7 @@ void Directory_file_order_source::start_or_continue_notification( bool was_notif
     {
         if( was_notified )
         {
-            Z_LOG( "FindNextChangeNotification(\"" << _path << "\")\n" );
+            Z_LOG2( "scheduler", "FindNextChangeNotification(\"" << _path << "\")\n" );
             BOOL ok = FindNextChangeNotification( _notification_event.handle() );
             if( !ok )  throw_mswin_error( "FindNextChangeNotification" );
         }
@@ -333,7 +336,7 @@ void Directory_file_order_source::close_notification()
             remove_from_event_manager();
             set_async_manager( _spooler->_connection_manager );   // remove_from_event_manager() für set_async_next_gmtime() rückgängig machen
 
-            Z_LOG( "FindCloseChangeNotification()\n" );
+            Z_LOG2( "scheduler", "FindCloseChangeNotification()\n" );
             FindCloseChangeNotification( _notification_event.handle() );
             _notification_event._handle = NULL;   // set_handle() ruft CloseHandle(), das wäre nicht gut
         }
@@ -470,7 +473,7 @@ Order* Directory_file_order_source::read_directory( bool was_notified, const str
     }
 
 
-    int delay = _directory_error? _delay_after_error :
+    int delay = _directory_error? delay_after_error() :
                 !result?          max( 1, _repeat )       // Unter Unix funktioniert's _nur_ durch wiederkehrendes Nachsehen
                                 : INT_MAX;                // Nächsts request_order() abwarten
 
@@ -488,7 +491,7 @@ void Directory_file_order_source::read_new_files_and_handle_deleted_files( const
     hash_set<string>            virgin_known_files;
 
 
-    Z_LOG( __FUNCTION__ << "  " << _path << " wird gelesen wegen \"" << cause << "\" ...\n" );
+    Z_LOG2( "scheduler", __FUNCTION__ << "  " << _path << " wird gelesen wegen \"" << cause << "\" ...\n" );
 
 
     _new_files.clear();
@@ -518,7 +521,7 @@ void Directory_file_order_source::read_new_files_and_handle_deleted_files( const
         }
     }
 
-    Z_LOG( __FUNCTION__ << "  " << _path << "  " << _new_files.size() << " Dateinamen gelesen\n" );
+    Z_LOG2( "scheduler", __FUNCTION__ << "  " << _path << "  " << _new_files.size() << " Dateinamen gelesen\n" );
     //log()->info( "******* WATCHING " + _path + " ******* " + cause );   // TEST
 
 
@@ -598,8 +601,12 @@ void Directory_file_order_source::send_mail( Scheduler_event::Event_code event_c
                 body << "<file_order_source directory=\"" << _path << "\"/> doesn't work because of following error:\n";
                 body << x->what() << "\n";
                 body << "\n";
-                body << "Retrying every " << _delay_after_error << " seconds.\n";
-                body << "You will be notified when the directory is accessible again\n";
+
+                if( delay_after_error() < INT_MAX )
+                {
+                    body << "Retrying every " << delay_after_error() << " seconds.\n";
+                    body << "You will be notified when the directory is accessible again\n";
+                }
 
                 scheduler_event.mail()->set_body( body );
                 scheduler_event.send_mail( _spooler->_mail_defaults );
@@ -649,6 +656,13 @@ bool Directory_file_order_source::async_continue_( Async_operation::Continue_fla
     read_directory( was_notified, cause );
 
     return true;
+}
+
+//---------------------------------------------------Directory_file_order_source::delay_after_error
+
+int Directory_file_order_source::delay_after_error()
+{
+    return min( _delay_after_error, _repeat );
 }
 
 //-------------------------------------------------------------------------------------------------

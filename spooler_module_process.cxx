@@ -493,7 +493,7 @@ bool Process_module_instance::begin__end()
                     int error = setpriority( PRIO_PROCESS, getpid(), posix::priority_from_string( _module->_priority ) );
                     if( error )  throw_errno( errno, "setpriority" );
                 }
-                catch( exception& x ) { Z_LOG( "setpriority(" << _module->_priority << ") ==> ERROR " << x.what() << "\n" ); }
+                catch( exception& x ) { Z_LOG2( "scheduler", "setpriority(" << _module->_priority << ") ==> ERROR " << x.what() << "\n" ); }
             }
 
             ::signal( SIGINT, SIG_IGN );    // Ctrl-C ignorieren (Darum kümmert sich der Haupt-Prozess)
@@ -529,11 +529,11 @@ bool Process_module_instance::begin__end()
             }
 
 
-            Z_LOG( "execvp(\"" << program_path() << "\")\n" );
+            Z_LOG2( "scheduler", "execvp(\"" << program_path() << "\")\n" );
             execvp( program_path().c_str(), args );
 
             int e = errno;
-            Z_LOG( "execvp()  errno-" << e << "  " << z_strerror(e) << "\n" );
+            Z_LOG2( "scheduler", "execvp()  errno-" << e << "  " << z_strerror(e) << "\n" );
             fprintf( stderr, "ERRNO-%d  %s, bei execlp(\"%s\")\n", e, strerror(e), program_path().c_str() );
             _exit( e? e : 250 );  // Wie melden wir den Fehler an den rufenden Prozess?
         }

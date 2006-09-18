@@ -965,7 +965,7 @@ void Response::finish()
     {
         if( _chunk_reader )
         {
-            Z_LOG( "_chunk_reader entfernt\n" ); 
+            Z_LOG2( "scheduler", "_chunk_reader entfernt\n" ); 
             _chunk_reader = NULL;
         }
     }
@@ -1049,7 +1049,7 @@ string Response::read( int recommended_size )
         if( _chunked )  result.append( "\r\n" );
     }
 
-    //Z_LOG( __PRETTY_FUNCTION__ << "() ==> " << result << "\n" );
+    //Z_LOG2( "scheduler", __PRETTY_FUNCTION__ << "() ==> " << result << "\n" );
 
     return result;
 }
@@ -1068,7 +1068,7 @@ string Response::start_new_chunk()
     
     if( _chunked )  result = as_hex_string( (int)_chunk_size ) + "\r\n";
     
-    //Z_LOG( __PRETTY_FUNCTION__ << "  chunk_size=" << _chunk_size << "\n" );
+    //Z_LOG2( "scheduler", __PRETTY_FUNCTION__ << "  chunk_size=" << _chunk_size << "\n" );
 
     if( _chunk_size > 0 )
     {

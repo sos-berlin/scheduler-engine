@@ -286,7 +286,7 @@ int Scheduler_event::send_mail( const Mail_defaults& mail_defaults )
     }
     catch( exception& x )
     {
-        Z_LOG( __FUNCTION__ << ":\n" );
+        Z_LOG2( "scheduler", __FUNCTION__ << ":\n" );
         _spooler->log()->warn( message_string( "SCHEDULER-302", x ) );
     }
 

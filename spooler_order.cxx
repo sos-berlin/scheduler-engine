@@ -281,7 +281,7 @@ Job_chain::~Job_chain()
     {
         close();
     }
-    catch( exception& x ) { Z_LOG( __FUNCTION__ << ": " << x.what() << '\n' ); }
+    catch( exception& x ) { Z_LOG2( "scheduler", __FUNCTION__ << ": " << x.what() << '\n' ); }
 }
 
 //---------------------------------------------------------------------------------Job_chain::close
@@ -542,7 +542,7 @@ int Job_chain::remove_all_pending_orders( bool leave_in_database )
         }
         else
         {
-            Z_LOG( __FUNCTION__ << ": " << order->obj_name() << " wird nicht entfernt, weil in Verarbeitung durch " << order->_task->obj_name() << "\n" );
+            Z_LOG2( "scheduler", __FUNCTION__ << ": " << order->obj_name() << " wird nicht entfernt, weil in Verarbeitung durch " << order->_task->obj_name() << "\n" );
         }
     }
 
@@ -781,7 +781,7 @@ void Job_chain::unregister_order( Order* order )
     {
         Order_map::iterator it = _order_map.find( order->string_id() );
         if( it != _order_map.end() )  _order_map.erase( it );
-                                else  Z_LOG( __FUNCTION__ << " " << order->obj_name() << " ist nicht registriert!?\n" );
+                                else  Z_LOG2( "scheduler", __FUNCTION__ << " " << order->obj_name() << " ist nicht registriert!?\n" );
     }
 }
 
@@ -1593,7 +1593,7 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
                     }
                     catch( exception& x )
                     {
-                        Z_LOG( obj_name() << ".payload enthält fehlerhaftes XML: " << x.what() );
+                        Z_LOG2( "scheduler", obj_name() << ".payload enthält fehlerhaftes XML: " << x.what() );
                     }
                 }
                 */
@@ -1723,7 +1723,7 @@ File_path Order::file_path() const
             result.set_path( string_from_variant( path ) );
         }
     }
-    catch( exception& x )  { Z_LOG( __FUNCTION__ << " " << x.what() << "\n" ); }
+    catch( exception& x )  { Z_LOG2( "scheduler", __FUNCTION__ << " " << x.what() << "\n" ); }
 
     return result;
 }
