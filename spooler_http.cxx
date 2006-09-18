@@ -861,7 +861,7 @@ Http_exception::Http_exception( Status_code status_code, const string& error_tex
 
 //------------------------------------------------------------------Http_exception::~Http_exception
 
-Http_exception::~Http_exception() 
+Http_exception::~Http_exception()  throw()
 {
 }
 
