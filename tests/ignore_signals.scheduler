@@ -63,6 +63,7 @@ start_job( "javascript", "" );
                 </commands>
             </job>
 
+            
             <job name="javascript" ignore_signals="SIGKILL SIGTERM">
                 <script language="JavaScript">
                     <![CDATA[
@@ -139,7 +140,18 @@ spooler_log.info( "initial_exit_code=" + initial_exit_code + "  wished_exit_code
            </job>
 
 
-            
+            <job name="javascript">
+                <commands on_exit_code="SIGHUP">
+                    <start_job job="following">
+                        <params>
+                            <param name="param" value="SIGHUP"/>
+                        </params>
+                    </start_job>
+                </commands>
+            </job>
+
+
+
             <job name="following">
                 <script language="JavaScript">
                     <![CDATA[
