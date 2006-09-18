@@ -210,11 +210,16 @@
     <p>
         Der Scheduler versucht periodisch die Überwachung erneut zu starten.
         Fehlermeldungen dabei werden ignoriert.
-        Die Periode ist einstellbar mit <scheduler_element name="file_order_source" attribute="delay_after_error"/>. 
-        Sobald das Verzeichnis wieder lesbar ist, gibt der Scheduler diese Meldung aus:
+        Die Periode ist einstellbar mit <scheduler_element name="file_order_source" attribute="delay_after_error"/>.
+        Wenn das Verzeichnis wieder lesbar ist,
+        sendet der Scheduler eine entsprechende eMail und
+        gibt der Scheduler diese Meldung aus:
     </p>
     <p>
         <scheduler_message level="info" code="SCHEDULER-984" show_text="yes"/>
+    </p>
+    <p>
+        Ein einzelner Verzeichnis-Fehler wird mit Warnung ignoriert, die Operation wird sofort wiederholt.
     </p>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->

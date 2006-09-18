@@ -59,7 +59,7 @@ static void io_error( Spooler* spooler, const string& filename )
         zschimmer::Xc x ( error_code.c_str(), filename.c_str() );
       //string error_text = S() << "ERRNO-" << spooler->_waiting_errno << "  " << strerror( spooler->_waiting_errno );
 
-        Z_LOGI( "\n*** SCHEDULER HÄLT WEGEN PLATTENPLATZMANGEL AN. " << x.what() << ", Datei " << filename << "\n\n" );
+        Z_LOGI2( "scheduler", "\n*** SCHEDULER HÄLT WEGEN PLATTENPLATZMANGEL AN. " << x.what() << ", Datei " << filename << "\n\n" );
 
         Scheduler_event scheduler_event ( Scheduler_event::evt_disk_full, log_warn, spooler );
         scheduler_event.set_error( x );
@@ -308,7 +308,7 @@ void Log::log( Log_level level, const string& prefix, const string& line )
     {
         fprintf( stderr, "%s\n", line.c_str() );
         fprintf( stderr, "Fehler beim Schreiben des Protokolls: %s\n", x.what() );
-        LOG( "Fehler beim Schreiben des Protokolls: " << x.what() << "\n" );
+        Z_LOG2( "scheduler", "Fehler beim Schreiben des Protokolls: " << x.what() << "\n" );
         
         if( level < log_error )  throw;     // Bei error() Exception ignorieren, denn die Funktion wird gerne in Exception-Handlern gerufen
     }
@@ -404,7 +404,7 @@ void Log::log2( Log_level level, const string& prefix, const string& line_, Pref
 
         if( line.length() == 0 || line[line.length()-1] != '\n' )  write( extra_log, order_log, "\n", 1 );
 
-        LOG( _log_line );  _log_line = "";
+        Z_LOG2( "scheduler", _log_line );  _log_line = "";
 
         
         if( extra_log )  extra_log->signal_events();
@@ -462,7 +462,7 @@ Prefix_log::~Prefix_log()
 
         try
         {
-            if( _file != -1 ) { LOG( "extra close("<<_file<<")\n" ); ::close( _file ), _file = -1; }    // Manchmal ist Datei bei unlink gesperrt: ERRNO-13. Warum?
+            if( _file != -1 ) { Z_LOG2( "scheduler", "extra close("<<_file<<")\n" ); ::close( _file ), _file = -1; }    // Manchmal ist Datei bei unlink gesperrt: ERRNO-13. Warum?
 
             Z_LOG2( "scheduler.log", "unlink " << _filename << "\n" );
             int ret = unlink( _filename.c_str() );
@@ -999,26 +999,36 @@ struct Prefix_log_deny_recursion
 
 void Prefix_log::log2( Log_level level, const string& prefix, const string& line_par, Has_log* log )
 {
-    if( _in_log )
+    string line = remove_password( line_par );
+    
+    if( !_log )  
     {
-        Z_LOG2( "scheduler", "Rekursiv: " << line_par );
+        Z_LOG2( "scheduler", __FUNCTION__ << "  _log==NULL  " << line << "\n" );
         return;
     }
 
-    Prefix_log_deny_recursion deny_recursion ( this );
+    Z_MUTEX( _log->_semaphore )
+    {
+        if( _in_log )
+        {
+            Z_LOG2( "scheduler", "Rekursiv: " << line );
+            return;
+        }
+
+        Prefix_log_deny_recursion deny_recursion ( this );
 
 
-    string line = remove_password( line_par );
+ 
+        if( level == log_error  &&  _task  &&  !_task->has_error() )  _task->set_error_xc_only( Xc( "SCHEDULER-140", line.c_str() ) );
 
-    if( level == log_error  &&  _task  &&  !_task->has_error() )  _task->set_error_xc_only( Xc( "SCHEDULER-140", line.c_str() ) );
+        if( _highest_level < level )  _highest_level = level, _highest_msg = line;
+        if( level < log_level() )  return;
 
-    if( _highest_level < level )  _highest_level = level, _highest_msg = line;
-    if( level < log_level() )  return;
+        _last_level = level;
+        _last[ level ] = line;
 
-    _last_level = level;
-    _last[ level ] = line;
-
-    if( _log )  _log->log2( level, _task? _task->obj_name() : _prefix, line, this, _order_log );
+        _log->log2( level, _task? _task->obj_name() : _prefix, line, this, _order_log );
+    }
 }
 
 //----------------------------------------------------------------------------Prefix_log::add_event

@@ -42,18 +42,23 @@
                     versucht der Scheduler nach der hier angegeben Zeit es erneut,
                     bis er Erfolg hat.
                 </p>
+                <p>
+                    Wenn das Attribut <code>repeat=""</code> eine kürzere Zeit einstellt,
+                    hat es Vorrang.
+                </p>
             </description>
         </xml_attribute>
 
-        <xml_attribute name="repeat" type="seconds">
+        <xml_attribute name="repeat" type="no|seconds">
             <description>
                 <p>
                     Der Scheduler prüft periodisch das Verzeichnis auf Veränderung.
                     Die Länge der Periode kann hier angegeben werden.
                 </p>
                 <p>
-                    Unter Windows ist <code>repeat=""</code> möglich und voreingestellt,
+                    Unter Windows ist <code>repeat="no"</code> möglich und voreingestellt,
                     denn der Scheduler nutzt die in Windows integrierte Verzeichnisüberwachung.
+                    Unter Unix sollte <code>"no"</code> nicht verwendet werden.
                 </p>
                 <p>
                     Unter Unix ist <code>repeat="10"</code> voreingestellt.

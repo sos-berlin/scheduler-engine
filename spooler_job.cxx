@@ -1246,12 +1246,11 @@ void Job::start_when_directory_changed( const string& directory_name, const stri
     _log->debug( "start_when_directory_changed \"" + directory_name + "\", \"" + filename_pattern + "\"" );
 
 
-    Directory_watcher*               old_directory_watcher = NULL;
     Directory_watcher_list::iterator it; 
 
     for( it = _directory_watcher_list.begin(); it != _directory_watcher_list.end(); it++ )
     {
-        old_directory_watcher = *it;
+        Directory_watcher* old_directory_watcher = *it;
 
         if( old_directory_watcher->directory()        == directory_name 
          && old_directory_watcher->filename_pattern() == filename_pattern )  
@@ -1283,8 +1282,10 @@ void Job::start_when_directory_changed( const string& directory_name, const stri
         new_dw->set_name( "job(\"" + _name + "\").start_when_directory_changed(\"" + directory_name + "\",\"" + filename_pattern + "\")" );
         new_dw->add_to( &_spooler->_wait_handles );
 
-        if( old_directory_watcher )
+        if( it != _directory_watcher_list.end() )
         {
+            Directory_watcher* old_directory_watcher = *it;
+
             try
             {
                 old_directory_watcher->wait( 0 );

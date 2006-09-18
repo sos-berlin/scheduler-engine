@@ -32,6 +32,8 @@ struct Log
     Time                        last_time                   () const                            { return _last_time; }
 
   protected:
+    friend struct               Prefix_log;                 // _semaphore
+
     void                        write                       ( Prefix_log* extra, Prefix_log* order, const char*, int len, bool log = true );
     void                        write                       ( Prefix_log* extra, Prefix_log* order, const string& line )              { write( extra, order, line.c_str(), line.length() ); }
     void                        write                       ( Prefix_log* extra, Prefix_log* order, const char* line )                { write( extra, order, line, strlen(line) ); }
