@@ -1274,42 +1274,38 @@ void Job::start_when_directory_changed( const string& directory_name, const stri
     }
 
 
-#   ifdef Z_WINDOWS
+    ptr<Directory_watcher> new_dw = Z_NEW( Directory_watcher( _log ) );
 
-        ptr<Directory_watcher> new_dw = Z_NEW( Directory_watcher( _log ) );
+    new_dw->watch_directory( directory_name, filename_pattern );
+    new_dw->set_name( "job(\"" + _name + "\").start_when_directory_changed(\"" + directory_name + "\",\"" + filename_pattern + "\")" );
+    new_dw->add_to( &_spooler->_wait_handles );
 
-        new_dw->watch_directory( directory_name, filename_pattern );
-        new_dw->set_name( "job(\"" + _name + "\").start_when_directory_changed(\"" + directory_name + "\",\"" + filename_pattern + "\")" );
-        new_dw->add_to( &_spooler->_wait_handles );
+    if( it == _directory_watcher_list.end() )  // neu?
+    {
+        _directory_watcher_list.push_back( new_dw );
+    }
+    else
+    {
+        Directory_watcher* old_directory_watcher = *it;
 
-        if( it != _directory_watcher_list.end() )
+        try
         {
-            Directory_watcher* old_directory_watcher = *it;
+            old_directory_watcher->wait( 0 );
 
-            try
+            if( old_directory_watcher->signaled() ) 
             {
-                old_directory_watcher->wait( 0 );
-
-                if( old_directory_watcher->signaled() ) 
-                {
-                    new_dw->_signaled = true;  // Ist gerade etwas passiert? Dann in die neue Überwachung hinüberretten
-                    Z_LOG2( "scheduler",  __FUNCTION__ << " Signal der alten Überwachung auf die neue übertragen.\n" );
-                }
+                new_dw->_signaled = true;  // Ist gerade etwas passiert? Dann in die neue Überwachung hinüberretten
+                Z_LOG2( "scheduler",  __FUNCTION__ << " Signal der alten Überwachung auf die neue übertragen.\n" );
             }
-            catch( exception& x ) { log()->warn( string(x.what()) + ", in old_directory_watcher->wait(0)" ); }      // Vorsichtshalber
-
-            // Nicht aus der Liste löschen, das bringt init_start_when_directory_changed() durcheinander! _directory_watcher_list.erase( it );
-            *it = new_dw;       // Alte durch neue Überwachung ersetzen
         }
-        else
-        {
-            _directory_watcher_list.push_back( new_dw );
-        }
+        catch( exception& x ) { log()->warn( string(x.what()) + ", in old_directory_watcher->wait(0)" ); }      // Vorsichtshalber
 
-        _directory_watcher_next_time = 0;
-        calculate_next_time();
+        // Nicht aus der Liste löschen, das bringt init_start_when_directory_changed() durcheinander! _directory_watcher_list.erase( it );
+        *it = new_dw;       // Alte durch neue Überwachung ersetzen
+    }
 
-#   endif
+    _directory_watcher_next_time = 0;
+    calculate_next_time();
 }
 
 //----------------------------------------------------------------Job::clear_when_directory_changed
