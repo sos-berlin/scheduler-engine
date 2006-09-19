@@ -878,11 +878,27 @@ bool Directory_watcher::has_changed_2( bool throw_error )
                 string filename = f->path().name(); 
 
                 new_f->push_back( filename ); 
-                if( !changed )  if( o == old_f->end()  ||  *o != filename )  { changed = true; Z_LOG2( "scheduler", "Directory_watcher::has_changed: " << filename << "\n" ); }
-                if( o != old_f->end() )  o++;
+
+                if( o == old_f->end()  ||  filename < *o )  // Datei hinzugefügt?
+                {
+                    changed = true; 
+                    Z_LOG2( "scheduler", __FUNCTION__ << " new file     " << filename << "\n" ); 
+                }
+                else
+                for(; o != old_f->end()  &&  *o < filename; o++ )  
+                { 
+                    if( _filename_pattern == "" )  changed = true; 
+                    Z_LOG2( "scheduler", __FUNCTION__ << " deleted file " << *o << "\n" ); 
+                }
+
+                if( o != old_f->end()  &&  *o == filename )  o++;
             }
 
-            if( !changed )  if( o != old_f->end() )  { changed = true; Z_LOG2( "scheduler", "Directory_watcher::has_changed\n" ); }
+            for(; o != old_f->end(); o++ )  
+            { 
+                if( _filename_pattern == "" )  changed = true; 
+                Z_LOG2( "scheduler", __FUNCTION__ << " deleted_file " << *o << "\n" ); 
+            }
 
             dir.close();
 
