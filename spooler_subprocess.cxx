@@ -378,7 +378,7 @@ Subprocess_register::~Subprocess_register()
 STDMETHODIMP Subprocess_register::Create_subprocess( VARIANT* program_and_parameters, spooler_com::Isubprocess** result, 
                                                      IDispatch* task )
 {
-    Z_LOGI( "Subprocess_register::Create_subprocess(" << debug_string_from_variant( *program_and_parameters ) << ")\n" );
+    Z_LOGI2( "scheduler", "Subprocess_register::Create_subprocess(" << debug_string_from_variant( *program_and_parameters ) << ")\n" );
     HRESULT hr = S_OK;
     
     try

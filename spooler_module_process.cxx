@@ -305,7 +305,7 @@ bool Process_module_instance::kill()
 
     _log.warn( message_string( "SCHEDULER-281" ) );   
 
-    LOG( "TerminateProcess(" <<  _process_handle << ",255)\n" );
+    Z_LOG2( "scheduler", "TerminateProcess(" <<  _process_handle << ",255)\n" );
     BOOL ok = TerminateProcess( _process_handle, 255 );
     if( !ok )  throw_mswin_error( "TerminateProcess" );
 
@@ -377,7 +377,7 @@ bool Process_module_instance::Process_event::wait( double seconds )
         int ret = waitpid( _pid, &status, WNOHANG | WUNTRACED );    // WUNTRACED: "which means to also return for children which are stopped, and whose status has not been reported."
         if( ret == -1 )
         {
-            LOG( "waitpid(" << _pid << ") ==> ERRNO-" << errno << "  " << z_strerror(errno) << "\n" );
+            Z_LOG2( "scheduler", "waitpid(" << _pid << ") ==> ERRNO-" << errno << "  " << z_strerror(errno) << "\n" );
             //int pid = _pid;
             _pid = 0;
             //throw_errno( errno, "waitpid", as_string(pid).c_str() );
@@ -390,7 +390,7 @@ bool Process_module_instance::Process_event::wait( double seconds )
             if( WIFSIGNALED( status ) )
             {
                 _process_signaled = WTERMSIG( status );
-              //LOG( "signal=" << _process_exit_code << "\n" );
+              //Z_LOG2( "scheduler", "signal=" << _process_exit_code << "\n" );
                 _pid = 0;
                 set_signaled();
                 return true;
@@ -399,14 +399,14 @@ bool Process_module_instance::Process_event::wait( double seconds )
             if( WIFEXITED( status ) )
             {
                 _process_exit_code = WEXITSTATUS( status );
-              //LOG( "exit_code=" << _process_exit_code << "\n" );
+              //Z_LOG2( "scheduler", "exit_code=" << _process_exit_code << "\n" );
                 _pid = 0;
                 set_signaled();
                 return true;
             }
         }
 
-      //LOG( "Prozess läuft noch\n" );
+      //Z_LOG2( "scheduler", "Prozess läuft noch\n" );
 
         if( seconds < 0.0001 )  break;
 
@@ -473,7 +473,7 @@ bool Process_module_instance::begin__end()
     m.insert( 1, posix::shell_command_line_from_argv( string_args ) );
     _log.info( m );
 
-    LOG( "signal(SIGCHLD,SIG_DFL)\n" );
+    Z_LOG2( "scheduler", "signal(SIGCHLD,SIG_DFL)\n" );
     ::signal( SIGCHLD, SIG_DFL );                 // Java verändert das Signal-Verhalten, so dass waitpid() ohne diesen Aufruf versagte.
 
     if( log_ptr )  *log_ptr << "fork()  ";
@@ -539,7 +539,7 @@ bool Process_module_instance::begin__end()
         }
 
         default:
-            LOG( "pid=" << pid << "\n" );
+            Z_LOG2( "scheduler", "pid=" << pid << "\n" );
             _pid = pid;
             _process_handle._pid = pid;
             _process_handle.set_name( S() << "process_handle(pid=" << pid << ")" );

@@ -611,7 +611,7 @@ int Spooler_db::get_id_( const string& variable_name, Transaction* outer_transac
                 id = sel.get_record().as_int(0);
             }
 
-            LOG( "Spooler_db::get_id(\"" + variable_name + "\") = " << id << '\n' );
+            Z_LOG2( "scheduler", "Spooler_db::get_id(\"" + variable_name + "\") = " << id << '\n' );
 
             _id_counters[ variable_name ] = id + 1;
         }
@@ -637,7 +637,7 @@ void Spooler_db::execute( const string& stmt )
 { 
     THREAD_LOCK( _lock )
     {
-        LOGI( "Spooler_db::execute  " << stmt << '\n' );
+        Z_LOGI2( "scheduler", "Spooler_db::execute  " << stmt << '\n' );
         _db.put( stmt ); 
     }
 }

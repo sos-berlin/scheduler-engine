@@ -136,7 +136,7 @@ static int my_write( Spooler* spooler, const string& filename, int file, const c
 
         if( err == EAGAIN )     // Das kann passieren, wenn ein Thread gleichzeitig nach stderr schreibt.
         {
-            //LOG( "Prefix_log::write ERRNO-" << err << " " << strerror(err) );
+            //Z_LOG2( "scheduler", "Prefix_log::write ERRNO-" << err << " " << strerror(err) );
             sos_sleep( 0.01 );
             ::write( file, "<<errno=EAGAIN>>", 16 ); 
             ret = ::write( file, t, text + len - t );
@@ -640,7 +640,7 @@ void Prefix_log::close2()
 
         try
         {
-            //LOG( "close(" << _file << ")\n" );
+            //Z_LOG2( "scheduler", "close(" << _file << ")\n" );
 
             int ret = ::close( _file );
             if( ret == -1 )  throw_errno( errno, "close", _filename.c_str() );
@@ -918,10 +918,10 @@ void Prefix_log::send( int reason, Scheduler_event* scheduler_event )
             if( _last_send  == 0  ||  _last_send  > now )  _last_send  = now;
             if( _first_send == 0  ||  _first_send > now )  _first_send = now;
 
-            //LOG( "Prefix_log::send now=" << now << " _last_send+collect_within=" << Time(_last_send + _collect_within) << " _first_send+collectmax=" << Time(_first_send + _collect_max) << "\n" );
-            //LOG( "Prefix_log::send now=" << now << " collect_within=" << _collect_within << " collectmax=" << _collect_max << "\n" );
-            //LOG( "now >= _last_send + _collect_within:  " << (now >= _last_send + _collect_within) << "\n" );
-            //LOG( "now >= _first_send + _collect_max  :  " << (now >= _first_send + _collect_max) << "\n" );
+            //Z_LOG2( "scheduler", "Prefix_log::send now=" << now << " _last_send+collect_within=" << Time(_last_send + _collect_within) << " _first_send+collectmax=" << Time(_first_send + _collect_max) << "\n" );
+            //Z_LOG2( "scheduler", "Prefix_log::send now=" << now << " collect_within=" << _collect_within << " collectmax=" << _collect_max << "\n" );
+            //Z_LOG2( "scheduler", "now >= _last_send + _collect_within:  " << (now >= _last_send + _collect_within) << "\n" );
+            //Z_LOG2( "scheduler", "now >= _first_send + _collect_max  :  " << (now >= _first_send + _collect_max) << "\n" );
 
           //if( reason == -1  &&  _mail_on_error                 // Fehler?
           // || now >= _last_send  + _collect_within - 0.001     // Nicht mehr sammeln?  (ohne -0.001 liefert der Ausdruck manchmal false).

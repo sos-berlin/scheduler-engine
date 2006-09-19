@@ -259,7 +259,7 @@ void Task::close()
         {
             // Was machen wir jetzt?
             // _operation->kill()?
-            LOG( *this << ".close(): Operation aktiv: " << _operation->async_state_text() << "\n" );
+            Z_LOG2( "scheduler", *this << ".close(): Operation aktiv: " << _operation->async_state_text() << "\n" );
 
             try
             {
@@ -1490,7 +1490,7 @@ bool Task::do_something()
 
             if( _next_time <= now )
             {
-                LOG( obj_name() << ".do_something()  Nichts getan. state=" << state_name() << ", _next_time=" << _next_time << ", wird verzögert\n" );
+                Z_LOG2( "scheduler", obj_name() << ".do_something()  Nichts getan. state=" << state_name() << ", _next_time=" << _next_time << ", wird verzögert\n" );
                 _next_time = Time::now() + 0.1;
             }
             else

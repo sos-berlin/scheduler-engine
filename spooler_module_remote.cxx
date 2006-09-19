@@ -76,7 +76,7 @@ Async_operation* Remote_module_instance_proxy::close__start()
     {
         if( _process  &&  _process->connected() )
         {
-            LOGI( "*** Remote_module_instance_proxy::close(): _remote_instance->release()\n" );
+            Z_LOGI2( "scheduler", "*** Remote_module_instance_proxy::close(): _remote_instance->release()\n" );
 
             try
             {
@@ -84,7 +84,7 @@ Async_operation* Remote_module_instance_proxy::close__start()
             }
             catch( exception& x )
             {
-                LOG( "Fehler wird ignoriert: " << x.what() << "\n" );       // Z.B. ERRNO-32 Broken pipe
+                Z_LOG2( "scheduler", "Fehler wird ignoriert: " << x.what() << "\n" );       // Z.B. ERRNO-32 Broken pipe
             }
         }
 

@@ -374,7 +374,7 @@ void Java_module_instance::add_obj( IDispatch* object, const string& name )
 
     string java_class_name = "sos/spooler/" + replace_regex_ext( name, "^(spooler_)?(.*)$", "\\u\\2" );    // "spooler_task" -> "sos.spooler.Task"
 
-    //LOGI( "Java_module_instance::add_obj " << java_class_name << "\n" );
+    //Z_LOGI2( "scheduler", "Java_module_instance::add_obj " << java_class_name << "\n" );
 
     jclass cls = e->GetObjectClass( _jobject );
     if( !cls )  e.throw_java( "GetMethodID" );

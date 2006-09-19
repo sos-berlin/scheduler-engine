@@ -1252,7 +1252,7 @@ Order::Order( Spooler* spooler, const Record& record, const string& payload_stri
 
     if( payload_string.find( "<" + Com_variable_set::xml_element_name() ) != string::npos )
     {
-        //LOG( "... payload ist ein Variable_set!\n" );
+        //Z_LOG2( "scheduler", "... payload ist ein Variable_set!\n" );
         ptr<Com_variable_set> v = new Com_variable_set;
         v->put_Xml( Bstr( payload_string ) );
         _payload = v;
@@ -2105,7 +2105,7 @@ bool Order::try_add_to_job_chain( Job_chain* job_chain )
         {
             if( _state.vt == VT_EMPTY )  set_state2( job_chain->first_node()->_state );     // Auftrag bekommt Zustand des ersten Jobs der Jobkette
 
-            //Z_DEBUG_ONLY( LOG( "job_chain->node_from_state()\n" ); )
+            //Z_DEBUG_ONLY( Z_LOG2( "scheduler", "job_chain->node_from_state()\n" ); )
             Job_chain_node* node = job_chain->node_from_state( _state );
 
             if( !node->_job  || !node->_job->order_queue() )  z::throw_xc( "SCHEDULER-149", job_chain->name(), debug_string_from_variant(_state) );

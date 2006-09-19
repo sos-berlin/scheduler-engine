@@ -362,7 +362,7 @@ With_log_switch read_profile_with_log( const string& profile, const string& sect
 
 static void set_ctrl_c_handler( bool on )
 {
-    //LOG( "set_ctrl_c_handler(" << on << ")\n" );
+    //Z_LOG2( "scheduler", "set_ctrl_c_handler(" << on << ")\n" );
 
 #   ifdef Z_WINDOWS
 
@@ -382,14 +382,14 @@ static void set_ctrl_c_handler( bool on )
 
 static void be_daemon()
 {
-    LOG( "fork()\n" );
+    Z_LOG2( "scheduler", "fork()\n" );
 
     switch( fork() )
     {
-        case  0: LOG( "pid=" << getpid() << "\n" );
+        case  0: Z_LOG2( "scheduler", "pid=" << getpid() << "\n" );
                  zschimmer::main_pid = getpid();
 
-                 LOG( "setsid()\n" );
+                 Z_LOG2( "scheduler", "setsid()\n" );
                  setsid(); 
 
                  if( isatty( fileno(stdin) ) ) 
@@ -705,7 +705,7 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
 #   ifdef Z_WINDOWS
         state_element.setAttribute( "cpu_time"             , buffer );
 #   else
-        LOG( "Command_processor::execute_show_state() cpu_time=" << cpu_time << "\n" );
+        Z_LOG2( "scheduler", "Command_processor::execute_show_state() cpu_time=" << cpu_time << "\n" );
 #   endif
 
     state_element.setAttribute( "loop"                 , _loop_counter );
@@ -1234,7 +1234,7 @@ void Spooler::wait_until_threads_stopped( Time until )
                     continue;
                 }
                 else
-                    LOG( "Thread " << thread->name() << " läuft noch\n" );
+                    Z_LOG2( "scheduler", "Thread " << thread->name() << " läuft noch\n" );
 
                 it++;
             }
@@ -1520,7 +1520,7 @@ void Spooler::close_jobs()
     {
         try
         {
-            //if( !*it )  LOG( "Spooler_thread::close1: Ein Job ist NULL\n" );
+            //if( !*it )  Z_LOG2( "scheduler", "Spooler_thread::close1: Ein Job ist NULL\n" );
             (*it)->close();
         }
         catch( const exception&  x ) { _log.error( x.what() ); }
@@ -2214,7 +2214,7 @@ void Spooler::run_scheduler_script()
     {
         if( _module.set() )
         {
-            LOGI( "Startskript wird geladen und gestartet\n" );
+            Z_LOGI2( "scheduler", "Startskript wird geladen und gestartet\n" );
         
             _module_instance = _module.create_instance();
           //_module_instance->_title = "Scheduler-Script";
@@ -2257,7 +2257,7 @@ void Spooler::run_scheduler_script()
 
             if( !ok )  z::throw_xc( "SCHEDULER-183" );
 
-            LOG( "Startskript ist gelaufen\n" );
+            Z_LOG2( "scheduler", "Startskript ist gelaufen\n" );
         }
     }
     catch( exception& )
@@ -2612,7 +2612,7 @@ void Spooler::run()
 
                             double t = (*p)->async_next_gmtime();
                             Time next_time = Time( t == 0? 0 : localtime_from_gmtime( t ) );
-                            //Z_LOG( **p << "->async_next_gmtime() => " << next_time << "\n" );
+                            //Z_LOG2( "scheduler", **p << "->async_next_gmtime() => " << next_time << "\n" );
                             if( next_time < wait_until )
                             {
                                 wait_until = next_time;
@@ -2642,7 +2642,7 @@ void Spooler::run()
                 if( ptr<Async_operation> operation = _connection_manager->async_next_operation() )
                 {
                     Time next_time = Time( localtime_from_gmtime( operation->async_next_gmtime() ) );
-                    //Z_LOG( **p << "->async_next_gmtime() => " << next_time << "\n" );
+                    //Z_LOG2( "scheduler", **p << "->async_next_gmtime() => " << next_time << "\n" );
                     if( next_time < wait_until )
                     {
                         wait_until = next_time;
@@ -3011,7 +3011,7 @@ void Spooler::abort_now( bool restart )
     // Point of no return
 
 #   ifdef Z_WINDOWS
-        LOG( "TerminateProcess( GetCurrentProcess() );\n" );
+        Z_LOG2( "scheduler", "TerminateProcess( GetCurrentProcess() );\n" );
         TerminateProcess( GetCurrentProcess(), exit_code );
         _exit( exit_code );
 #    else
@@ -3198,7 +3198,7 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line )
 
 static void start_process( const string& command_line )
 {
-    LOG( "start_process(\"" << command_line << "\")\n" );
+    Z_LOG2( "scheduler", "start_process(\"" << command_line << "\")\n" );
 
     PROCESS_INFORMATION process_info; 
     STARTUPINFO         startup_info; 
@@ -3327,7 +3327,7 @@ static void spooler_renew( const string& service_name, const string& renew_spool
         {
             string msg = "CopyFile " + this_spooler + ", " + renew_spooler + '\n';
             if( !is_service )  fprintf( stderr, "%s", msg.c_str() );  // stderr, weil wir kein Log haben.
-            LOG( msg );
+            Z_LOG2( "scheduler", msg );
 
             copy_ok = CopyFile( this_spooler.c_str(), renew_spooler.c_str(), FALSE );
             if( copy_ok )  break;
@@ -3339,7 +3339,7 @@ static void spooler_renew( const string& service_name, const string& renew_spool
             }
             catch( const exception& x ) { 
                 if( !is_service )  fprintf( stderr, "%s\n", x.what() );
-                LOG( x.what() << '\n' );
+                Z_LOG2( "scheduler", x.what() << '\n' );
             }
 
             if( error != ERROR_SHARING_VIOLATION )  return;
@@ -3391,14 +3391,14 @@ void __cdecl delete_new_spooler( void* )
         {
             string msg = "remove " + copied_spooler + '\n';
             fprintf( stderr, "%s", msg.c_str() );
-            LOG( msg );
+            Z_LOG2( "scheduler", msg );
 
             int ret = _unlink( copied_spooler.c_str() );
             if( ret == 0  || errno != EACCES ) break;
 
             msg = "errno=" + as_string(errno) + ' ' + z_strerror(errno) + '\n';
             fprintf( stderr, "%s", msg.c_str() );
-            LOG( msg.c_str() );
+            Z_LOG2( "scheduler", msg.c_str() );
             
             sos_sleep( renew_wait_interval );
         }
@@ -3695,7 +3695,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
                     {
                         spooler::is_daemon = true;
 
-                        LOG( "Scheduler wird Daemon. Pid wechselt\n");
+                        Z_LOG2( "scheduler", "Scheduler wird Daemon. Pid wechselt\n");
                         spooler::be_daemon();
                     }
 
@@ -3707,7 +3707,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
     }
     catch( const exception& x )
     {
-        LOG( x.what() << "\n" );
+        Z_LOG2( "scheduler", x.what() << "\n" );
         if( is_service )  spooler::send_error_email( x, argc, argv, parameter_line );
         cerr << x << "\n";
         ret = 1;
@@ -3715,14 +3715,14 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
     catch( const _com_error& x )
     {
         string what = string_from_ole( x.Description() );
-        LOG( what << "\n" );
+        Z_LOG2( "scheduler", what << "\n" );
         if( is_service )  spooler::send_error_email( zschimmer::Xc( x ), argc, argv, parameter_line );
         cerr << what << "\n";
         ret = 1;
     }
 
 
-    if( !is_object_server )  LOG( "Programm wird beendet\n" );
+    if( !is_object_server )  Z_LOG2( "scheduler", "Programm wird beendet\n" );
 
     return ret;
 }

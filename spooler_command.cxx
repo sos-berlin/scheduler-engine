@@ -1139,7 +1139,7 @@ void Command_processor::execute_file( const string& filename )
 
     string content = string_from_file( filename );
 
-    Z_LOGI( __FUNCTION__ << "\n" << filename << ":\n" << content << "\n" );
+    Z_LOGI2( "scheduler", __FUNCTION__ << "\n" << filename << ":\n" << content << "\n" );
 
     execute_2( content, modification_time_of_file( filename ) );
 }

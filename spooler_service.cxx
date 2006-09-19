@@ -498,7 +498,7 @@ static string string_from_power_event( DWORD e )
 
 static DWORD WINAPI HandlerEx( DWORD dwControl, DWORD event, void* event_data, void* )
 {
-    LOGI( "\nService HandlerEx(" << string_from_handler_control(dwControl) << "," << 
+    Z_LOGI2( "scheduler", "\nService HandlerEx(" << string_from_handler_control(dwControl) << "," << 
           ( dwControl == SERVICE_CONTROL_POWEREVENT? string_from_power_event( event ) : as_string( event ) ) << "," <<
           event_data << ")\n" )
 
@@ -627,7 +627,7 @@ static void spooler_state_changed( Spooler*, void* )
 
 static uint __stdcall service_thread( void* param )
 {
-    LOGI( "service_thread\n" );
+    Z_LOGI2( "scheduler", "service_thread\n" );
 
     Ole_initialize ole;
 
@@ -731,7 +731,7 @@ static void __stdcall ServiceMain( DWORD argc, char** argv )
 
 int spooler_service( const string& service_name, int argc, char** argv )
 {
-    LOGI( "spooler_service(argc=" << argc << ")\n" );
+    Z_LOGI2( "scheduler", "spooler_service(argc=" << argc << ")\n" );
 
     process_argc = argc;
     process_argv = argv;
@@ -746,7 +746,7 @@ int spooler_service( const string& service_name, int argc, char** argv )
         ste[0].lpServiceName = (char*)spooler_service_name.c_str();
         ste[0].lpServiceProc = ServiceMain;
 
-        LOGI( "StartServiceCtrlDispatcher(" << ste[0].lpServiceName << ")\n" );
+        Z_LOGI2( "scheduler", "StartServiceCtrlDispatcher(" << ste[0].lpServiceName << ")\n" );
 
         BOOL ok = StartServiceCtrlDispatcher( ste );
         if( !ok )  throw_mswin_error( "StartServiceCtrlDispatcher" );      // Z.B. nach 15s: MSWIN-00000427  Der Dienstprozess konnte keine Verbindung zum Dienstcontroller herstellen.

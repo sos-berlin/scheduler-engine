@@ -222,7 +222,7 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
         }
         else
         {
-            LOG( "Com_remote_module_instance_server::Construct: Die Java Virtual Machine läuft bereits.\n" );
+            Z_LOG2( "scheduler", "Com_remote_module_instance_server::Construct: Die Java Virtual Machine läuft bereits.\n" );
             // Parameter für Java können nicht übernommen werden.
         }
 
@@ -385,7 +385,7 @@ STDMETHODIMP Com_remote_module_instance_server::Step( VARIANT* result )
 
 STDMETHODIMP Com_remote_module_instance_server::Wait_for_subprocesses()
 {
-    Z_LOGI( "Com_remote_module_instance_server::Wait_for_subprocesses()\n" );
+    Z_LOGI2( "scheduler", "Com_remote_module_instance_server::Wait_for_subprocesses()\n" );
 
     HRESULT hr = NOERROR;
 

@@ -395,7 +395,7 @@ STDMETHODIMP Com_variable_set::get_Value( VARIANT* name, VARIANT* value )
         value->bstrVal = NULL;
 
         HRESULT hr = get_Xml( &V_BSTR(value) );
-        //if( !FAILED(hr) )  LOG( "Com_variable_set::get_value => " << string_from_bstr(V_BSTR(value)) << "\n" );
+        //if( !FAILED(hr) )  Z_LOG2( "scheduler", "Com_variable_set::get_value => " << string_from_bstr(V_BSTR(value)) << "\n" );
         return hr;
     }
     else 
@@ -3954,7 +3954,7 @@ STDMETHODIMP Com_job_chain::Add_order( VARIANT* order_or_payload, spooler_com::I
 {
     HRESULT hr = NOERROR;
 
-    //LOGI( "Job_chain.add_order\n" );
+    //Z_LOGI2( "scheduler", "Job_chain.add_order\n" );
 
     THREAD_LOCK( _lock )
     try
@@ -3977,7 +3977,7 @@ STDMETHODIMP Com_job_chain::Add_order( VARIANT* order_or_payload, spooler_com::I
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Job_chain.add_order" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Job_chain.add_order" ); }
 
-    //LOG( "Job_chain.add_order  hr=" << (void*)hr << "\n" );
+    //Z_LOG2( "scheduler", "Job_chain.add_order  hr=" << (void*)hr << "\n" );
 
     return hr;
 }
@@ -4003,7 +4003,7 @@ STDMETHODIMP Com_job_chain::Add_or_replace_order( spooler_com::Iorder* iorder )
     catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
 
-    //LOG( "Job_chain.add_order  hr=" << (void*)hr << "\n" );
+    //Z_LOG2( "scheduler", "Job_chain.add_order  hr=" << (void*)hr << "\n" );
 
     return hr;
 }
@@ -4014,7 +4014,7 @@ STDMETHODIMP Com_job_chain::Try_add_order( Iorder* iorder, VARIANT_BOOL* result 
 {
     HRESULT hr = NOERROR;
 
-    //LOGI( "Job_chain.add_order\n" );
+    //Z_LOGI2( "scheduler", "Job_chain.add_order\n" );
 
     THREAD_LOCK( _lock )
     try
@@ -4032,7 +4032,7 @@ STDMETHODIMP Com_job_chain::Try_add_order( Iorder* iorder, VARIANT_BOOL* result 
     catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
 
-    //LOG( "Job_chain.add_order  hr=" << (void*)hr << "\n" );
+    //Z_LOG2( "scheduler", "Job_chain.add_order  hr=" << (void*)hr << "\n" );
 
     return hr;
 }
@@ -5121,7 +5121,7 @@ STDMETHODIMP Com_order_queue::Add_order( VARIANT* order_or_payload, Iorder** res
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Order_queue.add_order" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Order_queue.add_order" ); }
 
-    //LOG( "Com_order_queue::add_order  hr=" << (void*)hr << "\n" );
+    //Z_LOG2( "scheduler", "Com_order_queue::add_order  hr=" << (void*)hr << "\n" );
 
     return hr;
 }

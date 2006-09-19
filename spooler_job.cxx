@@ -385,7 +385,7 @@ void Job::init0()
 {
     if( _init0_called )  return;
 
-    LOGI( obj_name() << ".init0()\n" );
+    Z_LOGI2( "scheduler", obj_name() << ".init0()\n" );
 
     _state = s_none;
 
@@ -434,7 +434,7 @@ void Job::set_log()
 
 void Job::init()
 {
-    LOGI( obj_name() << ".init()\n" );
+    Z_LOGI2( "scheduler", obj_name() << ".init()\n" );
 
     if( !_init_called )
     {
@@ -547,7 +547,7 @@ void Job::close()
             {
                 task->try_kill();
             }
-            catch( const exception& x ) { LOG( *task << ".kill() => " << x.what() << "\n" ); }
+            catch( const exception& x ) { Z_LOG2( "scheduler", *task << ".kill() => " << x.what() << "\n" ); }
         }
 
         Z_FOR_EACH( Task_list, _running_tasks, t )  (*t)->job_close();
@@ -1957,7 +1957,7 @@ bool Job::do_something()
 
                 if( _next_time <= now )
                 {
-                    LOG( obj_name() << ".do_something()  Nichts getan. state=" << state_name() << ", _next_time=" << _next_time << ", wird verzögert\n" );
+                    Z_LOG2( "scheduler", obj_name() << ".do_something()  Nichts getan. state=" << state_name() << ", _next_time=" << _next_time << ", wird verzögert\n" );
                     _next_time = Time::now() + 1;
                 }
                 else
