@@ -400,23 +400,30 @@
                 <xsl:for-each select="job [ /spooler/@show_order_jobs_checkbox or not( @order='yes' ) ]">
 
                     <xsl:element name="tr">
-                        <xsl:attribute name="id"         >scheduler_tr_job_<xsl:value-of select="@job"/></xsl:attribute>
+                        <xsl:attribute name="id"         >
+                            <xsl:text>scheduler_tr_job_</xsl:text>
+                            <xsl:value-of select="@job"/>
+                        </xsl:attribute>
                         <xsl:attribute name="class"      >job</xsl:attribute>
                         <xsl:attribute name="style"      >cursor: default; padding-top: 1pt</xsl:attribute>
                         <xsl:attribute name="onmouseover">
                             this.className =
                             document.getElementById( "scheduler_tr_job_<xsl:value-of select="@job"/>__2" ).className = "job_hover";
-                            this.style.cursor = "hand";
+                            this.style.cursor = "pointer";
                         </xsl:attribute>
                         <xsl:attribute name="onmouseout" >
                             this.className =
                             document.getElementById( "scheduler_tr_job_<xsl:value-of select="@job"/>__2" ).className = "job"
                             this.style.cursor = "default";
                         </xsl:attribute>
-                        <xsl:attribute name="onclick">call_error_checked( show_job_details, '<xsl:value-of select="@job"/>' )</xsl:attribute>
+                        <xsl:attribute name="onclick">
+                            call_error_checked( show_job_details, '<xsl:value-of select="@job"/>' )
+                        </xsl:attribute>
 
                         <td colspan="4">
-                            <b><xsl:value-of select="@job"/></b>
+                            <b>
+                                <xsl:value-of select="@job"/>
+                            </b>
                             &#160;
                             <xsl:value-of select="@title"/>
                             <xsl:if test="@state_text!=''">
@@ -425,7 +432,7 @@
                             </xsl:if>
                         </td>
 
-<!--
+                        <!--
                         <td align="right">
                             <xsl:call-template name="command_menu">
                                 <xsl:with-param name="onclick" select="concat( 'job_menu__onclick(&quot;', @job, '&quot;)' )"/>
@@ -435,20 +442,26 @@
                     </xsl:element>
 
                     <xsl:element name="tr">
-                        <xsl:attribute name="id"   >scheduler_tr_job_<xsl:value-of select="@job"/>__2</xsl:attribute>
+                        <xsl:attribute name="id"   >
+                            <xsl:text>scheduler_tr_job_</xsl:text>
+                            <xsl:value-of select="@job"/>
+                            <xsl:text>__2</xsl:text>
+                        </xsl:attribute>
                         <xsl:attribute name="class">job         </xsl:attribute>
                         <xsl:attribute name="style">cursor: default</xsl:attribute>
                         <xsl:attribute name="onmouseover">
                             this.className =
                             document.getElementById( "scheduler_tr_job_<xsl:value-of select="@job"/>" ).className = "job_hover";
-                            this.style.cursor = "hand";
+                            this.style.cursor = "pointer";
                         </xsl:attribute>
                         <xsl:attribute name="onmouseout" >
                             this.className =
                             document.getElementById( "scheduler_tr_job_<xsl:value-of select="@job"/>" ).className = "job"
                             this.style.cursor = "default";
                         </xsl:attribute>
-                        <xsl:attribute name="onclick">call_error_checked( show_job_details, '<xsl:value-of select="@job"/>' )</xsl:attribute>
+                        <xsl:attribute name="onclick">
+                            call_error_checked( show_job_details, '<xsl:value-of select="@job"/>' )
+                        </xsl:attribute>
 
                         <td colspan="2">
                             <xsl:apply-templates select="@state"/>
@@ -497,7 +510,7 @@
                     <xsl:if test="/spooler/@show_tasks_checkbox and tasks/task">
                         <xsl:apply-templates select="tasks" mode="job_list"/>
                     </xsl:if>
-                    
+
                     <tr>
                         <td colspan="99" style="border-bottom: 1 solid #00b0ff; line-height: 3pt">
                             &#160;
@@ -529,7 +542,7 @@
                                                 Next start
                                             </xsl:when>
                                             <xsl:otherwise>-->
-                                                ∙<!--
+                                        <!--
                                             </xsl:otherwise>
                                         </xsl:choose>-->
                                     </xsl:otherwise>
@@ -556,9 +569,11 @@
                     </xsl:when>
                     <xsl:otherwise>
                         <xsl:attribute name="style"      >cursor: default</xsl:attribute>
-                        <xsl:attribute name="onmouseover">this.className='task_hover'; this.cursor = "hand";</xsl:attribute>
+                        <xsl:attribute name="onmouseover">this.className='task_hover'; this.cursor = "pointer";</xsl:attribute>
                         <xsl:attribute name="onmouseout" >this.className='task'      ; this.cursor = "default";</xsl:attribute>
-                        <xsl:attribute name="onclick">call_error_checked( show_task_details, '<xsl:value-of select="../../@job"/>', <xsl:value-of select="@id"/> )</xsl:attribute>
+                        <xsl:attribute name="onclick">
+                            call_error_checked( show_task_details, '<xsl:value-of select="../../@job"/>', <xsl:value-of select="@id"/> )
+                        </xsl:attribute>
 
                         <td>
                             <span style="margin-left: 2ex">
@@ -573,7 +588,7 @@
                             <xsl:if test="@running_since!=''">
                                 <xsl:text> &#160;</xsl:text>
                                 <!--span class="small"-->
-                                    <xsl:value-of select="@running_since__xslt_datetime_diff"  disable-output-escaping="yes"/>
+                                <xsl:value-of select="@running_since__xslt_datetime_diff"  disable-output-escaping="yes"/>
                                 <!--/span-->
                             </xsl:if>
                         </td>
@@ -605,7 +620,7 @@
                                     <xsl:if test="@in_process_since!=''">
                                         <xsl:text> &#160;</xsl:text>
                                         <span class="small">
-                                            (<xsl:value-of select="@in_process_since__xslt_datetime_diff"  disable-output-escaping="yes"/>)
+                                            (<xsl:value-of select="@in_process_since__xslt_datetime_diff"  disable-output-escaping="yes"/> in step)
                                         </span>
                                     </xsl:if>
                                 </td>
@@ -616,7 +631,7 @@
                                     <xsl:text> </xsl:text>
                                     <xsl:if test="@in_process_since!=''">
                                         <span class="small">
-                                            (<xsl:value-of select="@in_process_since__xslt_datetime_diff"  disable-output-escaping="yes"/>)
+                                            (<xsl:value-of select="@in_process_since__xslt_datetime_diff"  disable-output-escaping="yes"/> in step)
                                         </span>
                                     </xsl:if>
                                 </td>
@@ -650,7 +665,8 @@
 
     <xsl:template name="job_chains">
         <xsl:param name="job_chain_select"/>
-        <xsl:param name="single"             select="false()"/>     <!-- false: Mehrere im linken Frame,
+        <xsl:param name="single"             select="false()"/>
+        <!-- false: Mehrere im linken Frame,
                                                                          true:  Eine Jobkette im rechten frame -->
         <xsl:variable name="max_orders">
             <xsl:choose>
@@ -677,11 +693,13 @@
                 <xsl:if test="$single">
                     <tr>
                         <td colspan="99">
-                            Job chain&#160; <b><xsl:value-of select="@name"/></b>
+                            Job chain&#160; <b>
+                                <xsl:value-of select="@name"/>
+                            </b>
                             <br/>&#160;
                         </td>
                     </tr>
-                </xsl:if>                
+                </xsl:if>
                 <!--                
                 <tr>
                     <td colspan="99" align="left" class="job_chain">
@@ -697,19 +715,19 @@
                     </td>
                     <td class="head">
                         <span style="white-space: nowrap">
-                        Job
-                        <xsl:if test="not( $single )">
-                            <!-- Checkbox für Show jobs-->
-                            <xsl:element name="input">
-                                <xsl:attribute name="id"     >show_job_chain_jobs_checkbox</xsl:attribute>
-                                <xsl:attribute name="type"   >checkbox</xsl:attribute>
-                                <xsl:attribute name="onclick">call_error_checked( show_job_chain_jobs_checkbox__onclick )</xsl:attribute>
-                                <xsl:if test="/spooler/@show_job_chain_jobs_checkbox">
-                                    <xsl:attribute name="checked">checked</xsl:attribute>
-                                </xsl:if>
-                            </xsl:element>
-                            <label for="show_job_chain_jobs_checkbox">show</label>
-                        </xsl:if>
+                            Job
+                            <xsl:if test="not( $single )">
+                                <!-- Checkbox für Show jobs-->
+                                <xsl:element name="input">
+                                    <xsl:attribute name="id"     >show_job_chain_jobs_checkbox</xsl:attribute>
+                                    <xsl:attribute name="type"   >checkbox</xsl:attribute>
+                                    <xsl:attribute name="onclick">call_error_checked( show_job_chain_jobs_checkbox__onclick )</xsl:attribute>
+                                    <xsl:if test="/spooler/@show_job_chain_jobs_checkbox">
+                                        <xsl:attribute name="checked">checked</xsl:attribute>
+                                    </xsl:if>
+                                </xsl:element>
+                                <label for="show_job_chain_jobs_checkbox">show</label>
+                            </xsl:if>
                         </span>
                     </td>
                     <td class="head">
@@ -746,13 +764,17 @@
                         </td>
                     </tr>
                 </xsl:if>
-                
+
                 <xsl:for-each select="$job_chain_select">
 
                     <xsl:variable name="job_chain_name" select="@name"/>
-                    
+
                     <xsl:if test="( /spooler/@show_job_chain_orders_checkbox or /spooler/@show_job_chain_jobs_checkbox ) and position() &gt; 1">
-                        <tr><td colspan="99"><hr style="color: black" size="1"/></td></tr>
+                        <tr>
+                            <td colspan="99">
+                                <hr style="color: black" size="1"/>
+                            </td>
+                        </tr>
                     </xsl:if>
 
                     <xsl:if test="not( $single )">
@@ -762,18 +784,22 @@
                             </xsl:attribute>
                             <xsl:attribute name="onmouseover">
                                 this.className = "job_chain_hover";
-                                this.style.cursor = "hand";
+                                this.style.cursor = "pointer";
                             </xsl:attribute>
                             <xsl:attribute name="onmouseout" >
                                 this.className = "job_chain";
                                 this.style.cursor = "default"
                             </xsl:attribute>
-                            <xsl:attribute name="onclick">call_error_checked( show_job_chain_details, '<xsl:value-of select="@name"/>' )</xsl:attribute>
+                            <xsl:attribute name="onclick">
+                                call_error_checked( show_job_chain_details, '<xsl:value-of select="@name"/>' )
+                            </xsl:attribute>
 
                             <td colspan="2">
-                                <b><xsl:value-of select="@name"/></b>
+                                <b>
+                                    <xsl:value-of select="@name"/>
+                                </b>
                             </td>
-                            
+
                             <td>
                                 <xsl:if test="not( /spooler/@show_job_chain_jobs_checkbox)">
                                     <xsl:value-of select="count( job_chain_node[@job] )"/> jobs,
@@ -783,17 +809,19 @@
                                     </xsl:call-template>
                                     &#160;
                                 </xsl:if>
-                                
+
                                 <xsl:choose>
                                     <xsl:when test="not( @state )"/>
                                     <xsl:when test="@state='under_construction'"/>
                                     <xsl:when test="@state='ready'"/>
                                     <xsl:otherwise>
-                                        <span class="job_chain_error">state=<xsl:value-of select="@state"/></span>
+                                        <span class="job_chain_error">
+                                            state=<xsl:value-of select="@state"/>
+                                        </span>
                                     </xsl:otherwise>
                                 </xsl:choose>
                             </td>
-                            
+
                             <td>
                                 <xsl:call-template name="bold_counter">
                                     <xsl:with-param name="counter" select="@orders" />
@@ -841,7 +869,7 @@
                                     <xsl:text> &#160; </xsl:text>
                                     regex=<xsl:value-of select="@regex"/>
                                 </td>
-                                
+
                                 <td colspan="2">
                                     <xsl:if test="files/@count > 0">
                                         <xsl:element name="span">
@@ -884,8 +912,8 @@
                             </xsl:if>
 
                         </xsl:for-each>
-                        
-                        
+
+
                         <xsl:for-each select="job_chain_node[ @job ]">
 
                             <xsl:element name="tr">
@@ -898,7 +926,7 @@
                                 <xsl:attribute name="class">
                                     job
                                 </xsl:attribute>
-                                
+
                                 <xsl:variable name="job_name" select="@job"/>
                                 <xsl:variable name="job" select="/spooler/answer/state/jobs/job[@job=$job_name]"/>
 
@@ -909,13 +937,15 @@
                                     </xsl:attribute>
                                     <xsl:attribute name="onmouseover">
                                         this.className = "job_hover";
-                                        this.style.cursor = "hand";
+                                        this.style.cursor = "pointer";
                                     </xsl:attribute>
                                     <xsl:attribute name="onmouseout" >
                                         this.className = "job";
                                         this.style.cursor = "default";
                                     </xsl:attribute>
-                                    <xsl:attribute name="onclick">call_error_checked( show_job_details, '<xsl:value-of select="@job"/>', '<xsl:value-of select="$job_chain_name"/>' )</xsl:attribute>
+                                    <xsl:attribute name="onclick">
+                                        call_error_checked( show_job_details, '<xsl:value-of select="@job"/>', '<xsl:value-of select="$job_chain_name"/>' )
+                                    </xsl:attribute>
                                 </xsl:if>
 
                                 <td style="padding-left: 2ex">
@@ -923,7 +953,9 @@
                                 </td>
 
                                 <td colspan="1">
-                                    <b><xsl:value-of select="@job"/></b>
+                                    <b>
+                                        <xsl:value-of select="@job"/>
+                                    </b>
                                 </td>
 
                                 <td>
@@ -936,7 +968,9 @@
                                                 <xsl:variable name="job_chain_task_count" select="count( $job/tasks/task[ order/@job_chain=$job_chain_name ] )"/>
                                                 <xsl:element name="span">
                                                     <xsl:attribute name="style">white-space: nowrap</xsl:attribute>
-                                                    <xsl:attribute name="title"><xsl:value-of select="$job_chain_task_count"/> tasks processing orders from job chain <xsl:value-of select="$job_chain_name"/></xsl:attribute>
+                                                    <xsl:attribute name="title">
+                                                        <xsl:value-of select="$job_chain_task_count"/> tasks processing orders from job chain <xsl:value-of select="$job_chain_name"/>
+                                                    </xsl:attribute>
                                                     <xsl:call-template name="bold_counter">
                                                         <xsl:with-param name="counter" select="$job_chain_task_count" />
                                                         <xsl:with-param name="suffix" select="'working tasks'" />
@@ -1012,7 +1046,7 @@
 
                             <xsl:element name="tr">
                                 <xsl:attribute name="class">job_chain</xsl:attribute>
-                            
+
                                 <td colspan="3" style="padding-left: 2ex;">
                                     <b>Blacklist</b>
                                 </td>
@@ -1036,21 +1070,21 @@
                         </xsl:if>
                     </xsl:if>
                 </xsl:for-each>
-                
-                
+
+
                 <!-- Nichtauftragsjobs zeigen -->
-                
+
                 <xsl:if test="/spooler/@show_job_chain_jobs_checkbox and not( $single ) and /spooler/answer/state/jobs/job [ not( @order='yes' ) ]">
                     <tr>
                         <td colspan="99" style="line-height: 8pt">&#160;</td>
                     </tr>
-                    
+
                     <tr>
                         <td colspan="99" style="padding-top: 4pt; border-top: 1px solid gray">
                             no-order jobs:
                         </td>
                     </tr>
-                    
+
                     <xsl:for-each select="/spooler/answer/state/jobs/job [ not( @order='yes' ) ]">
                         <xsl:element name="tr">
                             <xsl:attribute name="class">
@@ -1061,7 +1095,7 @@
                             </xsl:attribute>
                             <xsl:attribute name="onmouseover">
                                 this.className = "job_hover";
-                                this.style.cursor = "hand";
+                                this.style.cursor = "pointer";
                             </xsl:attribute>
                             <xsl:attribute name="onmouseout" >
                                 this.className = "job";
