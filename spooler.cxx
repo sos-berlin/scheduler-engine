@@ -3486,6 +3486,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
     set_log_category_default( "scheduler.loop", false );
     set_log_category_default( "scheduler.call", true );   // Aufrufe von spooler_process() etc. protokollieren (Beginn und Ende)
     set_log_category_default( "scheduler.order", true );
+    set_log_category_default( "scheduler.file_order", true );
 
 
 
