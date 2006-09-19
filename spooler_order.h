@@ -133,6 +133,7 @@ struct Order : Com_order,
     void                        add_to_or_replace_in_job_chain( Job_chain* );
     bool                        try_add_to_job_chain    ( Job_chain* );
     void                        remove_from_job_chain   ( bool leave_in_database = false );
+    void                        remove_from_job         ();
     void                        add_to_blacklist        ();
     void                        move_to_node            ( Job_chain_node* );
     void                        postprocessing          ( bool success );                           // Verarbeitung nach spooler_process()

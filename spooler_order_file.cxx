@@ -223,13 +223,13 @@ xml::Element_ptr Directory_file_order_source::dom_element( const xml::Document_p
 
             if( show & show_order_source_files )
             {
-                for( int i = _new_files_index; i < _new_files.size(); i++ )
+                for( int i = _new_files_index, j = show._max_orders; i < _new_files.size() && j > 0; i++, j-- )
                 {
                     z::File_info* f = _new_files[ i ];
 
                     xml::Element_ptr file_element = document.createElement( "file" );
-                    file_element.setAttribute( "last_write", Time( f->last_write_time() ).xml_value( Time::without_ms ) + "Z" );
-                    file_element.setAttribute( "path"      , f->path() );
+                    file_element.setAttribute( "last_write_time", Time( f->last_write_time() ).xml_value( Time::without_ms ) + "Z" );
+                    file_element.setAttribute( "path"           , f->path() );
 
                     files_element.appendChild( file_element );
                 }

@@ -10,6 +10,31 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2006-09-19" version="2.0.158" subversion_revision="4525">
+        <revision type="new" title="start_when_directory_changed robuster gemacht">
+            <description>
+                <p>
+                    Die Windows-Verzeichnisüberwachung wird bei jedem Aufruf 
+                    (bei <scheduler_element name="start_when_directoy-change"/> am Ende der Task)
+                    erneuert, ohne das ein Signal verloren geht.
+                </p>
+                <p>
+                    Wenn unter Unix ein Regulärer Ausdruck angegeben ist, 
+                    startet <code>start_when_directory_changed</code> den Job nur noch,
+                    wenn eine Datei hinzugefügt, aber nicht, wenn eine Datei entfernt worden ist.
+                </p>
+                <ul>
+                    <li>
+                        <scheduler_element name="start_when_directoy-change"/>
+                    </li>
+                    <li>
+                        <scheduler_method class="Job" object="spooler_job" method="start_when_directory_changed"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+    </change>
+
     <change date="2006-09-14" version="2.0.158" subversion_revision="4505">
         <revision type="new" title="Subprocess.own_process_group">
             <description>

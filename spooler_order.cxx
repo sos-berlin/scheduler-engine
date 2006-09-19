@@ -2040,13 +2040,7 @@ void Order::remove_from_job_chain( bool leave_in_database )
 
     if( _job_chain_node )
     {
-        if( _in_job_queue )
-        {
-            Order_queue* order_queue = _job_chain_node->_job->order_queue();        // Kann bei Programmende NULL sein
-            if( order_queue )  order_queue->remove_order( this );
-        }
-
-        _job_chain_node = NULL;
+        remove_from_job();
     }
 
     if( _job_chain )
@@ -2075,6 +2069,21 @@ void Order::remove_from_job_chain( bool leave_in_database )
     {
         job_chain->check_for_removing();
     }
+}
+
+//---------------------------------------------------------------------------Order::remove_from_job
+
+void Order::remove_from_job()
+{
+    if( _in_job_queue )
+    {
+        if( Order_queue* order_queue = _job_chain_node->_job->order_queue() )        // Kann bei Programmende NULL sein
+            order_queue->remove_order( this );
+
+        if( _order_queue )  _order_queue->remove_order( this );     // Auftrag ist nicht in einer Jobkette
+    }
+
+    _job_chain_node = NULL;
 }
 
 //--------------------------------------------------------------------------Order::add_to_job_chain
@@ -2173,6 +2182,8 @@ void Order::add_to_or_replace_in_job_chain( Job_chain* job_chain )
 void Order::add_to_blacklist()
 { 
     assert( _job_chain );
+    if( _in_job_queue )  remove_from_job();
+
     _job_chain->add_to_blacklist( this ); 
 }
 

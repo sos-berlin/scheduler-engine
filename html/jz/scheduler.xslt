@@ -805,15 +805,88 @@
                     </xsl:if>
 
                     <xsl:if test="$single  or  /spooler/@show_job_chain_jobs_checkbox  or  /spooler/@show_job_chain_orders_checkbox and job_chain_node/job/order_queue/order">
-                        <xsl:for-each select="job_chain_node[ @job ]">
-                            <!-- $show_orders vergrößert den Abstand zwischen den Job_chain_nodes. Aber nur, wenn überhaupt ein Order in der Jobkette ist -->
-                            <xsl:variable name="show_orders" select="( /spooler/@show_job_chain_orders_checkbox or $single ) and ../job_chain_node/job/order_queue/order"/>
 
-                            <xsl:variable name="tr_style">
-                                <xsl:if test="$show_orders">
-                                    padding-top: 1ex;
+                        <!-- $show_orders vergrößert den Abstand zwischen den Job_chain_nodes. Aber nur, wenn überhaupt ein Order in der Jobkette ist -->
+                        <xsl:variable name="show_orders" select="( /spooler/@show_job_chain_orders_checkbox or $single ) and job_chain_node/job/order_queue/order"/>
+
+                        <xsl:variable name="tr_style">
+                            <xsl:if test="$show_orders">
+                                padding-top: 1ex;
+                            </xsl:if>
+                        </xsl:variable>
+
+
+                        <xsl:for-each select="file_order_source">
+
+                            <xsl:element name="tr">
+                                <xsl:if test="$single ">
+                                    <xsl:attribute name="style">
+                                        <xsl:value-of select="$tr_style"/>
+                                    </xsl:attribute>
                                 </xsl:if>
-                            </xsl:variable>
+
+                                <xsl:attribute name="class">job_chain</xsl:attribute>
+
+                                <!--td style="padding-left: 2ex" colspan="2">
+                                    file order source
+                                </td-->
+
+                                <td style="padding-left: 2ex">Source</td>
+
+                                <td colspan="2">
+                                    <b>
+                                        <xsl:value-of select="@directory"/>
+                                    </b>
+
+                                    <xsl:text> &#160; </xsl:text>
+                                    regex=<xsl:value-of select="@regex"/>
+                                </td>
+                                
+                                <td colspan="2">
+                                    <xsl:if test="files/@count > 0">
+                                        <xsl:element name="span">
+                                            <xsl:attribute name="title">
+                                                <xsl:text>Snapshot of</xsl:text>
+                                                <xsl:value-of select="files/@snapshot_time"/>
+                                            </xsl:attribute>
+                                            <xsl:call-template name="bold_counter">
+                                                <xsl:with-param name="counter" select="files/@count" />
+                                                <xsl:with-param name="suffix"  select="'files'" />
+                                            </xsl:call-template>
+                                        </xsl:element>
+                                    </xsl:if>
+                                </td>
+
+                            </xsl:element>
+
+
+                            <xsl:if test="ERROR">
+                                <tr>
+                                    <td> </td>
+                                    <td colspan="99">
+                                        <xsl:apply-templates select="ERROR"/>
+                                    </td>
+                                </tr>
+                            </xsl:if>
+
+                            <xsl:if test="( /spooler/@show_job_chain_orders_checkbox or $single ) and files/file">
+                                <xsl:for-each select="files/file">
+                                    <tr>
+                                        <td style="padding-left: 2ex"> </td>
+                                        <td colspan="2">
+                                            <xsl:value-of select="@path"/>
+                                        </td>
+                                        <td>
+                                            <!--xsl:value-of select="@last_write_time__xslt_date_or_time_with_diff"/-->
+                                        </td>
+                                    </tr>
+                                </xsl:for-each>
+                            </xsl:if>
+
+                        </xsl:for-each>
+                        
+                        
+                        <xsl:for-each select="job_chain_node[ @job ]">
 
                             <xsl:element name="tr">
                                 <xsl:if test="$single ">
@@ -930,6 +1003,37 @@
                             <!--xsl:apply-templates select="job/tasks/task" mode="job_chain_list"/-->
 
                         </xsl:for-each>
+
+                        <xsl:if test="blacklist/@count > 1">
+
+                            <tr>
+                                <td colspan="99" style="line-height: 1ex">&#160;</td>
+                            </tr>
+
+                            <xsl:element name="tr">
+                                <xsl:attribute name="class">job_chain</xsl:attribute>
+                            
+                                <td colspan="3" style="padding-left: 2ex;">
+                                    <b>Blacklist</b>
+                                </td>
+                                <td colspan="2">
+                                    <xsl:call-template name="bold_counter">
+                                        <xsl:with-param name="counter" select="blacklist/@count" />
+                                        <xsl:with-param name="suffix"  select="'orders'" />
+                                    </xsl:call-template>
+                                </td>
+                            </xsl:element>
+
+                            <xsl:if test="/spooler/@show_job_chain_orders_checkbox or $single">
+                                <tr class="order">
+                                    <td colspan="99">
+                                        <xsl:apply-templates select="blacklist" mode="job_chain_list">
+                                            <xsl:with-param name="max_orders" select="$max_orders"/>
+                                        </xsl:apply-templates>
+                                    </td>
+                                </tr>
+                            </xsl:if>
+                        </xsl:if>
                     </xsl:if>
                 </xsl:for-each>
                 
@@ -980,10 +1084,12 @@
                                 <xsl:choose>
                                     <xsl:when test="$job/tasks/@count>0">
                                         <xsl:text>, </xsl:text>
-                                        <xsl:call-template name="bold_counter">
-                                            <xsl:with-param name="counter" select="$job/tasks/@count" />
-                                            <xsl:with-param name="suffix" select="'tasks'" />
-                                        </xsl:call-template>
+                                        <span class="task" style="padding-left: 2pt; padding-right: 2pt; padding-bottom: 2pt;">
+                                            <xsl:call-template name="bold_counter">
+                                                <xsl:with-param name="counter" select="$job/tasks/@count" />
+                                                <xsl:with-param name="suffix" select="'tasks'" />
+                                            </xsl:call-template>
+                                        </span>
                                     </xsl:when>
                                     <xsl:otherwise>
                                         <xsl:if test="$job/@next_start_time">
@@ -1022,7 +1128,7 @@
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Order in Job chain list-->
 
-    <xsl:template match="order_queue" mode="job_chain_list">
+    <xsl:template match="order_queue | blacklist" mode="job_chain_list">
         <xsl:param name="max_orders" select="100"/>
 
         <table cellspacing="0" cellpadding="0" width="100%">

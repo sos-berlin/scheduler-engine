@@ -232,6 +232,7 @@ Scheduler.prototype.modify_datetime_for_xslt = function( response )
     this.add_datetime_attributes_for_xslt( response, now, "disconnected_at"       );
     this.add_datetime_attributes_for_xslt( response, now, "wait_until"            );
     this.add_datetime_attributes_for_xslt( response, now, "resume_at"             );
+  //this.add_datetime_attributes_for_xslt( response, now, "last_write_time"       );  ist GMT
 }
 
 //---------------------------------------------------------------------Scheduler.call_error_checked
