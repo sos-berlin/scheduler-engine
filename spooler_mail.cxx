@@ -796,9 +796,11 @@ void Com_mail::use_queue_defaults( const Mail_defaults& defaults )
 
 void Com_mail::use_smtp_default( const Mail_defaults& defaults )
 {
+    if( defaults[ "queue_only" ] == "1" )  _msg->set_queue_only( true );
+    if( defaults[ "queue_only" ] == "0" )  _msg->set_queue_only( false );
+
     if( defaults.has_value( "smtp"      )  &&  defaults[ "smtp"      ] != "-" )  set_smtp     ( defaults[ "smtp"      ] );
 }
-
 
 //-------------------------------------------------------------------------------------------------
 

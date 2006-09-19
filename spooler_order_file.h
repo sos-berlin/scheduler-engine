@@ -59,9 +59,22 @@ struct Directory_file_order_source : //idispatch_implementation< Directory_file_
     Event                      _notification_event;             // Nur Windows
     Time                       _notification_event_time;        // Wann wir zuletzt die Benachrichtigung bestellt haben
     int                        _max_orders;
+
     vector< ptr<z::File_info> > _new_files;
     int                        _new_files_index;
     Time                       _new_files_time;
+
+
+    struct Bad_entry : Object
+    {
+                                Bad_entry               ( const File_path& p, const exception& x )  : _file_path(p), _error(x) {}
+
+        File_path              _file_path;
+        Xc_copy                _error;
+    };
+
+    typedef stdext::hash_map< string, ptr<Bad_entry> >  Bad_map;
+    Bad_map                    _bad_map;
 };
 
 //-------------------------------------------------------------------------------------------------

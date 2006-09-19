@@ -232,9 +232,9 @@ void Spooler_db::open2( const string& db_name )
                                             + join( "", create_extra ) 
                                             + "primary key( \"ID\" )" );
 
-                    create_table_when_needed( _spooler->_orders_tablename, 
+                    create_table_when_needed( _spooler->_orders_tablename, S() <<
                                             "\"JOB_CHAIN\"   varchar(100) not null,"        // Primärschlüssel
-                                            "\"ID\"          varchar(100) not null,"        // Primärschlüssel
+                                            "\"ID\"          varchar(" << spooler::order_id_length_max << ") not null,"        // Primärschlüssel
                                             "\"SPOOLER_ID\"  varchar(100),"
                                             "\"PRIORITY\"    integer not null,"
                                             "\"STATE\"       varchar(100),"
@@ -255,10 +255,10 @@ void Spooler_db::open2( const string& db_name )
                     add_column( _spooler->_orders_tablename, "ORDER_XML"     , "add \"ORDER_XML\"     clob" );
                     add_column( _spooler->_job_history_tablename, "EXIT_CODE", "add \"EXIT_CODE\"     integer" );
 
-                    create_table_when_needed( _spooler->_order_history_tablename, 
+                    create_table_when_needed( _spooler->_order_history_tablename, S() <<
                                             "\"HISTORY_ID\"  integer not null,"             // Primärschlüssel
                                             "\"JOB_CHAIN\"   varchar(100) not null,"        // Primärschlüssel
-                                            "\"ORDER_ID\"    varchar(100) not null,"
+                                            "\"ORDER_ID\"    varchar(" << spooler::order_id_length_max << ") not null,"
                                             "\"SPOOLER_ID\"  varchar(100),"
                                             "\"TITLE\"       varchar(200),"
                                             "\"STATE\"       varchar(100) not null,"
@@ -279,6 +279,32 @@ void Spooler_db::open2( const string& db_name )
                                             "primary key( \"TASK_ID\" )" );
 
                     add_column( _spooler->_tasks_tablename, "TASK_XML", " add \"TASK_XML\" clob" );
+
+
+                    /*
+                    string cmd = S() << "ALTER TABLE " << _spooler->_orders_tablename << " modify \"ID\" varchar(" << order_id_length_max << ")";
+                    _log->info( cmd );
+                    execute( cmd );
+
+                    cmd = S() << "ALTER TABLE " << _spooler->_order_history_tablename << " modify \"ORDER_ID\" varchar(" << order_id_length_max << ")";
+                    _log->info( cmd );
+                    execute( cmd );
+                    */
+                    _order_id_length_max = spooler::order_id_length_max;
+
+                    {
+                        Any_file f ( S() << "-in " << _spooler->_db_name << " select `id` from " << _spooler->_orders_tablename << " where 1=0" );
+                        int field_size= +f.spec()._field_type_ptr->field_descr_ptr( 0 )->type_ptr()->field_size();
+                        _order_id_length_max = field_size - 1;     // Eins weniger fürs 0-Byte
+
+                        if( _order_id_length_max <= 0 )
+                        {
+                            _log->warn( "Database doesn't deliver width of column " + _spooler->_orders_tablename + ".id" );
+                            _order_id_length_max = spooler::order_id_length_max;
+                        }
+
+                        Z_LOG2( "scheduler", "_order_id_length_max=" << _order_id_length_max << "\n" );
+                    }
 
                     commit();
                 }

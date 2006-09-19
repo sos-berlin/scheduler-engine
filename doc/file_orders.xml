@@ -218,9 +218,9 @@
     <p>
         <scheduler_message level="info" code="SCHEDULER-984" show_text="yes"/>
     </p>
-    <p>
+    <!--p>
         Ein einzelner Verzeichnis-Fehler wird mit Warnung ignoriert, die Operation wird sofort wiederholt.
-    </p>
+    </p-->
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 

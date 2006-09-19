@@ -96,6 +96,8 @@ const double                    wait_for_thread_termination         = latter_day
 //const double                    wait_step_for_thread_termination2   = 600.0;       // 2. Nörgelabstand
 //const double wait_for_thread_termination_after_interrupt = 1.0;
 
+const int                       order_id_length_max                 = 255;              // Die Datenbankspalte _muss_ so groß sein, sonst bricht Scheduler mit SCHEDULER-303, SCHEDULER-265 ab!
+
 const char*                     temporary_process_class_name        = "(temporaries)";
 const int                       no_termination_timeout              = UINT_MAX;
 static bool                     is_daemon                           = false;
@@ -117,6 +119,8 @@ extern zschimmer::Message_code_text  scheduler_messages[];            // message
 
 struct Error_settings
 {
+    Error_settings() : _zero_(this+1) {}
+
     void read( const string& ini_file )
     {
         _from = read_profile_string( ini_file, "spooler", "log_mail_from", _from );
@@ -124,13 +128,16 @@ struct Error_settings
         _cc   = read_profile_string( ini_file, "spooler", "log_mail_cc"  , _cc   );
         _bcc  = read_profile_string( ini_file, "spooler", "log_mail_bcc" , _bcc  );
         _smtp = read_profile_string( ini_file, "spooler", "smtp"         , _smtp );
+        //_queue_only = read_profile_string( ini_file, "spooler", "log_mail_queue_only", _queue_only );
     }
 
+    Fill_zero                  _zero_;
     string                     _from;
     string                     _to;
     string                     _cc;
     string                     _bcc;
     string                     _smtp;
+  //bool                       _queue_only;
 };
 
 //-------------------------------------------------------------------------------------------------
@@ -193,6 +200,7 @@ static void send_error_email( const string& subject, const string& text )
         if( error_settings._cc   != "" )  msg->set_cc  ( error_settings._cc   );
         if( error_settings._bcc  != "" )  msg->set_bcc ( error_settings._bcc  );
         if( error_settings._smtp != "" )  msg->set_smtp( error_settings._smtp );
+        //if( error_settings._queue_only )  msg->set_queue_only( true );
 
         string body = remove_password( text );
 
@@ -1692,6 +1700,7 @@ void Spooler::load_arg()
 
     _mail_defaults.set( "queue_dir", subst_env( read_profile_string( _factory_ini, "spooler", "mail_queue_dir"   , "-" ) ) );
     _mail_defaults.set( "smtp"     ,            read_profile_string( _factory_ini, "spooler", "smtp"             , "-" ) );
+    _mail_defaults.set( "queue_only",           read_profile_bool  ( _factory_ini, "spooler", "log_mail_queue_only", false )? "1" : "0" );
     _mail_defaults.set( "from"     ,            read_profile_string( _factory_ini, "spooler", "log_mail_from"    ) );
     _mail_defaults.set( "to"       ,            read_profile_string( _factory_ini, "spooler", "log_mail_to"      ) );
     _mail_defaults.set( "cc"       ,            read_profile_string( _factory_ini, "spooler", "log_mail_cc"      ) );

@@ -887,7 +887,6 @@
 
                             </xsl:element>
 
-
                             <xsl:if test="ERROR">
                                 <tr>
                                     <td> </td>
@@ -901,7 +900,7 @@
                                 <xsl:for-each select="files/file">
                                     <tr>
                                         <td style="padding-left: 2ex"> </td>
-                                        <td colspan="2">
+                                        <td colspan="3">
                                             <xsl:value-of select="@path"/>
                                         </td>
                                         <td>
@@ -910,6 +909,23 @@
                                     </tr>
                                 </xsl:for-each>
                             </xsl:if>
+
+                            <!--xsl:if test="( /spooler/@show_job_chain_orders_checkbox or $single ) and bad_files/file">
+                                <xsl:for-each select="bad_files/file">
+                                    <tr>
+                                        <td style="padding-left: 2ex"> </td>
+                                        <td colspan="4" class="job_chain_error">
+                                            <xsl:value-of select="@path"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding-left: 2ex"> </td>
+                                        <td colspan="4" class="bad_files_error">
+                                            <xsl:apply-templates select="ERROR"/>
+                                        </td>
+                                    </tr>
+                                </xsl:for-each>
+                            </xsl:if-->
 
                         </xsl:for-each>
 

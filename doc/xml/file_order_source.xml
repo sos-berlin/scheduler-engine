@@ -56,10 +56,15 @@
                     Die Länge der Periode kann hier angegeben werden.
                 </p>
                 <p>
+                    Unter Windows ist <code>repeat="60"</code> voreingestellt-
+                    Der Scheduler nutzt zusätzlich die in Windows integrierte Verzeichnisüberwachung,
+                    so dass er auf eine Änderung des Verzeichnisses sofort reagiert.
+                </p>
+                <!--p>
                     Unter Windows ist <code>repeat="no"</code> möglich und voreingestellt,
                     denn der Scheduler nutzt die in Windows integrierte Verzeichnisüberwachung.
                     Unter Unix sollte <code>"no"</code> nicht verwendet werden.
-                </p>
+                </p-->
                 <p>
                     Unter Unix ist <code>repeat="10"</code> voreingestellt.
                 </p>

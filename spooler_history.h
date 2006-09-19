@@ -47,6 +47,7 @@ struct Spooler_db : Object, Scheduler_object
     string                      db_name                 ()                                          { return _db_name; }
     string                      error                   ()                                          { THREAD_LOCK_RETURN( _error_lock, string, _error ); }
     bool                        is_waiting              () const                                    { return _waiting; }
+    int                         order_id_length_max     ()                                          { return opened()? _order_id_length_max : spooler::order_id_length_max; }
 
     void                        spooler_start           ();
     void                        spooler_stop            ();
@@ -113,6 +114,7 @@ struct Spooler_db : Object, Scheduler_object
     int                        _error_count;
     bool                       _waiting;
     ptr<Prefix_log>            _log;
+    int                        _order_id_length_max;
 };
 
 //--------------------------------------------------------------------------------------Transaction

@@ -2171,6 +2171,30 @@
             </text>
         </message>
 
+        <message code="SCHEDULER-344">
+            <text xml:lang="en">
+                <title>order.id has more than <p2/> characters: <p1/></title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-345">
+            <text xml:lang="en">
+                <title>order.id has more than <p2/> characters, the limit of your database column <p3/>: <p1/></title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-346">
+            <text xml:lang="en">
+                <title>Due to previous error the path is set on the bad list: <p1/></title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-347">
+            <text xml:lang="en">
+                <title>Path ist removed from the bad list: <p1/></title>
+            </text>
+        </message>
+
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->

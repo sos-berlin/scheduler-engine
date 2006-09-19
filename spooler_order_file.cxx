@@ -29,7 +29,7 @@ const int       directory_file_order_source_max_default     = 100;      // Nicht
 const int       max_tries                                 = 2;        // Nach Fehler machen wie sofort einen zweiten Versuch
 
 #ifdef Z_WINDOWS
-    const int   directory_file_order_source_repeat_default  = INT_MAX;
+    const int   directory_file_order_source_repeat_default  = 60;
 #else
     const int   directory_file_order_source_repeat_default  = 10;
 #endif
@@ -249,6 +249,28 @@ xml::Element_ptr Directory_file_order_source::dom_element( const xml::Document_p
             element.appendChild( files_element );
         }
 
+        if( _bad_map.size() > 0 )
+        {
+            xml::Element_ptr bad_files_element = document.createElement( "bad_files" );
+            bad_files_element.setAttribute( "count", (int)_bad_map.size() );
+
+            if( show & show_order_source_files )
+            {
+                Z_FOR_EACH( Bad_map, _bad_map, it )
+                {
+                    Bad_entry* bad_entry = it->second;
+
+                    xml::Element_ptr file_element = document.createElement( "file" );
+                    file_element.setAttribute( "path", bad_entry->_file_path );
+                    append_error_element( file_element, bad_entry->_error );
+
+                    bad_files_element.appendChild( file_element );
+                }
+            }
+
+            element.appendChild( bad_files_element );
+        }
+
     return element;
 }
 
@@ -443,23 +465,55 @@ Order* Directory_file_order_source::read_directory( bool was_notified, const str
                 for(; _new_files_index < n; _new_files_index++ )
                 {
                     z::File_info* new_file = _new_files[ _new_files_index ];
-                    string        path     = new_file->path();
-                    ptr<Order>    order    = new Order( _spooler );
+                    File_path     path     = new_file->path();
 
-                    order->set_file_path( path );
-                    order->set_state( _next_state );
+                    try
+                    {
+                        ptr<Order> order = new Order( _spooler );
 
-                    string date = Time( new_file->last_write_time() ).as_string( Time::without_ms ) + " GMT";   // localtime_from_gmtime() rechnet alte Sommerzeit-Daten in Winterzeit um
-                    log()->info( message_string( "SCHEDULER-983", order->obj_name(), "written at " + date ) );
+                        order->set_file_path( path );
+                        order->set_state( _next_state );
 
-                    order->add_to_job_chain( _job_chain );
+                        string date = Time( new_file->last_write_time() ).as_string( Time::without_ms ) + " GMT";   // localtime_from_gmtime() rechnet alte Sommerzeit-Daten in Winterzeit um
+                        log()->info( message_string( "SCHEDULER-983", order->obj_name(), "written at " + date ) );
 
-                    if( !result )  result = order;      // Der erste, sofort ausführbare Auftrag
+                        order->add_to_job_chain( _job_chain );
 
-                    _new_files[ _new_files_index ] = NULL;
+                        if( !result )  result = order;      // Der erste, sofort ausführbare Auftrag
+
+                        _new_files[ _new_files_index ] = NULL;
+
+                        if( _bad_map.find( path ) != _bad_map.end() )   // Zurzeit nicht denkbar, weil es nur zu lange Pfade betrifft
+                        {
+                            _bad_map.erase( path );
+                            log()->info( message_string( "SCHEDULER-346", path ) );
+                        }
+                    }
+                    catch( exception& x )   // Möglich bei für Order.id zu langem Pfad
+                    {
+                        if( _bad_map.find( path ) == _bad_map.end() )
+                        {
+                            log()->error( x.what() );
+                            log()->warn( message_string( "SCHEDULER-347", path ) );
+                            _bad_map[ path ] = Z_NEW( Bad_entry( path, x ) );
+                        }
+                    }
                 }
 
                 if( n < _new_files.size() )  log()->info( message_string( "SCHEDULER-985", _new_files.size() - n ) );
+            }
+
+            if( _directory_error )
+            {
+                log()->info( message_string( "SCHEDULER-984", _path ) );
+
+                if( _send_recovered_mail )
+                {
+                    _send_recovered_mail = false;
+                    send_mail( Scheduler_event::evt_file_order_source_recovered, NULL );
+                }
+
+                _directory_error = NULL;
             }
         }
         catch( exception& x )
@@ -550,20 +604,6 @@ void Directory_file_order_source::read_new_files_and_handle_deleted_files( const
 
     Z_LOG2( "scheduler.file_order", __FUNCTION__ << "  " << _path << "  " << _new_files.size() << " Dateinamen gelesen\n" );
     //log()->info( "******* WATCHING " + _path + " ******* " + cause );   // TEST
-
-
-    if( _directory_error )
-    {
-        log()->info( message_string( "SCHEDULER-984", _path ) );
-
-        if( _send_recovered_mail )
-        {
-            _send_recovered_mail = false;
-            send_mail( Scheduler_event::evt_file_order_source_recovered, NULL );
-        }
-    }
-
-    _directory_error = NULL;
 
 
     sort( _new_files.begin(), _new_files.end(), zschimmer::File_info::quick_last_write_less );

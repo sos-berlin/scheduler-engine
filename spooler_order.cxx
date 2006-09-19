@@ -1679,7 +1679,13 @@ void Order::set_id( const Order::Id& id )
     {
         if( _id_locked )  z::throw_xc( "SCHEDULER-159" );
 
-        string_id();    // Sicherstellen, das id in einen String wandelbar ist
+        string id_string = string_id( id );    // Sicherstellen, das id in einen String wandelbar ist
+
+        if( _spooler->_db->opened()  &&  id_string.length() > _spooler->_db->order_id_length_max() )  
+            z::throw_xc( "SCHEDULER-345", id_string, _spooler->_db->order_id_length_max(), _spooler->_orders_tablename + "." + "id" );
+
+        if( id_string.length() > order_id_length_max )  z::throw_xc( "SCHEDULER-344", id_string, order_id_length_max );
+
 
         _id = id;
         _is_users_id = true;
@@ -1990,7 +1996,7 @@ Com_job* Order::com_job()
     return result;
 }
 
-//------------------------------------------------------------------------Order::add_to_order_queue
+//--------------------------------------------------------------------------------Order::add_to_job
 
 void Order::add_to_job( const string& job_name )
 {
@@ -2000,6 +2006,21 @@ void Order::add_to_job( const string& job_name )
         if( !order_queue )  z::throw_xc( "SCHEDULER-147", job_name );
         add_to_order_queue( order_queue );
     }
+}
+
+//---------------------------------------------------------------------------Order::remove_from_job
+
+void Order::remove_from_job()
+{
+    if( _in_job_queue )
+    {
+        if( Order_queue* order_queue = _job_chain_node->_job->order_queue() )        // Kann bei Programmende NULL sein
+            order_queue->remove_order( this );
+
+        if( _order_queue )  _order_queue->remove_order( this );     // Auftrag ist nicht in einer Jobkette
+    }
+
+    _job_chain_node = NULL;
 }
 
 //------------------------------------------------------------------------Order::add_to_order_queue
@@ -2069,21 +2090,6 @@ void Order::remove_from_job_chain( bool leave_in_database )
     {
         job_chain->check_for_removing();
     }
-}
-
-//---------------------------------------------------------------------------Order::remove_from_job
-
-void Order::remove_from_job()
-{
-    if( _in_job_queue )
-    {
-        if( Order_queue* order_queue = _job_chain_node->_job->order_queue() )        // Kann bei Programmende NULL sein
-            order_queue->remove_order( this );
-
-        if( _order_queue )  _order_queue->remove_order( this );     // Auftrag ist nicht in einer Jobkette
-    }
-
-    _job_chain_node = NULL;
 }
 
 //--------------------------------------------------------------------------Order::add_to_job_chain
