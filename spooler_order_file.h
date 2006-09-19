@@ -53,9 +53,9 @@ struct Directory_file_order_source : //idispatch_implementation< Directory_file_
     Regex                      _regex;
     int                        _delay_after_error;
     int                        _repeat;
+    bool                       _expecting_request_order;
     Xc_copy                    _directory_error;
     bool                       _send_recovered_mail;
-  //bool                       _first;
     Event                      _notification_event;             // Nur Windows
     Time                       _notification_event_time;        // Wann wir zuletzt die Benachrichtigung bestellt haben
     int                        _max_orders;

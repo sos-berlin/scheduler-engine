@@ -2525,7 +2525,7 @@ void Spooler::run()
 
         if( something_done )
         {
-            Z_DEBUG_ONLY( if( nichts_getan_zaehler )  Z_LOG2( "scheduler", "nichts_getan_zaehler=" << nichts_getan_zaehler << "\n" ); )
+            if( nichts_getan_zaehler )  Z_LOG2( "scheduler.nothing_done", "something_done!, nichts_getan_zaehler=" << nichts_getan_zaehler << "\n" );
             nothing_done_count = 0;
             nichts_getan_zaehler = 0;
         }
@@ -2537,7 +2537,7 @@ void Spooler::run()
         }
         else
         {
-            Z_DEBUG_ONLY( Z_LOG2( "scheduler.nothing_done", "nothing_done_count=" << nothing_done_count << " nichts_getan_zaehler=" << nichts_getan_zaehler << "\n" ); )
+            Z_LOG2( "scheduler.nothing_done", "nothing_done_count=" << nothing_done_count << " nichts_getan_zaehler=" << nichts_getan_zaehler << "\n" );
         }
 
         //----------------------------------------------------------------------WARTEZEIT ERMITTELN

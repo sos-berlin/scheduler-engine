@@ -1,5 +1,16 @@
 // $Id$
 
+/*
+    VERBESSERUNG:
+
+    request_order() durch ein Abonnement ersetzen: 
+    Job oder Task kann Auftr‰ge abonnieren und das Abonnement auch wieder abbestellen.
+    Dann wird das Verzeichnis auﬂerhalb der <run_time/> nicht ¸berwacht.
+
+    Wir brauchen ein Verzeichnis der Abonnementen (struct Job/Task : Order_source_abonnent)
+*/
+
+
 #include "spooler.h"
 
 using stdext::hash_set;
@@ -363,8 +374,11 @@ void Directory_file_order_source::start()
 {
     if( _next_job->name() == file_order_sink_job_name )  z::throw_xc( "SCHEDULER-342", _job_chain->obj_name() );
 
+    _expecting_request_order = true;            // Auf request_order() warten
+    set_async_next_gmtime( double_time_max );
+    //set_async_next_gmtime( (time_t)0 );     // Am Start das Verzeichnis auslesen
+
     set_async_manager( _spooler->_connection_manager );
-    set_async_next_gmtime( (time_t)0 );     // Am Start das Verzeichnis auslesen
 }
 
 //-------------------------------------------------------Directory_file_order_source::request_order
@@ -373,16 +387,17 @@ Order* Directory_file_order_source::request_order( const string& cause )
 {
     Order* result = NULL;
 
-    if( async_next_gmtime_reached() )       // Das, weil die Jobs bei jeder Gelegenheit do_something() durchlaufen, auch wenn nichts anliegt (z.B. bei TCP-Verkehr)
+    if( _expecting_request_order 
+     || async_next_gmtime_reached() )       // Das, weil die Jobs bei jeder Gelegenheit do_something() durchlaufen, auch wenn nichts anliegt (z.B. bei TCP-Verkehr)
     {
-        Z_LOG2( "scheduler.file_order", __FUNCTION__ << " cause=" << cause << ", async_next_gmtime_reached()\n" );
+        Z_LOG2( "scheduler.file_order", __FUNCTION__ << " cause=" << cause << "\n" );
 
         result = read_directory( false, cause );
         if( result )  assert( result->is_immediately_processable() );
     }
     else
     {
-        Z_LOG2( "scheduler.file_order", __FUNCTION__ << " cause=" << cause << ", !async_next_gmtime_reached()\n" );
+        //Z_LOG2( "scheduler.file_order", __FUNCTION__ << " cause=" << cause << ", !async_next_gmtime_reached()\n" );
     }
 
     return result;
@@ -452,12 +467,12 @@ Order* Directory_file_order_source::read_directory( bool was_notified, const str
             _new_files.clear();
             _new_files_index = 0;
 
-            if( try_index < max_tries )
-            {
-                log()->warn( x.what() ); 
-                close_notification();
-                continue;
-            }
+            //if( try_index < max_tries )
+            //{
+            //    log()->warn( x.what() ); 
+            //    close_notification();
+            //    continue;
+            //}
 
             if( _directory_error )
             {
@@ -482,12 +497,15 @@ Order* Directory_file_order_source::read_directory( bool was_notified, const str
         break;
     }
 
+    _expecting_request_order = result != NULL;  // N‰chstes request_order() abwarten
 
-    int delay = _directory_error? delay_after_error() :
-                !result?          max( 1, _repeat )       // Unter Unix funktioniert's _nur_ durch wiederkehrendes Nachsehen
-                                : INT_MAX;                // N‰chstes request_order() abwarten
+    time_t delay = _directory_error        ? delay_after_error() :
+                   _expecting_request_order? INT_MAX               // N‰chstes request_order() abwarten
+                                           : max( 1, _repeat );    // Unter Unix funktioniert's _nur_ durch wiederkehrendes Nachsehen
 
     set_async_delay( delay );
+    //Z_LOG2( "scheduler.file_order", __FUNCTION__  << " set_async_delay(" << delay << ")  _expecting_request_order=" << _expecting_request_order << 
+    //          "   async_next_gmtime" << Time( async_next_gmtime() ).as_string() << "GMT \n" );
 
     return result;
 }
