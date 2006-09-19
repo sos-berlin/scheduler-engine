@@ -2536,6 +2536,7 @@ void Spooler::run()
             if( wait_until == 0 )  wait_until = Time::now() + 1;
         }
         else
+        if( nothing_done_count > 1 )
         {
             Z_LOG2( "scheduler.nothing_done", "nothing_done_count=" << nothing_done_count << " nichts_getan_zaehler=" << nichts_getan_zaehler << "\n" );
         }
@@ -2775,6 +2776,7 @@ bool Spooler::run_continue()
 
     // TCP- UND UDP-VERBINDUNGEN IN SPOOLER_COMMUNICATION.CXX FORTSETZEN
     something_done |= _connection_manager->async_continue();
+    //Z_LOG2( "joacim", __FUNCTION__ << "  something_done=" << something_done << "\n" );
 
     return something_done;
 }

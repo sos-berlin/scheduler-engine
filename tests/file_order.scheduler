@@ -32,7 +32,7 @@ for( var i = 1; i <= n; i++ )
                     <![CDATA[
                     
 var i = 0;
-var n = 10000;
+var n = 10;
 spooler.variables( "n" ) = n;
 var hostware = new ActiveXObject( "hostware.global" );
 
@@ -49,7 +49,7 @@ function spooler_process()
 
                 ]]>
                 </script>
-                <run_time once="yes"/>
+                <run_time once="no"/>
             </job>
 
             <job name="javascript" order="yes">
@@ -108,7 +108,7 @@ public class My_job  extends sos.spooler.Job_impl
 }
                 ]]>
                 </script>
-                <run_time once="yes"/>
+                <run_time once="no"/>
             </job>
 
 
