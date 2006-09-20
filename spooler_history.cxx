@@ -320,7 +320,7 @@ void Spooler_db::add_column( const string& table_name, const string& column_name
         string cmd = "ALTER TABLE " + table_name + " " + add_clause;
         _log->info( message_string( "SCHEDULER-908", table_name, column_name, cmd ) );
         
-        _db.put( cmd );
+        execute( cmd );
         ta.commit();
     }
 }
@@ -377,6 +377,8 @@ int Spooler_db::expand_varchar_column( const string& table_name, const string& c
                 {
                     if( table_name == _spooler->_orders_tablename  &&  lcase(column_name) == "id" )
                     {
+                        cmd << "-split- ";  // Für sosdb.cxx: Nicht an Semikolons auftrennen
+                        
                         cmd << "DECLARE @pk_id varchar(255); ";
                         cmd << "BEGIN ";
                         cmd << "SELECT @pk_id = \"NAME\" from sysindexes where name like 'PK__" << table_name << "_%'; ";
@@ -384,6 +386,7 @@ int Spooler_db::expand_varchar_column( const string& table_name, const string& c
                         cmd <<      "ALTER TABLE " << table_name << " ALTER COLUMN \"ID\" VARCHAR(" << new_width << ") NOT NULL; ";
                         cmd <<      "ALTER TABLE " << table_name << " ADD PRIMARY KEY (\"JOB_CHAIN\", \"ID\"); ";
                         cmd << "END;";
+
                         _log->info( cmd );
                         execute( cmd );
                     }
@@ -422,6 +425,7 @@ int Spooler_db::expand_varchar_column( const string& table_name, const string& c
 
                     _log->info( cmd );
                     execute( cmd );
+                    break;
                 }
 
              //?case dbms_firebird:
@@ -531,7 +535,7 @@ void Spooler_db::create_table_when_needed( const string& tablename, const string
         _log->info( message_string( "SCHEDULER-909", tablename ) );
 
         Transaction ta ( this );
-            _db.put( "CREATE TABLE " + tablename + " (" + fields + ") " );
+            execute( "CREATE TABLE " + tablename + " (" + fields + ") " );
         ta.commit(); 
     }
 }
