@@ -112,6 +112,7 @@ void Transaction::commit()
 { 
     if( !_outer_transaction )
     {
+        if( !_db )  z::throw_xc( __FUNCTION__, "_db==NULL" );
         _db->commit();   
     }
      
@@ -123,6 +124,8 @@ void Transaction::commit()
 
 void Transaction::rollback()
 { 
+    if( !_db )  z::throw_xc( __FUNCTION__, "_db==NULL" );
+
     _db->rollback(); 
     _db = NULL; 
     _guard.leave(); 
@@ -437,16 +440,16 @@ int Spooler_db::expand_varchar_column( const string& table_name, const string& c
                 }
             }
 
-            width = column_width( table_name, column_name );
-            
-            if( width != new_width )  _log->warn( S() << "Retrievied column width is different: " << width );
-            ta.commit();
+            ta.commit();    // Damit Postgres nicht in column_width() hängen bleibt (Linux)
         }
         catch( exception& x )
         {
             _log->warn( x.what() );
             _log->warn( message_string( "SCHEDULER-349", table_name, column_name ) );
         }
+
+        width = column_width( table_name, column_name );
+        if( width != new_width )  _log->warn( S() << "Retrievied column width is different: " << width );
     }
 
     return width;
