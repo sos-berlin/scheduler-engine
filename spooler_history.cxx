@@ -377,11 +377,11 @@ int Spooler_db::expand_varchar_column( const string& table_name, const string& c
                 {
                     if( table_name == _spooler->_orders_tablename  &&  lcase(column_name) == "id" )
                     {
-                        cmd << "DECLARE @pk_id varchar(" << new_width << "); ";
+                        cmd << "DECLARE @pk_id varchar(255); ";
                         cmd << "BEGIN ";
                         cmd << "SELECT @pk_id = \"NAME\" from sysindexes where name like 'PK__" << table_name << "_%'; ";
                         cmd <<      "EXEC ('ALTER TABLE " << table_name << " DROP CONSTRAINT ' + @pk_id ); ";
-                        cmd <<      "ALTER TABLE " << table_name << " ALTER COLUMN \"ID\" VARCHAR(255) NOT NULL; ";
+                        cmd <<      "ALTER TABLE " << table_name << " ALTER COLUMN \"ID\" VARCHAR(" << new_width << ") NOT NULL; ";
                         cmd <<      "ALTER TABLE " << table_name << " ADD PRIMARY KEY (\"JOB_CHAIN\", \"ID\"); ";
                         cmd << "END;";
                         _log->info( cmd );
