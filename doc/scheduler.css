@@ -12,6 +12,7 @@ h4              { margin-bottom: 1em; }
 
 hr              { height: 1px; font-size: 1px; border: 0px; color: gray; background-color: gray; }
 
+p.empty         { font-size: 10pt; margin-bottom: 0px; margin-top: 0ex; }    /* <p class="empty">&#160;</p> macht einen Abstand wie margin-top von <p> */
 p               { font-size: 10pt; margin-bottom: 0px; max-width: 90ex; }
 p.ini_entry     { font-size: 10pt; margin-bottom: 0px; max-width: 150ex; }
 th              { font-size: 10pt; vertical-align: baseline; text-align: left; border-bottom: 1px solid black; font-weight: normal; }
@@ -110,7 +111,7 @@ td.api_title                    { padding-left: 3mm; }
 
 .api_programming_language_selector { margin-right: 2ex; }
 
-.message                        { background-color: #f8f8f8; max-width: 999ex; }
+.message                        { background-color: #f8f8f8; max-width: 90ex; }
 .message_info                   {}
 .message_warn                   { color: #800000; }
 .message_error                  { color: red; }

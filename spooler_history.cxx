@@ -234,7 +234,7 @@ void Spooler_db::open2( const string& db_name )
 
                     create_table_when_needed( _spooler->_orders_tablename, S() <<
                                             "\"JOB_CHAIN\"   varchar(100) not null,"        // Primärschlüssel
-                                            "\"ID\"          varchar(" << spooler::order_id_length_max << ") not null,"        // Primärschlüssel
+                                            "\"ID\"          varchar(" << const_order_id_length_max << ") not null,"        // Primärschlüssel
                                             "\"SPOOLER_ID\"  varchar(100),"
                                             "\"PRIORITY\"    integer not null,"
                                             "\"STATE\"       varchar(100),"
@@ -258,7 +258,7 @@ void Spooler_db::open2( const string& db_name )
                     create_table_when_needed( _spooler->_order_history_tablename, S() <<
                                             "\"HISTORY_ID\"  integer not null,"             // Primärschlüssel
                                             "\"JOB_CHAIN\"   varchar(100) not null,"        // Primärschlüssel
-                                            "\"ORDER_ID\"    varchar(" << spooler::order_id_length_max << ") not null,"
+                                            "\"ORDER_ID\"    varchar(" << const_order_id_length_max << ") not null,"
                                             "\"SPOOLER_ID\"  varchar(100),"
                                             "\"TITLE\"       varchar(200),"
                                             "\"STATE\"       varchar(100) not null,"
@@ -281,30 +281,7 @@ void Spooler_db::open2( const string& db_name )
                     add_column( _spooler->_tasks_tablename, "TASK_XML", " add \"TASK_XML\" clob" );
 
 
-                    /*
-                    string cmd = S() << "ALTER TABLE " << _spooler->_orders_tablename << " modify \"ID\" varchar(" << order_id_length_max << ")";
-                    _log->info( cmd );
-                    execute( cmd );
-
-                    cmd = S() << "ALTER TABLE " << _spooler->_order_history_tablename << " modify \"ORDER_ID\" varchar(" << order_id_length_max << ")";
-                    _log->info( cmd );
-                    execute( cmd );
-                    */
-                    _order_id_length_max = spooler::order_id_length_max;
-
-                    {
-                        Any_file f ( S() << "-in " << _spooler->_db_name << " select `id` from " << _spooler->_orders_tablename << " where 1=0" );
-                        int field_size= +f.spec()._field_type_ptr->field_descr_ptr( 0 )->type_ptr()->field_size();
-                        _order_id_length_max = field_size - 1;     // Eins weniger fürs 0-Byte
-
-                        if( _order_id_length_max <= 0 )
-                        {
-                            _log->warn( "Database doesn't deliver width of column " + _spooler->_orders_tablename + ".id" );
-                            _order_id_length_max = spooler::order_id_length_max;
-                        }
-
-                        Z_LOG2( "scheduler", "_order_id_length_max=" << _order_id_length_max << "\n" );
-                    }
+                    handle_order_id_columns();
 
                     commit();
                 }
@@ -343,6 +320,98 @@ void Spooler_db::add_column( const string& table_name, const string& column_name
         _db.put( cmd );
         ta.commit();
     }
+}
+
+//--------------------------------------------------------------Spooler_db::handle_order_id_columns
+
+void Spooler_db::handle_order_id_columns()
+{
+    int orders_column_width  = expand_varchar_column( _spooler->_orders_tablename       , "id"      , const_order_id_length_max - 1, const_order_id_length_max, "not null" );
+    int history_column_width = expand_varchar_column( _spooler->_order_history_tablename, "order_id", const_order_id_length_max - 1, const_order_id_length_max, "not null" );
+
+    _order_id_length_max = 0;
+
+    if( orders_column_width > 0 )  _order_id_length_max = orders_column_width;
+    if( history_column_width > 0 )  _order_id_length_max = history_column_width;
+
+    if( _order_id_length_max == 0 )
+    {
+        _order_id_length_max = const_order_id_length_max;
+        _log->warn( message_string( "SCHEDULER-350", _spooler->_orders_tablename, "id", _order_id_length_max ) );
+    }
+
+    Z_LOG2( "scheduler", "_order_id_length_max=" << _order_id_length_max << "\n" );
+}
+
+//----------------------------------------------------------------Spooler_db::expand_varchar_column
+
+int Spooler_db::expand_varchar_column( const string& table_name, const string& column_name, 
+                                       int minimum_width, int new_width, const string& sql_extra )
+{
+    int width = column_width( table_name, column_name );
+    
+    if( width < minimum_width )
+    {
+        try
+        {
+            switch( _db.dbms_kind() )
+            {
+                case dbms_postgresql:
+                {
+                    S cmd;
+                    cmd << "ALTER TABLE " << table_name 
+                        << " modifiy " << sql::uquoted_name( column_name ) 
+                        << " varchar(" << new_width << ")";
+                    _log->info( cmd );
+                    execute( cmd );
+                    break;
+                }
+
+                default:
+                {
+                    S cmd;
+                    cmd << "ALTER TABLE " << table_name 
+                        << " alter column " << sql::uquoted_name( column_name ) 
+                        << " type varchar(" << new_width << ")";
+                    
+                    if( sql_extra != "" )  // Wir müssen NOT NULL neu setzen
+                    {
+                        cmd << ", alter column " << sql::uquoted_name( column_name ) 
+                            << " set " << sql_extra;
+                    }
+
+                    _log->info( cmd );
+                    execute( cmd );
+                }
+            }
+
+            width = column_width( table_name, column_name );
+            
+            if( width != new_width )  _log->warn( S() << "Retrievied column width is different: " << width );
+        }
+        catch( exception& x )
+        {
+            _log->warn( x.what() );
+            _log->warn( message_string( "SCHEDULER-349", table_name, column_name ) );
+        }
+    }
+
+    return width;
+}
+
+//-------------------------------------------------------------------------Spooler_db::column_width
+
+int Spooler_db::column_width( const string& table_name, const string& column_name )
+{
+    int result;
+
+    Any_file f ( S() << "-in " << _spooler->_db_name << " select `" << column_name << "` from " << table_name << " where 1=0" );
+    int field_size= +f.spec()._field_type_ptr->field_descr_ptr( 0 )->type_ptr()->field_size();
+    result = max( 0, field_size - 1 );   // Eins weniger fürs 0-Byte
+
+    if( result == 0 )  _log->warn( message_string( "SCHEDULER-348", _spooler->_orders_tablename, ".id" ) );
+
+    return result;
 }
 
 //--------------------------------------------------------------------------------Spooler_db::close

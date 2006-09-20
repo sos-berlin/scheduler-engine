@@ -47,7 +47,7 @@ struct Spooler_db : Object, Scheduler_object
     string                      db_name                 ()                                          { return _db_name; }
     string                      error                   ()                                          { THREAD_LOCK_RETURN( _error_lock, string, _error ); }
     bool                        is_waiting              () const                                    { return _waiting; }
-    int                         order_id_length_max     ()                                          { return opened()? _order_id_length_max : spooler::order_id_length_max; }
+    int                         order_id_length_max     ()                                          { return opened()? _order_id_length_max : const_order_id_length_max; }
 
     void                        spooler_start           ();
     void                        spooler_stop            ();
@@ -96,6 +96,10 @@ struct Spooler_db : Object, Scheduler_object
     void                        get_history_table_table ();
     void                        create_table_when_needed( const string& tablename, const string& fields );
     void                        add_column              ( const string& table_name, const string& column_name, const string add_clause );
+    void                        handle_order_id_columns ();
+    int                         expand_varchar_column   ( const string& table_name, const string& column_name, int minimum_width, int new_width, 
+                                                          const string& sql_extra = "" );
+    int                         column_width            ( const string& table_name, const string& column_name );
     int                         get_id                  ( const string& variable_name, Transaction* = NULL );
     int                         get_id_                 ( const string& variable_name, Transaction* );
     void                        delete_order            ( Order*, Transaction* );

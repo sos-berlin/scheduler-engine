@@ -15,7 +15,7 @@
             <description>
                 <p>
                     Die Windows-Verzeichnisüberwachung wird bei jedem Aufruf 
-                    (bei <scheduler_element name="start_when_directoy-change"/> am Ende der Task)
+                    (bei <scheduler_element name="start_when_directory_changed"/> am Ende der Task)
                     erneuert, ohne das ein Signal verloren geht.
                 </p>
                 <p>
@@ -25,7 +25,7 @@
                 </p>
                 <ul>
                     <li>
-                        <scheduler_element name="start_when_directoy-change"/>
+                        <scheduler_element name="start_when_directory_changed"/>
                     </li>
                     <li>
                         <scheduler_method class="Job" object="spooler_job" method="start_when_directory_changed"/>

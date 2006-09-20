@@ -105,16 +105,14 @@
         <li>
             <p>
                 der Dateiauftrag noch nicht einem Job übergeben wurde
-                <br/>
-                <scheduler_message level="warn" code="SCHEDULER-982" show_text="yes"/>
             </p>
+            <scheduler_message level="warn" code="SCHEDULER-982"/>
         </li>
         <li>
             <p>
                 der Dateiauftrag auf der Schwarzen Liste steht
-                <br/>
-                <scheduler_message level="info" code="SCHEDULER-981" show_text="yes"/>
             </p>
+            <scheduler_message level="info" code="SCHEDULER-981"/>
         </li>
     </ul>
     <p>
@@ -146,9 +144,7 @@
         Wenn aber die Datei bereits entfernt worden ist,
         gibt der Scheduler eine Warnung aus und der Dateiauftrag ist erledigt.
     </p>
-    <p>
-        <scheduler_message level="warn" code="SCHEDULER-339" show_text="yes"/>
-    </p>
+    <scheduler_message level="warn" code="SCHEDULER-339"/>
 
     <p>
         Wenn die Datei sich nicht entfernen bzw. verschieben lässt, 
@@ -176,16 +172,14 @@
         aber die Datei noch vorhanden ist,
         dann setzt der Scheduler den Auftrag  auf die Schwarze Liste.
     </p>
-    <p>
-        <scheduler_message level="warn" code="SCHEDULER-340" show_text="yes"/>
-    </p>
+    <scheduler_message level="warn" code="SCHEDULER-340"/>
     <p>
         Dort bleibt er bis
     </p>
     <ul>
         <li>
             der Scheduler beim Lesen des Verzeichnisses feststellt, dass die Datei entfernt worden ist
-            (Meldung <scheduler_message code="SCHEDULER-981"/>), oder
+            <scheduler_message level="info" code="SCHEDULER-981"/>
         </li>
         <li>
             das Kommando <scheduler_element name="remove_order"/> ausgeführt wird.
@@ -215,12 +209,24 @@
         sendet der Scheduler eine entsprechende eMail und
         gibt der Scheduler diese Meldung aus:
     </p>
-    <p>
-        <scheduler_message level="info" code="SCHEDULER-984" show_text="yes"/>
-    </p>
+    <scheduler_message level="info" code="SCHEDULER-984"/>
+    
     <!--p>
         Ein einzelner Verzeichnis-Fehler wird mit Warnung ignoriert, die Operation wird sofort wiederholt.
     </p-->
+
+    <h3>
+        Fehler beim Erstellen des Dateiauftrags
+    </h3>
+    <p>
+        Wenn ein Dateiname nicht zu einem Auftrag gemacht werden kann
+        (weil der Pfad zu lang ist für die Datenbankspalte 
+        <scheduler_db table="scheduler_orders" column="id"/>),
+        dann merkt er sich den Pfad,
+        um die Fehlermeldung nicht bei jedem Lesen des Verzeichnisses zu wiederholen,
+        und setzt fort nach der Meldung
+    </p>
+    <scheduler_message level="warn" code="SCHEDULER-346"/>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
@@ -239,8 +245,8 @@
         Die Meldungen dazu sind:
     </p>
 
-    <scheduler_message level="info" code="SCHEDULER-985" show_text="yes"/>
-    <scheduler_message level="info" code="SCHEDULER-986" show_text="yes"/>
+    <scheduler_message level="info" code="SCHEDULER-985"/>
+    <scheduler_message level="info" code="SCHEDULER-986"/>
 
     <p>
         Der Scheduler liest das Verzeichnis erneut, wenn
@@ -259,7 +265,7 @@
     </ul>
 
 
-    <h3>Verzeichnisüberwachung durch Windows</h3>
+    <h3>Verzeichnisüberwachung durch Microsoft® Windows®</h3>
 
     <p>
         Unter Windows lässt der Scheduler außerdem das Verzeichnis vom Betriebssystem überwachen.
@@ -268,15 +274,16 @@
         Damit reagiert der Scheduler sofort auf eine neue Datei.
     </p>
     <p>
-        Trotzdem sollte für ein Verzeichnis auf einem anderen Rechner ein Wiederholungsintervall mit 
-        <scheduler_element name="file_order_source" attribute="repeat"/> eingestellt werden.
-        Die Verzeichnisüberwachung verstummt, 
+        Trotzdem sollte für ein Verzeichnis auf einem anderen Rechner das Wiederholungsintervall nicht mit
+        <scheduler_element name="file_order_source" attribute="repeat" value="no"/> abgestellt werden.
+        Die Windows-Verzeichnisüberwachung verstummt, 
         wenn das Verzeichnis entfernt und wieder angelegt wird.
         Siehe außerdem Microsofts 
         <!--dass die Überwachung eines Verzeichnisses auf einem anderen Rechner nicht korrekt funktioniert,
         wenn das Verzeichnis mehrfach geöffnet ist:-->
         <a href="http://support.microsoft.com/?scid=kb%3Ben-us%3B188321&amp;x=8&amp;y=13">Article 188321: 
         FindFirstChangeNotification May Not Notify All Processes on File Changes</a>.
+        Das Wiederholungsintervall erneuert die Verzeichnisüberwachung periodisch.
     </p>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
@@ -287,7 +294,7 @@
         startet der Scheduler für jeden Dateiauftrag.
     </p>
     <p>
-        Die Umgebungsvariable <code>SCHEDULER_TASK_TRIGGER_FILES</code> enthält den Dateipfad.
+        Die Umgebungsvariable <scheduler_env name="SCHEDULER_TASK_TRIGGER_FILES"/> enthält den Dateipfad.
     </p>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->

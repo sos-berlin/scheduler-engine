@@ -275,37 +275,14 @@
     </div>
 
 
-    <h1 style="margin-top: 3em">Dokumentation</h1>
-
     <p>
-        Ausführlicher
+        <a href="documentation.xml">Dokumentation</a>
     </p>
-    <p class="indent" style="margin-top: 0px">
-        Vieles ist nur kurz erwähnt und könnte ausführlicher beschrieben werden.
-    </p>
-
-
-    <p>
-        Layout
-    </p>
-    <p class="indent" style="margin-top: 0px">
-        Die erste Seite kürzen, sie sollte in ein Browser-Fenster passen.
-        Zweispaltig ausführen.
-        Und die zentrierten Überschriften nerven.
-    </p>
-    <p class="indent">
-        Zeilenlänge beschränken auf nicht mehr als 100, vielleicht 65 Zeichen.
-    </p>
-
-
-    <p>
-        Meldungen
-    </p>
-    <p class="indent" style="margin-top: 0px">
-        Beschreibung der Meldungen.
-        Welche Operation (API, XML) erzeugt welche Meldung?
-        Anklickbare Meldungs-Codes im Scheduler-Protokoll der HTML-Oberfläche.
-    </p>
+    <div class="indent">
+        <p style="margin-top: 0px">
+            In der Dokumentation gibt es noch viel zu tun.
+        </p>
+    </div>
 
 
 </description>

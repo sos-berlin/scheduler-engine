@@ -23,7 +23,7 @@ namespace spooler {
 
 const string    scheduler_file_path_variable_name           = "scheduler_file_path";
 const string    file_order_sink_job_name                    = "scheduler_file_order_sink";
-const int       delay_after_error_default                   = 60;
+const int       delay_after_error_default                   = INT_MAX;
 const int       file_order_sink_job_idle_timeout_default    = 60;
 const int       directory_file_order_source_max_default     = 100;      // Nicht zuviele Aufträge, sonst wird der Scheduler langsam (in remove_order?)
 const int       max_tries                                 = 2;        // Nach Fehler machen wie sofort einen zweiten Versuch
@@ -486,7 +486,7 @@ Order* Directory_file_order_source::read_directory( bool was_notified, const str
                         if( _bad_map.find( path ) != _bad_map.end() )   // Zurzeit nicht denkbar, weil es nur zu lange Pfade betrifft
                         {
                             _bad_map.erase( path );
-                            log()->info( message_string( "SCHEDULER-346", path ) );
+                            log()->info( message_string( "SCHEDULER-347", path ) );
                         }
                     }
                     catch( exception& x )   // Möglich bei für Order.id zu langem Pfad
@@ -494,7 +494,7 @@ Order* Directory_file_order_source::read_directory( bool was_notified, const str
                         if( _bad_map.find( path ) == _bad_map.end() )
                         {
                             log()->error( x.what() );
-                            log()->warn( message_string( "SCHEDULER-347", path ) );
+                            log()->warn( message_string( "SCHEDULER-346", path ) );
                             _bad_map[ path ] = Z_NEW( Bad_entry( path, x ) );
                         }
                     }
@@ -554,8 +554,10 @@ Order* Directory_file_order_source::read_directory( bool was_notified, const str
     _expecting_request_order = result != NULL;  // Nächstes request_order() abwarten
 
     time_t delay = _directory_error        ? delay_after_error() :
-                   _expecting_request_order? INT_MAX               // Nächstes request_order() abwarten
-                                           : max( 1, _repeat );    // Unter Unix funktioniert's _nur_ durch wiederkehrendes Nachsehen
+                   _expecting_request_order? INT_MAX                // Nächstes request_order() abwarten
+                                           : _repeat;               // Unter Unix funktioniert's _nur_ durch wiederkehrendes Nachsehen
+
+    if( delay < 1 )  delay = 1;     // Falls ein Spaßvogel es geschafft hat, repeat="0" anzugeben
 
     set_async_delay( delay );
     //Z_LOG2( "scheduler.file_order", __FUNCTION__  << " set_async_delay(" << delay << ")  _expecting_request_order=" << _expecting_request_order << 
@@ -729,7 +731,8 @@ bool Directory_file_order_source::async_continue_( Async_operation::Continue_fla
 
 int Directory_file_order_source::delay_after_error()
 {
-    return min( _delay_after_error, _repeat );
+    return _delay_after_error < INT_MAX? _delay_after_error 
+                              : _repeat;
 }
 
 //-------------------------------------------------------------------------------------------------

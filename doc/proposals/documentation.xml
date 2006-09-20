@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id$-->
+
+<description
+    title               = "Dokumentation erweitern"
+    base_dir            = "../"
+    parent_page         = "index.xml"
+    author              = "$Author$"
+    date                = "$Date$"
+>
+    <h2>Ausführlicher</h2>
+    
+    <p>
+        Vieles ist nur kurz erwähnt und könnte ausführlicher beschrieben werden.
+    </p>
+
+
+    <h2>
+        Layout
+    </h2>
+    <p>
+        Die erste Seite kürzen, sie sollte in ein Browser-Fenster passen.
+        Zweispaltig ausführen.
+        Und die zentrierten Überschriften nerven.
+    </p>
+
+
+    <h2>
+        Meldungen
+    </h2>
+    <p>
+        Beschreibung der Meldungen.
+        Welche Operation (API, XML) erzeugt welche Meldung?
+        Anklickbare Meldungs-Codes im Scheduler-Protokoll der HTML-Oberfläche.
+    </p>
+
+    
+    <h2>Verzeichnisse</h2>
+
+    <p>
+        Weitere Verzeichnisse mit Verweisen im Text auf sie.
+        Zum Beispiel in file_orders.xml Verweise auf die eMails die hier verschickt werden.
+    </p>
+
+    <h3>
+        Verzeichnis der eMails
+    </h3>
+
+    <h3>
+        Verzeichnis der Umgebungsvariablen
+    </h3>
+
+    <h3>
+        Verzeichnis der Datenbanktabellen
+    </h3>
+    <p>
+        Mit den Spalten.
+    </p>
+
+
+
+</description>

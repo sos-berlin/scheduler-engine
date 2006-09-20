@@ -1684,7 +1684,7 @@ void Order::set_id( const Order::Id& id )
         if( _spooler->_db->opened()  &&  id_string.length() > _spooler->_db->order_id_length_max() )  
             z::throw_xc( "SCHEDULER-345", id_string, _spooler->_db->order_id_length_max(), _spooler->_orders_tablename + "." + "id" );
 
-        if( id_string.length() > order_id_length_max )  z::throw_xc( "SCHEDULER-344", id_string, order_id_length_max );
+        if( id_string.length() > const_order_id_length_max )  z::throw_xc( "SCHEDULER-344", id_string, const_order_id_length_max );
 
 
         _id = id;

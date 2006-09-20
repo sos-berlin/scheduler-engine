@@ -2880,7 +2880,7 @@ const char file_html_jz_scheduler_xslt[] =
     "</xsl:for-each>\r\n"
     "</xsl:if>\r\n"
     "\r\n"
-    "<xsl:if test=\"( /spooler/@show_job_chain_orders_checkbox or $single ) and bad_files/file\">\r\n"
+    "<!--xsl:if test=\"( /spooler/@show_job_chain_orders_checkbox or $single ) and bad_files/file\">\r\n"
     "<xsl:for-each select=\"bad_files/file\">\r\n"
     "<tr>\r\n"
     "<td style=\"padding-left: 2ex\"> </td>\r\n"
@@ -2895,7 +2895,7 @@ const char file_html_jz_scheduler_xslt[] =
     "</td>\r\n"
     "</tr>\r\n"
     "</xsl:for-each>\r\n"
-    "</xsl:if>\r\n"
+    "</xsl:if-->\r\n"
     "\r\n"
     "</xsl:for-each>\r\n"
     "\r\n"
@@ -5637,8 +5637,8 @@ static const Embedded_file embedded_files_array[] =
     { "html/jz/scheduler.js", file_html_jz_scheduler_js, sizeof file_html_jz_scheduler_js - 1, 1158661396 },
     { "html/jz/show_log.js", file_html_jz_show_log_js, sizeof file_html_jz_show_log_js - 1, 1113979995 },
     { "html/jz/translation_de.js", file_html_jz_translation_de_js, sizeof file_html_jz_translation_de_js - 1, 1113979995 },
-    { "html/jz/scheduler.xslt", file_html_jz_scheduler_xslt, sizeof file_html_jz_scheduler_xslt - 1, 1158694500 },
-    { "html/jz/scheduler.css", file_html_jz_scheduler_css, sizeof file_html_jz_scheduler_css - 1, 1158694340 },
+    { "html/jz/scheduler.xslt", file_html_jz_scheduler_xslt, sizeof file_html_jz_scheduler_xslt - 1, 1158695108 },
+    { "html/jz/scheduler.css", file_html_jz_scheduler_css, sizeof file_html_jz_scheduler_css - 1, 1158695108 },
     { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1158575784 },
     { NULL, NULL, 0 }
 };

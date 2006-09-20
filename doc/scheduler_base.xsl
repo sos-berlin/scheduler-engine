@@ -1430,7 +1430,7 @@
     <xsl:template match="scheduler_message" mode="description">
 
         <xsl:choose>
-            <xsl:when test="ancestor::p or ancestor::li">
+            <xsl:when test="ancestor::p">
                 <xsl:call-template name="scheduler_message">
                     <xsl:with-param name="level"     select="@level"/>
                     <xsl:with-param name="code"      select="@code"/>
@@ -1442,7 +1442,7 @@
                 <xsl:element name="p">
                     <xsl:attribute name="class">message</xsl:attribute>
                     
-                    <xsl:if test="preceding-sibling::*[1] [ local-name() = 'scheduler_message' ]">
+                    <xsl:if test="preceding-sibling::*[1] [ local-name() = 'scheduler_message' ] or parent::li">
                         <xsl:attribute name="style">margin-top: 0em;</xsl:attribute>
                     </xsl:if>
 
@@ -1464,50 +1464,76 @@
         <xsl:param name="code"/>
         <xsl:param name="show_text" select="false()"/>
 
-        <xsl:element name="span">
-            <!--xsl:if test="$show_text">
-                <xsl:attribute name="class">message_text</xsl:attribute>
-            </xsl:if-->
+        <xsl:choose>
+            <xsl:when test="$level or $show_text">
+                <table cellspacing="0" cellpadding="0">
+                    <tr>
+                        <xsl:if test="$level">
+                            <td>
+                                <xsl:call-template name="message_level">
+                                    <xsl:with-param name="level" select="@level"/>
+                                </xsl:call-template>
 
-            <xsl:if test="$level">
-                <xsl:call-template name="message_level">
-                    <xsl:with-param name="level" select="@level"/>
-                </xsl:call-template>
-                
-                <code>
-                    <xsl:text> </xsl:text>
-                </code>
-            </xsl:if>
+                                <code>
+                                    <xsl:text> </xsl:text>
+                                </code>
+                            </td>
+                        </xsl:if>
 
-            <xsl:element name="a">
-                <xsl:attribute name="href">
-                    <xsl:value-of select="/*/@base_dir"/>
-                    <xsl:text>messages/index.xml#message_</xsl:text>
-                    <xsl:value-of select="$code"/>
-                </xsl:attribute>
-                <xsl:element name="code">
-                    <xsl:attribute name="style">white-space: nowrap</xsl:attribute>
+                        <td>
+                            <code>&#160;</code>
+                            <xsl:call-template name="scheduler_message_code">
+                                <xsl:with-param name="code" select="@code"/>
+                            </xsl:call-template>
+                        </td>
+
+                        <td style="padding-left: 1em">
+                            <xsl:call-template name="show_message_text">
+                                <xsl:with-param name="code" select="$code"/>
+                            </xsl:call-template>
+                        </td>
+                    </tr>
+                </table>
+            </xsl:when>
+            
+            <xsl:otherwise>
+                <xsl:element name="span">
                     <xsl:attribute name="title">
                         <xsl:call-template name="show_message_text">
                             <xsl:with-param name="code" select="$code"/>
                         </xsl:call-template>
                     </xsl:attribute>
-                    <xsl:value-of select="$code"/>
-                </xsl:element>
-            </xsl:element>
 
-            <xsl:if test="@show_text">
-                <code>
-                    <xsl:text>&#160; </xsl:text>
-                    <xsl:call-template name="show_message_text">
-                        <xsl:with-param name="code" select="$code"/>
+                    <xsl:call-template name="scheduler_message_code">
+                        <xsl:with-param name="code" select="@code"/>
                     </xsl:call-template>
-                </code>
-            </xsl:if>
-        </xsl:element>
+                </xsl:element>
+            </xsl:otherwise>
+        </xsl:choose>
     
     </xsl:template>
 
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_message-->
+
+    <xsl:template name="scheduler_message_code">
+        <xsl:param name="code"/>
+
+        <xsl:element name="a">
+            <xsl:attribute name="href">
+                <xsl:value-of select="/*/@base_dir"/>
+                <xsl:text>messages/index.xml#message_</xsl:text>
+                <xsl:value-of select="$code"/>
+            </xsl:attribute>
+            
+            <xsl:element name="code">
+                <xsl:attribute name="style">white-space: nowrap</xsl:attribute>
+            
+                <xsl:value-of select="$code"/>
+            </xsl:element>
+        </xsl:element>
+        
+    </xsl:template>
+    
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~show_message_text-->
 
     <xsl:template name="show_message_text">
@@ -1947,6 +1973,51 @@
 
     </xsl:template>
 
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_db-->
+
+    <xsl:template match="scheduler_db" mode="description">
+        <xsl:call-template name="scheduler_db">
+            <xsl:with-param name="table" select="@table"/>
+            <xsl:with-param name="column" select="@column"/>
+        </xsl:call-template>
+    </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_db-->
+
+    <xsl:template name="scheduler_db">
+        <xsl:param name="table"/>
+        <xsl:param name="column"/>
+
+        <code>
+            <xsl:value-of select="$table"/>
+
+            <xsl:if test="$column">
+                <xsl:text>.</xsl:text>
+                <xsl:value-of select="$column"/>
+            </xsl:if>
+        </code>
+        
+    </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_env-->
+
+    <xsl:template match="scheduler_env" mode="description">
+        <xsl:call-template name="scheduler_env">
+            <xsl:with-param name="name" select="@name"/>
+        </xsl:call-template>
+    </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_env-->
+
+    <xsl:template name="scheduler_env">
+        <xsl:param name="name"/>
+
+        <code>
+            <xsl:value-of select="$name"/>
+        </code>
+
+    </xsl:template>
+
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_error-->
 
     <xsl:template match="scheduler_error" mode="description">
@@ -2032,29 +2103,31 @@
         <xsl:param name="show_level"/>
         <xsl:param name="message_set"/>
 
-        <table cellspacing="0" cellpadding="0">
-            <xsl:apply-templates select="$message_set[ @level='error' ]">
-                <xsl:sort select="@code"/>
-                <xsl:with-param name="show_level" select="$show_level"/>
-            </xsl:apply-templates>
+        <div class="message">
+            <table cellspacing="0" cellpadding="0">
+                <xsl:apply-templates select="$message_set[ @level='error' ]">
+                    <xsl:sort select="@code"/>
+                    <xsl:with-param name="show_level" select="$show_level"/>
+                </xsl:apply-templates>
 
-            <xsl:apply-templates select="$message_set[ @level='warn' ]">
-                <xsl:sort select="@code"/>
-                <xsl:with-param name="show_level" select="$show_level"/>
-            </xsl:apply-templates>
+                <xsl:apply-templates select="$message_set[ @level='warn' ]">
+                    <xsl:sort select="@code"/>
+                    <xsl:with-param name="show_level" select="$show_level"/>
+                </xsl:apply-templates>
 
-            <xsl:apply-templates select="$message_set[ @level='info' ]">
-                <xsl:sort select="@code"/>
-                <xsl:with-param name="show_level" select="$show_level"/>
-            </xsl:apply-templates>
+                <xsl:apply-templates select="$message_set[ @level='info' ]">
+                    <xsl:sort select="@code"/>
+                    <xsl:with-param name="show_level" select="$show_level"/>
+                </xsl:apply-templates>
 
-            <xsl:apply-templates select="$message_set[ starts-with( @level, 'debug') ]">
-                <xsl:sort select="@level"/>
-                <xsl:sort select="@code"/>
-                <xsl:with-param name="show_level" select="$show_level"/>
-            </xsl:apply-templates>
-        </table>
-
+                <xsl:apply-templates select="$message_set[ starts-with( @level, 'debug') ]">
+                    <xsl:sort select="@level"/>
+                    <xsl:sort select="@code"/>
+                    <xsl:with-param name="show_level" select="$show_level"/>
+                </xsl:apply-templates>
+            </table>
+        </div>
+        
     </xsl:template>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~message-->

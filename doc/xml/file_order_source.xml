@@ -35,30 +35,39 @@
             </description>
         </xml_attribute>
 
-        <xml_attribute name="delay_after_error" type="seconds" initial="60">
+        <xml_attribute name="delay_after_error" type="seconds" initial="repeat">
             <description>
                 <p>
-                    Wenn das Verzeichnis nicht lesbar ist,
-                    versucht der Scheduler nach der hier angegeben Zeit es erneut,
-                    bis er Erfolg hat.
+                    Voreingestellt ist der Wert des Attributs <code>repeat="…"</code>.
                 </p>
                 <p>
-                    Wenn das Attribut <code>repeat=""</code> eine kürzere Zeit einstellt,
-                    hat es Vorrang.
+                    Wenn das Verzeichnis nicht lesbar ist,
+                    verschickt er eine eMail und
+                    versucht der Scheduler es periodisch erneut,
+                    bis er Erfolg hat.
+                    Dann verschickt er eine weitere eMail.
+                    
                 </p>
             </description>
+            <messages>
+                <message level="info" code="SCHEDULER-984"/>
+            </messages>
         </xml_attribute>
 
         <xml_attribute name="repeat" type="no|seconds">
             <description>
                 <p>
-                    Der Scheduler prüft periodisch das Verzeichnis auf Veränderung.
+                    Der Scheduler prüft periodisch das Verzeichnis auf Veränderung<!--,
+                    wenn der erste Job bereit für einen neuen Auftrag ist  
+                    (der Scheduler setzt fort, auch wenn der Job keine <run_time> mehr hat,
+                    weil es zu request_order() kein Gegenstück gibt-->.
                     Die Länge der Periode kann hier angegeben werden.
                 </p>
                 <p>
-                    Unter Windows ist <code>repeat="60"</code> voreingestellt-
-                    Der Scheduler nutzt zusätzlich die in Windows integrierte Verzeichnisüberwachung,
+                    Unter Windows ist <code>repeat="60"</code> voreingestellt.
+                    Außerdem nutzt der Scheduler zusätzlich die in Windows integrierte Verzeichnisüberwachung,
                     so dass er auf eine Änderung des Verzeichnisses sofort reagiert.
+                    Sie wird nach Ablauf des Wiederholungsintervalls erneuert.
                 </p>
                 <!--p>
                     Unter Windows ist <code>repeat="no"</code> möglich und voreingestellt,
@@ -67,6 +76,7 @@
                 </p-->
                 <p>
                     Unter Unix ist <code>repeat="10"</code> voreingestellt.
+                    Das Verzeichnis wird alle 10 Sekunden auf Veränderung geprüft.
                 </p>
             </description>
 

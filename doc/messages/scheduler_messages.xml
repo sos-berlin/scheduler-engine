@@ -2195,6 +2195,24 @@
             </text>
         </message>
 
+        <message code="SCHEDULER-348">
+            <text xml:lang="en">
+                <title>Database doesn't deliver witdh of column <p1/>.<p2/></title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-349">
+            <text xml:lang="en">
+                <title>Database column <p1/>.<p2/> could not be expanded</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-350">
+            <text xml:lang="en">
+                <title>Width of database column <p1/>.<p2/> is unknown. We assume <p3/></title>
+            </text>
+        </message>
+
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->

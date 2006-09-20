@@ -85,7 +85,7 @@ extern const char               dtd_string[];
 extern volatile int             ctrl_c_pressed;
 extern const string             xml_schema_path;            // "scheduler.xsd"
 extern const string             scheduler_character_encoding;
-extern const int                order_id_length_max;
+extern const int                const_order_id_length_max;
 
 
 #ifdef Z_WINDOWS
