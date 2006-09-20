@@ -32,7 +32,7 @@ for( var i = 1; i <= n; i++ )
                     <![CDATA[
                     
 var i = 0;
-var n = 10;
+var n = 10000;
 spooler.variables( "n" ) = n;
 var hostware = new ActiveXObject( "hostware.global" );
 
@@ -49,7 +49,7 @@ function spooler_process()
 
                 ]]>
                 </script>
-                <run_time once="no"/>
+                <run_time once="yes"/>
             </job>
 
             <job name="javascript" order="yes">
@@ -116,8 +116,9 @@ public class My_job  extends sos.spooler.Job_impl
 
         <job_chains>
             <job_chain name="my_job_chain">
-                <file_order_source directory="/tmp/x/" regex="^gen" max="100" delay_after_error="10" repeat="20"/>
-                <!--file_order_source directory="/tmp/y" regex="^gen" max="100" next_state="second"/-->
+                <file_order_source directory="/tmp/x/" regex="^gen"/>
+                <!--file_order_source directory="/tmp/yyy/" regex="^gen"/-->
+                <!--file_order_source directory="/tmp/y" regex="^gen" next_state="second"/-->
                 <job_chain_node state="first" job="javascript"/>
                 <job_chain_node state="second" job="javascript2"/>
                 <file_order_sink state="remove" remove="yes"/>
