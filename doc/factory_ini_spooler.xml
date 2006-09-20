@@ -48,6 +48,7 @@
         <ini_entry setting="log_mail_to" />
         <ini_entry setting="log_mail_cc" />
         <ini_entry setting="log_mail_bcc" />
+        <ini_entry setting="mail_queue_only" />
         <ini_entry setting="mail_encoding" />
         <ini_entry setting="mail_on_error" />
         <ini_entry setting="mail_on_warning" />

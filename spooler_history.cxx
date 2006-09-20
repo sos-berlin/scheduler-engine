@@ -280,10 +280,10 @@ void Spooler_db::open2( const string& db_name )
 
                     add_column( _spooler->_tasks_tablename, "TASK_XML", " add \"TASK_XML\" clob" );
 
+                    commit();
+
 
                     handle_order_id_columns();
-
-                    commit();
                 }
 
                 _email_sent_after_db_error = false;
@@ -354,20 +354,11 @@ int Spooler_db::expand_varchar_column( const string& table_name, const string& c
     {
         try
         {
+            Transaction ta ( this );
+
             switch( _db.dbms_kind() )
             {
                 case dbms_postgresql:
-                {
-                    S cmd;
-                    cmd << "ALTER TABLE " << table_name 
-                        << " modifiy " << sql::uquoted_name( column_name ) 
-                        << " varchar(" << new_width << ")";
-                    _log->info( cmd );
-                    execute( cmd );
-                    break;
-                }
-
-                default:
                 {
                     S cmd;
                     cmd << "ALTER TABLE " << table_name 
@@ -382,12 +373,26 @@ int Spooler_db::expand_varchar_column( const string& table_name, const string& c
 
                     _log->info( cmd );
                     execute( cmd );
+                    break;
+                }
+
+                case dbms_access:
+                default:
+                {
+                    S cmd;
+                    cmd << "ALTER TABLE " << table_name 
+                        << " alter column " << sql::uquoted_name( column_name ) 
+                        << " varchar(" << new_width << ")";
+
+                    _log->info( cmd );
+                    execute( cmd );
                 }
             }
 
             width = column_width( table_name, column_name );
             
             if( width != new_width )  _log->warn( S() << "Retrievied column width is different: " << width );
+            ta.commit();
         }
         catch( exception& x )
         {
@@ -410,6 +415,8 @@ int Spooler_db::column_width( const string& table_name, const string& column_nam
     result = max( 0, field_size - 1 );   // Eins weniger fürs 0-Byte
 
     if( result == 0 )  _log->warn( message_string( "SCHEDULER-348", _spooler->_orders_tablename, ".id" ) );
+
+    Z_LOG2( "scheduler", "width( " << table_name << "." << column_name << ") = " << result << "\n" );
 
     return result;
 }

@@ -10,7 +10,28 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2006-09-19" version="2.0.158" subversion_revision="4525">
+    <change date="2006-09-19" version="2.0.158" subversion_revision="4533">
+        <revision type="new" title="Mail-Versand nur in Dateiverzeichnis">
+            <description>
+                <p>
+                    Die neue Einstellung verhindert den Versand und stellt die Nachricht in das mit
+                    <scheduler_ini_entry file="sos.ini" section="spooler" entry="queue_dir"/>
+                    eingestellte Verzeichnis.
+                </p>
+                <p>
+                    Ebenso <code>queue_only</code> in der Datei <code>sos.ini</code>.
+                </p>
+                <ul>
+                    <li>
+                        <scheduler_ini_entry file="sos.ini" section="mail" entry="queue_only"/>
+                    </li>
+                    <li>
+                        <scheduler_ini_entry file="factory.ini" section="spooler" entry="mail_queue_only"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+
         <revision type="new" title="start_when_directory_changed robuster gemacht">
             <description>
                 <p>
@@ -48,30 +69,6 @@
                     </li>
                     <li>
                         <scheduler_ini_entry file="factory.ini" section="spooler" entry="subprocess.own_process_group"/>
-                    </li>
-                </ul>
-            </description>
-        </revision>
-
-        <revision type="new" title="Mail-Versand nur in Dateiverzeichnis">
-            <description>
-                <p>
-                    <code>smtp=-queue</code> verhindert den Versand und stellt die Nachricht in das mit
-                    <scheduler_ini_entry file="sos.ini" section="spooler" entry="queue_dir"/>                    
-                    eingestellte Verzeichnis.
-                </p>
-                <p>
-                    Ebenso <code>queue_only</code> in der Datei <code>sos.ini</code>.
-                </p>
-                <ul>
-                    <li>
-                        <scheduler_ini_entry file="sos.ini" section="mail" entry="queue_only"/>
-                    </li>
-                    <li>
-                        <scheduler_ini_entry file="sos.ini" section="mail" entry="smtp"/>
-                    </li>
-                    <li>
-                        <scheduler_ini_entry file="factory.ini" section="spooler" entry="smtp"/>
                     </li>
                 </ul>
             </description>
