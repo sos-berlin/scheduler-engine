@@ -405,6 +405,7 @@ int Spooler_db::expand_varchar_column( const string& table_name, const string& c
 
 
 
+                case dbms_firebird:
                 case dbms_postgresql:
                 {
                     cmd << "ALTER TABLE " << table_name;
@@ -428,7 +429,7 @@ int Spooler_db::expand_varchar_column( const string& table_name, const string& c
                     break;
                 }
 
-             //?case dbms_firebird:
+
                 case dbms_oracle:
                 case dbms_oracle_thin:
                 case dbms_mysql:
