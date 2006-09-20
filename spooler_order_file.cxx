@@ -494,8 +494,12 @@ Order* Directory_file_order_source::read_directory( bool was_notified, const str
                         if( _bad_map.find( path ) == _bad_map.end() )
                         {
                             log()->error( x.what() );
-                            log()->warn( message_string( "SCHEDULER-346", path ) );
+                            z::Xc xx ( "SCHEDULER-346", path );
+                            log()->warn( xx.what() );
                             _bad_map[ path ] = Z_NEW( Bad_entry( path, x ) );
+
+                            xx.append_text( x.what() );
+                            send_mail( Scheduler_event::evt_file_order_error, &xx );
                         }
                     }
                 }
@@ -689,6 +693,27 @@ void Directory_file_order_source::send_mail( Scheduler_event::Event_code event_c
                 Scheduler_event scheduler_event ( event_code, log_info, this );
 
                 scheduler_event.set_message( msg );
+                scheduler_event.mail()->set_from_name( _spooler->name() + ", " + _job_chain->obj_name() );    // "Scheduler host:port -id=xxx Job chain ..."
+                scheduler_event.mail()->set_subject( msg );
+
+                S body;
+                body << Sos_optional_date_time::now().as_string() << "\n\n" << _job_chain->obj_name() << "\n";
+                body << "Scheduler -id=" << _spooler->id() << "  host=" << _spooler->_hostname << "\n\n";
+                body << msg << "\n";
+
+                scheduler_event.mail()->set_body( body );
+                scheduler_event.send_mail( _spooler->_mail_defaults );
+
+                break;
+            }
+
+            case Scheduler_event::evt_file_order_error:
+            {
+                string msg = x->what();
+                Scheduler_event scheduler_event ( event_code, log_info, this );
+
+                scheduler_event.set_message( msg );
+                scheduler_event.set_error( *x );
                 scheduler_event.mail()->set_from_name( _spooler->name() + ", " + _job_chain->obj_name() );    // "Scheduler host:port -id=xxx Job chain ..."
                 scheduler_event.mail()->set_subject( msg );
 

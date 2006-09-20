@@ -28,6 +28,9 @@ string Scheduler_event::name_of_event_code( Event_code event_code )
         case evt_database_error_abort:          return "database_error_abort";
         case evt_database_continue:             return "database_continue";
         case evt_task_start_error:              return "task_start_error";
+        case evt_file_order_source_error:       return "file_order_source_error";
+        case evt_file_order_source_recovered:   return "file_order_source_recovered";
+        case evt_file_order_error:              return "file_order_error";
         default:                                return S() << "Event_code(" << event_code << ")";
     }
 }

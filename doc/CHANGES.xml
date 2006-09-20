@@ -11,6 +11,28 @@
     <scheduler_keyword keyword="Change log"/>
 
     <change date="2006-09-19" version="2.0.158" subversion_revision="4533">
+        <revision type="new" title="Tabellenspalten werden verbreitert">
+            <description>
+                <p>
+                    Der Scheduler prüft beim Start die Spaltenbreiten von
+                    <code>scheduler_orders.id</code> und <code>scheduler_order_history.order_id</code>
+                    und erweitert sie ggfs. auf 255 Zeichen,
+                    damit die Auftragskennungen der Dateiaufträge Platz finden.
+                    Ein Fehler dabei wird ignoriert.
+                </p>
+            </description>
+        </revision>
+
+        <revision type="new" title="Dateiaufträge mit zu langen Pfaden">
+            <description>
+                <p>
+                    Mit den neuen Datenbankspaltenbreiten verarbeitet der Scheduler Pfade bis 255 Zeichen Länge.
+                    Längere Pfade werden mit Warnung ignoriert. 
+                    Der Scheduler merkt sie sich, um die Fehlermeldung nicht zu wiederholen.
+                </p>
+            </description>
+        </revision>
+
         <revision type="new" title="Mail-Versand nur in Dateiverzeichnis">
             <description>
                 <p>
