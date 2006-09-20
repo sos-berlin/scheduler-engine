@@ -3024,7 +3024,7 @@ const char file_html_jz_scheduler_xslt[] =
     "\r\n"
     "</xsl:for-each>\r\n"
     "\r\n"
-    "<xsl:if test=\"blacklist/@count > 1\">\r\n"
+    "<xsl:if test=\"blacklist/@count >= 1\">\r\n"
     "\r\n"
     "<tr>\r\n"
     "<td colspan=\"99\" style=\"line-height: 1ex\">&#160;</td>\r\n"
@@ -5637,7 +5637,7 @@ static const Embedded_file embedded_files_array[] =
     { "html/jz/scheduler.js", file_html_jz_scheduler_js, sizeof file_html_jz_scheduler_js - 1, 1158661396 },
     { "html/jz/show_log.js", file_html_jz_show_log_js, sizeof file_html_jz_show_log_js - 1, 1113979995 },
     { "html/jz/translation_de.js", file_html_jz_translation_de_js, sizeof file_html_jz_translation_de_js - 1, 1113979995 },
-    { "html/jz/scheduler.xslt", file_html_jz_scheduler_xslt, sizeof file_html_jz_scheduler_xslt - 1, 1158695108 },
+    { "html/jz/scheduler.xslt", file_html_jz_scheduler_xslt, sizeof file_html_jz_scheduler_xslt - 1, 1158742917 },
     { "html/jz/scheduler.css", file_html_jz_scheduler_css, sizeof file_html_jz_scheduler_css - 1, 1158695108 },
     { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1158575784 },
     { NULL, NULL, 0 }

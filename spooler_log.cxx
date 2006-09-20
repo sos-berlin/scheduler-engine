@@ -333,7 +333,7 @@ void Log::log2( Log_level level, const string& prefix, const string& line_, Pref
 #       ifdef Z_WINDOWS
             bool with_colors     = _spooler && _spooler->_zschimmer_mode  Z_WINDOWS_ONLY( Z_DEBUG_ONLY( || true ) );
             bool restore_console = false;
-            CONSOLE_SCREEN_BUFFER_INFO console_screen_buffer_info;
+            CONSOLE_SCREEN_BUFFER_INFO console_screen_buffer_info; 
 
             if( with_colors  &&  _file != -1  &&  isatty( _file ) ) 
             {

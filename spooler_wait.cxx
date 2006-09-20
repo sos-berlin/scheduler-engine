@@ -56,6 +56,23 @@ void windows_message_step()
 }
 
 #endif
+
+//------------------------------------------------------------------------------------console_width
+#ifdef Z_WINDOWS
+
+static int console_width()
+{
+
+    CONSOLE_SCREEN_BUFFER_INFO console_screen_buffer_info; 
+    memset( &console_screen_buffer_info, 0, sizeof console_screen_buffer_info );
+
+    BOOL ok = GetConsoleScreenBufferInfo( GetStdHandle(STD_ERROR_HANDLE), &console_screen_buffer_info );
+
+    return ok? console_screen_buffer_info.dwSize.X 
+             : 80;
+}
+
+#endif
 //-------------------------------------------------------------------------------------Event::close
 
 void Event::close()
@@ -447,7 +464,9 @@ bool Wait_handles::wait_until_2( const Time& until, const Object* wait_for_objec
 
         if( _spooler  &&  _spooler->_print_time_every_second )
         {
-            double step = 1.0;
+            int     console_line_length = 0;
+            double  step = 1.0;
+
             while( Time::now() < until - step )
             {
                 ret = MsgWaitForMultipleObjects( _handles.size(), handles, FALSE, (int)( ceil( step * 1000 ) ), QS_ALLINPUT ); 
@@ -456,21 +475,28 @@ bool Wait_handles::wait_until_2( const Time& until, const Object* wait_for_objec
                 Time now = Time::now();
                 Time rest = until - now;
                 t = (int)ceil( min( (double)max_sleep_time_ms, rest * 1000.0 ) );
-                cerr << Time::now().as_string( Time::without_ms ) << " (";
+
+                S console_line;
+                console_line << Time::now().as_string( Time::without_ms ) << " (";
                 if( until < latter_day ) 
                 {
                     int days = rest.day_nr();
-                    if( days > 0 )  cerr << days << "d+";
-                    cerr << rest.time_of_day().as_string( Time::without_ms ) << "s";
-                    if( days > 0 )  cerr << " until " << Time( until ).as_string();
+                    if( days > 0 )  console_line << days << "d+";
+                    console_line << rest.time_of_day().as_string( Time::without_ms ) << "s";
+                    if( days > 0 )  console_line << " until " << Time( until ).as_string();
                 }
-                if( wait_for_object )  cerr << " for " << wait_for_object->obj_name().substr( 0, 55 );
-                cerr << ")  \r";
+                if( wait_for_object )  console_line << " for " << wait_for_object->obj_name();
+                console_line << ")";
+
+                string l = console_line.str().substr( 0, console_width() - 1 );
+                console_line_length = l.length();
+                l += '\r';
+                cerr << l << flush;
             }
 
             ret = MsgWaitForMultipleObjects( _handles.size(), handles, FALSE, max( 0, t ), QS_ALLINPUT ); 
 
-            cerr << string( 79, ' ' ) << '\r' << flush;  // Zeile löschen
+            if( console_line_length )  cerr << string( console_line_length - 1, ' ' ) << '\r' << flush;  // Zeile löschen (line_length-1 wegen \r)
         }
         else
         {

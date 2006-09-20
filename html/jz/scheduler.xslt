@@ -1054,7 +1054,7 @@
 
                         </xsl:for-each>
 
-                        <xsl:if test="blacklist/@count > 1">
+                        <xsl:if test="blacklist/@count >= 1">
 
                             <tr>
                                 <td colspan="99" style="line-height: 1ex">&#160;</td>

@@ -326,8 +326,8 @@ void Spooler_db::add_column( const string& table_name, const string& column_name
 
 void Spooler_db::handle_order_id_columns()
 {
-    int orders_column_width  = expand_varchar_column( _spooler->_orders_tablename       , "id"      , const_order_id_length_max - 1, const_order_id_length_max, "not null" );
-    int history_column_width = expand_varchar_column( _spooler->_order_history_tablename, "order_id", const_order_id_length_max - 1, const_order_id_length_max, "not null" );
+    int orders_column_width  = expand_varchar_column( _spooler->_orders_tablename       , "id"      , const_order_id_length_max - 1, const_order_id_length_max );
+    int history_column_width = expand_varchar_column( _spooler->_order_history_tablename, "order_id", const_order_id_length_max - 1, const_order_id_length_max );
 
     _order_id_length_max = 0;
 
@@ -345,8 +345,7 @@ void Spooler_db::handle_order_id_columns()
 
 //----------------------------------------------------------------Spooler_db::expand_varchar_column
 
-int Spooler_db::expand_varchar_column( const string& table_name, const string& column_name, 
-                                       int minimum_width, int new_width, const string& sql_extra )
+int Spooler_db::expand_varchar_column( const string& table_name, const string& column_name, int minimum_width, int new_width )
 {
     int width = column_width( table_name, column_name );
     
@@ -356,36 +355,85 @@ int Spooler_db::expand_varchar_column( const string& table_name, const string& c
         {
             Transaction ta ( this );
 
+            S cmd;
+
             switch( _db.dbms_kind() )
             {
-                case dbms_postgresql:
+                case dbms_access:
                 {
-                    S cmd;
-                    cmd << "ALTER TABLE " << table_name 
-                        << " alter column " << sql::uquoted_name( column_name ) 
-                        << " type varchar(" << new_width << ")";
-                    
-                    if( sql_extra != "" )  // Wir müssen NOT NULL neu setzen
-                    {
-                        cmd << ", alter column " << sql::uquoted_name( column_name ) 
-                            << " set " << sql_extra;
-                    }
+                    cmd << " alter column " << sql::uquoted_name( column_name ) 
+                        << " varchar(" << new_width << ")";
 
                     _log->info( cmd );
                     execute( cmd );
                     break;
                 }
 
-                case dbms_access:
-                default:
+
+                case dbms_sql_server:
                 {
-                    S cmd;
-                    cmd << "ALTER TABLE " << table_name 
-                        << " alter column " << sql::uquoted_name( column_name ) 
-                        << " varchar(" << new_width << ")";
+                    if( table_name == _spooler->_orders_tablename  &&  lcase(column_name) == "id" )
+                    {
+                        cmd << "DECLARE @pk_id varchar(" << new_width << ");\n";
+                        cmd << "BEGIN\n";
+                        cmd << "    SELECT @pk_id = \"NAME\" from sysindexes where name like 'PK__" << table_name << "_%';\n";
+                        cmd << "    EXEC ('ALTER TABLE " << table_name << " DROP CONSTRAINT ' + @pk_id );\n";
+                        cmd << "    ALTER TABLE " << table_name << " ALTER COLUMN \"ID\" VARCHAR(255) NOT NULL;\n";
+                        cmd << "    ALTER TABLE " << table_name << " ADD PRIMARY KEY (\"JOB_CHAIN\", \"ID\");\n";
+                        cmd << "END;";
+                        _log->info( cmd );
+                        execute( cmd );
+                    }
+                    else
+                    {
+                        cmd << "ALTER TABLE " << table_name;
+                        cmd << " alter column " << sql::uquoted_name( column_name ) 
+                            << " varchar(" << new_width << ")";
+
+                        _log->info( cmd );
+                        execute( cmd );
+                    }
+
+                    break;
+                }
+
+
+
+                case dbms_postgresql:
+                {
+                    cmd << "ALTER TABLE " << table_name;
+                    cmd << " alter column " << sql::uquoted_name( column_name ) 
+                        << " type varchar(" << new_width << ")";
+                    
+                    _log->info( cmd );
+                    execute( cmd );
+                    break;
+                }
+
+
+                case dbms_db2:
+                {
+                    cmd << "ALTER TABLE " << table_name;
+                    cmd << " alter column " << sql::uquoted_name( column_name ) 
+                        << " set data type varchar(" << new_width << ")";
 
                     _log->info( cmd );
                     execute( cmd );
+                }
+
+             //?case dbms_firebird:
+                case dbms_oracle:
+                case dbms_oracle_thin:
+                case dbms_mysql:
+                default:
+                {
+                    cmd << "ALTER TABLE " << table_name;
+                    cmd << " modify " << sql::uquoted_name( column_name ) 
+                        << " varchar(" << new_width << ")";
+                    
+                    _log->info( cmd );
+                    execute( cmd );
+                    break;
                 }
             }
 

@@ -2306,7 +2306,6 @@ void Spooler::stop( const exception* )
     {
         j->second->close(); 
     }
-    _job_chain_map.clear();
 
     //close_threads();
     close_jobs();
@@ -2314,6 +2313,7 @@ void Spooler::stop( const exception* )
     if( _shutdown_ignore_running_tasks )  _spooler->kill_all_processes();   // Übriggebliebene Prozesse killen
 
 
+    _job_chain_map.clear();
     _object_set_class_list.clear();
   //_spooler_thread_list.clear();
     _thread_list.clear();
@@ -2477,7 +2477,10 @@ void Spooler::run()
     set_state( s_running );
 
 #   ifdef Z_WINDOWS
-        _print_time_every_second = log_directory() == "*stderr"  &&  isatty( fileno( stderr ) );
+        if( isatty( fileno( stderr ) )) 
+        {
+            _print_time_every_second = log_directory() == "*stderr";
+        }
 #   endif
 
     if( !_xml_cmd.empty() )

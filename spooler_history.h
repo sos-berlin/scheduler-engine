@@ -97,8 +97,7 @@ struct Spooler_db : Object, Scheduler_object
     void                        create_table_when_needed( const string& tablename, const string& fields );
     void                        add_column              ( const string& table_name, const string& column_name, const string add_clause );
     void                        handle_order_id_columns ();
-    int                         expand_varchar_column   ( const string& table_name, const string& column_name, int minimum_width, int new_width, 
-                                                          const string& sql_extra = "" );
+    int                         expand_varchar_column   ( const string& table_name, const string& column_name, int minimum_width, int new_width );
     int                         column_width            ( const string& table_name, const string& column_name );
     int                         get_id                  ( const string& variable_name, Transaction* = NULL );
     int                         get_id_                 ( const string& variable_name, Transaction* );
