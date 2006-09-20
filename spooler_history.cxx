@@ -449,7 +449,7 @@ int Spooler_db::expand_varchar_column( const string& table_name, const string& c
         }
 
         width = column_width( table_name, column_name );
-        if( width != new_width )  _log->warn( S() << "Retrievied column width is different: " << width );
+        if( width != new_width )  _log->warn( S() << "Retrieved column width is different: " << width );
     }
 
     return width;
