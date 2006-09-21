@@ -43,6 +43,7 @@
             
             <!-- Kopf- und Fußzeilen der HTML-Seiten -->
             <phrase id="head.link_to_first_page">Erste Seite</phrase>
+            <phrase id="head.link_to_options">Start</phrase>
             <phrase id="head.link_to_api">API</phrase>
             <phrase id="head.link_to_xml">XML</phrase>
             <phrase id="head.link_to_index">Register</phrase>

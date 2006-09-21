@@ -204,7 +204,8 @@
         </p>
     </div>
 
-    <p><b>COM</b></p>
+    <p><b><scheduler_a href="job_com.xml">COM</scheduler_a></b></p>
+    
     <div class="indent">
         <p>
             Sie können auch (unter Windows) einen Job in jeder beliebigen Programmiersprache

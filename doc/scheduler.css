@@ -118,8 +118,9 @@ td.api_title                    { padding-left: 3mm; }
 
 .not_for_unix_perl              { font-style: italic; }
 
-td.first_page                   { max-width: 90ex; }
-div.box                         { margin-top: 2em; margin-right: 2em;
+td.first_page                   { width: 90ex; }
+div.box                         { margin-top: 1.5em; 
                                   background-color: #ffffe0; 
                                   padding-top: 0.75em; padding-left: 1em; padding-right: 1em; 
                                   border: solid 1px #c0c0f0; }
+                                  

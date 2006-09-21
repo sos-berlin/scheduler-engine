@@ -1951,7 +1951,8 @@
         <xsl:call-template name="scheduler_a">
             <xsl:with-param name="href" select="@href"/>
             <xsl:with-param name="quote" select="@quote='yes'"/>
-            <xsl:with-param name="title" select="node()"/>
+            <xsl:with-param name="text" select="node()"/>
+            <xsl:with-param name="base_dir" select="''"/>
         </xsl:call-template>
     </xsl:template>
 
@@ -1960,7 +1961,8 @@
     <xsl:template name="scheduler_a">
         <xsl:param name="href"/>
         <xsl:param name="quote"/>
-        <xsl:param name="title"/>
+        <xsl:param name="text"/>
+        <xsl:param name="base_dir" select="/*/@base_dir"/>
 
         <xsl:if test="$quote">
             <xsl:text>»</xsl:text>
@@ -1968,6 +1970,7 @@
 
         <xsl:element name="a">
             <xsl:attribute name="href">
+                <xsl:value-of select="$base_dir"/>
                 <xsl:value-of select="$href"/>
             </xsl:attribute>
 
@@ -1975,11 +1978,11 @@
             <xsl:variable name="root_title"   select="normalize-space( $root_element/@title )"/>
 
             <xsl:choose>
-                <xsl:when test="$title">
+                <xsl:when test="$text">
                     <xsl:attribute name="title">
                         <xsl:copy-of select="$root_title"/>
                     </xsl:attribute>
-                    <xsl:copy-of select="$title"/>
+                    <xsl:copy-of select="$text"/>
                 </xsl:when>
                 <xsl:otherwise>
                     <xsl:copy-of select="$root_title"/>
@@ -2967,31 +2970,46 @@
 
     <xsl:template name="browse_bar_register">
 
-        &#160; 
+        &#160;
 
-        <xsl:element name="a">
-            <xsl:attribute name="href"><xsl:value-of select="$base_dir"/>api/api.xml</xsl:attribute>
-            <xsl:call-template name="phrase">
-                <xsl:with-param name="id" select="'head.link_to_api'"/>
-            </xsl:call-template>
-        </xsl:element>
+        <xsl:call-template name="scheduler_a">
+            <xsl:with-param name="href" select="'command_line.xml'"/>
+            <xsl:with-param name="text">
+                <xsl:call-template name="phrase">
+                    <xsl:with-param name="id" select="'head.link_to_options'"/>
+                </xsl:call-template>
+            </xsl:with-param>
+        </xsl:call-template>
         &#160; &#160; &#160;
 
-        <xsl:element name="a">
-            <xsl:attribute name="href"><xsl:value-of select="$base_dir"/>xml.xml</xsl:attribute>
-            <xsl:call-template name="phrase">
-                <xsl:with-param name="id" select="'head.link_to_xml'"/>
-            </xsl:call-template>
-        </xsl:element>
+        <xsl:call-template name="scheduler_a">
+            <xsl:with-param name="href" select="'xml.xml'"/>
+            <xsl:with-param name="text">
+                <xsl:call-template name="phrase">
+                    <xsl:with-param name="id" select="'head.link_to_xml'"/>
+                </xsl:call-template>
+            </xsl:with-param>
+        </xsl:call-template>
         &#160; &#160; &#160;
 
-        <xsl:element name="a">
-            <xsl:attribute name="href"><xsl:value-of select="$base_dir"/>register.xml</xsl:attribute>
-            <xsl:attribute name="rel">index</xsl:attribute>
-            <xsl:call-template name="phrase">
-                <xsl:with-param name="id" select="'head.link_to_index'"/>
-            </xsl:call-template>
-        </xsl:element>
+        <xsl:call-template name="scheduler_a">
+            <xsl:with-param name="href" select="'api/api.xml'"/>
+            <xsl:with-param name="text">
+                <xsl:call-template name="phrase">
+                    <xsl:with-param name="id" select="'head.link_to_api'"/>
+                </xsl:call-template>
+            </xsl:with-param>
+        </xsl:call-template>
+        &#160; &#160; &#160;
+
+        <xsl:call-template name="scheduler_a">
+            <xsl:with-param name="href" select="'register.xml'"/>
+            <xsl:with-param name="text">
+                <xsl:call-template name="phrase">
+                    <xsl:with-param name="id" select="'head.link_to_index'"/>
+                </xsl:call-template>
+            </xsl:with-param>
+        </xsl:call-template>
         &#160; &#160; &#160;
 
     </xsl:template>

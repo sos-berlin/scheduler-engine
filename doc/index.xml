@@ -47,7 +47,7 @@
             <td>
                 <h1 style="text-align: left; font-size: 18pt; margin-bottom: 2ex">Der Scheduler</h1>
             </td>
-            <td style="vertical-align: top; text-align: right">
+            <td style="vertical-align: top;" align="right">
                 <p style="font-size: 8pt">
                     →<scheduler_a href="CHANGES.xml"/>
                     <br/>
@@ -79,7 +79,11 @@
                         </dt>
                         <dd>
                             <p>
-                                Die <scheduler_a href="konfiguration.xml"/> enthält die Beschreibungen der Jobs, deren Startzeiten usw.
+                                Die <scheduler_a href="konfiguration.xml"/> enthält 
+                                die Beschreibungen der Jobs, 
+                                deren Startzeiten,
+                                die Jobketten
+                                usw.
                             </p>
                         </dd>
 
@@ -93,9 +97,10 @@
                                 Die Einstellungen in der
                                 <scheduler_a href="factory_ini.xml"/>
                                 haben Vorrang vor den Einstellungen in der XML-Konfiguration.
-                                Einige seltene Einstellungen werden in der <scheduler_a href="sos_ini.xml"/> vorgenommen.
+                                In der <scheduler_a href="sos_ini.xml"/>
+                                werden nur wenige Einstellungen vorgenommen.
                                 <!--Hier können einige Einstellungen vorgenommen werden,
-                    die auch andere Produkte als den Scheduler betreffen.-->
+                                die auch andere Produkte als den Scheduler betreffen.-->
                             </p>
                         </dd>
 
@@ -105,7 +110,8 @@
                         </dt>
                         <dd>
                             <p>
-                                Die Optionen an der Kommandozeile haben Vorrang vor den Einstellungen
+                                Die <scheduler_a href="command_line.xml">Optionen an der Kommandozeile</scheduler_a>
+                                haben Vorrang vor den Einstellungen
                                 in der <scheduler_a href="factory_ini.xml"/> und
                                 der <scheduler_a href="konfiguration.xml"/>.
                             </p>
@@ -117,7 +123,8 @@
                         </dt>
                         <dd>
                             <p>
-                                Der Scheduler kann unter Windows als Dienst installiert
+                                Der Scheduler kann unter Windows als <scheduler_a href="service.xml">Dienst</scheduler_a>
+                                installiert
                                 und unter Unix als Daemon gestartet werden.
                             </p>
                         </dd>
@@ -125,12 +132,17 @@
 
 
                         <dt>
-                            <scheduler_a href="datenbank.xml">Datenbank</scheduler_a>
+                            <scheduler_a href="datenbank.xml">Datenbank und Historie</scheduler_a>
                         </dt>
                         <dd>
                             <p>
-                                Der Scheduler kann seine Task- und Auftragswarteschlangen in einer Datenbank halten.
-                                Und er führt eine Historie mit <scheduler_a href="protokolle.xml">Protokollen</scheduler_a>.
+                                Der Scheduler kann seine Task- und Auftragswarteschlangen in einer 
+                                <scheduler_a href="datenbank.xml">Datenbank</scheduler_a> 
+                                halten.
+                                Und er führt darin eine <scheduler_a href="history.xml">Historie</scheduler_a>,
+                                die auch die einzelnen
+                                <scheduler_a href="protokolle.xml">Protokolle</scheduler_a>
+                                enthält.
                             </p>
                         </dd>
                     </dl>
@@ -165,7 +177,7 @@
                 </div>
             </td>
             
-            <!--td style="padding-left: 3em"> </td-->
+            <td style="padding-left: 1.5em"> </td>
             
             <td class="first_page">
                 <div class="box">
@@ -187,7 +199,7 @@
                         </dd>
 
                         <dt>
-                            <scheduler_a href="xml/start_when_directory_changed.xml">Einfache Verzeichnisüberwachung</scheduler_a>
+                            <scheduler_a href="directory_watch.xml">Einfache Verzeichnisüberwachung</scheduler_a>
                         </dt>
                         <dd>
                             Der Scheduler startet einen Job, wenn eine Datei einem Verzeichnis hinzugefügt wird.
