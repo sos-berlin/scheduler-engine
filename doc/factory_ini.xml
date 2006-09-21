@@ -4,7 +4,7 @@
 <!--$Id$-->
 
 <ini file     = "factory.ini"
-     title    = "Datei factory.ini, Übersicht"
+     title    = "Datei factory.ini"
      base_dir = ""
      author   = "$Author$"
      date     = "$Date$">
@@ -18,10 +18,13 @@
     <description>
         <p>
             In dieser Datei können Einstellungen für den Scheduler vorgenommen werden.
+            (leere Einträge "<code>eintrag=</code>" gelten als nicht vorhanden und 
+            überschreiben keine Einstellung der <scheduler_a href="konfiguration.xml"/>)
         </p>
         <p>
             Den Pfad dieser Datei können sie mit der Option <scheduler_option name="ini"/> ändern.
         </p>
+        
     </description>
 
     <scheduler_keyword keyword="factory.ini"/>

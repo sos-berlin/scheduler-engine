@@ -1,7 +1,7 @@
 /* $Id$ */
 
 body            { font-size: 10pt; font-family: Arial, sans-serif; }
-h1              { font-size: 14pt; font-weight: bold; margin-bottom: 2em;  }
+h1              { font-size: 14pt; font-weight: bold; margin-top: 0em; margin-bottom: 1em;  }
 h1.nonfirst     { font-size: 14pt; font-weight: bold; margin-bottom: 2em; margin-top: 4em; }
 h2              { font-size: 12pt; font-weight: bold; margin-top: 2em; border-top: 1px solid #f0f0f0; padding-top: 3ex; }
 h2.bar          { font-size: 12pt; font-weight: bold; margin-top: 2em; border-top: 1px solid #f0f0f0; padding-top: 3ex; width: 72ex; }
@@ -117,3 +117,9 @@ td.api_title                    { padding-left: 3mm; }
 .message_error                  { color: red; }
 
 .not_for_unix_perl              { font-style: italic; }
+
+td.first_page                   { max-width: 90ex; }
+div.box                         { margin-top: 2em; margin-right: 2em;
+                                  background-color: #ffffe0; 
+                                  padding-top: 0.75em; padding-left: 1em; padding-right: 1em; 
+                                  border: solid 1px #c0c0f0; }

@@ -10,6 +10,19 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2006-09-20" version="2.0.158" subversion_revision="4545">
+        <revision type="modification" title="Mehrere &lt;commands&gt; aus Basiskonfigurationen werden zusammengefügt">
+            <description>
+                <p>
+                    Alle <scheduler_element name="commands"/> aus der Konfiguration 
+                    mit den <scheduler_element name="base"/>-Konfigurationen werden ausgeführt,
+                    <scheduler_element name="base"/> zuerst.
+                </p>
+            </description>
+        </revision>
+    </change>
+    
+    
     <change date="2006-09-20" version="2.0.158" subversion_revision="4533">
         <revision type="new" title="Tabellenspalten werden verbreitert">
             <description>

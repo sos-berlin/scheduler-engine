@@ -3122,14 +3122,15 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line )
         start();
 
         // <commands> aus <config> ausführen:
-        if( xml::Element_ptr commands_element = _config_element_to_load.select_node( "commands" ) )
+        if( _commands_document )
         {
             Command_processor command_processor ( this, Security::seclev_all );
             command_processor.set_log( &_log );
             
-            DOM_FOR_EACH_ELEMENT( commands_element, command_element )
+            DOM_FOR_EACH_ELEMENT( _commands_document.documentElement(), command_element )
             {
-                xml::Element_ptr result = command_processor.execute_command( command_element, _config_element_mod_time );
+                xml::Element_ptr result = command_processor.execute_command( command_element, Time::now() );
+
                 if( !result.select_node( "ok [ count(*) = 0  and  count(@*) = 0 ]" ) )
                 {
                     Message_string m ( "SCHEDULER-966" );
@@ -3138,7 +3139,6 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line )
                     _log.info( m );
                 }
             }
-            //command_processor.execute_commands( commands_element, _config_element_mod_time );
         }
 
         _config_element_to_load = NULL;

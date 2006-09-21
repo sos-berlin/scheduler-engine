@@ -4,7 +4,7 @@
 <!--$Id$-->
 
 <description
-    title    = "HTTP-Server"
+    title    = "HTTP-Server und Web-Services"
     base_dir = ""
     author   = "$Author$"
     date     = "$Date$"

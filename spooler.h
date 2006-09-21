@@ -516,6 +516,8 @@ struct Spooler : Object,
     xml::Document_ptr          _config_document;            // Das Dokument zu _config_element
     xml::Element_ptr           _config_element;             // Die gerade geladene Konfiguration (und Job hat einen Verweis auf <job>)
 
+    xml::Document_ptr          _commands_document;          // Zusammengebautes <commands>
+
     ptr<Com_variable_set>      _variables;
     Security                   _security;                   // <security>
     Object_set_class_list      _object_set_class_list;      // <object_set_classes>

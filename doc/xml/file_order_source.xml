@@ -121,7 +121,7 @@
         </p>
         <p>
             Siehe auch
-            <scheduler_a href="../file_orders.xml"/> und
+            <scheduler_a href="../file_orders.xml" quote="yes"/> und
             <scheduler_element name="file_order_sink"/>.
         </p>
     </description>

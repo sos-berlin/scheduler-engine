@@ -414,7 +414,16 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const Time& x
             else
             if( e.nodeName_is( "commands" ) )
             {
-                // Ignorieren, wird nach start() von spooler.cxx ausgeführt.
+                if( !_commands_document ) 
+                {
+                    _commands_document.create();
+                    _commands_document.appendChild( _commands_document.createElement( "commands" ) );       // Wurzel
+                }
+
+                DOM_FOR_EACH_ELEMENT( e, command_element )
+                {
+                    _commands_document.documentElement().appendChild( command_element.cloneNode(true) );
+                }
             }
         }
     }

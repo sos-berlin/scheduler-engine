@@ -5,7 +5,7 @@
 <!--$Id$-->
 
 <description
-    title    = "XML-Konfiguration"
+    title    = "Konfiguration in XML"
     base_dir = ""
     author   = "$Author$"
     date     = "$Date$"

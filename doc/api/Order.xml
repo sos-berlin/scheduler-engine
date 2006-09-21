@@ -667,7 +667,7 @@ $spooler->job_chain( "my_job_chain" )->add_order( $order );</pre>
         <scheduler_method class="Order" object="order" property="params"/><code>.<scheduler_method class="Variable_set" object="" method="value" value='"scheduler_file_path"'/>.</code>
     </p>
     <p>
-        Siehe <scheduler_a href="../file_orders.xml"/>.
+        Siehe <scheduler_a href="../file_orders.xml" quote="yes"/>.
     </p>
 </description>
 

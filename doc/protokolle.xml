@@ -16,9 +16,14 @@
     Der Scheduler schreibt seine Protokolle in das mit der Option <scheduler_option name="log-dir"/> eingestellte Verzeichnis.
 </p>
 
+    <p>
+        Die Meldungen sind numeriert,
+        siehe <scheduler_a href="messages/index.xml" quote="yes"/>.
+    </p>
 
 
-<scheduler_keyword keyword="Hauptprotokoll" type="definition"/>
+
+    <scheduler_keyword keyword="Hauptprotokoll" type="definition"/>
 
 <h3>Hauptprotokoll</h3>
 <p>

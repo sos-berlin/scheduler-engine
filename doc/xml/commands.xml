@@ -16,6 +16,8 @@
                 <p>
                     Der Scheduler führt die Kommandos nach dem Laden der Konfiguration
                     und vor dem Scheduler-Skript aus.
+                    Die <code>&lt;commands></code> aus den <scheduler_element name="base"/>-Konfigurationen
+                    werden zuerst ausgeführt.
                 </p>
                 <p>
                     Ein Fehler beendet den Scheduler.

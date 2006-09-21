@@ -1950,6 +1950,8 @@
     <xsl:template match="scheduler_a" mode="description">
         <xsl:call-template name="scheduler_a">
             <xsl:with-param name="href" select="@href"/>
+            <xsl:with-param name="quote" select="@quote='yes'"/>
+            <xsl:with-param name="title" select="node()"/>
         </xsl:call-template>
     </xsl:template>
 
@@ -1957,19 +1959,37 @@
 
     <xsl:template name="scheduler_a">
         <xsl:param name="href"/>
+        <xsl:param name="quote"/>
+        <xsl:param name="title"/>
 
-        <xsl:text>»</xsl:text>
+        <xsl:if test="$quote">
+            <xsl:text>»</xsl:text>
+        </xsl:if>
 
         <xsl:element name="a">
             <xsl:attribute name="href">
                 <xsl:value-of select="$href"/>
             </xsl:attribute>
-            
+
             <xsl:variable name="root_element" select="document( $href )/*"/>
-            <xsl:copy-of select="normalize-space( $root_element/@title )"/>
+            <xsl:variable name="root_title"   select="normalize-space( $root_element/@title )"/>
+
+            <xsl:choose>
+                <xsl:when test="$title">
+                    <xsl:attribute name="title">
+                        <xsl:copy-of select="$root_title"/>
+                    </xsl:attribute>
+                    <xsl:copy-of select="$title"/>
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:copy-of select="$root_title"/>
+                </xsl:otherwise>
+            </xsl:choose>
         </xsl:element>
 
-        <xsl:text>«</xsl:text>
+        <xsl:if test="$quote">
+            <xsl:text>«</xsl:text>
+        </xsl:if>
 
     </xsl:template>
 
@@ -2898,7 +2918,8 @@
                         <xsl:text> </xsl:text>
                         <xsl:variable name="name" select="substring-before( substring-after( /*/@author, 'Author: ' ), ' $' )"/>
                         <xsl:choose>
-                            <xsl:when test="$name = 'jz'">Joacim Zschimmer</xsl:when>
+                            <xsl:when test="$name = 'jz'">
+                                <a href="http://www.zschimmer.com">Joacim Zschimmer</a></xsl:when>
                             <xsl:otherwise><xsl:value-of select="$name"/></xsl:otherwise>
                         </xsl:choose>,
                         <!--xsl:variable name="name" select="document('standards.xml')/standards/authors/author[ @author = current()/@author ]/@full_name"/>

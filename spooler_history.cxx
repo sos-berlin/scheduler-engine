@@ -381,7 +381,7 @@ int Spooler_db::expand_varchar_column( const string& table_name, const string& c
                         
                         cmd << "DECLARE @pk_id varchar(255); ";
                         cmd << "BEGIN ";
-                        cmd << "SELECT @pk_id = \"NAME\" from sysindexes where name like 'PK__" << table_name << "_%'; ";
+                        cmd <<      "SELECT @pk_id = \"NAME\" from sysindexes where name like 'PK__" << table_name << "_%'; ";
                         cmd <<      "EXEC ('ALTER TABLE " << table_name << " DROP CONSTRAINT ' + @pk_id ); ";
                         cmd <<      "ALTER TABLE " << table_name << " ALTER COLUMN \"ID\" VARCHAR(" << new_width << ") NOT NULL; ";
                         cmd <<      "ALTER TABLE " << table_name << " ADD PRIMARY KEY (\"JOB_CHAIN\", \"ID\"); ";
@@ -404,8 +404,48 @@ int Spooler_db::expand_varchar_column( const string& table_name, const string& c
                 }
 
 
-
                 case dbms_firebird:
+                    /*  Hallo Joacim,
+
+                        damit wir es nicht vergessen, einbauen möchte ich es nicht. wir bleiben
+                        dabei, dass wir für Firebird aktuell gar nichts tun (also auskommentiert
+                        lassen).
+
+                        Das Problem ist, dass Firebird 1.5 nur kleine Indizes verwenden kann, die
+                        nicht mehr als 250 Byte lang sind. Abzgl. einiger Metadaten können wir
+                        aktuell tatsächlich nur 2 Attribute zu je 100 Byte aufnehmen. 
+
+                        Mit Firebird 2.x wird sich das verbessern, da dann Funktionsindizes
+                        unterstützt werden, mit denen ggf. nur ein Teil des Attributs in den Index
+                        aufgenommen wird. Sollte sich diese Version durchgesetzt haben, können wir
+                        das wieder reaktivieren.
+
+                        Für Firebird geht es so:
+
+                        SET TERMINATOR ^;
+                        RECREATE PROCEDURE tmp AS DECLARE VARIABLE pk_id varchar(255); 
+                        BEGIN
+                          SELECT "RDB$CONSTRAINT_NAME" FROM RDB$RELATION_CONSTRAINTS WHERE
+                        "RDB$RELATION_NAME"='SCHEDULER_ORDERS' AND "RDB$CONSTRAINT_TYPE"='PRIMARY KEY' INTO :pk_id;
+                          EXECUTE STATEMENT 'ALTER TABLE SCHEDULER_ORDERS DROP CONSTRAINT ' || :pk_id;
+                          EXECUTE STATEMENT 'ALTER TABLE SCHEDULER_ORDERS ALTER "ID" TYPE VARCHAR(255)';
+                          EXECUTE STATEMENT 'ALTER TABLE SCHEDULER_ORDERS ADD PRIMARY KEY ("JOB_CHAIN", "ID")';
+                        END^
+                        SET TERMINATOR ;^
+                        COMMIT RETAIN;
+                        EXECUTE PROCEDURE tmp;
+
+                        Dieser gesamte Block muss in einem Statement abgesetzt werden.
+                        Danach in einem neuen Statement
+
+                        TABLE SCHEDULER_ORDER_HISTORY ALTER "ORDER_ID" TYPE VARCHAR(255);
+
+                        Gruß
+                        Andreas
+                    */
+                    return width;
+
+
                 case dbms_postgresql:
                 {
                     cmd << "ALTER TABLE " << table_name;

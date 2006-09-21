@@ -91,9 +91,16 @@
                 Verwenden Sie dazu die Einstellung <scheduler_element name="run_time" attribute="once" value="yes"/>.
             </p>
             <p>
+                Der Job sollte mit <scheduler_element name="run_time" attribute="repeat"/> periodisch gestartet
+                und mit <scheduler_element name="delay_after_error"/> versehen werden.
+            </p>
+            <p>
                 Dieselbe Einstellung können Sie auch in der XML-Konfiguration mit
                 <scheduler_element name="start_when_directory_changed"/>
                 vornehmen.
+            </p>
+            <p>
+                Siehe auch <scheduler_a href="../file_orders.xml" quote="yes"/>.
             </p>
         </description>
 

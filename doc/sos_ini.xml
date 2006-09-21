@@ -4,7 +4,7 @@
 <!--$Id$-->
 
 <ini file     = "sos.ini"
-     title    = "Datei sos.ini,&#160; Übersicht"
+     title    = "Datei sos.ini"
      base_dir = ""
      author   = "$Author$"
      date     = "$Date$">
