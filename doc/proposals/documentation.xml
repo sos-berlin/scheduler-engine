@@ -17,22 +17,13 @@
     </p>
 
 
-    <h2>
-        Layout
-    </h2>
-    <p>
-        Die erste Seite kürzen, sie sollte in ein Browser-Fenster passen.
-        Zweispaltig ausführen.
-        Und die zentrierten Überschriften nerven.
-    </p>
-
 
     <h2>
         Meldungen
     </h2>
     <p>
         Beschreibung der Meldungen.
-        Welche Operation (API, XML) erzeugt welche Meldung?
+        Verzeichnis: Welche Operation (API, XML) erzeugt welche Meldung?
         Anklickbare Meldungs-Codes im Scheduler-Protokoll der HTML-Oberfläche.
     </p>
 
@@ -51,14 +42,48 @@
     <h3>
         Verzeichnis der Umgebungsvariablen
     </h3>
+    <p>
+        Umgebungsvariablen, die der Scheduler für die Jobs setzt.
+    </p>
+    <p>
+        Umgebungsvariablen, die der Scheduler liest (SOS_INI).
+        Und dass die Umgebungsvariablen vom Start im Scheduler abrufbar sind.
+        Verzeichnis der Stellen (XML-Attribute), die Umgebungsvariablen auflösen.
+    </p>
 
     <h3>
         Verzeichnis der Datenbanktabellen
     </h3>
     <p>
         Mit den Spalten.
+        Welche Spalten bei alten Datenbanken hinzugefügt oder erweitert werden.
     </p>
 
+
+    <h3>Alte Texte von 2002 überarbeiten</h3>
+    <p>
+        Dienste, Historie: Layout anpassen und Inhalt prüfen.
+    </p>
+
+
+    <h3>Besonderheiten der Betriebssystem-Varianten</h3>
+    <p>
+        HP-UX: Keine Protokollkomprimierung in der Datenbank.
+        Windows-Dienst.
+        Task-Priorität.
+        Verzeichnisüberwachung.
+        Perl, Sprachen der Scripting-Engine: VBscript, Javascript, Perlscript.
+        
+        
+    </p>
+
+
+    <h3>XHTML</h3>
+    <p>
+        Der Text ist nicht ganz (X)HTML-Konform: 
+        Wenn auf einer Seite ein Register-Stichwort zweimal vorkommt, gibt's zwei Stellen mit derselben Id.
+        Das müsste anders gelöst sein.
+    </p>
 
 
 </description>

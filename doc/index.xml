@@ -73,7 +73,6 @@
                     <h2>Einstellungen und Datenbank</h2>
 
                     <dl>
-
                         <dt>
                             <scheduler_a href="konfiguration.xml"/>
                         </dt>
@@ -110,25 +109,12 @@
                         </dt>
                         <dd>
                             <p>
-                                Die <scheduler_a href="command_line.xml">Optionen an der Kommandozeile</scheduler_a>
+                                Die <scheduler_a href="command_line.xml">Optionen beim Start des Schedulers</scheduler_a>
                                 haben Vorrang vor den Einstellungen
                                 in der <scheduler_a href="factory_ini.xml"/> und
                                 der <scheduler_a href="konfiguration.xml"/>.
                             </p>
                         </dd>
-
-
-                        <dt>
-                            <scheduler_a href="service.xml">Dienst</scheduler_a>
-                        </dt>
-                        <dd>
-                            <p>
-                                Der Scheduler kann unter Windows als <scheduler_a href="service.xml">Dienst</scheduler_a>
-                                installiert
-                                und unter Unix als Daemon gestartet werden.
-                            </p>
-                        </dd>
-
 
 
                         <dt>
@@ -143,6 +129,25 @@
                                 die auch die einzelnen
                                 <scheduler_a href="protokolle.xml">Protokolle</scheduler_a>
                                 enthält.
+                            </p>
+                        </dd>
+                    </dl>
+                </div>
+
+
+                <div class="box">
+                    <h2>Start</h2>
+
+                    <dl>
+                        <dt>
+                            <scheduler_a href="service.xml">Dienst</scheduler_a>
+                        </dt>
+                        <dd>
+                            <p>
+                                Der Scheduler wird unter Windows als <scheduler_a href="service.xml">Dienst</scheduler_a>
+                                installiert
+                                und unter Unix als 
+                                <scheduler_option name="service">Daemon</scheduler_option> gestartet.
                             </p>
                         </dd>
                     </dl>

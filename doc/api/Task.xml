@@ -68,6 +68,10 @@
             <p>
                 Der Aufruf <scheduler_element name="kill_task"/> bricht alle mit <code>add_pid()</code> bekannt gemachten Prozesse ab.
             </p>
+            <p>
+                Unter Unix kann eine Prozessgruppen-Id als negative pid übergeben werden.
+                Ein <code>kill</code> bricht dann die ganze Prozessgruppe ab.
+            </p>
         </description>
     </method>
 

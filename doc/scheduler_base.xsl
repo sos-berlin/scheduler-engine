@@ -1614,8 +1614,15 @@
             </xsl:attribute>
 
             <xsl:attribute name="title">
+                <xsl:value-of select="$phrases/phrase [ @id='xml_element.chapter_title.prefix' ]"/>
+                <xsl:text> &lt;</xsl:text>
+                <xsl:value-of select="$name"/>
                 <xsl:variable name="xml_element" select="document( concat( $my_directory, $name, '.xml' ) )/xml_element"/>
-                <xsl:value-of select="normalize-space( $xml_element/@title )"/>
+                <xsl:variable name="title" select="normalize-space( $xml_element/@title )"/>
+                <xsl:if test="$title">
+                    <xsl:text>>  —  </xsl:text>
+                    <xsl:value-of select="$title"/>
+                </xsl:if>
             </xsl:attribute>
 
             <code>
@@ -1785,6 +1792,7 @@
         <xsl:call-template name="scheduler_option">
             <xsl:with-param name="name"  select="@name"/>
             <xsl:with-param name="value" select="@value"/>
+            <xsl:with-param name="content"  select="node()"/>
         </xsl:call-template>
         <!--
         <xsl:element name="a">
@@ -1800,6 +1808,7 @@
     <xsl:template name="scheduler_option">
         <xsl:param name="name"/>
         <xsl:param name="value"/>
+        <xsl:param name="content"/>
 
         <xsl:element name="a">
             <xsl:attribute name="name">
@@ -1810,31 +1819,61 @@
 
         <xsl:element name="a">
             <xsl:attribute name="class">silent</xsl:attribute>
+            
             <xsl:attribute name="href">
                 <xsl:value-of select="concat( $base_dir, 'command_line.xml#option_', $name )"/>
             </xsl:attribute>
-            <code>
-                <xsl:text>-</xsl:text>
-                <xsl:value-of select="$name"/>
-            </code>
 
-            <xsl:if test="$value">
-                <code>
-                    <xsl:text>=</xsl:text>
-                    <xsl:value-of select="$value"/>
-                </code>
-            </xsl:if>
+            <xsl:choose>
+                <xsl:when test="$content">
+                    <xsl:attribute name="title">
+                        <xsl:value-of select="$phrases/phrase [ @id='command_line.option.reference' ]"/>
+                        <xsl:text> -</xsl:text>
+                        <xsl:value-of select="$name"/>
+                        <xsl:if test="$value">
+                            <xsl:text>=</xsl:text>
+                            <xsl:value-of select="$value"/>
+                        </xsl:if>
+                    </xsl:attribute>
+                    <xsl:copy-of select="$content"/>
+                </xsl:when>
+                <xsl:otherwise>
+                    <code>
+                        <xsl:text>-</xsl:text>
+                        <xsl:value-of select="$name"/>
+                    </code>
 
-            <!--
-            <xsl:variable name="command_option" select="document( 'command_line.xml' )/command_line/command_options/command_option[ @name = current()/@name or @setting = current()/@name ]"/>
-
-            <xsl:if test="$command_option/@type">
-                <code>="</code><i><xsl:value-of select="$command_option/@type"/></i><code>"</code>
-            </xsl:if>
--->
+                    <xsl:if test="$value">
+                        <code>
+                            <xsl:text>=</xsl:text>
+                            <xsl:value-of select="$value"/>
+                        </code>
+                    </xsl:if>
+                </xsl:otherwise>
+            </xsl:choose>
         </xsl:element>
     </xsl:template>
 
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_option_display-->
+
+    <xsl:template name="scheduler_option_display">
+        <xsl:param name="name"/>
+        <xsl:param name="value"/>
+        
+        <code>
+            <xsl:text>-</xsl:text>
+            <xsl:value-of select="$name"/>
+        </code>
+
+        <xsl:if test="$value">
+            <code>
+                <xsl:text>=</xsl:text>
+                <xsl:value-of select="$value"/>
+            </code>
+        </xsl:if>
+
+    </xsl:template>
+    
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_method-->
 
     <xsl:template match="scheduler_method" mode="description">
@@ -1951,7 +1990,7 @@
         <xsl:call-template name="scheduler_a">
             <xsl:with-param name="href" select="@href"/>
             <xsl:with-param name="quote" select="@quote='yes'"/>
-            <xsl:with-param name="text" select="node()"/>
+            <xsl:with-param name="content" select="node()"/>
             <xsl:with-param name="base_dir" select="''"/>
         </xsl:call-template>
     </xsl:template>
@@ -1961,7 +2000,7 @@
     <xsl:template name="scheduler_a">
         <xsl:param name="href"/>
         <xsl:param name="quote"/>
-        <xsl:param name="text"/>
+        <xsl:param name="content"/>
         <xsl:param name="base_dir" select="/*/@base_dir"/>
 
         <xsl:if test="$quote">
@@ -1978,11 +2017,11 @@
             <xsl:variable name="root_title"   select="normalize-space( $root_element/@title )"/>
 
             <xsl:choose>
-                <xsl:when test="$text">
+                <xsl:when test="$content">
                     <xsl:attribute name="title">
                         <xsl:copy-of select="$root_title"/>
                     </xsl:attribute>
-                    <xsl:copy-of select="$text"/>
+                    <xsl:copy-of select="$content"/>
                 </xsl:when>
                 <xsl:otherwise>
                     <xsl:copy-of select="$root_title"/>
@@ -2918,16 +2957,28 @@
                         <xsl:call-template name="phrase">
                             <xsl:with-param name="id" select="'head.last_updated_by'"/>
                         </xsl:call-template>
+                        
                         <xsl:text> </xsl:text>
-                        <xsl:variable name="name" select="substring-before( substring-after( /*/@author, 'Author: ' ), ' $' )"/>
-                        <xsl:choose>
-                            <xsl:when test="$name = 'jz'">
-                                <a href="http://www.zschimmer.com">Joacim Zschimmer</a></xsl:when>
-                            <xsl:otherwise><xsl:value-of select="$name"/></xsl:otherwise>
-                        </xsl:choose>,
-                        <!--xsl:variable name="name" select="document('standards.xml')/standards/authors/author[ @author = current()/@author ]/@full_name"/>
-                        <xsl:value-of select="$name"/>,-->
-                        <xsl:value-of select="translate( substring-before( substring-after( /*/@date,   'Date: '   ), ' (' ), '/', '-' )"/>
+                        
+                        <span style="white-space: nowrap">
+                            <xsl:variable name="name" select="substring-before( substring-after( /*/@author, 'Author: ' ), ' $' )"/>
+                            <xsl:choose>
+                                <xsl:when test="$name = 'jz'">
+                                    <a href="http://www.zschimmer.com">Joacim Zschimmer</a></xsl:when>
+                                <xsl:otherwise><xsl:value-of select="$name"/></xsl:otherwise>
+                            </xsl:choose>,
+                            <!--xsl:variable name="name" select="document('standards.xml')/standards/authors/author[ @author = current()/@author ]/@full_name"/>
+                            <xsl:value-of select="$name"/>,-->
+                        </span>
+
+                        <xsl:element name="span">
+                            <xsl:attribute name="style">white-space: nowrap</xsl:attribute>
+                            <xsl:variable name="date" select="translate( substring-before( substring-after( /*/@date,   'Date: '   ), ' (' ), '/', '-' )"/>
+                            <xsl:attribute name="title">
+                                <xsl:value-of select="$date"/>
+                            </xsl:attribute>
+                            <xsl:value-of select="substring( $date, 1, 10 )"/>   <!-- yyyy-mm-dd -->
+                        </xsl:element>
                     </p>
                 </td>
             </tr>
@@ -2940,7 +2991,8 @@
         <xsl:param name="parent_page"/>
 
         <p style="font-size: 8pt; margin-top: 0px; padding-top: 0px">
-            Scheduler &#160; &#160; &#160;
+            Scheduler &#160; &#160; 
+            
             <xsl:if test="not( /*/@suppress_browse_bar='yes' )">
                 <xsl:element name="a">
                     <xsl:attribute name="class">silent</xsl:attribute>
@@ -2974,43 +3026,43 @@
 
         <xsl:call-template name="scheduler_a">
             <xsl:with-param name="href" select="'command_line.xml'"/>
-            <xsl:with-param name="text">
+            <xsl:with-param name="content">
                 <xsl:call-template name="phrase">
                     <xsl:with-param name="id" select="'head.link_to_options'"/>
                 </xsl:call-template>
             </xsl:with-param>
         </xsl:call-template>
-        &#160; &#160; &#160;
+        &#160; &#160;
 
         <xsl:call-template name="scheduler_a">
             <xsl:with-param name="href" select="'xml.xml'"/>
-            <xsl:with-param name="text">
+            <xsl:with-param name="content">
                 <xsl:call-template name="phrase">
                     <xsl:with-param name="id" select="'head.link_to_xml'"/>
                 </xsl:call-template>
             </xsl:with-param>
         </xsl:call-template>
-        &#160; &#160; &#160;
+        &#160; &#160;
 
         <xsl:call-template name="scheduler_a">
             <xsl:with-param name="href" select="'api/api.xml'"/>
-            <xsl:with-param name="text">
+            <xsl:with-param name="content">
                 <xsl:call-template name="phrase">
                     <xsl:with-param name="id" select="'head.link_to_api'"/>
                 </xsl:call-template>
             </xsl:with-param>
         </xsl:call-template>
-        &#160; &#160; &#160;
+        &#160; &#160;
 
         <xsl:call-template name="scheduler_a">
             <xsl:with-param name="href" select="'register.xml'"/>
-            <xsl:with-param name="text">
+            <xsl:with-param name="content">
                 <xsl:call-template name="phrase">
                     <xsl:with-param name="id" select="'head.link_to_index'"/>
                 </xsl:call-template>
             </xsl:with-param>
         </xsl:call-template>
-        &#160; &#160; &#160;
+        &#160; &#160;
 
     </xsl:template>
 

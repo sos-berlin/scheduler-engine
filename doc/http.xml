@@ -48,7 +48,7 @@
 <h2>Zugriffsschutz</h2>
 <p>
     Der Scheduler lässt nur TCP- und HTTP-Verbindung zu von Rechnern,
-    die <scheduler_element name="allowed_host"/> die Erlaubnis bekommen haben.
+    die mit <scheduler_element name="allowed_host"/> die Erlaubnis bekommen haben.
 </p>
 
 

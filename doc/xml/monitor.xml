@@ -4,7 +4,7 @@
 <!--$Id$-->
 
 <xml_element name     = "monitor"
-             title    = "Monitor"
+             title    = "Monitor, zum Überwachen des Jobs"
              category = "Konfiguration"
              base_dir = "../"
              parent_page = "../konfiguration.xml"

@@ -31,6 +31,7 @@
             <phrase id="command_line.variants.title">Aufrufvarianten</phrase>
             <phrase id="command_line.options.title">Optionen</phrase>
             <phrase id="command_line.option.multiple">Die Option kann mehrfach angegeben werden.</phrase>
+            <phrase id="command_line.option.reference">Kommandozeilenoption</phrase>
 
             
             <phrase id="common.in_programming_language">in</phrase>

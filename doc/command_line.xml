@@ -4,7 +4,7 @@
 <!--$Id$-->
 
 <command_line program  = "scheduler"
-              title    = "Kommandozeile"
+              title    = "Kommandozeilenoptionen"
               base_dir = ""
               author   = "$Author$"
               date     = "$Date$">

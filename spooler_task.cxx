@@ -863,7 +863,10 @@ void Task::add_pid( int pid, const Time& timeout_period )
         _log->debug9( message_string( "SCHEDULER-912", pid, timeout_at ) );
     }
 
-    _registered_pids[ pid ] = Z_NEW( Registered_pid( this, pid, timeout_at, false, false, false, false, "" ) );
+    bool is_process_group = false;
+    if( pid < 0 )  pid = -pid, is_process_group = true;
+
+    _registered_pids[ pid ] = Z_NEW( Registered_pid( this, pid, timeout_at, false, false, false, is_process_group, "" ) );
 
     set_subprocess_timeout();
 }
