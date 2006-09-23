@@ -507,7 +507,21 @@
     
     <description>
         <p>
-            Die Parameter (rechts vom Gleichheitszeichen) können in Anführungszeichen oder in Apostrophe
+            Der Scheduler wird durch einfachen Aufruf gestartet.
+        </p>
+        <pre>C:\>…<i>installation path</i>…\scheduler.exe …\my_scheduler_configuration.xml …</pre>
+        <pre>user@host:~> …<i>installation path</i>…/scheduler …/my_scheduler_configuration.xml …</pre>
+        <p>
+            In der Regel müssen vorher noch einige Umgebungsvariablen gesetzt sein,
+            siehe das Handbuch »Installation und Konfiguration«.
+
+            <!-- TODO Welche? Das sollte hier kurz aufgeführt werden und steht jetzt sicher ausführlich in einer Installationsbeschreibung.
+                 Pfad für JVM, javac, libstdc++, libspidermonkey.so, libjavascript.so -->
+        </p>
+        <p>
+            Die Parameter (rechts vom Gleichheitszeichen) 
+            der hier beschriebenen Kommandozeilenoptionen
+            können in Anführungszeichen oder in Apostrophe
             gesetzt werden.
         </p>
     </description>
