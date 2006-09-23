@@ -11,7 +11,7 @@
         <xsd:documentation xml:lang="de">
             $Id$
             Schema für die Scheduler-Konfiguration,
-            s.a. http://www.zschimmer.com/sos/scheduler/konfiguration.xml.html.
+            s.a. http://www.zschimmer.com/sos/scheduler/konfiguration.html.
         </xsd:documentation>
     </xsd:annotation>
         

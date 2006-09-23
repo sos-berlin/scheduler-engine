@@ -50,7 +50,7 @@
             <description>
                 <p>
                     Die neue Einstellung verhindert den Versand und stellt die Nachricht in das mit
-                    <scheduler_ini_entry file="sos.ini" section="spooler" entry="queue_dir"/>
+                    <scheduler_ini_entry file="sos.ini" section="mail" entry="queue_dir"/>
                     eingestellte Verzeichnis.
                 </p>
                 <p>
