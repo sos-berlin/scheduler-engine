@@ -5,7 +5,7 @@
 
 <register
     author="$Author: scheduler_keyword_to_xml.pl $"
-    date= "$Date: 2006/9/22 11:25:59 $"
+    date= "$Date: 2006/9/24 6:4:57 $"
 >
 <register_keyword keyword='abort_immediately'>
     <register_keyword_display><code>abort_immediately()</code></register_keyword_display>
@@ -2114,7 +2114,6 @@
     <register_keyword_display><code>queue_dir=</code></register_keyword_display>
     <register_entry register_file='sos_ini_mail.xml#entry_queue_dir' register_title='file sos.ini, section [mail]'  register_keyword='queue_dir' type='definition'/>
     <register_ini_entry register_file='CHANGES.xml' register_title='Änderungsprotokoll' file='sos.ini' section='mail' entry='queue_dir'/>
-    <register_ini_entry register_file='CHANGES.xml' register_title='Änderungsprotokoll' file='sos.ini' section='spooler' entry='queue_dir'/>
     <register_ini_entry register_file='settings.xml' register_title='Einstellungen' file='sos.ini' section='mail' entry='queue_dir'/>
 </register_keyword>
 <register_keyword keyword='queue_dir (property)'>

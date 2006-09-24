@@ -10,11 +10,22 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2006-09-20" version="2.0.158" subversion_revision="4545">
+    <change date="2006-09-24" version="2.0.158" subversion_revision="4551">
+        <revision type="new" title="add_pid() für Prozessgruppe">
+            <description>
+                <p>
+                    <scheduler_method class="Task" object="spooler_task" method="add_pid"/> akzeptiert die Pid auch negativ,
+                    um eine Prozessgruppe zu bezeichnen. 
+                    Unter Unix wird dann bei einem <code>kill</code> die Prozessgruppe abgebrochen.
+                    Unter Windows hat eine negative Pid zurzeit keine besondere Wirkung.
+                </p>
+            </description>
+        </revision>
+
         <revision type="modification" title="Mehrere &lt;commands&gt; aus Basiskonfigurationen werden zusammengefügt">
             <description>
                 <p>
-                    Alle <scheduler_element name="commands"/> aus der Konfiguration 
+                    Alle <scheduler_element name="commands"/> aus der Konfiguration
                     mit den <scheduler_element name="base"/>-Konfigurationen werden ausgeführt,
                     <scheduler_element name="base"/> zuerst.
                 </p>
