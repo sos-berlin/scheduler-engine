@@ -129,7 +129,7 @@
                     <scheduler_method class="Task" properties="changed_directories"/>
                     konnte mehrfache Einträge enthalten, 
                     wenn der Scheduler mehrfache Änderungen desselben Verzeichnisses bemerkte,
-                    Verzeichnisänderungen bemerkt, bevor die Task gestartet werden konnte.
+                    bevor die Task gestartet werden konnte.
                     Jetzt wird jedes Verzeichnis nur einmal eingetragen.
                 </p>
             </description>
@@ -196,7 +196,8 @@
 
         <revision type="new" title="Dateiaufträge">
             <description>
-                In <scheduler_element name="job_chain"/> können zwei neue XML-Elemente angegeben werden:
+                In <scheduler_element name="job_chain"/> können zwei neue XML-Elemente angegeben werden,
+                und ein Kommando liefert die Schwarze Liste:
 
                 <ul>
                     <li>

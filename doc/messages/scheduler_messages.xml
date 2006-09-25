@@ -2185,19 +2185,19 @@
 
         <message code="SCHEDULER-346">
             <text xml:lang="en">
-                <title>Due to previous error the path is set on the bad list: <p1/></title>
+                <title>Due to previous error the path will be ignored: <p1/></title>
             </text>
         </message>
 
         <message code="SCHEDULER-347">
             <text xml:lang="en">
-                <title>Path ist removed from the bad list: <p1/></title>
+                <title>Path has been removed from the blacklist: <p1/></title>
             </text>
         </message>
 
         <message code="SCHEDULER-348">
             <text xml:lang="en">
-                <title>Database doesn't deliver witdh of column <p1/>.<p2/></title>
+                <title>Database doesn't deliver width of column <p1/>.<p2/></title>
             </text>
         </message>
 
@@ -2846,13 +2846,13 @@
 
         <message code="SCHEDULER-977">
             <text xml:lang="en">
-                <title>Job does not stop because of <code>&lt;job stop_on_error="no"></code>. Task error was: <p1/></title>
+                <title>Job is not stopping because of <code>&lt;job stop_on_error="no"></code>. Task error was: <p1/></title>
             </text>
         </message>
         
         <message code="SCHEDULER-978">
             <text xml:lang="en">
-                <title>Job stops because of <code>&lt;job stop_on_error="yes"></code>. Task error was: <p1/></title>
+                <title>Job is stopping because of <code>&lt;job stop_on_error="yes"></code>. Task error was: <p1/></title>
             </text>
         </message>
         
@@ -2894,7 +2894,7 @@
 
         <message code="SCHEDULER-985">
             <text xml:lang="en">
-                <title><p1>number</p1> more file orders will be added later, after previous orders has been processed</title>
+                <title><p1>number</p1> more file orders will be added later, after previous orders have been processed</title>
             </text>
         </message>
         
