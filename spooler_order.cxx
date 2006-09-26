@@ -1722,7 +1722,7 @@ File_path Order::file_path() const
 
     try
     {
-        if( ptr<spooler_com::Ivariable_set> order_params = params_or_null() )
+        if( ptr<Com_variable_set> order_params = params_or_null() )
         {
             Variant path;
             order_params->get_Var( Bstr( scheduler_file_path_variable_name ), &path );
@@ -1800,7 +1800,7 @@ Variant Order::param( const string& name ) const
 {
     Variant result;
 
-    if( ptr<spooler_com::Ivariable_set> params = params_or_null() )  
+    if( ptr<Com_variable_set> params = params_or_null() )  
     {
         HRESULT hr = params->get_Var( Bstr( name ), &result );
         if( FAILED(hr) )  throw_com( hr, __FUNCTION__, name );
