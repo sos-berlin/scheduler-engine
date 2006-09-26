@@ -610,6 +610,8 @@
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <property name="var">
+    <not_implemented programming_language="javascript"/>    <!-- var ist Schlüsselwort -->
+
     <com>
         <com.parameter name="name">
             <com.type type="BSTR"/>
@@ -644,9 +646,9 @@
         Die Scheduler-weiten Variablen als <code>Variable_set</code>
     </title>
 
-    <description>
+    <!-- var ist nicht für Javsascript implementiert! description>
         Siehe <scheduler_method class="Spooler" method="var"/>
-    </description>
+    </description-->
 </property>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->

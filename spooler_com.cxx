@@ -332,7 +332,7 @@ STDMETHODIMP Com_variable_set::QueryInterface( const IID& iid, void** result )
 
 void Com_variable_set::set_dom( const xml::Element_ptr& params, Variable_set_map* variable_sets, const string& variable_element_name )
 {
-    if( !params)  return;
+    if( !params )  return;
 
     HRESULT hr;
 
@@ -343,17 +343,29 @@ void Com_variable_set::set_dom( const xml::Element_ptr& params, Variable_set_map
             if( e.nodeName_is( variable_element_name ) ) 
             {
                 Bstr    name  = e.getAttribute( "name" );
-                Variant value = e.getAttribute( "value" );
+                string  value = e.getAttribute( "value" );
+                
+                if( variable_sets )
+                {
+                    Variable_set_map::iterator it = variable_sets->find( variable_set_name_for_substitution );
+                    if( it != variable_sets->end() )
+                    {
+                        value = subst_env( value, +it->second );
+                    }
+                }
+                
+                Variant value_vt = value;
 
-                hr = put_Var( name, &value );                       if( FAILED(hr) )  throw_ole( hr, "Ivariable_set::put_var" );
+                hr = put_Var( name, &value_vt );                       
+                if( FAILED(hr) )  throw_ole( hr, "Ivariable_set::put_var" );
             }
             else
             if( e.nodeName_is( "copy_params" ) )
             {
                 string from = e.getAttribute( "from" );
-                if( !variable_sets )  throw_xc( "SCHEDULER-329", from );
+                if( !variable_sets )  z::throw_xc( "SCHEDULER-329", from );
                 Variable_set_map::iterator it = variable_sets->find( from );
-                if( it == variable_sets->end() )  throw_xc( "SCHEDULER-329", from );
+                if( it == variable_sets->end() )  z::throw_xc( "SCHEDULER-329", from );
 
                 merge( it->second );
             }
@@ -687,6 +699,13 @@ STDMETHODIMP Com_variable_set::Clone( Ivariable_set** result )
     return hr;
 }
 
+//--------------------------------------------------------------------------Com_variable_set::clone
+
+ptr<Com_variable_set> Com_variable_set::clone()
+{
+    return new Com_variable_set( *this );
+}
+
 //--------------------------------------------------------------------------Com_variable_set::Merge
 
 STDMETHODIMP Com_variable_set::Merge( Ivariable_set* other )
@@ -851,6 +870,15 @@ STDMETHODIMP Com_variable_set::get_Names( BSTR* result )
     catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
 
     return hr;
+}
+
+//---------------------------------------------------------------------------------------operator +
+
+ptr<Com_variable_set> operator+( const ptr<Com_variable_set>& a, Com_variable_set* b )
+{
+    ptr<Com_variable_set> result = a->clone();
+    result->merge( b );
+    return result;
 }
 
 //------------------------------------------------------------Com_variable_set_enumerator::_methods
@@ -1552,7 +1580,7 @@ void Com_log_proxy::set_property( const string& name, const Variant& value )
 {
     if( name == "level" )  _level = value.as_int();
     else  
-        throw_xc( "Com_log_proxy::set_property", name );
+        z::throw_xc( "Com_log_proxy::set_property", name );
 }
 
 //---------------------------------------------------------------------Com_log_proxy::GetIDsOfNames

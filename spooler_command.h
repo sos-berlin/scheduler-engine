@@ -127,7 +127,9 @@ struct Command_processor
 
   //void                        set_communication_operation ( Communication::Operation* p )         { _communication_operation = p; }
     void                        set_validate                ( bool b )                              { _validate = b; }
-    void                        set_variable_set            ( const string& name, spooler_com::Ivariable_set* v ) { _variable_set_map[ name ] = v; }
+    void                        set_variable_set            ( const string& name, Com_variable_set* v ) { _variable_set_map[ name ] = v; }
+  //void                        set_subst                   ( Com_variable_set* env )               { set_variable_set( variable_set_name_for_substitution, env ); }
+
   //void                        abort_immediately           ( int exit_code = 1 );
 
     Fill_zero                  _zero_;

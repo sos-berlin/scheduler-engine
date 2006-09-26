@@ -86,6 +86,7 @@ extern volatile int             ctrl_c_pressed;
 extern const string             xml_schema_path;            // "scheduler.xsd"
 extern const string             scheduler_character_encoding;
 extern const int                const_order_id_length_max;
+extern const string             variable_set_name_for_substitution;
 
 
 #ifdef Z_WINDOWS
@@ -578,6 +579,8 @@ struct Spooler : Object,
     bool                       _is_waitable_timer_set;
 
   //double                     _clock_difference;           // -now="..."   Zum Debuggen: Mit dieser Differenz zur tatsächlichen Uhrzeit arbeiten
+
+    ptr<Com_variable_set>      _environment;
 };
 
 //-------------------------------------------------------------------------------------------------

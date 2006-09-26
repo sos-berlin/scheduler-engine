@@ -111,6 +111,8 @@ volatile int                    ctrl_c_pressed                      = 0;        
 
 Spooler*                        spooler_ptr                         = NULL;
 
+const string                    variable_set_name_for_substitution  = "$";              // Name der Variablenmenge für die ${...}-Ersetzung
+
 //-------------------------------------------------------------------------------------------------
 
 extern zschimmer::Message_code_text  scheduler_messages[];            // messages.cxx, generiert aus messages.xml
@@ -542,7 +544,8 @@ Spooler::Spooler()
     _termination_gmtimeout_at(no_termination_timeout),
     _web_services(this),
     _waitable_timer( "waitable_timer" ),
-    _validate_xml(true)
+    _validate_xml(true),
+    _environment( variable_set_from_environment() )
 {
     if( spooler_ptr )  throw_xc( "spooler_ptr" );
     spooler_ptr = this;

@@ -19,6 +19,19 @@
             Die Parameter können zur Laufzeit überschrieben und erweitert werden.
         </p>
         <p>
+            <scheduler_a href="../ersetzung_von_umgebungsvariablen.xml">Umgebungsvariablen</scheduler_a>
+            können abgerufen werden,
+            wenn das Element verwendet wird in
+        </p>
+        <ul>
+            <li>
+                <scheduler_element name="add_order"/>
+            </li>
+            <li>
+                <scheduler_element name="start_job"/>
+            </li>
+        </ul>
+        <p>
             Job-Parameter können mit der Methode <scheduler_method class="Task" method="params" /> abgerufen werden.
         </p>
         <p>

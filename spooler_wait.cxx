@@ -446,7 +446,7 @@ bool Wait_handles::wait_until_2( const Time& until, const Object* wait_for_objec
         double wait_time         = until - now;
         int    max_sleep_time_ms = INT_MAX-1;
         int    t                 = (int)ceil( min( (double)max_sleep_time_ms, wait_time * 1000.0 ) );
-        DWORD  ret;
+        DWORD  ret               = WAIT_TIMEOUT;
 
 
         if( t <= 0 )  if( again )  break;
@@ -466,11 +466,11 @@ bool Wait_handles::wait_until_2( const Time& until, const Object* wait_for_objec
         {
             int     console_line_length = 0;
             double  step = 1.0;
-
+            
             while( Time::now() < until - step )
             {
                 ret = MsgWaitForMultipleObjects( _handles.size(), handles, FALSE, (int)( ceil( step * 1000 ) ), QS_ALLINPUT ); 
-                if( ret != WAIT_TIMEOUT )  goto WAIT_OK;
+                if( ret != WAIT_TIMEOUT )  break;
 
                 Time now = Time::now();
                 Time rest = until - now;
@@ -494,16 +494,18 @@ bool Wait_handles::wait_until_2( const Time& until, const Object* wait_for_objec
                 cerr << l << flush;
             }
 
-            ret = MsgWaitForMultipleObjects( _handles.size(), handles, FALSE, max( 0, t ), QS_ALLINPUT ); 
+            if( ret == WAIT_TIMEOUT )
+            {
+                ret = MsgWaitForMultipleObjects( _handles.size(), handles, FALSE, max( 0, t ), QS_ALLINPUT ); 
+            }
 
-            if( console_line_length )  cerr << string( console_line_length - 1, ' ' ) << '\r' << flush;  // Zeile löschen (line_length-1 wegen \r)
+            if( console_line_length )  cerr << string( console_line_length, ' ' ) << '\r' << flush;  // Zeile löschen
         }
         else
         {
             ret = MsgWaitForMultipleObjects( _handles.size(), handles, FALSE, t, QS_ALLINPUT ); 
         }
         
-WAIT_OK:
         delete [] handles;  handles = NULL;
 
         if( ret == WAIT_FAILED )  throw_mswin_error( "MsgWaitForMultipleObjects" );

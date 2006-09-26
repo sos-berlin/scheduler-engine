@@ -10,6 +10,22 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2006-09-26" version="2.0.158" subversion_revision="4555">
+        <revision type="modification" title="Umgebungsvariablen in &lt;add_order>&lt;params> und &lt;start_job&lt;params>">
+            <description>
+                <p>
+                    Innerhalb von
+                    <scheduler_element name="add_order"/> und
+                    <scheduler_element name="start_job"/> können in 
+                    in <scheduler_element name="param" attribute="value"/> 
+                    <scheduler_a href="ersetzung_von_umgebungsvariablen.xml">Umgebungsvariablen abgerufen</scheduler_a>
+                    werden.
+                </p>
+            </description>
+        </revision>
+    </change>
+
+
     <change date="2006-09-24" version="2.0.158" subversion_revision="4551">
         <revision type="new" title="add_pid() für Prozessgruppe">
             <description>

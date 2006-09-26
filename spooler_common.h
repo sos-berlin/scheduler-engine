@@ -85,6 +85,10 @@ struct Scheduler_object
     string                     _mail_xslt_stylesheet_path;
 };
 
+//-------------------------------------------------------------------------------------------------
+
+ptr<Com_variable_set>           variable_set_from_environment();
+
 //-------------------------------------------------------------------------------scheduler_object<>
 /*
 template< class BASE_CLASS >

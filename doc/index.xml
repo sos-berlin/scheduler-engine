@@ -265,7 +265,11 @@
                             <scheduler_a href="xml_commands.xml"/>
                         </dt>
                         <dd>
-                            Über HTTP, TCP und UDP nimmt der Scheduler
+                            Über 
+                            <scheduler_a href="http.xml">HTTP</scheduler_a>, 
+                            <scheduler_element name="config" attribute="tcp_port">TCP</scheduler_element> und
+                            <scheduler_element name="config" attribute="tcp_port">UDP</scheduler_element>
+                            nimmt der Scheduler
                             <scheduler_a href="xml_commands.xml">Kommandos in XML</scheduler_a> entgegen.
                         </dd>
                     </dl>

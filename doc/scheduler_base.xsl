@@ -1561,6 +1561,7 @@
             <xsl:with-param name="value"     select="@value"    />
             <xsl:with-param name="parameter" select="@parameter"/>
             <xsl:with-param name="child"     select="@child"/>
+            <xsl:with-param name="content"   select="node()"/>
         </xsl:call-template>
     </xsl:template>
 
@@ -1574,6 +1575,7 @@
         <xsl:param name="value"     select="'…'"/>
         <xsl:param name="parameter"/>
         <xsl:param name="child"/>
+        <xsl:param name="content"/>
 
         <xsl:variable name="my_directory">
             <xsl:choose>
@@ -1615,57 +1617,111 @@
 
             <xsl:attribute name="title">
                 <xsl:value-of select="$phrases/phrase [ @id='xml_element.chapter_title.prefix' ]"/>
-                <xsl:text> &lt;</xsl:text>
-                <xsl:value-of select="$name"/>
+                
+                <xsl:choose>
+                    <xsl:when test="$content">
+                        <xsl:call-template name="scheduler_element_text">
+                            <xsl:with-param name="name"      select="$name"/>
+                            <xsl:with-param name="attribute" select="$attribute"/>
+                            <xsl:with-param name="relation"  select="$relation"/>
+                            <xsl:with-param name="value"     select="$value"/>
+                            <xsl:with-param name="parameter" select="$parameter"/>
+                            <xsl:with-param name="child"     select="$child"/>
+                        </xsl:call-template>
+                    </xsl:when>
+                    <xsl:otherwise>
+                        <xsl:text> &lt;</xsl:text>
+                        <xsl:value-of select="$name"/>
+                        <xsl:text>></xsl:text>
+                    </xsl:otherwise>
+                </xsl:choose>
+                
                 <xsl:variable name="xml_element" select="document( concat( $my_directory, $name, '.xml' ) )/xml_element"/>
                 <xsl:variable name="title" select="normalize-space( $xml_element/@title )"/>
+
                 <xsl:if test="$title">
-                    <xsl:text>>  —  </xsl:text>
+                    <xsl:text>  —  </xsl:text>
                     <xsl:value-of select="$title"/>
+                </xsl:if>
+
+                <xsl:if test="$attribute">
+                    <xsl:variable name="attribute_title" select="$xml_element/xml_attributes/xml_attribute [ @name=$attribute or @setting=$attribute ]/@title"/>
+                    <xsl:if test="$attribute_title">
+                        <xsl:text>; </xsl:text>
+                        <xsl:value-of select="$attribute_title"/>
+                    </xsl:if>
                 </xsl:if>
             </xsl:attribute>
 
-            <code>
-                <xsl:text>&lt;</xsl:text>
-                <xsl:value-of select="$name"/>
-
-                <xsl:if test="$attribute">
-                    <xsl:text> </xsl:text>
-                    <xsl:value-of select="$attribute"/>
-                    <xsl:choose>
-                        <xsl:when test="$relation">
-                            <xsl:text>&#x2005;</xsl:text>
-                            <xsl:value-of select="$relation"/>
-                            <xsl:text>&#x2005;</xsl:text>
-                        </xsl:when>
-                        <xsl:otherwise>=</xsl:otherwise>
-                    </xsl:choose>
-                    <xsl:text>"</xsl:text>
-                    <xsl:choose>
-                        <xsl:when test="$value">
-                            <xsl:value-of select="$value"/>
-                        </xsl:when>
-                        <xsl:otherwise>…</xsl:otherwise>
-                    </xsl:choose>
-                    <xsl:text>"</xsl:text>
-                </xsl:if>
-
-                <xsl:if test="$parameter">
-                    <xsl:text> </xsl:text>
-                    <xsl:value-of select="$parameter"/>
-                </xsl:if>
-
-                <xsl:text>></xsl:text>
-
-                <xsl:if test="$child">
-                    <xsl:text>&lt;</xsl:text>
-                    <xsl:value-of select="$child"/>
-                    <xsl:text>></xsl:text>
-                </xsl:if>
-            </code>
+            <xsl:choose>
+                <xsl:when test="$content">
+                    <xsl:copy-of select="$content"/>
+                </xsl:when>
+                <xsl:otherwise>
+                    <code>
+                        <xsl:call-template name="scheduler_element_text">
+                            <xsl:with-param name="name"      select="$name"/>
+                            <xsl:with-param name="attribute" select="$attribute"/>
+                            <xsl:with-param name="relation"  select="$relation"/>
+                            <xsl:with-param name="value"     select="$value"/>
+                            <xsl:with-param name="parameter" select="$parameter"/>
+                            <xsl:with-param name="child"     select="$child"/>
+                        </xsl:call-template>
+                    </code>
+                </xsl:otherwise>
+            </xsl:choose>
         </xsl:element>
     </xsl:template>
 
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_element_text-->
+    
+    <xsl:template name="scheduler_element_text">
+        <xsl:param name="name"/>
+        <xsl:param name="attribute"/>
+        <xsl:param name="relation"/>
+        <xsl:param name="value"/>
+        <xsl:param name="parameter"/>
+        <xsl:param name="child"/>
+
+        <xsl:text>&lt;</xsl:text>
+        <xsl:value-of select="$name"/>
+
+        <xsl:if test="$attribute">
+            <xsl:text> </xsl:text>
+            <xsl:value-of select="$attribute"/>
+            <xsl:choose>
+                <xsl:when test="$relation">
+                    <xsl:text>&#x2005;</xsl:text>
+                    <xsl:value-of select="$relation"/>
+                    <xsl:text>&#x2005;</xsl:text>
+                </xsl:when>
+                <xsl:otherwise>=</xsl:otherwise>
+            </xsl:choose>
+            <xsl:text>"</xsl:text>
+            <xsl:choose>
+                <xsl:when test="$value">
+                    <xsl:value-of select="$value"/>
+                </xsl:when>
+                <xsl:otherwise>…</xsl:otherwise>
+            </xsl:choose>
+            <xsl:text>"</xsl:text>
+        </xsl:if>
+
+        <xsl:if test="$parameter">
+            <xsl:text> </xsl:text>
+            <xsl:value-of select="$parameter"/>
+        </xsl:if>
+
+        <xsl:text>></xsl:text>
+
+        <xsl:if test="$child">
+            <xsl:text>&lt;</xsl:text>
+            <xsl:value-of select="$child"/>
+            <xsl:text>></xsl:text>
+        </xsl:if>
+
+    </xsl:template>
+    
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_setting-->
 
     <xsl:template match="scheduler_setting" mode="description">

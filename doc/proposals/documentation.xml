@@ -18,16 +18,6 @@
 
 
 
-    <h2>
-        Meldungen
-    </h2>
-    <p>
-        Beschreibung der Meldungen.
-        Verzeichnis: Welche Operation (API, XML) erzeugt welche Meldung?
-        Anklickbare Meldungs-Codes im Scheduler-Protokoll der HTML-Oberfläche.
-    </p>
-
-    
     <h2>Verzeichnisse</h2>
 
     <p>
@@ -35,10 +25,17 @@
         Zum Beispiel in file_orders.xml Verweise auf die eMails die hier verschickt werden.
     </p>
 
+    
     <h3>
         Verzeichnis der eMails
     </h3>
+    <p>
+        Bei welchen Gelegenheiten werden welche eMails verschickt?
+        Welche sind mit XSLT selbst formulierbar?
+        Wir haben anscheinend noch keine ausführliche Beschreibung des XSLT-eMail-Verfahrens mit Beispielen.
+    </p>
 
+    
     <h3>
         Verzeichnis der Umgebungsvariablen
     </h3>
@@ -51,6 +48,7 @@
         Verzeichnis der Stellen (XML-Attribute), die Umgebungsvariablen auflösen.
     </p>
 
+
     <h3>
         Verzeichnis der Datenbanktabellen
     </h3>
@@ -60,30 +58,48 @@
     </p>
 
 
-    <h3>Alte Texte von 2002 überarbeiten</h3>
+    <h3>
+        Verzeichnis der Meldungen
+    </h3>
+    <p>
+        Beschreibung der Meldungen.
+        Verzeichnis: Welche Operation (API, XML) erzeugt welche Meldung?
+        Anklickbare Meldungs-Codes im Scheduler-Protokoll der HTML-Oberfläche.
+    </p>
+
+
+    <h2>Alte Texte von 2002 überarbeiten</h2>
     <p>
         Dienste, Historie: Layout anpassen und Inhalt prüfen.
     </p>
 
 
-    <h3>Besonderheiten der Betriebssystem-Varianten</h3>
+    <h2>Besonderheiten der Betriebssystem-Varianten</h2>
     <p>
+        In einer Tabelle gegenüber stellen.
         HP-UX: Keine Protokollkomprimierung in der Datenbank.
         Windows-Dienst.
         Task-Priorität.
         Verzeichnisüberwachung.
         Perl, Sprachen der Scripting-Engine: VBscript, Javascript, Perlscript.
-        
-        
+        Start des Schedulers. Installation.
     </p>
 
 
-    <h3>XHTML</h3>
+    <h2>XHTML</h2>
     <p>
         Der Text ist nicht ganz (X)HTML-Konform: 
         Wenn auf einer Seite ein Register-Stichwort zweimal vorkommt, gibt's zwei Stellen mit derselben Id.
         Das müsste anders gelöst sein.
     </p>
+
+    
+    <h2>Skriptsprache merken</h2>
+    <p>
+        Verweise in die API zeigen die JavaScript-Variante.
+        In einem Cookie könnte die zuletzt verwendete Sprache vermerkt werden, so dass der Leser nicht immer wieder selbst seine Sprache anklicken muss.
+    </p>
+
 
 
 </description>

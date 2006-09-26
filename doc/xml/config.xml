@@ -42,7 +42,7 @@
         </xml_attribute>
 
 
-        <xml_attribute setting="port">
+        <xml_attribute setting="port" title="Portnummer für TCP und UDP">
             <description>
                 <p>
                     Siehe auch <scheduler_element name="config" attribute="tcp_port"/>.

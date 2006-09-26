@@ -114,6 +114,7 @@ Command_processor::Command_processor( Spooler* spooler, Security::Level security
     _validate(true),
     _security_level( security_level )
 {
+    _variable_set_map[ variable_set_name_for_substitution ] = _spooler->_environment;
     _spooler->_executing_command = true;
 
     begin_answer();

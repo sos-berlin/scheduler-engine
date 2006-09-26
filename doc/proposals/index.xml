@@ -6,7 +6,6 @@
 <description
     title               = "Vorschläge zur weiteren Entwicklung"
     base_dir            = "../"
-    parent_page         = "index.xml"
     author              = "$Author$"
     date                = "$Date$"
 >

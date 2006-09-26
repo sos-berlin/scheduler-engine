@@ -61,8 +61,9 @@ struct Spooler;
 //-------------------------------------------------------------------------------------------------
 
 extern Typelib_ref              typelib;
+struct Com_variable_set;
 
-typedef map< string, ptr<spooler_com::Ivariable_set> >   Variable_set_map;
+typedef map< string, ptr<Com_variable_set> >   Variable_set_map;
 
 //----------------------------------------------------------------------------------------Com_error
 
@@ -152,6 +153,7 @@ struct Com_variable_set: spooler_com::Ivariable_set,
     string                      get_string                  ( const string& name );
     string                      get_string_by_name          ( const string& name, bool* name_found ) const;
     void                        merge                       ( const Ivariable_set* );
+    ptr<Com_variable_set>       clone                       ();
     void                        to_xslt_parameters          ( xml::Xslt_parameters*, Has_log* warning_log = NULL );
 
     STDMETHODIMP                Set_var                     ( BSTR name, VARIANT* value )           { return put_Var( name, value ); }
@@ -188,6 +190,8 @@ struct Com_variable_set: spooler_com::Ivariable_set,
     Map                        _map;
     bool                       _ignore_case;
 };
+
+ptr<Com_variable_set>           operator +              ( const ptr<Com_variable_set>&, const Com_variable_set* );
 
 //----------------------------------------------------------------------Com_variable_set_enumerator
 

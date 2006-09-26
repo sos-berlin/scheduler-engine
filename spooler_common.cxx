@@ -50,6 +50,20 @@ ptr<Xslt_stylesheet> Scheduler_object::mail_xslt_stylesheet()
     return _mail_xslt_stylesheet; 
 }
 
+//--------------------------------------------------------------------variable_set_from_environment
+
+ptr<Com_variable_set> variable_set_from_environment()
+{
+    ptr<Com_variable_set> result = new Com_variable_set();
+    for( char** e = environ; *e; e++ )
+    {
+        const char* equal = strchr( *e, '=' );
+        if( equal )  result->set_var( string( *e, equal - *e ), equal + 1 );
+    }
+
+    return result;
+}
+
 //-------------------------------------------------------------------------------------------------
 
 } //namespace spoooler

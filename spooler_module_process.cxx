@@ -153,22 +153,6 @@ string Process_module_instance::program_path()
     return _shell_file.path() != ""? _shell_file.path() :  _module->_process_filename;
 }
 
-//-------------------------------------------Process_module_instance::variable_set_from_environment
-#ifdef Z_WINDOWS
-
-ptr<Com_variable_set> Process_module_instance::variable_set_from_environment()
-{
-    ptr<Com_variable_set> result = new Com_variable_set();
-    for( char** e = environ; *e; e++ )
-    {
-        const char* equal = strchr( *e, '=' );
-        if( equal )  result->set_var( string( *e, equal - *e ), equal + 1 );
-    }
-
-    return result;
-}
-
-#endif
 //--------------------------------------------------------------Process_module_instance::close__end
 
 void Process_module_instance::close__end()

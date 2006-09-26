@@ -97,8 +97,8 @@ struct Order : Com_order,
     void                    set_payload                 ( const VARIANT& );
     Payload                     payload                 ()                                          { THREAD_LOCK_RETURN( _lock, Variant, _payload ); }
     string                      string_payload          () const;
-    ptr<spooler_com::Ivariable_set> params_or_null      () const;
-    ptr<spooler_com::Ivariable_set> params              () const;
+    ptr<Com_variable_set>       params_or_null          () const;
+    ptr<Com_variable_set>       params                  () const;
     void                    set_param                   ( const string& name, const Variant& value );
     Variant                     param                   ( const string& name ) const;
 

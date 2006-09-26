@@ -54,7 +54,6 @@ struct Process_module_instance : Module_instance
   private:
     void                        close_handle                ();
     string                      program_path                ();
-    ptr<Com_variable_set>       variable_set_from_environment();
 
 
     Fill_zero                  _zero_;

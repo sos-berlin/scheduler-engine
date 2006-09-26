@@ -1758,7 +1758,7 @@ string Order::string_payload() const
 
 //----------------------------------------------------------------------------Order::params_or_null
 
-ptr<spooler_com::Ivariable_set> Order::params_or_null() const
+ptr<Com_variable_set> Order::params_or_null() const
 {
     ptr<spooler_com::Ivariable_set> result;
 
@@ -1769,14 +1769,14 @@ ptr<spooler_com::Ivariable_set> Order::params_or_null() const
     HRESULT hr = iunknown->QueryInterface( spooler_com::IID_Ivariable_set, result.void_pp() );
     if( FAILED(hr) )  return NULL;
 
-    return result;
+    return dynamic_cast<Com_variable_set*>( +result );
 }
 
 //------------------------------------------------------------------------------------Order::params
 
-ptr<spooler_com::Ivariable_set> Order::params() const
+ptr<Com_variable_set> Order::params() const
 {
-    ptr<spooler_com::Ivariable_set> result = params_or_null();
+    ptr<Com_variable_set> result = params_or_null();
     if( !result )  z::throw_xc( "SCHEDULER-338" );
     return result;
 }
