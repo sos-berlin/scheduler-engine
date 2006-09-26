@@ -54,7 +54,7 @@ start_job( "java"      , 9 );
                     <start_job job="following">
                         <params>
                             <param name="param" value="SUCCESS"/>
-                            <param name="a"     value="aaa (sollte überschrieben werden)"/>
+                            <param name="a"     value="aaa (sollte überschrieben werden) $PATH"/>
                         </params>
                     </start_job>
                 </commands>
@@ -105,7 +105,7 @@ spooler_log.info( "initial_exit_code=" + initial_exit_code + "  wished_exit_code
                     <start_job job="following">
                         <params>
                             <param name="param" value="SUCCESS"/>
-                            <param name="a"     value="aaa (sollte überschrieben werden)"/>
+                            <param name="a"     value="aaa (sollte überschrieben werden) $PATH"/>
                             <copy_params from="task"/>
                         </params>
                     </start_job>
