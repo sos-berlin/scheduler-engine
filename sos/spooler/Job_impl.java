@@ -89,7 +89,11 @@ public class Job_impl
       * Bei &lt;job order="true">: false versetzt den Auftrag in den Fehlerzustand (s. {@link Job_chain_node}).
       */
 
-    public boolean  spooler_process     ()      throws Exception  { return false; }
+    public boolean  spooler_process     ()      throws Exception  
+    { 
+        //spooler_method_not_implemented(); 
+        return false; 
+    }
 
 
     /*+ Wird als letzte Funktion eines Joblaufs gerufen, wenn ein Fehler aufgetreten ist 
@@ -103,6 +107,10 @@ public class Job_impl
       */
 
     public void     spooler_on_success  ()      throws Exception  {}
+
+
+
+    //private native void spooler_method_not_implemented();
 
 
     

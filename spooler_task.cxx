@@ -1572,6 +1572,14 @@ bool Task::step__end()
 
         if( spooler_process_result.vt == VT_ERROR  &&  V_ERROR( &spooler_process_result ) == DISP_E_UNKNOWNNAME )
         {
+            //if( _order )  
+            //{
+            //    z::Xc x = z::Xc( "SCHEDULER-351" );
+            //    _job->log()->error( x.what() );
+            //    _job->set_state( Job::s_error );
+            //    z::throw_xc( x );
+            //}
+
             result = true;
             continue_task = false;
         }

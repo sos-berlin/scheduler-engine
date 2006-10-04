@@ -65,6 +65,7 @@ struct Subprocess : idispatch_implementation< Subprocess, spooler_com::Isubproce
     STDMETHODIMP            get_Own_process_group           ( VARIANT_BOOL* result )                { return _process.get_Own_process_group( result );}
     STDMETHODIMP                Wait_for_termination        ( VARIANT* seconds, VARIANT_BOOL* );
     STDMETHODIMP                Kill                        ( int signal )                          { return _process.Kill( signal ); }
+    STDMETHODIMP            get_Env                         ( spooler_com::Ivariable_set** );
 
     HRESULT                     Update_register_entry       ();
 

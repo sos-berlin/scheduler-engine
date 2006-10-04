@@ -120,4 +120,6 @@ public class Subprocess  extends Idispatch
     
     public void         set_own_process_group   ( boolean b)                        {                com_call( ">own_process_group", b ); }
     public boolean          own_process_group   ()                                  { return boolean_com_call( "<own_process_group" ); }
+    
+    public Variable_set     env                 ()                                  { return (Variable_set)com_call( "<env" ); }
 }

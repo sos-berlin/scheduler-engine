@@ -170,6 +170,8 @@ library Spooler
 
         [propget]
         HRESULT                 Names                       ( [out,retval] BSTR* );
+
+        HRESULT                 Substitute                  ( [in] BSTR, [out,retval] BSTR* );
     }
 
     [
@@ -1368,6 +1370,9 @@ library Spooler
 
         [propget]
         HRESULT                 Own_process_group       ( [out,retval] VARIANT_BOOL* );
+
+        [propget]
+        HRESULT                 Env                     ( [out,retval] Ivariable_set** );
     };
 
     [

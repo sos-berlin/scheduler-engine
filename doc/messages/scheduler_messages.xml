@@ -1142,10 +1142,10 @@
 
         <message code="SCHEDULER-226">
             <text xml:lang="de">
-                <title>Der Auftrag ist nicht verarbeitet worden ist (spooler_init() oder spooler_open() lieferte false)</title>
+                <title>Der Auftrag ist nicht verarbeitet worden ist, weil die Task vor dem ersten Jobschritt (spooler_process()) beendet worden ist</title>
             </text>
             <text xml:lang="en">
-                <title>Order has not been processed because spooler_init() or spooler_open() returned false</title>
+                <title>Order has not been processed because the task has been terminated before the first step (spooler_process())</title>
             </text>
         </message>
 
@@ -2143,7 +2143,7 @@
 
         <message code="SCHEDULER-339">
             <text xml:lang="en">
-                <title>Someone has removed file <p1/></title>
+                <title>File does not exist and can therefore neither be moved nor removed: <p1/></title>
             </text>
         </message>
 
@@ -2213,6 +2213,12 @@
             </text>
         </message>
 
+        <!--message code="SCHEDULER-351">
+            <text xml:lang="en">
+                <title>The order job has not implemented spooler_process()</title>
+            </text>
+        </message-->
+        
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->

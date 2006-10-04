@@ -13,15 +13,30 @@
     date     = "$Date$">
 
     <ini_entries>
-        <ini_entry name="vm" type="dateiname" title="Dateiname der Java virtual machine">
+        <ini_entry name="vm" type="path" title="Dateipfad der Java virtual machine">
+            <scheduler_keyword keyword="Java Runtime Environment"/>
             <description>
                 <p>
-                    Voreingestellt ist für Windows <code>jvm.dll</code>, für HP-UX <code>jvm.sl</code> und sonst <code>jvm.so</code>.
+                    Voreingestellt ist für HP-UX <code>jvm.sl</code> und für andere Unix-Varianten <code>jvm.so</code>.
                 </p>
                 <p>
+                    Die Voreinstellung für Windows wird aus der Registrierung gelesen.
+                    Aus dem Schlüssel
+                </p>
+                <pre>HKEY_LOCAL_MACHINE\software\JavaSoft\Java Runtime Environment</pre>
+                <p>
+                    wird der Eintrag <code>CurrentVersion</code> gelesen, der die aktuelle Versionsnummer enthält,
+                    z.B. "<code>1.5</code>".
+                    Anschließend wird der Schlüssel der Version gelesen, z.B.
+                </p>
+                <pre>HKEY_LOCAL_MACHINE\software\JavaSoft\Java Runtime Environment\1.5</pre>
+                <p>
+                und dem dortigen Eintrag <code>RuntimeLib</code> der Pfad der <code>jvm.dll</code> entnommen.
+                </p>
+                <!--p>
                     Wenn das Verzeichnis des Moduls nicht im <code>PATH</code> ist,
                     können Sie hier den vollständigen Pfad angeben.
-                </p>
+                </p-->
             </description>
         </ini_entry>
 

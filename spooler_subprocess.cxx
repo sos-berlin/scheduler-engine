@@ -63,6 +63,7 @@ const Com_method Subprocess::_methods[] =
     COM_PROPERTY_PUT( Subprocess, 18, Own_process_group,            0, VT_BOOL ),
     COM_PROPERTY_GET( Subprocess, 18, Own_process_group, VT_BOOL  , 0 ),
   //COM_PROPERTY_PUT( Subprocess, 17, Show_window    ,              0, VT_BYREF|VT_VARIANT ),
+    COM_PROPERTY_GET( Subprocess, 19, Env            , VT_DISPATCH, 0 ),
 #endif
     {}
 };
@@ -75,8 +76,14 @@ Subprocess::Subprocess( Subprocess_register* subprocess_register, IDispatch* tas
     _zero_(this+1),
     _subprocess_register(subprocess_register),
     _task(task),                // Itask oder Itask_proxy
-    _timeout( INT_MAX )
+    _timeout( INT_MAX ),
+    _environment( new Com_variable_set )
 {
+#   ifndef Z_WINDOWS
+        _process_environment->_ignore_case = false;
+#   endif
+    _environment->merge( variable_set_from_environment() );
+
     if( Com_task* com_task = dynamic_cast<Com_task*>( task ) )
     {
         _process.set_own_process_group( com_task->task()->_spooler->_subprocess_own_process_group_default );
@@ -86,6 +93,7 @@ Subprocess::Subprocess( Subprocess_register* subprocess_register, IDispatch* tas
     {
         _process.set_own_process_group( com_task_proxy->_subprocess_own_process_group_default );
     }
+
 }
 
 //--------------------------------------------------------------------------Subprocess::~Subprocess
@@ -129,7 +137,11 @@ STDMETHODIMP Subprocess::put_Environment( BSTR name_bstr, BSTR value_bstr )
     try
     {
         _process.assert_not_started();
-        _process.set_environment_entry( string_from_bstr( name_bstr ), string_from_bstr( value_bstr ) );
+
+        Variant name_vt = name_bstr;
+        Variant value_vt = value_bstr;
+        hr = _environment->put_Value( &name_vt, &value_vt );
+        //_process.set_environment_entry( string_from_bstr( name_bstr ), string_from_bstr( value_bstr ) );
     }
     catch( exception& x ) { Set_excepinfo( x, __FUNCTION__ ); }
     
@@ -155,6 +167,8 @@ STDMETHODIMP Subprocess::Start( VARIANT* program_and_parameters )
         }
 #   endif
 
+    Z_FOR_EACH( Com_variable_set::Map, _environment->_map, it )  
+        _process.set_environment_entry( string_from_bstr( it->second->_name ), string_from_variant( it->second->_value ) );
 
     try
     {
@@ -324,6 +338,14 @@ STDMETHODIMP Subprocess::put_Show_window( VARIANT* value )
     return E_NOTIMPL;
 
 # endif
+}
+
+//------------------------------------------------------------------------------Subprocess::get_Env
+
+STDMETHODIMP Subprocess::get_Env( spooler_com::Ivariable_set** result )
+{
+    *result = _environment.copy();
+    return S_OK;
 }
 
 //----------------------------------------------------------------Subprocess::Update_register_entry

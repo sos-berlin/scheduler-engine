@@ -2128,7 +2128,6 @@ void Spooler::start()
     _base_log.set_directory( _log_directory );
     _base_log.open_new();
     
-    //_log.info( "Scheduler " + _version + " startet mit " + _config_filename + ", pid=" + as_string( getpid() ) );
     _log.info( message_string( "SCHEDULER-900", _version, _config_filename, getpid() ) );
     _spooler_start_time = Time::now();
 
@@ -3507,8 +3506,6 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
 
 
 
-    Z_LOG2( "scheduler", "Scheduler " VER_PRODUCTVERSION_STR "\n" );
-
     int     ret                = 0;
     bool    is_service         = false;
     bool    is_object_server   = false;
@@ -3625,8 +3622,13 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
 
         if( send_cmd != "" )  is_service = false;
 
+
+        // scheduler.log
+
         if( log_filename.empty() )  log_filename = subst_env( read_profile_string( factory_ini, "spooler", "log" ) );
         if( !log_filename.empty() )  log_start( log_filename );
+
+        Z_LOG2( "scheduler", "Scheduler " VER_PRODUCTVERSION_STR "\n" );
 
 
         if( is_scheduler_client )

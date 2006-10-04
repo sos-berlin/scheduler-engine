@@ -151,4 +151,6 @@ public class Variable_set extends Idispatch
     public String           xml                 ()                                  { return (String)       com_call( "<xml"                    ); }
 
     public String           names               ()                                  { return (String)       com_call( "<names"                  ); }
+    
+    public String           substitute          ( String string )                   { return (String)       com_call( "substitute", string      ); }
 }

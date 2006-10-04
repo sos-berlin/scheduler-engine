@@ -271,6 +271,7 @@ const Com_method Com_variable_set::_methods[] =
     { DISPATCH_PROPERTYGET, 7, "java_class_name"    , (Com_method_ptr)&Com_variable_set::get_Java_class_name, VT_BSTR   },
   //{ DISPATCH_PROPERTYGET, 9, "Names_array"        , (Com_method_ptr)&Com_variable_set::get_Names_array, VT_ARRAY      },
     { DISPATCH_PROPERTYGET, 9, "Names"              , (Com_method_ptr)&Com_variable_set::get_Names      , VT_BSTR       },
+    { DISPATCH_METHOD     ,10, "Substitute"         , (Com_method_ptr)&Com_variable_set::Substitute     , VT_BSTR       , { VT_BSTR } },
     {}
 };
 
@@ -868,6 +869,22 @@ STDMETHODIMP Com_variable_set::get_Names( BSTR* result )
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+
+//---------------------------------------------------------------------Com_variable_set::Substitute
+
+STDMETHODIMP Com_variable_set::Substitute( BSTR bstr, BSTR* result )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        hr = String_to_bstr( subst_env( string_from_bstr( bstr ), this ), result );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
 
     return hr;
 }
