@@ -34,17 +34,25 @@ spooler.job( "javascript" ).start();
 
 spooler_log.mail_on_error = true;  // <kill_task> kann zu einem Fehler in Process.priority() führen, das Verhalten prüfen wir
 
+
+{
+    var subprocess = spooler_task.create_subprocess();
+    subprocess.start( subprocess.env.substitute( "${MY_HOME}/my_program" ) );
+    subprocess.wait_for_termination();
+}
+
 var subprocess = spooler_task.create_subprocess();
 
 subprocess.environment( "test1" ) = "ETT";
 subprocess.environment( "test2" ) = "TVÅ";
-//subprocess.environment( "path" ) = "";
+subprocess.environment( "PATH" ) = "";
 spooler_log.info( "subprocess.env.names=" + subprocess.env.names );
 var s = "test1=$test1 TEST1=$TEST1 test2={$test2}";
 spooler_log.info( "substitute: " + s + " ==> " + subprocess.env.substitute( s ) );
 subprocess.ignore_error = true;
 
-subprocess.start( "cmd.exe /c set" );
+//subprocess.start( "cmd.exe /c set" );
+subprocess.start( "sh -c set" );
 //subprocess.start( "sleep 30" );
 
 spooler_log.info( "pid=" + subprocess.pid );

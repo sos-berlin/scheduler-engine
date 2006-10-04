@@ -132,7 +132,7 @@ struct Ivariable_set : IDispatch
   //virtual HRESULT     get_Names_array                 ( SAFEARRAY** );
     virtual HRESULT     get_Names                       ( BSTR* )                               = 0;
 
-    virtual HREsULT         Substitute                  ( BSTR, BSTR* )                         = 0;
+    virtual HRESULT         Substitute                  ( BSTR, BSTR* )                         = 0;
 };
 
 //----------------------------------------------------------------------Variable_set_enumerator
@@ -643,7 +643,7 @@ struct Isubprocess : IDispatch
     virtual HRESULT     get_Ignore_signal           ( VARIANT_BOOL* )                               = 0;
     virtual HRESULT         Wait_for_termination    ( VARIANT*, VARIANT_BOOL* )                     = 0;
     virtual HRESULT         Kill                    ( int signal )                                  = 0;
-    virtual HRESULT     get_env                     ( Ivariable_set** )                             = 0;
+    virtual HRESULT     get_Env                     ( Ivariable_set** )                             = 0;
 };
 
 //--------------------------------------------------------------------------------Ixslt_stylesheet 

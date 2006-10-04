@@ -80,7 +80,7 @@ Subprocess::Subprocess( Subprocess_register* subprocess_register, IDispatch* tas
     _environment( new Com_variable_set )
 {
 #   ifndef Z_WINDOWS
-        _process_environment->_ignore_case = false;
+        _environment->_ignore_case = false;
 #   endif
     _environment->merge( variable_set_from_environment() );
 
