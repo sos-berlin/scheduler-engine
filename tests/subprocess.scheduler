@@ -18,8 +18,8 @@
         <script language="javascript">
             <![CDATA[
             
-spooler.job( "javascript" ).start();            
-//spooler.job( "java" ).start();            
+//spooler.job( "javascript" ).start();            
+spooler.job( "java" ).start();            
             
         ]]>
         </script>
@@ -39,6 +39,7 @@ spooler_log.mail_on_error = true;  // <kill_task> kann zu einem Fehler in Proces
     var subprocess = spooler_task.create_subprocess();
     subprocess.start( subprocess.env.substitute( "${MY_HOME}/my_program" ) );
     subprocess.wait_for_termination();
+    spooler_log.info( subprocess.exit_code );
 }
 
 var subprocess = spooler_task.create_subprocess();
@@ -47,7 +48,7 @@ subprocess.environment( "test1" ) = "ETT";
 subprocess.environment( "test2" ) = "TVÅ";
 subprocess.environment( "PATH" ) = "";
 spooler_log.info( "subprocess.env.names=" + subprocess.env.names );
-var s = "test1=$test1 TEST1=$TEST1 test2={$test2}";
+var s = "test1=$test1 TEST1=$TEST1 test2=${test2}";
 spooler_log.info( "substitute: " + s + " ==> " + subprocess.env.substitute( s ) );
 subprocess.ignore_error = true;
 
@@ -122,6 +123,7 @@ public class My_job  extends sos.spooler.Job_impl
         subprocess.set_ignore_error( false );
         subprocess.set_environment( "test1", "ETT" );
         subprocess.set_environment( "test2", "TV" );
+        spooler_log.info( subprocess.env().substitute( "test1=$test1" ) );
         subprocess.set_timeout( 300 );
 
         subprocess.start( new String[]{ "sleep", "20"} );

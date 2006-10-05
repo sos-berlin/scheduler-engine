@@ -49,7 +49,7 @@ if( forwarding_job_chain.order_count() == 0 )
                 debug="yes"
             >
                 <params>
-                    <param name="param1" value="WEBDIENST"/>
+                    <param name="param1" value="$TEST"/>
                     <param name="job_chain" value="meine_jobkette"/>
                 </params>
             </web_service>

@@ -9,18 +9,27 @@
         <script language="javascript">
             <![CDATA[
 
-var params = spooler.create_variable_set();
-params.value( "EINS" ) = "1";
-params.value( "ZWEI" ) = "2";
-params.value( "HOME" ) = "Heimat";
-spooler.job( "process" ).start( params );
-
+if(0)
+{
+    var params = spooler.create_variable_set();
+    params.value( "EINS" ) = "1";
+    params.value( "ZWEI" ) = "2";
+    params.value( "HOME" ) = "Heimat";
+    spooler.job( "process" ).start( params );
+}
+else
+{
+    var order = spooler.create_order();
+    order.id = 1;
+    order.title = "Wir haben einen Auftrag";
+    spooler.job_chain( "my_job_chain" ).add_order( order );
+}
 
         ]]></script>                   
 
 
         <jobs>
-            <job name="process" title="Aufruf von /tmp/test.cmd">
+            <job name="process" title="Aufruf von /tmp/test.cmd" order="yes">
                 
                 <process 
                     file="/tmp/test.cmd" 
@@ -39,5 +48,11 @@ spooler.job( "process" ).start( params );
                 <run_time/>
             </job>
         </jobs>
+
+        <job_chains>
+            <job_chain name="my_job_chain">
+                <job_chain_node state="1" job="process"/>
+            </job_chain>
+        </job_chains>
     </config>
 </spooler>
