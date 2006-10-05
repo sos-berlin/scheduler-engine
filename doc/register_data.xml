@@ -2853,6 +2853,7 @@
 </register_keyword>
 <register_keyword keyword='terminate'>
     <register_keyword_display><code>&lt;terminate&gt;</code></register_keyword_display>
+    <register_entry register_file='CHANGES.xml#use_element__terminate' register_title='Änderungsprotokoll'  register_keyword='terminate'/>
     <register_entry register_file='command_line.xml#use_element__terminate' register_title='Kommandozeilenoptionen'  register_keyword='terminate'/>
     <register_entry register_file='xml.xml#use_element__terminate' register_title='XXX'  register_keyword='terminate'/>
     <register_entry register_file='xml/terminate.xml#' register_title='&lt;terminate&gt; (Kommando)'  register_keyword='terminate' type='definition'/>
