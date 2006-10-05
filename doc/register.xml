@@ -5,7 +5,7 @@
 
 <register
     author="$Author: scheduler_keyword_to_xml.pl $"
-    date= "$Date: 2006/10/4 13:37:41 $"
+    date= "$Date: 2006/10/4 16:54:59 $"
 >
 <register_keyword keyword='abort_immediately'>
     <register_keyword_display><code>abort_immediately()</code></register_keyword_display>
@@ -646,6 +646,10 @@
     <register_entry register_file='CHANGES.xml#use_option__env' register_title='Änderungsprotokoll'  register_keyword='env'/>
     <register_entry register_file='command_line.xml#option_env' register_title='Kommandozeilenoptionen'  register_keyword='env' type='definition'/>
     <register_entry register_file='command_line.xml#use_option__env' register_title='Kommandozeilenoptionen'  register_keyword='env'/>
+</register_keyword>
+<register_keyword keyword='env (property)'>
+    <register_keyword_display><code>env</code> (property)</register_keyword_display>
+    <register_entry register_file='api/Subprocess.xml#method__env' register_title='Subprocess.env' register_keyword='env' type='definition'/>
 </register_keyword>
 <register_keyword keyword='environment'>
     <register_keyword_display><code>&lt;environment&gt;</code></register_keyword_display>
@@ -2788,6 +2792,10 @@
     <register_entry register_file='xml.xml#use_element__subprocesses' register_title='Alle XML-Elemente'  register_keyword='subprocesses'/>
     <register_entry register_file='xml/answer/subprocesses.xml#' register_title='&lt;subprocesses&gt; (Antwort)'  register_keyword='subprocesses' type='definition'/>
 </register_keyword>
+<register_keyword keyword='substitute'>
+    <register_keyword_display><code>substitute()</code></register_keyword_display>
+    <register_entry register_file='api/Variable_set.xml#method__substitute' register_title='Variable_set.substitute()' register_keyword='substitute()' type='definition'/>
+</register_keyword>
 <register_keyword keyword='task'>
     <register_keyword_display><code>&lt;task&gt;</code></register_keyword_display>
     <register_entry register_file='CHANGES.xml#use_element__task' register_title='Änderungsprotokoll'  register_keyword='task'/>
@@ -3017,6 +3025,7 @@
     <register_entry register_file='api/Order.xml#method__payload' register_title='Order.payload' register_keyword='Variable_set'/>
     <register_entry register_file='api/Spooler.xml#method__create_variable_set' register_title='Spooler.create_variable_set()' register_keyword='Variable_set'/>
     <register_entry register_file='api/Spooler.xml#method__variables' register_title='Spooler.variables' register_keyword='Variable_set'/>
+    <register_entry register_file='api/Subprocess.xml#method__env' register_title='Subprocess.env' register_keyword='Variable_set'/>
     <register_entry register_file='api/Task.xml#method__params' register_title='Task.params' register_keyword='Variable_set'/>
     <register_entry register_file='api/Variable_set.xml#method__merge' register_title='Variable_set.merge()' register_keyword='Variable_set'/>
     <register_entry register_file='api/Variable_set.xml' register_keyword='Variable_set' type='definition'/>

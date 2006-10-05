@@ -10,6 +10,44 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2006-10-04" version="2.0.158" subversion_revision="4559">
+        <revision type="new" title="Variable_set.substitute">
+            <description>
+                <p>
+                    Neue Methode zum Ersetzen von $-Variablen in einem String.
+                </p>
+                <ul>
+                    <li>
+                        <scheduler_method class="Variable_set" method="substitute"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+        
+        <revision type="new" title="Subprocess.env">
+            <description>
+                <p>
+                    Die Umgebungsvariablen des zu startenden Subprozesses werden in 
+                    einem <scheduler_method class="Variable_set"/> gehalten.
+                    Damit kann die neue Methode
+                    <scheduler_method class="Variable_set" method="substitute"/>
+                    genutzt werden.
+                </p>
+                <p>
+                    Der Subprozess erbt die Umgebungsvariablen vom laufenden Prozess
+                    zum Zeitpunkt des Aufrufs von 
+                    <scheduler_method class="Task" object="spooler_task" method="create_subprocess"/>.
+                </p>
+                <ul>
+                    <li>
+                        <scheduler_method class="Subprocess" property="env"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+    </change>
+
+
     <change date="2006-09-26" version="2.0.158" subversion_revision="4555">
         <revision type="modification" title="Umgebungsvariablen in &lt;add_order>&lt;params> und &lt;start_job&lt;params>">
             <description>
@@ -18,7 +56,7 @@
                     <scheduler_element name="add_order"/> und
                     <scheduler_element name="start_job"/> können in 
                     in <scheduler_element name="param" attribute="value"/> 
-                    <scheduler_a href="ersetzung_von_umgebungsvariablen.xml">Umgebungsvariablen abgerufen</scheduler_a>
+                    <scheduler_a href="variable_substitution.xml">Umgebungsvariablen abgerufen</scheduler_a>
                     werden.
                 </p>
             </description>

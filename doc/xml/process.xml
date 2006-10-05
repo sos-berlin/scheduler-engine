@@ -16,7 +16,7 @@
     </xml_parent_elements>
 
     <xml_attributes>
-        <xml_attribute name="file" type="filename">
+        <xml_attribute name="file" type="filename" subst_env="yes" title="Pfad des auszuführenden Programms">
             <description>
                 <p>
                     Name der Datei, die das Programm oder das Skript enthält,
@@ -26,7 +26,7 @@
             </description>
         </xml_attribute>
 
-        <xml_attribute name="param" type="text" subst_env="yes">
+        <xml_attribute name="param" type="text" subst_env="yes" title="Parameterzeile">
             <description>
                 <p>
                     Gibt den Parameterstring an, der dem Prozess übergeben wird.
@@ -55,7 +55,7 @@ spooler.job( "process" ).start( params );
         </xml_attribute>
 
 
-        <xml_attribute name="log_file" type="dateiname">
+        <xml_attribute name="log_file" type="dateiname" subst_env="yes">
             <description>
                 <p>
                     Der Scheduler übernimmt nach Prozessende den Inhalt dieser Datei in sein Protokoll.

@@ -1784,6 +1784,7 @@
         <xsl:param name="section"/>
         <xsl:param name="entry"/>
         <xsl:param name="value"/>
+        <xsl:param name="show_entry_only" select="false()"/>
 
         <xsl:element name="a">
             <xsl:attribute name="name">
@@ -1798,32 +1799,36 @@
                 <xsl:value-of select="concat( $base_dir, translate( $file, '.', '_' ), '_', $section, '.xml', '#entry_', $entry )"/>
             </xsl:attribute>
 
-            <code>
-                <xsl:value-of select="$file"/>
-            </code>
+            <xsl:if test="not( $show_entry_only )">
+                <code>
+                    <xsl:value-of select="$file"/>
+                </code>
 
-            <xsl:text> (</xsl:text>
-
-            <xsl:call-template name="phrase">
-                <xsl:with-param name="id" select="'ini.section'"/>
-            </xsl:call-template>
-
-            <xsl:text> </xsl:text>
-            <code>
-                <xsl:text>[</xsl:text>
-                <xsl:value-of select="$section"/>
-                <xsl:text>]</xsl:text>
-            </code>
-
-            <xsl:if test="$entry">
-                <xsl:text>, </xsl:text>
+                <xsl:text> (</xsl:text>
 
                 <xsl:call-template name="phrase">
-                    <xsl:with-param name="id" select="'ini.entry'"/>
+                    <xsl:with-param name="id" select="'ini.section'"/>
                 </xsl:call-template>
 
                 <xsl:text> </xsl:text>
+                <code>
+                    <xsl:text>[</xsl:text>
+                    <xsl:value-of select="$section"/>
+                    <xsl:text>]</xsl:text>
+                </code>
+            </xsl:if>
 
+            <xsl:if test="$entry">
+                <xsl:if test="not( $show_entry_only )">
+                    <xsl:text>, </xsl:text>
+
+                    <xsl:call-template name="phrase">
+                        <xsl:with-param name="id" select="'ini.entry'"/>
+                    </xsl:call-template>
+
+                    <xsl:text> </xsl:text>
+                </xsl:if>
+                
                 <code>
                     <xsl:value-of select="$entry"/>
                     <xsl:text>=</xsl:text>
@@ -1838,7 +1843,9 @@
                 </code>
             </xsl:if>
 
-            <xsl:text>)</xsl:text>
+            <xsl:if test="not( $show_entry_only )">
+                <xsl:text>)</xsl:text>
+            </xsl:if>
         </xsl:element>
     </xsl:template>
 

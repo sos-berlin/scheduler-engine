@@ -69,7 +69,9 @@ log = scheduler.wait com_server.* >scheduler.log</pre>
 
     <setting setting        = "log_dir"
              type           = "verzeichnis"
-             title          = "Verzeichnis der Protokolle">
+             title          = "Verzeichnis der Protokolle"
+             subst_env      = "yes"
+    >
 
         <description>
             <p>
@@ -224,7 +226,7 @@ log = scheduler.wait com_server.* >scheduler.log</pre>
 
     <setting setting   = "include_path"
              type      = "verzeichnis"
-             title     = "Für &lt;include&gt;"
+             title     = "Verzeichnispfad für &lt;include&gt;"
              subst_env = "yes">
         <description>
             <p>
@@ -236,7 +238,9 @@ log = scheduler.wait com_server.* >scheduler.log</pre>
 
     <setting setting = "html_dir"
              type    = "verzeichnis"
-             title   = "Verzeichnis der HTML-Dateien">
+             title   = "Verzeichnis der HTML-Dateien"
+             subst_env = "yes"
+    >
         <description>
             <p>
                 In diesem Verzeichnis stehen die HTML-Dateien für den HTTP-Server im Scheduler.
@@ -571,7 +575,9 @@ db = odbc -db=factory_oracle -user=factory -password=factory
 
     <setting setting = "mail_queue_dir"
              type    = "verzeichnis"
-             title   = "Verzeichnis der zeitweilig nicht versendbaren eMails">
+             title   = "Verzeichnis der zeitweilig nicht versendbaren eMails"
+             subst_env = "yes"
+    >
         <description>
             <p>
                 eMails, die der Scheduler nicht verschicken kann (weil z.B. der SMTP-Server nicht läuft),

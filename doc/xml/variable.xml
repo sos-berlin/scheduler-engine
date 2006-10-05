@@ -17,7 +17,7 @@
     </xml_parent_elements>
 
     <xml_attributes>
-        <xml_attribute name="name">
+        <xml_attribute name="name" title="Name der Umgebungsvariablen">
             <description>
                 <p>
                     Der Name der Umgebungsvariablen.
@@ -29,7 +29,7 @@
             </description>
         </xml_attribute>
 
-        <xml_attribute name="value">
+        <xml_attribute name="value" subst_env="yes" title="Wert der Umgebungsvariablen">
             <description>
                 <p>
                     Mit '$' kann der Wert einer Umgebungsvariablen abgerufen werden,

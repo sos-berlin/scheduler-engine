@@ -54,6 +54,7 @@
             <phrase id="index.title">Register</phrase>
             
             <phrase id="ini.file.title">Die Datei</phrase>
+            <phrase id="ini.file">Datei</phrase>
             <phrase id="ini.sections.title">Die Abschnitte</phrase>
             <phrase id="ini.section">Abschnitt</phrase>
             <phrase id="ini.entries.title">Die Einträge</phrase>
@@ -111,13 +112,14 @@
             <phrase id="xml.command_table.title.command">Kommando</phrase>
             <phrase id="xml.command_table.title.answer">Antwort (eingepackt in <code>&lt;spooler>&lt;answer></code>)</phrase>
 
-            
+
             <phrase id="xml_element.chapter_title.prefix">XML-Element</phrase>
             <phrase id="xml_element.behaviour_with">Verhalten mit</phrase>
             <phrase id="xml_element.parent_elements.title">Eltern-Elemente</phrase>
             <phrase id="xml_element.child_elements.title">Kind-Elemente</phrase>
             <phrase id="xml_element.attributes.title">Attribute</phrase>
             <phrase id="xml_element.answer.title.prefix">Anwort</phrase>
+            <phrase id="xml_attributes">XML-Attribute</phrase>
 
         </phrases>
 

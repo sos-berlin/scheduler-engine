@@ -20,7 +20,7 @@
         <xml_attribute name="name" type="name" title="Name des Dienstes im Scheduler">
         </xml_attribute>
 
-        <xml_attribute name="url_path" type="url_path" title="URL-Pfad, unter dem der Web-Dienst ansprechbar ist">
+        <xml_attribute name="url_path" type="url_path" subst_env="yes" title="URL-Pfad, unter dem der Web-Dienst ansprechbar ist">
             <description>
                 <p>
                     Er sollte mit einem Schrägstrich beginnen.

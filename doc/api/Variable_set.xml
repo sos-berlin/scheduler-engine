@@ -213,6 +213,35 @@ while( t.hasMoreTokens() )
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
+<method name="substitute">
+    <com>
+        <com.parameter>
+            <com.type type="BSTR"/>
+        </com.parameter>
+    </com>
+
+    <title>
+        Ersetzt $-Variablen in einem String
+    </title>
+
+    <description>
+        <p>
+            Im Beispiel wird <scheduler_method class="Subprocess" property="env"/> verwendet.
+        </p>
+        <p>
+            Referenzen der Form <code>$</code><i>name</i> und <code>${</code><i>name</i><code>}</code>
+            im String werden durch Variablenwerte ersetzt,
+            siehe auch <scheduler_a href="../variable_substitution.xml"/>.
+        </p>
+    </description>
+    
+    <example programming_language="javascript">
+        <pre>subprocess.start( subprocess.env.substitute( "${MY_HOME}/my_program" ) );</pre>
+    </example>
+</method>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
 <title>
     Variablenmenge zur Übergabe von Parametern
 </title>

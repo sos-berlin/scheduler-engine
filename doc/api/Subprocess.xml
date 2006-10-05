@@ -224,6 +224,45 @@
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
+<property name="env" access="read">
+    <com>
+        <com.result name="value">
+            <com.type class="Variable_set"/>
+        </com.result>
+    </com>
+
+    <title>
+        Umgebungsvariablen als Variable_set
+    </title>
+
+    <description>
+        <p>
+            Liefert ein <scheduler_method class="Variable_set"/> der Umgebungsvariablen.
+        </p>
+        <p>
+            Anfänglich ist die Umgebung mit den Umgebungsvariablen des rufenden Prozesses gefüllt.
+            Umgebungsvariablen können entfernt werden, indem sie auf <code>""</code> gesetzt werden.
+            Der Aufruf <scheduler_method class="Subprocess" method="start"/> übergibt die Umgebungsvariablen
+            dem Subprozess.
+        </p>
+        <p>
+            Unter Unix werden groß und klein geschriebene Umgebungsvariablen unterschieden.
+        </p>
+        <p>
+            Nach dem Start des Subprozesses haben Änderungen an den Umgebungsvariablen keine Wirkung.
+            Auch können vom Prozess geänderte Umgebungsvariablen nicht gelesen werden.
+        </p>
+    </description>
+
+    <example programming_language="javascript">
+        <pre>var subprocess = spooler_task.create_subprocess();
+subprocess.start( subprocess.env.substitute( "${MY_HOME}/my_program" ) );
+subprocess.wait_for_termination();</pre>
+    </example>
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
 <property name="environment" access="write">
     <com>
         <com.parameter name="name">
@@ -245,7 +284,23 @@
             mit den übrigen Umgebungsvariablen des laufenden Prozesses
             dem neuen Subprozess übergeben.
         </p>
+        <p>
+            Unter Unix werden groß und klein geschriebene Umgebungsvariablen unterschieden.
+        </p>
+        <p>
+            Siehe auch <scheduler_method class="Subprocess" property="env"/>.
+        </p>
     </description>
+    <example programming_language="javascript">
+        <pre>// The following two statements have the same effect
+subprocess.environment( "my_variable" ) = "my_value"
+subprocess.env.value( "my_variable" ) = "my_value"</pre>
+    </example>
+    <example programming_language="java">
+        <pre>// The following two statements have the same effect
+subprocess.set_environment( "my_variable", "my_value" )
+subprocess.env().set_value( "my_variable" ) = "my_value"</pre>
+    </example>
 </property>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->

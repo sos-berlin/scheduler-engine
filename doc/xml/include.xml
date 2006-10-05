@@ -20,7 +20,7 @@
 
 
     <xml_attributes>
-        <xml_attribute name="file" type="filename" subst_env="yes">
+        <xml_attribute name="file" type="filename" subst_env="yes" title="Pfad der einzufügenden Datei">
             <description>
                 <p>
                     Der Name der Datei, deren Inhalt eingefügt werden soll.
