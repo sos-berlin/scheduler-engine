@@ -19,10 +19,6 @@
             Die Parameter können zur Laufzeit überschrieben und erweitert werden.
         </p>
         <p>
-            <scheduler_a href="../variable_substitution.xml">Umgebungsvariablen</scheduler_a>
-            können innerhalb bestimmter Zusammenhänge abgerufen werden, siehe das Attribut <code>value</code>.
-        </p>
-        <p>
             Job-Parameter können mit der Methode <scheduler_method class="Task" method="params" /> abgerufen werden.
         </p>
         <p>
@@ -42,18 +38,6 @@
         <xml_attribute name="name" title="Eindeutiger Name"/>
         <xml_attribute name="value" subst_env="yes">
             <description>
-                <p>
-                    In bestimmten Zusammenhängen kann das <code>$</code>-Zeichen verwendet werden,
-                    um Umgebungsvariablen zu ersetzen. Das sind
-                </p>
-                <ul>
-                    <li>
-                        <scheduler_element name="add_order"/>
-                    </li>
-                    <li>
-                        <scheduler_element name="start_job"/>
-                    </li>
-                </ul>
             </description>
         </xml_attribute>
     </xml_attributes>
