@@ -11,6 +11,34 @@
     <scheduler_keyword keyword="Change log"/>
 
     <change date="2006-10-04" version="2.0.158" subversion_revision="4559">
+        <revision type="modification" title="Änderungen in den Dokumentationsdateien">
+            <description>
+                <ul>
+                    <li>
+                        Die Datei <code>ersetzung_von_umgebungsvariablen.xml</code> 
+                        ist ersetzt worden durch
+                        <scheduler_a href="variable_substitution.xml"><code>variable_substitution.xml</code></scheduler_a>.
+                        Die Seite enthält ein Verzeichnis aller Attribute und .ini-Einstellungen, 
+                        in denen Umgebungsvariablen verwendet werden können.
+                    </li>
+                    <li>
+                        Das generierte Register steht jetzt in <code>register_data.xml</code>.
+                        Die Datei <scheduler_a href="register.xml"><code>register.xml</code></scheduler_a>
+                        enthält jetzt einen Text.
+                    </li>
+                </ul>
+            </description>
+        </revision>
+
+        <revision type="correction" title="Beim Beenden des Schedulers werden &lt;process>-Prozesse abgewartet">
+            <description>
+                <p>
+                    Bei <scheduler_element name="terminate"/> wartete der Scheduler das Ende von 
+                    <scheduler_element name="process"/>-Tasks nicht ab. Jetzt tut er das.
+                </p>
+            </description>
+        </revision>
+
         <revision type="new" title="Variable_set.substitute">
             <description>
                 <p>
@@ -49,7 +77,7 @@
 
 
     <change date="2006-09-26" version="2.0.158" subversion_revision="4555">
-        <revision type="modification" title="Umgebungsvariablen in &lt;add_order>&lt;params> und &lt;start_job&lt;params>">
+        <revision type="modification" title="Umgebungsvariablen in &lt;add_order>&lt;params> und &lt;start_job>&lt;params>">
             <description>
                 <p>
                     Innerhalb von

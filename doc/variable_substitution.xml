@@ -5,7 +5,7 @@
 <!--$Id$-->
 
 <variable_substitution
-    title    = "Verzeichnis der Einstellungen, die den Abruf von Umgebungsvariablen mit ${…} erlauben"
+    title    = "Einstellungen, die den Abruf von Umgebungsvariablen mit ${…} erlauben"
     base_dir = ""
     author   = "$Author$"
     date     = "$Date$"
@@ -21,6 +21,10 @@
         <p>
             Es gelten die Werte der Umgebungsvariablen vom Start des Schedulers.
         </p>
+        <p>
+            Variablen können auch programmiert ersetzt werden mit 
+            <scheduler_method class="Variable_set" method="substitute"/>.
+        </p>
         <!--p>
             Innerhalb mancher XML-Kommandos (z.B. <scheduler_element name="start_job"/>)
             werden außer den Umgebungsvariablen auch die Task-Parameter ersetzt. 
@@ -28,8 +32,10 @@
         </p-->
 
         <scheduler_example>
-            <pre>log_dir = ${SCHEDULER_HOME}/logs
-log_dir = $SCHEDULER_HOME/logs</pre>
+            <pre># File factory.ini
+[java]            
+class_path = ${SCHEDULER_HOME}/lib/sos.spooler.jar
+class_path = $SCHEDULER_HOME/lib/sos.spooler.jar</pre>
         </scheduler_example>
     </description>
 

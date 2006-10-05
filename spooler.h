@@ -581,6 +581,7 @@ struct Spooler : Object,
   //double                     _clock_difference;           // -now="..."   Zum Debuggen: Mit dieser Differenz zur tatsächlichen Uhrzeit arbeiten
 
     ptr<Com_variable_set>      _environment;
+    Variable_set_map           _variable_set_map;           // _variable_set_map[""] = _environment; für <params>, Com_variable_set::set_dom()
 };
 
 //-------------------------------------------------------------------------------------------------

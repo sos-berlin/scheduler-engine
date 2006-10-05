@@ -4,6 +4,12 @@
 
 <!--$Id$-->
 
+
+<!--
+    Hier sind alle XML-Element mit <scheduler_element> aufgeführt.
+    Das wird von variable_substitution.xsl genutzt.
+-->
+
 <description
     title    = "Alle XML-Elemente"
     base_dir = ""

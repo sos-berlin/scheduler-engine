@@ -250,7 +250,7 @@ void Web_service::set_dom( const xml::Element_ptr& element, const Time& )
 
     DOM_FOR_EACH_ELEMENT( element, e )
     {
-        if( e.nodeName_is( "params" ) )  _parameters->set_dom( e );  
+        if( e.nodeName_is( "params" ) )  _parameters->set_dom( e, &_spooler->_variable_set_map );  
     }
 
 

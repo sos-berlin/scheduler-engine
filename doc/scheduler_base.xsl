@@ -1020,59 +1020,75 @@
 
     <xsl:template match="/register">
 
-        <xsl:variable name="title" select="$phrases/phrase [ @id='index.title' ]"/>
-
         <html>
             <xsl:call-template name="html_head">
-                <xsl:with-param name="title" select="$title"/>
+                <xsl:with-param name="title" select="@title"/>
             </xsl:call-template>
 
             <body>
                 <xsl:call-template name="body_start">
-                    <xsl:with-param name="title"       select="$title"/>
+                    <xsl:with-param name="title" select="@title"/>
                 </xsl:call-template>
 
-                <xsl:call-template name="complete_register"/>
-                <!--
-                <p>
-                    <b>Inhalt</b>
-                </p>
+                <xsl:if test="description/node()">
+                    <xsl:apply-templates select="description"/>
+                    <p>
+                        &#160;
+                    </p>
+                    <hr/>
+                </xsl:if>
 
-                <p>
-                    <a href="#stichwörter">Stichwörter</a><br/>
-                    <a href="#optionen">Optionen</a><br/>
-                    <a href="#ini">Einträge in .ini-Dateien</a><br/>
-                    <a href="#xml_elemente">XML-Elemente</a><br/>
-                </p>
-
-                <a name="stichwörter"/>
-                <h2>Stichwörter</h2>
-                <xsl:call-template name="register">
-                    <xsl:with-param name="children_name" select="'register_entry'"/>
-                </xsl:call-template>
-
-                <a name="optionen"/>
-                <h2>Optionen der Kommandozeile</h2>
-                <xsl:call-template name="register">
-                    <xsl:with-param name="children_name" select="'register_option'"/>
-                </xsl:call-template>
-
-                <a name="ini"/>
-                <h2>Einträge in .ini-Dateien</h2>
-                <xsl:call-template name="register">
-                    <xsl:with-param name="children_name" select="'register_ini_entry'"/>
-                </xsl:call-template>
-
-                <a name="xml_elemente"/>
-                <h2>XML-Elemente</h2>
-                <xsl:call-template name="register">
-                    <xsl:with-param name="children_name" select="'register_element'"/>
-                </xsl:call-template>
--->
+                <xsl:apply-templates select="document( 'register_data.xml' )/*"/>
 
                 <xsl:call-template name="bottom"/>
             </body>
         </html>
+
+    </xsl:template>
+    
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~/register_data-->
+
+    <xsl:template match="/register_data">
+
+        <xsl:variable name="title" select="$phrases/phrase [ @id='index.title' ]"/>
+
+        <xsl:call-template name="complete_register"/>
+        <!--
+        <p>
+            <b>Inhalt</b>
+        </p>
+
+        <p>
+            <a href="#stichwörter">Stichwörter</a><br/>
+            <a href="#optionen">Optionen</a><br/>
+            <a href="#ini">Einträge in .ini-Dateien</a><br/>
+            <a href="#xml_elemente">XML-Elemente</a><br/>
+        </p>
+
+        <a name="stichwörter"/>
+        <h2>Stichwörter</h2>
+        <xsl:call-template name="register">
+            <xsl:with-param name="children_name" select="'register_entry'"/>
+        </xsl:call-template>
+
+        <a name="optionen"/>
+        <h2>Optionen der Kommandozeile</h2>
+        <xsl:call-template name="register">
+            <xsl:with-param name="children_name" select="'register_option'"/>
+        </xsl:call-template>
+
+        <a name="ini"/>
+        <h2>Einträge in .ini-Dateien</h2>
+        <xsl:call-template name="register">
+            <xsl:with-param name="children_name" select="'register_ini_entry'"/>
+        </xsl:call-template>
+
+        <a name="xml_elemente"/>
+        <h2>XML-Elemente</h2>
+        <xsl:call-template name="register">
+            <xsl:with-param name="children_name" select="'register_element'"/>
+        </xsl:call-template>
+-->
 
     </xsl:template>
 
@@ -1170,9 +1186,9 @@
 
     </xsl:template>
 
-    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~register-->
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~register_data-->
 
-    <xsl:template name="register">
+    <xsl:template name="register_data">
         <xsl:param name="children_name"/>
 
         <table cellspacing="0" cellpadding="0">
@@ -1430,7 +1446,7 @@
     <xsl:template match="scheduler_message" mode="description">
 
         <xsl:choose>
-            <xsl:when test="ancestor::p">
+            <xsl:when test="ancestor::p or parent::li">
                 <xsl:call-template name="scheduler_message">
                     <xsl:with-param name="level"     select="@level"/>
                     <xsl:with-param name="code"      select="@code"/>

@@ -13,7 +13,7 @@
     date     = "$Date$">
 
     <ini_entries>
-        <ini_entry name="class_path" type="class_path" title="Für Java">
+        <ini_entry name="class_path" type="class_path" subst_env="yes" title="Für Java">
             <description>
                 <p>
                     Hier können Sie den <code>class_path</code> um Verzeichnisse oder Jars erweitern,

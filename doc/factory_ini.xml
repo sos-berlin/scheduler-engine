@@ -19,7 +19,8 @@
         <p>
             In dieser Datei können Einstellungen für den Scheduler vorgenommen werden.
             (leere Einträge "<code>eintrag=</code>" gelten als nicht vorhanden und 
-            überschreiben keine Einstellung der <scheduler_a href="konfiguration.xml"/>)
+            überschreiben keine Einstellung der 
+            <scheduler_a href="konfiguration.xml">XML-Konfiguration</scheduler_a>)
         </p>
         <p>
             Den Pfad dieser Datei können sie mit der Option <scheduler_option name="ini"/> ändern.

@@ -1072,7 +1072,7 @@ bool Task::do_something()
                     loop = false;
                     bool ok = true;
 
-                    if( !_operation )
+                    if( !_operation  &&  _state != s_running_process )
                     {
                         if( _module_instance && !_module_instance_async_error )
                         {

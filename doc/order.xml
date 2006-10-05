@@ -78,7 +78,7 @@
     <h2>Verzeichnisüberwachung mit Dateiaufträgen</h2>
     <p>
         Zu Aufträgen, die aus Dateien eines Verzeichnisses entstehen,
-        siehe <scheduler_a href="file_orders.xml"/>.
+        siehe <scheduler_a href="file_orders.xml" quote="yes"/>.
     </p>
     
     

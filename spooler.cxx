@@ -547,6 +547,8 @@ Spooler::Spooler()
     _validate_xml(true),
     _environment( variable_set_from_environment() )
 {
+    _variable_set_map[ variable_set_name_for_substitution ] = _environment;
+
     if( spooler_ptr )  throw_xc( "spooler_ptr" );
     spooler_ptr = this;
 

@@ -168,7 +168,7 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
             else
             if( e.nodeName_is( "object_set" ) )  _object_set_descr = SOS_NEW( Object_set_descr( e ) );
             else
-            if( e.nodeName_is( "params"     ) )  _default_params->set_dom( e );  
+            if( e.nodeName_is( "params"     ) )  _default_params->set_dom( e, &_spooler->_variable_set_map );  
             else
             if( e.nodeName_is( "script"     ) )  
             {

@@ -3,7 +3,7 @@
 
 
 my $script_name     = "scheduler_keyword_to_xml.pl";
-my $output_filename = "register.xml";
+my $output_filename = "register_data.xml";
 my $output_path     = "../../spooler/doc/$output_filename";
 
 
@@ -17,7 +17,7 @@ print OUTPUT '<?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>' ."\n";
 print OUTPUT "\n";
 print OUTPUT "<!-- ACHTUNG: NICHT AENDERN! DIESE DATEI IST GENENIERT VON $script_name -->\n";
 print OUTPUT "\n";
-print OUTPUT "<register\n";
+print OUTPUT "<register_data\n";
 print OUTPUT '    author="$' . "Author: $script_name " . '$"' . "\n";
 print OUTPUT '    date= "$' . 'Date: ' . "$year/$month/$mday $hour:$min:$sec" . ' $"' . "\n";
 print OUTPUT ">\n";
@@ -52,7 +52,7 @@ foreach my $k ( @keys )
 }
 
 
-print OUTPUT "</register>\n";
+print OUTPUT "</register_data>\n";
 
 
 
