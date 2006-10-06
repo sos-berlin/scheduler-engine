@@ -1760,7 +1760,7 @@ void Spooler::load_arg()
             else
             if( opt.with_value( "log-dir"          ) )  _log_directory = opt.value(),  _log_directory_as_option_set = true;
             else
-            if( opt.with_value( "include-path"     ) )  subst_env( _include_path = opt.value() ),  _include_path_as_option_set = true;
+            if( opt.with_value( "include-path"     ) )  _include_path = opt.value(),  _include_path_as_option_set = true;
             else
             if( opt.with_value( "param"            ) )  _spooler_param = opt.value(),  _spooler_param_as_option_set = true;
             else

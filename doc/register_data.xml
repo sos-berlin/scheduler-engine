@@ -54,7 +54,6 @@
     <register_entry register_file='order.xml#use_element__add_order' register_title='Aufträge'  register_keyword='add_order'/>
     <register_entry register_file='xml.xml#use_element__add_order' register_title='XXX'  register_keyword='add_order'/>
     <register_entry register_file='xml/add_order.xml#' register_title='&lt;add_order&gt; (Kommando)'  register_keyword='add_order' type='definition'/>
-    <register_entry register_file='xml/param.xml#use_element__add_order' register_title='&lt;param&gt;'  register_keyword='add_order'/>
     <register_entry register_file='xml/web_service.xml#use_element__add_order' register_title='&lt;web_service&gt; (Konfiguration)'  register_keyword='add_order'/>
 </register_keyword>
 <register_keyword keyword='add_order'>
@@ -2652,7 +2651,6 @@
     <register_entry register_file='xml/answer/task.xml#use_element__start_job' register_title='&lt;task&gt; (Antwort)'  register_keyword='start_job'/>
     <register_entry register_file='xml/copy_params.xml#use_element__start_job' register_title='&lt;copy_params&gt;'  register_keyword='start_job'/>
     <register_entry register_file='xml/modify_job.xml#use_element__start_job' register_title='&lt;modify_job&gt; (Kommando)'  register_keyword='start_job'/>
-    <register_entry register_file='xml/param.xml#use_element__start_job' register_title='&lt;param&gt;'  register_keyword='start_job'/>
     <register_entry register_file='xml/start_job.xml#' register_title='&lt;start_job&gt; (Kommando)'  register_keyword='start_job' type='definition'/>
     <register_entry register_file='xml/web_service.xml#use_element__start_job' register_title='&lt;web_service&gt; (Konfiguration)'  register_keyword='start_job'/>
 </register_keyword>
