@@ -1969,6 +1969,7 @@
     <register_entry register_file='CHANGES.xml#use_element__payload' register_title='Änderungsprotokoll'  register_keyword='payload'/>
     <register_entry register_file='xml.xml#use_element__payload' register_title='XXX'  register_keyword='payload'/>
     <register_entry register_file='xml/payload.xml#' register_title='&lt;payload&gt;'  register_keyword='payload' type='definition'/>
+    <register_entry register_file='xml/show_state.xml#use_element__payload' register_title='&lt;show_state&gt; (Kommando)'  register_keyword='payload'/>
 </register_keyword>
 <register_keyword keyword='payload (property)'>
     <register_keyword_display><code>payload</code> (property)</register_keyword_display>
@@ -2453,6 +2454,7 @@
 </register_keyword>
 <register_keyword keyword='show_order'>
     <register_keyword_display><code>&lt;show_order&gt;</code></register_keyword_display>
+    <register_entry register_file='CHANGES.xml#use_element__show_order' register_title='Änderungsprotokoll'  register_keyword='show_order'/>
     <register_entry register_file='datenbank.xml#use_element__show_order' register_title='Datenbank'  register_keyword='show_order'/>
     <register_entry register_file='settings.xml#use_element__show_order' register_title='Einstellungen'  register_keyword='show_order'/>
     <register_entry register_file='xml.xml#use_element__show_order' register_title='XXX'  register_keyword='show_order'/>
