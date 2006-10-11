@@ -32,7 +32,7 @@ for( var i = 1; i <= n; i++ )
                     <![CDATA[
                     
 var i = 0;
-var n = 10000;
+//var n = 10000;
 spooler.variables( "n" ) = n;
 var hostware = new ActiveXObject( "hostware.global" );
 
@@ -84,6 +84,7 @@ counter = 1*spooler.variables( "n" );
 
 function spooler_process() 
 {               
+    var order = spooler_task.order;     // Prüfen, ob Garbage Collector den Auftrag zu lange offen hält
     spooler_log.info( "ZWEI" );
     return true;
 }
