@@ -539,8 +539,18 @@ xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& 
           //order->set_priority  ( record.as_int   ( "priority"   ) );
         }
 
+        //Hier fehlt: if( show & show_log )
         string log = file_as_string( GZIP_AUTO + _spooler->_db->db_name() + " -table=" + _spooler->_order_history_tablename + " -blob=\"LOG\"" 
                                      " where \"HISTORY_ID\"=" + history_id );
+
+        /* Payload steht nicht in der Historie
+        if( show & show_payload )
+        {
+            string payload = file_as_string( GZIP_AUTO + _spooler->_db->db_name() + " -table=" + _spooler->_order_history_tablename + " -clob=\"PAYLOAD\"" 
+                                             " where \"HISTORY_ID\"=" + history_id );
+            if( payload != "" )  order->set_payload( payload );
+        }
+        */
 
         return order->dom_element( _answer, show, &log );
     }
