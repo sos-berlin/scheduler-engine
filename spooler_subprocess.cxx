@@ -84,6 +84,8 @@ Subprocess::Subprocess( Subprocess_register* subprocess_register, IDispatch* tas
 #   endif
     _environment->merge( variable_set_from_environment() );
 
+    _process.set_inherit_environment( false );
+
     if( Com_task* com_task = dynamic_cast<Com_task*>( task ) )
     {
         _process.set_own_process_group( com_task->task()->_spooler->_subprocess_own_process_group_default );
