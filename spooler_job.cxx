@@ -568,8 +568,9 @@ void Job::close()
         }
 
         if( _order_queue )  _order_queue->close();    // Entkoppelt auch COM-Object Com_order_queue
-        _log->close();
+        _log->close_file();
         _history.close();
+        _log->close();
 
         // COM-Objekte entkoppeln, falls noch jemand eine Referenz darauf hat:
         if( _com_job  )  _com_job->close(),         _com_job  = NULL;

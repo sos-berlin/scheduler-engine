@@ -2278,8 +2278,9 @@ void Order::postprocessing( bool success )
                         _log->info( message_string( "SCHEDULER-944", _initial_state, next_start ) );        // "Kein weiterer Job in der Jobkette, der Auftrag wird mit state=<p1/> wiederholt um <p2/>"
 
                         _end_time = Time::now();
-                        _log->close();
+                        _log->close_file();
                         if( _job_chain  &&  _is_in_database )  _spooler->_db->write_order_history( this );
+                        _log->close();
 
                         _start_time = 0;
                         _end_time = 0;

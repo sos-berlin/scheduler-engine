@@ -45,7 +45,7 @@ struct Log
     int                        _file;
     int                        _err_no;
     Thread_semaphore           _semaphore;
-    string                     _log_line;
+  //string                     _log_line;
     string                     _log_buffer;                 // Bis Ausgabedatei geöffnet ist
     Time                       _last_time;
 };
@@ -63,7 +63,7 @@ struct Prefix_log : Object, Has_log
     void                        init                        ( Scheduler_object*, const string& prefix = empty_string );
     void                        open                        ();
     void                        close                       ();
-    void                        close2                      ();
+    void                        close_file                  ();
     bool                        started                     () const                            { return _started; }        // open() gerufen
     bool                        opened                      () const                            { return _file != -1; }
     bool                        closed                      () const                            { return _closed; }

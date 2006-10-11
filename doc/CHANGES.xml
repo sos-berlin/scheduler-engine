@@ -10,6 +10,45 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2006-10-04" version="2.0.158" subversion_revision="4569">
+        <revision type="new" title="&lt;show_order what='payload'/>">
+            <description>
+                <p>
+                    <scheduler_element name="show_order" attribute="what" value="payload"/>
+                    liefert die Parameter des Auftrags.
+                </p>
+            </description>
+        </revision>
+
+        <revision type="correction" title="Subprocess.env()">
+            <description>
+                <p>
+                    Der Mechanismus ist überarbeitet worden, 
+                    um eine Unverträglichkeit mit sos.hostware.Process_with_pid auszuräumen.
+                </p>
+            </description>
+        </revision>
+        
+        <revision type="correction" title="Protokolldateien werden früher gelöscht">
+            <description>
+                <p>
+                    Der neue Scheduler entfernt die Protokolldateien früher,
+                    auch wenn das entsprechende Objekt (in der Regel ein <scheduler_method class="Order"/>)
+                    noch gehalten wird.
+                </p>
+                <p>
+                    Mit einem Javascript-Job konnte folgendes passieren:
+                    Wenn dieselbe Task nacheinander zwei Aufträge mit derselben Id bekam,
+                    hielt sie wegen des noch nicht angelaufenen Garbage Collectors
+                    die zwei Aufträge offen. 
+                    Erst beim Beenden der Task wurden die zwei Auftragsobjekte geschlossen,
+                    also die Destruktoren gerufen, die die Protokolldateien löschten.
+                    Das führte zu einem Fehler, weil beide Protokolldateien wegen derselben Auftragskennung dieselben Dateinamen haben.
+                </p>
+            </description>
+        </revision>
+    </change>
+    
     <change date="2006-10-04" version="2.0.158" subversion_revision="4559">
         <revision type="modification" title="Änderungen in den Dokumentationsdateien">
             <description>

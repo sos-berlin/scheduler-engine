@@ -271,7 +271,7 @@ void Log::write( Prefix_log* extra_log, Prefix_log* order_log, const char* text,
 
     if( len > 0 )
     {
-        if( log && log_ptr )  _log_line.append( text, len );
+        //if( log && log_ptr )  _log_line.append( text, len );
 
         if( _file != -1 )
         {
@@ -387,24 +387,36 @@ void Log::log2( Log_level level, const string& prefix, const string& line_, Pref
         int begin = 0;
         while( begin < line.length() )
         {
+            z::Log_ptr log ( "scheduler" );
             int next = line.find( '\n', begin );  
             if( next == string::npos )  next = line.length(); 
                                   else  next++;
 
-            write( extra_log, order_log, buffer1, strlen(buffer1), false );           // Zeit
-            write( extra_log, order_log, buffer2, strlen(buffer2) );                  // [info]
+            int buffer1_len = strlen( buffer1 );
+            log->write( buffer1, buffer1_len );
+            write( extra_log, order_log, buffer1, buffer1_len, false );           // Zeit
+
+            int buffer2_len = strlen( buffer2 );
+            log->write( buffer2, buffer2_len );
+            write( extra_log, order_log, buffer2, buffer2_len );                  // [info]
+
             if( !prefix.empty() )  write( NULL, order_log, "(" + prefix + ") " );     // (Job ...)
 
             int len = next - begin;
             while( len > 1  &&  line.c_str()[begin+len-1] == '\r' )  len--;
+            log->write( line.c_str() + begin, len );
             write( extra_log, order_log, line.c_str() + begin, len );                 // Text
 
             begin = next;
         }
 
-        if( line.length() == 0 || line[line.length()-1] != '\n' )  write( extra_log, order_log, "\n", 1 );
+        if( line.length() == 0 || line[line.length()-1] != '\n' )  
+        {
+            Z_LOG( "\n" );
+            write( extra_log, order_log, "\n", 1 );
+        }
 
-        Z_LOG2( "scheduler", _log_line );  _log_line = "";
+        //Z_LOG2( "scheduler", _log_line );  _log_line = "";
 
         
         if( extra_log )  extra_log->signal_events();
@@ -456,20 +468,26 @@ Prefix_log::~Prefix_log()
 {
     close();
 
-    if( _remove_after_close )
-    {
-        _remove_after_close = false;
+    //if( _remove_after_close )
+    //{
+    //    _remove_after_close = false;
 
-        try
-        {
-            if( _file != -1 ) { Z_LOG2( "scheduler", "extra close("<<_file<<")\n" ); ::close( _file ), _file = -1; }    // Manchmal ist Datei bei unlink gesperrt: ERRNO-13. Warum?
+    //    try
+    //    {
+    //        if( _file != -1 )   // Manchmal ist Datei bei unlink gesperrt: ERRNO-13. Warum?
+    //        { 
+    //            Z_LOG2( "scheduler", "extra close("<<_file<<")\n" ); 
+    //            ::close( _file );
+    //            _file = -1; 
+    //        }    
 
-            Z_LOG2( "scheduler.log", "unlink " << _filename << "\n" );
-            int ret = unlink( _filename.c_str() );
-            if( ret == -1 )  throw_errno( errno, "unlink", _filename.c_str() );
-        }
-        catch( const exception&  x ) { _spooler->_log.error( message_string( "SCHEDULER-291", x ) ); }
-    }
+    //        z_unlink( _filename );
+    //        //Z_LOG2( "scheduler.log", "unlink " << _filename << "\n" );
+    //        //int ret = unlink( _filename.c_str() );
+    //        //if( ret == -1 )  throw_errno( errno, "unlink", _filename.c_str() );
+    //    }
+    //    catch( const exception&  x ) { _spooler->_log.error( message_string( "SCHEDULER-291", x ) ); }
+    //}
 }
 
 //---------------------------------------------------------------------------------Prefix_log::init
@@ -605,7 +623,7 @@ void Prefix_log::close()
 
     if( _file != -1 )  
     {
-        close2();
+        close_file();
 
         /*
         try
@@ -623,13 +641,24 @@ void Prefix_log::close()
         */
     }
 
+    if( _remove_after_close )
+    {
+        _remove_after_close = false;
+
+        try
+        {
+            z_unlink( _filename );
+        }
+        catch( const exception&  x ) { _spooler->_log.error( message_string( "SCHEDULER-291", x ) ); }
+    }
+
     signal_events();
     _events.clear();
 }
 
-//-------------------------------------------------------------------------------Prefix_log::close2
+//---------------------------------------------------------------------------Prefix_log::close_file
 
-void Prefix_log::close2()
+void Prefix_log::close_file()
 {
     if( _file != -1 )  
     {
@@ -910,7 +939,7 @@ void Prefix_log::send( int reason, Scheduler_event* scheduler_event )
 
         if( _first_send == 0  &&  !mail_it )
         {
-            close2();    // Protokoll nicht senden
+            close_file();    // Protokoll nicht senden
             _mail = NULL;
         }
         else
@@ -931,7 +960,7 @@ void Prefix_log::send( int reason, Scheduler_event* scheduler_event )
                 // mail_on_error==false oder mail_on_process==false nicht wie gewünscht,
                 // denn diese Bedingung wird erst festgestellt, wenn das Protokoll bereits geschrieben ist.
 
-                close2();
+                close_file();
                 //Z_LOG2( "joacim", "Prefix_log::send_really()\n" );
                 send_really( scheduler_event );
 
