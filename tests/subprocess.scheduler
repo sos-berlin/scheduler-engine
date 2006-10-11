@@ -46,13 +46,13 @@ var subprocess = spooler_task.create_subprocess();
 
 subprocess.environment( "test1" ) = "ETT";
 subprocess.environment( "test2" ) = "TVÅ";
-//subprocess.environment( "PATH" ) = "";
+subprocess.environment( "PATh" ) = "";
 spooler_log.info( "subprocess.env.names=" + subprocess.env.names );
 var s = "test1=$test1 TEST1=$TEST1 test2=${test2}";
 spooler_log.info( "substitute: " + s + " ==> " + subprocess.env.substitute( s ) );
 subprocess.ignore_error = true;
 
-subprocess.start( "cmd.exe /c set" );
+subprocess.start( "sh -c set" );
 //subprocess.start( "sh -c set" );
 //subprocess.start( "sleep 30" );
 
