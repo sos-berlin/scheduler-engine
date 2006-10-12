@@ -20,14 +20,14 @@
             </description>
         </revision>
 
-        <revision type="correction" title="Subprocess.env()">
+        <!--revision type="correction" title="Subprocess.env()">
             <description>
                 <p>
                     Der Mechanismus ist überarbeitet worden, 
                     um eine Unverträglichkeit mit sos.hostware.Process_with_pid auszuräumen.
                 </p>
             </description>
-        </revision>
+        </revision-->
         
         <revision type="correction" title="Protokolldateien werden früher gelöscht">
             <description>
