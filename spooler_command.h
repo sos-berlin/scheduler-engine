@@ -136,6 +136,7 @@ struct Command_processor
     Spooler*                   _spooler;
     Communication::Operation*  _communication_operation;
     bool                       _load_config_immediately;
+    bool                       _dont_log_command;
     xml::Document_ptr          _answer;
     Xc_copy                    _error;
     bool                       _validate;

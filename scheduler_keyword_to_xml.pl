@@ -15,7 +15,7 @@ open( OUTPUT, ">$output_filename" )  or die "$output_filename: $!";
 print OUTPUT '<?xml version="1.0" encoding="utf-8"?>' ."\n";
 print OUTPUT '<?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>' ."\n";
 print OUTPUT "\n";
-print OUTPUT "<!-- ACHTUNG: NICHT AENDERN! DIESE DATEI IST GENENIERT VON $script_name -->\n";
+print OUTPUT "<!-- ACHTUNG: NICHT AENDERN! DIESE DATEI IST GENERIERT VON $script_name -->\n";
 print OUTPUT "\n";
 print OUTPUT "<register_data\n";
 print OUTPUT '    author="$' . "Author: $script_name " . '$"' . "\n";

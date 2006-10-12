@@ -11,6 +11,24 @@
 >
 
     <p>
+        Scheduler-Parameter, Umgebungsvariablen
+    </p>
+    <div class="indent">
+        <p style="margin-top: 0px">
+            Unterhalb <scheduler_element name="config"/> könnte das Element <scheduler_element name="params"/>
+            die Parameter für den Scheduler (<scheduler_method class="Spooler" property="variables"/>) setzen.
+            Die Methode dafür sollte <code>spooler.params</code> heißen, 
+            so wie z.B. <scheduler_method class="Task" property="params"/>.
+        </p>
+        <p>
+            Unterhalb <scheduler_element name="job"/> könnte das Element <scheduler_element name="environment"/>
+            die Umgebungsvariablen für eine Task setzen.
+            Bisher wird das Element nur unterhalb <scheduler_element name="process"/> erkannt.
+        </p>
+    </div>
+
+
+    <p>
         <a href="subprocess.xml">Erweiterungen der Subprozesse</a>
     </p>
     <div class="indent">

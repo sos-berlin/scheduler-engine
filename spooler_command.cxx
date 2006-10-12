@@ -863,7 +863,10 @@ void Command_processor::execute_http( http::Operation* http_operation )
                 }
                 
                 http_response->set_header( "Cache-Control", "no-cache" );
+                //if( _log )  _log->info( message_string( "SCHEDULER-932", _request ) );
+
                 response_body = execute( xml, Time::now(), true );
+
                 response_content_type = "text/xml";
             }
             else
@@ -1153,6 +1156,7 @@ void Command_processor::execute_file( const string& filename )
     string content = string_from_file( filename );
 
     Z_LOGI2( "scheduler", __FUNCTION__ << "\n" << filename << ":\n" << content << "\n" );
+    _dont_log_command = true;
 
     execute_2( content, modification_time_of_file( filename ) );
 }
@@ -1200,6 +1204,8 @@ void Command_processor::execute_2( const xml::Document_ptr& command_doc, const T
 
     try 
     {
+        if( !_dont_log_command )  Z_LOG2( "scheduler", "Execute " << replace_regex( command_doc.xml(), "\\?\\>\n", "?>", 1 ) );  // XML endet mit \n
+
         if( _spooler->_validate_xml  &&  _validate )  
         {
             //command_doc.validate_against_dtd( _spooler->_dtd );

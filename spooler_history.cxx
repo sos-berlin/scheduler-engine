@@ -1322,7 +1322,7 @@ xml::Element_ptr Spooler_db::read_task( const xml::Document_ptr& doc, int task_i
 
             //task_element.setAttribute( "log_file"        , _log.filename() );
 
-            if( record.as_int( "ERROR" ) )  
+            if( !record.null( "ERROR" )  &&  record.as_int( "ERROR" ) )  
             {
                 xml::Element_ptr error_element = doc.createElement( "ERROR" );
                 error_element.setAttribute( "code", record.as_string( "ERROR_CODE" ) );

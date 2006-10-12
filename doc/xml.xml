@@ -5,17 +5,17 @@
 <!--$Id$-->
 
 
-<!--
-    Hier sind alle XML-Element mit <scheduler_element> aufgeführt.
-    Das wird von variable_substitution.xsl genutzt.
--->
-
 <description
     title    = "Alle XML-Elemente"
     base_dir = ""
     author   = "$Author$"
     date     = "$Date$"
 >
+
+<!--
+    Hier sind alle XML-Element mit <scheduler_element> aufgeführt.
+    Das wird von variable_substitution.xsl genutzt.
+-->
 
 <scheduler_keyword keyword="XML-Elemente (alle)"/><br/>
 
