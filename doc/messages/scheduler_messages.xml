@@ -2213,6 +2213,12 @@
             </text>
         </message>
 
+        <message code="SCHEDULER-351">
+            <text xml:lang="en">
+                <title>&lt;modify_order_... setback="<p1/>">: Invalid value for attribute setback=</title>
+            </text>
+        </message>
+
         <!--message code="SCHEDULER-351">
             <text xml:lang="en">
                 <title>The order job has not implemented spooler_process()</title>

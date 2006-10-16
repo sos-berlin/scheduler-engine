@@ -121,8 +121,9 @@ struct Order : Com_order,
     void                        add_to_order_queue      ( Order_queue* );
     void                        add_to_job              ( const string& job_name );
 
-    void                        setback_                ();
-    void                        setback                 ( const Time& );
+    void                        setback                 ();
+    void                    set_setback                 ( const Time&, bool keep_setback_count = false );
+    void                        clear_setback           ( bool keep_setback_count = false );
     void                    set_at                      ( const Time& );
     Time                        at                      ()                                          { return _setback; }
   //void                    set_run_time_xml            ( const string& );

@@ -4776,7 +4776,7 @@ STDMETHODIMP Com_order::Setback()
     {
         if( !_order )  return E_POINTER;
 
-        _order->setback_();
+        _order->setback();
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Order.setback" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Order.setback" ); }

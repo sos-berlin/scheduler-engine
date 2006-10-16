@@ -600,11 +600,32 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
     string    job_chain_name = modify_order_element.getAttribute( "job_chain" );
     Order::Id id             = modify_order_element.getAttribute( "order"     );
     string    priority       = modify_order_element.getAttribute( "priority"  );
+    string    state          = modify_order_element.getAttribute( "state"  );
 
     ptr<Job_chain> job_chain = _spooler->job_chain( job_chain_name );
     ptr<Order>     order     = job_chain->order( id );
 
     if( priority != "" )  order->set_priority( as_int( priority ) );
+
+    if( state != "" )  
+    {
+        order->assert_no_task();
+        order->set_state( state );
+    }
+
+    if( modify_order_element.hasAttribute( "setback" ) )
+    {
+        if( modify_order_element.bool_getAttribute( "setback" ) )
+        {
+            throw_xc( "SCHEDULER-351", modify_order_element.getAttribute( "setback" ) );
+            //order->setback();
+        }
+        else
+        {
+            order->assert_no_task();
+            order->clear_setback( true );        // order->_setback_count belassen
+        }
+    }
 
     if( xml::Element_ptr run_time_element = modify_order_element.select_node( "run_time" ) )
     {

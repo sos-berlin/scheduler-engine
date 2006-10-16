@@ -4935,6 +4935,8 @@ const char file_scheduler_xsd[] =
     "<xsd:attribute name=\"job_chain\" type=\"Name\"         use=\"required\"/>\r\n"
     "<xsd:attribute name=\"order\"     type=\"Order_id\"     use=\"required\"/>\r\n"
     "<xsd:attribute name=\"priority\"  type=\"xsd:integer\"/>\r\n"
+    "<xsd:attribute name=\"state\"     type=\"String\"/>\r\n"
+    "<xsd:attribute name=\"setback\"   type=\"No\"/>\r\n"
     "</xsd:complexType>\r\n"
     "</xsd:element>\r\n"
     "\r\n"
@@ -5414,6 +5416,15 @@ const char file_scheduler_xsd[] =
     "</xsd:simpleType>\r\n"
     "\r\n"
     "\r\n"
+    "<xsd:simpleType name=\"No\">\r\n"
+    "<xsd:restriction base=\"xsd:NMTOKEN\">\r\n"
+    "<xsd:enumeration value=\"no\"/>\r\n"
+    "<xsd:enumeration value=\"false\"/>\r\n"
+    "<xsd:enumeration value=\"0\"/>\r\n"
+    "</xsd:restriction>\r\n"
+    "</xsd:simpleType>\r\n"
+    "\r\n"
+    "\r\n"
     "<xsd:simpleType name=\"Name\">\r\n"
     "<!-- Eine engere Beschr\xc3" "\xa4" "nkung w\xc3" "\xa4" "re gut: Buchstabe gefolgt von (Buchstabe, Ziffer, _ und vielleicht -)*  -->\r\n"
     "<xsd:restriction base=\"String\">\r\n"
@@ -5639,7 +5650,7 @@ static const Embedded_file embedded_files_array[] =
     { "html/jz/translation_de.js", file_html_jz_translation_de_js, sizeof file_html_jz_translation_de_js - 1, 1113979995 },
     { "html/jz/scheduler.xslt", file_html_jz_scheduler_xslt, sizeof file_html_jz_scheduler_xslt - 1, 1158749601 },
     { "html/jz/scheduler.css", file_html_jz_scheduler_css, sizeof file_html_jz_scheduler_css - 1, 1158695108 },
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1159001189 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1160997681 },
     { NULL, NULL, 0 }
 };
 

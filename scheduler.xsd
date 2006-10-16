@@ -518,6 +518,8 @@
             <xsd:attribute name="job_chain" type="Name"         use="required"/>
             <xsd:attribute name="order"     type="Order_id"     use="required"/>
             <xsd:attribute name="priority"  type="xsd:integer"/>
+            <xsd:attribute name="state"     type="String"/>
+            <xsd:attribute name="setback"   type="No"/>
         </xsd:complexType>
     </xsd:element>
 
@@ -992,6 +994,15 @@
             <xsd:enumeration value="true"/>
             <xsd:enumeration value="false"/>
             <xsd:enumeration value="1"/>
+            <xsd:enumeration value="0"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    
+    <xsd:simpleType name="No">
+        <xsd:restriction base="xsd:NMTOKEN">
+            <xsd:enumeration value="no"/>
+            <xsd:enumeration value="false"/>
             <xsd:enumeration value="0"/>
         </xsd:restriction>
     </xsd:simpleType>

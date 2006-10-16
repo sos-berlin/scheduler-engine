@@ -10,6 +10,22 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2006-10-16" version="2.0.159" subversion_revision="4578">
+        <revision type="modification" title="Variablenersetzung verfeinert'/>">
+            <description>
+                <p>
+                    Alleinstehende <code>$</code> bleiben stehen.
+                    Das Zeichen wird nur dann ersetzt, wenn ein Buchstabe oder ein Unterstrich folgt.
+                    Damit kann ein Dollarzeichen in Windows-Freigaben (<code>"\\HOST\C$"</code>) und 
+                    vielen Regulären Ausdrücken 
+                    (<code>".txt$"</code>, <code>"[a-z$]"</code>, aber nicht <code>"[$a-z]"</code>)
+                    verwendet werden.                    
+                </p>
+            </description>
+        </revision>
+    </change>
+
+    
     <change date="2006-10-11" version="2.0.158" subversion_revision="4569">
         <revision type="new" title="&lt;show_order what='payload'/>">
             <description>

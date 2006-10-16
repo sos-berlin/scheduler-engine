@@ -1442,7 +1442,7 @@ void Order::set_dom( const xml::Element_ptr& element, Variable_set_map* variable
     if( title            != "" )  set_title   ( title );
     if( state_name       != "" )  set_state   ( state_name.c_str() );
     if( web_service_name != "" )  set_web_service( _spooler->_web_services.web_service_by_name( web_service_name ) );
-    if( setback_string   != "" )  setback( Time::time_with_now( setback_string ) );
+    if( setback_string   != "" )  set_setback ( Time::time_with_now( setback_string ) );
 
 
     DOM_FOR_EACH_ELEMENT( element, e )  
@@ -1927,7 +1927,7 @@ void Order::set_state( const State& state )
                     else  set_state2( state );
     }
 
-    _setback_count = 0;
+    clear_setback();
 }
 
 //---------------------------------------------------------------------------------Order::set_state
@@ -1935,7 +1935,7 @@ void Order::set_state( const State& state )
 void Order::set_state( const State& state, const Time& start_time )
 {
     set_state( state );
-    setback( start_time );
+    set_setback( start_time );
 }
 
 //--------------------------------------------------------------------------------Order::set_state2
@@ -2146,7 +2146,7 @@ bool Order::try_add_to_job_chain( Job_chain* job_chain )
         }
 
 
-        setback( _state == _initial_state  &&  !_setback  &&  _run_time->set()? next_start_time( true ) : _setback );
+        set_setback( _state == _initial_state  &&  !_setback  &&  _run_time->set()? next_start_time( true ) : _setback );
     }
 
     return true;
@@ -2210,6 +2210,7 @@ void Order::move_to_node( Job_chain_node* node )
 
         _job_chain_node = node;
 
+        clear_setback();
         set_state2( node? node->_state : Order::State() );
 
         if( node && node->_job )  node->_job->order_queue()->add_order( this );
@@ -2385,9 +2386,9 @@ void Order::postprocessing2( Job* last_job )
     if( finished()  &&  !_on_blacklist )  close();
 }
 
-//----------------------------------------------------------------------------------Order::setback_
+//-----------------------------------------------------------------------------------Order::setback
 
-void Order::setback_()
+void Order::setback()
 {
     //THREAD_LOCK( _lock )
     {
@@ -2418,11 +2419,12 @@ void Order::setback_()
     }
 }
 
-//-----------------------------------------------------------------------------------Order::setback
+//-------------------------------------------------------------------------------Order::set_setback
 
-void Order::setback( const Time& start_time_ )
+void Order::set_setback( const Time& start_time_, bool keep_setback_count )
 {
-    Time start_time = start_time_ > Time::now()? start_time_ : Time(0);
+    Time start_time = start_time_ == 0  ||  start_time_ > Time::now()? start_time_ 
+                                                                     : Time(0);
 
     if( _setback != start_time )
     {
@@ -2438,7 +2440,17 @@ void Order::setback( const Time& start_time_ )
     }
 
 
-    _setback_count = 0;
+    if( !keep_setback_count )  _setback_count = 0;
+}
+
+//-----------------------------------------------------------------------------Order::clear_setback
+
+void Order::clear_setback( bool keep_setback_count )
+{
+    if( _setback_count > 0 )
+    {
+        set_setback( 0, keep_setback_count );
+    }
 }
 
 //------------------------------------------------------------------------------------Order::set_at
@@ -2462,7 +2474,7 @@ void Order::set_at( const Time& time )
 
     set_run_time( run_time_element );
     */
-    setback( time );
+    set_setback( time );
 }
 
 //---------------------------------------------------------------------------Order::next_start_time
@@ -2535,7 +2547,7 @@ void Order::before_modify_run_time_event()
 
 void Order::run_time_modified_event()
 {
-    if( _state == _initial_state  &&  !_task )  setback( _run_time->set()? next_start_time( true ) : Time(0) );
+    if( _state == _initial_state  &&  !_task )  set_setback( _run_time->set()? next_start_time( true ) : Time(0) );
 }
 
 //------------------------------------------------------------------------------Order::set_run_time
@@ -2545,7 +2557,7 @@ void Order::set_run_time( const xml::Element_ptr& e )
     _run_time = Z_NEW( Run_time( _spooler, Run_time::application_order ) );
     _run_time->set_modified_event_handler( this );
 
-    if( e )  _run_time->set_dom( e );       // Ruft setback() über modify_event()
+    if( e )  _run_time->set_dom( e );       // Ruft set_setback() über modify_event()
        else  run_time_modified_event();
 }
 
