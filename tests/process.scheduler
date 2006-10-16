@@ -40,6 +40,10 @@ else
                         <variable name="var1" value="111"/>
                         <variable name="PATH" value="$PATH;***"/>
                         <variable name="PATH" value="$PATH;222"/>
+                        <variable name="SHARE" value="\\HOST\C$"/>
+                        <variable name="SHARE" value="\\HOST\C$\DIR"/>
+                        <variable name="REGEX" value="A$"/>
+                        <variable name="REGEX" value="A$|X"/>
                         <!--Nur Windows: variable name="var.mit.punkt0" value="Eine Variable mit Punkt"/>
                         <variable name="var.mit.punkt" value="${var.mit.punkt} Eine Variable mit Punkt"/-->
                     </environment>
