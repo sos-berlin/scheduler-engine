@@ -618,6 +618,7 @@ bool Spooler_thread::is_ready_for_termination()
         if( _task_list.size() == 0 )
         {
             if( _spooler->_manual                        )  return true;
+            if( _spooler->_configuration_is_job_script   )  return true;
             if( _spooler->state() == Spooler::s_stopping )  return true;
         }
     }

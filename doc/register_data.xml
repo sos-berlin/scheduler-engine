@@ -546,6 +546,7 @@
     <register_entry register_file='api/Order.xml#use_element__delay_order_after_setback' register_title='Order'  register_keyword='delay_order_after_setback'/>
     <register_entry register_file='xml.xml#use_element__delay_order_after_setback' register_title='Alle XML-Elemente'  register_keyword='delay_order_after_setback'/>
     <register_entry register_file='xml/delay_order_after_setback.xml#' register_title='&lt;delay_order_after_setback&gt; (Konfiguration)'  register_keyword='delay_order_after_setback' type='definition'/>
+    <register_entry register_file='xml/modify_order.xml#use_element__delay_order_after_setback' register_title='&lt;modify_order&gt; (Kommando)'  register_keyword='delay_order_after_setback'/>
 </register_keyword>
 <register_keyword keyword='delay_order_after_setback (property)'>
     <register_keyword_display><code>delay_order_after_setback</code> (property)</register_keyword_display>
@@ -2408,6 +2409,7 @@
 <register_keyword keyword='setback'>
     <register_keyword_display><code>setback=</code></register_keyword_display>
     <register_entry register_file='xml/answer/order.xml#attribute_setback' register_title='&lt;order&gt; (Antwort)'  register_keyword='setback' type='definition'/>
+    <register_entry register_file='xml/modify_order.xml#attribute_setback' register_title='&lt;modify_order&gt; (Kommando)'  register_keyword='setback' type='definition'/>
 </register_keyword>
 <register_keyword keyword='setback_count'>
     <register_keyword_display><code>setback_count</code></register_keyword_display>
@@ -2702,6 +2704,7 @@
     <register_entry register_file='xml/answer/task.xml#attribute_state' register_title='&lt;task&gt; (Antwort)'  register_keyword='state' type='definition'/>
     <register_entry register_file='xml/file_order_sink.xml#attribute_state' register_title='&lt;file_order_sink&gt; (Konfiguration)'  register_keyword='state' type='definition'/>
     <register_entry register_file='xml/job_chain_node.xml#attribute_state' register_title='&lt;job_chain_node&gt; (Konfiguration)'  register_keyword='state' type='definition'/>
+    <register_entry register_file='xml/modify_order.xml#attribute_state' register_title='&lt;modify_order&gt; (Kommando)'  register_keyword='state' type='definition'/>
 </register_keyword>
 <register_keyword keyword='state (property)'>
     <register_keyword_display><code>state</code> (property)</register_keyword_display>

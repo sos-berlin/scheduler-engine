@@ -3103,6 +3103,7 @@
 
         &#160;
 
+        <!--
         <xsl:call-template name="scheduler_a">
             <xsl:with-param name="href" select="'command_line.xml'"/>
             <xsl:with-param name="content">
@@ -3112,7 +3113,8 @@
             </xsl:with-param>
         </xsl:call-template>
         &#160; &#160;
-
+        -->
+        
         <xsl:call-template name="scheduler_a">
             <xsl:with-param name="href" select="'xml.xml'"/>
             <xsl:with-param name="content">

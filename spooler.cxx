@@ -1727,6 +1727,8 @@ void Spooler::load_arg()
     }
 
 
+    int param_count = 0;
+
     try
     {
         for( Sos_option_iterator opt ( _argc, _argv, _parameter_line ); !opt.end(); opt.next() )
@@ -1741,7 +1743,8 @@ void Spooler::load_arg()
             else
             if( opt.with_value( "log"              ) )  ;   // wurde in sos_main() bearbeitet
             else
-            if( opt.flag      ( "i"                ) )  _interactive = opt.set();   // Nur für Joacim
+            if( _zschimmer_mode &&
+                opt.flag      ( "i"                ) )  _interactive = opt.set();   // Nur für Joacim
             else
             if( opt.with_value( "pid-file"         ) )  _pid_filename = opt.value();
             else
@@ -1753,6 +1756,14 @@ void Spooler::load_arg()
             else
             if( opt.with_value( "config"           )
              || opt.param(1)                         )  _config_filename = opt.value();
+            else
+            if( _zschimmer_mode && opt.param() )
+            {
+                string value = opt.value();
+                uint   eq    = value.find( '=' );
+                if( eq != string::npos )  _variables->set_var( value.substr( 0, eq ), value.substr( eq + 1 ) );
+                                    else  _variables->set_var( as_string( ++param_count ), value );
+            }
             else
             if( opt.with_value( "cd"               ) )  { string dir = opt.value(); if( chdir( dir.c_str() ) )  throw_errno( errno, "chdir", dir.c_str() ); } //_directory = dir; }
             else
@@ -1788,7 +1799,7 @@ void Spooler::load_arg()
             else
             if( opt.with_value( "env"                    ) )  ;  // Bereits von spooler_main() erledigt
             else
-            if( opt.flag      ( 'z', "zschimmer"         ) )  _zschimmer_mode = opt.set();
+            if( opt.flag      ( "zschimmer"              ) )  _zschimmer_mode = opt.set();
           //else
           //if( opt.with_value( "now"                    ) )  _clock_difference = Time( Sos_date_time( opt.value() ) ) - Time::now();
             else
@@ -1816,13 +1827,23 @@ void Spooler::load_arg()
         _temp_dir = replace_regex( _temp_dir, "\\" Z_DIR_SEPARATOR "$", "" );
         if( _spooler_id != "" )  _temp_dir += Z_DIR_SEPARATOR + _spooler_id;
 
-        _manual = !_job_name.empty();
-        if( _manual  &&  _log_directory.empty() )  _log_directory = "*stderr";
-
         _log_level = make_log_level( log_level );
 
         if( _log_level <= log_debug_spooler )  _debug = true;
         if( _config_filename.empty() )  z::throw_xc( "SCHEDULER-115" );
+
+
+        if( _zschimmer_mode  &&  string_ends_with( _config_filename, ".js" ) )  
+        {
+            _configuration_is_job_script = true;
+            _configuration_job_script_language = "javascript";
+
+            if( !_log_directory_as_option_set )  _log_directory = "*stderr";
+        }
+
+        _manual = !_job_name.empty();
+        if( _manual  &&  !_log_directory_as_option_set )  _log_directory = "*stderr";
+
 
         if( _html_directory == "" )  _html_directory = directory_of_path( _config_filename ) + "/html";
     }
@@ -1937,7 +1958,30 @@ void Spooler::load()
                                             // spooler_history.cxx verweigert das Warten auf die Datenbank, wenn _executing_command gesetzt ist,
                                             // damit der Scheduler nicht in einem TCP-Kommando blockiert.
 
-    cp.execute_file( _config_filename );
+    if( _configuration_is_job_script )
+    {
+        S configuration;
+
+        configuration << 
+            "<?xml version='1.0'?>\n" 
+            "<spooler>\n" 
+            "    <config>\n"
+            "        <process_classes/>\n"
+            "        <jobs>\n"
+            "            <job name='" << xml_encode_attribute_value( basename_of_path( _config_filename ) ) << "'>\n"
+            "                <script language='" << xml_encode_attribute_value( _configuration_job_script_language ) << "'>\n"
+            "                   <include file='" << xml_encode_attribute_value( _config_filename ) << "'/>\n"
+            "                </script>\n"
+            "                <run_time once='yes'/>\n"
+            "            </job>\n"
+            "        </jobs>\n"
+            "    </config>\n"
+            "</spooler>\n";
+
+        cp.execute( configuration, Time::now() );
+    }
+    else
+        cp.execute_file( _config_filename );
 
 
 #   ifdef Z_WINDOWS
@@ -2176,7 +2220,8 @@ void Spooler::start()
     set_ctrl_c_handler( true );       // Falls Java (über Dateityp jdbc) gestartet worden ist und den Signal-Handler verändert hat
 
     // Thread _communication nach Java starten (auch implizit durch _db). Java muss laufen, wenn der Thread startet! (Damit attach_thread() greift)
-    if( !_manual )  _communication.start_or_rebind();
+    //if( !_manual )  
+        _communication.start_or_rebind();
 
     FOR_EACH( Job_chain_map, _job_chain_map, it ) 
     {

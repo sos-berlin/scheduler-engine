@@ -21,8 +21,28 @@
         <p>
             Die Datei gilt für allgemeine Einstellungen, die neben dem Scheduler auch für andere Produkte gelten.
         </p>
-        <p>
-            Den Pfad dieser Datei können sie mit der Option <scheduler_option name="sos.ini"/> ändern.
+        <!--p>
+            Den Pfad dieser Datei können Sie einstellen (vorrangige Einstellungen zuerst):
         </p>
+        <ul>
+            <li>
+                Unter Windows in der Registrierung:
+                <code>HKEY_LOCAL_MACHINE\Software\SOS Software</code>, Eintrag <code>sos.ini</code>.
+            </li>
+            <li style="color: grey">
+                Wegen ewiger Kompatibilität leider auch: Unter Windows in der Registrierung:
+                <code>HKEY_LOCAL_MACHINE\Software\SOS Software\sos.ini</code>, Eintrag <code>(Standard)</code> oder <code>""</code>.
+            </li>
+            <li>
+                Mit der Option <scheduler_option name="sos.ini"/>
+            </li>
+            <li>
+                Mit der Umgebungsvariablen <code>SOS_INI</code>
+            </li>
+            <li>
+                Unter Windows, wenn der Pfad nicht eingestellt ist, wird "<code>sos.ini</code>" verwendet, 
+                was Windows das Auffinden der Datei überlässt.
+            </li>
+        </ul-->
     </description>
 </ini>

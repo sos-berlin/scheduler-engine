@@ -393,18 +393,23 @@ void Log::log2( Log_level level, const string& prefix, const string& line_, Pref
                                   else  next++;
 
             int buffer1_len = strlen( buffer1 );
-            log->write( buffer1, buffer1_len );
+            //if( log )  log->write( buffer1, buffer1_len );
             write( extra_log, order_log, buffer1, buffer1_len, false );           // Zeit
 
             int buffer2_len = strlen( buffer2 );
-            log->write( buffer2, buffer2_len );
+            if( log )  log->write( buffer2 + 1, buffer2_len - 1 );
             write( extra_log, order_log, buffer2, buffer2_len );                  // [info]
 
-            if( !prefix.empty() )  write( NULL, order_log, "(" + prefix + ") " );     // (Job ...)
+            if( !prefix.empty() )
+            {
+                string s = "(" + prefix + ") ";
+                if( log )  log << s;
+                write( NULL, order_log, s );     // (Job ...)
+            }
 
             int len = next - begin;
             while( len > 1  &&  line.c_str()[begin+len-1] == '\r' )  len--;
-            log->write( line.c_str() + begin, len );
+            if( log )  log->write( line.c_str() + begin, len );
             write( extra_log, order_log, line.c_str() + begin, len );                 // Text
 
             begin = next;

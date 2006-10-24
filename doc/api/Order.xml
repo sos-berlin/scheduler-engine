@@ -307,6 +307,14 @@
             eingestellten Frist wiederholt.
             Die Rückgabe von <scheduler_method class="Job_impl" method="spooler_process"/> bleibt ohne Wirkung.
         </p>
+        <p>
+            Der Auftrag zählt aufeinander folgende Aufrufe dieser Methode,
+            was von <scheduler_element name="delay_order_after_setback"/>
+            berücksichtigt wird.
+            Der Zähler wird auf 0 gestellt, wenn <scheduler_method class="Job_impl" method="spooler_process"/>
+            ohne diesen Aufruf zu Ende ausgeführt worden ist.
+            Beim Start des Schedulers sind alle Zähler 0.
+        </p>
     </description>
 
     <messages>

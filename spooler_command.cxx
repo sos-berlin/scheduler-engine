@@ -566,9 +566,7 @@ xml::Element_ptr Command_processor::execute_add_order( const xml::Element_ptr& a
 {
     if( _security_level < Security::seclev_all )  z::throw_xc( "SCHEDULER-121" );
 
-    string job_name         = add_order_element.getAttribute( "job"       );
-    string job_chain_name   = add_order_element.getAttribute( "job_chain" );
-    bool   replace          = add_order_element.bool_getAttribute( "replace", false );
+    string job_name = add_order_element.getAttribute( "job" );
 
     ptr<Order> order = new Order( _spooler );
     order->set_dom( add_order_element, &_variable_set_map );
@@ -576,7 +574,9 @@ xml::Element_ptr Command_processor::execute_add_order( const xml::Element_ptr& a
 
     if( job_name == "" )
     {
-        Job_chain* job_chain = _spooler->job_chain( job_chain_name );
+        bool       replace   = add_order_element.bool_getAttribute( "replace", false );
+        Job_chain* job_chain = _spooler->job_chain( add_order_element.getAttribute( "job_chain" ) );
+
         if( replace )  order->add_to_or_replace_in_job_chain( job_chain );
                  else  order->add_to_job_chain( job_chain );
     }

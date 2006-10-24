@@ -477,16 +477,21 @@ bool Wait_handles::wait_until_2( const Time& until, const Object* wait_for_objec
                 t = (int)ceil( min( (double)max_sleep_time_ms, rest * 1000.0 ) );
 
                 S console_line;
-                console_line << Time::now().as_string( Time::without_ms ) << " (";
-                if( until < latter_day ) 
+                console_line << Time::now().as_string( Time::without_ms );
+                
+                if( until < latter_day  ||  wait_for_object )
                 {
-                    int days = rest.day_nr();
-                    if( days > 0 )  console_line << days << "d+";
-                    console_line << rest.time_of_day().as_string( Time::without_ms ) << "s";
-                    if( days > 0 )  console_line << " until " << Time( until ).as_string();
+                    console_line << " (";
+                    if( until < latter_day ) 
+                    {
+                        int days = rest.day_nr();
+                        if( days > 0 )  console_line << days << "d+";
+                        console_line << rest.time_of_day().as_string( Time::without_ms ) << "s";
+                        if( days > 0 )  console_line << " until " << Time( until ).as_string();
+                    }
+                    if( wait_for_object )  console_line << " for " << wait_for_object->obj_name();
+                    console_line << ")";
                 }
-                if( wait_for_object )  console_line << " for " << wait_for_object->obj_name();
-                console_line << ")";
 
                 string l = console_line.str().substr( 0, console_width() - 1 );
                 console_line_length = l.length();

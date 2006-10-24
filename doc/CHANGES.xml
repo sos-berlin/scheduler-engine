@@ -11,7 +11,7 @@
     <scheduler_keyword keyword="Change log"/>
 
     <change date="2006-10-16" version="2.0.159" subversion_revision="4578">
-        <revision type="modification" title="Variablenersetzung verfeinert'/>">
+        <revision type="modification" title="Variablenersetzung verfeinert">
             <description>
                 <p>
                     Alleinstehende <code>$</code> bleiben stehen.
@@ -21,6 +21,24 @@
                     (<code>".txt$"</code>, <code>"[a-z$]"</code>, aber nicht <code>"[$a-z]"</code>)
                     verwendet werden.                    
                 </p>
+                <ul>
+                    <li>
+                        Kapitel <scheduler_a href="variable_substitution.xml" quote="yes"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+
+        <revision type="new" title="&lt;modify_order setback=&quot;no&quot; state=&quot;…&quot;>">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_element name="modify_order" attribute="setback" value="no"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="modify_order" attribute="state"/>
+                    </li>
+                </ul>
             </description>
         </revision>
     </change>

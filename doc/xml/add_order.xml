@@ -31,7 +31,7 @@
 
 
     <xml_attributes>
-        <xml_attribute name="job_chain" type="state">
+        <xml_attribute name="job_chain" type="name">
             <description>
                 <p>
                     Die Jobkette, in die der Auftrag eingetragen werden soll.
@@ -91,6 +91,9 @@
         <xml_attribute name="job" type="name">
             <description>
                 <p>
+                    Der Auftrag wird direkt in die Auftragswarteschlange des Jobs eingereiht,
+                    ohne in eine Jobkette aufgenommen zu werden
+                    (nicht empfohlen).
                 </p>
             </description>
         </xml_attribute>

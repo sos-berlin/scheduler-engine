@@ -494,6 +494,8 @@ struct Spooler : Object,
     bool                       _validate_xml;
     xml::Schema_ptr            _schema;
     string                     _config_filename;            // -config=
+    bool                       _configuration_is_job_script;        // Als Konfigurationsdatei ist eine Skript-Datei angegeben worden
+    string                     _configuration_job_script_language; 
     string                     _html_directory;
     bool                       _executing_command;          // true: spooler_history wartet nicht auf Datenbank (damit Scheduler nicht blockiert)
     int                        _process_count;

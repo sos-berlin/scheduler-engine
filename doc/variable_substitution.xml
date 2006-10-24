@@ -19,6 +19,10 @@
             (außer dem Unterstrich _) folgt.
         </p>
         <p>
+            Das Zeichen »<code>$</code>« bleibt stehen,
+            wenn kein »<code>{</code>« oder Buchstabe folgt.
+        </p>
+        <p>
             Es gelten die Werte der Umgebungsvariablen vom Start des Schedulers.
         </p>
         <p>
@@ -35,7 +39,12 @@
             <pre># File factory.ini
 [java]            
 class_path = ${SCHEDULER_HOME}/lib/sos.spooler.jar
-class_path = $SCHEDULER_HOME/lib/sos.spooler.jar</pre>
+class_path = $SCHEDULER_HOME/lib/sos.spooler.jar
+class_path = \\otherhost\C$\lib\classes.jar
+
+&lt;params>
+    &lt;param name="txt_file_regex" value="\.txt$"/>
+&lt;/params></pre>
         </scheduler_example>
     </description>
 
