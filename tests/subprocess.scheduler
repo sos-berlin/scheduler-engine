@@ -15,16 +15,6 @@
 
         <process_classes/>
 
-        <script language="javascript">
-            <![CDATA[
-            
-spooler.job( "javascript" ).start();            
-//spooler.job( "java" ).start();            
-            
-        ]]>
-        </script>
-
-
         <jobs>
 
             <job name="javascript">
@@ -152,5 +142,9 @@ public class My_job  extends sos.spooler.Job_impl
             </job>
 
         </jobs>
+
+        <commands>
+            <start_job job="java"/>
+        </commands>
     </config>
 </spooler>
