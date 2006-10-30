@@ -758,14 +758,14 @@ const Com_method Run_time::_methods[] =
 
 //-------------------------------------------------------------------------------Run_time::Run_time
 
-Run_time::Run_time( Spooler* spooler, Application a )
+Run_time::Run_time( Spooler* spooler, Order* order )
 :
     Idispatch_implementation( &class_descriptor ),
     _zero_(this+1),
     _spooler(spooler),
-    _application(a)
+    _order(order)
 {
-    if( _application == application_order )
+    if( _order )
     {
         _once = true;
     }
@@ -790,6 +790,8 @@ STDMETHODIMP Run_time::QueryInterface( const IID& iid, void** result )
 STDMETHODIMP Run_time::put_Xml( BSTR xml )
 {
     Z_COM_IMPLEMENT( set_xml( string_from_bstr( xml ) ) );
+
+    // *** this ist ungültig ***
 }
 
 //----------------------------------------------------------------------------Run_time::operator ==
@@ -826,7 +828,11 @@ void Run_time::set_xml( const string& xml )
     //set_dom( _spooler->_dtd.validate_xml( xml ).documentElement() );
     xml::Document_ptr doc ( xml );
     if( _spooler->_validate_xml )  _spooler->_schema.validate( xml::Document_ptr( xml ) );
-    set_dom( doc.documentElement() );
+
+    if( !_order )  z::throw_xc( "SCHEDULER-352" );
+    _order->set_run_time( doc.documentElement() );
+
+    // *** this ist ungültig ***
 }
 
 //--------------------------------------------------------------------------------Run_time::set_dom
@@ -850,7 +856,7 @@ void Run_time::set_dom( const xml::Element_ptr& element )
     _set = true;
 
     _once = element.bool_getAttribute( "once", _once );
-    if( _application == application_order  &&  !_once )  z::throw_xc( "SCHEDULER-220", "once='yes'" );
+    if( _order  &&  !_once )  z::throw_xc( "SCHEDULER-220", "once='yes'" );
 
     default_period.set_dom( element, NULL );
     default_day = default_period;

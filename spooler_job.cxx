@@ -508,7 +508,7 @@ void Job::init_start_when_directory_changed( Task* task )
 
 void Job::init_run_time()
 {
-    _run_time = Z_NEW( Run_time( _spooler, Run_time::application_job ) );
+    _run_time = Z_NEW( Run_time( _spooler ) );
 }
 
 //--------------------------------------------------------------------------------Job::set_run_time
@@ -516,7 +516,7 @@ void Job::init_run_time()
 void Job::set_run_time( const xml::Element_ptr& element )
 {
     init_run_time();
-    _run_time->set_holidays( _spooler->holidays() ), 
+    _run_time->set_holidays( _spooler->holidays() );
     _run_time->set_dom( element );
 
     _start_once    = _run_time->once();
@@ -582,6 +582,8 @@ void Job::close()
 
 void Job::set_remove( bool remove )
 { 
+    _replacement_job = NULL;
+
     if( !remove )
     {
         _remove = false;
@@ -623,6 +625,14 @@ bool Job::should_removed()
     }
 
     return false;
+}
+
+//-------------------------------------------------------------------------Job::set_replacement_job
+
+void Job::set_replacement_job( Job* replacement_job )
+{
+    set_remove( true );
+    _replacement_job = replacement_job;
 }
 
 //-------------------------------------------------------------------------Job::jobname_as_filename
@@ -776,7 +786,7 @@ void Job::load_tasks_from_db()
 
             string xml = file_as_string( _spooler->_db->db_name() + " -table=" + _spooler->_tasks_tablename + " -clob='task_xml'"
                                                                     " where \"TASK_ID\"=" + as_string( task_id ) );
-            if( !xml.empty() )  set_dom( xml::Document_ptr( xml ).documentElement(), Time::now() );
+            if( !xml.empty() )  set_dom( xml::Document_ptr( xml ).documentElement(), Time::now() );  // 2006-10-28 Das sieht ja merkwürdig aus. Sollte es heißen task->set_dom()?
 
 
             _log->info( message_string( "SCHEDULER-917", task_id, start_at.as_string() ) );

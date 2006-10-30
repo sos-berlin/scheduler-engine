@@ -199,6 +199,7 @@ struct Order : Com_order,
     Task*                      _task;                   // Auftrag wird gerade von dieser Task in spooler_process() verarbeitet 
     bool                       _moved;                  // Nur wenn _task != NULL: true, wenn Job state oder job geändert hat. Dann nicht automatisch in Jobkette weitersetzen
     ptr<Run_time>              _run_time;
+    bool                       _run_time_modified;
     Period                     _period;                 // Bei _run_time.set(): Aktuelle oder nächste Periode
   //bool                       _period_once;
     Time                       _setback;                // Bis wann der Auftrag zurückgestellt ist (bei _setback_count > 0, sonst Startzeitpunkt "at")

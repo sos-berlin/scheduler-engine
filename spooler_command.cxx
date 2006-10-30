@@ -1075,6 +1075,7 @@ void Command_processor::execute_http( http::Operation* http_operation )
                 catch( exception& )
                 {                                                        
                     string fn = filename.substr( 1 );    // '/' abschneiden
+                    if( string_begins_with( fn, "jz/" ) )  fn = "z/" + fn.substr( 3 );
                     const Embedded_file* f = embedded_files.get_embedded_file_or_null( "html/" + fn );
                     if( !f ) 
                     {

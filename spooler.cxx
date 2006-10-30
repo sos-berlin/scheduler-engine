@@ -816,11 +816,22 @@ void Spooler::load_job_from_xml( const xml::Element_ptr& e, const Time& xml_mod_
                : spooler_id.empty() || spooler_id == id() )
     {
         string job_name = e.getAttribute("name");
+        bool   replace  = e.bool_getAttribute( "replace", false );
+
         ptr<Job> job = get_job_or_null( job_name );
         if( job )
         {
-            job->set_dom( e, xml_mod_time );
-            if( init )  init_job( job, true );
+            if( replace )
+            {
+                ptr<Job> replacement_job = Z_NEW( Job( this ) );
+                replacement_job->set_dom( e, xml_mod_time );
+                job->set_replacement_job( replacement_job );
+            }
+            else
+            {
+                job->set_dom( e, xml_mod_time );
+                if( init )  init_job( job, true );
+            }
         }
         else
         {
@@ -842,7 +853,7 @@ void Spooler::init_job( Job* job, bool call_init_too )
     }
     catch( exception& )
     {
-        _log.error( message_string( "SCHEDULER-330", job->obj_name() ) );
+        _log.error( message_string( "SCHEDULER-330", job->obj_name() ) );   // remove_temporary_jobs() gibt keine weitere Fehlermeldung aus.
         throw;
     }
 }
@@ -899,8 +910,7 @@ int Spooler::remove_temporary_jobs( Job* which_job )
             {
                 if( job->should_removed() )    
                 {
-                    job->_log->info( message_string( "SCHEDULER-257" ) );   // "Job wird jetzt entfernt"
-                    //job->_log->log( job->temporary()? log_debug : log_info, message_string( "SCHEDULER-257" ) );   // "Job wird jetzt entfernt"
+                    job->_log->info( message_string( job->_replacement_job? "SCHEDULER-988" : "SCHEDULER-257" ) );   // "Job wird jetzt entfernt bzw. ersetzt"
 
                     try
                     {
@@ -908,7 +918,19 @@ int Spooler::remove_temporary_jobs( Job* which_job )
                     }
                     catch( exception &x )  { _log.warn( x.what() ); }   // Kann das überhaupt passieren?
 
-                    it = _job_list.erase( it );
+                    if( job->_replacement_job )
+                    {
+                        *it = job->_replacement_job;
+                        job = *it++;
+
+                        try
+                        {
+                            init_job( job, true );
+                        }
+                        catch( exception& x ) { Z_LOG2( "scheduler", __FUNCTION__ << " " << x.what() << "\n" ); }
+                    }
+                    else
+                        it = _job_list.erase( it );
 
                     count++;
 

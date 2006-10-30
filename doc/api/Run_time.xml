@@ -31,6 +31,16 @@
         <code>&lt;run_time></code>
     </title>
 
+    <description>
+        <p>
+            Verwirft die bisherige Einstellung und setzt <code>Run_time</code> neu.
+        </p>
+    </description>
+
+    <messages>
+        <message level="error" code="SCHEDULER-352"/>
+    </messages>
+
 </property>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->

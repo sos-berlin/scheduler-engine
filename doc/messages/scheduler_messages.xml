@@ -2219,12 +2219,12 @@
             </text>
         </message>
 
-        <!--message code="SCHEDULER-351">
+        <message code="SCHEDULER-352">
             <text xml:lang="en">
-                <title>The order job has not implemented spooler_process()</title>
+                <title>Only the run_time of an order can be renewed</title>
             </text>
-        </message-->
-        
+        </message>
+
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->
@@ -2921,7 +2921,13 @@
                 <title>Starting process: <p1>program and arguments</p1></title>
             </text>
         </message>
-        
+
+        <message code="SCHEDULER-988">
+            <text xml:lang="en">
+                <title>Job is being replaced now</title>
+            </text>
+        </message>
+
         <message code="SCHEDULER-999">
             <text xml:lang="de">
                 <title>Scheduler ordentlich beendet</title>

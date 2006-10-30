@@ -301,6 +301,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-985", "$1 more file orders will be added later, after previous orders have been processed" },
     { "SCHEDULER-986", "Continuing reading buffered directory (as of $1)" },
     { "SCHEDULER-987", "Starting process: $1" },
+    { "SCHEDULER-988", "Job is being replaced now" },
     { "SCHEDULER-999", "Scheduler has been terminated properly" },
     {}
 };

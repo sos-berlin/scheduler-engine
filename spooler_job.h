@@ -221,6 +221,7 @@ struct Job : Object,
     bool                        visible                     () const                                { return _visible; }
     bool                        temporary                   () const                                { return _temporary; }
     void                    set_remove                      ( bool );
+    void                    set_replacement_job             ( Job* );
     void                        set_delay_after_error       ( int error_steps, const string& delay );
     void                        set_delay_after_error       ( int error_steps, Time delay )         { _log->debug9( "delay_after_error["        +as_string(error_steps)+"]="+delay.as_string() ); _delay_after_error[ error_steps ] = delay; }
     void                        set_stop_after_error        ( int error_steps )                     { _log->debug9( "delay_after_error["        +as_string(error_steps)+"]=\"STOP\""           ); _delay_after_error[ error_steps ] = latter_day; }
@@ -357,6 +358,7 @@ struct Job : Object,
     bool                       _waiting_for_process;        // Task kann nicht gestartet werden, weil kein Prozess in der Prozessklasse verfügbar ist
     bool                       _waiting_for_process_try_again;  
     string                     _description;                // <description>
+    ptr<Job>                   _replacement_job;
 
   protected:
     friend struct               Job_history;

@@ -324,7 +324,7 @@ struct At_set
 struct Run_time : idispatch_implementation< Run_time, spooler_com::Irun_time >, 
                   spooler_com::Ihas_java_class_name
 {
-    enum Application { application_job, application_order };
+  //enum Application { application_job, application_order };
 
 
     static Class_descriptor     class_descriptor;
@@ -342,7 +342,7 @@ struct Run_time : idispatch_implementation< Run_time, spooler_com::Irun_time >,
 
     bool                        operator ==                 ( const Run_time& );
 
-                                Run_time                    ( Spooler*, Application );
+                                Run_time                    ( Spooler*, Order* = NULL );
 
     void                    set_modified_event_handler      ( Modified_event_handler* m )           { _modified_event_handler = m; }
 
@@ -386,7 +386,8 @@ struct Run_time : idispatch_implementation< Run_time, spooler_com::Irun_time >,
 
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
-    Application                _application;
+    Order*                     _order;
+  //Application                _application;
     Modified_event_handler*    _modified_event_handler;
     bool                       _set;
     bool                       _once;

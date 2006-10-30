@@ -26,7 +26,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="echo perl ../zschimmer/files_to_c++.pl  -trim html/jz/*.html html/jz/*.js html/jz/*.xslt html/jz/*.css scheduler.xsd -- spooler_embedded_files.cxx&#x0D;&#x0A;perl ../zschimmer/files_to_c++.pl  html/favicon.ico -trim html/jz/*.html html/jz/*.js html/jz/*.xslt html/jz/*.css scheduler.xsd &gt;spooler_embedded_files.cxx&#x0D;&#x0A;"
+				CommandLine="echo perl ../zschimmer/files_to_c++.pl  -trim html/z/*.html html/z/*.js html/z/*.xslt html/z/*.css scheduler.xsd -- spooler_embedded_files.cxx&#x0D;&#x0A;perl ../zschimmer/files_to_c++.pl  html/favicon.ico -trim html/z/*.html html/z/*.js html/z/*.xslt html/z/*.css scheduler.xsd &gt;spooler_embedded_files.cxx&#x0D;&#x0A;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -136,7 +136,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="echo perl ../zschimmer/files_to_c++.pl  -trim html/jz/*.html html/jz/*.js html/jz/*.xslt html/jz/*.css scheduler.xsd -- spooler_embedded_files.cxx&#x0D;&#x0A;perl ../zschimmer/files_to_c++.pl  html/favicon.ico -trim html/jz/*.html html/jz/*.js html/jz/*.xslt html/jz/*.css scheduler.xsd &gt;spooler_embedded_files.cxx&#x0D;&#x0A;"
+				CommandLine="echo perl ../zschimmer/files_to_c++.pl  -trim html/z/*.html html/z/*.js html/z/*.xslt html/z/*.css scheduler.xsd -- spooler_embedded_files.cxx&#x0D;&#x0A;perl ../zschimmer/files_to_c++.pl  html/favicon.ico -trim html/z/*.html html/z/*.js html/z/*.xslt html/z/*.css scheduler.xsd &gt;spooler_embedded_files.cxx&#x0D;&#x0A;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -248,7 +248,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="echo perl ../zschimmer/files_to_c++.pl  -trim html/jz/*.html html/jz/*.js html/jz/*.xslt html/jz/*.css scheduler.xsd -- spooler_embedded_files.cxx&#x0D;&#x0A;perl ../zschimmer/files_to_c++.pl  html/favicon.ico -trim html/jz/*.html html/jz/*.js html/jz/*.xslt html/jz/*.css scheduler.xsd &gt;spooler_embedded_files.cxx&#x0D;&#x0A;"
+				CommandLine="echo perl ../zschimmer/files_to_c++.pl  -trim html/z/*.html html/z/*.js html/z/*.xslt html/z/*.css scheduler.xsd -- spooler_embedded_files.cxx&#x0D;&#x0A;perl ../zschimmer/files_to_c++.pl  html/favicon.ico -trim html/z/*.html html/z/*.js html/z/*.xslt html/z/*.css scheduler.xsd &gt;spooler_embedded_files.cxx&#x0D;&#x0A;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"

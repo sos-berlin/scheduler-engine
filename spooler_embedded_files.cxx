@@ -9,7 +9,7 @@
 const char file_html_favicon_ico[] = 
     "\x00" "\x00" "\x01" "\x00" "\x01" "\x00" "\x10" "\x10" "\x10" "\x00" "\x00" "\x00" "\x00" "\x00" "(\x01" "\x00" "\x00" "\x16" "\x00" "\x00" "\x00" "(\x00" "\x00" "\x00" "\x10" "\x00" "\x00" "\x00" " \x00" "\x00" "\x00" "\x01" "\x00" "\x04" "\x00" "\x00" "\x00" "\x00" "\x00" "\x80" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x10" "\x00" "\x00" "\x00" "\x10" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x80" "\x00" "\x00" "\x80" "\x00" "\x00" "\x00" "\x80" "\x80" "\x00" "\x80" "\x00" "\x00" "\x00" "\x80" "\x00" "\x80" "\x00" "\x80" "\x80" "\x00" "\x00" "\xc0" "\xc0" "\xc0" "\x00" "\x80" "\x80" "\x80" "\x00" "\x00" "\x00" "\xff" "\x00" "\x00" "\xff" "\x00" "\x00" "\x00" "\xff" "\xff" "\x00" "\xff" "\x00" "\x00" "\x00" "\xff" "\x00" "\xff" "\x00" "\xff" "\xff" "\x00" "\x00" "\xff" "\xff" "\xff" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x80" "\x03" "\x00" "\x00" "\x87" "\xf3" "\x00" "\x00" "\xc3" "\xf9" "\x00" "\x00" "\xe1" "\xfd" "\x00" "\x00" "\xf1" "\xff" "\x00" "\x00" "\xf8" "\xff" "\x00" "\x00" "\xf8" "\x7f" "\x00" "\x00" "\xfc" "?\x00" "\x00" "\xfe" "?\x00" "\x00" "\xff" "\x1f" "\x00" "\x00" "\xff" "\x0f" "\x00" "\x00" "\xff" "\x87" "\x00" "\x00" "\x9f" "\xc7" "\x00" "\x00" "\x8f" "\xe3" "\x00" "\x00" "\xc0" "\x01" "\x00" "\x00" "\xdf" "\xff" "\x00" "\x00" "";
 
-const char file_html_jz_details_frame_html[] = 
+const char file_html_z_details_frame_html[] = 
     "<!-- $Id$ -->\r\n"
     "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">\r\n"
     "<html>\r\n"
@@ -296,7 +296,7 @@ const char file_html_jz_details_frame_html[] =
     "</html>\r\n"
     "";
 
-const char file_html_jz_index_html[] = 
+const char file_html_z_index_html[] = 
     "<!-- $Id$ -->\r\n"
     "<html>\r\n"
     "<head>\r\n"
@@ -325,7 +325,7 @@ const char file_html_jz_index_html[] =
     "</html>\r\n"
     "";
 
-const char file_html_jz_left_frame_html[] = 
+const char file_html_z_left_frame_html[] = 
     "<!-- $Id$ -->\r\n"
     "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">\r\n"
     "<html>\r\n"
@@ -610,7 +610,7 @@ const char file_html_jz_left_frame_html[] =
     "</html>\r\n"
     "";
 
-const char file_html_jz_browser_dependencies_js[] = 
+const char file_html_z_browser_dependencies_js[] = 
     "// $Id$\r\n"
     "\r\n"
     "// Anpassungen f\xfc" "r DOM und XSL-T\r\n"
@@ -710,7 +710,7 @@ const char file_html_jz_browser_dependencies_js[] =
     "//-------------------------------------------------------------------------------------------------\r\n"
     "";
 
-const char file_html_jz_popup_menu_js[] = 
+const char file_html_z_popup_menu_js[] = 
     "// $Id$\r\n"
     "\r\n"
     "// document.onmousemove wird gesetzt!\r\n"
@@ -937,7 +937,7 @@ const char file_html_jz_popup_menu_js[] =
     "//-------------------------------------------------------------------------------------------------\r\n"
     "";
 
-const char file_html_jz_scheduler_js[] = 
+const char file_html_z_scheduler_js[] = 
     "// $Id$\r\n"
     "\r\n"
     "//----------------------------------------------------------------------------------------------var\r\n"
@@ -1816,7 +1816,7 @@ const char file_html_jz_scheduler_js[] =
     "//-------------------------------------------------------------------------------------------------\r\n"
     "";
 
-const char file_html_jz_show_log_js[] = 
+const char file_html_z_show_log_js[] = 
     "// $Id$\r\n"
     "\r\n"
     "// Javascript-Code f\xfc" "r HTTP Show log des Schedulers.\r\n"
@@ -1947,7 +1947,7 @@ const char file_html_jz_show_log_js[] =
     "//-------------------------------------------------------------------------------------------------\r\n"
     "";
 
-const char file_html_jz_translation_de_js[] = 
+const char file_html_z_translation_de_js[] = 
     "// $Id$\r\n"
     "\r\n"
     "function init_translation_table( t )\r\n"
@@ -1967,7 +1967,7 @@ const char file_html_jz_translation_de_js[] =
     "t[ \"start time:\"         ] = \"n\xe4" "chster Start:\";\r\n"
     "}";
 
-const char file_html_jz_scheduler_xslt[] = 
+const char file_html_z_scheduler_xslt[] = 
     "<?xml version='1.0' encoding=\"utf-8\"?>\r\n"
     "<!-- $Id$ -->\r\n"
     "\r\n"
@@ -4326,7 +4326,7 @@ const char file_html_jz_scheduler_xslt[] =
     "<!-- Das ist drei Punkte: \xe2" "\x80" "\xa6" " -->\r\n"
     "";
 
-const char file_html_jz_scheduler_css[] = 
+const char file_html_z_scheduler_css[] = 
     "/*  $Id$ \r\n"
     "\r\n"
     "STYLESHEET F\xdc" "R DEN SCHEDULER\r\n"
@@ -4786,6 +4786,8 @@ const char file_scheduler_xsd[] =
     "</xsd:union>\r\n"
     "</xsd:simpleType>\r\n"
     "</xsd:attribute>\r\n"
+    "\r\n"
+    "<xsd:attribute name=\"replace\"               type=\"Yes_no\"/>\r\n"
     "</xsd:complexType>\r\n"
     "\r\n"
     "<!--libxslt xsd:key name=\"delay_after_error\">\r\n"
@@ -4932,6 +4934,10 @@ const char file_scheduler_xsd[] =
     "\r\n"
     "<xsd:element name=\"modify_order\">\r\n"
     "<xsd:complexType>\r\n"
+    "<xsd:sequence>\r\n"
+    "<xsd:element ref=\"run_time\"/>\r\n"
+    "</xsd:sequence>\r\n"
+    "\r\n"
     "<xsd:attribute name=\"job_chain\" type=\"Name\"         use=\"required\"/>\r\n"
     "<xsd:attribute name=\"order\"     type=\"Order_id\"     use=\"required\"/>\r\n"
     "<xsd:attribute name=\"priority\"  type=\"xsd:integer\"/>\r\n"
@@ -5639,18 +5645,18 @@ namespace spooler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "html/favicon.ico", file_html_favicon_ico, sizeof file_html_favicon_ico - 1, 1111081027 },
-    { "html/jz/details_frame.html", file_html_jz_details_frame_html, sizeof file_html_jz_details_frame_html - 1, 1137326806 },
-    { "html/jz/index.html", file_html_jz_index_html, sizeof file_html_jz_index_html - 1, 1113979995 },
-    { "html/jz/left_frame.html", file_html_jz_left_frame_html, sizeof file_html_jz_left_frame_html - 1, 1158661396 },
-    { "html/jz/browser_dependencies.js", file_html_jz_browser_dependencies_js, sizeof file_html_jz_browser_dependencies_js - 1, 1130350343 },
-    { "html/jz/popup_menu.js", file_html_jz_popup_menu_js, sizeof file_html_jz_popup_menu_js - 1, 1158582852 },
-    { "html/jz/scheduler.js", file_html_jz_scheduler_js, sizeof file_html_jz_scheduler_js - 1, 1158661396 },
-    { "html/jz/show_log.js", file_html_jz_show_log_js, sizeof file_html_jz_show_log_js - 1, 1113979995 },
-    { "html/jz/translation_de.js", file_html_jz_translation_de_js, sizeof file_html_jz_translation_de_js - 1, 1113979995 },
-    { "html/jz/scheduler.xslt", file_html_jz_scheduler_xslt, sizeof file_html_jz_scheduler_xslt - 1, 1158749601 },
-    { "html/jz/scheduler.css", file_html_jz_scheduler_css, sizeof file_html_jz_scheduler_css - 1, 1158695108 },
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1161001406 },
+    { "html/favicon.ico", file_html_favicon_ico, sizeof file_html_favicon_ico - 1, 1111073827 },
+    { "html/z/details_frame.html", file_html_z_details_frame_html, sizeof file_html_z_details_frame_html - 1, 1162029282 },
+    { "html/z/index.html", file_html_z_index_html, sizeof file_html_z_index_html - 1, 1162029282 },
+    { "html/z/left_frame.html", file_html_z_left_frame_html, sizeof file_html_z_left_frame_html - 1, 1162029282 },
+    { "html/z/browser_dependencies.js", file_html_z_browser_dependencies_js, sizeof file_html_z_browser_dependencies_js - 1, 1162029282 },
+    { "html/z/popup_menu.js", file_html_z_popup_menu_js, sizeof file_html_z_popup_menu_js - 1, 1162029282 },
+    { "html/z/scheduler.js", file_html_z_scheduler_js, sizeof file_html_z_scheduler_js - 1, 1162029282 },
+    { "html/z/show_log.js", file_html_z_show_log_js, sizeof file_html_z_show_log_js - 1, 1162029282 },
+    { "html/z/translation_de.js", file_html_z_translation_de_js, sizeof file_html_z_translation_de_js - 1, 1162029282 },
+    { "html/z/scheduler.xslt", file_html_z_scheduler_xslt, sizeof file_html_z_scheduler_xslt - 1, 1162029282 },
+    { "html/z/scheduler.css", file_html_z_scheduler_css, sizeof file_html_z_scheduler_css - 1, 1162029282 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1162015479 },
     { NULL, NULL, 0 }
 };
 

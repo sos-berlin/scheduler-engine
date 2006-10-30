@@ -2273,7 +2273,10 @@ void Order::postprocessing( bool success )
                 }
                 else
                 {
-                    Time next_start = next_start_time();
+                    bool is_first_call = _run_time_modified;
+                    _run_time_modified = false;
+                    Time next_start = next_start_time( is_first_call );
+
                     if( next_start != latter_day )
                     {
                         _log->info( message_string( "SCHEDULER-944", _initial_state, next_start ) );        // "Kein weiterer Job in der Jobkette, der Auftrag wird mit state=<p1/> wiederholt um <p2/>"
@@ -2548,13 +2551,14 @@ void Order::before_modify_run_time_event()
 void Order::run_time_modified_event()
 {
     if( _state == _initial_state  &&  !_task )  set_setback( _run_time->set()? next_start_time( true ) : Time(0) );
+                                          else  _run_time_modified = true;
 }
 
 //------------------------------------------------------------------------------Order::set_run_time
 
 void Order::set_run_time( const xml::Element_ptr& e )
 {
-    _run_time = Z_NEW( Run_time( _spooler, Run_time::application_order ) );
+    _run_time = Z_NEW( Run_time( _spooler, this ) );
     _run_time->set_modified_event_handler( this );
 
     if( e )  _run_time->set_dom( e );       // Ruft set_setback() über modify_event()

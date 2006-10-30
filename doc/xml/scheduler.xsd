@@ -369,6 +369,8 @@
                     </xsd:union>
                 </xsd:simpleType>
             </xsd:attribute>
+
+            <xsd:attribute name="replace"               type="Yes_no"/>
         </xsd:complexType>
 
         <!--libxslt xsd:key name="delay_after_error">
@@ -515,6 +517,10 @@
     
     <xsd:element name="modify_order">
         <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element ref="run_time"/>
+            </xsd:sequence>
+            
             <xsd:attribute name="job_chain" type="Name"         use="required"/>
             <xsd:attribute name="order"     type="Order_id"     use="required"/>
             <xsd:attribute name="priority"  type="xsd:integer"/>
