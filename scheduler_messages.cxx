@@ -219,6 +219,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-349", "Database column $1.$2 could not be expanded" },
     { "SCHEDULER-350", "Width of database column $1.$2 is unknown. We assume $3" },
     { "SCHEDULER-351", "<modify_order_... setback=\"$1\">: Invalid value for attribute setback=" },
+    { "SCHEDULER-352", "Only the run_time of an order can be renewed" },
     { "SCHEDULER-900", "Scheduler $1 is starting with $2, pid=$3" },
     { "SCHEDULER-902", "state=$1" },
     { "SCHEDULER-904", "Tasks have $1s to terminate" },
@@ -302,6 +303,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-986", "Continuing reading buffered directory (as of $1)" },
     { "SCHEDULER-987", "Starting process: $1" },
     { "SCHEDULER-988", "Job is being replaced now" },
+    { "SCHEDULER-989", "Job cannot be removed now, it will be done later" },
     { "SCHEDULER-999", "Scheduler has been terminated properly" },
     {}
 };

@@ -10,6 +10,42 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+
+    <change date="2006-10-30" version="2.0.160" subversion_revision="4586">
+        <revision type="new" title="&lt;modify_order>&lt;run_time>">
+            <description>
+                <p>
+                    Die <scheduler_element name="run_time"/> eines Auftrags kann für den nächsten Durchlauf neu gesetzt werden.
+                </p>
+                <ul>
+                    <li>
+                        <scheduler_element name="modify_order" child="run_time"/>
+                    </li>
+                    <li>
+                        <scheduler_method class="Order" property="run_time"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+
+        <revision type="new" title='&lt;job replace="yes">'>
+            <description>
+                <p>
+                    Ein Job kann ersetzt werden.
+                </p>
+                <ul>
+                    <li>
+                        <scheduler_element name="job" attribute="replace" value="yes"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="add_jobs"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+    </change>
+
+
     <change date="2006-10-16" version="2.0.159" subversion_revision="4578">
         <revision type="modification" title="Variablenersetzung verfeinert">
             <description>

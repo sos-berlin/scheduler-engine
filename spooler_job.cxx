@@ -594,6 +594,8 @@ void Job::set_remove( bool remove )
     if( !_order_source_list.empty() )  z::throw_xc( "SCHEDULER-229", obj_name() );
 
     _remove = true; 
+
+    if( !should_removed() )  _log->info( message_string( "SCHEDULER-989" ) );
     stop( true );
 }
 

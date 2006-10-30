@@ -370,6 +370,21 @@
             </messages>
         </xml_attribute>
 
+        <xml_attribute name="replace" type="yes|no" initial="no">
+            <description>
+                <p>
+                    <code>replace="yes"</code> lässt diese Job-Definition eine evtl. bereits vorhandene ersetzen.
+                    Wenn das nicht möglich ist, weil z.B. gerade eine Task läuft,
+                    dann ersetzt der Scheduler den Job später.
+                </p>
+            </description>
+
+            <messages>
+                <message level="info" code="SCHEDULER-988"/>
+                <message level="info" code="SCHEDULER-989"/>
+            </messages>
+        </xml_attribute>
+
     </xml_attributes>
 
     <xml_child_elements>
