@@ -40,16 +40,16 @@ order.title = "Wir haben einen Auftrag!";
 
 order.run_time.xml = "<run_time>" +
                         "<date date='2006-10-30'>" +
-                            "<period begin='11:19:00' end='23:25:30' />" +
-                            "<period single_start='11:19:50' />" +
-                            "<period begin='11:19:30' end='11:34:50' />" +
+                            "<period begin='14:55:00' end='23:25:30' />" +
+                            "<period single_start='14:55:50' />" +
+                            "<period begin='14:55:30' end='23:34:50' />" +
                         "</date>" +             
                         "<date date='2006-10-30'>" +
-                            "<period begin='12:20:30' end='21:34:50' />" +
+                            "<period begin='14:55:30' end='21:34:50' />" +
                         "</date>" +
                         "<weekdays>" + 
                             "<day day='7'>" +
-                                "<period begin='11:19:40' end='20:00' />" +
+                                "<period begin='14:55:40' end='20:00' />" +
                             "</day>" +
                         "</weekdays>" + 
                      "</run_time>";
@@ -86,7 +86,7 @@ function spooler_process()
                          '</modify_order>' );
     spooler_log.info( order.run_time.xml );
     //var order2 = spooler.create_order();
-    //order2.run_time.xml = "<run_time><period begin='10:21:20'/></run_time>";
+    //order2.run_time.xml = "<run_time><period begin='14:55:20'/></run_time>";
     //spooler_log.info( "order2.string_next_start_time=" + order2.string_next_start_time );
 
     //new ActiveXObject("hostware.Global").sleep(9999);
