@@ -35,21 +35,21 @@ order.title = "Ein ganz ganz langer Titel, um zu sehen, wie die HTML-Oberfläche
 var order = spooler.create_order();
 order.id = 1;
 order.title = "Wir haben einen Auftrag!";
+
 //order.run_time.xml = '<run_time let_run="no" repeat="20"/>';  // let_run ist unsinn, nur zum test
 
-//if(0)
 order.run_time.xml = "<run_time>" +
-                        "<date date='2006-08-16'>" +
-                            "<period begin='09:21:00' end='23:25:30' />" +
-                            "<period single_start='09:21:20' />" +
-                            "<period begin='09:21:30' end='11:34:50' />" +
+                        "<date date='2006-10-30'>" +
+                            "<period begin='11:19:00' end='23:25:30' />" +
+                            "<period single_start='11:19:50' />" +
+                            "<period begin='11:19:30' end='11:34:50' />" +
                         "</date>" +             
-                        "<date date='2006-08-17'>" +
+                        "<date date='2006-10-30'>" +
                             "<period begin='12:20:30' end='21:34:50' />" +
                         "</date>" +
                         "<weekdays>" + 
                             "<day day='7'>" +
-                                "<period begin='07:00' end='08:00' />" +
+                                "<period begin='11:19:40' end='20:00' />" +
                             "</day>" +
                         "</weekdays>" + 
                      "</run_time>";
@@ -69,16 +69,22 @@ spooler_log.info( "-------------------------------------------------------------
 
         <jobs>
 
-            <job name="javascript" order="yes" idle_timeout="30" title="Das ist der Titel von javascript">
+            <job name="javascript" order="yes" title="Das ist der Titel von javascript">
         
-                <script language="JavaScript"><![CDATA[
+                <script language="JavaScript">
+                <![CDATA[
 
 function spooler_process() 
 {               
     spooler_log.info( "order.title=" + spooler_task.order.title );
     spooler_log.info( "order.string_next_start_time=" + spooler_task.order.string_next_start_time );               
 
-    //spooler_task.order.run_time.xml = '<run_time><period single_start="12:37:30"/></run_time>';
+    var order = spooler_task.order;
+    //order.run_time.xml = '<run_time><period single_start="12:37:30"/></run_time>';
+    spooler.execute_xml( '<modify_order job_chain="Kette" order="1">' +
+                             '<run_time><period single_start="12:37:30"/></run_time>' +
+                         '</modify_order>' );
+    spooler_log.info( order.run_time.xml );
     //var order2 = spooler.create_order();
     //order2.run_time.xml = "<run_time><period begin='10:21:20'/></run_time>";
     //spooler_log.info( "order2.string_next_start_time=" + order2.string_next_start_time );
