@@ -311,6 +311,7 @@ STDMETHODIMP Subprocess::get_Ignore_signal( VARIANT_BOOL* result )
 
 STDMETHODIMP Subprocess::put_Timeout( double timeout )
 {
+    Z_LOG2( "scheduler", __FUNCTION__ << "=" << timeout << "\n" );
     _timeout = timeout;
     return Update_register_entry();
 }

@@ -37,6 +37,7 @@
 </register_keyword>
 <register_keyword keyword='add_jobs'>
     <register_keyword_display><code>&lt;add_jobs&gt;</code></register_keyword_display>
+    <register_entry register_file='CHANGES.xml#use_element__add_jobs' register_title='Änderungsprotokoll'  register_keyword='add_jobs'/>
     <register_entry register_file='xml.xml#use_element__add_jobs' register_title='Alle XML-Elemente'  register_keyword='add_jobs'/>
     <register_entry register_file='xml/add_jobs.xml#' register_title='&lt;add_jobs&gt; (Kommando)'  register_keyword='add_jobs' type='definition'/>
     <register_entry register_file='xml/allowed_host.xml#use_element__add_jobs' register_title='&lt;allowed_host&gt; (Konfiguration)'  register_keyword='add_jobs'/>
@@ -2231,6 +2232,7 @@
 <register_keyword keyword='replace'>
     <register_keyword_display><code>replace=</code></register_keyword_display>
     <register_entry register_file='xml/add_order.xml#attribute_replace' register_title='&lt;add_order&gt; (Kommando)'  register_keyword='replace' type='definition'/>
+    <register_entry register_file='xml/job.xml#attribute_replace' register_title='&lt;job&gt; (Konfiguration)'  register_keyword='replace' type='definition'/>
 </register_keyword>
 <register_keyword keyword='replaced'>
     <register_keyword_display><code>replaced=</code></register_keyword_display>

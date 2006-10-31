@@ -884,6 +884,9 @@ void Task::remove_pid( int pid )
 
 void Task::add_subprocess( int pid, double timeout, bool ignore_exitcode, bool ignore_signal, bool is_process_group, const string& title )
 {
+    Z_LOG2( "scheduler", __FUNCTION__ << " " << pid << "," << timeout << "," << ignore_exitcode << "," << ignore_signal << "," << is_process_group << "\n" );
+    Z_LOG2( "scheduler", __FUNCTION__ << "   title=" << title << "\n" );   // Getrennt, falls Parameterübergabe fehlerhaftist und es zum Abbruch kommt (com_server.cxx)
+    
     Time timeout_at = timeout < INT_MAX - 1? Time::now() + timeout
                                            : latter_day;
 
