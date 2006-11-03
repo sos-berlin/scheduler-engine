@@ -518,7 +518,7 @@
     <xsd:element name="modify_order">
         <xsd:complexType>
             <xsd:sequence>
-                <xsd:element ref="run_time"/>
+                <xsd:element ref="run_time" minOccurs="0"/>
             </xsd:sequence>
             
             <xsd:attribute name="job_chain" type="Name"         use="required"/>

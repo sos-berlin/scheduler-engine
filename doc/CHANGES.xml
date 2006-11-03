@@ -11,6 +11,26 @@
     <scheduler_keyword keyword="Change log"/>
 
 
+    <change date="2006-10-03" version="2.0.160" subversion_revision="4591">
+        <revision type="correction" title="Auftrag ohne Parameter in der Datenbank ließ Scheduler abbrechen">
+            <description>
+                <p>
+                    Der Fehler ist mit den Dateiaufträgen (Version 2.0.158.4484 2006-09-13)
+                    in den Scheduler gelangt und jetzt behoben.
+                </p>
+            </description>
+        </revision>
+
+        <revision type="modification" title='Scheduler braucht seit 26. September 2006 eine aktuelle sos.mail.jar'>
+            <description>
+                <p>
+                    Die Datei <code>sos.mail.jar</code> sollte nicht älter als 1.6.131.4555 (2006-09-26) sein.
+                </p>
+            </description>
+        </revision>
+    </change>
+
+
     <change date="2006-10-30" version="2.0.160" subversion_revision="4586">
         <revision type="new" title="&lt;modify_order>&lt;run_time>">
             <description>

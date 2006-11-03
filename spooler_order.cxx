@@ -1765,6 +1765,7 @@ ptr<Com_variable_set> Order::params_or_null() const
     if( _payload.vt != VT_DISPATCH  &&  _payload.vt != VT_UNKNOWN )  return NULL;
     
     IUnknown* iunknown = V_UNKNOWN( &_payload );
+    if( iunknown == NULL )  return NULL;
 
     HRESULT hr = iunknown->QueryInterface( spooler_com::IID_Ivariable_set, result.void_pp() );
     if( FAILED(hr) )  return NULL;
