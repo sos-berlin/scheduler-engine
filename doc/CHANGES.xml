@@ -11,6 +11,22 @@
     <scheduler_keyword keyword="Change log"/>
 
 
+    <change date="2006-10-06" version="2.0.160" subversion_revision="4592">
+        <revision type="new" title="&lt;show_state what=&quot;job_params&quot;>">
+            <description>
+                <p>
+                    Die XML-Kommandos können jetzt die <scheduler_element name="params"/> eines <scheduler_element name="job"/> liefern.
+                </p>
+                <ul>
+                    <li>
+                        <scheduler_element name="show_state" attribute="what" value="job_params"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+    </change>
+
+
     <change date="2006-10-03" version="2.0.160" subversion_revision="4591">
         <revision type="correction" title="Auftrag ohne Parameter in der Datenbank ließ Scheduler abbrechen">
             <description>

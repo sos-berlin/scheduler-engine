@@ -774,6 +774,8 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
         else
         if( string_equals_prefix_then_skip( &p, "payload"          ) )  show |= show_payload;
         else
+        if( string_equals_prefix_then_skip( &p, "job_params"       ) )  show |= show_job_params;
+        else
         if( string_equals_prefix_then_skip( &p, "standard"         ) )  ;
         else
             z::throw_xc( "SCHEDULER-164", what );

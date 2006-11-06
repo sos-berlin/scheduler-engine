@@ -149,6 +149,7 @@
             </description>
         </xml_child_element>
 
+        <xml_child_element directory="xml/" name="params"/>
         <xml_child_element name="queued_tasks"/>
         <xml_child_element name="history"/>
         <xml_child_element name="order_queue"/>

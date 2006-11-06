@@ -2382,6 +2382,8 @@ xml::Element_ptr Job::dom_element( const xml::Document_ptr& document, const Show
         }
 */
 
+        if( ( show & show_job_params )  &&  _default_params )  job_element.appendChild( _default_params->dom_element( document, "params", "param" ) );
+
         if( show & show_run_time )  job_element.appendChild( _run_time->dom_element( document ) );
 
         dom_append_nl( job_element );

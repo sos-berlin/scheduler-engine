@@ -66,6 +66,11 @@
                         (<scheduler_element name="job" directory="xml/answer/"/>).
                     </dd>
 
+                    <dt><code>job_params</code></dt>
+                    <dd>
+                        Liefert auch die <scheduler_element name="params"/> der Jobs.
+                    </dd>
+
                     <dt><code>blacklist</code></dt>
                     <dd>
                         Liefert auch die Aufträge der Blacklist einer Jobkette.
