@@ -856,7 +856,7 @@ void Run_time::set_dom( const xml::Element_ptr& element )
     _set = true;
 
     _once = element.bool_getAttribute( "once", _once );
-    if( _order  &&  !_once )  z::throw_xc( "SCHEDULER-220", "once='yes'" );
+    if( _order  &&  !_once )  z::throw_xc( "SCHEDULER-220", "once='no'" );
 
     default_period.set_dom( element, NULL );
     default_day = default_period;

@@ -1,0 +1,373 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id$-->
+
+<description
+    title               = "Überwachung mehrerer Scheduler mit Ereignissen"
+    base_dir            = "../"
+    parent_page         = "index.xml"
+    author              = "$Author$"
+    date                = "$Date$"
+>
+
+    <p>
+        In Kürze:
+    </p>
+    
+    <ul>
+        <li>
+            Der Scheduler wird über eine TCP-Verbindung fortlaufend über auftretende Ereignisse berichten.
+        </li>
+        <li>
+            Ein Haupt-Scheduler sammelt die Ereignisse mehrerer Scheduler.
+        </li>
+        <li>
+            Er liefert die Ereignisse als einzelne Aufträge an eine Jobkette.
+        </li>
+        <li>
+            Und er liefert sie an den Java-Monitor.
+        </li>
+        <li>
+            Am Haupt-Scheduler kann eingestellt werden, welche Ereignisse berücksichtigt werden sollen.
+        </li>
+        <li>
+            Der Haupt-Scheduler kann Stellvertreter benennen, die in bei Nichterreichbarkeit ersetzen.
+        </li>
+        <li>
+            Der Scheduler bekommt eine Zustandsdatei, worin er die vom Haupt-Scheduler angebenen Scheduler einträgt.
+        </li>
+        <li>
+            Die Ereignisse werden später auch als SNMP-Traps berichtet.
+        </li>
+    </ul>
+    
+
+    <h2>Überwachter Scheduler</h2>
+    <p>
+        Erweiterungen zu <scheduler_element name="config" attribute="main_scheduler"/>
+    </p>
+    <p>
+        Der Scheduler verbindet sich wie bisher mit dem angegebenen Haupt-Scheduler.
+        Dieser antwortet mit 
+    </p>
+    <ul>
+        <li>
+            der Liste seiner Stellvertreter, die der Scheduler in seiner neuen Zustandsdatei speichert, 
+        </li>
+        <li>
+            der Liste der Ereignistypen, die der Scheduler dem Haupt-Scheduler melden soll, und
+        </li>
+        <li>
+            der Frist ohne Ereignisse, innerhalb der der Scheduler ein Lebenszeichen geben soll.
+        </li>
+    </ul>
+
+    <h3>Stellvertreter</h3>
+    <p>
+        Kann der Scheduler sich nicht mit dem Haupt-Scheduler verbinden,
+        und ist die Adresse des Haupt-Schedulers dieselbe wie in der Statusdatei (also vom letzten Lauf des Schedulers),
+        dann verbindet sich der Scheduler mit einem Stellvertreter aus der Statusdatei.
+        Die Stellvertreter werden ignoriert, wenn die Adresse des Haupt-Schedulers nicht dieselbe ist.
+        Bei Misserfolg probiert er die Stellvertreter der Reihe nach und beginnt dann wieder mit dem Haupt-Scheduler
+        (nach einer Atempause von einer Minute).
+    </p>
+    <p>
+        Ebenso verfährt der Scheduler, wenn die Verbindung zum Haupt-Scheduler oder einem Stellvertreter abreißt.
+    </p>
+
+    <h3>Zustandsdatei</h3>
+    <p>
+        Im Verzeichnis <scheduler_option name="log-dir"/> hält der Scheduler die Datei <code>scheduler_state.xml</code>.
+        Darin ist der zuletzt eingestellte Haupt-Scheduler mit seinen Stellvertretern eingetragen.
+    </p>
+
+    <h3>Ereignissstrom</h3>
+    <p>
+        Sobald die Verbindung zum Haupt-Scheduler (oder seinem Stellvertreter, was nicht unterschieden wird) steht,
+        und dieser Ereignisse bestellt hat,
+        meldet der Scheduler jedes Ereignis mit einem XML-Element <code>&lt;event></code>.
+        Das ist ein kontinuierlicher Strom von XML-Elementen, die der Haupt-Scheduler nicht beantwortet 
+        und nicht unterbrechen kann.
+    </p>
+
+    <h3>Pufferung des Ereignisstroms</h3>
+    <p>
+        Solange der Hauptscheduler nicht verbunden ist
+        oder wenn sich die Ereignisse auf der TCP-Verbindung stauen
+        (wegen Netzwerkengpasses oder zu langsamen Haupt-Schedulers),
+        puffert der Scheduler die Ereignisse in der Datei <code>events.xml</code>
+        (im Verzeichnis <scheduler_option name="log-dir"/>).
+        Die Implementierung wird vielleicht jedes Ereignis in diese Datei schreiben.
+        <i>(Wir können die Datei analog zum Hauptprotokoll mit Datum und Uhrzeit benennen und am Ende stehen lassen.)</i>
+    </p>
+
+    <h3>Lebenszeichen</h3>
+    <p>
+        Tritt eine Zeit lang kein Ereignis ein,
+        dann schickt der Scheduler zur Prüfung der Verbindung ein Leerzeichen.
+        Die Frist gibt der Haupt-Scheduler vor.
+    </p>
+
+
+    <h2>Haupt-Scheduler</h2>
+    <p>
+        Jeder Scheduler kann Haupt-Scheduler sein.
+        Er wird es dadurch, dass ein anderer scheduler ihn mit 
+        <scheduler_element name="config" attribute="main_scheduler"/> angibt.
+    </p>
+
+    <p>
+        Der Haupt-Scheduler nimmt Verbindungen der Scheduler an und kann Ereignisströme anfordern.
+        Er versieht jedes XML-Element des Ereignisstroms mit einem Attribut, 
+        das die Herkunft des Ereignisses angibt.
+    </p>
+
+    <h3>Vom Haupt-Scheduler generierte Ereignisse</h3>
+    <p>
+        Bei Verbindungsaufbau und -abbau erzeugt der Haupt-Scheduler je ein Ereignis.
+    </p>
+
+    <h3>Jedes Ereignis ist ein Auftrag</h3>
+    <p>
+        <!--Das neue Element <scheduler_element name="scheduler_event_source"/-->
+        Eine Jobkette kann angegeben werden, die der Scheduler mit Ereignissen füttern soll.
+        <scheduler_method class="Order" property="xml_payload"/> enthält das jeweilige Ereignis.
+    </p>
+    <pre>&lt;main_scheduler feed_job_chain="<i>job_chain</i>"></pre>
+    <!--pre>&lt;job_chain name="…">
+    &lt;scheduler_event_source/>
+    &lt;job_chain_node …/>
+&lt;/job_chain></pre-->
+    <p>
+        Die Jobkette kann zur Beschleunigung ohne Datenbank betrieben werden
+        (<scheduler_element name="job_chain" attribute="orders_recoverable" value="no"/>).
+    </p>
+
+
+    <h3>Pufferung der Ereignisse</h3>
+    <p>
+        Der Haupt-Scheduler puffert ebenso wie die Scheduler die Ereignisse in einer Datei.
+        Der Puffer dient zur Fütterung der Jobkette, wenn die Jobs die Ereignisse nicht schnell genug verarbeiten,
+        und zur Versorgung der Monitore.
+    </p>
+
+
+    <h3>Auswahl der Ereignisse (Filterung)</h3>
+    <p>
+        Welche Ereignisse die Scheduler melden sollen,
+        wird in der XML-Konfiguration des Haupt-Schedulers bestimmt.
+    </p>
+    <pre>&lt;main_scheduler>
+    &lt;select_events object_type="Scheduler"/>
+    &lt;select_events object_type="Job"/>
+    &lt;select_events object_type="Task"/>
+    &lt;select_events object_type="Order"/>
+&lt;/main_scheduler></pre>
+    <p>
+        Oder kurz:
+    </p>
+    <!--pre>&lt;main_scheduler>
+    &lt;select_events object_type="Scheduler Job Task Order"/>
+&lt;/main_scheduler></pre>
+    <p>
+        Noch kürzer:
+    </p-->
+    <pre>&lt;main_scheduler>
+    &lt;select_events object_type="all"/>
+&lt;/main_scheduler></pre>
+
+    <h3>Mögliche Erweitung der Auswahl</h3>
+    <p>
+        Sollen vielleicht einzelne Jobs ausgewählt werden?
+    </p>
+    <pre>&lt;main_scheduler>
+    &lt;select_events job="mein_job"/>
+    &lt;select_events job="ein_anderer_job"/>
+&lt;/main_scheduler></pre>
+    <p>
+        Oder nur bestimmte Ereignisse? 
+    </p>
+    <pre>&lt;main_scheduler>
+    &lt;select_events event="task_started"/>
+&lt;/main_scheduler></pre>
+
+    <p>
+        <i>Soll die Auswahl so aussehen?</i>
+    </p>
+    <p>
+        Die Benennung der Attribute orientiert sich an die XML-Elemente für den eMail-Versand mit XSLT.
+    </p>
+    
+    
+    
+    <h3>Stellvertreter des Haupt-Schedulers</h3>
+    <p>
+        Der Haupt-Scheduler kann Vertreter benennen, die seine Aufgabe übernehmen, falls er ausfällt.
+        Die Monitore und die Scheduler verbinden sich in diesem Fall mit einem Vertreter.
+    </p>
+    <pre>&lt;main_scheduler>
+    &lt;main_scheduler_proxy proxy="…"/>
+    &lt;main_scheduler_proxy proxy="…"/>
+&lt;/main_scheduler></pre>
+
+
+    
+
+    <h2>Monitor</h2>
+    <p>
+        Der Monitor ist ein Dialogprogramm, 
+        das sich mit einem Haupt-Scheduler verbindet,
+        um von ihm kontinuierlich Informationen über die Zustände der laufenden Scheduler zu erhalten.
+    </p>
+
+    <h3>Ereignisse</h3>
+    <p>
+        Dazu schickt er das Kommando <scheduler_element name="get_events"/>,
+        das der Scheduler mit einer Kennung und der endlosen Folge von Ereignissen beantwortet.
+        Die TCP-Verbindung ist von der Antwort belegt und kann nicht für andere Kommandos benutzt werden.
+    </p>
+    <p>
+        Der Monitor kann angeben, von welchen Schedulern er die Ereignisse wünscht.
+    </p>
+    <pre>&lt;get_events>
+    &lt;select_events spooler_id="..."/>
+&lt;/get_events></pre>
+
+    <h3>Stellvertreter</h3>
+    <p>
+        Der Monitor kann sich mit 
+        <scheduler_element name="show_state"/> 
+        die Liste der Stellvertreter vom Haupt-Scheduler geben lassen,
+        die er in einer Datei hält, um bei nicht erreichbarem Haupt-Scheduler darauf zurückzugreifen.
+    </p>
+
+
+    <h2>Ereignisse</h2>
+    <p>
+        Die Scheduler liefern auf Bestellung kontinuierlich über eine eigene TCP-Verbindung 
+        Informationen zu Zustandsänderungen, die Ereignisse.
+    </p>
+    <p>
+        Die Ereignisse sollen auch als SNMP-traps geliefert werden können.
+    </p>
+
+
+    <h3>Scheduler-Ereignisse</h3>
+    <dl>
+        <dt><code>&lt;event event="<b>scheduler_started</b>"/></code></dt>
+        <dd>
+            Der Scheduler ist bereit 
+        </dd>
+        
+        <dt><code>&lt;event event="<b>scheduler_stopped</b>"/></code></dt>
+        <dd>
+            Der Scheduler wird beendet
+        </dd>
+        
+        <dt><code>&lt;event event="<b>scheduler_suspended</b>"/></code></dt>
+        <dd>
+            Der Scheduler ist angehalten
+        </dd>
+        
+        <dt><code>&lt;event event="<b>scheduler_continued</b>"/></code></dt>
+        <dd>
+            Der Scheduler wird fortgesetzt
+        </dd>
+        
+        <dt><code>&lt;event event="<b>database_error</b>"/></code></dt>
+        <dd>
+            Problem mit der Datenbank ...
+        </dd>
+    </dl>
+    
+    
+    <h3>Job-Ereignisse</h3>
+    
+    <dl>
+        <dt><code>&lt;event event="<b>job_add_delayed</b>" job="<i>name</i>"/></code></dt>
+        <dd>
+            Job soll hinzugefügt werden (<scheduler_element name="job"/>)
+        </dd>
+        
+        <dt><code>&lt;event event="<b>job_added</b>" job="<i>name</i>"/></code></dt>
+        <dd>
+            Job ist hinzugefügt worden
+        </dd>
+        
+        <dt><code>&lt;event event="<b>job_remove_delayed</b>" job="<i>name</i>"/>
+            </code>
+        </dt>
+        <dd>
+            Job soll entfernt werden
+        </dd>
+
+        <dt>
+            <code>
+                &lt;event event="<b>job_removed</b>" job="<i>name</i>"/>
+            </code>
+        </dt>
+        <dd>Job ist entfernt worden</dd>
+    </dl>
+
+
+    <h3>Task-Ereignisse</h3>
+
+    <dl>
+        <dt>
+            <code>
+                &lt;event event="<b>task_started</b>" job="<i>name</i>" task="<i>id</i>"/>
+            </code>
+        </dt>
+        <dd>
+            Task startet
+        </dd>
+
+        <dt>
+            <code>
+                &lt;event event="<b>task_ended</b>" job="<i>name</i>" task="<i>id</i>"/>
+            </code>
+        </dt>
+        <dd>Task hat geendet</dd>
+
+        <dt><code>&lt;event event="<b>task_waiting</b>" job="<i>name</i>" task="<i>id</i>"/></code></dt>
+        <dd>Task macht eine Pause (Zustand <code>suspended</code>, <code>running_waiting_for_order</code>, <code>running_delayed</code>)</dd>
+    </dl>
+
+
+    <h3>Auftrags-Ereignisse</h3>
+    
+    <dl>
+        <dt><code>&lt;event event="<b>order_added</b>" job_chain="<i>name</i>" order="<i>id</i>" state="…" title="…"/></code></dt>
+        <dd>
+            Ein Auftrag ist in eine Jobkette gestellt worden.
+        </dd>
+
+        <dt><code>&lt;event event="<b>order_state_changed</b>" job_chain="<i>name</i>" order="<i>id</i>" state="…" title="…"/></code></dt>
+        <dd>
+            Der Zustand des Auftrags wechselt.
+        </dd>
+
+        <dt><code>&lt;event event="<b>order_step_startet</b>" job_chain="<i>name</i>" order="<i>id</i>" state="…" title="…"/></code></dt>
+        <dd>
+            Eine Task beginnt, den Auftrag auszuführen
+        </dd>
+
+        <dt><code>&lt;event event="<b>order_step_finished</b>" job_chain="<i>name</i>" order="<i>id</i>" state="…" title="…"/></code></dt>
+        <dd>
+            Eine Task hat den Auftrag ausgeführt (mit Wechsel des Zustands)
+        </dd>
+
+        <dt><code>&lt;event event="<b>order_suspended</b>" job_chain="<i>name</i>" order="<i>id</i>" state="…" title="…"/></code></dt>
+        <dd>
+            Der Auftrag ist angehalten.
+        </dd>
+
+        <dt><code>&lt;event event="<b>order_finished</b>" job_chain="<i>name</i>" order="<i>id</i>" state="…" title="…"/></code></dt>
+        <dd>
+            Der Auftrag ist ausgeführt und wird entfernt.
+        </dd>
+    </dl>
+    
+    
+</description>

@@ -141,7 +141,7 @@ void Spooler_thread::start( Event* event_destination )
 
     try
     {
-        if( get_java_vm(false)->running() )  get_java_vm(false)->attach_thread( _name );
+        //if( get_java_vm(false)->running() )  get_java_vm(false)->attach_thread( _name );
 
 /*
         if( _module.set() )

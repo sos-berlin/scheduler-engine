@@ -1296,6 +1296,16 @@ void Order::init()
     set_run_time( NULL );
 }
 
+//---------------------------------------------------------------------------Order::update_database
+
+void Order::update_database()
+{
+    if( _job_chain  &&  _is_in_database )
+    {
+        _spooler->_db->update_order( this );
+    }
+}
+
 //---------------------------------------------------------------------------------Order::string_id
 
 string Order::string_id() 

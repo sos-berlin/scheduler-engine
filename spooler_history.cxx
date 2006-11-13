@@ -775,7 +775,7 @@ int Spooler_db::get_id_( const string& variable_name, Transaction* outer_transac
 {
     int id;
 
-    if( get_java_vm(false)->running() )  get_java_vm(false)->attach_thread( "" );
+    //if( get_java_vm(false)->running() )  get_java_vm(false)->attach_thread( "" );
 
 
     Transaction ta ( this, outer_transaction );

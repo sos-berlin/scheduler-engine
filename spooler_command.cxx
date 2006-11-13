@@ -632,6 +632,8 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
         order->set_run_time( run_time_element );
     }
 
+    order->update_database();
+
     return _answer.createElement( "ok" );
 }
 

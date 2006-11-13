@@ -2391,7 +2391,7 @@ void Spooler::stop( const exception* )
     _job_list.clear();
     _process_class_list.clear();
 
-    //_java_vm.close();  Erneutes _java.init() stürzt ab, deshalb lassen wird Java stehen und schließen es erst am Schluss
+    //_java_vm.close();  Erneutes _java.init() stürzt ab, deshalb lassen wir Java stehen und schließen es erst am Schluss
 
     if( _main_scheduler_connection )
     {

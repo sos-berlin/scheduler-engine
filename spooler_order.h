@@ -37,6 +37,7 @@ struct Order : Com_order,
                                ~Order                   ();
 
     void                        init                    ();
+    void                        update_database         ();
     void                        attach_task             ( Task* );
     void                        assert_no_task          ();
     bool                        is_immediately_processable( const Time& now = Time() );

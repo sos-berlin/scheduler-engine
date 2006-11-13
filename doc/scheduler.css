@@ -28,6 +28,7 @@ ol              { margin-left: 24pt; padding-left: 0pt; }
 pre             { background-color: #ffffe0; font-family: "Lucida Console", monospace; font-size: 9pt; 
                   padding-left: 0ex; margin-top: 1em; margin-bottom: 1em; line-height: 12pt;  }
 pre i           { font-size: 9pt; font-family: Arial, Sans-Serif; line-height: 10pt; }
+code i          { font-size: 9pt; font-family: Arial, Sans-Serif; line-height: 10pt; }
 col             { padding-bottom: 1pt; padding-right: 2pt }
 caption         { font-size: 10pt; padding-bottom: 5pt; padding-left: 3pt; padding-right: 2pt; padding-top: 2pt }
 

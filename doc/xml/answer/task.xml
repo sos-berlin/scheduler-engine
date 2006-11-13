@@ -90,6 +90,12 @@
                         </td>
                     </tr>
                     <tr>
+                        <td valign="baseline" style="padding-top: 1ex"><scheduler_keyword keyword="suspended"/><code>state="suspended"</code></td>
+                        <td valign="baseline" style="padding-top: 1ex; padding-left: 2ex">
+                            Die Task ist angehalten worden.
+                        </td>
+                    </tr>
+                    <tr>
                         <td valign="baseline" style="padding-top: 1ex"><scheduler_keyword keyword="ending_waiting_for_subprocesses"/><code>state="ending_waiting_for_subprocesses"</code></td>
                         <td valign="baseline" style="padding-top: 1ex; padding-left: 2ex">
                             Wie <code>ending</code>, zuvor wird aber auf das Ende der Subprozessen gewartet.
