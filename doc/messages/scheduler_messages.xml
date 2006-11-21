@@ -2225,6 +2225,12 @@
             </text>
         </message>
 
+        <message code="SCHEDULER-353">
+            <text xml:lang="en">
+                <title>No immediate response from command &lt;<p1/>></title>
+            </text>
+        </message>
+
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->

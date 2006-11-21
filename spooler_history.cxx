@@ -629,7 +629,7 @@ void Spooler_db::try_reopen_after_error( exception& x, bool wait_endless )
                     body += "\ndb=" + remove_password( _spooler->_db_name ) + "\r\n\r\n" + x.what() + "\r\n\r\nThe Scheduler is trying to open the database again.";
                     //if( !_spooler->_need_db )  body += "\r\nWenn das nicht geht, schreibt der Scheduler die Historie in Textdateien.";
 
-                    Scheduler_event scheduler_event ( Scheduler_event::evt_database_error, log_warn, this );
+                    Scheduler_event scheduler_event ( evt_database_error, log_warn, this );
                     scheduler_event.set_error( x );
                     scheduler_event.set_count( _error_count );
 
@@ -683,7 +683,7 @@ void Spooler_db::try_reopen_after_error( exception& x, bool wait_endless )
         {
             if( _email_sent_after_db_error )    // Zurzeit immer true
             {
-                Scheduler_event scheduler_event ( Scheduler_event::evt_database_continue, log_info, this );
+                Scheduler_event scheduler_event ( evt_database_continue, log_info, this );
 
                 Mail_defaults mail_defaults ( _spooler );
 
@@ -704,7 +704,7 @@ void Spooler_db::try_reopen_after_error( exception& x, bool wait_endless )
                     string msg = message_string( "SCHEDULER-265", x );     // "SCHEDULER WIRD BEENDET WEGEN FEHLERS BEIM ZUGRIFF AUF DATENBANK"
                     _log->error( msg );
 
-                    Scheduler_event scheduler_event ( Scheduler_event::evt_database_error_abort, log_error, this );
+                    Scheduler_event scheduler_event ( evt_database_error_abort, log_error, this );
                     scheduler_event.set_error( x );
                     scheduler_event.set_scheduler_terminates( true );
 
@@ -722,7 +722,7 @@ void Spooler_db::try_reopen_after_error( exception& x, bool wait_endless )
 
             _spooler->log()->info( message_string( "SCHEDULER-959" ) );   // "Historie wird von Datenbank auf Dateien umgeschaltet" );
 
-            Scheduler_event scheduler_event ( Scheduler_event::evt_database_error_switch_to_file, log_warn, this );
+            Scheduler_event scheduler_event ( evt_database_error_switch_to_file, log_warn, this );
             scheduler_event.set_error( x );
 
             Mail_defaults mail_defaults( _spooler );

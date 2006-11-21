@@ -65,6 +65,13 @@ Xml_operation::Xml_operation( Xml_operation_connection* operation_connection )
 {
 }
 
+//---------------------------------------------------------------------ml_operation::~Xml_operation
+    
+Xml_operation::~Xml_operation()
+{
+    if( _response )  _response->set_connection( NULL );
+}
+
 //-----------------------------------------------------------------Xml_operation::async_state_text_
     
 string Xml_operation::async_state_text_() const
@@ -86,7 +93,7 @@ void Xml_operation::put_request_part( const char* data, int length )
     _request.append( data, length );
 }
 
-//--------------------------------------------------------------------Xml_operation::begin
+//-----------------------------------------------------------------------------Xml_operation::begin
 
 void Xml_operation::begin()
 {
@@ -98,13 +105,35 @@ void Xml_operation::begin()
     if( string_begins_with( _request, " " ) )  _request = ltrim( _request );
 
     _connection->_log.info( message_string( "SCHEDULER-932", _request ) );
-    _response = command_processor.execute( _request, Time::now(), _operation_connection->_indent );
 
-    if( _operation_connection->_indent )  _response = replace_regex( _response, "\n", "\r\n" );      // Für Windows-telnet
+    _response = command_processor.response_execute( _request, Time::now(), _operation_connection->_indent );
+    _response->set_connection( _connection );
 
-    _response += '\0';  // Null-Byte terminiert die XML-Antwort
+    //if( _operation_connection->_indent )  _response->_response = replace_regex( response->_response, "\n", "\r\n" );      // Für Windows-telnet
+
+    if( Synchronous_command_response* scr = dynamic_cast<Synchronous_command_response*>( +_response ) )
+    {
+        scr->append_text( string( "\0", 1 ) );  // Null-Byte terminiert die XML-Antwort
+    }
+    else
+    {
+        int NULL_BYTE_ANHAENGEN;
+    }
 
     if( command_processor._error )  _connection->_log.error( command_processor._error->what() );
+}
+
+//--------------------------------------------------------------------Xml_response::signal_new_data
+
+void Xml_response::signal_new_data()
+{ 
+    if( _connection )
+    {
+        if( _connection->state() == zschimmer::Buffered_socket_operation::s_ready )
+        {
+            _connection->_socket_event.signal( __FUNCTION__ ); 
+        }
+    }
 }
 
 //----------------------------------------------------Communication::Listen_socket::async_continue_
@@ -584,6 +613,18 @@ void Communication::close( double wait_time )
     _connection_list.clear();
 
     _terminate = true;
+}
+
+//------------------------------------------------------------------Communication::finish_responses
+
+void Communication::finish_responses( double wait_time )
+{
+    FOR_EACH( Connection_list, _connection_list, it )
+    {
+        ptr<Connection> connection = *it;
+        connection->async_continue();
+        //...?
+    }
 }
 
 //--------------------------------------------------------------------Communication::remove_connection

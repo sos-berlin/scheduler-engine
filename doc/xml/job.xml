@@ -72,7 +72,7 @@
             </description>
         </xml_attribute>
 
-        <xml_attribute name="min_tasks" type="zahl" initial="0" title="Mindeste Anzahl der stets zu laufenden Tasks">
+        <xml_attribute name="min_tasks" type="zahl" initial="0" title="Mindeste Anzahl der stets laufenden Tasks">
             <description>
                 <p>
                     Der Scheduler sorgt dafür, das wenigstens die angegebene Anzahl Tasks läuft.

@@ -14,6 +14,7 @@
 
 #include "spooler.h"
 #include "../zschimmer/z_sql.h"
+#include "../zschimmer/xml.h"
 
 using stdext::hash_set;
 using stdext::hash_map;
@@ -1263,7 +1264,12 @@ Order::Order( Spooler* spooler, const Record& record, const string& payload_stri
                                 else  _payload = payload_string;
     }
 
-    _initial_state = record.as_string( "initial_state" );
+    string initial_state = record.as_string( "initial_state" );
+    if( initial_state != "" )
+    {
+        _initial_state = initial_state;
+        _initial_state_set = true;
+    }
 
     _created.set_datetime( record.as_string( "created_time" ) );
 
@@ -1616,7 +1622,9 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
 
         if( show & show_run_time )  element.appendChild( _run_time->dom_element( document ) );
 
-        element.appendChild( _log->dom_element( document, show ) );
+        if( log  &&  show & show_log ) element.append_new_text_element( "log", *log );     // Protokoll aus der Datenbank
+        else
+        if( _log )  element.appendChild( _log->dom_element( document, show ) );
     }
 
     if( show & ( show_payload | show_for_database_only )  &&  _xml_payload != "" )
@@ -1649,6 +1657,24 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
     element.setAttribute( "web_service_operation", _http_operation->web_service_operation_or_null()->id() );
 
     return element;
+}
+
+//--------------------------------------------------------Order::print_xml_child_elements_for_event
+
+void Order::print_xml_child_elements_for_event( ostream* s, Scheduler_event* )
+{
+    *s << "<order";
+    
+    if( _job_chain )
+    *s << " job_chain=\"" << xml_encode_attribute_value( _job_chain->name() )   << '"';
+    *s << " id=\""        << xml_encode_attribute_value( string_id() )          << '"';
+
+    if( _title != "" )
+    *s << " title=\""     << xml_encode_attribute_value( _title )               << '"';
+
+    *s << " state=\""     << xml_encode_attribute_value( _state.as_string() )   << '"';
+
+    *s << "/>";
 }
 
 //---------------------------------------------------------------------------------------Order::dom
@@ -1968,6 +1994,13 @@ void Order::set_state2( const State& state, bool is_error_state )
     _state = state;
 
     if( !_initial_state_set )  _initial_state = state,  _initial_state_set = true;
+
+
+    if( _id_locked )
+    {
+        Scheduler_event event ( evt_order_state_changed, log_info, this );
+        _spooler->report_event( &event );
+    }
 }
 
 //------------------------------------------------------------------------------Order::set_priority

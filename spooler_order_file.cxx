@@ -499,7 +499,7 @@ Order* Directory_file_order_source::read_directory( bool was_notified, const str
                             _bad_map[ path ] = Z_NEW( Bad_entry( path, x ) );
 
                             xx.append_text( x.what() );
-                            send_mail( Scheduler_event::evt_file_order_error, &xx );
+                            send_mail( evt_file_order_error, &xx );
                         }
                     }
                 }
@@ -514,7 +514,7 @@ Order* Directory_file_order_source::read_directory( bool was_notified, const str
                 if( _send_recovered_mail )
                 {
                     _send_recovered_mail = false;
-                    send_mail( Scheduler_event::evt_file_order_source_recovered, NULL );
+                    send_mail( evt_file_order_source_recovered, NULL );
                 }
 
                 _directory_error = NULL;
@@ -543,7 +543,7 @@ Order* Directory_file_order_source::read_directory( bool was_notified, const str
                 if( _spooler->_mail_on_error )
                 {
                     _send_recovered_mail = true; 
-                    send_mail( Scheduler_event::evt_file_order_source_error, &x );
+                    send_mail( evt_file_order_source_error, &x );
                 }
             }
 
@@ -648,13 +648,13 @@ void Directory_file_order_source::read_new_files_and_handle_deleted_files( const
 
 //-----------------------------------------------------------Directory_file_order_source::send_mail
 
-void Directory_file_order_source::send_mail( Scheduler_event::Event_code event_code, const exception* x )
+void Directory_file_order_source::send_mail( Scheduler_event_type event_code, const exception* x )
 {
     try
     {                                   
         switch( event_code )
         {
-            case Scheduler_event::evt_file_order_source_error:
+            case evt_file_order_source_error:
             {
                 assert( x );
 
@@ -687,7 +687,7 @@ void Directory_file_order_source::send_mail( Scheduler_event::Event_code event_c
                 break;
             }
 
-            case Scheduler_event::evt_file_order_source_recovered:
+            case evt_file_order_source_recovered:
             {
                 string msg = message_string( "SCHEDULER-984", _path );
                 Scheduler_event scheduler_event ( event_code, log_info, this );
@@ -707,7 +707,7 @@ void Directory_file_order_source::send_mail( Scheduler_event::Event_code event_c
                 break;
             }
 
-            case Scheduler_event::evt_file_order_error:
+            case evt_file_order_error:
             {
                 string msg = x->what();
                 Scheduler_event scheduler_event ( event_code, log_info, this );

@@ -91,6 +91,10 @@
                 <xsd:element ref="start_job"/>
              <!--xsd:element ref="signal_object"/-->
                 <xsd:element ref="terminate"/>
+
+
+                <!-- Asynchron ausgeführte Kommandos -->
+                <xsd:element ref="get_events"/>
             </xsd:choice>
         </xsd:complexType>
     </xsd:element>
@@ -951,6 +955,11 @@
     </xsd:element>
 
 
+    <xsd:element name="get_events">
+        <xsd:complexType/>
+    </xsd:element>
+    
+    
     <xsd:element name="web_services">
         <xsd:complexType>
             <xsd:sequence>

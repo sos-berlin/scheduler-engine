@@ -102,6 +102,7 @@ struct Communication
     };
 
 
+    
     struct Operation : Async_operation
     {
                                 Operation                   ( Operation_connection* pc )            : _zero_(this+1), _connection(pc->_connection), _spooler(pc->_spooler), _operation_connection(pc) {}
@@ -122,7 +123,7 @@ struct Communication
         virtual string          get_response_part           ()                                      = 0;
         virtual bool            should_close_connection     ()                                      { return false; }
 
-        virtual bool            async_continue_             ( Continue_flags )                      { return true; }
+        virtual bool            async_continue_             ( Continue_flags )                      = 0;
         virtual bool            async_finished_             () const                                { return true; }
         virtual string          async_state_text_           () const;
 
@@ -191,6 +192,7 @@ struct Communication
     void                        start_or_rebind             ();
   //void                        start_thread                ();
     void                        close                       ( double wait_time );
+    void                        finish_responses            ( double wait_time );                   // Antworten versenden (synchron)
     void                        bind                        ();
     void                        rebind                      ()                                      { bind(); }
   //int                         thread_main                 ();
@@ -226,11 +228,33 @@ struct Communication
     bool                       _started;
 };
 
+//-------------------------------------------------------------------------------------------------
+
+struct Xml_response : Async_operation
+{
+                                Xml_response                ()                                      : _zero_(this+1) {}
+
+    void                    set_connection                  ( Communication::Connection* c )        { _connection = c; }
+    void                        signal_new_data             ();
+
+    virtual string              get_part                    ()                                      = 0;
+
+  private:
+    Fill_zero                  _zero_;
+    Communication::Connection* _connection;
+};
+    
 //------------------------------------------------------------------------------------Xml_operation
 
 struct Xml_operation : Communication::Operation
 {
                                 Xml_operation               ( Xml_operation_connection* );
+                               ~Xml_operation               ();
+
+
+    // Async_operation
+    virtual bool                async_continue_             ( Continue_flags )                      { return _response? _response->async_continue() : false; }
+
 
     void                        close                       ()                                      { _operation_connection = NULL; Communication::Operation::close(); }
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr& doc, const Show_what& ) const { return doc.createElement( "xml_operation" ); }
@@ -240,8 +264,8 @@ struct Xml_operation : Communication::Operation
 
     void                        begin                       ();
 
-    bool                        response_is_complete        ()                                      { return true; }
-    string                      get_response_part           ()                                      { string result = _response;  _response = "";  return result; }
+    bool                        response_is_complete        ()                                      { return _response->async_finished(); }
+    string                      get_response_part           ()                                      { return _response->get_part(); }
 
     virtual string              async_state_text_           () const;
 
@@ -250,7 +274,7 @@ struct Xml_operation : Communication::Operation
     bool                       _request_is_complete;
     Xml_end_finder             _xml_end_finder;
     string                     _request;
-    string                     _response;
+    ptr<Xml_response>          _response;
 };
 
 //-------------------------------------------------------------------------Xml_operation_connection

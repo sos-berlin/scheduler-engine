@@ -235,7 +235,7 @@ void send_error_email( const exception& x, int argc, char** argv, const string& 
 
     if( spooler )
     {
-        Scheduler_event scheduler_event ( Scheduler_event::evt_scheduler_fatal_error, log_error, spooler );
+        Scheduler_event scheduler_event ( spooler::evt_scheduler_fatal_error, log_error, spooler );
         scheduler_event.set_error( x );
         scheduler_event.set_scheduler_terminates( true );
 
@@ -450,7 +450,7 @@ bool Termination_async_operation::async_continue_( Continue_flags flags )
             _spooler->_log.error( error_line );
 
             {
-                Scheduler_event scheduler_event ( Scheduler_event::evt_scheduler_kills, log_error, _spooler );
+                Scheduler_event scheduler_event ( evt_scheduler_kills, log_error, _spooler );
                 scheduler_event.set_scheduler_terminates( true );
 
                 Mail_defaults mail_defaults( _spooler );
@@ -547,6 +547,8 @@ Spooler::Spooler()
     _validate_xml(true),
     _environment( variable_set_from_environment() )
 {
+    _scheduler_event_manager = Z_NEW( Scheduler_event_manager( this ) );
+
     _variable_set_map[ variable_set_name_for_substitution ] = _environment;
 
     if( spooler_ptr )  throw_xc( "spooler_ptr" );
@@ -771,6 +773,17 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
     state_element.appendChild( _web_services.dom_element( dom, show ) );
 
     return state_element;
+}
+
+//------------------------------------------------------Spooler::print_xml_child_elements_for_event
+
+void Spooler::print_xml_child_elements_for_event( ostream* s, Scheduler_event* )
+{
+    *s << "<state";
+
+    *s << " state=\"" << state_name() << '"';
+
+    *s << "/>";
 }
 
 //------------------------------------------------------------------------Spooler::jobs_dom_element
@@ -1502,6 +1515,13 @@ void Spooler::set_state( State state )
     try
     {
         _log.log( state == s_loading || state == s_starting? log_debug3 : log_info, message_string( "SCHEDULER-902", state_name() ) );      // Nach _state = s_stopping aufrufen, damit's nicht blockiert!
+    }
+    catch( exception& ) {}      // ENOSPC bei s_stopping ignorieren wir
+
+    try
+    {
+        Scheduler_event event ( evt_scheduler_state_changed, log_info, this );
+        report_event( &event );
     }
     catch( exception& ) {}      // ENOSPC bei s_stopping ignorieren wir
 
@@ -2321,7 +2341,7 @@ void Spooler::run_scheduler_script()
                     body << ( _log.highest_level() == log_warn? "warning" : "error" ) << ":\n\n";
                     body << subject << "\n\n";
 
-                    Scheduler_event scheduler_event ( Scheduler_event::evt_scheduler_started, _log.highest_level(), this );
+                    Scheduler_event scheduler_event ( evt_scheduler_started, _log.highest_level(), this );
 
                     if( _log.highest_level() >= log_error )  scheduler_event.set_error( Xc( "SCHEDULER-227", _log.last( _log.highest_level() ).c_str() ) );
                     else
@@ -2398,6 +2418,8 @@ void Spooler::stop( const exception* )
         //_main_scheduler_connection->logoff( x );
     }
 
+    if( _scheduler_event_manager )  _scheduler_event_manager->close_responses();
+    _communication.finish_responses( 5.0 );
     _communication.close( 5.0 );      // Mit Wartezeit. Vor Restart, damit offene Verbindungen nicht vererbt werden.
 
     _db->spooler_stop();
@@ -2595,6 +2617,7 @@ void Spooler::run()
         _event.reset();
 
         execute_state_cmd();
+
         if( _shutdown_cmd )  if( !_single_thread  ||  !_single_thread->has_tasks()  ||  _shutdown_ignore_running_tasks )  break;
 
         bool something_done = run_continue();

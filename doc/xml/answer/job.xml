@@ -149,7 +149,14 @@
             </description>
         </xml_child_element>
 
-        <xml_child_element directory="xml/" name="params"/>
+        <xml_child_element directory="xml/" name="params">
+            <description>
+                <p>
+                    Nur wenn <scheduler_element name="show_job" attribute="what" value="job_params"/> angegeben worden ist.
+                </p>
+            </description>
+        </xml_child_element>
+
         <xml_child_element name="queued_tasks"/>
         <xml_child_element name="history"/>
         <xml_child_element name="order_queue"/>

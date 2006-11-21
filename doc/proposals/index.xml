@@ -11,6 +11,16 @@
 >
 
     <p>
+        <a href="remote_jobs.xml">Jobs auf entfernten Rechnern starten</a>
+    </p>
+
+
+    <p>
+        <a href="supervision.xml">Scheduler-Überwachung mit Ereignissen</a>
+    </p>
+
+
+    <p>
         Scheduler-Parameter, Umgebungsvariablen
     </p>
     <div class="indent">

@@ -1777,7 +1777,7 @@ void Task::finish()
     // eMail versenden
     {
         // Vor Task::close(), damit _order_for_task_end genutzt werden kann, s. Task::dom_element()
-        Scheduler_event event ( Scheduler_event::evt_task_ended, _log->highest_level(), this );
+        Scheduler_event event ( evt_task_ended, _log->highest_level(), this );
         trigger_event( &event );
     }
 
@@ -1932,7 +1932,7 @@ void Task::send_collected_log()
 {
     try
     {
-        Scheduler_event scheduler_event ( Scheduler_event::evt_task_ended, _log->highest_level(), this );
+        Scheduler_event scheduler_event ( evt_task_ended, _log->highest_level(), this );
         _log->send( -2, &scheduler_event );
     }
     catch( const exception&  x ) { _spooler->_log.error( x.what() ); }

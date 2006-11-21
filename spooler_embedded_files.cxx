@@ -4508,6 +4508,10 @@ const char file_scheduler_xsd[] =
     "<xsd:element ref=\"start_job\"/>\r\n"
     "<!--xsd:element ref=\"signal_object\"/-->\r\n"
     "<xsd:element ref=\"terminate\"/>\r\n"
+    "\r\n"
+    "\r\n"
+    "<!-- Asynchron ausgef\xc3" "\xbc" "hrte Kommandos -->\r\n"
+    "<xsd:element ref=\"get_events\"/>\r\n"
     "</xsd:choice>\r\n"
     "</xsd:complexType>\r\n"
     "</xsd:element>\r\n"
@@ -5368,6 +5372,11 @@ const char file_scheduler_xsd[] =
     "</xsd:element>\r\n"
     "\r\n"
     "\r\n"
+    "<xsd:element name=\"get_events\">\r\n"
+    "<xsd:complexType/>\r\n"
+    "</xsd:element>\r\n"
+    "\r\n"
+    "\r\n"
     "<xsd:element name=\"web_services\">\r\n"
     "<xsd:complexType>\r\n"
     "<xsd:sequence>\r\n"
@@ -5656,7 +5665,7 @@ static const Embedded_file embedded_files_array[] =
     { "html/z/translation_de.js", file_html_z_translation_de_js, sizeof file_html_z_translation_de_js - 1, 1162029282 },
     { "html/z/scheduler.xslt", file_html_z_scheduler_xslt, sizeof file_html_z_scheduler_xslt - 1, 1162029282 },
     { "html/z/scheduler.css", file_html_z_scheduler_css, sizeof file_html_z_scheduler_css - 1, 1162029282 },
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1162558153 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1164043825 },
     { NULL, NULL, 0 }
 };
 

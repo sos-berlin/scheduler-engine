@@ -8,6 +8,10 @@ namespace spooler {
 
 //-------------------------------------------------------------------------------------------------
 
+const int                   recommended_response_block_size = 100000;
+
+//-------------------------------------------------------------------------------------------------
+
 xml::Element_ptr                create_error_element        ( const xml::Document_ptr&, const Xc_copy&, time_t gmt = 0 );
 
 //-----------------------------------------------------------------------------------Show_what_enum
@@ -75,6 +79,99 @@ Xc_copy                         xc_from_dom_error           ( const xml::Element
 void                            dom_append_nl               ( const xml::Element_ptr& );
 string                          xml_as_string               ( const xml::Document_ptr&, bool indent = false );
 
+//---------------------------------------------------------------------------------Command_response
+
+struct Command_response : Xml_response
+{
+                                Command_response            ();
+
+    virtual void                append_text                 ( const string& )                       = 0;
+    virtual string              complete_text               ()                                      { z::throw_xc( "SCHEDULER-353" ); }
+
+  protected:
+    void                        begin                       ();
+    void                        end                         ();
+};
+
+//-------------------------------------------------------------------------------------------------
+
+struct Synchronous_command_response : Command_response
+{
+                                Synchronous_command_response( const string& text ) : _response_text(text) {}
+
+    // Async_operation
+    virtual bool                async_continue_             ( Continue_flags )                      { z::throw_xc( __FUNCTION__ ); }
+    virtual bool                async_finished_             () const                                { return true; }
+    virtual string              async_state_text_           () const                                { return "Synchronous_command_response"; }
+
+    // Xml_response
+    string                      get_part                    ()                                      { string result = _response_text;  _response_text = "";  return result; }
+
+    // Command_response
+    void                        append_text                 ( const string& text )                  { _response_text += text; }
+    string                      complete_text               ()                                      { return _response_text; }
+
+  private:
+    string                     _response_text;
+};
+
+//-------------------------------------------------------------------File_buffered_command_response
+
+struct File_buffered_command_response : Command_response
+{
+    enum State
+    {
+        s_ready, 
+        s_congested,
+        s_finished
+    };
+
+                                File_buffered_command_response();
+
+    // Async_operation
+    virtual bool                async_continue_             ( Continue_flags );
+    virtual bool                async_finished_             () const                                { return _state == s_finished; }
+    virtual string              async_state_text_           () const                                { return "File_buffered_xml_response"; }
+
+    // Xml_response
+    string                      get_part                    ();
+    void                        append_text                 ( const string& );
+
+    void                        close                       ();
+
+  private:   
+    Fill_zero                  _zero_;
+    State                      _state;
+    int                        _buffer_size;
+    string                     _buffer;
+    z::File                    _congestion_file;
+    bool                       _last_seek_for_read;
+    int64                      _congestion_file_write_position;
+    int64                      _congestion_file_read_position;
+    bool                       _close;
+};
+
+//----------------------------------------------------------------------Get_events_command_response
+
+struct Get_events_command_response : File_buffered_command_response
+{
+                                Get_events_command_response ( Scheduler_event_manager* m )          : _zero_(this+1), _scheduler_event_manager(m) {}
+                               ~Get_events_command_response ();
+
+
+    void                        close                       ();
+    bool                    set_append_0_byte               ( bool b )                              { _append_0_byte = b; }
+
+    bool                        is_event_selected           ( const Scheduler_event& )              { return true; }
+    void                        write_event                 ( const Scheduler_event& );
+
+  private:
+    Fill_zero                  _zero_;
+    Scheduler_event_manager*   _scheduler_event_manager;
+    bool                       _append_0_byte;
+    bool                       _closed;
+};
+
 //--------------------------------------------------------------------------------Command_processor
 
 struct Command_processor
@@ -84,6 +181,7 @@ struct Command_processor
 
     void                        execute_file                ( const string& xml_filename );
     void                        execute_http                ( http::Operation* );
+    ptr<Command_response>       response_execute            ( const string& xml_text, const Time& xml_mod_time, bool indent = false );
     string                      execute                     ( const string& xml_text, const Time& xml_mod_time, bool indent = false );
     xml::Document_ptr           execute                     ( const xml::Document_ptr&, const Time& xml_mod_time = Time::now() );
     void                        execute_2                   ( const string& xml_text, const Time& xml_mod_time = Time::now() );
@@ -123,6 +221,7 @@ struct Command_processor
     xml::Element_ptr            execute_remove_job_chain    ( const xml::Element_ptr& );
     xml::Element_ptr            execute_register_remote_scheduler( const xml::Element_ptr& );
     xml::Element_ptr            execute_service_request     ( const xml::Element_ptr& );
+    xml::Element_ptr            execute_get_events          ( const xml::Element_ptr& );
 
     void                        get_id_and_next             ( const xml::Element_ptr& element, int* id, int* next );
 
@@ -145,6 +244,7 @@ struct Command_processor
     string                     _source_filename;            // Das Verzeichnis wird für <base file=".."> verwendet
     Has_log*                   _log;
     Variable_set_map           _variable_set_map;
+    ptr<Command_response>      _response;
 };
 
 //-------------------------------------------------------------------------------------------------

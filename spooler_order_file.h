@@ -40,7 +40,7 @@ struct Directory_file_order_source : //idispatch_implementation< Directory_file_
     Order*                      request_order           ( const string& cause );
 
   private:
-    void                        send_mail               ( Scheduler_event::Event_code, const exception* );
+    void                        send_mail               ( Scheduler_event_type, const exception* );
     void                        start_or_continue_notification( bool was_notified );
     void                        close_notification      ();
     Order*                      read_directory          ( bool was_notified, const string& cause );

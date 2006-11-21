@@ -36,6 +36,12 @@ struct Order : Com_order,
                                 Order                   ( Spooler*, const Record&, const string& payload, const string& run_time, const string& xml );
                                ~Order                   ();
 
+
+    // Scheduler_object:
+    Prefix_log*                 log                     ()                                          { return _log; }
+    void                        print_xml_child_elements_for_event( ostream*, Scheduler_event* );
+
+
     void                        init                    ();
     void                        update_database         ();
     void                        attach_task             ( Task* );
@@ -44,7 +50,6 @@ struct Order : Com_order,
     void                        open_log                ();
     void                        close                   ();
 
-    Prefix_log*                 log                     ()                                          { return _log; }
     
     void                    set_id                      ( const Variant& );
     Id                          id                      ()                                          { THREAD_LOCK_RETURN( _lock, Variant, _id ); }

@@ -2073,7 +2073,7 @@ void Job::set_job_error( const exception& x )
             x.what() << "\n"
             "No more task will be started.";
 
-    Scheduler_event scheduler_event ( Scheduler_event::evt_job_error, log_error, this );
+    Scheduler_event scheduler_event ( evt_job_error, log_error, this );
     scheduler_event.set_error( x );
 
     Mail_defaults mail_defaults ( _spooler );
@@ -2102,7 +2102,7 @@ void Job::set_state( State new_state )
         //if( _spooler->_debug )
         {
             if( new_state == s_stopping
-             || new_state == s_stopped
+             || new_state == s_stopped  && _visible
              || new_state == s_read_error
              || new_state == s_error      )  _log->info  ( message_string( "SCHEDULER-931", state_name() ) ); 
                                        else  _log->debug9( message_string( "SCHEDULER-931", state_name() ) );

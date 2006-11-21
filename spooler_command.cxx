@@ -539,9 +539,13 @@ xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& 
           //order->set_priority  ( record.as_int   ( "priority"   ) );
         }
 
-        //Hier fehlt: if( show & show_log )
-        string log = file_as_string( GZIP_AUTO + _spooler->_db->db_name() + " -table=" + _spooler->_order_history_tablename + " -blob=\"LOG\"" 
+        string log;
+
+        if( show & show_log )
+        {
+            log = file_as_string( GZIP_AUTO + _spooler->_db->db_name() + " -table=" + _spooler->_order_history_tablename + " -blob=\"LOG\"" 
                                      " where \"HISTORY_ID\"=" + history_id );
+        }
 
         /* Payload steht nicht in der Historie
         if( show & show_payload )
@@ -707,6 +711,50 @@ xml::Element_ptr Command_processor::execute_service_request( const xml::Element_
     return _answer.createElement( "ok" );
 }
 
+//-------------------------------------------------------Command_processor::execute_service_request
+
+xml::Element_ptr Command_processor::execute_get_events( const xml::Element_ptr& get_events_element )
+{
+    ptr<Get_events_command_response> response = Z_NEW( Get_events_command_response( _spooler->_scheduler_event_manager ) );
+    _response = response;
+
+    _spooler->_scheduler_event_manager->add_get_events_command_response( response );
+
+    _response->append_text( "<events>\n" );
+
+    return NULL;    // Antwort wird asynchron übergeben
+}
+
+//-----------------------------------------et_events_command_response::~Get_events_command_response
+
+Get_events_command_response::~Get_events_command_response()
+{
+    _scheduler_event_manager->remove_get_events_command_response( this );
+}
+
+//---------------------------------------------------------------Get_events_command_response::close
+
+void Get_events_command_response::close()
+{
+    if( !_closed )
+    {
+        _closed = true;
+
+        append_text( "</events>" );
+        int NULL_BYTE_ANHAENGEN;
+    }
+}
+
+//---------------------------------------------------------Get_events_command_response::write_event
+
+void Get_events_command_response::write_event( const Scheduler_event& event )
+{
+    append_text( event.xml() );
+
+    if( _append_0_byte )  append_text( string( "\0", 1 ) );       // 0-Byte anhängen
+                    else  append_text( "\n" );
+}
+
 //---------------------------------------------------------------Command_processor::execute_command
 
 xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& element, const Time& xml_mod_time )
@@ -840,6 +888,8 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     else
     if( element.nodeName_is( "service_request"  ) )  return execute_service_request( element );
     else
+    if( element.nodeName_is( "get_events"  ) )  return execute_get_events( element );
+    else
     {
         z::throw_xc( "SCHEDULER-105", element.nodeName() ); return xml::Element_ptr();
     }
@@ -849,12 +899,17 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
 
 string xml_as_string( const xml::Document_ptr& document, bool indent )
 {
+    string result;
+
     try 
     {
-        return document.xml( indent );
+        result = document.xml( indent );
+        if( indent )  result = replace_regex( result, "\n", "\r\n" );      // Für Windows-telnet
     }
     catch( const exception&  ) { return "<?xml version=\"1.0\"?><ERROR/>"; }
     catch( const _com_error& ) { return "<?xml version=\"1.0\"?><ERROR/>"; }
+
+    return result;
 }
 
 //-------------------------------------------------------------------Command_processor::execute_http
@@ -1137,7 +1192,7 @@ void Command_processor::execute_http( http::Operation* http_operation )
 
 //------------------------------------------------------------------------Command_processor::execute
 
-string Command_processor::execute( const string& xml_text_par, const Time& xml_mod_time, bool indent )
+ptr<Command_response> Command_processor::response_execute( const string& xml_text_par, const Time& xml_mod_time, bool indent )
 {
     //begin_answer();
 
@@ -1149,19 +1204,37 @@ string Command_processor::execute( const string& xml_text_par, const Time& xml_m
         if( strchr( xml_text.c_str(), '<' ) == NULL )  xml_text = "<" + xml_text + "/>";
 
         execute_2( xml_text, xml_mod_time );
+
+        if( !_answer.documentElement().firstChild().hasChildNodes()  &&  !_response )  z::throw_xc( "SCHEDULER-353" );
     }
     catch( const Xc& x        ) { append_error_to_answer( x );  if( _log ) _log->error( x.what() ); }
     catch( const exception& x ) { append_error_to_answer( x );  if( _log ) _log->error( x.what() ); }
 
-    return xml_as_string( _answer, indent );
+    ptr<Command_response> result = _response;
+    if( !result )
+    {
+        ptr<Synchronous_command_response> r = Z_NEW( Synchronous_command_response( xml_as_string( _answer, indent ) ) );
+        //r->begin();
+        //r->append_text( xml_as_string( _answer.documentElement().firstChild()....(), indent ) );
+        //r->end();
+
+        result = +r;
+    }
+    
+    return +result;
+}
+
+//------------------------------------------------------------------------Command_processor::execute
+
+string Command_processor::execute( const string& xml_text_par, const Time& xml_mod_time, bool indent )
+{
+    return response_execute( xml_text_par, xml_mod_time, indent )->complete_text();
 }
 
 //------------------------------------------------------------------------Command_processor::execute
 
 xml::Document_ptr Command_processor::execute( const xml::Document_ptr& command_document, const Time& xml_mod_time )
 {
-    //begin_answer();
-
     try 
     {
         _error = NULL;
@@ -1213,8 +1286,6 @@ xml::Document_ptr Command_processor::dom_from_xml( const string& xml_text )
 
 void Command_processor::execute_2( const string& xml_text, const Time& xml_mod_time )
 {
-    //begin_answer();
-
     try 
     {
         execute_2( dom_from_xml( xml_text ), xml_mod_time );
@@ -1226,8 +1297,6 @@ void Command_processor::execute_2( const string& xml_text, const Time& xml_mod_t
 
 void Command_processor::execute_2( const xml::Document_ptr& command_doc, const Time& xml_mod_time )
 {
-    //begin_answer();
-
     try 
     {
         if( !_dont_log_command )  Z_LOG2( "scheduler", "Execute " << replace_regex( command_doc.xml(), "\\?\\>\n", "?>", 1 ) );  // XML endet mit \n
@@ -1238,12 +1307,6 @@ void Command_processor::execute_2( const xml::Document_ptr& command_doc, const T
             _spooler->_schema.validate( command_doc );
         }
 
-/*
-        xml::DocumentType_ptr doctype = command_doc->doctype;
-        if( doctype )  command_doc->removeChild( doctype );
-
-        doctype = command_doc->createDoc
-*/
         xml::Element_ptr e = command_doc.documentElement();
 
         if( e.nodeName_is( "spooler" ) ) 
@@ -1261,7 +1324,18 @@ void Command_processor::execute_2( const xml::Document_ptr& command_doc, const T
             }
             else
             {
-                _answer.documentElement().firstChild().appendChild( execute_command( e, xml_mod_time ) );
+                xml::Element_ptr response_element = execute_command( e, xml_mod_time );
+                
+                if( response_element )
+                {
+                    _answer.documentElement().firstChild().appendChild( response_element );
+                }
+                else
+                if( _response )
+                {
+                    // Rückgabe als asynchrones Command_response (für <get_events>)
+                }
+                else z::throw_xc( "SCHEDULER-353", e.nodeName() );
             }
             
             xml::Node_ptr n = e.nextSibling(); 
@@ -1279,7 +1353,10 @@ void Command_processor::execute_commands( const xml::Element_ptr& commands_eleme
 {
     DOM_FOR_EACH_ELEMENT( commands_element, node )
     {
-        _answer.documentElement().firstChild().appendChild( execute_command( node, xml_mod_time ) );
+        xml::Element_ptr response_element = execute_command( node, xml_mod_time );
+        if( !response_element )  z::throw_xc( "SCHEDULER-353", node.nodeName() );
+
+        _answer.documentElement().firstChild().appendChild( response_element );
     }
 }
 
@@ -1287,6 +1364,8 @@ void Command_processor::execute_commands( const xml::Element_ptr& commands_eleme
 
 void Command_processor::begin_answer()
 {
+    string now = Time::now().as_string();
+
     if( !_answer )
     {
         _answer.create();
@@ -1294,7 +1373,7 @@ void Command_processor::begin_answer()
         _answer.appendChild( _answer.createElement( "spooler" ) );
 
         xml::Element_ptr answer_element = _answer.documentElement().appendChild( _answer.createElement( "answer" ) );
-        answer_element.setAttribute( "time", Time::now().as_string() );
+        answer_element.setAttribute( "time", now );
     }
 }
 
@@ -1314,6 +1393,153 @@ void Command_processor::append_error_to_answer( const Xc& x )
     _error = x;
     if( _answer  &&  _answer.documentElement()  &&  _answer.documentElement().firstChild() ) 
         append_error_element( _answer.documentElement().firstChild(), x );
+}
+
+//---------------------------------------------------------------Command_response::Command_response
+
+Command_response::Command_response()
+{
+}
+
+//--------------------------------------------------------------------------Command_response::begin
+
+void Command_response::begin()
+{
+    append_text( "<spooler><answer time=\"" + Time::now().as_string() + "\">" );
+}
+
+//--------------------------------------------------------------------------Command_response::close
+
+void Command_response::end()
+{
+    append_text( "</answer></spooler>" );
+}
+
+//-----------------------------------File_buffered_command_response::File_buffered_command_response
+
+File_buffered_command_response::File_buffered_command_response()
+: 
+    _zero_(this+1), 
+    _buffer_size(recommended_response_block_size) 
+{
+    _buffer.reserve( _buffer_size );
+}
+
+//------------------------------------------------------------File_buffered_command_response::close
+    
+void File_buffered_command_response::close()
+{
+    if( _state == s_ready  &&  _buffer == "" )  _state = s_finished;
+    _close = true;
+}
+
+//--------------------------------------------------File_buffered_command_response::async_continue_
+
+bool File_buffered_command_response::async_continue_( Continue_flags )
+{
+    z::throw_xc( __FUNCTION__ );
+    return false;
+}
+
+//------------------------------------------------------File_buffered_command_response::append_text
+
+void File_buffered_command_response::append_text( const string& text )
+{
+    if( _close )
+    {
+        Z_LOG( "*** " << __FUNCTION__ "  closed: " << text << "\n" );
+        return;
+    }
+
+
+    if( text.length() == 0 )  return;
+
+    if( _state != s_congested )
+    {
+        if( _buffer.length() == 0  ||  _buffer.length() + text.length() <= _buffer_size )
+        {
+            _buffer.append( text );
+            signal_new_data();  // Mit Senden beginnen
+        }
+        else
+        {
+            _state = s_congested;
+        }
+    }
+
+    if( _state == s_congested )
+    {
+        if( !_congestion_file.opened() )  
+        {
+            _congestion_file.open_temporary();
+            _congestion_file.unlink_later();
+        }
+        
+        if( _last_seek_for_read )
+        {
+            _congestion_file.seek( _congestion_file_write_position );
+            _last_seek_for_read = false;
+        }
+
+        _congestion_file.print( text );
+        
+        _congestion_file_write_position += text.length();
+    }
+}
+
+//---------------------------------------------------------File_buffered_command_response::get_part
+
+string File_buffered_command_response::get_part()
+{
+    string result;
+
+    switch( _state )
+    {
+        case s_ready:
+        {
+            if( _buffer == "" ) 
+            {
+                // Leeren String zurückgeben bedeutet, dass noch keine neuen Daten da sind
+            }
+            else
+            {
+                result = _buffer;
+                _buffer = "";
+            }
+
+            break;
+        }
+
+        case s_congested:
+        {
+            if( !_last_seek_for_read )
+            {
+                _congestion_file.seek( _congestion_file_read_position );
+                _last_seek_for_read = true;
+            }
+
+            result = _congestion_file.read_string( _buffer_size );
+
+            _congestion_file_read_position += result.length();
+            
+            if( _congestion_file_read_position == _congestion_file_write_position )
+            {
+                _congestion_file.seek( 0 );
+                _congestion_file.truncate( 0 );
+                _congestion_file_read_position = 0;
+                _congestion_file_write_position = 0;
+
+                _state = s_ready;
+            }
+        }
+
+        default:
+            z::throw_xc( __FUNCTION__, _state );
+    }
+
+    if( _close  &&  _state == s_ready  &&  _buffer == "" )  _state = s_finished;
+
+    return result;
 }
 
 //-------------------------------------------------------------------------------------------------

@@ -61,7 +61,7 @@ static void io_error( Spooler* spooler, const string& filename )
 
         Z_LOGI2( "scheduler", "\n*** SCHEDULER HÄLT WEGEN PLATTENPLATZMANGEL AN. " << x.what() << ", Datei " << filename << "\n\n" );
 
-        Scheduler_event scheduler_event ( Scheduler_event::evt_disk_full, log_warn, spooler );
+        Scheduler_event scheduler_event ( evt_disk_full, log_warn, spooler );
         scheduler_event.set_error( x );
 
         Mail_defaults mail_defaults ( spooler );
@@ -635,8 +635,8 @@ void Prefix_log::close()
         {
             //if( !_subject.empty()  ||  !_body.empty() )     // 20.11.2002
             {
-                Scheduler_event::Event_code event_code = _object->scheduler_type_code() == Scheduler_object::type_task? Scheduler_event::evt_task_ended 
-                                                                                                                      : Scheduler_event::evt_unknown;
+                Scheduler_event::Scheduler_event_type event_code = _object->scheduler_type_code() == Scheduler_object::type_task? evt_task_ended 
+                                                                                                                      : evt_unknown;
                 Scheduler_event scheduler_event ( event_code, highest_level(), _object );
                 send_really( &scheduler_event );
             }

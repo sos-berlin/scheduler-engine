@@ -101,23 +101,28 @@ extern const string             variable_set_name_for_substitution;
 
 using namespace std;
 struct Communication;
-struct Spooler;
-struct Spooler_thread;
+struct Get_events_command_response;
 struct Job;
-struct Task;
 struct Job_chain;
 struct Order_queue;
 struct Order;
 struct Process_class;
 struct Remote_scheduler;
+struct Scheduler_object;
+struct Scheduler_event;
+enum   Scheduler_event_type;
 struct Show_what;
+struct Spooler;
+struct Spooler_thread;
 struct Subprocess;
 struct Subprocess_register;
+struct Task;
 struct Web_service;
 struct Web_service_operation;
 struct Web_service_request;
 struct Web_service_response;
 struct Xslt_stylesheet;
+
 
 } //namespace spooler
 
@@ -133,8 +138,9 @@ namespace http
 #include "spooler_common.h"
 #include "spooler_time.h"
 #include "spooler_mail.h"
-#include "spooler_event.h"
 #include "spooler_log.h"
+#include "scheduler_object.h"
+#include "spooler_event.h"
 #include "spooler_security.h"
 #include "spooler_wait.h"
 #include "spooler_communication.h"
@@ -226,6 +232,10 @@ struct Spooler : Object,
                                 Spooler                     ();
                                ~Spooler                     ();
 
+    // Scheduler_object:
+    void                        print_xml_child_elements_for_event( ostream*, Scheduler_event* );
+    Prefix_log*                 log                         ()                                  { return &_log; }
+
 
     // Aufrufe für andere Threads:
     Thread_id                   thread_id                   () const                            { return _thread_id; }
@@ -242,7 +252,6 @@ struct Spooler : Object,
     string                      state_name                  () const                            { return state_name( _state ); }
     static string               state_name                  ( State );
   //bool                        free_threading_default      () const                            { return _free_threading_default; }
-    Prefix_log*                 log                         ()                                  { return &_log; }
     const string&               log_directory               () const                            { return _log_directory; }                      
     Time                        start_time                  () const                            { return _spooler_start_time; }
     Security::Level             security_level              ( const Ip_address& );
@@ -300,7 +309,7 @@ struct Spooler : Object,
 
     xml::Element_ptr            state_dom_element           ( const xml::Document_ptr&, const Show_what& = show_standard );
     void                        set_state                   ( State );
-  //void                        connect_to_main_scheduler   ();
+    void                        report_event                ( Scheduler_event* e )              { if( _scheduler_event_manager )  _scheduler_event_manager->report_event( e ); }
 
     void                        create_window               ();
     void                        start                       ();
@@ -528,6 +537,7 @@ struct Spooler : Object,
 
     Remote_scheduler_register  _remote_scheduler_register;
     ptr<Xml_client_connection> _main_scheduler_connection;
+    ptr<Scheduler_event_manager> _scheduler_event_manager;
 
     Module                     _module;                     // <script>
     ptr<Module_instance>       _module_instance;

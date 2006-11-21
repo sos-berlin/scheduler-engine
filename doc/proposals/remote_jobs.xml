@@ -1,0 +1,158 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id$-->
+
+<description
+    title               = "Jobs auf entfernten Rechnern starten"
+    base_dir            = "../"
+    parent_page         = "index.xml"
+    author              = "$Author$"
+    date                = "$Date$"
+>
+    <p style="color: red">— In Arbeit —</p>
+
+    <p>
+        <scheduler_element name="process"/>-Jobs können mit <code>ssh</code> auf einem entfernten Rechner gestartet werden.
+        Wie Jobs mit Zugriff auf die Scheduler-API möglich sein könnten, steht hier.
+    </p>
+
+    
+    <h2>A) Einfacher Vorschlag: Die entfernte Ausführung lokal definierter Jobs</h2>
+
+    <p>
+        Auf dem entfernten Rechner läuft ein Scheduler, der beliebige Jobs anderer Scheduler ausführen kann.
+    </p>
+
+    <pre>&lt;job scheduler="remote_host:4444"></pre>
+
+    <p>
+        Besser wäre, das Attribut <code>scheduler</code> an die Prozessklassen zu binden, um diese nicht nutzlos zu machen.
+    </p>
+
+    <pre>&lt;process_class name="remote" scheduler="remote_host:4444" max_processes="3">
+…
+&lt;job process_class="remote"></pre>
+
+    <p>
+        Dabei werden folgende Angaben zum entfernten Scheduler übertragen und dort verarbeitet:
+    </p>
+    <ul>
+        <li>
+            <scheduler_element name="script" attribute="language"/>
+        </li>
+        <li>
+            <scheduler_element name="script" attribute="com_class"/>
+        </li>
+        <li>
+            <scheduler_element name="script" attribute="java_class"/>
+        </li>
+        <li>
+            <scheduler_element name="script" attribute="java_options"/>?
+        </li>
+        <li>
+            <scheduler_element name="script" attribute="recompile"/>?
+        </li>
+        <li>
+            Inhalt von <scheduler_element name="script"/> mit aufgelösten <scheduler_element name="include"/>
+        </li>
+        <li>
+            Und die entsprechenden Angaben des <scheduler_element name="monitor"/>.
+        </li>
+    </ul>
+
+    <p>
+        Nicht übertragen werden
+    </p>
+    <ul>
+        <li>
+            <scheduler_element name="script" attribute="java_class_path"/>
+        </li>
+    </ul>
+
+
+    <h2>B) Ausführung entfernt definierter Jobs</h2>
+
+    <pre>&lt;job name="mein_job" remote_scheduler="remote_host:4444"></pre>
+
+    <p>
+        Der Job ist in der XML-Konfiguration des entfernten Schedulers definiert.
+        Der lokale Scheduler kann folgende Einstellungen vornehmen:
+    </p>
+    <ul>
+        <li>
+            <scheduler_element name="job" attribute="order"/>
+        </li>
+        <li>
+            <scheduler_element name="job" attribute="title"/>
+        </li>
+        <li>
+            <scheduler_element name="description"/>
+        </li>
+        <li>
+            <scheduler_element name="params"/>, werden den <scheduler_element name="params"/> des entfernt definierten Jobs hinzugefügt.
+        </li>
+        <li>
+            <scheduler_element name="commands"/> für lokal auszuführende Kommandos
+            (die <scheduler_element name="commands"/> der entfernten Job-Definition werden auf dem entfernten Scheduler ausgeführt)
+        </li>
+    </ul>
+    <p>
+        Die <scheduler_element name="run_time"/> wird auf dem entfernten Scheduler festgelegt.
+    </p>
+
+    
+    <h3>Task-Warteschlange</h3>
+    <p>
+        Die Task-Warteschlange wird lokal gehalten.
+    </p>
+
+    
+    <h3>Auftrags-Warteschlange</h3>
+    <p>
+        Die Auftrags-Warteschlange wird lokal gehalten.
+    </p>
+
+
+    
+    <h2>Ablauf</h2>
+
+    <h3>Verbindeung</h3>
+    <p>
+        Der Scheduler verbindet sich mit allen entfernten Schedulern.
+        Solange eine Verbindung nicht steht, wird keine entfernte Task gestartet.
+        Wenn die Verbindung steht, prüft der Scheduler, ob der entfernte Scheduler eine passende Job-Definition hat.
+        Wenn nicht, wird der lokale Job gestoppt.
+    </p>
+
+    <h3>Task-Start</h3>
+    <p>
+        Wenn der lokale Scheduler eine Task starten will, schickt er eine Anforderung an den entfernten Scheduler.
+        Der antwortet, sobald er eine Task starten kann 
+        (abhängig von <scheduler_element name="run_time"/>, <scheduler_element name="job" attribute="tasks"/> etc.).
+    </p>
+
+    <h3>Auftragsausführung</h3>
+    <p>
+        Analog zum Task-Start, auf Ebene von <scheduler_method class="Job_impl" method="spooler_process"/>.
+    </p>
+
+    <h3>kill</h3>
+    <p>
+        Ein <scheduler_element name="kill_task"/> wird an den entfernten Scheduler gereicht, der die Operation ausführt.
+    </p>
+
+
+    <h2>Schutz</h2>
+    <p>
+        Damit der Scheduler ein Skript von einem anderen Rechner annimmt,
+        muss der andere Rechner das Zugriffsrecht <scheduler_element name="allowed_host" attribute="level" value="all"/> haben.
+        Das ist derselbe Schutz wie für <scheduler_element name="add_jobs"/> und eigentlich ungenügend,
+        weil nur die IP-Adresse geprüft wird.
+    </p>
+    <p>
+        Kann auf ssh zurückgegriffen werden? Der Scheduler bekäme einen ssh-Server, 
+        der öffentliche/private Schlüssel und Kennwörter unterstützt.
+    </p>
+    
+</description>
