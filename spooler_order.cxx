@@ -1068,7 +1068,7 @@ void Order_queue::remove_order( Order* order )
 
             if( it == _setback_queue.end() )  z::throw_xc( "SCHEDULER-156", order->obj_name(), _job->name() );
 
-            order->_setback = 0;
+            order->clear_setback();  //2006-11-21  order->_setback = 0;
             order->_in_job_queue = false;
 
             _setback_queue.erase( it );

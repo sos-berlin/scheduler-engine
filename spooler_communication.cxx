@@ -218,7 +218,7 @@ string Communication::Operation::async_state_text_() const
     return result;
 }
 
-//------------------------------------------------------------------Communication::Connection::Connection
+//------------------------------------------------------------Communication::Connection::Connection
 
 Communication::Connection::Connection( Communication* communication )
 :
@@ -231,7 +231,7 @@ Communication::Connection::Connection( Communication* communication )
     //recv_clear();
 }
 
-//-----------------------------------------------------------------Communication::Connection::~Connection
+//-----------------------------------------------------------Communication::Connection::~Connection
 
 Communication::Connection::~Connection()
 {
@@ -247,7 +247,7 @@ Communication::Connection::~Connection()
     _write_socket = SOCKET_ERROR;
 }
 
-//-------------------------------------------------------Communication::Connection::connection_state_name
+//----------------------------------------------------Communication::Connection::connection_state_name
 
 string Communication::Connection::connection_state_name( Connection_state state )
 {
@@ -318,7 +318,7 @@ bool Communication::Connection::do_accept( SOCKET listen_socket )
     return true;
 }
 
-//-----------------------------------------------------------------Communication::Connection::do_close
+//--------------------------------------------------------------Communication::Connection::do_close
 
 void Communication::Connection::do_close()
 {
@@ -349,7 +349,7 @@ void Communication::Connection::remove_operation()
     }
 }
 
-//------------------------------------------------------------------Communication::Connection::do_recv
+//---------------------------------------------------------------Communication::Connection::do_recv
 
 bool Communication::Connection::do_recv()
 {
@@ -412,7 +412,7 @@ bool Communication::Connection::do_recv()
     return something_done;
 }
 
-//----------------------------------------------------------Communication::Connection::async_continue_
+//-------------------------------------------------------Communication::Connection::async_continue_
 
 bool Communication::Connection::async_continue_( Continue_flags )
 {
@@ -538,7 +538,7 @@ xml::Element_ptr Communication::Connection::dom_element( const xml::Document_ptr
     return result;
 }
 
-//--------------------------------------------------------------------Communication::Communication
+//---------------------------------------------------------------------Communication::Communication
 
 Communication::Communication( Spooler* spooler )
 : 
