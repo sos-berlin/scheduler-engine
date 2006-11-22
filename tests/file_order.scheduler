@@ -123,6 +123,7 @@ public class My_job  extends sos.spooler.Job_impl
                 <job_chain_node state="first" job="javascript"/>
                 <job_chain_node state="second" job="javascript2"/>
                 <file_order_sink state="remove" remove="yes"/>
+                <!--file_order_sink state="remove" move_to="/gibsnich/"/-->
                 <!--job_chain_node state="finished"/-->
             </job_chain>
         </job_chains>        
