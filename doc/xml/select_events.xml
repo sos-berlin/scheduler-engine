@@ -60,7 +60,7 @@
         <xml_attribute name="scheduler_id" type="id">
             <description>
                 <p>
-                    Ein <scheduler_a href="../supervisor.xml">Supervisor</scheduler_a> kann Ereignismeldungen von anderen Schedulern
+                    Ein &lt;scheduler_a href="../supervisor.xml">Supervisor&lt;/scheduler_a> kann Ereignismeldungen von anderen Schedulern
                     liefern, die hier ausgewählt werden können.
                     Mehrere <code>&lt;get_events></code> mit verschiedenen <code>event_type="…"</code> können angegeben werden.
                 </p>
