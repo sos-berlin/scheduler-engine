@@ -1298,6 +1298,7 @@ void Order::init()
     _log->set_prefix( obj_name() );
     _created = Time::now();
     _is_virgin = true;
+    _is_virgin_in_this_run_time = true;
 
     set_run_time( NULL );
 }
@@ -1367,6 +1368,7 @@ void Order::attach_task( Task* task )
     if( _is_virgin  &&  _http_operation )  _http_operation->on_first_order_processing( task );
 
     _is_virgin = false;
+    _is_virgin_in_this_run_time = false;
 }
 
 //----------------------------------------------------------------------------Order::assert_no_task
@@ -2317,6 +2319,8 @@ void Order::postprocessing( bool success )
                 }
                 else
                 {
+                    _is_virgin_in_this_run_time = true;
+
                     bool is_first_call = _run_time_modified;
                     _run_time_modified = false;
                     Time next_start = next_start_time( is_first_call );
@@ -2594,8 +2598,8 @@ void Order::before_modify_run_time_event()
 
 void Order::run_time_modified_event()
 {
-    if( _state == _initial_state  &&  !_task )  set_setback( _run_time->set()? next_start_time( true ) : Time(0) );
-                                          else  _run_time_modified = true;
+    if( _is_virgin_in_this_run_time )  set_setback( _run_time->set()? next_start_time( true ) : Time(0) );
+                                else  _run_time_modified = true;
 }
 
 //------------------------------------------------------------------------------Order::set_run_time

@@ -215,6 +215,7 @@ struct Order : Com_order,
     bool                       _is_in_database;
     bool                       _delay_storing_until_processing;  // Erst in die Datenbank schreiben, wenn die erste Task die Verarbeitung beginnt
     bool                       _is_virgin;              // Noch von keiner Task berührt
+    bool                       _is_virgin_in_this_run_time; // Wie _is_virgin, wird aber beim Erreichen des Endzustands wieder true gesetzt
     bool                       _finished;               // Auftrag nach spooler_process() beenden
 
     ptr<Web_service>           _web_service;

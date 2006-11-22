@@ -303,7 +303,7 @@
     …</pre>
     <p>
         Das Attribute <code>with_null_byte</code> lässt jedes Element 
-        <scheduler_element name="event"/> 
+        <scheduler_element directory="xml/answer/" name="event"/> 
         mit einem 0-Byte abschließen 
         (nicht XML-konform, aber erleichtert das Parsieren).
     </p>
@@ -496,7 +496,7 @@
         </li>
         <li>
             Nach einer Verbindungsunterbrechung will der Supervisor vielleicht das Kommando an der unterbrochenen Stelle fortsetzen.
-            <scheduler_element name="get_events/>"/> müsste dann um die Möglichkeit erweitert werden, 
+            <scheduler_element name="get_events"/> müsste dann um die Möglichkeit erweitert werden, 
             die Ereignisdatei auszulesen, zu filtern und zu übertragen.
             Damit der Supervisor sicher ist, dass es sich um denselben Scheduler-Lauf handelt, 
             bekommt jeder Lauf eine eigene Session-Id (Datum+Uhrzeit+ms+pid).
