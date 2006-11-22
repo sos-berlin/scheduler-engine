@@ -12,7 +12,6 @@ endif
 
 objects = \
  scheduler_client.o\
- scheduler_object.o\
  scheduler_messages.o\
  spooler.o\
  spooler_com.o\

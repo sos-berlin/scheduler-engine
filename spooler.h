@@ -110,7 +110,6 @@ struct Process_class;
 struct Remote_scheduler;
 struct Scheduler_object;
 struct Scheduler_event;
-enum   Scheduler_event_type;
 struct Show_what;
 struct Spooler;
 struct Spooler_thread;

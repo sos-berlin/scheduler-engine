@@ -160,7 +160,7 @@ struct Get_events_command_response : File_buffered_command_response
 
 
     void                        close                       ();
-    bool                    set_append_0_byte               ( bool b )                              { _append_0_byte = b; }
+    void                    set_append_0_byte               ( bool b )                              { _append_0_byte = b; }
 
     bool                        is_event_selected           ( const Scheduler_event& )              { return true; }
     void                        write_event                 ( const Scheduler_event& );
