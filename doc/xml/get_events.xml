@@ -10,20 +10,18 @@
              base_dir = "../"
              parent_page = "../xml_commands.xml"
              author   = "$Author$"
-             date     = "$Date$">
-
+             date     = "$Date$"
+            document_state      = "work_in_progress"
+>
 
     <description>
-        <p style="color: red">— In Arbeit —</p>
         <p>
             Liefert eine Folge von Ereignismeldungen 
-            <scheduler_element directory="xml/answer/" element="event"/>
+            <scheduler_element directory="xml/answer/" name="events"/>
             bis der Scheduler endet 
-            oder der Client ein neues Kommando (genauer: ein Zeichen) überträgt.
-            Das heißt, direkt auf 
-            <code>&lt;get_events>…&lt;/get_events></code>
-            darf kein Zeichen übertragen werden (auch kein newline <code>\n</code>),
-            sonst wird Lieferung der Meldungen sofort beendet.
+            oder der Client ein neues Kommando oder eine Leerzeile 
+            (ein zweites Newline <code>\n</code> nach <code>&lt;get_events</code>) 
+            überträgt.
         </p>
         <p>
             Falls der Scheduler die Ereignismeldungen nicht schnell genug versenden kann
@@ -34,7 +32,7 @@
 
 
     <xml_parent_elements>
-        <xml_parent_element name="commands"/>
+        <!--Kann nicht in <commands> benutzt werden, weil es asynchron ausgeführt wird.   xml_parent_element name="commands"/-->
     </xml_parent_elements>
 
 
@@ -44,7 +42,7 @@
             <description>
                 <p>
                     <code>append_null_byte="yes"</code> lässt jedes 
-                    <scheduler_element dir="xml/answer/" name="event"/> 
+                    <scheduler_element directory="xml/answer/" name="event"/> 
                     mit einem 0-Byte abschließen.
                 </p>
             </description>

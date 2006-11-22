@@ -11,6 +11,47 @@
     <scheduler_keyword keyword="Change log"/>
 
 
+    <change date="2006-11-22" version="2.0.160" subversion_revision="4598">
+        <revision type="correction" title="&lt;show_order what=&quot;log&quot;>">
+            <description>
+                <p>
+                    Das Kommando liefert jetzt auch das Protokoll ausgeführten Auftrags aus der Auftragshistorie.
+                </p>
+                <ul>
+                    <li>
+                        <scheduler_element name="show_order" attribute="what" value="log"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+
+        <revision type="correction" title="Order.state und Order.run_time">
+            <description>
+                <p>
+                    Eine Änderung des Zustands eines Auftrags (<scheduler_method class="Order" property="state"/>)
+                    führt nicht mehr zur sofortigen Ausführung desselben, 
+                    wenn seine <scheduler_method class="Order" property="run_time"/> 
+                    eine spätere Startzeit vorschreibt.
+                </p>
+                <ul>
+                    <li>
+                        <scheduler_method class="Order" property="state"/>
+                    </li>
+                    <li>
+                        <scheduler_method class="Order" property="run_time"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="modify_order" attribute="state"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="modify_order" child="run_time"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+    </change>
+
+
     <change date="2006-10-06" version="2.0.160" subversion_revision="4592">
         <revision type="new" title="&lt;show_state what=&quot;job_params&quot;>">
             <description>

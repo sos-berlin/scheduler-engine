@@ -464,6 +464,45 @@
         </li>
     </ul>
 
+    <h3>&lt;get_events></h3>
+    <ul>
+        <li>
+            Das Kommando wird asynchron ausgeführt, während der andauernden Ausführung läuft also der Scheduler weiter.
+        </li>
+        <li>
+            Kommando endet, wenn der Scheduler beendet wird 
+            (so spät wie möglich, um nocht die letzten Ereignisse im Scheduler-Lauf melden zu können).
+        </li>
+        <li>
+            Und Kommando endet, wenn ein neues übergeben wird (oder eine Leerzeile für telnet).
+            Schreiben und Lesen der TCP-Verbindung gleichzeitig (was auch den HTTP-Server gut täte).
+            Socket_operation um Read_operation und Write_operation erweitern, ebenso Buffered_socket_operation
+            in Buffered_read_operation und Buffered_write_operation.
+        </li>
+        <li>
+            Falls mehr Ereignisse auftreten als über die TCP-Verbindung gemeldet werden können, 
+            müssen die XML-Elemente gepuffert werden. 
+            Ein kleiner Puffer kann im Speicher gehalten werden.
+            Ein größerer Puffer kann in einer temporären Datei gehalten werden.
+            Wenn mit andauernden Stau (Stunden oder Tage) und damit mit einer sehr großen temporären Datei zu rechnen ist, 
+            könnte die Ereignisdatei zu Pufferung verwendet werden und die temporäre Datei lediglich Verweise aufnehmen.
+        </li>
+        <li>
+            Beim Beenden des Scheduler müssen alle gepufferten Ereignisse übertragen werden.
+            Das kann das Ende hinauszögern, besonders, wenn ein Supervisor die TCP-Verbindung nicht ausliest.
+            Was machen wir? Geben wir nur eine kurze Frist von sagen wir einer Minute?
+            Der Scheduler als Windows-Dienst bricht sich selbst nach einer halben Minute ab. 
+            Das müsste dann außer Kraft gesetzt werden.
+        </li>
+        <li>
+            Nach einer Verbindungsunterbrechung will der Supervisor vielleicht das Kommando an der unterbrochenen Stelle fortsetzen.
+            <scheduler_element name="get_events/>"/> müsste dann um die Möglichkeit erweitert werden, 
+            die Ereignisdatei auszulesen, zu filtern und zu übertragen.
+            Damit der Supervisor sicher ist, dass es sich um denselben Scheduler-Lauf handelt, 
+            bekommt jeder Lauf eine eigene Session-Id (Datum+Uhrzeit+ms+pid).
+        </li>
+    </ul>
+
     <h3>Verbindungen zu Supervisoren</h3>
     <ul>
         <li>
@@ -481,10 +520,13 @@
             Ebenso versucht er nach einem Verbindungsabbruch die Verbindung wieder aufzubauen.
         </li>
         <li>
-            Für jede Verbindung zu einem Stellvertreter hat der Scheduler einen Ereignis-Filter
-            und eine Position in der Ereignisdatei.
+            Der Scheduler registriert sich mit einem Kommando beim Supervisor.
+            Der beantwort die Meldung mit <code>&lt;ok/></code>.
+            Anschließend werden die Rollen an der Verbindung vertauscht:
+            Der Scheduler wird Server (Kommandoempfänger) und der Supervisor gibt das
+            Kommando <scheduler_element name="get_events"/>.
         </li>
-        <li>
+        <!--li>
             Der Scheduler hat direkten Zugriff auf die letzten 10.000 Ereignisse in der Ereignisdatei,
             für den Fall, dass die Ereignissmeldungen dem Supervisor nicht schnell genug übergeben werden können.
             Für den direkten Zugriff wird ein Ring mit 10.000 Dateizeigern realisiert (80KB).
@@ -500,12 +542,7 @@
             dann ersetzt der Scheduler die verloren gegangenen Ereignisse durch eine Ereignismeldung mit deren Anzahl.
             (Bei <scheduler_element name="get_events" attribute="ignore_lost_events" value="yes"/>, 
             sonst Abbruch des Kommandos mit Fehlermeldung.)
-        </li>
-        <li>
-            Bei Scheduler-Ende alle gepufferten Ereignisse (immer: die Ereignisse der Scheduler-Beendigung) ausgeben.
-            Wenn das länger dauert (>1s), eine Meldung ausgeben, damit man bescheid weiß.
-            Wenn der Scheduler als Dienst beendigt wird, haben wir nur eine halbe Minute Zeit (festgelegt in spooler_service.cxx).
-        </li>
+        </li-->
     </ul>
     
 
@@ -515,6 +552,27 @@
             Verbindungsaufbau eines Job-Schedulers nach Abbruch der Verbindung mit demselben:
             Wenn ein <scheduler_element name="get_events"/> aktiv war, 
             wiederholt der Scheduler das Kommando und gibt mit <code>from=""</code> die Ereignisnummer an.
+            Außerdem prüft er, ob er es mit demselben Scheduler-Lauf zu tun hat.
+        </li>
+        <li>
+            Die Ereignisse der angeschlossenen Scheduler werden wie eigene Ereignisse behandelt,
+            erweitert um die Scheduler-Id.
+        </li>
+        <li>
+            Der Supervisor akzeptiert nicht zwei Verbindungen mit derselben Scheduler-Id.
+            Die Scheduler-Id soll eindeutig sein.
+        </li>
+        <li>
+            <scheduler_element name="get_events"/> liefert auch die Ereignisse der angeschlossenen Scheduler,
+            wenn das mit <scheduler_element name="select_events"/> bestellt worden ist.
+            Das Verfahren ist sonst wie oben beschrieben.
+        </li>
+    </ul>
+
+    <h3>Tunnel</h3>
+    <ul>
+        <li>
+            Für den Tunnel baut der Supervisor eine zweite Verbindung zum Scheduler auf.
         </li>
     </ul>
     

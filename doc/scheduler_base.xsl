@@ -2966,11 +2966,19 @@
 
         <head>
             <title>
-                Scheduler: <xsl:value-of select="$title"/>
+                <xsl:text>Scheduler: </xsl:text>
+                <xsl:value-of select="$title"/>
             </title>
 
             <style type="text/css">
-                @import "<xsl:value-of select="$base_dir"/>scheduler.css";
+                <xsl:text>@import "</xsl:text>
+                <xsl:value-of select="$base_dir"/>
+                <xsl:text>scheduler.css";</xsl:text>
+                
+                <xsl:if test="/*/@document_state='work_in_progress'">
+                    <xsl:text>body { color: #404040; background-color: #e8ffe8; }</xsl:text>
+                </xsl:if>
+                
                 <xsl:copy-of select="/*/description.style/node()"/>
             </style>
         </head>
@@ -3007,11 +3015,18 @@
 
         <hr style="margin-bottom: 20pt"/>
 
-        <xsl:if test="$title">
+
+        <xsl:if test="$title or /*/@document_state='work_in_progress'">
             <h1 style="margin-top: 0pt">
                 <xsl:value-of select="$title"/>
+                <xsl:if test="/*/@document_state='work_in_progress'">
+                    <span class="work_in_progress">
+                        — In Arbeit —
+                    </span>
+                </xsl:if>
             </h1>
         </xsl:if>
+
     </xsl:template>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~bottom-->

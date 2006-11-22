@@ -125,3 +125,6 @@ div.box                         { margin-top: 1.5em;
                                   padding-top: 0.75em; padding-left: 1em; padding-right: 1em; 
                                   border: solid 1px #c0c0f0; }
                                   
+span.work_in_progress           { margin-top: 0em; margin-bottom: 2em; margin-left: 2em; 
+                                  color: red; font-family: 'Courier New' monospace; font-size: 16pt; 
+                                  white-space: nowrap; }

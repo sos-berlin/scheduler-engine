@@ -9,9 +9,8 @@
     parent_page         = "index.xml"
     author              = "$Author$"
     date                = "$Date$"
+    document_state      = "work_in_progress"
 >
-    <p style="color: red">— In Arbeit —</p>
-
     <p>
         <scheduler_element name="process"/>-Jobs können mit <code>ssh</code> auf einem entfernten Rechner gestartet werden.
         Wie Jobs mit Zugriff auf die Scheduler-API möglich sein könnten, steht hier.

@@ -10,11 +10,10 @@
              base_dir = "../"
              parent_page = "../xml_commands.xml"
              author   = "$Author$"
-             date     = "$Date$">
-
-
+             date     = "$Date$"
+             document_state = "work_in_progress"
+>
     <description>
-        <p style="color: red">— In Arbeit —</p>
         <p>
             Wählt die Ereignisse aus, die von <scheduler_element name="get_events"/> gemeldet werden sollen.
             Ausgewählt werden können mit mehreren
