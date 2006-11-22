@@ -1447,7 +1447,7 @@ void File_buffered_command_response::append_text( const string& text )
 {
     if( _close )
     {
-        Z_LOG( "*** " << __FUNCTION__ "  closed: " << text << "\n" );
+        Z_LOG( "*** " << __FUNCTION__ << "  closed: " << text << "\n" );
         return;
     }
 
