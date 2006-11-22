@@ -1983,7 +1983,7 @@ void Order::set_state2( const State& state, bool is_error_state )
 {
     if( _job_chain )
     {
-        string log_line = "set_state " + state.as_string();
+        string log_line = "set_state " + ( state.is_missing()? "(missing)" : state.as_string() );
 
         if( _job_chain_node && _job_chain_node->_job )  log_line += ", " + _job_chain_node->_job->obj_name();
         if( is_error_state                           )  log_line += ", error state";
@@ -2352,6 +2352,7 @@ void Order::postprocessing( bool success )
                 }
             }
             else
+            if( _order_queue )
             {
                 _order_queue->remove_order( this );
                 _order_queue = NULL;

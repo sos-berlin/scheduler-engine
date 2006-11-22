@@ -68,15 +68,32 @@
             <scheduler_element name="script" attribute="java_class_path"/>
         </li>
     </ul>
-
+    
 
     <h2>B) Ausführung entfernt definierter Jobs</h2>
 
-    <pre>&lt;job name="mein_job" remote_scheduler="remote_host:4444"></pre>
+    <ul>
+        <li>
+            Ein Server-Scheduler führt die Jobs aus
+        </li>
+        <li>
+            Ein Client-Scheduler startet die Jobs, verwaltet die Aufträge und führt Protokolle,
+            kurz, er verhält sich fast so wie bei bei lokaler Ausführung des Jobs.
+        </li>
+    </ul>
+
+    
+    <h3>Client-Scheduler</h3>
+    
+    <ul>
+        <li>
+            Der Client-Scheduler teilt dem Server-Scheduler mit, 
+            dass eine Task auszuführen ist.
+        </li>
+    </ul>
 
     <p>
-        Der Job ist in der XML-Konfiguration des entfernten Schedulers definiert.
-        Der lokale Scheduler kann folgende Einstellungen vornehmen:
+        Der Job ist in der XML-Konfiguration des Server-Schedulers definiert.
     </p>
     <ul>
         <li>
@@ -96,6 +113,18 @@
             (die <scheduler_element name="commands"/> der entfernten Job-Definition werden auf dem entfernten Scheduler ausgeführt)
         </li>
     </ul>
+
+    <h3>Server-Scheduler (oder entfernter Scheduler)</h3>
+
+    <ul>
+        <li>
+            Der Server-Scheduler hat die Job-Definitionen <scheduler_element name="job"/> mit allen Einstellungen.
+        </li>
+    </ul>
+
+    
+    <pre>&lt;job name="mein_job" remote_scheduler="remote_host:4444"></pre>
+
     <p>
         Die <scheduler_element name="run_time"/> wird auf dem entfernten Scheduler festgelegt.
     </p>
@@ -116,7 +145,7 @@
     
     <h2>Ablauf</h2>
 
-    <h3>Verbindeung</h3>
+    <h3>Verbindung</h3>
     <p>
         Der Scheduler verbindet sich mit allen entfernten Schedulern.
         Solange eine Verbindung nicht steht, wird keine entfernte Task gestartet.
@@ -124,17 +153,39 @@
         Wenn nicht, wird der lokale Job gestoppt.
     </p>
 
-    <h3>Task-Start</h3>
+    <h3>Task</h3>
+    <ul>
+        <li>
+            Wenn der Client-Scheduler eine Task in die Warteschlange eines entfernten Jobs einreiht,
+            wird sie zugleich auf dem entfernten Scheduler eingereiht.
+        </li>
+        <li>
+            Client und Server vergeben die Task-Id unabhängig.
+        </li>
+        <li>
+            Wer darf das Task-Objekt ändern? Der Client? Der Server?
+        </li>
+        <li>
+            Welche Änderungen werden zum Server bzw. Client übernommen? --> Methoden von <scheduler_element class="Task"/> durchgehen.
+        </li>
+        <li>
+            <scheduler_element name="kill_task"/> wird zum Server durchgereicht.
+        </li>
+        
+    </ul>
     <p>
-        Wenn der lokale Scheduler eine Task starten will, schickt er eine Anforderung an den entfernten Scheduler.
+        starten will, schickt er eine Anforderung an den entfernten Scheduler.
         Der antwortet, sobald er eine Task starten kann 
         (abhängig von <scheduler_element name="run_time"/>, <scheduler_element name="job" attribute="tasks"/> etc.).
     </p>
 
-    <h3>Auftragsausführung</h3>
-    <p>
-        Analog zum Task-Start, auf Ebene von <scheduler_method class="Job_impl" method="spooler_process"/>.
-    </p>
+    <h3>Auftrag</h3>
+    <ul>
+        <li>
+            Wenn der Client-Scheduler einen Auftrag in die Warteschlange eines Jobs einreiht, 
+            tut er das gleichzeitig auch auf dem Server-Scheduler.
+        </li>
+    </ul>
 
     <h3>kill</h3>
     <p>
