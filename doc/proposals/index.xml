@@ -11,7 +11,14 @@
 >
 
     <p>
-        <a href="remote_jobs.xml">Jobs auf entfernten Rechnern starten</a>
+        <scheduler_a href="distributed.xml" quote="yes"/>
+    </p>
+
+
+    <p>
+        <scheduler_a href="remote_task_execution.xml" quote="yes"/>
+        &#160;
+        <scheduler_a href="remote_jobs.xml" quote="yes"/>
     </p>
 
 

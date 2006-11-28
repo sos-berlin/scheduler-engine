@@ -1,0 +1,187 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id$-->
+
+<description
+    title               = "Tasks auf entfernten Rechnern ausführen"
+    base_dir            = "../"
+    parent_page         = "index.xml"
+    author              = "$Author$"
+    date                = "$Date$"
+    document_state      = "proposal"
+>
+    <p>
+        <scheduler_element name="process"/>-Jobs können mit <code>ssh</code> auf einem entfernten Rechner gestartet werden.
+        Wie Jobs mit Zugriff auf die Scheduler-API auf einen entfernten Rechner ausgeführt werden könnten, 
+        beschreibt der hier beschriebene Vorschlag A.
+        Zu Vorschlag B und C siehe <scheduler_a href="remote_jobs.xml" quote="yes"/>.
+    </p>
+
+    <p>&#160;</p>
+
+    <ul>
+        <li>
+            Auf dem entfernten Rechner läuft ein Scheduler, der beliebige Jobs anderer Scheduler ausführen kann.
+        </li>
+        <li>
+            Die Task kommuniziert nach dem Start allein mit dem Client-Scheduler. 
+            Die API-Aufrufe werden vom Client-Scheduler ausgeführt,
+            d.h. das alle Dateinamen sich auf den Rechner des Client-Schedulers beziehen.
+        </li>
+    </ul>
+
+    <!--pre>&lt;job scheduler="remote_host:4444"></pre>
+
+    <p>
+        Besser wäre, das Attribut <code>scheduler</code> an die Prozessklassen zu binden, um diese nicht nutzlos zu machen.
+    </p-->
+    <p>
+        Das ein Job von einem entfernten Scheduler (auf einem entfernten Rechner) ausgeführt werden soll,
+        wird über die Prozessklasse definert.
+        Die Prozessklasse wird dem entfernten Scheduler zugeordnet.
+    </p>
+
+    <pre>&lt;process_class name="remote" scheduler="remote_host:4444" max_processes="3">
+…
+&lt;job process_class="remote"></pre>
+
+
+    <p>
+        Der entfernte Scheduler dient nur dazu, einen Task-Prozess zu starten.
+        Anschließend hat er mit diesem Prozess nichts zu tun
+        und der Task-Prozess verbindet sich mit dem steuernden Scheduler.
+    </p>
+
+    <h3>Am Server ist fast nichts einstellbar</h3>
+    <p>
+        Der Scheduler lässt mit <scheduler_element name="allowed_host" attribute="level" value="all"/> den Start externer Jobs zu.
+        Der externe Scheduler übergibt die Einstellungen des <scheduler_element name="job"/>.
+    </p>
+    <p>
+        Doch einige Einstellungen des Servers werden berücksichtigt.
+    </p>
+
+    <dl>
+        <dt>
+            <scheduler_element name="config" attribute="include_path"/>
+        </dt>
+        <dd>
+            Die Einstellung am Server wird verwendet.
+        </dd>
+
+        <dt>
+            <scheduler_element name="include" attribute="file"/>
+        </dt>
+        <dd>
+            Das Element <scheduler_element name="script"/> wird anders implementiert.
+            Die Elemente <scheduler_element name="include"/> werden nicht mehr gleich beim Einlesen,
+            sondern erst kurz vor der Ausführung durch den Task-Prozess aufgelöst.
+            Nur <scheduler_option name="include-path"/> wird vom Hauptprozess interpretiert.
+        </dd>
+
+        <dt>
+            <scheduler_element name="config" attribute="java_class_path"/>
+        </dt>
+        <dd>
+            Der Java-Classpath ist am Server-Scheduler einstellbar.
+            Die Einstellung vom Client-Scheduler wird nicht übernommen.
+        </dd>
+    </dl>
+    
+    <p>
+        Der lokale Hauptprozess übergibt die lokalen Konfigurationsdaten in XML
+        über <code>stdin</code> dem Task-Prozess. 
+        
+    </p>
+    <pre>&lt;config java_class_path="…" include_path="…" … /></pre>
+
+
+
+    <h3>Prozessregister</h3>
+    <p>
+        Der entfernte Scheduler führt ein Prozessregister,
+        das mit <scheduler_element name="show_state"/> eingesehen werden kann.
+        Die Prozesse sind dem Client-Scheduler zugeordnet,
+        der sie auch abbrechen kann (entferntes <scheduler_element name="kill_task"/>).
+    </p>
+    <pre>&lt;start_remote_task tcp_port="<i>ein port des hauptprozesses</i>"/>
+&lt;kill_remote_task pid="…"/>
+&lt;close_remote_task pid="…"/></pre>
+
+
+
+    <h3>Plattformunabhängigkeit</h3>
+    <p>
+        Damit der entfernte Job auf einer anderen Plattform (Sparc, Intel) ablaufen kann,
+        muss die Übertragung der Daten zwischen Haupt- und Task-Prozess plattformneutral sein.
+        Das betrifft integer und double.
+    </p>
+
+
+    <h3>stdout und stderr</h3>
+    <p>
+        Bisher legt der Hauptprozess Dateien für <code>stdout</code> und <code>stderr</code> an,
+        in die der Task-Prozess schreibt. Das ist bei entfernter Task-Ausführung nicht mehr möglich.
+    </p>
+    <!--p>
+        Lösung a: 
+        Der Task-Prozess schreibt die Ausgaben in eigene temporäre Dateien und
+        liefert sie am Ende durch einen besonderen Aufruf dem Hauptprozess.
+        Nachteil: Bei einem Verbindungsabbruch geht der Inhalt der Dateien verloren.
+    </p-->
+    <p>
+        Der Task-Prozess hat <code>stdout</code> und <code>stderr</code> an TCP-Sockets gebunden,
+        die die Datenströme zum Hauptprozess übertragen.
+        Vorteil:
+        <code>stdout</code> und <code>stderr</code> werden ins laufende Task-Protokoll eingefügt
+        (auch bei nicht entfernter Ausführung).
+    </p>
+    <p>
+        Möglicherweise kann die TCP-Verbindung verwendet werden,
+        die sowieso schon zwischen Haupt- und Task-Prozess besteht.
+    </p>
+
+    <!--h3>Server mit einigen lokalen Einstellungen</h3>
+
+    <p>
+        Lokale Dateinamen werden lokal eingestellt. Das ist noch nicht ausgearbeitet.
+    </p-->
+    <!--p>
+        Dabei werden folgende Angaben zum entfernten Scheduler übertragen und dort verarbeitet:
+    </p>
+    <ul>
+        <li>
+            <scheduler_element name="script" attribute="language"/>
+        </li>
+        <li>
+            <scheduler_element name="script" attribute="com_class"/>
+        </li>
+        <li>
+            <scheduler_element name="script" attribute="java_class"/>
+        </li>
+        <li>
+            <scheduler_element name="script" attribute="java_options"/>?
+        </li>
+        <li>
+            <scheduler_element name="script" attribute="recompile"/>?
+        </li>
+        <li>
+            Inhalt von <scheduler_element name="script"/> mit aufgelösten <scheduler_element name="include"/>
+        </li>
+        <li>
+            Und die entsprechenden Angaben des <scheduler_element name="monitor"/>.
+        </li>
+    </ul>
+
+    <p>
+        Nicht übertragen werden
+    </p>
+    <ul>
+        <li>
+            <scheduler_element name="script" attribute="java_class_path"/>
+        </li>
+    </ul-->
+        
+    
+</description>

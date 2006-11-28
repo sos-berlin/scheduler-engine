@@ -1,0 +1,69 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id$-->
+
+<description
+    title               = "Verbesserung der asynchronen Ausführung im Scheduler"
+    base_dir            = "../"
+    parent_page         = "index.xml"
+    author              = "$Author$"
+    date                = "$Date$"
+    document_state      = "work_in_progress"
+>
+    <h3>Umgehen der Begrenzung auf 64 Events unter Windows</h3>
+
+    <p>
+        <a href="http://msdn.microsoft.com/library/default.asp?url=/library/en-us/dllproc/base/msgwaitformultipleobjects.asp"><code>MsgWaitForMultipleObjects()</code></a>
+    </p>
+    <p>
+        Statt <code>send()</code> und <code>recv()</code> werden
+        <a href="http://msdn.microsoft.com/library/default.asp?url=/library/en-us/fileio/fs/writefile.asp"><code>WriteFile()</code></a>
+        und
+        <a href="http://msdn.microsoft.com/library/default.asp?url=/library/en-us/fileio/fs/readfile.asp"><code>ReadFile()</code></a>
+        mit
+        <a href="http://msdn.microsoft.com/library/default.asp?url=/library/en-us/dllproc/base/overlapped_str.asp"><code>OVERLAPPED</code></a>
+        verwendet.
+        Alle Verbindungen werden demselben Event zugeordnet.
+        In einer Schleife kann mit dem schnellen Aufruf
+        <a href="http://msdn.microsoft.com/library/default.asp?url=/library/en-us/dllproc/base/hasoverlappediocompleted.asp"><code>HasOverlappedIoCompleted()</code></a>
+        festgestellt werden, welche Sockets bereit sind.
+    </p>
+
+    <h2>Direkte Kopplung der Ereignisse mit asynchronen Objekten</h2>
+    <p>
+        Bisher werden bei einem Ereignis alle asynchronen Objekte ausgeführt (<code>async_continue()</code>).
+        Besser wäre, das Eintreten eines Ereignisses würde direkt zur Fortsetzung eines damit verbundenen Objekts führen,
+        während alle anderen Objekte nicht angerührt werden.
+    </p>
+
+    <p>
+        Wir haben folgende Ereignisse:
+    </p>
+    <ul>
+        <li>
+            Socket-Ereigniss (connect, accept, send, recv)
+        </li>
+        <li>
+            Wecker
+        </li>
+    </ul>
+
+    <p>
+        Bei einem Ereignis wird das Objekt in eine neue Ausführungswarteschlange eingereiht 
+        (oder <code>async_next_gmtime</code> auf 0 gesetzt).
+    </p>
+    <p>
+        send- und recv-Ereignisse sollten getrennten Objekten zugeordnet werden.
+    </p>
+
+    <h3>Tasks als asynchrone Objekte</h3>
+    <p>
+        Jobs und Tasks könnten asynchrone Objekte sein. 
+        Dann hätten wir ein einheitliches Verfahren.
+    </p>
+    
+    
+    
+    
+</description>                                     
