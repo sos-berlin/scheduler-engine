@@ -2393,7 +2393,7 @@ void Order::setback()
         if( _setback_count <= maximum )
         {
             Time delay = _task->job()->get_delay_order_after_setback( _setback_count );
-            _setback = delay? Time::now() + delay : 0;
+            _setback = delay? Time::now() + delay : Time(0);
             _log->info( message_string( "SCHEDULER-946", _setback_count, _setback ) );   // "setback(): Auftrag zum $1. Mal zurückgestellt, bis $2"
         }
         else
