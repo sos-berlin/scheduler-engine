@@ -134,6 +134,7 @@ struct Order : Com_order,
     void                        setback                 ();
     void                    set_setback                 ( const Time&, bool keep_setback_count = false );
     void                        clear_setback           ( bool keep_setback_count = false );
+    bool                     is_setback                 ()                                          { return _setback_count > 0; }
     void                    set_at                      ( const Time& );
     Time                        at                      ()                                          { return _setback; }
   //void                    set_run_time_xml            ( const string& );
@@ -437,7 +438,7 @@ struct Order_queue : Com_order_queue
     bool                        has_order               ( const Time& now )                         { return first_order(now) != NULL; }
     ptr<Order>                  get_order_for_processing( const Time& now );
     Time                        next_time               ();
-    void                        update_priorities       ();
+  //void                        update_priorities       ();
     ptr<Order>                  order_or_null           ( const Order::Id& );
     Job*                        job                     () const                                    { return _job; }
     xml::Element_ptr            dom_element             ( const xml::Document_ptr&, const Show_what& , Job_chain* );
@@ -455,11 +456,10 @@ struct Order_queue : Com_order_queue
     ptr<Com_order_queue>       _com_order_queue;
     
     typedef list< ptr<Order> >  Queue;
-    Queue                      _queue;                  // Order._setback == 0
-    Queue                      _setback_queue ;         // Order._setback > 0
+    Queue                      _queue;
 
-    int                        _lowest_priority;        // Zur Optimierung
-    int                        _highest_priority;       // Zur Optimierung
+  //int                        _lowest_priority;        // Zur Optimierung
+  //int                        _highest_priority;       // Zur Optimierung
     //bool                       _has_users_id;           // D.h. id auf Eindeutigkeit prüfen. Bei selbst generierten Ids überflüssig. Zur Optimierung.
 };
 

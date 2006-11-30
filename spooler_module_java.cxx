@@ -381,6 +381,8 @@ void Java_module_instance::init()
 
 void Java_module_instance::check_api_version()
 {
+    /* Das muss auch für Monitor_impl realisiert werden. Besser auf statische Klassenmethode zurückgreifen (sos.spooler.Spooler_constants). 
+
     string java_api_version;
 
     try
@@ -403,6 +405,7 @@ void Java_module_instance::check_api_version()
     {
         z::throw_xc( "SCHEDULER-354", needed_api_version, java_api_version );
     }
+    */
 }
 
 //--------------------------------------------------------------------Java_module_instance::add_obj

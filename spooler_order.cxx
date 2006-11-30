@@ -880,18 +880,13 @@ void Order_queue::close()
 {
     _job = NULL;    // Falls Job gelöscht wird
 
-
-    Queue* queues[] = { &_queue, &_setback_queue };
-    for( Queue** q = queues; q < queues + NO_OF(queues); q++ )
+    for( Queue::iterator it = _queue.begin(); it != _queue.end(); it = _queue.erase( it ) )
     {
-        for( Queue::iterator it = (*q)->begin(); it != (*q)->end(); it = (*q)->erase( it ) )
-        {
-            Order* order = *it;
-            _log->info( message_string( "SCHEDULER-937", order->obj_name() ) );
-        }
+        Order* order = *it;
+        _log->info( message_string( "SCHEDULER-937", order->obj_name() ) );
     }
 
-    update_priorities();
+    //update_priorities();
     //_has_users_id = false;
 }
 
@@ -913,20 +908,14 @@ xml::Element_ptr Order_queue::dom_element( const xml::Document_ptr& document, co
         {
             int limit = show._max_orders;
 
-            Queue* queues[] = { &_queue, &_setback_queue };
-            for( Queue** q = queues; q < queues + NO_OF(queues); q++ )
+            FOR_EACH( Queue, _queue, it )
             {
-                if( limit <= 0 ) break;
-
-                FOR_EACH( Queue, **q, it )
+                Order* order = *it;
+                if( !which_job_chain  ||  order->job_chain() == which_job_chain )
                 {
-                    Order* order = *it;
-                    if( !which_job_chain  ||  order->job_chain() == which_job_chain )
-                    {
-                        dom_append_nl( element );
-                        element.appendChild( order->dom_element( document, show ) );
-                        if( --limit == 0 )  break;
-                    }
+                    if( limit-- <= 0 )  break;
+                    dom_append_nl( element );
+                    element.appendChild( order->dom_element( document, show ) );
                 }
             }
 
@@ -945,17 +934,13 @@ int Order_queue::order_count( const Job_chain* which_job_chain )
     {
         int count = 0;
 
-        //THREAD_LOCK( _lock )
-        {
-            FOR_EACH( Queue, _queue        , it )  if( (*it)->_job_chain == which_job_chain )  count++;
-            FOR_EACH( Queue, _setback_queue, it )  if( (*it)->_job_chain == which_job_chain )  count++;
-        }
+        FOR_EACH( Queue, _queue, it )  if( (*it)->_job_chain == which_job_chain )  count++;
 
         return count;
     }
     else
     {
-        return _queue.size() + _setback_queue.size();
+        return _queue.size();
     }
 }
 
@@ -973,141 +958,75 @@ void Order_queue::reinsert_order( Order* order )
 
 void Order_queue::add_order( Order* order, Do_log do_log )
 {
-    // Wird von Order mit geperrtem order->_lock gerufen.
-
 #   ifdef Z_DEBUG
-        Z_FOR_EACH( Queue, _queue        , it )  assert( *it != order );
-        Z_FOR_EACH( Queue, _setback_queue, it )  assert( *it != order );
+        Z_FOR_EACH( Queue, _queue, it )  assert( *it != order );
 #   endif
 
     _job->set_visible( true );
 
-    //THREAD_LOCK( _lock )
+
+    Time start_time = order->start_time();
+
+
+    if( start_time )
     {
-        if( Time start_time = order->start_time() )
+        if( !order->_suspended )
         {
-            if( !order->_suspended )
-            {
-                if( order->_setback < latter_day )  order->_log->log( do_log? log_info : log_debug3, message_string( "SCHEDULER-938", order->_setback ) );
-                                              else  order->_log->log( do_log? log_warn : log_debug3, message_string( "SCHEDULER-296" ) );       // "Die <run_time> des Auftrags hat keine nächste Startzeit" );
-            }
-
-          //_log->debug( "add_order (setback queue) " + order->obj_name() );
-
-            // Auftrag nach Rückstellungszeitpunkt (und Priorität) geordnet in die _setback_queue einfügen:
-
-            Queue::iterator it;
-            for( it = _setback_queue.begin(); it != _setback_queue.end(); it++ )
-            {
-                Order* o = *it;
-                if( o->_setback > start_time )  break;
-                if( o->_setback == start_time  &&  o->_priority > order->_priority )  break;
-            }
-
-            _setback_queue.insert( it, order );
-
-            _job->calculate_next_time_after_modified_order_queue();
+            if( order->_setback < latter_day )  order->_log->log( do_log? log_info : log_debug3, message_string( "SCHEDULER-938", order->_setback ) );
+                                          else  order->_log->log( do_log? log_warn : log_debug3, message_string( "SCHEDULER-296" ) );       // "Die <run_time> des Auftrags hat keine nächste Startzeit" );
         }
-        else
-        {
-            _log->debug( "add_order " + order->obj_name() );
-/*
-            Id_map::iterator id_it = _id_map.find( order->_id );
-            if( id_it != _id_map.end() )
-            {
-                _log->debug( "Auftrag mit gleicher Id wird ersetzt: " + order->obj_name() );
-                _queue.erase( id_it->second );
-                _id_map.erase( id_it );
-            }
-*/
-            Queue::iterator ins       = _queue.end();
-            bool            ins_set   = false;
-            bool            wake_up   = !order->_task  &&  !has_order( Time::now() );  //_queue.empty();
-          //bool            id_found  = false;
-
-            //_has_users_id |= order->_is_users_id;
-
-            if( /*_has_users_id  ||*/  order->priority() > _lowest_priority  &&  order->priority() <= _highest_priority )     // Optimierung
-            {
-                for( Queue::iterator it = _queue.begin(); it != _queue.end(); it++ )
-                {
-                    Order* o = *it;
-                    if( !ins_set  &&  order->priority() > o->priority() )
-                    {
-                        ins = it;
-                        ins_set = true;
-                        //if( id_found )
-                            break;
-                    }
-
-                    //if( !id_found  &&  o->id_is_equal( order->_id ) )
-                    //{
-                    //    _log->debug( message_string( "SCHEDULER-939", order->obj_name() ) );      // "Auftrag mit gleicher Id wird ersetzt: " 
-                    //    if( ins == it )  { ins = _queue.erase( it ); break; }
-                    //               else  it = _queue.erase( it );    Nachfolgendes it++ ist falsch
-                    //    id_found = true;
-                    //}
-                }
-            }
-
-            if( ins_set )                                 _queue.insert( ins, order );
-            else
-            if( order->priority() > _highest_priority )   _queue.push_front( order );
-                                                    else  _queue.push_back( order );
-
-            update_priorities();
-
-            if( wake_up )  _job->signal( "Order" );
-        }
-
-        order->_in_job_queue = true;
     }
+    else
+        _log->debug( message_string( "SCHEDULER-990", order->obj_name() ) );
+
+
+    Queue::iterator insert_before = _queue.begin();
+    bool            wake_up       = !order->_task  &&  !has_order( Time::now() );
+    
+    for(; insert_before != _queue.end(); insert_before++ )
+    {
+        Order* o = *insert_before;
+
+        if( o->_suspended < order->_suspended )  continue;
+        if( o->_suspended > order->_suspended )  break;
+        
+        if( o->_setback < order->_setback )  continue;
+        if( o->_setback > order->_setback )  break;
+
+        if( o->_priority < order->_priority )  continue;
+        if( o->_priority > order->_priority )  break;
+    }
+
+    _queue.insert( insert_before, order );
+    order->_in_job_queue = true;
+
+    //update_priorities();
+
+    _job->calculate_next_time_after_modified_order_queue();
+    if( wake_up )  _job->signal( "Order" );
 }
 
 //------------------------------------------------------------------------Order_queue::remove_order
 
 void Order_queue::remove_order( Order* order )
 {
-    // Wird von Order mit geperrtem order->_lock gerufen.
+    _log->debug9( "remove_order " + order->obj_name() );
 
-    //THREAD_LOCK( _lock )
-    {
-        if( order->start_time() )
-        {
-            _log->debug9( "remove_order (setback) " + order->obj_name() );
+    Queue::iterator it;
+    for( it = _queue.begin(); it != _queue.end(); it++ )  if( *it == order )  break;
 
-            Queue::iterator it;
-            for( it = _setback_queue.begin(); it != _setback_queue.end(); it++ )  if( *it == order )  break;
+    if( it == _queue.end() )  z::throw_xc( "SCHEDULER-156", order->obj_name(), _job->name() );
 
-            if( it == _setback_queue.end() )  z::throw_xc( "SCHEDULER-156", order->obj_name(), _job->name() );
+    order->_in_job_queue = false;
 
-            if( order->_setback_count > 0 )  order->_setback_count = 0, order->_setback = 0;
-            order->_in_job_queue = false;
+    _queue.erase( it );
+    order = NULL;  // order ist jetzt möglicherweise ungültig
 
-            _setback_queue.erase( it );
-            order = NULL;  // order ist jetzt möglicherweise ungültig
-        }
-        else
-        {
-            _log->debug9( "remove_order " + order->obj_name() );
-
-            Queue::iterator it;
-            for( it = _queue.begin(); it != _queue.end(); it++ )  if( *it == order )  break;
-
-            if( it == _queue.end() )  z::throw_xc( "SCHEDULER-156", order->obj_name(), _job->name() );
-
-            order->_in_job_queue = false;
-
-            _queue.erase( it );
-            order = NULL;  // order ist jetzt möglicherweise ungültig
-            //_id_map.erase( order->_id );
-            update_priorities();
-        }
-    }
+    //update_priorities();
 }
 
 //-------------------------------------------------------------------Order_queue::update_priorities
-
+/*
 void Order_queue::update_priorities()
 {
     if( !_queue.empty() )
@@ -1121,42 +1040,30 @@ void Order_queue::update_priorities()
         _lowest_priority  = 0;
     }
 }
-
+*/
 //-------------------------------------------------------------------------Order_queue::first_order
 
 Order* Order_queue::first_order( const Time& now )
 {
     // now kann 0 sein, dann werden nur Aufträge ohne Startzeit beachtet
 
-    // SEITENEFFEKT: Aufträge aus der _setback_queue, deren Rückstellungszeitpunkt erreicht ist, werden in die _queue verschoben.
+    Order* result = NULL;
 
-    //THREAD_LOCK( _lock )
+    FOR_EACH( Queue, _queue, o )
     {
-        // Zurückgestellte Aufträge, deren Wartezeit abgelaufen ist, hervorholen
+        Order* order = *o;
 
-
-        if( now > 0 )
+        if( order->is_immediately_processable( now ) )
         {
-            while( !_setback_queue.empty() )
-            {
-                ptr<Order> o = *_setback_queue.begin();
-                if( o->start_time() > now )  break;
-
-                remove_order( o );
-                o->_setback = 0;
-                add_order( o );
-            }
+            result = order;
+            result->_setback = 0;
+            break;
         }
 
-        FOR_EACH( Queue, _queue, o )
-        {
-            Order* order = *o;
-            if( !order->is_immediately_processable( now ) )  continue;
-            return order;
-        }
+        if( order->start_time() > now )  break;
     }
 
-    return NULL;
+    return result;
 }
 
 //------------------------------------------------------------Order_queue::get_order_for_processing
@@ -1196,15 +1103,7 @@ ptr<Order> Order_queue::get_order_for_processing( const Time& now )
 
 Time Order_queue::next_time()
 {
-    //THREAD_LOCK( _lock )
-    {
-        Order* o = first_order( 0 );
-        if( o )  return o->start_time();
-
-        //if( !_queue.empty() )  return 0;    //2004-02-25: latter_day;
-        if( !_setback_queue.empty() )  return (*_setback_queue.begin())->start_time();
-    }
-
+    if( !_queue.empty() )  return (*_queue.begin())->start_time();
     return latter_day;
 }
 
@@ -1212,11 +1111,7 @@ Time Order_queue::next_time()
 
 ptr<Order> Order_queue::order_or_null( const Order::Id& id )
 {
-    //THREAD_LOCK( _lock )
-    {
-        FOR_EACH( Queue, _queue        , it )  if( (*it)->_id == id )  return *it;
-        FOR_EACH( Queue, _setback_queue, it )  if( (*it)->_id == id )  return *it;
-    }
+    FOR_EACH( Queue, _queue, it )  if( (*it)->_id == id )  return *it;
 
     return NULL;
 }
@@ -2309,15 +2204,17 @@ void Order::postprocessing( bool success )
             _log->info( message_string( "SCHEDULER-943", _setback_count ) );   // " mal zurückgestellt. Der Auftrag wechselt in den Fehlerzustand"
             success = false;
             force_error_state = true;
+            _setback = 0;
+            _setback_count = 0;
         }
 
         _task = NULL;
 
 
 
-        if( !_setback && !_moved && !_finished  ||  force_error_state )
+        if( !is_setback() && !_moved && !_finished  ||  force_error_state )
         {
-            _setback_count = 0;
+            //_setback_count = 0;
 
             if( _job_chain_node )
             {
@@ -2495,7 +2392,8 @@ void Order::setback()
         int maximum = _task->job()->max_order_setbacks();
         if( _setback_count <= maximum )
         {
-            _setback = Time::now() + _task->job()->get_delay_order_after_setback( _setback_count );
+            Time delay = _task->job()->get_delay_order_after_setback( _setback_count );
+            _setback = delay? Time::now() + delay : 0;
             _log->info( message_string( "SCHEDULER-946", _setback_count, _setback ) );   // "setback(): Auftrag zum $1. Mal zurückgestellt, bis $2"
         }
         else

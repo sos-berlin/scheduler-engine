@@ -2946,6 +2946,12 @@
             </text>
         </message>
 
+        <message code="SCHEDULER-990">
+            <text xml:lang="en">
+                <title>Adding <p1>order</p1></title>
+            </text>
+        </message>
+
         <message code="SCHEDULER-999">
             <text xml:lang="de">
                 <title>Scheduler ordentlich beendet</title>

@@ -11,8 +11,8 @@
     <scheduler_keyword keyword="Change log"/>
 
 
-    <change date="2006-11-30" version="2.0.161" subversion_revision="4605">
-        <revision type="new" title="Order.suspend()">
+    <change date="2006-11-30" version="2.0.161" subversion_revision="4608">
+        <!--revision type="new" title="Order.suspend()">
             <description>
                 <p>
                     Aufträge können angehalten werden.
@@ -27,7 +27,7 @@
                 </ul>
 
             </description>
-        </revision>
+        </revision-->
     </change>
 
     <change date="2006-11-22" version="2.0.160" subversion_revision="4598">
@@ -35,7 +35,7 @@
             <description>
                 <p>
                     <scheduler_method class="Order" method="setback"/> bricht in dieser Version den Scheduler ab 
-                    (korrigiert in 2.0.161.4605 2006-11-30).
+                    (korrigiert in 2.0.161.4608 2006-11-30).
                 </p>
             </description>
         </revision>
