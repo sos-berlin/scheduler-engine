@@ -207,7 +207,7 @@
         Die Periode ist einstellbar mit <scheduler_element name="file_order_source" attribute="delay_after_error"/>.
         Wenn das Verzeichnis wieder lesbar ist,
         sendet der Scheduler eine entsprechende eMail und
-        gibt der Scheduler diese Meldung aus:
+        gibt diese Meldung aus:
     </p>
     <scheduler_message level="info" code="SCHEDULER-984"/>
     

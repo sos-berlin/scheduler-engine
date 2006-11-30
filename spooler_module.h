@@ -23,6 +23,7 @@ extern const string spooler_close_name;
 extern const string spooler_process_name;
 extern const string spooler_on_error_name;
 extern const string spooler_on_success_name;
+extern const string spooler_api_version_name;
 //extern const string wait_for_subprocesses_name;
 
 //-------------------------------------------------------------------------------------------------

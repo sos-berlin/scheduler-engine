@@ -215,10 +215,10 @@ xml::Element_ptr Directory_file_order_source::dom_element( const xml::Document_p
 {
     xml::Element_ptr element = document.createElement( "file_order_source" );
 
-                                             element.setAttribute         ( "directory"  , _path );
-                                             element.setAttribute_optional( "regex", _regex_string );
-        if( _notification_event._signaled )  element.setAttribute         ( "signaled", "yes" );
-        if( _max_orders < INT_MAX )          element.setAttribute         ( "max", _max_orders );
+                                             element.setAttribute         ( "directory" , _path );
+                                             element.setAttribute_optional( "regex"     , _regex_string );
+        if( _notification_event._signaled )  element.setAttribute         ( "signaled"  , "yes" );
+        if( _max_orders < INT_MAX )          element.setAttribute         ( "max"       , _max_orders );
         if( !_next_state.is_missing() )      element.setAttribute         ( "next_state", debug_string_from_variant( _next_state ) );
 
         if( delay_after_error() < INT_MAX )  element.setAttribute( "delay_after_error", delay_after_error() );

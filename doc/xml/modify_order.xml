@@ -81,6 +81,15 @@
             </description>
         </xml_attribute>
 
+        <xml_attribute name="suspended" type="yes|no">
+            <description>
+                <p>
+                    Setzt den Auftrag aus oder setzt ihn fort, 
+                    siehe <scheduler_method class="Order" property="suspended"/>.
+                </p>
+            </description>
+        </xml_attribute>
+
     </xml_attributes>
 
     <xml_child_elements>

@@ -1447,11 +1447,13 @@
 
         <xsl:choose>
             <xsl:when test="ancestor::p or parent::li">
-                <xsl:call-template name="scheduler_message">
-                    <xsl:with-param name="level"     select="@level"/>
-                    <xsl:with-param name="code"      select="@code"/>
-                    <xsl:with-param name="show_text" select="@show_text"/>
-                </xsl:call-template>
+                <div class="message">
+                    <xsl:call-template name="scheduler_message">
+                        <xsl:with-param name="level"     select="@level"/>
+                        <xsl:with-param name="code"      select="@code"/>
+                        <xsl:with-param name="show_text" select="@show_text"/>
+                    </xsl:call-template>
+                </div>
             </xsl:when>
             
             <xsl:otherwise>
@@ -1972,7 +1974,7 @@
 
     <xsl:template name="scheduler_method">
         <xsl:param name="class"          select="/.."/>
-        <xsl:param name="object"/>
+        <xsl:param name="object"         select="/.."/>
         <xsl:param name="method"         select="/.."/>
         <xsl:param name="property"       select="/.."/>
         <xsl:param name="java_signature" select="/.."/>
@@ -2975,7 +2977,7 @@
                 <xsl:value-of select="$base_dir"/>
                 <xsl:text>scheduler.css";</xsl:text>
                 
-                <xsl:if test="/*/@document_state='work_in_progress'">
+                <xsl:if test="/*/@document_state='work_in_progress' or /*/@document_state='proposal'">
                     <xsl:text>body { color: #404040; background-color: #e8ffe8; }</xsl:text>
                 </xsl:if>
                 
@@ -3002,12 +3004,16 @@
                         <xsl:call-template name="browse_bar_register">
                             <xsl:with-param name="parent_page" select="$parent_page"/>
                         </xsl:call-template>
-
-                        <a href="http://www.sos-berlin.com">
-                            <xsl:call-template name="phrase">
-                                <xsl:with-param name="id" select="'head.link_to_sos'"/>
-                            </xsl:call-template>
-                        </a>
+                        
+                        <!--&#160; &#160;
+                        <xsl:element name="img">
+                            <xsl:attribute name="alt">logo</xsl:attribute>
+                            <xsl:attribute name="src">
+                                <xsl:value-of select="$base_dir"/>
+                                <xsl:text>images/logo/job_scheduler_rabbit_gray_69x31.jpg</xsl:text>
+                                <!- -xsl:text>images/logo/job_scheduler_rabbit_circle_black_white_60x61.jpg</xsl:text- ->
+                            </xsl:attribute>
+                        </xsl:element-->
                     </p>
                 </td>
             </tr>
@@ -3015,16 +3021,66 @@
 
         <hr style="margin-bottom: 20pt"/>
 
+        <xsl:if test="concat( '', /*/@suppress_logo ) != 'yes'">
+            <div style="float: right; width: 60px; height: 60px; position: relative; top: -5px; margin-left: 1em; margin-right: 1em; margin-bottom: 1em; ">
+                <xsl:element name="a">
+                    <xsl:attribute name="href">
+                        <xsl:value-of select="concat( $base_dir, $start_page )"/>
+                    </xsl:attribute>
+                    <xsl:attribute name="class">nix</xsl:attribute>
+                    <xsl:attribute name="style">border: none</xsl:attribute>
+                    
+                    <xsl:element name="img">
+                        <xsl:attribute name="alt">logo</xsl:attribute>
+                        <xsl:attribute name="width">60</xsl:attribute>
+                        <xsl:attribute name="height">60</xsl:attribute>
+                        <xsl:attribute name="src">
+                            <xsl:value-of select="$base_dir"/>
+                            <xsl:text>images/logo/job_scheduler_rabbit_circle_60x60.gif</xsl:text>
+                        </xsl:attribute>
+                        <xsl:attribute name="style">border: none; </xsl:attribute>
+                        <xsl:attribute name="title">
+                            <xsl:value-of select="$phrases/phrase [ @id='head.link_to_first_page' ]"/>
+                        </xsl:attribute>
+                    </xsl:element>
+                </xsl:element>
+            </div>
+        </xsl:if>        
 
         <xsl:if test="$title or /*/@document_state='work_in_progress'">
             <h1 style="margin-top: 0pt">
                 <xsl:value-of select="$title"/>
                 <xsl:if test="/*/@document_state='work_in_progress'">
-                    <span class="work_in_progress">
+                    <span class="work_in_progress" style="margin-left: 2em;">
                         — In Arbeit —
                     </span>
                 </xsl:if>
             </h1>
+            <!--table cellspacing="0" cellpadding="0" width="100%">
+                <tr>
+                    <td valign="top">
+                        <h1 style="margin-top: 0pt">
+                            <xsl:value-of select="$title"/>
+                            <xsl:if test="/*/@document_state='work_in_progress'">
+                                <span class="work_in_progress" style="margin-left: 2em;">
+                                    — In Arbeit —
+                                </span>
+                            </xsl:if>
+                        </h1>
+                    </td>
+                    <td valign="top" align="right">
+                        <xsl:element name="img">
+                            <xsl:attribute name="alt">logo</xsl:attribute>
+                            <xsl:attribute name="width">60</xsl:attribute>
+                            <xsl:attribute name="height">61</xsl:attribute>
+                            <xsl:attribute name="src">
+                                <xsl:value-of select="$base_dir"/>
+                                <xsl:text>images/logo/job_scheduler_rabbit_circle_black_white_60x61.jpg</xsl:text>
+                            </xsl:attribute>
+                        </xsl:element>
+                    </td>
+                </tr>
+            </table-->
         </xsl:if>
 
     </xsl:template>
@@ -3038,15 +3094,22 @@
         <table cellspacing="0" cellpadding="0" width="100%">
             <tr>
                 <td style="vertical-align: top;">
-                    <xsl:call-template name="browse_bar">
+                    <p style="font-size: 8pt; margin-top: 0">
+                        <a href="http://www.sos-berlin.com">
+                            <xsl:call-template name="phrase">
+                                <xsl:with-param name="id" select="'head.link_to_sos'"/>
+                            </xsl:call-template>
+                        </a>
+                    </p>
+                    <!--xsl:call-template name="browse_bar">
                         <xsl:with-param name="parent_page" select="$parent_page"/>
-                    </xsl:call-template>
+                    </xsl:call-template-->
                 </td>
                 <td style="vertical-align: top;" align="right">
                     <p style="font-size: 8pt; margin-top: 0">
-                        <xsl:call-template name="browse_bar_register">
+                        <!--xsl:call-template name="browse_bar_register">
                             <xsl:with-param name="parent_page" select="$parent_page"/>
-                        </xsl:call-template>
+                        </xsl:call-template-->
 
                         <xsl:call-template name="phrase">
                             <xsl:with-param name="id" select="'head.last_updated_by'"/>
@@ -3085,9 +3148,9 @@
         <xsl:param name="parent_page"/>
 
         <p style="font-size: 8pt; margin-top: 0px; padding-top: 0px">
-            Scheduler &#160; &#160; 
-            
             <xsl:if test="not( /*/@suppress_browse_bar='yes' )">
+                Scheduler &#160; &#160;
+                
                 <xsl:element name="a">
                     <xsl:attribute name="class">silent</xsl:attribute>
                     <xsl:attribute name="href"><xsl:value-of select="concat( $base_dir, $start_page )"/></xsl:attribute>
@@ -3158,8 +3221,7 @@
                 </xsl:call-template>
             </xsl:with-param>
         </xsl:call-template>
-        &#160; &#160;
-
+        
     </xsl:template>
 
 </xsl:stylesheet>
@@ -3167,5 +3229,7 @@
 <!-- Das ist ein Gedankenstrich: — -->
 <!-- Das ist ein langer Strich: – -->
 <!-- Das ist drei Punkte: … -->
-<!-- Das ist ein Pfeil: → -->
+<!-- Das ist ein Pfeil nach rechts: → &#x2192; -->
+<!-- Das ist ein Pfeil nach links: ← -->
+<!-- Das ist ein Doppelpfeil: ↔ -->
 <!-- »« -->

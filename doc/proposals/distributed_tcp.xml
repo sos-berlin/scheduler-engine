@@ -4,7 +4,7 @@
 <!--$Id$-->
 
 <description
-    title               = "Verteilter Scheduler"
+    title               = "Verteilter Scheduler in Peer-to-Peer-Technik (nur eine Stichwortsammlung)"
     base_dir            = "../"
     parent_page         = "index.xml"
     author              = "$Author$"

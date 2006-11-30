@@ -2231,6 +2231,12 @@
             </text>
         </message>
 
+        <message code="SCHEDULER-354">
+            <text xml:lang="en">
+                <title>Scheduler Java classes (sos.spooler.jar <p1>version</p1> expected) are not up to date: <p2/></title>
+            </text>
+        </message>
+
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->

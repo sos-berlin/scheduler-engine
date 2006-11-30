@@ -221,6 +221,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-351", "<modify_order_... setback=\"$1\">: Invalid value for attribute setback=" },
     { "SCHEDULER-352", "Only the run_time of an order can be renewed" },
     { "SCHEDULER-353", "No immediate response from command <$1>" },
+    { "SCHEDULER-354", "Scheduler Java classes (sos.spooler.jar $1 expected) are not up to date: $2" },
     { "SCHEDULER-900", "Scheduler $1 is starting with $2, pid=$3" },
     { "SCHEDULER-902", "state=$1" },
     { "SCHEDULER-904", "Tasks have $1s to terminate" },

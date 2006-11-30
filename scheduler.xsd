@@ -425,6 +425,7 @@
                             <xsd:attribute name="job"           type="Name"/>
                             <xsd:attribute name="next_state"    type="String"/>
                             <xsd:attribute name="error_state"   type="String"/>
+                            <xsd:attribute name="suspend"       type="Yes_no"/>
                         </xsd:complexType>
                     </xsd:element>
                     <xsd:element name="file_order_sink" maxOccurs="unbounded">
@@ -530,6 +531,7 @@
             <xsd:attribute name="priority"  type="xsd:integer"/>
             <xsd:attribute name="state"     type="String"/>
             <xsd:attribute name="setback"   type="No"/>
+            <xsd:attribute name="suspended" type="Yes_no"/>
         </xsd:complexType>
     </xsd:element>
 

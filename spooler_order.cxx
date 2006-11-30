@@ -959,6 +959,16 @@ int Order_queue::order_count( const Job_chain* which_job_chain )
     }
 }
 
+//----------------------------------------------------------------------Order_queue::reinsert_order
+/*
+void Order_queue::reinsert_order( Order* order )
+{
+    ptr<Order> hold_order = order;
+
+    remove_order( order );
+    add_order( order );
+}
+*/
 //---------------------------------------------------------------------------Order_queue::add_order
 
 void Order_queue::add_order( Order* order, Do_log do_log )
@@ -974,10 +984,13 @@ void Order_queue::add_order( Order* order, Do_log do_log )
 
     //THREAD_LOCK( _lock )
     {
-        if( order->_setback )
+        if( Time start_time = order->start_time() )
         {
-            if( order->_setback < latter_day )  order->_log->log( do_log? log_info : log_debug3, message_string( "SCHEDULER-938", order->_setback ) );
-                                          else  order->_log->log( do_log? log_warn : log_debug3, message_string( "SCHEDULER-296" ) );       // "Die <run_time> des Auftrags hat keine nächste Startzeit" );
+            if( !order->_suspended )
+            {
+                if( order->_setback < latter_day )  order->_log->log( do_log? log_info : log_debug3, message_string( "SCHEDULER-938", order->_setback ) );
+                                              else  order->_log->log( do_log? log_warn : log_debug3, message_string( "SCHEDULER-296" ) );       // "Die <run_time> des Auftrags hat keine nächste Startzeit" );
+            }
 
           //_log->debug( "add_order (setback queue) " + order->obj_name() );
 
@@ -987,8 +1000,8 @@ void Order_queue::add_order( Order* order, Do_log do_log )
             for( it = _setback_queue.begin(); it != _setback_queue.end(); it++ )
             {
                 Order* o = *it;
-                if( o->_setback > order->_setback )  break;
-                if( o->_setback == order->_setback  &&  o->_priority > order->_priority )  break;
+                if( o->_setback > start_time )  break;
+                if( o->_setback == start_time  &&  o->_priority > order->_priority )  break;
             }
 
             _setback_queue.insert( it, order );
@@ -1059,7 +1072,7 @@ void Order_queue::remove_order( Order* order )
 
     //THREAD_LOCK( _lock )
     {
-        if( order->_setback )
+        if( order->start_time() )
         {
             _log->debug9( "remove_order (setback) " + order->obj_name() );
 
@@ -1068,7 +1081,7 @@ void Order_queue::remove_order( Order* order )
 
             if( it == _setback_queue.end() )  z::throw_xc( "SCHEDULER-156", order->obj_name(), _job->name() );
 
-            order->clear_setback();  //2006-11-21  order->_setback = 0;
+            if( order->_setback_count > 0 )  order->_setback_count = 0, order->_setback = 0;
             order->_in_job_queue = false;
 
             _setback_queue.erase( it );
@@ -1127,7 +1140,7 @@ Order* Order_queue::first_order( const Time& now )
             while( !_setback_queue.empty() )
             {
                 ptr<Order> o = *_setback_queue.begin();
-                if( o->_setback > now )  break;
+                if( o->start_time() > now )  break;
 
                 remove_order( o );
                 o->_setback = 0;
@@ -1186,10 +1199,10 @@ Time Order_queue::next_time()
     //THREAD_LOCK( _lock )
     {
         Order* o = first_order( 0 );
-        if( o )  return o->_setback;
+        if( o )  return o->start_time();
 
         //if( !_queue.empty() )  return 0;    //2004-02-25: latter_day;
-        if( !_setback_queue.empty() )  return (*_setback_queue.begin())->_setback;
+        if( !_setback_queue.empty() )  return (*_setback_queue.begin())->start_time();
     }
 
     return latter_day;
@@ -1340,6 +1353,7 @@ bool Order::is_immediately_processable( const Time& now )
 {
     if( _on_blacklist )     return false;  
     if( _setback > now )    return false;
+    if( _suspended )        return false;
     if( _task )             return false;               // Schon in Verarbeitung
     if( _replacement_for )  return false;
     if( _job_chain  &&  _job_chain->state() != Job_chain::s_ready )  return false;   // Jobkette wird nicht gelöscht?
@@ -1537,6 +1551,9 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
     {
         if( _setback )
         element.setAttribute( "next_start_time", _setback.as_string() );
+
+        if( _suspended )
+        element.setAttribute( "suspended", true );
 
         if( _title != "" )
         element.setAttribute( "title"     , _title );
@@ -1981,28 +1998,43 @@ void Order::set_state( const State& state, const Time& start_time )
 
 void Order::set_state2( const State& state, bool is_error_state )
 {
-    if( _job_chain )
+    if( state != _state )
     {
-        string log_line = "set_state " + ( state.is_missing()? "(missing)" : state.as_string() );
+        _state = state;
 
-        if( _job_chain_node && _job_chain_node->_job )  log_line += ", " + _job_chain_node->_job->obj_name();
-        if( is_error_state                           )  log_line += ", error state";
+        if( _job_chain )
+        {
+            string log_line = "set_state " + ( state.is_missing()? "(missing)" : state.as_string() );
 
-        if( _setback )  log_line += ", at=" + _setback.as_string();
+            if( _job_chain_node && _job_chain_node->_job )  log_line += ", " + _job_chain_node->_job->obj_name();
+            if( is_error_state                           )  log_line += ", error state";
 
-        _log->info( log_line );
+            if( _setback )  log_line += ", at=" + _setback.as_string();
+
+            if( _suspended )  log_line += ", suspended";
+
+            _log->info( log_line );
+        }
+
+        if( _id_locked )
+        {
+            Scheduler_event event ( evt_order_state_changed, log_info, this );
+            _spooler->report_event( &event );
+        }
     }
-
-    _state = state;
 
     if( !_initial_state_set )  _initial_state = state,  _initial_state_set = true;
+}
 
+//------------------------------------------------------------------------Order::set_job_chain_node
 
-    if( _id_locked )
-    {
-        Scheduler_event event ( evt_order_state_changed, log_info, this );
-        _spooler->report_event( &event );
-    }
+void Order::set_job_chain_node( Job_chain_node* node, bool is_error_state )
+{
+    _job_chain_node = node;
+
+    if( node  &&  node->_suspend )  set_suspended();
+
+    set_state2( node? node->_state : empty_variant, is_error_state );
 }
 
 //------------------------------------------------------------------------------Order::set_priority
@@ -2015,7 +2047,8 @@ void Order::set_priority( Priority priority )
         {
             _priority = priority;
 
-            if( !_setback  &&  _in_job_queue  &&  !_task )   // Nicht gerade in Verarbeitung?
+            //2006-11-23  if( !_setback  &&  _in_job_queue  &&  !_task )   // Nicht gerade in Verarbeitung?
+            if( _in_job_queue  &&  !_task )   // Nicht gerade in Verarbeitung?
             {
                 ptr<Order> hold_me = this;
                 order_queue()->remove_order( this );
@@ -2178,7 +2211,7 @@ bool Order::try_add_to_job_chain( Job_chain* job_chain )
 
             _removed_from_job_chain = NULL;
             _job_chain = job_chain;
-            _job_chain_node = node;
+            set_job_chain_node( node );
 
             _log->set_prefix( obj_name() );
 
@@ -2254,10 +2287,8 @@ void Order::move_to_node( Job_chain_node* node )
 
         if( _job_chain_node && _in_job_queue )  _job_chain_node->_job->order_queue()->remove_order( this ), _job_chain_node = NULL;
 
-        _job_chain_node = node;
-
+        set_job_chain_node( node );
         clear_setback();
-        set_state2( node? node->_state : Order::State() );
 
         if( node && node->_job )  node->_job->order_queue()->add_order( this );
     }
@@ -2273,7 +2304,7 @@ void Order::postprocessing( bool success )
     {
         bool force_error_state = false;
 
-        if( _setback == latter_day  &&  _setback_count > _task->job()->max_order_setbacks() )
+        if( !_suspended  &&  _setback == latter_day  &&  _setback_count > _task->job()->max_order_setbacks() )
         {
             _log->info( message_string( "SCHEDULER-943", _setback_count ) );   // " mal zurückgestellt. Der Auftrag wechselt in den Fehlerzustand"
             success = false;
@@ -2296,22 +2327,10 @@ void Order::postprocessing( bool success )
                     else  _job_chain_node->_job->order_queue()->remove_order( this );
                 }
 
-                State new_state;
+                Job_chain_node* new_node = success? _job_chain_node->_next_node
+                                                  : _job_chain_node->_error_node;
 
-                if( success )
-                {
-                    //_log->debug( "Neuer Zustand ist " + error_string_from_variant(_job_chain_node->_next_state) );
-                    new_state = _job_chain_node->_next_state;
-                    _job_chain_node = _job_chain_node->_next_node;
-                }
-                else
-                {
-                    //_log->debug( "Neuer Fehler-Zustand ist " + error_string_from_variant(_job_chain_node->_error_state) );
-                    new_state = _job_chain_node->_error_state;
-                    _job_chain_node = _job_chain_node->_error_node;
-                }
-
-                set_state2( new_state, !success );
+                set_job_chain_node( new_node, !success );
 
                 if( _job_chain_node  &&  _job_chain_node->_job )
                 {
@@ -2400,11 +2419,15 @@ void Order::postprocessing2( Job* last_job )
 
     if( finished() )
     {
+        bool to_blacklist = _suspended;
+
         if( is_file_order()  &&  file_exists( file_path() ) )
         {
             _log->error( message_string( "SCHEDULER-340" ) );
-            if( _job_chain )  add_to_blacklist();
+            to_blacklist = true;
         }
+
+        if( to_blacklist  &&  _job_chain )  add_to_blacklist();
 
         try
         {
@@ -2436,6 +2459,22 @@ void Order::postprocessing2( Job* last_job )
 
 
     if( finished()  &&  !_on_blacklist )  close();
+}
+
+//-----------------------------------------------------------------------------Order::set_suspended
+
+void Order::set_suspended( bool suspended )
+{
+    if( suspended == _suspended )  return;
+
+    bool        in_job_queue = _in_job_queue;
+    ptr<Order>  hold_me      = this;
+
+    if( in_job_queue )  order_queue()->remove_order( this );
+    _suspended = suspended;
+    if( in_job_queue )  order_queue()->add_order( this );
+
+    if( _on_blacklist  &&  !_suspended )  remove_from_job_chain();
 }
 
 //-----------------------------------------------------------------------------------Order::setback
@@ -2527,6 +2566,14 @@ void Order::set_at( const Time& time )
     set_run_time( run_time_element );
     */
     set_setback( time );
+}
+
+//--------------------------------------------------------------------------------Order::start_time
+
+Time Order::start_time()
+{
+    if( _suspended )  return latter_day;
+    return _setback;
 }
 
 //---------------------------------------------------------------------------Order::next_start_time
@@ -2644,14 +2691,6 @@ string Order::obj_name() const
 
         result += debug_string_from_variant(_id);
         if( _title != "" )  result += " " + quoted_string( _title );
-
-        /*
-        if( _setback )
-            if( _setback == latter_day )  result += ", without start time!";
-                                    else  result += ", at=" + _setback.as_string();
-        */
-      //else
-      //if( _priority )  result += ", pri=" + as_string( _priority );
     }
 
     return result;

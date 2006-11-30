@@ -28,6 +28,7 @@ extern const string spooler_close_name          = "spooler_close()V";
 extern const string spooler_process_name        = "spooler_process()Z";
 extern const string spooler_on_error_name       = "spooler_on_error()V";
 extern const string spooler_on_success_name     = "spooler_on_success()V";
+extern const string spooler_api_version_name    = "spooler_api_version()Ljava.lang.String;";
 
 // Monitor-Methoden:
 const string spooler_task_before_name    = "spooler_task_before()Z";       

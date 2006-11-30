@@ -8,10 +8,11 @@
     base_dir            = "../"
     author              = "$Author$"
     date                = "$Date$"
+    document_state      = "proposal"
 >
 
     <p>
-        <scheduler_a href="distributed.xml" quote="yes"/>
+        <scheduler_a href="distributed_order_execution.xml" quote="yes"/>
     </p>
 
 
@@ -23,7 +24,11 @@
 
 
     <p>
-        <a href="supervision.xml">Scheduler-Überwachung mit Ereignissen</a>
+        <scheduler_a href="supervisor_proxies.xml" quote="yes"/>
+    </p>
+
+    <p>
+        <scheduler_a href="supervision.xml" quote="yes"/>
     </p>
 
 

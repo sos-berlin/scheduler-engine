@@ -81,6 +81,7 @@ struct Order : Com_order,
     void                    set_job_by_name             ( const string& );
     Job*                        job                     () const;
 
+    void                    set_job_chain_node          ( Job_chain_node*, bool is_error_state = false );
     void                    set_state                   ( const State& );
     void                    set_state                   ( const State&, const Time& );
     void                    set_state2                  ( const State&, bool is_error_state = false );
@@ -127,12 +128,16 @@ struct Order : Com_order,
     void                        add_to_order_queue      ( Order_queue* );
     void                        add_to_job              ( const string& job_name );
 
+    bool                        suspended               ()                                          { return _suspended; }
+    void                    set_suspended               ( bool b = true );
+
     void                        setback                 ();
     void                    set_setback                 ( const Time&, bool keep_setback_count = false );
     void                        clear_setback           ( bool keep_setback_count = false );
     void                    set_at                      ( const Time& );
     Time                        at                      ()                                          { return _setback; }
   //void                    set_run_time_xml            ( const string& );
+    Time                        start_time              ();
     Time                        next_start_time         ( bool first_call = false );
 
     // Auftrag in einer Jobkette:
@@ -211,6 +216,7 @@ struct Order : Com_order,
     Time                       _setback;                // Bis wann der Auftrag zurückgestellt ist (bei _setback_count > 0, sonst Startzeitpunkt "at")
     int                        _setback_count;
     bool                       _on_blacklist;           // assert( _job_chain )
+    bool                       _suspended;
   //bool                       _recoverable;            // In Datenbank halten
     bool                       _is_in_database;
     bool                       _delay_storing_until_processing;  // Erst in die Datenbank schreiben, wenn die erste Task die Verarbeitung beginnt
@@ -279,6 +285,7 @@ struct Job_chain_node : Com_job_chain_node
     ptr<Job>                   _job;                    // NULL: Kein Job, Auftrag endet
     bool                       _file_order_sink_remove;  // <file_order_sink remove="yes"/>
     File_path                  _file_order_sink_move_to; // <file_order_sink move_to="..."/>
+    bool                       _suspend;                // <job_chain_node suspend="yes"/>
 
     Order::State               _state;                  // Bezeichnung des Zustands
 
@@ -422,6 +429,7 @@ struct Order_queue : Com_order_queue
     void                        close                   ();
     void                        add_order               ( Order*, Do_log = do_log );
     void                        remove_order            ( Order* );
+    void                        reinsert_order          ( Order* );
     int                         order_count             ( const Job_chain* = NULL );
     bool                        empty                   ()                                          { return _queue.empty(); }
     bool                        empty                   ( const Job_chain* job_chain )              { return order_count( job_chain ) == 0; }

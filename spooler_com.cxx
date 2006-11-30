@@ -4314,6 +4314,8 @@ const Com_method Com_order::_methods[] =
     { DISPATCH_PROPERTYGET, 23, "Xml_payload"               , (Com_method_ptr)&Com_order::get_Xml_payload       , VT_BSTR       },
     { DISPATCH_PROPERTYPUT, 24, "Params"                    , (Com_method_ptr)&Com_order::put_Params            , VT_EMPTY      , { VT_DISPATCH } },
     { DISPATCH_PROPERTYGET, 24, "Params"                    , (Com_method_ptr)&Com_order::get_Params            , VT_DISPATCH   },
+    { DISPATCH_PROPERTYPUT, 25, "Suspended"                 , (Com_method_ptr)&Com_order::put_Suspended         , VT_EMPTY      , { VT_BOOL } },
+    { DISPATCH_PROPERTYGET, 25, "Suspended"                 , (Com_method_ptr)&Com_order::get_Suspended         , VT_BOOL       },
     {}
 };
 
@@ -5098,6 +5100,44 @@ STDMETHODIMP Com_order::get_Params( Ivariable_set** result )
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+
+//-------------------------------------------------------------------------Com_order::put_Suspended
+
+STDMETHODIMP Com_order::put_Suspended( VARIANT_BOOL suspended )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_order )  return E_POINTER;
+
+        _order->set_suspended( suspended != 0 );
+    }
+    catch( const exception& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+
+//-------------------------------------------------------------------------Com_order::get_Suspended
+
+STDMETHODIMP Com_order::get_Suspended( VARIANT_BOOL* result )
+{
+    HRESULT hr = NOERROR;
+
+    *result = VARIANT_FALSE;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_order )  return E_POINTER;
+
+        *result = _order->suspended()? VARIANT_TRUE : VARIANT_FALSE;
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
 
     return hr;
 }

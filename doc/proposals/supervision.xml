@@ -4,11 +4,12 @@
 <!--$Id$-->
 
 <description
-    title               = "Überwachung mehrerer Scheduler mit Ereignissen"
+    title               = "Supervision — Überwachung mehrerer Scheduler mit Ereignissen"
     base_dir            = "../"
     parent_page         = "index.xml"
     author              = "$Author$"
     date                = "$Date$"
+    document_state      = "proposal"
 >
 
     <p>
@@ -155,7 +156,7 @@
         Eine Jobkette kann angegeben werden, die der Scheduler mit Ereignissen füttern soll.
         <scheduler_method class="Order" property="xml_payload"/> enthält das jeweilige Ereignis.
     </p>
-    <pre>&lt;main_scheduler feed_job_chain="<i>job_chain</i>"></pre>
+    <pre>&lt;supervisor feed_job_chain="<i>job_chain</i>"></pre>
     <!--pre>&lt;job_chain name="…">
     &lt;scheduler_event_source/>
     &lt;job_chain_node …/>
@@ -194,28 +195,28 @@
     <p>
         Noch kürzer:
     </p-->
-    <pre>&lt;main_scheduler>
+    <pre>&lt;supervisor>
     &lt;get_events/>
-&lt;/main_scheduler></pre>
+&lt;/supervisor></pre>
 
     <h3>Mögliche Erweitung der Auswahl</h3>
     <p>
         Sollen vielleicht einzelne Jobs ausgewählt werden?
     </p>
-    <pre>&lt;main_scheduler>
+    <pre>&lt;supervisor>
     &lt;get_events>
         &lt;select_events job="mein_job"/>
         &lt;select_events job="ein_anderer_job"/>
     &lt;/get_events>
-&lt;/main_scheduler></pre>
+&lt;/supervisor></pre>
     <p>
         Oder nur bestimmte Ereignisse? 
     </p>
-    <pre>&lt;main_scheduler>
+    <pre>&lt;supervisor>
     &lt;get_events>
         &lt;select_events event_type="task_started"/>
     &lt;/get_events>
-&lt;/main_scheduler></pre>
+&lt;/supervisor></pre>
 
     <p>
         <i>Soll die Auswahl so aussehen?</i>
@@ -239,7 +240,7 @@
         des Supervisor verpackt:
     </p>
     <pre>&lt;spooler>
-    &lt;answer time="<i>main_scheduler_clock</i>">
+    &lt;answer time="<i>supervisor_clock</i>">
         &lt;spooler>
             &lt;answer time="<i>scheduler_clock</i>">
                 &lt;<i>some_answer</i>> … &lt;/<i>some_answer</i>>
@@ -266,10 +267,11 @@
         Die überwachten Scheduler verbinden sich mit allen Stellvertretern.
         Der Monitore verbindet sich mit einem Stellvertreter, wenn der Supervisor ausgefallen ist.
     </p>
-    <pre>&lt;main_scheduler>
-    &lt;main_scheduler_proxy proxy="…"/>
-    &lt;main_scheduler_proxy proxy="…"/>
-&lt;/main_scheduler></pre>
+    <pre>&lt;supervisor>
+    &lt;supervisor_proxy proxy="…"/>
+    &lt;supervisor_proxy proxy="…"/>
+&lt;/supervisor>
+    </pre>
 
 
     

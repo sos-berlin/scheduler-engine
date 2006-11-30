@@ -1076,6 +1076,12 @@ library Spooler
 
         [propget]
         HRESULT                 Params                  ( [out,retval] Ivariable_set** );
+
+        [propput]
+        HRESULT                 Suspended               ( [in] VARIANT_BOOL );
+
+        [propget]
+        HRESULT                 Suspended               ( [out,retval] VARIANT_BOOL* );
     }
 
     [

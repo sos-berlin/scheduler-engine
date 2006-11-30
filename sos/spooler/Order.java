@@ -226,4 +226,7 @@ public class Order extends Idispatch
     public void         set_at                  ( String date_time )                { com_call( ">at", date_time ); }
   //public void         set_at                  ( java.util.Date date )             { com_call( ">at", date ); }
     public void         set_at                  ( java.util.Date date )             { set_at( new java.text.SimpleDateFormat( "yyyy-MM-dd HH:mm:ss.SSS" ).format( date ) ); }
+    
+    public void         set_suspended           ( boolean b )                       {                        com_call( ">suspended", b ); }
+    public boolean          suspended           ()                                  { return         boolean_com_call( "<suspended" ); }
 }

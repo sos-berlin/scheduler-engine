@@ -11,7 +11,35 @@
     <scheduler_keyword keyword="Change log"/>
 
 
+    <change date="2006-11-30" version="2.0.161" subversion_revision="4605">
+        <revision type="new" title="Order.suspend()">
+            <description>
+                <p>
+                    Aufträge können angehalten werden.
+                </p>
+                <ul>
+                    <li>
+                        <scheduler_method class="Order" property="suspended"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="modify_order" attribute="suspended"/>
+                    </li>
+                </ul>
+
+            </description>
+        </revision>
+    </change>
+
     <change date="2006-11-22" version="2.0.160" subversion_revision="4598">
+        <revision type="error" title="Order.setback()">
+            <description>
+                <p>
+                    <scheduler_method class="Order" method="setback"/> bricht in dieser Version den Scheduler ab 
+                    (korrigiert in 2.0.161.4605 2006-11-30).
+                </p>
+            </description>
+        </revision>
+
         <revision type="correction" title="&lt;show_order what=&quot;log&quot;>">
             <description>
                 <p>
@@ -81,7 +109,8 @@
         <revision type="modification" title='Scheduler braucht seit 26. September 2006 eine aktuelle sos.mail.jar'>
             <description>
                 <p>
-                    Die Datei <code>sos.mail.jar</code> sollte nicht älter als 1.6.131.4555 (2006-09-26) sein.
+                    Die Datei <code>sos.mail.jar</code> sollte nicht älter als 
+                    Version 1.6.131.4555 (Dateidatum 2006-09-25 09:00) sein.
                 </p>
             </description>
         </revision>

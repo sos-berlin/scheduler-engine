@@ -24,8 +24,8 @@ ul.big          { margin-top: 0em; margin-left: 12pt; padding-left: 0pt; }
 li              { font-size: 10pt; max-width: 88ex; }
 ul.big li       { margin-top: 1em; font-size: 10pt; max-width: 88ex; }
 ol              { margin-left: 24pt; padding-left: 0pt; }
-.example        { background-color: #ffffe0; }
-pre             { background-color: #ffffe0; font-family: "Lucida Console", monospace; font-size: 9pt; 
+.example        { background-color: #ffffe8; }
+pre             { background-color: #ffffe8; font-family: "Lucida Console", monospace; font-size: 9pt; 
                   padding-left: 0ex; margin-top: 1em; margin-bottom: 1em; line-height: 12pt;  }
 pre i           { font-size: 9pt; font-family: Arial, Sans-Serif; line-height: 10pt; }
 code i          { font-size: 9pt; font-family: Arial, Sans-Serif; line-height: 10pt; }
@@ -47,8 +47,13 @@ code            { font-family: "Lucida Console", monospace; font-size: 9pt; line
 .message_insertion { font-family: Arial, sans-serif; font-size: 9pt; font-style: italic; }
 /*.standard_in_code { font-family: Arial, sans-serif; }   Um in <code> wieder zurück zur normalen Schrift zu kommen */
 
+a.nix           { text-decoration: none; color: inherit; background-color: inherit }
+a.nix:link      { text-decoration: none; color: inherit; background-color: inherit }
+a.nix:active    { text-decoration: none; color: inherit; background-color: inherit }
+a.nix:visited   { text-decoration: none; color: inherit; background-color: inherit }
+a.nix:hover     { text-decoration: none; color: inherit; background-color: inherit }
 a.silent        { text-decoration: none; color: #0000A0 }
-a               { text-decoration: none; color: #0000A0 }
+a               { text-decoration: none; color: inherit; background-color: inherit }
 
 a:link          { color: #0000a0; cursor: pointer; }
 a:active        { color: #0000a0; }
@@ -125,6 +130,6 @@ div.box                         { margin-top: 1.5em;
                                   padding-top: 0.75em; padding-left: 1em; padding-right: 1em; 
                                   border: solid 1px #c0c0f0; }
                                   
-span.work_in_progress           { margin-top: 0em; margin-bottom: 2em; margin-left: 2em; 
-                                  color: red; font-family: 'Courier New' monospace; font-size: 16pt; 
+span.work_in_progress           { margin-top: 0em; margin-bottom: 2em; 
+                                  color: red; font-family: 'Courier New' monospace;  
                                   white-space: nowrap; }

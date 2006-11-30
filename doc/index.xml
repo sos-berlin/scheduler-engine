@@ -26,6 +26,7 @@
     head_title          = "Dokumentation"
     base_dir            = ""
     suppress_browse_bar = "yes"
+    suppress_logo       = "yes" 
     author              = "$Author$"
     date                = "$Date$"
 >
@@ -36,34 +37,38 @@
     </scheduler_ignore>
 
     <description.style type="text/css">
+        /* Zschimmers Orange: #e06000, Orange des Logos: 234,121,15 #ea790f */
         h2              { color: #e06000; font-size: 10pt; font-weight: bold; margin-top: 0em; border: none; padding-top: 0em; } /*margin-top: 2em; border-top: 0px solid #fff8ee; padding-top: 1.0em; }*/
         dt              { margin-top: 1.5em; font-weight: bold; margin-bottom: 0.25em; }
         dd              { margin-left: 0ex; margin-top: 0.25em; }
     </description.style>
 
-        
+
+    <!--div style="float: right; width: 133px; margin-left: 3em; margin-right: 0em;">
+        <img alt="logo" width="133" height="93" src="images/logo/job_scheduler_rabbit_circle_typo_colour_web_133x93.jpg"/>
+    </div-->
+    <div style="float: right; width: 165px; height: 114px; position: relative; top: -5px; margin-left: 3em; margin-right: 1em;">
+        <img alt="logo" width="165" height="114" src="images/logo/job_scheduler_rabbit_circle_typo_colour_165x114.jpg"/>
+    </div>
+
+    <h1 style="text-align: left; font-size: 18pt; margin-bottom: 2ex">Der Scheduler</h1>
+
     <table cellspacing="0" cellpadding="0" style="width: 100%">
         <tr>
             <td>
-                <h1 style="text-align: left; font-size: 18pt; margin-bottom: 2ex">Der Scheduler</h1>
-            </td>
-            <td style="vertical-align: top;" align="right">
-                <p style="font-size: 8pt">
-                    →<scheduler_a href="CHANGES.xml"/>
-                    <br/>
-                    →<scheduler_a href="proposals/index.xml"/>
+                <p>
+                    Der Scheduler startet Jobs und überwacht sie.
+                    Die Starts können zeitgesteuert, durch Änderung eines Verzeichnisses, durch einen Auftrag oder durch ein Kommando erfolgen.
+                    Der Scheduler kennt Aufträge, die durch Jobketten geschleust werden.
+                    Er läuft auf Windows, Linux, Solaris und HP-UX.
+                    Hier sind wichtige Teile des Schedulers beschrieben.
                 </p>
+            </td>
+            <td style="width: 30ex; vertical-align: top; padding-left: 1em;" align="right">
             </td>
         </tr>
     </table>
 
-    <p>
-        Der Scheduler startet Jobs und überwacht sie.
-        Die Starts können zeitgesteuert, durch Änderung eines Verzeichnisses, durch einen Auftrag oder durch ein Kommando erfolgen.
-        Der Scheduler kennt Aufträge, die durch Jobketten geschleust werden.
-        Er läuft auf Windows, Linux, Solaris und HP-UX.
-        Hier sind wichtige Teile des Schedulers beschrieben.
-    </p>
 
 
     <table cellpadding="0" cellspacing="0">
@@ -180,6 +185,18 @@
                         </dd>
                     </dl>
                 </div>
+
+                <table style="margin-top: 1em">
+                    <tr>
+                        <td style="font-size: 8pt">
+                            &#x2192;<scheduler_a href="CHANGES.xml"/>
+                        </td>
+                        <td style="padding-left: 2em; font-size: 8pt">
+                            &#x2192;<scheduler_a href="proposals/index.xml"/>
+                        </td>
+                    </tr>
+                </table>
+
             </td>
             
             <td style="padding-left: 1.5em"> </td>

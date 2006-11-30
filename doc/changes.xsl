@@ -74,8 +74,15 @@
 
         <xsl:element name="p">
             <xsl:attribute name="style">
-		margin-top: 0px;
-                <xsl:if test="@type='correction'">color: green;</xsl:if>
+                margin-top: 0px;
+                <xsl:choose>
+                    <xsl:when test="@type='correction'">
+                        <xsl:text>color: green;</xsl:text>
+                    </xsl:when>
+                    <xsl:when test="@type='error'">
+                        <xsl:text>color: #d00000;</xsl:text>
+                    </xsl:when>
+                </xsl:choose>
             </xsl:attribute>
 
             <b><xsl:value-of select="@title"/></b>

@@ -44,6 +44,8 @@ namespace spooler {
 
 //--------------------------------------------------------------------------------------------const
 
+const string needed_api_version = "2.0.160.4605 (2006-11-23)";
+
 const static JNINativeMethod native_methods[] = 
 {
     { "com_call", "(JLjava/lang/String;[Ljava/lang/Object;)Ljava/lang/Object;", (void*)Java_sos_spooler_Idispatch_com_1call }
@@ -364,6 +366,43 @@ void Java_module_instance::init()
     assert( _jobject == NULL );
     _jobject = e->NewObject( _module->_java_class, method_id );
     if( !_jobject )  e.throw_java( _module->_java_class_name + " Konstruktor" );
+
+    try
+    {
+        // Das ist die falsche Stelle.
+        // Die Prüfung sollte an höherer Stelle, im Haupt-Prozess gerufen werden.
+        // Dort haben wir ein Protokoll für log()->warn() und für entfernte Jobs kann der Client-Scheduler die Version prüfen.
+        check_api_version();
+    }
+    catch( exception& x )  { Z_LOG2( "scheduler", "*** ERROR ***  " << x.what() << "\n" ); }  
+}
+
+//----------------------------------------------------------Java_module_instance::check_api_version
+
+void Java_module_instance::check_api_version()
+{
+    string java_api_version;
+
+    try
+    {
+        java_api_version = string_from_variant( call( spooler_api_version_name ) );
+    }
+    catch( exception& x )  { z::throw_xc( "SCHEDULER-354", needed_api_version, x ); }
+
+
+    vector<string> my_version   = z::vector_split( "[\\. ]", needed_api_version, 5 );  // Z.B. "2.0.160.4605 (2006-11-23 12:00:00)"
+    vector<string> java_version = z::vector_split( "[\\. ]", java_api_version  , 5 );
+    int m[4], j[4];
+    
+    for( int i = 0; i < 4; i++ )  m[i] = as_int( my_version[i] ),  j[i] = as_int( java_version[i] );
+
+    if( j[0] != m[0]                        // 1. Teil muss übereinstimmen
+     || j[1] != m[1]                        // 2. Teil muss übereinstimmen
+     || j[1] == m[1]  &&  j[2] < m[2]       // 3. Teil muss nicht kleiner sein
+     || j[2] == m[2]  &&  j[3] < m[3] )     // 4. Teil muss nicht kleiner sein
+    {
+        z::throw_xc( "SCHEDULER-354", needed_api_version, java_api_version );
+    }
 }
 
 //--------------------------------------------------------------------Java_module_instance::add_obj
@@ -419,15 +458,22 @@ Variant Java_module_instance::call( const string& name_par )
     if( !method_id )  
     {
         if( is_optional )  return Variant();
-        z::throw_xc( "SCHEDULER-174", name, _module->_java_class_name.c_str() );
+        e.throw_java( name, message_string( "SCHEDULER-174", name, _module->_java_class_name ) );
+        //z::throw_xc( "SCHEDULER-174", name, _module->_java_class_name.c_str() );
     }
 
     Variant result;
 
     if( *name.rbegin() == 'Z' )
     {
-        In_call in_call ( this, name );  //.substr( 0, name.length() - 1 ) );
+        In_call in_call ( this, name );
         result = e->CallBooleanMethod( _jobject, method_id ) != 0;
+    }
+    else
+    if( *name.rbegin() == ';' )     // Für spooler_api_version()
+    {
+        In_call in_call ( this, name ); 
+        result = string_from_jstring( e, Jstring( Vm::static_vm, (jstring)e->CallObjectMethod( _jobject, method_id ) ) );
     }
     else
     {

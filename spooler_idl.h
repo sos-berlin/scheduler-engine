@@ -597,6 +597,9 @@ struct Iorder : IDispatch
 
     virtual HRESULT     put_Params                  ( Ivariable_set* )                              = 0;
     virtual HRESULT     get_Params                  ( Ivariable_set** )                             = 0;
+
+    virtual HRESULT     put_Suspended               ( VARIANT_BOOL )                                = 0;
+    virtual HRESULT     get_Suspended               ( VARIANT_BOOL* )                               = 0;
 };
 
 //--------------------------------------------------------------------Remote_module_instance_server

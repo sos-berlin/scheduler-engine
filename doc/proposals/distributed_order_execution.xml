@@ -4,18 +4,14 @@
 <!--$Id$-->
 
 <description
-    title               = "Verteilter Scheduler"
+    title               = "Verteilte Ausführung von Aufträgen mit Verteiltem Scheduler"
     base_dir            = "../"
     parent_page         = "index.xml"
     author              = "$Author$"
     date                = "$Date$"
-    document_state      = "work_in_progress"
+    document_state      = "proposal"
 >
     
-    <p>
-        
-    </p>
-
     <ul>
         <li>
             Mehrere Scheduler teilen sich die Aufgaben:
@@ -39,53 +35,19 @@
 
 
     <p>
-        Drei Verfahren sind denkbar. 
+        Drei Verfahren sind denkbar.
+    </p>
+    <p>
+        A) <scheduler_a href="distributed_order_execution_with_transaction.xml" quote="yes"/>
+        <br/>
+        B) Das hier beschriebene, ebenfalls datenbank-basierte Verfahren
+        <br/>
+        C) <!--scheduler_a href="distributed_tcp.xml" quote="yes"/-->
+            Verteilter Scheduler in Peer-to-Peer-Technik 
+    </p>
+    <p>
         Ich betrachte nur Aufträge, keine Tasks.
         Tasks könnten ähnlich abgewickelt werden (bis auf <scheduler_element name="run_time"/>-Starts).
-    </p>
-
-    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
-
-    <h2>A) Koordinierung durch Datenbank-Transaktion</h2>
-
-    <p>
-        Die Auftragswarteschlangen und die Schwarze Liste (für suspendierte Aufträge im Endzustand) werden ausschließlich in der Datenbank gehalten.
-        Die Scheduler entnehmen der Datenbank den nächsten auszuführenden Auftrag auf folgende Weise:
-    </p>
-
-
-    <p>
-        Die sichere Lösung erfordert eine Transaktion, die den Jobschritt überspannt.
-        Weil der Scheduler den Jobschritt asynchron ausführt, 
-        also während der Ausführung andere Aufgaben ausführen kann,
-        muss eine zweite Datenbankverbindung geöffnet werden.
-        Das ist so, als würde der Job selbst (in seinem Prozess) eine Datenbankverbindung öffnen.
-        Der Scheduler hält einen Pool verfügbarer Datenbankverbindungen vor.
-        Für jede laufende Task wird eine Verbindung benötigt.
-    </p>
-
-    <ul>
-        <li>
-            Der erste Auftrag in der Warteschlange wird mit SQL gesperrt.
-            Ob die Sperre wirkt, muss die Datenbank sofort mitteilen (nicht erst bei Commit).
-        </li>
-        <li>
-            Der Auftrag wird mit Select gelesen
-        </li>
-        <li>
-            Der Job-Schritt wird durchgeführt
-        </li>
-        <li>
-            Der Zustand des Auftrags wechselt
-        </li>
-        <li>
-            Commit
-        </li>
-    </ul>
-
-    <p>
-        Ein zweiter Scheduler, der dieselben Schritte durchführen will, kann den Satz nicht sperren.
-        Er geht dann zum nächsten Satz über.
     </p>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
@@ -226,6 +188,53 @@ commit</pre>
     where processing_scheduler_instance = "<i>me</i>" and order_id="…" …</pre>
 
 
+    <h3>Dateiaufträge</h3>
+    <p>
+        Siehe <scheduler_a href="../file_orders.xml" quote="yes"/>.
+    </p>
+    <p>
+        Jeder Scheduler kann dasselbe Verzeichnis überwachen.
+    </p>
+    <p>
+        Dass ein Auftrag auf der Schwarzen Liste steht
+        (weil nach Auftragsende die Datei noch vorhanden ist),
+        wird gleichbedeutend sein mit einem suspendierten Auftrag.
+        Die Tabelle <code>scheduler_orders</code> wird um die neue Spalte <code>suspended</code> erweitert.
+    </p>
+    <p>
+        Die Liste der schlechten Dateinamen 
+        (aus denen sich kein Auftrag machen lässt, weil der Pfad zu lang für die Datenbank ist)
+        wird von jedem Scheduler getrennt im Speicher gehalten.
+    </p>
+    <p>
+        Es würde genügen, wenn nur ein Scheduler Dateinamen zu Aufträgen macht.
+        Das könnte in der Konfiguration eingestellt werden:
+    </p>
+    <pre>&lt;file_order_source directory="…" when_scheduler_is_running_on_host="<i>hostname</i>"/></pre>
+
+    <p>
+        Vielleicht können wir den das Verzeichnis überwachenden Scheduler auch automatisch auswählen.
+        Beim Ausfall des Scheduler würde ein anderer die Überwachung übernehmen.
+        Der überwachende Scheduler schreibt in die Datenbank, 
+        welche Verzeichnisse für welche Jobketten er überwacht.
+        Andere Scheduler überwachen den Herzschlag und beim Ausbleiben bestimmen sie einen neuen.
+    </p>
+    <pre>select scheduler_instance_id, scheduler_session_id
+    from scheduler_directories
+    where scheduler_id="…" and job_chain="…" and directory="<i>path</i>"</pre>
+
+    <pre>select …
+    from scheduler_instances
+    where scheduler_instance="<i>scheduler_instance</i>"
+      and next_heart_beat &lt; <i>now</i>
+</pre>
+    
+    <pre>update scheduler_watched_directories
+    set scheduler_instance_id=<i>my_scheduler_id</i>"
+    where scheduler_instance_id="<i>old_scheduler_id</i>"
+    and job_chain="…" and directory="<i>path</i>"
+</pre>
+    
 
     <!--ul>
         <li>

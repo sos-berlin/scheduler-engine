@@ -631,6 +631,11 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
         }
     }
 
+    if( modify_order_element.hasAttribute( "suspended" ) )
+    {
+        order->set_suspended( modify_order_element.bool_getAttribute( "suspended" ) );
+    }
+
     if( xml::Element_ptr run_time_element = modify_order_element.select_node( "run_time" ) )
     {
         order->set_run_time( run_time_element );
