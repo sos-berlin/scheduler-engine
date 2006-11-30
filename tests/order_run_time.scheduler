@@ -32,12 +32,12 @@ order.title = "Wir haben einen Auftrag!";
 //order.run_time.xml = '<run_time let_run="no" repeat="20"/>';  // let_run ist unsinn, nur zum test
 
 order.run_time.xml = "<run_time>" +
-                        "<date date='2006-11-19'>" +
+                        "<date date='2006-11-30'>" +
                             "<period begin='14:55:00' end='23:25:30' />" +
                             "<period single_start='14:55:50' />" +
                             "<period begin='14:55:30' end='23:34:50' />" +
                         "</date>" +             
-                        "<date date='2006-11-19'>" +
+                        "<date date='2006-11-30'>" +
                             "<period begin='14:55:30' end='21:34:50' />" +
                         "</date>" +
                         "<weekdays>" + 
