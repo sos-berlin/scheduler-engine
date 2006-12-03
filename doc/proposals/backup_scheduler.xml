@@ -1,0 +1,123 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id$-->
+
+<description
+    title               = "Backup-Scheduler"
+    base_dir            = "../"
+    parent_page         = "index.xml"
+    author              = "$Author$"
+    date                = "$Date$"
+    document_state      = "proposal"
+>
+    <p>
+        Ein zweiter Scheduler kann mit der Konfiguration des ersten gestartet werden.
+        Eine Kommandozeilenoption legt fest, dass der Scheduler sich bereithalten soll,
+        den ersten Scheduler zu ersetzen.
+    </p>
+
+    <p>
+        Eine Datenbank ist Voraussetzung.
+    </p>
+
+    <h3>Scheduler-Instanzen</h3>
+    <p>
+        Ich nenne den ersten und den zweiten Scheduler je eine Scheduler-Instanz.
+        Jede Instanz bekommt eine eigene Instanzenkennung, 
+        die möglichst automatisch und vorhersehbar gebildet werden wird,
+        z.B. aus Rechnername und TCP-Port.
+    </p>
+    <p>
+        Die Instanzenkennung kann vielleicht auch per Kommandozeilenoption vorgegeben werden:
+        <code>-instance-id=…</code>.
+    </p>
+
+    <p>
+        In der Datenbank trägt sich der erste Scheduler unter seiner Instanzenkennung
+        als laufende Instanz für die Scheduler-Id ein.
+    </p>
+    <pre>insert into scheduler_running_instances ( scheduler_id, scheduler_instance_id ) 
+    values ( "<i>scheduler_id</i>", "<i>scheduler_instance_id</i>" )</pre>
+
+
+
+    <h3>Herzschlag</h3>
+    <p>
+        Der erste Scheduler hat einen Datenbanksatz,
+        den er regelmäßig (minütlich) mit einem Zeitstempel versieht (Herzschlag).
+        <pre>update scheduler_instances
+    set last_heart_beat=sysdate(), next_heart_beat="<i>time</i>"
+    where scheduler_instance_id="<i>scheduler_instance_id</i>"</pre>
+    </p>
+
+    <h3>Überwachung des Herzschlags</h3>
+    <p>
+        Der zweite Scheduler überwacht das EKG des ersten.
+        Sobald dessen Herzschlag aussetzt 
+        (<code>next_heart_beat</code> und Nachfrist sind verstrichen),
+        trägt sich der zweite Scheduler als laufender Scheduler ein
+        und übernimmt den Betrieb.
+        Er hat die Rolle des ersten Schedulers und 
+        schreibt nun selbst seinen Herzschlag in die Datenbank.
+    </p>
+
+    <p>
+        Vielleicht prüft der zweite Scheduler vor der Übernahme zusätzlich per TCP,
+        ob der erste Scheduler erreichbar ist. 
+        <i>Aber was bedeutet es, wenn er erreichbar ist?</i>
+    </p>
+
+    <p>
+        Der Scheduler kann seinen Herzschlag nur in die Datenbank schreiben,
+        wenn er als laufender Scheduler eingetragen ist.
+        Das wird durch eine Where-Klausel geprüft.
+        Wenn er nicht mehr laufender Scheduler ist, bricht er sich und 
+        alle seine Tasks sofort ab.
+    </p>
+    <p>
+        Außerdem prüft der Scheduler nach jedem Schreiben des Herzschlags,
+        ob er sich verspätet hat,
+        und gibt in dem Fall eine Warnung aus.
+    </p>
+
+
+    <h3>Beide Instanzen sind gleichrangig</h3>
+    <p>
+        Der Scheduler, der sich zuerst in die Datenbank als laufende Instanz einträgt,
+        ist der laufende, der andere der Backup-Scheduler.
+    </p>
+    <p>
+        Wenn der Backup-Scheduler den Betrieb übernommen hat, ist er der laufende Scheduler,
+        während der neu startende erste Scheduler Backup-Scheduler wird.
+    </p>
+
+
+    <h3>Vorrang festlegen</h3>
+    <p>
+        Wenn ein Scheduler Vorrang haben soll, z.B. beim gleichzeitigen Start zweier Scheduler,
+        kann dem einen Scheduler eine Wartezeit vorgegeben werden.
+        Nur wenn während der Wartezeit sich der andere Scheduler nicht als laufende Instanz registriert,
+        übernimmt er den Betrieb.
+    </p>
+
+
+    <h3>Normales Beenden der laufenden Instanz</h3>
+    <p>
+        Wenn die laufende Instanz normal beendet wird, 
+        kann er dem Backup-Scheduler per UDP ein Telegramm über sein bevorstehendes Ableben schicken,
+        sodass der schneller reagieren kann.
+        <i>(Woher weiß er dessen UDP-Adresse?)</i>
+    </p>
+
+    
+    <h3>Details</h3>
+    <p>
+        Das genaues Verhalten mit Fristen und Nachfristen wird noch festgelegt.
+        Ebenso das Datenbankschema.
+    </p>
+
+    
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+</description>

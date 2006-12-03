@@ -26,7 +26,7 @@
     head_title          = "Dokumentation"
     base_dir            = ""
     suppress_browse_bar = "yes"
-    suppress_logo       = "yes" 
+  xxsuppress_logo       = "yes" 
     author              = "$Author$"
     date                = "$Date$"
 >
@@ -47,9 +47,9 @@
     <!--div style="float: right; width: 133px; margin-left: 3em; margin-right: 0em;">
         <img alt="logo" width="133" height="93" src="images/logo/job_scheduler_rabbit_circle_typo_colour_web_133x93.jpg"/>
     </div-->
-    <div style="float: right; width: 165px; height: 114px; position: relative; top: -5px; margin-left: 3em; margin-right: 1em;">
+    <!--verschmuddelt div style="float: right; width: 165px; height: 114px; position: relative; top: -5px; margin-left: 3em; margin-right: 1em;">
         <img alt="logo" width="165" height="114" src="images/logo/job_scheduler_rabbit_circle_typo_colour_165x114.jpg"/>
-    </div>
+    </div-->
 
     <h1 style="text-align: left; font-size: 18pt; margin-bottom: 2ex">Der Scheduler</h1>
 

@@ -218,6 +218,7 @@
             <xsd:attribute name="web_service"       type="Name"/>
             <xsd:attribute name="replace"           type="Yes_no"/>
             <xsd:attribute name="at"                type="Date_time_with_now"/>
+            <xsd:attribute name="suspended"         type="Yes_no"/>
         </xsd:complexType>
     </xsd:element>
 

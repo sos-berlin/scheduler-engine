@@ -784,7 +784,22 @@ function order_menu__onclick( job_chain_name, order_id, x, y )
 
     popup_builder.add_show_log( "Show log"        , "show_log?job_chain=" + job_chain_name +
                                                             "&order=" + order_id, "show_log_order_" + job_chain_name + "__" + order_id );
-    popup_builder.add_command ( "Remove"          , "<remove_order job_chain='" + job_chain_name + "' order='" + order_id + "' />" );
+    popup_builder.add_command ( "suspended=yes"   , "<modify_order job_chain='" + xml_encode_attribute( job_chain_name ) + "' order='" + xml_encode_attribute( order_id ) + "' suspended='yes' />" );
+    popup_builder.add_command ( "suspended=no"    , "<modify_order job_chain='" + xml_encode_attribute( job_chain_name ) + "' order='" + xml_encode_attribute( order_id ) + "' suspended='no' />" );
+    popup_builder.add_command ( "setback=no"      , "<modify_order job_chain='" + xml_encode_attribute( job_chain_name ) + "' order='" + xml_encode_attribute( order_id ) + "' setback='no' />" );
+    popup_builder.add_command ( "Remove"          , "<remove_order job_chain='" + xml_encode_attribute( job_chain_name ) + "' order='" + xml_encode_attribute( order_id ) + "' />" );
+
+    _popup_menu = popup_builder.show_popup_menu( x, y );
+}
+
+//----------------------------------------------------------------------history_order_menu__onclick
+
+function history_order_menu__onclick( job_chain_name, order_id, x, y )
+{
+    var popup_builder = new Popup_menu_builder();
+
+    popup_builder.add_show_log( "Show log"        , "show_log?job_chain=" + job_chain_name +
+                                                            "&order=" + order_id, "show_log_order_" + job_chain_name + "__" + order_id );
 
     _popup_menu = popup_builder.show_popup_menu( x, y );
 }
@@ -840,6 +855,14 @@ function xml_encode( text )
     if( text == null )  return "";
     return text.toString().replace( /&/g, "&amp;" ).replace( /</g, "&lt;" ).replace( />/g, "&gt;" );
     //TODO Reguläre Ausdrücke vorkompilieren
+}
+
+//-----------------------------------------------------------------------------xml_encode_attribute
+
+function xml_encode_attribute( text )
+{
+    if( text == null )  return "";
+    return xml_encode( text ).replace( /"/g, "&quot;" );
 }
 
 //-----------------------------------------------------------------------------------scheduler_init

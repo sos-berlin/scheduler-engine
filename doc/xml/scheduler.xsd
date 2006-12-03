@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- $Id: scheduler.xsd 4591 2006-11-03 12:49:06Z jz $ -->
+<!-- $Id: scheduler.xsd 4607 2006-11-30 09:10:11Z jz $ -->
 
 <xsd:schema 
     xmlns:xsd          = "http://www.w3.org/2001/XMLSchema" 
@@ -9,7 +9,7 @@
 
     <xsd:annotation>
         <xsd:documentation xml:lang="de">
-            $Id: scheduler.xsd 4591 2006-11-03 12:49:06Z jz $
+            $Id: scheduler.xsd 4607 2006-11-30 09:10:11Z jz $
             Schema für die Scheduler-Konfiguration,
             s.a. http://www.zschimmer.com/sos/scheduler/konfiguration.html.
         </xsd:documentation>
@@ -91,6 +91,10 @@
                 <xsd:element ref="start_job"/>
              <!--xsd:element ref="signal_object"/-->
                 <xsd:element ref="terminate"/>
+
+
+                <!-- Asynchron ausgeführte Kommandos -->
+                <xsd:element ref="get_events"/>
             </xsd:choice>
         </xsd:complexType>
     </xsd:element>
@@ -214,6 +218,7 @@
             <xsd:attribute name="web_service"       type="Name"/>
             <xsd:attribute name="replace"           type="Yes_no"/>
             <xsd:attribute name="at"                type="Date_time_with_now"/>
+            <xsd:attribute name="suspended"         type="Yes_no"/>
         </xsd:complexType>
     </xsd:element>
 
@@ -421,6 +426,7 @@
                             <xsd:attribute name="job"           type="Name"/>
                             <xsd:attribute name="next_state"    type="String"/>
                             <xsd:attribute name="error_state"   type="String"/>
+                            <xsd:attribute name="suspend"       type="Yes_no"/>
                         </xsd:complexType>
                     </xsd:element>
                     <xsd:element name="file_order_sink" maxOccurs="unbounded">
@@ -526,6 +532,7 @@
             <xsd:attribute name="priority"  type="xsd:integer"/>
             <xsd:attribute name="state"     type="String"/>
             <xsd:attribute name="setback"   type="No"/>
+            <xsd:attribute name="suspended" type="Yes_no"/>
         </xsd:complexType>
     </xsd:element>
 
@@ -951,6 +958,11 @@
     </xsd:element>
 
 
+    <xsd:element name="get_events">
+        <xsd:complexType/>
+    </xsd:element>
+    
+    
     <xsd:element name="web_services">
         <xsd:complexType>
             <xsd:sequence>

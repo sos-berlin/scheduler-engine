@@ -105,8 +105,7 @@ struct File_order_sink_module_instance : Internal_module_instance
                 if( result == false )  order->add_to_blacklist();
             }
 
-            //if( result == true  &&  job_chain_node->_next_state == job_chain_node->_state )  
-            order->set_finished();  //remove_from_job_chain();
+            order->set_end_state_reached();
         }
 
         return result;

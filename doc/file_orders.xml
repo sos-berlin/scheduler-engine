@@ -290,7 +290,7 @@
 
     <h2>Auftragsgesteuerte &lt;process>-Jobs</h2>
     <p>
-        Einen auftragsgesteuerter <scheduler_element name="process"/>-Job 
+        Einen auftragsgesteuerten <scheduler_element name="process"/>-Job 
         startet der Scheduler für jeden Dateiauftrag.
     </p>
     <p>

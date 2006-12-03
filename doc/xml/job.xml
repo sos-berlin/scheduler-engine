@@ -4,7 +4,7 @@
 <!--$Id$-->
 
 <xml_element name     = "job"
-             title    = "Definition eines Job"
+             title    = "Definition eines Jobs"
              category = "Konfiguration"
              base_dir = "../"
              parent_page = "../konfiguration.xml"

@@ -307,6 +307,8 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-988", "Job is being replaced now" },
     { "SCHEDULER-989", "Job cannot be removed now, it will be done later" },
     { "SCHEDULER-990", "Adding $1" },
+    { "SCHEDULER-991", "Order has been suspended" },
+    { "SCHEDULER-992", "Order ist not longer suspended, next start $1" },
     { "SCHEDULER-999", "Scheduler has been terminated properly" },
     {}
 };

@@ -1223,10 +1223,12 @@ void Spooler_db::update_order( Order* order )
 
                         update[ "state" ] = state_string;
                         
-                        if( order->_priority_modified   )  update[ "priority"   ] = order->priority()           ,  order->_state_text_modified = false;
-                        if( order->_title_modified      )  update[ "title"      ] = order->title()              ,  order->_title_modified      = false;
-                        if( order->_state_text_modified )  update[ "state_text" ] = order->state_text()         ,  order->_state_text_modified = false;
+                        if( order->_priority_modified   )  update[ "priority"   ] = order->priority();
+                        if( order->_title_modified      )  update[ "title"      ] = order->title();
+                        if( order->_state_text_modified )  update[ "state_text" ] = order->state_text();
 
+                        // _run_time_modified gilt nicht für den Datenbanksatz, sondern für den Aufragsneustart
+                        // Vorschlag: xxx_modified auflösen zugunsten eines gecachten letzten Datenbanksatzes, dessen Inhalt verglichen werden.
                         if( order->run_time() ) 
                         {
                             xml::Document_ptr doc = order->run_time()->dom_document();
@@ -1235,7 +1237,16 @@ void Spooler_db::update_order( Order* order )
                         }
                         else
                             update[ "run_time" ].set_direct( "null" );
-                            
+
+                        if( order->_order_xml_modified )
+                        {
+                            xml::Document_ptr order_document = order->dom( show_for_database_only );
+                            xml::Element_ptr  order_element  = order_document.documentElement();
+                            if( order_element.hasAttributes()  ||  order_element.firstChild() )
+                                update_orders_clob( order, "order_xml", order_document.xml() );
+                            else  
+                                update[ "order_xml" ].set_direct( "null" );
+                        }
 
                         update[ "initial_state" ] = order->initial_state().as_string();
 
@@ -1258,6 +1269,10 @@ void Spooler_db::update_order( Order* order )
                         ta.commit();
                     }
 
+                    order->_order_xml_modified  = false;            
+                    order->_state_text_modified = false; 
+                    order->_title_modified      = false;
+                    order->_state_text_modified = false;
                     break;
                 }
                 catch( exception& x )  

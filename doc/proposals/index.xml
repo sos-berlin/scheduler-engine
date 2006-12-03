@@ -11,6 +11,18 @@
     document_state      = "proposal"
 >
 
+
+
+    <p>
+        <scheduler_a href="extended_run_time.xml" quote="yes"/>
+    </p>
+
+
+    <p>
+        <scheduler_a href="backup_scheduler.xml" quote="yes"/>
+    </p>
+
+
     <p>
         <scheduler_a href="distributed_order_execution.xml" quote="yes"/>
     </p>

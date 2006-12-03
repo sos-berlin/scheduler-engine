@@ -73,8 +73,9 @@ struct Order : Com_order,
   //Job_chain*                  removed_from_job_chain  () const                                    { return _removed_from_job_chain; }
     Order_queue*                order_queue             ();
 
-    void                    set_finished                ()                                          { _finished = true; }
     bool                        finished                ();
+    void                    set_end_state_reached       ()                                          { _end_state_reached = true; }
+    bool                        end_state_reached       ();
 
     void                    set_job                     ( Job* );
     void                    set_job                     ( spooler_com::Ijob* );
@@ -138,7 +139,7 @@ struct Order : Com_order,
     void                    set_at                      ( const Time& );
     Time                        at                      ()                                          { return _setback; }
   //void                    set_run_time_xml            ( const string& );
-    Time                        start_time              ();
+    Time                        next_time               ();
     Time                        next_start_time         ( bool first_call = false );
 
     // Auftrag in einer Jobkette:
@@ -223,7 +224,7 @@ struct Order : Com_order,
     bool                       _delay_storing_until_processing;  // Erst in die Datenbank schreiben, wenn die erste Task die Verarbeitung beginnt
     bool                       _is_virgin;              // Noch von keiner Task berührt
     bool                       _is_virgin_in_this_run_time; // Wie _is_virgin, wird aber beim Erreichen des Endzustands wieder true gesetzt
-    bool                       _finished;               // Auftrag nach spooler_process() beenden
+    bool                       _end_state_reached;      // Auftrag nach spooler_process() beenden, für <file_order_sink>
 
     ptr<Web_service>           _web_service;
     ptr<http::Operation>       _http_operation;
@@ -283,19 +284,18 @@ struct Job_chain_node : Com_job_chain_node
 
     Fill_zero                  _zero_;
 
-    ptr<Job>                   _job;                    // NULL: Kein Job, Auftrag endet
-    bool                       _file_order_sink_remove;  // <file_order_sink remove="yes"/>
-    File_path                  _file_order_sink_move_to; // <file_order_sink move_to="..."/>
-    bool                       _suspend;                // <job_chain_node suspend="yes"/>
-
     Order::State               _state;                  // Bezeichnung des Zustands
 
     Order::State               _next_state;             // Bezeichnung des Folgezustands
-    Job_chain_node*            _next_node;              // Folgeknoten
-    
     Order::State               _error_state;            // Bezeichnung des Fehlerzustands
+
+    Job_chain_node*            _next_node;              // Folgeknoten
     Job_chain_node*            _error_node;             // Fehlerknoten
 
+    ptr<Job>                   _job;                    // NULL: Kein Job, Auftrag endet
+    bool                       _file_order_sink_remove; // <file_order_sink remove="yes"/>
+    File_path                  _file_order_sink_move_to;// <file_order_sink move_to="..."/>
+    bool                       _suspend;                // <job_chain_node suspend="yes"/>
     int                        _priority;               // Das ist die Entfernung zum letzten Knoten + 1, negativ (also -1, -2, -3, ...)
 };
 
@@ -429,7 +429,7 @@ struct Order_queue : Com_order_queue
 
     void                        close                   ();
     void                        add_order               ( Order*, Do_log = do_log );
-    void                        remove_order            ( Order* );
+    void                        remove_order            ( Order*, Do_log = do_log );
     void                        reinsert_order          ( Order* );
     int                         order_count             ( const Job_chain* = NULL );
     bool                        empty                   ()                                          { return _queue.empty(); }

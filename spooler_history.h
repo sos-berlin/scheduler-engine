@@ -74,8 +74,6 @@ struct Spooler_db : Object, Scheduler_object
     void                        write_order_history     ( Order*, Transaction* = NULL );
     void                        finish_order            ( Order*, Transaction* = NULL );
 
-  //void                        write_order_history     ( Order*, Transaction* = NULL );
-
     void                        execute                 ( const string& stmt );
     void                        commit                  ();
     void                        rollback                ();

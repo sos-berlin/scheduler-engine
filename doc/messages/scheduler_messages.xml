@@ -2952,6 +2952,18 @@
             </text>
         </message>
 
+        <message code="SCHEDULER-991">
+            <text xml:lang="en">
+                <title>Order has been suspended</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-992">
+            <text xml:lang="en">
+                <title>Order ist not longer suspended, next start <p1/></title>
+            </text>
+        </message>
+
         <message code="SCHEDULER-999">
             <text xml:lang="de">
                 <title>Scheduler ordentlich beendet</title>
