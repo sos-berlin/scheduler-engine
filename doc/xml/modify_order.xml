@@ -114,11 +114,11 @@
                     </li>
                 </ul>
                 <p>
-                    <code>at="now"</code> lässt einen wegen 
+                    <code>at="now"</code> setzt einen wegen 
                     <scheduler_method class="Order" property="run_time"/>
                     oder 
                     <scheduler_method class="Order" method="setback"/>
-                    wartenden Auftrag anlaufen.
+                    wartenden Auftrag fort.
                 </p>
                 <p>
                     Siehe auch <scheduler_element name="add_order" attribute="at"/> und <scheduler_method class="Order" property="at"/>.
