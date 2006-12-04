@@ -122,11 +122,11 @@ spooler_log.info( "initial_exit_code=" + initial_exit_code + "  wished_exit_code
 
                 <commands on_exit_code="3 7">
                     <add_order job_chain="my_job_chain" at="now">
-                        <params>
+                        <!--params>
                             <param name="param" value="3 7"/>
                             <param name="a"     value="aaa (sollte überschrieben werden)"/>
                             <copy_params from="task"/>
-                        </params>
+                        </params-->
                     </add_order>
                 </commands>
             </job>
@@ -210,6 +210,16 @@ function spooler_process()
                             <param name="mein_parameter" value="mein Wert"/>
                             <param name="mein_parameter2" value="mein Wert2"/>
                             <copy_params from="task"/>
+                        </params>
+                    </start_job>
+                </commands>
+
+                <commands on_exit_code="error">
+                    <!-- Kommentar -->
+                    <start_job job="following">
+                        <params>
+                            <param name="param" value="ERROR"/>
+                            <copy_params from="order"/>
                         </params>
                     </start_job>
                 </commands>
