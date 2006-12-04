@@ -1821,8 +1821,11 @@ void Task::process_on_exit_commands()
             cp.set_log( _log );
             cp.set_variable_set( "task", _params );
             
-            if( ptr<Com_variable_set> order_params = _order_for_task_end? _order_for_task_end->params_or_null() : NULL )
+            if( _job->order_controlled() )
+            {
+                ptr<Com_variable_set> order_params = _order_for_task_end? _order_for_task_end->params_or_null() : NULL;
                 cp.set_variable_set( "order", order_params );
+            }
 
             DOM_FOR_EACH_ELEMENT( commands_element, c )
             {

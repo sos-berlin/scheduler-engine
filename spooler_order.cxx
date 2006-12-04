@@ -1364,17 +1364,14 @@ void Order::set_dom( const xml::Element_ptr& element, Variable_set_map* variable
     string title            = element.getAttribute( "title"     );
     string state_name       = element.getAttribute( "state"     );
     string web_service_name = element.getAttribute( "web_service" );
-    string setback_string   = element.getAttribute( "at" );
-    //if( setback_string == "" )  
-    //    setback_string      = element.getAttribute( "setback" );        // So kommt's aus der Datenbank, siehe dom_element()
-
+    string at_string        = element.getAttribute( "at" );
 
     if( priority         != "" )  set_priority( as_int(priority) );
     if( id               != "" )  set_id      ( id.c_str() );
     if( title            != "" )  set_title   ( title );
     if( state_name       != "" )  set_state   ( state_name.c_str() );
     if( web_service_name != "" )  set_web_service( _spooler->_web_services.web_service_by_name( web_service_name ) );
-    if( setback_string   != "" )  set_setback ( Time::time_with_now( setback_string ) );
+    if( at_string        != "" )  set_at      ( Time::time_with_now( at_string ) );
 
     if( element.hasAttribute( "suspended" ) )
         set_suspended( element.bool_getAttribute( "suspended" ) );
@@ -2395,6 +2392,13 @@ void Order::set_suspended( bool suspended )
     }
 }
 
+//---------------------------------------------------------------------------------Order::start_now
+
+void Order::start_now()
+{
+    set_at( 0 );
+}
+
 //-----------------------------------------------------------------------------------Order::setback
 
 void Order::setback()
@@ -2460,19 +2464,6 @@ void Order::set_at( const Time& time )
     if( _moved      )  z::throw_xc( "SCHEDULER-188", obj_name() );
   //if( _job_chain  )  z::throw_xc( "SCHEDULER-186", obj_name(), _job_chain->name() );
 
-    /*
-    xml::Document_ptr run_time_dom;
-    run_time_dom.create();
-
-    xml::Element_ptr run_time_element = run_time_dom    .create_root_element( "run_time" );
-    xml::Element_ptr date_element     = run_time_element.append_new_element( "date" );
-    xml::Element_ptr day_element      = date_element    .append_new_element( "day" );
-
-    date_element.setAttribute( "date" , time.as_string().substr( 0, 10 ) );
-    day_element .setAttribute( "begin", time.as_string().substr( 11 ) );
-
-    set_run_time( run_time_element );
-    */
     set_setback( time );
 }
 

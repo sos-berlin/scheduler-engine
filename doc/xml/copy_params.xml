@@ -83,7 +83,7 @@
                         </ul>
                         <p>
                             Es ist ein Fehler (<scheduler_message code="SCHEDULER-329"/>),
-                            wenn die Task keinen Auftrag hat.
+                            wenn der Job nicht auftragsgesteuert ist (<scheduler_element name="job" attribute="order" value="no"/>).
                         </p>
                         <!--p>
                             wenn eine Task ohne Auftrag gestartet

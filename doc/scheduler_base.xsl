@@ -1446,7 +1446,17 @@
     <xsl:template match="scheduler_message" mode="description">
 
         <xsl:choose>
-            <xsl:when test="ancestor::p or parent::li">
+            <xsl:when test="ancestor::p">
+                <span class="message">
+                    <xsl:call-template name="scheduler_message">
+                        <xsl:with-param name="level"     select="@level"/>
+                        <xsl:with-param name="code"      select="@code"/>
+                        <xsl:with-param name="show_text" select="@show_text"/>
+                    </xsl:call-template>
+                </span>
+            </xsl:when>
+
+            <xsl:when test="parent::li">
                 <div class="message">
                     <xsl:call-template name="scheduler_message">
                         <xsl:with-param name="level"     select="@level"/>
@@ -1455,7 +1465,7 @@
                     </xsl:call-template>
                 </div>
             </xsl:when>
-            
+
             <xsl:otherwise>
                 <xsl:element name="p">
                     <xsl:attribute name="class">message</xsl:attribute>
@@ -2959,6 +2969,25 @@
 
     <xsl:template match="p4" mode="message">
         <span class="message_insertion"><xsl:copy-of select="node()"/>(4)</span>
+    </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_link_to_change_log-->
+
+    <xsl:template match="scheduler_link_to_change_log" mode="description">
+
+        <xsl:call-template name="scheduler_a">
+            <xsl:with-param name="href">CHANGES.xml</xsl:with-param>
+        </xsl:call-template>
+
+        <xsl:text> </xsl:text>
+        <xsl:variable name="change" select="document('CHANGES.xml')/changes/change[ position() = 1 ]"/>
+        <!--xsl:value-of select="$change/@version"/>
+        <xsl:text>.</xsl:text>
+        <xsl:value-of select="$change/@subversion_revision"/-->
+        <xsl:text> (</xsl:text>            
+        <xsl:value-of select="$change/@date"/>
+        <xsl:text>)</xsl:text>
+        
     </xsl:template>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~html_head-->

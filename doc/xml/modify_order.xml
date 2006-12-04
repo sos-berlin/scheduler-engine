@@ -90,6 +90,34 @@
             </description>
         </xml_attribute>
 
+        <xml_attribute name="at" type="timestamp" itle="Startzeit des Auftrags">
+            <description>
+                <p>
+                    <code>"now"</code>,
+                    <code>"yyyy-mm-dd HH:MM</code>[<code>:SS</code>]<code>"</code>,
+                    <code>"now + HH:MM</code>[<code>:SS</code>]<code>"</code> und
+                    <code>"now + SECONDS"</code>
+                    sind möglich.
+                </p>
+                <p>
+                    Ändert den nächsten Startzeitpunkt eines wartendenen Auftrags,
+                </p>
+                <ul>
+                    <li>
+                        dessen
+                        <scheduler_method class="Order" property="run_time"/> 
+                        noch nicht erreicht ist, oder
+                    </li>
+                    <li>
+                        der mit <scheduler_method class="Order" method="setback"/>
+                        zurückgestellt worden ist.
+                    </li>
+                </ul>
+                <p>
+                    Siehe auch <scheduler_element name="add_order" attribute="at"/> und <scheduler_method class="Order" property="at"/>.
+                </p>
+            </description>
+        </xml_attribute>
     </xml_attributes>
 
     <xml_child_elements>

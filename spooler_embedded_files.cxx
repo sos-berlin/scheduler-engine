@@ -1726,7 +1726,8 @@ const char file_html_z_scheduler_js[] =
     "\"&order=\" + order_id, \"show_log_order_\" + job_chain_name + \"__\" + order_id );\n"
     "popup_builder.add_command ( \"suspended=yes\"   , \"<modify_order job_chain='\" + xml_encode_attribute( job_chain_name ) + \"' order='\" + xml_encode_attribute( order_id ) + \"' suspended='yes' />\" );\n"
     "popup_builder.add_command ( \"suspended=no\"    , \"<modify_order job_chain='\" + xml_encode_attribute( job_chain_name ) + \"' order='\" + xml_encode_attribute( order_id ) + \"' suspended='no' />\" );\n"
-    "popup_builder.add_command ( \"setback=no\"      , \"<modify_order job_chain='\" + xml_encode_attribute( job_chain_name ) + \"' order='\" + xml_encode_attribute( order_id ) + \"' setback='no' />\" );\n"
+    "popup_builder.add_command ( \"Start now\"       , \"<modify_order job_chain='\" + xml_encode_attribute( job_chain_name ) + \"' order='\" + xml_encode_attribute( order_id ) + \"' at='now' />\" );\n"
+    "//popup_builder.add_command ( \"setback=no\"      , \"<modify_order job_chain='\" + xml_encode_attribute( job_chain_name ) + \"' order='\" + xml_encode_attribute( order_id ) + \"' setback='no' />\" );\n"
     "popup_builder.add_command ( \"Remove\"          , \"<remove_order job_chain='\" + xml_encode_attribute( job_chain_name ) + \"' order='\" + xml_encode_attribute( order_id ) + \"' />\" );\n"
     "\n"
     "_popup_menu = popup_builder.show_popup_menu( x, y );\n"
@@ -5745,13 +5746,13 @@ static const Embedded_file embedded_files_array[] =
     { "html/z/left_frame.html", file_html_z_left_frame_html, sizeof file_html_z_left_frame_html - 1, 1162029282 },
     { "html/z/browser_dependencies.js", file_html_z_browser_dependencies_js, sizeof file_html_z_browser_dependencies_js - 1, 1162029282 },
     { "html/z/popup_menu.js", file_html_z_popup_menu_js, sizeof file_html_z_popup_menu_js - 1, 1162029282 },
-    { "html/z/scheduler.js", file_html_z_scheduler_js, sizeof file_html_z_scheduler_js - 1, 1164903896 },
+    { "html/z/scheduler.js", file_html_z_scheduler_js, sizeof file_html_z_scheduler_js - 1, 1165216561 },
     { "html/z/show_log.js", file_html_z_show_log_js, sizeof file_html_z_show_log_js - 1, 1162029282 },
     { "html/z/translation_de.js", file_html_z_translation_de_js, sizeof file_html_z_translation_de_js - 1, 1162029282 },
-    { "html/z/scheduler.xslt", file_html_z_scheduler_xslt, sizeof file_html_z_scheduler_xslt - 1, 1164977773 },
+    { "html/z/scheduler.xslt", file_html_z_scheduler_xslt, sizeof file_html_z_scheduler_xslt - 1, 1165167653 },
     { "html/z/scheduler.css", file_html_z_scheduler_css, sizeof file_html_z_scheduler_css - 1, 1162029282 },
     { "html/z/job_scheduler_rabbit_circle_45x45.gif", file_html_z_job_scheduler_rabbit_circle_45x45_gif, sizeof file_html_z_job_scheduler_rabbit_circle_45x45_gif - 1, 1164977749 },
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1164962796 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1165167653 },
     { NULL, NULL, 0 }
 };
 

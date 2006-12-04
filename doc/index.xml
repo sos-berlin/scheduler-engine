@@ -189,7 +189,8 @@
                 <table style="margin-top: 1em">
                     <tr>
                         <td style="font-size: 8pt">
-                            &#x2192;<scheduler_a href="CHANGES.xml"/>
+                            &#x2192;<scheduler_link_to_change_log/>
+                            <!--scheduler_a href="CHANGES.xml"/-->
                         </td>
                         <td style="padding-left: 2em; font-size: 8pt">
                             &#x2192;<scheduler_a href="proposals/index.xml"/>

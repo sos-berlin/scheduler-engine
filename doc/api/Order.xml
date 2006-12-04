@@ -654,47 +654,46 @@ $spooler->job_chain( "my_job_chain" )->add_order( $order );</pre>
     </messages>
 </property>
 
-<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<property name="suspended">
-    <com>
-        <com.result>
-            <com.type type="bool"/>
-        </com.result>        
-    </com>
+    <property name="suspended">
+        <com>
+            <com.result>
+                <com.type type="bool"/>
+            </com.result>        
+        </com>
 
-    <title>
-        Ausgesetzer Auftrag
-    </title>
+        <title>
+            Ausgesetzer Auftrag
+        </title>
 
-    <description>
-        <p><span class="work_in_progress">— Noch nicht implementiert —</span></p>
-        <p>
-            Ein ausgesetzter Auftrag wird nicht ausgeführt.
-        </p>
-        <p>
-            Wenn der Auftrag gerade von einer Task ausgeführt wird, 
-            wird der Schritt (<scheduler_method class="Job_impl" method="spooler_process"/>) noch
-            zu Ende ausgeführt und der Auftrag nach den gewohnten Regeln in den Folgezustand versetzt,
-            bevor er tatsächlich ausgesetzt wird.
-        </p>
-        <p>
-            Damit kann ein Auftrag in einen Endzustand ausgesetzt werden,
-            womit verhindet wird, dass er entfernt wird.
-            Erst wenn die Aussetzung eines solchen Auftrags aufgehoben wird
-            (<code>order.suspended=false</code>),
-            entfernt der Scheduler den Auftrag.
-        </p>
-        <p>
-            Ein ausgesetzter Auftrag im Endzustand kann mit 
-            <scheduler_method class="Order" property="state"/> in einen Zustand versetzt werden,
-            der einem Job zugeordnet ist.
-            Der Auftrag bleibt dennoch ausgesetzt.
-        </p>
-    </description>
-</property>
+        <description>
+            <p>
+                Ein ausgesetzter Auftrag wird nicht ausgeführt.
+            </p>
+            <p>
+                Wenn der Auftrag gerade von einer Task ausgeführt wird, 
+                wird der Schritt (<scheduler_method class="Job_impl" method="spooler_process"/>) noch
+                zu Ende ausgeführt und der Auftrag nach den gewohnten Regeln in den Folgezustand versetzt,
+                bevor er tatsächlich ausgesetzt wird.
+            </p>
+            <p>
+                Damit kann ein Auftrag in einen Endzustand ausgesetzt werden,
+                womit verhindet wird, dass er entfernt wird.
+                Erst wenn die Aussetzung eines solchen Auftrags aufgehoben wird,
+                (<code>order.suspended=false</code>),
+                entfernt der Scheduler den Auftrag.
+            </p>
+            <p>
+                Ein ausgesetzter Auftrag im Endzustand kann mit 
+                <scheduler_method class="Order" property="state"/> in einen Zustand versetzt werden,
+                der einem Job zugeordnet ist.
+                Der Auftrag bleibt dennoch ausgesetzt.
+            </p>
+        </description>
+    </property>
 
-<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <title>
     Auftrag

@@ -270,8 +270,7 @@
     <pre>&lt;supervisor>
     &lt;supervisor_proxy proxy="…"/>
     &lt;supervisor_proxy proxy="…"/>
-&lt;/supervisor>
-    </pre>
+&lt;/supervisor></pre>
 
 
     

@@ -368,7 +368,7 @@ void Com_variable_set::set_dom( const xml::Element_ptr& params, Variable_set_map
                 Variable_set_map::iterator it = variable_sets->find( from );
                 if( it == variable_sets->end() )  z::throw_xc( "SCHEDULER-329", from );
 
-                merge( it->second );
+                if( it->second )  merge( it->second );
             }
         }
     }
@@ -4316,6 +4316,7 @@ const Com_method Com_order::_methods[] =
     { DISPATCH_PROPERTYGET, 24, "Params"                    , (Com_method_ptr)&Com_order::get_Params            , VT_DISPATCH   },
     { DISPATCH_PROPERTYPUT, 25, "Suspended"                 , (Com_method_ptr)&Com_order::put_Suspended         , VT_EMPTY      , { VT_BOOL } },
     { DISPATCH_PROPERTYGET, 25, "Suspended"                 , (Com_method_ptr)&Com_order::get_Suspended         , VT_BOOL       },
+  //{ DISPATCH_METHOD     , 26, "Start_now"                 , (Com_method_ptr)&Com_order::Start_now             , VT_EMPTY      },
     {}
 };
 
@@ -5142,7 +5143,25 @@ STDMETHODIMP Com_order::get_Suspended( VARIANT_BOOL* result )
     return hr;
 }
 
-//-----------------------------------------------------------------------Com_order_queue::_methods
+//-----------------------------------------------------------------------------Com_order::Start_now
+/*
+STDMETHODIMP Com_order::Start_now()
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_order )  return E_POINTER;
+
+        _order->start_now();
+    }
+    catch( const exception& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+*/
+//------------------------------------------------------------------------Com_order_queue::_methods
 #ifdef Z_COM
 
 const Com_method Com_order_queue::_methods[] =

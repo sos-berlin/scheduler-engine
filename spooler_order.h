@@ -132,6 +132,7 @@ struct Order : Com_order,
     bool                        suspended               ()                                          { return _suspended; }
     void                    set_suspended               ( bool b = true );
 
+    void                        start_now               ();
     void                        setback                 ();
     void                    set_setback                 ( const Time&, bool keep_setback_count = false );
     void                        clear_setback           ( bool keep_setback_count = false );

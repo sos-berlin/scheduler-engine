@@ -605,6 +605,7 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
     Order::Id id             = modify_order_element.getAttribute( "order"     );
     string    priority       = modify_order_element.getAttribute( "priority"  );
     string    state          = modify_order_element.getAttribute( "state"  );
+    string    at             = modify_order_element.getAttribute( "at" );
 
     ptr<Job_chain> job_chain = _spooler->job_chain( job_chain_name );
     ptr<Order>     order     = job_chain->order( id );
@@ -616,6 +617,8 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
         order->assert_no_task();
         order->set_state( state );
     }
+
+    if( at != "" )  order->set_at( Time::time_with_now( at ) );
 
     if( modify_order_element.hasAttribute( "setback" ) )
     {

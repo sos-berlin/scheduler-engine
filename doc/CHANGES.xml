@@ -11,8 +11,8 @@
     <scheduler_keyword keyword="Change log"/>
 
 
-    <change date="2006-11-30" version="2.0.161" subversion_revision="4608">
-        <!--revision type="new" title="Order.suspend()">
+    <change date="2006-12-04" version="2.0.161" subversion_revision="4612">
+        <revision type="new" title="Order.suspend()">
             <description>
                 <p>
                     Aufträge können angehalten werden.
@@ -27,7 +27,16 @@
                 </ul>
 
             </description>
-        </revision-->
+        </revision>
+
+        <revision type="modification" title="&lt;copy_params from=&quot;order&quot;">
+            <description>
+                <p>
+                    <scheduler_element name="copy_params" attribute="from" value="order"/>
+                    akzeptiert jetzt auch Aufträge ohne Parameter.
+                </p>
+            </description>
+        </revision>
     </change>
 
     <change date="2006-11-22" version="2.0.160" subversion_revision="4598">

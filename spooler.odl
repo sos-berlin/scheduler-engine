@@ -1082,6 +1082,8 @@ library Spooler
 
         [propget]
         HRESULT                 Suspended               ( [out,retval] VARIANT_BOOL* );
+
+      //HRESULT                 Start_now               ();
     }
 
     [
