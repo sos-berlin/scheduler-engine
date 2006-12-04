@@ -289,7 +289,7 @@ Job_chain::~Job_chain()
 
 void Job_chain::close()
 {
-    Z_LOGI2( "scheduler", *this << ".close()\n" );
+    Z_LOGI2( "scheduler", obj_name() << ".close()\n" );
     remove_all_pending_orders( true );
     _blacklist_map.clear();
     _order_sources.close();

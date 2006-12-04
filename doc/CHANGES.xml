@@ -36,7 +36,7 @@
                     setzt einen wegen 
                     <scheduler_method class="Order" property="run_time"/>
                     oder
-                    <scheduler_method class="order" method="setback"/>
+                    <scheduler_method class="Order" method="setback"/>
                     wartenden Auftrag fort.
                 </p>
             </description>

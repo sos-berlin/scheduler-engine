@@ -620,7 +620,9 @@ void Communication::close( double wait_time )
 
 void Communication::finish_responses( double wait_time )
 {
-    FOR_EACH( Connection_list, _connection_list, it )
+    Connection_list copy = _connection_list;        // Nicht über Original-Liste laufen, die kann verändert werden
+
+    FOR_EACH( Connection_list, copy, it )
     {
         ptr<Connection> connection = *it;
         connection->async_continue();

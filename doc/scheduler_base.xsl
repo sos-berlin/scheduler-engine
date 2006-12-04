@@ -2104,7 +2104,7 @@
                 </xsl:call-template>
             </xsl:when>
 
-            <xsl:when test="local-name( $root_element ) = 'api.class'">
+            <xsl:when test="local-name( $root_element ) = 'api.class' and $root_element/@name != 'api'">
                 <xsl:call-template name="scheduler_method">
                     <xsl:with-param name="class" select="$root_element/@name"/>
                 </xsl:call-template>
