@@ -5746,7 +5746,7 @@ static const Embedded_file embedded_files_array[] =
     { "html/z/left_frame.html", file_html_z_left_frame_html, sizeof file_html_z_left_frame_html - 1, 1162029282 },
     { "html/z/browser_dependencies.js", file_html_z_browser_dependencies_js, sizeof file_html_z_browser_dependencies_js - 1, 1162029282 },
     { "html/z/popup_menu.js", file_html_z_popup_menu_js, sizeof file_html_z_popup_menu_js - 1, 1162029282 },
-    { "html/z/scheduler.js", file_html_z_scheduler_js, sizeof file_html_z_scheduler_js - 1, 1165216561 },
+    { "html/z/scheduler.js", file_html_z_scheduler_js, sizeof file_html_z_scheduler_js - 1, 1165219596 },
     { "html/z/show_log.js", file_html_z_show_log_js, sizeof file_html_z_show_log_js - 1, 1162029282 },
     { "html/z/translation_de.js", file_html_z_translation_de_js, sizeof file_html_z_translation_de_js - 1, 1162029282 },
     { "html/z/scheduler.xslt", file_html_z_scheduler_xslt, sizeof file_html_z_scheduler_xslt - 1, 1165167653 },

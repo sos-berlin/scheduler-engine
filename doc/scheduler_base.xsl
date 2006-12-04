@@ -2094,35 +2094,62 @@
         <xsl:param name="content"/>
         <xsl:param name="base_dir" select="/*/@base_dir"/>
 
-        <xsl:if test="$quote">
-            <xsl:text>»</xsl:text>
-        </xsl:if>
+        <xsl:variable name="root_element" select="document( $href )/*"/>
+        <xsl:variable name="root_title"   select="normalize-space( $root_element/@title )"/>
 
-        <xsl:element name="a">
-            <xsl:attribute name="href">
-                <xsl:value-of select="$base_dir"/>
-                <xsl:value-of select="$href"/>
-            </xsl:attribute>
+        <xsl:choose>
+            <xsl:when test="local-name( $root_element ) = 'xml_element'">
+                <xsl:call-template name="scheduler_element">
+                    <xsl:with-param name="name" select="$root_element/@name"/>
+                </xsl:call-template>
+            </xsl:when>
 
-            <xsl:variable name="root_element" select="document( $href )/*"/>
-            <xsl:variable name="root_title"   select="normalize-space( $root_element/@title )"/>
+            <xsl:when test="local-name( $root_element ) = 'api.class'">
+                <xsl:call-template name="scheduler_method">
+                    <xsl:with-param name="class" select="$root_element/@name"/>
+                </xsl:call-template>
+            </xsl:when>
 
-            <xsl:choose>
-                <xsl:when test="$content">
-                    <xsl:attribute name="title">
-                        <xsl:copy-of select="$root_title"/>
+            <xsl:when test="local-name( $root_element ) = 'ini_section'">
+                <xsl:call-template name="scheduler_method">
+                    <xsl:with-param name="file" select="$root_element/@file"/>
+                    <xsl:with-param name="section" select="$root_element/@name"/>
+                </xsl:call-template>
+            </xsl:when>
+
+            <xsl:otherwise>
+                <xsl:if test="$quote">
+                    <xsl:text>»</xsl:text>
+                </xsl:if>
+
+                <xsl:element name="a">
+                    <xsl:attribute name="href">
+                        <xsl:value-of select="$base_dir"/>
+                        <xsl:value-of select="$href"/>
                     </xsl:attribute>
-                    <xsl:copy-of select="$content"/>
-                </xsl:when>
-                <xsl:otherwise>
-                    <xsl:copy-of select="$root_title"/>
-                </xsl:otherwise>
-            </xsl:choose>
-        </xsl:element>
 
-        <xsl:if test="$quote">
-            <xsl:text>«</xsl:text>
-        </xsl:if>
+                    <xsl:choose>
+                        <xsl:when test="$content">
+                            <xsl:attribute name="title">
+                                <xsl:copy-of select="$root_title"/>
+                            </xsl:attribute>
+                            <xsl:copy-of select="$content"/>
+                        </xsl:when>
+
+                        <xsl:when test="$root_title">
+                            <xsl:copy-of select="$root_title"/>
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <code><xsl:value-of select="$href"/></code>
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </xsl:element>
+
+                <xsl:if test="$quote">
+                    <xsl:text>«</xsl:text>
+                </xsl:if>
+            </xsl:otherwise>
+        </xsl:choose>
 
     </xsl:template>
 
@@ -2872,7 +2899,7 @@
     <xsl:template match="message" mode="tr">
 
         <tr>
-            <td rowspan="2" style="padding-right: 1ex;">
+            <td class="message" style="padding-right: 1ex;">
                 <xsl:element name="a">
                     <xsl:attribute name="name">message_<xsl:value-of select="@code"/></xsl:attribute>
                 </xsl:element>
@@ -2881,23 +2908,80 @@
                     <xsl:value-of select="@code"/>
                 </code>
             </td>
-            <td style="padding-left: 1ex; padding-right: 1ex;">
+            <td class="message" style="padding-left: 1ex; padding-right: 1ex;">
                 en:
             </td>
-            <td style="padding-left: 1ex; padding-right: 1ex;">
-                <xsl:apply-templates select="text[ @xml:lang='en' ]"/>
+            <td class="message" style="padding-left: 1ex; padding-right: 1ex;">
+                <xsl:apply-templates select="text[ @xml:lang='en' ]/title"/>
             </td>
         </tr>
         
-        <tr>
-            <td style="padding-left: 1ex; padding-right: 1ex; background-color: #f8f8ff;">
-                de:
-            </td>
-            <td style="padding-left: 1ex; padding-right: 1ex; background-color: #f8f8ff;">
-                <xsl:apply-templates select="text[ @xml:lang='de' ]"/>
-            </td>
-        </tr>
-        
+        <xsl:if test="text[ @xml:lang='en' ]/description">
+            <tr>
+                <td></td>
+                <td></td>
+                <td style="padding-left: 1ex; padding-right: 1ex;">
+                    <div style="margin-top: 6pt;">
+                        <xsl:apply-templates select="text[ @xml:lang='en' ]/description"/>
+                    </div>
+                </td>
+            </tr>
+        </xsl:if>
+
+        <xsl:if test="text[ @xml:lang='de' ]">
+            <tr>
+                <td> </td>
+                <td style="padding-left: 1ex; padding-right: 1ex;"><!--background-color: #f8f8ff;"-->
+                    de:
+                </td>
+                <td style="padding-left: 1ex; padding-right: 1ex;"><!--background-color: #f8f8ff;"-->
+                    <xsl:apply-templates select="text[ @xml:lang='de' ]"/>
+                </td>
+            </tr>
+            
+            <xsl:if test="description">
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td style="padding-left: 1ex; padding-right: 1ex;">
+                        <div style="margin-top: 6pt;">
+                            <xsl:apply-templates select="description"/>
+                        </div>
+                    </td>
+                </tr>
+            </xsl:if>
+        </xsl:if>
+
+
+        <xsl:variable name="files" select="document( 'files.xml' )/files/file 
+                                            [    document( @path )//scheduler_message [ @code=current()/@code ]
+                                              or document( @path )//message           [ @code=current()/@code ] ]"/>
+        <xsl:if test="$files">
+            <tr>
+                <td></td>
+                <td style="padding-left: 1ex;">
+                    &#x2192;
+                </td>
+                <td colspan="99" style="padding-left: 1ex; padding-right: 1ex;">
+                    <xsl:variable name="my_root" select="/*"/>
+                    <xsl:for-each select="$files">
+                        <xsl:call-template name="scheduler_a">
+                            <xsl:with-param name="href" select="@path"/>
+                            <xsl:with-param name="base_dir" select="$my_root/@base_dir"/>
+                            <xsl:with-param name="quote" select="'yes'"/>
+                        </xsl:call-template>
+
+                        <!--xsl:variable name="references" select="document( @path )/*/scheduler_message [ @code=current()/@code ]
+                                                                 | document( @path )/*/message           [ @code=current()/@code ] "/-->
+                        
+                        <xsl:if test="position() &lt; last()">
+                            <xsl:text>, &#160; </xsl:text>
+                        </xsl:if>
+                    </xsl:for-each>
+                </td>
+            </tr>
+        </xsl:if>
+
         <xsl:if test="position() != last()">
             <tr>
                 <td colspan="99" style="border-bottom: 1px solid white; line-height: 4pt">

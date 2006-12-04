@@ -315,6 +315,11 @@
             ohne diesen Aufruf zu Ende ausgeführt worden ist.
             Beim Start des Schedulers sind alle Zähler 0.
         </p>
+        <p>
+            Das Kommando
+            <scheduler_element name="modify_order" attribute="at" value="now"/> 
+            lässt einen zugestellten Auftrag sofort anlaufen.
+        </p>
     </description>
 
     <messages>
@@ -341,7 +346,14 @@
     </title>
 
     <description>
-        Siehe <scheduler_element name="run_time"/>.
+        <p>
+            Siehe <scheduler_element name="run_time"/>.
+        </p>
+        <p>
+            Das Kommando
+            <scheduler_element name="modify_order" attribute="at" value="now"/>
+            lässt einen wartenden Auftrag sofort anlaufen.
+        </p>
     </description>
 
     <example programming_language="javascript">
@@ -628,6 +640,13 @@
                 <code>"now + </code><i>seconds</i><code>"</code>
             </li>
         </ul>
+        <p>
+            Die Einstellung ändert die von 
+            <scheduler_method class="Order" property="run_time"/> 
+            oder
+            <scheduler_method class="Order" method="setback"/>
+            vorgegebene Startzeit.
+        </p>
         <p>
             Siehe <scheduler_element name="add_order" attribute="at"/>.
         </p>
