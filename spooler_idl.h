@@ -601,7 +601,7 @@ struct Iorder : IDispatch
     virtual HRESULT     put_Suspended               ( VARIANT_BOOL )                                = 0;
     virtual HRESULT     get_Suspended               ( VARIANT_BOOL* )                               = 0;
 
-    virtual HRESULT         Start_now               ()                                              = 0;
+  //virtual HRESULT         Start_now               ()                                              = 0;
 };
 
 //--------------------------------------------------------------------Remote_module_instance_server
