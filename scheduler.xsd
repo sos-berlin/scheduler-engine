@@ -47,6 +47,7 @@
                         <xsd:attribute name="port"                  type="xsd:nonNegativeInteger"/>
                         <xsd:attribute name="tcp_port"              type="xsd:nonNegativeInteger"/>
                         <xsd:attribute name="udp_port"              type="xsd:nonNegativeInteger"/>
+                        <xsd:attribute name="ip_address"            type="String"/>
                         <xsd:attribute name="param"                 type="String"/>
                         <xsd:attribute name="log_dir"               type="File"/>
                         <xsd:attribute name="priority_max"          type="xsd:nonNegativeInteger"/>

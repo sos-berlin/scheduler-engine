@@ -693,6 +693,9 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
     if( _udp_port )
     state_element.setAttribute( "udp_port"             , _udp_port );
 
+    if( _ip_address )
+    state_element.setAttribute( "ip_address"           , _ip_address.ip_string() );
+
     if( _db )
     {
         THREAD_LOCK( _lock )
@@ -1834,6 +1837,8 @@ void Spooler::load_arg()
             if( opt.with_value( "tcp-port"         ) )  _tcp_port = opt.as_int(),  _tcp_port_as_option_set = true;
             else
             if( opt.with_value( "udp-port"         ) )  _udp_port = opt.as_int(),  _udp_port_as_option_set = true;
+            else
+            if( opt.with_value( "ip-address"       ) )  _ip_address = opt.value(),  _ip_address_as_option_set = true;
             else
             if( opt.flag      ( "ignore-process-classes" ) )  _ignore_process_classes = opt.set();
             else

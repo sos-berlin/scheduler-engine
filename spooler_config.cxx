@@ -326,6 +326,9 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const Time& x
             _udp_port  = config_element.int_getAttribute( "udp_port"     , _udp_port     );
         }
 
+        if( !_ip_address_as_option_set )
+            _ip_address = config_element.getAttribute( "ip_address" );
+
         _priority_max  = config_element.int_getAttribute( "priority_max" , _priority_max );
 
 #     ifdef _DEBUG

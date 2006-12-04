@@ -208,6 +208,29 @@ log = scheduler.wait com_server.* >scheduler.log</pre>
         </description>
     </setting>
 
+    
+    <setting setting = "ip_address" 
+             type    = "ip_number" 
+             initial = "0.0.0.0" 
+             title   = "IP-Adresse der Schnittstelle für TCP und UDP">
+        <description>
+            <p>
+                Die IP-Adresse, an die TCP- und UDP-Port gebunden werden.
+                Der Scheduler ist dann nur über diese IP-Adresse erreichbar.
+            </p>
+            <p>
+                Ein Hostname kann angegeben werden.
+            </p>
+            <p>
+                Default ist 0.0.0.0, was für alle IP-Adressen steht.
+            </p>
+            <p>
+                Wenn eine andere IP-Adresse als 127.0.0.1 oder localhost angegeben ist,
+                kann der Scheduler nicht über localhost erreicht werden.
+            </p>
+        </description>
+    </setting>
+
 
     <setting setting= "log_level"
              type   = "log_level"

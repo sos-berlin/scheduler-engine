@@ -803,7 +803,7 @@
                         <td style="padding-left: 1ex">
                             <xsl:call-template name="scheduler_option">
                                 <xsl:with-param name="name"  select="$command_option/@name"/>
-                                <xsl:with-param name="value" select="document( 'settings.xml' )/settings/setting[ @setting = current()/@setting ]/@initial"/>
+                                <!--xsl:with-param name="value" select="document( 'settings.xml' )/settings/setting[ @setting = current()/@setting ]/@initial"/-->
                             </xsl:call-template>
                         </td>
 
@@ -823,7 +823,7 @@
                             <td style="padding-left: 1ex">
                                 <xsl:call-template name="scheduler_option">
                                     <xsl:with-param name="name"  select="$command_option/@name"/>
-                                    <xsl:with-param name="value" select="document( 'settings.xml' )/settings/setting[ @setting = current()/@setting ]/@initial"/>
+                                    <!--xsl:with-param name="value" select="document( 'settings.xml' )/settings/setting[ @setting = current()/@setting ]/@initial"/-->
                                 </xsl:call-template>
                             </td>
 
@@ -867,7 +867,7 @@
                                 <xsl:with-param name="file"    select="ancestor::ini_section/@file"/>
                                 <xsl:with-param name="section" select="ancestor::ini_section/@name"/>
                                 <xsl:with-param name="entry"   select="@name | @setting"/>
-                                <xsl:with-param name="value"   select="document( 'settings.xml' )/settings/setting[ @setting = current()/@setting ]/@initial"/>
+                                <!--xsl:with-param name="value"   select="document( 'settings.xml' )/settings/setting[ @setting = current()/@setting ]/@initial"/-->
                             </xsl:call-template>
                         </td>
 
@@ -889,7 +889,7 @@
                                     <xsl:with-param name="file"    select="ancestor::ini_section/@file"/>
                                     <xsl:with-param name="section" select="ancestor::ini_section/@name"/>
                                     <xsl:with-param name="entry"   select="@name | @setting"/>
-                                    <xsl:with-param name="value"   select="document( 'settings.xml' )/settings/setting[ @setting = current()/@setting ]/@initial"/>
+                                    <!--xsl:with-param name="value"   select="document( 'settings.xml' )/settings/setting[ @setting = current()/@setting ]/@initial"/-->
                                 </xsl:call-template>
                             </td>
 

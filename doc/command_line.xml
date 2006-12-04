@@ -78,6 +78,8 @@
             </description>
         </command_option>
 
+        <command_option name="ip-address"   setting="ip_address"/>
+
         <command_option name="reuse-port" title="TCP- und UDP-Port wiederverwenden (im Notfall)">
             <description>
                 <p>

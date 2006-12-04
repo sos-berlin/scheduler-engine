@@ -115,6 +115,8 @@
         <xml_attribute setting="java_class_path"/>
         <xml_attribute setting="java_options"/>
 
+        <xml_attribute setting="ip_address"/>
+
     </xml_attributes>
 
 

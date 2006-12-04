@@ -181,7 +181,8 @@ bool Communication::Udp_socket::async_continue_( Continue_flags )
         sockaddr_in    addr;     
         sockaddrlen_t  addr_len = sizeof addr;
 
-        addr.sin_addr.s_addr = 0;
+        addr.sin_addr = _spooler->_ip_address.as_in_addr();     // 0.0.0.0: Über alle Schnittstellen erreichbar
+
         int len = recvfrom( _read_socket, buffer, sizeof buffer, 0, (sockaddr*)&addr, &addr_len );
         if( len > 0 ) 
         {
@@ -744,9 +745,9 @@ void Communication::bind()
 
                 //_udp_socket.set_linger( false );
                 
-                sa.sin_port        = htons( _spooler->udp_port() );
-                sa.sin_family      = AF_INET;
-                sa.sin_addr.s_addr = 0; // INADDR_ANY
+                sa.sin_port   = htons( _spooler->udp_port() );
+                sa.sin_family = AF_INET;
+                sa.sin_addr   = _spooler->_ip_address.as_in_addr();     // 0.0.0.0: Über alle Schnittstellen erreichbar
 
                 ret = bind_socket( _udp_socket._read_socket, &sa, "UDP" );
                 if( ret == SOCKET_ERROR )  throw_socket( socket_errno(), "udp-bind ", as_string(_spooler->udp_port()).c_str() );
@@ -759,7 +760,11 @@ void Communication::bind()
 
                 _udp_socket.set_event_name( S() << "UDP:" << ntohs( sa.sin_port ) );
 
-                _spooler->log()->info( message_string( "SCHEDULER-956", "UDP", _udp_port ) );    // "Scheduler erwartet Kommandos über UDP-Port " + sos::as_string(_udp_port) );
+                {
+                    Message_string m ( "SCHEDULER-956", "UDP", _udp_port );     // "Scheduler erwartet Kommandos über $1-Port " 
+                    if( sa.sin_addr.s_addr )  m.insert_string( 2, Ip_address( sa.sin_addr ).as_string() );    
+                    _spooler->log()->info( m );
+                }
             }
         }
 
@@ -786,9 +791,9 @@ void Communication::bind()
 
                 //_listen_socket.set_linger( false );
                 
-                sa.sin_port        = htons( _spooler->tcp_port() );
-                sa.sin_family      = AF_INET;
-                sa.sin_addr.s_addr = 0; // INADDR_ANY
+                sa.sin_port   = htons( _spooler->tcp_port() );
+                sa.sin_family = AF_INET;
+                sa.sin_addr   = _spooler->_ip_address.as_in_addr();     // 0.0.0.0: Über alle Schnittstellen erreichbar
 
                 ret = bind_socket( _listen_socket._read_socket, &sa, "TCP" );
                 if( ret == SOCKET_ERROR )  throw_socket( socket_errno(), "tcp-bind", as_string(_spooler->tcp_port()).c_str() );
@@ -803,7 +808,11 @@ void Communication::bind()
                 _tcp_port = _spooler->tcp_port();
                 _rebound = true;
 
-                _spooler->log()->info( message_string( "SCHEDULER-956", "TCP", _tcp_port ) );    // "Scheduler erwartet Kommandos über $1-Port " 
+                {
+                    Message_string m ( "SCHEDULER-956", "TCP", _tcp_port );     // "Scheduler erwartet Kommandos über $1-Port " 
+                    if( sa.sin_addr.s_addr )  m.insert_string( 2, Ip_address( sa.sin_addr ).as_string() );    
+                    _spooler->log()->info( m );
+                }
             }
         }
 
