@@ -746,7 +746,7 @@ void Scheduler_member::make_scheduler_member_id()
 
 string Scheduler_member::obj_name() const
 { 
-    return "Distributed Scheduler";   // + _scheduler_member_id;
+    return "Distributed_scheduler";   // + _scheduler_member_id;
 } 
 
 //-------------------------------------------------------------------------------------------------

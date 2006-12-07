@@ -29,7 +29,7 @@ struct Log
     string                      filename                    () const                            { return _filename; }
     int                         fd                          ()                                  { return _file; }
     void                        start_new_file              ();
-    Time                        last_time                   () const                            { return _last_time; }
+    Gmtime                      last_time                   () const                            { return _last_time; }
 
   protected:
     friend struct               Prefix_log;                 // _semaphore
@@ -47,7 +47,7 @@ struct Log
     Thread_semaphore           _semaphore;
   //string                     _log_line;
     string                     _log_buffer;                 // Bis Ausgabedatei geöffnet ist
-    Time                       _last_time;
+    Gmtime                     _last_time;
 };
 
 //---------------------------------------------------------------------------------------Prefix_log

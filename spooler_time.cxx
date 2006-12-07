@@ -29,6 +29,10 @@
 
 namespace sos {
 namespace spooler {
+
+extern const Gmtime                    doomsday                    = (Gmtime)double_time_max;
+
+
 namespace time {
 
 //-------------------------------------------------------------------------------------------------
@@ -74,16 +78,16 @@ void insert_into_message( Message_string* m, int index, const Time& time ) throw
 //--------------------------------------------------------------------------------------Time::round
 
 double Time::round( double t )
-{ 
-    return floor( t * 1000.0 + 0.5 ) / 1000.0; 
+{
+    return floor( t * 1000.0 + 0.5 ) / 1000.0;
 }
 
 //----------------------------------------------------------------------------------Time::normalize
 
 double Time::normalize( double t )
-{ 
+{
     return t < 0?                0 :
-           t > latter_day._time? latter_day._time 
+           t > latter_day._time? latter_day._time
                                : t;
 }
 
@@ -166,7 +170,7 @@ void Time::set( double t )
 
 #   if defined Z_DEBUG && defined Z_WINDOWS
         if( _time == 0 )  _time_as_string.clear();   // Für static empty_period sollte in gcc as_string() nicht gerufen werden! (Sonst Absturz)
-                    else  _time_as_string = _time == latter_day_int? last_day_name
+                    else  _time_as_string = _time == latter_day_int? time::last_day_name
                                                                    : as_string();
 #   endif
 }
@@ -1023,5 +1027,93 @@ void Run_time::print( ostream& s ) const
 //-------------------------------------------------------------------------------------------------
 
 } //namespace time
+
+
+//--------------------------------------------------------------------------------------Gmtime::set
+
+void Gmtime::set( double t )
+{
+    _time = round(t);
+
+    if( _time > double_time_max )  _time = double_time_max;
+
+
+#   if defined Z_DEBUG && defined Z_WINDOWS
+        if( _time <= 0 )  _time_as_string.clear();   // Für static empty_period sollte in gcc as_string() nicht gerufen werden! (Sonst Absturz)
+                    else  _time_as_string = _time == double_time_max? time::last_day_name
+                                                                    : as_string();
+#   endif
+}
+
+//---------------------------------------------------------------------------Gmtime::set_local_time
+
+void Gmtime::set_local_time( const Time& t )
+{
+    set( t == latter_day? double_time_max 
+                        : gmtime_from_localtime( t ) );
+}
+
+//-------------------------------------------------------------------------------Gmtime::local_time
+
+Time Gmtime::local_time() const
+{
+    return _time == double_time_max? latter_day
+                                   : Time( localtime_from_gmtime( _time ) );
+}
+
+//--------------------------------------------------------------------------------Gmtime::as_string
+
+string Gmtime::as_string( With_ms with ) const
+{
+    string result;
+
+    if( _time < 0 )
+    {
+        result = "-" + zschimmer::as_string( (int64)-_time );
+    }
+    else
+    {
+        result.reserve( 27 );   // yyyy-mm-dd hh:mm:ss.000 GMT
+
+        result.append( string_gmt_from_time_t( (time_t)_time ) );
+
+        if( with == with_ms ) 
+        {
+            char        buff [30];
+            const char* bruch = buff + sprintf( buff, "%0.3lf", _time ) - 4;
+            result += buff;
+        }
+
+        result += " GMT";
+    }
+
+    return result;
+}
+
+//--------------------------------------------------------------------------Gmtime::as_local_string
+
+string Gmtime::as_local_string( With_ms w ) const
+{
+    return local_time().as_string( w == with_ms? time::Time::with_ms : time::Time::without_ms );
+}
+
+//------------------------------------------------------------------------------------Gmtime::round
+
+double Gmtime::round( double t )
+{ 
+    return floor( t * 1000.0 + 0.5 ) / 1000.0; 
+}
+
+//--------------------------------------------------------------------------------Gmtime::normalize
+
+double Gmtime::normalize( double t )
+{ 
+    return t < 0?                0 :
+           t > latter_day._time? latter_day._time 
+                               : t;
+}
+
+//-------------------------------------------------------------------------------------------------
+
 } //namespace spooler
 } //namespace sos

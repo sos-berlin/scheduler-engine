@@ -73,10 +73,10 @@ struct Wait_handles : Non_cloneable
     HANDLE                      operator []                 ( int index )                           { return _handles[index]; }
 #endif
 
-    bool                        wait_until                  ( const Time&  , const Object* debug_wait_for_object, 
-                                                              const Time& resume_until, const Object* );   // Berücksichtigt Sommerzeitumstellung
-    bool                        wait_until_2                ( const Time& t, const Object& o )  { return wait_until_2( t, &o, t, &o); }
-    bool                        wait_until_2                ( const Time&  , const Object* debug_wait_for_object, const Time& resume_until, const Object* );
+    bool                        wait_until                  ( const Gmtime&  , const Object* debug_wait_for_object, 
+                                                              const Gmtime& resume_until, const Object* );   // Berücksichtigt Sommerzeitumstellung
+    bool                        wait_until_2                ( const Gmtime& until, const Object& o )  { return wait_until_2( until, &o, until, &o); }
+    bool                        wait_until_2                ( const Gmtime& until, const Object* debug_wait_for_object, const Gmtime& resume_until, const Object* );
   //bool                        wait                        ( double time );
 
     bool                        signaled                    ();
