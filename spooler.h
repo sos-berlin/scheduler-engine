@@ -334,6 +334,7 @@ struct Spooler : Object,
 
   //void                        single_thread_step          ();
     void                        wait                        ();
+    void                        wait                        ( Wait_handles*, Time wait_until, Object* wait_until_object, Time resume_at, Object* resume_at_object );
 
     void                        signal                      ( const string& signal_name )       { if( _log.log_level() <= log_debug9 )  _log.debug9( "Signal \"" + signal_name + "\"" ); _event.signal( signal_name ); }
     void                        async_signal                ( const char* signal_name = "" )    { _event.async_signal( signal_name ); }

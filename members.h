@@ -15,7 +15,7 @@ struct Scheduler_member : Async_operation, Scheduler_object
                                ~Scheduler_member            ();
 
     void                        close                       ();
-    void                        shutdown                    ();                                     // Entfernt auch Datenbanksätze
+    void                        shutdown                    ();                                     // Ordentliches Herunterfahren des Schedulers
 
     // Async_operation
     bool                        async_finished_             () const                                { return false; }
@@ -24,7 +24,7 @@ struct Scheduler_member : Async_operation, Scheduler_object
 
     // Scheduler_object
     Prefix_log*                 log                         ()                                      { return _log; }
-    string                      obj_name                    () const                                { return "Scheduler_member"; } // + _scheduler_member_id; }
+    string                      obj_name                    () const;
 
 
     void                    set_backup                      ( bool b = true )                       { assert( !_operation );  _is_backup = b; }
@@ -54,8 +54,6 @@ struct Scheduler_member : Async_operation, Scheduler_object
     void                        start_operation             ();
     void                        close_operation             ();
 
-  //void                        write_member_record         ( Transaction* );
-  //void                        be_active                   ( Transaction*, const string& previous_active_member_id );
     void                        become_active               ();
     bool                        insert_scheduler_id_record  ( Transaction* );
     void                        try_to_become_active2       ( Transaction* );

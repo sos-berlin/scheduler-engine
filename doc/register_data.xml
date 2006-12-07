@@ -486,6 +486,7 @@
 </register_keyword>
 <register_keyword keyword='debug'>
     <register_keyword_display><code>debug=</code></register_keyword_display>
+    <register_entry register_file='sos_ini_java.xml#entry_debug' register_title='file sos.ini, section [java]'  register_keyword='debug' type='definition'/>
     <register_entry register_file='xml/web_service.xml#attribute_debug' register_title='&lt;web_service&gt; (Konfiguration)'  register_keyword='debug' type='definition'/>
 </register_keyword>
 <register_keyword keyword='debug1'>

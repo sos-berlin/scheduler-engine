@@ -44,6 +44,16 @@
 
         <ini_entry name="options" type="text" setting="java_options"/>
 
+        <ini_entry name="debug" type="yes_no">
+            <description>
+                <p>
+                    <code>debug=yes</code> lässt die Aufruf an Java ins <code>scheduler.log</code> protokollieren
+                    Außerdem versetzt die Einstellung Java in den Debug-Modus, 
+                    wodurch z.B. bei einer Exception der Aufruf-Stack nach stdout (oder stderr) geschrieben wird.
+                </p>
+            </description>
+        </ini_entry>
+
     </ini_entries>
 
     <description>

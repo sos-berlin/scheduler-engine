@@ -115,11 +115,11 @@ void Event::remove_from( Wait_handles* w )
 
 //------------------------------------------------------------------------ait_handles::Wait_handles
 
-Wait_handles::Wait_handles( Spooler* spooler, Prefix_log* log )
+Wait_handles::Wait_handles( Spooler* spooler )
 : 
     _zero_(this+1),
     _spooler(spooler),
-    _log(log),
+    _log( spooler->log() ),
     _lock("Wait_handles") 
 {
 }

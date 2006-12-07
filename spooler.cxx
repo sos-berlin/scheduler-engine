@@ -536,7 +536,7 @@ Spooler::Spooler()
     _communication(this), 
     _base_log(this),
     _log(1),
-    _wait_handles(this,&_log),
+    _wait_handles(this),
     _module(this,&_log),
     _log_level( log_info ),
     _factory_ini( default_factory_ini ),
@@ -2280,6 +2280,14 @@ void Spooler::start()
     set_ctrl_c_handler( true );       // Falls Java (über Dateityp jdbc) gestartet worden ist und den Signal-Handler verändert hat
 
 
+#   ifdef Z_WINDOWS
+        if( isatty( fileno( stderr ) )) 
+        {
+            _print_time_every_second = log_directory() == "*stderr";
+        }
+#   endif
+
+
     start_scheduler_member();
     if( _state_cmd == sc_terminate )  return;
 
@@ -2344,8 +2352,8 @@ void Spooler::start_scheduler_member()
     
         while( _state_cmd != sc_terminate  &&  _scheduler_member->is_scheduler_terminated() ) 
         {
-            sos_sleep( 1 );
-            _connection_manager->async_continue();//_connection_manager->wait( 1 );
+            wait();
+            _connection_manager->async_continue();
             run_check_ctrl_c();
         }
     }
@@ -2363,7 +2371,7 @@ void Spooler::start_scheduler_member()
                 return;
             }
 
-            sos_sleep( 1 );
+            wait();
             _connection_manager->async_continue();//_connection_manager->wait( 1 );
             run_check_ctrl_c();
         }
@@ -2639,13 +2647,6 @@ void Spooler::run()
 {
     set_state( s_running );
 
-#   ifdef Z_WINDOWS
-        if( isatty( fileno( stderr ) )) 
-        {
-            _print_time_every_second = log_directory() == "*stderr";
-        }
-#   endif
-
     if( !_xml_cmd.empty() )
     {
         Command_processor cp ( this, Security::seclev_all );
@@ -2768,7 +2769,7 @@ void Spooler::run()
 
       //if( !something_done  &&  wait_until > 0  &&  _state_cmd == sc_none  &&  wait_until > Time::now() )   Immer wait() rufen, damit Event.signaled() gesetzt wird!
         {
-            Wait_handles wait_handles ( this, &_log );
+            Wait_handles wait_handles ( this );
             
             if( _state != Spooler::s_paused )
             {
@@ -2804,7 +2805,7 @@ void Spooler::run()
                     if( wait_until == 0 )  break;
                 }
             }
-            
+
 
             // TCP- und UDP-HANDLES EINSAMMELN, für spooler_communication.cxx
 
@@ -2812,22 +2813,6 @@ void Spooler::run()
             _connection_manager->get_events( &events );
             FOR_EACH( vector<System_event*>, events, e )  wait_handles.add( *e );
 
-
-            // Termination_async_operation etc.
-
-            if( wait_until > 0 )
-            {
-                if( ptr<Async_operation> operation = _connection_manager->async_next_operation() )
-                {
-                    Time next_time = Time( localtime_from_gmtime( operation->async_next_gmtime() ) );
-                    //Z_LOG2( "scheduler", **p << "->async_next_gmtime() => " << next_time << "\n" );
-                    if( next_time < wait_until )
-                    {
-                        wait_until = next_time;
-                        wait_until_object = operation;
-                    }
-                }
-            }
 
             //-------------------------------------------------------------------------------WARTEN
 
@@ -2842,61 +2827,8 @@ void Spooler::run()
                 else
                 {
                     Time now_before_wait = nothing_done_count == nothing_done_max? Time::now() : Time(0);
-                    bool signaled        = false;
 
-                    _wait_counter++;
-                    _last_wait_until = wait_until;
-                    _last_resume_at  = resume_at;
-
-
-                    if( _zschimmer_mode  &&  _should_suspend_machine  &&  is_machine_suspendable() )  // &&  !_single_thread->has_tasks() )
-                    {
-#                       ifdef Z_WINDOWS
-                            if( !IsSystemResumeAutomatic() )  _should_suspend_machine = false;  // Rechner ist nicht automatisch gestartet, sondern durch Benutzer? Dann kein Suspend
-
-                            if( _should_suspend_machine )
-                            {
-                                Time now = Time::now();
-                                if( now + inhibit_suspend_wait_time < resume_at )
-                                {
-                                    signaled = wait_handles.wait_until( min( now + before_suspend_wait_time, wait_until ), wait_until_object, resume_at, resume_at_object );
-                                    if( !signaled )   // Nichts passiert?
-                                    {
-                                        if( IsSystemResumeAutomatic() )   // Benutzer schläft noch?
-                                        {
-                                            suspend_machine();
-                                        }
-
-                                        _should_suspend_machine = false;
-                                    }
-                                }
-                            }
-#                       endif
-                    }
-
-
-#                 ifndef Z_UNIX   // Unter Unix mit Verzeichnisüberwachung gibt der Scheduler alle show_message_after_seconds Sekunden die Meldung SCHEDULER-972 aus
-                    if( !signaled  &&  !_print_time_every_second )  //!string_begins_with( _log.last_line(), "SCHEDULER-972" ) )
-                    {
-                        Time first_wait_until = _base_log.last_time() + ( _log.log_level() <= log_debug3? show_message_after_seconds_debug : show_message_after_seconds );
-                        if( first_wait_until < wait_until )
-                        {
-                            string msg = message_string( "SCHEDULER-972", wait_until.as_string(), wait_until_object );
-                            if( msg != _log.last_line() ) 
-                            {
-                                String_object o ( msg );
-                                signaled = wait_handles.wait_until( first_wait_until, &o, resume_at, resume_at_object );
-                                if( !signaled  &&  msg != _log.last_line() )  _log.info( msg );
-                            }
-                        }
-                    }
-#                 endif
-
-                    if( !signaled )
-                    {
-                        wait_handles.wait_until( wait_until, wait_until_object, resume_at, resume_at_object );
-                    }
-
+                    wait( &wait_handles, wait_until, wait_until_object, resume_at, resume_at_object );
 
                     if( nothing_done_count == nothing_done_max  &&  Time::now() - now_before_wait >= 0.010 )  nothing_done_count = 0, nichts_getan_zaehler = 0;
                 }
@@ -2922,6 +2854,111 @@ void Spooler::run()
         //-----------------------------------------------------------------------------------CTRL-C
 
         run_check_ctrl_c();
+    }
+}
+
+//------------------------------------------------------------------------------------Spooler::wait
+
+void Spooler::wait()
+{
+    //if( _print_time_every_second )
+    {
+        // Zur Sommerzeit wartet wait() eine Stunde länger
+        Wait_handles wait_handles = _wait_handles;
+        wait( &wait_handles, latter_day, NULL, latter_day, NULL );
+        wait_handles.clear();
+    }
+    //else
+    //{
+    //    // Active_scheduler_heart_beat hat dasselbe Problem.
+    //    // Scheint so, dass wir wait_until() auf GMT umstellen müssen.
+    //    // D.h. die ganze Sommerzeitumstellung muss erneut geprüft werden.
+
+    //    double until = _connection_manager->async_next_gmtime();
+    //    while(1)
+    //    {
+    //        time_t rest = until - ::time(NULL);
+    //        if( rest <= 0 )  break;
+    //        sos_sleep( max( rest, time_t(1) ) );        // Befristen, damit Ctrl-C geprüft werden kann
+    //        if( ctrl_c_pressed )  break;
+    //    }
+    //}
+}
+
+//------------------------------------------------------------------------------------Spooler::wait
+
+void Spooler::wait( Wait_handles* wait_handles, Time wait_until, Object* wait_until_object, Time resume_at, Object* resume_at_object )
+{
+    bool signaled = false;
+
+    _wait_counter++;
+    _last_wait_until = wait_until;
+    _last_resume_at  = resume_at;
+
+
+    // Termination_async_operation etc.
+
+    if( wait_until > 0 )
+    {
+        if( ptr<Async_operation> operation = _connection_manager->async_next_operation() )
+        {
+            Time next_time = Time( localtime_from_gmtime( operation->async_next_gmtime() ) );
+            //Z_LOG2( "scheduler", **p << "->async_next_gmtime() => " << next_time << "\n" );
+            if( next_time < wait_until )
+            {
+                wait_until = next_time;
+                wait_until_object = operation;
+            }
+        }
+    }
+
+
+    if( _zschimmer_mode  &&  _should_suspend_machine  &&  is_machine_suspendable() )  // &&  !_single_thread->has_tasks() )
+    {
+#       ifdef Z_WINDOWS
+            if( !IsSystemResumeAutomatic() )  _should_suspend_machine = false;  // Rechner ist nicht automatisch gestartet, sondern durch Benutzer? Dann kein Suspend
+
+            if( _should_suspend_machine )
+            {
+                Time now = Time::now();
+                if( now + inhibit_suspend_wait_time < resume_at )
+                {
+                    signaled = wait_handles->wait_until( min( now + before_suspend_wait_time, wait_until ), wait_until_object, resume_at, resume_at_object );
+                    if( !signaled )   // Nichts passiert?
+                    {
+                        if( IsSystemResumeAutomatic() )   // Benutzer schläft noch?
+                        {
+                            suspend_machine();
+                        }
+
+                        _should_suspend_machine = false;
+                    }
+                }
+            }
+#       endif
+    }
+
+
+#   ifndef Z_UNIX   // Unter Unix mit Verzeichnisüberwachung gibt der Scheduler alle show_message_after_seconds Sekunden die Meldung SCHEDULER-972 aus
+        if( !signaled  &&  !_print_time_every_second )  //!string_begins_with( _log.last_line(), "SCHEDULER-972" ) )
+        {
+            Time first_wait_until = _base_log.last_time() + ( _log.log_level() <= log_debug3? show_message_after_seconds_debug : show_message_after_seconds );
+            if( first_wait_until < wait_until )
+            {
+                string msg = message_string( "SCHEDULER-972", wait_until.as_string(), wait_until_object );
+                if( msg != _log.last_line() ) 
+                {
+                    String_object o ( msg );
+                    signaled = wait_handles->wait_until( first_wait_until, &o, resume_at, resume_at_object );
+                    if( !signaled  &&  msg != _log.last_line() )  _log.info( msg );
+                }
+            }
+        }
+#   endif
+
+    if( !signaled )
+    {
+        wait_handles->wait_until( wait_until, wait_until_object, resume_at, resume_at_object );
     }
 }
 
@@ -3683,6 +3720,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
     set_log_category_default( "scheduler.call", true );   // Aufrufe von spooler_process() etc. protokollieren (Beginn und Ende)
     set_log_category_default( "scheduler.order", true );
     set_log_category_default( "scheduler.file_order", true );
+    set_log_category_default( "scheduler.distributed", true );  // Vorläufig
 
 
 

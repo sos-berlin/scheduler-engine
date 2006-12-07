@@ -54,7 +54,7 @@ struct Wait_handles : Non_cloneable
 {
     Fill_zero _zero_;
 
-                                Wait_handles                ( Spooler*, Prefix_log* );
+                                Wait_handles                ( Spooler* );
                                 Wait_handles                ( const Wait_handles& );
                                ~Wait_handles                ();
 

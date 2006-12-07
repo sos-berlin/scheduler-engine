@@ -17,11 +17,11 @@ const time_t                    heart_beat_period           = 60;   // Sekunden
 const time_t                    heart_beat_shorter_period   = max( (time_t)1, heart_beat_period*9/10 - 1 );   // Sekunden
 const time_t                    trauerfrist                 = 2*3600;   // Trauerzeit, nach der Mitgliedssätze gelöscht werden
 
-//-------------------------------------------------------------------------Active_member_heart_beat
+//----------------------------------------------------------------------Active_scheduler_heart_beat
 
-struct Active_member_heart_beat : Async_operation
+struct Active_scheduler_heart_beat : Async_operation
 {
-    Active_member_heart_beat( Scheduler_member* m ) 
+    Active_scheduler_heart_beat( Scheduler_member* m ) 
     :
         _scheduler_member(m)
     {
@@ -36,13 +36,13 @@ struct Active_member_heart_beat : Async_operation
 
     string async_state_text_() const
     {
-        return "Active_member_heart_beat";
+        return "Active_scheduler_heart_beat";
     }
 
 
     bool async_continue_( Continue_flags )
     {
-        Z_LOGI2( "scheduler", __FUNCTION__ << "\n" );
+        Z_LOGI2( "scheduler.distributed", __FUNCTION__ << "\n" );
 
         try
         {
@@ -86,11 +86,11 @@ struct Active_member_heart_beat : Async_operation
     Scheduler_member*               _scheduler_member;
 };
 
-//------------------------------------------------------------------------Inactive_member_operation
+//----------------------------------------------------------------------Inactive_scheduler_watchdog
 
-struct Inactive_member_operation : Async_operation
+struct Inactive_scheduler_watchdog : Async_operation
 {
-    Inactive_member_operation( Scheduler_member* m ) 
+    Inactive_scheduler_watchdog( Scheduler_member* m ) 
     :
         _scheduler_member(m)
     {
@@ -105,13 +105,13 @@ struct Inactive_member_operation : Async_operation
 
     string async_state_text_() const
     {
-        return "Inactive_member_operation";
+        return "Inactive_scheduler_watchdog";
     }
 
 
     bool async_continue_( Continue_flags )
     {
-        Z_LOGI2( "scheduler", __FUNCTION__ << "\n" );
+        Z_LOGI2( "scheduler.distributed", __FUNCTION__ << "\n" );
     
         try
         {
@@ -172,7 +172,7 @@ Scheduler_member::~Scheduler_member()
     {
         close();
     }
-    catch( exception& x ) { Z_LOG2( "scheduler", "ERROR in " << __FUNCTION__ << ": " << x.what() << "\n" ); }
+    catch( exception& x ) { Z_LOG2( "scheduler.distributed", "ERROR in " << __FUNCTION__ << ": " << x.what() << "\n" ); }
 }
 
 //--------------------------------------------------------------------------Scheduler_member::close
@@ -222,12 +222,12 @@ void Scheduler_member::shutdown()
 
 void Scheduler_member::delete_member_record( Transaction* ta )
 {
-    Z_LOGI2( "scheduler", __FUNCTION__ << "\n" );
+    Z_LOGI2( "scheduler.distributed", __FUNCTION__ << "\n" );
     assert( ta );
 
 
     db()->execute( S() << "DELETE from " << _spooler->_members_tablename << 
-                             " where `scheduler_member_id`=" << sql::quoted( member_id() ) );
+                            " where `scheduler_member_id`=" << sql::quoted( member_id() ) );
 
     // Wenn Where-Klause nicht zutrifft, sind wir zwischendurch inaktiv geworden
 }
@@ -236,12 +236,12 @@ void Scheduler_member::delete_member_record( Transaction* ta )
 
 void Scheduler_member::delete_scheduler_id_record( Transaction* ta )
 {
-    Z_LOGI2( "scheduler", __FUNCTION__ << "\n" );
+    Z_LOGI2( "scheduler.distributed", __FUNCTION__ << "\n" );
     assert( ta );
 
 
     db()->execute( S() << "DELETE from " << _spooler->_variables_tablename << 
-                             " where `name`=" << sql::quoted( active_member_variable_name() ) <<
+                             " where `name`="     << sql::quoted( active_member_variable_name() ) <<
                                 "and `textwert`=" << sql::quoted( member_id() ) );
 
     // Wenn Where-Klause nicht zutrifft, sind wir zwischendurch inaktiv geworden
@@ -251,16 +251,16 @@ void Scheduler_member::delete_scheduler_id_record( Transaction* ta )
 
 void Scheduler_member::delete_old_member_records( Transaction* ta )
 {
-    Z_LOGI2( "scheduler", __FUNCTION__ << "\n" );
+    Z_LOGI2( "scheduler.distributed", __FUNCTION__ << "\n" );
     assert( ta );
 
     db()->execute( S() << "DELETE from " << _spooler->_members_tablename << 
                             " where `scheduler_id` = " << sql::quoted( _spooler->id_for_db() ) <<
-                            " and `next_heart_beat` < " << ( ::time(NULL) - trauerfrist ) );
+                              " and `next_heart_beat` < " << ( ::time(NULL) - trauerfrist ) );
 
     if( int record_count = db()->record_count() )
     {
-        Z_LOG2( "scheduler", record_count << " alte Sätze aus " << _spooler->_members_tablename << " gelöscht\n" );
+        Z_LOG2( "scheduler.distributed", record_count << " alte Sätze aus " << _spooler->_members_tablename << " gelöscht\n" );
     }
 }
 
@@ -268,6 +268,8 @@ void Scheduler_member::delete_old_member_records( Transaction* ta )
 
 void Scheduler_member::start()
 {
+    Z_LOGI2( "scheduler", __FUNCTION__ << "\n" );
+
     if( !db()->opened() )
     {
         if( _is_backup )  z::throw_xc( "SCHEDULER-357" ); 
@@ -307,7 +309,7 @@ void Scheduler_member::start()
 
 bool Scheduler_member::insert_scheduler_id_record( Transaction* ta )
 {
-    Z_LOGI2( "scheduler", __FUNCTION__ << "\n" );
+    Z_LOGI2( "scheduler.distributed", __FUNCTION__ << "\n" );
     assert( ta );
     assert( !_is_active );
 
@@ -318,7 +320,7 @@ bool Scheduler_member::insert_scheduler_id_record( Transaction* ta )
     
     if( record_exists )
     {
-        if( active_member_id != "" )  Z_LOGI2( "scheduler", __FUNCTION__ << "  Aktives Mitglied ist anscheinend " << active_member_id << "\n" );//show_active_members( ta );//_log->info( message_string( "SCHEDULER-995", active_member_id, "" ) );
+        if( active_member_id != "" )  Z_LOGI2( "scheduler.distributed", __FUNCTION__ << "  Aktives Mitglied ist anscheinend " << active_member_id << "\n" );//show_active_members( ta );//_log->info( message_string( "SCHEDULER-995", active_member_id, "" ) );
     }
     else
     {
@@ -347,13 +349,13 @@ void Scheduler_member::start_operation()
     {
         if( _is_active )
         {
-            ptr<Active_member_heart_beat> operation = Z_NEW( Active_member_heart_beat( this ) );
+            ptr<Active_scheduler_heart_beat> operation = Z_NEW( Active_scheduler_heart_beat( this ) );
             operation->set_alarm();
             _operation = +operation;
         }
         else
         {
-            ptr<Inactive_member_operation> operation = Z_NEW( Inactive_member_operation( this ) );
+            ptr<Inactive_scheduler_watchdog> operation = Z_NEW( Inactive_scheduler_watchdog( this ) );
             operation->set_alarm();
             _operation = +operation;
         }
@@ -377,7 +379,7 @@ void Scheduler_member::close_operation()
 
 void Scheduler_member::try_to_become_active( Transaction* outer_transaction )
 {
-    Z_LOGI2( "scheduler", __FUNCTION__ << "\n" );
+    Z_LOGI2( "scheduler.distributed", __FUNCTION__ << "\n" );
     assert( !_is_active );
     if( !db()->opened() )  z::throw_xc( "SCHEDULER-357" );
 
@@ -403,7 +405,7 @@ void Scheduler_member::try_to_become_active( Transaction* outer_transaction )
 
 void Scheduler_member::try_to_become_active2( Transaction* ta )
 {
-    Z_LOGI2( "scheduler", __FUNCTION__ << "\n" );
+    Z_LOGI2( "scheduler.distributed", __FUNCTION__ << "\n" );
     assert( ta );
 
 
@@ -523,7 +525,7 @@ void Scheduler_member::become_active()
 
 void Scheduler_member::do_heart_beat()
 {
-    Z_LOGI2( "scheduler", __FUNCTION__ << "\n" );
+    Z_LOGI2( "scheduler.distributed", __FUNCTION__ << "\n" );
 
     if( db()->opened() )
     do
@@ -578,8 +580,8 @@ void Scheduler_member::insert_member_record( Transaction* ta )
     time_t new_last_heart_beat = ::time(NULL);
     time_t new_next_heart_beat = new_last_heart_beat + heart_beat_period;
 
-    Z_LOGI2( "scheduler", __FUNCTION__ << "  new_last_heart_beat=" << new_last_heart_beat << " (" << string_local_from_time_t( new_last_heart_beat) << "), "
-                                            "new_next_heart_beat=" << new_next_heart_beat << " (" << string_local_from_time_t( new_next_heart_beat) << ")\n" );
+    Z_LOGI2( "scheduler.distributed", __FUNCTION__ << "  new_last_heart_beat=" << new_last_heart_beat << " (" << string_local_from_time_t( new_last_heart_beat) << "), "
+                                                        "new_next_heart_beat=" << new_next_heart_beat << " (" << string_local_from_time_t( new_next_heart_beat) << ")\n" );
 
 
     sql::Update_stmt update ( &db()->_db_descr, _spooler->_members_tablename );
@@ -610,8 +612,8 @@ bool Scheduler_member::try_to_heartbeat_member_record( Transaction* ta )
     time_t new_last_heart_beat = ::time(NULL);
     time_t new_next_heart_beat = new_last_heart_beat + heart_beat_period;
 
-    Z_LOGI2( "scheduler", __FUNCTION__ << "  new_last_heart_beat=" << new_last_heart_beat << " (" << string_local_from_time_t( new_last_heart_beat) << "), "
-                                            "new_next_heart_beat=" << new_next_heart_beat << " (" << string_local_from_time_t( new_next_heart_beat) << ")\n" );
+    Z_LOGI2( "scheduler.distributed", __FUNCTION__ << "  new_last_heart_beat=" << new_last_heart_beat << " (" << string_local_from_time_t( new_last_heart_beat) << "), "
+                                                      "new_next_heart_beat=" << new_next_heart_beat << " (" << string_local_from_time_t( new_next_heart_beat) << ")\n" );
 
 //#   ifdef Z_DEBUG
 //        _log->info( S() << "new_last_heart_beat=" << new_last_heart_beat << " (" << string_local_from_time_t( new_last_heart_beat) << "), "
@@ -677,7 +679,7 @@ void Scheduler_member::show_active_members( Transaction*  ta )
 
 bool Scheduler_member::async_continue_( Continue_flags )
 {
-    Z_LOGI2( "scheduler", __FUNCTION__ << "\n" );
+    Z_LOGI2( "scheduler.distributed", __FUNCTION__ << "\n" );
 
     if( _operation )
     {
@@ -739,6 +741,13 @@ void Scheduler_member::make_scheduler_member_id()
 
     set_member_id( S() << _spooler->id_for_db() << "." << _spooler->_hostname << "." << getpid() );
 }
+
+//-----------------------------------------------------------------------Scheduler_member::obj_name
+
+string Scheduler_member::obj_name() const
+{ 
+    return "Distributed Scheduler";   // + _scheduler_member_id;
+} 
 
 //-------------------------------------------------------------------------------------------------
 
