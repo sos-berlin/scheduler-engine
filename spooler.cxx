@@ -1855,6 +1855,8 @@ void Spooler::load_arg()
             else
             if( opt.flag      ( "backup"                 ) )  _is_backup_member = opt.set();
             else
+            if( opt.flag      ( "heart-beat"             ) )  _with_heart_beat = opt.set();
+            else
             //if( opt.flag      ( "member-id"              ) )  _scheduler_member_id = opt.set();
             //else
             if( opt.with_value( "env"                    ) )  ;  // Bereits von spooler_main() erledigt
@@ -2288,8 +2290,11 @@ void Spooler::start()
 #   endif
 
 
-    start_scheduler_member();
-    if( _state_cmd == sc_terminate )  return;
+    if( _with_heart_beat  ||  _is_backup_member )  
+    {
+        start_scheduler_member();
+        if( _state_cmd == sc_terminate )  return;
+    }
 
 
     // Thread _communication nach Java starten (auch implizit durch _db). Java muss laufen, wenn der Thread startet! (Damit attach_thread() greift)
@@ -2695,7 +2700,7 @@ void Spooler::run()
         if( _scheduler_member )  check_scheduler_member();
         if( _single_thread->is_ready_for_termination() )  break;
 
-        if( something_done )  wait_until = 0;   // Nicht warten, wir drehen noch eine Runde
+        if( something_done )  wait_until.set_null();   // Nicht warten, wir drehen noch eine Runde
 
         //----------------------------------------------------------------------------NICHTS GETAN?
 
@@ -2986,7 +2991,7 @@ bool Spooler::run_continue()
         something_done |= _single_thread->process();    
     }
 
-    if( something_done )  _last_wait_until = 0, _last_resume_at = 0;
+    if( something_done )  _last_wait_until.set_null(), _last_resume_at.set_null();
 
 
     // TCP- UND UDP-VERBINDUNGEN IN SPOOLER_COMMUNICATION.CXX FORTSETZEN

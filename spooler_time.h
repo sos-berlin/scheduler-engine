@@ -433,7 +433,7 @@ struct Gmtime
                               //operator double             () const                                { return _time; }
 
   //Gmtime&                     operator =                  ( const Time& t )                       { set_local_time( t );  return *this; }
-    Gmtime&                     operator =                  ( time_t t )                            { _time = (double)t; }
+  //Gmtime&                     operator =                  ( time_t t )                            { _time = (double)t; }
 
     void                        operator +=                 ( double t )                            { set( _time + t ); }
     void                        operator -=                 ( double t )                            { set( _time - t ); }
@@ -467,6 +467,8 @@ struct Gmtime
     string                      as_string                   ( With_ms = with_ms ) const;
     string                      as_local_string             ( With_ms = with_ms ) const;
 
+    void                        set_null                    ()                                      { set( 0.0 ); }
+    void                        set_time_t                  ( time_t t )                            { set( (double)t ); }
     void                        set                         ( double t );
 
     Gmtime                      time_of_day                 () const                                { return Gmtime( _time - midnight().as_double() ); }

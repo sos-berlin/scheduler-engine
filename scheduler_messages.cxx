@@ -230,6 +230,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-360", "Error when accessing a Scheduler member database table" },
     { "SCHEDULER-361", "No database" },
     { "SCHEDULER-362", "Scheduler member aborts because it has become inactive" },
+    { "SCHEDULER-363", "Error when creating SQL table $1: $2" },
     { "SCHEDULER-800", "Waiting for main Scheduler to start" },
     { "SCHEDULER-801", "Waiting for active Scheduler to become inactive" },
     { "SCHEDULER-802", "Active Scheduler is terminated properly, so this inactive Scheduler terminates too" },

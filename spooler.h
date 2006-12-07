@@ -502,7 +502,7 @@ struct Spooler : Object,
 
     int                        _loop_counter;               // Zähler der Schleifendurchläufe in spooler.cxx
     int                        _wait_counter;               // Zähler der Aufrufe von wait_until()
-    time_t                     _last_time_enter_pressed;    // int wegen Threads (Spooler_communication und Spooler_wait)
+    Gmtime                     _last_time_enter_pressed;    // int wegen Threads (Spooler_communication und Spooler_wait)
 
     ptr<object_server::Connection_manager>  _connection_manager;
   //ptr<Async_manager>                      _async_manager;
@@ -603,6 +603,7 @@ struct Spooler : Object,
     ptr<Com_variable_set>      _environment;
     Variable_set_map           _variable_set_map;           // _variable_set_map[""] = _environment; für <params>, Com_variable_set::set_dom()
     bool                       _is_backup_member;
+    bool                       _with_heart_beat;
   //string                     _scheduler_member_id;
     ptr<Scheduler_member>      _scheduler_member;
 };

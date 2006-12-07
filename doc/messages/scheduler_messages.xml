@@ -2284,6 +2284,12 @@
                 <title>Scheduler member aborts because it has become inactive</title>
             </text>
         </message>
+
+        <message code="SCHEDULER-363">
+            <text xml:lang="en">
+                <title>Error when creating SQL table <p1/>: <p2/></title>
+            </text>
+        </message>
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->

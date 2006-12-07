@@ -276,6 +276,7 @@ void Scheduler_member::start()
         return;
     }
 
+    create_table_when_needed();
 
     if( _scheduler_member_id == "" )  make_scheduler_member_id();
     check_member_id();
@@ -303,6 +304,25 @@ void Scheduler_member::start()
 
     set_async_manager( _spooler->_connection_manager );
     start_operation();
+}
+
+//-------------------------------------------------------Scheduler_member::create_table_when_needed
+
+void Scheduler_member::create_table_when_needed()
+{
+    db()->create_table_when_needed( _spooler->_members_tablename,
+            "`scheduler_id`"           " varchar(100) not null, "
+            "`scheduler_member_id`"    " varchar(100) not null, "
+            "`running_since`"          " datetime, "
+            "`last_heart_beat`"        " integer not null, "
+          //"`last_heart_beat`"        " timestamp not null, "
+            "`next_heart_beat`"        " integer, "
+          //"`next_heart_beat`"        " timestamp, "
+          //"`ip_address`"             " varchar(40), "
+          //"`udp_port`"               " integer, "
+          //"`tcp_port`"               " integer, "
+            "`http_url`"               " varchar(100), "
+            "primary key( `scheduler_member_id` )" );
 }
 
 //-----------------------------------------------------Scheduler_member::insert_scheduler_id_record

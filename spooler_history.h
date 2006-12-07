@@ -87,6 +87,7 @@ struct Spooler_db : Object, Scheduler_object
     void                        commit                  ();
     void                        rollback                ();
     void                        try_reopen_after_error  ( exception&, bool wait_endless = false );
+    void                        create_table_when_needed( const string& tablename, const string& fields );
 
     Fill_zero                  _zero_;
     Thread_semaphore           _lock;
@@ -101,7 +102,6 @@ struct Spooler_db : Object, Scheduler_object
     void                        open2                   ( const string& db_name );
     void                        open_history_table      ();
     void                        get_history_table_table ();
-    void                        create_table_when_needed( const string& tablename, const string& fields );
     void                        add_column              ( const string& table_name, const string& column_name, const string add_clause );
     void                        handle_order_id_columns ();
     int                         expand_varchar_column   ( const string& table_name, const string& column_name, int minimum_width, int new_width );

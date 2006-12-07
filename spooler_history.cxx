@@ -599,9 +599,16 @@ void Spooler_db::create_table_when_needed( const string& tablename, const string
         _log->warn( x.what() );
         _log->info( message_string( "SCHEDULER-909", tablename ) );
 
-        Transaction ta ( this );
-            execute( "CREATE TABLE " + tablename + " (" + fields + ") " );
-        ta.commit(); 
+        try
+        {
+            Transaction ta ( this );
+                execute( "CREATE TABLE " + tablename + " (" + fields + ") " );
+            ta.commit(); 
+        }
+        catch( exception& x )
+        {
+            z::throw_xc( "SCHEDULER-363", tablename, x );
+        }
     }
 }
 

@@ -48,6 +48,7 @@ struct Scheduler_member : Async_operation, Scheduler_object
     void                        check_member_id             ();
 
   protected:
+    void                        create_table_when_needed    ();
     void                        delete_member_record        ( Transaction* ta );
     void                        delete_scheduler_id_record  ( Transaction* ta );
     void                        delete_old_member_records   ( Transaction* ta );
