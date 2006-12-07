@@ -86,6 +86,9 @@ Transaction::Transaction( Spooler_db* db, Transaction* outer_transaction )
     _guard(&db->_lock),
     _outer_transaction(outer_transaction)
 {
+    assert( db );
+    if( !_db->opened() )  z::throw_xc( "SCHEDULER-357" );
+
     if( !_outer_transaction )
     {
         _db->rollback();     // Falls irgendeine Transaktion offengeblieben ist

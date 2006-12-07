@@ -325,6 +325,7 @@ struct Spooler : Object,
     void                        nichts_getan                ( int anzahl, const string& );
     void                        run                         ();
     bool                        run_continue                ();
+    void                        start_scheduler_member      ();
     void                        check_scheduler_member      ();
   //void                        start_threads               ();
     Spooler_thread*             new_thread                  ( bool free_threading = true );

@@ -24,7 +24,7 @@ struct Scheduler_member : Async_operation, Scheduler_object
 
     // Scheduler_object
     Prefix_log*                 log                         ()                                      { return _log; }
-    string                      obj_name                    () const                                { return "Scheduler_member " + _scheduler_member_id; }
+    string                      obj_name                    () const                                { return "Scheduler_member"; } // + _scheduler_member_id; }
 
 
     void                    set_backup                      ( bool b = true )                       { assert( !_operation );  _is_backup = b; }
@@ -33,13 +33,15 @@ struct Scheduler_member : Async_operation, Scheduler_object
     string                      member_id                   ()                                      { return _scheduler_member_id; }
 
     bool                     is_active                      ()                                      { return _is_active; }
+    bool                     is_scheduler_terminated        ()                                      { return _is_scheduler_terminated; }
     bool                     is_backup                      ()                                      { return _is_backup; }
+    time_t                      last_heart_beat             ()                                      { return _last_heart_beat; }
 
     void                        start                       ();
     void                        do_heart_beat               ();
     void                        do_heart_beat               ( Transaction* );
     void                        show_active_members         ( Transaction* );
-    void                        try_to_be_active            ( Transaction* = NULL );
+    void                        try_to_become_active        ( Transaction* = NULL );
 
     string                      active_member_variable_name();
     Spooler_db*                 db                          ();
@@ -54,10 +56,11 @@ struct Scheduler_member : Async_operation, Scheduler_object
 
   //void                        write_member_record         ( Transaction* );
   //void                        be_active                   ( Transaction*, const string& previous_active_member_id );
-    void                        be_active                   ();
+    void                        become_active               ();
     bool                        insert_scheduler_id_record  ( Transaction* );
-    void                        check_active_member         ( Transaction* );
-    bool                        try_to_update_heart_beat_record( Transaction*, bool first_time = false );
+    void                        try_to_become_active2       ( Transaction* );
+    bool                        try_to_heartbeat_member_record( Transaction* );
+    void                        insert_member_record        ( Transaction* );
     void                        make_scheduler_member_id    ();
 
   private:
@@ -65,6 +68,7 @@ struct Scheduler_member : Async_operation, Scheduler_object
     string                     _scheduler_member_id;
     bool                       _is_active;
     bool                       _is_backup;
+    bool                       _is_scheduler_terminated;        // Scheduler ist ordentlich beendet worden
     time_t                     _last_heart_beat;
     time_t                     _next_heart_beat;
     string                     _last_active_member_id;

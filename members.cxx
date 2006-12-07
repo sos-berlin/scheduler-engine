@@ -53,13 +53,12 @@ struct Active_member_heart_beat : Async_operation
             }
 
             
-            set_alarm();
-
             _scheduler_member->do_heart_beat();
         
             if( _scheduler_member->is_active() )
             {
                 // Wir sind weiterhin aktives Mitglied
+                set_alarm();
             }
             else
             {
@@ -79,7 +78,7 @@ struct Active_member_heart_beat : Async_operation
 
     void set_alarm()
     {
-        set_async_next_gmtime( ::time(NULL) + heart_beat_shorter_period );
+        set_async_next_gmtime( _scheduler_member->last_heart_beat() + heart_beat_shorter_period );
     }
 
 
@@ -123,7 +122,7 @@ struct Inactive_member_operation : Async_operation
             }
 
 
-            _scheduler_member->try_to_be_active();
+            _scheduler_member->try_to_become_active();
 
             if( _scheduler_member->is_active() )
             {
@@ -174,13 +173,6 @@ Scheduler_member::~Scheduler_member()
         close();
     }
     catch( exception& x ) { Z_LOG2( "scheduler", "ERROR in " << __FUNCTION__ << ": " << x.what() << "\n" ); }
-}
-
-//----------------------------------------------------Scheduler_member::active_member_variable_name
-
-string Scheduler_member::active_member_variable_name()
-{
-    return "scheduler/" + _spooler->id_for_db() + "/active_member";
 }
 
 //--------------------------------------------------------------------------Scheduler_member::close
@@ -251,6 +243,7 @@ void Scheduler_member::delete_scheduler_id_record( Transaction* ta )
     db()->execute( S() << "DELETE from " << _spooler->_variables_tablename << 
                              " where `name`=" << sql::quoted( active_member_variable_name() ) <<
                                 "and `textwert`=" << sql::quoted( member_id() ) );
+
     // Wenn Where-Klause nicht zutrifft, sind wir zwischendurch inaktiv geworden
 }
 
@@ -283,7 +276,6 @@ void Scheduler_member::start()
 
 
     if( _scheduler_member_id == "" )  make_scheduler_member_id();
-
     check_member_id();
 
 
@@ -293,26 +285,9 @@ void Scheduler_member::start()
         {
             Transaction ta ( db() );
 
-            insert_scheduler_id_record( &ta );      // Falls die Scheduler-Id noch nicht registriert ist
-
-            //Falls die Mitglieds-Id nicht wirklich eindeutig sein sollte, 
-            //können wir den Herzschlag unseres Doppelgängers prüfen:
-            //time_t now = ::time(NULL);
-            //Any_file select ( S() << db()->db_name() <<
-            //                 "SELECT m.`scheduler_member_id`, m.`last_heart_beat`, m.`next_heart_beat` "
-            //                 "from `" << _spooler->_members_tablename   << 
-            //                   " where `scheduler_member_id`=" << sql::quoted( member_id() ) <<
-            //                   " and ( `next_heart_beat` >=  " << now
-            //                   " or `last_heart_beat` >= " << ( now - heart_beat_period ) );
-
-            //delete_member_record( & ta );
+            if( !_is_backup )  insert_scheduler_id_record( &ta );   // Falls die Scheduler-Id noch nicht registriert ist
             delete_old_member_records( &ta );
-
-            // Wir tragen uns als Mitglied in scheduler_members ein:
-            //bool ok = try_to_update_heart_beat_record( &ta, true );
-            //assert( ok );
-
-            try_to_be_active( &ta );
+            try_to_become_active( &ta );                            // Stellt auch _is_scheduler_terminated fest
 
             ta.commit();
         }
@@ -335,7 +310,6 @@ bool Scheduler_member::insert_scheduler_id_record( Transaction* ta )
     Z_LOGI2( "scheduler", __FUNCTION__ << "\n" );
     assert( ta );
     assert( !_is_active );
-    if( !db()->opened() )  z::throw_xc( "SCHEDULER-357" );
 
 
     bool   result           = false;
@@ -374,7 +348,7 @@ void Scheduler_member::start_operation()
         if( _is_active )
         {
             ptr<Active_member_heart_beat> operation = Z_NEW( Active_member_heart_beat( this ) );
-            operation->async_wake();    // Sofort ausführen
+            operation->set_alarm();
             _operation = +operation;
         }
         else
@@ -399,9 +373,9 @@ void Scheduler_member::close_operation()
     }
 }
 
-//---------------------------------------------------------------Scheduler_member::try_to_be_active
+//-----------------------------------------------------------Scheduler_member::try_to_become_active
 
-void Scheduler_member::try_to_be_active( Transaction* outer_transaction )
+void Scheduler_member::try_to_become_active( Transaction* outer_transaction )
 {
     Z_LOGI2( "scheduler", __FUNCTION__ << "\n" );
     assert( !_is_active );
@@ -413,31 +387,7 @@ void Scheduler_member::try_to_be_active( Transaction* outer_transaction )
         {
             Transaction ta ( db(), outer_transaction );
 
-
-            // Ist ein aktives Mitglied unter der Scheduler-Id eingetragen?
-
-            //bool   record_exists    = false;
-            //string active_member_id = db()->get_variable( &ta, active_member_variable_name(), &record_exists );
-            //
-            //if( record_exists )
-            //{
-            //    if( active_member_id != "" )  show_active_members( &ta );//_log->info( message_string( "SCHEDULER-995", active_member_id, "" ) );
-            //}
-            //else
-            //{
-            //    // Wir tragen uns als erstes Mitglied ein
-            //    try
-            //    {
-            //        db()->insert_variable( &ta, active_member_variable_name(), member_id() );
-            //    }
-            //    catch( exception& )
-            //    {
-            //        active_member_id = db()->get_variable( &ta, active_member_variable_name(), &record_exists );
-            //        if( !record_exists )  throw;
-            //    }
-            //}
-            
-            check_active_member( &ta );
+            try_to_become_active2( &ta );
 
             ta.commit();
         }
@@ -449,22 +399,21 @@ void Scheduler_member::try_to_be_active( Transaction* outer_transaction )
     } while(0);
 }
 
-//------------------------------------------------------------Scheduler_member::check_active_member
+//----------------------------------------------------------Scheduler_member::try_to_become_active2
 
-void Scheduler_member::check_active_member( Transaction* ta )
+void Scheduler_member::try_to_become_active2( Transaction* ta )
 {
     Z_LOGI2( "scheduler", __FUNCTION__ << "\n" );
     assert( ta );
-    if( !db()->opened() )  z::throw_xc( "SCHEDULER-357" );
 
 
     string other_member_id;
 
-    Any_file select ( S() << db()->db_name() <<
+    Any_file select ( S() << "-in " << db()->db_name() <<
                      "SELECT m.`scheduler_member_id`, m.`last_heart_beat`, m.`next_heart_beat` "
-                     "from `" << _spooler->_members_tablename   << "` m, " <<
-                         " `" << _spooler->_variables_tablename << "` v " <<
-                         "where v.`name` = " + sql::quoted( active_member_variable_name() ) <<
+                     "from " << _spooler->_members_tablename   << " m, " <<
+                         " " << _spooler->_variables_tablename << " v " <<
+                         "where v.`name` = " << sql::quoted( active_member_variable_name() ) <<
                           " and v.`textwert` = m.`scheduler_member_id`" );
 
     if( select.eof() )
@@ -478,8 +427,13 @@ void Scheduler_member::check_active_member( Transaction* ta )
 
         if( record_is_updated )
         {
-            try_to_update_heart_beat_record( ta, true );
-            be_active();
+            insert_member_record( ta );
+            become_active();
+        }
+        else
+        {
+            // Der Scheduler-Id-Satz ist nicht vorhanden, also ist der Scheduler ordentlich beendet worden
+            _is_scheduler_terminated = true;
         }
     }
     else
@@ -515,9 +469,14 @@ void Scheduler_member::check_active_member( Transaction* ta )
         }
 
 
-        if( other_member_timed_out )
+        if( !other_member_timed_out )
         {
-            //be_active( ta, other_member_id );
+            _is_scheduler_terminated = false;
+        }
+        else
+        {
+            // Scheduler-Id soll auf unsere Mitglieds-Id verweisen
+
             sql::Update_stmt update ( &db()->_db_descr, _spooler->_variables_tablename );
             
             update[ "textwert" ] = member_id();
@@ -532,8 +491,8 @@ void Scheduler_member::check_active_member( Transaction* ta )
 
             if( record_is_updated )
             {
-                try_to_update_heart_beat_record( ta, true );
-                be_active();
+                insert_member_record( ta );
+                become_active();
             }
         }
     }
@@ -550,9 +509,9 @@ void Scheduler_member::check_active_member( Transaction* ta )
     }
 }
 
-//----------------------------------------------------------------------Scheduler_member::be_active
+//------------------------------------------------------------------Scheduler_member::become_active
 
-void Scheduler_member::be_active()
+void Scheduler_member::become_active()
 {
     assert( !_is_active );
 
@@ -560,29 +519,6 @@ void Scheduler_member::be_active()
     _log->info( message_string( "SCHEDULER-997" ) );
 }
 
-/*
-void Scheduler_member::be_active( Transaction* ta, const string& previous_active_member_id )
-{
-    Z_LOGI2( "scheduler", __FUNCTION__ << "\n" );
-    assert( ta );
-
-    sql::Update_stmt update ( &db()->_db_descr, _spooler->_variables_tablename );
-    
-    update[ "textwert" ] = member_id();
-    update.and_where_condition( "name", active_member_variable_name() );
-
-    if( previous_active_member_id != "" )
-        update.and_where_condition( "textwert", previous_member_id );
-
-    //if( last_heart_beat_ptr )
-    //    update.add_where( S() << " and ( select `last_heart_beat` from " << _spooler->_members_tablename <<
-    //                                    " where `scheduler_member_id`=" << sql::quoted( other_member_id ) << ") "
-    //                                  "= " << *last_heart_beat_ptr );
-
-    db()->execute_single( update );
-    _is_active = true;
-}
-*/
 //------------------------------------------------------------------Scheduler_member::do_heart_beat
 
 void Scheduler_member::do_heart_beat()
@@ -606,6 +542,13 @@ void Scheduler_member::do_heart_beat()
             continue;
         }
     } while(0);
+
+
+    time_t available_time = _next_heart_beat - ::time(NULL);    // Herzschlag noch in der Frist?
+    if( available_time < 0 )
+    {
+        _log->warn( message_string( "SCHEDULER-996", string_gmt_from_time_t( _next_heart_beat ), -available_time ) );
+    }
 }
     
 //------------------------------------------------------------------Scheduler_member::do_heart_beat
@@ -614,7 +557,7 @@ void Scheduler_member::do_heart_beat( Transaction* ta )
 {
     assert( ta );
     
-    bool ok = try_to_update_heart_beat_record( ta );
+    bool ok = try_to_heartbeat_member_record( ta );
 
     if( !ok )
     {
@@ -625,9 +568,44 @@ void Scheduler_member::do_heart_beat( Transaction* ta )
     }
 }
 
-//------------------------------------------------Scheduler_member::try_to_update_heart_beat_record
+//-----------------------------------------------------------Scheduler_member::insert_member_record
 
-bool Scheduler_member::try_to_update_heart_beat_record( Transaction* ta, bool first_time )
+void Scheduler_member::insert_member_record( Transaction* ta )
+{
+    assert( ta );
+    assert( !_is_active );
+
+    time_t new_last_heart_beat = ::time(NULL);
+    time_t new_next_heart_beat = new_last_heart_beat + heart_beat_period;
+
+    Z_LOGI2( "scheduler", __FUNCTION__ << "  new_last_heart_beat=" << new_last_heart_beat << " (" << string_local_from_time_t( new_last_heart_beat) << "), "
+                                            "new_next_heart_beat=" << new_next_heart_beat << " (" << string_local_from_time_t( new_next_heart_beat) << ")\n" );
+
+
+    sql::Update_stmt update ( &db()->_db_descr, _spooler->_members_tablename );
+    
+    update[ "last_heart_beat" ] = new_last_heart_beat;
+    update[ "next_heart_beat" ] = new_next_heart_beat;
+    update[ "scheduler_id"    ] = _spooler->id_for_db();
+    update[ "running_since"   ].set_datetime( string_local_from_time_t( new_last_heart_beat ) );
+    update[ "http_url"        ] = _spooler->http_url();
+    update.and_where_condition( "scheduler_member_id", member_id() );
+
+    bool record_is_updated = db()->try_execute_single( update );
+
+    if( !record_is_updated )
+    {
+        update[ "scheduler_member_id" ] = member_id();
+        db()->execute( update.make_insert_stmt() );
+    }
+
+    _last_heart_beat = new_last_heart_beat;
+    _next_heart_beat = new_next_heart_beat;
+}
+
+//-------------------------------------------------Scheduler_member::try_to_heartbeat_member_record
+
+bool Scheduler_member::try_to_heartbeat_member_record( Transaction* ta )
 {
     time_t new_last_heart_beat = ::time(NULL);
     time_t new_next_heart_beat = new_last_heart_beat + heart_beat_period;
@@ -635,13 +613,13 @@ bool Scheduler_member::try_to_update_heart_beat_record( Transaction* ta, bool fi
     Z_LOGI2( "scheduler", __FUNCTION__ << "  new_last_heart_beat=" << new_last_heart_beat << " (" << string_local_from_time_t( new_last_heart_beat) << "), "
                                             "new_next_heart_beat=" << new_next_heart_beat << " (" << string_local_from_time_t( new_next_heart_beat) << ")\n" );
 
-#   ifdef Z_DEBUG
-        _log->info( S() << "new_last_heart_beat=" << new_last_heart_beat << " (" << string_local_from_time_t( new_last_heart_beat) << "), "
-                           "new_next_heart_beat=" << new_next_heart_beat << " (" << string_local_from_time_t( new_next_heart_beat) << ")" );
-#   endif
+//#   ifdef Z_DEBUG
+//        _log->info( S() << "new_last_heart_beat=" << new_last_heart_beat << " (" << string_local_from_time_t( new_last_heart_beat) << "), "
+//                           "new_next_heart_beat=" << new_next_heart_beat << " (" << string_local_from_time_t( new_next_heart_beat) << ")" );
+//#   endif
 
     assert( ta );
-
+    assert( _is_active );
 
 
     sql::Update_stmt update ( &db()->_db_descr, _spooler->_members_tablename );
@@ -649,41 +627,16 @@ bool Scheduler_member::try_to_update_heart_beat_record( Transaction* ta, bool fi
     update[ "last_heart_beat" ] = new_last_heart_beat;
     update[ "next_heart_beat" ] = new_next_heart_beat;
 
-    update.and_where_condition( "scheduler_member_id", member_id() );
-    update.add_where( S() << " and ( select `textwert` from " << _spooler->_variables_tablename <<
-                                    " where `name`="     << sql::quoted( active_member_variable_name() ) <<
-                                      " and `textwert`=" << sql::quoted( member_id() ) << " )" );
+    update.and_where_condition( "scheduler_member_id", member_id()      );
+    update.and_where_condition( "last_heart_beat"    , _last_heart_beat );
+    update.and_where_condition( "next_heart_beat"    , _next_heart_beat );
 
-    if( first_time )    // Aufruf aus start()
-    {
-        update[ "scheduler_id"  ] = _spooler->id_for_db();
-        update[ "running_since" ].set_datetime( string_local_from_time_t( new_last_heart_beat ) );
-        update[ "http_url"      ] = _spooler->http_url();
-    }
-    else
-    {
-        update.and_where_condition( "last_heart_beat", _last_heart_beat );
-        update.and_where_condition( "next_heart_beat", _next_heart_beat );
-    }
+    update.add_where( S() << " and ( select `textwert` from " << _spooler->_variables_tablename <<
+                                    " where `name`="     << sql::quoted( active_member_variable_name() ) << ")"
+                                 " = " << sql::quoted( member_id() ) << " )" );
+
 
     bool record_is_updated = db()->try_execute_single( update );
-
-    if( first_time  &&  !record_is_updated )
-    {
-        update[ "scheduler_member_id" ] = member_id();
-        db()->execute( update.make_insert_stmt() );
-        record_is_updated = true;
-    }
-
-
-    if( !first_time )
-    {
-        time_t available_time = _next_heart_beat - ::time(NULL);    // Herzschlag noch in der Frist?
-        if( available_time < 0 )
-        {
-            _log->warn( message_string( "SCHEDULER-996", string_gmt_from_time_t( _next_heart_beat ), -available_time ) );
-        }
-    }
 
     if( record_is_updated )
     {
@@ -702,10 +655,10 @@ void Scheduler_member::show_active_members( Transaction*  ta )
 
     // Aktives Mitglied zeigen:
 
-    Any_file select ( S() << db()->db_name() <<
+    Any_file select ( S() << "-in " << db()->db_name() <<
                      "SELECT m.`scheduler_member_id`, m.`http_url` "
-                     "from `" << _spooler->_members_tablename   << "` m, " <<
-                         " `" << _spooler->_variables_tablename << "` v " <<
+                     "from " << _spooler->_members_tablename   << " m, " <<
+                         " " << _spooler->_variables_tablename << " v " <<
                          "where v.`name` = " + sql::quoted( active_member_variable_name() ) <<
                            "and v.`textwert` = m.`scheduler_member_id`" );
 
@@ -725,30 +678,28 @@ void Scheduler_member::show_active_members( Transaction*  ta )
 bool Scheduler_member::async_continue_( Continue_flags )
 {
     Z_LOGI2( "scheduler", __FUNCTION__ << "\n" );
-    //Z_DEBUG_ONLY( if( _is_active )  assert( dynamic_cast<Inactive_member_operation*>( +_operation ) );
-    //                           else assert( dynamic_cast<Active_member_heart_beat*>( +_operation ) );  ) //???
 
-    //try
+    if( _operation )
     {
-        if( _operation )
-        {
-            _operation->async_check_exception( "Error in Scheduler member operation" );
-            close_operation();
-        }
-
-        if( db()->opened() )
-        {
-            start_operation();
-        }
-        else
-        if( _is_backup )  z::throw_xc( "SCHEDULER-357" );
+        _operation->async_check_exception( "Error in Scheduler member operation" );
+        close_operation();
     }
-    //catch( exception& x )
-    //{
-    //    throw;
-    //}
+
+    if( db()->opened() )
+    {
+        start_operation();
+    }
+    else
+    if( _is_backup )  z::throw_xc( "SCHEDULER-357" );
 
     return true;
+}
+
+//----------------------------------------------------Scheduler_member::active_member_variable_name
+
+string Scheduler_member::active_member_variable_name()
+{
+    return "scheduler/" + _spooler->id_for_db() + "/active_member";
 }
 
 //------------------------------------------------------------------Scheduler_member::set_member_id

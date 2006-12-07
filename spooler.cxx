@@ -2280,11 +2280,8 @@ void Spooler::start()
     set_ctrl_c_handler( true );       // Falls Java (über Dateityp jdbc) gestartet worden ist und den Signal-Handler verändert hat
 
 
-    _scheduler_member = Z_NEW( Scheduler_member( this ) );
-  //_scheduler_member->set_member_id( _scheduler_member_id );
-    _scheduler_member->set_backup( _is_backup_member );
-    _scheduler_member->start();
-    while( !_scheduler_member->is_active() )  sos_sleep( 1 ), _connection_manager->async_continue();//_connection_manager->wait( 1 );
+    start_scheduler_member();
+    if( _state_cmd == sc_terminate )  return;
 
 
     // Thread _communication nach Java starten (auch implizit durch _db). Java muss laufen, wenn der Thread startet! (Damit attach_thread() greift)
@@ -2330,6 +2327,47 @@ void Spooler::start()
         }
     }
 */
+}
+
+//------------------------------------------------------------------Spooler::start_scheduler_member
+
+void Spooler::start_scheduler_member()
+{
+    _scheduler_member = Z_NEW( Scheduler_member( this ) );
+  //_scheduler_member->set_member_id( _scheduler_member_id );
+    _scheduler_member->set_backup( _is_backup_member );
+    _scheduler_member->start();
+
+    if( _scheduler_member->is_backup()  &&  _scheduler_member->is_scheduler_terminated() ) 
+    {
+        _log.info( message_string( "SCHEDULER-800" ) );
+    
+        while( _state_cmd != sc_terminate  &&  _scheduler_member->is_scheduler_terminated() ) 
+        {
+            sos_sleep( 1 );
+            _connection_manager->async_continue();//_connection_manager->wait( 1 );
+            run_check_ctrl_c();
+        }
+    }
+
+    if( !_scheduler_member->is_active() )
+    {
+        _log.info( message_string( "SCHEDULER-801" ) );
+
+        while( _state_cmd != sc_terminate  &&  !_scheduler_member->is_active() )  
+        {
+            if( _scheduler_member->is_backup()  &&  _scheduler_member->is_scheduler_terminated() ) 
+            {
+                _log.info( message_string( "SCHEDULER-802" ) );
+                cmd_terminate();
+                return;
+            }
+
+            sos_sleep( 1 );
+            _connection_manager->async_continue();//_connection_manager->wait( 1 );
+            run_check_ctrl_c();
+        }
+    }
 }
 
 //--------------------------------------------------------------------Spooler::run_scheduler_script
@@ -3262,71 +3300,74 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line )
 
         start();
 
-        // <commands> aus <config> ausführen:
-        if( _commands_document )
+        if( _state_cmd != sc_terminate )
         {
-            Command_processor command_processor ( this, Security::seclev_all );
-            command_processor.set_log( &_log );
-            
-            DOM_FOR_EACH_ELEMENT( _commands_document.documentElement(), command_element )
+            // <commands> aus <config> ausführen:
+            if( _commands_document )
             {
-                xml::Element_ptr result = command_processor.execute_command( command_element, Time::now() );
-
-                if( !result.select_node( "ok [ count(*) = 0  and  count(@*) = 0 ]" ) )
+                Command_processor command_processor ( this, Security::seclev_all );
+                command_processor.set_log( &_log );
+                
+                DOM_FOR_EACH_ELEMENT( _commands_document.documentElement(), command_element )
                 {
-                    Message_string m ( "SCHEDULER-966" );
-                    m.set_max_insertion_length( INT_MAX );
-                    m.insert( 1, result.xml( true ) );
-                    _log.info( m );
+                    xml::Element_ptr result = command_processor.execute_command( command_element, Time::now() );
+
+                    if( !result.select_node( "ok [ count(*) = 0  and  count(@*) = 0 ]" ) )
+                    {
+                        Message_string m ( "SCHEDULER-966" );
+                        m.set_max_insertion_length( INT_MAX );
+                        m.insert( 1, result.xml( true ) );
+                        _log.info( m );
+                    }
                 }
             }
-        }
 
-        _config_element_to_load = NULL;
-        _config_document_to_load = NULL;
-
-
-        run_scheduler_script();
-
-        if( _main_scheduler_connection )  _main_scheduler_connection->set_socket_manager( _connection_manager );
+            _config_element_to_load = NULL;
+            _config_document_to_load = NULL;
 
 
-        try
-        {
-            run();
-        }
-        catch( exception& x )
-        {
-            set_state( s_stopping );        // Wichtig, damit _log wegen _waiting_errno nicht blockiert!
+            run_scheduler_script();
+
+            if( _main_scheduler_connection )  _main_scheduler_connection->set_socket_manager( _connection_manager );
+
 
             try
             {
-                _log.error( "" );
-                _log.error( x.what() );
-                _log.error( message_string( "SCHEDULER-264" ) );  // "SCHEDULER TERMINATES AFTER SERIOUS ERROR"
+                run();
             }
-            catch( exception& ) {}
+            catch( exception& x )
+            {
+                set_state( s_stopping );        // Wichtig, damit _log wegen _waiting_errno nicht blockiert!
 
-            try 
-            { 
                 try
                 {
-                    Command_processor cp ( this, Security::seclev_all );
-                    bool indent = true;
-                    string xml = cp.execute( "<show_state what='task_queue orders remote_schedulers' />", Time::now(), indent );
-                    try
-                    {
-                        _log.info( xml );  // Blockiert bei ENOSPC nicht wegen _state == s_stopping
-                    }
-                    catch( exception& ) { Z_LOG2( "scheduler", "\n\n" << xml << "\n\n" ); }
-                } 
+                    _log.error( "" );
+                    _log.error( x.what() );
+                    _log.error( message_string( "SCHEDULER-264" ) );  // "SCHEDULER TERMINATES AFTER SERIOUS ERROR"
+                }
                 catch( exception& ) {}
 
-                stop( &x ); 
-            } 
-            catch( exception& x ) { _log.error( x.what() ); }
+                try 
+                { 
+                    try
+                    {
+                        Command_processor cp ( this, Security::seclev_all );
+                        bool indent = true;
+                        string xml = cp.execute( "<show_state what='task_queue orders remote_schedulers' />", Time::now(), indent );
+                        try
+                        {
+                            _log.info( xml );  // Blockiert bei ENOSPC nicht wegen _state == s_stopping
+                        }
+                        catch( exception& ) { Z_LOG2( "scheduler", "\n\n" << xml << "\n\n" ); }
+                    } 
+                    catch( exception& ) {}
 
-            throw;
+                    stop( &x ); 
+                } 
+                catch( exception& x ) { _log.error( x.what() ); }
+
+                throw;
+            }
         }
 
         stop();

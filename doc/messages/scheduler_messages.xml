@@ -2289,7 +2289,25 @@
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->
 
     <messages>
-        
+        <message code="SCHEDULER-800" weight="info">
+            <text xml:lang="en">
+                <title>Waiting for main Scheduler member to start</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-801" weight="info">
+            <text xml:lang="en">
+                <title>Waiting for active Scheduler member to become inactive</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-802" weight="info">
+            <text xml:lang="en">
+                <title>Active Scheduler member is terminated properly, so this inactive Scheduler member terminates too</title>
+            </text>
+        </message>
+
+
         <message code="SCHEDULER-900" weight="info">
             <text xml:lang="de">
                 <title>Scheduler <p1/> startet mit <p2/>, pid=<p3/></title>
