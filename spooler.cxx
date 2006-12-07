@@ -2789,8 +2789,7 @@ void Spooler::run()
 
 #                        else
 
-                            double t = (*p)->async_next_gmtime();
-                            Time next_time = Time( t == 0? 0 : localtime_from_gmtime( t ) );
+                            Gmtime next_time = (Gmtime)(*p)->async_next_gmtime();
                             //Z_LOG2( "scheduler", **p << "->async_next_gmtime() => " << next_time << "\n" );
                             if( next_time < wait_until )
                             {
