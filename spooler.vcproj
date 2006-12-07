@@ -358,6 +358,10 @@
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 			>
 			<File
+				RelativePath=".\members.cxx"
+				>
+			</File>
+			<File
 				RelativePath=".\scheduler_client.cxx"
 				>
 			</File>

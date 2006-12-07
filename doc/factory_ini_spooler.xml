@@ -30,6 +30,7 @@
         <ini_entry setting="db_orders_table" />
         <ini_entry setting="db_history_table"/>
         <ini_entry setting="db_order_history_table" />
+        <ini_entry setting="db_members_table" />
 
         <ini_entry setting="max_db_errors" />
         <ini_entry setting="history_file" />

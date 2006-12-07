@@ -13,7 +13,7 @@ h4              { margin-bottom: 1em; }
 hr              { height: 1px; font-size: 1px; border: 0px; color: gray; background-color: gray; }
 
 p.empty         { font-size: 10pt; margin-bottom: 0px; margin-top: 0ex; }    /* <p class="empty">&#160;</p> macht einen Abstand wie margin-top von <p> */
-p               { font-size: 10pt; margin-bottom: 0px; max-width: 90ex; }
+p               { font-size: 10pt; margin-bottom: 0px; max-width: 472pt; }
 p.ini_entry     { font-size: 10pt; margin-bottom: 0px; max-width: 150ex; }
 th              { font-size: 10pt; vertical-align: baseline; text-align: left; border-bottom: 1px solid black; font-weight: normal; }
 td              { font-size: 10pt; vertical-align: baseline; }
@@ -26,8 +26,8 @@ ul.big li       { margin-top: 1em; font-size: 10pt; max-width: 88ex; }
 ol              { margin-left: 24pt; padding-left: 0pt; }
 .example        { background-color: #ffffe8; }
 pre             { background-color: #ffffe8; font-family: "Lucida Console", monospace; font-size: 9pt; 
-                  padding-left: 0ex; margin-top: 1em; margin-bottom: 1em; line-height: 12pt;  }
-pre i           { font-size: 9pt; font-family: Arial, Sans-Serif; line-height: 10pt; }
+                  padding-left: 0ex; margin-top: 1em; margin-bottom: 1em; line-height: 12pt; max-width: 472pt; }
+pre i           { font-size: 9pt; font-family: Arial, Sans-Serif; line-height: 10pt; max-width: 472pt; }
 code i          { font-size: 9pt; font-family: Arial, Sans-Serif; line-height: 10pt; }
 col             { padding-bottom: 1pt; padding-right: 2pt }
 caption         { font-size: 10pt; padding-bottom: 5pt; padding-left: 3pt; padding-right: 2pt; padding-top: 2pt }
@@ -117,7 +117,7 @@ td.api_title                    { padding-left: 3mm; }
 
 .api_programming_language_selector { margin-right: 2ex; }
 
-.message                        { background-color: #f8f8f8; max-width: 90ex; }
+.message                        { background-color: #f8f8f8; max-width: 472pt; }
 .message_info                   {}
 .message_warn                   { color: #800000; }
 .message_error                  { color: red; }
@@ -133,4 +133,3 @@ div.box                         { margin-top: 1.5em;
 span.work_in_progress           { margin-top: 0em; margin-bottom: 2em; 
                                   color: red; font-family: 'Courier New' monospace;  
                                   white-space: nowrap; }
-                                  

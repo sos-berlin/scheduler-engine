@@ -71,10 +71,19 @@ struct Spooler_db : Object, Scheduler_object
     void                        update_clob             ( const string& table_name, const string& column_name, const string& key_name, const string& key_value, const string& value );
     string                      read_clob               ( const string& table_name, const string& column_name, const string& key_name, const string& key_value );
 
+    string                      get_variable            ( Transaction*, const string& name, bool* record_exists );
+    void                        set_variable            ( Transaction*, const string& name, const string& value );
+    void                        insert_variable         ( Transaction*, const string& name, const string& value );
+    void                        update_variable         ( Transaction*, const string& name, const string& value );
+    bool                        try_update_variable     ( Transaction*, const string& name, const string& value );
+
     void                        write_order_history     ( Order*, Transaction* = NULL );
     void                        finish_order            ( Order*, Transaction* = NULL );
 
     void                        execute                 ( const string& stmt );
+    void                        execute_single          ( const string& stmt );
+    bool                        try_execute_single      ( const string& stmt );
+    int                         record_count            ()                                          { return _db.record_count(); }
     void                        commit                  ();
     void                        rollback                ();
     void                        try_reopen_after_error  ( exception&, bool wait_endless = false );

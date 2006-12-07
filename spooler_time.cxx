@@ -293,6 +293,13 @@ string Time::as_string( With_ms with ) const
     }
 }
 
+//---------------------------------------------------------------------------------Time::jdbc_value
+
+string Time::jdbc_value() const
+{ 
+    return "{ts'" + as_string( without_ms ) + "'}"; 
+}
+
 //----------------------------------------------------------------------------------Time::xml_value
 
 string Time::xml_value( With_ms with ) const

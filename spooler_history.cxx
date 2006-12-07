@@ -283,6 +283,19 @@ void Spooler_db::open2( const string& db_name )
 
                     add_column( _spooler->_tasks_tablename, "TASK_XML", " add \"TASK_XML\" clob" );
 
+                    create_table_when_needed( _spooler->_members_tablename,
+                                            "`scheduler_id`"           " varchar(100) not null, "
+                                            "`scheduler_member_id`"    " varchar(100) not null, "
+                                            "`running_since`"          " datetime, "
+                                            "`last_heart_beat`"        " integer not null, "
+                                          //"`last_heart_beat`"        " timestamp not null, "
+                                            "`next_heart_beat`"        " integer, "
+                                          //"`next_heart_beat`"        " timestamp, "
+                                          //"`ip_address`"             " varchar(40), "
+                                          //"`udp_port`"               " integer, "
+                                          //"`tcp_port`"               " integer, "
+                                            "`http_url`"               " varchar(100), "
+                                            "primary key( `scheduler_member_id` )" );
                     commit();
 
 
@@ -307,6 +320,8 @@ void Spooler_db::open2( const string& db_name )
 
 void Spooler_db::add_column( const string& table_name, const string& column_name, const string add_clause )
 {
+    if( _db_name == "" )  z::throw_xc( "SCHEDULER-361", __FUNCTION__ );
+
     try
     {
         Transaction ta ( this );
@@ -506,6 +521,8 @@ int Spooler_db::column_width( const string& table_name, const string& column_nam
 {
     int result;
 
+    if( _spooler->_db_name == "" )  z::throw_xc( "SCHEDULER-361", __FUNCTION__ );
+
     Any_file f ( S() << "-in " << _spooler->_db_name << " select `" << column_name << "` from " << table_name << " where 1=0" );
     int field_size= +f.spec()._field_type_ptr->field_descr_ptr( 0 )->type_ptr()->field_size();
     result = max( 0, field_size - 1 );   // Eins weniger fürs 0-Byte
@@ -545,6 +562,8 @@ void Spooler_db::close()
 
 void Spooler_db::open_history_table()
 {
+    if( _db_name == "" )  z::throw_xc( "SCHEDULER-361", __FUNCTION__ );
+
     THREAD_LOCK( _lock )
     {
         if( !_history_table.opened() )
@@ -560,6 +579,8 @@ void Spooler_db::open_history_table()
 
 void Spooler_db::create_table_when_needed( const string& tablename, const string& fields )
 {
+    if( _db_name == "" )  z::throw_xc( "SCHEDULER-361", __FUNCTION__ );
+
     try
     {
         Transaction ta ( this );        // Select und Create table nicht in derselben Transaktion. Für Access und PostgresQL
@@ -829,6 +850,81 @@ int Spooler_db::get_id_( const string& variable_name, Transaction* outer_transac
     return id;
 }
 
+//-------------------------------------------------------------------------Spooler_db::get_variable
+
+string Spooler_db::get_variable( Transaction* ta, const string& name, bool* record_exists )
+{
+    assert( ta );
+    if( _db_name == "" )  z::throw_xc( "SCHEDULER-361", __FUNCTION__ );
+
+    Any_file select ( "-in " + _db_name + "SELECT \"TEXTWERT\" from " + _spooler->_variables_tablename + " where \"NAME\"=" + sql::quoted( name ) );
+
+    if( select.eof() )
+    {
+        if( record_exists )  *record_exists = false;
+        return "";
+    }
+    else
+    {
+        if( record_exists )  *record_exists = true;
+        return select.get_record().as_string(0);
+    }
+}
+
+//-------------------------------------------------------------------------Spooler_db::set_variable
+/* Nicht getestet
+void Spooler_db::set_variable( Transaction* ta, const string& name, const string& value )
+{
+    assert( ta );
+
+    if( !try_update_variable( ta, name, value ) )
+        insert_variable( name, value );
+}
+*/
+//----------------------------------------------------------------------Spooler_db::insert_variable
+
+void Spooler_db::insert_variable( Transaction* ta, const string& name, const string& value )
+{
+    assert( ta );
+
+    sql::Insert_stmt insert ( &_spooler->_db->_db_descr, _spooler->_variables_tablename );
+    
+    insert[ "name" ] = name;
+    insert[ "textwert" ] = value;
+
+    execute( insert );
+}
+
+//-------------------------------------------------------------------------Spooler_db::set_variable
+/* Nicht getestet
+void Spooler_db::update_variable( Transaction* ta, const string& name, const string& value )
+{
+    assert( ta );
+
+    sql::Update_stmt update ( &_spooler->_db->_db_descr, _spooler->_variables_tablename );
+    
+    update.and_where_condition( "name", name );
+    update[ "wert"     ] = value;
+
+    execute_single( update );
+}
+*/
+//-------------------------------------------------------------------------Spooler_db::set_variable
+
+bool Spooler_db::try_update_variable( Transaction* ta, const string& name, const string& value )
+{
+    assert( ta );
+
+    sql::Update_stmt update ( &_spooler->_db->_db_descr, _spooler->_variables_tablename );
+    
+    update.and_where_condition( "name", name );
+    update[ "textwert" ] = value;
+
+    execute( update );
+
+    return _db.record_count() == 1;
+}
+
 //------------------------------------------------------------------------------Spooler_db::execute
 
 void Spooler_db::execute( const string& stmt )
@@ -838,6 +934,22 @@ void Spooler_db::execute( const string& stmt )
         Z_LOGI2( "scheduler", "Spooler_db::execute  " << stmt << '\n' );
         _db.put( stmt ); 
     }
+}
+
+//-----------------------------------------------------------------------Spooler_db::execute_single
+
+void Spooler_db::execute_single( const string& stmt )
+{ 
+    execute( stmt );
+    if( _db.record_count() != 1 )  z::throw_xc( "SCHEDULER-355", _db.record_count(), stmt );
+}
+
+//-------------------------------------------------------------------Spooler_db::try_execute_single
+
+bool Spooler_db::try_execute_single( const string& stmt )
+{ 
+    execute( stmt );
+    return _db.record_count() == 1;
 }
 
 //-------------------------------------------------------------------------------Spooler_db::commit
@@ -995,6 +1107,8 @@ string Spooler_db::read_orders_clob( Order* order, const string& column_name )
 
 string Spooler_db::read_orders_clob( const string& job_chain_name, const string& order_id, const string& column_name )
 {
+    if( _db_name == "" )  z::throw_xc( "SCHEDULER-361", __FUNCTION__ );
+
     return file_as_string( _db_name + " -table=" + _spooler->_orders_tablename + " -clob=" + column_name +
         " where `spooler_id`=" + sql::quoted( _spooler->id_for_db() ) + 
           " and `job_chain`="  + sql::quoted( job_chain_name ) + 
@@ -1015,6 +1129,8 @@ void Spooler_db::update_orders_clob( Order* order, const string& column_name, co
 
 void Spooler_db::update_orders_clob( const string& job_chain_name, const string& order_id, const string& column_name, const string& value )
 {
+    if( _db_name == "" )  z::throw_xc( "SCHEDULER-361", __FUNCTION__ );
+
     if( value == "" )
     {
         sql::Update_stmt update ( &_db_descr );
@@ -1060,6 +1176,8 @@ void Spooler_db::update_clob( const string& table_name, const string& column_nam
 
 void Spooler_db::update_clob( const string& table_name, const string& column_name, const string& key_name, const string& key_value, const string& value )
 {
+    if( _db_name == "" )  z::throw_xc( "SCHEDULER-361", __FUNCTION__ );
+
     if( value == "" )
     {
         sql::Update_stmt update ( &_db_descr );
@@ -1080,6 +1198,8 @@ void Spooler_db::update_clob( const string& table_name, const string& column_nam
 
 string Spooler_db::read_clob( const string& table_name, const string& column_name, const string& key_name, const string& key_value )
 {
+    if( _db_name == "" )  z::throw_xc( "SCHEDULER-361", __FUNCTION__ );
+
     return file_as_string( _db_name + " -table=" + table_name + " -clob=" + column_name + "  where `" + key_name + "`=" + sql::quoted( key_value ) );
 }
 
@@ -1568,6 +1688,8 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
 
                         clause += " order by \"ID\" ";  if( next < 0 )  clause += " desc";
                         
+                        if( _spooler->_db->_db_name == "" )  z::throw_xc( "SCHEDULER-361", __FUNCTION__ );
+
                         sel.open( prefix + _spooler->_db->_db_name + 
                                 " select " + 
                                 ( next == 0? "" : "%limit(" + as_string(abs(next)) + ") " ) +

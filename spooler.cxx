@@ -659,6 +659,14 @@ Security::Level Spooler::security_level( const Ip_address& host )
     return result;
 }
 
+//--------------------------------------------------------------------------------Spooler::http_url
+
+string Spooler::http_url() const
+{
+    if( _tcp_port )  return S() << "http://" << _hostname << ":" << _tcp_port;
+               else  return "";
+}
+
 //-----------------------------------------------------------------------Spooler::state_dom_element
 
 xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const Show_what& show )
@@ -1739,6 +1747,7 @@ void Spooler::load_arg()
     _order_history_tablename    = ucase(     read_profile_string    ( _factory_ini, "spooler", "db_order_history_table", "SCHEDULER_ORDER_HISTORY" ) );
     _orders_tablename           = ucase(     read_profile_string    ( _factory_ini, "spooler", "db_orders_table"       , "SCHEDULER_ORDERS"    ) );
     _variables_tablename        = ucase(     read_profile_string    ( _factory_ini, "spooler", "db_variables_table"    , "SCHEDULER_VARIABLES" ) );
+    _members_tablename          = ucase(     read_profile_string    ( _factory_ini, "spooler", "db_members_table"      , "SCHEDULER_MEMBERS" ) );
   //_interactive                = true;     // Kann ohne weiteres true gesetzt werden (aber _is_service setzt es wieder false)
 
 
@@ -1844,6 +1853,10 @@ void Spooler::load_arg()
             else
             if( opt.flag      ( "validate-xml"           ) )  _validate_xml = opt.set();
             else
+            if( opt.flag      ( "backup"                 ) )  _is_backup_member = opt.set();
+            else
+            //if( opt.flag      ( "member-id"              ) )  _scheduler_member_id = opt.set();
+            //else
             if( opt.with_value( "env"                    ) )  ;  // Bereits von spooler_main() erledigt
             else
             if( opt.flag      ( "zschimmer"              ) )  _zschimmer_mode = opt.set();
@@ -2266,6 +2279,14 @@ void Spooler::start()
     set_ctrl_c_handler( false );
     set_ctrl_c_handler( true );       // Falls Java (über Dateityp jdbc) gestartet worden ist und den Signal-Handler verändert hat
 
+
+    _scheduler_member = Z_NEW( Scheduler_member( this ) );
+  //_scheduler_member->set_member_id( _scheduler_member_id );
+    _scheduler_member->set_backup( _is_backup_member );
+    _scheduler_member->start();
+    while( !_scheduler_member->is_active() )  sos_sleep( 1 ), _connection_manager->async_continue();//_connection_manager->wait( 1 );
+
+
     // Thread _communication nach Java starten (auch implizit durch _db). Java muss laufen, wenn der Thread startet! (Damit attach_thread() greift)
     //if( !_manual )  
         _communication.start_or_rebind();
@@ -2381,6 +2402,12 @@ void Spooler::stop( const exception* )
     //set_state( _state_cmd == sc_let_run_terminate_and_restart? s_stopping_let_run : s_stopping );
 
     //_log.msg( "Spooler::stop" );
+
+    if( _scheduler_member )
+    {
+        _scheduler_member->shutdown();
+        _scheduler_member = NULL;
+    }
 
     if( _module_instance )      // Scheduler-Skript zuerst beenden, damit die Finalizer die Tasks (von Job.start()) und andere Objekte schließen können.
     {
@@ -2626,6 +2653,7 @@ void Spooler::run()
         if( _shutdown_cmd )  if( !_single_thread  ||  !_single_thread->has_tasks()  ||  _shutdown_ignore_running_tasks )  break;
 
         bool something_done = run_continue();
+        if( _scheduler_member )  check_scheduler_member();
         if( _single_thread->is_ready_for_termination() )  break;
 
         if( something_done )  wait_until = 0;   // Nicht warten, wir drehen noch eine Runde
@@ -2890,6 +2918,20 @@ bool Spooler::run_continue()
     //Z_LOG2( "joacim", __FUNCTION__ << "  something_done=" << something_done << "\n" );
 
     return something_done;
+}
+
+//------------------------------------------------------------------Spooler::check_scheduler_member
+
+void Spooler::check_scheduler_member()
+{
+    _scheduler_member->async_check_exception( "Error in Scheduler member" );
+    
+    if( !_scheduler_member->is_active() )
+    {
+        _log.warn( message_string( "SCHEDULER-362" ) );
+        _log.warn( "abort_immediately" );
+        abort_immediately();
+    }
 }
 
 //------------------------------------------------------------------------Spooler::run_check_ctrl_c

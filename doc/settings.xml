@@ -315,6 +315,13 @@ log = scheduler.wait com_server.* >scheduler.log</pre>
         </description>
     </setting>
 
+    
+    <setting setting = "db_members_table"
+             type    = "name"
+             initial = "SCHEDULER_MEMBERS"
+             title   = "Name der Datenbanktabelle für die Scheduler-Mitglieder">
+    </setting>
+
 
     <setting setting = "history_columns"
              type    = "name, name, ..."

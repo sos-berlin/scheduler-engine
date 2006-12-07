@@ -25,7 +25,8 @@ struct Scheduler_object
         type_web_service_response,
         type_process,
         type_directory_file_order_source,
-        type_scheduler_event_manager
+        type_scheduler_event_manager,
+        type_scheduler_member,
       //type_subprocess_register
     };
 

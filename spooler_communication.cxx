@@ -630,7 +630,7 @@ void Communication::finish_responses( double wait_time )
     }
 }
 
-//--------------------------------------------------------------------Communication::remove_connection
+//-----------------------------------------------------------------Communication::remove_connection
 
 void Communication::remove_connection( Connection* connection )
 {

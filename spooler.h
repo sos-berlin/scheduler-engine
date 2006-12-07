@@ -116,6 +116,7 @@ struct Spooler_thread;
 struct Subprocess;
 struct Subprocess_register;
 struct Task;
+struct Transaction;
 struct Web_service;
 struct Web_service_operation;
 struct Web_service_request;
@@ -163,6 +164,7 @@ namespace http
 #include "spooler_web_service.h"
 #include "spooler_module_remote.h"
 #include "spooler_module_remote_server.h"
+#include "members.h"
 
 //-------------------------------------------------------------------------------------------------
 
@@ -240,6 +242,7 @@ struct Spooler : Object,
     Thread_id                   thread_id                   () const                            { return _thread_id; }
     const string&               id                          () const                            { return _spooler_id; }
     string                      id_for_db                   () const                            { return _spooler_id.empty()? "-" : _spooler_id; }
+    string                      http_url                    () const;
     string                      name                        () const;                           // "Scheduler -id=... host:port"
     const string&               param                       () const                            { return _spooler_param; }
     int                         udp_port                    () const                            { return _udp_port; }
@@ -322,6 +325,7 @@ struct Spooler : Object,
     void                        nichts_getan                ( int anzahl, const string& );
     void                        run                         ();
     bool                        run_continue                ();
+    void                        check_scheduler_member      ();
   //void                        start_threads               ();
     Spooler_thread*             new_thread                  ( bool free_threading = true );
   //void                        close_threads               ();
@@ -434,6 +438,7 @@ struct Spooler : Object,
 
     string                     _variables_tablename;
     string                     _orders_tablename;
+    string                     _members_tablename;
 
     string                     _tasks_tablename;
     string                     _job_history_tablename;
@@ -595,6 +600,9 @@ struct Spooler : Object,
 
     ptr<Com_variable_set>      _environment;
     Variable_set_map           _variable_set_map;           // _variable_set_map[""] = _environment; für <params>, Com_variable_set::set_dom()
+    bool                       _is_backup_member;
+  //string                     _scheduler_member_id;
+    ptr<Scheduler_member>      _scheduler_member;
 };
 
 //-------------------------------------------------------------------------------------------------
