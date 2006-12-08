@@ -270,11 +270,7 @@ void Scheduler_member::start()
 {
     Z_LOGI2( "scheduler", __FUNCTION__ << "\n" );
 
-    if( !db()->opened() )
-    {
-        if( _is_backup )  z::throw_xc( "SCHEDULER-357" ); 
-        return;
-    }
+    if( !db()->opened() )  z::throw_xc( "SCHEDULER-357" ); 
 
     create_table_when_needed();
 
