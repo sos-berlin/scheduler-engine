@@ -2251,7 +2251,7 @@
 
         <message code="SCHEDULER-357">
             <text xml:lang="en">
-                <title>This Scheduler member is inactive, which is not possible without a database</title>
+                <title>Heart beat and backup Scheduler need a database</title>
             </text>
         </message>
 

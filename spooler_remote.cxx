@@ -66,13 +66,20 @@ string Xml_client_connection::obj_name() const
     
 bool Xml_client_connection::async_continue_( Continue_flags flags )
 {
+    Z_DEBUG_ONLY( Z_LOGI2( "joacim", __FUNCTION__ << "\n" ); )
+
     bool something_done = false;
 
     try
     {
         if( _socket_operation )
         {
-            if( !_socket_operation->async_finished() )  return false;
+            if( !_socket_operation->async_finished() ) 
+            {
+                Z_DEBUG_ONLY( Z_LOG2( "scheduler", __FUNCTION__ << " !_socket_operation->async_finished()\n" ); )
+                return false;
+            }
+
             _socket_operation->async_check_error();
 
             if( _socket_operation->_eof )  z::throw_xc( "SCHEDULER-224" );
@@ -82,7 +89,12 @@ bool Xml_client_connection::async_continue_( Continue_flags flags )
         switch( _state )
         {
             case s_initial:
-                if( !( flags & cont_next_gmtime_reached ) )  return false;
+                if( !( flags & cont_next_gmtime_reached ) )  
+                { 
+                    Z_DEBUG_ONLY( Z_LOG( "*** " << __FUNCTION__ << " !cont_next_gmtime_reached\n" ); 
+                                  Z_WINDOWS_ONLY( DebugBreak(); ) ) 
+                    return false; 
+                }
 
                 _socket_operation = Z_NEW( Buffered_socket_operation );
 

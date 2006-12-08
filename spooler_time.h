@@ -9,6 +9,10 @@ namespace sos {
 namespace spooler {
 namespace time {
 
+//-------------------------------------------------------------------------------------------------
+
+extern const int                latter_day_int;
+
 //--------------------------------------------------------------------------------With_single_start
 
 enum With_single_start
@@ -32,6 +36,9 @@ struct Time
     };
 
     static Time                 time_with_now               ( const string& );              // Datum mit Zeit oder "now+zeit"
+    static void             set_current_difference_to_utc   ();
+    static int                  current_difference_to_utc   ()                              { set_current_difference_to_utc(); return static_current_difference_to_utc; }
+    static int                  static_current_difference_to_utc;
 
 
                                 Time                        ( double t = 0.0 )              { set(t); }
@@ -51,39 +58,44 @@ struct Time
     void                        operator =                  ( const char* t )               { set(t); }
     void                        operator =                  ( const Sos_optional_date_time& );
 
-    void                        operator +=                 ( double t )                    { set( _time + t ); }
-    void                        operator -=                 ( double t )                    { set( _time - t ); }
+    void                        operator +=                 ( double t )                    { set( as_double() + t ); }
+    void                        operator -=                 ( double t )                    { set( as_double() - t ); }
 
-    Time                        operator +                  ( const Time& t )               { return Time( _time + t ); }
-    Time                        operator +                  ( double t )                    { return Time( _time + t ); }
-    Time                        operator +                  ( int t )                       { return Time( _time + t ); }
-    Time                        operator -                  ( const Time& t )               { return Time( _time - t ); }
-    Time                        operator -                  ( double t )                    { return Time( _time - t ); }
-    Time                        operator -                  ( int t )                       { return Time( _time - t ); }
+    Time                        operator +                  ( const Time& t )               { return Time( as_double() + t.as_double() ); }
+    Time                        operator +                  ( double t )                    { return Time( as_double() + t             ); }
+    Time                        operator +                  ( int t )                       { return Time( as_double() + t             ); }
+    Time                        operator -                  ( const Time& t )               { return Time( as_double() - t.as_double() ); }
+    Time                        operator -                  ( double t )                    { return Time( as_double() - t             ); }
+    Time                        operator -                  ( int t )                       { return Time( as_double() - t             ); }
 
-    bool                        operator <                  ( const Time& t ) const         { return _time <  t._time; }
-    bool                        operator <=                 ( const Time& t ) const         { return _time <= t._time; }
-    bool                        operator ==                 ( const Time& t ) const         { return _time == t._time; }
-    bool                        operator !=                 ( const Time& t ) const         { return _time != t._time; }
-    bool                        operator >=                 ( const Time& t ) const         { return _time >= t._time; }
-    bool                        operator >                  ( const Time& t ) const         { return _time >  t._time; }
+    bool                        operator <                  ( const Time& t ) const         { return as_double() <  t.as_double(); }
+    bool                        operator <=                 ( const Time& t ) const         { return as_double() <= t.as_double(); }
+    bool                        operator ==                 ( const Time& t ) const         { return as_double() == t.as_double(); }
+    bool                        operator !=                 ( const Time& t ) const         { return as_double() != t.as_double(); }
+    bool                        operator >=                 ( const Time& t ) const         { return as_double() >= t.as_double(); }
+    bool                        operator >                  ( const Time& t ) const         { return as_double() >  t.as_double(); }
 
-    bool                        operator <                  ( double t ) const              { return _time <  round(t); }
-    bool                        operator <=                 ( double t ) const              { return _time <= round(t); }
-    bool                        operator ==                 ( double t ) const              { return _time == round(t); }
-    bool                        operator !=                 ( double t ) const              { return _time != round(t); }
-    bool                        operator >=                 ( double t ) const              { return _time >= round(t); }
-    bool                        operator >                  ( double t ) const              { return _time >  round(t); }
+    bool                        operator <                  ( double t ) const              { return as_double() <  round(t); }
+    bool                        operator <=                 ( double t ) const              { return as_double() <= round(t); }
+    bool                        operator ==                 ( double t ) const              { return as_double() == round(t); }
+    bool                        operator !=                 ( double t ) const              { return as_double() != round(t); }
+    bool                        operator >=                 ( double t ) const              { return as_double() >= round(t); }
+    bool                        operator >                  ( double t ) const              { return as_double() >  round(t); }
 
-    bool                        operator <                  ( int t ) const                 { return _time <  round(t); }
-    bool                        operator <=                 ( int t ) const                 { return _time <= round(t); }
-    bool                        operator ==                 ( int t ) const                 { return _time == round(t); }
-    bool                        operator !=                 ( int t ) const                 { return _time != round(t); }
-    bool                        operator >=                 ( int t ) const                 { return _time >= round(t); }
-    bool                        operator >                  ( int t ) const                 { return _time >  round(t); }
+    bool                        operator <                  ( int t ) const                 { return as_double() <  round(t); }
+    bool                        operator <=                 ( int t ) const                 { return as_double() <= round(t); }
+    bool                        operator ==                 ( int t ) const                 { return as_double() == round(t); }
+    bool                        operator !=                 ( int t ) const                 { return as_double() != round(t); }
+    bool                        operator >=                 ( int t ) const                 { return as_double() >= round(t); }
+    bool                        operator >                  ( int t ) const                 { return as_double() >  round(t); }
 
-                                operator double             () const                        { return _time; }
-    bool                        operator !                  () const                        { return _time == 0; }
+                                operator double             () const                        { return as_double(); }
+    bool                        operator !                  () const                        { return is_null(); }
+
+    void                    set_null                        ()                              { set( 0 ); }
+    bool                     is_null                        () const                        { return _time == 0; }
+    void                    set_never                       ()                              { set( latter_day_int ); } 
+    bool                     is_never                       () const                        { return _time == latter_day_int; } 
 
     static double               round                       ( double t );
     static double               normalize                   ( double t );
@@ -91,6 +103,8 @@ struct Time
     void                        set                         ( time_t t )                    { set( (double)t ); }
     void                        set                         ( double );
     void                        set                         ( const string& );
+    void                        set_utc                     ( double );
+    double                      as_double                   () const;
 
 #ifdef Z_WINDOWS
     void                        set                         ( const FILETIME& ); 
@@ -99,11 +113,12 @@ struct Time
 #endif
 
     void                        set_datetime                ( const string& );
-    Time                        time_of_day                 () const                        { return _time - midnight(); }
+    void                        set_datetime_utc            ( const string& );
+    Time                        time_of_day                 () const                        { return as_double() - midnight(); }
     Time                        midnight                    () const                        { return day_nr() * 24*60*60; }
-    int                         day_nr                      () const                        { return uint(_time) / (24*60*60); }
-    time_t                      as_time_t                   () const                        { return (time_t)( _time + 0.0001 ); }
-    DATE                        as_local_com_date           () const                        { return com_date_from_seconds_since_1970( round( _time ) ); }
+    int                         day_nr                      () const                        { return uint(as_double()) / (24*60*60); }
+    time_t                      as_time_t                   () const                        { return (time_t)( as_double() + 0.0001 ); }
+    DATE                        as_local_com_date           () const                        { return com_date_from_seconds_since_1970( round( as_double() ) ); }
     int64                       int64_filetime              () const;
     double                      cut_fraction                ( string* datetime_string );
 
@@ -121,13 +136,14 @@ struct Time
         string                 _time_as_string;
 #   endif    
 
+  private:
     double                     _time;                       // wie time_t: Anzahl Sekunden seit 1.1.1970 oder seit Mitternacht
+    bool                       _is_utc;
 };      
 
 void                            insert_into_message         ( Message_string*, int index, const Time& ) throw();
 
 
-extern const int                latter_day_int;
 extern const Time               latter_day;
 
 //-------------------------------------------------------------------------------------------Period
@@ -405,12 +421,14 @@ struct Run_time : idispatch_implementation< Run_time, spooler_com::Irun_time >,
 //-------------------------------------------------------------------------------------------------
 
 Time                            time_from_string            ( const string& );
+void                            test_summertime             ( const string& date_time );
 
 //-------------------------------------------------------------------------------------------------
 
 } //namespace time
 
 //-------------------------------------------------------------------------------------------Gmtime
+/* Hübsche Klasse, berücksichtigt aber bei der Umrechnug die Sommerzeit nicht.
 // Greenwich Time (UTC)
 
 struct Gmtime
@@ -485,7 +503,7 @@ struct Gmtime
 };
 
 extern const Gmtime             doomsday;
-
+*/
 //-------------------------------------------------------------------------------------------------
 
 inline void insert_into_message( Message_string* m, int index, const time::Time& t ) throw()        { m->insert_string( index, t.as_string() ); }

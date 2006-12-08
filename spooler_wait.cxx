@@ -323,9 +323,19 @@ bool Wait_handles::wait( double wait_time )
 */
 //-------------------------------------------------------------------------Wait_handles::wait_until
 
-bool Wait_handles::wait_until( const Gmtime& until, const Object* wait_for_object, const Gmtime& resume_until, const Object* resume_object )
+bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object, const Time& resume_until, const Object* resume_object )
 {
-    /*
+#   ifdef Z_DEBUG
+        if( z::Log_ptr log = "scheduler.wait" )
+        {
+            *log << __FUNCTION__ << " ";
+            *log << " until=" << until << ", ";
+            if( wait_for_object )  *log << "  for " << wait_for_object->obj_name() << ", ";
+            *log << *this << "\n";
+        }
+#   endif
+
+
     if( until  &&  until < latter_day )
     {
         if( _spooler->_zschimmer_mode  &&  _spooler->_next_daylight_saving_transition_time )
@@ -380,14 +390,18 @@ bool Wait_handles::wait_until( const Gmtime& until, const Object* wait_for_objec
                 //ftime( &tm2 );
                 t = ::time(NULL);
                 localtime_r( &t, &tm2 );
-                if( tm1.tm_isdst != tm2.tm_isdst )  _log->info( message_string( tm2.tm_isdst? "SCHEDULER-951" : "SCHEDULER-952" ) );
-                                              else  Z_DEBUG_ONLY( _log->debug9( "Keine Sommerzeitumschaltung" ) );
+                if( tm1.tm_isdst != tm2.tm_isdst )
+                {
+                    _log->info( message_string( tm2.tm_isdst? "SCHEDULER-951" : "SCHEDULER-952" ) );
+                    break;
+                }
+                else
+                {
+                    Z_DEBUG_ONLY( _log->debug9( "Keine Sommerzeitumschaltung" ) );
+                }
             }
         }
     }
-    return wait_until_2( until, wait_for_object, resume_until, resume_object );
-
-    */
 
     return wait_until_2( until, wait_for_object, resume_until, resume_object );
 }
@@ -395,7 +409,7 @@ bool Wait_handles::wait_until( const Gmtime& until, const Object* wait_for_objec
 //-----------------------------------------------------------------------Wait_handles::wait_until_2
 // Liefert Nummer des Events (0..n-1) oder -1 bei Zeitablauf
 
-bool Wait_handles::wait_until_2( const Gmtime& until, const Object* wait_for_object, const Gmtime& resume_until, const Object* resume_object )
+bool Wait_handles::wait_until_2( const Time& until, const Object* wait_for_object, const Time& resume_until, const Object* resume_object )
 {
     // until kann 0 sein
     _catched_event = NULL;
@@ -409,12 +423,12 @@ bool Wait_handles::wait_until_2( const Gmtime& until, const Object* wait_for_obj
     HANDLE* handles   = NULL;
     //bool    waitable_timer_set = false;
     BOOL    ok;
-    Gmtime  now       = Gmtime::now();
+    Time    now       = Time::now();
 
 
     if( now < until  &&  _spooler->_waitable_timer )
     {
-        if( resume_until < doomsday )
+        if( resume_until < latter_day )
         {
             LARGE_INTEGER gmtime;
 
@@ -422,7 +436,7 @@ bool Wait_handles::wait_until_2( const Gmtime& until, const Object* wait_for_obj
             //ok = LocalFileTimeToFileTime( &local_time, (FILETIME*)&gmtime );   Das könnte zum Beginn der Winterzeit eine Stunde zu früh sein
             //if( !ok )  z::throw_mswin( "LocalFileTimeToFileTime" );
 
-            gmtime.QuadPart = -(int64)( ( resume_until - now ).as_double() * 10000000 );  // Negativer Wert bedeutet relative Angabe in 100ns.
+            gmtime.QuadPart = -(int64)( ( resume_until - now ) * 10000000 );  // Negativer Wert bedeutet relative Angabe in 100ns.
             if( gmtime.QuadPart < 0 )
             {
                 Z_LOG2( "scheduler.wait", "SetWaitableTimer(" << ( gmtime.QuadPart / 10000000.0 ) << "s: " << resume_until.as_string() << ")"  
@@ -447,7 +461,7 @@ bool Wait_handles::wait_until_2( const Gmtime& until, const Object* wait_for_obj
 
     while(1)
     {
-        double wait_time         = until.as_double() - now.as_double();     // Kann negativ werden
+        double wait_time         = until - now;
         int    max_sleep_time_ms = INT_MAX-1;
         int    t                 = (int)ceil( min( (double)max_sleep_time_ms, wait_time * 1000.0 ) );
         DWORD  ret               = WAIT_TIMEOUT;
@@ -460,8 +474,9 @@ bool Wait_handles::wait_until_2( const Gmtime& until, const Object* wait_for_obj
             if( t > 1800 )  { result = false; break; }  // Um mehr als eine halbe Stunde verrechnet? Das muss an der Sommerzeitumstellung liegen
         }
 
-        if( t > 0 )  Z_LOG2( "scheduler.wait", "MsgWaitForMultipleObjects " << sos::as_string(t/1000.0) << "s (bis " << until.as_string() << ( wait_for_object? " auf " + wait_for_object->obj_name() : "" ) << ")  " << as_string() << "\n" );
-
+#       ifdef Z_DEBUG
+            Z_LOG2( t > 0? "scheduler.wait" : "scheduler.loop", "MsgWaitForMultipleObjects " << sos::as_string(t/1000.0) << "s (" << wait_time << "s, bis " << until << ( wait_for_object? " auf " + wait_for_object->obj_name() : "" ) << ")  " << as_string() << "\n" );
+#       endif
 
         handles = new HANDLE [ _handles.size()+1 ];
         for( int i = 0; i < _handles.size(); i++ )  handles[i] = _handles[i];
@@ -471,27 +486,27 @@ bool Wait_handles::wait_until_2( const Gmtime& until, const Object* wait_for_obj
             int     console_line_length = 0;
             double  step = 1.0;
             
-            while( !until.is_null()  &&  Gmtime::now() < until - step )
+            while( Time::now() < until - step )
             {
                 ret = MsgWaitForMultipleObjects( _handles.size(), handles, FALSE, (int)( ceil( step * 1000 ) ), QS_ALLINPUT ); 
                 if( ret != WAIT_TIMEOUT )  break;
 
-                Gmtime now  = Gmtime::now();
-                Gmtime rest = until - now;
-                t = (int)ceil( min( (double)max_sleep_time_ms, rest.as_double() * 1000.0 ) );
+                Time now = Time::now();
+                Time rest = until - now;
+                t = (int)ceil( min( (double)max_sleep_time_ms, rest * 1000.0 ) );
 
                 S console_line;
                 console_line << Time::now().as_string( Time::without_ms );
                 
-                if( until < doomsday  ||  wait_for_object )
+                if( until < latter_day  ||  wait_for_object )
                 {
                     console_line << " (";
-                    if( until < doomsday ) 
+                    if( until < latter_day ) 
                     {
                         int days = rest.day_nr();
                         if( days > 0 )  console_line << days << "d+";
-                        console_line << rest.time_of_day().as_string( Gmtime::without_ms ) << "s";
-                        if( days > 0 )  console_line << " until " << until.as_string();
+                        console_line << rest.time_of_day().as_string( Time::without_ms ) << "s";
+                        if( days > 0 )  console_line << " until " << Time( until ).as_string();
                     }
                     if( wait_for_object )  console_line << " for " << wait_for_object->obj_name();
                     console_line << ")";
@@ -554,7 +569,7 @@ bool Wait_handles::wait_until_2( const Gmtime& until, const Object* wait_for_obj
             throw_mswin_error( "MsgWaitForMultipleObjects" );
 
 
-        now = Gmtime::now();
+        now = Time::now();
     }
 
 
@@ -569,7 +584,7 @@ bool Wait_handles::wait_until_2( const Gmtime& until, const Object* wait_for_obj
 #else
 
     {
-        Gmtime now = Gmtime::now();
+        Time now = Time::now();
 
         if( until > now )   Z_LOG2( "scheduler.wait", "wait_until " << until.as_string() << ( wait_for_object? " auf " + wait_for_object->obj_name() : "" ) << " " << as_string() << "\n" );
 
@@ -577,10 +592,10 @@ bool Wait_handles::wait_until_2( const Gmtime& until, const Object* wait_for_obj
 
         for( int i = _events.size() - 1; i >= 0; i-- )   if( _events[i] )  wait->add( _events[i] );
 
-        wait->set_polling_interval( now < _spooler->_last_time_enter_pressed + 10.0? 0.1 
-                                                                                   : 1.0 );
+        wait->set_polling_interval( now.as_time_t() < _spooler->_last_time_enter_pressed + 10.0? 0.1 
+                                                                                               : 1.0 );
 
-        int ret = wait->wait( until.as_double() - now.as_double() );
+        int ret = wait->wait( (double)( until - now ) );
         return ret > 0;
       //return wait->wait( min( directory_watcher_interval, (double)( until - Time::now() ) ) );
 

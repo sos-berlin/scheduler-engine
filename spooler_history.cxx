@@ -87,7 +87,7 @@ Transaction::Transaction( Spooler_db* db, Transaction* outer_transaction )
     _outer_transaction(outer_transaction)
 {
     assert( db );
-    if( !_db->opened() )  z::throw_xc( "SCHEDULER-357" );
+    if( !_db->opened() )  z::throw_xc( "SCHEDULER-361" );
 
     if( !_outer_transaction )
     {
@@ -809,52 +809,39 @@ int Spooler_db::get_id_( const string& variable_name, Transaction* outer_transac
     //if( get_java_vm(false)->running() )  get_java_vm(false)->attach_thread( "" );
 
 
-    Transaction ta ( this, outer_transaction );
+    if( _db.opened() )
     {
-        if( _db.opened() )
+        Transaction ta ( this, outer_transaction );
+
+        execute( "UPDATE " + _spooler->_variables_tablename + " set \"WERT\" = \"WERT\"+1 where \"NAME\"=" + sql::quoted( variable_name ) );
+
+        Any_file sel;
+        sel.open( "-in " + _db_name + "SELECT \"WERT\" from " + _spooler->_variables_tablename + " where \"NAME\"=" + sql::quoted( variable_name ) );
+        if( sel.eof() )
         {
-            //_job_id_update.execute();    // id++
-
-            //_job_id_select.execute();
-            //id = _job_id_select.get_record().as_int(0);
-            //_job_id_select.close( close_cursor );
-
-//static int c = 3;  if( --c <= 0 )  throw_xc( "FEHLER" );
-            execute( "UPDATE " + _spooler->_variables_tablename + " set \"WERT\" = \"WERT\"+1 where \"NAME\"=" + sql::quoted( variable_name ) );
-
-            Any_file sel;
-            sel.open( "-in " + _db_name + "SELECT \"WERT\" from " + _spooler->_variables_tablename + " where \"NAME\"=" + sql::quoted( variable_name ) );
-            if( sel.eof() )
-            {
-                //Any_file sel2 ( "-in " + _db_name + "SELECT max( \"ID\" )  from " + uquoted(_spooler->_job_history_tablename) );
-                //Record record = sel2.get_record();
-                //id = record.null( 0 )? 1 : record.as_int( 0 );  Fehler in Hostware: record.null(0) liefert immer true
-                //sel2.close();
-
-                id = 1;
-                execute( "INSERT into " + _spooler->_variables_tablename + " (\"NAME\",\"WERT\") " 
-                         "values (" + sql::quoted( variable_name ) + ",'" + as_string(id) + "')" );
-            }
-            else
-            {
-                id = sel.get_record().as_int(0);
-            }
-
-            Z_LOG2( "scheduler", "Spooler_db::get_id(\"" + variable_name + "\") = " << id << '\n' );
-
-            _id_counters[ variable_name ] = id + 1;
-        }
-        else
-        if( _waiting )
-        {
-            z::throw_xc( "SCHEDULER-184" );
+            id = 1;
+            execute( "INSERT into " + _spooler->_variables_tablename + " (\"NAME\",\"WERT\") " 
+                     "values (" + sql::quoted( variable_name ) + ",'" + as_string(id) + "')" );
         }
         else
         {
-            id = InterlockedIncrement( &_id_counters[ variable_name ] );
+            id = sel.get_record().as_int(0);
         }
+
+        Z_LOG2( "scheduler", "Spooler_db::get_id(\"" + variable_name + "\") = " << id << '\n' );
+
+        _id_counters[ variable_name ] = id + 1;
 
         ta.commit();
+    }
+    else
+    if( _waiting )
+    {
+        z::throw_xc( "SCHEDULER-184" );
+    }
+    else
+    {
+        id = InterlockedIncrement( &_id_counters[ variable_name ] );
     }
 
     return id;

@@ -196,6 +196,18 @@
             </messages>
         </command_option>
 
+        
+        <command_option name="backup" title="Startet den Scheduler als Backup-Scheduler">
+            <description>
+                <p>
+                    Der Backup-Scheduler beobachtet einen mit 
+                    <scheduler_option name="heart-beat"/>
+                    gestarteten Scheduler.
+                </p>
+            </description>
+        </command_option>
+
+
         <example>
             <pre>c:\bin\scheduler.exe c:\scheduler\config.xml -log-dir=c:\scheduler\logs</pre>
         </example>
@@ -505,7 +517,6 @@
         </command_option>
     </command_options>
 
-    
     
     <description>
         <p>

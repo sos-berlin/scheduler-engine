@@ -14,6 +14,7 @@
 */
 
 #include "spooler.h"
+#include "../kram/sleep.h"
 
 #ifdef SYSTEM_HPUX
 #   include <time.h>
@@ -30,12 +31,16 @@
 namespace sos {
 namespace spooler {
 
-extern const Gmtime                    doomsday                    = (Gmtime)double_time_max;
+//extern const Gmtime                    doomsday                    = (Gmtime)double_time_max;
 
 
 namespace time {
 
-//-------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------static
+
+int                             Time::static_current_difference_to_utc  = 0;
+
+//--------------------------------------------------------------------------------------------const
 
 extern const int                       latter_day_int              = INT_MAX;
 extern const Time                      latter_day                  = latter_day_int;
@@ -53,6 +58,33 @@ int64 base_filetime = 116444736000000000LL;
 //-------------------------------------------------------------------------------------------------
 
 Run_time::Class_descriptor              Run_time::class_descriptor ( &typelib, "sos.spooler.Run_time", Run_time::_methods );
+
+//----------------------------------------------------------------------------------test_summertime
+
+void test_summertime( const string& date_time )
+{
+    Time l;
+    Time u;
+
+    l.set_datetime( date_time );
+    u.set_datetime_utc( date_time );
+
+    while(1)
+    {
+        Time::set_current_difference_to_utc();
+        Time now = Time::now();
+        Time now_utc;
+        now_utc.set_utc( double_from_gmtime() );
+
+        cerr << Time::current_difference_to_utc() << " " << ( ::time(NULL) - now.as_time_t()  ) << " "
+             << now_utc.as_string( Time::without_ms ) << ", " 
+             << now.as_string( Time::without_ms ) << "    " 
+             << l.as_time_t() << " " << ( ( now.as_time_t() - l.as_time_t() + 100 ) / 3600 ) << "h " << l.as_string() << ", " 
+             << u.as_time_t() << " " << ( ( now.as_time_t() - u.as_time_t() + 100 ) / 3600 ) << "h " << u.as_string() << "\n";
+        sos_sleep( 1 );
+        if( ctrl_c_pressed )  exit(0);
+    }
+}
 
 //---------------------------------------------------------------------------------time_from_string
 
@@ -143,6 +175,8 @@ Time Time::time_with_now( const string& time_string )
 
 void Time::set( const string& t )
 {
+    _is_utc = false;
+
     if( t == "never" )
     {
         *this = latter_day;
@@ -164,6 +198,7 @@ void Time::set( const string& t )
 void Time::set( double t )
 {
     _time = round(t);
+    _is_utc = false;
 
     if( _time > latter_day_int )  _time = latter_day_int;
 
@@ -229,10 +264,63 @@ FILETIME Time::filetime() const
 
 int64 Time::int64_filetime() const
 {
-    return (int64)( _time * 10000000.0 + 0.5 ) + base_filetime;
+    return (int64)( as_double() * 10000000.0 + 0.5 ) + base_filetime;
 }
 
 #endif
+
+//--------------------------------------------------------------Time::set_current_difference_to_utc
+
+void Time::set_current_difference_to_utc()
+{
+    int  new_difference;
+    bool is_dst;
+
+#   ifdef Z_WINDOWS
+
+        timeb  tm;
+        ftime( &tm );
+        new_difference = timezone + ( tm.dstflag? _dstbias : 0 );
+        is_dst = tm.dstflag != 0;
+
+#   else
+
+        timeval  tv;
+        tm       tm;
+
+        gettimeofday( &tv, NULL );
+        localtime_r( &tv.tv_sec, &tm );
+
+        new_difference = timezone + ( tm.tm_isdst? _dstbias : 0 );
+        is_dst = tm.tm_isdst != 0;
+
+#   endif
+
+    if( static_current_difference_to_utc != new_difference )
+    {
+        Z_LOG2( "scheduler", __FUNCTION__ << " " << new_difference << " tz=" << timezone << " is_dst=" << is_dst << " dstbias=" << _dstbias << " (old=" << static_current_difference_to_utc << ")\n" );
+        static_current_difference_to_utc = new_difference;
+    }
+}
+
+//----------------------------------------------------------------------------------Time::as_double
+
+double Time::as_double() const
+{
+    //Z_DEBUG_ONLY( if( _is_utc )  Z_LOG( __FUNCTION__ << " _time=" << ::sos::as_string(_time) << " - " << current_difference_to_utc() << "\n" ) );
+
+    return _is_utc? _time - current_difference_to_utc()
+                  : _time;    
+}
+
+//------------------------------------------------------------------------------------Time::set_utc
+
+void Time::set_utc( double t )
+{
+    set( t );
+    if( !is_null()  &&  !is_never() )  _is_utc = true;
+}
+
 //-------------------------------------------------------------------------------Time::set_datetime
 
 void Time::set_datetime( const string& t )
@@ -241,6 +329,14 @@ void Time::set_datetime( const string& t )
 
     double fraction = cut_fraction( &my_t );
     set( Sos_optional_date_time( my_t ).as_time_t() + fraction );
+}
+
+//---------------------------------------------------------------------------Time::set_datetime_utc
+
+void Time::set_datetime_utc( const string& t )
+{
+    set_datetime( t );
+    if( !is_null()  &&  !is_never() )  _is_utc = true;
 }
 
 //-------------------------------------------------------------------------------Time::cut_fraction
@@ -258,7 +354,7 @@ double Time::cut_fraction( string* datetime_string )
     if( p > p0  &&  digit_count > 0  &&  p[-1] == '.' )
     {
         p--;
-        result = as_double( p );
+        result = ::sos::as_double( p );
         datetime_string->erase( p - p0 );
     }
 
@@ -269,14 +365,18 @@ double Time::cut_fraction( string* datetime_string )
 
 string Time::as_string( With_ms with ) const
 {
-    if( _time == latter_day_int )
+    string result;
+
+    result.reserve( 27 );  // yyyy-mm-dd hh:mm:ss.mmm GMT
+
+    if( is_never() )
     {
-        return last_day_name;
+        result = last_day_name;
     }
     else
-    if( _time == 0 )
+    if( is_null() )
     {
-        return immediately_name;
+        result = immediately_name;
     }
     else
     {
@@ -288,13 +388,16 @@ string Time::as_string( With_ms with ) const
         {
             char hhmmss [30];
             sprintf( hhmmss, "%02d:%02d:%02d%s", (int)(_time/(60*60)), abs( (int)(_time/60) ) % 60, (int)abs( (int64)_time % 60 ), bruch );
-            return hhmmss;
+            result = hhmmss;
         }
         else
         {
-            return Sos_optional_date_time( uint(_time) ).as_string() + bruch;
+            result = Sos_optional_date_time( uint(_time) ).as_string() + bruch;
+            if( _is_utc )  result += " UTC";
         }
     }
+
+    return result;
 }
 
 //---------------------------------------------------------------------------------Time::jdbc_value
@@ -1030,7 +1133,7 @@ void Run_time::print( ostream& s ) const
 
 
 //--------------------------------------------------------------------------------------Gmtime::set
-
+/*
 void Gmtime::set( double t )
 {
     _time = round(t);
@@ -1049,6 +1152,10 @@ void Gmtime::set( double t )
 
 void Gmtime::set_local_time( const Time& t )
 {
+#   if defined Z_DEBUG
+        assert( t == 0  ||  t > 30*365*3600 );
+#   endif
+
     set( t == latter_day? double_time_max 
                         : gmtime_from_localtime( t ) );
 }
@@ -1057,6 +1164,10 @@ void Gmtime::set_local_time( const Time& t )
 
 Time Gmtime::local_time() const
 {
+#   if defined Z_DEBUG
+        assert( _time == 0  ||  _time > 30*365*3600 );
+#   endif
+
     return _time == double_time_max? latter_day
                                    : Time( localtime_from_gmtime( _time ) );
 }
@@ -1067,24 +1178,36 @@ string Gmtime::as_string( With_ms with ) const
 {
     string result;
 
+    if( _time == double_time_max )
+    {
+        return time::last_day_name;
+    }
+    else
+    if( _time == 0 )
+    {
+        return time::immediately_name;
+    }
+    else
     if( _time < 0 )
     {
         result = "-" + zschimmer::as_string( (int64)-_time );
     }
     else
     {
-        result.reserve( 27 );   // yyyy-mm-dd hh:mm:ss.000 GMT
+        char        buff [30];
+        const char* bruch = with == with_ms? buff + sprintf( buff, "%0.3lf", _time ) - 4
+                                           : "";
 
-        result.append( string_gmt_from_time_t( (time_t)_time ) );
-
-        if( with == with_ms ) 
+        if( _time < 100*(24*60*60) )
         {
-            char        buff [30];
-            const char* bruch = buff + sprintf( buff, "%0.3lf", _time ) - 4;
-            result += buff;
+            char hhmmss [30];
+            sprintf( hhmmss, "%02d:%02d:%02d%s", (int)(_time/(60*60)), abs( (int)(_time/60) ) % 60, (int)abs( (int64)_time % 60 ), bruch );
+            return hhmmss;
         }
-
-        result += " GMT";
+        else
+        {
+            return string_gmt_from_time_t( (time_t)_time ) + bruch + " GMT";
+        }
     }
 
     return result;
@@ -1112,7 +1235,7 @@ double Gmtime::normalize( double t )
            t > latter_day._time? latter_day._time 
                                : t;
 }
-
+*/
 //-------------------------------------------------------------------------------------------------
 
 } //namespace spooler

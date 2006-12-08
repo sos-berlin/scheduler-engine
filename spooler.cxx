@@ -737,10 +737,10 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
     state_element.setAttribute( "loop"                 , _loop_counter );
     state_element.setAttribute( "waits"                , _wait_counter );
 
-    if( !_last_wait_until.is_null() )
+    if( _last_wait_until )
     state_element.setAttribute( "wait_until", _last_wait_until.as_string() );
 
-    if( !_last_resume_at.is_null()  &&  _last_resume_at != doomsday )
+    if( _last_resume_at  &&  _last_resume_at != latter_day )
     state_element.setAttribute( "resume_at", _last_resume_at.as_string() );
 
 #   ifdef Z_UNIX
@@ -1862,6 +1862,10 @@ void Spooler::load_arg()
             if( opt.with_value( "env"                    ) )  ;  // Bereits von spooler_main() erledigt
             else
             if( opt.flag      ( "zschimmer"              ) )  _zschimmer_mode = opt.set();
+            else
+            if( opt.flag      ( "test-summertime"        ) )  time::test_summertime( ( Time::now() + 10 ).as_string() );
+            else
+            if( opt.with_value( "test-summertime"        ) )  time::test_summertime( opt.value() );
           //else
           //if( opt.with_value( "now"                    ) )  _clock_difference = Time( Sos_date_time( opt.value() ) ) - Time::now();
             else
@@ -2673,9 +2677,9 @@ void Spooler::run()
     while(1)  // Die große Haupt-Schleife
     {
         bool    log_wait          = _print_time_every_second || log_categories.update_flag_if_modified( "scheduler.wait", &log_wait_0, &log_wait_id );
-        Gmtime  wait_until        = doomsday;
+        Time    wait_until        = latter_day;
         Object* wait_until_object = NULL;    
-        Gmtime  resume_at         = doomsday;
+        Time    resume_at         = latter_day;
         Object* resume_at_object  = NULL;
 
         _loop_counter++;
@@ -2716,7 +2720,7 @@ void Spooler::run()
         if( ++nothing_done_count > nothing_done_max )
         {
             nichts_getan( ++nichts_getan_zaehler, catched_event_string );
-            if( wait_until == 0 )  wait_until = Gmtime::now() + 1;
+            if( wait_until == 0 )  wait_until = Time::now() + 1;
         }
         else
         if( nothing_done_count > 1 )
@@ -2735,7 +2739,7 @@ void Spooler::run()
                 FOR_EACH( Task_list, _single_thread->_task_list, t )
                 {
                     Task* task = *t;
-                    Gmtime task_next_time = (Gmtime)task->next_time();
+                    Time  task_next_time = task->next_time();
 
                     if( task->job()->is_machine_resumable()  &&  resume_at > task_next_time )  resume_at = task_next_time,  resume_at_object = task;
 
@@ -2757,7 +2761,7 @@ void Spooler::run()
                 {
                     Job* job = *it;
 
-                    Gmtime next_job_time = (Gmtime)job->next_time();
+                    Time next_job_time = job->next_time();
 
                     if( job->is_machine_resumable()  &&  resume_at > next_job_time )  resume_at = next_job_time,  resume_at_object = job;
 
@@ -2794,7 +2798,8 @@ void Spooler::run()
 
 #                        else
 
-                            Gmtime next_time = (Gmtime)(*p)->async_next_gmtime();
+                            Time next_time;
+                            next_time.set_utc( (*p)->async_next_gmtime() );
                             //Z_LOG2( "scheduler", **p << "->async_next_gmtime() => " << next_time << "\n" );
                             if( next_time < wait_until )
                             {
@@ -2826,7 +2831,7 @@ void Spooler::run()
             {
                 if( wait_until == 0 )
                 {
-                    wait_handles.wait_until( Gmtime(), wait_until_object, Gmtime(), NULL );   // Signale checken
+                    wait_handles.wait_until( Time(), wait_until_object, Time(), NULL );   // Signale checken
                 }
                 else
                 {
@@ -2850,7 +2855,7 @@ void Spooler::run()
                 }
             }
 
-            if( log_wait )  Z_LOG2( "scheduler.loop", "-------------scheduler loop " << _loop_counter << "-------------> " << catched_event_string << "\n" );  
+            if( log_wait )  Z_LOG2( "scheduler.loop", "-------------scheduler loop " << _loop_counter << "-------------> " << catched_event_string << "  wait_until=" << wait_until << "  something_done=" << something_done << "\n" );  
 
             wait_handles.clear();
         }
@@ -2869,7 +2874,7 @@ void Spooler::wait()
     {
         // Zur Sommerzeit wartet wait() eine Stunde länger
         Wait_handles wait_handles = _wait_handles;
-        wait( &wait_handles, doomsday, NULL, doomsday, NULL );
+        wait( &wait_handles, latter_day, NULL, latter_day, NULL );
         wait_handles.clear();
     }
     //else
@@ -2891,10 +2896,10 @@ void Spooler::wait()
 
 //------------------------------------------------------------------------------------Spooler::wait
 
-void Spooler::wait( Wait_handles* wait_handles, const Gmtime& wait_until_, Object* wait_until_object, const Gmtime& resume_at, Object* resume_at_object )
+void Spooler::wait( Wait_handles* wait_handles, const Time& wait_until_, Object* wait_until_object, const Time& resume_at, Object* resume_at_object )
 {
-    Gmtime wait_until = wait_until_;
-    bool   signaled   = false;
+    Time wait_until = wait_until_;
+    bool signaled   = false;
 
     _wait_counter++;
     _last_wait_until = wait_until;
@@ -2907,7 +2912,8 @@ void Spooler::wait( Wait_handles* wait_handles, const Gmtime& wait_until_, Objec
     {
         if( ptr<Async_operation> operation = _connection_manager->async_next_operation() )
         {
-            Gmtime next_time = (Gmtime)operation->async_next_gmtime();
+            Time next_time;
+            next_time.set_utc( operation->async_next_gmtime() );
             //Z_LOG2( "scheduler", **p << "->async_next_gmtime() => " << next_time << "\n" );
             if( next_time < wait_until )
             {
@@ -2925,7 +2931,7 @@ void Spooler::wait( Wait_handles* wait_handles, const Gmtime& wait_until_, Objec
 
             if( _should_suspend_machine )
             {
-                Gmtime now = Gmtime::now();
+                Time now = Time::now();
                 if( now + inhibit_suspend_wait_time < resume_at )
                 {
                     signaled = wait_handles->wait_until( min( now + before_suspend_wait_time, wait_until ), wait_until_object, resume_at, resume_at_object );
@@ -2947,11 +2953,10 @@ void Spooler::wait( Wait_handles* wait_handles, const Gmtime& wait_until_, Objec
 #   ifndef Z_UNIX   // Unter Unix mit Verzeichnisüberwachung gibt der Scheduler alle show_message_after_seconds Sekunden die Meldung SCHEDULER-972 aus
         if( !signaled  &&  !_print_time_every_second )  //!string_begins_with( _log.last_line(), "SCHEDULER-972" ) )
         {
-            Gmtime first_wait_until = _base_log.last_time();
-            first_wait_until += ( _log.log_level() <= log_debug3? show_message_after_seconds_debug : show_message_after_seconds );
+            Time first_wait_until = _base_log.last_time() + ( _log.log_level() <= log_debug3? show_message_after_seconds_debug : show_message_after_seconds );
             if( first_wait_until < wait_until )
             {
-                string msg = message_string( "SCHEDULER-972", wait_until.as_local_string(), wait_until_object );
+                string msg = message_string( "SCHEDULER-972", wait_until.as_string(), wait_until_object );
                 if( msg != _log.last_line() ) 
                 {
                     String_object o ( msg );
@@ -3854,6 +3859,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
 
         Z_LOG2( "scheduler", "Scheduler " VER_PRODUCTVERSION_STR "\n" );
 
+        sos::spooler::time::Time::set_current_difference_to_utc();
 
         if( is_scheduler_client )
         {

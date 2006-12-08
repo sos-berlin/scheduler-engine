@@ -224,7 +224,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-354", "Scheduler Java classes (sos.spooler.jar $1 expected) are not up to date: $2" },
     { "SCHEDULER-355", "SQL update statement did not updates excactly one record, instead $1: $2" },
     { "SCHEDULER-356", "Some other Scheduler member has become active" },
-    { "SCHEDULER-357", "This Scheduler member is inactive, which is not possible without a database" },
+    { "SCHEDULER-357", "Heart beat and backup Scheduler need a database" },
     { "SCHEDULER-358", "Scheduler member id has to start with the Scheduler id and a dot" },
     { "SCHEDULER-359", "A backup Scheduler member needs a Scheduler id" },
     { "SCHEDULER-360", "Error when accessing a Scheduler member database table" },
