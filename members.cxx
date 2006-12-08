@@ -493,6 +493,9 @@ void Scheduler_member::try_to_become_active2( Transaction* ta )
         }
         else
         {
+            // Der Herzschlag des bisher aktiven Schedulers hat ausgesetzt.
+            // Wir versuchen, den den Betrieb zu übernehmen.
+
             // Scheduler-Id soll auf unsere Mitglieds-Id verweisen
 
             sql::Update_stmt update ( &db()->_db_descr, _spooler->_variables_tablename );
