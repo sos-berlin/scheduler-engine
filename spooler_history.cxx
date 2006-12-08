@@ -614,7 +614,7 @@ void Spooler_db::create_table_when_needed( const string& tablename, const string
 
 //---------------------------------------------------------------Spooler_db::try_reopen_after_error
 
-void Spooler_db::try_reopen_after_error( exception& x, bool wait_endless )
+void Spooler_db::try_reopen_after_error( const exception& callers_exception, bool wait_endless )
 {
     bool    too_much_errors = false;
     string  warn_msg;
@@ -623,12 +623,12 @@ void Spooler_db::try_reopen_after_error( exception& x, bool wait_endless )
     // Wenn ein TCP-Kommando ausgeführt wird, müssen wir hier sofort raus, sonst wird das Kommando doppelt oder rekursiv aufgerufen werden async_continue_selected(), s.u.
     if( _spooler->_executing_command )  throw;
 
-    if( In_recursion in_recursion = &_waiting )  throw_xc( x );   
+    if( In_recursion in_recursion = &_waiting )  throw_xc( callers_exception );   
     else
     {
-        THREAD_LOCK( _error_lock )  _error = x.what();
+        THREAD_LOCK( _error_lock )  _error = callers_exception.what();
 
-        _spooler->log()->error( message_string( "SCHEDULER-303", x ) );
+        _spooler->log()->error( message_string( "SCHEDULER-303", callers_exception ) );
 
         if( _db.opened() )  _spooler->log()->info( message_string( "SCHEDULER-957" ) );   // "Datenbank wird geschlossen"
         try
@@ -657,15 +657,15 @@ void Spooler_db::try_reopen_after_error( exception& x, bool wait_endless )
                 {
                     string body = "This is the " + as_string(_error_count) + ". problem with the database.";
                     if( !_spooler->_wait_endless_for_db_open )  body += "\n(" + warn_msg + ")";
-                    body += "\ndb=" + remove_password( _spooler->_db_name ) + "\r\n\r\n" + x.what() + "\r\n\r\nThe Scheduler is trying to open the database again.";
+                    body += "\ndb=" + remove_password( _spooler->_db_name ) + "\r\n\r\n" + callers_exception.what() + "\r\n\r\nThe Scheduler is trying to open the database again.";
                     //if( !_spooler->_need_db )  body += "\r\nWenn das nicht geht, schreibt der Scheduler die Historie in Textdateien.";
 
                     Scheduler_event scheduler_event ( evt_database_error, log_warn, this );
-                    scheduler_event.set_error( x );
+                    scheduler_event.set_error( callers_exception );
                     scheduler_event.set_count( _error_count );
 
                     Mail_defaults mail_defaults ( _spooler );
-                    mail_defaults.set( "subject", S() << "ERROR ON DATABASE ACCESS: " << x.what() );
+                    mail_defaults.set( "subject", S() << "ERROR ON DATABASE ACCESS: " << callers_exception.what() );
                     mail_defaults.set( "body"   , body );
 
                     scheduler_event.send_mail( mail_defaults );
@@ -732,17 +732,17 @@ void Spooler_db::try_reopen_after_error( exception& x, bool wait_endless )
                 
                 if( _spooler->_need_db ) 
                 {
-                    string msg = message_string( "SCHEDULER-265", x );     // "SCHEDULER WIRD BEENDET WEGEN FEHLERS BEIM ZUGRIFF AUF DATENBANK"
+                    string msg = message_string( "SCHEDULER-265", callers_exception );     // "SCHEDULER WIRD BEENDET WEGEN FEHLERS BEIM ZUGRIFF AUF DATENBANK"
                     _log->error( msg );
 
                     Scheduler_event scheduler_event ( evt_database_error_abort, log_error, this );
-                    scheduler_event.set_error( x );
+                    scheduler_event.set_error( callers_exception );
                     scheduler_event.set_scheduler_terminates( true );
 
                     Mail_defaults mail_defaults ( _spooler );
 
                     mail_defaults.set( "subject", msg );
-                    mail_defaults.set( "body"   , S() << "db=" << remove_password( _spooler->_db_name ) << "\r\n\r\n" << x.what() << "\r\n\r\n" << warn_msg );
+                    mail_defaults.set( "body"   , S() << "db=" << remove_password( _spooler->_db_name ) << "\r\n\r\n" << callers_exception.what() << "\r\n\r\n" << warn_msg );
 
                     scheduler_event.send_mail( mail_defaults );
                     
@@ -754,11 +754,11 @@ void Spooler_db::try_reopen_after_error( exception& x, bool wait_endless )
             _spooler->log()->info( message_string( "SCHEDULER-959" ) );   // "Historie wird von Datenbank auf Dateien umgeschaltet" );
 
             Scheduler_event scheduler_event ( evt_database_error_switch_to_file, log_warn, this );
-            scheduler_event.set_error( x );
+            scheduler_event.set_error( callers_exception );
 
             Mail_defaults mail_defaults( _spooler );
-            mail_defaults.set( "subject", string("SCHEDULER CONTINUES WITHOUT DATABASE AFTER ERRORS: ") + x.what() );
-            mail_defaults.set( "body"   , S() << "Because of need_db=no\n" "db=" << remove_password( _spooler->_db_name ) << "\r\n\r\n" << x.what() << "\r\n\r\n" << warn_msg );
+            mail_defaults.set( "subject", string("SCHEDULER CONTINUES WITHOUT DATABASE AFTER ERRORS: ") + callers_exception.what() );
+            mail_defaults.set( "body"   , S() << "Because of need_db=no\n" "db=" << remove_password( _spooler->_db_name ) << "\r\n\r\n" << callers_exception.what() << "\r\n\r\n" << warn_msg );
             
             scheduler_event.send_mail( mail_defaults );
 

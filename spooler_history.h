@@ -86,7 +86,7 @@ struct Spooler_db : Object, Scheduler_object
     int                         record_count            ()                                          { return _db.record_count(); }
     void                        commit                  ();
     void                        rollback                ();
-    void                        try_reopen_after_error  ( exception&, bool wait_endless = false );
+    void                        try_reopen_after_error  ( const exception&, bool wait_endless = false );
     void                        create_table_when_needed( const string& tablename, const string& fields );
 
     Fill_zero                  _zero_;
