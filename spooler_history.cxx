@@ -937,6 +937,42 @@ bool Spooler_db::try_update_variable( Transaction* ta, const string& name, const
     return _db.record_count() == 1;
 }
 
+//----------------------------------------------------------------------Spooler_db::open_result_set
+
+Any_file Spooler_db::open_result_set( const string& sql )
+{
+    assert( _transaction );
+
+    _transaction->_transaction_used = true;
+
+    Any_file result;
+
+    try
+    {
+        result.open( "-in " + db_name() + sql );
+
+        if( _transaction->_log_sql  &&  _log->log_level() >= log_debug3 )  
+        {
+            S line;
+            line << sql;
+            if( _db.record_count() >= 0 )  line << "  ==> " << _db.record_count() << " records";
+            _log->debug3( line );
+        }
+    }
+    catch( exception& x )
+    {
+        if( _transaction->_log_sql )  // Vielleicht für alle Anweisungen, aber dann haben wir einen Fehler im Protokoll, das ist nicht 100%ig kompatibel
+        {
+            _log->warn( sql );
+            _log->error( x.what() );
+        }
+
+        throw;
+    }
+
+    return result;
+}
+
 //------------------------------------------------------------------------------Spooler_db::execute
 
 void Spooler_db::execute( const string& stmt )

@@ -16,7 +16,7 @@ namespace spooler {
 //const time_t                    accepted_clock_difference       = Z_NDEBUG_DEBUG(  5,  2 );     // Die Uhren sollten noch besser übereinstimmen! ntp verwenden!
 //const time_t                    warned_clock_difference         = Z_NDEBUG_DEBUG(  1,  1 ); 
 const time_t                    heart_beat_period               = Z_NDEBUG_DEBUG( 60, 20 );
-const time_t                    max_heart_beat_processing_time = Z_NDEBUG_DEBUG( 10,  3 );     // Zeit, die gebraucht wird, um den Herzschlag auszuführen
+const time_t                    max_heart_beat_processing_time  = Z_NDEBUG_DEBUG( 10,  3 );     // Zeit, die gebraucht wird, um den Herzschlag auszuführen
 //const time_t                    heart_beat_delay                = max_heart_beat_processing_time;// + accepted_clock_difference;
 const time_t                    heart_beat_minimum_check_period = heart_beat_period / 2;
 const time_t                    trauerfrist                     = 2*3600;   // Trauerzeit, nach der Mitgliedssätze gelöscht werden
@@ -363,12 +363,12 @@ bool Inactive_scheduler_watchdog::try_to_become_active2( Transaction* ta )
     string other_member_id;
 
 
-    Any_file select ( S() << "-in " << db()->db_name() <<
-                     "SELECT m.`scheduler_member_id`, m.`last_heart_beat`, m.`next_heart_beat` "
-                     "from " << _spooler->_members_tablename   << " m, " <<
-                         " " << _spooler->_variables_tablename << " v " <<
-                         "where v.`name`=" << sql::quoted( _scheduler_member->active_member_variable_name() ) <<
-                          " and v.`textwert`=m.`scheduler_member_id`" );
+    Any_file select = db()->open_result_set( S() << 
+                 "select m.`scheduler_member_id`, m.`last_heart_beat`, m.`next_heart_beat` "
+                 " from " << _spooler->_members_tablename   << " m, " <<
+                     " " << _spooler->_variables_tablename << " v " <<
+                     " where v.`name`=" << sql::quoted( _scheduler_member->active_member_variable_name() ) <<
+                      " and v.`textwert`=m.`scheduler_member_id`" );
 
     if( select.eof() )
     {
@@ -481,6 +481,17 @@ bool Inactive_scheduler_watchdog::try_to_become_active2( Transaction* ta )
 
                 // Scheduler-Id soll auf unsere Mitglieds-Id verweisen
 
+
+                Any_file select;
+
+                if( db()->dbms_kind() != dbms_access )
+                {
+                    // Anderen Member-Eintrag sperren
+                    select = db()->open_result_set( S() << "select `last_heart_beat` from " << _spooler->_members_tablename <<
+                                                           "  where `scheduler_member_id`=" << sql::quoted( other_member_id ) << "  for update" );
+                    if( !select.eof() )  select.get_record();
+                }
+
                 sql::Update_stmt update ( &db()->_db_descr, _spooler->_variables_tablename );
                 
                 update[ "textwert" ] = _scheduler_member->member_id();
@@ -488,7 +499,7 @@ bool Inactive_scheduler_watchdog::try_to_become_active2( Transaction* ta )
                 update.and_where_condition( "textwert", other_member_id );
 
                 update.add_where( S() << " and ( select `last_heart_beat` from " << _spooler->_members_tablename <<
-                                                " where `scheduler_member_id`=" << sql::quoted( other_member_id ) << ") "
+                                                " where `scheduler_member_id`=" << sql::quoted( other_member_id ) << " ) "
                                                "= " << last_heart_beat );
 
                 bool record_is_updated = db()->try_execute_single( update );
@@ -591,12 +602,12 @@ void Inactive_scheduler_watchdog::show_active_scheduler( Transaction*  outer_tra
 
             bool found = false;
 
-            Any_file select ( S() << "-in " << db()->db_name() <<
-                             "SELECT m.`scheduler_member_id`, m.`http_url` "
-                             "from " << _spooler->_members_tablename   << " m, " <<
-                                 " " << _spooler->_variables_tablename << " v " <<
-                                 "where v.`name`=" + sql::quoted( _scheduler_member->active_member_variable_name() ) <<
-                                   "and v.`textwert`=m.`scheduler_member_id`" );
+            Any_file select = db()->open_result_set( S() << 
+                         "select m.`scheduler_member_id`, m.`http_url` "
+                         " from " << _spooler->_members_tablename   << " m, " <<
+                             " " << _spooler->_variables_tablename << " v " <<
+                             " where v.`name`=" + sql::quoted( _scheduler_member->active_member_variable_name() ) <<
+                                "and v.`textwert`=m.`scheduler_member_id`" );
 
             while( !select.eof() )
             {
@@ -954,6 +965,17 @@ bool Scheduler_member::try_to_heartbeat_member_record( Transaction* ta )
     assert( ta );
 
 
+    //Any_file select;
+    //if( db()->_db->dbms() != dbms_access )
+    //{
+    //    // Variablensatz sperren
+    //    select.open( S() << "-in " << db()->db_name() << 
+    //                        "select `textwert` from " << _spooler->_variables_tablename <<
+    //                                " where `scheduler_member_id`=" << sql::quoted( other_member_id ) << " for update" );   // for share?
+    //    if( !select.eof() )  select.get_record();
+    //}
+
+
     sql::Update_stmt update ( &db()->_db_descr, _spooler->_members_tablename );
     
     update[ "last_heart_beat" ] = new_last_heart_beat;
@@ -964,7 +986,7 @@ bool Scheduler_member::try_to_heartbeat_member_record( Transaction* ta )
     update.and_where_condition( "next_heart_beat"    , _next_heart_beat );
 
     update.add_where( S() << " and ( select `textwert` from " << _spooler->_variables_tablename <<
-                                    " where `name`="     << sql::quoted( active_member_variable_name() ) << ")"
+                                    " where `name`="     << sql::quoted( active_member_variable_name() ) << " )"
                                  " = " << sql::quoted( member_id() ) );
 
 

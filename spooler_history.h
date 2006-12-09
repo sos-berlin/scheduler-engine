@@ -80,10 +80,12 @@ struct Spooler_db : Object, Scheduler_object
     void                        write_order_history     ( Order*, Transaction* = NULL );
     void                        finish_order            ( Order*, Transaction* = NULL );
 
+    Any_file                    open_result_set         ( const string& sql );
     void                        execute                 ( const string& stmt );
     void                        execute_single          ( const string& stmt );
     bool                        try_execute_single      ( const string& stmt );
     int                         record_count            ()                                          { return _db.record_count(); }
+    Dbms_kind                   dbms_kind               ()                                          { return _db.dbms_kind(); }
     void                        commit                  ();
     void                        rollback                ();
     void                        try_reopen_after_error  ( const exception&, bool wait_endless = false );
