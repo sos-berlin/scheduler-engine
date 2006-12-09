@@ -19,7 +19,7 @@ struct Scheduler_member : Async_operation, Scheduler_object
 
     // Async_operation
     bool                        async_finished_             () const                                { return false; }
-    string                      async_state_text_           () const                                { return obj_name(); }
+    string                      async_state_text_           () const;
     bool                        async_continue_             ( Continue_flags );
 
     // Scheduler_object

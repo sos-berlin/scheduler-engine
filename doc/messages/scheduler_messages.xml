@@ -3025,14 +3025,14 @@
 
         <message code="SCHEDULER-993">
             <text xml:lang="en">
-                <title>Scheduler member <p1>member_id</p1> announced next heart beat at <p2/>, but no heart beat since <p3/></title>
+                <title>No heart beat since <p3/>, although Scheduler member <p1>member_id</p1> announced it for <p2/></title>
                 <!--title>Scheduler member <p1>member_id</p1>'s heart does not beat since <p2/>, expected next_heart_beat at <p3/></title-->
             </text>
         </message>
 
         <message code="SCHEDULER-994">
             <text xml:lang="en">
-                <title>Scheduler member <p1>member_id</p1>'s heart does not beat since <p3/>s (<p2>time</p2>)</title>
+                <title>No heart beat since <p3/>s (<p2>time</p2>) of Scheduler member <p1>member_id</p1></title>
             </text>
         </message>
 
@@ -3044,7 +3044,7 @@
 
         <message code="SCHEDULER-996">
             <text xml:lang="en">
-                <title>Heart beat is too late: announced next_heart_beat is <p1/> (<p2/>s ago)</title>
+                <title>Heart beat is late: next_heart_beat has been announced for <p1/> (this is <p2/>s late)</title>
             </text>
         </message>
 

@@ -20,6 +20,7 @@ const time_t                    max_heart_beat_processing_time = Z_NDEBUG_DEBUG(
 //const time_t                    heart_beat_delay                = max_heart_beat_processing_time;// + accepted_clock_difference;
 const time_t                    heart_beat_minimum_check_period = heart_beat_period / 2;
 const time_t                    trauerfrist                     = 2*3600;   // Trauerzeit, nach der Mitgliedssätze gelöscht werden
+const time_t                    database_commit_visible_time    = 10;                       // Zeit, die die Datenbank braucht, um nach Commit Daten für anderen Client sichtbar zu machen.
 
 const bool                      log_sql                         = true;
 
@@ -100,6 +101,7 @@ struct Inactive_scheduler_watchdog : Async_operation, Scheduler_object
     time_t                     _next_check_time;
     bool                       _is_scheduler_terminated;    // Scheduler ist ordentlich beendet worden
     bool                       _announced_to_become_active; // Wenn eine Meldung ausgegeben oder ein Datensatz zu ändern versucht wurde 
+    time_t                     _become_active_until;        // Aktivierung bis dann (now+database_commit_visible_time) verzögern, dann nochmal prüfen
     Prefix_log*                _log;
 };
 
@@ -193,7 +195,20 @@ bool Inactive_scheduler_watchdog::async_finished_() const
 
 string Inactive_scheduler_watchdog::async_state_text_() const
 {
-    return "Inactive_scheduler_watchdog";
+    S result;
+
+    result << "Inactive_scheduler_watchdog";
+
+    if( _become_active_until )
+    {
+        result << " (becoming active at " << string_gmt_from_time_t( _become_active_until) << ")";
+    }
+    else
+    {
+        result << " (inactive)";
+    }
+
+    return result;
 }
 
 //-----------------------------------------------------Inactive_scheduler_watchdog::async_continue_
@@ -209,7 +224,6 @@ bool Inactive_scheduler_watchdog::async_continue_( Continue_flags )
             _scheduler_member->async_wake();    // Datenbank ist geschlossen worden
             return true;
         }
-
 
         try_to_become_active();
 
@@ -251,13 +265,21 @@ void Inactive_scheduler_watchdog::set_alarm()
         time_t delay = max_heart_beat_processing_time + 1;   // Erst in der folgenden Sekunde prüfen
 
         _next_check_time = now + heart_beat_period + delay;
-        
-        time_t wait_until = _other_scheduler._next_heart_beat_db + delay;
-        if( wait_until - now >= heart_beat_minimum_check_period  &&  wait_until < _next_check_time )
+
+        if( _become_active_until  &&  _next_check_time > _become_active_until )
         {
-            time_t new_next_check = wait_until;
-            extra_log << ", watchdog synchronized with heart beat: " << ( new_next_check - _next_check_time  ) << "s";
-            _next_check_time = new_next_check;
+            _next_check_time = _become_active_until;
+            extra_log << ", warten, bis Datenbank Änderungen für alle sichtbar gemacht hat";
+        }
+        else
+        {
+            time_t wait_until = _other_scheduler._next_heart_beat_db + delay;
+            if( wait_until - now >= heart_beat_minimum_check_period  &&  wait_until < _next_check_time )
+            {
+                time_t new_next_check = wait_until;
+                extra_log << ", watchdog synchronized with heart beat: " << ( new_next_check - _next_check_time  ) << "s";
+                _next_check_time = new_next_check;
+            }
         }
     }
 
@@ -284,18 +306,36 @@ void Inactive_scheduler_watchdog::try_to_become_active()
                 Transaction ta ( db() );
                 ta.set_log_sql( log_sql );
 
-                become_active = try_to_become_active2( &ta );
+                if( _become_active_until )
+                {
+                    bool ok = _scheduler_member->do_heart_beat( &ta );
+                    if( !ok ) 
+                    {
+                        _become_active_until = 0;
+                    }
+                    ta.commit();
+                }
+                else
+                {
+                    become_active = try_to_become_active2( &ta );
 
-                if( become_active )  ta.commit();
-                               else  ta.rollback();  // Doppelt, try_to_become_active2() hat auch schon einen rollback gemacht
+                    if( become_active )  ta.commit();
+                                   else  ta.rollback();  // Doppelt, try_to_become_active2() hat auch schon einen rollback gemacht
+                }
             }
 
             if( become_active )
             {
+                _become_active_until = ::time(NULL) + database_commit_visible_time + 1;     // Nachfolgende Sekunde
+            }
+
+            if( _become_active_until  &&  _become_active_until <= ::time(NULL) )
+            {
+                _become_active_until = 0;
                 set_active();
             }
 
-            if( _announced_to_become_active  &&  !_scheduler_member->_is_active )
+            if( _announced_to_become_active  &&  !_scheduler_member->_is_active  &&  !_become_active_until )
             {
                 _announced_to_become_active = false;
                 show_active_scheduler();
@@ -881,7 +921,6 @@ bool Scheduler_member::do_heart_beat()
 bool Scheduler_member::do_heart_beat( Transaction* ta )
 {
     assert( ta );
-    assert( _is_active );
     
 
     bool ok = try_to_heartbeat_member_record( ta );
@@ -894,7 +933,6 @@ bool Scheduler_member::do_heart_beat( Transaction* ta )
         //show_active_scheduler( ta );
     }
 
-    assert( ok == _is_active );
     return ok;
 }
 
@@ -988,10 +1026,31 @@ bool Scheduler_member::insert_member_record( Transaction* ta )
         }
     }
 
-    _last_heart_beat = new_last_heart_beat;
-    _next_heart_beat = new_next_heart_beat;
+    if( record_is_updated )
+    {
+        _last_heart_beat = new_last_heart_beat;
+        _next_heart_beat = new_next_heart_beat;
+    }
 
     return record_is_updated;
+}
+
+//--------------------------------------------------------------Scheduler_member::async_state_text_
+
+string Scheduler_member::async_state_text_() const
+{
+    S result;
+
+    result << obj_name();
+
+    if( _is_active )  result << " (active)";
+    else  
+    if( _inactive_scheduler_watchdog )
+    {
+        result << _inactive_scheduler_watchdog->async_state_text();
+    }
+
+    return result;
 }
 
 //----------------------------------------------------------------Scheduler_member::async_continue_
