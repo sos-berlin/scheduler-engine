@@ -13,11 +13,11 @@ namespace spooler {
 
 //-------------------------------------------------------------------------------------------------
 
-const time_t                    accepted_clock_difference       = Z_NDEBUG_DEBUG(  5,  2 );     // Die Uhren sollten noch besser übereinstimmen! ntp verwenden!
-const time_t                    warned_clock_difference         = Z_NDEBUG_DEBUG(  1,  1 ); 
+//const time_t                    accepted_clock_difference       = Z_NDEBUG_DEBUG(  5,  2 );     // Die Uhren sollten noch besser übereinstimmen! ntp verwenden!
+//const time_t                    warned_clock_difference         = Z_NDEBUG_DEBUG(  1,  1 ); 
 const time_t                    heart_beat_period               = Z_NDEBUG_DEBUG( 60, 20 );
-const time_t                    heart_beat_maximum_process_time = Z_NDEBUG_DEBUG( 10,  3 );     // Zeit, die gebraucht wird, um den Herzschlag auszuführen
-const time_t                    heart_beat_delay                = heart_beat_maximum_process_time + accepted_clock_difference;
+const time_t                    max_heart_beat_processing_time = Z_NDEBUG_DEBUG( 10,  3 );     // Zeit, die gebraucht wird, um den Herzschlag auszuführen
+//const time_t                    heart_beat_delay                = max_heart_beat_processing_time;// + accepted_clock_difference;
 const time_t                    heart_beat_minimum_check_period = heart_beat_period / 2;
 const time_t                    trauerfrist                     = 2*3600;   // Trauerzeit, nach der Mitgliedssätze gelöscht werden
 
@@ -51,6 +51,22 @@ struct Active_scheduler_heart_beat : Async_operation, Scheduler_object
     time_t                     _next_heart_beat;
 };
 
+//-------------------------------------------------------------------------------------------------
+
+struct Other_scheduler 
+{
+                                Other_scheduler             ()                                      : _zero_(this+1) {}
+
+    Fill_zero                  _zero_;
+    string                     _member_id;
+    time_t                     _last_heart_beat_db;
+    time_t                     _next_heart_beat_db;
+    time_t                     _last_heart_beat_detected;
+    //time_t                     _clock_difference;
+    //bool                       _clock_difference_checked;
+    //bool                       _checking_clock_difference;
+};
+
 //----------------------------------------------------------------------Inactive_scheduler_watchdog
 
 struct Inactive_scheduler_watchdog : Async_operation, Scheduler_object
@@ -71,7 +87,7 @@ struct Inactive_scheduler_watchdog : Async_operation, Scheduler_object
 
     void                        try_to_become_active        ();
     bool                        try_to_become_active2       ( Transaction* );
-    void                        check_clock_difference      ( time_t last_heart_beat, time_t now );
+  //void                        check_clock_difference      ( time_t last_heart_beat, time_t now );
     bool                        insert_member_record_and_prepare_to_become_active( Transaction* );
     void                        show_active_members         ( Transaction* = NULL );
     bool                        set_active                  ();
@@ -80,13 +96,9 @@ struct Inactive_scheduler_watchdog : Async_operation, Scheduler_object
 
     Fill_zero                  _zero_;
     Scheduler_member*          _scheduler_member;
-    string                     _last_active_member_id;
-    time_t                     _expected_next_heart_beat_of_active_scheduler;
-    time_t                     _clock_difference;
-    bool                       _clock_difference_checked;
-    bool                       _checking_clock_difference;
-    bool                       _is_scheduler_terminated;    // Scheduler ist ordentlich beendet worden
+    Other_scheduler            _other_scheduler;
     time_t                     _next_check_time;
+    bool                       _is_scheduler_terminated;    // Scheduler ist ordentlich beendet worden
     Prefix_log*                _log;
 };
 
@@ -227,17 +239,19 @@ void Inactive_scheduler_watchdog::set_alarm()
     time_t now = ::time(NULL);
     S      extra_log;
 
-    if( !_clock_difference_checked  &&  _expected_next_heart_beat_of_active_scheduler )
+    //if( !_other_scheduler._clock_difference_checked  &&  _other_scheduler._next_heart_beat_db )
+    //{
+    //    extra_log << ", checking clock difference ...";
+    //    _other_scheduler._checking_clock_difference = true;
+    //    _next_check_time = now + warned_clock_difference;
+    //}
+    //else
     {
-        extra_log << ", checking clock difference ...";
-        _checking_clock_difference = true;
-        _next_check_time = now + warned_clock_difference;
-    }
-    else
-    {
-        _next_check_time = now + heart_beat_period + heart_beat_delay + 1;
+        time_t delay = max_heart_beat_processing_time + 1;   // Erst in der folgenden Sekunde prüfen
+
+        _next_check_time = now + heart_beat_period + delay;
         
-        time_t wait_until = _expected_next_heart_beat_of_active_scheduler + heart_beat_delay + 1;
+        time_t wait_until = _other_scheduler._next_heart_beat_db + delay;
         if( wait_until - now >= heart_beat_minimum_check_period  &&  wait_until < _next_check_time )
         {
             time_t new_next_check = wait_until;
@@ -316,7 +330,7 @@ bool Inactive_scheduler_watchdog::try_to_become_active2( Transaction* ta )
         
         update[ "textwert" ] = _scheduler_member->member_id();
         update.and_where_condition( "name"    , _scheduler_member->active_member_variable_name() );
-        update.and_where_condition( "textwert", "" );
+        //update.and_where_condition( "textwert", "" );
 
         bool record_is_updated = db()->try_execute_single( update );
 
@@ -338,86 +352,114 @@ bool Inactive_scheduler_watchdog::try_to_become_active2( Transaction* ta )
         assert( select.eof() );
 
 
-               other_member_id          = record.as_string( 0 );
-        bool   other_member_timed_out   = false;
-        time_t last_heart_beat          = (time_t)( record.as_double( 1 ) + 0.5 );
-        time_t next_heart_beat          = record.null( 2 )? 0 : (time_t)( record.as_int64( 2 ) + 0.5 );
+               other_member_id        = record.as_string( 0 );
+        bool   other_member_timed_out = false;
+        time_t last_heart_beat        = record.as_int64( 1 );                         //(time_t)( record.as_double( 1 ) + 0.5 );
+        time_t next_heart_beat        = record.null( 2 )? 0 : record.as_int64( 2 );   //(time_t)( record.as_double( 2 ) + 0.5 );
 
         
-        if( last_heart_beat > now )
+        if( other_member_id != _other_scheduler._member_id )
         {
-            time_t diff = last_heart_beat - now;
-            
-            if( diff >= warned_clock_difference + 1 )
-                _log->warn( message_string( "SCHEDULER-364", diff, other_member_id ) );
-        }
-
-        if( next_heart_beat + heart_beat_delay/2 < now )
-        {
-            _log->warn( message_string( "SCHEDULER-993", 
-                                            other_member_id, 
-                                            string_gmt_from_time_t( last_heart_beat ) + " UTC", 
-                                            string_gmt_from_time_t( next_heart_beat ) + " UTC" ) );
-
-            if( next_heart_beat + heart_beat_delay < now )  other_member_timed_out = true;
-        }
-
-        if( !other_member_timed_out  &&  last_heart_beat + heart_beat_period + heart_beat_delay/2 < now )
-        {
-            _log->warn( message_string( "SCHEDULER-994", 
-                                            other_member_id, 
-                                            string_gmt_from_time_t( next_heart_beat ) + " UTC", 
-                                            now - ( last_heart_beat + heart_beat_period ) ) );
-
-            if( last_heart_beat + heart_beat_period + heart_beat_delay < now )  other_member_timed_out = true;
-        }
-        
-        if( !other_member_timed_out  &&  _checking_clock_difference  &&  last_heart_beat == _expected_next_heart_beat_of_active_scheduler )
-        {
-            check_clock_difference( last_heart_beat, now );
-        }
-
-
-        if( !other_member_timed_out )
-        {
-            _is_scheduler_terminated = false;
-
-            // Eigenes Überwachung mit Herzschlag des aktiven Schedulers synchronisieren, nur leicht verzögert
-            _expected_next_heart_beat_of_active_scheduler = next_heart_beat;
+            _other_scheduler = Other_scheduler();
+            _other_scheduler._member_id                = other_member_id;
+            _other_scheduler._last_heart_beat_detected = now;
         }
         else
         {
-            // Der Herzschlag des bisher aktiven Schedulers hat ausgesetzt.
-            // Wir versuchen, den den Betrieb zu übernehmen.
+            //if( last_heart_beat > now )
+            //{
+            //    time_t diff = last_heart_beat - now;
+            //    
+            //    if( diff >= warned_clock_difference + 1 )
+            //        _log->warn( message_string( "SCHEDULER-364", diff, other_member_id ) );
+            //}
+            bool warned = false;
 
-            // Scheduler-Id soll auf unsere Mitglieds-Id verweisen
-
-            sql::Update_stmt update ( &db()->_db_descr, _spooler->_variables_tablename );
-            
-            update[ "textwert" ] = _scheduler_member->member_id();
-            update.and_where_condition( "name"    , _scheduler_member->active_member_variable_name() );
-            update.and_where_condition( "textwert", other_member_id );
-
-            update.add_where( S() << " and ( select `last_heart_beat` from " << _spooler->_members_tablename <<
-                                            " where `scheduler_member_id`=" << sql::quoted( other_member_id ) << ") "
-                                           "= " << last_heart_beat );
-
-            bool record_is_updated = db()->try_execute_single( update );
-
-            if( record_is_updated )
+            if( last_heart_beat == _other_scheduler._last_heart_beat_db )   // Kein neuer Herzschlag?
             {
-                become_active = insert_member_record_and_prepare_to_become_active( ta );
+                if( _other_scheduler._last_heart_beat_detected + heart_beat_period + max_heart_beat_processing_time/2 < now )
+                {
+                    _log->warn( message_string( "SCHEDULER-994", 
+                                                    other_member_id, 
+                                                    string_gmt_from_time_t( _other_scheduler._last_heart_beat_detected ) + " UTC", 
+                                                    _other_scheduler._last_heart_beat_detected - now ) );
+                    warned = true;
+
+                    if( _other_scheduler._last_heart_beat_detected + heart_beat_period + max_heart_beat_processing_time < now )  
+                        other_member_timed_out = true;
+                }
+            }
+            else
+            {
+                _other_scheduler._last_heart_beat_detected = now;
+            }
+
+            if( !other_member_timed_out  &&  !warned  &&  next_heart_beat + max_heart_beat_processing_time < now )
+            {
+                _log->warn( message_string( "SCHEDULER-993", 
+                                                other_member_id, 
+                                                string_gmt_from_time_t( next_heart_beat ) + " UTC",
+                                                string_gmt_from_time_t( _other_scheduler._last_heart_beat_detected ) + " UTC" ) );
+
+                //if( next_heart_beat + heart_beat_delay < now )  other_member_timed_out = true;
+            }
+
+            //if( !other_member_timed_out  &&  last_heart_beat + heart_beat_period + heart_beat_delay/2 < now )
+            //{
+            //    _log->warn( message_string( "SCHEDULER-994", 
+            //                                    other_member_id, 
+            //                                    string_gmt_from_time_t( next_heart_beat ) + " UTC", 
+            //                                    now - ( last_heart_beat + heart_beat_period ) ) );
+
+            //    //if( last_heart_beat + heart_beat_period + heart_beat_delay < now )  other_member_timed_out = true;
+            //}
+            
+            //if( !other_member_timed_out  &&  _other_scheduler._checking_clock_difference  &&  last_heart_beat == _other_scheduler._next_heart_beat_db )
+            //{
+            //    check_clock_difference( last_heart_beat, now );
+            //}
+
+            if( !other_member_timed_out )
+            {
+                _is_scheduler_terminated = false;
+            }
+            else
+            {
+                // Der Herzschlag des bisher aktiven Schedulers hat ausgesetzt.
+                // Wir versuchen, den Betrieb zu übernehmen.
+
+                // Scheduler-Id soll auf unsere Mitglieds-Id verweisen
+
+                sql::Update_stmt update ( &db()->_db_descr, _spooler->_variables_tablename );
+                
+                update[ "textwert" ] = _scheduler_member->member_id();
+                update.and_where_condition( "name"    , _scheduler_member->active_member_variable_name() );
+                update.and_where_condition( "textwert", other_member_id );
+
+                update.add_where( S() << " and ( select `last_heart_beat` from " << _spooler->_members_tablename <<
+                                                " where `scheduler_member_id`=" << sql::quoted( other_member_id ) << ") "
+                                               "= " << last_heart_beat );
+
+                bool record_is_updated = db()->try_execute_single( update );
+
+                if( record_is_updated )
+                {
+                    become_active = insert_member_record_and_prepare_to_become_active( ta );
+                }
             }
         }
+
+        _other_scheduler._last_heart_beat_db = last_heart_beat;
+        _other_scheduler._next_heart_beat_db = next_heart_beat;
     }
 
     if( !become_active )
     {
-        if( other_member_id != _last_active_member_id )
+        if( other_member_id != _other_scheduler._member_id )
         {
             _log->info( message_string( "SCHEDULER-998", other_member_id == ""? "(none)" : other_member_id ) );
-            _last_active_member_id = other_member_id;
-            _clock_difference_checked = false;
+            _other_scheduler._member_id = other_member_id;
+            //_other_scheduler._clock_difference_checked = false;
         }
 
         ta->rollback();
@@ -428,24 +470,24 @@ bool Inactive_scheduler_watchdog::try_to_become_active2( Transaction* ta )
 
 //----------------------------------------------Inactive_scheduler_watchdog::check_clock_difference
 
-void Inactive_scheduler_watchdog::check_clock_difference( time_t last_heart_beat, time_t now )
-{
-    _clock_difference         = last_heart_beat - now;
-    _clock_difference_checked = true;
-    
-    time_t own_delay = ::time(NULL) - _next_check_time;
-
-    if( abs( _clock_difference ) < own_delay + warned_clock_difference + 1 )
-    {
-        _log->info( message_string( "SCHEDULER-804", _last_active_member_id ) );
-    }
-    else
-    {
-        _log->warn( message_string( "SCHEDULER-364", _clock_difference, _last_active_member_id ) );
-    }
-
-    _checking_clock_difference = false;
-}
+//void Inactive_scheduler_watchdog::check_clock_difference( time_t last_heart_beat, time_t now )
+//{
+//    _other_scheduler._clock_difference         = last_heart_beat - now;
+//    _other_scheduler._clock_difference_checked = true;
+//    
+//    time_t own_delay = ::time(NULL) - _next_check_time;
+//
+//    if( abs( _other_scheduler._clock_difference ) < own_delay + warned_clock_difference + 1 )
+//    {
+//        _log->info( message_string( "SCHEDULER-804", _other_scheduler._member_id ) );
+//    }
+//    else
+//    {
+//        _log->warn( message_string( "SCHEDULER-364", _other_scheduler._clock_difference, _other_scheduler._member_id ) );
+//    }
+//
+//    _other_scheduler._checking_clock_difference = false;
+//}
 
 //-------------------Inactive_scheduler_watchdog::insert_member_record_and_prepare_to_become_active
 
@@ -474,7 +516,7 @@ bool Inactive_scheduler_watchdog::set_active()
     _log->info( message_string( "SCHEDULER-997" ) );
 
     bool is_active = _scheduler_member->do_heart_beat();    // Nochmal die Datenbank prüfen, kann _is_active=false setzen
-    if( is_active )  _last_active_member_id = _scheduler_member->member_id();
+    if( is_active )  _other_scheduler._member_id = _scheduler_member->member_id();
 
     assert( is_active == _scheduler_member->_is_active );
     return is_active;
@@ -686,8 +728,8 @@ void Scheduler_member::create_table_when_needed()
             "`scheduler_id`"           " varchar(100) not null, "
             "`scheduler_member_id`"    " varchar(100) not null, "
             "`running_since`"          " datetime, "
-            "`last_heart_beat`"        " numeric(14,3) not null, "
-            "`next_heart_beat`"        " numeric(14,3), "
+            "`last_heart_beat`"        " integer, "     //numeric(14,3) not null, "
+            "`next_heart_beat`"        " integer, "     //numeric(14,3), "
           //"`ip_address`"             " varchar(40), "
           //"`udp_port`"               " integer, "
           //"`tcp_port`"               " integer, "
@@ -804,7 +846,7 @@ bool Scheduler_member::do_heart_beat()
     } while(0);
 
 
-    time_t available_time = old_next_heart_beat + heart_beat_maximum_process_time - ::time(NULL);    // Herzschlag noch in der Frist?
+    time_t available_time = old_next_heart_beat + max_heart_beat_processing_time - ::time(NULL);    // Herzschlag noch in der Frist?
     if( available_time < 0 )
     {
         _log->warn( message_string( "SCHEDULER-996", string_gmt_from_time_t( _next_heart_beat ), -available_time ) );

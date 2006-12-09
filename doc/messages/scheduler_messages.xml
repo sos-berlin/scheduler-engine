@@ -3025,13 +3025,14 @@
 
         <message code="SCHEDULER-993">
             <text xml:lang="en">
-                <title>Scheduler member <p1>member_id</p1>'s heart does not beat since <p2/>, expected next_heart_beat at <p3/></title>
+                <title>Scheduler member <p1>member_id</p1> announced next heart beat at <p2/>, but last heart but was at <p3/></title>
+                <!--title>Scheduler member <p1>member_id</p1>'s heart does not beat since <p2/>, expected next_heart_beat at <p3/></title-->
             </text>
         </message>
 
         <message code="SCHEDULER-994">
             <text xml:lang="en">
-                <title>Scheduler member <p1>member_id</p1>'s heart does not beat since <p2/>, after period of <p3/>s has elapsed</title>
+                <title>Scheduler member <p1>member_id</p1>'s heart does not beat since <p3/>s (<p2>time</p2>)</title>
             </text>
         </message>
 
@@ -3070,7 +3071,7 @@
 
         <message code="SCHEDULER-800" weight="info">
             <text xml:lang="en">
-                <title>Waiting for main Scheduler to start</title>
+                <title>Waiting for start of primary Scheduler</title>
             </text>
         </message>
 
