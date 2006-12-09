@@ -2355,7 +2355,8 @@ void Spooler::start_scheduler_member()
     _scheduler_member->set_backup( _is_backup_member );
     _scheduler_member->start();
 
-    if( _scheduler_member->is_backup()  &&  _scheduler_member->is_scheduler_terminated() ) 
+
+    if( _scheduler_member->is_scheduler_terminated()  &&  _scheduler_member->is_backup() )
     {
         _log.info( message_string( "SCHEDULER-800" ) );
     
@@ -2373,11 +2374,16 @@ void Spooler::start_scheduler_member()
 
         while( _state_cmd != sc_terminate  &&  !_scheduler_member->is_active() )  
         {
-            if( _scheduler_member->is_backup()  &&  _scheduler_member->is_scheduler_terminated() ) 
+            if( _scheduler_member->is_scheduler_terminated() ) 
             {
-                _log.info( message_string( "SCHEDULER-802" ) );
-                cmd_terminate();
-                return;
+                //if( _scheduler_member->is_backup() )
+                {
+                    _log.info( message_string( "SCHEDULER-802" ) );
+                    cmd_terminate();
+                    return;
+                }
+                //else
+                //    break;
             }
 
             wait();

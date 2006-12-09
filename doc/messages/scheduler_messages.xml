@@ -3025,7 +3025,7 @@
 
         <message code="SCHEDULER-993">
             <text xml:lang="en">
-                <title>Scheduler member <p1>member_id</p1> announced next heart beat at <p2/>, but last heart but was at <p3/></title>
+                <title>Scheduler member <p1>member_id</p1> announced next heart beat at <p2/>, but no heart beat since <p3/></title>
                 <!--title>Scheduler member <p1>member_id</p1>'s heart does not beat since <p2/>, expected next_heart_beat at <p3/></title-->
             </text>
         </message>
@@ -3044,7 +3044,7 @@
 
         <message code="SCHEDULER-996">
             <text xml:lang="en">
-                <title>Heart beat is too late: announced next_heart_beat was <p1/> (<p2/>s ago)</title>
+                <title>Heart beat is too late: announced next_heart_beat is <p1/> (<p2/>s ago)</title>
             </text>
         </message>
 
@@ -3056,7 +3056,7 @@
 
         <message code="SCHEDULER-998">
             <text xml:lang="en">
-                <title>Active Scheduler is <p1>scheduler_member_id. Still standing by</p1></title>
+                <title>Active Scheduler is <p1>scheduler_member_id</p1>. Still standing by</title>
             </text>
         </message>
 
@@ -3093,17 +3093,23 @@
             </text>
         </message>
 
-        <message code="SCHEDULER-804" weight="info">
+        <!--message code="SCHEDULER-804" weight="info">
             <text xml:lang="en">
                 <title>Clock seems to be in sync with Scheduler member <p1/></title>
             </text>
-        </message>
+        </message-->
 
         <!--message code="SCHEDULER-805" weight="warn">
             <text xml:lang="en">
                 <title>Active Scheduler is a little late with his heart beat announced for <p1/></title>
             </text>
         </message-->
+
+        <message code="SCHEDULER-805" weight="info">
+            <text xml:lang="en">
+                <title>No active Scheduler in database at this time</title>
+            </text>
+        </message>
     </messages>
     
 </messages>

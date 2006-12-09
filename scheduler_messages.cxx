@@ -318,18 +318,18 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-990", "Adding $1" },
     { "SCHEDULER-991", "Order has been suspended" },
     { "SCHEDULER-992", "Order ist not longer suspended, next start $1" },
-    { "SCHEDULER-993", "Scheduler member $1 announced next heart beat at $2, but last heart but was at $3" },
+    { "SCHEDULER-993", "Scheduler member $1 announced next heart beat at $2, but no heart beat since $3" },
     { "SCHEDULER-994", "Scheduler member $1's heart does not beat since $3s ($2)" },
     { "SCHEDULER-995", "Active Scheduler is $1, $2" },
-    { "SCHEDULER-996", "Heart beat is too late: announced next_heart_beat was $1 ($2s ago)" },
+    { "SCHEDULER-996", "Heart beat is too late: announced next_heart_beat is $1 ($2s ago)" },
     { "SCHEDULER-997", "This Scheduler becomes active now" },
-    { "SCHEDULER-998", "Active Scheduler is $1" },
+    { "SCHEDULER-998", "Active Scheduler is $1. Still standing by" },
     { "SCHEDULER-999", "Scheduler has been terminated properly" },
     { "SCHEDULER-800", "Waiting for start of primary Scheduler" },
     { "SCHEDULER-801", "Waiting for active Scheduler to become inactive" },
     { "SCHEDULER-802", "Active Scheduler is terminated properly, so this inactive Scheduler terminates too" },
     { "SCHEDULER-803", "We will become the active Scheduler" },
-    { "SCHEDULER-804", "Clock seems to be in sync with Scheduler member $1" },
+    { "SCHEDULER-805", "No active Scheduler in database at this time" },
     {}
 };
 } //namespace sos
