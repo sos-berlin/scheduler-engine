@@ -82,6 +82,7 @@ static string quote_and_prepend_comma( const string& s )
 
 Transaction::Transaction( Spooler_db* db, Transaction* outer_transaction )
 : 
+    _zero_(this+1),
     _db(db), 
     _guard(&db->_lock),
     _outer_transaction(outer_transaction)
@@ -89,10 +90,22 @@ Transaction::Transaction( Spooler_db* db, Transaction* outer_transaction )
     assert( db );
     if( !_db->opened() )  z::throw_xc( "SCHEDULER-361" );
 
-    if( !_outer_transaction )
+    if( _outer_transaction )
     {
-        _db->rollback();     // Falls irgendeine Transaktion offengeblieben ist
+        _log_sql = _outer_transaction->_log_sql;
     }
+    else
+    {
+        //_db->rollback();     // Falls irgendeine Transaktion offengeblieben ist
+
+        if( db->_transaction )
+        {
+            Z_DEBUG_ONLY( Z_WINDOWS_ONLY( DebugBreak() ) );
+            z::throw_xc( "NESTED_TRANSACTION", __FUNCTION__ );
+        }
+    }
+
+    db->_transaction = this;
 }
 
 //------------------------------------------------------------------------Transaction::~Transaction
@@ -105,7 +118,7 @@ Transaction::~Transaction()
         { 
             rollback();
         } 
-        catch( exception& ) {}
+        catch( exception& x ) { Z_LOG( "*** ERROR " << __FUNCTION__ << " " << x.what() << "\n" ); }
     }
 }
 
@@ -113,11 +126,18 @@ Transaction::~Transaction()
 
 void Transaction::commit()
 { 
-    if( !_outer_transaction )
+    assert( _db );
+
+    if( _outer_transaction ) 
     {
-        if( !_db )  z::throw_xc( __FUNCTION__, "_db==NULL" );
+        _outer_transaction->_transaction_used |= _transaction_used;
+    }
+    else
+    {
         _db->commit();   
     }
+
+    _db->_transaction = _outer_transaction;
      
     _db = NULL;
     _guard.leave(); 
@@ -127,13 +147,21 @@ void Transaction::commit()
 
 void Transaction::rollback()
 { 
-    if( !_db )  z::throw_xc( __FUNCTION__, "_db==NULL" );
+    if( _db )
+    {
+        if( _outer_transaction )  
+        {
+            _outer_transaction->_transaction_used |= _transaction_used;
 
-    _db->rollback(); 
-    _db = NULL; 
-    _guard.leave(); 
+            Z_DEBUG( Z_WINDOWS_ONLY( DebugBreak() ) );
+            z::throw_xc( "ROLLBACK-IN-INNER-TRANSACTION", "Rollback in inner transaction not possible" );
+        }
 
-    if( _outer_transaction )  throw_xc( "ROLLBACK-FEHLER", "Rollback in innerer Transaktion setzt die äußere Transaktion zurück" );
+        _db->rollback(); 
+        _db->_transaction = _outer_transaction;
+        _db = NULL; 
+        _guard.leave(); 
+    }
 }
 
 //--------------------------------------------------------------Transaction::try_reopen_after_error
@@ -299,7 +327,7 @@ void Spooler_db::open2( const string& db_name )
                                           //"`tcp_port`"               " integer, "
                                             "`http_url`"               " varchar(100), "
                                             "primary key( `scheduler_member_id` )" );
-                    commit();
+                    //commit();
 
 
                     handle_order_id_columns();
@@ -926,10 +954,36 @@ bool Spooler_db::try_update_variable( Transaction* ta, const string& name, const
 
 void Spooler_db::execute( const string& stmt )
 { 
+    assert( _transaction );
+
+    if( stmt != "ROLLBACK" )  _transaction->_transaction_used = true;
+
     THREAD_LOCK( _lock )
     {
         Z_LOGI2( "scheduler", "Spooler_db::execute  " << stmt << '\n' );
-        _db.put( stmt ); 
+        
+        try
+        {
+            _db.put( stmt ); 
+
+            if( _transaction->_log_sql  &&  _log->log_level() >= log_debug3  &&  ( _transaction->_transaction_used || stmt != "ROLLBACK" ) )  
+            {
+                S line;
+                line << stmt;
+                if( _db.record_count() >= 0 )  line << "  ==> " << _db.record_count() << " records";
+                _log->debug3( line );
+            }
+        }
+        catch( exception& x )
+        {
+            if( _transaction->_log_sql )  // Vielleicht für alle Anweisungen, aber dann haben wir einen Fehler im Protokoll, das ist nicht 100%ig kompatibel
+            {
+                _log->warn( stmt );
+                _log->error( x.what() );
+            }
+
+            throw;
+        }
     }
 }
 
@@ -1126,6 +1180,10 @@ void Spooler_db::update_orders_clob( Order* order, const string& column_name, co
 
 void Spooler_db::update_orders_clob( const string& job_chain_name, const string& order_id, const string& column_name, const string& value )
 {
+    assert( _transaction );
+
+    _transaction->_transaction_used = true;
+
     if( _db_name == "" )  z::throw_xc( "SCHEDULER-361", __FUNCTION__ );
 
     if( value == "" )
@@ -1153,6 +1211,10 @@ void Spooler_db::update_orders_clob( const string& job_chain_name, const string&
 
 void Spooler_db::update_clob( const string& table_name, const string& column_name, const string& key_name, int key_value, const string& value )
 {
+    assert( _transaction );
+
+    _transaction->_transaction_used = true;
+
     if( value == "" )
     {
         sql::Update_stmt update ( &_db_descr );
@@ -1173,6 +1235,10 @@ void Spooler_db::update_clob( const string& table_name, const string& column_nam
 
 void Spooler_db::update_clob( const string& table_name, const string& column_name, const string& key_name, const string& key_value, const string& value )
 {
+    assert( _transaction );
+
+    _transaction->_transaction_used = true;
+
     if( _db_name == "" )  z::throw_xc( "SCHEDULER-361", __FUNCTION__ );
 
     if( value == "" )

@@ -712,14 +712,14 @@ void Task::set_state( State new_state )
 
             if( new_state != s_running_delayed )  _next_spooler_process = 0;
 
+            State old_state = _state;
             _state = new_state;
-
 
             if( is_idle()  &&  _job->_module->_process_class )  _job->_module->_process_class->notify_a_process_is_idle();
 
 
             Log_level log_level = new_state == s_starting || new_state == s_closed? log_info : log_debug9;
-            if( log_level >= log_info || _spooler->_debug )
+            if( ( log_level >= log_info || _spooler->_debug )  &&  ( _state != s_closed || old_state != s_none ) )
             {
                 S details;
                 if( _next_time )  details << " (" << _next_time << ")";

@@ -125,6 +125,7 @@ struct Spooler_db : Object, Scheduler_object
     bool                       _waiting;
     ptr<Prefix_log>            _log;
     int                        _order_id_length_max;
+    Transaction*               _transaction;
 };
 
 //--------------------------------------------------------------------------------------Transaction
@@ -134,13 +135,17 @@ struct Transaction
                                 Transaction             ( Spooler_db*, Transaction* outer_transaction = NULL );
                                ~Transaction             ();
 
+    void                    set_log_sql                 ( bool b )                                  { _log_sql = b; }
     void                        commit                  ();
     void                        rollback                ();
   //void                        try_reopen_after_error  ();
 
+    Fill_zero                  _zero_;
     Spooler_db*                _db;
-    Mutex_guard                _guard;
     Transaction*               _outer_transaction;
+    bool                       _transaction_used;       // Noch nicht zuverlässt, z.B. Any_file(select) und Any_file(clob) werden nicht erkannt
+    bool                       _log_sql;
+    Mutex_guard                _guard;
 };
 
 //--------------------------------------------------------------------------------------Job_history

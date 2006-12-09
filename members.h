@@ -41,7 +41,7 @@ struct Scheduler_member : Async_operation, Scheduler_object
     void                        do_heart_beat               ();
     void                        do_heart_beat               ( Transaction* );
     void                        show_active_members         ( Transaction* );
-    void                        try_to_become_active        ( Transaction* = NULL );
+    void                        try_to_become_active        ();
 
     string                      active_member_variable_name();
     Spooler_db*                 db                          ();
@@ -55,12 +55,15 @@ struct Scheduler_member : Async_operation, Scheduler_object
     void                        start_operation             ();
     void                        close_operation             ();
 
+    void                        set_clock_difference        ( time_t difference );
     void                        become_active               ();
     bool                        insert_scheduler_id_record  ( Transaction* );
     void                        try_to_become_active2       ( Transaction* );
     bool                        try_to_heartbeat_member_record( Transaction* );
-    void                        insert_member_record        ( Transaction* );
+    void                        insert_member_record_and_prepare_to_become_active( Transaction* );
+    bool                        insert_member_record        ( Transaction* );
     void                        make_scheduler_member_id    ();
+    void                        db_execute                  ( const string& stmt );
 
   private:
     Fill_zero                  _zero_;
@@ -71,8 +74,15 @@ struct Scheduler_member : Async_operation, Scheduler_object
     time_t                     _last_heart_beat;
     time_t                     _next_heart_beat;
     string                     _last_active_member_id;
+    bool                       _become_active;
+    time_t                     _expected_next_heart_beat_of_active_scheduler;
+    time_t                     _clock_difference;
+    bool                       _clock_difference_checked;
     ptr<Async_operation>       _operation;
     ptr<Prefix_log>            _log;
+
+    friend struct               Active_scheduler_heart_beat;
+    friend struct               Inactive_scheduler_watchdog;
 };
 
 //-------------------------------------------------------------------------------------------------

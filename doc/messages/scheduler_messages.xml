@@ -2245,13 +2245,13 @@
 
         <message code="SCHEDULER-356">
             <text xml:lang="en">
-                <title>Some other Scheduler member has become active</title>
+                <title>Some other Scheduler has become active</title>
             </text>
         </message>
 
         <message code="SCHEDULER-357">
             <text xml:lang="en">
-                <title>Heart beat and backup Scheduler need a database</title>
+                <title>This is a heart beat or backup Scheduler, and it needs a database</title>
             </text>
         </message>
 
@@ -2261,11 +2261,11 @@
             </text>
         </message>
 
-        <message code="SCHEDULER-359">
+        <!--message code="SCHEDULER-359">
             <text xml:lang="en">
                 <title>A backup Scheduler member needs a Scheduler id</title>
             </text>
-        </message>
+        </message-->
 
         <message code="SCHEDULER-360">
             <text xml:lang="en">
@@ -2281,7 +2281,7 @@
 
         <message code="SCHEDULER-362">
             <text xml:lang="en">
-                <title>Scheduler member aborts because it has become inactive</title>
+                <title>Scheduler aborts because it has become inactive</title>
             </text>
         </message>
 
@@ -2290,30 +2290,18 @@
                 <title>Error when creating SQL table <p1/>: <p2/></title>
             </text>
         </message>
+
+        <message code="SCHEDULER-364">
+            <text xml:lang="en">
+                <title>Clocks are not synchonized. Difference to Scheduler member <p2/>'s clock is <p1/>s</title>
+            </text>
+        </message>
+
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->
 
     <messages>
-        <message code="SCHEDULER-800" weight="info">
-            <text xml:lang="en">
-                <title>Waiting for main Scheduler to start</title>
-            </text>
-        </message>
-
-        <message code="SCHEDULER-801" weight="info">
-            <text xml:lang="en">
-                <title>Waiting for active Scheduler to become inactive</title>
-            </text>
-        </message>
-
-        <message code="SCHEDULER-802" weight="info">
-            <text xml:lang="en">
-                <title>Active Scheduler is terminated properly, so this inactive Scheduler terminates too</title>
-            </text>
-        </message>
-
-
         <message code="SCHEDULER-900" weight="info">
             <text xml:lang="de">
                 <title>Scheduler <p1/> startet mit <p2/>, pid=<p3/></title>
@@ -3049,7 +3037,7 @@
 
         <message code="SCHEDULER-995">
             <text xml:lang="en">
-                <title>Active Scheduler member is <p1>scheduler_member_id</p1>, <p2>url</p2></title>
+                <title>Active Scheduler is <p1>scheduler_member_id</p1>, <p2>url</p2></title>
             </text>
         </message>
 
@@ -3061,13 +3049,13 @@
 
         <message code="SCHEDULER-997">
             <text xml:lang="en">
-                <title>This Scheduler member becomes active now</title>
+                <title>This Scheduler becomes active now</title>
             </text>
         </message>
 
         <message code="SCHEDULER-998">
             <text xml:lang="en">
-                <title>Active Scheduler member is <p1>scheduler_member_id. Still standing by</p1></title>
+                <title>Active Scheduler is <p1>scheduler_member_id. Still standing by</p1></title>
             </text>
         </message>
 
@@ -3079,7 +3067,36 @@
                 <title>Scheduler has been terminated properly</title>
             </text>
         </message>
-        
+
+        <message code="SCHEDULER-800" weight="info">
+            <text xml:lang="en">
+                <title>Waiting for main Scheduler to start</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-801" weight="info">
+            <text xml:lang="en">
+                <title>Waiting for active Scheduler to become inactive</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-802" weight="info">
+            <text xml:lang="en">
+                <title>Active Scheduler is terminated properly, so this inactive Scheduler terminates too</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-803" weight="info">
+            <text xml:lang="en">
+                <title>We will become the active Scheduler</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-804" weight="info">
+            <text xml:lang="en">
+                <title>Clocks seem to be synchronized with Scheduler member <p1/></title>
+            </text>
+        </message>
     </messages>
     
 </messages>
