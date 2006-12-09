@@ -520,6 +520,7 @@ bool Wait_handles::wait_until_2( const Time& until, const Object* wait_for_objec
 
             if( ret == WAIT_TIMEOUT )
             {
+                if( t > 0  &&  console_line_length == 0 )  cerr << _spooler->_wait_counter << '\r', console_line_length = 20;//_spooler->_wait_rotating_bar();
                 ret = MsgWaitForMultipleObjects( _handles.size(), handles, FALSE, max( 0, t ), QS_ALLINPUT ); 
             }
 

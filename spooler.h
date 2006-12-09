@@ -503,6 +503,7 @@ struct Spooler : Object,
     int                        _loop_counter;               // Zähler der Schleifendurchläufe in spooler.cxx
     int                        _wait_counter;               // Zähler der Aufrufe von wait_until()
     time_t                     _last_time_enter_pressed;    // int wegen Threads (Spooler_communication und Spooler_wait)
+    Rotating_bar               _wait_rotating_bar;
 
     ptr<object_server::Connection_manager>  _connection_manager;
   //ptr<Async_manager>                      _async_manager;

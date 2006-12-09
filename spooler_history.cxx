@@ -153,7 +153,7 @@ void Transaction::rollback()
         {
             _outer_transaction->_transaction_used |= _transaction_used;
 
-            Z_DEBUG( Z_WINDOWS_ONLY( DebugBreak() ) );
+            Z_DEBUG_ONLY( Z_WINDOWS_ONLY( DebugBreak() ) );
             z::throw_xc( "ROLLBACK-IN-INNER-TRANSACTION", "Rollback in inner transaction not possible" );
         }
 
@@ -314,19 +314,6 @@ void Spooler_db::open2( const string& db_name )
 
                     add_column( _spooler->_tasks_tablename, "TASK_XML", " add \"TASK_XML\" clob" );
 
-                    create_table_when_needed( _spooler->_members_tablename,
-                                            "`scheduler_id`"           " varchar(100) not null, "
-                                            "`scheduler_member_id`"    " varchar(100) not null, "
-                                            "`running_since`"          " datetime, "
-                                            "`last_heart_beat`"        " integer not null, "
-                                          //"`last_heart_beat`"        " timestamp not null, "
-                                            "`next_heart_beat`"        " integer, "
-                                          //"`next_heart_beat`"        " timestamp, "
-                                          //"`ip_address`"             " varchar(40), "
-                                          //"`udp_port`"               " integer, "
-                                          //"`tcp_port`"               " integer, "
-                                            "`http_url`"               " varchar(100), "
-                                            "primary key( `scheduler_member_id` )" );
                     //commit();
 
 

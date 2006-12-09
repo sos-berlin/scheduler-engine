@@ -2293,7 +2293,7 @@
 
         <message code="SCHEDULER-364">
             <text xml:lang="en">
-                <title>Clocks are not synchonized. Difference to Scheduler member <p2/>'s clock is <p1/>s</title>
+                <title>Clocks seem not to be in sync. Difference to Scheduler member <p2/>'s clock is <p1/>s</title>
             </text>
         </message>
 
@@ -3094,9 +3094,15 @@
 
         <message code="SCHEDULER-804" weight="info">
             <text xml:lang="en">
-                <title>Clocks seem to be synchronized with Scheduler member <p1/></title>
+                <title>Clock seems to be in sync with Scheduler member <p1/></title>
             </text>
         </message>
+
+        <!--message code="SCHEDULER-805" weight="warn">
+            <text xml:lang="en">
+                <title>Active Scheduler is a little late with his heart beat announced for <p1/></title>
+            </text>
+        </message-->
     </messages>
     
 </messages>

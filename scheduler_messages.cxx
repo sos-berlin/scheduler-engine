@@ -230,7 +230,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-361", "No database" },
     { "SCHEDULER-362", "Scheduler aborts because it has become inactive" },
     { "SCHEDULER-363", "Error when creating SQL table $1: $2" },
-    { "SCHEDULER-364", "Clocks are not synchonized. Difference to Scheduler member $2's clock is $1s" },
+    { "SCHEDULER-364", "Clocks seem not to be in sync. Difference to Scheduler member $2's clock is $1s" },
     { "SCHEDULER-900", "Scheduler $1 is starting with $2, pid=$3" },
     { "SCHEDULER-902", "state=$1" },
     { "SCHEDULER-904", "Tasks have $1s to terminate" },
@@ -329,7 +329,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-801", "Waiting for active Scheduler to become inactive" },
     { "SCHEDULER-802", "Active Scheduler is terminated properly, so this inactive Scheduler terminates too" },
     { "SCHEDULER-803", "We will become the active Scheduler" },
-    { "SCHEDULER-804", "Clocks seem to be synchronized with Scheduler member $1" },
+    { "SCHEDULER-804", "Clock seems to be in sync with Scheduler member $1" },
     {}
 };
 } //namespace sos
