@@ -862,9 +862,9 @@ int Spooler_db::get_id_( const string& variable_name, Transaction* outer_transac
     return id;
 }
 
-//-------------------------------------------------------------------------Spooler_db::get_variable
+//--------------------------------------------------------------------Spooler_db::get_variable_text
 
-string Spooler_db::get_variable( Transaction* ta, const string& name, bool* record_exists )
+string Spooler_db::get_variable_text( Transaction* ta, const string& name, bool* record_exists )
 {
     assert( ta );
     if( _db_name == "" )  z::throw_xc( "SCHEDULER-361", __FUNCTION__ );
@@ -884,15 +884,17 @@ string Spooler_db::get_variable( Transaction* ta, const string& name, bool* reco
 }
 
 //-------------------------------------------------------------------------Spooler_db::set_variable
-/* Nicht getestet
+
 void Spooler_db::set_variable( Transaction* ta, const string& name, const string& value )
 {
     assert( ta );
 
     if( !try_update_variable( ta, name, value ) )
-        insert_variable( name, value );
+    {
+        insert_variable( ta, name, value );
+    }
 }
-*/
+
 //----------------------------------------------------------------------Spooler_db::insert_variable
 
 void Spooler_db::insert_variable( Transaction* ta, const string& name, const string& value )

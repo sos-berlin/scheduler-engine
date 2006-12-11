@@ -90,18 +90,29 @@ struct Service_thread_param
 
 //---------------------------------------------------------------------------------make_service_name
 
-string make_service_name( const string& id )
+string make_service_name( const string& id, bool is_backup )
 {
-    if( id.empty() )  return std_service_name;
-                else  return std_service_name + ( "_" + id );
+    S result;
+
+    result << std_service_name;
+
+    if( !id.empty() )  result << "_" << id;
+    if( is_backup )  result << "_backup";
+
+    return result;
 }
 
 //------------------------------------------------------------------------------make_service_display
 
-string make_service_display( const string& id )
+string make_service_display( const string& id, bool is_backup )
 {
-    if( id.empty() )  return std_service_display_name;
-                else  return string(std_service_display_name) + " -id=" + id;
+    S result;
+
+    result << std_service_display_name;
+    if( !id.empty() )  result << " -id=" << id;
+    if( is_backup   )  result << " -backup";
+
+    return result;
 }
 
 //----------------------------------------------------------------------------------------event_log

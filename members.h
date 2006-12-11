@@ -33,29 +33,31 @@ struct Scheduler_member : Async_operation, Scheduler_object
     string                      member_id                   ()                                      { return _scheduler_member_id; }
 
     bool                     is_active                      ()                                      { return _is_active; }
-    bool                     is_scheduler_terminated        ();
+    bool                     is_scheduler_up                ();
     bool                     is_backup                      ()                                      { return _is_backup; }
+    string                      active_member_id            ();
     time_t                      last_heart_beat             ()                                      { return _last_heart_beat; }
 
-    void                        start                       ();
-    bool                        do_heart_beat               ();
-    bool                        do_heart_beat               ( Transaction* );
+    bool                        start                       ();
+    bool                        wait_until_not_terminated   ();
+    bool                        wait_until_active           ();
+    bool                        do_heart_beat               ( Transaction*, bool db_record_marked_active );
 
-    string                      active_member_variable_name();
+    string                      not_properly_terminated_variable_name();
     Spooler_db*                 db                          ();
     void                        check_member_id             ();
 
   protected:
     void                        create_table_when_needed    ();
     void                        delete_member_record        ( Transaction* ta );
-    void                        delete_scheduler_id_record  ( Transaction* ta );
     void                        delete_old_member_records   ( Transaction* ta );
     void                        start_operation             ();
     void                        close_operation             ();
 
-    bool                        insert_scheduler_id_record  ( Transaction* );
-    bool                        try_to_heartbeat_member_record( Transaction* );
-    bool                        insert_member_record        ( Transaction* );
+    void                        insert_scheduler_id_record  ( Transaction* );
+    void                        insert_member_record        ( Transaction* );
+    bool                        check_database_consistency  ( Transaction* ta );
+    bool                        try_to_heartbeat_member_record( Transaction*, bool db_record_marked_active );
     void                        make_scheduler_member_id    ();
     void                        db_execute                  ( const string& stmt );
 

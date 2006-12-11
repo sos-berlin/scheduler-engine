@@ -196,13 +196,31 @@
             </messages>
         </command_option>
 
-        
+
+        <command_option name="heart-beat" title="Startet den Scheduler mit Herzschlag für backup-fähigen Betrieb">
+            <description>
+                <p>
+                    Der Backup-Scheduler beobachtet einen mit
+                    <scheduler_option name="heart-beat"/>
+                    gestarteten Scheduler.
+                </p>
+            </description>
+        </command_option>
+
+
         <command_option name="backup" title="Startet den Scheduler als Backup-Scheduler">
             <description>
                 <p>
-                    Der Backup-Scheduler beobachtet einen mit 
-                    <scheduler_option name="heart-beat"/>
+                    
+                </p>
+                <p>
+                    Der Backup-Scheduler beobachtet über die Datenbank einen mit
+                    <scheduler_option name="heart-beat"/> 
+                    und gleicher Konfiguration, insbesondere <scheduler_option name="id"/>,
                     gestarteten Scheduler.
+                </p>
+                <p>
+                    
                 </p>
             </description>
         </command_option>

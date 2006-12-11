@@ -2353,44 +2353,7 @@ void Spooler::start_scheduler_member()
     _scheduler_member = Z_NEW( Scheduler_member( this ) );
   //_scheduler_member->set_member_id( _scheduler_member_id );
     _scheduler_member->set_backup( _is_backup_member );
-    _scheduler_member->start();
-
-
-    if( _scheduler_member->is_scheduler_terminated()  &&  _scheduler_member->is_backup() )
-    {
-        _log.info( message_string( "SCHEDULER-800" ) );
-    
-        while( _state_cmd != sc_terminate  &&  _scheduler_member->is_scheduler_terminated() ) 
-        {
-            wait();
-            _connection_manager->async_continue();
-            run_check_ctrl_c();
-        }
-    }
-
-    if( !_scheduler_member->is_active() )
-    {
-        _log.info( message_string( "SCHEDULER-801" ) );
-
-        while( _state_cmd != sc_terminate  &&  !_scheduler_member->is_active() )  
-        {
-            if( _scheduler_member->is_scheduler_terminated() ) 
-            {
-                //if( _scheduler_member->is_backup() )
-                {
-                    _log.info( message_string( "SCHEDULER-802" ) );
-                    cmd_terminate();
-                    return;
-                }
-                //else
-                //    break;
-            }
-
-            wait();
-            _connection_manager->async_continue();//_connection_manager->wait( 1 );
-            run_check_ctrl_c();
-        }
-    }
+    _scheduler_member->start();     // Wartet, bis entschieden ist, dass wir aktiv werden
 }
 
 //--------------------------------------------------------------------Spooler::run_scheduler_script
@@ -2466,7 +2429,8 @@ void Spooler::stop( const exception* )
 
     if( _scheduler_member )
     {
-        _scheduler_member->shutdown();
+        if( _scheduler_member->is_active() )  _scheduler_member->shutdown();
+                                        else  _scheduler_member->close();
         _scheduler_member = NULL;
     }
 
@@ -3763,6 +3727,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
         bool    do_install_service  = false;
         bool    do_remove_service   = false;
         bool    is_service_set      = false;
+        bool    is_backup           = false;
         string  id;
         string  service_name, service_display;
         string  service_description = "Job scheduler for process automation";
@@ -3848,6 +3813,8 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
                     set_environment_variable( value.substr( 0, eq ), value.substr( eq + 1 ) );
                 }
                 else
+                if( opt.flag      ( "backup"           ) )  is_backup = opt.set();
+                else
                     call_scheduler = true;     // Aber is_scheduler_client hat Vorrang!
 
                 if( !command_line.empty() )  command_line += " ";
@@ -3906,8 +3873,8 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
                 }
                 else
                 {
-                    service_name = spooler::make_service_name(id);
-                    if( service_display == "" )  service_display = spooler::make_service_display(id);
+                    service_name = spooler::make_service_name( id, is_backup );
+                    if( service_display == "" )  service_display = spooler::make_service_display( id, is_backup );
                 }
 
                 if( !renew_spooler.empty() )  

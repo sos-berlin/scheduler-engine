@@ -71,7 +71,7 @@ struct Spooler_db : Object, Scheduler_object
     void                        update_clob             ( const string& table_name, const string& column_name, const string& key_name, const string& key_value, const string& value );
     string                      read_clob               ( const string& table_name, const string& column_name, const string& key_name, const string& key_value );
 
-    string                      get_variable            ( Transaction*, const string& name, bool* record_exists );
+    string                      get_variable_text       ( Transaction*, const string& name, bool* record_exists = NULL );
     void                        set_variable            ( Transaction*, const string& name, const string& value );
     void                        insert_variable         ( Transaction*, const string& name, const string& value );
     void                        update_variable         ( Transaction*, const string& name, const string& value );

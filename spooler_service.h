@@ -15,8 +15,8 @@ DWORD                           service_state               ( const string& serv
 void                            service_start               ( const string& service_name );
 inline bool                     service_is_started          ( const string& service_name )    { return service_state(service_name) == SERVICE_START_PENDING; }
 
-string                          make_service_name           ( const string& id );
-string                          make_service_display        ( const string& id );
+string                          make_service_name           ( const string& id, bool is_backup );
+string                          make_service_display        ( const string& id, bool is_backup );
 
 //-------------------------------------------------------------------------------------------------
 

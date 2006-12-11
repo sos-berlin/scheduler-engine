@@ -2245,7 +2245,7 @@
 
         <message code="SCHEDULER-356">
             <text xml:lang="en">
-                <title>Some other Scheduler has become active</title>
+                <title>SOME OTHER SCHEDULER HAS STOLEN ACTIVITY</title>
             </text>
         </message>
 
@@ -3025,7 +3025,7 @@
 
         <message code="SCHEDULER-993">
             <text xml:lang="en">
-                <title>No heart beat since <p3/>, although Scheduler member <p1>member_id</p1> announced it for <p2/></title>
+                <title>No heart beat since <p4/>s (<p3>time</p3>), although Scheduler member <p1>member_id</p1> announced it for <p2/></title>
                 <!--title>Scheduler member <p1>member_id</p1>'s heart does not beat since <p2/>, expected next_heart_beat at <p3/></title-->
             </text>
         </message>
@@ -3038,7 +3038,7 @@
 
         <message code="SCHEDULER-995">
             <text xml:lang="en">
-                <title>Active Scheduler is <p1>scheduler_member_id</p1>, <p2>url</p2></title>
+                <title>Active Scheduler seems to be <p1>scheduler_member_id</p1>, <p3>url</p3>, claiming its last heart beat was <p2/>s ago</title>
             </text>
         </message>
 
@@ -3050,7 +3050,7 @@
 
         <message code="SCHEDULER-997">
             <text xml:lang="en">
-                <title>This Scheduler becomes active now</title>
+                <title>This Scheduler is active now</title>
             </text>
         </message>
 
@@ -3071,13 +3071,13 @@
 
         <message code="SCHEDULER-800" weight="info">
             <text xml:lang="en">
-                <title>Waiting for start of primary Scheduler</title>
+                <title>Waiting for start of Scheduler</title>
             </text>
         </message>
 
         <message code="SCHEDULER-801" weight="info">
             <text xml:lang="en">
-                <title>Waiting for active Scheduler to become inactive</title>
+                <title>Waiting for active Scheduler <p1/> to become inactive</title>
             </text>
         </message>
 
@@ -3089,7 +3089,7 @@
 
         <message code="SCHEDULER-803" weight="info">
             <text xml:lang="en">
-                <title>We will become the active Scheduler</title>
+                <title>This Scheduler will become active</title>
             </text>
         </message>
 
