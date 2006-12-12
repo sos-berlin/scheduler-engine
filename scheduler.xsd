@@ -955,7 +955,10 @@
 
     
     <xsd:element name="terminate">
-        <xsd:complexType/>
+        <xsd:complexType>
+            <xsd:attribute name="all_schedulers" type="Yes_no"/>
+            <xsd:attribute name="restart"        type="Yes_no"/>
+        </xsd:complexType>
     </xsd:element>
 
 

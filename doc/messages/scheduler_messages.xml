@@ -2255,11 +2255,11 @@
             </text>
         </message>
 
-        <message code="SCHEDULER-358">
+        <!--message code="SCHEDULER-358">
             <text xml:lang="en">
                 <title>Scheduler member id has to start with the Scheduler id and a dot</title>
             </text>
-        </message>
+        </message-->
 
         <!--message code="SCHEDULER-359">
             <text xml:lang="en">
@@ -2307,7 +2307,7 @@
                 <title>Scheduler <p1/> startet mit <p2/>, pid=<p3/></title>
             </text>
             <text xml:lang="en">
-                <title>Scheduler <p1/> is starting with <p2/>, pid=<p3/></title>
+                <title>Scheduler <p1/> is starting with <p2/>, session_id=<p4/>, pid=<p3/></title>
             </text>
         </message>
 
@@ -3038,7 +3038,7 @@
 
         <message code="SCHEDULER-995">
             <text xml:lang="en">
-                <title>Active Scheduler seems to be <p1>scheduler_member_id</p1>, <p3>url</p3>, claiming its last heart beat was <p2/>s ago</title>
+                <title>The active Scheduler seems to be <p1>scheduler_member_id</p1> (pid=<p4/>, <p3>url</p3>), claiming its last heart beat was <p2/>s ago</title>
             </text>
         </message>
 
@@ -3048,15 +3048,15 @@
             </text>
         </message>
 
-        <message code="SCHEDULER-997">
+        <!--message code="SCHEDULER-997">
             <text xml:lang="en">
-                <title>This Scheduler is active now</title>
+                <title>This Scheduler exits. An inactive Scheduler can become active and resume operation</title>
             </text>
-        </message>
+        </message-->
 
         <message code="SCHEDULER-998">
             <text xml:lang="en">
-                <title>This Scheduler exits. Some other active Scheduler can resume operation</title>
+                <title>Scheduler exits</title>
             </text>
         </message>
 
@@ -3107,13 +3107,19 @@
 
         <message code="SCHEDULER-805" weight="info">
             <text xml:lang="en">
-                <title>No active Scheduler in database at this time</title>
+                <title>No Scheduler is active</title>
             </text>
         </message>
 
-        <message code="SCHEDULER-806">
+        <!--message code="SCHEDULER-806">
             <text xml:lang="en">
                 <title>Active Scheduler is <p1>scheduler_member_id</p1>. Still standing by</title>
+            </text>
+        </message-->
+
+        <message code="SCHEDULER-807">
+            <text xml:lang="en">
+                <title>This Scheduler is active now</title>
             </text>
         </message>
 

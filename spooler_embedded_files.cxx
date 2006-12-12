@@ -5455,7 +5455,10 @@ const char file_scheduler_xsd[] =
     "\n"
     "\n"
     "<xsd:element name=\"terminate\">\n"
-    "<xsd:complexType/>\n"
+    "<xsd:complexType>\n"
+    "<xsd:attribute name=\"all_schedulers\" type=\"Yes_no\"/>\n"
+    "<xsd:attribute name=\"restart\"        type=\"Yes_no\"/>\n"
+    "</xsd:complexType>\n"
     "</xsd:element>\n"
     "\n"
     "\n"
@@ -5753,7 +5756,7 @@ static const Embedded_file embedded_files_array[] =
     { "html/z/scheduler.xslt", file_html_z_scheduler_xslt, sizeof file_html_z_scheduler_xslt - 1, 1165167653 },
     { "html/z/scheduler.css", file_html_z_scheduler_css, sizeof file_html_z_scheduler_css - 1, 1162029282 },
     { "html/z/job_scheduler_rabbit_circle_45x45.gif", file_html_z_job_scheduler_rabbit_circle_45x45_gif, sizeof file_html_z_job_scheduler_rabbit_circle_45x45_gif - 1, 1164977749 },
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1165230990 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1165910951 },
     { NULL, NULL, 0 }
 };
 

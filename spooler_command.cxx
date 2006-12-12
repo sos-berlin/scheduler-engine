@@ -276,12 +276,28 @@ xml::Element_ptr Command_processor::execute_modify_spooler( const xml::Element_p
 
 //-------------------------------------------------------------Command_processor::execute_terminate
 
-xml::Element_ptr Command_processor::execute_terminate( const xml::Element_ptr& )
+xml::Element_ptr Command_processor::execute_terminate( const xml::Element_ptr& element )
 {
     if( _security_level < Security::seclev_no_add )  z::throw_xc( "SCHEDULER-121" );
 
-    _spooler->cmd_terminate();
+    bool restart        = element.bool_getAttribute( "restart"       , false );
+    bool all_schedulers = element.bool_getAttribute( "all_schedulers", false );
+
+
+    if( _spooler->_scheduler_member  &&  all_schedulers )
+    {
+        _spooler->_scheduler_member->set_command_for_all_schedulers_but_me
+        (
+            (Transaction*)NULL,
+            restart? Scheduler_member::cmd_terminate_and_restart 
+                   : Scheduler_member::cmd_terminate
+        );
+    }
+
+    if( restart )  _spooler->cmd_terminate_and_restart();
+             else  _spooler->cmd_terminate();
     
+
     return _answer.createElement( "ok" );
 }
 //--------------------------------------------------------------Command_processor::execute_show_job
@@ -509,10 +525,10 @@ xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& 
         string history_id;
 
         {
-            Any_file sel ( "-in " + _spooler->_db->db_name() + 
+            Any_file sel = _spooler->_db->transaction()->open_result_set(
                            " select max(\"HISTORY_ID\") as history_id_max "
-                           " from " + _spooler->_order_history_tablename +
-                           " where \"SPOOLER_ID\"=" + sql::quoted( _spooler->id_for_db() ) + 
+                           "  from " + _spooler->_order_history_tablename +
+                           "  where \"SPOOLER_ID\"=" + sql::quoted( _spooler->id_for_db() ) + 
                             " and \"JOB_CHAIN\"="   + sql::quoted( job_chain_name ) +
                             " and \"ORDER_ID\"="    + sql::quoted( id_string ) );
 
@@ -523,10 +539,10 @@ xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& 
         }
 
         {
-            Any_file sel ( "-in " + _spooler->_db->db_name() +
+            Any_file sel = _spooler->_db->transaction()->open_result_set(
                            "select \"ORDER_ID\" as \"ID\", \"START_TIME\", \"TITLE\", \"STATE\", \"STATE_TEXT\""
-                           " from " + _spooler->_order_history_tablename +
-                           " where \"HISTORY_ID\"=" + history_id );
+                           "  from " + _spooler->_order_history_tablename +
+                           "  where \"HISTORY_ID\"=" + history_id );
 
             Record record = sel.get_record();
 
@@ -543,8 +559,13 @@ xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& 
 
         if( show & show_log )
         {
+            Transaction ta ( _spooler->_db );
+            ta.set_transaction_used();
+
             log = file_as_string( GZIP_AUTO + _spooler->_db->db_name() + " -table=" + _spooler->_order_history_tablename + " -blob=\"LOG\"" 
                                      " where \"HISTORY_ID\"=" + history_id );
+
+            ta.commit();
         }
 
         /* Payload steht nicht in der Historie
@@ -1010,10 +1031,13 @@ void Command_processor::execute_http( http::Operation* http_operation )
                         }
                         else
                         {
-                            Any_file sel ( "-in " + _spooler->_db->db_name() + 
-                                           " select max(\"HISTORY_ID\") as history_id_max "
-                                           " from " + _spooler->_order_history_tablename +
-                                           " where \"SPOOLER_ID\"=" + sql::quoted( _spooler->id_for_db() ) + 
+                            Transaction ta ( _spooler->_db );
+                            ta.set_transaction_used();
+
+                            Any_file sel = ta.open_result_set(
+                                           "select max(\"HISTORY_ID\") as history_id_max "
+                                           "  from " + _spooler->_order_history_tablename +
+                                           "  where \"SPOOLER_ID\"=" + sql::quoted( _spooler->id_for_db() ) + 
                                              " and \"JOB_CHAIN\"="  + sql::quoted( job_chain_name ) +
                                              " and \"ORDER_ID\"="   + sql::quoted( order_id ) );
 

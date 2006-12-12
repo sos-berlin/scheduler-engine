@@ -85,7 +85,9 @@ Transaction::Transaction( Spooler_db* db, Transaction* outer_transaction )
     _zero_(this+1),
     _db(db), 
     _guard(&db->_lock),
-    _outer_transaction(outer_transaction)
+    _outer_transaction(outer_transaction),
+    _spooler(db->_spooler),
+    _log(db->_log)
 {
     assert( db );
     if( !_db->opened() )  z::throw_xc( "SCHEDULER-361" );
@@ -164,13 +166,58 @@ void Transaction::rollback()
     }
 }
 
-//--------------------------------------------------------------Transaction::try_reopen_after_error
-/*
-void Transaction::try_reopen_after_error( exception& x, bool wait_endless )
-{
-    _db->try_reopen_after_error();
+//---------------------------------------------------------------------Transaction::open_result_set
+
+Any_file Transaction::open_result_set( const string& sql )
+{ 
+    return open_file( "-in " + _db->db_name(), sql ); 
 }
-*/
+
+//---------------------------------------------------------------------------Transaction::open_file
+
+Any_file Transaction::open_file( const string& db_prefix, const string& sql )
+{
+    _transaction_used = true;
+
+    Any_file result;
+
+    try
+    {
+        result.open( db_prefix + " " + sql );
+
+        if( _db->_log->log_level() >= log_debug9 )  
+        {
+            S line;
+            line << sql;
+            if( _db->_db.record_count() >= 0 )  line << "  ==> " << _db->_db.record_count() << " records";
+            _db->_log->debug9( line );
+        }
+    }
+    catch( exception& x )
+    {
+        if( _log_sql )  // Vielleicht für alle Anweisungen, aber dann haben wir einen Fehler im Protokoll, das ist nicht 100%ig kompatibel
+        {
+            _db->_log->warn( sql );
+            _db->_log->error( x.what() );
+        }
+        else
+            _db->_log->debug( sql ), _db->_log->debug( x.what() );
+
+        throw;
+    }
+
+    return result;
+}
+
+//---------------------------------------------------Retry_transaction::reopen_database_after_error
+
+void Retry_transaction::reopen_database_after_error( exception& x )
+{ 
+    if( _outer_transaction )  throw;    // Wenn's eine äußere Transaktion gibt, dann die Schleife dort wiederholen
+
+    _database_retry.reopen_database_after_error( x );
+}
+
 //---------------------------------------------------------------------------Spooler_db::Spooler_db
 
 Spooler_db::Spooler_db( Spooler* spooler )
@@ -181,6 +228,19 @@ Spooler_db::Spooler_db( Spooler* spooler )
     _db_descr( z::sql::flag_uppercase_names | z::sql::flag_quote_names | z::sql::flag_dont_quote_table_names )
 {
     _log = Z_NEW( Prefix_log( this, "Database" ) );
+}
+
+//---------------------------------------------------------------ransaction*Spooler_db::transaction
+    
+Transaction*Spooler_db::transaction()
+{
+    if( !_transaction )
+    {
+        Z_DEBUG_ONLY( Z_WINDOWS_ONLY( assert( (__FUNCTION__,0) ) ) );
+        z::throw_xc( "NO-TRANSACTION" );
+    }
+
+    return _transaction;
 }
 
 //---------------------------------------------------------------------------------Spooler_db::open
@@ -197,6 +257,8 @@ void Spooler_db::open( const string& db_name )
         
         try_reopen_after_error( x, true );
     }
+
+    create_tables_when_needed();
 }
 
 //--------------------------------------------------------------------------------Spooler_db::open2
@@ -238,86 +300,6 @@ void Spooler_db::open2( const string& db_name )
                 if( _db.opened() )
                 {
                     _db_name += " ";
-
-                    create_table_when_needed( _spooler->_variables_tablename, 
-                                            "\"NAME\" varchar(100) not null,"
-                                            "\"WERT\" integer,"  
-                                            "\"TEXTWERT\" varchar(250),"  
-                                            "primary key ( \"name\" )" );
-
-
-                    vector<string> create_extra = vector_map( sql_quoted_name, vector_split( " *, *", _spooler->_job_history_columns ) );
-                    for( int i = 0; i < create_extra.size(); i++ )  create_extra[i] += " varchar(250),";
-
-                    create_table_when_needed( _spooler->_job_history_tablename, 
-                                            "\"ID\"          integer not null,"
-                                            "\"SPOOLER_ID\"  varchar(100),"
-                                            "\"JOB_NAME\"    varchar(100) not null,"
-                                            "\"START_TIME\"  datetime not null,"
-                                            "\"END_TIME\"    datetime,"
-                                            "\"CAUSE\"       varchar(50),"
-                                            "\"STEPS\"       integer,"
-                                            "\"EXIT_CODE\"   integer,"
-                                            "\"ERROR\"       boolean,"
-                                            "\"ERROR_CODE\"  varchar(50),"
-                                            "\"ERROR_TEXT\"  varchar(250),"
-                                            "\"PARAMETERS\"  clob,"
-                                            "\"LOG\"         blob," 
-                                            + join( "", create_extra ) 
-                                            + "primary key( \"ID\" )" );
-
-                    create_table_when_needed( _spooler->_orders_tablename, S() <<
-                                            "\"JOB_CHAIN\"   varchar(100) not null,"        // Primärschlüssel
-                                            "\"ID\"          varchar(" << const_order_id_length_max << ") not null,"        // Primärschlüssel
-                                            "\"SPOOLER_ID\"  varchar(100),"
-                                            "\"PRIORITY\"    integer not null,"
-                                            "\"STATE\"       varchar(100),"
-                                            "\"STATE_TEXT\"  varchar(100),"
-                                            "\"TITLE\"       varchar(200),"
-                                            "\"CREATED_TIME\" datetime not null,"
-                                            "\"MOD_TIME\"    datetime,"
-                                            "\"ORDERING\"    integer not null,"             // Um die Reihenfolge zu erhalten
-                                            "\"PAYLOAD\"     clob,"
-                                            "\"INITIAL_STATE\" varchar(100),"               
-                                            "\"RUN_TIME\"    clob,"
-                                            "\"ORDER_XML\"   clob,"
-                                            "primary key( \"SPOOLER_ID\", \"JOB_CHAIN\", \"ID\" )" );
-
-
-                    add_column( _spooler->_orders_tablename, "INITIAL_STATE" , "add \"INITIAL_STATE\" varchar(100)" );
-                    add_column( _spooler->_orders_tablename, "RUN_TIME"      , "add \"RUN_TIME\"      clob" );
-                    add_column( _spooler->_orders_tablename, "ORDER_XML"     , "add \"ORDER_XML\"     clob" );
-                    add_column( _spooler->_job_history_tablename, "EXIT_CODE", "add \"EXIT_CODE\"     integer" );
-
-                    create_table_when_needed( _spooler->_order_history_tablename, S() <<
-                                            "\"HISTORY_ID\"  integer not null,"             // Primärschlüssel
-                                            "\"JOB_CHAIN\"   varchar(100) not null,"        // Primärschlüssel
-                                            "\"ORDER_ID\"    varchar(" << const_order_id_length_max << ") not null,"
-                                            "\"SPOOLER_ID\"  varchar(100),"
-                                            "\"TITLE\"       varchar(200),"
-                                            "\"STATE\"       varchar(100) not null,"
-                                            "\"STATE_TEXT\"  varchar(100),"
-                                            "\"START_TIME\"  datetime not null,"
-                                            "\"END_TIME\"    datetime not null,"
-                                            "\"LOG\"         blob," 
-                                            "primary key( \"HISTORY_ID\" )" );
-
-                    create_table_when_needed( _spooler->_tasks_tablename, 
-                                            "\"TASK_ID\"        integer not null,"          // Primärschlüssel
-                                            "\"SPOOLER_ID\"     varchar(100),"
-                                            "\"JOB_NAME\"       varchar(100) not null,"
-                                            "\"ENQUEUE_TIME\"   datetime,"
-                                            "\"START_AT_TIME\"  datetime,"
-                                            "\"PARAMETERS\"     clob,"
-                                            "\"TASK_XML\"       clob,"
-                                            "primary key( \"TASK_ID\" )" );
-
-                    add_column( _spooler->_tasks_tablename, "TASK_XML", " add \"TASK_XML\" clob" );
-
-                    //commit();
-
-
-                    handle_order_id_columns();
                 }
 
                 _email_sent_after_db_error = false;
@@ -334,6 +316,123 @@ void Spooler_db::open2( const string& db_name )
     }
 }
 
+//------------------------------------------------------------Spooler_db::create_tables_when_needed
+
+void Spooler_db::create_tables_when_needed()
+{
+    create_table_when_needed( _spooler->_variables_tablename, 
+                            "\"NAME\" varchar(100) not null,"
+                            "\"WERT\" integer,"  
+                            "\"TEXTWERT\" varchar(250),"  
+                            "primary key ( \"name\" )" );
+
+    add_column( _spooler->_variables_tablename, "textwert", " add `textwert` varchar(250)" );
+
+    vector<string> create_extra = vector_map( sql_quoted_name, vector_split( " *, *", _spooler->_job_history_columns ) );
+    for( int i = 0; i < create_extra.size(); i++ )  create_extra[i] += " varchar(250),";
+
+    create_table_when_needed( _spooler->_job_history_tablename, 
+                            "\"ID\"          integer not null,"
+                            "\"SPOOLER_ID\"  varchar(100),"
+                            "\"JOB_NAME\"    varchar(100) not null,"
+                            "\"START_TIME\"  datetime not null,"
+                            "\"END_TIME\"    datetime,"
+                            "\"CAUSE\"       varchar(50),"
+                            "\"STEPS\"       integer,"
+                            "\"EXIT_CODE\"   integer,"
+                            "\"ERROR\"       boolean,"
+                            "\"ERROR_CODE\"  varchar(50),"
+                            "\"ERROR_TEXT\"  varchar(250),"
+                            "\"PARAMETERS\"  clob,"
+                            "\"LOG\"         blob," 
+                            + join( "", create_extra ) 
+                            + "primary key( \"ID\" )" );
+
+    create_table_when_needed( _spooler->_orders_tablename, S() <<
+                            "\"JOB_CHAIN\"   varchar(100) not null,"        // Primärschlüssel
+                            "\"ID\"          varchar(" << const_order_id_length_max << ") not null,"        // Primärschlüssel
+                            "\"SPOOLER_ID\"  varchar(100),"
+                            "\"PRIORITY\"    integer not null,"
+                            "\"STATE\"       varchar(100),"
+                            "\"STATE_TEXT\"  varchar(100),"
+                            "\"TITLE\"       varchar(200),"
+                            "\"CREATED_TIME\" datetime not null,"
+                            "\"MOD_TIME\"    datetime,"
+                            "\"ORDERING\"    integer not null,"             // Um die Reihenfolge zu erhalten
+                            "\"PAYLOAD\"     clob,"
+                            "\"INITIAL_STATE\" varchar(100),"               
+                            "\"RUN_TIME\"    clob,"
+                            "\"ORDER_XML\"   clob,"
+                            "primary key( \"SPOOLER_ID\", \"JOB_CHAIN\", \"ID\" )" );
+
+
+    add_column( _spooler->_orders_tablename, "INITIAL_STATE" , "add \"INITIAL_STATE\" varchar(100)" );
+    add_column( _spooler->_orders_tablename, "RUN_TIME"      , "add \"RUN_TIME\"      clob" );
+    add_column( _spooler->_orders_tablename, "ORDER_XML"     , "add \"ORDER_XML\"     clob" );
+    add_column( _spooler->_job_history_tablename, "EXIT_CODE", "add \"EXIT_CODE\"     integer" );
+
+    create_table_when_needed( _spooler->_order_history_tablename, S() <<
+                            "\"HISTORY_ID\"  integer not null,"             // Primärschlüssel
+                            "\"JOB_CHAIN\"   varchar(100) not null,"        // Primärschlüssel
+                            "\"ORDER_ID\"    varchar(" << const_order_id_length_max << ") not null,"
+                            "\"SPOOLER_ID\"  varchar(100),"
+                            "\"TITLE\"       varchar(200),"
+                            "\"STATE\"       varchar(100) not null,"
+                            "\"STATE_TEXT\"  varchar(100),"
+                            "\"START_TIME\"  datetime not null,"
+                            "\"END_TIME\"    datetime not null,"
+                            "\"LOG\"         blob," 
+                            "primary key( \"HISTORY_ID\" )" );
+
+    create_table_when_needed( _spooler->_tasks_tablename, 
+                            "\"TASK_ID\"        integer not null,"          // Primärschlüssel
+                            "\"SPOOLER_ID\"     varchar(100),"
+                            "\"JOB_NAME\"       varchar(100) not null,"
+                            "\"ENQUEUE_TIME\"   datetime,"
+                            "\"START_AT_TIME\"  datetime,"
+                            "\"PARAMETERS\"     clob,"
+                            "\"TASK_XML\"       clob,"
+                            "primary key( \"TASK_ID\" )" );
+
+    add_column( _spooler->_tasks_tablename, "TASK_XML", " add \"TASK_XML\" clob" );
+
+
+    handle_order_id_columns();
+}
+
+//-------------------------------------------------------------Spooler_db::create_table_when_needed
+
+void Spooler_db::create_table_when_needed( const string& tablename, const string& fields )
+{
+    if( _db_name == "" )  z::throw_xc( "SCHEDULER-361", __FUNCTION__ );
+
+    try
+    {
+        Transaction ta ( this );        // Select und Create table nicht in derselben Transaktion. Für Access und PostgresQL
+
+        Any_file select = ta.open_result_set( "select count(*)  from " + tablename + "  where 1=0" );
+        select.get_record();
+        select.close();
+        // ok
+    }
+    catch( exception& x )
+    {
+        _log->warn( x.what() );
+        _log->info( message_string( "SCHEDULER-909", tablename ) );
+
+        try
+        {
+            Transaction ta ( this );
+                execute( "CREATE TABLE " + tablename + " (" + fields + ") " );
+            ta.commit(); 
+        }
+        catch( exception& x )
+        {
+            z::throw_xc( "SCHEDULER-363", tablename, x );
+        }
+    }
+}
+
 //---------------------------------------------------------------------------Spooler_db::add_column
 
 void Spooler_db::add_column( const string& table_name, const string& column_name, const string add_clause )
@@ -343,7 +442,7 @@ void Spooler_db::add_column( const string& table_name, const string& column_name
     try
     {
         Transaction ta ( this );
-        Any_file select ( "-in " + _db_name + " -max-length=1K  SELECT \"" + column_name + "\" from " + table_name + " where 1=0" );
+        Any_file select = ta.open_file( "-in " + db_name() + " -max-length=1K", "select `" + column_name + "` from " + table_name + " where 1=0" );
     }
     catch( exception& x )
     {
@@ -541,7 +640,7 @@ int Spooler_db::column_width( const string& table_name, const string& column_nam
 
     if( _spooler->_db_name == "" )  z::throw_xc( "SCHEDULER-361", __FUNCTION__ );
 
-    Any_file f ( S() << "-in " << _spooler->_db_name << " select `" << column_name << "` from " << table_name << " where 1=0" );
+    Any_file f = Transaction(this,_transaction).open_result_set( S() << "select `" << column_name << "` from " << table_name << " where 1=0" );
     int field_size= +f.spec()._field_type_ptr->field_descr_ptr( 0 )->type_ptr()->field_size();
     result = max( 0, field_size - 1 );   // Eins weniger fürs 0-Byte
 
@@ -589,40 +688,6 @@ void Spooler_db::open_history_table()
             _history_table.open( "-in -out -key=id sql -table=" + _spooler->_job_history_tablename + 
                                //" -sql-fields=(id,spooler_id,job_name,start_time,cause,parameters) | " +       extra-Felder nicht vergessen!
                                  " | " + _db_name + " -ignore=(parameters,log) -max-length=" + as_string(blob_field_size) );
-        }
-    }
-}
-
-//-------------------------------------------------------------Spooler_db::create_table_when_needed
-
-void Spooler_db::create_table_when_needed( const string& tablename, const string& fields )
-{
-    if( _db_name == "" )  z::throw_xc( "SCHEDULER-361", __FUNCTION__ );
-
-    try
-    {
-        Transaction ta ( this );        // Select und Create table nicht in derselben Transaktion. Für Access und PostgresQL
-
-        Any_file select;
-        select.open( "-in " + _db_name + " SELECT count(*) from " + tablename + " where 1=0" );
-        select.get_record();
-        select.close();
-        // ok
-    }
-    catch( exception& x )
-    {
-        _log->warn( x.what() );
-        _log->info( message_string( "SCHEDULER-909", tablename ) );
-
-        try
-        {
-            Transaction ta ( this );
-                execute( "CREATE TABLE " + tablename + " (" + fields + ") " );
-            ta.commit(); 
-        }
-        catch( exception& x )
-        {
-            z::throw_xc( "SCHEDULER-363", tablename, x );
         }
     }
 }
@@ -830,8 +895,7 @@ int Spooler_db::get_id_( const string& variable_name, Transaction* outer_transac
 
         execute( "UPDATE " + _spooler->_variables_tablename + " set \"WERT\" = \"WERT\"+1 where \"NAME\"=" + sql::quoted( variable_name ) );
 
-        Any_file sel;
-        sel.open( "-in " + _db_name + "SELECT \"WERT\" from " + _spooler->_variables_tablename + " where \"NAME\"=" + sql::quoted( variable_name ) );
+        Any_file sel = ta.open_result_set( "select \"WERT\"  from " + _spooler->_variables_tablename + "  where \"NAME\"=" + sql::quoted( variable_name ) );
         if( sel.eof() )
         {
             id = 1;
@@ -862,14 +926,11 @@ int Spooler_db::get_id_( const string& variable_name, Transaction* outer_transac
     return id;
 }
 
-//--------------------------------------------------------------------Spooler_db::get_variable_text
+//-------------------------------------------------------------------Transaction::get_variable_text
 
-string Spooler_db::get_variable_text( Transaction* ta, const string& name, bool* record_exists )
+string Transaction::get_variable_text( const string& name, bool* record_exists )
 {
-    assert( ta );
-    if( _db_name == "" )  z::throw_xc( "SCHEDULER-361", __FUNCTION__ );
-
-    Any_file select ( "-in " + _db_name + "SELECT \"TEXTWERT\" from " + _spooler->_variables_tablename + " where \"NAME\"=" + sql::quoted( name ) );
+    Any_file select = open_result_set( "select \"TEXTWERT\"  from " + _spooler->_variables_tablename + "  where \"NAME\"=" + sql::quoted( name ) );
 
     if( select.eof() )
     {
@@ -885,23 +946,20 @@ string Spooler_db::get_variable_text( Transaction* ta, const string& name, bool*
 
 //-------------------------------------------------------------------------Spooler_db::set_variable
 
-void Spooler_db::set_variable( Transaction* ta, const string& name, const string& value )
+void Transaction::set_variable( const string& name, const string& value )
 {
-    assert( ta );
-
-    if( !try_update_variable( ta, name, value ) )
+    if( !try_update_variable( name, value ) )
     {
-        insert_variable( ta, name, value );
+        insert_variable( name, value );
     }
 }
 
-//----------------------------------------------------------------------Spooler_db::insert_variable
+//---------------------------------------------------------------------Transaction::insert_variable
 
-void Spooler_db::insert_variable( Transaction* ta, const string& name, const string& value )
+void Transaction::insert_variable( const string& name, const string& value )
 {
-    assert( ta );
-
-    sql::Insert_stmt insert ( &_spooler->_db->_db_descr, _spooler->_variables_tablename );
+    assert( _db );
+    sql::Insert_stmt insert ( &_db->_db_descr, _spooler->_variables_tablename );
     
     insert[ "name" ] = name;
     insert[ "textwert" ] = value;
@@ -909,13 +967,11 @@ void Spooler_db::insert_variable( Transaction* ta, const string& name, const str
     execute( insert );
 }
 
-//-------------------------------------------------------------------------Spooler_db::set_variable
+//-------------------------------------------------------------------------Transaction::set_variable
 /* Nicht getestet
-void Spooler_db::update_variable( Transaction* ta, const string& name, const string& value )
+void Transaction::update_variable( const string& name, const string& value )
 {
-    assert( ta );
-
-    sql::Update_stmt update ( &_spooler->_db->_db_descr, _spooler->_variables_tablename );
+    sql::Update_stmt update ( &_db->_db_descr, _spooler->_variables_tablename );
     
     update.and_where_condition( "name", name );
     update[ "wert"     ] = value;
@@ -923,66 +979,35 @@ void Spooler_db::update_variable( Transaction* ta, const string& name, const str
     execute_single( update );
 }
 */
-//-------------------------------------------------------------------------Spooler_db::set_variable
+//-----------------------------------------------------------------Transaction::try_update_variable
 
-bool Spooler_db::try_update_variable( Transaction* ta, const string& name, const string& value )
+bool Transaction::try_update_variable( const string& name, const string& value )
 {
-    assert( ta );
+    assert( _db );
 
-    sql::Update_stmt update ( &_spooler->_db->_db_descr, _spooler->_variables_tablename );
+    sql::Update_stmt update ( &_db->_db_descr, _spooler->_variables_tablename );
     
     update.and_where_condition( "name", name );
     update[ "textwert" ] = value;
 
     execute( update );
 
-    return _db.record_count() == 1;
+    return record_count() == 1;
 }
 
-//----------------------------------------------------------------------Spooler_db::open_result_set
+//-----------------------------------------------------------------------------Transaction::execute
 
-Any_file Spooler_db::open_result_set( const string& sql )
-{
-    assert( _transaction );
+void Transaction::execute( const string& stmt )
+{ 
+    if( stmt != "ROLLBACK" )  set_transaction_used();
 
-    _transaction->_transaction_used = true;
-
-    Any_file result;
-
-    try
-    {
-        result.open( "-in " + db_name() + sql );
-
-        if( _transaction->_log_sql  &&  _log->log_level() >= log_debug3 )  
-        {
-            S line;
-            line << sql;
-            if( _db.record_count() >= 0 )  line << "  ==> " << _db.record_count() << " records";
-            _log->debug3( line );
-        }
-    }
-    catch( exception& x )
-    {
-        if( _transaction->_log_sql )  // Vielleicht für alle Anweisungen, aber dann haben wir einen Fehler im Protokoll, das ist nicht 100%ig kompatibel
-        {
-            _log->warn( sql );
-            _log->error( x.what() );
-        }
-
-        throw;
-    }
-
-    return result;
+    _db->execute( stmt );
 }
 
 //------------------------------------------------------------------------------Spooler_db::execute
 
 void Spooler_db::execute( const string& stmt )
 { 
-    assert( _transaction );
-
-    if( stmt != "ROLLBACK" )  _transaction->_transaction_used = true;
-
     THREAD_LOCK( _lock )
     {
         Z_LOGI2( "scheduler", "Spooler_db::execute  " << stmt << '\n' );
@@ -991,41 +1016,41 @@ void Spooler_db::execute( const string& stmt )
         {
             _db.put( stmt ); 
 
-            if( _transaction->_log_sql  &&  _log->log_level() >= log_debug3  &&  ( _transaction->_transaction_used || stmt != "ROLLBACK" ) )  
+            if( _log->log_level() >= log_debug9  &&  ( _transaction->_transaction_used || stmt != "ROLLBACK" ) )  
             {
                 S line;
                 line << stmt;
                 if( _db.record_count() >= 0 )  line << "  ==> " << _db.record_count() << " records";
-                _log->debug3( line );
+                _log->debug9( line );
             }
         }
         catch( exception& x )
         {
-            if( _transaction->_log_sql )  // Vielleicht für alle Anweisungen, aber dann haben wir einen Fehler im Protokoll, das ist nicht 100%ig kompatibel
-            {
-                _log->warn( stmt );
-                _log->error( x.what() );
-            }
+            // Besser Fehler melden (mit Andreas klären)
+            //_log->warn( stmt );
+            //_log->error( x.what() );
+            _log->debug( stmt );
+            _log->debug( x.what() );
 
             throw;
         }
     }
 }
 
-//-----------------------------------------------------------------------Spooler_db::execute_single
+//----------------------------------------------------------------------Transaction::execute_single
 
-void Spooler_db::execute_single( const string& stmt )
+void Transaction::execute_single( const string& stmt )
 { 
     execute( stmt );
-    if( _db.record_count() != 1 )  z::throw_xc( "SCHEDULER-355", _db.record_count(), stmt );
+    if( record_count() != 1 )  z::throw_xc( "SCHEDULER-355", record_count(), stmt );
 }
 
-//-------------------------------------------------------------------Spooler_db::try_execute_single
+//------------------------------------------------------------------Transaction::try_execute_single
 
-bool Spooler_db::try_execute_single( const string& stmt )
+bool Transaction::try_execute_single( const string& stmt )
 { 
     execute( stmt );
-    return _db.record_count() == 1;
+    return record_count() == 1;
 }
 
 //-------------------------------------------------------------------------------Spooler_db::commit
@@ -1185,6 +1210,8 @@ string Spooler_db::read_orders_clob( const string& job_chain_name, const string&
 {
     if( _db_name == "" )  z::throw_xc( "SCHEDULER-361", __FUNCTION__ );
 
+    transaction()->set_transaction_used();
+
     return file_as_string( _db_name + " -table=" + _spooler->_orders_tablename + " -clob=" + column_name +
         " where `spooler_id`=" + sql::quoted( _spooler->id_for_db() ) + 
           " and `job_chain`="  + sql::quoted( job_chain_name ) + 
@@ -1205,10 +1232,6 @@ void Spooler_db::update_orders_clob( Order* order, const string& column_name, co
 
 void Spooler_db::update_orders_clob( const string& job_chain_name, const string& order_id, const string& column_name, const string& value )
 {
-    assert( _transaction );
-
-    _transaction->_transaction_used = true;
-
     if( _db_name == "" )  z::throw_xc( "SCHEDULER-361", __FUNCTION__ );
 
     if( value == "" )
@@ -1223,7 +1246,7 @@ void Spooler_db::update_orders_clob( const string& job_chain_name, const string&
     }
     else
     {
-        Any_file clob ( "-out " + _db_name + " -table=" + _spooler->_orders_tablename + " -clob=" + column_name + 
+        Any_file clob = transaction()->open_file( "-out " + _db_name,  "-table=" + _spooler->_orders_tablename + " -clob=" + column_name + 
             " where `spooler_id`=" + sql::quoted( _spooler->id_for_db() ) +
               " and `job_chain`="  + sql::quoted( job_chain_name ) + 
               " and `id`="         + sql::quoted( order_id ) );
@@ -1236,10 +1259,6 @@ void Spooler_db::update_orders_clob( const string& job_chain_name, const string&
 
 void Spooler_db::update_clob( const string& table_name, const string& column_name, const string& key_name, int key_value, const string& value )
 {
-    assert( _transaction );
-
-    _transaction->_transaction_used = true;
-
     if( value == "" )
     {
         sql::Update_stmt update ( &_db_descr );
@@ -1250,7 +1269,7 @@ void Spooler_db::update_clob( const string& table_name, const string& column_nam
     }
     else
     {
-        Any_file clob ( "-out " + _db_name + " -table=" + table_name + " -clob=" + column_name + " where `" + key_name + "`=" + as_string( key_value ) );
+        Any_file clob = transaction()->open_file( "-out " + _db_name, "-table=" + table_name + " -clob=" + column_name + " where `" + key_name + "`=" + as_string( key_value ) );
         clob.put( value );
         clob.close();
     }
@@ -1260,10 +1279,6 @@ void Spooler_db::update_clob( const string& table_name, const string& column_nam
 
 void Spooler_db::update_clob( const string& table_name, const string& column_name, const string& key_name, const string& key_value, const string& value )
 {
-    assert( _transaction );
-
-    _transaction->_transaction_used = true;
-
     if( _db_name == "" )  z::throw_xc( "SCHEDULER-361", __FUNCTION__ );
 
     if( value == "" )
@@ -1276,7 +1291,7 @@ void Spooler_db::update_clob( const string& table_name, const string& column_nam
     }
     else
     {
-        Any_file clob ( "-out " + _db_name + " -table=" + table_name + " -clob=" + column_name + " where `" + key_name + "`=" + sql::quoted( key_value ) );
+        Any_file clob = transaction()->open_file( "-out " + _db_name, "-table=" + table_name + " -clob=" + column_name + " where `" + key_name + "`=" + sql::quoted( key_value ) );
         clob.put( value );
         clob.close();
     }
@@ -1287,6 +1302,8 @@ void Spooler_db::update_clob( const string& table_name, const string& column_nam
 string Spooler_db::read_clob( const string& table_name, const string& column_name, const string& key_name, const string& key_value )
 {
     if( _db_name == "" )  z::throw_xc( "SCHEDULER-361", __FUNCTION__ );
+
+    transaction()->set_transaction_used();
 
     return file_as_string( _db_name + " -table=" + table_name + " -clob=" + column_name + "  where `" + key_name + "`=" + sql::quoted( key_value ) );
 }
@@ -1381,6 +1398,7 @@ void Spooler_db::write_order_history( Order* order, Transaction* outer_transacti
             {
                 try 
                 {
+                    ta.set_transaction_used();
                     string blob_filename = db_name() + " -table=" + _spooler->_order_history_tablename + " -blob=log where \"HISTORY_ID\"=" + as_string( history_id );
                     if( _spooler->_order_history_with_log == arc_gzip )  blob_filename = GZIP + blob_filename;
                     copy_file( "file -b " + log_filename, blob_filename );
@@ -1510,8 +1528,8 @@ xml::Element_ptr Spooler_db::read_task( const xml::Document_ptr& doc, int task_i
     {
         Transaction ta ( this );
         {
-            Any_file sel ( "-in " + _spooler->_db->db_name() + 
-                            "select \"SPOOLER_ID\", \"JOB_NAME\", \"START_TIME\", \"END_TIME\", \"CAUSE\", \"STEPS\", \"ERROR\", \"ERROR_CODE\", \"ERROR_TEXT\" " +
+            Any_file sel = ta.open_result_set(
+                            "select \"SPOOLER_ID\", \"JOB_NAME\", \"START_TIME\", \"END_TIME\", \"CAUSE\", \"STEPS\", \"ERROR\", \"ERROR_CODE\", \"ERROR_TEXT\" " 
                             "  from " + _spooler->_job_history_tablename  +
                             "  where \"ID\"=" + as_string(task_id) );
             if( sel.eof() )  z::throw_xc( "SCHEDULER-207", task_id );
@@ -1557,7 +1575,9 @@ xml::Element_ptr Spooler_db::read_task( const xml::Document_ptr& doc, int task_i
             {
                 try
                 {
-                    string log = file_as_string( GZIP_AUTO + _spooler->_db->db_name() + " -table=" + _spooler->_job_history_tablename + " -blob=\"LOG\"" 
+                    ta.set_transaction_used();
+
+                    string log = file_as_string( GZIP_AUTO + db_name() + " -table=" + _spooler->_job_history_tablename + " -blob=\"LOG\"" 
                                                 " where \"ID\"=" + as_string(task_id) );
                     dom_append_text_element( task_element, "log", log );
                 }
@@ -1778,8 +1798,8 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
                         
                         if( _spooler->_db->_db_name == "" )  z::throw_xc( "SCHEDULER-361", __FUNCTION__ );
 
-                        sel.open( prefix + _spooler->_db->_db_name + 
-                                " select " + 
+                        sel = ta.open_file( prefix + _spooler->_db->_db_name, 
+                                "select " + 
                                 ( next == 0? "" : "%limit(" + as_string(abs(next)) + ") " ) +
                                 " \"ID\", \"SPOOLER_ID\", \"JOB_NAME\", \"START_TIME\", \"END_TIME\", \"CAUSE\", \"STEPS\", \"ERROR\", \"ERROR_CODE\", \"ERROR_TEXT\" " +
                                 join( "", vector_map( quote_and_prepend_comma, _extra_names ) ) +
@@ -1866,6 +1886,8 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
                         {
                             try
                             {
+                                ta.set_transaction_used();
+
                                 string log = file_as_string( GZIP_AUTO + _spooler->_db->_db_name + "-table=" + _spooler->_job_history_tablename + " -blob=log where \"ID\"=" + as_string(id), "" );
                                 if( !log.empty() ) dom_append_text_element( history_entry, "log", log );
                             }
@@ -1999,8 +2021,7 @@ void Task_history::write( bool start )
 
                         if( !parameters.empty() )
                         {
-                            Any_file blob;
-                            blob.open( "-out " + _spooler->_db->db_name() + " -table=" + _spooler->_job_history_tablename + " -clob=parameters where \"ID\"=" + as_string( _task->_id ) );
+                            Any_file blob = ta.open_file( "-out " + _spooler->_db->db_name(), " -table=" + _spooler->_job_history_tablename + " -clob=parameters where \"ID\"=" + as_string( _task->_id ) );
                             blob.put( parameters );
                             blob.close();
                         }
@@ -2047,6 +2068,8 @@ void Task_history::write( bool start )
                         if( _job_history->_with_log  &&  !log_filename.empty()  &&  log_filename[0] != '*' )
                         {
                             try {
+                                ta.set_transaction_used();
+
                                 string blob_filename = _spooler->_db->db_name() + " -table=" + _spooler->_job_history_tablename + " -blob='log' where \"ID\"=" + as_string( _task->_id );
                                 if( _job_history->_with_log == arc_gzip )  blob_filename = GZIP + blob_filename;
                                 copy_file( "file -b " + log_filename, blob_filename );

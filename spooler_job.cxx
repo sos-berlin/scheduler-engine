@@ -764,7 +764,7 @@ void Job::load_tasks_from_db()
 
     Transaction ta ( _spooler->_db );
 
-    Any_file sel ( "-in " + _spooler->_db->db_name() + 
+    Any_file sel = ta.open_result_set( 
                     "select \"TASK_ID\", \"ENQUEUE_TIME\", \"START_AT_TIME\"" //, length(\"PARAMETERS\") parlen " +
                     "  from " + _spooler->_tasks_tablename +
                     "  where \"SPOOLER_ID\"=" + quoted_string( _spooler->id_for_db(), '\'', '\'' ) +
@@ -782,10 +782,12 @@ void Job::load_tasks_from_db()
 
             start_at.set_datetime( record.as_string( "start_at_time" ) );
 
+            ta.set_transaction_used();
             string parameters_xml = file_as_string( _spooler->_db->db_name() + " -table=" + _spooler->_tasks_tablename + " -clob='parameters'"
                                                                                 " where \"TASK_ID\"=" + as_string( task_id ) );
             if( !parameters_xml.empty() )  parameters->set_xml( parameters_xml );
 
+            ta.set_transaction_used();
             string xml = file_as_string( _spooler->_db->db_name() + " -table=" + _spooler->_tasks_tablename + " -clob='task_xml'"
                                                                     " where \"TASK_ID\"=" + as_string( task_id ) );
             if( !xml.empty() )  set_dom( xml::Document_ptr( xml ).documentElement(), Time::now() );  // 2006-10-28 Das sieht ja merkwürdig aus. Sollte es heißen task->set_dom()?
@@ -847,8 +849,8 @@ void Job::Task_queue::enqueue_task( const ptr<Task>& task )
                 if( task->has_parameters() )
                 {
                     Any_file blob;
-                    blob.open( "-out " + _spooler->_db->db_name() + " -table=" + _spooler->_tasks_tablename + " -clob='parameters'"
-                            " where \"TASK_ID\"=" + as_string( task->_id ) );
+                    blob = ta.open_file( "-out " + _spooler->_db->db_name(), " -table=" + _spooler->_tasks_tablename + " -clob='parameters'"
+                            "  where \"TASK_ID\"=" + as_string( task->_id ) );
                     blob.put( xml_as_string( task->parameters_as_dom() ) );
                     blob.close();
                 }

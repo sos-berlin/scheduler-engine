@@ -327,6 +327,7 @@ struct Spooler : Object,
     bool                        run_continue                ();
     void                        start_scheduler_member      ();
     void                        check_scheduler_member      ();
+    string                      session_id                  ()                                  { return _session_id; }
   //void                        start_threads               ();
     Spooler_thread*             new_thread                  ( bool free_threading = true );
   //void                        close_threads               ();
@@ -607,7 +608,9 @@ struct Spooler : Object,
     bool                       _with_heart_beat;
   //string                     _scheduler_member_id;
     ptr<Scheduler_member>      _scheduler_member;
-    bool                       _scheduler_member_inactivated;
+    bool                       _scheduler_is_up;
+    bool                       _proper_termination;
+    string                     _session_id;
 };
 
 //-------------------------------------------------------------------------------------------------

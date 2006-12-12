@@ -2191,7 +2191,7 @@ void Spooler::create_window()
 {
 #   if defined Z_WINDOWS
 
-        string title = S() << name() << " " << _config_filename;
+        string title = S() << name() << "  " << _config_filename << "  pid=" << getpid();
         SetConsoleTitle( title.c_str() );
 /*
         const char* window_class_name = "Scheduler";
@@ -2240,7 +2240,15 @@ void Spooler::start()
     _base_log.set_directory( _log_directory );
     _base_log.open_new();
     
-    _log.info( message_string( "SCHEDULER-900", _version, _config_filename, getpid() ) );
+    {
+        S s;
+        s << "scheduler";
+        if( _spooler_id != "" )  s << _spooler_id;
+        s << "." << _hostname << "." << _tcp_port << "." << getpid() << "." << string_printf( "%-.6lf", double_from_gmtime() );
+        _session_id = s;
+    }
+
+    _log.info( message_string( "SCHEDULER-900", _version, _config_filename, getpid(), _session_id ) );
     _spooler_start_time = Time::now();
 
     _web_services.load();   // Nicht in Spooler::load(), denn es öffnet schon -log-dir-Dateien (das ist nicht gut für -send-cmd=)
@@ -2300,6 +2308,8 @@ void Spooler::start()
         if( _state_cmd == sc_terminate )  return;
     }
 
+    _scheduler_is_up = true;
+
 
     // Thread _communication nach Java starten (auch implizit durch _db). Java muss laufen, wenn der Thread startet! (Damit attach_thread() greift)
     //if( !_manual )  
@@ -2354,6 +2364,8 @@ void Spooler::start_scheduler_member()
   //_scheduler_member->set_member_id( _scheduler_member_id );
     _scheduler_member->set_backup( _is_backup_member );
     _scheduler_member->start();     // Wartet, bis entschieden ist, dass wir aktiv werden
+
+    check_scheduler_member();
 }
 
 //--------------------------------------------------------------------Spooler::run_scheduler_script
@@ -2429,8 +2441,15 @@ void Spooler::stop( const exception* )
 
     if( _scheduler_member )
     {
-        if( _scheduler_member->is_active() )  _scheduler_member->shutdown();
-                                        else  _scheduler_member->close();
+        if( _scheduler_member->is_active() )  
+        {
+            if( _shutdown_cmd == sc_terminate_and_restart  || _shutdown_cmd == sc_let_run_terminate_and_restart )  
+                _scheduler_member->set_command_for_all_inactive_schedulers_but_me( (Transaction*)NULL, Scheduler_member::cmd_terminate_and_restart );
+
+            _scheduler_member->shutdown();
+        }
+
+        _scheduler_member->close();
         _scheduler_member = NULL;
     }
 
@@ -2980,7 +2999,10 @@ bool Spooler::run_continue()
 void Spooler::check_scheduler_member()
 {
     _scheduler_member->async_check_exception( "Error in Scheduler member" );
-    
+
+    _scheduler_is_up     = _scheduler_member->is_scheduler_up();
+    _proper_termination = _scheduler_member->is_active();
+
     if( !_scheduler_member->is_active() )
     {
         kill_all_processes();
@@ -2990,7 +3012,6 @@ void Spooler::check_scheduler_member()
         _scheduler_member->show_active_scheduler();
         _scheduler_member->close();     // Scheduler-Mitglieds-Eintrag entfernen
         _scheduler_member = NULL;       // aber Eintrag für verteilten Scheduler lassen, Scheduler ist nicht herunterfahren (wird ja vom anderen aktiven Scheuler fortgesetzt)
-        _scheduler_member_inactivated = true;
 
         cmd_terminate();
     }
@@ -3399,7 +3420,10 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line )
     }// while( _shutdown_cmd == sc_reload  ||  _shutdown_cmd == sc_load_config );
 
 
-    _log.info( message_string( _scheduler_member_inactivated? "SCHEDULER-998" : "SCHEDULER-999" ) );  // "Scheduler ordentlich beendet"
+    _log.info( message_string( _proper_termination? "SCHEDULER-999"         // "Scheduler ordentlich beendet"
+                                                  : "SCHEDULER-997" ) );    // "Scheduler exits"
+                               //_scheduler_is_up           ? "SCHEDULER-998"       // "This Scheduler exits. An inactive Scheduler can become active and resume operation"
+                               //                           : "SCHEDULER-997" ) );  // "Scheduler exits"
     //_log.info( "Scheduler ordentlich beendet." );
     _log.close();
 

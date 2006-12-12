@@ -11,6 +11,17 @@ namespace spooler {
 
 struct Scheduler_member : Async_operation, Scheduler_object
 {
+    enum Command
+    {
+        cmd_none,
+        cmd_terminate,
+        cmd_terminate_and_restart
+    };
+
+    static string               string_from_command         ( Command );
+    static Command              command_from_string         ( const string& );
+
+
                                 Scheduler_member            ( Spooler* );
                                ~Scheduler_member            ();
 
@@ -36,14 +47,17 @@ struct Scheduler_member : Async_operation, Scheduler_object
     bool                     is_activity_stolen             ()                                      { return _activity_stolen; }
     bool                     is_scheduler_up                ();
     bool                     is_backup                      ()                                      { return _is_backup; }
+    Command                     heart_beat_command          ()                                      { return _heart_beat_command; }
     string                      active_member_id            ();
     time_t                      last_heart_beat             ()                                      { return _last_heart_beat; }
 
     bool                        start                       ();
-    bool                        wait_until_not_terminated   ();
+    bool                        wait_until_started_up       ();
     bool                        wait_until_active           ();
     bool                        do_heart_beat               ( Transaction*, bool db_record_marked_active );
     void                        show_active_scheduler       ( Transaction* = NULL );
+    void                        set_command_for_all_inactive_schedulers_but_me( Transaction*, Command );
+    void                        set_command_for_all_schedulers_but_me( Transaction*, Command );
 
     string                      scheduler_up_variable_name  ();
     Spooler_db*                 db                          ();
@@ -60,6 +74,8 @@ struct Scheduler_member : Async_operation, Scheduler_object
     void                        insert_member_record        ( Transaction* );
     bool                        check_database_consistency  ( Transaction* ta );
     bool                        try_to_heartbeat_member_record( Transaction*, bool db_record_marked_active );
+    void                        set_command_for_all_schedulers_but_me( Transaction*, const string& where, Command );
+  //void                        set_command_for_members     ( Transaction*, const string& where, Command );
     void                        make_scheduler_member_id    ();
     void                        db_execute                  ( const string& stmt );
 
@@ -74,6 +90,8 @@ struct Scheduler_member : Async_operation, Scheduler_object
     time_t                     _last_heart_beat;
     time_t                     _next_heart_beat;
     bool                       _activity_stolen;
+    Command                    _heart_beat_command;
+    string                     _heart_beat_command_string;
     Async_operation*           _current_operation;
     ptr<Active_scheduler_heart_beat> _active_scheduler_heart_beat;
     ptr<Inactive_scheduler_watchdog> _inactive_scheduler_watchdog;

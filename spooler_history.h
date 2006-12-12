@@ -71,24 +71,17 @@ struct Spooler_db : Object, Scheduler_object
     void                        update_clob             ( const string& table_name, const string& column_name, const string& key_name, const string& key_value, const string& value );
     string                      read_clob               ( const string& table_name, const string& column_name, const string& key_name, const string& key_value );
 
-    string                      get_variable_text       ( Transaction*, const string& name, bool* record_exists = NULL );
-    void                        set_variable            ( Transaction*, const string& name, const string& value );
-    void                        insert_variable         ( Transaction*, const string& name, const string& value );
-    void                        update_variable         ( Transaction*, const string& name, const string& value );
-    bool                        try_update_variable     ( Transaction*, const string& name, const string& value );
-
     void                        write_order_history     ( Order*, Transaction* = NULL );
     void                        finish_order            ( Order*, Transaction* = NULL );
 
-    Any_file                    open_result_set         ( const string& sql );
+    Transaction*                transaction             ();
     void                        execute                 ( const string& stmt );
-    void                        execute_single          ( const string& stmt );
-    bool                        try_execute_single      ( const string& stmt );
     int                         record_count            ()                                          { return _db.record_count(); }
     Dbms_kind                   dbms_kind               ()                                          { return _db.dbms_kind(); }
     void                        commit                  ();
     void                        rollback                ();
     void                        try_reopen_after_error  ( const exception&, bool wait_endless = false );
+    void                        create_tables_when_needed();
     void                        create_table_when_needed( const string& tablename, const string& fields );
 
     Fill_zero                  _zero_;
@@ -141,6 +134,21 @@ struct Transaction
     void                        commit                  ();
     void                        rollback                ();
   //void                        try_reopen_after_error  ();
+    void                        set_transaction_used    ()                                          { _transaction_used = true; }
+
+    Any_file                    open_result_set         ( const string& sql );
+    Any_file                    open_file               ( const string& db_prefix, const string& sql );
+
+    void                        execute                 ( const string& sql );
+    void                        execute_single          ( const string& sql );
+    bool                        try_execute_single      ( const string& sql );
+    string                      get_variable_text       ( const string& name, bool* record_exists = NULL );
+    void                        set_variable            ( const string& name, const string& value );
+    void                        insert_variable         ( const string& name, const string& value );
+    void                        update_variable         ( const string& name, const string& value );
+    bool                        try_update_variable     ( const string& name, const string& value );
+    int                         record_count            ()                                          { return _db->record_count(); }
+
 
     Fill_zero                  _zero_;
     Spooler_db*                _db;
@@ -148,6 +156,57 @@ struct Transaction
     bool                       _transaction_used;       // Noch nicht zuverlässt, z.B. Any_file(select) und Any_file(clob) werden nicht erkannt
     bool                       _log_sql;
     Mutex_guard                _guard;
+    Spooler*                   _spooler;
+    Prefix_log*                _log;
+};
+
+//-----------------------------------------------------------------------------------Database_retry
+// for( Database_retry db_retry ( _spooler->_db ); retry_db; retry_db++ )
+// try
+// {
+//      Transaction ta;
+//      ...
+//      ta.commit();
+// } 
+// catch( exception& x )
+// {
+//      db_retry.reopen_after_error( x );
+// }
+
+struct Database_retry
+{
+                                Database_retry          ( Spooler_db* db )                        : _db(db), _enter_loop(1) {}
+
+                                operator bool           ()                                          { return enter_loop(); }
+    bool                        enter_loop              ()                                          { return _enter_loop > 0; }
+    void                        reopen_database_after_error( exception& x )                         { _db->try_reopen_after_error( x ); _enter_loop = 2; }
+    void                        operator ++             (int)                                       { _enter_loop--; }
+
+    Spooler_db*                _db;
+    int                        _enter_loop;
+};
+
+//--------------------------------------------------------------------------------Retry_transaction
+// for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ )
+// try
+// {
+//      ...
+//      ta.commit();
+// } 
+// catch( exception& x )
+// {
+//      ta.reopen_after_error( x );
+// }
+
+struct Retry_transaction : Transaction
+{
+                                Retry_transaction       ( Spooler_db* db, Transaction* outer = NULL ) : Transaction(db,outer), _database_retry( db ) {}
+
+    bool                        enter_loop              ()                                          { return _database_retry.enter_loop(); }
+    void                        reopen_database_after_error( exception& );
+    void                        operator ++             (int)                                       { _database_retry++; }
+
+    Database_retry             _database_retry;
 };
 
 //--------------------------------------------------------------------------------------Job_history

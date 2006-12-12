@@ -397,7 +397,7 @@ xml::Element_ptr Job_chain::dom_element( const xml::Document_ptr& document, cons
 
             try
             {
-                Any_file sel ( "-in " + _spooler->_db->db_name() + // "-max-length=32K  "
+                Any_file sel = _spooler->_db->transaction()->open_result_set( 
                                "select %limit(20) \"ORDER_ID\" as \"ID\", \"JOB_CHAIN\", \"START_TIME\", \"TITLE\", \"STATE\", \"STATE_TEXT\""
                                " from " + _spooler->_order_history_tablename +
                                " where \"JOB_CHAIN\"=" + sql::quoted( _name ) +
