@@ -2667,7 +2667,6 @@ void Spooler::run()
         _event.reset();
 
         execute_state_cmd();
-
         if( _shutdown_cmd )  if( !_single_thread  ||  !_single_thread->has_tasks()  ||  _shutdown_ignore_running_tasks )  break;
 
         bool something_done = run_continue();
@@ -2984,9 +2983,16 @@ void Spooler::check_scheduler_member()
     
     if( !_scheduler_member->is_active() )
     {
+        kill_all_processes();
+        
         _log.warn( message_string( "SCHEDULER-362" ) );
-        _log.warn( "abort_immediately" );
-        abort_immediately();
+
+        _scheduler_member->show_active_scheduler();
+        _scheduler_member->close();     // Scheduler-Mitglieds-Eintrag entfernen
+        _scheduler_member = NULL;       // aber Eintrag für verteilten Scheduler lassen, Scheduler ist nicht herunterfahren (wird ja vom anderen aktiven Scheuler fortgesetzt)
+        _scheduler_member_inactivated = true;
+
+        cmd_terminate();
     }
 }
 
@@ -3393,7 +3399,7 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line )
     }// while( _shutdown_cmd == sc_reload  ||  _shutdown_cmd == sc_load_config );
 
 
-    _log.info( message_string( "SCHEDULER-999" ) );  // "Scheduler ordentlich beendet"
+    _log.info( message_string( _scheduler_member_inactivated? "SCHEDULER-998" : "SCHEDULER-999" ) );  // "Scheduler ordentlich beendet"
     //_log.info( "Scheduler ordentlich beendet." );
     _log.close();
 

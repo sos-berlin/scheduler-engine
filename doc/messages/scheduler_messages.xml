@@ -3025,7 +3025,7 @@
 
         <message code="SCHEDULER-993">
             <text xml:lang="en">
-                <title>No heart beat since <p4/>s (<p3>time</p3>), although Scheduler member <p1>member_id</p1> announced it for <p2/></title>
+                <title>No heart beat since <p4/>s (<p3>time</p3>), although Scheduler member <p1>member_id</p1> announced one for <p2/></title>
                 <!--title>Scheduler member <p1>member_id</p1>'s heart does not beat since <p2/>, expected next_heart_beat at <p3/></title-->
             </text>
         </message>
@@ -3056,7 +3056,7 @@
 
         <message code="SCHEDULER-998">
             <text xml:lang="en">
-                <title>Active Scheduler is <p1>scheduler_member_id</p1>. Still standing by</title>
+                <title>This Scheduler exits. Some other active Scheduler can resume operation</title>
             </text>
         </message>
 
@@ -3083,7 +3083,7 @@
 
         <message code="SCHEDULER-802" weight="info">
             <text xml:lang="en">
-                <title>Active Scheduler is terminated properly, so this inactive Scheduler terminates too</title>
+                <title>Active Scheduler has terminated properly</title>
             </text>
         </message>
 
@@ -3110,6 +3110,13 @@
                 <title>No active Scheduler in database at this time</title>
             </text>
         </message>
+
+        <message code="SCHEDULER-806">
+            <text xml:lang="en">
+                <title>Active Scheduler is <p1>scheduler_member_id</p1>. Still standing by</title>
+            </text>
+        </message>
+
     </messages>
     
 </messages>

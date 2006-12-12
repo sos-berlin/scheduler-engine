@@ -33,6 +33,7 @@ struct Scheduler_member : Async_operation, Scheduler_object
     string                      member_id                   ()                                      { return _scheduler_member_id; }
 
     bool                     is_active                      ()                                      { return _is_active; }
+    bool                     is_activity_stolen             ()                                      { return _activity_stolen; }
     bool                     is_scheduler_up                ();
     bool                     is_backup                      ()                                      { return _is_backup; }
     string                      active_member_id            ();
@@ -42,8 +43,9 @@ struct Scheduler_member : Async_operation, Scheduler_object
     bool                        wait_until_not_terminated   ();
     bool                        wait_until_active           ();
     bool                        do_heart_beat               ( Transaction*, bool db_record_marked_active );
+    void                        show_active_scheduler       ( Transaction* = NULL );
 
-    string                      not_properly_terminated_variable_name();
+    string                      scheduler_up_variable_name  ();
     Spooler_db*                 db                          ();
     void                        check_member_id             ();
 
@@ -71,10 +73,12 @@ struct Scheduler_member : Async_operation, Scheduler_object
     bool                       _is_backup;
     time_t                     _last_heart_beat;
     time_t                     _next_heart_beat;
+    bool                       _activity_stolen;
     Async_operation*           _current_operation;
     ptr<Active_scheduler_heart_beat> _active_scheduler_heart_beat;
     ptr<Inactive_scheduler_watchdog> _inactive_scheduler_watchdog;
     ptr<Prefix_log>            _log;
+    bool                       _closed;
 };
 
 //-------------------------------------------------------------------------------------------------

@@ -607,6 +607,7 @@ struct Spooler : Object,
     bool                       _with_heart_beat;
   //string                     _scheduler_member_id;
     ptr<Scheduler_member>      _scheduler_member;
+    bool                       _scheduler_member_inactivated;
 };
 
 //-------------------------------------------------------------------------------------------------
