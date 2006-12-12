@@ -135,6 +135,7 @@ struct Transaction
     void                        rollback                ();
   //void                        try_reopen_after_error  ();
     void                        set_transaction_used    ()                                          { _transaction_used = true; }
+    Transaction*                outer_transaction       ()                                          { return _outer_transaction; }
 
     Any_file                    open_result_set         ( const string& sql );
     Any_file                    open_file               ( const string& db_prefix, const string& sql );
@@ -179,7 +180,8 @@ struct Database_retry
 
                                 operator bool           ()                                          { return enter_loop(); }
     bool                        enter_loop              ()                                          { return _enter_loop > 0; }
-    void                        reopen_database_after_error( exception& x )                         { _db->try_reopen_after_error( x ); _enter_loop = 2; }
+    void                        repeat_loop             ()                                          { _enter_loop = 2; }
+    void                        reopen_database_after_error( exception& x )                         { _db->try_reopen_after_error( x ); repeat_loop(); }
     void                        operator ++             (int)                                       { _enter_loop--; }
 
     Spooler_db*                _db;

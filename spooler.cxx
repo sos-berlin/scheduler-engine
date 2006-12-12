@@ -531,7 +531,7 @@ Spooler::Spooler()
 : 
     Scheduler_object( this, this, Scheduler_object::type_scheduler ),
     _zero_(this+1), 
-    _version(VER_PRODUCTVERSION_STR),
+    _version(""),
     _security(this),
     _communication(this), 
     _base_log(this),
@@ -2858,28 +2858,9 @@ void Spooler::run()
 
 void Spooler::wait()
 {
-    //if( _print_time_every_second )
-    {
-        // Zur Sommerzeit wartet wait() eine Stunde länger
-        Wait_handles wait_handles = _wait_handles;
-        wait( &wait_handles, latter_day, NULL, latter_day, NULL );
-        wait_handles.clear();
-    }
-    //else
-    //{
-    //    // Active_scheduler_heart_beat hat dasselbe Problem.
-    //    // Scheint so, dass wir wait_until() auf GMT umstellen müssen.
-    //    // D.h. die ganze Sommerzeitumstellung muss erneut geprüft werden.
-
-    //    double until = _connection_manager->async_next_gmtime();
-    //    while(1)
-    //    {
-    //        time_t rest = until - ::time(NULL);
-    //        if( rest <= 0 )  break;
-    //        sos_sleep( max( rest, time_t(1) ) );        // Befristen, damit Ctrl-C geprüft werden kann
-    //        if( ctrl_c_pressed )  break;
-    //    }
-    //}
+    Wait_handles wait_handles = _wait_handles;
+    wait( &wait_handles, latter_day, NULL, latter_day, NULL );
+    wait_handles.clear();
 }
 
 //------------------------------------------------------------------------------------Spooler::wait

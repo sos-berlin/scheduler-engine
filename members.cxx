@@ -16,17 +16,17 @@ namespace spooler {
 
 //const time_t                    accepted_clock_difference       = Z_NDEBUG_DEBUG(  5,  2 );     // Die Uhren sollten noch besser übereinstimmen! ntp verwenden!
 //const time_t                    warned_clock_difference         = Z_NDEBUG_DEBUG(  1,  1 ); 
-const time_t                    active_heart_beat_period                = Z_NDEBUG_DEBUG( 60, 20 );
+const time_t                    heart_beat_period                       = Z_NDEBUG_DEBUG( 60, 20 );
 const time_t                    max_heart_beat_processing_time          = Z_NDEBUG_DEBUG( 10,  3 );     // Zeit, die gebraucht wird, um den Herzschlag auszuführen
-const time_t                    active_heart_beat_minimum_check_period  = active_heart_beat_period / 2;
+const time_t                    active_heart_beat_minimum_check_period  = heart_beat_period / 2;
 const time_t                    trauerfrist                             = 2*3600;                       // Trauerzeit, nach der Mitgliedssätze gelöscht werden
 const time_t                    database_commit_visible_time            = 10;                           // Zeit, die die Datenbank braucht, um nach Commit Daten für anderen Client sichtbar zu machen.
 
-//----------------------------------------------------------------------Active_scheduler_heart_beat
+//---------------------------------------------------------------------------------------Heart_beat
 
-struct Active_scheduler_heart_beat : Async_operation, Scheduler_object
+struct Heart_beat : Async_operation, Scheduler_object
 {
-                                Active_scheduler_heart_beat ( Scheduler_member* );
+                                Heart_beat ( Scheduler_member* );
 
 
     // Async_operation
@@ -85,7 +85,7 @@ struct Inactive_scheduler_watchdog : Async_operation, Scheduler_object
 
 
     void                        try_to_become_active        ();
-    bool                        check_for_inactivity        ( Transaction* );
+    bool                        check_for_inactivity        ( Transaction& );
   //void                        check_clock_difference      ( time_t last_heart_beat, time_t now );
     bool                        mark_as_active              ();
     bool                        set_active                  ();
@@ -102,34 +102,34 @@ struct Inactive_scheduler_watchdog : Async_operation, Scheduler_object
     Prefix_log*                _log;
 };
 
-//-----------------------------------------Active_scheduler_heart_beat::Active_scheduler_heart_beat
+//----------------------------------------------------------------------------eart_beat::Heart_beat
 
-Active_scheduler_heart_beat::Active_scheduler_heart_beat( Scheduler_member* m ) 
+Heart_beat::Heart_beat( Scheduler_member* m ) 
 :
     _zero_(this+1),
-    Scheduler_object( m->_spooler, this, Scheduler_object::type_active_scheduler_heart_beat ),
+    Scheduler_object( m->_spooler, this, Scheduler_object::type_heart_beat ),
     _scheduler_member(m),
     _log(m->_log)
 {
 }
 
-//-------------------------------------------------------------------------------------------------
-
-bool Active_scheduler_heart_beat::async_finished_() const
+//----------------------------------------------------------------------Heart_beat::async_finished_
+    
+bool Heart_beat::async_finished_() const
 { 
     return false;
 }
 
-//---------------------------------------------------Active_scheduler_heart_beat::async_state_text_
-
-string Active_scheduler_heart_beat::async_state_text_() const
+//--------------------------------------------------------------------Heart_beat::async_state_text_
+    
+string Heart_beat::async_state_text_() const
 {
-    return "Active_scheduler_heart_beat";
+    return "Heart_beat";
 }
 
-//-----------------------------------------------------Active_scheduler_heart_beat::async_continue_
+//----------------------------------------------------------------------Heart_beat::async_continue_
 
-bool Active_scheduler_heart_beat::async_continue_( Continue_flags )
+bool Heart_beat::async_continue_( Continue_flags )
 {
     Z_LOGI2( "scheduler.distributed", __FUNCTION__ << "\n" );
 
@@ -141,8 +141,9 @@ bool Active_scheduler_heart_beat::async_continue_( Continue_flags )
             return true;
         }
 
-        
-        bool ok = _scheduler_member->do_heart_beat( NULL, true );
+        bool was_active = _scheduler_member->_is_active;
+       
+        bool ok = _scheduler_member->do_heart_beat( NULL, was_active );
         if( ok )
         {
             // Wir sind weiterhin aktives Mitglied
@@ -163,11 +164,11 @@ bool Active_scheduler_heart_beat::async_continue_( Continue_flags )
     return true;
 }
 
-//-----------------------------------------------------------Active_scheduler_heart_beat::set_alarm
+//----------------------------------------------------------------------------Heart_beat::set_alarm
 
-void Active_scheduler_heart_beat::set_alarm()
+void Heart_beat::set_alarm()
 {
-    set_async_next_gmtime( _scheduler_member->last_heart_beat() + active_heart_beat_period );
+    set_async_next_gmtime( _scheduler_member->last_heart_beat() + heart_beat_period );
 }
 
 //-----------------------------------------Inactive_scheduler_watchdog::Inactive_scheduler_watchdog
@@ -226,7 +227,7 @@ bool Inactive_scheduler_watchdog::async_continue_( Continue_flags )
 
         if( _scheduler_member->is_active() )
         {
-            // Wir sind aktives Mitglied geworden, Operation beenden und zu Active_scheduler_heart_beat wechseln!
+            // Wir sind aktives Mitglied geworden, Operation beenden und zu Heart_beat wechseln!
             _scheduler_member->async_wake();
         }
         else
@@ -261,7 +262,7 @@ void Inactive_scheduler_watchdog::set_alarm()
     {
         time_t delay = max_heart_beat_processing_time + 1;   // Erst in der folgenden Sekunde prüfen
 
-        _next_check_time = now + active_heart_beat_period + delay;
+        _next_check_time = now + heart_beat_period + delay;
 
         //if( _set_active_until  &&  _next_check_time > _set_active_until )
         //{
@@ -302,7 +303,7 @@ void Inactive_scheduler_watchdog::try_to_become_active()
         //    {
         //        Transaction ta ( db() );
 
-                none_is_active = check_for_inactivity( &ta );
+                none_is_active = check_for_inactivity( ta );
 
                 ta.commit();
             //}
@@ -335,7 +336,7 @@ void Inactive_scheduler_watchdog::try_to_become_active()
         if( _announced_to_become_active  &&  !_scheduler_member->_is_active )  //&&  !_set_active_until )
         {
             _announced_to_become_active = false;
-            _scheduler_member->show_active_scheduler();
+            _scheduler_member->show_active_scheduler( Transaction( db() ) );
         }
     }
     catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", x ) ); }
@@ -343,7 +344,7 @@ void Inactive_scheduler_watchdog::try_to_become_active()
 
 //-----------------------------------------------Inactive_scheduler_watchdog::check_for_inactivity
 
-bool Inactive_scheduler_watchdog::check_for_inactivity( Transaction* ta )
+bool Inactive_scheduler_watchdog::check_for_inactivity( Transaction& ta )
 {
     // Rollback, wenn Funktion false liefert!
 
@@ -365,6 +366,7 @@ bool Inactive_scheduler_watchdog::check_for_inactivity( Transaction* ta )
 
     if( select.eof() )  // Keiner ist aktiv?
     {
+        int FEHLER;
         if( _other_scheduler._member_id != "" )
         {
             _log->info( message_string( "SCHEDULER-805" ) );
@@ -381,8 +383,10 @@ bool Inactive_scheduler_watchdog::check_for_inactivity( Transaction* ta )
         Record record = select.get_record();
         if( !select.eof() )
         {
-            _log->error( "MORE THAN ONE ACTIVE SCHEDULER" );
+            _log->error( message_string( "SCHEDULER-808" ) );
             _scheduler_member->show_active_scheduler( ta );
+            _scheduler_member->mark_as_inactive( ta );
+            
             return false;
         }
 
@@ -392,7 +396,19 @@ bool Inactive_scheduler_watchdog::check_for_inactivity( Transaction* ta )
         time_t last_heart_beat        = record.as_int64( 1 );                         //(time_t)( record.as_double( 1 ) + 0.5 );
         time_t next_heart_beat        = record.null( 2 )? 0 : record.as_int64( 2 );   //(time_t)( record.as_double( 2 ) + 0.5 );
 
-        
+        if( other_member_id == _spooler->id_for_db() )
+        {
+            if( _other_scheduler._member_id != other_member_id )
+            {
+                _log->info( message_string( "SCHEDULER-805" ) );
+                _other_scheduler = Other_scheduler();
+                _other_scheduler._member_id = other_member_id;
+            }
+
+            none_is_active = true;
+            _is_scheduler_up = ta->get_variable_text( _scheduler_member->scheduler_up_variable_name() ) != "";
+        }
+        else
         if( other_member_id != _other_scheduler._member_id )
         {
             _other_scheduler = Other_scheduler();
@@ -415,7 +431,7 @@ bool Inactive_scheduler_watchdog::check_for_inactivity( Transaction* ta )
 
             if( last_heart_beat == _other_scheduler._last_heart_beat_db )   // Kein neuer Herzschlag?
             {
-                if( _other_scheduler._last_heart_beat_detected + active_heart_beat_period + max_heart_beat_processing_time/2 < now )
+                if( _other_scheduler._last_heart_beat_detected + heart_beat_period + max_heart_beat_processing_time/2 < now )
                 {
                     _log->warn( message_string( "SCHEDULER-994", 
                                                     other_member_id, 
@@ -423,7 +439,7 @@ bool Inactive_scheduler_watchdog::check_for_inactivity( Transaction* ta )
                                                     now - _other_scheduler._last_heart_beat_detected ) );
                     warned = true;
 
-                    if( _other_scheduler._last_heart_beat_detected + active_heart_beat_period + max_heart_beat_processing_time < now )  
+                    if( _other_scheduler._last_heart_beat_detected + heart_beat_period + max_heart_beat_processing_time < now )  
                         other_member_timed_out = true;
                 }
             }
@@ -443,14 +459,14 @@ bool Inactive_scheduler_watchdog::check_for_inactivity( Transaction* ta )
                 //if( next_heart_beat + heart_beat_delay < now )  other_member_timed_out = true;
             }
 
-            //if( !other_member_timed_out  &&  last_heart_beat + active_heart_beat_period + heart_beat_delay/2 < now )
+            //if( !other_member_timed_out  &&  last_heart_beat + heart_beat_period + heart_beat_delay/2 < now )
             //{
             //    _log->warn( message_string( "SCHEDULER-994", 
             //                                    other_member_id, 
             //                                    string_gmt_from_time_t( next_heart_beat ) + " UTC", 
-            //                                    now - ( last_heart_beat + active_heart_beat_period ) ) );
+            //                                    now - ( last_heart_beat + heart_beat_period ) ) );
 
-            //    //if( last_heart_beat + active_heart_beat_period + heart_beat_delay < now )  other_member_timed_out = true;
+            //    //if( last_heart_beat + heart_beat_period + heart_beat_delay < now )  other_member_timed_out = true;
             //}
             
             //if( !other_member_timed_out  &&  _other_scheduler._checking_clock_difference  &&  last_heart_beat == _other_scheduler._next_heart_beat_db )
@@ -481,7 +497,7 @@ bool Inactive_scheduler_watchdog::mark_as_active()
     bool   ok;
     time_t now                 = ::time(NULL);
     time_t new_last_heart_beat = now;
-    time_t new_next_heart_beat = new_last_heart_beat + active_heart_beat_period;
+    time_t new_next_heart_beat = new_last_heart_beat + heart_beat_period;
 
 
     _log->info( message_string( "SCHEDULER-803" ) );
@@ -490,40 +506,35 @@ bool Inactive_scheduler_watchdog::mark_as_active()
     { 
         use_for_update,         // Sätze mit "select for update" sperren
         use_with_updlock,       // SQL-Server: Sätze mit "select with(updlock)" sperren, für SQL Server
-        use_commit_visible_time // Access: Nach use_commit_visible_time Erfolg prüfen
+      //use_commit_visible_time // Access: Nach use_commit_visible_time Erfolg prüfen
     } 
     db_mode = db()->dbms_kind() == dbms_sql_server? use_with_updlock 
-              //db()->dbms_kind() == dbms_access    ? use_commit_visible_time
+            //db()->dbms_kind() == dbms_access    ? use_commit_visible_time
                                                   : use_for_update;
 
     try
     {
         Transaction ta ( db() );
 
-        Any_file select_for_update;
-
         //if( db_mode != use_commit_visible_time )
-        if( _other_scheduler._member_id != "" )
-        {
-            //db()->execute( "SET TRANSACTION ISOLATION LEVEL SERIALIZABLE" );
-            S sql;
-            sql << "select `is_active`  from " << _spooler->_members_tablename;
-            if( db_mode == use_with_updlock  )  sql << "  with(updlock)";
-            sql << " where `scheduler_member_id`";
-            sql << " in (" << sql::quoted( _other_scheduler._member_id ) << "," 
-                           << sql::quoted( _scheduler_member->member_id() ) << ")";
-            if( db_mode == use_for_update )  sql << " for update";
+        //db()->execute( "SET TRANSACTION ISOLATION LEVEL SERIALIZABLE" );
+        S sql;
+        sql << "select `is_active`  from " << _spooler->_members_tablename;
+        if( db_mode == use_with_updlock  )  sql << "  with(updlock)";
+        sql << " where `scheduler_member_id`";
+        sql << " in (" << sql::quoted( _other_scheduler._member_id ) << "," 
+                       << sql::quoted( _scheduler_member->member_id() ) << ")";
+        if( db_mode == use_for_update )  sql << " for update";
 
-            select_for_update = ta.open_result_set( sql );
-        }
+        Any_file select_for_update = ta.open_result_set( sql );
 
-        if( _other_scheduler._member_id == "" )
-        {
-            // Wir sind der erste aktive Scheduler
-            ok = true;
-        }
-        else
-        {
+        //if( _other_scheduler._member_id == "" )
+        //{
+        //    // Wir sind der erste aktive Scheduler
+        //    ok = true;
+        //}
+        //else
+        //{
             // Bisher aktiven Scheduler inaktivieren
 
             sql::Update_stmt update ( &db()->_db_descr, _spooler->_members_tablename );
@@ -532,7 +543,7 @@ bool Inactive_scheduler_watchdog::mark_as_active()
             update.and_where_condition( "scheduler_member_id", _other_scheduler._member_id );
             update.and_where_condition( "is_active"          , 1 );
             ok = ta.try_execute_single( update );
-        }
+        //}
 
         if( ok )
         {
@@ -599,10 +610,10 @@ bool Inactive_scheduler_watchdog::set_active()
     {
         Transaction ta ( db() );
 
-        ok = _scheduler_member->check_database_consistency( &ta );
+        ok = _scheduler_member->check_database_integrity( ta );
         if( ok )
         {
-            ok = _scheduler_member->do_heart_beat( &ta, true );
+            ok = _scheduler_member->do_heart_beat( ta, true );
         }
 
         ta.commit();
@@ -682,8 +693,8 @@ void Scheduler_member::close()
         {
             Transaction ta ( db() );
 
-            delete_member_record( &ta );
-            delete_old_member_records( &ta );
+            delete_member_record( ta );
+            delete_old_member_records( ta );
 
             ta.commit();
         }
@@ -717,7 +728,7 @@ void Scheduler_member::shutdown()
 
 //-----------------------------------------------------------Scheduler_member::delete_member_record
 
-void Scheduler_member::delete_member_record( Transaction* ta )
+void Scheduler_member::delete_member_record( Transaction& ta )
 {
     Z_LOGI2( "scheduler.distributed", __FUNCTION__ << "\n" );
     assert( ta );
@@ -731,7 +742,7 @@ void Scheduler_member::delete_member_record( Transaction* ta )
 
 //------------------------------------------------------Scheduler_member::delete_old_member_records
 
-void Scheduler_member::delete_old_member_records( Transaction* ta )
+void Scheduler_member::delete_old_member_records( Transaction& ta )
 {
     Z_LOGI2( "scheduler.distributed", __FUNCTION__ << "\n" );
     assert( ta );
@@ -752,8 +763,7 @@ bool Scheduler_member::start()
 {
     Z_LOGI2( "scheduler", __FUNCTION__ << "\n" );
 
-    assert( !_current_operation );
-    assert( !_active_scheduler_heart_beat );
+    assert( !_heart_beat );
     assert( !_inactive_scheduler_watchdog );
 
     if( !db()->opened() )  z::throw_xc( "SCHEDULER-357" ); 
@@ -763,14 +773,18 @@ bool Scheduler_member::start()
     if( _scheduler_member_id == "" )  make_scheduler_member_id();
     check_member_id();
 
+    bool db_broken = false;
 
     for( Retry_transaction ta ( db() ); ta.enter_loop(); ta++ ) try
     {
         bool is_scheduler_up;
 
-        delete_old_member_records( &ta );
+        db_broken = check_database_integrity( ta );
+        if( db_broken )  break;
 
-        insert_member_record( &ta );
+        delete_old_member_records( ta );
+        insert_empty_member_record();
+        insert_member_record( ta );
         if( !_is_backup ) 
         {
             ta.set_variable( scheduler_up_variable_name(), "1" );
@@ -789,9 +803,16 @@ bool Scheduler_member::start()
     }
     catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", x ) ); }
 
+    if( db_broken )  z::throw_xc( "SCHEDULER-364" );
+
 
     set_async_manager( _spooler->_connection_manager );
-    start_operation();
+
+    _heart_beat = Z_NEW( Heart_beat( this ) );
+    _heart_beat->set_alarm();
+    _heart_beat->set_async_manager( _spooler->_connection_manager );
+    
+    if( !_is_active )  start_inactive_scheduler_watchdog();
 
 
     bool ok = true;
@@ -806,6 +827,10 @@ bool Scheduler_member::start()
         ok = wait_until_active();
     }
 
+    if( _is_active )
+    {
+        if( check_database_integrity( Transaction( db() ) ) )  z::throw_xc( "SCHEDULER-364" );
+    }
 
     return ok;
 }
@@ -858,6 +883,7 @@ void Scheduler_member::create_table_when_needed()
     db()->create_table_when_needed( _spooler->_members_tablename,
             "`scheduler_member_id`"    " varchar(100) not null, "
             "`scheduler_id`"           " varchar(100) not null, "
+            "`version`"                " varchar(100) not null, "
             "`running_since`"          " datetime, "
             "`last_heart_beat`"        " integer, "     //numeric(14,3) not null, "
             "`next_heart_beat`"        " integer, "     //numeric(14,3), "
@@ -872,70 +898,88 @@ void Scheduler_member::create_table_when_needed()
             "primary key( `scheduler_member_id` )" );
 }
 
-//----------------------------------------------------------------Scheduler_member::start_operation
+//----------------------------------------------Scheduler_member::start_inactive_scheduler_watchdog
 
-void Scheduler_member::start_operation()
+void Scheduler_member::start_inactive_scheduler_watchdog()
 {
-    if( db()->opened() )
-    {
-        if( _is_active )
-        {
-            assert( !_inactive_scheduler_watchdog );
-            assert( !_active_scheduler_heart_beat );
-            assert( !_current_operation );
+    if( !_inactive_scheduler_watchdog )
+        _inactive_scheduler_watchdog = Z_NEW( Inactive_scheduler_watchdog( this ) );
 
-            _active_scheduler_heart_beat = Z_NEW( Active_scheduler_heart_beat( this ) );
-            _active_scheduler_heart_beat->set_alarm();
-            _current_operation = +_active_scheduler_heart_beat;
-        }
-        else
-        {
-            assert( !_active_scheduler_heart_beat );
-
-            if( !_inactive_scheduler_watchdog )
-                _inactive_scheduler_watchdog = Z_NEW( Inactive_scheduler_watchdog( this ) );
-
-            _inactive_scheduler_watchdog->set_alarm();
-            //show_active_scheduler();
-            _current_operation = +_inactive_scheduler_watchdog;
-        }
-
-        _current_operation->set_async_manager( _spooler->_connection_manager );
-    }
+    _inactive_scheduler_watchdog->set_alarm();
+    _inactive_scheduler_watchdog->set_async_manager( _spooler->_connection_manager );
 }
 
 //----------------------------------------------------------------Scheduler_member::close_operation
 
 void Scheduler_member::close_operation()
 {
-    if( _current_operation ) 
+    if( _heart_beat ) 
     {
-        _current_operation->set_async_manager( NULL );
-        _current_operation = NULL;
+        _heart_beat->set_async_manager( NULL );
+        _heart_beat = NULL;
     }
 
-    _active_scheduler_heart_beat = NULL;
-    _inactive_scheduler_watchdog = NULL;
+    if( _inactive_scheduler_watchdog )
+    {
+        _inactive_scheduler_watchdog->set_async_child( NULL );
+        _inactive_scheduler_watchdog = NULL;
+    }
+}
+
+//----------------------------------------------------------------Scheduler_member::async_continue_
+
+bool Scheduler_member::async_continue_( Continue_flags )
+{
+    Z_LOGI2( "scheduler.distributed", __FUNCTION__ << "\n" );
+
+    _heart_beat->async_check_exception( "Error in Scheduler member operation" );
+    if( _inactive_scheduler_watchdog )  _inactive_scheduler_watchdog->async_check_exception( "Error in Scheduler member operation" );
+
+    if( _is_active  &&  _inactive_scheduler_watchdog )
+    {
+        _inactive_scheduler_watchdog->set_async_manager( NULL );
+        _inactive_scheduler_watchdog = NULL;
+    }
+
+    if( !_is_active  &&  !_inactive_scheduler_watchdog )
+    {
+        start_inactive_scheduler_watchdog();
+    }
+
+    //if( !_activity_stolen )
+    //{
+    //    if( db()->opened() )
+    //    {
+    //        start_inactive_scheduler_watchdog();
+    //    }
+    //    else
+    //    if( _is_backup )  z::throw_xc( "SCHEDULER-357" );
+    //}
+
+    return true;
 }
 
 //------------------------------------------------------------------Scheduler_member::do_heart_beat
 
-bool Scheduler_member::do_heart_beat( Transaction* outer_transaction, bool db_record_marked_active )
+bool Scheduler_member::do_heart_beat( Transaction& outer_transaction, bool db_record_marked_active )
 {
     Z_LOGI2( "scheduler.distributed", __FUNCTION__ << "\n" );
 
-    bool   ok = false;
     time_t old_next_heart_beat = _next_heart_beat;
-    bool   was_late = false;
+    bool   ok                  = false;
+    bool   was_late            = false;
 
-    if( db()->opened() )
+    if( !db()->opened() )  return false;
+
+
+  AGAIN:
     for( Retry_transaction ta ( db(), outer_transaction ); ta.enter_loop(); ta++ ) try
     {
-        ok = check_database_consistency( &ta );
+        //ok = check_database_integrity( ta );
 
-        if( ok )  ok = try_to_heartbeat_member_record( &ta, db_record_marked_active );
+        ok = try_to_heartbeat_member_record( ta, db_record_marked_active );
 
-        if( !ok )
+        if( !ok  &&  _is_active )
         {
             _is_active = false;
             _activity_stolen = true;
@@ -944,15 +988,13 @@ bool Scheduler_member::do_heart_beat( Transaction* outer_transaction, bool db_re
 
         ta.commit();
 
-        if( !was_late )
+
+        time_t now = ::time(NULL);
+        if( !was_late  &&  now - old_next_heart_beat > max_heart_beat_processing_time )    // Herzschlag noch in der Frist?
         {
-            time_t now = ::time(NULL);
-            if( now - old_next_heart_beat > max_heart_beat_processing_time )   // Herzschlag noch in der Frist?
-            {
-                was_late = true;
-                _log->warn( message_string( "SCHEDULER-996", string_gmt_from_time_t( old_next_heart_beat ) + " UTC", now - old_next_heart_beat ) );
-                continue;
-            }
+            was_late = true;
+            _log->warn( message_string( "SCHEDULER-996", string_gmt_from_time_t( old_next_heart_beat ) + " UTC", now - old_next_heart_beat ) );
+            if( !outer_transaction )   goto AGAIN;  // Noch einmal in neuer Transaktion, um zu prüfen, ob uns jemand die Aktivität genommen hat.
         }
     }
     catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", x ) ); }
@@ -962,10 +1004,10 @@ bool Scheduler_member::do_heart_beat( Transaction* outer_transaction, bool db_re
     
 //-------------------------------------------------Scheduler_member::try_to_heartbeat_member_record
 
-bool Scheduler_member::try_to_heartbeat_member_record( Transaction* ta, bool db_record_marked_active )
+bool Scheduler_member::try_to_heartbeat_member_record( Transaction& ta, bool db_record_marked_active )
 {
     time_t new_last_heart_beat = ::time(NULL);
-    time_t new_next_heart_beat = new_last_heart_beat + active_heart_beat_period;
+    time_t new_next_heart_beat = new_last_heart_beat + heart_beat_period;
 
     Z_LOGI2( "scheduler.distributed", __FUNCTION__ << "  new_last_heart_beat=" << new_last_heart_beat << " (" << string_gmt_from_time_t( new_last_heart_beat ) << " UTC), "
                                                         "new_next_heart_beat=" << new_next_heart_beat << " (" << string_gmt_from_time_t( new_next_heart_beat ) << " UTC)\n" );
@@ -1019,9 +1061,9 @@ bool Scheduler_member::try_to_heartbeat_member_record( Transaction* ta, bool db_
     return record_is_updated;
 }
 
-//-----------------------------------------------------Scheduler_member::check_database_consistency
+//-------------------------------------------------------Scheduler_member::check_database_integrity
 
-bool Scheduler_member::check_database_consistency( Transaction* ta )
+bool Scheduler_member::check_database_integrity( Transaction& ta )
 {
     assert( ta );
 
@@ -1032,21 +1074,86 @@ bool Scheduler_member::check_database_consistency( Transaction* ta )
                            " and `is_active`<>0" ).get_record().as_int( 0 );
     
     bool ok = active_count <= 1;
-    if( !ok )  _log->error( S() << "MORE THAN ONE ACTIVE SCHEDULER: " << active_count );
+    if( !ok )
+    {
+        _log->error( message_string( "SCHEDULER-808", active_count ) );
+        mark_as_inactive( ta );
+        int IS_INACTIVE_SETZEN; //??
+    }
 
     return ok;
 }
 
+//-----------------------------------------------------Scheduler_member::insert_empty_member_record
+
+void Scheduler_member::insert_empty_member_record()
+{
+    time_t now   = ::time(NULL);
+    Record record;
+
+    try
+    {
+        Transaction ta ( db() );
+
+        Any_file select = ta.open_result_set
+        (
+            S() << "select `is_active`"
+                   "  from " << _spooler->_variables_tablename << 
+                   "  where `scheduler_member_id`=" << _spooler->id_for_db() );  int SCHRÄGER_IN_SCHEDULER_ID_VERBIETEN;
+
+        if( !select.eof() )
+        {
+            record = select.get_record();
+        }
+        else
+        {
+            sql::Insert_stmt stmt ( &db()->_db_descr, _spooler->_members_tablename );
+
+            stmt[ "scheduler_member_id" ] = _spooler->id_for_db();
+            stmt[ "last_heart_beat"     ] = now;
+            stmt[ "next_heart_beat"     ] = 0;
+            stmt[ "is_active"           ] = 1;
+            stmt[ "scheduler_id"        ] = _spooler->id_for_db();
+            stmt[ "version"             ] = _spooler->_version;
+            stmt[ "running_since"       ].set_datetime( string_local_from_time_t( now ) );
+            stmt[ "host"                ] = _spooler->_hostname;
+            stmt[ "pid"                 ] = getpid();
+            stmt[ "http_url"            ] = _spooler->http_url();
+
+            ta.execute( stmt );
+        }
+
+        ta.commit();
+    }
+    catch( exception& )
+    {
+        Transaction ta ( db() );
+
+        Any_file select = ta.open_result_set
+        (
+            S() << "select `is_active`"
+                   "  from " << _spooler->_variables_tablename << 
+                   "  where `scheduler_member_id`=" << _spooler->id_for_db() 
+        );
+
+        if( select.eof() )  throw;
+
+        record = select.get_record();
+    }
+
+    bool none_is_active = record.as_int( 0 ) != 0;
+}
+
 //-----------------------------------------------------------Scheduler_member::insert_member_record
 
-void Scheduler_member::insert_member_record( Transaction* ta )
+void Scheduler_member::insert_member_record( Transaction& ta )
 {
     assert( ta );
     assert( !_is_active );
 
     time_t now = ::time(NULL);
     time_t new_last_heart_beat = now;
-    time_t new_next_heart_beat = new_last_heart_beat + active_heart_beat_period;
+    time_t new_next_heart_beat = new_last_heart_beat + heart_beat_period;
 
     Z_LOGI2( "scheduler.distributed", __FUNCTION__ << "  new_last_heart_beat=" << new_last_heart_beat << " (" << string_gmt_from_time_t( new_last_heart_beat) << " UTC), "
                                                         "new_next_heart_beat=" << new_next_heart_beat << " (" << string_gmt_from_time_t( new_next_heart_beat) << " UTC)\n" );
@@ -1061,6 +1168,7 @@ void Scheduler_member::insert_member_record( Transaction* ta )
     insert[ "next_heart_beat"     ] = new_next_heart_beat;
     insert[ "is_active"           ] = 0;
     insert[ "scheduler_id"        ] = _spooler->id_for_db();
+    insert[ "version"             ] = _spooler->_version;
     insert[ "running_since"       ].set_datetime( string_local_from_time_t( new_last_heart_beat ) );
     insert[ "host"                ] = _spooler->_hostname;
     insert[ "pid"                 ] = getpid();
@@ -1070,6 +1178,20 @@ void Scheduler_member::insert_member_record( Transaction* ta )
 
     _last_heart_beat = new_last_heart_beat;
     _next_heart_beat = new_next_heart_beat;
+}
+
+//---------------------------------------------------------------Scheduler_member::mark_as_inactive
+
+void Scheduler_member::mark_as_inactive( Transaction& ta )
+{
+    assert( ta );
+
+    sql::Update_stmt update ( &db()->_db_descr, _spooler->_members_tablename );
+
+    update[ "is_active" ] = 0;
+    update.and_where_condition( "scheduler_member_id", member_id() );
+
+    ta->execute( update );
 }
 
 //--------------------------------------------------------------Scheduler_member::async_state_text_
@@ -1092,21 +1214,21 @@ string Scheduler_member::async_state_text_() const
 
 //---------------------------------Scheduler_member::set_command_for_all_inactive_schedulers_but_me
 
-void Scheduler_member::set_command_for_all_inactive_schedulers_but_me( Transaction* ta, Command command )
+void Scheduler_member::set_command_for_all_inactive_schedulers_but_me( Transaction& ta, Command command )
 {
     set_command_for_all_schedulers_but_me( ta, "`is_active`=0", command );
 }
 
 //------------------------------------------Scheduler_member::set_command_for_all_schedulers_but_me
 
-void Scheduler_member::set_command_for_all_schedulers_but_me( Transaction* ta, Command command )
+void Scheduler_member::set_command_for_all_schedulers_but_me( Transaction& ta, Command command )
 {
     set_command_for_all_schedulers_but_me( ta, "", command );
 }
 
 //------------------------------------------Scheduler_member::set_command_for_all_schedulers_but_me
 
-void Scheduler_member::set_command_for_all_schedulers_but_me( Transaction* outer_transaction, const string& where, Command command )
+void Scheduler_member::set_command_for_all_schedulers_but_me( Transaction& outer_transaction, const string& where, Command command )
 {
     for( Retry_transaction ta ( db(), outer_transaction ); ta.enter_loop(); ta++ ) try
     {
@@ -1114,8 +1236,8 @@ void Scheduler_member::set_command_for_all_schedulers_but_me( Transaction* outer
      
         update[ "command" ] = string_from_command( command );
         update.and_where_condition( "scheduler_id", _spooler->id_for_db() );
-        update.add_where( "`scheduler_member_id`<>" + sql::quoted( member_id() ) );
-        update.add_where( where );
+        update.add_where( " and `scheduler_member_id`<>" + sql::quoted( member_id() ) );
+        if( where != "" )  update.add_where( " and " + where );
 
         ta.execute( update );
         ta.commit();
@@ -1123,34 +1245,9 @@ void Scheduler_member::set_command_for_all_schedulers_but_me( Transaction* outer
     catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", x ) ); }
 }
 
-//----------------------------------------------------------------Scheduler_member::async_continue_
-
-bool Scheduler_member::async_continue_( Continue_flags )
-{
-    Z_LOGI2( "scheduler.distributed", __FUNCTION__ << "\n" );
-
-    if( _current_operation )
-    {
-        _current_operation->async_check_exception( "Error in Scheduler member operation" );
-        close_operation();
-    }
-
-    if( !_activity_stolen )
-    {
-        if( db()->opened() )
-        {
-            start_operation();
-        }
-        else
-        if( _is_backup )  z::throw_xc( "SCHEDULER-357" );
-    }
-
-    return true;
-}
-
 //----------------------------------------------------------Scheduler_member::show_active_scheduler
 
-void Scheduler_member::show_active_scheduler( Transaction* outer_transaction )
+void Scheduler_member::show_active_scheduler( Transaction& outer_transaction )
 {
     Z_LOGI2( "scheduler.distributed", __FUNCTION__ << "\n" );
 
@@ -1198,7 +1295,7 @@ string Scheduler_member::scheduler_up_variable_name()
     
 void Scheduler_member::set_member_id( const string& member_id )
 {
-    assert( !_current_operation );
+    assert( !_heart_beat  &&  !_inactive_scheduler_watchdog );
 
     _scheduler_member_id = member_id;
     check_member_id();
@@ -1210,8 +1307,14 @@ void Scheduler_member::set_member_id( const string& member_id )
 
 string Scheduler_member::active_member_id()
 {
-    if( _inactive_scheduler_watchdog )  return _inactive_scheduler_watchdog->_other_scheduler._member_id;
-    if( _is_active )  member_id();
+    if( _inactive_scheduler_watchdog )
+    {
+        if( _inactive_scheduler_watchdog->_other_scheduler._member_id == _spooler->id_for_db() )  return "";
+        return _inactive_scheduler_watchdog->_other_scheduler._member_id;
+    }
+
+    if( _is_active )  return member_id();
+
     return "";
 }
 
@@ -1233,7 +1336,7 @@ Spooler_db* Scheduler_member::db()
 
 void Scheduler_member::check_member_id()
 {
-    string prefix = _spooler->id_for_db() + ".";
+    string prefix = _spooler->id_for_db() + "/";
     if( !string_begins_with( member_id(), prefix )  ||  member_id() == prefix )  z::throw_xc( "SCHEDULER-358", member_id(), prefix );
 }
 
@@ -1242,7 +1345,7 @@ void Scheduler_member::check_member_id()
 void Scheduler_member::make_scheduler_member_id()
 {
     set_member_id( S() << _spooler->id_for_db() 
-                       << "." << _spooler->_hostname << "." << _spooler->tcp_port() 
+                       << "/" << _spooler->_hostname << "." << _spooler->tcp_port() 
                        << "." << getpid() << "." << ( (uint64)(double_from_gmtime()*1000000)%1000000 ) );
 }
 

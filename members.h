@@ -54,10 +54,11 @@ struct Scheduler_member : Async_operation, Scheduler_object
     bool                        start                       ();
     bool                        wait_until_started_up       ();
     bool                        wait_until_active           ();
-    bool                        do_heart_beat               ( Transaction*, bool db_record_marked_active );
-    void                        show_active_scheduler       ( Transaction* = NULL );
-    void                        set_command_for_all_inactive_schedulers_but_me( Transaction*, Command );
-    void                        set_command_for_all_schedulers_but_me( Transaction*, Command );
+    bool                        do_heart_beat               ( Transaction&, bool db_record_marked_active );
+    void                        mark_as_inactive            ( Transaction& );
+    void                        show_active_scheduler       ( Transaction& );
+    void                        set_command_for_all_inactive_schedulers_but_me( Transaction&, Command );
+    void                        set_command_for_all_schedulers_but_me( Transaction&, Command );
 
     string                      scheduler_up_variable_name  ();
     Spooler_db*                 db                          ();
@@ -65,22 +66,23 @@ struct Scheduler_member : Async_operation, Scheduler_object
 
   protected:
     void                        create_table_when_needed    ();
-    void                        delete_member_record        ( Transaction* ta );
-    void                        delete_old_member_records   ( Transaction* ta );
-    void                        start_operation             ();
+    void                        delete_member_record        ( Transaction& ta );
+    void                        delete_old_member_records   ( Transaction& ta );
+    void                        start_inactive_scheduler_watchdog();
     void                        close_operation             ();
 
-    void                        insert_scheduler_id_record  ( Transaction* );
-    void                        insert_member_record        ( Transaction* );
-    bool                        check_database_consistency  ( Transaction* ta );
-    bool                        try_to_heartbeat_member_record( Transaction*, bool db_record_marked_active );
-    void                        set_command_for_all_schedulers_but_me( Transaction*, const string& where, Command );
-  //void                        set_command_for_members     ( Transaction*, const string& where, Command );
+    void                        insert_scheduler_id_record  ( Transaction& );
+    void                        insert_empty_member_record  ();
+    void                        insert_member_record        ( Transaction& );
+    bool                        check_database_integrity    ( Transaction& ta );
+    bool                        try_to_heartbeat_member_record( Transaction&, bool db_record_marked_active );
+    void                        set_command_for_all_schedulers_but_me( Transaction&, const string& where, Command );
+  //void                        set_command_for_members     ( Transaction&, const string& where, Command );
     void                        make_scheduler_member_id    ();
     void                        db_execute                  ( const string& stmt );
 
   private:
-    friend struct               Active_scheduler_heart_beat;
+    friend struct               Heart_beat;
     friend struct               Inactive_scheduler_watchdog;
 
     Fill_zero                  _zero_;
@@ -93,7 +95,7 @@ struct Scheduler_member : Async_operation, Scheduler_object
     Command                    _heart_beat_command;
     string                     _heart_beat_command_string;
     Async_operation*           _current_operation;
-    ptr<Active_scheduler_heart_beat> _active_scheduler_heart_beat;
+    ptr<Heart_beat>            _heart_beat;
     ptr<Inactive_scheduler_watchdog> _inactive_scheduler_watchdog;
     ptr<Prefix_log>            _log;
     bool                       _closed;

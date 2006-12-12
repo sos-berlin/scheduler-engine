@@ -225,11 +225,12 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-355", "SQL update statement did not updates excactly one record, instead $1: $2" },
     { "SCHEDULER-356", "SOME OTHER SCHEDULER HAS STOLEN ACTIVITY" },
     { "SCHEDULER-357", "This is a heart beat or backup Scheduler, and it needs a database" },
+    { "SCHEDULER-358", "Scheduler member id has to start with the Scheduler id followed by a slash" },
     { "SCHEDULER-360", "Error when accessing a Scheduler member database table" },
     { "SCHEDULER-361", "No database" },
     { "SCHEDULER-362", "Scheduler aborts because it has become inactive" },
     { "SCHEDULER-363", "Error when creating SQL table $1: $2" },
-    { "SCHEDULER-364", "Clocks seem not to be in sync. Difference to Scheduler member $2's clock is $1s" },
+    { "SCHEDULER-364", "Database integrity is broken" },
     { "SCHEDULER-900", "Scheduler $1 is starting with $2, session_id=$4, pid=$3" },
     { "SCHEDULER-902", "state=$1" },
     { "SCHEDULER-904", "Tasks have $1s to terminate" },
@@ -319,7 +320,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-992", "Order ist not longer suspended, next start $1" },
     { "SCHEDULER-993", "No heart beat since $4s ($3), although Scheduler member $1 announced one for $2" },
     { "SCHEDULER-994", "No heart beat since $3s ($2) of Scheduler member $1" },
-    { "SCHEDULER-995", "Active Scheduler seems to be $1 (pid=$4, $3), claiming its last heart beat was $2s ago" },
+    { "SCHEDULER-995", "The active Scheduler seems to be $1 (pid=$4, $3), claiming its last heart beat was $2s ago" },
     { "SCHEDULER-996", "Heart beat is late: next_heart_beat has been announced for $1 (this is $2s late)" },
     { "SCHEDULER-998", "Scheduler exits" },
     { "SCHEDULER-999", "Scheduler has been terminated properly" },
@@ -329,6 +330,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-803", "This Scheduler will become active" },
     { "SCHEDULER-805", "No Scheduler is active" },
     { "SCHEDULER-807", "This Scheduler is active now" },
+    { "SCHEDULER-808", "MORE THAN ONE ACTIVE SCHEDULER IN DATABASE" },
     {}
 };
 } //namespace sos

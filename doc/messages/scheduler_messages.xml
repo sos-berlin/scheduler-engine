@@ -2255,11 +2255,11 @@
             </text>
         </message>
 
-        <!--message code="SCHEDULER-358">
+        <message code="SCHEDULER-358">
             <text xml:lang="en">
-                <title>Scheduler member id has to start with the Scheduler id and a dot</title>
+                <title>Scheduler member id has to start with the Scheduler id followed by a slash</title>
             </text>
-        </message-->
+        </message>
 
         <!--message code="SCHEDULER-359">
             <text xml:lang="en">
@@ -2291,9 +2291,15 @@
             </text>
         </message>
 
-        <message code="SCHEDULER-364">
+        <!--message code="SCHEDULER-364">
             <text xml:lang="en">
                 <title>Clocks seem not to be in sync. Difference to Scheduler member <p2/>'s clock is <p1/>s</title>
+            </text>
+        </message-->
+
+        <message code="SCHEDULER-364">
+            <text xml:lang="en">
+                <title>Database integrity is broken</title>
             </text>
         </message>
 
@@ -3122,6 +3128,13 @@
                 <title>This Scheduler is active now</title>
             </text>
         </message>
+
+        <message code="SCHEDULER-808">
+            <text xml:lang="en">
+                <title>MORE THAN ONE ACTIVE SCHEDULER IN DATABASE</title>
+            </text>
+        </message>
+        
 
     </messages>
     
