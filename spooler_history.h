@@ -181,7 +181,7 @@ struct Database_retry
                                 operator bool           ()                                          { return enter_loop(); }
     bool                        enter_loop              ()                                          { return _enter_loop > 0; }
     void                        repeat_loop             ()                                          { _enter_loop = 2; }
-    void                        reopen_database_after_error( exception& x )                         { _db->try_reopen_after_error( x ); repeat_loop(); }
+    void                        reopen_database_after_error( const exception& x )                   { _db->try_reopen_after_error( x ); repeat_loop(); }
     void                        operator ++             (int)                                       { _enter_loop--; }
 
     Spooler_db*                _db;
@@ -205,7 +205,7 @@ struct Retry_transaction : Transaction
                                 Retry_transaction       ( Spooler_db* db, Transaction* outer = NULL ) : Transaction(db,outer), _database_retry( db ) {}
 
     bool                        enter_loop              ()                                          { return _database_retry.enter_loop(); }
-    void                        reopen_database_after_error( exception& );
+    void                        reopen_database_after_error( const exception& );
     void                        operator ++             (int)                                       { _database_retry++; }
 
     Database_retry             _database_retry;

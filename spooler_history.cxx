@@ -215,7 +215,7 @@ Any_file Transaction::open_file( const string& db_prefix, const string& sql, con
 
 //---------------------------------------------------Retry_transaction::reopen_database_after_error
 
-void Retry_transaction::reopen_database_after_error( exception& x )
+void Retry_transaction::reopen_database_after_error( const exception& x )
 { 
     if( _outer_transaction )  throw;    // Wenn's eine ‰uﬂere Transaktion gibt, dann die Schleife dort wiederholen
 
