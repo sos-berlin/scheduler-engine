@@ -1864,11 +1864,11 @@ void Spooler::load_arg()
             else
             if( opt.flag      ( "validate-xml"           ) )  _validate_xml = opt.set();
             else
-            if( opt.flag      ( "backup"                 ) )  _is_backup_member = opt.set();
-            else
             if( opt.flag      ( "exclusive"              ) )  _is_exclusive_member = opt.set();
             else
-            if( opt.flag      ( "heart-beat"             ) )  _with_heart_beat = opt.set();
+            if( opt.flag      ( "backup"                 ) )  _is_backup_member = opt.set();
+            else
+            if( opt.flag      ( "distributed"            ) )  _is_distributed = opt.set();
             else
             //if( opt.flag      ( "member-id"              ) )  _scheduler_member_id = opt.set();
             //else
@@ -1884,6 +1884,9 @@ void Spooler::load_arg()
             else
                 throw_sos_option_error( opt );
         }
+
+        if( _is_backup_member && !_is_exclusive_member )  z::throw_xc( "SCHEDULER-368", "-backup", "-exclusive" );
+        if( _is_distributed && _is_exclusive_member    )  z::throw_xc( "SCHEDULER-369", "-distributed", "-exclusive" );
 
         if( _is_service )  _interactive = false;
 
@@ -2315,9 +2318,10 @@ void Spooler::start()
 #   endif
 
 
-    if( _with_heart_beat  ||  _is_backup_member )  
+    if( _is_exclusive_member || _is_distributed )  
     {
         start_scheduler_member();
+        wait_for_scheduler_member();
         if( _state_cmd == sc_terminate )  return;
     }
 
@@ -2377,7 +2381,13 @@ void Spooler::start_scheduler_member()
   //_scheduler_member->set_member_id( _scheduler_member_id );
     _scheduler_member->set_backup( _is_backup_member );
     _scheduler_member->start();     // Wartet, bis entschieden ist, dass wir aktiv werden
+}
 
+//---------------------------------------------------------------Spooler::wait_for_scheduler_member
+
+void Spooler::wait_for_scheduler_member()
+{
+    Z_LOGI( "scheduler", __FUNCTION__ << "\n" );
 
     bool ok = true;
 
@@ -2493,11 +2503,12 @@ void Spooler::stop( const exception* )
 
     if( _scheduler_member )
     {
-        if( _scheduler_member->is_exclusive() )  
+        if( _terminate_shutdown )  
         {
-            if( _shutdown_cmd == sc_terminate_and_restart  || _shutdown_cmd == sc_let_run_terminate_and_restart )  
-                _scheduler_member->set_command_for_all_inactive_schedulers_but_me( (Transaction*)NULL, Scheduler_member::cmd_terminate_and_restart );
-
+            _scheduler_member->set_command_for_all_inactive_schedulers_but_me( (Transaction*)NULL, 
+                _terminate_all_schedulers? Scheduler_member::cmd_terminate :
+                                           Scheduler_member::cmd_terminate_and_restart );
+            
             _scheduler_member->shutdown();
         }
 
@@ -3043,13 +3054,13 @@ void Spooler::check_scheduler_member()
     _scheduler_member->async_check_exception( "Error in Scheduler member" );
 
     _scheduler_is_up    = _scheduler_member->is_scheduler_up();
-    _proper_termination = _scheduler_member->is_exclusive();
+  //_proper_termination = _scheduler_member->is_exclusive();
 
-    if( !_scheduler_member->is_exclusive() )
+    if( !_scheduler_member->is_active()  ||  _is_exclusive_member && !_scheduler_member->is_exclusive() )
     {
         kill_all_processes();
         
-        _log.warn( message_string( "SCHEDULER-362" ) );
+        _log.warn( message_string( _is_exclusive_member? "SCHEDULER-367" : "SCHEDULER-362" ) );
 
         _scheduler_member->show_active_schedulers( (Transaction*)NULL );
         _scheduler_member->close();     // Scheduler-Mitglieds-Eintrag entfernen
@@ -3074,7 +3085,7 @@ void Spooler::run_check_ctrl_c()
         if( _state != s_stopping )
         {
             _log.warn( message_string( "SCHEDULER-262", signal_text ) );   // "Abbruch-Signal (Ctrl-C) empfangen. Der Scheduler wird beendet.\n" );
-            cmd_terminate();
+            cmd_terminate( false, INT_MAX, true );  // Nur dieses Mitglied des verteilten Schedulers beenden
 
             ctrl_c_pressed = 0;
             set_ctrl_c_handler( true );
@@ -3217,27 +3228,28 @@ void Spooler::cmd_stop()
 //---------------------------------------------------------------------------Spooler::cmd_terminate
 // Anderer Thread (spooler_service.cxx)
 
-void Spooler::cmd_terminate( int timeout )
+void Spooler::cmd_terminate( bool restart, int timeout, bool shutdown, bool all_schedulers )
 {
     if( timeout < 0 )  timeout = 0;
 
-    _state_cmd                = sc_terminate;
+    _state_cmd                = restart? sc_terminate_and_restart : sc_terminate;
     _termination_gmtimeout_at = timeout < 999999999? ::time(NULL) + timeout : no_termination_timeout;
+    _terminate_shutdown       = shutdown;
+    _terminate_all_schedulers = all_schedulers;
+
+    /*
+    if( all_schedulers && _scheduler_member )
+    {
+        _scheduler_member->set_command_for_all_schedulers_but_me
+        (
+            (Transaction*)NULL,
+            restart? Scheduler_member::cmd_terminate_and_restart
+                   : Scheduler_member::cmd_terminate
+        );
+    }
+    */
 
     signal( "terminate" );
-}
-
-//---------------------------------------------------------------Spooler::cmd_terminate_and_restart
-// Anderer Thread
-
-void Spooler::cmd_terminate_and_restart( int timeout )
-{
-    if( timeout < 0 )  timeout = 0;
-
-    _state_cmd                = sc_terminate_and_restart;
-    _termination_gmtimeout_at = timeout < 999999999? ::time(NULL) + timeout : no_termination_timeout;
-    
-    signal( "terminate_and_restart" );
 }
 
 //-------------------------------------------------------Spooler::cmd_let_run_terminate_and_restart
@@ -3462,8 +3474,8 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line )
     }// while( _shutdown_cmd == sc_reload  ||  _shutdown_cmd == sc_load_config );
 
 
-    _log.info( message_string( _proper_termination? "SCHEDULER-999"         // "Scheduler ordentlich beendet"
-                                                  : "SCHEDULER-997" ) );    // "Scheduler exits"
+    _log.info( message_string( _terminate_shutdown? "SCHEDULER-999"         // "Scheduler ordentlich beendet"
+                                                  : "SCHEDULER-998" ) );    // "Scheduler exits"
                                //_scheduler_is_up           ? "SCHEDULER-998"       // "This Scheduler exits. An inactive Scheduler can become active and resume operation"
                                //                           : "SCHEDULER-997" ) );  // "Scheduler exits"
     //_log.info( "Scheduler ordentlich beendet." );

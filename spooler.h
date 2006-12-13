@@ -284,8 +284,8 @@ struct Spooler : Object,
     void                        cmd_pause                   ()                                  { _state_cmd = sc_pause; signal( "pause" ); }
     void                        cmd_continue                ();
   //void                        cmd_stop                    ();
-    void                        cmd_terminate               ( int timeout = INT_MAX );
-    void                        cmd_terminate_and_restart   ( int timeout = INT_MAX );
+    void                        cmd_terminate               ( bool restart = false, int timeout = INT_MAX, bool shutdown = true, bool all_schedulers = false );
+    void                        cmd_terminate_and_restart   ( int timeout = INT_MAX )           { return cmd_terminate( true, timeout ); }
     void                        cmd_let_run_terminate_and_restart();
 
     void                        abort_immediately           ( bool restart = false );
@@ -327,6 +327,7 @@ struct Spooler : Object,
     void                        run                         ();
     bool                        run_continue                ();
     void                        start_scheduler_member      ();
+    void                        wait_for_scheduler_member   ();
     void                        check_scheduler_member      ();
     bool                        is_active                   ();
     bool                        is_exclusive                ();
@@ -339,6 +340,7 @@ struct Spooler : Object,
 
   //void                        single_thread_step          ();
     void                        wait                        ();
+    void                        simple_wait_step            ();
     void                        wait                        ( Wait_handles*, const Time& wait_until, Object* wait_until_object, const Time& resume_at, Object* resume_at_object );
 
     void                        signal                      ( const string& signal_name )       { if( _log.log_level() <= log_debug9 )  _log.debug9( "Signal \"" + signal_name + "\"" ); _event.signal( signal_name ); }
@@ -589,6 +591,8 @@ struct Spooler : Object,
     State_cmd                  _shutdown_cmd;               // run() beenden, also alle Tasks beenden!
     bool                       _shutdown_ignore_running_tasks;
     time_t                     _termination_gmtimeout_at;   // Für sc_terminate und sc_terminate_with_restart
+    bool                       _terminate_shutdown;
+    bool                       _terminate_all_schedulers;
     ptr<Async_operation>       _termination_async_operation;
 
     string                     _directory;
@@ -610,11 +614,11 @@ struct Spooler : Object,
     Variable_set_map           _variable_set_map;           // _variable_set_map[""] = _environment; für <params>, Com_variable_set::set_dom()
     bool                       _is_backup_member;
     bool                       _is_exclusive_member;
-    bool                       _with_heart_beat;
+    bool                       _is_distributed;
   //string                     _scheduler_member_id;
     ptr<Scheduler_member>      _scheduler_member;
     bool                       _scheduler_is_up;
-    bool                       _proper_termination;
+  //bool                       _proper_termination;
     string                     _session_id;
 };
 

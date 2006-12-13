@@ -469,7 +469,7 @@ Order::State normalized_state( const Order::State& state )
 void Job_chain::load_orders_from_database()
 {
     if( !_orders_recoverable )  return;
-    _spooler->assert_is_exclusive();
+    _spooler->assert_is_exclusive( __FUNCTION__ );
     
     if( !_spooler->_db  ||  !_spooler->_db->opened() )  
     {

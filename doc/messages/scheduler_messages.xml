@@ -2315,6 +2315,24 @@
             </text>
         </message>
 
+        <message code="SCHEDULER-367">
+            <text xml:lang="en">
+                <title>Scheduler aborts because it has lost exclusiveness</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-368">
+            <text xml:lang="en">
+                <title>Option <p1/> needs <p2/></title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-369">
+            <text xml:lang="en">
+                <title>Option <p1/> conflicts <p2/></title>
+            </text>
+        </message>
+
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->

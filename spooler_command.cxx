@@ -258,7 +258,7 @@ xml::Element_ptr Command_processor::execute_modify_spooler( const xml::Element_p
       //else
         if( cmd == "reload"                )  _spooler->cmd_reload();
         else
-        if( cmd == "terminate"             )  _spooler->cmd_terminate( timeout );
+        if( cmd == "terminate"             )  _spooler->cmd_terminate( false, timeout );
         else
         if( cmd == "terminate_and_restart" )  _spooler->cmd_terminate_and_restart( timeout );
         else
@@ -282,20 +282,11 @@ xml::Element_ptr Command_processor::execute_terminate( const xml::Element_ptr& e
 
     bool restart        = element.bool_getAttribute( "restart"       , false );
     bool all_schedulers = element.bool_getAttribute( "all_schedulers", false );
+    bool shutdown       = element.bool_getAttribute( "shutdown"      , true );
+    int  timeout        = element. int_getAttribute( "timeout"       , INT_MAX );
 
 
-    if( _spooler->_scheduler_member  &&  all_schedulers )
-    {
-        _spooler->_scheduler_member->set_command_for_all_schedulers_but_me
-        (
-            (Transaction*)NULL,
-            restart? Scheduler_member::cmd_terminate_and_restart 
-                   : Scheduler_member::cmd_terminate
-        );
-    }
-
-    if( restart )  _spooler->cmd_terminate_and_restart();
-             else  _spooler->cmd_terminate();
+    _spooler->cmd_terminate( restart, timeout, shutdown, all_schedulers );
     
 
     return _answer.createElement( "ok" );

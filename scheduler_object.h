@@ -28,7 +28,7 @@ struct Scheduler_object
         type_scheduler_event_manager,
         type_scheduler_member,
         type_heart_beat,
-        type_inactive_scheduler_watchdog
+        type_exclusive_scheduler_watchdog
       //type_subprocess_register
     };
 

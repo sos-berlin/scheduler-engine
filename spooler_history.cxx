@@ -352,17 +352,21 @@ void Spooler_db::create_tables_when_needed()
                             + join( "", create_extra ) 
                             + "primary key( \"ID\" )" );
 
+    add_column( _spooler->_job_history_tablename, "EXIT_CODE", "add \"EXIT_CODE\"     integer" );
+
     create_table_when_needed( _spooler->_orders_tablename, S() <<
                             "\"JOB_CHAIN\"   varchar(100) not null,"        // Primärschlüssel
                             "\"ID\"          varchar(" << const_order_id_length_max << ") not null,"        // Primärschlüssel
-                            "\"SPOOLER_ID\"  varchar(100),"
+                            "\"SPOOLER_ID\"  varchar(100),"                         // Index bei mehreren Scheduler-Ids
+                            "\"PROCESSABLE\" boolean not null,"                     // Index
+                            "\"PROCESSING_SCHEDULER_MEMBER_ID\" varchar(100),"      // Index
                             "\"PRIORITY\"    integer not null,"
                             "\"STATE\"       varchar(100),"
                             "\"STATE_TEXT\"  varchar(100),"
                             "\"TITLE\"       varchar(200),"
                             "\"CREATED_TIME\" datetime not null,"
                             "\"MOD_TIME\"    datetime,"
-                            "\"ORDERING\"    integer not null,"             // Um die Reihenfolge zu erhalten
+                            "\"ORDERING\"    integer not null,"             // Um die Reihenfolge zu erhalten, sollte geordneter Index sein
                             "\"PAYLOAD\"     clob,"
                             "\"INITIAL_STATE\" varchar(100),"               
                             "\"RUN_TIME\"    clob,"
@@ -373,7 +377,9 @@ void Spooler_db::create_tables_when_needed()
     add_column( _spooler->_orders_tablename, "INITIAL_STATE" , "add \"INITIAL_STATE\" varchar(100)" );
     add_column( _spooler->_orders_tablename, "RUN_TIME"      , "add \"RUN_TIME\"      clob" );
     add_column( _spooler->_orders_tablename, "ORDER_XML"     , "add \"ORDER_XML\"     clob" );
-    add_column( _spooler->_job_history_tablename, "EXIT_CODE", "add \"EXIT_CODE\"     integer" );
+    add_column( _spooler->_orders_tablename, "PROCESSABLE"   , "add \"PROCESSABLE\"   boolean" );
+    add_column( _spooler->_orders_tablename, "PROCESSING_SCHEDULER_MEMBER_ID", "add \"PROCESSING_SCHEDULER_MEMBER_ID\" varchar(100)" );
+    
 
     create_table_when_needed( _spooler->_order_history_tablename, S() <<
                             "\"HISTORY_ID\"  integer not null,"             // Primärschlüssel
@@ -1154,6 +1160,10 @@ void Spooler_db::insert_order( Order* order )
                     insert[ "state"         ] = order->state().as_string();
                     insert[ "state_text"    ] = order->state_text()                , order->_state_text_modified = false;
                     insert[ "priority"      ] = order->priority()                  , order->_priority_modified   = false;
+
+                    if( order->is_processable() )
+                    insert[ "processable"   ] = true;
+
                     insert.set_datetime( "created_time", order->_created.as_string(Time::without_ms) );
                     insert.set_datetime( "mod_time", Time::now().as_string(Time::without_ms) );
 
@@ -1452,6 +1462,7 @@ void Spooler_db::update_order( Order* order )
                         update.set_table_name( _spooler->_orders_tablename );
 
                         update[ "state" ] = state_string;
+                        update[ "processable" ] = order->is_processable()? sql::Value(true) : sql::null_value;
                         
                         if( order->_priority_modified   )  update[ "priority"   ] = order->priority();
                         if( order->_title_modified      )  update[ "title"      ] = order->title();

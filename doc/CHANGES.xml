@@ -11,6 +11,47 @@
     <scheduler_keyword keyword="Change log"/>
 
 
+    <change date="2006-12-13" version="2.0.161" subversion_revision="4647">
+        <revision type="new" title="Backup-Scheduler">
+            <description>
+                <p>
+                </p>
+                <ul>
+                    <li>
+                        <scheduler_option name="exclusive"/>
+                    </li>
+                    <li>
+                        <scheduler_option name="backup"/>
+                    </li>
+                    <li>
+                        <scheduler_option name="distributed"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="terminate" attribute="restart"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="terminate" attribute="timeout"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="terminate" attribute="shutdown"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="terminate" attribute="all_schedulers"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+        
+        <revision type="new" title="debug9 protokolliert SQL-Kommandos">
+            <description>
+                <p>
+                    Bei <scheduler_option name="log-level" value="debug9"/> schreint der Scheduler die SQL-Kommandos ins Hauptprotokoll.
+                </p>
+            </description>
+        </revision>
+
+    </change>
+
     <change date="2006-12-04" version="2.0.161" subversion_revision="4619">
         <revision type="new" title="&lt;config ip_address=&quot;...&quot;>">
             <description>

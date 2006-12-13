@@ -3520,7 +3520,7 @@ STDMETHODIMP Com_spooler::Terminate( VARIANT* timeout_vt )
         hr = Variant_to_int( *timeout_vt, &timeout );
         if( FAILED(hr) )  return hr;
 
-        _spooler->cmd_terminate( timeout );
+        _spooler->cmd_terminate( false, timeout );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }

@@ -89,7 +89,7 @@ struct Scheduler_member : Async_operation, Scheduler_object
 
   private:
     friend struct               Heart_beat;
-    friend struct               Inactive_scheduler_watchdog;
+    friend struct               Exclusive_scheduler_watchdog;
 
     Fill_zero                  _zero_;
     string                     _scheduler_member_id;
@@ -103,7 +103,7 @@ struct Scheduler_member : Async_operation, Scheduler_object
     string                     _heart_beat_command_string;
     Async_operation*           _current_operation;
     ptr<Heart_beat>            _heart_beat;
-    ptr<Inactive_scheduler_watchdog> _inactive_scheduler_watchdog;
+    ptr<Exclusive_scheduler_watchdog> _exclusive_scheduler_watchdog;
     ptr<Prefix_log>            _log;
     bool                       _closed;
 };

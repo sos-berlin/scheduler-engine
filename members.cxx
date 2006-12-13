@@ -61,16 +61,17 @@ struct Other_scheduler
     time_t                     _last_heart_beat_db;
     time_t                     _next_heart_beat_db;
     time_t                     _last_heart_beat_detected;
+    bool                       _scheduler_993_logged;
     //time_t                     _clock_difference;
     //bool                       _clock_difference_checked;
     //bool                       _checking_clock_difference;
 };
 
-//----------------------------------------------------------------------Inactive_scheduler_watchdog
+//----------------------------------------------------------------------Exclusive_scheduler_watchdog
 
-struct Inactive_scheduler_watchdog : Async_operation, Scheduler_object
+struct Exclusive_scheduler_watchdog : Async_operation, Scheduler_object
 {
-                                Inactive_scheduler_watchdog ( Scheduler_member* );
+                                Exclusive_scheduler_watchdog ( Scheduler_member* );
 
 
     // Async_operation
@@ -179,31 +180,31 @@ void Heart_beat::set_alarm()
     set_async_next_gmtime( _scheduler_member->_next_heart_beat );   //last_heart_beat() + heart_beat_period );
 }
 
-//-----------------------------------------Inactive_scheduler_watchdog::Inactive_scheduler_watchdog
+//-----------------------------------------Exclusive_scheduler_watchdog::Exclusive_scheduler_watchdog
 
-Inactive_scheduler_watchdog::Inactive_scheduler_watchdog( Scheduler_member* m ) 
+Exclusive_scheduler_watchdog::Exclusive_scheduler_watchdog( Scheduler_member* m ) 
 :
     _zero_(this+1),
-    Scheduler_object( m->_spooler, this, Scheduler_object::type_inactive_scheduler_watchdog ),
+    Scheduler_object( m->_spooler, this, Scheduler_object::type_exclusive_scheduler_watchdog ),
     _scheduler_member(m),
     _log(m->_log)
 {
 }
 
-//-----------------------------------------------------Inactive_scheduler_watchdog::async_finished_
+//-----------------------------------------------------Exclusive_scheduler_watchdog::async_finished_
     
-bool Inactive_scheduler_watchdog::async_finished_() const
+bool Exclusive_scheduler_watchdog::async_finished_() const
 { 
     return false;
 }
 
-//---------------------------------------------------Inactive_scheduler_watchdog::async_state_text_
+//---------------------------------------------------Exclusive_scheduler_watchdog::async_state_text_
 
-string Inactive_scheduler_watchdog::async_state_text_() const
+string Exclusive_scheduler_watchdog::async_state_text_() const
 {
     S result;
 
-    result << "Inactive_scheduler_watchdog";
+    result << "Exclusive_scheduler_watchdog";
 
     //if( _set_exclusive_until )
     //{
@@ -217,9 +218,9 @@ string Inactive_scheduler_watchdog::async_state_text_() const
     return result;
 }
 
-//-----------------------------------------------------Inactive_scheduler_watchdog::async_continue_
+//-----------------------------------------------------Exclusive_scheduler_watchdog::async_continue_
 
-bool Inactive_scheduler_watchdog::async_continue_( Continue_flags )
+bool Exclusive_scheduler_watchdog::async_continue_( Continue_flags )
 {
     Z_LOGI2( "scheduler.distributed", __FUNCTION__ << "\n" );
 
@@ -242,7 +243,7 @@ bool Inactive_scheduler_watchdog::async_continue_( Continue_flags )
 
     if( _scheduler_member->is_exclusive() )
     {
-        _scheduler_member->async_wake();    // Wir sind aktives Mitglied geworden, Inactive_scheduler_watchdog beenden
+        _scheduler_member->async_wake();    // Wir sind aktives Mitglied geworden, Exclusive_scheduler_watchdog beenden
     }
     else
     {
@@ -252,9 +253,9 @@ bool Inactive_scheduler_watchdog::async_continue_( Continue_flags )
     return true;
 }
 
-//-----------------------------------------------------------Inactive_scheduler_watchdog::set_alarm
+//-----------------------------------------------------------Exclusive_scheduler_watchdog::set_alarm
 
-void Inactive_scheduler_watchdog::set_alarm()
+void Exclusive_scheduler_watchdog::set_alarm()
 {
     if( _scheduler_member->_next_heart_beat < _next_check_time )
     {
@@ -268,9 +269,9 @@ void Inactive_scheduler_watchdog::set_alarm()
     }
 }
 
-//------------------------------------------------Inactive_scheduler_watchdog::try_to_become_exclusive
+//------------------------------------------------Exclusive_scheduler_watchdog::try_to_become_exclusive
 
-void Inactive_scheduler_watchdog::try_to_become_exclusive()
+void Exclusive_scheduler_watchdog::try_to_become_exclusive()
 {
     Z_LOGI2( "scheduler.distributed", __FUNCTION__ << "\n" );
     assert( !_scheduler_member->_is_exclusive );
@@ -327,9 +328,9 @@ void Inactive_scheduler_watchdog::try_to_become_exclusive()
     }
 }
 
-//-------------------------------Inactive_scheduler_watchdog::check_exclusive_schedulers_heart_beat
+//-------------------------------Exclusive_scheduler_watchdog::check_exclusive_schedulers_heart_beat
 
-bool Inactive_scheduler_watchdog::check_exclusive_schedulers_heart_beat( Transaction* ta )
+bool Exclusive_scheduler_watchdog::check_exclusive_schedulers_heart_beat( Transaction* ta )
 {
     // Rollback, wenn Funktion false liefert!
 
@@ -358,8 +359,8 @@ bool Inactive_scheduler_watchdog::check_exclusive_schedulers_heart_beat( Transac
         if( _other_scheduler._member_id != _scheduler_member->empty_member_id() )
         {
             _log->info( message_string( "SCHEDULER-805" ) );
-            _other_scheduler = Other_scheduelr();
-            _other_scheduler._member_id = _scheduler_member->empty_member_id()
+            _other_scheduler = Other_scheduler();
+            _other_scheduler._member_id = _scheduler_member->empty_member_id();
         }
 
         none_is_exclusive = true;   // Kein Scheduler ist exklusiv, 
@@ -376,27 +377,25 @@ bool Inactive_scheduler_watchdog::check_exclusive_schedulers_heart_beat( Transac
         time_t last_heart_beat        = record.as_int64( 1 );                         //(time_t)( record.as_double( 1 ) + 0.5 );
         time_t next_heart_beat        = record.null( 2 )? 0 : record.as_int64( 2 );   //(time_t)( record.as_double( 2 ) + 0.5 );
 
-        if( other_member_id == _scheduler_member->empty_member_id() )
-        {
-            if( _other_scheduler._member_id != other_member_id )
-            {
-                _log->info( message_string( "SCHEDULER-801", other_member_id ) );
-                _other_scheduler = Other_scheduler();
-                _other_scheduler._member_id = other_member_id;
-            }
 
-            none_is_exclusive = true;
-            //_is_scheduler_up = ta->get_variable_text( _scheduler_member->scheduler_up_variable_name() ) != "";
-        }
-        else
+
         if( other_member_id != _other_scheduler._member_id )
         {
+            if( other_member_id == _scheduler_member->empty_member_id() )  _log->info( message_string( "SCHEDULER-805" ) );
+            else _log->info( message_string( "SCHEDULER-801", other_member_id ) );
+
             _other_scheduler = Other_scheduler();
             _other_scheduler._member_id                = other_member_id;
             _other_scheduler._last_heart_beat_detected = ::time(NULL);
 
             //_log->info( message_string( "SCHEDULER-995", other_member_id, ::time(NULL) - last_heart_beat, other_http_url ) );
             _scheduler_member->show_active_schedulers( ta );
+        }
+
+
+        if( _other_scheduler._member_id == _scheduler_member->empty_member_id() )
+        {
+            none_is_exclusive = true;
         }
         else
         {
@@ -428,8 +427,10 @@ bool Inactive_scheduler_watchdog::check_exclusive_schedulers_heart_beat( Transac
                 _other_scheduler._last_heart_beat_detected = ::time(NULL);
             }
 
-            if( !other_member_timed_out  &&  !warned  &&  next_heart_beat + max_heart_beat_processing_time < now1 )
+            if( !other_member_timed_out  &&  !warned  &&  !_other_scheduler._scheduler_993_logged 
+             && next_heart_beat + max_heart_beat_processing_time < now1 )
             {
+                _other_scheduler._scheduler_993_logged = true;
                 _log->warn( message_string( "SCHEDULER-993", 
                                                 other_member_id, 
                                                 my_string_from_time_t( next_heart_beat ),
@@ -467,9 +468,9 @@ bool Inactive_scheduler_watchdog::check_exclusive_schedulers_heart_beat( Transac
     return none_is_exclusive;
 }
 
-//-------------------------------------------Inactive_scheduler_watchdog::calculate_next_check_time
+//-------------------------------------------Exclusive_scheduler_watchdog::calculate_next_check_time
 
-void Inactive_scheduler_watchdog::calculate_next_check_time()
+void Exclusive_scheduler_watchdog::calculate_next_check_time()
 {
     time_t now   = ::time(NULL);
     time_t delay = max_heart_beat_processing_time + 1;   // Erst in der folgenden Sekunde prüfen
@@ -493,9 +494,9 @@ void Inactive_scheduler_watchdog::calculate_next_check_time()
     }
 }
 
-//------------------------------------------------------Inactive_scheduler_watchdog::mark_as_exclusive
+//------------------------------------------------------Exclusive_scheduler_watchdog::mark_as_exclusive
 
-bool Inactive_scheduler_watchdog::mark_as_exclusive()
+bool Exclusive_scheduler_watchdog::mark_as_exclusive()
 {
     Z_LOGI2( "scheduler.distributed", __FUNCTION__ << "\n" );
     assert( !_scheduler_member->_is_exclusive );
@@ -566,9 +567,9 @@ bool Inactive_scheduler_watchdog::mark_as_exclusive()
     return ok;
 }
 
-//----------------------------------------------Inactive_scheduler_watchdog::check_clock_difference
+//----------------------------------------------Exclusive_scheduler_watchdog::check_clock_difference
 
-//void Inactive_scheduler_watchdog::check_clock_difference( time_t last_heart_beat, time_t now )
+//void Exclusive_scheduler_watchdog::check_clock_difference( time_t last_heart_beat, time_t now )
 //{
 //    _other_scheduler._clock_difference         = last_heart_beat - now;
 //    _other_scheduler._clock_difference_checked = true;
@@ -587,9 +588,9 @@ bool Inactive_scheduler_watchdog::mark_as_exclusive()
 //    _other_scheduler._checking_clock_difference = false;
 //}
 
-//----------------------------------------------------------Inactive_scheduler_watchdog::set_exclusive
+//----------------------------------------------------------Exclusive_scheduler_watchdog::set_exclusive
 
-bool Inactive_scheduler_watchdog::set_exclusive()
+bool Exclusive_scheduler_watchdog::set_exclusive()
 {
     Z_LOGI2( "scheduler.distributed", __FUNCTION__ << "\n" );
     assert( !_scheduler_member->_is_exclusive );
@@ -822,7 +823,7 @@ bool Scheduler_member::start()
     Z_LOGI2( "scheduler", __FUNCTION__ << "\n" );
 
     assert( !_heart_beat );
-    assert( !_inactive_scheduler_watchdog );
+    assert( !_exclusive_scheduler_watchdog );
 
     if( !db()->opened() )  z::throw_xc( "SCHEDULER-357" ); 
 
@@ -846,10 +847,10 @@ bool Scheduler_member::start()
         ta.commit( __FUNCTION__ );
 
 
-        _inactive_scheduler_watchdog = Z_NEW( Inactive_scheduler_watchdog( this ) );
-        _inactive_scheduler_watchdog->try_to_become_exclusive();   // Stellt sofort _is_scheduler_up fest
-        _inactive_scheduler_watchdog->_is_scheduler_up = scheduler_up;
-        if( _is_exclusive )  _inactive_scheduler_watchdog = NULL;
+        _exclusive_scheduler_watchdog = Z_NEW( Exclusive_scheduler_watchdog( this ) );
+        _exclusive_scheduler_watchdog->try_to_become_exclusive();   // Stellt sofort _is_scheduler_up fest
+        _exclusive_scheduler_watchdog->_is_scheduler_up = scheduler_up;
+        if( _is_exclusive )  _exclusive_scheduler_watchdog = NULL;
     }
 
 
@@ -950,7 +951,7 @@ void Scheduler_member::start_operations()
 {
     if( _is_exclusive )
     {
-        assert( !_inactive_scheduler_watchdog );
+        assert( !_exclusive_scheduler_watchdog );
 
         if( !_heart_beat )
             _heart_beat = Z_NEW( Heart_beat( this ) );
@@ -960,11 +961,11 @@ void Scheduler_member::start_operations()
     }
     else
     {
-        if( !_inactive_scheduler_watchdog )
-            _inactive_scheduler_watchdog = Z_NEW( Inactive_scheduler_watchdog( this ) );
+        if( !_exclusive_scheduler_watchdog )
+            _exclusive_scheduler_watchdog = Z_NEW( Exclusive_scheduler_watchdog( this ) );
 
-        _inactive_scheduler_watchdog->set_alarm();
-        _inactive_scheduler_watchdog->set_async_manager( _spooler->_connection_manager );
+        _exclusive_scheduler_watchdog->set_alarm();
+        _exclusive_scheduler_watchdog->set_async_manager( _spooler->_connection_manager );
     }
 }
 
@@ -978,10 +979,10 @@ void Scheduler_member::close_operations()
         _heart_beat = NULL;
     }
 
-    if( _inactive_scheduler_watchdog )
+    if( _exclusive_scheduler_watchdog )
     {
-        _inactive_scheduler_watchdog->set_async_child( NULL );
-        _inactive_scheduler_watchdog = NULL;
+        _exclusive_scheduler_watchdog->set_async_child( NULL );
+        _exclusive_scheduler_watchdog = NULL;
     }
 }
 
@@ -992,12 +993,12 @@ bool Scheduler_member::async_continue_( Continue_flags )
     Z_LOGI2( "scheduler.distributed", __FUNCTION__ << "\n" );
 
     if( _heart_beat                  )  _heart_beat                 ->async_check_exception( "Error in Scheduler member operation" );
-    if( _inactive_scheduler_watchdog )  _inactive_scheduler_watchdog->async_check_exception( "Error in Scheduler member operation" );
+    if( _exclusive_scheduler_watchdog )  _exclusive_scheduler_watchdog->async_check_exception( "Error in Scheduler member operation" );
 
-    if( _is_exclusive  &&  _inactive_scheduler_watchdog )
+    if( _is_exclusive  &&  _exclusive_scheduler_watchdog )
     {
-        _inactive_scheduler_watchdog->set_async_manager( NULL );
-        _inactive_scheduler_watchdog = NULL;
+        _exclusive_scheduler_watchdog->set_async_manager( NULL );
+        _exclusive_scheduler_watchdog = NULL;
     }
 
     if( !_is_exclusive  &&  _heart_beat )
@@ -1123,8 +1124,8 @@ bool Scheduler_member::try_to_heartbeat_member_record( Transaction* ta, bool db_
 
                 switch( _heart_beat_command )
                 {
-                    case cmd_terminate            : _spooler->cmd_terminate();              break;
-                    case cmd_terminate_and_restart: _spooler->cmd_terminate_and_restart();  break;
+                    case cmd_terminate            : _spooler->cmd_terminate( false, INT_MAX, false );  break;
+                    case cmd_terminate_and_restart: _spooler->cmd_terminate( true , INT_MAX, false );  break;
                     default: ;
                 }
             }
@@ -1144,7 +1145,7 @@ bool Scheduler_member::try_to_heartbeat_member_record( Transaction* ta, bool db_
 
 void Scheduler_member::assert_database_integrity( const string& message_text )
 {
-    for( Retry_transaction ta ( db(), outer_transaction ); ta.enter_loop(); ta++ ) try
+    for( Retry_transaction ta ( db() ); ta.enter_loop(); ta++ ) try
     {
         if( !check_database_integrity( &ta ) )  z::throw_xc( "SCHEDULER-364", message_text );
     }
@@ -1153,7 +1154,7 @@ void Scheduler_member::assert_database_integrity( const string& message_text )
 
 //-------------------------------------------------------Scheduler_member::check_database_integrity
 
-bool Scheduler_member::check_database_integrity( Transaction* outer_transaction )
+bool Scheduler_member::check_database_integrity( Transaction* ta )
 {
     bool ok = false;
 
@@ -1167,7 +1168,7 @@ bool Scheduler_member::check_database_integrity( Transaction* outer_transaction 
                 "  where `scheduler_member_id`=" << sql::quoted( empty_member_id() );
 
     
-    Any_file result = ta.open_result_set( sql_stmt, __FUNCTION__ );    // In _einem_ Snapshot abfragen
+    Any_file result = ta->open_result_set( sql_stmt, __FUNCTION__ );    // In _einem_ Snapshot abfragen
 
     int exclusive_count = result.get_record().as_int( 1 );
     int empty_count     = result.get_record().as_int( 1 );
@@ -1177,7 +1178,7 @@ bool Scheduler_member::check_database_integrity( Transaction* outer_transaction 
     if( !ok )
     {
         _log->error( message_string( "SCHEDULER-808", S() << "exclusive_count=" << exclusive_count << " empty_count=" << empty_count ) );
-        mark_as_inactive( &ta );
+        mark_as_inactive( ta );
     }
 
     return ok;
@@ -1353,9 +1354,9 @@ string Scheduler_member::async_state_text_() const
 
     if( _is_exclusive )  result << " (exclusive)";
     else  
-    if( _inactive_scheduler_watchdog )
+    if( _exclusive_scheduler_watchdog )
     {
-        result << _inactive_scheduler_watchdog->async_state_text();
+        result << _exclusive_scheduler_watchdog->async_state_text();
     }
 
     return result;
@@ -1459,7 +1460,7 @@ string Scheduler_member::empty_member_id()
     
 void Scheduler_member::set_member_id( const string& member_id )
 {
-    assert( !_heart_beat  &&  !_inactive_scheduler_watchdog );
+    assert( !_heart_beat  &&  !_exclusive_scheduler_watchdog );
 
     _scheduler_member_id = member_id;
     check_member_id();
@@ -1471,10 +1472,10 @@ void Scheduler_member::set_member_id( const string& member_id )
 
 string Scheduler_member::exclusive_member_id()
 {
-    if( _inactive_scheduler_watchdog )
+    if( _exclusive_scheduler_watchdog )
     {
-        if( _inactive_scheduler_watchdog->_other_scheduler._member_id == _spooler->id_for_db() )  return "";
-        return _inactive_scheduler_watchdog->_other_scheduler._member_id;
+        if( _exclusive_scheduler_watchdog->_other_scheduler._member_id == _spooler->id_for_db() )  return "";
+        return _exclusive_scheduler_watchdog->_other_scheduler._member_id;
     }
 
     if( _is_exclusive )  return member_id();
@@ -1486,7 +1487,7 @@ string Scheduler_member::exclusive_member_id()
 
 bool Scheduler_member::is_scheduler_up()
 { 
-    return _is_active  ||  _inactive_scheduler_watchdog  &&  _inactive_scheduler_watchdog->_is_scheduler_up; 
+    return _is_active  ||  _exclusive_scheduler_watchdog  &&  _exclusive_scheduler_watchdog->_is_scheduler_up; 
 }
 
 //-----------------------------------------------------------------------------Scheduler_member::db

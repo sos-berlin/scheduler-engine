@@ -529,7 +529,7 @@ static DWORD WINAPI HandlerEx( DWORD dwControl, DWORD event, void* event_data, v
             {
                 pending_timed_out = false;
                 service_stop = true;
-                spooler_ptr->cmd_terminate( terminate_timeout );
+                spooler_ptr->cmd_terminate( false, terminate_timeout );
                 set_service_status( 0, SERVICE_STOP_PENDING );
                 result = NO_ERROR;  
                 break;
