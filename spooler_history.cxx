@@ -132,7 +132,7 @@ void Transaction::commit( const string& debug_extra )
 
     if( _outer_transaction ) 
     {
-        Z_LOG2( "scheduler", __FUNCTION__ "  Commit delayed because of _outer_transaction  " << debug_extra << "\n" );
+        Z_LOG2( "scheduler", __FUNCTION__ << "  Commit delayed because of _outer_transaction  " << debug_extra << "\n" );
         _outer_transaction->_transaction_used |= _transaction_used;
     }
     else
