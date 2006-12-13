@@ -75,11 +75,11 @@ struct Spooler_db : Object, Scheduler_object
     void                        finish_order            ( Order*, Transaction* = NULL );
 
     Transaction*                transaction             ();
-    void                        execute                 ( const string& stmt );
+    void                        execute                 ( const string& stmt, const string& debug_extra = "" );
     int                         record_count            ()                                          { return _db.record_count(); }
     Dbms_kind                   dbms_kind               ()                                          { return _db.dbms_kind(); }
-    void                        commit                  ();
-    void                        rollback                ();
+    void                        commit                  ( const string& debug_extra = "" );
+    void                        rollback                ( const string& debug_extra = "" );
     void                        try_reopen_after_error  ( const exception&, bool wait_endless = false );
     void                        create_tables_when_needed();
     void                        create_table_when_needed( const string& tablename, const string& fields );
@@ -131,18 +131,18 @@ struct Transaction
                                ~Transaction             ();
 
     void                    set_log_sql                 ( bool b )                                  { _log_sql = b; }
-    void                        commit                  ();
-    void                        rollback                ();
+    void                        commit                  ( const string& debug_text = "" );
+    void                        rollback                ( const string& debug_text = "" );
   //void                        try_reopen_after_error  ();
     void                        set_transaction_used    ()                                          { _transaction_used = true; }
     Transaction*                outer_transaction       ()                                          { return _outer_transaction; }
 
-    Any_file                    open_result_set         ( const string& sql );
-    Any_file                    open_file               ( const string& db_prefix, const string& sql );
+    Any_file                    open_result_set         ( const string& sql, const string& debug_text = "" );
+    Any_file                    open_file               ( const string& db_prefix, const string& sql, const string& debug_text = "" );
 
-    void                        execute                 ( const string& sql );
-    void                        execute_single          ( const string& sql );
-    bool                        try_execute_single      ( const string& sql );
+    void                        execute                 ( const string& sql, const string& debug_text = "" );
+    void                        execute_single          ( const string& sql, const string& debug_text = "" );
+    bool                        try_execute_single      ( const string& sql, const string& debug_text = "" );
     string                      get_variable_text       ( const string& name, bool* record_exists = NULL );
     void                        set_variable            ( const string& name, const string& value );
     void                        insert_variable         ( const string& name, const string& value );

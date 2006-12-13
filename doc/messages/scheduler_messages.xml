@@ -2245,7 +2245,7 @@
 
         <message code="SCHEDULER-356">
             <text xml:lang="en">
-                <title>SOME OTHER SCHEDULER HAS STOLEN ACTIVITY</title>
+                <title>SOME OTHER SCHEDULER HAS STOLEN EXCLUSIVENESS</title>
             </text>
         </message>
 
@@ -2306,6 +2306,12 @@
         <message code="SCHEDULER-365">
             <text xml:lang="en">
                 <title>Illegal character in -id=<p1/></title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-366">
+            <text xml:lang="en">
+                <title>This is a distributed, non-exclusive Scheduler, and the Operation can only be performed on an exclusive Scheduler</title>
             </text>
         </message>
 
@@ -3050,7 +3056,7 @@
 
         <message code="SCHEDULER-995">
             <text xml:lang="en">
-                <title>The active Scheduler seems to be <p1>scheduler_member_id</p1> (pid=<p4/>, <p3>url</p3>), claiming its last heart beat was <p2/>s ago</title>
+                <title>The exclusive Scheduler seems to be <p1>scheduler_member_id</p1> (pid=<p4/>, <p3>url</p3>), claiming its last heart beat was <p2/>s ago</title>
             </text>
         </message>
 
@@ -3089,7 +3095,7 @@
 
         <message code="SCHEDULER-801" weight="info">
             <text xml:lang="en">
-                <title>Waiting for active Scheduler <p1/> to become inactive</title>
+                <title>Watching exclusive Scheduler <p1/></title>
             </text>
         </message>
 
@@ -3101,7 +3107,7 @@
 
         <message code="SCHEDULER-803" weight="info">
             <text xml:lang="en">
-                <title>This Scheduler will become active</title>
+                <title>This Scheduler becomes exclusive now</title>
             </text>
         </message>
 
@@ -3131,16 +3137,21 @@
 
         <message code="SCHEDULER-807">
             <text xml:lang="en">
-                <title>This Scheduler is active now</title>
+                <title>This Scheduler is active and exclusive now</title>
             </text>
         </message>
 
         <message code="SCHEDULER-808">
             <text xml:lang="en">
-                <title>MORE THAN ONE ACTIVE SCHEDULER IN DATABASE</title>
+                <title>DATABASE INTEGRITY IS BROKEN</title>
             </text>
         </message>
-        
+
+        <message code="SCHEDULER-809">
+            <text xml:lang="en">
+                <title>Scheduler is up (or is not properly terminated)</title>
+            </text>
+        </message>
 
     </messages>
     

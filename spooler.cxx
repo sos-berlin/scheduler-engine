@@ -751,6 +751,9 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
     if( _last_resume_at  &&  _last_resume_at != latter_day )
     state_element.setAttribute( "resume_at", _last_resume_at.as_string() );
 
+    state_element.setAttribute( "active"   , is_active() );
+    state_element.setAttribute( "exclusive", is_exclusive() );
+
 #   ifdef Z_UNIX
     {
         // Offene file descriptors ermitteln. Zum Debuggen, weil das Gerücht geht, Dateien würden offen bleiben.
@@ -2373,7 +2376,41 @@ void Spooler::start_scheduler_member()
     _scheduler_member->set_backup( _is_backup_member );
     _scheduler_member->start();     // Wartet, bis entschieden ist, dass wir aktiv werden
 
+
+    bool ok = true;
+
+    if( _is_backup_member  &&  !_scheduler_member->is_scheduler_up() ) 
+    {
+        ok = _scheduler_member->wait_until_is_scheduler_up();
+    }
+    
+    if( ok  &&  !_scheduler_member->is_exclusive() )
+    {
+        ok = _scheduler_member->wait_until_is_exclusive();
+    }
+
     check_scheduler_member();
+}
+
+//-------------------------------------------------------------------------------Spooler::is_active
+
+bool Spooler::is_active()
+{
+    return !_scheduler_member || _scheduler_member->is_active();
+}
+
+//----------------------------------------------------------------------------Spooler::is_exclusive
+
+bool Spooler::is_exclusive()
+{
+    return !_scheduler_member || _scheduler_member->is_exclusive();
+}
+
+//---------------------------------------------------------------------Spooler::assert_is_exclusive
+
+void Spooler::assert_is_exclusive( const string& text )
+{
+    if( !is_exclusive() )  z::throw_xc( "SCHEDULER-366", text );
 }
 
 //--------------------------------------------------------------------Spooler::run_scheduler_script
@@ -2449,7 +2486,7 @@ void Spooler::stop( const exception* )
 
     if( _scheduler_member )
     {
-        if( _scheduler_member->is_active() )  
+        if( _scheduler_member->is_exclusive() )  
         {
             if( _shutdown_cmd == sc_terminate_and_restart  || _shutdown_cmd == sc_let_run_terminate_and_restart )  
                 _scheduler_member->set_command_for_all_inactive_schedulers_but_me( (Transaction*)NULL, Scheduler_member::cmd_terminate_and_restart );
@@ -2989,16 +3026,16 @@ void Spooler::check_scheduler_member()
 {
     _scheduler_member->async_check_exception( "Error in Scheduler member" );
 
-    _scheduler_is_up     = _scheduler_member->is_scheduler_up();
-    _proper_termination = _scheduler_member->is_active();
+    _scheduler_is_up    = _scheduler_member->is_scheduler_up();
+    _proper_termination = _scheduler_member->is_exclusive();
 
-    if( !_scheduler_member->is_active() )
+    if( !_scheduler_member->is_exclusive() )
     {
         kill_all_processes();
         
         _log.warn( message_string( "SCHEDULER-362" ) );
 
-        _scheduler_member->show_active_scheduler();
+        _scheduler_member->show_active_schedulers( (Transaction*)NULL );
         _scheduler_member->close();     // Scheduler-Mitglieds-Eintrag entfernen
         _scheduler_member = NULL;       // aber Eintrag für verteilten Scheduler lassen, Scheduler ist nicht herunterfahren (wird ja vom anderen aktiven Scheuler fortgesetzt)
 

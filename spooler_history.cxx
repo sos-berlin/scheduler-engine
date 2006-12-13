@@ -126,17 +126,18 @@ Transaction::~Transaction()
 
 //------------------------------------------------------------------------------Transaction::commit
 
-void Transaction::commit()
+void Transaction::commit( const string& debug_extra )
 { 
     assert( _db );
 
     if( _outer_transaction ) 
     {
+        Z_LOG2( "scheduler", __FUNCTION__ "  Commit delayed because of _outer_transaction  " << debug_extra << "\n" );
         _outer_transaction->_transaction_used |= _transaction_used;
     }
     else
     {
-        _db->commit();   
+        _db->commit( debug_extra );   
     }
 
     _db->_transaction = _outer_transaction;
@@ -147,7 +148,7 @@ void Transaction::commit()
 
 //----------------------------------------------------------------------------Transaction::rollback
 
-void Transaction::rollback()
+void Transaction::rollback( const string& debug_extra )
 { 
     if( _db )
     {
@@ -156,7 +157,7 @@ void Transaction::rollback()
             _outer_transaction->_transaction_used |= _transaction_used;
 
             Z_DEBUG_ONLY( Z_WINDOWS_ONLY( DebugBreak() ) );
-            z::throw_xc( "ROLLBACK-IN-INNER-TRANSACTION", "Rollback in inner transaction not possible" );
+            z::throw_xc( "ROLLBACK-IN-INNER-TRANSACTION", "Rollback in inner transaction not possible", debug_extra );
         }
 
         _db->rollback(); 
@@ -168,16 +169,19 @@ void Transaction::rollback()
 
 //---------------------------------------------------------------------Transaction::open_result_set
 
-Any_file Transaction::open_result_set( const string& sql )
+Any_file Transaction::open_result_set( const string& sql, const string& debug_text )
 { 
-    return open_file( "-in " + _db->db_name(), sql ); 
+    return open_file( "-in " + _db->db_name(), sql, debug_text ); 
 }
 
 //---------------------------------------------------------------------------Transaction::open_file
 
-Any_file Transaction::open_file( const string& db_prefix, const string& sql )
+Any_file Transaction::open_file( const string& db_prefix, const string& sql, const string& debug_text )
 {
     _transaction_used = true;
+
+    string debug_extra;
+    if( debug_text != "" )  debug_extra = "  (" + debug_text + ")";
 
     Any_file result;
 
@@ -188,7 +192,7 @@ Any_file Transaction::open_file( const string& db_prefix, const string& sql )
         if( _db->_log->log_level() >= log_debug9 )  
         {
             S line;
-            line << sql;
+            line << sql << debug_extra;
             if( _db->_db.record_count() >= 0 )  line << "  ==> " << _db->_db.record_count() << " records";
             _db->_log->debug9( line );
         }
@@ -197,7 +201,7 @@ Any_file Transaction::open_file( const string& db_prefix, const string& sql )
     {
         if( _log_sql )  // Vielleicht für alle Anweisungen, aber dann haben wir einen Fehler im Protokoll, das ist nicht 100%ig kompatibel
         {
-            _db->_log->warn( sql );
+            _db->_log->warn( sql + debug_extra );
             _db->_log->error( x.what() );
         }
         else
@@ -997,79 +1001,79 @@ bool Transaction::try_update_variable( const string& name, const string& value )
 
 //-----------------------------------------------------------------------------Transaction::execute
 
-void Transaction::execute( const string& stmt )
+void Transaction::execute( const string& stmt, const string& debug_text )
 { 
     if( stmt != "ROLLBACK" )  set_transaction_used();
 
-    _db->execute( stmt );
+    _db->execute( stmt, debug_text );
 }
 
 //------------------------------------------------------------------------------Spooler_db::execute
 
-void Spooler_db::execute( const string& stmt )
+void Spooler_db::execute( const string& stmt, const string& debug_text )
 { 
-    THREAD_LOCK( _lock )
+    string debug_extra;
+    if( debug_text != "" )  debug_extra = "  (" + debug_text + ")";
+
+    Z_LOG2( "scheduler", __FUNCTION__ << "  " << stmt << debug_extra << "\n" );
+    
+    try
     {
-        Z_LOGI2( "scheduler", "Spooler_db::execute  " << stmt << '\n' );
-        
-        try
-        {
-            _db.put( stmt ); 
+        _db.put( stmt ); 
 
-            if( _log->log_level() >= log_debug9  &&  ( _transaction->_transaction_used || stmt != "ROLLBACK" ) )  
-            {
-                S line;
-                line << stmt;
-                if( _db.record_count() >= 0 )  line << "  ==> " << _db.record_count() << " records";
-                _log->debug9( line );
-            }
-        }
-        catch( exception& x )
+        if( _log->log_level() >= log_debug9  &&  ( _transaction->_transaction_used || stmt != "ROLLBACK" ) )  
         {
-            // Besser Fehler melden (mit Andreas klären)
-            //_log->warn( stmt );
-            //_log->error( x.what() );
-            _log->debug( stmt );
-            _log->debug( x.what() );
-
-            throw;
+            S line;
+            line << stmt << debug_extra;
+            if( _db.record_count() >= 0 )  line << "  ==> " << _db.record_count() << " records";
+            _log->debug9( line );
         }
+    }
+    catch( exception& x )
+    {
+        // Besser Fehler melden (mit Andreas klären)
+        //_log->warn( stmt );
+        //_log->error( x.what() );
+        _log->debug( stmt + debug_extra );
+        _log->debug( x.what() );
+
+        throw;
     }
 }
 
 //----------------------------------------------------------------------Transaction::execute_single
 
-void Transaction::execute_single( const string& stmt )
+void Transaction::execute_single( const string& stmt, const string& debug_text )
 { 
-    execute( stmt );
+    execute( stmt, debug_text );
     if( record_count() != 1 )  z::throw_xc( "SCHEDULER-355", record_count(), stmt );
 }
 
 //------------------------------------------------------------------Transaction::try_execute_single
 
-bool Transaction::try_execute_single( const string& stmt )
+bool Transaction::try_execute_single( const string& stmt, const string& debug_text )
 { 
-    execute( stmt );
+    execute( stmt, debug_text );
     return record_count() == 1;
 }
 
 //-------------------------------------------------------------------------------Spooler_db::commit
 
-void Spooler_db::commit()
+void Spooler_db::commit( const string& debug_text )
 {
     THREAD_LOCK( _lock )
     {
-        if( _db.opened() )  execute( "COMMIT" );
+        if( _db.opened() )  execute( "COMMIT", debug_text );
     }
 }
 
 //-----------------------------------------------------------------------------Spooler_db::rollback
 
-void Spooler_db::rollback()
+void Spooler_db::rollback( const string& debug_text )
 {
     THREAD_LOCK( _lock )
     {
-        if( _db.opened() )  execute( "ROLLBACK" );
+        if( _db.opened() )  execute( "ROLLBACK", debug_text );
     }
 }   
 

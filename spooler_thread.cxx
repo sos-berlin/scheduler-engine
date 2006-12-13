@@ -390,6 +390,7 @@ bool Spooler_thread::step()
                 // Dieser Job ist in _prioritized_order_job_array und wird unten fortgesetzt.
             }
             else
+            if( _spooler->is_exclusive() )
             {
                 something_done = job->do_something();
             }

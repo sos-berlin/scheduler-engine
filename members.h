@@ -44,23 +44,26 @@ struct Scheduler_member : Async_operation, Scheduler_object
     string                      member_id                   ()                                      { return _scheduler_member_id; }
 
     bool                     is_active                      ()                                      { return _is_active; }
-    bool                     is_activity_stolen             ()                                      { return _activity_stolen; }
+    bool                     is_exclusive                   ()                                      { return _is_exclusive; }
+    bool                     is_exclusiveness_stolen        ()                                      { return _is_exclusiveness_stolen; }
     bool                     is_scheduler_up                ();
     bool                     is_backup                      ()                                      { return _is_backup; }
     Command                     heart_beat_command          ()                                      { return _heart_beat_command; }
-    string                      active_member_id            ();
+    string                      exclusive_member_id         ();
+    string                      empty_member_id             ();
     time_t                      last_heart_beat             ()                                      { return _last_heart_beat; }
 
     bool                        start                       ();
-    bool                        wait_until_started_up       ();
-    bool                        wait_until_active           ();
+    bool                        wait_until_is_scheduler_up  ();
+    bool                        wait_until_is_exclusive     ();
     bool                        do_heart_beat               ( Transaction*, bool db_record_marked_active );
-    void                        mark_as_inactive            ( Transaction* );
-    void                        show_active_scheduler       ( Transaction* = NULL );
+    bool                        do_exclusive_heart_beat     ( Transaction* );
+    void                        mark_as_inactive            ( Transaction*, bool delete_inactive_record = false, bool delete_new_active_record = false );
+    void                        show_active_schedulers      ( Transaction* );
     void                        set_command_for_all_inactive_schedulers_but_me( Transaction*, Command );
     void                        set_command_for_all_schedulers_but_me( Transaction*, Command );
 
-    string                      scheduler_up_variable_name  ();
+  //string                      scheduler_up_variable_name  ();
     Spooler_db*                 db                          ();
     void                        check_member_id             ();
 
@@ -68,11 +71,11 @@ struct Scheduler_member : Async_operation, Scheduler_object
     void                        create_table_when_needed    ();
     void                        delete_member_record        ( Transaction* ta );
     void                        delete_old_member_records   ( Transaction* ta );
-    void                        start_inactive_scheduler_watchdog();
-    void                        close_operation             ();
+    void                        start_operations            ();
+    void                        close_operations            ();
 
     void                        insert_scheduler_id_record  ( Transaction* );
-    void                        insert_empty_member_record  ();
+    bool                        check_empty_member_record  ();
     void                        insert_member_record        ( Transaction* );
     void                        lock_member_records         ( Transaction*, const string& member1_id, const string& member2_id );
     bool                        check_database_integrity    ( Transaction* );
@@ -89,10 +92,11 @@ struct Scheduler_member : Async_operation, Scheduler_object
     Fill_zero                  _zero_;
     string                     _scheduler_member_id;
     bool                       _is_active;
+    bool                       _is_exclusive;
     bool                       _is_backup;
     time_t                     _last_heart_beat;
     time_t                     _next_heart_beat;
-    bool                       _activity_stolen;
+    bool                       _is_exclusiveness_stolen;
     Command                    _heart_beat_command;
     string                     _heart_beat_command_string;
     Async_operation*           _current_operation;
