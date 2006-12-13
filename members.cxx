@@ -353,6 +353,15 @@ bool Inactive_scheduler_watchdog::check_exclusive_schedulers_heart_beat( Transac
 
     if( select.eof() )
     {
+        other_member_id = _scheduler_member->empty_member_id();
+
+        if( _other_scheduler._member_id != _scheduler_member->empty_member_id() )
+        {
+            _log->info( message_string( "SCHEDULER-805" ) );
+            _other_scheduler = Other_scheduelr();
+            _other_scheduler._member_id = _scheduler_member->empty_member_id()
+        }
+
         none_is_exclusive = true;   // Kein Scheduler ist exklusiv, 
         _is_scheduler_up = false;   // aber der Scheduler ist auch nicht hochgefahren (Satz mit empty_member_id() fehlt)
     }
@@ -371,7 +380,7 @@ bool Inactive_scheduler_watchdog::check_exclusive_schedulers_heart_beat( Transac
         {
             if( _other_scheduler._member_id != other_member_id )
             {
-                _log->info( message_string( "SCHEDULER-805" ) );
+                _log->info( message_string( "SCHEDULER-801", other_member_id ) );
                 _other_scheduler = Other_scheduler();
                 _other_scheduler._member_id = other_member_id;
             }
@@ -856,20 +865,38 @@ bool Scheduler_member::wait_until_is_scheduler_up()
 {
     _log->info( message_string( "SCHEDULER-800" ) );
 
-    while( _spooler->_state_cmd != Spooler::sc_terminate  &&  !is_scheduler_up() ) 
-    {
-        _spooler->wait();
-        _spooler->_connection_manager->async_continue();
-        _spooler->run_check_ctrl_c();
-    }
+    while( _spooler->_state_cmd != Spooler::sc_terminate  &&  !is_scheduler_up() )  _spooler->simple_wait_step();
 
     bool ok = is_scheduler_up();
 
-    if( ok )
+    if( ok )  assert_database_integrity( __FUNCTION__ );
+
+    return ok;
+}
+
+//-----------------------------------------------------------Scheduler_member::wait_until_is_active
+
+bool Scheduler_member::wait_until_is_active()
+{
+    if( !is_scheduler_up() ) _log->info( message_string( "SCHEDULER-800" ) );
+        else  _log->info( message_string( __FUNCTION__ ) );
+
+    bool was_scheduler_up = is_scheduler_up();
+
+    while( _spooler->_state_cmd != Spooler::sc_terminate  &&  !is_active() )  
     {
-        Transaction ta ( db() );
-        if( !check_database_integrity( &ta ) )  z::throw_xc( "SCHEDULER-364", __FUNCTION__ );
+        if( was_scheduler_up  &&  !is_scheduler_up() ) 
+        {
+            _log->info( message_string( "SCHEDULER-802" ) );
+            was_scheduler_up = false; 
+        }
+
+        _spooler->simple_wait_step();
     }
+
+    bool ok = is_active();
+
+    if( ok )  assert_database_integrity( __FUNCTION__ );
 
     return ok;
 }
@@ -878,23 +905,11 @@ bool Scheduler_member::wait_until_is_scheduler_up()
 
 bool Scheduler_member::wait_until_is_exclusive()
 {
-    if( exclusive_member_id() == "" )  _log->info( message_string( "SCHEDULER-800" ) );
-                                 else  _log->info( message_string( "SCHEDULER-801", exclusive_member_id() ) );
+    wait_until_is_active();
 
-    bool was_scheduler_up = is_scheduler_up();
+    if( exclusive_member_id() != "" )  _log->info( message_string( "SCHEDULER-801", exclusive_member_id() ) );
 
-    while( _spooler->_state_cmd != Spooler::sc_terminate  &&  !is_exclusive() )  
-    {
-        if( was_scheduler_up  &&  !is_scheduler_up() ) 
-        {
-            _log->info( message_string( "SCHEDULER-802" ) );
-            was_scheduler_up = false; 
-        }
-
-        _spooler->wait();
-        _spooler->_connection_manager->async_continue();
-        _spooler->run_check_ctrl_c();
-    }
+    while( _spooler->_state_cmd != Spooler::sc_terminate  &&  !is_exclusive() )  _spooler->simple_wait_step();
 
     bool ok = is_exclusive();
 
@@ -1125,11 +1140,22 @@ bool Scheduler_member::try_to_heartbeat_member_record( Transaction* ta, bool db_
     return record_is_updated;
 }
 
+//------------------------------------------------------Scheduler_member::assert_database_integrity
+
+void Scheduler_member::assert_database_integrity( const string& message_text )
+{
+    for( Retry_transaction ta ( db(), outer_transaction ); ta.enter_loop(); ta++ ) try
+    {
+        if( !check_database_integrity( &ta ) )  z::throw_xc( "SCHEDULER-364", message_text );
+    }
+    catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", x ) ); }
+}
+
 //-------------------------------------------------------Scheduler_member::check_database_integrity
 
-bool Scheduler_member::check_database_integrity( Transaction* ta )
+bool Scheduler_member::check_database_integrity( Transaction* outer_transaction )
 {
-    assert( ta );
+    bool ok = false;
 
     S sql_stmt;
     sql_stmt << "select 1, count( `exclusive` )"
@@ -1141,17 +1167,17 @@ bool Scheduler_member::check_database_integrity( Transaction* ta )
                 "  where `scheduler_member_id`=" << sql::quoted( empty_member_id() );
 
     
-    Any_file result = ta->open_result_set( sql_stmt, __FUNCTION__ );    // In _einem_ Snapshot abfragen
+    Any_file result = ta.open_result_set( sql_stmt, __FUNCTION__ );    // In _einem_ Snapshot abfragen
 
     int exclusive_count = result.get_record().as_int( 1 );
     int empty_count     = result.get_record().as_int( 1 );
 
-    bool ok = exclusive_count == 1 && empty_count == 1  ||
-              exclusive_count == 0 && empty_count == 0;
+    ok = exclusive_count == 1 && empty_count == 1  ||
+         exclusive_count == 0 && empty_count == 0;
     if( !ok )
     {
         _log->error( message_string( "SCHEDULER-808", S() << "exclusive_count=" << exclusive_count << " empty_count=" << empty_count ) );
-        mark_as_inactive( ta );
+        mark_as_inactive( &ta );
     }
 
     return ok;

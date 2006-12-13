@@ -1866,6 +1866,8 @@ void Spooler::load_arg()
             else
             if( opt.flag      ( "backup"                 ) )  _is_backup_member = opt.set();
             else
+            if( opt.flag      ( "exclusive"              ) )  _is_exclusive_member = opt.set();
+            else
             if( opt.flag      ( "heart-beat"             ) )  _with_heart_beat = opt.set();
             else
             //if( opt.flag      ( "member-id"              ) )  _scheduler_member_id = opt.set();
@@ -2384,7 +2386,12 @@ void Spooler::start_scheduler_member()
         ok = _scheduler_member->wait_until_is_scheduler_up();
     }
     
-    if( ok  &&  !_scheduler_member->is_exclusive() )
+    if( ok  &&  !_scheduler_member->is_active() )
+    {
+        ok = _scheduler_member->wait_until_is_active();
+    }
+
+    if( ok  &&  _is_exclusive_member  &&  !_scheduler_member->is_exclusive() )
     {
         ok = _scheduler_member->wait_until_is_exclusive();
     }
@@ -2906,6 +2913,15 @@ void Spooler::wait()
     Wait_handles wait_handles = _wait_handles;
     wait( &wait_handles, latter_day, NULL, latter_day, NULL );
     wait_handles.clear();
+}
+
+//------------------------------------------------------------------------Spooler::simple_wait_step
+
+void Spooler::simple_wait_step()
+{
+    wait();
+    _connection_manager->async_continue();
+    run_check_ctrl_c();
 }
 
 //------------------------------------------------------------------------------------Spooler::wait

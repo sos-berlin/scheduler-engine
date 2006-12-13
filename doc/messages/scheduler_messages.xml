@@ -3125,7 +3125,7 @@
 
         <message code="SCHEDULER-805" weight="info">
             <text xml:lang="en">
-                <title>No Scheduler is active</title>
+                <title>No Scheduler is exclusive</title>
             </text>
         </message>
 

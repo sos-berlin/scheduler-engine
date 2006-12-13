@@ -55,6 +55,7 @@ struct Scheduler_member : Async_operation, Scheduler_object
 
     bool                        start                       ();
     bool                        wait_until_is_scheduler_up  ();
+    bool                        wait_until_is_active        ();
     bool                        wait_until_is_exclusive     ();
     bool                        do_heart_beat               ( Transaction*, bool db_record_marked_active );
     bool                        do_exclusive_heart_beat     ( Transaction* );
@@ -78,6 +79,7 @@ struct Scheduler_member : Async_operation, Scheduler_object
     bool                        check_empty_member_record  ();
     void                        insert_member_record        ( Transaction* );
     void                        lock_member_records         ( Transaction*, const string& member1_id, const string& member2_id );
+    void                        assert_database_integrity   ( const string& message_text );
     bool                        check_database_integrity    ( Transaction* );
     bool                        try_to_heartbeat_member_record( Transaction*, bool db_record_marked_active );
     void                        set_command_for_all_schedulers_but_me( Transaction*, const string& where, Command );

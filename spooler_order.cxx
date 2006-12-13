@@ -469,6 +469,7 @@ Order::State normalized_state( const Order::State& state )
 void Job_chain::load_orders_from_database()
 {
     if( !_orders_recoverable )  return;
+    _spooler->assert_is_exclusive();
     
     if( !_spooler->_db  ||  !_spooler->_db->opened() )  
     {
@@ -1251,8 +1252,17 @@ string Order::string_id( const Id& id )
 
 bool Order::is_immediately_processable( const Time& now )
 {
+    // select ... from scheduler_orders  where not suspended and replacement_for is null and setback is null 
+    // scheduler_orders.processable := !_on_blacklist && !_suspende
+
+    return _setback <= now  &&  is_processable();
+}
+
+//----------------------------------------------------------------Order::is_immediately_processable
+
+bool Order::is_processable()
+{
     if( _on_blacklist )     return false;  
-    if( _setback > now )    return false;
     if( _suspended )        return false;
     if( _task )             return false;               // Schon in Verarbeitung
     if( _replacement_for )  return false;

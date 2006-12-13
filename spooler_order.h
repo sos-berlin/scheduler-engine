@@ -47,6 +47,7 @@ struct Order : Com_order,
     void                        attach_task             ( Task* );
     void                        assert_no_task          ();
     bool                        is_immediately_processable( const Time& now = Time() );
+    bool                        is_processable          ();
     void                        open_log                ();
     void                        close                   ();
 
