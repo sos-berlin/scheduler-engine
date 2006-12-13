@@ -231,6 +231,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-362", "Scheduler aborts because it has become inactive" },
     { "SCHEDULER-363", "Error when creating SQL table $1: $2" },
     { "SCHEDULER-364", "Database integrity is broken" },
+    { "SCHEDULER-365", "Illegal character in -id=$1" },
     { "SCHEDULER-900", "Scheduler $1 is starting with $2, session_id=$4, pid=$3" },
     { "SCHEDULER-902", "state=$1" },
     { "SCHEDULER-904", "Tasks have $1s to terminate" },

@@ -240,6 +240,7 @@ struct Spooler : Object,
 
     // Aufrufe für andere Threads:
     Thread_id                   thread_id                   () const                            { return _thread_id; }
+    void                    set_id                          ( const string& );
     const string&               id                          () const                            { return _spooler_id; }
     string                      id_for_db                   () const                            { return _spooler_id.empty()? "-" : _spooler_id; }
     string                      http_url                    () const;

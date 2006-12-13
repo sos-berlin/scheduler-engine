@@ -531,7 +531,7 @@ Spooler::Spooler()
 : 
     Scheduler_object( this, this, Scheduler_object::type_scheduler ),
     _zero_(this+1), 
-    _version(""),
+    _version(VER_PRODUCTVERSION_STR),
     _security(this),
     _communication(this), 
     _base_log(this),
@@ -657,6 +657,14 @@ Security::Level Spooler::security_level( const Ip_address& host )
     }
 
     return result;
+}
+
+//----------------------------------------------------------------------------------Spooler::set_id
+
+void Spooler::set_id( const string& id )
+{
+    if( id.find( '/' ) != string::npos )  z::throw_xc( "SCHEDULER-365", id );
+    _spooler_id = id;
 }
 
 //--------------------------------------------------------------------------------Spooler::http_url
@@ -1710,7 +1718,7 @@ void Spooler::load_arg()
 
     string log_level = as_string( _log_level );
 
-    _spooler_id                 =            read_profile_string    ( _factory_ini, "spooler", "id"                 );
+    set_id                      (            read_profile_string    ( _factory_ini, "spooler", "id"                 ) );
     _config_filename            =            read_profile_string    ( _factory_ini, "spooler", "config"             );
     _html_directory             = subst_env( read_profile_string    ( _factory_ini, "spooler", "html_dir"           ) );
     _log_directory              =            read_profile_string    ( _factory_ini, "spooler", "log-dir"            );  // veraltet
@@ -1821,7 +1829,7 @@ void Spooler::load_arg()
             else
             if( opt.with_value( "cd"               ) )  { string dir = opt.value(); if( chdir( dir.c_str() ) )  throw_errno( errno, "chdir", dir.c_str() ); } //_directory = dir; }
             else
-            if( opt.with_value( "id"               ) )  _spooler_id = opt.value();
+            if( opt.with_value( "id"               ) )  set_id( opt.value() );
             else
             if( opt.with_value( "log-dir"          ) )  _log_directory = opt.value(),  _log_directory_as_option_set = true;
             else

@@ -2303,6 +2303,12 @@
             </text>
         </message>
 
+        <message code="SCHEDULER-365">
+            <text xml:lang="en">
+                <title>Illegal character in -id=<p1/></title>
+            </text>
+        </message>
+
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->
