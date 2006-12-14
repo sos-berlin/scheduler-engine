@@ -39,12 +39,12 @@ struct Order : Com_order,
 
     // Scheduler_object:
     Prefix_log*                 log                     ()                                          { return _log; }
-    void                        print_xml_child_elements_for_event( ostream*, Scheduler_event* );
+    void                        print_xml_child_elements_for_event( String_stream*, Scheduler_event* );
 
 
     void                        init                    ();
     void                        update_database         ();
-    void                        attach_task             ( Task* );
+    bool                        attach_task             ( Task* );
     void                        assert_no_task          ();
     bool                        is_immediately_processable( const Time& now = Time() );
     bool                        is_processable          ();
@@ -293,6 +293,7 @@ struct Job_chain_node : Com_job_chain_node
 
     Job_chain_node*            _next_node;              // Folgeknoten
     Job_chain_node*            _error_node;             // Fehlerknoten
+    Job_chain*                 _job_chain;
 
     ptr<Job>                   _job;                    // NULL: Kein Job, Auftrag endet
     bool                       _file_order_sink_remove; // <file_order_sink remove="yes"/>
@@ -391,11 +392,12 @@ struct Job_chain : Com_job_chain, Scheduler_object
     bool                       _visible;
 
 
-    typedef list< ptr<Job_chain_node> >  Chain;
-    Chain                      _chain;
-
     typedef stdext::hash_map< string, Order* >   Order_map;
     Order_map                  _order_map;
+
+  public:
+    typedef list< ptr<Job_chain_node> >  Chain;
+    Chain                      _chain;
 };
 
 //--------------------------------------------------------------------------------Internal_priority
@@ -437,6 +439,7 @@ struct Order_queue : Com_order_queue
     bool                        empty                   ()                                          { return _queue.empty(); }
     bool                        empty                   ( const Job_chain* job_chain )              { return order_count( job_chain ) == 0; }
     Order*                      first_order             ( const Time& now );
+    Order*                      load_next_processable_order_from_database();
     bool                        has_order               ( const Time& now )                         { return first_order(now) != NULL; }
     ptr<Order>                  get_order_for_processing( const Time& now );
     Time                        next_time               ();

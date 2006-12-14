@@ -148,7 +148,7 @@ struct Task : Object,
     Web_service*                web_service                 () const;
     Web_service*                web_service_or_null         () const                                { return _web_service; }
 
-    void                    set_order                       ( Order* );
+    bool                    set_order                       ( Order* );
     Order*                      take_order                  ( const Time& now );
     void                        postprocess_order           ( bool spooler_process_result );
 

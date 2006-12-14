@@ -234,7 +234,7 @@ struct Spooler : Object,
                                ~Spooler                     ();
 
     // Scheduler_object:
-    void                        print_xml_child_elements_for_event( ostream*, Scheduler_event* );
+    void                        print_xml_child_elements_for_event( String_stream*, Scheduler_event* );
     Prefix_log*                 log                         ()                                  { return &_log; }
 
 
@@ -331,6 +331,7 @@ struct Spooler : Object,
     void                        check_scheduler_member      ();
     bool                        is_active                   ();
     bool                        has_exclusiveness           ();
+    bool                        is_distributed              ();
     void                        assert_has_exclusiveness    ( const string& message_text );
     string                      session_id                  ()                                  { return _session_id; }
   //void                        start_threads               ();

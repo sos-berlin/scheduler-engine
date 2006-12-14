@@ -240,10 +240,10 @@ struct Headers
     void                        set                         ( const string& name, const string& value );
     void                        set_unchecked               ( const string& name, const string& value );
     void                        set_default                 ( const string& name, const string& value );
-    void                        print                       ( ostream* ) const;
-    void                        print                       ( ostream*, const Map::const_iterator& ) const;
-    void                        print                       ( ostream*, const string& header_name ) const;
-    void                        print_and_remove            ( ostream*, const string& header_name );
+    void                        print                       ( String_stream* ) const;
+    void                        print                       ( String_stream*, const Map::const_iterator& ) const;
+    void                        print                       ( String_stream*, const string& header_name ) const;
+    void                        print_and_remove            ( String_stream*, const string& header_name );
     void                    set_content_type_parameter      ( const string& name, const string& value );
     void                    set_charset_name                ( const string& value )                 { set_content_type_parameter( "charset", value ); }
     string                      charset_name                () const                                { return get_content_type_parameter( get( "Content-Type" ), "charset" ); }

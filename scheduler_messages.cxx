@@ -338,6 +338,8 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-808", "DATABASE INTEGRITY IS BROKEN" },
     { "SCHEDULER-809", "Scheduler is up (or is not properly terminated)" },
     { "SCHEDULER-811", "Executing command read from database: $1" },
+    { "SCHEDULER-812", "Just before processing, order has been removed in database before processing" },
+    { "SCHEDULER-813", "Just before processing, order has been occupied by Scheduler $1" },
     {}
 };
 } //namespace sos

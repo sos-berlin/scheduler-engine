@@ -799,7 +799,7 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
 
 //------------------------------------------------------Spooler::print_xml_child_elements_for_event
 
-void Spooler::print_xml_child_elements_for_event( ostream* s, Scheduler_event* )
+void Spooler::print_xml_child_elements_for_event( String_stream* s, Scheduler_event* )
 {
     *s << "<state";
 

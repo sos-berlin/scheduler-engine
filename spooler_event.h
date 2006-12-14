@@ -55,7 +55,7 @@ struct Scheduler_event
     xml::Document_ptr           dom                         ();
     xml::Document_ptr           mail_dom                    ( const xml::Document_ptr& event = xml::Document_ptr() );  // Default: dom()
     void                        make_xml                    ();
-    void                        print_xml                   ( ostream* );
+    void                        print_xml                   ( String_stream* );
     const string&               xml                         () const                                { return _xml; }
   //int                         send_mail                   ( const xml::Document_ptr& mail  = xml::Document_ptr() );  // Default: mail_dom()
     int                         send_mail                   ( const Mail_defaults& );

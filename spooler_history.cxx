@@ -370,6 +370,7 @@ void Spooler_db::create_tables_when_needed()
                             "\"PAYLOAD\"     clob,"
                             "\"INITIAL_STATE\" varchar(100),"               
                             "\"RUN_TIME\"    clob,"
+                            "\"AT\"          datetime,"
                             "\"ORDER_XML\"   clob,"
                             "primary key( \"SPOOLER_ID\", \"JOB_CHAIN\", \"ID\" )" );
 
@@ -1528,6 +1529,12 @@ void Spooler_db::update_order( Order* order )
             throw;
         }
     }
+}
+
+//---------------------------------------------------------Transaction::occupy_order_for_processing
+
+void Transaction::occupy_order_for_processing()
+{
 }
 
 //----------------------------------------------------------------------------Spooler_db::read_task

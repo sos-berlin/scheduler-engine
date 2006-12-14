@@ -570,8 +570,9 @@ Job_chain_node* Job_chain::add_job( Job* job, const Order::State& state, const O
 
     ptr<Job_chain_node> node = new Job_chain_node;
 
-    node->_job   = job;
-    node->_state = state;
+    node->_job_chain = this;
+    node->_job       = job;
+    node->_state     = state;
 
     if( node->_state.is_missing() )  node->_state = job->name();      // Parameter state nicht angegeben? Default ist der Jobname
 
@@ -1069,7 +1070,86 @@ Order* Order_queue::first_order( const Time& now )
         if( order->next_time() > now )  break;
     }
 
+    if( !result  &&  _spooler->is_distributed() )
+    {
+        result = load_next_processable_order_from_database();
+    }
+
     return result;
+}
+
+//-------------------------------------------Order_queue::load_next_processable_order_from_database
+
+Order* Order_queue::load_next_processable_order_from_database()
+{
+    Time       now = Time::now();
+    ptr<Order> order;
+
+    S select_sql;
+    select_sql << "select %limit(1) `id`, `job_chain`, `priority`, `state`, `processable`, `state_text`, `titlte`, `created_time`, `initial_state`"
+                    "  from " << _spooler->_orders_tablename <<
+                    "  where `spooler_id`=" << sql::quoted( _spooler->id_for_db() ) <<
+                       " ( ";
+
+    bool any_job_chain = false;
+    Z_FOR_EACH( Spooler::Job_chain_map, _spooler->_job_chain_map, jc )
+    {
+        Job_chain* job_chain = jc->second;
+
+        Z_FOR_EACH( Job_chain::Chain, job_chain->_chain, n )
+        {
+            Job_chain_node* node = *n;
+            assert( node->_job == _job );
+
+            if( any_job_chain )  select_sql << " or ";
+            any_job_chain = true;
+
+            select_sql << "`job_chain`="  << sql::quoted( node->_job_chain->name() ) <<
+                     " and `state`="      << sql::quoted( string_from_variant( node->_state ) );
+        }
+    }
+
+
+    select_sql << ") and `processable` is not null"
+                   " and ( `at`<={ts'" << now.as_string( Time::without_ms ) << "'} or `at` is null )"
+                "  order by `ordering`";
+
+    for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
+    {
+        Any_file result_set = ta.open_result_set( select_sql );
+
+        while( !result_set.eof() )
+        {
+            Record record   = result_set.get_record();
+            string order_id = record.as_string( "id" );
+
+            try
+            {
+                Job_chain* job_chain = _spooler->job_chain( record.as_string( "job_chain" ) );
+
+                // Folgende Zeilen in Funktion auslagern:
+                order = new Order( _spooler, record, 
+                                              _spooler->_db->read_orders_clob( job_chain->name(), order_id, "payload"   ), 
+                                              _spooler->_db->read_orders_clob( job_chain->name(), order_id, "run_time"  ),
+                                              _spooler->_db->read_orders_clob( job_chain->name(), order_id, "order_xml" ) );
+
+                order->_order_xml_modified  = false;            
+                order->_state_text_modified = false; 
+                order->_title_modified      = false;
+                order->_state_text_modified = false;
+                order->_is_in_database      = true;
+
+                order->add_to_job_chain( job_chain ); 
+            }
+            catch( exception& x )
+            {
+                _log->error( message_string( "SCHEDULER-295", order_id, x ) ); 
+            }
+        }
+    }
+    catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", x ) ); }
+
+    return order;
 }
 
 //------------------------------------------------------------Order_queue::get_order_for_processing
@@ -1271,9 +1351,16 @@ bool Order::is_processable()
     return true;
 }
 
+//----------------------------------------------------------------------------Order::assert_no_task
+
+void Order::assert_no_task()
+{
+    if( _task )  z::throw_xc( "SCHEDULER-217", obj_name(), _task->obj_name() );
+}
+
 //-------------------------------------------------------------------------------Order::attach_task
 
-void Order::attach_task( Task* task )
+bool Order::attach_task( Task* task )
 {
     assert( task );
     assert_no_task();   // Vorsichtshalber
@@ -1287,19 +1374,109 @@ void Order::attach_task( Task* task )
         _delay_storing_until_processing = false;
     }
 
-    _task = task;
+    bool is_occupied = false;
 
-    if( _is_virgin  &&  _http_operation )  _http_operation->on_first_order_processing( task );
+    for( Retry_transaction ta ( db(), outer_transaction ); ta.enter_loop(); ta++ ) try
+    {
+        is_occupied = db_occupy_order_for_processing( &ta );
+    }
+    catch( exception& x ) { _log.error( "Error in " << __FUNCTION__ ); ta.reopen_database_after_error( x ); }
 
-    _is_virgin = false;
-    _is_virgin_in_this_run_time = false;
+    if( is_occupied )
+    {
+        _task = task;
+
+        if( _is_virgin  &&  _http_operation )  _http_operation->on_first_order_processing( task );
+
+        _is_virgin = false;
+        _is_virgin_in_this_run_time = false;
+    }
+    else
+    {
+        int AUFTRAG_LOSCHEN;
+    }
+    
+    return is_occupied;
 }
 
-//----------------------------------------------------------------------------Order::assert_no_task
+//------------------------------------------------------------------Order::db_occupy_for_processing
 
-void Order::assert_no_task()
+bool Order::db_occupy_for_processing( Transaction* ta )
 {
-    if( _task )  z::throw_xc( "SCHEDULER-217", obj_name(), _task->obj_name() );
+    sql::Update_stmt update ( _spooler->_db->_db_descr, _spooler->_orders_tablename );
+
+    update[ "processing_scheduler_member_id" ] = _spooler->scheduler_member_id();
+
+    update.and_where_condition( "spooler_id", _spooler->id_for_db() );
+    update.and_where_condition( "job_chain" , job_chain()->name() );
+    update.and_where_condition( "id"        , id().as_string()    );
+    update.and_where_condition( "processing_scheduler_member_id", sql::null_value );
+
+    bool is_occupied = ta->try_execute_single( update, __FUNCTION__ );
+    
+    if( !is_occupied )
+    {
+        update.remove_where_condition( "processing_scheduler_member_id" );
+        db_show_occupation( ta, log_debug9 );
+    }
+
+    return is_occupied;
+}
+
+//---------------------------------------------------------------------Order::db_release_processing
+
+void Order::db_release_processing( Transaction* ta )
+{
+    sql::Update_stmt update ( _spooler->_db->_db_descr, _spooler->_orders_tablename );
+
+    update[ "processing_scheduler_member_id" ] = null_value;
+
+    update.and_where_condition( "spooler_id", _spooler->id_for_db() );
+    update.and_where_condition( "job_chain" , job_chain()->name() );
+    update.and_where_condition( "id"        , id().as_string()    );
+    update.and_where_condition( "processing_scheduler_member_id", _spooler->scheduler_member_id() );
+
+    bool is_released = ta->try_execute_single( update, __FUNCTION__ );
+    
+    if( !is_released )
+    {
+        _log->error( "Unable to release order" );
+        db_show_occupation( ta );
+    }
+
+    return is_occupied;
+}
+
+//------------------------------------------------------------------------Order::db_show_occupation
+
+void Order::db_show_occupation( Transaction* ta, Log_level log_level )
+{
+    Any_file result_set = ta->open_result_set( "select `processing_scheduler_member_id`"
+        "  from " << _spooler->_orders_tablename 
+        "  where " << update.where();
+    if( result_set.eof() )
+    {
+        _log->log( log_level, message_string( "SCHEDULER-812" ) );
+    }
+    else
+    {
+        // ?Haben wir eine Satzsperre oder kann ein anderer Scheduler processing_scheduler_member_id schon wieder auf null gesetzt haben?
+        Record record = result_set.get_record();
+        _log->log( log_level, message_string( "SCHEDULER-813", record.as_string(0) ) );
+    }
+}
+
+//----------------------------------------------------------------------------------Order::db_where
+
+string Order::db_where()
+{
+    sql::Where_clause where;
+
+    where.and_where_condition( "spooler_id", _spooler->id_for_db() );
+    where.and_where_condition( "job_chain" , job_chain()->name() );
+    where.and_where_condition( "id"        , id().as_string()    );
+
+    return where;
 }
 
 //----------------------------------------------------------------------------------Order::open_log
@@ -1592,7 +1769,7 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
 
 //--------------------------------------------------------Order::print_xml_child_elements_for_event
 
-void Order::print_xml_child_elements_for_event( ostream* s, Scheduler_event* )
+void Order::print_xml_child_elements_for_event( String_stream* s, Scheduler_event* )
 {
     *s << "<order";
     

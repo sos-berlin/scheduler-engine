@@ -232,7 +232,7 @@ void Headers::set_content_type_parameter( const string& name, const string& valu
 
 //-----------------------------------------------------------------------------------Headers::print
 
-void Headers::print( ostream* s ) const
+void Headers::print( String_stream* s ) const
 {
     Z_FOR_EACH_CONST( Map, _map, h )
     {
@@ -242,7 +242,7 @@ void Headers::print( ostream* s ) const
 
 //-----------------------------------------------------------------------------------Headers::print
 
-void Headers::print( ostream* s, const string& header_name ) const
+void Headers::print( String_stream* s, const string& header_name ) const
 {
     Map::const_iterator it = _map.find( lcase( header_name ) );
     if( it != _map.end() )  print( s, it );
@@ -250,7 +250,7 @@ void Headers::print( ostream* s, const string& header_name ) const
 
 //-----------------------------------------------------------------------------------Headers::print
 
-void Headers::print( ostream* s, const Headers::Map::const_iterator& it ) const
+void Headers::print( String_stream* s, const Headers::Map::const_iterator& it ) const
 {
     if( it != _map.end() )
     {
@@ -260,7 +260,7 @@ void Headers::print( ostream* s, const Headers::Map::const_iterator& it ) const
 
 //------------------------------------------------------------------------Headers::print_and_remove
 
-void Headers::print_and_remove( ostream* s, const string& header_name )
+void Headers::print_and_remove( String_stream* s, const string& header_name )
 {
     Map::iterator it = _map.find( lcase( header_name ) );
     if( it != _map.end() )

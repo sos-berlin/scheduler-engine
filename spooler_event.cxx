@@ -339,7 +339,7 @@ void Scheduler_event_manager::remove_get_events_command_response( Get_events_com
 
 //-----------------------------------------------------------------------------Scheduler_event::xml
 
-void Scheduler_event::print_xml( ostream* s )
+void Scheduler_event::print_xml( String_stream* s )
 {
     *s << "<event";
     *s << " time=\"" << timestamp().xml_value() << '"';
@@ -351,7 +351,7 @@ void Scheduler_event::print_xml( ostream* s )
     //}
 
     *s << '>';
-    int length_without_children = s->tellp(); 
+    int length_without_children = s->length(); 
 
     if( _object )
     {
@@ -359,9 +359,9 @@ void Scheduler_event::print_xml( ostream* s )
     }
 
 
-    if( length_without_children == s->tellp() )
+    if( length_without_children == s->length() )
     {
-        s->seekp( length_without_children - 1 );
+        s->truncate( length_without_children - 1 );
         *s << "/>";
     }
     else

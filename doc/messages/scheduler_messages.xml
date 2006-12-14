@@ -3177,6 +3177,17 @@
             </text>
         </message>
 
+        <message code="SCHEDULER-812">
+            <text xml:lang="en">
+                <title>Just before processing, order has been removed in database before processing</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-813">
+            <text xml:lang="en">
+                <title>Just before processing, order has been occupied by Scheduler <p1/></title>
+            </text>
+        </message>
     </messages>
     
 </messages>

@@ -512,7 +512,7 @@ bool Wait_handles::wait_until_2( const Time& until, const Object* wait_for_objec
                     console_line << ")";
                 }
 
-                string l = console_line.str().substr( 0, console_width() - 1 );
+                string l = console_line.to_string().substr( 0, console_width() - 1 );
                 console_line_length = l.length();
                 l += '\r';
                 cerr << l << flush;

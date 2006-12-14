@@ -1851,8 +1851,8 @@ ptr<Task> Job::task_to_start()
             {
                 task = create_task( NULL, "", 0 ); 
     
-                task->_trigger_files = trigger_files( task );     // Vor set_order()!
-                task->set_order( order );
+                task->_trigger_files = trigger_files( task );   // Vor set_order()!
+                task->set_order( order );                       // is_distributed() => Nimmt den Auftrag nur, wenn er in der Datenbank belegbar ist
                 task->_let_run |= ( cause == cause_period_single );
             }
 

@@ -1185,7 +1185,12 @@ bool Task::do_something()
                                         {
                                             if( Order* order = _job->request_order( obj_name() ) )
                                             {
-                                                set_order( order );
+                                                bool ok = set_order( order );
+                                                if( !ok )
+                                                {
+                                                    set_state( s_running_waiting_for_order );
+                                                    break;
+                                                }
                                             }
                                             else
                                             {
@@ -1645,27 +1650,35 @@ bool Task::operation__end()
 
 //---------------------------------------------------------------------------------Task::set_order
 
-void Task::set_order( Order* order )
+bool Task::set_order( Order* order )
 {
     // Wird von Job gerufen, wenn Task wegen neuen Auftrags startet
 
+    bool ok = false;
+
     if( _order  &&  _order->is_file_order() )  _trigger_files = "";
+
+    if( order ) 
+    {
+        ok = _order->attach_task( this );            // Auftrag war schon bereitgestellt. Exception von insert_oder()
+        if( ok )  if( order->is_file_order() )  _trigger_files = order->file_path();
+            else  order = NULL;
+    }
 
     _order = order;
     _order_for_task_end = order;                // Damit bei Task-Ende im Fehlerfall noch der Auftrag gezeigt wird, s. dom_element()
     
-    if( _order ) 
-    {
-        _order->attach_task( this );            // Auftrag war schon bereitgestellt. Exception von insert_oder()
-        if( order->is_file_order() )  _trigger_files = order->file_path();
-    }
+    return ok;
 }
 
 //---------------------------------------------------------------------------------Task::take_order
 
 Order* Task::take_order( const Time& now )
 {
-    if( !_order )  THREAD_LOCK_DUMMY( _lock )  set_order( _job->order_queue()->get_order_for_processing( now ) );
+    if( !_order )
+    {
+        set_order( _job->order_queue()->get_order_for_processing( now ) );
+    }
 
     return _order;
 }

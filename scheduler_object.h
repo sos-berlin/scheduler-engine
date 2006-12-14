@@ -44,7 +44,7 @@ struct Scheduler_object
     void                    set_mail_xslt_stylesheet_path   ( const string& path )                  { _mail_xslt_stylesheet.release();  _mail_xslt_stylesheet_path = path; }
     virtual ptr<Xslt_stylesheet> mail_xslt_stylesheet       ();
     virtual Prefix_log*         log                         ()                                      = 0;
-    virtual void                print_xml_child_elements_for_event( ostream*, Scheduler_event* )  {}
+    virtual void                print_xml_child_elements_for_event( String_stream*, Scheduler_event* )  {}
 
     Spooler*                   _spooler;
     IUnknown*                  _my_iunknown;
