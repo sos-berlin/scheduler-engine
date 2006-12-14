@@ -1450,7 +1450,7 @@ void Order::db_show_occupation( Transaction* ta, Log_level log_level )
 {
     Any_file result_set = ta->open_result_set( S() << "select `processing_scheduler_member_id`"
         "  from " << _spooler->_orders_tablename
-        << db_where_clause().to_string() );
+        << db_where_clause().where_string() );
 
     if( result_set.eof() )
     {
