@@ -752,7 +752,7 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
     state_element.setAttribute( "resume_at", _last_resume_at.as_string() );
 
     state_element.setAttribute( "active"   , is_active() );
-    state_element.setAttribute( "exclusive", is_exclusive() );
+    state_element.setAttribute( "exclusive", has_exclusiveness() );
 
 #   ifdef Z_UNIX
     {
@@ -2322,7 +2322,8 @@ void Spooler::start()
     {
         start_scheduler_member();
         wait_for_scheduler_member();
-        if( _state_cmd == sc_terminate )  return;
+        execute_state_cmd();
+        return;
     }
 
     _scheduler_is_up = true;
@@ -2380,6 +2381,7 @@ void Spooler::start_scheduler_member()
     _scheduler_member = Z_NEW( Scheduler_member( this ) );
   //_scheduler_member->set_member_id( _scheduler_member_id );
     _scheduler_member->set_backup( _is_backup_member );
+  //_scheduler_member->demand_exclusiveness( _is_exclusive );
     _scheduler_member->start();     // Wartet, bis entschieden ist, dass wir aktiv werden
 }
 
@@ -2387,7 +2389,7 @@ void Spooler::start_scheduler_member()
 
 void Spooler::wait_for_scheduler_member()
 {
-    Z_LOGI( "scheduler", __FUNCTION__ << "\n" );
+    Z_LOGI2( "scheduler", __FUNCTION__ << "\n" );
 
     bool ok = true;
 
@@ -2401,12 +2403,12 @@ void Spooler::wait_for_scheduler_member()
         ok = _scheduler_member->wait_until_is_active();
     }
 
-    if( ok  &&  _is_exclusive_member  &&  !_scheduler_member->is_exclusive() )
+    if( ok  &&  _is_exclusive_member  &&  !_scheduler_member->has_exclusiveness() )
     {
-        ok = _scheduler_member->wait_until_is_exclusive();
+        ok = _scheduler_member->wait_until_has_exclusiveness();
     }
 
-    check_scheduler_member();
+    if( !_state_cmd )  check_scheduler_member();
 }
 
 //-------------------------------------------------------------------------------Spooler::is_active
@@ -2416,18 +2418,18 @@ bool Spooler::is_active()
     return !_scheduler_member || _scheduler_member->is_active();
 }
 
-//----------------------------------------------------------------------------Spooler::is_exclusive
+//----------------------------------------------------------------------------Spooler::has_exclusiveness
 
-bool Spooler::is_exclusive()
+bool Spooler::has_exclusiveness()
 {
-    return !_scheduler_member || _scheduler_member->is_exclusive();
+    return !_scheduler_member || _scheduler_member->has_exclusiveness();
 }
 
-//---------------------------------------------------------------------Spooler::assert_is_exclusive
+//---------------------------------------------------------------------Spooler::assert_has_exclusiveness
 
-void Spooler::assert_is_exclusive( const string& text )
+void Spooler::assert_has_exclusiveness( const string& text )
 {
-    if( !is_exclusive() )  z::throw_xc( "SCHEDULER-366", text );
+    if( !has_exclusiveness() )  z::throw_xc( "SCHEDULER-366", text );
 }
 
 //--------------------------------------------------------------------Spooler::run_scheduler_script
@@ -2933,6 +2935,7 @@ void Spooler::simple_wait_step()
     wait();
     _connection_manager->async_continue();
     run_check_ctrl_c();
+    //execute_state_cmd();    // Damit cmd_terminate() zu _shutdown_cmd führt
 }
 
 //------------------------------------------------------------------------------------Spooler::wait
@@ -3054,9 +3057,9 @@ void Spooler::check_scheduler_member()
     _scheduler_member->async_check_exception( "Error in Scheduler member" );
 
     _scheduler_is_up    = _scheduler_member->is_scheduler_up();
-  //_proper_termination = _scheduler_member->is_exclusive();
+  //_proper_termination = _scheduler_member->has_exclusiveness();
 
-    if( !_scheduler_member->is_active()  ||  _is_exclusive_member && !_scheduler_member->is_exclusive() )
+    if( !_scheduler_member->is_active()  ||  _is_exclusive_member && !_scheduler_member->has_exclusiveness() )
     {
         kill_all_processes();
         
@@ -3066,7 +3069,7 @@ void Spooler::check_scheduler_member()
         _scheduler_member->close();     // Scheduler-Mitglieds-Eintrag entfernen
         _scheduler_member = NULL;       // aber Eintrag für verteilten Scheduler lassen, Scheduler ist nicht herunterfahren (wird ja vom anderen aktiven Scheuler fortgesetzt)
 
-        cmd_terminate();
+        cmd_terminate( false, INT_MAX, false );
     }
 }
 
@@ -3085,7 +3088,7 @@ void Spooler::run_check_ctrl_c()
         if( _state != s_stopping )
         {
             _log.warn( message_string( "SCHEDULER-262", signal_text ) );   // "Abbruch-Signal (Ctrl-C) empfangen. Der Scheduler wird beendet.\n" );
-            cmd_terminate( false, INT_MAX, true );  // Nur dieses Mitglied des verteilten Schedulers beenden
+            cmd_terminate( false, INT_MAX, false );  // Nur dieses Mitglied des verteilten Schedulers beenden
 
             ctrl_c_pressed = 0;
             set_ctrl_c_handler( true );
@@ -3399,7 +3402,7 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line )
 
         start();
 
-        if( _state_cmd != sc_terminate )
+        if( !_shutdown_cmd )
         {
             // <commands> aus <config> ausführen:
             if( _commands_document )

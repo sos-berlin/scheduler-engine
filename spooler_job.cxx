@@ -451,7 +451,7 @@ void Job::init()
 
         _log->open();
 
-        if( _spooler->_db->opened()  &&  _spooler->is_exclusive() )  load_tasks_from_db();
+        if( _spooler->_db->opened()  &&  _spooler->has_exclusiveness() )  load_tasks_from_db();
 
         _init_called = true;
     }
@@ -717,7 +717,7 @@ void Job::signal( const string& signal_name )
 
 ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, const string& name, const Time& start_at, int id )
 {
-    _spooler->assert_is_exclusive( "create_task" );
+    _spooler->assert_has_exclusiveness( "create_task" );
     if( _remove )  z::throw_xc( "SCHEDULER-230", obj_name() );
 
     switch( _state )
@@ -761,7 +761,7 @@ ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, const
 
 void Job::load_tasks_from_db()
 {
-    _spooler->assert_is_exclusive( __FUNCTION__ );
+    _spooler->assert_has_exclusiveness( __FUNCTION__ );
 
     Time now = Time::now();
 
@@ -823,7 +823,7 @@ void Job::load_tasks_from_db()
 
 void Job::Task_queue::enqueue_task( const ptr<Task>& task )
 {
-    _spooler->assert_is_exclusive( __FUNCTION__ );    // Doppelte Sicherung
+    _spooler->assert_has_exclusiveness( __FUNCTION__ );    // Doppelte Sicherung
 
     _job->set_visible( true );
 

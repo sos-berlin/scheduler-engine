@@ -233,7 +233,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-364", "Database integrity is broken" },
     { "SCHEDULER-365", "Illegal character in -id=$1" },
     { "SCHEDULER-366", "This is a distributed, non-exclusive Scheduler, and the Operation can only be performed on an exclusive Scheduler" },
-    { "SCHEDULER-367", "Scheduler aborts because it has lost exclusiveness" },
+    { "SCHEDULER-367", "Scheduler aborts because it has lost his exclusiveness" },
     { "SCHEDULER-368", "Option $1 needs $2" },
     { "SCHEDULER-369", "Option $1 conflicts $2" },
     { "SCHEDULER-900", "Scheduler $1 is starting with $2, session_id=$4, pid=$3" },
@@ -337,6 +337,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-807", "This Scheduler is active and exclusive now" },
     { "SCHEDULER-808", "DATABASE INTEGRITY IS BROKEN" },
     { "SCHEDULER-809", "Scheduler is up (or is not properly terminated)" },
+    { "SCHEDULER-811", "Executing command read from database: $1" },
     {}
 };
 } //namespace sos

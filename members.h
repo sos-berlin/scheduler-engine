@@ -38,13 +38,14 @@ struct Scheduler_member : Async_operation, Scheduler_object
     string                      obj_name                    () const;
 
 
+  //void                    set_demand_exclusiveness        ( bool b = true )                       { assert( !_current_operation );  _demand_exclusiveness = b; }
     void                    set_backup                      ( bool b = true )                       { assert( !_current_operation );  _is_backup = b; }
 
     void                    set_member_id                   ( const string& );
     string                      member_id                   ()                                      { return _scheduler_member_id; }
 
     bool                     is_active                      ()                                      { return _is_active; }
-    bool                     is_exclusive                   ()                                      { return _is_exclusive; }
+    bool                        has_exclusiveness           ()                                      { return _has_exclusiveness; }
     bool                     is_exclusiveness_stolen        ()                                      { return _is_exclusiveness_stolen; }
     bool                     is_scheduler_up                ();
     bool                     is_backup                      ()                                      { return _is_backup; }
@@ -56,7 +57,7 @@ struct Scheduler_member : Async_operation, Scheduler_object
     bool                        start                       ();
     bool                        wait_until_is_scheduler_up  ();
     bool                        wait_until_is_active        ();
-    bool                        wait_until_is_exclusive     ();
+    bool                        wait_until_has_exclusiveness();
     bool                        do_heart_beat               ( Transaction*, bool db_record_marked_active );
     bool                        do_exclusive_heart_beat     ( Transaction* );
     void                        mark_as_inactive            ( Transaction*, bool delete_inactive_record = false, bool delete_new_active_record = false );
@@ -76,7 +77,7 @@ struct Scheduler_member : Async_operation, Scheduler_object
     void                        close_operations            ();
 
     void                        insert_scheduler_id_record  ( Transaction* );
-    bool                        check_empty_member_record  ();
+    bool                        check_empty_member_record   ();
     void                        insert_member_record        ( Transaction* );
     void                        lock_member_records         ( Transaction*, const string& member1_id, const string& member2_id );
     void                        assert_database_integrity   ( const string& message_text );
@@ -94,7 +95,8 @@ struct Scheduler_member : Async_operation, Scheduler_object
     Fill_zero                  _zero_;
     string                     _scheduler_member_id;
     bool                       _is_active;
-    bool                       _is_exclusive;
+  //bool                       _demand_exclusiveness;
+    bool                       _has_exclusiveness;
     bool                       _is_backup;
     time_t                     _last_heart_beat;
     time_t                     _next_heart_beat;

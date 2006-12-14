@@ -330,8 +330,8 @@ struct Spooler : Object,
     void                        wait_for_scheduler_member   ();
     void                        check_scheduler_member      ();
     bool                        is_active                   ();
-    bool                        is_exclusive                ();
-    void                        assert_is_exclusive         ( const string& message_text );
+    bool                        has_exclusiveness           ();
+    void                        assert_has_exclusiveness    ( const string& message_text );
     string                      session_id                  ()                                  { return _session_id; }
   //void                        start_threads               ();
     Spooler_thread*             new_thread                  ( bool free_threading = true );

@@ -11,7 +11,7 @@
     <scheduler_keyword keyword="Change log"/>
 
 
-    <change date="2006-12-13" version="2.0.161" subversion_revision="4647">
+    <change date="2006-12-13" version="2.0.162" subversion_revision="4647">
         <revision type="new" title="Backup-Scheduler">
             <description>
                 <p>
@@ -22,6 +22,9 @@
                     </li>
                     <li>
                         <scheduler_option name="backup"/>
+                    </li>
+                    <li>
+                        <scheduler_option name="install-service"/>
                     </li>
                     <li>
                         <scheduler_option name="distributed"/>
@@ -37,6 +40,12 @@
                     </li>
                     <li>
                         <scheduler_element name="terminate" attribute="all_schedulers"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="show_schedulers"/>
+                    </li>
+                    <li>
+                        <scheduler_ini_file name="factory.ini" section="spooler" entry="db_check_integrity"/>
                     </li>
                 </ul>
             </description>

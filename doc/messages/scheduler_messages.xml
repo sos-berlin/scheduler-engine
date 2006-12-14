@@ -2317,7 +2317,7 @@
 
         <message code="SCHEDULER-367">
             <text xml:lang="en">
-                <title>Scheduler aborts because it has lost exclusiveness</title>
+                <title>Scheduler aborts because it has lost his exclusiveness</title>
             </text>
         </message>
 
@@ -3168,6 +3168,12 @@
         <message code="SCHEDULER-809">
             <text xml:lang="en">
                 <title>Scheduler is up (or is not properly terminated)</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-811">
+            <text xml:lang="en">
+                <title>Executing command read from database: <p1/></title>
             </text>
         </message>
 
