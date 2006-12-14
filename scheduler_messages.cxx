@@ -236,6 +236,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-367", "Scheduler aborts because it has lost his exclusiveness" },
     { "SCHEDULER-368", "Option $1 needs $2" },
     { "SCHEDULER-369", "Option $1 conflicts $2" },
+    { "SCHEDULER-370", "Operation can only be performed on a distributed Scheduler" },
     { "SCHEDULER-900", "Scheduler $1 is starting with $2, session_id=$4, pid=$3" },
     { "SCHEDULER-902", "state=$1" },
     { "SCHEDULER-904", "Tasks have $1s to terminate" },

@@ -2333,6 +2333,12 @@
             </text>
         </message>
 
+        <message code="SCHEDULER-370">
+            <text xml:lang="en">
+                <title>Operation can only be performed on a distributed Scheduler</title>
+            </text>
+        </message>
+
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->

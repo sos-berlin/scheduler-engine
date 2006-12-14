@@ -2418,6 +2418,22 @@ bool Spooler::is_active()
     return !_scheduler_member || _scheduler_member->is_active();
 }
 
+//---------------------------------------------------------------------Spooler::assert_has_exclusiveness
+
+void Spooler::assert_is_distributed( const string& text )
+{
+    if( _scheduler_member )  z::throw_xc( "SCHEDULER-370", text );
+}
+
+//---------------------------------------------------------------------Spooler::scheduler_member_id
+
+string Spooler::scheduler_member_id()
+{
+    assert_is_distributed( __FUNCTION__ );
+
+    return _scheduler_member->member_id();
+}
+
 //----------------------------------------------------------------------------Spooler::has_exclusiveness
 
 bool Spooler::has_exclusiveness()

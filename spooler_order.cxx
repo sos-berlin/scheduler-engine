@@ -1376,11 +1376,11 @@ bool Order::attach_task( Task* task )
 
     bool is_occupied = false;
 
-    for( Retry_transaction ta ( db(), outer_transaction ); ta.enter_loop(); ta++ ) try
+    for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
     {
-        is_occupied = db_occupy_order_for_processing( &ta );
+        is_occupied = db_occupy_for_processing( &ta );
     }
-    catch( exception& x ) { _log.error( "Error in " << __FUNCTION__ ); ta.reopen_database_after_error( x ); }
+    catch( exception& x ) { _log->error( S() << "Error in " << __FUNCTION__ ); ta.reopen_database_after_error( x ); }
 
     if( is_occupied )
     {
@@ -1403,7 +1403,9 @@ bool Order::attach_task( Task* task )
 
 bool Order::db_occupy_for_processing( Transaction* ta )
 {
-    sql::Update_stmt update ( _spooler->_db->_db_descr, _spooler->_orders_tablename );
+    _spooler->assert_is_distributed( __FUNCTION__ );
+
+    sql::Update_stmt update = db_update_stmt();( _spooler->_db->_db_descr, _spooler->_orders_tablename );
 
     update[ "processing_scheduler_member_id" ] = _spooler->scheduler_member_id();
 
@@ -1425,15 +1427,10 @@ bool Order::db_occupy_for_processing( Transaction* ta )
 
 //---------------------------------------------------------------------Order::db_release_processing
 
-void Order::db_release_processing( Transaction* ta )
+bool Order::db_release_processing( Transaction* ta )
 {
-    sql::Update_stmt update ( _spooler->_db->_db_descr, _spooler->_orders_tablename );
-
-    update[ "processing_scheduler_member_id" ] = null_value;
-
-    update.and_where_condition( "spooler_id", _spooler->id_for_db() );
-    update.and_where_condition( "job_chain" , job_chain()->name() );
-    update.and_where_condition( "id"        , id().as_string()    );
+    sql::Update_stmt update = db_update_stmt();
+    update[ "processing_scheduler_member_id" ] = sql::null_value;
     update.and_where_condition( "processing_scheduler_member_id", _spooler->scheduler_member_id() );
 
     bool is_released = ta->try_execute_single( update, __FUNCTION__ );
@@ -1441,19 +1438,20 @@ void Order::db_release_processing( Transaction* ta )
     if( !is_released )
     {
         _log->error( "Unable to release order" );
-        db_show_occupation( ta );
+        db_show_occupation( ta, log_error );
     }
 
-    return is_occupied;
+    return is_released;
 }
 
 //------------------------------------------------------------------------Order::db_show_occupation
 
 void Order::db_show_occupation( Transaction* ta, Log_level log_level )
 {
-    Any_file result_set = ta->open_result_set( "select `processing_scheduler_member_id`"
-        "  from " << _spooler->_orders_tablename 
-        "  where " << update.where();
+    Any_file result_set = ta->open_result_set( S() << "select `processing_scheduler_member_id`"
+        "  from " << _spooler->_orders_tablename
+        << db_where_clause().to_string() );
+
     if( result_set.eof() )
     {
         _log->log( log_level, message_string( "SCHEDULER-812" ) );
@@ -1466,18 +1464,37 @@ void Order::db_show_occupation( Transaction* ta, Log_level log_level )
     }
 }
 
-//----------------------------------------------------------------------------------Order::db_where
+//----------------------------------------------------------------------------Order::db_update_stmt
 
-string Order::db_where()
+sql::Update_stmt Order::db_update_stmt()
 {
-    sql::Where_clause where;
-
-    where.and_where_condition( "spooler_id", _spooler->id_for_db() );
-    where.and_where_condition( "job_chain" , job_chain()->name() );
-    where.and_where_condition( "id"        , id().as_string()    );
-
-    return where;
+    sql::Update_stmt result ( &_spooler->_db->_db_descr, _spooler->_orders_tablename );
+    db_fill_where_clause( &result );
+    return result;
 }
+
+//---------------------------------------------------------------------------Order::db_where_clause
+
+sql::Where_clause Order::db_where_clause()
+{
+    sql::Where_clause result ( &_spooler->_db->_db_descr );
+
+    result.and_where_condition( "spooler_id", _spooler->id_for_db() );
+    result.and_where_condition( "job_chain" , job_chain()->name() );
+    result.and_where_condition( "id"        , id().as_string()    );
+    //db_fill_where_clause( &result );
+
+    return result;
+}
+
+//----------------------------------------------------------------------Order::db_fill_where_clause
+
+//void Order::db_fill_where_clause( sql::Where_clause* where )
+//{
+//    where->and_where_condition( "spooler_id", _spooler->id_for_db() );
+//    where->and_where_condition( "job_chain" , job_chain()->name() );
+//    where->and_where_condition( "id"        , id().as_string()    );
+//}
 
 //----------------------------------------------------------------------------------Order::open_log
 

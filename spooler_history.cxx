@@ -1531,12 +1531,6 @@ void Spooler_db::update_order( Order* order )
     }
 }
 
-//---------------------------------------------------------Transaction::occupy_order_for_processing
-
-void Transaction::occupy_order_for_processing()
-{
-}
-
 //----------------------------------------------------------------------------Spooler_db::read_task
 // Die XML-Struktur ist wie Task::dom_element(), nicht wie Job_history::read_tail()
 

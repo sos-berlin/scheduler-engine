@@ -163,6 +163,14 @@ struct Order : Com_order,
     void                        before_modify_run_time_event();
     void                        run_time_modified_event ();
 
+    sql::Update_stmt            db_update_stmt          ();
+    sql::Where_clause           db_where_clause         ();
+  //void                        db_fill_where_clause    ( sql::Where_clause* );
+    bool                        db_occupy_for_processing( Transaction* );
+    bool                        db_release_processing   ( Transaction* );
+    void                        db_show_occupation      ( Transaction*, Log_level );
+
+
     ptr<Prefix_log>            _log;
 
 
