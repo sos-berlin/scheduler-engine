@@ -18,8 +18,11 @@ struct Scheduler_member : Async_operation, Scheduler_object
         cmd_terminate_and_restart
     };
 
+    static const int            max_precedence;
+
     static string               string_from_command         ( Command );
     static Command              command_from_string         ( const string& );
+
 
 
                                 Scheduler_member            ( Spooler* );

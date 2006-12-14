@@ -1416,7 +1416,7 @@ bool Order::db_occupy_for_processing( Transaction* ta )
 {
     //_spooler->assert_is_distributed( __FUNCTION__ );
 
-    sql::Update_stmt update = db_update_stmt();( _spooler->_db->_db_descr, _spooler->_orders_tablename );
+    sql::Update_stmt update = db_update_stmt();
 
     update[ "processing_scheduler_member_id" ] = _spooler->scheduler_member_id();
 

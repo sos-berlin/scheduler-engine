@@ -1559,6 +1559,7 @@ string Spooler::state_name( State state )
         case s_stopped:             return "stopped";
         case s_loading:             return "loading";
         case s_starting:            return "starting";
+        case s_starting_waiting:    return "starting_waiting";
         case s_running:             return "running";
         case s_paused:              return "paused";
         case s_stopping:            return "stopping";
@@ -2393,22 +2394,29 @@ void Spooler::wait_for_scheduler_member()
 
     bool ok = true;
 
+    State previous_state = state();
+
     if( _is_backup_member  &&  !_scheduler_member->is_scheduler_up() ) 
     {
+        set_state( s_starting_waiting );
         ok = _scheduler_member->wait_until_is_scheduler_up();
     }
     
     if( ok  &&  !_scheduler_member->is_active() )
     {
+        set_state( s_starting_waiting );
         ok = _scheduler_member->wait_until_is_active();
     }
 
     if( ok  &&  _is_exclusive_member  &&  !_scheduler_member->has_exclusiveness() )
     {
+        set_state( s_starting_waiting );
         ok = _scheduler_member->wait_until_has_exclusiveness();
     }
 
-    if( !_state_cmd )  check_scheduler_member();
+    set_state( previous_state );
+
+    if( !_spooler->is_termination_state_cmd() )  check_scheduler_member();
 }
 
 //-------------------------------------------------------------------------------Spooler::is_active
@@ -2651,6 +2659,15 @@ void Spooler::nichts_getan( int anzahl, const string& str )
     double t = 1;
     Z_LOG2( "scheduler", "sleep(" << t << ")...\n" );
     sos_sleep( t );
+}
+
+//----------------------------------------------------------------Spooler::is_termination_state_cmd
+
+bool Spooler::is_termination_state_cmd() 
+{ 
+    return _state_cmd == sc_terminate || 
+           _state_cmd == sc_terminate_and_restart || 
+           _state_cmd == sc_let_run_terminate_and_restart; 
 }
 
 //-----------------------------------------------------------------------Spooler::execute_state_cmd

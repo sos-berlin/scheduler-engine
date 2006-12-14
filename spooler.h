@@ -201,6 +201,7 @@ struct Spooler : Object,
         s_stopped,
         s_loading,
         s_starting,
+        s_starting_waiting,
         s_running,
         s_paused,
         s_stopping,
@@ -294,6 +295,7 @@ struct Spooler : Object,
 
     void                        cmd_load_config             ( const xml::Element_ptr&, const Time& xml_mod_time, const string& source_filename );
     void                        execute_state_cmd           ();
+    bool                        is_termination_state_cmd    ();
 
     Job*                        get_job                     ( const string& job_name, bool can_be_not_initialized = false );
     Job*                        get_job_or_null             ( const string& job_name );

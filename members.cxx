@@ -21,6 +21,7 @@ const time_t                    max_heart_beat_processing_time          = Z_NDEB
 const time_t                    active_heart_beat_minimum_check_period  = heart_beat_period / 2;
 const time_t                    trauerfrist                             = 2*3600;                       // Trauerzeit, nach der Mitgliedssätze gelöscht werden
 const time_t                    database_commit_visible_time            = 10;                           // Zeit, die die Datenbank braucht, um nach Commit Daten für anderen Client sichtbar zu machen.
+const int                       Scheduler_member::max_precedence        = 9999;
 
 //---------------------------------------------------------------------------------------Heart_beat
 
@@ -866,7 +867,7 @@ bool Scheduler_member::wait_until_is_scheduler_up()
 {
     _log->info( message_string( "SCHEDULER-800" ) );
 
-    while( !_spooler->_state_cmd  &&  !is_scheduler_up() )
+    while( !_spooler->is_termination_state_cmd()  &&  !is_scheduler_up() )
     {
         _spooler->simple_wait_step();
     }
@@ -887,7 +888,7 @@ bool Scheduler_member::wait_until_is_active()
 
     bool was_scheduler_up = is_scheduler_up();
 
-    while( _spooler->_state_cmd && !is_active() )  
+    while( !_spooler->is_termination_state_cmd() && !is_active() )  
     {
         if( was_scheduler_up  &&  !is_scheduler_up() ) 
         {
@@ -913,7 +914,7 @@ bool Scheduler_member::wait_until_has_exclusiveness()
 
     if( exclusive_member_id() != "" )  _log->info( message_string( "SCHEDULER-801", exclusive_member_id() ) );
 
-    while( !_spooler->_state_cmd  &&  !has_exclusiveness() )  _spooler->simple_wait_step();
+    while( !_spooler->is_termination_state_cmd()  &&  !has_exclusiveness() )  _spooler->simple_wait_step();
 
     bool ok = has_exclusiveness();
 
@@ -935,6 +936,7 @@ void Scheduler_member::create_table_when_needed()
             "`scheduler_id`"           " varchar(100) not null, "
             "`version`"                " varchar(100) not null, "
             "`running_since`"          " datetime, "
+            "`precedence`"             " numeric(4) not null, "
             "`last_heart_beat`"        " integer, "     //numeric(14,3) not null, "
             "`next_heart_beat`"        " integer, "     //numeric(14,3), "
             "`active`"                 " boolean, "                     // null oder 1 (not null)
@@ -1223,6 +1225,7 @@ bool Scheduler_member::check_empty_member_record()
             sql::Insert_stmt stmt ( &db()->_db_descr, _spooler->_members_tablename );
 
             stmt[ "scheduler_member_id" ] = empty_member_id();
+            stmt[ "precedence"          ] = 0;
           //stmt[ "last_heart_beat"     ] = Beide Felder NULL lassen, damit sie nicht als veraltete Einträge angesehen und gelöscht werden
           //stmt[ "next_heart_beat"     ] = 
             stmt[ "exclusive"           ] = 1;
@@ -1280,6 +1283,7 @@ void Scheduler_member::insert_member_record( Transaction* ta )
     sql::Insert_stmt insert ( &db()->_db_descr, _spooler->_members_tablename );
     
     insert[ "scheduler_member_id" ] = member_id();
+    insert[ "precedence"          ] = max_precedence;
     insert[ "last_heart_beat"     ] = new_last_heart_beat;
     insert[ "next_heart_beat"     ] = new_next_heart_beat;
     insert[ "active"              ] = sql::null_value;
