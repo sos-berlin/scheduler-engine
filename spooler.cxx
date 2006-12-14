@@ -2418,30 +2418,38 @@ bool Spooler::is_active()
     return !_scheduler_member || _scheduler_member->is_active();
 }
 
-//---------------------------------------------------------------------Spooler::assert_has_exclusiveness
+//--------------------------------------------------------------------------Spooler::is_distributed
 
-void Spooler::assert_is_distributed( const string& text )
-{
-    if( _scheduler_member )  z::throw_xc( "SCHEDULER-370", text );
-}
+//bool Spooler::is_distributed()
+//{
+//    return _scheduler_member  &&  is_exclusive();
+//}
+
+//----------------------------------------------------------------Spooler::assert_has_exclusiveness
+
+//void Spooler::assert_is_distributed( const string& text )
+//{
+//    if( _scheduler_member )  z::throw_xc( "SCHEDULER-370", text );
+//}
 
 //---------------------------------------------------------------------Spooler::scheduler_member_id
 
 string Spooler::scheduler_member_id()
 {
-    assert_is_distributed( __FUNCTION__ );
+    //assert_is_distributed( __FUNCTION__ );
+    assert( _scheduler_member );
 
     return _scheduler_member->member_id();
 }
 
-//----------------------------------------------------------------------------Spooler::has_exclusiveness
+//-----------------------------------------------------------------------Spooler::has_exclusiveness
 
 bool Spooler::has_exclusiveness()
 {
     return !_scheduler_member || _scheduler_member->has_exclusiveness();
 }
 
-//---------------------------------------------------------------------Spooler::assert_has_exclusiveness
+//----------------------------------------------------------------Spooler::assert_has_exclusiveness
 
 void Spooler::assert_has_exclusiveness( const string& text )
 {

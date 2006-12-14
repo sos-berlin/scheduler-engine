@@ -1660,9 +1660,11 @@ bool Task::set_order( Order* order )
 
     if( order ) 
     {
-        ok = _order->attach_task( this );            // Auftrag war schon bereitgestellt. Exception von insert_oder()
-        if( ok )  if( order->is_file_order() )  _trigger_files = order->file_path();
-            else  order = NULL;
+        ok = order->attach_task( this );            // Auftrag war schon bereitgestellt. Exception von insert_oder()
+ 
+        if( !ok )  order = NULL;
+        else
+        if( order->is_file_order() )  _trigger_files = order->file_path();
     }
 
     _order = order;

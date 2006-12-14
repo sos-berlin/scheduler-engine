@@ -165,7 +165,7 @@ struct Order : Com_order,
 
     sql::Update_stmt            db_update_stmt          ();
     sql::Where_clause           db_where_clause         ();
-  //void                        db_fill_where_clause    ( sql::Where_clause* );
+    void                        db_fill_where_clause    ( sql::Where_clause* );
     bool                        db_occupy_for_processing( Transaction* );
     bool                        db_release_processing   ( Transaction* );
     void                        db_show_occupation      ( Transaction*, Log_level );

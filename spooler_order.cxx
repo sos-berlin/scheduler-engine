@@ -1070,7 +1070,7 @@ Order* Order_queue::first_order( const Time& now )
         if( order->next_time() > now )  break;
     }
 
-    if( !result  &&  _spooler->is_distributed() )
+    if( !result  &&  !_spooler->has_exclusiveness() )
     {
         result = load_next_processable_order_from_database();
     }
@@ -1082,6 +1082,8 @@ Order* Order_queue::first_order( const Time& now )
 
 Order* Order_queue::load_next_processable_order_from_database()
 {
+    assert( !_spooler->has_exclusiveness() );
+
     Time       now = Time::now();
     ptr<Order> order;
 
@@ -1364,6 +1366,8 @@ bool Order::attach_task( Task* task )
 {
     assert( task );
     assert_no_task();   // Vorsichtshalber
+    
+    bool is_attached = false;
 
 
     if( !_log->opened() )  open_log();
@@ -1374,15 +1378,26 @@ bool Order::attach_task( Task* task )
         _delay_storing_until_processing = false;
     }
 
-    bool is_occupied = false;
 
-    for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
+    if( _spooler->has_exclusiveness() )
     {
-        is_occupied = db_occupy_for_processing( &ta );
+        is_attached = true;
     }
-    catch( exception& x ) { _log->error( S() << "Error in " << __FUNCTION__ ); ta.reopen_database_after_error( x ); }
+    else
+    {
+        for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
+        {
+            is_attached = db_occupy_for_processing( &ta );
+        }
+        catch( exception& x ) { _log->error( S() << "Error in " << __FUNCTION__ ); ta.reopen_database_after_error( x ); }
 
-    if( is_occupied )
+        if( !is_attached )
+        {
+            int AUFTRAG_LOSCHEN;
+        }
+    }
+
+    if( is_attached )
     {
         _task = task;
 
@@ -1391,19 +1406,15 @@ bool Order::attach_task( Task* task )
         _is_virgin = false;
         _is_virgin_in_this_run_time = false;
     }
-    else
-    {
-        int AUFTRAG_LOSCHEN;
-    }
-    
-    return is_occupied;
+
+    return is_attached;
 }
 
 //------------------------------------------------------------------Order::db_occupy_for_processing
 
 bool Order::db_occupy_for_processing( Transaction* ta )
 {
-    _spooler->assert_is_distributed( __FUNCTION__ );
+    //_spooler->assert_is_distributed( __FUNCTION__ );
 
     sql::Update_stmt update = db_update_stmt();( _spooler->_db->_db_descr, _spooler->_orders_tablename );
 
@@ -1478,23 +1489,18 @@ sql::Update_stmt Order::db_update_stmt()
 sql::Where_clause Order::db_where_clause()
 {
     sql::Where_clause result ( &_spooler->_db->_db_descr );
-
-    result.and_where_condition( "spooler_id", _spooler->id_for_db() );
-    result.and_where_condition( "job_chain" , job_chain()->name() );
-    result.and_where_condition( "id"        , id().as_string()    );
-    //db_fill_where_clause( &result );
-
+    db_fill_where_clause( &result );
     return result;
 }
 
 //----------------------------------------------------------------------Order::db_fill_where_clause
 
-//void Order::db_fill_where_clause( sql::Where_clause* where )
-//{
-//    where->and_where_condition( "spooler_id", _spooler->id_for_db() );
-//    where->and_where_condition( "job_chain" , job_chain()->name() );
-//    where->and_where_condition( "id"        , id().as_string()    );
-//}
+void Order::db_fill_where_clause( sql::Where_clause* where )
+{
+    where->and_where_condition( "spooler_id", _spooler->id_for_db() );
+    where->and_where_condition( "job_chain" , job_chain()->name() );
+    where->and_where_condition( "id"        , id().as_string()    );
+}
 
 //----------------------------------------------------------------------------------Order::open_log
 

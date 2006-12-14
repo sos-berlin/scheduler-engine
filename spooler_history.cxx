@@ -904,7 +904,7 @@ int Spooler_db::get_id_( const string& variable_name, Transaction* outer_transac
     {
         Transaction ta ( this, outer_transaction );
 
-        execute( "UPDATE " + _spooler->_variables_tablename + " set \"WERT\" = \"WERT\"+1 where \"NAME\"=" + sql::quoted( variable_name ) );
+        execute( "UPDATE " + _spooler->_variables_tablename + "  set \"WERT\" = \"WERT\"+1  where \"NAME\"=" + sql::quoted( variable_name ) );
 
         Any_file sel = ta.open_result_set( "select \"WERT\"  from " + _spooler->_variables_tablename + "  where \"NAME\"=" + sql::quoted( variable_name ) );
         if( sel.eof() )

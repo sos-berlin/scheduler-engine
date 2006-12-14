@@ -331,8 +331,8 @@ struct Spooler : Object,
     void                        check_scheduler_member      ();
     bool                        is_active                   ();
     bool                        has_exclusiveness           ();
-    bool                        is_distributed              ();
-    void                        assert_is_distributed       ( const string& message_text );
+    //bool                        is_distributed              ();
+    //void                        assert_is_distributed       ( const string& message_text );
     void                        assert_has_exclusiveness    ( const string& message_text );
     string                      scheduler_member_id         ();
     string                      session_id                  ()                                  { return _session_id; }
