@@ -225,6 +225,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-355", "SQL update statement did not updates excactly one record, instead $1: $2" },
     { "SCHEDULER-357", "This is an exclusive or distributed Scheduler, and it needs a database" },
     { "SCHEDULER-358", "Scheduler member id has to start with the Scheduler id followed by a slash" },
+    { "SCHEDULER-359", "For an exclusive or distributed Scheduler, the database $1 is not supported" },
     { "SCHEDULER-360", "Error when accessing a Scheduler member database table" },
     { "SCHEDULER-361", "No database" },
     { "SCHEDULER-362", "Scheduler aborts because it has become inactive" },

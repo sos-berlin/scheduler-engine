@@ -551,12 +551,12 @@ xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& 
         if( show & show_log )
         {
             Transaction ta ( _spooler->_db );
-            ta.set_transaction_used();
 
+            ta.set_transaction_read();
             log = file_as_string( GZIP_AUTO + _spooler->_db->db_name() + " -table=" + _spooler->_order_history_tablename + " -blob=\"LOG\"" 
                                      " where \"HISTORY_ID\"=" + history_id );
 
-            ta.commit();
+            ta.commit( __FUNCTION__ );
         }
 
         /* Payload steht nicht in der Historie
@@ -1023,7 +1023,6 @@ void Command_processor::execute_http( http::Operation* http_operation )
                         else
                         {
                             Transaction ta ( _spooler->_db );
-                            ta.set_transaction_used();
 
                             Any_file sel = ta.open_result_set(
                                            "select max(\"HISTORY_ID\") as history_id_max "

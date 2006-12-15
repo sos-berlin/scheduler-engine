@@ -451,9 +451,9 @@ struct Order_queue : Com_order_queue
     int                         order_count             ( const Job_chain* = NULL );
     bool                        empty                   ()                                          { return _queue.empty(); }
     bool                        empty                   ( const Job_chain* job_chain )              { return order_count( job_chain ) == 0; }
-    Order*                      first_order             ( const Time& now );
+    Order*                      first_order             ( const Time& now, bool read_database = true );
     Order*                      load_next_processable_order_from_database();
-    bool                        has_order               ( const Time& now )                         { return first_order(now) != NULL; }
+    bool                        has_order               ( const Time& now )                         { return first_order( now, false ) != NULL; }
     ptr<Order>                  get_order_for_processing( const Time& now );
     Time                        next_time               ();
   //void                        update_priorities       ();

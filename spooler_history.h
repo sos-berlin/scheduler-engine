@@ -35,6 +35,15 @@ typedef Archive_switch With_log_switch;
 
 struct Transaction;
 
+//-----------------------------------------------------------------------------Database_lock_syntax
+
+enum Database_lock_syntax
+{ 
+    db_lock_none,
+    db_lock_for_update,         // Sätze mit "select for update" sperren
+    db_lock_with_updlock,       // SQL-Server: Sätze mit "select with(updlock)" sperren, für SQL Server
+};
+
 //---------------------------------------------------------------------------------------Spooler_db
 
 struct Spooler_db : Object, Scheduler_object
@@ -60,20 +69,16 @@ struct Spooler_db : Object, Scheduler_object
 
     xml::Element_ptr            read_task               ( const xml::Document_ptr&, int task_id, const Show_what& );
 
-    void                        update_clob             ( const string& table_name, const string& column_name, const string& value, const string& where );
-    void                        update_clob             ( const string& table_name, const string& column_name, const string& key_name, int           key_value, const string& value );
-    void                        update_clob             ( const string& table_name, const string& column_name, const string& key_name, const string& key_value, const string& value );
-    string                      read_clob               ( const string& table_name, const string& column_name, const string& where );
-    string                      read_clob               ( const string& table_name, const string& column_name, const string& key_name, const string& key_value );
-
     void                        write_order_history     ( Order*, Transaction* = NULL );
 
     Transaction*                transaction             ();
-    void                        execute                 ( const string& stmt, const string& debug_extra = "" );
+  //void                        execute                 ( const string& stmt, const string& debug_extra = "" );
     int                         record_count            ()                                          { return _db.record_count(); }
     Dbms_kind                   dbms_kind               ()                                          { return _db.dbms_kind(); }
-    void                        commit                  ( const string& debug_extra = "" );
-    void                        rollback                ( const string& debug_extra = "" );
+    string                      dbms_name               ()                                          { return _db.dbms_name(); }
+    Database_lock_syntax        lock_syntax             ();
+    //void                        commit                  ( const string& debug_extra = "" );
+    //void                        rollback                ( const string& debug_extra = "" );
     void                        try_reopen_after_error  ( const exception&, bool wait_endless = false );
     void                        create_tables_when_needed();
     void                        create_table_when_needed( const string& tablename, const string& fields );
@@ -127,11 +132,12 @@ struct Transaction
     void                        commit                  ( const string& debug_text = "" );
     void                        rollback                ( const string& debug_text = "" );
   //void                        try_reopen_after_error  ();
-    void                        set_transaction_used    ()                                          { _transaction_used = true; }
+    void                        set_transaction_written ()                                          { _transaction_written = true; }
+    void                        set_transaction_read    ()                                          { _transaction_read = true; }
     Transaction*                outer_transaction       ()                                          { return _outer_transaction; }
 
     Any_file                    open_result_set         ( const string& sql, const string& debug_text = "" );
-    Any_file                    open_file               ( const string& db_prefix, const string& sql, const string& debug_text = "" );
+    Any_file                    open_file               ( const string& db_prefix, const string& sql, const string& debug_text = "", bool writes = true );
 
     void                        execute                 ( const string& sql, const string& debug_text = "" );
     void                        execute_single          ( const string& sql, const string& debug_text = "" );
@@ -141,13 +147,22 @@ struct Transaction
     void                        insert_variable         ( const string& name, const string& value );
     void                        update_variable         ( const string& name, const string& value );
     bool                        try_update_variable     ( const string& name, const string& value );
+    void                        update_clob             ( const string& table_name, const string& column_name, const string& value, const string& where );
+    void                        update_clob             ( const string& table_name, const string& column_name, const string& key_name, int           key_value, const string& value );
+    void                        update_clob             ( const string& table_name, const string& column_name, const string& key_name, const string& key_value, const string& value );
+    string                      read_clob               ( const string& table_name, const string& column_name, const string& where );
+    string                      read_clob               ( const string& table_name, const string& column_name, const string& key_name, const string& key_value );
+
     int                         record_count            ()                                          { return _db->record_count(); }
+    Spooler_db*                 db                      ()                                          { assert( _db ); return _db; }
+    sql::Database_descriptor*   database_descriptor     ()                                          { db()->_db_descr; }
 
 
     Fill_zero                  _zero_;
     Spooler_db*                _db;
     Transaction*               _outer_transaction;
-    bool                       _transaction_used;       // Noch nicht zuverlässt, z.B. Any_file(select) und Any_file(clob) werden nicht erkannt
+    bool                       _transaction_written;
+    bool                       _transaction_read;
     bool                       _log_sql;
     Mutex_guard                _guard;
     Spooler*                   _spooler;

@@ -1866,7 +1866,7 @@ void Spooler::load_arg()
             else
             if( opt.flag      ( "validate-xml"           ) )  _validate_xml = opt.set();
             else
-            if( opt.flag      ( "exclusive"              ) )  _is_exclusive_member = opt.set();
+            if( opt.flag      ( "exclusive"              ) )  _demand_exclusiveness = opt.set();
             else
             if( opt.flag      ( "backup"                 ) )  _is_backup_member = opt.set();
             else
@@ -1887,8 +1887,8 @@ void Spooler::load_arg()
                 throw_sos_option_error( opt );
         }
 
-        if( _is_backup_member && !_is_exclusive_member )  z::throw_xc( "SCHEDULER-368", "-backup", "-exclusive" );
-        if( _is_distributed && _is_exclusive_member    )  z::throw_xc( "SCHEDULER-369", "-distributed", "-exclusive" );
+        if( _is_backup_member && !_demand_exclusiveness )  z::throw_xc( "SCHEDULER-368", "-backup", "-exclusive" );
+        if( _is_distributed && _demand_exclusiveness    )  z::throw_xc( "SCHEDULER-369", "-distributed", "-exclusive" );
 
         if( _is_service )  _interactive = false;
 
@@ -2298,7 +2298,7 @@ void Spooler::start()
 
     // Datenbank
 
-    if( _is_distributed || _is_exclusive_member ) 
+    if( _is_distributed || _demand_exclusiveness ) 
     {
         if( _db_name == "" )  z::throw_xc( "SCHEDULER-357" ); 
         _need_db = true;
@@ -2324,7 +2324,7 @@ void Spooler::start()
 #   endif
 
 
-    if( _is_exclusive_member || _is_distributed )  
+    if( _demand_exclusiveness || _is_distributed )  
     {
         start_scheduler_member();
         wait_for_scheduler_member();
@@ -2385,9 +2385,10 @@ void Spooler::start()
 void Spooler::start_scheduler_member()
 {
     _scheduler_member = Z_NEW( Scheduler_member( this ) );
-  //_scheduler_member->set_member_id( _scheduler_member_id );
+
     _scheduler_member->set_backup( _is_backup_member );
-  //_scheduler_member->demand_exclusiveness( _is_exclusive );
+    _scheduler_member->demand_exclusiveness( _demand_exclusiveness );
+
     _scheduler_member->start();     // Wartet, bis entschieden ist, dass wir aktiv werden
 }
 
@@ -2406,14 +2407,14 @@ void Spooler::wait_for_scheduler_member()
         set_state( s_starting_waiting );
         ok = _scheduler_member->wait_until_is_scheduler_up();
     }
-    
+
     if( ok  &&  !_scheduler_member->is_active() )
     {
         set_state( s_starting_waiting );
         ok = _scheduler_member->wait_until_is_active();
     }
 
-    if( ok  &&  _is_exclusive_member  &&  !_scheduler_member->has_exclusiveness() )
+    if( ok  &&  _demand_exclusiveness  &&  !_scheduler_member->has_exclusiveness() )
     {
         set_state( s_starting_waiting );
         ok = _scheduler_member->wait_until_has_exclusiveness();
@@ -2864,7 +2865,8 @@ void Spooler::run()
 
                     if( job->is_machine_resumable()  &&  resume_at > next_job_time )  resume_at = next_job_time,  resume_at_object = job;
 
-                    if( wait_until > next_job_time ) 
+                    if( wait_until > next_job_time  
+                     || wait_until == next_job_time && job->visible() )   // wait_until_object sollte nicht auf einen unsichtbaren Job zeigen
                     {
                         wait_until = next_job_time;
                         wait_until_object = job;
@@ -3105,11 +3107,11 @@ void Spooler::check_scheduler_member()
     _scheduler_is_up    = _scheduler_member->is_scheduler_up();
   //_proper_termination = _scheduler_member->has_exclusiveness();
 
-    if( !_scheduler_member->is_active()  ||  _is_exclusive_member && !_scheduler_member->has_exclusiveness() )
+    if( !_scheduler_member->is_active()  ||  _demand_exclusiveness && !_scheduler_member->has_exclusiveness() )
     {
         kill_all_processes();
         
-        _log.warn( message_string( _is_exclusive_member? "SCHEDULER-367" : "SCHEDULER-362" ) );
+        _log.warn( message_string( _demand_exclusiveness? "SCHEDULER-367" : "SCHEDULER-362" ) );
 
         _scheduler_member->show_active_schedulers( (Transaction*)NULL );
         _scheduler_member->close();     // Scheduler-Mitglieds-Eintrag entfernen

@@ -2252,11 +2252,11 @@
             </text>
         </message>
 
-        <!--message code="SCHEDULER-359">
+        <message code="SCHEDULER-359">
             <text xml:lang="en">
-                <title>A backup Scheduler member needs a Scheduler id</title>
+                <title>For an exclusive or distributed Scheduler, the database <p1/> is not supported</title>
             </text>
-        </message-->
+        </message>
 
         <message code="SCHEDULER-360">
             <text xml:lang="en">

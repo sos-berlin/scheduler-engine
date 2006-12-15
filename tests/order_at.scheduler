@@ -26,8 +26,8 @@ if( spooler.job_chain( "my_job_chain" ).order_count == 0 )
     order.params("my_var") = "my_value";
     spooler.job_chain( "my_job_chain" ).add_order( order );
     
-    spooler.job( "perl" ).start();
-    spooler.job( "java" ).start();
+    //spooler.job( "perl" ).start();
+    //spooler.job( "java" ).start();
     
     if( spooler.db_name == "" )  spooler_log.warn( "Der Test funktioniert nur mit Datenbank" );
     else x = spooler.execute_xml( '<modify_spooler cmd="terminate_and_restart"/>' );

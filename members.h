@@ -41,7 +41,7 @@ struct Scheduler_member : Async_operation, Scheduler_object
     string                      obj_name                    () const;
 
 
-  //void                    set_demand_exclusiveness        ( bool b = true )                       { assert( !_current_operation );  _demand_exclusiveness = b; }
+    void                        demand_exclusiveness        ( bool b = true )                       { assert( !_current_operation );  _demand_exclusiveness = b; }
     void                    set_backup                      ( bool b = true )                       { assert( !_current_operation );  _is_backup = b; }
 
     void                    set_member_id                   ( const string& );
@@ -100,7 +100,7 @@ struct Scheduler_member : Async_operation, Scheduler_object
     Fill_zero                  _zero_;
     string                     _scheduler_member_id;
     bool                       _is_active;
-  //bool                       _demand_exclusiveness;
+    bool                       _demand_exclusiveness;
     bool                       _has_exclusiveness;
     bool                       _is_backup;
     time_t                     _next_heart_beat;

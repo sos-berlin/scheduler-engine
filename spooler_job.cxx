@@ -717,7 +717,7 @@ void Job::signal( const string& signal_name )
 
 ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, const string& name, const Time& start_at, int id )
 {
-    _spooler->assert_has_exclusiveness( "create_task" );
+    if( !order_controlled() )  _spooler->assert_has_exclusiveness( "create_task" );
     if( _remove )  z::throw_xc( "SCHEDULER-230", obj_name() );
 
     switch( _state )
@@ -785,12 +785,12 @@ void Job::load_tasks_from_db()
 
             start_at.set_datetime( record.as_string( "start_at_time" ) );
 
-            ta.set_transaction_used();
+            ta.set_transaction_read();
             string parameters_xml = file_as_string( _spooler->_db->db_name() + " -table=" + _spooler->_tasks_tablename + " -clob='parameters'"
                                                                                 " where \"TASK_ID\"=" + as_string( task_id ) );
             if( !parameters_xml.empty() )  parameters->set_xml( parameters_xml );
 
-            ta.set_transaction_used();
+            ta.set_transaction_read();
             string xml = file_as_string( _spooler->_db->db_name() + " -table=" + _spooler->_tasks_tablename + " -clob='task_xml'"
                                                                     " where \"TASK_ID\"=" + as_string( task_id ) );
             if( !xml.empty() )  set_dom( xml::Document_ptr( xml ).documentElement(), Time::now() );  // 2006-10-28 Das sieht ja merkwürdig aus. Sollte es heißen task->set_dom()?
@@ -823,7 +823,7 @@ void Job::load_tasks_from_db()
 
 void Job::Task_queue::enqueue_task( const ptr<Task>& task )
 {
-    _spooler->assert_has_exclusiveness( __FUNCTION__ );    // Doppelte Sicherung
+    if( !_job->order_controlled() )  _spooler->assert_has_exclusiveness( __FUNCTION__ );    // Doppelte Sicherung
 
     _job->set_visible( true );
 
@@ -849,7 +849,7 @@ void Job::Task_queue::enqueue_task( const ptr<Task>& task )
                 if( task->_start_at )
                 insert.set_datetime( "START_AT_TIME" ,   task->_start_at.as_string( Time::without_ms ) );
 
-                _spooler->_db->execute( insert );
+                ta.execute( insert );
 
                 if( task->has_parameters() )
                 {
@@ -863,9 +863,9 @@ void Job::Task_queue::enqueue_task( const ptr<Task>& task )
                 xml::Document_ptr task_document = task->dom( show_for_database_only );
                 xml::Element_ptr  task_element  = task_document.documentElement();
                 if( task_element.hasAttributes()  ||  task_element.firstChild() )
-                    _spooler->_db->update_clob( _spooler->_tasks_tablename, "task_xml", "task_id", task->id(), task_document.xml() );
+                    ta.update_clob( _spooler->_tasks_tablename, "task_xml", "task_id", task->id(), task_document.xml() );
 
-                ta.commit();
+                ta.commit( __FUNCTION__ );
 
                 task->_is_in_database = true;
             }
@@ -897,9 +897,9 @@ void Job::Task_queue::remove_task_from_db( int task_id )
             {
                 Transaction ta ( _spooler->_db );
 
-                _spooler->_db->execute( "DELETE from " + _spooler->_tasks_tablename +
-                                        "  where \"TASK_ID\"=" + as_string( task_id ) );
-                ta.commit();
+                ta.execute( "DELETE from " + _spooler->_tasks_tablename +
+                            "  where \"TASK_ID\"=" + as_string( task_id ) );
+                ta.commit( __FUNCTION__);
             }
 
             break;
