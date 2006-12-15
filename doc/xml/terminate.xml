@@ -23,10 +23,57 @@
         <xml_parent_element name="commands"/>
     </xml_parent_elements>
 
+    <xml_attributes>
+        <xml_attribute name="all_schedulers" type="yes|no" initial="no">
+            <description>
+                <p>
+                    In Zusammenhang mit <scheduler_option name="exclusive"/> 
+                    werden alle beteiligten Scheduler beendet.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="restart" type="yes|no" initial="no">
+            <description>
+                <p>
+                    Lässt den Scheduler erneut starten.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="shutdown" type="yes|no" initial="no">
+            <description>
+                <p>
+                    In Zusammenhang mit <scheduler_option name="exclusive"/> wird der verteilte Scheduler in der Datenbank als Herunterfahren markiert.
+                    Kein anderer Scheduler übernimmt den Betrieb.
+                </p>
+                <p>
+                    <code>&lt;terminate shutdown="no"/></code> markiert den verteilten Scheduler nicht als Heruntergefahren,
+                    so dass ein anderer Scheduler den Betrieb übernehmen kann.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="timeout" type="seconds">
+            <description>
+                <p>
+                    Wenn angegeben, bricht der Scheduler nach der angegeben Frist
+                    alle Tasks ab, die bis dahin nicht beendet haben.
+                </p>
+            </description>
+        </xml_attribute>
+
+    </xml_attributes>
+    
 
     <xml_answer element="ok"/>
 
+    <messages>
+        <message level="info" code="SCHEDULER-998"/>
+        <message level="info" code="SCHEDULER-999"/>
+    </messages>
+
     <example>
-        <pre>&lt;terminate></pre>
+        <pre>&lt;terminate/></pre>
     </example>
 </xml_element>

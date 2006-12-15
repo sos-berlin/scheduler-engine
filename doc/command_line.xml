@@ -197,32 +197,96 @@
         </command_option>
 
 
-        <command_option name="heart-beat" title="Startet den Scheduler mit Herzschlag für backup-fähigen Betrieb">
+        <command_option name="exclusive" title="Startet den Scheduler für die exklusive Ausführung">
             <description>
                 <p>
-                    Der Backup-Scheduler beobachtet einen mit
-                    <scheduler_option name="heart-beat"/>
-                    gestarteten Scheduler.
+                    Voraussetzung ist Datenbankbetrieb 
+                    (<scheduler_ini_entry file="factory.ini" section="spooler" entry="db"/>).
+                    Mehrere Scheduler mit derselben Scheduler-Id (<scheduler_option name="id"/>) und derselben Datenbank
+                    können mit <code>-exclusive</code> gestartet werden, wobei nur einer den Betrieb übernimmt.
+                    Erst wenn dieser ausfällt oder einzeln beendet wird 
+                    (<scheduler_element name="terminate" attribute="shutdown" value="no"/>),
+                    übernimmt ein anderer Scheduler den Betrieb.
+                    Die Übernahme dauert etwa eine Minute.
+                </p>
+                <p>
+                    Vorsicht: 
+                    Alle beteiligten Scheduler müssen mit <code>-exclusive</code> oder <scheduler_option name="distributed"/>
+                    gestartet werden.
+                    Wenn ein Scheduler mit und einer ohne die Einstellung gestartet wird,
+                    laufen zwei Scheduler gleichzeitig, was zu unerwarteten Ergebnissen führen kann.
+                </p>
+                <p>
+                    Siehe auch <scheduler_option name="backup"/>.
                 </p>
             </description>
+
+            <messages>
+                <message level="error" code="SCHEDULER-357"/>
+                <message level="error" code="SCHEDULER-358"/>
+                <message level="error" code="SCHEDULER-361"/>
+                <message level="warn"  code="SCHEDULER-362"/>
+                <message level="error" code="SCHEDULER-364"/>
+                <message level="error" code="SCHEDULER-365"/>
+                <message level="error" code="SCHEDULER-366"/>
+                <message level="warn"  code="SCHEDULER-367"/>
+                <message level="error" code="SCHEDULER-370"/>
+                <message level="error" code="SCHEDULER-371"/>
+                <message level="error" code="SCHEDULER-372"/>
+                <message level="info"  code="SCHEDULER-801"/>
+                <message level="info"  code="SCHEDULER-802"/>
+                <message level="info"  code="SCHEDULER-803"/>
+                <message level="info"  code="SCHEDULER-805"/>
+                <message level="info"  code="SCHEDULER-807"/>
+                <message level="info"  code="SCHEDULER-809"/>
+                <message level="info"  code="SCHEDULER-811"/>
+                <message level="warn"  code="SCHEDULER-993"/>
+                <message level="warn"  code="SCHEDULER-994"/>
+                <message level="info"  code="SCHEDULER-995"/>
+                <message level="warn"  code="SCHEDULER-996"/>
+            </messages>
         </command_option>
 
 
         <command_option name="backup" title="Startet den Scheduler als Backup-Scheduler">
             <description>
                 <p>
-                    
+                    Nur mit <scheduler_option name="exclusive"/> möglich.
                 </p>
                 <p>
-                    Der Backup-Scheduler beobachtet über die Datenbank einen mit
-                    <scheduler_option name="heart-beat"/> 
-                    und gleicher Konfiguration, insbesondere <scheduler_option name="id"/>,
-                    gestarteten Scheduler.
+                    Ein Backup-Scheduler übernimmt den Betrieb nur, beginnt aber keinen neuen Betrieb.
+                    D.h. nach <scheduler_element name="terminate" attribute="shutdown" value="yes"/>
+                    läuft er nicht an, sondern wartet auf einen anderen Scheduler, der den Betrieb startet.
                 </p>
                 <p>
-                    
+                    Zusammem mit <scheduler_option name="install-service"/> und <scheduler_option name="remove-service"/>
+                    führt <code>-backup</code> zu einem eigenen Dienstenamen,
+                    so dass der Backup-Scheduler als eigener Dienst auf demselben Rechner installiert werden kann.
                 </p>
             </description>
+        </command_option>
+
+
+        <command_option name="distributed" title="Verteilter Scheduler">
+            <description>
+                <p>
+                    Voraussetzung ist Datenbankbetrieb
+                    (<scheduler_ini_file file="factory.ini" section="spooler" entry="db"/>).
+                    Mehrere Scheduler mit derselben Scheduler-Id (<scheduler_option name="id"/>), derselben Datenbank
+                    und derselben Konfiguration können gestartet werden,
+                    die sich die Ausführung der Aufträge teilen.
+                </p>
+                <p>
+                    Der Scheduler führt nur auftragsgesteuerte Jobs aus (<scheduler_element name="job" attribute="order" value="yes"/>),
+                    es sei denn, der exklusive Betrieb mit <scheduler_option name="exclusive"/> ist eingeschaltet.
+                    Nur der Scheduler, der der die Exklusivität hat, führt auch nicht auftragsgesteuerte Jobs aus.
+                </p>
+            </description>
+            <messages>
+                <message level="error" code="SCHEDULER-366"/>
+                <message level="warn"  code="SCHEDULER-812"/>
+                <message level="warn"  code="SCHEDULER-813"/>
+            </messages>
         </command_option>
 
 
@@ -288,6 +352,7 @@
                     Nur in Verbindung mit <code>-install-service</code> oder <code>-remove-service</code>.
                     Wenn diese Option fehlt und <code>-id=</code> angegeben ist,
                     verwendet der Scheduler den Namen <code>sos_scheduler_</code><i>scheduler_id</i>.
+                    Bei <scheduler_option name="backup"/> fügt er <code>_backup</code> hinzu.
                 </p>
             </description>
         </command_option>

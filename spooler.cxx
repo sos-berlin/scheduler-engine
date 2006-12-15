@@ -1741,6 +1741,7 @@ void Spooler::load_arg()
     _order_history_yes          =            read_profile_bool      ( _factory_ini, "spooler", "order_history"      , true );
     _order_history_with_log     =            read_profile_with_log  ( _factory_ini, "spooler", "order_history_with_log", arc_no );
     _db_name                    =            read_profile_string    ( _factory_ini, "spooler", "db"                 );
+    _db_check_integrity         =            read_profile_bool      ( _factory_ini, "spooler", "db_check_integrity" , _db_check_integrity );
 
     // need_db=yes|no|strict
     string need_db_str          =            read_profile_string    ( _factory_ini, "spooler", "need_db"            , "no"                );
@@ -2265,12 +2266,10 @@ void Spooler::start()
         _session_id = s;
     }
 
-    _log.info( message_string( "SCHEDULER-900", _version, _config_filename, getpid(), _session_id ) );
+    _log.info( message_string( "SCHEDULER-900", _version, _config_filename, getpid() ) );
     _spooler_start_time = Time::now();
 
     _web_services.load();   // Nicht in Spooler::load(), denn es öffnet schon -log-dir-Dateien (das ist nicht gut für -send-cmd=)
-
-    FOR_EACH_JOB( job )  init_job( *job, false );
 
     try
     {
@@ -2297,15 +2296,21 @@ void Spooler::start()
     }
 
 
-    THREAD_LOCK( _lock )
-    {
-        if( _need_db  && _db_name.empty() )  z::throw_xc( "SCHEDULER-205" );
+    // Datenbank
 
-        _db = Z_NEW( Spooler_db( this ) );
-        _db->open( _db_name );
+    if( _is_distributed || _is_exclusive_member ) 
+    {
+        if( _db_name == "" )  z::throw_xc( "SCHEDULER-357" ); 
+        _need_db = true;
     }
 
+    if( _need_db  && _db_name.empty() )  z::throw_xc( "SCHEDULER-205" );
+
+    _db = Z_NEW( Spooler_db( this ) );
+    _db->open( _db_name );
+
     _db->spooler_start();
+
 
     set_ctrl_c_handler( false );
     set_ctrl_c_handler( true );       // Falls Java (über Dateityp jdbc) gestartet worden ist und den Signal-Handler verändert hat
@@ -2324,15 +2329,15 @@ void Spooler::start()
         start_scheduler_member();
         wait_for_scheduler_member();
         execute_state_cmd();
-        return;
+        if( _shutdown_cmd )  return;
     }
 
     _scheduler_is_up = true;
 
+    _communication.start_or_rebind();
 
-    // Thread _communication nach Java starten (auch implizit durch _db). Java muss laufen, wenn der Thread startet! (Damit attach_thread() greift)
-    //if( !_manual )  
-        _communication.start_or_rebind();
+
+    FOR_EACH_JOB( job )  init_job( *job, false );
 
     FOR_EACH( Job_chain_map, _job_chain_map, it ) 
     {

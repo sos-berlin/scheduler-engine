@@ -33,17 +33,16 @@ struct Order : Com_order,
     Z_GNU_ONLY(                 Order                   (); )                                       // Für gcc 3.2. Nicht implementiert
                                 Order                   ( Spooler* );
                                 Order                   ( Spooler*, const VARIANT& );
-                                Order                   ( Spooler*, const Record&, const string& payload, const string& run_time, const string& xml );
+                                Order                   ( Spooler*, const Record& );
                                ~Order                   ();
 
 
     // Scheduler_object:
     Prefix_log*                 log                     ()                                          { return _log; }
     void                        print_xml_child_elements_for_event( String_stream*, Scheduler_event* );
-
+    void                        load_blobs              ( Transaction* );
 
     void                        init                    ();
-    void                        update_database         ();
     bool                        attach_task             ( Task* );
     void                        assert_no_task          ();
     bool                        is_immediately_processable( const Time& now = Time() );
@@ -163,13 +162,20 @@ struct Order : Com_order,
     void                        before_modify_run_time_event();
     void                        run_time_modified_event ();
 
-    sql::Update_stmt            db_update_stmt          ();
-    sql::Where_clause           db_where_clause         ();
-    void                        db_fill_where_clause    ( sql::Where_clause* );
+    void                        db_insert               ();
+    void                        db_update               ( bool release_occupation = false );
+    string                      db_read_clob            ( Transaction*, const string& column_name );
+    void                        db_update_clob          ( Transaction*, const string& column_name, const string& value );
+
+  //void                        db_delete_order         ();
     bool                        db_occupy_for_processing( Transaction* );
     bool                        db_release_processing   ( Transaction* );
     void                        db_show_occupation      ( Transaction*, Log_level );
-
+    sql::Update_stmt            db_update_stmt          ();
+    sql::Where_clause           db_where_clause         ();
+    void                        db_fill_where_clause    ( sql::Where_clause* );
+    int                         db_get_ordering         ( Transaction* ta = NULL );
+    Spooler_db*                 db                      ();
 
     ptr<Prefix_log>            _log;
 
@@ -180,9 +186,6 @@ struct Order : Com_order,
 
     friend struct               Order_queue;
     friend struct               Job_chain;
-    friend void                 Spooler_db::insert_order( Order* );
-    friend void                 Spooler_db::update_order( Order* );
-    friend void                 Spooler_db::finish_order( Order*, Transaction* );
 
 
     Thread_semaphore           _lock;
@@ -231,9 +234,11 @@ struct Order : Com_order,
     bool                       _suspended;
   //bool                       _recoverable;            // In Datenbank halten
     bool                       _is_in_database;
+    bool                       _is_db_occupied;
     bool                       _delay_storing_until_processing;  // Erst in die Datenbank schreiben, wenn die erste Task die Verarbeitung beginnt
     bool                       _is_virgin;              // Noch von keiner Task berührt
     bool                       _is_virgin_in_this_run_time; // Wie _is_virgin, wird aber beim Erreichen des Endzustands wieder true gesetzt
+  //bool                       _is_outdated;            // Bei nächster Gelegenheit aus Warteschlange entfernen
     bool                       _end_state_reached;      // Auftrag nach spooler_process() beenden, für <file_order_sink>
 
     ptr<Web_service>           _web_service;
@@ -455,6 +460,10 @@ struct Order_queue : Com_order_queue
     ptr<Order>                  order_or_null           ( const Order::Id& );
     Job*                        job                     () const                                    { return _job; }
     xml::Element_ptr            dom_element             ( const xml::Document_ptr&, const Show_what& , Job_chain* );
+  //void                        remove_outdated_orders  ();
+    //bool                        has_outdated_orders     ()                                          { return _has_outdated_orders; }
+    //void                        set_has_outdated_orders ()                                          { _has_outdated_orders = true; }
+
 
 
     Fill_zero                  _zero_;
@@ -470,6 +479,8 @@ struct Order_queue : Com_order_queue
     
     typedef list< ptr<Order> >  Queue;
     Queue                      _queue;
+
+    //bool                       _has_outdated_orders;
 
   //int                        _lowest_priority;        // Zur Optimierung
   //int                        _highest_priority;       // Zur Optimierung

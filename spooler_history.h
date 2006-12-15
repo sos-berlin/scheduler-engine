@@ -55,24 +55,18 @@ struct Spooler_db : Object, Scheduler_object
     Prefix_log*                 log                     ()                                          { return _log; }
     int                         get_task_id             ()                                          { return get_id( "spooler_job_id" ); }
     int                         get_order_id            ( Transaction* ta = NULL )                  { return get_id( "spooler_order_id", ta ); }
-    int                         get_order_ordering      ( Transaction* ta = NULL )                  { return get_id( "spooler_order_ordering", ta ); }
     int                         get_order_history_id    ( Transaction* ta )                         { return get_id( "spooler_order_history_id", ta ); }
+    int                         get_id                  ( const string& variable_name, Transaction* = NULL );
 
     xml::Element_ptr            read_task               ( const xml::Document_ptr&, int task_id, const Show_what& );
 
-    void                        insert_order            ( Order* );
-    void                        update_order            ( Order* );
-    void                        update_orders_clob      ( Order*, const string& column_name, const string& value );
-    void                        update_orders_clob      ( const string& job_chain_name, const string& order_id, const string& column_name, const string& value );
-    string                      read_orders_clob        ( Order*, const string& column_name );
-    string                      read_orders_clob        ( const string& job_chain_name, const string& order_id, const string& column_name );
-
+    void                        update_clob             ( const string& table_name, const string& column_name, const string& value, const string& where );
     void                        update_clob             ( const string& table_name, const string& column_name, const string& key_name, int           key_value, const string& value );
     void                        update_clob             ( const string& table_name, const string& column_name, const string& key_name, const string& key_value, const string& value );
+    string                      read_clob               ( const string& table_name, const string& column_name, const string& where );
     string                      read_clob               ( const string& table_name, const string& column_name, const string& key_name, const string& key_value );
 
     void                        write_order_history     ( Order*, Transaction* = NULL );
-    void                        finish_order            ( Order*, Transaction* = NULL );
 
     Transaction*                transaction             ();
     void                        execute                 ( const string& stmt, const string& debug_extra = "" );
@@ -101,7 +95,6 @@ struct Spooler_db : Object, Scheduler_object
     void                        handle_order_id_columns ();
     int                         expand_varchar_column   ( const string& table_name, const string& column_name, int minimum_width, int new_width );
     int                         column_width            ( const string& table_name, const string& column_name );
-    int                         get_id                  ( const string& variable_name, Transaction* = NULL );
     int                         get_id_                 ( const string& variable_name, Transaction* );
     void                        delete_order            ( Order*, Transaction* );
 

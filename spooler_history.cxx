@@ -1133,143 +1133,6 @@ void Spooler_db::spooler_stop()
     }
 }
 
-//-------------------------------------------------------------------------Spooler_db::insert_order
-
-void Spooler_db::insert_order( Order* order )
-{
-    try
-    {
-        while(1)
-        {
-            if( !_db.opened() )  return;
-
-            try
-            {
-                Transaction ta ( this );
-                {
-                    delete_order( order, &ta );
-
-                    sql::Insert_stmt insert ( &_db_descr );
-                    
-                    insert.set_table_name( _spooler->_orders_tablename );
-                    
-                    insert[ "ordering"      ] = get_order_ordering( &ta );
-                    insert[ "job_chain"     ] = order->job_chain()->name();
-                    insert[ "id"            ] = order->id().as_string();
-                    insert[ "spooler_id"    ] = _spooler->id_for_db();
-                    insert[ "title"         ] = order->title()                     , order->_title_modified      = false;
-                    insert[ "state"         ] = order->state().as_string();
-                    insert[ "state_text"    ] = order->state_text()                , order->_state_text_modified = false;
-                    insert[ "priority"      ] = order->priority()                  , order->_priority_modified   = false;
-
-                    if( order->is_processable() )
-                    insert[ "processable"   ] = true;
-
-                    insert.set_datetime( "created_time", order->_created.as_string(Time::without_ms) );
-                    insert.set_datetime( "mod_time", Time::now().as_string(Time::without_ms) );
-
-
-                    insert[ "initial_state" ] = order->initial_state().as_string();
-
-                    execute( insert );
-
-
-                    string payload_string = order->payload().as_string();
-                    if( payload_string != "" )  update_orders_clob( order, "payload", payload_string );
-                    //order->_payload_modified = false;
-
-                    xml::Document_ptr order_document = order->dom( show_for_database_only );
-                    xml::Element_ptr  order_element  = order_document.documentElement();
-                    if( order_element.hasAttributes()  ||  order_element.firstChild() )
-                        update_orders_clob( order, "order_xml", order_document.xml() );
-
-                    if( order->run_time() )
-                    {
-                        xml::Document_ptr doc = order->run_time()->dom_document();
-                        if( doc.documentElement().hasAttributes()  ||  doc.documentElement().hasChildNodes() )  update_orders_clob( order, "run_time", doc.xml() );
-                    }
-
-                    ta.commit();
-                }
-
-                order->_is_in_database = true;
-
-                break;
-            }
-            catch( exception& x )  
-            { 
-                try_reopen_after_error( x );
-            }
-        }
-    }
-    catch( exception& x ) 
-    { 
-        _spooler->log()->error( message_string( "SCHEDULER-305", _spooler->_orders_tablename, x ) );        // "FEHLER BEIM EINFÜGEN IN DIE TABELLE "
-        throw;
-    }
-}
-
-//--------------------------------------------------------------------Spooler_db::read_payload_clob
-
-string Spooler_db::read_orders_clob( Order* order, const string& column_name )
-{
-    if( !order )  throw_xc( __FUNCTION__ );
-    if( !order->job_chain() )  throw_xc( __FUNCTION__ );
-
-    return read_orders_clob( order->job_chain()->name(), order->id().as_string(), column_name );
-}
-
-//--------------------------------------------------------------------Spooler_db::read_payload_clob
-
-string Spooler_db::read_orders_clob( const string& job_chain_name, const string& order_id, const string& column_name )
-{
-    if( _db_name == "" )  z::throw_xc( "SCHEDULER-361", __FUNCTION__ );
-
-    transaction()->set_transaction_used();
-
-    return file_as_string( _db_name + " -table=" + _spooler->_orders_tablename + " -clob=" + column_name +
-        " where `spooler_id`=" + sql::quoted( _spooler->id_for_db() ) + 
-          " and `job_chain`="  + sql::quoted( job_chain_name ) + 
-          " and `id`="         + sql::quoted( order_id ) );
-}
-
-//-------------------------------------------------------------------Spooler_db::update_orders_clob
-
-void Spooler_db::update_orders_clob( Order* order, const string& column_name, const string& value )
-{
-    if( !order )  throw_xc( __FUNCTION__ );
-    if( !order->job_chain() )  throw_xc( __FUNCTION__ );
-
-    update_orders_clob( order->job_chain()->name(), order->id().as_string(), column_name, value );
-}
-
-//--------------------------------------------------------------------Spooler_db::update_orders_clob
-
-void Spooler_db::update_orders_clob( const string& job_chain_name, const string& order_id, const string& column_name, const string& value )
-{
-    if( _db_name == "" )  z::throw_xc( "SCHEDULER-361", __FUNCTION__ );
-
-    if( value == "" )
-    {
-        sql::Update_stmt update ( &_db_descr );
-        update.set_table_name( _spooler->_orders_tablename );
-        update[ column_name ].set_direct( "null" );
-        update.and_where_condition( "spooler_id", _spooler->id_for_db() );
-        update.and_where_condition( "job_chain" , job_chain_name );
-        update.and_where_condition( "id"        , order_id );
-        execute( update );
-    }
-    else
-    {
-        Any_file clob = transaction()->open_file( "-out " + _db_name,  "-table=" + _spooler->_orders_tablename + " -clob=" + column_name + 
-            " where `spooler_id`=" + sql::quoted( _spooler->id_for_db() ) +
-              " and `job_chain`="  + sql::quoted( job_chain_name ) + 
-              " and `id`="         + sql::quoted( order_id ) );
-        clob.put( value );
-        clob.close();
-    }
-}
-
 //--------------------------------------------------------------------------Spooler_db::update_clob
 
 void Spooler_db::update_clob( const string& table_name, const string& column_name, const string& key_name, int key_value, const string& value )
@@ -1284,9 +1147,7 @@ void Spooler_db::update_clob( const string& table_name, const string& column_nam
     }
     else
     {
-        Any_file clob = transaction()->open_file( "-out " + _db_name, "-table=" + table_name + " -clob=" + column_name + " where `" + key_name + "`=" + as_string( key_value ) );
-        clob.put( value );
-        clob.close();
+        update_clob( table_name, column_name, value, "where `" + key_name + "`=" + as_string( key_value ) );
     }
 }
 
@@ -1306,69 +1167,35 @@ void Spooler_db::update_clob( const string& table_name, const string& column_nam
     }
     else
     {
-        Any_file clob = transaction()->open_file( "-out " + _db_name, "-table=" + table_name + " -clob=" + column_name + " where `" + key_name + "`=" + sql::quoted( key_value ) );
-        clob.put( value );
-        clob.close();
+        update_clob( table_name, column_name, value, "where `" + key_name + "`=" + sql::quoted( key_value ) );
     }
 }
 
-//-------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------Spooler_db::update_clob
+
+void Spooler_db::update_clob( const string& table_name, const string& column_name, const string& value, const string& where )
+{
+    Any_file clob = transaction()->open_file( "-out " + _db_name, "-table=" + table_name + " -clob=" + column_name + "  " + where );
+    clob.put( value );
+    clob.close();
+}
+
+//----------------------------------------------------------------------------Spooler_db::read_clob
 
 string Spooler_db::read_clob( const string& table_name, const string& column_name, const string& key_name, const string& key_value )
+{
+    return read_clob( table_name, column_name, "  where `" + key_name + "`=" + sql::quoted( key_value ) );
+}
+
+//----------------------------------------------------------------------------Spooler_db::read_clob
+
+string Spooler_db::read_clob( const string& table_name, const string& column_name, const string& where )
 {
     if( _db_name == "" )  z::throw_xc( "SCHEDULER-361", __FUNCTION__ );
 
     transaction()->set_transaction_used();
 
-    return file_as_string( _db_name + " -table=" + table_name + " -clob=" + column_name + "  where `" + key_name + "`=" + sql::quoted( key_value ) );
-}
-
-//-------------------------------------------------------------------------Spooler_db::delete_order
-
-void Spooler_db::delete_order( Order* order, Transaction* )
-{
-    sql::Delete_stmt del ( &_db_descr );
-
-    del.set_table_name( _spooler->_orders_tablename );
-
-    del.and_where_condition( "job_chain" , order->job_chain()->name() );
-    del.and_where_condition( "id"        , order->id().as_string() );
-    del.and_where_condition( "spooler_id", _spooler->id_for_db() );
-
-    execute( del );
-}
-
-//-------------------------------------------------------------------------Spooler_db::finish_order
-
-void Spooler_db::finish_order( Order* order, Transaction* outer_transaction )
-{
-    while(1)
-    {
-        try
-        {
-            if( !_db.opened() )  return;
-
-
-            Transaction ta ( this, outer_transaction );
-            {
-                if( order->_is_in_database )
-                {
-                    delete_order( order, &ta );
-                    order->_is_in_database = false;
-                }
-
-                write_order_history( order, &ta );
-            }
-
-            ta.commit();
-            break;
-        }
-        catch( exception& x )  
-        { 
-            if( outer_transaction )  throw;
-            try_reopen_after_error( x );
-        }
-    }
+    return file_as_string( _db_name + " -table=" + table_name + " -clob=" + column_name + "  " + where );
 }
 
 //------------------------------------------------------------------Spooler_db::write_order_history
@@ -1431,102 +1258,6 @@ void Spooler_db::write_order_history( Order* order, Transaction* outer_transacti
         { 
             if( outer_transaction )  throw;
             try_reopen_after_error( x );
-        }
-    }
-}
-
-//-------------------------------------------------------------------------Spooler_db::update_order
-
-void Spooler_db::update_order( Order* order )
-{
-    if( order->finished() )  
-    {
-        finish_order( order );
-    }
-    else
-    {
-        string payload_string = order->string_payload();
-        string state_string   = order->state().as_string();
-
-        try
-        {
-            while(1)
-            {
-                if( !_db.opened() )  return;
-
-                try
-                {
-                    Transaction ta ( this );
-                    {
-                        sql::Update_stmt update ( &_db_descr );
-
-                        update.set_table_name( _spooler->_orders_tablename );
-
-                        update[ "state" ] = state_string;
-                        update[ "processable" ] = order->is_processable()? sql::Value(true) : sql::null_value;
-                        
-                        if( order->_priority_modified   )  update[ "priority"   ] = order->priority();
-                        if( order->_title_modified      )  update[ "title"      ] = order->title();
-                        if( order->_state_text_modified )  update[ "state_text" ] = order->state_text();
-
-                        // _run_time_modified gilt nicht für den Datenbanksatz, sondern für den Aufragsneustart
-                        // Vorschlag: xxx_modified auflösen zugunsten eines gecachten letzten Datenbanksatzes, dessen Inhalt verglichen werden.
-                        if( order->run_time() ) 
-                        {
-                            xml::Document_ptr doc = order->run_time()->dom_document();
-                            if( doc.documentElement().hasAttributes()  ||  doc.documentElement().hasChildNodes() )  update_orders_clob( order, "run_time", doc.xml() );
-                                                                                                              else  update[ "run_time" ].set_direct( "null" );
-                        }
-                        else
-                            update[ "run_time" ].set_direct( "null" );
-
-                        if( order->_order_xml_modified )
-                        {
-                            xml::Document_ptr order_document = order->dom( show_for_database_only );
-                            xml::Element_ptr  order_element  = order_document.documentElement();
-                            if( order_element.hasAttributes()  ||  order_element.firstChild() )
-                                update_orders_clob( order, "order_xml", order_document.xml() );
-                            else  
-                                update[ "order_xml" ].set_direct( "null" );
-                        }
-
-                        update[ "initial_state" ] = order->initial_state().as_string();
-
-                        update.set_datetime( "mod_time", Time::now().as_string(Time::without_ms) );
-
-                        //if( order->_payload_modified )
-                        {
-                            if( payload_string == "" )  update[ "payload" ].set_direct( "null" );
-                                                  else  update_orders_clob( order, "payload", payload_string );
-                            //order->_payload_modified = false;
-                        }
-    
-
-                        update.and_where_condition( "job_chain", order->job_chain()->name() );
-                        update.and_where_condition( "id"       , order->id().as_string()    );
-                        update.and_where_condition( "spooler_id", _spooler->id_for_db() );
-
-                        execute( update );
-
-                        ta.commit();
-                    }
-
-                    order->_order_xml_modified  = false;            
-                    order->_state_text_modified = false; 
-                    order->_title_modified      = false;
-                    order->_state_text_modified = false;
-                    break;
-                }
-                catch( exception& x )  
-                { 
-                    try_reopen_after_error( x );
-                }
-            }
-        }
-        catch( exception& x ) 
-        { 
-            _spooler->log()->error( message_string( "SCHEDULER-306", _spooler->_orders_tablename, x ) );      // "FEHLER BEIM UPDATE DER TABELLE "
-            throw;
         }
     }
 }

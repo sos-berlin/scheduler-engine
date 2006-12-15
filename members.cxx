@@ -19,7 +19,7 @@ namespace spooler {
 const time_t                    heart_beat_period                       = Z_NDEBUG_DEBUG( 60, 20 );
 const time_t                    max_heart_beat_processing_time          = Z_NDEBUG_DEBUG( 10,  3 );     // Zeit, die gebraucht wird, um den Herzschlag auszuführen
 const time_t                    active_heart_beat_minimum_check_period  = heart_beat_period / 2;
-const time_t                    trauerfrist                             = 2*3600;                       // Trauerzeit, nach der Mitgliedssätze gelöscht werden
+const time_t                    trauerfrist                             = 12*3600;                      // Trauerzeit, nach der Mitgliedssätze gelöscht werden
 const time_t                    database_commit_visible_time            = 10;                           // Zeit, die die Datenbank braucht, um nach Commit Daten für anderen Client sichtbar zu machen.
 const int                       Scheduler_member::max_precedence        = 9999;
 
@@ -47,8 +47,8 @@ struct Heart_beat : Async_operation, Scheduler_object
     Fill_zero                  _zero_;
     Scheduler_member*          _scheduler_member;
     Prefix_log*                _log;
-    time_t                     _last_heart_beat;
-    time_t                     _next_heart_beat;
+    //time_t                     _db_last_heart_beat;
+    //time_t                     _db_next_heart_beat;
 };
 
 //-------------------------------------------------------------------------------------------------
@@ -258,14 +258,14 @@ bool Exclusive_scheduler_watchdog::async_continue_( Continue_flags )
 
 void Exclusive_scheduler_watchdog::set_alarm()
 {
-    if( _scheduler_member->_next_heart_beat < _next_check_time )
+    if( _scheduler_member->_db_next_heart_beat < _next_check_time )
     {
-        Z_LOG2( "scheduler.distributed", __FUNCTION__ << "  Next heart beat at " << my_string_from_time_t( _scheduler_member->_next_heart_beat ) );
-        set_async_next_gmtime( _scheduler_member->_next_heart_beat );
+        Z_LOG2( "scheduler.distributed", __FUNCTION__ << "  Next heart beat at " << my_string_from_time_t( _scheduler_member->_db_next_heart_beat ) << "\n" );
+        set_async_next_gmtime( _scheduler_member->_db_next_heart_beat );
     }
     else
     {
-        Z_LOG2( "scheduler.distributed", __FUNCTION__ << "  Next check at " << my_string_from_time_t( _next_check_time ) );
+        Z_LOG2( "scheduler.distributed", __FUNCTION__ << "  Next check at " << my_string_from_time_t( _next_check_time ) << "\n" );
         set_async_next_gmtime( _next_check_time );
     }
 }
@@ -387,7 +387,7 @@ bool Exclusive_scheduler_watchdog::check_exclusive_schedulers_heart_beat( Transa
 
             _other_scheduler = Other_scheduler();
             _other_scheduler._member_id                = other_member_id;
-            _other_scheduler._last_heart_beat_detected = ::time(NULL);
+            //_other_scheduler._last_heart_beat_detected = ::time(NULL);
 
             //_log->info( message_string( "SCHEDULER-995", other_member_id, ::time(NULL) - last_heart_beat, other_http_url ) );
             _scheduler_member->show_active_schedulers( ta );
@@ -435,8 +435,7 @@ bool Exclusive_scheduler_watchdog::check_exclusive_schedulers_heart_beat( Transa
                 _log->warn( message_string( "SCHEDULER-993", 
                                                 other_member_id, 
                                                 my_string_from_time_t( next_heart_beat ),
-                                                my_string_from_time_t( _other_scheduler._last_heart_beat_detected ),
-                                                now1 - _other_scheduler._last_heart_beat_detected ) );
+                                                now1 - next_heart_beat ) );
 
                 //if( next_heart_beat + heart_beat_delay < now1 )  other_member_timed_out = true;
             }
@@ -502,10 +501,12 @@ bool Exclusive_scheduler_watchdog::mark_as_exclusive()
     Z_LOGI2( "scheduler.distributed", __FUNCTION__ << "\n" );
     assert( !_scheduler_member->_has_exclusiveness );
 
+    _scheduler_member->calculate_next_heart_beat();
+
     bool   ok;
-    time_t now                 = ::time(NULL);
-    time_t new_last_heart_beat = now;
-    time_t new_next_heart_beat = new_last_heart_beat + heart_beat_period;
+    time_t now                    = ::time(NULL);
+    time_t new_db_last_heart_beat = now;
+    time_t new_db_next_heart_beat = _scheduler_member->_next_heart_beat;
 
 
     _log->info( message_string( "SCHEDULER-803" ) );  // "This Scheduler becomes exclusive"
@@ -538,13 +539,14 @@ bool Exclusive_scheduler_watchdog::mark_as_exclusive()
         {
             sql::Update_stmt update ( &db()->_db_descr, _spooler->_members_tablename );
         
-            update[ "active"    ] = 1;
-            update[ "exclusive" ] = 1;
-            update[ "last_heart_beat" ] = new_last_heart_beat;
-            update[ "next_heart_beat" ] = new_next_heart_beat;
+            update[ "active"          ] = 1;
+            update[ "exclusive"       ] = 1;
+            update[ "last_heart_beat" ] = new_db_last_heart_beat;
+            update[ "next_heart_beat" ] = new_db_next_heart_beat;
             update.and_where_condition( "scheduler_member_id", _scheduler_member->member_id() );
             update.and_where_condition( "active"             , sql::null_value );
             update.and_where_condition( "exclusive"          , sql::null_value );
+
             ok = ta.try_execute_single( update, __FUNCTION__ );
         }
 
@@ -558,8 +560,8 @@ bool Exclusive_scheduler_watchdog::mark_as_exclusive()
 
     if( ok )
     {
-        _scheduler_member->_last_heart_beat = new_last_heart_beat;
-        _scheduler_member->_next_heart_beat = new_next_heart_beat;
+        _scheduler_member->_db_last_heart_beat = new_db_last_heart_beat;
+        _scheduler_member->_db_next_heart_beat = new_db_next_heart_beat;
 
         //_set_exclusive_until = ::time(NULL);
         //if( db_mode == use_commit_visible_time )  _set_exclusive_until += database_commit_visible_time + 1;     // Nachfolgende Sekunde
@@ -619,8 +621,10 @@ bool Exclusive_scheduler_watchdog::set_exclusive()
     if( ok )
     {
         _other_scheduler._member_id = _scheduler_member->member_id();
-        _scheduler_member->_is_active = true;
+
+        _scheduler_member->_is_active         = true;
         _scheduler_member->_has_exclusiveness = true;
+
         _log->info( message_string( "SCHEDULER-807" ) );
     }
 
@@ -719,55 +723,13 @@ void Scheduler_member::shutdown()
     close();
 }
 
-//-----------------------------------------------------------Scheduler_member::delete_member_record
-/*
-void Scheduler_member::delete_member_record( Transaction* ta )
+//------------------------------------------------------Scheduler_member::calculate_next_heart_beat
+
+void Scheduler_member::calculate_next_heart_beat()
 {
-    Z_LOGI2( "scheduler.distributed", __FUNCTION__ << "\n" );
-    assert( ta );
-
-    bool ok;
-
-    lock_member_records( ta, member_id(), _spooler->id_for_db() );
-
-    {
-        sql::Update_stmt update ( &db()->_db_descr, _spooler->_members_tablename );
-
-        update[ "active"    ] = sql::null_value;
-        update[ "exclusive" ] = sql::null_value;
-        update.and_where_condition( "scheduler_member_id", member_id() );
-        update.and_where_condition( "active"             , 1 );
-        update.and_where_condition( "exclusive"          , 1 );
-        ok = ta->try_execute_single( update, __FUNCTION__ );
-    }
-
-    if( ok )
-    {
-        sql::Update_stmt update ( &db()->_db_descr, _spooler->_members_tablename );
-    
-        update[ "active" ] = 1;
-        update[ "exclusive" ] = 1;
-        update.and_where_condition( "scheduler_member_id", empty_member_id() );
-        update.and_where_condition( "active"             , sql::null_value );
-        update.and_where_condition( "exclusive"          , sql::null_value );
-        ok = ta->try_execute_single( update, __FUNCTION__ );
-    }
-
-    if( !ok )  
-    {
-        _log->warn( message_string( "SCHEDULER-356" ) );  // Ein anderer Scheduler hat die Exklusivität übernommen
-        show_active_schedulers( ta );
-    }
-
-    ta->execute
-    (
-        S() << "DELETE from " << _spooler->_members_tablename << 
-               "  where `scheduler_member_id`=" << sql::quoted( member_id() ) <<
-                  " and `exclusive` is null",
-        __FUNCTION__
-    );
+    _next_heart_beat = ::time(NULL) + heart_beat_period;
 }
-*/
+
 //------------------------------------------------------------Scheduler_member::lock_member_records
 
 void Scheduler_member::lock_member_records( Transaction* ta, const string& member1_id, const string& member2_id )
@@ -1035,10 +997,11 @@ bool Scheduler_member::do_exclusive_heart_beat( Transaction* outer_transaction )
 
     if( !ok )
     {
-        _has_exclusiveness = false;
+        _has_exclusiveness       = false;
         _is_exclusiveness_stolen = true;
-        _is_active = false;
-        _log->error( message_string( "SCHEDULER-356" ) );   // "Some other Scheduler member has become exclusive"
+        _is_active               = false;
+
+        _log->error( message_string( "SCHEDULER-372" ) );   // "Some other Scheduler member has become exclusive"
     }
 
     return ok;
@@ -1050,9 +1013,12 @@ bool Scheduler_member::do_heart_beat( Transaction* outer_transaction, bool db_re
 {
     Z_LOGI2( "scheduler.distributed", __FUNCTION__ << "\n" );
 
-    time_t old_next_heart_beat = _next_heart_beat;
+    time_t old_next_heart_beat = _db_next_heart_beat;
     bool   ok                  = false;
     bool   was_late            = false;
+
+
+    calculate_next_heart_beat();
 
     if( !db()->opened() )  return false;
 
@@ -1060,7 +1026,8 @@ bool Scheduler_member::do_heart_beat( Transaction* outer_transaction, bool db_re
   AGAIN:
     for( Retry_transaction ta ( db(), outer_transaction ); ta.enter_loop(); ta++ ) try
     {
-        ok = check_database_integrity( &ta );
+        ok = true;
+        if( _spooler->_db_check_integrity )  ok = check_database_integrity( &ta );
 
         if( ok )  ok = try_to_heartbeat_member_record( &ta, db_record_marked_exclusive );
 
@@ -1084,23 +1051,25 @@ bool Scheduler_member::do_heart_beat( Transaction* outer_transaction, bool db_re
 
 bool Scheduler_member::try_to_heartbeat_member_record( Transaction* ta, bool db_record_marked_exclusive )
 {
-    time_t new_last_heart_beat = ::time(NULL);
-    time_t new_next_heart_beat = new_last_heart_beat + heart_beat_period;
+    calculate_next_heart_beat();
 
-    Z_LOGI2( "scheduler.distributed", __FUNCTION__ << "  new_last_heart_beat=" << new_last_heart_beat << " (" << my_string_from_time_t( new_last_heart_beat ) << "), "
-                                                        "new_next_heart_beat=" << new_next_heart_beat << " (" << my_string_from_time_t( new_next_heart_beat ) << ")\n" );
+    time_t new_db_last_heart_beat = ::time(NULL);
+    time_t new_db_next_heart_beat = _next_heart_beat;
+
+    Z_LOGI2( "scheduler.distributed", __FUNCTION__ << "  new_db_last_heart_beat=" << new_db_last_heart_beat << " (" << my_string_from_time_t( new_db_last_heart_beat ) << "), "
+                                                        "new_db_next_heart_beat=" << new_db_next_heart_beat << " (" << my_string_from_time_t( new_db_next_heart_beat ) << ")\n" );
 
     assert( ta );
 
 
     sql::Update_stmt update ( &db()->_db_descr, _spooler->_members_tablename );
     
-    update[ "last_heart_beat" ] = new_last_heart_beat;
-    update[ "next_heart_beat" ] = new_next_heart_beat;
+    update[ "last_heart_beat" ] = new_db_last_heart_beat;
+    update[ "next_heart_beat" ] = new_db_next_heart_beat;
 
     update.and_where_condition( "scheduler_member_id", member_id()      );
-    update.and_where_condition( "last_heart_beat"    , _last_heart_beat );
-    update.and_where_condition( "next_heart_beat"    , _next_heart_beat );
+    update.and_where_condition( "last_heart_beat"    , _db_last_heart_beat );
+    update.and_where_condition( "next_heart_beat"    , _db_next_heart_beat );
     update.and_where_condition( "exclusive"          , db_record_marked_exclusive? sql::Value(1) : sql::null_value );
     update.and_where_condition( "command"            , _heart_beat_command? sql::Value( string_from_command( _heart_beat_command ) ) 
                                                                           : sql::null_value );
@@ -1126,29 +1095,32 @@ bool Scheduler_member::try_to_heartbeat_member_record( Transaction* ta, bool db_
             {
                 _heart_beat_command_string = result_set.get_record().as_string( 0 );
                 _heart_beat_command        = command_from_string( _heart_beat_command_string) ;
-                
-                if( _heart_beat_command )
-                {
-                    _log->info( message_string( "SCHEDULER-811", _heart_beat_command_string ) );
-
-                    switch( _heart_beat_command )
-                    {
-                        case cmd_terminate            : _spooler->cmd_terminate( false, INT_MAX, false );  break;
-                        case cmd_terminate_and_restart: _spooler->cmd_terminate( true , INT_MAX, false );  break;
-                        default: ;
-                    }
-                }
+                if( _heart_beat_command )  execute_command( _heart_beat_command );
             }
         }
     }
 
     if( record_is_updated )
     {
-        _last_heart_beat = new_last_heart_beat;
-        _next_heart_beat = new_next_heart_beat;
+        _db_last_heart_beat = new_db_last_heart_beat;
+        _db_next_heart_beat = new_db_next_heart_beat;
     }
 
     return record_is_updated;
+}
+
+//----------------------------------------------------------------Scheduler_member::execute_command
+
+void Scheduler_member::execute_command( Command command )
+{
+    _log->info( message_string( "SCHEDULER-811", _heart_beat_command_string ) );
+
+    switch( command )
+    {
+        case cmd_terminate            : _spooler->cmd_terminate( false, INT_MAX, false );  break;
+        case cmd_terminate_and_restart: _spooler->cmd_terminate( true , INT_MAX, false );  break;
+        default: ;
+    }
 }
 
 //------------------------------------------------------Scheduler_member::assert_database_integrity
@@ -1180,14 +1152,27 @@ bool Scheduler_member::check_database_integrity( Transaction* ta )
     
     Any_file result = ta->open_result_set( sql_stmt, __FUNCTION__ );    // In _einem_ Snapshot abfragen
 
-    int exclusive_count = result.get_record().as_int( 1 );
-    int empty_count     = result.get_record().as_int( 1 );
+    int exclusive_count = 0;
+    int empty_count     = 0;
+
+    while( !result.eof() )
+    {
+        Record record = result.get_record();
+        switch( record.as_int( 0 ) )
+        {
+            case 1: exclusive_count = record.as_int( 1 );  break;
+            case 2: empty_count     = record.as_int( 1 );  break;
+            default: assert((__FUNCTION__,0));
+        }
+    }
+
 
     ok = exclusive_count == 1 && empty_count == 1  ||
          exclusive_count == 0 && empty_count == 0;
+
     if( !ok )
     {
-        _log->error( message_string( "SCHEDULER-808", S() << "exclusive_count=" << exclusive_count << " empty_count=" << empty_count ) );
+        _log->error( message_string( "SCHEDULER-371", S() << "exclusive_count=" << exclusive_count << " empty_count=" << empty_count ) );
         mark_as_inactive( ta );
     }
 
@@ -1270,12 +1255,15 @@ void Scheduler_member::insert_member_record( Transaction* ta )
     assert( ta );
     assert( !_is_active );
 
-    time_t now = ::time(NULL);
-    time_t new_last_heart_beat = now;
-    time_t new_next_heart_beat = new_last_heart_beat + heart_beat_period;
 
-    Z_LOGI2( "scheduler.distributed", __FUNCTION__ << "  new_last_heart_beat=" << new_last_heart_beat << " (" << my_string_from_time_t( new_last_heart_beat) << "), "
-                                                        "new_next_heart_beat=" << new_next_heart_beat << " (" << my_string_from_time_t( new_next_heart_beat) << ")\n" );
+    calculate_next_heart_beat();
+
+    time_t now                    = ::time(NULL);
+    time_t new_db_last_heart_beat = now;
+    time_t new_db_next_heart_beat = _next_heart_beat;
+
+    Z_LOGI2( "scheduler.distributed", __FUNCTION__ << "  new_db_last_heart_beat=" << new_db_last_heart_beat << " (" << my_string_from_time_t( new_db_last_heart_beat) << "), "
+                                                        "new_db_next_heart_beat=" << new_db_next_heart_beat << " (" << my_string_from_time_t( new_db_next_heart_beat) << ")\n" );
 
 
     // Darf nicht vorhanden sein:  db()->execute( S() << "DELETE from " << _spooler->_members_tablename << "  where `scheduler_member_id`=" << sql::quoted( member_id() ) );
@@ -1284,13 +1272,13 @@ void Scheduler_member::insert_member_record( Transaction* ta )
     
     insert[ "scheduler_member_id" ] = member_id();
     insert[ "precedence"          ] = max_precedence;
-    insert[ "last_heart_beat"     ] = new_last_heart_beat;
-    insert[ "next_heart_beat"     ] = new_next_heart_beat;
+    insert[ "last_heart_beat"     ] = new_db_last_heart_beat;
+    insert[ "next_heart_beat"     ] = new_db_next_heart_beat;
     insert[ "active"              ] = sql::null_value;
     insert[ "exclusive"           ] = sql::null_value;
     insert[ "scheduler_id"        ] = _spooler->id_for_db();
     insert[ "version"             ] = _spooler->_version;
-    insert[ "running_since"       ].set_datetime( string_local_from_time_t( new_last_heart_beat ) );
+    insert[ "running_since"       ].set_datetime( string_local_from_time_t( new_db_last_heart_beat ) );
     insert[ "host"                ] = _spooler->_hostname;
     
     if( _spooler->tcp_port() )
@@ -1304,8 +1292,8 @@ void Scheduler_member::insert_member_record( Transaction* ta )
 
     ta->execute( insert );
 
-    _last_heart_beat = new_last_heart_beat;
-    _next_heart_beat = new_next_heart_beat;
+    _db_last_heart_beat = new_db_last_heart_beat;
+    _db_next_heart_beat = new_db_next_heart_beat;
 }
 
 //---------------------------------------------------------------Scheduler_member::mark_as_inactive
@@ -1326,8 +1314,8 @@ void Scheduler_member::mark_as_inactive( Transaction* ta, bool delete_inactive_r
     update.and_where_condition( "scheduler_member_id", member_id() );
     update.and_where_condition( "active"             , _is_active   ? sql::Value( 1 ) : sql::null_value );
     update.and_where_condition( "exclusive"          , _has_exclusiveness? sql::Value( 1 ) : sql::null_value );
-  //update.and_where_condition( "last_heart_beat"    , _last_heart_beat );
-  //update.and_where_condition( "next_heart_beat"    , _next_heart_beat );
+  //update.and_where_condition( "last_heart_beat"    , _db_last_heart_beat );
+  //update.and_where_condition( "next_heart_beat"    , _db_next_heart_beat );
 
     bool ok = ta->try_execute_single( delete_inactive_record? update.make_delete_stmt() 
                                                             : update.make_update_stmt(), __FUNCTION__ );
@@ -1347,7 +1335,7 @@ void Scheduler_member::mark_as_inactive( Transaction* ta, bool delete_inactive_r
                                                              : update.make_update_stmt(), __FUNCTION__ );
         if( !ok )
         {
-            _log->error( message_string( "SCHEDULER-808", "Update without effect: " + update.make_stmt() ) );
+            _log->error( message_string( "SCHEDULER-371", "Update without effect: " + update.make_stmt() ) );
             show_active_schedulers( ta );
         }
     }

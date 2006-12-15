@@ -46,7 +46,7 @@
                         <scheduler_element name="show_schedulers"/>
                     </li>
                     <li>
-                        <scheduler_ini_file name="factory.ini" section="spooler" entry="db_check_integrity"/>
+                        <scheduler_ini_entry file="factory.ini" section="spooler" entry="db_check_integrity"/>
                     </li>
                 </ul>
             </description>
@@ -55,7 +55,7 @@
         <revision type="new" title="debug9 protokolliert SQL-Kommandos">
             <description>
                 <p>
-                    Bei <scheduler_option name="log-level" value="debug9"/> schreint der Scheduler die SQL-Kommandos ins Hauptprotokoll.
+                    Bei <scheduler_option name="log-level" value="debug9"/> schreibt der Scheduler seine SQL-Kommandos ins Hauptprotokoll.
                 </p>
             </description>
         </revision>

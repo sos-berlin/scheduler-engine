@@ -55,7 +55,7 @@ struct Scheduler_member : Async_operation, Scheduler_object
     Command                     heart_beat_command          ()                                      { return _heart_beat_command; }
     string                      exclusive_member_id         ();
     string                      empty_member_id             ();
-    time_t                      last_heart_beat             ()                                      { return _last_heart_beat; }
+    time_t                      last_heart_beat             ()                                      { return _db_last_heart_beat; }
 
     bool                        start                       ();
     bool                        wait_until_is_scheduler_up  ();
@@ -79,6 +79,7 @@ struct Scheduler_member : Async_operation, Scheduler_object
     void                        start_operations            ();
     void                        close_operations            ();
 
+    void                        calculate_next_heart_beat   ();
     void                        insert_scheduler_id_record  ( Transaction* );
     bool                        check_empty_member_record   ();
     void                        insert_member_record        ( Transaction* );
@@ -88,8 +89,9 @@ struct Scheduler_member : Async_operation, Scheduler_object
     bool                        try_to_heartbeat_member_record( Transaction*, bool db_record_marked_active );
     void                        set_command_for_all_schedulers_but_me( Transaction*, const string& where, Command );
   //void                        set_command_for_members     ( Transaction*, const string& where, Command );
-    void                        make_scheduler_member_id    ();
+    void                        execute_command             ( Command );
     void                        db_execute                  ( const string& stmt );
+    void                        make_scheduler_member_id    ();
 
   private:
     friend struct               Heart_beat;
@@ -101,8 +103,9 @@ struct Scheduler_member : Async_operation, Scheduler_object
   //bool                       _demand_exclusiveness;
     bool                       _has_exclusiveness;
     bool                       _is_backup;
-    time_t                     _last_heart_beat;
     time_t                     _next_heart_beat;
+    time_t                     _db_last_heart_beat;
+    time_t                     _db_next_heart_beat;
     bool                       _is_exclusiveness_stolen;
     Command                    _heart_beat_command;
     string                     _heart_beat_command_string;

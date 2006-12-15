@@ -31,7 +31,15 @@
         <ini_entry setting="db_history_table"/>
         <ini_entry setting="db_order_history_table" />
         <ini_entry setting="db_members_table" />
-
+        
+        <ini_entry name="db_check_integrity" type="yes|no">
+            <description>
+                <p>
+                    Der Scheduler führt zusätzliche Prüfungen der Datenbank-Integrität durch.
+                </p>
+            </description>
+        </ini_entry>
+        
         <ini_entry setting="max_db_errors" />
         <ini_entry setting="history_file" />
         <ini_entry setting="history_columns" />

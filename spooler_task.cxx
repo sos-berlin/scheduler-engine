@@ -1183,16 +1183,16 @@ bool Task::do_something()
                                     {
                                         if( !take_order( now ) )
                                         {
-                                            if( Order* order = _job->request_order( obj_name() ) )
-                                            {
-                                                bool ok = set_order( order );
-                                                if( !ok )
-                                                {
-                                                    set_state( s_running_waiting_for_order );
-                                                    break;
-                                                }
-                                            }
-                                            else
+                                            //if( Order* order = _job->request_order( obj_name() ) )
+                                            //{
+                                            //    bool ok = set_order( order );
+                                            //    if( !ok )
+                                            //    {
+                                            //        set_state( s_running_waiting_for_order );
+                                            //        break;
+                                            //    }
+                                            //}
+                                            //else
                                             {
                                                 _idle_timeout_at = _job->_idle_timeout == latter_day? latter_day : now + _job->_idle_timeout;
                                                 set_state( s_running_waiting_for_order );
@@ -1648,9 +1648,9 @@ bool Task::operation__end()
     return result;
 }
 
-//---------------------------------------------------------------------------------Task::set_order
+//-------------------------------------------------------------------------------Task::occupy_order
 
-bool Task::set_order( Order* order )
+bool Task::occupy_order( Order* order )
 {
     // Wird von Job gerufen, wenn Task wegen neuen Auftrags startet
 
@@ -1679,7 +1679,11 @@ Order* Task::take_order( const Time& now )
 {
     if( !_order )
     {
-        set_order( _job->order_queue()->get_order_for_processing( now ) );
+        Order* order = _job->order_queue()->get_order_for_processing( now );
+        if( !order )  order = _job->request_order( obj_name() );
+
+        bool ok = occupy_order( order );
+        //if( !ok )  job()->order_queue()->remove_outdated_orders();
     }
 
     return _order;

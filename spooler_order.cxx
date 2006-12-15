@@ -499,16 +499,9 @@ void Job_chain::load_orders_from_database()
 
             try
             {
-                ptr<Order> order = new Order( _spooler, record, 
-                                              _spooler->_db->read_orders_clob( _name, order_id, "payload"   ), 
-                                              _spooler->_db->read_orders_clob( _name, order_id, "run_time"  ),
-                                              _spooler->_db->read_orders_clob( _name, order_id, "order_xml" ) );
-                order->_order_xml_modified  = false;            
-                order->_state_text_modified = false; 
-                order->_title_modified      = false;
-                order->_state_text_modified = false;
-                order->_is_in_database = true;
-                order->add_to_job_chain( this );    // Einstieg nur über Order, damit Semaphoren stets in derselben Reihenfolge gesperrt werden.
+                ptr<Order> order = new Order( _spooler, record );
+                order->add_to_job_chain( this );
+                order->load_blobs( &ta );
                 count++;
             }
             catch( exception& x )
@@ -1056,6 +1049,8 @@ Order* Order_queue::first_order( const Time& now )
 
     Order* result = NULL;
 
+    //remove_outdated_orders();
+
     FOR_EACH( Queue, _queue, o )
     {
         Order* order = *o;
@@ -1077,6 +1072,29 @@ Order* Order_queue::first_order( const Time& now )
 
     return result;
 }
+
+//--------------------------------------------------------------Order_queue::remove_outdated_orders
+
+//void Order_queue::remove_outdated_orders()
+//{
+//    if( _has_outdated_orders )
+//    {
+//      AGAIN:
+//        FOR_EACH( Queue, _queue, o )
+//        {
+//            Order* order = *o;
+//
+//            if( order->_is_outdated )
+//            {
+//                assert( order->_job_chain() );
+//                order->remove_from_job_chain( true );
+//                goto AGAIN;  // Iterator ist ungültig 
+//            }
+//        }
+//
+//        _has_outdated_orders = true;
+//    }
+//}
 
 //-------------------------------------------Order_queue::load_next_processable_order_from_database
 
@@ -1127,27 +1145,17 @@ Order* Order_queue::load_next_processable_order_from_database()
 
             try
             {
-                Job_chain* job_chain = _spooler->job_chain( record.as_string( "job_chain" ) );
-
-                // Folgende Zeilen in Funktion auslagern:
-                order = new Order( _spooler, record, 
-                                              _spooler->_db->read_orders_clob( job_chain->name(), order_id, "payload"   ), 
-                                              _spooler->_db->read_orders_clob( job_chain->name(), order_id, "run_time"  ),
-                                              _spooler->_db->read_orders_clob( job_chain->name(), order_id, "order_xml" ) );
-
-                order->_order_xml_modified  = false;            
-                order->_state_text_modified = false; 
-                order->_title_modified      = false;
-                order->_state_text_modified = false;
-                order->_is_in_database      = true;
-
-                order->add_to_job_chain( job_chain ); 
+                order = new Order( _spooler, record );
+                order->add_to_job_chain( _spooler->job_chain( record.as_string( "job_chain" ) ) );
+                order->load_blobs( &ta );
             }
             catch( exception& x )
             {
                 _log->error( message_string( "SCHEDULER-295", order_id, x ) ); 
             }
         }
+
+        ta.commit( __FUNCTION__ );
     }
     catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", x ) ); }
 
@@ -1231,14 +1239,13 @@ Order::Order( Spooler* spooler, const VARIANT& payload )
 
 //-------------------------------------------------------------------------------------Order::Order
 
-Order::Order( Spooler* spooler, const Record& record, const string& payload_string, const string& run_time_xml, const string& xml )
+Order::Order( Spooler* spooler, const Record& record )
 :
     Com_order(this),
     Scheduler_object( spooler, static_cast<IDispatch*>( this ), type_order ),
     _zero_(this+1),
     _lock("Order")
 {
-
     init();
 
     set_id      ( record.as_string( "id"         ) );
@@ -1246,19 +1253,6 @@ Order::Order( Spooler* spooler, const Record& record, const string& payload_stri
     _state_text = record.as_string( "state_text" );
     _title      = record.as_string( "title"      );
     _priority   = record.as_int   ( "priority"   );
-
-    if( payload_string.find( "<" + Com_variable_set::xml_element_name() ) != string::npos )
-    {
-        //Z_LOG2( "scheduler", "... payload ist ein Variable_set!\n" );
-        ptr<Com_variable_set> v = new Com_variable_set;
-        v->put_Xml( Bstr( payload_string ) );
-        _payload = v;
-    }
-    else
-    {
-        if( payload_string.empty() )  _payload = (IDispatch*)NULL;
-                                else  _payload = payload_string;
-    }
 
     string initial_state = record.as_string( "initial_state" );
     if( initial_state != "" )
@@ -1271,10 +1265,11 @@ Order::Order( Spooler* spooler, const Record& record, const string& payload_stri
 
     _log->set_prefix( obj_name() );
 
-    //string run_time_xml = record.as_string( "run_time" );
-    if( run_time_xml != "" )  set_run_time( xml::Document_ptr( run_time_xml ).documentElement() );
-
-    if( xml != "" )  set_dom( xml::Document_ptr( xml ).documentElement() );
+    _order_xml_modified  = false;            
+    _state_text_modified = false; 
+    _title_modified      = false;
+    _state_text_modified = false;
+    _is_in_database = true;
 }
 
 //------------------------------------------------------------------------------------Order::~Order
@@ -1299,14 +1294,28 @@ void Order::init()
     set_run_time( NULL );
 }
 
-//---------------------------------------------------------------------------Order::update_database
+//--------------------------------------------------------------------------------Order::load_blobs
 
-void Order::update_database()
+void Order::load_blobs( Transaction* ta )
 {
-    if( _job_chain  &&  _is_in_database )
+    string payload_string = db_read_clob( ta, "payload"   );
+    if( payload_string.find( "<" + Com_variable_set::xml_element_name() ) != string::npos )
     {
-        _spooler->_db->update_order( this );
+        ptr<Com_variable_set> v = new Com_variable_set;
+        v->put_Xml( Bstr( payload_string ) );
+        _payload = v;
     }
+    else
+    {
+        if( payload_string.empty() )  _payload = (IDispatch*)NULL;
+                                else  _payload = payload_string;
+    }
+
+    string run_time_xml = db_read_clob( ta, "run_time"  );
+    if( run_time_xml != "" )  set_run_time( xml::Document_ptr( run_time_xml ).documentElement() );
+
+    string order_xml = db_read_clob( ta, "order_xml" );
+    if( order_xml != "" )  set_dom( xml::Document_ptr( order_xml ).documentElement() );
 }
 
 //---------------------------------------------------------------------------------Order::string_id
@@ -1367,47 +1376,42 @@ bool Order::attach_task( Task* task )
     assert( task );
     assert_no_task();   // Vorsichtshalber
     
-    bool is_attached = false;
-
 
     if( !_log->opened() )  open_log();
 
     if( _delay_storing_until_processing  &&  _job_chain  &&  _job_chain->_orders_recoverable  &&  !_is_in_database )
     {
-        _spooler->_db->insert_order( this );
+        db_insert();
         _delay_storing_until_processing = false;
     }
 
 
-    if( _spooler->has_exclusiveness() )
-    {
-        is_attached = true;
-    }
-    else
+    if( !_spooler->has_exclusiveness()  &&  _job_chain )
     {
         for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
         {
-            is_attached = db_occupy_for_processing( &ta );
+            _is_db_occupied = db_occupy_for_processing( &ta );
+            ta.commit( __FUNCTION__ );
         }
         catch( exception& x ) { _log->error( S() << "Error in " << __FUNCTION__ ); ta.reopen_database_after_error( x ); }
 
-        if( !is_attached )
+        if( !_is_db_occupied )
         {
-            int AUFTRAG_LOSCHEN;
+            remove_from_job_chain( true );      // Macht this ungültig!
+            return false; 
+            //_is_outdated = true;
+            //task->job()->order_queue()->set_has_outdated_orders();
         }
     }
 
-    if( is_attached )
-    {
-        _task = task;
+    _task = task;
 
-        if( _is_virgin  &&  _http_operation )  _http_operation->on_first_order_processing( task );
+    if( _is_virgin  &&  _http_operation )  _http_operation->on_first_order_processing( task );
 
-        _is_virgin = false;
-        _is_virgin_in_this_run_time = false;
-    }
+    _is_virgin = false;
+    _is_virgin_in_this_run_time = false;
 
-    return is_attached;
+    return true;
 }
 
 //------------------------------------------------------------------Order::db_occupy_for_processing
@@ -1437,7 +1441,7 @@ bool Order::db_occupy_for_processing( Transaction* ta )
 }
 
 //---------------------------------------------------------------------Order::db_release_processing
-
+/*
 bool Order::db_release_processing( Transaction* ta )
 {
     sql::Update_stmt update = db_update_stmt();
@@ -1454,24 +1458,245 @@ bool Order::db_release_processing( Transaction* ta )
 
     return is_released;
 }
-
+*/
 //------------------------------------------------------------------------Order::db_show_occupation
 
-void Order::db_show_occupation( Transaction* ta, Log_level log_level )
+void Order::db_show_occupation( Transaction* outer_transaction, Log_level log_level )
 {
-    Any_file result_set = ta->open_result_set( S() << "select `processing_scheduler_member_id`"
-        "  from " << _spooler->_orders_tablename
-        << db_where_clause().where_string() );
-
-    if( result_set.eof() )
+    for( Retry_transaction ta ( _spooler->_db, outer_transaction ); ta.enter_loop(); ta++ ) try
     {
-        _log->log( log_level, message_string( "SCHEDULER-812" ) );
+        Any_file result_set = ta.open_result_set( S() << "select `processing_scheduler_member_id`"
+            "  from " << _spooler->_orders_tablename
+            << db_where_clause().where_string() );
+
+        if( result_set.eof() )
+        {
+            _log->log( log_level, message_string( "SCHEDULER-812" ) );
+        }
+        else
+        {
+            // ?Haben wir eine Satzsperre oder kann ein anderer Scheduler processing_scheduler_member_id schon wieder auf null gesetzt haben?
+            Record record = result_set.get_record();
+            _log->log( log_level, message_string( "SCHEDULER-813", record.as_string(0) ) );
+        }
+
+        ta.commit( __FUNCTION__ );
+    }
+    catch( exception& x ) { ta.reopen_database_after_error( z::Xc( "SCHEDULER-306", _spooler->_orders_tablename, x  ) ); }
+}
+
+//---------------------------------------------------------------------------Order::db_delete_order
+
+//void Order::db_delete( Transaction* ta )
+//{
+//    sql::Delete_stmt del ( &_db_descr, _spooler->_orders_tablename );
+//
+//    fill_where_clause( &del );
+//
+//    ta->execute( del, __FUNCTION__ );
+//}
+
+//-------------------------------------------------------------------------Spooler_db::finish_order
+
+//void Order::db_finish_order( Transaction* outer_transaction )
+//{
+//    for( Retry_transaction ta ( _spooler->_db, outer_transaction ); ta.enter_loop(); ta++ ) try
+//    {
+//        if( !_db.opened() )  return;
+//
+//        if( _is_in_database )
+//        {
+//            db_delete_order( &ta );
+//            _is_in_database = false;
+//        }
+//
+//        _spooler->_db->write_order_history( this, &ta );
+//
+//        ta.commit();
+//    }
+//    catch( exception& x ) { ta.reopen_database_after_error( x ); }
+//}
+
+//---------------------------------------------------------------------------------Order::db_update
+
+void Order::db_update( bool release_occupation )
+{
+    if( _is_in_database &&  _job_chain  &&  _spooler->_db->opened() )
+    {
+        sql::Update_stmt update    = db_update_stmt();
+        bool             update_ok = false;
+
+
+        if( release_occupation && _is_db_occupied )
+        {
+            update[ "processing_scheduler_member_id" ] = sql::null_value;
+            update.and_where_condition( "processing_scheduler_member_id", _spooler->scheduler_member_id() );
+        }
+
+
+        if( finished() )
+        {
+            for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
+            {
+                if( !_spooler->_db->opened() )  break;
+
+                update_ok = ta.try_execute_single( update.make_delete_stmt(), __FUNCTION__ );
+
+                db()->write_order_history( this, &ta );
+
+                ta.commit( __FUNCTION__ );
+            }
+            catch( exception& x ) { ta.reopen_database_after_error( z::Xc( "SCHEDULER-306", _spooler->_orders_tablename, x  ) ); }
+
+            _is_in_database = false;
+        }
+        else
+        {
+            string payload_string = string_payload();   // Kann Exception auslösen
+
+            update[ "state"         ] = state().as_string();    // Kann Exception auslösen
+            update[ "initial_state" ] = initial_state().as_string();
+            update[ "processable"   ] = is_processable()? sql::Value(true) : sql::null_value;
+            update.set_datetime( "mod_time", Time::now().as_string(Time::without_ms) );
+
+            if( _priority_modified   )  update[ "priority"   ] = priority();
+            if( _title_modified      )  update[ "title"      ] = title();
+            if( _state_text_modified )  update[ "state_text" ] = state_text();
+
+            for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
+            {
+                if( !_spooler->_db->opened() )  break;
+
+                if( !finished() )
+                {
+                    // _run_time_modified gilt nicht für den Datenbanksatz, sondern für den Aufragsneustart
+                    // Vorschlag: xxx_modified auflösen zugunsten eines gecachten letzten Datenbanksatzes, dessen Inhalt verglichen werden.
+                    if( run_time() ) 
+                    {
+                        xml::Document_ptr doc = run_time()->dom_document();
+                        if( doc.documentElement().hasAttributes()  ||  doc.documentElement().hasChildNodes() )  db_update_clob( &ta, "run_time", doc.xml() );
+                                                                                                          else  update[ "run_time" ].set_direct( "null" );
+                    }
+                    else
+                        update[ "run_time" ].set_direct( "null" );
+
+                    if( _order_xml_modified )
+                    {
+                        xml::Document_ptr order_document = dom( show_for_database_only );
+                        xml::Element_ptr  order_element  = order_document.documentElement();
+                        if( order_element.hasAttributes()  ||  order_element.firstChild() )  db_update_clob( &ta, "order_xml", order_document.xml() );
+                                                                                       else  update[ "order_xml" ].set_direct( "null" );
+                    }
+
+                    //if( _payload_modified )
+                    {
+                        if( payload_string == "" )  update[ "payload" ].set_direct( "null" );
+                                              else  db_update_clob( &ta, "payload", payload_string );
+                        //_payload_modified = false;
+                    }
+                }
+
+                update_ok = ta.try_execute_single( update, __FUNCTION__ );
+
+                ta.commit();
+            }
+            catch( exception& x ) { ta.reopen_database_after_error( z::Xc( "SCHEDULER-306", _spooler->_orders_tablename, x  ) ); }
+        }
+
+        if( !update_ok  &&  release_occupation  &&  _is_db_occupied  )
+        {
+            //_log->error( "OCCUPATION LOST" );
+            db_show_occupation( NULL, log_error );
+        }
+
+        _order_xml_modified  = false;            
+        _state_text_modified = false; 
+        _title_modified      = false;
+        _state_text_modified = false;
+    }
+    else
+    if( finished() )  
+        _spooler->_db->write_order_history( this );
+}
+
+//---------------------------------------------------------------------------------Order::db_insert
+
+void Order::db_insert()
+{
+    string payload_string = payload().as_string();
+
+    if( db()->opened() )
+    for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
+    {
+        if( !db()->opened() )  break;
+        
+        ta.execute( db_update_stmt().make_delete_stmt() );
+
+        sql::Insert_stmt insert ( &_spooler->_db->_db_descr, _spooler->_orders_tablename );
+        
+        insert[ "ordering"      ] = db_get_ordering( &ta );
+        insert[ "job_chain"     ] = job_chain()->name();
+        insert[ "id"            ] = id().as_string();
+        insert[ "spooler_id"    ] = _spooler->id_for_db();
+        insert[ "title"         ] = title()                     , _title_modified      = false;
+        insert[ "state"         ] = state().as_string();
+        insert[ "state_text"    ] = state_text()                , _state_text_modified = false;
+        insert[ "priority"      ] = priority()                  , _priority_modified   = false;
+        insert[ "initial_state" ] = initial_state().as_string();
+        insert.set_datetime( "created_time", _created.as_string(Time::without_ms) );
+        insert.set_datetime( "mod_time"    , Time::now().as_string(Time::without_ms) );
+
+        if( is_processable() )  insert[ "processable"   ] = true;
+
+        ta.execute( insert, __FUNCTION__ );
+
+
+        if( payload_string != "" )  db_update_clob( &ta, "payload", payload_string );
+        //_payload_modified = false;
+
+        xml::Document_ptr order_document = dom( show_for_database_only );
+        xml::Element_ptr  order_element  = order_document.documentElement();
+        if( order_element.hasAttributes()  ||  order_element.firstChild() )
+            db_update_clob( &ta, "order_xml", order_document.xml() );
+
+        if( run_time() )
+        {
+            xml::Document_ptr doc = run_time()->dom_document();
+            if( doc.documentElement().hasAttributes()  ||  doc.documentElement().hasChildNodes() )  db_update_clob( &ta, "run_time", doc.xml() );
+        }
+
+        ta.commit( __FUNCTION__ );
+
+        _is_in_database = true;
+    }
+    catch( exception& x ) { ta.reopen_database_after_error( z::Xc( "SCHEDULER-305", _spooler->_orders_tablename, x ) ); }
+}
+
+//------------------------------------------------------------------------------Order::db_read_clob
+
+string Order::db_read_clob( Transaction* ta, const string& column_name )
+{
+    if( _spooler->_db->db_name() == "" )  z::throw_xc( "SCHEDULER-361", __FUNCTION__ );
+
+    ta->set_transaction_used();
+    return db()->read_clob( _spooler->_orders_tablename, column_name, db_where_clause().where_string() );
+}
+
+//----------------------------------------------------------------------------Order::db_update_clob
+
+void Order::db_update_clob( Transaction* ta, const string& column_name, const string& value )
+{
+    if( _spooler->_db->db_name() == "" )  z::throw_xc( "SCHEDULER-361", __FUNCTION__ );
+
+    if( value == "" )
+    {
+        sql::Update_stmt update = db_update_stmt();
+        update[ column_name ].set_direct( "null" );
+        ta->execute( update, __FUNCTION__ );
     }
     else
     {
-        // ?Haben wir eine Satzsperre oder kann ein anderer Scheduler processing_scheduler_member_id schon wieder auf null gesetzt haben?
-        Record record = result_set.get_record();
-        _log->log( log_level, message_string( "SCHEDULER-813", record.as_string(0) ) );
+        db()->update_clob( _spooler->_orders_tablename, column_name, value, db_where_clause().where_string() );
     }
 }
 
@@ -1497,9 +1722,25 @@ sql::Where_clause Order::db_where_clause()
 
 void Order::db_fill_where_clause( sql::Where_clause* where )
 {
+    assert( _job_chain );  if( !_job_chain )  z::throw_xc( __FUNCTION__ );
+
     where->and_where_condition( "spooler_id", _spooler->id_for_db() );
     where->and_where_condition( "job_chain" , job_chain()->name() );
     where->and_where_condition( "id"        , id().as_string()    );
+}
+
+//---------------------------------------------------------------------------Order::db_get_ordering
+
+int Order::db_get_ordering( Transaction* ta )
+{ 
+    return db()->get_id( "spooler_order_ordering", ta ); 
+}
+
+//----------------------------------------------------------------------------------------Order::db
+
+Spooler_db* Order::db()
+{
+    return _spooler->_db;
 }
 
 //----------------------------------------------------------------------------------Order::open_log
@@ -1848,8 +2089,8 @@ void Order::set_id( const Order::Id& id )
 
         string id_string = string_id( id );    // Sicherstellen, das id in einen String wandelbar ist
 
-        if( _spooler->_db->opened()  &&  id_string.length() > _spooler->_db->order_id_length_max() )  
-            z::throw_xc( "SCHEDULER-345", id_string, _spooler->_db->order_id_length_max(), _spooler->_orders_tablename + "." + "id" );
+        if( db()->opened()  &&  id_string.length() > db()->order_id_length_max() )  
+            z::throw_xc( "SCHEDULER-345", id_string, db()->order_id_length_max(), _spooler->_orders_tablename + "." + "id" );
 
         if( id_string.length() > const_order_id_length_max )  z::throw_xc( "SCHEDULER-344", id_string, const_order_id_length_max );
 
@@ -2253,14 +2494,15 @@ void Order::remove_from_job_chain( bool leave_in_database )
 
     if( !_end_time )  _end_time = Time::now();
 
-    if( _is_in_database  &&  !leave_in_database )  _spooler->_db->finish_order( this );
-
-
-
     if( _job_chain_node )
     {
         remove_from_job();
     }
+
+    assert( finished() );
+
+    if( _is_in_database  &&  !leave_in_database )  db_update( true );
+
 
     if( _job_chain )
     {
@@ -2340,7 +2582,7 @@ bool Order::try_add_to_job_chain( Job_chain* job_chain )
 
             if( !_delay_storing_until_processing  &&  job_chain->_orders_recoverable  &&  !_is_in_database )
             {
-                _spooler->_db->insert_order( this );
+                db_insert();
             }
         }
 
@@ -2572,7 +2814,7 @@ void Order::postprocessing2( Job* last_job )
     {
         try
         {
-            _spooler->_db->update_order( this );
+            db_update( true );
         }
         catch( exception& x )
         {

@@ -453,7 +453,6 @@ struct Spooler : Object,
     string                     _variables_tablename;
     string                     _orders_tablename;
     string                     _members_tablename;
-
     string                     _tasks_tablename;
     string                     _job_history_tablename;
     string                     _job_history_columns;
@@ -485,6 +484,7 @@ struct Spooler : Object,
     bool                       _need_db;                    // need_db=yes|strict  Wenn DB sich nicht öffnen lässt, ohne DB arbeiten und Historie ggfs. in Dateien schreiben
     bool                       _wait_endless_for_db_open;   // need_db=yes
     int                        _max_db_errors;              // Nach so vielen Fehlern im Scheduler-Leben DB abschalten (wie need_db)
+    bool                       _db_check_integrity;
 
     int                        _waiting_errno;              // Scheduler unterbrochen wegen errno (spooler_log.cxx)
     string                     _waiting_errno_filename;

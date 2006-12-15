@@ -2511,12 +2511,12 @@
             </div>
         </xsl:if>
 
-        <div class="indent">
+        <!--div class="indent">
             <xsl:apply-templates select="messages">
                 <xsl:with-param name="h" select="'h4'"/>
                 <xsl:with-param name="show_level" select="true()"/>
             </xsl:apply-templates>
-        </div>
+        </div-->
 
     </xsl:template>
 
