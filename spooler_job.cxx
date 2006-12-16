@@ -432,13 +432,13 @@ void Job::set_log()
 //----------------------------------------------------------------------------------------Job::init
 // Bei <add_jobs> von einem anderen Thread gerufen.
 
-void Job::init()
+void Job::init( Transaction* ta )
 {
     Z_LOGI2( "scheduler", obj_name() << ".init()\n" );
 
     if( !_init_called )
     {
-        _history.open();
+        _history.open( ta );
 
         _module_ptr = _object_set_descr? &_object_set_descr->_class->_module
                                        : +_module;
@@ -451,7 +451,7 @@ void Job::init()
 
         _log->open();
 
-        if( _spooler->_db->opened()  &&  _spooler->has_exclusiveness() )  load_tasks_from_db();
+        if( _spooler->_db->opened()  &&  _spooler->has_exclusiveness() )  load_tasks_from_db( ta );
 
         _init_called = true;
     }
@@ -759,13 +759,13 @@ ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, const
 
 //--------------------------------------------------------------------------Job::load_tasks_from_db
 
-void Job::load_tasks_from_db()
+void Job::load_tasks_from_db( Transaction* outer_transaction )
 {
     _spooler->assert_has_exclusiveness( __FUNCTION__ );
 
     Time now = Time::now();
 
-    Transaction ta ( _spooler->_db );
+    Transaction ta ( _spooler->_db, outer_transaction );
 
     Any_file sel = ta.open_result_set( 
                     "select \"TASK_ID\", \"ENQUEUE_TIME\", \"START_AT_TIME\"" //, length(\"PARAMETERS\") parlen " +
@@ -1792,7 +1792,9 @@ ptr<Task> Job::task_to_start()
                     Task* task = *t;
                     if( !task->order()  &&  task->state() == Task::s_running_waiting_for_order )    //|| (*t)->state() == Task::s_suspended  ) 
                     { 
+                        // 2006-12-16  Ist das nicht doppelt geprüft? Siehe first_order() und s_running_waiting_for_order in diesem Modul
                         task->occupy_order( order, now );
+                        task->signal( __FUNCTION__ );
                         order = NULL;
                         break; 
                     }
@@ -1864,7 +1866,7 @@ ptr<Task> Job::task_to_start()
 
                 if( order ) 
                 {
-                    task->occupy_order( order, now );   // Versuchen, den Auftrag für die Task zu belegen
+                    task->occupy_order( order, now );   // Versuchen, den Auftrag für die Task zu belegen. Die Task sollte möglichst gleich starten
                     order = NULL;                       // order kann jetzt ungültig sein! (wenn er in der Datenbank nicht belegbar ist)
                     if( !task->order()  &&  cause == cause_order )  task = NULL;      // occupy_order() ist fehlgeschlagen? Dann die Task vergessen 
                 }

@@ -173,7 +173,8 @@ bool Database_orders_read_operation::async_continue_( Continue_flags )
     string select_sql_end = "  order by `ordering`";
 
     
-    bool database_can_limit_union_selects = db()->dbms_kind() == dbms_oracle;
+    bool database_can_limit_union_selects = db()->dbms_kind() == dbms_oracle  ||  
+                                            db()->dbms_kind() == dbms_oracle_thin;
     //PostgresQL: Union kann nicht Selects mit einzelnen Limits verknüpfen, das Limit gilt fürs ganze Ergebnis
     //PostgresQL: Und die einzelnen Selects können nicht geordnet werden (wodurch die Limits erst Sinn machen)
 
@@ -1758,7 +1759,7 @@ void Order::db_insert()
         insert[ "initial_state" ] = initial_state().as_string();
 
         if( _setback )
-        //insert.set_datetime( "at", _setback.as_string( Time::without_ms ) );
+        insert.set_datetime( "at", _setback.as_string( Time::without_ms ) );
 
         insert.set_datetime( "created_time", _created.as_string(Time::without_ms) );
         insert.set_datetime( "mod_time"    , Time::now().as_string(Time::without_ms) );
@@ -1829,7 +1830,7 @@ void Order::db_update( bool release_occupation )
             update[ "state"         ] = state().as_string();    // Kann Exception auslösen
             update[ "initial_state" ] = initial_state().as_string();
             update[ "processable"   ] = is_processable()? sql::Value(true) : sql::null_value;
-            //update.set_datetime( "at", _setback? _setback.as_string( Time::without_ms ) : "" );
+            update.set_datetime( "at", _setback? _setback.as_string( Time::without_ms ) : "" );
             update.set_datetime( "mod_time", Time::now().as_string(Time::without_ms) );
 
             if( _priority_modified   )  update[ "priority"   ] = priority();

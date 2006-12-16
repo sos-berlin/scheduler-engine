@@ -621,7 +621,7 @@ bool Exclusive_scheduler_watchdog::set_exclusive()
         _scheduler_member->_is_active         = true;
         _scheduler_member->_has_exclusiveness = true;
 
-        _log->info( message_string( "SCHEDULER-807" ) );
+        _log->info( message_string( "SCHEDULER-806" ) );
     }
 
     return ok;

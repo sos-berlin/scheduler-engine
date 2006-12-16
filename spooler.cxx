@@ -865,7 +865,7 @@ void Spooler::load_job_from_xml( const xml::Element_ptr& e, const Time& xml_mod_
             else
             {
                 job->set_dom( e, xml_mod_time );
-                if( init )  init_job( job, true );
+                if( init )  init1_job( (Transaction*)NULL, job );
             }
         }
         else
@@ -877,14 +877,29 @@ void Spooler::load_job_from_xml( const xml::Element_ptr& e, const Time& xml_mod_
     }
 }
 
-//--------------------------------------------------------------------------------Spooler::init_job
+//-------------------------------------------------------------------------------Spooler::init0_job
 
-void Spooler::init_job( Job* job, bool call_init_too )
+void Spooler::init0_job( Job* job )
 {
     try
     {
         job->init0();
-        if( call_init_too )  job->init();
+    }
+    catch( exception& )
+    {
+        _log.error( message_string( "SCHEDULER-330", job->obj_name() ) );   // remove_temporary_jobs() gibt keine weitere Fehlermeldung aus.
+        throw;
+    }
+}
+
+//-------------------------------------------------------------------------------Spooler::init1_job
+
+void Spooler::init1_job( Transaction* ta, Job* job )
+{
+    try
+    {
+        job->init0();
+        job->init( ta );
     }
     catch( exception& )
     {
@@ -960,7 +975,7 @@ int Spooler::remove_temporary_jobs( Job* which_job )
 
                         try
                         {
-                            init_job( job, true );
+                            init1_job( (Transaction*)NULL, job );
                         }
                         catch( exception& x ) { Z_LOG2( "scheduler", __FUNCTION__ << " " << x.what() << "\n" ); }
                     }
@@ -1405,7 +1420,8 @@ void Spooler::add_job( const ptr<Job>& job, bool init )
 
     if( init )
     {
-        init_job( job, _jobs_initialized );     // Falls Job im Startskript über execute_xml() hingefügt wird: jetzt noch kein init()!
+        if( _jobs_initialized )  init1_job( (Transaction*)NULL, job );
+                           else  init0_job( job );     // Falls Job im Startskript über execute_xml() hingefügt wird: jetzt noch kein init()!
     }
 
     _job_list.push_back( job );
@@ -1572,7 +1588,12 @@ string Spooler::state_name( State state )
 
 void Spooler::init_jobs()
 {
-    FOR_EACH_JOB( job )  init_job( *job, true );
+    Transaction ta ( db() );
+
+    FOR_EACH_JOB( job )  init1_job( &ta, *job );
+
+    ta.commit( __FUNCTION__ );
+
     _jobs_initialized = true;
 }
 
@@ -2272,7 +2293,7 @@ void Spooler::start()
     _web_services.load();   // Nicht in Spooler::load(), denn es öffnet schon -log-dir-Dateien (das ist nicht gut für -send-cmd=)
 
 
-    FOR_EACH_JOB( job )  init_job( *job, false );   // Setzt _has_java_source
+    FOR_EACH_JOB( job )  init0_job( *job );   // Setzt _has_java_source
 
 
     try

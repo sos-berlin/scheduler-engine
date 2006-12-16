@@ -198,7 +198,7 @@ struct Job : Object,
 
     void                        init0                       ();                                     // Wird vor Spooler-Skript gerufen
     void                        prepare_on_exit_commands    ();
-    void                        init                        ();                                     // Wird nach Spooler-Skript gerufen, ruft auch init2()
+    void                        init                        ( Transaction* );                       // Wird nach Spooler-Skript gerufen, ruft auch init2()
     void                        init2                       ();                                     // Wird nach reread() gerufen
     void                        init_start_when_directory_changed( Task* = NULL );
     void                        set_log                     ();
@@ -234,7 +234,7 @@ struct Job : Object,
     Order*                      request_order               ( const Time& now, const string& cause );   // Fordert einen Auftrag für die _order_queue an
     void                        register_order_source       ( Order_source* );
     void                        unregister_order_source     ( Order_source* );
-    void                        load_tasks_from_db          ();
+    void                        load_tasks_from_db          ( Transaction* );
     xml::Element_ptr            read_history                ( const xml::Document_ptr& doc, int id, int n, const Show_what& show ) { return _history.read_tail( doc, id, n, show ); }
 
     void                        close                       ();

@@ -3164,15 +3164,15 @@
             </text>
         </message>
 
-        <!--message code="SCHEDULER-806">
+        <message code="SCHEDULER-806">
             <text xml:lang="en">
-                <title>Active Scheduler is <p1>scheduler_member_id</p1>. Still standing by</title>
+                <title>This Scheduler is active and exclusive now</title>
             </text>
-        </message-->
+        </message>
 
         <message code="SCHEDULER-807">
             <text xml:lang="en">
-                <title>This Scheduler is active and exclusive now</title>
+                <title>Using database product <p1/></title>
             </text>
         </message>
 

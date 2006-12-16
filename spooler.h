@@ -372,7 +372,8 @@ struct Spooler : Object,
     // Order
     void                        load_jobs_from_xml          ( const xml::Element_ptr&, const Time& xml_mod_time, bool init = false );
     void                        load_job_from_xml           ( const xml::Element_ptr&, const Time& xml_mod_time, bool init = false );
-    void                        init_job                    ( Job*, bool call_init_too = true );
+    void                        init0_job                   ( Job* );
+    void                        init1_job                   ( Transaction*, Job* );
     xml::Element_ptr            jobs_dom_element            ( const xml::Document_ptr&, const Show_what& );
 
     void                        init_job_chains             ();                                 // In spooler_order.cxx

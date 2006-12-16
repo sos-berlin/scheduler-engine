@@ -5,7 +5,7 @@
 #include "../zschimmer/z_sql.h"
 #include "../kram/sleep.h"
 #include "../kram/sos_java.h"
-
+#include "../file/sosdb.h"
 
 
 using namespace zschimmer;
@@ -90,7 +90,7 @@ Transaction::Transaction( Spooler_db* db, Transaction* outer_transaction )
     _log(db->_log)
 {
     assert( db );
-    if( !_db->opened() )  z::throw_xc( "SCHEDULER-361" );
+    //Das müssen wir später prüfen  if( !_db->opened() )  z::throw_xc( "SCHEDULER-361" );
 
     if( _outer_transaction )
     {
@@ -118,7 +118,7 @@ Transaction::~Transaction()
     {
         try 
         { 
-            rollback();
+            rollback( __FUNCTION__ );
         } 
         catch( exception& x ) { Z_LOG( "*** ERROR " << __FUNCTION__ << " " << x.what() << "\n" ); }
     }
@@ -189,13 +189,20 @@ void Transaction::rollback( const string& debug_text )
 
 Any_file Transaction::open_result_set( const string& sql, const string& debug_text )
 { 
-    set_transaction_read();
-    return open_file( "-in " + _db->db_name(), sql, debug_text, false ); 
+    string native_sql = db()->_db.sos_database_session()->translate_sql( sql );
+    return open_file_2( "-in " + db()->db_name(), "%native " + native_sql, debug_text, false, native_sql );
 }
 
 //---------------------------------------------------------------------------Transaction::open_file
 
 Any_file Transaction::open_file( const string& db_prefix, const string& sql, const string& debug_text, bool writes )
+{
+    return open_file_2( db_prefix, sql, debug_text, writes, sql );
+}
+
+//-------------------------------------------------------------------------Transaction::open_file_2
+
+Any_file Transaction::open_file_2( const string& db_prefix, const string& execution_sql, const string& debug_text, bool writes, const string& logging_sql )
 {
     if( writes ) set_transaction_written(); else set_transaction_read();
 
@@ -206,12 +213,12 @@ Any_file Transaction::open_file( const string& db_prefix, const string& sql, con
 
     try
     {
-        result.open( db_prefix + " " + sql );
+        result.open( db_prefix + " " + execution_sql );
 
         if( _db->_log->log_level() >= log_debug9 )  
         {
             S line;
-            line << sql << debug_extra;
+            line << logging_sql << debug_extra;
             if( _db->_db.record_count() >= 0 )  line << "  ==> " << _db->_db.record_count() << " records";
             _db->_log->debug9( line );
         }
@@ -220,11 +227,11 @@ Any_file Transaction::open_file( const string& db_prefix, const string& sql, con
     {
         if( _log_sql )  // Vielleicht für alle Anweisungen, aber dann haben wir einen Fehler im Protokoll, das ist nicht 100%ig kompatibel
         {
-            _db->_log->warn( sql + debug_extra );
+            _db->_log->warn( logging_sql + debug_extra );
             _db->_log->error( x.what() );
         }
         else
-            _db->_log->debug( sql ), _db->_log->debug( x.what() );
+            _db->_log->debug( logging_sql ), _db->_log->debug( x.what() );
 
         throw;
     }
@@ -281,7 +288,7 @@ void Spooler_db::open( const string& db_name )
         try_reopen_after_error( x, true );
     }
 
-    create_tables_when_needed();
+    if( _db_name != "" )  create_tables_when_needed();
 }
 
 //--------------------------------------------------------------------------------Spooler_db::open2
@@ -320,10 +327,9 @@ void Spooler_db::open2( const string& db_name )
 
                 _db.open( "-in -out " + my_db_name );   // -create
 
-                if( _db.opened() )
-                {
-                    _db_name += " ";
-                }
+                if( _db.opened() ) _db_name += " ";
+
+                _log->info( message_string( "SCHEDULER-807", _db.dbms_name() ) );     // Datenbank wird geöffnet
 
                 _email_sent_after_db_error = false;
             }
@@ -676,7 +682,7 @@ int Spooler_db::column_width( Transaction* ta, const string& table_name, const s
 {
     int result;
 
-    if( _spooler->_db_name == "" )  z::throw_xc( "SCHEDULER-361", __FUNCTION__ );
+    if( _db_name == "" )  z::throw_xc( "SCHEDULER-361", __FUNCTION__ );
 
     Any_file f = ta->open_result_set( S() << "select `" << column_name << "` from " << table_name << " where 1=0" );
     int field_size= +f.spec()._field_type_ptr->field_descr_ptr( 0 )->type_ptr()->field_size();
@@ -1058,11 +1064,13 @@ void Transaction::execute( const string& stmt, const string& debug_text )
 
     Z_LOG2( "scheduler", __FUNCTION__ << "  " << stmt << debug_extra << "\n" );
     
+    string native_sql = db()->_db.sos_database_session()->translate_sql( stmt );
+
     try
     {
         bool was_transaction_used = _db->_db.is_transaction_used();
 
-        _db->_db.put( stmt ); 
+        _db->_db.put( "%native " + native_sql ); 
 
         if( _log->log_level() >= log_debug9 )  
         {
@@ -1071,14 +1079,14 @@ void Transaction::execute( const string& stmt, const string& debug_text )
             if( !was_transaction_used  &&  ( stmt == "COMMIT" || stmt == "ROLLBACK" ) )
             //if( !_transaction_written  &&  ( stmt == "COMMIT" || stmt == "ROLLBACK" ) )
             {
-                line << lcase( stmt );     // Wenn das zuverlässig läuft, kann auf commit/rollback verzichtet werden
+                line << lcase( native_sql );     // Wenn das zuverlässig läuft, kann auf commit/rollback verzichtet werden
 
 #               ifdef Z_DEBUG
                     line << ( _transaction_read? " (read only)" :" (empty transaction)" );
 #               endif       
             }
             else
-                line << stmt;
+                line << native_sql;
 
             line << debug_extra;
             if( record_count() >= 0 )  line << "  ==> " << record_count() << " records";
@@ -1090,7 +1098,7 @@ void Transaction::execute( const string& stmt, const string& debug_text )
         // Besser Fehler melden (mit Andreas klären)
         //_log->warn( stmt );
         //_log->error( x.what() );
-        _log->debug( stmt + debug_extra );
+        _log->debug( native_sql + debug_extra );
         _log->debug( x.what() );
 
         throw;
@@ -1388,7 +1396,7 @@ Job_history::~Job_history()
 
 //--------------------------------------------------------------------------------Job_history::open
 
-void Job_history::open()
+void Job_history::open( Transaction* outer_transaction )
 {
     string section = _job->profile_section();
 
@@ -1404,7 +1412,7 @@ void Job_history::open()
 
         if( _spooler->_db->opened()  &&  _filename == "" )
         {
-            Transaction ta ( +_spooler->_db );
+            Transaction ta ( +_spooler->_db, outer_transaction );
             {
                 _with_log = read_profile_with_log( _spooler->_factory_ini, section, "history_with_log", _spooler->_job_history_with_log );
 
@@ -1753,7 +1761,7 @@ void Task_history::write( bool start )
                 if( !_spooler->_db->opened() )       // Datenbank ist (wegen eines Fehlers) geschlossen worden?
                 {
                     _job_history->close();
-                    _job_history->open();
+                    _job_history->open( (Transaction*)NULL );
                     
                     if( !start )  
                     {

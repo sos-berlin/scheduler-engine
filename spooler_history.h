@@ -140,6 +140,7 @@ struct Transaction
 
     Any_file                    open_result_set         ( const string& sql, const string& debug_text = "" );
     Any_file                    open_file               ( const string& db_prefix, const string& sql, const string& debug_text = "", bool writes = true );
+    Any_file                    open_file_2             ( const string& db_prefix, const string& execution_sql, const string& debug_text, bool writes, const string& logging_sql );
 
     void                        execute                 ( const string& sql, const string& debug_text = "" );
     void                        execute_single          ( const string& sql, const string& debug_text = "" );
@@ -228,7 +229,7 @@ struct Job_history
                                 Job_history             ( Job* );
                                ~Job_history             ();
 
-    void                        open                    ();
+    void                        open                    (  Transaction* );
     void                        close                   ();
     int                         min_steps               ()                                          { return _history_yes? _on_process : INT_MAX; }
 
