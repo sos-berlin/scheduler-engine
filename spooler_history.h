@@ -81,7 +81,7 @@ struct Spooler_db : Object, Scheduler_object
     //void                        rollback                ( const string& debug_extra = "" );
     void                        try_reopen_after_error  ( const exception&, bool wait_endless = false );
     void                        create_tables_when_needed();
-    void                        create_table_when_needed( const string& tablename, const string& fields );
+    void                        create_table_when_needed( Transaction*, const string& tablename, const string& fields );
 
     Fill_zero                  _zero_;
     Thread_semaphore           _lock;
@@ -94,12 +94,12 @@ struct Spooler_db : Object, Scheduler_object
     friend struct Transaction;
 
     void                        open2                   ( const string& db_name );
-    void                        open_history_table      ();
-    void                        get_history_table_table ();
-    void                        add_column              ( const string& table_name, const string& column_name, const string add_clause );
-    void                        handle_order_id_columns ();
-    int                         expand_varchar_column   ( const string& table_name, const string& column_name, int minimum_width, int new_width );
-    int                         column_width            ( const string& table_name, const string& column_name );
+    void                        open_history_table      ( Transaction* );
+  //void                        get_history_table_table ();
+    void                        add_column              ( Transaction*, const string& table_name, const string& column_name, const string add_clause );
+    void                        handle_order_id_columns ( Transaction* );
+    int                         expand_varchar_column   ( Transaction*, const string& table_name, const string& column_name, int minimum_width, int new_width );
+    int                         column_width            ( Transaction*, const string& table_name, const string& column_name );
     int                         get_id_                 ( const string& variable_name, Transaction* );
     void                        delete_order            ( Order*, Transaction* );
 
@@ -130,10 +130,12 @@ struct Transaction
 
     void                    set_log_sql                 ( bool b )                                  { _log_sql = b; }
     void                        commit                  ( const string& debug_text = "" );
+    void                        intermediate_commit     ( const string& debug_text = "" );
     void                        rollback                ( const string& debug_text = "" );
   //void                        try_reopen_after_error  ();
     void                        set_transaction_written ()                                          { _transaction_written = true; }
     void                        set_transaction_read    ()                                          { _transaction_read = true; }
+    bool                        is_transaction_used     ()                                          { return db()->_db.is_transaction_used(); }
     Transaction*                outer_transaction       ()                                          { return _outer_transaction; }
 
     Any_file                    open_result_set         ( const string& sql, const string& debug_text = "" );

@@ -231,7 +231,7 @@ struct Job : Object,
     Time                        get_delay_order_after_setback( int setback_count );
     void                        set_max_order_setbacks      ( int n )                               { _log->debug9( "max_order_setbacks"+as_string(n) ); _max_order_setbacks = n; }
     int                         max_order_setbacks          () const                                { return _max_order_setbacks; }
-    Order*                      request_order               ( const string& cause );                // Fordert einen Auftrag für die _order_queue an
+    Order*                      request_order               ( const Time& now, const string& cause );   // Fordert einen Auftrag für die _order_queue an
     void                        register_order_source       ( Order_source* );
     void                        unregister_order_source     ( Order_source* );
     void                        load_tasks_from_db          ();
@@ -322,6 +322,7 @@ struct Job : Object,
     Order_queue*                order_queue                 () const                                { return _order_queue; }
     bool                        order_controlled            () const                                { return _order_queue != NULL; }
     void                    set_order_controlled            ();
+    bool                        is_requesting_order         () const                                { return _is_requesting_order; }
     void                    set_idle_timeout                ( const Time& );
 
     void                        set_job_chain_priority      ( int pri )                             { THREAD_LOCK(_lock) if( _job_chain_priority < pri )  _job_chain_priority = pri; }
@@ -443,6 +444,8 @@ struct Job : Object,
     typedef list< Order_source* >  Order_source_list;
     Order_source_list             _order_source_list;    // Muss leer sein bei ~Job!
 
+    bool                       _is_requesting_order;
+
     typedef list< pair<string,string> > Start_when_directory_changed_list;  
     Start_when_directory_changed_list  _start_when_directory_changed_list;      // Für <start_when_directory_changed>
 };
@@ -458,7 +461,7 @@ struct Internal_job : Job
 
 typedef list< ptr<Job> >    Job_list;
 
-#define FOR_EACH_JOB( ITERATOR )  FOR_EACH( Job_list, _job_list, ITERATOR )
+#define FOR_EACH_JOB( ITERATOR )  FOR_EACH( Job_list, _spooler->_job_list, ITERATOR )
 
 //-------------------------------------------------------------------------------------------------
 

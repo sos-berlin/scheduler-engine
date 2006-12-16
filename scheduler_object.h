@@ -6,6 +6,9 @@
 namespace sos {
 namespace spooler {
 
+
+struct Spooler_db;
+
 //---------------------------------------------------------------------------------Scheduler_object
 
 struct Scheduler_object
@@ -28,7 +31,8 @@ struct Scheduler_object
         type_scheduler_event_manager,
         type_scheduler_member,
         type_heart_beat,
-        type_exclusive_scheduler_watchdog
+        type_exclusive_scheduler_watchdog,
+        type_read_database_orders_operation
       //type_subprocess_register
     };
 
@@ -45,6 +49,8 @@ struct Scheduler_object
     virtual ptr<Xslt_stylesheet> mail_xslt_stylesheet       ();
     virtual Prefix_log*         log                         ()                                      = 0;
     virtual void                print_xml_child_elements_for_event( String_stream*, Scheduler_event* )  {}
+
+    Spooler_db*                 db                          ();
 
     Spooler*                   _spooler;
     IUnknown*                  _my_iunknown;

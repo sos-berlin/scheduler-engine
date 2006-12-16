@@ -1699,18 +1699,23 @@ void Job::unregister_order_source( Order_source* order_source )
 
 //-------------------------------------------------------------------------------Job::request_order
 
-Order* Job::request_order( const string& cause )
+Order* Job::request_order( const Time& now, const string& cause )
 {
-    Order* result = NULL;
+    Order* result = _order_queue->get_order_for_processing( now );
 
-    Z_FOR_EACH( Order_source_list, _order_source_list, it )
+    if( !result )
     {
-        Order_source* order_source = *it;
-        result = order_source->request_order( cause );
-        if( result )  break;
+        Z_FOR_EACH( Order_source_list, _order_source_list, it )
+        {
+            Order_source* order_source = *it;
+            result = order_source->request_order( cause );
+            if( result )  break;
+        }
     }
 
-    if( result )  assert( result->is_immediately_processable() );
+    _is_requesting_order = result == NULL;
+
+    if( result )  assert( result->is_immediately_processable( now ) );
     return result;
 }
 
@@ -1778,16 +1783,20 @@ ptr<Task> Job::task_to_start()
 
         if( !cause  &&  _order_queue )
         {
-            order = _order_queue->first_order( now );
-            if( !order )  order = request_order( obj_name() );
+            order = request_order( now, obj_name() );
+
             if( order )
             {
-                bool there_is_another_task_ready = false;
-                FOR_EACH( Task_list, _running_tasks, t )
-                    if( (*t)->state() == Task::s_running_waiting_for_order 
-                        || (*t)->state() == Task::s_suspended                 )  { there_is_another_task_ready = true; break; }
-
-                if( there_is_another_task_ready )  order = NULL;  // Soll sich doch die bereits laufende Task um den Auftrag kümmern!
+                FOR_EACH( Task_list, _running_tasks, t ) 
+                {
+                    Task* task = *t;
+                    if( !task->order()  &&  task->state() == Task::s_running_waiting_for_order )    //|| (*t)->state() == Task::s_suspended  ) 
+                    { 
+                        task->occupy_order( order, now );
+                        order = NULL;
+                        break; 
+                    }
+                }
             }
         }
 
@@ -1836,7 +1845,7 @@ ptr<Task> Job::task_to_start()
             }
         }
 
-        // order jetzt nicht verlieren! Der Auftrag hängt allein in der Variablen order!
+        // order jetzt nicht verlieren! Der Auftrag hängt allein in der Variablen order! (2006-12-16 Das stimmt nicht mehr, der Auftrag ist in der _order_queue)
 
         if( cause )
         {
@@ -1850,17 +1859,24 @@ ptr<Task> Job::task_to_start()
             else
             {
                 task = create_task( NULL, "", 0 ); 
-    
-                task->_trigger_files = trigger_files( task );   // Vor occupy_order()!
-                task->occupy_order( order );                    // is_distributed() => Nimmt den Auftrag nur, wenn er in der Datenbank belegbar ist
-                order = NULL;                                   // order kann jetzt ungültig sein!
                 task->_let_run |= ( cause == cause_period_single );
+                task->_trigger_files = trigger_files( task );   // Vor occupy_order()!
+
+                if( order ) 
+                {
+                    task->occupy_order( order, now );   // Versuchen, den Auftrag für die Task zu belegen
+                    order = NULL;                       // order kann jetzt ungültig sein! (wenn er in der Datenbank nicht belegbar ist)
+                    if( !task->order()  &&  cause == cause_order )  task = NULL;      // occupy_order() ist fehlgeschlagen? Dann die Task vergessen 
+                }
             }
 
-            task->_cause = cause;
-            task->_changed_directories = _changed_directories;  
-            _changed_directories = "";
-            _directory_changed = false;
+            if( task )
+            {
+                task->_cause = cause;
+                task->_changed_directories = _changed_directories;  
+                _changed_directories = "";
+                _directory_changed = false;
+            }
 
             if( now >= _next_single_start )  _next_single_start = latter_day;  // Vorsichtshalber, 26.9.03
         }
@@ -2101,13 +2117,14 @@ void Job::set_state( State new_state )
 
         if( new_state == s_pending  &&  !_delay_until )  reset_error();      // Bei delay_after_error Fehler stehen lassen
 
+        State old_state = _state;
         _state = new_state;
 
         if( _state == s_stopped 
          || _state == s_read_error
          || _state == s_error      )  _next_start_time = _next_time = latter_day;
 
-        //if( _spooler->_debug )
+        if( old_state != s_none  ||  new_state != s_stopped )  // Übergang von none zu stopped interessiert uns nicht
         {
             if( new_state == s_stopping
              || new_state == s_stopped  && _visible

@@ -70,6 +70,10 @@
     <register_keyword_display><code>after=</code></register_keyword_display>
     <register_entry register_file='xml/start_job.xml#attribute_after' register_title='&lt;start_job&gt; (Kommando)'  register_keyword='after' type='definition'/>
 </register_keyword>
+<register_keyword keyword='all_schedulers'>
+    <register_keyword_display><code>all_schedulers=</code></register_keyword_display>
+    <register_entry register_file='xml/terminate.xml#attribute_all_schedulers' register_title='&lt;terminate&gt; (Kommando)'  register_keyword='all_schedulers' type='definition'/>
+</register_keyword>
 <register_keyword keyword='all_steps'>
     <register_keyword_display><code>all_steps=</code></register_keyword_display>
     <register_entry register_file='xml/answer/job.xml#attribute_all_steps' register_title='&lt;job&gt; (Antwort)'  register_keyword='all_steps' type='definition'/>
@@ -138,6 +142,12 @@
 </register_keyword>
 <register_keyword keyword='Auftragssenke'>
     <register_entry register_file='xml/file_order_sink.xml' register_title='&lt;file_order_sink&gt; (Konfiguration)'  register_keyword='Auftragssenke'/>
+</register_keyword>
+<register_keyword keyword='backup'>
+    <register_keyword_display><code>-backup=</code></register_keyword_display>
+    <register_entry register_file='CHANGES.xml#use_option__backup' register_title='Änderungsprotokoll'  register_keyword='backup'/>
+    <register_entry register_file='command_line.xml#option_backup' register_title='Kommandozeilenoptionen'  register_keyword='backup' type='definition'/>
+    <register_entry register_file='command_line.xml#use_option__backup' register_title='Kommandozeilenoptionen'  register_keyword='backup'/>
 </register_keyword>
 <register_keyword keyword='base'>
     <register_keyword_display><code>&lt;base&gt;</code></register_keyword_display>
@@ -418,8 +428,14 @@
     <register_keyword_display><code>db=</code></register_keyword_display>
     <register_entry register_file='factory_ini_spooler.xml#entry_db' register_title='file factory.ini, section [spooler]'  register_keyword='db' type='definition'/>
     <register_entry register_file='xml/answer/state.xml#attribute_db' register_title='&lt;state&gt; (Antwort)'  register_keyword='db' type='definition'/>
+    <register_ini_entry register_file='command_line.xml' register_title='Kommandozeilenoptionen' file='factory.ini' section='spooler' entry='db'/>
     <register_ini_entry register_file='datenbank.xml' register_title='Datenbank' file='factory.ini' section='spooler' entry='db'/>
     <register_ini_entry register_file='xml/job_chain.xml' register_title='&lt;job_chain&gt; (Konfiguration)' file='factory.ini' section='spooler' entry='db'/>
+</register_keyword>
+<register_keyword keyword='db_check_integrity'>
+    <register_keyword_display><code>db_check_integrity=</code></register_keyword_display>
+    <register_entry register_file='factory_ini_spooler.xml#entry_db_check_integrity' register_title='file factory.ini, section [spooler]'  register_keyword='db_check_integrity' type='definition'/>
+    <register_ini_entry register_file='CHANGES.xml' register_title='Änderungsprotokoll' file='factory.ini' section='spooler' entry='db_check_integrity'/>
 </register_keyword>
 <register_keyword keyword='db_history_table'>
     <register_keyword_display><code>db_history_table=</code></register_keyword_display>
@@ -611,6 +627,12 @@
     <register_keyword_display><code>disconnected_at=</code></register_keyword_display>
     <register_entry register_file='xml/answer/remote_scheduler.xml#attribute_disconnected_at' register_title='&lt;remote_scheduler&gt; (Antwort)'  register_keyword='disconnected_at' type='definition'/>
 </register_keyword>
+<register_keyword keyword='distributed'>
+    <register_keyword_display><code>-distributed=</code></register_keyword_display>
+    <register_entry register_file='CHANGES.xml#use_option__distributed' register_title='Änderungsprotokoll'  register_keyword='distributed'/>
+    <register_entry register_file='command_line.xml#option_distributed' register_title='Kommandozeilenoptionen'  register_keyword='distributed' type='definition'/>
+    <register_entry register_file='command_line.xml#use_option__distributed' register_title='Kommandozeilenoptionen'  register_keyword='distributed'/>
+</register_keyword>
 <register_keyword keyword='Eclipse'>
     <register_entry register_file='api/Spooler_program.xml' register_title='Spooler_program'  register_keyword='Eclipse'/>
 </register_keyword>
@@ -753,6 +775,13 @@
 </register_keyword>
 <register_keyword keyword='Exception (Java)'>
     <register_entry register_file='script_language_javascript.xml' register_title='Skripte in JavaScript'  register_keyword='Exception (Java)'/>
+</register_keyword>
+<register_keyword keyword='exclusive'>
+    <register_keyword_display><code>-exclusive=</code></register_keyword_display>
+    <register_entry register_file='CHANGES.xml#use_option__exclusive' register_title='Änderungsprotokoll'  register_keyword='exclusive'/>
+    <register_entry register_file='command_line.xml#option_exclusive' register_title='Kommandozeilenoptionen'  register_keyword='exclusive' type='definition'/>
+    <register_entry register_file='command_line.xml#use_option__exclusive' register_title='Kommandozeilenoptionen'  register_keyword='exclusive'/>
+    <register_entry register_file='xml/terminate.xml#use_option__exclusive' register_title='&lt;terminate&gt; (Kommando)'  register_keyword='exclusive'/>
 </register_keyword>
 <register_keyword keyword='execute_xml'>
     <register_keyword_display><code>execute_xml()</code></register_keyword_display>
@@ -1078,7 +1107,9 @@
 </register_keyword>
 <register_keyword keyword='install-service'>
     <register_keyword_display><code>-install-service=</code></register_keyword_display>
+    <register_entry register_file='CHANGES.xml#use_option__install-service' register_title='Änderungsprotokoll'  register_keyword='install-service'/>
     <register_entry register_file='command_line.xml#option_install-service' register_title='Kommandozeilenoptionen'  register_keyword='install-service' type='definition'/>
+    <register_entry register_file='command_line.xml#use_option__install-service' register_title='Kommandozeilenoptionen'  register_keyword='install-service'/>
 </register_keyword>
 <register_keyword keyword='ip'>
     <register_keyword_display><code>ip=</code></register_keyword_display>
@@ -2308,6 +2339,10 @@
     <register_keyword_display><code>response_xslt_stylesheet=</code></register_keyword_display>
     <register_entry register_file='xml/web_service.xml#attribute_response_xslt_stylesheet' register_title='&lt;web_service&gt; (Konfiguration)'  register_keyword='response_xslt_stylesheet' type='definition'/>
 </register_keyword>
+<register_keyword keyword='restart'>
+    <register_keyword_display><code>restart=</code></register_keyword_display>
+    <register_entry register_file='xml/terminate.xml#attribute_restart' register_title='&lt;terminate&gt; (Kommando)'  register_keyword='restart' type='definition'/>
+</register_keyword>
 <register_keyword keyword='reuse-port'>
     <register_keyword_display><code>-reuse-port=</code></register_keyword_display>
     <register_entry register_file='command_line.xml#option_reuse-port' register_title='Kommandozeilenoptionen'  register_keyword='reuse-port' type='definition'/>
@@ -2519,6 +2554,10 @@
     <register_entry register_file='xml.xml#use_element__show_order' register_title='Alle XML-Elemente'  register_keyword='show_order'/>
     <register_entry register_file='xml/show_order.xml#' register_title='&lt;show_order&gt; (Kommando)'  register_keyword='show_order' type='definition'/>
 </register_keyword>
+<register_keyword keyword='show_schedulers'>
+    <register_keyword_display><code>&lt;show_schedulers&gt;</code></register_keyword_display>
+    <register_entry register_file='CHANGES.xml#use_element__show_schedulers' register_title='Änderungsprotokoll'  register_keyword='show_schedulers'/>
+</register_keyword>
 <register_keyword keyword='show_state'>
     <register_keyword_display><code>&lt;show_state&gt;</code></register_keyword_display>
     <register_entry register_file='CHANGES.xml#use_element__show_state' register_title='Änderungsprotokoll'  register_keyword='show_state'/>
@@ -2534,6 +2573,10 @@
     <register_entry register_file='settings.xml#use_element__show_task' register_title='Einstellungen'  register_keyword='show_task'/>
     <register_entry register_file='xml.xml#use_element__show_task' register_title='Alle XML-Elemente'  register_keyword='show_task'/>
     <register_entry register_file='xml/show_task.xml#' register_title='&lt;show_task&gt; (Kommando)'  register_keyword='show_task' type='definition'/>
+</register_keyword>
+<register_keyword keyword='shutdown'>
+    <register_keyword_display><code>shutdown=</code></register_keyword_display>
+    <register_entry register_file='xml/terminate.xml#attribute_shutdown' register_title='&lt;terminate&gt; (Kommando)'  register_keyword='shutdown' type='definition'/>
 </register_keyword>
 <register_keyword keyword='signal'>
     <register_keyword_display><code>signal</code></register_keyword_display>
@@ -2977,6 +3020,7 @@
     <register_keyword_display><code>timeout=</code></register_keyword_display>
     <register_entry register_file='xml/job.xml#attribute_timeout' register_title='&lt;job&gt; (Konfiguration)'  register_keyword='timeout' type='definition'/>
     <register_entry register_file='xml/modify_spooler.xml#attribute_timeout' register_title='&lt;modify_spooler&gt; (Kommando)'  register_keyword='timeout' type='definition'/>
+    <register_entry register_file='xml/terminate.xml#attribute_timeout' register_title='&lt;terminate&gt; (Kommando)'  register_keyword='timeout' type='definition'/>
     <register_entry register_file='xml/web_service.xml#attribute_timeout' register_title='&lt;web_service&gt; (Konfiguration)'  register_keyword='timeout' type='definition'/>
 </register_keyword>
 <register_keyword keyword='timeout (property)'>

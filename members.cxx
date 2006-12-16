@@ -27,7 +27,7 @@ const int                       Scheduler_member::max_precedence        = 9999;
 
 struct Heart_beat : Async_operation, Scheduler_object
 {
-                                Heart_beat ( Scheduler_member* );
+                                Heart_beat                  ( Scheduler_member* );
 
 
     // Async_operation
@@ -39,9 +39,6 @@ struct Heart_beat : Async_operation, Scheduler_object
 
     // Scheduler_operation
     Prefix_log*                 log                         ()                                      { return _log; }
-
-
-    Spooler_db*                 db                          ()                                      { return _scheduler_member->db(); }
 
 
     Fill_zero                  _zero_;
@@ -92,7 +89,6 @@ struct Exclusive_scheduler_watchdog : Async_operation, Scheduler_object
   //void                        check_clock_difference      ( time_t last_heart_beat, time_t now );
     bool                        mark_as_exclusive           ();
     bool                        set_exclusive               ();
-    Spooler_db*                 db                          ()                                      { return _scheduler_member->db(); }
 
 
     Fill_zero                  _zero_;
@@ -155,7 +151,7 @@ bool Heart_beat::async_continue_( Continue_flags )
     try
     {
         bool ok = _scheduler_member->_has_exclusiveness? _scheduler_member->do_exclusive_heart_beat( (Transaction*)NULL )
-                                                       : _scheduler_member->do_heart_beat( (Transaction*)NULL, false );
+                                                       : _scheduler_member->do_a_heart_beat( (Transaction*)NULL, false );
         if( ok )
         {
             // Wir sind weiterhin aktiv
@@ -282,7 +278,7 @@ void Exclusive_scheduler_watchdog::try_to_become_exclusive()
 
     for( Retry_transaction ta ( db() ); ta.enter_loop(); ta++ ) try
     {
-        _scheduler_member->do_heart_beat( &ta, false );     // Der Herzschlag ist ein Nebeneffekt von try_to_become_exclusive()
+        _scheduler_member->do_a_heart_beat( &ta, false );     // Der Herzschlag ist ein Nebeneffekt von try_to_become_exclusive()
 
         bool none_has_exclusiveness = false;
 
@@ -291,7 +287,7 @@ void Exclusive_scheduler_watchdog::try_to_become_exclusive()
         //    {
         //        Transaction ta ( db() );
 
-                none_has_exclusiveness = check_exclusive_schedulers_heart_beat( &ta );   // Ruft auch do_heart_beat()
+                none_has_exclusiveness = check_exclusive_schedulers_heart_beat( &ta );   // Ruft auch do_a_heart_beat()
 
                 ta.commit( __FUNCTION__ );
             //}
@@ -306,7 +302,7 @@ void Exclusive_scheduler_watchdog::try_to_become_exclusive()
         //}
         //else
         //{
-        //    bool ok = _scheduler_member->do_heart_beat( NULL, true );
+        //    bool ok = _scheduler_member->do_a_heart_beat( NULL, true );
         //    if( !ok ) 
         //    {
         //        _set_exclusive_until = 0;
@@ -894,7 +890,9 @@ bool Scheduler_member::wait_until_has_exclusiveness()
 
 void Scheduler_member::create_table_when_needed()
 {
-    db()->create_table_when_needed( _spooler->_members_tablename,
+    Transaction ta ( db() );
+
+    db()->create_table_when_needed( &ta, _spooler->_members_tablename,
             "`scheduler_member_id`"    " varchar(100) not null, "
             "`scheduler_id`"           " varchar(100) not null, "
             "`version`"                " varchar(100) not null, "
@@ -911,6 +909,8 @@ void Scheduler_member::create_table_when_needed()
             "`pid`"                    " varchar(20)  not null, "
             "`http_url`"               " varchar(100), "
             "primary key( `scheduler_member_id` )" );
+
+    ta.commit( __FUNCTION__ );
 }
 
 //---------------------------------------------------------------Scheduler_member::start_operations
@@ -997,7 +997,7 @@ bool Scheduler_member::do_exclusive_heart_beat( Transaction* outer_transaction )
 {
     Z_LOGI2( "scheduler.distributed", __FUNCTION__ << "\n" );
 
-    bool ok = do_heart_beat( outer_transaction, true );
+    bool ok = do_a_heart_beat( outer_transaction, true );
 
     if( !ok )
     {
@@ -1011,9 +1011,16 @@ bool Scheduler_member::do_exclusive_heart_beat( Transaction* outer_transaction )
     return ok;
 }
     
-//------------------------------------------------------------------Scheduler_member::do_heart_beat
+//----------------------------------------------------------------Scheduler_member::do_a_heart_beat
 
-bool Scheduler_member::do_heart_beat( Transaction* outer_transaction, bool db_record_marked_exclusive )
+bool Scheduler_member::do_a_heart_beat( Transaction* outer_transaction )
+{
+    return do_a_heart_beat( outer_transaction, has_exclusiveness() );
+}
+
+//-----------------------------------------------------------------Scheduler_member::do_a_heart_beat
+
+bool Scheduler_member::do_a_heart_beat( Transaction* outer_transaction, bool db_record_marked_exclusive )
 {
     Z_LOGI2( "scheduler.distributed", __FUNCTION__ << "\n" );
 
@@ -1492,13 +1499,6 @@ string Scheduler_member::exclusive_member_id()
 bool Scheduler_member::is_scheduler_up()
 { 
     return _is_active  ||  _exclusive_scheduler_watchdog  &&  _exclusive_scheduler_watchdog->_is_scheduler_up; 
-}
-
-//-----------------------------------------------------------------------------Scheduler_member::db
-
-Spooler_db* Scheduler_member::db()
-{ 
-    return _spooler->_db; 
 }
 
 //----------------------------------------------------------------Scheduler_member::check_member_id

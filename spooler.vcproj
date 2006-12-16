@@ -366,6 +366,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\scheduler_object.cxx"
+				>
+			</File>
+			<File
 				RelativePath="spooler.cxx"
 				>
 				<FileConfiguration

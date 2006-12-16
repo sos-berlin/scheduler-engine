@@ -43,9 +43,9 @@ struct Order : Com_order,
     void                        load_blobs              ( Transaction* );
 
     void                        init                    ();
-    bool                        attach_task             ( Task* );
+    bool                        attach_task             ( Task*, const Time& now );
     void                        assert_no_task          ();
-    bool                        is_immediately_processable( const Time& now = Time() );
+    bool                        is_immediately_processable( const Time& now );
     bool                        is_processable          ();
     void                        open_log                ();
     void                        close                   ();
@@ -353,12 +353,16 @@ struct Job_chain : Com_job_chain, Scheduler_object
 
     void                    set_orders_recoverable      ( bool b )                                  { _orders_recoverable = b; }
     void                        load_orders_from_database();
+    int                         load_orders_from_result_set( Transaction*, Any_file* result_set );
+    bool                        load_order_from_database_record( Transaction*, const Record& );
+
     int                         remove_all_pending_orders( bool leave_in_database = false );
 
     Job_chain_node*             add_job                 ( Job*, const Order::State& input_state, 
                                                           const Order::State& next_state  = Variant(Variant::vt_missing), 
                                                           const Order::State& error_state = Variant(Variant::vt_missing) );
     void                        finish                  ();
+    bool                        contains_job            ( Job* );
 
   //Job*                        first_job               ();
     Job_chain_node*             first_node             ();
@@ -451,10 +455,10 @@ struct Order_queue : Com_order_queue
     int                         order_count             ( const Job_chain* = NULL );
     bool                        empty                   ()                                          { return _queue.empty(); }
     bool                        empty                   ( const Job_chain* job_chain )              { return order_count( job_chain ) == 0; }
-    Order*                      first_order             ( const Time& now, bool read_database = true );
+    Order*                      first_order             ( const Time& now );
     Order*                      load_next_processable_order_from_database();
-    bool                        has_order               ( const Time& now )                         { return first_order( now, false ) != NULL; }
-    ptr<Order>                  get_order_for_processing( const Time& now );
+    bool                        has_order               ( const Time& now )                         { return first_order( now ) != NULL; }
+    Order*                      get_order_for_processing( const Time& now );
     Time                        next_time               ();
   //void                        update_priorities       ();
     ptr<Order>                  order_or_null           ( const Order::Id& );
@@ -480,11 +484,40 @@ struct Order_queue : Com_order_queue
     typedef list< ptr<Order> >  Queue;
     Queue                      _queue;
 
+    time_t                     _last_db_check_time;
+
     //bool                       _has_outdated_orders;
 
   //int                        _lowest_priority;        // Zur Optimierung
   //int                        _highest_priority;       // Zur Optimierung
     //bool                       _has_users_id;           // D.h. id auf Eindeutigkeit prüfen. Bei selbst generierten Ids überflüssig. Zur Optimierung.
+};
+
+//-------------------------------------------------------------------Database_orders_read_operation
+
+struct Database_orders_read_operation : Async_operation, Scheduler_object
+{
+                                Database_orders_read_operation( Spooler* );
+
+
+    // Async_operation
+    bool                        async_finished_             () const;
+    string                      async_state_text_           () const;
+    bool                        async_continue_             ( Continue_flags );
+
+
+    // Scheduler_operation
+    Prefix_log*                 log                         ()                                      { return _log; }
+
+
+    string                      make_union_select_order_sql ( const string& select_sql_begin, const string& select_sql_end );
+    string                      make_where_expression_for_job( Job* );
+    int                         read_result_set             ( Transaction*, const string& select_sql );
+    void                        set_alarm                   ();
+
+
+    Fill_zero                  _zero_;
+    Prefix_log*                _log;
 };
 
 //-------------------------------------------------------------------------------------------------

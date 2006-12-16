@@ -2271,6 +2271,10 @@ void Spooler::start()
 
     _web_services.load();   // Nicht in Spooler::load(), denn es öffnet schon -log-dir-Dateien (das ist nicht gut für -send-cmd=)
 
+
+    FOR_EACH_JOB( job )  init_job( *job, false );   // Setzt _has_java_source
+
+
     try
     {
         _java_vm->set_log( &_log );
@@ -2336,8 +2340,6 @@ void Spooler::start()
 
     _communication.start_or_rebind();
 
-
-    FOR_EACH_JOB( job )  init_job( *job, false );
 
     FOR_EACH( Job_chain_map, _job_chain_map, it ) 
     {
@@ -2432,13 +2434,6 @@ bool Spooler::is_active()
     return !_scheduler_member || _scheduler_member->is_active();
 }
 
-//--------------------------------------------------------------------------Spooler::is_distributed
-
-//bool Spooler::is_distributed()
-//{
-//    return _scheduler_member  &&  is_exclusive();
-//}
-
 //----------------------------------------------------------------Spooler::assert_has_exclusiveness
 
 //void Spooler::assert_is_distributed( const string& text )
@@ -2463,11 +2458,27 @@ bool Spooler::has_exclusiveness()
     return !_scheduler_member || _scheduler_member->has_exclusiveness();
 }
 
+//--------------------------------------------------------------------------Spooler::is_distributed
+
+bool Spooler::is_distributed()
+{
+    return _is_distributed;
+}
+
 //----------------------------------------------------------------Spooler::assert_has_exclusiveness
 
 void Spooler::assert_has_exclusiveness( const string& text )
 {
     if( !has_exclusiveness() )  z::throw_xc( "SCHEDULER-366", text );
+}
+
+//-------------------------------------------------------------------------Spooler::do_a_heart_beat
+
+bool Spooler::do_a_heart_beat( Transaction* ta )
+{
+    if( !_scheduler_member )  return true;
+
+    return _scheduler_member->do_a_heart_beat( ta );
 }
 
 //--------------------------------------------------------------------Spooler::run_scheduler_script
@@ -2801,7 +2812,10 @@ void Spooler::run()
         if( _shutdown_cmd )  if( !_single_thread  ||  !_single_thread->has_tasks()  ||  _shutdown_ignore_running_tasks )  break;
 
         bool something_done = run_continue();
+        
         if( _scheduler_member )  check_scheduler_member();
+        if( _database_orders_read_operation )  _database_orders_read_operation->async_check_exception();
+
         if( _single_thread->is_ready_for_termination() )  break;
 
         if( something_done )  wait_until.set_null();   // Nicht warten, wir drehen noch eine Runde

@@ -239,6 +239,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-370", "Operation can only be performed on a distributed Scheduler" },
     { "SCHEDULER-371", "DATABASE INTEGRITY IS BROKEN" },
     { "SCHEDULER-372", "SOME OTHER SCHEDULER HAS STOLEN EXCLUSIVENESS" },
+    { "SCHEDULER-372", "SOME OTHER SCHEDULER HAS STOLEN ACTIVITY" },
     { "SCHEDULER-900", "Scheduler $1 is starting with $2, pid=$3" },
     { "SCHEDULER-902", "state=$1" },
     { "SCHEDULER-904", "Tasks have $1s to terminate" },

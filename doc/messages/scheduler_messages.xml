@@ -2342,6 +2342,12 @@
             </text>
         </message>
 
+        <message code="SCHEDULER-372">
+            <text xml:lang="en">
+                <title>SOME OTHER SCHEDULER HAS STOLEN ACTIVITY</title>
+            </text>
+        </message>
+
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->

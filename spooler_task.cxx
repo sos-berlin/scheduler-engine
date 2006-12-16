@@ -1183,21 +1183,9 @@ bool Task::do_something()
                                     {
                                         if( !take_order( now ) )
                                         {
-                                            //if( Order* order = _job->request_order( obj_name() ) )
-                                            //{
-                                            //    bool ok = set_order( order );
-                                            //    if( !ok )
-                                            //    {
-                                            //        set_state( s_running_waiting_for_order );
-                                            //        break;
-                                            //    }
-                                            //}
-                                            //else
-                                            {
-                                                _idle_timeout_at = _job->_idle_timeout == latter_day? latter_day : now + _job->_idle_timeout;
-                                                set_state( s_running_waiting_for_order );
-                                                break;
-                                            }
+                                            _idle_timeout_at = _job->_idle_timeout == latter_day? latter_day : now + _job->_idle_timeout;
+                                            set_state( s_running_waiting_for_order );
+                                            break;
                                         }
 
                                         _log->set_order_log( _order->_log );
@@ -1650,9 +1638,15 @@ bool Task::operation__end()
 
 //-------------------------------------------------------------------------------Task::occupy_order
 
-bool Task::occupy_order( Order* order )
+bool Task::occupy_order( Order* order, const Time& now )
+
+// Wird von Job gerufen, wenn Task wegen neuen Auftrags startet oder fortgesetzt wird (s_running_waiting_for_order)
+
 {
-    // Wird von Job gerufen, wenn Task wegen neuen Auftrags startet
+    assert( !_operation );
+    assert( _state == s_none || _state == s_running || _state == s_running_waiting_for_order );
+    assert( !_order );
+
 
     bool ok = false;
 
@@ -1660,7 +1654,7 @@ bool Task::occupy_order( Order* order )
 
     if( order ) 
     {
-        ok = order->attach_task( this );            // Auftrag war schon bereitgestellt. Exception von insert_oder()
+        ok = order->attach_task( this, now );        // Auftrag war schon bereitgestellt. Exception möglich von insert_oder()
  
         if( !ok )  order = NULL;
         else
@@ -1679,11 +1673,8 @@ Order* Task::take_order( const Time& now )
 {
     if( !_order )
     {
-        Order* order = _job->order_queue()->get_order_for_processing( now );
-        if( !order )  order = _job->request_order( obj_name() );
-
-        bool ok = occupy_order( order );
-        //if( !ok )  job()->order_queue()->remove_outdated_orders();
+        Order* order = _job->request_order( now, obj_name() );
+        if( order )  occupy_order( order, now );
     }
 
     return _order;

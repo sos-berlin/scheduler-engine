@@ -414,7 +414,7 @@ Order* Directory_file_order_source::request_order( const string& cause )
         Z_LOG2( "scheduler.file_order", __FUNCTION__ << " cause=" << cause << "\n" );
 
         result = read_directory( false, cause );
-        if( result )  assert( result->is_immediately_processable() );
+        if( result )  assert( result->is_immediately_processable( Time::now() ) );
     }
     else
     {

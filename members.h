@@ -61,7 +61,8 @@ struct Scheduler_member : Async_operation, Scheduler_object
     bool                        wait_until_is_scheduler_up  ();
     bool                        wait_until_is_active        ();
     bool                        wait_until_has_exclusiveness();
-    bool                        do_heart_beat               ( Transaction*, bool db_record_marked_active );
+    bool                        do_a_heart_beat             ( Transaction* );
+    bool                        do_a_heart_beat             ( Transaction*, bool db_record_marked_active );
     bool                        do_exclusive_heart_beat     ( Transaction* );
     void                        mark_as_inactive            ( Transaction*, bool delete_inactive_record = false, bool delete_new_active_record = false );
     void                        show_active_schedulers      ( Transaction* );
@@ -69,7 +70,6 @@ struct Scheduler_member : Async_operation, Scheduler_object
     void                        set_command_for_all_schedulers_but_me( Transaction*, Command );
 
   //string                      scheduler_up_variable_name  ();
-    Spooler_db*                 db                          ();
     void                        check_member_id             ();
 
   protected:

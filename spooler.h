@@ -107,6 +107,7 @@ struct Job_chain;
 struct Order_queue;
 struct Order;
 struct Process_class;
+struct Database_orders_read_operation;
 struct Remote_scheduler;
 struct Scheduler_object;
 struct Scheduler_event;
@@ -330,10 +331,11 @@ struct Spooler : Object,
     bool                        run_continue                ();
     void                        start_scheduler_member      ();
     void                        wait_for_scheduler_member   ();
+    bool                        do_a_heart_beat             ( Transaction* );
     void                        check_scheduler_member      ();
     bool                        is_active                   ();
     bool                        has_exclusiveness           ();
-    //bool                        is_distributed              ();
+    bool                        is_distributed              ();
     //void                        assert_is_distributed       ( const string& message_text );
     void                        assert_has_exclusiveness    ( const string& message_text );
     string                      scheduler_member_id         ();
@@ -588,6 +590,7 @@ struct Spooler : Object,
     Job_chain_map              _job_chain_map;
     int                        _job_chain_map_version;             // Zeitstempel der letzten Änderung (letzter Aufruf von Spooler::add_job_chain()), 
     long32                     _next_free_order_id;
+    ptr<Database_orders_read_operation>  _database_orders_read_operation;
 
     Thread_id                  _thread_id;                  // Haupt-Thread
     Time                       _spooler_start_time;
