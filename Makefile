@@ -11,7 +11,7 @@ endif
 
 
 objects = \
- members.o\
+ distributed.o\
  scheduler_client.o\
  scheduler_messages.o\
  spooler.o\
