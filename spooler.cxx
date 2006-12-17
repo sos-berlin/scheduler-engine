@@ -548,6 +548,7 @@ Spooler::Spooler()
     _environment( variable_set_from_environment() )
 {
     _scheduler_event_manager = Z_NEW( Scheduler_event_manager( this ) );
+    _order_subsystem = Z_NEW( Order_subsystem( this ) );
 
     _variable_set_map[ variable_set_name_for_substitution ] = _environment;
 
@@ -770,7 +771,9 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
 
   //state_element.appendChild( execute_show_threads( show ) );
     state_element.appendChild( process_classes_dom_element( dom, show ) );
-    state_element.appendChild( job_chains_dom_element( dom, show ) );
+    
+    if( _order_subsystem )
+    state_element.appendChild( _order_subsystem->job_chains_dom_element( dom, show ) );
 
     {
         xml::Element_ptr subprocesses_element = dom.createElement( "subprocesses" );
@@ -927,22 +930,6 @@ void Spooler::cmd_job( const xml::Element_ptr& element )
     signal( "add_job" );
 }
 
-//----------------------------------------------------------------Spooler::load_job_chains_from_xml
-
-void Spooler::load_job_chains_from_xml( const xml::Element_ptr& element )
-{
-    DOM_FOR_EACH_ELEMENT( element, e )
-    {
-        if( e.nodeName_is( "job_chain" ) )
-        {
-            // Siehe auch Command_processor::execute_job_chain()
-            ptr<Job_chain> job_chain = new Job_chain( this );
-            job_chain->set_dom( e );
-            add_job_chain( job_chain );
-        }
-    }
-}
-
 //-------------------------------------------------------------------Spooler::remove_temporary_jobs
 
 int Spooler::remove_temporary_jobs( Job* which_job )
@@ -1007,22 +994,6 @@ void Spooler::remove_job( Job* job )
     {
         job->_log->debug( message_string( "SCHEDULER-258" ) );  // "Job wird entfernt sobald alle Tasks beendet sind" );
     }
-}
-
-//---------------------------------------------------------------------------Spooler::has_any_order
-
-bool Spooler::has_any_order()
-{
-    THREAD_LOCK( _lock )
-    {
-        FOR_EACH_JOB( j )
-        {
-            Job* job = *j;
-            if( job->order_queue()  &&  !job->order_queue()->empty() )  return true;
-        }
-    }
-
-    return false;
 }
 
 //--------------------------------------------------------------------------Spooler::threads_as_xml
@@ -1411,6 +1382,29 @@ Object_set_class* Spooler::get_object_set_class_or_null( const string& name )
     return NULL;
 }
 */
+//-------------------------------------------------------------------------Spooler::order_subsystem
+
+Order_subsystem* Spooler::order_subsystem()
+{ 
+    assert( _order_subsystem ); 
+    if( !_order_subsystem )  z::throw_xc( __FUNCTION__ );
+
+    return _order_subsystem; 
+}
+
+//---------------------------------------------------------------------------Spooler::has_any_order
+
+bool Spooler::has_any_order()
+{
+    FOR_EACH_JOB( j )
+    {
+        Job* job = *j;
+        if( job->order_queue()  &&  !job->order_queue()->empty() )  return true;
+    }
+
+    return false;
+}
+
 //---------------------------------------------------------------------------------Spooler::add_job
 
 void Spooler::add_job( const ptr<Job>& job, bool init )
@@ -1909,7 +1903,7 @@ void Spooler::load_arg()
         }
 
         if( _is_backup_member && !_demand_exclusiveness )  z::throw_xc( "SCHEDULER-368", "-backup", "-exclusive" );
-        if( _is_distributed && _demand_exclusiveness    )  z::throw_xc( "SCHEDULER-369", "-distributed", "-exclusive" );
+        //if( _is_distributed && _demand_exclusiveness    )  z::throw_xc( "SCHEDULER-369", "-distributed", "-exclusive" );
 
         if( _is_service )  _interactive = false;
 
@@ -2054,7 +2048,7 @@ void Spooler::load()
     _process_class_list.push_back( process_class );         
 
 
-    init_job_chains();
+    _order_subsystem->init();
     _web_services.init();    // Ein Job und eine Jobkette einrichten, s. spooler_web_service.cxx
 
 
@@ -2290,8 +2284,8 @@ void Spooler::start()
     _log.info( message_string( "SCHEDULER-900", _version, _config_filename, getpid() ) );
     _spooler_start_time = Time::now();
 
-    _web_services.load();   // Nicht in Spooler::load(), denn es öffnet schon -log-dir-Dateien (das ist nicht gut für -send-cmd=)
-
+    _order_subsystem->start();
+    _web_services.start();   // Nicht in Spooler::load(), denn es öffnet schon -log-dir-Dateien (das ist nicht gut für -send-cmd=)
 
     FOR_EACH_JOB( job )  init0_job( *job );   // Setzt _has_java_source
 
@@ -2351,8 +2345,8 @@ void Spooler::start()
 
     if( _demand_exclusiveness || _is_distributed )  
     {
-        start_scheduler_member();
-        wait_for_scheduler_member();
+        start_distributed_scheduler();
+        wait_for_distributed_scheduler();
         execute_state_cmd();
         if( _shutdown_cmd )  return;
     }
@@ -2361,13 +2355,7 @@ void Spooler::start()
 
     _communication.start_or_rebind();
 
-
-    FOR_EACH( Job_chain_map, _job_chain_map, it ) 
-    {
-        Job_chain* job_chain = it->second;
-        if( job_chain->_load_orders_from_database )
-            job_chain->load_orders_from_database();  // Die Jobketten aus der XML-Konfiguration
-    }
+    _order_subsystem->load_orders_from_database();
 
   //_spooler_thread_list.clear();
 
@@ -2403,21 +2391,21 @@ void Spooler::start()
 */
 }
 
-//------------------------------------------------------------------Spooler::start_scheduler_member
+//-------------------------------------------------------------Spooler::start_distributed_scheduler
 
-void Spooler::start_scheduler_member()
+void Spooler::start_distributed_scheduler()
 {
-    _scheduler_member = Z_NEW( Scheduler_member( this ) );
+    _distributed_scheduler = Z_NEW( Distributed_scheduler( this ) );
 
-    _scheduler_member->set_backup( _is_backup_member );
-    _scheduler_member->demand_exclusiveness( _demand_exclusiveness );
+    _distributed_scheduler->set_backup( _is_backup_member );
+    _distributed_scheduler->demand_exclusiveness( _demand_exclusiveness );
 
-    _scheduler_member->start();     // Wartet, bis entschieden ist, dass wir aktiv werden
+    _distributed_scheduler->start();     // Wartet, bis entschieden ist, dass wir aktiv werden
 }
 
-//---------------------------------------------------------------Spooler::wait_for_scheduler_member
+//----------------------------------------------------------Spooler::wait_for_distributed_scheduler
 
-void Spooler::wait_for_scheduler_member()
+void Spooler::wait_for_distributed_scheduler()
 {
     Z_LOGI2( "scheduler", __FUNCTION__ << "\n" );
 
@@ -2425,58 +2413,34 @@ void Spooler::wait_for_scheduler_member()
 
     State previous_state = state();
 
-    if( _is_backup_member  &&  !_scheduler_member->is_scheduler_up() ) 
+    if( _is_backup_member  &&  !_distributed_scheduler->is_scheduler_up() ) 
     {
         set_state( s_starting_waiting );
-        ok = _scheduler_member->wait_until_is_scheduler_up();
+        ok = _distributed_scheduler->wait_until_is_scheduler_up();
     }
 
-    if( ok  &&  !_scheduler_member->is_active() )
+    if( ok  &&  !_distributed_scheduler->is_active() )
     {
         set_state( s_starting_waiting );
-        ok = _scheduler_member->wait_until_is_active();
+        ok = _distributed_scheduler->wait_until_is_active();
     }
 
-    if( ok  &&  _demand_exclusiveness  &&  !_scheduler_member->has_exclusiveness() )
+    if( ok  &&  _demand_exclusiveness  &&  !_distributed_scheduler->has_exclusiveness() )
     {
         set_state( s_starting_waiting );
-        ok = _scheduler_member->wait_until_has_exclusiveness();
+        ok = _distributed_scheduler->wait_until_has_exclusiveness();
     }
 
     set_state( previous_state );
 
-    if( !_spooler->is_termination_state_cmd() )  check_scheduler_member();
+    if( !_spooler->is_termination_state_cmd() )  check_distributed_scheduler();
 }
 
 //-------------------------------------------------------------------------------Spooler::is_active
 
 bool Spooler::is_active()
 {
-    return !_scheduler_member || _scheduler_member->is_active();
-}
-
-//----------------------------------------------------------------Spooler::assert_has_exclusiveness
-
-//void Spooler::assert_is_distributed( const string& text )
-//{
-//    if( _scheduler_member )  z::throw_xc( "SCHEDULER-370", text );
-//}
-
-//---------------------------------------------------------------------Spooler::scheduler_member_id
-
-string Spooler::scheduler_member_id()
-{
-    //assert_is_distributed( __FUNCTION__ );
-    assert( _scheduler_member );
-
-    return _scheduler_member->member_id();
-}
-
-//-----------------------------------------------------------------------Spooler::has_exclusiveness
-
-bool Spooler::has_exclusiveness()
-{
-    return !_scheduler_member || _scheduler_member->has_exclusiveness();
+    return !_distributed_scheduler || _distributed_scheduler->is_active();
 }
 
 //--------------------------------------------------------------------------Spooler::is_distributed
@@ -2488,18 +2452,46 @@ bool Spooler::is_distributed()
 
 //----------------------------------------------------------------Spooler::assert_has_exclusiveness
 
+void Spooler::assert_is_distributed( const string& text )
+{
+    if( !is_distributed() )  z::throw_xc( "SCHEDULER-370", text );
+}
+
+//---------------------------------------------------------------------Spooler::scheduler_member_id
+
+string Spooler::scheduler_member_id()
+{
+    //assert_is_distributed( __FUNCTION__ );
+    assert( _distributed_scheduler );
+
+    return _distributed_scheduler->member_id();
+}
+
+//-----------------------------------------------------------------------Spooler::has_exclusiveness
+
+bool Spooler::has_exclusiveness()
+{
+    return !_distributed_scheduler || _distributed_scheduler->has_exclusiveness();
+}
+
+//----------------------------------------------------------------Spooler::assert_has_exclusiveness
+
 void Spooler::assert_has_exclusiveness( const string& text )
 {
-    if( !has_exclusiveness() )  z::throw_xc( "SCHEDULER-366", text );
+    if( !has_exclusiveness() )
+    {
+        Z_DEBUG_ONLY( assert(0) );
+        z::throw_xc( "SCHEDULER-366", text );
+    }
 }
 
 //-------------------------------------------------------------------------Spooler::do_a_heart_beat
 
 bool Spooler::do_a_heart_beat( Transaction* ta )
 {
-    if( !_scheduler_member )  return true;
+    if( !_distributed_scheduler )  return true;
 
-    return _scheduler_member->do_a_heart_beat( ta );
+    return _distributed_scheduler->do_a_heart_beat( ta );
 }
 
 //--------------------------------------------------------------------Spooler::run_scheduler_script
@@ -2573,19 +2565,19 @@ void Spooler::stop( const exception* )
 
     //_log.msg( "Spooler::stop" );
 
-    if( _scheduler_member )
+    if( _distributed_scheduler )
     {
         if( _terminate_shutdown )  
         {
-            _scheduler_member->set_command_for_all_inactive_schedulers_but_me( (Transaction*)NULL, 
-                _terminate_all_schedulers? Scheduler_member::cmd_terminate :
-                                           Scheduler_member::cmd_terminate_and_restart );
+            _distributed_scheduler->set_command_for_all_inactive_schedulers_but_me( (Transaction*)NULL, 
+                _terminate_all_schedulers? Distributed_scheduler::cmd_terminate :
+                                           Distributed_scheduler::cmd_terminate_and_restart );
             
-            _scheduler_member->shutdown();
+            _distributed_scheduler->shutdown();
         }
 
-        _scheduler_member->close();
-        _scheduler_member = NULL;
+        _distributed_scheduler->close();
+        _distributed_scheduler = NULL;
     }
 
     if( _module_instance )      // Scheduler-Skript zuerst beenden, damit die Finalizer die Tasks (von Job.start()) und andere Objekte schließen können.
@@ -2604,10 +2596,7 @@ void Spooler::stop( const exception* )
     }
 
 
-    for( Job_chain_map::iterator j = _job_chain_map.begin(); j != _job_chain_map.end(); j++ )  //j = _job_chain_map.erase( j ) )
-    {
-        j->second->close(); 
-    }
+    if( _order_subsystem )  _order_subsystem->close_job_chains();
 
     //close_threads();
     close_jobs();
@@ -2615,7 +2604,7 @@ void Spooler::stop( const exception* )
     if( _shutdown_ignore_running_tasks )  _spooler->kill_all_processes();   // Übriggebliebene Prozesse killen
 
 
-    _job_chain_map.clear();
+    if( _order_subsystem )  _order_subsystem->close(), _order_subsystem = NULL;
     _object_set_class_list.clear();
   //_spooler_thread_list.clear();
     _thread_list.clear();
@@ -2834,8 +2823,8 @@ void Spooler::run()
 
         bool something_done = run_continue();
         
-        if( _scheduler_member )  check_scheduler_member();
-        if( _database_orders_read_operation )  _database_orders_read_operation->async_check_exception();
+        if( _distributed_scheduler )  check_distributed_scheduler();
+        _order_subsystem->check_exception();
 
         if( _single_thread->is_ready_for_termination() )  break;
 
@@ -3133,24 +3122,24 @@ bool Spooler::run_continue()
     return something_done;
 }
 
-//------------------------------------------------------------------Spooler::check_scheduler_member
+//------------------------------------------------------------------Spooler::check_distributed_scheduler
 
-void Spooler::check_scheduler_member()
+void Spooler::check_distributed_scheduler()
 {
-    _scheduler_member->async_check_exception( "Error in Scheduler member" );
+    _distributed_scheduler->async_check_exception( "Error in Scheduler member" );
 
-    _scheduler_is_up    = _scheduler_member->is_scheduler_up();
-  //_proper_termination = _scheduler_member->has_exclusiveness();
+    _scheduler_is_up    = _distributed_scheduler->is_scheduler_up();
+  //_proper_termination = _distributed_scheduler->has_exclusiveness();
 
-    if( !_scheduler_member->is_active()  ||  _demand_exclusiveness && !_scheduler_member->has_exclusiveness() )
+    if( !_distributed_scheduler->check_is_active()  ||  _demand_exclusiveness && !_distributed_scheduler->has_exclusiveness() )
     {
         kill_all_processes();
         
         _log.warn( message_string( _demand_exclusiveness? "SCHEDULER-367" : "SCHEDULER-362" ) );
 
-        _scheduler_member->show_active_schedulers( (Transaction*)NULL );
-        _scheduler_member->close();     // Scheduler-Mitglieds-Eintrag entfernen
-        _scheduler_member = NULL;       // aber Eintrag für verteilten Scheduler lassen, Scheduler ist nicht herunterfahren (wird ja vom anderen aktiven Scheuler fortgesetzt)
+        _distributed_scheduler->show_active_schedulers( (Transaction*)NULL );
+        _distributed_scheduler->close();     // Scheduler-Mitglieds-Eintrag entfernen
+        _distributed_scheduler = NULL;       // aber Eintrag für verteilten Scheduler lassen, Scheduler ist nicht herunterfahren (wird ja vom anderen aktiven Scheuler fortgesetzt)
 
         cmd_terminate( false, INT_MAX, false );
     }
@@ -3324,13 +3313,13 @@ void Spooler::cmd_terminate( bool restart, int timeout, bool shutdown, bool all_
     _terminate_all_schedulers = all_schedulers;
 
     /*
-    if( all_schedulers && _scheduler_member )
+    if( all_schedulers && _distributed_scheduler )
     {
-        _scheduler_member->set_command_for_all_schedulers_but_me
+        _distributed_scheduler->set_command_for_all_schedulers_but_me
         (
             (Transaction*)NULL,
-            restart? Scheduler_member::cmd_terminate_and_restart
-                   : Scheduler_member::cmd_terminate
+            restart? Distributed_scheduler::cmd_terminate_and_restart
+                   : Distributed_scheduler::cmd_terminate
         );
     }
     */
@@ -3871,7 +3860,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
     set_log_category_default( "scheduler.call", true );   // Aufrufe von spooler_process() etc. protokollieren (Beginn und Ende)
     set_log_category_default( "scheduler.order", true );
     set_log_category_default( "scheduler.file_order", true );
-    set_log_category_default( "scheduler.distributed", true );  // Vorläufig
+  //set_log_category_default( "scheduler.distributed", true );  // Vorläufig
 
 
 

@@ -165,7 +165,7 @@ namespace http
 #include "spooler_web_service.h"
 #include "spooler_module_remote.h"
 #include "spooler_module_remote_server.h"
-#include "members.h"
+#include "distributed.h"
 
 //-------------------------------------------------------------------------------------------------
 
@@ -279,8 +279,6 @@ struct Spooler : Object,
   //Object_set_class*           get_object_set_class        ( const string& name );
     Object_set_class*           get_object_set_class_or_null( const string& name );
 
-    bool                        has_any_order               ();
-
     void                        signal_object               ( const string& object_set_class_name, const Level& );
     void                        cmd_reload                  ();
     void                        cmd_pause                   ()                                  { _state_cmd = sc_pause; signal( "pause" ); }
@@ -329,17 +327,20 @@ struct Spooler : Object,
     void                        nichts_getan                ( int anzahl, const string& );
     void                        run                         ();
     bool                        run_continue                ();
-    void                        start_scheduler_member      ();
-    void                        wait_for_scheduler_member   ();
+
+    // Distributed_scheduler
+    void                        start_distributed_scheduler   ();
+    void                        wait_for_distributed_scheduler();
+    void                        check_distributed_scheduler   ();
     bool                        do_a_heart_beat             ( Transaction* );
-    void                        check_scheduler_member      ();
     bool                        is_active                   ();
     bool                        has_exclusiveness           ();
     bool                        is_distributed              ();
-    //void                        assert_is_distributed       ( const string& message_text );
+    void                        assert_is_distributed       ( const string& message_text );
     void                        assert_has_exclusiveness    ( const string& message_text );
     string                      scheduler_member_id         ();
-    string                      session_id                  ()                                  { return _session_id; }
+
+  //string                      session_id                  ()                                  { return _session_id; }
   //void                        start_threads               ();
     Spooler_thread*             new_thread                  ( bool free_threading = true );
   //void                        close_threads               ();
@@ -376,14 +377,6 @@ struct Spooler : Object,
     void                        init1_job                   ( Transaction*, Job* );
     xml::Element_ptr            jobs_dom_element            ( const xml::Document_ptr&, const Show_what& );
 
-    void                        init_job_chains             ();                                 // In spooler_order.cxx
-    void                        init_file_order_sink        ();                                 // In spooler_order_file.cxx
-    void                        load_job_chains_from_xml    ( const xml::Element_ptr& );
-    void                        add_job_chain               ( Job_chain* );
-    Job_chain*                  job_chain                   ( const string& name );
-    Job_chain*                  job_chain_or_null           ( const string& name );
-    xml::Element_ptr            job_chains_dom_element      ( const xml::Document_ptr&, const Show_what& );
-
     // Prozesse
     void                        load_process_classes_from_dom( const xml::Element_ptr&, const Time& xml_mod_time );
     void                        add_process_class           ( Process_class* );
@@ -406,12 +399,19 @@ struct Spooler : Object,
     void                        end_dont_suspend_machine    ();
     void                        suspend_machine             ();
 
+    Spooler_db*                 db                          ()                                  { return _db; }
+    sql::Database_descriptor*   database_descriptor         ()                                  { return db()->database_descriptor(); }
+
+    Order_subsystem*            order_subsystem             ();
+    bool                        has_any_order               ();
+
   private:
     Fill_zero                  _zero_;
     int                        _argc;
     char**                     _argv;
     string                     _parameter_line;
     bool                       _jobs_initialized;
+    ptr<Order_subsystem>       _order_subsystem;
 
   public:
     Thread_semaphore           _lock;                       // Command_processor::execute_show_state() sperrt auch, für Zugriff auf _db.
@@ -586,12 +586,6 @@ struct Spooler : Object,
   //Spooler_thread_list         _spooler_thread_list;        // Nur Threads mit _free_threading=no, die also keine richtigen Threads sind und im Spooler-Thread laufen
 
 
-    Thread_semaphore           _job_chain_lock;
-    typedef map< string, ptr<Job_chain> >  Job_chain_map;
-    Job_chain_map              _job_chain_map;
-    int                        _job_chain_map_version;             // Zeitstempel der letzten Änderung (letzter Aufruf von Spooler::add_job_chain()), 
-    long32                     _next_free_order_id;
-    ptr<Database_orders_read_operation>  _database_orders_read_operation;
 
     Thread_id                  _thread_id;                  // Haupt-Thread
     Time                       _spooler_start_time;
@@ -625,7 +619,7 @@ struct Spooler : Object,
     bool                       _demand_exclusiveness;
     bool                       _is_distributed;
   //string                     _scheduler_member_id;
-    ptr<Scheduler_member>      _scheduler_member;
+    ptr<Distributed_scheduler> _distributed_scheduler;
     bool                       _scheduler_is_up;
   //bool                       _proper_termination;
     string                     _session_id;

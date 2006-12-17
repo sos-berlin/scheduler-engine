@@ -54,6 +54,7 @@ struct Spooler_db : Object, Scheduler_object
     void                        close                   ();
     bool                        opened                  ()                                          { return _db.opened(); }
     string                      db_name                 ()                                          { return _db_name; }
+    sql::Database_descriptor*   database_descriptor     ()                                          { return &_db_descr; }
     string                      error                   ()                                          { THREAD_LOCK_RETURN( _error_lock, string, _error ); }
     bool                        is_waiting              () const                                    { return _waiting; }
     int                         order_id_length_max     ()                                          { return opened()? _order_id_length_max : const_order_id_length_max; }
@@ -158,7 +159,7 @@ struct Transaction
 
     int                         record_count            ()                                          { return _db->record_count(); }
     Spooler_db*                 db                      ()                                          { assert( _db ); return _db; }
-    sql::Database_descriptor*   database_descriptor     ()                                          { db()->_db_descr; }
+    sql::Database_descriptor*   database_descriptor     ()                                          { return db()->database_descriptor(); }
 
 
     Fill_zero                  _zero_;

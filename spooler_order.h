@@ -341,7 +341,7 @@ struct Job_chain : Com_job_chain, Scheduler_object
     Prefix_log*                 log                     ()                                          { return &_log; }
 
     void                    set_name                    ( const string& name )                      { _name = name,  _log.set_prefix( obj_name() ); }
-    string                      name                    ()                                          { THREAD_LOCK_RETURN( _lock, string, _name ); }
+    string                      name                    () const                                    { return _name; }
 
     void                    set_state                   ( State state )                             { _state = state; }
     State                       state                   () const                                    { return _state; }
@@ -352,7 +352,7 @@ struct Job_chain : Com_job_chain, Scheduler_object
     bool                        visible                 () const                                    { return _visible; }
 
     void                    set_orders_recoverable      ( bool b )                                  { _orders_recoverable = b; }
-    void                        load_orders_from_database();
+    void                        load_orders_from_database( Transaction* );
     int                         load_orders_from_result_set( Transaction*, Any_file* result_set );
     bool                        load_order_from_database_record( Transaction*, const Record& );
 
@@ -458,15 +458,14 @@ struct Order_queue : Com_order_queue
     Order*                      first_order             ( const Time& now );
     Order*                      load_next_processable_order_from_database();
     bool                        has_order               ( const Time& now )                         { return first_order( now ) != NULL; }
-    Order*                      get_order_for_processing( const Time& now );
+    Order*                      request_order           ( const Time& now );
     Time                        next_time               ();
   //void                        update_priorities       ();
     ptr<Order>                  order_or_null           ( const Order::Id& );
     Job*                        job                     () const                                    { return _job; }
     xml::Element_ptr            dom_element             ( const xml::Document_ptr&, const Show_what& , Job_chain* );
-  //void                        remove_outdated_orders  ();
-    //bool                        has_outdated_orders     ()                                          { return _has_outdated_orders; }
-    //void                        set_has_outdated_orders ()                                          { _has_outdated_orders = true; }
+    string                      make_where_expression   ();
+    string                      make_where_expression_for_job_chain( const Job_chain* );
 
 
 
@@ -493,30 +492,42 @@ struct Order_queue : Com_order_queue
     //bool                       _has_users_id;           // D.h. id auf Eindeutigkeit prüfen. Bei selbst generierten Ids überflüssig. Zur Optimierung.
 };
 
-//-------------------------------------------------------------------Database_orders_read_operation
+//-------------------------------------------------------------------------------------------------
 
-struct Database_orders_read_operation : Async_operation, Scheduler_object
+struct Order_subsystem : Object, Scheduler_object
 {
-                                Database_orders_read_operation( Spooler* );
-
-
-    // Async_operation
-    bool                        async_finished_             () const;
-    string                      async_state_text_           () const;
-    bool                        async_continue_             ( Continue_flags );
+                                Order_subsystem             ( Spooler* );
 
 
     // Scheduler_operation
     Prefix_log*                 log                         ()                                      { return _log; }
 
+    void                        init                        ();
+    void                        start                       ();
+    void                        close                       ();
+    void                        close_job_chains            ();
 
-    string                      make_union_select_order_sql ( const string& select_sql_begin, const string& select_sql_end );
-    string                      make_where_expression_for_job( Job* );
-    int                         read_result_set             ( Transaction*, const string& select_sql );
-    void                        set_alarm                   ();
+    void                        init_file_order_sink        ();                                     // In spooler_order_file.cxx
+    void                        load_job_chains_from_xml    ( const xml::Element_ptr& );
+    void                        add_job_chain               ( Job_chain* );
+    void                        remove_job_chain            ( Job_chain* );
+    Job_chain*                  job_chain                   ( const string& name );
+    Job_chain*                  job_chain_or_null           ( const string& name );
+    xml::Element_ptr            job_chains_dom_element      ( const xml::Document_ptr&, const Show_what& );
+    void                        load_orders_from_database   ();
+    void                        check_exception             ();
+    bool                        is_sharing_orders_in_database();                                    // Für verteilte (distributed) Ausführung
+    void                        assert_is_sharing_orders_in_database( const string& text );
+    void                        request_order_for_job       ( Job* );
 
-
+//private:
     Fill_zero                  _zero_;
+    Thread_semaphore           _job_chain_lock;
+    typedef map< string, ptr<Job_chain> >  Job_chain_map;
+    Job_chain_map              _job_chain_map;
+    int                        _job_chain_map_version;             // Zeitstempel der letzten Änderung (letzter Aufruf von Spooler::add_job_chain()), 
+    long32                     _next_free_order_id;
+    ptr<Database_orders_read_operation>  _database_orders_read_operation;
     Prefix_log*                _log;
 };
 

@@ -32,7 +32,8 @@ struct Scheduler_object
         type_scheduler_member,
         type_heart_beat,
         type_exclusive_scheduler_watchdog,
-        type_read_database_orders_operation
+        type_read_database_orders_operation,
+        type_order_subsystem
       //type_subprocess_register
     };
 

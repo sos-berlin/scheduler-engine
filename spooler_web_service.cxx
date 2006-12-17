@@ -110,14 +110,14 @@ void Web_services::init()
     }
 }
 
-//-------------------------------------------------------------------------------Web_services::load
+//------------------------------------------------------------------------------Web_services::start
 
-void Web_services::load()
+void Web_services::start()
 {
     Z_FOR_EACH( Url_web_service_map, _url_web_service_map, ws )
     {
         Web_service* web_service = ws->second;
-        web_service->load();
+        web_service->start();
     }
 }
 
@@ -181,9 +181,9 @@ Web_service::~Web_service()
 {
 }
 
-//--------------------------------------------------------------------------------Web_service::load
+//-------------------------------------------------------------------------------Web_service::start
 
-void Web_service::load()
+void Web_service::start()
 {
     _log->set_prefix( obj_name() );
     _log->set_title( obj_name() );
@@ -226,7 +226,7 @@ void Web_service::load_xslt_stylesheet( Xslt_stylesheet* stylesheet, const strin
 
 void Web_service::check()
 {
-    if( _job_chain_name != "" )  _spooler->job_chain( _job_chain_name );  // Jobkette ist bekannt?
+    if( _job_chain_name != "" )  _spooler->order_subsystem()->job_chain( _job_chain_name );  // Jobkette ist bekannt?
 }
 
 //-----------------------------------------------------------------------------Web_service::set_dom
@@ -258,7 +258,7 @@ void Web_service::set_dom( const xml::Element_ptr& element, const Time& )
     {
         // Interne Jobkette und Job jetzt sichtbar machen
 
-        _spooler->job_chain( forwarding_job_chain_name )->set_visible( true );
+        _spooler->order_subsystem()->job_chain( forwarding_job_chain_name )->set_visible( true );
         _spooler->get_job( forwarder_job_name, true )->set_visible( true );
     }
 }
@@ -478,7 +478,7 @@ void Web_service_operation::begin()
         ptr<Order> order = new Order( _spooler );
 
         order->set_delay_storing_until_processing( true );  // Erst speichern, wenn eine Task den Auftrag ausführt
-        order->add_to_job_chain( _spooler->job_chain( _web_service->_job_chain_name ) );
+        order->add_to_job_chain( _spooler->order_subsystem()->job_chain( _web_service->_job_chain_name ) );
         _http_operation->link_order( order );                // ~Order ruft Http_operation::unlink_order()
         
         _log->info( message_string( "SCHEDULER-964", order->obj_name() ) );

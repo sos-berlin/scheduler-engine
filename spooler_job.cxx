@@ -838,7 +838,7 @@ void Job::Task_queue::enqueue_task( const ptr<Task>& task )
                 Transaction ta ( _spooler->_db );
                 //task->_history.enqueue();
 
-                Insert_stmt insert ( &_spooler->_db->_db_descr );
+                Insert_stmt insert ( ta.database_descriptor() );
                 insert.set_table_name( _spooler->_tasks_tablename );
 
                 insert             [ "TASK_ID"       ] = task->_id;
@@ -1701,19 +1701,26 @@ void Job::unregister_order_source( Order_source* order_source )
 
 Order* Job::request_order( const Time& now, const string& cause )
 {
-    Order* result = _order_queue->get_order_for_processing( now );
+    //bool is_first_request = !_is_requesting_order;
 
-    if( !result )
+    Order* result = NULL;
+    
+    //if( is_first_request )      // 2006-12-17 Einmal anfordern genügt
     {
-        Z_FOR_EACH( Order_source_list, _order_source_list, it )
+        result = _order_queue->request_order( now );
+
+        if( !result )
         {
-            Order_source* order_source = *it;
-            result = order_source->request_order( cause );
-            if( result )  break;
+            Z_FOR_EACH( Order_source_list, _order_source_list, it )
+            {
+                Order_source* order_source = *it;
+                result = order_source->request_order( cause );
+                if( result )  break;
+            }
         }
     }
 
-    _is_requesting_order = result == NULL;
+    _is_requesting_order = result == NULL;      // Erst hier nach Order_queue::request_order()!
 
     if( result )  assert( result->is_immediately_processable( now ) );
     return result;
@@ -1839,12 +1846,12 @@ ptr<Task> Job::task_to_start()
 
         if( order )
         {
-            order = order_queue()->get_order_for_processing( now );  // Jetzt aus der Warteschlange nehmen und nicht verlieren!
-            if( order )  // Ist der Auftrag noch da?
-            {
+            //order = order_queue()->request_order( now );  // Jetzt aus der Warteschlange nehmen und nicht verlieren!
+            //if( order )  // Ist der Auftrag noch da?
+            //{
                 cause = cause_order;
                 log_line += "Task starts for " + order->obj_name();
-            }
+            //}
         }
 
         // order jetzt nicht verlieren! Der Auftrag hängt allein in der Variablen order! (2006-12-16 Das stimmt nicht mehr, der Auftrag ist in der _order_queue)

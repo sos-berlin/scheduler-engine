@@ -234,7 +234,7 @@ xml::Element_ptr Command_processor::execute_show_order_history( const xml::Eleme
     int id, next;
     get_id_and_prev( element, &id, &next );
     
-    Sos_ptr<Job_chain> job_chain = _spooler->job_chain( element.getAttribute( "job_chain" ) );
+    Sos_ptr<Job_chain> job_chain = _spooler->order_subsystem()->job_chain( element.getAttribute( "job_chain" ) );
 
     return job_chain->read_order_history( _answer, id, next, show );
 }
@@ -303,7 +303,7 @@ xml::Element_ptr Command_processor::execute_show_job( const xml::Element_ptr& el
     Job_chain*  job_chain      = NULL;
     string      job_chain_name = element.getAttribute( "job_chain" );
     
-    if( job_chain_name != "" )  job_chain = _spooler->job_chain( job_chain_name );
+    if( job_chain_name != "" )  job_chain = _spooler->order_subsystem()->job_chain( job_chain_name );
     
     return _spooler->get_job( element.getAttribute( "job" ) ) -> dom_element( _answer, show, job_chain );
 }
@@ -456,7 +456,8 @@ xml::Element_ptr Command_processor::execute_job_chain( const xml::Element_ptr& j
 
     ptr<Job_chain> job_chain = new Job_chain( _spooler );
     job_chain->set_dom( job_chain_element );
-    _spooler->add_job_chain( job_chain );
+
+    _spooler->order_subsystem()->add_job_chain( job_chain );
 
     return _answer.createElement( "ok" );
 }
@@ -471,7 +472,7 @@ xml::Element_ptr Command_processor::execute_show_job_chains( const xml::Element_
     if( show & show_all_   )  show |= show | show_description | show_orders;
     if( show & show_orders )  show |= show_job_chain_orders;
 
-    return _spooler->job_chains_dom_element( _answer, show | show_job_chains | show_job_chain_jobs );
+    return _spooler->order_subsystem()->job_chains_dom_element( _answer, show | show_job_chains | show_job_chain_jobs );
 }
 
 //--------------------------------------------------------Command_processor::execute_show_job_chain
@@ -486,7 +487,7 @@ xml::Element_ptr Command_processor::execute_show_job_chain( const xml::Element_p
 
     string job_chain_name = show_job_chain_element.getAttribute( "job_chain" );
 
-    return _spooler->job_chain( job_chain_name )->dom_element( _answer, show );
+    return _spooler->order_subsystem()->job_chain( job_chain_name )->dom_element( _answer, show );
 }
 
 //------------------------------------------------------------Command_processor::execute_show_order
@@ -502,7 +503,7 @@ xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& 
     Order::Id id             = show_order_element.getAttribute( "order"     );
     string    id_string      = string_from_variant( id );
 
-    ptr<Job_chain> job_chain = _spooler->job_chain( job_chain_name );
+    ptr<Job_chain> job_chain = _spooler->order_subsystem()->job_chain( job_chain_name );
     ptr<Order>     order     = job_chain->order_or_null( id );
 
     if( order )
@@ -591,7 +592,7 @@ xml::Element_ptr Command_processor::execute_add_order( const xml::Element_ptr& a
     if( job_name == "" )
     {
         bool       replace   = add_order_element.bool_getAttribute( "replace", false );
-        Job_chain* job_chain = _spooler->job_chain( add_order_element.getAttribute( "job_chain" ) );
+        Job_chain* job_chain = _spooler->order_subsystem()->job_chain( add_order_element.getAttribute( "job_chain" ) );
 
         if( replace )  order->add_to_or_replace_in_job_chain( job_chain );
                  else  order->add_to_job_chain( job_chain );
@@ -619,7 +620,7 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
     string    state          = modify_order_element.getAttribute( "state"  );
     string    at             = modify_order_element.getAttribute( "at" );
 
-    ptr<Job_chain> job_chain = _spooler->job_chain( job_chain_name );
+    ptr<Job_chain> job_chain = _spooler->order_subsystem()->job_chain( job_chain_name );
     ptr<Order>     order     = job_chain->order( id );
 
     if( priority != "" )  order->set_priority( as_int( priority ) );
@@ -670,7 +671,7 @@ xml::Element_ptr Command_processor::execute_remove_order( const xml::Element_ptr
     string    job_chain_name = modify_order_element.getAttribute( "job_chain" );
     Order::Id id             = modify_order_element.getAttribute( "order"     );
 
-    ptr<Job_chain> job_chain = _spooler->job_chain( job_chain_name );
+    ptr<Job_chain> job_chain = _spooler->order_subsystem()->job_chain( job_chain_name );
     ptr<Order>     order     = job_chain->order( id );
 
     order->remove_from_job_chain();
@@ -686,7 +687,7 @@ xml::Element_ptr Command_processor::execute_remove_job_chain( const xml::Element
 
     string job_chain_name = modify_order_element.getAttribute( "job_chain" );
 
-    _spooler->job_chain( job_chain_name )->remove();
+    _spooler->order_subsystem()->job_chain( job_chain_name )->remove();
 
     return _answer.createElement( "ok" );
 }
@@ -726,7 +727,7 @@ xml::Element_ptr Command_processor::execute_service_request( const xml::Element_
 
     order->set_state( Web_service::forwarding_job_chain_forward_state );
     order->set_payload( Variant( service_request_element.xml() ) );
-    order->add_to_job_chain( _spooler->job_chain( Web_service::forwarding_job_chain_name ) );
+    order->add_to_job_chain( _spooler->order_subsystem()->job_chain( Web_service::forwarding_job_chain_name ) );
     
     return _answer.createElement( "ok" );
 }
@@ -1014,7 +1015,7 @@ void Command_processor::execute_http( http::Operation* http_operation )
                     {
                         string     job_chain_name = http_request->parameter( "job_chain" );
                         string     order_id       = http_request->parameter( "order" );
-                        ptr<Order> order          = _spooler->job_chain( job_chain_name )->order_or_null( order_id );
+                        ptr<Order> order          = _spooler->order_subsystem()->job_chain( job_chain_name )->order_or_null( order_id );
 
                         if( order )
                         {

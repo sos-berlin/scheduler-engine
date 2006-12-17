@@ -31,6 +31,84 @@
 namespace sos {
 namespace spooler {
 
+//-------------------------------------------------------------------------------Log_set_console_colors
+
+#ifdef Z_WINDOWS
+
+    struct Log_set_console_colors
+    {
+        Spooler*                    _spooler;
+        CONSOLE_SCREEN_BUFFER_INFO  _console_screen_buffer_info; 
+        bool                        _restore_console;
+
+
+        Log_set_console_colors( Spooler* spooler )
+        :
+            _spooler(spooler),
+            _restore_console(false)
+        {
+        }
+
+
+        void set_color_for_level( Log_level level )
+        {
+            bool with_colors = _spooler && _spooler->_zschimmer_mode  Z_WINDOWS_ONLY( Z_DEBUG_ONLY( || true ) );
+
+            if( with_colors ) 
+            {
+                _restore_console = true;
+                GetConsoleScreenBufferInfo( GetStdHandle(STD_ERROR_HANDLE), &_console_screen_buffer_info );
+
+                WORD attributes = _console_screen_buffer_info.wAttributes;   //BACKGROUND_BLUE | BACKGROUND_RED | BACKGROUND_GREEN | BACKGROUND_INTENSITY;
+                if( attributes & BACKGROUND_INTENSITY
+                 && attributes & BACKGROUND_RED 
+                 && attributes & BACKGROUND_GREEN )       // Hintergrund ist hell und weiß oder gelb
+                {
+                    attributes &= ~( FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE );
+
+                    switch( level )
+                    {
+                        case log_error:     attributes |= FOREGROUND_INTENSITY | FOREGROUND_RED; break;
+                        case log_warn:      attributes |= FOREGROUND_RED; break;
+                        case log_info:      attributes |= FOREGROUND_INTENSITY | FOREGROUND_BLUE; break;
+                        case log_debug1:    attributes |= FOREGROUND_BLUE; break;
+                        case log_debug2:    
+                        case log_debug3:    attributes |= FOREGROUND_GREEN; break;
+                        case log_debug4:
+                        case log_debug5:
+                        case log_debug6:
+                        case log_debug7:
+                        case log_debug8:    attributes |= FOREGROUND_GREEN; break;
+                        case log_debug9:
+                        default:            attributes |= FOREGROUND_GREEN; break;
+                    }
+
+                    SetConsoleTextAttribute( GetStdHandle(STD_ERROR_HANDLE), attributes );
+                }
+            }
+        }
+
+
+        ~Log_set_console_colors()
+        {
+            if( _restore_console )
+            {
+                SetConsoleTextAttribute( GetStdHandle(STD_ERROR_HANDLE), _console_screen_buffer_info.wAttributes );
+            }
+        }
+    };
+
+#  else
+
+    struct Log_set_console_colors
+    {
+        Log_set_console_colors( Spooler* )
+        {
+        }
+    };
+
+#endif
+
 //------------------------------------------------------------------------------------is_stop_errno
     
 static bool is_stop_errno( Spooler* spooler, int err_no )
@@ -262,7 +340,7 @@ void Log::start_new_file()
 
 //---------------------------------------------------------------------------------------Log::write
 
-void Log::write( Prefix_log* extra_log, Prefix_log* order_log, const char* text, int len, bool log )
+void Log::write( Prefix_log* extra_log, Prefix_log* order_log, const char* text, int len )
 {
     if( _err_no )  return;       // Falls nach einer Exception noch was ins Log geschrieben wird, ignorieren wir das.
 
@@ -298,11 +376,12 @@ void Log::log( Log_level level, const string& prefix, const string& line )
 {
     if( this == NULL )  return;
 
-    if( level < _spooler->_log_level )  return;
+    //if( level < _spooler->_log_level )  return;
+    bool log_to_files = level >= _spooler->_log_level;
 
     try
     {
-        log2( level, prefix, line );
+        log2( level, log_to_files, prefix, line );
     }
     catch( const exception& x ) 
     {
@@ -316,101 +395,75 @@ void Log::log( Log_level level, const string& prefix, const string& line )
 
 //----------------------------------------------------------------------------------------Log::log2
 
-void Log::log2( Log_level level, const string& prefix, const string& line_, Prefix_log* extra_log, Prefix_log* order_log )
+void Log::log2( Log_level level, bool log_to_files, const string& prefix, const string& line_, Prefix_log* extra_log, Prefix_log* order_log )
 {
     if( this == NULL )  return;
 
     //if( _file == -1 )  return;
+            
+    if( !log_to_files  &&  !log_category_is_set( "scheduler" ) )  return;
+
 
     string line = line_;
     for( int i = line.find( '\r' ); i != string::npos; i = line.find( '\r', i+1 ) )  line[i] = ' ';     // Windows scheint sonst doppelte Zeilenwechsel zu schreiben. jz 25.11.03
-
+    
     THREAD_LOCK( _semaphore )
     {
-        char buffer1[50];
-        char buffer2[50];
+        Log_set_console_colors console_colors ( _spooler );
 
-#       ifdef Z_WINDOWS
-            bool with_colors     = _spooler && _spooler->_zschimmer_mode  Z_WINDOWS_ONLY( Z_DEBUG_ONLY( || true ) );
-            bool restore_console = false;
-            CONSOLE_SCREEN_BUFFER_INFO console_screen_buffer_info; 
+        char time_buffer [50];   time_buffer[0] = '\0';
+        char level_buffer[50];
 
-            if( with_colors  &&  _file != -1  &&  isatty( _file ) ) 
-            {
-                restore_console = true;
-                GetConsoleScreenBufferInfo( GetStdHandle(STD_ERROR_HANDLE), &console_screen_buffer_info );
+        if( log_to_files )
+        {
+            if( _file != -1  &&  isatty( _file ) )  console_colors.set_color_for_level( level );
 
-                WORD attributes = console_screen_buffer_info.wAttributes;   //BACKGROUND_BLUE | BACKGROUND_RED | BACKGROUND_GREEN | BACKGROUND_INTENSITY;
-                if( attributes & BACKGROUND_INTENSITY
-                 && attributes & BACKGROUND_RED 
-                 && attributes & BACKGROUND_GREEN )       // Hintergrund ist hell und weiß oder gelb
-                {
-                    attributes &= ~( FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE );
-
-                    switch( level )
-                    {
-                        case log_error:     attributes |= FOREGROUND_INTENSITY | FOREGROUND_RED; break;
-                        case log_warn:      attributes |= FOREGROUND_RED; break;
-                        case log_info:      attributes |= FOREGROUND_INTENSITY | FOREGROUND_BLUE; break;
-                        case log_debug1:    attributes |= FOREGROUND_BLUE; break;
-                        case log_debug2:    
-                        case log_debug3:    attributes |= FOREGROUND_GREEN; break;
-                        case log_debug4:
-                        case log_debug5:
-                        case log_debug6:
-                        case log_debug7:
-                        case log_debug8:    attributes |= FOREGROUND_GREEN; break;
-                        case log_debug9:
-                        default:            attributes |= FOREGROUND_GREEN; break;
-                    }
-
-                    SetConsoleTextAttribute( GetStdHandle(STD_ERROR_HANDLE), attributes );
-                }
-            }
-#       endif
-
-
-        _last_time = Time::now();
-        string now = _last_time.as_string();
-        strcpy( buffer1, now.c_str() );
-
+            Time now = Time::now();
+            _last_time = now;
+            strcpy( time_buffer, now.as_string().c_str() );
+        }
+        
         switch( level )
         {
-          //case log_fatal: strcpy ( buffer2, " [FATAL]  " );  break;
-            case log_error: strcpy ( buffer2, " [ERROR]  " );  break;
-            case log_warn : strcpy ( buffer2, " [WARN]   " );  break;
-            case log_info : strcpy ( buffer2, " [info]   " );  break;
-            case log_debug: strcpy ( buffer2, " [debug]  " );  break;
-            default:        sprintf( buffer2, " [debug%d] ", (int)-level );
+          //case log_fatal: strcpy ( level_buffer, " [FATAL]  " );  break;
+            case log_error: strcpy ( level_buffer, " [ERROR]  " );  break;
+            case log_warn : strcpy ( level_buffer, " [WARN]   " );  break;
+            case log_info : strcpy ( level_buffer, " [info]   " );  break;
+            case log_debug: strcpy ( level_buffer, " [debug]  " );  break;
+            default:        sprintf( level_buffer, " [debug%d] ", (int)-level );
         }
+
 
         int begin = 0;
         while( begin < line.length() )
         {
             z::Log_ptr log ( "scheduler" );
+
             int next = line.find( '\n', begin );  
             if( next == string::npos )  next = line.length(); 
                                   else  next++;
 
-            int buffer1_len = strlen( buffer1 );
-            //if( log )  log->write( buffer1, buffer1_len );
-            write( extra_log, order_log, buffer1, buffer1_len, false );           // Zeit
+            if( log_to_files )
+            {
+                int buffer1_len = strlen( time_buffer );
+                write( extra_log, order_log, time_buffer, buffer1_len );                        // Zeit
+            }
 
-            int buffer2_len = strlen( buffer2 );
-            if( log )  log->write( buffer2 + 1, buffer2_len - 1 );
-            write( extra_log, order_log, buffer2, buffer2_len );                  // [info]
+            int buffer2_len = strlen( level_buffer );
+            if( log          )  log->write( level_buffer + 1, buffer2_len - 1 );
+            if( log_to_files )  write( extra_log, order_log, level_buffer, buffer2_len );       // [info]
 
             if( !prefix.empty() )
             {
-                string s = "(" + prefix + ") ";
-                if( log )  log << s;
-                write( NULL, order_log, s );     // (Job ...)
+                string s; s.reserve( prefix.length() + 3 ); s = "(",  s += prefix, s += ") ";   // (prefix)
+                if( log          )  log << s;
+                if( log_to_files )  write( NULL, order_log, s );     // (Job ...)
             }
 
             int len = next - begin;
             while( len > 1  &&  line.c_str()[begin+len-1] == '\r' )  len--;
-            if( log )  log->write( line.c_str() + begin, len );
-            write( extra_log, order_log, line.c_str() + begin, len );                 // Text
+            if( log          )  log->write( line.c_str() + begin, len );
+            if( log_to_files )  write( extra_log, order_log, line.c_str() + begin, len );       // Text
 
             begin = next;
         }
@@ -418,24 +471,19 @@ void Log::log2( Log_level level, const string& prefix, const string& line_, Pref
         if( line.length() == 0 || line[line.length()-1] != '\n' )  
         {
             Z_LOG( "\n" );
-            write( extra_log, order_log, "\n", 1 );
+            if( log_to_files )  write( extra_log, order_log, "\n", 1 );
         }
 
         //Z_LOG2( "scheduler", _log_line );  _log_line = "";
 
         
-        if( extra_log )  extra_log->signal_events();
-        if( order_log )  order_log->signal_events();
+        if( log_to_files )  
+        {
+            if( extra_log )  extra_log->signal_events();
+            if( order_log )  order_log->signal_events();
 
-        if( this == &_spooler->_base_log )  _spooler->_log.signal_events();   // Nicht schön, aber es gibt sowieso nur ein Log.
-
-
-#       ifdef Z_WINDOWS
-            if( restore_console )
-            {
-                SetConsoleTextAttribute( GetStdHandle(STD_ERROR_HANDLE), console_screen_buffer_info.wAttributes );
-            }
-#       endif
+            if( this == &_spooler->_base_log )  _spooler->_log.signal_events();   // Nicht schön, aber es gibt sowieso nur ein Log.
+        }
     }
 }
 
@@ -1011,6 +1059,13 @@ void Prefix_log::send_really( Scheduler_event* scheduler_event )
     _mail = NULL;
 }
 
+//-----------------------------------------------------------------Prefix_log::is_enabled_log_level
+
+bool Prefix_log::is_enabled_log_level( Log_level level )
+{ 
+    return log_level() <= level;
+}
+
 //---------------------------------------------------------------------------------Prefix_log::log2
 
 struct Prefix_log_deny_recursion
@@ -1056,12 +1111,13 @@ void Prefix_log::log2( Log_level level, const string& prefix, const string& line
         if( level == log_error  &&  _task  &&  !_task->has_error() )  _task->set_error_xc_only( Xc( "SCHEDULER-140", line.c_str() ) );
 
         if( _highest_level < level )  _highest_level = level, _highest_msg = line;
-        if( level < log_level() )  return;
+        //if( level < log_level() )  return;
 
         _last_level = level;
         _last[ level ] = line;
 
-        _log->log2( level, _task? _task->obj_name() : _prefix, line, this, _order_log );
+        bool log_to_files = level >= log_level();
+        _log->log2( level, log_to_files, _task? _task->obj_name() : _prefix, line, this, _order_log );
     }
 }
 

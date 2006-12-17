@@ -47,7 +47,7 @@ struct Web_service: idispatch_implementation< Web_service, spooler_com::Iweb_ser
     Prefix_log*                 log                         ()                                      { return _log; }
     string                      obj_name                    () const                                { return "Web_service " + _name; }
 
-    void                        load                        ();
+    void                        start                       ();
     void                        check                       ();
     void                    set_url_path                    ( const string& url_path )              { _url_path = url_path; }
     string                      url_path                    () const                                { return _url_path; }
@@ -103,7 +103,7 @@ struct Web_services
     void                        add_web_services            ( const xml::Element_ptr& web_services_element );
     void                        add_web_service             ( Web_service* );
     void                        init                        ();
-    void                        load                        ();
+    void                        start                       ();
 
     Web_service*                web_service_by_url_path_or_null( const string& url_path );
     Web_service*                web_service_by_name         ( const string& name );

@@ -22,7 +22,7 @@ struct Log
     void                        error                       ( const string& line )              { log( log_error , "", line ); }
 
     void                        log                         ( Log_level, const string& prefix, const string& line );
-    void                        log2                        ( Log_level, const string& prefix, const string& line, 
+    void                        log2                        ( Log_level, bool log_to_files, const string& prefix, const string& line, 
                                                               Prefix_log* extra_log = NULL, Prefix_log* order_log = NULL );
     void                        collect_stderr              ();
     
@@ -34,7 +34,7 @@ struct Log
   protected:
     friend struct               Prefix_log;                 // _semaphore
 
-    void                        write                       ( Prefix_log* extra, Prefix_log* order, const char*, int len, bool log = true );
+    void                        write                       ( Prefix_log* extra, Prefix_log* order, const char*, int len );
     void                        write                       ( Prefix_log* extra, Prefix_log* order, const string& line )              { write( extra, order, line.c_str(), line.length() ); }
     void                        write                       ( Prefix_log* extra, Prefix_log* order, const char* line )                { write( extra, order, line, strlen(line) ); }
 
@@ -82,6 +82,7 @@ struct Prefix_log : Object, Has_log
     void                        start_new_file              ();
   //void                    set_log_level                   ( Log_level level )                 { _log_level = level; }
     int                         log_level                   ();
+    bool                        is_enabled_log_level        ( Log_level );
     void                        reset_highest_level         ()                                  { _highest_level = (Log_level)-999; }
     Log_level                   highest_level               () const                            { return _highest_level; }
     string                      highest_msg                 () const                            { return _highest_msg; }

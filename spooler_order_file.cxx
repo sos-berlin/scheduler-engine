@@ -141,15 +141,16 @@ struct File_order_sink_job : Internal_job
     }
 };
 
-//--------------------------------------------------------------------Spooler::init_file_order_sink
+//------------------------------------------------------------Order_subsystem::init_file_order_sink
 
-void Spooler::init_file_order_sink()
+void Order_subsystem::init_file_order_sink()
 {
     ptr<File_order_sink_job> file_order_sink_job = Z_NEW( File_order_sink_job( _spooler ) );
     file_order_sink_job->set_visible( false );
     file_order_sink_job->set_order_controlled();
     file_order_sink_job->set_idle_timeout( file_order_sink_job_idle_timeout_default );
-    add_job( +file_order_sink_job, true );
+
+    _spooler->add_job( +file_order_sink_job, true );
 
     // Der Scheduler führt Tasks des Jobs scheduler_file_order_sink in jedem Scheduler-Schritt aus,
     // damit sich die Aufträge nicht stauen (Der interne Job läuft nicht in einem eigenen Prozess)
@@ -409,7 +410,7 @@ Order* Directory_file_order_source::request_order( const string& cause )
     Order* result = NULL;
 
     if( _expecting_request_order 
-     || async_next_gmtime_reached() )       // Das, weil die Jobs bei jeder Gelegenheit do_something() durchlaufen, auch wenn nichts anliegt (z.B. bei TCP-Verkehr)
+     || async_next_gmtime_reached() )       // (2006-12-17 sollte überflüssig sein, s. Job::request_order)  Das, weil die Jobs bei jeder Gelegenheit do_something() durchlaufen, auch wenn nichts anliegt (z.B. bei TCP-Verkehr)
     {
         Z_LOG2( "scheduler.file_order", __FUNCTION__ << " cause=" << cause << "\n" );
 
@@ -473,7 +474,7 @@ Order* Directory_file_order_source::read_directory( bool was_notified, const str
                         order->set_file_path( path );
                         order->set_state( _next_state );
 
-                        string date = Time( new_file->last_write_time() ).as_string( Time::without_ms ) + " GMT";   // localtime_from_gmtime() rechnet alte Sommerzeit-Daten in Winterzeit um
+                        string date = Time( new_file->last_write_time() ).as_string( Time::without_ms ) + " UTC";   // localtime_from_gmtime() rechnet alte Sommerzeit-Daten in Winterzeit um
                         log()->info( message_string( "SCHEDULER-983", order->obj_name(), "written at " + date ) );
 
                         order->add_to_job_chain( _job_chain );
@@ -556,9 +557,9 @@ Order* Directory_file_order_source::read_directory( bool was_notified, const str
 
     _expecting_request_order = result != NULL;  // Nächstes request_order() abwarten
 
-    time_t delay = _directory_error        ? delay_after_error() :
-                   _expecting_request_order? INT_MAX                // Nächstes request_order() abwarten
-                                           : _repeat;               // Unter Unix funktioniert's _nur_ durch wiederkehrendes Nachsehen
+    int delay = _directory_error        ? delay_after_error() :
+                _expecting_request_order? INT_MAX                // Nächstes request_order() abwarten
+                                        : _repeat;               // Unter Unix funktioniert's _nur_ durch wiederkehrendes Nachsehen
 
     if( delay < 1 )  delay = 1;     // Falls ein Spaßvogel es geschafft hat, repeat="0" anzugeben
 

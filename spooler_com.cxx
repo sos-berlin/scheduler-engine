@@ -3374,7 +3374,7 @@ STDMETHODIMP Com_spooler::Add_job_chain( spooler_com::Ijob_chain* job_chain )
     {
         if( !_spooler )  return E_POINTER;
 
-        _spooler->add_job_chain( dynamic_cast<Job_chain*>( job_chain ) );
+        _spooler->order_subsystem()->add_job_chain( dynamic_cast<Job_chain*>( job_chain ) );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.add_job_chain" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.add_job_chain" ); }
@@ -3393,7 +3393,7 @@ STDMETHODIMP Com_spooler::get_Job_chain( BSTR name, spooler_com::Ijob_chain** re
     {
         if( !_spooler )  return E_POINTER;
 
-        *result = _spooler->job_chain( string_from_bstr(name) ); //->com_job_chain();
+        *result = _spooler->order_subsystem()->job_chain( string_from_bstr(name) ); //->com_job_chain();
         (*result)->AddRef();
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.get_job_chain" ); }
@@ -3484,7 +3484,7 @@ STDMETHODIMP Com_spooler::Job_chain_exists( BSTR name, VARIANT_BOOL* result )
     {
         if( !_spooler )  return E_POINTER;
 
-        *result = _spooler->job_chain_or_null( string_from_bstr(name) ) != NULL;
+        *result = _spooler->order_subsystem()->job_chain_or_null( string_from_bstr(name) ) != NULL;
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.job_chain_exists" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.job_chain_exists" ); }

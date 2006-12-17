@@ -7,9 +7,9 @@
 namespace sos {
 namespace spooler {
 
-//---------------------------------------------------------------------------------Scheduler_member
+//------------------------------------------------------------------Distributed_scheduler
 
-struct Scheduler_member : Async_operation, Scheduler_object
+struct Distributed_scheduler : Async_operation, Scheduler_object
 {
     enum Command
     {
@@ -25,8 +25,8 @@ struct Scheduler_member : Async_operation, Scheduler_object
 
 
 
-                                Scheduler_member            ( Spooler* );
-                               ~Scheduler_member            ();
+                                Distributed_scheduler       ( Spooler* );
+                               ~Distributed_scheduler       ();
 
     void                        close                       ();
     void                        shutdown                    ();                                     // Ordentliches Herunterfahren des Schedulers
@@ -47,8 +47,9 @@ struct Scheduler_member : Async_operation, Scheduler_object
     void                    set_member_id                   ( const string& );
     string                      member_id                   ()                                      { return _scheduler_member_id; }
 
-    bool                     is_active                      ()                                      { return _is_active; }
+    bool                        check_is_active             ();
     bool                        has_exclusiveness           ()                                      { return _has_exclusiveness; }
+    bool                     is_active                      ()                                      { return _is_active; }
     bool                     is_exclusiveness_stolen        ()                                      { return _is_exclusiveness_stolen; }
     bool                     is_scheduler_up                ();
     bool                     is_backup                      ()                                      { return _is_backup; }
@@ -80,6 +81,7 @@ struct Scheduler_member : Async_operation, Scheduler_object
     void                        close_operations            ();
 
     void                        calculate_next_heart_beat   ();
+    bool                        check_heart_beat_is_in_time ( time_t expected_next_heart_beat );
     void                        insert_scheduler_id_record  ( Transaction* );
     bool                        check_empty_member_record   ();
     void                        insert_member_record        ( Transaction* );

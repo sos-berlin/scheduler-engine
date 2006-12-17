@@ -215,7 +215,7 @@ Any_file Transaction::open_file_2( const string& db_prefix, const string& execut
     {
         result.open( db_prefix + " " + execution_sql );
 
-        if( _db->_log->log_level() >= log_debug9 )  
+        if( _db->_log->is_enabled_log_level( log_debug9 ) )     // Hostware protokolliert schon ins scheduler.log
         {
             S line;
             line << logging_sql << debug_extra;
@@ -1016,7 +1016,7 @@ void Transaction::set_variable( const string& name, const string& value )
 void Transaction::insert_variable( const string& name, const string& value )
 {
     assert( _db );
-    sql::Insert_stmt insert ( &_db->_db_descr, _spooler->_variables_tablename );
+    sql::Insert_stmt insert ( database_descriptor(), _spooler->_variables_tablename );
     
     insert[ "name" ] = name;
     insert[ "textwert" ] = value;
@@ -1028,7 +1028,7 @@ void Transaction::insert_variable( const string& name, const string& value )
 /* Nicht getestet
 void Transaction::update_variable( const string& name, const string& value )
 {
-    sql::Update_stmt update ( &_db->_db_descr, _spooler->_variables_tablename );
+    sql::Update_stmt update ( database_descriptor(), _spooler->_variables_tablename );
     
     update.and_where_condition( "name", name );
     update[ "wert"     ] = value;
@@ -1042,7 +1042,7 @@ bool Transaction::try_update_variable( const string& name, const string& value )
 {
     assert( _db );
 
-    sql::Update_stmt update ( &_db->_db_descr, _spooler->_variables_tablename );
+    sql::Update_stmt update ( database_descriptor(), _spooler->_variables_tablename );
     
     update.and_where_condition( "name", name );
     update[ "textwert" ] = value;
@@ -1072,7 +1072,7 @@ void Transaction::execute( const string& stmt, const string& debug_text )
 
         _db->_db.put( "%native " + native_sql ); 
 
-        if( _log->log_level() >= log_debug9 )  
+        if( _log->is_enabled_log_level( log_debug9 ) )      // Hostware protokolliert schon ins scheduler.log
         {
             S line;
 
@@ -1080,10 +1080,7 @@ void Transaction::execute( const string& stmt, const string& debug_text )
             //if( !_transaction_written  &&  ( stmt == "COMMIT" || stmt == "ROLLBACK" ) )
             {
                 line << lcase( native_sql );     // Wenn das zuverlässig läuft, kann auf commit/rollback verzichtet werden
-
-#               ifdef Z_DEBUG
-                    line << ( _transaction_read? " (read only)" :" (empty transaction)" );
-#               endif       
+                Z_DEBUG_ONLY( line << ( _transaction_read? " (read only)" :" (empty transaction)" ) );
             }
             else
                 line << native_sql;
@@ -1250,7 +1247,7 @@ void Spooler_db::write_order_history( Order* order, Transaction* outer_transacti
             Transaction ta ( this, outer_transaction );
 
             int              history_id = get_order_history_id( &ta );
-            sql::Insert_stmt insert     ( &_db_descr );
+            sql::Insert_stmt insert     ( ta.database_descriptor() );
 
             insert.set_table_name( _spooler->_order_history_tablename );
             
@@ -1777,7 +1774,7 @@ void Task_history::write( bool start )
                 {
                     if( start )
                     {
-                        sql::Insert_stmt insert ( &_spooler->_db->_db_descr );
+                        sql::Insert_stmt insert ( ta.database_descriptor() );
                         
                         insert.set_table_name( _spooler->_job_history_tablename );
                         

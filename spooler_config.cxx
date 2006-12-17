@@ -412,7 +412,7 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const Time& x
             else
             if( e.nodeName_is( "job_chains" ) )
             {
-                load_job_chains_from_xml( e );
+                order_subsystem()->load_job_chains_from_xml( e );
             }
             else
             if( e.nodeName_is( "commands" ) )

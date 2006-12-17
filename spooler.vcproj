@@ -358,7 +358,7 @@
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 			>
 			<File
-				RelativePath=".\members.cxx"
+				RelativePath=".\distributed.cxx"
 				>
 			</File>
 			<File
@@ -1030,6 +1030,10 @@
 			Name="Header-Dateien"
 			Filter="h;hpp;hxx;hm;inl"
 			>
+			<File
+				RelativePath=".\distributed.h"
+				>
+			</File>
 			<File
 				RelativePath="spooler.h"
 				>

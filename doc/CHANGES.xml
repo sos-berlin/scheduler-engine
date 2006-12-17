@@ -15,7 +15,8 @@
         <revision type="new" title="Backup-Scheduler">
             <description>
                 <p>
-                    
+
+                    spooler_log.last(log_level)
                 </p>
                 <ul>
                     <li>
