@@ -105,6 +105,9 @@ namespace spooler {
         Log_set_console_colors( Spooler* )
         {
         }
+
+
+        void set_color_for_level( Log_level ) {}
     };
 
 #endif
