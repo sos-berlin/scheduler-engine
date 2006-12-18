@@ -1885,6 +1885,8 @@ void Spooler::load_arg()
             else
             if( opt.flag      ( "backup"                 ) )  _is_backup_member = opt.set();
             else
+            if( opt.with_value( "backup-precedence"      ) )  _backup_precedence = opt.as_int(), _has_backup_precedence = true;
+            else
             if( opt.flag      ( "distributed"            ) )  _is_distributed = opt.set();
             else
             //if( opt.flag      ( "member-id"              ) )  _scheduler_member_id = opt.set();
@@ -2398,6 +2400,10 @@ void Spooler::start_distributed_scheduler()
     _distributed_scheduler = Z_NEW( Distributed_scheduler( this ) );
 
     _distributed_scheduler->set_backup( _is_backup_member );
+
+    if( _has_backup_precedence )
+    _distributed_scheduler->set_backup_precedence( _backup_precedence );
+
     _distributed_scheduler->demand_exclusiveness( _demand_exclusiveness );
 
     _distributed_scheduler->start();     // Wartet, bis entschieden ist, dass wir aktiv werden

@@ -3199,6 +3199,12 @@
                 <title>Just before processing, order has been occupied by Scheduler <p1/></title>
             </text>
         </message>
+
+        <message code="SCHEDULER-814">
+            <text xml:lang="en">
+                <title>Inactive Scheduler '<p2/>' has the higher backup precedence <p1/> (<p3>http_url</p3>)</title>
+            </text>
+        </message>
     </messages>
     
 </messages>

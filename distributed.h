@@ -18,7 +18,9 @@ struct Distributed_scheduler : Async_operation, Scheduler_object
         cmd_terminate_and_restart
     };
 
-    static const int            max_precedence;
+    //static const int            min_precedence;
+    //static const int            max_precedence;
+
 
     static string               string_from_command         ( Command );
     static Command              command_from_string         ( const string& );
@@ -46,6 +48,9 @@ struct Distributed_scheduler : Async_operation, Scheduler_object
 
     void                    set_member_id                   ( const string& );
     string                      member_id                   ()                                      { return _scheduler_member_id; }
+
+    void                    set_backup_precedence           ( int v )                               { _backup_precedence = v; } 
+    int                         backup_precedence           ()                                      { return _backup_precedence; }
 
     bool                        check_is_active             ();
     bool                        has_exclusiveness           ()                                      { return _has_exclusiveness; }
@@ -105,6 +110,7 @@ struct Distributed_scheduler : Async_operation, Scheduler_object
     bool                       _demand_exclusiveness;
     bool                       _has_exclusiveness;
     bool                       _is_backup;
+    int                        _backup_precedence;
     time_t                     _next_heart_beat;
     time_t                     _db_last_heart_beat;
     time_t                     _db_next_heart_beat;

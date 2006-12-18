@@ -345,6 +345,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-811", "Executing command read from database: $1" },
     { "SCHEDULER-812", "Just before processing, order has been removed in database" },
     { "SCHEDULER-813", "Just before processing, order has been occupied by Scheduler $1" },
+    { "SCHEDULER-814", "Inactive Scheduler '$2' has the higher backup precedence $1 ($3)" },
     {}
 };
 } //namespace sos

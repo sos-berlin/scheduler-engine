@@ -16,12 +16,16 @@ namespace spooler {
 
 //const time_t                    accepted_clock_difference       = Z_NDEBUG_DEBUG(  5,  2 );     // Die Uhren sollten noch besser übereinstimmen! ntp verwenden!
 //const time_t                    warned_clock_difference         = Z_NDEBUG_DEBUG(  1,  1 ); 
-const time_t                    heart_beat_period                       = Z_NDEBUG_DEBUG( 60, 20 );
-const time_t                    max_heart_beat_processing_time          = Z_NDEBUG_DEBUG( 10,  3 );     // Zeit, die gebraucht wird, um den Herzschlag auszuführen
-const time_t                    active_heart_beat_minimum_check_period  = heart_beat_period / 2;
-const time_t                    trauerfrist                             = 12*3600;                      // Trauerzeit, nach der Mitgliedssätze gelöscht werden
-const time_t                    database_commit_visible_time            = 10;                           // Zeit, die die Datenbank braucht, um nach Commit Daten für anderen Client sichtbar zu machen.
-const int                       Distributed_scheduler::max_precedence   = 9999;
+const int                       heart_beat_period                       = Z_NDEBUG_DEBUG( 60, 20 );
+const int                       max_processing_time                     = Z_NDEBUG_DEBUG( 10,  3 );     // Zeit, die gebraucht wird, um den Herzschlag auszuführen
+const int                       active_heart_beat_minimum_check_period  = heart_beat_period / 2;
+const int                       active_heart_beat_maximum_check_period  = heart_beat_period + max_processing_time + 1;
+const int                       trauerfrist                             = 12*3600;                      // Trauerzeit, nach der Mitgliedssätze gelöscht werden
+const int                       database_commit_visible_time            = 10;                           // Zeit, die die Datenbank braucht, um nach Commit Daten für anderen Client sichtbar zu machen.
+const int                       precedence_check_period                 = active_heart_beat_maximum_check_period;
+
+//const int                       Distributed_scheduler::min_precedence   = 0;
+//const int                       Distributed_scheduler::max_precedence   = 9999;
 
 //---------------------------------------------------------------------------------------Heart_beat
 
@@ -87,7 +91,7 @@ struct Exclusive_scheduler_watchdog : Async_operation, Scheduler_object
   //void                        check_clock_difference      ( time_t last_heart_beat, time_t now );
     bool                        mark_as_exclusive           ();
     bool                        set_exclusive               ();
-
+    bool                        check_backup_precedence     ();
 
     Fill_zero                  _zero_;
     Distributed_scheduler*          _distributed_scheduler;
@@ -95,6 +99,7 @@ struct Exclusive_scheduler_watchdog : Async_operation, Scheduler_object
     time_t                     _next_check_time;
     bool                       _is_scheduler_up;            // Scheduler ist nicht ordentlich beendet worden
     bool                       _announced_to_become_exclusive; // Wenn eine Meldung ausgegeben oder ein Datensatz zu ändern versucht wurde 
+    time_t                     _next_precedence_check;
     //time_t                     _set_exclusive_until;           // Nur für Access (kennt keine Sperre): Aktivierung bis dann (now+database_commit_visible_time) verzögern, dann nochmal prüfen
     Prefix_log*                _log;
 };
@@ -290,12 +295,25 @@ void Exclusive_scheduler_watchdog::try_to_become_exclusive()
                 ta.commit( __FUNCTION__ );
             //}
 
-            if( none_has_exclusiveness  &&  _is_scheduler_up )
+            if( none_has_exclusiveness )
             {
-                _announced_to_become_exclusive = true;
-                bool ok = mark_as_exclusive();
-                if( ok )  set_exclusive();
+                if( _is_scheduler_up )
+                {
+                    bool has_precedence = check_backup_precedence();
+                    if( has_precedence )
+                    {
+                        _announced_to_become_exclusive = true;
+
+                        bool ok = mark_as_exclusive();
+                        if( ok )  set_exclusive();
+                    }
+                }
             }
+            else
+            {
+                _next_precedence_check = 0;
+            }
+
 
         //}
         //else
@@ -359,8 +377,8 @@ bool Exclusive_scheduler_watchdog::check_exclusive_schedulers_heart_beat( Transa
             _other_scheduler._member_id = _distributed_scheduler->empty_member_id();
         }
 
-        none_has_exclusiveness = true;   // Kein Scheduler ist exklusiv, 
-        _is_scheduler_up = false;   // aber der Scheduler ist auch nicht hochgefahren (Satz mit empty_member_id() fehlt)
+        none_has_exclusiveness = true;  // Kein Scheduler ist exklusiv, 
+        _is_scheduler_up = false;       // aber der Scheduler ist auch nicht hochgefahren (Satz mit empty_member_id() fehlt)
     }
     else
     {
@@ -411,7 +429,7 @@ bool Exclusive_scheduler_watchdog::check_exclusive_schedulers_heart_beat( Transa
 
             if( last_heart_beat == _other_scheduler._last_heart_beat_db )   // Kein neuer Herzschlag?
             {
-                if( _other_scheduler._last_heart_beat_detected + heart_beat_period + max_heart_beat_processing_time/2 < now1 )
+                if( _other_scheduler._last_heart_beat_detected + heart_beat_period + max_processing_time/2 < now1 )
                 {
                     _log->warn( message_string( "SCHEDULER-994", 
                                                     other_member_id, 
@@ -419,7 +437,7 @@ bool Exclusive_scheduler_watchdog::check_exclusive_schedulers_heart_beat( Transa
                                                     now1 - _other_scheduler._last_heart_beat_detected ) );
                     warned = true;
 
-                    if( _other_scheduler._last_heart_beat_detected + heart_beat_period + max_heart_beat_processing_time < now1 )  
+                    if( _other_scheduler._last_heart_beat_detected + heart_beat_period + max_processing_time < now1 )  
                         other_member_timed_out = true;
                 }
             }
@@ -429,7 +447,7 @@ bool Exclusive_scheduler_watchdog::check_exclusive_schedulers_heart_beat( Transa
             }
 
             if( !other_member_timed_out  &&  !warned  &&  !_other_scheduler._scheduler_993_logged 
-             && next_heart_beat + max_heart_beat_processing_time < now1 )
+             && next_heart_beat + max_processing_time < now1 )
             {
                 _other_scheduler._scheduler_993_logged = true;
                 _log->warn( message_string( "SCHEDULER-993", 
@@ -473,9 +491,8 @@ bool Exclusive_scheduler_watchdog::check_exclusive_schedulers_heart_beat( Transa
 void Exclusive_scheduler_watchdog::calculate_next_check_time()
 {
     time_t now   = ::time(NULL);
-    time_t delay = max_heart_beat_processing_time + 1;   // Erst in der folgenden Sekunde prüfen
 
-    _next_check_time = now + heart_beat_period + delay;
+    _next_check_time = now + active_heart_beat_maximum_check_period;
 
     //if( _set_exclusive_until  &&  _next_check_time > _set_exclusive_until )
     //{
@@ -484,7 +501,9 @@ void Exclusive_scheduler_watchdog::calculate_next_check_time()
     //}
     //else
     {
+        time_t delay          = max_processing_time + 1;   // Erst in der folgenden Sekunde prüfen
         time_t new_next_check = _other_scheduler._next_heart_beat_db + delay + 1;
+
         if( new_next_check - now >= active_heart_beat_minimum_check_period  &&  new_next_check < _next_check_time )
         {
             time_t diff = new_next_check - _next_check_time;
@@ -492,6 +511,65 @@ void Exclusive_scheduler_watchdog::calculate_next_check_time()
             _next_check_time = new_next_check;
         }
     }
+}
+
+//--------------------------------------------Exclusive_scheduler_watchdog::check_backup_precedence
+
+bool Exclusive_scheduler_watchdog::check_backup_precedence()
+{
+    bool result = false;
+
+    //if( _distributed_scheduler->backup_precedence() == Distributed_scheduler::max_precedence )        Überflüssig
+    //{
+    //    result = true;
+    //}
+    //else
+    if( !_next_precedence_check  ||  _next_precedence_check <= ::time(NULL) )
+    {
+        try
+        {
+            Transaction ta ( db() );
+
+            bool     higher_precedence = false;
+            time_t   now               = ::time(NULL);
+            Any_file result_set        = ta.open_result_set
+                ( 
+                    S() << "select `precedence`, `scheduler_member_id`, `http_url`  from " << _spooler->_members_tablename << 
+                       "  where `precedence`>" << _distributed_scheduler->backup_precedence() <<
+                         "  and `active` is null " 
+                         "  and `exclusive` is null " 
+                         "  and `next_heart_beat`>=" << ( now - ( heart_beat_period + max_processing_time ) ) <<    // Vorrang funktioniert nur, 
+                         "  and `next_heart_beat`<=" << ( now + ( heart_beat_period + max_processing_time ) ),      // wenn die Uhren übereinstimmen
+                    __FUNCTION__
+                );
+            
+            while( !result_set.eof() )
+            {
+                Record record = result_set.get_record();
+                _log->info( message_string( "SCHEDULER-814", record.as_string(0), record.as_string(1), record.as_string(2) ) );
+                higher_precedence = true;
+            }
+
+            if( higher_precedence  &&  !_next_precedence_check )
+            {
+                _next_precedence_check = ::time(NULL) + precedence_check_period;
+            }
+            else
+            {
+                //if( precedence_count )  _log->info( message_string( "SCHEDULER-814", "ignored" ) );
+                _next_precedence_check = 0;
+                result = true;
+            }
+        }
+        catch( exception& x )  { _log->error( S() << x.what() << ", while checking backup precendence" ); }
+    }
+    else
+    {
+        Z_LOG2( "scheduler.distributed", __FUNCTION__ << "  continuing waiting...\n" );
+    }
+
+
+    return result;
 }
 
 //--------------------------------------------------Exclusive_scheduler_watchdog::mark_as_exclusive
@@ -660,6 +738,7 @@ Distributed_scheduler::Distributed_scheduler( Spooler* spooler )
 :
     Scheduler_object( spooler, this, type_scheduler_member ),
     _zero_(this+1)
+    //_backup_precedence( max_precedence )
 {
     _log = Z_NEW( Prefix_log( spooler, obj_name() ) );
 }
@@ -833,6 +912,7 @@ bool Distributed_scheduler::wait_until_is_scheduler_up()
     while( !_spooler->is_termination_state_cmd()  &&  !is_scheduler_up() )
     {
         _spooler->simple_wait_step();
+        async_check_exception();
     }
 
     bool ok = is_scheduler_up();
@@ -860,6 +940,7 @@ bool Distributed_scheduler::wait_until_is_active()
         }
 
         _spooler->simple_wait_step();
+        async_check_exception();
     }
 
     bool ok = _is_active;
@@ -901,7 +982,7 @@ void Distributed_scheduler::create_table_when_needed()
             "`scheduler_id`"           " varchar(100) not null, "
             "`version`"                " varchar(100) not null, "
             "`running_since`"          " datetime, "
-            "`precedence`"             " numeric(4) not null, "
+            "`precedence`"             " integer, "
             "`last_heart_beat`"        " integer, "     //numeric(14,3) not null, "
             "`next_heart_beat`"        " integer, "     //numeric(14,3), "
             "`active`"                 " boolean, "                     // null oder 1 (not null)
@@ -1059,7 +1140,7 @@ bool Distributed_scheduler::do_a_heart_beat( Transaction* outer_transaction, boo
         }
 
         //time_t now = ::time(NULL);
-        //if( !was_late  &&  now - old_next_heart_beat > max_heart_beat_processing_time )    // Herzschlag noch in der Frist?
+        //if( !was_late  &&  now - old_next_heart_beat > max_processing_time )    // Herzschlag noch in der Frist?
         //{
         //    was_late = true;
         //    _log->warn( message_string( "SCHEDULER-996", my_string_from_time_t( old_next_heart_beat ), now - old_next_heart_beat ) );
@@ -1140,7 +1221,7 @@ bool Distributed_scheduler::check_heart_beat_is_in_time( time_t expected_next_he
     bool   result;
     time_t now = ::time(NULL);
     
-    if( now - expected_next_heart_beat <= max_heart_beat_processing_time )    
+    if( now - expected_next_heart_beat <= max_processing_time )    
     {
         result = true;  // Herzschlag ist in der Frist
     }
@@ -1254,7 +1335,7 @@ bool Distributed_scheduler::check_empty_member_record()
             sql::Insert_stmt stmt ( ta.database_descriptor(), _spooler->_members_tablename );
 
             stmt[ "scheduler_member_id" ] = empty_member_id();
-            stmt[ "precedence"          ] = 0;
+          //stmt[ "precedence"          ] = 0;
           //stmt[ "last_heart_beat"     ] = Beide Felder NULL lassen, damit sie nicht als veraltete Einträge angesehen und gelöscht werden
           //stmt[ "next_heart_beat"     ] = 
             stmt[ "exclusive"           ] = 1;
@@ -1315,7 +1396,7 @@ void Distributed_scheduler::insert_member_record( Transaction* ta )
     sql::Insert_stmt insert ( ta->database_descriptor(), _spooler->_members_tablename );
     
     insert[ "scheduler_member_id" ] = member_id();
-    insert[ "precedence"          ] = max_precedence;
+    insert[ "precedence"          ] = _backup_precedence;
     insert[ "last_heart_beat"     ] = new_db_last_heart_beat;
     insert[ "next_heart_beat"     ] = new_db_next_heart_beat;
     insert[ "active"              ] = sql::null_value;

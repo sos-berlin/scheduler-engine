@@ -616,6 +616,8 @@ struct Spooler : Object,
     ptr<Com_variable_set>      _environment;
     Variable_set_map           _variable_set_map;           // _variable_set_map[""] = _environment; für <params>, Com_variable_set::set_dom()
     bool                       _is_backup_member;
+    int                        _backup_precedence;
+    bool                       _has_backup_precedence;
     bool                       _demand_exclusiveness;
     bool                       _is_distributed;
   //string                     _scheduler_member_id;
