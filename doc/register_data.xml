@@ -149,6 +149,12 @@
     <register_entry register_file='command_line.xml#option_backup' register_title='Kommandozeilenoptionen'  register_keyword='backup' type='definition'/>
     <register_entry register_file='command_line.xml#use_option__backup' register_title='Kommandozeilenoptionen'  register_keyword='backup'/>
 </register_keyword>
+<register_keyword keyword='backup-precedence'>
+    <register_keyword_display><code>-backup-precedence=</code></register_keyword_display>
+    <register_entry register_file='CHANGES.xml#use_option__backup-precedence' register_title='Änderungsprotokoll'  register_keyword='backup-precedence'/>
+    <register_entry register_file='command_line.xml#option_backup-precedence' register_title='Kommandozeilenoptionen'  register_keyword='backup-precedence' type='definition'/>
+    <register_entry register_file='command_line.xml#use_option__backup-precedence' register_title='Kommandozeilenoptionen'  register_keyword='backup-precedence'/>
+</register_keyword>
 <register_keyword keyword='base'>
     <register_keyword_display><code>&lt;base&gt;</code></register_keyword_display>
     <register_entry register_file='CHANGES.xml#use_element__base' register_title='Änderungsprotokoll'  register_keyword='base'/>

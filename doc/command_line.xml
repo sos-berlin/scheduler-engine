@@ -267,6 +267,24 @@
         </command_option>
 
 
+        <command_option name="backup-precedence" type="integer" initial="0" title="Vorrang unter den Backup-Schedulern">
+            <description>
+                <p>
+                    Nur mit <scheduler_option name="backup"/> möglich.
+                </p>
+                <p>
+                    Wenn mehrere Backup-Scheduler einen ausgefallenen Scheduler 
+                    (<scheduler_option name="exclusive"/>)
+                    ersetzen können, 
+                    übernimmt der mit dem höchsten Wert von <scheduler_option name="backup-precedence"/>.
+                </p>
+                <p>
+                    Wenn die Uhren nicht gleichlaufen, kann ein anderer Scheduler als der mit dem höchsten Rang den Betrieb übernehmen.
+                </p>
+            </description>
+        </command_option>
+
+
         <command_option name="distributed" title="Verteilter Scheduler">
             <description>
                 <p>
