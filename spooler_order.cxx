@@ -1018,8 +1018,6 @@ int Job_chain::load_orders_from_result_set( Transaction* ta, Any_file* result_se
 
 Order* Job_chain::load_order_from_database_record( Transaction* ta, const Record& record )
 {
-    bool result = false;
-
     string order_id = record.as_string( "id" );
 
     ptr<Order> order = new Order( _spooler, record, name() );
@@ -1310,7 +1308,7 @@ int Job_chain::order_count()
 
 bool Job_chain::has_order_id( const Order::Id& order_id )
 {
-    int IN_DATENBANK_PRÜFEN;
+    int IN_DATENBANK_PRUEFEN;
 
     //if( _spooler->order_subsystem->is_share..() )
     //"select `id`  from  " << _spooler->_orders_tablename << "  where " << db_where()";
@@ -1635,7 +1633,7 @@ bool Order_queue::request_order( const Time& now )
 
     if( !result )
     {
-        if( Order* order = first_order( now ) )
+        if( first_order( now ) )
         {
             assert( !order_subsystem()->is_sharing_orders_in_database() );
             result = true;
