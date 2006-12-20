@@ -203,6 +203,10 @@
                 siehe <scheduler_method class="Log"/>.
             </p>
         </description>
+
+        <messages>
+            <message level="info" code="SCHEDULER-815"/>
+        </messages>
     </method>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->

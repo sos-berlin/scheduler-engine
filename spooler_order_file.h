@@ -37,7 +37,7 @@ struct Directory_file_order_source : //idispatch_implementation< Directory_file_
     xml::Element_ptr            dom_element             ( const xml::Document_ptr&, const Show_what& );
     void                        finish                  ();
     void                        start                   ();
-    Order*                      request_order           ( const string& cause );
+    bool                        request_order           ( const string& cause );
 
   private:
     void                        send_mail               ( Scheduler_event_type, const exception* );

@@ -1142,7 +1142,7 @@
                 <title>Der Auftrag ist nicht verarbeitet worden ist, weil die Task vor dem ersten Jobschritt (spooler_process()) beendet worden ist</title>
             </text>
             <text xml:lang="en">
-                <title>Order has not been processed because the task has been terminated before the first step (spooler_process())</title>
+                <title>Order has not been processed because the task has been terminated before the processing step (spooler_process())</title>
             </text>
         </message>
 
@@ -2342,9 +2342,21 @@
             </text>
         </message>
 
-        <message code="SCHEDULER-372">
+        <message code="SCHEDULER-373">
             <text xml:lang="en">
                 <title>SOME OTHER SCHEDULER HAS STOLEN ACTIVITY</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-374">
+            <text xml:lang="en">
+                <title>In <p1>job_chain</p1>, state '<p2/>' has no job</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-375">
+            <text xml:lang="en">
+                <title>This operation is not suppported under distributed order execution</title>
             </text>
         </message>
 
@@ -3205,6 +3217,13 @@
                 <title>Inactive Scheduler '<p2/>' has the higher backup precedence <p1/> (<p3>http_url</p3>)</title>
             </text>
         </message>
+        
+        <message code="SCHEDULER-815">
+            <text xml:lang="en">
+                <title>Task should end, but it has just been started with an order attached, so one step will be done</title>
+            </text>
+        </message>
+        
     </messages>
     
 </messages>

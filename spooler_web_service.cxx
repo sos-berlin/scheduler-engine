@@ -386,7 +386,7 @@ void Web_service::forward( const xml::Document_ptr& payload_dom )
 
         order->set_state( forwarding_job_chain_forward_state );
         order->set_payload( Variant( transformed_payload_dom.xml() ) );
-        order->add_to_job_chain( _spooler->job_chain( forwarding_job_chain_name ) );
+        order->place_in_job_chain( _spooler->job_chain( forwarding_job_chain_name ) );
         */
     }
     catch( exception& x )
@@ -478,7 +478,7 @@ void Web_service_operation::begin()
         ptr<Order> order = new Order( _spooler );
 
         order->set_delay_storing_until_processing( true );  // Erst speichern, wenn eine Task den Auftrag ausführt
-        order->add_to_job_chain( _spooler->order_subsystem()->job_chain( _web_service->_job_chain_name ) );
+        order->place_in_job_chain( _spooler->order_subsystem()->job_chain( _web_service->_job_chain_name ) );
         _http_operation->link_order( order );                // ~Order ruft Http_operation::unlink_order()
         
         _log->info( message_string( "SCHEDULER-964", order->obj_name() ) );

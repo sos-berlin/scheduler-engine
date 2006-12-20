@@ -1252,7 +1252,7 @@ void Spooler_db::write_order_history( Order* order, Transaction* outer_transacti
             insert.set_table_name( _spooler->_order_history_tablename );
             
             insert[ "history_id" ] = history_id;
-            insert[ "job_chain"  ] = order->job_chain()->name();
+            insert[ "job_chain"  ] = order->job_chain_name();
             insert[ "order_id"   ] = order->id().as_string();
             insert[ "title"      ] = order->title();
             insert[ "state"      ] = order->state().as_string();

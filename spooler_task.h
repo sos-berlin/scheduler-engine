@@ -148,8 +148,9 @@ struct Task : Object,
     Web_service*                web_service                 () const;
     Web_service*                web_service_or_null         () const                                { return _web_service; }
 
-    bool                        occupy_order                ( Order*, const Time& now );
-    Order*                      take_order                  ( const Time& now );
+  //bool                        occupy_order                ( Order*, const Time& now );
+    Order*                      fetch_and_occupy_order      ( const Time& now, const string& cause );
+  //void                        set_order                   ( Order* );
     void                        postprocess_order           ( bool spooler_process_result );
 
     void                        add_pid                     ( int pid, const Time& timeout = latter_day );
@@ -164,6 +165,7 @@ struct Task : Object,
 
   protected:
     void                        remove_order_after_error    ();
+    void                        remove_order                ();
 
     void                        finish                      ();
     void                        process_on_exit_commands    ();

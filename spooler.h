@@ -107,7 +107,6 @@ struct Job_chain;
 struct Order_queue;
 struct Order;
 struct Process_class;
-struct Database_orders_read_operation;
 struct Remote_scheduler;
 struct Scheduler_object;
 struct Scheduler_event;
@@ -411,7 +410,6 @@ struct Spooler : Object,
     char**                     _argv;
     string                     _parameter_line;
     bool                       _jobs_initialized;
-    ptr<Order_subsystem>       _order_subsystem;
 
   public:
     Thread_semaphore           _lock;                       // Command_processor::execute_show_state() sperrt auch, für Zugriff auf _db.
@@ -508,6 +506,7 @@ struct Spooler : Object,
     string                     _xml_cmd;                    // Parameter -cmd, ein zuerst auszuführendes Kommando.
     string                     _pid_filename;
 
+    ptr<Order_subsystem>       _order_subsystem;
     Web_services               _web_services;
     Job_list                   _job_list;
     Wait_handles               _wait_handles;

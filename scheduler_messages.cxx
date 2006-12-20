@@ -99,7 +99,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-223", "Logon at main Scheduler failed: $1" },
     { "SCHEDULER-224", "The main Job Scheduler has closed connection" },
     { "SCHEDULER-225", "start_new_file() is only applicable for the main protocol" },
-    { "SCHEDULER-226", "Order has not been processed because the task has been terminated before the first step (spooler_process())" },
+    { "SCHEDULER-226", "Order has not been processed because the task has been terminated before the processing step (spooler_process())" },
     { "SCHEDULER-227", "Scheduler script has logged an error: $1" },
     { "SCHEDULER-229", "An order controlled job <job order=\"yes\"> cannot be removed" },
     { "SCHEDULER-230", "Job \"$1\" is to be removed - it is not longer usable" },
@@ -239,7 +239,9 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-370", "Operation can only be performed on a distributed Scheduler" },
     { "SCHEDULER-371", "DATABASE INTEGRITY IS BROKEN" },
     { "SCHEDULER-372", "SOME OTHER SCHEDULER HAS STOLEN EXCLUSIVENESS" },
-    { "SCHEDULER-372", "SOME OTHER SCHEDULER HAS STOLEN ACTIVITY" },
+    { "SCHEDULER-373", "SOME OTHER SCHEDULER HAS STOLEN ACTIVITY" },
+    { "SCHEDULER-374", "In $1, state '$2' has no job" },
+    { "SCHEDULER-375", "This operation is not suppported under distributed order execution" },
     { "SCHEDULER-900", "Scheduler $1 is starting with $2, pid=$3" },
     { "SCHEDULER-902", "state=$1" },
     { "SCHEDULER-904", "Tasks have $1s to terminate" },
@@ -346,6 +348,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-812", "Just before processing, order has been removed in database" },
     { "SCHEDULER-813", "Just before processing, order has been occupied by Scheduler $1" },
     { "SCHEDULER-814", "Inactive Scheduler '$2' has the higher backup precedence $1 ($3)" },
+    { "SCHEDULER-815", "Task should end, but it has just been started with an order attached, so one step will be done" },
     {}
 };
 } //namespace sos

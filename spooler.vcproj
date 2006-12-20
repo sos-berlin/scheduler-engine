@@ -1035,6 +1035,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\scheduler_object.h"
+				>
+			</File>
+			<File
 				RelativePath="spooler.h"
 				>
 			</File>
@@ -1108,6 +1112,10 @@
 			</File>
 			<File
 				RelativePath="spooler_order.h"
+				>
+			</File>
+			<File
+				RelativePath=".\spooler_order_file.h"
 				>
 			</File>
 			<File

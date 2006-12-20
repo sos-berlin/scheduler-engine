@@ -405,17 +405,21 @@ void Directory_file_order_source::start()
 
 //-------------------------------------------------------Directory_file_order_source::request_order
 
-Order* Directory_file_order_source::request_order( const string& cause )
+bool Directory_file_order_source::request_order( const string& cause )
 {
-    Order* result = NULL;
+    bool result = NULL;
 
     if( _expecting_request_order 
-     || async_next_gmtime_reached() )       // (2006-12-17 sollte überflüssig sein, s. Job::request_order)  Das, weil die Jobs bei jeder Gelegenheit do_something() durchlaufen, auch wenn nichts anliegt (z.B. bei TCP-Verkehr)
+     || async_next_gmtime_reached() )       // Das, weil die Jobs bei jeder Gelegenheit do_something() durchlaufen, auch wenn nichts anliegt (z.B. bei TCP-Verkehr)
     {
         Z_LOG2( "scheduler.file_order", __FUNCTION__ << " cause=" << cause << "\n" );
 
-        result = read_directory( false, cause );
-        if( result )  assert( result->is_immediately_processable( Time::now() ) );
+        Order* order = read_directory( false, cause );
+        if( order )  
+        {
+            assert( order->is_immediately_processable( Time::now() ) );
+            result = true;
+        }
     }
     else
     {
@@ -477,7 +481,7 @@ Order* Directory_file_order_source::read_directory( bool was_notified, const str
                         string date = Time( new_file->last_write_time() ).as_string( Time::without_ms ) + " UTC";   // localtime_from_gmtime() rechnet alte Sommerzeit-Daten in Winterzeit um
                         log()->info( message_string( "SCHEDULER-983", order->obj_name(), "written at " + date ) );
 
-                        order->add_to_job_chain( _job_chain );
+                        order->place_in_job_chain( _job_chain );
 
                         if( !result )  result = order;      // Der erste, sofort ausführbare Auftrag
 

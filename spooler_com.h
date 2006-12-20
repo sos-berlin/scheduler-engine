@@ -718,6 +718,7 @@ struct Com_job_chain : spooler_com::Ijob_chain,
 
     STDMETHODIMP                Remove                  ();
 
+  private:
     Thread_semaphore           _lock;
     Job_chain*                 _job_chain;
 };

@@ -2470,7 +2470,7 @@ string Spooler::scheduler_member_id()
     //assert_is_distributed( __FUNCTION__ );
     assert( _distributed_scheduler );
 
-    return _distributed_scheduler->member_id();
+    return _distributed_scheduler? _distributed_scheduler->member_id() : "";
 }
 
 //-----------------------------------------------------------------------Spooler::has_exclusiveness
@@ -2581,9 +2581,6 @@ void Spooler::stop( const exception* )
             
             _distributed_scheduler->shutdown();
         }
-
-        _distributed_scheduler->close();
-        _distributed_scheduler = NULL;
     }
 
     if( _module_instance )      // Scheduler-Skript zuerst beenden, damit die Finalizer die Tasks (von Job.start()) und andere Objekte schließen können.
@@ -2618,6 +2615,13 @@ void Spooler::stop( const exception* )
     _process_class_list.clear();
 
     //_java_vm.close();  Erneutes _java.init() stürzt ab, deshalb lassen wir Java stehen und schließen es erst am Schluss
+
+
+    if( _distributed_scheduler )
+    {
+        _distributed_scheduler->close();
+        _distributed_scheduler = NULL;
+    }
 
     if( _main_scheduler_connection )
     {

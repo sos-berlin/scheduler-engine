@@ -817,12 +817,16 @@ void Distributed_scheduler::lock_member_records( Transaction* ta, const string& 
     assert( ta );
 
     S sql;
-    sql << "select `scheduler_member_id`  from " << _spooler->_members_tablename;
-    if( db()->lock_syntax() == db_lock_with_updlock  )  sql << "  WITH(UPDLOCK)";
-    sql << "  where `scheduler_member_id`"
-        << " in (" << sql::quoted( member1_id ) << "," 
+    sql << "select `scheduler_member_id`  from " << _spooler->_members_tablename << " %update_lock"
+           "  where `scheduler_member_id`"
+           " in (" << sql::quoted( member1_id ) << "," 
                    << sql::quoted( member2_id ) << ")";
-    if( db()->lock_syntax() == db_lock_for_update )  sql << " FOR UPDATE";
+    //sql << "select `scheduler_member_id`  from " << _spooler->_members_tablename
+    //if( db()->lock_syntax() == db_lock_with_updlock  )  sql << "  WITH(UPDLOCK)";
+    //sql << "  where `scheduler_member_id`"
+    //    << " in (" << sql::quoted( member1_id ) << "," 
+    //               << sql::quoted( member2_id ) << ")";
+    //if( db()->lock_syntax() == db_lock_for_update )  sql << " FOR UPDATE";
 
     ta->set_transaction_written();
     ta->open_result_set( sql, __FUNCTION__ );

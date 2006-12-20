@@ -4014,7 +4014,9 @@ STDMETHODIMP Com_job_chain::Add_order( VARIANT* order_or_payload, spooler_com::I
         if( !order )  return E_INVALIDARG;
 
         // Einstieg nur über Order, damit Semaphoren stets in derselben Reihenfolge gesperrt werden.
-        order->add_to_job_chain( dynamic_cast<Job_chain*>( this ) );  
+        order->place_in_job_chain( dynamic_cast<Job_chain*>( this ) );  
+        //dynamic_cast<Job_chain*>( this )->add_order( order );
+        
 
         *result = iorder;
         (*result)->AddRef();
@@ -4043,7 +4045,7 @@ STDMETHODIMP Com_job_chain::Add_or_replace_order( spooler_com::Iorder* iorder )
         if( !order )  return E_INVALIDARG;
 
         // Einstieg nur über Order, damit Semaphoren stets in derselben Reihenfolge gesperrt werden.
-        order->add_to_or_replace_in_job_chain( dynamic_cast<Job_chain*>( this ) );  
+        order->place_or_replace_in_job_chain( dynamic_cast<Job_chain*>( this ) );  
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
@@ -4072,7 +4074,7 @@ STDMETHODIMP Com_job_chain::Try_add_order( Iorder* iorder, VARIANT_BOOL* result 
         if( !order )  return E_INVALIDARG;
 
         // Einstieg nur über Order, damit Semaphoren stets in derselben Reihenfolge gesperrt werden.
-        *result = order->try_add_to_job_chain( dynamic_cast<Job_chain*>( this ) )? VARIANT_FALSE : VARIANT_TRUE;  
+        *result = order->try_place_in_job_chain( dynamic_cast<Job_chain*>( this ) )? VARIANT_FALSE : VARIANT_TRUE;  
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
@@ -4467,7 +4469,7 @@ STDMETHODIMP Com_order::get_Job_chain( Ijob_chain** result )
     {
         if( !_order )  return E_POINTER;
 
-        Job_chain* job_chain = _order->job_chain();
+        Job_chain* job_chain = _order->job_chain_for_api();
         if( job_chain )  
         {
             ptr<Ijob_chain> ijob_chain = job_chain; //->com_job_chain();
@@ -4991,26 +4993,6 @@ STDMETHODIMP Com_order::get_Log( Ilog** result )
         if( *result )  (*com_log)->AddRef();
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
-
-    return hr;
-}
-*/
-//----------------------------------------------------------------------Com_order::add_to_job_chain
-/*
-STDMETHODIMP Com_order::add_to_job_chain( Ijob_chain* ijob_chain )
-{
-    HRESULT hr = NOERROR;
-
-    THREAD_LOCK( _lock )
-    try
-    {
-        if( !_order )  return E_POINTER;
-        if( !ijob_chain )  return E_POINTER;
-
-        _order->add_to_job_chain( dynamic_cast<Com_job_chain*>( &*ijob_chain )->_job_chain );
-    }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Order.add_to_job_chain" ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Order.add_to_job_chain" ); }
 
     return hr;
 }

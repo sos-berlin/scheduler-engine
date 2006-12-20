@@ -11,6 +11,7 @@ struct Job_chain;
 struct Job_chain_node;
 struct Order_queue;
 struct Order;
+struct Database_order_detector;
 
 //-------------------------------------------------------------------------------------------------
 
@@ -33,7 +34,7 @@ struct Order : Com_order,
     Z_GNU_ONLY(                 Order                   (); )                                       // Für gcc 3.2. Nicht implementiert
                                 Order                   ( Spooler* );
                                 Order                   ( Spooler*, const VARIANT& );
-                                Order                   ( Spooler*, const Record& );
+                                Order                   ( Spooler*, const Record&, const string& job_chain_name );
                                ~Order                   ();
 
 
@@ -43,7 +44,7 @@ struct Order : Com_order,
     void                        load_blobs              ( Transaction* );
 
     void                        init                    ();
-    bool                        attach_task             ( Task*, const Time& now );
+    bool                        occupy_for_task         ( Task*, const Time& now );
     void                        assert_no_task          ();
     bool                        is_immediately_processable( const Time& now );
     bool                        is_processable          ();
@@ -52,14 +53,14 @@ struct Order : Com_order,
 
     
     void                    set_id                      ( const Variant& );
-    Id                          id                      ()                                          { THREAD_LOCK_RETURN( _lock, Variant, _id ); }
+    const Id&                   id                      ()                                          { return _id; }
     string                      string_id               ();
     static string               string_id               ( const Id& );
     void                    set_default_id              ();
-    bool                        id_is_equal             ( const Id& id )                            { if( _id_locked ) return _id == id; else THREAD_LOCK_RETURN( _lock, bool, _id == id ); }
+    bool                        id_is_equal             ( const Id& id )                            { return _id == id; }
 
-    void                    set_title                   ( const string& title )                     { THREAD_LOCK(_lock)  _title = title,  _title_modified = true,  _log->set_prefix( obj_name() ); }
-    string&                     title                   ()                                          { THREAD_LOCK_RETURN( _lock, string, _title ); }
+    void                    set_title                   ( const string& title )                     { _title = title,  _title_modified = true,  _log->set_prefix( obj_name() ); }
+    string&                     title                   ()                                          { return _title; }
     string                      obj_name                () const;
                                                             
     void                    set_priority                ( Priority );
@@ -68,7 +69,9 @@ struct Order : Com_order,
     bool                        is_virgin               () const                                    { return _is_virgin; }
     void                    set_delay_storing_until_processing( bool b )                            { _delay_storing_until_processing = b; }
 
-    Job_chain*                  job_chain               () const                                    { return _job_chain? _job_chain : _removed_from_job_chain; }
+    Job_chain*                  job_chain               () const;
+    string                      job_chain_name          () const                                    { return _job_chain_name; }
+    Job_chain*                  job_chain_for_api       () const;
     Job_chain_node*             job_chain_node          () const                                    { return _job_chain_node; }
   //Job_chain*                  removed_from_job_chain  () const                                    { return _removed_from_job_chain; }
     Order_queue*                order_queue             ();
@@ -86,14 +89,14 @@ struct Order : Com_order,
     void                    set_state                   ( const State& );
     void                    set_state                   ( const State&, const Time& );
     void                    set_state2                  ( const State&, bool is_error_state = false );
-    State                       state                   ()                                          { THREAD_LOCK_RETURN( _lock, State, _state ); }
-    bool                        state_is_equal          ( const State& state )                      { THREAD_LOCK_RETURN( _lock, bool, _state == state ); }
+    State                       state                   ()                                          { return _state; }
+    bool                        state_is_equal          ( const State& state )                      { return _state == state; }
     static void                 check_state             ( const State& );
-    State                       initial_state           ()                                          { THREAD_LOCK_RETURN( _lock, State, _initial_state ); }
+    State                       initial_state           ()                                          { return _initial_state; }
 
 
-    void                    set_state_text              ( const string& state_text )                { THREAD_LOCK( _lock )  _state_text = state_text,  _state_text_modified = true; }
-    string                      state_text              ()                                          { THREAD_LOCK_RETURN( _lock, string, _state_text ); }
+    void                    set_state_text              ( const string& state_text )                { _state_text = state_text,  _state_text_modified = true; }
+    string                      state_text              ()                                          { return _state_text; }
 
     Time                        start_time              () const                                    { return _start_time; }
     Time                        end_time                () const                                    { return _end_time; }
@@ -103,7 +106,7 @@ struct Order : Com_order,
     bool                        is_file_order           () const;
     
     void                    set_payload                 ( const VARIANT& );
-    Payload                     payload                 ()                                          { THREAD_LOCK_RETURN( _lock, Variant, _payload ); }
+    const Payload&              payload                 ()                                          { return _payload; }
     string                      string_payload          () const;
     ptr<Com_variable_set>       params_or_null          () const;
     ptr<Com_variable_set>       params                  () const;
@@ -118,8 +121,8 @@ struct Order : Com_order,
     Web_service*                web_service             () const;
     Web_service*                web_service_or_null     () const                                    { return _web_service; }
     void                    set_http_operation          ( http::Operation* op )                     { _http_operation = op; }
-    Web_service_operation*      web_service_operation          () const;
-    Web_service_operation*      web_service_operation_or_null  () const                             { return _http_operation? _http_operation->web_service_operation_or_null() : NULL; }
+    Web_service_operation*      web_service_operation        () const;
+    Web_service_operation*      web_service_operation_or_null() const                               { return _http_operation? _http_operation->web_service_operation_or_null() : NULL; }
 
     Run_time*                   run_time                ()                                          { return _run_time; }
 
@@ -144,10 +147,10 @@ struct Order : Com_order,
     Time                        next_start_time         ( bool first_call = false );
 
     // Auftrag in einer Jobkette:
-    void                        add_to_job_chain        ( Job_chain* );
-    void                        add_to_or_replace_in_job_chain( Job_chain* );
-    bool                        try_add_to_job_chain    ( Job_chain* );
-    void                        remove_from_job_chain   ( bool leave_in_database = false );
+    void                        place_in_job_chain      ( Job_chain* );
+    void                        place_or_replace_in_job_chain( Job_chain* );
+    bool                        try_place_in_job_chain  ( Job_chain* );
+    void                        remove_from_job_chain   ();
     void                        remove_from_job         ();
     void                        add_to_blacklist        ();
     void                        move_to_node            ( Job_chain_node* );
@@ -163,13 +166,16 @@ struct Order : Com_order,
     void                        run_time_modified_event ();
 
     void                        db_insert               ();
-    void                        db_update               ( bool release_occupation = false );
+    bool                        db_occupy_for_processing( Transaction* );
+    void                        db_release_occupation   ();
+
+    enum Update_option { update_not_occupated, update_and_release_occupation };
+    void                        db_update               ( Update_option );
+
     string                      db_read_clob            ( Transaction*, const string& column_name );
     void                        db_update_clob          ( Transaction*, const string& column_name, const string& value );
 
   //void                        db_delete_order         ();
-    bool                        db_occupy_for_processing( Transaction* );
-    bool                        db_release_processing   ( Transaction* );
     void                        db_show_occupation      ( Transaction*, Log_level );
     sql::Update_stmt            db_update_stmt          ();
     sql::Where_clause           db_where_clause         ();
@@ -188,24 +194,26 @@ struct Order : Com_order,
     friend struct               Job_chain;
 
 
-    Thread_semaphore           _lock;
+  //Thread_semaphore           _lock;
 
     Id                         _id;
+    State                      _state;
+
     bool                       _id_locked;              // Einmal gesperrt, immer gesperrt
     bool                       _is_users_id;            // Id ist nicht vom Spooler generiert, also nicht sicher eindeutig.
+    string                     _state_text;
+    bool                       _state_text_modified;
   //bool                       _remove_from_job_chain;  // Nur wenn _task != NULL: Nach spooler_process() remove_form_job_chain() rufen!
     Priority                   _priority;
     bool                       _priority_modified;
-    State                      _state;
     State                      _initial_state;
     bool                       _initial_state_set;
-    string                     _state_text;
-    bool                       _state_text_modified;
     string                     _title;
     bool                       _title_modified;
-    Job_chain*                 _job_chain;              
+    Job_chain*                 _job_chain;
+    string                     _job_chain_name;
     Job_chain_node*            _job_chain_node;         // Nächster Stelle, falls in einer Jobkette
-    Job_chain*                 _removed_from_job_chain; // Ehemaliges _job_chain, nach remove_from_job_chain(), wenn _task != NULL
+    string                     _removed_from_job_chain_name; // Ehemaliges _job_chain->name(), nach remove_from_job_chain(), wenn _task != NULL
   //bool                       _dont_close_log;
     Order_queue*               _order_queue;            // Auftrag ist in einer Auftragsliste, aber nicht in einer Jobkette. _job_chain == NULL, _job_chain_node == NULL!
     Payload                    _payload;
@@ -235,6 +243,7 @@ struct Order : Com_order,
   //bool                       _recoverable;            // In Datenbank halten
     bool                       _is_in_database;
     bool                       _is_db_occupied;
+    State                      _occupied_state;
     bool                       _delay_storing_until_processing;  // Erst in die Datenbank schreiben, wenn die erste Task die Verarbeitung beginnt
     bool                       _is_virgin;              // Noch von keiner Task berührt
     bool                       _is_virgin_in_this_run_time; // Wie _is_virgin, wird aber beim Erreichen des Endzustands wieder true gesetzt
@@ -261,7 +270,7 @@ struct Order_source : Scheduler_object, Event_operation
     virtual void                close                   ()                                          = 0;
     virtual void                finish                  ();
     virtual void                start                   ()                                          = 0;
-    virtual Order*              request_order           ( const string& cause )                     = 0;
+    virtual bool                request_order           ( const string& cause )                     = 0;
     virtual xml::Element_ptr    dom_element             ( const xml::Document_ptr&, const Show_what& ) = 0;
 
   protected:
@@ -278,7 +287,7 @@ struct Order_sources
     void                        close                   ();
     void                        finish                  ();
     void                        start                   ();
-    Order*                      request_order           ( const string& cause );
+  //bool                        request_order           ( const string& cause );
     bool                        has_order_source        ()                                          { return !_order_source_list.empty(); }
 
 
@@ -354,7 +363,7 @@ struct Job_chain : Com_job_chain, Scheduler_object
     void                    set_orders_recoverable      ( bool b )                                  { _orders_recoverable = b; }
     void                        load_orders_from_database( Transaction* );
     int                         load_orders_from_result_set( Transaction*, Any_file* result_set );
-    bool                        load_order_from_database_record( Transaction*, const Record& );
+    Order*                      load_order_from_database_record( Transaction*, const Record& );
 
     int                         remove_all_pending_orders( bool leave_in_database = false );
 
@@ -365,13 +374,14 @@ struct Job_chain : Com_job_chain, Scheduler_object
     bool                        contains_job            ( Job* );
 
   //Job*                        first_job               ();
-    Job_chain_node*             first_node             ();
+    Job_chain_node*             first_node              ();
     Job_chain_node*             node_from_state         ( const Order::State& );
     Job_chain_node*             node_from_state_or_null ( const Order::State& );
     Job_chain_node*             node_from_job           ( Job* );
+    Job*                        job_from_state          ( const Order::State& );
 
-  //Order*                      add_order               ( VARIANT* order_or_payload, VARIANT* job_or_state );
-  //void                        remove_order            ( Order* );
+    void                        add_order               ( Order* );
+    void                        remove_order            ( Order* );
 
     ptr<Order>                  order                   ( const Order::Id& id );
     ptr<Order>                  order_or_null           ( const Order::Id& id );
@@ -402,7 +412,7 @@ struct Job_chain : Com_job_chain, Scheduler_object
 
   private:
     friend struct               Order;
-    Thread_semaphore           _lock;
+  //Thread_semaphore           _lock;
     Prefix_log                 _log;
     string                     _name;
     State                      _state;
@@ -455,11 +465,17 @@ struct Order_queue : Com_order_queue
     int                         order_count             ( const Job_chain* = NULL );
     bool                        empty                   ()                                          { return _queue.empty(); }
     bool                        empty                   ( const Job_chain* job_chain )              { return order_count( job_chain ) == 0; }
-    Order*                      first_order             ( const Time& now );
-    Order*                      load_next_processable_order_from_database();
+    Order*                      first_order             ( const Time& now ) const;
+    Order*                      fetch_order             ( const Time& now );
+    Order*                      load_and_occupy_next_processable_order_from_database( Task* occupying_task, const Time& now );
     bool                        has_order               ( const Time& now )                         { return first_order( now ) != NULL; }
-    Order*                      request_order           ( const Time& now );
+    bool                        request_order           ( const Time& now );
+    void                        withdraw_order_request  ();
+    Order*                      fetch_and_occupy_order  ( const Time& now, const string& cause, Task* occupying_task );
     Time                        next_time               ();
+    bool                        is_order_requested      ()                                          { return _is_order_requested; }
+    void                    set_had_processable_order_in_database();
+    bool                        had_processable_order_in_database()                                 { return _had_processable_order_in_database; }
   //void                        update_priorities       ();
     ptr<Order>                  order_or_null           ( const Order::Id& );
     Job*                        job                     () const                                    { return _job; }
@@ -467,6 +483,7 @@ struct Order_queue : Com_order_queue
     string                      make_where_expression   ();
     string                      make_where_expression_for_job_chain( const Job_chain* );
 
+    Order_subsystem*            order_subsystem         () const;
 
 
     Fill_zero                  _zero_;
@@ -475,7 +492,7 @@ struct Order_queue : Com_order_queue
   private:
     friend struct               Directory_file_order_source;        // Darf _queue lesen
 
-    Thread_semaphore           _lock;
+  //Thread_semaphore           _lock;
     Job*                       _job;
     Prefix_log*                _log;
     ptr<Com_order_queue>       _com_order_queue;
@@ -483,13 +500,11 @@ struct Order_queue : Com_order_queue
     typedef list< ptr<Order> >  Queue;
     Queue                      _queue;
 
-    time_t                     _last_db_check_time;
-
-    //bool                       _has_outdated_orders;
+    bool                       _had_processable_order_in_database;
+    bool                       _is_order_requested;
 
   //int                        _lowest_priority;        // Zur Optimierung
   //int                        _highest_priority;       // Zur Optimierung
-    //bool                       _has_users_id;           // D.h. id auf Eindeutigkeit prüfen. Bei selbst generierten Ids überflüssig. Zur Optimierung.
 };
 
 //-------------------------------------------------------------------------------------------------
@@ -515,10 +530,13 @@ struct Order_subsystem : Object, Scheduler_object
     Job_chain*                  job_chain_or_null           ( const string& name );
     xml::Element_ptr            job_chains_dom_element      ( const xml::Document_ptr&, const Show_what& );
     void                        load_orders_from_database   ();
+    Order*                      load_order_from_database_record( Transaction*, const Record& );
     void                        check_exception             ();
     bool                        is_sharing_orders_in_database();                                    // Für verteilte (distributed) Ausführung
     void                        assert_is_sharing_orders_in_database( const string& text );
+    void                        assert_not_sharing_orders_in_database( const string& debug_text );
     void                        request_order_for_job       ( Job* );
+    bool                        is_job_in_any_job_chain     ( Job* );
 
 //private:
     Fill_zero                  _zero_;
@@ -527,8 +545,8 @@ struct Order_subsystem : Object, Scheduler_object
     Job_chain_map              _job_chain_map;
     int                        _job_chain_map_version;             // Zeitstempel der letzten Änderung (letzter Aufruf von Spooler::add_job_chain()), 
     long32                     _next_free_order_id;
-    ptr<Database_orders_read_operation>  _database_orders_read_operation;
-    Prefix_log*                _log;
+    ptr<Database_order_detector> _database_order_detector;
+    ptr<Prefix_log>            _log;
 };
 
 //-------------------------------------------------------------------------------------------------

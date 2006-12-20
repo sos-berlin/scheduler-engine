@@ -1094,6 +1094,11 @@ bool Task::do_something()
 
                         if( _state < s_ending  &&  _end )      // Task beenden?
                         {
+                            if( _state <= s_running  &&  _order  &&  _step_count == 0 )   // SCHEDULER-226 (s.u.) nach SCHEDULER-271 (Task-Ende wegen Prozessmangels)
+                            {
+                                _log->info( message_string( "SCHEDULER-815", _order->obj_name() ) );    // Task einen Schritt machen lassen, um den Auftrag auszuführen
+                            }
+                            else
                             if( !loaded() )         set_state( s_ended );
                             else
                             if( !_begin_called )    set_state( s_release );
@@ -1181,7 +1186,7 @@ bool Task::do_something()
                                 {
                                     if( _job->order_queue() )
                                     {
-                                        if( !take_order( now ) )
+                                        if( !fetch_and_occupy_order( now, state_name() ) )
                                         {
                                             _idle_timeout_at = _job->_idle_timeout == latter_day? latter_day : now + _job->_idle_timeout;
                                             set_state( s_running_waiting_for_order );
@@ -1220,7 +1225,7 @@ bool Task::do_something()
 
                         case s_running_waiting_for_order:
                         {
-                            if( take_order( now ) )
+                            if( fetch_and_occupy_order( now, state_name() ) )
                             {
                                 set_state( s_running );     // Auftrag da? Dann Task weiterlaufen lassen (Ende der Run_time wird noch geprüft)
                                 loop = true;                // _order wird in step__end() wieder abgeräumt
@@ -1636,45 +1641,28 @@ bool Task::operation__end()
     return result;
 }
 
-//-------------------------------------------------------------------------------Task::occupy_order
+//----------------------------------------------------------------------Task::fetch_and_occupy_orde
 
-bool Task::occupy_order( Order* order, const Time& now )
+Order* Task::fetch_and_occupy_order( const Time& now, const string& cause )
 
-// Wird von Job gerufen, wenn Task wegen neuen Auftrags startet oder fortgesetzt wird (s_running_waiting_for_order)
+// Wird auch von Job gerufen, wenn ein neuer Auftrag zum Start einer neuen Task führt
 
 {
+    assert( _job->order_queue() );
     assert( !_operation );
     assert( _state == s_none || _state == s_running || _state == s_running_waiting_for_order );
-    assert( !_order );
 
 
-    bool ok = false;
-
-    if( _order  &&  _order->is_file_order() )  _trigger_files = "";
-
-    if( order ) 
+    if( !_order  
+     && !_end )    // Kann beim Aufruf aus Job::do_something() passieren 
     {
-        ok = order->attach_task( this, now );        // Auftrag war schon bereitgestellt. Exception möglich von insert_oder()
- 
-        if( !ok )  order = NULL;
-        else
-        if( order->is_file_order() )  _trigger_files = order->file_path();
-    }
+        if( Order* order = _job->order_queue()->fetch_and_occupy_order( now, cause, this ) )
+        {
+            if( order->is_file_order() )  _trigger_files = order->file_path();
 
-    _order = order;
-    _order_for_task_end = order;                // Damit bei Task-Ende im Fehlerfall noch der Auftrag gezeigt wird, s. dom_element()
-    
-    return ok;
-}
-
-//---------------------------------------------------------------------------------Task::take_order
-
-Order* Task::take_order( const Time& now )
-{
-    if( !_order )
-    {
-        Order* order = _job->request_order( now, obj_name() );
-        if( order )  occupy_order( order, now );
+            _order = order;
+            _order_for_task_end = order;                // Damit bei Task-Ende im Fehlerfall noch der Auftrag gezeigt wird, s. dom_element()
+        }
     }
 
     return _order;
@@ -1687,8 +1675,7 @@ void Task::postprocess_order( bool spooler_process_result )
     if( _order )
     {
         _order->postprocessing( spooler_process_result );
-        _log->set_order_log( NULL );
-        _order = NULL;
+        remove_order();
     }
 }
 
@@ -1699,9 +1686,17 @@ void Task::remove_order_after_error()
     if( _order )
     {
         _order->processing_error();
-        _log->set_order_log( NULL );
-        _order = NULL;
+        remove_order();
     }
+}
+
+//-------------------------------------------------------------------------------Task::remove_order
+
+void Task::remove_order()
+{
+    if( _order->is_file_order() )  _trigger_files = "";
+    _log->set_order_log( NULL );
+    _order = NULL;
 }
 
 //-------------------------------------------------------------------------------------Task::finish
@@ -1712,7 +1707,7 @@ void Task::finish()
 
     process_on_exit_commands();
 
-    if( _order )    // Auftrag nicht verarbeitet? spooler_init() oder spooler_open() lieferte false
+    if( _order )    // Auftrag nicht verarbeitet? spooler_process() nicht ausgeführt, z.B. weil spooler_init() oder spooler_open() false geliefert haben.
     {
         if( !has_error() )  set_error( Xc( "SCHEDULER-226" ) );
         remove_order_after_error();  // Nur rufen, wenn der Job stoppt oder verzögert wird! (has_error() == true) Sonst wird der Job wieder und wieder gestartet.

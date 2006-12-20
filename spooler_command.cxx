@@ -594,8 +594,8 @@ xml::Element_ptr Command_processor::execute_add_order( const xml::Element_ptr& a
         bool       replace   = add_order_element.bool_getAttribute( "replace", false );
         Job_chain* job_chain = _spooler->order_subsystem()->job_chain( add_order_element.getAttribute( "job_chain" ) );
 
-        if( replace )  order->add_to_or_replace_in_job_chain( job_chain );
-                 else  order->add_to_job_chain( job_chain );
+        if( replace )  order->place_or_replace_in_job_chain( job_chain );
+                 else  order->place_in_job_chain( job_chain );
     }
     else 
     {
@@ -657,7 +657,7 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
         order->set_run_time( run_time_element );
     }
 
-    order->db_update();
+    order->db_update( Order::update_not_occupated );
 
     return _answer.createElement( "ok" );
 }
@@ -727,7 +727,7 @@ xml::Element_ptr Command_processor::execute_service_request( const xml::Element_
 
     order->set_state( Web_service::forwarding_job_chain_forward_state );
     order->set_payload( Variant( service_request_element.xml() ) );
-    order->add_to_job_chain( _spooler->order_subsystem()->job_chain( Web_service::forwarding_job_chain_name ) );
+    order->place_in_job_chain( _spooler->order_subsystem()->job_chain( Web_service::forwarding_job_chain_name ) );
     
     return _answer.createElement( "ok" );
 }

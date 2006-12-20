@@ -35,10 +35,10 @@ struct Time
         with_ms
     };
 
+
     static Time                 time_with_now               ( const string& );              // Datum mit Zeit oder "now+zeit"
     static void             set_current_difference_to_utc   ();
     static int                  current_difference_to_utc   ()                              { set_current_difference_to_utc(); return static_current_difference_to_utc; }
-    static int                  static_current_difference_to_utc;
 
 
                                 Time                        ( double t = 0.0 )              { set(t); }
@@ -139,6 +139,9 @@ struct Time
   private:
     double                     _time;                       // wie time_t: Anzahl Sekunden seit 1.1.1970 oder seit Mitternacht
     bool                       _is_utc;
+
+  public:
+    static int                  static_current_difference_to_utc;
 };      
 
 void                            insert_into_message         ( Message_string*, int index, const Time& ) throw();

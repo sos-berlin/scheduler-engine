@@ -533,6 +533,8 @@ void Job::close()
 {
     THREAD_LOCK_DUMMY( _lock )
     {
+        if( _order_queue )  _order_queue->withdraw_order_request();
+
         try
         {
             clear_when_directory_changed();
@@ -1699,32 +1701,37 @@ void Job::unregister_order_source( Order_source* order_source )
 
 //-------------------------------------------------------------------------------Job::request_order
 
-Order* Job::request_order( const Time& now, const string& cause )
+bool Job::request_order( const Time& now, const string& cause )
 {
     //bool is_first_request = !_is_requesting_order;
 
-    Order* result = NULL;
+    bool result = false;
     
     //if( is_first_request )      // 2006-12-17 Einmal anfordern genügt
     {
         result = _order_queue->request_order( now );
 
-        if( !result )
+        Z_FOR_EACH( Order_source_list, _order_source_list, it )
         {
-            Z_FOR_EACH( Order_source_list, _order_source_list, it )
-            {
-                Order_source* order_source = *it;
-                result = order_source->request_order( cause );
-                if( result )  break;
-            }
+            Order_source* order_source = *it;
+            result = order_source->request_order( cause );
+            if( result )  break;
         }
     }
 
-    _is_requesting_order = result == NULL;      // Erst hier nach Order_queue::request_order()!
-
-    if( result )  assert( result->is_immediately_processable( now ) );
     return result;
 }
+
+//----------------------------------------------------------------------Job::fetch_and_occupy_order
+
+//Order* Job::fetch_and_occupy_order( const Time& now, const string& cause, Task* occupy_for_task )
+//{
+//    Order* result = _order_queue->fetch_and_occupy_order( now, occupy_for_task );
+//    if( !result )  request_order( now, cause );
+//
+//    if( result )  assert( result->is_immediately_processable( now ) );
+//    return result;
+//}
 
 //-------------------------------------------------------------------Job::notify_a_process_is_idle
 
@@ -1754,11 +1761,11 @@ ptr<Task> Job::task_to_start()
     if( _spooler->state() == Spooler::s_stopping
      || _spooler->state() == Spooler::s_stopping_let_run )  return NULL;
 
-    Time            now   = Time::now();
-    Start_cause     cause = cause_none;
-    ptr<Task>       task  = NULL;
-    ptr<Order>      order;
-    string          log_line;
+    Time        now       = Time::now();
+    Start_cause cause     = cause_none;
+    ptr<Task>   task      = NULL;
+    bool        has_order = false;
+    string      log_line;
 
     task = get_task_from_queue( now );
     if( task )  cause = task->_start_at? cause_queue_at : cause_queue;
@@ -1788,36 +1795,26 @@ ptr<Task> Job::task_to_start()
             if( _directory_changed )       cause = cause_directory,                             log_line += "Task starts due to an event for watched directory " + _changed_directories;
         }
 
-        if( !cause  &&  _order_queue )
-        {
-            order = request_order( now, obj_name() );
-
-            if( order )
-            {
-                FOR_EACH( Task_list, _running_tasks, t ) 
-                {
-                    Task* task = *t;
-                    if( !task->order()  &&  task->state() == Task::s_running_waiting_for_order )    //|| (*t)->state() == Task::s_suspended  ) 
-                    { 
-                        // 2006-12-16  Ist das nicht doppelt geprüft? Siehe first_order() und s_running_waiting_for_order in diesem Modul
-                        task->occupy_order( order, now );
-                        task->signal( __FUNCTION__ );
-                        order = NULL;
-                        break; 
-                    }
-                }
-            }
-        }
-
         if( _start_min_tasks )
         {
             assert( not_ending_tasks_count() < _min_tasks );
             cause = cause_min_tasks;
         }
+
+        if( !cause  &&  _order_queue )
+        {
+            has_order = request_order( now, obj_name() );
+
+            //if( has_order )
+            //{
+            //    fetch_orders_for_waiting_tasks( now );
+            //    has_order = request_order( now, obj_name() );
+            //}
+        }
     }
 
 
-    if( cause || order )     // Es soll also eine Task gestartet werden.
+    if( cause || has_order )     // Es soll also eine Task gestartet werden.
     {
         // Ist denn ein Prozess verfügbar?
 
@@ -1836,30 +1833,15 @@ ptr<Task> Job::task_to_start()
                 _spooler->try_to_free_process( this, _module->_process_class, now );     // Beendet eine Task in s_running_waiting_for_order
             }
 
-            cause = cause_none;   // Wir können die Task nicht starten, denn kein Prozess ist verfügbar
-            order = NULL;
+            cause = cause_none, has_order = false;      // Wir können die Task nicht starten, denn kein Prozess ist verfügbar
         }
         else
         {
             remove_waiting_job_from_process_list();
         }
 
-        if( order )
+        if( cause || has_order )
         {
-            //order = order_queue()->request_order( now );  // Jetzt aus der Warteschlange nehmen und nicht verlieren!
-            //if( order )  // Ist der Auftrag noch da?
-            //{
-                cause = cause_order;
-                log_line += "Task starts for " + order->obj_name();
-            //}
-        }
-
-        // order jetzt nicht verlieren! Der Auftrag hängt allein in der Variablen order! (2006-12-16 Das stimmt nicht mehr, der Auftrag ist in der _order_queue)
-
-        if( cause )
-        {
-            if( !log_line.empty() )  _log->debug( log_line );
-
             if( task )
             {
                 _task_queue.remove_task( task->id(), Task_queue::w_task_started );
@@ -1871,16 +1853,23 @@ ptr<Task> Job::task_to_start()
                 task->_let_run |= ( cause == cause_period_single );
                 task->_trigger_files = trigger_files( task );   // Vor occupy_order()!
 
-                if( order ) 
+                if( has_order ) 
                 {
-                    task->occupy_order( order, now );   // Versuchen, den Auftrag für die Task zu belegen. Die Task sollte möglichst gleich starten
-                    order = NULL;                       // order kann jetzt ungültig sein! (wenn er in der Datenbank nicht belegbar ist)
-                    if( !task->order()  &&  cause == cause_order )  task = NULL;      // occupy_order() ist fehlgeschlagen? Dann die Task vergessen 
+                    Order* order = task->fetch_and_occupy_order( now, __FUNCTION__ );   // Versuchen, den Auftrag für die neue Task zu belegen
+                    
+                    if( !order  &&  !cause )  task->close(), task = NULL;               // Fehlgeschlagen? Dann die Task vergessen 
+                    else 
+                    {
+                        log_line += "Task starts for " + order->obj_name();
+                        if( !cause )  cause = cause_order;
+                    }
                 }
             }
 
             if( task )
             {
+                if( !log_line.empty() )  _log->debug( log_line );
+
                 task->_cause = cause;
                 task->_changed_directories = _changed_directories;  
                 _changed_directories = "";
@@ -1945,12 +1934,15 @@ bool Job::do_something()
 
                 if( _state == s_running  &&  _order_queue )     // Auftrag bereit und Tasks warten auf Aufträge?
                 {
-                    if( ptr<Order> order = _order_queue->first_order( now ) )
+                    FOR_EACH( Task_list, _running_tasks, t )
                     {
-                        FOR_EACH( Task_list, _running_tasks, t )
+                        Task* task = *t;
+                        if( task->state() == Task::s_running_waiting_for_order  &&  !task->order() ) 
                         {
-                            Task* task = *t;
-                            if( task->state() == Task::s_running_waiting_for_order )  task->do_something();
+                            if( task->fetch_and_occupy_order( now, __FUNCTION__ ) )
+                            {
+                                task->do_something();
+                            }
                         }
                     }
                 }
@@ -2023,6 +2015,25 @@ bool Job::do_something()
 
     return something_done;
 }
+
+//--------------------------------------------------------------Job::fetch_orders_for_waiting_tasks
+
+//bool Job::fetch_orders_for_waiting_tasks( const string& now )
+//{
+//    bool result = false;
+//
+//    FOR_EACH( Task_list, _running_tasks, t )    // 2006-12-16  Ist das nicht doppelt geprüft? Siehe first_order() und s_running_waiting_for_order in diesem Modul
+//    {
+//        Task* task = *t;
+//        if( task->state() == Task::s_running_waiting_for_order  &&  !task->order() )    //|| (*t)->state() == Task::s_suspended  ) 
+//        { 
+//            //task->fetch_and_occupy_order( now, obj_name() );
+//            result += task->do_something();
+//        }
+//    }
+//
+//    return result;
+//}
 
 //----------------------------------------------------------------------------Job::on_task_finished
 
@@ -2431,7 +2442,7 @@ xml::Element_ptr Job::dom_element( const xml::Document_ptr& document, const Show
             Z_FOR_EACH( Task_list, _running_tasks, t )
             {
                 Task* task = *t;
-                if( !which_job_chain  ||  !task->_order  ||  task->_order->job_chain() == which_job_chain )
+                if( !which_job_chain  ||  !task->_order  ||  task->_order->job_chain_for_api() == which_job_chain )
                 {
                     if( !show._task_id  ||  show._task_id == task->id() )
                     {

@@ -8,6 +8,7 @@ namespace spooler {
 
 
 struct Spooler_db;
+struct Order_subsystem;
 
 //---------------------------------------------------------------------------------Scheduler_object
 
@@ -51,7 +52,8 @@ struct Scheduler_object
     virtual Prefix_log*         log                         ()                                      = 0;
     virtual void                print_xml_child_elements_for_event( String_stream*, Scheduler_event* )  {}
 
-    Spooler_db*                 db                          ();
+    Spooler_db*                 db                          () const;
+    Order_subsystem*            order_subsystem             () const;
 
     Spooler*                   _spooler;
     IUnknown*                  _my_iunknown;
