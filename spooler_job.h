@@ -139,7 +139,7 @@ struct Job : Object,
 
         bool                    empty                       ()                                      { return _map.empty(); }
         void                    set                         ( int error_steps, const Time& delay );
-        void                    set_stop                    ( int error_steps )                     { set( error_steps, latter_day ); }
+        void                    set_stop                    ( int error_steps )                     { set( error_steps, Time::never ); }
         void                    clear                       ()                                      { _map.clear(); }
 
         typedef map< int, Time >  Map;
@@ -224,7 +224,7 @@ struct Job : Object,
     void                    set_replacement_job             ( Job* );
     void                        set_delay_after_error       ( int error_steps, const string& delay );
     void                        set_delay_after_error       ( int error_steps, Time delay )         { _log->debug9( "delay_after_error["        +as_string(error_steps)+"]="+delay.as_string() ); _delay_after_error[ error_steps ] = delay; }
-    void                        set_stop_after_error        ( int error_steps )                     { _log->debug9( "delay_after_error["        +as_string(error_steps)+"]=\"STOP\""           ); _delay_after_error[ error_steps ] = latter_day; }
+    void                        set_stop_after_error        ( int error_steps )                     { _log->debug9( "delay_after_error["        +as_string(error_steps)+"]=\"STOP\""           ); _delay_after_error[ error_steps ] = Time::never; }
     void                        clear_delay_after_error     ()                                      { _log->debug9( "clear_delay_after_error()" ); _delay_after_error.clear(); }
     void                        set_delay_order_after_setback( int setbacks, const string& delay );
     void                        set_delay_order_after_setback( int setbacks, Time delay )           { _log->debug9( "delay_order_after_setback["+as_string(setbacks   )+"]="+delay.as_string() ); _delay_order_after_setback[setbacks   ] = delay; }
@@ -259,7 +259,7 @@ struct Job : Object,
     bool                        should_start_task_because_of_min_tasks();
     int                         not_ending_tasks_count      () const;
 
-    ptr<Task>                   create_task                 ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, const Time& = latter_day );
+    ptr<Task>                   create_task                 ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, const Time& = Time::never );
     ptr<Task>                   create_task                 ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, const Time&, int id );
     ptr<Task>                   get_task_from_queue         ( Time now );
     void                        run_task                    ( const ptr<Task>&  );
@@ -278,7 +278,7 @@ struct Job : Object,
 
     Time                        next_time                   ()                                      { THREAD_LOCK_RETURN( _lock, Time, _next_time ); }
     Time                        next_start_time             ();
-    bool                        has_next_start_time         ()                                      { return next_start_time() < latter_day; }
+    bool                        has_next_start_time         ()                                      { return next_start_time() < Time::never; }
     bool                     is_machine_resumable           () const                                { return _machine_resumable; }
     void                    set_machine_resumable           ( bool b )                              { _machine_resumable = b; }
 
@@ -338,7 +338,6 @@ struct Job : Object,
     void                        count_task                  ()                                      { InterlockedIncrement( &_tasks_count ); }
     void                        count_step                  ()                                      { InterlockedIncrement( &_step_count ); }
 
-    Prefix_log*                 log                         ()                                      { return _log; }
     virtual string              obj_name                    () const                                { return "Job " + _name; }
 
 
@@ -355,7 +354,6 @@ struct Job : Object,
     Fill_zero                  _zero_;
     string                     _name;
     Thread_semaphore           _lock;
-    ptr<Prefix_log>            _log;
     bool                       _waiting_for_process;        // Task kann nicht gestartet werden, weil kein Prozess in der Prozessklasse verfügbar ist
     bool                       _waiting_for_process_try_again;  
     string                     _description;                // <description>

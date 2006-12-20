@@ -84,9 +84,6 @@ struct Scheduler_event_manager : Object,
 {
                                 Scheduler_event_manager     ( Spooler* );
 
-    // Scheduler_object:
-    Prefix_log*                 log                         ()                                      { return _log; }
-
     void                        open                        ();
     void                        close_responses             ();
 
@@ -97,7 +94,6 @@ struct Scheduler_event_manager : Object,
     
   private:
     Fill_zero                  _zero_;
-    ptr<Prefix_log>            _log;
     z::File                    _event_file;
 
     typedef std::list< Get_events_command_response* >    Get_events_command_response_list;

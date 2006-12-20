@@ -740,7 +740,6 @@ Distributed_scheduler::Distributed_scheduler( Spooler* spooler )
     _zero_(this+1)
     //_backup_precedence( max_precedence )
 {
-    _log = Z_NEW( Prefix_log( spooler, obj_name() ) );
 }
 
 //----------------------------------------------------Distributed_scheduler::~Distributed_scheduler
@@ -1125,7 +1124,7 @@ bool Distributed_scheduler::do_a_heart_beat( Transaction* outer_transaction, boo
     if( !db()->opened() )  return false;
 
 
-  AGAIN:
+  //AGAIN:
     for( Retry_transaction ta ( db(), outer_transaction ); ta.enter_loop(); ta++ ) try
     {
         ok = true;
@@ -1136,12 +1135,13 @@ bool Distributed_scheduler::do_a_heart_beat( Transaction* outer_transaction, boo
         ta.commit( __FUNCTION__ );
 
 
-        bool is_in_time = check_heart_beat_is_in_time( old_next_heart_beat );
-        if( !is_in_time  &&  !was_late )
-        {
-            was_late = true;
-            if( !outer_transaction )   goto AGAIN;  // Noch einmal in neuer Transaktion, um zu prüfen, ob uns jemand die Aktivität genommen hat.
-        }
+        check_heart_beat_is_in_time( old_next_heart_beat );  // Verspätung wird nur gemeldet
+        //bool is_in_time = 
+        //if( !is_in_time  &&  !was_late )
+        //{
+        //    was_late = true;
+        //    if( !outer_transaction )   goto AGAIN;  // Noch einmal in neuer Transaktion, um zu prüfen, ob uns jemand nach dem Commit die Aktivität genommen hat (unwahrscheinlich)
+        //}
 
         //time_t now = ::time(NULL);
         //if( !was_late  &&  now - old_next_heart_beat > max_processing_time )    // Herzschlag noch in der Frist?

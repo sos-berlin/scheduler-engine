@@ -312,7 +312,6 @@ Scheduler_event_manager::Scheduler_event_manager( Spooler* spooler )
     Scheduler_object( spooler, this, Scheduler_object::type_scheduler_event_manager ),
     _zero_(this+1)
 {
-    _log = Z_NEW( Prefix_log( this, "Scheduler_event_manager" ) );
 }
 
 //------------------------------------------cheduler_event_manager::add_get_events_command_response

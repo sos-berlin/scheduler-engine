@@ -172,7 +172,6 @@ Web_service::Web_service( Spooler* sp )
     _timeout( INT_MAX ),
     _parameters( new Com_variable_set )
 {
-    _log = Z_NEW( Prefix_log( this, "Web_service" ) );
 }
 
 //------------------------------------------------------------------------Web_service::~Web_service
@@ -423,9 +422,6 @@ Web_service_operation::Web_service_operation( Web_service* ws, http::Operation* 
     _http_operation(ht),
     _id(operation_id)
 {
-    _log = Z_NEW( Prefix_log( this, "Web_service " + ws->name() ) );
-
-    _log->set_prefix( obj_name() );
     _log->set_title( obj_name() );
 
     if( _web_service->_debug  &&  _log->log_level() > log_debug_spooler )  _log->set_log_level( log_debug_spooler );
@@ -845,6 +841,13 @@ STDMETHODIMP Web_service_request::get_Binary_content( SAFEARRAY** result )
     return http_request()->get_Binary_content( result ); 
 }
 
+//--------------------------------------------------------------------Web_service_request::obj_name
+
+string Web_service_request::obj_name() const
+{ 
+    return S() << Scheduler_object::obj_name() << " " << _web_service_operation->_web_service->obj_name() << ":" << _web_service_operation->_id; 
+}
+
 //-------------------------------------------------------------------Web_service_response::_methods
 
 const Com_method Web_service_response::_methods[] =
@@ -996,6 +999,13 @@ STDMETHODIMP Web_service_response::Send() // VARIANT* content, BSTR content_type
     if( FAILED(hr) )  return hr;
 
     return http_response()->Send();
+}
+
+//-------------------------------------------------------------------Web_service_response::obj_name
+
+string Web_service_response::obj_name() const
+{ 
+    return S() << Scheduler_object::obj_name() << " " << _web_service_operation->_web_service->obj_name() << ":" << _web_service_operation->_id; 
 }
 
 //-------------------------------------------------------------------------------------------------

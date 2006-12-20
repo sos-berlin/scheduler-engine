@@ -27,10 +27,23 @@ string Scheduler_object::name_of_type_code( Scheduler_object::Type_code type_cod
         case type_scheduler_member:         return "Scheduler_member";
         case type_heart_beat:               return "Heart_beat";
         case type_exclusive_scheduler_watchdog: return "Exclusive_scheduler_watchdog";
-        case type_read_database_orders_operation: return "Read_database_orders_operation";
+        case type_database_order_detector:  return "Database_order_detector";
         case type_order_subsystem:          return "Order_subsystem";
+        case type_xml_client_connection:    return "Xml_client_connection";
         default:                            return S() << "Type_code(" << type_code << ")";
     }
+}
+
+//---------------------------------------------------------------S-cheduler_object::Scheduler_object
+
+Scheduler_object::Scheduler_object( Spooler* spooler, IUnknown* me, Type_code code )
+: 
+    _spooler(spooler), 
+    _my_iunknown(me), 
+    _scheduler_object_type_code(code)
+{
+    _log = this == spooler? Z_NEW( Prefix_log( 1 ) )        // Der Scheduler initialisiert beim Start sein Hauptprotokoll selbst
+                          : Z_NEW( Prefix_log( this ) );
 }
 
 //-----------------------------------------------------------Scheduler_object::mail_xslt_stylesheet

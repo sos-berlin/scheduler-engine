@@ -671,7 +671,7 @@ static uint __stdcall service_thread( void* param )
             set_service_status( 0, SERVICE_PAUSED );     // Das schaltet die Diensteknöpfe frei, falls der Spooler beim eMail-Versand hängt.
             event_log( x, p->_argc, p->_argv, &spooler );
           //set_service_status( 2 );
-            spooler._log.error( x.what() );
+            spooler.log()->error( x.what() );
             ret = 99;
         }
 

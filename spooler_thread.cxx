@@ -73,7 +73,7 @@ xml::Element_ptr Spooler_thread::dom_element( const xml::Document_ptr& document,
         thread_element.setAttribute( "name"           , _name );
         thread_element.setAttribute( "running_tasks"  , _running_tasks_count );
 
-        if( _next_time != 0  &&  _next_time != latter_day )
+        if( _next_time != 0  &&  _next_time != Time::never )
         thread_element.setAttribute( "sleeping_until" , _next_time.as_string() );
 
         thread_element.setAttribute( "steps"          , _step_count );
@@ -248,7 +248,7 @@ ptr<Task> Spooler_thread::get_task_or_null( int task_id )
 Task* Spooler_thread::get_next_task_to_run()
 {
     Task* next_task = NULL;
-    Time  next_time = latter_day;
+    Time  next_time = Time::never;
 
     THREAD_LOCK( _lock )
     {
@@ -269,7 +269,7 @@ Task* Spooler_thread::get_next_task()
 {
     Task* task = get_next_task_to_run();
 
-    _next_time = task? task->next_time() : latter_day;
+    _next_time = task? task->next_time() : Time::never;
 
     return task;
 }
@@ -282,7 +282,7 @@ void Spooler_thread::wait()
 
     if( _spooler->state() == Spooler::s_paused )
     {
-        _next_time = latter_day;
+        _next_time = Time::never;
         msg = "Angehalten";
     }
     else
@@ -888,7 +888,7 @@ void Spooler_thread::wait_until_thread_stopped( Time until )
 //          } 
 //          catch( const Xc& x) { _log.error(x.what()); }
 
-            wait_for_event( _thread_handle, latter_day );      // Warten, bis thread terminiert ist
+            wait_for_event( _thread_handle, Time::never );      // Warten, bis thread terminiert ist
         }
 
         _log.msg( "... stopped" );
@@ -917,7 +917,7 @@ bool Spooler_thread::try_to_free_process( Job* for_job, Process_class* process_c
                     if( task->ending() )
                     {
                         if( task->ending_since() + 60 >= now )  return;   // Task beendet sich (seit weniger als eine Minute)
-                        _spooler->_log.warn( task->obj_name() + " beendet sich jetzt schon eine Minute. Wir versuchen eine andere Task zu beenden" );
+                        _spooler->log()->warn( task->obj_name() + " beendet sich jetzt schon eine Minute. Wir versuchen eine andere Task zu beenden" );
                     }
                 }
             }

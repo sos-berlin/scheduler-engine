@@ -60,11 +60,11 @@ Job::Job( Spooler* spooler, const ptr<Module>& module )
     _module->set_log( _log );
   //_log->set_job( this );
 
-    _next_time      = latter_day;
-    _directory_watcher_next_time = latter_day;
+    _next_time      = Time::never;
+    _directory_watcher_next_time = Time::never;
     _default_params = new Com_variable_set;
-    _task_timeout   = latter_day;
-    _idle_timeout   = latter_day;
+    _task_timeout   = Time::never;
+    _idle_timeout   = Time::never;
     _max_tasks      = 1;
 }
 
@@ -399,7 +399,7 @@ void Job::init0()
     if( _module->_monitor  &&  _module->_monitor->_dom_element )  read_script( _module->_monitor );
     if( _module->set() )  _module->init();
 
-    _next_start_time = latter_day;
+    _next_start_time = Time::never;
     _period._begin = 0;
     _period._end   = 0;
 
@@ -522,7 +522,7 @@ void Job::set_run_time( const xml::Element_ptr& element )
     _start_once    = _run_time->once();
     _period._begin = 0;
     _period._end   = 0;
-    _next_single_start = latter_day;
+    _next_single_start = Time::never;
 
     if( _state != s_none )  set_next_start_time( Time::now() );
 }
@@ -961,7 +961,7 @@ Time Job::Task_queue::next_at_start_time( Time now )
         if( task->_start_at )  return task->_start_at;
     }
 
-    return latter_day;
+    return Time::never;
 }
 
 //-------------------------------------------------------------------------Job::get_task_from_queue
@@ -1340,7 +1340,7 @@ void Job::clear_when_directory_changed()
 
         _directory_watcher_list.clear();
 
-        _directory_watcher_next_time = latter_day;
+        _directory_watcher_next_time = Time::never;
     }
 }
 
@@ -1378,7 +1378,7 @@ bool Job::check_for_changed_directory( const Time& now )
 
     //Z_LOG2( "joacim", "Job::task_to_start(): Verzeichnisüberwachung _directory_watcher_next_time=" << _directory_watcher_next_time << ", now=" << now << "\n" );
     _directory_watcher_next_time = _directory_watcher_list.size() > 0? Time( now + directory_watcher_intervall )
-                                                                     : latter_day;
+                                                                     : Time::never;
     calculate_next_time();
 
 
@@ -1464,7 +1464,7 @@ void Job::select_period( Time now )
     {
         THREAD_LOCK_DUMMY( _lock )  _period = _run_time->next_period(now);  
 
-        if( _period.begin() != latter_day )
+        if( _period.begin() != Time::never )
         {
             string rep; if( _period.has_repeat_or_once() )  rep = _period._repeat.as_string();
             _log->debug( message_string( "SCHEDULER-921", _period.begin(), _period.end(), rep ) );
@@ -1489,10 +1489,10 @@ void Job::set_next_start_time( Time now, bool repeat )
     {
         select_period( now );
 
-        Time   next_start_time = latter_day;  //_next_start_time;
+        Time   next_start_time = Time::never;  //_next_start_time;
         string msg;
 
-        _next_single_start = latter_day;
+        _next_single_start = Time::never;
 
         if( _delay_until )
         {
@@ -1502,7 +1502,7 @@ void Job::set_next_start_time( Time now, bool repeat )
         else
         if( order_controlled()  &&  !_start_min_tasks  ) 
         {
-            next_start_time = latter_day;
+            next_start_time = Time::never;
         }
         else
         if( _state == s_pending )
@@ -1533,11 +1533,11 @@ void Job::set_next_start_time( Time now, bool repeat )
                         _repeat = 0;
                     }
                     else
-                    if( _period.repeat() < latter_day )
+                    if( _period.repeat() < Time::never )
                     {
                         next_start_time = now + _period.repeat();
 
-                        if( _spooler->_debug && next_start_time != latter_day )  msg = message_string( "SCHEDULER-926", _period._repeat, next_start_time );   // "Nächste Wiederholung wegen <period repeat=\""
+                        if( _spooler->_debug && next_start_time != Time::never )  msg = message_string( "SCHEDULER-926", _period._repeat, next_start_time );   // "Nächste Wiederholung wegen <period repeat=\""
 
                         if( next_start_time >= _period.end() )
                         {
@@ -1548,7 +1548,7 @@ void Job::set_next_start_time( Time now, bool repeat )
                             }
                             else
                             {
-                                next_start_time = latter_day;
+                                next_start_time = Time::never;
                                 if( _spooler->_debug )  msg = message_string( "SCHEDULER-927" );    // "Nächste Startzeit wird bestimmt zu Beginn der nächsten Periode "
                                                   else  msg = "";
                             }
@@ -1564,7 +1564,7 @@ void Job::set_next_start_time( Time now, bool repeat )
         }
         else
         {
-            next_start_time = latter_day;
+            next_start_time = Time::never;
         }
 
         if( _spooler->_debug )
@@ -1598,7 +1598,7 @@ void Job::calculate_next_time( Time now )
 
     THREAD_LOCK_DUMMY( _lock )
     {
-        Time next_time = latter_day;
+        Time next_time = Time::never;
 
         if( !_waiting_for_process )
         {
@@ -1703,35 +1703,25 @@ void Job::unregister_order_source( Order_source* order_source )
 
 bool Job::request_order( const Time& now, const string& cause )
 {
-    //bool is_first_request = !_is_requesting_order;
-
     bool result = false;
-    
-    //if( is_first_request )      // 2006-12-17 Einmal anfordern genügt
-    {
-        result = _order_queue->request_order( now );
 
-        Z_FOR_EACH( Order_source_list, _order_source_list, it )
-        {
-            Order_source* order_source = *it;
-            result = order_source->request_order( cause );
-            if( result )  break;
-        }
+    // Wir prüfen erst die Dateiauftäge (File_order). 
+    // Die gelten nur für diesen Scheduler und haben deshalb Vorrang.
+
+    Z_FOR_EACH( Order_source_list, _order_source_list, it ) 
+    {
+        Order_source* order_source = *it;
+        result = order_source->request_order( cause );
+        if( result )  break;
     }
+
+    // Jetzt prüfen wir die verteilten Aufträge.
+    // Die können auch von anderen Schedulern verarbeitet werden, und sind deshalb nachrangig.
+
+    if( !result )  result = _order_queue->request_order( now ); 
 
     return result;
 }
-
-//----------------------------------------------------------------------Job::fetch_and_occupy_order
-
-//Order* Job::fetch_and_occupy_order( const Time& now, const string& cause, Task* occupy_for_task )
-//{
-//    Order* result = _order_queue->fetch_and_occupy_order( now, occupy_for_task );
-//    if( !result )  request_order( now, cause );
-//
-//    if( result )  assert( result->is_immediately_processable( now ) );
-//    return result;
-//}
 
 //-------------------------------------------------------------------Job::notify_a_process_is_idle
 
@@ -1876,7 +1866,7 @@ ptr<Task> Job::task_to_start()
                 _directory_changed = false;
             }
 
-            if( now >= _next_single_start )  _next_single_start = latter_day;  // Vorsichtshalber, 26.9.03
+            if( now >= _next_single_start )  _next_single_start = Time::never;  // Vorsichtshalber, 26.9.03
         }
     }
     else
@@ -1967,7 +1957,7 @@ bool Job::do_something()
                                 _running_tasks.push_back( task );
                                 set_state( s_running );
 
-                                _next_start_time = latter_day;
+                                _next_start_time = Time::never;
                                 calculate_next_time();
 
                                 task->attach_to_a_thread();
@@ -2142,7 +2132,7 @@ void Job::set_state( State new_state )
 
         if( _state == s_stopped 
          || _state == s_read_error
-         || _state == s_error      )  _next_start_time = _next_time = latter_day;
+         || _state == s_error      )  _next_start_time = _next_time = Time::never;
 
         if( old_state != s_none  ||  new_state != s_stopped )  // Übergang von none zu stopped interessiert uns nicht
         {
@@ -2374,7 +2364,7 @@ xml::Element_ptr Job::dom_element( const xml::Document_ptr& document, const Show
         if( _state_cmd         )  job_element.setAttribute( "cmd"    , state_cmd_name()  );
 
         Time next = next_start_time();
-        if( next < latter_day )
+        if( next < Time::never )
         job_element.setAttribute( "next_start_time", next.as_string() );
 
         if( _delay_until )
@@ -2401,29 +2391,29 @@ xml::Element_ptr Job::dom_element( const xml::Document_ptr& document, const Show
             Time   time          = Time::now();
             Time   next_at_start = _task_queue.next_at_start_time( time );
             
-            if( next == latter_day )
+            if( next == Time::never )
             {
                 //p = _run_time->next_period( p.end() );
                 next = p.begin();
-                if( p.end() != latter_day )  time = p.end();
+                if( p.end() != Time::never )  time = p.end();
 
                 while( i-- ) {          
                     if( p.has_start()  ||  _task_queue.has_task_waiting_for_period() )  break;
                     p = _run_time->next_period( time, time::wss_next_period_or_single_start );
                     next = p.begin();
-                    if( next == latter_day        )  break;
+                    if( next == Time::never        )  break;
                     if( next > next_at_start      )  break;
                     if( next > _next_single_start )  break;
                     time = p.end();
                 }
                 
-                if( i < 0 )  next = latter_day;
+                if( i < 0 )  next = Time::never;
             }
 
             if( next > _next_single_start )  next = _next_single_start;
             if( next > next_at_start      )  next = next_at_start;
             if( _order_queue )  next = min( next, _order_queue->next_time() );
-            if( next < latter_day )  job_element.setAttribute( "next_start_time", next.as_string() );
+            if( next < Time::never )  job_element.setAttribute( "next_start_time", next.as_string() );
         }
 */
 

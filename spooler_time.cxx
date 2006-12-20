@@ -42,8 +42,9 @@ int                             Time::static_current_difference_to_utc  = 0;
 
 //--------------------------------------------------------------------------------------------const
 
-extern const int                       latter_day_int              = INT_MAX;
-extern const Time                      latter_day                  = latter_day_int;
+extern const int                       never_int                   = INT_MAX;
+extern const Time                      latter_day                  = never_int;
+       const Time                      Time::never                 = never_int;
 static const char                      last_day_name[]             = "never";
 static const char                      immediately_name[]          = "now";
 
@@ -118,9 +119,9 @@ double Time::round( double t )
 
 double Time::normalize( double t )
 {
-    return t < 0?                0 :
-           t > latter_day._time? latter_day._time
-                               : t;
+    return t < 0?                 0 :
+           t > Time::never._time? Time::never._time
+                                : t;
 }
 
 //---------------------------------------------------------------------------------Time::operator =
@@ -179,7 +180,7 @@ void Time::set( const string& t )
 
     if( t == "never" )
     {
-        *this = latter_day;
+        *this = Time::never;
     }
     else
     {
@@ -200,13 +201,13 @@ void Time::set( double t )
     _time = round(t);
     _is_utc = false;
 
-    if( _time > latter_day_int )  _time = latter_day_int;
+    if( _time > never_int )  _time = never_int;
 
 
 #   if defined Z_DEBUG && defined Z_WINDOWS
         if( _time == 0 )  _time_as_string.clear();   // Für static empty_period sollte in gcc as_string() nicht gerufen werden! (Sonst Absturz)
-                    else  _time_as_string = _time == latter_day_int? time::last_day_name
-                                                                   : as_string();
+                    else  _time_as_string = _time == never_int? time::last_day_name
+                                                              : as_string();
 #   endif
 }
 
@@ -460,7 +461,7 @@ void Period::set_default()
 {
     _begin  = "00:00:00";
     _end    = "24:00:00";
-    _repeat = latter_day;
+    _repeat = Time::never;
 }
 
 //----------------------------------------------------------------------------------Period::set_dom
@@ -483,7 +484,7 @@ void Period::set_dom( const xml::Element_ptr& element, const Period* deflt )
 
         _begin        = dt;
         _end          = dt;
-        _repeat       = latter_day;
+        _repeat       = Time::never;
         _single_start = true;
         _let_run      = true;
     }
@@ -505,7 +506,7 @@ void Period::set_dom( const xml::Element_ptr& element, const Period* deflt )
                 _repeat = as_double( repeat );
         }
 
-        if( _repeat == 0 )  _repeat = latter_day;
+        if( _repeat == 0 )  _repeat = Time::never;
     }
 
     string end = element.getAttribute( "end" , "24:00:00" );
@@ -544,8 +545,8 @@ bool Period::is_comming( Time time_of_day, With_single_start single_start ) cons
     if( single_start & wss_next_single_start  &&  _single_start  &&  time_of_day <= _begin )  result = true;
                                                                               // ^ Falls _begin == 00:00 und time_of_day == 00:00 (Beginn des nächsten Tags)
     else
-    if( single_start & wss_next_any_start  &&  ( ( _single_start || _start_once || _repeat < latter_day ) && time_of_day <= _begin ) )  result = true;
-                                                                                                                      // ^ Falls _begin == 00:00 und time_of_day == 00:00 (Beginn des nächsten Tags)
+    if( single_start & wss_next_any_start  &&  ( ( _single_start || _start_once || _repeat < Time::never ) && time_of_day <= _begin ) )  result = true;
+                                                                                                                       // ^ Falls _begin == 00:00 und time_of_day == 00:00 (Beginn des nächsten Tags)
     else
         result = false;
 
@@ -559,17 +560,17 @@ bool Period::is_comming( Time time_of_day, With_single_start single_start ) cons
 Time Period::next_try( Time t )
 {
 /* 30.5.03
-    Time result = latter_day;
+    Time result = Time::never;
 
     if( _repeat )
     {
-        result = min( Time( t + _repeat ), latter_day );
-        if( result >= end() )  result = latter_day;
+        result = min( Time( t + _repeat ), Time::never );
+        if( result >= end() )  result = Time::never;
     }
 */
     Time result = t;
 
-    if( result >= end() )  result = latter_day;
+    if( result >= end() )  result = Time::never;
 
     return result;
 }
@@ -796,7 +797,7 @@ Period At_set::next_period( Time tim, With_single_start single_start )
                 result._end          = time;
                 result._single_start = true;
                 result._let_run      = true;
-                result._repeat       = latter_day;
+                result._repeat       = Time::never;
 
                 return result;
             }
@@ -1101,7 +1102,7 @@ Period Run_time::next_period( Time tim_par, With_single_start single_start )
         next = min( next, _monthday_set.next_period( tim, single_start ) );
         next = min( next, _ultimo_set  .next_period( tim, single_start ) );
 
-        if( next.begin() != latter_day )
+        if( next.begin() != Time::never )
         {
             if( _holiday_set.find( (uint)next.begin().midnight() ) == _holiday_set.end() )  return next;  // Gefundener Zeitpunkt ist kein Feiertag? Dann ok!
             tim = next.begin().midnight() + 24*60*60;   // Feiertag? Dann nächsten Tag probieren
@@ -1156,7 +1157,7 @@ void Gmtime::set_local_time( const Time& t )
         assert( t == 0  ||  t > 30*365*3600 );
 #   endif
 
-    set( t == latter_day? double_time_max 
+    set( t == Time::never? double_time_max 
                         : gmtime_from_localtime( t ) );
 }
 
@@ -1168,7 +1169,7 @@ Time Gmtime::local_time() const
         assert( _time == 0  ||  _time > 30*365*3600 );
 #   endif
 
-    return _time == double_time_max? latter_day
+    return _time == double_time_max? Time::never
                                    : Time( localtime_from_gmtime( _time ) );
 }
 
@@ -1232,7 +1233,7 @@ double Gmtime::round( double t )
 double Gmtime::normalize( double t )
 { 
     return t < 0?                0 :
-           t > latter_day._time? latter_day._time 
+           t > Time::never._time? Time::never._time 
                                : t;
 }
 */

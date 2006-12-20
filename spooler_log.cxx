@@ -485,7 +485,7 @@ void Log::log2( Log_level level, bool log_to_files, const string& prefix, const 
             if( extra_log )  extra_log->signal_events();
             if( order_log )  order_log->signal_events();
 
-            if( this == &_spooler->_base_log )  _spooler->_log.signal_events();   // Nicht schön, aber es gibt sowieso nur ein Log.
+            if( this == &_spooler->_base_log )  _spooler->log()->signal_events();   // Nicht schön, aber es gibt sowieso nur ein Log.
         }
     }
 }
@@ -503,19 +503,19 @@ Prefix_log::Prefix_log( int )
 
 //---------------------------------------------------------------------------Prefix_log::Prefix_log
 
-Prefix_log::Prefix_log( Scheduler_object* o, const string& prefix )
+Prefix_log::Prefix_log( Scheduler_object* o )
 :
     _zero_(this+1),
     _object(o),
     _spooler(o->_spooler),
     _log(&o->_spooler->_base_log),
-    _prefix(prefix),
+    _prefix( o->obj_name() ),
     _file(-1),
   //_log_level(log_unknown),
     _mail_defaults(NULL),
     _last_level( log_unknown )
 {
-    init( o, prefix );
+    init( o );
 }
 
 //--------------------------------------------------------------------------Prefix_log::~Prefix_log
@@ -542,7 +542,7 @@ Prefix_log::~Prefix_log()
     //        //int ret = unlink( _filename.c_str() );
     //        //if( ret == -1 )  throw_errno( errno, "unlink", _filename.c_str() );
     //    }
-    //    catch( const exception&  x ) { _spooler->_log.error( message_string( "SCHEDULER-291", x ) ); }
+    //    catch( const exception&  x ) { _spooler->log()->error( message_string( "SCHEDULER-291", x ) ); }
     //}
 }
 
@@ -692,8 +692,8 @@ void Prefix_log::close()
                 send_really( &scheduler_event );
             }
         }
-        catch( const exception&  x ) { _spooler->_log.error(x.what());                         _remove_after_close = false; }
-        catch( const _com_error& x ) { _spooler->_log.error(bstr_as_string(x.Description()));  _remove_after_close = false; }
+        catch( const exception&  x ) { _spooler->log()->error(x.what());                         _remove_after_close = false; }
+        catch( const _com_error& x ) { _spooler->log()->error(bstr_as_string(x.Description()));  _remove_after_close = false; }
         */
     }
 
@@ -705,7 +705,7 @@ void Prefix_log::close()
         {
             z_unlink( _filename );
         }
-        catch( const exception&  x ) { _spooler->_log.error( message_string( "SCHEDULER-291", x ) ); }
+        catch( const exception&  x ) { _spooler->log()->error( message_string( "SCHEDULER-291", x ) ); }
     }
 
     signal_events();
@@ -730,7 +730,7 @@ void Prefix_log::close_file()
             int ret = ::close( _file );
             if( ret == -1 )  throw_errno( errno, "close", _filename.c_str() );
         }
-        catch( const exception& x ) { _spooler->_log.error( string("Error when closing protocol file: ") + x.what() ); }
+        catch( const exception& x ) { _spooler->log()->error( string("Error when closing protocol file: ") + x.what() ); }
 
         _file = -1;
 
@@ -756,7 +756,7 @@ void Prefix_log::write( const char* text, int len )
 
     if( _file == -1 )
     {
-        if( this == &_spooler->_log  ||  _spooler->log_directory() != "*stderr" )        // Datei wird noch geöffnet?
+        if( this == _spooler->_log  ||  _spooler->log_directory() != "*stderr" )        // Datei wird noch geöffnet?
         {
             _log_buffer.append( text, len );
         }
@@ -1219,7 +1219,7 @@ xml::Element_ptr Prefix_log::dom_element( const xml::Document_ptr& document, con
         }
         catch( exception& x ) 
         { 
-            _spooler->_log.warn( x.what() ); 
+            _spooler->log()->warn( x.what() ); 
             log_element.appendChild( document.createTextNode( x.what() ) );
         }
     }

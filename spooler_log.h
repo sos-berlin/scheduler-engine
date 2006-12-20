@@ -57,7 +57,7 @@ struct Prefix_log : Object, Has_log
     Fill_zero _zero_;
 
                                 Prefix_log                  ( int );                            // Für Spooler
-                                Prefix_log                  ( Scheduler_object*, const string& prefix = empty_string );
+                                Prefix_log                  ( Scheduler_object* );
                                ~Prefix_log                  ();
 
     void                        init                        ( Scheduler_object*, const string& prefix = empty_string );

@@ -39,7 +39,7 @@ struct Order : Com_order,
 
 
     // Scheduler_object:
-    Prefix_log*                 log                     ()                                          { return _log; }
+  //Prefix_log*                 log                     ()                                          { return _log; }
     void                        print_xml_child_elements_for_event( String_stream*, Scheduler_event* );
     void                        load_blobs              ( Transaction* );
 
@@ -152,6 +152,7 @@ struct Order : Com_order,
     bool                        try_place_in_job_chain  ( Job_chain* );
     void                        remove_from_job_chain   ();
     void                        remove_from_job         ();
+    bool                        tip_own_job_for_new_order_state();
     void                        add_to_blacklist        ();
     void                        move_to_node            ( Job_chain_node* );
     void                        postprocessing          ( bool success );                           // Verarbeitung nach spooler_process()
@@ -183,7 +184,7 @@ struct Order : Com_order,
     int                         db_get_ordering         ( Transaction* ta = NULL );
     Spooler_db*                 db                      ();
 
-    ptr<Prefix_log>            _log;
+  //ptr<Prefix_log>            _log;
 
 
   private:
@@ -264,8 +265,10 @@ struct Order_source : Scheduler_object, Event_operation
 {
                                 Order_source            ( Job_chain*, Scheduler_object::Type_code );
 
+
     // Scheduler_object:
-    virtual Prefix_log*         log                     ();
+    Prefix_log*                 log                     ();
+
 
     virtual void                close                   ()                                          = 0;
     virtual void                finish                  ();
@@ -347,9 +350,8 @@ struct Job_chain : Com_job_chain, Scheduler_object
     void                        close                   ();
     void                        remove                  ();
     void                        check_for_removing      ();
-    Prefix_log*                 log                     ()                                          { return &_log; }
 
-    void                    set_name                    ( const string& name )                      { _name = name,  _log.set_prefix( obj_name() ); }
+    void                    set_name                    ( const string& name )                      { _name = name,  _log->set_prefix( obj_name() ); }
     string                      name                    () const                                    { return _name; }
 
     void                    set_state                   ( State state )                             { _state = state; }
@@ -361,9 +363,9 @@ struct Job_chain : Com_job_chain, Scheduler_object
     bool                        visible                 () const                                    { return _visible; }
 
     void                    set_orders_recoverable      ( bool b )                                  { _orders_recoverable = b; }
-    void                        load_orders_from_database( Transaction* );
+    void                        add_order_from_database( Transaction* );
     int                         load_orders_from_result_set( Transaction*, Any_file* result_set );
-    Order*                      load_order_from_database_record( Transaction*, const Record& );
+    Order*                      add_order_from_database_record( Transaction*, const Record& );
 
     int                         remove_all_pending_orders( bool leave_in_database = false );
 
@@ -398,12 +400,12 @@ struct Job_chain : Com_job_chain, Scheduler_object
     void                    set_dom                     ( const xml::Element_ptr& );
     xml::Element_ptr            dom_element             ( const xml::Document_ptr&, const Show_what& );
 
-    string                      obj_name                ()                                          { return "Job_chain " + _name; }
+    string                      obj_name                () const                                    { return "Job_chain " + _name; }
 
 
     Fill_zero                  _zero_;
     bool                       _orders_recoverable;
-    bool                       _load_orders_from_database;      // load_orders_from_database() muss noch gerufen werden.
+    bool                       _load_orders_from_database;      // add_order_from_database() muss noch gerufen werden.
 
     Order_sources              _order_sources;
 
@@ -412,8 +414,6 @@ struct Job_chain : Com_job_chain, Scheduler_object
 
   private:
     friend struct               Order;
-  //Thread_semaphore           _lock;
-    Prefix_log                 _log;
     string                     _name;
     State                      _state;
     bool                       _visible;
@@ -474,10 +474,10 @@ struct Order_queue : Com_order_queue
     Order*                      fetch_and_occupy_order  ( const Time& now, const string& cause, Task* occupying_task );
     Time                        next_time               ();
     bool                        is_order_requested      ()                                          { return _is_order_requested; }
-    void                    set_had_processable_order_in_database();
-    bool                        had_processable_order_in_database()                                 { return _had_processable_order_in_database; }
+    void                    set_next_announced_order_time( const Time&, bool is_now );
+    Time                        next_announced_order_time();
   //void                        update_priorities       ();
-    ptr<Order>                  order_or_null           ( const Order::Id& );
+  //ptr<Order>                  order_or_null           ( const Order::Id& );
     Job*                        job                     () const                                    { return _job; }
     xml::Element_ptr            dom_element             ( const xml::Document_ptr&, const Show_what& , Job_chain* );
     string                      make_where_expression   ();
@@ -492,7 +492,6 @@ struct Order_queue : Com_order_queue
   private:
     friend struct               Directory_file_order_source;        // Darf _queue lesen
 
-  //Thread_semaphore           _lock;
     Job*                       _job;
     Prefix_log*                _log;
     ptr<Com_order_queue>       _com_order_queue;
@@ -500,8 +499,8 @@ struct Order_queue : Com_order_queue
     typedef list< ptr<Order> >  Queue;
     Queue                      _queue;
 
-    bool                       _had_processable_order_in_database;
     bool                       _is_order_requested;
+    Time                       _next_announced_order_time;      // Gültig, wenn _is_order_requested
 
   //int                        _lowest_priority;        // Zur Optimierung
   //int                        _highest_priority;       // Zur Optimierung
@@ -513,9 +512,6 @@ struct Order_subsystem : Object, Scheduler_object
 {
                                 Order_subsystem             ( Spooler* );
 
-
-    // Scheduler_operation
-    Prefix_log*                 log                         ()                                      { return _log; }
 
     void                        init                        ();
     void                        start                       ();
@@ -530,7 +526,6 @@ struct Order_subsystem : Object, Scheduler_object
     Job_chain*                  job_chain_or_null           ( const string& name );
     xml::Element_ptr            job_chains_dom_element      ( const xml::Document_ptr&, const Show_what& );
     void                        load_orders_from_database   ();
-    Order*                      load_order_from_database_record( Transaction*, const Record& );
     void                        check_exception             ();
     bool                        is_sharing_orders_in_database();                                    // Für verteilte (distributed) Ausführung
     void                        assert_is_sharing_orders_in_database( const string& text );
@@ -546,7 +541,6 @@ struct Order_subsystem : Object, Scheduler_object
     int                        _job_chain_map_version;             // Zeitstempel der letzten Änderung (letzter Aufruf von Spooler::add_job_chain()), 
     long32                     _next_free_order_id;
     ptr<Database_order_detector> _database_order_detector;
-    ptr<Prefix_log>            _log;
 };
 
 //-------------------------------------------------------------------------------------------------

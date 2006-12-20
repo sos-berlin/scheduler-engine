@@ -705,11 +705,11 @@ int Com_mail::send( const Mail_defaults& defaults )
 
     if( _from == ""  ||  _to == ""  ||  _subject == ""  ||  _body == "" )
     {
-        _spooler->_log.warn( message_string( "SCHEDULER-292" ) );   //"Email unterdrückt, weil From, To, Subject oder der Nachrichtentext fehlt"
+        _spooler->log()->warn( message_string( "SCHEDULER-292" ) );   //"Email unterdrückt, weil From, To, Subject oder der Nachrichtentext fehlt"
         return 0;
     }
 
-    _spooler->_log.debug( "email " + _msg->to() + ": " + _msg->subject() );
+    _spooler->log()->debug( "email " + _msg->to() + ": " + _msg->subject() );
 
 
     const double throttle = 1.0;

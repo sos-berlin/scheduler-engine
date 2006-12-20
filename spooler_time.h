@@ -11,7 +11,7 @@ namespace time {
 
 //-------------------------------------------------------------------------------------------------
 
-extern const int                latter_day_int;
+extern const int                never_int;
 
 //--------------------------------------------------------------------------------With_single_start
 
@@ -94,8 +94,8 @@ struct Time
 
     void                    set_null                        ()                              { set( 0 ); }
     bool                     is_null                        () const                        { return _time == 0; }
-    void                    set_never                       ()                              { set( latter_day_int ); } 
-    bool                     is_never                       () const                        { return _time == latter_day_int; } 
+    void                    set_never                       ()                              { set( never_int ); } 
+    bool                     is_never                       () const                        { return _time == never_int; } 
 
     static double               round                       ( double t );
     static double               normalize                   ( double t );
@@ -142,6 +142,7 @@ struct Time
 
   public:
     static int                  static_current_difference_to_utc;
+    static const Time           never;
 };      
 
 void                            insert_into_message         ( Message_string*, int index, const Time& ) throw();
@@ -156,10 +157,10 @@ struct Period
                                 Period                      ()                                      : _zero_(this+1) { init(); }
     explicit                    Period                      ( const xml::Element_ptr& e, const Period* deflt=NULL )  : _zero_(this+1) { init(); set_dom( e, deflt ); }
     
-    void                        init                        ()                                      { _begin=_end=_repeat=latter_day; }
+    void                        init                        ()                                      { _begin = _end = _repeat = Time::never; }
 
-    bool                        empty                       () const                                { return _begin == latter_day; }
-    bool                        has_start                   () const                                { return is_single_start() || repeat() != latter_day; }
+    bool                        empty                       () const                                { return _begin == Time::never; }
+    bool                        has_start                   () const                                { return is_single_start() || repeat() != Time::never; }
     Time                        next_try                    ( Time );
     Period                      operator +                  ( const Time& t ) const                 { Period p = *this; p._begin += t; p._end += t; return p; }
     friend Period               operator +                  ( const Time& t, const Period& p )      { return p+t; }
@@ -176,7 +177,7 @@ struct Period
     Time                        repeat                      () const                                { return _repeat; }
     bool                        is_single_start             () const                                { return _single_start; }
     bool                        let_run                     () const                                { return _let_run; }
-    bool                        has_repeat_or_once          () const                                { return _repeat < latter_day || _start_once; }
+    bool                        has_repeat_or_once          () const                                { return _repeat < Time::never || _start_once; }
 
   //void                        set_next_start_time         ( const Time& );
 
@@ -390,7 +391,7 @@ struct Run_time : idispatch_implementation< Run_time, spooler_com::Irun_time >,
     Period                      next_period                 ( With_single_start single_start = wss_next_period )      { return next_period( Time::now(), single_start ); }
     Period                      next_period                 ( Time, With_single_start single_start = wss_next_period );
 
-    bool                        period_follows              ( Time time )                           { return next_period(time).begin() != latter_day; }
+    bool                        period_follows              ( Time time )                           { return next_period(time).begin() != Time::never; }
 
     Time                        next_single_start           ( Time time )                           { return next_period(time,wss_next_single_start).begin(); }
     Time                        next_any_start              ( Time time )                           { return next_period(time,wss_next_any_start).begin(); }
@@ -516,7 +517,6 @@ inline void insert_into_message( Message_string* m, int index, const time::Time&
 using time::Time;
 using time::Period;
 using time::Run_time;
-using time::latter_day;
 
 } //namespace spooler
 } //namespace sos

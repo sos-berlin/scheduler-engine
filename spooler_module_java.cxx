@@ -264,7 +264,7 @@ Java_idispatch::~Java_idispatch()
             _idispatch = NULL;
 
         }
-        catch( const exception& x )  { _spooler->_log.error( _class_name + "::~Java_idispatch: " + x.what() ); }
+        catch( const exception& x )  { _spooler->log()->error( _class_name + "::~Java_idispatch: " + x.what() ); }
     }
 }
 */

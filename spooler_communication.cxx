@@ -151,7 +151,7 @@ bool Communication::Listen_socket::async_continue_( Continue_flags flags )
         {
             if( _communication->_connection_list.size() >= max_communication_connections )
             {
-                _spooler->_log.error( message_string( "SCHEDULER-286", max_communication_connections ) );
+                _spooler->log()->error( message_string( "SCHEDULER-286", max_communication_connections ) );
             }
             else
             {
@@ -658,7 +658,7 @@ bool Communication::main_thread_exists()
 
         if( kill( _spooler->_pid, 0 ) == -1  &&  errno == ESRCH )
         {
-            //_spooler->_log.error( "Kommunikations-Thread wird beendet, weil der Hauptthread (pid=" + as_string(_spooler->_pid) + ") verschwunden ist" );
+            //_spooler->log()->error( "Kommunikations-Thread wird beendet, weil der Hauptthread (pid=" + as_string(_spooler->_pid) + ") verschwunden ist" );
             //_spooler->_log verklemmt sich manchmal nach Ausgabe des Zeitstemples (vor "[ERROR]"). Vielleicht wegen einer Semaphore?
 
             //fprintf( stderr, "Kommunikations-Thread wird beendet, weil der Hauptthread (pid=%d) verschwunden ist\n", _spooler->_pid );
@@ -681,7 +681,7 @@ int Communication::bind_socket( SOCKET socket, struct sockaddr_in* sa, const str
 
     if( _spooler->_reuse_port )     // War für Suse 8 nötig. Und für Windows XP, wenn Scheduler zuvor abgestürzt ist (mit Debugger), denn dann bleibt der Port ewig blockiert
     {
-        _spooler->_log.warn( message_string( "SCHEDULER-288", port_name ) );
+        _spooler->log()->warn( message_string( "SCHEDULER-288", port_name ) );
         Z_LOG2( "scheduler", "setsockopt(" << socket << ",SOL_SOCKET,SO_REUSEADDR,1)  " );
         ret = setsockopt( socket, SOL_SOCKET, SO_REUSEADDR, (const char*)&true_, sizeof true_ );
         Z_LOG2( "scheduler", "ret=" << ret );  if( ret == SOCKET_ERROR )  Z_LOG2( "scheduler", "errno=" << errno << "  "  << z_strerror(errno) );
@@ -696,7 +696,7 @@ int Communication::bind_socket( SOCKET socket, struct sockaddr_in* sa, const str
     {
         int my_errno = errno;  // Nur für Unix
 
-        _spooler->_log.warn( message_string( "SCHEDULER-289", port_name, wait_for_port_available ) );
+        _spooler->log()->warn( message_string( "SCHEDULER-289", port_name, wait_for_port_available ) );
 
         for( int i = 1; i <= wait_for_port_available; i++ )
         {

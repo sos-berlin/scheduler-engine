@@ -13,12 +13,12 @@ const int main_scheduler_retry_time = 60;
     
 Xml_client_connection::Xml_client_connection( Spooler* sp, const Host_and_port& host_and_port )
 : 
+    Scheduler_object( sp, this, type_xml_client_connection ),
     _zero_(this+1), 
     _spooler(sp),
-    _log( sp->_log ),
     _host_and_port(host_and_port)
 {
-    _log.set_prefix( S() << "Haupt-Scheduler " << _host_and_port.as_string() );
+    _log->set_prefix( S() << "Haupt-Scheduler " << _host_and_port.as_string() );
     set_async_next_gmtime( (time_t)0 );
     //set_async_child( &_socket_operation );
 }
@@ -152,7 +152,7 @@ bool Xml_client_connection::async_continue_( Continue_flags flags )
 
                 _state = s_finished;
 
-                //_log.info( "ANTWORT: " + _recv_data );
+                //log()->info( "ANTWORT: " + _recv_data );
 
                 xml::Document_ptr response_document;
                 response_document.create();
@@ -165,7 +165,7 @@ bool Xml_client_connection::async_continue_( Continue_flags flags )
                         DOM_FOR_EACH_ELEMENT( e1, e2 )
                             if( e2.nodeName_is( "ERROR" ) )  z::throw_xc( "SCHEDULER-223", e2.getAttribute( "text" ) );
 
-                _log.info( message_string( "SCHEDULER-950" ) );   // "Scheduler ist registriert"
+                log()->info( message_string( "SCHEDULER-950" ) );   // "Scheduler ist registriert"
                 break;
             }
 
@@ -174,7 +174,7 @@ bool Xml_client_connection::async_continue_( Continue_flags flags )
     }
     catch( exception& x )
     {
-        _log.warn( x.what() );
+        log()->warn( x.what() );
 
         if( _socket_operation )
         {

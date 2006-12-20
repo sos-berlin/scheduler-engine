@@ -33,8 +33,9 @@ struct Scheduler_object
         type_scheduler_member,
         type_heart_beat,
         type_exclusive_scheduler_watchdog,
-        type_read_database_orders_operation,
-        type_order_subsystem
+        type_database_order_detector,
+        type_order_subsystem,
+        type_xml_client_connection
       //type_subprocess_register
     };
 
@@ -42,16 +43,17 @@ struct Scheduler_object
     static string               name_of_type_code           ( Type_code );
 
 
-                                Scheduler_object            ( Spooler* sp, IUnknown* me, Type_code code )         : _spooler(sp), _my_iunknown(me), _scheduler_object_type_code(code) {}
+                                Scheduler_object            ( Spooler*, IUnknown* me, Type_code );
     virtual                    ~Scheduler_object            ()                                      {}    // Für gcc
 
 
     Type_code                   scheduler_type_code         () const                                { return _scheduler_object_type_code; }
     void                    set_mail_xslt_stylesheet_path   ( const string& path )                  { _mail_xslt_stylesheet.release();  _mail_xslt_stylesheet_path = path; }
     virtual ptr<Xslt_stylesheet> mail_xslt_stylesheet       ();
-    virtual Prefix_log*         log                         ()                                      = 0;
     virtual void                print_xml_child_elements_for_event( String_stream*, Scheduler_event* )  {}
+    virtual string              obj_name                    () const                                { return name_of_type_code( _scheduler_object_type_code ); }
 
+    Prefix_log*                 log                         ()                                      { return _log; }
     Spooler_db*                 db                          () const;
     Order_subsystem*            order_subsystem             () const;
 
@@ -60,6 +62,7 @@ struct Scheduler_object
     Type_code                  _scheduler_object_type_code;
     ptr<Xslt_stylesheet>       _mail_xslt_stylesheet;
     string                     _mail_xslt_stylesheet_path;
+    ptr<Prefix_log>            _log;
 };
 
 //-------------------------------------------------------------------------------------------------

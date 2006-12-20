@@ -236,7 +236,6 @@ struct Spooler : Object,
 
     // Scheduler_object:
     void                        print_xml_child_elements_for_event( String_stream*, Scheduler_event* );
-    Prefix_log*                 log                         ()                                  { return &_log; }
 
 
     // Aufrufe für andere Threads:
@@ -350,7 +349,7 @@ struct Spooler : Object,
     void                        simple_wait_step            ();
     void                        wait                        ( Wait_handles*, const Time& wait_until, Object* wait_until_object, const Time& resume_at, Object* resume_at_object );
 
-    void                        signal                      ( const string& signal_name )       { if( _log.log_level() <= log_debug9 )  _log.debug9( "Signal \"" + signal_name + "\"" ); _event.signal( signal_name ); }
+    void                        signal                      ( const string& signal_name );
     void                        async_signal                ( const char* signal_name = "" )    { _event.async_signal( signal_name ); }
     bool                        signaled                    ()                                  { return _event.signaled(); }
 
@@ -432,7 +431,6 @@ struct Spooler : Object,
     bool                       _ip_address_as_option_set;
     string                     _version;
     Log                        _base_log;
-    Prefix_log                 _log;
     int                        _pid;
     string                     _my_program_filename;
     bool                       _is_service;                 // NT-Dienst

@@ -31,7 +31,7 @@ struct Process : zschimmer::Object, Scheduler_object
     object_server::Session*     session                     ()                                      { return _session; }
   //void                    set_event                       ( Event* e )                            { if( _connection )  _connection->set_event( e ); }
     bool                        async_continue              ();
-    double                      async_next_gmtime           ()                                      { return _connection? _connection->async_next_gmtime() : (double)latter_day; }
+    double                      async_next_gmtime           ()                                      { return _connection? _connection->async_next_gmtime() : (double)Time::never; }
     void                        add_module_instance         ( Module_instance* );
     void                        remove_module_instance      ( Module_instance* );
     int                         module_instance_count       ()                                      { return _module_instance_count; }
@@ -50,7 +50,6 @@ struct Process : zschimmer::Object, Scheduler_object
 
     void                    set_dom                         ( const xml::Element_ptr&, const Time& xml_mod_time );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
-    Prefix_log*                 log                         ()                                      { return _log; }
     string                      obj_name                    () const                                { return "Process " + as_string( pid() ); }
 
     
@@ -59,7 +58,6 @@ struct Process : zschimmer::Object, Scheduler_object
     string                     _job_name;
     int                        _task_id;
     Thread_semaphore           _lock;
-    ptr<Prefix_log>            _log;
     string                     _server_hostname;
     int                        _server_port;
     ptr<object_server::Connection> _connection;             // Verbindung zum Prozess

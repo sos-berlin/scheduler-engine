@@ -39,7 +39,6 @@ struct Distributed_scheduler : Async_operation, Scheduler_object
     bool                        async_continue_             ( Continue_flags );
 
     // Scheduler_object
-    Prefix_log*                 log                         ()                                      { return _log; }
     string                      obj_name                    () const;
 
 
@@ -120,7 +119,6 @@ struct Distributed_scheduler : Async_operation, Scheduler_object
     Async_operation*           _current_operation;
     ptr<Heart_beat>            _heart_beat;
     ptr<Exclusive_scheduler_watchdog> _exclusive_scheduler_watchdog;
-    ptr<Prefix_log>            _log;
     bool                       _closed;
 };
 

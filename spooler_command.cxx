@@ -201,7 +201,7 @@ void Command_processor::get_id_and_next( const xml::Element_ptr& element, int* i
     if( next_str != "" )  *next = as_uint(next_str);
 
     const int max_n = 1000;
-    if( abs(*next) > max_n )  *next = sgn(*next) * max_n,  _spooler->_log.warn( message_string( "SCHEDULER-285", max_n ) );
+    if( abs(*next) > max_n )  *next = sgn(*next) * max_n,  _spooler->log()->warn( message_string( "SCHEDULER-285", max_n ) );
 }
 
 //----------------------------------------------------------Command_processor::execute_show_history
@@ -1051,7 +1051,7 @@ void Command_processor::execute_http( http::Operation* http_operation )
                     }
                     else
                     {
-                        log = &_spooler->_log;  // Hauptprotokoll
+                        log = _spooler->_log;  // Hauptprotokoll
                     }
 
                     if( log )
@@ -1296,7 +1296,7 @@ xml::Document_ptr Command_processor::dom_from_xml( const string& xml_text )
     if( !ok )
     {
         string text = command_doc.error_text();
-        _spooler->_log.error( text );       // Log ist möglicherweise noch nicht geöffnet
+        _spooler->log()->error( text );       // Log ist möglicherweise noch nicht geöffnet
         throw_xc( "XML-ERROR", text );
     }
 

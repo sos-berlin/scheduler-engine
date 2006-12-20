@@ -615,7 +615,7 @@ void Operation::unlink_order()
             cancel();
         }
     }
-    catch( exception& x ) { _spooler->_log.error( x.what() ); }
+    catch( exception& x ) { _spooler->log()->error( x.what() ); }
 }
 
 //-------------------------------------------------------------------Operation::on_order_processing

@@ -2615,7 +2615,7 @@ STDMETHODIMP Com_task::Add_pid( int pid, VARIANT* timeout )
         if( !_task )  z::throw_xc( "SCHEDULER-122" );
         if( !_task->thread()  ||  current_thread_id() != _task->thread()->thread_id() )  return E_ACCESSDENIED;
 
-        Time t  = timeout->vt == VT_EMPTY || com::variant_is_missing( *timeout )? latter_day 
+        Time t  = timeout->vt == VT_EMPTY || com::variant_is_missing( *timeout )? Time::never 
                                                                                 : time_from_variant( *timeout );
         _task->add_pid( pid, t );
     }
@@ -3314,7 +3314,7 @@ STDMETHODIMP Com_spooler::put_Var( BSTR name, VARIANT* value )
 
         if( ( name == NULL || SysStringLen(name) == 0 )  &&  string_from_variant(*value) == crash_string )
         {
-            _spooler->_log.error( "spooler.var(\"\")=\"" + string(crash_string) + "\"  lässt Scheduler jetzt abbrechen." );
+            _spooler->log()->error( "spooler.var(\"\")=\"" + string(crash_string) + "\"  lässt Scheduler jetzt abbrechen." );
             dummy = *(int*)NULL;
         }
 #   endif

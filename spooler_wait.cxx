@@ -336,7 +336,7 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
 #   endif
 
 
-    if( until  &&  until < latter_day )
+    if( until  &&  until < Time::never )
     {
         if( _spooler->_zschimmer_mode  &&  _spooler->_next_daylight_saving_transition_time )
         {
@@ -428,7 +428,7 @@ bool Wait_handles::wait_until_2( const Time& until, const Object* wait_for_objec
 
     if( now < until  &&  _spooler->_waitable_timer )
     {
-        if( resume_until < latter_day )
+        if( resume_until < Time::never )
         {
             LARGE_INTEGER gmtime;
 
@@ -498,10 +498,10 @@ bool Wait_handles::wait_until_2( const Time& until, const Object* wait_for_objec
                 S console_line;
                 console_line << Time::now().as_string( Time::without_ms );
                 
-                if( until < latter_day  ||  wait_for_object )
+                if( until < Time::never  ||  wait_for_object )
                 {
                     console_line << " (";
-                    if( until < latter_day ) 
+                    if( until < Time::never ) 
                     {
                         int days = rest.day_nr();
                         if( days > 0 )  console_line << days << "d+";

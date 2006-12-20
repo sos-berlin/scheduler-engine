@@ -44,7 +44,6 @@ struct Web_service: idispatch_implementation< Web_service, spooler_com::Iweb_ser
 
 
     // Scheduler_object
-    Prefix_log*                 log                         ()                                      { return _log; }
     string                      obj_name                    () const                                { return "Web_service " + _name; }
 
     void                        start                       ();
@@ -75,7 +74,6 @@ struct Web_service: idispatch_implementation< Web_service, spooler_com::Iweb_ser
     int                        _timeout;
 
     string                     _log_filename_prefix;
-    ptr<Prefix_log>            _log;
     bool                       _log_xml;
     bool                       _debug;
 
@@ -133,7 +131,6 @@ struct Web_service_operation : idispatch_implementation< Web_service_operation, 
 
 
     // Scheduler_object
-    Prefix_log*                 log                         ()                                      { return _log; }
     string                      obj_name                    () const;
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& ) const;
     bool                        closed                      () const                                { return _http_operation == NULL; }
@@ -175,7 +172,6 @@ struct Web_service_operation : idispatch_implementation< Web_service_operation, 
     http::Operation*           _http_operation;
     Time                       _timeout_at;
     string                     _log_filename_prefix;
-    ptr<Prefix_log>            _log;
 };
 
 //----------------------------------------------------------------Web_service_stylesheet_operation 

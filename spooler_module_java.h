@@ -94,7 +94,7 @@ struct Java_module_instance : Module_instance, java::Has_vm
 
     void                        make_class                  ();
 
-    virtual string              obj_name                    ()                                      { return "Java_module_instance"; }
+    virtual string              obj_name                    () const                                { return "Java_module_instance"; }
 
 
     Fill_zero                  _zero_;

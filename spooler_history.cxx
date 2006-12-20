@@ -257,7 +257,6 @@ Spooler_db::Spooler_db( Spooler* spooler )
     _lock("Spooler_db"),
     _db_descr( z::sql::flag_uppercase_names | z::sql::flag_quote_names | z::sql::flag_dont_quote_table_names )
 {
-    _log = Z_NEW( Prefix_log( this, "Database" ) );
 }
 
 //---------------------------------------------------------------ransaction*Spooler_db::transaction

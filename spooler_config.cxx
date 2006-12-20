@@ -234,7 +234,7 @@ void Spooler::load_object_set_classes_from_xml( Object_set_class_list* liste, co
 {
     DOM_FOR_EACH_ELEMENT( element, e )
     {
-        if( e.nodeName_is( "object_set_class" ) )  liste->push_back( SOS_NEW( Object_set_class( this, &_log, e, xml_mod_time ) ) );
+        if( e.nodeName_is( "object_set_class" ) )  liste->push_back( SOS_NEW( Object_set_class( this, _log, e, xml_mod_time ) ) );
     }
 }
 

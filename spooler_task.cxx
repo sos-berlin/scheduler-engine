@@ -217,7 +217,7 @@ Task::Task( Job* job )
     _log->inherit_settings( *_job->_log );
     _log->set_mail_defaults();
 
-    _idle_timeout_at = latter_day;
+    _idle_timeout_at = Time::never;
     
     set_subprocess_timeout();
 
@@ -403,7 +403,7 @@ xml::Element_ptr Task::dom_element( const xml::Document_ptr& document, const Sho
                     }
 
 
-                    if( p->_timeout_at != latter_day )
+                    if( p->_timeout_at != Time::never )
                     subprocess_element.setAttribute( "timeout_at", p->_timeout_at.as_string() );
 
                     if( p->_title != "" )
@@ -671,11 +671,11 @@ void Task::set_state( State new_state )
         switch( new_state )
         {
             case s_waiting_for_process:
-                _next_time = latter_day;
+                _next_time = Time::never;
                 break;
 
             case s_running_process:
-                _next_time = latter_day;
+                _next_time = Time::never;
                 break;
 
             case s_running_delayed:
@@ -688,7 +688,7 @@ void Task::set_state( State new_state )
 
                 if( _state != s_running_waiting_for_order )  _idle_since = Time::now();
 
-                if( _idle_timeout_at != latter_day )
+                if( _idle_timeout_at != Time::never )
                 {
                     _next_time = min( _next_time, _idle_timeout_at );
                 }
@@ -825,7 +825,7 @@ Time Task::next_time()
     if( _operation )
     {
         result = _operation->async_finished()? Time(0) :                                    // Falls Operation synchron ist (das ist, wenn Task nicht in einem separaten Prozess l‰uft)
-                 _timeout == latter_day      ? latter_day
+                 _timeout == Time::never     ? Time::never
                                              : Time( _last_operation_time + _timeout );     // _timeout sollte nicht zu groﬂ sein
     }
     else
@@ -842,7 +842,7 @@ Time Task::next_time()
 
 bool Task::check_timeout( const Time& now )
 {
-    if( _timeout < latter_day  &&  now > _last_operation_time + _timeout  &&  !_kill_tried )
+    if( _timeout < Time::never  &&  now > _last_operation_time + _timeout  &&  !_kill_tried )
     {
         _log->error( message_string( "SCHEDULER-272", _timeout.as_time_t() ) );   // "Task wird nach nach Zeitablauf abgebrochen"
         return try_kill();
@@ -855,9 +855,9 @@ bool Task::check_timeout( const Time& now )
 
 void Task::add_pid( int pid, const Time& timeout_period )
 {
-    Time timeout_at = latter_day;
+    Time timeout_at = Time::never;
 
-    if( timeout_period != latter_day )
+    if( timeout_period != Time::never )
     {
         timeout_at = Time::now() + timeout_period;
         _log->debug9( message_string( "SCHEDULER-912", pid, timeout_at ) );
@@ -888,7 +888,7 @@ void Task::add_subprocess( int pid, double timeout, bool ignore_exitcode, bool i
     Z_LOG2( "scheduler", __FUNCTION__ << "   title=" << title << "\n" );   // Getrennt, falls Parameter¸bergabe fehlerhaftist und es zum Abbruch kommt (com_server.cxx)
     
     Time timeout_at = timeout < INT_MAX - 1? Time::now() + timeout
-                                           : latter_day;
+                                           : Time::never;
 
     _registered_pids[ pid ] = Z_NEW( Registered_pid( this, pid, timeout_at, true, ignore_exitcode, ignore_signal, is_process_group, title ) );
 
@@ -955,7 +955,7 @@ void Task::Registered_pid::try_kill()
         }
 
         _killed = true;
-        _timeout_at = latter_day;
+        _timeout_at = Time::never;
 
         close();
     }
@@ -965,10 +965,10 @@ void Task::Registered_pid::try_kill()
 
 void Task::set_subprocess_timeout()
 {
-    _subprocess_timeout = latter_day;
+    _subprocess_timeout = Time::never;
     FOR_EACH( Registered_pids, _registered_pids, p )  if( _subprocess_timeout > p->second->_timeout_at )  _subprocess_timeout = p->second->_timeout_at;
 
-    if( _subprocess_timeout != latter_day )  signal( "subprocess_timeout" );
+    if( _subprocess_timeout != Time::never )  signal( "subprocess_timeout" );
     //if( _subprocess_timeout > _next_time )  set_next_time( _subprocess_timeout );
 }
 
@@ -1188,7 +1188,7 @@ bool Task::do_something()
                                     {
                                         if( !fetch_and_occupy_order( now, state_name() ) )
                                         {
-                                            _idle_timeout_at = _job->_idle_timeout == latter_day? latter_day : now + _job->_idle_timeout;
+                                            _idle_timeout_at = _job->_idle_timeout == Time::never? Time::never : now + _job->_idle_timeout;
                                             set_state( s_running_waiting_for_order );
                                             break;
                                         }
@@ -1241,7 +1241,7 @@ bool Task::do_something()
                                 }
                                 else
                                 {
-                                    _idle_timeout_at = _job->_idle_timeout == latter_day? latter_day : now + _job->_idle_timeout;
+                                    _idle_timeout_at = _job->_idle_timeout == Time::never? Time::never : now + _job->_idle_timeout;
                                     set_state( s_running_waiting_for_order );   // _next_time neu setzen
                                     Z_LOG2( "scheduler", obj_name() << ": idle_timeout ist abgelaufen, aber force_idle_timeout=\"no\" und nicht mehr als min_tasks Tasks laufen  now=" << now << ", _next_time=" << _next_time << "\n" );
                                     //_log->debug9( message_string( "SCHEDULER-916" ) );   // "idle_timeout ist abgelaufen, Task beendet sich" 
@@ -1663,6 +1663,10 @@ Order* Task::fetch_and_occupy_order( const Time& now, const string& cause )
             _order = order;
             _order_for_task_end = order;                // Damit bei Task-Ende im Fehlerfall noch der Auftrag gezeigt wird, s. dom_element()
         }
+        else
+        {
+            _job->request_order( now, cause );
+        }
     }
 
     return _order;
@@ -1734,12 +1738,12 @@ void Task::finish()
 
         if( !_job->repeat() )   // spooler_task.repeat hat Vorrang
         {
-            Time delay = _job->_delay_after_error.empty()? latter_day : Time(0);
+            Time delay = _job->_delay_after_error.empty()? Time::never : Time(0);
 
             FOR_EACH( Job::Delay_after_error, _job->_delay_after_error, it )
                 if( _job->_error_steps >= it->first )  delay = it->second;
 
-            if( delay == latter_day )
+            if( delay == Time::never )
             {
                 _job->stop( false );
             }
@@ -1943,8 +1947,8 @@ void Task::send_collected_log()
         Scheduler_event scheduler_event ( evt_task_ended, _log->highest_level(), this );
         _log->send( -2, &scheduler_event );
     }
-    catch( const exception&  x ) { _spooler->_log.error( x.what() ); }
-    catch( const _com_error& x ) { _spooler->_log.error( bstr_as_string(x.Description()) ); }
+    catch( const exception&  x ) { _spooler->log()->error( x.what() ); }
+    catch( const _com_error& x ) { _spooler->log()->error( bstr_as_string(x.Description()) ); }
 }
 
 //--------------------------------------------------------------------------Task::set_mail_defaults

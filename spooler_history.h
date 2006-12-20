@@ -62,7 +62,6 @@ struct Spooler_db : Object, Scheduler_object
     void                        spooler_start           ();
     void                        spooler_stop            ();
 
-    Prefix_log*                 log                     ()                                          { return _log; }
     int                         get_task_id             ()                                          { return get_id( "spooler_job_id" ); }
     int                         get_order_id            ( Transaction* ta = NULL )                  { return get_id( "spooler_order_id", ta ); }
     int                         get_order_history_id    ( Transaction* ta )                         { return get_id( "spooler_order_history_id", ta ); }
@@ -117,7 +116,6 @@ struct Spooler_db : Object, Scheduler_object
     bool                       _email_sent_after_db_error;
     int                        _error_count;
     bool                       _waiting;
-    ptr<Prefix_log>            _log;
     int                        _order_id_length_max;
     Transaction*               _transaction;
 };

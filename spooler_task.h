@@ -114,7 +114,6 @@ struct Task : Object,
     bool                        do_something                ();
 
     Job*                        job                         ();
-    Prefix_log*                 log                         ()                                      { return _log; }
     Time                        next_time                   ();
     void                        calculate_next_time_after_modified_order_queue();
     Spooler_thread*             thread                      ()                                      { return _thread; }
@@ -153,7 +152,7 @@ struct Task : Object,
   //void                        set_order                   ( Order* );
     void                        postprocess_order           ( bool spooler_process_result );
 
-    void                        add_pid                     ( int pid, const Time& timeout = latter_day );
+    void                        add_pid                     ( int pid, const Time& timeout = Time::never );
     void                        remove_pid                  ( int pid );
     void                        add_subprocess              ( int pid, double timeout, bool ignore_error, bool ignore_signal, bool is_process_group, const string& title );
     void                        set_subprocess_timeout      ();
@@ -196,7 +195,7 @@ struct Task : Object,
     bool                        check_timeout               ( const Time& now );
     bool                        try_kill                    ();
     
-    bool                        wait_until_terminated       ( double wait_time = latter_day );
+    bool                        wait_until_terminated       ( double wait_time = Time::never );
     void                        set_delay_spooler_process   ( Time t )                              { _log->debug("delay_spooler_process=" + t.as_string() ); _next_spooler_process = Time::now() + t; }
 
     void                        set_state                   ( State );
@@ -260,7 +259,6 @@ struct Task : Object,
 
     Job*                       _job;
     Thread_semaphore           _lock;
-    ptr<Prefix_log>            _log;
     Spooler_thread*            _thread;
     Task_history               _history;
  
