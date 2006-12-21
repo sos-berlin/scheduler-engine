@@ -14,6 +14,7 @@ objects = \
  distributed.o\
  scheduler_client.o\
  scheduler_messages.o\
+ scheduler_object.o\
  spooler.o\
  spooler_com.o\
  spooler_common.o\
