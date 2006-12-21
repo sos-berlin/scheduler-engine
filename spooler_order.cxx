@@ -24,11 +24,12 @@ namespace spooler {
 
 //-------------------------------------------------------------------------------------------------
 
-const int    check_database_orders_period       = 15;
-const int    database_orders_read_ahead_count   = 1;
-const string database_null_at_date              = "2000-01-01 00:00";
-const string default_end_state_name             = "<END_STATE>";
-const string order_select_database_columns      = "`id`, `priority`, `state`, `state_text`, `initial_state`, `title`, `created_time`";
+const int    check_database_orders_period           = 15;
+const int    check_database_orders_period_minimum   = 1;
+const int    database_orders_read_ahead_count       = 1;
+const string database_null_at_date                  = "2000-01-01 00:00:00";
+const string default_end_state_name                 = "<END_STATE>";
+const string order_select_database_columns          = "`id`, `priority`, `state`, `state_text`, `initial_state`, `title`, `created_time`";
 
 //--------------------------------------------------------------------------Database_order_detector
 
@@ -58,6 +59,8 @@ struct Database_order_detector : Async_operation, Scheduler_object
   private:
     Fill_zero                  _zero_;
     Time                       _now;                        // Zeitpunkt von async_continue_()
+    Time                       _database_null_at_time;
+    int                        _next_check_period;
   //stdext::hash_set<string>   _names_of_requesting_jobs;
 };
 
@@ -375,14 +378,14 @@ bool Database_order_detector::async_continue_( Continue_flags )
 
     _now = Time::now();
 
-    Time read_until = _now + check_database_orders_period;
+    Time read_until             = _now + check_database_orders_period;
+    int  announced_orders_count = 0;
 
     string select_sql_begin = S() << "select %limit(" << database_orders_read_ahead_count << ") `at`, `job_chain`, `state`"
                     "  from " << _spooler->_orders_tablename <<
                     "  where `spooler_id`=" << sql::quoted( _spooler->id_for_db() ) <<
                        " and `processable` is not null"
-                       " and `processing_scheduler_member_id` is null"
-                       " and `at`<={ts'" << read_until.as_string( Time::without_ms ) << "'}";
+                       " and `processing_scheduler_member_id` is null";
 
     string select_sql_end = "  order by `at`";
 
@@ -399,6 +402,7 @@ bool Database_order_detector::async_continue_( Continue_flags )
             string select_sql = make_union_select_order_sql( select_sql_begin, select_sql_end );
             if( select_sql != "" )
             {
+                announced_orders_count +=
                 read_result_set( &ta, select_sql );
             }
         }
@@ -410,10 +414,11 @@ bool Database_order_detector::async_continue_( Continue_flags )
                 
                 if( is_job_requesting_order( job ) )
                 {
-                    string job_chain_expression = job->order_queue()->make_where_expression();
+                    string job_chain_expression = make_where_expression_for_job( job );
 
                     if( job_chain_expression != "" )
                     {
+                        announced_orders_count +=
                         read_result_set( &ta, S() << select_sql_begin + " and " + job_chain_expression << select_sql_end );
                     }
                 }
@@ -431,6 +436,7 @@ bool Database_order_detector::async_continue_( Continue_flags )
     }
     catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", x ) ); }
 
+    if( announced_orders_count )  _next_check_period = check_database_orders_period_minimum;
     set_alarm();
 
     return true;
@@ -449,7 +455,7 @@ string Database_order_detector::make_union_select_order_sql( const string& selec
 
         if( is_job_requesting_order( job ) )
         {
-            string job_chains_expression = job->order_queue()->make_where_expression();
+            string job_chains_expression = make_where_expression_for_job( job );
 
             if( job_chains_expression != "" )
             {
@@ -479,6 +485,23 @@ bool Database_order_detector::is_job_requesting_order( Job* job )
     return result;
 }
 
+//-------------------------------------------Database_order_detector::make_where_expression_for_job
+
+string Database_order_detector::make_where_expression_for_job( Job* job )
+{
+    S result;
+                  
+    result << job->order_queue()->make_where_expression();
+
+    if( !result.empty() )
+    {
+        Time t = job->order_queue()->next_announced_order_time();
+        if( t < Time::never )  result << " and `at`<{ts'" << t.as_string( Time::without_ms ) << "'}";
+    }
+
+    return result;
+}
+
 //---------------------------------------------------------Database_order_detector::read_result_set
 
 int Database_order_detector::read_result_set( Transaction* ta, const string& select_sql )
@@ -494,6 +517,7 @@ int Database_order_detector::read_result_set( Transaction* ta, const string& sel
         Time       at;
 
         at.set_datetime( record.as_string( "at" ) );
+        if( at == _database_null_at_time )  at.set_null();
         
         job->order_queue()->set_next_announced_order_time( at, at <= _now );
         
@@ -513,7 +537,9 @@ void Database_order_detector::set_alarm()
         Job* job = *j;
         if( job->order_controlled()  &&  job->order_queue()->is_order_requested() )  
         {
-            set_async_delay( check_database_orders_period );
+            if( !_next_check_period )  _next_check_period = check_database_orders_period_minimum;
+            set_async_delay( _next_check_period );
+            _next_check_period = min( 2*_next_check_period, check_database_orders_period );
             break;
         }
     }
@@ -1077,15 +1103,14 @@ void Job_chain::add_order( Order* order )
 
     set_visible( true );
 
+    Job_chain_node* node = node_from_state( order->_state );
+    if( !node->_job  || !node->_job->order_queue() )  z::throw_xc( "SCHEDULER-149", name(), debug_string_from_variant(order->_state) );
+
     order->_job_chain      = this;
     order->_job_chain_name = name();
     order->_removed_from_job_chain_name = "";
     order->_log->set_prefix( order->obj_name() );
-
-    Job_chain_node* node = node_from_state( order->_state );
-    if( !node->_job  || !node->_job->order_queue() )  z::throw_xc( "SCHEDULER-149", name(), debug_string_from_variant(order->_state) );
     order->set_job_chain_node( node );
-    //order->bind_to_job_chain( this );
 
     register_order( order );
     node->_job->order_queue()->add_order( order );
@@ -1824,10 +1849,12 @@ Order* Order_queue::load_and_occupy_next_processable_order_from_database( Task* 
 
 Time Order_queue::next_time()
 {
-    int NEXT_TIME_VON_DATENBANK_HOLEN;  //Aber nicht hier!
+    Order* order  = first_order( Time(0) );
+    Time   result = order? order->next_time() : Time::never;
 
-    Order* order = first_order( 0 );//2006-12-19   if( !_queue.empty() )  return (*_queue.begin())->next_time();
-    return order? order->next_time() : Time::never;
+    if( result > _next_announced_order_time )  result = _next_announced_order_time;
+
+    return result;
 }
 
 //-----------------------------------------------------------------------Order_queue::order_or_null

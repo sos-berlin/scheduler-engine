@@ -242,6 +242,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-373", "SOME OTHER SCHEDULER HAS STOLEN ACTIVITY" },
     { "SCHEDULER-374", "In $1, state '$2' has no job" },
     { "SCHEDULER-375", "This operation is not suppported under distributed order execution" },
+    { "SCHEDULER-376", "This operation is not suppported under distributed order execution" },
     { "SCHEDULER-900", "Scheduler $1 is starting with $2, pid=$3" },
     { "SCHEDULER-902", "state=$1" },
     { "SCHEDULER-904", "Tasks have $1s to terminate" },

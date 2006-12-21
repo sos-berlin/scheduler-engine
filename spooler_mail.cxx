@@ -720,9 +720,13 @@ int Com_mail::send( const Mail_defaults& defaults )
     }
 
 
-    return _msg->send();
+    bool result = _msg->send();
 
     _spooler->_last_mail_timestamp = Time::now();
+
+    _spooler->check( __FUNCTION__ );
+
+    return result;
 }
 
 //------------------------------------------------------------------------Com_mail::xslt_stylesheet

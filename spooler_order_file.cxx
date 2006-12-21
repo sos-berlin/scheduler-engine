@@ -429,6 +429,16 @@ bool Directory_file_order_source::request_order( const string& cause )
     return result;
 }
 
+//----------------------------------------------Directory_file_order_source::withdraw_order_request
+
+void Directory_file_order_source::withdraw_order_request()
+{
+    Z_LOGI2( "joacim", __FUNCTION__ << " " << _path << "\n" );
+
+    _expecting_request_order = false;
+    set_async_next_gmtime( double_time_max );
+}
+
 //------------------------------------------------------Directory_file_order_source::read_directory
 
 Order* Directory_file_order_source::read_directory( bool was_notified, const string& cause )

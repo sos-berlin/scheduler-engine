@@ -274,6 +274,8 @@ struct Order_source : Scheduler_object, Event_operation
     virtual void                finish                  ();
     virtual void                start                   ()                                          = 0;
     virtual bool                request_order           ( const string& cause )                     = 0;
+    virtual void                withdraw_order_request  ()                                          = 0;
+
     virtual xml::Element_ptr    dom_element             ( const xml::Document_ptr&, const Show_what& ) = 0;
 
   protected:

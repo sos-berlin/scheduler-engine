@@ -1266,6 +1266,8 @@ xml::Document_ptr Command_processor::execute( const xml::Document_ptr& command_d
     catch( const Xc& x        ) { append_error_to_answer( x );  if( _log ) _log->error( x.what() ); }
     catch( const exception& x ) { append_error_to_answer( x );  if( _log ) _log->error( x.what() ); }
 
+    //if( !_spooler->check_is_active() )  _spooler->abort_immediately( __FUNCTION__ );
+
     return _answer;
 }
 
@@ -1368,6 +1370,8 @@ void Command_processor::execute_2( const xml::Document_ptr& command_doc, const T
         }
     }
     catch( const _com_error& com_error ) { throw_com_error( com_error, "DOM/XML" ); }
+
+    if( !_spooler->ok() )  _spooler->cmd_terminate_after_error( __FUNCTION__, command_doc.xml() );
 }
 
 //--------------------------------------------------------------Command_processor::execute_commands

@@ -1703,6 +1703,10 @@ void Job::unregister_order_source( Order_source* order_source )
 
 bool Job::request_order( const Time& now, const string& cause )
 {
+    Z_LOGI2( "joacim", __FUNCTION__ << "  " << cause << "\n" );
+    assert( _order_queue );
+
+
     bool result = false;
 
     // Wir prüfen erst die Dateiauftäge (File_order). 
@@ -1721,6 +1725,25 @@ bool Job::request_order( const Time& now, const string& cause )
     if( !result )  result = _order_queue->request_order( now ); 
 
     return result;
+}
+
+//----------------------------------------------------------------------Job::withdraw_order_request
+
+void Job::withdraw_order_request()
+{
+    Z_LOGI2( "joacim", __FUNCTION__ << "\n" );
+    assert( _order_queue );
+
+    Z_FOR_EACH( Order_source_list, _order_source_list, it ) 
+    {
+        Order_source* order_source = *it;
+        order_source->withdraw_order_request();
+    }
+
+    // Jetzt prüfen wir die verteilten Aufträge.
+    // Die können auch von anderen Schedulern verarbeitet werden, und sind deshalb nachrangig.
+
+    _order_queue->withdraw_order_request(); 
 }
 
 //-------------------------------------------------------------------Job::notify_a_process_is_idle
@@ -1801,6 +1824,12 @@ ptr<Task> Job::task_to_start()
             //    has_order = request_order( now, obj_name() );
             //}
         }
+    }
+    else
+    {
+        assert( !is_in_period(now) );
+
+        if( order_controlled() )  withdraw_order_request();
     }
 
 
@@ -2002,6 +2031,9 @@ bool Job::do_something()
     }
   //catch( Stop_scheduler_exception& ) { throw; }
     catch( const exception&  x ) { set_error( x );  set_job_error( x );  sos_sleep(1); }     // Bremsen, falls sich der Fehler sofort wiederholt
+
+
+    if( something_done  &&  !_spooler->ok() )  _spooler->cmd_terminate_after_error( __FUNCTION__, obj_name() );
 
     return something_done;
 }

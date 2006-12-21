@@ -145,6 +145,9 @@ void Transaction::commit( const string& debug_text )
      
     _db = NULL;
     _guard.leave(); 
+
+
+    if( !_spooler->ok() )  _spooler->cmd_terminate_after_error( __FUNCTION__, debug_text );
 }
 
 //-----------------------------------------------------------------Transaction::intermediate_commit
@@ -183,6 +186,9 @@ void Transaction::rollback( const string& debug_text )
         _db = NULL; 
         _guard.leave(); 
     }
+
+
+    if( !_spooler->ok() )  _spooler->cmd_terminate_after_error( __FUNCTION__, debug_text );
 }
 
 //---------------------------------------------------------------------Transaction::open_result_set

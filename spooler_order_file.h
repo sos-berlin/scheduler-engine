@@ -38,6 +38,8 @@ struct Directory_file_order_source : //idispatch_implementation< Directory_file_
     void                        finish                  ();
     void                        start                   ();
     bool                        request_order           ( const string& cause );
+    void                        withdraw_order_request  ();
+
 
   private:
     void                        send_mail               ( Scheduler_event_type, const exception* );

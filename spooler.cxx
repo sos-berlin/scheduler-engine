@@ -2438,6 +2438,8 @@ void Spooler::wait_for_distributed_scheduler()
 
     set_state( previous_state );
 
+    _assert_is_active = true;
+
     if( !_spooler->is_termination_state_cmd() )  check_distributed_scheduler();
 }
 
@@ -2572,6 +2574,8 @@ void Spooler::stop( const exception* )
 
     if( _distributed_scheduler )
     {
+        _assert_is_active = false;
+
         if( _terminate_shutdown )  
         {
             _distributed_scheduler->set_command_for_all_inactive_schedulers_but_me( (Transaction*)NULL, 
@@ -2618,6 +2622,7 @@ void Spooler::stop( const exception* )
 
     if( _distributed_scheduler )
     {
+        _assert_is_active = false;
         _distributed_scheduler->close();
         _distributed_scheduler = NULL;
     }
@@ -3142,7 +3147,7 @@ void Spooler::signal( const string& signal_name )
     }
 }
 
-//------------------------------------------------------------------Spooler::check_distributed_scheduler
+//-------------------------------------------------------------Spooler::check_distributed_scheduler
 
 void Spooler::check_distributed_scheduler()
 {
@@ -3151,18 +3156,71 @@ void Spooler::check_distributed_scheduler()
     _scheduler_is_up    = _distributed_scheduler->is_scheduler_up();
   //_proper_termination = _distributed_scheduler->has_exclusiveness();
 
-    if( !_distributed_scheduler->check_is_active()  ||  _demand_exclusiveness && !_distributed_scheduler->has_exclusiveness() )
+    check_is_active();
+}
+
+//--------------------------------------------------------------------------------------Spooler::ok
+
+bool Spooler::ok()
+{
+    bool ok = true;
+    
+    if( _assert_is_active )
     {
-        kill_all_processes();
-        
-        _log->warn( message_string( _demand_exclusiveness? "SCHEDULER-367" : "SCHEDULER-362" ) );
-
-        _distributed_scheduler->show_active_schedulers( (Transaction*)NULL );
-        _distributed_scheduler->close();     // Scheduler-Mitglieds-Eintrag entfernen
-        _distributed_scheduler = NULL;       // aber Eintrag für verteilten Scheduler lassen, Scheduler ist nicht herunterfahren (wird ja vom anderen aktiven Scheuler fortgesetzt)
-
-        cmd_terminate( false, INT_MAX, false );
+        if( !check_is_active() )  
+        {
+            ok = false;
+            cmd_terminate_after_error( "", "" );
+        }
     }
+
+    return ok;
+}
+
+//-----------------------------------------------------------------------------------Spooler::check
+
+bool Spooler::check( const string& debug_function, const string& message_text )
+{
+    bool result = true;
+
+    if( !ok() )
+    {
+        cmd_terminate_after_error( debug_function, message_text );
+        result = false;
+    }
+
+    return result;
+}
+
+//-------------------------------------------------------------------------Spooler::check_is_active
+
+bool Spooler::check_is_active()
+
+// Kann nach jeder vermutlich längeren Operation aufgerufen werden, vor allem bei externer Software: Datenbank, eMail, xslt etc.
+
+{
+    bool result = true;
+
+    if( _distributed_scheduler )
+    {
+        if( !_distributed_scheduler->check_is_active()  ||  _demand_exclusiveness && !_distributed_scheduler->has_exclusiveness() )
+        {
+            _assert_is_active = false;
+
+            kill_all_processes();
+            
+            _log->warn( message_string( _demand_exclusiveness? "SCHEDULER-367" : "SCHEDULER-362" ) );
+
+            _distributed_scheduler->show_active_schedulers( (Transaction*)NULL );
+            _distributed_scheduler->close();     // Scheduler-Mitglieds-Eintrag entfernen
+            _distributed_scheduler = NULL;       // aber Eintrag für verteilten Scheduler lassen, Scheduler ist nicht herunterfahren (wird ja vom anderen aktiven Scheduler fortgesetzt)
+
+            cmd_terminate( false, INT_MAX, false );
+            result = false;
+        }
+    }
+
+    return result;
 }
 
 //------------------------------------------------------------------------Spooler::run_check_ctrl_c
@@ -3320,6 +3378,19 @@ void Spooler::cmd_stop()
     signal( "stop" );
 }
 */
+//---------------------------------------------------------------Spooler::cmd_terminate_after_error
+
+void Spooler::cmd_terminate_after_error( const string& debug_function, const string& debug_text )
+{
+    S text;
+    if( debug_function != "" )  text << "in " << debug_function;
+    if( debug_text != "" )  text << ": " << debug_text;
+
+    if( !text.empty() )  _log->error( text );
+
+    cmd_terminate( false, INT_MAX, false, false );
+}
+
 //---------------------------------------------------------------------------Spooler::cmd_terminate
 // Anderer Thread (spooler_service.cxx)
 
@@ -3354,6 +3425,14 @@ void Spooler::cmd_let_run_terminate_and_restart()
 {
     _state_cmd = sc_let_run_terminate_and_restart;
     signal( "let_run_terminate_and_restart" );
+}
+
+//-----------------------------------------------------------------------Spooler::abort_immediately
+
+void Spooler::abort_immediately( const string& message_text )
+{
+    _log->error( message_text );
+    abort_immediately( false );
 }
 
 //-----------------------------------------------------------------------Spooler::abort_immediately
@@ -3413,8 +3492,13 @@ void Spooler::abort_now( bool restart )
 void Spooler::kill_all_processes()
 {
     for( int i = 0; i < NO_OF( _process_handles ); i++ )  
+    {
         if( _process_handles[i] )  
+        {
             try_kill_process_immediately( _process_handles[i] );
+            _process_handles[i] = NULL;
+        }
+    }
 
     for( int i = 0; i < NO_OF( _pids ); i++ )
     {
@@ -3425,6 +3509,8 @@ void Spooler::kill_all_processes()
                 else  
 #           endif
                 try_kill_process_immediately( _pids[i]._pid );
+
+            _pids[i]._pid = 0;
         }
     }
 }

@@ -232,6 +232,7 @@ struct Job : Object,
     void                        set_max_order_setbacks      ( int n )                               { _log->debug9( "max_order_setbacks"+as_string(n) ); _max_order_setbacks = n; }
     int                         max_order_setbacks          () const                                { return _max_order_setbacks; }
     bool                        request_order               ( const Time& now, const string& cause );   // Fordert einen Auftrag für die _order_queue an
+    void                        withdraw_order_request      ();
     void                        register_order_source       ( Order_source* );
     void                        unregister_order_source     ( Order_source* );
     void                        load_tasks_from_db          ( Transaction* );

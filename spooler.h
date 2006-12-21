@@ -281,11 +281,12 @@ struct Spooler : Object,
     void                        cmd_reload                  ();
     void                        cmd_pause                   ()                                  { _state_cmd = sc_pause; signal( "pause" ); }
     void                        cmd_continue                ();
-  //void                        cmd_stop                    ();
+    void                        cmd_terminate_after_error   ( const string& function_name, const string& message_text );
     void                        cmd_terminate               ( bool restart = false, int timeout = INT_MAX, bool shutdown = true, bool all_schedulers = false );
     void                        cmd_terminate_and_restart   ( int timeout = INT_MAX )           { return cmd_terminate( true, timeout ); }
     void                        cmd_let_run_terminate_and_restart();
 
+    void                        abort_immediately           ( const string& message_text );
     void                        abort_immediately           ( bool restart = false );
     void                        abort_now                   ( bool restart = false );
     void                        kill_all_processes          ();
@@ -330,8 +331,11 @@ struct Spooler : Object,
     void                        start_distributed_scheduler   ();
     void                        wait_for_distributed_scheduler();
     void                        check_distributed_scheduler   ();
+    bool                        ok                          ();
+    bool                        check                       ( const string& debug_function, const string& debug_text = "" );
     bool                        do_a_heart_beat             ( Transaction* );
     bool                        is_active                   ();
+    bool                        check_is_active             ();
     bool                        has_exclusiveness           ();
     bool                        is_distributed              ();
     void                        assert_is_distributed       ( const string& message_text );
@@ -619,6 +623,7 @@ struct Spooler : Object,
     bool                       _is_distributed;
   //string                     _scheduler_member_id;
     ptr<Distributed_scheduler> _distributed_scheduler;
+    bool                       _assert_is_active;
     bool                       _scheduler_is_up;
   //bool                       _proper_termination;
     string                     _session_id;
