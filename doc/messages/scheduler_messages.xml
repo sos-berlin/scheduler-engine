@@ -2360,12 +2360,6 @@
             </text>
         </message>
 
-        <message code="SCHEDULER-376">
-            <text xml:lang="en">
-                <title>This operation is not suppported under distributed order execution</title>
-            </text>
-        </message>
-
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->

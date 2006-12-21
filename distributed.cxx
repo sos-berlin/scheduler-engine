@@ -1227,12 +1227,18 @@ bool Distributed_scheduler::check_heart_beat_is_in_time( time_t expected_next_he
     
     if( now - expected_next_heart_beat <= max_processing_time )    
     {
+        _late_heart_beat = 0;
         result = true;  // Herzschlag ist in der Frist
     }
     else
     {
         result = false;
-        _log->warn( message_string( "SCHEDULER-996", my_string_from_time_t( expected_next_heart_beat ), now - expected_next_heart_beat ) );
+
+        if( _late_heart_beat != expected_next_heart_beat )
+        {
+            _late_heart_beat = expected_next_heart_beat;
+            _log->warn( message_string( "SCHEDULER-996", my_string_from_time_t( expected_next_heart_beat ), now - expected_next_heart_beat ) );
+        }
     }
 
     return result;
@@ -1627,7 +1633,7 @@ bool Distributed_scheduler::check_is_active()
     if( _is_active )  
     {
         bool is_in_time = check_heart_beat_is_in_time( _next_heart_beat );
-        if( !is_in_time ) 
+        if( !is_in_time  &&  !db()->is_in_transaction() )      // Nicht in laufender Transaction
         {
             _log->warn( message_string( "SCHEDULER-997" ) );
             do_a_heart_beat( (Transaction*)NULL );

@@ -72,6 +72,7 @@ struct Spooler_db : Object, Scheduler_object
     void                        write_order_history     ( Order*, Transaction* = NULL );
 
     Transaction*                transaction             ();
+    bool                        is_in_transaction       ()                                          { return _transaction != NULL; }
   //void                        execute                 ( const string& stmt, const string& debug_extra = "" );
     int                         record_count            ()                                          { return _db.record_count(); }
     Dbms_kind                   dbms_kind               ()                                          { return _db.dbms_kind(); }
@@ -128,6 +129,7 @@ struct Transaction
                                ~Transaction             ();
 
     void                    set_log_sql                 ( bool b )                                  { _log_sql = b; }
+    void                        begin_transaction       ( Spooler_db* db )                          { _db = db; }
     void                        commit                  ( const string& debug_text = "" );
     void                        intermediate_commit     ( const string& debug_text = "" );
     void                        rollback                ( const string& debug_text = "" );
@@ -191,7 +193,7 @@ struct Database_retry
                                 operator bool           ()                                          { return enter_loop(); }
     bool                        enter_loop              ()                                          { return _enter_loop > 0; }
     void                        repeat_loop             ()                                          { _enter_loop = 2; }
-    void                        reopen_database_after_error( const exception& x )                   { _db->try_reopen_after_error( x ); repeat_loop(); }
+    void                        reopen_database_after_error( const exception& );
     void                        operator ++             (int)                                       { _enter_loop--; }
 
     Spooler_db*                _db;
@@ -199,16 +201,12 @@ struct Database_retry
 };
 
 //--------------------------------------------------------------------------------Retry_transaction
-// for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ )
-// try
+// for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
 // {
 //      ...
 //      ta.commit();
 // } 
-// catch( exception& x )
-// {
-//      ta.reopen_after_error( x );
-// }
+// catch( exception& x ) { ta.reopen_after_error( x ); }
 
 struct Retry_transaction : Transaction
 {
@@ -216,7 +214,7 @@ struct Retry_transaction : Transaction
 
     bool                        enter_loop              ()                                          { return _database_retry.enter_loop(); }
     void                        reopen_database_after_error( const exception& );
-    void                        operator ++             (int)                                       { _database_retry++; }
+    void                        operator ++             (int);
 
     Database_retry             _database_retry;
 };

@@ -48,6 +48,7 @@
 #include "../zschimmer/com_remote.h"
 #include "../zschimmer/xml_end_finder.h"
 #include "../zschimmer/z_signals.h"
+#include "../zschimmer/not_in_recursion.h"
 
 
 
@@ -2457,7 +2458,7 @@ bool Spooler::is_distributed()
     return _is_distributed;
 }
 
-//----------------------------------------------------------------Spooler::assert_has_exclusiveness
+//-------------------------------------------------------------------Spooler::assert_is_distributed
 
 void Spooler::assert_is_distributed( const string& text )
 {
@@ -3159,6 +3160,21 @@ void Spooler::check_distributed_scheduler()
     check_is_active();
 }
 
+//-----------------------------------------------------------------------------------Spooler::check
+
+bool Spooler::check( const string& debug_function, const string& message_text )
+{
+    bool result = true;
+
+    if( !ok() )
+    {
+        cmd_terminate_after_error( debug_function, message_text );
+        result = false;
+    }
+
+    return result;
+}
+
 //--------------------------------------------------------------------------------------Spooler::ok
 
 bool Spooler::ok()
@@ -3177,21 +3193,6 @@ bool Spooler::ok()
     return ok;
 }
 
-//-----------------------------------------------------------------------------------Spooler::check
-
-bool Spooler::check( const string& debug_function, const string& message_text )
-{
-    bool result = true;
-
-    if( !ok() )
-    {
-        cmd_terminate_after_error( debug_function, message_text );
-        result = false;
-    }
-
-    return result;
-}
-
 //-------------------------------------------------------------------------Spooler::check_is_active
 
 bool Spooler::check_is_active()
@@ -3201,22 +3202,25 @@ bool Spooler::check_is_active()
 {
     bool result = true;
 
-    if( _distributed_scheduler )
+    if( Not_in_recursion not_in_recursion = &_is_in_check_is_active )
     {
-        if( !_distributed_scheduler->check_is_active()  ||  _demand_exclusiveness && !_distributed_scheduler->has_exclusiveness() )
+        if( _distributed_scheduler )
         {
-            _assert_is_active = false;
+            if( !_distributed_scheduler->check_is_active()  ||  _demand_exclusiveness && !_distributed_scheduler->has_exclusiveness() )
+            {
+                _assert_is_active = false;
 
-            kill_all_processes();
-            
-            _log->warn( message_string( _demand_exclusiveness? "SCHEDULER-367" : "SCHEDULER-362" ) );
+                kill_all_processes();
+                
+                _log->warn( message_string( _demand_exclusiveness? "SCHEDULER-367" : "SCHEDULER-362" ) );
 
-            _distributed_scheduler->show_active_schedulers( (Transaction*)NULL );
-            _distributed_scheduler->close();     // Scheduler-Mitglieds-Eintrag entfernen
-            _distributed_scheduler = NULL;       // aber Eintrag für verteilten Scheduler lassen, Scheduler ist nicht herunterfahren (wird ja vom anderen aktiven Scheduler fortgesetzt)
+                _distributed_scheduler->show_active_schedulers( (Transaction*)NULL );
+                _distributed_scheduler->close();     // Scheduler-Mitglieds-Eintrag entfernen
+                _distributed_scheduler = NULL;       // aber Eintrag für verteilten Scheduler lassen, Scheduler ist nicht herunterfahren (wird ja vom anderen aktiven Scheduler fortgesetzt)
 
-            cmd_terminate( false, INT_MAX, false );
-            result = false;
+                cmd_terminate( false, INT_MAX, false );
+                result = false;
+            }
         }
     }
 

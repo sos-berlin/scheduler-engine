@@ -624,6 +624,7 @@ struct Spooler : Object,
   //string                     _scheduler_member_id;
     ptr<Distributed_scheduler> _distributed_scheduler;
     bool                       _assert_is_active;
+    int                        _is_in_check_is_active;
     bool                       _scheduler_is_up;
   //bool                       _proper_termination;
     string                     _session_id;

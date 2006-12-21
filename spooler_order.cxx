@@ -1823,16 +1823,21 @@ Order* Order_queue::load_and_occupy_next_processable_order_from_database( Task* 
                 bool ok = order->db_occupy_for_processing( &ta );
                 if( ok )
                 {
-                    order->occupy_for_task( occupying_task, now );
                     order->load_blobs( &ta );
+                    order->occupy_for_task( occupying_task, now );
 
                     job_chain->add_order( order );
 
                     result = order;
                 }
             }
-            catch( exception& )
+            catch( exception& x )
             {
+                ta.rollback( __FUNCTION__ );
+                order->_is_db_occupied = false;
+
+                Z_LOGI2( "scheduler", __FUNCTION__ << "  " << x.what() << "\n" );
+
                 order->close();
                 throw;
             }
@@ -2291,7 +2296,7 @@ void Order::db_release_occupation()
 
 void Order::db_update( Update_option update_option )
 {
-    if( _is_in_database &&  _job_chain  &&  _spooler->_db->opened() )
+    if( _is_in_database &&  _spooler->_db->opened() )
     {
         if( update_option == update_not_occupated  &&  _is_db_occupied )  z::throw_xc( __FUNCTION__, "is_db_occupied" );
 

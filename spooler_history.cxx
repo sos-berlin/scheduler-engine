@@ -143,11 +143,12 @@ void Transaction::commit( const string& debug_text )
 
     _db->_transaction = _outer_transaction;
      
+    Spooler_db* db = _db;
     _db = NULL;
     _guard.leave(); 
 
 
-    if( !_spooler->ok() )  _spooler->cmd_terminate_after_error( __FUNCTION__, debug_text );
+    if( !db->_transaction  &&  !_spooler->ok() )  _spooler->cmd_terminate_after_error( __FUNCTION__, debug_text );
 }
 
 //-----------------------------------------------------------------Transaction::intermediate_commit
@@ -183,12 +184,12 @@ void Transaction::rollback( const string& debug_text )
         if( db()->opened() )  execute( "ROLLBACK", debug_text );
 
         _db->_transaction = _outer_transaction;
+        Spooler_db* db = _db;
         _db = NULL; 
         _guard.leave(); 
+
+        if( !db->_transaction  &&  !_spooler->ok() )  _spooler->cmd_terminate_after_error( __FUNCTION__, debug_text );
     }
-
-
-    if( !_spooler->ok() )  _spooler->cmd_terminate_after_error( __FUNCTION__, debug_text );
 }
 
 //---------------------------------------------------------------------Transaction::open_result_set
@@ -252,6 +253,23 @@ void Retry_transaction::reopen_database_after_error( const exception& x )
     if( _outer_transaction )  throw;    // Wenn's eine äußere Transaktion gibt, dann die Schleife dort wiederholen
 
     _database_retry.reopen_database_after_error( x );
+}
+
+//--------------------------------------------------------------------Retry_transaction::operator++
+
+void Retry_transaction::operator++(int)
+{ 
+    rollback( __FUNCTION__ );  
+    begin_transaction( _database_retry._db );
+    _database_retry++; 
+}
+
+//------------------------------------------------------Database_retry::reopen_database_after_error
+
+void Database_retry::reopen_database_after_error( const exception& x )
+{ 
+    _db->try_reopen_after_error( x ); 
+    repeat_loop(); 
 }
 
 //---------------------------------------------------------------------------Spooler_db::Spooler_db

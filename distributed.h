@@ -113,6 +113,7 @@ struct Distributed_scheduler : Async_operation, Scheduler_object
     time_t                     _next_heart_beat;
     time_t                     _db_last_heart_beat;
     time_t                     _db_next_heart_beat;
+    time_t                     _late_heart_beat;
     bool                       _is_exclusiveness_stolen;
     Command                    _heart_beat_command;
     string                     _heart_beat_command_string;
