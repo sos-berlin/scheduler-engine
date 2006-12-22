@@ -115,8 +115,7 @@ struct Order : Com_order,
 
     void                    set_xml_payload             ( const string& xml );
     string                      xml_payload             () const                                    { return _xml_payload; }
-
-    void                    set_web_service             ( const string& );
+                                                                                      void                    set_web_service             ( const string& );
     void                    set_web_service             ( Web_service* );
     Web_service*                web_service             () const;
     Web_service*                web_service_or_null     () const                                    { return _web_service; }
@@ -134,6 +133,9 @@ struct Order : Com_order,
 
     bool                        suspended               ()                                          { return _suspended; }
     void                    set_suspended               ( bool b = true );
+
+    void                        inhibit_distribution    ()                                          { _is_distribution_inhibited = true; }
+    void                        assert_is_not_distributed  ( const string& debug_text );
 
     void                        start_now               ();
     void                        setback                 ();
@@ -167,8 +169,9 @@ struct Order : Com_order,
     void                        run_time_modified_event ();
 
     void                        db_insert               ();
-    bool                        db_occupy_for_processing( Transaction* );
+    bool                        db_occupy_for_processing();
     void                        db_release_occupation   ();
+    void                        db_fill_stmt            ( sql::Write_stmt* );
 
     enum Update_option { update_not_occupated, update_and_release_occupation };
     void                        db_update               ( Update_option );
@@ -242,6 +245,8 @@ struct Order : Com_order,
     bool                       _on_blacklist;           // assert( _job_chain )
     bool                       _suspended;
   //bool                       _recoverable;            // In Datenbank halten
+    bool                       _is_distribution_inhibited;
+    bool                       _is_distributed;
     bool                       _is_in_database;
     bool                       _is_db_occupied;
     State                      _occupied_state;
@@ -365,7 +370,7 @@ struct Job_chain : Com_job_chain, Scheduler_object
     bool                        visible                 () const                                    { return _visible; }
 
     void                    set_orders_recoverable      ( bool b )                                  { _orders_recoverable = b; }
-    void                        add_order_from_database( Transaction* );
+    void                        add_orders_from_database( Transaction* );
     int                         load_orders_from_result_set( Transaction*, Any_file* result_set );
     Order*                      add_order_from_database_record( Transaction*, const Record& );
 
@@ -407,7 +412,8 @@ struct Job_chain : Com_job_chain, Scheduler_object
 
     Fill_zero                  _zero_;
     bool                       _orders_recoverable;
-    bool                       _load_orders_from_database;      // add_order_from_database() muss noch gerufen werden.
+    bool                       _is_distributed;                 // Aufträge können vom verteilten Scheduler ausgeführt werden
+    bool                       _load_orders_from_database;      // add_orders_from_database() muss noch gerufen werden.
 
     Order_sources              _order_sources;
 
@@ -469,7 +475,7 @@ struct Order_queue : Com_order_queue
     bool                        empty                   ( const Job_chain* job_chain )              { return order_count( job_chain ) == 0; }
     Order*                      first_order             ( const Time& now ) const;
     Order*                      fetch_order             ( const Time& now );
-    Order*                      load_and_occupy_next_processable_order_from_database( Task* occupying_task, const Time& now );
+    Order*                      load_and_occupy_next_distributed_order_from_database( Task* occupying_task, const Time& now );
     bool                        has_order               ( const Time& now )                         { return first_order( now ) != NULL; }
     bool                        request_order           ( const Time& now );
     void                        withdraw_order_request  ();
@@ -482,7 +488,7 @@ struct Order_queue : Com_order_queue
   //ptr<Order>                  order_or_null           ( const Order::Id& );
     Job*                        job                     () const                                    { return _job; }
     xml::Element_ptr            dom_element             ( const xml::Document_ptr&, const Show_what& , Job_chain* );
-    string                      make_where_expression   ();
+    string                      make_where_expression_for_distributed_orders();
     string                      make_where_expression_for_job_chain( const Job_chain* );
 
     Order_subsystem*            order_subsystem         () const;
@@ -529,11 +535,10 @@ struct Order_subsystem : Object, Scheduler_object
     xml::Element_ptr            job_chains_dom_element      ( const xml::Document_ptr&, const Show_what& );
     void                        load_orders_from_database   ();
     void                        check_exception             ();
-    bool                        is_sharing_orders_in_database();                                    // Für verteilte (distributed) Ausführung
-    void                        assert_is_sharing_orders_in_database( const string& text );
-    void                        assert_not_sharing_orders_in_database( const string& debug_text );
-    void                        request_order_for_job       ( Job* );
+    bool                        are_orders_distributed      ();                                    // Für verteilte (distributed) Ausführung
+    void                        request_order               ();
     bool                        is_job_in_any_job_chain     ( Job* );
+    bool                        is_job_in_any_distributed_job_chain( Job* );
 
 //private:
     Fill_zero                  _zero_;

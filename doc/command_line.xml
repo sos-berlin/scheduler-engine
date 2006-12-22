@@ -211,7 +211,7 @@
                 </p>
                 <p>
                     Vorsicht: 
-                    Alle beteiligten Scheduler müssen mit <code>-exclusive</code> oder <scheduler_option name="distributed"/>
+                    Alle beteiligten Scheduler müssen mit <code>-exclusive</code> oder <scheduler_option name="distributed-orders"/>
                     gestartet werden.
                     Wenn ein Scheduler mit und einer ohne die Einstellung gestartet wird,
                     laufen zwei Scheduler gleichzeitig, was zu unerwarteten Ergebnissen führen kann.
@@ -285,7 +285,7 @@
         </command_option>
 
 
-        <command_option name="distributed" title="Verteilter Scheduler">
+        <command_option name="distributed-orders" title="Verteilter Scheduler">
             <description>
                 <p>
                     Voraussetzung ist Datenbankbetrieb

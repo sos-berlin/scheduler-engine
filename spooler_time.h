@@ -96,6 +96,8 @@ struct Time
     bool                     is_null                        () const                        { return _time == 0; }
     void                    set_never                       ()                              { set( never_int ); } 
     bool                     is_never                       () const                        { return _time == never_int; } 
+    Time                        rounded_to_next_second      () const                        { return Time( floor( _time + 0.9995 ) ); }
+
 
     static double               round                       ( double t );
     static double               normalize                   ( double t );

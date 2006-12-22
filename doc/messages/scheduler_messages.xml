@@ -2356,7 +2356,7 @@
 
         <message code="SCHEDULER-375">
             <text xml:lang="en">
-                <title>This operation is not suppported under distributed order execution</title>
+                <title>Order is distributed and therefore does not support operation <p1/></title>
             </text>
         </message>
 
@@ -3202,13 +3202,13 @@
 
         <message code="SCHEDULER-812">
             <text xml:lang="en">
-                <title>Just before processing, order has been removed in database</title>
+                <title>Just before processing, order record in database has been occupied or removed</title>
             </text>
         </message>
 
         <message code="SCHEDULER-813">
             <text xml:lang="en">
-                <title>Just before processing, order has been occupied by Scheduler <p1/></title>
+                <title>Order is occupied by Scheduler <p1/></title>
             </text>
         </message>
 
@@ -3223,7 +3223,19 @@
                 <title>Task should end, but it has just been started with an order attached, so one step will be done</title>
             </text>
         </message>
-        
+
+        <message code="SCHEDULER-816">
+            <text xml:lang="en">
+                <title>Unable to release occupation in database</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-817">
+            <text xml:lang="en">
+                <title>Missing order record in database</title>
+            </text>
+        </message>
+
     </messages>
     
 </messages>

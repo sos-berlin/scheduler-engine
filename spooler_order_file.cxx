@@ -485,6 +485,7 @@ Order* Directory_file_order_source::read_directory( bool was_notified, const str
                     {
                         ptr<Order> order = new Order( _spooler );
 
+                        order->inhibit_distribution();
                         order->set_file_path( path );
                         order->set_state( _next_state );
 

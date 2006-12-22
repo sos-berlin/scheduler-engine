@@ -1,4 +1,4 @@
-// $Id$
+ // $Id$
 /*
     Hier sind implementiert
 
@@ -27,7 +27,8 @@ namespace spooler {
 const int    check_database_orders_period           = 15;
 const int    check_database_orders_period_minimum   = 1;
 const int    database_orders_read_ahead_count       = 1;
-const string database_null_at_date                  = "2000-01-01 00:00:00";
+const string now_database_distributed_next_time     = "2000-01-01 00:00:00";        // Auftrag ist verteilt und ist sofort ausführbar
+const string never_database_distributed_next_time   = "2999-12-31 00:00:00";        // Auftrag ist verteilt, hat aber keine Startzeit (weil z.B. suspendiert)
 const string default_end_state_name                 = "<END_STATE>";
 const string order_select_database_columns          = "`id`, `priority`, `state`, `state_text`, `initial_state`, `title`, `created_time`";
 
@@ -49,17 +50,18 @@ struct Database_order_detector : Async_operation, Scheduler_object
 
 
     string                      make_union_select_order_sql ( const string& select_sql_begin, const string& select_sql_end );
-    string                      make_where_expression_for_job( Job* );
+    string                      make_where_expression_for_distributed_orders_at_job( Job* );
     bool                        is_job_requesting_order     ( Job* );
     int                         read_result_set             ( Transaction*, const string& select_sql );
     void                        set_alarm                   ();
-    void                        request_order_for_job       ( Job* );
-    void                        withdraw_order_request_for_job( Job* );
+    void                        request_order               ();
+  //void                        withdraw_order_request_for_job( Job* );
 
   private:
     Fill_zero                  _zero_;
     Time                       _now;                        // Zeitpunkt von async_continue_()
-    Time                       _database_null_at_time;
+    Time                       _now_database_distributed_next_time;
+    Time                       _never_database_distributed_next_time;
     int                        _next_check_period;
   //stdext::hash_set<string>   _names_of_requesting_jobs;
 };
@@ -86,7 +88,7 @@ void Order_subsystem::start()
 {
     Z_LOGI2( "scheduler", __FUNCTION__ << "\n" );
 
-    if( is_sharing_orders_in_database() )
+    if( are_orders_distributed() )
     {
         _database_order_detector = Z_NEW( Database_order_detector( _spooler ) );
         _database_order_detector->set_async_manager( _spooler->_connection_manager );
@@ -169,7 +171,7 @@ void Order_subsystem::add_job_chain( Job_chain* job_chain )
         */
 
 
-        if( !order_subsystem()->is_sharing_orders_in_database()  &&  job_chain->_orders_recoverable )
+        if( _spooler->has_exclusiveness()  &&  job_chain->_orders_recoverable )
         {
             if( !_spooler->db()  ||  !_spooler->db()->opened() )  // Beim Start des Schedulers
             {
@@ -179,7 +181,7 @@ void Order_subsystem::add_job_chain( Job_chain* job_chain )
             {
                 for( Retry_transaction ta ( db() ); ta.enter_loop(); ta++ ) try
                 {
-                    job_chain->add_order_from_database( &ta );
+                    job_chain->add_orders_from_database( &ta );
                 }
                 catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_orders_tablename, x ) ); }
             }
@@ -271,11 +273,27 @@ bool Order_subsystem::is_job_in_any_job_chain( Job* job )
     return false;
 }
 
+//---------------------------------------------Order_subsystem::is_job_in_any_distributed_job_chain
+
+bool Order_subsystem::is_job_in_any_distributed_job_chain( Job* job )
+{
+    if( are_orders_distributed() ) 
+    {
+        Z_FOR_EACH( Job_chain_map, _job_chain_map, jc )
+        {
+            Job_chain* job_chain = jc->second;
+            if( job_chain->_is_distributed  &&  job_chain->contains_job( job ) )  return true;
+        }
+    }
+
+    return false;
+}
+
 //-------------------------------------------------------Order_subsystem::load_orders_from_database
 
 void Order_subsystem::load_orders_from_database()
 {
-    if( db()->opened()  &&  !is_sharing_orders_in_database() )
+    if( db()->opened()  &&  _spooler->has_exclusiveness() )
     {
         Transaction ta ( db() );
 
@@ -283,41 +301,29 @@ void Order_subsystem::load_orders_from_database()
         {
             Job_chain* job_chain = it->second;
             if( job_chain->_load_orders_from_database )
-                job_chain->add_order_from_database( &ta );  // Die Jobketten aus der XML-Konfiguration
+            {
+                job_chain->add_orders_from_database( &ta );  // Die Jobketten aus der XML-Konfiguration
+            }
         }
 
         ta.commit( __FUNCTION__ );
     }
 }
 
-//---------------------------------------------------Order_subsystem::is_sharing_orders_in_database
+//----------------------------------------------------------Order_subsystem::are_orders_distributed
 
-bool Order_subsystem::is_sharing_orders_in_database()
+bool Order_subsystem::are_orders_distributed()
 {
-    return _spooler->is_distributed();
+    return _spooler->are_orders_distributed();
 }
 
-//--------------------------------------------Order_subsystem::assert_is_sharing_orders_in_database
+//-------------------------------------------------------------------Order_subsystem::request_order
 
-void Order_subsystem::assert_is_sharing_orders_in_database( const string& debug_text )
-{
-    return _spooler->assert_is_distributed( debug_text );
-}
-
-//-------------------------------------------Order_subsystem::assert_not_sharing_orders_in_database
-
-void Order_subsystem::assert_not_sharing_orders_in_database( const string& debug_text )
-{
-    if( is_sharing_orders_in_database() )  z::throw_xc( "SCHEDULER-375", debug_text );
-}
-
-//-----------------------------------------------------------Order_subsystem::request_order_for_job
-
-void Order_subsystem::request_order_for_job( Job* job )
+void Order_subsystem::request_order()
 {
     if( _database_order_detector )
     {
-        _database_order_detector->request_order_for_job( job );
+        _database_order_detector->request_order();
     }
 }
 
@@ -335,6 +341,8 @@ Database_order_detector::Database_order_detector( Spooler* spooler )
     _zero_(this+1),
     Scheduler_object( spooler, this, Scheduler_object::type_database_order_detector )
 {
+    _now_database_distributed_next_time  .set_datetime( now_database_distributed_next_time   );
+    _never_database_distributed_next_time.set_datetime( never_database_distributed_next_time );
 }
 
 //---------------------------------------------------------Database_order_detector::async_finished_
@@ -373,7 +381,7 @@ string Database_order_detector::async_state_text_() const
 bool Database_order_detector::async_continue_( Continue_flags )
 {
     Z_LOGI2( "scheduler.distributed", __FUNCTION__ << "  " << async_state_text() << "\n" );
-    order_subsystem()->assert_is_sharing_orders_in_database( __FUNCTION__);
+    _spooler->assert_are_orders_distributed( __FUNCTION__);
 
 
     _now = Time::now();
@@ -381,13 +389,13 @@ bool Database_order_detector::async_continue_( Continue_flags )
     Time read_until             = _now + check_database_orders_period;
     int  announced_orders_count = 0;
 
-    string select_sql_begin = S() << "select %limit(" << database_orders_read_ahead_count << ") `at`, `job_chain`, `state`"
+    string select_sql_begin = S() << "select %limit(" << database_orders_read_ahead_count << ") `distributed_next_time`, `job_chain`, `state`"
                     "  from " << _spooler->_orders_tablename <<
                     "  where `spooler_id`=" << sql::quoted( _spooler->id_for_db() ) <<
-                       " and `processable` is not null"
+                       " and `distributed_next_time` is not null"
                        " and `processing_scheduler_member_id` is null";
 
-    string select_sql_end = "  order by `at`";
+    string select_sql_end = "  order by `distributed_next_time`";
 
     
     bool database_can_limit_union_selects = db()->dbms_kind() == dbms_oracle  ||  
@@ -414,7 +422,7 @@ bool Database_order_detector::async_continue_( Continue_flags )
                 
                 if( is_job_requesting_order( job ) )
                 {
-                    string job_chain_expression = make_where_expression_for_job( job );
+                    string job_chain_expression = make_where_expression_for_distributed_orders_at_job( job );
 
                     if( job_chain_expression != "" )
                     {
@@ -455,7 +463,7 @@ string Database_order_detector::make_union_select_order_sql( const string& selec
 
         if( is_job_requesting_order( job ) )
         {
-            string job_chains_expression = make_where_expression_for_job( job );
+            string job_chains_expression = make_where_expression_for_distributed_orders_at_job( job );
 
             if( job_chains_expression != "" )
             {
@@ -485,18 +493,20 @@ bool Database_order_detector::is_job_requesting_order( Job* job )
     return result;
 }
 
-//-------------------------------------------Database_order_detector::make_where_expression_for_job
+//---------------------Database_order_detector::make_where_expression_for_distributed_orders_at_job
 
-string Database_order_detector::make_where_expression_for_job( Job* job )
+string Database_order_detector::make_where_expression_for_distributed_orders_at_job( Job* job )
 {
     S result;
                   
-    result << job->order_queue()->make_where_expression();
+    result << job->order_queue()->make_where_expression_for_distributed_orders();
 
     if( !result.empty() )
     {
         Time t = job->order_queue()->next_announced_order_time();
-        if( t < Time::never )  result << " and `at`<{ts'" << t.as_string( Time::without_ms ) << "'}";
+        assert( t );
+
+        if( t < Time::never )  result << " and `distributed_next_time`<{ts'" << t.as_string( Time::without_ms ) << "'}";
     }
 
     return result;
@@ -514,12 +524,13 @@ int Database_order_detector::read_result_set( Transaction* ta, const string& sel
         Record     record    = result_set.get_record();
         Job_chain* job_chain = order_subsystem()->job_chain( record.as_string( "job_chain" ) );
         Job*       job       = job_chain->job_from_state( record.as_string( "state" ) );
-        Time       at;
+        Time       distributed_next_time;
 
-        at.set_datetime( record.as_string( "at" ) );
-        if( at == _database_null_at_time )  at.set_null();
+        distributed_next_time.set_datetime( record.as_string( "distributed_next_time" ) );
+        if( distributed_next_time == _now_database_distributed_next_time   )  distributed_next_time.set_null();
+        if( distributed_next_time == _never_database_distributed_next_time )  distributed_next_time.set_never();
         
-        job->order_queue()->set_next_announced_order_time( at, at <= _now );
+        job->order_queue()->set_next_announced_order_time( distributed_next_time, distributed_next_time <= _now );
         
         //_names_of_requesting_jobs.erase( job->name() );
         count++;
@@ -547,7 +558,7 @@ void Database_order_detector::set_alarm()
 
 //-----------------------------------------------------------Database_order_detector::request_order
 
-void Database_order_detector::request_order_for_job( Job* job )
+void Database_order_detector::request_order()
 
 // Nur einmal für einen Job rufen, solange der Job keinen neuen Auftrag bekommen hast! Order_queue::request_order() kümmert sich darum.
 
@@ -564,12 +575,11 @@ void Database_order_detector::request_order_for_job( Job* job )
     }
 }
 
-//------------------------------------------Database_order_detector::withdraw_order_request_for_job
+//--------------------------------------------------Database_order_detector::withdraw_order_request
 
-void Database_order_detector::withdraw_order_request_for_job( Job* job )
-{
-    //_names_of_requesting_jobs.erase( job->name() );
-}
+//void Database_order_detector::withdraw_order_request()
+//{
+//}
 
 //-----------------------------------------------------------------------Order_source::Order_source
 
@@ -713,8 +723,6 @@ xml::Element_ptr Job_chain_node::dom_element( const xml::Document_ptr& document,
 
 int Job_chain_node::order_count( Job_chain* job_chain )
 {
-    int DATENBANK_LESEN;
-
     return _job? _job->order_queue()->order_count( job_chain ) : 0;
 }
 
@@ -774,8 +782,12 @@ void Job_chain::set_dom( const xml::Element_ptr& element )
     if( !element )  return;
 
     set_name(             element.     getAttribute( "name" ) );
-    _visible            = element.bool_getAttribute( "visible"           , _visible );
+    _visible            = element.bool_getAttribute( "visible"           , _visible            );
     _orders_recoverable = element.bool_getAttribute( "orders_recoverable", _orders_recoverable );
+
+    if( order_subsystem()->are_orders_distributed() )
+    _is_distributed     = element.bool_getAttribute( "distributed"       , _is_distributed     );
+
 
     DOM_FOR_EACH_ELEMENT( element, e )
     {
@@ -1097,7 +1109,8 @@ Job_chain_node* Job_chain::first_node()
 
 void Job_chain::add_order( Order* order )
 {
-    assert( order_subsystem()->is_sharing_orders_in_database() == order->_is_db_occupied );
+    assert( order->_is_distributed == order->_is_db_occupied );
+    assert( !order->_is_distributed || _is_distributed );
     if( state() != s_ready )  z::throw_xc( "SCHEDULER-151" );
     if( has_order_id( order->id() ) )  z::throw_xc( "SCHEDULER-186", order->obj_name(), name() );
 
@@ -1166,9 +1179,9 @@ void Job_chain::remove_order( Order* order )
 //    set_job_chain_node( node );
 //}
 
-//-------------------------------------------------------------Job_chain::add_order_from_database
+//-------------------------------------------------------------Job_chain::add_orders_from_database
 
-void Job_chain::add_order_from_database( Transaction* ta )
+void Job_chain::add_orders_from_database( Transaction* ta )
 {
     assert( _orders_recoverable );
     _spooler->assert_has_exclusiveness( __FUNCTION__ );
@@ -1183,9 +1196,10 @@ void Job_chain::add_order_from_database( Transaction* ta )
         ( 
             S() << "select " << order_select_database_columns <<
             "  from " << _spooler->_orders_tablename <<
-            "  where \"SPOOLER_ID\"=" << sql::quoted(_spooler->id_for_db()) <<
-              " and \"JOB_CHAIN\"="  << sql::quoted(_name) <<
-            "  order by \"ORDERING\"",
+            "  where `spooler_id`=" << sql::quoted(_spooler->id_for_db()) <<
+              " and `job_chain`="  << sql::quoted(_name) <<
+              " and `distributed_next_time` is null"
+            "  order by `ordering`",
             __FUNCTION__
         );
 
@@ -1301,7 +1315,7 @@ int Job_chain::order_count()
     int       result = 0;
     set<Job*> jobs;             // Jobs können (theoretisch) doppelt vorkommen, sollen aber nicht doppelt gezählt werden.
 
-    if( order_subsystem()->is_sharing_orders_in_database() )
+    if( _is_distributed )
     {
         for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
         {
@@ -1374,7 +1388,7 @@ void Job_chain::unregister_order( Order* order )
 
 void Job_chain::add_to_blacklist( Order* order )
 {
-    order_subsystem()->assert_not_sharing_orders_in_database( __FUNCTION__ );
+    order->assert_is_not_distributed( __FUNCTION__ );
 
     _blacklist_map[ order->string_id() ] = order;
     //_blacklist.push_back( order );
@@ -1508,21 +1522,27 @@ xml::Element_ptr Order_queue::dom_element( const xml::Document_ptr& document, co
 
 int Order_queue::order_count( const Job_chain* which_job_chain )
 {
-    int result;
+    int result = 0;
 
-    if( order_subsystem()->is_sharing_orders_in_database() )
+    if( which_job_chain )
+    {
+        FOR_EACH( Queue, _queue, it )  if( (*it)->_job_chain == which_job_chain )  result++;
+    }
+    else
+    {
+        result += _queue.size();
+    }
+
+
+    if( order_subsystem()->are_orders_distributed() )
     {
         string w = which_job_chain? make_where_expression_for_job_chain( which_job_chain )
-                                  : make_where_expression();
-        if( w == "" )
-        {
-            result = 0;
-        }
-        else
+                                  : make_where_expression_for_distributed_orders();
+        if( w != "" )
         {
             for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
             {
-                result = ta.open_result_set
+                int count = ta.open_result_set
                             (
                                 S() << "select count(*)  from " << _spooler->_orders_tablename <<
                                        "  where `spooler_id`=" << sql::quoted( _spooler->id_for_db() ) <<
@@ -1530,23 +1550,10 @@ int Order_queue::order_count( const Job_chain* which_job_chain )
                             ).get_record().as_int( 0 );
 
                 ta.commit( __FUNCTION__ );
+
+                result += count;
             }
             catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", x ) ); }
-        }
-    }
-    else
-    {
-        if( which_job_chain )
-        {
-            int count = 0;
-
-            FOR_EACH( Queue, _queue, it )  if( (*it)->_job_chain == which_job_chain )  count++;
-
-            result = count;
-        }
-        else
-        {
-            result = _queue.size();
         }
     }
 
@@ -1660,15 +1667,13 @@ bool Order_queue::request_order( const Time& now )
     {
         if( first_order( now ) )
         {
-            assert( !order_subsystem()->is_sharing_orders_in_database() );
             result = true;
         }
         else
         if( !_is_order_requested    // Das erste Mal?
-         && order_subsystem()->is_sharing_orders_in_database()  
-         && order_subsystem()->is_job_in_any_job_chain( _job ) )  // Das ist bei vielen Jobketten nicht effizent
+         && order_subsystem()->is_job_in_any_distributed_job_chain( _job ) )  // Das ist bei vielen Jobketten nicht effizent
         {
-            order_subsystem()->request_order_for_job( _job );     // Nur einmal rufen, bis ein neuer Auftrag für den Job eingetrifft
+            order_subsystem()->request_order();     // Nur einmal rufen, bis ein neuer Auftrag für den Job eingetrifft
             _is_order_requested = true;
         }
     }
@@ -1682,10 +1687,10 @@ void Order_queue::withdraw_order_request()
 {
     _is_order_requested = false;
 
-    if( _spooler->_order_subsystem  &&  _spooler->_order_subsystem->_database_order_detector )
-    {
-        _spooler->_order_subsystem->_database_order_detector->withdraw_order_request_for_job( _job );
-    }
+    //if( _spooler->_order_subsystem  &&  _spooler->_order_subsystem->_database_order_detector )
+    //{
+    //    _spooler->_order_subsystem->_database_order_detector->withdraw_order_request_for_job( _job );
+    //}
 }
 
 //-------------------------------------------------------Order_queue::set_next_announced_order_time
@@ -1734,7 +1739,7 @@ Order* Order_queue::first_order( const Time& now ) const
         if( order->next_time() > now )  break;
     }
 
-    if( result )  assert( !order_subsystem()->is_sharing_orders_in_database() );
+    if( result )  assert( !result->_is_distributed );
 
     return result;
 }
@@ -1775,7 +1780,7 @@ Order* Order_queue::fetch_and_occupy_order( const Time& now, const string& cause
 
     if( order )  
     {
-        assert( !order_subsystem()->is_sharing_orders_in_database() );
+        assert( !order->_is_distributed );
         order->occupy_for_task( occupying_task, now );
     }
     else
@@ -1784,7 +1789,8 @@ Order* Order_queue::fetch_and_occupy_order( const Time& now, const string& cause
         _is_order_requested = false;            // Nächster request_order() führt zum async_wake() des Database_order_detector
         _next_announced_order_time = Time::never;
 
-        order = load_and_occupy_next_processable_order_from_database( occupying_task, now );
+        order = load_and_occupy_next_distributed_order_from_database( occupying_task, now );
+        if( order )  assert( order->_is_distributed );
         // Möglicherweise NULL
     }
 
@@ -1795,57 +1801,69 @@ Order* Order_queue::fetch_and_occupy_order( const Time& now, const string& cause
     return order;
 }
 
-//--------------------------------Order_queue::load_and_occupy_next_processable_order_from_database
+//--------------------------------Order_queue::load_and_occupy_next_distributed_order_from_database
 
-Order* Order_queue::load_and_occupy_next_processable_order_from_database( Task* occupying_task, const Time& now )
+Order* Order_queue::load_and_occupy_next_distributed_order_from_database( Task* occupying_task, const Time& now )
 {
-    Order* result   = NULL;
+    Order* result    = NULL;
     S      select_sql;
+
 
     select_sql << "select %limit(1)  `job_chain`, " << order_select_database_columns <<
                 "  from " << _spooler->_orders_tablename << " %update_lock" 
                 "  where `spooler_id`=" << sql::quoted(_spooler->id_for_db()) <<
+                   " and `distributed_next_time`<{ts'" << never_database_distributed_next_time << "'}"
                    " and `processing_scheduler_member_id` is null" << 
-                   " and " << make_where_expression() <<
-                "  order by `at`, `priority`, `ordering`";
+                   " and " << make_where_expression_for_distributed_orders() <<
+                "  order by `distributed_next_time`, `priority`, `ordering`";
 
-    for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
-    {
-        Any_file result_set = ta.open_result_set( select_sql );
-        if( !result_set.eof() )
+    //try
+    //{
+        ptr<Order> order;
+
+        for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
         {
-            Record     record    = result_set.get_record();
-            ptr<Order> order     = new Order( _spooler, record, record.as_string( "job_chain" ) );
-            Job_chain* job_chain = order_subsystem()->job_chain( order->_job_chain_name );
-
-            try
+            Any_file result_set = ta.open_result_set( select_sql );
+            if( !result_set.eof() )
             {
-                bool ok = order->db_occupy_for_processing( &ta );
-                if( ok )
-                {
-                    order->load_blobs( &ta );
-                    order->occupy_for_task( occupying_task, now );
-
-                    job_chain->add_order( order );
-
-                    result = order;
-                }
-            }
-            catch( exception& x )
-            {
-                ta.rollback( __FUNCTION__ );
-                order->_is_db_occupied = false;
-
-                Z_LOGI2( "scheduler", __FUNCTION__ << "  " << x.what() << "\n" );
-
-                order->close();
-                throw;
+                Record record = result_set.get_record();
+                order = new Order( _spooler, record, record.as_string( "job_chain" ) );
             }
         }
+        catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", x ) ); }
 
-        ta.commit( __FUNCTION__ );
-    }
-    catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", x ) ); }
+
+        if( order )
+        {
+            order->_is_distributed = true;
+            
+            Job_chain* job_chain = order_subsystem()->job_chain( order->_job_chain_name );
+            assert( job_chain->_is_distributed );
+
+            bool ok = order->db_occupy_for_processing();
+            if( ok )
+            {
+                for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
+                {
+                    order->load_blobs( &ta );
+                    ta.commit( __FUNCTION__ );
+                }
+                catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", x ) ); }
+        
+                order->occupy_for_task( occupying_task, now );
+                job_chain->add_order( order );
+
+                result = order;
+            }
+        }
+    //}
+    //catch( exception& x )
+    //{
+    //    Z_LOGI2( "scheduler", __FUNCTION__ << "  " << x.what() << "\n" );
+    //    if( order )  order->close();
+    //    throw;
+    //}
+
 
     return result;
 }
@@ -1854,8 +1872,19 @@ Order* Order_queue::load_and_occupy_next_processable_order_from_database( Task* 
 
 Time Order_queue::next_time()
 {
-    Order* order  = first_order( Time(0) );
-    Time   result = order? order->next_time() : Time::never;
+    Time result = Time::never;
+
+    Z_FOR_EACH_CONST( Queue, _queue, o )
+    {
+        Order* order = *o;
+
+        if( order->is_processable() )
+        {
+            assert( !order->_is_distributed );
+            result = order->next_time();
+            break;
+        }
+    }
 
     if( result > _next_announced_order_time )  result = _next_announced_order_time;
 
@@ -1875,7 +1904,7 @@ Time Order_queue::next_time()
 
 //---------------------------------------------------------------Order_queue::make_where_expression
 
-string Order_queue::make_where_expression()
+string Order_queue::make_where_expression_for_distributed_orders()
 {
     S   result;
     int is_in_any_job_chain = 0;
@@ -1883,14 +1912,16 @@ string Order_queue::make_where_expression()
     Z_FOR_EACH( Order_subsystem::Job_chain_map, order_subsystem()->_job_chain_map, jc )
     {
         Job_chain* job_chain = jc->second;
-
-        string w = make_where_expression_for_job_chain( job_chain );
-        if( w != "" )
+        if( job_chain->_is_distributed )
         {
-            if( is_in_any_job_chain )  result << " or ";
-            is_in_any_job_chain++;
+            string w = make_where_expression_for_job_chain( job_chain );
+            if( w != "" )
+            {
+                if( is_in_any_job_chain )  result << " or ";
+                is_in_any_job_chain++;
 
-            result << w;
+                result << w;
+            }
         }
     }
 
@@ -1898,7 +1929,7 @@ string Order_queue::make_where_expression()
                                    : "( " + result + " )";
 }
 
-//---------------------------------------------------------------Order_queue::make_where_expression
+//-------------------------------------------------Order_queue::make_where_expression_for_job_chain
 
 string Order_queue::make_where_expression_for_job_chain( const Job_chain* job_chain )
 {
@@ -2109,6 +2140,13 @@ bool Order::is_processable()
     return true;
 }
 
+//--------------------------------------------------------------------Order::assert_is_not_distributed
+
+void Order::assert_is_not_distributed( const string& debug_text )
+{
+    if( !_is_distributed )  z::throw_xc( "SCHEDULER-375", debug_text );
+}
+
 //----------------------------------------------------------------------------Order::assert_no_task
 
 void Order::assert_no_task()
@@ -2135,10 +2173,9 @@ bool Order::occupy_for_task( Task* task, const Time& now )
 
     if( _moved )  z::throw_xc( "SCHEDULER-0", obj_name() + " _moved=true?" );
 
-    _task       = task;
+    _setback = 0;
+    _task    = task;
     if( !_start_time )  _start_time = now;      
-    Z_DEBUG_ONLY( assert( !_setback ) );  // Schon in first_order() gelöscht
-    _setback    = 0;
 
     if( _is_virgin  &&  _http_operation )  _http_operation->on_first_order_processing( task );
     _is_virgin = false;
@@ -2149,11 +2186,12 @@ bool Order::occupy_for_task( Task* task, const Time& now )
 
 //------------------------------------------------------------------Order::db_occupy_for_processing
 
-bool Order::db_occupy_for_processing( Transaction* ta )
+bool Order::db_occupy_for_processing()
 {
+    assert( _is_distributed );
     assert( _job_chain == NULL );   // Der Auftrag kommt erst nach der Belegung in die Jobkette, deshalb ist _job_chain == NULL
 
-    order_subsystem()->assert_is_sharing_orders_in_database( __FUNCTION__ );
+    _spooler->assert_are_orders_distributed( __FUNCTION__ );
 
     sql::Update_stmt update = db_update_stmt();
 
@@ -2164,14 +2202,26 @@ bool Order::db_occupy_for_processing( Transaction* ta )
     //update.and_where_condition( "id"        , id().as_string()    );
     update.and_where_condition( "state"     , state().as_string() );
     update.and_where_condition( "processing_scheduler_member_id", sql::null_value );
-int COMMIT;
-    bool update_ok = ta->try_execute_single( update, __FUNCTION__ );
+
+
+    bool update_ok = false;
+
+    for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
+    {
+        update_ok = ta.try_execute_single( update, __FUNCTION__ );
+        ta.commit( __FUNCTION__ );
+    }
+    catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", x ) ); }
+
     
-    if( update_ok )  _is_db_occupied = true, _occupied_state = _state;
+    if( update_ok )
+    {
+        _is_db_occupied = true, _occupied_state = _state;
+    }
     else
     {
-        update.remove_where_condition( "processing_scheduler_member_id" );
-        db_show_occupation( ta, log_debug9 );
+        _log->debug( message_string( "SCHEDULER-812" ) );
+        db_show_occupation( (Transaction*)NULL, log_debug9 );
     }
 
     return _is_db_occupied;
@@ -2189,7 +2239,7 @@ void Order::db_show_occupation( Transaction* outer_transaction, Log_level log_le
 
         if( result_set.eof() )
         {
-            _log->log( log_level, message_string( "SCHEDULER-812" ) );      int SCHEDULER_812;  // Die Fehlermeldung stimmt nicht immer
+            _log->log( log_level, message_string( "SCHEDULER-817" ) );
         }
         else
         {
@@ -2231,11 +2281,11 @@ void Order::db_insert()
             insert[ "priority"      ] = priority()                  , _priority_modified   = false;
             insert[ "initial_state" ] = initial_state().as_string();
 
-            insert.set_datetime( "at"          , _setback? _setback.as_string( Time::without_ms ) : database_null_at_date );
-            insert.set_datetime( "created_time", _created.as_string(Time::without_ms) );
-            insert.set_datetime( "mod_time"    , Time::now().as_string(Time::without_ms) );
+            db_fill_stmt( &insert );
 
-            if( is_processable() )  insert[ "processable"   ] = true;
+            insert.set_datetime( "created_time", _created.as_string(Time::without_ms) );
+
+            //if( is_processable() )  insert[ "processable"   ] = true;
 
             ta.execute( insert, __FUNCTION__ );
         }
@@ -2280,7 +2330,7 @@ void Order::db_release_occupation()
             bool update_ok = ta.try_execute_single( update, __FUNCTION__ );
             if( !update_ok ) 
             {
-                _log->error( "Unable to release occupation in database" );
+                _log->error( message_string( "SCHEDULER-816" ) );
                 db_show_occupation( &ta, log_error );
             }
 
@@ -2339,9 +2389,9 @@ void Order::db_update( Update_option update_option )
 
             update[ "state"         ] = state_string;
             update[ "initial_state" ] = initial_state().as_string();
-            update[ "processable"   ] = is_processable()? sql::Value(true) : sql::null_value;
-            update.set_datetime( "at"      , _setback? _setback.as_string( Time::without_ms ) : database_null_at_date );
-            update.set_datetime( "mod_time", Time::now().as_string(Time::without_ms) );
+          //update[ "processable"   ] = is_processable()? sql::Value(true) : sql::null_value;
+
+            db_fill_stmt( &update );
 
             if( _priority_modified   )  update[ "priority"   ] = priority();
             if( _title_modified      )  update[ "title"      ] = title();
@@ -2393,7 +2443,7 @@ void Order::db_update( Update_option update_option )
             else
             if( _is_db_occupied )
             {
-                //_log->error( "OCCUPATION LOST" );
+                _log->error( message_string( "SCHEDULER-816" ) );
                 db_show_occupation( NULL, log_error );
             }
         }
@@ -2408,6 +2458,27 @@ void Order::db_update( Update_option update_option )
     else
     if( finished() )  
         _spooler->_db->write_order_history( this );
+}
+
+//------------------------------------------------------------------------------Order::db_fill_stmt
+
+void Order::db_fill_stmt( sql::Write_stmt* stmt )
+{
+    stmt->set_datetime( "mod_time", Time::now().as_string(Time::without_ms) );
+
+
+    string t;
+
+    if( _is_distributed )
+    {
+        Time next_time = this->next_time().rounded_to_next_second();
+
+        t = next_time.is_null ()? now_database_distributed_next_time :
+            next_time.is_never()? never_database_distributed_next_time 
+                                : next_time.as_string( Time::without_ms );
+    }
+
+    if( stmt->is_update()  ||  t != "" )  stmt->set_datetime( "distributed_next_time", t );
 }
 
 //------------------------------------------------------------------------------Order::db_read_clob
@@ -3138,7 +3209,7 @@ void Order::set_job_chain_node( Job_chain_node* node, bool is_error_state )
 
 void Order::move_to_node( Job_chain_node* node )
 {
-    order_subsystem()->assert_not_sharing_orders_in_database( __FUNCTION__ );
+    assert_is_not_distributed( __FUNCTION__ );
 
     if( _on_blacklist )  _job_chain->remove_from_blacklist( this );
 
@@ -3198,7 +3269,7 @@ Com_job* Order::com_job()
 
 void Order::add_to_job( const string& job_name )
 {
-    order_subsystem()->assert_not_sharing_orders_in_database( __FUNCTION__ );
+    assert_is_not_distributed( __FUNCTION__ );
 
     //THREAD_LOCK( _lock )
     {
@@ -3227,7 +3298,7 @@ void Order::remove_from_job()
 
 void Order::add_to_order_queue( Order_queue* order_queue )
 {
-    order_subsystem()->assert_not_sharing_orders_in_database( __FUNCTION__ );
+    assert_is_not_distributed( __FUNCTION__ );
 
     if( !order_queue )  z::throw_xc( "SCHEDULER-147", "?" );
 
@@ -3289,7 +3360,7 @@ void Order::place_in_job_chain( Job_chain* job_chain )
 
 //----------------------------------------------------------------------Order::try_place_in_job_chain
 
-bool Order::try_place_in_job_chain( Job_chain* job_chain)
+bool Order::try_place_in_job_chain( Job_chain* job_chain )
 {
     bool result = false;
 
@@ -3308,7 +3379,9 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain)
 
         set_setback( _state == _initial_state  &&  !_setback  &&  _run_time->set()? next_start_time( true ) : _setback );
 
-        if( order_subsystem()->is_sharing_orders_in_database() )
+        _is_distributed = !_is_distribution_inhibited  &&  job_chain->_is_distributed;
+
+        if( _is_distributed  )
         {
             _job_chain_name = job_chain->name();
             _removed_from_job_chain_name = "";
@@ -3333,7 +3406,7 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain)
 
 void Order::place_or_replace_in_job_chain( Job_chain* job_chain )
 {
-    order_subsystem()->assert_not_sharing_orders_in_database( __FUNCTION__ );
+    assert_is_not_distributed( __FUNCTION__ );
 
     if( ptr<Order> other_order = job_chain->order_or_null( id() ) )   // Nicht aus der Datenbank gelesen
     {
@@ -3425,6 +3498,8 @@ void Order::postprocessing( bool success )
 
             if( _job_chain_node )
             {
+                assert( _job_chain );
+
                 if( _job_chain_node->_job )
                 {
                     if( !_job_chain_node->_job->order_queue() )  _log->warn( "Job " + _job_chain_node->_job->obj_name() + " without order queue (§1495)" );  // Problem §1495
@@ -3438,7 +3513,7 @@ void Order::postprocessing( bool success )
 
                 if( _job_chain_node  &&  _job_chain_node->_job )
                 {
-                    if( !order_subsystem()->is_sharing_orders_in_database() )
+                    if( !_is_distributed )
                     {
                         _job_chain_node->_job->order_queue()->add_order( this );
                     }
@@ -3565,7 +3640,7 @@ void Order::postprocessing2( Job* last_job )
         }
     }
 
-    if( _job_chain  &&  order_subsystem()->is_sharing_orders_in_database() )
+    if( _is_distributed  &&  _job_chain )
     {
         _job_chain->remove_order( this );
     }
@@ -3596,7 +3671,7 @@ void Order::set_suspended( bool suspended )
 
 void Order::add_to_blacklist()
 { 
-    order_subsystem()->assert_not_sharing_orders_in_database( __FUNCTION__ );
+    assert_is_not_distributed( __FUNCTION__ );
 
     assert( _job_chain );
     if( _in_job_queue )  remove_from_job();
@@ -3683,8 +3758,8 @@ void Order::set_at( const Time& time )
 
 Time Order::next_time()
 {
-    if( _suspended )  return Time::never;
-    return _setback;
+    return is_processable()? _setback 
+                           : Time::never;
 }
 
 //---------------------------------------------------------------------------Order::next_start_time

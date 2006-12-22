@@ -473,6 +473,7 @@ void Web_service_operation::begin()
 
         ptr<Order> order = new Order( _spooler );
 
+        order->inhibit_distribution();
         order->set_delay_storing_until_processing( true );  // Erst speichern, wenn eine Task den Auftrag ausführt
         order->place_in_job_chain( _spooler->order_subsystem()->job_chain( _web_service->_job_chain_name ) );
         _http_operation->link_order( order );                // ~Order ruft Http_operation::unlink_order()

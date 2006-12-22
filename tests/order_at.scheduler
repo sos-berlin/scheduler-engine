@@ -25,12 +25,16 @@ if( spooler.job_chain( "my_job_chain" ).order_count == 0 )
     order.params = spooler.create_variable_set();
     order.params("my_var") = "my_value";
     spooler.job_chain( "my_job_chain" ).add_order( order );
-    
-    spooler.job( "perl" ).start();
-    spooler.job( "java" ).start();
 
-    if( spooler.db_name == "" )  spooler_log.warn( "Der Test funktioniert nur mit Datenbank" );
-    //else x = spooler.execute_xml( '<modify_spooler cmd="terminate_and_restart"/>' );
+    try
+    {
+        spooler.job( "perl" ).start();
+        spooler.job( "java" ).start();
+
+        if( spooler.db_name == "" )  spooler_log.warn( "Der Test funktioniert nur mit Datenbank" );
+        //else x = spooler.execute_xml( '<modify_spooler cmd="terminate_and_restart"/>' );
+    }
+    catch( x ) { spooler_log.error( x.message ); }
 }
 else
 {

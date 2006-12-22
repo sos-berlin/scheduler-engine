@@ -337,8 +337,8 @@ struct Spooler : Object,
     bool                        is_active                   ();
     bool                        check_is_active             ();
     bool                        has_exclusiveness           ();
-    bool                        is_distributed              ();
-    void                        assert_is_distributed       ( const string& message_text );
+    bool                        are_orders_distributed      ();
+    void                        assert_are_orders_distributed( const string& message_text );
     void                        assert_has_exclusiveness    ( const string& message_text );
     string                      scheduler_member_id         ();
 
@@ -620,7 +620,7 @@ struct Spooler : Object,
     int                        _backup_precedence;
     bool                       _has_backup_precedence;
     bool                       _demand_exclusiveness;
-    bool                       _is_distributed;
+    bool                       _are_orders_distributed;
   //string                     _scheduler_member_id;
     ptr<Distributed_scheduler> _distributed_scheduler;
     bool                       _assert_is_active;

@@ -197,7 +197,7 @@ void Transaction::rollback( const string& debug_text )
 Any_file Transaction::open_result_set( const string& sql, const string& debug_text )
 { 
     string native_sql = db()->_db.sos_database_session()->translate_sql( sql );
-    return open_file_2( "-in " + db()->db_name(), "%native " + native_sql, debug_text, false, native_sql );
+    return open_file_2( "-in " + db()->db_name(), "-read-only %native " + native_sql, debug_text, false, native_sql );
 }
 
 //---------------------------------------------------------------------------Transaction::open_file
@@ -408,8 +408,8 @@ void Spooler_db::create_tables_when_needed()
                             "\"JOB_CHAIN\"   varchar(100) not null,"        // Primärschlüssel
                             "\"ID\"          varchar(" << const_order_id_length_max << ") not null,"        // Primärschlüssel
                             "\"SPOOLER_ID\"  varchar(100),"                         // Index bei mehreren Scheduler-Ids
-                            "\"AT\"          datetime,"
-                            "\"PROCESSABLE\" boolean not null,"                     // Index
+                            "\"DISTRIBUTED_NEXT_TIME\"   datetime,"                 // Auftrag ist verteilt ausführbar
+                          //"\"PROCESSABLE\" boolean not null,"                     // Index
                             "\"PROCESSING_SCHEDULER_MEMBER_ID\" varchar(100),"      // Index
                             "\"PRIORITY\"    integer not null,"
                             "\"STATE\"       varchar(100),"
@@ -428,8 +428,8 @@ void Spooler_db::create_tables_when_needed()
     add_column( &ta, _spooler->_orders_tablename, "INITIAL_STATE" , "add \"INITIAL_STATE\" varchar(100)" );
     add_column( &ta, _spooler->_orders_tablename, "RUN_TIME"      , "add \"RUN_TIME\"      clob" );
     add_column( &ta, _spooler->_orders_tablename, "ORDER_XML"     , "add \"ORDER_XML\"     clob" );
-    add_column( &ta, _spooler->_orders_tablename, "PROCESSABLE"   , "add \"PROCESSABLE\"   boolean" );
-    add_column( &ta, _spooler->_orders_tablename, "AT"            , "add \"AT\"            datetime" );
+  //add_column( &ta, _spooler->_orders_tablename, "PROCESSABLE"   , "add \"PROCESSABLE\"   boolean" );
+    add_column( &ta, _spooler->_orders_tablename, "DISTRIBUTED_NEXT_TIME", "add \"DISTRIBUTED_NEXT_TIME\" datetime" );
     add_column( &ta, _spooler->_orders_tablename, "PROCESSING_SCHEDULER_MEMBER_ID", "add \"PROCESSING_SCHEDULER_MEMBER_ID\" varchar(100)" );
     
 
@@ -1092,6 +1092,7 @@ void Transaction::execute( const string& stmt, const string& debug_text )
     try
     {
         bool was_transaction_used = _db->_db.is_transaction_used();
+        bool was_transaction_written = _db->_db.is_transaction_written();
 
         _db->_db.put( "%native " + native_sql ); 
 
@@ -1099,11 +1100,10 @@ void Transaction::execute( const string& stmt, const string& debug_text )
         {
             S line;
 
-            if( !was_transaction_used  &&  ( stmt == "COMMIT" || stmt == "ROLLBACK" ) )
-            //if( !_transaction_written  &&  ( stmt == "COMMIT" || stmt == "ROLLBACK" ) )
+            if( !was_transaction_written  &&  ( stmt == "COMMIT" || stmt == "ROLLBACK" ) )
             {
                 line << lcase( native_sql );     // Wenn das zuverlässig läuft, kann auf commit/rollback verzichtet werden
-                Z_DEBUG_ONLY( line << ( _transaction_read? " (read only)" :" (empty transaction)" ) );
+                Z_DEBUG_ONLY( line << ( was_transaction_used? " (read only)" :" (empty transaction)" ) );
             }
             else
                 line << native_sql;

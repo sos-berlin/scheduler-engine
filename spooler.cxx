@@ -1887,7 +1887,7 @@ void Spooler::load_arg()
             else
             if( opt.with_value( "backup-precedence"      ) )  _backup_precedence = opt.as_int(), _has_backup_precedence = true;
             else
-            if( opt.flag      ( "distributed"            ) )  _is_distributed = opt.set();
+            if( opt.flag      ( "distributed-orders"     ) )  _are_orders_distributed = opt.set();
             else
             //if( opt.flag      ( "member-id"              ) )  _scheduler_member_id = opt.set();
             //else
@@ -1905,7 +1905,7 @@ void Spooler::load_arg()
         }
 
         if( _is_backup_member && !_demand_exclusiveness )  z::throw_xc( "SCHEDULER-368", "-backup", "-exclusive" );
-        //if( _is_distributed && _demand_exclusiveness    )  z::throw_xc( "SCHEDULER-369", "-distributed", "-exclusive" );
+        //if( _are_orders_distributed && _demand_exclusiveness    )  z::throw_xc( "SCHEDULER-369", "-distributed", "-exclusive" );
 
         if( _is_service )  _interactive = false;
 
@@ -2319,7 +2319,7 @@ void Spooler::start()
 
     // Datenbank
 
-    if( _is_distributed || _demand_exclusiveness ) 
+    if( _are_orders_distributed || _demand_exclusiveness ) 
     {
         if( _db_name == "" )  z::throw_xc( "SCHEDULER-357" ); 
         _need_db = true;
@@ -2345,7 +2345,7 @@ void Spooler::start()
 #   endif
 
 
-    if( _demand_exclusiveness || _is_distributed )  
+    if( _demand_exclusiveness || _are_orders_distributed )  
     {
         start_distributed_scheduler();
         wait_for_distributed_scheduler();
@@ -2451,25 +2451,25 @@ bool Spooler::is_active()
     return !_distributed_scheduler || _distributed_scheduler->is_active();
 }
 
-//--------------------------------------------------------------------------Spooler::is_distributed
+//------------------------------------------------------------------Spooler::are_orders_distributed
 
-bool Spooler::is_distributed()
+bool Spooler::are_orders_distributed()
 {
-    return _is_distributed;
+    return _are_orders_distributed;
 }
 
-//-------------------------------------------------------------------Spooler::assert_is_distributed
+//-----------------------------------------------------------Spooler::assert_are_orders_distributed
 
-void Spooler::assert_is_distributed( const string& text )
+void Spooler::assert_are_orders_distributed( const string& text )
 {
-    if( !is_distributed() )  z::throw_xc( "SCHEDULER-370", text );
+    if( !are_orders_distributed() )  z::throw_xc( "SCHEDULER-370xx", text );
 }
 
 //---------------------------------------------------------------------Spooler::scheduler_member_id
 
 string Spooler::scheduler_member_id()
 {
-    //assert_is_distributed( __FUNCTION__ );
+    //assert_are_orders_distributed( __FUNCTION__ );
     assert( _distributed_scheduler );
 
     return _distributed_scheduler? _distributed_scheduler->member_id() : "";
@@ -2488,7 +2488,6 @@ void Spooler::assert_has_exclusiveness( const string& text )
 {
     if( !has_exclusiveness() )
     {
-        Z_DEBUG_ONLY( assert(0) );
         z::throw_xc( "SCHEDULER-366", text );
     }
 }
@@ -2899,17 +2898,19 @@ void Spooler::run()
                 FOR_EACH_JOB( it )
                 {
                     Job* job = *it;
-
-                    Time next_job_time = job->next_time();
-
-                    if( job->is_machine_resumable()  &&  resume_at > next_job_time )  resume_at = next_job_time,  resume_at_object = job;
-
-                    if( wait_until > next_job_time  
-                     || wait_until == next_job_time && job->visible() )   // wait_until_object sollte nicht auf einen unsichtbaren Job zeigen
+                    if( job->order_controlled()  ||  has_exclusiveness() )
                     {
-                        wait_until = next_job_time;
-                        wait_until_object = job;
-                        if( wait_until == 0 )  break;
+                        Time next_job_time = job->next_time();
+
+                        if( job->is_machine_resumable()  &&  resume_at > next_job_time )  resume_at = next_job_time,  resume_at_object = job;
+
+                        if( wait_until > next_job_time  
+                         || wait_until == next_job_time && job->visible() )   // wait_until_object sollte nicht auf einen unsichtbaren Job zeigen
+                        {
+                            wait_until = next_job_time;
+                            wait_until_object = job;
+                            if( wait_until == 0 )  break;
+                        }
                     }
                 }
             }

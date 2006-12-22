@@ -32,7 +32,7 @@
                         <scheduler_option name="install-service"/>
                     </li>
                     <li>
-                        <scheduler_option name="distributed"/> (im Test)
+                        <scheduler_option name="distributed-orders"/> (im Test)
                     </li>
                     <li>
                         <scheduler_element name="terminate" attribute="restart"/>
@@ -45,6 +45,9 @@
                     </li>
                     <li>
                         <scheduler_element name="terminate" attribute="all_schedulers"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="job_chain" attribute="distributed" value="yes"/>
                     </li>
                     <!--li>
                         <scheduler_element name="show_schedulers"/>
