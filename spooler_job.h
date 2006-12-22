@@ -214,7 +214,7 @@ struct Job : Object,
   //Spooler_thread*             thread                      () const                                { return _thread; }
     string                      job_state                   ();
     string                      include_path                () const;
-    string                      title                       ()                                      { string title; THREAD_LOCK( _lock )  title = _title;  return title; }
+    string                      title                       ()                                      { return _title; }
     string                      jobname_as_filename         ();
     string                      profile_section             ();
     void                    set_visible                     ( bool b )                              { _visible = b; }
@@ -277,7 +277,7 @@ struct Job : Object,
     void                        calculate_next_time         ( Time now = Time::now() );
     void                        calculate_next_time_after_modified_order_queue();
 
-    Time                        next_time                   ()                                      { THREAD_LOCK_RETURN( _lock, Time, _next_time ); }
+    Time                        next_time                   ()                                      { return _next_time; }
     Time                        next_start_time             ();
     bool                        has_next_start_time         ()                                      { return next_start_time() < Time::never; }
     bool                     is_machine_resumable           () const                                { return _machine_resumable; }
@@ -289,8 +289,8 @@ struct Job : Object,
     bool                        do_something                ();
     bool                        should_removed              ();
 
-    void                    set_repeat                      ( double seconds )                      { THREAD_LOCK( _lock )  _log->debug( "repeat=" + as_string(seconds) ),  _repeat = seconds; }
-    Time                        repeat                      ()                                      { THREAD_LOCK_RETURN( _lock, Time, _repeat ); }
+    void                    set_repeat                      ( double seconds )                      { _log->debug( "repeat=" + as_string(seconds) ),  _repeat = seconds; }
+    Time                        repeat                      ()                                      { return _repeat; }
 
     void                        set_state                   ( State );
     void                        set_state_cmd               ( State_cmd );
@@ -305,12 +305,12 @@ struct Job : Object,
     static string               state_cmd_name              ( State_cmd );
     static State_cmd            as_state_cmd                ( const string& );
 
-    void                        set_state_text              ( const string& text )                  { THREAD_LOCK( _lock )  _state_text = text, _log->debug9( "state_text = " + text ); }
+    void                        set_state_text              ( const string& text )                  { _state_text = text, _log->debug9( "state_text = " + text ); }
 
     void                        set_error_xc                ( const Xc& );
     void                        set_error_xc_only           ( const Xc& );
     void                        set_error                   ( const exception& );
-    void                        reset_error                 ()                                      { THREAD_LOCK( _lock )  _error = NULL,  _log->reset_highest_level(); }
+    void                        reset_error                 ()                                      { _error = NULL,  _log->reset_highest_level(); }
     void                        set_job_error               ( const exception& );
 
     void                        signal                      ( const string& signal_name );
@@ -326,7 +326,7 @@ struct Job : Object,
   //bool                        is_requesting_order         () const                                { return _is_requesting_order; }
     void                    set_idle_timeout                ( const Time& );
 
-    void                        set_job_chain_priority      ( int pri )                             { THREAD_LOCK(_lock) if( _job_chain_priority < pri )  _job_chain_priority = pri; }
+    void                        set_job_chain_priority      ( int pri )                             { if( _job_chain_priority < pri )  _job_chain_priority = pri; }
     static bool                 higher_job_chain_priority   ( const Job* a, const Job* b )          { return a->_job_chain_priority > b->_job_chain_priority; }
 
     ptr<Module_instance>        create_module_instance      ();
@@ -354,7 +354,6 @@ struct Job : Object,
 
     Fill_zero                  _zero_;
     string                     _name;
-    Thread_semaphore           _lock;
     bool                       _waiting_for_process;        // Task kann nicht gestartet werden, weil kein Prozess in der Prozessklasse verfügbar ist
     bool                       _waiting_for_process_try_again;  
     string                     _description;                // <description>

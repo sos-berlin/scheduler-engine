@@ -2835,7 +2835,8 @@ void Spooler::run()
         execute_state_cmd();
         if( _shutdown_cmd )  if( !_single_thread  ||  !_single_thread->has_tasks()  ||  _shutdown_ignore_running_tasks )  break;
 
-        bool something_done = run_continue();
+        Time now = Time::now();
+        bool something_done = run_continue( now );
         
         if( _distributed_scheduler )  check_distributed_scheduler();
         _order_subsystem->check_exception();
@@ -2897,20 +2898,17 @@ void Spooler::run()
             {
                 FOR_EACH_JOB( it )
                 {
-                    Job* job = *it;
-                    if( job->order_controlled()  ||  has_exclusiveness() )
+                    Job* job           = *it;
+                    Time next_job_time = job->next_time();
+
+                    if( job->is_machine_resumable()  &&  resume_at > next_job_time )  resume_at = next_job_time,  resume_at_object = job;
+
+                    if( wait_until > next_job_time  
+                     || wait_until == next_job_time && job->visible() )   // wait_until_object sollte nicht auf einen unsichtbaren Job zeigen
                     {
-                        Time next_job_time = job->next_time();
-
-                        if( job->is_machine_resumable()  &&  resume_at > next_job_time )  resume_at = next_job_time,  resume_at_object = job;
-
-                        if( wait_until > next_job_time  
-                         || wait_until == next_job_time && job->visible() )   // wait_until_object sollte nicht auf einen unsichtbaren Job zeigen
-                        {
-                            wait_until = next_job_time;
-                            wait_until_object = job;
-                            if( wait_until == 0 )  break;
-                        }
+                        wait_until = next_job_time;
+                        wait_until_object = job;
+                        if( wait_until == 0 )  break;
                     }
                 }
             }
@@ -3107,7 +3105,7 @@ void Spooler::wait( Wait_handles* wait_handles, const Time& wait_until_, Object*
 
 //----------------------------------------------------------------------------Spooler::run_continue
 
-bool Spooler::run_continue()
+bool Spooler::run_continue( const Time& now )
 {
     bool something_done = false;
 
@@ -3125,7 +3123,7 @@ bool Spooler::run_continue()
 
         // TASKS FORTSETZEN
 
-        something_done |= _single_thread->process();    
+        something_done |= _single_thread->process( now );    
     }
 
     if( something_done )  _last_wait_until.set_null(), _last_resume_at.set_null();
@@ -3156,7 +3154,6 @@ void Spooler::check_distributed_scheduler()
     _distributed_scheduler->async_check_exception( "Error in Scheduler member" );
 
     _scheduler_is_up    = _distributed_scheduler->is_scheduler_up();
-  //_proper_termination = _distributed_scheduler->has_exclusiveness();
 
     check_is_active();
 }

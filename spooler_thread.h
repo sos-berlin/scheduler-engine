@@ -33,7 +33,7 @@ struct Spooler_thread : zschimmer::Thread
 
     virtual int                 thread_main                 ();
   //bool                        running                     ()                                      { DWORD rc; return GetExitCodeThread(_thread_handle,&rc)? rc == STILL_ACTIVE : false; }
-    bool                        process                     ();                                     // Einen Schritt im (Pseudo-)Thread ausführen
+    bool                        process                     ( const Time& now );                    // Einen Schritt im (Pseudo-)Thread ausführen
     void                        start                       ( Event* destination );
   //void                        stop_jobs                   ();
 
@@ -74,8 +74,8 @@ struct Spooler_thread : zschimmer::Thread
     bool                       _free_threading;
 
 //private:
-    bool                        step                        ();
-    bool                        do_something                ( Task* );
+    bool                        step                        ( const Time& now );
+    bool                        do_something                ( Task*, const Time& now );
     void                        wait                        ();
     Task*                       get_next_task_to_run        ();
     void                        remove_ended_tasks          ();

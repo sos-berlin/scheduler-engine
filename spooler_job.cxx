@@ -48,7 +48,6 @@ Job::Job( Spooler* spooler, const ptr<Module>& module )
     _zero_(this+1),
     _task_queue(this),
     _history(this),
-    _lock( "Job" ),
     _visible(true),
     _stop_on_error(true)
 {
@@ -85,7 +84,6 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
 {
     if( !element )  return;
 
-    THREAD_LOCK_DUMMY( _lock )
     {
         bool order;
 
@@ -464,6 +462,13 @@ void Job::init( Transaction* ta )
 
 void Job::init2()
 {
+    if( !order_controlled()  &&  !_spooler->has_exclusiveness() )  
+    {
+        _log->error( message_string( "SCHEDULER-376" ) );
+        set_state( s_stopped );
+        return;
+    }
+
     set_state( s_pending );
     
     _delay_until   = 0;
@@ -531,7 +536,6 @@ void Job::set_run_time( const xml::Element_ptr& element )
 
 void Job::close()
 {
-    THREAD_LOCK_DUMMY( _lock )
     {
         if( _order_queue )  _order_queue->withdraw_order_request();
 
@@ -667,7 +671,6 @@ string Job::profile_section()
 
 void Job::set_error_xc_only( const Xc& x )
 {
-    THREAD_LOCK_DUMMY( _lock )
     {
         _error = x;
         _repeat = 0;
@@ -707,15 +710,15 @@ void Job::set_error( const exception& x )
 
 void Job::signal( const string& signal_name )
 { 
-    THREAD_LOCK_DUMMY( _lock )  _next_time = 0;
+    Z_DEBUG_ONLY( assert( _state != s_stopped ) );
+
+    _next_time = 0;
     
     //Z_LOG2( "joacim", __FUNCTION__ << " " << signal_name << "\n" );
     _spooler->signal( signal_name ); 
 }
 
 //---------------------------------------------------------------------------------Job::create_task
-// Wird auch vom Kommunikations-Thread für <start_job> gerufen!
-// create_task() nicht mit gesperrten _lock rufen, denn get_id() in DB blockieren!
 
 ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, const string& name, const Time& start_at, int id )
 {
@@ -751,8 +754,6 @@ ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, const
 }
 
 //---------------------------------------------------------------------------------Job::create_task
-// Wird auch vom Kommunikations-Thread für <start_job> gerufen!
-// create_task() nicht mit gesperrten _lock rufen, denn get_id() in DB blockieren!
 
 ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, const string& name, const Time& start_at )
 {
@@ -973,7 +974,6 @@ ptr<Task> Job::get_task_from_queue( Time now )
     if( _state == s_read_error )  return NULL;
     if( _state == s_error      )  return NULL;
 
-    THREAD_LOCK_DUMMY( _lock )
     {
         if( _task_queue.empty() )     return NULL;
 
@@ -999,7 +999,6 @@ ptr<Task> Job::get_task_from_queue( Time now )
 
 void Job::remove_running_task( Task* task )
 {
-    THREAD_LOCK_DUMMY( _lock )  
     {
         Task_list::iterator t = _running_tasks.begin();
         while( t != _running_tasks.end() )
@@ -1028,16 +1027,6 @@ void Job::remove_running_task( Task* task )
 }
 
 //---------------------------------------------------------------------------------------Job::start
-/*
-ptr<Task> Job::start( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, Time start_at, bool log )
-{
-    Sos_ptr<Task> result;
-    THREAD_LOCK_DUMMY( _lock )  result = start_without_lock( params, task_name, start_at, log );
-    return result;
-}
-*/
-//---------------------------------------------------------------------------------------Job::start
-// start() und create_task() nicht mit gesperrten _lock rufen, denn get_id() in DB blockieren!
 
 ptr<Task> Job::start( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, const Time& start_at )
 {
@@ -1072,7 +1061,6 @@ void Job::enqueue_task( Task* task )
 
 bool Job::read_script( Module* module )
 {
-    THREAD_LOCK_DUMMY( _lock )
     {
         try
         {
@@ -1107,7 +1095,6 @@ void Job::stop_after_task_error( bool end_all_tasks, const string& error_message
 
 void Job::stop( bool end_all_tasks )
 {
-    THREAD_LOCK_DUMMY( _lock )
     {
         set_state( _running_tasks.size() > 0? s_stopping : s_stopped );
 
@@ -1144,7 +1131,6 @@ bool Job::execute_state_cmd()
 {
     bool something_done = false;
 
-    //THREAD_LOCK( _lock )   // create_task() nicht mit gesperrten _lock rufen, denn get_id() in DB blockieren.
     {
         State_cmd state_cmd = _state_cmd;
         _state_cmd = sc_none;
@@ -1180,14 +1166,13 @@ bool Job::execute_state_cmd()
                                    //|| _state == s_suspended
                                                                )                               something_done = true;
                                     set_state( s_running );
-                                    THREAD_LOCK_DUMMY( _lock )  Z_FOR_EACH( Task_list, _running_tasks, t )  (*t)->cmd_end();
+                                    Z_FOR_EACH( Task_list, _running_tasks, t )  (*t)->cmd_end();
                                     break;
 
                 case sc_suspend:    
                 {
                     if( _state == s_running )
                     {
-                        THREAD_LOCK_DUMMY( _lock )
                         {
                             Z_FOR_EACH( Task_list, _running_tasks, t ) 
                             {
@@ -1208,7 +1193,6 @@ bool Job::execute_state_cmd()
                 {
                     //if( _state == s_suspended )
                     {
-                        THREAD_LOCK_DUMMY( _lock )
                         {
                             Z_FOR_EACH( Task_list, _running_tasks, t ) 
                             {
@@ -1240,7 +1224,7 @@ bool Job::execute_state_cmd()
                         }
                         else
                         {
-                            ptr<Task> task = create_task( NULL, "", 0 );      // create_task() nicht mit gesperrten _lock rufen, denn get_id() in DB blockieren.
+                            ptr<Task> task = create_task( NULL, "", 0 ); 
                             
                             set_state( s_pending );
                             check_min_tasks( "job has been unstopped with cmd=\"wake\"" );
@@ -1334,7 +1318,6 @@ void Job::start_when_directory_changed( const string& directory_name, const stri
 
 void Job::clear_when_directory_changed()
 {
-    THREAD_LOCK_DUMMY( _lock )
     {
         if( !_directory_watcher_list.empty() )  _log->debug( "clear_when_directory_changed" );
 
@@ -1462,7 +1445,7 @@ void Job::select_period( Time now )
 {
     if( now >= _period.end() )       // Periode abgelaufen?
     {
-        THREAD_LOCK_DUMMY( _lock )  _period = _run_time->next_period(now);  
+        _period = _run_time->next_period(now);  
 
         if( _period.begin() != Time::never )
         {
@@ -1485,7 +1468,6 @@ bool Job::is_in_period( Time now )
 
 void Job::set_next_start_time( Time now, bool repeat )
 {
-    THREAD_LOCK_DUMMY( _lock )
     {
         select_period( now );
 
@@ -1596,7 +1578,6 @@ void Job::calculate_next_time( Time now )
     if( _state == s_none )  return;
 
 
-    THREAD_LOCK_DUMMY( _lock )
     {
         Time next_time = Time::never;
 
@@ -1975,7 +1956,6 @@ bool Job::do_something()
                         ptr<Task> task = task_to_start();
                         if( task )
                         {
-                            THREAD_LOCK_DUMMY( _lock )
                             {
                                 _log->open();           // Jobprotokoll, nur wirksam, wenn set_filename() gerufen, s. Job::init().
 
@@ -2153,7 +2133,6 @@ void Job::set_job_error( const exception& x )
 
 void Job::set_state( State new_state )
 { 
-    THREAD_LOCK_DUMMY( _lock )  
     {
         if( new_state == _state )  return;
 
@@ -2189,7 +2168,6 @@ void Job::set_state_cmd( State_cmd cmd )
 { 
     bool ok = false;
 
-    //THREAD_LOCK_DUMMY( _lock )          start() (create_task(), get_task_id()) nicht mit gesperrtem _lock rufen, weil DB blockieren kann!
     {
         switch( cmd )
         {
@@ -2245,10 +2223,7 @@ string Job::job_state()
 {
     string st;
 
-    THREAD_LOCK_DUMMY( _lock )
-    {
-        st = "state=" + state_name();
-    }
+    st = "state=" + state_name();
 
     return st;
 }
@@ -2573,7 +2548,6 @@ void Job::kill_queued_task( int task_id )
 
 void Job::kill_task( int id, bool immediately )
 {
-    THREAD_LOCK_DUMMY( _lock )
     {
         //Task* task = NULL;
 
@@ -2595,7 +2569,6 @@ void Job::kill_task( int id, bool immediately )
 
 void Job::signal_object( const string& object_set_class_name, const Level& level )
 {
-    THREAD_LOCK_DUMMY( _lock )
     {
         if( _state == Job::s_pending
          && _object_set_descr
@@ -2615,7 +2588,6 @@ ptr<Module_instance> Job::create_module_instance()
 {
     ptr<Module_instance>  result;
 
-    THREAD_LOCK_DUMMY( _lock )
     {
         if( _state == s_read_error )  z::throw_xc( "SCHEDULER-190" );
         if( _state == s_error      )  z::throw_xc( "SCHEDULER-204", _name, _error.what() );
@@ -2636,7 +2608,6 @@ ptr<Module_instance> Job::create_module_instance()
 /*
 Module_instance* Job::get_free_module_instance( Task* task )
 {
-    THREAD_LOCK_DUMMY( _lock )
     {
         Z_FOR_EACH( Module_instance_vector, _module_instances, m )
         {
@@ -2660,7 +2631,6 @@ Module_instance* Job::get_free_module_instance( Task* task )
 
 void Job::release_module_instance( Module_instance* module_instance )
 {
-    THREAD_LOCK_DUMMY( _lock )
     {
         Z_FOR_EACH( Module_instance_vector, _module_instances, m )
         {

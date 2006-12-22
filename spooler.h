@@ -325,7 +325,7 @@ struct Spooler : Object,
     void                        end_waiting_tasks           ();
     void                        nichts_getan                ( int anzahl, const string& );
     void                        run                         ();
-    bool                        run_continue                ();
+    bool                        run_continue                ( const Time& now );
 
     // Distributed_scheduler
     void                        start_distributed_scheduler   ();

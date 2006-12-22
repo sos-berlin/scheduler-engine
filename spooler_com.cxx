@@ -2436,7 +2436,7 @@ STDMETHODIMP Com_task::get_Result( VARIANT* value )
         if( !_task )  z::throw_xc( "SCHEDULER-122" );
 
         VariantInit( value ); 
-        THREAD_LOCK( _task->_job->_lock )  hr = VariantCopy( value, &_task->_result );
+        hr = VariantCopy( value, &_task->_result );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Task.result" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Task.result" ); }

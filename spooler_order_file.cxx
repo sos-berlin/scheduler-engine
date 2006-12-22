@@ -447,6 +447,9 @@ Order* Directory_file_order_source::read_directory( bool was_notified, const str
     Order_queue*    first_order_queue   = _next_job->order_queue();
 
 
+    _spooler->assert_has_exclusiveness( __FUNCTION__ );
+
+
     for( int try_index = 1;; try_index++ )           // Nach einem Fehler machen wir einen zweiten Versuch, bevor wir eine eMail schicken
     {
         try

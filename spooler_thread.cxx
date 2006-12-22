@@ -335,17 +335,22 @@ bool Spooler_thread::any_tasks_there()
 */
 //---------------------------------------------------------------------Spooler_thread::do_something
 
-bool Spooler_thread::do_something( Task* task )
+bool Spooler_thread::do_something( Task* task, const Time& now )
 {
-    _current_task = task;
+    bool something_done = false;
 
-    bool ok = task->do_something();
-    
-    _task_closed |= task->state() == Task::s_closed;
+    if( !_spooler->_zschimmer_mode || task->next_time() <= now )
+    {
+        _current_task = task;
 
-    _current_task = NULL;
+        something_done = task->do_something();
+        
+        _task_closed |= task->state() == Task::s_closed;
 
-    return ok;
+        _current_task = NULL;
+    }
+
+    return something_done;
 }
 
 //---------------------------------------------------------------Spooler_thread::remove_ended_tasks
@@ -374,7 +379,7 @@ void Spooler_thread::remove_ended_tasks()
 
 //-----------------------------------------------------------------------------Spooler_thread::step
 
-bool Spooler_thread::step()
+bool Spooler_thread::step( const Time& now )
 {
     bool something_done = false;
 
@@ -390,7 +395,7 @@ bool Spooler_thread::step()
                 // Dieser Job ist in _prioritized_order_job_array und wird unten fortgesetzt.
             }
             else
-            if( _spooler->has_exclusiveness() )
+            if( job->next_time() <= now )
             {
                 something_done = job->do_something();
             }
@@ -426,8 +431,12 @@ bool Spooler_thread::step()
 
         FOR_EACH( vector<Job*>, _prioritized_order_job_array, j )
         {
-            something_done = (*j)->do_something();
-            if( something_done )  break;
+            Job* job = *j;
+            if( job->next_time() <= now )
+            {
+                something_done = job->do_something();
+                if( something_done )  break;
+            }
         }
 
 
@@ -451,7 +460,7 @@ bool Spooler_thread::step()
                           //if( _my_event.signaled_then_reset() )  return true;
                             if( _event  ->signaled()            )  return true;      // Das ist _event oder _spooler->_event
 
-                            stepped = do_something( task );
+                            stepped = do_something( task, now );
 
                             something_done |= stepped;
                             if( stepped )  break;
@@ -474,9 +483,7 @@ bool Spooler_thread::step()
           //if( _my_event.signaled_then_reset() )  return true;
             if( _event  ->signaled()            )  return true;      // Das ist _my_event oder _spooler->_event
 
-            something_done |= do_something( task );
-
-            if( something_done )  break;
+            something_done |= do_something( task, now );
         }
 
         remove_ended_tasks();
@@ -629,13 +636,13 @@ bool Spooler_thread::is_ready_for_termination()
 
 //--------------------------------------------------------------------------Spooler_thread::process
 
-bool Spooler_thread::process()
+bool Spooler_thread::process( const Time& now )
 {
     bool something_done = false;
 
   //try
     {
-        something_done = step();
+        something_done = step( now );
 /*    
         if( something_done )  _nothing_done_count = 0;
         else 

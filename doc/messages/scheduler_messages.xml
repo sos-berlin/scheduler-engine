@@ -2302,7 +2302,7 @@
 
         <message code="SCHEDULER-366">
             <text xml:lang="en">
-                <title>This is a distributed, non-exclusive Scheduler, and the operation can only be performed on an exclusive Scheduler</title>
+                <title>This is a distributed, non-exclusive Scheduler and therefore does not support operation '<p1/>'</title>
             </text>
         </message>
 
@@ -2356,7 +2356,13 @@
 
         <message code="SCHEDULER-375">
             <text xml:lang="en">
-                <title>Order is distributed and therefore does not support operation <p1/></title>
+                <title>Order is distributed and therefore does not support operation '<p1/>'</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-376">
+            <text xml:lang="en">
+                <title>A distributed, not exclusive Scheduler enables only order controlled jobs</title>
             </text>
         </message>
 
