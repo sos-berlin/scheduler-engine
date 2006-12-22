@@ -10,7 +10,7 @@
 
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 using namespace std;
 
@@ -474,5 +474,5 @@ const char dtd_string[] =
 
 //-------------------------------------------------------------------------------------------------
 
-} //namespace spooler
+} //namespace scheduler
 } //namespace sos

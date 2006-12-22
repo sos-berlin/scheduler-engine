@@ -4,7 +4,7 @@
 #define __SCHEDULER_CLIENT_H
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 //-------------------------------------------------------------------------------------------------
 
@@ -12,7 +12,7 @@ int scheduler_client_main( int argc, char** argv );
 
 //-------------------------------------------------------------------------------------------------
 
-} //namespace spooler
+} //namespace scheduler
 } //namespace sos
 
 #endif

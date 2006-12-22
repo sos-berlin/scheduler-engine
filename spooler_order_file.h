@@ -5,7 +5,7 @@
 
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 //-------------------------------------------------------------------------------------------------
     
@@ -81,7 +81,7 @@ struct Directory_file_order_source : //idispatch_implementation< Directory_file_
 
 //-------------------------------------------------------------------------------------------------
 
-} //namespace spooler
+} //namespace scheduler
 } //namespace sos
 
 #endif

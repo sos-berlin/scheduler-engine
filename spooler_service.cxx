@@ -21,7 +21,7 @@
 #include <process.h>
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 using namespace zschimmer::windows;
 
@@ -315,7 +315,7 @@ static void set_service_status( int spooler_error, int state = 0 )
                                                     : !spooler_ptr                                       ? SERVICE_STOPPED 
                                                     : spooler_ptr->state() == Spooler::s_stopped         ? SERVICE_STOPPED       //SetServiceStatus() ruft exit()!
                                                     : spooler_ptr->state() == Spooler::s_starting        ? SERVICE_START_PENDING
-                                                    : spooler_ptr->state() == Spooler::s_starting_waiting? SERVICE_PAUSED       // START_PENDING blockiert Bedienknöpfe der Dienstesteuerung (Windows XP)
+                                                    : spooler_ptr->state() == Spooler::s_starting_waiting? SERVICE_RUNNING       // START_PENDING blockiert Bedienknöpfe der Dienstesteuerung (Windows XP)
                                                     : spooler_ptr->state() == Spooler::s_stopping        ? stop_pending
                                                     : spooler_ptr->state() == Spooler::s_stopping_let_run? stop_pending
                                                     : spooler_ptr->state() == Spooler::s_running         ? SERVICE_RUNNING
@@ -781,7 +781,7 @@ int spooler_service( const string& service_name, int argc, char** argv )
 
 //-------------------------------------------------------------------------------------------------
 
-} //namespace spooler
+} //namespace scheduler
 } //namespace sos
 
 #endif //SYSTEM_WIN

@@ -29,7 +29,7 @@
 
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 //-------------------------------------------------------------------------------Log_set_console_colors
 
@@ -823,16 +823,16 @@ Com_mail* Prefix_log::imail()
 /*
         if( _smtp_server != "-" )
         {
-            hr = _mail->put_Smtp( Bstr(_smtp_server) );     if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::smtp_server", _smtp_server.c_str() );
+            hr = _mail->put_Smtp( Bstr(_smtp_server) );     if( FAILED(hr) ) throw_ole( hr, "scheduler::Mail::smtp_server", _smtp_server.c_str() );
         }
 
         if( _queue_dir != "-" )
         {
-            hr = _mail->put_Queue_dir( Bstr(_queue_dir) );     if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::queue_dir", _smtp_server.c_str() );
+            hr = _mail->put_Queue_dir( Bstr(_queue_dir) );     if( FAILED(hr) ) throw_ole( hr, "scheduler::Mail::queue_dir", _smtp_server.c_str() );
         }
         if( _mail_defaults[ "queue_dir" ] != "-" )
         {
-            hr = _mail->put_Queue_dir( Bstr(_mail_defaults[ "queue_dir" ]) );     if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::queue_dir", _queue_dir.c_str() );
+            hr = _mail->put_Queue_dir( Bstr(_mail_defaults[ "queue_dir" ]) );     if( FAILED(hr) ) throw_ole( hr, "scheduler::Mail::queue_dir", _queue_dir.c_str() );
         }
 */
 
@@ -865,11 +865,11 @@ void Prefix_log::set_mail_header()
 {
     HRESULT hr = NOERROR;
 
-    if( _from != "-" )  hr = _mail->put_From( Bstr( _from ) );    if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::from", _from.c_str() );
-                        hr = _mail->put_To  ( Bstr( _to   ) );    if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::to"  , _to.c_str() );
-    if( _cc   != "-" )  hr = _mail->put_Cc  ( Bstr( _cc   ) );    if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::cc"  , _cc.c_str() );
-    if( _cc   != "-" )  hr = _mail->put_Cc  ( Bstr( _cc   ) );    if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::cc"  , _cc.c_str() );
-    if( _bcc  != "-" )  hr = _mail->put_Bcc ( Bstr( _bcc  ) );    if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::bcc" , _bcc.c_str() );
+    if( _from != "-" )  hr = _mail->put_From( Bstr( _from ) );    if( FAILED(hr) ) throw_ole( hr, "scheduler::Mail::from", _from.c_str() );
+                        hr = _mail->put_To  ( Bstr( _to   ) );    if( FAILED(hr) ) throw_ole( hr, "scheduler::Mail::to"  , _to.c_str() );
+    if( _cc   != "-" )  hr = _mail->put_Cc  ( Bstr( _cc   ) );    if( FAILED(hr) ) throw_ole( hr, "scheduler::Mail::cc"  , _cc.c_str() );
+    if( _cc   != "-" )  hr = _mail->put_Cc  ( Bstr( _cc   ) );    if( FAILED(hr) ) throw_ole( hr, "scheduler::Mail::cc"  , _cc.c_str() );
+    if( _bcc  != "-" )  hr = _mail->put_Bcc ( Bstr( _bcc  ) );    if( FAILED(hr) ) throw_ole( hr, "scheduler::Mail::bcc" , _bcc.c_str() );
 }
 */
 //-----------------------------------------------------------------------Prefix_log::start_new_file
@@ -897,18 +897,18 @@ void Prefix_log::set_mail_from_name( const string& from_name, bool overwrite )
         if( !overwrite )
         {
             Bstr from_bstr;
-            hr = _mail->get_From( &from_bstr._bstr );     if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::from" );
+            hr = _mail->get_From( &from_bstr._bstr );     if( FAILED(hr) ) throw_ole( hr, "scheduler::Mail::from" );
 
             if( SysStringLen(from_bstr) > 0 )  return;
         }
 
         Bstr old_from;
-        hr = _mail->get_From( &old_from._bstr );                        if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::from" );
+        hr = _mail->get_From( &old_from._bstr );                        if( FAILED(hr) ) throw_ole( hr, "scheduler::Mail::from" );
         if( !wcschr( old_from, '<' )  &&  wcschr( old_from, '@' ) )
         {
             string from = '"' + from_name + "\" <" + bstr_as_string(old_from) + ">";
             Bstr from_bstr = from;
-            hr = _mail->put_From( from_bstr );                          if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::from", from.c_str() );
+            hr = _mail->put_From( from_bstr );                          if( FAILED(hr) ) throw_ole( hr, "scheduler::Mail::from", from.c_str() );
         }
     }
     else
@@ -929,12 +929,12 @@ void Prefix_log::set_mail_subject( const string& subject, bool overwrite )
         if( !overwrite )
         {
             Bstr subject_bstr;
-            hr = _mail->get_Subject( &subject_bstr._bstr );  if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::subject" );
+            hr = _mail->get_Subject( &subject_bstr._bstr );  if( FAILED(hr) ) throw_ole( hr, "scheduler::Mail::subject" );
 
             if( SysStringLen(subject_bstr) > 0 )  return;
         }
 
-        hr = _mail->put_Subject( Bstr(subject) );     if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::subject", subject.c_str() );
+        hr = _mail->put_Subject( Bstr(subject) );     if( FAILED(hr) ) throw_ole( hr, "scheduler::Mail::subject", subject.c_str() );
     }
     else
     {
@@ -954,12 +954,12 @@ void Prefix_log::set_mail_body( const string& body, bool overwrite )
         if( !overwrite )
         {
             Bstr body_bstr;
-            hr = _mail->get_Body( &body_bstr._bstr );   if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::body" );
+            hr = _mail->get_Body( &body_bstr._bstr );   if( FAILED(hr) ) throw_ole( hr, "scheduler::Mail::body" );
 
             if( SysStringLen(body_bstr) > 0 )  return;
         }
 
-        hr = _mail->put_Body( Bstr(body) );             if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::body", body.c_str() );
+        hr = _mail->put_Body( Bstr(body) );             if( FAILED(hr) ) throw_ole( hr, "scheduler::Mail::body", body.c_str() );
     }
     else
     {
@@ -1363,5 +1363,5 @@ void Stdout_collector::collect_stderr()
 */
 //-------------------------------------------------------------------------------------------------
 
-} //namespace spooler
+} //namespace scheduler
 } //namespace sos

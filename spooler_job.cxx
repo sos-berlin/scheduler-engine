@@ -23,7 +23,7 @@
 
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 using namespace zschimmer::sql;
 
@@ -59,7 +59,7 @@ Job::Job( Spooler* spooler, const ptr<Module>& module )
     _module->set_log( _log );
   //_log->set_job( this );
 
-    _next_time      = Time::never;
+    _next_time      = 0; //Einmal do_something() ausführen Time::never;
     _directory_watcher_next_time = Time::never;
     _default_params = new Com_variable_set;
     _task_timeout   = Time::never;
@@ -710,7 +710,7 @@ void Job::set_error( const exception& x )
 
 void Job::signal( const string& signal_name )
 { 
-    Z_DEBUG_ONLY( assert( _state != s_stopped ) );
+    //Z_DEBUG_ONLY( assert( _state != s_stopped ) );
 
     _next_time = 0;
     
@@ -1588,6 +1588,8 @@ void Job::calculate_next_time( Time now )
             {
                 bool in_period = is_in_period(now);
 
+                if( order_controlled() )  request_order( now, __FUNCTION__ );
+
                 if( ( _start_once || _start_once_for_directory ) && in_period ) 
                 {
                     next_time = now;
@@ -1690,20 +1692,27 @@ bool Job::request_order( const Time& now, const string& cause )
 
     bool result = false;
 
-    // Wir prüfen erst die Dateiauftäge (File_order). 
-    // Die gelten nur für diesen Scheduler und haben deshalb Vorrang.
-
-    Z_FOR_EACH( Order_source_list, _order_source_list, it ) 
+    if( _order_queue->first_order( now ) )
     {
-        Order_source* order_source = *it;
-        result = order_source->request_order( cause );
-        if( result )  break;
+        result = true;
     }
+    else
+    {
+        // Wir prüfen erst die Dateiauftäge (File_order). 
+        // Die gelten nur für diesen Scheduler und haben deshalb Vorrang.
 
-    // Jetzt prüfen wir die verteilten Aufträge.
-    // Die können auch von anderen Schedulern verarbeitet werden, und sind deshalb nachrangig.
+        Z_FOR_EACH( Order_source_list, _order_source_list, it ) 
+        {
+            Order_source* order_source = *it;
+            result = order_source->request_order( cause );
+            if( result )  break;
+        }
 
-    if( !result )  result = _order_queue->request_order( now ); 
+        // Jetzt prüfen wir die verteilten Aufträge.
+        // Die können auch von anderen Schedulern verarbeitet werden, und sind deshalb nachrangig.
+
+        if( !result )  result = _order_queue->request_order( now ); 
+    }
 
     return result;
 }
@@ -2657,5 +2666,5 @@ Internal_job::Internal_job( const string& name, const ptr<Module>& module )
 
 //-------------------------------------------------------------------------------------------------
 
-} //namespace spooler
+} //namespace scheduler
 } //namespace sos

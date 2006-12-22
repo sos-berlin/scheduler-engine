@@ -5,7 +5,7 @@
 
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 //-------------------------------------------------------------------------------------------------
 
@@ -102,7 +102,7 @@ struct Scheduler_event_manager : Object,
 
 //-------------------------------------------------------------------------------------------------
 
-} //namespace spooler
+} //namespace scheduler
 } //namespace sos
 
 #endif

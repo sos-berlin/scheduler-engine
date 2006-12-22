@@ -8,7 +8,7 @@
 
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 //-------------------------------------------------------------------------------------------------
 
@@ -308,7 +308,7 @@ inline bool is_communication_operation( Async_operation* op )
 
 //-------------------------------------------------------------------------------------------------
 
-} //namespace spooler
+} //namespace scheduler
 } //namespace sos
 
 #endif

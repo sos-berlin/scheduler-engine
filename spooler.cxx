@@ -64,7 +64,7 @@ extern const Bool _dll = false;
 #endif
 
 
-namespace spooler {
+namespace scheduler {
 
 
 const char*                     default_factory_ini                 = "factory.ini";
@@ -236,7 +236,7 @@ void send_error_email( const exception& x, int argc, char** argv, const string& 
 
     if( spooler )
     {
-        Scheduler_event scheduler_event ( spooler::evt_scheduler_fatal_error, log_error, spooler );
+        Scheduler_event scheduler_event ( scheduler::evt_scheduler_fatal_error, log_error, spooler );
         scheduler_event.set_error( x );
         scheduler_event.set_scheduler_terminates( true );
 
@@ -2578,10 +2578,11 @@ void Spooler::stop( const exception* )
 
         if( _terminate_shutdown )  
         {
-            _distributed_scheduler->set_command_for_all_inactive_schedulers_but_me( (Transaction*)NULL, 
-                _terminate_all_schedulers? Distributed_scheduler::cmd_terminate :
-                                           Distributed_scheduler::cmd_terminate_and_restart );
-            
+            if( _terminate_all_schedulers )
+            {
+                _distributed_scheduler->set_command_for_all_inactive_schedulers_but_me( (Transaction*)NULL, Distributed_scheduler::cmd_terminate  );
+            }
+
             _distributed_scheduler->shutdown();
         }
     }
@@ -3396,14 +3397,14 @@ void Spooler::cmd_terminate_after_error( const string& debug_function, const str
 //---------------------------------------------------------------------------Spooler::cmd_terminate
 // Anderer Thread (spooler_service.cxx)
 
-void Spooler::cmd_terminate( bool restart, int timeout, bool shutdown, bool all_schedulers )
+void Spooler::cmd_terminate( bool restart, int timeout, bool shutdown, bool terminate_all_schedulers )
 {
     if( timeout < 0 )  timeout = 0;
 
     _state_cmd                = restart? sc_terminate_and_restart : sc_terminate;
     _termination_gmtimeout_at = timeout < 999999999? ::time(NULL) + timeout : no_termination_timeout;
     _terminate_shutdown       = shutdown;
-    _terminate_all_schedulers = all_schedulers;
+    _terminate_all_schedulers = terminate_all_schedulers;
 
     /*
     if( all_schedulers && _distributed_scheduler )
@@ -3795,11 +3796,11 @@ static void spooler_renew( const string& service_name, const string& renew_spool
 
         for( t; t > 0; t -= renew_wait_interval )
         {
-            if( spooler::service_state(service_name) == SERVICE_STOPPED )  break;    
+            if( scheduler::service_state(service_name) == SERVICE_STOPPED )  break;    
             sos_sleep( renew_wait_interval );
         }
 
-        if( spooler::service_state(service_name) != SERVICE_STOPPED )  return;
+        if( scheduler::service_state(service_name) != SERVICE_STOPPED )  return;
     }
 
     if( renew_spooler != this_spooler )
@@ -3830,7 +3831,7 @@ static void spooler_renew( const string& service_name, const string& renew_spool
         if( !is_service )  fprintf( stderr, "Der Scheduler ist ausgetauscht und wird neu gestartet\n\n" );
     }
 
-    if( is_service )  spooler::service_start( service_name );
+    if( is_service )  scheduler::service_start( service_name );
                 else  start_process( quoted_windows_process_parameter( renew_spooler ) + " " + command_line );
 }
 
@@ -3905,7 +3906,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
 
         try
         {
-            my_spooler._is_service = spooler::is_daemon;
+            my_spooler._is_service = scheduler::is_daemon;
 
             ret = my_spooler.launch( argc, argv, parameter_line );
 
@@ -3953,13 +3954,13 @@ int object_server( int argc, char** argv )
                    
 //-------------------------------------------------------------------------------------------------
 
-} //namespace spooler
+} //namespace scheduler
 
 //-------------------------------------------------------------------------------------spooler_main
 
 int spooler_main( int argc, char** argv, const string& parameter_line )
 {
-    add_message_code_texts( sos::spooler::scheduler_messages );
+    add_message_code_texts( sos::scheduler::scheduler_messages );
 
     set_log_category_default( "scheduler"     , true );
   //set_log_category_default( "scheduler.*"   , true );
@@ -3985,7 +3986,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
         SetErrorMode( SEM_FAILCRITICALERRORS | SEM_NOOPENFILEERRORBOX );    // Das System soll sich Messageboxen verkneifen (auﬂer beim Absturz)
 #   endif
 
-    spooler::error_settings.read( spooler::default_factory_ini );
+    scheduler::error_settings.read( scheduler::default_factory_ini );
 
     try
     {
@@ -4003,7 +4004,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
         bool    renew_service = false;
         string  send_cmd;
         string  log_filename;
-        string  factory_ini = spooler::default_factory_ini;
+        string  factory_ini = scheduler::default_factory_ini;
         string  dependencies;
 
         for( Sos_option_iterator opt ( argc, argv, parameter_line ); !opt.end(); opt.next() )
@@ -4016,11 +4017,11 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
             else
             //if( opt.flag      ( "renew-spooler"    ) )  renew_spooler = program_filename();
           //else
-          //if( opt.flag      ( "show-dtd"         ) )  { if( opt.set() )  need_call_scheduler = false, fprintf( stdout, "%s", spooler::dtd_string ); }
+          //if( opt.flag      ( "show-dtd"         ) )  { if( opt.set() )  need_call_scheduler = false, fprintf( stdout, "%s", scheduler::dtd_string ); }
           //else
             if( opt.with_value( "expand-classpath" ) )  { cout << java::expand_class_path( opt.value() ) << '\n'; need_call_scheduler = false; }
             else
-            if( opt.flag      ( "show-xml-schema"  ) )  { if( opt.set() )  need_call_scheduler = false, fprintf( stdout, "%s", spooler::embedded_files.string_from_embedded_file( spooler::xml_schema_path ).c_str() ); }
+            if( opt.flag      ( "show-xml-schema"  ) )  { if( opt.set() )  need_call_scheduler = false, fprintf( stdout, "%s", scheduler::embedded_files.string_from_embedded_file( scheduler::xml_schema_path ).c_str() ); }
             else
             if( opt.with_value( "renew-spooler"    ) )  renew_spooler = opt.value();
             else
@@ -4067,7 +4068,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
                 else
                 if( opt.with_value( "id"               ) )  id = opt.value();
                 else
-                if( opt.with_value( "ini"              ) )  factory_ini = opt.value(), spooler::error_settings.read( factory_ini );
+                if( opt.with_value( "ini"              ) )  factory_ini = opt.value(), scheduler::error_settings.read( factory_ini );
                 else
                 if( opt.with_value( "log"              ) )  log_filename = opt.value();
                 else
@@ -4099,16 +4100,16 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
 
         Z_LOG2( "scheduler", "Scheduler " VER_PRODUCTVERSION_STR "\n" );
 
-        sos::spooler::time::Time::set_current_difference_to_utc();
+        sos::scheduler::time::Time::set_current_difference_to_utc();
 
         if( is_scheduler_client )
         {
-            ret = spooler::scheduler_client_main( argc, argv );
+            ret = scheduler::scheduler_client_main( argc, argv );
         }
         else
         if( is_object_server )
         {
-            ret = spooler::object_server( argc, argv );
+            ret = scheduler::object_server( argc, argv );
         }
         else
         {
@@ -4140,40 +4141,40 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
                 }
                 else
                 {
-                    service_name = spooler::make_service_name( id, is_backup );
-                    if( service_display == "" )  service_display = spooler::make_service_display( id, is_backup );
+                    service_name = scheduler::make_service_name( id, is_backup );
+                    if( service_display == "" )  service_display = scheduler::make_service_display( id, is_backup );
                 }
 
                 if( !renew_spooler.empty() )  
                 { 
-                    spooler::spooler_renew( service_name, renew_spooler, renew_service, command_line ); 
+                    scheduler::spooler_renew( service_name, renew_spooler, renew_service, command_line ); 
                 }
                 else
                 if( do_remove_service | do_install_service )
                 {
-                    if( do_remove_service  )  spooler::remove_service( service_name );
+                    if( do_remove_service  )  scheduler::remove_service( service_name );
                     if( do_install_service ) 
                     {
                         //if( !is_service )  command_line = "-service " + command_line;
                         command_line = "-service=" + service_name + " " + command_line;
                         dependencies += '\0';
-                        spooler::install_service( service_name, service_display, service_description, dependencies, command_line );
+                        scheduler::install_service( service_name, service_display, service_description, dependencies, command_line );
                     }
                 }
                 else
                 if( call_scheduler || need_call_scheduler )
                 {
-                    _beginthread( spooler::delete_new_spooler, 50000, NULL );
+                    _beginthread( scheduler::delete_new_spooler, 50000, NULL );
 
-                //if( !is_service_set )  is_service = spooler::service_is_started(service_name);
+                //if( !is_service_set )  is_service = scheduler::service_is_started(service_name);
 
                     if( is_service )
                     {
-                        ret = spooler::spooler_service( service_name, argc, argv );   
+                        ret = scheduler::spooler_service( service_name, argc, argv );   
                     }
                     else
                     {
-                        ret = spooler::spooler_main( argc, argv, parameter_line );
+                        ret = scheduler::spooler_main( argc, argv, parameter_line );
                     }
                 }
 
@@ -4183,13 +4184,13 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
                 {
                     if( is_service )
                     {
-                        spooler::is_daemon = true;
+                        scheduler::is_daemon = true;
 
                         Z_LOG2( "scheduler", "Scheduler wird Daemon. Pid wechselt\n");
-                        spooler::be_daemon();
+                        scheduler::be_daemon();
                     }
 
-                    ret = spooler::spooler_main( argc, argv, command_line );
+                    ret = scheduler::spooler_main( argc, argv, command_line );
                 }
 
 #           endif
@@ -4198,7 +4199,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
     catch( const exception& x )
     {
         Z_LOG2( "scheduler", x.what() << "\n" );
-        if( is_service )  spooler::send_error_email( x, argc, argv, parameter_line );
+        if( is_service )  scheduler::send_error_email( x, argc, argv, parameter_line );
         cerr << x << "\n";
         ret = 1;
     }
@@ -4206,7 +4207,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
     {
         string what = string_from_ole( x.Description() );
         Z_LOG2( "scheduler", what << "\n" );
-        if( is_service )  spooler::send_error_email( zschimmer::Xc( x ), argc, argv, parameter_line );
+        if( is_service )  scheduler::send_error_email( zschimmer::Xc( x ), argc, argv, parameter_line );
         cerr << what << "\n";
         ret = 1;
     }

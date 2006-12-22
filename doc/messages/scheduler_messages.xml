@@ -17,7 +17,7 @@
     <!-- <title> ohne Zeilenwechsel schreiben!  Also: <title>text ...</title> -->
 
     <cplusplus namespace="sos"/>
-    <cplusplus namespace="spooler"/>
+    <cplusplus namespace="scheduler"/>
 
     
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~FEHLER-MELDUNGEN-->
@@ -3242,6 +3242,12 @@
             </text>
         </message>
 
+        <message code="SCHEDULER-818">
+            <text xml:lang="en">
+                <title>Active Scheduler has been startet, so this inactive Scheduler starts again too</title>
+            </text>
+        </message>
+        
     </messages>
     
 </messages>

@@ -3,7 +3,7 @@
 #include "spooler.h"
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 //-----------------------------------------------------------------Internal_module::Internal_module
     
@@ -95,6 +95,6 @@ bool Internal_module_instance::name_exists( const string& name )
 
 //-------------------------------------------------------------------------------------------------
 
-} //namespace spooler
+} //namespace scheduler
 } //namespace sos
 

@@ -4,7 +4,7 @@
 #include "spooler.h"
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 //--------------------------------------------------------------Scheduler_object::name_of_type_code
     

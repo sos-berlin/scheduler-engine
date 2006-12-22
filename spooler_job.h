@@ -4,7 +4,7 @@
 #define __SPOOLER_JOB_H
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 
 typedef int                     Level;
@@ -463,7 +463,7 @@ typedef list< ptr<Job> >    Job_list;
 
 //-------------------------------------------------------------------------------------------------
 
-} //namespace spooler
+} //namespace scheduler
 } //namespace sos
 
 #endif

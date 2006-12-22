@@ -1,7 +1,7 @@
 // $Id$
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 //-------------------------------------------------------------------------------------------------
 
@@ -165,5 +165,5 @@ struct Remote_scheduler_register
 
 //-------------------------------------------------------------------------------------------------
 
-} //namespace spooler
+} //namespace scheduler
 } //namespace sos

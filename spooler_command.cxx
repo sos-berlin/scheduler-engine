@@ -33,7 +33,7 @@
 
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 using namespace std;
 
@@ -285,8 +285,9 @@ xml::Element_ptr Command_processor::execute_terminate( const xml::Element_ptr& e
     bool shutdown       = element.bool_getAttribute( "shutdown"      , true );
     int  timeout        = element. int_getAttribute( "timeout"       , INT_MAX );
 
+    bool terminate_all_schedulers = all_schedulers  &&  !restart;
 
-    _spooler->cmd_terminate( restart, timeout, shutdown, all_schedulers );
+    _spooler->cmd_terminate( restart, timeout, shutdown, terminate_all_schedulers );
     
 
     return _answer.createElement( "ok" );
@@ -1571,5 +1572,5 @@ string File_buffered_command_response::get_part()
 
 //-------------------------------------------------------------------------------------------------
 
-} //namespace spooler
+} //namespace scheduler
 } //namespace sos

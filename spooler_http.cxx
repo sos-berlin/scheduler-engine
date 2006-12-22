@@ -35,7 +35,7 @@
 using namespace std;
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 namespace http {
 
 //-------------------------------------------------------------------------------------------static
@@ -1556,5 +1556,5 @@ string Html_chunk_reader::read_from_chunk( int )
 //-------------------------------------------------------------------------------------------------
 
 } //namespace http
-} //namespace spooler
+} //namespace scheduler
 } //namespace sos

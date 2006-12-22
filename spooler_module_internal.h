@@ -4,7 +4,7 @@
 #define __SPOOLER_MODULE_INTERNAL_H
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 //----------------------------------------------------------------------------------Internal_module
 
@@ -41,7 +41,7 @@ struct Internal_module_instance : Module_instance
 
 //-------------------------------------------------------------------------------------------------
 
-} //namespace spooler
+} //namespace scheduler
 } //namespace sos
 
 #endif

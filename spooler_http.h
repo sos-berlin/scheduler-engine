@@ -5,7 +5,7 @@
 
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 namespace http {
 
 //--------------------------------------------------------------------------------------------const
@@ -456,7 +456,7 @@ struct Operation_connection : Communication::Operation_connection
 //-------------------------------------------------------------------------------------------------
 
 } //namespace http
-} //namespace spooler
+} //namespace scheduler
 } //namespace sos
 
 #endif

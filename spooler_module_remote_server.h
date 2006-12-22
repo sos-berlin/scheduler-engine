@@ -6,7 +6,7 @@
 #include "../zschimmer/com_remote.h"
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 //--------------------------------------------------------------------Remote_module_instance_server
 
@@ -60,7 +60,7 @@ struct Com_remote_module_instance_server : spooler_com::Iremote_module_instance_
 
 //-------------------------------------------------------------------------------------------------
 
-} //namespace spooler
+} //namespace scheduler
 } //namespace sos
 
 #endif

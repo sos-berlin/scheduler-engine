@@ -5,7 +5,7 @@
 
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 struct Job_chain;
 struct Job_chain_node;
@@ -554,7 +554,7 @@ struct Order_subsystem : Object, Scheduler_object
 
 //string                          string_from_state       ( Order::State );
 
-} //namespace spooler
+} //namespace scheduler
 } //namespace sos
 
 #endif

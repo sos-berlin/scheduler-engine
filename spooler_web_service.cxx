@@ -5,7 +5,7 @@
 #include "../zschimmer/charset.h"
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 using namespace zschimmer::com;
 
@@ -1011,5 +1011,5 @@ string Web_service_response::obj_name() const
 
 //-------------------------------------------------------------------------------------------------
 
-} //namespace spooler
+} //namespace scheduler
 } //namespace sos

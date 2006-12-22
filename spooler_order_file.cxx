@@ -17,15 +17,15 @@ using stdext::hash_set;
 using stdext::hash_map;
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 //--------------------------------------------------------------------------------------------const
 
-const string    scheduler_file_path_variable_name           = "scheduler_file_path";
-const string    file_order_sink_job_name                    = "scheduler_file_order_sink";
-const int       delay_after_error_default                   = INT_MAX;
-const int       file_order_sink_job_idle_timeout_default    = 60;
-const int       directory_file_order_source_max_default     = 100;      // Nicht zuviele Aufträge, sonst wird der Scheduler langsam (in remove_order?)
+const string    scheduler_file_path_variable_name         = "scheduler_file_path";
+const string    file_order_sink_job_name                  = "scheduler_file_order_sink";
+const int       delay_after_error_default                 = INT_MAX;
+const int       file_order_sink_job_idle_timeout_default  = 60;
+const int       directory_file_order_source_max_default   = 100;      // Nicht zuviele Aufträge, sonst wird der Scheduler langsam (in remove_order?)
 const int       max_tries                                 = 2;        // Nach Fehler machen wie sofort einen zweiten Versuch
 
 #ifdef Z_WINDOWS
@@ -414,12 +414,13 @@ bool Directory_file_order_source::request_order( const string& cause )
     {
         Z_LOG2( "scheduler.file_order", __FUNCTION__ << " cause=" << cause << "\n" );
 
-        Order* order = read_directory( false, cause );
-        if( order )  
-        {
-            assert( order->is_immediately_processable( Time::now() ) );
-            result = true;
-        }
+        async_wake();
+        //Order* order = read_directory( false, cause );
+        //if( order )  
+        //{
+        //    assert( order->is_immediately_processable( Time::now() ) );
+        //    result = true;
+        //}
     }
     else
     {
@@ -488,7 +489,7 @@ Order* Directory_file_order_source::read_directory( bool was_notified, const str
                     {
                         ptr<Order> order = new Order( _spooler );
 
-                        order->inhibit_distribution();
+                        //order->inhibit_distribution();
                         order->set_file_path( path );
                         order->set_state( _next_state );
 

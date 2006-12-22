@@ -8,7 +8,7 @@
 #include "../zschimmer/message.h"
 
 namespace sos { 
-namespace spooler { 
+namespace scheduler { 
         
 Message_code_text scheduler_messages[] =
 {
@@ -242,7 +242,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-373", "SOME OTHER SCHEDULER HAS STOLEN ACTIVITY" },
     { "SCHEDULER-374", "In $1, state '$2' has no job" },
     { "SCHEDULER-375", "Order is distributed and therefore does not support operation '$1'" },
-    { "SCHEDULER-376", "A distributed Scheduler enables only order controlled jobs" },
+    { "SCHEDULER-376", "A distributed, not exclusive Scheduler enables only order controlled jobs" },
     { "SCHEDULER-900", "Scheduler $1 is starting with $2, pid=$3" },
     { "SCHEDULER-902", "state=$1" },
     { "SCHEDULER-904", "Tasks have $1s to terminate" },
@@ -352,7 +352,8 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-815", "Task should end, but it has just been started with an order attached, so one step will be done" },
     { "SCHEDULER-816", "Unable to release occupation in database" },
     { "SCHEDULER-817", "Missing order record in database" },
+    { "SCHEDULER-818", "Active Scheduler has been startet, so this inactive Scheduler starts again too" },
     {}
 };
 } //namespace sos
-} //namespace spooler
+} //namespace scheduler

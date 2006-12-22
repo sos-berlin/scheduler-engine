@@ -13,7 +13,7 @@
 
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 using namespace zschimmer::com::object_server;
 using namespace spooler_com;

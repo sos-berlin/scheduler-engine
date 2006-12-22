@@ -10,7 +10,7 @@
 #define JAVA_IDISPATCH_CLASS "sos/spooler/Idispatch"
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 //struct Java_vm;
 struct Java_thread_data;
@@ -108,7 +108,7 @@ struct Java_module_instance : Module_instance, java::Has_vm
 
 //-------------------------------------------------------------------------------------------------
 
-} //namespace spooler
+} //namespace scheduler
 } //namespace sos
 
 #endif

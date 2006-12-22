@@ -4,7 +4,7 @@
 #define __SPOOLER_MODULE_PROCESS_H
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 //--------------------------------------------------------------------------Process_module_instance
 
@@ -76,7 +76,7 @@ struct Process_module_instance : Module_instance
 
 //-------------------------------------------------------------------------------------------------
 
-} //namespace spooler
+} //namespace scheduler
 } //namespace sos
 
 #endif

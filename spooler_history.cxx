@@ -11,7 +11,7 @@
 using namespace zschimmer;
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 const char history_column_names[] =    "id"           ":numeric," 
                                        "spooler_id,"
@@ -508,7 +508,7 @@ void Spooler_db::add_column( Transaction* ta, const string& table_name, const st
         //Transaction ta ( this );
 
         bool is_write_operation = false;
-        Any_file select = ta->open_file( "-in " + db_name() + " -max-length=1K", "select `" + column_name + "` from " + table_name + " where 1=0", "add_column", is_write_operation );
+        Any_file select = ta->open_file( "-in " + db_name() + " -max-length=1K -read-only", "select `" + column_name + "` from " + table_name + " where 1=0", "add_column", is_write_operation );
     }
     catch( exception& x )
     {
@@ -1091,7 +1091,7 @@ void Transaction::execute( const string& stmt, const string& debug_text )
 
     try
     {
-        bool was_transaction_used = _db->_db.is_transaction_used();
+        bool was_transaction_used    = _db->_db.is_transaction_used();
         bool was_transaction_written = _db->_db.is_transaction_written();
 
         _db->_db.put( "%native " + native_sql ); 
@@ -2004,6 +2004,6 @@ void Task_history::set_extra_field( const string& name, const Variant& value )
 
 //-------------------------------------------------------------------------------------------------
 
-} //namespace spooler
+} //namespace scheduler
 } //namespace sos
 

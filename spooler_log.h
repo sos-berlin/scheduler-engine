@@ -4,7 +4,7 @@
 #define __SPOOLER_LOG_H
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 //----------------------------------------------------------------------------------------------Log
 
@@ -217,7 +217,7 @@ struct Prefix_log : Object, Has_log
 
 //-------------------------------------------------------------------------------------------------
 
-} //namespace spooler
+} //namespace scheduler
 } //namespace sos
 
 #endif

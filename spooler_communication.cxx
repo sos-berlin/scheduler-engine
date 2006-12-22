@@ -14,7 +14,7 @@
 using namespace std;
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 const int wait_for_port_available = 2*60;   // Soviele Sekunden warten, bis TCP- oder UDP-Port frei wird
 
@@ -893,6 +893,6 @@ xml::Element_ptr Communication::dom_element( const xml::Document_ptr& document, 
 
 //-------------------------------------------------------------------------------------------------
 
-} //namespace spooler
+} //namespace scheduler
 } //namespace sos
 

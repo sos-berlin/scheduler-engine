@@ -22,7 +22,7 @@
 #include "../kram/log.h"
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 //--------------------------------------------------------------------------------------------const
 
@@ -1027,5 +1027,5 @@ void Directory_watcher::reset()
 
 //-------------------------------------------------------------------------------------------------
 
-} //namespace spooler
+} //namespace scheduler
 } //namespace sos

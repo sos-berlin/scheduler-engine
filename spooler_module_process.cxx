@@ -5,7 +5,7 @@
 using namespace std;
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 //-------------------------------------------------Process_module_instance::Process_module_instance
 
@@ -645,6 +645,6 @@ int Process_module_instance::termination_signal()
 
 //-------------------------------------------------------------------------------------------------
 
-} //namespace spooler
+} //namespace scheduler
 } //namespace sos
 

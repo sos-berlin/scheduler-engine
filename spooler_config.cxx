@@ -17,7 +17,7 @@ using namespace zschimmer::com;
 
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 //--------------------------------------------------------------------------optional_single_element
 
@@ -435,5 +435,5 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const Time& x
 
 //-------------------------------------------------------------------------------------------------
 
-} //namespace spooler
+} //namespace scheduler
 } //namespace sos

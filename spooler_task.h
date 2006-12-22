@@ -5,7 +5,7 @@
 
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 //--------------------------------------------------------------------------------------Start_cause
 
@@ -400,7 +400,7 @@ struct Job_module_task : Module_task
 
 //-------------------------------------------------------------------------------------------------
 
-} //namespace spooler
+} //namespace scheduler
 } //namespace sos
 
 #endif

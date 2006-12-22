@@ -11,7 +11,7 @@
 
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 using namespace zschimmer::com::object_server;
 
@@ -163,7 +163,7 @@ void Remote_module_instance_proxy::add_obj( IDispatch* object, const string& nam
 void Remote_module_instance_proxy::add_log_obj( Com_log* log, const string& name )
 {
     typedef object_server::Reference_with_properties  Ref;
-    ptr<Ref> remote_ref = Z_NEW( Ref( "sos::spooler::Log", log ) );
+    ptr<Ref> remote_ref = Z_NEW( Ref( "sos::scheduler::Log", log ) );
     
     int level = 0;
     log->get_level( &level );

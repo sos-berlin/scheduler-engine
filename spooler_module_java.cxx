@@ -40,7 +40,7 @@ using namespace std;
 using namespace zschimmer::java;
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 //--------------------------------------------------------------------------------------------const
 
@@ -82,7 +82,7 @@ jobject JNICALL Java_sos_spooler_Idispatch_com_1call( JNIEnv* jenv, jclass cls, 
 {
     try
     {
-        return sos::spooler::jobject_from_variant( jenv, variant_java_com_call( jenv, cls, jidispatch, jname, jparams ), &thread_data->_idispatch_container );
+        return sos::scheduler::jobject_from_variant( jenv, variant_java_com_call( jenv, cls, jidispatch, jname, jparams ), &thread_data->_idispatch_container );
     }
     catch( const exception&  x ) { set_java_exception( jenv, x ); }
     catch( const _com_error& x ) { set_java_exception( jenv, x ); }
@@ -520,5 +520,5 @@ bool Java_module_instance::name_exists( const string& name )
 
 //-------------------------------------------------------------------------------------------------
 
-} //namespace spooler
+} //namespace scheduler
 } //namespace sos

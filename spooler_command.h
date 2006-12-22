@@ -4,7 +4,7 @@
 #define __SPOOLER_COMMAND_H
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 //-------------------------------------------------------------------------------------------------
 
@@ -250,7 +250,7 @@ struct Command_processor
 //-------------------------------------------------------------------------------------------------
 
 
-} //namespace spooler
+} //namespace scheduler
 } //namespace sos
 
 #endif

@@ -8,7 +8,7 @@
 
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 #ifdef SYSTEM_WIN
 #   define DIR_SEP "\\"
@@ -60,7 +60,7 @@ typedef scheduler_object< Object >  Scheduler_object;       // Standard-Fall
 */
 //-------------------------------------------------------------------------------------------------
 
-} //namespace spooler
+} //namespace scheduler
 } //namespace sos
 
 #endif

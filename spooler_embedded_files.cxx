@@ -5743,7 +5743,7 @@ const char file_scheduler_xsd[] =
 using namespace zschimmer;
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
@@ -5765,5 +5765,5 @@ static const Embedded_file embedded_files_array[] =
 
 extern const Embedded_files embedded_files = { embedded_files_array };
 
-} //namespace spooler
+} //namespace scheduler
 } //namespace sos

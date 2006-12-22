@@ -4,7 +4,7 @@
 #define __SPOOLER_SECURITY_H
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 //-----------------------------------------------------------------------------------------Security
 
@@ -38,7 +38,7 @@ struct Security
 
 //-------------------------------------------------------------------------------------------------
 
-} //namespace spooler
+} //namespace scheduler
 } //namespace sos
 
 #endif

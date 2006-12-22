@@ -7,7 +7,7 @@
 
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 //----------------------------------------------------------------------------------Xslt_stylesheet
 
@@ -49,7 +49,7 @@ struct Xslt_stylesheet : idispatch_implementation< Xslt_stylesheet, spooler_com:
 
 //-------------------------------------------------------------------------------------------------
 
-} //namespace spooler
+} //namespace scheduler
 } //namespace sos
 
 #endif

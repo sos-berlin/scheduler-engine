@@ -20,7 +20,7 @@ extern "C" BOOL WINAPI DllMain( HANDLE hinstance, DWORD ul_reason_being_called, 
         case DLL_PROCESS_ATTACH: 
             sos::_hinstance = (::HINSTANCE)hinstance; 
             sos::application.init();
-            sos::spooler::typelib.set_hinstance( (HINSTANCE)hinstance );
+            sos::scheduler::typelib.set_hinstance( (HINSTANCE)hinstance );
             break;
 
 	case DLL_THREAD_ATTACH:     

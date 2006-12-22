@@ -23,7 +23,7 @@ using namespace zschimmer::com;
 
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 using namespace std;
 using namespace spooler_com;
@@ -3422,7 +3422,7 @@ STDMETHODIMP Com_spooler::Create_order( Iorder** result )
     return hr;
 }
 
-//--------------------------------------------------------------------------spooler::get_is_service
+//--------------------------------------------------------------------------scheduler::get_is_service
 
 STDMETHODIMP Com_spooler::get_Is_service( VARIANT_BOOL* result )
 {
@@ -3438,7 +3438,7 @@ STDMETHODIMP Com_spooler::get_Is_service( VARIANT_BOOL* result )
     return hr;
 }
 
-//---------------------------------------------------------------------------spooler::get_directory
+//---------------------------------------------------------------------------scheduler::get_directory
 
 STDMETHODIMP Com_spooler::get_Directory( BSTR* result )
 {
@@ -5214,5 +5214,5 @@ STDMETHODIMP Com_order_queue::Add_order( VARIANT* order_or_payload, Iorder** res
 
 //-------------------------------------------------------------------------------------------------
 
-} //namespace spooler
+} //namespace scheduler
 } //namespace sos

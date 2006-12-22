@@ -20,7 +20,7 @@ using stdext::hash_set;
 using stdext::hash_map;
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 //-------------------------------------------------------------------------------------------------
 
@@ -1496,8 +1496,13 @@ xml::Element_ptr Order_queue::dom_element( const xml::Document_ptr& document, co
         //if( Time next = next_time() )
         element.setAttribute( "next_start_time", next_time().as_string() );
 
+        if( _is_order_requested )
+        element.setAttribute( "order_requested", "yes" );
+
         if( show & show_orders )
         {
+            int DATENBANK_LESEN;
+
             int limit = show._max_orders;
 
             FOR_EACH( Queue, _queue, it )
@@ -1665,7 +1670,7 @@ bool Order_queue::request_order( const Time& now )
 
     if( !result )
     {
-        if( first_order( now ) )
+        if( first_order( now ) )        // Ist schon in Job::request_order geprüft worden
         {
             result = true;
         }
@@ -2144,7 +2149,7 @@ bool Order::is_processable()
 
 void Order::assert_is_not_distributed( const string& debug_text )
 {
-    if( !_is_distributed )  z::throw_xc( "SCHEDULER-375", debug_text );
+    if( _is_distributed )  z::throw_xc( "SCHEDULER-375", debug_text );
 }
 
 //----------------------------------------------------------------------------Order::assert_no_task

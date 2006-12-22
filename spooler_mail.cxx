@@ -6,7 +6,7 @@
 #include "../zschimmer/z_mail.h"
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 using namespace std;
 using namespace spooler_com;
@@ -808,5 +808,5 @@ void Com_mail::use_smtp_default( const Mail_defaults& defaults )
 
 //-------------------------------------------------------------------------------------------------
 
-} //namespace spooler
+} //namespace scheduler
 } //namespace sos

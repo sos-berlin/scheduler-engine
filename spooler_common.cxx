@@ -4,7 +4,7 @@
 #include "spooler.h"
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 //--------------------------------------------------------------------variable_set_from_environment
 

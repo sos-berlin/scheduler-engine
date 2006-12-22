@@ -3,7 +3,7 @@
 #include "spooler.h"
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 //----------------------------------------------------------------------------------Security::level
 
@@ -42,7 +42,7 @@ Security::Level Security::as_level( const string& name )
 
 //-------------------------------------------------------------------------------------------------
 
-} //namespace spooler
+} //namespace scheduler
 } //namespace sos
 
 

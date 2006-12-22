@@ -15,7 +15,7 @@
 using namespace std;
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 //-------------------------------------------------------------------------------------check_result
 
@@ -327,5 +327,5 @@ Variant Scripting_engine_module_instance::call( const string& name, bool param )
 
 //-------------------------------------------------------------------------------------------------
 
-} //namespace spooler
+} //namespace scheduler
 } //namespace sos

@@ -24,7 +24,7 @@
 
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 //typedef spooler_com::Log_level Log_level;
 /*
@@ -893,7 +893,7 @@ struct Com_subprocess : spooler_com::Isubprocess,
 
 //-------------------------------------------------------------------------------------------------
 
-} //namespace spooler
+} //namespace scheduler
 } //namespace sos
 
 #endif

@@ -5,7 +5,7 @@
 
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 //------------------------------------------------------------------Distributed_scheduler
 
@@ -125,7 +125,7 @@ struct Distributed_scheduler : Async_operation, Scheduler_object
 
 //-------------------------------------------------------------------------------------------------
 
-} //namespace spooler
+} //namespace scheduler
 } //namespace sos
 
 #endif

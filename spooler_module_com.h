@@ -4,7 +4,7 @@
 #define __SPOOLER_MODULE_COM_H
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 //-------------------------------------------------------------------------------------------------
 
@@ -80,7 +80,7 @@ struct Scripting_engine_module_instance : Com_module_instance_base
 
 //-------------------------------------------------------------------------------------------------
 
-} //namespace spooler
+} //namespace scheduler
 } //namespace sos
 
 #endif

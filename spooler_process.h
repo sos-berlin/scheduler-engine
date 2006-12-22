@@ -7,7 +7,7 @@
 
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 
 struct Process_class;
@@ -120,7 +120,7 @@ typedef list< ptr<Process_class> >   Process_class_list;
 
 //-------------------------------------------------------------------------------------------------
 
-} //namespace spooler
+} //namespace scheduler
 } //namespace sos
 
 #endif

@@ -6,7 +6,7 @@
 #include <jni.h>
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 #ifdef Z_WINDOWS
 #   define SPOOLER_DEFAULT_LANGUAGE     "VBScript"
@@ -326,7 +326,7 @@ struct Com_job_instance_factory : IDispatch
 */
 //-------------------------------------------------------------------------------------------------
 
-} //namespace spooler
+} //namespace scheduler
 } //namespace sos
 
 #endif

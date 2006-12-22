@@ -5,7 +5,7 @@
 #ifdef Z_WINDOWS
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 int                             spooler_service             ( const string& service_name, int argc, char** argv );
 void                            install_service             ( const string& service_name, const string& service_description, const string& service_display, 
@@ -20,7 +20,7 @@ string                          make_service_display        ( const string& id, 
 
 //-------------------------------------------------------------------------------------------------
 
-} //namespace spooler
+} //namespace scheduler
 } //namespace sos
 
 #endif

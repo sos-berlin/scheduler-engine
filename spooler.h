@@ -76,7 +76,7 @@ using namespace zschimmer;
 using namespace zschimmer::com;
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 //--------------------------------------------------------------------------------------------const
     
@@ -124,7 +124,7 @@ struct Web_service_response;
 struct Xslt_stylesheet;
 
 
-} //namespace spooler
+} //namespace scheduler
 
 namespace http
 {
@@ -169,7 +169,7 @@ namespace http
 //-------------------------------------------------------------------------------------------------
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 //-------------------------------------------------------------------------------------------------
 
@@ -282,7 +282,7 @@ struct Spooler : Object,
     void                        cmd_pause                   ()                                  { _state_cmd = sc_pause; signal( "pause" ); }
     void                        cmd_continue                ();
     void                        cmd_terminate_after_error   ( const string& function_name, const string& message_text );
-    void                        cmd_terminate               ( bool restart = false, int timeout = INT_MAX, bool shutdown = true, bool all_schedulers = false );
+    void                        cmd_terminate               ( bool restart = false, int timeout = INT_MAX, bool shutdown = true, bool terminate_all_schedulers = false );
     void                        cmd_terminate_and_restart   ( int timeout = INT_MAX )           { return cmd_terminate( true, timeout ); }
     void                        cmd_let_run_terminate_and_restart();
 
@@ -640,7 +640,7 @@ void                            send_error_email            ( const exception&, 
 
 //-------------------------------------------------------------------------------------------------
 
-} //namespace spooler
+} //namespace scheduler
 
 int                             spooler_main                ( int argc, char** argv, const string& parameters );
 

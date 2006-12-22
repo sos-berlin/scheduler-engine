@@ -116,7 +116,7 @@ public class My_job  extends sos.spooler.Job_impl
         </jobs>
 
         <job_chains>
-            <job_chain name="my_job_chain">
+            <job_chain name="my_job_chain" distributed="yes">
                 <file_order_source directory="/tmp/x/" regex="^gen"/>
                 <!--file_order_source directory="/tmp/yyy/" regex="^gen"/-->
                 <!--file_order_source directory="/tmp/y" regex="^gen" next_state="second"/-->

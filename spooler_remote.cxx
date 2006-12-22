@@ -3,7 +3,7 @@
 #include "spooler.h"
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 //--------------------------------------------------------------------------------------------const
     
@@ -303,5 +303,5 @@ void Remote_scheduler::connection_lost_event( const exception* x )
 
 //-------------------------------------------------------------------------------------------------
 
-} //namespace spooler
+} //namespace scheduler
 } //namespace sos

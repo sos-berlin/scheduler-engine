@@ -29,7 +29,7 @@
 
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 //extern const Gmtime                    doomsday                    = (Gmtime)double_time_max;
 
@@ -1239,5 +1239,5 @@ double Gmtime::normalize( double t )
 */
 //-------------------------------------------------------------------------------------------------
 
-} //namespace spooler
+} //namespace scheduler
 } //namespace sos

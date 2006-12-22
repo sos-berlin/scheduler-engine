@@ -15,7 +15,7 @@
 
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 
 //------------------------------------------------------------------------------------Mail_defaults
@@ -177,7 +177,7 @@ struct Com_mail : spooler_com::Imail,
     ptr<Xslt_stylesheet>       _xslt_stylesheet;
 };
 
-} //namespace spooler
+} //namespace scheduler
 } //namespace sos
 
 

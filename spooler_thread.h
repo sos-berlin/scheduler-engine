@@ -4,7 +4,7 @@
 #define __SPOOLER_THREAD_H
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 //-----------------------------------------------------------------------------------Spooler_thread
 
@@ -141,7 +141,7 @@ typedef list< ptr<Spooler_thread> >  Thread_list;
 
 //-------------------------------------------------------------------------------------------------
 
-} //namespace spooler
+} //namespace scheduler
 } //namespace sos
 
 #endif

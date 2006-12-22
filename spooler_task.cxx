@@ -23,7 +23,7 @@
 #define THREAD_LOCK_DUMMY( x )
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 //--------------------------------------------------------------------------------------------const
 

@@ -6,7 +6,7 @@
 #include <math.h>
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 namespace time {
 
 //-------------------------------------------------------------------------------------------------
@@ -520,7 +520,7 @@ using time::Time;
 using time::Period;
 using time::Run_time;
 
-} //namespace spooler
+} //namespace scheduler
 } //namespace sos
 
 #endif

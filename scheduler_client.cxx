@@ -265,7 +265,7 @@ using namespace std;
 using namespace zschimmer;
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 //-------------------------------------------------------------------------------------------------
 
@@ -522,13 +522,13 @@ int scheduler_client_main( int argc, char** argv )
 
 //-------------------------------------------------------------------------------------------------
 
-} //namespace spooler
+} //namespace scheduler
 } //namespace sos
 
 //---------------------------------------------------------------------------------------------main
 /*
 int main( int argc, char** argv )
 {
-    return sos::spooler::scheduler_client_main( argc, argv );
+    return sos::scheduler::scheduler_client_main( argc, argv );
 }
 */

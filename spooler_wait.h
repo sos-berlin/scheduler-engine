@@ -12,7 +12,7 @@
 #endif
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 
 #ifdef Z_WINDOWS
@@ -179,7 +179,7 @@ struct Directory_watcher : Event  //, Async_operation
 
 //-------------------------------------------------------------------------------------------------
 
-} //namespace spooler
+} //namespace scheduler
 } //namespace sos
 
 #endif

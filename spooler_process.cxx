@@ -6,7 +6,7 @@
 
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 using namespace object_server;
 

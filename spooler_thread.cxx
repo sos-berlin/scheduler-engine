@@ -12,7 +12,7 @@
 #include "../kram/sos_java.h"
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 
 //-------------------------------------------------------------------Spooler_thread::Spooler_thread

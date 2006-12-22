@@ -4,7 +4,7 @@
 #define __SCHEDULER_OBJECT_H
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 
 struct Spooler_db;
@@ -67,7 +67,7 @@ struct Scheduler_object
 
 //-------------------------------------------------------------------------------------------------
 
-} //namespace spooler
+} //namespace scheduler
 } //namespace sos
 
 #endif

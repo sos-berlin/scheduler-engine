@@ -10,7 +10,7 @@
 using namespace zschimmer;
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 //-------------------------------------------------------------------------------------------------
 
@@ -92,15 +92,18 @@ struct Exclusive_scheduler_watchdog : Async_operation, Scheduler_object
     bool                        mark_as_exclusive           ();
     bool                        set_exclusive               ();
     bool                        check_backup_precedence     ();
+    string                      read_distributed_scheduler_session_id();
+    bool                        restart_when_active_scheduler_has_started();
 
     Fill_zero                  _zero_;
-    Distributed_scheduler*          _distributed_scheduler;
+    Distributed_scheduler*     _distributed_scheduler;
     Other_scheduler            _other_scheduler;
     time_t                     _next_check_time;
     bool                       _is_scheduler_up;            // Scheduler ist nicht ordentlich beendet worden
     bool                       _announced_to_become_exclusive; // Wenn eine Meldung ausgegeben oder ein Datensatz zu ändern versucht wurde 
     time_t                     _next_precedence_check;
-    //time_t                     _set_exclusive_until;           // Nur für Access (kennt keine Sperre): Aktivierung bis dann (now+database_commit_visible_time) verzögern, dann nochmal prüfen
+    string                     _distributed_scheduler_session_id;
+  //time_t                     _set_exclusive_until;           // Nur für Access (kennt keine Sperre): Aktivierung bis dann (now+database_commit_visible_time) verzögern, dann nochmal prüfen
     Prefix_log*                _log;
 };
 
@@ -236,6 +239,11 @@ bool Exclusive_scheduler_watchdog::async_continue_( Continue_flags )
     try
     {
         try_to_become_exclusive();
+
+        if( !_distributed_scheduler->_has_exclusiveness  &&  _is_scheduler_up )
+        {
+            restart_when_active_scheduler_has_started();
+        }
     }
     catch( exception& )
     {
@@ -709,6 +717,64 @@ bool Exclusive_scheduler_watchdog::set_exclusive()
     return ok;
 }
 
+//--------------------------Exclusive_scheduler_watchdog::restart_when_active_scheduler_has_started
+
+bool Exclusive_scheduler_watchdog::restart_when_active_scheduler_has_started()
+{
+    bool result = false;
+
+    if( _is_scheduler_up )
+    {
+        string current_id = read_distributed_scheduler_session_id();
+
+        if( current_id != ""  &&  current_id != _distributed_scheduler_session_id )
+        {
+            _distributed_scheduler_session_id = current_id;
+
+            _log->info( message_string( "SCHEDULER-818" ) );
+            bool restart = true;
+            bool shutdown = false;
+            _spooler->cmd_terminate( restart, INT_MAX, shutdown );
+            result = true;
+        }
+    }
+
+    return result;
+}
+
+//------------------------------Exclusive_scheduler_watchdog::read_distributed_scheduler_session_id
+
+string Exclusive_scheduler_watchdog::read_distributed_scheduler_session_id()
+{
+    S result;
+
+    if( _is_scheduler_up )
+    {
+        if( db()  &&  db()->opened() )
+        for( Retry_transaction ta ( db() ); ta.enter_loop(); ta++ )
+        try
+        {
+            Any_file select = ta.open_result_set( 
+                                S() << "select `host`, `pid`, `running_since`"
+                                       "  from " << _spooler->_members_tablename <<
+                                      "  where `scheduler_member_id`=" + sql::quoted( _distributed_scheduler->empty_member_id()  ),
+                                __FUNCTION__ );
+
+            if( !select.eof() )
+            {
+                Record record = select.get_record();
+
+                result << record.as_string( "host" ) << "." << 
+                          record.as_string( "pid" ) << "." << 
+                          record.as_string( "running_since" );
+            }
+        }
+        catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_members_tablename, x ) ); }
+    }
+
+    return result;
+}
+
 //------------------------------------------------static Distributed_scheduler::string_from_command
 
 string Distributed_scheduler::string_from_command( Command command )
@@ -891,6 +957,8 @@ bool Distributed_scheduler::start()
         _exclusive_scheduler_watchdog = Z_NEW( Exclusive_scheduler_watchdog( this ) );
         _exclusive_scheduler_watchdog->try_to_become_exclusive();   // Stellt sofort _is_scheduler_up fest
         _exclusive_scheduler_watchdog->_is_scheduler_up = scheduler_up;
+        _exclusive_scheduler_watchdog->_distributed_scheduler_session_id = _exclusive_scheduler_watchdog->read_distributed_scheduler_session_id();
+
         if( _has_exclusiveness )  _exclusive_scheduler_watchdog = NULL;
     }
     else
@@ -953,7 +1021,7 @@ bool Distributed_scheduler::wait_until_is_active()
     return ok;
 }
 
-//---------------------------------------------------Distributed_scheduler::wait_until_has_exclusiveness
+//----------------------------------------------Distributed_scheduler::wait_until_has_exclusiveness
 
 bool Distributed_scheduler::wait_until_has_exclusiveness()
 {
@@ -1669,5 +1737,5 @@ string Distributed_scheduler::obj_name() const
 
 //-------------------------------------------------------------------------------------------------
 
-} //namespace spooler
+} //namespace scheduler
 } //namespace sos

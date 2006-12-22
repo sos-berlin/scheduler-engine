@@ -5,7 +5,7 @@
 
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 const string mail_xpath = "( /mail | /scheduler_event/mail )";
 

@@ -17,7 +17,7 @@
 using namespace std;
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 //--------------------------------------------------------------------------------------------const
 
@@ -877,5 +877,5 @@ void Module_instance::release__end()
 
 //-------------------------------------------------------------------------------------------------
 
-} //namespace spooler
+} //namespace scheduler
 } //namespace sos

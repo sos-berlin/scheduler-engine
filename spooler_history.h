@@ -18,7 +18,7 @@
 
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 //-----------------------------------------------------------------------------------Archive_switch
 
@@ -292,7 +292,7 @@ struct Task_history
 
 //-------------------------------------------------------------------------------------------------
 
-} //namespace spooler
+} //namespace scheduler
 } //namespace sos
 
 #endif

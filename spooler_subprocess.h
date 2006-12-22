@@ -7,7 +7,7 @@
 
 
 namespace sos {
-namespace spooler {
+namespace scheduler {
 
 
 struct Process_class;
@@ -114,7 +114,7 @@ struct Subprocess_register : Object
 
 //-------------------------------------------------------------------------------------------------
 
-} //namespace spooler
+} //namespace scheduler
 } //namespace sos
 
 #endif
