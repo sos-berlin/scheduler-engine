@@ -530,7 +530,7 @@ static DWORD WINAPI HandlerEx( DWORD dwControl, DWORD event, void* event_data, v
             {
                 pending_timed_out = false;
                 service_stop = true;
-                spooler_ptr->cmd_terminate( false, terminate_timeout, false );
+                spooler_ptr->cmd_terminate( false, terminate_timeout, true );
                 set_service_status( 0, SERVICE_STOP_PENDING );
                 result = NO_ERROR;  
                 break;
@@ -557,7 +557,7 @@ static DWORD WINAPI HandlerEx( DWORD dwControl, DWORD event, void* event_data, v
             case SERVICE_CONTROL_SHUTDOWN:          // Requests the service to perform cleanup tasks, because the system is shutting down. 
                 // Wir haben nicht mehr als 20s: Das ist eigentlich zu kurz. STOP_PENDING gibt eine kleine Gnadenfrist. 2006-06-19
                 pending_timed_out = false;
-                spooler_ptr->cmd_terminate( false, INT_MAX, true );
+                spooler_ptr->cmd_terminate( false, terminate_timeout, true );
                 set_service_status( 0, SERVICE_STOP_PENDING );
                 result = NO_ERROR;  
                 break;

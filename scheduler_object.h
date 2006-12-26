@@ -7,7 +7,7 @@ namespace sos {
 namespace scheduler {
 
 
-struct Spooler_db;
+struct Database;
 struct Order_subsystem;
 
 //---------------------------------------------------------------------------------Scheduler_object
@@ -54,7 +54,7 @@ struct Scheduler_object
     virtual string              obj_name                    () const                                { return name_of_type_code( _scheduler_object_type_code ); }
 
     Prefix_log*                 log                         ()                                      { return _log; }
-    Spooler_db*                 db                          () const;
+    Database*                   db                          () const;
     Order_subsystem*            order_subsystem             () const;
 
     Spooler*                   _spooler;

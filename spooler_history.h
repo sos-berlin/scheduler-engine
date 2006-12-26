@@ -44,11 +44,11 @@ enum Database_lock_syntax
     db_lock_with_updlock,       // SQL-Server: Sätze mit "select with(updlock)" sperren, für SQL Server
 };
 
-//---------------------------------------------------------------------------------------Spooler_db
+//---------------------------------------------------------------------------------------Database
 
-struct Spooler_db : Object, Scheduler_object
+struct Database : Object, Scheduler_object
 {
-                                Spooler_db              ( Spooler* );
+                                Database                ( Spooler* );
 
     void                        open                    ( const string& db_name );
     void                        close                   ();
@@ -73,16 +73,14 @@ struct Spooler_db : Object, Scheduler_object
 
     Transaction*                transaction             ();
     bool                        is_in_transaction       ()                                          { return _transaction != NULL; }
-  //void                        execute                 ( const string& stmt, const string& debug_extra = "" );
     int                         record_count            ()                                          { return _db.record_count(); }
     Dbms_kind                   dbms_kind               ()                                          { return _db.dbms_kind(); }
     string                      dbms_name               ()                                          { return _db.dbms_name(); }
     Database_lock_syntax        lock_syntax             ();
-    //void                        commit                  ( const string& debug_extra = "" );
-    //void                        rollback                ( const string& debug_extra = "" );
     void                        try_reopen_after_error  ( const exception&, bool wait_endless = false );
     void                        create_tables_when_needed();
     void                        create_table_when_needed( Transaction*, const string& tablename, const string& fields );
+    time_t                      open_time               () const                                    { return _open_time; }
 
     Fill_zero                  _zero_;
     Thread_semaphore           _lock;
@@ -119,33 +117,39 @@ struct Spooler_db : Object, Scheduler_object
     bool                       _waiting;
     int                        _order_id_length_max;
     Transaction*               _transaction;
+    time_t                     _open_time;
+
+  public:
+    static const int            seconds_before_reopen;
 };
 
 //--------------------------------------------------------------------------------------Transaction
 
 struct Transaction
 {
-                                Transaction             ( Spooler_db*, Transaction* outer_transaction = NULL );
+                                Transaction             ( Database*, Transaction* outer_transaction = NULL );
                                ~Transaction             ();
 
     void                    set_log_sql                 ( bool b )                                  { _log_sql = b; }
-    void                        begin_transaction       ( Spooler_db* db )                          { _db = db; }
-    void                        commit                  ( const string& debug_text = "" );
-    void                        intermediate_commit     ( const string& debug_text = "" );
-    void                        rollback                ( const string& debug_text = "" );
+    void                        begin_transaction       ( Database* );
+    void                        commit                  ( const string& debug_text );
+    void                        intermediate_commit     ( const string& debug_text );
+    void                        rollback                ( const string& debug_text, bool force = false );
+    void                        force_rollback          ( const string& debug_text )                { rollback( debug_text, true ); }
   //void                        try_reopen_after_error  ();
-    void                        set_transaction_written ()                                          { _transaction_written = true; }
-    void                        set_transaction_read    ()                                          { _transaction_read = true; }
+    void                        set_transaction_written ()                                          { _transaction_written = true; }    // Wird nicht benutzt
+    void                        set_transaction_read    ()                                          { _transaction_read = true; }       // Wird nicht benutzt
     bool                        is_transaction_used     ()                                          { return db()->_db.is_transaction_used(); }
+    bool                        need_commit_or_rollback ()                                          { return db()->_db.need_commit_or_rollback(); }
     Transaction*                outer_transaction       ()                                          { return _outer_transaction; }
 
-    Any_file                    open_result_set         ( const string& sql, const string& debug_text = "" );
-    Any_file                    open_file               ( const string& db_prefix, const string& sql, const string& debug_text = "", bool writes = true );
-    Any_file                    open_file_2             ( const string& db_prefix, const string& execution_sql, const string& debug_text, bool writes, const string& logging_sql );
+    Any_file                    open_result_set         ( const string& sql, const string& debug_text, bool writes_transaction = false );
+    Any_file                    open_file               ( const string& db_prefix, const string& sql, const string& debug_text = "", bool need_commit_or_rollback = true );
+    Any_file                    open_file_2             ( const string& db_prefix, const string& execution_sql, const string& debug_text, bool need_commit_or_rollback, const string& logging_sql );
 
-    void                        execute                 ( const string& sql, const string& debug_text = "" );
-    void                        execute_single          ( const string& sql, const string& debug_text = "" );
-    bool                        try_execute_single      ( const string& sql, const string& debug_text = "" );
+    void                        execute                 ( const string& sql, const string& debug_text, bool force = false );
+    void                        execute_single          ( const string& sql, const string& debug_text );
+    bool                        try_execute_single      ( const string& sql, const string& debug_text );
     string                      get_variable_text       ( const string& name, bool* record_exists = NULL );
     void                        set_variable            ( const string& name, const string& value );
     void                        insert_variable         ( const string& name, const string& value );
@@ -156,17 +160,18 @@ struct Transaction
     void                        update_clob             ( const string& table_name, const string& column_name, const string& key_name, const string& key_value, const string& value );
     string                      read_clob               ( const string& table_name, const string& column_name, const string& where );
     string                      read_clob               ( const string& table_name, const string& column_name, const string& key_name, const string& key_value );
+    string                      file_as_string          ( const string& hostware_filename );
 
     int                         record_count            ()                                          { return _db->record_count(); }
-    Spooler_db*                 db                      ()                                          { assert( _db ); return _db; }
+    Database*                   db                      ()                                          { assert( _db ); return _db; }
     sql::Database_descriptor*   database_descriptor     ()                                          { return db()->database_descriptor(); }
 
 
     Fill_zero                  _zero_;
-    Spooler_db*                _db;
+    Database*                  _db;
     Transaction*               _outer_transaction;
-    bool                       _transaction_written;
-    bool                       _transaction_read;
+    bool                       _transaction_written;    // Wird nicht benutzt
+    bool                       _transaction_read;       // Wird nicht benutzt
     bool                       _log_sql;
     Mutex_guard                _guard;
     Spooler*                   _spooler;
@@ -188,7 +193,7 @@ struct Transaction
 
 struct Database_retry
 {
-                                Database_retry          ( Spooler_db* db )                        : _db(db), _enter_loop(1) {}
+                                Database_retry          ( Database* db )                        : _db(db), _enter_loop(1) {}
 
                                 operator bool           ()                                          { return enter_loop(); }
     bool                        enter_loop              ()                                          { return _enter_loop > 0; }
@@ -196,7 +201,7 @@ struct Database_retry
     void                        reopen_database_after_error( const exception& );
     void                        operator ++             (int)                                       { _enter_loop--; }
 
-    Spooler_db*                _db;
+    Database*                _db;
     int                        _enter_loop;
 };
 
@@ -210,7 +215,7 @@ struct Database_retry
 
 struct Retry_transaction : Transaction
 {
-                                Retry_transaction       ( Spooler_db* db, Transaction* outer = NULL ) : Transaction(db,outer), _database_retry( db ) {}
+                                Retry_transaction       ( Database* db, Transaction* outer = NULL ) : Transaction(db,outer), _database_retry( db ) {}
 
     bool                        enter_loop              ()                                          { return _database_retry.enter_loop(); }
     void                        reopen_database_after_error( const exception& );

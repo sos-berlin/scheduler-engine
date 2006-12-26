@@ -2327,7 +2327,7 @@ void Spooler::start()
 
     if( _need_db  && _db_name.empty() )  z::throw_xc( "SCHEDULER-205" );
 
-    _db = Z_NEW( Spooler_db( this ) );
+    _db = Z_NEW( Database( this ) );
     _db->open( _db_name );
 
     _db->spooler_start();
@@ -2494,11 +2494,11 @@ void Spooler::assert_has_exclusiveness( const string& text )
 
 //-------------------------------------------------------------------------Spooler::do_a_heart_beat
 
-bool Spooler::do_a_heart_beat( Transaction* ta )
+bool Spooler::do_a_heart_beat()
 {
     if( !_distributed_scheduler )  return true;
 
-    return _distributed_scheduler->do_a_heart_beat( ta );
+    return _distributed_scheduler->do_a_heart_beat();
 }
 
 //--------------------------------------------------------------------Spooler::run_scheduler_script
@@ -3499,7 +3499,7 @@ void Spooler::kill_all_processes()
         if( _process_handles[i] )  
         {
             try_kill_process_immediately( _process_handles[i] );
-            _process_handles[i] = NULL;
+            _process_handles[i] = 0;
         }
     }
 

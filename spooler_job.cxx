@@ -775,7 +775,8 @@ void Job::load_tasks_from_db( Transaction* outer_transaction )
                     "  from " + _spooler->_tasks_tablename +
                     "  where \"SPOOLER_ID\"=" + quoted_string( _spooler->id_for_db(), '\'', '\'' ) +
                        " and \"JOB_NAME\"=" + quoted_string( _name, '\'', '\'' ) +
-                    "  order by \"TASK_ID\"" );
+                    "  order by \"TASK_ID\"",
+                    __FUNCTION__ );
     
     while( !sel.eof() )
     {
@@ -852,7 +853,7 @@ void Job::Task_queue::enqueue_task( const ptr<Task>& task )
                 if( task->_start_at )
                 insert.set_datetime( "START_AT_TIME" ,   task->_start_at.as_string( Time::without_ms ) );
 
-                ta.execute( insert );
+                ta.execute( insert, __FUNCTION__ );
 
                 if( task->has_parameters() )
                 {
@@ -901,7 +902,8 @@ void Job::Task_queue::remove_task_from_db( int task_id )
                 Transaction ta ( _spooler->_db );
 
                 ta.execute( "DELETE from " + _spooler->_tasks_tablename +
-                            "  where \"TASK_ID\"=" + as_string( task_id ) );
+                            "  where \"TASK_ID\"=" + as_string( task_id ),
+                            __FUNCTION__ );
                 ta.commit( __FUNCTION__);
             }
 

@@ -523,7 +523,8 @@ xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& 
                            "  from " + _spooler->_order_history_tablename +
                            "  where \"SPOOLER_ID\"=" + sql::quoted( _spooler->id_for_db() ) + 
                             " and \"JOB_CHAIN\"="   + sql::quoted( job_chain_name ) +
-                            " and \"ORDER_ID\"="    + sql::quoted( id_string ) );
+                            " and \"ORDER_ID\"="    + sql::quoted( id_string ),
+                            __FUNCTION__ );
 
             if( sel.eof() )  goto NO_ORDER;
 
@@ -535,7 +536,8 @@ xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& 
             Any_file sel = _spooler->_db->transaction()->open_result_set(
                            "select \"ORDER_ID\" as \"ID\", \"START_TIME\", \"TITLE\", \"STATE\", \"STATE_TEXT\""
                            "  from " + _spooler->_order_history_tablename +
-                           "  where \"HISTORY_ID\"=" + history_id );
+                           "  where \"HISTORY_ID\"=" + history_id,
+                           __FUNCTION__ );
 
             Record record = sel.get_record();
 
@@ -1031,7 +1033,8 @@ void Command_processor::execute_http( http::Operation* http_operation )
                                            "  from " + _spooler->_order_history_tablename +
                                            "  where \"SPOOLER_ID\"=" + sql::quoted( _spooler->id_for_db() ) + 
                                              " and \"JOB_CHAIN\"="  + sql::quoted( job_chain_name ) +
-                                             " and \"ORDER_ID\"="   + sql::quoted( order_id ) );
+                                             " and \"ORDER_ID\"="   + sql::quoted( order_id ),
+                                             __FUNCTION__ );
 
                             if( !sel.eof() )
                             {

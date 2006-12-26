@@ -333,7 +333,7 @@ struct Spooler : Object,
     void                        check_distributed_scheduler   ();
     bool                        ok                          ();
     bool                        check                       ( const string& debug_function, const string& debug_text = "" );
-    bool                        do_a_heart_beat             ( Transaction* );
+    bool                        do_a_heart_beat             ();
     bool                        is_active                   ();
     bool                        check_is_active             ();
     bool                        has_exclusiveness           ();
@@ -401,7 +401,7 @@ struct Spooler : Object,
     void                        end_dont_suspend_machine    ();
     void                        suspend_machine             ();
 
-    Spooler_db*                 db                          ()                                  { return _db; }
+    Database*                   db                          ()                                  { return _db; }
     sql::Database_descriptor*   database_descriptor         ()                                  { return db()->database_descriptor(); }
 
     Order_subsystem*            order_subsystem             ();
@@ -483,7 +483,7 @@ struct Spooler : Object,
     Thread_semaphore           _serialize_lock;             // Wenn die Threads nicht nebenläufig sein sollen
 
     string                     _db_name;
-    ptr<Spooler_db>            _db;
+    ptr<Database>              _db;
     bool                       _need_db;                    // need_db=yes|strict  Wenn DB sich nicht öffnen lässt, ohne DB arbeiten und Historie ggfs. in Dateien schreiben
     bool                       _wait_endless_for_db_open;   // need_db=yes
     int                        _max_db_errors;              // Nach so vielen Fehlern im Scheduler-Leben DB abschalten (wie need_db)

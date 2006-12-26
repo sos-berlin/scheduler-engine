@@ -3248,6 +3248,12 @@
             </text>
         </message>
         
+        <message code="SCHEDULER-819">
+            <text xml:lang="en">
+                <title>Scheduler becomes active</title>
+            </text>
+        </message>
+        
     </messages>
     
 </messages>

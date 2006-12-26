@@ -71,7 +71,7 @@ ptr<Xslt_stylesheet> Scheduler_object::mail_xslt_stylesheet()
 
 //-----------------------------------------------------------------------------Scheduler_object::db
 
-Spooler_db* Scheduler_object::db() const 
+Database* Scheduler_object::db() const 
 {
     return _spooler->_db;
 }

@@ -353,6 +353,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-816", "Unable to release occupation in database" },
     { "SCHEDULER-817", "Missing order record in database" },
     { "SCHEDULER-818", "Active Scheduler has been startet, so this inactive Scheduler starts again too" },
+    { "SCHEDULER-819", "Scheduler becomes active" },
     {}
 };
 } //namespace sos

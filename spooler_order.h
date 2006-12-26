@@ -185,7 +185,7 @@ struct Order : Com_order,
     sql::Where_clause           db_where_clause         ();
     void                        db_fill_where_clause    ( sql::Where_clause* );
     int                         db_get_ordering         ( Transaction* ta = NULL );
-    Spooler_db*                 db                      ();
+    Database*                   db                      ();
 
   //ptr<Prefix_log>            _log;
 

@@ -874,7 +874,8 @@ xml::Element_ptr Job_chain::dom_element( const xml::Document_ptr& document, cons
                                " from " + _spooler->_order_history_tablename +
                                " where \"JOB_CHAIN\"=" + sql::quoted( _name ) +
                                  " and \"SPOOLER_ID\"=" + sql::quoted( _spooler->id_for_db() ) +
-                               " order by \"HISTORY_ID\" desc" );
+                               " order by \"HISTORY_ID\" desc",
+                               __FUNCTION__ );
 
                 while( !sel.eof() )
                 {
@@ -1323,7 +1324,8 @@ int Job_chain::order_count()
                         (
                             S() << "select count(*)  from " << _spooler->_orders_tablename <<
                                    "  where `spooler_id`=" << sql::quoted( _spooler->id_for_db() ) <<
-                                   " and `job_chain`="  << sql::quoted( name() ) 
+                                   " and `job_chain`="  << sql::quoted( name() ),
+                            __FUNCTION__
                         ).get_record().as_int( 0 );
 
             ta.commit( __FUNCTION__ );
@@ -1529,16 +1531,6 @@ int Order_queue::order_count( const Job_chain* which_job_chain )
 {
     int result = 0;
 
-    if( which_job_chain )
-    {
-        FOR_EACH( Queue, _queue, it )  if( (*it)->_job_chain == which_job_chain )  result++;
-    }
-    else
-    {
-        result += _queue.size();
-    }
-
-
     if( order_subsystem()->are_orders_distributed() )
     {
         string w = which_job_chain? make_where_expression_for_job_chain( which_job_chain )
@@ -1551,7 +1543,8 @@ int Order_queue::order_count( const Job_chain* which_job_chain )
                             (
                                 S() << "select count(*)  from " << _spooler->_orders_tablename <<
                                        "  where `spooler_id`=" << sql::quoted( _spooler->id_for_db() ) <<
-                                       " and " << w 
+                                       " and " << w,
+                                __FUNCTION__
                             ).get_record().as_int( 0 );
 
                 ta.commit( __FUNCTION__ );
@@ -1559,6 +1552,19 @@ int Order_queue::order_count( const Job_chain* which_job_chain )
                 result += count;
             }
             catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", x ) ); }
+        }
+
+        FOR_EACH( Queue, _queue, it )  if( !(*it)->_is_in_database  &&  ( !which_job_chain || (*it)->_job_chain == which_job_chain ) )  result++;
+    }
+    else
+    {
+        if( which_job_chain )
+        {
+            FOR_EACH( Queue, _queue, it )  if( (*it)->_job_chain == which_job_chain )  result++;
+        }
+        else
+        {
+            result += _queue.size();
         }
     }
 
@@ -1828,7 +1834,9 @@ Order* Order_queue::load_and_occupy_next_distributed_order_from_database( Task* 
 
         for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
         {
-            Any_file result_set = ta.open_result_set( select_sql );
+            bool transaction_written = true;
+
+            Any_file result_set = ta.open_result_set( select_sql, __FUNCTION__, transaction_written );
             if( !result_set.eof() )
             {
                 Record record = result_set.get_record();
@@ -2238,9 +2246,12 @@ void Order::db_show_occupation( Transaction* outer_transaction, Log_level log_le
 {
     for( Retry_transaction ta ( _spooler->_db, outer_transaction ); ta.enter_loop(); ta++ ) try
     {
-        Any_file result_set = ta.open_result_set( S() << "select `processing_scheduler_member_id`"
-            "  from " << _spooler->_orders_tablename
-            << db_where_clause().where_string() );
+        Any_file result_set = ta.open_result_set
+            ( 
+                S() << "select `processing_scheduler_member_id`"
+                       "  from " << _spooler->_orders_tablename
+                       << db_where_clause().where_string(),
+                __FUNCTION__);
 
         if( result_set.eof() )
         {
@@ -2271,7 +2282,7 @@ void Order::db_insert()
 
         int ordering = db_get_ordering( &ta );
         
-        ta.execute( db_update_stmt().make_delete_stmt() );
+        ta.execute( db_update_stmt().make_delete_stmt(), __FUNCTION__ );
 
         {
             sql::Insert_stmt insert ( ta.database_descriptor(), _spooler->_orders_tablename );
@@ -2551,7 +2562,7 @@ int Order::db_get_ordering( Transaction* ta )
 
 //----------------------------------------------------------------------------------------Order::db
 
-Spooler_db* Order::db()
+Database* Order::db()
 {
     return _spooler->_db;
 }

@@ -72,6 +72,18 @@
                 </p>
             </description>
         </xml_attribute>
+        
+
+        <xml_attribute name="distributed" type="yes|no" initial="no">
+            <description>
+                <p>
+                    Wirkt nur mit der Kommandozeilenoption <scheduler_option name="distributed-orders"/>
+                    und lässt die Aufträge von mehrereren Schedulern verteilt ausführen.
+                </p>
+            </description>
+        </xml_attribute>
+
+
     </xml_attributes>
 
 
