@@ -1150,10 +1150,6 @@ void Spooler::unregister_process_handle( Process_handle p )
             if( _process_handles[i] == p )  { _process_handles[i] = 0;  return; }
         }
     }
-
-#   ifdef _DEBUG
-        throw_xc( "unregister_process_handle" );
-#   endif
 }
 
 //-------------------------------------------------------------------------------Task::register_pid
@@ -2470,7 +2466,7 @@ void Spooler::assert_are_orders_distributed( const string& text )
 string Spooler::scheduler_member_id()
 {
     //assert_are_orders_distributed( __FUNCTION__ );
-    assert( _distributed_scheduler );
+    //assert( _distributed_scheduler );
 
     return _distributed_scheduler? _distributed_scheduler->member_id() : "";
 }
@@ -3154,7 +3150,7 @@ void Spooler::check_distributed_scheduler()
 {
     _distributed_scheduler->async_check_exception( "Error in Scheduler member" );
 
-    _scheduler_is_up    = _distributed_scheduler->is_scheduler_up();
+    _scheduler_is_up = _distributed_scheduler->is_scheduler_up();
 
     check_is_active();
 }
@@ -3180,13 +3176,10 @@ bool Spooler::ok()
 {
     bool ok = true;
     
-    if( _assert_is_active )
+    if( !check_is_active() )  
     {
-        if( !check_is_active() )  
-        {
-            ok = false;
-            cmd_terminate_after_error( "", "" );
-        }
+        ok = false;
+        cmd_terminate( false, INT_MAX, false, false );
     }
 
     return ok;
@@ -3199,11 +3192,13 @@ bool Spooler::check_is_active()
 // Kann nach jeder vermutlich längeren Operation aufgerufen werden, vor allem bei externer Software: Datenbank, eMail, xslt etc.
 
 {
+    // Wir sind mitten in irgendeiner Verarbeitung. Also nur bestimmte Sachen verändern! 
+
     bool result = true;
 
-    if( Not_in_recursion not_in_recursion = &_is_in_check_is_active )
+    if( _assert_is_active  &&  _distributed_scheduler )
     {
-        if( _distributed_scheduler )
+        if( Not_in_recursion not_in_recursion = &_is_in_check_is_active )
         {
             if( !_distributed_scheduler->check_is_active()  ||  _demand_exclusiveness && !_distributed_scheduler->has_exclusiveness() )
             {
@@ -3211,11 +3206,15 @@ bool Spooler::check_is_active()
 
                 kill_all_processes();
                 
-                _log->warn( message_string( _demand_exclusiveness? "SCHEDULER-367" : "SCHEDULER-362" ) );
+                _log->error( message_string( _demand_exclusiveness? "SCHEDULER-367" : "SCHEDULER-362" ) );
 
                 _distributed_scheduler->show_active_schedulers( (Transaction*)NULL );
-                _distributed_scheduler->close();     // Scheduler-Mitglieds-Eintrag entfernen
-                _distributed_scheduler = NULL;       // aber Eintrag für verteilten Scheduler lassen, Scheduler ist nicht herunterfahren (wird ja vom anderen aktiven Scheduler fortgesetzt)
+
+                //_distributed_scheduler offen lassen, damit belegte Aufträge freigegeben werden können.
+                // Außerdem sind wir mitten in irgendeiner Verarbeitung, da sollten wir _distributed_scheduler weder schließen noch entfernen
+
+                //_distributed_scheduler->close();     // Scheduler-Mitglieds-Eintrag entfernen
+                //_distributed_scheduler = NULL;       // aber Eintrag für verteilten Scheduler lassen, Scheduler ist nicht herunterfahren (wird ja vom anderen aktiven Scheduler fortgesetzt)
 
                 cmd_terminate( false, INT_MAX, false );
                 result = false;
@@ -3385,11 +3384,7 @@ void Spooler::cmd_stop()
 
 void Spooler::cmd_terminate_after_error( const string& debug_function, const string& debug_text )
 {
-    S text;
-    if( debug_function != "" )  text << "in " << debug_function;
-    if( debug_text != "" )  text << ": " << debug_text;
-
-    if( !text.empty() )  _log->error( text );
+    _log->error( message_string( "SCHEDULER-264", "in " + debug_function, debug_text ) );
 
     cmd_terminate( false, INT_MAX, false, false );
 }

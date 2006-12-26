@@ -32,6 +32,7 @@ struct Scheduler_object
         type_scheduler_event_manager,
         type_scheduler_member,
         type_heart_beat,
+        type_other_scheduler,
         type_exclusive_scheduler_watchdog,
         type_database_order_detector,
         type_order_subsystem,

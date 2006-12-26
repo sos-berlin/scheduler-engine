@@ -200,7 +200,7 @@ void Transaction::rollback( const string& debug_text, bool force )
         _db = NULL; 
         _guard.leave(); 
 
-        if( !db->_transaction  &&  !_spooler->ok() )  _spooler->cmd_terminate_after_error( __FUNCTION__, debug_text );
+        if( !db->_transaction )  _spooler->check( __FUNCTION__, debug_text );
     }
 }
 
@@ -270,7 +270,6 @@ void Retry_transaction::reopen_database_after_error( const exception& x )
     if( _outer_transaction )  throw;    // Wenn's eine äußere Transaktion gibt, dann die Schleife dort wiederholen
 
     assert( _db );
-    assert( !_db->is_in_transaction() );
 
     Database* db = _db;
 
@@ -279,7 +278,8 @@ void Retry_transaction::reopen_database_after_error( const exception& x )
         rollback( __FUNCTION__ );
     }
     catch( exception& x )  { Z_LOG2( "scheduler", __FUNCTION__ << "  " << x.what() << "\n" ); }
-    
+    assert( !db->is_in_transaction() );
+
     _database_retry.reopen_database_after_error( x );
 
     begin_transaction( db );

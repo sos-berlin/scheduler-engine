@@ -7,7 +7,10 @@
 namespace sos {
 namespace scheduler {
 
-//------------------------------------------------------------------Distributed_scheduler
+
+struct Other_scheduler;
+
+//----------------------------------------------------------------------------Distributed_scheduler
 
 struct Distributed_scheduler : Async_operation, Scheduler_object
 {
@@ -68,12 +71,14 @@ struct Distributed_scheduler : Async_operation, Scheduler_object
     bool                        wait_until_has_exclusiveness();
     bool                        do_a_heart_beat             ();
     void                        mark_as_inactive            ( bool delete_inactive_record = false, bool delete_new_active_record = false );
-    void                        show_active_schedulers      ( Transaction* );
+    void                        show_exclusive_scheduler    ( Transaction* ta )                     { show_active_schedulers( ta, true ); }
+    void                        show_active_schedulers      ( Transaction*, bool exclusive_only = false );
     void                        set_command_for_all_inactive_schedulers_but_me( Transaction*, Command );
     void                        set_command_for_all_schedulers_but_me( Transaction*, Command );
 
   //string                      scheduler_up_variable_name  ();
     void                        check_member_id             ();
+    void                        check_active_schedulers_heart_beat( Transaction* );
 
   protected:
     void                        create_table_when_needed    ();
@@ -82,15 +87,16 @@ struct Distributed_scheduler : Async_operation, Scheduler_object
     void                        start_operations            ();
     void                        close_operations            ();
 
+    bool                        mark_as_exclusive           ();
   //void                        mark_as_active              ();
     void                        calculate_next_heart_beat   ( time_t now );
     bool                        check_heart_beat_is_in_time ( time_t expected_next_heart_beat );
     void                        insert_scheduler_id_record  ( Transaction* );
-    bool                        check_empty_member_record   ();
+    void                        check_empty_member_record   ();
     void                        insert_member_record        ( Transaction*, bool set_active );
     void                        lock_member_records         ( Transaction*, const string& member1_id, const string& member2_id );
     void                        assert_database_integrity   ( const string& message_text );
-    bool                        check_database_integrity    ();
+  //bool                        check_database_integrity    ();
     bool                        heartbeat_member_record     ();
     void                        set_command_for_all_schedulers_but_me( Transaction*, const string& where, Command );
   //void                        set_command_for_members     ( Transaction*, const string& where, Command );
@@ -98,6 +104,8 @@ struct Distributed_scheduler : Async_operation, Scheduler_object
     void                        execute_command             ( Command );
     void                        db_execute                  ( const string& stmt );
     void                        make_scheduler_member_id    ();
+    Other_scheduler*            exclusive_scheduler         ();     // NULL, wenn _exclusive_scheduler->is_empty_member()
+    Other_scheduler*            empty_scheduler_record      ();
 
   private:
     friend struct               Heart_beat;
@@ -115,6 +123,7 @@ struct Distributed_scheduler : Async_operation, Scheduler_object
     time_t                     _db_next_heart_beat;
     time_t                     _late_heart_beat;
     bool                       _is_exclusiveness_stolen;
+    bool                       _is_in_error;
   //Command                    _heart_beat_command;
     string                     _heart_beat_command_string;
     Async_operation*           _current_operation;
@@ -122,6 +131,11 @@ struct Distributed_scheduler : Async_operation, Scheduler_object
     ptr<Exclusive_scheduler_watchdog> _exclusive_scheduler_watchdog;
     bool                       _closed;
     int                        _is_in_do_a_heart_beat;
+
+    typedef stdext::hash_map< string, ptr<Other_scheduler> >    Scheduler_map;
+    Scheduler_map              _active_scheduler_map;
+
+    ptr<Other_scheduler>       _exclusive_scheduler;        // Kein Scheduler ist exklusiv, wenn _exclusive_scheduler->is_empty_member()
 };
 
 //-------------------------------------------------------------------------------------------------

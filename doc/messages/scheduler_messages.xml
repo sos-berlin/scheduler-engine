@@ -3093,29 +3093,27 @@
             </text>
         </message>
 
-        <message code="SCHEDULER-993">
+        <!--message code="SCHEDULER-993">
             <text xml:lang="en">
-                <title>No heart beat from active Scheduler member <p1>member_id</p1>, although it announced one for <p2/> (<p3/>s ago)</title>
-                <!--title>No heart beat since <p4/>s (<p3>time</p3>), although Scheduler member <p1>member_id</p1> announced one for <p2/></title-->
-                <!--title>Scheduler member <p1>member_id</p1>'s heart does not beat since <p2/>, expected next_heart_beat at <p3/></title-->
+                <title>No heart beat, although it announced one for <p2/> (<p3/>s ago)</title>
             </text>
-        </message>
+        </message-->
 
         <message code="SCHEDULER-994">
             <text xml:lang="en">
-                <title>No heart beat since <p3/>s (<p2>time</p2>) of active Scheduler member <p1>member_id</p1></title>
+                <title>No heart beat since <p2/>s (<p1>time</p1>)</title>
             </text>
         </message>
 
         <message code="SCHEDULER-995">
             <text xml:lang="en">
-                <title>The exclusive Scheduler seems to be <p1>scheduler_member_id</p1> (pid=<p4/>, <p3>url</p3>), claiming its last heart beat was <p2/>s ago</title>
+                <title>No heart beat since <p2/>s (<p1>time</p1>), it seems to be dead</title>
             </text>
         </message>
 
         <message code="SCHEDULER-996">
             <text xml:lang="en">
-                <title>Heart beat is late: next_heart_beat has been announced for <p1/> (this is <p2/>s late)</title>
+                <title>Own heart beat is late: next_heart_beat has been announced for <p1/> (this is <p2/>s late)</title>
             </text>
         </message>
 
@@ -3178,7 +3176,7 @@
 
         <message code="SCHEDULER-805" weight="info">
             <text xml:lang="en">
-                <title>No Scheduler is exclusive</title>
+                <title>No Scheduler is active</title>
             </text>
         </message>
 
@@ -3244,7 +3242,7 @@
 
         <message code="SCHEDULER-818">
             <text xml:lang="en">
-                <title>Active Scheduler has been startet, so this inactive Scheduler starts again too</title>
+                <title>Active Scheduler has been started, so this inactive Scheduler starts again too</title>
             </text>
         </message>
         
@@ -3254,6 +3252,48 @@
             </text>
         </message>
         
+        <message code="SCHEDULER-820" weight="info">
+            <text xml:lang="en">
+                <title>Watching Scheduler member</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-821">
+            <text xml:lang="en">
+                <title>Scheduler member '<p1>scheduler_member_id</p1>' seems to be active, claiming its last heart beat was <p2/>s ago (pid=<p4/>, <p3>url</p3>)</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-822">
+            <text xml:lang="en">
+                <title>Scheduler member '<p1>scheduler_member_id</p1>' seems to be exclusive, claiming its last heart beat was <p2/>s ago (pid=<p4/>, <p3>url</p3>)</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-823">
+            <text xml:lang="en">
+                <title>Dead Scheduler member '<p1>scheduler_member_id</p1>' has resurrected after <p2/>s</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-824">
+            <text xml:lang="en">
+                <title>The exclusive Scheduler member is '<p1>scheduler_member_id</p1>'</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-825">
+            <text xml:lang="en">
+                <title>No exclusive Scheduler member</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-826">
+            <text xml:lang="en">
+                <title>Terminated</title>
+            </text>
+        </message>
+
     </messages>
     
 </messages>
