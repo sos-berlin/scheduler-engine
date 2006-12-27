@@ -132,6 +132,8 @@ Transaction::~Transaction()
 
 void Transaction::begin_transaction( Database* db )
 { 
+    if( !_guard )  _guard.enter( &db->_lock, __FUNCTION__ );
+
     _db = db; 
     db->_transaction = this;
 }
@@ -150,17 +152,25 @@ void Transaction::commit( const string& debug_text )
     }
     else
     {
-        if( db()->opened() )  execute( "COMMIT", debug_text );
+        if( db()->opened() )  
+        {
+            if( !_spooler->check( __FUNCTION__, debug_text, this ) )
+            {
+                _spooler->abort_immediately_after_distribution_error( __FUNCTION__ );     // Wir wollen das verspätete Commit verhindern
+                //_spooler->throw_distribution_error( "commit" );       // Das führt nach Datenbank-Reopen doch noch zu einem Commit (weil check wieder true liefert?) 
+                                                                        // Außerdem geht dann kein Commit mehr, auch nicht Order::db_release_occupation().
+            }
+
+            execute( "COMMIT", debug_text );
+        }
     }
 
     _db->_transaction = _outer_transaction;
-     
-    Database* db = _db;
     _db = NULL;
     _guard.leave(); 
 
 
-    if( !db->_transaction  &&  !_spooler->ok() )  _spooler->cmd_terminate_after_error( __FUNCTION__, debug_text );
+    if( !_outer_transaction )  _spooler->check( __FUNCTION__, debug_text );
 }
 
 //-----------------------------------------------------------------Transaction::intermediate_commit
@@ -193,14 +203,27 @@ void Transaction::rollback( const string& debug_text, bool force )
             Z_LOG( "Rollback in inner transaction." << debug_text );        // Keine Exception, weil wir schon in einer Exception sein können.
         }
 
-        if( db()->opened() )  execute( "ROLLBACK", debug_text, force );
+        if( db()->opened() )  
+        {
+            try
+            {
+                execute( "ROLLBACK", debug_text, force );
+            }
+            catch( exception& )
+            {
+                _db->_transaction = _outer_transaction;
+                _db = NULL; 
+                _guard.leave(); 
+                throw;
+            }
+        }
 
         _db->_transaction = _outer_transaction;
         Database* db = _db;
         _db = NULL; 
         _guard.leave(); 
 
-        if( !db->_transaction )  _spooler->check( __FUNCTION__, debug_text );
+        //Wir sind vielleicht in einer Exception, also keine weitere Exception auslösen:  if( !db->_transaction )  _spooler->check( __FUNCTION__, debug_text );
     }
 }
 
@@ -391,7 +414,6 @@ void Database::open2( const string& db_name )
 
                 if( _db.opened() ) _db_name += " ";
 
-                _open_time = ::time(NULL);
                 _log->info( message_string( "SCHEDULER-807", _db.dbms_name() ) );     // Datenbank wird geöffnet
 
                 _email_sent_after_db_error = false;
@@ -871,7 +893,8 @@ void Database::try_reopen_after_error( const exception& callers_exception, bool 
                     open2( _spooler->_db_name );
                     //open_history_table();
                     THREAD_LOCK( _error_lock )  _error = "";
-
+ 
+                    _reopen_time = ::time(NULL);
                     break;
                 }
                 catch( exception& x )
@@ -1155,10 +1178,11 @@ bool Transaction::try_update_variable( const string& name, const string& value )
 
 void Transaction::execute( const string& stmt, const string& debug_text, bool force )
 { 
-    bool is_commit_or_rollback = stmt == "COMMIT"  ||  stmt == "ROLLBACK";
+    bool is_commit   = stmt == "COMMIT";
+    bool is_rollback = stmt == "ROLLBACK";
   //if( !is_commit_or_rollback )  set_transaction_written();
 
-    if( force || !is_commit_or_rollback || need_commit_or_rollback() )
+    if( force || !is_commit && !is_rollback || need_commit_or_rollback() )
     {
         string debug_extra;
         if( debug_text != "" )  debug_extra = "  (" + debug_text + ")";

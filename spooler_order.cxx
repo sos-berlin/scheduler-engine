@@ -692,7 +692,11 @@ xml::Element_ptr Job_chain_node::dom_element( const xml::Document_ptr& document,
 
         if( _job )
         {
-            element.setAttribute( "orders", order_count( job_chain ) );
+            if( !_job_chain->_spooler->db()->is_in_transaction() )
+            {
+                element.setAttribute( "orders", order_count( job_chain ) );
+            }
+
             element.setAttribute( "job", _job->name() );
             
             if( _job->order_queue()->is_order_requested() )
@@ -1492,8 +1496,10 @@ xml::Element_ptr Order_queue::dom_element( const xml::Document_ptr& document, co
 
     //THREAD_LOCK( _lock )
     {
-        int queue_length = order_count( which_job_chain );
-        element.setAttribute( "length", queue_length );
+        if( !_spooler->db()->is_in_transaction() )
+        {
+            element.setAttribute( "length", order_count( which_job_chain ) );
+        }
 
         //if( Time next = next_time() )
         element.setAttribute( "next_start_time", next_time().as_string() );
@@ -2362,6 +2368,12 @@ void Order::db_release_occupation()
 
 void Order::db_update( Update_option update_option )
 {
+    if( update_option == update_and_release_occupation  &&  _spooler->_are_all_tasks_killed )
+    {
+        _log->warn( message_string( "SCHEDULER-830" ) );   // "Because all Scheduler tasks are killed, the order in database is not updated. Only the occupation is released"
+        db_release_occupation();
+    }
+    else
     if( _is_in_database &&  _spooler->_db->opened() )
     {
         if( update_option == update_not_occupated  &&  _is_db_occupied )  z::throw_xc( __FUNCTION__, "is_db_occupied" );
@@ -2405,7 +2417,6 @@ void Order::db_update( Update_option update_option )
 
             update[ "state"         ] = state_string;
             update[ "initial_state" ] = initial_state().as_string();
-          //update[ "processable"   ] = is_processable()? sql::Value(true) : sql::null_value;
 
             db_fill_stmt( &update );
 

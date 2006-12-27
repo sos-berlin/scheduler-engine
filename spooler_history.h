@@ -80,7 +80,7 @@ struct Database : Object, Scheduler_object
     void                        try_reopen_after_error  ( const exception&, bool wait_endless = false );
     void                        create_tables_when_needed();
     void                        create_table_when_needed( Transaction*, const string& tablename, const string& fields );
-    time_t                      open_time               () const                                    { return _open_time; }
+    time_t                      reopen_time             () const                                    { return _reopen_time; }
 
     Fill_zero                  _zero_;
     Thread_semaphore           _lock;
@@ -117,7 +117,7 @@ struct Database : Object, Scheduler_object
     bool                       _waiting;
     int                        _order_id_length_max;
     Transaction*               _transaction;
-    time_t                     _open_time;
+    time_t                     _reopen_time;
 
   public:
     static const int            seconds_before_reopen;

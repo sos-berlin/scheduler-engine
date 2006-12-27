@@ -2338,13 +2338,13 @@
 
         <message code="SCHEDULER-372">
             <text xml:lang="en">
-                <title>SOME OTHER SCHEDULER HAS STOLEN EXCLUSIVENESS</title>
+                <title>EXCLUSIVENESS HAS BEEN STOLEN BY SCHEDULER MEMBER <p1/></title>
             </text>
         </message>
 
         <message code="SCHEDULER-373">
             <text xml:lang="en">
-                <title>SOME OTHER SCHEDULER HAS STOLEN ACTIVITY</title>
+                <title>ACTIVE HAS BEEN STOLEN BY SCHEDULER MEMBER <p1/></title>
             </text>
         </message>
 
@@ -2363,6 +2363,18 @@
         <message code="SCHEDULER-376">
             <text xml:lang="en">
                 <title>A distributed, not exclusive Scheduler enables only order controlled jobs</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-377">
+            <text xml:lang="en">
+                <title>After own late heart beat, this Scheduler has lost exclusiveness in favor of Scheduler member '<p1/>'</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-378">
+            <text xml:lang="en">
+                <title>After own late heart beat, this Scheduler has been deactived and all occupied orders are freed by Scheduler member '<p1/>'</title>
             </text>
         </message>
 
@@ -3107,13 +3119,13 @@
 
         <message code="SCHEDULER-995">
             <text xml:lang="en">
-                <title>No heart beat since <p2/>s (<p1>time</p1>), it seems to be dead</title>
+                <title>No heart beat since <p2/>s (<p1>time</p1>), Scheduler seems to be dead</title>
             </text>
         </message>
 
         <message code="SCHEDULER-996">
             <text xml:lang="en">
-                <title>Own heart beat is late: next_heart_beat has been announced for <p1/> (this is <p2/>s late)</title>
+                <title>No heart beat since <p2/>s (<p1>time</p1>), ignored because of recent database reconnect</title>
             </text>
         </message>
 
@@ -3254,7 +3266,7 @@
         
         <message code="SCHEDULER-820" weight="info">
             <text xml:lang="en">
-                <title>Watching Scheduler member</title>
+                <title>Watching this Scheduler</title>
             </text>
         </message>
 
@@ -3294,6 +3306,29 @@
             </text>
         </message>
 
+        <message code="SCHEDULER-827">
+            <text xml:lang="en">
+                <title>Own heart beat is late: next_heart_beat has been announced for <p1/> (this is <p2/>s late)</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-828">
+            <text xml:lang="en">
+                <title><p1/> old member records deleteded in database table <p2/></title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-829">
+            <text xml:lang="en">
+                <title>Releasing occupied order <p1>job_chain</p1>:<p2>id</p2></title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-830">
+            <text xml:lang="en">
+                <title>Because all Scheduler tasks are killed, the order in database is not updated. Only the occupation is released</title>
+            </text>
+        </message>
     </messages>
     
 </messages>

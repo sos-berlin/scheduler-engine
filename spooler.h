@@ -286,6 +286,7 @@ struct Spooler : Object,
     void                        cmd_terminate_and_restart   ( int timeout = INT_MAX )           { return cmd_terminate( true, timeout ); }
     void                        cmd_let_run_terminate_and_restart();
 
+    void                        abort_immediately_after_distribution_error( const string& debug_text );
     void                        abort_immediately           ( const string& message_text );
     void                        abort_immediately           ( bool restart = false );
     void                        abort_now                   ( bool restart = false );
@@ -331,11 +332,13 @@ struct Spooler : Object,
     void                        start_distributed_scheduler   ();
     void                        wait_for_distributed_scheduler();
     void                        check_distributed_scheduler   ();
-    bool                        ok                          ();
-    bool                        check                       ( const string& debug_function, const string& debug_text = "" );
-    bool                        do_a_heart_beat             ();
+    bool                        ok                          ( Transaction* = NULL );
+    bool                        check                       ( const string& debug_function, const string& debug_text = "", Transaction* = NULL );
+    bool                        check_is_active             ( Transaction* = NULL );
+  //void                        throw_distribution_error    ( const string& function );
+
+  //bool                        do_a_heart_beat             ();
     bool                        is_active                   ();
-    bool                        check_is_active             ();
     bool                        has_exclusiveness           ();
     bool                        are_orders_distributed      ();
     void                        assert_are_orders_distributed( const string& message_text );
@@ -538,6 +541,7 @@ struct Spooler : Object,
     Process_handle             _process_handles[ max_processes ];   // Für abort_immediately(), mutex-frei alle abhängigen Prozesse
     struct Killpid { int _pid; bool _is_process_group; };
     Killpid                    _pids[ max_processes ];              // Für abort_immediately(), mutex-frei alle Task.add_pid(), Subprozesse der Tasks
+    bool                       _are_all_tasks_killed;
   //Process_group_handle       _process_groups[ max_processes ];    // Für abort_immediately(), mutex-frei alle Task.add_pid(), Subprozesse der Tasks
 //private:
   //bool                       _free_threading_default;

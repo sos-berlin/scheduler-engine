@@ -1441,7 +1441,6 @@ bool Task::do_something()
                 if( error_count == 0 )  set_error( x );
                                  else  _log->error( x.what() );
 
-
                 try
                 {
                     remove_order_after_error();
@@ -1867,28 +1866,31 @@ void Task::trigger_event( Scheduler_event* scheduler_event )
 
         bool is_error = has_error();
 
-        string body = Sos_optional_date_time::now().as_string() + "\n\nJob " + _job->name() + "  " + _job->title() + "\n";
-        body += "Task-Id " + as_string(id()) + ", " + as_string(_step_count) + " steps\n";
-        body += "Scheduler -id=" + _spooler->id() + "  host=" + _spooler->_hostname + "\n\n";
+        S body;
+        body << Sos_optional_date_time::now().as_string() << "\n\nJob " << _job->name() << "  " << _job->title() << "\n";
+        body << "Task-Id " << as_string(id()) << ", " << as_string(_step_count) << " steps\n";
+        if( _order )  body << _order->obj_name() << "\n";
+        body << "Scheduler -id=" << _spooler->id() << "  host=" << _spooler->_hostname << "\n\n";
 
         if( !is_error )
         {
-            string subject = obj_name();
+            S subject;
+            subject << obj_name();
 
             if( _log->highest_level() == log_error )
             {
-                subject += " ended with error";
-                body += _log->highest_msg() + "\n\n";
+                subject << " ended with error";
+                body << _log->highest_msg() << "\n\n";
             }
             else
             if( _log->highest_level() == log_warn )
             {
-                subject += " ended with warning";
-                body += _log->highest_msg() + "\n\n";
+                subject << " ended with warning";
+                body << _log->highest_msg() << "\n\n";
             }
             else
             {
-                subject += " succeeded";
+                subject << " succeeded";
             }
 
             _log->set_mail_default( "subject", subject, false );
@@ -1898,7 +1900,7 @@ void Task::trigger_event( Scheduler_event* scheduler_event )
             string errmsg = _error? _error->what() : _log->highest_msg();
             _log->set_mail_default( "subject", string("ERROR ") + errmsg, true );
 
-            body += errmsg + "\n\n";
+            body << errmsg << "\n\n";
         }
 
         _log->set_mail_default( "body", body + "This message contains the job protocol." );   //, is_error );

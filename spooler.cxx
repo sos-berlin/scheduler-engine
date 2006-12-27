@@ -2401,6 +2401,7 @@ void Spooler::start_distributed_scheduler()
     _distributed_scheduler->set_backup_precedence( _backup_precedence );
 
     _distributed_scheduler->demand_exclusiveness( _demand_exclusiveness );
+    if( _are_orders_distributed )  _distributed_scheduler->set_watch_distributed_order_execution();
 
     _distributed_scheduler->start();     // Wartet, bis entschieden ist, dass wir aktiv werden
 }
@@ -2468,7 +2469,7 @@ string Spooler::scheduler_member_id()
     //assert_are_orders_distributed( __FUNCTION__ );
     //assert( _distributed_scheduler );
 
-    return _distributed_scheduler? _distributed_scheduler->member_id() : "";
+    return _distributed_scheduler? _distributed_scheduler->my_member_id() : "";
 }
 
 //-----------------------------------------------------------------------Spooler::has_exclusiveness
@@ -2490,12 +2491,12 @@ void Spooler::assert_has_exclusiveness( const string& text )
 
 //-------------------------------------------------------------------------Spooler::do_a_heart_beat
 
-bool Spooler::do_a_heart_beat()
-{
-    if( !_distributed_scheduler )  return true;
-
-    return _distributed_scheduler->do_a_heart_beat();
-}
+//bool Spooler::do_a_heart_beat()
+//{
+//    if( !_distributed_scheduler )  return true;
+//
+//    return _distributed_scheduler->do_a_heart_beat();
+//}
 
 //--------------------------------------------------------------------Spooler::run_scheduler_script
 
@@ -2715,7 +2716,7 @@ void Spooler::execute_state_cmd()
     if( _state_cmd )
     {
         if( _state_cmd == sc_pause )     if( _state == s_running )  set_state( s_paused  ); //, signal_threads( "pause" );
-        if( _state_cmd == sc_continue )  if( _state == s_paused  )  set_state( s_running ); //, signal_threads( "continue" );
+        if( _state_cmd == sc_continue )  if( _state == s_paused  )  set_state( s_running ),  check( __FUNCTION__, "paused" ); //, signal_threads( "continue" );
 
         if( _state_cmd == sc_load_config  
          || _state_cmd == sc_reload       
@@ -3157,11 +3158,11 @@ void Spooler::check_distributed_scheduler()
 
 //-----------------------------------------------------------------------------------Spooler::check
 
-bool Spooler::check( const string& debug_function, const string& message_text )
+bool Spooler::check( const string& debug_function, const string& message_text, Transaction* outer_transaction )
 {
     bool result = true;
 
-    if( !ok() )
+    if( !check_is_active( outer_transaction ) )  
     {
         cmd_terminate_after_error( debug_function, message_text );
         result = false;
@@ -3172,11 +3173,11 @@ bool Spooler::check( const string& debug_function, const string& message_text )
 
 //--------------------------------------------------------------------------------------Spooler::ok
 
-bool Spooler::ok()
+bool Spooler::ok( Transaction* outer_transaction )
 {
     bool ok = true;
     
-    if( !check_is_active() )  
+    if( !check_is_active( outer_transaction ) )  
     {
         ok = false;
         cmd_terminate( false, INT_MAX, false, false );
@@ -3187,7 +3188,7 @@ bool Spooler::ok()
 
 //-------------------------------------------------------------------------Spooler::check_is_active
 
-bool Spooler::check_is_active()
+bool Spooler::check_is_active( Transaction* outer_transaction )
 
 // Kann nach jeder vermutlich längeren Operation aufgerufen werden, vor allem bei externer Software: Datenbank, eMail, xslt etc.
 
@@ -3200,7 +3201,8 @@ bool Spooler::check_is_active()
     {
         if( Not_in_recursion not_in_recursion = &_is_in_check_is_active )
         {
-            if( !_distributed_scheduler->check_is_active()  ||  _demand_exclusiveness && !_distributed_scheduler->has_exclusiveness() )
+            if( !_distributed_scheduler->check_is_active( outer_transaction )  
+            ||  _demand_exclusiveness && !_distributed_scheduler->has_exclusiveness() )
             {
                 _assert_is_active = false;
 
@@ -3208,7 +3210,7 @@ bool Spooler::check_is_active()
                 
                 _log->error( message_string( _demand_exclusiveness? "SCHEDULER-367" : "SCHEDULER-362" ) );
 
-                _distributed_scheduler->show_active_schedulers( (Transaction*)NULL );
+                _distributed_scheduler->show_active_schedulers( outer_transaction );
 
                 //_distributed_scheduler offen lassen, damit belegte Aufträge freigegeben werden können.
                 // Außerdem sind wir mitten in irgendeiner Verarbeitung, da sollten wir _distributed_scheduler weder schließen noch entfernen
@@ -3223,6 +3225,27 @@ bool Spooler::check_is_active()
     }
 
     return result;
+}
+
+//----------------------------------------------------------------Spooler::throw_distribution_error
+
+//void Spooler::throw_distribution_error( const string& debug_text )
+//{
+//    zschimmer::Xc x ( _demand_exclusiveness? "SCHEDULER-367" : "SCHEDULER-362", debug_text );
+//    
+//    _log->error( x.what() );
+//    z::throw_xc( x );
+//}
+
+//----------------------------------------------Spooler::abort_immediately_after_distribution_error
+
+void Spooler::abort_immediately_after_distribution_error( const string& debug_text )
+{
+    zschimmer::Xc x ( _demand_exclusiveness? "SCHEDULER-367" : "SCHEDULER-362", debug_text );
+    
+    _log->error( x.what() );
+    send_error_email( x, _argc, _argv, _parameter_line, this );
+    abort_immediately();
 }
 
 //------------------------------------------------------------------------Spooler::run_check_ctrl_c
@@ -3511,6 +3534,8 @@ void Spooler::kill_all_processes()
             _pids[i]._pid = 0;
         }
     }
+    
+    _are_all_tasks_killed = true;
 }
 
 //----------------------------------------------------------------------------------Spooler::launch
