@@ -88,7 +88,7 @@ struct Object_set : Sos_self_deleting
     bool                        step                        ( Level result_level );
     void                        set_in_call                 ( const string& name );
 
-  //Spooler_thread*             thread                      () const;
+  //Task_subsystem*             thread                      () const;
 
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
@@ -211,7 +211,7 @@ struct Job : Object,
     State                       state                       () const                                { return _state; }
     Object_set_descr*           object_set_descr            () const                                { return _object_set_descr; }
   //string                      priority                    () const                                { return _priority; }
-  //Spooler_thread*             thread                      () const                                { return _thread; }
+  //Task_subsystem*             thread                      () const                                { return _thread; }
     string                      job_state                   ();
     string                      include_path                () const;
     string                      title                       ()                                      { return _title; }
@@ -349,7 +349,7 @@ struct Job : Object,
     friend struct               Object_set_task;
   //friend struct               Process_task;
     friend struct               Com_job;
-    friend struct               Spooler_thread;
+    friend struct               Task_subsystem;
 
 
     Fill_zero                  _zero_;
@@ -375,7 +375,7 @@ struct Job : Object,
     bool                       _reread;                     // <script> neu einlesen, also <include> erneut ausführen
     Time                       _delay_until;                // Nach Fehler verzögern
     Time                       _next_start_time;
-    Time                       _next_time;                  // Für Spooler_thread::wait(): Um diese Zeit soll Job::do_something() gerufen werden.
+    Time                       _next_time;                  // Für Task_subsystem::wait(): Um diese Zeit soll Job::do_something() gerufen werden.
     Time                       _next_single_start;
     Time                       _repeat;                     // spooler_task.repeat
     Time                       _task_timeout;               // Frist für einen Schritt einer Task

@@ -154,7 +154,7 @@ void Order_subsystem::init_file_order_sink()
 
     // Der Scheduler führt Tasks des Jobs scheduler_file_order_sink in jedem Scheduler-Schritt aus,
     // damit sich die Aufträge nicht stauen (Der interne Job läuft nicht in einem eigenen Prozess)
-    // Siehe Spooler_thread::step().
+    // Siehe Task_subsystem::step().
 }
 
 //-----------------------------------------Directory_file_order_source::Directory_file_order_source

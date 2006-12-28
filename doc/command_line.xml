@@ -233,9 +233,9 @@
                 <message level="error" code="SCHEDULER-370"/>
                 <message level="error" code="SCHEDULER-371"/>
                 <message level="error" code="SCHEDULER-372"/>
-                <message level="info"  code="SCHEDULER-801"/>
-                <message level="info"  code="SCHEDULER-802"/>
-                <message level="info"  code="SCHEDULER-803"/>
+                <message level="info"  code="SCHEDULER-832"/>
+                <message level="info"  code="SCHEDULER-834"/>
+                <message level="info"  code="SCHEDULER-835"/>
                 <message level="info"  code="SCHEDULER-805"/>
                 <message level="info"  code="SCHEDULER-807"/>
                 <message level="info"  code="SCHEDULER-809"/>

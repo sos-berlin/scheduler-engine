@@ -1,4 +1,4 @@
- // $Id$
+// $Id$
 /*
     Hier sind implementiert
 
@@ -55,6 +55,7 @@ struct Database_order_detector : Async_operation, Scheduler_object
     int                         read_result_set             ( Transaction*, const string& select_sql );
     void                        set_alarm                   ();
     void                        request_order               ();
+    void                        on_new_order                ()                                      { _next_check_period = check_database_orders_period_minimum; }
   //void                        withdraw_order_request_for_job( Job* );
 
   private:
@@ -462,7 +463,7 @@ bool Database_order_detector::async_continue_( Continue_flags )
     }
     catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_orders_tablename, x ), __FUNCTION__ ); }
 
-    if( announced_orders_count )  _next_check_period = check_database_orders_period_minimum;
+    if( announced_orders_count )  on_new_order();
     set_alarm();
 
     return true;
@@ -1420,6 +1421,27 @@ void Job_chain::remove_from_blacklist( Order* order )
     }
 }
 
+//---------------------------------------------------------------------Job_chain::tip_for_new_order
+
+bool Job_chain::tip_for_new_order( const Order::State& state, const Time& at )
+{
+    bool result = false;
+
+    Job_chain_node* node = node_from_state( state );
+
+    if( Job* job = node->_job )
+    {
+        if( job->order_queue()->is_order_requested() 
+         && at < job->order_queue()->next_announced_order_time() )
+        {
+            job->order_queue()->set_next_announced_order_time( at, at.is_null() || at <= Time::now() );
+            result = true;
+        }
+    }
+
+    return result;
+}
+
 //--------------------------------------------------------------------------------Job_chain::remove
 
 void Job_chain::remove()
@@ -2240,6 +2262,7 @@ bool Order::db_occupy_for_processing()
     if( update_ok )
     {
         _is_db_occupied = true, _occupied_state = _state;
+        if( order_subsystem()->_database_order_detector )  order_subsystem()->_database_order_detector->on_new_order();     // Verkürzt die Überwachungsperiode
     }
     else
     {
@@ -2392,7 +2415,7 @@ void Order::db_update( Update_option update_option )
 
         if( update_option == update_and_release_occupation )
         {
-            update.and_where_condition( "state", _occupied_state.as_string() );
+            if( _is_db_occupied )  update.and_where_condition( "state", _occupied_state.as_string() );
             update[ "processing_scheduler_member_id" ] = sql::null_value;
         }
 
@@ -3464,17 +3487,7 @@ bool Order::tip_own_job_for_new_order_state()
 
     if( is_processable() )
     {
-        Job_chain_node* node = job_chain()->node_from_state( _state );
-
-        if( Job* job = node->_job )
-        {
-            if( job->order_queue()->is_order_requested() 
-             && at() < job->order_queue()->next_announced_order_time() )
-            {
-                job->order_queue()->set_next_announced_order_time( at(), at() <= Time::now() );
-                result = true;
-            }
-        }
+        result = job_chain()->tip_for_new_order( _state, at() );
     }
 
     return result;

@@ -110,13 +110,13 @@ struct Task : Object,
     xml::Document_ptr           dom                         ( const Show_what& ) const;
 
     State                       state                       () const                                { return _state; }
-    void                        attach_to_a_thread          ();
+    void                        init                        ();
     bool                        do_something                ();
 
     Job*                        job                         ();
     Time                        next_time                   ();
     void                        calculate_next_time_after_modified_order_queue();
-    Spooler_thread*             thread                      ()                                      { return _thread; }
+    Task_subsystem*             thread                      ()                                      { return _thread; }
     string                      name                        () const                                { return obj_name(); }
     virtual string              obj_name                    () const                                { return _obj_name; }
 
@@ -212,10 +212,6 @@ struct Task : Object,
     void                    set_next_time                   ( const Time& );
 
 
-    void                        enter_thread                ( Spooler_thread* );
-    void                        leave_thread                ();
-
-
   
     friend struct               Job;
     friend struct               Job::Task_queue;
@@ -259,7 +255,7 @@ struct Task : Object,
 
     Job*                       _job;
     Thread_semaphore           _lock;
-    Spooler_thread*            _thread;
+    Task_subsystem*            _thread;
     Task_history               _history;
  
     Thread_semaphore           _terminated_events_lock;

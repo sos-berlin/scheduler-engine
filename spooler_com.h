@@ -533,7 +533,7 @@ struct Com_thread : spooler_com::Ithread,
                     spooler_com::Ihas_java_class_name, 
                     Sos_ole_object               
 {
-                                Com_thread                  ( Spooler_thread* );
+                                Com_thread                  ( Task_subsystem* );
 
     STDMETHODIMP                QueryInterface              ( const IID&, void** );
 
@@ -551,7 +551,7 @@ struct Com_thread : spooler_com::Ithread,
 
   protected:
     Thread_semaphore           _lock;
-    Spooler_thread*            _thread;                     // Es gibt nur einen Com_thread pro Spooler_thread
+    Task_subsystem*            _thread;                     // Es gibt nur einen Com_thread pro Task_subsystem
 };
 */
 //--------------------------------------------------------------------------------------Com_spooler

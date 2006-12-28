@@ -374,6 +374,8 @@ struct Job_chain : Com_job_chain, Scheduler_object
     int                         load_orders_from_result_set( Transaction*, Any_file* result_set );
     Order*                      add_order_from_database_record( Transaction*, const Record& );
 
+    bool                        tip_for_new_order       ( const Order::State& state, const Time& at );
+
     int                         remove_all_pending_orders( bool leave_in_database = false );
 
     Job_chain_node*             add_job                 ( Job*, const Order::State& input_state, 

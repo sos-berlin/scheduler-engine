@@ -43,7 +43,7 @@ struct Distributed_scheduler : Async_operation, Scheduler_object
 
     void                        close                       ();
     void                        shutdown                    ();                                     // Ordentliches Herunterfahren des Schedulers
-    void                        mark_begin_of_shutdown      ();
+  //void                        mark_begin_of_shutdown      ();
 
     void                        demand_exclusiveness        ( bool b = true )                       { assert( !_current_operation );  _demand_exclusiveness = b; }
     void                    set_backup                      ( bool b = true )                       { assert( !_current_operation );  _is_backup = b; }
@@ -59,18 +59,18 @@ struct Distributed_scheduler : Async_operation, Scheduler_object
     bool                        check_is_active             ( Transaction* = NULL );
     bool                        has_exclusiveness           ()                                      { return _has_exclusiveness; }
     bool                     is_active                      ()                                      { return _is_active; }
-    bool                     is_exclusiveness_stolen        ()                                      { return _is_exclusiveness_stolen; }
     bool                     is_scheduler_up                ();
     bool                     is_backup                      ()                                      { return _is_backup; }
+    bool                     is_exclusiveness_lost          ()                                      { return _is_exclusiveness_lost; }
   //Command                     heart_beat_command          ()                                      { return _heart_beat_command; }
     string                      exclusive_member_id         ();
     string                      empty_member_id             ();
   //time_t                      last_heart_beat             ()                                      { return _db_last_heart_beat; }
 
     bool                        start                       ();
-    bool                        wait_until_is_scheduler_up  ();
-    bool                        wait_until_is_active        ();
-    bool                        wait_until_has_exclusiveness();
+    //bool                        wait_until_is_scheduler_up  ();
+    //bool                        wait_until_is_active        ();
+    //bool                        wait_until_has_exclusiveness();
     bool                        do_a_heart_beat             ();
     void                        show_exclusive_scheduler    ( Transaction* ta )                     { show_active_schedulers( ta, true ); }
     void                        show_active_schedulers      ( Transaction*, bool exclusive_only = false );
@@ -89,7 +89,7 @@ struct Distributed_scheduler : Async_operation, Scheduler_object
     void                        close_operations            ();
 
     void                        check_empty_member_record   ();
-    void                        insert_member_record        ( bool set_active );
+    void                        insert_member_record        ();
 
     void                        assert_database_integrity   ( const string& message_text );
     bool                        mark_as_exclusive           ();
@@ -128,7 +128,7 @@ struct Distributed_scheduler : Async_operation, Scheduler_object
     time_t                     _db_next_heart_beat;
     time_t                     _late_heart_beat;
 
-    bool                       _is_exclusiveness_stolen;
+    bool                       _is_exclusiveness_lost;
     bool                       _is_in_error;
     bool                       _was_start_ok;
     string                     _heart_beat_command_string;

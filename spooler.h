@@ -112,7 +112,7 @@ struct Scheduler_object;
 struct Scheduler_event;
 struct Show_what;
 struct Spooler;
-struct Spooler_thread;
+struct Task_subsystem;
 struct Subprocess;
 struct Subprocess_register;
 struct Task;
@@ -188,7 +188,7 @@ With_log_switch                 read_profile_with_log       ( const string& prof
 
 typedef void (*State_changed_handler)( Spooler*, void* );
 
-typedef map<Thread_id,Spooler_thread*>      Thread_id_map;
+typedef map<Thread_id,Task_subsystem*>      Thread_id_map;
 
 //------------------------------------------------------------------------------------------Spooler
 
@@ -201,7 +201,8 @@ struct Spooler : Object,
         s_stopped,
         s_loading,
         s_starting,
-        s_starting_waiting,
+        s_waiting_for_activation,
+      //s_starting_waiting,
         s_running,
         s_paused,
         s_stopping,
@@ -254,7 +255,6 @@ struct Spooler : Object,
     State                       state                       () const                            { return _state; }
     string                      state_name                  () const                            { return state_name( _state ); }
     static string               state_name                  ( State );
-  //bool                        free_threading_default      () const                            { return _free_threading_default; }
     const string&               log_directory               () const                            { return _log_directory; }                      
     Time                        start_time                  () const                            { return _spooler_start_time; }
     Security::Level             security_level              ( const Ip_address& );
@@ -262,22 +262,17 @@ struct Spooler : Object,
     bool                        is_service                  () const                            { return _is_service; }
     string                      directory                   () const                            { return _directory; }
 
-  //xml::Element_ptr            threads_as_xml              ( const xml::Document_ptr&, const Show_what& );
-
     int                         launch                      ( int argc, char** argv, const string& params );                                
     void                        set_state_changed_handler   ( State_changed_handler h )         { _state_changed_handler = h; }
 
-    Thread_id                   run_single_thread                   () const                            { return _thread_id; }
-
     // Für andere Threads:
-    Spooler_thread*             get_thread                  ( const string& thread_name );
-    Spooler_thread*             get_thread_or_null          ( const string& thread_name );
-    Spooler_thread*             select_thread_for_task      ( Task* );
+    //Task_subsystem*             get_thread                  ( const string& thread_name );
+    //Task_subsystem*             get_thread_or_null          ( const string& thread_name );
+    //Task_subsystem*             select_thread_for_task      ( Task* );
 
   //Object_set_class*           get_object_set_class        ( const string& name );
     Object_set_class*           get_object_set_class_or_null( const string& name );
 
-    void                        signal_object               ( const string& object_set_class_name, const Level& );
     void                        cmd_reload                  ();
     void                        cmd_pause                   ()                                  { _state_cmd = sc_pause; signal( "pause" ); }
     void                        cmd_continue                ();
@@ -317,11 +312,11 @@ struct Spooler : Object,
 
     void                        create_window               ();
     void                        start                       ();
+    void                        activate                    ();
+    void                        execute_config_commands     ();
     void                        run_scheduler_script        ();
     void                        run_check_ctrl_c            ();
     void                        stop                        ( const exception* = NULL );
-  //void                        signal_threads              ( const string& signal_name );
-  //void                        wait_until_threads_stopped  ( Time until );
     void                        reload                      ();
     void                        end_waiting_tasks           ();
     void                        nichts_getan                ( int anzahl, const string& );
@@ -330,11 +325,13 @@ struct Spooler : Object,
 
     // Distributed_scheduler
     void                        start_distributed_scheduler   ();
-    void                        wait_for_distributed_scheduler();
+  //void                        wait_for_distributed_scheduler();
     void                        check_distributed_scheduler   ();
     bool                        ok                          ( Transaction* = NULL );
     bool                        check                       ( const string& debug_function, const string& debug_text = "", Transaction* = NULL );
     bool                        check_is_active             ( Transaction* = NULL );
+    void                        assert_is_activated            ( const string& function );
+
   //void                        throw_distribution_error    ( const string& function );
 
   //bool                        do_a_heart_beat             ();
@@ -345,13 +342,9 @@ struct Spooler : Object,
     void                        assert_has_exclusiveness    ( const string& message_text );
     string                      scheduler_member_id         ();
 
-  //string                      session_id                  ()                                  { return _session_id; }
-  //void                        start_threads               ();
-    Spooler_thread*             new_thread                  ( bool free_threading = true );
-  //void                        close_threads               ();
-  //bool                        run_single_thread           ();
 
-  //void                        single_thread_step          ();
+  //string                      session_id                  ()                                  { return _session_id; }
+
     void                        wait                        ();
     void                        simple_wait_step            ();
     void                        wait                        ( Wait_handles*, const Time& wait_until, Object* wait_until_object, const Time& resume_at, Object* resume_at_object );
@@ -360,16 +353,12 @@ struct Spooler : Object,
     void                        async_signal                ( const char* signal_name = "" )    { _event.async_signal( signal_name ); }
     bool                        signaled                    ()                                  { return _event.signaled(); }
 
-    Spooler_thread*             thread_by_thread_id         ( Thread_id );
-  //void                        send_error_email            ( const string& subject, const string& body );
-
     void                        send_cmd                    ();
 
     // Jobs
     void                        add_job                     ( const ptr<Job>&, bool init );
     void                        cmd_add_jobs                ( const xml::Element_ptr& );
     void                        cmd_job                     ( const xml::Element_ptr& );
-  //void                        do_add_jobs                 ();
     int                         remove_temporary_jobs       ( Job* which_job = NULL );
     void                        remove_job                  ( Job* );
     void                        init_jobs                   ();
@@ -480,9 +469,6 @@ struct Spooler : Object,
     ptr<Com_spooler>           _com_spooler;                // COM-Objekt spooler
     ptr<Com_log>               _com_log;                    // COM-Objekt spooler.log
 
-    Thread_id_map              _thread_id_map;              // Thread_id -> Spooler_thread
-    Thread_semaphore           _thread_id_map_lock;
-
     Thread_semaphore           _job_name_lock;              // Sperre von get_job(name) bis add_job() für eindeutige Jobnamen
     Thread_semaphore           _serialize_lock;             // Wenn die Threads nicht nebenläufig sein sollen
 
@@ -495,12 +481,10 @@ struct Spooler : Object,
 
     int                        _waiting_errno;              // Scheduler unterbrochen wegen errno (spooler_log.cxx)
     string                     _waiting_errno_filename;
-  //bool                       _waiting_errno_continue;     // Nach Fehler fortsetzen
 
     bool                       _has_java;                   // Es gibt ein Java-Modul. Java muss also gestartet werden
     bool                       _has_java_source;            // Es gibt Java-Quell-Code. Wir brauchen ein Arbeitsverzeichnis.
     ptr<java::Vm>              _java_vm;
-  //string                     _java_work_dir;              // Zum Compilieren, für .class
     string                     _config_java_class_path;     // <config java_class_path="">
     string                     _config_java_options;        // <config java_config="">
 
@@ -518,7 +502,6 @@ struct Spooler : Object,
     Wait_handles               _wait_handles;
 
     Event                      _event;                      // Für Signale aus anderen Threads, mit Betriebssystem implementiert (nicht Unix)
-  //Simple_event               _simple_event;               // Für Signale aus demselben Thread, ohne Betriebssystem implementiert
 
     int                        _loop_counter;               // Zähler der Schleifendurchläufe in spooler.cxx
     int                        _wait_counter;               // Zähler der Aufrufe von wait_until()
@@ -526,9 +509,6 @@ struct Spooler : Object,
     Rotating_bar               _wait_rotating_bar;
 
     ptr<object_server::Connection_manager>  _connection_manager;
-  //ptr<Async_manager>                      _async_manager;
-
-  //xml::Dtd_ptr               _dtd;
     bool                       _validate_xml;
     xml::Schema_ptr            _schema;
     string                     _config_filename;            // -config=
@@ -545,7 +525,6 @@ struct Spooler : Object,
     bool                       _are_all_tasks_killed;
   //Process_group_handle       _process_groups[ max_processes ];    // Für abort_immediately(), mutex-frei alle Task.add_pid(), Subprozesse der Tasks
 //private:
-  //bool                       _free_threading_default;
     time::Holiday_set          _holiday_set;                // Feiertage für alle Jobs
 
     State_changed_handler      _state_changed_handler;      // Callback für NT-Dienst SetServiceStatus()
@@ -574,25 +553,14 @@ struct Spooler : Object,
 
     Process_class_list         _process_class_list;
     Process_list               _process_list;
-  //int                        _process_count_max;
     bool                       _ignore_process_classes;
 
 
-    //Time                       _next_start_time;
     Time                       _last_wait_until;            // Für <show_state>
     Time                       _last_resume_at;             // Für <show_state>
     bool                       _print_time_every_second;
 
-    Thread_list                _thread_list;                // Alle Threads
-    int                        _max_threads;
-    Spooler_thread*            _single_thread;              // Es gibt nur einen Thread! Threads sind eigentlich ein Überbleibsel aus alter Zeit
-
-
-  //typedef list< Spooler_thread* >  Spooler_thread_list;
-  //Spooler_thread_list         _spooler_thread_list;        // Nur Threads mit _free_threading=no, die also keine richtigen Threads sind und im Spooler-Thread laufen
-
-
-
+    ptr<Task_subsystem>        _task_subsystem;              // Es gibt nur einen Thread! Threads sind eigentlich ein Überbleibsel aus alter Zeit
     Thread_id                  _thread_id;                  // Haupt-Thread
     Time                       _spooler_start_time;
     State                      _state;
@@ -626,11 +594,11 @@ struct Spooler : Object,
     bool                       _has_backup_precedence;
     bool                       _demand_exclusiveness;
     bool                       _are_orders_distributed;
+    bool                       _is_activated;
   //string                     _scheduler_member_id;
     ptr<Distributed_scheduler> _distributed_scheduler;
     bool                       _assert_is_active;
     int                        _is_in_check_is_active;
-    bool                       _scheduler_is_up;
   //bool                       _proper_termination;
   //string                     _session_id;
 };

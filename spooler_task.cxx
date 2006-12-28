@@ -166,13 +166,6 @@ bool Object_set::step( Level result_level )
     }
 }
 */
-//-------------------------------------------------------------------------------Object_set::thread
-/*
-Spooler_thread* Object_set::thread() const
-{
-    return _task->_job->_thread;
-}
-*/
 //---------------------------------------------------------------------------------start_cause_name
 
 string start_cause_name( Start_cause cause )
@@ -310,6 +303,15 @@ void Task::close()
     }
 
     set_state( s_closed );
+}
+
+//---------------------------------------------------------------------------------------Task::init
+
+void Task::init()
+{
+    set_state( s_loading );
+
+    _spooler->_task_subsystem->add_task( this );       // Jetzt kann der Thread die Task schon starten!
 }
 
 //----------------------------------------------------------------------------------------Task::dom_element
@@ -458,22 +460,6 @@ Job* Task::job()
     return _job;
 }
 
-//-------------------------------------------------------------------------------Task::enter_thread
-// Anderer Thread!
-
-void Task::enter_thread( Spooler_thread* thread )
-{
-    THREAD_LOCK_DUMMY( _lock )
-    {
-        _thread = thread;
-
-      //if( dynamic_cast<Remote_module_instance_proxy*>( +_module_instance ) )
-        set_state( s_loading );
-
-        thread->add_task( this );       // Jetzt kann der Thread die Task schon starten!
-    }
-}
-
 //------------------------------------------------------------------------------------Task::cmd_end
 
 void Task::cmd_end( bool kill_immediately )
@@ -504,24 +490,6 @@ void Task::cmd_nice_end( Job* for_job )
     _log->info( message_string( "SCHEDULER-271", for_job->name() ) );   //"Task wird dem Job " + for_job->name() + " zugunsten beendet" );
 
     cmd_end();
-}
-
-//-------------------------------------------------------------------------------Task::leave_thread
-
-void Task::leave_thread()
-{
-    // Thread entfernt die Task, wenn er die Schleife über die _task_list beendet hat. _thread->remove_task( this );
-    _thread = NULL;
-}
-
-//-------------------------------------------------------------------------Task::attach_to_a_thread
-// Anderer Thread!
-
-void Task::attach_to_a_thread()
-{
-    assert( current_thread_id() == _spooler->thread_id() );
-
-    enter_thread( _spooler->select_thread_for_task( this ) );       // Es ist immer derselbe Thread, denn es gibt nur einen
 }
 
 //--------------------------------------------------------------------------Task::set_error_xc_only
@@ -707,8 +675,8 @@ void Task::set_state( State new_state )
 
         if( new_state != _state )
         {
-            if( new_state == s_running  ||  new_state == s_starting )  _job->increment_running_tasks(),  _thread->increment_running_tasks();
-            if( _state    == s_running  ||  _state    == s_starting )  _job->decrement_running_tasks(),  _thread->decrement_running_tasks();
+            if( new_state == s_running  ||  new_state == s_starting )  _job->increment_running_tasks(),  _spooler->_task_subsystem->increment_running_tasks();
+            if( _state    == s_running  ||  _state    == s_starting )  _job->decrement_running_tasks(),  _spooler->_task_subsystem->decrement_running_tasks();
 
             if( new_state != s_running_delayed )  _next_spooler_process = 0;
 
@@ -770,7 +738,7 @@ void Task::signal( const string& signal_name )
         _signaled = true;
         set_next_time( 0 );
 
-        if( _thread )  _thread->signal( signal_name );
+        _spooler->_task_subsystem->signal( signal_name );
                //else  Task ist noch nicht richtig gestartet. Passiert, wenn end() von anderer Task gerufen wird.
     }
 }
@@ -1502,7 +1470,7 @@ bool Task::do_something()
             }
         }
 
-        //if( something_done )  _spooler->assert_is_active( __FUNCTION__ );
+        //if( something_done )  _spooler->assert_is_activated( __FUNCTION__ );
     }
 
   //if( _next_time && !_let_run )  set_next_time( min( _next_time, _job->_period.end() ) );                      // Am Ende der Run_time wecken, damit die Task beendet werden kann
@@ -1545,7 +1513,7 @@ bool Task::load()
 
 
     _job->count_task();
-    _thread->count_task();
+    _spooler->_task_subsystem->count_task();
     //(nur für altes use_engine="job", löscht Fehlermeldung von Job::do_somethin() init_start_when_directory_changed: reset_error();
     _running_since = Time::now();
 
@@ -1593,7 +1561,7 @@ bool Task::step__end()
 
         if( has_step_count()  ||  _step_count == 0 )        // Bei kind_process nur einen Schritt zählen
         {
-            _thread->count_step();
+            _spooler->_task_subsystem->count_step();
             _job->count_step();
             _step_count++;
         }
@@ -1793,7 +1761,6 @@ void Task::finish()
 
 
     close();
-    leave_thread();
 
     if( _job->is_machine_resumable() )  _spooler->end_dont_suspend_machine();
 }
@@ -1925,21 +1892,21 @@ void Task::trigger_event( Scheduler_event* scheduler_event )
 
 bool Task::wait_until_terminated( double wait_time )
 {
-    Thread_id my_thread_id = current_thread_id();
-    if( my_thread_id == _thread->thread_id() )  z::throw_xc( "SCHEDULER-125" );     // Deadlock
+    z::throw_xc( "SCHEDULER-125" );     // Deadlock
+    return false;
 
-  //Spooler_thread* calling_thread = _spooler->thread_by_thread_id( my_thread_id );
-  //if( calling_thread &&  !calling_thread->_free_threading )  z::throw_xc( "SCHEDULER-131" );
+    //Thread_id my_thread_id = current_thread_id();
+    //if( my_thread_id == _spooler->thread_id() )  z::throw_xc( "SCHEDULER-125" );     // Deadlock
 
-    Event event ( obj_name() + " wait_until_terminated" );
+    //Event event ( obj_name() + " wait_until_terminated" );
 
-    THREAD_LOCK_DUMMY( _terminated_events_lock )  _terminated_events.push_back( &event );
+    //THREAD_LOCK_DUMMY( _terminated_events_lock )  _terminated_events.push_back( &event );
 
-    bool result = event.wait( wait_time );
+    //bool result = event.wait( wait_time );
 
-    THREAD_LOCK_DUMMY( _terminated_events_lock )  _terminated_events.pop_back();
+    //THREAD_LOCK_DUMMY( _terminated_events_lock )  _terminated_events.pop_back();
 
-    return result;
+    //return result;
 }
 
 //-------------------------------------------------------------------------Task::send_collected_log
@@ -2226,7 +2193,6 @@ bool Job_module_task::do_load()
         module_instance->init();
 
         module_instance->add_obj( (IDispatch*)_spooler->_com_spooler    , "spooler"        );
-      //module_instance->add_obj( (IDispatch*)_job->_thread->_com_thread, "spooler_thread" );
         module_instance->add_obj( (IDispatch*)_job->_com_job            , "spooler_job"    );
         module_instance->add_obj( (IDispatch*)module_instance->_com_task, "spooler_task"   );
         module_instance->add_obj( (IDispatch*)module_instance->_com_log , "spooler_log"    );

@@ -218,7 +218,7 @@ xml::Element_ptr Command_processor::execute_show_history( const xml::Element_ptr
     int id, next;
     get_id_and_next( element, &id, &next );
     
-    ptr<Job> job = _spooler->get_job( job_name );
+    ptr<Job> job = _spooler->get_job( job_name, true );
 
     return job->read_history( _answer, id, next, show );
 }
@@ -306,7 +306,7 @@ xml::Element_ptr Command_processor::execute_show_job( const xml::Element_ptr& el
     
     if( job_chain_name != "" )  job_chain = _spooler->order_subsystem()->job_chain( job_chain_name );
     
-    return _spooler->get_job( element.getAttribute( "job" ) ) -> dom_element( _answer, show, job_chain );
+    return _spooler->get_job( element.getAttribute( "job" ), true ) -> dom_element( _answer, show, job_chain );
 }
 
 //------------------------------------------------------------Command_processor::execute_modify_job
@@ -314,6 +314,7 @@ xml::Element_ptr Command_processor::execute_show_job( const xml::Element_ptr& el
 xml::Element_ptr Command_processor::execute_modify_job( const xml::Element_ptr& element )
 {
     if( _security_level < Security::seclev_no_add )  z::throw_xc( "SCHEDULER-121" );
+    _spooler->assert_is_activated( __FUNCTION__ );
 
     string job_name = element.getAttribute( "job" );
     string cmd_name = element.getAttribute( "cmd" );
@@ -359,6 +360,7 @@ xml::Element_ptr Command_processor::execute_show_task( const xml::Element_ptr& e
 xml::Element_ptr Command_processor::execute_kill_task( const xml::Element_ptr& element )
 {
     if( _security_level < Security::seclev_no_add )  z::throw_xc( "SCHEDULER-121" );
+    _spooler->assert_is_activated( __FUNCTION__ );
 
     int    id          = element. int_getAttribute( "id" );
     string job_name    = element.     getAttribute( "job" );              // Hilfsweise
@@ -375,6 +377,7 @@ xml::Element_ptr Command_processor::execute_kill_task( const xml::Element_ptr& e
 xml::Element_ptr Command_processor::execute_start_job( const xml::Element_ptr& element )
 {
     if( _security_level < Security::seclev_no_add )  z::throw_xc( "SCHEDULER-121" );
+    _spooler->assert_is_activated( __FUNCTION__ );
 
     string job_name        = element.getAttribute( "job"   );
     string task_name       = element.getAttribute( "name"  );
@@ -409,19 +412,19 @@ xml::Element_ptr Command_processor::execute_start_job( const xml::Element_ptr& e
 
 //---------------------------------------------------------Command_processor::execute_signal_object
 
-xml::Element_ptr Command_processor::execute_signal_object( const xml::Element_ptr& element )
-{
-    if( _security_level < Security::seclev_signal )  z::throw_xc( "SCHEDULER-121" );
-
-    string class_name = element.getAttribute( "class" );
-    Level  level      = as_int( element.getAttribute( "level" ) );
-
-    xml::Element_ptr jobs_element = _answer.createElement( "tasks" );
-
-    _spooler->signal_object( class_name, level );
-    
-    return _answer.createElement( "ok" );
-}
+//xml::Element_ptr Command_processor::execute_signal_object( const xml::Element_ptr& element )
+//{
+//    if( _security_level < Security::seclev_signal )  z::throw_xc( "SCHEDULER-121" );
+//
+//    string class_name = element.getAttribute( "class" );
+//    Level  level      = as_int( element.getAttribute( "level" ) );
+//
+//    xml::Element_ptr jobs_element = _answer.createElement( "tasks" );
+//
+//    //_spooler->signal_object( class_name, level );
+//    
+//    return _answer.createElement( "ok" );
+//}
 
 //--------------------------------------------------------------Command_processor::execute_add_jobs
 
@@ -429,7 +432,7 @@ xml::Element_ptr Command_processor::execute_add_jobs( const xml::Element_ptr& ad
 {
     if( _security_level < Security::seclev_all )  z::throw_xc( "SCHEDULER-121" );
 
-    //ptr<Spooler_thread> thread = _spooler->get_thread( add_jobs_element.getAttribute( "thread" ) );
+    //ptr<Task_subsystem> thread = _spooler->get_thread( add_jobs_element.getAttribute( "thread" ) );
     _spooler->cmd_add_jobs( add_jobs_element );
 
     return _answer.createElement( "ok" );
@@ -585,6 +588,7 @@ NO_ORDER:
 xml::Element_ptr Command_processor::execute_add_order( const xml::Element_ptr& add_order_element )
 {
     if( _security_level < Security::seclev_all )  z::throw_xc( "SCHEDULER-121" );
+    _spooler->assert_is_activated( __FUNCTION__ );
 
     string job_name = add_order_element.getAttribute( "job" );
 
@@ -616,6 +620,7 @@ xml::Element_ptr Command_processor::execute_add_order( const xml::Element_ptr& a
 xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr& modify_order_element )
 {
     if( _security_level < Security::seclev_no_add )  z::throw_xc( "SCHEDULER-121" );
+    _spooler->assert_is_activated( __FUNCTION__ );
 
     string    job_chain_name = modify_order_element.getAttribute( "job_chain" );
     Order::Id id             = modify_order_element.getAttribute( "order"     );
@@ -695,6 +700,7 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
 xml::Element_ptr Command_processor::execute_remove_order( const xml::Element_ptr& modify_order_element )
 {
     if( _security_level < Security::seclev_no_add )  z::throw_xc( "SCHEDULER-121" );
+    _spooler->assert_is_activated( __FUNCTION__ );
 
     string    job_chain_name = modify_order_element.getAttribute( "job_chain" );
     Order::Id id             = modify_order_element.getAttribute( "order"     );
@@ -744,6 +750,7 @@ xml::Element_ptr Command_processor::execute_remove_order( const xml::Element_ptr
 xml::Element_ptr Command_processor::execute_remove_job_chain( const xml::Element_ptr& modify_order_element )
 {
     if( _security_level < Security::seclev_no_add )  z::throw_xc( "SCHEDULER-121" );
+    _spooler->assert_is_activated( __FUNCTION__ );
 
     string job_chain_name = modify_order_element.getAttribute( "job_chain" );
 
@@ -783,6 +790,9 @@ xml::Element_ptr Command_processor::execute_register_remote_scheduler( const xml
 
 xml::Element_ptr Command_processor::execute_service_request( const xml::Element_ptr& service_request_element )
 {
+    if( _security_level < Security::seclev_no_add )  z::throw_xc( "SCHEDULER-121" );
+    _spooler->assert_is_activated( __FUNCTION__ );
+
     ptr<Order> order = new Order( _spooler );
 
     order->set_state( Web_service::forwarding_job_chain_forward_state );
@@ -945,8 +955,8 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     else
     if( element.nodeName_is( "job_chain"        ) )  return execute_job_chain( element );
     else
-    if( element.nodeName_is( "signal_object"    ) )  return execute_signal_object( element );
-    else
+    //if( element.nodeName_is( "signal_object"    ) )  return execute_signal_object( element );
+    //else
     if( element.nodeName_is( "config"           ) )  return execute_config( element, xml_mod_time );
     else
     if( element.nodeName_is( "show_job_chains"  ) )  return execute_show_job_chains( element, show );

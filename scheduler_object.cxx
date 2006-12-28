@@ -28,6 +28,7 @@ string Scheduler_object::name_of_type_code( Scheduler_object::Type_code type_cod
         case type_heart_beat:               return "Heart_beat";
         case type_other_scheduler:          return "Scheduler_member";
         case type_exclusive_scheduler_watchdog: return "Exclusive_scheduler_watchdog";
+        case type_active_schedulers_watchdog: return "Active_schedulers_watchdog";
         case type_database_order_detector:  return "Database_order_detector";
         case type_order_subsystem:          return "Order_subsystem";
         case type_xml_client_connection:    return "Xml_client_connection";

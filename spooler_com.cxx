@@ -2294,7 +2294,7 @@ STDMETHODIMP Com_task::put_Error( VARIANT* error_par )
     try
     {
         if( !_task )  z::throw_xc( "SCHEDULER-122" );
-        if( !_task->thread()  ||  current_thread_id() != _task->thread()->thread_id() )  return E_ACCESSDENIED;
+        if( current_thread_id() != _task->_spooler->thread_id() )  return E_ACCESSDENIED;
 
         Variant error_vt = *error_par;
         hr = error_vt.ChangeType( VT_BSTR );        if( FAILED(hr) )  return hr;
@@ -2413,7 +2413,7 @@ STDMETHODIMP Com_task::put_Result( VARIANT* value )
     try
     {
         if( !_task )  z::throw_xc( "SCHEDULER-122" );
-        if( !_task->thread()  ||  current_thread_id() != _task->thread()->thread_id() )  return E_ACCESSDENIED;
+        if( current_thread_id() != _task->_spooler->thread_id() )  return E_ACCESSDENIED;
       //if( !_task->_job->its_current_task(_task) )  z::throw_xc( "SCHEDULER-138" );
 
         THREAD_LOCK( _task->_lock )  hr = _task->_result.Copy( value );
@@ -2454,8 +2454,7 @@ STDMETHODIMP Com_task::put_Repeat( double seconds )
     try
     {
         if( !_task )  z::throw_xc( "SCHEDULER-122" );
-        if( !_task->thread()  ||  current_thread_id() != _task->thread()->thread_id() )  return E_ACCESSDENIED;
-      //if( !_task->_job->its_current_task(_task) )  z::throw_xc( "SCHEDULER-138" );
+        if( current_thread_id() != _task->_spooler->thread_id() )  return E_ACCESSDENIED;
 
         _task->_job->set_repeat( seconds );
     }
@@ -2475,8 +2474,7 @@ STDMETHODIMP Com_task::put_History_field( BSTR name, VARIANT* value )
     try
     {
         if( !_task )  z::throw_xc( "SCHEDULER-122" );
-        if( !_task->thread()  ||  current_thread_id() != _task->thread()->thread_id() )  return E_ACCESSDENIED;
-      //if( !_task->_job->its_current_task(_task) )  z::throw_xc( "SCHEDULER-138" );
+        if( current_thread_id() != _task->_spooler->thread_id() )  return E_ACCESSDENIED;
 
         _task->set_history_field( bstr_as_string(name), *value );
     }
@@ -2553,7 +2551,7 @@ STDMETHODIMP Com_task::get_Order( Iorder** result )
     try
     {
         if( !_task )  z::throw_xc( "SCHEDULER-122" );
-        if( !_task->thread()  ||  current_thread_id() != _task->thread()->thread_id() )  return E_ACCESSDENIED;
+        if( current_thread_id() != _task->_spooler->thread_id() )  return E_ACCESSDENIED;
 
         *result = _task->order();
         if( *result )  (*result)->AddRef();
@@ -2573,7 +2571,7 @@ STDMETHODIMP Com_task::get_Changed_directories( BSTR* result )
     try
     {
         if( !_task )  z::throw_xc( "SCHEDULER-122" );
-        if( !_task->thread()  ||  current_thread_id() != _task->thread()->thread_id() )  return E_ACCESSDENIED;
+        if( current_thread_id() != _task->_spooler->thread_id() )  return E_ACCESSDENIED;
 
         hr = String_to_bstr( _task->_changed_directories, result );
     }
@@ -2592,7 +2590,7 @@ STDMETHODIMP Com_task::get_Trigger_files( BSTR* result )
     try
     {
         if( !_task )  z::throw_xc( "SCHEDULER-122" );
-        if( !_task->thread()  ||  current_thread_id() != _task->thread()->thread_id() )  return E_ACCESSDENIED;
+        if( current_thread_id() != _task->_spooler->thread_id() )  return E_ACCESSDENIED;
 
         hr = String_to_bstr( _task->_trigger_files, result );
     }
@@ -2613,7 +2611,7 @@ STDMETHODIMP Com_task::Add_pid( int pid, VARIANT* timeout )
     try
     {
         if( !_task )  z::throw_xc( "SCHEDULER-122" );
-        if( !_task->thread()  ||  current_thread_id() != _task->thread()->thread_id() )  return E_ACCESSDENIED;
+        if( current_thread_id() != _task->_spooler->thread_id() )  return E_ACCESSDENIED;
 
         Time t  = timeout->vt == VT_EMPTY || com::variant_is_missing( *timeout )? Time::never 
                                                                                 : time_from_variant( *timeout );
@@ -2636,7 +2634,7 @@ STDMETHODIMP Com_task::Remove_pid( int pid )
     try
     {
         if( !_task )  z::throw_xc( "SCHEDULER-122" );
-        if( !_task->thread()  ||  current_thread_id() != _task->thread()->thread_id() )  return E_ACCESSDENIED;
+        if( current_thread_id() != _task->_spooler->thread_id() )  return E_ACCESSDENIED;
 
         _task->remove_pid( pid );
     }
@@ -2657,7 +2655,7 @@ STDMETHODIMP Com_task::get_Stderr_or_stdout_text_or_path( BSTR* result, bool get
         *result = NULL;
 
         if( !_task )  z::throw_xc( "SCHEDULER-122" );
-        if( !_task->thread()  ||  current_thread_id() != _task->thread()->thread_id() )  return E_ACCESSDENIED;
+        if( current_thread_id() != _task->_spooler->thread_id() )  return E_ACCESSDENIED;
         if( !_task->_module_instance )  return S_FALSE;
 
         string filename = get_stderr? _task->_module_instance->stderr_path() 
@@ -3010,7 +3008,7 @@ const Com_method Com_thread::_methods[] =
 */
 //---------------------------------------------------------------------------Com_thread::Com_thread
 /*
-Com_thread::Com_thread( Spooler_thread* thread )
+Com_thread::Com_thread( Task_subsystem* thread )
 :
     Sos_ole_object( thread_class_ptr, (Ithread*)this ),
     _thread(thread)

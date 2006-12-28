@@ -1233,7 +1233,7 @@ bool Job::execute_state_cmd()
 
                             task->_cause = cause_wake;
                             task->_let_run = true;
-                            task->attach_to_a_thread();   // Es gibt zZ nur einen Thread
+                            task->init();
                         }
                     }
                     break;
@@ -1268,7 +1268,7 @@ void Job::start_when_directory_changed( const string& directory_name, const stri
 
                 // Windows: Überwachung erneuern
                 // Wenn das Verzeichnis bereits überwacht war, aber inzwischen gelöscht, und das noch nicht bemerkt worden ist
-                // (weil Spooler_thread::wait vor lauter Jobaktivität nicht gerufen wurde), dann ist es besser, die Überwachung 
+                // (weil Task_subsystem::wait vor lauter Jobaktivität nicht gerufen wurde), dann ist es besser, die Überwachung 
                 // hier zu erneuern. Besonders, wenn das Verzeichnis wieder angelegt ist.
                 // Das ist bei lokalen Verzeichnissen nicht möglich, weil mkdir auf einen Fehler läuft, solange die Überwachung noch aktiv ist.
                 // Aber bei Netzwerkverzeichnissen gibt es keinen Fehler, und die Überwachung schweigt.
@@ -1573,7 +1573,7 @@ Time Job::next_start_time()
 }
 
 //-------------------------------------------------------------------------Job::calculate_next_time
-// Für Spooler_thread
+// Für Task_subsystem
 
 void Job::calculate_next_time( Time now )
 {
@@ -1980,7 +1980,7 @@ bool Job::do_something()
                                 _next_start_time = Time::never;
                                 calculate_next_time();
 
-                                task->attach_to_a_thread();
+                                task->init();
                                 _log->info( message_string( "SCHEDULER-930", task->id(), task->string_cause() ) );
 
                                 if( _min_tasks <= not_ending_tasks_count() )  _start_min_tasks = false;
@@ -2252,6 +2252,7 @@ string Job::state_name( State state )
 {
     switch( state )
     {
+        case s_none:            return "not_initialized";
         case s_stopping:        return "stopping";
         case s_stopped:         return "stopped";
         case s_read_error:      return "read_error";

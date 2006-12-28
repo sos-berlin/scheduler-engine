@@ -238,42 +238,6 @@ void Spooler::load_object_set_classes_from_xml( Object_set_class_list* liste, co
     }
 }
 
-//--------------------------------------------------------------------------Spooler_thread::set_dom
-/*
-void Spooler_thread::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
-{
-    string str;
-
-    _name = element.getAttribute( "name" );
-
-    str = element.getAttribute( "free_threading" );
-    if( !str.empty() )  z::throw_xc( "SCHEDULER-189", "free_threading" );    //_free_threading = as_bool( str );
-
-#   ifdef Z_WINDOWS
-        str = element.getAttribute( "priority" );
-        if( !str.empty() )
-        {
-            if( str == "idle" )  _thread_priority = THREAD_PRIORITY_IDLE;
-            else
-            {
-                _thread_priority = as_int( str );
-
-                if( _thread_priority < -15 )  _thread_priority = -15; 
-                if( _thread_priority >  +2 )  _thread_priority =  +2;   // In Windows sollte die Priorität nicht zu hoch werden
-            }
-        }
-#   endif
-
-    if( element.getAttributeNode( "include_path" ) )  z::throw_xc( "SCHEDULER-189", "<thread include_path=>" );  //_include_path = element.getAttribute( "include_path" );
-
-    DOM_FOR_EACH_ELEMENT( element, e )
-    {
-        if( e.nodeName_is( "script" ) )  z::throw_xc( "SCHEDULER-189", "<script in thread>" );  //_module.set_dom( e, xml_mod_time, include_path() );
-        else
-        if( e.nodeName_is( "jobs"   ) )  _spooler->load_jobs_from_xml( e, xml_mod_time );   // Zur Kompatibilität
-    }
-}
-*/
 //-----------------------------------------------------------------------------Spooler::load_config
 
 void Spooler::load_config( const xml::Element_ptr& config_element, const Time& xml_mod_time, const string& source_filename )
@@ -335,8 +299,6 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const Time& x
       //_max_threads   = config_element.int_getAttribute( "threads"      , _max_threads  );
 #     endif
           
-        if( _max_threads < 1 )  _max_threads = 1;
-
         _config_java_class_path = subst_env( config_element.getAttribute( "java_class_path" ) );
         _config_java_options    = subst_env( config_element.getAttribute( "java_options"    ) );
 

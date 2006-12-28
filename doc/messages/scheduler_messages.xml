@@ -127,16 +127,12 @@
             </text>
         </message>
 
-        <!--message code="SCHEDULER-109">
-            <text xml:lang="de">
-                <title>
-                    Aktion <p1/> im Zustand <p2/> nicht möglich
-                </title>
-            </text>
+        <message code="SCHEDULER-109">
             <text xml:lang="en">
-                <title></title>
+                <title>Job '<p1/>' is not initialized</title>
             </text>
-        </message-->
+        </message>
+
 
         <message code="SCHEDULER-110">
             <text xml:lang="de">
@@ -2308,7 +2304,7 @@
 
         <message code="SCHEDULER-367">
             <text xml:lang="en">
-                <title>Scheduler aborts because it has lost his exclusiveness</title>
+                <title>Scheduler aborts because it has lost its exclusiveness</title>
             </text>
         </message>
 
@@ -2368,7 +2364,7 @@
 
         <message code="SCHEDULER-377">
             <text xml:lang="en">
-                <title>After own late heart beat, this Scheduler has lost exclusiveness in favor of Scheduler member '<p1/>'</title>
+                <title>After own late heart beat, Scheduler member '<p1/>' has taken exclusiveness</title>
             </text>
         </message>
 
@@ -2387,6 +2383,12 @@
         <message code="SCHEDULER-380">
             <text xml:lang="en">
                 <title><code>job_chain orders_recoverable="no"</code> cannot be combined with <code>distributed="yes"</code>, in <p1/></title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-381">
+            <text xml:lang="en">
+                <title>Scheduler is not activated (in backup mode) and can not execute the operation</title>
             </text>
         </message>
     </messages>
@@ -3161,30 +3163,6 @@
             </text>
         </message>
 
-        <message code="SCHEDULER-800" weight="info">
-            <text xml:lang="en">
-                <title>Waiting for start of Scheduler</title>
-            </text>
-        </message>
-
-        <message code="SCHEDULER-801" weight="info">
-            <text xml:lang="en">
-                <title>Watching exclusive Scheduler <p1/></title>
-            </text>
-        </message>
-
-        <message code="SCHEDULER-802" weight="info">
-            <text xml:lang="en">
-                <title>Active Scheduler has terminated properly</title>
-            </text>
-        </message>
-
-        <message code="SCHEDULER-803" weight="info">
-            <text xml:lang="en">
-                <title>This Scheduler becomes exclusive now</title>
-            </text>
-        </message>
-
         <!--message code="SCHEDULER-804" weight="info">
             <text xml:lang="en">
                 <title>Clock seems to be in sync with Scheduler member <p1/></title>
@@ -3265,7 +3243,7 @@
 
         <message code="SCHEDULER-818">
             <text xml:lang="en">
-                <title>Active Scheduler has been started, so this inactive Scheduler starts again too</title>
+                <title>Currently active Scheduler has been started, so this inactive Scheduler starts again too</title>
             </text>
         </message>
         
@@ -3277,7 +3255,7 @@
         
         <message code="SCHEDULER-820" weight="info">
             <text xml:lang="en">
-                <title>Watching this Scheduler</title>
+                <title>Watching heart beat of that Scheduler</title>
             </text>
         </message>
 
@@ -3344,6 +3322,36 @@
         <message code="SCHEDULER-831">
             <text xml:lang="en">
                 <title>Waiting for start of non-backup Scheduler</title>
+            </text>
+        </message>
+        
+        <message code="SCHEDULER-832" weight="info">
+            <text xml:lang="en">
+                <title>Waiting for start of Scheduler</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-833" weight="info">
+            <text xml:lang="en">
+                <title>Watching heart beat of that exclusive Scheduler, ready to take over operation</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-834" weight="info">
+            <text xml:lang="en">
+                <title>Active Scheduler has terminated properly</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-835" weight="info">
+            <text xml:lang="en">
+                <title>This Scheduler becomes exclusive now</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-836" weight="warn">
+            <text xml:lang="en">
+                <title>Deactivating that dead Scheduler</title>
             </text>
         </message>
     </messages>
