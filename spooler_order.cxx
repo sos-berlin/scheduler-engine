@@ -1535,6 +1535,7 @@ xml::Element_ptr Order_queue::dom_element( const xml::Document_ptr& document, co
 
 int Order_queue::order_count( const Job_chain* which_job_chain )
 {
+    int IN_DB_ORDER_COUNT_UMBENNEN;  // Und order_count() nicht mehr auf Datenbank zugreifen lassen! Wenigstens zur Deutlichkeit im Namen für dom_element()
     int result = 0;
 
     if( order_subsystem()->are_orders_distributed() )

@@ -21,9 +21,6 @@ struct Distributed_scheduler : Async_operation, Scheduler_object
         cmd_terminate_and_restart
     };
 
-    //static const int            min_precedence;
-    //static const int            max_precedence;
-
 
     static string               string_from_command         ( Command );
     static Command              command_from_string         ( const string& );
@@ -33,17 +30,19 @@ struct Distributed_scheduler : Async_operation, Scheduler_object
                                 Distributed_scheduler       ( Spooler* );
                                ~Distributed_scheduler       ();
 
-    void                        close                       ();
-    void                        shutdown                    ();                                     // Ordentliches Herunterfahren des Schedulers
 
     // Async_operation
     bool                        async_finished_             () const                                { return false; }
     string                      async_state_text_           () const;
     bool                        async_continue_             ( Continue_flags );
 
+
     // Scheduler_object
     string                      obj_name                    () const;
 
+
+    void                        close                       ();
+    void                        shutdown                    ();                                     // Ordentliches Herunterfahren des Schedulers
 
     void                        demand_exclusiveness        ( bool b = true )                       { assert( !_current_operation );  _demand_exclusiveness = b; }
     void                    set_backup                      ( bool b = true )                       { assert( !_current_operation );  _is_backup = b; }
@@ -65,7 +64,7 @@ struct Distributed_scheduler : Async_operation, Scheduler_object
   //Command                     heart_beat_command          ()                                      { return _heart_beat_command; }
     string                      exclusive_member_id         ();
     string                      empty_member_id             ();
-    time_t                      last_heart_beat             ()                                      { return _db_last_heart_beat; }
+  //time_t                      last_heart_beat             ()                                      { return _db_last_heart_beat; }
 
     bool                        start                       ();
     bool                        wait_until_is_scheduler_up  ();
@@ -83,30 +82,28 @@ struct Distributed_scheduler : Async_operation, Scheduler_object
 
   protected:
     void                        create_table_when_needed    ();
-    void                        delete_member_record        ( Transaction* ta );
+  //void                        delete_my_member_record     ( Transaction* ta );
     void                        delete_old_member_records   ( Transaction* ta );
     void                        start_operations            ();
     void                        close_operations            ();
 
+    void                        check_empty_member_record   ();
+    void                        insert_member_record        ( bool set_active );
+
+    void                        assert_database_integrity   ( const string& message_text );
     bool                        mark_as_exclusive           ();
   //void                        mark_as_active              ();
     void                        calculate_next_heart_beat   ( time_t now );
     bool                        check_my_member_record      ( Transaction*, bool force_error = false );
     bool                        check_heart_beat_is_in_time ( time_t expected_next_heart_beat );
-    void                        insert_scheduler_id_record  ( Transaction* );
-    void                        check_empty_member_record   ();
-    void                        insert_member_record        ( bool set_active );
     void                        lock_member_records         ( Transaction*, const string& member1_id, const string& member2_id );
-    void                        assert_database_integrity   ( const string& message_text );
   //bool                        check_database_integrity    ();
     bool                        heartbeat_member_record     ();
     void                        set_command_for_all_schedulers_but_me( Transaction*, const string& where, Command );
-  //void                        set_command_for_members     ( Transaction*, const string& where, Command );
     void                        read_and_execute_command    ();
     void                        execute_command             ( Command );
-    void                        db_execute                  ( const string& stmt );
     void                        make_scheduler_member_id    ();
-    Scheduler_member*           exclusive_scheduler         ();     // NULL, wenn _exclusive_scheduler->is_empty_member()
+    Scheduler_member*           exclusive_scheduler         ();                                     // NULL, wenn _exclusive_scheduler->is_empty_member()
     Scheduler_member*           empty_scheduler_record      ();
 
   private:
