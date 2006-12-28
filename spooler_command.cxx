@@ -620,11 +620,35 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
     string    job_chain_name = modify_order_element.getAttribute( "job_chain" );
     Order::Id id             = modify_order_element.getAttribute( "order"     );
     string    priority       = modify_order_element.getAttribute( "priority"  );
-    string    state          = modify_order_element.getAttribute( "state"  );
-    string    at             = modify_order_element.getAttribute( "at" );
+    string    state          = modify_order_element.getAttribute( "state"     );
+    string    at             = modify_order_element.getAttribute( "at"        );
 
     ptr<Job_chain> job_chain = _spooler->order_subsystem()->job_chain( job_chain_name );
-    ptr<Order>     order     = job_chain->order( id );
+    ptr<Order>     order     = job_chain->_is_distributed? job_chain->order_or_null( id ) 
+                                                         : job_chain->order( id );
+
+    if( !order )  order = _spooler->order_subsystem()->load_order_from_database( job_chain_name, id );
+
+    //if( !order )
+    //{
+    //    Transaction ta ( _spooler->db() );
+
+    //    sql::Update_stmt update ( _spooler->database_descriptor(), _spooler->_orders_tablename );
+
+    //    update.and_where_condition( "spooler_id", _spooler->id_for_db() );
+    //    update.and_where_condition( "job_chain" , job_chain_name        );
+    //    update.and_where_condition( "id"        , id().as_string()      );
+    //    update.and_where_condition( "processing_scheduler_member_id", sql::null_value );
+
+    //    if( priority != "" )  update[ "priority" ] = as_int( priority );
+    //    if( state    != "" )  update[ "state"    ] = state;
+
+    //    ta.execute( update );
+
+    //    ta.commit( __FUNCTION__ );
+    //}
+    //else
+
 
     if( priority != "" )  order->set_priority( as_int( priority ) );
 
@@ -660,7 +684,8 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
         order->set_run_time( run_time_element );
     }
 
-    order->db_update( Order::update_not_occupated );
+    order->db_update( Order::update_anyway );
+
 
     return _answer.createElement( "ok" );
 }
@@ -675,9 +700,41 @@ xml::Element_ptr Command_processor::execute_remove_order( const xml::Element_ptr
     Order::Id id             = modify_order_element.getAttribute( "order"     );
 
     ptr<Job_chain> job_chain = _spooler->order_subsystem()->job_chain( job_chain_name );
-    ptr<Order>     order     = job_chain->order( id );
+    ptr<Order>     order     = job_chain->_is_distributed? job_chain->order_or_null( id ) 
+                                                         : job_chain->order( id );
 
-    order->remove_from_job_chain();
+    if( order )
+    {
+        order->remove_from_job_chain();
+    }
+    else
+    {
+        assert( job_chain->_is_distributed );
+
+        for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
+        {
+            sql::Delete_stmt delete_stmt ( _spooler->database_descriptor(), _spooler->_orders_tablename );
+
+            delete_stmt.and_where_condition( "spooler_id", _spooler->id_for_db() );
+            delete_stmt.and_where_condition( "job_chain" , job_chain_name        );
+            delete_stmt.and_where_condition( "id"        , id.as_string()        );
+            delete_stmt.and_where_condition( "processing_scheduler_member_id", sql::null_value );
+            
+            ta.execute( delete_stmt, __FUNCTION__ );
+            
+            if( ta.record_count() == 0 )
+            {
+                // Sollte Exception auslösen: nicht da oder belegt
+                _spooler->order_subsystem()->load_order_from_database( job_chain_name, id );
+                
+                // Der Auftrag ist gerade freigegeben oder hinzugefügt worden
+                ta.execute_single( delete_stmt, __FUNCTION__ ); 
+            }
+
+            ta.commit( __FUNCTION__ );
+        }
+        catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_orders_tablename, x ), __FUNCTION__ ); }
+    }
 
     return _answer.createElement( "ok" );
 }
@@ -713,7 +770,7 @@ xml::Element_ptr Command_processor::execute_register_remote_scheduler( const xml
     if( !remote_scheduler )  remote_scheduler = Z_NEW( Remote_scheduler );
 
     remote_scheduler->_host_and_port = host_and_port;
-    remote_scheduler->_host_and_port._host.set_name();
+    remote_scheduler->_host_and_port._host.resolve_name();
     remote_scheduler->set_dom( register_scheduler_element );
     
     xml_processor->_operation_connection->_remote_scheduler = remote_scheduler;        // Remote_scheduler mit TCP-Verbindung verknüpfen

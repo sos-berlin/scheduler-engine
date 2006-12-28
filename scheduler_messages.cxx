@@ -245,6 +245,8 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-376", "A distributed, not exclusive Scheduler enables only order controlled jobs" },
     { "SCHEDULER-377", "After own late heart beat, this Scheduler has lost exclusiveness in favor of Scheduler member '$1'" },
     { "SCHEDULER-378", "After own late heart beat, this Scheduler has been deactived and all occupied orders are freed by Scheduler member '$1'" },
+    { "SCHEDULER-379", "$1 is occupied by Scheduler member '$2'" },
+    { "SCHEDULER-380", "job_chain orders_recoverable=\"no\" cannot be combined with distributed=\"yes\", in $1" },
     { "SCHEDULER-900", "Scheduler $1 is starting with $2, pid=$3" },
     { "SCHEDULER-902", "state=$1" },
     { "SCHEDULER-904", "Tasks have $1s to terminate" },
@@ -366,6 +368,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-828", "$1 old member records deleteded in database table $2" },
     { "SCHEDULER-829", "Releasing occupied order $1:$2" },
     { "SCHEDULER-830", "Because all Scheduler tasks are killed, the order in database is not updated. Only the occupation is released" },
+    { "SCHEDULER-831", "Waiting for start of non-backup Scheduler" },
     {}
 };
 } //namespace sos

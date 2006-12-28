@@ -470,11 +470,12 @@ struct Spooler : Object,
     string                     _order_history_tablename;
     bool                       _order_history_yes;
     With_log_switch            _order_history_with_log;
-
+    Log_level                  _db_log_level;
 
     string                     _factory_ini;                // -ini=factory.ini
     string                     _sos_ini;                    // -sos.ini=sos.ini
-    string                     _hostname;
+    string                     _short_hostname;             // Ohne Netzwerk
+    string                     _complete_hostname;          // Mit Netzwerk
 
     ptr<Com_spooler>           _com_spooler;                // COM-Objekt spooler
     ptr<Com_log>               _com_log;                    // COM-Objekt spooler.log
@@ -631,7 +632,7 @@ struct Spooler : Object,
     int                        _is_in_check_is_active;
     bool                       _scheduler_is_up;
   //bool                       _proper_termination;
-    string                     _session_id;
+  //string                     _session_id;
 };
 
 //-------------------------------------------------------------------------------------------------

@@ -173,7 +173,7 @@ struct Order : Com_order,
     void                        db_release_occupation   ();
     void                        db_fill_stmt            ( sql::Write_stmt* );
 
-    enum Update_option { update_not_occupated, update_and_release_occupation };
+    enum Update_option { update_anyway, update_not_occupied, update_and_release_occupation };
     void                        db_update               ( Update_option );
 
     string                      db_read_clob            ( Transaction*, const string& column_name );
@@ -312,7 +312,7 @@ struct Job_chain_node : Com_job_chain_node
                                 Job_chain_node          ()                                          : _zero_(this+1) {}
 
     xml::Element_ptr            dom_element             ( const xml::Document_ptr&, const Show_what&, Job_chain* );
-    int                         order_count             ( Job_chain* = NULL );
+    int                         order_count             ( Transaction*, Job_chain* = NULL );
     bool                        is_file_order_sink      ()                                          { return _file_order_sink_remove || _file_order_sink_move_to != ""; }
 
 
@@ -401,7 +401,7 @@ struct Job_chain : Com_job_chain, Scheduler_object
     void                        add_to_blacklist        ( Order* );
     void                        remove_from_blacklist   ( Order* );
 
-    int                         order_count             ();
+    int                         order_count             ( Transaction* );
     bool                        has_order               () const;
 
     void                    set_dom                     ( const xml::Element_ptr& );
@@ -470,9 +470,9 @@ struct Order_queue : Com_order_queue
     void                        add_order               ( Order*, Do_log = do_log );
     void                        remove_order            ( Order*, Do_log = do_log );
     void                        reinsert_order          ( Order* );
-    int                         order_count             ( const Job_chain* = NULL );
+    int                         order_count             ( Transaction*, const Job_chain* = NULL );
     bool                        empty                   ()                                          { return _queue.empty(); }
-    bool                        empty                   ( const Job_chain* job_chain )              { return order_count( job_chain ) == 0; }
+    bool                        empty                   ( const Job_chain* job_chain )              { return order_count( (Transaction*)NULL, job_chain ) == 0; }  // Ohne Datenbank
     Order*                      first_order             ( const Time& now ) const;
     Order*                      fetch_order             ( const Time& now );
     Order*                      load_and_occupy_next_distributed_order_from_database( Task* occupying_task, const Time& now );
@@ -534,6 +534,7 @@ struct Order_subsystem : Object, Scheduler_object
     Job_chain*                  job_chain_or_null           ( const string& name );
     xml::Element_ptr            job_chains_dom_element      ( const xml::Document_ptr&, const Show_what& );
     void                        load_orders_from_database   ();
+    ptr<Order>                  load_order_from_database    ( const string& job_chain_name, Order::Id );
     void                        check_exception             ();
     bool                        are_orders_distributed      ();                                    // Für verteilte (distributed) Ausführung
     void                        request_order               ();

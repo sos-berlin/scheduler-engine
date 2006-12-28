@@ -2378,6 +2378,17 @@
             </text>
         </message>
 
+        <message code="SCHEDULER-379">
+            <text xml:lang="en">
+                <title><p1>order</p1> is occupied by Scheduler member '<p2/>'</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-380">
+            <text xml:lang="en">
+                <title><code>job_chain orders_recoverable="no"</code> cannot be combined with <code>distributed="yes"</code>, in <p1/></title>
+            </text>
+        </message>
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->
@@ -3327,6 +3338,12 @@
         <message code="SCHEDULER-830">
             <text xml:lang="en">
                 <title>Because all Scheduler tasks are killed, the order in database is not updated. Only the occupation is released</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-831">
+            <text xml:lang="en">
+                <title>Waiting for start of non-backup Scheduler</title>
             </text>
         </message>
     </messages>

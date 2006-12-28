@@ -1870,7 +1870,7 @@ void Task::trigger_event( Scheduler_event* scheduler_event )
         body << Sos_optional_date_time::now().as_string() << "\n\nJob " << _job->name() << "  " << _job->title() << "\n";
         body << "Task-Id " << as_string(id()) << ", " << as_string(_step_count) << " steps\n";
         if( _order )  body << _order->obj_name() << "\n";
-        body << "Scheduler -id=" << _spooler->id() << "  host=" << _spooler->_hostname << "\n\n";
+        body << "Scheduler -id=" << _spooler->id() << "  host=" << _spooler->_complete_hostname << "\n\n";
 
         if( !is_error )
         {
@@ -1965,7 +1965,7 @@ void Task::set_mail_defaults()
 
     string body = Sos_optional_date_time::now().as_string() + "\n\nJob " + _job->name() + "  " + _job->title() + "\n";
     body += "Task-Id " + as_string(id()) + ", " + as_string(_step_count) + " Schritte\n";
-    body += "Scheduler -id=" + _spooler->id() + "  host=" + _spooler->_hostname + "\n\n";
+    body += "Scheduler -id=" + _spooler->id() + "  host=" + _spooler->_complete_hostname + "\n\n";
 
     if( !is_error )
     {

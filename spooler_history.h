@@ -77,7 +77,7 @@ struct Database : Object, Scheduler_object
     Dbms_kind                   dbms_kind               ()                                          { return _db.dbms_kind(); }
     string                      dbms_name               ()                                          { return _db.dbms_name(); }
     Database_lock_syntax        lock_syntax             ();
-    void                        try_reopen_after_error  ( const exception&, bool wait_endless = false );
+    void                        try_reopen_after_error  ( const exception&, const string& function, bool wait_endless = false );
     void                        create_tables_when_needed();
     void                        create_table_when_needed( Transaction*, const string& tablename, const string& fields );
     time_t                      reopen_time             () const                                    { return _reopen_time; }
@@ -198,7 +198,7 @@ struct Database_retry
                                 operator bool           ()                                          { return enter_loop(); }
     bool                        enter_loop              ()                                          { return _enter_loop > 0; }
     void                        repeat_loop             ()                                          { _enter_loop = 2; }
-    void                        reopen_database_after_error( const exception& );
+    void                        reopen_database_after_error( const exception&, const string& function );
     void                        operator ++             (int)                                       { _enter_loop--; }
 
     Database*                _db;
@@ -218,7 +218,7 @@ struct Retry_transaction : Transaction
                                 Retry_transaction       ( Database* db, Transaction* outer = NULL ) : Transaction(db,outer), _database_retry( db ) {}
 
     bool                        enter_loop              ()                                          { return _database_retry.enter_loop(); }
-    void                        reopen_database_after_error( const exception& );
+    void                        reopen_database_after_error( const exception&, const string& function );
     void                        operator ++             (int);
 
     Database_retry             _database_retry;

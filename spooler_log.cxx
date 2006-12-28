@@ -69,7 +69,7 @@ namespace scheduler {
                     switch( level )
                     {
                         case log_error:     attributes |= FOREGROUND_INTENSITY | FOREGROUND_RED; break;
-                        case log_warn:      attributes |= FOREGROUND_RED; break;
+                        case log_warn:      attributes |= FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_BLUE; break;
                         case log_info:      attributes |= FOREGROUND_INTENSITY | FOREGROUND_BLUE; break;
                         case log_debug1:    attributes |= FOREGROUND_BLUE; break;
                         case log_debug2:    
@@ -77,10 +77,10 @@ namespace scheduler {
                         case log_debug4:
                         case log_debug5:
                         case log_debug6:
-                        case log_debug7:
-                        case log_debug8:    attributes |= FOREGROUND_GREEN; break;
+                        case log_debug7:    attributes |= FOREGROUND_GREEN; break;
+                        case log_debug8:    
                         case log_debug9:
-                        default:            attributes |= FOREGROUND_GREEN; break;
+                        default:            attributes |= FOREGROUND_RED | FOREGROUND_GREEN; break;
                     }
 
                     SetConsoleTextAttribute( GetStdHandle(STD_ERROR_HANDLE), attributes );
@@ -294,6 +294,7 @@ void Log::open_new()
             filename += "/scheduler-";
             filename += time.formatted( "yyyy-mm-dd-HHMMSS" );
             if( !_spooler->id().empty() )  filename += "." + _spooler->id();
+            if( _spooler->_is_backup_member )  filename += "_backup";
             filename += ".log";
 
             Z_LOG2( "scheduler.log", "open(\"" << filename << "\")\n" );

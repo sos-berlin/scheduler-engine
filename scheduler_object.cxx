@@ -43,8 +43,15 @@ Scheduler_object::Scheduler_object( Spooler* spooler, IUnknown* me, Type_code co
     _my_iunknown(me), 
     _scheduler_object_type_code(code)
 {
-    _log = this == spooler? Z_NEW( Prefix_log( 1 ) )        // Der Scheduler initialisiert beim Start sein Hauptprotokoll selbst
-                          : Z_NEW( Prefix_log( this ) );
+    if( this == spooler )
+    {
+        _log = Z_NEW( Prefix_log( 1 ) );       // Der Scheduler initialisiert beim Start sein Hauptprotokoll selbst
+    }
+    else
+    {
+        _log = Z_NEW( Prefix_log( this ) );
+        _log->set_prefix( obj_name() );
+    }
 }
 
 //-----------------------------------------------------------Scheduler_object::mail_xslt_stylesheet

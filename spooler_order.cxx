@@ -183,7 +183,7 @@ void Order_subsystem::add_job_chain( Job_chain* job_chain )
                 {
                     job_chain->add_orders_from_database( &ta );
                 }
-                catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_orders_tablename, x ) ); }
+                catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_orders_tablename, x ), __FUNCTION__ ); }
             }
         }
 
@@ -305,9 +305,36 @@ void Order_subsystem::load_orders_from_database()
                 job_chain->add_orders_from_database( &ta );  // Die Jobketten aus der XML-Konfiguration
             }
         }
-
-        ta.commit( __FUNCTION__ );
     }
+}
+
+//--------------------------------------------------------Order_subsystem::load_order_from_database
+
+ptr<Order> Order_subsystem::load_order_from_database( const string& job_chain_name, Order::Id order_id )
+{
+    ptr<Order> result;
+
+    for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
+    {
+        Any_file result_set = ta.open_result_set
+            ( 
+                S() << "select " << order_select_database_columns << ", `distributed_next_time`"
+                       "  from " << _spooler->_orders_tablename <<
+                       "  where `spooler_id`=" << sql::quoted(_spooler->id_for_db()) <<
+                          " and `job_chain`="  << sql::quoted( job_chain_name ),
+                __FUNCTION__
+            );
+
+        if( result_set.eof() )  z::throw_xc( "SCHEDULER-162", order_id.as_string(), job_chain_name );
+
+        Record record = result_set.get_record();
+        result = new Order( _spooler, record, job_chain_name );
+        if( !record.null( "distributed_next_time" ) )  z::throw_xc( "SCHEDULER-379", result->obj_name(), record.as_string( "distributed_next_time" ) );
+        result->load_blobs( &ta );
+    }
+    catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_orders_tablename, x ), __FUNCTION__ ); }
+
+    return result;
 }
 
 //----------------------------------------------------------Order_subsystem::are_orders_distributed
@@ -432,17 +459,8 @@ bool Database_order_detector::async_continue_( Continue_flags )
                 }
             }
         }
-
-        //if( ta.is_transaction_used() )
-        //{
-        //    bool ok = _spooler->do_a_heart_beat( &ta );
-        //    if( !ok )  log()->error( S() << __FUNCTION__ << "  do_a_heart_beat() return false" );
-        //    int WAS_TUN_BEI_EINEM_INFARKT;
-        //}
-     
-        ta.commit( __FUNCTION__ );
     }
-    catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", x ) ); }
+    catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_orders_tablename, x ), __FUNCTION__ ); }
 
     if( announced_orders_count )  _next_check_period = check_database_orders_period_minimum;
     set_alarm();
@@ -692,12 +710,8 @@ xml::Element_ptr Job_chain_node::dom_element( const xml::Document_ptr& document,
 
         if( _job )
         {
-            if( !_job_chain->_spooler->db()->is_in_transaction() )
-            {
-                element.setAttribute( "orders", order_count( job_chain ) );
-            }
-
-            element.setAttribute( "job", _job->name() );
+            element.setAttribute( "orders", order_count( (Transaction*)NULL, job_chain ) );     // Datenbank wird nicht gezählt
+            element.setAttribute( "job"   , _job->name() );
             
             if( _job->order_queue()->is_order_requested() )
                 element.setAttribute( "is_order_requested", "yes" );
@@ -725,9 +739,9 @@ xml::Element_ptr Job_chain_node::dom_element( const xml::Document_ptr& document,
 
 //----------------------------------------------------------------------Job_chain_node::order_count
 
-int Job_chain_node::order_count( Job_chain* job_chain )
+int Job_chain_node::order_count( Transaction* ta, Job_chain* job_chain )
 {
-    return _job? _job->order_queue()->order_count( job_chain ) : 0;
+    return _job? _job->order_queue()->order_count( ta, job_chain ) : 0;
 }
 
 //-----------------------------------------------------------------------------Job_chain::Job_chain
@@ -792,6 +806,7 @@ void Job_chain::set_dom( const xml::Element_ptr& element )
     if( order_subsystem()->are_orders_distributed() )
     _is_distributed     = element.bool_getAttribute( "distributed"       , _is_distributed     );
 
+    if( _is_distributed  &&  !_orders_recoverable )  z::throw_xc( message_string( "SCHEDULER-380", obj_name() ) );
 
     DOM_FOR_EACH_ELEMENT( element, e )
     {
@@ -844,7 +859,7 @@ xml::Element_ptr Job_chain::dom_element( const xml::Document_ptr& document, cons
     //THREAD_LOCK( _lock )
     {
         element.setAttribute( "name"  , _name );
-        element.setAttribute( "orders", order_count() );
+        element.setAttribute( "orders", order_count( (Transaction*)NULL ) );        // Datenbank wird nicht gezählt
         element.setAttribute( "state" , state_name( state() ) );
         if( !_visible ) element.setAttribute( "visible", _visible );
         element.setAttribute( "orders_recoverable", _orders_recoverable );
@@ -1202,8 +1217,8 @@ void Job_chain::add_orders_from_database( Transaction* ta )
             S() << "select " << order_select_database_columns <<
             "  from " << _spooler->_orders_tablename <<
             "  where `spooler_id`=" << sql::quoted(_spooler->id_for_db()) <<
-              " and `job_chain`="  << sql::quoted(_name) <<
-              " and `distributed_next_time` is null"
+               " and `job_chain`="  << sql::quoted( _name ) <<
+               " and `distributed_next_time` is null"
             "  order by `ordering`",
             __FUNCTION__
         );
@@ -1294,8 +1309,6 @@ ptr<Order> Job_chain::order( const Order::Id& id )
 
 ptr<Order> Job_chain::order_or_null( const Order::Id& order_id )
 {
-    int DATENBANK_LESEN; //??
-
     Order_map::iterator it = _order_map.find( Order::string_id( order_id ) );
     return it != _order_map.end()? it->second : NULL;
 }
@@ -1315,33 +1328,28 @@ bool Job_chain::has_order() const
 
 //---------------------------------------------------------------------------Job_chain::order_count
 
-int Job_chain::order_count()
+int Job_chain::order_count( Transaction* ta )
 {
     int       result = 0;
     set<Job*> jobs;             // Jobs können (theoretisch) doppelt vorkommen, sollen aber nicht doppelt gezählt werden.
 
-    if( _is_distributed )
+    if( _is_distributed && ta )
     {
-        for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
-        {
-            result = ta.open_result_set
-                        (
-                            S() << "select count(*)  from " << _spooler->_orders_tablename <<
-                                   "  where `spooler_id`=" << sql::quoted( _spooler->id_for_db() ) <<
-                                   " and `job_chain`="  << sql::quoted( name() ),
-                            __FUNCTION__
-                        ).get_record().as_int( 0 );
-
-            ta.commit( __FUNCTION__ );
-        }
-        catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", x ) ); }
+        result = ta->open_result_set
+                    (
+                        S() << "select count(*)  from " << _spooler->_orders_tablename <<
+                               "  where `spooler_id`=" << sql::quoted( _spooler->id_for_db() ) <<
+                               " and `job_chain`="  << sql::quoted( name() ),
+                        __FUNCTION__
+                     )
+                 .get_record().as_int( 0 );
     }
     else
     {
         for( Chain::iterator it = _chain.begin(); it != _chain.end(); it++ )
         {
             Job* job = (*it)->_job;
-            if( job  &&  !set_includes( jobs, job ) )  jobs.insert( job ),  result += job->order_queue()->order_count( this );
+            if( job  &&  !set_includes( jobs, job ) )  jobs.insert( job ),  result += job->order_queue()->order_count( (Transaction*)NULL, this );
         }
     }
 
@@ -1496,10 +1504,7 @@ xml::Element_ptr Order_queue::dom_element( const xml::Document_ptr& document, co
 
     //THREAD_LOCK( _lock )
     {
-        if( !_spooler->db()->is_in_transaction() )
-        {
-            element.setAttribute( "length", order_count( which_job_chain ) );
-        }
+        element.setAttribute( "length", order_count( (Transaction*)NULL, which_job_chain ) );   // Datenbank wird nicht gezählt
 
         //if( Time next = next_time() )
         element.setAttribute( "next_start_time", next_time().as_string() );
@@ -1533,35 +1538,34 @@ xml::Element_ptr Order_queue::dom_element( const xml::Document_ptr& document, co
 
 //-------------------------------------------------------------------------Order_queue::order_count
 
-int Order_queue::order_count( const Job_chain* which_job_chain )
+int Order_queue::order_count( Transaction* ta, const Job_chain* which_job_chain )
 {
     int IN_DB_ORDER_COUNT_UMBENNEN;  // Und order_count() nicht mehr auf Datenbank zugreifen lassen! Wenigstens zur Deutlichkeit im Namen für dom_element()
     int result = 0;
 
-    if( order_subsystem()->are_orders_distributed() )
+    if( ta  &&  ( which_job_chain? which_job_chain->_is_distributed : order_subsystem()->are_orders_distributed() ) )
     {
         string w = which_job_chain? make_where_expression_for_job_chain( which_job_chain )
                                   : make_where_expression_for_distributed_orders();
         if( w != "" )
         {
-            for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
-            {
-                int count = ta.open_result_set
-                            (
-                                S() << "select count(*)  from " << _spooler->_orders_tablename <<
-                                       "  where `spooler_id`=" << sql::quoted( _spooler->id_for_db() ) <<
-                                       " and " << w,
-                                __FUNCTION__
-                            ).get_record().as_int( 0 );
+            int count = ta->open_result_set
+                        (
+                            S() << "select count(*)  from " << _spooler->_orders_tablename <<
+                                   "  where `spooler_id`=" << sql::quoted( _spooler->id_for_db() ) <<
+                                   " and " << w,
+                            __FUNCTION__
+                        )
+                        .get_record().as_int( 0 );
 
-                ta.commit( __FUNCTION__ );
-
-                result += count;
-            }
-            catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", x ) ); }
+            result += count;
         }
 
-        FOR_EACH( Queue, _queue, it )  if( !(*it)->_is_in_database  &&  ( !which_job_chain || (*it)->_job_chain == which_job_chain ) )  result++;
+        FOR_EACH( Queue, _queue, it )
+        {
+            Order* order = *it;
+            if( !order->_is_in_database  &&  ( !which_job_chain || order->_job_chain == which_job_chain ) )  result++;
+        }
     }
     else
     {
@@ -1850,7 +1854,7 @@ Order* Order_queue::load_and_occupy_next_distributed_order_from_database( Task* 
                 order = new Order( _spooler, record, record.as_string( "job_chain" ) );
             }
         }
-        catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", x ) ); }
+        catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_orders_tablename, x ), __FUNCTION__ ); }
 
 
         if( order )
@@ -1866,9 +1870,8 @@ Order* Order_queue::load_and_occupy_next_distributed_order_from_database( Task* 
                 for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
                 {
                     order->load_blobs( &ta );
-                    ta.commit( __FUNCTION__ );
                 }
-                catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", x ) ); }
+                catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_orders_tablename, x ), __FUNCTION__ ); }
         
                 order->occupy_for_task( occupying_task, now );
                 job_chain->add_order( order );
@@ -2231,7 +2234,7 @@ bool Order::db_occupy_for_processing()
         update_ok = ta.try_execute_single( update, __FUNCTION__ );
         ta.commit( __FUNCTION__ );
     }
-    catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", x ) ); }
+    catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_orders_tablename, x ), __FUNCTION__ ); }
 
     
     if( update_ok )
@@ -2270,10 +2273,8 @@ void Order::db_show_occupation( Transaction* outer_transaction, Log_level log_le
             Record record = result_set.get_record();
             _log->log( log_level, message_string( "SCHEDULER-813", record.as_string(0) ) );
         }
-
-        ta.commit( __FUNCTION__ );
     }
-    catch( exception& x ) { ta.reopen_database_after_error( z::Xc( "SCHEDULER-306", _spooler->_orders_tablename, x  ) ); }
+    catch( exception& x ) { ta.reopen_database_after_error( z::Xc( "SCHEDULER-306", _spooler->_orders_tablename, x  ), __FUNCTION__ ); }
 }
 
 //---------------------------------------------------------------------------------Order::db_insert
@@ -2331,7 +2332,7 @@ void Order::db_insert()
 
         _is_in_database = true;
     }
-    catch( exception& x ) { ta.reopen_database_after_error( z::Xc( "SCHEDULER-305", _spooler->_orders_tablename, x ) ); }
+    catch( exception& x ) { ta.reopen_database_after_error( z::Xc( "SCHEDULER-305", _spooler->_orders_tablename, x ), __FUNCTION__ ); }
 
     tip_own_job_for_new_order_state();
 }
@@ -2351,17 +2352,18 @@ void Order::db_release_occupation()
             update.and_where_condition( "state"                         , _occupied_state.as_string()     );
 
             bool update_ok = ta.try_execute_single( update, __FUNCTION__ );
+
+            ta.commit( __FUNCTION__ );
+
             if( !update_ok ) 
             {
                 _log->error( message_string( "SCHEDULER-816" ) );
                 db_show_occupation( &ta, log_error );
             }
 
-            ta.commit( __FUNCTION__ );
-
             _is_db_occupied = false; 
         }
-        catch( exception& x ) { ta.reopen_database_after_error( z::Xc( "SCHEDULER-306", _spooler->_orders_tablename, x ) ); }
+        catch( exception& x ) { ta.reopen_database_after_error( z::Xc( "SCHEDULER-306", _spooler->_orders_tablename, x ), __FUNCTION__ ); }
     }
 }
 
@@ -2377,7 +2379,7 @@ void Order::db_update( Update_option update_option )
     else
     if( _is_in_database &&  _spooler->_db->opened() )
     {
-        if( update_option == update_not_occupated  &&  _is_db_occupied )  z::throw_xc( __FUNCTION__, "is_db_occupied" );
+        if( update_option == update_not_occupied  &&  _is_db_occupied )  z::throw_xc( __FUNCTION__, "is_db_occupied" );
 
 
         string           state_string = state().as_string();    // Kann Exception auslösen;
@@ -2407,7 +2409,7 @@ void Order::db_update( Update_option update_option )
 
                 ta.commit( __FUNCTION__ );
             }
-            catch( exception& x ) { ta.reopen_database_after_error( z::Xc( "SCHEDULER-306", _spooler->_orders_tablename, x  ) ); }
+            catch( exception& x ) { ta.reopen_database_after_error( z::Xc( "SCHEDULER-306", _spooler->_orders_tablename, x  ), __FUNCTION__ ); }
 
             _is_in_database = false;  
             _is_db_occupied = false;
@@ -2462,7 +2464,7 @@ void Order::db_update( Update_option update_option )
 
                 ta.commit( __FUNCTION__ );
             }
-            catch( exception& x ) { ta.reopen_database_after_error( z::Xc( "SCHEDULER-306", _spooler->_orders_tablename, x  ) ); }
+            catch( exception& x ) { ta.reopen_database_after_error( z::Xc( "SCHEDULER-306", _spooler->_orders_tablename, x ), __FUNCTION__ ); }
         }
 
         if( update_option == update_and_release_occupation )
@@ -3357,11 +3359,10 @@ void Order::remove_from_job_chain()
 
     if( _job_chain_name != "" )
     {
-        if( _is_in_database )  db_update( update_and_release_occupation );
-
         _log->info( _task? message_string( "SCHEDULER-941", _task->obj_name() ) 
                          : message_string( "SCHEDULER-940" ) );
 
+        if( _is_in_database )  db_update( update_and_release_occupation );
     }
 
     if( _job_chain )  _job_chain->remove_order( this );

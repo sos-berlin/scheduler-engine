@@ -688,7 +688,7 @@ void Directory_file_order_source::send_mail( Scheduler_event_type event_code, co
                 body << Sos_optional_date_time::now().as_string() << "\n";
                 body << "\n";
                 body << _job_chain->obj_name() << "\n";
-                body << "Scheduler -id=" << _spooler->id() << "  host=" << _spooler->_hostname << "\n";
+                body << "Scheduler -id=" << _spooler->id() << "  host=" << _spooler->_complete_hostname << "\n";
                 body << "\n";
                 body << "<file_order_source directory=\"" << _path << "\"/> doesn't work because of following error:\n";
                 body << x->what() << "\n";
@@ -717,7 +717,7 @@ void Directory_file_order_source::send_mail( Scheduler_event_type event_code, co
 
                 S body;
                 body << Sos_optional_date_time::now().as_string() << "\n\n" << _job_chain->obj_name() << "\n";
-                body << "Scheduler -id=" << _spooler->id() << "  host=" << _spooler->_hostname << "\n\n";
+                body << "Scheduler -id=" << _spooler->id() << "  host=" << _spooler->_complete_hostname << "\n\n";
                 body << msg << "\n";
 
                 scheduler_event.mail()->set_body( body );
@@ -738,7 +738,7 @@ void Directory_file_order_source::send_mail( Scheduler_event_type event_code, co
 
                 S body;
                 body << Sos_optional_date_time::now().as_string() << "\n\n" << _job_chain->obj_name() << "\n";
-                body << "Scheduler -id=" << _spooler->id() << "  host=" << _spooler->_hostname << "\n\n";
+                body << "Scheduler -id=" << _spooler->id() << "  host=" << _spooler->_complete_hostname << "\n\n";
                 body << msg << "\n";
 
                 scheduler_event.mail()->set_body( body );

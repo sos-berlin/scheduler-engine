@@ -539,6 +539,7 @@ Spooler::Spooler()
     _wait_handles(this),
     _module(this,_log),
     _log_level( log_info ),
+    _db_log_level( log_none ),
     _factory_ini( default_factory_ini ),
     _mail_defaults(NULL),
     _termination_gmtimeout_at(no_termination_timeout),
@@ -637,7 +638,7 @@ string Spooler::name() const
     S result;
     
     result << "Scheduler ";
-    result << _hostname;
+    result << _complete_hostname;
     if( _tcp_port )  result << ":" << _tcp_port;
 
     if( _spooler_id != "" )  result << " -id=" << _spooler_id;
@@ -672,8 +673,19 @@ void Spooler::set_id( const string& id )
 
 string Spooler::http_url() const
 {
-    if( _tcp_port )  return S() << "http://" << _hostname << ":" << _tcp_port;
-               else  return "";
+    S result;
+
+    if( _tcp_port )  
+    {
+        result << "http://";
+
+        if( _ip_address_as_option_set )  result << _ip_address.name();
+        else result << _complete_hostname;
+
+        result << ":" << _tcp_port;
+    }
+
+    return result;
 }
 
 //-----------------------------------------------------------------------Spooler::state_dom_element
@@ -691,7 +703,7 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
     state_element.setAttribute( "version"              , VER_PRODUCTVERSION_STR );
     state_element.setAttribute( "pid"                  , _pid );
     state_element.setAttribute( "config_file"          , _config_filename );
-    state_element.setAttribute( "host"                 , _hostname );
+    state_element.setAttribute( "host"                 , _short_hostname );
 
   //if( _need_db )
   //state_element.setAttribute( "need_db"              , _need_db == need_db_yes? "yes" 
@@ -1753,6 +1765,7 @@ void Spooler::load_arg()
     _order_history_with_log     =            read_profile_with_log  ( _factory_ini, "spooler", "order_history_with_log", arc_no );
     _db_name                    =            read_profile_string    ( _factory_ini, "spooler", "db"                 );
     _db_check_integrity         =            read_profile_bool      ( _factory_ini, "spooler", "db_check_integrity" , _db_check_integrity );
+    _db_log_level               = make_log_level(read_profile_string( _factory_ini ,"spooler", "db_log_level"       , as_string( _db_log_level ) ) );
 
     // need_db=yes|no|strict
     string need_db_str          =            read_profile_string    ( _factory_ini, "spooler", "need_db"            , "no"                );
@@ -1871,7 +1884,7 @@ void Spooler::load_arg()
             else
             if( opt.with_value( "udp-port"         ) )  _udp_port = opt.as_int(),  _udp_port_as_option_set = true;
             else
-            if( opt.with_value( "ip-address"       ) )  _ip_address = opt.value(),  _ip_address_as_option_set = true;
+            if( opt.with_value( "ip-address"       ) )  _ip_address = opt.value(),  _ip_address.resolve_name(),  _ip_address_as_option_set = true;
             else
             if( opt.flag      ( "ignore-process-classes" ) )  _ignore_process_classes = opt.set();
             else
@@ -2038,7 +2051,9 @@ void Spooler::load()
 
     char hostname[200];  // Nach _communication.init() und nach _prefix_log.init()!
     if( gethostname( hostname, sizeof hostname ) == SOCKET_ERROR )  hostname[0] = '\0',  _log->warn( "gethostname(): " + z_strerror( errno ) );
-    _hostname = hostname;
+    _short_hostname = hostname;
+    _complete_hostname = complete_computer_name();
+    
 
 
     // Die erste Prozessklasse ist die Klasse für temporäre Prozesse
@@ -2271,13 +2286,13 @@ void Spooler::start()
     _base_log.set_directory( _log_directory );
     _base_log.open_new();
     
-    {
-        S s;
-        s << "scheduler";
-        if( _spooler_id != "" )  s << _spooler_id;
-        s << "." << _hostname << "." << _tcp_port << "." << getpid() << "." << string_printf( "%-.6lf", double_from_gmtime() );
-        _session_id = s;
-    }
+    //{
+    //    S s;
+    //    s << "scheduler";
+    //    if( _spooler_id != "" )  s << _spooler_id;
+    //    s << "." << _short_hostname << "." << _tcp_port << "." << getpid() << "." << string_printf( "%-.6lf", double_from_gmtime() );
+    //    _session_id = s;
+    //}
 
     _log->info( message_string( "SCHEDULER-900", _version, _config_filename, getpid() ) );
     _spooler_start_time = Time::now();
@@ -3421,9 +3436,9 @@ void Spooler::cmd_terminate( bool restart, int timeout, bool shutdown, bool term
 
     _state_cmd                = restart? sc_terminate_and_restart : sc_terminate;
     _termination_gmtimeout_at = timeout < 999999999? ::time(NULL) + timeout : no_termination_timeout;
-    _terminate_shutdown       = shutdown;
     _terminate_all_schedulers = terminate_all_schedulers;
 
+    if( shutdown  &&  _distributed_scheduler  )  _distributed_scheduler->mark_begin_of_shutdown();
     /*
     if( all_schedulers && _distributed_scheduler )
     {
@@ -3587,7 +3602,7 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line )
 
         // Nachdem argv und profile gelesen sind, und config geladen ist:
 
-        _mail_defaults.set( "from_name", name() );      // Jetzt sind _hostname und _tcp_port bekannt
+        _mail_defaults.set( "from_name", name() );      // Jetzt sind _complete_hostname und _tcp_port bekannt
         _log->init( this );                              // Neue Einstellungen übernehmen: Default für from_name
 
 
@@ -3679,7 +3694,7 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line )
 
 
     _log->info( message_string( _terminate_shutdown? "SCHEDULER-999"         // "Scheduler ordentlich beendet"
-                                                  : "SCHEDULER-998" ) );    // "Scheduler exits"
+                                                   : "SCHEDULER-998" ) );    // "Scheduler exits"
                                //_scheduler_is_up           ? "SCHEDULER-998"       // "This Scheduler exits. An inactive Scheduler can become active and resume operation"
                                //                           : "SCHEDULER-997" ) );  // "Scheduler exits"
     //_log->info( "Scheduler ordentlich beendet." );

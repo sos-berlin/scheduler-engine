@@ -877,7 +877,7 @@ void Job::Task_queue::enqueue_task( const ptr<Task>& task )
         }
         catch( exception& x )
         {
-            _spooler->_db->try_reopen_after_error( x );
+            _spooler->_db->try_reopen_after_error( x, __FUNCTION__ );
         }
     }
 
@@ -911,7 +911,7 @@ void Job::Task_queue::remove_task_from_db( int task_id )
         }
         catch( exception& x )
         {
-            _spooler->_db->try_reopen_after_error( x );
+            _spooler->_db->try_reopen_after_error( x, __FUNCTION__ );
         }
     }
 }

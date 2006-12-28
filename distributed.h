@@ -43,6 +43,7 @@ struct Distributed_scheduler : Async_operation, Scheduler_object
 
     void                        close                       ();
     void                        shutdown                    ();                                     // Ordentliches Herunterfahren des Schedulers
+    void                        mark_begin_of_shutdown      ();
 
     void                        demand_exclusiveness        ( bool b = true )                       { assert( !_current_operation );  _demand_exclusiveness = b; }
     void                    set_backup                      ( bool b = true )                       { assert( !_current_operation );  _is_backup = b; }

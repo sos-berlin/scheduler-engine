@@ -3465,7 +3465,7 @@ STDMETHODIMP Com_spooler::get_Hostname( BSTR* result )
     {
         if( !_spooler )  return E_POINTER;
 
-        hr = String_to_bstr( _spooler->_hostname, result );
+        hr = String_to_bstr( _spooler->_short_hostname, result );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.get_hostname" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.get_hostname" ); }
@@ -3905,10 +3905,14 @@ STDMETHODIMP Com_job_chain::get_Order_count( int* result )
     {
         if( !_job_chain )  return E_POINTER;
 
-        *result = _job_chain->order_count();
+        for( Retry_transaction ta ( _job_chain->db() ); ta.enter_loop(); ta++ ) try
+        {
+            *result = _job_chain->order_count( &ta );
+        }
+        catch( exception& x ) { ta.reopen_database_after_error( x, __FUNCTION__ ); }
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Job_chain.order_count" ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Job_chain.order_count" ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
 
     return hr;
 }
@@ -5180,7 +5184,13 @@ STDMETHODIMP Com_order_queue::get_Length( int* result )
 {
     THREAD_LOCK( _lock )
     {
-        *result = dynamic_cast<Order_queue*>(this)->order_count();
+        Order_queue* order_queue = dynamic_cast<Order_queue*>( this );
+
+        for( Retry_transaction ta ( order_queue->_spooler->db() ); ta.enter_loop(); ta++ ) try
+        {
+            *result = order_queue->order_count( &ta );
+        }
+        catch( exception& x ) { ta.reopen_database_after_error( x, __FUNCTION__ ); }
     }
 
     return S_OK;

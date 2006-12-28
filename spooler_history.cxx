@@ -262,12 +262,12 @@ Any_file Transaction::open_file_2( const string& db_prefix, const string& execut
     {
         result.open( db_prefix + " " + execution_sql );
 
-        if( _db->_log->is_enabled_log_level( log_debug9 ) )     // Hostware protokolliert schon ins scheduler.log
+        if( _db->_log->is_enabled_log_level( _spooler->_db_log_level ) )     // Hostware protokolliert schon ins scheduler.log
         {
             S line;
             line << logging_sql << debug_extra;
             if( _db->_db.record_count() >= 0 )  line << "  ==> " << _db->_db.record_count() << " records";
-            _db->_log->debug9( line );
+            _db->_log->log( _spooler->_db_log_level, line );
         }
     }
     catch( exception& x )
@@ -288,7 +288,7 @@ Any_file Transaction::open_file_2( const string& db_prefix, const string& execut
 
 //---------------------------------------------------Retry_transaction::reopen_database_after_error
 
-void Retry_transaction::reopen_database_after_error( const exception& x )
+void Retry_transaction::reopen_database_after_error( const exception& x, const string& function )
 { 
     if( _outer_transaction )  throw;    // Wenn's eine ‰uﬂere Transaktion gibt, dann die Schleife dort wiederholen
 
@@ -298,12 +298,12 @@ void Retry_transaction::reopen_database_after_error( const exception& x )
 
     try
     {
-        rollback( __FUNCTION__ );
+        rollback( S() << __FUNCTION__ << ", " << function );
     }
     catch( exception& x )  { Z_LOG2( "scheduler", __FUNCTION__ << "  " << x.what() << "\n" ); }
     assert( !db->is_in_transaction() );
 
-    _database_retry.reopen_database_after_error( x );
+    _database_retry.reopen_database_after_error( x, function );
 
     begin_transaction( db );
 }
@@ -324,12 +324,12 @@ void Retry_transaction::operator++(int)
 
 //------------------------------------------------------Database_retry::reopen_database_after_error
 
-void Database_retry::reopen_database_after_error( const exception& x )
+void Database_retry::reopen_database_after_error( const exception& x, const string& function )
 { 
     assert( _db );
     assert( !_db->is_in_transaction() );
 
-    _db->try_reopen_after_error( x ); 
+    _db->try_reopen_after_error( x, function ); 
 
     repeat_loop(); 
 }
@@ -370,7 +370,7 @@ void Database::open( const string& db_name )
     {
         if( !_spooler->_wait_endless_for_db_open )  throw;
         
-        try_reopen_after_error( x, true );
+        try_reopen_after_error( x, __FUNCTION__, true );
     }
 
     if( _db_name != "" )  create_tables_when_needed();
@@ -824,7 +824,7 @@ void Database::open_history_table( Transaction* ta )
 
 //-----------------------------------------------------------------Database::try_reopen_after_error
 
-void Database::try_reopen_after_error( const exception& callers_exception, bool wait_endless )
+void Database::try_reopen_after_error( const exception& callers_exception, const string& function, bool wait_endless )
 {
     bool    too_much_errors = false;
     string  warn_msg;
@@ -838,7 +838,7 @@ void Database::try_reopen_after_error( const exception& callers_exception, bool 
     {
         THREAD_LOCK( _error_lock )  _error = callers_exception.what();
 
-        _spooler->log()->error( message_string( "SCHEDULER-303", callers_exception ) );
+        _spooler->log()->error( message_string( "SCHEDULER-303", callers_exception, function ) );
 
         if( _db.opened() )  _spooler->log()->info( message_string( "SCHEDULER-957" ) );   // "Datenbank wird geschlossen"
         try
@@ -1011,7 +1011,7 @@ int Database::get_id( const string& variable_name, Transaction* outer_transactio
             catch( exception& x )
             {
                 if( outer_transaction )  throw;         // Fehlerschleife in der rufenden Routine, um Transaktion und damit _lock freizugeben!
-                try_reopen_after_error( x );
+                try_reopen_after_error( x, __FUNCTION__ );
             }
         }
     }
@@ -1186,7 +1186,7 @@ void Transaction::execute( const string& stmt, const string& debug_text, bool fo
     {
         string debug_extra;
         if( debug_text != "" )  debug_extra = "  (" + debug_text + ")";
-        if( !_log->is_enabled_log_level( log_debug9 ) )  Z_LOG2( "scheduler", __FUNCTION__ << "  " << stmt << debug_extra << "\n" );
+        if( !_log->is_enabled_log_level( _spooler->_db_log_level ) )  Z_LOG2( "scheduler", __FUNCTION__ << "  " << stmt << debug_extra << "\n" );
 
         string native_sql = db()->_db.sos_database_session()->translate_sql( stmt );
 
@@ -1216,13 +1216,13 @@ void Transaction::execute( const string& stmt, const string& debug_text, bool fo
             throw;
         }
 
-        if( _log->is_enabled_log_level( log_debug9 ) )      // Hostware protokolliert schon ins scheduler.log
+        if( _log->is_enabled_log_level( _spooler->_db_log_level ) )      // Hostware protokolliert schon ins scheduler.log
         {
             S line;
             line << native_sql;
             line << debug_extra;
             if( record_count() >= 0 )  line << "  ==> " << record_count() << " records";
-            _log->debug9( line );
+            _log->log( _spooler->_db_log_level, line );
         }
     }
 }
@@ -1424,7 +1424,7 @@ void Database::write_order_history( Order* order, Transaction* outer_transaction
         catch( exception& x )  
         { 
             if( outer_transaction )  throw;
-            try_reopen_after_error( x );
+            try_reopen_after_error( x, __FUNCTION__ );
         }
     }
 }
@@ -2001,7 +2001,7 @@ void Task_history::write( bool start )
         }
         catch( exception& x )
         {
-            _spooler->_db->try_reopen_after_error( x );
+            _spooler->_db->try_reopen_after_error( x, __FUNCTION__ );
         }
     }
 
