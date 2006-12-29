@@ -1227,7 +1227,7 @@
                     <xsl:element name="td">
                         <xsl:attribute name="style">
                             white-space: nowrap;
-                            <xsl:if test="@task">font-weight: bold;</xsl:if>
+                            <xsl:if test="@task or @occupied_by_scheduler_member_id">font-weight: bold;</xsl:if>
                         </xsl:attribute>
 
                         <!--xsl:if test="@replacement">
@@ -1255,7 +1255,7 @@
                     <xsl:element name="td">
                         <xsl:attribute name="align">left</xsl:attribute>
                         <xsl:attribute name="style">
-                            <xsl:if test="@task">font-weight: bold;</xsl:if>
+                            <xsl:if test="@task or @occupied_by_scheduler_member_id">font-weight: bold;</xsl:if>
                             <xsl:text>padding-left: 2ex;</xsl:text>
                             <xsl:value-of select="$order_style"/>
                         </xsl:attribute>
@@ -1290,10 +1290,10 @@
                         </xsl:if>
                     </xsl:element>
 
-                    <td>
+                    <td style="text-align: right">
                         <xsl:choose>
                             <xsl:when test="@task">
-                                <span class="task" style="white-space: nowrap; font-weight: bold">
+                                <span class="task" style="white-space: nowrap; font-size: 8pt;">
                                     Task <xsl:value-of select="@task"/>
                                 </span>
                             </xsl:when>
@@ -2319,7 +2319,7 @@
 
     </xsl:template>
 
-    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_url-->
+    <!--~scheduler_url-->
     <!-- Hängt /z/ an die Scheduler-Url, wenn die eigene diesen Suffix hat -->
     
     <xsl:template name="scheduler_url">
@@ -2336,7 +2336,7 @@
         
     </xsl:template>
 
-    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~translate_target-->
+    <!--~translate_target-->
     <!-- Für <a target="..."/> -->
     
     <xsl:template name="translate_target">
@@ -2344,7 +2344,7 @@
         <xsl:value-of select="translate( $target, ':/.-', '____' )" />
     </xsl:template>
 
-    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~command_menu-->
+    <!--~command_menu-->
 
     <xsl:template name="command_menu">
         <xsl:param name="onclick"/>
@@ -2474,6 +2474,3 @@
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 </xsl:stylesheet>
-
-<!-- Das ist ein Gedankenstrich: – -->
-<!-- Das ist drei Punkte: … -->

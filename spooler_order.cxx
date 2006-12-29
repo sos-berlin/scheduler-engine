@@ -1582,7 +1582,7 @@ xml::Element_ptr Order_queue::dom_element( const xml::Document_ptr& document, co
                 string w = db_where_expression_for_distributed_orders();
                 if( w != "" )
                 {
-                    element.append_new_comment( "From database:" );
+                    element.append_new_comment( "In database only:" );
                     dom_append_nl( element );
 
                     S select_sql;
