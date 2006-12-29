@@ -77,6 +77,9 @@ struct Distributed_scheduler : Async_operation, Scheduler_object
     void                        set_command_for_all_inactive_schedulers_but_me( Transaction*, Command );
     void                        set_command_for_all_schedulers_but_me( Transaction*, Command );
 
+    string                      http_url_of_member_id       ( const string& scheduler_member_id );
+    Scheduler_member*           scheduler_member_or_null    ( const string& scheduler_member_id );
+
   //string                      scheduler_up_variable_name  ();
     void                        check_member_id             ();
     bool                        check_schedulers_heart_beat ();

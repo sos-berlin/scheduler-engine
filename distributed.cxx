@@ -57,6 +57,7 @@ struct Scheduler_member : Object, Scheduler_object
     time_t                     _last_heart_beat_db;
     time_t                     _next_heart_beat_db;
     time_t                     _last_heart_beat_detected;
+    string                     _http_url;
     bool                       _scheduler_993_logged;
     Distributed_scheduler*     _distributed_scheduler;
     //time_t                     _clock_difference;
@@ -167,6 +168,7 @@ bool Scheduler_member::check_heart_beat( time_t now_before_select, const Record&
     _is_exclusive           = !record.null    ( "exclusive" );
     _is_active              = !record.null    ( "active"    );
     _deactivating_member_id = record.as_string( "deactivating_member_id" );
+    _http_url               = record.as_string( "http_url"  );
 
     if( !is_empty_member() )
     {
@@ -1468,11 +1470,13 @@ bool Distributed_scheduler::check_my_member_record( Transaction* outer_transacti
 
     if( !ok )
     {
+        _is_in_error = true;
+
         check_heart_beat_is_in_time( _next_heart_beat );      // Vielleicht haben wir uns verspätet? (Setzt _late_heart_beat)
 
         if( deactivating_member_id == "" )  deactivating_member_id = "(unknown)";
         
-        if( _is_exclusiveness_lost )  _log->error( message_string( _late_heart_beat? "SCHEDULER-377" : "SCHEDULER-372" ) );     // "SOME OTHER SCHEDULER HAS STOLEN EXCLUSIVENESS"
+        if( _is_exclusiveness_lost )  _log->error( message_string( _late_heart_beat? "SCHEDULER-377" : "SCHEDULER-372", deactivating_member_id ) );     // "SOME OTHER SCHEDULER HAS STOLEN EXCLUSIVENESS"
         _log->error( message_string( _late_heart_beat? "SCHEDULER-378" : "SCHEDULER-373", deactivating_member_id ) );   
     }
 
@@ -1593,7 +1597,7 @@ bool Distributed_scheduler::check_schedulers_heart_beat()
     for( Retry_transaction ta ( db() ); ta.enter_loop(); ta++ ) try
     {
         Any_file result_set = ta.open_result_set( S() << 
-                     "select `scheduler_member_id`, `last_heart_beat`, `next_heart_beat`, `exclusive`, `active`, `deactivating_member_id` "
+                     "select `scheduler_member_id`, `last_heart_beat`, `next_heart_beat`, `exclusive`, `active`, `deactivating_member_id`, `http_url` "
                       " from " << _spooler->_members_tablename << 
                      "  where `scheduler_id`=" << sql::quoted( _spooler->id_for_db() ),
                         //" and `active` is not null",
@@ -2126,14 +2130,6 @@ bool Distributed_scheduler::is_scheduler_up()
        //&&  empty_scheduler_record()->_is_active;        // Siehe mark_begin_of_shutdown()
 }
 
-//----------------------------------------------------Distributed_scheduler::empty_scheduler_record
-
-Scheduler_member* Distributed_scheduler::empty_scheduler_record()
-{
-    Scheduler_map::iterator it = _scheduler_map.find( empty_member_id() );
-    return it != _scheduler_map.end()? it->second : NULL;
-}
-
 //-----------------------------------------------------------Distributed_scheduler::check_member_id
 
 void Distributed_scheduler::check_member_id()
@@ -2150,6 +2146,35 @@ void Distributed_scheduler::make_scheduler_member_id()
                           << "/" << _spooler->_complete_hostname << ":" << _spooler->tcp_port() 
                           << "/" << getpid() 
                           << "." << ( as_string( 1000000 + (uint64)( double_from_gmtime() * 1000000 ) % 1000000 ).substr( 1 ) ) );  // Mikrosekunden, sechsstellig
+}
+
+//----------------------------------------------------Distributed_scheduler::empty_scheduler_record
+
+Scheduler_member* Distributed_scheduler::empty_scheduler_record()
+{
+    return scheduler_member_or_null( empty_member_id() );
+}
+
+//-----------------------------------------------------Distributed_scheduler::http_url_of_member_id
+
+string Distributed_scheduler::http_url_of_member_id( const string& scheduler_member_id )
+{
+    string result;
+
+    if( Scheduler_member* scheduler_member = scheduler_member_or_null( scheduler_member_id ) )
+    {
+        result = scheduler_member->_http_url;
+    }
+
+    return result;
+}
+
+//--------------------------------------------------Distributed_scheduler::scheduler_member_or_null
+
+Scheduler_member* Distributed_scheduler::scheduler_member_or_null( const string& scheduler_member_id )
+{
+    Scheduler_map::iterator it = _scheduler_map.find( scheduler_member_id );
+    return it != _scheduler_map.end()? it->second : NULL;
 }
 
 //------------------------------------------------------------------Distributed_scheduler::obj_name

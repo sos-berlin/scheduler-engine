@@ -1196,9 +1196,9 @@
         <xsl:if test="@length > count( $limited_orders )">
             <xsl:variable name="remaining" select="@length - count( $limited_orders )"/>
             <span style="margin-left: 2ex; font-size: 8pt">
-                <xsl:text>(about </xsl:text>
+                <xsl:text>(</xsl:text>
                 <xsl:value-of select="$remaining"/>
-                <xsl:text> more orders)</xsl:text>
+                <xsl:text> other orders)</xsl:text>
             </span>
         </xsl:if>
 
@@ -1295,15 +1295,49 @@
                             <xsl:when test="@task">
                                 <span class="task" style="white-space: nowrap; font-weight: bold">
                                     Task <xsl:value-of select="@task"/>
-                                    &#160;
                                 </span>
                             </xsl:when>
+
                             <xsl:when test="@occupied_by_scheduler_member_id">
-                                <span class="remote_scheduler" style="white-space: nowrap; font-size: 8pt">
-                                    Scheduler <xsl:value-of select="@occupied_by_scheduler_member_id"/>
-                                    &#160;
-                                </span>
+                                <xsl:element name="span">
+                                    <xsl:attribute name="class">remote_scheduler</xsl:attribute>
+                                    <xsl:attribute name="style">white-space: nowrap; font-size: 8pt;</xsl:attribute>
+                                    <xsl:attribute name="title">
+                                        <xsl:text>Order is processed by Scheduler member </xsl:text>
+                                        <xsl:value-of select="@occupied_by_scheduler_member_id"/>
+                                    </xsl:attribute>
+
+                                    <xsl:choose>
+                                        <xsl:when test="@occupied_by_http_url">
+                                            <xsl:element name="a">
+                                                <xsl:attribute name="class">remote_scheduler</xsl:attribute>
+                                                <xsl:attribute name="href">
+                                                    <xsl:call-template name="scheduler_url">
+                                                        <xsl:with-param name="url" select="@occupied_by_http_url"/>
+                                                    </xsl:call-template>
+                                                </xsl:attribute>
+                                                <xsl:attribute name="target">
+                                                    <xsl:call-template name="translate_target">
+                                                        <xsl:with-param name="target" select="@occupied_by_http_url"/>
+                                                    </xsl:call-template>
+                                                </xsl:attribute>
+                                                <xsl:choose>
+                                                    <xsl:when test="contains( @occupied_by_http_url, 'http://' )">
+                                                        <xsl:value-of select="substring-after( @occupied_by_http_url, 'http://' )"/>
+                                                    </xsl:when>
+                                                    <xsl:otherwise>
+                                                        <xsl:value-of select="@occupied_by_scheduler_member_id"/>
+                                                    </xsl:otherwise>
+                                                </xsl:choose>
+                                            </xsl:element>
+                                        </xsl:when>
+                                        <xsl:otherwise>
+                                            <xsl:value-of select="@occupied_by_scheduler_member_id"/>
+                                        </xsl:otherwise>
+                                    </xsl:choose>
+                                </xsl:element>
                             </xsl:when>
+
                             <xsl:otherwise>
                                 <xsl:if test="@next_start_time">
                                     <span class="small" style="white-space: nowrap">
@@ -1446,7 +1480,13 @@
                         </xsl:attribute>
                         <xsl:attribute name="title"><xsl:value-of select="$url"/></xsl:attribute>
                         <xsl:attribute name="onclick">
-                            window.open( "<xsl:value-of select="$url"/>", "<xsl:value-of select="translate( $url, ':/.-', '____' )" />" )
+                            <xsl:text>window.open( "</xsl:text>
+                            <xsl:value-of select="$url"/>
+                            <xsl:text>", "</xsl:text>
+                            <xsl:call-template name="translate_target">
+                                <xsl:with-param name="target" select="$url"/>
+                            </xsl:call-template>
+                            <xsl:text>" )</xsl:text>
                         </xsl:attribute>
                         <xsl:attribute name="onmouseover">this.original_class_name = this.className;  this.className='remote_scheduler_hover'</xsl:attribute>
                         <xsl:attribute name="onmouseout" >this.className=this.original_class_name </xsl:attribute>
@@ -2277,6 +2317,31 @@
             <xsl:text> &#160; </xsl:text>
         </xsl:if>
 
+    </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_url-->
+    <!-- Hängt /z/ an die Scheduler-Url, wenn die eigene diesen Suffix hat -->
+    
+    <xsl:template name="scheduler_url">
+        <xsl:param name="url"/>
+
+        <xsl:choose>
+            <xsl:when test="substring( /spooler/@my_url_base, string-length( /spooler/@my_url_base ) - 2 ) = '/z/'">
+                <xsl:value-of select="concat( $url, '/z/' )"/>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:value-of select="$url"/>
+            </xsl:otherwise>
+        </xsl:choose>
+        
+    </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~translate_target-->
+    <!-- Für <a target="..."/> -->
+    
+    <xsl:template name="translate_target">
+        <xsl:param name="target"/>
+        <xsl:value-of select="translate( $target, ':/.-', '____' )" />
     </xsl:template>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~command_menu-->

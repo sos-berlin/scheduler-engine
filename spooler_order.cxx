@@ -1200,7 +1200,7 @@ void Job_chain::remove_order( Order* order )
 
     if( order->_is_db_occupied )  
     {
-        assert( order->_task );
+        //assert( order->_task );
         //order->db_release_occupation();
     }
 
@@ -1602,14 +1602,22 @@ xml::Element_ptr Order_queue::dom_element( const xml::Document_ptr& document, co
 
                         try
                         {
-                            ptr<Order> order = new Order( _spooler, record, record.as_string( "job_chain" ) );
+                            string job_chain_name                = record.as_string( "job_chain" );
+                            string occupying_scheduler_member_id = record.as_string( "occupying_scheduler_member_id" );
+
+                            ptr<Order> order = new Order( _spooler, record, job_chain_name );
 
                             order->load_order_xml_blob( &ta );
                             if( show.is_set( show_payload  ) )  order->load_payload_blob( &ta );
                             if( show.is_set( show_run_time ) )  order->load_run_time_blob( &ta );
 
+
                             xml::Element_ptr order_element = order->dom_element( document, show );
-                            order_element.setAttribute_optional( "occupied_by_scheduler_member_id", record.as_string( "occupying_scheduler_member_id" ) );
+
+                            order_element.setAttribute_optional( "occupied_by_scheduler_member_id", occupying_scheduler_member_id );
+                            
+                            if( _spooler->_distributed_scheduler )
+                            order_element.setAttribute_optional( "occupied_by_http_url", _spooler->_distributed_scheduler->http_url_of_member_id( occupying_scheduler_member_id ) );
                             
                             element.appendChild( order_element );
                             dom_append_nl( element );
