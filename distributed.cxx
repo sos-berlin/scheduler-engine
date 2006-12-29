@@ -1801,7 +1801,7 @@ void Distributed_scheduler::assert_database_integrity( const string& message_tex
             {
                 case 1: exclusive_count = record.as_int( 1 );  break;
                 case 2: empty_count     = record.as_int( 1 );  break;
-                default: assert((__FUNCTION__,0));
+                default: assert(__FUNCTION__==NULL);
             }
         }
 
