@@ -2340,7 +2340,7 @@
 
         <message code="SCHEDULER-373">
             <text xml:lang="en">
-                <title>ACTIVE HAS BEEN STOLEN BY SCHEDULER MEMBER <p1/></title>
+                <title>UNEXPECTED DEACTIVATION BY SCHEDULER MEMBER <p1/></title>
             </text>
         </message>
 

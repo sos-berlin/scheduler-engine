@@ -42,6 +42,9 @@ struct Order : Com_order,
   //Prefix_log*                 log                     ()                                          { return _log; }
     void                        print_xml_child_elements_for_event( String_stream*, Scheduler_event* );
     void                        load_blobs              ( Transaction* );
+    void                        load_order_xml_blob     ( Transaction* );
+    void                        load_run_time_blob      ( Transaction* );
+    void                        load_payload_blob       ( Transaction* );
 
     void                        init                    ();
     bool                        occupy_for_task         ( Task*, const Time& now );
@@ -397,7 +400,7 @@ struct Job_chain : Com_job_chain, Scheduler_object
     ptr<Order>                  order                   ( const Order::Id& id );
     ptr<Order>                  order_or_null           ( const Order::Id& id );
 
-    bool                        has_order_id            ( const Order::Id& );
+    bool                        has_order_id            ( Transaction*, const Order::Id& );
     void                        register_order          ( Order* );                                 // Um doppelte Auftragskennungen zu entdecken: Fehler SCHEDULER-186
     void                        unregister_order        ( Order* );
     void                        add_to_blacklist        ( Order* );
@@ -405,6 +408,8 @@ struct Job_chain : Com_job_chain, Scheduler_object
 
     int                         order_count             ( Transaction* );
     bool                        has_order               () const;
+
+    string                      db_where_clause         () const;
 
     void                    set_dom                     ( const xml::Element_ptr& );
     xml::Element_ptr            dom_element             ( const xml::Document_ptr&, const Show_what& );
@@ -490,8 +495,8 @@ struct Order_queue : Com_order_queue
   //ptr<Order>                  order_or_null           ( const Order::Id& );
     Job*                        job                     () const                                    { return _job; }
     xml::Element_ptr            dom_element             ( const xml::Document_ptr&, const Show_what& , Job_chain* );
-    string                      make_where_expression_for_distributed_orders();
-    string                      make_where_expression_for_job_chain( const Job_chain* );
+    string                      db_where_expression_for_distributed_orders();
+    string                      db_where_expression_for_job_chain( const Job_chain* );
 
     Order_subsystem*            order_subsystem         () const;
 
@@ -542,6 +547,8 @@ struct Order_subsystem : Object, Scheduler_object
     void                        request_order               ();
     bool                        is_job_in_any_job_chain     ( Job* );
     bool                        is_job_in_any_distributed_job_chain( Job* );
+    string                      job_chain_db_where_clause   ( const string& job_chain_name );
+    string                      order_db_where_clause       ( const string& job_chain_name, const string& order_id );
 
 //private:
     Fill_zero                  _zero_;

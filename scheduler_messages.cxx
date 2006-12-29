@@ -240,7 +240,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-370", "Operation can only be performed on a distributed Scheduler" },
     { "SCHEDULER-371", "DATABASE INTEGRITY IS BROKEN" },
     { "SCHEDULER-372", "EXCLUSIVENESS HAS BEEN STOLEN BY SCHEDULER MEMBER $1" },
-    { "SCHEDULER-373", "ACTIVE HAS BEEN STOLEN BY SCHEDULER MEMBER $1" },
+    { "SCHEDULER-373", "UNEXPECTED DEACTIVATION BY SCHEDULER MEMBER $1" },
     { "SCHEDULER-374", "In $1, state '$2' has no job" },
     { "SCHEDULER-375", "Order is distributed and therefore does not support operation '$1'" },
     { "SCHEDULER-376", "A distributed, not exclusive Scheduler enables only order controlled jobs" },

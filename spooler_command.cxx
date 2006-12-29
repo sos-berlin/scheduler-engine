@@ -643,7 +643,7 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
     //    update.and_where_condition( "spooler_id", _spooler->id_for_db() );
     //    update.and_where_condition( "job_chain" , job_chain_name        );
     //    update.and_where_condition( "id"        , id().as_string()      );
-    //    update.and_where_condition( "processing_scheduler_member_id", sql::null_value );
+    //    update.and_where_condition( "occupying_scheduler_member_id", sql::null_value );
 
     //    if( priority != "" )  update[ "priority" ] = as_int( priority );
     //    if( state    != "" )  update[ "state"    ] = state;
@@ -721,10 +721,10 @@ xml::Element_ptr Command_processor::execute_remove_order( const xml::Element_ptr
         {
             sql::Delete_stmt delete_stmt ( _spooler->database_descriptor(), _spooler->_orders_tablename );
 
-            delete_stmt.and_where_condition( "spooler_id", _spooler->id_for_db() );
-            delete_stmt.and_where_condition( "job_chain" , job_chain_name        );
-            delete_stmt.and_where_condition( "id"        , id.as_string()        );
-            delete_stmt.and_where_condition( "processing_scheduler_member_id", sql::null_value );
+            delete_stmt.and_where_condition( "spooler_id"                   , _spooler->id_for_db() );
+            delete_stmt.and_where_condition( "job_chain"                    , job_chain_name        );
+            delete_stmt.and_where_condition( "id"                           , id.as_string()        );
+            delete_stmt.and_where_condition( "occupying_scheduler_member_id", sql::null_value );
             
             ta.execute( delete_stmt, __FUNCTION__ );
             

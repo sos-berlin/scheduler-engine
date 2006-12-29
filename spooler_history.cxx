@@ -106,7 +106,7 @@ Transaction::Transaction( Database* db, Transaction* outer_transaction )
 
         if( db->_transaction )
         {
-            Z_DEBUG_ONLY( Z_WINDOWS_ONLY( DebugBreak() ) );
+            Z_DEBUG_ONLY( Z_WINDOWS_ONLY( assert( "NESTED TRANSACTION"==NULL ) ) );
             z::throw_xc( "NESTED_TRANSACTION", __FUNCTION__ );
         }
     }
@@ -470,9 +470,8 @@ void Database::create_tables_when_needed()
                             "\"JOB_CHAIN\""    " varchar(100) not null,"        // Primärschlüssel
                             "\"ID\""           " varchar(" << const_order_id_length_max << ") not null,"        // Primärschlüssel
                             "\"SPOOLER_ID\""   " varchar(100),"                         // Index bei mehreren Scheduler-Ids
-                            "\"DISTRIBUTED_NEXT_TIME\"" " datetime,"                 // Auftrag ist verteilt ausführbar
-                          //"\"PROCESSABLE\"" "boolean not null,"                     // Index
-                            "\"PROCESSING_SCHEDULER_MEMBER_ID\"" "varchar(100),"      // Index
+                            "`distributed_next_time`" " datetime,"                 // Auftrag ist verteilt ausführbar
+                            "`occupying_scheduler_member_id`" "varchar(100),"      // Index
                             "\"PRIORITY\""     " integer not null,"
                             "\"STATE\""        " varchar(100),"
                             "\"STATE_TEXT\""   " varchar(100),"
@@ -490,9 +489,8 @@ void Database::create_tables_when_needed()
     add_column( &ta, _spooler->_orders_tablename, "INITIAL_STATE" , "add \"INITIAL_STATE\"" " varchar(100)" );
     add_column( &ta, _spooler->_orders_tablename, "RUN_TIME"      , "add \"RUN_TIME\""      " clob" );
     add_column( &ta, _spooler->_orders_tablename, "ORDER_XML"     , "add \"ORDER_XML\""     " clob" );
-  //add_column( &ta, _spooler->_orders_tablename, "PROCESSABLE"   , "add \"PROCESSABLE\""   " boolean" );
-    add_column( &ta, _spooler->_orders_tablename, "DISTRIBUTED_NEXT_TIME", "add \"DISTRIBUTED_NEXT_TIME\" datetime" );
-    add_column( &ta, _spooler->_orders_tablename, "PROCESSING_SCHEDULER_MEMBER_ID", "add \"PROCESSING_SCHEDULER_MEMBER_ID\" varchar(100)" );
+    add_column( &ta, _spooler->_orders_tablename, "distributed_next_time"        , "add `distributed_next_time`"         " datetime" );
+    add_column( &ta, _spooler->_orders_tablename, "occupying_scheduler_member_id", "add `occupying_scheduler_member_id`" " varchar(100)" );
     
 
     create_table_when_needed( &ta, _spooler->_order_history_tablename, S() <<

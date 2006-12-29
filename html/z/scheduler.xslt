@@ -670,7 +670,7 @@
         <xsl:param name="job_chain_select"/>
         <xsl:param name="single"             select="false()"/>
         <!-- false: Mehrere im linken Frame,
-                                                                         true:  Eine Jobkette im rechten frame -->
+             true:  Eine Jobkette im rechten frame -->
         <xsl:variable name="max_orders">
             <xsl:choose>
                 <xsl:when test="$single">
@@ -943,6 +943,8 @@
                                 <tr class="order">
                                     <td colspan="99">
                                         <xsl:apply-templates select="job/order_queue" mode="job_chain_list">
+                                            <xsl:with-param name="orders" 
+                                                select="job/order_queue/order[ @job_chain = current()/parent::job_chain/@name  and  @state = current()/@state ]"/>
                                             <xsl:with-param name="max_orders" select="$max_orders"/>
                                         </xsl:apply-templates>
                                     </td>
@@ -1084,6 +1086,7 @@
                                 <tr class="order">
                                     <td colspan="99">
                                         <xsl:apply-templates select="blacklist" mode="job_chain_list">
+                                            <xsl:with-param name="orders" select="blacklist/order[ @job_chain = current()/@name ]"/>
                                             <xsl:with-param name="max_orders" select="$max_orders"/>
                                         </xsl:apply-templates>
                                     </td>
@@ -1186,16 +1189,17 @@
 
     <xsl:template match="order_queue | blacklist" mode="job_chain_list">
         <xsl:param name="max_orders" select="100"/>
+        <xsl:param name="orders"/>
 
-        <xsl:if test="@length >= $max_orders  or  order[ ../@length > last() ]">
-            <tr class="order">
-                <td></td>
-                <td></td>
-                <td>
-                    <span style="margin-left: 2ex">...</span>
-                </td>
-                <td colspan="99"></td>
-            </tr>
+        <xsl:param name="limited_orders" select="$orders" /> <!--[ position() &lt;= $max_orders ]"/-->
+
+        <xsl:if test="@length > count( $limited_orders )">
+            <xsl:variable name="remaining" select="@length - count( $limited_orders )"/>
+            <span style="margin-left: 2ex; font-size: 8pt">
+                <xsl:text>(possibly</xsl:text>
+                <!--xsl:value-of select="$remaining"/-->
+                <xsl:text> more orders)</xsl:text>
+            </span>
         </xsl:if>
 
         <table cellspacing="0" cellpadding="0" width="100%">
@@ -1204,7 +1208,7 @@
             <col valign="top"/>
             <col valign="top" align="right"/>
             
-            <xsl:for-each select="order[ position() &lt;= $max_orders ]">
+            <xsl:for-each select="$limited_orders">
                 <xsl:sort select="position()" order="descending"/>
 
                 <!--tr class="order">

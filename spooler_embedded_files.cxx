@@ -2937,6 +2937,8 @@ const char file_html_z_scheduler_xslt[] =
     "<tr class=\"order\">\n"
     "<td colspan=\"99\">\n"
     "<xsl:apply-templates select=\"job/order_queue\" mode=\"job_chain_list\">\n"
+    "<xsl:with-param name=\"orders\" \n"
+    "select=\"job/order_queue/order[ @job_chain = current()/parent::job_chain/@name  and  @state = current()/@state ]\"/>\n"
     "<xsl:with-param name=\"max_orders\" select=\"$max_orders\"/>\n"
     "</xsl:apply-templates>\n"
     "</td>\n"
@@ -3078,6 +3080,7 @@ const char file_html_z_scheduler_xslt[] =
     "<tr class=\"order\">\n"
     "<td colspan=\"99\">\n"
     "<xsl:apply-templates select=\"blacklist\" mode=\"job_chain_list\">\n"
+    "<xsl:with-param name=\"orders\" select=\"blacklist/order[ @job_chain = current()/@name ]\"/>\n"
     "<xsl:with-param name=\"max_orders\" select=\"$max_orders\"/>\n"
     "</xsl:apply-templates>\n"
     "</td>\n"
@@ -3180,16 +3183,17 @@ const char file_html_z_scheduler_xslt[] =
     "\n"
     "<xsl:template match=\"order_queue | blacklist\" mode=\"job_chain_list\">\n"
     "<xsl:param name=\"max_orders\" select=\"100\"/>\n"
+    "<xsl:param name=\"orders\"/>\n"
     "\n"
-    "<xsl:if test=\"@length >= $max_orders  or  order[ ../@length > last() ]\">\n"
-    "<tr class=\"order\">\n"
-    "<td></td>\n"
-    "<td></td>\n"
-    "<td>\n"
-    "<span style=\"margin-left: 2ex\">...</span>\n"
-    "</td>\n"
-    "<td colspan=\"99\"></td>\n"
-    "</tr>\n"
+    "<xsl:param name=\"limited_orders\" select=\"$orders\" /> <!--[ position() &lt;= $max_orders ]\"/-->\n"
+    "\n"
+    "<xsl:if test=\"@length > count( $limited_orders )\">\n"
+    "<xsl:variable name=\"remaining\" select=\"@length - count( $limited_orders )\"/>\n"
+    "<span style=\"margin-left: 2ex; font-size: 8pt\">\n"
+    "<xsl:text>(possibly</xsl:text>\n"
+    "<!--xsl:value-of select=\"$remaining\"/-->\n"
+    "<xsl:text> more orders)</xsl:text>\n"
+    "</span>\n"
     "</xsl:if>\n"
     "\n"
     "<table cellspacing=\"0\" cellpadding=\"0\" width=\"100%\">\n"
@@ -3198,7 +3202,7 @@ const char file_html_z_scheduler_xslt[] =
     "<col valign=\"top\"/>\n"
     "<col valign=\"top\" align=\"right\"/>\n"
     "\n"
-    "<xsl:for-each select=\"order[ position() &lt;= $max_orders ]\">\n"
+    "<xsl:for-each select=\"$limited_orders\">\n"
     "<xsl:sort select=\"position()\" order=\"descending\"/>\n"
     "\n"
     "<!--tr class=\"order\">\n"
@@ -5756,7 +5760,7 @@ static const Embedded_file embedded_files_array[] =
     { "html/z/scheduler.js", file_html_z_scheduler_js, sizeof file_html_z_scheduler_js - 1, 1165219596 },
     { "html/z/show_log.js", file_html_z_show_log_js, sizeof file_html_z_show_log_js - 1, 1162029282 },
     { "html/z/translation_de.js", file_html_z_translation_de_js, sizeof file_html_z_translation_de_js - 1, 1162029282 },
-    { "html/z/scheduler.xslt", file_html_z_scheduler_xslt, sizeof file_html_z_scheduler_xslt - 1, 1165167653 },
+    { "html/z/scheduler.xslt", file_html_z_scheduler_xslt, sizeof file_html_z_scheduler_xslt - 1, 1167396018 },
     { "html/z/scheduler.css", file_html_z_scheduler_css, sizeof file_html_z_scheduler_css - 1, 1162029282 },
     { "html/z/job_scheduler_rabbit_circle_45x45.gif", file_html_z_job_scheduler_rabbit_circle_45x45_gif, sizeof file_html_z_job_scheduler_rabbit_circle_45x45_gif - 1, 1164977749 },
     { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1166748348 },

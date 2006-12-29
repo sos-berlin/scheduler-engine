@@ -163,26 +163,26 @@
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-    <scheduler_keyword keyword="Schwarze Liste"/>
+    <scheduler_keyword keyword="suspend"/>
 
-    <h2>Schwarze Liste</h2>
+    <h2>Suspendierte Dateiaufträge</h2>
 
     <p>
         Wenn ein Dateiauftrag ausgeführt ist (einen Endzustand erreicht hat),
         aber die Datei noch vorhanden ist,
-        dann setzt der Scheduler den Auftrag  auf die Schwarze Liste.
+        dann suspendiert der Scheduler den Auftrag.
     </p>
     <scheduler_message level="warn" code="SCHEDULER-340"/>
     <p>
-        Dort bleibt er bis
+        Der Auftrag wird entfernt,
     </p>
     <ul>
         <li>
-            der Scheduler beim Lesen des Verzeichnisses feststellt, dass die Datei entfernt worden ist
-            <scheduler_message level="info" code="SCHEDULER-981"/>
+            wenn der Scheduler beim Lesen des Verzeichnisses feststellt, dass die Datei entfernt worden ist
+            <scheduler_message level="info" code="SCHEDULER-981"/>, oder
         </li>
         <li>
-            das Kommando <scheduler_element name="remove_order"/> ausgeführt wird.
+            wenn das Kommando <scheduler_element name="remove_order"/> ausgeführt wird.
         </li>
     </ul>
 
