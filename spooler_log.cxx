@@ -1212,7 +1212,7 @@ xml::Element_ptr Prefix_log::dom_element( const xml::Document_ptr& document, con
         if( subject     != "" )  log_element.setAttribute( "mail_subject", subject );
     }
 
-    if( show & show_log )
+    if( show.is_set( show_log ) )
     {
         try
         {

@@ -232,7 +232,7 @@ xml::Element_ptr Directory_file_order_source::dom_element( const xml::Document_p
             files_element.setAttribute( "snapshot_time", _new_files_time.as_string() );
             files_element.setAttribute( "count"        , (int)_new_files.size() );
 
-            if( show & show_order_source_files )
+            if( show.is_set( show_order_source_files ) )
             {
                 for( int i = _new_files_index, j = show._max_orders; i < _new_files.size() && j > 0; i++, j-- )
                 {
@@ -254,7 +254,7 @@ xml::Element_ptr Directory_file_order_source::dom_element( const xml::Document_p
             xml::Element_ptr bad_files_element = document.createElement( "bad_files" );
             bad_files_element.setAttribute( "count", (int)_bad_map.size() );
 
-            if( show & show_order_source_files )
+            if( show.is_set( show_order_source_files ) )
             {
                 Z_FOR_EACH( Bad_map, _bad_map, it )
                 {

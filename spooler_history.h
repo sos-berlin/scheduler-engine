@@ -90,6 +90,7 @@ struct Database : Object, Scheduler_object
     friend struct Spooler;
     friend struct Job_history;
     friend struct Task_history;
+    friend struct Read_transaction;
     friend struct Transaction;
 
     void                        open2                   ( const string& db_name );
@@ -123,29 +124,60 @@ struct Database : Object, Scheduler_object
     static const int            seconds_before_reopen;
 };
 
+//---------------------------------------------------------------------------------Read_transaction
+
+struct Read_transaction
+{
+                                Read_transaction        ( Database* );
+                               ~Read_transaction        ();
+
+    virtual bool                is_read_only            () const                                    { return true; }
+    virtual void                begin_transaction       ( Database* );
+
+    void                        assert_is_commitable    ( const string& debug_text ) const;
+
+    void                    set_log_sql                 ( bool b )                                  { _log_sql = b; }
+
+    Any_file                    open_result_set         ( const string& sql, const string& debug_text, bool writes_transaction = false );
+    Any_file                    open_file               ( const string& db_prefix, const string& sql, const string& debug_text = "", bool need_commit_or_rollback = true );
+    Any_file                    open_file_2             ( const string& db_prefix, const string& execution_sql, const string& debug_text, bool need_commit_or_rollback, const string& logging_sql );
+    string                      read_clob               ( const string& table_name, const string& column_name, const string& where );
+    string                      read_clob               ( const string& table_name, const string& column_name, const string& key_name, const string& key_value );
+    string                      file_as_string          ( const string& hostware_filename );
+
+    Database*                   db                      ()                                          { assert( _db ); return _db; }
+    sql::Database_descriptor*   database_descriptor     ()                                          { return db()->database_descriptor(); }
+
+
+  protected:
+    Fill_zero                  _zero_;
+    Database*                  _db;
+    bool                       _log_sql;
+    Prefix_log*                _log;
+    Mutex_guard                _guard;
+    Spooler*                   _spooler;
+};
+
 //--------------------------------------------------------------------------------------Transaction
 
-struct Transaction
+struct Transaction : Read_transaction
 {
                                 Transaction             ( Database*, Transaction* outer_transaction = NULL );
                                ~Transaction             ();
 
-    void                    set_log_sql                 ( bool b )                                  { _log_sql = b; }
-    void                        begin_transaction       ( Database* );
+    virtual bool                is_read_only            () const                                    { return false; }
+    virtual void                begin_transaction       ( Database* );
+
     void                        commit                  ( const string& debug_text );
     void                        intermediate_commit     ( const string& debug_text );
     void                        rollback                ( const string& debug_text, bool force = false );
     void                        force_rollback          ( const string& debug_text )                { rollback( debug_text, true ); }
   //void                        try_reopen_after_error  ();
-    void                        set_transaction_written ()                                          { _transaction_written = true; }    // Wird nicht benutzt
-    void                        set_transaction_read    ()                                          { _transaction_read = true; }       // Wird nicht benutzt
+    void                        set_transaction_written ()                                          {} //{ _transaction_written = true; }
+    void                        set_transaction_read    ()                                          {} //{ _transaction_read = true; } 
     bool                        is_transaction_used     ()                                          { return db()->_db.is_transaction_used(); }
     bool                        need_commit_or_rollback ()                                          { return db()->_db.need_commit_or_rollback(); }
     Transaction*                outer_transaction       ()                                          { return _outer_transaction; }
-
-    Any_file                    open_result_set         ( const string& sql, const string& debug_text, bool writes_transaction = false );
-    Any_file                    open_file               ( const string& db_prefix, const string& sql, const string& debug_text = "", bool need_commit_or_rollback = true );
-    Any_file                    open_file_2             ( const string& db_prefix, const string& execution_sql, const string& debug_text, bool need_commit_or_rollback, const string& logging_sql );
 
     void                        execute                 ( const string& sql, const string& debug_text, bool force = false );
     void                        execute_single          ( const string& sql, const string& debug_text );
@@ -158,24 +190,14 @@ struct Transaction
     void                        update_clob             ( const string& table_name, const string& column_name, const string& value, const string& where );
     void                        update_clob             ( const string& table_name, const string& column_name, const string& key_name, int           key_value, const string& value );
     void                        update_clob             ( const string& table_name, const string& column_name, const string& key_name, const string& key_value, const string& value );
-    string                      read_clob               ( const string& table_name, const string& column_name, const string& where );
-    string                      read_clob               ( const string& table_name, const string& column_name, const string& key_name, const string& key_value );
-    string                      file_as_string          ( const string& hostware_filename );
 
     int                         record_count            ()                                          { return _db->record_count(); }
-    Database*                   db                      ()                                          { assert( _db ); return _db; }
-    sql::Database_descriptor*   database_descriptor     ()                                          { return db()->database_descriptor(); }
 
 
     Fill_zero                  _zero_;
-    Database*                  _db;
     Transaction*               _outer_transaction;
-    bool                       _transaction_written;    // Wird nicht benutzt
-    bool                       _transaction_read;       // Wird nicht benutzt
-    bool                       _log_sql;
-    Mutex_guard                _guard;
-    Spooler*                   _spooler;
-    Prefix_log*                _log;
+    //bool                       _transaction_written;    // Wird nicht benutzt
+    //bool                       _transaction_read;       // Wird nicht benutzt
 };
 
 //-----------------------------------------------------------------------------------Database_retry

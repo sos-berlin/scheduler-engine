@@ -752,7 +752,8 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
 
 #   ifdef Z_UNIX
     {
-        // Offene file descriptors ermitteln. Zum Debuggen, weil das Gerücht geht, Dateien würden offen bleiben.
+        // Offene file descriptors ermitteln. Zum Debuggen, weil das Gerücht geht, Dateien würden offen bleiben. 
+        // Das war nur ein Gerücht.
         S s;
         int n = sysconf( _SC_OPEN_MAX );
         for( int fd = 0; fd < n; fd++ )  if( fcntl( fd, F_GETFD ) != -1  ||  errno != EBADF )  s << ' ' << fd;
@@ -761,8 +762,8 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
 #   endif
 
 
-    if( show & show_jobs )  state_element.appendChild( jobs_dom_element( dom, show ) );
-                      else  state_element.append_new_comment( "<jobs> suppressed. Use what=\"jobs\"." );
+    if( show.is_set( show_jobs ) )  state_element.appendChild( jobs_dom_element( dom, show ) );
+                              else  state_element.append_new_comment( "<jobs> suppressed. Use what=\"jobs\"." );
 
     state_element.appendChild( process_classes_dom_element( dom, show ) );
     

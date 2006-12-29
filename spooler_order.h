@@ -41,10 +41,10 @@ struct Order : Com_order,
     // Scheduler_object:
   //Prefix_log*                 log                     ()                                          { return _log; }
     void                        print_xml_child_elements_for_event( String_stream*, Scheduler_event* );
-    void                        load_blobs              ( Transaction* );
-    void                        load_order_xml_blob     ( Transaction* );
-    void                        load_run_time_blob      ( Transaction* );
-    void                        load_payload_blob       ( Transaction* );
+    void                        load_blobs              ( Read_transaction* );
+    void                        load_order_xml_blob     ( Read_transaction* );
+    void                        load_run_time_blob      ( Read_transaction* );
+    void                        load_payload_blob       ( Read_transaction* );
 
     void                        init                    ();
     bool                        occupy_for_task         ( Task*, const Time& now );
@@ -179,11 +179,11 @@ struct Order : Com_order,
     enum Update_option { update_anyway, update_not_occupied, update_and_release_occupation };
     void                        db_update               ( Update_option );
 
-    string                      db_read_clob            ( Transaction*, const string& column_name );
+    string                      db_read_clob            ( Read_transaction*, const string& column_name );
     void                        db_update_clob          ( Transaction*, const string& column_name, const string& value );
 
   //void                        db_delete_order         ();
-    void                        db_show_occupation      ( Transaction*, Log_level );
+    void                        db_show_occupation      ( Log_level );
     sql::Update_stmt            db_update_stmt          ();
     sql::Where_clause           db_where_clause         ();
     void                        db_fill_where_clause    ( sql::Where_clause* );
@@ -315,7 +315,7 @@ struct Job_chain_node : Com_job_chain_node
                                 Job_chain_node          ()                                          : _zero_(this+1) {}
 
     xml::Element_ptr            dom_element             ( const xml::Document_ptr&, const Show_what&, Job_chain* );
-    int                         order_count             ( Transaction*, Job_chain* = NULL );
+    int                         order_count             ( Read_transaction*, Job_chain* = NULL );
     bool                        is_file_order_sink      ()                                          { return _file_order_sink_remove || _file_order_sink_move_to != ""; }
 
 
@@ -373,9 +373,10 @@ struct Job_chain : Com_job_chain, Scheduler_object
     bool                        visible                 () const                                    { return _visible; }
 
     void                    set_orders_recoverable      ( bool b )                                  { _orders_recoverable = b; }
-    void                        add_orders_from_database( Transaction* );
-    int                         load_orders_from_result_set( Transaction*, Any_file* result_set );
-    Order*                      add_order_from_database_record( Transaction*, const Record& );
+
+    void                        add_orders_from_database      ( Read_transaction* );
+    int                         load_orders_from_result_set   ( Read_transaction*, Any_file* result_set );
+    Order*                      add_order_from_database_record( Read_transaction*, const Record& );
 
     bool                        tip_for_new_order       ( const Order::State& state, const Time& at );
 
@@ -400,13 +401,13 @@ struct Job_chain : Com_job_chain, Scheduler_object
     ptr<Order>                  order                   ( const Order::Id& id );
     ptr<Order>                  order_or_null           ( const Order::Id& id );
 
-    bool                        has_order_id            ( Transaction*, const Order::Id& );
+    bool                        has_order_id            ( Read_transaction*, const Order::Id& );
     void                        register_order          ( Order* );                                 // Um doppelte Auftragskennungen zu entdecken: Fehler SCHEDULER-186
     void                        unregister_order        ( Order* );
     void                        add_to_blacklist        ( Order* );
     void                        remove_from_blacklist   ( Order* );
 
-    int                         order_count             ( Transaction* );
+    int                         order_count             ( Read_transaction* );
     bool                        has_order               () const;
 
     string                      db_where_clause         () const;
@@ -477,9 +478,9 @@ struct Order_queue : Com_order_queue
     void                        add_order               ( Order*, Do_log = do_log );
     void                        remove_order            ( Order*, Do_log = do_log );
     void                        reinsert_order          ( Order* );
-    int                         order_count             ( Transaction*, const Job_chain* = NULL );
+    int                         order_count             ( Read_transaction*, const Job_chain* = NULL );
     bool                        empty                   ()                                          { return _queue.empty(); }
-    bool                        empty                   ( const Job_chain* job_chain )              { return order_count( (Transaction*)NULL, job_chain ) == 0; }  // Ohne Datenbank
+    bool                        empty                   ( const Job_chain* job_chain )              { return order_count( (Read_transaction*)NULL, job_chain ) == 0; }  // Ohne Datenbank
     Order*                      first_order             ( const Time& now ) const;
     Order*                      fetch_order             ( const Time& now );
     Order*                      load_and_occupy_next_distributed_order_from_database( Task* occupying_task, const Time& now );

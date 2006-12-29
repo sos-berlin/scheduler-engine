@@ -83,15 +83,138 @@ static string quote_and_prepend_comma( const string& s )
     return ", `" + s + "`"; 
 }
 
+//---------------------------------------------------------------Read_transaction::Read_transaction
+
+Read_transaction::Read_transaction( Database* db )
+: 
+    _zero_(this+1),
+    _guard(&db->_lock),
+    _spooler(db->_spooler),
+    _log(db->_log)
+{
+    assert( db );
+    //Das müssen wir später prüfen  if( !_db->opened() )  z::throw_xc( "SCHEDULER-361" );
+
+    begin_transaction( db );
+}
+
+//--------------------------------------------------------------Read_transaction::~Read_transaction
+    
+Read_transaction::~Read_transaction()
+{ 
+}
+
+//------------------------------------------------------------Read_transaction::assert_is_read_only
+
+void Read_transaction::assert_is_commitable( const string& debug_text ) const
+{
+    if( is_read_only() )  z::throw_xc( "READ_ONLY_TRANSACTION", debug_text );
+}
+
+//--------------------------------------------------------------Read_transaction::begin_transaction
+    
+void Read_transaction::begin_transaction( Database* db )
+{ 
+    if( !_guard )  _guard.enter( &db->_lock, __FUNCTION__ );
+
+    _db = db; 
+}
+
+//----------------------------------------------------------------Read_transaction::open_result_set
+
+Any_file Read_transaction::open_result_set( const string& sql, const string& debug_text, bool need_commit_or_rollback )
+{ 
+    if( need_commit_or_rollback )  assert_is_commitable( debug_text );
+
+    string native_sql = db()->_db.sos_database_session()->translate_sql( sql );
+
+    S s;
+    if( !need_commit_or_rollback )  s << "-read-transaction ";
+    s << "%native " << native_sql;
+
+    return open_file_2( "-in " + db()->db_name(), s, debug_text, need_commit_or_rollback, native_sql );
+}
+
+//----------------------------------------------------------------------Read_transaction::open_file
+
+Any_file Read_transaction::open_file( const string& db_prefix, const string& sql, const string& debug_text, bool need_commit_or_rollback )
+{
+    if( need_commit_or_rollback )  assert_is_commitable( debug_text );
+
+    return open_file_2( db_prefix, sql, debug_text, need_commit_or_rollback, sql );
+}
+
+//--------------------------------------------------------------------Read_transaction::open_file_2
+
+Any_file Read_transaction::open_file_2( const string& db_prefix, const string& execution_sql, const string& debug_text, bool need_commit_or_rollback, const string& logging_sql )
+{
+    if( need_commit_or_rollback )  assert_is_commitable( debug_text );
+    //if( need_commit_or_rollback ) set_transaction_written(); else set_transaction_read();
+
+    string debug_extra;
+    if( debug_text != "" )  debug_extra = "  (" + debug_text + ")";
+
+    Any_file result;
+
+    try
+    {
+        result.open( db_prefix + " " + execution_sql );
+
+        if( _db->_log->is_enabled_log_level( _spooler->_db_log_level ) )     // Hostware protokolliert schon ins scheduler.log
+        {
+            S line;
+            line << logging_sql << debug_extra;
+            if( _db->_db.record_count() >= 0 )  line << "  ==> " << _db->_db.record_count() << " records";
+            _db->_log->log( _spooler->_db_log_level, line );
+        }
+    }
+    catch( exception& x )
+    {
+        if( _log_sql )  // Vielleicht für alle Anweisungen, aber dann haben wir einen Fehler im Protokoll, das ist nicht 100%ig kompatibel
+        {
+            _db->_log->warn( logging_sql + debug_extra );
+            _db->_log->error( x.what() );
+        }
+        else
+            _db->_log->debug( logging_sql ), _db->_log->debug( x.what() );
+
+        throw;
+    }
+
+    return result;
+}
+
+//----------------------------------------------------------------------Read_transaction::read_clob
+
+string Read_transaction::read_clob( const string& table_name, const string& column_name, const string& key_name, const string& key_value )
+{
+    return read_clob( table_name, column_name, "  where `" + key_name + "`=" + sql::quoted( key_value ) );
+}
+
+//----------------------------------------------------------------------Read_transaction::read_clob
+
+string Read_transaction::read_clob( const string& table_name, const string& column_name, const string& where )
+{
+    return this->file_as_string( " -read-transaction -table=" + table_name + " -clob=" + column_name + "  " + where );
+}
+
+//-----------------------------------------------------------------Read_transaction::file_as_string
+
+string Read_transaction::file_as_string( const string& hostware_filename )
+{
+    if( _db->db_name() == "" )  z::throw_xc( "SCHEDULER-361", __FUNCTION__ );
+
+    //set_transaction_read();
+    return ::sos::file_as_string( _db->db_name() + hostware_filename );
+}
+
 //-------------------------------------------------------------------------Transaction::Transaction
 
 Transaction::Transaction( Database* db, Transaction* outer_transaction )
 : 
+    Read_transaction( db ),
     _zero_(this+1),
-    _guard(&db->_lock),
-    _outer_transaction(outer_transaction),
-    _spooler(db->_spooler),
-    _log(db->_log)
+    _outer_transaction(outer_transaction)
 {
     assert( db );
     //Das müssen wir später prüfen  if( !_db->opened() )  z::throw_xc( "SCHEDULER-361" );
@@ -99,16 +222,6 @@ Transaction::Transaction( Database* db, Transaction* outer_transaction )
     if( _outer_transaction )
     {
         _log_sql = _outer_transaction->_log_sql;
-    }
-    else
-    {
-        //_db->rollback();     // Falls irgendeine Transaktion offengeblieben ist
-
-        if( db->_transaction )
-        {
-            Z_DEBUG_ONLY( Z_WINDOWS_ONLY( assert( "NESTED TRANSACTION"==NULL ) ) );
-            z::throw_xc( "NESTED_TRANSACTION", __FUNCTION__ );
-        }
     }
 
     begin_transaction( db );
@@ -132,9 +245,14 @@ Transaction::~Transaction()
 
 void Transaction::begin_transaction( Database* db )
 { 
-    if( !_guard )  _guard.enter( &db->_lock, __FUNCTION__ );
+    if( !_outer_transaction  &&  db->_transaction )
+    {
+        Z_DEBUG_ONLY( Z_WINDOWS_ONLY( assert( "NESTED TRANSACTION"==NULL ) ) );
+        z::throw_xc( "NESTED_TRANSACTION", __FUNCTION__ );
+    }
 
-    _db = db; 
+    Read_transaction::begin_transaction( db );
+
     db->_transaction = this;
 }
 
@@ -147,8 +265,8 @@ void Transaction::commit( const string& debug_text )
     if( _outer_transaction ) 
     {
         Z_LOG2( "joacim", __FUNCTION__ << "  Commit delayed because of _outer_transaction.  " << debug_text << "\n" );
-        _outer_transaction->_transaction_written |= _transaction_written;
-        _outer_transaction->_transaction_read    |= _transaction_read;
+        //_outer_transaction->_transaction_written |= _transaction_written;
+        //_outer_transaction->_transaction_read    |= _transaction_read;
     }
     else
     {
@@ -225,65 +343,6 @@ void Transaction::rollback( const string& debug_text, bool force )
 
         //Wir sind vielleicht in einer Exception, also keine weitere Exception auslösen:  if( !db->_transaction )  _spooler->check( __FUNCTION__, debug_text );
     }
-}
-
-//---------------------------------------------------------------------Transaction::open_result_set
-
-Any_file Transaction::open_result_set( const string& sql, const string& debug_text, bool writes_transaction )
-{ 
-    string native_sql = db()->_db.sos_database_session()->translate_sql( sql );
-
-    S s;
-    if( !writes_transaction )  s << "-read-transaction ";
-    s << "%native " << native_sql;
-
-    return open_file_2( "-in " + db()->db_name(), s, debug_text, writes_transaction, native_sql );
-}
-
-//---------------------------------------------------------------------------Transaction::open_file
-
-Any_file Transaction::open_file( const string& db_prefix, const string& sql, const string& debug_text, bool need_commit_or_rollback )
-{
-    return open_file_2( db_prefix, sql, debug_text, need_commit_or_rollback, sql );
-}
-
-//-------------------------------------------------------------------------Transaction::open_file_2
-
-Any_file Transaction::open_file_2( const string& db_prefix, const string& execution_sql, const string& debug_text, bool need_commit_or_rollback, const string& logging_sql )
-{
-    if( need_commit_or_rollback ) set_transaction_written(); else set_transaction_read();
-
-    string debug_extra;
-    if( debug_text != "" )  debug_extra = "  (" + debug_text + ")";
-
-    Any_file result;
-
-    try
-    {
-        result.open( db_prefix + " " + execution_sql );
-
-        if( _db->_log->is_enabled_log_level( _spooler->_db_log_level ) )     // Hostware protokolliert schon ins scheduler.log
-        {
-            S line;
-            line << logging_sql << debug_extra;
-            if( _db->_db.record_count() >= 0 )  line << "  ==> " << _db->_db.record_count() << " records";
-            _db->_log->log( _spooler->_db_log_level, line );
-        }
-    }
-    catch( exception& x )
-    {
-        if( _log_sql )  // Vielleicht für alle Anweisungen, aber dann haben wir einen Fehler im Protokoll, das ist nicht 100%ig kompatibel
-        {
-            _db->_log->warn( logging_sql + debug_extra );
-            _db->_log->error( x.what() );
-        }
-        else
-            _db->_log->debug( logging_sql ), _db->_log->debug( x.what() );
-
-        throw;
-    }
-
-    return result;
 }
 
 //---------------------------------------------------Retry_transaction::reopen_database_after_error
@@ -1339,30 +1398,6 @@ void Transaction::update_clob( const string& table_name, const string& column_na
     clob.close();
 }
 
-//------------------------------------------------------------------------------Database::read_clob
-
-string Transaction::read_clob( const string& table_name, const string& column_name, const string& key_name, const string& key_value )
-{
-    return read_clob( table_name, column_name, "  where `" + key_name + "`=" + sql::quoted( key_value ) );
-}
-
-//------------------------------------------------------------------------------Database::read_clob
-
-string Transaction::read_clob( const string& table_name, const string& column_name, const string& where )
-{
-    return this->file_as_string( " -read-transaction -table=" + table_name + " -clob=" + column_name + "  " + where );
-}
-
-//-----------------------------------------------------------------------Tranaction::file_as_string
-
-string Transaction::file_as_string( const string& hostware_filename )
-{
-    if( _db->db_name() == "" )  z::throw_xc( "SCHEDULER-361", __FUNCTION__ );
-
-    set_transaction_read();
-    return ::sos::file_as_string( _db->db_name() + hostware_filename );
-}
-
 //--------------------------------------------------------------------Database::write_order_history
 
 void Database::write_order_history( Order* order, Transaction* outer_transaction )
@@ -1484,7 +1519,7 @@ xml::Element_ptr Database::read_task( const xml::Document_ptr& doc, int task_id,
                 task_element.appendChild( error_element );
             }
 
-            if( show & show_log )
+            if( show.is_set( show_log ) )
             {
                 try
                 {
@@ -1661,7 +1696,7 @@ void Job_history::archive( Archive_switch arc, const string& filename )
 
 xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, int next, const Show_what& show, bool use_task_schema )
 {
-    bool with_log = ( show & show_log ) != 0;
+    bool with_log = show.is_set( show_log );
 
     xml::Element_ptr history_element;
 

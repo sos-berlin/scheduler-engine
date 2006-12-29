@@ -58,9 +58,11 @@ struct Show_what
                                                                                                       _max_orders(INT_MAX), 
                                                                                                       _max_task_history(10) {}
 
-                                operator Show_what_enum     () const                                { return _what; }
-    int                         operator &                  ( Show_what_enum w ) const              { return _what & w; }
+                              //operator Show_what_enum     () const                                { return _what; }
+  //int                         operator &                  ( Show_what_enum w ) const              { return _what & w; }
+    Show_what                   operator |                  ( Show_what_enum w ) const              { Show_what ww = *this; ww |= w; return ww;; }
     void                        operator |=                 ( Show_what_enum w )                    { _what = _what | w; }
+    bool                        is_set                      ( Show_what_enum w ) const              { return ( _what & w ) != 0; }
 
 
     Fill_zero                  _zero_;

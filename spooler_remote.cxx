@@ -226,7 +226,7 @@ xml::Element_ptr Remote_scheduler_register::dom_element( const xml::Document_ptr
         n++;
         if( remote_scheduler->_is_connected )  connected_count++;
 
-        if( show & show_remote_schedulers )  result.appendChild( remote_scheduler->dom_element( document, show ) );
+        if( show.is_set( show_remote_schedulers ) )  result.appendChild( remote_scheduler->dom_element( document, show ) );
     }
 
     result.setAttribute( "count"    , n );

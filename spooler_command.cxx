@@ -179,7 +179,7 @@ xml::Element_ptr Command_processor::execute_show_state( const xml::Element_ptr&,
     if( _security_level < Security::seclev_info )  z::throw_xc( "SCHEDULER-121" );
 
     Show_what show = show_;
-    if( show & show_all_ )  show |= Show_what_enum( show_task_queue | show_description | show_remote_schedulers );
+    if( show.is_set( show_all_ ) )  show |= Show_what_enum( show_task_queue | show_description | show_remote_schedulers );
 
 
     return _spooler->state_dom_element( _answer, show );
@@ -211,7 +211,7 @@ xml::Element_ptr Command_processor::execute_show_history( const xml::Element_ptr
     if( _security_level < Security::seclev_info )  z::throw_xc( "SCHEDULER-121" );
 
     Show_what show = show_;
-    if( show & show_all_ )  show |= show_log;
+    if( show.is_set( show_all_ ) )  show |= show_log;
 
     string job_name = element.getAttribute( "job" );
 
@@ -229,7 +229,7 @@ xml::Element_ptr Command_processor::execute_show_order_history( const xml::Eleme
 {
     if( _security_level < Security::seclev_info )  z::throw_xc( "SCHEDULER-121" );
 
-    if( show & show_all_ )  show = Show_what_enum( show | show_log );
+    if( show.is_set( show_all_ ) )  show = Show_what_enum( show | show_log );
 
     int id, next;
     get_id_and_prev( element, &id, &next );
@@ -299,7 +299,7 @@ xml::Element_ptr Command_processor::execute_show_job( const xml::Element_ptr& el
     if( _security_level < Security::seclev_info )  z::throw_xc( "SCHEDULER-121" );
 
     Show_what show = show_;
-    if( show & show_all_ )  show |= show_description | show_task_queue | show_orders;
+    if( show.is_set( show_all_ ) )  show |= show_description | show_task_queue | show_orders;
 
     Job_chain*  job_chain      = NULL;
     string      job_chain_name = element.getAttribute( "job_chain" );
@@ -473,8 +473,8 @@ xml::Element_ptr Command_processor::execute_show_job_chains( const xml::Element_
     if( _security_level < Security::seclev_info )  z::throw_xc( "SCHEDULER-121" );
 
     Show_what show = show_;
-    if( show & show_all_   )  show |= show | show_description | show_orders;
-    if( show & show_orders )  show |= show_job_chain_orders;
+    if( show.is_set( show_all_   ) )  show |= show._what | show_description | show_orders;
+    if( show.is_set( show_orders ) )  show |= show_job_chain_orders;
 
     return _spooler->order_subsystem()->job_chains_dom_element( _answer, show | show_job_chains | show_job_chain_jobs );
 }
@@ -486,8 +486,8 @@ xml::Element_ptr Command_processor::execute_show_job_chain( const xml::Element_p
     if( _security_level < Security::seclev_info )  z::throw_xc( "SCHEDULER-121" );
 
     Show_what show = show_;
-    if( show & show_all_   )  show |= show | show_description | show_orders;
-    if( show & show_orders )  show |= show_job_chain_orders;
+    if( show.is_set( show_all_   ) )  show |= show._what | show_description | show_orders;
+    if( show.is_set( show_orders ) )  show |= show_job_chain_orders;
 
     string job_chain_name = show_job_chain_element.getAttribute( "job_chain" );
 
@@ -501,7 +501,7 @@ xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& 
     if( _security_level < Security::seclev_info )  z::throw_xc( "SCHEDULER-121" );
 
     Show_what show = show_;
-    if( show == show_all_ )  show = Show_what( show_standard );
+    if( show.is_set( show_all_ ) )  show = Show_what( show_standard );
 
     string    job_chain_name = show_order_element.getAttribute( "job_chain" );
     Order::Id id             = show_order_element.getAttribute( "order"     );
@@ -555,7 +555,7 @@ xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& 
 
         string log;
 
-        if( show & show_log )
+        if( show.is_set( show_log ) )
         {
             Transaction ta ( _spooler->_db );
 

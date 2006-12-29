@@ -52,7 +52,7 @@ struct Database_order_detector : Async_operation, Scheduler_object
     string                      make_union_select_order_sql ( const string& select_sql_begin, const string& select_sql_end );
     string                      make_where_expression_for_distributed_orders_at_job( Job* );
     bool                        is_job_requesting_order     ( Job* );
-    int                         read_result_set             ( Transaction*, const string& select_sql );
+    int                         read_result_set             ( Read_transaction*, const string& select_sql );
     void                        set_alarm                   ();
     void                        request_order               ();
     void                        on_new_order                ()                                      { _next_check_period = check_database_orders_period_minimum; }
@@ -125,7 +125,7 @@ xml::Element_ptr Order_subsystem::job_chains_dom_element( const xml::Document_pt
 
     job_chains_element.setAttribute( "count", (int)_job_chain_map.size() );
 
-    if( show & ( show_job_chains | show_job_chain_jobs | show_job_chain_orders ) )
+    if( show.is_set( show_job_chains | show_job_chain_jobs | show_job_chain_orders ) )
     {
         FOR_EACH( Job_chain_map, _job_chain_map, it )
         {
@@ -294,7 +294,7 @@ void Order_subsystem::load_orders_from_database()
 {
     if( db()->opened()  &&  _spooler->has_exclusiveness() )
     {
-        Transaction ta ( db() );
+        Read_transaction ta ( db() );
 
         FOR_EACH( Job_chain_map, _job_chain_map, it ) 
         {
@@ -553,7 +553,7 @@ string Database_order_detector::make_where_expression_for_distributed_orders_at_
 
 //---------------------------------------------------------Database_order_detector::read_result_set
 
-int Database_order_detector::read_result_set( Transaction* ta, const string& select_sql )
+int Database_order_detector::read_result_set( Read_transaction* ta, const string& select_sql )
 {
     int      count      = 0;
     Any_file result_set = ta->open_result_set( select_sql, __FUNCTION__ );
@@ -709,6 +709,8 @@ void Order_sources::start()
 
 xml::Element_ptr Job_chain_node::dom_element( const xml::Document_ptr& document, const Show_what& show, Job_chain* job_chain )
 {
+    Read_transaction ta ( _job_chain->_spooler->_db );
+
     xml::Element_ptr element = document.createElement( "job_chain_node" );
 
         element.setAttribute( "state", debug_string_from_variant( _state ) );
@@ -731,20 +733,20 @@ xml::Element_ptr Job_chain_node::dom_element( const xml::Document_ptr& document,
 
         if( _job )
         {
-            element.setAttribute( "orders", order_count( (Transaction*)NULL, job_chain ) );     // Datenbank wird nicht gezählt
+            element.setAttribute( "orders", order_count( &ta, job_chain ) );
             element.setAttribute( "job"   , _job->name() );
             
             if( _job->order_queue()->is_order_requested() )
                 element.setAttribute( "is_order_requested", "yes" );
 
-            if( show & show_job_chain_jobs )
+            if( show.is_set( show_job_chain_jobs ) )
             {
                 dom_append_nl( element );
                 element.appendChild( _job->dom_element( document, show, job_chain ) );
                 dom_append_nl( element );
             }
             else
-            if( show & show_job_chain_orders )
+            if( show.is_set( show_job_chain_orders ) )
             {
                 // Nur Aufträge im Job zeigen, sonst nichts vom Job (der wird bereits von <show_state> in <jobs> gezeigt)
                 xml::Element_ptr job_element = document.createElement( "job" );
@@ -760,7 +762,7 @@ xml::Element_ptr Job_chain_node::dom_element( const xml::Document_ptr& document,
 
 //----------------------------------------------------------------------Job_chain_node::order_count
 
-int Job_chain_node::order_count( Transaction* ta, Job_chain* job_chain )
+int Job_chain_node::order_count( Read_transaction* ta, Job_chain* job_chain )
 {
     return _job? _job->order_queue()->order_count( ta, job_chain ) : 0;
 }
@@ -871,8 +873,10 @@ void Job_chain::set_dom( const xml::Element_ptr& element )
 
 xml::Element_ptr Job_chain::dom_element( const xml::Document_ptr& document, const Show_what& show )
 {
+    Read_transaction ta ( _spooler->_db );
+
     Show_what modified_show = show;
-    if( modified_show & show_job_chain_orders )  modified_show |= show_orders;
+    if( modified_show.is_set( show_job_chain_orders ) )  modified_show |= show_orders;
 
 
     xml::Element_ptr element = document.createElement( "job_chain" );
@@ -880,7 +884,7 @@ xml::Element_ptr Job_chain::dom_element( const xml::Document_ptr& document, cons
     //THREAD_LOCK( _lock )
     {
         element.setAttribute( "name"  , _name );
-        element.setAttribute( "orders", order_count( (Transaction*)NULL ) );        // Datenbank wird nicht gezählt
+        element.setAttribute( "orders", order_count( &ta ) );
         element.setAttribute( "state" , state_name( state() ) );
         if( !_visible ) element.setAttribute( "visible", _visible );
         element.setAttribute( "orders_recoverable", _orders_recoverable );
@@ -901,13 +905,13 @@ xml::Element_ptr Job_chain::dom_element( const xml::Document_ptr& document, cons
         }
 
 
-        if( show & show_order_history  &&  _spooler->_db->opened() )
+        if( show.is_set( show_order_history )  &&  _spooler->_db->opened() )
         {
             xml::Element_ptr order_history_element = document.createElement( "order_history" );
 
             try
             {
-                Transaction ta ( _spooler->_db, _spooler->_db->transaction() );
+                Read_transaction ta ( _spooler->_db );
 
                 Any_file sel = ta.open_result_set( 
                                "select %limit(20) \"ORDER_ID\" as \"ID\", \"JOB_CHAIN\", \"START_TIME\", \"TITLE\", \"STATE\", \"STATE_TEXT\""
@@ -947,7 +951,7 @@ xml::Element_ptr Job_chain::dom_element( const xml::Document_ptr& document, cons
             xml::Element_ptr blacklist_element = document.createElement( "blacklist" );
             blacklist_element.setAttribute( "count", (int)_blacklist_map.size() );
 
-            if( show & show_blacklist )
+            if( show.is_set( show_blacklist ) )
             {
                 Z_FOR_EACH( Blacklist_map, _blacklist_map, it )
                 {
@@ -1153,7 +1157,7 @@ void Job_chain::add_order( Order* order )
     assert( order->_is_distributed == order->_is_db_occupied );
     assert( !order->_is_distributed || _is_distributed );
     if( state() != s_ready )  z::throw_xc( "SCHEDULER-151" );
-    if( has_order_id( (Transaction*)NULL, order->id() ) )  z::throw_xc( "SCHEDULER-186", order->obj_name(), name() );
+    if( has_order_id( (Read_transaction*)NULL, order->id() ) )  z::throw_xc( "SCHEDULER-186", order->obj_name(), name() );
 
     set_visible( true );
 
@@ -1217,7 +1221,7 @@ void Job_chain::remove_order( Order* order )
 
 //-------------------------------------------------------------Job_chain::add_orders_from_database
 
-void Job_chain::add_orders_from_database( Transaction* ta )
+void Job_chain::add_orders_from_database( Read_transaction* ta )
 {
     assert( _orders_recoverable );
     _spooler->assert_has_exclusiveness( __FUNCTION__ );
@@ -1245,7 +1249,7 @@ void Job_chain::add_orders_from_database( Transaction* ta )
 
 //-----------------------------------------------------------Job_chain::load_orders_from_result_set
 
-int Job_chain::load_orders_from_result_set( Transaction* ta, Any_file* result_set )
+int Job_chain::load_orders_from_result_set( Read_transaction* ta, Any_file* result_set )
 {
     int count = 0;
 
@@ -1269,7 +1273,7 @@ int Job_chain::load_orders_from_result_set( Transaction* ta, Any_file* result_se
 
 //--------------------------------------------------------Job_chain::add_order_from_database_record
 
-Order* Job_chain::add_order_from_database_record( Transaction* ta, const Record& record )
+Order* Job_chain::add_order_from_database_record( Read_transaction* ta, const Record& record )
 {
     string order_id = record.as_string( "id" );
 
@@ -1343,7 +1347,7 @@ bool Job_chain::has_order() const
 
 //---------------------------------------------------------------------------Job_chain::order_count
 
-int Job_chain::order_count( Transaction* ta )
+int Job_chain::order_count( Read_transaction* ta )
 {
     int       result = 0;
     set<Job*> jobs;             // Jobs können (theoretisch) doppelt vorkommen, sollen aber nicht doppelt gezählt werden.
@@ -1359,7 +1363,7 @@ int Job_chain::order_count( Transaction* ta )
         for( Chain::iterator it = _chain.begin(); it != _chain.end(); it++ )
         {
             Job* job = (*it)->_job;
-            if( job  &&  !set_includes( jobs, job ) )  jobs.insert( job ),  result += job->order_queue()->order_count( (Transaction*)NULL, this );
+            if( job  &&  !set_includes( jobs, job ) )  jobs.insert( job ),  result += job->order_queue()->order_count( (Read_transaction*)NULL, this );
         }
     }
 
@@ -1368,7 +1372,7 @@ int Job_chain::order_count( Transaction* ta )
 
 //--------------------------------------------------------------------------Job_chain::has_order_id
 
-bool Job_chain::has_order_id( Transaction* ta, const Order::Id& order_id )
+bool Job_chain::has_order_id( Read_transaction* ta, const Order::Id& order_id )
 {
     Order_map::iterator it = _order_map.find( Order::string_id( order_id ) );
     bool result = it != _order_map.end();
@@ -1539,11 +1543,13 @@ void Order_queue::close()
 
 xml::Element_ptr Order_queue::dom_element( const xml::Document_ptr& document, const Show_what& show, Job_chain* which_job_chain )
 {
+    Read_transaction ta ( _spooler->_db );
+
     xml::Element_ptr element = document.createElement( "order_queue" );
 
     //THREAD_LOCK( _lock )
     {
-        element.setAttribute( "length", order_count( (Transaction*)NULL, which_job_chain ) );   // Datenbank wird nicht gezählt
+        element.setAttribute( "length", order_count( &ta, which_job_chain ) );
 
         //if( Time next = next_time() )
         element.setAttribute( "next_start_time", next_time().as_string() );
@@ -1551,7 +1557,7 @@ xml::Element_ptr Order_queue::dom_element( const xml::Document_ptr& document, co
         if( _is_order_requested )
         element.setAttribute( "order_requested", "yes" );
 
-        if( show & show_orders )
+        if( show.is_set( show_orders ) )
         {
             dom_append_nl( element );
 
@@ -1568,10 +1574,10 @@ xml::Element_ptr Order_queue::dom_element( const xml::Document_ptr& document, co
                 }
             }
 
-            if( remaining  &&  order_subsystem()->are_orders_distributed()  
+            if( remaining > 0  &&  order_subsystem()->are_orders_distributed()  
              &&  _spooler->db()  &&  _spooler->db()->opened()  &&  !_spooler->db()->is_in_transaction() )
             {
-                Transaction ta ( _spooler->db() );
+                Read_transaction ta ( _spooler->db() );
 
                 string w = db_where_expression_for_distributed_orders();
                 if( w != "" )
@@ -1589,21 +1595,26 @@ xml::Element_ptr Order_queue::dom_element( const xml::Document_ptr& document, co
                                 "  order by `distributed_next_time`, `priority`, `ordering`";
 
                     for( Any_file result_set = ta.open_result_set( select_sql, __FUNCTION__ ); 
-                         remaining  &&  !result_set.eof(); 
+                         remaining > 0 &&  !result_set.eof(); 
                          --remaining )
                     {
                         Record record = result_set.get_record();
-                        ptr<Order> order = new Order( _spooler, record, record.as_string( "job_chain" ) );
 
-                        order->load_order_xml_blob( &ta );
-                        if( show & show_payload  )  order->load_payload_blob( &ta );
-                        if( show & show_run_time )  order->load_run_time_blob( &ta );
+                        try
+                        {
+                            ptr<Order> order = new Order( _spooler, record, record.as_string( "job_chain" ) );
 
-                        xml::Element_ptr order_element = order->dom_element( document, show );
-                        order_element.setAttribute_optional( "occupied_by_scheduler_member_id", record.as_string( "occupying_scheduler_member_id" ) );
-                        
-                        element.appendChild( order_element );
-                        dom_append_nl( element );
+                            order->load_order_xml_blob( &ta );
+                            if( show.is_set( show_payload  ) )  order->load_payload_blob( &ta );
+                            if( show.is_set( show_run_time ) )  order->load_run_time_blob( &ta );
+
+                            xml::Element_ptr order_element = order->dom_element( document, show );
+                            order_element.setAttribute_optional( "occupied_by_scheduler_member_id", record.as_string( "occupying_scheduler_member_id" ) );
+                            
+                            element.appendChild( order_element );
+                            dom_append_nl( element );
+                        }
+                        catch( exception& x ) { Z_LOG2( "scheduler", __FUNCTION__ << "  " << x.what() << "\n" ); }  // Auftrag kann inzwischen gelöscht worden sein
                     }
                 }
             }
@@ -1615,7 +1626,7 @@ xml::Element_ptr Order_queue::dom_element( const xml::Document_ptr& document, co
 
 //-------------------------------------------------------------------------Order_queue::order_count
 
-int Order_queue::order_count( Transaction* ta, const Job_chain* which_job_chain )
+int Order_queue::order_count( Read_transaction* ta, const Job_chain* which_job_chain )
 {
     int result = 0;
 
@@ -2176,7 +2187,7 @@ void Order::init()
 
 //--------------------------------------------------------------------------------Order::load_blobs
 
-void Order::load_blobs( Transaction* ta )
+void Order::load_blobs( Read_transaction* ta )
 {
     load_order_xml_blob( ta );
     load_run_time_blob( ta );
@@ -2185,7 +2196,7 @@ void Order::load_blobs( Transaction* ta )
 
 //-----------------------------------------------------------------------Order::load_order_xml_blob
 
-void Order::load_order_xml_blob( Transaction* ta )
+void Order::load_order_xml_blob( Read_transaction* ta )
 {
     string order_xml = db_read_clob( ta, "order_xml" );
     if( order_xml != "" )  set_dom( xml::Document_ptr( order_xml ).documentElement() );
@@ -2193,7 +2204,7 @@ void Order::load_order_xml_blob( Transaction* ta )
 
 //------------------------------------------------------------------------Order::load_run_time_blob
 
-void Order::load_run_time_blob( Transaction* ta )
+void Order::load_run_time_blob( Read_transaction* ta )
 {
     string run_time_xml = db_read_clob( ta, "run_time"  );
     if( run_time_xml != "" )  set_run_time( xml::Document_ptr( run_time_xml ).documentElement() );
@@ -2201,7 +2212,7 @@ void Order::load_run_time_blob( Transaction* ta )
 
 //--------------------------------------------------------------------------------Order::load_blobs
 
-void Order::load_payload_blob( Transaction* ta )
+void Order::load_payload_blob( Read_transaction* ta )
 {
     string payload_string = db_read_clob( ta, "payload"   );
     if( payload_string.find( "<" + Com_variable_set::xml_element_name() ) != string::npos )
@@ -2343,7 +2354,7 @@ bool Order::db_occupy_for_processing()
     else
     {
         _log->debug( message_string( "SCHEDULER-812" ) );
-        db_show_occupation( (Transaction*)NULL, log_debug9 );
+        db_show_occupation( log_debug9 );
     }
 
     return _is_db_occupied;
@@ -2351,16 +2362,18 @@ bool Order::db_occupy_for_processing()
 
 //------------------------------------------------------------------------Order::db_show_occupation
 
-void Order::db_show_occupation( Transaction* outer_transaction, Log_level log_level )
+void Order::db_show_occupation( Log_level log_level )
 {
-    for( Retry_transaction ta ( _spooler->_db, outer_transaction ); ta.enter_loop(); ta++ ) try
+    try
     {
+        Read_transaction ta ( _spooler->db() );
+
         Any_file result_set = ta.open_result_set
             ( 
                 S() << "select `occupying_scheduler_member_id`"
                        "  from " << _spooler->_orders_tablename
                        << db_where_clause().where_string(),
-                __FUNCTION__);
+                __FUNCTION__ );
 
         if( result_set.eof() )
         {
@@ -2373,7 +2386,10 @@ void Order::db_show_occupation( Transaction* outer_transaction, Log_level log_le
             _log->log( log_level, message_string( "SCHEDULER-813", record.as_string(0) ) );
         }
     }
-    catch( exception& x ) { ta.reopen_database_after_error( z::Xc( "SCHEDULER-306", _spooler->_orders_tablename, x  ), __FUNCTION__ ); }
+    catch( exception& x ) 
+    { 
+        _log->error( S() << x.what() << ", in " << __FUNCTION__ );
+    }
 }
 
 //---------------------------------------------------------------------------------Order::db_insert
@@ -2457,7 +2473,7 @@ void Order::db_release_occupation()
             if( !update_ok ) 
             {
                 _log->error( message_string( "SCHEDULER-816" ) );
-                db_show_occupation( &ta, log_error );
+                db_show_occupation( log_error );
             }
 
             _is_db_occupied = false; 
@@ -2573,7 +2589,7 @@ void Order::db_update( Update_option update_option )
             if( _is_db_occupied )
             {
                 _log->error( message_string( "SCHEDULER-816" ) );
-                db_show_occupation( NULL, log_error );
+                db_show_occupation( log_error );
             }
         }
 
@@ -2612,7 +2628,7 @@ void Order::db_fill_stmt( sql::Write_stmt* stmt )
 
 //------------------------------------------------------------------------------Order::db_read_clob
 
-string Order::db_read_clob( Transaction* ta, const string& column_name )
+string Order::db_read_clob( Read_transaction* ta, const string& column_name )
 {
     if( _spooler->_db->db_name() == "" )  z::throw_xc( "SCHEDULER-361", __FUNCTION__ );
 
@@ -2826,7 +2842,7 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
 {
     xml::Element_ptr element = document.createElement( "order" );
 
-    if( show != show_for_database_only )
+    if( !show.is_set( show_for_database_only ) )
     {
         if( !_id.is_empty() )
         {
@@ -2835,7 +2851,7 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
         }
     }
 
-    if( show != show_for_database_only  &&  show != show_id_only )
+    if( !show.is_set( show_for_database_only )  &&  !show.is_set( show_id_only ) )
     {
         if( _setback )
         element.setAttribute( "next_start_time", _setback.as_string() );
@@ -2893,7 +2909,7 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
         if( _is_in_database  &&  _job_chain_name != ""  &&  !_job_chain )
         element.setAttribute( "in_database_only", "yes" );
 
-        if( show & show_payload  &&  !_payload.is_null_or_empty_string()  &&  !_payload.is_missing() )
+        if( show.is_set( show_payload )  &&  !_payload.is_null_or_empty_string()  &&  !_payload.is_missing() )
         {
             xml::Element_ptr payload_element = element.append_new_element( "payload" );
             xml::Node_ptr    payload_content;
@@ -2931,14 +2947,14 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
             payload_element.appendChild( payload_content );
         }
 
-        if( show & show_run_time )  element.appendChild( _run_time->dom_element( document ) );
+        if( show.is_set( show_run_time ) )  element.appendChild( _run_time->dom_element( document ) );
 
-        if( log  &&  show & show_log ) element.append_new_text_element( "log", *log );     // Protokoll aus der Datenbank
+        if( log  &&  show.is_set( show_log ) ) element.append_new_text_element( "log", *log );     // Protokoll aus der Datenbank
         else
         if( _log )  element.appendChild( _log->dom_element( document, show ) );
     }
 
-    if( show & ( show_payload | show_for_database_only )  &&  _xml_payload != "" )
+    if( show.is_set( show_payload | show_for_database_only )  &&  _xml_payload != "" )
     {
         xml::Element_ptr xml_payload_element = element.append_new_element( "xml_payload" );
 

@@ -2436,14 +2436,14 @@ xml::Element_ptr Job::dom_element( const xml::Document_ptr& document, const Show
         }
 */
 
-        if( ( show & show_job_params )  &&  _default_params )  job_element.appendChild( _default_params->dom_element( document, "params", "param" ) );
+        if( show.is_set( show_job_params )  &&  _default_params )  job_element.appendChild( _default_params->dom_element( document, "params", "param" ) );
 
-        if( show & show_run_time )  job_element.appendChild( _run_time->dom_element( document ) );
+        if( show.is_set( show_run_time ) )  job_element.appendChild( _run_time->dom_element( document ) );
 
         dom_append_nl( job_element );
 
 
-        if( show & show_tasks )
+        if( show.is_set( show_tasks ) )
         {
             xml::Element_ptr tasks_element = document.createElement( "tasks" );
             //tasks_element.setAttribute( "count", (int)_running_tasks.size() );
@@ -2469,9 +2469,9 @@ xml::Element_ptr Job::dom_element( const xml::Document_ptr& document, const Show
 
 
 
-        if( show & show_description )  dom_append_text_element( job_element, "description", _description );
+        if( show.is_set( show_description ) )  dom_append_text_element( job_element, "description", _description );
 
-        if( ( show & show_job_commands ) && _commands_document )  
+        if( show.is_set( show_job_commands ) && _commands_document )  
         {
             for( xml::Node_ptr n = _commands_document.documentElement().firstChild(); n; n = n.nextSibling() )
             {
@@ -2485,7 +2485,7 @@ xml::Element_ptr Job::dom_element( const xml::Document_ptr& document, const Show
         dom_append_nl( queue_element );
         job_element.appendChild( queue_element );
 
-        if( (show & show_task_queue)  &&  !_task_queue.empty() )
+        if( show.is_set( show_task_queue )  &&  !_task_queue.empty() )
         {
             FOR_EACH( Task_queue, _task_queue, it )
             {
@@ -2507,7 +2507,7 @@ xml::Element_ptr Job::dom_element( const xml::Document_ptr& document, const Show
             }
         }
 
-        if( show & show_task_history )
+        if( show.is_set( show_task_history ) )
         {
             job_element.appendChild( _history.read_tail( document, -1, -show._max_task_history, show, true ) );
         }
@@ -2515,7 +2515,7 @@ xml::Element_ptr Job::dom_element( const xml::Document_ptr& document, const Show
         if( _order_queue )
         {
             Show_what modified_show = show;
-            if( modified_show & show_job_orders )  modified_show |= show_orders;
+            if( modified_show.is_set( show_job_orders ) )  modified_show |= show_orders;
 
             job_element.appendChild( _order_queue->dom_element( document, modified_show, which_job_chain ) );
         }

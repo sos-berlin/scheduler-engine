@@ -473,7 +473,7 @@ const char file_html_z_left_frame_html[] =
     "if( _checkbox_states.show_job_chain_orders_checkbox || window.parent.details_frame._job_chain_element )\n"
     "{\n"
     "what = \"job_chain_orders order_source_files blacklist\";\n"
-    "max_orders = window.parent.details_frame._job_chain_element? 9999 : _max_orders;\n"
+    "max_orders = window.parent.details_frame._job_chain_element? 100 : _max_orders;\n"
     "}\n"
     "\n"
     "if( _show_card == \"remote_schedulers\" )  what += \" remote_schedulers\";\n"
@@ -2668,7 +2668,7 @@ const char file_html_z_scheduler_xslt[] =
     "<xsl:variable name=\"max_orders\">\n"
     "<xsl:choose>\n"
     "<xsl:when test=\"$single\">\n"
-    "<xsl:text>100</xsl:text>\n"
+    "<xsl:text>30</xsl:text>\n"
     "</xsl:when>\n"
     "<xsl:otherwise>\n"
     "<xsl:value-of select=\"/spooler/@my_max_orders\"/>\n"
@@ -3190,8 +3190,8 @@ const char file_html_z_scheduler_xslt[] =
     "<xsl:if test=\"@length > count( $limited_orders )\">\n"
     "<xsl:variable name=\"remaining\" select=\"@length - count( $limited_orders )\"/>\n"
     "<span style=\"margin-left: 2ex; font-size: 8pt\">\n"
-    "<xsl:text>(possibly</xsl:text>\n"
-    "<!--xsl:value-of select=\"$remaining\"/-->\n"
+    "<xsl:text>(about </xsl:text>\n"
+    "<xsl:value-of select=\"$remaining\"/>\n"
     "<xsl:text> more orders)</xsl:text>\n"
     "</span>\n"
     "</xsl:if>\n"
@@ -3289,6 +3289,12 @@ const char file_html_z_scheduler_xslt[] =
     "<xsl:when test=\"@task\">\n"
     "<span class=\"task\" style=\"white-space: nowrap; font-weight: bold\">\n"
     "Task <xsl:value-of select=\"@task\"/>\n"
+    "&#160;\n"
+    "</span>\n"
+    "</xsl:when>\n"
+    "<xsl:when test=\"@occupied_by_scheduler_member_id\">\n"
+    "<span class=\"remote_scheduler\" style=\"white-space: nowrap; font-size: 8pt\">\n"
+    "Scheduler <xsl:value-of select=\"@occupied_by_scheduler_member_id\"/>\n"
     "&#160;\n"
     "</span>\n"
     "</xsl:when>\n"
@@ -5754,13 +5760,13 @@ static const Embedded_file embedded_files_array[] =
     { "html/favicon.ico", file_html_favicon_ico, sizeof file_html_favicon_ico - 1, 1111073827 },
     { "html/z/details_frame.html", file_html_z_details_frame_html, sizeof file_html_z_details_frame_html - 1, 1162029282 },
     { "html/z/index.html", file_html_z_index_html, sizeof file_html_z_index_html - 1, 1162029282 },
-    { "html/z/left_frame.html", file_html_z_left_frame_html, sizeof file_html_z_left_frame_html - 1, 1162029282 },
+    { "html/z/left_frame.html", file_html_z_left_frame_html, sizeof file_html_z_left_frame_html - 1, 1167400074 },
     { "html/z/browser_dependencies.js", file_html_z_browser_dependencies_js, sizeof file_html_z_browser_dependencies_js - 1, 1162029282 },
     { "html/z/popup_menu.js", file_html_z_popup_menu_js, sizeof file_html_z_popup_menu_js - 1, 1162029282 },
     { "html/z/scheduler.js", file_html_z_scheduler_js, sizeof file_html_z_scheduler_js - 1, 1165219596 },
     { "html/z/show_log.js", file_html_z_show_log_js, sizeof file_html_z_show_log_js - 1, 1162029282 },
     { "html/z/translation_de.js", file_html_z_translation_de_js, sizeof file_html_z_translation_de_js - 1, 1162029282 },
-    { "html/z/scheduler.xslt", file_html_z_scheduler_xslt, sizeof file_html_z_scheduler_xslt - 1, 1167396018 },
+    { "html/z/scheduler.xslt", file_html_z_scheduler_xslt, sizeof file_html_z_scheduler_xslt - 1, 1167401715 },
     { "html/z/scheduler.css", file_html_z_scheduler_css, sizeof file_html_z_scheduler_css - 1, 1162029282 },
     { "html/z/job_scheduler_rabbit_circle_45x45.gif", file_html_z_job_scheduler_rabbit_circle_45x45_gif, sizeof file_html_z_job_scheduler_rabbit_circle_45x45_gif - 1, 1164977749 },
     { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1166748348 },

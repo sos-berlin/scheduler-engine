@@ -674,7 +674,7 @@
         <xsl:variable name="max_orders">
             <xsl:choose>
                 <xsl:when test="$single">
-                    <xsl:text>100</xsl:text>
+                    <xsl:text>30</xsl:text>
                 </xsl:when>
                 <xsl:otherwise>
                     <xsl:value-of select="/spooler/@my_max_orders"/>
@@ -1196,8 +1196,8 @@
         <xsl:if test="@length > count( $limited_orders )">
             <xsl:variable name="remaining" select="@length - count( $limited_orders )"/>
             <span style="margin-left: 2ex; font-size: 8pt">
-                <xsl:text>(possibly</xsl:text>
-                <!--xsl:value-of select="$remaining"/-->
+                <xsl:text>(about </xsl:text>
+                <xsl:value-of select="$remaining"/>
                 <xsl:text> more orders)</xsl:text>
             </span>
         </xsl:if>
@@ -1295,6 +1295,12 @@
                             <xsl:when test="@task">
                                 <span class="task" style="white-space: nowrap; font-weight: bold">
                                     Task <xsl:value-of select="@task"/>
+                                    &#160;
+                                </span>
+                            </xsl:when>
+                            <xsl:when test="@occupied_by_scheduler_member_id">
+                                <span class="remote_scheduler" style="white-space: nowrap; font-size: 8pt">
+                                    Scheduler <xsl:value-of select="@occupied_by_scheduler_member_id"/>
                                     &#160;
                                 </span>
                             </xsl:when>
