@@ -56,11 +56,6 @@
                         <scheduler_ini_entry file="factory.ini" section="spooler" entry="db_check_integrity"/>
                     </li-->
                 </ul>
-                <p>
-                    Die Schwarze Liste der 
-                    <scheduler_a href="file_orders.xml">Dateiaufträge</scheduler_a>
-                    ist ersetzt worden durch suspendierte Aufträge.
-                </p>
             </description>
         </revision>
         

@@ -102,7 +102,7 @@ struct File_order_sink_module_instance : Internal_module_instance
                     order->log()->warn( x.what() );     // Nicht error(), damit der Job nicht stoppt
                 }
 
-                if( result == false )  order->add_to_blacklist();
+                if( result == false )  order->set_on_blacklist();
             }
 
             order->set_end_state_reached();
@@ -414,7 +414,7 @@ bool Directory_file_order_source::request_order( const string& cause )
     {
         Z_LOG2( "scheduler.file_order", __FUNCTION__ << " cause=" << cause << "\n" );
 
-        async_wake();
+        async_wake();          int WIRD_DAS_PAUSENLOS_GERUFEN;
         //Order* order = read_directory( false, cause );
         //if( order )  
         //{
@@ -593,8 +593,8 @@ Order* Directory_file_order_source::read_directory( bool was_notified, const str
 
 void Directory_file_order_source::read_new_files_and_handle_deleted_files( const string& cause )
 {
-    hash_set<string>            removed_blacklist_files;
-    hash_set<string>            virgin_known_files;
+    hash_set<string> removed_blacklist_files;
+    hash_set<string> virgin_known_files;
 
 
     Z_LOG2( "scheduler.file_order", __FUNCTION__ << "  " << _path << " wird gelesen wegen \"" << cause << "\" ...\n" );
@@ -605,7 +605,7 @@ void Directory_file_order_source::read_new_files_and_handle_deleted_files( const
     _new_files_index = 0;
     _new_files_time = Time::now();
 
-    Z_FOR_EACH( Job_chain::Blacklist_map, _job_chain->_blacklist_map, it )  removed_blacklist_files.insert( it->first );
+    Z_FOR_EACH( Job_chain::Blacklist_map, _job_chain->_blacklist_map, it )  removed_blacklist_files.insert( it->first );         int BLACKLIST;
 
 
     for( Directory_watcher::Directory_reader dir ( _path, _regex_string == ""? NULL : &_regex );; )

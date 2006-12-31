@@ -27,8 +27,9 @@ namespace scheduler {
 const int    check_database_orders_period           = 15;
 const int    check_database_orders_period_minimum   = 1;
 const int    database_orders_read_ahead_count       = 1;
-const string now_database_distributed_next_time     = "2000-01-01 00:00:00";        // Auftrag ist verteilt und ist sofort ausführbar
-const string never_database_distributed_next_time   = "2999-12-31 00:00:00";        // Auftrag ist verteilt, hat aber keine Startzeit (weil z.B. suspendiert)
+const string now_database_distributed_next_time       = "2000-01-01 00:00:00";        // Auftrag ist verteilt und ist sofort ausführbar
+const string never_database_distributed_next_time     = "2999-12-31 00:00:00";        // Auftrag ist verteilt, hat aber keine Startzeit (weil z.B. suspendiert)
+const string blacklist_database_distributed_next_time = "2999-12-31 00:01:00";        // Auftrag ist auf der schwarzen Liste
 const string default_end_state_name                 = "<END_STATE>";
 const string order_select_database_columns          = "`id`, `priority`, `state`, `state_text`, `initial_state`, `title`, `created_time`";
 
@@ -63,6 +64,7 @@ struct Database_order_detector : Async_operation, Scheduler_object
     Time                       _now;                        // Zeitpunkt von async_continue_()
     Time                       _now_database_distributed_next_time;
     Time                       _never_database_distributed_next_time;
+    Time                       _blacklist_database_distributed_next_time;
     int                        _next_check_period;
   //stdext::hash_set<string>   _names_of_requesting_jobs;
 };
@@ -391,6 +393,7 @@ Database_order_detector::Database_order_detector( Spooler* spooler )
 {
     _now_database_distributed_next_time  .set_datetime( now_database_distributed_next_time   );
     _never_database_distributed_next_time.set_datetime( never_database_distributed_next_time );
+    _blacklist_database_distributed_next_time.set_datetime( blacklist_database_distributed_next_time );
 }
 
 //---------------------------------------------------------Database_order_detector::async_finished_
@@ -567,7 +570,7 @@ int Database_order_detector::read_result_set( Read_transaction* ta, const string
 
         distributed_next_time.set_datetime( record.as_string( "distributed_next_time" ) );
         if( distributed_next_time == _now_database_distributed_next_time   )  distributed_next_time.set_null();
-        if( distributed_next_time == _never_database_distributed_next_time )  distributed_next_time.set_never();
+        if( distributed_next_time >= _never_database_distributed_next_time )  distributed_next_time.set_never();
         
         job->order_queue()->set_next_announced_order_time( distributed_next_time, distributed_next_time <= _now );
         
@@ -833,14 +836,18 @@ void Job_chain::set_dom( const xml::Element_ptr& element )
 
     DOM_FOR_EACH_ELEMENT( element, e )
     {
-        if( e.nodeName_is( "file_order_source" ) )
+        if( e.nodeName_is( "file_order_source" ) )      // Wegen _on_blacklist und _is_virgin
         {
+            if( _is_distributed )  z::throw_xc( "SCHEDULER-382", obj_name() );
+
             ptr<Directory_file_order_source> d = Z_NEW( Directory_file_order_source( this, e ) );
             _order_sources._order_source_list.push_back( +d );
         }
         else
         if( e.nodeName_is( "file_order_sink" ) )
         {
+            if( _is_distributed )  z::throw_xc( "SCHEDULER-382", obj_name() );  // Wegen blacklist
+
             string state = e.getAttribute( "state" );
 
             bool can_be_not_initialized = true;
@@ -1162,7 +1169,7 @@ void Job_chain::add_order( Order* order )
     set_visible( true );
 
     Job_chain_node* node = node_from_state( order->_state );
-    if( !order->_suspended  &&  !node->_job )  z::throw_xc( "SCHEDULER-149", name(), debug_string_from_variant(order->_state) );
+    if( ( !order->_suspended || !order->_on_blacklist )  &&  !node->_job )  z::throw_xc( "SCHEDULER-149", name(), debug_string_from_variant(order->_state) );
     if( node->_job )  assert( node->_job->order_queue() );
 
     order->_job_chain      = this;
@@ -1175,8 +1182,8 @@ void Job_chain::add_order( Order* order )
 
     register_order( order );
 
-    if( node->_job )  node->_job->order_queue()->add_order( order );
-                else  add_to_blacklist( order );
+    if( order->_on_blacklist || !node->_job )  add_to_blacklist( order );
+                                         else  node->_job->order_queue()->add_order( order );
 }
 
 //--------------------------------------------------------------------------Job_chain::remove_order
@@ -1418,10 +1425,12 @@ void Job_chain::unregister_order( Order* order )
 
 void Job_chain::add_to_blacklist( Order* order )
 {
-    order->assert_is_not_distributed( __FUNCTION__ );
+    //if( order->_suspended || !node_from_state_or_null( order->_state ) || !node_from_state_or_null( order->_state )->_job )  z::throw_xc( __FUNCTION__ );
 
     _blacklist_map[ order->string_id() ] = order;
+
     order->_on_blacklist = true;
+    order->_order_xml_modified = true;
 }
 
 //-----------------------------------------------------------------Job_chain::remove_from_blacklist
@@ -1943,9 +1952,7 @@ Order* Order_queue::load_and_occupy_next_distributed_order_from_database( Task* 
 
         for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
         {
-            bool transaction_written = true;
-
-            Any_file result_set = ta.open_result_set( select_sql, __FUNCTION__, transaction_written );
+            Any_file result_set = ta.open_commitable_result_set( select_sql, __FUNCTION__ );
             if( !result_set.eof() )
             {
                 Record record = result_set.get_record();
@@ -2624,11 +2631,18 @@ void Order::db_fill_stmt( sql::Write_stmt* stmt )
 
     if( _is_distributed )
     {
-        Time next_time = this->next_time().rounded_to_next_second();
+        if( _on_blacklist )
+        {
+            t = blacklist_database_distributed_next_time;
+        }
+        else
+        {
+            Time next_time = this->next_time().rounded_to_next_second();
 
-        t = next_time.is_null ()? now_database_distributed_next_time :
-            next_time.is_never()? never_database_distributed_next_time 
-                                : next_time.as_string( Time::without_ms );
+            t = next_time.is_null ()? now_database_distributed_next_time :
+                next_time.is_never()? never_database_distributed_next_time 
+                                    : next_time.as_string( Time::without_ms );
+        }
     }
 
     if( stmt->is_update()  ||  t != "" )  stmt->set_datetime( "distributed_next_time", t );
@@ -2993,8 +3007,8 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
     if( _http_operation  &&  _http_operation->web_service_operation_or_null() )
     element.setAttribute( "web_service_operation", _http_operation->web_service_operation_or_null()->id() );
 
-    if( _suspended )
-    element.setAttribute( "suspended", "yes" );
+    if( _on_blacklist )  element.setAttribute( "on_blacklist", "yes" );
+    if( _suspended )  element.setAttribute( "suspended", "yes" );
 
     return element;
 }
@@ -3764,7 +3778,7 @@ void Order::postprocessing2( Job* last_job )
         if( is_file_order()  &&  file_exists( file_path() ) )
         {
             _log->error( message_string( "SCHEDULER-340" ) );
-            _suspended = true;//add_to_blacklist();
+            if( _job_chain )  _job_chain->add_to_blacklist( this );
         }
 
         try
@@ -3778,10 +3792,10 @@ void Order::postprocessing2( Job* last_job )
     }
 
 
-    if( _suspended  &&  ( !_job_chain_node  ||  !_job_chain_node->_job ) )
-    //if( end_state_reached()  &&  _suspended )
+    if( _suspended  &&  _job_chain  &&  ( !_job_chain_node  ||  !_job_chain_node->_job ) )
+    //if( _suspended  &&  end_state_reached() )
     {
-        add_to_blacklist();
+        _job_chain->add_to_blacklist( this );
     }
 
 
@@ -3815,31 +3829,20 @@ void Order::postprocessing2( Job* last_job )
 
 void Order::set_suspended( bool suspended )
 {
+    if( suspended  &&  !_job_chain )  z::throw_xc( "SCHEDULER-157", obj_name(), __FUNCTION__ );
+
     if( _suspended != suspended )
     {
         _suspended = suspended;
         _order_xml_modified = true;
 
-        if( _on_blacklist  &&  !_suspended )  remove_from_job_chain();
+        if( _on_blacklist  &&  !suspended )  remove_from_job_chain();
         else
         if( _in_job_queue )  order_queue()->reinsert_order( this );
 
         if( _suspended )  _log->info( message_string( "SCHEDULER-991" ) );
                     else  _log->info( message_string( "SCHEDULER-992", _setback ) );
     }
-}
-
-//--------------------------------------------------------------------------Order::add_to_blacklist
-
-void Order::add_to_blacklist()
-{ 
-    assert( _suspended );
-    //assert_is_not_distributed( __FUNCTION__ );
-
-    assert( _job_chain );
-    if( _in_job_queue )  remove_from_job();
-
-    _job_chain->add_to_blacklist( this ); 
 }
 
 //---------------------------------------------------------------------------------Order::start_now
@@ -4008,6 +4011,15 @@ void Order::set_run_time( const xml::Element_ptr& e )
 
     if( e )  _run_time->set_dom( e );       // Ruft set_setback() über modify_event()
        else  run_time_modified_event();
+}
+
+//--------------------------------------------------------------------------Order::set_on_blacklist
+
+void Order::set_on_blacklist()
+{
+    if( !_job_chain )  z::throw_xc( __FUNCTION__, "no _job_chain" );        // Wenn _is_distributed
+
+    _job_chain->add_to_blacklist( this );
 }
 
 //-------------------------------------------------------------------------------Order::web_service

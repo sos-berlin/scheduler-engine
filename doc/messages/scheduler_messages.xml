@@ -2391,6 +2391,12 @@
                 <title>Scheduler is not activated (in backup mode) and can not execute the operation</title>
             </text>
         </message>
+
+        <message code="SCHEDULER-382">
+            <text xml:lang="en">
+                <title>File orders can not be distributed</title>
+            </text>
+        </message>
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->
@@ -3333,7 +3339,7 @@
 
         <message code="SCHEDULER-833" weight="info">
             <text xml:lang="en">
-                <title>Watching heart beat of that exclusive Scheduler, ready to take over operation</title>
+                <title>Watching heart beat of that exclusive Scheduler, standing by to take over operation</title>
             </text>
         </message>
 

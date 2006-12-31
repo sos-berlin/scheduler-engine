@@ -2156,7 +2156,7 @@ bool Spooler::are_orders_distributed()
 
 void Spooler::assert_are_orders_distributed( const string& text )
 {
-    if( !are_orders_distributed() )  z::throw_xc( "SCHEDULER-370xx", text );
+    if( !are_orders_distributed() )  z::throw_xc( "SCHEDULER-370", text );
 }
 
 //---------------------------------------------------------------------Spooler::scheduler_member_id
@@ -2272,14 +2272,14 @@ void Spooler::stop( const exception* )
 
         if( _terminate_shutdown )  
         {
-            //_distributed_scheduler->mark_begin_of_shutdown();
+            _distributed_scheduler->shutdown();
 
             if( _terminate_all_schedulers )
             {
-                _distributed_scheduler->set_command_for_all_inactive_schedulers_but_me( (Transaction*)NULL, Distributed_scheduler::cmd_terminate );
+                _distributed_scheduler->set_command_for_all_schedulers_but_me( (Transaction*)NULL, Distributed_scheduler::cmd_terminate );
             }
-
-            _distributed_scheduler->shutdown();
+            else
+                _distributed_scheduler->set_command_for_all_active_schedulers_but_me( (Transaction*)NULL, Distributed_scheduler::cmd_terminate );
         }
     }
 

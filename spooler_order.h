@@ -137,6 +137,8 @@ struct Order : Com_order,
     bool                        suspended               ()                                          { return _suspended; }
     void                    set_suspended               ( bool b = true );
 
+    void                        set_on_blacklist        ();
+
     void                        inhibit_distribution    ()                                          { _is_distribution_inhibited = true; }
     void                        assert_is_not_distributed  ( const string& debug_text );
 
@@ -158,7 +160,6 @@ struct Order : Com_order,
     void                        remove_from_job_chain   ();
     void                        remove_from_job         ();
     bool                        tip_own_job_for_new_order_state();
-    void                        add_to_blacklist        ();
     void                        move_to_node            ( Job_chain_node* );
     void                        postprocessing          ( bool success );                           // Verarbeitung nach spooler_process()
     void                        processing_error        ();

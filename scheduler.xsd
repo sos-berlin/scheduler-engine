@@ -86,6 +86,7 @@
                 <xsd:element ref="show_job_chain"/>
                 <xsd:element ref="show_order"/>
                 <xsd:element ref="s"/>
+                <xsd:element ref="show_schedulers"/>
                 <xsd:element ref="show_state"/>
                 <xsd:element ref="show_task"/>
                 <xsd:element ref="service_request"/>
@@ -121,6 +122,7 @@
             <xsd:element ref="show_job_chain"/>
             <xsd:element ref="show_order"/>
             <xsd:element ref="s"/>
+            <xsd:element ref="show_schedulers"/>
             <xsd:element ref="show_state"/>
             <xsd:element ref="show_task"/>
             <xsd:element ref="service_request"/>
@@ -922,7 +924,10 @@
         </xsd:complexType>
     </xsd:element>
 
-    
+
+    <xsd:element name="show_schedulers" type="Show_state"/>
+
+
     <xsd:element name="show_state" type="Show_state"/>
 
 

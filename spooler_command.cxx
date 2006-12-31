@@ -336,6 +336,21 @@ xml::Element_ptr Command_processor::execute_modify_job( const xml::Element_ptr& 
     return _answer.createElement( "ok" );
 }
 
+//-------------------------------------------------------Command_processor::execute_show_schedulers
+
+xml::Element_ptr Command_processor::execute_show_schedulers( const xml::Element_ptr& element, const Show_what& show )
+{
+    if( _security_level < Security::seclev_info )  z::throw_xc( "SCHEDULER-121" );
+
+    xml::Element_ptr result = _answer.createElement( "schedulers" );
+
+    if( _spooler->_distributed_scheduler )  result.appendChild( _spooler->_distributed_scheduler->dom_element( _answer, show ) );
+
+    result.appendChild( _spooler->_remote_scheduler_register.dom_element( _answer, show ) );
+    
+    return result;
+}
+
 //-------------------------------------------------------------Command_processor::execute_show_task
 
 xml::Element_ptr Command_processor::execute_show_task( const xml::Element_ptr& element, const Show_what& show )
@@ -944,6 +959,8 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     if( element.nodeName_is( "show_jobs"        ) )  return execute_show_jobs( show );
     else
     if( element.nodeName_is( "start_job"        ) )  return execute_start_job( element );
+    else
+    if( element.nodeName_is( "show_schedulers"  ) )  return execute_show_schedulers( element, show );
     else
     if( element.nodeName_is( "show_task"        ) )  return execute_show_task( element, show );
     else

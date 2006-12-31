@@ -1890,7 +1890,7 @@ void Task::trigger_event( Scheduler_event* scheduler_event )
 //----------------------------------------------------------------------Task::wait_until_terminated
 // Anderer Thread
 
-bool Task::wait_until_terminated( double wait_time )
+bool Task::wait_until_terminated( double )
 {
     z::throw_xc( "SCHEDULER-125" );     // Deadlock
     return false;

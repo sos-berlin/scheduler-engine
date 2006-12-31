@@ -209,6 +209,7 @@ struct Command_processor
   //xml::Element_ptr            execute_show_job            ( Job* );
     xml::Element_ptr            execute_modify_job          ( const xml::Element_ptr& );
     xml::Element_ptr            execute_start_job           ( const xml::Element_ptr& );
+    xml::Element_ptr            execute_show_schedulers     ( const xml::Element_ptr&, const Show_what& );
     xml::Element_ptr            execute_show_task           ( const xml::Element_ptr&, const Show_what& );
     xml::Element_ptr            execute_kill_task           ( const xml::Element_ptr& );
     xml::Element_ptr            execute_modify_spooler      ( const xml::Element_ptr& );

@@ -205,7 +205,15 @@ string Read_transaction::file_as_string( const string& hostware_filename )
     if( _db->db_name() == "" )  z::throw_xc( "SCHEDULER-361", __FUNCTION__ );
 
     //set_transaction_read();
-    return ::sos::file_as_string( _db->db_name() + hostware_filename );
+    try
+    {
+        return ::sos::file_as_string( _db->db_name() + hostware_filename );
+    }
+    catch( exception& x )
+    {
+        _log->log( _spooler->_db_log_level, S() << x.what() << ", when reading blob: " << hostware_filename );
+        throw;
+    }
 }
 
 //-------------------------------------------------------------------------Transaction::Transaction
@@ -626,8 +634,7 @@ void Database::add_column( Transaction* ta, const string& table_name, const stri
     {
         //Transaction ta ( this );
 
-        bool is_write_operation = false;
-        Any_file select = ta->open_file( "-in " + db_name() + " -max-length=1K -read-transaction", "select `" + column_name + "` from " + table_name + " where 1=0", "add_column", is_write_operation );
+        Any_file select = ta->open_commitable_file( "-in " + db_name() + " -max-length=1K -read-transaction", "select `" + column_name + "` from " + table_name + " where 1=0", "add_column" );
     }
     catch( exception& x )
     {
@@ -1117,8 +1124,8 @@ int Database::get_id_( const string& variable_name, Transaction* outer_transacti
         {
             for( int tries = 2; tries > 0; tries-- )
             {
-                Any_file sel = ta.open_result_set( "select `wert`  from " + _spooler->_variables_tablename + " %update_lock  where `name`=" + sql::quoted( variable_name ), 
-                                                   __FUNCTION__, true );
+                Any_file sel = ta.open_commitable_result_set( "select `wert`  from " + _spooler->_variables_tablename + " %update_lock  where `name`=" + sql::quoted( variable_name ), 
+                                                              __FUNCTION__ );
                 if( !sel.eof() )
                 {
                     id = sel.get_record().as_int(0) + 1;
@@ -1256,8 +1263,8 @@ void Transaction::execute( const string& stmt, const string& debug_text, bool fo
             // Besser Fehler melden (mit Andreas klären)
             //_log->warn( stmt );
             //_log->error( x.what() );
-            _log->debug( native_sql + debug_extra );
-            _log->debug( x.what() );
+            _log->log( _spooler->_db_log_level, native_sql + debug_extra );
+            _log->log( _spooler->_db_log_level, x.what() );
 
             x.append_text( debug_text );
             throw;
@@ -1267,8 +1274,8 @@ void Transaction::execute( const string& stmt, const string& debug_text, bool fo
             // Besser Fehler melden (mit Andreas klären)
             //_log->warn( stmt );
             //_log->error( x.what() );
-            _log->debug( native_sql + debug_extra );
-            _log->debug( x.what() );
+            _log->log( _spooler->_db_log_level, native_sql + debug_extra );
+            _log->log( _spooler->_db_log_level, x.what() );
 
             throw;
         }
@@ -1393,9 +1400,20 @@ void Transaction::update_clob( const string& table_name, const string& column_na
 
 void Transaction::update_clob( const string& table_name, const string& column_name, const string& value, const string& where )
 {
-    Any_file clob = open_file( "-out " + db()->db_name(), "-table=" + table_name + " -clob=" + column_name + "  " + where );
-    clob.put( value );
-    clob.close();
+    string hostware_filename = S() << "-table=" << table_name << " -clob=" << column_name << "  " << where;
+
+    Any_file clob = open_file( "-out " + db()->db_name(), hostware_filename );
+
+    try
+    {
+        clob.put( value );
+        clob.close();
+    }
+    catch( exception& x )
+    {
+        _log->log( _spooler->_db_log_level, S() << x.what() << ", when writing clob: " << hostware_filename );
+        throw;
+    }
 }
 
 //--------------------------------------------------------------------Database::write_order_history

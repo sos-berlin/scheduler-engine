@@ -74,8 +74,9 @@ struct Distributed_scheduler : Async_operation, Scheduler_object
     bool                        do_a_heart_beat             ();
     void                        show_exclusive_scheduler    ( Transaction* ta )                     { show_active_schedulers( ta, true ); }
     void                        show_active_schedulers      ( Transaction*, bool exclusive_only = false );
-    void                        set_command_for_all_inactive_schedulers_but_me( Transaction*, Command );
-    void                        set_command_for_all_schedulers_but_me( Transaction*, Command );
+  //void                        set_command_for_all_inactive_schedulers_but_me( Transaction*, Command );
+    void                        set_command_for_all_active_schedulers_but_me  ( Transaction*, Command );
+    void                        set_command_for_all_schedulers_but_me         ( Transaction*, Command );
 
     string                      http_url_of_member_id       ( const string& scheduler_member_id );
     Scheduler_member*           scheduler_member_or_null    ( const string& scheduler_member_id );
@@ -83,6 +84,10 @@ struct Distributed_scheduler : Async_operation, Scheduler_object
   //string                      scheduler_up_variable_name  ();
     void                        check_member_id             ();
     bool                        check_schedulers_heart_beat ();
+
+    xml::Document_ptr           my_member_dom_document      ();
+    xml::Element_ptr            my_member_dom_element       ( const xml::Document_ptr& );
+    xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
 
   protected:
     void                        create_table_when_needed    ();

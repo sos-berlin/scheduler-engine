@@ -3221,7 +3221,7 @@ const char file_html_z_scheduler_xslt[] =
     "<xsl:element name=\"td\">\n"
     "<xsl:attribute name=\"style\">\n"
     "white-space: nowrap;\n"
-    "<xsl:if test=\"@task\">font-weight: bold;</xsl:if>\n"
+    "<xsl:if test=\"@task or @occupied_by_scheduler_member_id\">font-weight: bold;</xsl:if>\n"
     "</xsl:attribute>\n"
     "\n"
     "<!--xsl:if test=\"@replacement\">\n"
@@ -3249,7 +3249,7 @@ const char file_html_z_scheduler_xslt[] =
     "<xsl:element name=\"td\">\n"
     "<xsl:attribute name=\"align\">left</xsl:attribute>\n"
     "<xsl:attribute name=\"style\">\n"
-    "<xsl:if test=\"@task\">font-weight: bold;</xsl:if>\n"
+    "<xsl:if test=\"@task or @occupied_by_scheduler_member_id\">font-weight: bold;</xsl:if>\n"
     "<xsl:text>padding-left: 2ex;</xsl:text>\n"
     "<xsl:value-of select=\"$order_style\"/>\n"
     "</xsl:attribute>\n"
@@ -3284,10 +3284,10 @@ const char file_html_z_scheduler_xslt[] =
     "</xsl:if>\n"
     "</xsl:element>\n"
     "\n"
-    "<td>\n"
+    "<td style=\"text-align: right\">\n"
     "<xsl:choose>\n"
     "<xsl:when test=\"@task\">\n"
-    "<span class=\"task\" style=\"white-space: nowrap; font-weight: bold\">\n"
+    "<span class=\"task\" style=\"white-space: nowrap; font-size: 8pt;\">\n"
     "Task <xsl:value-of select=\"@task\"/>\n"
     "</span>\n"
     "</xsl:when>\n"
@@ -4465,8 +4465,6 @@ const char file_html_z_scheduler_xslt[] =
     "</xsl:choose>\n"
     "</xsl:template>\n"
     "\n"
-    "<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->\n"
-    "\n"
     "</xsl:stylesheet>\n"
     "";
 
@@ -4662,6 +4660,7 @@ const char file_scheduler_xsd[] =
     "<xsd:element ref=\"show_job_chain\"/>\n"
     "<xsd:element ref=\"show_order\"/>\n"
     "<xsd:element ref=\"s\"/>\n"
+    "<xsd:element ref=\"show_schedulers\"/>\n"
     "<xsd:element ref=\"show_state\"/>\n"
     "<xsd:element ref=\"show_task\"/>\n"
     "<xsd:element ref=\"service_request\"/>\n"
@@ -4697,6 +4696,7 @@ const char file_scheduler_xsd[] =
     "<xsd:element ref=\"show_job_chain\"/>\n"
     "<xsd:element ref=\"show_order\"/>\n"
     "<xsd:element ref=\"s\"/>\n"
+    "<xsd:element ref=\"show_schedulers\"/>\n"
     "<xsd:element ref=\"show_state\"/>\n"
     "<xsd:element ref=\"show_task\"/>\n"
     "<xsd:element ref=\"service_request\"/>\n"
@@ -5499,6 +5499,9 @@ const char file_scheduler_xsd[] =
     "</xsd:element>\n"
     "\n"
     "\n"
+    "<xsd:element name=\"show_schedulers\" type=\"Show_state\"/>\n"
+    "\n"
+    "\n"
     "<xsd:element name=\"show_state\" type=\"Show_state\"/>\n"
     "\n"
     "\n"
@@ -5832,10 +5835,10 @@ static const Embedded_file embedded_files_array[] =
     { "html/z/scheduler.js", file_html_z_scheduler_js, sizeof file_html_z_scheduler_js - 1, 1165219596 },
     { "html/z/show_log.js", file_html_z_show_log_js, sizeof file_html_z_show_log_js - 1, 1162029282 },
     { "html/z/translation_de.js", file_html_z_translation_de_js, sizeof file_html_z_translation_de_js - 1, 1162029282 },
-    { "html/z/scheduler.xslt", file_html_z_scheduler_xslt, sizeof file_html_z_scheduler_xslt - 1, 1167428434 },
+    { "html/z/scheduler.xslt", file_html_z_scheduler_xslt, sizeof file_html_z_scheduler_xslt - 1, 1167467512 },
     { "html/z/scheduler.css", file_html_z_scheduler_css, sizeof file_html_z_scheduler_css - 1, 1167426577 },
     { "html/z/job_scheduler_rabbit_circle_45x45.gif", file_html_z_job_scheduler_rabbit_circle_45x45_gif, sizeof file_html_z_job_scheduler_rabbit_circle_45x45_gif - 1, 1164977749 },
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1166748348 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1167566095 },
     { NULL, NULL, 0 }
 };
 
