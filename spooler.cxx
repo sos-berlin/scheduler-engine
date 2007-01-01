@@ -747,8 +747,9 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
     if( _last_resume_at  &&  _last_resume_at != Time::never )
     state_element.setAttribute( "resume_at", _last_resume_at.as_string() );
 
-    state_element.setAttribute( "active"   , is_active() );
-    state_element.setAttribute( "exclusive", has_exclusiveness() );
+    if( _distributed_scheduler )  state_element.setAttribute( "distributed", "yes" );
+    if( is_active()            )  state_element.setAttribute( "active"     , "yes" );
+    if( has_exclusiveness()    )  state_element.setAttribute( "exclusive"  , "yes" );
 
 #   ifdef Z_UNIX
     {
@@ -788,6 +789,7 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
     }
 
     state_element.appendChild( _remote_scheduler_register.dom_element( dom, show ) );
+    if( show.is_set( show_distributed_scheduler )  &&  _distributed_scheduler )  state_element.appendChild( _distributed_scheduler->dom_element( dom, show ) );
     state_element.appendChild( _communication.dom_element( dom, show ) );
     state_element.append_new_text_element( "operations", "\n" + _connection_manager->string_from_operations( "\n" ) + "\n" );
     state_element.appendChild( _web_services.dom_element( dom, show ) );

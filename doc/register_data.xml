@@ -634,10 +634,15 @@
     <register_entry register_file='xml/answer/remote_scheduler.xml#attribute_disconnected_at' register_title='&lt;remote_scheduler&gt; (Antwort)'  register_keyword='disconnected_at' type='definition'/>
 </register_keyword>
 <register_keyword keyword='distributed'>
-    <register_keyword_display><code>-distributed=</code></register_keyword_display>
-    <register_entry register_file='CHANGES.xml#use_option__distributed' register_title='Änderungsprotokoll'  register_keyword='distributed'/>
-    <register_entry register_file='command_line.xml#option_distributed' register_title='Kommandozeilenoptionen'  register_keyword='distributed' type='definition'/>
-    <register_entry register_file='command_line.xml#use_option__distributed' register_title='Kommandozeilenoptionen'  register_keyword='distributed'/>
+    <register_keyword_display><code>distributed=</code></register_keyword_display>
+    <register_entry register_file='xml/job_chain.xml#attribute_distributed' register_title='&lt;job_chain&gt; (Konfiguration)'  register_keyword='distributed' type='definition'/>
+</register_keyword>
+<register_keyword keyword='distributed-orders'>
+    <register_keyword_display><code>-distributed-orders=</code></register_keyword_display>
+    <register_entry register_file='CHANGES.xml#use_option__distributed-orders' register_title='Änderungsprotokoll'  register_keyword='distributed-orders'/>
+    <register_entry register_file='command_line.xml#option_distributed-orders' register_title='Kommandozeilenoptionen'  register_keyword='distributed-orders' type='definition'/>
+    <register_entry register_file='command_line.xml#use_option__distributed-orders' register_title='Kommandozeilenoptionen'  register_keyword='distributed-orders'/>
+    <register_entry register_file='xml/job_chain.xml#use_option__distributed-orders' register_title='&lt;job_chain&gt; (Konfiguration)'  register_keyword='distributed-orders'/>
 </register_keyword>
 <register_keyword keyword='Eclipse'>
     <register_entry register_file='api/Spooler_program.xml' register_title='Spooler_program'  register_keyword='Eclipse'/>

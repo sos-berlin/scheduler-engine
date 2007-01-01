@@ -59,10 +59,12 @@ td.after_head_space     { margin-top: 0; margin-bottom: 0pt; line-height: 4pt; }
 
 .remote_scheduler               { background-color: #ffffa0 }
 .remote_scheduler_hover         { background-color: #efef8f; }
-a.remote_scheduler:link         { text-decoration: none; color: inherit; background-color: inherit; }
-a.remote_scheduler:active       { text-decoration: none; color: inherit; background-color: inherit; }
-a.remote_scheduler:visited      { text-decoration: none; color: inherit; background-color: inherit; }
-a.remote_scheduler:hover        { text-decoration: none; color: inherit; background-color: #efef8f; }
+
+.distributed_scheduler               { background-color: #ffffa0 }
+a.distributed_scheduler:link         { text-decoration: none; color: inherit; background-color: inherit; }
+a.distributed_scheduler:active       { text-decoration: none; color: inherit; background-color: inherit; }
+a.distributed_scheduler:visited      { text-decoration: none; color: inherit; background-color: inherit; }
+a.distributed_scheduler:hover        { text-decoration: none; color: inherit; background-color: #efef8f; }
 
 /* Anklickbar */
 .hover                  { text-decoration: underline }

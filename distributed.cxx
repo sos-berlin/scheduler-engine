@@ -55,9 +55,10 @@ struct Scheduler_member : Object, Scheduler_object
     bool                       _is_active;
     bool                       _is_checked;
     string                     _deactivating_member_id;
-    time_t                     _last_heart_beat_db;
-    time_t                     _next_heart_beat_db;
+    time_t                     _db_last_heart_beat;
+    time_t                     _db_next_heart_beat;
     time_t                     _last_heart_beat_detected;
+    int                        _heart_beat_count;
     string                     _http_url;
     bool                       _scheduler_993_logged;
     Distributed_scheduler*     _distributed_scheduler;
@@ -173,7 +174,7 @@ bool Scheduler_member::check_heart_beat( time_t now_before_select, const Record&
 
     if( !is_empty_member() )
     {
-        if( _last_heart_beat_db == 0  &&  _distributed_scheduler->_my_scheduler != this )     // Neu entdeckt?
+        if( _db_last_heart_beat == 0  &&  _distributed_scheduler->_my_scheduler != this )     // Neu entdeckt?
         {
             log()->info( message_string( _distributed_scheduler->_demand_exclusiveness && _is_exclusive? "SCHEDULER-833" : "SCHEDULER-820" ) );
         }
@@ -182,7 +183,7 @@ bool Scheduler_member::check_heart_beat( time_t now_before_select, const Record&
         time_t next_heart_beat = record.null( "next_heart_beat" )? 0 : record.as_int64( "next_heart_beat" );
 
 
-        if( last_heart_beat != _last_heart_beat_db )   // Neuer Herzschlag oder neu entdeckter Scheduler?
+        if( last_heart_beat != _db_last_heart_beat )   // Neuer Herzschlag oder neu entdeckter Scheduler?
         {
             time_t now = ::time(NULL);
             if( _is_dead )
@@ -191,6 +192,7 @@ bool Scheduler_member::check_heart_beat( time_t now_before_select, const Record&
                 on_resurrection();
             }
 
+            if( _last_heart_beat_detected )  _heart_beat_count++;   // Den ersten Durchlauf zählen wir nicht, denn dann haben wir noch keinen Herzschlag
             _last_heart_beat_detected = now;
         }
         else
@@ -222,8 +224,8 @@ bool Scheduler_member::check_heart_beat( time_t now_before_select, const Record&
             }
         }
 
-        _last_heart_beat_db = last_heart_beat;
-        _next_heart_beat_db = next_heart_beat;
+        _db_last_heart_beat = last_heart_beat;
+        _db_next_heart_beat = next_heart_beat;
     }
 
     return result;
@@ -434,8 +436,8 @@ bool Scheduler_member::mark_as_inactive( bool delete_inactive_record, bool delet
 //            
 //            if( !from->is_empty_member() )
 //            {
-//                update.and_where_condition( "last_heart_beat", from->_last_heart_beat_db );
-//                update.and_where_condition( "next_heart_beat", from->_next_heart_beat_db );
+//                update.and_where_condition( "last_heart_beat", from->_db_last_heart_beat );
+//                update.and_where_condition( "next_heart_beat", from->_db_next_heart_beat );
 //            }
 //
 //            ok = ta.try_execute_single( update, __FUNCTION__ );
@@ -499,16 +501,40 @@ bool Scheduler_member::mark_as_inactive( bool delete_inactive_record, bool delet
 
 //--------------------------------------------------------------------Scheduler_member::dom_element
 
-xml::Element_ptr Scheduler_member::dom_element( const xml::Document_ptr& dom_document, const Show_what& show_what )
+xml::Element_ptr Scheduler_member::dom_element( const xml::Document_ptr& dom_document, const Show_what& )
 {
-    xml::Element_ptr result = dom_document.createElement( "scheduler_member" );
+    Read_transaction  transaction  ( db() );
+    string            where        = S() << "where `scheduler_member_id`=" << sql::quoted( _member_id );
+    string            xml          = transaction.read_clob( _spooler->_members_tablename, "xml", where );
+    xml::Element_ptr  result;
+
+    if( xml != "" )
+    {
+        xml::Document_ptr dom_document = xml;
+        if( dom_document.documentElement() )  result = dom_document.documentElement().cloneNode( true );
+    }
+
+    if( !result )  result = dom_document.createElement( "distributed_scheduler_member" );
+
 
     result.setAttribute( "scheduler_member_id", _member_id );
-    result.setAttribute( "http_url"           , _http_url );
+    result.setAttribute( "http_url"           , _http_url  );
+    result.setAttribute( "heart_beat_count"   , _heart_beat_count );
     if( _is_active    )  result.setAttribute( "active"   , "yes" );
     if( _is_exclusive )  result.setAttribute( "exclusive", "yes" );
     if( _is_dead      )  result.setAttribute( "dead"     , "yes" );
-    if( _last_heart_beat_detected )  result.setAttribute( "last_detected_heart_beat", my_string_from_time_t( _last_heart_beat_detected ) );
+
+    if( _heart_beat_count )  
+    {
+        result.setAttribute( "last_detected_heart_beat"    , my_string_from_time_t( _last_heart_beat_detected ) );
+        result.setAttribute( "last_detected_heart_beat_age", ::time(NULL) - _last_heart_beat_detected );
+        result.setAttribute( "heart_beat_quality"          , _is_dead? "bad" : "good" );
+    }
+    else
+    {
+        result.setAttribute( "database_last_heart_beat_age", ::time(NULL) - _db_last_heart_beat );
+    }
+
     result.setAttribute_optional( "deactivating_scheduler_member_id", _deactivating_member_id );
 
     return result;
@@ -696,8 +722,10 @@ void Exclusive_scheduler_watchdog::try_to_become_exclusive()
     _is_starting = false;
 
 
-    if( !_wait_for_exclusive_scheduler_start_until ) 
+    if( !_wait_for_exclusive_scheduler_start_until  ||  _wait_for_exclusive_scheduler_start_until <= ::time(NULL) ) 
     {
+        _wait_for_exclusive_scheduler_start_until = 0;
+
         if( exclusive_scheduler  &&  !exclusive_scheduler->_is_dead ) 
         {
             _next_precedence_check = 0;
@@ -736,12 +764,12 @@ void Exclusive_scheduler_watchdog::calculate_next_check_time()
     if( Scheduler_member* watched_scheduler = _distributed_scheduler->exclusive_scheduler() )
     {
         time_t delay          = max_processing_time + 1;   // Erst in der folgenden Sekunde prüfen
-        time_t new_next_check = watched_scheduler->_next_heart_beat_db + delay + 1;
+        time_t new_next_check = watched_scheduler->_db_next_heart_beat + delay + 1;
 
         if( new_next_check - now >= active_heart_beat_minimum_check_period  &&  new_next_check < _next_check_time )
         {
             time_t diff = new_next_check - _next_check_time;
-            if( abs(diff) > 2 )  Z_LOG2( "scheduler.distributed", __FUNCTION__ << "  Synchronized with _next_heart_beat_db=" << my_string_from_time_t( watched_scheduler->_next_heart_beat_db ) << ": " << diff << "s\n" );
+            if( abs(diff) > 2 )  Z_LOG2( "scheduler.distributed", __FUNCTION__ << "  Synchronized with _db_next_heart_beat=" << my_string_from_time_t( watched_scheduler->_db_next_heart_beat ) << ": " << diff << "s\n" );
             _next_check_time = new_next_check;
         }
     }
@@ -1730,8 +1758,8 @@ bool Distributed_scheduler::mark_as_exclusive()
         
         if( !_exclusive_scheduler->is_empty_member() )
         {
-            update.and_where_condition( "last_heart_beat"    , _exclusive_scheduler->_last_heart_beat_db );
-            update.and_where_condition( "next_heart_beat"    , _exclusive_scheduler->_next_heart_beat_db );
+            update.and_where_condition( "last_heart_beat"    , _exclusive_scheduler->_db_last_heart_beat );
+            update.and_where_condition( "next_heart_beat"    , _exclusive_scheduler->_db_next_heart_beat );
         }
 
         ok = ta.try_execute_single( update, __FUNCTION__ );
@@ -2209,13 +2237,17 @@ xml::Element_ptr Distributed_scheduler::my_member_dom_element( const xml::Docume
 {
     xml::Element_ptr result = document.createElement( "distributed_scheduler_member" );
 
-    result.setAttribute( "version"      , _spooler->_version );
-    result.setAttribute( "host"         , _spooler->_complete_hostname );
-    result.setAttribute( "pid"          , getpid() );
-    result.setAttribute( "running_since", Time::now().as_string() );
+    result.setAttribute( "version"          , _spooler->_version );
+    result.setAttribute( "host"             , _spooler->_complete_hostname );
+    result.setAttribute( "pid"              , getpid() );
+    result.setAttribute( "running_since"    , Time::now().as_string() );
+    result.setAttribute( "backup-precedence", _backup_precedence );
 
-    if( _spooler->tcp_port() )  result.setAttribute( "tcp_port", _spooler->tcp_port() );
-    if( _spooler->udp_port() )  result.setAttribute( "udp_port", _spooler->udp_port() );
+    if( is_backup()           )  result.setAttribute( "backup"              , "yes" );
+    if( _demand_exclusiveness )  result.setAttribute( "demand_exclusiveness", "yes" );
+    if( _spooler->tcp_port()  )  result.setAttribute( "tcp_port", _spooler->tcp_port() );
+    if( _spooler->udp_port()  )  result.setAttribute( "udp_port", _spooler->udp_port() );
+
 
     return result;
 }
@@ -2231,6 +2263,7 @@ xml::Element_ptr Distributed_scheduler::dom_element( const xml::Document_ptr& do
     result.setAttribute( "scheduler_member_id", my_member_id() );
     if( _is_active         )  result.setAttribute( "active"   , "yes" );
     if( _has_exclusiveness )  result.setAttribute( "exclusive", "yes" );
+    if( !is_scheduler_up() )  result.setAttribute( "shutdown" , "yes" );
 
 
     Z_FOR_EACH( Scheduler_map, _scheduler_map, it ) 
@@ -2238,7 +2271,7 @@ xml::Element_ptr Distributed_scheduler::dom_element( const xml::Document_ptr& do
         Scheduler_member* member = it->second;
 
         if( !member->is_empty_member() 
-         && member->_last_heart_beat_detected )        // Nur die Scheduler, von denen wir einmal einen Herzschlag gehört haben
+         && ( member->_heart_beat_count || !member->_is_dead ) )     // Nur die Scheduler, von denen wir einmal einen Herzschlag gehört haben, oder die neu und noch ohne Herzschlag sind
         {
             result.appendChild( member->dom_element( document, show_what ) );
         }

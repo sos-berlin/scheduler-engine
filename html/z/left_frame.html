@@ -141,16 +141,16 @@ function update_jobs_frame()
 {
     var what       = "";
     var max_orders = 0;
-    
+
     if( _checkbox_states.show_job_chain_orders_checkbox || window.parent.details_frame._job_chain_element )
     {
         what = "job_chain_orders order_source_files blacklist";
         max_orders = window.parent.details_frame._job_chain_element? 100 : _max_orders;
     }
     
-    if( _show_card == "remote_schedulers" )  what += " remote_schedulers";
-    if( _show_card == "job_chains"        )  what += " job_chains";
-    
+    if( _show_card == "distributed_scheduler" )  what += " distributed_scheduler";
+    if( _show_card == "remote_schedulers"     )  what += " remote_schedulers";
+    if( _show_card == "job_chains"            )  what += " job_chains";
     
     _response = _scheduler.execute( "<show_state what='" + what + "' max_orders='" + max_orders + "'/>" );
     
@@ -200,7 +200,8 @@ function show_card( what )
     if( what != _show_card )
     {
         if( what == "process_classes" 
-         || what == "remote_schedulers" )
+         || what == "remote_schedulers"
+         || what == "distributed_scheduler" )
         {
             window.parent.details_frame.hide();
             //window.parent.details_frame.clear();

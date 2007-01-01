@@ -40,7 +40,8 @@ enum Show_what_enum
     show_job_commands       = 0x20000,
     show_blacklist          = 0x40000,
     show_order_source_files = 0x80000,
-    show_job_params         = 0x100000,
+    show_job_params            = 0x100000,
+    show_distributed_scheduler = 0x200000,
   //show_web_services       = 0x20000,
   //show_web_service_operations = 0x40000,
 

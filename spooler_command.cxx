@@ -11,6 +11,7 @@
 #include "../file/anyfile.h"
 #include "../zschimmer/z_sql.h"
 #include "../zschimmer/embedded_files.h"
+#include "../zschimmer/z_gzip.h"
 
 // Für temporäre Datei:
 #include <sys/stat.h>               // S_IREAD, stat()
@@ -44,6 +45,7 @@ using namespace std;
 //-------------------------------------------------------------------------------------------------
 
 const string default_filename = "index.html";
+extern const Embedded_files embedded_files_z;   // Zschimmers HTML-Dateien (/z/index.html etc.)
 
 //--------------------------------------------------------------------------dom_append_text_element
 
@@ -932,6 +934,8 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
         else
         if( string_equals_prefix_then_skip( &p, "job_params"       ) )  show |= show_job_params;
         else
+        if( string_equals_prefix_then_skip( &p, "distributed_scheduler" ) )  show |= show_distributed_scheduler;
+        else
         if( string_equals_prefix_then_skip( &p, "standard"         ) )  ;
         else
             z::throw_xc( "SCHEDULER-164", what );
@@ -1246,7 +1250,7 @@ void Command_processor::execute_http( http::Operation* http_operation )
                 {                                                        
                     string fn = filename.substr( 1 );    // '/' abschneiden
                     if( string_begins_with( fn, "jz/" ) )  fn = "z/" + fn.substr( 3 );
-                    const Embedded_file* f = embedded_files.get_embedded_file_or_null( "html/" + fn );
+                    const Embedded_file* f = embedded_files_z.get_embedded_file_or_null( "html/" + fn );
                     if( !f ) 
                     {
                         /*
@@ -1271,7 +1275,8 @@ void Command_processor::execute_http( http::Operation* http_operation )
                     }
 
                     //http_response->set_header( "Last-Modified", http::date_string( f->_last_modified_time ) );
-                    response_body.assign( f->_content, f->_length );
+                    response_body = string_gzip_deflate( f->_content, f->_length );
+                    //response_body.assign( f->_content, f->_length );
                 }
             }
         }

@@ -26,7 +26,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="echo perl ../zschimmer/files_to_c++.pl  -trim html/z/*.html html/z/*.js html/z/*.xslt html/z/*.css scheduler.xsd -- spooler_embedded_files.cxx&#x0D;&#x0A;perl ../zschimmer/files_to_c++.pl  html/favicon.ico -trim html/z/*.html html/z/*.js html/z/*.xslt html/z/*.css  html/z/*.gif  html/z/*.jpg scheduler.xsd &gt;spooler_embedded_files.cxx&#x0D;&#x0A;"
+				CommandLine="echo perl ../zschimmer/files_to_c++.pl  -trim scheduler.xsd --spooler_embedded_files.cxx&#x0D;&#x0A;perl ../zschimmer/files_to_c++.pl  -trim scheduler.xsd &gt;spooler_embedded_files.cxx&#x0D;&#x0A;echo ../zschimmer/files_to_c++.pl  -name=embedded_files_z -gzip html/favicon.ico html/z/*.html html/z/*.js html/z/*.xslt html/z/*.css  html/z/*.gif  html/z/*.jpg scheduler.xsd --spooler_embedded_files_z.cxx&#x0D;&#x0A;perl ../zschimmer/files_to_c++.pl  -name=embedded_files_z -gzip html/favicon.ico html/z/*.html html/z/*.js html/z/*.xslt html/z/*.css  html/z/*.gif  html/z/*.jpg scheduler.xsd &gt;spooler_embedded_files_z.cxx&#x0D;&#x0A;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -136,7 +136,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="echo perl ../zschimmer/files_to_c++.pl  -trim html/z/*.html html/z/*.js html/z/*.xslt html/z/*.css scheduler.xsd -- spooler_embedded_files.cxx&#x0D;&#x0A;perl ../zschimmer/files_to_c++.pl  html/favicon.ico -trim html/z/*.html html/z/*.js html/z/*.xslt html/z/*.css  html/z/*.gif  html/z/*.jpg scheduler.xsd &gt;spooler_embedded_files.cxx&#x0D;&#x0A;"
+				CommandLine="echo perl ../zschimmer/files_to_c++.pl  -trim scheduler.xsd --spooler_embedded_files.cxx&#x0D;&#x0A;perl ../zschimmer/files_to_c++.pl  -trim scheduler.xsd &gt;spooler_embedded_files.cxx&#x0D;&#x0A;echo ../zschimmer/files_to_c++.pl  -name=embedded_files_z -gzip html/favicon.ico html/z/*.html html/z/*.js html/z/*.xslt html/z/*.css  html/z/*.gif  html/z/*.jpg scheduler.xsd --spooler_embedded_files_z.cxx&#x0D;&#x0A;perl ../zschimmer/files_to_c++.pl  -name=embedded_files_z -gzip html/favicon.ico html/z/*.html html/z/*.js html/z/*.xslt html/z/*.css  html/z/*.gif  html/z/*.jpg scheduler.xsd &gt;spooler_embedded_files_z.cxx&#x0D;&#x0A;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -248,7 +248,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="echo perl ../zschimmer/files_to_c++.pl  -trim html/z/*.html html/z/*.js html/z/*.xslt html/z/*.css scheduler.xsd -- spooler_embedded_files.cxx&#x0D;&#x0A;perl ../zschimmer/files_to_c++.pl  html/favicon.ico -trim html/z/*.html html/z/*.js html/z/*.xslt html/z/*.css  html/z/*.gif  html/z/*.jpg scheduler.xsd &gt;spooler_embedded_files.cxx&#x0D;&#x0A;"
+				CommandLine="echo perl ../zschimmer/files_to_c++.pl  -trim scheduler.xsd --spooler_embedded_files.cxx&#x0D;&#x0A;perl ../zschimmer/files_to_c++.pl  -trim scheduler.xsd &gt;spooler_embedded_files.cxx&#x0D;&#x0A;echo ../zschimmer/files_to_c++.pl  -name=embedded_files_z -gzip html/favicon.ico html/z/*.html html/z/*.js html/z/*.xslt html/z/*.css  html/z/*.gif  html/z/*.jpg scheduler.xsd --spooler_embedded_files_z.cxx&#x0D;&#x0A;perl ../zschimmer/files_to_c++.pl  -name=embedded_files_z -gzip html/favicon.ico html/z/*.html html/z/*.js html/z/*.xslt html/z/*.css  html/z/*.gif  html/z/*.jpg scheduler.xsd &gt;spooler_embedded_files_z.cxx&#x0D;&#x0A;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -555,6 +555,34 @@
 			</File>
 			<File
 				RelativePath=".\spooler_embedded_files.cxx"
+				>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release-DLL|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\spooler_embedded_files_z.cxx"
 				>
 				<FileConfiguration
 					Name="Release|Win32"
