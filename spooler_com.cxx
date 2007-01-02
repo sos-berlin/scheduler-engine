@@ -5071,7 +5071,7 @@ STDMETHODIMP Com_order::get_Params( Ivariable_set** result )
         if( !_order )  return E_POINTER;
 
         Variant variant = _order->payload();
-        if( !variant.is_null_or_empty_string() )
+        if( !variant.is_null_or_empty_string() )   // 2007-01-02  Wozu ist das denn gut?
         {
             if( variant.vt != VT_DISPATCH  &&  variant.vt != VT_UNKNOWN )  z::throw_xc( "SCHEDULER-317" );
             

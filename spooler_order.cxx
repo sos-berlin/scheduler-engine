@@ -3397,8 +3397,6 @@ void Order::set_job_chain_node( Job_chain_node* node, bool is_error_state )
 
 void Order::move_to_node( Job_chain_node* node )
 {
-    assert_is_not_distributed( __FUNCTION__ );
-
     if( _on_blacklist )  _job_chain->remove_from_blacklist( this );
 
     //THREAD_LOCK( _lock )
@@ -3413,7 +3411,7 @@ void Order::move_to_node( Job_chain_node* node )
         set_job_chain_node( node );
         clear_setback();
 
-        if( node && node->_job )  node->_job->order_queue()->add_order( this );
+        if( !_is_distributed && node && node->_job )  node->_job->order_queue()->add_order( this );
     }
 }
 
@@ -3688,6 +3686,7 @@ void Order::postprocessing( bool success )
             _setback_count = 0;
         }
 
+        if( _task  &&  _moved  &&  _job_chain_node  &&  _job_chain_node->_job )  _job_chain_node->_job->signal( "delayed set_state()" );
         _task = NULL;
 
 

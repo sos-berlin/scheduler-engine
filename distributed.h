@@ -82,7 +82,7 @@ struct Distributed_scheduler : Async_operation, Scheduler_object
     Scheduler_member*           scheduler_member_or_null    ( const string& scheduler_member_id );
 
   //string                      scheduler_up_variable_name  ();
-    void                        check_member_id             ();
+  //void                        check_member_id             ();
     bool                        check_schedulers_heart_beat ();
 
     xml::Document_ptr           my_member_dom_document      ();

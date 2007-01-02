@@ -1590,8 +1590,16 @@ void Job::calculate_next_time( Time now )
             {
                 bool in_period = is_in_period(now);
 
-                if( order_controlled() )  request_order( now, __FUNCTION__ );
+                if( order_controlled() )  
+                {
+                    bool ok = request_order( now, __FUNCTION__ );
+                    if( ok )  next_time = now;
+                }
 
+                if( next_time <= now )
+                {
+                }
+                else
                 if( ( _start_once || _start_once_for_directory ) && in_period ) 
                 {
                     next_time = now;

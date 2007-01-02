@@ -223,27 +223,47 @@
 
             <messages>
                 <message level="error" code="SCHEDULER-357"/>
-                <message level="error" code="SCHEDULER-358"/>
+                <message level="error" code="SCHEDULER-359"/>
                 <message level="error" code="SCHEDULER-361"/>
-                <message level="warn"  code="SCHEDULER-362"/>
-                <message level="error" code="SCHEDULER-364"/>
+                <message level="error" code="SCHEDULER-362"/>
                 <message level="error" code="SCHEDULER-365"/>
-                <message level="error" code="SCHEDULER-366"/>
-                <message level="warn"  code="SCHEDULER-367"/>
-                <message level="error" code="SCHEDULER-370"/>
+                <message level="error" code="SCHEDULER-367"/>
                 <message level="error" code="SCHEDULER-371"/>
                 <message level="error" code="SCHEDULER-372"/>
-                <message level="info"  code="SCHEDULER-832"/>
-                <message level="info"  code="SCHEDULER-834"/>
-                <message level="info"  code="SCHEDULER-835"/>
+                <message level="error" code="SCHEDULER-377"/>
+                <message level="error" code="SCHEDULER-381"/>
+                <message level="error" code="SCHEDULER-386"/>
                 <message level="info"  code="SCHEDULER-805"/>
                 <message level="info"  code="SCHEDULER-807"/>
                 <message level="info"  code="SCHEDULER-809"/>
                 <message level="info"  code="SCHEDULER-811"/>
-                <message level="warn"  code="SCHEDULER-993"/>
+                <message level="info"  code="SCHEDULER-814"/>
+                <message level="info"  code="SCHEDULER-818"/>
+                <message level="info"  code="SCHEDULER-819"/>
+                <message level="info"  code="SCHEDULER-820"/>
+                <message level="info"  code="SCHEDULER-821"/>
+                <message level="info"  code="SCHEDULER-822"/>
+                <message level="error" code="SCHEDULER-823"/>
+                <message level="info"  code="SCHEDULER-824"/>
+                <message level="info"  code="SCHEDULER-825"/>
+                <message level="info"  code="SCHEDULER-826"/>
+                <message level="warn"  code="SCHEDULER-827"/>
+                <message level="info"  code="SCHEDULER-828"/>
+                <message level="info"  code="SCHEDULER-829"/>
+                <message level="info"  code="SCHEDULER-830"/>
+                <message level="info"  code="SCHEDULER-831"/>
+                <message level="info"  code="SCHEDULER-832"/>
+                <message level="info"  code="SCHEDULER-833"/>
+                <message level="info"  code="SCHEDULER-834"/>
+                <message level="info"  code="SCHEDULER-835"/>
+                <message level="warn"  code="SCHEDULER-836"/>
+                <message level="warn"  code="SCHEDULER-837"/>
+                <message level="info"  code="SCHEDULER-838"/>
                 <message level="warn"  code="SCHEDULER-994"/>
                 <message level="info"  code="SCHEDULER-995"/>
                 <message level="warn"  code="SCHEDULER-996"/>
+                <message level="warn"  code="SCHEDULER-997"/>
+                <message level="info"  code="SCHEDULER-998"/>
             </messages>
         </command_option>
 
@@ -302,8 +322,22 @@
             </description>
             <messages>
                 <message level="error" code="SCHEDULER-366"/>
+                <message level="error" code="SCHEDULER-370"/>
+                <message level="error" code="SCHEDULER-373"/>
+                <message level="error" code="SCHEDULER-375"/>
+                <message level="error" code="SCHEDULER-376"/>
+                <message level="error" code="SCHEDULER-378"/>
+                <message level="error" code="SCHEDULER-379"/>
+                <message level="error" code="SCHEDULER-380"/>
+                <message level="error" code="SCHEDULER-382"/>
+                <message level="error" code="SCHEDULER-383"/>
+                <message level="error" code="SCHEDULER-384"/>
+                <message level="error" code="SCHEDULER-385"/>
                 <message level="warn"  code="SCHEDULER-812"/>
-                <message level="warn"  code="SCHEDULER-813"/>
+                <message level="info"  code="SCHEDULER-813"/>
+                <message level="info"  code="SCHEDULER-815"/>
+                <message level="warn"  code="SCHEDULER-816"/>
+                <message level="warn"  code="SCHEDULER-817"/>
             </messages>
         </command_option>
 

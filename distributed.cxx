@@ -246,8 +246,10 @@ int Heart_beat_watchdog_thread::thread_main()
         
         if( _distributed_scheduler->_is_active  &&  _distributed_scheduler->_db_last_heart_beat == heart_beat_time )  
         {
+            Z_WINDOWS_ONLY( Z_DEBUG_ONLY( DebugBreak() ) );
+
             _distributed_scheduler->_spooler->kill_all_processes();
-            _log->error( message_string( "SCHEDULER-386" ) );
+            _log->error( message_string( "SCHEDULER-386", ::time(NULL) - heart_beat_time ) );
             _distributed_scheduler->_spooler->abort_immediately( true );
         }
 
@@ -1305,8 +1307,8 @@ bool Distributed_scheduler::start()
     if( !db()->opened() )  z::throw_xc( "SCHEDULER-357" ); 
     if( db()->lock_syntax() == db_lock_none )  z::throw_xc( "SCHEDULER-359", db()->dbms_name() );
 
-    if( _scheduler_member_id == "" )  make_scheduler_member_id();
-    check_member_id();
+    make_scheduler_member_id();
+    //check_member_id();
     create_table_when_needed();
 
 
@@ -2299,7 +2301,7 @@ void Distributed_scheduler::set_my_member_id( const string& member_id )
     assert( !_heart_beat  &&  !_exclusive_scheduler_watchdog );
 
     _scheduler_member_id = member_id;
-    check_member_id();
+    //check_member_id();
 
     _log->set_prefix( obj_name() );
 }
@@ -2355,11 +2357,11 @@ bool Distributed_scheduler::is_scheduler_up()
 
 //-----------------------------------------------------------Distributed_scheduler::check_member_id
 
-void Distributed_scheduler::check_member_id()
-{
-    string prefix = _spooler->id_for_db() + "/";
-    if( !string_begins_with( my_member_id(), prefix )  ||  my_member_id() == prefix )  z::throw_xc( "SCHEDULER-358", my_member_id(), prefix );
-}
+//void Distributed_scheduler::check_member_id()
+//{
+//    string prefix = _spooler->id_for_db() + "/";
+//    if( !string_begins_with( my_member_id(), prefix )  ||  my_member_id() == prefix )  z::throw_xc( "SCHEDULER-358", my_member_id(), prefix );
+//}
 
 //--------------------------------------------------Distributed_scheduler::make_scheduler_member_id
 

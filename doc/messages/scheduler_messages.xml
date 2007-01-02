@@ -2238,15 +2238,15 @@
 
         <message code="SCHEDULER-357">
             <text xml:lang="en">
-                <title>This is an exclusive or distributed Scheduler, and it needs a database</title>
+                <title>This is an exclusive or distributed Scheduler, and therefore needs a database</title>
             </text>
         </message>
 
-        <message code="SCHEDULER-358">
+        <!--message code="SCHEDULER-358">
             <text xml:lang="en">
                 <title>Scheduler member id has to start with the Scheduler id followed by a slash</title>
             </text>
-        </message>
+        </message-->
 
         <message code="SCHEDULER-359">
             <text xml:lang="en">
@@ -2284,11 +2284,11 @@
             </text>
         </message-->
 
-        <message code="SCHEDULER-364">
+        <!--message code="SCHEDULER-364">
             <text xml:lang="en">
-                <title>Database integrity is broken</title>
-            </text>
-        </message>
+                <title></title>
+            </text
+        </message-->
 
         <message code="SCHEDULER-365">
             <text xml:lang="en">
@@ -2334,7 +2334,7 @@
 
         <message code="SCHEDULER-372">
             <text xml:lang="en">
-                <title>EXCLUSIVENESS HAS BEEN STOLEN BY SCHEDULER MEMBER <p1/></title>
+                <title>Exclusiveness has been stolen by Scheduler member '<p1/>'</title>
             </text>
         </message>
 
@@ -2370,7 +2370,7 @@
 
         <message code="SCHEDULER-378">
             <text xml:lang="en">
-                <title>After own late heart beat, this Scheduler has been deactived and all occupied orders are freed by Scheduler member '<p1/>'</title>
+                <title>After own late heart beat, this Scheduler has been deactived and the occupied orders are freed by Scheduler member '<p1/>'</title>
             </text>
         </message>
 
@@ -2388,7 +2388,7 @@
 
         <message code="SCHEDULER-381">
             <text xml:lang="en">
-                <title>Scheduler is not yet activated and can not execute the operation</title>
+                <title>Scheduler is not yet active and can not execute the operation</title>
             </text>
         </message>
 
@@ -2418,7 +2418,7 @@
 
         <message code="SCHEDULER-386">
             <text xml:lang="en">
-                <title>Heart beat watchdog is missing heart beat. Scheduler aborts.</title>
+                <title>Last heart beat was <p1/>s ago. Something is delaying Scheduler execution, Scheduler is aborted immediately</title>
             </text>
         </message>
 
@@ -3322,7 +3322,7 @@
 
         <message code="SCHEDULER-826">
             <text xml:lang="en">
-                <title>Terminated</title>
+                <title>That Scheduler has terminated</title>
             </text>
         </message>
 
@@ -3334,7 +3334,7 @@
 
         <message code="SCHEDULER-828">
             <text xml:lang="en">
-                <title><p1/> old member records deleteded in database table <p2/></title>
+                <title><p1/> old member records deleted in database table <p2/></title>
             </text>
         </message>
 
