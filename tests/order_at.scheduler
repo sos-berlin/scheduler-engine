@@ -116,11 +116,14 @@ function spooler_process()
             </job>
         
         </jobs>
+        
+            
         <job_chains>
             <job_chain name="my_job_chain">
                 <job_chain_node state="first" job="javascript"/>
                 <job_chain_node state="finished"/>
             </job_chain>
         </job_chains>        
+
     </config>
 </spooler>

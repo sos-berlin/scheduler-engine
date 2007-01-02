@@ -448,7 +448,7 @@ Order* Directory_file_order_source::read_directory( bool was_notified, const str
     Order_queue*    first_order_queue   = _next_job->order_queue();
 
 
-    _spooler->assert_has_exclusiveness( __FUNCTION__ );
+    _spooler->assert_has_exclusiveness( obj_name() + " " + __FUNCTION__ );
 
 
     for( int try_index = 1;; try_index++ )           // Nach einem Fehler machen wir einen zweiten Versuch, bevor wir eine eMail schicken
@@ -777,6 +777,17 @@ int Directory_file_order_source::delay_after_error()
 {
     return _delay_after_error < INT_MAX? _delay_after_error 
                               : _repeat;
+}
+
+//------------------------------------------------------------Directory_file_order_source::obj_name
+
+string Directory_file_order_source::obj_name() const
+{
+    S result;
+
+    result << "Directory_file_order_source(\"" << _path << "\",\"" << _regex_string << "\")";
+
+    return result;
 }
 
 //-------------------------------------------------------------------------------------------------

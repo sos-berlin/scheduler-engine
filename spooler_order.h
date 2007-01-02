@@ -178,7 +178,9 @@ struct Order : Com_order,
     void                        db_fill_stmt            ( sql::Write_stmt* );
 
     enum Update_option { update_anyway, update_not_occupied, update_and_release_occupation };
-    void                        db_update               ( Update_option );
+    void                        db_update               ( Update_option u )                         { db_update2( u, false ); }
+    void                        db_update2              ( Update_option, bool delet );
+    void                        db_delete               ( Update_option u )                         { db_update2( u, true ); }
 
     string                      db_read_clob            ( Read_transaction*, const string& column_name );
     void                        db_update_clob          ( Transaction*, const string& column_name, const string& value );
@@ -543,7 +545,8 @@ struct Order_subsystem : Object, Scheduler_object
     Job_chain*                  job_chain_or_null           ( const string& name );
     xml::Element_ptr            job_chains_dom_element      ( const xml::Document_ptr&, const Show_what& );
     void                        load_orders_from_database   ();
-    ptr<Order>                  load_order_from_database    ( const string& job_chain_name, Order::Id );
+    ptr<Order>                  load_order_from_database    ( const string& job_chain_name, const Order::Id& );
+    ptr<Order>                  try_load_order_from_database( const string& job_chain_name, const Order::Id& );
     void                        check_exception             ();
     bool                        are_orders_distributed      ();                                    // Für verteilte (distributed) Ausführung
     void                        request_order               ();

@@ -2358,7 +2358,7 @@
 
         <message code="SCHEDULER-376">
             <text xml:lang="en">
-                <title>A distributed, not exclusive Scheduler enables only order controlled jobs</title>
+                <title>A distributed, non-exclusive Scheduler enables only order controlled jobs</title>
             </text>
         </message>
 
@@ -2388,7 +2388,7 @@
 
         <message code="SCHEDULER-381">
             <text xml:lang="en">
-                <title>Scheduler is not activated (in backup mode) and can not execute the operation</title>
+                <title>Scheduler is not yet activated and can not execute the operation</title>
             </text>
         </message>
 
@@ -2397,6 +2397,31 @@
                 <title>File orders can not be distributed</title>
             </text>
         </message>
+
+        <message code="SCHEDULER-383">
+            <text xml:lang="en">
+                <title>This is a non-exclusive Scheduler processing distributed orders, and therefore cannot process non-distributed orders</title>
+            </text>
+        </message>
+        
+        <message code="SCHEDULER-384">
+            <text xml:lang="en">
+                <title><p1>job_chain</p1> is distributed and therefore does not support operation '<p2/>'</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-385">
+            <text xml:lang="en">
+                <title>Deletion of order in database has failed</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-386">
+            <text xml:lang="en">
+                <title>Heart beat watchdog is missing heart beat. Scheduler aborts.</title>
+            </text>
+        </message>
+
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->
@@ -3132,19 +3157,19 @@
 
         <message code="SCHEDULER-994">
             <text xml:lang="en">
-                <title>No heart beat since <p2/>s (<p1>time</p1>)</title>
+                <title>No heart beat since <p2/>s (<p1>time</p1>), expecting heart beat within <p3/>s</title>
             </text>
         </message>
 
         <message code="SCHEDULER-995">
             <text xml:lang="en">
-                <title>No heart beat since <p2/>s (<p1>time</p1>), Scheduler seems to be dead</title>
+                <title>No heart beat since <p2/>s (<p1>time</p1>), ignored within <p3/>s because of recent database reconnect</title>
             </text>
         </message>
 
         <message code="SCHEDULER-996">
             <text xml:lang="en">
-                <title>No heart beat since <p2/>s (<p1>time</p1>), ignored because of recent database reconnect</title>
+                <title>No heart beat since <p2/>s (<p1>time</p1>), Scheduler seems to be dead</title>
             </text>
         </message>
 
@@ -3358,6 +3383,18 @@
         <message code="SCHEDULER-836" weight="warn">
             <text xml:lang="en">
                 <title>Deactivating that dead Scheduler</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-837" weight="warn">
+            <text xml:lang="en">
+                <title>Taking exclusiveness from that Scheduler</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-838" weight="info">
+            <text xml:lang="en">
+                <title><p1/>. heart beat detected</title>
             </text>
         </message>
     </messages>

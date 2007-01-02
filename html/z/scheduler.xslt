@@ -1480,7 +1480,7 @@
                 </tr>
 
                 <tr>
-                    <td class="head1">Url</td>
+                    <td class="head1">URL</td>
                     <td class="head">State</td>
                     <td class="head">Pid</td>
                     <td class="head">Started at</td>

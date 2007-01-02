@@ -122,6 +122,7 @@ struct Database : Object, Scheduler_object
 
   public:
     static const int            seconds_before_reopen;
+  //static const int            lock_timeout;
 };
 
 //---------------------------------------------------------------------------------Read_transaction

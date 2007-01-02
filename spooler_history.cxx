@@ -35,7 +35,8 @@ const int db_error_retry_max = 0;       // Nach DB-Fehler max. so oft die Datenb
 
 //-------------------------------------------------------------------------------------------------
 
-const int Database::seconds_before_reopen = 60;   // Solange warten, bis Datenbank nach Fehler erneut geöffnet wird
+const int Database::seconds_before_reopen   = 60;   // Solange warten, bis Datenbank nach Fehler erneut geöffnet wird
+//const int Database::lock_timeout            = 30;   // Wartezeit für gesperrte Datenbanksätze, nicht von jeder Datenbank begrenzbar
 
 //---------------------------------------------------------------------------------------------test
 /*
@@ -471,18 +472,24 @@ void Database::open2( const string& db_name )
              || _db_name.substr(0,5) == "jdbc ")   _db_name = _db_name.substr(0,5) + " -id=spooler " +   _db_name.substr(5),
                                                  my_db_name = _db_name.substr(0,5) + " -id=spooler " + my_db_name.substr(5);
 
+            _log->info( message_string( "SCHEDULER-907", my_db_name ) );     // Datenbank wird geöffnet
+
             try
             {
-                string stmt;
+                _db.open( "-in -out " + my_db_name );
 
-                _log->info( message_string( "SCHEDULER-907", my_db_name ) );     // Datenbank wird geöffnet
+                //switch( _db.dbms_kind() )
+                //{
+                //    case dbms_sql_server: 
+                //        _db.put( S() << "set lock_timeout " << ( lock_timeout * 1000 ) );  
+                //        break;
 
-                _db.open( "-in -out " + my_db_name );   // -create
+                //    default: ;
+                //}
 
-                if( _db.opened() ) _db_name += " ";
+                _log->info( message_string( "SCHEDULER-807", _db.dbms_name() ) );     // Datenbank ist geöffnet
 
-                _log->info( message_string( "SCHEDULER-807", _db.dbms_name() ) );     // Datenbank wird geöffnet
-
+                _db_name += " ";
                 _email_sent_after_db_error = false;
             }
             catch( exception& x )  

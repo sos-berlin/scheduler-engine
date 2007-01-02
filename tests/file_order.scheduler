@@ -41,7 +41,7 @@ function spooler_process()
     for( var j = 1; j <= 100; j++ )
     {
         if( i++ == n )  return false;
-        hostware.open( "-out /tmp/x/gen" + i ).close();
+        hostware.open( "-out /tmp/x/gen" + i + ".ok" ).close();
     }
     
     return true;
@@ -116,8 +116,8 @@ public class My_job  extends sos.spooler.Job_impl
         </jobs>
 
         <job_chains>
-            <job_chain name="my_job_chain" distributed="yes">
-                <file_order_source directory="/tmp/x/" regex="^gen"/>
+            <job_chain name="my_job_chain" distributed="no">
+                <file_order_source directory="/tmp/x/" regex="^gen.*\.ok$"/>
                 <!--file_order_source directory="/tmp/yyy/" regex="^gen"/-->
                 <!--file_order_source directory="/tmp/y" regex="^gen" next_state="second"/-->
                 <job_chain_node state="first" job="javascript"/>

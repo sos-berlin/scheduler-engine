@@ -25,6 +25,7 @@ string Scheduler_object::name_of_type_code( Scheduler_object::Type_code type_cod
         case type_web_service_response:     return "Web_service_response";
         case type_scheduler_event_manager:  return "Scheduler_event_manager";
         case type_scheduler_member:         return "Scheduler_member";
+        case type_heart_beat_watchdog_thread: return "Heart_beat_watchdog_thread";
         case type_heart_beat:               return "Heart_beat";
         case type_other_scheduler:          return "Scheduler_member";
         case type_exclusive_scheduler_watchdog: return "Exclusive_scheduler_watchdog";

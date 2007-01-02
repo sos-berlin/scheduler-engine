@@ -45,8 +45,8 @@ struct Distributed_scheduler : Async_operation, Scheduler_object
     void                        shutdown                    ();                                     // Ordentliches Herunterfahren des Schedulers
   //void                        mark_begin_of_shutdown      ();
 
-    void                        demand_exclusiveness        ( bool b = true )                       { assert( !_current_operation );  _demand_exclusiveness = b; }
-    void                    set_backup                      ( bool b = true )                       { assert( !_current_operation );  _is_backup = b; }
+    void                        demand_exclusiveness        ( bool b = true )                       { _demand_exclusiveness = b; }
+    void                    set_backup                      ( bool b = true )                       { _is_backup = b; }
 
     void                    set_my_member_id                ( const string& );
     string                      my_member_id                ()                                      { return _scheduler_member_id; }
@@ -114,9 +114,11 @@ struct Distributed_scheduler : Async_operation, Scheduler_object
     void                        make_scheduler_member_id    ();
     Scheduler_member*           exclusive_scheduler         ();                                     // NULL, wenn _exclusive_scheduler->is_empty_member()
     Scheduler_member*           empty_scheduler_record      ();
+    void                        recommend_next_deadline_check_time( time_t );
 
   private:
     friend struct               Scheduler_member;
+    friend struct               Heart_beat_watchdog_thread;
     friend struct               Heart_beat;
     friend struct               Exclusive_scheduler_watchdog;
     friend struct               Active_schedulers_watchdog;
@@ -135,6 +137,7 @@ struct Distributed_scheduler : Async_operation, Scheduler_object
     time_t                     _db_last_heart_beat;
     time_t                     _db_next_heart_beat;
     time_t                     _late_heart_beat;
+    time_t                     _recommended_next_deadline_check_time;
 
     bool                       _is_exclusiveness_lost;
     bool                       _is_in_error;
@@ -143,7 +146,7 @@ struct Distributed_scheduler : Async_operation, Scheduler_object
     int                        _is_in_do_a_heart_beat;
     bool                       _closed;
 
-    Async_operation*                  _current_operation;
+    ptr<Heart_beat_watchdog_thread>   _heart_beat_watchdog_thread;
     ptr<Heart_beat>                   _heart_beat;
     ptr<Exclusive_scheduler_watchdog> _exclusive_scheduler_watchdog;
     ptr<Active_schedulers_watchdog>   _active_schedulers_watchdog;

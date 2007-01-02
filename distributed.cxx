@@ -3,6 +3,7 @@
 #include "spooler.h"
 #include "../kram/msec.h"
 #include "../zschimmer/not_in_recursion.h"
+#include "../zschimmer/threads.h"
 
 #ifdef Z_WINDOWS
 #   include <process.h>
@@ -18,9 +19,11 @@ namespace scheduler {
 //const time_t                    accepted_clock_difference       = Z_NDEBUG_DEBUG(  5,  2 );     // Die Uhren sollten noch besser übereinstimmen! ntp verwenden!
 //const time_t                    warned_clock_difference         = Z_NDEBUG_DEBUG(  1,  1 ); 
 const int                       heart_beat_period                       = Z_NDEBUG_DEBUG( 60, 20 );
-const int                       max_processing_time                     = Z_NDEBUG_DEBUG( 10,  3 );     // Zeit, die gebraucht wird, um den Herzschlag auszuführen
+const int                       max_processing_time                     = Z_NDEBUG_DEBUG(  5,  3 );     // Zeit, die gebraucht wird, um den Herzschlag auszuführen
+const int                       max_processing_time_2                   = Z_NDEBUG_DEBUG( 30, 10 );     // Nachfrist, inkl. außergewöhnlicher Verzögerungen (gestrichen: zzgl. Database::lock_timeout)
+const int                       max_processing_time_2_short             = max_processing_time_2 - 10;   // Zur eigenen Prüfung
 const int                       active_heart_beat_minimum_check_period  = heart_beat_period / 2;
-const int                       active_heart_beat_maximum_check_period  = heart_beat_period + max_processing_time + 1;
+const int                       active_heart_beat_maximum_check_period  = heart_beat_period + max_processing_time + 2;
 const int                       trauerfrist                             = 12*3600;                      // Trauerzeit, nach der Mitgliedssätze gelöscht werden
 const int                       database_commit_visible_time            = 10;                           // Zeit, die die Datenbank braucht, um nach Commit Daten für anderen Client sichtbar zu machen.
 const int                       precedence_check_period                 = active_heart_beat_maximum_check_period;
@@ -29,6 +32,21 @@ const int                       first_dead_orders_check_period          = 60;
 
 //const int                       Distributed_scheduler::min_precedence   = 0;
 //const int                       Distributed_scheduler::max_precedence   = 9999;
+
+//-------------------------------------------------------------------------------------------------
+
+struct Heart_beat_watchdog_thread : Thread, Scheduler_object
+{
+                                Heart_beat_watchdog_thread  ( Distributed_scheduler* );
+
+    int                         thread_main                 ();
+    void                        sleep                       ( int seconds );
+    void                        kill                        ();
+
+    Fill_zero                  _zero_;
+    bool                       _kill;
+    Distributed_scheduler*     _distributed_scheduler;
+};
 
 //----------------------------------------------------------------------------------Scheduler_member
 
@@ -60,16 +78,29 @@ struct Scheduler_member : Object, Scheduler_object
     time_t                     _last_heart_beat_detected;
     int                        _heart_beat_count;
     string                     _http_url;
-    bool                       _scheduler_993_logged;
     Distributed_scheduler*     _distributed_scheduler;
     //time_t                     _clock_difference;
     //bool                       _clock_difference_checked;
     //bool                       _checking_clock_difference;
 };
 
+//----------------------------------------------------------------------------Distributed_has_alarm
+
+struct Distributed_has_alarm
+{
+                                Distributed_has_alarm       ()                                      : _recommended_next_check_time(time_max) {}
+
+    virtual void                set_alarm                   ()                                      = 0;
+    virtual void                recommend_next_check_time   ( time_t );
+    void                        on_alarm                    ();
+
+
+    time_t                     _recommended_next_check_time;
+};
+
 //---------------------------------------------------------------------------------------Heart_beat
 
-struct Heart_beat : Async_operation, Scheduler_object
+struct Heart_beat : Async_operation, Scheduler_object, Distributed_has_alarm
 {
                                 Heart_beat                  ( Distributed_scheduler* );
 
@@ -89,7 +120,7 @@ struct Heart_beat : Async_operation, Scheduler_object
 
 //----------------------------------------------------------------------Exclusive_scheduler_watchdog
 
-struct Exclusive_scheduler_watchdog : Async_operation, Scheduler_object
+struct Exclusive_scheduler_watchdog : Async_operation, Scheduler_object, Distributed_has_alarm
 {
                                 Exclusive_scheduler_watchdog( Distributed_scheduler* );
 
@@ -102,6 +133,7 @@ struct Exclusive_scheduler_watchdog : Async_operation, Scheduler_object
 
     void                        calculate_next_check_time   ();
     void                        set_alarm                   ();
+
     void                        try_to_become_exclusive     ();
   //void                        check_clock_difference      ( time_t last_heart_beat, time_t now );
     bool                        check_has_backup_precedence ();
@@ -122,7 +154,7 @@ struct Exclusive_scheduler_watchdog : Async_operation, Scheduler_object
 
 //------------------------------------------------------------------------Active_schedulers_watchdog
 
-struct Active_schedulers_watchdog : Async_operation, Scheduler_object
+struct Active_schedulers_watchdog : Async_operation, Scheduler_object, Distributed_has_alarm
 {
                                 Active_schedulers_watchdog   ( Distributed_scheduler* );
 
@@ -146,6 +178,83 @@ struct Active_schedulers_watchdog : Async_operation, Scheduler_object
 static string my_string_from_time_t( time_t time )
 {
     return string_gmt_from_time_t( time ) + " UTC";
+}
+
+//--------------------------------------------eart_beat_watchdog_thread::Heart_beat_watchdog_thread
+
+Heart_beat_watchdog_thread::Heart_beat_watchdog_thread( Distributed_scheduler* d )
+:
+    Scheduler_object( d->_spooler, this, type_heart_beat_watchdog_thread ),
+    _zero_(this+1),
+    _distributed_scheduler(d)
+{
+}
+
+//----------------------------------------------------------Heart_beat_watchdog_thread::thread_main
+    
+void Heart_beat_watchdog_thread::sleep( int seconds )
+{
+#   ifdef Z_WINDOWS
+
+        int ms = seconds * 1000;
+        Z_LOG2( "scheduler.distributed", __FUNCTION__ << "  Sleep(" << ms << ")\n" );
+        Sleep( ms );
+
+#   else
+
+        while( !_kill  &&  seconds > 0 )
+        {
+            Z_LOG2( "scheduler.distributed", __FUNCTION__ << "  sleep(" << seconds << ")\n" );
+            seconds = ::sleep( seconds );
+        }
+
+#   endif
+}
+
+//-----------------------------------------------------------------Heart_beat_watchdog_thread::kill
+
+void Heart_beat_watchdog_thread::kill()
+{
+    Z_LOGI2( "scheduler", __FUNCTION__ << "\n" );
+
+
+    _kill = true;
+
+#   ifdef Z_WINDOWS
+        TerminateThread( thread_handle(), 1 );
+#    else
+        pthread_kill( thread_handle(), SIGTERM );
+#   endif
+}
+
+//----------------------------------------------------------Heart_beat_watchdog_thread::thread_main
+    
+int Heart_beat_watchdog_thread::thread_main()
+{
+#   ifdef Z_WINDOWS
+        SetThreadPriority( thread_handle(), THREAD_PRIORITY_HIGHEST );
+#   else
+        // Wie erhöht man die Priorität unter Unix?
+#   endif
+    
+
+    while( !_kill )
+    {
+        time_t heart_beat_time = _distributed_scheduler->_db_last_heart_beat;
+        
+        sleep( heart_beat_period + max_processing_time + max_processing_time_2_short );
+        
+        if( _distributed_scheduler->_is_active  &&  _distributed_scheduler->_db_last_heart_beat == heart_beat_time )  
+        {
+            _distributed_scheduler->_spooler->kill_all_processes();
+            _log->error( message_string( "SCHEDULER-386" ) );
+            _distributed_scheduler->_spooler->abort_immediately( true );
+        }
+
+        //Z_DEBUG_ONLY( _log->info( __FUNCTION__ ) );
+    }
+
+    return 0;
 }
 
 //------------------------------------------------------------------ther_scheduler::Scheduler_member
@@ -193,7 +302,9 @@ bool Scheduler_member::check_heart_beat( time_t now_before_select, const Record&
             }
 
             if( _last_heart_beat_detected )  _heart_beat_count++;   // Den ersten Durchlauf zählen wir nicht, denn dann haben wir noch keinen Herzschlag
-            _last_heart_beat_detected = now;
+            _last_heart_beat_detected = now + 1;                    // Nächste volle Sekunde
+
+            if( _heart_beat_count == 1  &&  this != _distributed_scheduler->_my_scheduler )  _log->info( message_string( "SCHEDULER-838", _heart_beat_count ) );
         }
         else
         // Behauptung des Schedulers in next_heart_beat prüfen (ohne Konsequenzen, weil die Uhren verschieden gehen können)
@@ -204,22 +315,35 @@ bool Scheduler_member::check_heart_beat( time_t now_before_select, const Record&
         //                                                  my_string_from_time_t( next_heart_beat ),
         //                                                  now_before_select - next_heart_beat ) );
         //}
-        if( _last_heart_beat_detected  &&  _last_heart_beat_detected + heart_beat_period + max_processing_time/2 < now_before_select )
+        if( _last_heart_beat_detected  &&  _last_heart_beat_detected + heart_beat_period + max_processing_time < now_before_select )
         {
-            bool is_in_database_reconnect_tolerance = db()->reopen_time() + Database::seconds_before_reopen + max_processing_time >= now_before_select;
-            bool was_alive = !_is_dead;
-            bool is_dead   = _last_heart_beat_detected + heart_beat_period + max_processing_time < now_before_select;
+            time_t standard_deadline                  = _last_heart_beat_detected + heart_beat_period + max_processing_time + max_processing_time_2; //+ Database::lock_timeout;
+            time_t database_reconnect_deadline        = db()->reopen_time() + Database::seconds_before_reopen + max_processing_time;
+            bool   is_in_database_reconnect_tolerance = database_reconnect_deadline >= now_before_select;
+            bool   was_alive                          = !_is_dead;
+
+            time_t deadline = is_in_database_reconnect_tolerance? database_reconnect_deadline
+                                                                : standard_deadline;
+            bool   is_dead  = !is_in_database_reconnect_tolerance  &&  deadline < now_before_select;
 
             if( was_alive )
-                log()->warn( message_string( !is_dead                          ? "SCHEDULER-994" :
-                                             is_in_database_reconnect_tolerance? "SCHEDULER-996" 
-                                                                               : "SCHEDULER-995", 
-                                             my_string_from_time_t( _last_heart_beat_detected ), 
-                                             now_before_select - _last_heart_beat_detected ) );
-
-            if( !is_in_database_reconnect_tolerance ) 
             {
-                _is_dead = true; 
+                string message_code = is_in_database_reconnect_tolerance? "SCHEDULER-995" :
+                                      !is_dead                          ? "SCHEDULER-994" 
+                                                                        : "SCHEDULER-996";
+                if( !string_begins_with( _log->last_line(), message_code ) )
+                {
+                    Message_string m ( message_code, my_string_from_time_t( _last_heart_beat_detected ), now_before_select - _last_heart_beat_detected );
+                    if( !is_dead )  m.insert( 3, deadline - ::time(NULL) );
+                    log()->warn( m );
+                }
+
+                _distributed_scheduler->recommend_next_deadline_check_time( deadline + 1 );
+            }
+
+            if( is_dead ) 
+            {
+                _is_dead = true;
                 result = false;
             }
         }
@@ -527,7 +651,7 @@ xml::Element_ptr Scheduler_member::dom_element( const xml::Document_ptr& dom_doc
     if( _heart_beat_count )  
     {
         result.setAttribute( "last_detected_heart_beat"    , my_string_from_time_t( _last_heart_beat_detected ) );
-        result.setAttribute( "last_detected_heart_beat_age", ::time(NULL) - _last_heart_beat_detected );
+        result.setAttribute( "last_detected_heart_beat_age", max( (time_t)0, ::time(NULL) - _last_heart_beat_detected ) );
         result.setAttribute( "heart_beat_quality"          , _is_dead? "bad" : "good" );
     }
     else
@@ -550,6 +674,24 @@ string Scheduler_member::obj_name() const
                        else  result << " " << _member_id;
 
     return result;
+}
+
+//-------------------------------------------------Distributed_has_alarm::recommend_next_check_time
+
+void Distributed_has_alarm::recommend_next_check_time( time_t t )
+{ 
+    if( _recommended_next_check_time > t ) 
+    {
+        _recommended_next_check_time = t; 
+        set_alarm();
+    }
+}
+
+//------------------------------------------------------------------Distributed_has_alarm::on_alarm
+
+void Distributed_has_alarm::on_alarm()
+{
+    _recommended_next_check_time = time_max;
 }
 
 //---------------------------------------------------------------------------Heart_beat::Heart_beat
@@ -609,7 +751,7 @@ bool Heart_beat::async_continue_( Continue_flags )
 
 void Heart_beat::set_alarm()
 {
-    set_async_next_gmtime( _distributed_scheduler->_next_heart_beat );   //last_heart_beat() + heart_beat_period );
+    set_async_next_gmtime( _distributed_scheduler->_next_heart_beat );
 }
 
 //---------------------------------------Exclusive_scheduler_watchdog::Exclusive_scheduler_watchdog
@@ -652,6 +794,7 @@ bool Exclusive_scheduler_watchdog::async_continue_( Continue_flags )
 {
     Z_LOGI2( "scheduler.distributed", __FUNCTION__ << "\n" );
 
+    Distributed_has_alarm::on_alarm();
 
     if( !db()->opened() )
     {
@@ -683,6 +826,35 @@ bool Exclusive_scheduler_watchdog::async_continue_( Continue_flags )
     return true;
 }
 
+//------------------------------------------Exclusive_scheduler_watchdog::calculate_next_check_time
+
+void Exclusive_scheduler_watchdog::calculate_next_check_time()
+{
+    time_t now = ::time(NULL);
+
+    _next_check_time = now + active_heart_beat_maximum_check_period;
+
+    //if( _set_exclusive_until  &&  _next_check_time > _set_exclusive_until )
+    //{
+    //    _next_check_time = _set_exclusive_until;
+    //    extra_log << ", warten, bis Datenbank Änderungen für alle sichtbar gemacht hat";
+    //}
+    //else
+    
+    if( Scheduler_member* watched_scheduler = _distributed_scheduler->exclusive_scheduler() )
+    {
+        time_t delay          = max_processing_time + 1;   // Erst in der folgenden Sekunde prüfen
+        time_t new_next_check = watched_scheduler->_db_next_heart_beat + delay + 1;
+
+        if( new_next_check - now >= active_heart_beat_minimum_check_period  &&  new_next_check < _next_check_time )
+        {
+            time_t diff = new_next_check - _next_check_time;
+            if( abs(diff) > 2 )  Z_LOG2( "scheduler.distributed", __FUNCTION__ << "  Synchronized with _db_next_heart_beat=" << my_string_from_time_t( watched_scheduler->_db_next_heart_beat ) << ": " << diff << "s\n" );
+            _next_check_time = new_next_check;
+        }
+    }
+}
+
 //----------------------------------------------------------Exclusive_scheduler_watchdog::set_alarm
 
 void Exclusive_scheduler_watchdog::set_alarm()
@@ -694,8 +866,14 @@ void Exclusive_scheduler_watchdog::set_alarm()
     //}
     //else
     {
-        Z_LOG2( "scheduler.distributed", __FUNCTION__ << "  Next check at " << my_string_from_time_t( _next_check_time ) << "\n" );
-        set_async_next_gmtime( _next_check_time );
+        //Z_LOG2( "scheduler.distributed", __FUNCTION__ << "  Next check at " << my_string_from_time_t( _next_check_time ) << "\n" );
+
+        time_t t = _next_check_time;
+
+        if( t > _recommended_next_check_time )
+            t = max( ::time(NULL) + 2, _recommended_next_check_time );
+
+        set_async_next_gmtime( t );
     }
 }
 
@@ -743,35 +921,6 @@ void Exclusive_scheduler_watchdog::try_to_become_exclusive()
     {
         _announced_to_become_exclusive = false;
         _distributed_scheduler->show_exclusive_scheduler( (Transaction*)NULL );
-    }
-}
-
-//------------------------------------------Exclusive_scheduler_watchdog::calculate_next_check_time
-
-void Exclusive_scheduler_watchdog::calculate_next_check_time()
-{
-    time_t now = ::time(NULL);
-
-    _next_check_time = now + active_heart_beat_maximum_check_period;
-
-    //if( _set_exclusive_until  &&  _next_check_time > _set_exclusive_until )
-    //{
-    //    _next_check_time = _set_exclusive_until;
-    //    extra_log << ", warten, bis Datenbank Änderungen für alle sichtbar gemacht hat";
-    //}
-    //else
-    
-    if( Scheduler_member* watched_scheduler = _distributed_scheduler->exclusive_scheduler() )
-    {
-        time_t delay          = max_processing_time + 1;   // Erst in der folgenden Sekunde prüfen
-        time_t new_next_check = watched_scheduler->_db_next_heart_beat + delay + 1;
-
-        if( new_next_check - now >= active_heart_beat_minimum_check_period  &&  new_next_check < _next_check_time )
-        {
-            time_t diff = new_next_check - _next_check_time;
-            if( abs(diff) > 2 )  Z_LOG2( "scheduler.distributed", __FUNCTION__ << "  Synchronized with _db_next_heart_beat=" << my_string_from_time_t( watched_scheduler->_db_next_heart_beat ) << ": " << diff << "s\n" );
-            _next_check_time = new_next_check;
-        }
     }
 }
 
@@ -947,6 +1096,8 @@ bool Active_schedulers_watchdog::async_continue_( Continue_flags )
 {
     Z_LOGI2( "scheduler.distributed", __FUNCTION__ << "\n" );
 
+    Distributed_has_alarm::on_alarm();
+
 
     if( !db()->opened() )
     {
@@ -998,7 +1149,13 @@ void Active_schedulers_watchdog::calculate_next_check_time()
 void Active_schedulers_watchdog::set_alarm()
 {
     Z_LOG2( "scheduler.distributed", __FUNCTION__ << "  Next check at " << my_string_from_time_t( _next_check_time ) << "\n" );
-    set_async_next_gmtime( _next_check_time );
+
+    time_t t = _next_check_time;
+
+    if( t > _recommended_next_check_time )
+        t = max( ::time(NULL) + 2, _recommended_next_check_time );
+
+    set_async_next_gmtime( t );
 }
 
 //------------------------------------------------static Distributed_scheduler::string_from_command
@@ -1053,6 +1210,8 @@ void Distributed_scheduler::close()
     {
         Z_LOGI2( "scheduler", __FUNCTION__ << "\n" );
 
+        if( _heart_beat_watchdog_thread )  _heart_beat_watchdog_thread->kill();
+
         close_operations();
         set_async_manager( NULL );
 
@@ -1069,6 +1228,13 @@ void Distributed_scheduler::close()
         catch( exception& x )
         {
             if( _log )  _log->warn( S() << x.what() << ", in " << __FUNCTION__ );
+        }
+
+        if( _heart_beat_watchdog_thread )
+        {
+            Z_LOG2( "scheduler", __FUNCTION__ << "  thread_wait_for_termination()\n" );
+            _heart_beat_watchdog_thread->thread_wait_for_termination();
+            _heart_beat_watchdog_thread = NULL;
         }
 
         _closed = true;
@@ -1174,6 +1340,10 @@ bool Distributed_scheduler::start()
 
     set_async_manager( _spooler->_connection_manager );
     start_operations();
+
+    assert( _heart_beat );
+    _heart_beat_watchdog_thread = Z_NEW( Heart_beat_watchdog_thread( this ) );
+    _heart_beat_watchdog_thread->thread_start();
 
 
 
@@ -1711,6 +1881,16 @@ bool Distributed_scheduler::check_schedulers_heart_beat()
     return result;
 }
 
+//----------------------------------------Distributed_scheduler::recommend_next_deadline_check_time
+
+void Distributed_scheduler::recommend_next_deadline_check_time( time_t recommended_check_time )
+{
+    time_t t = max( ::time(NULL) + 2, recommended_check_time );
+
+    if( _active_schedulers_watchdog   )  _active_schedulers_watchdog->recommend_next_check_time( t );
+    if( _exclusive_scheduler_watchdog )  _exclusive_scheduler_watchdog->recommend_next_check_time( t );
+}
+
 //-------------------------------------------------------Distributed_scheduler::exclusive_scheduler
 
 Scheduler_member* Distributed_scheduler::exclusive_scheduler()
@@ -1737,6 +1917,7 @@ bool Distributed_scheduler::mark_as_exclusive()
     time_t new_db_next_heart_beat = _next_heart_beat;
 
 
+    if( !_exclusive_scheduler->is_empty_member() )  _exclusive_scheduler->_log->warn( message_string( "SCHEDULER-837" ) );   // "Taking exclusiveness from that Scheduler"
     _log->info( message_string( "SCHEDULER-835" ) );  // "This Scheduler becomes exclusive"
 
     try

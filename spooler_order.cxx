@@ -311,7 +311,18 @@ void Order_subsystem::load_orders_from_database()
 
 //--------------------------------------------------------Order_subsystem::load_order_from_database
 
-ptr<Order> Order_subsystem::load_order_from_database( const string& job_chain_name, Order::Id order_id )
+ptr<Order> Order_subsystem::load_order_from_database( const string& job_chain_name, const Order::Id& order_id )
+{
+    ptr<Order> result = try_load_order_from_database( job_chain_name, order_id );
+
+    if( !result )  z::throw_xc( "SCHEDULER-162", order_id.as_string(), job_chain_name );
+
+    return result;
+}
+
+//----------------------------------------------------Order_subsystem::try_load_order_from_database
+
+ptr<Order> Order_subsystem::try_load_order_from_database( const string& job_chain_name, const Order::Id& order_id )
 {
     ptr<Order> result;
 
@@ -319,18 +330,19 @@ ptr<Order> Order_subsystem::load_order_from_database( const string& job_chain_na
     {
         Any_file result_set = ta.open_result_set
             ( 
-                S() << "select " << order_select_database_columns << ", `distributed_next_time`"
+                S() << "select " << order_select_database_columns << ", `occupying_scheduler_member_id`"
                        "  from " << _spooler->_orders_tablename <<
-                       "  where " << job_chain_db_where_clause( job_chain_name ),
+                       "  where " << order_db_where_clause( job_chain_name, order_id.as_string() ),
                 __FUNCTION__
             );
 
-        if( result_set.eof() )  z::throw_xc( "SCHEDULER-162", order_id.as_string(), job_chain_name );
-
-        Record record = result_set.get_record();
-        result = new Order( _spooler, record, job_chain_name );
-        if( !record.null( "distributed_next_time" ) )  z::throw_xc( "SCHEDULER-379", result->obj_name(), record.as_string( "distributed_next_time" ) );
-        result->load_blobs( &ta );
+        if( !result_set.eof() )
+        {
+            Record record = result_set.get_record();
+            result = new Order( _spooler, record, job_chain_name );
+            if( !record.null( "occupying_scheduler_member_id" ) )  z::throw_xc( "SCHEDULER-379", result->obj_name(), record.as_string( "occupying_scheduler_member_id" ) );
+            result->load_blobs( &ta );
+        }
     }
     catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_orders_tablename, x ), __FUNCTION__ ); }
 
@@ -1164,6 +1176,7 @@ void Job_chain::add_order( Order* order )
     assert( order->_is_distributed == order->_is_db_occupied );
     assert( !order->_is_distributed || _is_distributed );
     if( state() != s_ready )  z::throw_xc( "SCHEDULER-151" );
+    if( !order->_is_distributed  &&  !_spooler->has_exclusiveness() )  z::throw_xc( "SCHEDULER-383", order->obj_name() );
     if( has_order_id( (Read_transaction*)NULL, order->id() ) )  z::throw_xc( "SCHEDULER-186", order->obj_name(), name() );
 
     set_visible( true );
@@ -1231,7 +1244,7 @@ void Job_chain::remove_order( Order* order )
 void Job_chain::add_orders_from_database( Read_transaction* ta )
 {
     assert( _orders_recoverable );
-    _spooler->assert_has_exclusiveness( __FUNCTION__ );
+    _spooler->assert_has_exclusiveness( obj_name() + " " + __FUNCTION__ );
     assert( _spooler->db()  &&  _spooler->db()->opened() );
 
     _load_orders_from_database = false;
@@ -1450,15 +1463,16 @@ bool Job_chain::tip_for_new_order( const Order::State& state, const Time& at )
 {
     bool result = false;
 
-    Job_chain_node* node = node_from_state( state );
-
-    if( Job* job = node->_job )
+    if( Job_chain_node* node = node_from_state_or_null( state ) )
     {
-        if( job->order_queue()->is_order_requested() 
-         && at < job->order_queue()->next_announced_order_time() )
+        if( Job* job = node->_job )
         {
-            job->order_queue()->set_next_announced_order_time( at, at.is_null() || at <= Time::now() );
-            result = true;
+            if( job->order_queue()->is_order_requested() 
+             && at < job->order_queue()->next_announced_order_time() )
+            {
+                job->order_queue()->set_next_announced_order_time( at, at.is_null() || at <= Time::now() );
+                result = true;
+            }
         }
     }
 
@@ -2497,9 +2511,9 @@ void Order::db_release_occupation()
     }
 }
 
-//---------------------------------------------------------------------------------Order::db_update
+//--------------------------------------------------------------------------------Order::db_update2
 
-void Order::db_update( Update_option update_option )
+void Order::db_update2( Update_option update_option, bool delet )
 {
     if( update_option == update_and_release_occupation  &&  _spooler->_are_all_tasks_killed )
     {
@@ -2527,7 +2541,7 @@ void Order::db_update( Update_option update_option )
         }
 
         //if( _job_chain_name == "" )
-        if( finished() )
+        if( delet )
         {
             for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
             {
@@ -2540,6 +2554,8 @@ void Order::db_update( Update_option update_option )
                 ta.commit( __FUNCTION__ );
             }
             catch( exception& x ) { ta.reopen_database_after_error( z::Xc( "SCHEDULER-306", _spooler->_orders_tablename, x  ), __FUNCTION__ ); }
+
+            if( !update_ok )  _log->warn( "SCHEDULER-385" );
 
             _is_in_database = false;  
             _is_db_occupied = false;
@@ -3504,7 +3520,7 @@ void Order::remove_from_job_chain()
         _log->info( _task? message_string( "SCHEDULER-941", _task->obj_name() ) 
                          : message_string( "SCHEDULER-940" ) );
 
-        if( _is_in_database )  db_update( update_and_release_occupation );
+        if( _is_in_database )  db_delete( update_and_release_occupation );
     }
 
     if( _job_chain )  _job_chain->remove_order( this );
@@ -3589,24 +3605,34 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain )
 
 void Order::place_or_replace_in_job_chain( Job_chain* job_chain )
 {
-    assert_is_not_distributed( __FUNCTION__ );
+    assert( job_chain );
 
-    if( ptr<Order> other_order = job_chain->order_or_null( id() ) )   // Nicht aus der Datenbank gelesen
+    if( job_chain->_is_distributed )
     {
-        other_order->remove_from_job_chain();
-        place_in_job_chain( job_chain );
+        z::throw_xc( "SCHEDULER-384", job_chain->obj_name(), __FUNCTION__ );
+        //ptr<Order> other_order = job_chain->order_or_null( id() );  // Nicht aus der Datenbank gelesen
 
-        if( other_order->_task )
-        {
-            _replacement_for = other_order;
-            _replacement_for->_replaced_by = this;
-
-            _log->info( message_string( "SCHEDULER-942", other_order->_task->obj_name(), other_order->obj_name() ) );       // add_or_replace_order(): Auftrag wird verzögert bis <p1/> <p2/> ausgeführt hat
-        }
+        //if( !other_order )  other_order = order_subsystem()->try_load_order_from_database( job_chain->name(), id() );
     }
     else
     {
-        place_in_job_chain( job_chain );
+        if( ptr<Order> other_order = job_chain->order_or_null( id() ) )  // Nicht aus der Datenbank gelesen
+        {
+            other_order->remove_from_job_chain();
+            place_in_job_chain( job_chain );
+
+            if( other_order->_task )
+            {
+                _replacement_for = other_order;
+                _replacement_for->_replaced_by = this;
+
+                _log->info( message_string( "SCHEDULER-942", other_order->_task->obj_name(), other_order->obj_name() ) );       // add_or_replace_order(): Auftrag wird verzögert bis <p1/> <p2/> ausgeführt hat
+            }
+        }
+        else
+        {
+            place_in_job_chain( job_chain );
+        }
     }
 }
 
@@ -3808,7 +3834,8 @@ void Order::postprocessing2( Job* last_job )
     {
         try
         {
-            db_update( update_and_release_occupation );
+            if( finished() )  db_delete( update_and_release_occupation );
+                        else  db_update( update_and_release_occupation );
         }
         catch( exception& x )
         {

@@ -39,6 +39,7 @@ struct Directory_file_order_source : //idispatch_implementation< Directory_file_
     void                        start                   ();
     bool                        request_order           ( const string& cause );
     void                        withdraw_order_request  ();
+    string                      obj_name                () const;
 
 
   private:

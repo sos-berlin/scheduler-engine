@@ -31,6 +31,7 @@ struct Scheduler_object
         type_directory_file_order_source,
         type_scheduler_event_manager,
         type_scheduler_member,
+        type_heart_beat_watchdog_thread,
         type_heart_beat,
         type_other_scheduler,
         type_exclusive_scheduler_watchdog,

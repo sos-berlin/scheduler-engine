@@ -1574,6 +1574,12 @@ void Spooler::load_arg()
             if( opt.flag      ( "test-summertime"        ) )  time::test_summertime( ( Time::now() + 10 ).as_string() );
             else
             if( opt.with_value( "test-summertime"        ) )  time::test_summertime( opt.value() );
+
+#           ifdef Z_WINDOWS
+                else
+                if( opt.flag      ( "debug-break"      ) )  DebugBreak();
+#           endif
+
           //else
           //if( opt.with_value( "now"                    ) )  _clock_difference = Time( Sos_date_time( opt.value() ) ) - Time::now();
             else
@@ -2496,7 +2502,7 @@ void Spooler::end_waiting_tasks()
 
 void Spooler::run()
 {
-    set_state( is_active()? s_waiting_for_activation : s_running );
+    set_state( is_active()? s_running : s_waiting_for_activation );
 
 
     int     nothing_done_count   = 0;
@@ -2523,8 +2529,8 @@ void Spooler::run()
         {
             if( !_demand_exclusiveness  ||  _distributed_scheduler->has_exclusiveness() )
             {
-                activate();
                 _is_activated = true;
+                activate();
                 _assert_is_active = true;
             }
         }
@@ -2931,7 +2937,7 @@ bool Spooler::check_is_active( Transaction* outer_transaction )
 
 void Spooler::assert_is_activated( const string& function )
 {
-    if( _is_activated )  z::throw_xc( "SCHEDULER-381", function );
+    if( !_is_activated )  z::throw_xc( "SCHEDULER-381", function );
 }
 
 //----------------------------------------------------------------Spooler::throw_distribution_error
@@ -3169,6 +3175,7 @@ void Spooler::abort_immediately( bool restart )
 {
     try
     { 
+        kill_all_processes();
         _log->close(); 
         _communication.close( 0.0 );   // Damit offene HTTP-Logs ordentlich schlieﬂen (denn sonst ersetzt ie6 das Log durch eine Fehlermeldung)
     } 
