@@ -240,9 +240,10 @@ int Heart_beat_watchdog_thread::thread_main()
 
     while( !_kill )
     {
-        time_t heart_beat_time = _distributed_scheduler->_db_last_heart_beat;
+        time_t heart_beat_time = _distributed_scheduler->_db_last_heart_beat;       // Gleichzeitiger Zugriff von einem anderen Thread!
         
-        sleep( heart_beat_period + max_processing_time + max_processing_time_2_short );
+        int delay = ::time(NULL) + heart_beat_time + 1 + heart_beat_period + max_processing_time + max_processing_time_2_short;
+        sleep( delay );
         
         if( _distributed_scheduler->_is_active  &&  _distributed_scheduler->_db_last_heart_beat == heart_beat_time )  
         {
