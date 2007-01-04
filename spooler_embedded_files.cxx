@@ -989,7 +989,8 @@ const char file_scheduler_xsd[] =
     "<xsd:attribute name=\"all_schedulers\" type=\"Yes_no\"/>\n"
     "<xsd:attribute name=\"restart\"        type=\"Yes_no\"/>\n"
     "<xsd:attribute name=\"timeout\"        type=\"xsd:integer\"/>\n"
-    "<xsd:attribute name=\"shutdown\"       type=\"Yes_no\"/>\n"
+    "<xsd:attribute name=\"continue_exclusive_operation\" type=\"Yes_no\"/>\n"
+    "<xsd:attribute name=\"cluster_member_id\" type=\"String\"/>\n"
     "</xsd:complexType>\n"
     "</xsd:element>\n"
     "\n"
@@ -1276,7 +1277,7 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1167901343 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1167926803 },
     { NULL, NULL, 0 }
 };
 

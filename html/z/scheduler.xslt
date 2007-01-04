@@ -1497,8 +1497,8 @@
                             </span>
                         </xsl:if>
 
-                        <xsl:if test="@shutdown='yes'">
-                            <span style="margin-right: 1em; color: red">The cluster is shut down.</span>
+                        <xsl:if test="not( @is_backup_allowed_to_start='yes' )">
+                            <span style="margin-right: 1em; color: red">Only non-backup Schedulers are allowed to start operation.</span>
                         </xsl:if>
                     </td>
                 </tr>
@@ -1507,14 +1507,14 @@
                 </tr>
 
                 <tr>
-                    <td class="head1">URL</td>
-                    <td class="head">State</td>
-                    <td class="head">Pid</td>
-                    <td class="head">Started at</td>
-                    <td class="head">Last heart beat</td>
-                    <td class="head">Detected<br/>heart beats</td>
-                    <td class="head">Backup<br/>precedence</td>
-                    <td class="head">Version</td>
+                    <td class="head1" style="font-size: 8pt;">URL</td>
+                    <td class="head"  style="font-size: 8pt;">State</td>
+                    <td class="head"  style="font-size: 8pt;">Pid</td>
+                    <td class="head"  style="font-size: 8pt;">Started at</td>
+                    <td class="head"  style="font-size: 8pt;">Last heart beat</td>
+                    <td class="head"  style="font-size: 8pt;">Detected<br/>heart beats</td>
+                    <td class="head"  style="font-size: 8pt;">Backup<br/>precedence</td>
+                    <td class="head"  style="font-size: 8pt;" colspan="2">Version</td>
                 </tr>
 
                 <tr>
@@ -1526,7 +1526,7 @@
                 <xsl:for-each select="distributed_scheduler_member">
                     <xsl:element name="tr">
                         <xsl:attribute name="style">
-                            <xsl:text>cursor: pointer;</xsl:text>
+                            <xsl:text>cursor: default;</xsl:text>
                             <xsl:if test="@dead='yes' or not( @last_detected_heart_beat_age )">
                                 <xsl:choose>
                                     <xsl:when test="@dead='yes' and @heart_beat_count > 0">color: red;</xsl:when>
@@ -1534,33 +1534,41 @@
                                 </xsl:choose>
                             </xsl:if>
                         </xsl:attribute>
-                        <xsl:attribute name="title">
-                            <xsl:call-template name="scheduler_url">
-                                <xsl:with-param name="url" select="@http_url"/>
-                            </xsl:call-template>
-                            <xsl:text>, scheduler_member_id=</xsl:text>
-                            <xsl:value-of select="@scheduler_member_id"/>
-                        </xsl:attribute>
-                        
-                        <xsl:if test="@scheduler_member_id != ancestor::distributed_scheduler/@scheduler_member_id">
-                            <xsl:attribute name="onclick">
-                                <xsl:text>window.open( "</xsl:text>
-                                <xsl:call-template name="scheduler_url">
-                                    <xsl:with-param name="url" select="@http_url"/>
-                                </xsl:call-template>
-                                <xsl:text>", "</xsl:text>
-                                <xsl:call-template name="translate_target">
-                                    <xsl:with-param name="target" select="@http_url"/>
-                                </xsl:call-template>
-                                <xsl:text>" )</xsl:text>
-                            </xsl:attribute>
-                        </xsl:if>
                         
                         <xsl:attribute name="onmouseover">this.original_class_name = this.className;  this.className='remote_scheduler_hover'</xsl:attribute>
                         <xsl:attribute name="onmouseout" >this.className=this.original_class_name </xsl:attribute>
 
                         <td>
-                            <xsl:value-of select="@http_url"/>
+                            <xsl:element name="span">
+                                <xsl:attribute name="title">
+                                    <xsl:call-template name="scheduler_url">
+                                        <xsl:with-param name="url" select="@http_url"/>
+                                    </xsl:call-template>
+                                    <xsl:text>, scheduler_member_id=</xsl:text>
+                                    <xsl:value-of select="@scheduler_member_id"/>
+                                </xsl:attribute>
+
+                                <xsl:if test="@scheduler_member_id != ancestor::distributed_scheduler/@scheduler_member_id">
+                                    <xsl:attribute name="style">
+                                        <xsl:text>cursor: pointer;</xsl:text>
+                                    </xsl:attribute>
+
+                                    <xsl:attribute name="onclick">
+                                        <xsl:text>window.open( "</xsl:text>
+                                        <xsl:call-template name="scheduler_url">
+                                            <xsl:with-param name="url" select="@http_url"/>
+                                        </xsl:call-template>
+                                        <xsl:text>", "</xsl:text>
+                                        <xsl:call-template name="translate_target">
+                                            <xsl:with-param name="target" select="@http_url"/>
+                                        </xsl:call-template>
+                                        <xsl:text>" )</xsl:text>
+                                    </xsl:attribute>
+                                </xsl:if>
+
+                                <xsl:value-of select="@http_url"/>
+                            </xsl:element>
+
                             <xsl:if test="@scheduler_member_id=ancestor::distributed_scheduler/@scheduler_member_id">
                                 <span style="font-size: 8pt"> &#160;(this Scheduler)</span>
                             </xsl:if>
@@ -1595,7 +1603,7 @@
 
                             <xsl:if test="@backup='yes'">backup </xsl:if>
 
-                            <xsl:if test="not( @last_detected_heart_beat_age )">
+                            <xsl:if test="not( @dead='yes' ) and not( @last_detected_heart_beat_age )">
                                 <xsl:text>still checking... </xsl:text>
                             </xsl:if>
                             
@@ -1645,6 +1653,17 @@
                             <span style="font-size: 8pt">
                                 <xsl:value-of select="@version"/>
                             </span>
+                        </td>
+
+                        <td>
+                            <xsl:if test="@scheduler_member_id != ancestor::distributed_scheduler/@scheduler_member_id">
+                                <xsl:call-template name="command_menu">
+                                    <xsl:with-param name="onclick_call"       select="'scheduler_member__onclick'"/>
+                                    <xsl:with-param name="onclick_param1_str" select="@scheduler_member_id"/>
+                                    <xsl:with-param name="onclick_param2"     select="'mouse_x() - 70'"/>
+                                    <xsl:with-param name="onclick_param3"     select="'mouse_y() - 1'"/>
+                                </xsl:call-template>
+                            </xsl:if>
                         </td>
                     </xsl:element>
                 </xsl:for-each>

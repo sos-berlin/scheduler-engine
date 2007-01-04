@@ -277,7 +277,7 @@ struct Spooler : Object,
     void                        cmd_pause                   ()                                  { _state_cmd = sc_pause; signal( "pause" ); }
     void                        cmd_continue                ();
     void                        cmd_terminate_after_error   ( const string& function_name, const string& message_text );
-    void                        cmd_terminate               ( bool restart = false, int timeout = INT_MAX, bool shutdown = true, bool terminate_all_schedulers = false );
+    void                        cmd_terminate               ( bool restart = false, int timeout = INT_MAX, bool continue_exclusive_operation = false, bool terminate_all_schedulers = false );
     void                        cmd_terminate_and_restart   ( int timeout = INT_MAX )           { return cmd_terminate( true, timeout ); }
     void                        cmd_let_run_terminate_and_restart();
 
@@ -569,7 +569,7 @@ struct Spooler : Object,
     State_cmd                  _shutdown_cmd;               // run() beenden, also alle Tasks beenden!
     bool                       _shutdown_ignore_running_tasks;
     time_t                     _termination_gmtimeout_at;   // Für sc_terminate und sc_terminate_with_restart
-    bool                       _terminate_shutdown;
+    bool                       _terminate_continue_exclusive_operation;
     bool                       _terminate_all_schedulers;
     bool                       _terminate_all_schedulers_with_restart;
     ptr<Async_operation>       _termination_async_operation;

@@ -2365,7 +2365,10 @@ bool Order::occupy_for_task( Task* task, const Time& now )
 
     if( _moved )  z::throw_xc( "SCHEDULER-0", obj_name() + " _moved=true?" );
 
-    _setback = 0;
+    _setback        = 0;
+    _setback_called = false;
+    _moved          = false;
+
     _task    = task;
     if( !_start_time )  _start_time = now;      
 
@@ -3791,6 +3794,8 @@ void Order::postprocessing( bool success )
     {
         bool force_error_state = false;
 
+        if( !_setback_called )  _setback_count = 0;
+
         if( !_suspended  &&  _setback == Time::never  &&  _setback_count > _task->job()->max_order_setbacks() )
         {
             _log->info( message_string( "SCHEDULER-943", _setback_count ) );   // " mal zurückgestellt. Der Auftrag wechselt in den Fehlerzustand"
@@ -3807,8 +3812,6 @@ void Order::postprocessing( bool success )
 
         if( !is_setback() && !_moved && !_end_state_reached  ||  force_error_state )
         {
-            //_setback_count = 0;
-
             if( _job_chain_node )
             {
                 assert( _job_chain );
@@ -4002,6 +4005,7 @@ void Order::setback()
     if( !order_queue() )  z::throw_xc( "SCHEDULER-163", obj_name() );
 
     _setback_count++;
+    _setback_called = true;
 
     int maximum = _task->job()->max_order_setbacks();
     if( _setback_count <= maximum )

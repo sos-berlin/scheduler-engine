@@ -980,7 +980,8 @@
             <xsd:attribute name="all_schedulers" type="Yes_no"/>
             <xsd:attribute name="restart"        type="Yes_no"/>
             <xsd:attribute name="timeout"        type="xsd:integer"/>
-            <xsd:attribute name="shutdown"       type="Yes_no"/>
+            <xsd:attribute name="continue_exclusive_operation" type="Yes_no"/>
+            <xsd:attribute name="cluster_member_id" type="String"/>
         </xsd:complexType>
     </xsd:element>
 

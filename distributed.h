@@ -42,7 +42,7 @@ struct Distributed_scheduler : Async_operation, Scheduler_object
 
 
     void                        close                       ();
-    void                        shutdown                    ();                                     // Ordentliches Herunterfahren des Schedulers
+    void                    set_continue_exclusive_operation( bool b = true )                       { _continue_exclusive_operation = b; }
   //void                        mark_begin_of_shutdown      ();
 
     void                        demand_exclusiveness        ( bool b = true )                       { _demand_exclusiveness = b; }
@@ -59,7 +59,8 @@ struct Distributed_scheduler : Async_operation, Scheduler_object
     bool                        check_is_active             ( Transaction* = NULL );
     bool                        has_exclusiveness           ()                                      { return _has_exclusiveness; }
     bool                     is_active                      ()                                      { return _is_active; }
-    bool                     is_scheduler_up                ();
+    bool                     is_allowed_to_start            ();
+    bool                     is_backup_allowed_to_start     ();
     bool                     is_backup                      ()                                      { return _is_backup; }
     bool                     is_exclusiveness_lost          ()                                      { return _is_exclusiveness_lost; }
   //Command                     heart_beat_command          ()                                      { return _heart_beat_command; }
@@ -77,6 +78,7 @@ struct Distributed_scheduler : Async_operation, Scheduler_object
   //void                        set_command_for_all_inactive_schedulers_but_me( Transaction*, Command );
   //void                        set_command_for_all_active_schedulers_but_me  ( Transaction*, const string& command );
     bool                        set_command_for_all_schedulers_but_me         ( Transaction*, const string& command );
+    bool                        set_command_for_scheduler   ( Transaction*, const string& command, const string& member_id );
 
     string                      http_url_of_member_id       ( const string& scheduler_member_id );
     Scheduler_member*           scheduler_member_or_null    ( const string& scheduler_member_id );
@@ -133,6 +135,8 @@ struct Distributed_scheduler : Async_operation, Scheduler_object
     bool                       _is_backup_precedence_set;
     bool                       _demand_exclusiveness;
     bool                       _watch_distributed_order_execution;
+    bool                       _continue_exclusive_operation;
+    bool                       _is_backup_allowed_to_start;
 
     time_t                     _next_heart_beat;
     time_t                     _db_last_heart_beat;

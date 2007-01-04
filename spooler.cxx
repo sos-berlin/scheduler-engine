@@ -2293,10 +2293,7 @@ void Spooler::stop( const exception* )
     {
         _assert_is_active = false;
 
-        if( _terminate_shutdown )  
-        {
-            _distributed_scheduler->shutdown();
-        }
+        _distributed_scheduler->set_continue_exclusive_operation( _terminate_continue_exclusive_operation );
 
         if( _terminate_all_schedulers )
         {
@@ -2906,7 +2903,7 @@ bool Spooler::ok( Transaction* outer_transaction )
     if( !check_is_active( outer_transaction ) )  
     {
         ok = false;
-        cmd_terminate( false, INT_MAX, false, false );
+        cmd_terminate( false, INT_MAX, true );
     }
 
     return ok;
@@ -2944,7 +2941,7 @@ bool Spooler::check_is_active( Transaction* outer_transaction )
                 //_distributed_scheduler->close();     // Scheduler-Mitglieds-Eintrag entfernen
                 //_distributed_scheduler = NULL;       // aber Eintrag für verteilten Scheduler lassen, Scheduler ist nicht herunterfahren (wird ja vom anderen aktiven Scheduler fortgesetzt)
 
-                cmd_terminate( false, INT_MAX, false );
+                cmd_terminate( false, INT_MAX, true );
                 result = false;
             }
         }
@@ -2996,7 +2993,7 @@ void Spooler::run_check_ctrl_c()
         if( _state != s_stopping )
         {
             _log->warn( message_string( "SCHEDULER-262", signal_text ) );   // "Abbruch-Signal (Ctrl-C) empfangen. Der Scheduler wird beendet.\n" );
-            cmd_terminate( false, INT_MAX, false );  // Nur dieses Mitglied des verteilten Schedulers beenden
+            cmd_terminate( false, INT_MAX, true );  // Inaktiver Scheduler darf fortsetzen
 
             ctrl_c_pressed = 0;
             set_ctrl_c_handler( true );
@@ -3142,13 +3139,13 @@ void Spooler::cmd_terminate_after_error( const string& debug_function, const str
 {
     _log->error( message_string( "SCHEDULER-264", "in " + debug_function, debug_text ) );
 
-    cmd_terminate( false, INT_MAX, false, false );
+    cmd_terminate( false, INT_MAX, true );  
 }
 
 //---------------------------------------------------------------------------Spooler::cmd_terminate
 // Anderer Thread (spooler_service.cxx)
 
-void Spooler::cmd_terminate( bool restart, int timeout, bool shutdown, bool terminate_all_schedulers )
+void Spooler::cmd_terminate( bool restart, int timeout, bool continue_exclusive_operation, bool terminate_all_schedulers )
 {
     if( timeout < 0 )  timeout = 0;
 
@@ -3156,7 +3153,7 @@ void Spooler::cmd_terminate( bool restart, int timeout, bool shutdown, bool term
     _terminate_all_schedulers_with_restart = restart;
     _termination_gmtimeout_at = timeout < 999999999? ::time(NULL) + timeout : time_max;
     _terminate_all_schedulers = terminate_all_schedulers;
-    _terminate_shutdown       = shutdown;
+    _terminate_continue_exclusive_operation = continue_exclusive_operation;
 
     signal( "terminate" );
 }
@@ -3356,8 +3353,8 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line )
     }// while( _shutdown_cmd == sc_reload  ||  _shutdown_cmd == sc_load_config );
 
 
-    _log->info( message_string( _terminate_shutdown? "SCHEDULER-999"         // "Scheduler ordentlich beendet"
-                                                   : "SCHEDULER-998" ) );    // "Scheduler exits"
+    _log->info( message_string( "SCHEDULER-999" ) );        // "Scheduler ordentlich beendet"
+                                                
     _log->close();
 
    

@@ -3180,11 +3180,11 @@
             </text>
         </message>
 
-        <message code="SCHEDULER-998">
+        <!--message code="SCHEDULER-998">
             <text xml:lang="en">
                 <title>Scheduler exits</title>
             </text>
-        </message>
+        </message-->
 
         <message code="SCHEDULER-999">
             <text xml:lang="de">
@@ -3225,11 +3225,11 @@
             </text>
         </message>
 
-        <message code="SCHEDULER-809">
+        <!--message code="SCHEDULER-809">
             <text xml:lang="en">
                 <title>According to database, the Scheduler is up since <p1/></title>
             </text>
-        </message>
+        </message-->
 
         <message code="SCHEDULER-811">
             <text xml:lang="en">
@@ -3254,7 +3254,7 @@
                 <title>Inactive Scheduler '<p2/>' has the higher backup precedence <p1/> (<p3>http_url</p3>)</title>
             </text>
         </message>
-        
+
         <message code="SCHEDULER-815">
             <text xml:lang="en">
                 <title>Task should end, but it has just been started with an order attached, so one step will be done</title>
@@ -3278,13 +3278,13 @@
                 <title>Currently active Scheduler has been started, so this inactive Scheduler starts again too</title>
             </text>
         </message-->
-        
+
         <message code="SCHEDULER-819">
             <text xml:lang="en">
                 <title>Scheduler becomes active</title>
             </text>
         </message>
-        
+
         <message code="SCHEDULER-820" weight="info">
             <text xml:lang="en">
                 <title>Watching heart beat of that Scheduler</title>
@@ -3305,7 +3305,9 @@
 
         <message code="SCHEDULER-823">
             <text xml:lang="en">
-                <title>Dead Scheduler member '<p1>scheduler_member_id</p1>' has resurrected after <p2/>s</title>
+                <title>
+                    Dead Scheduler member '<p1>scheduler_member_id</p1>' has resurrected after <p2/>s
+                </title>
             </text>
         </message>
 
@@ -3353,15 +3355,16 @@
 
         <message code="SCHEDULER-831">
             <text xml:lang="en">
-                <title>Waiting for start of non-backup Scheduler</title>
+                <title>Waiting <p1/>s for start of non-backup Scheduler</title>
+                <!--title>This is a backup Scheduler and there are no dead Schedulers. So we are waiting for start of non-backup Scheduler</title-->
             </text>
         </message>
         
-        <message code="SCHEDULER-832" weight="info">
+        <!--message code="SCHEDULER-832" weight="info">
             <text xml:lang="en">
-                <title>Waiting for start of Scheduler</title>
+                <title>This is a backup Scheduler. Waiting for dead or now terminated Schedulers until start of backup operation</title>
             </text>
-        </message>
+        </message-->
 
         <message code="SCHEDULER-833" weight="info">
             <text xml:lang="en">

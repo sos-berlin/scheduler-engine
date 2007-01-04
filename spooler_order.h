@@ -253,6 +253,7 @@ struct Order : Com_order,
     Period                     _period;                 // Bei _run_time.set(): Aktuelle oder nächste Periode
   //bool                       _period_once;
     Time                       _setback;                // Bis wann der Auftrag zurückgestellt ist (bei _setback_count > 0, sonst Startzeitpunkt "at")
+    bool                       _setback_called;
     int                        _setback_count;
     bool                       _on_blacklist;           // assert( _job_chain )
     bool                       _suspended;

@@ -704,9 +704,14 @@ function scheduler_menu__onclick( x, y )
     popup_builder.add_command ( "Continue"                       , command( "continue"                      ) , state == "paused" || waiting_errno );
     popup_builder.add_bar();
   //popup_builder.add_command ( "Reload"                         , command( "reload"                        ), state != "stopped"  &&  state != "stopping" );
-    popup_builder.add_command ( "Terminate"                      , command( "terminate"                     ), !waiting_errno );
-    popup_builder.add_command ( "Terminate and restart"          , command( "terminate_and_restart"         ), !waiting_errno );
-    popup_builder.add_command ( "Let run, terminate and restart" , command( "let_run_terminate_and_restart" ), !waiting_errno );
+    popup_builder.add_command ( "Terminate"                      , "<terminate/>"              , !waiting_errno );
+    popup_builder.add_command ( "Terminate within 10s"           , "<terminate timeout='10'/>" , !waiting_errno );
+    popup_builder.add_command ( "Terminate and restart"          , "<terminate restart='yes'/>", !waiting_errno );
+    
+    if( _response.selectSingleNode( "spooler/answer/state" ).getAttribute( "exclusive" ) == "yes" )
+        popup_builder.add_command ( "Terminate and continue exclusive operation", command( "<terminate continue_exclusive_operation='yes'/>" ), !waiting_errno );
+    
+  //popup_builder.add_command ( "Let run, terminate and restart" , command( "let_run_terminate_and_restart" ), !waiting_errno );
     popup_builder.add_bar();
     popup_builder.add_command ( "Abort immediately"              , command( "abort_immediately"             ) );
     popup_builder.add_command ( "Abort immediately and restart"  , command( "abort_immediately_and_restart" ) );
@@ -805,6 +810,21 @@ function history_order_menu__onclick( job_chain_name, order_id, x, y )
     _popup_menu = popup_builder.show_popup_menu( x, y );
 }
 
+//------------------------------------------------------------------------scheduler_member__onclick
+
+function scheduler_member__onclick( cluster_member_id, x, y )
+{
+    if( cluster_member_id+"" != "" )
+    {
+        var popup_builder = new Popup_menu_builder();
+
+        popup_builder.add_command( "terminate"       , "<terminate cluster_member_id='" + xml_encode_attribute( cluster_member_id ) + "' />" );
+        popup_builder.add_command( "restart"         , "<terminate cluster_member_id='" + xml_encode_attribute( cluster_member_id ) + "' restart='yes' />" );
+ 
+        _popup_menu = popup_builder.show_popup_menu( x, y );
+    }
+}
+
 //-----------------------------------------------------------------------------------------open_url
 
 function open_url( url, window_name, features, replace )
@@ -855,7 +875,6 @@ function xml_encode( text )
 {
     if( text == null )  return "";
     return text.toString().replace( /&/g, "&amp;" ).replace( /</g, "&lt;" ).replace( />/g, "&gt;" );
-    //TODO Reguläre Ausdrücke vorkompilieren
 }
 
 //-----------------------------------------------------------------------------xml_encode_attribute

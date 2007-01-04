@@ -282,15 +282,28 @@ xml::Element_ptr Command_processor::execute_terminate( const xml::Element_ptr& e
 {
     if( _security_level < Security::seclev_no_add )  z::throw_xc( "SCHEDULER-121" );
 
-    bool restart        = element.bool_getAttribute( "restart"       , false );
-    bool all_schedulers = element.bool_getAttribute( "all_schedulers", false );
-    bool shutdown       = element.bool_getAttribute( "shutdown"      , true );
-    int  timeout        = element. int_getAttribute( "timeout"       , INT_MAX );
+    bool restart        = element.bool_getAttribute( "restart"                     , false );
+    bool all_schedulers = element.bool_getAttribute( "all_schedulers"              , false );
+    bool continue_excl  = element.bool_getAttribute( "continue_exclusive_operation", false );
+    int  timeout        = element. int_getAttribute( "timeout"                     , INT_MAX );
+    string member_id    = element.     getAttribute( "cluster_member_id" );
 
-    //bool terminate_all_schedulers = all_schedulers  &&  !restart;
+    if( member_id != "" )
+    {
+        if( !_spooler->_distributed_scheduler )  z::throw_xc( __FUNCTION__, "no cluster" );
 
-    _spooler->cmd_terminate( restart, timeout, shutdown, all_schedulers );
-    
+        S cmd;
+        cmd << "<terminate";
+        if( timeout < INT_MAX )  cmd << " timeout='" << timeout << "'";
+        if( restart )  cmd << " restart='yes'";
+        cmd << "/>";
+
+        _spooler->_distributed_scheduler->set_command_for_scheduler( (Transaction*)NULL, cmd, member_id );
+    }
+    else
+    {
+        _spooler->cmd_terminate( restart, timeout, continue_excl, all_schedulers );
+    }
 
     return _answer.createElement( "ok" );
 }
