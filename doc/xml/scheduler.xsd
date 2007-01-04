@@ -101,6 +101,21 @@
         </xsd:complexType>
     </xsd:element>
 
+
+    <xsd:element name="cluster_member_command">
+        <xsd:complexType>
+            <xsd:choice>
+                <xsd:element name="terminate">
+                    <xsd:complexType>
+                        <xsd:attribute name="timeout" type="xsd:integer"/>
+                        <xsd:attribute name="restart" type="Yes_no"/>
+                    </xsd:complexType>
+                </xsd:element>
+            </xsd:choice>
+        </xsd:complexType>
+    </xsd:element>
+
+
     <xsd:element name="commands" type="Commands"/>
 
     <xsd:complexType name="Commands">

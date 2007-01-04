@@ -121,6 +121,18 @@ void Read_transaction::begin_transaction( Database* db )
     _db = db; 
 }
 
+//-------------------------------------------------------------Read_transaction::read_single_record
+
+Record Read_transaction::read_single_record( const string& sql, const string& debug_text, bool need_commit_or_rollback )
+{
+    Any_file result_set = open_result_set( sql, debug_text, need_commit_or_rollback );
+    
+    Record result = result_set.get_record();
+    if( !result_set.eof() )  z::throw_xc( __FUNCTION__ );
+
+    return result;
+}
+
 //----------------------------------------------------------------Read_transaction::open_result_set
 
 Any_file Read_transaction::open_result_set( const string& sql, const string& debug_text, bool need_commit_or_rollback )
@@ -190,6 +202,21 @@ Any_file Read_transaction::open_file_2( const string& db_prefix, const string& e
 string Read_transaction::read_clob( const string& table_name, const string& column_name, const string& key_name, const string& key_value )
 {
     return read_clob( table_name, column_name, "  where `" + key_name + "`=" + sql::quoted( key_value ) );
+}
+
+//----------------------------------------------------------------------Read_transaction::read_clob
+
+string Read_transaction::read_clob_or_empty( const string& table_name, const string& column_name, const string& where )
+{
+    try
+    {
+        return this->file_as_string( " -read-transaction -table=" + table_name + " -clob=" + column_name + "  " + where );
+    }
+    catch( sos::Not_exist_error& x )
+    {
+        if( string(x.code()) == "SOS-1251" )  return "";    // "Gesuchter Satz nicht vorhanden, SELECT liefert leere Ergebnismenge"
+        throw;
+    }
 }
 
 //----------------------------------------------------------------------Read_transaction::read_clob
@@ -1407,7 +1434,8 @@ void Transaction::update_clob( const string& table_name, const string& column_na
 
 void Transaction::update_clob( const string& table_name, const string& column_name, const string& value, const string& where )
 {
-    string hostware_filename = S() << "-table=" << table_name << " -clob=" << column_name << "  " << where;
+    string hostware_filename = S() <<  "-no-blob-record-allowed -table=" << table_name << " -clob=" << column_name << "  " << where;
+    // Falls wir mal auf direkten Aufruf von jdbc umstellen, kann -no-blob-record-allowed wegfallen. Dann können wir das genauer programmieren.
 
     Any_file clob = open_file( "-out " + db()->db_name(), hostware_filename );
 

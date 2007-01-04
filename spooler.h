@@ -310,7 +310,8 @@ struct Spooler : Object,
     void                        set_state                   ( State );
     void                        report_event                ( Scheduler_event* e )              { if( _scheduler_event_manager )  _scheduler_event_manager->report_event( e ); }
 
-    void                        create_window               ();
+  //void                        create_window               ();
+    void                        update_console_title        ();
     void                        start                       ();
     void                        activate                    ();
     void                        execute_config_commands     ();
@@ -570,6 +571,7 @@ struct Spooler : Object,
     time_t                     _termination_gmtimeout_at;   // Für sc_terminate und sc_terminate_with_restart
     bool                       _terminate_shutdown;
     bool                       _terminate_all_schedulers;
+    bool                       _terminate_all_schedulers_with_restart;
     ptr<Async_operation>       _termination_async_operation;
 
     string                     _directory;
@@ -591,7 +593,8 @@ struct Spooler : Object,
     Variable_set_map           _variable_set_map;           // _variable_set_map[""] = _environment; für <params>, Com_variable_set::set_dom()
     bool                       _is_backup_member;
     int                        _backup_precedence;
-    bool                       _has_backup_precedence;
+    bool                       _is_backup_precedence_set;
+    bool                       _suppress_watchdog_thread;
     bool                       _demand_exclusiveness;
     bool                       _are_orders_distributed;
     bool                       _is_activated;

@@ -238,13 +238,13 @@
                 <message level="info"  code="SCHEDULER-809"/>
                 <message level="info"  code="SCHEDULER-811"/>
                 <message level="info"  code="SCHEDULER-814"/>
-                <message level="info"  code="SCHEDULER-818"/>
+                <!--message level="info"  code="SCHEDULER-818"/-->
                 <message level="info"  code="SCHEDULER-819"/>
                 <message level="info"  code="SCHEDULER-820"/>
                 <message level="info"  code="SCHEDULER-821"/>
                 <message level="info"  code="SCHEDULER-822"/>
-                <message level="error" code="SCHEDULER-823"/>
-                <message level="info"  code="SCHEDULER-824"/>
+                <message level="warn"  code="SCHEDULER-823"/>
+                <!--message level="info"  code="SCHEDULER-824"/-->
                 <message level="info"  code="SCHEDULER-825"/>
                 <message level="info"  code="SCHEDULER-826"/>
                 <message level="warn"  code="SCHEDULER-827"/>

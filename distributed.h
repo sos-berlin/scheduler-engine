@@ -14,16 +14,16 @@ struct Scheduler_member;
 
 struct Distributed_scheduler : Async_operation, Scheduler_object
 {
-    enum Command
-    {
-        cmd_none,
-        cmd_terminate,
-        cmd_terminate_and_restart
-    };
+    //enum Command
+    //{
+    //    cmd_none,
+    //    cmd_terminate,
+    //    cmd_terminate_and_restart
+    //};
 
 
-    static string               string_from_command         ( Command );
-    static Command              command_from_string         ( const string& );
+    //static string               string_from_command         ( Command );
+    //static Command              command_from_string         ( const string& );
 
 
 
@@ -51,7 +51,7 @@ struct Distributed_scheduler : Async_operation, Scheduler_object
     void                    set_my_member_id                ( const string& );
     string                      my_member_id                ()                                      { return _scheduler_member_id; }
 
-    void                    set_backup_precedence           ( int v )                               { _backup_precedence = v; } 
+    void                    set_backup_precedence           ( int v )                               { _backup_precedence = v; _is_backup_precedence_set = true; } 
     int                         backup_precedence           ()                                      { return _backup_precedence; }
 
     void                    set_watch_distributed_order_execution( bool b = true )                  { _watch_distributed_order_execution = b; }
@@ -75,8 +75,8 @@ struct Distributed_scheduler : Async_operation, Scheduler_object
     void                        show_exclusive_scheduler    ( Transaction* ta )                     { show_active_schedulers( ta, true ); }
     void                        show_active_schedulers      ( Transaction*, bool exclusive_only = false );
   //void                        set_command_for_all_inactive_schedulers_but_me( Transaction*, Command );
-    void                        set_command_for_all_active_schedulers_but_me  ( Transaction*, Command );
-    void                        set_command_for_all_schedulers_but_me         ( Transaction*, Command );
+  //void                        set_command_for_all_active_schedulers_but_me  ( Transaction*, const string& command );
+    bool                        set_command_for_all_schedulers_but_me         ( Transaction*, const string& command );
 
     string                      http_url_of_member_id       ( const string& scheduler_member_id );
     Scheduler_member*           scheduler_member_or_null    ( const string& scheduler_member_id );
@@ -108,9 +108,9 @@ struct Distributed_scheduler : Async_operation, Scheduler_object
     void                        lock_member_records         ( Transaction*, const string& member1_id, const string& member2_id );
   //bool                        check_database_integrity    ();
     bool                        heartbeat_member_record     ();
-    void                        set_command_for_all_schedulers_but_me( Transaction*, const string& where, Command );
+    bool                        set_command_for_all_schedulers_but_me( Transaction*, const string& command, const string& where_condition );
     void                        read_and_execute_command    ();
-    void                        execute_command             ( Command );
+    void                        execute_command             ( const string& command );
     void                        make_scheduler_member_id    ();
     Scheduler_member*           exclusive_scheduler         ();                                     // NULL, wenn _exclusive_scheduler->is_empty_member()
     Scheduler_member*           empty_scheduler_record      ();
@@ -130,6 +130,7 @@ struct Distributed_scheduler : Async_operation, Scheduler_object
     bool                       _has_exclusiveness;
     bool                       _is_backup;
     int                        _backup_precedence;
+    bool                       _is_backup_precedence_set;
     bool                       _demand_exclusiveness;
     bool                       _watch_distributed_order_execution;
 
@@ -142,7 +143,6 @@ struct Distributed_scheduler : Async_operation, Scheduler_object
     bool                       _is_exclusiveness_lost;
     bool                       _is_in_error;
     bool                       _was_start_ok;
-    string                     _heart_beat_command_string;
     int                        _is_in_do_a_heart_beat;
     bool                       _closed;
 
@@ -156,6 +156,11 @@ struct Distributed_scheduler : Async_operation, Scheduler_object
 
     ptr<Scheduler_member>      _exclusive_scheduler;        // Kein Scheduler ist exklusiv, wenn _exclusive_scheduler->is_empty_member()
     ptr<Scheduler_member>      _my_scheduler;
+
+
+  public:
+    const static int            default_backup_precedence;
+    const static int            default_non_backup_precedence;
 };
 
 //-------------------------------------------------------------------------------------------------

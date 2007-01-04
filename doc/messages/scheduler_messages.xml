@@ -2776,6 +2776,7 @@
             </text>
             <text xml:lang="en">
                 <title>add_or_replace_order(): order delayed until <p1/> has executed <p2/></title>
+                <!--title>Order with same ID currently processed by <p1/> will be replaced</title-->
             </text>
         </message>
 
@@ -3272,11 +3273,11 @@
             </text>
         </message>
 
-        <message code="SCHEDULER-818">
+        <!--message code="SCHEDULER-818">
             <text xml:lang="en">
                 <title>Currently active Scheduler has been started, so this inactive Scheduler starts again too</title>
             </text>
-        </message>
+        </message-->
         
         <message code="SCHEDULER-819">
             <text xml:lang="en">
@@ -3308,11 +3309,11 @@
             </text>
         </message>
 
-        <message code="SCHEDULER-824">
+        <!--message code="SCHEDULER-824">
             <text xml:lang="en">
                 <title>The exclusive Scheduler member is '<p1>scheduler_member_id</p1>'</title>
             </text>
-        </message>
+        </message-->
 
         <message code="SCHEDULER-825">
             <text xml:lang="en">
@@ -3334,7 +3335,7 @@
 
         <message code="SCHEDULER-828">
             <text xml:lang="en">
-                <title><p1/> old member records deleted in database table <p2/></title>
+                <title><p1/> inactive Scheduler member records older than <p3/> removed from database table <p2/></title>
             </text>
         </message>
 
@@ -3397,6 +3398,18 @@
                 <title><p1/>. heart beat detected</title>
             </text>
         </message>
+
+        <message code="SCHEDULER-839" weight="info">
+            <text xml:lang="en">
+                <title>This order has been replaced</title>
+            </text>
+        </message>
+
+        <!--message code="SCHEDULER-840" weight="info">
+            <text xml:lang="en">
+                <title>Order with same ID currently processed by <p1/> will be replaced</title>
+            </text>
+        </message-->
     </messages>
     
 </messages>

@@ -141,6 +141,7 @@ struct Order : Com_order,
 
     void                        inhibit_distribution    ()                                          { _is_distribution_inhibited = true; }
     void                        assert_is_not_distributed  ( const string& debug_text );
+    void                    set_distributed             ();
 
     void                        start_now               ();
     void                        setback                 ();
@@ -150,6 +151,8 @@ struct Order : Com_order,
     void                    set_at                      ( const Time& );
     Time                        at                      ()                                          { return _setback; }
   //void                    set_run_time_xml            ( const string& );
+    void                    set_replacement             ( Order* replaced_order );
+    void                    set_replacement             ( bool );
     Time                        next_time               ();
     Time                        next_start_time         ( bool first_call = false );
 
@@ -174,13 +177,14 @@ struct Order : Com_order,
 
     void                        db_insert               ();
     bool                        db_occupy_for_processing();
-    void                        db_release_occupation   ();
+    bool                        db_release_occupation   ();
     void                        db_fill_stmt            ( sql::Write_stmt* );
 
     enum Update_option { update_anyway, update_not_occupied, update_and_release_occupation };
-    void                        db_update               ( Update_option u )                         { db_update2( u, false ); }
-    void                        db_update2              ( Update_option, bool delet );
-    void                        db_delete               ( Update_option u )                         { db_update2( u, true ); }
+    bool                        db_update               ( Update_option u )                         { return db_update2( u, false ); }
+    bool                        db_update2              ( Update_option, bool delet, Transaction* outer_transaction = NULL );
+    bool                        db_delete               ( Update_option u )                         { return db_update2( u, true ); }
+    bool                        db_handle_modified_order( Transaction* );
 
     string                      db_read_clob            ( Read_transaction*, const string& column_name );
     void                        db_update_clob          ( Transaction*, const string& column_name, const string& value );
@@ -234,6 +238,8 @@ struct Order : Com_order,
 
     ptr<Order>                 _replaced_by;            // Nur wenn _task != NULL: _replaced_by soll this in der Jobkette ersetzen
     Order*                     _replacement_for;        // _replacement_for == NULL  ||  _replacement_for->_replaced_by == this && _replacement_for->_task != NULL
+    bool                       _is_replacement;         // _replacement_for != NULL => _is_replacement
+    string                     _replaced_order_occupator;// Task::obj:name() oder scheduler_member_id
 
     Time                       _created;
     Time                       _start_time;             // Erster Jobschritt
@@ -529,6 +535,13 @@ struct Order_queue : Com_order_queue
 
 struct Order_subsystem : Object, Scheduler_object
 {
+    enum Load_order_flags
+    {
+        lo_none,
+        lo_lock
+    };
+
+
                                 Order_subsystem             ( Spooler* );
 
 
@@ -545,8 +558,8 @@ struct Order_subsystem : Object, Scheduler_object
     Job_chain*                  job_chain_or_null           ( const string& name );
     xml::Element_ptr            job_chains_dom_element      ( const xml::Document_ptr&, const Show_what& );
     void                        load_orders_from_database   ();
-    ptr<Order>                  load_order_from_database    ( const string& job_chain_name, const Order::Id& );
-    ptr<Order>                  try_load_order_from_database( const string& job_chain_name, const Order::Id& );
+    ptr<Order>                  load_order_from_database    ( Transaction*, const string& job_chain_name, const Order::Id&, Load_order_flags = lo_none );
+    ptr<Order>                  try_load_order_from_database( Transaction*, const string& job_chain_name, const Order::Id&, Load_order_flags = lo_none );
     void                        check_exception             ();
     bool                        are_orders_distributed      ();                                    // Für verteilte (distributed) Ausführung
     void                        request_order               ();

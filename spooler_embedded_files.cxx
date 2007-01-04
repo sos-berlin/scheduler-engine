@@ -110,6 +110,21 @@ const char file_scheduler_xsd[] =
     "</xsd:complexType>\n"
     "</xsd:element>\n"
     "\n"
+    "\n"
+    "<xsd:element name=\"cluster_member_command\">\n"
+    "<xsd:complexType>\n"
+    "<xsd:choice>\n"
+    "<xsd:element name=\"terminate\">\n"
+    "<xsd:complexType>\n"
+    "<xsd:attribute name=\"timeout\" type=\"xsd:integer\"/>\n"
+    "<xsd:attribute name=\"restart\" type=\"Yes_no\"/>\n"
+    "</xsd:complexType>\n"
+    "</xsd:element>\n"
+    "</xsd:choice>\n"
+    "</xsd:complexType>\n"
+    "</xsd:element>\n"
+    "\n"
+    "\n"
     "<xsd:element name=\"commands\" type=\"Commands\"/>\n"
     "\n"
     "<xsd:complexType name=\"Commands\">\n"
@@ -1261,7 +1276,7 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1167573723 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1167901343 },
     { NULL, NULL, 0 }
 };
 

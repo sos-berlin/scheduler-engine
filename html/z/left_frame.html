@@ -148,9 +148,9 @@ function update_jobs_frame()
         max_orders = window.parent.details_frame._job_chain_element? 100 : _max_orders;
     }
     
-    if( _show_card == "distributed_scheduler" )  what += " distributed_scheduler";
-    if( _show_card == "remote_schedulers"     )  what += " remote_schedulers";
-    if( _show_card == "job_chains"            )  what += " job_chains";
+    if( _show_card == "cluster"           )  what += " distributed_scheduler";
+    if( _show_card == "remote_schedulers" )  what += " remote_schedulers";
+    if( _show_card == "job_chains"        )  what += " job_chains";
     
     _response = _scheduler.execute( "<show_state what='" + what + "' max_orders='" + max_orders + "'/>" );
     

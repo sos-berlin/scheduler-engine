@@ -27,9 +27,10 @@ namespace scheduler {
 const int    check_database_orders_period           = 15;
 const int    check_database_orders_period_minimum   = 1;
 const int    database_orders_read_ahead_count       = 1;
-const string now_database_distributed_next_time       = "2000-01-01 00:00:00";        // Auftrag ist verteilt und ist sofort ausführbar
-const string never_database_distributed_next_time     = "2999-12-31 00:00:00";        // Auftrag ist verteilt, hat aber keine Startzeit (weil z.B. suspendiert)
-const string blacklist_database_distributed_next_time = "2999-12-31 00:01:00";        // Auftrag ist auf der schwarzen Liste
+const string now_database_distributed_next_time         = "2000-01-01 00:00:00";        // Auftrag ist verteilt und ist sofort ausführbar
+const string never_database_distributed_next_time       = "3111-11-11 00:00:00";        // Auftrag ist verteilt, hat aber keine Startzeit (weil z.B. suspendiert)
+const string blacklist_database_distributed_next_time   = "3111-11-11 00:01:00";        // Auftrag ist auf der schwarzen Liste
+const string replacement_database_distributed_next_time = "3111-11-11 00:02:00";        // <order replacement="yes">
 const string default_end_state_name                 = "<END_STATE>";
 const string order_select_database_columns          = "`id`, `priority`, `state`, `state_text`, `initial_state`, `title`, `created_time`";
 
@@ -311,9 +312,9 @@ void Order_subsystem::load_orders_from_database()
 
 //--------------------------------------------------------Order_subsystem::load_order_from_database
 
-ptr<Order> Order_subsystem::load_order_from_database( const string& job_chain_name, const Order::Id& order_id )
+ptr<Order> Order_subsystem::load_order_from_database( Transaction* outer_transaction, const string& job_chain_name, const Order::Id& order_id, Load_order_flags flag )
 {
-    ptr<Order> result = try_load_order_from_database( job_chain_name, order_id );
+    ptr<Order> result = try_load_order_from_database( outer_transaction, job_chain_name, order_id, flag );
 
     if( !result )  z::throw_xc( "SCHEDULER-162", order_id.as_string(), job_chain_name );
 
@@ -322,26 +323,36 @@ ptr<Order> Order_subsystem::load_order_from_database( const string& job_chain_na
 
 //----------------------------------------------------Order_subsystem::try_load_order_from_database
 
-ptr<Order> Order_subsystem::try_load_order_from_database( const string& job_chain_name, const Order::Id& order_id )
+ptr<Order> Order_subsystem::try_load_order_from_database( Transaction* outer_transaction, const string& job_chain_name, const Order::Id& order_id, Load_order_flags flag )
 {
     ptr<Order> result;
 
-    for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
+    for( Retry_transaction ta ( _spooler->_db, outer_transaction ); ta.enter_loop(); ta++ ) try
     {
-        Any_file result_set = ta.open_result_set
-            ( 
-                S() << "select " << order_select_database_columns << ", `occupying_scheduler_member_id`"
-                       "  from " << _spooler->_orders_tablename <<
-                       "  where " << order_db_where_clause( job_chain_name, order_id.as_string() ),
-                __FUNCTION__
-            );
+        S select_sql;
+        select_sql <<  "select " << order_select_database_columns << ", `occupying_scheduler_member_id`"
+                       "  from " << _spooler->_orders_tablename;
+        if( flag & lo_lock )  select_sql << " %update_lock";
+        select_sql << "  where " << order_db_where_clause( job_chain_name, order_id.as_string() );
+        select_sql << " and `distributed_next_time` is not null";
+
+        Any_file result_set = ta.open_result_set( select_sql, __FUNCTION__ );
 
         if( !result_set.eof() )
         {
             Record record = result_set.get_record();
             result = new Order( _spooler, record, job_chain_name );
+            result->set_distributed();
             if( !record.null( "occupying_scheduler_member_id" ) )  z::throw_xc( "SCHEDULER-379", result->obj_name(), record.as_string( "occupying_scheduler_member_id" ) );
-            result->load_blobs( &ta );
+
+            try
+            {
+                result->load_blobs( &ta );
+            }
+            catch( exception& ) 
+            { 
+                result = NULL;  // Jemand hat wohl den Auftrag gelöscht
+            }      
         }
     }
     catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_orders_tablename, x ), __FUNCTION__ ); }
@@ -452,7 +463,10 @@ bool Database_order_detector::async_continue_( Continue_flags )
     Time read_until             = _now + check_database_orders_period;
     int  announced_orders_count = 0;
 
-    string select_sql_begin = S() << "select %limit(" << database_orders_read_ahead_count << ") `distributed_next_time`, `job_chain`, `state`"
+    S select_sql_begin;
+    select_sql_begin << "select ";
+    if( database_orders_read_ahead_count < INT_MAX ) select_sql_begin << " %limit(" << database_orders_read_ahead_count << ") ";
+    select_sql_begin << "`distributed_next_time`, `job_chain`, `state`"
                     "  from " << _spooler->_orders_tablename <<
                     "  where `spooler_id`=" << sql::quoted( _spooler->id_for_db() ) <<
                        " and `distributed_next_time` is not null"
@@ -560,7 +574,10 @@ string Database_order_detector::make_where_expression_for_distributed_orders_at_
         Time t = job->order_queue()->next_announced_order_time();
         assert( t );
 
-        if( t < Time::never )  result << " and `distributed_next_time`<{ts'" << t.as_string( Time::without_ms ) << "'}";
+        result << " and `distributed_next_time`<{ts'" 
+               << ( t < Time::never? t.as_string( Time::without_ms ) 
+                                   : never_database_distributed_next_time ) 
+               << "'}";
     }
 
     return result;
@@ -584,10 +601,11 @@ int Database_order_detector::read_result_set( Read_transaction* ta, const string
         if( distributed_next_time == _now_database_distributed_next_time   )  distributed_next_time.set_null();
         if( distributed_next_time >= _never_database_distributed_next_time )  distributed_next_time.set_never();
         
-        job->order_queue()->set_next_announced_order_time( distributed_next_time, distributed_next_time <= _now );
+        bool is_now = distributed_next_time <= _now;
+        job->order_queue()->set_next_announced_order_time( distributed_next_time, is_now );
         
         //_names_of_requesting_jobs.erase( job->name() );
-        count++;
+        count += is_now;
     }
 
     return count;
@@ -1986,16 +2004,20 @@ Order* Order_queue::load_and_occupy_next_distributed_order_from_database( Task* 
             bool ok = order->db_occupy_for_processing();
             if( ok )
             {
-                for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
+                try
                 {
+                    Read_transaction ta ( _spooler->db() );
                     order->load_blobs( &ta );
                 }
-                catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_orders_tablename, x ), __FUNCTION__ ); }
+                catch( exception& ) { order = NULL; }     // Jemand hat wohl den Datensatz gelöscht
         
-                order->occupy_for_task( occupying_task, now );
-                job_chain->add_order( order );
+                if( order )
+                {
+                    order->occupy_for_task( occupying_task, now );
+                    job_chain->add_order( order );
 
-                result = order;
+                    result = order;
+                }
             }
         }
     //}
@@ -2193,7 +2215,7 @@ Order::~Order()
         assert( !_job_chain );
         assert( !_on_blacklist );
         assert( !_in_job_queue );
-        assert( !_replacement_for );
+      //assert( !_is_replacement );
         assert( !_replaced_by );
         assert( !_order_queue );
 #   endif
@@ -2235,15 +2257,15 @@ void Order::load_order_xml_blob( Read_transaction* ta )
 
 void Order::load_run_time_blob( Read_transaction* ta )
 {
-    string run_time_xml = db_read_clob( ta, "run_time"  );
+    string run_time_xml = db_read_clob( ta, "run_time" );
     if( run_time_xml != "" )  set_run_time( xml::Document_ptr( run_time_xml ).documentElement() );
 }
 
-//--------------------------------------------------------------------------------Order::load_blobs
+//-------------------------------------------------------------------------Order::load_payload_blob
 
 void Order::load_payload_blob( Read_transaction* ta )
 {
-    string payload_string = db_read_clob( ta, "payload"   );
+    string payload_string = db_read_clob( ta, "payload" );
     if( payload_string.find( "<" + Com_variable_set::xml_element_name() ) != string::npos )
     {
         ptr<Com_variable_set> v = new Com_variable_set;
@@ -2292,10 +2314,10 @@ bool Order::is_immediately_processable( const Time& now )
 
 bool Order::is_processable()
 {
-    if( _on_blacklist )     return false;  
-    if( _suspended )        return false;
-    if( _task )             return false;               // Schon in Verarbeitung
-    if( _replacement_for )  return false;
+    if( _on_blacklist )    return false;  
+    if( _suspended )       return false;
+    if( _task )            return false;               // Schon in Verarbeitung
+    if( _is_replacement )  return false;
     if( _job_chain  &&  _job_chain->state() != Job_chain::s_ready )  return false;   // Jobkette wird nicht gelöscht?
 
     return true;
@@ -2306,6 +2328,15 @@ bool Order::is_processable()
 void Order::assert_is_not_distributed( const string& debug_text )
 {
     if( _is_distributed )  z::throw_xc( "SCHEDULER-375", debug_text );
+}
+
+//---------------------------------------------------------------------------Order::set_distributed
+
+void Order::set_distributed()
+{
+    if( !job_chain()  ||  !job_chain()->_is_distributed )  z::throw_xc( __FUNCTION__, obj_name(), "no job_chain or job_chain is not distributed" );
+
+    _is_distributed = true;
 }
 
 //----------------------------------------------------------------------------Order::assert_no_task
@@ -2432,9 +2463,40 @@ void Order::db_insert()
     {
         if( !db()->opened() )  break;
 
+        if( _is_replacement )
+        {
+            Any_file result_set = ta.open_result_set
+                ( 
+                    S() << "select `occupying_scheduler_member_id`"
+                           "  from " << _spooler->_orders_tablename << " %update_lock" 
+                           << db_update_stmt().where_string(), 
+                    __FUNCTION__ 
+                );
+
+            if( result_set.eof() )
+            {
+                set_replacement( false );
+            }
+            else
+            {
+                Record record = result_set.get_record();
+
+                if( record.null( "occupying_scheduler_member_id" ) )
+                    set_replacement( false );
+                else
+                {
+                    _replaced_order_occupator = record.as_string( "occupying_scheduler_member_id" );
+                    _log->info( message_string( "SCHEDULER-942", "Scheduler member " + record.as_string( "occupying_scheduler_member_id" ), "replaced order" ) );
+                }
+
+                ta.execute_single( db_update_stmt().make_delete_stmt(), __FUNCTION__ );
+            }
+        }
+
+
         int ordering = db_get_ordering( &ta );
         
-        ta.execute( db_update_stmt().make_delete_stmt(), __FUNCTION__ );
+        //2007-01-02  Warum wird der gelöscht?  ta.execute( db_update_stmt().make_delete_stmt(), __FUNCTION__ );
 
         {
             sql::Insert_stmt insert ( ta.database_descriptor(), _spooler->_orders_tablename );
@@ -2483,8 +2545,10 @@ void Order::db_insert()
 
 //---------------------------------------------------------------------Order::db_release_occupation
 
-void Order::db_release_occupation()
+bool Order::db_release_occupation()
 {
+    bool update_ok = false;
+
     if( _is_db_occupied  &&  _spooler->scheduler_member_id() != "" )
     {
         for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
@@ -2495,7 +2559,7 @@ void Order::db_release_occupation()
             update.and_where_condition( "occupying_scheduler_member_id", _spooler->scheduler_member_id() );
             update.and_where_condition( "state"                         , _occupied_state.as_string()     );
 
-            bool update_ok = ta.try_execute_single( update, __FUNCTION__ );
+            update_ok = ta.try_execute_single( update, __FUNCTION__ );
 
             ta.commit( __FUNCTION__ );
 
@@ -2509,16 +2573,22 @@ void Order::db_release_occupation()
         }
         catch( exception& x ) { ta.reopen_database_after_error( z::Xc( "SCHEDULER-306", _spooler->_orders_tablename, x ), __FUNCTION__ ); }
     }
+
+    return update_ok;
 }
 
 //--------------------------------------------------------------------------------Order::db_update2
 
-void Order::db_update2( Update_option update_option, bool delet )
+bool Order::db_update2( Update_option update_option, bool delet, Transaction* outer_transaction )
 {
+    bool update_ok = false;
+
+    // outer_transaction nur für db_handle_modified_order()
+
     if( update_option == update_and_release_occupation  &&  _spooler->_are_all_tasks_killed )
     {
         _log->warn( message_string( "SCHEDULER-830" ) );   // "Because all Scheduler tasks are killed, the order in database is not updated. Only the occupation is released"
-        db_release_occupation();
+        update_ok = db_release_occupation();
     }
     else
     if( _is_in_database &&  _spooler->_db->opened() )
@@ -2528,8 +2598,6 @@ void Order::db_update2( Update_option update_option, bool delet )
 
         string           state_string = state().as_string();    // Kann Exception auslösen;
         sql::Update_stmt update       = db_update_stmt();
-        bool             update_ok    = false;
-
 
         update.and_where_condition( "occupying_scheduler_member_id", _is_db_occupied? sql::Value( _spooler->scheduler_member_id() ) 
                                                                                      : sql::null_value                               );
@@ -2543,11 +2611,12 @@ void Order::db_update2( Update_option update_option, bool delet )
         //if( _job_chain_name == "" )
         if( delet )
         {
-            for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
+            for( Retry_transaction ta ( _spooler->_db, outer_transaction ); ta.enter_loop(); ta++ ) try
             {
                 if( !_spooler->_db->opened() )  break;
 
                 update_ok = ta.try_execute_single( update.make_delete_stmt(), __FUNCTION__ );
+                if( !update_ok )  update_ok = db_handle_modified_order( &ta );
 
                 db()->write_order_history( this, &ta );
 
@@ -2555,7 +2624,7 @@ void Order::db_update2( Update_option update_option, bool delet )
             }
             catch( exception& x ) { ta.reopen_database_after_error( z::Xc( "SCHEDULER-306", _spooler->_orders_tablename, x  ), __FUNCTION__ ); }
 
-            if( !update_ok )  _log->warn( "SCHEDULER-385" );
+            if( !update_ok )  _log->warn( message_string( "SCHEDULER-385" ) );
 
             _is_in_database = false;  
             _is_db_occupied = false;
@@ -2573,14 +2642,21 @@ void Order::db_update2( Update_option update_option, bool delet )
             if( _title_modified      )  update[ "title"      ] = title();
             if( _state_text_modified )  update[ "state_text" ] = state_text();
 
-            for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
+            for( Retry_transaction ta ( _spooler->_db, outer_transaction ); ta.enter_loop(); ta++ ) try
             {
                 if( !_spooler->_db->opened() )  break;
 
-                if( !finished() )
+                update_ok = ta.try_execute_single( update, __FUNCTION__ );
+
+                if( !update_ok )
                 {
-                    // _run_time_modified gilt nicht für den Datenbanksatz, sondern für den Aufragsneustart
-                    // Vorschlag: xxx_modified auflösen zugunsten eines gecachten letzten Datenbanksatzes, dessen Inhalt verglichen werden.
+                    update_ok = db_handle_modified_order( &ta );
+                }
+                else
+                //if( !finished() )
+                {
+                    // _run_time_modified gilt nicht für den Datenbanksatz, sondern für den Auftragsneustart
+                    // Vorschlag: xxx_modified auflösen zugunsten eines gecachten letzten Datenbanksatzes, mit dem verglichen wird.
                     if( run_time() ) 
                     {
                         xml::Document_ptr doc = run_time()->dom_document();
@@ -2605,8 +2681,6 @@ void Order::db_update2( Update_option update_option, bool delet )
                         //_payload_modified = false;
                     }
                 }
-
-                update_ok = ta.try_execute_single( update, __FUNCTION__ );
 
                 ta.commit( __FUNCTION__ );
             }
@@ -2634,6 +2708,42 @@ void Order::db_update2( Update_option update_option, bool delet )
     else
     if( finished() )  
         _spooler->_db->write_order_history( this );
+
+    return update_ok;
+}
+
+//------------------------------------------------------------------Order::db_handle_modified_order
+
+bool Order::db_handle_modified_order( Transaction* outer_transaction )
+{
+    // db_update() oder db_delete() konnte den Auftrag nicht ändern, weil die Where-Klausel nicht passte.
+    // Wir sehen hier nach der Ursache.
+
+    bool result = false;
+
+    try
+    {
+        if( ptr<Order> modified_order = order_subsystem()->try_load_order_from_database( outer_transaction, _job_chain_name, _id, Order_subsystem::lo_lock ) )
+        {
+            if( modified_order->_is_replacement )
+            {
+                // Der Auftrag in der Datenbank ersetzt unseren, gerade ausgeführten Auftrag.
+                // Unser Auftrag bleibt gelöscht, wie speichern ihn nicht.
+                // Der neue Auftrag in der Datenbank wird jetzt ausführbar gemacht:
+
+                _log->info( message_string( "SCHEDULER-839" ) );
+
+                modified_order->set_replacement( false );
+                result = modified_order->db_update2( update_not_occupied, false, outer_transaction );
+            }
+        }
+    }
+    catch( exception& x ) 
+    {
+        _log->error( S() << x.what() << ", in " << __FUNCTION__ );
+    }
+
+    return result;
 }
 
 //------------------------------------------------------------------------------Order::db_fill_stmt
@@ -2647,10 +2757,9 @@ void Order::db_fill_stmt( sql::Write_stmt* stmt )
 
     if( _is_distributed )
     {
-        if( _on_blacklist )
-        {
-            t = blacklist_database_distributed_next_time;
-        }
+        if( _on_blacklist )    t = blacklist_database_distributed_next_time;
+        else
+        if( _is_replacement )  t = replacement_database_distributed_next_time;
         else
         {
             Time next_time = this->next_time().rounded_to_next_second();
@@ -2788,7 +2897,8 @@ void Order::close()
 
     _task = NULL;
     //_removed_from_job_chain = NULL;
-    if( _replaced_by )  _replaced_by->_replacement_for = NULL, _replaced_by = NULL;
+    set_replacement( false );
+    if( _replaced_by )  _replaced_by->set_replacement( false ), _replaced_by = NULL;
 
     remove_from_job_chain();
 
@@ -2807,6 +2917,8 @@ void Order::set_dom( const xml::Element_ptr& element, Variable_set_map* variable
     string state_name       = element.getAttribute( "state"     );
     string web_service_name = element.getAttribute( "web_service" );
     string at_string        = element.getAttribute( "at" );
+    if( element.bool_getAttribute( "replacement" ) )  set_replacement( true );
+    _replaced_order_occupator = element.getAttribute( "replaced_order_occupator" );
 
     if( priority         != "" )  set_priority( as_int(priority) );
     if( id               != "" )  set_id      ( id.c_str() );
@@ -2941,9 +3053,6 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
         if( _setback  &&  _setback_count > 0 )
         element.setAttribute( "setback"   , _setback.as_string() );
 
-        if( _replacement_for )
-        element.setAttribute( "replacement", "yes" );
-
         if( _is_in_database  &&  _job_chain_name != ""  &&  !_job_chain )
         element.setAttribute( "in_database_only", "yes" );
 
@@ -3023,9 +3132,11 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
     if( _http_operation  &&  _http_operation->web_service_operation_or_null() )
     element.setAttribute( "web_service_operation", _http_operation->web_service_operation_or_null()->id() );
 
-    if( _on_blacklist )  element.setAttribute( "on_blacklist", "yes" );
-    if( _suspended )  element.setAttribute( "suspended", "yes" );
-
+    if( _on_blacklist    )  element.setAttribute( "on_blacklist", "yes" );
+    if( _suspended       )  element.setAttribute( "suspended"   , "yes" );
+    if( _is_replacement  )  element.setAttribute( "replacement" , "yes" ),
+                            element.setAttribute_optional( "replaced_order_occupator", _replaced_order_occupator );
+    
     return element;
 }
 
@@ -3526,7 +3637,7 @@ void Order::remove_from_job_chain()
     _setback_count = 0;
     _setback = Time(0);
 
-    if( _replacement_for )  _replacement_for->_replaced_by = NULL,  _replacement_for = NULL;
+    set_replacement( false );
 
     //_id_locked = false;
     
@@ -3551,12 +3662,18 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain )
     bool is_known = false;
 
 
-    for( Retry_transaction ta ( db() ); ta.enter_loop(); ta++ ) try
+    if( _is_replacement  &&  job_chain->_is_distributed )
     {
-        is_known = job_chain->has_order_id( &ta, id() );
+        // Bestehender Auftrag wird ersetzt
     }
-    catch( exception& x ) { ta.reopen_database_after_error( x, __FUNCTION__ ); }
-
+    else
+    {
+        for( Retry_transaction ta ( db() ); ta.enter_loop(); ta++ ) try
+        {
+            is_known = job_chain->has_order_id( &ta, id() );
+        }
+        catch( exception& x ) { ta.reopen_database_after_error( x, __FUNCTION__ ); }
+    }
 
     if( !is_known )
     {
@@ -3607,10 +3724,8 @@ void Order::place_or_replace_in_job_chain( Job_chain* job_chain )
 
     if( job_chain->_is_distributed )
     {
-        z::throw_xc( "SCHEDULER-384", job_chain->obj_name(), __FUNCTION__ );
-        //ptr<Order> other_order = job_chain->order_or_null( id() );  // Nicht aus der Datenbank gelesen
-
-        //if( !other_order )  other_order = order_subsystem()->try_load_order_from_database( job_chain->name(), id() );
+        set_replacement( true );
+        place_in_job_chain( job_chain );
     }
     else
     {
@@ -3621,10 +3736,9 @@ void Order::place_or_replace_in_job_chain( Job_chain* job_chain )
 
             if( other_order->_task )
             {
-                _replacement_for = other_order;
-                _replacement_for->_replaced_by = this;
-
-                _log->info( message_string( "SCHEDULER-942", other_order->_task->obj_name(), other_order->obj_name() ) );       // add_or_replace_order(): Auftrag wird verzögert bis <p1/> <p2/> ausgeführt hat
+                set_replacement( other_order );
+                _replaced_order_occupator = other_order->_task->obj_name();
+                _log->info( message_string( "SCHEDULER-942", _replaced_order_occupator, other_order->obj_name() ) );       // add_or_replace_order(): Auftrag wird verzögert bis <p1/> <p2/> ausgeführt hat
             }
         }
         else
@@ -4037,6 +4151,39 @@ void Order::set_run_time( const xml::Element_ptr& e )
 
     if( e )  _run_time->set_dom( e );       // Ruft set_setback() über modify_event()
        else  run_time_modified_event();
+}
+
+//---------------------------------------------------------------------------Order::set_replacement
+
+void Order::set_replacement( Order* replaced_order )
+{
+    assert( !replaced_order->_replaced_by );
+    assert( !replaced_order->_is_replacement );
+
+    set_replacement( replaced_order != NULL );
+    _replacement_for = replaced_order;
+    _replacement_for->_replaced_by = this;
+}
+
+//---------------------------------------------------------------------------Order::set_replacement
+
+void Order::set_replacement( bool b )
+{
+    _replaced_order_occupator = "";
+
+    if( _replacement_for )
+    {
+        _replacement_for->_replaced_by = NULL;
+        _replacement_for = NULL;
+    }
+
+    if( b != _is_replacement )
+    {
+        _is_replacement = b;
+        _order_xml_modified = true;
+
+        if( !_is_replacement )  _replacement_for = NULL;
+    }
 }
 
 //--------------------------------------------------------------------------Order::set_on_blacklist

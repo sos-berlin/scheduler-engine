@@ -41,7 +41,7 @@
             </description>
         </xml_attribute>
 
-        <xml_attribute name="shutdown" type="yes|no" initial="no">
+        <xml_attribute name="shutdown" type="yes|no" initial="yes">
             <description>
                 <p>
                     In Zusammenhang mit <scheduler_option name="exclusive"/> wird der verteilte Scheduler in der Datenbank als Herunterfahren markiert.

@@ -139,8 +139,10 @@ struct Read_transaction
 
     void                    set_log_sql                 ( bool b )                                  { _log_sql = b; }
 
+    Record                      read_single_record      ( const string& sql, const string& debug_text ) { return read_single_record( sql, debug_text, false ); }
     Any_file                    open_result_set         ( const string& sql, const string& debug_text ) { return open_result_set( sql, debug_text, false ); }
     Any_file                    open_file               ( const string& db_prefix, const string& sql, const string& debug_text = "" ) { return open_file( db_prefix, sql, debug_text, false ); }
+    string                      read_clob_or_empty      ( const string& table_name, const string& column_name, const string& where );
     string                      read_clob               ( const string& table_name, const string& column_name, const string& where );
     string                      read_clob               ( const string& table_name, const string& column_name, const string& key_name, const string& key_value );
     string                      file_as_string          ( const string& hostware_filename );
@@ -150,6 +152,7 @@ struct Read_transaction
 
 
   protected:
+    Record                      read_single_record      ( const string& sql, const string& debug_text, bool need_commit_or_rollback );
     Any_file                    open_result_set         ( const string& sql, const string& debug_text, bool writes_transaction);
     Any_file                    open_file               ( const string& db_prefix, const string& sql, const string& debug_text, bool need_commit_or_rollback );
     Any_file                    open_file_2             ( const string& db_prefix, const string& execution_sql, const string& debug_text, bool need_commit_or_rollback, const string& logging_sql );
@@ -173,6 +176,7 @@ struct Transaction : Read_transaction
     virtual bool                is_read_only            () const                                    { return false; }
     virtual void                begin_transaction       ( Database* );
 
+    Record                      read_commitable_single_record( const string& sql, const string& debug_text )                        { return read_single_record( sql, debug_text, true ); }
     Any_file                    open_commitable_result_set( const string& sql, const string& debug_text )                           { return open_result_set( sql, debug_text, true ); }
     Any_file                    open_commitable_file      ( const string& db_prefix, const string& sql, const string& debug_text )  { return open_file( db_prefix, sql, debug_text, true ); }
 

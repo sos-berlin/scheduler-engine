@@ -26,8 +26,8 @@ a.silent                { text-decoration: none; }
 /* Job-Description */
 div.description         {}
 
-th.head1, td.head1      { padding-right: 2pt; border-bottom: 1px solid black; }
-th.head , td.head       { padding-right: 2pt; border-bottom: 1px solid black; border-left: 1px solid black; }
+th.head1, td.head1      { padding-right: 2pt; vertical-align: bottom; border-bottom: 1px solid black; }
+th.head , td.head       { padding-right: 2pt; vertical-align: bottom; border-bottom: 1px solid black; border-left: 1px solid black; }
 
 td.after_head_space     { margin-top: 0; margin-bottom: 0pt; line-height: 4pt; }
 
@@ -60,11 +60,11 @@ td.after_head_space     { margin-top: 0; margin-bottom: 0pt; line-height: 4pt; }
 .remote_scheduler               { background-color: #ffffa0 }
 .remote_scheduler_hover         { background-color: #efef8f; }
 
-.distributed_scheduler               { background-color: #ffffa0 }
-a.distributed_scheduler:link         { text-decoration: none; color: inherit; background-color: inherit; }
-a.distributed_scheduler:active       { text-decoration: none; color: inherit; background-color: inherit; }
-a.distributed_scheduler:visited      { text-decoration: none; color: inherit; background-color: inherit; }
-a.distributed_scheduler:hover        { text-decoration: none; color: inherit; background-color: #efef8f; }
+.cluster               { background-color: #ffffa0 }
+a.cluster:link         { text-decoration: none; color: inherit; background-color: inherit; }
+a.cluster:active       { text-decoration: none; color: inherit; background-color: inherit; }
+a.cluster:visited      { text-decoration: none; color: inherit; background-color: inherit; }
+a.cluster:hover        { text-decoration: none; color: inherit; background-color: #efef8f; }
 
 /* Anklickbar */
 .hover                  { text-decoration: underline }

@@ -287,9 +287,9 @@ xml::Element_ptr Command_processor::execute_terminate( const xml::Element_ptr& e
     bool shutdown       = element.bool_getAttribute( "shutdown"      , true );
     int  timeout        = element. int_getAttribute( "timeout"       , INT_MAX );
 
-    bool terminate_all_schedulers = all_schedulers  &&  !restart;
+    //bool terminate_all_schedulers = all_schedulers  &&  !restart;
 
-    _spooler->cmd_terminate( restart, timeout, shutdown, terminate_all_schedulers );
+    _spooler->cmd_terminate( restart, timeout, shutdown, all_schedulers );
     
 
     return _answer.createElement( "ok" );
@@ -649,7 +649,7 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
     ptr<Order>     order     = job_chain->_is_distributed? job_chain->order_or_null( id ) 
                                                          : job_chain->order( id );
 
-    if( !order )  order = _spooler->order_subsystem()->load_order_from_database( job_chain_name, id );
+    if( !order )  order = _spooler->order_subsystem()->load_order_from_database( (Transaction*)NULL, job_chain_name, id, Order_subsystem::lo_lock );
 
     //if( !order )
     //{
@@ -741,18 +741,20 @@ xml::Element_ptr Command_processor::execute_remove_order( const xml::Element_ptr
             delete_stmt.and_where_condition( "spooler_id"                   , _spooler->id_for_db() );
             delete_stmt.and_where_condition( "job_chain"                    , job_chain_name        );
             delete_stmt.and_where_condition( "id"                           , id.as_string()        );
-            delete_stmt.and_where_condition( "occupying_scheduler_member_id", sql::null_value );
+          //delete_stmt.and_where_condition( "occupying_scheduler_member_id", sql::null_value );
             
             ta.execute( delete_stmt, __FUNCTION__ );
+            if( ta.record_count() == 0 )  z::throw_xc( "SCHEDULER-162", id.as_string() );
             
-            if( ta.record_count() == 0 )
-            {
-                // Sollte Exception auslösen: nicht da oder belegt
-                _spooler->order_subsystem()->load_order_from_database( job_chain_name, id );
-                
-                // Der Auftrag ist gerade freigegeben oder hinzugefügt worden
-                ta.execute_single( delete_stmt, __FUNCTION__ ); 
-            }
+            //if( ta.record_count() == 0 )
+            //{
+            //    // Sollte Exception auslösen: nicht da oder belegt
+            //    _spooler->order_subsystem()->load_order_from_database( job_chain_name, id );
+            //    
+            //    // Der Auftrag ist gerade freigegeben oder hinzugefügt worden
+            //    delete_stmt.remove_where_condition( "occupying_scheduler_member_id" );
+            //    ta.execute_single( delete_stmt, __FUNCTION__ ); 
+            //}
 
             ta.commit( __FUNCTION__ );
         }
@@ -1436,7 +1438,7 @@ void Command_processor::execute_2( const xml::Document_ptr& command_doc, const T
 
         if( e )
         {
-            if( e.nodeName_is( "commands" )  ||  e.nodeName_is( "command" ) )
+            if( e.nodeName_is( "commands" )  ||  e.nodeName_is( "command" )  ||  e.nodeName_is( "cluster_member_command" ) )
             {
                 execute_commands( e, xml_mod_time );
             }

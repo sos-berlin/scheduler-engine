@@ -96,7 +96,6 @@ const int                       kill_timeout_total                  = 30;       
 const int                       const_order_id_length_max           = 255;              // Die Datenbankspalte _muss_ so groß sein, sonst bricht Scheduler mit SCHEDULER-303, SCHEDULER-265 ab!
 
 const char*                     temporary_process_class_name        = "(temporaries)";
-const int                       no_termination_timeout              = UINT_MAX;
 static bool                     is_daemon                           = false;
 //static t                      daemon_starter_pid;
 //bool                          spooler_is_running      = false;
@@ -536,7 +535,7 @@ Spooler::Spooler()
     _db_log_level( log_none ),
     _factory_ini( default_factory_ini ),
     _mail_defaults(NULL),
-    _termination_gmtimeout_at(no_termination_timeout),
+    _termination_gmtimeout_at(time_max),
     _web_services(this),
     _waitable_timer( "waitable_timer" ),
     _validate_xml(true),
@@ -1254,6 +1253,8 @@ void Spooler::set_state( State state )
     }
     catch( exception& ) {}      // ENOSPC bei s_stopping ignorieren wir
 
+    update_console_title();
+
     try
     {
         Scheduler_event event ( evt_scheduler_state_changed, log_info, this );
@@ -1561,7 +1562,7 @@ void Spooler::load_arg()
             else
             if( opt.flag      ( "backup"                 ) )  _is_backup_member = opt.set();
             else
-            if( opt.with_value( "backup-precedence"      ) )  _backup_precedence = opt.as_int(), _has_backup_precedence = true;
+            if( opt.with_value( "backup-precedence"      ) )  _backup_precedence = opt.as_int(), _is_backup_precedence_set = true;
             else
             if( opt.flag      ( "distributed-orders"     ) )  _are_orders_distributed = opt.set();
             else
@@ -1574,6 +1575,8 @@ void Spooler::load_arg()
             if( opt.flag      ( "test-summertime"        ) )  time::test_summertime( ( Time::now() + 10 ).as_string() );
             else
             if( opt.with_value( "test-summertime"        ) )  time::test_summertime( opt.value() );
+            else
+            if( opt.flag      ( "suppress-watchdog-thread" ) )  _suppress_watchdog_thread = opt.set();
 
 #           ifdef Z_WINDOWS
                 else
@@ -1906,47 +1909,57 @@ void Spooler::set_next_daylight_saving_transition()
 #endif
 */
 
-void Spooler::create_window()
+void Spooler::update_console_title()
 {
 #   if defined Z_WINDOWS
 
-        string title = S() << name() << "  " << _config_filename << "  pid=" << getpid();
-        SetConsoleTitle( title.c_str() );
-/*
-        const char* window_class_name = "Scheduler";
-        WNDCLASSEX window_class;
- 
-        memset( &window_class, 0, sizeof window_class );
-        window_class.cbSize        = sizeof window_class;
-      //window_class.style         = CS_HREDRAW | CS_VREDRAW;
-        window_class.lpfnWndProc   = window_callback;
-        window_class.hInstance     = _hinstance;
-        window_class.hbrBackground = (HBRUSH)COLOR_WINDOW;
-        window_class.lpszClassName = window_class_name;
- 
-        RegisterClassEx( &window_class ); 
+        S title;
+        title  << name() << "  " << _config_filename << "  pid=" << getpid() << "  " << state_name();
+        SetConsoleTitle( title.to_string().c_str() );
 
-
-        HWND window = CreateWindow
-        ( 
-            window_class_name,
-            name().c_str(),      // title-bar string 
-            WS_OVERLAPPEDWINDOW, // top-level window 
-            CW_USEDEFAULT,       // default horizontal position 
-            CW_USEDEFAULT,       // default vertical position 
-            CW_USEDEFAULT,       // default width 
-            CW_USEDEFAULT,       // default height 
-            (HWND)NULL,          // no owner window 
-            (HMENU)NULL,         // use class menu 
-            _hinstance,          // handle to application instance 
-            NULL                 // no window-creation data 
-        );
-
-        ShowWindow( window, SW_SHOW ); 
-*/
 #   endif
 }
 
+
+//void Spooler::create_window()
+//{
+//#   if defined Z_WINDOWS
+//
+///*
+//        const char* window_class_name = "Scheduler";
+//        WNDCLASSEX window_class;
+// 
+//        memset( &window_class, 0, sizeof window_class );
+//        window_class.cbSize        = sizeof window_class;
+//      //window_class.style         = CS_HREDRAW | CS_VREDRAW;
+//        window_class.lpfnWndProc   = window_callback;
+//        window_class.hInstance     = _hinstance;
+//        window_class.hbrBackground = (HBRUSH)COLOR_WINDOW;
+//        window_class.lpszClassName = window_class_name;
+// 
+//        RegisterClassEx( &window_class ); 
+//
+//
+//        HWND window = CreateWindow
+//        ( 
+//            window_class_name,
+//            name().c_str(),      // title-bar string 
+//            WS_OVERLAPPEDWINDOW, // top-level window 
+//            CW_USEDEFAULT,       // default horizontal position 
+//            CW_USEDEFAULT,       // default vertical position 
+//            CW_USEDEFAULT,       // default width 
+//            CW_USEDEFAULT,       // default height 
+//            (HWND)NULL,          // no owner window 
+//            (HMENU)NULL,         // use class menu 
+//            _hinstance,          // handle to application instance 
+//            NULL                 // no window-creation data 
+//        );
+//
+//        ShowWindow( window, SW_SHOW ); 
+//*/
+//#   endif
+//}
+//
 //-----------------------------------------------------------------------------------Spooler::start
 
 void Spooler::start()
@@ -2105,8 +2118,10 @@ void Spooler::start_distributed_scheduler()
 
     _distributed_scheduler->set_backup( _is_backup_member );
 
-    if( _has_backup_precedence )
-    _distributed_scheduler->set_backup_precedence( _backup_precedence );
+    if( _is_backup_precedence_set )  
+    {
+        _distributed_scheduler->set_backup_precedence( _backup_precedence );
+    }
 
     _distributed_scheduler->demand_exclusiveness                 ( _demand_exclusiveness   );
     _distributed_scheduler->set_watch_distributed_order_execution( _are_orders_distributed );
@@ -2281,13 +2296,18 @@ void Spooler::stop( const exception* )
         if( _terminate_shutdown )  
         {
             _distributed_scheduler->shutdown();
+        }
 
-            if( _terminate_all_schedulers )
-            {
-                _distributed_scheduler->set_command_for_all_schedulers_but_me( (Transaction*)NULL, Distributed_scheduler::cmd_terminate );
-            }
-            else
-                _distributed_scheduler->set_command_for_all_active_schedulers_but_me( (Transaction*)NULL, Distributed_scheduler::cmd_terminate );
+        if( _terminate_all_schedulers )
+        {
+            // Das Kommando wird in <distributed_scheduler_command> eingepackt und muss von scheduler.xsd zugelassen sein
+            S cmd;
+            cmd << "<terminate";
+            if( _termination_gmtimeout_at  < time_max )  cmd << " timeout='" << ( _termination_gmtimeout_at - ::time(NULL) ) << "'";
+            if( _terminate_all_schedulers_with_restart )  cmd << " restart='yes'";
+            cmd << "/>";
+
+            _distributed_scheduler->set_command_for_all_schedulers_but_me( (Transaction*)NULL, cmd );
         }
     }
 
@@ -2457,7 +2477,7 @@ void Spooler::execute_state_cmd()
                     _termination_async_operation = NULL;
                 }
 
-                if( _termination_gmtimeout_at != no_termination_timeout ) 
+                if( _termination_gmtimeout_at != time_max ) 
                 {
                     _log->info( message_string( "SCHEDULER-904", ( _termination_gmtimeout_at - ::time(NULL) ) ) );
                     //_log->info( S() << "Die Frist zum Beenden der Tasks endet in " << ( _termination_gmtimeout_at - ::time(NULL) ) << "s" );
@@ -3133,21 +3153,10 @@ void Spooler::cmd_terminate( bool restart, int timeout, bool shutdown, bool term
     if( timeout < 0 )  timeout = 0;
 
     _state_cmd                = restart? sc_terminate_and_restart : sc_terminate;
-    _termination_gmtimeout_at = timeout < 999999999? ::time(NULL) + timeout : no_termination_timeout;
+    _terminate_all_schedulers_with_restart = restart;
+    _termination_gmtimeout_at = timeout < 999999999? ::time(NULL) + timeout : time_max;
     _terminate_all_schedulers = terminate_all_schedulers;
     _terminate_shutdown       = shutdown;
-
-    /*
-    if( all_schedulers && _distributed_scheduler )
-    {
-        _distributed_scheduler->set_command_for_all_schedulers_but_me
-        (
-            (Transaction*)NULL,
-            restart? Distributed_scheduler::cmd_terminate_and_restart
-                   : Distributed_scheduler::cmd_terminate
-        );
-    }
-    */
 
     signal( "terminate" );
 }
@@ -3292,7 +3301,7 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line )
         _mail_defaults.set( "from_name", name() );      // Jetzt sind _complete_hostname und _tcp_port bekannt
         _log->init( this );                              // Neue Einstellungen übernehmen: Default für from_name
 
-        create_window();
+        update_console_title();
 
         _module._dont_remote = true;
         if( _module.set() )  _module.init();

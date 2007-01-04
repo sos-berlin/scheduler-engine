@@ -356,17 +356,15 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-815", "Task should end, but it has just been started with an order attached, so one step will be done" },
     { "SCHEDULER-816", "Unable to release occupation in database" },
     { "SCHEDULER-817", "Missing order record in database" },
-    { "SCHEDULER-818", "Currently active Scheduler has been started, so this inactive Scheduler starts again too" },
     { "SCHEDULER-819", "Scheduler becomes active" },
     { "SCHEDULER-820", "Watching heart beat of that Scheduler" },
     { "SCHEDULER-821", "Scheduler member '$1' seems to be active, claiming its last heart beat was $2s ago (pid=$4, $3)" },
     { "SCHEDULER-822", "Scheduler member '$1' seems to be exclusive, claiming its last heart beat was $2s ago (pid=$4, $3)" },
     { "SCHEDULER-823", "Dead Scheduler member '$1' has resurrected after $2s" },
-    { "SCHEDULER-824", "The exclusive Scheduler member is '$1'" },
     { "SCHEDULER-825", "No exclusive Scheduler member" },
     { "SCHEDULER-826", "That Scheduler has terminated" },
     { "SCHEDULER-827", "Own heart beat is late: next_heart_beat has been announced for $1 (this is $2s late)" },
-    { "SCHEDULER-828", "$1 old member records deleted in database table $2" },
+    { "SCHEDULER-828", "$1 inactive Scheduler member records older than $3 removed from database table $2" },
     { "SCHEDULER-829", "Releasing occupied order $1:$2" },
     { "SCHEDULER-830", "Because all Scheduler tasks are killed, the order in database is not updated. Only the occupation is released" },
     { "SCHEDULER-831", "Waiting for start of non-backup Scheduler" },
@@ -377,6 +375,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-836", "Deactivating that dead Scheduler" },
     { "SCHEDULER-837", "Taking exclusiveness from that Scheduler" },
     { "SCHEDULER-838", "$1. heart beat detected" },
+    { "SCHEDULER-839", "This order has been replaced" },
     {}
 };
 } //namespace sos
