@@ -242,6 +242,10 @@
 <register_keyword keyword='closed'>
     <register_entry register_file='xml/answer/task.xml' register_title='&lt;task&gt; (Antwort)'  register_keyword='closed'/>
 </register_keyword>
+<register_keyword keyword='cluster'>
+    <register_keyword_display><code>&lt;cluster&gt;</code></register_keyword_display>
+    <register_entry register_file='CHANGES.xml#use_element__cluster' register_title='Änderungsprotokoll'  register_keyword='cluster'/>
+</register_keyword>
 <register_keyword keyword='cmd'>
     <register_keyword_display><code>-cmd=</code></register_keyword_display>
     <register_entry register_file='command_line.xml#option_cmd' register_title='Kommandozeilenoptionen'  register_keyword='cmd' type='definition'/>
@@ -347,6 +351,10 @@
     <register_keyword_display><code>content_type</code> (property)</register_keyword_display>
     <register_entry register_file='api/Web_service_request.xml#method__content_type' register_title='Web_service_request.content_type' register_keyword='content_type' type='definition'/>
     <register_entry register_file='api/Web_service_response.xml#method__content_type' register_title='Web_service_response.content_type' register_keyword='content_type' type='definition'/>
+</register_keyword>
+<register_keyword keyword='continue_exclusive_operation'>
+    <register_keyword_display><code>continue_exclusive_operation=</code></register_keyword_display>
+    <register_entry register_file='xml/terminate.xml#attribute_continue_exclusive_operation' register_title='&lt;terminate&gt; (Kommando)'  register_keyword='continue_exclusive_operation' type='definition'/>
 </register_keyword>
 <register_keyword keyword='copy_params'>
     <register_keyword_display><code>&lt;copy_params&gt;</code></register_keyword_display>
@@ -2565,10 +2573,6 @@
     <register_entry register_file='xml.xml#use_element__show_order' register_title='Alle XML-Elemente'  register_keyword='show_order'/>
     <register_entry register_file='xml/show_order.xml#' register_title='&lt;show_order&gt; (Kommando)'  register_keyword='show_order' type='definition'/>
 </register_keyword>
-<register_keyword keyword='show_schedulers'>
-    <register_keyword_display><code>&lt;show_schedulers&gt;</code></register_keyword_display>
-    <register_entry register_file='CHANGES.xml#use_element__show_schedulers' register_title='Änderungsprotokoll'  register_keyword='show_schedulers'/>
-</register_keyword>
 <register_keyword keyword='show_state'>
     <register_keyword_display><code>&lt;show_state&gt;</code></register_keyword_display>
     <register_entry register_file='CHANGES.xml#use_element__show_state' register_title='Änderungsprotokoll'  register_keyword='show_state'/>
@@ -2584,10 +2588,6 @@
     <register_entry register_file='settings.xml#use_element__show_task' register_title='Einstellungen'  register_keyword='show_task'/>
     <register_entry register_file='xml.xml#use_element__show_task' register_title='Alle XML-Elemente'  register_keyword='show_task'/>
     <register_entry register_file='xml/show_task.xml#' register_title='&lt;show_task&gt; (Kommando)'  register_keyword='show_task' type='definition'/>
-</register_keyword>
-<register_keyword keyword='shutdown'>
-    <register_keyword_display><code>shutdown=</code></register_keyword_display>
-    <register_entry register_file='xml/terminate.xml#attribute_shutdown' register_title='&lt;terminate&gt; (Kommando)'  register_keyword='shutdown' type='definition'/>
 </register_keyword>
 <register_keyword keyword='signal'>
     <register_keyword_display><code>signal</code></register_keyword_display>

@@ -41,15 +41,11 @@
             </description>
         </xml_attribute>
 
-        <xml_attribute name="shutdown" type="yes|no" initial="yes">
+        <xml_attribute name="continue_exclusive_operation" type="yes|no" initial="no">
             <description>
                 <p>
-                    In Zusammenhang mit <scheduler_option name="exclusive"/> wird der verteilte Scheduler in der Datenbank als Herunterfahren markiert.
-                    Kein anderer Scheduler übernimmt den Betrieb.
-                </p>
-                <p>
-                    <code>&lt;terminate shutdown="no"/></code> markiert den verteilten Scheduler nicht als Heruntergefahren,
-                    so dass ein anderer Scheduler den Betrieb übernehmen kann.
+                    In Zusammenhang mit <scheduler_option name="exclusive"/> wird eingestellt, 
+                    dass ein inaktiver Scheduler den Betrieb übernommt.
                 </p>
             </description>
         </xml_attribute>

@@ -286,23 +286,31 @@ xml::Element_ptr Command_processor::execute_terminate( const xml::Element_ptr& e
     bool all_schedulers = element.bool_getAttribute( "all_schedulers"              , false );
     bool continue_excl  = element.bool_getAttribute( "continue_exclusive_operation", false );
     int  timeout        = element. int_getAttribute( "timeout"                     , INT_MAX );
-    string member_id    = element.     getAttribute( "cluster_member_id" );
+    string member_id    = element.     getAttribute( "cluster_member_id"           );
+    bool delete_dead    = element.bool_getAttribute( "delete_dead_entry"           , false );
 
-    if( member_id != "" )
+    if( member_id == ""  ||  member_id == _spooler->cluster_member_id() )
     {
-        if( !_spooler->_distributed_scheduler )  z::throw_xc( __FUNCTION__, "no cluster" );
-
-        S cmd;
-        cmd << "<terminate";
-        if( timeout < INT_MAX )  cmd << " timeout='" << timeout << "'";
-        if( restart )  cmd << " restart='yes'";
-        cmd << "/>";
-
-        _spooler->_distributed_scheduler->set_command_for_scheduler( (Transaction*)NULL, cmd, member_id );
+        _spooler->cmd_terminate( restart, timeout, continue_excl, all_schedulers );
     }
     else
     {
-        _spooler->cmd_terminate( restart, timeout, continue_excl, all_schedulers );
+        if( !_spooler->_cluster )  z::throw_xc( __FUNCTION__, "no cluster" );
+
+        if( delete_dead )
+        {
+            _spooler->_cluster->delete_dead_scheduler_record( member_id );
+        }
+        else
+        {
+            S cmd;
+            cmd << "<terminate";
+            if( timeout < INT_MAX )  cmd << " timeout='" << timeout << "'";
+            if( restart )  cmd << " restart='yes'";
+            cmd << "/>";
+
+            _spooler->_cluster->set_command_for_scheduler( (Transaction*)NULL, cmd, member_id );
+        }
     }
 
     return _answer.createElement( "ok" );
@@ -351,15 +359,15 @@ xml::Element_ptr Command_processor::execute_modify_job( const xml::Element_ptr& 
     return _answer.createElement( "ok" );
 }
 
-//-------------------------------------------------------Command_processor::execute_show_schedulers
+//-------------------------------------------------------Command_processor::execute_cluster
 
-xml::Element_ptr Command_processor::execute_show_schedulers( const xml::Element_ptr& element, const Show_what& show )
+xml::Element_ptr Command_processor::execute_cluster( const xml::Element_ptr& element, const Show_what& show )
 {
     if( _security_level < Security::seclev_info )  z::throw_xc( "SCHEDULER-121" );
 
     xml::Element_ptr result = _answer.createElement( "schedulers" );
 
-    if( _spooler->_distributed_scheduler )  result.appendChild( _spooler->_distributed_scheduler->dom_element( _answer, show ) );
+    if( _spooler->_cluster )  result.appendChild( _spooler->_cluster->dom_element( _answer, show ) );
 
     result.appendChild( _spooler->_remote_scheduler_register.dom_element( _answer, show ) );
     
@@ -673,7 +681,7 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
     //    update.and_where_condition( "spooler_id", _spooler->id_for_db() );
     //    update.and_where_condition( "job_chain" , job_chain_name        );
     //    update.and_where_condition( "id"        , id().as_string()      );
-    //    update.and_where_condition( "occupying_scheduler_member_id", sql::null_value );
+    //    update.and_where_condition( "occupying_cluster_member_id", sql::null_value );
 
     //    if( priority != "" )  update[ "priority" ] = as_int( priority );
     //    if( state    != "" )  update[ "state"    ] = state;
@@ -754,7 +762,7 @@ xml::Element_ptr Command_processor::execute_remove_order( const xml::Element_ptr
             delete_stmt.and_where_condition( "spooler_id"                   , _spooler->id_for_db() );
             delete_stmt.and_where_condition( "job_chain"                    , job_chain_name        );
             delete_stmt.and_where_condition( "id"                           , id.as_string()        );
-          //delete_stmt.and_where_condition( "occupying_scheduler_member_id", sql::null_value );
+          //delete_stmt.and_where_condition( "occupying_cluster_member_id", sql::null_value );
             
             ta.execute( delete_stmt, __FUNCTION__ );
             if( ta.record_count() == 0 )  z::throw_xc( "SCHEDULER-162", id.as_string() );
@@ -765,7 +773,7 @@ xml::Element_ptr Command_processor::execute_remove_order( const xml::Element_ptr
             //    _spooler->order_subsystem()->load_order_from_database( job_chain_name, id );
             //    
             //    // Der Auftrag ist gerade freigegeben oder hinzugefügt worden
-            //    delete_stmt.remove_where_condition( "occupying_scheduler_member_id" );
+            //    delete_stmt.remove_where_condition( "occupying_cluster_member_id" );
             //    ta.execute_single( delete_stmt, __FUNCTION__ ); 
             //}
 
@@ -949,7 +957,7 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
         else
         if( string_equals_prefix_then_skip( &p, "job_params"       ) )  show |= show_job_params;
         else
-        if( string_equals_prefix_then_skip( &p, "distributed_scheduler" ) )  show |= show_distributed_scheduler;
+        if( string_equals_prefix_then_skip( &p, "cluster"          ) )  show |= show_cluster;
         else
         if( string_equals_prefix_then_skip( &p, "standard"         ) )  ;
         else
@@ -979,7 +987,7 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     else
     if( element.nodeName_is( "start_job"        ) )  return execute_start_job( element );
     else
-    if( element.nodeName_is( "show_schedulers"  ) )  return execute_show_schedulers( element, show );
+    if( element.nodeName_is( "cluster"  ) )  return execute_cluster( element, show );
     else
     if( element.nodeName_is( "show_task"        ) )  return execute_show_task( element, show );
     else

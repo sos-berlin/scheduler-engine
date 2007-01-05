@@ -308,7 +308,7 @@ void Transaction::commit( const string& debug_text )
     {
         if( db()->opened() )  
         {
-            if( !_spooler->check( __FUNCTION__, debug_text, this ) )
+            if( !_suppress_heart_beat_timeout_check  &&  !_spooler->check( __FUNCTION__, debug_text, this ) )
             {
                 _spooler->abort_immediately_after_distribution_error( __FUNCTION__ );     // Wir wollen das verspätete Commit verhindern
                 //_spooler->throw_distribution_error( "commit" );       // Das führt nach Datenbank-Reopen doch noch zu einem Commit (weil check wieder true liefert?) 
@@ -324,7 +324,7 @@ void Transaction::commit( const string& debug_text )
     _guard.leave(); 
 
 
-    if( !_outer_transaction )  _spooler->check( __FUNCTION__, debug_text );
+    if( !_suppress_heart_beat_timeout_check  &&  !_outer_transaction )  _spooler->check( __FUNCTION__, debug_text );
 }
 
 //-----------------------------------------------------------------Transaction::intermediate_commit
@@ -572,7 +572,7 @@ void Database::create_tables_when_needed()
                             "\"ID\""           " varchar(" << const_order_id_length_max << ") not null,"        // Primärschlüssel
                             "\"SPOOLER_ID\""   " varchar(100),"                         // Index bei mehreren Scheduler-Ids
                             "`distributed_next_time`" " datetime,"                 // Auftrag ist verteilt ausführbar
-                            "`occupying_scheduler_member_id`" "varchar(100),"      // Index
+                            "`occupying_cluster_member_id`" "varchar(100),"      // Index
                             "\"PRIORITY\""     " integer not null,"
                             "\"STATE\""        " varchar(100),"
                             "\"STATE_TEXT\""   " varchar(100),"
@@ -591,7 +591,7 @@ void Database::create_tables_when_needed()
     add_column( &ta, _spooler->_orders_tablename, "RUN_TIME"      , "add \"RUN_TIME\""      " clob" );
     add_column( &ta, _spooler->_orders_tablename, "ORDER_XML"     , "add \"ORDER_XML\""     " clob" );
     add_column( &ta, _spooler->_orders_tablename, "distributed_next_time"        , "add `distributed_next_time`"         " datetime" );
-    add_column( &ta, _spooler->_orders_tablename, "occupying_scheduler_member_id", "add `occupying_scheduler_member_id`" " varchar(100)" );
+    add_column( &ta, _spooler->_orders_tablename, "occupying_cluster_member_id", "add `occupying_cluster_member_id`" " varchar(100)" );
     
 
     create_table_when_needed( &ta, _spooler->_order_history_tablename, S() <<
@@ -1074,7 +1074,7 @@ void Database::try_reopen_after_error( const exception& callers_exception, const
             open2( "" );     // Umschalten auf dateibasierte Historie
         }
 
-        _spooler->check( __FUNCTION__ );
+        if( !_transaction ||  !_transaction->_suppress_heart_beat_timeout_check )  _spooler->check( __FUNCTION__ );
     }
 }
 

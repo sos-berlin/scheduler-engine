@@ -2238,7 +2238,7 @@
 
         <message code="SCHEDULER-357">
             <text xml:lang="en">
-                <title>This is an exclusive or distributed Scheduler, and therefore needs a database</title>
+                <title>This is member of a cluster (option -exclusive or -distributed-orders), and therefore needs a database</title>
             </text>
         </message>
 
@@ -2322,7 +2322,7 @@
 
         <message code="SCHEDULER-370">
             <text xml:lang="en">
-                <title>Operation can only be performed on a distributed Scheduler</title>
+                <title>Operation can only be performed on a distributed orders Scheduler</title>
             </text>
         </message>
 
@@ -3225,11 +3225,11 @@
             </text>
         </message>
 
-        <!--message code="SCHEDULER-809">
+        <message code="SCHEDULER-809">
             <text xml:lang="en">
-                <title>According to database, the Scheduler is up since <p1/></title>
+                <title>Dead scheduler record has been removed</title>
             </text>
-        </message-->
+        </message>
 
         <message code="SCHEDULER-811">
             <text xml:lang="en">
@@ -3293,27 +3293,25 @@
 
         <message code="SCHEDULER-821">
             <text xml:lang="en">
-                <title>Scheduler member '<p1>scheduler_member_id</p1>' seems to be active, claiming its last heart beat was <p2/>s ago (pid=<p4/>, <p3>url</p3>)</title>
+                <title>Scheduler member '<p1>cluster_member_id</p1>' seems to be active, claiming its last heart beat was <p2/>s ago (pid=<p4/>, <p3>url</p3>)</title>
             </text>
         </message>
 
         <message code="SCHEDULER-822">
             <text xml:lang="en">
-                <title>Scheduler member '<p1>scheduler_member_id</p1>' seems to be exclusive, claiming its last heart beat was <p2/>s ago (pid=<p4/>, <p3>url</p3>)</title>
+                <title>Scheduler member '<p1>cluster_member_id</p1>' seems to be exclusive, claiming its last heart beat was <p2/>s ago (pid=<p4/>, <p3>url</p3>)</title>
             </text>
         </message>
 
         <message code="SCHEDULER-823">
             <text xml:lang="en">
-                <title>
-                    Dead Scheduler member '<p1>scheduler_member_id</p1>' has resurrected after <p2/>s
-                </title>
+                <title>Dead Scheduler member '<p1>cluster_member_id</p1>' has resurrected after <p2/>s</title>
             </text>
         </message>
 
         <!--message code="SCHEDULER-824">
             <text xml:lang="en">
-                <title>The exclusive Scheduler member is '<p1>scheduler_member_id</p1>'</title>
+                <title>The exclusive Scheduler member is '<p1>cluster_member_id</p1>'</title>
             </text>
         </message-->
 
@@ -3360,11 +3358,11 @@
             </text>
         </message>
         
-        <!--message code="SCHEDULER-832" weight="info">
+        <message code="SCHEDULER-832" weight="info">
             <text xml:lang="en">
-                <title>This is a backup Scheduler. Waiting for dead or now terminated Schedulers until start of backup operation</title>
+                <title>This is a backup Scheduler, waiting for a non-backup Scheduler</title>
             </text>
-        </message-->
+        </message>
 
         <message code="SCHEDULER-833" weight="info">
             <text xml:lang="en">
@@ -3413,6 +3411,12 @@
                 <title>Order with same ID currently processed by <p1/> will be replaced</title>
             </text>
         </message-->
+        
+        <message code="SCHEDULER-841" weight="info">
+            <text xml:lang="en">
+                <title>It's requested, that the exclusive operation will not be continued</title>
+            </text>
+        </message>
     </messages>
     
 </messages>

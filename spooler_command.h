@@ -40,8 +40,8 @@ enum Show_what_enum
     show_job_commands       = 0x20000,
     show_blacklist          = 0x40000,
     show_order_source_files = 0x80000,
-    show_job_params            = 0x100000,
-    show_distributed_scheduler = 0x200000,
+    show_job_params         = 0x100000,
+    show_cluster            = 0x200000,
   //show_web_services       = 0x20000,
   //show_web_service_operations = 0x40000,
 
@@ -210,7 +210,7 @@ struct Command_processor
   //xml::Element_ptr            execute_show_job            ( Job* );
     xml::Element_ptr            execute_modify_job          ( const xml::Element_ptr& );
     xml::Element_ptr            execute_start_job           ( const xml::Element_ptr& );
-    xml::Element_ptr            execute_show_schedulers     ( const xml::Element_ptr&, const Show_what& );
+    xml::Element_ptr            execute_cluster     ( const xml::Element_ptr&, const Show_what& );
     xml::Element_ptr            execute_show_task           ( const xml::Element_ptr&, const Show_what& );
     xml::Element_ptr            execute_kill_task           ( const xml::Element_ptr& );
     xml::Element_ptr            execute_modify_spooler      ( const xml::Element_ptr& );

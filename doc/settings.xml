@@ -316,10 +316,10 @@ log = scheduler.wait com_server.* >scheduler.log</pre>
     </setting>
 
     
-    <setting setting = "db_members_table"
+    <setting setting = "db_clusters_table"
              type    = "name"
-             initial = "SCHEDULER_MEMBERS"
-             title   = "Name der Datenbanktabelle für die Scheduler-Mitglieder">
+             initial = "SCHEDULER_CLUSTERS"
+             title   = "Name der Datenbanktabelle für die Cluster">
     </setting>
 
 

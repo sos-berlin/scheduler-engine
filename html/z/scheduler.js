@@ -700,16 +700,28 @@ function scheduler_menu__onclick( x, y )
     popup_builder.add_show_log( "Show log"                       , "show_log?", "show_log" );
     popup_builder.add_bar();
   //popup_builder.add_command ( "Stop"                           , command( "stop" ), state != "stopped"  &&  state != "stopping"  &&  state != "stopping_let_run" );
-    popup_builder.add_command ( "Pause"                          , command( "pause"                         ) , state != "paused" && !waiting_errno );
-    popup_builder.add_command ( "Continue"                       , command( "continue"                      ) , state == "paused" || waiting_errno );
+    popup_builder.add_command ( "Pause"                          , command( "pause"    ) , state != "paused" && !waiting_errno );
+    popup_builder.add_command ( "Continue"                       , command( "continue" ) , state == "paused" || waiting_errno );
     popup_builder.add_bar();
-  //popup_builder.add_command ( "Reload"                         , command( "reload"                        ), state != "stopped"  &&  state != "stopping" );
-    popup_builder.add_command ( "Terminate"                      , "<terminate/>"              , !waiting_errno );
-    popup_builder.add_command ( "Terminate within 10s"           , "<terminate timeout='10'/>" , !waiting_errno );
-    popup_builder.add_command ( "Terminate and restart"          , "<terminate restart='yes'/>", !waiting_errno );
+  //popup_builder.add_command ( "Reload"                         , command( "reload"   ), state != "stopped"  &&  state != "stopping" );
+  
     
-    if( _response.selectSingleNode( "spooler/answer/state" ).getAttribute( "exclusive" ) == "yes" )
-        popup_builder.add_command ( "Terminate and continue exclusive operation", command( "<terminate continue_exclusive_operation='yes'/>" ), !waiting_errno );
+    if( _response.selectSingleNode( "spooler/answer/state" ).getAttribute( "cluster" ) == "yes" )
+    {
+        popup_builder.add_command ( "Terminate cluster"            , "<terminate all_schedulers='yes'/>"              , !waiting_errno );
+        popup_builder.add_command ( "Terminate cluster within ~10s", "<terminate all_schedulers='yes' timeout='10'/>" , !waiting_errno );
+        popup_builder.add_command ( "Terminate and restart cluster", "<terminate all_schedulers='yes' restart='yes'/>", !waiting_errno );
+        
+        if( _response.selectSingleNode( "spooler/answer/state" ).getAttribute( "exclusive" ) == "yes" )
+            popup_builder.add_command ( "Terminate and continue exclusive operation", "<terminate continue_exclusive_operation='yes'/>", !waiting_errno );
+    }
+    else
+    {
+        popup_builder.add_command ( "Terminate"            , "<terminate/>"              , !waiting_errno );
+        popup_builder.add_command ( "Terminate within 10s" , "<terminate timeout='10'/>" , !waiting_errno );
+        popup_builder.add_command ( "Terminate and restart", "<terminate restart='yes'/>", !waiting_errno );
+    }
+    
     
   //popup_builder.add_command ( "Let run, terminate and restart" , command( "let_run_terminate_and_restart" ), !waiting_errno );
     popup_builder.add_bar();
@@ -810,16 +822,24 @@ function history_order_menu__onclick( job_chain_name, order_id, x, y )
     _popup_menu = popup_builder.show_popup_menu( x, y );
 }
 
-//------------------------------------------------------------------------scheduler_member__onclick
+//--------------------------------------------------------------------------cluster_member__onclick
 
-function scheduler_member__onclick( cluster_member_id, x, y )
+function cluster_member__onclick( cluster_member_id, x, y )
 {
     if( cluster_member_id+"" != "" )
     {
         var popup_builder = new Popup_menu_builder();
+        var is_dead = _response.selectSingleNode( "spooler/answer//cluster_member [ @cluster_member_id='" + cluster_member_id + "' ]" ).getAttribute( "dead" ) == "yes";
 
-        popup_builder.add_command( "terminate"       , "<terminate cluster_member_id='" + xml_encode_attribute( cluster_member_id ) + "' />" );
-        popup_builder.add_command( "restart"         , "<terminate cluster_member_id='" + xml_encode_attribute( cluster_member_id ) + "' restart='yes' />" );
+        if( is_dead )
+        {
+            popup_builder.add_command( "delete entry"    , "<terminate cluster_member_id='" + xml_encode_attribute( cluster_member_id ) + "' delete_dead_entry='yes' />" );
+        }
+        else
+        {
+            popup_builder.add_command( "terminate"       , "<terminate cluster_member_id='" + xml_encode_attribute( cluster_member_id ) + "' />" );
+            popup_builder.add_command( "restart"         , "<terminate cluster_member_id='" + xml_encode_attribute( cluster_member_id ) + "' restart='yes' />" );
+        }
  
         _popup_menu = popup_builder.show_popup_menu( x, y );
     }

@@ -2,7 +2,7 @@
 
 #include "spooler.h"
 #include "../kram/msec.h"
-#include "../zschimmer/not_in_recursion.h"
+//#include "../zschimmer/not_in_recursion.h"
 #include "../zschimmer/threads.h"
 
 #ifdef Z_WINDOWS
@@ -13,6 +13,7 @@ using namespace zschimmer;
 
 namespace sos {
 namespace scheduler {
+namespace cluster {
 
 //-------------------------------------------------------------------------------------------------
 
@@ -23,21 +24,21 @@ const int                       max_processing_time                     = Z_NDEB
 const int                       max_processing_time_2                   = Z_NDEBUG_DEBUG( 30, 10 );     // Nachfrist, inkl. außergewöhnlicher Verzögerungen (gestrichen: zzgl. Database::lock_timeout)
 const int                       max_processing_time_2_short             = max_processing_time_2 - 10;   // Zur eigenen Prüfung
 const int                       active_heart_beat_minimum_check_period  = heart_beat_period / 2;
-const int                       active_heart_beat_maximum_check_period  = heart_beat_period + max_processing_time + 2;
+const int                       active_heart_beat_check_period          = heart_beat_period + max_processing_time + 2;
 //const int                       trauerfrist                             = 12*3600;                      // Trauerzeit, nach der Mitgliedssätze gelöscht werden
 const int                       database_commit_visible_time            = 10;                           // Zeit, die die Datenbank braucht, um nach Commit Daten für anderen Client sichtbar zu machen.
-const int                       precedence_check_period                 = active_heart_beat_maximum_check_period;
+const int                       precedence_check_period                 = active_heart_beat_check_period + 5;
 const int                       backup_startup_delay                    = 60;                           // Nach eigenem Start des Backup-Schedulers auf Start des non-backup-Schedulers warten
 const int                       first_dead_orders_check_period          = 60;
 
-const int                       Distributed_scheduler::default_non_backup_precedence = 0;
-const int                       Distributed_scheduler::default_backup_precedence = 1;
+const int                       Cluster::default_non_backup_precedence  = 0;
+const int                       Cluster::default_backup_precedence      = 1;
 
 //-------------------------------------------------------------------------------------------------
 
 struct Heart_beat_watchdog_thread : Thread, Scheduler_object
 {
-                                Heart_beat_watchdog_thread  ( Distributed_scheduler* );
+                                Heart_beat_watchdog_thread  ( Cluster* );
 
     int                         thread_main                 ();
     void                        sleep                       ( int seconds );
@@ -45,21 +46,31 @@ struct Heart_beat_watchdog_thread : Thread, Scheduler_object
 
     Fill_zero                  _zero_;
     bool                       _kill;
-    Distributed_scheduler*     _distributed_scheduler;
+    Cluster*                   _cluster;
 };
 
-//----------------------------------------------------------------------------------Scheduler_member
+//-----------------------------------------------------------------------------------Cluster_member
 
-struct Scheduler_member : Object, Scheduler_object
+struct Cluster_member : Object, Scheduler_object
 {
-                                Scheduler_member            ( Distributed_scheduler*, const string& member_id );
+    enum Mark_as_inactive_option
+    {
+      //mai_delete_empty_record,
+        mai_delete_inactive_record,
+        mai_delete_inactive_and_empty_records,
+        mai_mark_inactive_record_as_dead
+    };
 
-    bool                        is_empty_member             () const                                { return _member_id == _distributed_scheduler->empty_member_id(); }
+
+                                Cluster_member              ( Cluster*, const string& member_id );
+
+    bool                        is_empty_member             () const                                { return _member_id == _cluster->empty_member_id(); }
     bool                        check_heart_beat            ( time_t now_before_select, const Record& );
     bool                        free_occupied_orders        ( Transaction* = NULL );
     void                        deactivate_and_release_orders_after_death();
-    bool                        mark_as_inactive            ( bool delete_inactive_record = false, bool delete_new_active_record = false );
+    bool                        mark_as_inactive            ( Mark_as_inactive_option );
     void                        on_resurrection             ()                                      { _is_dead = false;  _dead_orders_check_period = first_dead_orders_check_period; }
+    bool                        delete_dead_record          ();
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
     string                      obj_name                    () const;
 
@@ -76,19 +87,21 @@ struct Scheduler_member : Object, Scheduler_object
     time_t                     _db_last_heart_beat;
     time_t                     _db_next_heart_beat;
     time_t                     _last_heart_beat_detected;
+    Time                       _last_heart_beat_detected_local_time;
+    bool                       _is_heart_beat_late;
     int                        _heart_beat_count;
     string                     _http_url;
-    Distributed_scheduler*     _distributed_scheduler;
+    Cluster*                   _cluster;
     //time_t                     _clock_difference;
     //bool                       _clock_difference_checked;
     //bool                       _checking_clock_difference;
 };
 
-//----------------------------------------------------------------------------Distributed_has_alarm
+//----------------------------------------------------------------------------------------Has_alarm
 
-struct Distributed_has_alarm
+struct Has_alarm
 {
-                                Distributed_has_alarm       ()                                      : _recommended_next_check_time(time_max) {}
+                                Has_alarm                   ()                                      : _recommended_next_check_time(time_max) {}
 
     virtual void                set_alarm                   ()                                      = 0;
     virtual void                recommend_next_check_time   ( time_t );
@@ -100,9 +113,9 @@ struct Distributed_has_alarm
 
 //---------------------------------------------------------------------------------------Heart_beat
 
-struct Heart_beat : Async_operation, Scheduler_object, Distributed_has_alarm
+struct Heart_beat : Async_operation, Scheduler_object, Has_alarm
 {
-                                Heart_beat                  ( Distributed_scheduler* );
+                                Heart_beat                  ( Cluster* );
 
 
     // Async_operation
@@ -115,14 +128,14 @@ struct Heart_beat : Async_operation, Scheduler_object, Distributed_has_alarm
 
   private:
     Fill_zero                  _zero_;
-    Distributed_scheduler*     _distributed_scheduler;
+    Cluster*                   _cluster;
 };
 
 //----------------------------------------------------------------------Exclusive_scheduler_watchdog
 
-struct Exclusive_scheduler_watchdog : Async_operation, Scheduler_object, Distributed_has_alarm
+struct Exclusive_scheduler_watchdog : Async_operation, Scheduler_object, Has_alarm
 {
-                                Exclusive_scheduler_watchdog( Distributed_scheduler* );
+                                Exclusive_scheduler_watchdog( Cluster* );
 
 
     // Async_operation
@@ -137,26 +150,26 @@ struct Exclusive_scheduler_watchdog : Async_operation, Scheduler_object, Distrib
     void                        try_to_become_exclusive     ();
   //void                        check_clock_difference      ( time_t last_heart_beat, time_t now );
     bool                        check_has_backup_precedence ();
-  //string                      read_distributed_scheduler_session_id();
+  //string                      read_cluster_session_id     ();
   //bool                        restart_when_active_scheduler_has_started();
 
   private:
     Fill_zero                  _zero_;
     time_t                     _next_check_time;
     bool                       _announced_to_become_exclusive; // Wenn eine Meldung ausgegeben oder ein Datensatz zu ändern versucht wurde 
-    time_t                     _next_precedence_check;
-    time_t                     _wait_for_exclusive_scheduler_start_until;
-  //string                     _distributed_scheduler_session_id;
+    time_t                     _next_precedence_check;                      // Um herauszufinden, welcher inaktive Scheduler exklusiv wird
+    time_t                     _wait_for_backup_scheduler_start_until;      // Der non-backup-Scheduler hat Vorrang, auch wenn etwas später kommt
+  //string                     _cluster_session_id;
     bool                       _is_starting;
-    Distributed_scheduler*     _distributed_scheduler;
+    Cluster*                   _cluster;
   //time_t                     _set_exclusive_until;           // Nur für Access (kennt keine Sperre): Aktivierung bis dann (now+database_commit_visible_time) verzögern, dann nochmal prüfen
 };
 
 //------------------------------------------------------------------------Active_schedulers_watchdog
 
-struct Active_schedulers_watchdog : Async_operation, Scheduler_object, Distributed_has_alarm
+struct Active_schedulers_watchdog : Async_operation, Scheduler_object, Has_alarm
 {
-                                Active_schedulers_watchdog   ( Distributed_scheduler* );
+                                Active_schedulers_watchdog   ( Cluster* );
 
 
     // Async_operation
@@ -170,7 +183,7 @@ struct Active_schedulers_watchdog : Async_operation, Scheduler_object, Distribut
   private:
     Fill_zero                  _zero_;
     time_t                     _next_check_time;
-    Distributed_scheduler*     _distributed_scheduler;
+    Cluster*                   _cluster;
 };
 
 //----------------------------------------------------------------------------my_string_from_time_t
@@ -182,11 +195,11 @@ static string my_string_from_time_t( time_t time )
 
 //-------------------------------------------Heart_beat_watchdog_thread::Heart_beat_watchdog_thread
 
-Heart_beat_watchdog_thread::Heart_beat_watchdog_thread( Distributed_scheduler* d )
+Heart_beat_watchdog_thread::Heart_beat_watchdog_thread( Cluster* d )
 :
     Scheduler_object( d->_spooler, this, type_heart_beat_watchdog_thread ),
     _zero_(this+1),
-    _distributed_scheduler(d)
+    _cluster(d)
 {
 }
 
@@ -197,14 +210,14 @@ void Heart_beat_watchdog_thread::sleep( int seconds )
 #   ifdef Z_WINDOWS
 
         int ms = seconds * 1000;
-        Z_LOG2( "scheduler.distributed", __FUNCTION__ << "  Sleep(" << ms << ")\n" );
+        Z_LOG2( "scheduler.cluster", __FUNCTION__ << "  Sleep(" << ms << ")\n" );
         Sleep( ms );
 
 #   else
 
         while( !_kill  &&  seconds > 0 )
         {
-            Z_LOG2( "scheduler.distributed", __FUNCTION__ << "  sleep(" << seconds << ")\n" );
+            Z_LOG2( "scheduler.cluster", __FUNCTION__ << "  sleep(" << seconds << ")\n" );
             seconds = ::sleep( seconds );
         }
 
@@ -233,6 +246,7 @@ int Heart_beat_watchdog_thread::thread_main()
 {
 #   ifdef Z_WINDOWS
         SetThreadPriority( thread_handle(), THREAD_PRIORITY_HIGHEST );
+        Z_LOG2( "scheduler", __FUNCTION__ << "  IsDebuggerPresent() ==> " << IsDebuggerPresent() << "\n" );
 #   else
         // Wie erhöht man die Priorität unter Unix?
 #   endif
@@ -240,19 +254,19 @@ int Heart_beat_watchdog_thread::thread_main()
 
     while( !_kill )
     {
-        time_t heart_beat_time = _distributed_scheduler->_db_last_heart_beat;       // Gleichzeitiger Zugriff von einem anderen Thread!
+        time_t heart_beat_time = _cluster->_db_last_heart_beat;       // Gleichzeitiger Zugriff von einem anderen Thread!
         
         int delay = (int)( heart_beat_time + 1 + heart_beat_period + max_processing_time + max_processing_time_2_short - ::time(NULL) );
         sleep( delay );
         
-        if( _distributed_scheduler->_is_active  &&  _distributed_scheduler->_db_last_heart_beat == heart_beat_time )  
+        if( _cluster->_is_active  &&  _cluster->_db_last_heart_beat == heart_beat_time )  
         {
             //Z_WINDOWS_ONLY( Z_DEBUG_ONLY( DebugBreak() ) );
             Z_WINDOWS_ONLY( if( !IsDebuggerPresent() ) )
             {
-                _distributed_scheduler->_spooler->kill_all_processes();
+                _cluster->_spooler->kill_all_processes();
                 _log->error( message_string( "SCHEDULER-386", ::time(NULL) - heart_beat_time ) );
-                _distributed_scheduler->_spooler->abort_immediately( true );
+                _cluster->_spooler->abort_immediately( true );
             }
         }
 
@@ -262,22 +276,22 @@ int Heart_beat_watchdog_thread::thread_main()
     return 0;
 }
 
-//------------------------------------------------------------------ther_scheduler::Scheduler_member
-    
-Scheduler_member::Scheduler_member( Distributed_scheduler* d, const string& id ) 
+//--------------------------------------------------------------------Cluster_member::Cluster_member
+
+Cluster_member::Cluster_member( Cluster* d, const string& id ) 
 : 
-    Scheduler_object( d->_spooler, this, Scheduler_object::type_other_scheduler ),
+    Scheduler_object( d->_spooler, this, Scheduler_object::type_cluster_member ),
     _zero_(this+1), 
-    _distributed_scheduler(d), 
+    _cluster(d), 
     _member_id(id),
     _dead_orders_check_period( first_dead_orders_check_period )
 {
     _log->set_prefix( obj_name() );
 }
 
-//----------------------------------------------------------------Scheduler_member::check_heart_beat
+//-----------------------------------------------------------------Cluster_member::check_heart_beat
 
-bool Scheduler_member::check_heart_beat( time_t now_before_select, const Record& record )
+bool Cluster_member::check_heart_beat( time_t now_before_select, const Record& record )
 {
     bool result = true;
 
@@ -285,22 +299,23 @@ bool Scheduler_member::check_heart_beat( time_t now_before_select, const Record&
     _is_active              = !record.null    ( "active"    );
     _deactivating_member_id = record.as_string( "deactivating_member_id" );
     _http_url               = record.as_string( "http_url"  );
+    bool db_is_dead         = !record.null    ( "dead" );
+    
+    time_t last_heart_beat = record.null( "last_heart_beat" )? 0 : record.as_int64( "last_heart_beat" );
+    time_t next_heart_beat = record.null( "next_heart_beat" )? 0 : record.as_int64( "next_heart_beat" );
+
 
     if( !is_empty_member() )
     {
-        if( _db_last_heart_beat == 0  &&  _distributed_scheduler->_my_scheduler != this )     // Neu entdeckt?
+        if( _db_last_heart_beat == 0  &&  _cluster->_my_scheduler != this )     // Neu entdeckt?
         {
-            log()->info( message_string( _distributed_scheduler->_demand_exclusiveness && _is_exclusive? "SCHEDULER-833" : "SCHEDULER-820" ) );
+            log()->info( message_string( _cluster->_demand_exclusiveness && _is_exclusive? "SCHEDULER-833" : "SCHEDULER-820" ) );
         }
-
-        time_t last_heart_beat = record.as_int64( "last_heart_beat" );
-        time_t next_heart_beat = record.null( "next_heart_beat" )? 0 : record.as_int64( "next_heart_beat" );
-
 
         if( last_heart_beat != _db_last_heart_beat )   // Neuer Herzschlag oder neu entdeckter Scheduler?
         {
             time_t now = ::time(NULL);
-            if( _is_dead )
+            if( _is_dead  &&  !db_is_dead )
             {
                 log()->warn( message_string( "SCHEDULER-823", _member_id, now - _last_heart_beat_detected ) );     // Wiederauferstanden?
                 on_resurrection();
@@ -308,8 +323,11 @@ bool Scheduler_member::check_heart_beat( time_t now_before_select, const Record&
 
             if( _last_heart_beat_detected )  _heart_beat_count++;   // Den ersten Durchlauf zählen wir nicht, denn dann haben wir noch keinen Herzschlag
             _last_heart_beat_detected = now + 1;                    // Nächste volle Sekunde
+            _last_heart_beat_detected_local_time = Time::now();  //.set_datetime( string_local_from_time_t( _last_heart_beat_detected ) );
 
-            if( _heart_beat_count == 1  &&  this != _distributed_scheduler->_my_scheduler )  _log->info( message_string( "SCHEDULER-838", _heart_beat_count ) );
+            _is_heart_beat_late = false;
+
+            if( _heart_beat_count == 1  &&  this != _cluster->_my_scheduler )  _log->info( message_string( "SCHEDULER-838", _heart_beat_count ) );
         }
         else
         // Behauptung des Schedulers in next_heart_beat prüfen (ohne Konsequenzen, weil die Uhren verschieden gehen können)
@@ -333,9 +351,14 @@ bool Scheduler_member::check_heart_beat( time_t now_before_select, const Record&
 
             if( was_alive )
             {
-                string message_code = is_in_database_reconnect_tolerance? "SCHEDULER-995" :
-                                      !is_dead                          ? "SCHEDULER-994" 
-                                                                        : "SCHEDULER-996";
+                string message_code;
+
+                if( is_in_database_reconnect_tolerance )  message_code = "SCHEDULER-995";
+                else
+                if( !is_dead                           )  message_code = "SCHEDULER-994", _is_heart_beat_late = true; 
+                else 
+                                                          message_code = "SCHEDULER-996";
+
                 if( !string_begins_with( _log->last_line(), message_code ) )
                 {
                     Message_string m ( message_code, my_string_from_time_t( _last_heart_beat_detected ), now_before_select - _last_heart_beat_detected );
@@ -343,7 +366,7 @@ bool Scheduler_member::check_heart_beat( time_t now_before_select, const Record&
                     log()->warn( m );
                 }
 
-                _distributed_scheduler->recommend_next_deadline_check_time( deadline + 1 );
+                _cluster->recommend_next_deadline_check_time( max( ::time(NULL) + 2, deadline + 1 ) );
             }
 
             if( is_dead ) 
@@ -352,19 +375,21 @@ bool Scheduler_member::check_heart_beat( time_t now_before_select, const Record&
                 result = false;
             }
         }
-
-        _db_last_heart_beat = last_heart_beat;
-        _db_next_heart_beat = next_heart_beat;
     }
+
+    _is_dead |= db_is_dead;
+
+    _db_last_heart_beat = last_heart_beat;
+    _db_next_heart_beat = next_heart_beat;
 
     return result;
 }
 
-//-----------------------------------------------------------Scheduler_member::free_occupied_orders
+//------------------------------------------------------------Cluster_member::free_occupied_orders
 
-bool Scheduler_member::free_occupied_orders( Transaction* outer_transaction )
+bool Cluster_member::free_occupied_orders( Transaction* outer_transaction )
 {
-    //Z_LOGI2( "scheduler.distributed", __FUNCTION__ << "\n" );
+    //Z_LOGI2( "scheduler.cluster", __FUNCTION__ << "\n" );
     bool result = false;
 
 
@@ -379,8 +404,8 @@ bool Scheduler_member::free_occupied_orders( Transaction* outer_transaction )
 
         {
             sql::Update_stmt update ( db()->database_descriptor(), _spooler->_orders_tablename );
-            update[ "occupying_scheduler_member_id" ] = fake_member_id;
-            update.and_where_condition( "occupying_scheduler_member_id", _member_id );
+            update[ "occupying_cluster_member_id" ] = fake_member_id;
+            update.and_where_condition( "occupying_cluster_member_id", _member_id );
          //?update.add_where( " and `distributed_next_time` is not null" );               // Die Spalte ist vielleicht für schnellen Zugriff indiziert
             ta.execute( update, __FUNCTION__ );
             record_count = ta.record_count();
@@ -392,7 +417,7 @@ bool Scheduler_member::free_occupied_orders( Transaction* outer_transaction )
                 ( 
                     S() << "select `job_chain`, `id`, `state` " <<
                     "  from " << _spooler->_orders_tablename << 
-                    "  where `occupying_scheduler_member_id`=" << sql::quoted( fake_member_id ) <<
+                    "  where `occupying_cluster_member_id`=" << sql::quoted( fake_member_id ) <<
                     //?" and `distributed_next_time` is not null" <<               // Die Spalte ist vielleicht für schnellen Zugriff indiziert
                     "  order by `job_chain`, `state`, `distributed_next_time`, `ordering`",
                     __FUNCTION__
@@ -413,8 +438,8 @@ bool Scheduler_member::free_occupied_orders( Transaction* outer_transaction )
             }
 
             sql::Update_stmt update ( db()->database_descriptor(), _spooler->_orders_tablename );
-            update[ "occupying_scheduler_member_id" ] = sql::null_value;
-            update.and_where_condition( "occupying_scheduler_member_id", fake_member_id );
+            update[ "occupying_cluster_member_id" ] = sql::null_value;
+            update.and_where_condition( "occupying_cluster_member_id", fake_member_id );
          //?update.add_where( " and `distributed_next_time` is not null" );               // Die Spalte ist vielleicht für schnellen Zugriff indiziert
             ta.execute( update, __FUNCTION__ );
             record_count = ta.record_count();
@@ -428,33 +453,39 @@ bool Scheduler_member::free_occupied_orders( Transaction* outer_transaction )
     return result;
 }
 
-//--------------------------------------Scheduler_member::deactivate_and_release_orders_after_death
+//---------------------------------------Cluster_member::deactivate_and_release_orders_after_death
 
-void Scheduler_member::deactivate_and_release_orders_after_death()
+void Cluster_member::deactivate_and_release_orders_after_death()
 {
-    Z_LOGI2( "scheduler.distributed", __FUNCTION__ << "  _next_dead_orders_check_time=" << my_string_from_time_t( _next_dead_orders_check_time ) << "\n" );
+    Z_LOGI2( "scheduler.cluster", __FUNCTION__ << "  _next_dead_orders_check_time=" << my_string_from_time_t( _next_dead_orders_check_time ) << "\n" );
 
 
     time_t now = ::time(NULL);
 
     if( _next_dead_orders_check_time <= now )
     {
-        bool delete_inactive_record = !_distributed_scheduler->_is_backup;  // Der primäre Scheduler löscht sofort die toten Sätze!
-
-        if( _is_active || delete_inactive_record )  mark_as_inactive( delete_inactive_record );     // ruft free_occupied_orders()
-                                              else  free_occupied_orders();
+        if( _is_active || !_cluster->_is_backup )     // Nur der primäre Scheduler darf dead=1 setzen und diese Sätze später (oder sofort) löschen
+        {
+            mark_as_inactive( mai_mark_inactive_record_as_dead );     // ruft free_occupied_orders()
+        }
+        else    
+            free_occupied_orders();
 
         _dead_orders_check_period *= 2;
         _next_dead_orders_check_time = now + _dead_orders_check_period;
     }
 }
 
-//----------------------------------------------------------Distributed_scheduler::mark_as_inactive
+//------------------------------------------------------------------------Cluster::mark_as_inactive
 
-bool Scheduler_member::mark_as_inactive( bool delete_inactive_record, bool delete_empty_member_record )
+bool Cluster_member::mark_as_inactive( Mark_as_inactive_option option )
 {
+    bool delete_inactive_record = option == mai_delete_inactive_record 
+                               || option == mai_delete_inactive_and_empty_records;
+    bool delete_empty_member_record = option == mai_delete_inactive_and_empty_records;
+
     assert( !delete_empty_member_record || delete_inactive_record );
-    assert( _is_active || delete_inactive_record );
+    assert( _is_active || ( delete_inactive_record || option == mai_mark_inactive_record_as_dead ) );
 
     bool ok = false;
 
@@ -463,20 +494,22 @@ bool Scheduler_member::mark_as_inactive( bool delete_inactive_record, bool delet
 
     for( Retry_transaction ta ( db() ); ta.enter_loop(); ta++ ) try
     {
-        _distributed_scheduler->lock_member_records( &ta, _member_id, _distributed_scheduler->empty_member_id() );
+        _cluster->lock_member_records( &ta, _member_id, _cluster->empty_member_id() );
 
 
         free_occupied_orders( &ta );
 
 
-        sql::Update_stmt update ( ta.database_descriptor(), _spooler->_members_tablename );
+        sql::Update_stmt update ( ta.database_descriptor(), _spooler->_clusters_tablename );
 
         update[ "active"    ] = sql::null_value;
         update[ "exclusive" ] = sql::null_value;
-        if( _member_id != _distributed_scheduler->my_member_id() )  update[ "deactivating_member_id" ] = _distributed_scheduler->my_member_id();
-        update.and_where_condition( "scheduler_member_id", _member_id );
-      //update.and_where_condition( "active"             , _is_active   ? sql::Value( 1 ) : sql::null_value );
-        update.and_where_condition( "exclusive"          , _is_exclusive? sql::Value( 1 ) : sql::null_value );
+        if( option == mai_mark_inactive_record_as_dead )  update[ "dead" ] = 1;
+
+        if( _member_id != _cluster->my_member_id() )  update[ "deactivating_member_id" ] = _cluster->my_member_id();
+        update.and_where_condition( "member_id", _member_id );
+      //update.and_where_condition( "active"   , _is_active   ? sql::Value( 1 ) : sql::null_value );
+        update.and_where_condition( "exclusive", _is_exclusive? sql::Value( 1 ) : sql::null_value );
 
         ok = ta.try_execute_single( delete_inactive_record? update.make_delete_stmt() 
                                                           : update.make_update_stmt(), 
@@ -485,11 +518,11 @@ bool Scheduler_member::mark_as_inactive( bool delete_inactive_record, bool delet
 
         if( ok && _is_exclusive  ||  delete_empty_member_record )
         {
-            sql::Update_stmt update ( ta.database_descriptor(), _spooler->_members_tablename );
+            sql::Update_stmt update ( ta.database_descriptor(), _spooler->_clusters_tablename );
         
             if( _is_exclusive )  update[ "exclusive" ] = 1;
 
-            update.and_where_condition( "scheduler_member_id", _distributed_scheduler->empty_member_id() );
+            update.and_where_condition( "member_id", _cluster->empty_member_id() );
 
             if( delete_empty_member_record )
             {
@@ -503,27 +536,27 @@ bool Scheduler_member::mark_as_inactive( bool delete_inactive_record, bool delet
                 if( !ok )
                 {
                     _log->error( message_string( "SCHEDULER-371", "Statement without effect: " + update_sql ) );
-                    _distributed_scheduler->_is_in_error = true;
-                    _distributed_scheduler->show_exclusive_scheduler( &ta );
+                    _cluster->_is_in_error = true;
+                    _cluster->show_exclusive_scheduler( &ta );
                 }
             }
         }
 
         if( ok )  ta.commit( __FUNCTION__ );
     }
-    catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_members_tablename, x ), __FUNCTION__ ); }
+    catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_clusters_tablename, x ), __FUNCTION__ ); }
 
 
-    if( this == _distributed_scheduler->_my_scheduler )
+    if( this == _cluster->_my_scheduler )
     {
         _is_active    = false;
         _is_exclusive = false;
     }
 
-    if( _member_id == _distributed_scheduler->my_member_id() )
+    if( _member_id == _cluster->my_member_id() )
     {
-        _distributed_scheduler->_is_active         = false;
-        _distributed_scheduler->_has_exclusiveness = false;
+        _cluster->_is_active         = false;
+        _cluster->_has_exclusiveness = false;
     }
 
     return ok;
@@ -531,9 +564,9 @@ bool Scheduler_member::mark_as_inactive( bool delete_inactive_record, bool delet
 
 //---------------------------------------------------------Distributed::shift_exclusiveness_from_to
 
-//bool Distributed::shift_exclusiveness_from_to( Scheduler_member* from, Scheduler_member* to, bool delete_from_record, bool delete_empty_member_record )
+//bool Distributed::shift_exclusiveness_from_to( Cluster_member* from, Cluster_member* to, bool delete_from_record, bool delete_empty_member_record )
 //{
-//    Z_LOGI2( "scheduler.distributed", __FUNCTION__ << "\n" );
+//    Z_LOGI2( "scheduler.cluster", __FUNCTION__ << "\n" );
 //    assert( from );
 //    assert( from->_is_exclusive );
 //    assert( to );
@@ -562,12 +595,12 @@ bool Scheduler_member::mark_as_inactive( bool delete_inactive_record, bool delet
 //        // Dem bisher exklusiven Scheduler die Exklusivität nehmen
 //
 //        {
-//            sql::Update_stmt update ( ta.database_descriptor(), _spooler->_members_tablename );
+//            sql::Update_stmt update ( ta.database_descriptor(), _spooler->_clusters_tablename );
 //        
 //            update[ "exclusive" ] = sql::null_value;
 //            if( from != _my_scheduler   )  update[ "deactivating_member_id" ] = my_member_id();
 //            if( from->is_empty_member() )  update[ "active" ] = 1;
-//            update.and_where_condition( "scheduler_member_id", from->_member_id );
+//            update.and_where_condition( "member_id", from->_member_id );
 //            update.add_where( " and `exclusive` is not null" );
 //            
 //            if( !from->is_empty_member() )
@@ -582,13 +615,13 @@ bool Scheduler_member::mark_as_inactive( bool delete_inactive_record, bool delet
 //
 //        if( ok )
 //        {
-//            sql::Update_stmt update ( ta.database_descriptor(), _spooler->_members_tablename );
+//            sql::Update_stmt update ( ta.database_descriptor(), _spooler->_clusters_tablename );
 //        
 //            update[ "active"          ] = 1;
 //            update[ "exclusive"       ] = 1;
 //            update[ "last_heart_beat" ] = new_db_last_heart_beat;
 //            update[ "next_heart_beat" ] = new_db_next_heart_beat;
-//            update.and_where_condition( "scheduler_member_id", my_member_id() );
+//            update.and_where_condition( "member_id", my_member_id() );
 //            update.and_where_condition( "exclusive"          , sql::null_value );
 //            update.add_where( S() << " and `active`" << ( to->_is_active? " is not null" : " is null" ) );
 //
@@ -626,13 +659,40 @@ bool Scheduler_member::mark_as_inactive( bool delete_inactive_record, bool delet
 //    return ok;
 //}
 
-//--------------------------------------------------------------------Scheduler_member::dom_element
+//--------------------------------------------------------------Cluster_member::delete_dead_record
 
-xml::Element_ptr Scheduler_member::dom_element( const xml::Document_ptr& dom_document, const Show_what& )
+bool Cluster_member::delete_dead_record()
+{
+    bool result = false;
+
+    for( Retry_transaction ta ( db() ); ta.enter_loop(); ta++ )  try
+    {
+        sql::Delete_stmt delete_stmt ( ta.database_descriptor(), _spooler->_clusters_tablename );
+     
+        delete_stmt.and_where_condition( "scheduler_id", _spooler->id_for_db() );
+        delete_stmt.and_where_condition( "member_id"   , _member_id );
+        delete_stmt.add_where( " and `dead` is not null" );
+
+        ta.execute( delete_stmt, __FUNCTION__ );
+        int count = ta.record_count();
+
+        ta.commit( __FUNCTION__ );
+
+        result = count > 0;
+        if( result )  _log->info( message_string( "SCHEDULER-809" ) );
+    }
+    catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_clusters_tablename, x ), __FUNCTION__ ); }
+
+    return result;
+}
+
+//----------------------------------------------------------------------Cluster_member::dom_element
+
+xml::Element_ptr Cluster_member::dom_element( const xml::Document_ptr& dom_document, const Show_what& )
 {
     Read_transaction  transaction  ( db() );
-    string            where        = S() << "where `scheduler_member_id`=" << sql::quoted( _member_id );
-    string            xml          = transaction.read_clob_or_empty( _spooler->_members_tablename, "xml", where );
+    string            where        = S() << "where `member_id`=" << sql::quoted( _member_id );
+    string            xml          = transaction.read_clob_or_empty( _spooler->_clusters_tablename, "xml", where );
     xml::Element_ptr  result;
 
     if( xml != "" )
@@ -641,25 +701,25 @@ xml::Element_ptr Scheduler_member::dom_element( const xml::Document_ptr& dom_doc
         if( dom_document.documentElement() )  result = dom_document.documentElement().cloneNode( true );
     }
 
-    if( !result )  result = dom_document.createElement( "distributed_scheduler_member" );
+    if( !result )  result = dom_document.createElement( "cluster_member" );
 
 
-    result.setAttribute( "scheduler_member_id", _member_id );
-    result.setAttribute( "http_url"           , _http_url  );
-    result.setAttribute( "heart_beat_count"   , _heart_beat_count );
+    result.setAttribute( "cluster_member_id", _member_id );
+    result.setAttribute( "http_url"         , _http_url  );
+    result.setAttribute( "heart_beat_count" , _heart_beat_count );
     if( _is_active    )  result.setAttribute( "active"   , "yes" );
     if( _is_exclusive )  result.setAttribute( "exclusive", "yes" );
     if( _is_dead      )  result.setAttribute( "dead"     , "yes" );
 
     if( _heart_beat_count )  
     {
-        result.setAttribute( "last_detected_heart_beat"    , my_string_from_time_t( _last_heart_beat_detected ) );
+        result.setAttribute( "last_detected_heart_beat"    , _last_heart_beat_detected_local_time.as_string( Time::without_ms ) );
         result.setAttribute( "last_detected_heart_beat_age", max( (time_t)0, ::time(NULL) - _last_heart_beat_detected ) );
-        result.setAttribute( "heart_beat_quality"          , _is_dead? "bad" : "good" );
+        result.setAttribute( "heart_beat_quality"          , _is_dead? "bad" : _is_heart_beat_late? "late" : "good" );
     }
     else
     {
-        result.setAttribute( "database_last_heart_beat_age", ::time(NULL) - _db_last_heart_beat );
+        result.setAttribute( "database_last_heart_beat", my_string_from_time_t( _db_last_heart_beat ) );
     }
 
     result.setAttribute_optional( "deactivating_member_id", _deactivating_member_id );
@@ -667,9 +727,9 @@ xml::Element_ptr Scheduler_member::dom_element( const xml::Document_ptr& dom_doc
     return result;
 }
 
-//------------------------------------------------------------------------Scheduler_member::obj_name
+//-------------------------------------------------------------------------Cluster_member::obj_name
 
-string Scheduler_member::obj_name() const
+string Cluster_member::obj_name() const
 { 
     S result;
     result << Scheduler_object::obj_name();
@@ -679,9 +739,9 @@ string Scheduler_member::obj_name() const
     return result;
 }
 
-//-------------------------------------------------Distributed_has_alarm::recommend_next_check_time
+//-------------------------------------------------------------Has_alarm::recommend_next_check_time
 
-void Distributed_has_alarm::recommend_next_check_time( time_t t )
+void Has_alarm::recommend_next_check_time( time_t t )
 { 
     if( _recommended_next_check_time > t ) 
     {
@@ -690,20 +750,20 @@ void Distributed_has_alarm::recommend_next_check_time( time_t t )
     }
 }
 
-//------------------------------------------------------------------Distributed_has_alarm::on_alarm
+//------------------------------------------------------------------------------Has_alarm::on_alarm
 
-void Distributed_has_alarm::on_alarm()
+void Has_alarm::on_alarm()
 {
     _recommended_next_check_time = time_max;
 }
 
 //---------------------------------------------------------------------------Heart_beat::Heart_beat
 
-Heart_beat::Heart_beat( Distributed_scheduler* m ) 
+Heart_beat::Heart_beat( Cluster* m ) 
 :
     Scheduler_object( m->_spooler, this, Scheduler_object::type_heart_beat ),
     _zero_(this+1),
-    _distributed_scheduler(m)
+    _cluster(m)
 {
     set_alarm();
 }
@@ -719,31 +779,33 @@ string Heart_beat::async_state_text_() const
 
 bool Heart_beat::async_continue_( Continue_flags )
 {
-    Z_LOGI2( "scheduler.distributed", __FUNCTION__ << "\n" );
+    Z_LOGI2( "scheduler.cluster", __FUNCTION__ << "\n" );
 
+
+    Has_alarm::on_alarm();
 
     if( !db()->opened() )
     {
-        _distributed_scheduler->async_wake();    // Datenbank ist geschlossen worden
+        _cluster->async_wake();    // Datenbank ist geschlossen worden
         return true;
     }
 
 
     try
     {
-        bool ok = _distributed_scheduler->do_a_heart_beat();
+        bool ok = _cluster->do_a_heart_beat();
         if( ok )
         {
             set_alarm();                            // Wir sind weiterhin aktiv
         }
         else
         {
-            _distributed_scheduler->async_wake();   // Wir sind nicht mehr aktiv, Operation beenden!
+            _cluster->async_wake();   // Wir sind nicht mehr aktiv, Operation beenden!
         }
     }
     catch( exception& )
     {
-        _distributed_scheduler->async_wake();       // Distributed_scheduler wird die Exception übernehmen
+        _cluster->async_wake();       // Cluster wird die Exception übernehmen
         throw;
     }
         
@@ -754,19 +816,23 @@ bool Heart_beat::async_continue_( Continue_flags )
 
 void Heart_beat::set_alarm()
 {
-    set_async_next_gmtime( _distributed_scheduler->_next_heart_beat );
+    time_t t = _cluster->_next_heart_beat;
+
+    if( t > _recommended_next_check_time )  t = _recommended_next_check_time;
+
+    set_async_next_gmtime( t );
 }
 
 //---------------------------------------Exclusive_scheduler_watchdog::Exclusive_scheduler_watchdog
 
-Exclusive_scheduler_watchdog::Exclusive_scheduler_watchdog( Distributed_scheduler* m ) 
+Exclusive_scheduler_watchdog::Exclusive_scheduler_watchdog( Cluster* m ) 
 :
     Scheduler_object( m->_spooler, this, Scheduler_object::type_exclusive_scheduler_watchdog ),
     _zero_(this+1),
-    _distributed_scheduler(m)
+    _cluster(m)
 {
     _log = m->_log;
-  //_distributed_scheduler_session_id = read_distributed_scheduler_session_id();
+  //_cluster_session_id = read_cluster_session_id();
     _is_starting = true;
     set_alarm();
 }
@@ -795,13 +861,13 @@ string Exclusive_scheduler_watchdog::async_state_text_() const
 
 bool Exclusive_scheduler_watchdog::async_continue_( Continue_flags )
 {
-    Z_LOGI2( "scheduler.distributed", __FUNCTION__ << "\n" );
+    Z_LOGI2( "scheduler.cluster", __FUNCTION__ << "\n" );
 
-    Distributed_has_alarm::on_alarm();
+    Has_alarm::on_alarm();
 
     if( !db()->opened() )
     {
-        _distributed_scheduler->async_wake();       // Datenbank ist geschlossen worden
+        _cluster->async_wake();       // Datenbank ist geschlossen worden
         return true;
     }
 
@@ -813,13 +879,13 @@ bool Exclusive_scheduler_watchdog::async_continue_( Continue_flags )
     }
     catch( exception& )
     {
-        _distributed_scheduler->async_wake();       // Distributed_scheduler wird die Exception übernehmen
+        _cluster->async_wake();       // Cluster wird die Exception übernehmen
         throw;
     }
 
-    if( _distributed_scheduler->has_exclusiveness() )
+    if( _cluster->has_exclusiveness() )
     {
-        _distributed_scheduler->async_wake();       // Wir sind aktives Mitglied geworden, Exclusive_scheduler_watchdog beenden
+        _cluster->async_wake();       // Wir sind aktives Mitglied geworden, Exclusive_scheduler_watchdog beenden
     }
     else
     {
@@ -836,7 +902,7 @@ void Exclusive_scheduler_watchdog::calculate_next_check_time()
 {
     time_t now = ::time(NULL);
 
-    _next_check_time = now + active_heart_beat_maximum_check_period;
+    _next_check_time = now + active_heart_beat_check_period;
 
     //if( _set_exclusive_until  &&  _next_check_time > _set_exclusive_until )
     //{
@@ -845,7 +911,7 @@ void Exclusive_scheduler_watchdog::calculate_next_check_time()
     //}
     //else
     
-    if( Scheduler_member* watched_scheduler = _distributed_scheduler->exclusive_scheduler() )
+    if( Cluster_member* watched_scheduler = _cluster->exclusive_scheduler() )
     {
         time_t delay          = max_processing_time + 1;   // Erst in der folgenden Sekunde prüfen
         time_t new_next_check = watched_scheduler->_db_next_heart_beat + delay + 1;
@@ -853,7 +919,7 @@ void Exclusive_scheduler_watchdog::calculate_next_check_time()
         if( new_next_check - now >= active_heart_beat_minimum_check_period  &&  new_next_check < _next_check_time )
         {
             time_t diff = new_next_check - _next_check_time;
-            if( abs(diff) > 2 )  Z_LOG2( "scheduler.distributed", __FUNCTION__ << "  Synchronized with _db_next_heart_beat=" << my_string_from_time_t( watched_scheduler->_db_next_heart_beat ) << ": " << diff << "s\n" );
+            if( abs(diff) > 2 )  Z_LOG2( "scheduler.cluster", __FUNCTION__ << "  Synchronized with _db_next_heart_beat=" << my_string_from_time_t( watched_scheduler->_db_next_heart_beat ) << ": " << diff << "s\n" );
             _next_check_time = new_next_check;
         }
     }
@@ -863,19 +929,18 @@ void Exclusive_scheduler_watchdog::calculate_next_check_time()
 
 void Exclusive_scheduler_watchdog::set_alarm()
 {
-    //if( _distributed_scheduler->_db_next_heart_beat < _next_check_time )
+    //if( _cluster->_db_next_heart_beat < _next_check_time )
     //{
-    //    Z_LOG2( "scheduler.distributed", __FUNCTION__ << "  Next heart beat at " << my_string_from_time_t( _distributed_scheduler->_db_next_heart_beat ) << "\n" );
-    //    set_async_next_gmtime( _distributed_scheduler->_db_next_heart_beat );
+    //    Z_LOG2( "scheduler.cluster", __FUNCTION__ << "  Next heart beat at " << my_string_from_time_t( _cluster->_db_next_heart_beat ) << "\n" );
+    //    set_async_next_gmtime( _cluster->_db_next_heart_beat );
     //}
     //else
     {
-        //Z_LOG2( "scheduler.distributed", __FUNCTION__ << "  Next check at " << my_string_from_time_t( _next_check_time ) << "\n" );
+        //Z_LOG2( "scheduler.cluster", __FUNCTION__ << "  Next check at " << my_string_from_time_t( _next_check_time ) << "\n" );
 
         time_t t = _next_check_time;
 
-        if( t > _recommended_next_check_time )
-            t = max( ::time(NULL) + 2, _recommended_next_check_time );
+        if( t > _recommended_next_check_time )  t = _recommended_next_check_time;
 
         set_async_next_gmtime( t );
     }
@@ -885,46 +950,46 @@ void Exclusive_scheduler_watchdog::set_alarm()
 
 void Exclusive_scheduler_watchdog::try_to_become_exclusive()
 {
-    Z_LOGI2( "scheduler.distributed", __FUNCTION__ << "\n" );
-    assert( !_distributed_scheduler->_has_exclusiveness );
+    Z_LOGI2( "scheduler.cluster", __FUNCTION__ << "\n" );
+    assert( !_cluster->_has_exclusiveness );
 
 
-    _distributed_scheduler->check_schedulers_heart_beat();  // Stellt fest: is_backup_allowed_to_start(), _exclusive_scheduler
+    _cluster->check_schedulers_heart_beat();  // Stellt fest: is_backup_member_allowed_to_start(), _exclusive_scheduler
 
 
-    Scheduler_member* exclusive_scheduler = _distributed_scheduler->exclusive_scheduler();
+    Cluster_member* exclusive_scheduler = _cluster->exclusive_scheduler();
 
-    if( exclusive_scheduler )  _wait_for_exclusive_scheduler_start_until = 0;
+    if( exclusive_scheduler )  _wait_for_backup_scheduler_start_until = 0;
     else
-    if( _is_starting  &&  _distributed_scheduler->_is_backup  &&  _distributed_scheduler->is_backup_allowed_to_start() )
+    if( _is_starting  &&  _cluster->_is_backup  &&  _cluster->is_backup_member_allowed_to_start() )
     {
-        _wait_for_exclusive_scheduler_start_until = ::time(NULL) + backup_startup_delay;
+        _wait_for_backup_scheduler_start_until = ::time(NULL) + backup_startup_delay;
         _log->info( message_string( "SCHEDULER-831", backup_startup_delay ) );
     }
     _is_starting = false;
 
 
-    if( !_wait_for_exclusive_scheduler_start_until  ||  _wait_for_exclusive_scheduler_start_until <= ::time(NULL) ) 
+    if( !_wait_for_backup_scheduler_start_until  ||  _wait_for_backup_scheduler_start_until <= ::time(NULL) ) 
     {
-        _wait_for_exclusive_scheduler_start_until = 0;
+        _wait_for_backup_scheduler_start_until = 0;
 
-        if( exclusive_scheduler  &&  !exclusive_scheduler->_is_dead ) 
+        if( exclusive_scheduler  &&  !exclusive_scheduler->_is_dead )
         {
             _next_precedence_check = 0;
         }
         else
-        if( _distributed_scheduler->is_allowed_to_start()  &&  check_has_backup_precedence() )
+        if( _cluster->is_member_allowed_to_start()  &&  check_has_backup_precedence() )
         {
             _announced_to_become_exclusive = true;
-            _distributed_scheduler->mark_as_exclusive();
+            _cluster->mark_as_exclusive();
         }
     }
 
 
-    if( _announced_to_become_exclusive  &&  !_distributed_scheduler->_has_exclusiveness )  //&&  !_set_exclusive_until )
+    if( _announced_to_become_exclusive  &&  !_cluster->_has_exclusiveness )  //&&  !_set_exclusive_until )
     {
         _announced_to_become_exclusive = false;
-        _distributed_scheduler->show_exclusive_scheduler( (Transaction*)NULL );
+        _cluster->show_exclusive_scheduler( (Transaction*)NULL );
     }
 }
 
@@ -932,29 +997,26 @@ void Exclusive_scheduler_watchdog::try_to_become_exclusive()
 
 bool Exclusive_scheduler_watchdog::check_has_backup_precedence()
 {
-    bool result = false;
+    bool   result = false;
+    time_t now    = ::time(NULL);
 
-    //if( _distributed_scheduler->backup_precedence() == Distributed_scheduler::max_precedence )        Überflüssig
-    //{
-    //    result = true;
-    //}
-    //else
-    if( !_next_precedence_check  ||  _next_precedence_check <= ::time(NULL) )
+
+    if( !_next_precedence_check  ||  _next_precedence_check <= now )
     {
         try
         {
             Transaction ta ( db() );
 
             bool     another_has_precedence = false;
-            time_t   now                    = ::time(NULL);
             Any_file result_set             = ta.open_result_set
                 ( 
-                    S() << "select `precedence`, `scheduler_member_id`, `http_url`  from " << _spooler->_members_tablename << 
-                       "  where `precedence`<" << _distributed_scheduler->backup_precedence() <<
+                    S() << "select `precedence`, `member_id`, `http_url`  from " << _spooler->_clusters_tablename << 
+                       "  where `precedence` < " << _cluster->backup_precedence() <<
                          "  and `active` is null " 
-                         "  and `exclusive` is null " 
-                         "  and `next_heart_beat`>=" << ( now - ( heart_beat_period + max_processing_time ) ) <<    // Vorrang funktioniert nur, 
-                         "  and `next_heart_beat`<=" << ( now + ( heart_beat_period + max_processing_time ) ),      // wenn die Uhren übereinstimmen
+                         "  and `exclusive` is null "
+                         "  and `dead` is null " 
+                         "  and `next_heart_beat` >= " << ( now - ( heart_beat_period + max_processing_time ) ) <<    // Vorrang funktioniert nur, 
+                         "  and `next_heart_beat` <= " << ( now + ( heart_beat_period + max_processing_time ) ),      // wenn die Uhren übereinstimmen
                     __FUNCTION__
                 );
             
@@ -967,20 +1029,19 @@ bool Exclusive_scheduler_watchdog::check_has_backup_precedence()
 
             if( another_has_precedence  &&  !_next_precedence_check )
             {
-                _next_precedence_check = ::time(NULL) + precedence_check_period;
+                _next_precedence_check = now + precedence_check_period;
             }
             else
             {
-                //if( precedence_count )  _log->info( message_string( "SCHEDULER-814", "ignored" ) );
-                _next_precedence_check = 0;
                 result = true;
+                _next_precedence_check = 0;
             }
         }
         catch( exception& x )  { _log->error( S() << x.what() << ", while checking backup precendence" ); }
     }
     else
     {
-        Z_LOG2( "scheduler.distributed", __FUNCTION__ << "  continuing waiting...\n" );
+        Z_LOG2( "scheduler.cluster", __FUNCTION__ << "  continuing waiting...\n" );
     }
 
 
@@ -1014,13 +1075,13 @@ bool Exclusive_scheduler_watchdog::check_has_backup_precedence()
 //{
 //    bool result = false;
 //
-//    if( _distributed_scheduler->is_backup_allowed_to_start() )
+//    if( _cluster->is_backup_member_allowed_to_start() )
 //    {
-//        string current_id = read_distributed_scheduler_session_id();
+//        string current_id = read_cluster_session_id();
 //
-//        if( current_id != ""  &&  current_id != _distributed_scheduler_session_id )
+//        if( current_id != ""  &&  current_id != _cluster_session_id )
 //        {
-//            _distributed_scheduler_session_id = current_id;
+//            _cluster_session_id = current_id;
 //
 //            _log->info( message_string( "SCHEDULER-818" ) );
 //            bool restart = true;
@@ -1033,24 +1094,24 @@ bool Exclusive_scheduler_watchdog::check_has_backup_precedence()
 //    return result;
 //}
 
-//------------------------------Exclusive_scheduler_watchdog::read_distributed_scheduler_session_id
+//------------------------------Exclusive_scheduler_watchdog::read_cluster_session_id
 //
-//string Exclusive_scheduler_watchdog::read_distributed_scheduler_session_id()
+//string Exclusive_scheduler_watchdog::read_cluster_session_id()
 //{
 //    S result;
 //
-//    if( _distributed_scheduler->is_backup_allowed_to_start() )
+//    if( _cluster->is_backup_member_allowed_to_start() )
 //    {
 //        if( db()  &&  db()->opened() )
 //        for( Retry_transaction ta ( db() ); ta.enter_loop(); ta++ )
 //        try
 //        {
-//            string where  = S() << "where `scheduler_member_id`=" << sql::quoted( _distributed_scheduler->empty_member_id() );
-//            string xml    = ta.read_clob_or_empty( _spooler->_members_tablename, "xml", where );
+//            string where  = S() << "where `member_id`=" << sql::quoted( _cluster->empty_member_id() );
+//            string xml    = ta.read_clob_or_empty( _spooler->_clusters_tablename, "xml", where );
 //            if( xml != "" )
 //            //Any_file select = ta.open_result_set( 
 //            //                    S() << "select `active` "
-//            //                           "  from " << _spooler->_members_tablename << "  " <<
+//            //                           "  from " << _spooler->_clusters_tablename << "  " <<
 //            //                          where ),
 //            //                    __FUNCTION__ );
 //
@@ -1066,7 +1127,7 @@ bool Exclusive_scheduler_watchdog::check_has_backup_precedence()
 //                          element.getAttribute( "running_since" );
 //            }
 //        }
-//        catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_members_tablename, x ), __FUNCTION__ ); }
+//        catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_clusters_tablename, x ), __FUNCTION__ ); }
 //    }
 //
 //    return result;
@@ -1074,11 +1135,11 @@ bool Exclusive_scheduler_watchdog::check_has_backup_precedence()
 //
 //---------------------------------------Active_schedulers_watchdog::Active_schedulers_watchdog
 
-Active_schedulers_watchdog::Active_schedulers_watchdog( Distributed_scheduler* m ) 
+Active_schedulers_watchdog::Active_schedulers_watchdog( Cluster* m ) 
 :
     Scheduler_object( m->_spooler, this, Scheduler_object::type_active_schedulers_watchdog ),
     _zero_(this+1),
-    _distributed_scheduler(m)
+    _cluster(m)
 {
     set_alarm();
 }
@@ -1098,29 +1159,29 @@ string Active_schedulers_watchdog::async_state_text_() const
 
 bool Active_schedulers_watchdog::async_continue_( Continue_flags )
 {
-    Z_LOGI2( "scheduler.distributed", __FUNCTION__ << "\n" );
+    Z_LOGI2( "scheduler.cluster", __FUNCTION__ << "\n" );
 
-    Distributed_has_alarm::on_alarm();
+    Has_alarm::on_alarm();
 
 
     if( !db()->opened() )
     {
-        _distributed_scheduler->async_wake();       // Datenbank ist geschlossen worden
+        _cluster->async_wake();       // Datenbank ist geschlossen worden
         return true;
     }
 
     try
     {
-        bool ok = _distributed_scheduler->check_schedulers_heart_beat();
+        bool ok = _cluster->check_schedulers_heart_beat();
 
         if( !ok )
         {
-            Z_FOR_EACH( Distributed_scheduler::Scheduler_map, _distributed_scheduler->_scheduler_map, it )
+            Z_FOR_EACH( Cluster::Scheduler_map, _cluster->_scheduler_map, it )
             {
-                Scheduler_member* other_scheduler = it->second;
+                Cluster_member* other_scheduler = it->second;
 
                 if( other_scheduler->_is_dead  &&  
-                    other_scheduler->_member_id != _distributed_scheduler->my_member_id() )
+                    other_scheduler->_member_id != _cluster->my_member_id() )
                 {
                     other_scheduler->deactivate_and_release_orders_after_death();
                 }
@@ -1129,7 +1190,7 @@ bool Active_schedulers_watchdog::async_continue_( Continue_flags )
     }
     catch( exception& )
     {
-        _distributed_scheduler->async_wake();       // Distributed_scheduler wird die Exception übernehmen
+        _cluster->async_wake();       // Cluster wird die Exception übernehmen
         throw;
     }
 
@@ -1145,26 +1206,25 @@ void Active_schedulers_watchdog::calculate_next_check_time()
 {
     time_t now = ::time(NULL);
 
-    _next_check_time = now + active_heart_beat_maximum_check_period;
+    _next_check_time = now + active_heart_beat_check_period;
 }
 
 //------------------------------------------------------------Active_schedulers_watchdog::set_alarm
 
 void Active_schedulers_watchdog::set_alarm()
 {
-    Z_LOG2( "scheduler.distributed", __FUNCTION__ << "  Next check at " << my_string_from_time_t( _next_check_time ) << "\n" );
+    Z_LOG2( "scheduler.cluster", __FUNCTION__ << "  Next check at " << my_string_from_time_t( _next_check_time ) << "\n" );
 
     time_t t = _next_check_time;
 
-    if( t > _recommended_next_check_time )
-        t = max( ::time(NULL) + 2, _recommended_next_check_time );
+    if( t > _recommended_next_check_time )  t = _recommended_next_check_time;
 
     set_async_next_gmtime( t );
 }
 
-//------------------------------------------------static Distributed_scheduler::string_from_command
+//------------------------------------------------static Cluster::string_from_command
 
-//string Distributed_scheduler::string_from_command( Command command )
+//string Cluster::string_from_command( Command command )
 //{
 //    switch( command )
 //    {
@@ -1175,9 +1235,9 @@ void Active_schedulers_watchdog::set_alarm()
 //    }
 //}
 
-//------------------------------------------------static Distributed_scheduler::command_from_string
+//------------------------------------------------static Cluster::command_from_string
 
-//Distributed_scheduler::Command Distributed_scheduler::command_from_string( const string& command )
+//Cluster::Command Cluster::command_from_string( const string& command )
 //{
 //    if( command == ""                      )  return cmd_none;
 //    if( command == "terminate"             )  return cmd_terminate;
@@ -1185,30 +1245,30 @@ void Active_schedulers_watchdog::set_alarm()
 //    return cmd_none;
 //}
 
-//-----------------------------------------------------Distributed_scheduler::Distributed_scheduler
+//-------------------------------------------------------------------Cluster::Cluster
 
-Distributed_scheduler::Distributed_scheduler( Spooler* spooler )
+Cluster::Cluster( Spooler* spooler )
 :
-    Scheduler_object( spooler, this, type_scheduler_member ),
+    Scheduler_object( spooler, this, type_cluster_member ),
     _zero_(this+1),
     _continue_exclusive_operation(true)
 {
 }
 
-//----------------------------------------------------Distributed_scheduler::~Distributed_scheduler
+//------------------------------------------------------------------Cluster::~Cluster
     
-Distributed_scheduler::~Distributed_scheduler()
+Cluster::~Cluster()
 {
     try
     {
         close();
     }
-    catch( exception& x ) { Z_LOG2( "scheduler.distributed", "ERROR in " << __FUNCTION__ << ": " << x.what() << "\n" ); }
+    catch( exception& x ) { Z_LOG2( "scheduler.cluster", "ERROR in " << __FUNCTION__ << ": " << x.what() << "\n" ); }
 }
 
-//---------------------------------------------------------------------Distributed_scheduler::close
+//-----------------------------------------------------------------------------------Cluster::close
 
-void Distributed_scheduler::close()
+void Cluster::close()
 {
     if( !_closed )
     {
@@ -1224,9 +1284,8 @@ void Distributed_scheduler::close()
         {
             if( _my_scheduler )  
             {
-                bool delete_member_record = true;
-                bool delete_empty_record  = _is_active  &&  !_continue_exclusive_operation;
-                bool ok = _my_scheduler->mark_as_inactive( delete_member_record, delete_empty_record );
+                bool ok = _my_scheduler->mark_as_inactive( _is_active  &&  !_continue_exclusive_operation? Cluster_member::mai_delete_inactive_and_empty_records 
+                                                                                                         : Cluster_member::mai_delete_inactive_record);
                 if( ok )  _my_scheduler = NULL;
             }
             
@@ -1251,9 +1310,9 @@ void Distributed_scheduler::close()
     }
 }
 
-//------------------------------------------------------------Distributed_scheduler::begin_shutdown
+//--------------------------------------------------------------------------Cluster::begin_shutdown
 
-//void Distributed_scheduler::mark_begin_of_shutdown()
+//void Cluster::mark_begin_of_shutdown()
 //
 //// Kündigt das Herunterfahren an durch active=null im leeren Memberdatensatz 
 //// Für den Fall, dass das nicht vollständig heruntergefahren werden kann und der Datensatz nicht gelöscht wird.
@@ -1265,24 +1324,24 @@ void Distributed_scheduler::close()
 //    {
 //        for( Retry_transaction ta ( db() ); ta.enter_loop(); ta++ ) try
 //        {
-//            sql::Update_stmt update ( ta.database_descriptor(), _spooler->_members_tablename );
+//            sql::Update_stmt update ( ta.database_descriptor(), _spooler->_clusters_tablename );
 //
 //            update[ "deactivating_member_id" ] = my_member_id();
 //            update[ "active"                 ] = sql::null_value;
 //            update.and_where_condition( "active"             , sql::Value( 1 ) );
-//            update.and_where_condition( "scheduler_member_id", empty_member_id() );
+//            update.and_where_condition( "cluster_member_id", empty_member_id() );
 //
 //            bool ok = ta.try_execute_single( update, __FUNCTION__ );
 //
 //            if( ok )  ta.commit( __FUNCTION__ );
 //        }
-//        catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_members_tablename, x ), __FUNCTION__ ); }
+//        catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_clusters_tablename, x ), __FUNCTION__ ); }
 //    }
 //}
 
-//------------------------------------------------------------------Distributed_scheduler::shutdown
+//--------------------------------------------------------------------------------Cluster::shutdown
 
-//void Distributed_scheduler::set_continue_exclusive_operation ()
+//void Cluster::set_continue_exclusive_operation ()
 //{
 //    Z_LOGI2( "scheduler", __FUNCTION__ << "\n" );
 //
@@ -1298,16 +1357,16 @@ void Distributed_scheduler::close()
 //    close();
 //}
 
-//-------------------------------------------------Distributed_scheduler::calculate_next_heart_beat
+//---------------------------------------------------------------Cluster::calculate_next_heart_beat
 
-void Distributed_scheduler::calculate_next_heart_beat( time_t now )
+void Cluster::calculate_next_heart_beat( time_t now )
 {
     _next_heart_beat = now + heart_beat_period;
 }
 
-//---------------------------------------------------------------------Distributed_scheduler::start
+//-----------------------------------------------------------------------------------Cluster::start
 
-bool Distributed_scheduler::start()
+bool Cluster::start()
 {
     Z_LOGI2( "scheduler", __FUNCTION__ << "\n" );
 
@@ -1322,7 +1381,7 @@ bool Distributed_scheduler::start()
     if( !db()->opened() )  z::throw_xc( "SCHEDULER-357" ); 
     if( db()->lock_syntax() == db_lock_none )  z::throw_xc( "SCHEDULER-359", db()->dbms_name() );
 
-    make_scheduler_member_id();
+    make_cluster_member_id();
     //check_member_id();
     create_table_when_needed();
 
@@ -1348,7 +1407,7 @@ bool Distributed_scheduler::start()
     if( !_my_scheduler )  
     {
         _is_in_error = true;
-        z::throw_xc( "SCHEDULER-371", S() << "Missing own record '" << my_member_id() << "' in table " << _spooler->_members_tablename );
+        z::throw_xc( "SCHEDULER-371", S() << "Missing own record '" << my_member_id() << "' in table " << _spooler->_clusters_tablename );
     }
 
 
@@ -1368,7 +1427,7 @@ bool Distributed_scheduler::start()
 
     if( !_is_active )
     {
-        //if( _is_backup  &&  !is_backup_allowed_to_start() )  _log->info( message_string( "SCHEDULER-832" ) );       // is_backup_allowed_to_start() liefert am Anfang immmer true
+        if( _is_backup  &&  !is_backup_member_allowed_to_start() )  _log->info( message_string( "SCHEDULER-832" ) );       // is_backup_member_allowed_to_start() liefert am Anfang immmer true
         //else
         //if( _demand_exclusiveness  &&  !_has_exclusiveness )  _log->info( message_string(  ) );
     }
@@ -1380,32 +1439,33 @@ bool Distributed_scheduler::start()
     return true;
 }
 
-//--------------------------------------------------Distributed_scheduler::create_table_when_needed
+//----------------------------------------------------------------Cluster::create_table_when_needed
 
-void Distributed_scheduler::create_table_when_needed()
+void Cluster::create_table_when_needed()
 {
     Transaction ta ( db() );
 
-    db()->create_table_when_needed( &ta, _spooler->_members_tablename,
-            "`scheduler_member_id`"    " varchar(100) not null, "
-            "`scheduler_id`"           " varchar(100) not null, "
-            "`precedence`"             " integer, "
-            "`last_heart_beat`"        " integer, "                     // time_t
-            "`next_heart_beat`"        " integer, "                     // time_t
-            "`active`"                 " boolean, "                     // null oder 1 (not null)
-            "`exclusive`"              " boolean, "                     // null oder 1 (not null)
-            "`command`"                " varchar(250), "
-            "`http_url`"               " varchar(100), "
-            "`deactivating_member_id`" " varchar(100), "
-            "`xml`"                    " clob, "
-            "primary key( `scheduler_member_id` )" );
+    db()->create_table_when_needed( &ta, _spooler->_clusters_tablename,
+            "`member_id`"                      " varchar(100) not null, "
+            "`scheduler_id`"                   " varchar(100) not null, "
+            "`precedence`"                     " integer, "
+            "`last_heart_beat`"                " integer, "                     // time_t
+            "`next_heart_beat`"                " integer, "                     // time_t
+            "`active`"                         " boolean, "                     // null oder 1 (not null)
+            "`exclusive`"                      " boolean, "                     // null oder 1 (not null)
+            "`dead`"                           " boolean, "                     // null oder 1 (not null)
+            "`command`"                        " varchar(250), "
+            "`http_url`"                       " varchar(100), "
+            "`deactivating_member_id`"         " varchar(100), "
+            "`xml`"                            " clob, "
+            "primary key( `member_id` )" );
 
     ta.commit( __FUNCTION__ );
 }
 
-//----------------------------------------------------------Distributed_scheduler::start_operations
+//------------------------------------------------------------------------Cluster::start_operations
 
-void Distributed_scheduler::start_operations()
+void Cluster::start_operations()
 {
     if( !_heart_beat )
     {
@@ -1435,9 +1495,9 @@ void Distributed_scheduler::start_operations()
     }
 }
 
-//----------------------------------------------------------Distributed_scheduler::close_operations
+//------------------------------------------------------------------------Cluster::close_operations
 
-void Distributed_scheduler::close_operations()
+void Cluster::close_operations()
 {
     if( _heart_beat ) 
     {
@@ -1458,36 +1518,36 @@ void Distributed_scheduler::close_operations()
     }
 }
 
-//------------------------------------------------Distributed_scheduler::wait_until_is_scheduler_up
+//--------------------------------------------------------------Cluster::wait_until_is_scheduler_up
 
-//bool Distributed_scheduler::wait_until_is_scheduler_up()
+//bool Cluster::wait_until_is_scheduler_up()
 //{
 //    _log->info( message_string( "SCHEDULER-832" ) );
 //
-//    while( !_spooler->is_termination_state_cmd()  &&  !is_backup_allowed_to_start() )
+//    while( !_spooler->is_termination_state_cmd()  &&  !is_backup_member_allowed_to_start() )
 //    {
 //        _spooler->simple_wait_step();
 //        async_check_exception();
 //    }
 //
-//    bool ok = is_backup_allowed_to_start();
+//    bool ok = is_backup_member_allowed_to_start();
 //
 //    if( ok )  assert_database_integrity( __FUNCTION__ );
 //
 //    return ok;
 //}
 //
-////------------------------------------------------------Distributed_scheduler::wait_until_is_active
+////--------------------------------------------------------------------Cluster::wait_until_is_active
 //
-//bool Distributed_scheduler::wait_until_is_active()
+//bool Cluster::wait_until_is_active()
 //{
-//    bool was_scheduler_up = is_backup_allowed_to_start();
+//    bool was_scheduler_up = is_backup_member_allowed_to_start();
 //
 //    //if( !was_scheduler_up )  _log->info( message_string( "SCHEDULER-832" ) );
 //
 //    while( !_spooler->is_termination_state_cmd()  &&  !_is_active )  
 //    {
-//        if( was_scheduler_up  &&  !is_backup_allowed_to_start() ) 
+//        if( was_scheduler_up  &&  !is_backup_member_allowed_to_start() ) 
 //        {
 //            _log->info( message_string( "SCHEDULER-834" ) );
 //            was_scheduler_up = false; 
@@ -1504,9 +1564,9 @@ void Distributed_scheduler::close_operations()
 //    return ok;
 //}
 //
-////----------------------------------------------Distributed_scheduler::wait_until_has_exclusiveness
+////------------------------------------------------------------Cluster::wait_until_has_exclusiveness
 //
-//bool Distributed_scheduler::wait_until_has_exclusiveness()
+//bool Cluster::wait_until_has_exclusiveness()
 //{
 //    wait_until_is_active();
 //
@@ -1520,11 +1580,11 @@ void Distributed_scheduler::close_operations()
 //    return ok;
 //}
 //
-//-----------------------------------------------------------Distributed_scheduler::async_continue_
+//-------------------------------------------------------------------------Cluster::async_continue_
 
-bool Distributed_scheduler::async_continue_( Continue_flags )
+bool Cluster::async_continue_( Continue_flags )
 {
-    Z_LOGI2( "scheduler.distributed", __FUNCTION__ << "\n" );
+    Z_LOGI2( "scheduler.cluster", __FUNCTION__ << "\n" );
 
     if( _heart_beat                   )  _heart_beat                  ->async_check_exception( "Heart_beat" );
     if( _exclusive_scheduler_watchdog )  _exclusive_scheduler_watchdog->async_check_exception( "Exclusive_scheduler_watchdog" );
@@ -1546,9 +1606,9 @@ bool Distributed_scheduler::async_continue_( Continue_flags )
     return true;
  }
 
-//-----------------------------------------------Distributed_scheduler::check_heart_beat_is_in_time
+//-------------------------------------------------------------Cluster::check_heart_beat_is_in_time
 
-bool Distributed_scheduler::check_heart_beat_is_in_time( time_t expected_next_heart_beat )
+bool Cluster::check_heart_beat_is_in_time( time_t expected_next_heart_beat )
 {
     bool   result;
     time_t now = ::time(NULL);
@@ -1572,11 +1632,11 @@ bool Distributed_scheduler::check_heart_beat_is_in_time( time_t expected_next_he
     return result;
 }
 
-//------------------------------------------------------------Distributed_scheduler::do_a_heart_beat
+//--------------------------------------------------------------------------Cluster::do_a_heart_beat
 
-bool Distributed_scheduler::do_a_heart_beat()
+bool Cluster::do_a_heart_beat()
 {
-    Z_LOGI2( "scheduler.distributed", __FUNCTION__ << "\n" );
+    Z_LOGI2( "scheduler.cluster", __FUNCTION__ << "\n" );
 
     bool   had_exclusiveness   = has_exclusiveness();
     bool   ok                  = true;
@@ -1588,19 +1648,19 @@ bool Distributed_scheduler::do_a_heart_beat()
 
     if( ok )
     {
-        if( Not_in_recursion not_in_recursion = &_is_in_do_a_heart_beat )   
-        // commit() und reopen_database_after_error() rufen _spooler->check(), der nach Fristablauf wieder in diese Routine steigen kann
-        {
+        //if( Not_in_recursion not_in_recursion = &_is_in_do_a_heart_beat )   
+        //// commit() und reopen_database_after_error() rufen _spooler->check(), der nach Fristablauf wieder in diese Routine steigen kann
+        //{
             time_t old_next_heart_beat = _db_next_heart_beat;
 
             ok = heartbeat_member_record();
             if( ok )  check_heart_beat_is_in_time( old_next_heart_beat );  // Verspätung wird nur gemeldet
-        }
-        else
-        {
-            Z_LOG2( "scheduler", __FUNCTION__ << "  Rekursiver Aufruf\n" );
-            ok = true;
-        }
+        //}
+        //else
+        //{
+        //    Z_LOG2( "joacim", __FUNCTION__ << "  Rekursiver Aufruf\n" );
+        //    ok = true;
+        //}
     }
     
     if( !ok )
@@ -1614,9 +1674,9 @@ bool Distributed_scheduler::do_a_heart_beat()
     return ok;
 }
     
-//--------------------------------------------Distributed_scheduler::heartbeat_member_record
+//----------------------------------------------------------Cluster::heartbeat_member_record
 
-bool Distributed_scheduler::heartbeat_member_record()
+bool Cluster::heartbeat_member_record()
 {
     bool   ok          = false;
     bool   has_command = false;
@@ -1624,24 +1684,26 @@ bool Distributed_scheduler::heartbeat_member_record()
 
     for( Retry_transaction ta ( db() ); ta.enter_loop(); ta++ ) try
     {
+        ta.suppress_heart_beat_timeout_check();
+
         time_t now = ::time(NULL);
         calculate_next_heart_beat( now );
 
         time_t new_db_last_heart_beat = now;
         time_t new_db_next_heart_beat = _next_heart_beat;
 
-        //Z_LOGI2( "scheduler.distributed", __FUNCTION__ << "  new_db_last_heart_beat=" << new_db_last_heart_beat << " (" << my_string_from_time_t( new_db_last_heart_beat ) << "), "
+        //Z_LOGI2( "scheduler.cluster", __FUNCTION__ << "  new_db_last_heart_beat=" << new_db_last_heart_beat << " (" << my_string_from_time_t( new_db_last_heart_beat ) << "), "
         //                                                    "new_db_next_heart_beat=" << new_db_next_heart_beat << " (" << my_string_from_time_t( new_db_next_heart_beat ) << ")\n" );
 
-        sql::Update_stmt update ( ta.database_descriptor(), _spooler->_members_tablename );
+        sql::Update_stmt update ( ta.database_descriptor(), _spooler->_clusters_tablename );
         
         update[ "last_heart_beat" ] = new_db_last_heart_beat;
         update[ "next_heart_beat" ] = new_db_next_heart_beat;
 
-        update.and_where_condition( "scheduler_member_id", my_member_id()      );
-        update.and_where_condition( "last_heart_beat"    , _db_last_heart_beat );
-        update.and_where_condition( "next_heart_beat"    , _db_next_heart_beat );
-        update.and_where_condition( "command"            , sql::null_value     );
+        update.and_where_condition( "member_id"      , my_member_id()      );
+        update.and_where_condition( "last_heart_beat", _db_last_heart_beat );
+        update.and_where_condition( "next_heart_beat", _db_next_heart_beat );
+        update.and_where_condition( "command"          , sql::null_value     );
         update.add_where( S() << " and `active`"    << ( _is_active        ? " is not null" : " is null" ) );
         update.add_where( S() << " and `exclusive`" << ( _has_exclusiveness? " is not null" : " is null" ) );
         bool record_is_updated = ta.try_execute_single( update, __FUNCTION__ );
@@ -1662,7 +1724,7 @@ bool Distributed_scheduler::heartbeat_member_record()
             _db_next_heart_beat = new_db_next_heart_beat;
         }
     }
-    catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_members_tablename, x ), __FUNCTION__ ); }
+    catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_clusters_tablename, x ), __FUNCTION__ ); }
 
     //if( !ok )
     //{
@@ -1674,9 +1736,9 @@ bool Distributed_scheduler::heartbeat_member_record()
     return ok;
 }
 
-//----------------------------------------------------Distributed_scheduler::check_my_member_record
+//------------------------------------------------------------------Cluster::check_my_member_record
 
-bool Distributed_scheduler::check_my_member_record( Transaction* outer_transaction, bool force_error )
+bool Cluster::check_my_member_record( Transaction* outer_transaction, bool force_error )
 {
     bool   is_active              = false;
     bool   is_exclusive           = false;
@@ -1687,8 +1749,8 @@ bool Distributed_scheduler::check_my_member_record( Transaction* outer_transacti
     for( Retry_transaction ta ( db(), outer_transaction ); ta.enter_loop(); ta++ ) try
     {
         Any_file result_set = ta.open_result_set( S() << "select `active`, `exclusive`, `deactivating_member_id` "
-                                                         "  from " << _spooler->_members_tablename << 
-                                                         "  where `scheduler_member_id`=" << sql::quoted( my_member_id() ),
+                                                         "  from " << _spooler->_clusters_tablename << 
+                                                         "  where `member_id`=" << sql::quoted( my_member_id() ),
                                                   __FUNCTION__ );
 
         if( !result_set.eof() )  
@@ -1702,7 +1764,7 @@ bool Distributed_scheduler::check_my_member_record( Transaction* outer_transacti
         else
             my_record_lost = true;
     }
-    catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_members_tablename, x ), __FUNCTION__ ); }
+    catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_clusters_tablename, x ), __FUNCTION__ ); }
 
     if( my_record_lost )
     {
@@ -1739,26 +1801,26 @@ bool Distributed_scheduler::check_my_member_record( Transaction* outer_transacti
     return ok;
 }
 
-//-------------------------------------------------------Distributed_scheduler::lock_member_records
+//---------------------------------------------------------------------Cluster::lock_member_records
 
-void Distributed_scheduler::lock_member_records( Transaction* ta, const string& member1_id, const string& member2_id )
+void Cluster::lock_member_records( Transaction* ta, const string& member1_id, const string& member2_id )
 {
     assert( ta );
 
     S sql;
-    sql << "select `scheduler_member_id`  from " << _spooler->_members_tablename << " %update_lock"
-           "  where `scheduler_member_id`"
+    sql << "select `member_id`  from " << _spooler->_clusters_tablename << " %update_lock"
+           "  where `member_id`"
            " in (" << sql::quoted( member1_id ) << "," 
                    << sql::quoted( member2_id ) << ")";
 
     ta->open_commitable_result_set( sql, __FUNCTION__ );
 }
 
-//-------------------------------------------------Distributed_scheduler::delete_old_member_records
+//---------------------------------------------------------------Cluster::delete_old_member_records
 
-//void Distributed_scheduler::delete_old_member_records( Transaction* outer_transaction )
+//void Cluster::delete_old_member_records( Transaction* outer_transaction )
 //{
-//    Z_LOGI2( "scheduler.distributed", __FUNCTION__ << "\n" );
+//    Z_LOGI2( "scheduler.cluster", __FUNCTION__ << "\n" );
 //
 //    try
 //    {
@@ -1769,7 +1831,7 @@ void Distributed_scheduler::lock_member_records( Transaction* ta, const string& 
 //
 //        ta.execute
 //        ( 
-//            S() << "DELETE from " << _spooler->_members_tablename << 
+//            S() << "DELETE from " << _spooler->_clusters_tablename << 
 //                    "  where `scheduler_id`= " << sql::quoted( _spooler->id_for_db() ) <<
 //                       " and `active` is null"
 //                       " and `next_heart_beat`<" << ( ::time(NULL) - trauerfrist ), 
@@ -1780,7 +1842,7 @@ void Distributed_scheduler::lock_member_records( Transaction* ta, const string& 
 //
 //        ta.commit( __FUNCTION__ );
 //
-//        if( record_count )  _log->warn( message_string( "SCHEDULER-828", record_count, _spooler->_members_tablename, t ) );
+//        if( record_count )  _log->warn( message_string( "SCHEDULER-828", record_count, _spooler->_clusters_tablename, t ) );
 //    }
 //    catch( exception& x )
 //    {
@@ -1788,9 +1850,9 @@ void Distributed_scheduler::lock_member_records( Transaction* ta, const string& 
 //    }
 //}
 
-//--------------------------------------------------Distributed_scheduler::read_and_execute_command
+//----------------------------------------------------------------Cluster::read_and_execute_command
 
-void Distributed_scheduler::read_and_execute_command()
+void Cluster::read_and_execute_command()
 {
     string command;
 
@@ -1799,8 +1861,8 @@ void Distributed_scheduler::read_and_execute_command()
         Any_file result_set = ta.open_result_set
         ( 
             S() << "select `command`"
-                   "  from " << _spooler->_members_tablename << " %update_lock"
-                   "  where `scheduler_member_id`=" << sql::quoted( my_member_id() ),
+                   "  from " << _spooler->_clusters_tablename << " %update_lock"
+                   "  where `member_id`=" << sql::quoted( my_member_id() ),
             __FUNCTION__
         );
 
@@ -1809,23 +1871,23 @@ void Distributed_scheduler::read_and_execute_command()
             Record record = result_set.get_record();
             command = record.as_string( 0 );
 
-            sql::Update_stmt update ( ta.database_descriptor(), _spooler->_members_tablename );
+            sql::Update_stmt update ( ta.database_descriptor(), _spooler->_clusters_tablename );
             update[ "command" ] = sql::null_value;
-            update.and_where_condition( "scheduler_member_id", my_member_id() );
+            update.and_where_condition( "member_id", my_member_id() );
             ta.execute_single( update, __FUNCTION__ );
 
             ta.commit( __FUNCTION__ );
         }
     }
-    catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_members_tablename, x ), __FUNCTION__ ); }
+    catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_clusters_tablename, x ), __FUNCTION__ ); }
 
 
     if( command != "" )  execute_command( command );
 }
 
-//-----------------------------------------------------------Distributed_scheduler::execute_command
+//-------------------------------------------------------------------------Cluster::execute_command
 
-void Distributed_scheduler::execute_command( const string& command )
+void Cluster::execute_command( const string& command )
 {
     _log->info( message_string( "SCHEDULER-811", command ) );
 
@@ -1849,16 +1911,16 @@ void Distributed_scheduler::execute_command( const string& command )
     //}
 }
 
-//-----------------------------------------------Distributed_scheduler::check_schedulers_heart_beat
+//-------------------------------------------------------------Cluster::check_schedulers_heart_beat
 
-bool Distributed_scheduler::check_schedulers_heart_beat()
+bool Cluster::check_schedulers_heart_beat()
 {
-    Z_LOGI2( "scheduler.distributed", __FUNCTION__ << "\n" );
+    Z_LOGI2( "scheduler.cluster", __FUNCTION__ << "\n" );
     
     bool   result            = true;                // Auch im Fehlerfall
     time_t now_before_select = ::time(NULL);        // Vor dem Datenbankzugriff
 
-    ptr<Scheduler_member> previous_exclusive_scheduler = _exclusive_scheduler;
+    ptr<Cluster_member> previous_exclusive_scheduler = _exclusive_scheduler;
     _exclusive_scheduler = NULL;
     Z_FOR_EACH( Scheduler_map, _scheduler_map, it )  it->second->_is_checked = false;
 
@@ -1870,22 +1932,22 @@ bool Distributed_scheduler::check_schedulers_heart_beat()
         Read_transaction ta ( db() );
 
         Any_file result_set = ta.open_result_set( S() << 
-                     "select `scheduler_member_id`, `last_heart_beat`, `next_heart_beat`, `exclusive`, `active`, `deactivating_member_id`, `http_url` "
-                      " from " << _spooler->_members_tablename << 
+                     "select `member_id`, `last_heart_beat`, `next_heart_beat`, `exclusive`, `active`, `dead`, `deactivating_member_id`, `http_url` "
+                      " from " << _spooler->_clusters_tablename << 
                      "  where `scheduler_id`=" << sql::quoted( _spooler->id_for_db() ),
                         //" and `active` is not null",
                      __FUNCTION__ );
 
         while( !result_set.eof() )
         {
-            Record record                    = result_set.get_record();
-            string other_scheduler_member_id = record.as_string( 0 );
+            Record record                  = result_set.get_record();
+            string other_cluster_member_id = record.as_string( 0 );
 
-            ptr<Scheduler_member> other_scheduler = _scheduler_map[ other_scheduler_member_id ];
+            ptr<Cluster_member> other_scheduler = _scheduler_map[ other_cluster_member_id ];
             if( !other_scheduler )
             {
-                other_scheduler = Z_NEW( Scheduler_member( this, other_scheduler_member_id ) );
-                _scheduler_map[ other_scheduler_member_id ] = other_scheduler;
+                other_scheduler = Z_NEW( Cluster_member( this, other_cluster_member_id ) );
+                _scheduler_map[ other_cluster_member_id ] = other_scheduler;
                 if( !_my_scheduler  &&  other_scheduler->_member_id == my_member_id() )  _my_scheduler = other_scheduler;
             }
 
@@ -1910,11 +1972,16 @@ bool Distributed_scheduler::check_schedulers_heart_beat()
         {
             Scheduler_map::iterator next_it = it;  next_it++;
 
-            Scheduler_member* o = it->second;
+            Cluster_member* o = it->second;
             if( !o->_is_checked )
             {
                 if( o == _my_scheduler )  _my_scheduler = NULL, _log->error( S() << __FUNCTION__ << "  Own Scheduler member record has been deleted" );
-                if( !o->_is_dead )  o->log()->info( message_string( "SCHEDULER-826" ) );
+                if( !o->_is_dead )  
+                {
+                    o->log()->info( message_string( o == empty_member_record()? "SCHEDULER-841"          // "It's requested, that the exclusive operation will not be continued"
+                                                                              : "SCHEDULER-826" ) );     // "That Scheduler has terminated"
+                    if( _heart_beat )  _heart_beat->recommend_next_check_time( 0 );   // Wecken, vielleicht gibt's ein command für uns.
+                }
 
                 Z_WINDOWS_ONLY( next_it= )  _scheduler_map.erase( it );        // next_it= vorsichtshalber (oder bleibt next_it stabil?). gcc-erase liefert void
             }
@@ -1924,7 +1991,7 @@ bool Distributed_scheduler::check_schedulers_heart_beat()
 
         if( previous_exclusive_scheduler != _exclusive_scheduler )
         {
-            if( !exclusive_scheduler() )  _log->debug( message_string( "SCHEDULER-825" ) );
+            if( !exclusive_scheduler() )  _log->info( message_string( "SCHEDULER-825" ) );
             //else
             //if( exclusive_scheduler() != _my_scheduler )   _log->info( message_string( "SCHEDULER-824", exclusive_scheduler()->_member_id ) );
         }
@@ -1934,29 +2001,27 @@ bool Distributed_scheduler::check_schedulers_heart_beat()
     return result;
 }
 
-//----------------------------------------Distributed_scheduler::recommend_next_deadline_check_time
+//------------------------------------------------------Cluster::recommend_next_deadline_check_time
 
-void Distributed_scheduler::recommend_next_deadline_check_time( time_t recommended_check_time )
+void Cluster::recommend_next_deadline_check_time( time_t recommended_check_time )
 {
-    time_t t = max( ::time(NULL) + 2, recommended_check_time );
-
-    if( _active_schedulers_watchdog   )  _active_schedulers_watchdog->recommend_next_check_time( t );
-    if( _exclusive_scheduler_watchdog )  _exclusive_scheduler_watchdog->recommend_next_check_time( t );
+    if( _active_schedulers_watchdog   )  _active_schedulers_watchdog->recommend_next_check_time( recommended_check_time );
+    if( _exclusive_scheduler_watchdog )  _exclusive_scheduler_watchdog->recommend_next_check_time( recommended_check_time );
 }
 
-//-------------------------------------------------------Distributed_scheduler::exclusive_scheduler
+//---------------------------------------------------------------------Cluster::exclusive_scheduler
 
-Scheduler_member* Distributed_scheduler::exclusive_scheduler()
+Cluster_member* Cluster::exclusive_scheduler()
 {
     return _exclusive_scheduler && !_exclusive_scheduler->is_empty_member()?  _exclusive_scheduler
                                                                            : NULL;
 }
 
-//---------------------------------------------------------Distributed_scheduler::mark_as_exclusive
+//-----------------------------------------------------------------------Cluster::mark_as_exclusive
 
-bool Distributed_scheduler::mark_as_exclusive()
+bool Cluster::mark_as_exclusive()
 {
-    Z_LOGI2( "scheduler.distributed", __FUNCTION__ << "\n" );
+    Z_LOGI2( "scheduler.cluster", __FUNCTION__ << "\n" );
     assert( !_has_exclusiveness );
 
     bool   ok;
@@ -1994,31 +2059,31 @@ bool Distributed_scheduler::mark_as_exclusive()
 
         // Dem bisher exklusiven Scheduler die Exklusivität nehmen
 
-        sql::Update_stmt update ( ta.database_descriptor(), _spooler->_members_tablename );
+        sql::Update_stmt update ( ta.database_descriptor(), _spooler->_clusters_tablename );
     
         update[ "exclusive"              ] = sql::null_value;
         update[ "deactivating_member_id" ] = my_member_id();
         if( _exclusive_scheduler->is_empty_member() )  update[ "active" ] = 1;
-        update.and_where_condition( "scheduler_member_id", _exclusive_scheduler->_member_id );
+        update.and_where_condition( "member_id", _exclusive_scheduler->_member_id );
         update.add_where( " and `exclusive` is not null" );
         
         if( !_exclusive_scheduler->is_empty_member() )
         {
-            update.and_where_condition( "last_heart_beat"    , _exclusive_scheduler->_db_last_heart_beat );
-            update.and_where_condition( "next_heart_beat"    , _exclusive_scheduler->_db_next_heart_beat );
+            update.and_where_condition( "last_heart_beat", _exclusive_scheduler->_db_last_heart_beat );
+            update.and_where_condition( "next_heart_beat", _exclusive_scheduler->_db_next_heart_beat );
         }
 
         ok = ta.try_execute_single( update, __FUNCTION__ );
 
         if( ok )
         {
-            sql::Update_stmt update ( ta.database_descriptor(), _spooler->_members_tablename );
+            sql::Update_stmt update ( ta.database_descriptor(), _spooler->_clusters_tablename );
         
             update[ "active"          ] = 1;
             update[ "exclusive"       ] = 1;
             update[ "last_heart_beat" ] = new_db_last_heart_beat;
             update[ "next_heart_beat" ] = new_db_next_heart_beat;
-            update.and_where_condition( "scheduler_member_id", my_member_id() );
+            update.and_where_condition( "member_id", my_member_id() );
             update.and_where_condition( "exclusive"          , sql::null_value );
             update.add_where( S() << " and `active`" << ( _is_active? " is not null" : " is null" ) );
 
@@ -2057,9 +2122,9 @@ bool Distributed_scheduler::mark_as_exclusive()
     return ok;
 }
 
-//-------------------------------------------------Distributed_scheduler::assert_database_integrity
+//---------------------------------------------------------------Cluster::assert_database_integrity
 
-void Distributed_scheduler::assert_database_integrity( const string& message_text )
+void Cluster::assert_database_integrity( const string& message_text )
 {
     bool ok              = false;
     int  exclusive_count = -1;
@@ -2068,11 +2133,11 @@ void Distributed_scheduler::assert_database_integrity( const string& message_tex
 
     S sql_stmt;
     sql_stmt << "select 1, count(*)"
-                "  from " << _spooler->_members_tablename <<
-                "  where `scheduler_member_id`=" << sql::quoted( empty_member_id() )<<
+                "  from " << _spooler->_clusters_tablename <<
+                "  where `member_id`=" << sql::quoted( empty_member_id() )<<
              "   union   "
               "  select 2, count( `exclusive` )"
-                "  from " << _spooler->_members_tablename <<
+                "  from " << _spooler->_clusters_tablename <<
                 "  where `scheduler_id`=" << sql::quoted( _spooler->id_for_db() );
 
     
@@ -2094,22 +2159,22 @@ void Distributed_scheduler::assert_database_integrity( const string& message_tex
         ok = empty_count == 0  &&  exclusive_count <= 1  ||
              empty_count == 1  &&  exclusive_count == 1;
     }
-    catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_members_tablename, x ), __FUNCTION__ ); }
+    catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_clusters_tablename, x ), __FUNCTION__ ); }
 
     if( !ok )
     {
         _is_in_error = true;
         z::throw_xc( "SCHEDULER-371", S() << "exclusive_count=" << exclusive_count << " empty_count=" << empty_count, 
-                                      "TABLE " + _spooler->_members_tablename, 
+                                      "TABLE " + _spooler->_clusters_tablename, 
                                       message_text );
     }
 
     //return ok;
 }
 
-//------------------------------------------------Distributed_scheduler::check_empty_member_record
+//--------------------------------------------------------------Cluster::check_empty_member_record
 
-void Distributed_scheduler::check_empty_member_record()
+void Cluster::check_empty_member_record()
 {
     time_t now        = ::time(NULL);
     Record record;
@@ -2122,11 +2187,11 @@ void Distributed_scheduler::check_empty_member_record()
         {
             Transaction ta ( db() );
 
-            string   where_clause = S() << "where `scheduler_member_id`=" << sql::quoted( empty_member_id() );
+            string   where_clause = S() << "where `member_id`=" << sql::quoted( empty_member_id() );
 
             Any_file result_set   = ta.open_result_set
             (
-                S() << "select `active`  from " << _spooler->_members_tablename << "  " << where_clause,
+                S() << "select `active`  from " << _spooler->_clusters_tablename << "  " << where_clause,
                 __FUNCTION__
             );
 
@@ -2134,9 +2199,9 @@ void Distributed_scheduler::check_empty_member_record()
             {
                 //if( result_set.get_record().null( "active" ) )
                 //{
-                //    sql::Update_stmt update ( db()->database_descriptor(), _spooler->_members_tablename );
+                //    sql::Update_stmt update ( db()->database_descriptor(), _spooler->_clusters_tablename );
                 //    update[ "active" ] = 1;
-                //    update.and_where_condition( "scheduler_member_id", empty_member_id() );
+                //    update.and_where_condition( "member_id", empty_member_id() );
                 //    ta.execute_single( update, __FUNCTION__ );
                 //}
             }
@@ -2145,7 +2210,7 @@ void Distributed_scheduler::check_empty_member_record()
             {
                 Any_file result_set = ta.open_commitable_result_set
                 (
-                    S() << "select `exclusive`  from " << _spooler->_members_tablename  << " %update_lock"
+                    S() << "select `exclusive`  from " << _spooler->_clusters_tablename  << " %update_lock"
                            "  where `scheduler_id`=" << sql::quoted( _spooler->id_for_db() ) 
                         <<   " and `exclusive` is not null",
                     __FUNCTION__
@@ -2157,21 +2222,21 @@ void Distributed_scheduler::check_empty_member_record()
                 if( exclusive_count > 1 )  z::throw_xc( "SCHEDULER-371", S() << exclusive_count << " exclusive Schedulers" );
 
 
-                sql::Insert_stmt stmt ( ta.database_descriptor(), _spooler->_members_tablename );
+                sql::Insert_stmt stmt ( ta.database_descriptor(), _spooler->_clusters_tablename );
 
-                stmt[ "scheduler_member_id" ] = empty_member_id();
-              //stmt[ "precedence"          ] = 0;
-              //stmt[ "last_heart_beat"     ] = Beide Felder NULL lassen, damit sie nicht als veraltete Einträge angesehen und gelöscht werden
-              //stmt[ "next_heart_beat"     ] = 
-                stmt[ "active"              ] = _is_active          ? sql::Value( 1 ) : sql::null_value;
-                stmt[ "exclusive"           ] = exclusive_count == 0? sql::Value( 1 ) : sql::null_value;
-                stmt[ "scheduler_id"        ] = _spooler->id_for_db();
-                stmt[ "http_url"            ] = _spooler->http_url();
+                stmt[ "member_id"       ] = empty_member_id();
+              //stmt[ "precedence"      ] = 0;
+              //stmt[ "last_heart_beat" ] = Beide Felder NULL lassen, damit sie nicht als veraltete Einträge angesehen und gelöscht werden
+              //stmt[ "next_heart_beat" ] = 
+                stmt[ "active"          ] = _is_active          ? sql::Value( 1 ) : sql::null_value;
+                stmt[ "exclusive"       ] = exclusive_count == 0? sql::Value( 1 ) : sql::null_value;
+                stmt[ "scheduler_id"    ] = _spooler->id_for_db();
+                stmt[ "http_url"        ] = _spooler->http_url();
 
                 ta.execute( stmt, "The empty member record" );
 
 
-                ta.update_clob( _spooler->_members_tablename, "xml", my_member_dom_document().xml(), where_clause );
+                ta.update_clob( _spooler->_clusters_tablename, "xml", my_member_dom_document().xml(), where_clause );
             }
 
             ta.commit( __FUNCTION__ );
@@ -2185,9 +2250,9 @@ void Distributed_scheduler::check_empty_member_record()
     while( second_try );
 }
 
-//------------------------------------------------------Distributed_scheduler::insert_member_record
+//--------------------------------------------------------------------Cluster::insert_member_record
 
-void Distributed_scheduler::insert_member_record()
+void Cluster::insert_member_record()
 {
     for( Retry_transaction ta ( db() ); ta.enter_loop(); ta++ ) try
     {
@@ -2199,20 +2264,20 @@ void Distributed_scheduler::insert_member_record()
         time_t new_db_next_heart_beat = _next_heart_beat;
 
 
-        sql::Insert_stmt insert ( ta.database_descriptor(), _spooler->_members_tablename );
+        sql::Insert_stmt insert ( ta.database_descriptor(), _spooler->_clusters_tablename );
         
-        insert[ "scheduler_member_id" ] = my_member_id();
-        insert[ "precedence"          ] = _backup_precedence;
-        insert[ "last_heart_beat"     ] = new_db_last_heart_beat;
-        insert[ "next_heart_beat"     ] = new_db_next_heart_beat;
-        insert[ "active"              ] = _is_active? sql::Value( 1 ) : sql::null_value;
-        insert[ "exclusive"           ] = sql::null_value;
-        insert[ "scheduler_id"        ] = _spooler->id_for_db();
-        insert[ "http_url"            ] = _spooler->http_url();
+        insert[ "member_id"       ] = my_member_id();
+        insert[ "precedence"      ] = _backup_precedence;
+        insert[ "last_heart_beat" ] = new_db_last_heart_beat;
+        insert[ "next_heart_beat" ] = new_db_next_heart_beat;
+        insert[ "active"          ] = _is_active? sql::Value( 1 ) : sql::null_value;
+        insert[ "exclusive"       ] = sql::null_value;
+        insert[ "scheduler_id"    ] = _spooler->id_for_db();
+        insert[ "http_url"        ] = _spooler->http_url();
 
         ta.execute( insert, __FUNCTION__ );
 
-        ta.update_clob( _spooler->_members_tablename, "xml", my_member_dom_document().xml(), "where `scheduler_member_id`=" + sql::quoted( my_member_id() ) );
+        ta.update_clob( _spooler->_clusters_tablename, "xml", my_member_dom_document().xml(), "where `member_id`=" + sql::quoted( my_member_id() ) );
 
         ta.commit( __FUNCTION__ );
 
@@ -2220,14 +2285,14 @@ void Distributed_scheduler::insert_member_record()
         _db_last_heart_beat = new_db_last_heart_beat;
         _db_next_heart_beat = new_db_next_heart_beat;
     }
-    catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_members_tablename, x ), __FUNCTION__ ); }
+    catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_clusters_tablename, x ), __FUNCTION__ ); }
 }
 
-//------------------------------------------------------------Distributed_scheduler::mark_as_active
+//--------------------------------------------------------------------------Cluster::mark_as_active
 
-//void Distributed_scheduler::mark_as_active()
+//void Cluster::mark_as_active()
 //{
-//    Z_LOGI2( "scheduler.distributed", __FUNCTION__ << "\n" );
+//    Z_LOGI2( "scheduler.cluster", __FUNCTION__ << "\n" );
 //    assert( !_is_active );
 //
 //    _log->debug( message_string( "SCHEDULER-819" ) );   // "Scheduler becomes active"
@@ -2236,26 +2301,26 @@ void Distributed_scheduler::insert_member_record()
 //    {
 //        Transaction ta ( db() );
 //
-//        sql::Update_stmt update ( ta.database_descriptor(), _spooler->_members_tablename );
+//        sql::Update_stmt update ( ta.database_descriptor(), _spooler->_clusters_tablename );
 //    
 //        update[ "active"          ] = 1;
-//        update.and_where_condition( "scheduler_member_id", _distributed_scheduler->my_member_id() );
-//        update.and_where_condition( "active"             , sql::null_value );
-//        update.and_where_condition( "exclusive"          , sql::null_value );
+//        update.and_where_condition( "member_id"      , _cluster->my_member_id() );
+//        update.and_where_condition( "active"         , sql::null_value );
+//        update.and_where_condition( "exclusive"       , sql::null_value );
 //        update.and_where_condition( "last_heart_beat"    , _db_last_heart_beat );
 //        update.and_where_condition( "next_heart_beat"    , _db_next_heart_beat );
 //
 //        ta.execute_single( update, __FUNCTION__ );
 //        ta.commit( __FUNCTION__ );
 //    }
-//    catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_members_tablename, x ) ); }
+//    catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_clusters_tablename, x ) ); }
 //
 //    _is_active = true;
 //}
 
-//---------------------------------------------------------Distributed_scheduler::async_state_text_
+//-----------------------------------------------------------------------Cluster::async_state_text_
 
-string Distributed_scheduler::async_state_text_() const
+string Cluster::async_state_text_() const
 {
     S result;
 
@@ -2271,30 +2336,30 @@ string Distributed_scheduler::async_state_text_() const
     return result;
 }
 
-//------------------------------Distributed_scheduler::set_command_for_all_active_schedulers_but_me
+//--------------------------------------------Cluster::set_command_for_all_active_schedulers_but_me
 
-//void Distributed_scheduler::set_command_for_all_active_schedulers_but_me( Transaction* ta, Command command )
+//void Cluster::set_command_for_all_active_schedulers_but_me( Transaction* ta, Command command )
 //{
 //    set_command_for_all_schedulers_but_me( ta, "`active` is not null", command );
 //}
 
-//-------------------------------------Distributed_scheduler::set_command_for_all_schedulers_but_me
+//---------------------------------------------------Cluster::set_command_for_all_schedulers_but_me
 
-bool Distributed_scheduler::set_command_for_all_schedulers_but_me( Transaction* ta, const string& command )
+bool Cluster::set_command_for_all_schedulers_but_me( Transaction* ta, const string& command )
 {
     return set_command_for_all_schedulers_but_me( ta, command, "" );
 }
 
 //-----------------------------------------------------------Distributed::set_command_for_scheduler
 
-bool Distributed_scheduler::set_command_for_scheduler( Transaction* ta, const string& command, const string& member_id )
+bool Cluster::set_command_for_scheduler( Transaction* ta, const string& command, const string& member_id )
 {
-    return set_command_for_all_schedulers_but_me( ta, command, S() << "`scheduler_member_id`=" << sql::quoted( member_id ) );
+    return set_command_for_all_schedulers_but_me( ta, command, S() << "`member_id`=" << sql::quoted( member_id ) );
 }
 
-//-------------------------------------Distributed_scheduler::set_command_for_all_schedulers_but_me
+//---------------------------------------------------Cluster::set_command_for_all_schedulers_but_me
 
-bool Distributed_scheduler::set_command_for_all_schedulers_but_me( Transaction* outer_transaction, const string& command, const string& where_condition )
+bool Cluster::set_command_for_all_schedulers_but_me( Transaction* outer_transaction, const string& command, const string& where_condition )
 {
     bool result = false;
 
@@ -2302,15 +2367,15 @@ bool Distributed_scheduler::set_command_for_all_schedulers_but_me( Transaction* 
     {
         Transaction ta ( db(), outer_transaction );
 
-        sql::Update_stmt update ( ta.database_descriptor(), _spooler->_members_tablename );
+        sql::Update_stmt update ( ta.database_descriptor(), _spooler->_clusters_tablename );
      
         update[ "command" ] = command;
         update.and_where_condition( "scheduler_id", _spooler->id_for_db() );
 
         S w;
-        w << " and not( `scheduler_member_id` in (" << sql::quoted( my_member_id()    ) << "," 
-                                                    << sql::quoted( empty_member_id() ) << ") )";
-
+        w << " and not( `member_id` in (" << sql::quoted( my_member_id()    ) << "," 
+                                                  << sql::quoted( empty_member_id() ) << ") )";
+        w << " and `dead` is null";
         if( where_condition != "" )  w << " and " << where_condition;
 
         update.add_where( w );
@@ -2329,23 +2394,36 @@ bool Distributed_scheduler::set_command_for_all_schedulers_but_me( Transaction* 
     return result;
 }
 
-//----------------------------------------------------Distributed_scheduler::show_active_schedulers
+//------------------------------------------------------------Cluster::delete_dead_scheduler_record
 
-void Distributed_scheduler::show_active_schedulers( Transaction* outer_transaction, bool exclusive_only )
+bool Cluster::delete_dead_scheduler_record( const string& member_id )
 {
-    Z_LOGI2( "scheduler.distributed", __FUNCTION__ << "\n" );
+    bool result = false;
+
+    if( Cluster_member* member = cluster_member_or_null( member_id ) )
+    {
+        result = member->delete_dead_record();
+    }
+
+    return result;
+}
+
+//------------------------------------------------------------------Cluster::show_active_schedulers
+
+void Cluster::show_active_schedulers( Transaction* outer_transaction, bool exclusive_only )
+{
+    Z_LOGI2( "scheduler.cluster", __FUNCTION__ << "\n" );
 
     if( db()  &&  db()->opened() )
-    for( Retry_transaction ta ( db(), outer_transaction ); ta.enter_loop(); ta++ )
-    try
+    for( Retry_transaction ta ( db(), outer_transaction ); ta.enter_loop(); ta++ )  try
     {
         bool found      = false;
         S    select_sql;
 
         string where_clause = S() << "where `scheduler_id`=" + sql::quoted( _spooler->id_for_db() ) <<
                                      " and " << ( exclusive_only? "`exclusive`" : "`active`" ) << " is not null";
-        select_sql << "select `scheduler_member_id`, `last_heart_beat`, `http_url`, `exclusive`"
-                       "  from " << _spooler->_members_tablename << "  " <<
+        select_sql << "select `member_id`, `last_heart_beat`, `http_url`, `exclusive`"
+                       "  from " << _spooler->_clusters_tablename << "  " <<
                        where_clause;
 
 
@@ -2354,7 +2432,7 @@ void Distributed_scheduler::show_active_schedulers( Transaction* outer_transacti
         while( !select.eof() )
         {
             Record record = select.get_record();
-            string xml    = ta.read_clob_or_empty( _spooler->_members_tablename, "xml", where_clause );
+            string xml    = ta.read_clob_or_empty( _spooler->_clusters_tablename, "xml", where_clause );
 
             if( xml != "" ) // Satz nicht zwischenzeitlich gelöscht?
             {
@@ -2362,7 +2440,7 @@ void Distributed_scheduler::show_active_schedulers( Transaction* outer_transacti
                 xml::Element_ptr  dom_element  = dom_document.documentElement();
 
 
-                string active_scheduler_id = record.as_string( "scheduler_member_id" );
+                string active_scheduler_id = record.as_string( "member_id" );
 
                 if( active_scheduler_id == empty_member_id() )
                 {
@@ -2372,7 +2450,7 @@ void Distributed_scheduler::show_active_schedulers( Transaction* outer_transacti
                 {
                     found = true;
 
-                    time_t last_heart_beat = record.as_int64 ( "last_heart_beat" );
+                    time_t last_heart_beat = record.null     ( "last_heart_beat" )? 0 : record.as_int64 ( "last_heart_beat" );
                     string http_url        = record.as_string( "http_url" );
                     bool   is_exclusive    = !record.null    ( "exclusive" );
 
@@ -2384,38 +2462,38 @@ void Distributed_scheduler::show_active_schedulers( Transaction* outer_transacti
 
         if( !found )  _log->info( message_string( "SCHEDULER-805" ) );
     }
-    catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_members_tablename, x ), __FUNCTION__ ); }
+    catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_clusters_tablename, x ), __FUNCTION__ ); }
 }
 
-//-------------------------------------Distributed_scheduler::scheduler_up_variable_name
+//---------------------------------------------------Cluster::scheduler_up_variable_name
 
-//string Distributed_scheduler::scheduler_up_variable_name()
+//string Cluster::scheduler_up_variable_name()
 //{
 //    return "scheduler/" + _spooler->id_for_db() + "/up";
 //}
 
-//-----------------------------------------------------------Distributed_scheduler::empty_member_id
+//-------------------------------------------------------------------------Cluster::empty_member_id
 
-string Distributed_scheduler::empty_member_id()
+string Cluster::empty_member_id()
 { 
     return _spooler->id_for_db(); 
 }
 
-//----------------------------------------------------------Distributed_scheduler::set_my_member_id
+//------------------------------------------------------------------------Cluster::set_my_member_id
 
-void Distributed_scheduler::set_my_member_id( const string& member_id )
+void Cluster::set_my_member_id( const string& member_id )
 {
     assert( !_heart_beat  &&  !_exclusive_scheduler_watchdog );
 
-    _scheduler_member_id = member_id;
+    _cluster_member_id = member_id;
     //check_member_id();
 
     _log->set_prefix( obj_name() );
 }
 
-//-------------------------------------------------------Distributed_scheduler::exclusive_member_id
+//---------------------------------------------------------------------Cluster::exclusive_member_id
 
-string Distributed_scheduler::exclusive_member_id()
+string Cluster::exclusive_member_id()
 {
     if( _has_exclusiveness    )  return my_member_id();
     if( exclusive_scheduler() )  return exclusive_scheduler()->_member_id;
@@ -2423,46 +2501,39 @@ string Distributed_scheduler::exclusive_member_id()
     return "";
 }
 
-//-----------------------------------------------------------Distributed_scheduler::check_is_active
+//-------------------------------------------------------------------------Cluster::check_is_active
 
-bool Distributed_scheduler::check_is_active( Transaction* outer_transaction )
+bool Cluster::check_is_active( Transaction* outer_transaction )
 {
-    if( _is_active )  
+    if( _is_active )   // &&  !_is_in_do_a_heart_beat )  
     {
-        if( Not_in_recursion not_in_recursion = &_is_in_do_a_heart_beat )   
+        bool is_in_time = check_heart_beat_is_in_time( _next_heart_beat );
+        if( !is_in_time )      // Nicht in laufender Transaction
         {
-            bool is_in_time = check_heart_beat_is_in_time( _next_heart_beat );
-            if( !is_in_time )      // Nicht in laufender Transaction
+            if( db()->is_in_transaction() )
             {
-                if( db()->is_in_transaction() )
-                {
-                    check_my_member_record( outer_transaction );
-                }
-                else
-                {
-                    _log->warn( message_string( "SCHEDULER-997" ) );
-                    do_a_heart_beat();
-                }
+                check_my_member_record( outer_transaction );
             }
-        }
-        else
-        {
-            Z_LOG2( "scheduler", __FUNCTION__ << "  Rekursiver Aufruf von do_a_heart_beat()\n" );  // Passiert in heartbeat_member_record() bei commit()
+            else
+            {
+                _log->warn( message_string( "SCHEDULER-997" ) );
+                do_a_heart_beat();
+            }
         }
     }
 
     return _is_active;
 }
 
-//-------------------------------------------------------Distributed_scheduler::is_allowed_to_start
+//---------------------------------------------------------------------Cluster::is_member_allowed_to_start
 
-bool Distributed_scheduler::is_allowed_to_start()
+bool Cluster::is_member_allowed_to_start()
 {
     bool result = false;
 
     if( _is_backup )
     {
-        result = is_backup_allowed_to_start();
+        result = is_backup_member_allowed_to_start();
     }
     else
     {
@@ -2472,13 +2543,13 @@ bool Distributed_scheduler::is_allowed_to_start()
     return result;
 }
 
-//-----------------------------------------------------------Distributed_scheduler::is_backup_allowed_to_start
+//--------------------------------------------------------------Cluster::is_backup_member_allowed_to_start
 
-bool Distributed_scheduler::is_backup_allowed_to_start()
+bool Cluster::is_backup_member_allowed_to_start()
 {
     bool result = false;
 
-    result = empty_scheduler_record() != NULL;
+    result = empty_member_record() != NULL;
 
     //if( !result )
     //{
@@ -2495,17 +2566,17 @@ bool Distributed_scheduler::is_backup_allowed_to_start()
     return result;
 }
 
-//-----------------------------------------------------------Distributed_scheduler::check_member_id
+//-------------------------------------------------------------------------Cluster::check_member_id
 
-//void Distributed_scheduler::check_member_id()
+//void Cluster::check_member_id()
 //{
 //    string prefix = _spooler->id_for_db() + "/";
 //    if( !string_begins_with( my_member_id(), prefix )  ||  my_member_id() == prefix )  z::throw_xc( "SCHEDULER-358", my_member_id(), prefix );
 //}
 
-//--------------------------------------------------Distributed_scheduler::make_scheduler_member_id
+//------------------------------------------------------------------Cluster::make_cluster_member_id
 
-void Distributed_scheduler::make_scheduler_member_id()
+void Cluster::make_cluster_member_id()
 {
     set_my_member_id( S() << _spooler->id_for_db() 
                           << "/" << _spooler->_complete_hostname << ":" << _spooler->tcp_port() 
@@ -2513,20 +2584,20 @@ void Distributed_scheduler::make_scheduler_member_id()
                           << "." << ( as_string( 1000000 + (uint64)( double_from_gmtime() * 1000000 ) % 1000000 ).substr( 1 ) ) );  // Mikrosekunden, sechsstellig
 }
 
-//----------------------------------------------------Distributed_scheduler::empty_scheduler_record
+//---------------------------------------------------------------------Cluster::empty_member_record
 
-Scheduler_member* Distributed_scheduler::empty_scheduler_record()
+Cluster_member* Cluster::empty_member_record()
 {
-    return scheduler_member_or_null( empty_member_id() );
+    return cluster_member_or_null( empty_member_id() );
 }
 
-//-----------------------------------------------------Distributed_scheduler::http_url_of_member_id
+//-------------------------------------------------------------------Cluster::http_url_of_member_id
 
-string Distributed_scheduler::http_url_of_member_id( const string& scheduler_member_id )
+string Cluster::http_url_of_member_id( const string& member_id )
 {
     string result;
 
-    if( Scheduler_member* scheduler_member = scheduler_member_or_null( scheduler_member_id ) )
+    if( Cluster_member* scheduler_member = cluster_member_or_null( member_id ) )
     {
         result = scheduler_member->_http_url;
     }
@@ -2534,17 +2605,17 @@ string Distributed_scheduler::http_url_of_member_id( const string& scheduler_mem
     return result;
 }
 
-//--------------------------------------------------Distributed_scheduler::scheduler_member_or_null
+//------------------------------------------------------------------Cluster::cluster_member_or_null
 
-Scheduler_member* Distributed_scheduler::scheduler_member_or_null( const string& scheduler_member_id )
+Cluster_member* Cluster::cluster_member_or_null( const string& member_id )
 {
-    Scheduler_map::iterator it = _scheduler_map.find( scheduler_member_id );
+    Scheduler_map::iterator it = _scheduler_map.find( member_id );
     return it != _scheduler_map.end()? it->second : NULL;
 }
 
-//----------------------------------------------------Distributed_scheduler::my_member_dom_document
+//------------------------------------------------------------------Cluster::my_member_dom_document
 
-xml::Document_ptr Distributed_scheduler::my_member_dom_document()
+xml::Document_ptr Cluster::my_member_dom_document()
 {
     xml::Document_ptr result;
 
@@ -2554,11 +2625,11 @@ xml::Document_ptr Distributed_scheduler::my_member_dom_document()
     return result;
 }
 
-//-----------------------------------------------------Distributed_scheduler::my_member_dom_element
+//-------------------------------------------------------------------Cluster::my_member_dom_element
 
-xml::Element_ptr Distributed_scheduler::my_member_dom_element( const xml::Document_ptr& document )
+xml::Element_ptr Cluster::my_member_dom_element( const xml::Document_ptr& document )
 {
-    xml::Element_ptr result = document.createElement( "distributed_scheduler_member" );
+    xml::Element_ptr result = document.createElement( "cluster_member" );
 
     result.setAttribute( "version"          , _spooler->_version );
     result.setAttribute( "host"             , _spooler->_complete_hostname );
@@ -2566,8 +2637,10 @@ xml::Element_ptr Distributed_scheduler::my_member_dom_element( const xml::Docume
     result.setAttribute( "running_since"    , Time::now().as_string() );
     result.setAttribute( "backup_precedence", _backup_precedence );
 
+
     if( is_backup()           )  result.setAttribute( "backup"              , "yes" );
     if( _demand_exclusiveness )  result.setAttribute( "demand_exclusiveness", "yes" );
+    if( _are_orders_distributed )  result.setAttribute( "distributed_orders", "yes" );
     if( _spooler->tcp_port()  )  result.setAttribute( "tcp_port", _spooler->tcp_port() );
     if( _spooler->udp_port()  )  result.setAttribute( "udp_port", _spooler->udp_port() );
 
@@ -2575,23 +2648,23 @@ xml::Element_ptr Distributed_scheduler::my_member_dom_element( const xml::Docume
     return result;
 }
 
-//---------------------------------------------------------------Distributed_scheduler::dom_element
+//-----------------------------------------------------------------------------Cluster::dom_element
 
-xml::Element_ptr Distributed_scheduler::dom_element( const xml::Document_ptr& document, const Show_what& show_what )
+xml::Element_ptr Cluster::dom_element( const xml::Document_ptr& document, const Show_what& show_what )
 {
-    xml::Element_ptr result = document.createElement( "distributed_scheduler" );
+    xml::Element_ptr result = document.createElement( "cluster" );
 
     check_schedulers_heart_beat();  // _scheduler_map auf den Stand bringen
 
-    result.setAttribute( "scheduler_member_id", my_member_id() );
+    result.setAttribute( "cluster_member_id", my_member_id() );
     if( _is_active         )  result.setAttribute( "active"   , "yes" );
     if( _has_exclusiveness )  result.setAttribute( "exclusive", "yes" );
-    if( _is_backup  &&  is_backup_allowed_to_start() )  result.setAttribute( "is_backup_allowed_to_start" , "yes" );
+    if( _is_backup )  result.setAttribute( "is_backup_member_allowed_to_start" , is_backup_member_allowed_to_start()? "yes" : "no" );
 
 
     Z_FOR_EACH( Scheduler_map, _scheduler_map, it ) 
     {
-        Scheduler_member* member = it->second;
+        Cluster_member* member = it->second;
 
         if( !member->is_empty_member() 
          //&& ( member->_heart_beat_count || !member->_is_dead )
@@ -2605,14 +2678,15 @@ xml::Element_ptr Distributed_scheduler::dom_element( const xml::Document_ptr& do
     return result;
 }
 
-//------------------------------------------------------------------Distributed_scheduler::obj_name
+//--------------------------------------------------------------------------------Cluster::obj_name
 
-string Distributed_scheduler::obj_name() const
+string Cluster::obj_name() const
 { 
-    return "Distributed_scheduler";   // + _scheduler_member_id;
+    return "Cluster";   // + _cluster_member_id;
 } 
 
 //-------------------------------------------------------------------------------------------------
 
+} //namespace cluster
 } //namespace scheduler
 } //namespace sos

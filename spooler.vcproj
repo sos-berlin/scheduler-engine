@@ -358,7 +358,7 @@
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 			>
 			<File
-				RelativePath=".\distributed.cxx"
+				RelativePath=".\cluster.cxx"
 				>
 			</File>
 			<File
@@ -1059,7 +1059,7 @@
 			Filter="h;hpp;hxx;hm;inl"
 			>
 			<File
-				RelativePath=".\distributed.h"
+				RelativePath=".\cluster.h"
 				>
 			</File>
 			<File

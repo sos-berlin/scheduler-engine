@@ -330,7 +330,7 @@ ptr<Order> Order_subsystem::try_load_order_from_database( Transaction* outer_tra
     for( Retry_transaction ta ( _spooler->_db, outer_transaction ); ta.enter_loop(); ta++ ) try
     {
         S select_sql;
-        select_sql <<  "select " << order_select_database_columns << ", `occupying_scheduler_member_id`"
+        select_sql <<  "select " << order_select_database_columns << ", `occupying_cluster_member_id`"
                        "  from " << _spooler->_orders_tablename;
         if( flag & lo_lock )  select_sql << " %update_lock";
         select_sql << "  where " << order_db_where_clause( job_chain_name, order_id.as_string() );
@@ -343,7 +343,7 @@ ptr<Order> Order_subsystem::try_load_order_from_database( Transaction* outer_tra
             Record record = result_set.get_record();
             result = new Order( _spooler, record, job_chain_name );
             result->set_distributed();
-            if( !record.null( "occupying_scheduler_member_id" ) )  z::throw_xc( "SCHEDULER-379", result->obj_name(), record.as_string( "occupying_scheduler_member_id" ) );
+            if( !record.null( "occupying_cluster_member_id" ) )  z::throw_xc( "SCHEDULER-379", result->obj_name(), record.as_string( "occupying_cluster_member_id" ) );
 
             try
             {
@@ -454,7 +454,7 @@ string Database_order_detector::async_state_text_() const
 
 bool Database_order_detector::async_continue_( Continue_flags )
 {
-    Z_LOGI2( "scheduler.distributed", __FUNCTION__ << "  " << async_state_text() << "\n" );
+    Z_LOGI2( "scheduler.cluster", __FUNCTION__ << "  " << async_state_text() << "\n" );
     _spooler->assert_are_orders_distributed( __FUNCTION__);
 
 
@@ -470,7 +470,7 @@ bool Database_order_detector::async_continue_( Continue_flags )
                     "  from " << _spooler->_orders_tablename <<
                     "  where `spooler_id`=" << sql::quoted( _spooler->id_for_db() ) <<
                        " and `distributed_next_time` is not null"
-                       " and `occupying_scheduler_member_id` is null";
+                       " and `occupying_cluster_member_id` is null";
 
     string select_sql_end = "  order by `distributed_next_time`";
 
@@ -1627,12 +1627,12 @@ xml::Element_ptr Order_queue::dom_element( const xml::Document_ptr& document, co
                     dom_append_nl( element );
 
                     S select_sql;
-                    select_sql << "select %limit(" << remaining << ") " << order_select_database_columns << ", `job_chain`, `occupying_scheduler_member_id` " << 
+                    select_sql << "select %limit(" << remaining << ") " << order_select_database_columns << ", `job_chain`, `occupying_cluster_member_id` " << 
                                   "  from " << _spooler->_orders_tablename <<
                                  "  where " << w << 
                                     " and `distributed_next_time` is not null "
-                                    " and ( `occupying_scheduler_member_id`<>" << sql::quoted( _spooler->scheduler_member_id() ) << " or"
-                                          " `occupying_scheduler_member_id` is null )"
+                                    " and ( `occupying_cluster_member_id`<>" << sql::quoted( _spooler->cluster_member_id() ) << " or"
+                                          " `occupying_cluster_member_id` is null )"
                                 "  order by `distributed_next_time`, `priority`, `ordering`";
 
                     for( Any_file result_set = ta.open_result_set( select_sql, __FUNCTION__ ); 
@@ -1643,8 +1643,8 @@ xml::Element_ptr Order_queue::dom_element( const xml::Document_ptr& document, co
 
                         try
                         {
-                            string job_chain_name                = record.as_string( "job_chain" );
-                            string occupying_scheduler_member_id = record.as_string( "occupying_scheduler_member_id" );
+                            string job_chain_name              = record.as_string( "job_chain" );
+                            string occupying_cluster_member_id = record.as_string( "occupying_cluster_member_id" );
 
                             ptr<Order> order = new Order( _spooler, record, job_chain_name );
 
@@ -1655,10 +1655,10 @@ xml::Element_ptr Order_queue::dom_element( const xml::Document_ptr& document, co
 
                             xml::Element_ptr order_element = order->dom_element( document, show );
 
-                            order_element.setAttribute_optional( "occupied_by_scheduler_member_id", occupying_scheduler_member_id );
+                            order_element.setAttribute_optional( "occupied_by_cluster_member_id", occupying_cluster_member_id );
                             
-                            if( _spooler->_distributed_scheduler )
-                            order_element.setAttribute_optional( "occupied_by_http_url", _spooler->_distributed_scheduler->http_url_of_member_id( occupying_scheduler_member_id ) );
+                            if( _spooler->_cluster )
+                            order_element.setAttribute_optional( "occupied_by_http_url", _spooler->_cluster->http_url_of_member_id( occupying_cluster_member_id ) );
                             
                             element.appendChild( order_element );
                             dom_append_nl( element );
@@ -1974,7 +1974,7 @@ Order* Order_queue::load_and_occupy_next_distributed_order_from_database( Task* 
                 "  from " << _spooler->_orders_tablename << " %update_lock" 
                 "  where `spooler_id`=" << sql::quoted(_spooler->id_for_db()) <<
                    " and `distributed_next_time`<{ts'" << never_database_distributed_next_time << "'}"
-                   " and `occupying_scheduler_member_id` is null" << 
+                   " and `occupying_cluster_member_id` is null" << 
                    " and " << db_where_expression_for_distributed_orders() <<
                 "  order by `distributed_next_time`, `priority`, `ordering`";
 
@@ -2390,13 +2390,13 @@ bool Order::db_occupy_for_processing()
 
     sql::Update_stmt update = db_update_stmt();
 
-    update[ "occupying_scheduler_member_id" ] = _spooler->scheduler_member_id();
+    update[ "occupying_cluster_member_id" ] = _spooler->cluster_member_id();
 
     //update.and_where_condition( "spooler_id", _spooler->id_for_db() );
     //update.and_where_condition( "job_chain" , job_chain->name() );
     //update.and_where_condition( "id"        , id().as_string()    );
     update.and_where_condition( "state"     , state().as_string() );
-    update.and_where_condition( "occupying_scheduler_member_id", sql::null_value );
+    update.and_where_condition( "occupying_cluster_member_id", sql::null_value );
 
 
     bool update_ok = false;
@@ -2433,7 +2433,7 @@ void Order::db_show_occupation( Log_level log_level )
 
         Any_file result_set = ta.open_result_set
             ( 
-                S() << "select `occupying_scheduler_member_id`"
+                S() << "select `occupying_cluster_member_id`"
                        "  from " << _spooler->_orders_tablename
                        << db_where_clause().where_string(),
                 __FUNCTION__ );
@@ -2444,7 +2444,7 @@ void Order::db_show_occupation( Log_level log_level )
         }
         else
         {
-            // ?Haben wir eine Satzsperre oder kann ein anderer Scheduler occupying_scheduler_member_id schon wieder auf null gesetzt haben?
+            // ?Haben wir eine Satzsperre oder kann ein anderer Scheduler occupying_cluster_member_id schon wieder auf null gesetzt haben?
             Record record = result_set.get_record();
             _log->log( log_level, message_string( "SCHEDULER-813", record.as_string(0) ) );
         }
@@ -2470,7 +2470,7 @@ void Order::db_insert()
         {
             Any_file result_set = ta.open_result_set
                 ( 
-                    S() << "select `occupying_scheduler_member_id`"
+                    S() << "select `occupying_cluster_member_id`"
                            "  from " << _spooler->_orders_tablename << " %update_lock" 
                            << db_update_stmt().where_string(), 
                     __FUNCTION__ 
@@ -2484,12 +2484,12 @@ void Order::db_insert()
             {
                 Record record = result_set.get_record();
 
-                if( record.null( "occupying_scheduler_member_id" ) )
+                if( record.null( "occupying_cluster_member_id" ) )
                     set_replacement( false );
                 else
                 {
-                    _replaced_order_occupator = record.as_string( "occupying_scheduler_member_id" );
-                    _log->info( message_string( "SCHEDULER-942", "Scheduler member " + record.as_string( "occupying_scheduler_member_id" ), "replaced order" ) );
+                    _replaced_order_occupator = record.as_string( "occupying_cluster_member_id" );
+                    _log->info( message_string( "SCHEDULER-942", "Scheduler member " + record.as_string( "occupying_cluster_member_id" ), "replaced order" ) );
                 }
 
                 ta.execute_single( db_update_stmt().make_delete_stmt(), __FUNCTION__ );
@@ -2552,14 +2552,14 @@ bool Order::db_release_occupation()
 {
     bool update_ok = false;
 
-    if( _is_db_occupied  &&  _spooler->scheduler_member_id() != "" )
+    if( _is_db_occupied  &&  _spooler->cluster_member_id() != "" )
     {
         for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
         {
             sql::Update_stmt update = db_update_stmt();
 
-            update[ "occupying_scheduler_member_id" ] = sql::null_value;
-            update.and_where_condition( "occupying_scheduler_member_id", _spooler->scheduler_member_id() );
+            update[ "occupying_cluster_member_id" ] = sql::null_value;
+            update.and_where_condition( "occupying_cluster_member_id", _spooler->cluster_member_id() );
             update.and_where_condition( "state"                         , _occupied_state.as_string()     );
 
             update_ok = ta.try_execute_single( update, __FUNCTION__ );
@@ -2602,13 +2602,13 @@ bool Order::db_update2( Update_option update_option, bool delet, Transaction* ou
         string           state_string = state().as_string();    // Kann Exception auslösen;
         sql::Update_stmt update       = db_update_stmt();
 
-        update.and_where_condition( "occupying_scheduler_member_id", _is_db_occupied? sql::Value( _spooler->scheduler_member_id() ) 
+        update.and_where_condition( "occupying_cluster_member_id", _is_db_occupied? sql::Value( _spooler->cluster_member_id() ) 
                                                                                      : sql::null_value                               );
 
         if( update_option == update_and_release_occupation )
         {
             if( _is_db_occupied )  update.and_where_condition( "state", _occupied_state.as_string() );
-            update[ "occupying_scheduler_member_id" ] = sql::null_value;
+            update[ "occupying_cluster_member_id" ] = sql::null_value;
         }
 
         //if( _job_chain_name == "" )
@@ -2669,7 +2669,7 @@ bool Order::db_update2( Update_option update_option, bool delet, Transaction* ou
                     else
                         update[ "run_time" ].set_direct( "null" );
 
-                    if( _order_xml_modified )
+                    //if( _order_xml_modified )  // Das wird nicht überall gesetzt und sowieso ändert sich das Element fast immer
                     {
                         xml::Document_ptr order_document = dom( show_for_database_only );
                         xml::Element_ptr  order_element  = order_document.documentElement();
@@ -2920,6 +2920,9 @@ void Order::set_dom( const xml::Element_ptr& element, Variable_set_map* variable
     string state_name       = element.getAttribute( "state"     );
     string web_service_name = element.getAttribute( "web_service" );
     string at_string        = element.getAttribute( "at" );
+    string setback          = element.getAttribute( "setback" );
+    _setback_count          = element.int_getAttribute( "setback_count", _setback_count );
+
     if( element.bool_getAttribute( "replacement" ) )  set_replacement( true );
     _replaced_order_occupator = element.getAttribute( "replaced_order_occupator" );
 
@@ -2932,6 +2935,8 @@ void Order::set_dom( const xml::Element_ptr& element, Variable_set_map* variable
 
     if( element.hasAttribute( "suspended" ) )
         set_suspended( element.bool_getAttribute( "suspended" ) );
+
+    if( setback != "" )  _setback.set_datetime( setback );
 
 
     DOM_FOR_EACH_ELEMENT( element, e )  
@@ -3053,9 +3058,6 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
         if( _log->opened() )
         element.setAttribute( "log_file"  , _log->filename() );
 
-        if( _setback  &&  _setback_count > 0 )
-        element.setAttribute( "setback"   , _setback.as_string() );
-
         if( _is_in_database  &&  _job_chain_name != ""  &&  !_job_chain )
         element.setAttribute( "in_database_only", "yes" );
 
@@ -3126,8 +3128,11 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
 
     // Wenn die folgenden Werte sich ändern, _order_xml_modified = true setzen!
 
-    if( _setback && _setback_count == 0 )
-    element.setAttribute( "at"        , _setback.as_string() );
+    if( _setback  )
+    element.setAttribute( _setback_count == 0? "at" : "setback", _setback.as_string() );
+
+    if( _setback_count > 0 )
+    element.setAttribute( "setback_count", _setback_count );
 
     if( _web_service )
     element.setAttribute( "web_service", _web_service->name() );

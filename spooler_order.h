@@ -239,7 +239,7 @@ struct Order : Com_order,
     ptr<Order>                 _replaced_by;            // Nur wenn _task != NULL: _replaced_by soll this in der Jobkette ersetzen
     Order*                     _replacement_for;        // _replacement_for == NULL  ||  _replacement_for->_replaced_by == this && _replacement_for->_task != NULL
     bool                       _is_replacement;         // _replacement_for != NULL => _is_replacement
-    string                     _replaced_order_occupator;// Task::obj:name() oder scheduler_member_id
+    string                     _replaced_order_occupator;// Task::obj:name() oder cluster_member_id
 
     Time                       _created;
     Time                       _start_time;             // Erster Jobschritt

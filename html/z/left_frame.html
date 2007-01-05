@@ -1,3 +1,4 @@
+
 <!-- $Id$ -->
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
@@ -148,7 +149,7 @@ function update_jobs_frame()
         max_orders = window.parent.details_frame._job_chain_element? 100 : _max_orders;
     }
     
-    if( _show_card == "cluster"           )  what += " distributed_scheduler";
+    if( _show_card == "cluster"           )  what += " cluster";
     if( _show_card == "remote_schedulers" )  what += " remote_schedulers";
     if( _show_card == "job_chains"        )  what += " job_chains";
     
@@ -201,7 +202,7 @@ function show_card( what )
     {
         if( what == "process_classes" 
          || what == "remote_schedulers"
-         || what == "cluster" )
+         || what == "cluster"           )
         {
             window.parent.details_frame.hide();
             //window.parent.details_frame.clear();

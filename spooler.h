@@ -164,7 +164,7 @@ namespace http
 #include "spooler_web_service.h"
 #include "spooler_module_remote.h"
 #include "spooler_module_remote_server.h"
-#include "distributed.h"
+#include "cluster.h"
 
 //-------------------------------------------------------------------------------------------------
 
@@ -324,10 +324,10 @@ struct Spooler : Object,
     void                        run                         ();
     bool                        run_continue                ( const Time& now );
 
-    // Distributed_scheduler
-    void                        start_distributed_scheduler   ();
-  //void                        wait_for_distributed_scheduler();
-    void                        check_distributed_scheduler   ();
+    // Cluster
+    void                        start_cluster   ();
+  //void                        wait_for_cluster();
+    void                        check_cluster   ();
     bool                        ok                          ( Transaction* = NULL );
     bool                        check                       ( const string& debug_function, const string& debug_text = "", Transaction* = NULL );
     bool                        check_is_active             ( Transaction* = NULL );
@@ -341,7 +341,7 @@ struct Spooler : Object,
     bool                        are_orders_distributed      ();
     void                        assert_are_orders_distributed( const string& message_text );
     void                        assert_has_exclusiveness    ( const string& message_text );
-    string                      scheduler_member_id         ();
+    string                      cluster_member_id         ();
 
 
   //string                      session_id                  ()                                  { return _session_id; }
@@ -448,7 +448,7 @@ struct Spooler : Object,
 
     string                     _variables_tablename;
     string                     _orders_tablename;
-    string                     _members_tablename;
+    string                     _clusters_tablename;
     string                     _tasks_tablename;
     string                     _job_history_tablename;
     string                     _job_history_columns;
@@ -598,11 +598,9 @@ struct Spooler : Object,
     bool                       _demand_exclusiveness;
     bool                       _are_orders_distributed;
     bool                       _is_activated;
-  //string                     _scheduler_member_id;
-    ptr<Distributed_scheduler> _distributed_scheduler;
+    ptr<cluster::Cluster>      _cluster;
     bool                       _assert_is_active;
     int                        _is_in_check_is_active;
-  //bool                       _proper_termination;
   //string                     _session_id;
 };
 

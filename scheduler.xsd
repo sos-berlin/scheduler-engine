@@ -982,6 +982,7 @@
             <xsd:attribute name="timeout"        type="xsd:integer"/>
             <xsd:attribute name="continue_exclusive_operation" type="Yes_no"/>
             <xsd:attribute name="cluster_member_id" type="String"/>
+            <xsd:attribute name="delete_dead_entry" type="Yes_no"/>
         </xsd:complexType>
     </xsd:element>
 

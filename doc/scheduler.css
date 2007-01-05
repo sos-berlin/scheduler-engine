@@ -53,8 +53,8 @@ a.nix:active    { text-decoration: none; color: inherit; background-color: inher
 a.nix:visited   { text-decoration: none; color: inherit; background-color: inherit }
 a.nix:hover     { text-decoration: none; color: inherit; background-color: inherit }
 a.silent        { text-decoration: none; color: #0000A0 }
-a               { text-decoration: none; color: inherit; background-color: inherit }
 
+a               { text-decoration: none; color: inherit; background-color: inherit }
 a:link          { color: #0000a0; cursor: pointer; }
 a:active        { color: #0000a0; }
 a:visited       { color: #0000a0; }  /*Das wird zu bunt: { color: #0000ff; }*/

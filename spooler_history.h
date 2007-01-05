@@ -187,6 +187,7 @@ struct Transaction : Read_transaction
   //void                        try_reopen_after_error  ();
     void                        set_transaction_written ()                                          {} //{ _transaction_written = true; }
     void                        set_transaction_read    ()                                          {} //{ _transaction_read = true; } 
+    void                        suppress_heart_beat_timeout_check()                                 { _suppress_heart_beat_timeout_check = true; }
     bool                        is_transaction_used     ()                                          { return db()->_db.is_transaction_used(); }
     bool                        need_commit_or_rollback ()                                          { return db()->_db.need_commit_or_rollback(); }
     Transaction*                outer_transaction       ()                                          { return _outer_transaction; }
@@ -208,6 +209,7 @@ struct Transaction : Read_transaction
 
     Fill_zero                  _zero_;
     Transaction*               _outer_transaction;
+    bool                       _suppress_heart_beat_timeout_check;
     //bool                       _transaction_written;    // Wird nicht benutzt
     //bool                       _transaction_read;       // Wird nicht benutzt
 };
