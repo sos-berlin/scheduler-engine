@@ -142,6 +142,7 @@ struct Order : Com_order,
     void                        inhibit_distribution    ()                                          { _is_distribution_inhibited = true; }
     void                        assert_is_not_distributed  ( const string& debug_text );
     void                    set_distributed             ();
+    bool                     is_distributed             () const                                    { return _is_distributed; }
 
     void                        start_now               ();
     void                        setback                 ();
@@ -386,6 +387,8 @@ struct Job_chain : Com_job_chain, Scheduler_object
     void                    set_visible                 ( bool b )                                  { _visible = b; }
     bool                        visible                 () const                                    { return _visible; }
 
+    bool                     is_distributed             () const                                    { return _is_distributed; }
+
     void                    set_orders_recoverable      ( bool b )                                  { _orders_recoverable = b; }
 
     void                        add_orders_from_database      ( Read_transaction* );
@@ -420,11 +423,12 @@ struct Job_chain : Com_job_chain, Scheduler_object
     void                        unregister_order        ( Order* );
     void                        add_to_blacklist        ( Order* );
     void                        remove_from_blacklist   ( Order* );
+    stdext::hash_set<string>    blacklist_id_set        ();
 
     int                         order_count             ( Read_transaction* );
     bool                        has_order               () const;
 
-    string                      db_where_clause         () const;
+    string                      db_where_condition      () const;
 
     void                    set_dom                     ( const xml::Element_ptr& );
     xml::Element_ptr            dom_element             ( const xml::Document_ptr&, const Show_what& );
@@ -570,7 +574,7 @@ struct Order_subsystem : Object, Scheduler_object
     void                        request_order               ();
     bool                        is_job_in_any_job_chain     ( Job* );
     bool                        is_job_in_any_distributed_job_chain( Job* );
-    string                      job_chain_db_where_clause   ( const string& job_chain_name );
+    string                      job_chain_db_where_condition   ( const string& job_chain_name );
     string                      order_db_where_clause       ( const string& job_chain_name, const string& order_id );
 
 //private:

@@ -521,8 +521,10 @@ static DWORD WINAPI HandlerEx( DWORD dwControl, DWORD event, void* event_data, v
         if( dwControl == SERVICE_CONTROL_STOP 
          || dwControl == SERVICE_CONTROL_SHUTDOWN )  start_self_destruction();      // Vorsichtshalber vor info()!
 
-        spooler_ptr->log()->info( message_string( "SCHEDULER-960", string_from_handler_control(dwControl),
-                                                                   ( dwControl == SERVICE_CONTROL_POWEREVENT? string_from_power_event( event ) : as_string( event ) ) ) );
+        spooler_ptr->log()->log( dwControl == SERVICE_CONTROL_INTERROGATE? log_debug
+                                                                         : log_info, 
+                                 message_string( "SCHEDULER-960", string_from_handler_control(dwControl),
+                                                                  ( dwControl == SERVICE_CONTROL_POWEREVENT? string_from_power_event( event ) : as_string( event ) ) ) );
 
         switch( dwControl )
         {

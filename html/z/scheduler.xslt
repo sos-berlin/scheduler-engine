@@ -2031,7 +2031,7 @@
                                 <xsl:choose>
                                     <xsl:when test="not( @id )">
                                         <xsl:if test="../../@waiting_for_process='yes'">
-                                            (needs process)
+                                            <span style="margin-left: 1ex; color: red">needs process</span>
                                         </xsl:if>
                                     </xsl:when>
                                     <xsl:otherwise>

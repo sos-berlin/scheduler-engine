@@ -390,14 +390,14 @@ string Order_subsystem::order_db_where_clause( const string& job_chain_name, con
 {
     S result;
 
-    result << job_chain_db_where_clause( job_chain_name ) << " and `id`="  << sql::quoted( order_id );
+    result << job_chain_db_where_condition( job_chain_name ) << " and `id`="  << sql::quoted( order_id );
 
     return result;
 }
 
-//-----------------------------------------------------------Order_subsystem::order_db_where_clause
+//----------------------------------------------------Order_subsystem::job_chain_db_where_condition
 
-string Order_subsystem::job_chain_db_where_clause( const string& job_chain_name )
+string Order_subsystem::job_chain_db_where_condition( const string& job_chain_name )
 {
     S result;
 
@@ -1274,7 +1274,7 @@ void Job_chain::add_orders_from_database( Read_transaction* ta )
         ( 
             S() << "select " << order_select_database_columns <<
             "  from " << _spooler->_orders_tablename <<
-            "  where " << db_where_clause() <<
+            "  where " << db_where_condition() <<
                " and `distributed_next_time` is null"
             "  order by `ordering`",
             __FUNCTION__
@@ -1392,7 +1392,7 @@ int Job_chain::order_count( Read_transaction* ta )
 
     if( _is_distributed && ta )
     {
-        result = ta->open_result_set( S() << "select count(*)  from " << _spooler->_orders_tablename <<"  where " << db_where_clause(),
+        result = ta->open_result_set( S() << "select count(*)  from " << _spooler->_orders_tablename <<"  where " << db_where_condition(),
                                       __FUNCTION__ )
                  .get_record().as_int( 0 );
     }
@@ -1475,6 +1475,34 @@ void Job_chain::remove_from_blacklist( Order* order )
     }
 }
 
+//----------------------------------------------------------------------Job_chain::blacklist_id_set
+
+hash_set<string> Job_chain::blacklist_id_set()
+{
+    hash_set<string> result;
+
+    if( !_is_distributed )
+    {
+        Z_FOR_EACH( Blacklist_map, _blacklist_map, it )  result.insert( it->first );
+    }
+    else
+    {
+        Read_transaction ta ( db() );
+        S select_sql;
+        select_sql << "select `id`  from " << _spooler->_orders_tablename <<
+                      "  where " << db_where_condition() << 
+                      "  and `distributed_next_time`=" << blacklist_database_distributed_next_time;
+
+        for( Any_file result_set = ta.open_result_set( select_sql, __FUNCTION__ ); !result_set.eof(); )
+        {
+            Record record = result_set.get_record();
+            result.insert( record.as_string( 0 ) );
+        }
+    }
+
+    return result;
+}
+
 //---------------------------------------------------------------------Job_chain::tip_for_new_order
 
 bool Job_chain::tip_for_new_order( const Order::State& state, const Time& at )
@@ -1534,11 +1562,11 @@ void Job_chain::check_for_removing()
     }
 }
 
-//-----------------------------------------------------------------------Job_chain::db_where_clause
+//--------------------------------------------------------------------Job_chain::db_where_condition
 
-string Job_chain::db_where_clause() const
+string Job_chain::db_where_condition() const
 { 
-    return order_subsystem()->job_chain_db_where_clause( _name ); 
+    return order_subsystem()->job_chain_db_where_condition( _name ); 
 }
 
 //-------------------------------------------------------------------------Order_queue::Order_queue

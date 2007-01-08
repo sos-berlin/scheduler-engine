@@ -464,7 +464,7 @@ Order* Directory_file_order_source::read_directory( bool was_notified, const str
 #           endif
 
 
-            if( first_order_queue->has_order( Time(0) ) )      // Auftragswarteschlange ist nicht leer?
+            if( !_job_chain->is_distributed()  &&  first_order_queue->has_order( Time(0) ) )      // Auftragswarteschlange ist nicht leer?
             {
                 // Erst die vorhandenen Aufträge abarbeiten lassen und nächsten Aufruf von request_order() abwarten
             }
@@ -593,7 +593,8 @@ Order* Directory_file_order_source::read_directory( bool was_notified, const str
 
 void Directory_file_order_source::read_new_files_and_handle_deleted_files( const string& cause )
 {
-    hash_set<string> removed_blacklist_files;
+    hash_set<string> blacklisted_files         = _job_chain->blacklist_id_set();       int EXCEPTION;
+    hash_set<string> removed_blacklisted_files = blacklisted_files;
     hash_set<string> virgin_known_files;
 
 
@@ -603,9 +604,7 @@ void Directory_file_order_source::read_new_files_and_handle_deleted_files( const
     _new_files.clear();
     _new_files.reserve( 1000 );
     _new_files_index = 0;
-    _new_files_time = Time::now();
-
-    Z_FOR_EACH( Job_chain::Blacklist_map, _job_chain->_blacklist_map, it )  removed_blacklist_files.insert( it->first );         int BLACKLIST;
+    _new_files_time  = Time::now();
 
 
     for( Directory_watcher::Directory_reader dir ( _path, _regex_string == ""? NULL : &_regex );; )
@@ -617,7 +616,7 @@ void Directory_file_order_source::read_new_files_and_handle_deleted_files( const
 
         if( Order* order = _job_chain->order_or_null( path ) ) 
         {
-            removed_blacklist_files.erase( path );
+            removed_blacklisted_files.erase( path );
             if( order->is_virgin() )  virgin_known_files.insert( path );
         }
         else
@@ -634,15 +633,32 @@ void Directory_file_order_source::read_new_files_and_handle_deleted_files( const
     sort( _new_files.begin(), _new_files.end(), zschimmer::File_info::quick_last_write_less );
 
 
-    // removed_blacklist_files: 
+    // removed_blacklisted_files: 
     // Aufträge in der Blacklist, deren Dateien nicht mehr da sind, entfernen
 
-    Z_FOR_EACH( hash_set<string>, removed_blacklist_files, it ) 
+    Z_FOR_EACH( hash_set<string>, removed_blacklisted_files, it ) 
     {
-        Job_chain::Blacklist_map::iterator it2 = _job_chain->_blacklist_map.find( *it );
-        if( it2 != _job_chain->_blacklist_map.end() )
+        ptr<Order> removed_file_order;
+
+        if( _job_chain->is_distributed() )
         {
-            Order* removed_file_order = it2->second;
+            hash_set<string>::iterator it2 = blacklisted_files.find( *it );
+            if( it2 != blacklisted_files.end() )
+            {
+                removed_file_order = order_subsystem()->try_load_order_from_database( (Transaction*)NULL, _job_chain->name(), *it2 );
+            }
+        }
+        else
+        {
+            Job_chain::Blacklist_map::iterator it2 = _job_chain->_blacklist_map.find( *it );
+            if( it2 != _job_chain->_blacklist_map.end() )
+            {
+                removed_file_order = it2->second;
+            }
+        }
+
+        if( removed_file_order )
+        {
             removed_file_order->log()->info( message_string( "SCHEDULER-981" ) );   // "File has been removed"
             removed_file_order->remove_from_job_chain();   
         }
