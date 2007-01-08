@@ -44,7 +44,7 @@ spooler_log.info( "Dieser Job soll insgesamt zweimal gestartet werden" );
 
 function spooler_open()
 {
-    return false;
+    return true;
 }
 
                     ]]>
@@ -72,16 +72,16 @@ hostware.sleep( 15 );
                 </script>
 
                 <run_time>
-                    <period begin="16:50" end="16:50:30"/>
-                    <period begin="16:51" end="16:51:30"/>
-                    <period begin="16:52" end="16:52:30"/>
-                    <period begin="16:53" end="16:53:30"/>
-                    <period begin="16:54" end="16:54:30"/>
-                    <period begin="16:55" end="16:55:30"/>
-                    <period begin="16:56" end="16:56:30"/>
-                    <period begin="16:57" end="16:57:30"/>
-                    <period begin="16:58" end="16:58:30"/>
-                    <period begin="16:59" end="16:59:30"/>
+                    <period begin="21:40" end="21:40:30"/>
+                    <period begin="21:41" end="21:41:30"/>
+                    <period begin="21:42" end="21:42:30"/>
+                    <period begin="21:43" end="21:43:30"/>
+                    <period begin="21:44" end="21:44:30"/>
+                    <period begin="21:45" end="21:45:30"/>
+                    <period begin="21:46" end="21:46:30"/>
+                    <period begin="21:47" end="21:47:30"/>
+                    <period begin="21:48" end="21:48:30"/>
+                    <period begin="21:49" end="21:49:30"/>
                 </run_time>
             </job>
 

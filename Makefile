@@ -11,7 +11,7 @@ endif
 
 
 objects = \
- distributed.o\
+ cluster.o\
  scheduler_client.o\
  scheduler_messages.o\
  scheduler_object.o\

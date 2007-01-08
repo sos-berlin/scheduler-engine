@@ -22,7 +22,7 @@ else
     var order = spooler.create_order();
     order.id = 1;
     order.title = "Wir haben einen Auftrag";
-    spooler.job_chain( "my_job_chain" ).add_order( order );
+    spooler.job_chain( "process.scheduler" ).add_or_replace_order( order );
 }
 
         ]]></script>                   
@@ -54,7 +54,7 @@ else
         </jobs>
 
         <job_chains>
-            <job_chain name="my_job_chain">
+            <job_chain name="process.scheduler">
                 <job_chain_node state="1" job="process"/>
             </job_chain>
         </job_chains>
