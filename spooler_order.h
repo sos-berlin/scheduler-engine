@@ -118,7 +118,7 @@ struct Order : Com_order,
 
     void                    set_xml_payload             ( const string& xml );
     string                      xml_payload             () const                                    { return _xml_payload; }
-                                                                                      void                    set_web_service             ( const string& );
+    void                    set_web_service             ( const string& );
     void                    set_web_service             ( Web_service* );
     Web_service*                web_service             () const;
     Web_service*                web_service_or_null     () const                                    { return _web_service; }
@@ -176,9 +176,11 @@ struct Order : Com_order,
     void                        run_time_modified_event ();
 
     void                        db_insert               ();
+    bool                        db_try_insert           ();
     bool                        db_occupy_for_processing();
     bool                        db_release_occupation   ();
     void                        db_fill_stmt            ( sql::Write_stmt* );
+    string                      calculate_db_distributed_next_time();
 
     enum Update_option { update_anyway, update_not_occupied, update_and_release_occupation };
     bool                        db_update               ( Update_option u )                         { return db_update2( u, false ); }
@@ -214,62 +216,64 @@ struct Order : Com_order,
     State                      _state;
 
     bool                       _id_locked;              // Einmal gesperrt, immer gesperrt
-    bool                       _is_users_id;            // Id ist nicht vom Spooler generiert, also nicht sicher eindeutig.
     string                     _state_text;
     bool                       _state_text_modified;
-  //bool                       _remove_from_job_chain;  // Nur wenn _task != NULL: Nach spooler_process() remove_form_job_chain() rufen!
     Priority                   _priority;
     bool                       _priority_modified;
-    State                      _initial_state;
-    bool                       _initial_state_set;
     string                     _title;
     bool                       _title_modified;
-    Job_chain*                 _job_chain;
     string                     _job_chain_name;
-    Job_chain_node*            _job_chain_node;         // Nächster Stelle, falls in einer Jobkette
-    string                     _removed_from_job_chain_name; // Ehemaliges _job_chain->name(), nach remove_from_job_chain(), wenn _task != NULL
-  //bool                       _dont_close_log;
-    Order_queue*               _order_queue;            // Auftrag ist in einer Auftragsliste, aber nicht in einer Jobkette. _job_chain == NULL, _job_chain_node == NULL!
     Payload                    _payload;
-  //bool                       _payload_modified;       // (Bei einem Objekt wird nur bemerkt, dass die Referenz geändert wurde, nicht das Objekt selbst)
-
     string                     _xml_payload;
-    bool                       _order_xml_modified;     // Datenbankspalte xml neu schreiben!
+    State                      _initial_state;
+    ptr<Web_service>           _web_service;
 
-    ptr<Order>                 _replaced_by;            // Nur wenn _task != NULL: _replaced_by soll this in der Jobkette ersetzen
-    Order*                     _replacement_for;        // _replacement_for == NULL  ||  _replacement_for->_replaced_by == this && _replacement_for->_task != NULL
+    bool                       _is_virgin;                  // Noch von keiner Task berührt
+  //bool                       _is_virgin_in_this_run_time; // Wie _is_virgin, wird aber beim Erreichen des Endzustands wieder true gesetzt
+
+    int                        _setback_count;
+    bool                       _on_blacklist;           // assert( _job_chain )
+    bool                       _suspended;
+
+    ptr<Run_time>              _run_time;
+    bool                       _run_time_modified;
+    Time                       _setback;                // Bis wann der Auftrag zurückgestellt ist (bei _setback_count > 0, sonst Startzeitpunkt "at")
+    bool                       _order_xml_modified;     // Datenbankspalte xml neu schreiben!
     bool                       _is_replacement;         // _replacement_for != NULL => _is_replacement
-    string                     _replaced_order_occupator;// Task::obj:name() oder cluster_member_id
 
     Time                       _created;
     Time                       _start_time;             // Erster Jobschritt
     Time                       _end_time;
 
+    bool                       _is_distributed;         // == scheduler_orders.distributed_next_time is not null
+
+
+    // Flüchtige Variablen, nicht für die Datenbank:
+
+    Job_chain*                 _job_chain;              // Nur gesetzt, wenn !_is_distributed oder in Verarbeitung (_task). Sonst wird der Auftrag nur in der Datenbank gehalten
+    Job_chain_node*            _job_chain_node;         // if( _job_chain)  Nächste Stelle, falls in einer Jobkette
+    Order_queue*               _order_queue;            // Auftrag ist in einer Auftragsliste, aber nicht in einer Jobkette. _job_chain == NULL, _job_chain_node == NULL!
+
+    string                     _removed_from_job_chain_name; // Ehemaliges _job_chain->name(), nach remove_from_job_chain(), wenn _task != NULL
+    ptr<Order>                 _replaced_by;            // Nur wenn _task != NULL: _replaced_by soll this in der Jobkette ersetzen
+    Order*                     _replacement_for;        // _replacement_for == NULL  ||  _replacement_for->_replaced_by == this && _replacement_for->_task != NULL
+    string                     _replaced_order_occupator;// Task::obj:name() oder cluster_member_id, zur Info
+
+    Period                     _period;                 // Bei _run_time.set(): Aktuelle oder nächste Periode
+
+    bool                       _initial_state_set;
     bool                       _in_job_queue;           // Auftrag ist in _job_chain_node->_job->order_queue() eingehängt
+
     Task*                      _task;                   // Auftrag wird gerade von dieser Task in spooler_process() verarbeitet 
     bool                       _moved;                  // Nur wenn _task != NULL: true, wenn Job state oder job geändert hat. Dann nicht automatisch in Jobkette weitersetzen
-    ptr<Run_time>              _run_time;
-    bool                       _run_time_modified;
-    Period                     _period;                 // Bei _run_time.set(): Aktuelle oder nächste Periode
-  //bool                       _period_once;
-    Time                       _setback;                // Bis wann der Auftrag zurückgestellt ist (bei _setback_count > 0, sonst Startzeitpunkt "at")
     bool                       _setback_called;
-    int                        _setback_count;
-    bool                       _on_blacklist;           // assert( _job_chain )
-    bool                       _suspended;
-  //bool                       _recoverable;            // In Datenbank halten
+
     bool                       _is_distribution_inhibited;
-    bool                       _is_distributed;
     bool                       _is_in_database;
     bool                       _is_db_occupied;
     State                      _occupied_state;
     bool                       _delay_storing_until_processing;  // Erst in die Datenbank schreiben, wenn die erste Task die Verarbeitung beginnt
-    bool                       _is_virgin;              // Noch von keiner Task berührt
-    bool                       _is_virgin_in_this_run_time; // Wie _is_virgin, wird aber beim Erreichen des Endzustands wieder true gesetzt
-  //bool                       _is_outdated;            // Bei nächster Gelegenheit aus Warteschlange entfernen
     bool                       _end_state_reached;      // Auftrag nach spooler_process() beenden, für <file_order_sink>
-
-    ptr<Web_service>           _web_service;
     ptr<http::Operation>       _http_operation;
 };
 

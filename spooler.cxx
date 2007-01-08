@@ -1530,6 +1530,8 @@ void Spooler::load_arg()
             else
             if( opt.with_value( "log-dir"          ) )  _log_directory = opt.value(),  _log_directory_as_option_set = true;
             else
+            if( opt.flag      ( "log-to-stdout"    ) )  _log_to_stdout = opt.set();
+            else
             if( opt.with_value( "include-path"     ) )  _include_path = opt.value(),  _include_path_as_option_set = true;
             else
             if( opt.with_value( "param"            ) )  _spooler_param = opt.value(),  _spooler_param_as_option_set = true;
@@ -2035,10 +2037,8 @@ void Spooler::start()
 
 
 #   ifdef Z_WINDOWS
-        if( isatty( fileno( stderr ) )) 
-        {
-            _print_time_every_second = log_directory() == "*stderr";
-        }
+        _print_time_every_second = log_directory() == "*stderr"  &&  isatty( fileno( stderr ) )
+                                   ||  _spooler->_log_to_stdout  &&  isatty( fileno( stdout ) );
 #   endif
 
     _communication.start_or_rebind();
@@ -2990,18 +2990,30 @@ void Spooler::run_check_ctrl_c()
             string signal_text = S() << "signal " << last_signal << " " << signal_name_from_code( last_signal ) << " " << signal_title_from_code( last_signal );
 #       endif
 
-        if( _state != s_stopping )
+        switch( ctrl_c_pressed )
         {
-            _log->warn( message_string( "SCHEDULER-262", signal_text ) );   // "Abbruch-Signal (Ctrl-C) empfangen. Der Scheduler wird beendet.\n" );
-            cmd_terminate( false, INT_MAX, true );  // Inaktiver Scheduler darf fortsetzen
+            case 1:
+                if( _state != s_stopping )
+                {
+                    _log->warn( message_string( "SCHEDULER-262", signal_text ) );   // "Abbruch-Signal (Ctrl-C) empfangen. Der Scheduler wird beendet.\n" );
+                    cmd_terminate( false, INT_MAX, true );  // Inaktiver Scheduler darf fortsetzen
 
-            ctrl_c_pressed = 0;
-            set_ctrl_c_handler( true );
-        }
-        else
-        {
-            _log->warn( message_string( "SCHEDULER-263", signal_text ) );  // "Abbruch-Signal (Ctrl-C) beim Beenden des Schedulers empfangen. Der Scheduler wird abgebrochen, sofort.\n" );
-            abort_now();
+                    ctrl_c_pressed = 0;
+                    set_ctrl_c_handler( true );
+                }
+
+                break;
+
+            case 2:
+                kill_all_processes();
+                break;
+
+            case 3:
+            default:
+            {
+                _log->warn( message_string( "SCHEDULER-263", signal_text ) );  // "Abbruch-Signal (Ctrl-C) beim Beenden des Schedulers empfangen. Der Scheduler wird abgebrochen, sofort.\n" );
+                abort_now();
+            }
         }
     }
 }

@@ -1971,31 +1971,35 @@ Order* Order_queue::load_and_occupy_next_distributed_order_from_database( Task* 
 
 
     select_sql << "select %limit(1)  `job_chain`, " << order_select_database_columns <<
-                "  from " << _spooler->_orders_tablename << " %update_lock" 
+                "  from " << _spooler->_orders_tablename <<  //" %update_lock" 
                 "  where `spooler_id`=" << sql::quoted(_spooler->id_for_db()) <<
-                   " and `distributed_next_time`<{ts'" << never_database_distributed_next_time << "'}"
+                   " and `distributed_next_time` < {ts'" << never_database_distributed_next_time << "'}"
                    " and `occupying_cluster_member_id` is null" << 
                    " and " << db_where_expression_for_distributed_orders() <<
                 "  order by `distributed_next_time`, `priority`, `ordering`";
 
     //try
     //{
-        ptr<Order> order;
+        Record record;
+        bool   record_filled = false;
+
 
         for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
         {
-            Any_file result_set = ta.open_commitable_result_set( select_sql, __FUNCTION__ );
+            Any_file result_set = ta.open_result_set( select_sql, __FUNCTION__ );
             if( !result_set.eof() )
             {
-                Record record = result_set.get_record();
-                order = new Order( _spooler, record, record.as_string( "job_chain" ) );
+                record = result_set.get_record();
+                record_filled = true;
             }
         }
         catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_orders_tablename, x ), __FUNCTION__ ); }
 
 
-        if( order )
+        if( record_filled )
         {
+            ptr<Order> order = new Order( _spooler, record, record.as_string( "job_chain" ) );
+        
             order->_is_distributed = true;
             
             Job_chain* job_chain = order_subsystem()->job_chain( order->_job_chain_name );
@@ -2229,9 +2233,10 @@ void Order::init()
 
     _log = Z_NEW( Prefix_log( this ) );
     _log->set_prefix( obj_name() );
-    _created = Time::now();
+
+    _created   = Time::now();
     _is_virgin = true;
-    _is_virgin_in_this_run_time = true;
+    //_is_virgin_in_this_run_time = true;
 
     set_run_time( NULL );
 }
@@ -2368,13 +2373,12 @@ bool Order::occupy_for_task( Task* task, const Time& now )
     _setback        = 0;
     _setback_called = false;
     _moved          = false;
-
-    _task    = task;
+    _task           = task;
     if( !_start_time )  _start_time = now;      
 
     if( _is_virgin  &&  _http_operation )  _http_operation->on_first_order_processing( task );
     _is_virgin = false;
-    _is_virgin_in_this_run_time = false;
+    //_is_virgin_in_this_run_time = false;
 
     return true;
 }
@@ -2395,9 +2399,9 @@ bool Order::db_occupy_for_processing()
     //update.and_where_condition( "spooler_id", _spooler->id_for_db() );
     //update.and_where_condition( "job_chain" , job_chain->name() );
     //update.and_where_condition( "id"        , id().as_string()    );
-    update.and_where_condition( "state"     , state().as_string() );
+    update.and_where_condition( "state"                      , state().as_string() );
     update.and_where_condition( "occupying_cluster_member_id", sql::null_value );
-
+    update.and_where_condition( "distributed_next_time"      , calculate_db_distributed_next_time() );
 
     bool update_ok = false;
 
@@ -2459,6 +2463,15 @@ void Order::db_show_occupation( Log_level log_level )
 
 void Order::db_insert()
 {
+    bool ok = db_try_insert();
+    if( !ok )  z::throw_xc( "SCHEDULER-186", obj_name(), _job_chain_name );
+}
+
+//-----------------------------------------------------------------------------Order::db_try_insert
+
+bool Order::db_try_insert()
+{
+    bool   insert_ok = false;
     string payload_string = payload().as_string();
 
     if( db()->opened() )
@@ -2495,55 +2508,84 @@ void Order::db_insert()
                 ta.execute_single( db_update_stmt().make_delete_stmt(), __FUNCTION__ );
             }
         }
+        else
+        if( !_is_distributed )
+        {
+            ta.execute( db_update_stmt().make_delete_stmt(), __FUNCTION__ );
+        }
+        else
+        {
+            // Satz darf nicht vorhanden sein.
+        }
 
 
         int ordering = db_get_ordering( &ta );
         
-        //2007-01-02  Warum wird der gelöscht?  ta.execute( db_update_stmt().make_delete_stmt(), __FUNCTION__ );
 
+        sql::Insert_stmt insert ( ta.database_descriptor(), _spooler->_orders_tablename );
+        
+        insert[ "ordering"      ] = ordering;
+        insert[ "job_chain"     ] = _job_chain_name;
+        insert[ "id"            ] = id().as_string();
+        insert[ "spooler_id"    ] = _spooler->id_for_db();
+        insert[ "title"         ] = title()                     , _title_modified      = false;
+        insert[ "state"         ] = state().as_string();
+        insert[ "state_text"    ] = state_text()                , _state_text_modified = false;
+        insert[ "priority"      ] = priority()                  , _priority_modified   = false;
+        insert[ "initial_state" ] = initial_state().as_string();
+
+        db_fill_stmt( &insert );
+
+        insert.set_datetime( "created_time", _created.as_string(Time::without_ms) );
+
+        //if( is_processable() )  insert[ "processable"   ] = true;
+
+        try
         {
-            sql::Insert_stmt insert ( ta.database_descriptor(), _spooler->_orders_tablename );
-            
-            insert[ "ordering"      ] = ordering;
-            insert[ "job_chain"     ] = _job_chain_name;
-            insert[ "id"            ] = id().as_string();
-            insert[ "spooler_id"    ] = _spooler->id_for_db();
-            insert[ "title"         ] = title()                     , _title_modified      = false;
-            insert[ "state"         ] = state().as_string();
-            insert[ "state_text"    ] = state_text()                , _state_text_modified = false;
-            insert[ "priority"      ] = priority()                  , _priority_modified   = false;
-            insert[ "initial_state" ] = initial_state().as_string();
-
-            db_fill_stmt( &insert );
-
-            insert.set_datetime( "created_time", _created.as_string(Time::without_ms) );
-
-            //if( is_processable() )  insert[ "processable"   ] = true;
-
             ta.execute( insert, __FUNCTION__ );
+            insert_ok = true;
         }
-
-        if( payload_string != "" )  db_update_clob( &ta, "payload", payload_string );
-        //_payload_modified = false;
-
-        xml::Document_ptr order_document = dom( show_for_database_only );
-        xml::Element_ptr  order_element  = order_document.documentElement();
-        if( order_element.hasAttributes()  ||  order_element.firstChild() )
-            db_update_clob( &ta, "order_xml", order_document.xml() );
-
-        if( run_time() )
+        catch( exception& )   // Datensatz ist bereits vorhanden?
         {
-            xml::Document_ptr doc = run_time()->dom_document();
-            if( doc.documentElement().hasAttributes()  ||  doc.documentElement().hasChildNodes() )  db_update_clob( &ta, "run_time", doc.xml() );
+            Any_file result_set = ta.open_result_set
+                ( 
+                    S() << "select " << order_select_database_columns << 
+                           " from " << _spooler->_orders_tablename << 
+                           db_where_clause().where_string(), 
+                    __FUNCTION__ 
+                );
+
+            if( result_set.eof() )  throw;  // Ein anderer Fehler als dass der Schlüssel schon vorhanden ist
         }
 
-        ta.commit( __FUNCTION__ );
 
-        _is_in_database = true;
+        if( insert_ok )
+        {
+            if( payload_string != "" )  db_update_clob( &ta, "payload", payload_string );
+            //_payload_modified = false;
+
+            xml::Document_ptr order_document = dom( show_for_database_only );
+            xml::Element_ptr  order_element  = order_document.documentElement();
+            if( order_element.hasAttributes()  ||  order_element.firstChild() )
+                db_update_clob( &ta, "order_xml", order_document.xml() );
+
+            if( run_time() )
+            {
+                xml::Document_ptr doc = run_time()->dom_document();
+                if( doc.documentElement().hasAttributes()  ||  doc.documentElement().hasChildNodes() )  db_update_clob( &ta, "run_time", doc.xml() );
+            }
+
+            ta.commit( __FUNCTION__ );
+
+            _is_in_database = true;
+        }
     }
     catch( exception& x ) { ta.reopen_database_after_error( z::Xc( "SCHEDULER-305", _spooler->_orders_tablename, x ), __FUNCTION__ ); }
 
-    tip_own_job_for_new_order_state();
+
+    if( insert_ok )  tip_own_job_for_new_order_state();
+
+    return insert_ok;
 }
 
 //---------------------------------------------------------------------Order::db_release_occupation
@@ -2755,25 +2797,32 @@ void Order::db_fill_stmt( sql::Write_stmt* stmt )
 {
     stmt->set_datetime( "mod_time", Time::now().as_string(Time::without_ms) );
 
+    string t = calculate_db_distributed_next_time();
+    if( stmt->is_update()  ||  t != "" )  stmt->set_datetime( "distributed_next_time", t );
+}
 
-    string t;
+//--------------------------------------------------------Order::calculate_db_distributed_next_time
+
+string Order::calculate_db_distributed_next_time()
+{
+    string result;
 
     if( _is_distributed )
     {
-        if( _on_blacklist )    t = blacklist_database_distributed_next_time;
+        if( _on_blacklist )    result = blacklist_database_distributed_next_time;
         else
-        if( _is_replacement )  t = replacement_database_distributed_next_time;
+        if( _is_replacement )  result = replacement_database_distributed_next_time;
         else
         {
             Time next_time = this->next_time().rounded_to_next_second();
 
-            t = next_time.is_null ()? now_database_distributed_next_time :
-                next_time.is_never()? never_database_distributed_next_time 
-                                    : next_time.as_string( Time::without_ms );
+            result = next_time.is_null ()? now_database_distributed_next_time :
+                     next_time.is_never()? never_database_distributed_next_time 
+                                         : next_time.as_string( Time::without_ms );
         }
     }
 
-    if( stmt->is_update()  ||  t != "" )  stmt->set_datetime( "distributed_next_time", t );
+    return result;
 }
 
 //------------------------------------------------------------------------------Order::db_read_clob
@@ -2850,7 +2899,7 @@ Database* Order::db()
 
 void Order::open_log()
 {
-    if( _job_chain && _spooler->_order_history_with_log && !string_begins_with( _spooler->log_directory(), "*" ) )
+    if( _job_chain_name != ""  &&  _spooler->_order_history_with_log  &&  !string_begins_with( _spooler->log_directory(), "*" ) )
     {
         string name = _id.as_string();
         
@@ -2932,6 +2981,7 @@ void Order::set_dom( const xml::Element_ptr& element, Variable_set_map* variable
     if( state_name       != "" )  set_state   ( state_name.c_str() );
     if( web_service_name != "" )  set_web_service( _spooler->_web_services.web_service_by_name( web_service_name ) );
     if( at_string        != "" )  set_at      ( Time::time_with_now( at_string ) );
+    _is_virgin = !element.bool_getAttribute( "touched" );
 
     if( element.hasAttribute( "suspended" ) )
         set_suspended( element.bool_getAttribute( "suspended" ) );
@@ -2991,6 +3041,12 @@ void Order::set_dom( const xml::Element_ptr& element, Variable_set_map* variable
         { 
             set_run_time( e );
         }
+        else
+        if( e.nodeName_is( "log" ) )
+        {
+            assert( !_log->opened() );
+            _log->continue_with_text( e.text() );
+        }
     }
 }
 
@@ -3009,7 +3065,7 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
         }
     }
 
-    if( !show.is_set( show_for_database_only )  &&  !show.is_set( show_id_only ) )
+    if( !show.is_set( show_for_database_only ) ) // &&  !show.is_set( show_id_only ) )
     {
         if( _setback )
         element.setAttribute( "next_start_time", _setback.as_string() );
@@ -3042,9 +3098,8 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
 
         if( _task )
         {
-        element.setAttribute( "task"            , _task->id() );   // Kann nach set_state() noch die Vorgänger-Task sein (bis spooler_process endet)
-      //element.setAttribute( "task"            , _task->obj_name() );   // Kann nach set_state() noch die Vorgänger-Task sein (bis spooler_process endet)
-        element.setAttribute( "in_process_since", _task->last_process_start_time().as_string() );
+            element.setAttribute( "task"            , _task->id() );   // Kann nach set_state() noch die Vorgänger-Task sein (bis spooler_process endet)
+            element.setAttribute( "in_process_since", _task->last_process_start_time().as_string() );
         }
 
         if( _state_text != "" )
@@ -3077,22 +3132,6 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
             if( !payload_content )
             {
                 string payload_string = string_payload();
-
-                /*
-                if( string_begins_with( payload_string, "<?xml" ) )
-                {
-                    try
-                    {
-                        xml::Document_ptr doc ( payload_string );
-                        payload_content = document.clone( doc.documentElement() );
-                    }
-                    catch( exception& x )
-                    {
-                        Z_LOG2( "scheduler", obj_name() << ".payload enthält fehlerhaftes XML: " << x.what() );
-                    }
-                }
-                */
-
                 if( !payload_content )  payload_content = document.createTextNode( payload_string );
             }
 
@@ -3100,10 +3139,16 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
         }
 
         if( show.is_set( show_run_time ) )  element.appendChild( _run_time->dom_element( document ) );
+    }
+
+    if( _is_distributed  ||  !show.is_set( show_for_database_only ) )
+    {
+        Show_what log_show_what = show;
+        if( _is_distributed  &&  show.is_set( show_for_database_only ) )  log_show_what |= show_log;
 
         if( log  &&  show.is_set( show_log ) ) element.append_new_text_element( "log", *log );     // Protokoll aus der Datenbank
         else
-        if( _log )  element.appendChild( _log->dom_element( document, show ) );
+        if( _log )  element.appendChild( _log->dom_element( document, log_show_what ) );
     }
 
     if( show.is_set( show_payload | show_for_database_only )  &&  _xml_payload != "" )
@@ -3144,6 +3189,7 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
     if( _suspended       )  element.setAttribute( "suspended"   , "yes" );
     if( _is_replacement  )  element.setAttribute( "replacement" , "yes" ),
                             element.setAttribute_optional( "replaced_order_occupator", _replaced_order_occupator );
+    if( !_is_virgin      )  element.setAttribute( "touched"     , "yes" );
     
     return element;
 }
@@ -3213,7 +3259,6 @@ void Order::set_id( const Order::Id& id )
 
 
         _id = id;
-        _is_users_id = true;
 
         //_log->set_prefix( "Order " + _id.as_string() );
         _log->set_prefix( obj_name() );
@@ -3226,7 +3271,6 @@ void Order::set_id( const Order::Id& id )
 void Order::set_default_id()
 {
     set_id( _spooler->_db->get_order_id() );
-    _is_users_id = false;
 }
 
 //-----------------------------------------------------------------------------Order::set_file_path
@@ -3395,7 +3439,7 @@ void Order::set_payload( const VARIANT& payload )
 {
     //THREAD_LOCK( _lock )
     {
-        Z_LOG2( "scheduler.order", obj_name() << ".payload=" << debug_string_from_variant(payload) << "\n" );
+        //Z_LOG2( "scheduler.order", obj_name() << ".payload=" << debug_string_from_variant(payload) << "\n" );
         _payload = payload;
         //_payload_modified = true;
     }
@@ -3405,11 +3449,11 @@ void Order::set_payload( const VARIANT& payload )
 
 void Order::set_xml_payload( const string& xml_string )
 { 
-    Z_LOGI2( "scheduler.order", obj_name() << ".xml_payload=" << xml_string << "\n" );
+    //Z_LOGI2( "scheduler.order", obj_name() << ".xml_payload=" << xml_string << "\n" );
     
-    xml::Document_ptr doc ( xml_string );       // Sicherstellen, dass xml_string valide ist
+    xml::Document_ptr doc ( xml_string, "iso-8859-1" );
 
-    _xml_payload = xml_string;  
+    _xml_payload = doc.ascii_xml();     // _xml_payload kann in order_xml <order> eingefügt werden, unabhängig von der Codierung (ist nur 7bit-Ascii)
     _order_xml_modified = true; 
 }
 
@@ -3688,6 +3732,7 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain )
         ptr<Order> hold_me = this;   // Halten für remove_from_job_chain()
         
         if( _job_chain_name != "" )  remove_from_job_chain();
+        assert( !_job_chain );
         
         if( _id.vt == VT_EMPTY )  set_default_id();
         _id_locked = true;
@@ -3715,7 +3760,13 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain )
 
         if( !_delay_storing_until_processing  &&  job_chain->_orders_recoverable  &&  !_is_in_database )
         {
-            db_insert();
+            bool ok = db_try_insert();       // false, falls aus irgendeinem Grund die Order-ID schon vorhanden ist
+            
+            if( !ok )
+            {
+                if( _job_chain )  _job_chain->remove_order( this );
+                z::throw_xc( "SCHEDULER-186", obj_name(), _job_chain_name );
+            }
         }
 
         result = true;
@@ -3858,7 +3909,7 @@ void Order::postprocessing( bool success )
 
                         _start_time = 0;
                         _end_time = 0;
-                        _is_virgin_in_this_run_time = true;
+                        //_is_virgin_in_this_run_time = true;
 
                         open_log();
 
@@ -4147,8 +4198,9 @@ void Order::before_modify_run_time_event()
 
 void Order::run_time_modified_event()
 {
-    if( _is_virgin_in_this_run_time )  set_setback( _run_time->set()? next_start_time( true ) : Time(0) );
-                                else  _run_time_modified = true;
+    //if( _is_virgin_in_this_run_time )  
+    if( _state == _initial_state )  set_setback( _run_time->set()? next_start_time( true ) : Time(0) );
+                             else  _run_time_modified = true;
 }
 
 //------------------------------------------------------------------------------Order::set_run_time

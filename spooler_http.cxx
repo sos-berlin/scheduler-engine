@@ -618,13 +618,13 @@ void Operation::unlink_order()
     catch( exception& x ) { _spooler->log()->error( x.what() ); }
 }
 
-//-------------------------------------------------------------------Operation::on_order_processing
+//-------------------------------------------------------------Operation::on_first_order_processing
 
 void Operation::on_first_order_processing( Task* )
 {
     // <web_service timeout="">: Die Frist gilt nur bis zur ersten Ausführung
 
-    set_gmtimeout( double_time_max );      // Timeout abschalten
+    set_gmtimeout( double_time_max );       // Timeout abschalten
 }
 
 //---------------------------------------------------------------------------------Operation::begin

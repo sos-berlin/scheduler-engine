@@ -1566,8 +1566,13 @@ void Job::set_next_start_time( Time now, bool repeat )
 
 Time Job::next_start_time()
 {
-    Time result = min( _next_start_time, _next_single_start );
-    if( _order_queue )  result = min( result, _order_queue->next_time() );
+    Time result = Time::never;
+
+    if( _state == s_pending  ||  _state == s_running )
+    {
+        result = min( _next_start_time, _next_single_start );
+        if( _order_queue )  result = min( result, _order_queue->next_time() );
+    }
 
     return result;
 }

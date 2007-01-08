@@ -181,8 +181,8 @@ Directory_file_order_source::Directory_file_order_source( Job_chain* job_chain, 
     if( element.getAttribute( "repeat" ) == "no" )  _repeat = INT_MAX;
                                               else  _repeat = element.int_getAttribute( "repeat", _repeat );
 
-    _max_orders        = element.int_getAttribute( "max", _max_orders );
-    _next_state        = normalized_state( element.getAttribute( "next_state", _next_state.as_string() ) );
+    _max_orders = element.int_getAttribute( "max", _max_orders );
+    _next_state = normalized_state( element.getAttribute( "next_state", _next_state.as_string() ) );
 }
 
 //----------------------------------------Directory_file_order_source::~Directory_file_order_source
@@ -444,11 +444,11 @@ void Directory_file_order_source::withdraw_order_request()
 
 Order* Directory_file_order_source::read_directory( bool was_notified, const string& cause )
 {
-    Order*          result              = NULL;
-    Order_queue*    first_order_queue   = _next_job->order_queue();
+    Order*       result            = NULL;
+    Order_queue* first_order_queue = _next_job->order_queue();
 
 
-    _spooler->assert_has_exclusiveness( obj_name() + " " + __FUNCTION__ );
+    //_spooler->assert_has_exclusiveness( obj_name() + " " + __FUNCTION__ );
 
 
     for( int try_index = 1;; try_index++ )           // Nach einem Fehler machen wir einen zweiten Versuch, bevor wir eine eMail schicken

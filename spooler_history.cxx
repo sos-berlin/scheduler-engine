@@ -393,7 +393,8 @@ void Retry_transaction::reopen_database_after_error( const exception& x, const s
 
     try
     {
-        rollback( S() << __FUNCTION__ << ", " << function );
+        bool force = true;
+        rollback( S() << __FUNCTION__ << ", " << function, force );
     }
     catch( exception& x )  { Z_LOG2( "scheduler", __FUNCTION__ << "  " << x.what() << "\n" ); }
     assert( !db->is_in_transaction() );
@@ -590,7 +591,7 @@ void Database::create_tables_when_needed()
     add_column( &ta, _spooler->_orders_tablename, "INITIAL_STATE" , "add \"INITIAL_STATE\"" " varchar(100)" );
     add_column( &ta, _spooler->_orders_tablename, "RUN_TIME"      , "add \"RUN_TIME\""      " clob" );
     add_column( &ta, _spooler->_orders_tablename, "ORDER_XML"     , "add \"ORDER_XML\""     " clob" );
-    add_column( &ta, _spooler->_orders_tablename, "distributed_next_time"        , "add `distributed_next_time`"         " datetime" );
+    add_column( &ta, _spooler->_orders_tablename, "distributed_next_time"      , "add `distributed_next_time`"         " datetime" );
     add_column( &ta, _spooler->_orders_tablename, "occupying_cluster_member_id", "add `occupying_cluster_member_id`" " varchar(100)" );
     
 

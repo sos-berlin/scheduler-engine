@@ -315,6 +315,7 @@ xml::Element_ptr Command_processor::execute_terminate( const xml::Element_ptr& e
 
     return _answer.createElement( "ok" );
 }
+
 //--------------------------------------------------------------Command_processor::execute_show_job
 
 xml::Element_ptr Command_processor::execute_show_job( const xml::Element_ptr& element, const Show_what& show_ )

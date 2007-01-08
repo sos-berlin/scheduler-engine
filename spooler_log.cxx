@@ -1,3 +1,4 @@
+
 // $Id$
 
 #include "spooler.h"
@@ -371,6 +372,8 @@ void Log::write( Prefix_log* extra_log, Prefix_log* order_log, const char* text,
 
         if( extra_log )  extra_log->write( text, len );
         if( order_log )  order_log->write( text, len );
+
+        if( _spooler->_log_to_stdout )  my_write( _spooler, "(stderr)", fileno(stderr), text, len );
     }
 }
 
@@ -420,7 +423,7 @@ void Log::log2( Log_level level, bool log_to_files, const string& prefix, const 
 
         if( log_to_files )
         {
-            if( _file != -1  &&  isatty( _file ) )  console_colors.set_color_for_level( level );
+            if( _file != -1  &&  isatty( _file )  ||  _spooler->_log_to_stdout  &&  isatty( fileno( stdout ) ) )  console_colors.set_color_for_level( level );
 
             Time now = Time::now();
             _last_time = now;
@@ -434,6 +437,8 @@ void Log::log2( Log_level level, bool log_to_files, const string& prefix, const 
             case log_warn : strcpy ( level_buffer, " [WARN]   " );  break;
             case log_info : strcpy ( level_buffer, " [info]   " );  break;
             case log_debug: strcpy ( level_buffer, " [debug]  " );  break;
+            case log_none : strcpy ( level_buffer, " [none]   " );  break;          // Passiert, wenn nur das scheduler.log beschrieben werden soll (log_to_files==false)
+            case log_unknown:strcpy( level_buffer, " [unknown]" );  break;          // Sollte nicht passieren
             default:        sprintf( level_buffer, " [debug%d] ", (int)-level );
         }
 
@@ -662,11 +667,14 @@ void Prefix_log::open()
         {
             write( _log_buffer.c_str(), _log_buffer.length() );
             _log_buffer = "";
-        }
 
-        string msg = "\n";
-        if( _title != "" )  msg += _title + " - ";
-        log( log_info, msg + "Protocol starts in " + _filename );       // "SCHEDULER-961"
+            if( !_is_logging_continuing )
+            {
+                string msg = "\n";
+                if( _title != "" )  msg += _title + " - ";
+                log( log_info, msg + "Protocol starts in " + _filename );       // "SCHEDULER-961"
+            }
+        }
     }
 
     _started = true;
@@ -1169,47 +1177,50 @@ xml::Element_ptr Prefix_log::dom_element( const xml::Document_ptr& document, con
 {
     xml::Element_ptr log_element = document.createElement( "log" );
 
-    if( log_level()    >= log_min   )  log_element.setAttribute( "level"          , name_of_log_level( (Log_level)log_level() ) );
-    if( _highest_level >= log_min   )  log_element.setAttribute( "highest_level"  , name_of_log_level( (Log_level)_highest_level ) );
-    if( last( log_error ) != ""     )  log_element.setAttribute( "last_error"     , last( log_error ) );
-    if( last( log_warn  ) != ""     )  log_element.setAttribute( "last_warning"   , last( log_warn ) );
-    if( last( log_info  ) != ""     )  log_element.setAttribute( "last_info"      , last( log_info ) );
-
-    if( _filename != "" )
+    if( !show.is_set( show_for_database_only ) )
     {
-        if( _mail_on_error              )  log_element.setAttribute( "mail_on_error"  , "yes" );
-        if( _mail_on_warning            )  log_element.setAttribute( "mail_on_warning", "yes" );
-        if( _mail_on_success            )  log_element.setAttribute( "mail_on_success", "yes" );
-        if( _mail_on_process            )  log_element.setAttribute( "mail_on_process", _mail_on_process );
+        if( log_level()    >= log_min   )  log_element.setAttribute( "level"          , name_of_log_level( (Log_level)log_level() ) );
+        if( _highest_level >= log_min   )  log_element.setAttribute( "highest_level"  , name_of_log_level( (Log_level)_highest_level ) );
+        if( last( log_error ) != ""     )  log_element.setAttribute( "last_error"     , last( log_error ) );
+        if( last( log_warn  ) != ""     )  log_element.setAttribute( "last_warning"   , last( log_warn ) );
+        if( last( log_info  ) != ""     )  log_element.setAttribute( "last_info"      , last( log_info ) );
 
-      //string queue_dir   = _mail_defaults[ "queue_dir" ];
-        string smtp_server = _mail_defaults[ "smtp"    ];
-        string from        = _mail_defaults[ "from"    ];
-        string to          = _mail_defaults[ "to"      ];
-        string cc          = _mail_defaults[ "cc"      ];
-        string bcc         = _mail_defaults[ "bcc"     ];
-        string subject     = _mail_defaults[ "subject" ];
-
-        if( _mail )
+        if( _filename != "" )
         {
-            HRESULT hr;
+            if( _mail_on_error              )  log_element.setAttribute( "mail_on_error"  , "yes" );
+            if( _mail_on_warning            )  log_element.setAttribute( "mail_on_warning", "yes" );
+            if( _mail_on_success            )  log_element.setAttribute( "mail_on_success", "yes" );
+            if( _mail_on_process            )  log_element.setAttribute( "mail_on_process", _mail_on_process );
 
-            //hr = _mail->get_Queue_dir( &bstr );if( !FAILED(hr) )  queue_dir   = string_from_bstr( bstr );
-            { Bstr bstr; hr = _mail->get_Smtp   ( &bstr._bstr );  if( !FAILED(hr) )  smtp_server = string_from_bstr( bstr ); }
-            { Bstr bstr; hr = _mail->get_From   ( &bstr._bstr );  if( !FAILED(hr) )  from        = string_from_bstr( bstr ); }
-            { Bstr bstr; hr = _mail->get_To     ( &bstr._bstr );  if( !FAILED(hr) )  to          = string_from_bstr( bstr ); }
-            { Bstr bstr; hr = _mail->get_Cc     ( &bstr._bstr );  if( !FAILED(hr) )  cc          = string_from_bstr( bstr ); }
-            { Bstr bstr; hr = _mail->get_Bcc    ( &bstr._bstr );  if( !FAILED(hr) )  bcc         = string_from_bstr( bstr ); }
-            { Bstr bstr; hr = _mail->get_Subject( &bstr._bstr );  if( !FAILED(hr) )  subject     = string_from_bstr( bstr ); }
+          //string queue_dir   = _mail_defaults[ "queue_dir" ];
+            string smtp_server = _mail_defaults[ "smtp"    ];
+            string from        = _mail_defaults[ "from"    ];
+            string to          = _mail_defaults[ "to"      ];
+            string cc          = _mail_defaults[ "cc"      ];
+            string bcc         = _mail_defaults[ "bcc"     ];
+            string subject     = _mail_defaults[ "subject" ];
+
+            if( _mail )
+            {
+                HRESULT hr;
+
+                //hr = _mail->get_Queue_dir( &bstr );if( !FAILED(hr) )  queue_dir   = string_from_bstr( bstr );
+                { Bstr bstr; hr = _mail->get_Smtp   ( &bstr._bstr );  if( !FAILED(hr) )  smtp_server = string_from_bstr( bstr ); }
+                { Bstr bstr; hr = _mail->get_From   ( &bstr._bstr );  if( !FAILED(hr) )  from        = string_from_bstr( bstr ); }
+                { Bstr bstr; hr = _mail->get_To     ( &bstr._bstr );  if( !FAILED(hr) )  to          = string_from_bstr( bstr ); }
+                { Bstr bstr; hr = _mail->get_Cc     ( &bstr._bstr );  if( !FAILED(hr) )  cc          = string_from_bstr( bstr ); }
+                { Bstr bstr; hr = _mail->get_Bcc    ( &bstr._bstr );  if( !FAILED(hr) )  bcc         = string_from_bstr( bstr ); }
+                { Bstr bstr; hr = _mail->get_Subject( &bstr._bstr );  if( !FAILED(hr) )  subject     = string_from_bstr( bstr ); }
+            }
+
+          //if( queue_dir   != "" )  log_element.setAttribute( "queue_dir"   , queue_dir );
+            if( smtp_server != "" )  log_element.setAttribute( "smtp"        , smtp_server );
+            if( from        != "" )  log_element.setAttribute( "mail_from"   , from );
+            if( to          != "" )  log_element.setAttribute( "mail_to"     , to );
+            if( cc          != "" )  log_element.setAttribute( "mail_cc"     , cc );
+            if( bcc         != "" )  log_element.setAttribute( "mail_bcc"    , bcc );
+            if( subject     != "" )  log_element.setAttribute( "mail_subject", subject );
         }
-
-      //if( queue_dir   != "" )  log_element.setAttribute( "queue_dir"   , queue_dir );
-        if( smtp_server != "" )  log_element.setAttribute( "smtp"        , smtp_server );
-        if( from        != "" )  log_element.setAttribute( "mail_from"   , from );
-        if( to          != "" )  log_element.setAttribute( "mail_to"     , to );
-        if( cc          != "" )  log_element.setAttribute( "mail_cc"     , cc );
-        if( bcc         != "" )  log_element.setAttribute( "mail_bcc"    , bcc );
-        if( subject     != "" )  log_element.setAttribute( "mail_subject", subject );
     }
 
     if( show.is_set( show_log ) )
@@ -1227,6 +1238,24 @@ xml::Element_ptr Prefix_log::dom_element( const xml::Document_ptr& document, con
 
 
     return log_element;
+}
+
+//-------------------------------------------------------------------Prefix_log::continue_with_text
+
+void Prefix_log::continue_with_text( const string& text )
+{
+    if( opened() )
+    {
+        z::throw_xc( __FUNCTION__, "log file shall not be opened" );
+    }
+    else
+    {
+        string b = _log_buffer;     // Sollte leer sein
+        _log_buffer = text;
+        _log_buffer += b;
+    }
+
+    if( _log_buffer != "" )  _is_logging_continuing = true;
 }
 
 //----------------------------------------------------------------------------Prefix_log::as_string

@@ -126,6 +126,7 @@ struct Prefix_log : Object, Has_log
                                                                                                   return it == _last.end()? "" : it->second; }
     string                      last_line                   () const                            { return last( _last_level ); }
 
+    void                        continue_with_text          ( const string& );
     string                      as_string                   ();
 
     void                    set_mail_on_error               ( bool b )                          { _mail_on_error = b; }
@@ -209,6 +210,7 @@ struct Prefix_log : Object, Has_log
 
     Mail_defaults              _mail_defaults;
 
+    bool                       _is_logging_continuing;
     string                     _log_buffer;                 // Für Jobprotokollausgaben bis open(), also vor dem Jobstart
 
     bool                       _remove_after_close;

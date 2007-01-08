@@ -1610,7 +1610,7 @@ bool Task::operation__end()
     return result;
 }
 
-//----------------------------------------------------------------------Task::fetch_and_occupy_orde
+//---------------------------------------------------------------------Task::fetch_and_occupy_order
 
 Order* Task::fetch_and_occupy_order( const Time& now, const string& cause )
 
@@ -1623,7 +1623,7 @@ Order* Task::fetch_and_occupy_order( const Time& now, const string& cause )
 
 
     if( !_order  
-     && !_end )    // Kann beim Aufruf aus Job::do_something() passieren 
+     && !_end   )   // Kann beim Aufruf aus Job::do_something() passieren 
     {
         if( Order* order = _job->order_queue()->fetch_and_occupy_order( now, cause, this ) )
         {
@@ -1631,6 +1631,8 @@ Order* Task::fetch_and_occupy_order( const Time& now, const string& cause )
 
             _order = order;
             _order_for_task_end = order;                // Damit bei Task-Ende im Fehlerfall noch der Auftrag gezeigt wird, s. dom_element()
+
+            _log->info( message_string( "SCHEDULER-842", _order->obj_name(), _order->state() ) );
         }
         else
         {
@@ -1647,6 +1649,7 @@ void Task::postprocess_order( bool spooler_process_result )
 {
     if( _order )
     {
+        _log->info( message_string( "SCHEDULER-843", _order->obj_name(), _order->state() ) );
         _order->postprocessing( spooler_process_result );
         remove_order();
     }
@@ -1658,6 +1661,7 @@ void Task::remove_order_after_error()
 {
     if( _order )
     {
+        _log->info( message_string( "SCHEDULER-843", _order->obj_name(), _order->state() ) );
         _order->processing_error();
         remove_order();
     }

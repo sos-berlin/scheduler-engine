@@ -3417,6 +3417,18 @@
                 <title>It's requested, that the exclusive operation will not be continued</title>
             </text>
         </message>
+
+        <message code="SCHEDULER-842" weight="info">
+            <text xml:lang="en">
+                <title>Task is going to process <p1>order</p1>, state=<p2/></title>
+            </text>
+        </message>
+        
+        <message code="SCHEDULER-843" weight="info">
+            <text xml:lang="en">
+                <title>Task has ended processing of <p1>order</p1>, state=<p2/></title>
+            </text>
+        </message>
     </messages>
     
 </messages>

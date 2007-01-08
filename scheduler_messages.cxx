@@ -376,6 +376,8 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-838", "$1. heart beat detected" },
     { "SCHEDULER-839", "This order has been replaced" },
     { "SCHEDULER-841", "It's requested, that the exclusive operation will not be continued" },
+    { "SCHEDULER-842", "Task is going to process $1, state=$2" },
+    { "SCHEDULER-843", "Task has ended processing of $1, state=$2" },
     {}
 };
 } //namespace sos
