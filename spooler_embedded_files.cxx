@@ -420,6 +420,8 @@ const char file_scheduler_xsd[] =
     "<xsd:element name=\"job_chain\">\n"
     "<xsd:complexType>\n"
     "<xsd:sequence>\n"
+    "<xsd:element name=\"note\" minOccurs=\"0\" maxOccurs=\"unbounded\"/>\n"
+    "\n"
     "<xsd:element name=\"file_order_source\" minOccurs=\"0\" maxOccurs=\"unbounded\">\n"
     "<xsd:complexType>\n"
     "<xsd:attribute name=\"directory\"         type=\"String\" use=\"required\"/>\n"
@@ -584,6 +586,31 @@ const char file_scheduler_xsd[] =
     "</xsd:attribute>\n"
     "\n"
     "<xsd:attribute name=\"timeout\" type=\"xsd:nonNegativeInteger\"/>\n"
+    "</xsd:complexType>\n"
+    "</xsd:element>\n"
+    "\n"
+    "\n"
+    "<xsd:element name=\"note\">\n"
+    "<xsd:annotation>\n"
+    "<xsd:documentation>additional note in HTML</xsd:documentation>\n"
+    "</xsd:annotation>\n"
+    "<xsd:complexType mixed=\"true\">\n"
+    "<xsd:complexContent mixed=\"true\">\n"
+    "<xsd:restriction base=\"xsd:anyType\">\n"
+    "<xsd:sequence>\n"
+    "<xsd:any namespace=\"http://www.w3.org/1999/xhtml\" processContents=\"lax\"/>\n"
+    "</xsd:sequence>\n"
+    "<xsd:attribute name=\"language\" use=\"required\">\n"
+    "<xsd:simpleType>\n"
+    "<xsd:restriction base=\"xsd:string\">\n"
+    "<xsd:length value=\"2\"/>\n"
+    "<xsd:enumeration value=\"de\"/>\n"
+    "<xsd:enumeration value=\"en\"/>\n"
+    "</xsd:restriction>\n"
+    "</xsd:simpleType>\n"
+    "</xsd:attribute>\n"
+    "</xsd:restriction>\n"
+    "</xsd:complexContent>\n"
     "</xsd:complexType>\n"
     "</xsd:element>\n"
     "\n"
@@ -1278,7 +1305,7 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1168014035 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1168347861 },
     { NULL, NULL, 0 }
 };
 

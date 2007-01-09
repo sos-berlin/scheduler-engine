@@ -1991,7 +1991,7 @@ Order* Order_queue::first_order( const Time& now ) const
             break;
         }
 
-        if( order->next_time() > now )  break;
+        if( order->_setback > now )  break;
     }
 
     if( result )  assert( !result->_is_distributed );

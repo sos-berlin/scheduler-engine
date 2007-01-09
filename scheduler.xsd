@@ -411,7 +411,7 @@
     <xsd:element name="job_chain">
         <xsd:complexType>
             <xsd:sequence>
-                <xsd:element name="note"/>
+                <xsd:element name="note" minOccurs="0" maxOccurs="unbounded"/>
                 
                 <xsd:element name="file_order_source" minOccurs="0" maxOccurs="unbounded">
                     <xsd:complexType>
