@@ -38,6 +38,7 @@ struct Directory_file_order_source : //idispatch_implementation< Directory_file_
     void                        finish                  ();
     void                        start                   ();
     bool                        request_order           ( const string& cause );
+    Order*                      fetch_and_occupy_order  ( const Time& now, const string& cause, Task* occupying_task );
     void                        withdraw_order_request  ();
     string                      obj_name                () const;
 
@@ -48,7 +49,12 @@ struct Directory_file_order_source : //idispatch_implementation< Directory_file_
     void                        close_notification      ();
     Order*                      read_directory          ( bool was_notified, const string& cause );
     void                        read_new_files_and_handle_deleted_files( const string& cause );
+    bool                        read_new_files          ();
+    bool                        clean_up_blacklisted_files();
+    bool                        clean_up_virgin_orders  ();
+    Order*                      fetch_and_occupy_order_from_new_files( const Time& now, const string& cause, Task* occupying_task );
     int                         delay_after_error       ();
+    void                        clear_new_files         ();
 
     Fill_zero                  _zero_;
     File_path                  _path;
@@ -65,6 +71,7 @@ struct Directory_file_order_source : //idispatch_implementation< Directory_file_
 
     vector< ptr<z::File_info> > _new_files;
     int                        _new_files_index;
+    int                        _new_files_count;        // _new_files.size() ohne NULL-Einträge
     Time                       _new_files_time;
 
 
@@ -78,6 +85,9 @@ struct Directory_file_order_source : //idispatch_implementation< Directory_file_
 
     typedef stdext::hash_map< string, ptr<Bad_entry> >  Bad_map;
     Bad_map                    _bad_map;
+
+    bool                       _are_blacklisted_orders_cleaned_up;
+    bool                       _are_virgin_orders_cleaned_up;
 };
 
 //-------------------------------------------------------------------------------------------------

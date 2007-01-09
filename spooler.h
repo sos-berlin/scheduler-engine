@@ -21,6 +21,9 @@
 #endif
 
 
+#define SCHEDULER_FILE_ORDER_GENERATE_VIRGINS 0
+
+
 #ifdef SPOOLER_USE_MSXML
 #   include "../zschimmer/xml_msxml.h"
     using namespace zschimmer::xml_msxml;

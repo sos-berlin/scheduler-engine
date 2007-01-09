@@ -2168,15 +2168,12 @@ void Cluster::assert_database_integrity( const string& message_text )
                                       "TABLE " + _spooler->_clusters_tablename, 
                                       message_text );
     }
-
-    //return ok;
 }
 
 //--------------------------------------------------------------Cluster::check_empty_member_record
 
 void Cluster::check_empty_member_record()
 {
-    time_t now        = ::time(NULL);
     Record record;
     bool   second_try = false;
 

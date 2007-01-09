@@ -552,31 +552,15 @@
                 <xsl:attribute name="class">task</xsl:attribute>
                 <xsl:choose>
                     <xsl:when test=" not( @id ) ">
-                        <td>
+                        <td colspan="3">
                             <span style="margin-left: 2ex">
                                 <xsl:choose>
                                     <xsl:when test="../../@waiting_for_process='yes'">
                                         <span class="task_error">Needs process!</span>
                                     </xsl:when>
-                                    <xsl:otherwise>
-                                        <!--<xsl:choose>
-                                            <xsl:when test="../../@next_start_time">
-                                                Next start
-                                            </xsl:when>
-                                            <xsl:otherwise>-->
-                                        <!--
-                                            </xsl:otherwise>
-                                        </xsl:choose>-->
-                                    </xsl:otherwise>
                                 </xsl:choose>
                             </span>
                         </td>
-
-                        <td align="right">
-                            <!--<xsl:value-of select="../../@next_start_time__xslt_datetime_diff"  disable-output-escaping="yes"/>-->
-                        </td>
-
-                        <td></td>
 
                         <xsl:choose>
                             <xsl:when test="../../@order='yes'">
@@ -870,7 +854,7 @@
                         <xsl:for-each select="file_order_source">
 
                             <xsl:element name="tr">
-                                <xsl:if test="$single ">
+                                <xsl:if test="$single">
                                     <xsl:attribute name="style">
                                         <xsl:value-of select="$tr_style"/>
                                     </xsl:attribute>
@@ -885,12 +869,12 @@
                                 <td style="padding-left: 2ex">Source</td>
 
                                 <td colspan="2">
-                                    <b>
-                                        <xsl:value-of select="@directory"/>
-                                    </b>
+                                    <xsl:value-of select="@directory"/>
 
-                                    <xsl:text> &#160; </xsl:text>
-                                    regex=<xsl:value-of select="@regex"/>
+                                    <xsl:if test="@regex != ''">
+                                        <xsl:text> &#160; </xsl:text>
+                                        regex=<xsl:value-of select="@regex"/>
+                                    </xsl:if>
                                 </td>
 
                                 <td colspan="2">
@@ -1013,6 +997,11 @@
                                 <td>
                                     <xsl:apply-templates select="$job/@state"/>
 
+                                    <xsl:if test="$job/@waiting_for_process='yes'">
+                                        <span style="margin-left: 1ex; color: red">needs process</span>
+                                    </xsl:if>
+
+
                                     <xsl:choose>
                                         <xsl:when test="$job/tasks/@count &gt; 0">
                                             <xsl:text>, </xsl:text>
@@ -1131,19 +1120,15 @@
 
                     <xsl:for-each select="/spooler/answer/state/jobs/job [ not( @order='yes' ) ]">
                         <xsl:element name="tr">
-                            <xsl:attribute name="class">
-                                job
-                            </xsl:attribute>
-                            <xsl:attribute name="style">
-                                cursor: default;
-                            </xsl:attribute>
+                            <xsl:attribute name="class">job</xsl:attribute>
+                            <xsl:attribute name="style">cursor: default;</xsl:attribute>
                             <xsl:attribute name="onmouseover">
-                                this.className = "job_hover";
-                                this.style.cursor = "pointer";
+                                <xsl:text>this.className = "job_hover";</xsl:text>
+                                <xsl:text>this.style.cursor = "pointer";</xsl:text>
                             </xsl:attribute>
                             <xsl:attribute name="onmouseout" >
-                                this.className = "job";
-                                this.style.cursor = "default";
+                                <xsl:text>this.className = "job";</xsl:text>
+                                <xsl:text>this.style.cursor = "default";</xsl:text>
                             </xsl:attribute>
                             <xsl:attribute name="onclick">call_error_checked( show_job_details, '<xsl:value-of select="@job"/>' )</xsl:attribute>
                             
@@ -1158,6 +1143,7 @@
                             
                             <td colspan="3">
                                 <xsl:apply-templates select="$job/@state"/>
+                                <xsl:text> </xsl:text>
                                 
                                 <xsl:choose>
                                     <xsl:when test="$job/tasks/@count>0">
@@ -1178,6 +1164,10 @@
                                         </xsl:if>
                                     </xsl:otherwise>
                                 </xsl:choose>
+                                
+                                <xsl:if test="$job/@waiting_for_process='yes'">
+                                    <span style="margin-left: 1ex; color: red">, needs process</span>
+                                </xsl:if>
                             </td>
                         </xsl:element>
                     </xsl:for-each>

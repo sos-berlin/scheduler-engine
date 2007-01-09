@@ -411,6 +411,8 @@
     <xsd:element name="job_chain">
         <xsd:complexType>
             <xsd:sequence>
+                <xsd:element name="note"/>
+                
                 <xsd:element name="file_order_source" minOccurs="0" maxOccurs="unbounded">
                     <xsd:complexType>
                         <xsd:attribute name="directory"         type="String" use="required"/>
@@ -575,6 +577,31 @@
             </xsd:attribute>
             
             <xsd:attribute name="timeout" type="xsd:nonNegativeInteger"/>
+        </xsd:complexType>
+    </xsd:element>
+
+
+    <xsd:element name="note">
+        <xsd:annotation>
+            <xsd:documentation>additional note in HTML</xsd:documentation>
+        </xsd:annotation>
+        <xsd:complexType mixed="true">
+            <xsd:complexContent mixed="true">
+                <xsd:restriction base="xsd:anyType">
+                    <xsd:sequence>
+                        <xsd:any namespace="http://www.w3.org/1999/xhtml" processContents="lax"/>
+                    </xsd:sequence>
+                    <xsd:attribute name="language" use="required">
+                        <xsd:simpleType>
+                            <xsd:restriction base="xsd:string">
+                                <xsd:length value="2"/>
+                                <xsd:enumeration value="de"/>
+                                <xsd:enumeration value="en"/>
+                            </xsd:restriction>
+                        </xsd:simpleType>
+                    </xsd:attribute>
+                </xsd:restriction>
+            </xsd:complexContent>
         </xsd:complexType>
     </xsd:element>
 

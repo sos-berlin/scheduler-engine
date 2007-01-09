@@ -186,7 +186,7 @@ struct Order : Com_order,
     enum Update_option { update_anyway, update_not_occupied, update_and_release_occupation };
     bool                        db_update               ( Update_option u )                         { return db_update2( u, false ); }
     bool                        db_update2              ( Update_option, bool delet, Transaction* outer_transaction = NULL );
-    bool                        db_delete               ( Update_option u )                         { return db_update2( u, true ); }
+    bool                        db_delete               ( Update_option u, Transaction* outer_transaction = NULL )              { return db_update2( u, true, outer_transaction ); }
     bool                        db_handle_modified_order( Transaction* );
 
     string                      db_read_clob            ( Read_transaction*, const string& column_name );
@@ -297,6 +297,7 @@ struct Order_source : Scheduler_object, Event_operation
     virtual void                finish                  ();
     virtual void                start                   ()                                          = 0;
     virtual bool                request_order           ( const string& cause )                     = 0;
+    virtual Order*              fetch_and_occupy_order  ( const Time& now, const string& cause , Task* occupying_task ) = 0;
     virtual void                withdraw_order_request  ()                                          = 0;
 
     virtual xml::Element_ptr    dom_element             ( const xml::Document_ptr&, const Show_what& ) = 0;
@@ -305,7 +306,7 @@ struct Order_source : Scheduler_object, Event_operation
     Fill_zero                  _zero_;
     Job_chain*                 _job_chain;
     Order::State               _next_state;
-    Job*                       _next_job;
+    Order_queue*               _next_order_queue;
 };
 
 //------------------------------------------------------------------------------------Order_sources
@@ -423,7 +424,9 @@ struct Job_chain : Com_job_chain, Scheduler_object
     void                        unregister_order        ( Order* );
     void                        add_to_blacklist        ( Order* );
     void                        remove_from_blacklist   ( Order* );
-    stdext::hash_set<string>    blacklist_id_set        ();
+    bool                        is_on_blacklist         ( const string& order_id );
+    Order*                      blacklisted_order_or_null( const string& order_id );
+    stdext::hash_set<string>    db_blacklist_id_set     ();
 
     int                         order_count             ( Read_transaction* );
     bool                        has_order               () const;
@@ -496,6 +499,8 @@ struct Order_queue : Com_order_queue
     void                        add_order               ( Order*, Do_log = do_log );
     void                        remove_order            ( Order*, Do_log = do_log );
     void                        reinsert_order          ( Order* );
+    void                        register_order_source   ( Order_source* );
+    void                        unregister_order_source ( Order_source* );
     int                         order_count             ( Read_transaction*, const Job_chain* = NULL );
     bool                        empty                   ()                                          { return _queue.empty(); }
     bool                        empty                   ( const Job_chain* job_chain )              { return order_count( (Read_transaction*)NULL, job_chain ) == 0; }  // Ohne Datenbank
@@ -503,16 +508,18 @@ struct Order_queue : Com_order_queue
     Order*                      fetch_order             ( const Time& now );
     Order*                      load_and_occupy_next_distributed_order_from_database( Task* occupying_task, const Time& now );
     bool                        has_order               ( const Time& now )                         { return first_order( now ) != NULL; }
-    bool                        request_order           ( const Time& now );
+    bool                        request_order           ( const Time& now, const string& cause );
     void                        withdraw_order_request  ();
     Order*                      fetch_and_occupy_order  ( const Time& now, const string& cause, Task* occupying_task );
     Time                        next_time               ();
     bool                        is_order_requested      ()                                          { return _is_order_requested; }
-    void                    set_next_announced_order_time( const Time&, bool is_now );
-    Time                        next_announced_order_time();
+    void                    set_next_announced_distributed_order_time( const Time&, bool is_now );
+    Time                        next_announced_distributed_order_time();
+    void                        tip_for_new_order       ();
   //void                        update_priorities       ();
   //ptr<Order>                  order_or_null           ( const Order::Id& );
     Job*                        job                     () const                                    { return _job; }
+    bool                        is_in_any_distributed_job_chain();
     xml::Element_ptr            dom_element             ( const xml::Document_ptr&, const Show_what& , Job_chain* );
     string                      db_where_expression_for_distributed_orders();
     string                      db_where_expression_for_job_chain( const Job_chain* );
@@ -534,7 +541,11 @@ struct Order_queue : Com_order_queue
     Queue                      _queue;
 
     bool                       _is_order_requested;
-    Time                       _next_announced_order_time;      // Gültig, wenn _is_order_requested
+    Time                       _next_announced_distributed_order_time;      // Gültig, wenn _is_order_requested
+    bool                       _has_tip_for_new_order;
+
+    typedef list< Order_source* >  Order_source_list;
+    Order_source_list             _order_source_list;    // Muss leer sein bei ~Job!
 
   //int                        _lowest_priority;        // Zur Optimierung
   //int                        _highest_priority;       // Zur Optimierung
@@ -547,7 +558,9 @@ struct Order_subsystem : Object, Scheduler_object
     enum Load_order_flags
     {
         lo_none,
-        lo_lock
+        lo_lock = 0x01,
+        lo_blacklisted = 0x02,
+        lo_blacklisted_lock = lo_blacklisted | lo_lock
     };
 
 

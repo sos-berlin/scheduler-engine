@@ -439,7 +439,7 @@ void Log::log2( Log_level level, bool log_to_files, const string& prefix, const 
             case log_debug: strcpy ( level_buffer, " [debug]  " );  break;
             case log_none : strcpy ( level_buffer, " [none]   " );  break;          // Passiert, wenn nur das scheduler.log beschrieben werden soll (log_to_files==false)
             case log_unknown:strcpy( level_buffer, " [unknown]" );  break;          // Sollte nicht passieren
-            default:        sprintf( level_buffer, " [debug%d] ", (int)-level );
+            default:        snprintf( level_buffer, sizeof level_buffer, " [debug%d] ", (int)-level );
         }
 
 

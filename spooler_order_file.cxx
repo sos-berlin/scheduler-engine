@@ -19,6 +19,7 @@ using stdext::hash_map;
 namespace sos {
 namespace scheduler {
 
+
 //--------------------------------------------------------------------------------------------const
 
 const string    scheduler_file_path_variable_name         = "scheduler_file_path";
@@ -200,10 +201,10 @@ void Directory_file_order_source::close()
 {
     close_notification();
 
-    if( _next_job ) 
+    if( _next_order_queue ) 
     {
-        _next_job->unregister_order_source( this );
-        _next_job = NULL;
+        _next_order_queue->unregister_order_source( this );
+        _next_order_queue = NULL;
     }
 
     _job_chain = NULL;   // close() wird von ~Job_chain gerufen, also kann Job_chain ungültig sein
@@ -230,19 +231,21 @@ xml::Element_ptr Directory_file_order_source::dom_element( const xml::Document_p
         {
             xml::Element_ptr files_element = document.createElement( "files" );
             files_element.setAttribute( "snapshot_time", _new_files_time.as_string() );
-            files_element.setAttribute( "count"        , (int)_new_files.size() );
+            files_element.setAttribute( "count"        , _new_files_count );
 
             if( show.is_set( show_order_source_files ) )
             {
                 for( int i = _new_files_index, j = show._max_orders; i < _new_files.size() && j > 0; i++, j-- )
                 {
                     z::File_info* f = _new_files[ i ];
+                    if( f )
+                    {
+                        xml::Element_ptr file_element = document.createElement( "file" );
+                        file_element.setAttribute( "last_write_time", Time( f->last_write_time() ).xml_value( Time::without_ms ) + "Z" );
+                        file_element.setAttribute( "path"           , f->path() );
 
-                    xml::Element_ptr file_element = document.createElement( "file" );
-                    file_element.setAttribute( "last_write_time", Time( f->last_write_time() ).xml_value( Time::without_ms ) + "Z" );
-                    file_element.setAttribute( "path"           , f->path() );
-
-                    files_element.appendChild( file_element );
+                        files_element.appendChild( file_element );
+                    }
                 }
             }
 
@@ -384,17 +387,17 @@ void Directory_file_order_source::close_notification()
 
 void Directory_file_order_source::finish()
 {
-    Order_source::finish();     // Setzt _next_job
-    assert( _next_job );
+    Order_source::finish();     // Setzt _next_order_queue
+    assert( _next_order_queue );
 
-    _next_job->register_order_source( this );
+    _next_order_queue->register_order_source( this );
 }
 
 //---------------------------------------------------------------Directory_file_order_source::start
 
 void Directory_file_order_source::start()
 {
-    if( _next_job->name() == file_order_sink_job_name )  z::throw_xc( "SCHEDULER-342", _job_chain->obj_name() );
+    if( _next_order_queue->job()->name() == file_order_sink_job_name )  z::throw_xc( "SCHEDULER-342", _job_chain->obj_name() );
 
     _expecting_request_order = true;            // Auf request_order() warten
     set_async_next_gmtime( double_time_max );
@@ -410,11 +413,25 @@ bool Directory_file_order_source::request_order( const string& cause )
     bool result = NULL;
 
     if( _expecting_request_order 
-     || async_next_gmtime_reached() )       // Das, weil die Jobs bei jeder Gelegenheit do_something() durchlaufen, auch wenn nichts anliegt (z.B. bei TCP-Verkehr)
+     || async_next_gmtime_reached() )       // 2007-01-09 nicht länger: Das, weil die Jobs bei jeder Gelegenheit do_something() durchlaufen, auch wenn nichts anliegt (z.B. bei TCP-Verkehr)
     {
         Z_LOG2( "scheduler.file_order", __FUNCTION__ << " cause=" << cause << "\n" );
 
-        async_wake();          int WIRD_DAS_PAUSENLOS_GERUFEN;
+        result = _new_files_index < _new_files.size();
+
+        if( !result )
+        {
+            //if( _job_chain->is_distributed() )
+            //{
+            //    result = read_new_files();
+            //}
+            //else
+            {
+                async_wake();
+            }
+        }
+
+        _expecting_request_order = false;
         //Order* order = read_directory( false, cause );
         //if( order )  
         //{
@@ -440,12 +457,43 @@ void Directory_file_order_source::withdraw_order_request()
     set_async_next_gmtime( double_time_max );
 }
 
+//---------------------------------------------------------Directory_file_order_source::fetch_order
+
+Order* Directory_file_order_source::fetch_and_occupy_order( const Time& now, const string& cause, Task* occupying_task )
+{
+    Order* result = NULL;
+
+    //clean_up_blacklisted_files();
+    //clean_up_virgin_orders();
+
+    while( !result )
+    {
+        Order* order = fetch_and_occupy_order_from_new_files( now, cause, occupying_task );
+        
+        if( !order )
+        {
+            read_directory( false, __FUNCTION__ );
+            //read_new_files();
+            //clean_up_blacklisted_files();
+            //clean_up_virgin_orders();
+
+            order = fetch_and_occupy_order_from_new_files( now, cause, occupying_task );
+        }
+
+        if( !order )  break;
+
+        result = order;
+    }
+
+    return result;
+}
+
 //------------------------------------------------------Directory_file_order_source::read_directory
 
 Order* Directory_file_order_source::read_directory( bool was_notified, const string& cause )
 {
     Order*       result            = NULL;
-    Order_queue* first_order_queue = _next_job->order_queue();
+    Order_queue* first_order_queue = _next_order_queue;
 
 
     //_spooler->assert_has_exclusiveness( obj_name() + " " + __FUNCTION__ );
@@ -464,66 +512,42 @@ Order* Directory_file_order_source::read_directory( bool was_notified, const str
 #           endif
 
 
-            if( !_job_chain->is_distributed()  &&  first_order_queue->has_order( Time(0) ) )      // Auftragswarteschlange ist nicht leer?
+#         if SCHEDULER_FILE_ORDER_GENERATE_VIRGINS
+            if( first_order_queue->has_order( Time(0) ) )      // Auftragswarteschlange ist nicht leer?
             {
                 // Erst die vorhandenen Aufträge abarbeiten lassen und nächsten Aufruf von request_order() abwarten
             }
             else
+#         endif
             {
                 if( _new_files_index < _new_files.size() )     // Noch Dateien im Puffer
                 {
-                    log()->info( message_string( "SCHEDULER-986", _new_files_time.as_string( Time::without_ms ) ) );
+#                   if SCHEDULER_FILE_ORDER_GENERATE_VIRGINS
+                        log()->info( message_string( "SCHEDULER-986", _new_files_time.as_string( Time::without_ms ) ) );
+#                   endif
                 }
                 else
                 {
-                    read_new_files_and_handle_deleted_files( cause );
+                    //read_new_files_and_handle_deleted_files( cause );
+                    read_new_files();
+                    clean_up_blacklisted_files();
+                    clean_up_virgin_orders();
+                    while( _new_files_index < _new_files.size()  &&  _new_files[ _new_files_index ] == NULL )  _new_files_index++;
                 }
 
-                int n = min( _new_files_index + _max_orders, (int)_new_files.size() );
-                for(; _new_files_index < n; _new_files_index++ )
-                {
-                    z::File_info* new_file = _new_files[ _new_files_index ];
-                    File_path     path     = new_file->path();
-
-                    try
+#               if SCHEDULER_FILE_ORDER_GENERATE_VIRGINS
+                    if( !_job_chain->is_distributed() )
                     {
-                        ptr<Order> order = new Order( _spooler );
-
-                        //order->inhibit_distribution();
-                        order->set_file_path( path );
-                        order->set_state( _next_state );
-
-                        string date = Time( new_file->last_write_time() ).as_string( Time::without_ms ) + " UTC";   // localtime_from_gmtime() rechnet alte Sommerzeit-Daten in Winterzeit um
-                        log()->info( message_string( "SCHEDULER-983", order->obj_name(), "written at " + date ) );
-
-                        order->place_in_job_chain( _job_chain );
-
-                        if( !result )  result = order;      // Der erste, sofort ausführbare Auftrag
-
-                        _new_files[ _new_files_index ] = NULL;
-
-                        if( _bad_map.find( path ) != _bad_map.end() )   // Zurzeit nicht denkbar, weil es nur zu lange Pfade betrifft
+                        int n = min( _new_files_index + _max_orders, (int)_new_files.size() );
+                        while( _new_files_index < n )
                         {
-                            _bad_map.erase( path );
-                            log()->info( message_string( "SCHEDULER-347", path ) );
+                            Order* order = fetch_and_occupy_order_from_new_files();
+                            if( !result )  order = result;
                         }
+                        if( n < _new_files.size() )  log()->info( message_string( "SCHEDULER-985", _new_files.size() - n ) );
                     }
-                    catch( exception& x )   // Möglich bei für Order.id zu langem Pfad
-                    {
-                        if( _bad_map.find( path ) == _bad_map.end() )
-                        {
-                            log()->error( x.what() );
-                            z::Xc xx ( "SCHEDULER-346", path );
-                            log()->warn( xx.what() );
-                            _bad_map[ path ] = Z_NEW( Bad_entry( path, x ) );
+#               endif
 
-                            xx.append_text( x.what() );
-                            send_mail( evt_file_order_error, &xx );
-                        }
-                    }
-                }
-
-                if( n < _new_files.size() )  log()->info( message_string( "SCHEDULER-985", _new_files.size() - n ) );
             }
 
             if( _directory_error )
@@ -541,8 +565,7 @@ Order* Directory_file_order_source::read_directory( bool was_notified, const str
         }
         catch( exception& x )
         {
-            _new_files.clear();
-            _new_files_index = 0;
+            clear_new_files();
 
             //if( try_index < max_tries )
             //{
@@ -589,21 +612,157 @@ Order* Directory_file_order_source::read_directory( bool was_notified, const str
     return result;
 }
 
+//---------------------------------------------Directory_file_order_source::fetch_and_occupy_order_from_new_files
+
+Order* Directory_file_order_source::fetch_and_occupy_order_from_new_files( const Time& now, const string&, Task* occupying_task )
+{
+    Order* result = NULL;
+
+
+    while( !result  &&  _new_files_index < _new_files.size() )
+    {
+        if( z::File_info* new_file = _new_files[ _new_files_index ] )
+        {
+            File_path path = new_file->path();
+
+            try
+            {
+                if( file_exists( path )  &&  !_job_chain->order_or_null( path ) )
+                {
+                    ptr<Order> order = new Order( _spooler );
+
+                    order->set_file_path( path );
+                    order->set_state( _next_state );
+
+                    string date = Time( new_file->last_write_time() ).as_string( Time::without_ms ) + " UTC";   // localtime_from_gmtime() rechnet alte Sommerzeit-Daten in Winterzeit um
+
+                    bool ok = order->try_place_in_job_chain( _job_chain );
+                    // !ok ==> Auftrag ist bereits vorhanden
+
+                    if( ok  &&  order->is_distributed() ) 
+                    {
+                        ok = order->db_occupy_for_processing();
+                        if( ok )  ok = order->occupy_for_task( occupying_task, now );
+                        if( ok )  _job_chain->add_order( order );
+                    }
+
+                    if( ok )
+                    {
+                        result = order;
+                        log()->info( message_string( "SCHEDULER-983", order->obj_name(), "written at " + date ) );
+                    }
+                }
+
+                _new_files[ _new_files_index ] = NULL;
+
+                if( _bad_map.find( path ) != _bad_map.end() )   // Zurzeit nicht denkbar, weil es nur zu lange Pfade betrifft
+                {
+                    _bad_map.erase( path );
+                    log()->info( message_string( "SCHEDULER-347", path ) );
+                }
+
+            }
+            catch( exception& x )   // Möglich bei für Order.id zu langem Pfad
+            {
+                if( _bad_map.find( path ) == _bad_map.end() )
+                {
+                    log()->error( x.what() );
+                    z::Xc xx ( "SCHEDULER-346", path );
+                    log()->warn( xx.what() );
+                    _bad_map[ path ] = Z_NEW( Bad_entry( path, x ) );
+
+                    xx.append_text( x.what() );
+                    send_mail( evt_file_order_error, &xx );
+                }
+            }
+        }
+
+        _new_files_index++;
+    }
+
+    return result;
+}
+
 //-----------------------------Directory_file_order_source::read_new_files_and_handle_deleted_files
 
-void Directory_file_order_source::read_new_files_and_handle_deleted_files( const string& cause )
+//void Directory_file_order_source::read_new_files_and_handle_deleted_files( const string& cause )
+//{
+//    hash_set<string> blacklisted_files         = _job_chain->blacklist_id_set();       int EXCEPTION;
+//    hash_set<string> removed_blacklisted_files = blacklisted_files;
+//    hash_set<string> virgin_known_files;
+//
+//
+//    Z_LOG2( "scheduler.file_order", __FUNCTION__ << "  " << _path << " wird gelesen wegen \"" << cause << "\" ...\n" );
+//
+//
+//    read_new_files();
+//
+//    // removed_blacklisted_files: 
+//    // Aufträge in der Blacklist, deren Dateien nicht mehr da sind, entfernen
+//
+//    Z_FOR_EACH( hash_set<string>, removed_blacklisted_files, it ) 
+//    {
+//        ptr<Order> removed_file_order;
+//
+//        if( _job_chain->is_distributed() )
+//        {
+//            hash_set<string>::iterator it2 = blacklisted_files.find( *it );
+//            if( it2 != blacklisted_files.end() )
+//            {
+//                removed_file_order = order_subsystem()->try_load_order_from_database( (Transaction*)NULL, _job_chain->name(), *it2 );
+//            }
+//        }
+//        else
+//        {
+//            Job_chain::Blacklist_map::iterator it2 = _job_chain->_blacklist_map.find( *it );
+//            if( it2 != _job_chain->_blacklist_map.end() )
+//            {
+//                removed_file_order = it2->second;
+//            }
+//        }
+//
+//        if( removed_file_order )
+//        {
+//            removed_file_order->log()->info( message_string( "SCHEDULER-981" ) );   // "File has been removed"
+//            removed_file_order->remove_from_job_chain();   
+//        }
+//    }
+//
+//
+//    // virgin_known_files:
+//    // Jungfräuliche Aufträge, denen die Datei abhanden gekommen sind, entfernen
+//
+//    Order_queue::Queue* queue = &_next_order_queue->_queue;    // Zugriff mit Ausnahmegenehmigung. In _setback_queue verzögerte werden nicht beachtet
+//    for( Order_queue::Queue::iterator it = queue->begin(); it != queue->end(); )
+//    {
+//        Order* order = *it++;  // Hier schon weiterschalten, bevor it durch remove_from_job_chain ungültig wird
+//
+//        if( order->is_virgin()  &&  virgin_known_files.find( order->string_id() ) == virgin_known_files.end()  &&  order->is_file_order() )
+//        {
+//            order->log()->warn( message_string( "SCHEDULER-982" ) );
+//            order->remove_from_job_chain();
+//        }
+//    }
+//}
+
+//-----------------------------------------------------Directory_file_order_source::clear_new_files
+
+void Directory_file_order_source::clear_new_files()
 {
-    hash_set<string> blacklisted_files         = _job_chain->blacklist_id_set();       int EXCEPTION;
-    hash_set<string> removed_blacklisted_files = blacklisted_files;
-    hash_set<string> virgin_known_files;
-
-
-    Z_LOG2( "scheduler.file_order", __FUNCTION__ << "  " << _path << " wird gelesen wegen \"" << cause << "\" ...\n" );
-
-
     _new_files.clear();
     _new_files.reserve( 1000 );
     _new_files_index = 0;
+    _new_files_count = 0;
+
+    _are_blacklisted_orders_cleaned_up = false;
+    _are_virgin_orders_cleaned_up       = false;
+}
+
+//------------------------------------------------------Directory_file_order_source::read_new_files
+
+bool Directory_file_order_source::read_new_files()
+{
+    clear_new_files();
     _new_files_time  = Time::now();
 
 
@@ -612,73 +771,117 @@ void Directory_file_order_source::read_new_files_and_handle_deleted_files( const
         ptr<z::File_info> file_info = dir.get();
         if( !file_info )  break;
 
-        string path = file_info->path();
-
-        if( Order* order = _job_chain->order_or_null( path ) ) 
-        {
-            removed_blacklisted_files.erase( path );
-            if( order->is_virgin() )  virgin_known_files.insert( path );
-        }
-        else
-        {
-            file_info->last_write_time();     // last_write_time füllen für sort, quick_last_write_less()
-            _new_files.push_back( file_info );
-        }
+        file_info->last_write_time();       // last_write_time füllen für sort, quick_last_write_less()
+        _new_files.push_back( file_info );
+        _new_files_count++;
     }
 
     Z_LOG2( "scheduler.file_order", __FUNCTION__ << "  " << _path << "  " << _new_files.size() << " Dateinamen gelesen\n" );
-    //log()->info( "******* WATCHING " + _path + " ******* " + cause );   // TEST
-
 
     sort( _new_files.begin(), _new_files.end(), zschimmer::File_info::quick_last_write_less );
 
+    return !_new_files.empty();
+}
 
-    // removed_blacklisted_files: 
-    // Aufträge in der Blacklist, deren Dateien nicht mehr da sind, entfernen
+//------------------------------------------Directory_file_order_source::clean_up_blacklisted_files
 
-    Z_FOR_EACH( hash_set<string>, removed_blacklisted_files, it ) 
+bool Directory_file_order_source::clean_up_blacklisted_files()
+{
+    bool result = false;
+
+    if( !_are_blacklisted_orders_cleaned_up )
     {
-        ptr<Order> removed_file_order;
+        hash_set<string> blacklisted_files = _job_chain->db_blacklist_id_set();       int EXCEPTION;
 
-        if( _job_chain->is_distributed() )
+        if( !blacklisted_files.empty() )
         {
-            hash_set<string>::iterator it2 = blacklisted_files.find( *it );
-            if( it2 != blacklisted_files.end() )
+            hash_set<string> removed_blacklisted_files = blacklisted_files;
+
+            for( int i = 0; i < _new_files.size(); i++ )
             {
-                removed_file_order = order_subsystem()->try_load_order_from_database( (Transaction*)NULL, _job_chain->name(), *it2 );
+                if( z::File_info* new_file = _new_files[ _new_files_index ] )
+                    removed_blacklisted_files.erase( new_file->path() );
+            }
+
+
+            Z_FOR_EACH( hash_set<string>, removed_blacklisted_files, it ) 
+            {
+                string path = *it;
+
+                try
+                {
+                    if( ptr<Order> order = _job_chain->order_or_null( path ) )  // Kein Datenbankzugriff 
+                    {
+                        order->log()->info( message_string( "SCHEDULER-981" ) );   // "File has been removed"
+                        order->remove_from_job_chain();   
+                    }
+                    else
+                    if( _job_chain->is_distributed() )
+                    {
+                        Transaction ta ( _spooler->_db ); 
+
+                        ptr<Order> order = order_subsystem()->try_load_order_from_database( &ta, _job_chain->name(), path, Order_subsystem::lo_blacklisted_lock );
+                        order->db_delete( Order::update_not_occupied, &ta );
+
+                        ta.commit( __FUNCTION__ );
+                    }
+                }
+                catch( exception& x )
+                {
+                    _log->error( S() << x.what() << ", in " << __FUNCTION__ << ", " << path << "\n" );
+                }
             }
         }
-        else
+
+        _are_blacklisted_orders_cleaned_up = true;
+    }
+
+    return result;
+}
+
+//----------------------------------------------Directory_file_order_source::clean_up_virgin_orders
+
+bool Directory_file_order_source::clean_up_virgin_orders()
+
+// Jungfräuliche Aufträge, denen die Datei abhanden gekommen sind, entfernen
+
+{
+    bool result = false;
+
+#if SCHEDULER_FILE_ORDER_GENERATE_VIRGINS
+    if( !_are_virgin_orders_cleaned_up )
+    {
+        hash_set<string> virgin_new_files;
+
+        for( int i = 0; i < _new_files.size(); i++ )
         {
-            Job_chain::Blacklist_map::iterator it2 = _job_chain->_blacklist_map.find( *it );
-            if( it2 != _job_chain->_blacklist_map.end() )
+            if( z::File_info* new_file = _new_files[ i ] )
             {
-                removed_file_order = it2->second;
+                string path  = new_file->path();
+                Order* order = _job_chain->order_or_null( path );   // Kein Datenbankzugriff, also nicht für verteilte Aufträge
+
+                if( order  &&  order->is_virgin() )  virgin_new_files.insert( path );
             }
         }
 
-        if( removed_file_order )
+
+        Order_queue::Queue* queue = &_next_order_queue->_queue;    // Zugriff mit Ausnahmegenehmigung. In _setback_queue verzögerte werden nicht beachtet
+        for( Order_queue::Queue::iterator it = queue->begin(); it != queue->end(); )
         {
-            removed_file_order->log()->info( message_string( "SCHEDULER-981" ) );   // "File has been removed"
-            removed_file_order->remove_from_job_chain();   
+            Order* order = *it++;  // Hier schon weiterschalten, bevor it durch remove_from_job_chain ungültig wird
+
+            if( order->is_virgin()  &&  virgin_new_files.find( order->string_id() ) == virgin_new_files.end()  &&  order->is_file_order() )
+            {
+                order->log()->warn( message_string( "SCHEDULER-982" ) );
+                order->remove_from_job_chain();
+            }
         }
+
+        _are_virgin_orders_cleaned_up = true;
     }
+#endif
 
-
-    // virgin_known_files:
-    // Jungfräuliche Aufträge, denen die Datei abhanden gekommen sind, entfernen
-
-    Order_queue::Queue* queue = &_next_job->order_queue()->_queue;    // Zugriff mit Ausnahmegenehmigung. In _setback_queue verzögerte werden nicht beachtet
-    for( Order_queue::Queue::iterator it = queue->begin(); it != queue->end(); )
-    {
-        Order* order = *it++;  // Hier schon weiterschalten, bevor it durch remove_from_job_chain ungültig wird
-
-        if( order->is_virgin()  &&  virgin_known_files.find( order->string_id() ) == virgin_known_files.end()  &&  order->is_file_order() )
-        {
-            order->log()->warn( message_string( "SCHEDULER-982" ) );
-            order->remove_from_job_chain();
-        }
-    }
+    return result;
 }
 
 //-----------------------------------------------------------Directory_file_order_source::send_mail
@@ -783,6 +986,8 @@ bool Directory_file_order_source::async_continue_( Async_operation::Continue_fla
     _notification_event.reset();
 
     read_directory( was_notified, cause );
+
+    if( _new_files_index < _new_files.size() )  _next_order_queue->tip_for_new_order();
 
     return true;
 }

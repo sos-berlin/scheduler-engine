@@ -2392,11 +2392,11 @@
             </text>
         </message>
 
-        <message code="SCHEDULER-382">
+        <!--message code="SCHEDULER-382">
             <text xml:lang="en">
-                <title>File orders can not be distributed</title>
+                <title></title>
             </text>
-        </message>
+        </message-->
 
         <message code="SCHEDULER-383">
             <text xml:lang="en">
@@ -3092,7 +3092,7 @@
 
         <message code="SCHEDULER-983">
             <text xml:lang="en">
-                <title>New file, <p2>written at ...</p2>: adding <p1>Order</p1></title>
+                <title>New file, <p2>written at ...</p2>: Added <p1>order</p1></title>
             </text>
         </message>
 

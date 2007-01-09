@@ -61,7 +61,7 @@ void Process::remove_module_instance( Module_instance* )
         if( _process_class )  
         {
             _process_class->remove_process( this );
-            _spooler->signal( "Process available" );
+            //_spooler->signal( "Process available" );
         }
     }
 }
@@ -243,6 +243,13 @@ void Process_class::remove_process( Process* process )
             { 
                 process->_process_class = NULL; 
                 _process_list.erase( p ); 
+
+                if( !_waiting_jobs.empty() )
+                {
+                    Job* job = *_waiting_jobs.rbegin();
+                    job->signal( S() << __FUNCTION__  << "  " << process->obj_name() );
+                }
+
                 return; 
             }
         }
@@ -315,8 +322,6 @@ bool Process_class::process_available( Job* for_job )
     // Warten Jobs auf einen freien Prozess? 
     // Dann liefern wir nur true, wenn dieser Job der erste in der Warteschlange ist.
     return *_waiting_jobs.rbegin() == for_job;
-
-    //FOR_EACH( Job_list, _waiting_jobs, j )  if( *j == job )  return true;
 }
 
 //---------------------------------------------------------------Process_class::enqueue_waiting_job
@@ -324,14 +329,20 @@ bool Process_class::process_available( Job* for_job )
 void Process_class::enqueue_waiting_job( Job* job )
 {
     _waiting_jobs.push_back( job );
-    _spooler->log()->debug9( message_string( "SCHEDULER-949", job->obj_name() ) );   // " ist für einen verfügbaren Prozess vorgemerkt" );
+    _spooler->log()->info( message_string( "SCHEDULER-949", job->obj_name() ) );   // " ist für einen verfügbaren Prozess vorgemerkt" );
 }
 
 //----------------------------------------------------------------Process_class::remove_waiting_job
 
-void Process_class::remove_waiting_job( Job* job )
+void Process_class::remove_waiting_job( Job* waiting_job )
 {
-    _waiting_jobs.remove( job );
+    _waiting_jobs.remove( waiting_job );
+
+    if( _process_list.size() < _max_processes  &&  !_waiting_jobs.empty() )
+    {
+        Job* job = *_waiting_jobs.rbegin();
+        job->signal( S() << __FUNCTION__ << "  " << waiting_job->obj_name() );
+    }
 }
 
 //----------------------------------------------------------------------Process_class::need_process

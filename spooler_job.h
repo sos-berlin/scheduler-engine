@@ -233,8 +233,6 @@ struct Job : Object,
     int                         max_order_setbacks          () const                                { return _max_order_setbacks; }
     bool                        request_order               ( const Time& now, const string& cause );   // Fordert einen Auftrag für die _order_queue an
     void                        withdraw_order_request      ();
-    void                        register_order_source       ( Order_source* );
-    void                        unregister_order_source     ( Order_source* );
     void                        load_tasks_from_db          ( Transaction* );
     xml::Element_ptr            read_history                ( const xml::Document_ptr& doc, int id, int n, const Show_what& show ) { return _history.read_tail( doc, id, n, show ); }
 
@@ -438,9 +436,6 @@ struct Job : Object,
 
     Delay_order_after_setback  _delay_order_after_setback;
     int                        _max_order_setbacks;
-
-    typedef list< Order_source* >  Order_source_list;
-    Order_source_list             _order_source_list;    // Muss leer sein bei ~Job!
 
   //bool                       _is_requesting_order;
 

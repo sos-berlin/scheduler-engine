@@ -597,7 +597,6 @@ void Job::set_remove( bool remove )
     }
 
     if( order_controlled() )  z::throw_xc( "SCHEDULER-229", obj_name() );   // _prioritized_order_job_array und Job_chain_node enthalten Job*!
-    if( !_order_source_list.empty() )  z::throw_xc( "SCHEDULER-229", obj_name() );
 
     _remove = true; 
 
@@ -1001,31 +1000,33 @@ ptr<Task> Job::get_task_from_queue( Time now )
 
 void Job::remove_running_task( Task* task )
 {
+    ptr<Task> hold_task = task;
+
+    Task_list::iterator t = _running_tasks.begin();
+    while( t != _running_tasks.end() )
     {
-        Task_list::iterator t = _running_tasks.begin();
-        while( t != _running_tasks.end() )
-        {
-            if( *t == task )  t = _running_tasks.erase( t );
-                        else  t++;
-        }
-
-        if( _running_tasks.empty() )
-        {
-            if( _state != s_stopped )
-            {
-                if( _state == s_stopping )  
-                {
-                    set_state( s_stopped );
-                }
-                else
-                {
-                    set_state( s_pending );
-                }
-            }
-
-            set_next_start_time( Time::now(), true );
-        }
+        if( *t == task )  t = _running_tasks.erase( t );
+                    else  t++;
     }
+
+    if( _running_tasks.empty() )
+    {
+        if( _state != s_stopped )
+        {
+            if( _state == s_stopping )  
+            {
+                set_state( s_stopped );
+            }
+            else
+            {
+                set_state( s_pending );
+            }
+        }
+
+        set_next_start_time( Time::now(), true );
+    }
+
+    if( _running_tasks.size() < _max_tasks )  signal( S() << __FUNCTION__ << "  " << task->obj_name() );
 }
 
 //---------------------------------------------------------------------------------------Job::start
@@ -1672,64 +1673,13 @@ void Job::calculate_next_time_after_modified_order_queue()
     calculate_next_time();
 }
 
-//-----------------------------------------------------------------------Job::register_order_source
-
-void Job::register_order_source( Order_source* order_source )
-{
-#   if defined _DEBUG
-        Z_FOR_EACH( Order_source_list, _order_source_list, it )  assert( *it != order_source );
-#   endif
-
-    _order_source_list.push_back( order_source);
-}
-
-//---------------------------------------------------------------------Job::unregister_order_source
-
-void Job::unregister_order_source( Order_source* order_source )
-{
-    Z_FOR_EACH( Order_source_list, _order_source_list, it )
-    {
-        if( *it == order_source )
-        {
-            it = _order_source_list.erase( it );
-            return;
-        }
-    }
-}
-
 //-------------------------------------------------------------------------------Job::request_order
 
 bool Job::request_order( const Time& now, const string& cause )
 {
-    Z_LOGI2( "joacim", __FUNCTION__ << "  " << cause << "\n" );
     assert( _order_queue );
 
-
-    bool result = false;
-
-    if( _order_queue->first_order( now ) )
-    {
-        result = true;
-    }
-    else
-    {
-        // Wir prüfen erst die Dateiauftäge (File_order). 
-        // Die gelten nur für diesen Scheduler und haben deshalb Vorrang.
-
-        Z_FOR_EACH( Order_source_list, _order_source_list, it ) 
-        {
-            Order_source* order_source = *it;
-            result = order_source->request_order( cause );
-            if( result )  break;
-        }
-
-        // Jetzt prüfen wir die verteilten Aufträge.
-        // Die können auch von anderen Schedulern verarbeitet werden, und sind deshalb nachrangig.
-
-        if( !result )  result = _order_queue->request_order( now ); 
-    }
-
-    return result;
+    return _order_queue->request_order( now, cause ); 
 }
 
 //----------------------------------------------------------------------Job::withdraw_order_request
@@ -1738,12 +1688,6 @@ void Job::withdraw_order_request()
 {
     Z_LOGI2( "joacim", __FUNCTION__ << "\n" );
     assert( _order_queue );
-
-    Z_FOR_EACH( Order_source_list, _order_source_list, it ) 
-    {
-        Order_source* order_source = *it;
-        order_source->withdraw_order_request();
-    }
 
     // Jetzt prüfen wir die verteilten Aufträge.
     // Die können auch von anderen Schedulern verarbeitet werden, und sind deshalb nachrangig.
@@ -1822,12 +1766,6 @@ ptr<Task> Job::task_to_start()
         if( !cause  &&  _order_queue )
         {
             has_order = request_order( now, obj_name() );
-
-            //if( has_order )
-            //{
-            //    fetch_orders_for_waiting_tasks( now );
-            //    has_order = request_order( now, obj_name() );
-            //}
         }
     }
     else
@@ -1868,6 +1806,7 @@ ptr<Task> Job::task_to_start()
         {
             if( task )
             {
+                assert( cause );
                 _task_queue.remove_task( task->id(), Task_queue::w_task_started );
                 task->_trigger_files = trigger_files( task );     // Ebenso im else-Zweig
             }
@@ -1881,7 +1820,11 @@ ptr<Task> Job::task_to_start()
                 {
                     Order* order = task->fetch_and_occupy_order( now, __FUNCTION__ );   // Versuchen, den Auftrag für die neue Task zu belegen
                     
-                    if( !order  &&  !cause )  task->close(), task = NULL;               // Fehlgeschlagen? Dann die Task vergessen 
+                    if( !order  &&  !cause )    // Fehlgeschlagen? Dann die Task vergessen 
+                    {
+                        task->close(); 
+                        task = NULL;
+                    }
                     else 
                     {
                         log_line += "Task starts for " + order->obj_name();

@@ -1160,8 +1160,6 @@ bool Task::do_something()
                                             set_state( s_running_waiting_for_order );
                                             break;
                                         }
-
-                                        _log->set_order_log( _order->_log );
                                     }
 
                                     _running_state_reached = true;
@@ -1632,6 +1630,7 @@ Order* Task::fetch_and_occupy_order( const Time& now, const string& cause )
             _order = order;
             _order_for_task_end = order;                // Damit bei Task-Ende im Fehlerfall noch der Auftrag gezeigt wird, s. dom_element()
 
+            _log->set_order_log( _order->_log );
             _log->info( message_string( "SCHEDULER-842", _order->obj_name(), _order->state() ) );
         }
         else
