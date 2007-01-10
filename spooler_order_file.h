@@ -51,7 +51,7 @@ struct Directory_file_order_source : //idispatch_implementation< Directory_file_
     void                        read_new_files_and_handle_deleted_files( const string& cause );
     bool                        read_new_files          ();
     bool                        clean_up_blacklisted_files();
-    bool                        clean_up_virgin_orders  ();
+  //bool                        clean_up_virgin_orders  ();
     Order*                      fetch_and_occupy_order_from_new_files( const Time& now, const string& cause, Task* occupying_task );
     int                         delay_after_error       ();
     void                        clear_new_files         ();
@@ -87,7 +87,6 @@ struct Directory_file_order_source : //idispatch_implementation< Directory_file_
     Bad_map                    _bad_map;
 
     bool                       _are_blacklisted_orders_cleaned_up;
-    bool                       _are_virgin_orders_cleaned_up;
 };
 
 //-------------------------------------------------------------------------------------------------

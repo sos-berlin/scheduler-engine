@@ -301,6 +301,38 @@ bool Task_subsystem::try_to_free_process( Job* for_job, Process_class* process_c
     return false;
 }
 
+//----------------------------------------------------------Task_subsystem::increment_running_tasks
+
+void Task_subsystem::increment_running_tasks()
+{ 
+    InterlockedIncrement( &_running_tasks_count ); 
+    //_spooler->update_console_title();
+}
+
+//----------------------------------------------------------Task_subsystem::decrement_running_tasks
+
+void Task_subsystem::decrement_running_tasks()
+{ 
+    InterlockedDecrement( &_running_tasks_count ); 
+    //_spooler->update_console_title();
+}
+
+//--------------------------------------------------------------Task_subsystem::count_started_tasks
+
+void Task_subsystem::count_started_tasks()
+{
+    _finished_tasks_count++;
+    //_spooler->update_console_title();
+}
+
+//-------------------------------------------------------------Task_subsystem::count_finished_tasks
+
+void Task_subsystem::count_finished_tasks()
+{
+    _started_tasks_count++;
+    _spooler->update_console_title();
+}
+
 //-------------------------------------------------------------------------------------------------
 
 } //namespace spoooler

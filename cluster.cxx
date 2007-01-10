@@ -1746,7 +1746,7 @@ bool Cluster::check_my_member_record( Transaction* outer_transaction, bool force
     bool   my_record_lost         = false;
 
 
-    for( Retry_transaction ta ( db(), outer_transaction ); ta.enter_loop(); ta++ ) try
+    for( Retry_nested_transaction ta ( db(), outer_transaction ); ta.enter_loop(); ta++ ) try
     {
         Any_file result_set = ta.open_result_set( S() << "select `active`, `exclusive`, `deactivating_member_id` "
                                                          "  from " << _spooler->_clusters_tablename << 
@@ -2412,7 +2412,7 @@ void Cluster::show_active_schedulers( Transaction* outer_transaction, bool exclu
     Z_LOGI2( "scheduler.cluster", __FUNCTION__ << "\n" );
 
     if( db()  &&  db()->opened() )
-    for( Retry_transaction ta ( db(), outer_transaction ); ta.enter_loop(); ta++ )  try
+    for( Retry_nested_transaction ta ( db(), outer_transaction ); ta.enter_loop(); ta++ )  try
     {
         bool found      = false;
         S    select_sql;

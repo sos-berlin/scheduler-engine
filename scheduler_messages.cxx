@@ -132,7 +132,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-260", "Error in Scheduler Skript, spooler_exit(): $1Error in Scheduler script, spooler_exit(): $1" },
     { "SCHEDULER-261", "Nothing done, event=$1, operations=$2" },
     { "SCHEDULER-262", "Kill signal ($1) received. Scheduler is terminating" },
-    { "SCHEDULER-263", "Kill signal ($1) received while terminating Scheduler. SCHEDULER IS ABORTING IMMEDIATELY." },
+    { "SCHEDULER-263", "Kill signal ($1) #$2 received. $3" },
     { "SCHEDULER-264", "SCHEDULER IS TERMINATING AFTER SERIOUS ERROR" },
     { "SCHEDULER-265", "SCHEDULER IS ABORTING DUE TO A PROBLEM WITH THE DATABASE: $1" },
     { "SCHEDULER-266", "Error when writing the history: $1" },
@@ -349,7 +349,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-809", "Dead scheduler record has been removed" },
     { "SCHEDULER-811", "Executing command read from database: $1" },
     { "SCHEDULER-812", "Just before processing, order record in database has been occupied or removed" },
-    { "SCHEDULER-813", "Order is occupied by Scheduler $1" },
+    { "SCHEDULER-813", "Order is occupied by Scheduler '$1'" },
     { "SCHEDULER-814", "Inactive Scheduler '$2' has the higher backup precedence $1 ($3)" },
     { "SCHEDULER-815", "Task should end, but it has just been started with an order attached, so one step will be done" },
     { "SCHEDULER-816", "Unable to release occupation in database" },
@@ -375,8 +375,8 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-838", "$1. heart beat detected" },
     { "SCHEDULER-839", "This order has been replaced" },
     { "SCHEDULER-841", "It's requested, that the exclusive operation will not be continued" },
-    { "SCHEDULER-842", "Task is going to process $1, state=$2" },
-    { "SCHEDULER-843", "Task has ended processing of $1, state=$2" },
+    { "SCHEDULER-842", "Task is going to process $1, state=$2, on Scheduler $3" },
+    { "SCHEDULER-843", "Task has ended processing of $1, state=$2, on Scheduler $3" },
     {}
 };
 } //namespace sos

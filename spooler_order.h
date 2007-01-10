@@ -589,6 +589,8 @@ struct Order_subsystem : Object, Scheduler_object
     bool                        is_job_in_any_distributed_job_chain( Job* );
     string                      job_chain_db_where_condition   ( const string& job_chain_name );
     string                      order_db_where_clause       ( const string& job_chain_name, const string& order_id );
+    void                        count_started_orders        ();
+    void                        count_finished_orders       ();
 
 //private:
     Fill_zero                  _zero_;
@@ -598,6 +600,8 @@ struct Order_subsystem : Object, Scheduler_object
     int                        _job_chain_map_version;             // Zeitstempel der letzten Änderung (letzter Aufruf von Spooler::add_job_chain()), 
     long32                     _next_free_order_id;
     ptr<Database_order_detector> _database_order_detector;
+    int                        _started_orders_count;
+    int                        _finished_orders_count;
 };
 
 //-------------------------------------------------------------------------------------------------

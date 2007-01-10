@@ -246,6 +246,19 @@ string Read_transaction::file_as_string( const string& hostware_filename )
 
 //-------------------------------------------------------------------------Transaction::Transaction
 
+Transaction::Transaction( Database* db )
+: 
+    Read_transaction( db ),
+    _zero_(this+1)
+{
+    assert( db );
+    //Das müssen wir später prüfen  if( !_db->opened() )  z::throw_xc( "SCHEDULER-361" );
+
+    begin_transaction( db );
+}
+
+//-------------------------------------------------------------------------Transaction::Transaction
+
 Transaction::Transaction( Database* db, Transaction* outer_transaction )
 : 
     Read_transaction( db ),
@@ -381,9 +394,9 @@ void Transaction::rollback( const string& debug_text, bool force )
     }
 }
 
-//---------------------------------------------------Retry_transaction::reopen_database_after_error
+//--------------------------------------------Retry_nested_transaction::reopen_database_after_error
 
-void Retry_transaction::reopen_database_after_error( const exception& x, const string& function )
+void Retry_nested_transaction::reopen_database_after_error( const exception& x, const string& function )
 { 
     if( _outer_transaction )  throw;    // Wenn's eine äußere Transaktion gibt, dann die Schleife dort wiederholen
 
@@ -404,9 +417,9 @@ void Retry_transaction::reopen_database_after_error( const exception& x, const s
     begin_transaction( db );
 }
 
-//--------------------------------------------------------------------Retry_transaction::operator++
+//-------------------------------------------------------------Retry_nested_transaction::operator++
 
-void Retry_transaction::operator++(int)
+void Retry_nested_transaction::operator++(int)
 { 
     _database_retry++; 
     _database_retry.enter_loop();
@@ -416,6 +429,15 @@ void Retry_transaction::operator++(int)
     //    rollback( __FUNCTION__ );  
     //    begin_transaction( _database_retry._db );
     //}
+}
+
+//--------------------------------------------------Retry_nested_transaction::intermediate_rollback
+
+void Retry_transaction::intermediate_rollback( const string& debug_text )
+{ 
+    assert( _db );
+    
+    if( db()->opened() )  execute( "ROLLBACK", debug_text, true );
 }
 
 //------------------------------------------------------Database_retry::reopen_database_after_error

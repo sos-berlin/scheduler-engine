@@ -170,7 +170,9 @@ struct Read_transaction
 
 struct Transaction : Read_transaction
 {
-                                Transaction             ( Database*, Transaction* outer_transaction = NULL );
+                                Transaction             ( Database* );
+                                Transaction             ( Database*, Transaction* outer_transaction );
+             
                                ~Transaction             ();
 
     virtual bool                is_read_only            () const                                    { return false; }
@@ -241,23 +243,33 @@ struct Database_retry
     int                        _enter_loop;
 };
 
-//--------------------------------------------------------------------------------Retry_transaction
-// for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
+//-------------------------------------------------------------------------Retry_nested_transaction
+// for( Retry_nested_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
 // {
 //      ...
 //      ta.commit();
 // } 
 // catch( exception& x ) { ta.reopen_after_error( x ); }
 
-struct Retry_transaction : Transaction
+struct Retry_nested_transaction : Transaction
 {
-                                Retry_transaction       ( Database* db, Transaction* outer = NULL ) : Transaction(db,outer), _database_retry( db ) {}
+                                Retry_nested_transaction( Database* db, Transaction* outer )        : Transaction(db,outer), _database_retry( db ) {}
+  
 
     bool                        enter_loop              ()                                          { return _database_retry.enter_loop(); }
     void                        reopen_database_after_error( const exception&, const string& function );
     void                        operator ++             (int);
 
     Database_retry             _database_retry;
+};
+
+//--------------------------------------------------------------------------------Retry_transaction
+
+struct Retry_transaction : Retry_nested_transaction
+{
+                                Retry_transaction       ( Database* db )                            : Retry_nested_transaction( db, (Transaction*)NULL ) {}
+
+    void                        intermediate_rollback   ( const string& debug_text );
 };
 
 //--------------------------------------------------------------------------------------Job_history

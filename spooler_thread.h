@@ -27,8 +27,10 @@ struct Task_subsystem : Object
     ptr<Task>                   get_task_or_null            ( int task_id );
     Task*                       get_next_task               ();
 
-    void                        increment_running_tasks     ()                                      { InterlockedIncrement( &_running_tasks_count ); }
-    void                        decrement_running_tasks     ()                                      { InterlockedDecrement( &_running_tasks_count ); }
+    void                        increment_running_tasks     ();
+    void                        decrement_running_tasks     ();
+    void                        count_started_tasks         ();
+    void                        count_finished_tasks        ();
 
     void                        count_task                  ()                                      { InterlockedIncrement( &_task_count ); }
     void                        count_step                  ()                                      { InterlockedIncrement( &_step_count ); }
@@ -70,6 +72,9 @@ struct Task_subsystem : Object
                                                             // Statistik
     long32                     _step_count;                 // Seit Spooler-Start ausgeführte Schritte
     long32                     _task_count;                 // Seit Spooler-Start gestartetet Tasks
+
+    int                        _started_tasks_count;
+    int                        _finished_tasks_count;
 };
 
 //-------------------------------------------------------------------------------------------------

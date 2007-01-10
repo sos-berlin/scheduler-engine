@@ -57,6 +57,7 @@ struct Scheduler_object
 
     Prefix_log*                 log                         ()                                      { return _log; }
     Database*                   db                          () const;
+    Task_subsystem*             task_subsystem              () const;
     Order_subsystem*            order_subsystem             () const;
 
     Spooler*                   _spooler;

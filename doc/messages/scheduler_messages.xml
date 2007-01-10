@@ -1480,11 +1480,8 @@
         </message>
 
         <message code="SCHEDULER-263">
-            <text xml:lang="de">
-                <title>Abbruch-Signal (<p1/>) beim Beenden des Schedulers empfangen. DER SCHEDULER WIRD ABGEBROCHEN, SOFORT.</title>
-            </text>
             <text xml:lang="en">
-                <title>Kill signal (<p1/>) received while terminating Scheduler. SCHEDULER IS ABORTING IMMEDIATELY.</title>
+                <title>Kill signal (<p1/>) #<p2/> received. <p3>what to do</p3></title>
             </text>
         </message>
 
@@ -3245,7 +3242,7 @@
 
         <message code="SCHEDULER-813">
             <text xml:lang="en">
-                <title>Order is occupied by Scheduler <p1/></title>
+                <title>Order is occupied by Scheduler '<p1/>'</title>
             </text>
         </message>
 
@@ -3420,13 +3417,13 @@
 
         <message code="SCHEDULER-842" weight="info">
             <text xml:lang="en">
-                <title>Task is going to process <p1>order</p1>, state=<p2/></title>
+                <title>Task is going to process <p1>order</p1>, state=<p2/>, on Scheduler <p3/></title>
             </text>
         </message>
         
         <message code="SCHEDULER-843" weight="info">
             <text xml:lang="en">
-                <title>Task has ended processing of <p1>order</p1>, state=<p2/></title>
+                <title>Task has ended processing of <p1>order</p1>, state=<p2/>, on Scheduler <p3/></title>
             </text>
         </message>
     </messages>

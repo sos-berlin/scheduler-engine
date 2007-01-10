@@ -21,9 +21,6 @@
 #endif
 
 
-#define SCHEDULER_FILE_ORDER_GENERATE_VIRGINS 0
-
-
 #ifdef SPOOLER_USE_MSXML
 #   include "../zschimmer/xml_msxml.h"
     using namespace zschimmer::xml_msxml;
@@ -401,6 +398,7 @@ struct Spooler : Object,
     sql::Database_descriptor*   database_descriptor         ()                                  { return db()->database_descriptor(); }
 
     Order_subsystem*            order_subsystem             ();
+    Task_subsystem*             task_subsystem              ()                                  { return _task_subsystem; }
     bool                        has_any_order               ();
 
   private:
@@ -605,6 +603,8 @@ struct Spooler : Object,
     ptr<cluster::Cluster>      _cluster;
     bool                       _assert_is_active;
     int                        _is_in_check_is_active;
+    bool                       _has_windows_console;
+    int                        _ctrl_c_pressed_handled;
   //string                     _session_id;
 };
 

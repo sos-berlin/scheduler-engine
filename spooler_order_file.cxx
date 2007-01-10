@@ -463,22 +463,16 @@ Order* Directory_file_order_source::fetch_and_occupy_order( const Time& now, con
 {
     Order* result = NULL;
 
-    //clean_up_blacklisted_files();
-    //clean_up_virgin_orders();
-
     while( !result )
     {
         Order* order = fetch_and_occupy_order_from_new_files( now, cause, occupying_task );
         
-        if( !order )
-        {
-            read_directory( false, __FUNCTION__ );
-            //read_new_files();
-            //clean_up_blacklisted_files();
-            //clean_up_virgin_orders();
+        //if( !order )
+        //{
+        //    read_directory( false, __FUNCTION__ );
 
-            order = fetch_and_occupy_order_from_new_files( now, cause, occupying_task );
-        }
+        //    order = fetch_and_occupy_order_from_new_files( now, cause, occupying_task );
+        //}
 
         if( !order )  break;
 
@@ -490,7 +484,7 @@ Order* Directory_file_order_source::fetch_and_occupy_order( const Time& now, con
 
 //------------------------------------------------------Directory_file_order_source::read_directory
 
-Order* Directory_file_order_source::read_directory( bool was_notified, const string& cause )
+Order* Directory_file_order_source::read_directory( bool was_notified, const string& )
 {
     Order*       result            = NULL;
     Order_queue* first_order_queue = _next_order_queue;
@@ -512,42 +506,12 @@ Order* Directory_file_order_source::read_directory( bool was_notified, const str
 #           endif
 
 
-#         if SCHEDULER_FILE_ORDER_GENERATE_VIRGINS
-            if( first_order_queue->has_order( Time(0) ) )      // Auftragswarteschlange ist nicht leer?
+            if( _new_files_index == _new_files.size() )     // Noch Dateien im Puffer
             {
-                // Erst die vorhandenen Aufträge abarbeiten lassen und nächsten Aufruf von request_order() abwarten
-            }
-            else
-#         endif
-            {
-                if( _new_files_index < _new_files.size() )     // Noch Dateien im Puffer
-                {
-#                   if SCHEDULER_FILE_ORDER_GENERATE_VIRGINS
-                        log()->info( message_string( "SCHEDULER-986", _new_files_time.as_string( Time::without_ms ) ) );
-#                   endif
-                }
-                else
-                {
-                    //read_new_files_and_handle_deleted_files( cause );
-                    read_new_files();
-                    clean_up_blacklisted_files();
-                    clean_up_virgin_orders();
-                    while( _new_files_index < _new_files.size()  &&  _new_files[ _new_files_index ] == NULL )  _new_files_index++;
-                }
-
-#               if SCHEDULER_FILE_ORDER_GENERATE_VIRGINS
-                    if( !_job_chain->is_distributed() )
-                    {
-                        int n = min( _new_files_index + _max_orders, (int)_new_files.size() );
-                        while( _new_files_index < n )
-                        {
-                            Order* order = fetch_and_occupy_order_from_new_files();
-                            if( !result )  order = result;
-                        }
-                        if( n < _new_files.size() )  log()->info( message_string( "SCHEDULER-985", _new_files.size() - n ) );
-                    }
-#               endif
-
+                //read_new_files_and_handle_deleted_files( cause );
+                read_new_files();
+                clean_up_blacklisted_files();
+                while( _new_files_index < _new_files.size()  &&  _new_files[ _new_files_index ] == NULL )  _new_files_index++;
             }
 
             if( _directory_error )
@@ -642,6 +606,13 @@ Order* Directory_file_order_source::fetch_and_occupy_order_from_new_files( const
                     if( ok  &&  order->is_distributed() ) 
                     {
                         ok = order->db_occupy_for_processing();
+
+                        if( !file_exists( path ) )
+                        {
+                            order->db_release_occupation();
+                            ok = false;
+                        }
+
                         if( ok )  ok = order->occupy_for_task( occupying_task, now );
                         if( ok )  _job_chain->add_order( order );
                     }
@@ -755,7 +726,6 @@ void Directory_file_order_source::clear_new_files()
     _new_files_count = 0;
 
     _are_blacklisted_orders_cleaned_up = false;
-    _are_virgin_orders_cleaned_up       = false;
 }
 
 //------------------------------------------------------Directory_file_order_source::read_new_files
@@ -791,7 +761,15 @@ bool Directory_file_order_source::clean_up_blacklisted_files()
 
     if( !_are_blacklisted_orders_cleaned_up )
     {
-        hash_set<string> blacklisted_files = _job_chain->db_blacklist_id_set();       int EXCEPTION;
+        hash_set<string> blacklisted_files;
+
+
+        try
+        {
+            blacklisted_files = _job_chain->db_blacklist_id_set();
+        }
+        catch( exception& x )  { _log->error( S() << x.what() << ", in " << __FUNCTION__ << ", db_blacklist_id_set()\n" ); }
+
 
         if( !blacklisted_files.empty() )
         {
@@ -841,48 +819,46 @@ bool Directory_file_order_source::clean_up_blacklisted_files()
 
 //----------------------------------------------Directory_file_order_source::clean_up_virgin_orders
 
-bool Directory_file_order_source::clean_up_virgin_orders()
-
-// Jungfräuliche Aufträge, denen die Datei abhanden gekommen sind, entfernen
-
-{
-    bool result = false;
-
-#if SCHEDULER_FILE_ORDER_GENERATE_VIRGINS
-    if( !_are_virgin_orders_cleaned_up )
-    {
-        hash_set<string> virgin_new_files;
-
-        for( int i = 0; i < _new_files.size(); i++ )
-        {
-            if( z::File_info* new_file = _new_files[ i ] )
-            {
-                string path  = new_file->path();
-                Order* order = _job_chain->order_or_null( path );   // Kein Datenbankzugriff, also nicht für verteilte Aufträge
-
-                if( order  &&  order->is_virgin() )  virgin_new_files.insert( path );
-            }
-        }
-
-
-        Order_queue::Queue* queue = &_next_order_queue->_queue;    // Zugriff mit Ausnahmegenehmigung. In _setback_queue verzögerte werden nicht beachtet
-        for( Order_queue::Queue::iterator it = queue->begin(); it != queue->end(); )
-        {
-            Order* order = *it++;  // Hier schon weiterschalten, bevor it durch remove_from_job_chain ungültig wird
-
-            if( order->is_virgin()  &&  virgin_new_files.find( order->string_id() ) == virgin_new_files.end()  &&  order->is_file_order() )
-            {
-                order->log()->warn( message_string( "SCHEDULER-982" ) );
-                order->remove_from_job_chain();
-            }
-        }
-
-        _are_virgin_orders_cleaned_up = true;
-    }
-#endif
-
-    return result;
-}
+//bool Directory_file_order_source::clean_up_virgin_orders()
+//
+//// Jungfräuliche Aufträge, denen die Datei abhanden gekommen sind, entfernen
+//
+//{
+//    bool result = false;
+//
+//    if( !_are_virgin_orders_cleaned_up )
+//    {
+//        hash_set<string> virgin_new_files;
+//
+//        for( int i = 0; i < _new_files.size(); i++ )
+//        {
+//            if( z::File_info* new_file = _new_files[ i ] )
+//            {
+//                string path  = new_file->path();
+//                Order* order = _job_chain->order_or_null( path );   // Kein Datenbankzugriff, also nicht für verteilte Aufträge
+//
+//                if( order  &&  order->is_virgin() )  virgin_new_files.insert( path );
+//            }
+//        }
+//
+//
+//        Order_queue::Queue* queue = &_next_order_queue->_queue;    // Zugriff mit Ausnahmegenehmigung. In _setback_queue verzögerte werden nicht beachtet
+//        for( Order_queue::Queue::iterator it = queue->begin(); it != queue->end(); )
+//        {
+//            Order* order = *it++;  // Hier schon weiterschalten, bevor it durch remove_from_job_chain ungültig wird
+//
+//            if( order->is_virgin()  &&  virgin_new_files.find( order->string_id() ) == virgin_new_files.end()  &&  order->is_file_order() )
+//            {
+//                order->log()->warn( message_string( "SCHEDULER-982" ) );
+//                order->remove_from_job_chain();
+//            }
+//        }
+//
+//        _are_virgin_orders_cleaned_up = true;
+//    }
+//
+//    return result;
+//}
 
 //-----------------------------------------------------------Directory_file_order_source::send_mail
 

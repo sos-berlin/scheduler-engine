@@ -306,9 +306,9 @@ With_log_switch read_profile_with_log( const string& profile, const string& sect
         {
             ctrl_c_pressed++;
 
-            if( ctrl_c_pressed >= 2 )
+            if( ctrl_c_pressed >= 4 )
             {
-                if( ctrl_c_pressed == 2  &&  spooler_ptr )  spooler_ptr->abort_now();  
+                if( ctrl_c_pressed == 4  &&  spooler_ptr )  spooler_ptr->abort_now();  
                 return false;
             }
 
@@ -1100,9 +1100,11 @@ void Spooler::register_process_handle( Process_handle p )
         if( _process_handles[i] == 0 )  
         { 
             _process_handles[i] = p;  
-            return; 
+            break; 
         }
     }
+
+    update_console_title();
 }
 
 //---------------------------------------------------------------Spooler::unregister_process_handle
@@ -1115,9 +1117,11 @@ void Spooler::unregister_process_handle( Process_handle p )
 
         for( int i = 0; i < NO_OF( _process_handles ); i++ )
         {
-            if( _process_handles[i] == p )  { _process_handles[i] = 0;  return; }
+            if( _process_handles[i] == p )  { _process_handles[i] = 0;  break; }
         }
     }
+
+    update_console_title();
 }
 
 //-------------------------------------------------------------------------------Task::register_pid
@@ -1915,9 +1919,31 @@ void Spooler::update_console_title()
 {
 #   if defined Z_WINDOWS
 
-        S title;
-        title  << name() << "  " << _config_filename << "  pid=" << getpid() << "  " << state_name();
-        SetConsoleTitle( title.to_string().c_str() );
+        if( _has_windows_console )
+        {
+            S title;
+            title << name() << "  ";
+            title << _config_filename;
+            title << "  pid=" << getpid() << "  ";
+            title << state_name();
+
+            if( _task_subsystem  &&  _task_subsystem->_finished_tasks_count )
+            {
+                title << ", " <<_task_subsystem->_finished_tasks_count << " finished tasks";
+            }
+
+            if( _order_subsystem  &&  _order_subsystem->_finished_orders_count )
+            {
+                title << ", " << _order_subsystem->_finished_orders_count << " finished orders";     
+            }
+
+            int process_count = 0;
+            for( int i = 0; i < NO_OF( _process_handles ); i++ )  if( _process_handles[i] )  process_count++;
+            if( _state == s_running  ||  process_count > 0 )  title << ", " << process_count << " running processes";
+
+            BOOL ok = SetConsoleTitle( title.to_string().c_str() );
+            if( !ok )  _has_windows_console = false;
+        }
 
 #   endif
 }
@@ -2982,7 +3008,7 @@ void Spooler::abort_immediately_after_distribution_error( const string& debug_te
 
 void Spooler::run_check_ctrl_c()
 {
-    if( ctrl_c_pressed )
+    if( ctrl_c_pressed != _ctrl_c_pressed_handled )
     {
 #       ifdef Z_WINDOWS
             string signal_text = "ctrl-C";
@@ -2990,31 +3016,50 @@ void Spooler::run_check_ctrl_c()
             string signal_text = S() << "signal " << last_signal << " " << signal_name_from_code( last_signal ) << " " << signal_title_from_code( last_signal );
 #       endif
 
+
+    
         switch( ctrl_c_pressed )
         {
             case 1:
+            {
+                string m = message_string( "SCHEDULER-263", signal_text, ctrl_c_pressed, "Stopping Scheduler" ); 
+                _log->warn( m );
+                if( !_log_to_stdout )  cout << m << endl;
+
                 if( _state != s_stopping )
                 {
                     _log->warn( message_string( "SCHEDULER-262", signal_text ) );   // "Abbruch-Signal (Ctrl-C) empfangen. Der Scheduler wird beendet.\n" );
                     cmd_terminate( false, INT_MAX, true );  // Inaktiver Scheduler darf fortsetzen
 
-                    ctrl_c_pressed = 0;
-                    set_ctrl_c_handler( true );
                 }
 
+                set_ctrl_c_handler( true );
                 break;
+            }
 
             case 2:
+            {
+                string m = message_string( "SCHEDULER-263", signal_text, ctrl_c_pressed, "Killing all processes" );
+                _log->warn( m );
+                if( !_log_to_stdout )  cout << m << endl;
+
                 kill_all_processes();
+                set_ctrl_c_handler( true );
                 break;
+            }
 
             case 3:
             default:
             {
-                _log->warn( message_string( "SCHEDULER-263", signal_text ) );  // "Abbruch-Signal (Ctrl-C) beim Beenden des Schedulers empfangen. Der Scheduler wird abgebrochen, sofort.\n" );
+                string m = message_string( "SCHEDULER-263", signal_text, ctrl_c_pressed, "ABORTING IMMEDIATELY" );
+                _log->warn( m );
+                if( !_log_to_stdout )  cout << m << endl;
+
                 abort_now();
             }
         }
+
+        _ctrl_c_pressed_handled = ctrl_c_pressed;
     }
 }
 
@@ -3292,6 +3337,9 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line )
 
     _communication.init();  // Für Windows
 
+#   ifdef Z_WINDOWS
+        if( !_is_service )  _has_windows_console = true;
+#   endif
 
 
     //do

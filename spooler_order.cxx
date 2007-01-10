@@ -33,6 +33,8 @@ const string blacklist_database_distributed_next_time   = "3111-11-11 00:01:00";
 const string replacement_database_distributed_next_time = "3111-11-11 00:02:00";        // <order replacement="yes">
 const string default_end_state_name                 = "<END_STATE>";
 const string order_select_database_columns          = "`id`, `priority`, `state`, `state_text`, `initial_state`, `title`, `created_time`";
+const string xml_payload_encoding                   = "iso-8859-1";
+const int    max_insert_race_retry_count            = 5;                                // Race condition beim Einfügen eines Datensatzes
 
 //--------------------------------------------------------------------------Database_order_detector
 
@@ -329,7 +331,7 @@ ptr<Order> Order_subsystem::try_load_order_from_database( Transaction* outer_tra
 {
     ptr<Order> result;
 
-    for( Retry_transaction ta ( _spooler->_db, outer_transaction ); ta.enter_loop(); ta++ ) try
+    for( Retry_nested_transaction ta ( _spooler->_db, outer_transaction ); ta.enter_loop(); ta++ ) try
     {
         S select_sql;
         select_sql <<  "select " << order_select_database_columns << ", `occupying_cluster_member_id`"
@@ -409,6 +411,22 @@ string Order_subsystem::job_chain_db_where_condition( const string& job_chain_na
          " and `job_chain`="  << sql::quoted( job_chain_name );
 
     return result;
+}
+
+//------------------------------------------------------------Order_subsystem::count_started_orders
+
+void Order_subsystem::count_started_orders()
+{
+    _started_orders_count++;
+    //_spooler->update_console_title();
+}
+
+//-----------------------------------------------------------Order_subsystem::count_finished_orders
+
+void Order_subsystem::count_finished_orders()
+{
+    _finished_orders_count++;
+    _spooler->update_console_title();
 }
 
 //-------------------------------------------------Database_order_detector::Database_order_detector
@@ -1195,7 +1213,9 @@ void Job_chain::add_order( Order* order )
     assert( !order->_is_distributed || _is_distributed );
     if( state() != s_ready )  z::throw_xc( "SCHEDULER-151" );
     if( !order->_is_distributed  &&  !_spooler->has_exclusiveness() )  z::throw_xc( "SCHEDULER-383", order->obj_name() );
+    
     if( has_order_id( (Read_transaction*)NULL, order->id() ) )  z::throw_xc( "SCHEDULER-186", order->obj_name(), name() );
+
 
     set_visible( true );
 
@@ -1999,50 +2019,6 @@ Order* Order_queue::first_order( const Time& now ) const
     return result;
 }
 
-//-------------------------------------------------------------------------Order_queue::fetch_order
-
-//Order* Order_queue::fetch_order( Task* occupying_task, const Time& now )
-//
-//// Kann zusätzlich zu Order_queue::first_order() die Warteschlange aufräumen
-//
-//{
-//    Order* order = NULL;
-//
-//    if( !order)
-//    {
-//        Z_FOR_EACH( Order_source_list, _order_source_list, it )     // Dateiauftäge (File_order)
-//        {
-//            Order_source* order_source = *it;
-//            order = order_source->fetch_order();
-//            if( order )  break;
-//        }
-//    }
-//
-//#   if SCHEDULER_FILE_ORDER_GENERATE_VIRGINS
-//        while( !order )
-//        {
-//            order = first_order( now );
-//            if( !order )  break;
-//
-//            if( order->is_virgin()  &&  order->is_file_order()  &&  order->_job_chain
-//             && !file_exists( order->file_path() ) )
-//            {
-//                order->log()->info( message_string( "SCHEDULER-982" ) );  // Datei ist entfernt worden
-//                order->remove_from_job_chain();
-//                order = NULL;
-//            }
-//        }
-//#    else
-//        if( !order )
-//        {
-//            order = first_order( now );
-//            if( order )  order->occupy_for_task( occupying_task, now );
-//        }
-//#   endif
-//
-//    return order;
-//}
-
 //--------------------------------------------------------------Order_queue::fetch_and_occupy_order
 
 Order* Order_queue::fetch_and_occupy_order( const Time& now, const string& cause, Task* occupying_task )
@@ -2053,25 +2029,31 @@ Order* Order_queue::fetch_and_occupy_order( const Time& now, const string& cause
     assert( occupying_task );
 
 
+    // Zuerst Aufträge aus unserer Warteschlange im Speicher
+
     Order* order = first_order( now );
     if( order )  order->occupy_for_task( occupying_task, now );
 
 
-    if( !order )
-    {
-        Z_FOR_EACH( Order_source_list, _order_source_list, it )     // Dateiauftäge (File_order)
-        {
-            Order_source* order_source = *it;
-            order = order_source->fetch_and_occupy_order( now, cause, occupying_task );
-            if( order )  break;
-        }
-    }
-
+    // Dann (alte) Aufträge aus der Datenbank
     if( !order  &&  _next_announced_distributed_order_time <= now  &&  is_in_any_distributed_job_chain() )   // Auftrag nur lesen, wenn vorher angekündigt
     {
         order = load_and_occupy_next_distributed_order_from_database( occupying_task, now );
         // Möglicherweise NULL (wenn ein anderer Scheduler den Auftrag weggeschnappt hat)
         if( order )  assert( order->_is_distributed );
+    }
+
+
+    // Die Dateiaufträge (File_order_source)
+
+    if( !order )
+    {
+        Z_FOR_EACH( Order_source_list, _order_source_list, it )
+        {
+            Order_source* order_source = *it;
+            order = order_source->fetch_and_occupy_order( now, cause, occupying_task );
+            if( order )  break;
+        }
     }
 
     if( order )
@@ -2509,7 +2491,12 @@ bool Order::occupy_for_task( Task* task, const Time& now )
     _task           = task;
     if( !_start_time )  _start_time = now;      
 
-    if( _is_virgin  &&  _http_operation )  _http_operation->on_first_order_processing( task );
+    if( _is_virgin )
+    {
+        if( _http_operation )  _http_operation->on_first_order_processing( task );
+        order_subsystem()->count_started_orders();
+    }
+
     _is_virgin = false;
     //_is_virgin_in_this_run_time = false;
 
@@ -2597,7 +2584,7 @@ void Order::db_show_occupation( Log_level log_level )
 void Order::db_insert()
 {
     bool ok = db_try_insert();
-    if( !ok )  z::throw_xc( "SCHEDULER-186", obj_name(), _job_chain_name );
+    if( !ok )  z::throw_xc( "SCHEDULER-186", obj_name(), _job_chain_name, "in database" );
 }
 
 //-----------------------------------------------------------------------------Order::db_try_insert
@@ -2644,7 +2631,7 @@ bool Order::db_try_insert()
         else
         if( !_is_distributed )
         {
-            ta.execute( db_update_stmt().make_delete_stmt(), __FUNCTION__ );
+            ta.execute( db_update_stmt().make_delete_stmt() + " and `distributed_next_time` is null", __FUNCTION__ );
         }
         else
         {
@@ -2673,24 +2660,35 @@ bool Order::db_try_insert()
 
         //if( is_processable() )  insert[ "processable"   ] = true;
 
-        try
+        for( int insert_race_retry_count = 1; !insert_ok; insert_race_retry_count++ )
         {
-            ta.execute( insert, __FUNCTION__ );
-            insert_ok = true;
-        }
-        catch( exception& )   // Datensatz ist bereits vorhanden?
-        {
-            Any_file result_set = ta.open_result_set
-                ( 
-                    S() << "select " << order_select_database_columns << 
-                           " from " << _spooler->_orders_tablename << 
-                           db_where_clause().where_string(), 
-                    __FUNCTION__ 
-                );
+            try
+            {
+                ta.execute( insert, __FUNCTION__ );
+                insert_ok = true;
+            }
+            catch( exception& x )     // Datensatz ist bereits vorhanden?
+            {
+                if( insert_race_retry_count > max_insert_race_retry_count )  throw;
 
-            if( result_set.eof() )  throw;  // Ein anderer Fehler als dass der Schlüssel schon vorhanden ist
-        }
+                ta.intermediate_rollback( __FUNCTION__ );      // Postgres verlangt nach Fehler ein Rollback
 
+                Any_file result_set = ta.open_result_set
+                    ( 
+                        S() << "select " << order_select_database_columns << 
+                               " from " << _spooler->_orders_tablename << 
+                               db_where_clause().where_string(), 
+                        __FUNCTION__ 
+                    );
+
+                if( !result_set.eof() )  break;
+
+                S log_line;
+                log_line << "Retry #" << insert_race_retry_count << " after error: " << x.what();
+                ( _job_chain? _job_chain->log() : _spooler->log() ) -> warn( S() << obj_name() << ", " << log_line );
+                _log->debug( log_line );
+            }
+        }
 
         if( insert_ok )
         {
@@ -2789,7 +2787,7 @@ bool Order::db_update2( Update_option update_option, bool delet, Transaction* ou
         //if( _job_chain_name == "" )
         if( delet )
         {
-            for( Retry_transaction ta ( _spooler->_db, outer_transaction ); ta.enter_loop(); ta++ ) try
+            for( Retry_nested_transaction ta ( _spooler->_db, outer_transaction ); ta.enter_loop(); ta++ ) try
             {
                 if( !_spooler->_db->opened() )  break;
 
@@ -2820,7 +2818,7 @@ bool Order::db_update2( Update_option update_option, bool delet, Transaction* ou
             if( _title_modified      )  update[ "title"      ] = title();
             if( _state_text_modified )  update[ "state_text" ] = state_text();
 
-            for( Retry_transaction ta ( _spooler->_db, outer_transaction ); ta.enter_loop(); ta++ ) try
+            for( Retry_nested_transaction ta ( _spooler->_db, outer_transaction ); ta.enter_loop(); ta++ ) try
             {
                 if( !_spooler->_db->opened() )  break;
 
@@ -3290,7 +3288,7 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
 
         try
         {
-            xml::Document_ptr doc ( _xml_payload );
+            xml::Document_ptr doc ( _xml_payload, xml_payload_encoding );
 
             if( doc.documentElement() )
             {
@@ -3584,7 +3582,7 @@ void Order::set_xml_payload( const string& xml_string )
 { 
     //Z_LOGI2( "scheduler.order", obj_name() << ".xml_payload=" << xml_string << "\n" );
     
-    xml::Document_ptr doc ( xml_string, "iso-8859-1" );
+    xml::Document_ptr doc ( xml_string, xml_payload_encoding );
 
     _xml_payload = doc.ascii_xml();     // _xml_payload kann in order_xml <order> eingefügt werden, unabhängig von der Codierung (ist nur 7bit-Ascii)
     _order_xml_modified = true; 
@@ -3881,28 +3879,24 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain )
 
         _is_distributed = !_is_distribution_inhibited  &&  job_chain->_is_distributed;
 
-        if( _is_distributed  )
+        _job_chain_name = job_chain->name();
+        _removed_from_job_chain_name = "";
+
+        if( _delay_storing_until_processing ) 
         {
-            _job_chain_name = job_chain->name();
-            _removed_from_job_chain_name = "";
+            if( _is_distributed )  z::throw_xc( __FUNCTION__, "_delay_storing_until_processing & _is_distributed not possible" );   // db_try_insert() muss Datenbanksatz prüfen können
+            result = true;
         }
         else
+        if( job_chain->_orders_recoverable  &&  !_is_in_database )
+        {
+            result = db_try_insert();       // false, falls aus irgendeinem Grund die Order-ID schon vorhanden ist
+        }
+
+        if( result  &&  !_is_distributed )
         {
             job_chain->add_order( this );
         }
-
-        if( !_delay_storing_until_processing  &&  job_chain->_orders_recoverable  &&  !_is_in_database )
-        {
-            bool ok = db_try_insert();       // false, falls aus irgendeinem Grund die Order-ID schon vorhanden ist
-            
-            if( !ok )
-            {
-                if( _job_chain )  _job_chain->remove_order( this );
-                z::throw_xc( "SCHEDULER-186", obj_name(), _job_chain_name );
-            }
-        }
-
-        result = true;
     }
 
     return result;
@@ -4056,7 +4050,9 @@ void Order::postprocessing( bool success )
                         }
                     }
                     else
+                    {
                         _log->info( message_string( "SCHEDULER-945" ) );     // "Kein weiterer Job in der Jobkette, der Auftrag ist erledigt"
+                    }
                 }
             }
             else
@@ -4133,6 +4129,7 @@ void Order::postprocessing2( Job* last_job )
     if( finished() )
     {
         _end_time = Time::now();
+        order_subsystem()->count_finished_orders();
     }
 
     if( _job_chain  &&  ( _is_in_database || finished() ) )
@@ -4154,7 +4151,10 @@ void Order::postprocessing2( Job* last_job )
     }
 
 
-    if( finished()  &&  !_on_blacklist )  close();
+    if( finished() )
+    {
+        if( !_on_blacklist )  close();
+    }
 }
 
 //-----------------------------------------------------------------------------Order::set_suspended

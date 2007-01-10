@@ -877,7 +877,7 @@
                                     </xsl:if>
                                 </td>
 
-                                <td colspan="2">
+                                <td colspan="2" style="text-align: right">
                                     <xsl:if test="files/@count > 0">
                                         <xsl:element name="span">
                                             <xsl:attribute name="title">
@@ -1236,7 +1236,7 @@
                     <xsl:element name="td">
                         <xsl:attribute name="style">
                             white-space: nowrap;
-                            <xsl:if test="@task or @occupied_by_scheduler_member_id">font-weight: bold;</xsl:if>
+                            <xsl:if test="@task or @occupied_by_cluster_member_id">font-weight: bold;</xsl:if>
                         </xsl:attribute>
 
                         <!--xsl:if test="@replacement">
@@ -1264,7 +1264,7 @@
                     <xsl:element name="td">
                         <xsl:attribute name="align">left</xsl:attribute>
                         <xsl:attribute name="style">
-                            <!--xsl:if test="@task or @occupied_by_scheduler_member_id">font-weight: bold;</xsl:if-->
+                            <!--xsl:if test="@task or @occupied_by_cluster_member_id">font-weight: bold;</xsl:if-->
                             <xsl:text>padding-left: 2ex;</xsl:text>
                             <xsl:value-of select="$order_style"/>
                         </xsl:attribute>
@@ -1318,13 +1318,13 @@
                                 </span>
                             </xsl:when>
 
-                            <xsl:when test="@occupied_by_scheduler_member_id">
+                            <xsl:when test="@occupied_by_cluster_member_id">
                                 <xsl:element name="span">
                                     <xsl:attribute name="class">cluster</xsl:attribute>
                                     <xsl:attribute name="style">white-space: nowrap; font-size: 8pt;</xsl:attribute>
                                     <xsl:attribute name="title">
                                         <xsl:text>Order is processed by Scheduler member </xsl:text>
-                                        <xsl:value-of select="@occupied_by_scheduler_member_id"/>
+                                        <xsl:value-of select="@occupied_by_cluster_member_id"/>
                                     </xsl:attribute>
 
                                     <xsl:choose>
@@ -1345,13 +1345,13 @@
                                                         <xsl:value-of select="substring-after( @occupied_by_http_url, 'http://' )"/>
                                                     </xsl:when>
                                                     <xsl:otherwise>
-                                                        <xsl:value-of select="@occupied_by_scheduler_member_id"/>
+                                                        <xsl:value-of select="@occupied_by_cluster_member_id"/>
                                                     </xsl:otherwise>
                                                 </xsl:choose>
                                             </xsl:element>
                                         </xsl:when>
                                         <xsl:otherwise>
-                                            <xsl:value-of select="@occupied_by_scheduler_member_id"/>
+                                            <xsl:value-of select="@occupied_by_cluster_member_id"/>
                                         </xsl:otherwise>
                                     </xsl:choose>
                                 </xsl:element>
@@ -1652,10 +1652,10 @@
                     </span>
                 </xsl:if>
 
-                <xsl:if test="@deactivating_scheduler_member_id">
+                <xsl:if test="@deactivating_cluster_member_id">
                     <span style="margin-right: 1ex;">
                         <xsl:text>Deactivated by </xsl:text>
-                        <xsl:value-of select="@deactivating_scheduler_member_id"/>
+                        <xsl:value-of select="@deactivating_cluster_member_id"/>
                         <xsl:text> </xsl:text>
                     </span>
                 </xsl:if>

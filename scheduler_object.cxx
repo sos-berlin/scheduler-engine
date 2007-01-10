@@ -92,6 +92,13 @@ Order_subsystem* Scheduler_object::order_subsystem() const
     return _spooler->order_subsystem();
 }
 
+//-----------------------------------------------------------------Scheduler_object::task_subsystem
+
+Task_subsystem* Scheduler_object::task_subsystem() const
+{
+    return _spooler->task_subsystem();
+}
+
 //-------------------------------------------------------------------------------------------------
 
 } //namespace spoooler

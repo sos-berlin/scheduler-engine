@@ -1114,6 +1114,8 @@ bool Task::do_something()
                             {
                                 ok = operation__end();
 
+                                //task_subsystem()->count_started_tasks();
+
                                 set_state( ok? _module_instance->_module->_kind == Module::kind_process? s_running_process 
                                                                                                        : s_running 
                                              : s_ending );
@@ -1631,7 +1633,7 @@ Order* Task::fetch_and_occupy_order( const Time& now, const string& cause )
             _order_for_task_end = order;                // Damit bei Task-Ende im Fehlerfall noch der Auftrag gezeigt wird, s. dom_element()
 
             _log->set_order_log( _order->_log );
-            _log->info( message_string( "SCHEDULER-842", _order->obj_name(), _order->state() ) );
+            _log->info( message_string( "SCHEDULER-842", _order->obj_name(), _order->state(), _spooler->http_url() ) );
         }
         else
         {
@@ -1648,7 +1650,7 @@ void Task::postprocess_order( bool spooler_process_result )
 {
     if( _order )
     {
-        _log->info( message_string( "SCHEDULER-843", _order->obj_name(), _order->state() ) );
+        _log->info( message_string( "SCHEDULER-843", _order->obj_name(), _order->state(), _spooler->http_url() ) );
         _order->postprocessing( spooler_process_result );
         remove_order();
     }
@@ -1764,6 +1766,8 @@ void Task::finish()
 
 
     close();
+
+    task_subsystem()->count_finished_tasks();
 
     if( _job->is_machine_resumable() )  _spooler->end_dont_suspend_machine();
 }
