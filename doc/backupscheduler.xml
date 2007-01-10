@@ -40,10 +40,10 @@ Alle Scheduler werden mit <scheduler_option name="exclusive"/>  gestartet.
 <p>Folgende Kommandozeilenparameter definieren den Backup-Cluster.</p>
 
 <ul>
-<li><scheduler_option name="exclusive"/></li>
-bestimmt, dass der Scheduler zum Backup-Cluster gehört.
-<li><scheduler_option name="backup"/></li>
-bestimmt, dass es sich um einen Backup-Scheduler handelt. Es kann mehrere Backup-Scheduler geben. Fehlt das Attribut, handelt es sich um einen primären Scheduler. Es kann mehrere primäre Scheduler geben, die alle gleichberechtigt sind.
+<li><scheduler_option name="exclusive"/>
+bestimmt, dass der Scheduler zum Backup-Cluster gehört.</li>
+<li><scheduler_option name="backup"/>
+bestimmt, dass es sich um einen Backup-Scheduler handelt. Es kann mehrere Backup-Scheduler geben. Fehlt das Attribut, handelt es sich um einen primären Scheduler. Es kann mehrere primäre Scheduler geben, die alle die gleiche Startpriorität im Falle eines Ausfalls des aktiven Schedulers haben</li>
 <li><scheduler_option name="backup-precedence"/><br/>
 bestimmt die Rangfolge, mit der Backup-Scheduler aktiv werden. Es wird jeweils der Scheduler mit der kleinstem Wert aktiv, wenn der aktive Scheduler ausfällt.</li>
 </ul>
@@ -52,34 +52,38 @@ bestimmt die Rangfolge, mit der Backup-Scheduler aktiv werden. Es wird jeweils d
 
 <p>Beim Beenden werden die laufenden Process-Schritte laufender Jobs wird noch ausgeführt. Mit dem Parameter <scheduler_option name="timout"/>=&lt;wert&gt; kann das Beenden laufender Process-Schritte nach Ablauf einer Zeit erzwungen werden.</p>
 
-<br/><b>Beenden aller Scheduler im Backup-Cluster</b><br/>
+<h3>Beenden aller Scheduler im Backup-Cluster</h3>
 <p>Ein Cluster wird beendet,wenn in der Scheduler Weboberfläche das Kommando "terminate cluster" aufgerufen wird. Alle Scheduler des Cluster werden damit beendet. </p>
 
 <p>Entspricht XML-Kommando &lt;terminate all_schedulers="yes"&gt;</p>
 
-<br/><b>Beenden aller Scheduler im Backup-Cluster mit Timeout</b><br/>
+
+<h3>Beenden aller Scheduler im Backup-Cluster mit Timeout</h3>
 <p>Ein Cluster wird beendet,wenn in der Scheduler Weboberfläche das Kommando "terminate cluster within 60s" aufgerufen wird. Alle Scheduler des Cluster werden damit beendet. Nach Ablauf von 60 Sekunden werden alle noch laufenden Process-Schritte abgebrochen. </p>
 <p>Entspricht XML-Kommando &lt;terminate all_schedulers="yes" timeout="60"&gt;</p>
 
-<br/><b>Beenden aller Scheduler im Backup-Cluster mit Neustart</b><br/>
+<h3>Beenden aller Scheduler im Backup-Cluster mit Neustart</h3>
 <p>Ein Cluster wird beendet,wenn in der Scheduler Weboberfläche das Kommando "terminate and restart cluster" aufgerufen wird. Alle Scheduler des Cluster werden damit beendet und anschließend neu gestartet. Der aktive Scheduler ist nach dem Neustart wieder aktiv.</p>
 <p>Werden alle Scheduler neu gestartet, ist anschließend der primäre Scheduler der aktive Scheduler</p>
 <p>Entspricht XML-Kommando &lt;terminate all_schedulers="yes" restart="yes"&gt;</p>
 
-<br/><b>Beenden aller Scheduler im Backup-Cluster mit Neustart mit Timeout</b><br/>
+
+<h3>Beenden aller Scheduler im Backup-Cluster mit Neustart mit Timeout</h3>
 <p>Ein Cluster wird beendet,wenn in der Scheduler Weboberfläche das Kommando "terminate and restart cluster" aufgerufen wird. Alle Scheduler des Cluster werden damit beendet und anschließend neu gestartet. Der akive Scheduler ist nach dem Neustart wieder aktiv. Nach Ablauf von 60 Sekunden werden alle noch laufenden Process-Schritte abgebrochen.</p>
 <p>Werden alle Scheduler neu gestartet, ist anschließend der primäre Scheduler der aktive Scheduler</p>
 <p>Entspricht XML-Kommando &lt;terminate all_schedulers="yes" restart="yes" timeout="60"&gt;</p>
 
-<br/><b>Beenden des aktiven Schedulers. Die Backup-Scheduler bleiben gestartet und laufen nicht an</b><br/>
+
+<h3>Beenden des aktiven Schedulers. Die Backup-Scheduler bleiben gestartet und laufen nicht an</h3>
 <p>Ein Scheduler wird beendet,wenn in der Scheduler Weboberfläche das Kommando "terminate" aufgerufen wird. </p>
 <p>Entspricht XML-Kommando &lt;terminate&gt;</p>
 
-<br/><b>Beenden des primären Schedulers mit Neustart. Die Backup-Scheduler bleiben gestartet und laufen nicht an</b><br/>
+
+<h3>Beenden des primären Schedulers mit Neustart. Die Backup-Scheduler bleiben gestartet und laufen nicht an</h3>
 <p>Ein Scheduler wird beendet und anschließend neu gestartet,wenn in der Scheduler Weboberfläche das Kommando "terminate and restart" aufgerufen wird. </p>
 <p>Entspricht XML-Kommando &lt;terminate restart="yes"&gt;</p>
 
-<br/><b>Beenden eines Backup-Schedulers mit Neustart.</b><br/>
+<h3>Beenden eines Backup-Schedulers mit Neustart.</h3>
 <p>Ein Scheduler wird beendet und anschließend neu gestartet,wenn in der Scheduler Weboberfläche das Kommando "terminate and restart" aufgerufen wird. </p>
 <p>Handelt es sich um einen Backup-Scheduler, wird er nach dem Neustart nicht aktiv. Ist ein inaktiver laufender primärer Scheduler im Cluster, wird dieser aktiv.</p>
 <p>Entspricht XML-Kommando &lt;terminate restart="yes"&gt;</p>
