@@ -112,4 +112,4 @@ Der primäre Scheduler wird mit terminate fail-safe beendet. Ein bereits laufend
 <li>Wenn der Rechner heruntergefahren wird, übernimmt ein Backup-Scheduler auf einem zweiten Rechner (continue_exclusive_operation="yes")</li>
 <li>Wenn primärer Scheduler und Backup-Scheduler auf einem Rechner laufen und dieser Rechner neu gestartet wird, kann es sein, dass der Backup-Scheduler zuerst startet. Er übernimmt dann nicht sofort die Verarbeitung sondern wartet, ob vom primären Scheduler ein Herzschlag kommt. Nur wenn nach 60s kein Herzschlag kommt, übernimmt der Backup-Scheduler die Verarbeitung. Dies entspricht dem Standardverhalten beim Ausbleiben eines Herzschlags vom aktiven Scheduler.</li>
 </ul>
-</description>
+</description Uwe>
