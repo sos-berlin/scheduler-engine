@@ -7,7 +7,7 @@
     date                = "$Date: 2007-01-10 17:19:39 +0200 (Do, 05 Okt 2006) $"
 >
 
-<h1>Backup-Scheduler-Cluster-Alan</h1>
+<h1>Backup-Scheduler-Cluster</h1>
 
 <p>Ein Backup-Scheduler-Cluster besteht aus mehreren Instanzen eines Schedulers, die alle mit der gleichen Scheduler-Id und der Option <scheduler_option name="exclusive"/> gestartet wurden. Die Scheduler-Instanzen können auf unterschiedlichen Rechnern oder auf einem Rechner laufen. In einem Cluster ist maximal ein Scheduler aktiv, d.h. startet Jobs bzw. verarbeitet Aufträge. Die anderen Scheduler sind inaktiv, d.h. sie warten darauf, im Notfall den Betrieb zu übernehmen.</p>
 
@@ -112,4 +112,4 @@ Der primäre Scheduler wird mit terminate fail-safe beendet. Ein bereits laufend
 <li>Wenn der Rechner heruntergefahren wird, übernimmt ein Backup-Scheduler auf einem zweiten Rechner (continue_exclusive_operation="yes")</li>
 <li>Wenn primärer Scheduler und Backup-Scheduler auf einem Rechner laufen und dieser Rechner neu gestartet wird, kann es sein, dass der Backup-Scheduler zuerst startet. Er übernimmt dann nicht sofort die Verarbeitung sondern wartet, ob vom primären Scheduler ein Herzschlag kommt. Nur wenn nach 60s kein Herzschlag kommt, übernimmt der Backup-Scheduler die Verarbeitung. Dies entspricht dem Standardverhalten beim Ausbleiben eines Herzschlags vom aktiven Scheduler.</li>
 </ul>
-</description Uwe>
+</description>
