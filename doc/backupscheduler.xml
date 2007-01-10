@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
 <description
     title               = "Backup-Scheduler"
@@ -7,7 +7,7 @@
     date                = "$Date: 2007-01-10 17:19:39 +0200 (Do, 05 Okt 2006) $"
 >
 
-<h1>Backup-Scheduler-Cluster</h1>
+<h1>Backup-Scheduler-Cluster-Alan</h1>
 
 <p>Ein Backup-Scheduler-Cluster besteht aus mehreren Instanzen eines Schedulers, die alle mit der gleichen Scheduler-Id und der Option <scheduler_option name="exclusive"/> gestartet wurden. Die Scheduler-Instanzen können auf unterschiedlichen Rechnern oder auf einem Rechner laufen. In einem Cluster ist maximal ein Scheduler aktiv, d.h. startet Jobs bzw. verarbeitet Aufträge. Die anderen Scheduler sind inaktiv, d.h. sie warten darauf, im Notfall den Betrieb zu übernehmen.</p>
 
