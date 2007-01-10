@@ -698,7 +698,7 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
 
     if( state != "" )  
     {
-        order->assert_no_task();
+        order->assert_no_task( __FUNCTION__ );
         order->set_state( state );
     }
 
@@ -713,7 +713,7 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
         }
         else
         {
-            order->assert_no_task();
+            order->assert_no_task( __FUNCTION__ );
             order->clear_setback( true );        // order->_setback_count belassen
         }
     }

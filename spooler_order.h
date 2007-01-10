@@ -48,7 +48,8 @@ struct Order : Com_order,
 
     void                        init                    ();
     bool                        occupy_for_task         ( Task*, const Time& now );
-    void                        assert_no_task          ();
+    void                        assert_no_task          ( const string& debug_text );
+    void                        assert_task             ( const string& debug_text );
     bool                        is_immediately_processable( const Time& now );
     bool                        is_processable          ();
     void                        open_log                ();
@@ -163,7 +164,7 @@ struct Order : Com_order,
     bool                        try_place_in_job_chain  ( Job_chain* );
     void                        remove_from_job_chain   ();
     void                        remove_from_job         ();
-    bool                        tip_own_job_for_new_order_state();
+    bool                        tip_own_job_for_new_distributed_order_state();
     void                        move_to_node            ( Job_chain_node* );
     void                        postprocessing          ( bool success );                           // Verarbeitung nach spooler_process()
     void                        processing_error        ();
@@ -396,7 +397,7 @@ struct Job_chain : Com_job_chain, Scheduler_object
     int                         load_orders_from_result_set   ( Read_transaction*, Any_file* result_set );
     Order*                      add_order_from_database_record( Read_transaction*, const Record& );
 
-    bool                        tip_for_new_order       ( const Order::State& state, const Time& at );
+    bool                        tip_for_new_distributed_order       ( const Order::State& state, const Time& at );
 
     int                         remove_all_pending_orders( bool leave_in_database = false );
 
@@ -455,7 +456,6 @@ struct Job_chain : Com_job_chain, Scheduler_object
     State                      _state;
     bool                       _visible;
 
-
     typedef stdext::hash_map< string, Order* >   Order_map;
     Order_map                  _order_map;
 
@@ -510,12 +510,15 @@ struct Order_queue : Com_order_queue
     bool                        has_order               ( const Time& now )                         { return first_order( now ) != NULL; }
     bool                        request_order           ( const Time& now, const string& cause );
     void                        withdraw_order_request  ();
+    void                        withdraw_distributed_order_request();
     Order*                      fetch_and_occupy_order  ( const Time& now, const string& cause, Task* occupying_task );
     Time                        next_time               ();
-    bool                        is_order_requested      ()                                          { return _is_order_requested; }
+    bool                        is_distributed_order_requested             ( time_t now )           { return _next_distributed_order_check_time <= now; }
+    time_t                      next_distributed_order_check_time          ()              const    { return _next_distributed_order_check_time; }
+    void                        calculate_next_distributed_order_check_time( time_t now );
     void                    set_next_announced_distributed_order_time( const Time&, bool is_now );
     Time                        next_announced_distributed_order_time();
-    void                        tip_for_new_order       ();
+    void                        tip_for_new_distributed_order       ();
   //void                        update_priorities       ();
   //ptr<Order>                  order_or_null           ( const Order::Id& );
     Job*                        job                     () const                                    { return _job; }
@@ -540,8 +543,10 @@ struct Order_queue : Com_order_queue
     typedef list< ptr<Order> >  Queue;
     Queue                      _queue;
 
-    bool                       _is_order_requested;
-    Time                       _next_announced_distributed_order_time;      // Gültig, wenn _is_order_requested
+  //bool                       _is_distributed_order_requested;
+    time_t                     _next_distributed_order_check_time;
+    int                        _next_distributed_order_check_delay;
+    Time                       _next_announced_distributed_order_time;      // Gültig, wenn _is_distributed_order_requested
     bool                       _has_tip_for_new_order;
 
     typedef list< Order_source* >  Order_source_list;

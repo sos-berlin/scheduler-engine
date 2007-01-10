@@ -1939,7 +1939,7 @@ void Spooler::update_console_title()
 
             int process_count = 0;
             for( int i = 0; i < NO_OF( _process_handles ); i++ )  if( _process_handles[i] )  process_count++;
-            if( _state == s_running  ||  process_count > 0 )  title << ", " << process_count << " running processes";
+            if( _state == s_running  ||  process_count > 0 )  title << ", " << process_count << " processes";
 
             BOOL ok = SetConsoleTitle( title.to_string().c_str() );
             if( !ok )  _has_windows_console = false;

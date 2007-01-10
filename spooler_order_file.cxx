@@ -587,13 +587,14 @@ Order* Directory_file_order_source::fetch_and_occupy_order_from_new_files( const
     {
         if( z::File_info* new_file = _new_files[ _new_files_index ] )
         {
-            File_path path = new_file->path();
+            File_path  path = new_file->path();
+            ptr<Order> order;
 
             try
             {
                 if( file_exists( path )  &&  !_job_chain->order_or_null( path ) )
                 {
-                    ptr<Order> order = new Order( _spooler );
+                    order = new Order( _spooler );
 
                     order->set_file_path( path );
                     order->set_state( _next_state );
@@ -609,13 +610,14 @@ Order* Directory_file_order_source::fetch_and_occupy_order_from_new_files( const
 
                         if( !file_exists( path ) )
                         {
-                            order->db_release_occupation();
+                            // Ein anderer Scheduler hat vielleicht den Dateiauftrag blitzschnell erledigt
+                            order->db_release_occupation(); 
                             ok = false;
                         }
-
-                        if( ok )  ok = order->occupy_for_task( occupying_task, now );
-                        if( ok )  _job_chain->add_order( order );
                     }
+
+                    if( ok )  ok = order->occupy_for_task( occupying_task, now );
+                    if( ok  &&  !_job_chain )  _job_chain->add_order( order );      // Verteilter Auftrag
 
                     if( ok )
                     {
@@ -644,6 +646,11 @@ Order* Directory_file_order_source::fetch_and_occupy_order_from_new_files( const
 
                     xx.append_text( x.what() );
                     send_mail( evt_file_order_error, &xx );
+                }
+
+                if( order ) 
+                {
+                    order->close();
                 }
             }
         }
@@ -963,7 +970,7 @@ bool Directory_file_order_source::async_continue_( Async_operation::Continue_fla
 
     read_directory( was_notified, cause );
 
-    if( _new_files_index < _new_files.size() )  _next_order_queue->tip_for_new_order();
+    if( _new_files_index < _new_files.size() )  _next_order_queue->tip_for_new_distributed_order();
 
     return true;
 }

@@ -1641,6 +1641,8 @@ Order* Task::fetch_and_occupy_order( const Time& now, const string& cause )
         }
     }
 
+    if( _order )  _order->assert_task( __FUNCTION__ );
+
     return _order;
 }
 

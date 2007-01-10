@@ -434,7 +434,7 @@ bool Cluster_member::free_occupied_orders( Transaction* outer_transaction )
                 _log->warn( message_string( "SCHEDULER-829", job_chain_name, order_id ) );
 
                 if( Job_chain* job_chain = order_subsystem()->job_chain_or_null( job_chain_name ) )
-                    job_chain->tip_for_new_order( state, Time(0) );
+                    job_chain->tip_for_new_distributed_order( state, Time(0) );
             }
 
             sql::Update_stmt update ( db()->database_descriptor(), _spooler->_orders_tablename );
