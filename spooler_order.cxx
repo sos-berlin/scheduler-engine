@@ -3148,6 +3148,12 @@ void Order::close()
     set_replacement( false );
     if( _replaced_by )  _replaced_by->set_replacement( false ), _replaced_by = NULL;
 
+    if( _is_db_occupied )
+    {
+        Z_LOGI2( "scheduler", __FUNCTION__ << "  db_release_occupation()\n" );
+        db_release_occupation();
+    }
+
     remove_from_job_chain();
 
     _log->close();

@@ -617,13 +617,16 @@ Order* Directory_file_order_source::fetch_and_occupy_order_from_new_files( const
                     }
 
                     if( ok )  ok = order->occupy_for_task( occupying_task, now );
-                    if( ok  &&  !_job_chain )  _job_chain->add_order( order );      // Verteilter Auftrag
+
+                    if( ok  &&  order->is_distributed() )  _job_chain->add_order( order );
 
                     if( ok )
                     {
                         result = order;
                         log()->info( message_string( "SCHEDULER-983", order->obj_name(), "written at " + date ) );
                     }
+
+                    if( !ok )  order->close(),  order = NULL;
                 }
 
                 _new_files[ _new_files_index ] = NULL;
