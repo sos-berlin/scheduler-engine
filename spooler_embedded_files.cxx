@@ -1016,7 +1016,27 @@ const char file_scheduler_xsd[] =
     "<xsd:attribute name=\"all_schedulers\" type=\"Yes_no\"/>\n"
     "<xsd:attribute name=\"restart\"        type=\"Yes_no\"/>\n"
     "<xsd:attribute name=\"timeout\"        type=\"xsd:integer\"/>\n"
+    "\n"
     "<xsd:attribute name=\"continue_exclusive_operation\" type=\"Yes_no\"/>\n"
+    "<!--xsd:attribute name=\"continue_exclusive_operation\">\n"
+    "<xsd:simpleType>\n"
+    "<xsd:union>\n"
+    "<xsd:simpleType>\n"
+    "<xsd:restriction base=\"xsd:NMTOKEN\">\n"
+    "<xsd:enumeration value=\"non_backup\"/>\n"
+    "<xsd:enumeration value=\"this\"/>\n"
+    "<xsd:enumeration value=\"any\"/>\n"
+    "</xsd:restriction>\n"
+    "</xsd:simpleType>\n"
+    "<xsd:simpleType>\n"
+    "<xsd:restriction base=\"String\">\n"
+    "<xsd:pattern value=\"http://.+\"/>\n"
+    "</xsd:restriction>\n"
+    "</xsd:simpleType>\n"
+    "</xsd:union>\n"
+    "</xsd:simpleType>\n"
+    "</xsd:attribute-->\n"
+    "\n"
     "<xsd:attribute name=\"cluster_member_id\" type=\"String\"/>\n"
     "<xsd:attribute name=\"delete_dead_entry\" type=\"Yes_no\"/>\n"
     "</xsd:complexType>\n"
@@ -1305,7 +1325,7 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1168348046 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1168554623 },
     { NULL, NULL, 0 }
 };
 

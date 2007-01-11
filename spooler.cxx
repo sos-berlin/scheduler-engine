@@ -1104,7 +1104,7 @@ void Spooler::register_process_handle( Process_handle p )
         }
     }
 
-    update_console_title();
+    update_console_title( 2 );
 }
 
 //---------------------------------------------------------------Spooler::unregister_process_handle
@@ -1121,7 +1121,7 @@ void Spooler::unregister_process_handle( Process_handle p )
         }
     }
 
-    update_console_title();
+    update_console_title( 2 );
 }
 
 //-------------------------------------------------------------------------------Task::register_pid
@@ -1257,7 +1257,7 @@ void Spooler::set_state( State state )
     }
     catch( exception& ) {}      // ENOSPC bei s_stopping ignorieren wir
 
-    update_console_title();
+    Z_DEBUG_ONLY( update_console_title() );
 
     try
     {
@@ -1915,9 +1915,13 @@ void Spooler::set_next_daylight_saving_transition()
 #endif
 */
 
-void Spooler::update_console_title()
+void Spooler::update_console_title( int level )
 {
 #   if defined Z_WINDOWS
+
+#       ifndef Z_DEBUG
+            if( !_zschimmer_mode && level != 1 )  return;
+#       endif
 
         if( _has_windows_console )
         {
@@ -1927,19 +1931,22 @@ void Spooler::update_console_title()
             title << "  pid=" << getpid() << "  ";
             title << state_name();
 
-            if( _task_subsystem  &&  _task_subsystem->_finished_tasks_count )
+            if( level == 2 )    // Aktuelles im laufenden Betrieb zeigen
             {
-                title << ", " <<_task_subsystem->_finished_tasks_count << " finished tasks";
-            }
+                if( _task_subsystem  &&  _task_subsystem->_finished_tasks_count )
+                {
+                    title << ", " <<_task_subsystem->_finished_tasks_count << " finished tasks";
+                }
 
-            if( _order_subsystem  &&  _order_subsystem->_finished_orders_count )
-            {
-                title << ", " << _order_subsystem->_finished_orders_count << " finished orders";     
-            }
+                if( _order_subsystem  &&  _order_subsystem->_finished_orders_count )
+                {
+                    title << ", " << _order_subsystem->_finished_orders_count << " finished orders";     
+                }
 
-            int process_count = 0;
-            for( int i = 0; i < NO_OF( _process_handles ); i++ )  if( _process_handles[i] )  process_count++;
-            if( _state == s_running  ||  process_count > 0 )  title << ", " << process_count << " processes";
+                int process_count = 0;
+                for( int i = 0; i < NO_OF( _process_handles ); i++ )  if( _process_handles[i] )  process_count++;
+                if( _state == s_running  ||  process_count > 0 )  title << ", " << process_count << " processes";
+            }
 
             BOOL ok = SetConsoleTitle( title.to_string().c_str() );
             if( !ok )  _has_windows_console = false;
@@ -2136,7 +2143,7 @@ void Spooler::execute_config_commands()
     _config_document_to_load = NULL;
 }
 
-//-------------------------------------------------------------Spooler::start_cluster
+//---------------------------------------------------------------------------Spooler::start_cluster
 
 void Spooler::start_cluster()
 {
@@ -2154,38 +2161,6 @@ void Spooler::start_cluster()
 
     _cluster->start();     // Wartet, bis entschieden ist, dass wir aktiv werden
 }
-
-//----------------------------------------------------------Spooler::wait_for_cluster
-
-//void Spooler::wait_for_cluster()
-//{
-//    Z_LOGI2( "scheduler", __FUNCTION__ << "\n" );
-//
-//    bool ok = true;
-//
-//    State previous_state = state();
-//
-//    if( _is_backup_member  &&  !_cluster->is_scheduler_up() ) 
-//    {
-//        ok = _cluster->wait_until_is_scheduler_up();
-//    }
-//
-//    if( ok  &&  !_cluster->is_active() )
-//    {
-//        ok = _cluster->wait_until_is_active();
-//    }
-//
-//    if( ok  &&  _demand_exclusiveness  &&  !_cluster->has_exclusiveness() )
-//    {
-//        ok = _cluster->wait_until_has_exclusiveness();
-//    }
-//
-//    set_state( previous_state );
-//
-//    _assert_is_active = true;
-//
-//    if( !_spooler->is_termination_state_cmd() )  check_cluster();
-//}
 
 //-------------------------------------------------------------------------------Spooler::is_active
 
@@ -2212,9 +2187,6 @@ void Spooler::assert_are_orders_distributed( const string& text )
 
 string Spooler::cluster_member_id()
 {
-    //assert_are_orders_distributed( __FUNCTION__ );
-    //assert( _cluster );
-
     return _cluster? _cluster->my_member_id() : "";
 }
 
@@ -2234,15 +2206,6 @@ void Spooler::assert_has_exclusiveness( const string& text )
         z::throw_xc( "SCHEDULER-366", text );
     }
 }
-
-//-------------------------------------------------------------------------Spooler::do_a_heart_beat
-
-//bool Spooler::do_a_heart_beat()
-//{
-//    if( !_cluster )  return true;
-//
-//    return _cluster->do_a_heart_beat();
-//}
 
 //--------------------------------------------------------------------Spooler::run_scheduler_script
 
@@ -2319,7 +2282,11 @@ void Spooler::stop( const exception* )
     {
         _assert_is_active = false;
 
-        _cluster->set_continue_exclusive_operation( _terminate_continue_exclusive_operation );
+        try
+        {
+            _cluster->set_continue_exclusive_operation( _terminate_continue_exclusive_operation );
+        }
+        catch( exception& x ) { _log->error( S() << x.what() << ", in Cluster::set_continue_exclusive_operation\n" ); }
 
         if( _terminate_all_schedulers )
         {
@@ -2830,7 +2797,7 @@ void Spooler::wait( Wait_handles* wait_handles, const Time& wait_until_, Object*
 
 
 #   ifndef Z_UNIX   // Unter Unix mit Verzeichnisüberwachung gibt der Scheduler alle show_message_after_seconds Sekunden die Meldung SCHEDULER-972 aus
-        if( !signaled  &&  !_print_time_every_second )  //!string_begins_with( _log->last_line(), "SCHEDULER-972" ) )
+        if( !signaled  &&  !_cluster  &&  !_print_time_every_second )
         {
             Time first_wait_until = _base_log.last_time() + ( _log->log_level() <= log_debug3? show_message_after_seconds_debug : show_message_after_seconds );
             if( first_wait_until < wait_until )
@@ -2896,11 +2863,11 @@ void Spooler::signal( const string& signal_name )
     }
 }
 
-//-------------------------------------------------------------Spooler::check_cluster
+//---------------------------------------------------------------------------Spooler::check_cluster
 
 void Spooler::check_cluster()
 {
-    _cluster->async_check_exception( "Error in Scheduler member" );
+    _cluster->async_check_exception( "Error in cluster operation" );
 
     check_is_active();
 }
@@ -2929,7 +2896,7 @@ bool Spooler::ok( Transaction* outer_transaction )
     if( !check_is_active( outer_transaction ) )  
     {
         ok = false;
-        cmd_terminate( false, INT_MAX, true );
+        cmd_terminate( false, INT_MAX, cluster::Cluster::continue_exclusive_any );
     }
 
     return ok;
@@ -2967,7 +2934,7 @@ bool Spooler::check_is_active( Transaction* outer_transaction )
                 //_cluster->close();     // Scheduler-Mitglieds-Eintrag entfernen
                 //_cluster = NULL;       // aber Eintrag für verteilten Scheduler lassen, Scheduler ist nicht herunterfahren (wird ja vom anderen aktiven Scheduler fortgesetzt)
 
-                cmd_terminate( false, INT_MAX, true );
+                cmd_terminate( false, INT_MAX, cluster::Cluster::continue_exclusive_any );
                 result = false;
             }
         }
@@ -3028,9 +2995,8 @@ void Spooler::run_check_ctrl_c()
 
                 if( _state != s_stopping )
                 {
-                    _log->warn( message_string( "SCHEDULER-262", signal_text ) );   // "Abbruch-Signal (Ctrl-C) empfangen. Der Scheduler wird beendet.\n" );
-                    cmd_terminate( false, INT_MAX, true );  // Inaktiver Scheduler darf fortsetzen
-
+                    _log->warn( message_string( "SCHEDULER-262", signal_text ) );       // "Abbruch-Signal (Ctrl-C) empfangen. Der Scheduler wird beendet.\n" );
+                    cmd_terminate( false, INT_MAX, cluster::Cluster::continue_exclusive_any );
                 }
 
                 set_ctrl_c_handler( true );
@@ -3196,13 +3162,13 @@ void Spooler::cmd_terminate_after_error( const string& debug_function, const str
 {
     _log->error( message_string( "SCHEDULER-264", "in " + debug_function, debug_text ) );
 
-    cmd_terminate( false, INT_MAX, true );  
+    cmd_terminate( false, INT_MAX, cluster::Cluster::continue_exclusive_any );  
 }
 
 //---------------------------------------------------------------------------Spooler::cmd_terminate
 // Anderer Thread (spooler_service.cxx)
 
-void Spooler::cmd_terminate( bool restart, int timeout, bool continue_exclusive_operation, bool terminate_all_schedulers )
+void Spooler::cmd_terminate( bool restart, int timeout, const string& continue_exclusive_operation, bool terminate_all_schedulers )
 {
     if( timeout < 0 )  timeout = 0;
 

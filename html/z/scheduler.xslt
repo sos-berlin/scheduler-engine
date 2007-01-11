@@ -1668,22 +1668,24 @@
             <td>
                 <xsl:choose>
                     <xsl:when test="@last_detected_heart_beat_age">
-                        <xsl:value-of select="@last_detected_heart_beat_age"/>
-                        <xsl:text>s ago </xsl:text>
-                        <xsl:if test="@heart_beat_quality">
-                            <xsl:element name="span">
-                                <xsl:attribute name="style">
-                                    <xsl:text>margin-left: 1ex;</xsl:text>
-                                    <xsl:choose>
-                                        <xsl:when test="@heart_beat_quality != 'good'">color: red;</xsl:when>
-                                    </xsl:choose>
-                                </xsl:attribute>
+                        <xsl:element name="span">
+                            <xsl:attribute name="style">
+                                <xsl:choose>
+                                    <xsl:when test="@heart_beat_quality != 'good'">color: red;</xsl:when>
+                                </xsl:choose>
+                            </xsl:attribute>
 
-                                <xsl:text>(</xsl:text>
-                                <xsl:value-of select="@heart_beat_quality"/>
-                                <xsl:text>)</xsl:text>
-                            </xsl:element>
-                        </xsl:if>
+                            <xsl:value-of select="@last_detected_heart_beat_age"/>
+                            <xsl:text>s ago </xsl:text>
+                            
+                            <xsl:if test="@heart_beat_quality">
+                                <span style="margin-left: 1ex;">
+                                    <xsl:text>(</xsl:text>
+                                    <xsl:value-of select="@heart_beat_quality"/>
+                                    <xsl:text>)</xsl:text>
+                                </span>
+                            </xsl:if>
+                        </xsl:element>
                     </xsl:when>
                     <xsl:when test="@dead != 'yes'  and  @database_last_heart_beat">
                         <span style="font-size: 8pt">

@@ -330,7 +330,7 @@ void Task_subsystem::count_started_tasks()
 void Task_subsystem::count_finished_tasks()
 {
     _started_tasks_count++;
-    _spooler->update_console_title();
+    _spooler->update_console_title( 2 );
 }
 
 //-------------------------------------------------------------------------------------------------

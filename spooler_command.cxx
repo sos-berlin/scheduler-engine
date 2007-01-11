@@ -282,12 +282,16 @@ xml::Element_ptr Command_processor::execute_terminate( const xml::Element_ptr& e
 {
     if( _security_level < Security::seclev_no_add )  z::throw_xc( "SCHEDULER-121" );
 
-    bool restart        = element.bool_getAttribute( "restart"                     , false );
-    bool all_schedulers = element.bool_getAttribute( "all_schedulers"              , false );
-    bool continue_excl  = element.bool_getAttribute( "continue_exclusive_operation", false );
-    int  timeout        = element. int_getAttribute( "timeout"                     , INT_MAX );
-    string member_id    = element.     getAttribute( "cluster_member_id"           );
-    bool delete_dead    = element.bool_getAttribute( "delete_dead_entry"           , false );
+    bool   restart        = element.bool_getAttribute( "restart"                     , false );
+    bool   all_schedulers = element.bool_getAttribute( "all_schedulers"              , false );
+    int    timeout        = element. int_getAttribute( "timeout"                     , INT_MAX );
+    string member_id      = element.     getAttribute( "cluster_member_id"           );
+    bool   delete_dead    = element.bool_getAttribute( "delete_dead_entry"           , false );
+
+  //string continue_excl  = element.     getAttribute( "continue_exclusive_operation", "non_backup" );
+    string continue_excl  = element.bool_getAttribute( "continue_exclusive_operation" )? cluster::Cluster::continue_exclusive_any 
+                                                                                       : "non_backup";
+    if( continue_excl == "non_backup" )  continue_excl = cluster::Cluster::continue_exclusive_non_backup;
 
     if( member_id == ""  ||  member_id == _spooler->cluster_member_id() )
     {

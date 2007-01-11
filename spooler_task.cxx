@@ -1664,7 +1664,7 @@ void Task::remove_order_after_error()
 {
     if( _order )
     {
-        _log->info( message_string( "SCHEDULER-843", _order->obj_name(), _order->state() ) );
+        _log->info( message_string( "SCHEDULER-843", _order->obj_name(), _order->state(), _spooler->http_url(), "after error" ) );
         _order->processing_error();
         remove_order();
     }

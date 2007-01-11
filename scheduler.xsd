@@ -1007,7 +1007,27 @@
             <xsd:attribute name="all_schedulers" type="Yes_no"/>
             <xsd:attribute name="restart"        type="Yes_no"/>
             <xsd:attribute name="timeout"        type="xsd:integer"/>
+
             <xsd:attribute name="continue_exclusive_operation" type="Yes_no"/>
+            <!--xsd:attribute name="continue_exclusive_operation">
+                <xsd:simpleType>
+                    <xsd:union>
+                        <xsd:simpleType>
+                            <xsd:restriction base="xsd:NMTOKEN">
+                                <xsd:enumeration value="non_backup"/>
+                                <xsd:enumeration value="this"/>
+                                <xsd:enumeration value="any"/>
+                            </xsd:restriction>
+                        </xsd:simpleType>
+                        <xsd:simpleType>
+                            <xsd:restriction base="String">
+                                <xsd:pattern value="http://.+"/>
+                            </xsd:restriction>
+                        </xsd:simpleType>
+                    </xsd:union>
+                </xsd:simpleType>
+            </xsd:attribute-->
+            
             <xsd:attribute name="cluster_member_id" type="String"/>
             <xsd:attribute name="delete_dead_entry" type="Yes_no"/>
         </xsd:complexType>

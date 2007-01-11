@@ -33,6 +33,9 @@ const int                       first_dead_orders_check_period          = 60;
 
 const int                       Cluster::default_non_backup_precedence  = 0;
 const int                       Cluster::default_backup_precedence      = 1;
+const string                    Cluster::continue_exclusive_non_backup  = "";               // Das ist der Default
+const string                    Cluster::continue_exclusive_this        = "this";
+const string                    Cluster::continue_exclusive_any         = "any";            // In der Datenbank, Feld http_url, wird das zu ""
 
 //-------------------------------------------------------------------------------------------------
 
@@ -56,8 +59,8 @@ struct Cluster_member : Object, Scheduler_object
     enum Mark_as_inactive_option
     {
       //mai_delete_empty_record,
-        mai_delete_inactive_record,
-        mai_delete_inactive_and_empty_records,
+        mai_delete_my_inactive_record,
+      //mai_delete_inactive_and_empty_records,
         mai_mark_inactive_record_as_dead
     };
 
@@ -65,6 +68,7 @@ struct Cluster_member : Object, Scheduler_object
                                 Cluster_member              ( Cluster*, const string& member_id );
 
     bool                        is_empty_member             () const                                { return _member_id == _cluster->empty_member_id(); }
+    bool                        its_me                      () const                                { return _member_id == _cluster->my_member_id(); }
     bool                        check_heart_beat            ( time_t now_before_select, const Record& );
     bool                        free_occupied_orders        ( Transaction* = NULL );
     void                        deactivate_and_release_orders_after_death();
@@ -78,6 +82,7 @@ struct Cluster_member : Object, Scheduler_object
     Fill_zero                  _zero_;
     string                     _member_id;
     bool                       _is_dead;
+    bool                       _is_db_dead;
     time_t                     _dead_orders_check_period;
     time_t                     _next_dead_orders_check_time;
     bool                       _is_exclusive;
@@ -212,7 +217,8 @@ void Heart_beat_watchdog_thread::sleep( int seconds )
 
     while( !_kill  &&  now < until )
     {
-        int sleep_time = until - now;
+        int sleep_time = (int)( until - now );
+
 #       ifdef Z_WINDOWS
 
             int ms = sleep_time * 1000;
@@ -274,7 +280,7 @@ int Heart_beat_watchdog_thread::thread_main()
             Z_WINDOWS_ONLY( if( !IsDebuggerPresent() ) )
             {
                 _cluster->_spooler->kill_all_processes();
-                _log->error( message_string( "SCHEDULER-386", ::time(NULL) - heart_beat_time ) );
+                _log->error( message_string( "SCHEDULER-386", my_string_from_time_t( heart_beat_time ), ::time(NULL) - heart_beat_time ) );
                 _cluster->_spooler->abort_immediately( true );
             }
         }
@@ -308,7 +314,7 @@ bool Cluster_member::check_heart_beat( time_t now_before_select, const Record& r
     _is_active              = !record.null    ( "active"    );
     _deactivating_member_id = record.as_string( "deactivating_member_id" );
     _http_url               = record.as_string( "http_url"  );
-    bool db_is_dead         = !record.null    ( "dead" );
+    _is_db_dead             = !record.null    ( "dead"      );
     
     time_t last_heart_beat = record.null( "last_heart_beat" )? 0 : record.as_int64( "last_heart_beat" );
     time_t next_heart_beat = record.null( "next_heart_beat" )? 0 : record.as_int64( "next_heart_beat" );
@@ -324,7 +330,8 @@ bool Cluster_member::check_heart_beat( time_t now_before_select, const Record& r
         if( last_heart_beat != _db_last_heart_beat )   // Neuer Herzschlag oder neu entdeckter Scheduler?
         {
             time_t now = ::time(NULL);
-            if( _is_dead  &&  !db_is_dead )
+
+            if( _is_dead  &&  !_is_db_dead )
             {
                 log()->warn( message_string( "SCHEDULER-823", _member_id, now - _last_heart_beat_detected ) );     // Wiederauferstanden?
                 on_resurrection();
@@ -386,7 +393,7 @@ bool Cluster_member::check_heart_beat( time_t now_before_select, const Record& r
         }
     }
 
-    _is_dead |= db_is_dead;
+    _is_dead |= _is_db_dead;
 
     _db_last_heart_beat = last_heart_beat;
     _db_next_heart_beat = next_heart_beat;
@@ -468,14 +475,17 @@ void Cluster_member::deactivate_and_release_orders_after_death()
 {
     Z_LOGI2( "scheduler.cluster", __FUNCTION__ << "  _next_dead_orders_check_time=" << my_string_from_time_t( _next_dead_orders_check_time ) << "\n" );
 
+    assert( !its_me() );
+
 
     time_t now = ::time(NULL);
 
     if( _next_dead_orders_check_time <= now )
     {
-        if( _is_active || !_cluster->_is_backup )     // Nur der primäre Scheduler darf dead=1 setzen und diese Sätze später (oder sofort) löschen
+        if( !_is_db_dead  &&  !_cluster->_is_backup )   // Nur der primäre Scheduler darf dead=1 setzen und diese Sätze später (oder sofort) löschen
         {
-            mark_as_inactive( mai_mark_inactive_record_as_dead );     // ruft free_occupied_orders()
+            _log->warn( message_string( "SCHEDULER-836" ) );        // "Deactivating dead Scheduler"
+            mark_as_inactive( mai_mark_inactive_record_as_dead );   // ruft free_occupied_orders()
         }
         else    
             free_occupied_orders();
@@ -489,22 +499,18 @@ void Cluster_member::deactivate_and_release_orders_after_death()
 
 bool Cluster_member::mark_as_inactive( Mark_as_inactive_option option )
 {
-    bool delete_inactive_record = option == mai_delete_inactive_record 
-                               || option == mai_delete_inactive_and_empty_records;
-    bool delete_empty_member_record = option == mai_delete_inactive_and_empty_records;
+    bool delete_empty_member_record = its_me()  &&  _cluster->_continue_exclusive_operation == Cluster::continue_exclusive_non_backup;
 
-    assert( !delete_empty_member_record || delete_inactive_record );
-    assert( _is_active || ( delete_inactive_record || option == mai_mark_inactive_record_as_dead ) );
+    assert( !delete_empty_member_record  ||  option == mai_delete_my_inactive_record );
+    assert( ( option == mai_delete_my_inactive_record    ) == its_me() );
+    assert( ( option == mai_mark_inactive_record_as_dead ) != its_me() );
 
     bool ok = false;
-
-    if( _is_dead )  _log->warn( message_string( "SCHEDULER-836" ) );  // "Deactivating dead Scheduler"
 
 
     for( Retry_transaction ta ( db() ); ta.enter_loop(); ta++ ) try
     {
         _cluster->lock_member_records( &ta, _member_id, _cluster->empty_member_id() );
-
 
         free_occupied_orders( &ta );
 
@@ -513,24 +519,32 @@ bool Cluster_member::mark_as_inactive( Mark_as_inactive_option option )
 
         update[ "active"    ] = sql::null_value;
         update[ "exclusive" ] = sql::null_value;
-        if( option == mai_mark_inactive_record_as_dead )  update[ "dead" ] = 1;
 
         if( _member_id != _cluster->my_member_id() )  update[ "deactivating_member_id" ] = _cluster->my_member_id();
         update.and_where_condition( "member_id", _member_id );
       //update.and_where_condition( "active"   , _is_active   ? sql::Value( 1 ) : sql::null_value );
         update.and_where_condition( "exclusive", _is_exclusive? sql::Value( 1 ) : sql::null_value );
 
-        ok = ta.try_execute_single( delete_inactive_record? update.make_delete_stmt() 
-                                                          : update.make_update_stmt(), 
-                                    __FUNCTION__ );
-
-
-        if( ok && _is_exclusive  ||  delete_empty_member_record )
+        if( option == mai_delete_my_inactive_record )
         {
+            ok = ta.try_execute_single( update.make_delete_stmt(), __FUNCTION__ );
+        }
+        else
+        if( option == mai_mark_inactive_record_as_dead )  
+        {
+            update[ "dead" ] = 1;
+            ok = ta.try_execute_single( update.make_update_stmt(), __FUNCTION__ );
+        }
+        else
+            assert(false);
+
+
+        if( ok  &&  _is_exclusive )
+        {
+            Z_DEBUG_ONLY( assert( _is_active ) );
+
             sql::Update_stmt update ( ta.database_descriptor(), _spooler->_clusters_tablename );
         
-            if( _is_exclusive )  update[ "exclusive" ] = 1;
-
             update.and_where_condition( "member_id", _cluster->empty_member_id() );
 
             if( delete_empty_member_record )
@@ -540,6 +554,16 @@ bool Cluster_member::mark_as_inactive( Mark_as_inactive_option option )
             }
             else
             {
+                assert( _is_exclusive );
+                update[ "exclusive" ] = 1;
+
+                if( its_me() )
+                {
+                    string http_url = _cluster->_continue_exclusive_operation;
+                    if( http_url == Cluster::continue_exclusive_any )  http_url = "";
+                    update[ "http_url" ] = http_url;
+                }
+
                 string update_sql = update.make_update_stmt();
                 ok = ta.try_execute_single( update_sql, __FUNCTION__ );
                 if( !ok )
@@ -963,14 +987,14 @@ void Exclusive_scheduler_watchdog::try_to_become_exclusive()
     assert( !_cluster->_has_exclusiveness );
 
 
-    _cluster->check_schedulers_heart_beat();  // Stellt fest: is_backup_member_allowed_to_start(), _exclusive_scheduler
+    _cluster->check_schedulers_heart_beat();  // Stellt fest: is_member_allowed_to_start(), _exclusive_scheduler
 
 
     Cluster_member* exclusive_scheduler = _cluster->exclusive_scheduler();
 
     if( exclusive_scheduler )  _wait_for_backup_scheduler_start_until = 0;
     else
-    if( _is_starting  &&  _cluster->_is_backup  &&  _cluster->is_backup_member_allowed_to_start() )
+    if( _is_starting  &&  _cluster->_is_backup  &&  _cluster->is_member_allowed_to_start() )
     {
         _wait_for_backup_scheduler_start_until = ::time(NULL) + backup_startup_delay;
         _log->info( message_string( "SCHEDULER-831", backup_startup_delay ) );
@@ -1189,8 +1213,7 @@ bool Active_schedulers_watchdog::async_continue_( Continue_flags )
             {
                 Cluster_member* other_scheduler = it->second;
 
-                if( other_scheduler->_is_dead  &&  
-                    other_scheduler->_member_id != _cluster->my_member_id() )
+                if( other_scheduler->_is_dead  &&  !other_scheduler->its_me() )
                 {
                     other_scheduler->deactivate_and_release_orders_after_death();
                 }
@@ -1231,36 +1254,13 @@ void Active_schedulers_watchdog::set_alarm()
     set_async_next_gmtime( t );
 }
 
-//------------------------------------------------static Cluster::string_from_command
-
-//string Cluster::string_from_command( Command command )
-//{
-//    switch( command )
-//    {
-//        case cmd_none                 : return "";
-//        case cmd_terminate            : return "terminate";
-//        case cmd_terminate_and_restart: return "terminate_and_restart";
-//        default:                        return as_string( (int)command );
-//    }
-//}
-
-//------------------------------------------------static Cluster::command_from_string
-
-//Cluster::Command Cluster::command_from_string( const string& command )
-//{
-//    if( command == ""                      )  return cmd_none;
-//    if( command == "terminate"             )  return cmd_terminate;
-//    if( command == "terminate_and_restart" )  return cmd_terminate_and_restart;
-//    return cmd_none;
-//}
-
 //-------------------------------------------------------------------Cluster::Cluster
 
 Cluster::Cluster( Spooler* spooler )
 :
     Scheduler_object( spooler, this, type_cluster_member ),
     _zero_(this+1),
-    _continue_exclusive_operation(true)
+    _continue_exclusive_operation( continue_exclusive_any )
 {
 }
 
@@ -1293,8 +1293,7 @@ void Cluster::close()
         {
             if( _my_scheduler )  
             {
-                bool ok = _my_scheduler->mark_as_inactive( _is_active  &&  !_continue_exclusive_operation? Cluster_member::mai_delete_inactive_and_empty_records 
-                                                                                                         : Cluster_member::mai_delete_inactive_record);
+                bool ok = _my_scheduler->mark_as_inactive( Cluster_member::mai_delete_my_inactive_record );
                 if( ok )  _my_scheduler = NULL;
             }
             
@@ -1318,53 +1317,6 @@ void Cluster::close()
         _closed = true;
     }
 }
-
-//--------------------------------------------------------------------------Cluster::begin_shutdown
-
-//void Cluster::mark_begin_of_shutdown()
-//
-//// Kündigt das Herunterfahren an durch active=null im leeren Memberdatensatz 
-//// Für den Fall, dass das nicht vollständig heruntergefahren werden kann und der Datensatz nicht gelöscht wird.
-//
-//{
-//    Z_LOGI2( "scheduler", __FUNCTION__ << "\n" );
-//
-//    if( db()  &&  db()->opened()  )
-//    {
-//        for( Retry_transaction ta ( db() ); ta.enter_loop(); ta++ ) try
-//        {
-//            sql::Update_stmt update ( ta.database_descriptor(), _spooler->_clusters_tablename );
-//
-//            update[ "deactivating_member_id" ] = my_member_id();
-//            update[ "active"                 ] = sql::null_value;
-//            update.and_where_condition( "active"             , sql::Value( 1 ) );
-//            update.and_where_condition( "cluster_member_id", empty_member_id() );
-//
-//            bool ok = ta.try_execute_single( update, __FUNCTION__ );
-//
-//            if( ok )  ta.commit( __FUNCTION__ );
-//        }
-//        catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_clusters_tablename, x ), __FUNCTION__ ); }
-//    }
-//}
-
-//--------------------------------------------------------------------------------Cluster::shutdown
-
-//void Cluster::set_continue_exclusive_operation ()
-//{
-//    Z_LOGI2( "scheduler", __FUNCTION__ << "\n" );
-//
-//    if( db()  &&  db()->opened()  )
-//    {
-//        if( _my_scheduler )  
-//        {
-//            bool ok = _my_scheduler->mark_as_inactive( true, true );  // Member-Satz und leeren Member-Satz löschen
-//            if( ok )  _my_scheduler = NULL;
-//        }
-//    }
-//
-//    close();
-//}
 
 //---------------------------------------------------------------Cluster::calculate_next_heart_beat
 
@@ -1436,7 +1388,7 @@ bool Cluster::start()
 
     if( !_is_active )
     {
-        if( _is_backup  &&  !is_backup_member_allowed_to_start() )  _log->info( message_string( "SCHEDULER-832" ) );       // is_backup_member_allowed_to_start() liefert am Anfang immmer true
+        if( _is_backup  &&  !is_member_allowed_to_start() )  _log->info( message_string( "SCHEDULER-832" ) );
         //else
         //if( _demand_exclusiveness  &&  !_has_exclusiveness )  _log->info( message_string(  ) );
     }
@@ -1911,13 +1863,6 @@ void Cluster::execute_command( const string& command )
     {
         _log->error( S() << __FUNCTION__ << " " << command << "  ==>  " << x.what() << "\n" );
     }
-
-    //switch( command )
-    //{
-    //    case cmd_terminate            : _spooler->cmd_terminate( false, INT_MAX, false );  break;
-    //    case cmd_terminate_and_restart: _spooler->cmd_terminate( true , INT_MAX, false );  break;
-    //    default: ;
-    //}
 }
 
 //-------------------------------------------------------------Cluster::check_schedulers_heart_beat
@@ -1984,7 +1929,7 @@ bool Cluster::check_schedulers_heart_beat()
             Cluster_member* o = it->second;
             if( !o->_is_checked )
             {
-                if( o == _my_scheduler )  _my_scheduler = NULL, _log->error( S() << __FUNCTION__ << "  Own Scheduler member record has been deleted" );
+                if( o == _my_scheduler )  _my_scheduler = NULL, _log->error( S() << __FUNCTION__ << "  Own cluster member record has been deleted" );
                 if( !o->_is_dead )  
                 {
                     o->log()->info( message_string( o == empty_member_record()? "SCHEDULER-841"          // "It's requested, that the exclusive operation will not be continued"
@@ -2237,7 +2182,7 @@ void Cluster::check_empty_member_record()
                 stmt[ "active"          ] = _is_active          ? sql::Value( 1 ) : sql::null_value;
                 stmt[ "exclusive"       ] = exclusive_count == 0? sql::Value( 1 ) : sql::null_value;
                 stmt[ "scheduler_id"    ] = _spooler->id_for_db();
-                stmt[ "http_url"        ] = _spooler->http_url();
+                stmt[ "http_url"        ] = "";
 
                 ta.execute( stmt, "The empty member record" );
 
@@ -2531,43 +2476,22 @@ bool Cluster::check_is_active( Transaction* outer_transaction )
     return _is_active;
 }
 
-//---------------------------------------------------------------------Cluster::is_member_allowed_to_start
+//--------------------------------------------------------------Cluster::is_member_allowed_to_start
 
 bool Cluster::is_member_allowed_to_start()
 {
-    bool result = false;
+    bool result = true;
 
-    if( _is_backup )
+    if( Cluster_member* empty_record = empty_member_record() )
     {
-        result = is_backup_member_allowed_to_start();
+        result = true;
+        //Noch nicht realisiert:  result = empty_record->_http_url == ""  ||  empty_record->_http_url == _spooler->http_url();
     }
     else
+    if( _is_backup )
     {
-        return true;
+        result = false;
     }
-
-    return result;
-}
-
-//--------------------------------------------------------------Cluster::is_backup_member_allowed_to_start
-
-bool Cluster::is_backup_member_allowed_to_start()
-{
-    bool result = false;
-
-    result = empty_member_record() != NULL;
-
-    //if( !result )
-    //{
-    //    Z_FOR_EACH( Scheduler_map, _scheduler_map, it )
-    //    {
-    //        if( it->second->_is_dead ) 
-    //        {
-    //            result = true;
-    //            break;
-    //        }
-    //    }
-    //}
 
     return result;
 }
@@ -2619,6 +2543,29 @@ Cluster_member* Cluster::cluster_member_or_null( const string& member_id )
     return it != _scheduler_map.end()? it->second : NULL;
 }
 
+//--------------------------------------------------------Cluster::set_continue_exclusive_operation
+
+void Cluster::set_continue_exclusive_operation( const string& http_url_ )
+{
+    string http_url = http_url_;
+
+    if( http_url == continue_exclusive_this )  http_url = _spooler->http_url();
+    else
+    if( http_url == continue_exclusive_any  ); // ok
+    else
+    if( http_url == continue_exclusive_non_backup || http_url == "" )   // Default
+    {
+        http_url = "";
+    }
+    else
+    if( string_begins_with( http_url, "http://" ) );  // ok
+    else
+        z::throw_xc( __FUNCTION__, http_url );
+
+
+    _continue_exclusive_operation = http_url;
+}
+
 //------------------------------------------------------------------Cluster::my_member_dom_document
 
 xml::Document_ptr Cluster::my_member_dom_document()
@@ -2665,7 +2612,7 @@ xml::Element_ptr Cluster::dom_element( const xml::Document_ptr& document, const 
     result.setAttribute( "cluster_member_id", my_member_id() );
     if( _is_active         )  result.setAttribute( "active"   , "yes" );
     if( _has_exclusiveness )  result.setAttribute( "exclusive", "yes" );
-    if( _is_backup )  result.setAttribute( "is_backup_member_allowed_to_start" , is_backup_member_allowed_to_start()? "yes" : "no" );
+    result.setAttribute( "is_member_allowed_to_start", is_member_allowed_to_start()? "yes" : "no" );
 
 
     Z_FOR_EACH( Scheduler_map, _scheduler_map, it ) 

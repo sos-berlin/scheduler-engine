@@ -29,7 +29,7 @@ struct Cluster : Async_operation, Scheduler_object
 
 
     void                        close                       ();
-    void                    set_continue_exclusive_operation( bool b = true )                       { _continue_exclusive_operation = b; }
+    void                    set_continue_exclusive_operation( const string& http_url );             // Oder continue_exclusive_non_backup etc.
   //void                        mark_begin_of_shutdown      ();
 
     void                        demand_exclusiveness        ( bool b = true )                       { _demand_exclusiveness = b; }
@@ -47,7 +47,6 @@ struct Cluster : Async_operation, Scheduler_object
     bool                        has_exclusiveness           ()                                      { return _has_exclusiveness; }
     bool                     is_active                      ()                                      { return _is_active; }
     bool                     is_member_allowed_to_start     ();
-    bool                     is_backup_member_allowed_to_start();
     bool                     is_backup                      ()                                      { return _is_backup; }
     bool                     is_exclusiveness_lost          ()                                      { return _is_exclusiveness_lost; }
   //Command                     heart_beat_command          ()                                      { return _heart_beat_command; }
@@ -123,7 +122,7 @@ struct Cluster : Async_operation, Scheduler_object
     bool                       _is_backup_precedence_set;
     bool                       _demand_exclusiveness;
     bool                       _are_orders_distributed;
-    bool                       _continue_exclusive_operation;
+    string                     _continue_exclusive_operation;
 
     time_t                     _next_heart_beat;
     time_t                     _db_last_heart_beat;
@@ -151,6 +150,11 @@ struct Cluster : Async_operation, Scheduler_object
   public:
     const static int            default_backup_precedence;
     const static int            default_non_backup_precedence;
+
+    // Für set_continue_exclusive_operation
+    const static string         continue_exclusive_non_backup;      // Nur Non-backup-Scheduler darf exklusiv werden
+    const static string         continue_exclusive_this;            // Nur Scheduler mit unserem Url darf exklusiv werden
+    const static string         continue_exclusive_any;             // Jeder darf exklusiv werden
 };
 
 //-------------------------------------------------------------------------------------------------

@@ -2415,7 +2415,7 @@
 
         <message code="SCHEDULER-386">
             <text xml:lang="en">
-                <title>Last heart beat was <p1/>s ago. Something is delaying Scheduler execution, Scheduler is aborted immediately</title>
+                <title>Last heart beat was <p1>time</p1>, <p2/>s ago. Something is delaying Scheduler execution, Scheduler is aborted immediately</title>
             </text>
         </message>
 

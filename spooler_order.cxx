@@ -33,7 +33,6 @@ const string blacklist_database_distributed_next_time   = "3111-11-11 00:01:00";
 const string replacement_database_distributed_next_time = "3111-11-11 00:02:00";        // <order replacement="yes">
 const string default_end_state_name                 = "<END_STATE>";
 const string order_select_database_columns          = "`id`, `priority`, `state`, `state_text`, `initial_state`, `title`, `created_time`";
-const string xml_payload_encoding                   = "iso-8859-1";
 const int    max_insert_race_retry_count            = 5;                                // Race condition beim Einfügen eines Datensatzes
 
 //--------------------------------------------------------------------------Database_order_detector
@@ -59,8 +58,6 @@ struct Database_order_detector : Async_operation, Scheduler_object
     int                         read_result_set             ( Read_transaction*, const string& select_sql );
     void                        set_alarm                   ();
     void                        request_order               ();
-    void                        on_new_order                ()                                      { _next_check_period = check_database_orders_period_minimum; }
-  //void                        withdraw_order_request_for_job( Job* );
 
   private:
     Fill_zero                  _zero_;
@@ -69,9 +66,270 @@ struct Database_order_detector : Async_operation, Scheduler_object
     Time                       _now_database_distributed_next_time;
     Time                       _never_database_distributed_next_time;
     Time                       _blacklist_database_distributed_next_time;
-    int                        _next_check_period;
-  //stdext::hash_set<string>   _names_of_requesting_jobs;
 };
+
+//-------------------------------------------------Database_order_detector::Database_order_detector
+
+Database_order_detector::Database_order_detector( Spooler* spooler ) 
+:
+    _zero_(this+1),
+    Scheduler_object( spooler, this, Scheduler_object::type_database_order_detector )
+{
+    _now_database_distributed_next_time  .set_datetime( now_database_distributed_next_time   );
+    _never_database_distributed_next_time.set_datetime( never_database_distributed_next_time );
+    _blacklist_database_distributed_next_time.set_datetime( blacklist_database_distributed_next_time );
+}
+
+//---------------------------------------------------------Database_order_detector::async_finished_
+    
+bool Database_order_detector::async_finished_() const
+{ 
+    return false;
+}
+
+//-------------------------------------------------------Database_order_detector::async_state_text_
+
+string Database_order_detector::async_state_text_() const
+{
+    S result;
+    S jobs;
+    time_t now = 0;
+
+    result << obj_name();
+
+    FOR_EACH_JOB( j )
+    {
+        Job* job = *j;
+        if( Order_queue* order_queue = job->order_queue() ) 
+        {
+            time_t t = job->order_queue()->next_distributed_order_check_time();
+            if( t < time_max )
+            {
+                if( !jobs.empty() )  jobs << ", ";
+                jobs << job->name();
+                jobs << " ";
+                if( t == 0 )  jobs << "0";
+                else
+                {
+                    if( !now )  now = ::time(NULL);
+                    int64 seconds = now - t;
+                    if( seconds > 0 )  jobs << "+";
+                    jobs << seconds;    // Normalerweise negativ (noch verbleibende Zeit)
+                }
+                //if( t )  jobs << string_gmt_from_time_t( t ) << " UTC";
+                //   else  jobs << "now";
+                jobs << "s";
+            }
+        }
+    }
+
+    if( !jobs.empty() )  result << "  requesting jobs: " << jobs;
+        
+    return result;
+}
+
+//---------------------------------------------------------Database_order_detector::async_continue_
+
+bool Database_order_detector::async_continue_( Continue_flags )
+{
+    Z_LOGI2( "scheduler.cluster", __FUNCTION__ << "  " << async_state_text() << "\n" );
+    _spooler->assert_are_orders_distributed( __FUNCTION__);
+
+
+    _now     = Time::now();
+    _now_utc = ::time(NULL);
+
+    Time read_until             = _now + check_database_orders_period;
+    int  announced_orders_count = 0;
+
+    S select_sql_begin;
+    select_sql_begin << "select ";
+    if( database_orders_read_ahead_count < INT_MAX ) select_sql_begin << " %limit(" << database_orders_read_ahead_count << ") ";
+    select_sql_begin << "`distributed_next_time`, `job_chain`, `state`"
+                    "  from " << _spooler->_orders_tablename <<
+                    "  where `spooler_id`=" << sql::quoted( _spooler->id_for_db() ) <<
+                       " and `distributed_next_time` is not null"
+                       " and `occupying_cluster_member_id` is null";
+
+    string select_sql_end = "  order by `distributed_next_time`";
+
+    
+    bool database_can_limit_union_selects = db()->dbms_kind() == dbms_oracle  ||  
+                                            db()->dbms_kind() == dbms_oracle_thin;
+    // PostgresQL: Union kann nicht Selects mit einzelnen Limits verknüpfen, das Limit gilt fürs ganze Ergebnis,
+    // und die einzelnen Selects können nicht geordnet werden (wodurch die Limits erst Sinn machen)
+
+    for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
+    {
+        if( database_can_limit_union_selects )
+        {
+            string select_sql = make_union_select_order_sql( select_sql_begin, select_sql_end );
+            if( select_sql != "" )
+            {
+                announced_orders_count +=
+                read_result_set( &ta, select_sql );
+            }
+        }
+        else
+        {
+            FOR_EACH_JOB( job_iterator )
+            {
+                Job* job = *job_iterator;
+                
+                if( is_job_requesting_order( job ) )
+                {
+                    string job_chain_expression = make_where_expression_for_distributed_orders_at_job( job );
+
+                    if( job_chain_expression != "" )
+                    {
+                        announced_orders_count +=
+                        read_result_set( &ta, S() << select_sql_begin + " and " + job_chain_expression << select_sql_end );
+                    }
+                }
+            }
+        }
+    }
+    catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_orders_tablename, x ), __FUNCTION__ ); }
+
+    //if( announced_orders_count )  on_new_order();
+
+
+    _now_utc = ::time(NULL);
+
+    FOR_EACH_JOB( job_iterator )
+    {
+        if( Order_queue* order_queue = (*job_iterator)->order_queue() )
+        {
+            order_queue->calculate_next_distributed_order_check_time( _now_utc );
+        }
+    }
+
+    set_alarm();
+
+    return true;
+}
+
+//---------------------------------------------Database_order_detector::make_union_select_order_sql
+
+string Database_order_detector::make_union_select_order_sql( const string& select_sql_begin, const string& select_sql_end )
+{
+    S    result;
+    bool has_any_job = false;
+
+    FOR_EACH_JOB( job_iterator )
+    {
+        Job* job = *job_iterator;
+
+        if( is_job_requesting_order( job ) )
+        {
+            string job_chains_expression = make_where_expression_for_distributed_orders_at_job( job );
+
+            if( job_chains_expression != "" )
+            {
+                if( has_any_job )  result << "  UNION  ";
+                has_any_job = true;
+                result << select_sql_begin << " and " << job_chains_expression << select_sql_end;
+            }
+        }
+    }
+
+    return result;
+}
+
+//-------------------------------------------------Database_order_detector::is_job_requesting_order
+
+bool Database_order_detector::is_job_requesting_order( Job* job )
+{
+    bool result = false;
+
+    if( Order_queue* order_queue = job->order_queue() )
+    {
+        result = order_queue->is_distributed_order_requested( _now_utc )
+                 && order_queue->next_announced_distributed_order_time() > _now;
+    }
+
+    return result;
+}
+
+//---------------------Database_order_detector::make_where_expression_for_distributed_orders_at_job
+
+string Database_order_detector::make_where_expression_for_distributed_orders_at_job( Job* job )
+{
+    S result;
+                  
+    result << job->order_queue()->db_where_expression_for_distributed_orders();
+
+    if( !result.empty() )
+    {
+        Time t = job->order_queue()->next_announced_distributed_order_time();
+        assert( t );
+
+        result << " and `distributed_next_time` < {ts'" 
+               << ( t < Time::never? t.as_string( Time::without_ms ) 
+                                   : never_database_distributed_next_time ) 
+               << "'}";
+    }
+
+    return result;
+}
+
+//---------------------------------------------------------Database_order_detector::read_result_set
+
+int Database_order_detector::read_result_set( Read_transaction* ta, const string& select_sql )
+{
+    int      count      = 0;
+    Any_file result_set = ta->open_result_set( select_sql, __FUNCTION__ );
+
+    while( !result_set.eof() )
+    {
+        Record     record    = result_set.get_record();
+        Job_chain* job_chain = order_subsystem()->job_chain( record.as_string( "job_chain" ) );
+        Job*       job       = job_chain->job_from_state( record.as_string( "state" ) );
+        Time       distributed_next_time;
+
+        distributed_next_time.set_datetime( record.as_string( "distributed_next_time" ) );
+        if( distributed_next_time == _now_database_distributed_next_time   )  distributed_next_time.set_null();
+        if( distributed_next_time >= _never_database_distributed_next_time )  distributed_next_time.set_never();
+        
+        bool is_now = distributed_next_time <= _now;
+        job->order_queue()->set_next_announced_distributed_order_time( distributed_next_time, is_now );
+        
+        //_names_of_requesting_jobs.erase( job->name() );
+        count += is_now;
+    }
+
+    return count;
+}
+
+//---------------------------------------------------------------Database_order_detector::set_alarm
+
+void Database_order_detector::set_alarm()
+{
+    time_t next_alarm = time_max;
+
+    FOR_EACH_JOB( j )
+    {
+        Job* job = *j;
+
+        if( Order_queue* order_queue = job->order_queue() )
+        {
+            time_t t = order_queue->next_distributed_order_check_time();
+            if( next_alarm > t )  next_alarm = t;
+        }
+    }
+
+    set_async_next_gmtime( next_alarm );
+}
+
+//-----------------------------------------------------------Database_order_detector::request_order
+
+void Database_order_detector::request_order()
+
+// Nur einmal für einen Job rufen, solange der Job keinen neuen Auftrag bekommen hast! Order_queue::request_order() kümmert sich darum.
+
+{
+    set_alarm();
+}
 
 //-----------------------------------------------------------------Order_subsystem::Order_subsystem
 
@@ -427,283 +685,8 @@ void Order_subsystem::count_started_orders()
 void Order_subsystem::count_finished_orders()
 {
     _finished_orders_count++;
-    _spooler->update_console_title();
+    _spooler->update_console_title( 2 );
 }
-
-//-------------------------------------------------Database_order_detector::Database_order_detector
-
-Database_order_detector::Database_order_detector( Spooler* spooler ) 
-:
-    _zero_(this+1),
-    Scheduler_object( spooler, this, Scheduler_object::type_database_order_detector )
-{
-    _now_database_distributed_next_time  .set_datetime( now_database_distributed_next_time   );
-    _never_database_distributed_next_time.set_datetime( never_database_distributed_next_time );
-    _blacklist_database_distributed_next_time.set_datetime( blacklist_database_distributed_next_time );
-}
-
-//---------------------------------------------------------Database_order_detector::async_finished_
-    
-bool Database_order_detector::async_finished_() const
-{ 
-    return false;
-}
-
-//-------------------------------------------------------Database_order_detector::async_state_text_
-
-string Database_order_detector::async_state_text_() const
-{
-    S result;
-    S jobs;
-    time_t now = 0;
-
-    result << obj_name();
-
-    FOR_EACH_JOB( j )
-    {
-        Job* job = *j;
-        if( Order_queue* order_queue = job->order_queue() ) 
-        {
-            time_t t = job->order_queue()->next_distributed_order_check_time();
-            if( t < time_max )
-            {
-                if( !jobs.empty() )  jobs << ", ";
-                jobs << job->name();
-                jobs << " ";
-                if( t == 0 )  jobs << "0";
-                else
-                {
-                    if( !now )  now = ::time(NULL);
-                    int64 seconds = now - t;
-                    if( seconds > 0 )  jobs << "+";
-                    jobs << seconds;    // Normalerweise negativ (noch verbleibende Zeit)
-                }
-                //if( t )  jobs << string_gmt_from_time_t( t ) << " UTC";
-                //   else  jobs << "now";
-                jobs << "s";
-            }
-        }
-    }
-
-    if( !jobs.empty() )  result << "  requesting jobs: " << jobs;
-        
-    return result;
-}
-
-//---------------------------------------------------------Database_order_detector::async_continue_
-
-bool Database_order_detector::async_continue_( Continue_flags )
-{
-    Z_LOGI2( "scheduler.cluster", __FUNCTION__ << "  " << async_state_text() << "\n" );
-    _spooler->assert_are_orders_distributed( __FUNCTION__);
-
-
-    _now     = Time::now();
-    _now_utc = ::time(NULL);
-
-    Time read_until             = _now + check_database_orders_period;
-    int  announced_orders_count = 0;
-
-    S select_sql_begin;
-    select_sql_begin << "select ";
-    if( database_orders_read_ahead_count < INT_MAX ) select_sql_begin << " %limit(" << database_orders_read_ahead_count << ") ";
-    select_sql_begin << "`distributed_next_time`, `job_chain`, `state`"
-                    "  from " << _spooler->_orders_tablename <<
-                    "  where `spooler_id`=" << sql::quoted( _spooler->id_for_db() ) <<
-                       " and `distributed_next_time` is not null"
-                       " and `occupying_cluster_member_id` is null";
-
-    string select_sql_end = "  order by `distributed_next_time`";
-
-    
-    bool database_can_limit_union_selects = db()->dbms_kind() == dbms_oracle  ||  
-                                            db()->dbms_kind() == dbms_oracle_thin;
-    // PostgresQL: Union kann nicht Selects mit einzelnen Limits verknüpfen, das Limit gilt fürs ganze Ergebnis,
-    // und die einzelnen Selects können nicht geordnet werden (wodurch die Limits erst Sinn machen)
-
-    for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
-    {
-        if( database_can_limit_union_selects )
-        {
-            string select_sql = make_union_select_order_sql( select_sql_begin, select_sql_end );
-            if( select_sql != "" )
-            {
-                announced_orders_count +=
-                read_result_set( &ta, select_sql );
-            }
-        }
-        else
-        {
-            FOR_EACH_JOB( job_iterator )
-            {
-                Job* job = *job_iterator;
-                
-                if( is_job_requesting_order( job ) )
-                {
-                    string job_chain_expression = make_where_expression_for_distributed_orders_at_job( job );
-
-                    if( job_chain_expression != "" )
-                    {
-                        announced_orders_count +=
-                        read_result_set( &ta, S() << select_sql_begin + " and " + job_chain_expression << select_sql_end );
-                    }
-                }
-            }
-        }
-    }
-    catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_orders_tablename, x ), __FUNCTION__ ); }
-
-    if( announced_orders_count )  on_new_order();
-    set_alarm();
-
-    return true;
-}
-
-//---------------------------------------------Database_order_detector::make_union_select_order_sql
-
-string Database_order_detector::make_union_select_order_sql( const string& select_sql_begin, const string& select_sql_end )
-{
-    S    result;
-    bool has_any_job = false;
-
-    FOR_EACH_JOB( job_iterator )
-    {
-        Job* job = *job_iterator;
-
-        if( is_job_requesting_order( job ) )
-        {
-            string job_chains_expression = make_where_expression_for_distributed_orders_at_job( job );
-
-            if( job_chains_expression != "" )
-            {
-                if( has_any_job )  result << "  UNION  ";
-                has_any_job = true;
-                result << select_sql_begin << " and " << job_chains_expression << select_sql_end;
-            }
-        }
-    }
-
-    return result;
-}
-
-//-------------------------------------------------Database_order_detector::is_job_requesting_order
-
-bool Database_order_detector::is_job_requesting_order( Job* job )
-
-// Mit Seiteneffekt: Nur einmal für jeden Job rufen!  Ruft Order_queue::calculate_next_distributed_order_check_time();
-
-{
-    bool result = false;
-
-    if( Order_queue* order_queue = job->order_queue() )
-    {
-        result = order_queue->is_distributed_order_requested( _now_utc )
-                 && order_queue->next_announced_distributed_order_time() > _now;
-
-        if( result )
-        {
-            order_queue->calculate_next_distributed_order_check_time( _now_utc );
-        }
-        //result = order_queue->is_order_requested()  &&  order_queue->next_announced_distributed_order_time() > _now;
-    }
-
-    return result;
-}
-
-//---------------------Database_order_detector::make_where_expression_for_distributed_orders_at_job
-
-string Database_order_detector::make_where_expression_for_distributed_orders_at_job( Job* job )
-{
-    S result;
-                  
-    result << job->order_queue()->db_where_expression_for_distributed_orders();
-
-    if( !result.empty() )
-    {
-        Time t = job->order_queue()->next_announced_distributed_order_time();
-        assert( t );
-
-        result << " and `distributed_next_time` < {ts'" 
-               << ( t < Time::never? t.as_string( Time::without_ms ) 
-                                   : never_database_distributed_next_time ) 
-               << "'}";
-    }
-
-    return result;
-}
-
-//---------------------------------------------------------Database_order_detector::read_result_set
-
-int Database_order_detector::read_result_set( Read_transaction* ta, const string& select_sql )
-{
-    int      count      = 0;
-    Any_file result_set = ta->open_result_set( select_sql, __FUNCTION__ );
-
-    while( !result_set.eof() )
-    {
-        Record     record    = result_set.get_record();
-        Job_chain* job_chain = order_subsystem()->job_chain( record.as_string( "job_chain" ) );
-        Job*       job       = job_chain->job_from_state( record.as_string( "state" ) );
-        Time       distributed_next_time;
-
-        distributed_next_time.set_datetime( record.as_string( "distributed_next_time" ) );
-        if( distributed_next_time == _now_database_distributed_next_time   )  distributed_next_time.set_null();
-        if( distributed_next_time >= _never_database_distributed_next_time )  distributed_next_time.set_never();
-        
-        bool is_now = distributed_next_time <= _now;
-        job->order_queue()->set_next_announced_distributed_order_time( distributed_next_time, is_now );
-        
-        //_names_of_requesting_jobs.erase( job->name() );
-        count += is_now;
-    }
-
-    return count;
-}
-
-//---------------------------------------------------------------Database_order_detector::set_alarm
-
-void Database_order_detector::set_alarm()
-{
-    time_t next_alarm = time_max;
-
-    FOR_EACH_JOB( j )
-    {
-        Job* job = *j;
-
-        if( Order_queue* order_queue = job->order_queue() )
-        {
-            time_t t = order_queue->next_distributed_order_check_time();
-            if( next_alarm > t )  next_alarm = t;
-        }
-    }
-
-    set_async_next_gmtime( next_alarm );
-}
-
-//-----------------------------------------------------------Database_order_detector::request_order
-
-void Database_order_detector::request_order()
-
-// Nur einmal für einen Job rufen, solange der Job keinen neuen Auftrag bekommen hast! Order_queue::request_order() kümmert sich darum.
-
-{
-  //assert( _names_of_requesting_jobs.find( job->name() ) == _names_of_requesting_jobs.end() );
-
-    //_log->info( S() << "NEW REQUESTING JOB " << job->name() );
-
-    //_names_of_requesting_jobs.insert( job->name() );
-    //if( !_is_distributed_order_requested )
-    {
-        //_is_distributed_order_requested = true;
-        set_alarm();
-    }
-}
-
-//--------------------------------------------------Database_order_detector::withdraw_order_request
-
-//void Database_order_detector::withdraw_order_request()
-//{
-//}
 
 //-----------------------------------------------------------------------Order_source::Order_source
 
@@ -2601,7 +2584,7 @@ bool Order::db_occupy_for_processing()
     if( update_ok )
     {
         _is_db_occupied = true, _occupied_state = _state;
-        if( order_subsystem()->_database_order_detector )  order_subsystem()->_database_order_detector->on_new_order();     // Verkürzt die Überwachungsperiode
+        //if( order_subsystem()->_database_order_detector )  order_subsystem()->_database_order_detector->on_new_order();     // Verkürzt die Überwachungsperiode
     }
     else
     {
@@ -3359,7 +3342,7 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
 
         try
         {
-            xml::Document_ptr doc ( _xml_payload, xml_payload_encoding );
+            xml::Document_ptr doc ( _xml_payload, scheduler_character_encoding );
 
             if( doc.documentElement() )
             {
@@ -3653,7 +3636,7 @@ void Order::set_xml_payload( const string& xml_string )
 { 
     //Z_LOGI2( "scheduler.order", obj_name() << ".xml_payload=" << xml_string << "\n" );
     
-    xml::Document_ptr doc ( xml_string, xml_payload_encoding );
+    xml::Document_ptr doc ( xml_string, scheduler_character_encoding );
 
     _xml_payload = doc.ascii_xml();     // _xml_payload kann in order_xml <order> eingefügt werden, unabhängig von der Codierung (ist nur 7bit-Ascii)
     _order_xml_modified = true; 

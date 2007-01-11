@@ -277,7 +277,9 @@ struct Spooler : Object,
     void                        cmd_pause                   ()                                  { _state_cmd = sc_pause; signal( "pause" ); }
     void                        cmd_continue                ();
     void                        cmd_terminate_after_error   ( const string& function_name, const string& message_text );
-    void                        cmd_terminate               ( bool restart = false, int timeout = INT_MAX, bool continue_exclusive_operation = false, bool terminate_all_schedulers = false );
+    void                        cmd_terminate               ( bool restart = false, int timeout = INT_MAX, 
+                                                              const string& continue_exclusive_operation = cluster::Cluster::continue_exclusive_non_backup, 
+                                                              bool terminate_all_schedulers = false );
     void                        cmd_terminate_and_restart   ( int timeout = INT_MAX )           { return cmd_terminate( true, timeout ); }
     void                        cmd_let_run_terminate_and_restart();
 
@@ -311,7 +313,7 @@ struct Spooler : Object,
     void                        report_event                ( Scheduler_event* e )              { if( _scheduler_event_manager )  _scheduler_event_manager->report_event( e ); }
 
   //void                        create_window               ();
-    void                        update_console_title        ();
+    void                        update_console_title        ( int level = 1 );
     void                        start                       ();
     void                        activate                    ();
     void                        execute_config_commands     ();
@@ -563,7 +565,7 @@ struct Spooler : Object,
     Time                       _last_resume_at;             // Für <show_state>
     bool                       _print_time_every_second;
 
-    ptr<Task_subsystem>        _task_subsystem;              // Es gibt nur einen Thread! Threads sind eigentlich ein Überbleibsel aus alter Zeit
+    ptr<Task_subsystem>        _task_subsystem;
     Thread_id                  _thread_id;                  // Haupt-Thread
     Time                       _spooler_start_time;
     State                      _state;
@@ -571,7 +573,7 @@ struct Spooler : Object,
     State_cmd                  _shutdown_cmd;               // run() beenden, also alle Tasks beenden!
     bool                       _shutdown_ignore_running_tasks;
     time_t                     _termination_gmtimeout_at;   // Für sc_terminate und sc_terminate_with_restart
-    bool                       _terminate_continue_exclusive_operation;
+    string                     _terminate_continue_exclusive_operation;
     bool                       _terminate_all_schedulers;
     bool                       _terminate_all_schedulers_with_restart;
     ptr<Async_operation>       _termination_async_operation;
