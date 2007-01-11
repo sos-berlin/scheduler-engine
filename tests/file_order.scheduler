@@ -49,7 +49,7 @@ function spooler_process()
 
                 ]]>
                 </script>
-                <run_time once="yes"/>
+                <run_time once="no"/>
             </job>
 
             <job name="javascript" order="yes">
@@ -61,6 +61,8 @@ counter = 1*spooler.variables( "n" );
 
 function spooler_process() 
 {               
+    var order = spooler_task.order;
+    spooler_log.info( "ORDER-ID=" + order.id );
     //spooler_log.info( "order.xml=" + spooler_task.order.xml );
     //spooler_log.info( "spooler_task.trigger_files=" + spooler_task.trigger_files );
     //new ActiveXObject( "hostware.global" ).sleep( 10 );
@@ -85,7 +87,7 @@ counter = 1*spooler.variables( "n" );
 function spooler_process() 
 {               
     var order = spooler_task.order;     // Prüfen, ob Garbage Collector den Auftrag zu lange offen hält
-    spooler_log.info( "ZWEI" );
+    spooler_log.info( "ORDER-ID=" + order.id );
     return true;
 }
 
@@ -93,7 +95,7 @@ function spooler_process()
 
             </job>
         
-            <job name="java">
+            <job name="java" order="yes" tasks="3">
                 <script java_class="spooler_job.My_job">
                     <![CDATA[
 package spooler_job;
@@ -104,24 +106,26 @@ public class My_job  extends sos.spooler.Job_impl
 {   
     public boolean spooler_process()  throws Exception
     {
-        return false;
+        spooler_log.info( "ORDER_ID=" + spooler_task.order().id() );
+        return true;
     }
 }
                 ]]>
                 </script>
-                <run_time once="no"/>
+                <run_time/>
             </job>
 
 
         </jobs>
 
         <job_chains>
-            <job_chain name="my_job_chain" distributed="no">
+            <job_chain name="my_job_chain" distributed="yes">
                 <file_order_source directory="/tmp/x/" regex="^gen.*\.ok$"/>
                 <!--file_order_source directory="/tmp/yyy/" regex="^gen"/-->
                 <!--file_order_source directory="/tmp/y" regex="^gen" next_state="second"/-->
-                <job_chain_node state="first" job="javascript"/>
-                <job_chain_node state="second" job="javascript2"/>
+                <job_chain_node state="edno" job="javascript"/>
+                <job_chain_node state="dwa" job="javascript2"/>
+                <job_chain_node state="tri" job="java"/>
                 <file_order_sink state="remove" remove="yes"/>
                 <!--file_order_sink state="remove" move_to="/gibsnich/"/-->
                 <!--job_chain_node state="finished"/-->

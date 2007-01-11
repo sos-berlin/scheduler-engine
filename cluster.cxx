@@ -207,21 +207,30 @@ Heart_beat_watchdog_thread::Heart_beat_watchdog_thread( Cluster* d )
     
 void Heart_beat_watchdog_thread::sleep( int seconds )
 {
-#   ifdef Z_WINDOWS
+    time_t now   = ::time(NULL);
+    time_t until = now + seconds;
 
-        int ms = seconds * 1000;
-        Z_LOG2( "scheduler.cluster", __FUNCTION__ << "  Sleep(" << ms << ")\n" );
-        Sleep( ms );
+    while( !_kill  &&  now < until )
+    {
+        int sleep_time = until - now;
+#       ifdef Z_WINDOWS
 
-#   else
+            int ms = sleep_time * 1000;
+            Z_LOG2( "scheduler.cluster", __FUNCTION__ << "  Sleep(" << ms << ")\n" );
+            Sleep( ms );
 
-        while( !_kill  &&  seconds > 0 )
-        {
-            Z_LOG2( "scheduler.cluster", __FUNCTION__ << "  sleep(" << seconds << ")\n" );
-            seconds = ::sleep( seconds );
-        }
+#        else
 
-#   endif
+            //Z_LOG2( "scheduler.cluster", __FUNCTION__ << "  sleep(" << seconds << ")\n" );
+            while( !_kill  &&  sleep_time-- > 0 )
+            {
+                ::sleep( 1 );     // Nur eine Sekunde, um _kill abfragen zu können
+            }
+
+#       endif
+
+        now = ::time(NULL);
+    }
 }
 
 //-----------------------------------------------------------------Heart_beat_watchdog_thread::kill
@@ -236,7 +245,7 @@ void Heart_beat_watchdog_thread::kill()
 #   ifdef Z_WINDOWS
         TerminateThread( thread_handle(), 1 );
 #    else
-        pthread_kill( thread_handle(), SIGTERM );
+        //Funktioniert nicht: pthread_kill( thread_handle(), SIGTERM );
 #   endif
 }
 
@@ -257,7 +266,7 @@ int Heart_beat_watchdog_thread::thread_main()
         time_t heart_beat_time = _cluster->_db_last_heart_beat;       // Gleichzeitiger Zugriff von einem anderen Thread!
         
         int delay = (int)( heart_beat_time + 1 + heart_beat_period + max_processing_time + max_processing_time_2_short - ::time(NULL) );
-        sleep( delay );
+        sleep( delay + 1 );
         
         if( _cluster->_is_active  &&  _cluster->_db_last_heart_beat == heart_beat_time )  
         {
