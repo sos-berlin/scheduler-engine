@@ -104,7 +104,7 @@ Der primäre Scheduler wird mit "terminate fail-safe" beendet. Ein bereits laufe
 
 <ul>
 <li>Beenden im Dienstefenster entspricht dem Kommando &lt;terminate&gt;. Die Backup-Scheduler laufen nicht an. Wird ein Backup-Scheduler beendet und gibt es einen inaktiven primären Scheduler, wird der primäre Scheduler aktiv</li>
-<li>Neustarten im Dienstefenster entspricht dem Kommando &lt;terminate restart="yes"&gt;. Die Backup-Scheduler laufen nicht an. Der primäre Scheduler wird aktiv</li>
+<li>Neustarten im Dienstefenster entspricht dem Kommando <scheduler_element name="terminate" attribute="restart" value="yes"/>. Die Backup-Scheduler laufen nicht an. Der primäre Scheduler wird aktiv</li>
 </ul>
 
 <h2>Verhalten beim Neustarten des Rechners</h2>
@@ -115,6 +115,17 @@ Der primäre Scheduler wird mit "terminate fail-safe" beendet. Ein bereits laufe
 </ul>
 
 <h2>Einen inaktiven Backup-Scheduler zum aktiven primären Scheduler machen</h2>
-<p>Wenn ein aktiver backupScheduler beendet wird, wird er beim Neustart inaktiv sein. Falls der primäre Scheduler längere Zeit ausfällt, muss der backup-Scheduler daher als primärer Scheduler gestartet werden. Ein Backup-Scheduler wird als primärer Scheduler gestartet wenn beim Aufruf von jobscheduler.cmd der Parameter "start_exclusive" anstelle von "start" angegeben wird. </p>
+<p>Wenn ein aktiver Backup-Scheduler beendet wird, wird er beim Neustart inaktiv sein. Falls der primäre Scheduler längere Zeit ausfällt, muss der Backup-Scheduler daher als primärer Scheduler gestartet werden. Ein Backup-Scheduler wird als primärer Scheduler gestartet wenn beim Aufruf von jobscheduler.cmd der Parameter "start -exclusive" anstelle von "start" angegeben wird. </p>
 
+<h2>Kommandos des Startscript</h2>
+<p>Wenn beim der Parameter [start] ohne weitere Angaben angegeben wird, wird der Scheduler so gestartet, wie es beim Setup angegeben wurde.</p>
+<p>Folgende zusätzliche Kommandos gibt es für den Betrieb eines Backup-Cluster-Schedulers</p>
+<ul>
+<li><b>terminate_cluster</b> Fährt alle Scheduler des Backup-Clusters herunter</li>
+<li><b>restart_cluster</b> Startet alle Scheduler des Backup-Clusters neu. Anschließend ist der primäre Scheduler aktiv.</li>
+<li><b>terminate_fail-safe</b> Beendet den Scheduler. Ein anderer inaktiver Scheduler im Backup-Cluster wird aktiv.</li>
+<li><b>start -exclusive</b> Startet einen primären Scheduler im Backup-Cluster.</li>
+<li><b>start -exclusive -backup</b> Startet einen Backup-Scheduler im Backup-Cluster.</li>
+<li><b>start -exclusive -backup -backp-precedence=[n]</b> Startet einen Backup-Scheduler im Backup-Cluster mit der Rangfolge [n].</li>
+</ul>
 </description>
