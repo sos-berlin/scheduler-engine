@@ -24,9 +24,6 @@ Alle Scheduler verwenden die gleiche Konfiguraionsdatei bzw. eine aktuelle Kopie
 Alle Scheduler werden mit der gleichen Scheduler-id gestartet.
 </li>
 <li>
-Die Uhren der Rechner mit Instanzen des Clusters laufen synchron.
-</li>
-<li>
 Alle Scheduler werden mit <scheduler_option name="exclusive"/>  gestartet.
 </li>
 </ul>
@@ -45,12 +42,12 @@ bestimmt, dass der Scheduler zum Backup-Cluster gehört.</li>
 <li><scheduler_option name="backup"/>
 bestimmt, dass es sich um einen Backup-Scheduler handelt. Es kann mehrere Backup-Scheduler geben. Fehlt das Attribut, handelt es sich um einen primären Scheduler. Es kann mehrere primäre Scheduler geben, die alle die gleiche Startpriorität im Falle eines Ausfalls des aktiven Schedulers haben</li>
 <li><scheduler_option name="backup-precedence"/><br/>
-bestimmt die Rangfolge, mit der Backup-Scheduler aktiv werden. Es wird jeweils der Scheduler mit der kleinstem Wert aktiv, wenn der aktive Scheduler ausfällt.</li>
+bestimmt die Rangfolge, mit der Backup-Scheduler aktiv werden. Es wird jeweils der Scheduler mit dem kleinstem Wert aktiv, wenn der aktive Scheduler ausfällt.</li>
 </ul>
 
 <h2>Beenden eines Backup-Scheduler-Clusters mit Funktionen der Weboberfläche</h2>
 
-<p>Beim Beenden werden die laufenden Process-Schritte laufender Jobs wird noch ausgeführt. Mit dem Parameter <scheduler_option name="timout"/>=&lt;wert&gt; kann das Beenden laufender Process-Schritte nach Ablauf einer Zeit erzwungen werden.</p>
+<p>Beim Beenden werden die laufenden Process-Schritte laufender Jobs wird noch ausgeführt. Mit dem Parameter <scheduler_option name="timeout"/>=&lt;wert&gt; kann das Beenden laufender Process-Schritte nach Ablauf einer Zeit erzwungen werden.</p>
 
 <h3>Beenden aller Scheduler im Backup-Cluster</h3>
 <p>Ein Cluster wird beendet,wenn in der Scheduler Weboberfläche das Kommando "terminate cluster" aufgerufen wird. Alle Scheduler des Cluster werden damit beendet. </p>
@@ -92,14 +89,14 @@ bestimmt die Rangfolge, mit der Backup-Scheduler aktiv werden. Es wird jeweils d
 <h2>Primären Scheduler reaktivieren</h2>
 
 <ol>
-<li>Der primäre Scheduler wird gestartet. Da bereits ein backup Scheduler läuft, übernimmt er nicht die Verarbeitung.</li>
-<li>Der Backup-Scheduler wird neu gestartet ("terminate and restart"). Da der primäre inaktive Scheduler aktiv wird, sobald kein anderer Scheduler aktiv ist, übernimmt er die Verarbeitung (wenn es mehrere primäre Scheduler gibt, ist unbestimmt, welcher aktiv wird).</li>
+<li>Der primäre Scheduler wird gestartet. Da bereits ein backup Scheduler läuft, übernimmt der primäre Scheduler nicht die Verarbeitung.</li>
+<li>Der Backup-Scheduler wird neu gestartet ("terminate and restart"). Da der primäre inaktive Scheduler aktiv wird, sobald kein anderer Scheduler aktiv ist, übernimmt er die Verarbeitung (wenn es mehrere primäre Scheduler gibt, bestimmt <scheduler_option name="backup-precedence"/> welcher aktiv wird).</li>
 </ol>
  
 <h2>Backup-Schedulers soll übernehmen</h2>
 
 <p>
-Der primäre Scheduler wird mit terminate fail-safe beendet. Ein bereits laufender Backup-Scheduler übernimmt damit die Verarbeitung. Wenn der primäre Scheduler mit restart beendet wird, wird nicht unbedingt ein Backup-Scheduler übernehmen sondern möglicherweise der primäre Scheduler wieder der Aktive sein.
+Der primäre Scheduler wird mit "terminate fail-safe" beendet. Ein bereits laufender Backup-Scheduler übernimmt damit die Verarbeitung.  
 </p>
 
  
@@ -116,4 +113,8 @@ Der primäre Scheduler wird mit terminate fail-safe beendet. Ein bereits laufend
 <li>Wenn der Rechner heruntergefahren wird, übernimmt ein Backup-Scheduler auf einem zweiten Rechner (continue_exclusive_operation="yes")</li>
 <li>Wenn primärer Scheduler und Backup-Scheduler auf einem Rechner laufen und dieser Rechner neu gestartet wird, kann es sein, dass der Backup-Scheduler zuerst startet. Er übernimmt dann nicht sofort die Verarbeitung sondern wartet, ob vom primären Scheduler ein Herzschlag kommt. Nur wenn nach 60s kein Herzschlag kommt, übernimmt der Backup-Scheduler die Verarbeitung. Dies entspricht dem Standardverhalten beim Ausbleiben eines Herzschlags vom aktiven Scheduler.</li>
 </ul>
+
+<h2>Einen inaktiven Backup-Scheduler zum aktiven primären Scheduler machen</h2>
+Wenn ein aktiver backupScheduler beendet wird, wird er beim Neustart inaktiv sein. Falls der primäre Scheduler längere Zeit ausfällt, muss der backup-Scheduler daher als primärer Scheduler gestartet werden. Ein Backup-Scheduler wird als primärer Scheduler gestartet wenn beim Aufruf von jobscheduler.cmd der Parameter "start_exclusive" anstelle von "start" angegeben wird. 
+
 </description>
