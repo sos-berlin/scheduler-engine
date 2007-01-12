@@ -115,6 +115,6 @@ Der primäre Scheduler wird mit "terminate fail-safe" beendet. Ein bereits laufe
 </ul>
 
 <h2>Einen inaktiven Backup-Scheduler zum aktiven primären Scheduler machen</h2>
-Wenn ein aktiver backupScheduler beendet wird, wird er beim Neustart inaktiv sein. Falls der primäre Scheduler längere Zeit ausfällt, muss der backup-Scheduler daher als primärer Scheduler gestartet werden. Ein Backup-Scheduler wird als primärer Scheduler gestartet wenn beim Aufruf von jobscheduler.cmd der Parameter "start_exclusive" anstelle von "start" angegeben wird. 
+<p>Wenn ein aktiver backupScheduler beendet wird, wird er beim Neustart inaktiv sein. Falls der primäre Scheduler längere Zeit ausfällt, muss der backup-Scheduler daher als primärer Scheduler gestartet werden. Ein Backup-Scheduler wird als primärer Scheduler gestartet wenn beim Aufruf von jobscheduler.cmd der Parameter "start_exclusive" anstelle von "start" angegeben wird. </p>
 
 </description>
