@@ -126,6 +126,6 @@ Der primäre Scheduler wird mit "terminate fail-safe" beendet. Ein bereits laufe
 <li><b>terminate_fail-safe</b> Beendet den Scheduler. Ein anderer inaktiver Scheduler im Backup-Cluster wird aktiv.</li>
 <li><b>start -exclusive</b> Startet einen primären Scheduler im Backup-Cluster.</li>
 <li><b>start -exclusive -backup</b> Startet einen Backup-Scheduler im Backup-Cluster.</li>
-<li><b>start -exclusive -backup -backp-precedence=[n]</b> Startet einen Backup-Scheduler im Backup-Cluster mit der Rangfolge [n].</li>
+<li><b>start -exclusive -backup -backup-precedence=[n]</b> Startet einen Backup-Scheduler im Backup-Cluster mit der Rangfolge [n].</li>
 </ul>
 </description>
