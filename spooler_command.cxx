@@ -764,7 +764,7 @@ xml::Element_ptr Command_processor::execute_remove_order( const xml::Element_ptr
         {
             sql::Delete_stmt delete_stmt ( _spooler->database_descriptor(), _spooler->_orders_tablename );
 
-            delete_stmt.add_where( order_subsystem()->order_db_where_condition( job_chain_name, id ) );
+            delete_stmt.add_where( _spooler->order_subsystem()->order_db_where_condition( job_chain_name, id.as_string() ) );
           //delete_stmt.and_where_condition( "occupying_cluster_member_id", sql::null_value );
             
             ta.execute( delete_stmt, __FUNCTION__ );
