@@ -596,7 +596,7 @@ ptr<Order> Order_subsystem::try_load_order_from_database( Transaction* outer_tra
         select_sql <<  "select " << order_select_database_columns << ", `occupying_cluster_member_id`"
                        "  from " << _spooler->_orders_tablename;
         if( flag & lo_lock )  select_sql << " %update_lock";
-        select_sql << "  where " << order_db_where_clause( job_chain_name, order_id.as_string() );
+        select_sql << "  where " << order_db_where_condition( job_chain_name, order_id.as_string() );
 
         if( flag & lo_blacklisted )  select_sql << " and `distributed_next_time`={ts'" << blacklist_database_distributed_next_time << "'}";
                                else  select_sql << " and `distributed_next_time` is not null";
@@ -649,9 +649,9 @@ void Order_subsystem::check_exception()
     if( _database_order_detector )  _database_order_detector->async_check_exception();
 }
 
-//-----------------------------------------------------------Order_subsystem::order_db_where_clause
+//--------------------------------------------------------Order_subsystem::order_db_where_condition
 
-string Order_subsystem::order_db_where_clause( const string& job_chain_name, const string& order_id )
+string Order_subsystem::order_db_where_condition( const string& job_chain_name, const string& order_id )
 {
     S result;
 
@@ -1459,7 +1459,7 @@ bool Job_chain::has_order_id( Read_transaction* ta, const Order::Id& order_id )
         int count = ta->open_result_set
             ( 
                 S() << "select count(*)  from " << _spooler->_orders_tablename << 
-                       "  where " << order_subsystem()->order_db_where_clause( _name, order_id.as_string() ),
+                       "  where " << order_subsystem()->order_db_where_condition( _name, order_id.as_string() ),
                 __FUNCTION__
             )
             .get_record().as_int( 0 );
