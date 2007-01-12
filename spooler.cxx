@@ -101,6 +101,7 @@ static bool                     is_daemon                           = false;
 //bool                          spooler_is_running      = false;
 
 volatile int                    ctrl_c_pressed                      = 0;                // Tatsächliches Signal ist in last_signal
+volatile int                    ctrl_c_pressed_handled              = 0;
 #ifndef Z_WINDOWS
     volatile int                last_signal                         = 0;                // Signal für ctrl_c_pressed
 #endif
@@ -306,9 +307,10 @@ With_log_switch read_profile_with_log( const string& profile, const string& sect
         {
             ctrl_c_pressed++;
 
-            if( ctrl_c_pressed >= 4 )
+            if( ctrl_c_pressed - ctrl_c_pressed_handled >= 2 )
+            //if( ctrl_c_pressed >= 4 )
             {
-                if( ctrl_c_pressed == 4  &&  spooler_ptr )  spooler_ptr->abort_now();  
+                if( spooler_ptr )  spooler_ptr->abort_now();  
                 return false;
             }
 
@@ -746,9 +748,9 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
     if( _last_resume_at  &&  _last_resume_at != Time::never )
     state_element.setAttribute( "resume_at", _last_resume_at.as_string() );
 
-    if( _cluster            )  state_element.setAttribute( "cluster"  , "yes" );
-    if( is_active()         )  state_element.setAttribute( "active"   , "yes" );
-    if( has_exclusiveness() )  state_element.setAttribute( "exclusive", "yes" );
+    //if( _cluster            )  state_element.setAttribute( "cluster"  , "yes" );
+    //if( is_active()         )  state_element.setAttribute( "active"   , "yes" );
+    //if( has_exclusiveness() )  state_element.setAttribute( "exclusive", "yes" );
 
 #   ifdef Z_UNIX
     {
@@ -788,7 +790,7 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
     }
 
     state_element.appendChild( _remote_scheduler_register.dom_element( dom, show ) );
-    if( show.is_set( show_cluster )  &&  _cluster )  state_element.appendChild( _cluster->dom_element( dom, show ) );
+    if( _cluster )  state_element.appendChild( _cluster->dom_element( dom, show ) );
     state_element.appendChild( _communication.dom_element( dom, show ) );
     state_element.append_new_text_element( "operations", "\n" + _connection_manager->string_from_operations( "\n" ) + "\n" );
     state_element.appendChild( _web_services.dom_element( dom, show ) );
@@ -2975,7 +2977,7 @@ void Spooler::abort_immediately_after_distribution_error( const string& debug_te
 
 void Spooler::run_check_ctrl_c()
 {
-    if( ctrl_c_pressed != _ctrl_c_pressed_handled )
+    if( ctrl_c_pressed != ctrl_c_pressed_handled )
     {
 #       ifdef Z_WINDOWS
             string signal_text = "ctrl-C";
@@ -3025,7 +3027,7 @@ void Spooler::run_check_ctrl_c()
             }
         }
 
-        _ctrl_c_pressed_handled = ctrl_c_pressed;
+        ctrl_c_pressed_handled = ctrl_c_pressed;
     }
 }
 

@@ -155,6 +155,13 @@
                                 <scheduler_option name="service">Daemon</scheduler_option> gestartet.
                             </p>
                         </dd>
+                        
+                        <dt>
+                            <scheduler_a href="backupscheduler.xml"/>
+                        </dt>
+                        <dd>
+                            Redundanter Betrieb
+                        </dd>
                     </dl>
                 </div>
 
@@ -186,6 +193,7 @@
                     </dl>
                 </div>
 
+                
                 <table style="margin-top: 1em">
                     <tr>
                         <td style="font-size: 8pt">

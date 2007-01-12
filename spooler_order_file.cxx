@@ -463,8 +463,8 @@ Order* Directory_file_order_source::fetch_and_occupy_order( const Time& now, con
 {
     Order* result = NULL;
 
-    while( !result )
-    {
+    //while( !result )
+    //{
         Order* order = fetch_and_occupy_order_from_new_files( now, cause, occupying_task );
         
         //if( !order )
@@ -474,10 +474,10 @@ Order* Directory_file_order_source::fetch_and_occupy_order( const Time& now, con
         //    order = fetch_and_occupy_order_from_new_files( now, cause, occupying_task );
         //}
 
-        if( !order )  break;
+        //if( !order )  break;
 
         result = order;
-    }
+    //}
 
     return result;
 }

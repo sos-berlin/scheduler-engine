@@ -251,6 +251,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-384", "$1 is distributed and therefore does not support operation '$2'" },
     { "SCHEDULER-385", "Deletion of order in database has failed" },
     { "SCHEDULER-386", "Last heart beat was $1, $2s ago. Something is delaying Scheduler execution, Scheduler is aborted immediately" },
+    { "SCHEDULER-389", "This order stored in database is distributed and cannot be used in a non-distributed job chain" },
     { "SCHEDULER-900", "Scheduler $1 is starting with $2, pid=$3" },
     { "SCHEDULER-902", "state=$1" },
     { "SCHEDULER-904", "Tasks have $1s to terminate" },

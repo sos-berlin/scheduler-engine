@@ -364,13 +364,13 @@ xml::Element_ptr Command_processor::execute_modify_job( const xml::Element_ptr& 
     return _answer.createElement( "ok" );
 }
 
-//-------------------------------------------------------Command_processor::execute_cluster
+//----------------------------------------------------------Command_processor::execute_show_cluster
 
-xml::Element_ptr Command_processor::execute_cluster( const xml::Element_ptr& element, const Show_what& show )
+xml::Element_ptr Command_processor::execute_show_cluster( const xml::Element_ptr& element, const Show_what& show )
 {
     if( _security_level < Security::seclev_info )  z::throw_xc( "SCHEDULER-121" );
 
-    xml::Element_ptr result = _answer.createElement( "schedulers" );
+    xml::Element_ptr result = _answer.createElement( "cluster" );
 
     if( _spooler->_cluster )  result.appendChild( _spooler->_cluster->dom_element( _answer, show ) );
 
@@ -992,7 +992,7 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     else
     if( element.nodeName_is( "start_job"        ) )  return execute_start_job( element );
     else
-    if( element.nodeName_is( "cluster"  ) )  return execute_cluster( element, show );
+    if( element.nodeName_is( "show_cluster"     ) )  return execute_show_cluster( element, show );
     else
     if( element.nodeName_is( "show_task"        ) )  return execute_show_task( element, show );
     else

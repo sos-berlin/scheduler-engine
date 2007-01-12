@@ -382,12 +382,13 @@ bool Cluster_member::check_heart_beat( time_t now_before_select, const Record& r
                     log()->warn( m );
                 }
 
-                _cluster->recommend_next_deadline_check_time( max( ::time(NULL) + 2, deadline + 1 ) );
+                time_t now = ::time(NULL);
+                if( deadline > now + 2 )  _cluster->recommend_next_deadline_check_time( deadline + 1 );
             }
 
             if( is_dead ) 
             {
-                _is_dead = true;
+                if( _is_active )  _is_dead = true;      // Inaktive Scheduler deaktivieren wir nicht und erklären sie auch nicht für tot
                 result = false;
             }
         }
@@ -748,7 +749,7 @@ xml::Element_ptr Cluster_member::dom_element( const xml::Document_ptr& dom_docum
     {
         result.setAttribute( "last_detected_heart_beat"    , _last_heart_beat_detected_local_time.as_string( Time::without_ms ) );
         result.setAttribute( "last_detected_heart_beat_age", max( (time_t)0, ::time(NULL) - _last_heart_beat_detected ) );
-        result.setAttribute( "heart_beat_quality"          , _is_dead? "bad" : _is_heart_beat_late? "late" : "good" );
+        result.setAttribute( "heart_beat_quality"          , /*_is_dead? "bad" :*/ _is_heart_beat_late? "late" : "good" );
     }
     else
     {
@@ -1213,7 +1214,7 @@ bool Active_schedulers_watchdog::async_continue_( Continue_flags )
             {
                 Cluster_member* other_scheduler = it->second;
 
-                if( other_scheduler->_is_dead  &&  !other_scheduler->its_me() )
+                if( !other_scheduler->its_me()  &&  other_scheduler->_is_active )
                 {
                     other_scheduler->deactivate_and_release_orders_after_death();
                 }
@@ -2612,21 +2613,24 @@ xml::Element_ptr Cluster::dom_element( const xml::Document_ptr& document, const 
     result.setAttribute( "cluster_member_id", my_member_id() );
     if( _is_active         )  result.setAttribute( "active"   , "yes" );
     if( _has_exclusiveness )  result.setAttribute( "exclusive", "yes" );
+    if( _is_backup         )  result.setAttribute( "backup"   , "yes" );
     result.setAttribute( "is_member_allowed_to_start", is_member_allowed_to_start()? "yes" : "no" );
 
 
-    Z_FOR_EACH( Scheduler_map, _scheduler_map, it ) 
+    if( show_what.is_set( show_cluster ) )
     {
-        Cluster_member* member = it->second;
-
-        if( !member->is_empty_member() 
-         //&& ( member->_heart_beat_count || !member->_is_dead )
-        )     // Nur die Scheduler, von denen wir einmal einen Herzschlag gehört haben, oder die neu und noch ohne Herzschlag sind
+        Z_FOR_EACH( Scheduler_map, _scheduler_map, it ) 
         {
-            result.appendChild( member->dom_element( document, show_what ) );
+            Cluster_member* member = it->second;
+
+            if( !member->is_empty_member() 
+             //&& ( member->_heart_beat_count || !member->_is_dead )
+            )     // Nur die Scheduler, von denen wir einmal einen Herzschlag gehört haben, oder die neu und noch ohne Herzschlag sind
+            {
+                result.appendChild( member->dom_element( document, show_what ) );
+            }
         }
     }
-
 
     return result;
 }

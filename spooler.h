@@ -606,7 +606,6 @@ struct Spooler : Object,
     bool                       _assert_is_active;
     int                        _is_in_check_is_active;
     bool                       _has_windows_console;
-    int                        _ctrl_c_pressed_handled;
   //string                     _session_id;
 };
 

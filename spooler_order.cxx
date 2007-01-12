@@ -1305,10 +1305,9 @@ void Job_chain::add_orders_from_database( Read_transaction* ta )
 
     Any_file result_set = ta->open_result_set
         ( 
-            S() << "select " << order_select_database_columns <<
+            S() << "select " << order_select_database_columns << ", `distributed_next_time`"
             "  from " << _spooler->_orders_tablename <<
             "  where " << db_where_condition() <<
-               " and `distributed_next_time` is null"
             "  order by `ordering`",
             __FUNCTION__
         );
@@ -1350,6 +1349,11 @@ Order* Job_chain::add_order_from_database_record( Read_transaction* ta, const Re
 
     ptr<Order> order = new Order( _spooler, record, name() );
     order->load_blobs( ta );
+
+    if( record.as_string( "distributed_next_time" ) != "" )
+    {
+        z::throw_xc( "SCHEDULER-389", order->obj_name() );    // Wird von load_orders_from_result_set() ignoriert (sollte vielleicht nicht)
+    }
 
     add_order( order );
 
@@ -2839,8 +2843,12 @@ bool Order::db_update2( Update_option update_option, bool delet, Transaction* ou
             {
                 if( !_spooler->_db->opened() )  break;
 
-                update_ok = ta.try_execute_single( update.make_delete_stmt(), __FUNCTION__ );
-                if( !update_ok )  update_ok = db_handle_modified_order( &ta );
+                S delete_sql;
+                delete_sql << update.make_delete_stmt();
+                delete_sql << " and `distributed_next_time` is " << ( _is_distributed? "not null" : " not null" );  // update_ok=false, wenn das nicht stimmt
+
+                update_ok = ta.try_execute_single( delete_sql, __FUNCTION__ );
+                if( !update_ok )  update_ok = db_handle_modified_order( &ta );  int DISTRIBUTED_FEHLER_KOENNTE_GEZEIGT_WERDEN; // Zeigen, wenn distributed_next_time falsch ist.
 
                 db()->write_order_history( this, &ta );
 
@@ -3944,7 +3952,8 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain )
         else
         if( job_chain->_orders_recoverable  &&  !_is_in_database )
         {
-            result = db_try_insert();       // false, falls aus irgendeinem Grund die Order-ID schon vorhanden ist
+            if( db()->opened() )  result = db_try_insert();       // false, falls aus irgendeinem Grund die Order-ID schon vorhanden ist
+                            else  result = true;
         }
 
         if( result  &&  !_is_distributed )

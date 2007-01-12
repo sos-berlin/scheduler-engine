@@ -2419,6 +2419,12 @@
             </text>
         </message>
 
+        <message code="SCHEDULER-389">
+            <text xml:lang="en">
+                <title>This order stored in database is distributed and cannot be used in a non-distributed job chain</title>
+            </text>
+        </message>
+
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->
