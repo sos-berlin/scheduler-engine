@@ -69,6 +69,7 @@ function spooler_process()
     //spooler.terminate();
     if( --counter == 0 )  spooler.terminate();
     //if( spooler_task.order.params( "scheduler_file_order" ) == "/tmp/x/gen9" )  spooler.terminate();
+    spooler_task.end();
     return true;
 }
 
@@ -88,6 +89,7 @@ function spooler_process()
 {               
     var order = spooler_task.order;     // Prüfen, ob Garbage Collector den Auftrag zu lange offen hält
     spooler_log.info( "ORDER-ID=" + order.id );
+    spooler_task.end();
     return true;
 }
 
@@ -123,8 +125,8 @@ public class My_job  extends sos.spooler.Job_impl
                 <file_order_source directory="/tmp/x/" regex="^gen.*\.ok$"/>
                 <!--file_order_source directory="/tmp/yyy/" regex="^gen"/-->
                 <!--file_order_source directory="/tmp/y" regex="^gen" next_state="second"/-->
-                <job_chain_node state="edno" job="javascript"/>
-                <job_chain_node state="dwa" job="javascript2"/>
+                <!--job_chain_node state="edno" job="javascript"/-->
+                <!--job_chain_node state="dwa" job="javascript2"/-->
                 <job_chain_node state="tri" job="java"/>
                 <file_order_sink state="remove" remove="yes"/>
                 <!--file_order_sink state="remove" move_to="/gibsnich/"/-->

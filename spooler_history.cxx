@@ -386,7 +386,6 @@ void Transaction::rollback( const string& debug_text, bool force )
         }
 
         _db->_transaction = _outer_transaction;
-        Database* db = _db;
         _db = NULL; 
         _guard.leave(); 
 
@@ -491,7 +490,7 @@ void Database::open( const string& db_name )
         try_reopen_after_error( x, __FUNCTION__, true );
     }
 
-    if( _db_name != "" )  create_tables_when_needed();
+    if( opened() )  create_tables_when_needed();
 }
 
 //----------------------------------------------------------------------------------Database::open2
