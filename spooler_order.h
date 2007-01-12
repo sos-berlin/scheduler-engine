@@ -592,8 +592,8 @@ struct Order_subsystem : Object, Scheduler_object
     void                        request_order               ();
     bool                        is_job_in_any_job_chain     ( Job* );
     bool                        is_job_in_any_distributed_job_chain( Job* );
-    string                      job_chain_db_where_condition   ( const string& job_chain_name );
-    string                      order_db_where_clause       ( const string& job_chain_name, const string& order_id );
+    string                      job_chain_db_where_condition( const string& job_chain_name );
+    string                      order_db_where_condition    ( const string& job_chain_name, const string& order_id );
     void                        count_started_orders        ();
     void                        count_finished_orders       ();
 

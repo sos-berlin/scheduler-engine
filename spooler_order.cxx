@@ -2827,14 +2827,18 @@ bool Order::db_update2( Update_option update_option, bool delet, Transaction* ou
         string           state_string = state().as_string();    // Kann Exception auslösen;
         sql::Update_stmt update       = db_update_stmt();
 
-        update.and_where_condition( "occupying_cluster_member_id", _is_db_occupied? sql::Value( _spooler->cluster_member_id() ) 
-                                                                                  : sql::null_value                             );
-
-        if( update_option == update_and_release_occupation )
+        if( _is_db_occupied )
         {
-            if( _is_db_occupied )  update.and_where_condition( "state", _occupied_state.as_string() );
-            update[ "occupying_cluster_member_id" ] = sql::null_value;
+            update.and_where_condition( "occupying_cluster_member_id", sql::Value( _spooler->cluster_member_id() ) );
+            update.and_where_condition( "state"                      , _occupied_state.as_string() );
+
+            if( update_option == update_and_release_occupation )  update[ "occupying_cluster_member_id" ] = sql::null_value;
         }
+        else
+        {
+            update.and_where_condition( "occupying_cluster_member_id", sql::null_value );
+        }
+
 
         //if( _job_chain_name == "" )
         if( delet )
@@ -2845,7 +2849,7 @@ bool Order::db_update2( Update_option update_option, bool delet, Transaction* ou
 
                 S delete_sql;
                 delete_sql << update.make_delete_stmt();
-                delete_sql << " and `distributed_next_time` is " << ( _is_distributed? "not null" : " not null" );  // update_ok=false, wenn das nicht stimmt
+                delete_sql << " and `distributed_next_time` is " << ( _is_distributed? "not null" : " null" );  // update_ok=false, wenn das nicht stimmt
 
                 update_ok = ta.try_execute_single( delete_sql, __FUNCTION__ );
                 if( !update_ok )  update_ok = db_handle_modified_order( &ta );  int DISTRIBUTED_FEHLER_KOENNTE_GEZEIGT_WERDEN; // Zeigen, wenn distributed_next_time falsch ist.
@@ -2860,6 +2864,7 @@ bool Order::db_update2( Update_option update_option, bool delet, Transaction* ou
 
             _is_in_database = false;  
             _is_db_occupied = false;
+            _occupied_state = Variant();
         }
         else
         {
