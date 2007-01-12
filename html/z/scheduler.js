@@ -742,8 +742,9 @@ function job_menu__onclick( job_name, x, y )
                       //: _response.selectSingleNode( "spooler/answer/state/jobs/job [ @job = '" + job_name + "' ]" );  // Linker Rahmen
 
     var state = job_element.getAttribute( "state" );
+    var is_initialized = state != "not_initialized";
 
-    popup_builder.add_show_log( "Show log"        , "show_log?job=" + job_name, "show_log_job_" + job_name );
+    popup_builder.add_show_log( "Show log"      , "show_log?job=" + job_name, "show_log_job_" + job_name, is_initialized );
 
     //var description_element = job_element.selectSingleNode( "description" );
     //var is_active = description_element? description_element.text != "" : false;
@@ -751,17 +752,17 @@ function job_menu__onclick( job_name, x, y )
     popup_builder.add_entry   ( "Show description", "show_job_description()", is_active );
 
     popup_builder.add_bar();
-    popup_builder.add_command ( "Start task now", "<start_job job='" + job_name + "'/>" );
-    popup_builder.add_command ( "Start at &lt;runtime&gt;", "<modify_job job='" + job_name + "' cmd='start'   />" );
-    popup_builder.add_command ( "Stop"          , "<modify_job job='" + job_name + "' cmd='stop'    />", state != "stopped"  &&  state != "stopping" );
-    popup_builder.add_command ( "Unstop"        , "<modify_job job='" + job_name + "' cmd='unstop'  />", state == "stopped"  ||  state == "stopping" );
-//  popup_builder.add_command ( "Wake"          , "<modify_job job='" + job_name + "' cmd='wake'    />" );
-    popup_builder.add_command ( "Reread"        , "<modify_job job='" + job_name + "' cmd='reread'  />" );
-    popup_builder.add_command ( "Remove job"    , "<modify_job job='" + job_name + "' cmd='remove'  />", job_element.getAttribute( "order" ) != "yes" );
+    popup_builder.add_command ( "Start task now", "<start_job job='" + job_name + "'/>"                , is_initialized );
+    popup_builder.add_command ( "Start at &lt;runtime&gt;", "<modify_job job='" + job_name + "' cmd='start' />", is_initialized );
+    popup_builder.add_command ( "Stop"          , "<modify_job job='" + job_name + "' cmd='stop'    />", is_initialized  &&  state != "stopped"  &&  state != "stopping" );
+    popup_builder.add_command ( "Unstop"        , "<modify_job job='" + job_name + "' cmd='unstop'  />", is_initialized  &&  ( state == "stopped"  ||  state == "stopping" ) );
+//  popup_builder.add_command ( "Wake"          , "<modify_job job='" + job_name + "' cmd='wake'    />", is_initialized );
+    popup_builder.add_command ( "Reread"        , "<modify_job job='" + job_name + "' cmd='reread'  />", is_initialized );
+    popup_builder.add_command ( "Remove job"    , "<modify_job job='" + job_name + "' cmd='remove'  />", is_initialized  &&  job_element.getAttribute( "order" ) != "yes" );
     popup_builder.add_bar();
-    popup_builder.add_command ( "End tasks"     , "<modify_job job='" + job_name + "' cmd='end'     />" );
-    popup_builder.add_command ( "Suspend tasks" , "<modify_job job='" + job_name + "' cmd='suspend' />" );
-    popup_builder.add_command ( "Continue tasks", "<modify_job job='" + job_name + "' cmd='continue'/>" );
+    popup_builder.add_command ( "End tasks"     , "<modify_job job='" + job_name + "' cmd='end'     />", is_initialized );
+    popup_builder.add_command ( "Suspend tasks" , "<modify_job job='" + job_name + "' cmd='suspend' />", is_initialized );
+    popup_builder.add_command ( "Continue tasks", "<modify_job job='" + job_name + "' cmd='continue'/>", is_initialized );
 
     _popup_menu = popup_builder.show_popup_menu( x, y );
 }

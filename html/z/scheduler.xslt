@@ -1983,11 +1983,15 @@
             <xsl:when test=".='pending'">
                 <xsl:value-of select="."/>
             </xsl:when>
-            
+
             <xsl:when test=".='running'">
                 <xsl:value-of select="."/>
             </xsl:when>
-            
+
+            <xsl:when test=".='not_initialized'">
+                <xsl:value-of select="."/>
+            </xsl:when>
+
             <xsl:otherwise>
                 <span class="job_error">
                     <xsl:value-of select="."/>
