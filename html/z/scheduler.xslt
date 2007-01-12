@@ -84,7 +84,7 @@
                     <xsl:with-param name="class" select="'process_class'"/>
                 </xsl:apply-templates>
 
-                <xsl:if test="state/@cluster='yes'">
+                <xsl:if test="state/cluster">
                     <xsl:apply-templates mode="card_selector" select="/spooler">
                         <xsl:with-param name="name"  select="'cluster'"/>
                         <xsl:with-param name="title" select="'Cluster'"/>

@@ -1214,7 +1214,7 @@ bool Active_schedulers_watchdog::async_continue_( Continue_flags )
             {
                 Cluster_member* other_scheduler = it->second;
 
-                if( !other_scheduler->its_me()  &&  other_scheduler->_is_active )
+                if( !other_scheduler->its_me()  &&  !other_scheduler->is_empty_member()  &&  other_scheduler->_is_active )
                 {
                     other_scheduler->deactivate_and_release_orders_after_death();
                 }
