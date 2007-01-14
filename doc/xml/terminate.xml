@@ -45,7 +45,7 @@
             <description>
                 <p>
                     In Zusammenhang mit <scheduler_option name="exclusive"/> wird eingestellt, 
-                    dass ein inaktiver Scheduler den Betrieb übernommt.
+                    dass ein inaktiver Scheduler den Betrieb übernimmt.
                 </p>
             </description>
         </xml_attribute>

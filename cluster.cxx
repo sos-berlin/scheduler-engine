@@ -1198,33 +1198,30 @@ bool Active_schedulers_watchdog::async_continue_( Continue_flags )
     Has_alarm::on_alarm();
 
 
-    if( !db()->opened() )
+    if( db()->opened() )
     {
-        _cluster->async_wake();       // Datenbank ist geschlossen worden
-        return true;
-    }
-
-    try
-    {
-        bool ok = _cluster->check_schedulers_heart_beat();
-
-        if( !ok )
+        try
         {
-            Z_FOR_EACH( Cluster::Scheduler_map, _cluster->_scheduler_map, it )
-            {
-                Cluster_member* other_scheduler = it->second;
+            bool ok = _cluster->check_schedulers_heart_beat();
 
-                if( !other_scheduler->its_me()  &&  !other_scheduler->is_empty_member()  &&  other_scheduler->_is_active )
+            if( !ok )
+            {
+                Z_FOR_EACH( Cluster::Scheduler_map, _cluster->_scheduler_map, it )
                 {
-                    other_scheduler->deactivate_and_release_orders_after_death();
+                    Cluster_member* other_scheduler = it->second;
+
+                    if( !other_scheduler->its_me()  &&  !other_scheduler->is_empty_member()  &&  other_scheduler->_is_active )
+                    {
+                        other_scheduler->deactivate_and_release_orders_after_death();
+                    }
                 }
             }
         }
-    }
-    catch( exception& )
-    {
-        _cluster->async_wake();       // Cluster wird die Exception übernehmen
-        throw;
+        catch( exception& )
+        {
+            _cluster->async_wake();       // Cluster wird die Exception übernehmen
+            throw;
+        }
     }
 
     calculate_next_check_time();
@@ -2608,7 +2605,7 @@ xml::Element_ptr Cluster::dom_element( const xml::Document_ptr& document, const 
 {
     xml::Element_ptr result = document.createElement( "cluster" );
 
-    check_schedulers_heart_beat();  // _scheduler_map auf den Stand bringen
+    if( _spooler->db()->opened() )  check_schedulers_heart_beat();  // _scheduler_map auf den Stand bringen
 
     result.setAttribute( "cluster_member_id", my_member_id() );
     if( _is_active         )  result.setAttribute( "active"   , "yes" );

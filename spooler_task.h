@@ -196,7 +196,7 @@ struct Task : Object,
     bool                        try_kill                    ();
     
     bool                        wait_until_terminated       ( double wait_time = Time::never );
-    void                        set_delay_spooler_process   ( Time t )                              { _log->debug("delay_spooler_process=" + t.as_string() ); _next_spooler_process = Time::now() + t; }
+    void                        set_delay_spooler_process   ( Time );
 
     void                        set_state                   ( State );
 

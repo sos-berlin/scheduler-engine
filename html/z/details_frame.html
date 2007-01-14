@@ -220,6 +220,7 @@ function update( force )
         var response = _scheduler.execute( "<show_task id='" + _task_id + "' what='all'/>" );
         
         var task_element = response.selectSingleNode( "spooler/answer/task" );
+        
         document.getElementById( "stylesheet_output" ).innerHTML = task_element? _stylesheet.xml_transform( task_element ) : "";
 
         ok = true;
@@ -233,6 +234,7 @@ function update( force )
                                                : "";
         
         var response = _scheduler.execute( "<show_job job='" + _job_name + "' job_chain='" + _job_chain_name + "' what='" + what + "' max_task_history='10'/>" );
+        
         _job_element = response.selectSingleNode( "spooler/answer/job" );
 
         _job_element.setAttribute( "my_show_card", _show_card );
@@ -256,6 +258,7 @@ function update( force )
         {
             var what = "orders,order_history";
             response = _scheduler.execute( "<show_job_chain job_chain='" + job_chain_name + "' what='" + what + "' />" );
+            
             modify_response( response );
         }
         
@@ -264,6 +267,8 @@ function update( force )
 
         ok = true;
     }
+
+    if( _scheduler != undefined )  _scheduler._time_log.log( "details.innerHTML" );
     
     return ok;
 }

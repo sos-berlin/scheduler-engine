@@ -418,13 +418,11 @@ void Java_module_instance::add_obj( IDispatch* object, const string& name )
 
     //Z_LOGI2( "scheduler", "Java_module_instance::add_obj " << java_class_name << "\n" );
 
-    jclass cls = e->GetObjectClass( _jobject );
-    if( !cls )  e.throw_java( "GetMethodID" );
+    jclass cls = _jobject.get_jclass();
 
     string signature = "L" + java_class_name + ";";
 
     jfieldID field_id = e->GetFieldID( cls, name.c_str(), signature.c_str() );
-    e->DeleteLocalRef( cls );
 
     if( !field_id )  e.throw_java( "GetFieldID", name );
 

@@ -434,7 +434,7 @@ void Order_subsystem::add_job_chain( Job_chain* job_chain )
         */
 
 
-        if( _spooler->has_exclusiveness()  &&  job_chain->_orders_recoverable )
+        if( _spooler->has_exclusiveness()  &&  job_chain->_orders_recoverable  &&  !job_chain->is_distributed() )
         {
             if( !_spooler->db()  ||  !_spooler->db()->opened() )  // Beim Start des Schedulers
             {
@@ -2831,8 +2831,6 @@ bool Order::db_update2( Update_option update_option, bool delet, Transaction* ou
         {
             update.and_where_condition( "occupying_cluster_member_id", sql::Value( _spooler->cluster_member_id() ) );
             update.and_where_condition( "state"                      , _occupied_state.as_string() );
-
-            if( update_option == update_and_release_occupation )  update[ "occupying_cluster_member_id" ] = sql::null_value;
         }
         else
         {
@@ -2869,6 +2867,8 @@ bool Order::db_update2( Update_option update_option, bool delet, Transaction* ou
         else
         {
             string payload_string = string_payload();   // Kann Exception auslösen
+
+            if( _is_db_occupied  &&  update_option == update_and_release_occupation )  update[ "occupying_cluster_member_id" ] = sql::null_value;
 
             update[ "state"         ] = state_string;
             update[ "initial_state" ] = initial_state().as_string();

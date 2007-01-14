@@ -189,7 +189,7 @@ Any_file Read_transaction::open_file_2( const string& db_prefix, const string& e
             _db->_log->error( x.what() );
         }
         else
-            _db->_log->debug( logging_sql ), _db->_log->debug( x.what() );
+            _db->_log->debug( logging_sql + debug_extra ), _db->_log->debug( x.what() );
 
         throw;
     }

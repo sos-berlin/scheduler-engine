@@ -79,7 +79,7 @@ const int                       inhibit_suspend_wait_time           = 10*60;    
 const int                       show_message_after_seconds          = 15*60;            // Nach dieser Wartezeit eine Meldung ausgeben
 const int                       show_message_after_seconds_debug    = 60;               // Nach dieser Wartezeit eine Meldung ausgeben
 
-const int                       nothing_done_max                    = 2+1;              // Ein überflüssiges Signal wird toleriert wegen Race condition, und dann gibt es manch voreiliges Signal (vor allem zu Beginn einer Operation)
+const int                       nothing_done_max                    = 10;  //2+1;        // Ein überflüssiges Signal wird toleriert wegen Race condition, und dann gibt es manch voreiliges Signal (vor allem zu Beginn einer Operation)
                                                                                         // +1 für Job::start_when_directory_changed() unter Windows    
 const double                    nichts_getan_bremse                 = 1.0;              // Wartezeit in nichts_getan(), Meldung SCHEDULER-261
 #ifdef Z_DEBUG
@@ -183,6 +183,65 @@ struct Termination_async_operation : Async_operation
     State                      _state;
     time_t                     _timeout_at;
 };
+
+//--------------------------------------------------------------------------------------print_usage
+
+static void print_usage()
+{
+    cerr << "\n"
+            "usage: " << _argv[0] << "\n"
+            "       [-config=]XMLFILE\n"
+            "       -validate-xml-\n"
+            "\n"
+            "       -?\n"
+            "       -V\n"
+            "       -show-xml-schema\n"
+            "\n"
+            "       -cd=PATH\n"
+            "       -log=HOSTWARELOGFILE\n"
+            "       -log-dir=DIRECTORY|*stderr\n"
+            "       -log-level=error|warn|info|debug|debug1|...|debug9\n"
+            "       -id=ID\n"
+            "       -param=PARAM\n"
+            "       -cmd=\"<xml_command/>\"\n"
+            "       -include-path=PATH\n"
+            "       -ini=FILE\n"
+            "       -sos.ini=FILE\n"
+            "\n"
+            "       -port=N\n"
+            "       -tcp-port=N\n"
+            "       -udp-port=N\n"
+            "       -reuse-port\n"
+            "\n"
+            "       -exclusive\n"
+            "       -backup\n"
+            "       -backup-precedence=N\n"
+            "       -distributed-orders\n"
+            "\n"
+            "       -send-cmd=\"<xml_command/>\"\n"
+            "\n"
+            "       -pid-file=FILE\n"
+            "       -kill[=PID]\n"
+            "       -service\n"
+#               ifdef Z_WINDOWS
+            "       -install-service[=NAME]\n"
+            "       -remove-service[=NAME]\n"
+            "       -renew-service[=NAME]\n"
+            "       -service-name=NAME\n"
+            "       -service-display=STRING\n"
+            "       -install-descr=STRING\n"
+            "       -need-service=SERVICE\n"
+#               endif
+            "\n"
+            "SCHEDULER CLIENT\n"
+            "       -scheduler=HOST:PORT\n"
+            "       -language=shell|javascript|vbscript|perlscript\n"
+            "       -process-class=NAME\n"
+            "       -at='DATE TIME'\n"
+            "       -job-chain=NAME\n"
+            "       -order-id=ID\n"
+            "\n";
+}
 
 //---------------------------------------------------------------------------------send_error_email
 
@@ -1178,6 +1237,21 @@ bool Spooler::has_any_order()
     return false;
 }
 
+//----------------------------------------------------------------------------Spooler::has_any_task
+
+bool Spooler::has_any_task()
+{
+    if( _task_subsystem  &&  _task_subsystem->_task_list.size() > 0 )  return true;
+
+    FOR_EACH_JOB( j )
+    {
+        Job* job = *j;
+        if( job->queue_filled() )  return true;
+    }
+
+    return false;
+}
+
 //---------------------------------------------------------------------------------Spooler::add_job
 
 void Spooler::add_job( const ptr<Job>& job, bool init )
@@ -1259,7 +1333,7 @@ void Spooler::set_state( State state )
     }
     catch( exception& ) {}      // ENOSPC bei s_stopping ignorieren wir
 
-    Z_DEBUG_ONLY( update_console_title() );
+    update_console_title();
 
     try
     {
@@ -1585,14 +1659,14 @@ void Spooler::load_arg()
             if( opt.with_value( "test-summertime"        ) )  time::test_summertime( opt.value() );
             else
             if( opt.flag      ( "suppress-watchdog-thread" ) )  _suppress_watchdog_thread = opt.set();
-
-#           ifdef Z_WINDOWS
-                else
-                if( opt.flag      ( "debug-break"      ) )  DebugBreak();
-#           endif
-
           //else
           //if( opt.with_value( "now"                    ) )  _clock_difference = Time( Sos_date_time( opt.value() ) ) - Time::now();
+            else
+            if( opt.flag      ( "check-memory-leak"     ) )  _check_memory_leak = opt.set();
+
+#           ifdef Z_WINDOWS
+                else if( opt.flag( "debug-break"        ) )  assert( !( opt.flag( "debug-break" ) && opt.set() ) );   // Lässt Windows eine Diagbox zeigen
+#           endif
             else
                 throw_sos_option_error( opt );
         }
@@ -1643,57 +1717,7 @@ void Spooler::load_arg()
     }
     catch( exception& )
     {
-        if( !_is_service )
-        {
-            cerr << "\n"
-                    "usage: " << _argv[0] << "\n"
-                    "       [-config=]XMLFILE\n"
-                    "       -validate-xml-\n"
-                    "\n"
-                    "       -V\n"
-                    "       -show-xml-schema\n"
-                    "\n"
-                    "       -cd=PATH\n"
-                    "       -log=HOSTWARELOGFILE\n"
-                    "       -log-dir=DIRECTORY|*stderr\n"
-                    "       -log-level=error|warn|info|debug|debug1|...|debug9\n"
-                    "       -id=ID\n"
-                    "       -param=PARAM\n"
-                    "       -cmd=\"<xml_command/>\"\n"
-                    "       -include-path=PATH\n"
-                    "       -ini=FILE\n"
-                    "       -sos.ini=FILE\n"
-                    "\n"
-                    "       -port=N\n"
-                    "       -tcp-port=N\n"
-                    "       -udp-port=N\n"
-                    "       -reuse-port\n"
-                    "\n"
-                    "       -send-cmd=\"<xml_command/>\"\n"
-                    "\n"
-                    "       -pid-file=FILE\n"
-                    "       -kill[=PID]\n"
-                    "       -service\n"
-#               ifdef Z_WINDOWS
-                    "       -install-service[=NAME]\n"
-                    "       -remove-service[=NAME]\n"
-                    "       -renew-service[=NAME]\n"
-                    "       -service-name=NAME\n"
-                    "       -service-display=STRING\n"
-                    "       -install-descr=STRING\n"
-                    "       -need-service=SERVICE\n"
-#               endif
-                    "\n"
-                    "SCHEDULER CLIENT\n"
-                    "       -scheduler=HOST:PORT\n"
-                    "       -language=shell|javascript|vbscript|perlscript\n"
-                    "       -process-class=NAME\n"
-                    "       -at='DATE TIME'\n"
-                    "       -job-chain=NAME\n"
-                    "       -order-id=ID\n"
-                    "\n";
-        }
-
+        if( !_is_service )  print_usage();
         throw;
     }
 }
@@ -2574,15 +2598,17 @@ void Spooler::run()
             nichts_getan_zaehler = 0;
         }
         else
-        if( ++nothing_done_count > nothing_done_max )
         {
-            nichts_getan( ++nichts_getan_zaehler, catched_event_string );
-            if( wait_until == 0 )  wait_until = Time::now() + 1;
-        }
-        else
-        if( nothing_done_count > 1 )
-        {
-            Z_LOG2( "scheduler.nothing_done", "nothing_done_count=" << nothing_done_count << " nichts_getan_zaehler=" << nichts_getan_zaehler << "\n" );
+            if( ++nothing_done_count > nothing_done_max )
+            {
+                nichts_getan( ++nichts_getan_zaehler, catched_event_string );
+                if( wait_until == 0 )  wait_until = Time::now() + 1;
+            }
+
+            if( nothing_done_count > 1 )
+            {
+                Z_LOG2( "scheduler.nothing_done", "nothing_done_count=" << nothing_done_count << " nichts_getan_zaehler=" << nichts_getan_zaehler << "\n" );
+            }
         }
 
         //----------------------------------------------------------------------WARTEZEIT ERMITTELN
@@ -2712,7 +2738,18 @@ void Spooler::run()
                 }
             }
 
-            if( log_wait )  Z_LOG2( "scheduler.loop", "-------------scheduler loop " << _loop_counter << "-------------> " << catched_event_string << "  wait_until=" << wait_until << "  something_done=" << something_done << "\n" );  
+            if( log_wait )  
+            {
+                if( zschimmer::Log_ptr log = "scheduler.loop" )
+                {
+                    S line;
+                    line << "-------------scheduler loop " << _loop_counter << "-------------> " << 
+                            catched_event_string << "  wait_until=" << wait_until;
+                    if( wait_until_object )  line << "  for " << wait_until_object->obj_name();
+                    line << ", something_done=" << something_done << "\n";  
+                    log << line;
+                }
+            }
 
             wait_handles.clear();
         }
@@ -3710,6 +3747,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
 
     try
     {
+        int     relevant_arg_count  = 0;
         bool    need_call_scheduler = true;
         bool    call_scheduler      = false;
         bool    do_install_service  = false;
@@ -3727,8 +3765,11 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
         string  factory_ini = scheduler::default_factory_ini;
         string  dependencies;
 
+
         for( Sos_option_iterator opt ( argc, argv, parameter_line ); !opt.end(); opt.next() )
         {
+            relevant_arg_count++;
+
             if( opt.with_value( "scheduler" ) )     // Stichwort für scheduler_client
             {
                 is_scheduler_client = true;
@@ -3753,7 +3794,9 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
             else
             if( opt.with_value( "title"            ) )  ;                               // Damit der Aufrufer einen Kommentar für ps übergeben kann (für -object-server)
             else
-            if( opt.flag      ( "V"                ) )  fprintf( stderr, "Scheduler %s\n", VER_PRODUCTVERSION_STR );
+            if( opt.flag      ( "V"                ) )  need_call_scheduler = false, fprintf( stderr, "Scheduler %s\n", VER_PRODUCTVERSION_STR );
+            else
+            if( opt.flag      ( "?"                ) )  need_call_scheduler = false, fprintf( stderr, "Scheduler %s\n", VER_PRODUCTVERSION_STR ), scheduler::print_usage();
             else
             if( opt.flag      ( "kill"             ) )  kill_pid_file = true;
             else

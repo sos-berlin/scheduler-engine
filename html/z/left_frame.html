@@ -43,9 +43,7 @@ var _response;
 var _timer;
 var _scheduler;
 var _show_card = "job_chains";
-//var _show_jobs            = true;
-//var _show_job_chains      = false;
-//var _show_process_classes = false;
+var _first_call = true;
 var _checkbox_states = new Object();
 var update_seconds           = 5;
 
@@ -72,7 +70,7 @@ function do_onload()
     
     _scheduler = new Scheduler();
     repeat_update( false, true );
-    repeat_update( document.getElementById( "update_periodically_checkbox" ).checked, true );
+    if( document.getElementById( "update_periodically_checkbox" ) )  repeat_update( document.getElementById( "update_periodically_checkbox" ).checked, true );
     scheduler_init();
 }
 
@@ -142,25 +140,29 @@ function update_jobs_frame()
 {
     var what       = "";
     var max_orders = 0;
-
+    
     if( _checkbox_states.show_job_chain_orders_checkbox || window.parent.details_frame._job_chain_element )
     {
         what = "job_chain_orders order_source_files blacklist";
         max_orders = window.parent.details_frame._job_chain_element? 100 : _max_orders;
     }
-    
-    if( _show_card == "cluster"           )  what += " cluster";
-    if( _show_card == "remote_schedulers" )  what += " remote_schedulers";
-    if( _show_card == "job_chains"        )  what += " job_chains";
+
+    if( _show_card == "cluster" || _first_call )  what += " cluster";
+    if( _show_card == "remote_schedulers"      )  what += " remote_schedulers";
+    if( _show_card == "job_chains"             )  what += " job_chains";
     
     _response = _scheduler.execute( "<show_state what='" + what + "' max_orders='" + max_orders + "'/>" );
     
     modify_response( _response );
     
+    if( _first_call  &&  _response.selectSingleNode( "spooler/answer/state" ).getAttribute( "state" ) == "waiting_for_activation" )  
+        _show_card = "cluster";
+        
     var scheduler_id = _response.selectSingleNode( "spooler/answer/state" ).getAttribute( "id" );
     document.title = "Scheduler " + ( scheduler_id? " id=" + scheduler_id : "" );
     
     document.getElementById( "stylesheet_output" ).innerHTML = _stylesheet.xml_transform( _response );
+    _scheduler._time_log.log( "left.innerHTML" );
 
     if( _translation_table )
     {    
@@ -174,7 +176,10 @@ function update_jobs_frame()
                 if( translation )  span_element.innerText = translation, spanElement.removeAttribute( "className" );
             }
         }
+        _scheduler._time_log.log( "translation" );
     }
+
+    _first_call = false;
 }
 
 //-------------------------------------------------------------------------------------------update
@@ -182,16 +187,23 @@ function update_jobs_frame()
 function update()
 {
     reset_error();
+    _scheduler._time_log = new Time_log;
+    
+    call_error_checked( update_both );
+
+    if( _timer != undefined )  set_update_timer();
+}
+
+//--------------------------------------------------------------------------------------update_both
+
+function update_both()
+{
     update_jobs_frame();
 
-  //if( window.parent.details_frame.document.readyState == undefined 
-  // || window.parent.details_frame.document.readyState == "complete" )
     if( window.parent._details_frame_loaded )
     {
-        call_error_checked( window.parent.details_frame.update );
+        window.parent.details_frame.update();
     }
-    
-    if( _timer != undefined )  set_update_timer();
 }
 
 //----------------------------------------------------------------------------------------show_card

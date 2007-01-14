@@ -2,6 +2,9 @@
 
 //----------------------------------------------------------------------------------------------var
 
+var debug            = false;
+var is_logging_times = false;
+
 var _popup_menu;
 
 // Die Variablen enthalten die Versionnummer (numerisch, z.B. 5.5) des Browsers, oder 0.
@@ -9,6 +12,7 @@ var ie       = 0;   // Microsoft Internet Explorer
 var netscape = 0;   // Netscape
 var firefox  = 0;   // Mozilla Firefox
 var opera    = 0;   // Opera
+
 
 //--------------------------------------------------------------------------------------------const
 
@@ -87,8 +91,46 @@ function check_browser()
             msg += "productSub="      + window.navigator.productSub         + "\n";
         }
 
-        alert( msg );
+        alert( "Scheduler: " + msg );
     }
+}
+
+//-----------------------------------------------------------------------------------------Time_log
+
+function Time_log()
+{
+    this.times_array = new Array();
+    this.log( "start" );
+    //this.times_array.push( new Array( "start", 1 * new Date() ) );
+}
+
+//-------------------------------------------------------------------------------------Time_log.log
+
+Time_log.prototype.log = function Time_log__log( what )
+{
+    if( is_logging_times )  this.times_array.push( new Array( what, 1 * new Date() ) );
+}
+
+//--------------------------------------------------------------------------------Time_log.get_line
+
+Time_log.prototype.get_line = function Time_log__get_line()
+{
+    var a = new Array;
+
+    this.log( "total" );
+    
+    var total = ( this.times_array[ this.times_array.length - 1 ][1] - this.times_array[ 0 ][1] ) / 1000;
+    a.push( "total " + total + "s" );
+
+    for( var i = 1; i < this.times_array.length - 1; i++ )
+    {
+        var t = this.times_array[i];
+        var ti = ( t[1] - this.times_array[i-1][1] ) / 1000;
+        var p = ti / total;
+        if( p >= 0.05 ) a.push( t[0] + " " + Math.round( 100*p ) + "% " + ti + "s"  );
+    }
+    
+    return a.join( ",  " );
 }
 
 //----------------------------------------------------------------------------------------Scheduler
@@ -99,6 +141,7 @@ function Scheduler()
     this._url               = "http://" + document.location.host + "/";
     this._xml_http          = window.XMLHttpRequest? new XMLHttpRequest() : new ActiveXObject( "Msxml2.XMLHTTP" );
     this._dependend_windows = new Object();
+    this._time_log          = new Time_log;
     //this._configuration = new Scheduler_html_configuration( this._url + "config.xml" );
 }
 
@@ -109,7 +152,6 @@ Scheduler.prototype.close = function()
 {
     //this._configuration = null;
     this._xml_http = null;
-
 
     var dependend_windows = this._dependend_windows;
     this._depended_windows = new Object();
@@ -123,6 +165,8 @@ Scheduler.prototype.close = function()
 Scheduler.prototype.execute = function Scheduler__execute( xml )
 {
     this.call_http( xml );
+    //this._time_log.log( xml );
+    if( is_logging_times )  this._time_log.log( ( xml.match( /^(<[^ >]+)[ >]/ )? RegExp.$1 + ">" : "Scheduler.excecute" ) + " " + Math.round( this._xml_http.responseText.length / 1024 ) + "KB" );
 
     var dom_document;
 
@@ -138,6 +182,7 @@ Scheduler.prototype.execute = function Scheduler__execute( xml )
         var ok = dom_document.loadXML( this._xml_http.responseText );
         if( !ok )  throw new Error( "Fehlerhafte XML-Antwort: " + dom_document.parseError.reason );
     }
+    this._time_log.log( "DOM" );
 
     var error_element = dom_document.selectSingleNode( "spooler/answer/ERROR" );
     if( error_element )
@@ -145,8 +190,9 @@ Scheduler.prototype.execute = function Scheduler__execute( xml )
         throw new Error( error_element.getAttribute( "text" ) );
     }
 
-    this.modify_datetime_for_xslt( dom_document );
 
+    this.modify_datetime_for_xslt( dom_document );
+    
     return dom_document;
 }
 
@@ -157,29 +203,37 @@ Scheduler.prototype.call_http = function( text, debug_text )
     this._xml_http.open( "POST", this._url, false );
     this._xml_http.setRequestHeader( "Cache-Control", "no-cache" );
 
-    var status = window.status;
-    window.status = "Waiting for response from scheduler ...";//text;
 
-    try
+    if( debug )
     {
         this._xml_http.send( text );
     }
-    catch( x )
+    else
     {
-        if(1)
-        //if( x.number == DE_E_CANNOT_CONNECT
-        // || x.number == DE_E_DATA_NOT_AVAILABLE
-        // || x.number == DE_E_RESOURCE_NOT_FOUND )
+        var status = window.status;
+        window.status = text + "    Waiting for response from scheduler ...";
+    
+        try
         {
-            x.message = "No connection to Scheduler\n" +
-                        ( x.number? "0x" + hex_string( x.number, 8 ) + ": " : "" ) + x.message;
+            this._xml_http.send( text );
         }
+        catch( x )
+        {
+            if(1)
+            //if( x.number == DE_E_CANNOT_CONNECT
+            // || x.number == DE_E_DATA_NOT_AVAILABLE
+            // || x.number == DE_E_RESOURCE_NOT_FOUND )
+            {
+                x.message = "No connection to Scheduler\n" +
+                            ( x.number? "0x" + hex_string( x.number, 8 ) + ": " : "" ) + x.message;
+            }
 
-        throw x;
-    }
-    finally
-    {
-        window.status = status;
+            throw x;
+        }
+        finally
+        {
+            window.status = status;
+        }
     }
 }
 
@@ -233,12 +287,19 @@ Scheduler.prototype.modify_datetime_for_xslt = function( response )
     this.add_datetime_attributes_for_xslt( response, now, "wait_until"            );
     this.add_datetime_attributes_for_xslt( response, now, "resume_at"             );
   //this.add_datetime_attributes_for_xslt( response, now, "last_write_time"       );  ist GMT
+  
+    this._time_log.log( "modify_datetime_for_xslt" );
 }
 
 //---------------------------------------------------------------------Scheduler.call_error_checked
 
 Scheduler.prototype.call_error_checked = function( method_name, arg1, arg2, arg3, arg4, arg5 )
 {
+    if( debug )
+    {
+        this[ method_name ]( arg1, arg2, arg3, arg4, arg5 );
+    }
+    else
     try
     {
         this[ method_name ]( arg1, arg2, arg3, arg4, arg5 );
@@ -279,14 +340,20 @@ function Stylesheet( url )
 
 Stylesheet.prototype.xml_transform = function( dom_document )
 {
+    var result;
+    
     if( this._xslt_processor )
     {
-        return new XMLSerializer().serializeToString( this._xslt_processor.transformToDocument( dom_document ) );
+        result = new XMLSerializer().serializeToString( this._xslt_processor.transformToDocument( dom_document ) );
     }
     else
     {
-        return dom_document.transformNode( this._xslt_dom );
+        result = dom_document.transformNode( this._xslt_dom );
     }
+
+    _scheduler._time_log.log( "XSLT" );    
+    
+    return result;
 }
 
 //---------------------------------------------------------------------xslt_format_datetime
@@ -447,6 +514,13 @@ function Scheduler_html_configuration( url )
 
 function call_error_checked( f, arg1, arg2, arg3, arg4, arg5 )
 {
+    _scheduler._time_log = new Time_log;
+
+    if( debug )
+    {
+        f( arg1, arg2, arg3, arg4, arg5 );
+    }
+    else
     try
     {
         f( arg1, arg2, arg3, arg4, arg5 );
@@ -455,6 +529,8 @@ function call_error_checked( f, arg1, arg2, arg3, arg4, arg5 )
     {
         return handle_exception( x );
     }
+
+    if( is_logging_times )  window.status = _scheduler._time_log.get_line();
 }
 
 //---------------------------------------------------------------------------------handle_exception
@@ -485,7 +561,7 @@ function handle_exception( x )
         if( typeof x == "object"  &&  x.stack )  e.style.title = x.stack;  // Firefox?
     }
     else
-        alert( msg );
+        alert( "Scheduler: " + msg );
 
     return error;
 }
@@ -554,6 +630,8 @@ function modify_response( response )
         spooler_element.setAttribute( "my_url_base"      , document.location.href    .replace( /\/[^\/]*$/, "/" ) );   // Alles bis zum letzten Schräger
         spooler_element.setAttribute( "my_url_path_base" , document.location.pathname.replace( /\/[^\/]*$/, "/" ) );   // Pfad bis zum letzten Schräger
     }
+
+    _scheduler._time_log.log( "modify_response" );
 }
 
 //------------------------------------------------------------------------------save_checkbox_state

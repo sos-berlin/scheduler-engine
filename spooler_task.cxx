@@ -768,6 +768,14 @@ void Task::set_history_field( const string& name, const Variant& value )
     _history.set_extra_field( name, value );
 }
 
+//------------------------------------------------------------------Task::set_delay_spooler_process
+
+void Task::set_delay_spooler_process( Time t )
+{ 
+    _log->debug("delay_spooler_process=" + t.as_string() ); 
+    _next_spooler_process = Time::now() + t; 
+}
+
 //------------------------------------------------------------------------------Task::set_next_time
 
 void Task::set_next_time( const Time& next_time )
@@ -788,8 +796,16 @@ void Task::calculate_next_time_after_modified_order_queue()
 
 Time Task::next_time()
 {
+    // Besser, ein neues _next_time wird an der Stelle gesetzt, wo das Ereignis auftritt //
+
+
     Time result;
 
+    if( _kill_immediately  &&  !_kill_tried )
+    {
+        result = Time(0);
+    }
+    else
     if( _operation )
     {
         result = _operation->async_finished()? Time(0) :                                    // Falls Operation synchron ist (das ist, wenn Task nicht in einem separaten Prozess läuft)
@@ -799,6 +815,7 @@ Time Task::next_time()
     else
     {
         result = _next_time;
+        if( _state == s_running_delayed  &&  result > _next_spooler_process )  result = _next_spooler_process;
     }
 
     if( result > _subprocess_timeout )  result = _subprocess_timeout;

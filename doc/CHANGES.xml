@@ -11,10 +11,13 @@
     <scheduler_keyword keyword="Change log"/>
 
 
-    <change date="2007-01-05" version="2.0.162" subversion_revision="4705">
+    <change date="2007-01-12" version="2.0.162" subversion_revision="4730">
         <revision type="new" title="Cluster: Backup-Scheduler und verteilte Aufträge (noch nicht für Produktion)">
             <description>
                 <ul>
+                    <li>
+                        <scheduler_a href="backupscheduler.xml" quote="yes"/>
+                    </li>
                     <li>
                         <scheduler_option name="exclusive"/>
                     </li>
@@ -37,7 +40,7 @@
                         <scheduler_element name="terminate" attribute="timeout"/>
                     </li>
                     <li>
-                        <scheduler_element name="terminate" attribute="shutdown"/>
+                        <scheduler_element name="terminate" attribute="continue_exclusive_operation"/>
                     </li>
                     <li>
                         <scheduler_element name="terminate" attribute="all_schedulers"/>

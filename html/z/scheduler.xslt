@@ -677,7 +677,7 @@
         <xsl:variable name="max_orders">
             <xsl:choose>
                 <xsl:when test="$single">
-                    <xsl:text>30</xsl:text>
+                    <xsl:text>9999</xsl:text>
                 </xsl:when>
                 <xsl:otherwise>
                     <xsl:value-of select="/spooler/@my_max_orders"/>
@@ -904,7 +904,22 @@
                             </xsl:if>
 
                             <xsl:if test="( /spooler/@show_job_chain_orders_checkbox or $single ) and files/file">
-                                <xsl:for-each select="files/file">
+                                <xsl:variable name="limited_files" select="files/file[ position() &lt;= $max_orders ]"/>
+                                <xsl:if test="files/@count > count( $limited_files )">
+                                    <xsl:variable name="remaining" select="files/@count - count( $limited_files )"/>
+                                    <tr>
+                                        <td> </td>
+                                        <td colspan="99">
+                                            <span style="font-size: 8pt">
+                                                <xsl:text>(</xsl:text>
+                                                <xsl:value-of select="$remaining"/>
+                                                <xsl:text> more files)</xsl:text>
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </xsl:if>
+                                <xsl:for-each select="$limited_files">
+                                    <xsl:sort select="-position()" data-type="number"/>
                                     <tr>
                                         <td style="padding-left: 2ex"> </td>
                                         <td colspan="3">
@@ -1200,7 +1215,7 @@
         <xsl:param name="max_orders" select="100"/>
         <xsl:param name="orders"/>
 
-        <xsl:param name="limited_orders" select="$orders" /> <!--[ position() &lt;= $max_orders ]"/-->
+        <xsl:param name="limited_orders" select="$orders[ position() &lt;= $max_orders ]"/>
 
         <xsl:if test="@length > count( $limited_orders )">
             <xsl:variable name="remaining" select="@length - count( $limited_orders )"/>
@@ -1218,7 +1233,7 @@
             <col valign="top" align="right"/>
             
             <xsl:for-each select="$limited_orders">
-                <xsl:sort select="position()" order="descending"/>
+                <xsl:sort select="-position()" data-type="number"/>
 
                 <!--tr class="order">
                     <td colspan="2"></td>
@@ -1438,7 +1453,7 @@
                     <xsl:for-each select="processes/process">
                         <tr>
                             <td style="padding-left: 2ex"><xsl:value-of select="@pid"/></td>
-                            <td><xsl:value-of select="@job"/><xsl:text>&#160;&#160;</xsl:text><xsl:value-of select="@task_id"/></td>
+                            <td class="task"><xsl:value-of select="@job"/><xsl:text>:</xsl:text><xsl:value-of select="@task_id"/></td>
                             <td style="white-space: nowrap"><xsl:value-of select="@running_since__xslt_datetime_with_diff" disable-output-escaping="yes"/></td>
                             <td class="small"><xsl:value-of select="@operations"/></td>
                             <td class="small"><xsl:value-of select="@callbacks"/></td>
@@ -1519,7 +1534,7 @@
             <tbody>
                 <xsl:apply-templates select="cluster_member">
                     <xsl:sort select="@http_url"/>
-                    <xsl:sort select="@dead"/>
+                    <xsl:sort select="@dead" data-type="number"/>
                     <xsl:sort select="@heart_beat_count = 0"/>
                 </xsl:apply-templates>
             </tbody>

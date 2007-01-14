@@ -108,6 +108,40 @@ void Task_subsystem::remove_ended_tasks()
         }
 
         _task_closed = false;
+
+
+#       if defined Z_DEBUG && defined Z_WINDOWS
+        // Könnte eine hübsche Klasse werden.
+        if( _spooler->_check_memory_leak )
+        {
+            static bool         first = true;
+            static _CrtMemState memory_state;
+
+            if( !_spooler->has_any_task()  &&  !_spooler->has_any_order() )     // Scheduler im Leerlauf?
+            {
+                if( first ) 
+                {
+                    first = false;
+                    _CrtMemCheckpoint( &memory_state );
+                }
+                else
+                {
+                    Z_LOGI2( "scheduler", "Checking for memory leak\n" );
+                    _CrtMemState new_memory_state;
+                    _CrtMemState memory_state_difference;
+
+                    _CrtMemCheckpoint( &new_memory_state );
+                    int are_significantly_different = _CrtMemDifference( &memory_state_difference, &memory_state, &new_memory_state );
+                    if( are_significantly_different )
+                    {
+                        _CrtMemDumpStatistics( &memory_state_difference );
+                        _CrtMemDumpAllObjectsSince( &memory_state );
+                        _CrtMemCheckpoint( &memory_state );
+                    }
+                }
+            }
+        }
+#       endif
     }
 }
 

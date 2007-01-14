@@ -402,6 +402,7 @@ struct Spooler : Object,
     Order_subsystem*            order_subsystem             ();
     Task_subsystem*             task_subsystem              ()                                  { return _task_subsystem; }
     bool                        has_any_order               ();
+    bool                        has_any_task                ();
 
   private:
     Fill_zero                  _zero_;
@@ -607,6 +608,7 @@ struct Spooler : Object,
     int                        _is_in_check_is_active;
     bool                       _has_windows_console;
   //string                     _session_id;
+    bool                       _check_memory_leak;
 };
 
 //-------------------------------------------------------------------------------------------------
