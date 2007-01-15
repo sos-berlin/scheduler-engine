@@ -200,14 +200,15 @@
         <command_option name="exclusive" title="Startet den Scheduler für die exklusive Ausführung">
             <description>
                 <p>
-                    Voraussetzung ist Datenbankbetrieb 
-                    (<scheduler_ini_entry file="factory.ini" section="spooler" entry="db"/>).
+                    Voraussetzung ist Datenbankbetrieb, siehe <scheduler_ini_entry file="factory.ini" section="spooler" entry="db"/>.
+                </p>
+                <p>
                     Mehrere Scheduler mit derselben Scheduler-Id (<scheduler_option name="id"/>) und derselben Datenbank
-                    können mit <code>-exclusive</code> gestartet werden, wobei nur einer den Betrieb übernimmt.
-                    Erst wenn dieser ausfällt oder einzeln beendet wird 
+                    können mit <code>-exclusive</code> gestartet werden, wobei nur einer aktiv wird.
+                    Erst wenn der aktive Scheduler ausfällt oder einzeln beendet wird 
                     (<scheduler_element name="terminate" attribute="continue_exclusive_operation" value="yes"/>),
-                    übernimmt ein anderer Scheduler den Betrieb.
-                    Die Übernahme dauert etwa eine Minute.
+                    wird ein anderer Scheduler aktiv.
+                    Die Übernahme kann einige Minuten dauern.
                 </p>
                 <p>
                     Vorsicht: 
@@ -283,6 +284,10 @@
                     führt <code>-backup</code> zu einem eigenen Dienstenamen,
                     so dass der Backup-Scheduler als eigener Dienst auf demselben Rechner installiert werden kann.
                 </p>
+                <p>
+                    Der Dateiname des <scheduler_a href="protokolle.xml">Hauptprotokolls</scheduler_a>
+                    bekommt den Zusatz "<code>_backup</code>".
+                </p>
             </description>
         </command_option>
 
@@ -290,16 +295,15 @@
         <command_option name="backup-precedence" type="integer" initial="0" title="Vorrang unter den Backup-Schedulern">
             <description>
                 <p>
-                    Nur mit <scheduler_option name="backup"/> möglich.
+                    Nur mit <scheduler_option name="exclusive"/> möglich.
                 </p>
                 <p>
-                    Wenn mehrere Backup-Scheduler einen ausgefallenen Scheduler 
-                    (<scheduler_option name="exclusive"/>)
+                    Wenn mehrere inaktive (Backup-)Scheduler einen ausgefallenen Scheduler 
                     ersetzen können, 
-                    übernimmt der mit dem höchsten Wert von <scheduler_option name="backup-precedence"/>.
+                    übernimmt der mit dem kleinsten Wert von <scheduler_option name="backup-precedence"/>.
                 </p>
                 <p>
-                    Wenn die Uhren nicht gleichlaufen, kann ein anderer Scheduler als der mit dem höchsten Rang den Betrieb übernehmen.
+                    Wenn die Uhren nicht gleichlaufen, kann ein anderer Scheduler als der mit dem vorderen Rang den Betrieb übernehmen.
                 </p>
             </description>
         </command_option>

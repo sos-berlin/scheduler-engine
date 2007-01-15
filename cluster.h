@@ -125,7 +125,7 @@ struct Cluster : Async_operation, Scheduler_object
     string                     _continue_exclusive_operation;
 
     time_t                     _next_heart_beat;
-    time_t                     _db_last_heart_beat;
+    volatile time_t            _db_last_heart_beat;         // Heart_beat_watchdog_thread liest das
     time_t                     _db_next_heart_beat;
     time_t                     _late_heart_beat;
     time_t                     _recommended_next_deadline_check_time;

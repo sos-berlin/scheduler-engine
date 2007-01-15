@@ -21,8 +21,8 @@ namespace cluster {
 //const time_t                    warned_clock_difference         = Z_NDEBUG_DEBUG(  1,  1 ); 
 const int                       heart_beat_period                       = Z_NDEBUG_DEBUG( 60, 20 );
 const int                       max_processing_time                     = Z_NDEBUG_DEBUG(  5,  3 );     // Zeit, die gebraucht wird, um den Herzschlag auszuführen
-const int                       max_processing_time_2                   = Z_NDEBUG_DEBUG( 30, 10 );     // Nachfrist, inkl. außergewöhnlicher Verzögerungen (gestrichen: zzgl. Database::lock_timeout)
-const int                       max_processing_time_2_short             = max_processing_time_2 - 10;   // Zur eigenen Prüfung
+const int                       max_processing_time_2                   = Z_NDEBUG_DEBUG( 60, 10 );     // Nachfrist, inkl. außergewöhnlicher Verzögerungen (gestrichen: zzgl. Database::lock_timeout)
+const int                       max_processing_time_2_short             = max_processing_time_2 - 5;    // Zur eigenen Prüfung
 const int                       active_heart_beat_minimum_check_period  = heart_beat_period / 2;
 const int                       active_heart_beat_check_period          = heart_beat_period + max_processing_time + 2;
 //const int                       trauerfrist                             = 12*3600;                      // Trauerzeit, nach der Mitgliedssätze gelöscht werden
@@ -46,6 +46,8 @@ struct Heart_beat_watchdog_thread : Thread, Scheduler_object
     int                         thread_main                 ();
     void                        sleep                       ( int seconds );
     void                        kill                        ();
+
+    string                      obj_name                    () const                                { return Scheduler_object::obj_name(); }
 
     Fill_zero                  _zero_;
     bool                       _kill;
@@ -206,6 +208,7 @@ Heart_beat_watchdog_thread::Heart_beat_watchdog_thread( Cluster* d )
     _zero_(this+1),
     _cluster(d)
 {
+    set_thread_name( obj_name() );
 }
 
 //----------------------------------------------------------Heart_beat_watchdog_thread::thread_main
@@ -2023,6 +2026,13 @@ bool Cluster::mark_as_exclusive()
         {
             update.and_where_condition( "last_heart_beat", _exclusive_scheduler->_db_last_heart_beat );
             update.and_where_condition( "next_heart_beat", _exclusive_scheduler->_db_next_heart_beat );
+
+            if( !_exclusive_scheduler->_is_db_dead )
+            {
+                update[ "dead" ] = 1;  int DEAD_TESTEN;
+            }
+
+            _log->warn( message_string( "SCHEDULER-836" ) );        // "Deactivating dead Scheduler"
         }
 
         ok = ta.try_execute_single( update, __FUNCTION__ );
@@ -2036,7 +2046,7 @@ bool Cluster::mark_as_exclusive()
             update[ "last_heart_beat" ] = new_db_last_heart_beat;
             update[ "next_heart_beat" ] = new_db_next_heart_beat;
             update.and_where_condition( "member_id", my_member_id() );
-            update.and_where_condition( "exclusive"          , sql::null_value );
+            update.and_where_condition( "exclusive", sql::null_value );
             update.add_where( S() << " and `active`" << ( _is_active? " is not null" : " is null" ) );
 
             ok = ta.try_execute_single( update, __FUNCTION__ );
@@ -2236,36 +2246,6 @@ void Cluster::insert_member_record()
     }
     catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_clusters_tablename, x ), __FUNCTION__ ); }
 }
-
-//--------------------------------------------------------------------------Cluster::mark_as_active
-
-//void Cluster::mark_as_active()
-//{
-//    Z_LOGI2( "scheduler.cluster", __FUNCTION__ << "\n" );
-//    assert( !_is_active );
-//
-//    _log->debug( message_string( "SCHEDULER-819" ) );   // "Scheduler becomes active"
-//
-//    for( Retry_transaction ta ( db() ); ta.enter_loop(); ta++ ) try
-//    {
-//        Transaction ta ( db() );
-//
-//        sql::Update_stmt update ( ta.database_descriptor(), _spooler->_clusters_tablename );
-//    
-//        update[ "active"          ] = 1;
-//        update.and_where_condition( "member_id"      , _cluster->my_member_id() );
-//        update.and_where_condition( "active"         , sql::null_value );
-//        update.and_where_condition( "exclusive"       , sql::null_value );
-//        update.and_where_condition( "last_heart_beat"    , _db_last_heart_beat );
-//        update.and_where_condition( "next_heart_beat"    , _db_next_heart_beat );
-//
-//        ta.execute_single( update, __FUNCTION__ );
-//        ta.commit( __FUNCTION__ );
-//    }
-//    catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_clusters_tablename, x ) ); }
-//
-//    _is_active = true;
-//}
 
 //-----------------------------------------------------------------------Cluster::async_state_text_
 

@@ -3030,7 +3030,7 @@ void Spooler::run_check_ctrl_c()
             {
                 string m = message_string( "SCHEDULER-263", signal_text, ctrl_c_pressed, "Stopping Scheduler" ); 
                 _log->warn( m );
-                if( !_log_to_stdout )  cout << m << endl;
+                if( !_log_to_stdout &&  !is_daemon )  cerr << m << endl;
 
                 if( _state != s_stopping )
                 {
@@ -3046,7 +3046,7 @@ void Spooler::run_check_ctrl_c()
             {
                 string m = message_string( "SCHEDULER-263", signal_text, ctrl_c_pressed, "Killing all processes" );
                 _log->warn( m );
-                if( !_log_to_stdout )  cout << m << endl;
+                if( !_log_to_stdout && !is_daemon )  cerr << m << endl;
 
                 kill_all_processes();
                 set_ctrl_c_handler( true );
@@ -3058,7 +3058,7 @@ void Spooler::run_check_ctrl_c()
             {
                 string m = message_string( "SCHEDULER-263", signal_text, ctrl_c_pressed, "ABORTING IMMEDIATELY" );
                 _log->warn( m );
-                if( !_log_to_stdout )  cout << m << endl;
+                if( !_log_to_stdout && !is_daemon )  cerr << m << endl;
 
                 abort_now();
             }
