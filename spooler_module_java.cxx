@@ -287,15 +287,17 @@ void Java_module_instance::init_java_vm( java::Vm* java_vm )
 
   //make_path( _java_vm->work_dir() );       // Java-VM prüft Vorhandensein der Verzeichnisse in classpath schon beim Start
 
-    Env e = java_vm->env();
+    {
+        Env e = java_vm->env();
+        Local_frame local_frame ( e, 10 );
 
-    //_idispatch_jclass = e->FindClass( JAVA_IDISPATCH_CLASS );
-    Class idispatch_class ( java_vm, JAVA_IDISPATCH_CLASS );
-    if( e->ExceptionCheck() )  e.throw_java( "FindClass " JAVA_IDISPATCH_CLASS );
+        //_idispatch_jclass = e->FindClass( JAVA_IDISPATCH_CLASS );
+        Class idispatch_class ( java_vm, JAVA_IDISPATCH_CLASS );
+        if( e->ExceptionCheck() )  e.throw_java( "FindClass " JAVA_IDISPATCH_CLASS );
 
-    int ret = e->RegisterNatives( idispatch_class, native_methods, NO_OF( native_methods ) );
-    if( ret < 0 )  throw_java_ret( ret, "RegisterNatives" );
-
+        int ret = e->RegisterNatives( idispatch_class, native_methods, NO_OF( native_methods ) );
+        if( ret < 0 )  throw_java_ret( ret, "RegisterNatives" );
+    }
 
 #   ifdef SCHEDULER_WITH_HOSTJAVA
         Z_LOG2( "scheduler", "init_hostjava()\n" );
@@ -330,6 +332,9 @@ void Java_module_instance::close__end()  // Synchron
 void Java_module_instance::init()
 {
     Env e = env();
+    Local_frame local_frame ( e, 10 );
+    Java_idispatch_stack_frame stack_frame;
+
 
     Module_instance::init();
 
@@ -383,6 +388,8 @@ void Java_module_instance::check_api_version()
 {
     /* Das muss auch für Monitor_impl realisiert werden. Besser auf statische Klassenmethode zurückgreifen (sos.spooler.Spooler_constants). 
 
+    Local_frame local_frame ( jenv(), 10 );
+
     string java_api_version;
 
     try
@@ -413,6 +420,8 @@ void Java_module_instance::check_api_version()
 void Java_module_instance::add_obj( IDispatch* object, const string& name )
 {
     Env e = env();
+    Local_frame local_frame ( e, 10 );
+
 
     string java_class_name = "sos/spooler/" + replace_regex_ext( name, "^(spooler_)?(.*)$", "\\u\\2" );    // "spooler_task" -> "sos.spooler.Task"
 
@@ -449,9 +458,12 @@ bool Java_module_instance::load()
 Variant Java_module_instance::call( const string& name_par )
 {
     Env    e = env();
-    Java_idispatch_stack_frame stack_frame;
     bool   is_optional = false;
     string name = name_par;
+
+    Local_frame local_frame ( e, 10 );
+    Java_idispatch_stack_frame stack_frame;
+
 
     if( name[0] == '?' )  is_optional = true,  name.erase( 0, 1 );
 
@@ -492,6 +504,7 @@ Variant Java_module_instance::call( const string& name_par )
 Variant Java_module_instance::call( const string& name, bool param )
 {
     Env e = env();
+    Local_frame local_frame ( e, 10 );
     Java_idispatch_stack_frame stack_frame;
 
     jmethodID method_id = _module->java_method_id( name );

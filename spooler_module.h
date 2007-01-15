@@ -155,7 +155,7 @@ struct Module : Object
     bool                       _recompile;                  // <script recompile="..">    Immer kompilieren
     bool                       _compiled;
 
-    jclass                     _java_class;
+    java::global_jobject<jclass> _java_class;
     typedef map<string,jmethodID>  Method_map;
     Method_map                 _method_map;
 

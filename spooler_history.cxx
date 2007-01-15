@@ -2028,19 +2028,6 @@ void Task_history::write( bool start )
                         insert.set_datetime( "start_time", start_time );
 
                         ta.execute( insert, __FUNCTION__ );
-                        /*
-                        Record record = _spooler->_db->_history_table.create_record();
-
-                        record.set_field( "id"             , _task->_id );
-                        record.set_field( "spooler_id"     , _spooler->id_for_db() );
-                        record.set_field( "job_name"       , _task->job()->name() );
-                        record.set_field( "start_time"     , start_time );
-                        record.set_field( "cause"          , start_cause_name( _task->_cause ) );
-
-                        //if( !parameters.empty()  &&  parameters.length() < blob_field_size )  record.set_field( "parameters", parameters ), parameters = "";
-
-                        _spooler->_db->_history_table.insert( record );
-                        */
 
                         if( !parameters.empty() )
                         {
@@ -2051,15 +2038,6 @@ void Task_history::write( bool start )
                     }
                     else
                     {
-        /*
-                        _spooler->_db->_history_update_params[1] = Time::now().as_string(Time::without_ms);
-                        _spooler->_db->_history_update_params[2] = _task->_step_count;
-                        _spooler->_db->_history_update_params[3] = _job->has_error()? 1 : 0;
-                        _spooler->_db->_history_update_params[4] = _job->_error.code();
-                        _spooler->_db->_history_update_params[5] = _job->_error.what().substr( 0, 250 );
-                        _spooler->_db->_history_update_params[6] = _task->_id;
-                        _spooler->_db->_history_update.execute();
-        */
                         string stmt = "UPDATE " + _spooler->_job_history_tablename + "  set ";
                         stmt +=   "\"START_TIME\"={ts'" + start_time + "'}";
                         stmt += ", \"END_TIME\"={ts'" + Time::now().as_string(Time::without_ms) + "'}";
