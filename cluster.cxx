@@ -2030,9 +2030,8 @@ bool Cluster::mark_as_exclusive()
             if( !_exclusive_scheduler->_is_db_dead )
             {
                 update[ "dead" ] = 1;  int DEAD_TESTEN;
+                _log->warn( message_string( "SCHEDULER-836" ) );        // "Deactivating dead Scheduler"
             }
-
-            _log->warn( message_string( "SCHEDULER-836" ) );        // "Deactivating dead Scheduler"
         }
 
         ok = ta.try_execute_single( update, __FUNCTION__ );
@@ -2460,7 +2459,7 @@ bool Cluster::is_member_allowed_to_start()
 {
     bool result = true;
 
-    if( Cluster_member* empty_record = empty_member_record() )
+    if( empty_member_record() )  //Cluster_member* empty_record = 
     {
         result = true;
         //Noch nicht realisiert:  result = empty_record->_http_url == ""  ||  empty_record->_http_url == _spooler->http_url();

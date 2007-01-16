@@ -484,13 +484,6 @@ struct Internal_priority
 
 struct Order_queue : Com_order_queue
 {
-    enum Do_log
-    {
-        dont_log = false,
-        do_log   = true
-    };
-
-
     Z_GNU_ONLY(                 Order_queue             ();  )                                      // Für gcc 3.2. Nicht implementiert
                                 Order_queue             ( Job*, Prefix_log* );
                                ~Order_queue             ();

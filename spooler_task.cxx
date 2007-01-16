@@ -1706,7 +1706,7 @@ void Task::finish()
 
     if( _order )    // Auftrag nicht verarbeitet? spooler_process() nicht ausgeführt, z.B. weil spooler_init() oder spooler_open() false geliefert haben.
     {
-        if( !has_error() )  set_error( Xc( "SCHEDULER-226" ) );
+        if( !has_error()  &&  _spooler->state() != Spooler::s_stopping )  set_error( Xc( "SCHEDULER-226" ) );
         remove_order_after_error();  // Nur rufen, wenn der Job stoppt oder verzögert wird! (has_error() == true) Sonst wird der Job wieder und wieder gestartet.
     }
 

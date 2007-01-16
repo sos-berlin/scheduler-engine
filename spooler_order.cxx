@@ -1852,8 +1852,12 @@ void Order_queue::add_order( Order* order, Do_log do_log )
     {
         if( !order->_suspended )
         {
-            if( order->_setback < Time::never )  order->_log->log( do_log? log_info : log_debug3, message_string( "SCHEDULER-938", order->_setback ) );
-                                           else  order->_log->log( do_log? log_warn : log_debug3, message_string( "SCHEDULER-296" ) );       // "Die <run_time> des Auftrags hat keine nächste Startzeit" );
+            if( order->_setback < Time::never )  
+            {
+                if( order->_setback )  order->_log->log( do_log? log_info : log_debug3, message_string( "SCHEDULER-938", order->_setback ) );
+            }
+            else  
+                order->_log->log( do_log? log_warn : log_debug3, message_string( "SCHEDULER-296" ) );       // "Die <run_time> des Auftrags hat keine nächste Startzeit" );
         }
     }
     else
@@ -2173,7 +2177,7 @@ Order* Order_queue::load_and_occupy_next_distributed_order_from_database( Task* 
                         Read_transaction ta ( _spooler->db() );
                         order->load_blobs( &ta );
                     }
-                    catch( exception& ) { order = NULL; }     // Jemand hat wohl den Datensatz gelöscht
+                    catch( exception& ) { order->close(); order = NULL; }     // Jemand hat wohl den Datensatz gelöscht
             
                     if( order )
                     {
@@ -3876,8 +3880,11 @@ void Order::remove_from_job_chain()
 
     if( _job_chain_name != "" )
     {
-        _log->info( _task? message_string( "SCHEDULER-941", _task->obj_name() ) 
-                         : message_string( "SCHEDULER-940" ) );
+        if( _job_chain || _is_in_database )     // Nur Protokollieren, wenn wirklich etwas entfernt wird, aus Jobkette im Speicher oder Datenbank (_is_distributed)
+        {
+            _log->info( _task? message_string( "SCHEDULER-941", _task->obj_name() ) 
+                             : message_string( "SCHEDULER-940" ) );
+        }
 
         if( _is_in_database )  db_delete( update_and_release_occupation );
     }

@@ -57,10 +57,10 @@ JNIEXPORT void JNICALL Java_sos_spooler_Spooler_1program_construct( JNIEnv* jenv
 {
     try
     {
-        int ret = sos::spooler_main( NULL, NULL, string_from_jstring( jenv, parameters_jstr ) );
+        int ret = sos::spooler_main( NULL, NULL, Env(jenv).string_from_jstring( parameters_jstr ) );
     }
-    catch( const exception&  ) {} //set_java_exception( jenv, x ); }
-    catch( const _com_error& ) {} //set_java_exception( jenv, x ); }
+    catch( const exception&  ) {} //env.set_java_exception(, x ); }
+    catch( const _com_error& ) {} //env.set_java_exception(, x ); }
 }
 
 //--------------------------------------------------------sos.spooler.Spooler_program.construct_argv
@@ -69,6 +69,7 @@ JNIEXPORT void JNICALL Java_sos_spooler_Spooler_1program_construct_1argv( JNIEnv
 {
     char** argv = NULL;
     int    argc = 0;
+    Env    env  = jenv;
 
     try
     {
@@ -79,7 +80,7 @@ JNIEXPORT void JNICALL Java_sos_spooler_Spooler_1program_construct_1argv( JNIEnv
         for( int i = 0; i < count; i++ )
         {
             jobject jparam = jenv->GetObjectArrayElement( jparams, i );
-            string arg = string_from_jstring( jenv, (jstring)jparam );
+            string arg = env.string_from_jstring( (jstring)jparam );
             argv[i] = new char[ arg.length() + 1 ];
             strcpy( argv[i], arg.c_str() );
           //fprintf(stderr,"%d: %s\n", i, argv[i]);
@@ -88,8 +89,8 @@ JNIEXPORT void JNICALL Java_sos_spooler_Spooler_1program_construct_1argv( JNIEnv
 
         int ret = sos::spooler_main( argc, argv, "" );
     }
-    catch( const exception&  ) {} //set_java_exception( jenv, x ); }
-    catch( const _com_error& ) {} //set_java_exception( jenv, x ); }
+    catch( const exception&  ) {} //env.set_java_exception(, x ); }
+    catch( const _com_error& ) {} //env.set_java_exception(, x ); }
 
     for( int i = 0; i < argc; i++ )  delete argv[i];
     delete[] argv;

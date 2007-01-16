@@ -73,12 +73,12 @@ struct Java_idispatch : Java_object
 //-----------------------------------------------------------------------------Java_module_instance
 // Für Java-Objekte
 
-struct Java_module_instance : Module_instance, java::Has_vm
+struct Java_module_instance : Module_instance
 {
     static void                 init_java_vm                ( java::Vm* );
 
 
-                                Java_module_instance        ( java::Vm*, Module* );
+                                Java_module_instance        ( Module* );
                                ~Java_module_instance        ()                                      { close__end(); }
 
     void                        close__end                  ();

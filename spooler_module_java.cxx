@@ -57,8 +57,10 @@ static zschimmer::Thread_data<Java_thread_data> thread_data;
 
 //-----------------------------------------------------------------------------jobject_from_variant
 
-static jobject jobject_from_variant( JNIEnv* jenv, const VARIANT& v, Java_idispatch_container* java_idispatch_container )
+static jobject scheduler_jobject_from_variant( JNIEnv* jenv, const VARIANT& v, Java_idispatch_container* java_idispatch_container )
 {
+    Com_env env = jenv;
+
     if( v.vt == VT_EMPTY )
     {
         return jenv->NewString( NULL, 0 );       // Für Job_chain_node.next_state, .error_state ("" wird zu VT_EMPTY)
@@ -70,7 +72,7 @@ static jobject jobject_from_variant( JNIEnv* jenv, const VARIANT& v, Java_idispa
     }
     else
     {
-        return z::java::jobject_from_variant( jenv, v, java_idispatch_container );
+        return env.jobject_from_variant( v, java_idispatch_container );
     }
 }
 
@@ -80,12 +82,14 @@ extern "C"
 //JNIEXPORT
 jobject JNICALL Java_sos_spooler_Idispatch_com_1call( JNIEnv* jenv, jclass cls, jlong jidispatch, jstring jname, jobjectArray jparams )
 {
+    Com_env env = jenv;
+
     try
     {
-        return sos::scheduler::jobject_from_variant( jenv, variant_java_com_call( jenv, cls, jidispatch, jname, jparams ), &thread_data->_idispatch_container );
+        return scheduler_jobject_from_variant( jenv, env.variant_java_com_call( cls, jidispatch, jname, jparams ), &thread_data->_idispatch_container );
     }
-    catch( const exception&  x ) { set_java_exception( jenv, x ); }
-    catch( const _com_error& x ) { set_java_exception( jenv, x ); }
+    catch( const exception&  x ) { env.set_java_exception( x ); }
+    catch( const _com_error& x ) { env.set_java_exception( x ); }
 
     return NULL;
 }
@@ -183,8 +187,8 @@ bool Module::make_java_class( bool force )
 
 jmethodID Module::java_method_id( const string& name )
 {
-    JNIEnv*   env = _java_vm->jenv();
-    jmethodID method_id;
+    Env         env;
+    jmethodID   method_id;
 
     Method_map::iterator it = _method_map.find( name );
     if( it == _method_map.end() )  
@@ -288,14 +292,14 @@ void Java_module_instance::init_java_vm( java::Vm* java_vm )
   //make_path( _java_vm->work_dir() );       // Java-VM prüft Vorhandensein der Verzeichnisse in classpath schon beim Start
 
     {
-        Env e = java_vm->env();
-        Local_frame local_frame ( e, 10 );
+        Env env = java_vm->jni_env();
+        Local_frame local_frame ( 10 );
 
-        //_idispatch_jclass = e->FindClass( JAVA_IDISPATCH_CLASS );
-        Class idispatch_class ( java_vm, JAVA_IDISPATCH_CLASS );
-        if( e->ExceptionCheck() )  e.throw_java( "FindClass " JAVA_IDISPATCH_CLASS );
+        //_idispatch_jclass = env->FindClass( JAVA_IDISPATCH_CLASS );
+        Class idispatch_class ( JAVA_IDISPATCH_CLASS );
+        if( env->ExceptionCheck() )  env.throw_java( "FindClass " JAVA_IDISPATCH_CLASS );
 
-        int ret = e->RegisterNatives( idispatch_class, native_methods, NO_OF( native_methods ) );
+        int ret = env->RegisterNatives( idispatch_class, native_methods, NO_OF( native_methods ) );
         if( ret < 0 )  throw_java_ret( ret, "RegisterNatives" );
     }
 
@@ -307,12 +311,10 @@ void Java_module_instance::init_java_vm( java::Vm* java_vm )
 
 //-------------------------------------------------------Java_module_instance::Java_module_instance
 
-Java_module_instance::Java_module_instance( Vm* vm, Module* module )
+Java_module_instance::Java_module_instance( Module* module )
 : 
     Module_instance(module),
-    Has_vm(vm),
-    _zero_(_end_), 
-    _jobject( _java_vm ) 
+    _zero_(_end_)
 {
 }
 
@@ -331,8 +333,8 @@ void Java_module_instance::close__end()  // Synchron
 
 void Java_module_instance::init()
 {
-    Env e = env();
-    Local_frame local_frame ( e, 10 );
+    Env         env;
+    Local_frame local_frame ( 10 );
     Java_idispatch_stack_frame stack_frame;
 
 
@@ -351,26 +353,26 @@ void Java_module_instance::init()
             {
                 try 
                 {
-                    _module->_java_class = e.find_class( class_name.c_str() );
+                    _module->_java_class = env.find_class( class_name.c_str() );
                 }
                 catch( const exception& x )
                 {
-                    _java_vm->_log.warn( x.what() );
-                    _java_vm->_log.warn( message_string( "SCHEDULER-294", class_name ) );     // "Die Java-Klasse " + class_name + " konnte nicht geladen werden. Die Java-Quelle wird neu übersetzt, mal sehen, ob's dann geht"
+                    Vm::static_vm->_log.warn( x.what() );
+                    Vm::static_vm->_log.warn( message_string( "SCHEDULER-294", class_name ) );     // "Die Java-Klasse " + class_name + " konnte nicht geladen werden. Die Java-Quelle wird neu übersetzt, mal sehen, ob's dann geht"
                     _module->make_java_class( true );       // force=true, Mod_time nicht berücksichtigen und auf jeden Fall kompilieren
                 }
             }
         }
 
-        _module->_java_class = e.find_class( class_name.c_str() );
+        _module->_java_class = env.find_class( class_name.c_str() );
     }
 
     jmethodID method_id = _module->java_method_id( "<init>()V" );   // Konstruktor
-    if( !method_id )  _java_vm->env().throw_java( "GetMethodID" );
+    if( !method_id )  env.throw_java( "GetMethodID" );
     
     assert( _jobject == NULL );
-    _jobject = e->NewObject( _module->_java_class, method_id );
-    if( !_jobject )  e.throw_java( _module->_java_class_name + " Konstruktor" );
+    _jobject = env->NewObject( _module->_java_class, method_id );
+    if( !_jobject )  env.throw_java( _module->_java_class_name + " Konstruktor" );
 
     try
     {
@@ -419,8 +421,8 @@ void Java_module_instance::check_api_version()
 
 void Java_module_instance::add_obj( IDispatch* object, const string& name )
 {
-    Env e = env();
-    Local_frame local_frame ( e, 10 );
+    Env env;
+    Local_frame local_frame ( 10 );
 
 
     string java_class_name = "sos/spooler/" + replace_regex_ext( name, "^(spooler_)?(.*)$", "\\u\\2" );    // "spooler_task" -> "sos.spooler.Task"
@@ -431,16 +433,16 @@ void Java_module_instance::add_obj( IDispatch* object, const string& name )
 
     string signature = "L" + java_class_name + ";";
 
-    jfieldID field_id = e->GetFieldID( cls, name.c_str(), signature.c_str() );
+    jfieldID field_id = env->GetFieldID( cls, name.c_str(), signature.c_str() );
 
-    if( !field_id )  e.throw_java( "GetFieldID", name );
+    if( !field_id )  env.throw_java( "GetFieldID", name );
 
-    ptr<Java_idispatch> java_idispatch = Z_NEW( Java_idispatch( vm(), object, true, java_class_name.c_str() ) );
+    ptr<Java_idispatch> java_idispatch = Z_NEW( Java_idispatch( object, true, java_class_name.c_str() ) );
 
     _added_jobjects.push_back( java_idispatch );
                          
-    e->SetObjectField( _jobject, field_id, java_idispatch->get_jobject() );
-    if( e->ExceptionCheck() )  e.throw_java( "SetObjectField", name );
+    env->SetObjectField( _jobject, field_id, java_idispatch->get_jobject() );
+    if( env->ExceptionCheck() )  env.throw_java( "SetObjectField", name );
 
 
     Module_instance::add_obj( object, name );
@@ -457,11 +459,11 @@ bool Java_module_instance::load()
 
 Variant Java_module_instance::call( const string& name_par )
 {
-    Env    e = env();
+    Env    env;
     bool   is_optional = false;
-    string name = name_par;
+    string name        = name_par;
 
-    Local_frame local_frame ( e, 10 );
+    Local_frame local_frame ( 10 );
     Java_idispatch_stack_frame stack_frame;
 
 
@@ -471,7 +473,7 @@ Variant Java_module_instance::call( const string& name_par )
     if( !method_id )  
     {
         if( is_optional )  return Variant();
-        e.throw_java( name, message_string( "SCHEDULER-174", name, _module->_java_class_name ) );
+        env.throw_java( name, message_string( "SCHEDULER-174", name, _module->_java_class_name ) );
         //z::throw_xc( "SCHEDULER-174", name, _module->_java_class_name.c_str() );
     }
 
@@ -480,21 +482,21 @@ Variant Java_module_instance::call( const string& name_par )
     if( *name.rbegin() == 'Z' )
     {
         In_call in_call ( this, name );
-        result = e->CallBooleanMethod( _jobject, method_id ) != 0;
+        result = env->CallBooleanMethod( _jobject, method_id ) != 0;
     }
     else
     if( *name.rbegin() == ';' )     // Für spooler_api_version()
     {
         In_call in_call ( this, name ); 
-        result = string_from_jstring( e, Jstring( Vm::static_vm, (jstring)e->CallObjectMethod( _jobject, method_id ) ) );
+        result = env.string_from_jstring( Local_jstring( (jstring)env->CallObjectMethod( _jobject, method_id ) ) );
     }
     else
     {
         In_call in_call ( this, name );
-        e->CallVoidMethod( _jobject, method_id );
+        env->CallVoidMethod( _jobject, method_id );
     }
 
-    if( e->ExceptionCheck() )  e.throw_java( name );
+    if( env->ExceptionCheck() )  env.throw_java( name );
 
     return result;
 }
@@ -503,8 +505,8 @@ Variant Java_module_instance::call( const string& name_par )
 
 Variant Java_module_instance::call( const string& name, bool param )
 {
-    Env e = env();
-    Local_frame local_frame ( e, 10 );
+    Env env;
+    Local_frame local_frame ( 10 );
     Java_idispatch_stack_frame stack_frame;
 
     jmethodID method_id = _module->java_method_id( name );
@@ -514,10 +516,10 @@ Variant Java_module_instance::call( const string& name, bool param )
     
     {
         In_call in_call ( this, name );  //name.substr( 0, name.length() - 1 ) );      // "Z" abschneiden
-        result = e->CallBooleanMethod( _jobject, method_id, param ) != 0;
+        result = env->CallBooleanMethod( _jobject, method_id, param ) != 0;
     }
 
-    if( e->ExceptionCheck() )  e.throw_java( name );
+    if( env->ExceptionCheck() )  env.throw_java( name );
 
     return result;
 }

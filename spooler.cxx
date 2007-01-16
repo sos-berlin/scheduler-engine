@@ -2835,22 +2835,22 @@ void Spooler::wait( Wait_handles* wait_handles, const Time& wait_until_, Object*
     }
 
 
-#   ifndef Z_UNIX   // Unter Unix mit Verzeichnisüberwachung gibt der Scheduler alle show_message_after_seconds Sekunden die Meldung SCHEDULER-972 aus
-        if( !signaled  &&  !_cluster  &&  !_print_time_every_second )
-        {
-            Time first_wait_until = _base_log.last_time() + ( _log->log_level() <= log_debug3? show_message_after_seconds_debug : show_message_after_seconds );
-            if( first_wait_until < wait_until )
-            {
-                string msg = message_string( "SCHEDULER-972", wait_until.as_string(), wait_until_object );
-                if( msg != _log->last_line() ) 
-                {
-                    String_object o ( msg );
-                    signaled = wait_handles->wait_until( first_wait_until, &o, resume_at, resume_at_object );
-                    if( !signaled  &&  msg != _log->last_line() )  _log->info( msg );
-                }
-            }
-        }
-#   endif
+//#   ifndef Z_UNIX   // Unter Unix mit Verzeichnisüberwachung gibt der Scheduler alle show_message_after_seconds Sekunden die Meldung SCHEDULER-972 aus
+//        if( !signaled  &&  !_cluster  &&  !_print_time_every_second )
+//        {
+//            Time first_wait_until = _base_log.last_time() + ( _log->log_level() <= log_debug3? show_message_after_seconds_debug : show_message_after_seconds );
+//            if( first_wait_until < wait_until )
+//            {
+//                string msg = message_string( "SCHEDULER-972", wait_until.as_string(), wait_until_object );
+//                if( msg != _log->last_line() ) 
+//                {
+//                    String_object o ( msg );
+//                    signaled = wait_handles->wait_until( first_wait_until, &o, resume_at, resume_at_object );
+//                    if( !signaled  &&  msg != _log->last_line() )  _log->info( msg );
+//                }
+//            }
+//        }
+//#   endif
 
     if( !signaled )
     {
