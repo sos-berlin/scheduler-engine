@@ -1160,7 +1160,7 @@ int Database::get_id_( const string& variable_name, Transaction* outer_transacti
 
         if( dbms_kind() == dbms_access )
         {
-            ta.execute( "UPDATE " + _spooler->_variables_tablename + "  set `wert`=`wert`+1  where `name`=" + sql::quoted( variable_name ), __FUNCTION__ );
+            ta.execute( S() << "UPDATE " << _spooler->_variables_tablename << "  set `wert`=`wert`+1  where `name`=" << sql::quoted( variable_name ), __FUNCTION__ );
 
             Any_file sel = ta.open_result_set( S() << "select `wert`  from " << _spooler->_variables_tablename << "  where `name`=" << sql::quoted( variable_name ),
                                                __FUNCTION__ );
@@ -1180,12 +1180,12 @@ int Database::get_id_( const string& variable_name, Transaction* outer_transacti
         {
             for( int tries = 2; tries > 0; tries-- )
             {
-                Any_file sel = ta.open_commitable_result_set( "select `wert`  from " + _spooler->_variables_tablename + " %update_lock  where `name`=" + sql::quoted( variable_name ), 
+                Any_file sel = ta.open_commitable_result_set( S() << "select `wert`  from " << _spooler->_variables_tablename << " %update_lock  where `name`=" << sql::quoted( variable_name ), 
                                                               __FUNCTION__ );
                 if( !sel.eof() )
                 {
                     id = sel.get_record().as_int(0) + 1;
-                    ta.execute( "UPDATE " + _spooler->_variables_tablename + "  set `wert`=`wert`+1  where `name`=" + sql::quoted( variable_name ), __FUNCTION__ );
+                    ta.execute( S() << "UPDATE " << _spooler->_variables_tablename << "  set `wert`=`wert`+1  where `name`=" << sql::quoted( variable_name ), __FUNCTION__ );
                     tries = 0;
                 }
                 else
@@ -1229,7 +1229,7 @@ int Database::get_id_( const string& variable_name, Transaction* outer_transacti
 
 string Transaction::get_variable_text( const string& name, bool* record_exists )
 {
-    Any_file select = open_result_set( "select \"TEXTWERT\"  from " + _spooler->_variables_tablename + "  where \"NAME\"=" + sql::quoted( name ), __FUNCTION__ );
+    Any_file select = open_result_set( S() << "select \"TEXTWERT\"  from " << _spooler->_variables_tablename << "  where \"NAME\"=" << sql::quoted( name ), __FUNCTION__ );
 
     if( select.eof() )
     {

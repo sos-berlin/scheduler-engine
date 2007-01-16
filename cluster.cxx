@@ -2348,7 +2348,7 @@ void Cluster::show_active_schedulers( Transaction* outer_transaction, bool exclu
         bool found      = false;
         S    select_sql;
 
-        string where_clause = S() << "where `scheduler_id`=" + sql::quoted( _spooler->id_for_db() ) <<
+        string where_clause = S() << "where `scheduler_id`=" << sql::quoted( _spooler->id_for_db() ) <<
                                      " and " << ( exclusive_only? "`exclusive`" : "`active`" ) << " is not null";
         select_sql << "select `member_id`, `last_heart_beat`, `http_url`, `exclusive`"
                        "  from " << _spooler->_clusters_tablename << "  " <<

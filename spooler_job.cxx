@@ -75,7 +75,7 @@ Job::~Job()
     {
         close();
     }
-    catch( exception& x ) { _log->warn( x.what() ); }
+    catch( exception& x ) { _log->warn( x.what() ); }     
 }
 
 //-------------------------------------------------------------------------------------Job::set_dom
