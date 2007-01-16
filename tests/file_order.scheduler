@@ -32,7 +32,7 @@ for( var i = 1; i <= n; i++ )
                     <![CDATA[
                     
 var i = 0;
-var n = 1000;
+var n = 500000;
 spooler.variables( "n" ) = n;
 var hostware = new ActiveXObject( "hostware.global" );
 
