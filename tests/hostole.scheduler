@@ -109,8 +109,12 @@ public class My_job  extends sos.spooler.Job_impl
             
           //processor.add_obj( this, "job_impl" );
           //processor.parse( "name=''+job_impl.spooler_job.name(); " );
-            processor.add_obj( new Q(), "q" );
-            processor.parse( "my_q=''+q.q.toString()" );
+            
+            if(false) {//Speicherleck in liveconnect: 
+                processor.add_obj( new Q(), "q" );
+                processor.parse( "my_q=''+q.q.toString()" );
+            }
+            
           //processor.parse( "var a = new Array(); for(var i=1;i<=2;i++) a[i]='xxxxxxxxxxxxxxxxxxxxxxxx yyyyyyyyyyyyyyyyyyyyyyyyyyy ************************** '; x=a.join();" );
             processor.process();
         }
