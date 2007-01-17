@@ -418,6 +418,7 @@ struct Spooler : Object,
     bool                       _log_directory_as_option_set;// -log-dir= als Option gesetzt, überschreibt Angabe in spooler.xml
     string                     _log_filename;
     bool                       _log_to_stdout;              // Zusätzlich nach stdout schreiben
+    Log_level                  _log_to_stdout_level;
     string                     _include_path;
     bool                       _include_path_as_option_set; // -include-path= als Option gesetzt, überschreibt Angabe in spooler.xml
     string                     _temp_dir;

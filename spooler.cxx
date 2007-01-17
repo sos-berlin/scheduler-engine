@@ -1612,6 +1612,8 @@ void Spooler::load_arg()
             else
             if( opt.flag      ( "log-to-stdout"    ) )  _log_to_stdout = opt.set();
             else
+            if( opt.with_value( "log-to-stdout-level") )  _log_to_stdout = true,  _log_to_stdout_level = make_log_level( opt.value() );
+            else
             if( opt.with_value( "include-path"     ) )  _include_path = opt.value(),  _include_path_as_option_set = true;
             else
             if( opt.with_value( "param"            ) )  _spooler_param = opt.value(),  _spooler_param_as_option_set = true;

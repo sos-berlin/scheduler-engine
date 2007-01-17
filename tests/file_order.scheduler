@@ -46,7 +46,7 @@ public class Generator  extends sos.spooler.Job_impl
         for( int j = 1; j <= 1000; j++ )
         {
             i++;
-            File file = new File( "/tmp/x/g" + i + ".ok" );
+            File file = new File( "$SOS_MOUNT/tmp/x/g" + i + ".ok" );
             boolean ok = file.createNewFile();
             if( ok )  new_file_count++;
             if( ok  &&  new_file_count % 1000 == 0 )  spooler_log.info( new_file_count + " DATEIEN ERZEUGT: " + file );
@@ -135,7 +135,7 @@ public class My_job  extends sos.spooler.Job_impl
 
         <job_chains>
             <job_chain name="my_job_chain" distributed="yes">
-                <file_order_source directory="/tmp/x/" regex="^g.*\.ok$"/>
+                <file_order_source directory="$SOS_MOUNT/tmp/x/" regex="^g.*\.ok$"/>
                 <!--file_order_source directory="/tmp/yyy/" regex="^g"/-->
                 <!--file_order_source directory="/tmp/y" regex="^g" next_state="second"/-->
                 <!--job_chain_node state="edno" job="javascript"/-->

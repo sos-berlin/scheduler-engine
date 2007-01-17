@@ -169,7 +169,7 @@ Directory_file_order_source::Directory_file_order_source( Job_chain* job_chain, 
     _repeat(directory_file_order_source_repeat_default),
     _max_orders(directory_file_order_source_max_default)
 {
-    _path = element.getAttribute( "directory" );
+    _path = subst_env( element.getAttribute( "directory" ) );
 
     _regex_string = element.getAttribute( "regex" );
     if( _regex_string != "" )

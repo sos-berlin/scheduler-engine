@@ -373,7 +373,7 @@ void Log::write( Prefix_log* extra_log, Prefix_log* order_log, const char* text,
         if( extra_log )  extra_log->write( text, len );
         if( order_log )  order_log->write( text, len );
 
-        if( _spooler->_log_to_stdout )  my_write( _spooler, "(stderr)", fileno(stderr), text, len );
+        if( _spooler->_log_to_stdout )  my_write( _spooler, "(stdout)", fileno(stdout), text, len );
     }
 }
 
