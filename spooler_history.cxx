@@ -590,11 +590,11 @@ void Database::create_tables_when_needed()
     add_column( &ta, _spooler->_job_history_tablename, "EXIT_CODE", "add \"EXIT_CODE\"     integer" );
 
     create_table_when_needed( &ta, _spooler->_orders_tablename, S() <<
-                            "\"JOB_CHAIN\""    " varchar(100) not null,"        // Primärschlüssel
-                            "\"ID\""           " varchar(" << const_order_id_length_max << ") not null,"        // Primärschlüssel
-                            "\"SPOOLER_ID\""   " varchar(100),"                         // Index bei mehreren Scheduler-Ids
-                            "`distributed_next_time`" " datetime,"                 // Auftrag ist verteilt ausführbar
-                            "`occupying_cluster_member_id`" "varchar(100),"      // Index
+                            "\"JOB_CHAIN\""    " varchar(100) not null,"                                    // Primärschlüssel
+                            "\"ID\""           " varchar(" << const_order_id_length_max << ") not null,"    // Primärschlüssel
+                            "\"SPOOLER_ID\""   " varchar(100),"                                             // Primärschlüssel
+                            "`distributed_next_time`" " datetime,"              // Auftrag ist verteilt ausführbar
+                            "`occupying_cluster_member_id`" "varchar(100),"     // Index
                             "\"PRIORITY\""     " integer not null,"
                             "\"STATE\""        " varchar(100),"
                             "\"STATE_TEXT\""   " varchar(100),"
@@ -618,7 +618,7 @@ void Database::create_tables_when_needed()
 
     create_table_when_needed( &ta, _spooler->_order_history_tablename, S() <<
                             "\"HISTORY_ID\""  " integer not null,"             // Primärschlüssel
-                            "\"JOB_CHAIN\""   " varchar(100) not null,"        // Primärschlüssel
+                            "\"JOB_CHAIN\""   " varchar(100) not null,"
                             "\"ORDER_ID\""    " varchar(" << const_order_id_length_max << ") not null,"
                             "\"SPOOLER_ID\""  " varchar(100),"
                             "\"TITLE\""       " varchar(200),"
