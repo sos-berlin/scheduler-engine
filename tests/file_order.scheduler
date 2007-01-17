@@ -18,7 +18,7 @@ var hostware = new ActiveXObject( "hostware.global" );
 
 for( var i = 1; i <= n; i++ )
 {
-    hostware.open( "-out /tmp/x/gen" + i ).close();
+    hostware.open( "-out /tmp/x/g" + i ).close();
 }
 */
 
@@ -28,29 +28,38 @@ for( var i = 1; i <= n; i++ )
         <jobs>
 
             <job name="generator">
-                <script language="JavaScript">
+                <script java_class="spooler_job.Generator">
                     <![CDATA[
-                    
-var i = 0;
-var n = 500000;
-spooler.variables( "n" ) = n;
-var hostware = new ActiveXObject( "hostware.global" );
+package spooler_job;
+import sos.spooler.*;
+import java.io.*;
 
-function spooler_process() 
-{     
-    for( var j = 1; j <= 100; j++ )
-    {
-        if( i++ == n )  return false;
-        hostware.open( "-out /tmp/x/gen" + i + ".ok" ).close();
+public class Generator  extends sos.spooler.Job_impl
+{   
+    int i = 0;
+    int new_file_count = 0;
+    int n = 500000;
+    //spooler.variables().set_var( "n", Integer.toString( n ) );
+
+    public boolean spooler_process()  throws Exception
+    {     
+        for( int j = 1; j <= 1000; j++ )
+        {
+            i++;
+            File file = new File( "/tmp/x/g" + i + ".ok" );
+            boolean ok = file.createNewFile();
+            if( ok )  new_file_count++;
+            if( ok  &&  new_file_count % 1000 == 0 )  spooler_log.info( new_file_count + " DATEIEN ERZEUGT: " + file );
+            if( i >= n )  return false;
+        }
+        
+        return true;
     }
-    
-    return true;
 }
-
                 ]]>
                 </script>
-                <run_time>
-                    <period repeat="00:03"/>
+                <run_time once="yes">
+                    <period repeat=""/>
                 </run_time>
             </job>
 
@@ -59,7 +68,7 @@ function spooler_process()
                 <script language="JavaScript">
                     <![CDATA[
 
-counter = 1*spooler.variables( "n" );
+//counter = 1*spooler.variables( "n" );
 
 function spooler_process() 
 {               
@@ -69,7 +78,7 @@ function spooler_process()
     //spooler_log.info( "spooler_task.trigger_files=" + spooler_task.trigger_files );
     //new ActiveXObject( "hostware.global" ).sleep( 10 );
     //spooler.terminate();
-    if( --counter == 0 )  spooler.terminate();
+    //if( --counter == 0 )  spooler.terminate();
     //if( spooler_task.order.params( "scheduler_file_order" ) == "/tmp/x/gen9" )  spooler.terminate();
     spooler_task.end();
     return true;
@@ -85,7 +94,7 @@ function spooler_process()
         
                 <script language="JavaScript"><![CDATA[
 
-counter = 1*spooler.variables( "n" );
+//counter = 1*spooler.variables( "n" );
 
 function spooler_process() 
 {               
@@ -111,7 +120,8 @@ public class My_job  extends sos.spooler.Job_impl
 {   
     public boolean spooler_process()  throws Exception
     {
-        spooler_log.info( "ORDER_ID=" + spooler_task.order().id() );
+        Order order = spooler_task.order();
+        spooler_log.info( "ORDER_ID=" + order.id() );
         return true;
     }
 }
@@ -125,9 +135,9 @@ public class My_job  extends sos.spooler.Job_impl
 
         <job_chains>
             <job_chain name="my_job_chain" distributed="yes">
-                <file_order_source directory="/tmp/x/" regex="^gen.*\.ok$"/>
-                <!--file_order_source directory="/tmp/yyy/" regex="^gen"/-->
-                <!--file_order_source directory="/tmp/y" regex="^gen" next_state="second"/-->
+                <file_order_source directory="/tmp/x/" regex="^g.*\.ok$"/>
+                <!--file_order_source directory="/tmp/yyy/" regex="^g"/-->
+                <!--file_order_source directory="/tmp/y" regex="^g" next_state="second"/-->
                 <!--job_chain_node state="edno" job="javascript"/-->
                 <!--job_chain_node state="dwa" job="javascript2"/-->
                 <job_chain_node state="tri" job="java"/>
