@@ -60,9 +60,8 @@ struct Cluster_member : Object, Scheduler_object
 {
     enum Mark_as_inactive_option
     {
-      //mai_delete_empty_record,
+        mai_standard,
         mai_delete_my_inactive_record,
-      //mai_delete_inactive_and_empty_records,
         mai_mark_inactive_record_as_dead
     };
 
@@ -96,6 +95,7 @@ struct Cluster_member : Object, Scheduler_object
     time_t                     _last_heart_beat_detected;
     Time                       _last_heart_beat_detected_local_time;
     bool                       _is_heart_beat_late;
+    int                        _late_heart_beat_count;
     int                        _heart_beat_count;
     string                     _http_url;
     Cluster*                   _cluster;
@@ -372,11 +372,14 @@ bool Cluster_member::check_heart_beat( time_t now_before_select, const Record& r
             {
                 string message_code;
 
-                if( is_in_database_reconnect_tolerance )  message_code = "SCHEDULER-995";
+                if( is_in_database_reconnect_tolerance )  
+                    message_code = "SCHEDULER-995";
                 else
-                if( !is_dead                           )  message_code = "SCHEDULER-994", _is_heart_beat_late = true; 
-                else 
-                                                          message_code = "SCHEDULER-996";
+                {
+                    _is_heart_beat_late = true;
+                    _late_heart_beat_count++;
+                    message_code = is_dead? "SCHEDULER-996" : "SCHEDULER-994";
+                }
 
                 if( !string_begins_with( _log->last_line(), message_code ) )
                 {
@@ -529,19 +532,24 @@ bool Cluster_member::mark_as_inactive( Mark_as_inactive_option option )
       //update.and_where_condition( "active"   , _is_active   ? sql::Value( 1 ) : sql::null_value );
         update.and_where_condition( "exclusive", _is_exclusive? sql::Value( 1 ) : sql::null_value );
 
-        if( option == mai_delete_my_inactive_record )
+        switch( option )
         {
-            ok = ta.try_execute_single( update.make_delete_stmt(), __FUNCTION__ );
-        }
-        else
-        if( option == mai_mark_inactive_record_as_dead )  
-        {
-            update[ "dead" ] = 1;
-            ok = ta.try_execute_single( update.make_update_stmt(), __FUNCTION__ );
-        }
-        else
-            assert(false);
+            case mai_delete_my_inactive_record:
+                ok = ta.try_execute_single( update.make_delete_stmt(), __FUNCTION__ );
+                break;
 
+            case mai_mark_inactive_record_as_dead:
+                update[ "dead" ] = 1;
+                ok = ta.try_execute_single( update.make_update_stmt(), __FUNCTION__ );
+                break;
+            
+            case mai_standard:
+                ok = ta.try_execute_single( update.make_update_stmt(), __FUNCTION__ );
+                break;
+
+            default:
+                assert(false);
+        }
 
         if( ok  &&  _is_exclusive )
         {
@@ -753,6 +761,7 @@ xml::Element_ptr Cluster_member::dom_element( const xml::Document_ptr& dom_docum
         result.setAttribute( "last_detected_heart_beat"    , _last_heart_beat_detected_local_time.as_string( Time::without_ms ) );
         result.setAttribute( "last_detected_heart_beat_age", max( (time_t)0, ::time(NULL) - _last_heart_beat_detected ) );
         result.setAttribute( "heart_beat_quality"          , /*_is_dead? "bad" :*/ _is_heart_beat_late? "late" : "good" );
+        if( _late_heart_beat_count > 0 )  result.setAttribute( "late_heart_beat_count", _late_heart_beat_count );
     }
     else
     {
@@ -1213,7 +1222,10 @@ bool Active_schedulers_watchdog::async_continue_( Continue_flags )
                 {
                     Cluster_member* other_scheduler = it->second;
 
-                    if( !other_scheduler->its_me()  &&  !other_scheduler->is_empty_member()  &&  other_scheduler->_is_active )
+                    if( !other_scheduler->its_me()  
+                    &&  !other_scheduler->is_empty_member()  
+                    &&   other_scheduler->_is_active 
+                    &&   other_scheduler->_is_dead )
                     {
                         other_scheduler->deactivate_and_release_orders_after_death();
                     }
@@ -1294,7 +1306,8 @@ void Cluster::close()
         {
             if( _my_scheduler )  
             {
-                bool ok = _my_scheduler->mark_as_inactive( Cluster_member::mai_delete_my_inactive_record );
+                bool ok = _my_scheduler->mark_as_inactive( _my_scheduler->_is_db_dead? Cluster_member::mai_standard 
+                                                                                     : Cluster_member::mai_delete_my_inactive_record );
                 if( ok )  _my_scheduler = NULL;
             }
             
@@ -2029,7 +2042,7 @@ bool Cluster::mark_as_exclusive()
 
             if( !_exclusive_scheduler->_is_db_dead )
             {
-                update[ "dead" ] = 1;  int DEAD_TESTEN;
+                update[ "dead" ] = 1;
                 _log->warn( message_string( "SCHEDULER-836" ) );        // "Deactivating dead Scheduler"
             }
         }

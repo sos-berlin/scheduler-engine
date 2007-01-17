@@ -1712,6 +1712,15 @@
 
             <td>
                 <xsl:value-of select="@heart_beat_count"/>
+
+                <xsl:if test="@late_heart_beat_count > 0">
+                    <xsl:text> </xsl:text>
+                    <span style="margin-left: 1ex; color: red">
+                        <xsl:text>(</xsl:text>
+                        <xsl:value-of select="@late_heart_beat_count"/>
+                        <xsl:text> late)</xsl:text>
+                    </span>
+                </xsl:if>
             </td>
 
             <td>
