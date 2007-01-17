@@ -622,7 +622,7 @@ void Database::create_tables_when_needed()
                             "\"ORDER_ID\""    " varchar(" << const_order_id_length_max << ") not null,"
                             "\"SPOOLER_ID\""  " varchar(100),"
                             "\"TITLE\""       " varchar(200),"
-                            "\"STATE\""       " varchar(100) not null,"
+                            "\"STATE\""       " varchar(100),"
                             "\"STATE_TEXT\""  " varchar(100),"
                             "\"START_TIME\""  " datetime not null,"
                             "\"END_TIME\""    " datetime not null,"

@@ -2427,7 +2427,7 @@
 
         <message code="SCHEDULER-340">
             <text xml:lang="en">
-                <title></title>
+                <title>More than <p1/> nested includes in <p2/></title>
             </text>
         </message>
 
@@ -3326,7 +3326,7 @@
 
         <message code="SCHEDULER-825">
             <text xml:lang="en">
-                <title>No exclusive Scheduler member</title>
+                <title>No exclusive Scheduler is running</title>
             </text>
         </message>
 

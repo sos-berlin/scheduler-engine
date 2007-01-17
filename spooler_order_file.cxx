@@ -748,7 +748,7 @@ bool Directory_file_order_source::read_new_files()
 
     for( Directory_watcher::Directory_reader dir ( _path, _regex_string == ""? NULL : &_regex );; )
     {
-        if( _spooler->_cluster )  _spooler->_cluster->check_is_active();    // PROVISORISCH FÜR LANGE VERZEICHNISSE AUF ENTFERNTEN RECHNER, macht bei Bedarf einen Herzschlag
+        if( _spooler->_cluster )  _spooler->_cluster->do_a_heart_beat_when_needed( __FUNCTION__ );    // PROVISORISCH FÜR LANGE VERZEICHNISSE AUF ENTFERNTEM RECHNER, macht bei Bedarf einen Herzschlag
 
         ptr<z::File_info> file_info = dir.get();
         if( !file_info )  break;

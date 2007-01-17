@@ -42,6 +42,7 @@ int                             Time::static_current_difference_to_utc  = 0;
 
 //--------------------------------------------------------------------------------------------const
 
+const int                              max_include_nesting         = 10;
 extern const int                       never_int                   = INT_MAX;
 extern const Time                      latter_day                  = never_int;
        const Time                      Time::never                 = never_int;
@@ -734,6 +735,59 @@ Period Ultimo_set::next_period( Time tim, With_single_start single_start )
     return Period();
 }
 
+//--------------------------------------------------------------------------------Holidays::set_dom
+
+void Holidays::set_dom( const xml::Element_ptr& e, const File_path& include_path, int include_nesting )
+{
+    if( e.nodeName_is( "holidays" ) )
+    {
+        DOM_FOR_EACH_ELEMENT( e, e2 )
+        {
+            if( e2.nodeName_is( "holiday" ) )
+            {
+                Sos_optional_date_time dt;
+                dt.assign( e2.getAttribute( "date" ) );
+                include( dt.as_time_t() );
+            }
+            else
+            if( e2.nodeName_is( "include" ) )
+            {
+                if( include_nesting >= max_include_nesting )  z::throw_xc( "SCHEDULER-340", max_include_nesting, "<holidays>" );
+
+                File_path file = e.getAttribute( "file" );
+
+                try
+                {
+                    if( !file.is_absolute_path() )  file.set_directory( include_path );
+                    
+                    xml::Document_ptr doc;
+                    doc.load_xml( string_from_file( file ) );
+                    
+                    if( !doc.documentElement() )  z::throw_xc( "SCHEDULER-319", "", file );
+
+                    set_dom( doc.documentElement(), include_path, include_nesting+1 );
+                }
+                catch( z::Xc& x )
+                {
+                    x.append_text( S() << "in <holiday><include file=\"" << file << "\"/>" );
+                    throw;
+                }
+            }
+            else
+                z::throw_xc( "SCHEDULER-319", e2.nodeName(), e.nodeName() );
+        }
+    }
+    else
+    if( e.nodeName_is( "holiday" ) )
+    {   
+        Sos_optional_date dt;
+        dt.assign( e.getAttribute( "date" ) );
+        include( dt.as_time_t() );
+    }
+    else
+        z::throw_xc( "SCHEDULER-319", e.nodeName(), __FUNCTION__ );
+}
+
 //--------------------------------------------------------------------------------------Date::print
 
 void Date::print( ostream& s ) const
@@ -1028,22 +1082,13 @@ void Run_time::set_dom( const xml::Element_ptr& element )
         else
         if( e.nodeName_is( "holidays" ) )
         {
-            _holiday_set.clear();
-
-            DOM_FOR_EACH_ELEMENT( e, e2 )
-            {
-                if( e2.nodeName_is( "holiday" ) )
-                {
-                    Sos_optional_date_time dt;
-                    dt.assign( e2.getAttribute( "date" ) );
-                    _holiday_set.insert( dt.as_time_t() );
-                }
-            }
+            _holidays.clear();
+            _holidays.set_dom( e, _spooler->include_path() );
         }
+        else
         if( e.nodeName_is( "holiday" ) )
         {
-            dt.assign( e.getAttribute( "date" ) );
-            _holiday_set.insert( dt.as_time_t() );
+            _holidays.set_dom( e, _spooler->include_path() );
         }
     }
 
@@ -1091,8 +1136,7 @@ Period Run_time::next_period( Time tim_par, With_single_start single_start )
     Time    tim = tim_par;
     Period  next;
 
-    //while(1)
-    while( tim < tim_par + 366*24*60*60 )
+    while( tim < tim_par + 366*24*60*60 )   // max. ein Jahr 
     {
         next = Period();
 
@@ -1104,7 +1148,7 @@ Period Run_time::next_period( Time tim_par, With_single_start single_start )
 
         if( next.begin() != Time::never )
         {
-            if( _holiday_set.find( (uint)next.begin().midnight() ) == _holiday_set.end() )  return next;  // Gefundener Zeitpunkt ist kein Feiertag? Dann ok!
+            if( !_holidays.is_included( (uint)next.begin().midnight() ) )  return next;  // Gefundener Zeitpunkt ist kein Feiertag? Dann ok!
             tim = next.begin().midnight() + 24*60*60;   // Feiertag? Dann nächsten Tag probieren
         }
         else

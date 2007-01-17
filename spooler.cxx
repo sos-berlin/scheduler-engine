@@ -1576,6 +1576,10 @@ void Spooler::load_arg()
             else
             if( opt.flag      ( "V"                ) )  ;   // wurde in sos_main() bearbeitet
             else
+            if( opt.flag      ( "?"                ) )  ;   // wurde in sos_main() bearbeitet
+            else
+            if( opt.flag      ( "h"                ) )  ;   // wurde in sos_main() bearbeitet
+            else
             if( opt.flag      ( "service"          ) )  ;   // wurde in sos_main() bearbeitet
             else
             if( opt.with_value( "service"          ) )  ;   // wurde in sos_main() bearbeitet
@@ -3798,7 +3802,8 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
             else
             if( opt.flag      ( "V"                ) )  need_call_scheduler = false, fprintf( stderr, "Scheduler %s\n", VER_PRODUCTVERSION_STR );
             else
-            if( opt.flag      ( "?"                ) )  need_call_scheduler = false, fprintf( stderr, "Scheduler %s\n", VER_PRODUCTVERSION_STR ), scheduler::print_usage();
+            if( opt.flag      ( "?"                )
+             || opt.flag      ( "h"                ) )  need_call_scheduler = false, fprintf( stderr, "Scheduler %s\n", VER_PRODUCTVERSION_STR ), scheduler::print_usage();
             else
             if( opt.flag      ( "kill"             ) )  kill_pid_file = true;
             else

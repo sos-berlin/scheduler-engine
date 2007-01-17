@@ -260,7 +260,10 @@ const char file_scheduler_xsd[] =
     "<xsd:element name=\"holidays\">\n"
     "<xsd:complexType>\n"
     "<xsd:sequence>\n"
-    "<xsd:element ref=\"holiday\" minOccurs=\"0\" maxOccurs=\"unbounded\"/>\n"
+    "<xsd:choice minOccurs=\"0\" maxOccurs=\"unbounded\">\n"
+    "<xsd:element ref=\"holiday\"/>\n"
+    "<xsd:element ref=\"include\"/>\n"
+    "</xsd:choice>\n"
     "</xsd:sequence>\n"
     "</xsd:complexType>\n"
     "</xsd:element>\n"
@@ -1325,7 +1328,7 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1168558008 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1169058403 },
     { NULL, NULL, 0 }
 };
 

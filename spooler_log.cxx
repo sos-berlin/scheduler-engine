@@ -345,7 +345,7 @@ void Log::start_new_file()
 
 //---------------------------------------------------------------------------------------Log::write
 
-void Log::write( Prefix_log* extra_log, Prefix_log* order_log, const char* text, int len )
+void Log::write( Log_level level, Prefix_log* extra_log, Prefix_log* order_log, const char* text, int len )
 {
     if( _err_no )  return;       // Falls nach einer Exception noch was ins Log geschrieben wird, ignorieren wir das.
 
@@ -373,7 +373,7 @@ void Log::write( Prefix_log* extra_log, Prefix_log* order_log, const char* text,
         if( extra_log )  extra_log->write( text, len );
         if( order_log )  order_log->write( text, len );
 
-        if( _spooler->_log_to_stdout )  my_write( _spooler, "(stdout)", fileno(stdout), text, len );
+        if( _spooler->_log_to_stdout  &&  level >= _spooler->_log_to_stdout_level )  my_write( _spooler, "(stdout)", fileno(stdout), text, len );
     }
 }
 
@@ -423,7 +423,7 @@ void Log::log2( Log_level level, bool log_to_files, const string& prefix, const 
 
         if( log_to_files )
         {
-            if( _file != -1  &&  isatty( _file )  ||  _spooler->_log_to_stdout  &&  isatty( fileno( stdout ) ) )  console_colors.set_color_for_level( level );
+            if( _file != -1  &&  isatty( _file )  ||  _spooler->_log_to_stdout  &&  level >= _spooler->_log_to_stdout_level  &&  isatty( fileno( stdout ) ) )  console_colors.set_color_for_level( level );
 
             Time now = Time::now();
             _last_time = now;
@@ -455,24 +455,24 @@ void Log::log2( Log_level level, bool log_to_files, const string& prefix, const 
             if( log_to_files )
             {
                 int buffer1_len = strlen( time_buffer );
-                write( extra_log, order_log, time_buffer, buffer1_len );                        // Zeit
+                write( level, extra_log, order_log, time_buffer, buffer1_len );                        // Zeit
             }
 
             int buffer2_len = strlen( level_buffer );
             if( log          )  log->write( level_buffer + 1, buffer2_len - 1 );
-            if( log_to_files )  write( extra_log, order_log, level_buffer, buffer2_len );       // [info]
+            if( log_to_files )  write( level, extra_log, order_log, level_buffer, buffer2_len );       // [info]
 
             if( !prefix.empty() )
             {
                 string s; s.reserve( prefix.length() + 3 ); s = "(",  s += prefix, s += ") ";   // (prefix)
                 if( log          )  log << s;
-                if( log_to_files )  write( NULL, order_log, s );     // (Job ...)
+                if( log_to_files )  write( level, NULL, order_log, s );     // (Job ...)
             }
 
             int len = next - begin;
             while( len > 1  &&  line.c_str()[begin+len-1] == '\r' )  len--;
             if( log          )  log->write( line.c_str() + begin, len );
-            if( log_to_files )  write( extra_log, order_log, line.c_str() + begin, len );       // Text
+            if( log_to_files )  write( level, extra_log, order_log, line.c_str() + begin, len );       // Text
 
             begin = next;
         }
@@ -480,7 +480,7 @@ void Log::log2( Log_level level, bool log_to_files, const string& prefix, const 
         if( line.length() == 0 || line[line.length()-1] != '\n' )  
         {
             Z_LOG( "\n" );
-            if( log_to_files )  write( extra_log, order_log, "\n", 1 );
+            if( log_to_files )  write( level, extra_log, order_log, "\n", 1 );
         }
 
         //Z_LOG2( "scheduler", _log_line );  _log_line = "";

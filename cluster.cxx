@@ -509,8 +509,8 @@ bool Cluster_member::mark_as_inactive( Mark_as_inactive_option option )
     bool delete_empty_member_record = its_me()  &&  _cluster->_continue_exclusive_operation == Cluster::continue_exclusive_non_backup;
 
     assert( !delete_empty_member_record  ||  option == mai_delete_my_inactive_record );
-    assert( ( option == mai_delete_my_inactive_record    ) == its_me() );
-    assert( ( option == mai_mark_inactive_record_as_dead ) != its_me() );
+    assert( option != mai_delete_my_inactive_record     ||   its_me() );
+    assert( option != mai_mark_inactive_record_as_dead  ||  !its_me() );
 
     bool ok = false;
 
@@ -2464,6 +2464,21 @@ bool Cluster::check_is_active( Transaction* outer_transaction )
     }
 
     return _is_active;
+}
+
+//-------------------------------------------------------------Cluster::do_a_heart_beat_when_needed
+
+bool Cluster::do_a_heart_beat_when_needed( const string& function )
+{
+    bool result = ::time(NULL) < _next_heart_beat + max_processing_time;
+
+    if( !result )
+    {
+        _log->debug3( message_string( "SCHEDULER-997", function ) );
+        result = do_a_heart_beat();
+    }
+
+    return result;
 }
 
 //--------------------------------------------------------------Cluster::is_member_allowed_to_start

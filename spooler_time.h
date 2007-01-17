@@ -289,21 +289,19 @@ struct Ultimo_set : Day_set
     friend ostream&             operator <<                 ( ostream& s, const Ultimo_set& o )     { o.print(s); return s; }
 };
 
-//-------------------------------------------------------------------------------------Holiday_set
+//-----------------------------------------------------------------------------------------Holidays
 
-typedef set<time_t>             Holiday_set;
-
-/*
-inline Holiday_set& operator += ( Holiday_set& a, const Holiday_set& b )
+struct Holidays
 {
-    for( Holiday_set::iterator it = b.begin(); it != b.end(); it++ )
-    {
-        a.insert( *it );
-    }
+    void                        clear                       ()                                      { _set.clear(); }
+    void                        set_dom                     ( const xml::Element_ptr&, const File_path& include_path, int include_nesting = 0 );
+    void                        include                     ( time_t t )                            { _set.insert( t ); }
+    bool                        is_included                 ( time_t t )                            { return _set.find( t ) != _set.end(); }
 
-    return a;
-}
-*/
+    typedef stdext::hash_set<time_t> Set;
+    Set                        _set;
+};
+
 //--------------------------------------------------------------------------------------------Date
 
 struct Date
@@ -380,7 +378,7 @@ struct Run_time : idispatch_implementation< Run_time, spooler_com::Irun_time >,
 
     bool                        set                         () const                                { return _set; }
 
-    void                        set_holidays                ( const Holiday_set& h )                { _holiday_set = h; }
+    void                        set_holidays                ( const Holidays& h )                   { _holidays = h; }
     void                        set_default                 ();
     void                        set_default_days            ();
 
@@ -419,7 +417,7 @@ struct Run_time : idispatch_implementation< Run_time, spooler_com::Irun_time >,
     Weekday_set                _weekday_set;
     Monthday_set               _monthday_set;
     Ultimo_set                 _ultimo_set;                 // 0: Letzter Tag, -1: Vorletzter Tag
-    Holiday_set                _holiday_set;
+    Holidays                   _holidays;
   //string                     _xml;
     xml::Document_ptr          _dom;
 };

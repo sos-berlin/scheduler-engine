@@ -249,7 +249,7 @@ struct Spooler : Object,
     const string&               param                       () const                            { return _spooler_param; }
     int                         udp_port                    () const                            { return _udp_port; }
     int                         tcp_port                    () const                            { return _tcp_port; }
-    string                      include_path                () const                            { return _include_path; }
+    File_path                   include_path                () const                            { return _include_path; }
     string                      temp_dir                    () const                            { return _temp_dir; }
     int                         priority_max                () const                            { return _priority_max; }
     State                       state                       () const                            { return _state; }
@@ -258,7 +258,7 @@ struct Spooler : Object,
     const string&               log_directory               () const                            { return _log_directory; }                      
     Time                        start_time                  () const                            { return _spooler_start_time; }
     Security::Level             security_level              ( const Ip_address& );
-    const time::Holiday_set&    holidays                    () const                            { return _holiday_set; }
+    const time::Holidays&       holidays                    () const                            { return _holidays; }
     bool                        is_service                  () const                            { return _is_service; }
     string                      directory                   () const                            { return _directory; }
 
@@ -419,7 +419,7 @@ struct Spooler : Object,
     string                     _log_filename;
     bool                       _log_to_stdout;              // Zusätzlich nach stdout schreiben
     Log_level                  _log_to_stdout_level;
-    string                     _include_path;
+    File_path                  _include_path;
     bool                       _include_path_as_option_set; // -include-path= als Option gesetzt, überschreibt Angabe in spooler.xml
     string                     _temp_dir;
     string                     _spooler_param;              // -param= Parameter für Skripten
@@ -532,7 +532,7 @@ struct Spooler : Object,
     bool                       _are_all_tasks_killed;
   //Process_group_handle       _process_groups[ max_processes ];    // Für abort_immediately(), mutex-frei alle Task.add_pid(), Subprozesse der Tasks
 //private:
-    time::Holiday_set          _holiday_set;                // Feiertage für alle Jobs
+    time::Holidays             _holidays;                   // Feiertage für alle Jobs
 
     State_changed_handler      _state_changed_handler;      // Callback für NT-Dienst SetServiceStatus()
 

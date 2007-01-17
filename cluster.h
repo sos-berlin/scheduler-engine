@@ -44,6 +44,7 @@ struct Cluster : Async_operation, Scheduler_object
     void                    set_orders_distributed          ( bool b = true )                       { _are_orders_distributed = b; }
 
     bool                        check_is_active             ( Transaction* = NULL );
+    bool                        do_a_heart_beat_when_needed ( const string& debug_text );
     bool                        has_exclusiveness           ()                                      { return _has_exclusiveness; }
     bool                     is_active                      ()                                      { return _is_active; }
     bool                     is_member_allowed_to_start     ();

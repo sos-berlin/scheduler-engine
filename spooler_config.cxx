@@ -331,29 +331,18 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const Time& x
             else
             if( e.nodeName_is( "holidays" ) )
             {
-                _holiday_set.clear();
-
-                DOM_FOR_EACH_ELEMENT( e, e2 )
-                {
-                    if( e2.nodeName_is( "holiday" ) )
-                    {
-                        Sos_optional_date_time dt;
-                        dt.assign( e2.getAttribute( "date" ) );
-                        _holiday_set.insert( dt.as_time_t() );
-                    }
-                }
+                _holidays.clear();
+                _holidays.set_dom( e, _spooler->include_path() );
+            }
+            else
+            if( e.nodeName_is( "holiday" ) )
+            {
+                _holidays.set_dom( e, _spooler->include_path() );
             }
             else
             if( e.nodeName_is( "web_services" ) )
             {
                 _web_services.add_web_services( e );
-            }
-            else
-            if( e.nodeName_is( "holiday" ) )
-            {
-                Sos_optional_date_time dt;
-                dt.assign( e.getAttribute( "date" ) );
-                _holiday_set.insert( dt.as_time_t() );
             }
             else
             if( e.nodeName_is( "process_classes" ) )

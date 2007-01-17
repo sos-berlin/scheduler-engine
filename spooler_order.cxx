@@ -1795,7 +1795,10 @@ int Order_queue::order_count( Read_transaction* ta, const Job_chain* which_job_c
                         (
                             S() << "select count(*)  from " << _spooler->_orders_tablename <<
                                    "  where `spooler_id`=" << sql::quoted( _spooler->id_for_db() ) <<
-                                   " and " << w,
+                                      " and `distributed_next_time` is not null"
+                                    //" and ( `occupying_cluster_member_id`<>" << sql::quoted( _spooler->cluster_member_id() ) << " or"
+                                    //      " `occupying_cluster_member_id` is null )"
+                                      " and " << w,
                             __FUNCTION__
                         )
                         .get_record().as_int( 0 );
@@ -1810,15 +1813,13 @@ int Order_queue::order_count( Read_transaction* ta, const Job_chain* which_job_c
         }
     }
     else
+    if( which_job_chain )
     {
-        if( which_job_chain )
-        {
-            FOR_EACH( Queue, _queue, it )  if( (*it)->_job_chain == which_job_chain )  result++;
-        }
-        else
-        {
-            result += _queue.size();
-        }
+        FOR_EACH( Queue, _queue, it )  if( (*it)->_job_chain == which_job_chain )  result++;
+    }
+    else
+    {
+        result += _queue.size();
     }
 
     return result;
