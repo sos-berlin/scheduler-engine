@@ -102,8 +102,12 @@ $(objects): $(patsubst %, sos/spooler/%.h, Idispatch)
 
 
 ifeq ($(OS),HP-UX)
-# Die folgende Pfad muss bei Programmaufruf gueltig sein, also auf der Produktionsmaschine!
+# Der folgende Pfad muss bei Programmaufruf gueltig sein, also auf der Produktionsmaschine!
 LIBS += -Wl,+b,/opt/java1.4/jre/lib/PA_RISC2.0:/opt/java1.4/jre/lib/PA_RISC2.0/server
+endif
+
+ifeq ($(NO_PERL),)
+# HP-UX: Der folgende Pfad muss bei Programmaufruf gueltig sein, also auf der Produktionsmaschine!
 SOS_LIBS += $(PROD_DIR)/zschimmer/$(O_DIR)/libsosperlscript.a
 endif
 
