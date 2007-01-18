@@ -1,131 +1,207 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
 <description
-    title               = "Backup-Scheduler"
+    title               = "Backup Job Scheduler"
     base_dir            = ""
     author              = "$Author: ur $"
     date                = "$Date: 2007-01-10 17:19:39 +0200 (Do, 05 Okt 2006) $"
 >
 
-<h1>Backup-Scheduler-Cluster</h1>
+<h1>Job Scheduler Backup Cluster</h1>
 
-<p>Ein Backup-Scheduler-Cluster besteht aus mehreren Instanzen eines Schedulers, die alle mit der gleichen Scheduler-Id und der Option <scheduler_option name="exclusive"/> gestartet wurden. Die Scheduler-Instanzen können auf unterschiedlichen Rechnern oder auf einem Rechner laufen. In einem Cluster ist maximal ein Scheduler aktiv, d.h. startet Jobs bzw. verarbeitet Aufträge. Die anderen Scheduler sind inaktiv, d.h. sie warten darauf, im Notfall den Betrieb zu übernehmen.</p>
+<p>Ein Scheduler Backup-Cluster sorgt für Ausfallsicherheit für einen Scheduler indem ein oder mehrere Ersatz-Scheduler (Backup Scheduler) auf anderen Rechnern gestartet 
+werden. Eine ausfallsicheres System besteht demnach aus einem primären Scheduler und mindestens einem Backup Scheduler. </p>
 
-<h2>Voraussetzungen für den Scheduler-Cluster</h2>
+<p>In einem Backup-Cluster zeigen alle Job Scheduler ihre Verfügbarkeit durch das Versenden von Herzschlägen an. Alle Job Scheduler prüfen, ob die 
+jeweils anderen Job Scheduler verfügbar sind. Stellt ein Backup Scheduler fest, dass vom primären Scheduler die Herzschläge über einen längeren Zeitraum
+(ca. 1-2 Minuten) ausbleiben, übernimmt dieser die Verarbeitung. Dabei werden die offenen Aufträge und laufenden Jobs fortgeführt und entsprechend
+der Konfiguration neue Jobs gestartet</p>
+
+
+<p>In einem Backup Cluster ist maximal ein Job Scheduler aktiv, d.h. der primäre Job Scheduler startet Jobs bzw. verarbeitet Aufträge. 
+Die anderen Job Scheduler sind inaktiv, d.h. die Backup Job Scheduler warten darauf, 
+bei Ausfall des primären Job Schedulers die Verarbeitung zu übernehmen.</p>
+
+<p>Die Voraussetzungen für die Operation eines Backup Clusters sind schematisch in der folgende Zeichnung abgebildet,
+und werden im Detail in den nächsten Abschnitt beschreiben.</p>
+
+<img src="images/availability-prerequisites-67%-6.png" style="margin: 20px 0px ; border:1px solid gray;"/>
+
+<p>Die Übernahme der Verarbeitung durch eines Backup Job Schedulers ist schematisch in der folgende Zeichnung abgebildet:</p>
+
+<img src="images/availability-failover-67%-6.png" style="margin: 20px 0px ; border:1px solid gray;"/>
+
+
+<h2>Voraussetzungen für den Job Scheduler Backup Cluster</h2>
 
 <ul>
 <li>
-Alle Scheduler des Cluster verwenden die gleiche Datenbank. Es werden die Datenbanksysteme Oracle, DB2, Mysql und Postgres unterstützt
+Alle Job Scheduler des Clusters verwenden die selbe Datenbank. 
+Es werden die Datenbanksysteme Oracle, DB2, MySQL und Postgres unterstützt.
 </li>
 <li>
-Alle Scheduler verwenden die gleiche Konfiguraionsdatei bzw. eine aktuelle Kopie.
+Alle Job Scheduler verwenden die selbe Konfigurationsdatei bzw. eine genaue Kopie.
 </li>
 <li>
-Alle Scheduler werden mit der gleichen Scheduler-id gestartet.
+Der primäre Scheduler und die Backup Scheduler werden mit der gleichen Scheduler-ID gestartet. 
 </li>
 <li>
-Alle Scheduler werden mit <scheduler_option name="exclusive"/>  gestartet.
+Der primäre Scheduler und die Backup Scheduler werden mit der Option <scheduler_option name="exclusive"/> 
+gestartet. 
 </li>
 </ul>
 
-<h2>Starten des Scheduler-Cluster</h2>
+<h2>Starten des Job Scheduler Backup Clusters</h2>
 
-<p>Die Scheduler, die den Cluster bilden sollen, werden der Reihe nach gestartet. Der erste gestartete Scheduler, der nicht mit der Option <scheduler_option name="backup"/> gestartet wurde, wird aktiv.</p>
+<p>Die Job Scheduler, die den Cluster bilden, werden in beliebiger Reihenfolge gestartet. 
+Der erste Job Scheduler, der nicht mit der Option <scheduler_option name="backup"/> gestartet wurde, wird aktiv.</p>
 
 <h2>Kommandozeilenparameter</h2>
 
-<p>Folgende Kommandozeilenparameter definieren den Backup-Cluster.</p>
+<p>Folgende Kommandozeilenparameter konfigurieren einen Job Scheduler als Mitglied des Backup Clusters:</p>
 
 <ul>
 <li><scheduler_option name="exclusive"/>
-bestimmt, dass der Scheduler zum Backup-Cluster gehört.</li>
+bestimmt, dass der Job Scheduler Mitglied des Backup Cluster ist.</li>
 <li><scheduler_option name="backup"/>
-bestimmt, dass es sich um einen Backup-Scheduler handelt. Es kann mehrere Backup-Scheduler geben. Fehlt das Attribut, handelt es sich um einen primären Scheduler. Es kann mehrere primäre Scheduler geben, die alle die gleiche Startpriorität im Falle eines Ausfalls des aktiven Schedulers haben</li>
-<li><scheduler_option name="backup-precedence"/><br/>
-bestimmt die Rangfolge, mit der Backup-Scheduler aktiv werden. Es wird jeweils der Scheduler mit dem kleinstem Wert aktiv, wenn der aktive Scheduler ausfällt.</li>
+bestimmt, dass es sich um einen Backup Job Scheduler handelt. 
+Fehlt das Attribut, dann handelt es sich um einen primären Job Scheduler. 
+Es kann mehrere Backup Job Scheduler geben, die alle die gleiche Startpriorität 
+im Falle eines Ausfalls des aktiven Job Schedulers haben</li>
+<li><scheduler_option name="backup-precedence"/>
+bestimmt die Rangfolge, mit der Backup Job Scheduler aktiv werden. 
+Es wird jeweils der Job Scheduler mit dem kleinstem Wert aktiv, wenn der primäre Job Scheduler ausfällt.</li>
 </ul>
 
-<h2>Beenden eines Backup-Scheduler-Clusters mit Funktionen der Weboberfläche</h2>
-
-<p>Beim Beenden werden die laufenden Process-Schritte laufender Jobs wird noch ausgeführt. Mit dem Parameter <scheduler_option name="timeout"/>=&lt;wert&gt; kann das Beenden laufender Process-Schritte nach Ablauf einer Zeit erzwungen werden.</p>
-
-<h3>Beenden aller Scheduler im Backup-Cluster</h3>
-<p>Ein Cluster wird beendet,wenn in der Scheduler Weboberfläche das Kommando "terminate cluster" aufgerufen wird. Alle Scheduler des Cluster werden damit beendet. </p>
-
-<p>Entspricht XML-Kommando &lt;terminate all_schedulers="yes"&gt;</p>
+<h2>Beenden von Job Schedulern im Backup Cluster mit den Funktionen der Web-Oberfläche</h2>
 
 
-<h3>Beenden aller Scheduler im Backup-Cluster mit Timeout</h3>
-<p>Ein Cluster wird beendet,wenn in der Scheduler Weboberfläche das Kommando "terminate cluster within 60s" aufgerufen wird. Alle Scheduler des Cluster werden damit beendet. Nach Ablauf von 60 Sekunden werden alle noch laufenden Process-Schritte abgebrochen. </p>
-<p>Entspricht XML-Kommando &lt;terminate all_schedulers="yes" timeout="60"&gt;</p>
-
-<h3>Beenden aller Scheduler im Backup-Cluster mit Neustart</h3>
-<p>Ein Cluster wird beendet,wenn in der Scheduler Weboberfläche das Kommando "terminate and restart cluster" aufgerufen wird. Alle Scheduler des Cluster werden damit beendet und anschließend neu gestartet. Der aktive Scheduler ist nach dem Neustart wieder aktiv.</p>
-<p>Werden alle Scheduler neu gestartet, ist anschließend der primäre Scheduler der aktive Scheduler</p>
-<p>Entspricht XML-Kommando &lt;terminate all_schedulers="yes" restart="yes"&gt;</p>
+<p>Beim Beenden werden die laufenden Prozessschritte von Jobs noch ausgeführt,
+allerdings keine neuen Prozessschritte veranlasst. 
+Mit dem Parameter <scheduler_option name="timeout"/>=&lt;wert&gt; 
+kann das Beenden laufender Prozessschritte nach Ablauf einer Zeit erzwungen werden.</p>
 
 
-<h3>Beenden aller Scheduler im Backup-Cluster mit Neustart mit Timeout</h3>
-<p>Ein Cluster wird beendet,wenn in der Scheduler Weboberfläche das Kommando "terminate and restart cluster" aufgerufen wird. Alle Scheduler des Cluster werden damit beendet und anschließend neu gestartet. Der akive Scheduler ist nach dem Neustart wieder aktiv. Nach Ablauf von 60 Sekunden werden alle noch laufenden Process-Schritte abgebrochen.</p>
-<p>Werden alle Scheduler neu gestartet, ist anschließend der primäre Scheduler der aktive Scheduler</p>
-<p>Entspricht XML-Kommando &lt;terminate all_schedulers="yes" restart="yes" timeout="60"&gt;</p>
+<h3>Beenden aller Job Scheduler im Backup Cluster</h3>
+<p>Alle Job Scheduler im Cluster werden beendet, indem in der Job Scheduler Web-Oberfläche das Kommando "terminate cluster" aufgerufen wird. 
+</p>
+<p>Entspricht dem XML-Kommando &lt;terminate all_schedulers="yes"&gt;</p>
 
 
-<h3>Beenden des aktiven Schedulers. Die Backup-Scheduler bleiben gestartet und laufen nicht an</h3>
-<p>Ein Scheduler wird beendet,wenn in der Scheduler Weboberfläche das Kommando "terminate" aufgerufen wird. </p>
-<p>Entspricht XML-Kommando &lt;terminate&gt;</p>
+<h3>Beenden aller Job Scheduler im Backup Cluster mit Timeout</h3>
+<p>Alle Job Scheduler im Cluster werden beendet, indem in der Job Scheduler Web-Oberfläche das Kommando "terminate cluster within 60s" 
+aufgerufen wird. 
+Nach Ablauf von 60 Sekunden werden alle noch laufenden Prozessschritte abgebrochen. </p>
+<p>Entspricht dem XML-Kommando &lt;terminate all_schedulers="yes" timeout="60"&gt;</p>
 
 
-<h3>Beenden des primären Schedulers mit Neustart. Die Backup-Scheduler bleiben gestartet und laufen nicht an</h3>
-<p>Ein Scheduler wird beendet und anschließend neu gestartet,wenn in der Scheduler Weboberfläche das Kommando "terminate and restart" aufgerufen wird. </p>
-<p>Entspricht XML-Kommando &lt;terminate restart="yes"&gt;</p>
+<h3>Beenden aller Job Scheduler im Backup Cluster mit Neustart</h3>
+<p>Alle Job Scheduler im Cluster werden beendet, indem in der Job Scheduler Web-Oberfläche das Kommando "terminate and restart cluster" 
+aufgerufen wird. Anschließend starten sie neu. 
+Der primäre Job Scheduler ist nach dem Neustart wieder aktiv.</p>
+<p>Werden alle Job Scheduler neu gestartet, so ist anschließend der primäre Job Scheduler der aktive Job Scheduler.</p>
+<p>Entspricht dem XML-Kommando &lt;terminate all_schedulers="yes" restart="yes"&gt;</p>
 
-<h3>Beenden eines Backup-Schedulers mit Neustart.</h3>
-<p>Ein Scheduler wird beendet und anschließend neu gestartet,wenn in der Scheduler Weboberfläche das Kommando "terminate and restart" aufgerufen wird. </p>
-<p>Handelt es sich um einen Backup-Scheduler, wird er nach dem Neustart nicht aktiv. Ist ein inaktiver laufender primärer Scheduler im Cluster, wird dieser aktiv.</p>
-<p>Entspricht XML-Kommando &lt;terminate restart="yes"&gt;</p>
+
+<h3>Beenden aller Job Scheduler im Backup Cluster mit Timeout und Neustart</h3>
+<p>Alle Job Scheduler im Cluster werden beendet, indem in der Job Scheduler Web-Oberfläche das Kommando "terminate and restart cluster" 
+aufgerufen wird. Die Job Scheduler starten anschließend neu.
+Der primäre Job Scheduler ist nach dem Neustart wieder aktiv. 
+Nach Ablauf von 60 Sekunden werden alle noch laufenden Prozessschritte abgebrochen.</p>
+<p>Werden alle Job Scheduler neu gestartet, so ist anschließend der primäre Scheduler der aktive Job Scheduler</p>
+<p>Entspricht dem XML-Kommando &lt;terminate all_schedulers="yes" restart="yes" timeout="60"&gt;</p>
+
+
+<h3>Beenden des aktiven Job Schedulers. Die Backup Job Scheduler bleiben gestartet ohne Jobs und Aufträge zu verarbeiten</h3>
+<p>Ein aktiver Job Scheduler wird beendet, indem in der Job Scheduler Web-Oberfläche das Kommando "terminate" aufgerufen wird. 
+Das Kommando hat keinen Einfluss auf Backup Job Scheduler, es erfolgt kein Failover, da kein Fehlerzustand
+im primären Job Scheduler eingetreten ist.
+</p>
+<p>Entspricht dem XML-Kommando &lt;terminate&gt;</p>
+
+
+<h3>Beenden des aktiven Job Schedulers mit Neustart. Die Backup Job Scheduler bleiben gestartet ohne Jobs und Aufträge zu verarbeiten</h3>
+<p>Ein aktiver Job Scheduler wird beendet und anschließend neu gestartet, indem in der Job Scheduler Web-Oberfläche 
+das Kommando "terminate and restart" aufgerufen wird.
+Das Kommando hat keinen Einfluss auf Backup Job Scheduler, es erfolgt kein Failover, da kein Fehlerzustand
+im primären Job Scheduler eingetreten ist.
+</p>
+<p>Entspricht dem XML-Kommando &lt;terminate restart="yes"&gt;</p>
+
+
+<h3>Beenden eines Backup Job Schedulers mit Neustart.</h3>
+<p>Ein Job Scheduler wird beendet und anschließend neu gestartet, indem in der Job Scheduler Web-Oberfläche 
+das Kommando "terminate and restart" aufgerufen wird. </p>
+<p>Der Backup Job Scheduler wird nach dem Neustart nicht aktiv. 
+Ist im Cluster ein inaktiver primärer Job Scheduler gestartet, so wird dieser aktiv.</p>
+<p>Entspricht dem XML-Kommando &lt;terminate restart="yes"&gt;</p>
 
  
-<h2>Primären Scheduler reaktivieren</h2>
+<h2>Primären Job Scheduler nach Ausfall reaktivieren</h2>
 
 <ol>
-<li>Der primäre Scheduler wird gestartet. Da bereits ein backup Scheduler läuft, übernimmt der primäre Scheduler nicht die Verarbeitung.</li>
-<li>Der Backup-Scheduler wird neu gestartet ("terminate and restart"). Da der primäre inaktive Scheduler aktiv wird, sobald kein anderer Scheduler aktiv ist, übernimmt er die Verarbeitung (wenn es mehrere primäre Scheduler gibt, bestimmt <scheduler_option name="backup-precedence"/> welcher aktiv wird).</li>
+<li>Der primäre Job Scheduler wird nach einem Ausfall gestartet. Falls bereits ein Backup Job Scheduler läuft, 
+übernimmt der primäre Job Scheduler nicht die Verarbeitung.</li>
+<li>Der Backup Job Scheduler wird neu gestartet ("terminate and restart"). 
+Der primäre, bislang inaktive, Job Scheduler wird aktiv und
+übernimmt die Verarbeitung. Wenn mehrere primäre Job Scheduler vorhanden sind, 
+bestimmt <scheduler_option name="backup-precedence"/> welcher Job Scheduler aktiv wird.</li>
 </ol>
  
-<h2>Backup-Schedulers soll übernehmen</h2>
+
+<h2>Backup Job Scheduler übernimmt die Verarbeitung</h2>
 
 <p>
-Der primäre Scheduler wird mit "terminate fail-safe" beendet. Ein bereits laufender Backup-Scheduler übernimmt damit die Verarbeitung.  
+Der primäre Job Scheduler wird mit "terminate fail-safe" beendet. 
+Ein bereits laufender Backup Job Scheduler übernimmt automatisch nach ca. 1-2 Minuten die Verarbeitung.  
 </p>
 
- 
-<h2>Verhalten im Dienstefenster</h2>
+
+<h2>Verhalten des Dienstes unter Windows</h2>
 
 <ul>
-<li>Beenden im Dienstefenster entspricht dem Kommando &lt;terminate&gt;. Die Backup-Scheduler laufen nicht an. Wird ein Backup-Scheduler beendet und gibt es einen inaktiven primären Scheduler, wird der primäre Scheduler aktiv</li>
-<li>Neustarten im Dienstefenster entspricht dem Kommando <scheduler_element name="terminate" attribute="restart" value="yes"/>. Die Backup-Scheduler laufen nicht an. Der primäre Scheduler wird aktiv</li>
+<li>Das Beenden des Dienstes entspricht dem Kommando &lt;terminate&gt;. Die Backup Job Scheduler laufen nicht an. 
+Wird ein Backup Job Scheduler beendet und gibt es einen inaktiven primären Job Scheduler, 
+so wird der primäre Job Scheduler aktiv.</li>
+<li>Das Starten des Dienstes entspricht dem Kommando <scheduler_element name="terminate" attribute="restart" value="yes"/>. Die Backup-Scheduler laufen nicht an. 
+Der primäre Job Scheduler wird aktiv.</li>
 </ul>
 
-<h2>Verhalten beim Neustarten des Rechners</h2>
+
+<h2>Verhalten beim Neustart des Rechners</h2>
 
 <ul>
-<li>Wenn der Rechner heruntergefahren wird, übernimmt ein Backup-Scheduler auf einem zweiten Rechner (continue_exclusive_operation="yes")</li>
-<li>Wenn primärer Scheduler und Backup-Scheduler auf einem Rechner laufen und dieser Rechner neu gestartet wird, kann es sein, dass der Backup-Scheduler zuerst startet. Er übernimmt dann nicht sofort die Verarbeitung sondern wartet, ob vom primären Scheduler ein Herzschlag kommt. Nur wenn nach 60s kein Herzschlag kommt, übernimmt der Backup-Scheduler die Verarbeitung. Dies entspricht dem Standardverhalten beim Ausbleiben eines Herzschlags vom aktiven Scheduler.</li>
+<li>Wenn der Rechner heruntergefahren wird, übernimmt ein Backup Job Scheduler auf einem zweiten Rechner 
+(continue_exclusive_operation="yes")</li>
+<li>Wenn primärer Job Scheduler und Backup Job Scheduler neu gestartet werden, z.B. wg. Neustart der Server,
+dann kann es sein, dass der Backup Job Scheduler zuerst startet. 
+Er übernimmt dann nicht sofort die Verarbeitung sondern wartet, 
+ob vom primären Job Scheduler ein Herzschlag kommt. 
+Nur wenn nach 60s kein Herzschlag kommt, übernimmt der Backup Job Scheduler die Verarbeitung. 
+Dies entspricht dem Standardverhalten beim Ausbleiben eines Herzschlags des aktiven Job Schedulers.</li>
 </ul>
 
-<h2>Einen inaktiven Backup-Scheduler zum aktiven primären Scheduler machen</h2>
-<p>Wenn ein aktiver Backup-Scheduler beendet wird, wird er beim Neustart inaktiv sein. Falls der primäre Scheduler längere Zeit ausfällt, muss der Backup-Scheduler daher als primärer Scheduler gestartet werden. Ein Backup-Scheduler wird als primärer Scheduler gestartet wenn beim Aufruf von jobscheduler.cmd der Parameter "start -exclusive" anstelle von "start" angegeben wird. </p>
+
+<h2>Einen inaktiven Backup Job Scheduler zum aktiven primären Job Scheduler machen</h2>
+<p>Wenn ein aktiver Backup Job Scheduler beendet wird, dann wird er beim Neustart inaktiv sein. 
+Falls der primäre Job Scheduler längere Zeit ausfällt, muss der Backup Job Scheduler 
+als primärer Job Scheduler gestartet werden. 
+Ein Backup Job Scheduler wird als primärer Job Scheduler gestartet, 
+indem beim Aufruf von <code>jobscheduler.cmd</code> der Parameter "start -exclusive" anstelle von "start" angegeben wird. </p>
+
 
 <h2>Kommandos des Startscript</h2>
-<p>Wenn beim der Parameter [start] ohne weitere Angaben angegeben wird, wird der Scheduler so gestartet, wie es beim Setup angegeben wurde.</p>
-<p>Folgende zusätzliche Kommandos gibt es für den Betrieb eines Backup-Cluster-Schedulers</p>
+<p>Wenn beim Start nur der Parameter "start" angegeben wird, damm wird der Job Scheduler so gestartet 
+wie es beim Setup eingerichtet wurde.</p>
+<p>Folgende zusätzliche Kommandos gibt es für den Betrieb eines Job Scheduler im Backup Cluster</p>
 <ul>
-<li><b>terminate_cluster</b> Fährt alle Scheduler des Backup-Clusters herunter</li>
-<li><b>restart_cluster</b> Startet alle Scheduler des Backup-Clusters neu. Anschließend ist der primäre Scheduler aktiv.</li>
-<li><b>terminate_fail-safe</b> Beendet den Scheduler. Ein anderer inaktiver Scheduler im Backup-Cluster wird aktiv.</li>
-<li><b>start -exclusive</b> Startet einen primären Scheduler im Backup-Cluster.</li>
-<li><b>start -exclusive -backup</b> Startet einen Backup-Scheduler im Backup-Cluster.</li>
-<li><b>start -exclusive -backup -backup-precedence=[n]</b> Startet einen Backup-Scheduler im Backup-Cluster mit der Rangfolge [n].</li>
+<li><b>terminate_cluster</b> Fährt alle Job Scheduler des Backup Clusters herunter</li>
+<li><b>restart_cluster</b> Startet alle Job Scheduler des Backup Clusters neu. 
+Anschließend ist der primäre Job Scheduler aktiv.</li>
+<li><b>terminate_fail-safe</b> Beendet den Job Scheduler. Ein anderer, inaktiver Job Scheduler im Backup Cluster wird aktiv.</li>
+<li><b>start -exclusive</b> Startet einen primären Job Scheduler im Backup Cluster.</li>
+<li><b>start -exclusive -backup</b> Startet einen Backup Job Scheduler im Cluster.</li>
+<li><b>start -exclusive -backup -backup-precedence=[n]</b> Startet einen Backup Job Scheduler im Cluster 
+mit der Rangfolge [n].</li>
 </ul>
 </description>
