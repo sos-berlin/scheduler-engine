@@ -784,7 +784,7 @@ function scheduler_menu__onclick( x, y )
   //popup_builder.add_command ( "Reload"                         , command( "reload"   ), state != "stopped"  &&  state != "stopping" );
   
     
-    if( _response.selectSingleNode( "spooler/answer/state" ).getAttribute( "cluster" ) == "yes" )
+    if( _response.selectSingleNode( "spooler/answer/state/cluster" ) )
     {
         popup_builder.add_command ( "Terminate cluster"            , "<terminate all_schedulers='yes'/>"              , !waiting_errno );
         popup_builder.add_command ( "Terminate cluster within ~10s", "<terminate all_schedulers='yes' timeout='10'/>" , !waiting_errno );

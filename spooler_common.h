@@ -34,12 +34,22 @@ extern const Embedded_files     embedded_files;             // spooler_embedded_
 #define        FOR_EACH(             TYPE, CONTAINER, ITERATOR )  for( TYPE::iterator       ITERATOR = (CONTAINER).begin(); (ITERATOR) != (CONTAINER).end(); (ITERATOR)++ )
 #define        FOR_EACH_CONST(       TYPE, CONTAINER, ITERATOR )  for( TYPE::const_iterator ITERATOR = (CONTAINER).begin(); (ITERATOR) != (CONTAINER).end(); (ITERATOR)++ )
 
-//--------------------------------------------------------------------------------------------Do_log
+//-------------------------------------------------------------------------------------------Do_log
 
 enum Do_log
 {
     dont_log = false,
     do_log   = true
+};
+
+//---------------------------------------------------------------------------------Yes_no_last_both
+
+enum Yes_no_last_both
+{
+    ynlb_no,
+    ynlb_yes,
+    ynlb_last,
+    ynlb_both
 };
 
 //---------------------------------------------------------------------------Modified_event_handler

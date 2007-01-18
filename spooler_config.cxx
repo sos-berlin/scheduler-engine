@@ -332,12 +332,12 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const Time& x
             if( e.nodeName_is( "holidays" ) )
             {
                 _holidays.clear();
-                _holidays.set_dom( e, _spooler->include_path() );
+                _holidays.set_dom( e );
             }
             else
             if( e.nodeName_is( "holiday" ) )
             {
-                _holidays.set_dom( e, _spooler->include_path() );
+                _holidays.set_dom( e);
             }
             else
             if( e.nodeName_is( "web_services" ) )

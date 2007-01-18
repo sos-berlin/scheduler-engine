@@ -2425,9 +2425,15 @@
             </text>
         </message>
 
-        <message code="SCHEDULER-340">
+        <message code="SCHEDULER-390">
             <text xml:lang="en">
                 <title>More than <p1/> nested includes in <p2/></title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-391">
+            <text xml:lang="en">
+                <title>Invalid value '<p1/>' for setting '<p2/>'. Allowed values are: <p3/></title>
             </text>
         </message>
 
@@ -3342,11 +3348,11 @@
             </text>
         </message>
 
-        <message code="SCHEDULER-828">
+        <!--message code="SCHEDULER-828">
             <text xml:lang="en">
                 <title><p1/> inactive Scheduler member records older than <p3/> removed from database table <p2/></title>
             </text>
-        </message>
+        </message-->
 
         <message code="SCHEDULER-829">
             <text xml:lang="en">

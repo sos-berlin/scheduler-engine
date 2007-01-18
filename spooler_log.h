@@ -125,6 +125,7 @@ struct Prefix_log : Object, Has_log
     string                      last                        ( Log_level level ) const           { Last::const_iterator it = _last.find( level );
                                                                                                   return it == _last.end()? "" : it->second; }
     string                      last_line                   () const                            { return last( _last_level ); }
+    bool                        has_line_for_level          ( Log_level level ) const           { return _last.find( level ) != _last.end(); }
 
     void                        continue_with_text          ( const string& );
     string                      as_string                   ();
@@ -155,7 +156,7 @@ struct Prefix_log : Object, Has_log
     void                    set_mail_defaults               ();
     void                    set_mail_default                ( const string& field_name, const string& value, bool overwrite = true );
 
-    void                        send                        ( int reason, Scheduler_event* );
+    void                        send                        ( Scheduler_event* );
     void                        send_really                 ( Scheduler_event* );
 
 
@@ -168,6 +169,7 @@ struct Prefix_log : Object, Has_log
   //void                        set_mail_header             ();
 
     friend struct               Log;
+    friend struct               Task;                       // Für _mail_on_error etc.
 
 
     Scheduler_object*          _object;
@@ -199,6 +201,7 @@ struct Prefix_log : Object, Has_log
     bool                       _mail_on_error;
     bool                       _mail_on_success;
     int                        _mail_on_process;
+    Yes_no_last_both           _mail_on_delay_after_error;
     bool                       _mail_it;
     ptr<Com_mail>              _mail;
     string                     _mail_section;               // Name des Abschnitts in factory.ini für eMail-Einstellungen

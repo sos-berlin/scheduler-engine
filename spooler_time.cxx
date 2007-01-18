@@ -737,7 +737,7 @@ Period Ultimo_set::next_period( Time tim, With_single_start single_start )
 
 //--------------------------------------------------------------------------------Holidays::set_dom
 
-void Holidays::set_dom( const xml::Element_ptr& e, const File_path& include_path, int include_nesting )
+void Holidays::set_dom( const xml::Element_ptr& e, int include_nesting )
 {
     if( e.nodeName_is( "holidays" ) )
     {
@@ -752,20 +752,20 @@ void Holidays::set_dom( const xml::Element_ptr& e, const File_path& include_path
             else
             if( e2.nodeName_is( "include" ) )
             {
-                if( include_nesting >= max_include_nesting )  z::throw_xc( "SCHEDULER-340", max_include_nesting, "<holidays>" );
+                if( include_nesting >= max_include_nesting )  z::throw_xc( "SCHEDULER-390", max_include_nesting, "<holidays>" );
 
-                File_path file = e.getAttribute( "file" );
+                File_path file = subst_env( e2.getAttribute( "file" ) );
 
                 try
                 {
-                    if( !file.is_absolute_path() )  file.set_directory( include_path );
+                    if( !file.is_absolute_path() )  file.prepend_directory( directory_of_path( _spooler->_config_filename ) );
                     
                     xml::Document_ptr doc;
                     doc.load_xml( string_from_file( file ) );
                     
                     if( !doc.documentElement() )  z::throw_xc( "SCHEDULER-319", "", file );
 
-                    set_dom( doc.documentElement(), include_path, include_nesting+1 );
+                    set_dom( doc.documentElement(), include_nesting+1 );
                 }
                 catch( z::Xc& x )
                 {
@@ -932,7 +932,8 @@ Run_time::Run_time( Spooler* spooler, Order* order )
     Idispatch_implementation( &class_descriptor ),
     _zero_(this+1),
     _spooler(spooler),
-    _order(order)
+    _order(order),
+    _holidays(spooler)
 {
     if( _order )
     {
@@ -1083,12 +1084,12 @@ void Run_time::set_dom( const xml::Element_ptr& element )
         if( e.nodeName_is( "holidays" ) )
         {
             _holidays.clear();
-            _holidays.set_dom( e, _spooler->include_path() );
+            _holidays.set_dom( e );
         }
         else
         if( e.nodeName_is( "holiday" ) )
         {
-            _holidays.set_dom( e, _spooler->include_path() );
+            _holidays.set_dom( e );
         }
     }
 

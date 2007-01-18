@@ -8,7 +8,12 @@ namespace sos {
 namespace scheduler {
 namespace cluster {
 
+
 struct Cluster_member;
+struct Heart_beat_watchdog_thread;
+struct Heart_beat;
+struct Exclusive_scheduler_watchdog;
+struct Active_schedulers_watchdog;
 
 //------------------------------------------------------------------------------------------Cluster
 

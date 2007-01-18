@@ -656,9 +656,17 @@
                 </p>
             </description>
         </command_option>
+        
+        <command_option name="?" title="Optionen zeigen">
+            <description>
+                <p>
+                    Zeigt die Kommandozeilen-Optionen.
+                </p>
+            </description>
+        </command_option>
     </command_options>
 
-    
+
     <description>
         <p>
             Der Scheduler wird durch einfachen Aufruf gestartet.

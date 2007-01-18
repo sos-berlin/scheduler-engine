@@ -247,7 +247,8 @@ void Process_class::remove_process( Process* process )
                 if( !_waiting_jobs.empty() )
                 {
                     Job* job = *_waiting_jobs.rbegin();
-                    job->signal( S() << __FUNCTION__  << "  " << process->obj_name() );
+                    job->notify_a_process_is_idle();
+                    //job->signal( S() << __FUNCTION__  << "  " << process->obj_name() );
                 }
 
                 return; 
@@ -341,7 +342,8 @@ void Process_class::remove_waiting_job( Job* waiting_job )
     if( _process_list.size() < _max_processes  &&  !_waiting_jobs.empty() )
     {
         Job* job = *_waiting_jobs.rbegin();
-        job->signal( S() << __FUNCTION__ << "  " << waiting_job->obj_name() );
+        //job->signal( S() << __FUNCTION__ << "  " << waiting_job->obj_name() );
+        job->notify_a_process_is_idle();
     }
 }
 

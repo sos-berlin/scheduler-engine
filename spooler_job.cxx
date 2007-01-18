@@ -713,7 +713,7 @@ void Job::signal( const string& signal_name )
 
     _next_time = 0;
     
-    //Z_LOG2( "joacim", __FUNCTION__ << " " << signal_name << "\n" );
+    Z_LOG2( "joacim", obj_name() << "  " __FUNCTION__ << " " << signal_name << "\n" );
     _spooler->signal( signal_name ); 
 }
 
@@ -1587,7 +1587,11 @@ void Job::calculate_next_time( Time now )
     {
         Time next_time = Time::never;
 
-        if( !_waiting_for_process )
+        if( _waiting_for_process )
+        {
+            if( _waiting_for_process_try_again )  next_time = 0;
+        }
+        else
         {
             if( _state == s_pending  
              || _state == s_running   &&  _running_tasks.size() < _max_tasks )
@@ -1844,17 +1848,13 @@ ptr<Task> Job::task_to_start()
             if( now >= _next_single_start )  _next_single_start = Time::never;  // Vorsichtshalber, 26.9.03
         }
     }
-    else
+
+    if( _waiting_for_process  &&  _module->_process_class->process_available( this ) )
     {
-        // Keine Task zu starten
-
-        if( _waiting_for_process )                 
-        {
-            bool notify = _waiting_for_process_try_again;                           // Sind wir mit notify_a_process_is_idle() benachrichtigt worden?
-            remove_waiting_job_from_process_list();
-
-            if( notify )  _module->_process_class->notify_a_process_is_idle();       // Dieser Job braucht den Prozess nicht mehr. Also nächsten Job benachrichtigen!
-        }
+        // Ob eine Task gestartet wird oder nicht, 
+        //bool notify = _waiting_for_process_try_again;                           // Sind wir mit notify_a_process_is_idle() benachrichtigt worden?
+        remove_waiting_job_from_process_list();
+        //if( notify )  _module->_process_class->notify_a_process_is_idle();       // Dieser Job braucht den Prozess nicht mehr. Also nächsten Job benachrichtigen!
     }
 
     if( task )  _start_once = false;

@@ -373,7 +373,7 @@ void Log::write( Log_level level, Prefix_log* extra_log, Prefix_log* order_log, 
         if( extra_log )  extra_log->write( text, len );
         if( order_log )  order_log->write( text, len );
 
-        if( _spooler->_log_to_stdout  &&  level >= _spooler->_log_to_stdout_level )  my_write( _spooler, "(stdout)", fileno(stdout), text, len );
+        if( _spooler->_log_to_stderr  &&  level >= _spooler->_log_to_stderr_level )  my_write( _spooler, "(stderr)", fileno(stderr), text, len );
     }
 }
 
@@ -423,7 +423,7 @@ void Log::log2( Log_level level, bool log_to_files, const string& prefix, const 
 
         if( log_to_files )
         {
-            if( _file != -1  &&  isatty( _file )  ||  _spooler->_log_to_stdout  &&  level >= _spooler->_log_to_stdout_level  &&  isatty( fileno( stdout ) ) )  console_colors.set_color_for_level( level );
+            if( _file != -1  &&  isatty( _file )  ||  _spooler->_log_to_stderr  &&  level >= _spooler->_log_to_stderr_level  &&  isatty( fileno( stderr ) ) )  console_colors.set_color_for_level( level );
 
             Time now = Time::now();
             _last_time = now;
@@ -569,6 +569,7 @@ void Prefix_log::init( Scheduler_object* o, const string& prefix )
     _mail_on_error   = _spooler->_mail_on_error;
     _mail_on_process = _spooler->_mail_on_process;
     _mail_on_success = _spooler->_mail_on_success;
+    _mail_on_delay_after_error = _spooler->_mail_on_delay_after_error;
   //_subject         = _spooler->_log_mail_subject;
     _collect_within  = _spooler->_log_collect_within;
     _collect_max     = _spooler->_log_collect_max;
@@ -595,6 +596,7 @@ void Prefix_log::set_profile_section( const string& section )
         _mail_on_error   = read_profile_bool           ( _spooler->_factory_ini, _section, "mail_on_error"     , _mail_on_error   );
         _mail_on_process = read_profile_mail_on_process( _spooler->_factory_ini, _section, "mail_on_process"   , _mail_on_process );
         _mail_on_success =         read_profile_bool   ( _spooler->_factory_ini, _section, "mail_on_success"   , _mail_on_success );
+        _mail_on_delay_after_error = read_profile_yes_no_last_both( _spooler->_factory_ini, _section, "mail_on_delay_after_error", _mail_on_delay_after_error );
       //_subject         =         read_profile_string ( _spooler->_factory_ini, _section, "log_mail_subject"  , _subject );
         _collect_within  = (double)read_profile_uint   ( _spooler->_factory_ini, _section, "log_collect_within", (uint)_collect_within );
         _collect_max     = (double)read_profile_uint   ( _spooler->_factory_ini, _section, "log_collect_max"   , (uint)_collect_max );
@@ -611,6 +613,7 @@ void Prefix_log::inherit_settings( const Prefix_log& other )
     _mail_on_error   = other._mail_on_error;
     _mail_on_process = other._mail_on_process;
     _mail_on_success = other._mail_on_success;
+    _mail_on_delay_after_error = other._mail_on_delay_after_error;
   //_subject         = other._subject;
     _collect_within  = other._collect_within;
     _collect_max     = other._collect_max;
@@ -979,13 +982,8 @@ void Prefix_log::set_mail_body( const string& body, bool overwrite )
 */
 //---------------------------------------------------------------------------------Prefix_log::send
 
-void Prefix_log::send( int reason, Scheduler_event* scheduler_event )
+void Prefix_log::send( Scheduler_event* scheduler_event )
 {
-    //Z_LOG2( "joacim", "Prefix_log::send()\n" );
-    // reason == -2  =>  Gelegentlicher Aufruf, um Fristen zu prüfen und ggfs. eMail zu versenden
-    // reason == -1  =>  Job mit Fehler beendet
-    // reason >=  0  =>  Anzahl spooler_process()
-
     if( _file == -1  &&  ( !_log || _log->filename() == "" ) )       // Nur senden, wenn die Log-Datei beschrieben worden ist
     {
         //Z_LOG2( "joacim", "Prefix_log::send()  _file == -1\n" );
@@ -994,20 +992,20 @@ void Prefix_log::send( int reason, Scheduler_event* scheduler_event )
     }
     else
     {
-        bool mail_it =  _mail_it
-                     || reason == -1  &&  ( _mail_on_error | _mail_on_warning )
-                     || reason ==  0  &&  _mail_on_success
-                     || reason  >  0  &&  ( _mail_on_success || _mail_on_process && reason >= _mail_on_process )
-                     || _mail_on_warning  &&  _last.find( log_warn ) != _last.end();
+        //bool mail_it =  _mail_it
+        //             || reason == -1  &&  ( _mail_on_error | _mail_on_warning )
+        //             || reason ==  0  &&  _mail_on_success
+        //             || reason  >  0  &&  ( _mail_on_success || _mail_on_process && reason >= _mail_on_process )
+        //             || _mail_on_warning  &&  _last.find( log_warn ) != _last.end();
 
         Time now = Time::now();
 
-        if( _first_send == 0  &&  !mail_it )
-        {
-            close_file();    // Protokoll nicht senden
-            _mail = NULL;
-        }
-        else
+        //if( _first_send == 0  &&  !mail_it )
+        //{
+        //    close_file();    // Protokoll nicht senden
+        //    _mail = NULL;
+        //}
+        //else
         {
             if( _last_send  == 0  ||  _last_send  > now )  _last_send  = now;
             if( _first_send == 0  ||  _first_send > now )  _first_send = now;
@@ -1191,6 +1189,7 @@ xml::Element_ptr Prefix_log::dom_element( const xml::Document_ptr& document, con
             if( _mail_on_warning            )  log_element.setAttribute( "mail_on_warning", "yes" );
             if( _mail_on_success            )  log_element.setAttribute( "mail_on_success", "yes" );
             if( _mail_on_process            )  log_element.setAttribute( "mail_on_process", _mail_on_process );
+          //if( _mail_on_delay_after_error  )  log_element.setAttribute( "mail_on_delay_after_error ", ...( _mail_on_delay_after_error  ) );
 
           //string queue_dir   = _mail_defaults[ "queue_dir" ];
             string smtp_server = _mail_defaults[ "smtp"    ];

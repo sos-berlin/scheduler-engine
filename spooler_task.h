@@ -293,6 +293,8 @@ struct Task : Object,
     bool                       _module_instance_async_error;    // SCHEDULER-202
     bool                       _is_in_database;                   // Datensatz für diese Task ist in der Datenbank
     bool                       _running_state_reached;      // Zustand s_running... erreicht
+    bool                       _is_first_job_delay_after_error;
+    bool                       _is_last_job_delay_after_error;
 
     ptr<Async_operation>       _operation;
     ptr<Com_variable_set>      _params;

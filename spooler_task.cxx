@@ -1729,6 +1729,8 @@ void Task::finish()
     {
         InterlockedIncrement( &_job->_error_steps );
 
+        _is_first_job_delay_after_error = _job->_error_steps == 1;
+
         if( !_job->repeat() )   // spooler_task.repeat hat Vorrang
         {
             Time delay = _job->_delay_after_error.empty()? Time::never : Time(0);
@@ -1738,6 +1740,7 @@ void Task::finish()
 
             if( delay == Time::never )
             {
+                _is_last_job_delay_after_error = true;
                 _job->stop( false );
             }
             else
@@ -1898,7 +1901,52 @@ void Task::trigger_event( Scheduler_event* scheduler_event )
 
         _log->set_mail_default( "body", body + "This message contains the job protocol." );   //, is_error );
 
-        _log->send( has_error() || _log->highest_level() >= log_error? -1 : _step_count, scheduler_event );
+
+
+        bool mail_it = _log->_mail_it;
+
+        if( !mail_it )
+        {
+            bool mail_due_to_error_or_warning = false;
+
+            if( _log->_mail_on_error | _log->_mail_on_warning  &&  ( has_error() || _log->highest_level() >= log_error ) )  mail_due_to_error_or_warning = true;
+            else
+            if( _log->_mail_on_warning  &&  _log->has_line_for_level( log_warn ) )  mail_due_to_error_or_warning = true;
+
+#           ifdef Z_DEBUG
+                if( _log->_mail_on_delay_after_error == ynlb_yes ) {
+                    int reason = has_error() || _log->highest_level() >= log_error? -1 : _step_count;
+                    bool old_mail_it =  reason == -1  &&  ( _log->_mail_on_error | _log->_mail_on_warning )
+                                     || reason ==  0  &&  _log->_mail_on_success
+                                     || reason  >  0  &&  ( _log->_mail_on_success || _log->_mail_on_process && reason >= _log->_mail_on_process )
+                                     || _log->_mail_on_warning  &&  _log->_last.find( log_warn ) != _log->_last.end();
+                    assert( mail_due_to_error_or_warning == old_mail_it );
+                }
+#           endif
+
+            switch( _log->_mail_on_delay_after_error )
+            {
+                case ynlb_yes:  break;
+                case ynlb_no:   if( !_is_first_job_delay_after_error )  mail_due_to_error_or_warning = false;  break;
+                case ynlb_last: if( !_is_last_job_delay_after_error  )  mail_due_to_error_or_warning = false;  break;
+                case ynlb_both: if( !_is_first_job_delay_after_error  
+                                &&  !_is_last_job_delay_after_error  )  mail_due_to_error_or_warning = false;  break;
+                default: z::throw_xc( __FUNCTION__ );
+            }
+
+            mail_it = mail_due_to_error_or_warning;
+        }
+
+        if( !mail_it  &&  _log->_mail_on_success  &&  _step_count >= 0                      )  mail_it = true;
+        if( !mail_it  &&  _log->_mail_on_process  &&  _step_count >= _log->_mail_on_process )  mail_it = true;
+
+
+        if( _log->_mail_it )  mail_it = true;
+
+        if( mail_it )
+        {
+            _log->send( scheduler_event );
+        }
 
         /*
         if( !_spooler->_manual )
@@ -1937,16 +1985,16 @@ bool Task::wait_until_terminated( double )
 
 //-------------------------------------------------------------------------Task::send_collected_log
 
-void Task::send_collected_log()
-{
-    try
-    {
-        Scheduler_event scheduler_event ( evt_task_ended, _log->highest_level(), this );
-        _log->send( -2, &scheduler_event );
-    }
-    catch( const exception&  x ) { _spooler->log()->error( x.what() ); }
-    catch( const _com_error& x ) { _spooler->log()->error( bstr_as_string(x.Description()) ); }
-}
+//void Task::send_collected_log()
+//{
+//    try
+//    {
+//        Scheduler_event scheduler_event ( evt_task_ended, _log->highest_level(), this );
+//        _log->send( -2, &scheduler_event );
+//    }
+//    catch( const exception&  x ) { _spooler->log()->error( x.what() ); }
+//    catch( const _com_error& x ) { _spooler->log()->error( bstr_as_string(x.Description()) ); }
+//}
 
 //--------------------------------------------------------------------------Task::set_mail_defaults
 /*

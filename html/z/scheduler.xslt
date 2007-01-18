@@ -1158,7 +1158,6 @@
                             
                             <td colspan="3">
                                 <xsl:apply-templates select="$job/@state"/>
-                                <xsl:text> </xsl:text>
                                 
                                 <xsl:choose>
                                     <xsl:when test="$job/tasks/@count>0">
@@ -1179,9 +1178,10 @@
                                         </xsl:if>
                                     </xsl:otherwise>
                                 </xsl:choose>
-                                
+
                                 <xsl:if test="$job/@waiting_for_process='yes'">
-                                    <span style="margin-left: 1ex; color: red">, needs process</span>
+                                    <xsl:text>, </xsl:text>
+                                    <span style="color: red">needs process</span>
                                 </xsl:if>
                             </td>
                         </xsl:element>
@@ -1563,19 +1563,6 @@
             <td>
                 <xsl:element name="a">
                     <xsl:attribute name="class">no_underline</xsl:attribute>
-                    <xsl:attribute name="style">
-                        <xsl:choose>
-                            <xsl:when test="@dead='yes'">text-decoration: line-through;</xsl:when>
-                            <xsl:otherwise              >text-decoration: none;</xsl:otherwise>
-                        </xsl:choose>
-                    </xsl:attribute>
-
-                    <xsl:attribute name="title">
-                        <xsl:text>ID=</xsl:text>
-                        <xsl:value-of select="@cluster_member_id"/>
-                        <xsl:text>, &#10;</xsl:text>
-                        <xsl:value-of select="@version"/>
-                    </xsl:attribute>
 
                     <xsl:if test="not( @dead='yes' ) and @cluster_member_id != ancestor::cluster/@cluster_member_id">
                         <xsl:attribute name="style">
@@ -1595,16 +1582,33 @@
                         </xsl:attribute>
                     </xsl:if>
 
-                    <xsl:choose>
-                        <xsl:when test="@cluster_member_id=ancestor::cluster/@cluster_member_id">
-                            <xsl:text>This Scheduler</xsl:text>
-                        </xsl:when>
-                        <xsl:otherwise>
-                            <xsl:value-of select="@http_url"/>
-                        </xsl:otherwise>
-                    </xsl:choose>
-                    <xsl:text> </xsl:text>
+                    <xsl:element name="span">
+                        <xsl:attribute name="style">
+                            <xsl:choose>
+                                <xsl:when test="@dead='yes'">text-decoration: line-through;</xsl:when>
+                                <xsl:otherwise              >text-decoration: none; font-weight: bold;</xsl:otherwise>
+                            </xsl:choose>
+                        </xsl:attribute>
+
+                        <xsl:attribute name="title">
+                            <xsl:text>ID=</xsl:text>
+                            <xsl:value-of select="@cluster_member_id"/>
+                            <xsl:text>, &#10;</xsl:text>
+                            <xsl:value-of select="@version"/>
+                        </xsl:attribute>
+
+                        <xsl:choose>
+                            <xsl:when test="@cluster_member_id=ancestor::cluster/@cluster_member_id">
+                                <xsl:text>This Scheduler</xsl:text>
+                            </xsl:when>
+                            <xsl:otherwise>
+                                <xsl:value-of select="@http_url"/>
+                            </xsl:otherwise>
+                        </xsl:choose>
+                    </xsl:element>
                 </xsl:element>
+                
+                <xsl:text> </xsl:text>
             </td>
 
             <td>
@@ -1629,11 +1633,23 @@
                 </xsl:choose>
 
                 <xsl:if test="@distributed_orders='yes'">
-                    <span style="margin-right: 1ex; white-space: nowrap; font-weight: bold">distributed orders </span>
+                    <xsl:element name="span">
+                        <xsl:attribute name="style">
+                            <xsl:text>margin-right: 1ex; white-space: nowrap; </xsl:text>
+                            <xsl:if test="not( @dead='yes' )">font-weight: bold; </xsl:if>
+                        </xsl:attribute>
+                        <xsl:text>distributed orders </xsl:text>
+                    </xsl:element>
                 </xsl:if>
 
                 <xsl:if test="@exclusive='yes'">
-                    <span style="margin-right: 1ex; font-weight: bold">exclusive </span>
+                    <xsl:element name="span">
+                        <xsl:attribute name="style">
+                            <xsl:text>margin-right: 1ex; white-space: nowrap; </xsl:text>
+                            <xsl:if test="not( @dead='yes' )">font-weight: bold; </xsl:if>
+                        </xsl:attribute>
+                        <xsl:text>exclusive </xsl:text>
+                    </xsl:element>
                 </xsl:if>
 
                 <xsl:if test="@backup='yes'">

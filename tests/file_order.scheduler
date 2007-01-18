@@ -40,14 +40,17 @@ import java.io.*;
 
 public class Generator  extends sos.spooler.Job_impl
 {   
-    int i = 0;
+    final int n        = 500000;
+    int i              = 0;
     int new_file_count = 0;
-    int n = 500000;
+
     //spooler.variables().set_var( "n", Integer.toString( n ) );
-    String sos_mount = spooler_task.params().value( "sos_mount" );
+
 
     public boolean spooler_process()  throws Exception
     {     
+        String sos_mount = spooler_task.params().value( "sos_mount" );
+        
         for( int j = 1; j <= 1000; j++ )
         {
             i++;
@@ -63,11 +66,13 @@ public class Generator  extends sos.spooler.Job_impl
 }
                 ]]>
                 </script>
+                
                 <run_time once="yes">
                     <period repeat=""/>
                 </run_time>
             </job>
 
+            
             <job name="javascript" order="yes">
 
                 <script language="JavaScript">

@@ -183,6 +183,7 @@ int                             read_profile_mail_on_process( const string& prof
 int                             read_profile_history_on_process( const string& prof, const string& section, const string& entry, int deflt );
 Archive_switch                  read_profile_archive        ( const string& profile, const string& section, const string& entry, Archive_switch deflt );
 With_log_switch                 read_profile_with_log       ( const string& profile, const string& section, const string& entry, Archive_switch deflt );
+Yes_no_last_both                read_profile_yes_no_last_both( const string& profile, const string& section, const string& entry, Yes_no_last_both deflt );
 
 //----------------------------------------------------------------------------State_changed_handler
 
@@ -417,8 +418,8 @@ struct Spooler : Object,
     string                     _log_directory;              // -log-dir=
     bool                       _log_directory_as_option_set;// -log-dir= als Option gesetzt, überschreibt Angabe in spooler.xml
     string                     _log_filename;
-    bool                       _log_to_stdout;              // Zusätzlich nach stdout schreiben
-    Log_level                  _log_to_stdout_level;
+    bool                       _log_to_stderr;              // Zusätzlich nach stdout schreiben
+    Log_level                  _log_to_stderr_level;
     File_path                  _include_path;
     bool                       _include_path_as_option_set; // -include-path= als Option gesetzt, überschreibt Angabe in spooler.xml
     string                     _temp_dir;
@@ -443,6 +444,8 @@ struct Spooler : Object,
     bool                       _mail_on_error;              // Für Job-Protokolle
     int                        _mail_on_process;            // Für Job-Protokolle
     bool                       _mail_on_success;            // Für Job-Protokolle
+    Yes_no_last_both           _mail_on_delay_after_error;  // Für Job-Protokolle
+    Yes_no_last_both           _mail_on_delay_after_setback;// Für Job-Protokolle
     string                     _mail_encoding;
 
     Mail_defaults              _mail_defaults;

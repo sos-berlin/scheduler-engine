@@ -412,6 +412,9 @@ bool Cluster_member::check_heart_beat( time_t now_before_select, const Record& r
 
 bool Cluster_member::free_occupied_orders( Transaction* outer_transaction )
 {
+    int NUR_RUFEN_WENN_DISTRIBUTED_ORDERS;
+
+
     //Z_LOGI2( "scheduler.cluster", __FUNCTION__ << "\n" );
     bool result = false;
 
@@ -760,7 +763,7 @@ xml::Element_ptr Cluster_member::dom_element( const xml::Document_ptr& dom_docum
     {
         result.setAttribute( "last_detected_heart_beat"    , _last_heart_beat_detected_local_time.as_string( Time::without_ms ) );
         result.setAttribute( "last_detected_heart_beat_age", max( (time_t)0, ::time(NULL) - _last_heart_beat_detected ) );
-        result.setAttribute( "heart_beat_quality"          , /*_is_dead? "bad" :*/ _is_heart_beat_late? "late" : "good" );
+        result.setAttribute( "heart_beat_quality"          , _is_dead? "dead" : _is_heart_beat_late? "late" : "good" );
         if( _late_heart_beat_count > 0 )  result.setAttribute( "late_heart_beat_count", _late_heart_beat_count );
     }
     else
@@ -1659,7 +1662,7 @@ bool Cluster::heartbeat_member_record()
 
     for( Retry_transaction ta ( db() ); ta.enter_loop(); ta++ ) try
     {
-        ta.suppress_heart_beat_timeout_check();
+        ta.suppress_heart_beat_timeout_check();     // commit() soll nicht über check_is_active() do_a_heart_beat() rufen
 
         time_t now = ::time(NULL);
         calculate_next_heart_beat( now );
@@ -1690,7 +1693,7 @@ bool Cluster::heartbeat_member_record()
             has_command = record_is_updated;     // Neues Kommando
         }
 
-        ta.commit( __FUNCTION__ );      // do_a_heart_beat() verhindert den rekursiven Aufruf über _spooler->check_is_active()
+        ta.commit( __FUNCTION__ );
         ok = record_is_updated;
 
         if( ok )

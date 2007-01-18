@@ -357,6 +357,29 @@ With_log_switch read_profile_with_log( const string& profile, const string& sect
     return read_profile_archive( profile, section, entry, deflt );
 }
 
+//--------------------------------------------------------------------read_profile_yes_no_last_both
+
+Yes_no_last_both read_profile_yes_no_last_both( const string& profile, const string& section, const string& entry, Yes_no_last_both deflt )
+{
+    Yes_no_last_both result;
+
+    string s = read_profile_string( profile, section, entry );
+
+    if( s == ""     )  result = deflt;
+    else
+    if( s == "yes"  )  result = ynlb_yes;
+    else
+    if( s == "no"   )  result = ynlb_no;
+    else
+    if( s == "last" )  result = ynlb_last;
+    else
+    if( s == "both" )  result = ynlb_both;
+    else
+        z::throw_xc( "SCHEDULER-391", s, entry, "yes, no, last, both" );
+
+    return result;
+}
+
 //-----------------------------------------------------------------------------------ctrl_c_handler
 #ifdef Z_WINDOWS
 
@@ -593,14 +616,18 @@ Spooler::Spooler()
     _wait_handles(this),
     _module(this,_log),
     _log_level( log_info ),
+    _log_to_stderr_level( log_unknown ),
     _db_log_level( log_none ),
     _factory_ini( default_factory_ini ),
     _mail_defaults(NULL),
+    _mail_on_delay_after_error( ynlb_both ),
+    _mail_on_delay_after_setback( ynlb_both ),
     _termination_gmtimeout_at(time_max),
     _web_services(this),
     _waitable_timer( "waitable_timer" ),
     _validate_xml(true),
-    _environment( variable_set_from_environment() )
+    _environment( variable_set_from_environment() ),
+    _holidays(this)
 {
     _scheduler_event_manager = Z_NEW( Scheduler_event_manager( this ) );
     _order_subsystem = Z_NEW( Order_subsystem( this ) );
@@ -1540,6 +1567,9 @@ void Spooler::load_arg()
     _mail_on_error   = read_profile_bool           ( _factory_ini, "spooler", "mail_on_error"  , _mail_on_error   );
     _mail_on_process = read_profile_mail_on_process( _factory_ini, "spooler", "mail_on_process", _mail_on_process );
     _mail_on_success = read_profile_bool           ( _factory_ini, "spooler", "mail_on_success", _mail_on_success );
+    _mail_on_delay_after_error   = read_profile_yes_no_last_both( _factory_ini, "spooler", "mail_on_delay_after_error"  , _mail_on_delay_after_error   );
+    _mail_on_delay_after_setback = read_profile_yes_no_last_both( _factory_ini, "spooler", "mail_on_delay_after_setback", _mail_on_delay_after_setback );
+
     _mail_encoding   = read_profile_string         ( _factory_ini, "spooler", "mail_encoding"  , "base64"        );      // "quoted-printable": Jmail braucht 1s pro 100KB dafür
 
     _mail_defaults.set( "queue_dir", subst_env( read_profile_string( _factory_ini, "spooler", "mail_queue_dir"   , "-" ) ) );
@@ -1614,9 +1644,9 @@ void Spooler::load_arg()
             else
             if( opt.with_value( "log-dir"          ) )  _log_directory = opt.value(),  _log_directory_as_option_set = true;
             else
-            if( opt.flag      ( "log-to-stdout"    ) )  _log_to_stdout = opt.set();
+            if( opt.flag      ( "log-to-stderr"    ) )  _log_to_stderr = opt.set();
             else
-            if( opt.with_value( "log-to-stdout-level") )  _log_to_stdout = true,  _log_to_stdout_level = make_log_level( opt.value() );
+            if( opt.with_value( "stderr-level"     ) )  _log_to_stderr = true,  _log_to_stderr_level = make_log_level( opt.value() );
             else
             if( opt.with_value( "include-path"     ) )  _include_path = opt.value(),  _include_path_as_option_set = true;
             else
@@ -2103,7 +2133,7 @@ void Spooler::start()
 
 #   ifdef Z_WINDOWS
         _print_time_every_second = log_directory() == "*stderr"  &&  isatty( fileno( stderr ) )
-                                   ||  _spooler->_log_to_stdout  &&  isatty( fileno( stdout ) );
+                                   ||  _log_to_stderr  &&  _log_to_stderr_level <= log_info  &&  isatty( fileno( stderr ) );
 #   endif
 
     _communication.start_or_rebind();
@@ -2283,7 +2313,7 @@ void Spooler::run_scheduler_script()
 
                     _log->set_mail_default( "subject"  , subject );
                     _log->set_mail_default( "body"     , body );
-                    _log->send( -1, &scheduler_event );
+                    _log->send( &scheduler_event );
                 }
                 catch( exception& x )  { _log->warn( S() << "Error on sending mail: " << x.what() ); }
             }
@@ -3036,7 +3066,7 @@ void Spooler::run_check_ctrl_c()
             {
                 string m = message_string( "SCHEDULER-263", signal_text, ctrl_c_pressed, "Stopping Scheduler" ); 
                 _log->warn( m );
-                if( !_log_to_stdout &&  !is_daemon )  cerr << m << endl;
+                if( !_log_to_stderr &&  !is_daemon )  cerr << m << endl;
 
                 if( _state != s_stopping )
                 {
@@ -3052,7 +3082,7 @@ void Spooler::run_check_ctrl_c()
             {
                 string m = message_string( "SCHEDULER-263", signal_text, ctrl_c_pressed, "Killing all processes" );
                 _log->warn( m );
-                if( !_log_to_stdout && !is_daemon )  cerr << m << endl;
+                if( !_log_to_stderr && !is_daemon )  cerr << m << endl;
 
                 kill_all_processes();
                 set_ctrl_c_handler( true );
@@ -3064,7 +3094,7 @@ void Spooler::run_check_ctrl_c()
             {
                 string m = message_string( "SCHEDULER-263", signal_text, ctrl_c_pressed, "ABORTING IMMEDIATELY" );
                 _log->warn( m );
-                if( !_log_to_stdout && !is_daemon )  cerr << m << endl;
+                if( !_log_to_stderr && !is_daemon )  cerr << m << endl;
 
                 abort_now();
             }

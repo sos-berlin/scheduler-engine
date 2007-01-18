@@ -293,11 +293,14 @@ struct Ultimo_set : Day_set
 
 struct Holidays
 {
+                                Holidays                    ( Spooler* spooler )                    : _spooler(spooler) {}
+
     void                        clear                       ()                                      { _set.clear(); }
-    void                        set_dom                     ( const xml::Element_ptr&, const File_path& include_path, int include_nesting = 0 );
+    void                        set_dom                     ( const xml::Element_ptr&, int include_nesting = 0 );
     void                        include                     ( time_t t )                            { _set.insert( t ); }
     bool                        is_included                 ( time_t t )                            { return _set.find( t ) != _set.end(); }
 
+    Spooler*                   _spooler;
     typedef stdext::hash_set<time_t> Set;
     Set                        _set;
 };
@@ -370,7 +373,7 @@ struct Run_time : idispatch_implementation< Run_time, spooler_com::Irun_time >,
     void                    set_xml                         ( const string& );
   //string                      xml                         ()                                      { return _xml; }
 
-    void                    set_dom                         ( const xml::Element_ptr& );            // Setzt nicht _xml!
+    void                    set_dom                         ( const xml::Element_ptr& );  // Setzt nicht _xml!
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr& ) const;
     xml::Document_ptr           dom_document                () const;
 

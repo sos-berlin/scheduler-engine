@@ -100,7 +100,7 @@ string Database_order_detector::async_state_text_() const
     FOR_EACH_JOB( j )
     {
         Job* job = *j;
-        if( Order_queue* order_queue = job->order_queue() ) 
+        if( job->order_queue() ) 
         {
             time_t t = job->order_queue()->next_distributed_order_check_time();
             if( t < time_max )
@@ -2741,7 +2741,7 @@ bool Order::db_try_insert()
                 if( !result_set.eof() )  break;
 
                 S log_line;
-                log_line << "Retry #" << insert_race_retry_count << " after error: " << x.what();
+                log_line << "Retry #" << insert_race_retry_count << " after possible correctable error: " << x.what();
                 ( _job_chain? _job_chain->log() : _spooler->log() ) -> warn( S() << obj_name() << ", " << log_line );
                 _log->debug( log_line );
             }
@@ -3945,7 +3945,7 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain )
 
         if( _state.vt == VT_EMPTY )  set_state2( job_chain->first_node()->_state );     // Auftrag bekommt Zustand des ersten Jobs der Jobkette
 
-        Job*            job  = job_chain->job_from_state( _state );     // Fehler bei Endzustand. Wir speichern den Auftrag nur, wenn's einen Job zum Zustand gibt
+        job_chain->job_from_state( _state );     // Fehler bei Endzustand. Wir speichern den Auftrag nur, wenn's einen Job zum Zustand gibt
         Job_chain_node* node = job_chain->node_from_state( _state );
 
         if( node->_suspend )  _suspended = true;

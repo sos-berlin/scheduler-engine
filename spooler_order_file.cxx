@@ -410,7 +410,7 @@ void Directory_file_order_source::start()
 
 bool Directory_file_order_source::request_order( const string& cause )
 {
-    bool result = NULL;
+    bool result = false;
 
     if( _expecting_request_order 
      || async_next_gmtime_reached() )       // 2007-01-09 nicht länger: Das, weil die Jobs bei jeder Gelegenheit do_something() durchlaufen, auch wenn nichts anliegt (z.B. bei TCP-Verkehr)
@@ -486,12 +486,7 @@ Order* Directory_file_order_source::fetch_and_occupy_order( const Time& now, con
 
 Order* Directory_file_order_source::read_directory( bool was_notified, const string& )
 {
-    Order*       result            = NULL;
-    Order_queue* first_order_queue = _next_order_queue;
-
-
-    //_spooler->assert_has_exclusiveness( obj_name() + " " + __FUNCTION__ );
-
+    Order* result = NULL;
 
     for( int try_index = 1;; try_index++ )           // Nach einem Fehler machen wir einen zweiten Versuch, bevor wir eine eMail schicken
     {
@@ -530,13 +525,6 @@ Order* Directory_file_order_source::read_directory( bool was_notified, const str
         catch( exception& x )
         {
             clear_new_files();
-
-            //if( try_index < max_tries )
-            //{
-            //    log()->warn( x.what() ); 
-            //    close_notification();
-            //    continue;
-            //}
 
             if( _directory_error )
             {
@@ -753,9 +741,12 @@ bool Directory_file_order_source::read_new_files()
         ptr<z::File_info> file_info = dir.get();
         if( !file_info )  break;
 
-        file_info->last_write_time();       // last_write_time füllen für sort, quick_last_write_less()
-        _new_files.push_back( file_info );
-        _new_files_count++;
+        bool file_still_exists = file_info->try_call_stat();       // last_write_time füllen für sort, quick_last_write_less()
+        if( file_still_exists )
+        {
+            _new_files.push_back( file_info );
+            _new_files_count++;
+        }
     }
 
     Z_LOG2( "scheduler.file_order", __FUNCTION__ << "  " << _path << "  " << _new_files.size() << " Dateinamen gelesen\n" );
