@@ -292,7 +292,7 @@
         </command_option>
 
 
-        <command_option name="backup-precedence" type="integer" initial="0" title="Vorrang unter den Backup-Schedulern">
+        <command_option name="backup-precedence" type="integer" initial="1" title="Vorrang unter den Backup-Schedulern">
             <description>
                 <p>
                     Nur mit <scheduler_option name="exclusive"/> möglich.
@@ -304,6 +304,9 @@
                 </p>
                 <p>
                     Wenn die Uhren nicht gleichlaufen, kann ein anderer Scheduler als der mit dem vorderen Rang den Betrieb übernehmen.
+                </p>
+                <p>
+                    Mit der Option <scheduler_option name="backup"/> ist die Voreinstellung 1, sonst 0.
                 </p>
             </description>
         </command_option>
