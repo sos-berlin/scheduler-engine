@@ -225,7 +225,6 @@
             <messages>
                 <message level="error" code="SCHEDULER-357"/>
                 <message level="error" code="SCHEDULER-359"/>
-                <message level="error" code="SCHEDULER-361"/>
                 <message level="error" code="SCHEDULER-362"/>
                 <message level="error" code="SCHEDULER-365"/>
                 <message level="error" code="SCHEDULER-367"/>
@@ -249,8 +248,7 @@
                 <message level="info"  code="SCHEDULER-825"/>
                 <message level="info"  code="SCHEDULER-826"/>
                 <message level="warn"  code="SCHEDULER-827"/>
-                <message level="info"  code="SCHEDULER-828"/>
-                <message level="info"  code="SCHEDULER-830"/>
+                <!--message level="info"  code="SCHEDULER-828"/-->
                 <message level="info"  code="SCHEDULER-831"/>
                 <message level="info"  code="SCHEDULER-832"/>
                 <message level="info"  code="SCHEDULER-833"/>
@@ -327,6 +325,7 @@
                 </p>
             </description>
             <messages>
+                <message level="error" code="SCHEDULER-361"/>
                 <message level="error" code="SCHEDULER-366"/>
                 <message level="error" code="SCHEDULER-370"/>
                 <message level="error" code="SCHEDULER-373"/>
@@ -344,6 +343,7 @@
                 <message level="warn"  code="SCHEDULER-816"/>
                 <message level="warn"  code="SCHEDULER-817"/>
                 <message level="info"  code="SCHEDULER-829"/>
+                <message level="info"  code="SCHEDULER-830"/>
             </messages>
         </command_option>
 
