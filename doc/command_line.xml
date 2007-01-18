@@ -250,7 +250,6 @@
                 <message level="info"  code="SCHEDULER-826"/>
                 <message level="warn"  code="SCHEDULER-827"/>
                 <message level="info"  code="SCHEDULER-828"/>
-                <message level="info"  code="SCHEDULER-829"/>
                 <message level="info"  code="SCHEDULER-830"/>
                 <message level="info"  code="SCHEDULER-831"/>
                 <message level="info"  code="SCHEDULER-832"/>
@@ -344,6 +343,7 @@
                 <message level="info"  code="SCHEDULER-815"/>
                 <message level="warn"  code="SCHEDULER-816"/>
                 <message level="warn"  code="SCHEDULER-817"/>
+                <message level="info"  code="SCHEDULER-829"/>
             </messages>
         </command_option>
 
