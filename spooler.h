@@ -444,8 +444,7 @@ struct Spooler : Object,
     bool                       _mail_on_error;              // Für Job-Protokolle
     int                        _mail_on_process;            // Für Job-Protokolle
     bool                       _mail_on_success;            // Für Job-Protokolle
-    First_and_last           _mail_on_delay_after_error;  // Für Job-Protokolle
-    First_and_last           _mail_on_delay_after_setback;// Für Job-Protokolle
+    First_and_last             _mail_on_delay_after_error;  // Für Job-Protokolle
     string                     _mail_encoding;
 
     Mail_defaults              _mail_defaults;
