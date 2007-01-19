@@ -2437,6 +2437,12 @@
             </text>
         </message>
 
+        <message code="SCHEDULER-392">
+            <text xml:lang="en">
+                <title>heart_beat_warn_timeout=<p1/>s has to be lower than heart_beat_own_timeout=<p2/>, which has to be lower than heart_beat_warn_timeout=<p3/>s</title>
+            </text>
+        </message>
+
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->

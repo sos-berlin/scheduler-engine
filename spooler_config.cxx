@@ -323,6 +323,11 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const Time& x
                 _security.set_dom( e );
             }
             else
+            if( e.nodeName_is( "cluster" ) )
+            {
+                // Wird nach Einrichten des Cluster ausgewertet
+            }
+            else
             if( e.nodeName_is( "object_set_classes" ) )
             {
                 _object_set_class_list.clear();

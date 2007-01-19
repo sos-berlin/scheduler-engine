@@ -254,6 +254,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-389", "This order stored in database is distributed and cannot be used in a non-distributed job chain" },
     { "SCHEDULER-390", "More than $1 nested includes in $2" },
     { "SCHEDULER-391", "Invalid value '$1' for setting '$2'. Allowed values are: $3" },
+    { "SCHEDULER-392", "heart_beat_warn_timeout=$1s has to be lower than heart_beat_own_timeout=$2, which has to be lower than heart_beat_warn_timeout=$3s" },
     { "SCHEDULER-900", "Scheduler $1 is starting with $2, pid=$3" },
     { "SCHEDULER-902", "state=$1" },
     { "SCHEDULER-904", "Tasks have $1s to terminate" },

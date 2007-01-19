@@ -38,6 +38,7 @@ const char file_scheduler_xsd[] =
     "</xsd:element>\n"
     "\n"
     "<xsd:element ref=\"security\"         minOccurs=\"0\"/>\n"
+    "<xsd:element ref=\"cluster\"          minOccurs=\"0\"/>\n"
     "<xsd:element ref=\"process_classes\"  minOccurs=\"0\"/>\n"
     "<xsd:element ref=\"script\"           minOccurs=\"0\"/>\n"
     "<xsd:element ref=\"web_services\"     minOccurs=\"0\"/>\n"
@@ -901,6 +902,30 @@ const char file_scheduler_xsd[] =
     "</xsd:element>\n"
     "\n"
     "\n"
+    "<xsd:element name=\"cluster\">\n"
+    "<xsd:complexType>\n"
+    "<xsd:attribute name=\"heart_beat_timeout\"      type=\"xsd:positiveInteger\"/>\n"
+    "\n"
+    "<xsd:attribute name=\"heart_beat_own_timeout\">\n"
+    "<xsd:simpleType>\n"
+    "<xsd:union>\n"
+    "<xsd:simpleType>\n"
+    "<xsd:restriction base=\"xsd:positiveInteger\"/>\n"
+    "</xsd:simpleType>\n"
+    "<xsd:simpleType>\n"
+    "<xsd:restriction base=\"xsd:NMTOKEN\">\n"
+    "<xsd:enumeration value=\"never\"/>\n"
+    "</xsd:restriction>\n"
+    "</xsd:simpleType>\n"
+    "</xsd:union>\n"
+    "</xsd:simpleType>\n"
+    "</xsd:attribute>\n"
+    "\n"
+    "<xsd:attribute name=\"heart_beat_warn_timeout\" type=\"xsd:positiveInteger\"/>\n"
+    "</xsd:complexType>\n"
+    "</xsd:element>\n"
+    "\n"
+    "\n"
     "<xsd:element name=\"service_request\">\n"
     "<xsd:complexType>\n"
     "<xsd:sequence>\n"
@@ -1328,7 +1353,7 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1169063178 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1169200164 },
     { NULL, NULL, 0 }
 };
 

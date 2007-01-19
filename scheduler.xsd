@@ -29,6 +29,7 @@
                             </xsd:element>
 
                             <xsd:element ref="security"         minOccurs="0"/>
+                            <xsd:element ref="cluster"          minOccurs="0"/>
                             <xsd:element ref="process_classes"  minOccurs="0"/>
                             <xsd:element ref="script"           minOccurs="0"/>
                             <xsd:element ref="web_services"     minOccurs="0"/>
@@ -891,7 +892,31 @@
         </xsd:complexType>
     </xsd:element>
 
-    
+
+    <xsd:element name="cluster">
+        <xsd:complexType>
+            <xsd:attribute name="heart_beat_timeout"      type="xsd:positiveInteger"/>
+
+            <xsd:attribute name="heart_beat_own_timeout">
+                <xsd:simpleType>
+                    <xsd:union>
+                        <xsd:simpleType>
+                            <xsd:restriction base="xsd:positiveInteger"/>
+                        </xsd:simpleType>
+                        <xsd:simpleType>
+                            <xsd:restriction base="xsd:NMTOKEN">
+                                <xsd:enumeration value="never"/>
+                            </xsd:restriction>
+                        </xsd:simpleType>
+                    </xsd:union>
+                </xsd:simpleType>
+            </xsd:attribute>
+
+            <xsd:attribute name="heart_beat_warn_timeout" type="xsd:positiveInteger"/>
+        </xsd:complexType>
+    </xsd:element>
+
+
     <xsd:element name="service_request">
         <xsd:complexType>
             <xsd:sequence>

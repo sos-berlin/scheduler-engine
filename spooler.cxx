@@ -2220,6 +2220,7 @@ void Spooler::start_cluster()
 
     _cluster->demand_exclusiveness  ( _demand_exclusiveness   );
     _cluster->set_orders_distributed( _are_orders_distributed );
+    if( xml::Element_ptr cluster_element = _config_element.select_node( "cluster" ) )  _cluster->set_dom( cluster_element );
 
     _cluster->start();     // Wartet, bis entschieden ist, dass wir aktiv werden
 }
