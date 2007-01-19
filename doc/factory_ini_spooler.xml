@@ -63,6 +63,7 @@
         <ini_entry setting="mail_on_warning" />
         <ini_entry setting="mail_on_process" />
         <ini_entry setting="mail_on_success" />
+        <ini_entry setting="mail_on_delay_after_error" />
         <ini_entry setting="mail_queue_dir" />
     </ini_entries>
 

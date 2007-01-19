@@ -664,6 +664,14 @@
                 </p>
             </description>
         </command_option>
+
+        <command_option name="h" title="Optionen zeigen">
+            <description>
+                <p>
+                    Zeigt die Kommandozeilen-Optionen.
+                </p>
+            </description>
+        </command_option>
     </command_options>
 
 

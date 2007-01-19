@@ -201,7 +201,7 @@ struct Prefix_log : Object, Has_log
     bool                       _mail_on_error;
     bool                       _mail_on_success;
     int                        _mail_on_process;
-    Yes_no_last_both           _mail_on_delay_after_error;
+    First_and_last           _mail_on_delay_after_error;
     bool                       _mail_it;
     ptr<Com_mail>              _mail;
     string                     _mail_section;               // Name des Abschnitts in factory.ini für eMail-Einstellungen

@@ -30,6 +30,15 @@
                 Für jeden Feiertag wird dieses Element wiederholt.
             </description>
         </xml_child_element>
+
+        <xml_child_element name="include">
+            <description>
+                Lässt den Scheduler eine Datei mit Feiertagen verwenden.
+                Erwartet wird ein XML-Dokument mit dem Wurzelement <scheduler_element name="holidays"/>.
+                Wenn der Pfad der Datei nicht absolut ist, geht der Scheduler vom Verzeichnis der XML-Konfigurationsdatei aus
+                (<scheduler_option name="config"/>).
+            </description>
+        </xml_child_element>
     </xml_child_elements>
 
     <description>
@@ -42,6 +51,8 @@
     &lt;holiday date="2004-12-25"/>
     &lt;holiday date="2004-12-26"/>
     &lt;holiday date="2004-12-31"/>
+    &lt;include file="holidays-2007.xml"/>
+    &lt;include file="holidays-2008.xml"/>
 &lt;/holidays></pre>
     </example>
 

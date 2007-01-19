@@ -16,6 +16,8 @@
         </xml_parent_element>
         <xml_parent_element name="description">
         </xml_parent_element>
+        <xml_parent_element name="holidays">
+        </xml_parent_element>
     </xml_parent_elements>
 
 
@@ -25,9 +27,25 @@
                 <p>
                     Der Name der Datei, deren Inhalt eingefügt werden soll.
                     Wenn der Dateiname nicht absolut ist,
-                    dann gibt die Option <scheduler_option name="include-path"/> das Verzeichnis an.
+                    dann geht der Scheduler abhängig vom umgebenden XML-Element von verschiedenen Verzeichnissen aus:
                 </p>
-            </description>
+                <dl>
+                    <dt>
+                        <scheduler_element name="script"/>, <scheduler_element name="description"/>:
+                    </dt>
+                    <dd>
+                        <scheduler_option name="include-path"/> gibt das Verzeichnis an.
+                    </dd>
+                    
+                    <dt>
+                        <scheduler_element name="holidays"/>:
+                    </dt>
+                    <dd>
+                        Das Verzeichnis der Konfigurationsdatei (<scheduler_option name="config"/>).
+                    </dd>
+                </dl>
+                    
+                </description>
         </xml_attribute>
 
     </xml_attributes>

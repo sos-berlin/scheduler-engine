@@ -1928,18 +1928,27 @@
                     </xsl:attribute>
                     <xsl:copy-of select="$content"/>
                 </xsl:when>
-                <xsl:otherwise>
-                    <code>
-                        <xsl:text>-</xsl:text>
-                        <xsl:value-of select="$name"/>
-                    </code>
 
-                    <xsl:if test="$value">
+                <xsl:otherwise>
+                    <xsl:variable name="option_element" select="document( 'command_line.xml' )/command_line/command_options/command_option [ @name=$name ]"/>
+
+                    <xsl:element name="span">
+                        <xsl:attribute name="title">
+                            <xsl:value-of select="normalize-space( $option_element/@title )"/>
+                        </xsl:attribute>
+                        
                         <code>
-                            <xsl:text>=</xsl:text>
-                            <xsl:value-of select="$value"/>
+                            <xsl:text>-</xsl:text>
+                            <xsl:value-of select="$name"/>
                         </code>
-                    </xsl:if>
+
+                        <xsl:if test="$value">
+                            <code>
+                                <xsl:text>=</xsl:text>
+                                <xsl:value-of select="$value"/>
+                            </code>
+                        </xsl:if>
+                    </xsl:element>
                 </xsl:otherwise>
             </xsl:choose>
         </xsl:element>

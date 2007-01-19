@@ -26,6 +26,7 @@
         <ini_entry setting="mail_on_error" />
         <ini_entry setting="mail_on_process" />
         <ini_entry setting="mail_on_success" />
+        <ini_entry setting="mail_on_delay_after_error" />
         <ini_entry setting="mail_queue_dir" />
         <ini_entry setting="log_mail_subject" />
         <ini_entry setting="log_mail_from" />

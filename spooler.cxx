@@ -367,13 +367,13 @@ First_and_last read_profile_yes_no_last_both( const string& profile, const strin
 
     if( s == ""                    )  result = deflt;
     else
-    if( s == "all"                 )  result = ynlb_yes;
+    if( s == "all"                 )  result = fl_all;
     else
-    if( s == "first_only"          )  result = ynlb_no;
+    if( s == "first_only"          )  result = fl_first_only;
     else
-    if( s == "last_only"           )  result = ynlb_last;
+    if( s == "last_only"           )  result = fl_last_only;
     else
-    if( s == "first_and_last_only" )  result = ynlb_both;
+    if( s == "first_and_last_only" )  result = fl_first_and_last_only;
     else
         z::throw_xc( "SCHEDULER-391", s, entry, "all, first_only, last_only, first_and_last_only" );
 
@@ -620,8 +620,8 @@ Spooler::Spooler()
     _db_log_level( log_none ),
     _factory_ini( default_factory_ini ),
     _mail_defaults(NULL),
-    _mail_on_delay_after_error( ynlb_both ),
-    _mail_on_delay_after_setback( ynlb_both ),
+    _mail_on_delay_after_error  ( fl_first_and_last_only ),
+    _mail_on_delay_after_setback( fl_first_and_last_only ),
     _termination_gmtimeout_at(time_max),
     _web_services(this),
     _waitable_timer( "waitable_timer" ),

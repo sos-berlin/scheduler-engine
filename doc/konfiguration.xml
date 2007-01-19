@@ -107,7 +107,11 @@
             …
         &lt;/security>
 
-        &lt;<a class="silent" href="xml/process_classes.xml">process_classes></a>
+        &lt;<a class="silent" href="xml/cluster.xml">cluster</a> heart_beat_timeout      = "…" 
+                 heart_beat_own_timeout  = "…" 
+                 heart_beat_warn_timeout = "…"/>
+
+    &lt;<a class="silent" href="xml/process_classes.xml">process_classes></a>
             &lt;<a class="silent" href="xml/process_class.xml">process_class</a> name          = "…"
                            max_processes = "…"
                            spooler_id    = "…"/>

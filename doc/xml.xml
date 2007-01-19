@@ -46,6 +46,7 @@
                 <scheduler_element name="allowed_host"/><br/>
                 <scheduler_element name="at"/><br/>
                 <scheduler_element name="base"/><br/>
+                <scheduler_element name="cluster"/><br/>
                 <scheduler_element name="commands"/><br/>
                 <scheduler_element name="config"/><br/>
                 <scheduler_element name="copy_params"/><br/>

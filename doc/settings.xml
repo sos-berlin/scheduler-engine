@@ -603,6 +603,54 @@ db = odbc -db=factory_oracle -user=factory -password=factory
     </setting>
 
 
+    <setting setting = "mail_on_delay_after_error"
+             type    = ""
+             initial = "first_and_last_only"
+             title   = "Unterdrückung der eMail bei &lt;delay_after_error>">
+        <description>
+            <p>
+                Voraussetzung: <code>mail_on_error=yes</code> oder <code>mail_on_warning=yes</code>
+        </p>
+            <p>
+                Wenn ein Job wegen <scheduler_element name="delay_after_error"/> erneut startet,
+                werden mit dieser Einstellungen die zahlreichen eMails reduziert.
+            </p>
+            
+            <dl>
+                <dt>
+                    <code>mail_on_error=all</code>
+                </dt>
+                <dd>
+                    Nach jedem fehlerhaften Job-Lauf wird eine eMail verschickt 
+                    (das ist das Verhalten des vorangegangenen Version des Schedulers).
+                </dd>
+
+                <dt>
+                    <code>mail_on_error=first_only</code>
+                </dt>
+                <dd>
+                    Nur der erste fehlerhafte Lauf veranlasst eine eMail, nicht aber die Wiederholungen.
+                </dd>
+
+                <dt>
+                    <code>mail_on_error=last_only</code>
+                </dt>
+                <dd>
+                    Nur der letzte fehlerhafte Lauf, der also den Job stoppen lässt, veranlasst eine eMail.
+                </dd>
+
+                <dt>
+                    <code>mail_on_error=first_and_last_only</code>
+                </dt>
+                <dd>
+                    Nur der erste und der letzte fehlerhafte Lauf veranlassen je eine eMail.
+                    Das ist die Voreinstellung (seit Version 2.0.163.4759 von 2007-01-19).
+                </dd>
+            </dl>
+        </description>
+    </setting>
+
+
     <setting setting = "mail_queue_dir"
              type    = "verzeichnis"
              title   = "Verzeichnis der zeitweilig nicht versendbaren eMails"

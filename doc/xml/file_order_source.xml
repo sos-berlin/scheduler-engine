@@ -18,7 +18,7 @@
     </xml_parent_elements>
 
     <xml_attributes>
-        <xml_attribute name="directory" type="directory_path">
+        <xml_attribute name="directory" type="directory_path" subst_env="yes">
             <description>
                 <p>
                     Pfad des Verzeichnisses, dass die Dateien enthält.

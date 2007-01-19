@@ -42,14 +42,14 @@ enum Do_log
     do_log   = true
 };
 
-//---------------------------------------------------------------------------------Yes_no_last_both
+//-----------------------------------------------------------------------------------First_and_last
 
-enum Yes_no_last_both
+enum First_and_last
 {
-    ynlb_no,
-    ynlb_yes,
-    ynlb_last,
-    ynlb_both
+    fl_first_only,
+    fl_all,
+    fl_last_only,
+    fl_first_and_last_only
 };
 
 //---------------------------------------------------------------------------Modified_event_handler

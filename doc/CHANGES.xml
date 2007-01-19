@@ -11,6 +11,90 @@
     <scheduler_keyword keyword="Change log"/>
 
 
+    <change date="2007-01-19" version="2.0.163" subversion_revision="4758">
+        <revision type="new" title="Optionen -?, -h und -V">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_option name="?"/> zeigt die Usage-Klausel
+                    </li>
+                    <li>
+                        <scheduler_option name="h"/> zeigt ebenfalls die Usage-Klausel
+                    </li>
+                    <li>
+                        <scheduler_option name="V"/> zeigt die Versionsnummer.
+                    </li>
+                </ul>
+                <p>
+                    Wenn keine anderen Optionen angegeben sind, beendet sich der Scheduler sofort.
+                </p>
+            </description>
+        </revision>
+
+        <revision type="new" title="Cluster: Fristen zur Überwachung des Herzschlags sind einstellbar">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_element name="cluster"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+
+        <revision type="new" title="&lt;file_order_source> lässt Umgebungsvariablen zu">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_element name="file_order_source" attribute="directory"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+
+        <revision type="new" title="Verwaltung der Feiertage in externer Datei: &lt;holidays> mit &lt;include>">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_element name="holidays" child="include"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+
+        <revision type="new" title="Neue Einstellung mail_on_delay_after_error">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_ini_entry file="factory.ini" section="spooler" entry="mail_on_delay_after_error"/>
+                    </li>
+                    <li>
+                        <scheduler_ini_entry file="factory.ini" section="job" entry="mail_on_delay_after_error"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+
+        <revision type="correction" title="Speicherleck in Java geschlossen">
+            <description>
+                <p>
+                    Ein winziges, aber stetiges Speicherleck ist abgedichtet.
+                    Insbesondere bei jeder Datenbankoperation (über JDBC) blieben einige Bytes übrig.
+                </p>
+            </description>
+        </revision>
+
+        <revision type="correction" title="Speicherleck bei stdout/stderr-Dateien geschlossen">
+            <description>
+                <p>
+                    Unter Unix wurden temporäre Dateien nicht korrekt geschlossen,
+                    wenn eine Task etwas nach stdout oder stderr geschrieben hat.
+                    Das ist behoben.
+                </p>
+            </description>
+        </revision>
+    </change>
+
+
     <change date="2007-01-12" version="2.0.162" subversion_revision="4730">
         <revision type="new" title="Cluster: Backup-Scheduler und verteilte Aufträge (noch nicht für Produktion)">
             <description>
@@ -48,12 +132,6 @@
                     <li>
                         <scheduler_element name="job_chain" attribute="distributed" value="yes"/>
                     </li>
-                    <!--li>
-                        <scheduler_element name="cluster"/>
-                    </li>
-                    <li>
-                        <scheduler_ini_entry file="factory.ini" section="spooler" entry="db_check_integrity"/>
-                    </li-->
                 </ul>
             </description>
         </revision>
