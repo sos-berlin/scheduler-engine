@@ -160,7 +160,7 @@
                             <scheduler_a href="backupscheduler.xml"/>
                         </dt>
                         <dd>
-                            Redundanter Betrieb
+                            Ausfallsicherer Betrieb
                         </dd>
                     </dl>
                 </div>

@@ -1,0 +1,204 @@
+<?xml version="1.0"?>
+<spooler
+    xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
+>
+    <config>
+
+        <base file="$SCHEDULER_TEST/base.scheduler"/>
+
+        <process_classes>
+            <process_class max_processes="40"/>
+        </process_classes>
+
+        <script language="javascript">
+            <![CDATA[
+
+//
+
+            ]]>
+        </script>
+
+
+        <jobs>
+
+            <job name="add_orders">
+                <script language="javascript">
+                    <![CDATA[
+
+function add_new_order()
+{
+    var order = spooler.create_order();
+  //order.id    = ;
+  //order.at    = new Date( new Date().getTime() + 80 * 1000 );
+    order.title = "____ .... Wir haben einen Auftrag!";
+    spooler.job_chain( "my_job_chain" ).add_order( order );
+    spooler_log.info( "Neuer Auftrag " + order.id + " " + order.title );
+}
+
+function spooler_process()
+{
+    var n =20;
+    
+    for( var i = 0; i < n; i++ ) add_new_order();
+    
+    spooler_task.delay_spooler_process = 1;
+
+    return true;
+}
+                ]]>
+                </script>
+            </job>
+
+
+            <job name="javascript" order="yes" idle_timeout="60" tasks="5">
+                <params>
+                    <param name="scheduler_name" value="$scheduler_name"/>
+                </params>
+                <script language="JavaScript">
+                    <![CDATA[
+                    
+var hostware = new ActiveXObject( "hostware.global" );
+
+function replace_substring( string, offset, length, replacement ) 
+{
+    return string.substring( 0, offset ) + replacement + string.substring( offset + length );
+}
+
+function handle_title()
+{
+    var order = spooler_task.order;
+    var title = order.title + "";
+    var s     = 1*order.state - 1;
+    
+    if( title.substring( s, s + 1 ) != "_" )
+    {
+        spooler_log.error( "Zustand " + order.state + " schon durchlaufen!" );
+        return false;
+    }
+
+    order.title = replace_substring( replace_substring( title, s, 1, order.state ), 5+s, 1, (spooler_task.params( "scheduler_name" )+"?").substring( 0, 1 ) );
+}
+
+function spooler_process() 
+{               
+    var order = spooler_task.order;
+    
+    handle_title();
+    //spooler_log.info( "Order " + order.id + " " + order.title + "  state=" + order.state );
+
+    spooler_log.info( "order_queue.length=" + spooler_job.order_queue.length );
+    if( order.state == "1" )  hostware.sleep( 1 );
+    
+    return true;
+}
+
+                ]]>
+                </script>
+            </job>
+
+
+            <job name="javascript_3" order="yes" idle_timeout="60" tasks="3">
+                <params>
+                    <param name="scheduler_name" value="$scheduler_name"/>
+                </params>
+                <script language="JavaScript">
+                    <![CDATA[
+
+var hostware = new ActiveXObject( "hostware.global" );
+
+function replace_substring( string, offset, length, replacement ) 
+{
+    return string.substring( 0, offset ) + replacement + string.substring( offset + length );
+}
+
+function handle_title()
+{
+    var order = spooler_task.order;
+    var title = order.title + "";
+    var s     = 1*order.state - 1;
+    
+    if( title.substring( s, s + 1 ) != "_" )
+    {
+        spooler_log.error( "Zustand " + order.state + " schon durchlaufen!" );
+        return false;
+    }
+
+    order.title = replace_substring( replace_substring( title, s, 1, order.state ), 5+s, 1, (spooler_task.params( "scheduler_name" )+"?").substring( 0, 1 ) );
+}
+
+
+function spooler_process() 
+{               
+    //spooler_log.info( "Order " + order.id + " " + order.title + "  state=" + order.state );
+
+    handle_title();
+    hostware.sleep( 1 );
+
+    return true;
+}
+
+                ]]>
+                </script>
+            </job>
+
+            <job name="javascript_4" order="yes" idle_timeout="60" tasks="5">
+                <params>
+                    <param name="scheduler_name" value="$scheduler_name"/>
+                </params>
+                <script language="JavaScript">
+                    <![CDATA[
+
+var hostware = new ActiveXObject( "hostware.global" );
+
+function replace_substring( string, offset, length, replacement ) 
+{
+    return string.substring( 0, offset ) + replacement + string.substring( offset + length );
+}
+
+function handle_title()
+{
+    var order = spooler_task.order;
+    var title = order.title + "";
+    var s     = 1*order.state - 1;
+    
+    if( title.substring( s, s + 1 ) != "_" )
+    {
+        spooler_log.error( "Zustand " + order.state + " schon durchlaufen!" );
+        return false;
+    }
+
+    order.title = replace_substring( replace_substring( title, s, 1, order.state ), 5+s, 1, (spooler_task.params( "scheduler_name" )+"?").substring( 0, 1 ) );
+}
+
+function spooler_process() 
+{               
+    var order = spooler_task.order;
+
+    handle_title();
+
+    var p = (order.title+"").substring( 0, 4 );
+    if( p == "1234" )  spooler_log.info( "OK: " + order.title );
+                 else  spooler_log.error( "FEHLER: " + order.title );
+
+    return true;
+}
+
+                ]]>
+                </script>
+            </job>
+
+        </jobs>
+
+        <job_chains>
+            <job_chain name="my_job_chain" distributed="yes">
+                <job_chain_node state="1" job="javascript"/>
+                <job_chain_node state="2" job="javascript"/>
+                <job_chain_node state="3" job="javascript_3"/>
+                <job_chain_node state="4" job="javascript_4"/>
+                <job_chain_node state="finished"/>
+            </job_chain>
+        </job_chains>
+
+    </config>
+</spooler>

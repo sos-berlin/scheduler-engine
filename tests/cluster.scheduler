@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<spooler
+    xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
+>
+    <config>
+        <base file="$SCHEDULER_TEST/base.scheduler"/>
+
+        <cluster 
+            heart_beat_warn_timeout = "10" 
+            heart_beat_own_timeout  = "55" 
+            heart_beat_timeout      = "40"
+         />
+
+        <jobs>
+        </jobs>
+    </config>
+</spooler>
