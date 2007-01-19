@@ -359,23 +359,23 @@ With_log_switch read_profile_with_log( const string& profile, const string& sect
 
 //--------------------------------------------------------------------read_profile_yes_no_last_both
 
-Yes_no_last_both read_profile_yes_no_last_both( const string& profile, const string& section, const string& entry, Yes_no_last_both deflt )
+First_and_last read_profile_yes_no_last_both( const string& profile, const string& section, const string& entry, First_and_last deflt )
 {
-    Yes_no_last_both result;
+    First_and_last result;
 
     string s = read_profile_string( profile, section, entry );
 
-    if( s == ""     )  result = deflt;
+    if( s == ""                    )  result = deflt;
     else
-    if( s == "yes"  )  result = ynlb_yes;
+    if( s == "all"                 )  result = ynlb_yes;
     else
-    if( s == "no"   )  result = ynlb_no;
+    if( s == "first_only"          )  result = ynlb_no;
     else
-    if( s == "last" )  result = ynlb_last;
+    if( s == "last_only"           )  result = ynlb_last;
     else
-    if( s == "both" )  result = ynlb_both;
+    if( s == "first_and_last_only" )  result = ynlb_both;
     else
-        z::throw_xc( "SCHEDULER-391", s, entry, "yes, no, last, both" );
+        z::throw_xc( "SCHEDULER-391", s, entry, "all, first_only, last_only, first_and_last_only" );
 
     return result;
 }
