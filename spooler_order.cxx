@@ -2715,8 +2715,6 @@ bool Order::db_try_insert()
 
         insert.set_datetime( "created_time", _created.as_string(Time::without_ms) );
 
-        //if( is_processable() )  insert[ "processable"   ] = true;
-
         for( int insert_race_retry_count = 1; !insert_ok; insert_race_retry_count++ )
         {
             try

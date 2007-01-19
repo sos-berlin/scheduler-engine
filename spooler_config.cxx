@@ -336,7 +336,7 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const Time& x
             else
             if( e.nodeName_is( "holidays" ) )
             {
-                _holidays.clear();
+                //2007-01-19  _holidays.clear();             int VIELLEICHT_BESSER_NICHT_LOESCHEN;
                 _holidays.set_dom( e );
             }
             else

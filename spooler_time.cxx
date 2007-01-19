@@ -760,9 +760,13 @@ void Holidays::set_dom( const xml::Element_ptr& e, int include_nesting )
                 {
                     if( !file.is_absolute_path() )  file.prepend_directory( directory_of_path( _spooler->_config_filename ) );
                     
+                    string xml_text = string_from_file( file );
+                    Z_LOG2( "scheduler", __FUNCTION__ << "  " << xml_text << "\n" );
+
                     xml::Document_ptr doc;
-                    doc.load_xml( string_from_file( file ) );
-                    
+                    doc.load_xml( xml_text );
+                    if( _spooler->_validate_xml )  _spooler->_schema.validate( doc );
+
                     if( !doc.documentElement() )  z::throw_xc( "SCHEDULER-319", "", file );
 
                     set_dom( doc.documentElement(), include_nesting+1 );

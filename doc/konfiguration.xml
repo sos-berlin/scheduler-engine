@@ -111,7 +111,7 @@
                  heart_beat_own_timeout  = "…" 
                  heart_beat_warn_timeout = "…"/>
 
-    &lt;<a class="silent" href="xml/process_classes.xml">process_classes></a>
+        &lt;<a class="silent" href="xml/process_classes.xml">process_classes></a>
             &lt;<a class="silent" href="xml/process_class.xml">process_class</a> name          = "…"
                            max_processes = "…"
                            spooler_id    = "…"/>
@@ -139,9 +139,10 @@
         &lt;/web_services>
 
         &lt;<a class="silent" href="xml/holidays.xml">holidays</a>>
-            &lt;<a class="silent" href="xml/holiday.xml">holiday</a> day="…"/>
+            &lt;<a class="silent" href="xml/holiday.xml">holiday</a> date="…"/>
+            &lt;<a class="silent" href="xml/include.xml">include</a> file="…"/>
             …
-        &lt;/holiday>
+        &lt;/holidays>
 
         &lt;<a class="silent" href="xml/jobs.xml">jobs></a>
             &lt;<a class="silent" href="xml/job.xml">job</a>
@@ -237,6 +238,7 @@
 
                     &lt;<a class="silent" href="xml/holidays.xml">holidays</a>>
                         &lt;<a class="silent" href="xml/holiday.xml">holiday</a> date="yyyy-mm-dd"/>
+                        &lt;<a class="silent" href="xml/include.xml">include</a> file="…"/>
                         …
                     &lt;/holidays>
                     

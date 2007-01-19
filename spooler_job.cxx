@@ -514,6 +514,7 @@ void Job::init_start_when_directory_changed( Task* task )
 void Job::init_run_time()
 {
     _run_time = Z_NEW( Run_time( _spooler ) );
+    _run_time->set_holidays( _spooler->holidays() );
 }
 
 //--------------------------------------------------------------------------------Job::set_run_time
@@ -521,7 +522,6 @@ void Job::init_run_time()
 void Job::set_run_time( const xml::Element_ptr& element )
 {
     init_run_time();
-    _run_time->set_holidays( _spooler->holidays() );
     _run_time->set_dom( element );
 
     _start_once    = _run_time->once();
@@ -1598,7 +1598,7 @@ void Job::calculate_next_time( Time now )
             {
                 bool in_period = is_in_period(now);
 
-                if( order_controlled() )  
+                if( in_period  &&  order_controlled() )  
                 {
                     bool ok = request_order( now, __FUNCTION__ );
                     if( ok )  next_time = now;
@@ -1951,7 +1951,7 @@ bool Job::do_something()
 
             if( !something_done  &&  _next_time <= now )    // Obwohl _next_time erreicht, ist nichts getan?
             {
-                calculate_next_time();
+                calculate_next_time( now );
 
                 if( _next_time <= now )
                 {
