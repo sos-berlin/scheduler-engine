@@ -713,7 +713,7 @@ void Job::signal( const string& signal_name )
 
     _next_time = 0;
     
-    Z_LOG2( "joacim", obj_name() << "  " __FUNCTION__ << " " << signal_name << "\n" );
+    Z_LOG2( "joacim", obj_name() << "  " << __FUNCTION__ << " " << signal_name << "\n" );
     _spooler->signal( signal_name ); 
 }
 
