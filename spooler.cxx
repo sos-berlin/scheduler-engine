@@ -621,7 +621,6 @@ Spooler::Spooler()
     _factory_ini( default_factory_ini ),
     _mail_defaults(NULL),
     _mail_on_delay_after_error  ( fl_first_and_last_only ),
-    _mail_on_delay_after_setback( fl_first_and_last_only ),
     _termination_gmtimeout_at(time_max),
     _web_services(this),
     _waitable_timer( "waitable_timer" ),
@@ -1568,7 +1567,6 @@ void Spooler::load_arg()
     _mail_on_process = read_profile_mail_on_process( _factory_ini, "spooler", "mail_on_process", _mail_on_process );
     _mail_on_success = read_profile_bool           ( _factory_ini, "spooler", "mail_on_success", _mail_on_success );
     _mail_on_delay_after_error   = read_profile_yes_no_last_both( _factory_ini, "spooler", "mail_on_delay_after_error"  , _mail_on_delay_after_error   );
-    _mail_on_delay_after_setback = read_profile_yes_no_last_both( _factory_ini, "spooler", "mail_on_delay_after_setback", _mail_on_delay_after_setback );
 
     _mail_encoding   = read_profile_string         ( _factory_ini, "spooler", "mail_encoding"  , "base64"        );      // "quoted-printable": Jmail braucht 1s pro 100KB dafür
 

@@ -12,25 +12,6 @@
 
 
     <change date="2007-01-19" version="2.0.163" subversion_revision="4758">
-        <revision type="new" title="Optionen -?, -h und -V">
-            <description>
-                <ul>
-                    <li>
-                        <scheduler_option name="?"/> zeigt die Usage-Klausel
-                    </li>
-                    <li>
-                        <scheduler_option name="h"/> zeigt ebenfalls die Usage-Klausel
-                    </li>
-                    <li>
-                        <scheduler_option name="V"/> zeigt die Versionsnummer.
-                    </li>
-                </ul>
-                <p>
-                    Wenn keine anderen Optionen angegeben sind, beendet sich der Scheduler sofort.
-                </p>
-            </description>
-        </revision>
-
         <revision type="new" title="Cluster: Fristen zur Überwachung des Herzschlags sind einstellbar">
             <description>
                 <ul>
@@ -71,6 +52,25 @@
                         <scheduler_ini_entry file="factory.ini" section="job" entry="mail_on_delay_after_error"/>
                     </li>
                 </ul>
+            </description>
+        </revision>
+
+        <revision type="new" title="Optionen -?, -h und -V">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_option name="?"/> zeigt die Usage-Klausel
+                    </li>
+                    <li>
+                        <scheduler_option name="h"/> zeigt ebenfalls die Usage-Klausel
+                    </li>
+                    <li>
+                        <scheduler_option name="V"/> zeigt die Versionsnummer.
+                    </li>
+                </ul>
+                <p>
+                    Wenn keine anderen Optionen angegeben sind, beendet sich der Scheduler sofort.
+                </p>
             </description>
         </revision>
 
