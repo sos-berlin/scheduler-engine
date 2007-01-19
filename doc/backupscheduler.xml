@@ -25,11 +25,11 @@ bei Ausfall des primären Job Schedulers die Verarbeitung zu übernehmen.</p>
 <p>Die Voraussetzungen für die Operation eines Backup Clusters sind schematisch in der folgende Zeichnung abgebildet,
 und werden im Detail in den nächsten Abschnitt beschreiben.</p>
 
-<img src="images/availability-prerequisites-67%-6.png" style="margin: 20px 0px ; border:1px solid gray;"/>
+<img src="images/availability-prerequisites-size67-qual100.jpg" style="margin: 20px 0px ; border:1px solid gray;"/>
 
 <p>Die Übernahme der Verarbeitung durch eines Backup Job Schedulers ist schematisch in der folgende Zeichnung abgebildet:</p>
 
-<img src="images/availability-failover-67%-6.png" style="margin: 20px 0px ; border:1px solid gray;"/>
+<img src="images/availability-failover-size67-qual100.jpg" style="margin: 20px 0px ; border:1px solid gray;"/>
 
 
 <h2>Voraussetzungen für den Job Scheduler Backup Cluster</h2>
