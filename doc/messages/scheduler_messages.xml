@@ -2443,6 +2443,11 @@
             </text>
         </message>
 
+        <message code="SCHEDULER-393">
+            <text xml:lang="en">
+                <title>Error when calling &lt;run_time> function <p1/>: <p2/></title>
+            </text>
+        </message>
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->

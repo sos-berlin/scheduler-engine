@@ -340,12 +340,9 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
     {
         if( _spooler->_zschimmer_mode  &&  _spooler->_next_daylight_saving_transition_time )
         {
-            // Noch zu testen: Scheduler am Zeitpunkt der Umschaltung (Sommer u. Winter) laufen lassen.
-            // Kann der Scheduler in einer Zeitzone ohne Sommerzeit arbeiten? Die Wartezeit ist dann ewig.
-
             if( _spooler->_next_daylight_saving_transition_time < until )
             {
-                wait_until_2( _spooler->_next_daylight_saving_transition_time, String_object( _spooler->_next_daylight_saving_transition_name ) );
+                return wait_until_2( _spooler->_next_daylight_saving_transition_time, String_object( _spooler->_next_daylight_saving_transition_name ) );
             }
         }
         else

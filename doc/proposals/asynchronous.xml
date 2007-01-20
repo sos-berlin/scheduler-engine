@@ -29,12 +29,29 @@
         <a href="http://msdn.microsoft.com/library/default.asp?url=/library/en-us/dllproc/base/hasoverlappediocompleted.asp"><code>HasOverlappedIoCompleted()</code></a>
         festgestellt werden, welche Sockets bereit sind.
     </p>
+    <p>
+        Bleiben noch die Prozesse: Wie warten wir auf mehr als 64 Prozesse?
+        Ein Ereignis kann einem Callback oder einem Thread zugeordent werden, der dann ein Sammel-Ereignis auslöst.
+    </p>
+    <p>
+        Threads ebenso.
+    </p>
+    <p>
+        Am Ende kommen wir mit drei Events aus: Für TCP, Prozesse und Threads.
+    </p>
 
+    
     <h2>Direkte Kopplung der Ereignisse mit asynchronen Objekten</h2>
     <p>
         Bisher werden bei einem Ereignis alle asynchronen Objekte ausgeführt (<code>async_continue()</code>).
         Besser wäre, das Eintreten eines Ereignisses würde direkt zur Fortsetzung eines damit verbundenen Objekts führen,
         während alle anderen Objekte nicht angerührt werden.
+    </p>
+    <p>
+        Falls nicht korrekt signalisiert wird:
+        Wir könnten auf Anforderung oder sekündlich die Objekte einmal aufrufen (async_on_continue), die es bestellt haben,
+        mit besonderen Parameter, das kein Ereignis vorliegt. 
+        Mit Meldungen (im scheduler.log und &lt;show_state/>), um diese Stellen anpassen zu können.
     </p>
 
     <p>
@@ -62,8 +79,80 @@
         Jobs und Tasks könnten asynchrone Objekte sein. 
         Dann hätten wir ein einheitliches Verfahren.
     </p>
+    <p>
+        Einfacher: Das Task-Subsystem wird asynchron, Tasks und Objekte erstmal nicht.
+    </p>
+
+
+    <h3>Sommerzeitumschaltung</h3>
+    <p>
+        Ein asynchrones Objekt, das zweimal im Jahr (oder zunächst jede Nacht) aktiv wird, 
+        um die Uhr umzustellen und den nächsten Termin zu bestimmen.
+        Damit braucht wait_until() nicht mehr die Sommerzeit zu berücksichtigen.
+    </p>
+
+
+    <h2>Weiterentwicklung der asynchronen Objekte</h2>
+    <p>
+        Die asynchronen Objekte werden für zwei Zwecke eingesetzt. 
+        Das könnte vielleicht besser getrennnt werden.
+        Sie unterscheiden sich in async_finished() und der Verschachtelbarkeit. 
+        Das sollte geklärt werden.
+    </p>
+    <p>
+        Ereignis-Methoden? Neben async_continue_() (async_on_continue()) könnte es andere Callbacks geben:
+    </p>
+    <ul>
+        <li>
+            Zeitablauf
+        </li>
+        <li>
+            Internes oder externes Signal 
+        </li>
+    </ul>
+
+    <h3>Priorisierung</h3>
+    <p>
+        Der TCP-Verkehr mit einem Benutzer sollte höhere Priorität haben.
+    </p>
+
+
+    <h3>Threads</h3>
+    <p>
+        Ein asynchrones Objekt sollte einen Thread steuern können.
+        Müsste mit den bisherigen Mitteln gehen.
+    </p>
+    <p>
+        Verwendungen:
+    </p>
+    <ul>
+        <li>
+            Dateiaufträge: Lesen eines großen Verzeichnisses
+        </li>
+        <li>
+            eMail-Versand, mit Warteschlange der zu versendenen eMails
+        </li>
+        <li>
+            &lt;show>-Kommandos mit umfangreichen Datenbankzugriff, 
+            nachdem der Zugriff auf die Datenstrukturen im Speicher abgeschlossen ist.
+            Für den Datenbankzugriff brauchen wir eine eigene Verbindung,
+            die nach einer Frist geschlossen werden kann.
+        </li>
+    </ul>
+
+
+    <h2>Bessere Trennung zwischen internen und externen Signalen/Ereignissen</h2>
+    <p>
+        Möglicherweise werden bei internen Signalen auch Windows-Events signalisiert. 
+        Das sollte nicht sein.
+    </p>
     
-    
+
+    <h2>Unix: Signale und select()</h2>
+    <p>
+        Für Unix könnte Signale benutzt werden. 
+        select() müsste dann auf SIGIO umgestellt werden.
+    </p>
     
     
 </description>                                     

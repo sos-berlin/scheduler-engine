@@ -79,7 +79,7 @@ Variant Internal_module_instance::call( const string& name )
 
 //-------------------------------------------------------------------Internal_module_instance::call
 
-Variant Internal_module_instance::call( const string&, bool )
+Variant Internal_module_instance::call( const string&, const Variant& )
 {
     z::throw_xc( __FUNCTION__ );
 }

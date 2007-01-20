@@ -12,6 +12,7 @@ namespace time {
 //-------------------------------------------------------------------------------------------------
 
 extern const int                never_int;
+const int                       max_weekdays_per_month      = 5;
 
 //--------------------------------------------------------------------------------With_single_start
 
@@ -161,6 +162,8 @@ struct Period
     
     void                        init                        ()                                      { _begin = _end = _repeat = Time::never; }
 
+    xml::Element_ptr            dom_element                 ( const xml::Document_ptr& );
+
     bool                        empty                       () const                                { return _begin == Time::never; }
     bool                        has_start                   () const                                { return is_single_start() || repeat() != Time::never; }
     Time                        next_try                    ( Time );
@@ -171,6 +174,7 @@ struct Period
     void                        set_dom                     ( const xml::Element_ptr&, const Period* deflt );
 
     bool                        operator <                  ( const Period& t ) const               { return _begin < t._begin; }  //für set<>
+    bool                        operator >                  ( const Period& t ) const               { return _begin > t._begin; }  //für set<>
     bool                        is_in_time                  ( Time t )                              { return t >= _begin && t < _end; }
     bool                        is_comming                  ( Time time_of_day, With_single_start single_start ) const;
 
@@ -210,9 +214,9 @@ struct Day
                                 Day                         ()                                      {}
                                 Day                         ( const Period_set& t )                 { _period_set = t; }
                                 Day                         ( const Period& t )                     { _period_set.insert( t ); }
-                                Day                         ( const xml::Element_ptr& e, const Day* deflt, const Period* p )   { set_dom( e, deflt, p ); }
+                                Day                         ( const xml::Element_ptr& e, const Day* deflt, const Period* p )   { set_dom_periods( e, deflt, p ); }
 
-    void                        set_dom                     ( const xml::Element_ptr&, const Day* deflt, const Period* );
+    void                        set_dom_periods             ( const xml::Element_ptr&, const Day* deflt, const Period* );
     void                        set_default                 ();
 
                                 operator bool               () const                                { return !_period_set.empty(); }
@@ -233,21 +237,26 @@ struct Day
 
 struct Day_set
 {
-                                Day_set                     ( int minimum, int maximum )                 : _minimum(minimum), _maximum(maximum) {} 
-    explicit                    Day_set                     ( int minimum, int maximum, const xml::Element_ptr& e )  : _minimum(minimum), _maximum(maximum) { set_dom(e); }
+                                Day_set                     ( int minimum, int maximum )                             : _zero_(this+1), _minimum(minimum), _maximum(maximum) {} 
+    explicit                    Day_set                     ( int minimum, int maximum, const xml::Element_ptr& e )  : _zero_(this+1), _minimum(minimum), _maximum(maximum) { set_dom(e); }
 
     void                        set_dom                     ( const xml::Element_ptr&, const Day* = NULL, const Period* = NULL );
+    int                         get_day_number              ( const xml::Element_ptr& );
+    int                         get_weekday_number          ( const xml::Element_ptr& );
 
-    bool                        is_empty                    ();
+    bool                        is_filled                   () const                                { return _is_day_set_filled; }
     char                        operator []                 ( int i )                               { return _days[i]; }
 
     void                        print                       ( ostream& ) const;
     friend ostream&             operator <<                 ( ostream& s, const Day_set& o )        { o.print(s); return s; }
 
 
+  protected:
+    Fill_zero                  _zero_;
     int                        _minimum;
     int                        _maximum;
     Day                        _days                        [1+31];
+    bool                       _is_day_set_filled;
 };
 
 //--------------------------------------------------------------------------------------Weekday_set
@@ -257,6 +266,7 @@ struct Weekday_set : Day_set
                                 Weekday_set                 ()                                      : Day_set( 0, 6 ) {}
     explicit                    Weekday_set                 ( const xml::Element_ptr& e )           : Day_set( 0, 6, e ) {}
 
+    void                        fill_with_default           ( const Day& );
     Period                      next_period                 ( Time, With_single_start single_start );
 
     void                        print                       ( ostream& s ) const                    { s << "Weekday_set("; Day_set::print(s); s << ")"; }
@@ -267,13 +277,41 @@ struct Weekday_set : Day_set
 
 struct Monthday_set : Day_set
 {
-                                Monthday_set                ()                                      : Day_set( 1, 31 ) {}
-    explicit                    Monthday_set                ( const xml::Element_ptr& e )           : Day_set( 1, 31, e ) {}
+                                Monthday_set                ()                                      : Day_set( 1, 31    ), _zero_(this+1) {}
+    explicit                    Monthday_set                ( const xml::Element_ptr& e )           : Day_set( 1, 31, e ), _zero_(this+1) {}
 
+    void                        set_dom                     ( const xml::Element_ptr&, const Day* = NULL, const Period* = NULL );
+
+    bool                        is_filled                   () const                                { return Day_set::is_filled() | 
+                                                                                                            _month_weekdays._is_filled | _reverse_month_weekdays._is_filled ; }
     Period                      next_period                 ( Time, With_single_start single_start );
 
     void                        print                       ( ostream& s ) const                    { s << "Monthday_set("; Day_set::print(s); s << ")"; }
     friend ostream&             operator <<                 ( ostream& s, const Monthday_set& o )   { o.print(s); return s; }
+
+
+    //struct Month_weekday
+    //{
+    //    int                    _weekday_number;
+    //    int                    _which;                      // 1...4: 1. bis 4. Wochentag des Monats, -1...-4 letzer bis viertletzer Wochentag des Monats
+    //};
+
+    //typedef stdext::hash_set<Month_weekday> Month_weekday_set;
+    //Month_weekday_set          _month_weekday_set;
+
+  private:
+    Fill_zero                  _zero_;
+
+    struct Month_weekdays
+    {
+        Day*                    day                         ( int which, int weekday_number );
+
+        Day                    _days                        [ 7 * max_weekdays_per_month ];
+        bool                   _is_filled;
+    };
+
+    Month_weekdays             _month_weekdays;
+    Month_weekdays             _reverse_month_weekdays;
 };
 
 //--------------------------------------------------------------------------------------Ultimo_set
@@ -296,6 +334,7 @@ struct Holidays
                                 Holidays                    ( Spooler* spooler )                    : _spooler(spooler) {}
 
     void                        clear                       ()                                      { _set.clear(); }
+    bool                        is_filled                   () const                                { return !_set.empty(); }
     void                        set_dom                     ( const xml::Element_ptr&, int include_nesting = 0 );
     void                        include                     ( time_t t )                            { _set.insert( t ); }
     bool                        is_included                 ( time_t t )                            { return _set.find( t ) != _set.end(); }
@@ -324,6 +363,7 @@ struct Date_set
 {
     Period                      next_period                 ( Time, With_single_start single_start );
 
+    bool                        is_filled                   () const                                { return !_date_set.empty(); }
     void                        print                       ( ostream& ) const;
     friend ostream&             operator <<                 ( ostream& s, const Date_set& o )       { o.print(s); return s; }
 
@@ -336,6 +376,7 @@ struct At_set
 {
     Period                      next_period                 ( Time, With_single_start single_start );
 
+    bool                        is_filled                   () const                                { return !_at_set.empty(); }
     void                        add                         ( const Time& at )                      { _at_set.insert( at ); }
     void                        print                       ( ostream& ) const;
     friend ostream&             operator <<                 ( ostream& s, const At_set& o )         { o.print(s); return s; }
@@ -368,6 +409,8 @@ struct Run_time : idispatch_implementation< Run_time, spooler_com::Irun_time >,
 
                                 Run_time                    ( Spooler*, Order* = NULL );
 
+    void                    set_function_com_object         ( IDispatch* com_object )               { _function_com_object = com_object; }
+    bool                        is_filled                   () const;
     void                    set_modified_event_handler      ( Modified_event_handler* m )           { _modified_event_handler = m; }
 
     void                    set_xml                         ( const string& );
@@ -376,6 +419,7 @@ struct Run_time : idispatch_implementation< Run_time, spooler_com::Irun_time >,
     void                    set_dom                         ( const xml::Element_ptr& );  // Setzt nicht _xml!
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr& ) const;
     xml::Document_ptr           dom_document                () const;
+    xml::Element_ptr            calendar_dom_element_or_null( const xml::Document_ptr&, const Time& from, const Time& until, int* const limit );
 
     void                        check                       ();                              
 
@@ -393,6 +437,7 @@ struct Run_time : idispatch_implementation< Run_time, spooler_com::Irun_time >,
 
     Period                      next_period                 ( With_single_start single_start = wss_next_period )      { return next_period( Time::now(), single_start ); }
     Period                      next_period                 ( Time, With_single_start single_start = wss_next_period );
+    Time                        call_function               ();
 
     bool                        period_follows              ( Time time )                           { return next_period(time).begin() != Time::never; }
 
@@ -423,6 +468,8 @@ struct Run_time : idispatch_implementation< Run_time, spooler_com::Irun_time >,
     Holidays                   _holidays;
   //string                     _xml;
     xml::Document_ptr          _dom;
+    string                     _start_time_function;
+    IDispatch*                 _function_com_object;
 };
 
 //-------------------------------------------------------------------------------------------------

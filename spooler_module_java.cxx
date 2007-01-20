@@ -503,7 +503,7 @@ Variant Java_module_instance::call( const string& name_par )
 
 //-----------------------------------------------------------------------Java_module_instance::call
 
-Variant Java_module_instance::call( const string& name, bool param )
+Variant Java_module_instance::call( const string& name, const Variant& param )
 {
     Env env;
     Local_frame local_frame ( 10 );

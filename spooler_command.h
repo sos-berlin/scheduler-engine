@@ -189,6 +189,7 @@ struct Command_processor
     xml::Document_ptr           execute                     ( const xml::Document_ptr&, const Time& xml_mod_time = Time::now() );
     void                        execute_2                   ( const string& xml_text, const Time& xml_mod_time = Time::now() );
     void                        execute_2                   ( const xml::Document_ptr&, const Time& xml_mod_time = Time::now() );
+    void                        execute_2                   ( const xml::Element_ptr& , const Time& xml_mod_time = Time::now() );
     xml::Document_ptr           dom_from_xml                ( const string& xml_text );
     void                        execute_commands            ( const xml::Element_ptr&, const Time& xml_mod_time );
     xml::Element_ptr            execute_command             ( const xml::Element_ptr&, const Time& xml_mod_time );
@@ -199,15 +200,14 @@ struct Command_processor
     void                        set_log                     ( Has_log* log )                        { _log = log; }     // Optional
 
     xml::Element_ptr            execute_show_state          ( const xml::Element_ptr&, const Show_what& );
+    xml::Element_ptr            execute_show_calendar       ( const xml::Element_ptr&, const Show_what& );
     xml::Element_ptr            execute_show_history        ( const xml::Element_ptr&, const Show_what& );
     xml::Element_ptr            execute_show_jobs           ( const Show_what& );
-  //xml::Element_ptr            execute_show_threads        ( const Show_what& );
     xml::Element_ptr            execute_show_process_classes( const Show_what& );
     xml::Element_ptr            execute_add_jobs            ( const xml::Element_ptr& );
     xml::Element_ptr            execute_job                 ( const xml::Element_ptr& );
     xml::Element_ptr            execute_job_chain           ( const xml::Element_ptr& );
     xml::Element_ptr            execute_show_job            ( const xml::Element_ptr&, const Show_what& );
-  //xml::Element_ptr            execute_show_job            ( Job* );
     xml::Element_ptr            execute_modify_job          ( const xml::Element_ptr& );
     xml::Element_ptr            execute_start_job           ( const xml::Element_ptr& );
     xml::Element_ptr            execute_show_cluster        ( const xml::Element_ptr&, const Show_what& );

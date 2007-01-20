@@ -206,6 +206,31 @@ void Command_processor::get_id_and_next( const xml::Element_ptr& element, int* i
     if( abs(*next) > max_n )  *next = sgn(*next) * max_n,  _spooler->log()->warn( message_string( "SCHEDULER-285", max_n ) );
 }
 
+//---------------------------------------------------------Command_processor::execute_show_calendar
+
+xml::Element_ptr Command_processor::execute_show_calendar( const xml::Element_ptr& element, const Show_what& show_ )
+{
+    if( _security_level < Security::seclev_info )  z::throw_xc( "SCHEDULER-121" );
+
+    Time from  = Time::now();
+    Time until = Time::never;
+    int  limit = element.int_getAttribute( "limit", 100 );
+
+    if( element.hasAttribute( "from"  ) )  from .set_datetime( element.getAttribute( "from"  ) );
+    if( element.hasAttribute( "until" ) )  until.set_datetime( element.getAttribute( "until" ) );
+
+    xml::Element_ptr& calendar_element = _answer.createElement( "calendar" );
+
+    FOR_EACH_JOB( j )
+    {
+        Job* job = *j;
+        if( xml::Element_ptr e = job->calendar_dom_element_or_null( _answer, from, until, &limit ) )  calendar_element.appendChild( e );
+        if( limit <= 0 )  break;
+    }
+
+    return calendar_element;
+}
+
 //----------------------------------------------------------Command_processor::execute_show_history
 
 xml::Element_ptr Command_processor::execute_show_history( const xml::Element_ptr& element, const Show_what& show_ )
@@ -976,6 +1001,10 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     if( element.nodeName_is( "show_state"       ) 
      || element.nodeName_is( "s"                ) )  return execute_show_state( element, show );
     else
+#ifdef Z_DEBUG
+    if( element.nodeName_is( "show_calendar"    )  &&  _spooler->_zschimmer_mode )  return execute_show_calendar( element, show );
+    else
+#endif
     if( element.nodeName_is( "show_history"     ) )  return execute_show_history( element, show );
     else
     if( element.nodeName_is( "modify_spooler"   ) )  return execute_modify_spooler( element );
@@ -1451,46 +1480,54 @@ void Command_processor::execute_2( const xml::Document_ptr& command_doc, const T
             _spooler->_schema.validate( command_doc );
         }
 
-        xml::Element_ptr e = command_doc.documentElement();
-
-        if( e.nodeName_is( "spooler" ) ) 
-        {
-            xml::Node_ptr n = e.firstChild(); 
-            while( n  &&  n.nodeType() != xml::ELEMENT_NODE )  n = n.nextSibling();
-            e = n;
-        }
-
-        if( e )
-        {
-            if( e.nodeName_is( "commands" )  ||  e.nodeName_is( "command" )  ||  e.nodeName_is( "cluster_member_command" ) )
-            {
-                execute_commands( e, xml_mod_time );
-            }
-            else
-            {
-                xml::Element_ptr response_element = execute_command( e, xml_mod_time );
-                
-                if( response_element )
-                {
-                    _answer.documentElement().firstChild().appendChild( response_element );
-                }
-                else
-                if( _response )
-                {
-                    // Rückgabe als asynchrones Command_response (für <get_events>)
-                }
-                else z::throw_xc( "SCHEDULER-353", e.nodeName() );
-            }
-            
-            xml::Node_ptr n = e.nextSibling(); 
-            while( n  &&  n.nodeType() != xml::ELEMENT_NODE )  n = n.nextSibling();
-            e = n;
-            if( e )  z::throw_xc( "SCHEDULER-319", e.nodeName() ); 
-        }
+        execute_2( command_doc.documentElement(), xml_mod_time );
     }
     catch( const _com_error& com_error ) { throw_com_error( com_error, "DOM/XML" ); }
 
     if( !_spooler->ok() )  _spooler->cmd_terminate_after_error( __FUNCTION__, command_doc.xml() );
+}
+
+
+//---------------------------------------------------------------------Command_processor::execute_2
+
+void Command_processor::execute_2( const xml::Element_ptr& element, const Time& xml_mod_time )
+{
+    xml::Element_ptr e = element;
+
+    if( e.nodeName_is( "spooler" ) ) 
+    {
+        xml::Node_ptr n = e.firstChild(); 
+        while( n  &&  n.nodeType() != xml::ELEMENT_NODE )  n = n.nextSibling();
+        e = n;
+    }
+
+    if( e )
+    {
+        if( e.nodeName_is( "commands" )  ||  e.nodeName_is( "command" )  ||  e.nodeName_is( "cluster_member_command" ) )
+        {
+            execute_commands( e, xml_mod_time );
+        }
+        else
+        {
+            xml::Element_ptr response_element = execute_command( e, xml_mod_time );
+            
+            if( response_element )
+            {
+                _answer.documentElement().firstChild().appendChild( response_element );
+            }
+            else
+            if( _response )
+            {
+                // Rückgabe als asynchrones Command_response (für <get_events>)
+            }
+            else z::throw_xc( "SCHEDULER-353", e.nodeName() );
+        }
+        
+        xml::Node_ptr n = e.nextSibling(); 
+        while( n  &&  n.nodeType() != xml::ELEMENT_NODE )  n = n.nextSibling();
+        e = n;
+        if( e )  z::throw_xc( "SCHEDULER-319", e.nodeName() ); 
+    }
 }
 
 //--------------------------------------------------------------Command_processor::execute_commands

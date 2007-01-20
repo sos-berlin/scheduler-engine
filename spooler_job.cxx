@@ -514,6 +514,7 @@ void Job::init_start_when_directory_changed( Task* task )
 void Job::init_run_time()
 {
     _run_time = Z_NEW( Run_time( _spooler ) );
+    _run_time->set_function_com_object( _com_job );
     _run_time->set_holidays( _spooler->holidays() );
 }
 
@@ -1891,7 +1892,7 @@ bool Job::do_something()
 
                 if( now > _period.end() )
                 {
-                    select_period();
+                    select_period( now );
                     if( !_period.is_in_time( _next_start_time ) )  set_next_start_time( now );
                     //if( is_in_period( now ) )  check_min_tasks( "a new period has begun" );
                 }
@@ -2482,6 +2483,31 @@ xml::Element_ptr Job::dom_element( const xml::Document_ptr& document, const Show
     return job_element;
 }
 
+//----------------------------------------------------------------Job::calendar_dom_element_or_null
+#ifdef Z_DEBUG
+
+xml::Element_ptr Job::calendar_dom_element_or_null( const xml::Document_ptr& dom_document, const Time& from, const Time& until, int* const limit )
+{
+    assert( limit );
+
+
+    xml::Element_ptr result;
+
+    if( xml::Element_ptr& run_times_element = _run_time->calendar_dom_element_or_null( dom_document, from, until, limit ) )
+    {
+        if( !result )
+        {
+            result = dom_document.createElement( "job" );
+            result.setAttribute( "name", name() );
+        }
+
+        result.appendChild( run_times_element );
+    }
+
+    return result;
+}
+
+#endif
 //------------------------------------------------------------------------Job::commands_dom_element
 /*
 xml::Element_ptr Job::commands_dom_element(  const xml::Document_ptr& document, const Show_what& show )

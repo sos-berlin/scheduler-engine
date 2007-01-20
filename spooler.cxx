@@ -1852,7 +1852,7 @@ void Spooler::load()
 #   endif
 }
 
-//-----------------------------------------------------Spooler::set_next_daylight_saving_transition
+//-------------------------------------------------------------------------time_from_dst_systemtime
 #ifdef Z_WINDOWS
 
 static Time time_from_dst_systemtime( const SYSTEMTIME& dst, const SYSTEMTIME& now )
@@ -2185,7 +2185,9 @@ void Spooler::execute_config_commands()
         
         DOM_FOR_EACH_ELEMENT( _commands_document.documentElement(), command_element )
         {
-            xml::Element_ptr result = command_processor.execute_command( command_element, Time::now() );
+            command_processor.execute_2( command_element, Time::now() );
+            xml::Element_ptr result = command_processor._answer.documentElement();
+            //xml::Element_ptr result = command_processor.execute_command( command_element, Time::now() );
 
             if( !result.select_node( "ok [ count(*) = 0  and  count(@*) = 0 ]" ) )
             {
