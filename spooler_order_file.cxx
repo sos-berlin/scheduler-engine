@@ -151,7 +151,7 @@ void Order_subsystem::init_file_order_sink()
     file_order_sink_job->set_order_controlled();
     file_order_sink_job->set_idle_timeout( file_order_sink_job_idle_timeout_default );
 
-    _spooler->add_job( +file_order_sink_job, true );
+    _spooler->job_subsystem()->add_job( +file_order_sink_job, true );
 
     // Der Scheduler führt Tasks des Jobs scheduler_file_order_sink in jedem Scheduler-Schritt aus,
     // damit sich die Aufträge nicht stauen (Der interne Job läuft nicht in einem eigenen Prozess)

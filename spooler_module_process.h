@@ -1,4 +1,4 @@
-// $Id$
+// $Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
 
 #ifndef __SPOOLER_MODULE_PROCESS_H
 #define __SPOOLER_MODULE_PROCESS_H
@@ -40,7 +40,7 @@ struct Process_module_instance : Module_instance
     void                        end__end                    ();
     Variant                     step__end                   ();
     Variant                     call                        ( const string& name );
-    Variant                     call                        ( const string& name, bool param );
+    Variant                     call                        ( const string& name, const Variant& param, const Variant& );
     bool                        name_exists                 ( const string& name );
     bool                        loaded                      ()                                      { return _idispatch != NULL; }
     bool                        callable                    ()                                      { return _idispatch != NULL; }

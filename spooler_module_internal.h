@@ -26,7 +26,7 @@ struct Internal_module_instance : Module_instance
     virtual void                add_obj                     ( IDispatch*, const string& name );
   //void                        close__end                  ();
     Variant                     call                        ( const string& name );
-    Variant                     call                        ( const string& name, bool param );      
+    Variant                     call                        ( const string& name, const Variant& param, const Variant& );      
     bool                        name_exists                 ( const string& name );
     bool                        loaded                      ()                                      { return _loaded; }
     bool                        callable                    ()                                      { return true; }

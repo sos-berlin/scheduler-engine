@@ -7,96 +7,96 @@ namespace sos {
 namespace scheduler {
 
 
-typedef int                     Level;
+//typedef int                     Level;
 struct                          Task;
 struct                          Module_task;
 
 //-----------------------------------------------------------------------------------Level_interval
 
-struct Level_interval
-{
-                                Level_interval              ()                                      : _low_level(0), _high_level(0) {}
-    explicit                    Level_interval              ( const xml::Element_ptr& e )           { set_dom( e ); }
-
-    void                        set_dom                     ( const xml::Element_ptr& );
-
-    bool                        is_in_interval              ( Level level )                         { return level >= _low_level && level < _high_level; }
-
-    Level                      _low_level;
-    Level                      _high_level;
-};
+//struct Level_interval
+//{
+//                                Level_interval              ()                                      : _low_level(0), _high_level(0) {}
+//    explicit                    Level_interval              ( const xml::Element_ptr& e )           { set_dom( e ); }
+//
+//    void                        set_dom                     ( const xml::Element_ptr& );
+//
+//    bool                        is_in_interval              ( Level level )                         { return level >= _low_level && level < _high_level; }
+//
+//    Level                      _low_level;
+//    Level                      _high_level;
+//};
 
 //---------------------------------------------------------------------------------Object_set_class
 
-struct Object_set_class : Sos_self_deleting
-{
-                                Object_set_class            ( Spooler* sp, Prefix_log* log )        : _spooler(sp), _module(sp,log) {}
-    explicit                    Object_set_class            ( Spooler* sp, Prefix_log* log, const xml::Element_ptr& e, const Time& xml_mod_time )  : _spooler(sp), _module(sp,log) { set_dom( e, xml_mod_time ); }
-
-    void                        set_dom                     ( const xml::Element_ptr&, const Time& xml_mod_time );
-
-    Spooler*                   _spooler;
-    string                     _name;
-    map<Level,string>          _level_map;
-    
-    Module                     _module;
-    bool                       _object_interface;
-
-  //Time                       _process_timeout;
-};
-
-typedef list< Sos_ptr<Object_set_class> >  Object_set_class_list;
+//struct Object_set_class : Sos_self_deleting
+//{
+//                                Object_set_class            ( Spooler* sp, Prefix_log* log )        : _spooler(sp), _module(sp,log) {}
+//    explicit                    Object_set_class            ( Spooler* sp, Prefix_log* log, const xml::Element_ptr& e, const Time& xml_mod_time )  : _spooler(sp), _module(sp,log) { set_dom( e, xml_mod_time ); }
+//
+//    void                        set_dom                     ( const xml::Element_ptr&, const Time& xml_mod_time );
+//
+//    Spooler*                   _spooler;
+//    string                     _name;
+//    map<Level,string>          _level_map;
+//    
+//    Module                     _module;
+//    bool                       _object_interface;
+//
+//  //Time                       _process_timeout;
+//};
+//
+//typedef list< Sos_ptr<Object_set_class> >  Object_set_class_list;
 
 //-----------------------------------------------------------------------------------Spooler_object
 
-struct Spooler_object
-{
-                                Spooler_object              ( const ptr<IDispatch>& dispatch = NULL ) : _idispatch(dispatch) {}
-
-    Spooler_object&             operator =                  ( const ptr<IDispatch>& dispatch )      { _idispatch = dispatch; return *this; }
-    Level                       level                       ();
-    void                        process                     ( Level output_level );
-    bool                        is_null                     ()                                      { return _idispatch == NULL; }
-
-    ptr<IDispatch>             _idispatch;
-};
+//struct Spooler_object
+//{
+//                                Spooler_object              ( const ptr<IDispatch>& dispatch = NULL ) : _idispatch(dispatch) {}
+//
+//    Spooler_object&             operator =                  ( const ptr<IDispatch>& dispatch )      { _idispatch = dispatch; return *this; }
+//    Level                       level                       ();
+//    void                        process                     ( Level output_level );
+//    bool                        is_null                     ()                                      { return _idispatch == NULL; }
+//
+//    ptr<IDispatch>             _idispatch;
+//};
 
 //---------------------------------------------------------------------------------Object_set_descr
 
-struct Object_set_descr : Sos_self_deleting
-{
-                                Object_set_descr            ()                                      {}
-    explicit                    Object_set_descr            ( const xml::Element_ptr& e )           { set_dom( e ); }
-
-    void                        set_dom                     ( const xml::Element_ptr& );
-
-    string                     _class_name;
-    Sos_ptr<Object_set_class>  _class;
-    Level_interval             _level_interval;
-};
+//struct Object_set_descr : Sos_self_deleting
+//{
+//                                Object_set_descr            ()                                      {}
+//    explicit                    Object_set_descr            ( const xml::Element_ptr& e )           { set_dom( e ); }
+//
+//    void                        set_dom                     ( const xml::Element_ptr& );
+//
+//    string                     _class_name;
+//    Sos_ptr<Object_set_class>  _class;
+//    Level_interval             _level_interval;
+//};
 
 //---------------------------------------------------------------------------------------Object_set
 
-struct Object_set : Sos_self_deleting
-{
-                                Object_set                  ( Spooler*, Module_task*, const Sos_ptr<Object_set_descr>& );
-                               ~Object_set                  ();
-
-    bool                        open                        ();
-    void                        close                       ();
-    Spooler_object              get                         ();
-    bool                        step                        ( Level result_level );
-    void                        set_in_call                 ( const string& name );
-
-  //Task_subsystem*             thread                      () const;
-
-    Fill_zero                  _zero_;
-    Spooler*                   _spooler;
-    Module_task*               _task;
-    Sos_ptr<Object_set_descr>  _object_set_descr;
-    Object_set_class*          _class;
-    ptr<IDispatch>             _idispatch;                  // Zeiger auf ein Object_set des Skripts
-};
+//struct Object_set : Sos_self_deleting
+//{
+//                                Object_set                  ( Spooler*, Module_task*, const Sos_ptr<Object_set_descr>& );
+//                               ~Object_set                  ();
+//
+//    bool                        open                        ();
+//    void                        close                       ();
+//    Spooler_object              get                         ();
+//    bool                        step                        ( Level result_level );
+//    void                        set_in_call                 ( const string& name );
+//
+//  //Task_subsystem*             thread                      () const;
+//
+//    Fill_zero                  _zero_;
+//    Spooler*                   _spooler;
+//    Module_task*               _task;
+//    Sos_ptr<Object_set_descr>  _object_set_descr;
+//    Object_set_class*          _class;
+//    ptr<IDispatch>             _idispatch;                  // Zeiger auf ein Object_set des Skripts
+//};
 
 //----------------------------------------------------------------------------------------------Job
 
@@ -210,7 +210,7 @@ struct Job : Object,
     const string&               name                        () const                                { return _name; }
     State_cmd                   state_cmd                   () const                                { return _state_cmd; }
     State                       state                       () const                                { return _state; }
-    Object_set_descr*           object_set_descr            () const                                { return _object_set_descr; }
+  //Object_set_descr*           object_set_descr            () const                                { return _object_set_descr; }
   //string                      priority                    () const                                { return _priority; }
   //Task_subsystem*             thread                      () const                                { return _thread; }
     string                      job_state                   ();
@@ -317,7 +317,7 @@ struct Job : Object,
     void                        remove_waiting_job_from_process_list();
 
     ptr<Com_job>&               com_job                     ()                                      { return _com_job; }
-    void                        signal_object               ( const string& object_set_class_name, const Level& );
+  //void                        signal_object               ( const string& object_set_class_name, const Level& );
 
     Order_queue*                order_queue                 () const                                { return _order_queue; }
     bool                        order_controlled            () const                                { return _order_queue != NULL; }
@@ -420,8 +420,8 @@ struct Job : Object,
     Module_instance_vector     _module_instances;
     ptr<Com_job>               _com_job;
 
-    Sos_ptr<Object_set_descr>  _object_set_descr;           // Job nutzt eine Objektemengeklasse
-    Level                      _output_level;
+    //Sos_ptr<Object_set_descr>  _object_set_descr;           // Job nutzt eine Objektemengeklasse
+    //Level                      _output_level;
     
     Task_queue                 _task_queue;                 // Warteschlange der nächsten zu startenden Tasks
     Task_list                  _running_tasks;              // Alle laufenden Tasks (auch die gestarteten, aber wartenden, z.B. s_running_waiting_for_order)
@@ -455,7 +455,34 @@ struct Internal_job : Job
 
 typedef list< ptr<Job> >    Job_list;
 
-#define FOR_EACH_JOB( ITERATOR )  FOR_EACH( Job_list, _spooler->_job_list, ITERATOR )
+#define FOR_EACH_JOB( ITERATOR )  FOR_EACH( Job_list, _spooler->job_subsystem()->_job_list, ITERATOR )
+
+//---------------------------------------------------------------------------Job_subsystem_interface
+
+struct Job_subsystem_interface : Subsystem
+{
+                                Job_subsystem_interface     ( Scheduler* scheduler, Type_code t )   : Subsystem( scheduler, t ) {}
+
+    virtual Job*                get_job                     ( const string& job_name, bool can_be_not_initialized = false ) = 0;
+    virtual Job*                get_job_or_null             ( const string& job_name )              = 0;
+    virtual void                add_job                     ( const ptr<Job>&, bool init )          = 0;
+    virtual int                 remove_temporary_jobs       ( Job* which_job = NULL )               = 0;
+    virtual void                remove_job                  ( Job* )                                = 0;
+    virtual void                init_jobs                   ()                                      = 0;
+    virtual void                close_jobs                  ()                                      = 0;
+    virtual void                load_jobs_from_xml          ( const xml::Element_ptr&, const Time& xml_mod_time, bool init = false ) = 0;
+    virtual void                load_job_from_xml           ( const xml::Element_ptr&, const Time& xml_mod_time, bool init = false ) = 0;
+    virtual void                init0_job                   ( Job* )                                = 0;
+    virtual void                init1_job                   ( Transaction*, Job* )                  = 0;
+    virtual xml::Element_ptr    jobs_dom_element            ( const xml::Document_ptr&, const Show_what& ) = 0;
+    virtual bool                has_any_order               ()                                      = 0;
+    virtual bool                is_any_task_queued          ()                                      = 0;
+
+
+    Job_list                   _job_list;                   // Das ist offen zugänglich für FOR_EACH_JOB
+};
+
+ptr<Job_subsystem_interface>    new_job_subsystem           ( Scheduler* );
 
 //-------------------------------------------------------------------------------------------------
 

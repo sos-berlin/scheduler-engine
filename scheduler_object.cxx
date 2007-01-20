@@ -32,6 +32,8 @@ string Scheduler_object::name_of_type_code( Scheduler_object::Type_code type_cod
         case type_database_order_detector:  return "Database_order_detector";
         case type_order_subsystem:          return "Order_subsystem";
         case type_xml_client_connection:    return "Xml_client_connection";
+        case type_scheduler_script:         return "Scheduler_script";
+        case type_job_subsystem:            return "Job_subsystem";
         default:                            return S() << "Type_code(" << type_code << ")";
     }
 }
@@ -85,11 +87,11 @@ Database* Scheduler_object::db() const
     return _spooler->_db;
 }
 
-//----------------------------------------------------------------Scheduler_object::order_subsystem
+//------------------------------------------------------------------Scheduler_object::job_subsystem
 
-Order_subsystem* Scheduler_object::order_subsystem() const
+Job_subsystem_interface* Scheduler_object::job_subsystem() const
 {
-    return _spooler->order_subsystem();
+    return _spooler->job_subsystem();
 }
 
 //-----------------------------------------------------------------Scheduler_object::task_subsystem
@@ -97,6 +99,13 @@ Order_subsystem* Scheduler_object::order_subsystem() const
 Task_subsystem* Scheduler_object::task_subsystem() const
 {
     return _spooler->task_subsystem();
+}
+
+//----------------------------------------------------------------Scheduler_object::order_subsystem
+
+Order_subsystem* Scheduler_object::order_subsystem() const
+{
+    return _spooler->order_subsystem();
 }
 
 //-------------------------------------------------------------------------------------------------

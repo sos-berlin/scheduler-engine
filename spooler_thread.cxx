@@ -48,7 +48,7 @@ void Task_subsystem::build_prioritized_order_job_array()
     {
         _prioritized_order_job_array.clear();
 
-        for( Job_list::iterator j = _spooler->_job_list.begin(); j != _spooler->_job_list.end(); j++ )
+        for( Job_list::iterator j = _spooler->job_subsystem()->_job_list.begin(); j != _spooler->job_subsystem()->_job_list.end(); j++ )
         {
             if( (*j)->order_controlled() )  _prioritized_order_job_array.push_back( *j );
         }
@@ -154,7 +154,7 @@ bool Task_subsystem::step( const Time& now )
 
     if( !something_done )
     {
-        Z_FOR_EACH( Job_list, _spooler->_job_list, j )
+        Z_FOR_EACH( Job_list, _spooler->job_subsystem()->_job_list, j )
         {
             Job* job = *j;
             
@@ -270,7 +270,7 @@ bool Task_subsystem::is_ready_for_termination()
 bool Task_subsystem::process( const Time& now )
 {
     bool something_done = step( now );
-    _spooler->remove_temporary_jobs();
+    _spooler->job_subsystem()->remove_temporary_jobs();
 
     return something_done;
 }
@@ -305,7 +305,7 @@ bool Task_subsystem::try_to_free_process( Job* for_job, Process_class* process_c
 */
     vector<Job*> prioritized_order_job_array;
 
-    for( Job_list::iterator j = _spooler->_job_list.begin(); j != _spooler->_job_list.end(); j++ )
+    for( Job_list::iterator j = _spooler->job_subsystem()->_job_list.begin(); j != _spooler->job_subsystem()->_job_list.end(); j++ )
     {
         if( (*j)->order_controlled() )  prioritized_order_job_array.push_back( *j );
     }

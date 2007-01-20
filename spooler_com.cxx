@@ -24,6 +24,7 @@ using namespace zschimmer::com;
 
 namespace sos {
 namespace scheduler {
+namespace com_objects {
 
 using namespace std;
 using namespace spooler_com;
@@ -1725,41 +1726,41 @@ const Com_method Com_object_set::_methods[] =
 #endif
 //-------------------------------------------------------------------Com_object_set::Com_object_set
 
-Com_object_set::Com_object_set( Object_set* object_set )
-:
-    Sos_ole_object( object_set_class_ptr, this ),
-    _object_set(object_set)
-{
-}
+//Com_object_set::Com_object_set( Object_set* object_set )
+//:
+//    Sos_ole_object( object_set_class_ptr, this ),
+//    _object_set(object_set)
+//{
+//}
 
 //--------------------------------------------------------------------Com_object_set::get_low_level
 
-STDMETHODIMP Com_object_set::get_Low_level( int* result )
-{
-    THREAD_LOCK( _lock )
-    {
-        if( !_object_set )  return E_POINTER;
-        //if( current_thread_id() != _object_set->thread()->thread_id() )  return E_ACCESSDENIED;
-
-        *result = _object_set->_object_set_descr->_level_interval._low_level;
-    }
-
-    return NOERROR;
-}
+//STDMETHODIMP Com_object_set::get_Low_level( int* result )
+//{
+//    THREAD_LOCK( _lock )
+//    {
+//        if( !_object_set )  return E_POINTER;
+//        //if( current_thread_id() != _object_set->thread()->thread_id() )  return E_ACCESSDENIED;
+//
+//        *result = _object_set->_object_set_descr->_level_interval._low_level;
+//    }
+//
+//    return NOERROR;
+//}
 
 //-------------------------------------------------------------------Com_object_set::get_high_level
 
-STDMETHODIMP Com_object_set::get_High_level( int* result )
-{
-    THREAD_LOCK( _lock )
-    {
-        if( !_object_set )  return E_POINTER;
-      //if( current_thread_id() != _object_set->thread()->thread_id() )  return E_ACCESSDENIED;
-
-        *result = _object_set->_object_set_descr->_level_interval._high_level;
-    }
-    return NOERROR;
-}
+//STDMETHODIMP Com_object_set::get_High_level( int* result )
+//{
+//    THREAD_LOCK( _lock )
+//    {
+//        if( !_object_set )  return E_POINTER;
+//      //if( current_thread_id() != _object_set->thread()->thread_id() )  return E_ACCESSDENIED;
+//
+//        *result = _object_set->_object_set_descr->_level_interval._high_level;
+//    }
+//    return NOERROR;
+//}
 
 //--------------------------------------------------------------------------------Com_job::_methods
 #ifdef Z_COM
@@ -2046,7 +2047,7 @@ STDMETHODIMP Com_job::Remove()
     {
         if( !_job )  z::throw_xc( "SCHEDULER-122" );
 
-        _job->_spooler->remove_job( _job );
+        _job->_spooler->job_subsystem()->remove_job( _job );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
@@ -3202,9 +3203,9 @@ STDMETHODIMP Com_spooler::get_Script( IDispatch** script_object )
     THREAD_LOCK( _lock )
     {
         if( !_spooler )  return E_POINTER;
-        if( !_spooler->_module_instance )  return E_ACCESSDENIED;
+        if( !_spooler->scheduler_script()->module_instance() )  return E_ACCESSDENIED;
 
-        *script_object = _spooler->_module_instance->dispatch();
+        *script_object = _spooler->scheduler_script()->module_instance()->dispatch();
         if( *script_object )  (*script_object)->AddRef();
     }
 
@@ -3221,7 +3222,7 @@ STDMETHODIMP Com_spooler::get_Job( BSTR job_name, Ijob** com_job )
     try
     {
         if( !_spooler )  return E_POINTER;
-        *com_job = _spooler->get_job( bstr_as_string( job_name ) )->com_job();
+        *com_job = _spooler->job_subsystem()->get_job( bstr_as_string( job_name ) )->com_job();
         (*com_job)->AddRef();
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Spooler.job" ); }
@@ -3935,7 +3936,7 @@ STDMETHODIMP Com_job_chain::Add_job( VARIANT* job_or_jobname, VARIANT* begin_sta
                 string jobname = string_from_variant(*job_or_jobname);
                 
                 job = jobname == ""  ||  stricmp( jobname.c_str(), "*end" ) == 0? NULL
-                                                                                : _job_chain->_spooler->get_job( jobname );
+                                                                                : _job_chain->_spooler->job_subsystem()->get_job( jobname );
                 break;
             }
 
@@ -5222,5 +5223,6 @@ STDMETHODIMP Com_order_queue::Add_order( VARIANT* order_or_payload, Iorder** res
 
 //-------------------------------------------------------------------------------------------------
 
+} //namespace com_objects
 } //namespace scheduler
 } //namespace sos

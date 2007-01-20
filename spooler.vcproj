@@ -370,6 +370,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\scheduler_script.cxx"
+				>
+			</File>
+			<File
 				RelativePath="spooler.cxx"
 				>
 				<FileConfiguration
@@ -1053,6 +1057,10 @@
 				RelativePath=".\spooler_xslt_stylesheet.cxx"
 				>
 			</File>
+			<File
+				RelativePath=".\subsystem.cxx"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header-Dateien"
@@ -1064,6 +1072,10 @@
 			</File>
 			<File
 				RelativePath=".\scheduler_object.h"
+				>
+			</File>
+			<File
+				RelativePath=".\scheduler_script.h"
 				>
 			</File>
 			<File
@@ -1184,6 +1196,10 @@
 			</File>
 			<File
 				RelativePath=".\spooler_web_service.h"
+				>
+			</File>
+			<File
+				RelativePath=".\subsystem.h"
 				>
 			</File>
 		</Filter>

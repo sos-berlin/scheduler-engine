@@ -246,9 +246,9 @@ struct Module_instance : Object
     virtual void                start                       ();
     virtual IDispatch*          dispatch                    () const                                { z::throw_xc( "SCHEDULER-172", "dispatch()" ); }
     Variant                     call_if_exists              ( const string& name );
-    Variant                     call_if_exists              ( const string& name, bool param );
+    Variant                     call_if_exists              ( const string& name, const Variant& );
     virtual Variant             call                        ( const string& name )                  = 0;
-    virtual Variant             call                        ( const string& name, bool param )      = 0;
+    virtual Variant             call                        ( const string& name, const Variant&, const Variant& = missing_variant )  = 0;
     virtual bool                name_exists                 ( const string& name )                  = 0;
     virtual bool                loaded                      ()                                      = 0;
     virtual bool                callable                    ()                                      = 0;

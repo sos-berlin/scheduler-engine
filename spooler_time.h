@@ -171,6 +171,7 @@ struct Period
     friend Period               operator +                  ( const Time& t, const Period& p )      { return p+t; }
 
     void                        set_default                 ();
+    void                        set_single_start            ( const Time& );
     void                        set_dom                     ( const xml::Element_ptr&, const Period* deflt );
 
     bool                        operator <                  ( const Period& t ) const               { return _begin < t._begin; }  //für set<>
@@ -409,6 +410,7 @@ struct Run_time : idispatch_implementation< Run_time, spooler_com::Irun_time >,
 
                                 Run_time                    ( Spooler*, Order* = NULL );
 
+    void                    set_log                         ( Prefix_log* log )                     { _log = log; }
     void                    set_function_com_object         ( IDispatch* com_object )               { _function_com_object = com_object; }
     bool                        is_filled                   () const;
     void                    set_modified_event_handler      ( Modified_event_handler* m )           { _modified_event_handler = m; }
@@ -437,7 +439,7 @@ struct Run_time : idispatch_implementation< Run_time, spooler_com::Irun_time >,
 
     Period                      next_period                 ( With_single_start single_start = wss_next_period )      { return next_period( Time::now(), single_start ); }
     Period                      next_period                 ( Time, With_single_start single_start = wss_next_period );
-    Time                        call_function               ();
+    Time                        call_function               ( const Time& );
 
     bool                        period_follows              ( Time time )                           { return next_period(time).begin() != Time::never; }
 
@@ -470,6 +472,7 @@ struct Run_time : idispatch_implementation< Run_time, spooler_com::Irun_time >,
     xml::Document_ptr          _dom;
     string                     _start_time_function;
     IDispatch*                 _function_com_object;
+    ptr<Prefix_log>            _log;
 };
 
 //-------------------------------------------------------------------------------------------------

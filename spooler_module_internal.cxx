@@ -1,4 +1,4 @@
-// $Id$
+// $Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
 
 #include "spooler.h"
 
@@ -79,7 +79,7 @@ Variant Internal_module_instance::call( const string& name )
 
 //-------------------------------------------------------------------Internal_module_instance::call
 
-Variant Internal_module_instance::call( const string&, const Variant& )
+Variant Internal_module_instance::call( const string&, const Variant&, const Variant& )
 {
     z::throw_xc( __FUNCTION__ );
 }

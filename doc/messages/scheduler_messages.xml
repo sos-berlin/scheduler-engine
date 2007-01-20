@@ -2448,6 +2448,12 @@
                 <title>Error when calling &lt;run_time> function <p1/>: <p2/></title>
             </text>
         </message>
+
+        <message code="SCHEDULER-394">
+            <text xml:lang="en">
+                <title><code>&lt;run_time></code>-Function '<p1/>' returned start time <p2/> which is earlier then the requested beginning <p3/> and therefore ignored</title>
+            </text>
+        </message>
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->

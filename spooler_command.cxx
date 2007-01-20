@@ -153,7 +153,7 @@ xml::Element_ptr Command_processor::execute_show_jobs( const Show_what& show )
 {
     if( _security_level < Security::seclev_info )  z::throw_xc( "SCHEDULER-121" );
 
-    return _spooler->jobs_dom_element( _answer, show );
+    return _spooler->job_subsystem()->jobs_dom_element( _answer, show );
 }
 
 //----------------------------------------------------------Command_processor::execute_show_threads
@@ -245,7 +245,7 @@ xml::Element_ptr Command_processor::execute_show_history( const xml::Element_ptr
     int id, next;
     get_id_and_next( element, &id, &next );
     
-    ptr<Job> job = _spooler->get_job( job_name, true );
+    ptr<Job> job = _spooler->job_subsystem()->get_job( job_name, true );
 
     return job->read_history( _answer, id, next, show );
 }
@@ -359,7 +359,7 @@ xml::Element_ptr Command_processor::execute_show_job( const xml::Element_ptr& el
     
     if( job_chain_name != "" )  job_chain = _spooler->order_subsystem()->job_chain( job_chain_name );
     
-    return _spooler->get_job( element.getAttribute( "job" ), true ) -> dom_element( _answer, show, job_chain );
+    return _spooler->job_subsystem()->get_job( element.getAttribute( "job" ), true ) -> dom_element( _answer, show, job_chain );
 }
 
 //------------------------------------------------------------Command_processor::execute_modify_job
@@ -375,7 +375,7 @@ xml::Element_ptr Command_processor::execute_modify_job( const xml::Element_ptr& 
     Job::State_cmd cmd = cmd_name.empty()? Job::sc_none 
                                          : Job::as_state_cmd( cmd_name );
 
-    Job* job = _spooler->get_job( job_name );
+    Job* job = _spooler->job_subsystem()->get_job( job_name );
 
 
     DOM_FOR_EACH_ELEMENT( element, e )
@@ -435,7 +435,7 @@ xml::Element_ptr Command_processor::execute_kill_task( const xml::Element_ptr& e
     bool   immediately = element.bool_getAttribute( "immediately", false );
     
 
-    _spooler->get_job( job_name )->kill_task( id, immediately );
+    _spooler->job_subsystem()->get_job( job_name )->kill_task( id, immediately );
     
     return _answer.createElement( "ok" );
 }
@@ -468,7 +468,7 @@ xml::Element_ptr Command_processor::execute_start_job( const xml::Element_ptr& e
         if( e.nodeName_is( "params" ) )  { pars->set_dom( e, &_variable_set_map );  break; }
     }
 
-    Job* job = _spooler->get_job( job_name );
+    Job* job = _spooler->job_subsystem()->get_job( job_name );
     ptr<Task> task = job->create_task( ptr<spooler_com::Ivariable_set>(pars), task_name, start_at );
     task->set_web_service( web_service_name );
     job->enqueue_task( task );
@@ -1127,7 +1127,7 @@ void Command_processor::execute_http( http::Operation* http_operation )
 
                     if( http_request->has_parameter( "job"   ) )
                     {
-                        log = _spooler->get_job( http_request->parameter( "job" ) )->_log;
+                        log = _spooler->job_subsystem()->get_job( http_request->parameter( "job" ) )->_log;
                     }
                     else
                     if( http_request->has_parameter( "task"  ) )
@@ -1210,7 +1210,7 @@ void Command_processor::execute_http( http::Operation* http_operation )
                 else
                 if( string_ends_with( path, "/job_description?" ) )
                 {
-                    Job* job = _spooler->get_job( http_request->parameter( "job" ) );;
+                    Job* job = _spooler->job_subsystem()->get_job( http_request->parameter( "job" ) );;
                     
                     if( job->_description == "" )  throw http::Http_exception( http::status_404_bad_request, "Der Job hat keine Beschreibung" );
 

@@ -37,7 +37,9 @@ struct Scheduler_object
         type_active_schedulers_watchdog,
         type_database_order_detector,
         type_order_subsystem,
-        type_xml_client_connection
+        type_xml_client_connection,
+        type_scheduler_script,
+        type_job_subsystem
       //type_subprocess_register
     };
 
@@ -57,6 +59,7 @@ struct Scheduler_object
 
     Prefix_log*                 log                         ()                                      { return _log; }
     Database*                   db                          () const;
+    Job_subsystem_interface*    job_subsystem               () const;
     Task_subsystem*             task_subsystem              () const;
     Order_subsystem*            order_subsystem             () const;
 

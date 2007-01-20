@@ -18,7 +18,7 @@ namespace scheduler {
 using namespace zschimmer::com::object_server;
 using namespace spooler_com;
 
-extern Typelib_descr spooler_typelib;
+//extern Typelib_descr spooler_typelib;
 
 DESCRIBE_CLASS( &spooler_typelib, Remote_module_instance_server, remote_module_instance_server, CLSID_Remote_module_instance_server, "Spooler.Remote_module_instance_server", "1.0" )
 

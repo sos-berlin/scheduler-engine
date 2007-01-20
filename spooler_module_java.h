@@ -87,7 +87,7 @@ struct Java_module_instance : Module_instance
     void                        check_api_version           ();
     bool                        load                        ();
     Variant                     call                        ( const string& name );
-    Variant                     call                        ( const string& name, bool param );
+    Variant                     call                        ( const string& name, const Variant& param, const Variant& );
     virtual bool                name_exists                 ( const string& name );
     bool                        loaded                      ()                                      { return _jobject != NULL; }
     bool                        callable                    ()                                      { return _jobject != NULL; }

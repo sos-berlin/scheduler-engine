@@ -1,4 +1,4 @@
-// $Id$
+// $Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
 /*
     Hier sind implementiert
 
@@ -77,11 +77,12 @@ Variant Com_module_instance_base::call( const string& name )
 
 //-------------------------------------------------------------------Com_module_instance_base::call
 
-Variant Com_module_instance_base::call( const string& name, const Variant& param )
+Variant Com_module_instance_base::call( const string& name, const Variant& param, const Variant& param2 )
 {
     In_call in_call ( this, name );
 
-    return com_call( _idispatch, name, param );
+    return param2.is_missing()? com_call( _idispatch, name, param )
+                              : com_call( _idispatch, name, param, param2 );
 }
 
 //-----------------------------------------------------------Com_module_instance_base::property_get
@@ -308,7 +309,7 @@ Variant Scripting_engine_module_instance::call( const string& name )
 
 //-----------------------------------------------------------Scripting_engine_module_instance::call
 
-Variant Scripting_engine_module_instance::call( const string& name, const Variant& param )
+Variant Scripting_engine_module_instance::call( const string& name, const Variant& param, const Variant& param2 )
 {
     SOS_DELETE( _script_site->_script_exception );
 
@@ -316,7 +317,8 @@ Variant Scripting_engine_module_instance::call( const string& name, const Varian
 
     try
     {
-        return com_call( _idispatch, name, param );
+        return param2.is_missing()? com_call( _idispatch, name, param )
+                                  : com_call( _idispatch, name, param, param2 );
     }
     catch( const exception& )
     {

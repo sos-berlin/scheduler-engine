@@ -503,7 +503,7 @@ Variant Java_module_instance::call( const string& name_par )
 
 //-----------------------------------------------------------------------Java_module_instance::call
 
-Variant Java_module_instance::call( const string& name, const Variant& param )
+Variant Java_module_instance::call( const string& name, const Variant& param, const Variant& param2 )
 {
     Env env;
     Local_frame local_frame ( 10 );
@@ -515,8 +515,17 @@ Variant Java_module_instance::call( const string& name, const Variant& param )
     bool result;
     
     {
-        In_call in_call ( this, name );  //name.substr( 0, name.length() - 1 ) );      // "Z" abschneiden
-        result = env->CallBooleanMethod( _jobject, method_id, param ) != 0;
+        In_call in_call ( this, name );
+
+        if( string_ends_with( name, "(Z)Z" )  &&  param2.is_missing() )
+            result = env->CallBooleanMethod( _jobject, method_id, param.as_bool() ) != 0;
+        else
+        //if( string_ends_with( name, "(Lsos/spooler/Spooler_object;)Z" ) )
+        //{
+        //    ...
+        //}
+        //else
+            z::throw_xc( __FUNCTION__, " Call is not implemented in scheduler java interface", name );
     }
 
     if( env->ExceptionCheck() )  env.throw_java( name );

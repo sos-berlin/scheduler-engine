@@ -1,4 +1,4 @@
-// $Id$
+// $Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
 // §851: Weitere Log-Ausgaben zum Scheduler-Start eingebaut
 /*
     Hier sind implementiert
@@ -32,14 +32,364 @@ using namespace zschimmer::sql;
 const int    max_task_time_out             = 365*24*3600;
 const double directory_watcher_intervall   = 1.0;              // Nur für Unix (Windows gibt ein asynchrones Signal)
 
-//----------------------------------------------------------------------Job::Delay_after_error::set
-/*
-void Job::Delay_after_error::set( int error_steps, const Time& delay )
+//------------------------------------------------------------------------------------Job_subsystem
+
+struct Job_subsystem : Job_subsystem_interface
 {
-    Map::iterator last = _map.rbegin();
-    _map[ error_steps ] = delay;
+                                Job_subsystem               ( Scheduler* );
+
+    // Subsystem:
+    bool                    set_subsystem_state             ( Subsystem_state );
+    void                        close                       ();
+
+    // Job_subsystem_interface:
+    Job*                        get_job                     ( const string& job_name, bool can_be_not_initialized );
+    Job*                        get_job_or_null             ( const string& job_name );
+    void                        add_job                     ( const ptr<Job>&, bool init );
+    int                         remove_temporary_jobs       ( Job* which_job = NULL );
+    void                        remove_job                  ( Job* );
+    void                        init_jobs                   ();
+    void                        close_jobs                  ();
+    void                        load_jobs_from_xml          ( const xml::Element_ptr&, const Time& xml_mod_time, bool init );
+    void                        load_job_from_xml           ( const xml::Element_ptr&, const Time& xml_mod_time, bool init );
+    void                        init0_job                   ( Job* );
+    void                        init1_job                   ( Transaction*, Job* );
+    xml::Element_ptr            jobs_dom_element            ( const xml::Document_ptr&, const Show_what& );
+    bool                        has_any_order               ();
+    bool                        is_any_task_queued          ();
+
+  private:
+    void                        start                       ();
+    void                        load                        ();
+
+    bool                       _jobs_initialized;
+};
+
+//--------------------------------------------------------------------------------new_job_subsystem
+
+ptr<Job_subsystem_interface> new_job_subsystem( Scheduler* scheduler )
+{
+    ptr<Job_subsystem> job_subsystem = Z_NEW( Job_subsystem( scheduler ) );
+    return +job_subsystem;
 }
-*/
+
+//---------------------------------------------------------------------Job_subsystem::Job_subsystem
+
+Job_subsystem::Job_subsystem( Scheduler* scheduler )
+: 
+    Job_subsystem_interface( scheduler, type_job_subsystem )
+{
+}
+
+//-----------------------------------------------------------------------------Job_subsystem::close
+    
+void Job_subsystem::close()
+{
+    _subsystem_state = subsys_stopped;
+}
+
+//---------------------------------------------------------------Job_subsystem::set_subsystem_state
+    
+bool Job_subsystem::set_subsystem_state( Subsystem_state new_state )
+{
+    throw_subsystem_state_error( new_state, __FUNCTION__ );
+
+    switch( new_state )
+    {
+        case subsys_loaded:
+        {
+            if( _subsystem_state != subsys_not_initialized )  throw_subsystem_state_error( new_state, __FUNCTION__ );
+            return true;
+        }
+
+        case subsys_started:
+        {
+            if( _subsystem_state != subsys_loaded )  throw_subsystem_state_error( new_state, __FUNCTION__ );
+            return true;
+        }
+
+        default:
+            throw_subsystem_state_error( new_state, __FUNCTION__ );
+    }
+}
+
+//------------------------------------------------------------------------------Job_subsystem::load
+//
+//void Job_subsystem::load()
+//{
+//}
+//
+//-----------------------------------------------------------------------------Job_subsystem::start
+//
+//void Job_subsystem::start()
+//{
+//}
+//
+//------------------------------------------------------------------Job_subsystem::jobs_dom_element
+
+xml::Element_ptr Job_subsystem::jobs_dom_element( const xml::Document_ptr& document, const Show_what& show )
+{
+    xml::Element_ptr jobs_element = document.createElement( "jobs" );
+    dom_append_nl( jobs_element );
+
+    FOR_EACH( Job_list, _job_list, it )
+    {
+        Job* job = *it;
+
+        if( job->visible()  &&  ( show._job_name == ""  ||  show._job_name == job->name() ) )
+        {
+            jobs_element.appendChild( job->dom_element( document, show ) ), dom_append_nl( jobs_element );
+        }
+    }
+
+    return jobs_element;
+}
+
+//----------------------------------------------------------------Job_subsystem::load_jobs_from_xml
+
+void Job_subsystem::load_jobs_from_xml( const xml::Element_ptr& element, const Time& xml_mod_time, bool init )
+{
+    DOM_FOR_EACH_ELEMENT( element, e )
+    {
+        if( e.nodeName_is( "job" ) )
+        {
+            load_job_from_xml( e, xml_mod_time, init );
+        }
+    }
+}
+
+//-----------------------------------------------------------------Job_subsystem::load_job_from_xml
+
+void Job_subsystem::load_job_from_xml( const xml::Element_ptr& e, const Time& xml_mod_time, bool init )
+{
+    string spooler_id = e.getAttribute( "spooler_id" );
+
+    if( _spooler->_manual? e.getAttribute("name") == _spooler->_job_name 
+                         : spooler_id.empty() || spooler_id == _spooler->id() )
+    {
+        string job_name = e.getAttribute("name");
+        bool   replace  = e.bool_getAttribute( "replace", false );
+
+        ptr<Job> job = get_job_or_null( job_name );
+        if( job )
+        {
+            if( replace )
+            {
+                ptr<Job> replacement_job = Z_NEW( Job( _spooler ) );
+                replacement_job->set_dom( e, xml_mod_time );
+                job->set_replacement_job( replacement_job );
+            }
+            else
+            {
+                job->set_dom( e, xml_mod_time );
+                if( init )  init1_job( (Transaction*)NULL, job );
+            }
+        }
+        else
+        {
+            job = Z_NEW( Job( _spooler ) );
+            job->set_dom( e, xml_mod_time );
+            add_job( job, init );
+        }
+    }
+}
+
+//-------------------------------------------------------------------------Job_subsystem::init0_job
+
+void Job_subsystem::init0_job( Job* job )
+{
+    try
+    {
+        job->init0();
+    }
+    catch( exception& )
+    {
+        _log->error( message_string( "SCHEDULER-330", job->obj_name() ) );   // remove_temporary_jobs() gibt keine weitere Fehlermeldung aus.
+        throw;
+    }
+}
+
+//-------------------------------------------------------------------------Job_subsystem::init1_job
+
+void Job_subsystem::init1_job( Transaction* ta, Job* job )
+{
+    try
+    {
+        job->init0();
+        job->init( ta );
+    }
+    catch( exception& )
+    {
+        _log->error( message_string( "SCHEDULER-330", job->obj_name() ) );   // remove_temporary_jobs() gibt keine weitere Fehlermeldung aus.
+        throw;
+    }
+}
+
+//-------------------------------------------------------------------------Job_subsystem::init_jobs
+
+void Job_subsystem::init_jobs()
+{
+    Transaction ta ( db() );
+
+    FOR_EACH_JOB( job )  init1_job( &ta, *job );
+
+    ta.commit( __FUNCTION__ );
+
+    _jobs_initialized = true;
+}
+
+//------------------------------------------------------------------------Job_subsystem::close_jobs
+
+void Job_subsystem::close_jobs()
+{
+    FOR_EACH( Job_list, _job_list, it )
+    {
+        try
+        {
+            (*it)->close();
+        }
+        catch( const exception&  x ) { _log->error( x.what() ); }
+        catch( const _com_error& x ) { _log->error( as_string( x.Description() ) ); }
+    }
+
+    // Jobs erst bei Spooler-Ende freigeben, s. close()
+    // Beim Beenden des Spooler noch laufende Threads können auf Jobs von bereits beendeten Threads zugreifen.
+    // Damit's nicht knallt: Jobs schließen, aber Objekte halten.
+}
+
+//-------------------------------------------------------------Job_subsystem::remove_temporary_jobs
+
+int Job_subsystem::remove_temporary_jobs( Job* which_job )
+{
+    int count = 0;
+
+    //THREAD_LOCK( _lock )
+    {
+        Job_list::iterator it = _job_list.begin();
+        while( it != _job_list.end() )
+        {
+            Job* job = *it;
+
+            if( !which_job  ||  which_job == job )
+            {
+                if( job->should_removed() )    
+                {
+                    job->_log->info( message_string( job->_replacement_job? "SCHEDULER-988" : "SCHEDULER-257" ) );   // "Job wird jetzt entfernt bzw. ersetzt"
+
+                    try
+                    {
+                        job->close(); 
+                    }
+                    catch( exception &x )  { _log->warn( x.what() ); }   // Kann das überhaupt passieren?
+
+                    if( job->_replacement_job )
+                    {
+                        *it = job->_replacement_job;
+                        job = *it++;
+
+                        try
+                        {
+                            init1_job( (Transaction*)NULL, job );
+                        }
+                        catch( exception& x ) { Z_LOG2( "scheduler", __FUNCTION__ << " " << x.what() << "\n" ); }
+                    }
+                    else
+                        it = _job_list.erase( it );
+
+                    count++;
+
+                    // Bei Auftragsjobs: _task_subsystem->build_prioritized_order_job_array();
+                    continue;
+                }
+            }
+
+            it++;
+        }
+    }
+
+    return count;
+}
+
+//------------------------------------------------------------------------Job_subsystem::remove_job
+
+void Job_subsystem::remove_job( Job* job )
+{
+    job->set_remove( true );
+    
+    int removed = remove_temporary_jobs( job );
+    if( !removed )
+    {
+        job->_log->debug( message_string( "SCHEDULER-258" ) );  // "Job wird entfernt sobald alle Tasks beendet sind" );
+    }
+}
+
+//---------------------------------------------------------------------------Job_subsystem::add_job
+
+void Job_subsystem::add_job( const ptr<Job>& job, bool init )
+{
+    Job* j = get_job_or_null( job->name() );
+    if( j )  z::throw_xc( "SCHEDULER-130", j->name() );
+
+    if( init )
+    {
+        if( _jobs_initialized )  init1_job( (Transaction*)NULL, job );
+                           else  init0_job( job );     // Falls Job im Startskript über execute_xml() hingefügt wird: jetzt noch kein init()!
+    }
+
+    _job_list.push_back( job );
+}
+
+//---------------------------------------------------------------------------Job_subsystem::get_job
+
+Job* Job_subsystem::get_job( const string& job_name, bool can_be_not_initialized )
+{
+    Job* job = get_job_or_null( job_name );
+    if( !job )  z::throw_xc( "SCHEDULER-108", job_name );
+    if( !can_be_not_initialized && !job->state() )  z::throw_xc( "SCHEDULER-109", job_name );
+    return job;
+}
+
+//-------------------------------------------------------------------Job_subsystem::get_job_or_null
+
+Job* Job_subsystem::get_job_or_null( const string& job_name )
+{
+    if( job_name == "" )  return NULL;
+
+    FOR_EACH( Job_list, _job_list, it )
+    {
+        Job* job = *it;
+        if( stricmp( job->_name.c_str(), job_name.c_str() ) == 0 )  return job;
+    }
+
+    return NULL;
+}
+
+//---------------------------------------------------------------------Job_subsystem::has_any_order
+
+bool Job_subsystem::has_any_order()
+{
+    FOR_EACH_JOB( j )
+    {
+        Job* job = *j;
+        if( job->order_queue()  &&  !job->order_queue()->empty() )  return true;
+    }
+
+    return false;
+}
+
+//----------------------------------------------------------------Job_subsystem::is_any_task_queued
+
+bool Job_subsystem::is_any_task_queued()
+{
+    FOR_EACH_JOB( j )
+    {
+        Job* job = *j;
+        if( job->queue_filled() )  return true;
+    }
+
+    return false;
+}
+
 //-----------------------------------------------------------------------------------------Job::Job
 
 Job::Job( Spooler* spooler, const ptr<Module>& module )
@@ -53,11 +403,14 @@ Job::Job( Spooler* spooler, const ptr<Module>& module )
 {
     _module = module? module : Z_NEW( Module( spooler ) );
 
-    init_run_time();
-
     _log            = Z_NEW( Prefix_log( this ) );
     _module->set_log( _log );
   //_log->set_job( this );
+
+    _com_job  = new Com_job( this );
+  //_com_log  = new Com_log( &_log );
+
+    init_run_time();
 
     _next_time      = 0; //Einmal do_something() ausführen Time::never;
     _directory_watcher_next_time = Time::never;
@@ -76,6 +429,8 @@ Job::~Job()
         close();
     }
     catch( exception& x ) { _log->warn( x.what() ); }     
+
+    if( _run_time )  _run_time->set_function_com_object( NULL ),  _run_time->set_log( NULL );
 }
 
 //-------------------------------------------------------------------------------------Job::set_dom
@@ -148,8 +503,8 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
 
         string text;
 
-        text = element.getAttribute( "output_level" );
-        if( !text.empty() )  _output_level = as_int( text );
+        //text = element.getAttribute( "output_level" );
+        //if( !text.empty() )  _output_level = as_int( text );
 
         //for( time::Holiday_set::iterator it = _spooler->_run_time->_holidays.begin(); it != _spooler->_run_time->_holidays.end(); it++ )
         //    _run_time->_holidays.insert( *it );
@@ -164,8 +519,8 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
                 catch( const _com_error& x ) { string d = bstr_as_string(x.Description()); _log->warn(d);  _description = d; }
             }
             else
-            if( e.nodeName_is( "object_set" ) )  _object_set_descr = SOS_NEW( Object_set_descr( e ) );
-            else
+            //if( e.nodeName_is( "object_set" ) )  _object_set_descr = SOS_NEW( Object_set_descr( e ) );
+            //else
             if( e.nodeName_is( "params"     ) )  _default_params->set_dom( e, &_spooler->_variable_set_map );  
             else
             if( e.nodeName_is( "script"     ) )  
@@ -377,7 +732,6 @@ void Job::prepare_on_exit_commands()
 }
 
 //---------------------------------------------------------------------------------------Job::init0
-// Bei <add_jobs> von einem anderen Thread gerufen.
 
 void Job::init0()
 {
@@ -386,12 +740,6 @@ void Job::init0()
     Z_LOGI2( "scheduler", obj_name() << ".init0()\n" );
 
     _state = s_none;
-
-    if( !_run_time->set() )  _run_time->set_default();
-    if( _spooler->_manual )  init_run_time(),  _run_time->set_default_days(),  _run_time->set_once();
-
-    _com_job  = new Com_job( this );
-  //_com_log  = new Com_log( &_log );
 
     if( _module->_dom_element )  read_script( _module );
     if( _module->_monitor  &&  _module->_monitor->_dom_element )  read_script( _module->_monitor );
@@ -408,25 +756,6 @@ void Job::init0()
     _init0_called = true;
 }
 
-//------------------------------------------------------------------------------------Job::set_name
-
-void Job::set_name( const string& name )
-{
-    _name  = name;
-    set_log();
-}
-
-//-------------------------------------------------------------------------------------Job::set_log
-
-void Job::set_log()
-{
-    _log->set_job_name( _name );
-    _log->set_prefix( "Job  " + _name );       // Zwei Blanks, damit die Länge mit "Task " übereinstimmt
-    _log->set_profile_section( profile_section() );
-    _log->set_title( obj_name() );
-    _log->set_mail_defaults();
-}
-
 //----------------------------------------------------------------------------------------Job::init
 // Bei <add_jobs> von einem anderen Thread gerufen.
 
@@ -438,8 +767,8 @@ void Job::init( Transaction* ta )
     {
         _history.open( ta );
 
-        _module_ptr = _object_set_descr? &_object_set_descr->_class->_module
-                                       : +_module;
+        _module_ptr = //_object_set_descr? &_object_set_descr->_class->_module :
+                                       +_module;
 
         if( !_spooler->log_directory().empty()  &&  _spooler->log_directory()[0] != '*' )
         {
@@ -462,6 +791,9 @@ void Job::init( Transaction* ta )
 
 void Job::init2()
 {
+    if( !_run_time->set() )  _run_time->set_default();
+    if( _spooler->_manual )  init_run_time(),  _run_time->set_default_days(),  _run_time->set_once();
+
     if( !order_controlled()  &&  !_spooler->has_exclusiveness() )  
     {
         _log->error( message_string( "SCHEDULER-376" ) );
@@ -485,6 +817,25 @@ void Job::init2()
     }
 
     set_next_start_time( Time::now() );
+}
+
+//------------------------------------------------------------------------------------Job::set_name
+
+void Job::set_name( const string& name )
+{
+    _name  = name;
+    set_log();
+}
+
+//-------------------------------------------------------------------------------------Job::set_log
+
+void Job::set_log()
+{
+    _log->set_job_name( _name );
+    _log->set_prefix( "Job  " + _name );       // Zwei Blanks, damit die Länge mit "Task " übereinstimmt
+    _log->set_profile_section( profile_section() );
+    _log->set_title( obj_name() );
+    _log->set_mail_defaults();
 }
 
 //-----------------------------------------------------------Job::init_start_when_directory_changed
@@ -514,7 +865,8 @@ void Job::init_start_when_directory_changed( Task* task )
 void Job::init_run_time()
 {
     _run_time = Z_NEW( Run_time( _spooler ) );
-    _run_time->set_function_com_object( _com_job );
+    _run_time->set_log( _log );                         // Am Ende löschen!
+    _run_time->set_function_com_object( _com_job );     assert( _com_job );
     _run_time->set_holidays( _spooler->holidays() );
 }
 
@@ -580,6 +932,7 @@ void Job::close()
         _log->close();
 
         // COM-Objekte entkoppeln, falls noch jemand eine Referenz darauf hat:
+        if( _run_time )  _run_time->set_function_com_object( NULL ),  _run_time->set_log( NULL );
         if( _com_job  )  _com_job->close(),         _com_job  = NULL;
       //if( _com_log  )  _com_log->close(),         _com_log  = NULL;
     }
@@ -2173,7 +2526,7 @@ void Job::set_state_cmd( State_cmd cmd )
                                 signal( state_cmd_name(cmd) );
                                 break;
 
-            case sc_remove:     _spooler->remove_job( this );
+            case sc_remove:     _spooler->job_subsystem()->remove_job( this );
                                 // this ist möglicherweise ungültig
                                 return;
 
@@ -2559,20 +2912,20 @@ void Job::kill_task( int id, bool immediately )
 //-------------------------------------------------------------------------------Job::signal_object
 // Anderer Thread
 
-void Job::signal_object( const string& object_set_class_name, const Level& level )
-{
-    {
-        if( _state == Job::s_pending
-         && _object_set_descr
-         && _object_set_descr->_class->_name == object_set_class_name 
-         && _object_set_descr->_level_interval.is_in_interval( level ) )
-        {
-            //start_without_lock( NULL, object_set_class_name );
-            //_event->signal( "Object_set " + object_set_class_name );
-            //_thread->signal( obj_name() + ", Object_set " + object_set_class_name );
-        }
-    }
-}
+//void Job::signal_object( const string& object_set_class_name, const Level& level )
+//{
+//    {
+//        if( _state == Job::s_pending
+//         && _object_set_descr
+//         && _object_set_descr->_class->_name == object_set_class_name 
+//         && _object_set_descr->_level_interval.is_in_interval( level ) )
+//        {
+//            //start_without_lock( NULL, object_set_class_name );
+//            //_event->signal( "Object_set " + object_set_class_name );
+//            //_thread->signal( obj_name() + ", Object_set " + object_set_class_name );
+//        }
+//    }
+//}
 
 //----------------------------------------------------------------------Job::create_module_instance
 

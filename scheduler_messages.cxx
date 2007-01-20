@@ -255,6 +255,8 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-390", "More than $1 nested includes in $2" },
     { "SCHEDULER-391", "Invalid value '$1' for setting '$2'. Allowed values are: $3" },
     { "SCHEDULER-392", "heart_beat_warn_timeout=$1s has to be lower than heart_beat_own_timeout=$2, which has to be lower than heart_beat_warn_timeout=$3s" },
+    { "SCHEDULER-393", "Error when calling <run_time> function $1: $2" },
+    { "SCHEDULER-394", "<run_time>-Function '$1' returned start time $2 which is earlier then the requested beginning $3 and therefore ignored" },
     { "SCHEDULER-900", "Scheduler $1 is starting with $2, pid=$3" },
     { "SCHEDULER-902", "state=$1" },
     { "SCHEDULER-904", "Tasks have $1s to terminate" },

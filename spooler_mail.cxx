@@ -13,7 +13,7 @@ using namespace spooler_com;
 
 //------------------------------------------------------------------------------------Typbibliothek
 
-extern Typelib_descr spooler_typelib;
+//extern Typelib_descr spooler_typelib;
 
 DESCRIBE_CLASS( &spooler_typelib, Com_mail, mail, CLSID_Mail, "Spooler.Mail", "1.0" )
 

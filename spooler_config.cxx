@@ -182,61 +182,61 @@ void Security::set_dom( const xml::Element_ptr& security_element )
 
 //------------------------------------------------------------------------Object_set_class::set_dom
 
-void Object_set_class::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
-{
-    _name = element.getAttribute( "name" );
-
-    string iface = element.getAttribute( "script_interface", "oo" );
-    _object_interface = iface == "oo";
-
-    DOM_FOR_EACH_ELEMENT( element, e )
-    {
-        if( e.nodeName_is( "script" ) )
-        {
-            _module.set_dom( e, xml_mod_time, _spooler->include_path() );
-        }
-        else
-        if( e.nodeName_is( "level_decls" ) )
-        {
-            DOM_FOR_EACH_ELEMENT( e, e2 )
-            {
-                if( e2.nodeName_is( "level_decl" ) )
-                {
-                    int    level = e2.int_getAttribute( "level", 0 );
-                    string name  = e2.getAttribute( "name" );
-
-                    _level_map[ level ] = name;
-                }
-            }
-        }
-    }
-}
+//void Object_set_class::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
+//{
+//    _name = element.getAttribute( "name" );
+//
+//    string iface = element.getAttribute( "script_interface", "oo" );
+//    _object_interface = iface == "oo";
+//
+//    DOM_FOR_EACH_ELEMENT( element, e )
+//    {
+//        if( e.nodeName_is( "script" ) )
+//        {
+//            _module.set_dom( e, xml_mod_time, _spooler->include_path() );
+//        }
+//        else
+//        if( e.nodeName_is( "level_decls" ) )
+//        {
+//            DOM_FOR_EACH_ELEMENT( e, e2 )
+//            {
+//                if( e2.nodeName_is( "level_decl" ) )
+//                {
+//                    int    level = e2.int_getAttribute( "level", 0 );
+//                    string name  = e2.getAttribute( "name" );
+//
+//                    _level_map[ level ] = name;
+//                }
+//            }
+//        }
+//    }
+//}
 
 //--------------------------------------------------------------------------Level_interval::set_dom
 
-void Level_interval::set_dom( const xml::Element_ptr& element )
-{
-    _low_level  = as_int( element.getAttribute( "low" ) );
-    _high_level = as_int( element.getAttribute( "high" ) );
-}
+//void Level_interval::set_dom( const xml::Element_ptr& element )
+//{
+//    _low_level  = as_int( element.getAttribute( "low" ) );
+//    _high_level = as_int( element.getAttribute( "high" ) );
+//}
 
 //------------------------------------------------------------------------Object_set_descr::set_dom
 
-void Object_set_descr::set_dom( const xml::Element_ptr& element )
-{ 
-    _class_name     = element.getAttribute( "class" );
-    _level_interval.set_dom( single_element( element, "levels" ) );
-}
+//void Object_set_descr::set_dom( const xml::Element_ptr& element )
+//{ 
+//    _class_name     = element.getAttribute( "class" );
+//    _level_interval.set_dom( single_element( element, "levels" ) );
+//}
 
 //--------------------------------------------------------Spooler::load_object_set_classes_from_xml
 
-void Spooler::load_object_set_classes_from_xml( Object_set_class_list* liste, const xml::Element_ptr& element, const Time& xml_mod_time )
-{
-    DOM_FOR_EACH_ELEMENT( element, e )
-    {
-        if( e.nodeName_is( "object_set_class" ) )  liste->push_back( SOS_NEW( Object_set_class( this, _log, e, xml_mod_time ) ) );
-    }
-}
+//void Spooler::load_object_set_classes_from_xml( Object_set_class_list* liste, const xml::Element_ptr& element, const Time& xml_mod_time )
+//{
+//    DOM_FOR_EACH_ELEMENT( element, e )
+//    {
+//        if( e.nodeName_is( "object_set_class" ) )  liste->push_back( SOS_NEW( Object_set_class( this, _log, e, xml_mod_time ) ) );
+//    }
+//}
 
 //-----------------------------------------------------------------------------Spooler::load_config
 
@@ -328,12 +328,12 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const Time& x
                 // Wird nach Einrichten des Cluster ausgewertet
             }
             else
-            if( e.nodeName_is( "object_set_classes" ) )
-            {
-                _object_set_class_list.clear();
-                load_object_set_classes_from_xml( &_object_set_class_list, e, xml_mod_time );
-            }
-            else
+            //if( e.nodeName_is( "object_set_classes" ) )
+            //{
+            //    _object_set_class_list.clear();
+            //    load_object_set_classes_from_xml( &_object_set_class_list, e, xml_mod_time );
+            //}
+            //else
             if( e.nodeName_is( "holidays" ) )
             {
                 //2007-01-19  _holidays.clear();             int VIELLEICHT_BESSER_NICHT_LOESCHEN;
@@ -358,12 +358,12 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const Time& x
             else
             if( e.nodeName_is( "script" ) )
             {
-                _module.set_dom( e, xml_mod_time, include_path() );
+                _scheduler_script->set_dom_script( e, xml_mod_time, include_path() );
             }
             else
             if( e.nodeName_is( "jobs" ) )
             {
-                load_jobs_from_xml( e, xml_mod_time );
+                job_subsystem()->load_jobs_from_xml( e, xml_mod_time );
             }
             else
             if( e.nodeName_is( "job_chains" ) )

@@ -141,7 +141,7 @@ Variant Process_module_instance::call( const string& name )
 
 //----------------------------------------------------------------------Process_module_instance::call
 
-Variant Process_module_instance::call( const string& name, bool )
+Variant Process_module_instance::call( const string& name, const Variant&, const Variant& )
 {
     z::throw_xc( __FUNCTION__, name );
 }

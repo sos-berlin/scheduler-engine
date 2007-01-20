@@ -858,6 +858,7 @@ const char file_scheduler_xsd[] =
     "<xsd:attribute name=\"let_run\"           type=\"Yes_no\"/>\n"
     "<xsd:attribute name=\"repeat\"            type=\"Duration\"/>\n"
     "<xsd:attribute name=\"once\"              type=\"Yes_no\"/>\n"
+    "<xsd:attribute name=\"start_time_function\" type=\"xsd:NMTOKEN\"/>\n"
     "</xsd:complexType>\n"
     "\n"
     "<!--libxslt xsd:key name=\"at\">\n"
@@ -1394,7 +1395,7 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1169286109 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1169311515 },
     { NULL, NULL, 0 }
 };
 

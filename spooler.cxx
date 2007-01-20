@@ -1,4 +1,4 @@
-// $Id$
+// $Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
 // §851: Weitere Log-Ausgaben zum Scheduler-Start eingebaut
 // §1479
 
@@ -614,7 +614,6 @@ Spooler::Spooler()
     _communication(this), 
     _base_log(this),
     _wait_handles(this),
-    _module(this,_log),
     _log_level( log_info ),
     _log_to_stderr_level( log_unknown ),
     _db_log_level( log_none ),
@@ -629,7 +628,10 @@ Spooler::Spooler()
     _holidays(this)
 {
     _scheduler_event_manager = Z_NEW( Scheduler_event_manager( this ) );
-    _order_subsystem = Z_NEW( Order_subsystem( this ) );
+    _scheduler_script        = new_scheduler_script( this );
+    _job_subsystem           = new_job_subsystem( this );
+    _order_subsystem         = Z_NEW( Order_subsystem( this ) );
+    _db                      = Z_NEW( Database( this ) );
 
     _variable_set_map[ variable_set_name_for_substitution ] = _environment;
 
@@ -685,7 +687,7 @@ Spooler::~Spooler()
     set_ctrl_c_handler( false );
 
     _task_subsystem = NULL;
-    _object_set_class_list.clear();
+    //_object_set_class_list.clear();
     _security.clear();
 
 
@@ -849,7 +851,7 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
 #   endif
 
 
-    if( show.is_set( show_jobs ) )  state_element.appendChild( jobs_dom_element( dom, show ) );
+    if( show.is_set( show_jobs ) )  state_element.appendChild( _job_subsystem->jobs_dom_element( dom, show ) );
                               else  state_element.append_new_comment( "<jobs> suppressed. Use what=\"jobs\"." );
 
     state_element.appendChild( process_classes_dom_element( dom, show ) );
@@ -892,191 +894,6 @@ void Spooler::print_xml_child_elements_for_event( String_stream* s, Scheduler_ev
     *s << " state=\"" << state_name() << '"';
 
     *s << "/>";
-}
-
-//------------------------------------------------------------------------Spooler::jobs_dom_element
-
-xml::Element_ptr Spooler::jobs_dom_element( const xml::Document_ptr& document, const Show_what& show )
-{
-    xml::Element_ptr jobs_element = document.createElement( "jobs" );
-    dom_append_nl( jobs_element );
-
-    FOR_EACH( Job_list, _job_list, it )
-    {
-        Job* job = *it;
-
-        if( job->visible()  &&  ( show._job_name == ""  ||  show._job_name == job->name() ) )
-        {
-            jobs_element.appendChild( job->dom_element( document, show ) ), dom_append_nl( jobs_element );
-        }
-    }
-
-    return jobs_element;
-}
-
-//----------------------------------------------------------------------Spooler::load_jobs_from_xml
-
-void Spooler::load_jobs_from_xml( const xml::Element_ptr& element, const Time& xml_mod_time, bool init )
-{
-    DOM_FOR_EACH_ELEMENT( element, e )
-    {
-        if( e.nodeName_is( "job" ) )
-        {
-            load_job_from_xml( e, xml_mod_time, init );
-        }
-    }
-}
-
-//----------------------------------------------------------------------Spooler::load_jobs_from_xml
-
-void Spooler::load_job_from_xml( const xml::Element_ptr& e, const Time& xml_mod_time, bool init )
-{
-    string spooler_id = e.getAttribute( "spooler_id" );
-
-    if( _manual? e.getAttribute("name") == _job_name 
-               : spooler_id.empty() || spooler_id == id() )
-    {
-        string job_name = e.getAttribute("name");
-        bool   replace  = e.bool_getAttribute( "replace", false );
-
-        ptr<Job> job = get_job_or_null( job_name );
-        if( job )
-        {
-            if( replace )
-            {
-                ptr<Job> replacement_job = Z_NEW( Job( this ) );
-                replacement_job->set_dom( e, xml_mod_time );
-                job->set_replacement_job( replacement_job );
-            }
-            else
-            {
-                job->set_dom( e, xml_mod_time );
-                if( init )  init1_job( (Transaction*)NULL, job );
-            }
-        }
-        else
-        {
-            job = Z_NEW( Job( this ) );
-            job->set_dom( e, xml_mod_time );
-            add_job( job, init );
-        }
-    }
-}
-
-//-------------------------------------------------------------------------------Spooler::init0_job
-
-void Spooler::init0_job( Job* job )
-{
-    try
-    {
-        job->init0();
-    }
-    catch( exception& )
-    {
-        _log->error( message_string( "SCHEDULER-330", job->obj_name() ) );   // remove_temporary_jobs() gibt keine weitere Fehlermeldung aus.
-        throw;
-    }
-}
-
-//-------------------------------------------------------------------------------Spooler::init1_job
-
-void Spooler::init1_job( Transaction* ta, Job* job )
-{
-    try
-    {
-        job->init0();
-        job->init( ta );
-    }
-    catch( exception& )
-    {
-        _log->error( message_string( "SCHEDULER-330", job->obj_name() ) );   // remove_temporary_jobs() gibt keine weitere Fehlermeldung aus.
-        throw;
-    }
-}
-
-//----------------------------------------------------------------------------Spooler::cmd_add_jobs
-// Anderer Thread
-
-void Spooler::cmd_add_jobs( const xml::Element_ptr& element )
-{
-    load_jobs_from_xml( element, Time::now(), true );
-
-    signal( "add_jobs" );
-}
-
-//---------------------------------------------------------------------------------Spooler::cmd_job
-
-void Spooler::cmd_job( const xml::Element_ptr& element )
-{
-    load_job_from_xml( element, Time::now(), _state >= s_starting );
-
-    signal( "add_job" );
-}
-
-//-------------------------------------------------------------------Spooler::remove_temporary_jobs
-
-int Spooler::remove_temporary_jobs( Job* which_job )
-{
-    int count = 0;
-
-    THREAD_LOCK( _lock )
-    {
-        Job_list::iterator it = _job_list.begin();
-        while( it != _job_list.end() )
-        {
-            Job* job = *it;
-
-            if( !which_job  ||  which_job == job )
-            {
-                if( job->should_removed() )    
-                {
-                    job->_log->info( message_string( job->_replacement_job? "SCHEDULER-988" : "SCHEDULER-257" ) );   // "Job wird jetzt entfernt bzw. ersetzt"
-
-                    try
-                    {
-                        job->close(); 
-                    }
-                    catch( exception &x )  { _log->warn( x.what() ); }   // Kann das überhaupt passieren?
-
-                    if( job->_replacement_job )
-                    {
-                        *it = job->_replacement_job;
-                        job = *it++;
-
-                        try
-                        {
-                            init1_job( (Transaction*)NULL, job );
-                        }
-                        catch( exception& x ) { Z_LOG2( "scheduler", __FUNCTION__ << " " << x.what() << "\n" ); }
-                    }
-                    else
-                        it = _job_list.erase( it );
-
-                    count++;
-
-                    // Bei Auftragsjobs: _task_subsystem->build_prioritized_order_job_array();
-                    continue;
-                }
-            }
-
-            it++;
-        }
-    }
-
-    return count;
-}
-
-//------------------------------------------------------------------------------Spooler::remove_job
-
-void Spooler::remove_job( Job* job )
-{
-    job->set_remove( true );
-    
-    int removed = remove_temporary_jobs( job );
-    if( !removed )
-    {
-        job->_log->debug( message_string( "SCHEDULER-258" ) );  // "Job wird entfernt sobald alle Tasks beendet sind" );
-    }
 }
 
 //-----------------------------------------------------------Spooler::load_process_classes_from_dom
@@ -1254,13 +1071,7 @@ Order_subsystem* Spooler::order_subsystem()
 
 bool Spooler::has_any_order()
 {
-    FOR_EACH_JOB( j )
-    {
-        Job* job = *j;
-        if( job->order_queue()  &&  !job->order_queue()->empty() )  return true;
-    }
-
-    return false;
+    return _job_subsystem->has_any_order();
 }
 
 //----------------------------------------------------------------------------Spooler::has_any_task
@@ -1269,59 +1080,7 @@ bool Spooler::has_any_task()
 {
     if( _task_subsystem  &&  _task_subsystem->_task_list.size() > 0 )  return true;
 
-    FOR_EACH_JOB( j )
-    {
-        Job* job = *j;
-        if( job->queue_filled() )  return true;
-    }
-
-    return false;
-}
-
-//---------------------------------------------------------------------------------Spooler::add_job
-
-void Spooler::add_job( const ptr<Job>& job, bool init )
-{
-    Job* j = get_job_or_null( job->name() );
-    if( j )  z::throw_xc( "SCHEDULER-130", j->name() );
-
-    if( init )
-    {
-        if( _jobs_initialized )  init1_job( (Transaction*)NULL, job );
-                           else  init0_job( job );     // Falls Job im Startskript über execute_xml() hingefügt wird: jetzt noch kein init()!
-    }
-
-    _job_list.push_back( job );
-}
-
-//---------------------------------------------------------------------------------Spooler::get_job
-// Anderer Thread
-
-Job* Spooler::get_job( const string& job_name, bool can_be_not_initialized )
-{
-    Job* job = get_job_or_null( job_name );
-    if( !job )  z::throw_xc( "SCHEDULER-108", job_name );
-    if( !can_be_not_initialized && !job->state() )  z::throw_xc( "SCHEDULER-109", job_name );
-    return job;
-}
-
-//-------------------------------------------------------------------------Spooler::get_job_or_null
-// Anderer Thread
-
-Job* Spooler::get_job_or_null( const string& job_name )
-{
-    if( job_name == "" )  return NULL;
-
-    THREAD_LOCK( _lock )
-    {
-        FOR_EACH( Job_list, _job_list, it )
-        {
-            Job* job = *it;
-            if( stricmp( job->_name.c_str(), job_name.c_str() ) == 0 )  return job;
-        }
-    }
-
-    return NULL;
+    return _job_subsystem->is_any_task_queued();
 }
 
 //--------------------------------------------------------------------------------Spooler::get_task
@@ -1387,52 +1146,6 @@ string Spooler::state_name( State state )
         case s_stopping_let_run:    return "stopping_let_run";
         default:                    return as_string( (int)state );
     }
-}
-
-//-------------------------------------------------------------------------------Spooler::init_jobs
-
-void Spooler::init_jobs()
-{
-    Transaction ta ( db() );
-
-    FOR_EACH_JOB( job )  init1_job( &ta, *job );
-
-    ta.commit( __FUNCTION__ );
-
-    _jobs_initialized = true;
-}
-
-//-------------------------------------------------------------------------------Spooler::stop_jobs
-/*
-void Spooler::stop_jobs()
-{
-    FOR_EACH_JOB( it ) 
-    {
-        _current_job = *it;
-
-        if( (*it)->state() != Job::s_stopped )  (*it)->stop( true );
-
-        _current_job = NULL;
-    }
-}
-*/
-//------------------------------------------------------------------------------Spooler::close_jobs
-
-void Spooler::close_jobs()
-{
-    FOR_EACH( Job_list, _job_list, it )
-    {
-        try
-        {
-            (*it)->close();
-        }
-        catch( const exception&  x ) { _log->error( x.what() ); }
-        catch( const _com_error& x ) { _log->error( as_string( x.Description() ) ); }
-    }
-
-    // Jobs erst bei Spooler-Ende freigeben, s. close()
-    // Beim Beenden des Spooler noch laufende Threads können auf Jobs von bereits beendeten Threads zugreifen.
-    // Damit's nicht knallt: Jobs schließen, aber Objekte halten.
 }
 
 //--------------------------------------------------------------------------------Spooler::send_cmd
@@ -2081,7 +1794,7 @@ void Spooler::start()
     _order_subsystem->start();
     _web_services.start();   // Nicht in Spooler::load(), denn es öffnet schon -log-dir-Dateien (das ist nicht gut für -send-cmd=)
 
-    FOR_EACH_JOB( job )  init0_job( *job );   // Setzt _has_java_source
+    FOR_EACH_JOB( job )  _job_subsystem->init0_job( *job );   // Setzt _has_java_source
 
 
     try
@@ -2119,7 +1832,6 @@ void Spooler::start()
 
     if( _need_db  && _db_name.empty() )  z::throw_xc( "SCHEDULER-205" );
 
-    _db = Z_NEW( Database( this ) );
     _db->open( _db_name );
 
     _db->spooler_start();
@@ -2149,13 +1861,40 @@ void Spooler::start()
 
 //--------------------------------------------------------------------------------Spooler::activate
 
+//void Spooler::activate()
+//{
+//    _order_subsystem->load_orders_from_database();
+//    init_jobs();
+//
+//    _task_subsystem = Z_NEW( Task_subsystem( this ) );
+//    _task_subsystem->start( &_event ); 
+//
+//    if( !_xml_cmd.empty() )
+//    {
+//        Command_processor cp ( this, Security::seclev_all );
+//        cout << cp.execute( _xml_cmd, Time::now(), true );                 // Bei einem Fehler Abbruch
+//        _xml_cmd = "";
+//    }
+//
+//    execute_config_commands();
+//
+//    _scheduler_script->set_subsystem_state( subsys_loaded );
+//    _scheduler_script->set_subsystem_state( subsys_started );
+//
+//    set_state( s_running );
+//}
+
 void Spooler::activate()
 {
-    _order_subsystem->load_orders_from_database();
-    init_jobs();
+    // Jobs erst nach dem Scheduler-Skript initialisieren, denn die brauchen letzteres für <run_time start_time_function="..">
+    _job_subsystem->init_jobs();
+
+    int JOB_RUN_TIME_ERST_NACH_SCHEDULER_SCRIPT_SETZEN;
 
     _task_subsystem = Z_NEW( Task_subsystem( this ) );
     _task_subsystem->start( &_event ); 
+
+    _order_subsystem->load_orders_from_database();
 
     if( !_xml_cmd.empty() )
     {
@@ -2164,9 +1903,10 @@ void Spooler::activate()
         _xml_cmd = "";
     }
 
-    execute_config_commands();
+    execute_config_commands();                                                                          
 
-    run_scheduler_script();
+    _scheduler_script->set_subsystem_state( subsys_loaded );
+    _scheduler_script->set_subsystem_state( subsys_started );
 
     set_state( s_running );
 }
@@ -2270,67 +2010,6 @@ void Spooler::assert_has_exclusiveness( const string& text )
     }
 }
 
-//--------------------------------------------------------------------Spooler::run_scheduler_script
-
-void Spooler::run_scheduler_script()
-{
-    try
-    {
-        if( _module.set() )
-        {
-            Z_LOGI2( "scheduler", "Startskript wird geladen und gestartet\n" );
-        
-            _module_instance = _module.create_instance();
-          //_module_instance->_title = "Scheduler-Script";
-            _module_instance->init();
-
-            _module_instance->add_obj( (IDispatch*)_com_spooler, "spooler"     );
-            _module_instance->add_obj( (IDispatch*)_com_log    , "spooler_log" );
-
-            _module_instance->load();
-            _module_instance->start();
-
-
-            bool ok = check_result( _module_instance->call_if_exists( spooler_init_name ) );
-
-            if( _log->highest_level() >= log_warn ) // &&  _log->mail_to() != ""  &&  _log->mail_from() != "" )
-            {
-                try
-                {
-                    string subject = name_of_log_level( _log->highest_level() ) + ": " + _log->highest_msg();
-                    S      body;
-
-                    body << Sos_optional_date_time::now().as_string() << "  " << name() << "\n\n";
-                    body << "Scheduler started with ";
-                    body << ( _log->highest_level() == log_warn? "warning" : "error" ) << ":\n\n";
-                    body << subject << "\n\n";
-
-                    Scheduler_event scheduler_event ( evt_scheduler_started, _log->highest_level(), this );
-
-                    if( _log->highest_level() >= log_error )  scheduler_event.set_error( Xc( "SCHEDULER-227", _log->last( _log->highest_level() ).c_str() ) );
-                    else
-                    if( _log->highest_level() == log_warn )   scheduler_event.set_message( _log->last( log_warn ) );
-                    
-
-                    _log->set_mail_default( "subject"  , subject );
-                    _log->set_mail_default( "body"     , body );
-                    _log->send( &scheduler_event );
-                }
-                catch( exception& x )  { _log->warn( S() << "Error on sending mail: " << x.what() ); }
-            }
-
-            if( !ok )  z::throw_xc( "SCHEDULER-183" );
-
-            Z_LOG2( "scheduler", "Startskript ist gelaufen\n" );
-        }
-    }
-    catch( exception& )
-    {
-        _log->error( message_string( "SCHEDULER-332" ) );
-        throw;
-    }
-}
-
 //------------------------------------------------------------------------------------Spooler::stop
 
 void Spooler::stop( const exception* )
@@ -2364,32 +2043,19 @@ void Spooler::stop( const exception* )
         }
     }
 
-    if( _module_instance )      // Scheduler-Skript zuerst beenden, damit die Finalizer die Tasks (von Job.start()) und andere Objekte schließen können.
-    {
-        Z_LOG2( "scheduler", "Scheduler-Skript wird beendet ...\n" );
-
-        try
-        {
-            _module_instance->call_if_exists( spooler_exit_name );
-        }
-        catch( exception& x )  { _log->warn( message_string( "SCHEDULER-260", x.what() ) ); }  // "Scheduler-Skript spooler_exit(): $1"
-
-        _module_instance->close();
-
-        Z_LOG2( "scheduler", "Scheduler-Skript ist beendet.\n" );
-    }
+    _scheduler_script->close();  // Scheduler-Skript zuerst beenden, damit die Finalizer die Tasks (von Job.start()) und andere Objekte schließen können.
 
 
     if( _order_subsystem )  _order_subsystem->close_job_chains();
 
-    close_jobs();
+    _job_subsystem->close_jobs();
 
     if( _shutdown_ignore_running_tasks )  _spooler->kill_all_processes();   // Übriggebliebene Prozesse killen
 
 
     if( _order_subsystem )  _order_subsystem->close(), _order_subsystem = NULL;
-    _object_set_class_list.clear();
-    _job_list.clear();
+    //_object_set_class_list.clear();
+    _job_subsystem->_job_list.clear();
     _process_class_list.clear();
 
     //_java_vm.close();  Erneutes _java.init() stürzt ab, deshalb lassen wir Java stehen und schließen es erst am Schluss
@@ -2454,7 +2120,7 @@ void Spooler::nichts_getan( int anzahl, const string& str )
         if( tasks.length() == 0 )  tasks << "no tasks";
 
 
-        FOR_EACH( Job_list, _job_list, j )  
+        FOR_EACH( Job_list, _job_subsystem->_job_list, j )  
         {
             Job* job = *j;
             if( jobs.length() > 0 )  jobs << ", ";
@@ -2510,7 +2176,7 @@ void Spooler::execute_state_cmd()
 
                 if( _state == s_stopping )
                 {
-                    Z_FOR_EACH( Job_list, _job_list, j )
+                    Z_FOR_EACH( Job_list, _job_subsystem->_job_list, j )
                     {
                         Job* job = *j;
                         //_log->info( message_string( "SCHEDULER-903", job->obj_name() ) );        // "Stopping"
@@ -3266,6 +2932,24 @@ void Spooler::cmd_let_run_terminate_and_restart()
     signal( "let_run_terminate_and_restart" );
 }
 
+//----------------------------------------------------------------------------Spooler::cmd_add_jobs
+
+void Spooler::cmd_add_jobs( const xml::Element_ptr& element )
+{
+    _job_subsystem->load_jobs_from_xml( element, Time::now(), true );
+
+    signal( "add_jobs" );
+}
+
+//---------------------------------------------------------------------------------Spooler::cmd_job
+
+void Spooler::cmd_job( const xml::Element_ptr& element )
+{
+    _job_subsystem->load_job_from_xml( element, Time::now(), _spooler->state() >= Spooler::s_starting );
+
+    signal( "add_job" );
+}
+
 //-----------------------------------------------------------------------Spooler::abort_immediately
 
 void Spooler::abort_immediately( const string& message_text )
@@ -3357,6 +3041,38 @@ void Spooler::kill_all_processes()
     _are_all_tasks_killed = true;
 }
 
+//------------------------------------------------------------Spooler::detect_warning_and_send_mail
+
+void Spooler::detect_warning_and_send_mail()
+{
+    // Wenn eine Warnung ins _Hauptprotokoll_ ausgegeben worden ist, eMail versenden
+    if( _log->highest_level() >= log_warn ) // &&  _log->mail_to() != ""  &&  _log->mail_from() != "" )
+    {
+        try
+        {
+            string subject = name_of_log_level( _log->highest_level() ) + ": " + _log->highest_msg();
+            S      body;
+
+            body << Sos_optional_date_time::now().as_string() << "  " << name() << "\n\n";
+            body << "Scheduler started with ";
+            body << ( _log->highest_level() == log_warn? "warning" : "error" ) << ":\n\n";
+            body << subject << "\n\n";
+
+            Scheduler_event scheduler_event ( evt_scheduler_started, _log->highest_level(), this );
+
+            if( _log->highest_level() >= log_error )  scheduler_event.set_error( Xc( "SCHEDULER-227", _log->last( _log->highest_level() ).c_str() ) );
+            else
+            if( _log->highest_level() == log_warn )   scheduler_event.set_message( _log->last( log_warn ) );
+            
+
+            _log->set_mail_default( "subject"  , subject );
+            _log->set_mail_default( "body"     , body );
+            _log->send( &scheduler_event );
+        }
+        catch( exception& x )  { _log->warn( S() << "Error on sending mail: " << x.what() ); }
+    }
+}
+
 //----------------------------------------------------------------------------------Spooler::launch
 
 int Spooler::launch( int argc, char** argv, const string& parameter_line )
@@ -3402,8 +3118,8 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line )
 
         update_console_title();
 
-        _module._dont_remote = true;
-        if( _module.set() )  _module.init();
+        //_module._dont_remote = true;                _scheduler_script
+        //if( _module.set() )  _module.init();
 
         if( _send_cmd != "" )  { send_cmd();  return 0; }
 

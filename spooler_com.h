@@ -53,6 +53,9 @@ struct Job;
 struct Task;
 struct Spooler;
 
+//-------------------------------------------------------------------------------------------------
+
+namespace com_objects {
 
 #ifndef Z_WINDOWS
     struct IXMLDOMDocument;    // Dummy
@@ -60,10 +63,16 @@ struct Spooler;
 
 //-------------------------------------------------------------------------------------------------
 
+extern Typelib_descr            spooler_typelib;
 extern Typelib_ref              typelib;
+
+//-------------------------------------------------------------------------------------------------
+
 struct Com_variable_set;
 
-typedef map< string, ptr<Com_variable_set> >   Variable_set_map;
+//-------------------------------------------------------------------------------------------------
+
+typedef stdext::hash_map< string, ptr<Com_variable_set> >   Variable_set_map;
 
 //----------------------------------------------------------------------------------------Com_error
 
@@ -892,6 +901,10 @@ struct Com_subprocess : spooler_com::Isubprocess,
 };
 
 //-------------------------------------------------------------------------------------------------
+
+} //namespace com_objects
+
+using namespace com_objects;
 
 } //namespace scheduler
 } //namespace sos

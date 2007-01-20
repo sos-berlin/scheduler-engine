@@ -258,7 +258,7 @@ void Web_service::set_dom( const xml::Element_ptr& element, const Time& )
         // Interne Jobkette und Job jetzt sichtbar machen
 
         _spooler->order_subsystem()->job_chain( forwarding_job_chain_name )->set_visible( true );
-        _spooler->get_job( forwarder_job_name, true )->set_visible( true );
+        _spooler->job_subsystem()->get_job( forwarder_job_name, true )->set_visible( true );
     }
 }
 

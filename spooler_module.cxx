@@ -657,7 +657,7 @@ Variant Module_instance::call_if_exists( const string& name )
 
 //------------------------------------------------------------------Module_instance::call_if_exists
 
-Variant Module_instance::call_if_exists( const string& name, bool param )
+Variant Module_instance::call_if_exists( const string& name, const Variant& param )
 {
     if( name_exists(name) )  return call( name, param );
                        else  return Variant( Variant::vt_error, DISP_E_UNKNOWNNAME );

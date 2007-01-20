@@ -912,7 +912,7 @@ void Job_chain::set_dom( const xml::Element_ptr& element )
             string state = e.getAttribute( "state" );
 
             bool can_be_not_initialized = true;
-            Job* job = _spooler->get_job( file_order_sink_job_name, can_be_not_initialized );
+            Job* job = _spooler->job_subsystem()->get_job( file_order_sink_job_name, can_be_not_initialized );
             job->set_visible( true );
 
             Job_chain_node* node = add_job( job, state, Variant(Variant::vt_missing), Variant(Variant::vt_missing) );
@@ -927,7 +927,7 @@ void Job_chain::set_dom( const xml::Element_ptr& element )
             string state    = e.getAttribute( "state" );
 
             bool can_be_not_initialized = true;
-            Job* job = job_name == ""? NULL : _spooler->get_job( job_name, can_be_not_initialized );
+            Job* job = job_name == ""? NULL : _spooler->job_subsystem()->get_job( job_name, can_be_not_initialized );
             if( state == "" )  z::throw_xc( "SCHEDULER-231", "job_chain_node", "state" );
 
             Job_chain_node* node = add_job( job, state, e.getAttribute( "next_state" ), e.getAttribute( "error_state" ) );
@@ -2388,6 +2388,8 @@ Order::~Order()
         assert( !_replaced_by );
         assert( !_order_queue );
 #   endif
+
+    if( _run_time )  _run_time->set_function_com_object( NULL ),  _run_time->set_log( NULL );
 }
 
 //--------------------------------------------------------------------------------------Order::init
@@ -3155,6 +3157,8 @@ void Order::close()
 
     remove_from_job_chain();
 
+    if( _run_time )  _run_time->set_function_com_object( NULL ),  _run_time->set_log( NULL );
+
     _log->close();
 }
 
@@ -3440,7 +3444,7 @@ Order_queue* Order::order_queue()
 
 void Order::set_job_by_name( const string& jobname )
 {
-    set_job( _spooler->get_job( jobname ) );
+    set_job( _spooler->job_subsystem()->get_job( jobname ) );
 }
 
 //------------------------------------------------------------------------------------Order::set_id
@@ -3823,7 +3827,7 @@ void Order::add_to_job( const string& job_name )
 
     //THREAD_LOCK( _lock )
     {
-        ptr<Order_queue> order_queue = _spooler->get_job( job_name )->order_queue();
+        ptr<Order_queue> order_queue = _spooler->job_subsystem()->get_job( job_name )->order_queue();
         if( !order_queue )  z::throw_xc( "SCHEDULER-147", job_name );
         add_to_order_queue( order_queue );
     }
@@ -4415,6 +4419,7 @@ void Order::run_time_modified_event()
 void Order::set_run_time( const xml::Element_ptr& e )
 {
     _run_time = Z_NEW( Run_time( _spooler, this ) );
+    _run_time->set_log( _log );
     _run_time->set_function_com_object( this );
     _run_time->set_modified_event_handler( this );
 

@@ -1,4 +1,4 @@
-// $Id$
+// $Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
 /*
     Hier sind implementiert
 
@@ -471,9 +471,20 @@ Time Time::now()
 
 void Period::set_default()
 {
-    _begin  = "00:00:00";
-    _end    = "24:00:00";
+    _begin  = 0;             //"00:00:00";
+    _end    = 24*60*60;      // = "24:00:00";
     _repeat = Time::never;
+}
+
+//-------------------------------------------------------------------------Period::set_single_start
+
+void Period::set_single_start( const Time& t )
+{
+    _begin        = t;
+    _end          = t;
+    _repeat       = Time::never;
+    _single_start = true;
+    _let_run      = true;
 }
 
 //----------------------------------------------------------------------------------Period::set_dom
@@ -492,13 +503,7 @@ void Period::set_dom( const xml::Element_ptr& element, const Period* deflt )
     string single_start = element.getAttribute( "single_start" );
     if( !single_start.empty() )
     {
-        dt.set_time( single_start );
-
-        _begin        = dt;
-        _end          = dt;
-        _repeat       = Time::never;
-        _single_start = true;
-        _let_run      = true;
+        set_single_start( Time( dt ) );
     }
     else
     {
@@ -1157,21 +1162,35 @@ void Run_time::set_xml( const string& xml )
 
 //--------------------------------------------------------------------------Run_time::call_function
 
-Time Run_time::call_function()
+Time Run_time::call_function( const Time& requested_beginning )
 {
-    Time result;
+    Time result = Time::never;
 
     try
     {
-        Variant v = _spooler->_module_instance->call( _start_time_function, _scheduler_com_object );
+        if( !_spooler->scheduler_script()->module_instance() )  z::throw_xc( __FUNCTION__, "No scheduler script" );
+
+        Variant date_v;
+        V_VT( &date_v ) = VT_DATE;
+        V_DATE( &date_v ) = com::com_date_from_seconds_since_1970( requested_beginning );       int SOMMERZEIT_TESTEN;
+
+        Variant v = _spooler->scheduler_script()->module_instance()->call( _start_time_function, date_v, _function_com_object );
         
         if( !v.is_null_or_empty_string() )
         {
-            if( variant_is_numeric( v ) )  result._begin = v.as_int64();
+            Time t;
+            if( variant_is_numeric( v ) )  t = v.as_int64();
             else
-            if( v.vt == VT_DATE         )  result._begin = seconds_since_1970_from_com_date( V_DATE( &v ) );
+            if( v.vt == VT_DATE         )  t = seconds_since_1970_from_com_date( V_DATE( &v ) );
             else                           
-                                           result._begin = set_datetime( v.as_string() );
+                                           t.set_datetime( v.as_string() );
+
+            if( t < requested_beginning )
+            {
+                if( _log )  _log->warn( message_string( "SCHEDULER-394", _start_time_function, t, requested_beginning ) );
+            }
+            else 
+                result = t;
         }
     }
     catch( exception& x )
@@ -1207,11 +1226,6 @@ void Run_time::set_dom( const xml::Element_ptr& element )
 
 
     _start_time_function = element.getAttribute( "start_time_function" );
-    if( _start_time_function != "" )
-    {
-        Time test;
-    }
-
 
 
     default_period.set_dom( element, NULL );
@@ -1331,43 +1345,32 @@ bool Run_time::is_filled() const
 Period Run_time::next_period( Time tim_par, With_single_start single_start )
 {
     Period result;
+    Time   tim = tim_par;
 
 
     if( _start_time_function != ""  &&  single_start & ( wss_next_any_start | wss_next_single_start ) )
     {
-        result._begin = call_function();
-
-        if( result._begin != Time::never )
-        {
-            result._single_start = true;
-            result._let_run = true;
-        }
+        tim = call_function( tim );
+        if( !tim.is_never() )  result.set_single_start( tim );
     }
 
 
-    if( result.begin() == Time::never  &&  is_filled() )
+    if( !tim.is_never()  ||  is_filled() )
     {
-        Time    tim = tim_par;
-
         while( tim < tim_par + 366*24*60*60 )   // max. ein Jahr 
         {
-            Period next;
+            if( _at_set      .is_filled() )  result = min( result, _at_set      .next_period( tim, single_start ) );
+            if( _date_set    .is_filled() )  result = min( result, _date_set    .next_period( tim, single_start ) );
+            if( _weekday_set .is_filled() )  result = min( result, _weekday_set .next_period( tim, single_start ) );
+            if( _monthday_set.is_filled() )  result = min( result, _monthday_set.next_period( tim, single_start ) );
+            if( _ultimo_set  .is_filled() )  result = min( result, _ultimo_set  .next_period( tim, single_start ) );
 
-            if( _at_set      .is_filled() )  next = min( next, _at_set      .next_period( tim, single_start ) );
-            if( _date_set    .is_filled() )  next = min( next, _date_set    .next_period( tim, single_start ) );
-            if( _weekday_set .is_filled() )  next = min( next, _weekday_set .next_period( tim, single_start ) );
-            if( _monthday_set.is_filled() )  next = min( next, _monthday_set.next_period( tim, single_start ) );
-            if( _ultimo_set  .is_filled() )  next = min( next, _ultimo_set  .next_period( tim, single_start ) );
-
-            if( next.begin() != Time::never )
+            if( result.begin() != Time::never )
             {
-                if( !_holidays.is_included( (uint)next.begin().midnight() ) )  
-                {
-                    result = next;  // Gefundener Zeitpunkt ist kein Feiertag? Dann ok!
-                    break;
-                }
+                if( !_holidays.is_included( (uint)result.begin().midnight() ) )  break;     // Gefundener Zeitpunkt ist kein Feiertag? Dann ok!
 
-                tim = next.begin().midnight() + 24*60*60;   // Feiertag? Dann nächsten Tag probieren
+                result = Period();
+                tim = result.begin().midnight() + 24*60*60;   // Feiertag? Dann nächsten Tag probieren
             }
             else
             {

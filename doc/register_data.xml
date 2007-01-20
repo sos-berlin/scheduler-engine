@@ -7,6 +7,11 @@
     author="$Author$"
     date= "$Date$"
 >
+<register_keyword keyword='?'>
+    <register_keyword_display><code>-?=</code></register_keyword_display>
+    <register_entry register_file='CHANGES.xml#use_option__?' register_title='Änderungsprotokoll'  register_keyword='?'/>
+    <register_entry register_file='command_line.xml#option_?' register_title='Kommandozeilenoptionen'  register_keyword='?' type='definition'/>
+</register_keyword>
 <register_keyword keyword='abort_immediately'>
     <register_keyword_display><code>abort_immediately()</code></register_keyword_display>
     <register_entry register_file='api/Spooler.xml#method__abort_immediately' register_title='Spooler.abort_immediately()' register_keyword='abort_immediately()' type='definition'/>
@@ -146,12 +151,14 @@
 <register_keyword keyword='backup'>
     <register_keyword_display><code>-backup=</code></register_keyword_display>
     <register_entry register_file='CHANGES.xml#use_option__backup' register_title='Änderungsprotokoll'  register_keyword='backup'/>
+    <register_entry register_file='backupscheduler.xml#use_option__backup' register_title='Backup Job Scheduler'  register_keyword='backup'/>
     <register_entry register_file='command_line.xml#option_backup' register_title='Kommandozeilenoptionen'  register_keyword='backup' type='definition'/>
     <register_entry register_file='command_line.xml#use_option__backup' register_title='Kommandozeilenoptionen'  register_keyword='backup'/>
 </register_keyword>
 <register_keyword keyword='backup-precedence'>
     <register_keyword_display><code>-backup-precedence=</code></register_keyword_display>
     <register_entry register_file='CHANGES.xml#use_option__backup-precedence' register_title='Änderungsprotokoll'  register_keyword='backup-precedence'/>
+    <register_entry register_file='backupscheduler.xml#use_option__backup-precedence' register_title='Backup Job Scheduler'  register_keyword='backup-precedence'/>
     <register_entry register_file='command_line.xml#option_backup-precedence' register_title='Kommandozeilenoptionen'  register_keyword='backup-precedence' type='definition'/>
     <register_entry register_file='command_line.xml#use_option__backup-precedence' register_title='Kommandozeilenoptionen'  register_keyword='backup-precedence'/>
 </register_keyword>
@@ -160,6 +167,7 @@
     <register_entry register_file='CHANGES.xml#use_element__base' register_title='Änderungsprotokoll'  register_keyword='base'/>
     <register_entry register_file='xml.xml#use_element__base' register_title='Alle XML-Elemente'  register_keyword='base'/>
     <register_entry register_file='xml/base.xml#' register_title='&lt;base&gt; (Konfiguration)'  register_keyword='base' type='definition'/>
+    <register_entry register_file='xml/cluster.xml#use_element__base' register_title='&lt;cluster&gt; (Konfiguration)'  register_keyword='base'/>
     <register_entry register_file='xml/commands.xml#use_element__base' register_title='&lt;commands&gt;'  register_keyword='base'/>
     <register_entry register_file='xml/web_service.xml#use_element__base' register_title='&lt;web_service&gt; (Konfiguration)'  register_keyword='base'/>
 </register_keyword>
@@ -245,6 +253,8 @@
 <register_keyword keyword='cluster'>
     <register_keyword_display><code>&lt;cluster&gt;</code></register_keyword_display>
     <register_entry register_file='CHANGES.xml#use_element__cluster' register_title='Änderungsprotokoll'  register_keyword='cluster'/>
+    <register_entry register_file='xml.xml#use_element__cluster' register_title='Alle XML-Elemente'  register_keyword='cluster'/>
+    <register_entry register_file='xml/cluster.xml#' register_title='&lt;cluster&gt; (Konfiguration)'  register_keyword='cluster' type='definition'/>
 </register_keyword>
 <register_keyword keyword='cmd'>
     <register_keyword_display><code>-cmd=</code></register_keyword_display>
@@ -318,6 +328,8 @@
     <register_keyword_display><code>-config=</code></register_keyword_display>
     <register_entry register_file='command_line.xml#option_config' register_title='Kommandozeilenoptionen'  register_keyword='config' type='definition'/>
     <register_entry register_file='command_line.xml#use_option__config' register_title='Kommandozeilenoptionen'  register_keyword='config'/>
+    <register_entry register_file='xml/holidays.xml#use_option__config' register_title='&lt;holidays&gt; (Konfiguration)'  register_keyword='config'/>
+    <register_entry register_file='xml/include.xml#use_option__config' register_title='&lt;include&gt; (Konfiguration)'  register_keyword='config'/>
 </register_keyword>
 <register_keyword keyword='config'>
     <register_keyword_display><code>config=</code></register_keyword_display>
@@ -449,7 +461,6 @@
 <register_keyword keyword='db_check_integrity'>
     <register_keyword_display><code>db_check_integrity=</code></register_keyword_display>
     <register_entry register_file='factory_ini_spooler.xml#entry_db_check_integrity' register_title='file factory.ini, section [spooler]'  register_keyword='db_check_integrity' type='definition'/>
-    <register_ini_entry register_file='CHANGES.xml' register_title='Änderungsprotokoll' file='factory.ini' section='spooler' entry='db_check_integrity'/>
 </register_keyword>
 <register_keyword keyword='db_history_table'>
     <register_keyword_display><code>db_history_table=</code></register_keyword_display>
@@ -567,6 +578,7 @@
     <register_keyword_display><code>&lt;delay_after_error&gt;</code></register_keyword_display>
     <register_entry register_file='CHANGES.xml#use_element__delay_after_error' register_title='Änderungsprotokoll'  register_keyword='delay_after_error'/>
     <register_entry register_file='api/Job.xml#use_element__delay_after_error' register_title='Job'  register_keyword='delay_after_error'/>
+    <register_entry register_file='settings.xml#use_element__delay_after_error' register_title='Einstellungen'  register_keyword='delay_after_error'/>
     <register_entry register_file='xml.xml#use_element__delay_after_error' register_title='Alle XML-Elemente'  register_keyword='delay_after_error'/>
     <register_entry register_file='xml/commands.xml#use_element__delay_after_error' register_title='&lt;commands&gt;'  register_keyword='delay_after_error'/>
     <register_entry register_file='xml/delay_after_error.xml#' register_title='&lt;delay_after_error&gt; (Konfiguration)'  register_keyword='delay_after_error' type='definition'/>
@@ -650,6 +662,7 @@
     <register_entry register_file='CHANGES.xml#use_option__distributed-orders' register_title='Änderungsprotokoll'  register_keyword='distributed-orders'/>
     <register_entry register_file='command_line.xml#option_distributed-orders' register_title='Kommandozeilenoptionen'  register_keyword='distributed-orders' type='definition'/>
     <register_entry register_file='command_line.xml#use_option__distributed-orders' register_title='Kommandozeilenoptionen'  register_keyword='distributed-orders'/>
+    <register_entry register_file='xml/cluster.xml#use_option__distributed-orders' register_title='&lt;cluster&gt; (Konfiguration)'  register_keyword='distributed-orders'/>
     <register_entry register_file='xml/job_chain.xml#use_option__distributed-orders' register_title='&lt;job_chain&gt; (Konfiguration)'  register_keyword='distributed-orders'/>
 </register_keyword>
 <register_keyword keyword='Eclipse'>
@@ -798,8 +811,10 @@
 <register_keyword keyword='exclusive'>
     <register_keyword_display><code>-exclusive=</code></register_keyword_display>
     <register_entry register_file='CHANGES.xml#use_option__exclusive' register_title='Änderungsprotokoll'  register_keyword='exclusive'/>
+    <register_entry register_file='backupscheduler.xml#use_option__exclusive' register_title='Backup Job Scheduler'  register_keyword='exclusive'/>
     <register_entry register_file='command_line.xml#option_exclusive' register_title='Kommandozeilenoptionen'  register_keyword='exclusive' type='definition'/>
     <register_entry register_file='command_line.xml#use_option__exclusive' register_title='Kommandozeilenoptionen'  register_keyword='exclusive'/>
+    <register_entry register_file='xml/cluster.xml#use_option__exclusive' register_title='&lt;cluster&gt; (Konfiguration)'  register_keyword='exclusive'/>
     <register_entry register_file='xml/terminate.xml#use_option__exclusive' register_title='&lt;terminate&gt; (Kommando)'  register_keyword='exclusive'/>
 </register_keyword>
 <register_keyword keyword='execute_xml'>
@@ -898,6 +913,11 @@
     <register_entry register_file='xml/select_events.xml#use_element__get_events' register_title='&lt;select_events&gt; (Kommando)'  register_keyword='get_events'/>
     <register_entry register_file='xml/supervisor.xml#use_element__get_events' register_title='&lt;supervisor&gt; (Konfiguration)'  register_keyword='get_events'/>
 </register_keyword>
+<register_keyword keyword='h'>
+    <register_keyword_display><code>-h=</code></register_keyword_display>
+    <register_entry register_file='CHANGES.xml#use_option__h' register_title='Änderungsprotokoll'  register_keyword='h'/>
+    <register_entry register_file='command_line.xml#option_h' register_title='Kommandozeilenoptionen'  register_keyword='h' type='definition'/>
+</register_keyword>
 <register_keyword keyword='has_description'>
     <register_keyword_display><code>has_description=</code></register_keyword_display>
     <register_entry register_file='xml/answer/job.xml#attribute_has_description' register_title='&lt;job&gt; (Antwort)'  register_keyword='has_description' type='definition'/>
@@ -909,6 +929,18 @@
     <register_keyword_display><code>header</code> (property)</register_keyword_display>
     <register_entry register_file='api/Web_service_request.xml#method__header' register_title='Web_service_request.header' register_keyword='header' type='definition'/>
     <register_entry register_file='api/Web_service_response.xml#method__header' register_title='Web_service_response.header' register_keyword='header' type='definition'/>
+</register_keyword>
+<register_keyword keyword='heart_beat_own_timeout'>
+    <register_keyword_display><code>heart_beat_own_timeout=</code></register_keyword_display>
+    <register_entry register_file='xml/cluster.xml#attribute_heart_beat_own_timeout' register_title='&lt;cluster&gt; (Konfiguration)'  register_keyword='heart_beat_own_timeout' type='definition'/>
+</register_keyword>
+<register_keyword keyword='heart_beat_timeout'>
+    <register_keyword_display><code>heart_beat_timeout=</code></register_keyword_display>
+    <register_entry register_file='xml/cluster.xml#attribute_heart_beat_timeout' register_title='&lt;cluster&gt; (Konfiguration)'  register_keyword='heart_beat_timeout' type='definition'/>
+</register_keyword>
+<register_keyword keyword='heart_beat_warn_timeout'>
+    <register_keyword_display><code>heart_beat_warn_timeout=</code></register_keyword_display>
+    <register_entry register_file='xml/cluster.xml#attribute_heart_beat_warn_timeout' register_title='&lt;cluster&gt; (Konfiguration)'  register_keyword='heart_beat_warn_timeout' type='definition'/>
 </register_keyword>
 <register_keyword keyword='highest_level'>
     <register_keyword_display><code>highest_level=</code></register_keyword_display>
@@ -983,8 +1015,11 @@
 </register_keyword>
 <register_keyword keyword='holidays'>
     <register_keyword_display><code>&lt;holidays&gt;</code></register_keyword_display>
+    <register_entry register_file='CHANGES.xml#use_element__holidays' register_title='Änderungsprotokoll'  register_keyword='holidays'/>
     <register_entry register_file='xml.xml#use_element__holidays' register_title='Alle XML-Elemente'  register_keyword='holidays'/>
     <register_entry register_file='xml/holidays.xml#' register_title='&lt;holidays&gt; (Konfiguration)'  register_keyword='holidays' type='definition'/>
+    <register_entry register_file='xml/holidays.xml#use_element__holidays' register_title='&lt;holidays&gt; (Konfiguration)'  register_keyword='holidays'/>
+    <register_entry register_file='xml/include.xml#use_element__holidays' register_title='&lt;include&gt; (Konfiguration)'  register_keyword='holidays'/>
 </register_keyword>
 <register_keyword keyword='host'>
     <register_keyword_display><code>host=</code></register_keyword_display>
@@ -1640,6 +1675,13 @@
 <register_keyword keyword='mail_it (property)'>
     <register_keyword_display><code>mail_it</code> (property)</register_keyword_display>
     <register_entry register_file='api/Log.xml#method__mail_it' register_title='Log.mail_it' register_keyword='mail_it' type='definition'/>
+</register_keyword>
+<register_keyword keyword='mail_on_delay_after_error'>
+    <register_keyword_display><code>mail_on_delay_after_error=</code></register_keyword_display>
+    <register_entry register_file='factory_ini_job.xml#entry_mail_on_delay_after_error' register_title='file factory.ini, section [job]'  register_keyword='mail_on_delay_after_error' type='definition'/>
+    <register_entry register_file='factory_ini_spooler.xml#entry_mail_on_delay_after_error' register_title='file factory.ini, section [spooler]'  register_keyword='mail_on_delay_after_error' type='definition'/>
+    <register_ini_entry register_file='CHANGES.xml' register_title='Änderungsprotokoll' file='factory.ini' section='job' entry='mail_on_delay_after_error'/>
+    <register_ini_entry register_file='CHANGES.xml' register_title='Änderungsprotokoll' file='factory.ini' section='spooler' entry='mail_on_delay_after_error'/>
 </register_keyword>
 <register_keyword keyword='mail_on_error'>
     <register_keyword_display><code>mail_on_error=</code></register_keyword_display>
@@ -2447,6 +2489,7 @@
     <register_entry register_file='xml.xml#use_element__script' register_title='Alle XML-Elemente'  register_keyword='script'/>
     <register_entry register_file='xml/answer/job.xml#use_element__script' register_title='&lt;job&gt; (Antwort)'  register_keyword='script'/>
     <register_entry register_file='xml/copy_params.xml#use_element__script' register_title='&lt;copy_params&gt;'  register_keyword='script'/>
+    <register_entry register_file='xml/include.xml#use_element__script' register_title='&lt;include&gt; (Konfiguration)'  register_keyword='script'/>
     <register_entry register_file='xml/job.xml#use_element__script' register_title='&lt;job&gt; (Konfiguration)'  register_keyword='script'/>
     <register_entry register_file='xml/script.xml#' register_title='&lt;script&gt; (Konfiguration)'  register_keyword='script' type='definition'/>
 </register_keyword>
@@ -2987,6 +3030,7 @@
 <register_keyword keyword='terminate'>
     <register_keyword_display><code>&lt;terminate&gt;</code></register_keyword_display>
     <register_entry register_file='CHANGES.xml#use_element__terminate' register_title='Änderungsprotokoll'  register_keyword='terminate'/>
+    <register_entry register_file='backupscheduler.xml#use_element__terminate' register_title='Backup Job Scheduler'  register_keyword='terminate'/>
     <register_entry register_file='command_line.xml#use_element__terminate' register_title='Kommandozeilenoptionen'  register_keyword='terminate'/>
     <register_entry register_file='xml.xml#use_element__terminate' register_title='Alle XML-Elemente'  register_keyword='terminate'/>
     <register_entry register_file='xml/terminate.xml#' register_title='&lt;terminate&gt; (Kommando)'  register_keyword='terminate' type='definition'/>
@@ -3020,6 +3064,10 @@
     <register_entry register_file='xml/answer/ERROR.xml#attribute_time' register_title='&lt;ERROR&gt; (Antwort)'  register_keyword='time' type='definition'/>
     <register_entry register_file='xml/answer/answer.xml#attribute_time' register_title='&lt;answer&gt; (Antwort)'  register_keyword='time' type='definition'/>
     <register_entry register_file='xml/answer/state.xml#attribute_time' register_title='&lt;state&gt; (Antwort)'  register_keyword='time' type='definition'/>
+</register_keyword>
+<register_keyword keyword='timeout'>
+    <register_keyword_display><code>-timeout=</code></register_keyword_display>
+    <register_entry register_file='backupscheduler.xml#use_option__timeout' register_title='Backup Job Scheduler'  register_keyword='timeout'/>
 </register_keyword>
 <register_keyword keyword='timeout'>
     <register_keyword_display><code>timeout</code></register_keyword_display>
@@ -3114,6 +3162,7 @@
 </register_keyword>
 <register_keyword keyword='V'>
     <register_keyword_display><code>-V=</code></register_keyword_display>
+    <register_entry register_file='CHANGES.xml#use_option__V' register_title='Änderungsprotokoll'  register_keyword='V'/>
     <register_entry register_file='command_line.xml#option_V' register_title='Kommandozeilenoptionen'  register_keyword='V' type='definition'/>
 </register_keyword>
 <register_keyword keyword='validate-xml'>

@@ -99,11 +99,15 @@ extern const string             variable_set_name_for_substitution;
 
 //-------------------------------------------------------------------------------------------------
 
-using namespace std;
+using namespace ::std;
+
+
 struct Communication;
 struct Get_events_command_response;
 struct Job;
 struct Job_chain;
+struct Job_subsystem_interface;
+struct Module_instance;
 struct Order_queue;
 struct Order;
 struct Process_class;
@@ -112,6 +116,7 @@ struct Scheduler_object;
 struct Scheduler_event;
 struct Show_what;
 struct Spooler;
+typedef Spooler Scheduler;
 struct Task_subsystem;
 struct Subprocess;
 struct Subprocess_register;
@@ -126,9 +131,9 @@ struct Xslt_stylesheet;
 
 } //namespace scheduler
 
-namespace http
-{
-} //namespace http
+//namespace http
+//{
+//} //namespace http
 } //namespace sos
 
 //-------------------------------------------------------------------------------------------------
@@ -140,6 +145,8 @@ namespace http
 #include "spooler_mail.h"
 #include "spooler_log.h"
 #include "scheduler_object.h"
+#include "subsystem.h"
+#include "scheduler_script.h"
 #include "spooler_event.h"
 #include "spooler_security.h"
 #include "spooler_wait.h"
@@ -272,7 +279,7 @@ struct Spooler : Object,
     //Task_subsystem*             select_thread_for_task      ( Task* );
 
   //Object_set_class*           get_object_set_class        ( const string& name );
-    Object_set_class*           get_object_set_class_or_null( const string& name );
+  //Object_set_class*           get_object_set_class_or_null( const string& name );
 
     void                        cmd_reload                  ();
     void                        cmd_pause                   ()                                  { _state_cmd = sc_pause; signal( "pause" ); }
@@ -283,6 +290,8 @@ struct Spooler : Object,
                                                               bool terminate_all_schedulers = false );
     void                        cmd_terminate_and_restart   ( int timeout = INT_MAX )           { return cmd_terminate( true, timeout ); }
     void                        cmd_let_run_terminate_and_restart();
+    void                        cmd_add_jobs                ( const xml::Element_ptr& element );
+    void                        cmd_job                     ( const xml::Element_ptr& );
 
     void                        abort_immediately_after_distribution_error( const string& debug_text );
     void                        abort_immediately           ( const string& message_text );
@@ -294,9 +303,6 @@ struct Spooler : Object,
     void                        execute_state_cmd           ();
     bool                        is_termination_state_cmd    ();
 
-    Job*                        get_job                     ( const string& job_name, bool can_be_not_initialized = false );
-    Job*                        get_job_or_null             ( const string& job_name );
-  //Job*                        get_next_job_to_start       ();
     ptr<Task>                   get_task                    ( int task_id );
     ptr<Task>                   get_task_or_null            ( int task_id );
 
@@ -307,7 +313,7 @@ struct Spooler : Object,
     void                        load_config                 ( const xml::Element_ptr& config, const Time& xml_mod_time, const string& source_filename );
     void                        set_next_daylight_saving_transition();
 
-    void                        load_object_set_classes_from_xml( Object_set_class_list*, const xml::Element_ptr&, const Time& xml_mod_time );
+  //void                        load_object_set_classes_from_xml( Object_set_class_list*, const xml::Element_ptr&, const Time& xml_mod_time );
 
     xml::Element_ptr            state_dom_element           ( const xml::Document_ptr&, const Show_what& = show_standard );
     void                        set_state                   ( State );
@@ -318,7 +324,6 @@ struct Spooler : Object,
     void                        start                       ();
     void                        activate                    ();
     void                        execute_config_commands     ();
-    void                        run_scheduler_script        ();
     void                        run_check_ctrl_c            ();
     void                        stop                        ( const exception* = NULL );
     void                        reload                      ();
@@ -359,22 +364,6 @@ struct Spooler : Object,
 
     void                        send_cmd                    ();
 
-    // Jobs
-    void                        add_job                     ( const ptr<Job>&, bool init );
-    void                        cmd_add_jobs                ( const xml::Element_ptr& );
-    void                        cmd_job                     ( const xml::Element_ptr& );
-    int                         remove_temporary_jobs       ( Job* which_job = NULL );
-    void                        remove_job                  ( Job* );
-    void                        init_jobs                   ();
-    void                        close_jobs                  ();
-
-    // Order
-    void                        load_jobs_from_xml          ( const xml::Element_ptr&, const Time& xml_mod_time, bool init = false );
-    void                        load_job_from_xml           ( const xml::Element_ptr&, const Time& xml_mod_time, bool init = false );
-    void                        init0_job                   ( Job* );
-    void                        init1_job                   ( Transaction*, Job* );
-    xml::Element_ptr            jobs_dom_element            ( const xml::Document_ptr&, const Show_what& );
-
     // Prozesse
     void                        load_process_classes_from_dom( const xml::Element_ptr&, const Time& xml_mod_time );
     void                        add_process_class           ( Process_class* );
@@ -400,17 +389,21 @@ struct Spooler : Object,
     Database*                   db                          ()                                  { return _db; }
     sql::Database_descriptor*   database_descriptor         ()                                  { return db()->database_descriptor(); }
 
+    Scheduler_script_interface* scheduler_script            () const                            { return _scheduler_script; }
+
     Order_subsystem*            order_subsystem             ();
     Task_subsystem*             task_subsystem              ()                                  { return _task_subsystem; }
+    Job_subsystem_interface*    job_subsystem               ()                                  { return _job_subsystem; }
     bool                        has_any_order               ();
     bool                        has_any_task                ();
+
+    void                        detect_warning_and_send_mail();
 
   private:
     Fill_zero                  _zero_;
     int                        _argc;
     char**                     _argv;
     string                     _parameter_line;
-    bool                       _jobs_initialized;
 
   public:
     Thread_semaphore           _lock;                       // Command_processor::execute_show_state() sperrt auch, für Zugriff auf _db.
@@ -507,7 +500,7 @@ struct Spooler : Object,
 
     ptr<Order_subsystem>       _order_subsystem;
     Web_services               _web_services;
-    Job_list                   _job_list;
+    ptr<Job_subsystem_interface> _job_subsystem;
     Wait_handles               _wait_handles;
 
     Event                      _event;                      // Für Signale aus anderen Threads, mit Betriebssystem implementiert (nicht Unix)
@@ -550,15 +543,14 @@ struct Spooler : Object,
 
     ptr<Com_variable_set>      _variables;
     Security                   _security;                   // <security>
-    Object_set_class_list      _object_set_class_list;      // <object_set_classes>
+  //Object_set_class_list      _object_set_class_list;      // <object_set_classes>
     Communication              _communication;              // TCP und UDP (ein Thread)
 
     Remote_scheduler_register  _remote_scheduler_register;
     ptr<Xml_client_connection> _main_scheduler_connection;
     ptr<Scheduler_event_manager> _scheduler_event_manager;
 
-    Module                     _module;                     // <script>
-    ptr<Module_instance>       _module_instance;
+    ptr<Scheduler_script_interface> _scheduler_script;
 
     Process_class_list         _process_class_list;
     Process_list               _process_list;

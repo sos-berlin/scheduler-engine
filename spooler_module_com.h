@@ -1,4 +1,4 @@
-// $Id$
+// $Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
 
 #ifndef __SPOOLER_MODULE_COM_H
 #define __SPOOLER_MODULE_COM_H
@@ -22,7 +22,7 @@ struct Com_module_instance_base : Module_instance
                Module_instance::add_obj;
     void                        close__end                  ();
     Variant                     call                        ( const string& name );
-    Variant                     call                        ( const string& name, bool param );
+    Variant                     call                        ( const string& name, const Variant& param, const Variant& );
     bool                        name_exists                 ( const string& name );
     bool                        loaded                      ()                                      { return _idispatch != NULL; }
     bool                        callable                    ()                                      { return _idispatch != NULL; }
@@ -72,7 +72,7 @@ struct Scripting_engine_module_instance : Com_module_instance_base
     void                        start                       ();
     virtual void                add_obj                     ( IDispatch*, const string& name );
     Variant                     call                        ( const string& name );
-    Variant                     call                        ( const string& name, bool param );
+    Variant                     call                        ( const string& name, const Variant&, const Variant& );
 
 
     ptr<Script_site>           _script_site;
