@@ -15,6 +15,7 @@ objects = \
  scheduler_client.o\
  scheduler_messages.o\
  scheduler_object.o\
+ scheduler_script.o\
  spooler.o\
  spooler_com.o\
  spooler_common.o\
@@ -49,7 +50,8 @@ objects = \
  spooler_time.o\
  spooler_wait.o\
  spooler_web_service.o\
- spooler_xslt_stylesheet.o
+ spooler_xslt_stylesheet.o\
+ subsystem.o
 
 
 java_classes=\

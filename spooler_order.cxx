@@ -139,7 +139,7 @@ bool Database_order_detector::async_continue_( Continue_flags )
     _now     = Time::now();
     _now_utc = ::time(NULL);
 
-    Time read_until             = _now + check_database_orders_period;
+  //Time read_until             = _now + check_database_orders_period;
     int  announced_orders_count = 0;
 
     S select_sql_begin;

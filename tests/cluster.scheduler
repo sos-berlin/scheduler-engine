@@ -8,8 +8,8 @@
 
         <cluster 
             heart_beat_warn_timeout = "10" 
-            heart_beat_own_timeout  = "55" 
-            heart_beat_timeout      = "40"
+            heart_beat_own_timeout  = "15" 
+            heart_beat_timeout      = "20"
          />
 
         <jobs>
