@@ -219,7 +219,7 @@ xml::Element_ptr Command_processor::execute_show_calendar( const xml::Element_pt
     if( element.hasAttribute( "from"  ) )  from .set_datetime( element.getAttribute( "from"  ) );
     if( element.hasAttribute( "until" ) )  until.set_datetime( element.getAttribute( "until" ) );
 
-    xml::Element_ptr& calendar_element = _answer.createElement( "calendar" );
+    xml::Element_ptr calendar_element = _answer.createElement( "calendar" );
 
     FOR_EACH_JOB( j )
     {
