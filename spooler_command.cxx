@@ -207,6 +207,7 @@ void Command_processor::get_id_and_next( const xml::Element_ptr& element, int* i
 }
 
 //---------------------------------------------------------Command_processor::execute_show_calendar
+#ifdef Z_DEBUG
 
 xml::Element_ptr Command_processor::execute_show_calendar( const xml::Element_ptr& element, const Show_what& show_ )
 {
@@ -231,6 +232,7 @@ xml::Element_ptr Command_processor::execute_show_calendar( const xml::Element_pt
     return calendar_element;
 }
 
+#endif
 //----------------------------------------------------------Command_processor::execute_show_history
 
 xml::Element_ptr Command_processor::execute_show_history( const xml::Element_ptr& element, const Show_what& show_ )

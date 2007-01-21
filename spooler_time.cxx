@@ -1179,7 +1179,7 @@ Time Run_time::call_function( const Time& requested_beginning )
         if( !v.is_null_or_empty_string() )
         {
             Time t;
-            if( variant_is_numeric( v ) )  t = v.as_int64();
+            if( variant_is_numeric( v ) )  t = (time_t)v.as_int64();
             else
             if( v.vt == VT_DATE         )  t = seconds_since_1970_from_com_date( V_DATE( &v ) );
             else                           
