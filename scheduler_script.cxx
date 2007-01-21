@@ -92,32 +92,49 @@ void Scheduler_script::set_dom_script( const xml::Element_ptr& script_element, c
     
 bool Scheduler_script::set_subsystem_state( Subsystem_state new_state )
 {
-    switch( new_state )
+    bool result = false;
+    
+    if( _subsystem_state != new_state )
     {
-        case subsys_loaded:
+        switch( new_state )
         {
-            if( _subsystem_state != subsys_not_initialized )  throw_subsystem_state_error( new_state, __FUNCTION__ );
-            load();
-            _subsystem_state = subsys_loaded;
-            Z_LOG2( "scheduler", "Startskript ist geladen\n" );
-            return true;
+            case subsys_initialized:
+            {
+                assert_subsystem_state( subsys_not_initialized, __FUNCTION__ );
+                _subsystem_state = subsys_initialized;
+                result = true;
+                break;
+            }
+
+            case subsys_loaded:
+            {
+                assert_subsystem_state( subsys_initialized, __FUNCTION__ );
+                load();
+                _subsystem_state = subsys_loaded;
+                Z_LOG2( "scheduler", "Startskript ist geladen\n" );
+                result = true;
+                break;
+            }
+
+            case subsys_active:
+            {
+                assert_subsystem_state( subsys_loaded, __FUNCTION__ );
+
+                Z_LOGI2( "scheduler", "Startskript wird gestartet\n" );
+                start();
+                _subsystem_state = subsys_active;
+                Z_LOG2( "scheduler", "Startskript ist gestartet worden\n" );
+
+                result = true;
+                break;
+            }
+
+            default:
+                throw_subsystem_state_error( new_state, __FUNCTION__ );
         }
-
-        case subsys_started:
-        {
-            if( _subsystem_state != subsys_loaded )  throw_subsystem_state_error( new_state, __FUNCTION__ );
-
-            Z_LOGI2( "scheduler", "Startskript wird gestartet\n" );
-            start();
-            _subsystem_state = subsys_started;
-            Z_LOG2( "scheduler", "Startskript ist gestartet worden\n" );
-
-            return true;
-        }
-
-        default:
-            throw_subsystem_state_error( new_state, __FUNCTION__ );
     }
+
+    return result;
 }
 
 //---------------------------------------------------------------------------Scheduler_script::load

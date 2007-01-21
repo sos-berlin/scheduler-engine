@@ -128,7 +128,7 @@ static void check_unchanged_attribute( const xml::Element_ptr& element, const st
         z::throw_xc( "SCHEDULER-234", attribute_name + "+" + current_value );
 }
 */
-//------------------------------------------------------------------------------------odule::Module
+//-----------------------------------------------------------------------------------Module::Module
 
 Module::Module( Spooler* sp, Prefix_log* log )
 : 

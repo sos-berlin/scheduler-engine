@@ -2135,8 +2135,6 @@ void Module_task::do_close__end()
         _log->log_file( _module_instance->stdout_path(), "stdout:" );
         _log->log_file( _module_instance->stderr_path(), "stderr:" );
 
-      //if( _job->_module_ptr->_reuse == Module::reuse_job )  _job->release_module_instance( _module_instance );
-
         _module_instance = NULL;    // Nach set_error(), weil set_error() _exit_code auf 1 setzt
     }
 }
@@ -2236,7 +2234,7 @@ bool Job_module_task::do_load()
     bool                 is_new = false;
 
 
-    if( _job->_module_ptr->_reuse == Module::reuse_job )
+    if( _job->_module->_reuse == Module::reuse_job )
     {
         //module_instance = _job->get_free_module_instance( this );
         module_instance = _job->create_module_instance();

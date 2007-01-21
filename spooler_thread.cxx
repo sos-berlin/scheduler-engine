@@ -21,8 +21,7 @@ Task_subsystem::Task_subsystem( Spooler* spooler )
 :
     _zero_(this+1),
     _spooler(spooler),
-    _log(spooler),
-    _lock( "Task_subsystem" )
+    _log(spooler)
 {
 }
 

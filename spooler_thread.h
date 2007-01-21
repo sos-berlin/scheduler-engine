@@ -39,7 +39,7 @@ struct Task_subsystem : Object
 
     // Für andere Threads:
     bool                        is_ready_for_termination    ();
-    void                        signal                      ( const string& signal_name )           { THREAD_LOCK( _lock )  if(_event) _event->signal(signal_name); }
+    void                        signal                      ( const string& signal_name )           { if( _event )  _event->signal(signal_name); }
 
     virtual string             _obj_name                    () const                                { return "Task_subsystem"; }
 
@@ -57,7 +57,6 @@ struct Task_subsystem : Object
 
 
     Spooler*                   _spooler;
-    Thread_semaphore           _lock;
     Prefix_log                 _log;
 
     Event*                     _event;

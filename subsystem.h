@@ -11,8 +11,9 @@ namespace scheduler {
 enum Subsystem_state
 {
     subsys_not_initialized,
+    subsys_initialized,
     subsys_loaded,
-    subsys_started,
+    subsys_active,
     subsys_stopped 
 };
 
@@ -31,6 +32,7 @@ struct Subsystem : Object, Non_cloneable, Scheduler_object
 
   protected:
     Z_NORETURN void             throw_subsystem_state_error ( Subsystem_state, const string& message_text );
+    void                        assert_subsystem_state      ( Subsystem_state, const string& message_text );
 
     Fill_zero                  _zero_;
     Subsystem_state            _subsystem_state;

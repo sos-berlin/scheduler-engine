@@ -471,9 +471,6 @@ struct Spooler : Object,
     ptr<Com_spooler>           _com_spooler;                // COM-Objekt spooler
     ptr<Com_log>               _com_log;                    // COM-Objekt spooler.log
 
-    Thread_semaphore           _job_name_lock;              // Sperre von get_job(name) bis add_job() für eindeutige Jobnamen
-    Thread_semaphore           _serialize_lock;             // Wenn die Threads nicht nebenläufig sein sollen
-
     string                     _db_name;
     ptr<Database>              _db;
     bool                       _need_db;                    // need_db=yes|strict  Wenn DB sich nicht öffnen lässt, ohne DB arbeiten und Historie ggfs. in Dateien schreiben

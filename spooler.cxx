@@ -630,8 +630,11 @@ Spooler::Spooler()
     _scheduler_event_manager = Z_NEW( Scheduler_event_manager( this ) );
     _scheduler_script        = new_scheduler_script( this );
     _job_subsystem           = new_job_subsystem( this );
+    _task_subsystem          = Z_NEW( Task_subsystem( this ) );
     _order_subsystem         = Z_NEW( Order_subsystem( this ) );
     _db                      = Z_NEW( Database( this ) );
+
+    _scheduler_script->set_subsystem_state( subsys_initialized );
 
     _variable_set_map[ variable_set_name_for_substitution ] = _environment;
 
@@ -835,20 +838,16 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
     if( _last_resume_at  &&  _last_resume_at != Time::never )
     state_element.setAttribute( "resume_at", _last_resume_at.as_string() );
 
-    //if( _cluster            )  state_element.setAttribute( "cluster"  , "yes" );
-    //if( is_active()         )  state_element.setAttribute( "active"   , "yes" );
-    //if( has_exclusiveness() )  state_element.setAttribute( "exclusive", "yes" );
-
-#   ifdef Z_UNIX
-    {
-        // Offene file descriptors ermitteln. Zum Debuggen, weil das Gerücht geht, Dateien würden offen bleiben. 
-        // Das war nur ein Gerücht.
-        S s;
-        int n = sysconf( _SC_OPEN_MAX );
-        for( int fd = 0; fd < n; fd++ )  if( fcntl( fd, F_GETFD ) != -1  ||  errno != EBADF )  s << ' ' << fd;
-        state_element.setAttribute( "file_descriptors", s.str().substr( 1 ) );
-    }
-#   endif
+//#   ifdef Z_UNIX
+//    {
+//        // Offene file descriptors ermitteln. Zum Debuggen, weil das Gerücht geht, Dateien würden offen bleiben. 
+//        // Das war nur ein Gerücht.
+//        S s;
+//        int n = sysconf( _SC_OPEN_MAX );
+//        for( int fd = 0; fd < n; fd++ )  if( fcntl( fd, F_GETFD ) != -1  ||  errno != EBADF )  s << ' ' << fd;
+//        state_element.setAttribute( "file_descriptors", s.str().substr( 1 ) );
+//    }
+//#   endif
 
 
     if( show.is_set( show_jobs ) )  state_element.appendChild( _job_subsystem->jobs_dom_element( dom, show ) );
@@ -890,9 +889,7 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
 void Spooler::print_xml_child_elements_for_event( String_stream* s, Scheduler_event* )
 {
     *s << "<state";
-
     *s << " state=\"" << state_name() << '"';
-
     *s << "/>";
 }
 
@@ -983,7 +980,7 @@ void Spooler::add_process_class( Process_class* process_class )
 
 bool Spooler::try_to_free_process( Job* for_job, Process_class* process_class, const Time& now )
 {
-    return _task_subsystem  &&  _task_subsystem->try_to_free_process( for_job, process_class, now );
+    return _task_subsystem->try_to_free_process( for_job, process_class, now );
 }
 
 //-----------------------------------------------------------------Spooler::register_process_handle
@@ -1792,9 +1789,8 @@ void Spooler::start()
     _spooler_start_time = Time::now();
 
     _order_subsystem->start();
-    _web_services.start();   // Nicht in Spooler::load(), denn es öffnet schon -log-dir-Dateien (das ist nicht gut für -send-cmd=)
-
-    FOR_EACH_JOB( job )  _job_subsystem->init0_job( *job );   // Setzt _has_java_source
+    _web_services.start();                                  // Nicht in Spooler::load(), denn es öffnet schon -log-dir-Dateien (das ist nicht gut für -send-cmd=)
+    _job_subsystem->set_subsystem_state( subsys_initialized );   // Setzt _has_java_source
 
 
     try
@@ -1864,7 +1860,7 @@ void Spooler::start()
 //void Spooler::activate()
 //{
 //    _order_subsystem->load_orders_from_database();
-//    init_jobs();
+//    load_jobs();
 //
 //    _task_subsystem = Z_NEW( Task_subsystem( this ) );
 //    _task_subsystem->start( &_event ); 
@@ -1879,34 +1875,31 @@ void Spooler::start()
 //    execute_config_commands();
 //
 //    _scheduler_script->set_subsystem_state( subsys_loaded );
-//    _scheduler_script->set_subsystem_state( subsys_started );
+//    _scheduler_script->set_subsystem_state( subsys_active );
 //
 //    set_state( s_running );
 //}
 
 void Spooler::activate()
 {
-    // Jobs erst nach dem Scheduler-Skript initialisieren, denn die brauchen letzteres für <run_time start_time_function="..">
-    _job_subsystem->init_jobs();
-
-    int JOB_RUN_TIME_ERST_NACH_SCHEDULER_SCRIPT_SETZEN;
-
-    _task_subsystem = Z_NEW( Task_subsystem( this ) );
+    _job_subsystem->set_subsystem_state( subsys_loaded );   
     _task_subsystem->start( &_event ); 
-
     _order_subsystem->load_orders_from_database();
 
     if( !_xml_cmd.empty() )
     {
         Command_processor cp ( this, Security::seclev_all );
-        cout << cp.execute( _xml_cmd, Time::now(), true );                 // Bei einem Fehler Abbruch
+        cout << cp.execute( _xml_cmd, Time::now(), true );          // Bei einem Fehler Abbruch
         _xml_cmd = "";
     }
 
     execute_config_commands();                                                                          
 
     _scheduler_script->set_subsystem_state( subsys_loaded );
-    _scheduler_script->set_subsystem_state( subsys_started );
+    _scheduler_script->set_subsystem_state( subsys_active );        // Hier passiert eigentlich nichts mehr (jedenfalls nicht bei Spidermonkey)
+
+    // Job-<run_time> benutzt das geladene Scheduler-Skript
+    _job_subsystem->set_subsystem_state( subsys_active );           
 
     set_state( s_running );
 }

@@ -105,7 +105,8 @@ struct Job : Object,
 {
     enum State
     {
-        s_none,
+        s_not_initialized,
+        s_initialized,
       //s_suspended,            // Alle Tasks sind suspended
         s_stopping,             // Wird gestoppt (Zustand, solange noch Tasks laufen, danach s_stopped)
         s_stopped,              // Gestoppt (z.B. wegen Fehler). Keine Task wird gestartet.
@@ -197,11 +198,11 @@ struct Job : Object,
     xml::Element_ptr            calendar_dom_element_or_null( const xml::Document_ptr&, const Time& from, const Time& until, int* const limit );
 
 
-    void                        init0                       ();                                     // Wird vor Spooler-Skript gerufen
-    void                        prepare_on_exit_commands    ();
-    void                        init                        ( Transaction* );                       // Wird nach Spooler-Skript gerufen, ruft auch init2()
-    void                        init2                       ();                                     // Wird nach reread() gerufen
+    void                        initialize                  ();                                     // Wird vor Spooler-Skript gerufen
+    void                        load                        ( Transaction* );                       // Wird nach Spooler-Skript gerufen, ruft auch init2()
+    void                        activate                    ();                                     // Wird nach reread() gerufen
     void                        init_start_when_directory_changed( Task* = NULL );
+    void                        prepare_on_exit_commands    ();
     void                        set_log                     ();
     void                        init_run_time               ();
     void                        set_run_time                ( const xml::Element_ptr& );
@@ -415,7 +416,6 @@ struct Job : Object,
     ptr<Module>                _module;                     // Job hat ein eigenes Skript
     xml::Element_ptr           _script_element;             // <script> (mit <include>) für <modify_job cmd="reload"/>
 
-    Module*                    _module_ptr;
     typedef vector< ptr<Module_instance> >  Module_instance_vector;
     Module_instance_vector     _module_instances;
     ptr<Com_job>               _com_job;
@@ -463,20 +463,20 @@ struct Job_subsystem_interface : Subsystem
 {
                                 Job_subsystem_interface     ( Scheduler* scheduler, Type_code t )   : Subsystem( scheduler, t ) {}
 
+    virtual void                close_jobs                  ()                                      = 0;
+    virtual void                initialize_job              ( Job* )                                = 0;
+    virtual void                load_job                  ( Transaction*, Job* )                  = 0;
+    virtual void                activate_job                ( Job* )                                = 0;
+    virtual void                load_jobs_from_xml          ( const xml::Element_ptr&, const Time& xml_mod_time, bool activate = false ) = 0;
+    virtual void                load_job_from_xml           ( const xml::Element_ptr&, const Time& xml_mod_time, bool activate = false ) = 0;
+    virtual void                add_job                     ( const ptr<Job>&, bool activate )      = 0;
+    virtual void                remove_job                  ( Job* )                                = 0;
+    virtual int                 remove_temporary_jobs       ( Job* which_job = NULL )               = 0;
     virtual Job*                get_job                     ( const string& job_name, bool can_be_not_initialized = false ) = 0;
     virtual Job*                get_job_or_null             ( const string& job_name )              = 0;
-    virtual void                add_job                     ( const ptr<Job>&, bool init )          = 0;
-    virtual int                 remove_temporary_jobs       ( Job* which_job = NULL )               = 0;
-    virtual void                remove_job                  ( Job* )                                = 0;
-    virtual void                init_jobs                   ()                                      = 0;
-    virtual void                close_jobs                  ()                                      = 0;
-    virtual void                load_jobs_from_xml          ( const xml::Element_ptr&, const Time& xml_mod_time, bool init = false ) = 0;
-    virtual void                load_job_from_xml           ( const xml::Element_ptr&, const Time& xml_mod_time, bool init = false ) = 0;
-    virtual void                init0_job                   ( Job* )                                = 0;
-    virtual void                init1_job                   ( Transaction*, Job* )                  = 0;
-    virtual xml::Element_ptr    jobs_dom_element            ( const xml::Document_ptr&, const Show_what& ) = 0;
     virtual bool                has_any_order               ()                                      = 0;
     virtual bool                is_any_task_queued          ()                                      = 0;
+    virtual xml::Element_ptr    jobs_dom_element            ( const xml::Document_ptr&, const Show_what& ) = 0;
 
 
     Job_list                   _job_list;                   // Das ist offen zugänglich für FOR_EACH_JOB
