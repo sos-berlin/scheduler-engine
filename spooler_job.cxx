@@ -540,24 +540,24 @@ void Job::close()
 
 void Job::initialize()
 {
-    if( _init0_called )  return;
+    if( _state < s_initialized )
+    {
+        Z_LOGI2( "scheduler", obj_name() << ".load()\n" );
 
-    Z_LOGI2( "scheduler", obj_name() << ".load()\n" );
+        if( _module->_dom_element )  read_script( _module );
+        if( _module->_monitor  &&  _module->_monitor->_dom_element )  read_script( _module->_monitor );
+        if( _module->set() )  _module->init();
 
-    if( _module->_dom_element )  read_script( _module );
-    if( _module->_monitor  &&  _module->_monitor->_dom_element )  read_script( _module->_monitor );
-    if( _module->set() )  _module->init();
+        _next_start_time = Time::never;
+        _period._begin = 0;
+        _period._end   = 0;
 
-    _next_start_time = Time::never;
-    _period._begin = 0;
-    _period._end   = 0;
+        if( _max_tasks < _min_tasks )  z::throw_xc( "SCHEDULER-322", _min_tasks, _max_tasks );
 
-    if( _max_tasks < _min_tasks )  z::throw_xc( "SCHEDULER-322", _min_tasks, _max_tasks );
+        prepare_on_exit_commands();
 
-    prepare_on_exit_commands();
-
-    _state = s_initialized;
-    _init0_called = true;
+        _state = s_initialized;
+    }
 }
 
 //----------------------------------------------------------------------------------------Job::load
@@ -566,7 +566,7 @@ void Job::load( Transaction* ta )
 {
     Z_LOGI2( "scheduler", obj_name() << ".activate()\n" );
 
-    if( !_init_called )
+    if( _state < s_loaded )
     {
         _history.open( ta );
 
@@ -587,7 +587,7 @@ void Job::load( Transaction* ta )
 
         if( _spooler->_db->opened()  &&  _spooler->has_exclusiveness() )  load_tasks_from_db( ta );
 
-        _init_called = true;
+        set_state( s_loaded );
     }
 }
 
@@ -595,25 +595,28 @@ void Job::load( Transaction* ta )
 
 void Job::activate()
 {
-    if( !_run_time->set() )  _run_time->set_default();
-    if( _spooler->_manual )  init_run_time(),  _run_time->set_default_days(),  _run_time->set_once();
-
-    set_state( s_pending );
-    
-    _delay_until = 0;
-    init_start_when_directory_changed();
-    check_min_tasks( "job initialization" );
-
-    for( Directory_watcher_list::iterator it = _directory_watcher_list.begin(); it != _directory_watcher_list.end(); it++ )
+    if( _state < s_pending )
     {
-        if( (*it)->filename_pattern() != "" )  
-        {
-            _start_once_for_directory = true;
-            break;
-        }
-    }
+        if( !_run_time->set() )  _run_time->set_default();
+        if( _spooler->_manual )  init_run_time(),  _run_time->set_default_days(),  _run_time->set_once();
 
-    set_next_start_time( Time::now() );
+        set_state( s_pending );
+        
+        _delay_until = 0;
+        init_start_when_directory_changed();
+        check_min_tasks( "job initialization" );
+
+        for( Directory_watcher_list::iterator it = _directory_watcher_list.begin(); it != _directory_watcher_list.end(); it++ )
+        {
+            if( (*it)->filename_pattern() != "" )  
+            {
+                _start_once_for_directory = true;
+                break;
+            }
+        }
+
+        set_next_start_time( Time::now() );
+    }
 }
 
 //-------------------------------------------------------------------------------------Job::set_dom
@@ -711,7 +714,7 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
                 if( _module->_process_filename != "" )  z::throw_xc( "SCHEDULER-234", obj_name() );
 
                 _module->set_dom_without_source( e, xml_mod_time );
-                if( _init0_called )  _module->set_dom_source_only( include_path() );
+                if( _state >= s_initialized )  _module->set_dom_source_only( include_path() );
 
                 _module->_process_filename     = "";
                 _module->_process_param_raw    = "";
@@ -758,7 +761,7 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
                     if( ee.nodeName_is( "script" ) )  
                     {
                         _module->_monitor->set_dom_without_source( ee, xml_mod_time );
-                        if( _init0_called )  _module->_monitor->set_dom_source_only( include_path() );
+                        if( _state >= s_initialized )  _module->_monitor->set_dom_source_only( include_path() );
                     }
                 }
             }
@@ -977,7 +980,7 @@ void Job::set_run_time( const xml::Element_ptr& element )
     _period._end   = 0;
     _next_single_start = Time::never;
 
-    if( _state != s_not_initialized )  set_next_start_time( Time::now() );
+    if( _state >= s_pending )  set_next_start_time( Time::now() );
 }
 
 //----------------------------------------------------------------------------------Job::set_remove
@@ -1021,6 +1024,7 @@ bool Job::should_removed()
         }
 
         if( _state == s_not_initialized )  return true;
+        if( _state == s_initialized     )  return true;
         if( _state == s_stopped         )  return true;
       //if( _state == s_read_error      )  return true;  Läuft jetzt keine Task?
       //if( _state == s_error           )  return true;  Diesen Zustand sollte es nicht geben
@@ -1125,7 +1129,7 @@ ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, const
         case s_read_error:  z::throw_xc( "SCHEDULER-132", _name, _error? _error->what() : "" );
         case s_error:       z::throw_xc( "SCHEDULER-204", _name, _error.what() );
         case s_stopped:     set_state( s_pending );  break;
-        default: ;
+        default:            if( _state < s_pending )  z::throw_xc( "SCHEDULER-396", state_name( s_pending ), __FUNCTION__ );
     }
 
     ptr<Task> task;
@@ -1708,7 +1712,7 @@ void Job::start_when_directory_changed( const string& directory_name, const stri
     }
 
     _directory_watcher_next_time = 0;
-    calculate_next_time();
+    calculate_next_time( Time::now() );
 }
 
 //----------------------------------------------------------------Job::clear_when_directory_changed
@@ -1759,7 +1763,7 @@ bool Job::check_for_changed_directory( const Time& now )
     //Z_LOG2( "joacim", "Job::task_to_start(): Verzeichnisüberwachung _directory_watcher_next_time=" << _directory_watcher_next_time << ", now=" << now << "\n" );
     _directory_watcher_next_time = _directory_watcher_list.size() > 0? Time( now + directory_watcher_intervall )
                                                                      : Time::never;
-    calculate_next_time();
+    calculate_next_time( now );
 
 
     Directory_watcher_list::iterator it = _directory_watcher_list.begin();
@@ -1912,7 +1916,7 @@ void Job::set_next_start_time( Time now, bool repeat )
                         _repeat = 0;
                     }
                     else
-                    if( _period.repeat() < Time::never )
+                    if( now >= _period.begin()  &&  _period.repeat() < Time::never )
                     {
                         next_start_time = now + _period.repeat();
 
@@ -2068,7 +2072,7 @@ void Job::calculate_next_time_after_modified_order_queue()
         }
     }
    
-    calculate_next_time();
+    calculate_next_time( Time::now() );
 }
 
 //-------------------------------------------------------------------------------Job::request_order
@@ -2279,7 +2283,7 @@ bool Job::do_something()
         {
             Time next_time_at_begin = _next_time;
 
-            if( _state )  
+            if( _state > s_loaded )  
             {
                 something_done |= execute_state_cmd();
 
@@ -2317,26 +2321,24 @@ bool Job::do_something()
                         ptr<Task> task = task_to_start();
                         if( task )
                         {
-                            {
-                                _log->open();           // Jobprotokoll, nur wirksam, wenn set_filename() gerufen, s. Job::init().
+                            _log->open();           // Jobprotokoll, nur wirksam, wenn set_filename() gerufen, s. Job::init().
 
-                                reset_error();
-                                _repeat = 0;
-                                _delay_until = 0;
+                            reset_error();
+                            _repeat = 0;
+                            _delay_until = 0;
 
-                                _running_tasks.push_back( task );
-                                set_state( s_running );
+                            _running_tasks.push_back( task );
+                            set_state( s_running );
 
-                                _next_start_time = Time::never;
-                                calculate_next_time();
+                            _next_start_time = Time::never;
+                            calculate_next_time( now );
 
-                                task->init();
-                                _log->info( message_string( "SCHEDULER-930", task->id(), task->string_cause() ) );
+                            task->init();
+                            _log->info( message_string( "SCHEDULER-930", task->id(), task->string_cause() ) );
 
-                                if( _min_tasks <= not_ending_tasks_count() )  _start_min_tasks = false;
+                            if( _min_tasks <= not_ending_tasks_count() )  _start_min_tasks = false;
 
-                                task->do_something();           // Damit die Task den Prozess startet und die Prozessklasse davon weiß
-                            }
+                            task->do_something();           // Damit die Task den Prozess startet und die Prozessklasse davon weiß
 
                             something_done = true;
                         }
@@ -2506,7 +2508,7 @@ void Job::set_state( State new_state )
          || _state == s_read_error
          || _state == s_error      )  _next_start_time = _next_time = Time::never;
 
-        if( old_state != s_not_initialized  ||  new_state != s_stopped )  // Übergang von none zu stopped interessiert uns nicht
+        if( old_state > s_initialized  ||  new_state != s_stopped )  // Übergang von none zu stopped interessiert uns nicht
         {
             if( new_state == s_stopping
              || new_state == s_stopped  && _visible
@@ -2700,6 +2702,7 @@ Time Job::get_delay_order_after_setback( int setback_count )
 
 xml::Element_ptr Job::dom_element( const xml::Document_ptr& document, const Show_what& show, Job_chain* which_job_chain )
 {
+    Time             now         = Time::now();
     xml::Element_ptr job_element = document.createElement( "job" );
 
     job_element.setAttribute( "job"       , _name                   );
@@ -2740,7 +2743,7 @@ xml::Element_ptr Job::dom_element( const xml::Document_ptr& document, const Show
         if( _delay_until )
         job_element.setAttribute( "delay_until", _delay_until.as_string() );
 
-        job_element.setAttribute( "in_period", is_in_period()? "yes" : "no" );
+        job_element.setAttribute( "in_period", is_in_period( now )? "yes" : "no" );
 
         if( _remove )
         job_element.setAttribute( "remove", "yes" );
@@ -2927,7 +2930,7 @@ void Job::kill_queued_task( int task_id )
     if( ok ) 
     {
         Time old_next_time = _next_time;
-        calculate_next_time();
+        calculate_next_time( Time::now() );
         if( _next_time != old_next_time )  signal( "task killed" );
     }
 }

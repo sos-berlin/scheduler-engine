@@ -257,6 +257,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-392", "heart_beat_warn_timeout=$1s has to be lower than heart_beat_own_timeout=$2, which has to be lower than heart_beat_warn_timeout=$3s" },
     { "SCHEDULER-393", "Error when calling <run_time> function $1: $2" },
     { "SCHEDULER-394", "<run_time>-Function '$1' returned start time $2 which is earlier then the requested beginning $3 and therefore ignored" },
+    { "SCHEDULER-395", "No Scheduler script" },
     { "SCHEDULER-900", "Scheduler $1 is starting with $2, pid=$3" },
     { "SCHEDULER-902", "state=$1" },
     { "SCHEDULER-904", "Tasks have $1s to terminate" },
@@ -382,6 +383,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-841", "It's requested, that the exclusive operation will not be continued" },
     { "SCHEDULER-842", "Task is going to process $1, state=$2, on Scheduler $3" },
     { "SCHEDULER-843", "Task has ended processing of $1, state=$2, on Scheduler $3" },
+    { "SCHEDULER-844", "Scheduler script is not yet active. Operation is executed without this" },
     {}
 };
 } //namespace sos

@@ -1162,13 +1162,13 @@ void Run_time::set_xml( const string& xml )
 
 //--------------------------------------------------------------------------Run_time::call_function
 
-Time Run_time::call_function( const Time& requested_beginning )
+Period Run_time::call_function( const Time& requested_beginning )
 {
-    Time result = Time::never;
+    Period result;
 
     try
     {
-        if( !_spooler->scheduler_script()->module_instance() )  z::throw_xc( __FUNCTION__, "No scheduler script" );
+        if( !_spooler->scheduler_script()->module_instance() )  z::throw_xc( "SCHEDULER-395", __FUNCTION__, _start_time_function );
 
         Variant date_v;
         V_VT( &date_v ) = VT_DATE;
@@ -1190,7 +1190,10 @@ Time Run_time::call_function( const Time& requested_beginning )
                 if( _log )  _log->warn( message_string( "SCHEDULER-394", _start_time_function, t, requested_beginning ) );
             }
             else 
-                result = t;
+            if( !t.is_never() ) 
+            {
+                result.set_single_start( t );
+            }
         }
     }
     catch( exception& x )
@@ -1324,9 +1327,9 @@ xml::Document_ptr Run_time::dom_document() const
 
 //---------------------------------------------------------------------------Run_time::first_period
 
-Period Run_time::first_period( Time tim_par )
+Period Run_time::first_period( Time beginning_time )
 {
-    return next_period( tim_par );
+    return next_period( beginning_time );
 }
 
 //------------------------------------------------------------------------------Run_time::is_filled
@@ -1342,42 +1345,58 @@ bool Run_time::is_filled() const
 
 //----------------------------------------------------------------------------Run_time::next_period
 
-Period Run_time::next_period( Time tim_par, With_single_start single_start )
+Period Run_time::next_period( Time beginning_time, With_single_start single_start )
 {
     Period result;
-    Time   tim = tim_par;
+    Time   tim   = beginning_time;
+    bool   is_no_function_warning_logged = false; 
 
 
-    if( _start_time_function != ""  &&  single_start & ( wss_next_any_start | wss_next_single_start ) )
+    while(1)
     {
-        tim = call_function( tim );
-        if( !tim.is_never() )  result.set_single_start( tim );
-    }
+        bool something_called = false;
 
+        if( _start_time_function != ""  &&  single_start & ( wss_next_any_start | wss_next_single_start ) )
+        {
+            if( _spooler->scheduler_script()->subsystem_state() != subsys_active  &&  _log  &&  !is_no_function_warning_logged )
+            {
+                _log->warn( message_string( "SCHEDULER-844", __FUNCTION__, _start_time_function ) );
+                is_no_function_warning_logged = true;
+            }
+            else
+                result = min( result, call_function( tim ) );
 
-    if( !tim.is_never()  ||  is_filled() )
-    {
-        while( tim < tim_par + 366*24*60*60 )   // max. ein Jahr 
+            something_called = true;
+        }
+
+        if( !tim.is_never()  ||  is_filled() )
         {
             if( _at_set      .is_filled() )  result = min( result, _at_set      .next_period( tim, single_start ) );
             if( _date_set    .is_filled() )  result = min( result, _date_set    .next_period( tim, single_start ) );
             if( _weekday_set .is_filled() )  result = min( result, _weekday_set .next_period( tim, single_start ) );
             if( _monthday_set.is_filled() )  result = min( result, _monthday_set.next_period( tim, single_start ) );
             if( _ultimo_set  .is_filled() )  result = min( result, _ultimo_set  .next_period( tim, single_start ) );
-
-            if( result.begin() != Time::never )
-            {
-                if( !_holidays.is_included( (uint)result.begin().midnight() ) )  break;     // Gefundener Zeitpunkt ist kein Feiertag? Dann ok!
-
-                result = Period();
-                tim = result.begin().midnight() + 24*60*60;   // Feiertag? Dann nächsten Tag probieren
-            }
-            else
-            {
-                tim = tim.midnight() + 24*60*60;   // Keine Periode? Dann nächsten Tag probieren
-            }
+            something_called = true;
         }
+
+        if( !something_called )  break;                         // <run_time> ist leer
+
+        if( result.begin() != Time::never )
+        {
+            if( !_holidays.is_included( result.begin() ) )  break;     // Gefundener Zeitpunkt ist kein Feiertag? Dann ok!
+
+            // Feiertag
+            tim    = result.begin().midnight() + 24*60*60;      // Nächsten Tag probieren
+            result = Period();
+        }
+        else
+        {
+            tim = tim.midnight() + 24*60*60;                    // Keine Periode? Dann nächsten Tag probieren
+        }
+
+        if( tim >= beginning_time + 366*24*60*60 )  break;     // Längstens ein Jahr ab beginning_time voraussehen
     }
+
 
     return result;
 }

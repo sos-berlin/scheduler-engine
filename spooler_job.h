@@ -107,6 +107,7 @@ struct Job : Object,
     {
         s_not_initialized,
         s_initialized,
+        s_loaded,   
       //s_suspended,            // Alle Tasks sind suspended
         s_stopping,             // Wird gestoppt (Zustand, solange noch Tasks laufen, danach s_stopped)
         s_stopped,              // Gestoppt (z.B. wegen Fehler). Keine Task wird gestartet.
@@ -249,8 +250,8 @@ struct Job : Object,
     void                        update_changed_directories  ( Directory_watcher* );
     string                      trigger_files               ( Task* task = NULL );
     void                        interrupt_script            ();
-    void                        select_period               ( Time = Time::now() );
-    bool                        is_in_period                ( Time = Time::now() );
+    void                        select_period               ( Time );
+    bool                        is_in_period                ( Time );
     bool                        queue_filled                ()                                      { return !_task_queue.empty(); }
     
     void                        on_task_finished            ( Task* );                              // Task::finished() ruft das
@@ -274,7 +275,7 @@ struct Job : Object,
     void                        stop_after_task_error       ( bool end_all_tasks, const string& error_message );   // _ignore_error verhindert stop()
     void                        set_next_start_time         ( Time now, bool repeat = false );
     void                        set_next_time               ( Time );
-    void                        calculate_next_time         ( Time now = Time::now() );
+    void                        calculate_next_time         ( Time now );
     void                        calculate_next_time_after_modified_order_queue();
 
     Time                        next_time                   ()                                      { return _next_time; }
@@ -368,8 +369,6 @@ struct Job : Object,
     long32                     _tasks_count;                // Anzahl gestarteter Tasks seit Spooler-Start
     long32                     _step_count;                 // Anzahl spooler_process() aller Tasks
 
-    bool                       _init0_called;
-    bool                       _init_called;
     State                      _state;
     State_cmd                  _state_cmd;
     bool                       _reread;                     // <script> neu einlesen, also <include> erneut ausführen

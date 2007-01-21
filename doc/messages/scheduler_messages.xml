@@ -2454,6 +2454,19 @@
                 <title><code>&lt;run_time></code>-Function '<p1/>' returned start time <p2/> which is earlier then the requested beginning <p3/> and therefore ignored</title>
             </text>
         </message>
+
+        <message code="SCHEDULER-395">
+            <text xml:lang="en">
+                <title>No Scheduler script</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-396">
+            <text xml:lang="en">
+                <title>Job has not yet reached state '<p1/>' for operation <p2/></title>
+            </text>
+        </message>
+
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->
@@ -3459,6 +3472,12 @@
         <message code="SCHEDULER-843" weight="info">
             <text xml:lang="en">
                 <title>Task has ended processing of <p1>order</p1>, state=<p2/>, on Scheduler <p3/></title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-844" weight="warn">
+            <text xml:lang="en">
+                <title>Scheduler script is not yet active. Operation is executed without this</title>
             </text>
         </message>
     </messages>

@@ -338,7 +338,7 @@ struct Holidays
     bool                        is_filled                   () const                                { return !_set.empty(); }
     void                        set_dom                     ( const xml::Element_ptr&, int include_nesting = 0 );
     void                        include                     ( time_t t )                            { _set.insert( t ); }
-    bool                        is_included                 ( time_t t )                            { return _set.find( t ) != _set.end(); }
+    bool                        is_included                 ( const Time& t )                       { return _set.find( t.midnight().as_time_t() ) != _set.end(); }
 
     Spooler*                   _spooler;
     typedef stdext::hash_set<time_t> Set;
@@ -439,7 +439,7 @@ struct Run_time : idispatch_implementation< Run_time, spooler_com::Irun_time >,
 
     Period                      next_period                 ( With_single_start single_start = wss_next_period )      { return next_period( Time::now(), single_start ); }
     Period                      next_period                 ( Time, With_single_start single_start = wss_next_period );
-    Time                        call_function               ( const Time& );
+    Period                      call_function               ( const Time& beginning_time );
 
     bool                        period_follows              ( Time time )                           { return next_period(time).begin() != Time::never; }
 
