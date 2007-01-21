@@ -258,6 +258,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-393", "Error when calling <run_time> function $1: $2" },
     { "SCHEDULER-394", "<run_time>-Function '$1' returned start time $2 which is earlier then the requested beginning $3 and therefore ignored" },
     { "SCHEDULER-395", "No Scheduler script" },
+    { "SCHEDULER-396", "Job has not yet reached state '$1' for operation $2" },
     { "SCHEDULER-900", "Scheduler $1 is starting with $2, pid=$3" },
     { "SCHEDULER-902", "state=$1" },
     { "SCHEDULER-904", "Tasks have $1s to terminate" },
