@@ -295,7 +295,7 @@ void Log::open_new()
             filename += "/scheduler-";
             filename += time.formatted( "yyyy-mm-dd-HHMMSS" );
             if( !_spooler->id().empty() )  filename += "." + _spooler->id();
-            if( _spooler->_is_backup_member )  filename += "_backup";
+            if( _spooler->_cluster_configuration._is_backup_member )  filename += "_backup";
             filename += ".log";
 
             Z_LOG2( "scheduler.log", "open(\"" << filename << "\")\n" );

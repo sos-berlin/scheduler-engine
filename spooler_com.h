@@ -184,6 +184,7 @@ struct Com_variable_set: spooler_com::Ivariable_set,
   //STDMETHODIMP            get_Names_array                 ( SAFEARRAY** );
     STDMETHODIMP            get_Names                       ( BSTR* );
     STDMETHODIMP                Substitute                  ( BSTR, BSTR* );
+    bool                        is_empty                    () const                                { return _map.empty(); }
 
 
     static const string         xml_element_name            ()                                      { return "sos.spooler.variable_set"; }
@@ -608,7 +609,7 @@ struct Com_spooler : spooler_com::Ispooler,
     STDMETHODIMP            get_Directory                   ( BSTR* );
     STDMETHODIMP                Job_chain_exists            ( BSTR name, VARIANT_BOOL* );
     STDMETHODIMP            get_Hostname                    ( BSTR* );
-    STDMETHODIMP                Terminate                   ( VARIANT* timeout );
+    STDMETHODIMP                Terminate                   ( VARIANT* timeout, VARIANT*,VARIANT*, VARIANT* );
     STDMETHODIMP                Terminate_and_restart       ( VARIANT* timeout );
     STDMETHODIMP                Abort_immediately           ();
     STDMETHODIMP                Abort_immediately_and_restart();

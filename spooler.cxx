@@ -686,6 +686,8 @@ Spooler::Spooler()
 
 Spooler::~Spooler() 
 {
+    if( _daylight_saving_time_detector )  _daylight_saving_time_detector->set_async_manager( NULL );
+
     spooler_ptr = NULL;
     set_ctrl_c_handler( false );
 
@@ -1384,16 +1386,14 @@ void Spooler::load_arg()
             else
             if( opt.flag      ( "validate-xml"           ) )  _validate_xml = opt.set();
             else
-            if( opt.flag      ( "exclusive"              ) )  _demand_exclusiveness = opt.set();
+            if( opt.flag      ( "exclusive"              ) )  _cluster_configuration._demand_exclusiveness   = opt.set();
             else
-            if( opt.flag      ( "backup"                 ) )  _is_backup_member = opt.set();
+            if( opt.flag      ( "backup"                 ) )  _cluster_configuration._is_backup_member       = opt.set();
             else
-            if( opt.with_value( "backup-precedence"      ) )  _backup_precedence = opt.as_int(), _is_backup_precedence_set = true;
+            if( opt.with_value( "backup-precedence"      ) )  _cluster_configuration._backup_precedence      = opt.as_int();
             else
-            if( opt.flag      ( "distributed-orders"     ) )  _are_orders_distributed = opt.set();
+            if( opt.flag      ( "distributed-orders"     ) )  _cluster_configuration._are_orders_distributed = opt.set();
             else
-            //if( opt.flag      ( "member-id"              ) )  _cluster_member_id = opt.set();
-            //else
             if( opt.with_value( "env"                    ) )  ;  // Bereits von spooler_main() erledigt
             else
             if( opt.flag      ( "zschimmer"              ) )  _zschimmer_mode = opt.set();
@@ -1402,7 +1402,7 @@ void Spooler::load_arg()
             else
             if( opt.with_value( "test-summertime"        ) )  time::test_summertime( opt.value() );
             else
-            if( opt.flag      ( "suppress-watchdog-thread" ) )  _suppress_watchdog_thread = opt.set();
+            if( opt.flag      ( "suppress-watchdog-thread" ) )  _cluster_configuration._suppress_watchdog_thread = opt.set();
           //else
           //if( opt.with_value( "now"                    ) )  _clock_difference = Time( Sos_date_time( opt.value() ) ) - Time::now();
             else
@@ -1415,8 +1415,7 @@ void Spooler::load_arg()
                 throw_sos_option_error( opt );
         }
 
-        if( _is_backup_member && !_demand_exclusiveness )  z::throw_xc( "SCHEDULER-368", "-backup", "-exclusive" );
-        //if( _are_orders_distributed && _demand_exclusiveness    )  z::throw_xc( "SCHEDULER-369", "-distributed", "-exclusive" );
+        if( _cluster_configuration._is_backup_member && !_cluster_configuration._demand_exclusiveness )  z::throw_xc( "SCHEDULER-368", "-backup", "-exclusive" );
 
         if( _is_service )  _interactive = false;
 
@@ -1557,7 +1556,7 @@ void Spooler::load()
             _waitable_timer.add_to( &_wait_handles );
 
 
-            set_next_daylight_saving_transition();
+            //set_next_daylight_saving_transition();
         }
 #   endif
 }
@@ -1565,112 +1564,112 @@ void Spooler::load()
 //-------------------------------------------------------------------------time_from_dst_systemtime
 #ifdef Z_WINDOWS
 
-static Time time_from_dst_systemtime( const SYSTEMTIME& dst, const SYSTEMTIME& now )
-{
-    if( dst.wYear != 0  ||  dst.wMonth == 0  ||  dst.wDay == 0 )  return 0;
-
-
-    SYSTEMTIME result;
-    SYSTEMTIME last_day; 
-    BOOL       ok;
-    
-    memset( &result, 0, sizeof result );
-    result.wYear = now.wYear;
-
-    while(1)
-    {
-        result.wMonth        = dst.wMonth;
-        result.wDay          = 1;
-        result.wHour         = dst.wHour;
-        result.wMinute       = dst.wMinute;
-        result.wMilliseconds = dst.wMilliseconds;
-
-
-        // result.wDayOfWeek errechnen
-
-        int64 filetime;  // 100 Nanosekunden
-        ok = SystemTimeToFileTime( &result, (FILETIME*)&filetime );
-        if( !ok )  return Time(0);
-
-        ok = FileTimeToSystemTime( (FILETIME*)&filetime, &result );   // Jetzt haben wir result.wDayOfWeek
-        if( !ok )  return Time(0);
-
-
-        // Letzten Tag des Monats bestimmen
-
-        last_day = result;
-        if( ++last_day.wMonth > 12 )  last_day.wMonth = 1, last_day.wYear++;
-
-        ok = SystemTimeToFileTime( &last_day, (FILETIME*)&filetime );
-        if( !ok )  return Time(0);
-
-        filetime -= 24*3600*10000000LL;
-
-        ok = FileTimeToSystemTime( (FILETIME*)&filetime, &last_day );  
-        if( !ok )  return Time(0);
-
-
-        // Wochentag setzen
-
-        result.wDay += ( dst.wDayOfWeek - result.wDayOfWeek + 7 ) % 7;
-        result.wDayOfWeek = dst.wDayOfWeek;
-
-
-        // Woche setzen (dst.wDay gibt an, der wievielte Wochentag des Monats es ist)
-
-        result.wDay += 7 * ( dst.wDay - 1 );
-
-
-        // Aber nicht über den Monat hinaus
-
-        while( result.wDay > last_day.wDay )  result.wDay -= 7;
-
-        if( windows::compare_systemtime( now, result ) < 0 )  break;
-
-        result.wYear++;  // Nächstes Jahr probieren
-        assert( result.wYear <= now.wYear + 1 );
-    }
-
-    return Time( result );
-}
+//static Time time_from_dst_systemtime( const SYSTEMTIME& dst, const SYSTEMTIME& now )
+//{
+//    if( dst.wYear != 0  ||  dst.wMonth == 0  ||  dst.wDay == 0 )  return 0;
+//
+//
+//    SYSTEMTIME result;
+//    SYSTEMTIME last_day; 
+//    BOOL       ok;
+//    
+//    memset( &result, 0, sizeof result );
+//    result.wYear = now.wYear;
+//
+//    while(1)
+//    {
+//        result.wMonth        = dst.wMonth;
+//        result.wDay          = 1;
+//        result.wHour         = dst.wHour;
+//        result.wMinute       = dst.wMinute;
+//        result.wMilliseconds = dst.wMilliseconds;
+//
+//
+//        // result.wDayOfWeek errechnen
+//
+//        int64 filetime;  // 100 Nanosekunden
+//        ok = SystemTimeToFileTime( &result, (FILETIME*)&filetime );
+//        if( !ok )  return Time(0);
+//
+//        ok = FileTimeToSystemTime( (FILETIME*)&filetime, &result );   // Jetzt haben wir result.wDayOfWeek
+//        if( !ok )  return Time(0);
+//
+//
+//        // Letzten Tag des Monats bestimmen
+//
+//        last_day = result;
+//        if( ++last_day.wMonth > 12 )  last_day.wMonth = 1, last_day.wYear++;
+//
+//        ok = SystemTimeToFileTime( &last_day, (FILETIME*)&filetime );
+//        if( !ok )  return Time(0);
+//
+//        filetime -= 24*3600*10000000LL;
+//
+//        ok = FileTimeToSystemTime( (FILETIME*)&filetime, &last_day );  
+//        if( !ok )  return Time(0);
+//
+//
+//        // Wochentag setzen
+//
+//        result.wDay += ( dst.wDayOfWeek - result.wDayOfWeek + 7 ) % 7;
+//        result.wDayOfWeek = dst.wDayOfWeek;
+//
+//
+//        // Woche setzen (dst.wDay gibt an, der wievielte Wochentag des Monats es ist)
+//
+//        result.wDay += 7 * ( dst.wDay - 1 );
+//
+//
+//        // Aber nicht über den Monat hinaus
+//
+//        while( result.wDay > last_day.wDay )  result.wDay -= 7;
+//
+//        if( windows::compare_systemtime( now, result ) < 0 )  break;
+//
+//        result.wYear++;  // Nächstes Jahr probieren
+//        assert( result.wYear <= now.wYear + 1 );
+//    }
+//
+//    return Time( result );
+//}
 
 //-----------------------------------------------------Spooler::set_next_daylight_saving_transition
 
-void Spooler::set_next_daylight_saving_transition()
-{
-    if( _zschimmer_mode )  
-    {
-        TIME_ZONE_INFORMATION time_zone_information;
-        DWORD result = GetTimeZoneInformation( &time_zone_information );
-        if( result != TIME_ZONE_ID_INVALID )
-        {
-            SYSTEMTIME now;
-            GetLocalTime( &now );
-
-            if( time_zone_information.StandardDate.wMonth )
-            {
-                Time standard_date = time_from_dst_systemtime( time_zone_information.StandardDate, now );
-                Time daylight_date = time_from_dst_systemtime( time_zone_information.DaylightDate, now );
-                
-                if( standard_date < daylight_date )
-                {
-                    _next_daylight_saving_transition_time = standard_date;  // Kann 0 sein
-                    _next_daylight_saving_transition_name = "begin of standard time: " + string_from_ole( time_zone_information.StandardName );
-                }
-                else
-                {
-                    _next_daylight_saving_transition_time = daylight_date;  // Kann 0 sein
-                    _next_daylight_saving_transition_name = "begin of daylight saving time: " + string_from_ole( time_zone_information.DaylightName );
-                }
-            }
-            else
-            {
-                _next_daylight_saving_transition_time = Time::never;
-                _next_daylight_saving_transition_name = "no daylight saving";
-            }
-        }
-    }
-}
+//void Spooler::set_next_daylight_saving_transition()
+//{
+//    if( _zschimmer_mode )  
+//    {
+//        TIME_ZONE_INFORMATION time_zone_information;
+//        DWORD result = GetTimeZoneInformation( &time_zone_information );
+//        if( result != TIME_ZONE_ID_INVALID )
+//        {
+//            SYSTEMTIME now;
+//            GetLocalTime( &now );
+//
+//            if( time_zone_information.StandardDate.wMonth )
+//            {
+//                Time standard_date = time_from_dst_systemtime( time_zone_information.StandardDate, now );
+//                Time daylight_date = time_from_dst_systemtime( time_zone_information.DaylightDate, now );
+//                
+//                if( standard_date < daylight_date )
+//                {
+//                    _next_daylight_saving_transition_time = standard_date;  // Kann 0 sein
+//                    _next_daylight_saving_transition_name = "begin of standard time: " + string_from_ole( time_zone_information.StandardName );
+//                }
+//                else
+//                {
+//                    _next_daylight_saving_transition_time = daylight_date;  // Kann 0 sein
+//                    _next_daylight_saving_transition_name = "begin of daylight saving time: " + string_from_ole( time_zone_information.DaylightName );
+//                }
+//            }
+//            else
+//            {
+//                _next_daylight_saving_transition_time = Time::never;
+//                _next_daylight_saving_transition_name = "no daylight saving";
+//            }
+//        }
+//    }
+//}
 
 #endif
 //----------------------------------------------------------------------------Spooler::create_window
@@ -1788,9 +1787,12 @@ void Spooler::start()
     _log->info( message_string( "SCHEDULER-900", _version, _config_filename, getpid() ) );
     _spooler_start_time = Time::now();
 
+    _daylight_saving_time_detector = time::new_daylight_saving_time_switch( this );
+    _daylight_saving_time_detector->set_async_manager( _connection_manager );
+
     _order_subsystem->start();
-    _web_services.start();                                  // Nicht in Spooler::load(), denn es öffnet schon -log-dir-Dateien (das ist nicht gut für -send-cmd=)
-    _job_subsystem->set_subsystem_state( subsys_initialized );   // Setzt _has_java_source
+    _web_services.start();                                      // Nicht in Spooler::load(), denn es öffnet schon -log-dir-Dateien (das ist nicht gut für -send-cmd=)
+    _job_subsystem->set_subsystem_state( subsys_initialized );  // Setzt _has_java_source
 
 
     try
@@ -1820,7 +1822,7 @@ void Spooler::start()
 
     // Datenbank
 
-    if( _are_orders_distributed || _demand_exclusiveness ) 
+    if( _cluster_configuration._are_orders_distributed || _cluster_configuration._demand_exclusiveness ) 
     {
         if( _db_name == "" )  z::throw_xc( "SCHEDULER-357" ); 
         _need_db = true;
@@ -1846,7 +1848,7 @@ void Spooler::start()
 
     if( _main_scheduler_connection )  _main_scheduler_connection->set_socket_manager( _connection_manager );
 
-    if( _demand_exclusiveness || _are_orders_distributed )  
+    if( _cluster_configuration._are_orders_distributed || _cluster_configuration._demand_exclusiveness ) 
     {
         start_cluster();
         //wait_for_cluster();
@@ -1942,18 +1944,8 @@ void Spooler::execute_config_commands()
 
 void Spooler::start_cluster()
 {
-    _cluster = Z_NEW( cluster::Cluster( this ) );
-
-    _cluster->set_backup( _is_backup_member );
-
-    if( _is_backup_precedence_set )  
-    {
-        _cluster->set_backup_precedence( _backup_precedence );
-    }
-
-    _cluster->demand_exclusiveness  ( _demand_exclusiveness   );
-    _cluster->set_orders_distributed( _are_orders_distributed );
-    if( xml::Element_ptr cluster_element = _config_element.select_node( "cluster" ) )  _cluster->set_dom( cluster_element );
+    _cluster = cluster::new_cluster_subsystem( this );
+    _cluster->set_configuration( _cluster_configuration );
 
     _cluster->start();     // Wartet, bis entschieden ist, dass wir aktiv werden
 }
@@ -1969,7 +1961,7 @@ bool Spooler::is_active()
 
 bool Spooler::are_orders_distributed()
 {
-    return _are_orders_distributed;
+    return _cluster_configuration._are_orders_distributed;
 }
 
 //-----------------------------------------------------------Spooler::assert_are_orders_distributed
@@ -1979,7 +1971,7 @@ void Spooler::assert_are_orders_distributed( const string& text )
     if( !are_orders_distributed() )  z::throw_xc( "SCHEDULER-370", text );
 }
 
-//---------------------------------------------------------------------Spooler::cluster_member_id
+//-----------------------------------------------------------------------Spooler::cluster_member_id
 
 string Spooler::cluster_member_id()
 {
@@ -2155,7 +2147,7 @@ void Spooler::execute_state_cmd()
     if( _state_cmd )
     {
         if( _state_cmd == sc_pause )     if( _state == s_running )  set_state( s_paused  );
-        if( _state_cmd == sc_continue )  if( _state == s_paused  )  set_state( s_running ),  check( __FUNCTION__, "paused" ); 
+        if( _state_cmd == sc_continue )  if( _state == s_paused  )  set_state( s_running ); 
 
         if( _state_cmd == sc_load_config  
          || _state_cmd == sc_reload       
@@ -2259,7 +2251,7 @@ void Spooler::run()
 
         if( !_is_activated  &&  is_active() ) 
         {
-            if( !_demand_exclusiveness  ||  _cluster->has_exclusiveness() )
+            if( !_cluster_configuration._demand_exclusiveness  ||  _cluster && _cluster->has_exclusiveness() )
             {
                 _is_activated = true;
                 activate();
@@ -2602,14 +2594,13 @@ void Spooler::signal( const string& signal_name )
 
 void Spooler::check_cluster()
 {
-    _cluster->async_check_exception( "Error in cluster operation" );
-
+    _cluster->check();
     check_is_active();
 }
 
-//-----------------------------------------------------------------------------------Spooler::check
+//------------------------------------------------------------------Spooler::assert_is_still_active
 
-bool Spooler::check( const string& debug_function, const string& message_text, Transaction* outer_transaction )
+bool Spooler::assert_is_still_active( const string& debug_function, const string& message_text, Transaction* outer_transaction )
 {
     bool result = true;
 
@@ -2624,18 +2615,18 @@ bool Spooler::check( const string& debug_function, const string& message_text, T
 
 //--------------------------------------------------------------------------------------Spooler::ok
 
-bool Spooler::ok( Transaction* outer_transaction )
-{
-    bool ok = true;
-    
-    if( !check_is_active( outer_transaction ) )  
-    {
-        ok = false;
-        cmd_terminate( false, INT_MAX, cluster::Cluster::continue_exclusive_any );
-    }
-
-    return ok;
-}
+//bool Spooler::ok( Transaction* outer_transaction )
+//{
+//    bool ok = true;
+//    
+//    if( !check_is_active( outer_transaction ) )  
+//    {
+//        ok = false;
+//        cmd_terminate( false, INT_MAX, cluster::Cluster::continue_exclusive_any );
+//    }
+//
+//    return ok;
+//}
 
 //-------------------------------------------------------------------------Spooler::check_is_active
 
@@ -2653,13 +2644,13 @@ bool Spooler::check_is_active( Transaction* outer_transaction )
         if( Not_in_recursion not_in_recursion = &_is_in_check_is_active )
         {
             if( !_cluster->check_is_active( outer_transaction )  
-            ||  _demand_exclusiveness && !_cluster->has_exclusiveness() )
+            ||  _cluster_configuration._demand_exclusiveness && !_cluster->has_exclusiveness() )
             {
                 _assert_is_active = false;
 
                 kill_all_processes();
                 
-                _log->error( message_string( _demand_exclusiveness? "SCHEDULER-367" : "SCHEDULER-362" ) );
+                _log->error( message_string( _cluster_configuration._demand_exclusiveness? "SCHEDULER-367" : "SCHEDULER-362" ) );
 
                 _cluster->show_active_schedulers( outer_transaction );
 
@@ -2669,7 +2660,7 @@ bool Spooler::check_is_active( Transaction* outer_transaction )
                 //_cluster->close();     // Scheduler-Mitglieds-Eintrag entfernen
                 //_cluster = NULL;       // aber Eintrag für verteilten Scheduler lassen, Scheduler ist nicht herunterfahren (wird ja vom anderen aktiven Scheduler fortgesetzt)
 
-                cmd_terminate( false, INT_MAX, cluster::Cluster::continue_exclusive_any );
+                cmd_terminate( false, INT_MAX, cluster::continue_exclusive_any );
                 result = false;
             }
         }
@@ -2685,21 +2676,11 @@ void Spooler::assert_is_activated( const string& function )
     if( !_is_activated )  z::throw_xc( "SCHEDULER-381", function );
 }
 
-//----------------------------------------------------------------Spooler::throw_distribution_error
-
-//void Spooler::throw_distribution_error( const string& debug_text )
-//{
-//    zschimmer::Xc x ( _demand_exclusiveness? "SCHEDULER-367" : "SCHEDULER-362", debug_text );
-//    
-//    _log->error( x.what() );
-//    z::throw_xc( x );
-//}
-
 //----------------------------------------------Spooler::abort_immediately_after_distribution_error
 
 void Spooler::abort_immediately_after_distribution_error( const string& debug_text )
 {
-    zschimmer::Xc x ( _demand_exclusiveness? "SCHEDULER-367" : "SCHEDULER-362", debug_text );
+    zschimmer::Xc x ( _cluster_configuration._demand_exclusiveness? "SCHEDULER-367" : "SCHEDULER-362", debug_text );
     
     _log->error( x.what() );
     send_error_email( x, _argc, _argv, _parameter_line, this );
@@ -2731,7 +2712,7 @@ void Spooler::run_check_ctrl_c()
                 if( _state != s_stopping )
                 {
                     _log->warn( message_string( "SCHEDULER-262", signal_text ) );       // "Abbruch-Signal (Ctrl-C) empfangen. Der Scheduler wird beendet.\n" );
-                    cmd_terminate( false, INT_MAX, cluster::Cluster::continue_exclusive_any );
+                    cmd_terminate( false, INT_MAX, cluster::continue_exclusive_any );
                 }
 
                 set_ctrl_c_handler( true );
@@ -2897,7 +2878,7 @@ void Spooler::cmd_terminate_after_error( const string& debug_function, const str
 {
     _log->error( message_string( "SCHEDULER-264", "in " + debug_function, debug_text ) );
 
-    cmd_terminate( false, INT_MAX, cluster::Cluster::continue_exclusive_any );  
+    cmd_terminate( false, INT_MAX, cluster::continue_exclusive_any );  
 }
 
 //---------------------------------------------------------------------------Spooler::cmd_terminate
@@ -2911,7 +2892,8 @@ void Spooler::cmd_terminate( bool restart, int timeout, const string& continue_e
     _terminate_all_schedulers_with_restart = restart;
     _termination_gmtimeout_at = timeout < 999999999? ::time(NULL) + timeout : time_max;
     _terminate_all_schedulers = terminate_all_schedulers;
-    _terminate_continue_exclusive_operation = continue_exclusive_operation;
+    _terminate_continue_exclusive_operation = continue_exclusive_operation == "non_backup"? cluster::continue_exclusive_non_backup
+                                                                                          : continue_exclusive_operation;
 
     signal( "terminate" );
 }
@@ -3610,7 +3592,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
 
         Z_LOG2( "scheduler", "Scheduler " VER_PRODUCTVERSION_STR "\n" );
 
-        sos::scheduler::time::Time::set_current_difference_to_utc();
+        sos::scheduler::time::Time::set_current_difference_to_utc( ::time(NULL) );
 
         if( is_scheduler_client )
         {

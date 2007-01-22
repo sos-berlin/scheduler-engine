@@ -286,7 +286,7 @@ struct Spooler : Object,
     void                        cmd_continue                ();
     void                        cmd_terminate_after_error   ( const string& function_name, const string& message_text );
     void                        cmd_terminate               ( bool restart = false, int timeout = INT_MAX, 
-                                                              const string& continue_exclusive_operation = cluster::Cluster::continue_exclusive_non_backup, 
+                                                              const string& continue_exclusive_operation = cluster::continue_exclusive_non_backup, 
                                                               bool terminate_all_schedulers = false );
     void                        cmd_terminate_and_restart   ( int timeout = INT_MAX )           { return cmd_terminate( true, timeout ); }
     void                        cmd_let_run_terminate_and_restart();
@@ -333,17 +333,12 @@ struct Spooler : Object,
     bool                        run_continue                ( const Time& now );
 
     // Cluster
-    void                        start_cluster   ();
-  //void                        wait_for_cluster();
-    void                        check_cluster   ();
-    bool                        ok                          ( Transaction* = NULL );
-    bool                        check                       ( const string& debug_function, const string& debug_text = "", Transaction* = NULL );
+    void                        start_cluster               ();
+    void                        check_cluster               ();
+    bool                        assert_is_still_active      ( const string& debug_function, const string& debug_text = "", Transaction* = NULL );
     bool                        check_is_active             ( Transaction* = NULL );
-    void                        assert_is_activated            ( const string& function );
+    void                        assert_is_activated         ( const string& function );
 
-  //void                        throw_distribution_error    ( const string& function );
-
-  //bool                        do_a_heart_beat             ();
     bool                        is_active                   ();
     bool                        has_exclusiveness           ();
     bool                        are_orders_distributed      ();
@@ -351,8 +346,6 @@ struct Spooler : Object,
     void                        assert_has_exclusiveness    ( const string& message_text );
     string                      cluster_member_id         ();
 
-
-  //string                      session_id                  ()                                  { return _session_id; }
 
     void                        wait                        ();
     void                        simple_wait_step            ();
@@ -579,8 +572,9 @@ struct Spooler : Object,
     bool                       _suspend_after_resume;
     bool                       _should_suspend_machine;
 
-    Time                       _next_daylight_saving_transition_time;
-    string                     _next_daylight_saving_transition_name;
+    ptr<time::Daylight_saving_time_detector> _daylight_saving_time_detector;
+    //Time                       _next_daylight_saving_transition_time;
+    //string                     _next_daylight_saving_transition_name;
     Event                      _waitable_timer;
     bool                       _is_waitable_timer_set;
 
@@ -588,14 +582,10 @@ struct Spooler : Object,
 
     ptr<Com_variable_set>      _environment;
     Variable_set_map           _variable_set_map;           // _variable_set_map[""] = _environment; für <params>, Com_variable_set::set_dom()
-    bool                       _is_backup_member;
-    int                        _backup_precedence;
-    bool                       _is_backup_precedence_set;
-    bool                       _suppress_watchdog_thread;
-    bool                       _demand_exclusiveness;
-    bool                       _are_orders_distributed;
+    
+    ptr<cluster::Cluster_subsystem_interface>      _cluster;
+    cluster::Configuration     _cluster_configuration;
     bool                       _is_activated;
-    ptr<cluster::Cluster>      _cluster;
     bool                       _assert_is_active;
     int                        _is_in_check_is_active;
     bool                       _has_windows_console;

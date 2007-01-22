@@ -38,8 +38,8 @@ struct Time
 
 
     static Time                 time_with_now               ( const string& );              // Datum mit Zeit oder "now+zeit"
-    static void             set_current_difference_to_utc   ();
-    static int                  current_difference_to_utc   ()                              { set_current_difference_to_utc(); return static_current_difference_to_utc; }
+    static void             set_current_difference_to_utc   ( time_t now );
+    static int                  current_difference_to_utc   ()                              { return static_current_difference_to_utc; }
 
 
                                 Time                        ( double t = 0.0 )              { set(t); }
@@ -49,8 +49,8 @@ struct Time
                                 Time                        ( const string& t )             { set(t); }
                                 Time                        ( const char* t   )             { set(t); }
                                 Time                        ( const Sos_optional_date_time& dt ) { *this = dt; }
-    Z_WINDOWS_ONLY(             Time                        ( const FILETIME& t )           { set(t); } )
-    Z_WINDOWS_ONLY(             Time                        ( const SYSTEMTIME& t )         { set(t); } )
+  //Z_WINDOWS_ONLY(             Time                        ( const FILETIME& t )           { set(t); } )
+  //Z_WINDOWS_ONLY(             Time                        ( const SYSTEMTIME& t )         { set(t); } )
 
     void                        operator =                  ( double t )                    { set(t); }
     void                        operator =                  ( time_t t )                    { set((double)t); }
@@ -110,9 +110,9 @@ struct Time
     double                      as_double                   () const;
 
 #ifdef Z_WINDOWS
-    void                        set                         ( const FILETIME& ); 
-    void                        set                         ( const SYSTEMTIME& );
-    FILETIME                    filetime                    () const;
+    //void                        set                         ( const FILETIME& ); 
+    //void                        set                         ( const SYSTEMTIME& );
+    //FILETIME                    filetime                    () const;
 #endif
 
     void                        set_datetime                ( const string& );
@@ -153,6 +153,33 @@ void                            insert_into_message         ( Message_string*, i
 
 extern const Time               latter_day;
 
+//----------------------------------------------------------------------Daylight_saving_time_detector
+
+struct Daylight_saving_time_detector : Async_operation
+{
+                                Daylight_saving_time_detector ( Scheduler* );
+
+
+    // Async_operation
+    bool                        async_finished_             () const                                { return false; }
+    string                      async_state_text_           () const;
+    bool                        async_continue_             ( Continue_flags );
+
+    void                        set_alarm                   ( time_t now );
+    string                      obj_name                    () const                                { return "Daylight_saving_time_detector"; }
+
+  private:
+    Fill_zero                  _zero_;
+    bool                       _was_in_daylight_saving_time;
+    time_t                     _next_transition_time;
+    string                     _next_transition_name;
+    Scheduler*                 _scheduler;
+    ptr<Prefix_log>            _log;
+};
+
+
+ptr<Daylight_saving_time_detector> new_daylight_saving_time_switch( Scheduler* scheduler )            { return Z_NEW( Daylight_saving_time_detector( scheduler ) ); }
+
 //-------------------------------------------------------------------------------------------Period
 
 struct Period
@@ -166,7 +193,7 @@ struct Period
 
     bool                        empty                       () const                                { return _begin == Time::never; }
     bool                        has_start                   () const                                { return is_single_start() || repeat() != Time::never; }
-    Time                        next_try                    ( Time );
+    Time                        next_try                    ( const Time& );
     Period                      operator +                  ( const Time& t ) const                 { Period p = *this; p._begin += t; p._end += t; return p; }
     friend Period               operator +                  ( const Time& t, const Period& p )      { return p+t; }
 
@@ -176,8 +203,8 @@ struct Period
 
     bool                        operator <                  ( const Period& t ) const               { return _begin < t._begin; }  //für set<>
     bool                        operator >                  ( const Period& t ) const               { return _begin > t._begin; }  //für set<>
-    bool                        is_in_time                  ( Time t )                              { return t >= _begin && t < _end; }
-    bool                        is_comming                  ( Time time_of_day, With_single_start single_start ) const;
+    bool                        is_in_time                  ( const Time& t )                       { return t >= _begin && t < _end; }
+    bool                        is_comming                  ( const Time& time_of_day, With_single_start single_start ) const;
 
     Time                        begin                       () const                                { return _begin; }
     Time                        end                         () const                                { return _end; }
@@ -222,9 +249,9 @@ struct Day
 
                                 operator bool               () const                                { return !_period_set.empty(); }
 
-    bool                        has_time                    ( Time time_of_day );
-    Period                      next_period                 ( Time time_of_day, With_single_start single_start ) const { return _period_set.empty()? Period(): next_period_(time_of_day,single_start); }
-    Period                      next_period_                ( Time time_of_day, With_single_start single_start ) const;
+    bool                        has_time                    ( const Time& time_of_day );
+    Period                      next_period                 ( const Time& time_of_day, With_single_start single_start ) const { return _period_set.empty()? Period(): next_period_(time_of_day,single_start); }
+    Period                      next_period_                ( const Time& time_of_day, With_single_start single_start ) const;
     void                        add                         ( const Period& p )                     { _period_set.insert( p ); }       
 
     void                        print                       ( ostream& ) const;
@@ -268,7 +295,7 @@ struct Weekday_set : Day_set
     explicit                    Weekday_set                 ( const xml::Element_ptr& e )           : Day_set( 0, 6, e ) {}
 
     void                        fill_with_default           ( const Day& );
-    Period                      next_period                 ( Time, With_single_start single_start );
+    Period                      next_period                 ( const Time&, With_single_start single_start );
 
     void                        print                       ( ostream& s ) const                    { s << "Weekday_set("; Day_set::print(s); s << ")"; }
     friend ostream&             operator <<                 ( ostream& s, const Weekday_set& o )    { o.print(s); return s; }
@@ -285,7 +312,7 @@ struct Monthday_set : Day_set
 
     bool                        is_filled                   () const                                { return Day_set::is_filled() | 
                                                                                                             _month_weekdays._is_filled | _reverse_month_weekdays._is_filled ; }
-    Period                      next_period                 ( Time, With_single_start single_start );
+    Period                      next_period                 ( const Time&, With_single_start single_start );
 
     void                        print                       ( ostream& s ) const                    { s << "Monthday_set("; Day_set::print(s); s << ")"; }
     friend ostream&             operator <<                 ( ostream& s, const Monthday_set& o )   { o.print(s); return s; }
@@ -322,7 +349,7 @@ struct Ultimo_set : Day_set
                                 Ultimo_set                  ()                                      : Day_set( 0, 30 ) {}
     explicit                    Ultimo_set                  ( const xml::Element_ptr& e )           : Day_set( 0, 30, e ) {}
 
-    Period                      next_period                 ( Time, With_single_start single_start );
+    Period                      next_period                 ( const Time&, With_single_start single_start );
 
     void                        print                       ( ostream& s ) const                    { s << "Ultimo_set("; Day_set::print(s); s << ")"; }
     friend ostream&             operator <<                 ( ostream& s, const Ultimo_set& o )     { o.print(s); return s; }
@@ -362,7 +389,7 @@ struct Date
 
 struct Date_set
 {
-    Period                      next_period                 ( Time, With_single_start single_start );
+    Period                      next_period                 ( const Time&, With_single_start single_start );
 
     bool                        is_filled                   () const                                { return !_date_set.empty(); }
     void                        print                       ( ostream& ) const;
@@ -375,7 +402,7 @@ struct Date_set
 
 struct At_set
 {
-    Period                      next_period                 ( Time, With_single_start single_start );
+    Period                      next_period                 ( const Time&, With_single_start single_start );
 
     bool                        is_filled                   () const                                { return !_at_set.empty(); }
     void                        add                         ( const Time& at )                      { _at_set.insert( at ); }
@@ -435,16 +462,16 @@ struct Run_time : idispatch_implementation< Run_time, spooler_com::Irun_time >,
     void                    set_once                        ( bool b = true )                       { _once = b; }
 
     Period                      first_period                ()                                      { return first_period( Time::now() ); }
-    Period                      first_period                ( Time );
+    Period                      first_period                ( const Time& );
 
     Period                      next_period                 ( With_single_start single_start = wss_next_period )      { return next_period( Time::now(), single_start ); }
-    Period                      next_period                 ( Time, With_single_start single_start = wss_next_period );
+    Period                      next_period                 ( const Time&, With_single_start single_start = wss_next_period );
     Period                      call_function               ( const Time& beginning_time );
 
-    bool                        period_follows              ( Time time )                           { return next_period(time).begin() != Time::never; }
+    bool                        period_follows              ( const Time& time )                    { return next_period(time).begin() != Time::never; }
 
-    Time                        next_single_start           ( Time time )                           { return next_period(time,wss_next_single_start).begin(); }
-    Time                        next_any_start              ( Time time )                           { return next_period(time,wss_next_any_start).begin(); }
+    Time                        next_single_start           ( const Time& time )                    { return next_period(time,wss_next_single_start).begin(); }
+    Time                        next_any_start              ( const Time& time )                    { return next_period(time,wss_next_any_start).begin(); }
 
     void                        print                       ( ostream& ) const;
     friend ostream&             operator <<                 ( ostream& s, const Run_time& o )       { o.print(s); return s; }
@@ -452,7 +479,7 @@ struct Run_time : idispatch_implementation< Run_time, spooler_com::Irun_time >,
 
 
   private:
-    Time                        next_time                   ( Time );
+    Time                        next_time                   ( const Time& );
 
 
     Fill_zero                  _zero_;

@@ -156,7 +156,11 @@ function update_jobs_frame()
     modify_response( _response );
     
     if( _first_call  &&  _response.selectSingleNode( "spooler/answer/state" ).getAttribute( "state" ) == "waiting_for_activation" )  
+    {
         _show_card = "cluster";
+        if( window.parent.details_frame._details_frame_loaded )  window.parent.details_frame.hide();
+    }
+
         
     var scheduler_id = _response.selectSingleNode( "spooler/answer/state" ).getAttribute( "id" );
     document.title = "Scheduler " + ( scheduler_id? " id=" + scheduler_id : "" );

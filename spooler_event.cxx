@@ -302,6 +302,8 @@ int Scheduler_event::send_mail( const Mail_defaults& mail_defaults )
         _spooler->log()->warn( message_string( "SCHEDULER-302", x ) );
     }
 
+    _spooler->assert_is_still_active( __FUNCTION__ );
+
     return 0; //?
 }
 

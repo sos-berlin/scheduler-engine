@@ -2,7 +2,6 @@
 
 #include "spooler.h"
 #include "../kram/msec.h"
-//#include "../zschimmer/not_in_recursion.h"
 #include "../zschimmer/threads.h"
 
 #ifdef Z_WINDOWS
@@ -15,7 +14,7 @@ namespace sos {
 namespace scheduler {
 namespace cluster {
 
-//-------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------const
 
 const int                       heart_beat_period                       = Z_NDEBUG_DEBUG( 60, 20 );
 const int                       active_heart_beat_minimum_check_period  = heart_beat_period / 2;
@@ -25,18 +24,184 @@ const int                       active_heart_beat_minimum_check_period  = heart_
 const int                       backup_startup_delay                    = 60;                           // Nach eigenem Start des Backup-Schedulers auf Start des non-backup-Schedulers warten
 const int                       first_dead_orders_check_period          = 60;
 
-const int                       Cluster::default_non_backup_precedence  = 0;
-const int                       Cluster::default_backup_precedence      = 1;
-const string                    Cluster::continue_exclusive_non_backup  = "";               // Das ist der Default
-const string                    Cluster::continue_exclusive_this        = "this";
-const string                    Cluster::continue_exclusive_any         = "any";            // In der Datenbank, Feld http_url, wird das zu ""
-const int                       Cluster::default_heart_beat_timeout     = Z_NDEBUG_DEBUG( 60, 15 );
-const int                       Cluster::default_heart_beat_own_timeout = Z_NDEBUG_DEBUG( 55, 12 );
-const int                       Cluster::default_heart_beat_warn_timeout= Z_NDEBUG_DEBUG( 10,  3 );
+const int                       default_non_backup_precedence           = 0;
+const int                       default_backup_precedence               = 1;
+const string                    continue_exclusive_non_backup           = "";               // Das ist der Default
+const string                    continue_exclusive_this                 = "this";
+const string                    continue_exclusive_any                  = "any";            // In der Datenbank, Feld http_url, wird das zu ""
+const int                       default_heart_beat_timeout              = Z_NDEBUG_DEBUG( 60, 15 );
+const int                       default_heart_beat_own_timeout          = Z_NDEBUG_DEBUG( 55, 12 );
+const int                       default_heart_beat_warn_timeout         = Z_NDEBUG_DEBUG( 10,  3 );
+
 
 //const time_t                    accepted_clock_difference       = Z_NDEBUG_DEBUG(  5,  2 );     // Die Uhren sollten noch besser übereinstimmen! ntp verwenden!
 //const time_t                    warned_clock_difference         = Z_NDEBUG_DEBUG(  1,  1 ); 
 //const int                       trauerfrist                             = 12*3600;                      // Trauerzeit, nach der Mitgliedssätze gelöscht werden
+
+//-------------------------------------------------------------------------------------------------
+
+struct Cluster_operation;
+struct Cluster_member;
+struct Heart_beat_watchdog_thread;
+struct Heart_beat;
+struct Exclusive_scheduler_watchdog;
+struct Active_schedulers_watchdog;
+
+//------------------------------------------------------------------------------------------Cluster
+
+struct Cluster : Cluster_subsystem_interface
+{
+                                Cluster                     ( Scheduler* );
+                               ~Cluster                     ();
+
+
+    // Subsystem
+
+    void                        close                       ();
+    virtual bool            set_subsystem_state             ( Subsystem_state )                     { z::throw_xc( __FUNCTION__ ); }
+    string                      obj_name                    () const;
+
+
+    // Cluster_subsystem_interface
+
+    void                    set_configuration               ( const Configuration& );
+    bool                        start                       ();
+
+    void                    set_continue_exclusive_operation( const string& http_url );             // Oder continue_exclusive_non_backup etc.
+    string                      my_member_id                ()                                      { return _cluster_member_id; }
+    int                         backup_precedence           ()                                      { return _backup_precedence; }
+    bool                        check_is_active             ( Transaction* );
+    bool                        do_a_heart_beat_when_needed ( const string& debug_text );
+    bool                        has_exclusiveness           ()                                      { return _has_exclusiveness; }
+    bool                     is_active                      ()                                      { return _is_active; }
+    bool                     is_member_allowed_to_start     ();
+    bool                     is_backup                      ()                                      { return _is_backup_member; }
+    bool                     is_exclusiveness_lost          ()                                      { return _is_exclusiveness_lost; }
+    bool                        set_command_for_all_schedulers_but_me( Transaction*, const string& command );
+    bool                        set_command_for_scheduler            ( Transaction*, const string& command, const string& member_id );
+    bool                        delete_dead_scheduler_record( const string& cluster_member_id );
+    void                        show_active_schedulers      ( Transaction*, bool exclusive_only );
+
+    string                      http_url_of_member_id       ( const string& cluster_member_id );
+    void                        check                       ();
+
+    xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
+
+
+    // Nur Cluster
+
+    // Für Cluster_operation:
+    bool                        async_finished_             () const                                { return false; }
+    string                      async_state_text_           () const;
+    bool                        async_continue_             ( Async_operation::Continue_flags );
+    void                        async_wake                  ();
+
+
+    void                        assert_not_started          ( const string& debug_message );
+
+    string                      exclusive_member_id         ();
+    string                      empty_member_id             ();
+    Cluster_member*             cluster_member_or_null      ( const string& cluster_member_id );
+
+    bool                        check_schedulers_heart_beat ();
+    bool                        do_a_heart_beat             ();
+
+    void                        show_exclusive_scheduler    ( Transaction* ta )                     { show_active_schedulers( ta, true ); }
+
+    xml::Document_ptr           my_member_dom_document      ();
+    xml::Element_ptr            my_member_dom_element       ( const xml::Document_ptr& );
+
+  private:
+    void                        set_my_member_id            ( const string& );
+    void                        create_table_when_needed    ();
+    void                        delete_old_member_records   ( Transaction* ta );
+    void                        start_operations            ();
+    void                        close_operations            ();
+
+    void                        check_empty_member_record   ();
+    void                        insert_member_record        ();
+
+    void                        assert_database_integrity   ( const string& message_text );
+    bool                        mark_as_exclusive           ();
+    void                        calculate_next_heart_beat   ( time_t now );
+    bool                        check_my_member_record      ( Transaction*, bool force_error = false );
+    bool                        check_heart_beat_is_in_time ( time_t expected_next_heart_beat );
+    void                        lock_member_records         ( Transaction*, const string& member1_id, const string& member2_id );
+  //bool                        check_database_integrity    ();
+    bool                        heartbeat_member_record     ();
+    bool                        set_command_for_all_schedulers_but_me( Transaction*, const string& command, const string& where_condition );
+    void                        read_and_execute_command    ();
+    void                        execute_command             ( const string& command );
+    void                        make_cluster_member_id      ();
+    Cluster_member*             exclusive_scheduler         ();                                     // NULL, wenn _exclusive_scheduler->is_empty_member()
+    Cluster_member*             empty_member_record         ();
+    void                        recommend_next_deadline_check_time( time_t );
+
+    friend struct               Cluster_member;
+    friend struct               Heart_beat_watchdog_thread;
+    friend struct               Heart_beat;
+    friend struct               Exclusive_scheduler_watchdog;
+    friend struct               Active_schedulers_watchdog;
+
+
+
+    Fill_zero                  _zero_;
+    string                     _cluster_member_id;
+
+    bool                       _is_active;
+    bool                       _has_exclusiveness;
+    bool                       _is_backup_precedence_set;
+    string                     _continue_exclusive_operation;
+
+    time_t                     _next_heart_beat;
+    volatile time_t            _db_last_heart_beat;         // Heart_beat_watchdog_thread liest das
+    time_t                     _db_next_heart_beat;
+    time_t                     _late_heart_beat;
+    time_t                     _recommended_next_deadline_check_time;
+
+    bool                       _is_backup_member;
+    int                        _backup_precedence;
+    bool                       _demand_exclusiveness;
+    bool                       _are_orders_distributed;
+    bool                       _suppress_watchdog_thread;
+    int                        _heart_beat_timeout;         // Großzügigere Frist für den Herzschlag, nach der der Scheduler für tot erklärt wird
+    int                        _heart_beat_own_timeout;     // < _heart_beat_timeout      Zur eigenen Prüfung, etwas kürzer als _heart_beat_timeout
+    int                        _heart_beat_warn_timeout;    // < _heart_beat_own_timeout  Nach dieser Zeit ohne Herzschlag gibt's eine Warnung
+    int                        _active_heart_beat_check_period;
+
+    bool                       _is_exclusiveness_lost;
+    bool                       _is_in_error;
+    bool                       _was_start_ok;
+    bool                       _closed;
+
+    ptr<Heart_beat_watchdog_thread>   _heart_beat_watchdog_thread;
+    ptr<Heart_beat>                   _heart_beat;
+    ptr<Exclusive_scheduler_watchdog> _exclusive_scheduler_watchdog;
+    ptr<Active_schedulers_watchdog>   _active_schedulers_watchdog;
+
+    typedef stdext::hash_map< string, ptr<Cluster_member> >    Scheduler_map;
+    Scheduler_map              _scheduler_map;
+
+    ptr<Cluster_member>        _exclusive_scheduler;        // Kein Scheduler ist exklusiv, wenn _exclusive_scheduler->is_empty_member()
+    ptr<Cluster_member>        _my_scheduler;
+    ptr<Cluster_operation>     _cluster_operation;          // Async_operation
+};
+
+//--------------------------------------------------------------------------------Cluster_operation
+
+struct Cluster_operation : Async_operation
+{
+                                Cluster_operation           ( Cluster* cluster )                    : _cluster(cluster) {}
+
+
+    // Async_operation
+    bool                        async_finished_             () const                                { return false; }
+    string                      async_state_text_           () const                                { return _cluster->async_state_text_(); }
+    bool                        async_continue_             ( Continue_flags fl )                   { return _cluster->async_continue_( fl ); }
+
+  private:
+    Cluster*                   _cluster;
+};
 
 //-------------------------------------------------------------------------------------------------
 
@@ -130,7 +295,11 @@ struct Heart_beat : Async_operation, Scheduler_object, Has_alarm
     bool                        async_finished_             () const                                { return false; }
     string                      async_state_text_           () const;
     bool                        async_continue_             ( Continue_flags );
+
+
+    // Scheduler_object
     string                      obj_name                    () const                                { return Scheduler_object::obj_name(); }
+
 
     void                        set_alarm                   ();
 
@@ -375,7 +544,7 @@ bool Cluster_member::check_heart_beat( time_t now_before_select, const Record& r
 
                 time_t deadline = is_in_database_reconnect_tolerance? database_reconnect_deadline
                                                                     : standard_deadline;
-                bool   is_dead  = _is_active  &&  !is_in_database_reconnect_tolerance  &&  deadline < now_before_select;
+                bool   is_dead  = !is_in_database_reconnect_tolerance  &&  deadline < now_before_select;
 
                 if( was_alive )
                 {
@@ -403,19 +572,20 @@ bool Cluster_member::check_heart_beat( time_t now_before_select, const Record& r
 
                 if( is_dead ) 
                 {
-                    if( _is_active )  _is_dead = true;      // Inaktive Scheduler deaktivieren wir nicht und erklären sie auch nicht für tot
+                    _is_dead = true;
+                    //if( _is_active )  _is_dead = true;      // Inaktive Scheduler deaktivieren wir nicht und erklären sie auch nicht für tot
                     result = false;
                 }
             }
             else
             {
-#               ifdef Z_DEBUG
-                    if( !_is_dead  &&  _is_active  &&  _heart_beat_count > 0  &&  !its_me() )
-                    {
-                        _log->warn( S() <<  "_last_heart_beat_detected=" << my_string_from_time_t( _last_heart_beat_detected ) <<
-                                            "  (" << ( now_before_select - _last_heart_beat_detected ) << "s)" );
-                    }
-#               endif
+//#               ifdef Z_DEBUG
+//                    if( !_is_dead  &&  _is_active  &&  _heart_beat_count > 0  &&  !its_me() )
+//                    {
+//                        _log->warn( S() <<  "_last_heart_beat_detected=" << my_string_from_time_t( _last_heart_beat_detected ) <<
+//                                            "  (" << ( now_before_select - _last_heart_beat_detected ) << "s)" );
+//                    }
+//#               endif
 
                 time_t now = ::time(NULL);
                 if( warn_deadline > now + 2 )  _cluster->recommend_next_deadline_check_time( warn_deadline + 1 );
@@ -512,7 +682,7 @@ void Cluster_member::deactivate_and_release_orders_after_death()
 
     if( _next_dead_orders_check_time <= now )
     {
-        if( !_is_db_dead  &&  !_cluster->_is_backup )   // Nur der primäre Scheduler darf dead=1 setzen und diese Sätze später (oder sofort) löschen
+        if( !_is_db_dead  &&  !_cluster->_is_backup_member )   // Nur der primäre Scheduler darf dead=1 setzen und diese Sätze später (oder sofort) löschen
         {
             _log->warn( message_string( "SCHEDULER-836" ) );        // "Deactivating dead Scheduler"
             mark_as_inactive( mai_mark_inactive_record_as_dead );   // ruft free_occupied_orders()
@@ -532,7 +702,7 @@ void Cluster_member::deactivate_and_release_orders_after_death()
 
 bool Cluster_member::mark_as_inactive( Mark_as_inactive_option option )
 {
-    bool delete_empty_member_record = its_me()  &&  _cluster->_continue_exclusive_operation == Cluster::continue_exclusive_non_backup;
+    bool delete_empty_member_record = its_me()  &&  _cluster->_continue_exclusive_operation == continue_exclusive_non_backup;
 
     assert( !delete_empty_member_record  ||  option == mai_delete_my_inactive_record );
     assert( option != mai_delete_my_inactive_record     ||   its_me() );
@@ -598,7 +768,7 @@ bool Cluster_member::mark_as_inactive( Mark_as_inactive_option option )
                 if( its_me() )
                 {
                     string http_url = _cluster->_continue_exclusive_operation;
-                    if( http_url == Cluster::continue_exclusive_any )  http_url = "";
+                    if( http_url == continue_exclusive_any )  http_url = "";
                     update[ "http_url" ] = http_url;
                 }
 
@@ -858,7 +1028,7 @@ bool Heart_beat::async_continue_( Continue_flags )
 
     if( !db()->opened() )
     {
-        _cluster->async_wake();    // Datenbank ist geschlossen worden
+        _cluster->async_wake();       // Datenbank ist geschlossen worden
         return true;
     }
 
@@ -1033,7 +1203,7 @@ void Exclusive_scheduler_watchdog::try_to_become_exclusive()
 
     if( exclusive_scheduler )  _wait_for_backup_scheduler_start_until = 0;
     else
-    if( _is_starting  &&  _cluster->_is_backup  &&  _cluster->is_member_allowed_to_start() )
+    if( _is_starting  &&  _cluster->_is_backup_member  &&  _cluster->is_member_allowed_to_start() )
     {
         _wait_for_backup_scheduler_start_until = ::time(NULL) + backup_startup_delay;
         _log->info( message_string( "SCHEDULER-831", backup_startup_delay ) );
@@ -1293,16 +1463,66 @@ void Active_schedulers_watchdog::set_alarm()
     set_async_next_gmtime( t );
 }
 
+//---------------------------------------------------------------------Configuration::Configuration
+
+Configuration::Configuration()
+: 
+    _zero_(this+1),
+    _backup_precedence      ( -INT_MAX ),
+    _heart_beat_timeout     ( default_heart_beat_timeout ),
+    _heart_beat_own_timeout ( default_heart_beat_own_timeout ),
+    _heart_beat_warn_timeout( default_heart_beat_warn_timeout )
+{
+}
+
+//-------------------------------------------------------------------------------------------------
+
+static int get_time_or_never( const xml::Element_ptr& e, const string& attribute_name, int deflt )
+{
+    int result;
+
+    string v = e.getAttribute( attribute_name );
+
+    if( v == "" )  result = deflt;
+    else
+    if( v == "never" )  result = INT_MAX;
+    else
+        result = e.int_getAttribute( attribute_name );
+
+    return result;
+}
+
+//---------------------------------------------------------------------------Configuration::set_dom
+    
+void Configuration::set_dom( const xml::Element_ptr& cluster_element )
+{
+    _heart_beat_timeout     = cluster_element.int_getAttribute  ( "heart_beat_timeout"     , _heart_beat_timeout      );
+    _heart_beat_own_timeout = get_time_or_never( cluster_element, "heart_beat_own_timeout" , _heart_beat_own_timeout  );
+    _heart_beat_warn_timeout= cluster_element.int_getAttribute  ( "heart_beat_warn_timeout", _heart_beat_warn_timeout );
+}
+
+//----------------------------------------------------------------------------Configuration::finish
+    
+void Configuration::finish()
+{
+    if( _backup_precedence == -INT_MAX )  _backup_precedence = _is_backup_member? default_backup_precedence : default_non_backup_precedence;
+}
+
+//----------------------------------------------------------------------------new_cluster_subsystem
+
+ptr<Cluster_subsystem_interface> new_cluster_subsystem( Scheduler* scheduler )
+{
+    ptr<Cluster> cluster = Z_NEW( Cluster( scheduler ) );
+    return +cluster;
+}
+
 //---------------------------------------------------------------------------------Cluster::Cluster
 
 Cluster::Cluster( Spooler* spooler )
 :
-    Scheduler_object( spooler, this, type_cluster_member ),
+    Cluster_subsystem_interface( spooler, type_cluster_member ),
     _zero_(this+1),
-    _continue_exclusive_operation( continue_exclusive_any ),
-    _heart_beat_timeout     ( default_heart_beat_timeout ),
-    _heart_beat_own_timeout ( default_heart_beat_own_timeout ),
-    _heart_beat_warn_timeout( default_heart_beat_warn_timeout )
+    _continue_exclusive_operation( continue_exclusive_any )
 {
 }
 
@@ -1328,7 +1548,6 @@ void Cluster::close()
         if( _heart_beat_watchdog_thread )  _heart_beat_watchdog_thread->kill();
 
         close_operations();
-        set_async_manager( NULL );
 
         if( my_member_id() != "" )
         try
@@ -1363,9 +1582,9 @@ void Cluster::close()
 
 //----------------------------------------------------------------------Cluster::assert_not_started
 
-void Cluster::assert_not_started()
+void Cluster::assert_not_started( const string& debug_message )
 {
-    if( _was_start_ok )  z::throw_xc( __FUNCTION__ );
+    if( _was_start_ok )  z::throw_xc( __FUNCTION__, debug_message );
 }
 
 //---------------------------------------------------------------Cluster::calculate_next_heart_beat
@@ -1373,6 +1592,25 @@ void Cluster::assert_not_started()
 void Cluster::calculate_next_heart_beat( time_t now )
 {
     _next_heart_beat = now + heart_beat_period;
+}
+
+//-----------------------------------------------------------------------Cluster::set_configuration
+
+void Cluster::set_configuration( const Configuration& c )
+{ 
+    assert_not_started( __FUNCTION__ ); 
+    
+    Configuration my_configuration = c; 
+    my_configuration.finish(); 
+
+    _is_backup_member             = my_configuration._is_backup_member;
+    _backup_precedence            = my_configuration._backup_precedence;
+    _demand_exclusiveness         = my_configuration._demand_exclusiveness;
+    _are_orders_distributed       = my_configuration._are_orders_distributed;
+    _suppress_watchdog_thread     = my_configuration._suppress_watchdog_thread;
+    _heart_beat_timeout           = my_configuration._heart_beat_timeout;
+    _heart_beat_own_timeout       = my_configuration._heart_beat_own_timeout;
+    _heart_beat_warn_timeout      = my_configuration._heart_beat_warn_timeout;
 }
 
 //-----------------------------------------------------------------------------------Cluster::start
@@ -1384,10 +1622,8 @@ bool Cluster::start()
     assert( !_heart_beat );
     assert( !_exclusive_scheduler_watchdog );
     assert( !_active_schedulers_watchdog );
-    assert( !_is_backup || _demand_exclusiveness );
+    assert( !_is_backup_member || _demand_exclusiveness );
 
-
-    if( !_is_backup_precedence_set )  _backup_precedence = _is_backup? default_backup_precedence : default_non_backup_precedence;
 
     if( !db()->opened() )  z::throw_xc( "SCHEDULER-357" ); 
     if( db()->lock_syntax() == db_lock_none )  z::throw_xc( "SCHEDULER-359", db()->dbms_name() );
@@ -1434,12 +1670,11 @@ bool Cluster::start()
 
     // Start
 
-    set_async_manager( _spooler->_connection_manager );
     start_operations();
 
     assert( _heart_beat );
 
-    if( !_spooler->_suppress_watchdog_thread  &&  _heart_beat_own_timeout != INT_MAX )
+    if( !_suppress_watchdog_thread  &&  _heart_beat_own_timeout != INT_MAX )
     {
         _heart_beat_watchdog_thread = Z_NEW( Heart_beat_watchdog_thread( this ) );
         _heart_beat_watchdog_thread->thread_start();
@@ -1448,7 +1683,7 @@ bool Cluster::start()
 
     if( !_is_active )
     {
-        if( _is_backup  &&  !is_member_allowed_to_start() )  _log->info( message_string( "SCHEDULER-832" ) );
+        if( _is_backup_member  &&  !is_member_allowed_to_start() )  _log->info( message_string( "SCHEDULER-832" ) );
         //else
         //if( _demand_exclusiveness  &&  !_has_exclusiveness )  _log->info( message_string(  ) );
     }
@@ -1488,6 +1723,12 @@ void Cluster::create_table_when_needed()
 
 void Cluster::start_operations()
 {
+    if( !_cluster_operation )
+    {
+        _cluster_operation = Z_NEW( Cluster_operation( this ) );
+        _cluster_operation->set_async_manager( _spooler->_connection_manager );
+    }
+
     if( !_heart_beat )
     {
         _heart_beat = Z_NEW( Heart_beat( this ) );
@@ -1520,6 +1761,12 @@ void Cluster::start_operations()
 
 void Cluster::close_operations()
 {
+    if( _cluster_operation )
+    {
+        _cluster_operation->set_async_manager( NULL );
+        _cluster_operation = NULL;
+    }
+
     if( _heart_beat ) 
     {
         _heart_beat->set_async_manager( NULL );
@@ -1603,7 +1850,7 @@ void Cluster::close_operations()
 //
 //-------------------------------------------------------------------------Cluster::async_continue_
 
-bool Cluster::async_continue_( Continue_flags )
+bool Cluster::async_continue_( Async_operation::Continue_flags )
 {
     Z_LOGI2( "scheduler.cluster", __FUNCTION__ << "\n" );
 
@@ -1624,7 +1871,14 @@ bool Cluster::async_continue_( Continue_flags )
     }
 
     return true;
- }
+}
+
+//-------------------------------------------------------------------------------Cluster::async_wake
+
+void Cluster::async_wake()
+{ 
+    if( _cluster_operation )  _cluster_operation->async_wake(); 
+}
 
 //-------------------------------------------------------------Cluster::check_heart_beat_is_in_time
 
@@ -2222,7 +2476,7 @@ void Cluster::check_empty_member_record()
                 //}
             }
             else
-            if( !_is_backup )
+            if( !_is_backup_member )
             {
                 Any_file result_set = ta.open_commitable_result_set
                 (
@@ -2320,6 +2574,13 @@ string Cluster::async_state_text_() const
     }
 
     return result;
+}
+
+//-----------------------------------------------------------------------------------Cluster::check
+
+void Cluster::check()
+{
+    if( _cluster_operation )  _cluster_operation->async_check_exception( "Error in cluster operation" );
 }
 
 //--------------------------------------------Cluster::set_command_for_all_active_schedulers_but_me
@@ -2538,7 +2799,7 @@ bool Cluster::is_member_allowed_to_start()
         //Noch nicht realisiert:  result = empty_record->_http_url == ""  ||  empty_record->_http_url == _spooler->http_url();
     }
     else
-    if( _is_backup )
+    if( _is_backup_member )
     {
         result = false;
     }
@@ -2616,32 +2877,6 @@ void Cluster::set_continue_exclusive_operation( const string& http_url_ )
     _continue_exclusive_operation = http_url;
 }
 
-//-------------------------------------------------------------------------------------------------
-
-static int get_time_or_never( const xml::Element_ptr& e, const string& attribute_name, int deflt )
-{
-    int result;
-
-    string v = e.getAttribute( attribute_name );
-
-    if( v == "" )  result = deflt;
-    else
-    if( v == "never" )  result = INT_MAX;
-    else
-        result = e.int_getAttribute( attribute_name );
-
-    return result;
-}
-
-//---------------------------------------------------------------------------------Cluster::set_dom
-
-void Cluster::set_dom( const xml::Element_ptr& cluster_element )
-{
-    set_heart_beat_timeout     ( cluster_element.int_getAttribute  ( "heart_beat_timeout"     , default_heart_beat_timeout      ) );
-    set_heart_beat_own_timeout ( get_time_or_never( cluster_element, "heart_beat_own_timeout" , default_heart_beat_own_timeout  ) );
-    set_heart_beat_warn_timeout( cluster_element.int_getAttribute  ( "heart_beat_warn_timeout", default_heart_beat_warn_timeout ) );
-}
-
 //------------------------------------------------------------------Cluster::my_member_dom_document
 
 xml::Document_ptr Cluster::my_member_dom_document()
@@ -2688,7 +2923,7 @@ xml::Element_ptr Cluster::dom_element( const xml::Document_ptr& document, const 
     result.setAttribute( "cluster_member_id", my_member_id() );
     if( _is_active         )  result.setAttribute( "active"   , "yes" );
     if( _has_exclusiveness )  result.setAttribute( "exclusive", "yes" );
-    if( _is_backup         )  result.setAttribute( "backup"   , "yes" );
+    if( _is_backup_member  )  result.setAttribute( "backup"   , "yes" );
     result.setAttribute( "is_member_allowed_to_start", is_member_allowed_to_start()? "yes" : "no" );
 
 

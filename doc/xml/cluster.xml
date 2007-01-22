@@ -63,10 +63,9 @@
         </xml_attribute>
     </xml_attributes>
 
+    <behavior_with_xml_element element="base" complete="yes"/>
+
     <description>
-        <p>
-            Das Element wirkt nicht in einer mit <scheduler_element name="base"/> eingezogenen Konfiguration.
-        </p>
         <p>
             Das Elememt wirkt nur in Verbindung mit den Optionen
             <scheduler_option name="exclusive"/> oder

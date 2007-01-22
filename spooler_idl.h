@@ -316,7 +316,7 @@ struct Ispooler : IDispatch
     virtual HRESULT     get_Ini_path                    ( BSTR* )                               = 0;
     virtual HRESULT         Execute_xml                 ( BSTR, BSTR* )                         = 0;
     virtual HRESULT         Create_xslt_stylesheet      ( Ixslt_stylesheet** )                  = 0;
-
+    virtual HRESULT         Terminate               ( VARIANT*, VARIANT*,VARIANT*, VARIANT* )   = 0;
 };
 
 //-------------------------------------------------------------------------------Ispooler_proxy 

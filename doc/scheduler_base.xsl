@@ -275,10 +275,10 @@
                         </xsl:call-template>
                     </h2>
 
-                    <p class="indent">
+                    <p>
                         <xsl:apply-templates select="." mode="phrase">
                             <xsl:with-param name="element">
-                                <code><xsl:value-of select="parent::*/@name"/></code>
+                                <code>&lt;<xsl:value-of select="parent::*/@name"/>&gt;</code>
                             </xsl:with-param>
                         </xsl:apply-templates>
                         <xsl:apply-templates select="description"/>

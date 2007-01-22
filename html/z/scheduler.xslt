@@ -1561,52 +1561,46 @@
             <xsl:attribute name="onmouseout" >this.className=this.original_class_name </xsl:attribute>
 
             <td>
-                <xsl:element name="a">
-                    <xsl:attribute name="class">no_underline</xsl:attribute>
+                <xsl:choose>
+                    <xsl:when test="not( @dead='yes' ) and @cluster_member_id != ancestor::cluster/@cluster_member_id">
+                        <xsl:element name="a">
+                            <xsl:attribute name="class">no_underline</xsl:attribute>
 
-                    <xsl:if test="not( @dead='yes' ) and @cluster_member_id != ancestor::cluster/@cluster_member_id">
-                        <xsl:attribute name="style">
-                            <xsl:text>cursor: pointer;</xsl:text>
-                        </xsl:attribute>
+                            <xsl:attribute name="style">
+                                <xsl:text>cursor: pointer;</xsl:text>
+                            </xsl:attribute>
 
-                        <xsl:attribute name="href">
-                            <xsl:call-template name="scheduler_url">
-                                <xsl:with-param name="url" select="@http_url"/>
-                            </xsl:call-template>
-                        </xsl:attribute>
+                            <xsl:attribute name="href">
+                                <xsl:call-template name="scheduler_url">
+                                    <xsl:with-param name="url" select="@http_url"/>
+                                </xsl:call-template>
+                            </xsl:attribute>
 
-                        <xsl:attribute name="target">
-                            <xsl:call-template name="translate_target">
-                                <xsl:with-param name="target" select="@http_url"/>
-                            </xsl:call-template>
-                        </xsl:attribute>
-                    </xsl:if>
+                            <xsl:attribute name="target">
+                                <xsl:call-template name="translate_target">
+                                    <xsl:with-param name="target" select="@http_url"/>
+                                </xsl:call-template>
+                            </xsl:attribute>
 
-                    <xsl:element name="span">
-                        <xsl:attribute name="style">
-                            <xsl:choose>
-                                <xsl:when test="@dead='yes'">text-decoration: line-through;</xsl:when>
-                                <xsl:otherwise              >text-decoration: none; font-weight: bold;</xsl:otherwise>
-                            </xsl:choose>
-                        </xsl:attribute>
+                            <xsl:apply-templates mode="cluster_member_http_url" select="."/>
 
-                        <xsl:attribute name="title">
-                            <xsl:text>ID=</xsl:text>
-                            <xsl:value-of select="@cluster_member_id"/>
-                            <xsl:text>, &#10;</xsl:text>
-                            <xsl:value-of select="@version"/>
-                        </xsl:attribute>
+                        </xsl:element>
+                    </xsl:when>
+                    
+                    <xsl:otherwise>
+                        <xsl:element name="span">
+                            <xsl:attribute name="style">
+                                <xsl:choose>
+                                    <xsl:when test="@dead='yes'">text-decoration: line-through;</xsl:when>
+                                    <xsl:otherwise              >font-weight: bold;</xsl:otherwise>
+                                </xsl:choose>
+                            </xsl:attribute>
 
-                        <xsl:choose>
-                            <xsl:when test="@cluster_member_id=ancestor::cluster/@cluster_member_id">
-                                <xsl:text>This Scheduler</xsl:text>
-                            </xsl:when>
-                            <xsl:otherwise>
-                                <xsl:value-of select="@http_url"/>
-                            </xsl:otherwise>
-                        </xsl:choose>
-                    </xsl:element>
-                </xsl:element>
+                            <xsl:apply-templates mode="cluster_member_http_url" select="."/>
+
+                        </xsl:element>
+                    </xsl:otherwise>
+                </xsl:choose>
                 
                 <xsl:text> </xsl:text>
             </td>
@@ -1760,6 +1754,30 @@
             <td colspan="99" style="border-top: 1px solid #fefe00; line-height: 1px;">
             </td>
         </tr>
+
+    </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~cluster_member-->
+
+    <xsl:template mode="cluster_member_http_url" match="cluster_member">
+
+        <xsl:element name="span">
+            <xsl:attribute name="title">
+                <xsl:text>ID=</xsl:text>
+                <xsl:value-of select="@cluster_member_id"/>
+                <xsl:text>, &#10;</xsl:text>
+                <xsl:value-of select="@version"/>
+            </xsl:attribute>
+
+            <xsl:choose>
+                <xsl:when test="@cluster_member_id=ancestor::cluster/@cluster_member_id">
+                    <xsl:text>This Scheduler</xsl:text>
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:value-of select="@http_url"/>
+                </xsl:otherwise>
+            </xsl:choose>
+        </xsl:element>
 
     </xsl:template>
 

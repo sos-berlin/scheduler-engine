@@ -48,6 +48,7 @@ extern const Time                      latter_day                  = never_int;
        const Time                      Time::never                 = never_int;
 static const char                      last_day_name[]             = "never";
 static const char                      immediately_name[]          = "now";
+static const int64                     base_filetime               = 116444736000000000LL;
 
 const char* weekday_names[] = { "so"     , "mo"    , "di"      , "mi"       , "do"        , "fr"     , "sa"      ,
                                 "sonntag", "montag", "dienstag", "mittwoch" , "donnerstag", "freitag", "samstag" ,
@@ -55,7 +56,6 @@ const char* weekday_names[] = { "so"     , "mo"    , "di"      , "mi"       , "d
                                 "sunday" , "monday", "tuesday" , "wednesday", "thursday"  , "friday" , "saturday",
                                 NULL };
 
-int64 base_filetime = 116444736000000000LL;
 
 //-------------------------------------------------------------------------------------------------
 
@@ -73,12 +73,15 @@ void test_summertime( const string& date_time )
 
     while(1)
     {
-        Time::set_current_difference_to_utc();
+        
+        time_t now_t = ::time(NULL);
+        Time::set_current_difference_to_utc( now_t );
+
         Time now = Time::now();
         Time now_utc;
         now_utc.set_utc( double_from_gmtime() );
 
-        cerr << Time::current_difference_to_utc() << " " << ( ::time(NULL) - now.as_time_t()  ) << " "
+        cerr << Time::current_difference_to_utc() << " " << ( now_t - now.as_time_t()  ) << " "
              << now_utc.as_string( Time::without_ms ) << ", " 
              << now.as_string( Time::without_ms ) << "    " 
              << l.as_time_t() << " " << ( ( now.as_time_t() - l.as_time_t() + 100 ) / 3600 ) << "h " << l.as_string() << ", " 
@@ -114,6 +117,55 @@ void insert_into_message( Message_string* m, int index, const Time& time ) throw
 inline int weekday_of_day_number( int day_number )
 {
     return ( day_number + 4 ) % 7;
+}
+
+//-----------------------------------------------------------------------is_in_daylight_saving_time
+
+bool is_in_daylight_saving_time( time_t t )
+{
+    tm tm1;
+    tm1.tm_isdst = 0;
+    
+    localtime_r( &t, &tm1 );
+    
+    return tm1.tm_isdst != 0; 
+}
+
+//--------------------------------------------------------------Time::set_current_difference_to_utc
+
+void Time::set_current_difference_to_utc( time_t now )
+{
+    bool is_dst         = is_in_daylight_saving_time( now );
+    int  new_difference = timezone + ( is_dst? _dstbias : 0 );
+
+//    int  new_difference;
+//    bool is_dst;
+//
+//#   ifdef Z_WINDOWS
+//
+//        timeb  tm;
+//        ftime( &tm );
+//        new_difference = timezone + ( tm.dstflag? _dstbias : 0 );
+//        is_dst = tm.dstflag != 0;
+//
+//#   else
+//
+//        timeval  tv;
+//        tm       tm;
+//
+//        gettimeofday( &tv, NULL );
+//        localtime_r( &tv.tv_sec, &tm );
+//
+//        new_difference = timezone + ( tm.tm_isdst? _dstbias : 0 );
+//        is_dst = tm.tm_isdst != 0;
+//
+//#   endif
+
+    if( static_current_difference_to_utc != new_difference )
+    {
+        Z_LOG2( "scheduler", __FUNCTION__ << " " << new_difference << " tz=" << timezone << " is_dst=" << is_dst << " dstbias=" << _dstbias << " (old=" << static_current_difference_to_utc << ")\n" );
+        static_current_difference_to_utc = new_difference;
+    }
 }
 
 //--------------------------------------------------------------------------------------Time::round
@@ -222,95 +274,43 @@ void Time::set( double t )
 //----------------------------------------------------------------------------------------Time::set
 #ifdef Z_WINDOWS
 
-void Time::set( const SYSTEMTIME& systemtime )
-{
-    BOOL     ok;
-    FILETIME filetime;
-
-    ok = SystemTimeToFileTime( &systemtime, &filetime );
-    if( !ok )  z::throw_mswin( "SystemTimeToFileTime" );
-
-    set( filetime );
-}
+//void Time::set( const SYSTEMTIME& systemtime )
+//{
+//    set( windows::filetime_from_systemtime( systemtime ) );
+//}
 
 #endif
 //----------------------------------------------------------------------------------------Time::set
 #ifdef Z_WINDOWS
 
-void Time::set( const FILETIME& filetime )
-{
-    /*
-    BOOL       ok;
-    int64      base_filetime;
-    SYSTEMTIME base_systemtime;
-    memset( &base_systemtime, 0, sizeof base_systemtime );
-
-    base_systemtime.wYear  = 1970;
-    base_systemtime.wMonth = 1;
-    base_systemtime.wDay   = 1;
-
-    ok = SystemTimeToFileTime( &base_systemtime, (FILETIME*)&base_filetime );    // ==> 116444736000000000
-    if( !ok )  z::throw_mswin( "SystemTimeToFileTime" );
-    */
-
-    set( (double)( *(int64*)&filetime - base_filetime ) / 10000000.0 );
-}
+//void Time::set( const FILETIME& filetime )
+//{
+//    set( windows::double_time_t_from_filetime( filetime ) );
+//    //set( (double)( *(int64*)&filetime - base_filetime ) / 10000000.0 );
+//}
 
 #endif
 
 //-----------------------------------------------------------------------------------Time::filetime
 #ifdef Z_WINDOWS
 
-FILETIME Time::filetime() const
-{
-    FILETIME result;
-
-    *(int64*)&result = int64_filetime();
-    return result;
-}
+//FILETIME Time::filetime() const
+//{
+//    return windows::filetime_from_time_t( as_double() );
+//    //FILETIME result;
+//
+//    //*(int64*)&result = int64_filetime();
+//    //return result;
+//}
 
 //-----------------------------------------------------------------------------------Time::filetime
 
-int64 Time::int64_filetime() const
-{
-    return (int64)( as_double() * 10000000.0 + 0.5 ) + base_filetime;
-}
+//int64 Time::int64_filetime() const
+//{
+//    return (int64)( as_double() * 10000000.0 + 0.5 ) + base_filetime;
+//}
 
 #endif
-
-//--------------------------------------------------------------Time::set_current_difference_to_utc
-
-void Time::set_current_difference_to_utc()
-{
-    int  new_difference;
-    bool is_dst;
-
-#   ifdef Z_WINDOWS
-
-        timeb  tm;
-        ftime( &tm );
-        new_difference = timezone + ( tm.dstflag? _dstbias : 0 );
-        is_dst = tm.dstflag != 0;
-
-#   else
-
-        timeval  tv;
-        tm       tm;
-
-        gettimeofday( &tv, NULL );
-        localtime_r( &tv.tv_sec, &tm );
-
-        new_difference = timezone + ( tm.tm_isdst? _dstbias : 0 );
-        is_dst = tm.tm_isdst != 0;
-
-#   endif
-
-    if( static_current_difference_to_utc != new_difference )
-    {
-        Z_LOG2( "scheduler", __FUNCTION__ << " " << new_difference << " tz=" << timezone << " is_dst=" << is_dst << " dstbias=" << _dstbias << " (old=" << static_current_difference_to_utc << ")\n" );
-        static_current_difference_to_utc = new_difference;
-    }
-}
 
 //----------------------------------------------------------------------------------Time::as_double
 
@@ -467,6 +467,224 @@ Time Time::now()
 #   endif
 }
 
+//-------------------------------------Daylight_saving_time_detector::Daylight_saving_time_detector
+
+Daylight_saving_time_detector::Daylight_saving_time_detector( Scheduler* scheduler )
+: 
+    _zero_(this+1),
+    _scheduler(scheduler)
+{
+    _log = Z_NEW( Prefix_log( scheduler ) );
+    _log->set_prefix( obj_name() );
+
+    set_alarm( ::time(NULL) );
+}
+
+//-----------------------------------------------------------------------time_t_from_dst_systemtime
+#ifdef Z_WINDOWS
+
+static time_t time_t_from_dst_systemtime( const SYSTEMTIME& dst, const SYSTEMTIME& now )
+{
+    if( dst.wYear != 0  ||  dst.wMonth == 0  ||  dst.wDay == 0 )  return 0;
+
+
+    SYSTEMTIME result;
+    SYSTEMTIME last_day; 
+    BOOL       ok;
+    
+    memset( &result, 0, sizeof result );
+    result.wYear = now.wYear;
+
+    while(1)
+    {
+        result.wMonth        = dst.wMonth;
+        result.wDay          = 1;
+        result.wHour         = dst.wHour;
+        result.wMinute       = dst.wMinute;
+        result.wMilliseconds = dst.wMilliseconds;
+
+
+        // result.wDayOfWeek errechnen
+
+        int64 filetime;  // 100 Nanosekunden
+        ok = SystemTimeToFileTime( &result, (FILETIME*)&filetime );
+        if( !ok )  return 0;
+
+        ok = FileTimeToSystemTime( (FILETIME*)&filetime, &result );   // Jetzt haben wir result.wDayOfWeek
+        if( !ok )  return 0;
+
+
+        // Letzten Tag des Monats bestimmen
+
+        last_day = result;
+        if( ++last_day.wMonth > 12 )  last_day.wMonth = 1, last_day.wYear++;
+
+        ok = SystemTimeToFileTime( &last_day, (FILETIME*)&filetime );
+        if( !ok )  return 0;
+
+        filetime -= 24*3600*10000000LL;
+
+        ok = FileTimeToSystemTime( (FILETIME*)&filetime, &last_day );  
+        if( !ok )  return 0;
+
+
+        // Wochentag setzen
+
+        result.wDay += ( dst.wDayOfWeek - result.wDayOfWeek + 7 ) % 7;
+        result.wDayOfWeek = dst.wDayOfWeek;
+
+
+        // Woche setzen (dst.wDay gibt an, der wievielte Wochentag des Monats es ist)
+
+        result.wDay += 7 * ( dst.wDay - 1 );
+
+
+        // Aber nicht über den Monat hinaus
+
+        while( result.wDay > last_day.wDay )  result.wDay -= 7;
+
+        if( windows::compare_systemtime( now, result ) < 0 )  break;
+
+        result.wYear++;  // Nächstes Jahr probieren
+        assert( result.wYear <= now.wYear + 1 );
+    }
+
+    return windows::time_t_from_filetime( windows::filetime_from_systemtime( result ) );
+}
+
+#endif
+//---------------------------------------------------------Daylight_saving_time_detector::set_alarm
+
+void Daylight_saving_time_detector::set_alarm( time_t now )
+{
+    double next_transition_time;
+
+
+    _next_transition_name        = "";
+    _was_in_daylight_saving_time = is_in_daylight_saving_time( now );
+
+
+#   ifdef Z_WINDOWS
+        if( _scheduler->_zschimmer_mode )  
+        {
+            TIME_ZONE_INFORMATION time_zone_information;
+            
+            DWORD result = GetTimeZoneInformation( &time_zone_information );
+
+            if( result != TIME_ZONE_ID_INVALID )
+            {
+                SYSTEMTIME now;
+                GetLocalTime( &now );
+
+                if( time_zone_information.StandardDate.wMonth )
+                {
+                    time_t standard_date = time_t_from_dst_systemtime( time_zone_information.StandardDate, now );
+                    time_t daylight_date = time_t_from_dst_systemtime( time_zone_information.DaylightDate, now );
+                    
+                    if( standard_date < daylight_date )
+                    {
+                        _next_transition_time = standard_date;  // Kann 0 sein
+                        _next_transition_name = S() << "begin of standard time: " << string_from_ole( time_zone_information.StandardName );
+                    }
+                    else
+                    {
+                        _next_transition_time = daylight_date;  // Kann 0 sein
+                        _next_transition_name = S() << "begin of daylight saving time: " << string_from_ole( time_zone_information.DaylightName );
+                    }
+                }
+                else
+                {
+                    _next_transition_time = time_max;
+                    _next_transition_name = "no daylight saving";
+                }
+            }
+        }
+      else
+#   endif
+    {
+        time_t local_now         = localtime_from_gmtime( now );
+        time_t local_midnight    = local_now / (24*3600) * 24*3600;
+        time_t local_switch_time;
+        
+        if( _was_in_daylight_saving_time )
+        {
+            local_switch_time = local_midnight + 3*3600;        // 3:00
+            _next_transition_name = "possible begin of standard time";
+        }
+        else
+        {
+            local_switch_time = local_midnight + 2*3600;        // 3:00
+            _next_transition_name = "possible begin of daylight saving time";
+        }
+
+        int wait_time = (int)( local_switch_time - local_now );
+        if( wait_time < 0 )  wait_time += 24*3600;    // Schon vorbei? Dann +24h
+
+        _next_transition_time = now + wait_time;
+    }
+
+
+    set_async_next_gmtime( _next_transition_time - 1 );    // Eine Sekunde vorher async_continue_() aufrufen
+
+
+    sos::scheduler::time::Time::set_current_difference_to_utc( now );
+}
+
+//---------------------------------------------------Daylight_saving_time_detector::async_continue_
+
+bool Daylight_saving_time_detector::async_continue_( Continue_flags )
+{
+    bool result = false;
+    bool was_in_daylight_saving_time = _was_in_daylight_saving_time;
+    time_t now = ::time(NULL);
+
+    time_t until = _next_transition_time + 1;       // Bis eine Sekunde nach der Zeitumschaltung warten
+    
+    if( now < until + 10 )  // Vorsichtshalber, um nicht im sleep() steckenzubleiben
+    {
+        Z_LOG( __FUNCTION__ << " Aufruf zu falschen Zeit\n" );      
+        set_alarm( now );
+    }
+    else
+    if( now < until )
+    {
+        while( now < until )                      // Warten von 01:59:59 bis 02:00:01
+        {
+            time_t t = until - now;
+            Z_LOG2( "scheduler", __FUNCTION__ << "  sleep " << t << "s\n"  );
+            sleep( (double)t );
+            now = ::time(NULL);
+        }
+
+        set_alarm( now );
+
+        if( was_in_daylight_saving_time  != _was_in_daylight_saving_time )
+        {
+            result = true;
+            _log->info( message_string( _was_in_daylight_saving_time? "SCHEDULER-951" : "SCHEDULER-952" ) );
+        }
+        else
+        {
+            Z_DEBUG_ONLY( _log->debug9( "(no change of daylight saving time)" ) );
+        }
+    }
+
+    return result;
+}
+
+//-------------------------------------------------Daylight_saving_time_detector::async_state_text_
+
+string Daylight_saving_time_detector::async_state_text_() const
+{
+    S result;
+    result << obj_name() << ", " << _next_transition_name;
+ 
+    //if( _was_in_daylight_saving_time )  result << ", waiting for end of daylight saving_time";
+    //                              else  result << ", waiting for begin of daylight saving time";
+
+    return result;
+}
+
 //------------------------------------------------------------------------------Period::set_default
 
 void Period::set_default()
@@ -549,7 +767,7 @@ void Period::check() const
 
 //-------------------------------------------------------------------------------Period::is_comming
 
-bool Period::is_comming( Time time_of_day, With_single_start single_start ) const
+bool Period::is_comming( const Time& time_of_day, With_single_start single_start ) const
 {
     bool result;
 
@@ -574,7 +792,7 @@ bool Period::is_comming( Time time_of_day, With_single_start single_start ) cons
 
 //---------------------------------------------------------------------------------Period::next_try
 
-Time Period::next_try( Time t )
+Time Period::next_try( const Time& t )
 {
 /* 30.5.03
     Time result = Time::never;
@@ -669,7 +887,7 @@ void Day::set_default()
 
 //------------------------------------------------------------------------------------Day::has_time
 
-bool Day::has_time( Time time_of_day )
+bool Day::has_time( const Time& time_of_day )
 {
     FOR_EACH( Period_set, _period_set, it )
     {
@@ -681,7 +899,7 @@ bool Day::has_time( Time time_of_day )
 
 //--------------------------------------------------------------------------------Day::next_period_
 
-Period Day::next_period_( Time time_of_day, With_single_start single_start ) const
+Period Day::next_period_( const Time& time_of_day, With_single_start single_start ) const
 {
     FOR_EACH_CONST( Period_set, _period_set, it )
     {
@@ -725,7 +943,7 @@ void Weekday_set::fill_with_default( const Day& default_day )
 
 //--------------------------------------------------------------------------------Weekday_set::next
 
-Period Weekday_set::next_period( Time tim, With_single_start single_start )
+Period Weekday_set::next_period( const Time& tim, With_single_start single_start )
 {
     if( _is_day_set_filled )
     {
@@ -780,7 +998,7 @@ void Monthday_set::set_dom( const xml::Element_ptr& monthdays_element, const Day
 
 //------------------------------------------------------------------------Monthday_set::next_period
 
-Period Monthday_set::next_period( Time tim, With_single_start single_start )
+Period Monthday_set::next_period( const Time& tim, With_single_start single_start )
 {
     Period result;
 
@@ -844,7 +1062,7 @@ Day* Monthday_set::Month_weekdays::day( int which, int weekday_number )
 
 //--------------------------------------------------------------------------Ultimo_set::next_period
 
-Period Ultimo_set::next_period( Time tim, With_single_start single_start )
+Period Ultimo_set::next_period( const Time& tim, With_single_start single_start )
 {
     if( _is_day_set_filled )
     {
@@ -934,7 +1152,7 @@ void Date::print( ostream& s ) const
 
 //----------------------------------------------------------------------------Date_set::next_period
 
-Period Date_set::next_period( Time tim, With_single_start single_start )
+Period Date_set::next_period( const Time& tim, With_single_start single_start )
 {
     Time     time_of_day = tim.time_of_day();
     int      day_nr      = tim.day_nr();
@@ -969,7 +1187,7 @@ void Date_set::print( ostream& s ) const
 
 //------------------------------------------------------------------------------At_set::next_period
 
-Period At_set::next_period( Time tim, With_single_start single_start )
+Period At_set::next_period( const Time& tim, With_single_start single_start )
 {
     if( single_start & wss_next_single_start )
     {
@@ -1327,7 +1545,7 @@ xml::Document_ptr Run_time::dom_document() const
 
 //---------------------------------------------------------------------------Run_time::first_period
 
-Period Run_time::first_period( Time beginning_time )
+Period Run_time::first_period( const Time& beginning_time )
 {
     return next_period( beginning_time );
 }
@@ -1345,7 +1563,7 @@ bool Run_time::is_filled() const
 
 //----------------------------------------------------------------------------Run_time::next_period
 
-Period Run_time::next_period( Time beginning_time, With_single_start single_start )
+Period Run_time::next_period( const Time& beginning_time, With_single_start single_start )
 {
     Period result;
     Time   tim   = beginning_time;

@@ -106,16 +106,16 @@ struct Order : Com_order,
     Time                        end_time                () const                                    { return _end_time; }
 
     void                    set_file_path               ( const File_path& );                       // Für einen Dateiauftrag (file order)
-    File_path                   file_path               () const;
-    bool                        is_file_order           () const;
+    File_path                   file_path               ();
+    bool                        is_file_order           ();
     
     void                    set_payload                 ( const VARIANT& );
     const Payload&              payload                 ()                                          { return _payload; }
     string                      string_payload          () const;
-    ptr<Com_variable_set>       params_or_null          () const;
-    ptr<Com_variable_set>       params                  () const;
+    ptr<Com_variable_set>       params_or_null          ();
+    ptr<Com_variable_set>       params                  ();
     void                    set_param                   ( const string& name, const Variant& value );
-    Variant                     param                   ( const string& name ) const;
+    Variant                     param                   ( const string& name );
 
     void                    set_xml_payload             ( const string& xml );
     string                      xml_payload             () const                                    { return _xml_payload; }

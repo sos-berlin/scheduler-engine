@@ -611,7 +611,10 @@ library Spooler
         [propget]
         HRESULT                 Hostname                ( [out,retval] BSTR* Result );
 
-        HRESULT                 Terminate               ( [in,optional] VARIANT* Timeout_in_seconds );
+        HRESULT                 Terminate               ( [in,optional] VARIANT* Timeout_in_seconds,
+                                                          [in,optional] VARIANT* restart,
+                                                          [in,optional] VARIANT* all_schedulers,
+                                                          [in,optional] VARIANT* continue_exclusive_operation );
 
         HRESULT                 Terminate_and_restart   ( [in,optional] VARIANT* Timeout_in_seconds );
 

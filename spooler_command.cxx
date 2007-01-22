@@ -316,10 +316,8 @@ xml::Element_ptr Command_processor::execute_terminate( const xml::Element_ptr& e
     bool   delete_dead    = element.bool_getAttribute( "delete_dead_entry"           , false );
 
   //string continue_excl  = element.     getAttribute( "continue_exclusive_operation", "non_backup" );
-    string continue_excl  = element.bool_getAttribute( "continue_exclusive_operation" )? cluster::Cluster::continue_exclusive_any 
+    string continue_excl  = element.bool_getAttribute( "continue_exclusive_operation" )? cluster::continue_exclusive_any 
                                                                                        : "non_backup";
-    if( continue_excl == "non_backup" )  continue_excl = cluster::Cluster::continue_exclusive_non_backup;
-
     if( member_id == ""  ||  member_id == _spooler->cluster_member_id() )
     {
         _spooler->cmd_terminate( restart, timeout, continue_excl, all_schedulers );
@@ -1486,9 +1484,9 @@ void Command_processor::execute_2( const xml::Document_ptr& command_doc, const T
     }
     catch( const _com_error& com_error ) { throw_com_error( com_error, "DOM/XML" ); }
 
-    if( !_spooler->ok() )  _spooler->cmd_terminate_after_error( __FUNCTION__, command_doc.xml() );
+    // Eigentlich nur für einige möglicherweise langlaufende <show_xxx>-Kommandos nötig, z.B. <show_state>, <show_history> (mit Datenbank)
+    if( !_spooler->check_is_active() )  _spooler->cmd_terminate_after_error( __FUNCTION__, command_doc.xml() );
 }
-
 
 //---------------------------------------------------------------------Command_processor::execute_2
 
@@ -1525,10 +1523,13 @@ void Command_processor::execute_2( const xml::Element_ptr& element, const Time& 
             else z::throw_xc( "SCHEDULER-353", e.nodeName() );
         }
         
-        xml::Node_ptr n = e.nextSibling(); 
-        while( n  &&  n.nodeType() != xml::ELEMENT_NODE )  n = n.nextSibling();
-        e = n;
-        if( e )  z::throw_xc( "SCHEDULER-319", e.nodeName() ); 
+        if( e != element )  // In einer Verschachtelung von <spooler>?
+        {
+            xml::Node_ptr n = e.nextSibling(); 
+            while( n  &&  n.nodeType() != xml::ELEMENT_NODE )  n = n.nextSibling();
+            e = n;
+            if( e )  z::throw_xc( "SCHEDULER-319", e.nodeName() ); 
+        }
     }
 }
 

@@ -2136,7 +2136,7 @@ Order* Order_queue::load_and_occupy_next_distributed_order_from_database( Task* 
     if( w != "" )
     {
         select_sql << "select %limit(1)  `job_chain`, " << order_select_database_columns <<
-                    "  from " << _spooler->_orders_tablename <<  //" %update_lock" 
+                    "  from " << _spooler->_orders_tablename <<  //" %update_lock"  Oracle kann nicht "for update", limit(1) und "order by" kombinieren
                     "  where `spooler_id`=" << sql::quoted(_spooler->id_for_db()) <<
                        " and `distributed_next_time` < {ts'" << never_database_distributed_next_time << "'}"
                        " and `occupying_cluster_member_id` is null" << 
@@ -2178,16 +2178,21 @@ Order* Order_queue::load_and_occupy_next_distributed_order_from_database( Task* 
                         Read_transaction ta ( _spooler->db() );
                         order->load_blobs( &ta );
                     }
-                    catch( exception& ) { order->close(); order = NULL; }     // Jemand hat wohl den Datensatz gelöscht
+                    catch( exception& ) 
+                    { 
+                        ok = false;      // Jemand hat wohl den Datensatz gelöscht
+                    }
             
-                    if( order )
+                    if( ok )
                     {
                         order->occupy_for_task( occupying_task, now );
                         job_chain->add_order( order );
 
-                        result = order;
+                        result = order,  order = NULL;
                     }
                 }
+
+                if( order )  order->close(), order = NULL;
             }
         //}
         //catch( exception& x )
@@ -2650,8 +2655,14 @@ void Order::db_insert()
 
 bool Order::db_try_insert()
 {
-    bool   insert_ok = false;
-    string payload_string = payload().as_string();
+    bool   insert_ok     = false;
+    string payload_string;
+
+    {
+        Com_variable_set* v = params_or_null();
+        if( !v || !v->is_empty() )  payload_string = payload().as_string();
+    }
+
 
     if( db()->opened() )
     for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
@@ -3490,7 +3501,7 @@ void Order::set_file_path( const File_path& path )
 
 //---------------------------------------------------------------------------------Order::file_path
 
-File_path Order::file_path() const
+File_path Order::file_path()
 {
     File_path result;
 
@@ -3510,7 +3521,7 @@ File_path Order::file_path() const
 
 //-----------------------------------------------------------------------------Order::is_file_order
 
-bool Order::is_file_order() const
+bool Order::is_file_order()
 {
     return file_path() != "";
 }
@@ -3532,9 +3543,14 @@ string Order::string_payload() const
 
 //----------------------------------------------------------------------------Order::params_or_null
 
-ptr<Com_variable_set> Order::params_or_null() const
+ptr<Com_variable_set> Order::params_or_null()
 {
     ptr<spooler_com::Ivariable_set> result;
+
+    if( _payload.is_empty() )
+    {
+        _payload = new Com_variable_set();
+    }
 
     if( _payload.vt != VT_DISPATCH  &&  _payload.vt != VT_UNKNOWN )  return NULL;
     
@@ -3549,7 +3565,7 @@ ptr<Com_variable_set> Order::params_or_null() const
 
 //------------------------------------------------------------------------------------Order::params
 
-ptr<Com_variable_set> Order::params() const
+ptr<Com_variable_set> Order::params() 
 {
     ptr<Com_variable_set> result = params_or_null();
     if( !result )  z::throw_xc( "SCHEDULER-338" );
@@ -3571,7 +3587,7 @@ void Order::set_param( const string& name, const Variant& value )
 
 //-------------------------------------------------------------------------------------Order::param
 
-Variant Order::param( const string& name ) const
+Variant Order::param( const string& name )
 {
     Variant result;
 

@@ -3,11 +3,9 @@
     xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
     xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
 >
-    <config
-        main_scheduler="0.0.0.0"  
-    >
+    <config>
 
-        <base file="$SCHEDULER_TEST/base.scheduler"/>
+        <base file="$SCHEDULER_TESTxxxxx/base.scheduler"/>
 
         <process_classes/>
     

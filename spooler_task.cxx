@@ -1486,8 +1486,6 @@ bool Task::do_something()
                 Z_LOG2( "scheduler.nothing_done", obj_name() << ".do_something()  Nichts getan. state=" << state_name() << ", _next_time war " << next_time_at_begin << "\n" );
             }
         }
-
-        //if( something_done )  _spooler->assert_is_activated( __FUNCTION__ );
     }
 
   //if( _next_time && !_let_run )  set_next_time( min( _next_time, _job->_period.end() ) );                      // Am Ende der Run_time wecken, damit die Task beendet werden kann

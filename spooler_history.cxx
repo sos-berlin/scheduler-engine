@@ -321,10 +321,10 @@ void Transaction::commit( const string& debug_text )
     {
         if( db()->opened() )  
         {
-            if( !_suppress_heart_beat_timeout_check  &&  !_spooler->check( __FUNCTION__, debug_text, this ) )
+            if( !_suppress_heart_beat_timeout_check  &&  !_spooler->assert_is_still_active( __FUNCTION__, debug_text, this ) )
             {
                 _spooler->abort_immediately_after_distribution_error( __FUNCTION__ );     // Wir wollen das verspätete Commit verhindern
-                //_spooler->throw_distribution_error( "commit" );       // Das führt nach Datenbank-Reopen doch noch zu einem Commit (weil check wieder true liefert?) 
+                //_spooler->throw_distribution_error( "commit" );       // Das führt nach Datenbank-Reopen doch noch zu einem Commit (weil assert_is_still_active wieder true liefert?) 
                                                                         // Außerdem geht dann kein Commit mehr, auch nicht Order::db_release_occupation().
             }
 
@@ -337,7 +337,7 @@ void Transaction::commit( const string& debug_text )
     _guard.leave(); 
 
 
-    if( !_suppress_heart_beat_timeout_check  &&  !_outer_transaction )  _spooler->check( __FUNCTION__, debug_text );
+    if( !_suppress_heart_beat_timeout_check  &&  !_outer_transaction )  _spooler->assert_is_still_active( __FUNCTION__, debug_text );
 }
 
 //-----------------------------------------------------------------Transaction::intermediate_commit
@@ -389,7 +389,7 @@ void Transaction::rollback( const string& debug_text, bool force )
         _db = NULL; 
         _guard.leave(); 
 
-        //Wir sind vielleicht in einer Exception, also keine weitere Exception auslösen:  if( !db->_transaction )  _spooler->check( __FUNCTION__, debug_text );
+        //Wir sind vielleicht in einer Exception, also keine weitere Exception auslösen:  if( !db->_transaction )  _spooler->assert_is_still_active( __FUNCTION__, debug_text );
     }
 }
 
@@ -1096,7 +1096,7 @@ void Database::try_reopen_after_error( const exception& callers_exception, const
             open2( "" );     // Umschalten auf dateibasierte Historie
         }
 
-        if( !_transaction ||  !_transaction->_suppress_heart_beat_timeout_check )  _spooler->check( __FUNCTION__ );
+        if( !_transaction ||  !_transaction->_suppress_heart_beat_timeout_check )  _spooler->assert_is_still_active( __FUNCTION__ );
     }
 }
 

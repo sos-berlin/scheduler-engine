@@ -1129,7 +1129,7 @@ ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, const
         case s_read_error:  z::throw_xc( "SCHEDULER-132", _name, _error? _error->what() : "" );
         case s_error:       z::throw_xc( "SCHEDULER-204", _name, _error.what() );
         case s_stopped:     set_state( s_pending );  break;
-        default:            if( _state < s_pending )  z::throw_xc( "SCHEDULER-396", state_name( s_pending ), __FUNCTION__ );
+        default:            if( _state < s_initialized )  z::throw_xc( "SCHEDULER-396", state_name( s_initialized ), __FUNCTION__, state_name() );
     }
 
     ptr<Task> task;
@@ -2376,8 +2376,6 @@ bool Job::do_something()
     catch( const exception&  x ) { set_error( x );  set_job_error( x );  sos_sleep(1); }     // Bremsen, falls sich der Fehler sofort wiederholt
 
 
-    if( something_done  &&  !_spooler->ok() )  _spooler->cmd_terminate_after_error( __FUNCTION__, obj_name() );
-
     return something_done;
 }
 
@@ -2606,6 +2604,7 @@ string Job::state_name( State state )
     {
         case s_not_initialized: return "not_initialized";
         case s_initialized:     return "initialized";
+        case s_loaded:          return "loaded";
         case s_stopping:        return "stopping";
         case s_stopped:         return "stopped";
         case s_read_error:      return "read_error";
