@@ -556,6 +556,10 @@ static time_t time_t_from_dst_systemtime( const SYSTEMTIME& dst, const SYSTEMTIM
 //---------------------------------------------------------Daylight_saving_time_detector::set_alarm
 
 void Daylight_saving_time_detector::set_alarm( time_t now )
+
+// Wenn die Uhr zurückgestellt wird, so dass die Zeitzone wechselt, bekommen wir das nicht mit.
+// Der Scheduler bleibt in der vorherigen Zeitzone, weil set_current_difference_to_utc() nicht erneut aufgerufen wird.
+
 {
     double next_transition_time;
 
@@ -689,7 +693,7 @@ string Daylight_saving_time_detector::async_state_text_() const
 
 void Period::set_default()
 {
-    _begin  = 0;             //"00:00:00";
+    _begin  = 0;             // = "00:00:00";
     _end    = 24*60*60;      // = "24:00:00";
     _repeat = Time::never;
 }

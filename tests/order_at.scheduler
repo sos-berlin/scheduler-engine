@@ -22,8 +22,8 @@ if( spooler.job_chain( "my_job_chain" ).order_count == 0 )
     order.id    = "javascript";
     order.title = "Order aus JavaScript";
     order.at    = "now+65";
-    order.params = spooler.create_variable_set();
-    order.params("my_var") = "my_value";
+    //order.params = spooler.create_variable_set();
+    order.params.value("my_var") = "my_value";
     spooler.job_chain( "my_job_chain" ).add_order( order );
 
     try

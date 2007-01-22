@@ -5078,18 +5078,24 @@ STDMETHODIMP Com_order::get_Params( Ivariable_set** result )
     {
         if( !_order )  return E_POINTER;
 
-        Variant variant = _order->payload();
-        if( !variant.is_null_or_empty_string() )   // 2007-01-02  Wozu ist das denn gut?
-        {
-            if( variant.vt != VT_DISPATCH  &&  variant.vt != VT_UNKNOWN )  z::throw_xc( "SCHEDULER-317" );
-            
-            IUnknown*          iunknown = V_UNKNOWN( &variant );
-            ptr<Ivariable_set> ivariable_set;
-            hr = iunknown->QueryInterface( IID_Ivariable_set, ivariable_set.void_pp() );
-            if( FAILED(hr) )  return hr;
+        *result = _order->params().copy();      // Legt automatisch ein Variable_set an. Exception, wenn payload etwas anderes ist
+        
+        //Variant variant = _order->payload();
+        //if( variant.is_null_or_empty_string() ) 
+        //{
+        //    hr = _order->params().CopyTo( result );     // Legt automatisch ein Variable_set an
+        //}
+        //else
+        //{
+        //    if( variant.vt != VT_DISPATCH  &&  variant.vt != VT_UNKNOWN )  z::throw_xc( "SCHEDULER-317" );
+        //    
+        //    IUnknown*          iunknown = V_UNKNOWN( &variant );
+        //    ptr<Ivariable_set> ivariable_set;
+        //    hr = iunknown->QueryInterface( IID_Ivariable_set, ivariable_set.void_pp() );
+        //    if( FAILED(hr) )  return hr;
 
-            *result = ivariable_set.take();
-        }
+        //    *result = ivariable_set.take();
+        //}
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }

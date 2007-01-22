@@ -11,6 +11,18 @@
     <scheduler_keyword keyword="Change log"/>
 
 
+    <change date="2007-01-22" version="2.0.163" subversion_revision="4781">
+        <revision type="new" title="Order.params initialisiert sich automatisch">
+            <description>
+                <p>
+                    <scheduler_method class="Order" property="params"/> initialisiert sich beim ersten Zugriff 
+                    automatisch mit einer <scheduler_method class="Variable_set"/>.
+                </p>
+            </description>
+        </revision>
+    </change>
+
+
     <change date="2007-01-19" version="2.0.163" subversion_revision="4758">
         <revision type="new" title="Cluster: Fristen zur Überwachung des Herzschlags sind einstellbar">
             <description>
