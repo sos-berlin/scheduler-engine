@@ -677,33 +677,34 @@ bool Daylight_saving_time_transition_detector::async_continue_( Continue_flags )
 
     time_t until = _next_transition_time + 1;       // Bis eine Sekunde nach der Zeitumschaltung warten
     
-    if( now < until + 10 )  // Vorsichtshalber, um nicht im sleep() steckenzubleiben
-    {
-        Z_LOG( __FUNCTION__ << " Aufruf zu falschen Zeit\n" );      
-        set_alarm( now );
-    }
-    else
     if( now < until )
     {
-        while( now < until )                      // Warten von 01:59:59 bis 02:00:01
+        if( now < until - 2 )   // Paranoid
         {
-            time_t t = until - now;
-            Z_LOG2( "scheduler", __FUNCTION__ << "  sleep " << t << "s\n"  );
-            sleep( (double)t );
-            now = ::time(NULL);
-        }
-
-        set_alarm( now );
-
-        if( was_in_daylight_saving_time  != _was_in_daylight_saving_time )
-        {
-            result = true;
-            _log->info( message_string( _was_in_daylight_saving_time? "SCHEDULER-951" : "SCHEDULER-952" ) );
+            Z_LOG( __FUNCTION__ << " Aufruf zu früh *******\n" );   // Sonst würden wir zu lange schlafen
         }
         else
         {
-            Z_DEBUG_ONLY( _log->debug9( "(no change of daylight saving time)" ) );
+            while( now < until )                      // Warten von 01:59:59 bis 02:00:01
+            {
+                time_t t = until - now;
+                Z_LOG2( "scheduler", __FUNCTION__ << "  sleep " << t << "s\n"  );
+                sleep( (double)t );
+                now = ::time(NULL);
+            }
         }
+    }
+
+    set_alarm( now );
+
+    if( was_in_daylight_saving_time  != _was_in_daylight_saving_time )
+    {
+        result = true;
+        _log->info( message_string( _was_in_daylight_saving_time? "SCHEDULER-951" : "SCHEDULER-952" ) );
+    }
+    else
+    {
+        Z_DEBUG_ONLY( _log->debug9( "(no change of daylight saving time)" ) );
     }
 
     return result;

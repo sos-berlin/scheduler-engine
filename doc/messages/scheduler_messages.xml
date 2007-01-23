@@ -2902,7 +2902,7 @@
                 <title>Sommerzeit beginnt</title>
             </text>
             <text xml:lang="en">
-                <title>Switching to daylight saving time</title>
+                <title>Daylight saving time has begun</title>
             </text>
         </message>
 
@@ -2911,7 +2911,7 @@
                 <title>Winterzeit beginnt</title>
             </text>
             <text xml:lang="en">
-                <title>Switching back from daylight saving time</title>
+                <title>Daylight saving time has ended, now it's standard time</title>
             </text>
         </message>
 

@@ -3490,7 +3490,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
 
         Z_LOG2( "scheduler", "Scheduler " VER_PRODUCTVERSION_STR "\n" );
 
-        sos::scheduler::time::Time::set_current_difference_to_utc( ::time(NULL) );
+        //sos::scheduler::time::Time::set_current_difference_to_utc( ::time(NULL) );
 
         if( is_scheduler_client )
         {
