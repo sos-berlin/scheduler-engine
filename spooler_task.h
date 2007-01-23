@@ -216,8 +216,7 @@ struct Task : Object,
     friend struct               Job;
     friend struct               Job::Task_queue;
     friend struct               Object_set;
-    friend struct               Com_task;
-
+    friend struct               com_objects::Com_task;
     friend struct               Task_history;
 
     virtual bool                do_load                     ()                                      { return true; }
