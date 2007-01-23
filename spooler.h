@@ -572,9 +572,7 @@ struct Spooler : Object,
     bool                       _suspend_after_resume;
     bool                       _should_suspend_machine;
 
-    ptr<time::Daylight_saving_time_detector> _daylight_saving_time_detector;
-    //Time                       _next_daylight_saving_transition_time;
-    //string                     _next_daylight_saving_transition_name;
+    ptr<time::Daylight_saving_time_transition_detector_interface> _daylight_saving_time_transition_detector;
     Event                      _waitable_timer;
     bool                       _is_waitable_timer_set;
 

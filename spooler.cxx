@@ -686,7 +686,7 @@ Spooler::Spooler()
 
 Spooler::~Spooler() 
 {
-    if( _daylight_saving_time_detector )  _daylight_saving_time_detector->set_async_manager( NULL );
+    if( _daylight_saving_time_transition_detector )  _daylight_saving_time_transition_detector->set_async_manager( NULL );
 
     spooler_ptr = NULL;
     set_ctrl_c_handler( false );
@@ -1561,117 +1561,6 @@ void Spooler::load()
 #   endif
 }
 
-//-------------------------------------------------------------------------time_from_dst_systemtime
-#ifdef Z_WINDOWS
-
-//static Time time_from_dst_systemtime( const SYSTEMTIME& dst, const SYSTEMTIME& now )
-//{
-//    if( dst.wYear != 0  ||  dst.wMonth == 0  ||  dst.wDay == 0 )  return 0;
-//
-//
-//    SYSTEMTIME result;
-//    SYSTEMTIME last_day; 
-//    BOOL       ok;
-//    
-//    memset( &result, 0, sizeof result );
-//    result.wYear = now.wYear;
-//
-//    while(1)
-//    {
-//        result.wMonth        = dst.wMonth;
-//        result.wDay          = 1;
-//        result.wHour         = dst.wHour;
-//        result.wMinute       = dst.wMinute;
-//        result.wMilliseconds = dst.wMilliseconds;
-//
-//
-//        // result.wDayOfWeek errechnen
-//
-//        int64 filetime;  // 100 Nanosekunden
-//        ok = SystemTimeToFileTime( &result, (FILETIME*)&filetime );
-//        if( !ok )  return Time(0);
-//
-//        ok = FileTimeToSystemTime( (FILETIME*)&filetime, &result );   // Jetzt haben wir result.wDayOfWeek
-//        if( !ok )  return Time(0);
-//
-//
-//        // Letzten Tag des Monats bestimmen
-//
-//        last_day = result;
-//        if( ++last_day.wMonth > 12 )  last_day.wMonth = 1, last_day.wYear++;
-//
-//        ok = SystemTimeToFileTime( &last_day, (FILETIME*)&filetime );
-//        if( !ok )  return Time(0);
-//
-//        filetime -= 24*3600*10000000LL;
-//
-//        ok = FileTimeToSystemTime( (FILETIME*)&filetime, &last_day );  
-//        if( !ok )  return Time(0);
-//
-//
-//        // Wochentag setzen
-//
-//        result.wDay += ( dst.wDayOfWeek - result.wDayOfWeek + 7 ) % 7;
-//        result.wDayOfWeek = dst.wDayOfWeek;
-//
-//
-//        // Woche setzen (dst.wDay gibt an, der wievielte Wochentag des Monats es ist)
-//
-//        result.wDay += 7 * ( dst.wDay - 1 );
-//
-//
-//        // Aber nicht über den Monat hinaus
-//
-//        while( result.wDay > last_day.wDay )  result.wDay -= 7;
-//
-//        if( windows::compare_systemtime( now, result ) < 0 )  break;
-//
-//        result.wYear++;  // Nächstes Jahr probieren
-//        assert( result.wYear <= now.wYear + 1 );
-//    }
-//
-//    return Time( result );
-//}
-
-//-----------------------------------------------------Spooler::set_next_daylight_saving_transition
-
-//void Spooler::set_next_daylight_saving_transition()
-//{
-//    if( _zschimmer_mode )  
-//    {
-//        TIME_ZONE_INFORMATION time_zone_information;
-//        DWORD result = GetTimeZoneInformation( &time_zone_information );
-//        if( result != TIME_ZONE_ID_INVALID )
-//        {
-//            SYSTEMTIME now;
-//            GetLocalTime( &now );
-//
-//            if( time_zone_information.StandardDate.wMonth )
-//            {
-//                Time standard_date = time_from_dst_systemtime( time_zone_information.StandardDate, now );
-//                Time daylight_date = time_from_dst_systemtime( time_zone_information.DaylightDate, now );
-//                
-//                if( standard_date < daylight_date )
-//                {
-//                    _next_daylight_saving_transition_time = standard_date;  // Kann 0 sein
-//                    _next_daylight_saving_transition_name = "begin of standard time: " + string_from_ole( time_zone_information.StandardName );
-//                }
-//                else
-//                {
-//                    _next_daylight_saving_transition_time = daylight_date;  // Kann 0 sein
-//                    _next_daylight_saving_transition_name = "begin of daylight saving time: " + string_from_ole( time_zone_information.DaylightName );
-//                }
-//            }
-//            else
-//            {
-//                _next_daylight_saving_transition_time = Time::never;
-//                _next_daylight_saving_transition_name = "no daylight saving";
-//            }
-//        }
-//    }
-//}
-
-#endif
 //----------------------------------------------------------------------------Spooler::create_window
 /*
 #if defined Z_WINDOWS && defined Z_DEBUG
@@ -1775,20 +1664,12 @@ void Spooler::start()
 
     _base_log.set_directory( _log_directory );
     _base_log.open_new();
-    
-    //{
-    //    S s;
-    //    s << "scheduler";
-    //    if( _spooler_id != "" )  s << _spooler_id;
-    //    s << "." << _short_hostname << "." << _tcp_port << "." << getpid() << "." << string_printf( "%-.6lf", double_from_gmtime() );
-    //    _session_id = s;
-    //}
 
     _log->info( message_string( "SCHEDULER-900", _version, _config_filename, getpid() ) );
     _spooler_start_time = Time::now();
 
-    _daylight_saving_time_detector = time::new_daylight_saving_time_switch( this );
-    _daylight_saving_time_detector->set_async_manager( _connection_manager );
+    _daylight_saving_time_transition_detector = time::new_daylight_saving_time_transition_detector( this );
+    _daylight_saving_time_transition_detector->set_async_manager( _connection_manager );
 
     _order_subsystem->start();
     _web_services.start();                                      // Nicht in Spooler::load(), denn es öffnet schon -log-dir-Dateien (das ist nicht gut für -send-cmd=)
@@ -1885,7 +1766,7 @@ void Spooler::start()
 void Spooler::activate()
 {
     _job_subsystem->set_subsystem_state( subsys_loaded );   
-    _task_subsystem->start( &_event ); 
+    //_task_subsystem->start( &_event ); 
     _order_subsystem->load_orders_from_database();
 
     if( !_xml_cmd.empty() )
@@ -3588,7 +3469,24 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
         // scheduler.log
 
         if( log_filename.empty() )  log_filename = subst_env( read_profile_string( factory_ini, "spooler", "log" ) );
-        if( !log_filename.empty() )  log_start( log_filename );
+        if( !log_filename.empty() )  
+        {
+            size_t pos = log_filename.find( '>' );
+            File_path path = pos == string::npos? log_filename : log_filename.substr( pos + 1 );
+
+            if( zschimmer::file_exists( path ) )  
+            {
+                File_path gz_path = path + ".gz";
+                S cmd; cmd << "gzip <" << path << " >" << gz_path;
+                try
+                {
+                    copy_file( path, "gzip | " + gz_path ); //gzip_file( log_filename, log_filename + ".gz" );
+                }
+                catch( exception& x ) { cerr << x.what() << ", while " << cmd << "\n"; }
+            }
+
+            log_start( log_filename );
+        }
 
         Z_LOG2( "scheduler", "Scheduler " VER_PRODUCTVERSION_STR "\n" );
 

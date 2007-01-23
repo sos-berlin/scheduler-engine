@@ -19,9 +19,8 @@ namespace scheduler {
 
 Task_subsystem::Task_subsystem( Spooler* spooler )
 :
-    _zero_(this+1),
-    _spooler(spooler),
-    _log(spooler)
+    Subsystem( spooler, type_task_subsystem ),
+    _zero_(this+1)
 {
 }
 
@@ -30,13 +29,6 @@ Task_subsystem::Task_subsystem( Spooler* spooler )
 Task_subsystem::~Task_subsystem() 
 {
     _task_list.clear();
-}
-
-//----------------------------------------------------------------------------Task_subsystem::start
-
-void Task_subsystem::start( Event* event_destination )
-{
-    _event = event_destination;
 }
 
 //------------------------------------------------Task_subsystem::build_prioritized_order_job_array
@@ -210,8 +202,7 @@ bool Task_subsystem::step( const Time& now )
                     {
                         if( task->job() == job )
                         {
-                          //if( _my_event.signaled_then_reset() )  return true;
-                            if( _event  ->signaled()            )  return true;      // Das ist _event oder _spooler->_event
+                            if( _spooler->_event.signaled() )  return true;  
 
                             stepped = do_something( task, now );
 
@@ -232,8 +223,7 @@ bool Task_subsystem::step( const Time& now )
     {
         FOR_EACH_TASK( it, task )
         {
-          //if( _my_event.signaled_then_reset() )  return true;
-            if( _event  ->signaled()            )  return true;      // Das ist _my_event oder _spooler->_event
+            if( _spooler->_event.signaled() )  return true;      // Das ist _my_event oder _spooler->_event
 
             something_done |= do_something( task, now );
         }

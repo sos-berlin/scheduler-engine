@@ -61,6 +61,31 @@ const char* weekday_names[] = { "so"     , "mo"    , "di"      , "mi"       , "d
 
 Run_time::Class_descriptor              Run_time::class_descriptor ( &typelib, "sos.spooler.Run_time", Run_time::_methods );
 
+//---------------------------------------------------------Daylight_saving_time_transition_detector
+
+struct Daylight_saving_time_transition_detector : Daylight_saving_time_transition_detector_interface
+{
+                                Daylight_saving_time_transition_detector( Scheduler* );
+
+
+    // Async_operation
+    bool                        async_finished_             () const                                { return false; }
+    string                      async_state_text_           () const;
+    bool                        async_continue_             ( Continue_flags );
+
+
+    void                        set_alarm                   ( time_t now );
+    string                      obj_name                    () const                                { return "Daylight_saving_time_transition_detector"; }
+
+  private:
+    Fill_zero                  _zero_;
+    bool                       _was_in_daylight_saving_time;
+    time_t                     _next_transition_time;
+    string                     _next_transition_name;
+    Scheduler*                 _scheduler;
+    ptr<Prefix_log>            _log;
+};
+
 //----------------------------------------------------------------------------------test_summertime
 
 void test_summertime( const string& date_time )
@@ -467,9 +492,17 @@ Time Time::now()
 #   endif
 }
 
-//-------------------------------------Daylight_saving_time_detector::Daylight_saving_time_detector
+//-----------------------------------------------------new_daylight_saving_time_transition_detector
 
-Daylight_saving_time_detector::Daylight_saving_time_detector( Scheduler* scheduler )
+ptr<Daylight_saving_time_transition_detector_interface> new_daylight_saving_time_transition_detector( Scheduler* scheduler )  
+{ 
+    ptr<Daylight_saving_time_transition_detector> result = Z_NEW( Daylight_saving_time_transition_detector( scheduler ) ); 
+    return +result;
+}
+
+//---------------Daylight_saving_time_transition_detector::Daylight_saving_time_transition_detector
+
+Daylight_saving_time_transition_detector::Daylight_saving_time_transition_detector( Scheduler* scheduler )
 : 
     _zero_(this+1),
     _scheduler(scheduler)
@@ -553,9 +586,9 @@ static time_t time_t_from_dst_systemtime( const SYSTEMTIME& dst, const SYSTEMTIM
 }
 
 #endif
-//---------------------------------------------------------Daylight_saving_time_detector::set_alarm
+//----------------------------------------------Daylight_saving_time_transition_detector::set_alarm
 
-void Daylight_saving_time_detector::set_alarm( time_t now )
+void Daylight_saving_time_transition_detector::set_alarm( time_t now )
 
 // Wenn die Uhr zurückgestellt wird, so dass die Zeitzone wechselt, bekommen wir das nicht mit.
 // Der Scheduler bleibt in der vorherigen Zeitzone, weil set_current_difference_to_utc() nicht erneut aufgerufen wird.
@@ -634,9 +667,9 @@ void Daylight_saving_time_detector::set_alarm( time_t now )
     sos::scheduler::time::Time::set_current_difference_to_utc( now );
 }
 
-//---------------------------------------------------Daylight_saving_time_detector::async_continue_
+//----------------------------------------Daylight_saving_time_transition_detector::async_continue_
 
-bool Daylight_saving_time_detector::async_continue_( Continue_flags )
+bool Daylight_saving_time_transition_detector::async_continue_( Continue_flags )
 {
     bool result = false;
     bool was_in_daylight_saving_time = _was_in_daylight_saving_time;
@@ -676,9 +709,9 @@ bool Daylight_saving_time_detector::async_continue_( Continue_flags )
     return result;
 }
 
-//-------------------------------------------------Daylight_saving_time_detector::async_state_text_
+//--------------------------------------Daylight_saving_time_transition_detector::async_state_text_
 
-string Daylight_saving_time_detector::async_state_text_() const
+string Daylight_saving_time_transition_detector::async_state_text_() const
 {
     S result;
     result << obj_name() << ", " << _next_transition_name;

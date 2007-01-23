@@ -34,6 +34,7 @@ string Scheduler_object::name_of_type_code( Scheduler_object::Type_code type_cod
         case type_xml_client_connection:    return "Xml_client_connection";
         case type_scheduler_script:         return "Scheduler_script";
         case type_job_subsystem:            return "Job_subsystem";
+        case type_task_subsystem:           return "Task_subsystem";
         default:                            return S() << "Type_code(" << type_code << ")";
     }
 }

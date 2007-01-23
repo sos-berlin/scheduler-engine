@@ -129,14 +129,15 @@ job_chain.name = "Jobkette";</pre>
             gemäß seiner Priorität eingeordnet.
         </p>
         <p>
-            Die Jobkette mit muss mit
+            Die Jobkette mit muss <scheduler_element name="job_chain"/> oder 
             <scheduler_method class="Spooler" method="add_job_chain"/>
-            dem Scheduler übergeben worden sein.
+            dem Scheduler bekannt gemacht worden sein.
         </p>
         <p>
             Wenn die Jobkette bereits einen Auftrag mit gleicher <scheduler_method class="Order" property="id"/>
             enthält,
             wird eine Exception mit Fehlercode <scheduler_message code="SCHEDULER-186"/> geliefert.
+            Siehe aber <scheduler_method class="Job_chain" method="add_or_replace_order"/>.
         </p>
     </description>
 

@@ -78,7 +78,7 @@
             <description>
                 <p>
                     Wirkt nur mit der Kommandozeilenoption <scheduler_option name="distributed-orders"/>
-                    und lässt die Aufträge von mehrereren Schedulern verteilt ausführen.
+                    und lässt die Aufträge von mehreren Schedulern verteilt ausführen.
                 </p>
             </description>
         </xml_attribute>

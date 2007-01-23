@@ -39,7 +39,8 @@ struct Scheduler_object
         type_order_subsystem,
         type_xml_client_connection,
         type_scheduler_script,
-        type_job_subsystem
+        type_job_subsystem,
+        type_task_subsystem
       //type_subprocess_register
     };
 

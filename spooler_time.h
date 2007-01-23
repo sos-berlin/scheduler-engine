@@ -153,32 +153,14 @@ void                            insert_into_message         ( Message_string*, i
 
 extern const Time               latter_day;
 
-//----------------------------------------------------------------------Daylight_saving_time_detector
+//-----------------------------------------------Daylight_saving_time_transition_detector_interface
 
-struct Daylight_saving_time_detector : Async_operation
+struct Daylight_saving_time_transition_detector_interface : Async_operation
 {
-                                Daylight_saving_time_detector ( Scheduler* );
-
-
-    // Async_operation
-    bool                        async_finished_             () const                                { return false; }
-    string                      async_state_text_           () const;
-    bool                        async_continue_             ( Continue_flags );
-
-    void                        set_alarm                   ( time_t now );
-    string                      obj_name                    () const                                { return "Daylight_saving_time_detector"; }
-
-  private:
-    Fill_zero                  _zero_;
-    bool                       _was_in_daylight_saving_time;
-    time_t                     _next_transition_time;
-    string                     _next_transition_name;
-    Scheduler*                 _scheduler;
-    ptr<Prefix_log>            _log;
 };
 
 
-ptr<Daylight_saving_time_detector> new_daylight_saving_time_switch( Scheduler* scheduler )            { return Z_NEW( Daylight_saving_time_detector( scheduler ) ); }
+ptr<Daylight_saving_time_transition_detector_interface> new_daylight_saving_time_transition_detector( Scheduler* );
 
 //-------------------------------------------------------------------------------------------Period
 

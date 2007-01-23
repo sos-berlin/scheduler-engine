@@ -8,7 +8,7 @@ namespace scheduler {
 
 //-----------------------------------------------------------------------------------Task_subsystem
 
-struct Task_subsystem : Object
+struct Task_subsystem : Subsystem
 {
     Fill_zero                  _zero_;
 
@@ -16,12 +16,15 @@ struct Task_subsystem : Object
                                 Task_subsystem              ( Spooler* );
                                ~Task_subsystem              ();
 
+
+    virtual void                close                       ()                                      {}
+    virtual bool            set_subsystem_state             ( Subsystem_state )                     { return false; }
+
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
     
     bool                        has_tasks                   ()                                      { return !_task_list.empty(); }
 
     bool                        process                     ( const Time& now );                    // Einen Schritt im (Pseudo-)Thread ausführen
-    void                        start                       ( Event* destination );
     void                        add_task                    ( Task* task )                          { _task_list.push_back( task );  signal( task->obj_name() ); }
 
     ptr<Task>                   get_task_or_null            ( int task_id );
@@ -55,9 +58,6 @@ struct Task_subsystem : Object
 
 
 
-
-    Spooler*                   _spooler;
-    Prefix_log                 _log;
 
     Event*                     _event;
 

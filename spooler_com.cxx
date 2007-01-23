@@ -3518,15 +3518,33 @@ STDMETHODIMP Com_spooler::Terminate( VARIANT* timeout_v, VARIANT* restart_v, VAR
 
     try
     {
-        int  timeout        = INT_MAX;
-        bool restart        = false;
-        bool all_schedulers = false;
+        int    timeout                      = INT_MAX;
+        bool   restart                      = false;
+        string continue_exclusive_operation;
+        bool   all_schedulers               = false;
 
                            hr = My_variant_to_int ( *timeout_v       , &timeout        );
         if( !FAILED(hr) )  hr =    Variant_to_bool( *restart_v       , &restart        );
-        if( !FAILED(hr) )  hr =    Variant_to_bool( *all_schedulers_v, &all_schedulers );
+        
+        if( !FAILED(hr) )
+        {
+            bool b = false;     // Default
+            hr = Variant_to_bool( *continue_exclusive_operation_v, &b );
+            if( !FAILED(hr) )  
+            {
+                continue_exclusive_operation = b? cluster::continue_exclusive_any 
+                                                : cluster::continue_exclusive_non_backup;
+            }
+            else
+            {
+                hr = S_OK;
+                continue_exclusive_operation = string_from_variant( *continue_exclusive_operation_v );
+            }
+        }
 
-        if( !FAILED(hr) )  _spooler->cmd_terminate( false, timeout, string_from_variant( *continue_exclusive_operation_v ), all_schedulers );
+        if( !FAILED(hr) )  hr = Variant_to_bool( *all_schedulers_v, &all_schedulers );
+
+        if( !FAILED(hr) )  _spooler->cmd_terminate( restart, timeout, continue_exclusive_operation, all_schedulers );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }

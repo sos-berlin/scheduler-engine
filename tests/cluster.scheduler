@@ -13,6 +13,22 @@
          />
 
         <jobs>
+            <job name="javascript">
+                <script language="javascript">
+                    <![CDATA[
+
+var timeout = 3;
+var restart = true;
+var all_schedulers = true;
+var continue_exclusive_operation = "non_backup";
+
+spooler.terminate();
+spooler.terminate( timeout, restart, all_schedulers, continue_exclusive_operation );
+                    
+                    ]]>
+                </script>
+                <run_time once="yes"/>
+            </job>
         </jobs>
     </config>
 </spooler>
