@@ -594,9 +594,6 @@ void Daylight_saving_time_transition_detector::set_alarm( time_t now )
 // Der Scheduler bleibt in der vorherigen Zeitzone, weil set_current_difference_to_utc() nicht erneut aufgerufen wird.
 
 {
-    double next_transition_time;
-
-
     _next_transition_name        = "";
     _was_in_daylight_saving_time = is_in_daylight_saving_time( now );
 

@@ -91,7 +91,7 @@ void Job_subsystem::close()
     
 bool Job_subsystem::set_subsystem_state( Subsystem_state new_state )
 {
-    bool result;
+    bool result = false;
 
     if( _subsystem_state != new_state )
     {
@@ -131,7 +131,6 @@ bool Job_subsystem::set_subsystem_state( Subsystem_state new_state )
             }
 
             default:
-                result = false;
                 throw_subsystem_state_error( new_state, __FUNCTION__ );
         }
     }
