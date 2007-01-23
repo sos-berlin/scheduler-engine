@@ -510,6 +510,35 @@
                 Ohne diesen Parameter wartet der Scheduler endlos auf die Tasks.
             </description>
         </com.parameter>
+
+        <com.parameter name="restart" optional="true">
+            <com.type type="bool"/>
+
+            <description>
+                <code>restart=true</code> lässt den Scheduler nach Beendigung neu starten.
+            </description>
+        </com.parameter>
+
+        <com.parameter name="all_schedulers" optional="true">
+            <com.type type="boolean"/>
+
+            <description>
+                <code>all_schedulers=true</code> beendet alle Scheduler im Cluster 
+                (s. <scheduler_option name="exclusive"/>)
+                Das kann eine Minute dauern.
+            </description>
+        </com.parameter>
+
+        <com.parameter name="continue_exclusive_operation" optional="true">
+            <com.type type="boolean"/>
+
+            <description>
+                <code>continue_exclusive_operation=true</code>
+                lässt einen anderen Scheuler im Cluster
+                (s. <scheduler_option name="exclusive"/>)
+                den Betrieb fortsetzen.
+            </description>
+        </com.parameter>
     </com>
 
     <description>

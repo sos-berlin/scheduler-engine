@@ -15,9 +15,29 @@
         <revision type="new" title="Order.params initialisiert sich automatisch">
             <description>
                 <p>
-                    <scheduler_method class="Order" property="params"/> initialisiert sich beim ersten Zugriff 
+                    <scheduler_method class="Order" property="params"/> initialisiert sich beim ersten Zugriff
                     automatisch mit einer <scheduler_method class="Variable_set"/>.
                 </p>
+            </description>
+        </revision>
+        
+        <revision type="new" title="Spooler.terminate() mit Parametern für Cluster-Betrieb">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_method class="Spooler" method="terminate"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+
+        <revision type="new" title="Verwaltung der Feiertage in externer Datei: &lt;holidays> mit &lt;include>">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_element name="holidays" child="include"/>
+                    </li>
+                </ul>
             </description>
         </revision>
     </change>
@@ -39,16 +59,6 @@
                 <ul>
                     <li>
                         <scheduler_element name="file_order_source" attribute="directory"/>
-                    </li>
-                </ul>
-            </description>
-        </revision>
-
-        <revision type="new" title="Verwaltung der Feiertage in externer Datei: &lt;holidays> mit &lt;include>">
-            <description>
-                <ul>
-                    <li>
-                        <scheduler_element name="holidays" child="include"/>
                     </li>
                 </ul>
             </description>

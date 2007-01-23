@@ -22,10 +22,37 @@ var restart = true;
 var all_schedulers = true;
 var continue_exclusive_operation = "non_backup";
 
-spooler.terminate();
-spooler.terminate( timeout, restart, all_schedulers, continue_exclusive_operation );
+//spooler.terminate();
+//spooler.terminate( timeout, restart, all_schedulers, continue_exclusive_operation );
                     
                     ]]>
+                </script>
+                <run_time once="yes"/>
+            </job>
+
+            <job name="java">
+                <script java_class="spooler_job.Java">
+                    <![CDATA[
+
+package spooler_job;
+                     
+import java.io.File;
+import sos.spooler.*;
+
+public class Java extends sos.spooler.Job_impl
+{
+    public boolean spooler_process()
+    {     
+        int     timeout        = 3;
+        boolean restart        = true;
+        boolean all_schedulers = true;
+        boolean continue_exclusive_operation = true;;
+
+        spooler.terminate( timeout, restart, all_schedulers, continue_exclusive_operation );
+        return false;
+    }
+}
+                ]]>
                 </script>
                 <run_time once="yes"/>
             </job>

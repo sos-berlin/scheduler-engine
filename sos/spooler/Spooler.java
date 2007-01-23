@@ -87,6 +87,12 @@ public class Spooler extends Idispatch
     
     public void             terminate           ()                                  {                       com_call( "terminate"                       ); }
     public void             terminate           ( int timeout_in_seconds )          {                       com_call( "terminate", timeout_in_seconds   ); }
+    public void             terminate           ( int timeout_in_seconds, boolean restart, boolean all_schedulers, boolean continue_exclusive_scheduler )
+                                                                                    {                       com_call( "terminate", new Integer( timeout_in_seconds ), 
+                                                                                                                                   new Boolean( restart ), 
+                                                                                                                                   new Boolean( all_schedulers ), 
+                                                                                                                                   new Boolean( continue_exclusive_scheduler ) ); }
+                                                                                                                                   
     public void             terminate_and_restart()                                 {                       com_call( "terminate_and_restart"           ); }
     public void             terminate_and_restart( int timeout_in_seconds )         {                       com_call( "terminate_and_restart", timeout_in_seconds); }
     
