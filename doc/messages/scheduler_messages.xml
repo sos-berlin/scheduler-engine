@@ -2467,6 +2467,17 @@
             </text>
         </message>
 
+        <message code="SCHEDULER-397">
+            <text xml:lang="en">
+                <title>A distributed order does not support <p1/></title>
+            </text>
+        </message>
+
+        <!--message code="SCHEDULER-398">
+            <text xml:lang="en">
+                <title>Same Java class <p1/> with source code is used in <p2>job</p2></title>
+            </text>
+        </message-->
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->

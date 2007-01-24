@@ -1463,7 +1463,7 @@ void Run_time::set_dom( const xml::Element_ptr& element )
 {
     if( !element )  return;
 
-    if( _modified_event_handler )  _modified_event_handler->before_modify_run_time_event();
+    if( _modified_event_handler )  _modified_event_handler->on_before_modify_run_time();
 
 
     Sos_optional_date_time  dt;
@@ -1666,7 +1666,7 @@ xml::Element_ptr Run_time::calendar_dom_element_or_null( const xml::Document_ptr
 
     if( _once )
     {
-        int ONCE_YES_BERUECKSICHTIGEN;
+        //ONCE_YES_BERUECKSICHTIGEN;
     }
 
     while( *limit > 0  &&  t <= until )

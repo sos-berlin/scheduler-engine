@@ -330,6 +330,7 @@ struct Job : Object,
     void                        set_job_chain_priority      ( int pri )                             { if( _job_chain_priority < pri )  _job_chain_priority = pri; }
     static bool                 higher_job_chain_priority   ( const Job* a, const Job* b )          { return a->_job_chain_priority > b->_job_chain_priority; }
 
+    Module*                     module                      ()                                      { return _module; }
     ptr<Module_instance>        create_module_instance      ();
     Module_instance*            get_free_module_instance    ( Task* );
     void                        release_module_instance     ( Module_instance* );

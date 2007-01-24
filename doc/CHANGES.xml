@@ -31,6 +31,16 @@
             </description>
         </revision>
 
+        <revision type="modification" title="Jobs ohne &lt;run_time> berücksichtigen jetzt die &lt;holidays>">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_element name="holidays"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+
         <revision type="new" title="Verwaltung der Feiertage in externer Datei: &lt;holidays> mit &lt;include>">
             <description>
                 <ul>

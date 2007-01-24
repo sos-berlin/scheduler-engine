@@ -55,7 +55,7 @@ struct Source_with_parts
                                 Source_with_parts           ( const xml::Element_ptr& dom )         { assign_dom(dom); }
 
     void                        add                         ( int linenr, const string& text, const Time& mod_time );
-    bool                        empty                       ()                                      { return _parts.empty(); }
+    bool                        empty                       () const                                { return _parts.empty(); }
     void                        clear                       ()                                      { _parts.clear(); }
 
     string                      text                        () const                                { return zschimmer::join( SYSTEM_NL, _parts ); }

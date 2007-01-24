@@ -512,6 +512,7 @@
 <register_keyword keyword='exclusive'>
     <register_keyword_display><code>-exclusive=</code></register_keyword_display>
     <register_entry register_file='CHANGES.xml#use_option__exclusive' register_title='Änderungsprotokoll'  register_keyword='exclusive'/>
+    <register_entry register_file='api/Spooler.xml#use_option__exclusive' register_title='XXX'  register_keyword='exclusive'/>
     <register_entry register_file='backupscheduler.xml#use_option__exclusive' register_title='Backup Job Scheduler'  register_keyword='exclusive'/>
     <register_entry register_file='command_line.xml#option_exclusive' register_title='Kommandozeilenoptionen'  register_keyword='exclusive' type='definition'/>
     <register_entry register_file='command_line.xml#use_option__exclusive' register_title='Kommandozeilenoptionen'  register_keyword='exclusive'/>

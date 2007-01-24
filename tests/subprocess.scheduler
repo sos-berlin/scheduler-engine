@@ -24,7 +24,7 @@
 
 spooler_log.mail_on_error = true;  // <kill_task> kann zu einem Fehler in Process.priority() führen, das Verhalten prüfen wir
 
-if(0)
+if(1)
 {
     var subprocess = spooler_task.create_subprocess();
     subprocess.start( subprocess.env.substitute( "${MY_HOME}/my_program" ) );
@@ -42,7 +42,6 @@ var s = "test1=$test1 TEST1=$TEST1 test2=${test2}";
 spooler_log.info( "substitute: " + s + " ==> " + subprocess.env.substitute( s ) );
 subprocess.ignore_error = true;
 
-subprocess.start( "sh -c set" );
 //subprocess.start( "sh -c set" );
 //subprocess.start( "sleep 30" );
 
@@ -57,6 +56,7 @@ spooler_log.info( "wait_for_termination ok=" + ok );
 
 if( subprocess.terminated )  spooler_log.info( "exit code=" + subprocess.exit_code ), spooler_log.info( "termination signal=" + subprocess.termination_signal );
 
+subprocess.start( "sh -c set" );
 
 var cmd = "sleep 6";
 var exit_code = system( cmd, 5 );
@@ -144,7 +144,7 @@ public class My_job  extends sos.spooler.Job_impl
         </jobs>
 
         <commands>
-            <start_job job="java"/>
+            <start_job job="javascript"/>
         </commands>
     </config>
 </spooler>

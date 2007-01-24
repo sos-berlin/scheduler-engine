@@ -1061,9 +1061,29 @@ void Spooler::unregister_pid( int pid )
 Order_subsystem* Spooler::order_subsystem()
 { 
     assert( _order_subsystem ); 
-    if( !_order_subsystem )  z::throw_xc( __FUNCTION__ );
+    if( !_order_subsystem )  z::throw_xc( __FUNCTION__, "Order subsystem is not initialized" );
 
     return _order_subsystem; 
+}
+
+//---------------------------------------------------------------------------Spooler::job_subsystem
+
+Job_subsystem_interface* Spooler::job_subsystem()
+{ 
+    assert( _job_subsystem ); 
+    if( !_job_subsystem )  z::throw_xc( __FUNCTION__, "Job subsystem is not initialized" );
+
+    return _job_subsystem; 
+}
+
+//--------------------------------------------------------------------------Spooler::task_subsystem
+
+Task_subsystem* Spooler::task_subsystem()
+{ 
+    assert( _task_subsystem ); 
+    if( !_task_subsystem )  z::throw_xc( __FUNCTION__, "Task subsystem is not initialized" );
+
+    return _task_subsystem; 
 }
 
 //---------------------------------------------------------------------------Spooler::has_any_order

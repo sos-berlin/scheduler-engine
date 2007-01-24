@@ -116,6 +116,10 @@
                     Die nächste Task (die in einem eigenen Prozess läuft) verwendet die neue Klasse.
                 </p>
             </description>
+
+            <messages>
+                <!--message level="error" code="SCHEDULER-398"/-->
+            </messages>
         </xml_attribute>
 
 <!--

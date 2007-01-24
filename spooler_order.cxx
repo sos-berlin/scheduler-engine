@@ -22,18 +22,21 @@ using stdext::hash_map;
 namespace sos {
 namespace scheduler {
 
-//-------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------const
 
-const int    check_database_orders_period           = 15;
-const int    check_database_orders_period_minimum   = 1;
-const int    database_orders_read_ahead_count       = 1;
+const int    check_database_orders_period               = 15;
+const int    check_database_orders_period_minimum       = 1;
+const int    database_orders_read_ahead_count           = 1;
+const int    max_insert_race_retry_count                = 5;                            // Race condition beim Einfügen eines Datensatzes
+
+//--------------------------------------------------------------------------------------------const
+
 const string now_database_distributed_next_time         = "2000-01-01 00:00:00";        // Auftrag ist verteilt und ist sofort ausführbar
 const string never_database_distributed_next_time       = "3111-11-11 00:00:00";        // Auftrag ist verteilt, hat aber keine Startzeit (weil z.B. suspendiert)
 const string blacklist_database_distributed_next_time   = "3111-11-11 00:01:00";        // Auftrag ist auf der schwarzen Liste
 const string replacement_database_distributed_next_time = "3111-11-11 00:02:00";        // <order replacement="yes">
-const string default_end_state_name                 = "<END_STATE>";
-const string order_select_database_columns          = "`id`, `priority`, `state`, `state_text`, `initial_state`, `title`, `created_time`";
-const int    max_insert_race_retry_count            = 5;                                // Race condition beim Einfügen eines Datensatzes
+const string default_end_state_name                     = "<END_STATE>";
+const string order_select_database_columns              = "`id`, `priority`, `state`, `state_text`, `initial_state`, `title`, `created_time`";
 
 //--------------------------------------------------------------------------Database_order_detector
 
@@ -620,7 +623,11 @@ ptr<Order> Order_subsystem::try_load_order_from_database( Transaction* outer_tra
             }      
         }
     }
-    catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_orders_tablename, x ), __FUNCTION__ ); }
+    catch( exception& x ) 
+    { 
+        if( result )  result->close(),  result = NULL;
+        ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_orders_tablename, x ), __FUNCTION__ ); 
+    }
 
     return result;
 }
@@ -2500,7 +2507,7 @@ bool Order::is_processable()
     return true;
 }
 
-//--------------------------------------------------------------------Order::assert_is_not_distributed
+//-----------------------------------------------------------------Order::assert_is_not_distributed
 
 void Order::assert_is_not_distributed( const string& debug_text )
 {
@@ -2509,11 +2516,17 @@ void Order::assert_is_not_distributed( const string& debug_text )
 
 //---------------------------------------------------------------------------Order::set_distributed
 
-void Order::set_distributed()
+void Order::set_distributed( bool distributed )
 {
-    if( !job_chain()  ||  !job_chain()->_is_distributed )  z::throw_xc( __FUNCTION__, obj_name(), "no job_chain or job_chain is not distributed" );
+    assert( distributed );
 
-    _is_distributed = true;
+    if( distributed )
+    {
+        if( _run_time->set() )  z::throw_xc( "SCHEDULER-397", "<run_time>" );
+        //if( !job_chain()  ||  !job_chain()->_is_distributed )  z::throw_xc( __FUNCTION__, obj_name(), "no job_chain or job_chain is not distributed" );
+    }
+
+    _is_distributed = distributed;
 }
 
 //----------------------------------------------------------------------------Order::assert_no_task
@@ -3970,7 +3983,7 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain )
 
         set_setback( _state == _initial_state  &&  !_setback  &&  _run_time->set()? next_start_time( true ) : _setback );
 
-        _is_distributed = !_is_distribution_inhibited  &&  job_chain->_is_distributed;
+        if( !_is_distribution_inhibited  &&  job_chain->_is_distributed )  set_distributed();
 
         _job_chain_name = job_chain->name();
         _removed_from_job_chain_name = "";
@@ -4412,10 +4425,11 @@ Time Order::next_start_time( bool first_call )
     return result;
 }
 
-//--------------------------------------------------------------Order::before_modify_run_time_event
+//-----------------------------------------------------------------Order::on_before_modify_run_time
 
-void Order::before_modify_run_time_event()
+void Order::on_before_modify_run_time()
 {
+    if( _is_distributed )  z::throw_xc( "SCHEDULER-397", "<run_time>" );
   //if( _task       )  z::throw_xc( "SCHEDULER-217", obj_name(), _task->obj_name() );
   //if( _moved      )  z::throw_xc( "SCHEDULER-188", obj_name() );
   //if( _job_chain  )  z::throw_xc( "SCHEDULER-186", obj_name(), _job_chain_name );

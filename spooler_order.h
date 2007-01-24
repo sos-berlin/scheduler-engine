@@ -142,7 +142,7 @@ struct Order : Com_order,
 
     void                        inhibit_distribution    ()                                          { _is_distribution_inhibited = true; }
     void                        assert_is_not_distributed  ( const string& debug_text );
-    void                    set_distributed             ();
+    void                    set_distributed             ( bool = true );
     bool                     is_distributed             () const                                    { return _is_distributed; }
 
     void                        start_now               ();
@@ -174,7 +174,7 @@ struct Order : Com_order,
     xml::Document_ptr           dom                     ( const Show_what& ) const;
 
     void                    set_run_time                ( const xml::Element_ptr& );
-    void                        before_modify_run_time_event();
+    void                        on_before_modify_run_time();
     void                        run_time_modified_event ();
 
     void                        db_insert               ();

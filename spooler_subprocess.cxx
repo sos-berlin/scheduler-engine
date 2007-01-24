@@ -39,7 +39,7 @@ const Com_method Subprocess::_methods[] =
 #ifdef COM_METHOD
     COM_PROPERTY_GET( Subprocess,  1, Java_class_name, VT_BSTR    , 0  ),
     COM_METHOD      ( Subprocess,  2, Close          , VT_EMPTY   , 0  ),
-    COM_METHOD      ( Subprocess,  3, Start          , VT_EMPTY   , 0, VT_BYREF|VT_VARIANT  ),
+    COM_METHOD      ( Subprocess,  3, Start          , VT_EMPTY   , 0, VT_BYREF|VT_VARIANT ),
     COM_PROPERTY_PUT( Subprocess,  4, Priority       ,              0, VT_INT ),
     COM_PROPERTY_GET( Subprocess,  4, Priority       , VT_INT     , 0 ),
     COM_PROPERTY_PUT( Subprocess,  5, Priority_class ,              0, VT_BSTR ),
@@ -158,6 +158,7 @@ STDMETHODIMP Subprocess::Start( VARIANT* program_and_parameters )
 
     HRESULT hr = S_OK;
     
+    _process.assert_not_started();
 
 #   ifdef Z_WINDOWSxxx // Test
         UINT previous_error_mode = 0;

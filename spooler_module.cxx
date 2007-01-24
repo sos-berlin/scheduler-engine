@@ -245,6 +245,22 @@ void Module::set_dom_source_only( const string& include_path )
 
 void Module::set_source_only( const Source_with_parts& source )
 {
+    //if( _kind == kind_java  &&  _spooler  &&  _spooler->job_subsystem_or_null() )
+    //{
+    //    FOR_EACH_JOB( j )
+    //    {
+    //        Job* job = *j;
+    //        
+    //        if( job->module()  
+    //        &&  job->module()->_kind == kind_java 
+    //        &&  job->module()->_source.empty() | source.empty()
+    //        &&  job->module()->_java_class_name == _java_class_name )
+    //        {
+    //            z::throw_xc( "SCHEDULER-398", _java_class_name, job->obj_name() );
+    //        }
+    //    }
+    //}
+
     _source = source;
     _compiled = false;
 

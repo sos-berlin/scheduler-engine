@@ -56,7 +56,7 @@ enum First_and_last
 
 struct Modified_event_handler
 {
-    virtual void                before_modify_run_time_event()                                      {}
+    virtual void                on_before_modify_run_time()                                      {}
     virtual void                run_time_modified_event     () = 0;
 };
 

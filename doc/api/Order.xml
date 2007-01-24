@@ -352,9 +352,16 @@
         <p>
             Das Kommando
             <scheduler_element name="modify_order" attribute="at" value="now"/>
-            lässt einen wartenden Auftrag sofort anlaufen.
+            lässt einen wegen <code>run_time</code> wartenden Auftrag sofort anlaufen.
+        </p>
+        <p>
+            Verteilte Aufträge können keine <code>run_time</code> haben.
         </p>
     </description>
+
+    <messages>
+        <message level="error" code="SCHEDULER-397"/>
+    </messages>
 
     <example programming_language="javascript">
         <pre><![CDATA[order.run_time.xml = "<run_time><at at='2006-05-23 11:43:00'/></run_time>";]]></pre>

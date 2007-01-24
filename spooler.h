@@ -384,9 +384,11 @@ struct Spooler : Object,
 
     Scheduler_script_interface* scheduler_script            () const                            { return _scheduler_script; }
 
+    Task_subsystem*             task_subsystem              ();
+    Task_subsystem*             task_subsystem_or_null      ()                                  { return _task_subsystem; }
+    Job_subsystem_interface*    job_subsystem               ();
+    Job_subsystem_interface*    job_subsystem_or_null       ()                                  { return _job_subsystem; }
     Order_subsystem*            order_subsystem             ();
-    Task_subsystem*             task_subsystem              ()                                  { return _task_subsystem; }
-    Job_subsystem_interface*    job_subsystem               ()                                  { return _job_subsystem; }
     bool                        has_any_order               ();
     bool                        has_any_task                ();
 
