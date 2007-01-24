@@ -28,12 +28,9 @@
 #endif
 
 
+
 namespace sos {
 namespace scheduler {
-
-//extern const Gmtime                    doomsday                    = (Gmtime)double_time_max;
-
-
 namespace time {
 
 //-------------------------------------------------------------------------------------------static
@@ -1417,6 +1414,9 @@ void Run_time::set_xml( const string& xml )
 
 Period Run_time::call_function( const Time& requested_beginning )
 {
+    // Die Funktion sollte keine Zeit in der wiederholten Stunde nach Ende der Sommerzeit liefern.
+
+
     Period result;
 
     try
