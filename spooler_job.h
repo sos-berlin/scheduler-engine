@@ -465,7 +465,7 @@ struct Job_subsystem_interface : Subsystem
 
     virtual void                close_jobs                  ()                                      = 0;
     virtual void                initialize_job              ( Job* )                                = 0;
-    virtual void                load_job                  ( Transaction*, Job* )                  = 0;
+    virtual void                load_job                    ( Transaction*, Job* )                  = 0;
     virtual void                activate_job                ( Job* )                                = 0;
     virtual void                load_jobs_from_xml          ( const xml::Element_ptr&, const Time& xml_mod_time, bool activate = false ) = 0;
     virtual void                load_job_from_xml           ( const xml::Element_ptr&, const Time& xml_mod_time, bool activate = false ) = 0;
