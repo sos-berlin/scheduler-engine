@@ -753,6 +753,7 @@ void Period::set_dom( const xml::Element_ptr& element, const Period* deflt )
     string single_start = element.getAttribute( "single_start" );
     if( !single_start.empty() )
     {
+        dt.set_time( single_start );
         set_single_start( Time( dt ) );
     }
     else
