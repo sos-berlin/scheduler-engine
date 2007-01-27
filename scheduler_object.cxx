@@ -58,6 +58,13 @@ Scheduler_object::Scheduler_object( Spooler* spooler, IUnknown* me, Type_code co
     }
 }
 
+//----------------------------------------------------------------------Scheduler_object::idispatch
+    
+IDispatch* Scheduler_object::idispatch()
+{
+    z::throw_xc( __FUNCTION__, obj_name() );
+}
+
 //-----------------------------------------------------------Scheduler_object::mail_xslt_stylesheet
     
 ptr<Xslt_stylesheet> Scheduler_object::mail_xslt_stylesheet()
@@ -104,7 +111,7 @@ Task_subsystem* Scheduler_object::task_subsystem() const
 
 //----------------------------------------------------------------Scheduler_object::order_subsystem
 
-Order_subsystem* Scheduler_object::order_subsystem() const
+Order_subsystem_interface* Scheduler_object::order_subsystem() const
 {
     return _spooler->order_subsystem();
 }

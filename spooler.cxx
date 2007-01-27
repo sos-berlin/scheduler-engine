@@ -631,10 +631,10 @@ Spooler::Spooler()
     _scheduler_script        = new_scheduler_script( this );
     _job_subsystem           = new_job_subsystem( this );
     _task_subsystem          = Z_NEW( Task_subsystem( this ) );
-    _order_subsystem         = Z_NEW( Order_subsystem( this ) );
+    _order_subsystem         = new_order_subsystem( this );
     _db                      = Z_NEW( Database( this ) );
 
-    _scheduler_script->set_subsystem_state( subsys_initialized );
+    _scheduler_script->switch_subsystem_state( subsys_initialized );
 
     _variable_set_map[ variable_set_name_for_substitution ] = _environment;
 
@@ -1058,7 +1058,7 @@ void Spooler::unregister_pid( int pid )
 
 //-------------------------------------------------------------------------Spooler::order_subsystem
 
-Order_subsystem* Spooler::order_subsystem()
+Order_subsystem_interface* Spooler::order_subsystem()
 { 
     assert( _order_subsystem ); 
     if( !_order_subsystem )  z::throw_xc( __FUNCTION__, "Order subsystem is not initialized" );
@@ -1532,7 +1532,7 @@ void Spooler::load()
     _process_class_list.push_back( process_class );         
 
 
-    _order_subsystem->init();
+    _order_subsystem->switch_subsystem_state( subsys_initialized );
     _web_services.init();    // Ein Job und eine Jobkette einrichten, s. spooler_web_service.cxx
 
 
@@ -1611,14 +1611,14 @@ void Spooler::update_console_title( int level )
 
             if( level == 2 )    // Aktuelles im laufenden Betrieb zeigen
             {
-                if( _task_subsystem  &&  _task_subsystem->_finished_tasks_count )
+                if( _task_subsystem  &&  _task_subsystem->finished_tasks_count() )
                 {
-                    title << ", " <<_task_subsystem->_finished_tasks_count << " finished tasks";
+                    title << ", " <<_task_subsystem->finished_tasks_count() << " finished tasks";
                 }
 
-                if( _order_subsystem  &&  _order_subsystem->_finished_orders_count )
+                if( _order_subsystem  &&  _order_subsystem->finished_orders_count() )
                 {
-                    title << ", " << _order_subsystem->_finished_orders_count << " finished orders";     
+                    title << ", " << _order_subsystem->finished_orders_count() << " finished orders";     
                 }
 
                 int process_count = 0;
@@ -1691,9 +1691,9 @@ void Spooler::start()
     _daylight_saving_time_transition_detector = time::new_daylight_saving_time_transition_detector( this );
     _daylight_saving_time_transition_detector->set_async_manager( _connection_manager );
 
-    _order_subsystem->start();
-    _web_services.start();                                      // Nicht in Spooler::load(), denn es öffnet schon -log-dir-Dateien (das ist nicht gut für -send-cmd=)
-    _job_subsystem->set_subsystem_state( subsys_initialized );  // Setzt _has_java_source
+    //_order_subsystem->start();
+    _web_services.start();                                          // Nicht in Spooler::load(), denn es öffnet schon -log-dir-Dateien (das ist nicht gut für -send-cmd=)
+    _job_subsystem->switch_subsystem_state( subsys_initialized );   // Setzt _has_java_source
 
 
     try
@@ -1777,17 +1777,17 @@ void Spooler::start()
 //
 //    execute_config_commands();
 //
-//    _scheduler_script->set_subsystem_state( subsys_loaded );
-//    _scheduler_script->set_subsystem_state( subsys_active );
+//    _scheduler_script->switch_subsystem_state( subsys_loaded );
+//    _scheduler_script->switch_subsystem_state( subsys_active );
 //
 //    set_state( s_running );
 //}
 
 void Spooler::activate()
 {
-    _job_subsystem->set_subsystem_state( subsys_loaded );   
+    _job_subsystem->switch_subsystem_state( subsys_loaded );   
     //_task_subsystem->start( &_event ); 
-    _order_subsystem->load_orders_from_database();
+    _order_subsystem->switch_subsystem_state( subsys_loaded );
 
     if( !_xml_cmd.empty() )
     {
@@ -1798,11 +1798,14 @@ void Spooler::activate()
 
     execute_config_commands();                                                                          
 
-    _scheduler_script->set_subsystem_state( subsys_loaded );
-    _scheduler_script->set_subsystem_state( subsys_active );        // Hier passiert eigentlich nichts mehr (jedenfalls nicht bei Spidermonkey)
+    _scheduler_script->switch_subsystem_state( subsys_loaded );
+    _scheduler_script->switch_subsystem_state( subsys_active );        // Hier passiert eigentlich nichts mehr (jedenfalls nicht bei Spidermonkey)
 
-    // Job-<run_time> benutzt das geladene Scheduler-Skript
-    _job_subsystem->set_subsystem_state( subsys_active );           
+
+    // Job- und Order-<run_time> benutzen das geladene Scheduler-Skript
+
+    _job_subsystem  ->switch_subsystem_state( subsys_active );
+    _order_subsystem->switch_subsystem_state( subsys_active );
 
     set_state( s_running );
 }
@@ -1932,14 +1935,14 @@ void Spooler::stop( const exception* )
     _scheduler_script->close();  // Scheduler-Skript zuerst beenden, damit die Finalizer die Tasks (von Job.start()) und andere Objekte schließen können.
 
 
-    if( _order_subsystem )  _order_subsystem->close_job_chains();
+    if( _order_subsystem )  _order_subsystem->close();
 
     _job_subsystem->close_jobs();
 
     if( _shutdown_ignore_running_tasks )  _spooler->kill_all_processes();   // Übriggebliebene Prozesse killen
 
 
-    if( _order_subsystem )  _order_subsystem->close(), _order_subsystem = NULL;
+    _order_subsystem = NULL;
     //_object_set_class_list.clear();
     _job_subsystem->_job_list.clear();
     _process_class_list.clear();

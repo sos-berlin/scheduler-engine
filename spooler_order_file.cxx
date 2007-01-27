@@ -142,16 +142,17 @@ struct File_order_sink_job : Internal_job
     }
 };
 
-//------------------------------------------------------------Order_subsystem::init_file_order_sink
+//-----------------------------------------------------------------------------init_file_order_sink
 
-void Order_subsystem::init_file_order_sink()
+void init_file_order_sink( Scheduler* scheduler )
 {
-    ptr<File_order_sink_job> file_order_sink_job = Z_NEW( File_order_sink_job( _spooler ) );
+    ptr<File_order_sink_job> file_order_sink_job = Z_NEW( File_order_sink_job( scheduler ) );
+
     file_order_sink_job->set_visible( false );
     file_order_sink_job->set_order_controlled();
     file_order_sink_job->set_idle_timeout( file_order_sink_job_idle_timeout_default );
 
-    _spooler->job_subsystem()->add_job( +file_order_sink_job, true );
+    scheduler->job_subsystem()->add_job( +file_order_sink_job, true );
 
     // Der Scheduler führt Tasks des Jobs scheduler_file_order_sink in jedem Scheduler-Schritt aus,
     // damit sich die Aufträge nicht stauen (Der interne Job läuft nicht in einem eigenen Prozess)
@@ -801,7 +802,7 @@ bool Directory_file_order_source::clean_up_blacklisted_files()
                     {
                         Transaction ta ( _spooler->_db ); 
 
-                        ptr<Order> order = order_subsystem()->try_load_order_from_database( &ta, _job_chain->name(), path, Order_subsystem::lo_blacklisted_lock );
+                        ptr<Order> order = order_subsystem()->try_load_order_from_database( &ta, _job_chain->name(), path, Order_subsystem_interface::lo_blacklisted_lock );
                         order->db_delete( Order::update_not_occupied, &ta );
 
                         ta.commit( __FUNCTION__ );

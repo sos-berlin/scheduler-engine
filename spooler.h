@@ -388,7 +388,7 @@ struct Spooler : Object,
     Task_subsystem*             task_subsystem_or_null      ()                                  { return _task_subsystem; }
     Job_subsystem_interface*    job_subsystem               ();
     Job_subsystem_interface*    job_subsystem_or_null       ()                                  { return _job_subsystem; }
-    Order_subsystem*            order_subsystem             ();
+    Order_subsystem_interface*  order_subsystem             ();
     bool                        has_any_order               ();
     bool                        has_any_task                ();
 
@@ -490,9 +490,11 @@ struct Spooler : Object,
     string                     _xml_cmd;                    // Parameter -cmd, ein zuerst auszuführendes Kommando.
     string                     _pid_filename;
 
-    ptr<Order_subsystem>       _order_subsystem;
-    Web_services               _web_services;
-    ptr<Job_subsystem_interface> _job_subsystem;
+    ptr<Job_subsystem_interface>   _job_subsystem;
+    ptr<Task_subsystem>            _task_subsystem;
+    ptr<Order_subsystem_interface> _order_subsystem;
+    Web_services                   _web_services;
+
     Wait_handles               _wait_handles;
 
     Event                      _event;                      // Für Signale aus anderen Threads, mit Betriebssystem implementiert (nicht Unix)
@@ -553,7 +555,6 @@ struct Spooler : Object,
     Time                       _last_resume_at;             // Für <show_state>
     bool                       _print_time_every_second;
 
-    ptr<Task_subsystem>        _task_subsystem;
     Thread_id                  _thread_id;                  // Haupt-Thread
     Time                       _spooler_start_time;
     State                      _state;

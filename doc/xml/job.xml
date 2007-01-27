@@ -377,9 +377,14 @@
                     Wenn das nicht möglich ist, weil z.B. gerade eine Task läuft,
                     dann ersetzt der Scheduler den Job später.
                 </p>
+                <p>
+                    Ein auftragsgesteuerte Job (<scheduler_element name="job" attribute="order" value="yes"/>)
+                    kann nicht ersetzt werden.
+                </p>
             </description>
 
             <messages>
+                <message level="error" code="SCHEDULER-229"/>
                 <message level="info" code="SCHEDULER-988"/>
                 <message level="info" code="SCHEDULER-989"/>
             </messages>

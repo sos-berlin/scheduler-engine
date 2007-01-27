@@ -18,7 +18,7 @@ struct Task_subsystem : Subsystem
 
 
     virtual void                close                       ()                                      {}
-    virtual bool            set_subsystem_state             ( Subsystem_state )                     { return false; }
+    virtual bool                switch_subsystem_state      ( Subsystem_state )                     { return false; }
 
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
     
@@ -34,6 +34,7 @@ struct Task_subsystem : Subsystem
     void                        decrement_running_tasks     ();
     void                        count_started_tasks         ();
     void                        count_finished_tasks        ();
+    int                         finished_tasks_count        () const                                { return _finished_tasks_count; }
 
     void                        count_task                  ()                                      { InterlockedIncrement( &_task_count ); }
     void                        count_step                  ()                                      { InterlockedIncrement( &_step_count ); }

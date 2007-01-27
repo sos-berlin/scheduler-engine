@@ -39,7 +39,7 @@ struct Job_subsystem : Job_subsystem_interface
                                 Job_subsystem               ( Scheduler* );
 
     // Subsystem:
-    bool                    set_subsystem_state             ( Subsystem_state );
+    bool                        switch_subsystem_state      ( Subsystem_state );
     void                        close                       ();
 
     // Job_subsystem_interface:
@@ -87,9 +87,9 @@ void Job_subsystem::close()
     _subsystem_state = subsys_stopped;
 }
 
-//---------------------------------------------------------------Job_subsystem::set_subsystem_state
+//------------------------------------------------------------Job_subsystem::switch_subsystem_state
     
-bool Job_subsystem::set_subsystem_state( Subsystem_state new_state )
+bool Job_subsystem::switch_subsystem_state( Subsystem_state new_state )
 {
     bool result = false;
 
@@ -482,7 +482,7 @@ Job::~Job()
     }
     catch( exception& x ) { _log->warn( x.what() ); }     
 
-    if( _run_time )  _run_time->set_function_com_object( NULL ),  _run_time->set_log( NULL );
+    if( _run_time )  _run_time->close();
 }
 
 //---------------------------------------------------------------------------------------Job::close
@@ -531,8 +531,9 @@ void Job::close()
     _log->close();
 
     // COM-Objekte entkoppeln, falls noch jemand eine Referenz darauf hat:
-    if( _run_time )  _run_time->set_function_com_object( NULL ),  _run_time->set_log( NULL );
-    if( _com_job  )  _com_job->close(),         _com_job  = NULL;
+    if( _com_job  )  _com_job->close(), _com_job  = NULL;
+
+    if( _run_time )  _run_time->close();
 }
 
 //----------------------------------------------------------------------------------Job::initialize
@@ -563,7 +564,7 @@ void Job::initialize()
 
 void Job::load( Transaction* ta )
 {
-    Z_LOGI2( "scheduler", obj_name() << ".activate()\n" );
+    Z_LOGI2( "scheduler", obj_name() << ".load()\n" );
 
     if( _state < s_loaded )
     {
@@ -961,9 +962,7 @@ void Job::init_start_when_directory_changed( Task* task )
 
 void Job::init_run_time()
 {
-    _run_time = Z_NEW( Run_time( _spooler ) );
-    _run_time->set_log( _log );                         // Am Ende löschen!
-    _run_time->set_function_com_object( _com_job );     assert( _com_job );
+    _run_time = Z_NEW( Run_time( this ) );
     _run_time->set_holidays( _spooler->holidays() );
 }
 

@@ -55,8 +55,12 @@
         </xml_attribute>
     </xml_attributes>
 
-Das Attribut <code>day</code> gibt den Tag von 0 für Sonntag bis 6 für Samstag an.
+    
+    <xml_child_elements>
+        <xml_child_element name="period" multiple="yes"/>
+    </xml_child_elements>
 
+    
     <description>
         <p>
             Setzt die Perioden für einen bestimmten Tag fest.

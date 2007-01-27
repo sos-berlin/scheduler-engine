@@ -11,6 +11,7 @@ struct Job_chain;
 struct Job_chain_node;
 struct Order_queue;
 struct Order;
+struct Order_subsystem;
 struct Database_order_detector;
 
 //-------------------------------------------------------------------------------------------------
@@ -23,12 +24,18 @@ struct Order : Com_order,
                Scheduler_object,
                Modified_event_handler
 {
-    Fill_zero                  _zero_;    
-
     typedef Variant             Payload;
     typedef int                 Priority;               // Höherer Wert bedeutet höhere Priorität
     typedef Variant             State;
     typedef Variant             Id;
+
+
+    enum Order_state
+    {
+        s_none,
+        s_active
+    };
+
 
 
     Z_GNU_ONLY(                 Order                   (); )                                       // Für gcc 3.2. Nicht implementiert
@@ -39,22 +46,27 @@ struct Order : Com_order,
 
 
     // Scheduler_object:
-  //Prefix_log*                 log                     ()                                          { return _log; }
-    void                        print_xml_child_elements_for_event( String_stream*, Scheduler_event* );
+    virtual string              obj_name                () const;
+    virtual IDispatch*          idispatch               ()                                          { return this; }
+
+
+    void                        close                   ();
+
+    void                        init                    ();
+    void                        activate                ();
     void                        load_blobs              ( Read_transaction* );
     void                        load_order_xml_blob     ( Read_transaction* );
     void                        load_run_time_blob      ( Read_transaction* );
     void                        load_payload_blob       ( Read_transaction* );
 
-    void                        init                    ();
     bool                        occupy_for_task         ( Task*, const Time& now );
     void                        assert_no_task          ( const string& debug_text );
     void                        assert_task             ( const string& debug_text );
     bool                        is_immediately_processable( const Time& now );
     bool                        is_processable          ();
     void                        open_log                ();
-    void                        close                   ();
 
+    void                        print_xml_child_elements_for_event( String_stream*, Scheduler_event* );
     
     void                    set_id                      ( const Variant& );
     const Id&                   id                      ()                                          { return _id; }
@@ -65,7 +77,6 @@ struct Order : Com_order,
 
     void                    set_title                   ( const string& title )                     { _title = title,  _title_modified = true,  _log->set_prefix( obj_name() ); }
     string&                     title                   ()                                          { return _title; }
-    string                      obj_name                () const;
                                                             
     void                    set_priority                ( Priority );
     Priority                    priority                () const                                    { return _priority; }
@@ -157,6 +168,7 @@ struct Order : Com_order,
     void                    set_replacement             ( bool );
     Time                        next_time               ();
     Time                        next_start_time         ( bool first_call = false );
+    void                        set_next_start_time     ();
 
     // Auftrag in einer Jobkette:
     void                        place_in_job_chain      ( Job_chain* );
@@ -200,8 +212,7 @@ struct Order : Com_order,
     void                        db_fill_where_clause    ( sql::Where_clause* );
     int                         db_get_ordering         ( Transaction* ta = NULL );
     Database*                   db                      ();
-
-  //ptr<Prefix_log>            _log;
+    Order_subsystem*            order_subsystem         () const;
 
 
   private:
@@ -212,7 +223,7 @@ struct Order : Com_order,
     friend struct               Job_chain;
 
 
-  //Thread_semaphore           _lock;
+    Fill_zero                  _zero_;    
 
     Id                         _id;
     State                      _state;
@@ -252,6 +263,7 @@ struct Order : Com_order,
 
     // Flüchtige Variablen, nicht für die Datenbank:
 
+    Order_state                _order_state;
     Job_chain*                 _job_chain;              // Nur gesetzt, wenn !_is_distributed oder in Verarbeitung (_task). Sonst wird der Auftrag nur in der Datenbank gehalten
     Job_chain_node*            _job_chain_node;         // if( _job_chain)  Nächste Stelle, falls in einer Jobkette
     Order_queue*               _order_queue;            // Auftrag ist in einer Auftragsliste, aber nicht in einer Jobkette. _job_chain == NULL, _job_chain_node == NULL!
@@ -358,8 +370,6 @@ struct Job_chain_node : Com_job_chain_node
 
 struct Job_chain : Com_job_chain, Scheduler_object
 {
-    //typedef Variant             State;
-
     enum State
     {
         s_under_construction,   // add_job() gesperrt, add_order() frei
@@ -375,6 +385,7 @@ struct Job_chain : Com_job_chain, Scheduler_object
                                ~Job_chain               ();
 
     void                        close                   ();
+    void                        activate                ();
     void                        remove                  ();
     void                        check_for_removing      ();
 
@@ -383,7 +394,6 @@ struct Job_chain : Com_job_chain, Scheduler_object
 
     void                    set_state                   ( State state )                             { _state = state; }
     State                       state                   () const                                    { return _state; }
-  //bool                        finished                () const                                    { return _state == s_finished; }
     static string               state_name              ( State );
 
     void                    set_visible                 ( bool b )                                  { _visible = b; }
@@ -437,6 +447,7 @@ struct Job_chain : Com_job_chain, Scheduler_object
     void                    set_dom                     ( const xml::Element_ptr& );
     xml::Element_ptr            dom_element             ( const xml::Document_ptr&, const Show_what& );
 
+    Order_subsystem*            order_subsystem         () const;
     string                      obj_name                () const                                    { return "Job_chain " + _name; }
 
 
@@ -549,9 +560,9 @@ struct Order_queue : Com_order_queue
   //int                        _highest_priority;       // Zur Optimierung
 };
 
-//-------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------Order_subsystem_interface
 
-struct Order_subsystem : Object, Scheduler_object
+struct Order_subsystem_interface : Subsystem
 {
     enum Load_order_flags
     {
@@ -561,50 +572,34 @@ struct Order_subsystem : Object, Scheduler_object
         lo_blacklisted_lock = lo_blacklisted | lo_lock
     };
 
+                                Order_subsystem_interface   ( Scheduler* );
 
-                                Order_subsystem             ( Spooler* );
 
+    virtual void                load_job_chains_from_xml    ( const xml::Element_ptr& )             = 0;
+    virtual void                add_job_chain               ( Job_chain* )                          = 0;
+    virtual void                remove_job_chain            ( Job_chain* )                          = 0;
+    virtual void                check_exception             ()                                      = 0;
+    virtual bool                are_orders_distributed      ()                                      = 0;
+    virtual bool                is_job_in_any_job_chain     ( Job* )                                = 0;
+    virtual bool                is_job_in_any_distributed_job_chain( Job* )                         = 0;
 
-    void                        init                        ();
-    void                        start                       ();
-    void                        close                       ();
-    void                        close_job_chains            ();
+    virtual void                request_order               ()                                      = 0;
+    virtual ptr<Order>          load_order_from_database    ( Transaction*, const string& job_chain_name, const Order::Id&, Load_order_flags = lo_none ) = 0;
+    virtual ptr<Order>      try_load_order_from_database    ( Transaction*, const string& job_chain_name, const Order::Id&, Load_order_flags = lo_none ) = 0;
+    virtual string              order_db_where_condition    ( const string& job_chain_name, const string& order_id ) = 0;
 
-    void                        init_file_order_sink        ();                                     // In spooler_order_file.cxx
-    void                        load_job_chains_from_xml    ( const xml::Element_ptr& );
-    void                        add_job_chain               ( Job_chain* );
-    void                        remove_job_chain            ( Job_chain* );
-    Job_chain*                  job_chain                   ( const string& name );
-    Job_chain*                  job_chain_or_null           ( const string& name );
-    xml::Element_ptr            job_chains_dom_element      ( const xml::Document_ptr&, const Show_what& );
-    void                        load_orders_from_database   ();
-    ptr<Order>                  load_order_from_database    ( Transaction*, const string& job_chain_name, const Order::Id&, Load_order_flags = lo_none );
-    ptr<Order>                  try_load_order_from_database( Transaction*, const string& job_chain_name, const Order::Id&, Load_order_flags = lo_none );
-    void                        check_exception             ();
-    bool                        are_orders_distributed      ();                                    // Für verteilte (distributed) Ausführung
-    void                        request_order               ();
-    bool                        is_job_in_any_job_chain     ( Job* );
-    bool                        is_job_in_any_distributed_job_chain( Job* );
-    string                      job_chain_db_where_condition( const string& job_chain_name );
-    string                      order_db_where_condition    ( const string& job_chain_name, const string& order_id );
-    void                        count_started_orders        ();
-    void                        count_finished_orders       ();
+    virtual Job_chain*          job_chain                   ( const string& name )                  = 0;
+    virtual Job_chain*          job_chain_or_null           ( const string& name )                  = 0;
+    virtual xml::Element_ptr    job_chains_dom_element      ( const xml::Document_ptr&, const Show_what& ) = 0;
 
-//private:
-    Fill_zero                  _zero_;
-    Thread_semaphore           _job_chain_lock;
-    typedef map< string, ptr<Job_chain> >  Job_chain_map;
-    Job_chain_map              _job_chain_map;
-    int                        _job_chain_map_version;             // Zeitstempel der letzten Änderung (letzter Aufruf von Spooler::add_job_chain()), 
-    long32                     _next_free_order_id;
-    ptr<Database_order_detector> _database_order_detector;
-    int                        _started_orders_count;
-    int                        _finished_orders_count;
+    virtual int                 finished_orders_count       () const                                = 0;
+    virtual int                 job_chain_map_version       () const                                = 0;
 };
 
-//-------------------------------------------------------------------------------------------------
 
-//string                          string_from_state       ( Order::State );
+ptr<Order_subsystem_interface>  new_order_subsystem         ( Scheduler* );
+
+//-------------------------------------------------------------------------------------------------
 
 } //namespace scheduler
 } //namespace sos

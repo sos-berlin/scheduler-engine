@@ -193,6 +193,12 @@ struct Job : Object,
                                 Job                         ( Spooler*, const ptr<Module>& = NULL );
     virtual                    ~Job                         (); 
 
+
+    // Scheduler_object:
+    virtual string              obj_name                    () const                                { return "Job " + _name; }
+    virtual IDispatch*          idispatch                   ()                                      { return _com_job; }
+
+
     void                    set_dom                         ( const xml::Element_ptr&, const Time& mod_time );
     void                        add_on_exit_commands_element( const xml::Element_ptr& commands_element, const Time& mod_time );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what&, Job_chain* = NULL );
@@ -340,8 +346,6 @@ struct Job : Object,
 
     void                        count_task                  ()                                      { InterlockedIncrement( &_tasks_count ); }
     void                        count_step                  ()                                      { InterlockedIncrement( &_step_count ); }
-
-    virtual string              obj_name                    () const                                { return "Job " + _name; }
 
 
     friend struct               Object_set;

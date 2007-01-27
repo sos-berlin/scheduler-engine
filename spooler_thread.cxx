@@ -35,7 +35,7 @@ Task_subsystem::~Task_subsystem()
 
 void Task_subsystem::build_prioritized_order_job_array()
 {
-    if( _prioritized_order_job_array_version != _spooler->order_subsystem()->_job_chain_map_version )        // Ist eine neue Jobkette hinzugekommen?
+    if( _prioritized_order_job_array_version != _spooler->order_subsystem()->job_chain_map_version() )        // Ist eine neue Jobkette hinzugekommen?
     {
         _prioritized_order_job_array.clear();
 
@@ -46,7 +46,7 @@ void Task_subsystem::build_prioritized_order_job_array()
 
         sort( _prioritized_order_job_array.begin(), _prioritized_order_job_array.end(), Job::higher_job_chain_priority );
 
-        _prioritized_order_job_array_version = _spooler->order_subsystem()->_job_chain_map_version;
+        _prioritized_order_job_array_version = _spooler->order_subsystem()->job_chain_map_version();
         //FOR_EACH( vector<Job*>, _prioritized_order_job_array, i )  _log.debug( "build_prioritized_order_job_array: Job " + (*i)->name() );
     }
 }

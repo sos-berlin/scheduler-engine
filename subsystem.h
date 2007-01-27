@@ -26,7 +26,7 @@ struct Subsystem : Object, Non_cloneable, Scheduler_object
                                 Subsystem                   ( Spooler* spooler, Type_code t )       : Scheduler_object( spooler, this, t ), _zero_(this+1) {}
 
     virtual void                close                       ()                                      = 0;
-    virtual bool            set_subsystem_state             ( Subsystem_state )                     = 0;
+    virtual bool                switch_subsystem_state      ( Subsystem_state )                     = 0;
 
     Subsystem_state             subsystem_state             () const                                { return _subsystem_state; }
 

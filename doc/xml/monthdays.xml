@@ -25,6 +25,14 @@
                 </p>
             </description>
         </xml_child_element>
+
+        <xml_child_element name="weekday" multiple="yes">
+            <description>
+                <p>
+                    Gibt einen bestimmten Wochentag an (z.B. der dritte Montag, der letzte Freitag).
+                </p>
+            </description>
+        </xml_child_element>
     </xml_child_elements>
 
 

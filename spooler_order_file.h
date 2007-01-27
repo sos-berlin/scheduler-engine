@@ -11,6 +11,10 @@ namespace scheduler {
     
 extern const string             file_order_sink_job_name;
 
+//-------------------------------------------------------------------------------------------------
+
+void                            init_file_order_sink    ( Scheduler* );                             // Könnte ein Subsystem sein
+
 //----------------------------------------------------------------------Directory_file_order_source
 
 struct Directory_file_order_source : //idispatch_implementation< Directory_file_order_source, spooler_com::Idirectory_file_order_source >,

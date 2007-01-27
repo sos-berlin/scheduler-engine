@@ -8,7 +8,7 @@ namespace scheduler {
 
 
 struct Database;
-struct Order_subsystem;
+struct Order_subsystem_interface;
 
 //---------------------------------------------------------------------------------Scheduler_object
 
@@ -49,7 +49,7 @@ struct Scheduler_object
 
 
                                 Scheduler_object            ( Spooler*, IUnknown* me, Type_code );
-    virtual                    ~Scheduler_object            ()                                      {}    // Für gcc
+    virtual                    ~Scheduler_object            ()                                      {}
 
 
     Type_code                   scheduler_type_code         () const                                { return _scheduler_object_type_code; }
@@ -57,12 +57,13 @@ struct Scheduler_object
     virtual ptr<Xslt_stylesheet> mail_xslt_stylesheet       ();
     virtual void                print_xml_child_elements_for_event( String_stream*, Scheduler_event* )  {}
     virtual string              obj_name                    () const                                { return name_of_type_code( _scheduler_object_type_code ); }
+    virtual IDispatch*          idispatch                   ();
 
     Prefix_log*                 log                         ()                                      { return _log; }
     Database*                   db                          () const;
     Job_subsystem_interface*    job_subsystem               () const;
     Task_subsystem*             task_subsystem              () const;
-    Order_subsystem*            order_subsystem             () const;
+    Order_subsystem_interface*  order_subsystem             () const;
 
     Spooler*                   _spooler;
     IUnknown*                  _my_iunknown;

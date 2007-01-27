@@ -1334,15 +1334,17 @@ const Com_method Run_time::_methods[] =
 
 //-------------------------------------------------------------------------------Run_time::Run_time
 
-Run_time::Run_time( Spooler* spooler, Order* order )
+Run_time::Run_time( Scheduler_object* host_object )
 :
     Idispatch_implementation( &class_descriptor ),
     _zero_(this+1),
-    _spooler(spooler),
-    _order(order),
-    _holidays(spooler)
+    _spooler(host_object->_spooler),
+    _host_object(host_object),
+    _holidays(host_object->_spooler)
 {
-    if( _order )
+    _log = host_object->log();  //Z_NEW( Prefix_log( host_object ) );
+
+    if( _host_object->scheduler_type_code() == Scheduler_object::type_order )
     {
         _once = true;
     }
@@ -1360,6 +1362,13 @@ STDMETHODIMP Run_time::QueryInterface( const IID& iid, void** result )
     Z_IMPLEMENT_QUERY_INTERFACE( this, iid, IDispatch                        , result );
 
     return Idispatch_implementation::QueryInterface( iid, result );
+}
+
+//----------------------------------------------------------------------------------Run_time::close
+
+void Run_time::close()
+{
+    _host_object = NULL;
 }
 
 //--------------------------------------------------------------------------------Run_time::put_Xml
@@ -1405,8 +1414,8 @@ void Run_time::set_xml( const string& xml )
     xml::Document_ptr doc ( xml );
     if( _spooler->_validate_xml )  _spooler->_schema.validate( xml::Document_ptr( xml ) );
 
-    if( !_order )  z::throw_xc( "SCHEDULER-352" );
-    _order->set_run_time( doc.documentElement() );
+    if( !_host_object  ||  _host_object->scheduler_type_code() != Scheduler_object::type_order )  z::throw_xc( "SCHEDULER-352" );
+    dynamic_cast<Order*>( _host_object ) -> set_run_time( doc.documentElement() );
 
     // *** this ist ungültig ***
 }
@@ -1420,39 +1429,44 @@ Period Run_time::call_function( const Time& requested_beginning )
 
     Period result;
 
-    try
+    if( !_start_time_function_error )
     {
-        if( !_spooler->scheduler_script()->module_instance() )  z::throw_xc( "SCHEDULER-395", __FUNCTION__, _start_time_function );
-
-        Variant date_v;
-        V_VT( &date_v ) = VT_DATE;
-        V_DATE( &date_v ) = com::com_date_from_seconds_since_1970( requested_beginning );       int SOMMERZEIT_TESTEN;
-
-        Variant v = _spooler->scheduler_script()->module_instance()->call( _start_time_function, date_v, _function_com_object );
-        
-        if( !v.is_null_or_empty_string() )
+        try
         {
-            Time t;
-            if( variant_is_numeric( v ) )  t = (time_t)v.as_int64();
-            else
-            if( v.vt == VT_DATE         )  t = seconds_since_1970_from_com_date( V_DATE( &v ) );
-            else                           
-                                           t.set_datetime( v.as_string() );
+            if( !_spooler->scheduler_script()->module_instance() )  z::throw_xc( "SCHEDULER-395", __FUNCTION__, _start_time_function );
 
-            if( t < requested_beginning )
+            Variant date_v;
+            V_VT( &date_v ) = VT_DATE;
+            V_DATE( &date_v ) = com::com_date_from_seconds_since_1970( requested_beginning );
+
+            Variant v = _spooler->scheduler_script()->module_instance()->call( _start_time_function, date_v, _host_object? _host_object->idispatch() : NULL );
+            
+            if( !v.is_null_or_empty_string() )
             {
-                if( _log )  _log->warn( message_string( "SCHEDULER-394", _start_time_function, t, requested_beginning ) );
-            }
-            else 
-            if( !t.is_never() ) 
-            {
-                result.set_single_start( t );
+                Time t;
+                if( variant_is_numeric( v ) )  t = (time_t)v.as_int64();
+                else
+                if( v.vt == VT_DATE         )  t = seconds_since_1970_from_com_date( V_DATE( &v ) );
+                else                           
+                                               t.set_datetime( v.as_string() );
+
+                if( t < requested_beginning )
+                {
+                    //if( _log )  _log->warn( message_string( "SCHEDULER-394", _start_time_function, t, requested_beginning ) );
+                    z::throw_xc( "SCHEDULER-394", _start_time_function, t, requested_beginning );
+                }
+                else 
+                if( !t.is_never() ) 
+                {
+                    result.set_single_start( t );
+                }
             }
         }
-    }
-    catch( exception& x )
-    {
-        z::throw_xc( "SCHEDULER-393", _start_time_function, x );
+        catch( exception& x )
+        {
+            _start_time_function_error = true;
+            z::throw_xc( "SCHEDULER-393", _start_time_function, x );
+        }
     }
 
     return result;
@@ -1479,8 +1493,7 @@ void Run_time::set_dom( const xml::Element_ptr& element )
     _set = true;
 
     _once = element.bool_getAttribute( "once", _once );
-    if( _order  &&  !_once )  z::throw_xc( "SCHEDULER-220", "once='no'" );
-
+    if( _host_object  &&  _host_object->scheduler_type_code() == Scheduler_object::type_order  &&  !_once )  z::throw_xc( "SCHEDULER-220", "once='no'" );
 
     _start_time_function = element.getAttribute( "start_time_function" );
 
@@ -1606,7 +1619,7 @@ Period Run_time::next_period( const Time& beginning_time, With_single_start sing
     bool   is_no_function_warning_logged = false; 
 
 
-    while(1)
+    while( tim < Time::never )
     {
         bool something_called = false;
 
@@ -1614,11 +1627,21 @@ Period Run_time::next_period( const Time& beginning_time, With_single_start sing
         {
             if( _spooler->scheduler_script()->subsystem_state() != subsys_active  &&  _log  &&  !is_no_function_warning_logged )
             {
-                _log->warn( message_string( "SCHEDULER-844", __FUNCTION__, _start_time_function ) );
+                _log->warn( message_string( "SCHEDULER-844", _start_time_function, __FUNCTION__ ) );
                 is_no_function_warning_logged = true;
             }
             else
-                result = min( result, call_function( tim ) );
+            {
+                try
+                {
+                    result = min( result, call_function( tim ) );
+                }
+                catch( exception& x )
+                {
+                    _log->error( x.what() );
+                    _log->error( message_string( "SCHEDULER-398", _start_time_function ) );
+                }
+            }
 
             something_called = true;
         }

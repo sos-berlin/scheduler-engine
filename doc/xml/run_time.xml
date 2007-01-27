@@ -19,6 +19,69 @@
 
 
     <xml_attributes>
+        <xml_attribute name="start_time_function" type="name">
+            <description>
+                <p>
+                    Gibt gibt den Namen einer Funktion im Scheduler-Skript an, die die nächste Startzeit liefert.
+                    Java ist nicht als Skript-Sprache möglich.
+                </p>
+                <p>
+                    Der erste Parameter gibt den Zeitpunkt an, ab dem die Funktion eine Startzeit liefern soll.
+                </p>
+                <p>
+                    Der zweite Parameter ist für <scheduler_element name="job" child_element="run_time"/> 
+                    das Objekt <scheduler_method class="Job"/>,
+                    und für <scheduler_element name="order" child_element="run_time"/> das Objekt <scheduler_method class="Order"/>.
+                </p>
+                <p>
+                    Rückgabe der Funktion ist ein Zeitpunkt, der nicht vor dem ersten Parameter liegen darf, 
+                    oder nichts (d.h. <code>""</code> oder <code>Empty</code>).
+                    Der Zeitpunkt kann als String "yyyy-mm-dd hh:mm:ss" geliefert oder je nach Sprache:
+                </p>
+                <ul>
+                    <li>
+                        in JavaScript: <code>Date</code> oder <code>undefined</code>
+                    </li>
+                    <li>
+                        in VBScript: <code>Date</code> oder <code>Empty</code>
+                    </li>
+                    <li>
+                        in Perl: nur als String
+                    </li>
+                </ul>
+            </description>
+
+            <example>
+                <pre>&lt;script language="javascript">&lt;![CDATA[
+
+    // This is my scheduler script
+    
+    // Start the job 30s after now, that is after start of Scheduler
+    var next_start_time = new Date( new Date().getTime() + 30*1000 );
+
+    function my_start_time_function( beginning_time, job )
+    {
+        var result;
+        if( beginning_time &lt; next_start_time )  result = next_start_time;
+        return result;
+    }
+        
+]]&gt;&lt;/script></pre>
+                <pre>&lt;job …>
+    …                
+    &lt;run_time start_time_function="my_start_time_function">
+&lt;/job></pre>
+                
+            </example>
+
+            <messages>
+                <message level="error" code="SCHEDULER-393"/>
+                <message level="error" code="SCHEDULER-395"/>
+                <message level="warn"  code="SCHEDULER-394"/>
+            </messages>
+        </xml_attribute>
+        
+        
         <xml_attribute name="once" type="yes_no" initial="no">
             <description>
                 <p>

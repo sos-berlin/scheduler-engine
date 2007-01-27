@@ -2445,13 +2445,13 @@
 
         <message code="SCHEDULER-393">
             <text xml:lang="en">
-                <title>Error when calling &lt;run_time> function <p1/>: <p2/></title>
+                <title>Error when calling &lt;run_time> function '<p1/>': <p2/></title>
             </text>
         </message>
 
         <message code="SCHEDULER-394">
             <text xml:lang="en">
-                <title><code>&lt;run_time></code>-Function '<p1/>' returned start time <p2/> which is earlier then the requested beginning <p3/> and therefore ignored</title>
+                <title><code>&lt;run_time></code>-Function '<p1/>' returned start time <p2/> which is earlier then the requested beginning <p3/></title>
             </text>
         </message>
 
@@ -2470,6 +2470,12 @@
         <message code="SCHEDULER-397">
             <text xml:lang="en">
                 <title>A distributed order does not support <p1/></title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-398">
+            <text xml:lang="en">
+                <title>After last error, next_start_function='<p1/>' will no longer be executed for this &lt;run_time></title>
             </text>
         </message>
 
@@ -3488,7 +3494,7 @@
 
         <message code="SCHEDULER-844" weight="warn">
             <text xml:lang="en">
-                <title>Scheduler script is not yet active. Operation is executed without this</title>
+                <title>Scheduler script is not yet active. Operation is executed without the call of function '<p1/>'</title>
             </text>
         </message>
     </messages>

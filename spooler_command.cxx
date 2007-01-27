@@ -697,68 +697,78 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
     string    at             = modify_order_element.getAttribute( "at"        );
 
     ptr<Job_chain> job_chain = _spooler->order_subsystem()->job_chain( job_chain_name );
-    ptr<Order>     order     = job_chain->_is_distributed? job_chain->order_or_null( id ) 
-                                                         : job_chain->order( id );
+    ptr<Order>     order;
 
-    if( !order )  order = _spooler->order_subsystem()->load_order_from_database( (Transaction*)NULL, job_chain_name, id, Order_subsystem::lo_lock );
-
-    //if( !order )
-    //{
-    //    Transaction ta ( _spooler->db() );
-
-    //    sql::Update_stmt update ( _spooler->database_descriptor(), _spooler->_orders_tablename );
-
-    //    update.and_where_condition( "spooler_id", _spooler->id_for_db() );
-    //    update.and_where_condition( "job_chain" , job_chain_name        );
-    //    update.and_where_condition( "id"        , id().as_string()      );
-    //    update.and_where_condition( "occupying_cluster_member_id", sql::null_value );
-
-    //    if( priority != "" )  update[ "priority" ] = as_int( priority );
-    //    if( state    != "" )  update[ "state"    ] = state;
-
-    //    ta.execute( update );
-
-    //    ta.commit( __FUNCTION__ );
-    //}
-    //else
-
-
-    if( priority != "" )  order->set_priority( as_int( priority ) );
-
-    if( state != "" )  
+    try
     {
-        order->assert_no_task( __FUNCTION__ );
-        order->set_state( state );
-    }
+        order = job_chain->_is_distributed? job_chain->order_or_null( id ) 
+                                          : job_chain->order( id );
 
-    if( at != "" )  order->set_at( Time::time_with_now( at ) );
+        if( !order )  order = _spooler->order_subsystem()->load_order_from_database( (Transaction*)NULL, job_chain_name, id, Order_subsystem_interface::lo_lock );
 
-    if( modify_order_element.hasAttribute( "setback" ) )
-    {
-        if( modify_order_element.bool_getAttribute( "setback" ) )
-        {
-            throw_xc( "SCHEDULER-351", modify_order_element.getAttribute( "setback" ) );
-            //order->setback();
-        }
-        else
+        //if( !order )
+        //{
+        //    Transaction ta ( _spooler->db() );
+
+        //    sql::Update_stmt update ( _spooler->database_descriptor(), _spooler->_orders_tablename );
+
+        //    update.and_where_condition( "spooler_id", _spooler->id_for_db() );
+        //    update.and_where_condition( "job_chain" , job_chain_name        );
+        //    update.and_where_condition( "id"        , id().as_string()      );
+        //    update.and_where_condition( "occupying_cluster_member_id", sql::null_value );
+
+        //    if( priority != "" )  update[ "priority" ] = as_int( priority );
+        //    if( state    != "" )  update[ "state"    ] = state;
+
+        //    ta.execute( update );
+
+        //    ta.commit( __FUNCTION__ );
+        //}
+        //else
+
+
+        if( priority != "" )  order->set_priority( as_int( priority ) );
+
+        if( state != "" )  
         {
             order->assert_no_task( __FUNCTION__ );
-            order->clear_setback( true );        // order->_setback_count belassen
+            order->set_state( state );
         }
-    }
 
-    if( modify_order_element.hasAttribute( "suspended" ) )
+        if( at != "" )  order->set_at( Time::time_with_now( at ) );
+
+        if( modify_order_element.hasAttribute( "setback" ) )
+        {
+            if( modify_order_element.bool_getAttribute( "setback" ) )
+            {
+                throw_xc( "SCHEDULER-351", modify_order_element.getAttribute( "setback" ) );
+                //order->setback();
+            }
+            else
+            {
+                order->assert_no_task( __FUNCTION__ );
+                order->clear_setback( true );        // order->_setback_count belassen
+            }
+        }
+
+        if( modify_order_element.hasAttribute( "suspended" ) )
+        {
+            order->set_suspended( modify_order_element.bool_getAttribute( "suspended" ) );
+        }
+
+        if( xml::Element_ptr run_time_element = modify_order_element.select_node( "run_time" ) )
+        {
+            order->set_run_time( run_time_element );
+        }
+
+        order->db_update( Order::update_anyway );
+        order->close();
+    }
+    catch( exception& )
     {
-        order->set_suspended( modify_order_element.bool_getAttribute( "suspended" ) );
+        if( order )  order->close();
+        throw;
     }
-
-    if( xml::Element_ptr run_time_element = modify_order_element.select_node( "run_time" ) )
-    {
-        order->set_run_time( run_time_element );
-    }
-
-    order->db_update( Order::update_anyway );
-
 
     return _answer.createElement( "ok" );
 }

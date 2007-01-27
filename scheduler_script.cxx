@@ -14,7 +14,7 @@ struct Scheduler_script : Scheduler_script_interface
 
 
     // Subsystem:
-    bool                    set_subsystem_state             ( Subsystem_state );
+    bool                        switch_subsystem_state      ( Subsystem_state );
     void                        close                       ();
 
 
@@ -88,9 +88,9 @@ void Scheduler_script::set_dom_script( const xml::Element_ptr& script_element, c
     _module.set_dom( script_element, xml_mod_time, include_path );
 }
 
-//------------------------------------------------------------Scheduler_script::set_subsystem_state
+//---------------------------------------------------------Scheduler_script::switch_subsystem_state
     
-bool Scheduler_script::set_subsystem_state( Subsystem_state new_state )
+bool Scheduler_script::switch_subsystem_state( Subsystem_state new_state )
 {
     bool result = false;
     
@@ -121,8 +121,8 @@ bool Scheduler_script::set_subsystem_state( Subsystem_state new_state )
                 assert_subsystem_state( subsys_loaded, __FUNCTION__ );
 
                 Z_LOGI2( "scheduler", "Startskript wird gestartet\n" );
+                _subsystem_state = subsys_active;  // Jetzt schon aktiv für die auszuführenden Skript-Funktionen
                 start();
-                _subsystem_state = subsys_active;
                 Z_LOG2( "scheduler", "Startskript ist gestartet worden\n" );
 
                 result = true;

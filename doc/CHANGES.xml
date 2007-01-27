@@ -11,6 +11,66 @@
     <scheduler_keyword keyword="Change log"/>
 
 
+    <change date="2007-01-27" version="2.0.163" subversion_revision="4793">
+        <revision type="new" title="Skript-Funktion für nächste Startzeit">
+            <description>
+                <p>
+                    Mit <scheduler_element name="run_time" attribute="start_time_function"/>
+                    kann eine Funktion aus dem Scheduler-Skript angegeben werden,
+                    die die nächste Startzeit liefert.
+                </p>
+            </description>
+        </revision>
+
+        <!--revision type="modification" title="Job_chain.order_count und Order_queue.length sind im Scheduler-Skript 0">
+            <description>
+                <p>
+                    Bei nicht verteilten Aufträgen lädt der Scheduler die Aufträge 
+                    erst nach der Ausführung des Scheduler-Skripts
+                    aus der Datenbank.
+                </p>
+                <ul>
+                    <li>
+                        <scheduler_method class="Job_chain" property="order_count"/>
+                    </li>
+                    <li>
+                        <scheduler_method class="Order" property="length"/>
+                    </li>
+                </ul>
+            </description>
+        </revision-->
+    </change>
+
+
+    <change date="2007-01-25" version="2.0.163" subversion_revision="4792">
+        <revision type="new" title="Wochentag im Monat: &lt;monthdays>&lt;weekday>">
+            <description>
+                <p>
+                    <scheduler_element name="run_time"/> ist erweitert:
+                    Mit <scheduler_element name="weekday" attribute="day" attribute2="which"/>
+                    können bestimmte Wochentage im Monat ausgewählt werden.
+                </p>
+                <p>
+                    Mit <scheduler_element name="run_time" attribute="start_time_function"/> 
+                    kann eine Funktion aus dem Scheduler-Skript angegeben werden,
+                    die die nächste Startzeit liefert.
+                </p>
+            </description>
+        </revision>
+
+        <revision type="modification" title="Solaris: Neue Module libstdc++.so.6.0.8 und libgcc_s.so.1">
+            <description>
+                <p>
+                    Weil der Scheduler für Solaris jetzt mit gcc 4.1.1 übersetzt wird,
+                    werden die neuen Module libstdc++.so.6.0.8 und libgcc_s.so.1 benötigt.
+                    Ein symbolischer Link muss eingerichtet werden:
+                </p>
+                <pre>ln -s libstdc++.so.6.0.8 libstd++.so.6</pre>
+            </description>
+        </revision>
+    </change>
+
+    
     <change date="2007-01-22" version="2.0.163" subversion_revision="4781">
         <revision type="new" title="Order.params initialisiert sich automatisch">
             <description>

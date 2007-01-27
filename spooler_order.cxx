@@ -38,6 +38,67 @@ const string replacement_database_distributed_next_time = "3111-11-11 00:02:00";
 const string default_end_state_name                     = "<END_STATE>";
 const string order_select_database_columns              = "`id`, `priority`, `state`, `state_text`, `initial_state`, `title`, `created_time`";
 
+//----------------------------------------------------------------------------------Order_subsystem
+
+struct Order_subsystem : Order_subsystem_interface
+{
+
+                                Order_subsystem             ( Spooler* );
+
+
+    // Subsystem
+
+    void                        close                       ();
+    bool                        switch_subsystem_state      ( Subsystem_state );
+
+
+    // Order_subsystem_interface
+
+    void                        load_job_chains_from_xml    ( const xml::Element_ptr& );
+    void                        add_job_chain               ( Job_chain* );
+    void                        remove_job_chain            ( Job_chain* );
+    void                        check_exception             ();
+
+    void                        request_order               ();
+    ptr<Order>                  load_order_from_database    ( Transaction*, const string& job_chain_name, const Order::Id&, Load_order_flags );
+    ptr<Order>              try_load_order_from_database    ( Transaction*, const string& job_chain_name, const Order::Id&, Load_order_flags );
+
+    Job_chain*                  job_chain                   ( const string& name );
+    Job_chain*                  job_chain_or_null           ( const string& name );
+    xml::Element_ptr            job_chains_dom_element      ( const xml::Document_ptr&, const Show_what& );
+
+    int                         finished_orders_count       () const                                { return _finished_orders_count; }
+
+
+    // Privat
+
+    void                        initialize                  ();
+    void                        activate                    ();
+    void                        close_job_chains            ();
+
+    void                        load_orders_from_database   ();
+    bool                        are_orders_distributed      ();
+    bool                        is_job_in_any_job_chain     ( Job* );
+    bool                        is_job_in_any_distributed_job_chain( Job* );
+    string                      job_chain_db_where_condition( const string& job_chain_name );
+    string                      order_db_where_condition    ( const string& job_chain_name, const string& order_id );
+    void                        count_started_orders        ();
+    void                        count_finished_orders       ();
+    int                         job_chain_map_version       () const                                { return _job_chain_map_version; }
+
+
+    Fill_zero                  _zero_;
+    typedef map< string, ptr<Job_chain> >  Job_chain_map;
+    Job_chain_map              _job_chain_map;
+    int                        _job_chain_map_version;             // Zeitstempel der letzten Änderung (letzter Aufruf von Spooler::add_job_chain()), 
+  //long32                     _next_free_order_id;
+
+  private:
+    ptr<Database_order_detector> _database_order_detector;
+    int                        _started_orders_count;
+    int                        _finished_orders_count;
+};
+
 //--------------------------------------------------------------------------Database_order_detector
 
 struct Database_order_detector : Async_operation, Scheduler_object
@@ -334,33 +395,29 @@ void Database_order_detector::request_order()
     set_alarm();
 }
 
+//------------------------------------------------------------------------------new_order_subsystem
+
+ptr<Order_subsystem_interface> new_order_subsystem( Scheduler* scheduler )
+{
+    ptr<Order_subsystem> order_subsystem = Z_NEW( Order_subsystem( scheduler ) );
+    return +order_subsystem;
+}
+
+//---------------------------------------------Order_subsystem_interface::Order_subsystem_interface
+
+Order_subsystem_interface::Order_subsystem_interface( Scheduler* scheduler ) 
+: 
+    Subsystem( scheduler, Scheduler_object::type_order_subsystem )
+{
+}
+
 //-----------------------------------------------------------------Order_subsystem::Order_subsystem
 
 Order_subsystem::Order_subsystem( Spooler* spooler )
 :
-    Scheduler_object( spooler, this, Scheduler_object::type_order_subsystem ),
+    Order_subsystem_interface( spooler ),
     _zero_(this+1)
 {
-}
-
-//----------------------------------------------------------------------------Order_subsystem::init
-
-void Order_subsystem::init()
-{
-    init_file_order_sink();
-}
-
-//----------------------------------------------------------------------------Order_subsystem::init
-
-void Order_subsystem::start()
-{
-    Z_LOGI2( "scheduler", __FUNCTION__ << "\n" );
-
-    if( are_orders_distributed() )
-    {
-        _database_order_detector = Z_NEW( Database_order_detector( _spooler ) );
-        _database_order_detector->set_async_manager( _spooler->_connection_manager );
-    }
 }
 
 //---------------------------------------------------------------------------Order_subsystem::close
@@ -369,7 +426,103 @@ void Order_subsystem::close()
 {
     Z_LOGI2( "scheduler", __FUNCTION__ << "\n" );
 
-    _job_chain_map.clear();
+    close_job_chains();
+}
+
+//----------------------------------------------------------Order_subsystem::switch_subsystem_state
+
+bool Order_subsystem::switch_subsystem_state( Subsystem_state new_state )
+{
+    bool result = false;
+
+    if( _subsystem_state != new_state )
+    {
+        switch( new_state )
+        {
+            case subsys_initialized:
+            {
+                assert_subsystem_state( subsys_not_initialized, __FUNCTION__ );
+
+                initialize();
+                _subsystem_state = subsys_initialized;
+
+                result = true;
+                break;
+            }
+
+            case subsys_loaded:
+            {
+                assert_subsystem_state( subsys_initialized, __FUNCTION__ );
+
+                load_orders_from_database();
+                _subsystem_state = subsys_loaded;
+
+                result = true;
+                break;
+            }
+
+            case subsys_active:
+            {
+                assert_subsystem_state( subsys_loaded, __FUNCTION__ );
+
+                _subsystem_state = subsys_active;  // Jetzt schon aktiv für die auszuführenden Skript-Funktionen <run_time start_time_function="">
+                activate();
+
+                result = true;
+                break;
+            }
+
+            default:
+                throw_subsystem_state_error( new_state, __FUNCTION__ );
+        }
+    }
+
+    return result;
+}
+
+//----------------------------------------------------------------------Order_subsystem::initialize
+
+void Order_subsystem::initialize()
+{
+    init_file_order_sink( _spooler );
+}
+
+//-------------------------------------------------------Order_subsystem::load_orders_from_database
+
+void Order_subsystem::load_orders_from_database()
+{
+    if( db()->opened()  &&  _spooler->has_exclusiveness() )
+    {
+        Read_transaction ta ( db() );
+
+        FOR_EACH( Job_chain_map, _job_chain_map, it ) 
+        {
+            Job_chain* job_chain = it->second;
+            if( job_chain->_load_orders_from_database )
+            {
+                job_chain->add_orders_from_database( &ta );  // Die Jobketten aus der XML-Konfiguration
+            }
+        }
+    }
+}
+
+//------------------------------------------------------------------------Order_subsystem::activate
+
+void Order_subsystem::activate()
+{
+    Z_LOGI2( "scheduler", __FUNCTION__ << "\n" );
+
+    Z_FOR_EACH( Job_chain_map, _job_chain_map, it ) 
+    {
+        Job_chain* job_chain = it->second;
+        job_chain->activate();
+    }
+
+    if( are_orders_distributed() )
+    {
+        _database_order_detector = Z_NEW( Database_order_detector( _spooler ) );
+        _database_order_detector->set_async_manager( _spooler->_connection_manager );
+    }
 }
 
 //----------------------------------------------------------------Order_subsystem::close_job_chains
@@ -555,25 +708,6 @@ bool Order_subsystem::is_job_in_any_distributed_job_chain( Job* job )
     }
 
     return false;
-}
-
-//-------------------------------------------------------Order_subsystem::load_orders_from_database
-
-void Order_subsystem::load_orders_from_database()
-{
-    if( db()->opened()  &&  _spooler->has_exclusiveness() )
-    {
-        Read_transaction ta ( db() );
-
-        FOR_EACH( Job_chain_map, _job_chain_map, it ) 
-        {
-            Job_chain* job_chain = it->second;
-            if( job_chain->_load_orders_from_database )
-            {
-                job_chain->add_orders_from_database( &ta );  // Die Jobketten aus der XML-Konfiguration
-            }
-        }
-    }
 }
 
 //--------------------------------------------------------Order_subsystem::load_order_from_database
@@ -873,6 +1007,7 @@ void Job_chain::close()
     Z_LOGI2( "scheduler", obj_name() << ".close()\n" );
 
     remove_all_pending_orders( true );
+
     _blacklist_map.clear();
     _order_sources.close();
     set_state( s_closed );
@@ -1367,6 +1502,20 @@ Order* Job_chain::add_order_from_database_record( Read_transaction* ta, const Re
     return order;
 }
 
+//------------------------------------------------------------------------------Job_chain::activate
+
+void Job_chain::activate()
+{
+    // Wird nur von Order_subsystem::activate() für beim Start des Schedulers geladene Jobketten gerufen,
+    // um nach Start des Scheduler-Skripts die <run_time next_start_function="..."> berechnen zu können.
+    // Für später hinzugefügte Jobketten wird diese Routine nicht gerufen (sie würde auch nichts tun).
+    Z_FOR_EACH( Order_map, _order_map, o )
+    {
+        Order* order = o->second;
+        order->activate();
+    }
+}
+
 //-------------------------------------------------------------Job_chain::remove_all_pending_orders
 
 int Job_chain::remove_all_pending_orders( bool leave_in_database )
@@ -1627,6 +1776,13 @@ void Job_chain::check_for_removing()
 string Job_chain::db_where_condition() const
 { 
     return order_subsystem()->job_chain_db_where_condition( _name ); 
+}
+
+//-----------------------------------------------------------------------Job_chain::order_subsystem
+
+Order_subsystem* Job_chain::order_subsystem() const
+{
+    return static_cast<Order_subsystem*>( _spooler->order_subsystem() );
 }
 
 //-------------------------------------------------------------------------Order_queue::Order_queue
@@ -2322,7 +2478,7 @@ string Order_queue::db_where_expression_for_job_chain( const Job_chain* job_chai
 
 Order_subsystem* Order_queue::order_subsystem() const
 { 
-    return _spooler->order_subsystem(); 
+    return static_cast<Order_subsystem*>( _spooler->order_subsystem() ); 
 }
 
 //-------------------------------------------------------------------------------------Order::Order
@@ -2401,7 +2557,7 @@ Order::~Order()
         assert( !_order_queue );
 #   endif
 
-    if( _run_time )  _run_time->set_function_com_object( NULL ),  _run_time->set_log( NULL );
+    if( _run_time )  _run_time->close();
 }
 
 //--------------------------------------------------------------------------------------Order::init
@@ -3181,7 +3337,7 @@ void Order::close()
 
     remove_from_job_chain();
 
-    if( _run_time )  _run_time->set_function_com_object( NULL ),  _run_time->set_log( NULL );
+    if( _run_time )  _run_time->close(), _run_time = NULL;
 
     _log->close();
 }
@@ -3981,12 +4137,13 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain )
 
         if( node->_suspend )  _suspended = true;
 
-        set_setback( _state == _initial_state  &&  !_setback  &&  _run_time->set()? next_start_time( true ) : _setback );
-
         if( !_is_distribution_inhibited  &&  job_chain->_is_distributed )  set_distributed();
 
         _job_chain_name = job_chain->name();
         _removed_from_job_chain_name = "";
+
+        //set_setback( _state == _initial_state  &&  !_setback  &&  _run_time->set()? next_start_time( true ) : _setback );
+        activate();
 
         if( _delay_storing_until_processing ) 
         {
@@ -4038,6 +4195,35 @@ void Order::place_or_replace_in_job_chain( Job_chain* job_chain )
         {
             place_in_job_chain( job_chain );
         }
+    }
+}
+
+//----------------------------------------------------------------------------------Order::activate
+
+void Order::activate()
+{
+    if( order_subsystem()->subsystem_state() == subsys_active )  
+    {
+        _order_state = s_active;
+    }
+
+    set_next_start_time();
+}
+
+//-----------------------------------------------------------------------Order::set_next_start_time
+
+void Order::set_next_start_time()
+{
+    if( _state == _initial_state  &&  !_setback  &&  _run_time->set() )
+    {
+        if( _order_state == s_active )  
+        {
+            set_setback( next_start_time( true ) );     // Braucht für <run_time start_time_function=""> das Scheduler-Skript
+        }
+    }
+    else
+    {
+        set_setback( _setback );
     }
 }
 
@@ -4439,18 +4625,21 @@ void Order::on_before_modify_run_time()
 
 void Order::run_time_modified_event()
 {
-    //if( _is_virgin_in_this_run_time )  
-    if( _state == _initial_state )  set_setback( _run_time->set()? next_start_time( true ) : Time(0) );
-                             else  _run_time_modified = true;
+    if( _order_state == s_active )
+    {
+        _setback = 0;           // Änderung von <run_time> überschreibt Order.at
+        set_next_start_time();
+    }
+
+    //if( _state == _initial_state )  set_setback( _run_time->set()? next_start_time( true ) : Time(0) );
+    //                         else  _run_time_modified = true;
 }
 
 //------------------------------------------------------------------------------Order::set_run_time
 
 void Order::set_run_time( const xml::Element_ptr& e )
 {
-    _run_time = Z_NEW( Run_time( _spooler, this ) );
-    _run_time->set_log( _log );
-    _run_time->set_function_com_object( this );
+    _run_time = Z_NEW( Run_time( this ) );
     _run_time->set_modified_event_handler( this );
 
     if( e )  _run_time->set_dom( e );       // Ruft set_setback() über modify_event()
@@ -4515,6 +4704,13 @@ Web_service_operation* Order::web_service_operation() const
     Web_service_operation* result = web_service_operation_or_null();
     if( !result )  z::throw_xc( "SCHEDULER-246" );
     return result;
+}
+
+//---------------------------------------------------------------------------Order::order_subsystem
+
+Order_subsystem* Order::order_subsystem() const
+{
+    return static_cast<Order_subsystem*>( _spooler->order_subsystem() );
 }
 
 //----------------------------------------------------------------------------------Order::obj_name

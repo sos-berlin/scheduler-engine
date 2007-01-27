@@ -405,22 +405,29 @@ struct Run_time : idispatch_implementation< Run_time, spooler_com::Irun_time >,
     static Class_descriptor     class_descriptor;
     static const Com_method    _methods[];
 
+
+                                Run_time                    ( Scheduler_object* host_object );
+
+
+    // IDispatch
+
     STDMETHODIMP_(ULONG)        AddRef                      ()                                      { return Idispatch_implementation::AddRef(); }
     STDMETHODIMP_(ULONG)        Release                     ()                                      { return Idispatch_implementation::Release(); }
     STDMETHODIMP                QueryInterface              ( const IID&, void** );
 
+
+    // Ihas_java_class_name
+
     STDMETHODIMP            get_Java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
     STDMETHODIMP_(char*)  const_java_class_name             ()                                      { return (char*)"sos.spooler.Run_time"; }
-
     STDMETHODIMP            put_Xml                         ( BSTR xml );
 
 
+
+    void                        close                       ();
+
     bool                        operator ==                 ( const Run_time& );
 
-                                Run_time                    ( Spooler*, Order* = NULL );
-
-    void                    set_log                         ( Prefix_log* log )                     { _log = log; }
-    void                    set_function_com_object         ( IDispatch* com_object )               { _function_com_object = com_object; }
     bool                        is_filled                   () const;
     void                    set_modified_event_handler      ( Modified_event_handler* m )           { _modified_event_handler = m; }
 
@@ -466,7 +473,7 @@ struct Run_time : idispatch_implementation< Run_time, spooler_com::Irun_time >,
 
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
-    Order*                     _order;
+    Scheduler_object*          _host_object;
   //Application                _application;
     Modified_event_handler*    _modified_event_handler;
     bool                       _set;
@@ -480,7 +487,7 @@ struct Run_time : idispatch_implementation< Run_time, spooler_com::Irun_time >,
   //string                     _xml;
     xml::Document_ptr          _dom;
     string                     _start_time_function;
-    IDispatch*                 _function_com_object;
+    bool                       _start_time_function_error;
     ptr<Prefix_log>            _log;
 };
 
