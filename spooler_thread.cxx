@@ -154,7 +154,7 @@ bool Task_subsystem::step( const Time& now )
                 // Dieser Job ist in _prioritized_order_job_array und wird unten fortgesetzt.
             }
             else
-            if( job->next_time() <= now )
+            //2007-01-27 War der Versuch einer Optimierung, funktioniert nicht mit start_when_directory_changed:   if( job->next_time() <= now )
             {
                 something_done = job->do_something();
             }
