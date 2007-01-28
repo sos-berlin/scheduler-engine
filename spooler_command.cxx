@@ -910,7 +910,7 @@ void Get_events_command_response::close()
         _closed = true;
 
         append_text( "</events>" );
-        int NULL_BYTE_ANHAENGEN;
+        Z_DEBUG_ONLY( int NULL_BYTE_ANHAENGEN );
     }
 }
 

@@ -3726,7 +3726,7 @@ ptr<Com_variable_set> Order::params_or_null()
     IUnknown* iunknown = V_UNKNOWN( &_payload );
     if( iunknown == NULL )  return NULL;
 
-    HRESULT hr = iunknown->QueryInterface( spooler_com::IID_Ivariable_set, result.void_pp() );
+    HRESULT hr = result.Assign_qi( iunknown );
     if( FAILED(hr) )  return NULL;
 
     return dynamic_cast<Com_variable_set*>( +result );

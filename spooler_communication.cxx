@@ -117,7 +117,7 @@ void Xml_operation::begin()
     }
     else
     {
-        int NULL_BYTE_ANHAENGEN;
+        Z_DEBUG_ONLY( int NULL_BYTE_ANHAENGEN; )
     }
 
     if( command_processor._error )  _connection->_log.error( command_processor._error->what() );

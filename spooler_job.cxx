@@ -616,6 +616,11 @@ void Job::activate()
         }
 
         set_next_start_time( Time::now() );
+
+
+        //TODO
+        // Man könnte hier warnen, wenn die Run_time keine Periode hat und in der Warteschlange eine Task ohne Startzeit ist.
+        // Die würde nie gestartet werden.
     }
 }
 
@@ -1445,7 +1450,15 @@ void Job::enqueue_task( Task* task )
 
     if( _spooler->_debug )  _log->debug( "start(at=" + task->_start_at.as_string() + ( task->_name == ""? "" : ",name=\"" + task->_name + '"' ) + ")" );
 
-    if( !task->_start_at  &&  !_run_time->period_follows( now ) )   z::throw_xc( "SCHEDULER-143" );
+    if( _state > s_loaded )
+    {
+        if( !task->_start_at  &&  !_run_time->period_follows( now ) )   z::throw_xc( "SCHEDULER-143" );
+    }
+    else
+    {
+        // _run_time ist noch nicht gesetzt (<run_time next_start_function=""> kann erst nach dem Laden des Scheduler-Skripts ausgeführt werden)
+        // Kann nur beim Laden des Scheduler-Skripts passieren
+    }
 
     task->_let_run = true;
 

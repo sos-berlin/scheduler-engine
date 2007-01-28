@@ -139,12 +139,15 @@ void Com_module_instance::init()
 
 
         ptr<IClassFactory> class_factory;
+        void*              void_ptr     = NULL;
 
-        hr = _DllGetClassObject( &clsid, (IID*)&IID_IClassFactory, class_factory.void_pp() );
+        hr = _DllGetClassObject( &clsid, (IID*)&IID_IClassFactory, &void_ptr );
         if( FAILED(hr) )  throw_ole( hr, (_module->_filename + "::DllGetClassObject").c_str(), _module->_com_class_name.c_str() );
+        class_factory._ptr = static_cast<IClassFactory*>( void_ptr );
 
-        hr = class_factory->CreateInstance( NULL, IID_IDispatch, _idispatch.void_pp() );
+        hr = class_factory->CreateInstance( NULL, IID_IDispatch, &void_ptr );
         if( FAILED(hr) )  throw_ole( hr, "CreateInstance", _module->_com_class_name.c_str() );
+        _idispatch._ptr = static_cast<IDispatch*>( void_ptr );
     }
     else
     {
