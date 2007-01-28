@@ -311,10 +311,10 @@ Com_variable_set::Com_variable_set( const Com_variable_set& o )
             Com_variable* v = it->second;
             if( v )
             {
-                ptr<Com_variable> clone;
+                ptr<Ivariable> clone;
 
-                v->Clone( (Ivariable**)&clone );
-                _map[ it->first ] = clone;
+                v->Clone( clone.pp() );
+                _map[ it->first ] = static_cast<Com_variable*>( +clone );
             }
         }
     }
@@ -723,8 +723,12 @@ STDMETHODIMP Com_variable_set::Merge( Ivariable_set* other )
         {
             if( it->second )
             {
-                ptr<Com_variable> v;
-                hr = it->second->Clone( (Ivariable**)&v );
+                Com_variable*   v;
+                ptr<Ivariable>  clone;
+
+                hr = it->second->Clone( clone.pp() );
+
+                v = static_cast<Com_variable*>( +clone );
 
                 Bstr name = v->_name;
                 if( _ignore_case )  name.to_lower();
