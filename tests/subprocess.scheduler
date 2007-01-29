@@ -144,7 +144,7 @@ public class My_job  extends sos.spooler.Job_impl
         </jobs>
 
         <commands>
-            <start_job job="javascript"/>
+            <start_job job="java"/>
         </commands>
     </config>
 </spooler>

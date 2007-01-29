@@ -1765,8 +1765,8 @@ void Spooler::activate()
 
     execute_config_commands();                                                                          
 
-    _scheduler_script->switch_subsystem_state( subsys_loaded );
-    _scheduler_script->switch_subsystem_state( subsys_active );        // Hier passiert eigentlich nichts mehr (jedenfalls nicht bei Spidermonkey)
+    bool ok = _scheduler_script->switch_subsystem_state( subsys_loaded );
+    if( ok )  _scheduler_script->switch_subsystem_state( subsys_active );        // Hier passiert eigentlich nichts mehr (jedenfalls nicht bei Spidermonkey)
 
 
     // Job- und Order-<run_time> benutzen das geladene Scheduler-Skript
