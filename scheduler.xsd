@@ -145,6 +145,7 @@
             <xsd:element ref="show_task"/>
             <xsd:element ref="service_request"/>
             <xsd:element ref="start_job"/>
+            <xsd:element ref="start_task_for_remote_client"/>
             <!--xsd:element ref="signal_object"/-->
             <xsd:element ref="terminate"/>
         </xsd:choice>
@@ -668,6 +669,7 @@
                         <xsd:attribute name="name"              type="Name"/>
                         <xsd:attribute name="max_processes"     type="xsd:nonNegativeInteger"/>
                         <xsd:attribute name="spooler_id"        type="Name"/>
+                        <xsd:attribute name="remote_scheduler"  type="String"/>
                     </xsd:complexType>
                 </xsd:element>
             </xsd:sequence>
@@ -1064,7 +1066,14 @@
         </xsd:complexType>
     </xsd:element>
 
-    
+
+    <xsd:element name="start_task_for_remote_client">
+        <xsd:complexType>
+            <xsd:attribute name="tcp_port"          type="xsd:nonNegativeInteger"   use="required"/>
+        </xsd:complexType>
+    </xsd:element>
+
+
     <xsd:element name="terminate">
         <xsd:complexType>
             <xsd:attribute name="all_schedulers" type="Yes_no"/>

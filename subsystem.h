@@ -31,6 +31,10 @@ struct Subsystem : Object, Non_cloneable, Scheduler_object
     Subsystem_state             subsystem_state             () const                                { return _subsystem_state; }
 
   protected:
+    virtual bool                subsystem_initialize        ();
+    virtual bool                subsystem_load              ();
+    virtual bool                subsystem_activate          ();
+
     Z_NORETURN void             throw_subsystem_state_error ( Subsystem_state, const string& message_text );
     void                        assert_subsystem_state      ( Subsystem_state, const string& message_text );
 

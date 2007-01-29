@@ -14,8 +14,10 @@ struct Scheduler_script : Scheduler_script_interface
 
 
     // Subsystem:
-    bool                        switch_subsystem_state      ( Subsystem_state );
     void                        close                       ();
+    bool                        subsystem_initilize         ();
+    bool                        subsystem_load              ();
+    bool                        subsystem_activate          ();
 
 
     // Scheduler_script_interface:
@@ -24,9 +26,7 @@ struct Scheduler_script : Scheduler_script_interface
 
 
   private:
-    void                        start                       ();
-    void                        load                        ();
-
+    Fill_zero                  _zero_;
     Module                     _module;                     // <script>
     ptr<Module_instance>       _module_instance;
     ptr<Com_log>               _com_log;                    // COM-Objekt spooler.log
@@ -40,18 +40,19 @@ ptr<Scheduler_script_interface> new_scheduler_script( Scheduler* scheduler )
     return +scheduler_script;
 }
 
-//----------------------------------------------------------------cheduler_script::Scheduler_script
+//---------------------------------------------------------------Scheduler_script::Scheduler_script
 
 Scheduler_script::Scheduler_script( Scheduler* scheduler )
 : 
     Scheduler_script_interface( scheduler, type_scheduler_script ),
+    _zero_(this+1),
     _module(_spooler,_log)
 {
     _module._dont_remote = true;
     _com_log = new Com_log( _log );
 }
 
-//---------------------------------------------------------------cheduler_script::~Scheduler_script
+//--------------------------------------------------------------Scheduler_script::~Scheduler_script
     
 Scheduler_script::~Scheduler_script()
 {
@@ -88,110 +89,73 @@ void Scheduler_script::set_dom_script( const xml::Element_ptr& script_element, c
     _module.set_dom( script_element, xml_mod_time, include_path );
 }
 
-//---------------------------------------------------------Scheduler_script::switch_subsystem_state
-    
-bool Scheduler_script::switch_subsystem_state( Subsystem_state new_state )
+//-----------------------------------------------------------Scheduler_script::subsystem_initialize
+
+bool Scheduler_script::subsystem_initialize()
+{
+    if( _module.set() )
+    {
+        _module.init();
+    }
+
+    _subsystem_state = subsys_initialized;
+    return true;
+}
+
+//-----------------------------------------------------------------Scheduler_script::subsystem_load
+
+bool Scheduler_script::subsystem_load()
 {
     bool result = false;
-    
-    if( _subsystem_state != new_state )
+
+    if( _module.set() )
     {
-        switch( new_state )
-        {
-            case subsys_initialized:
-            {
-                assert_subsystem_state( subsys_not_initialized, __FUNCTION__ );
-                _subsystem_state = subsys_initialized;
-                result = true;
-                break;
-            }
+        Z_LOGI2( "scheduler", "Scheduler-Skript wird geladen\n" );
 
-            case subsys_loaded:
-            {
-                assert_subsystem_state( subsys_initialized, __FUNCTION__ );
-                load();
-                _subsystem_state = subsys_loaded;
-                Z_LOG2( "scheduler", "Startskript ist geladen\n" );
-                result = true;
-                break;
-            }
+        _module_instance = _module.create_instance();
+      //_module_instance->_title = "Scheduler-Script";
+        _module_instance->init();
 
-            case subsys_active:
-            {
-                assert_subsystem_state( subsys_loaded, __FUNCTION__ );
+        _module_instance->add_obj( (IDispatch*)_spooler->_com_spooler, "spooler"     );
+        _module_instance->add_obj( (IDispatch*)_com_log              , "spooler_log" );
 
-                Z_LOGI2( "scheduler", "Startskript wird gestartet\n" );
-                _subsystem_state = subsys_active;  // Jetzt schon aktiv für die auszuführenden Skript-Funktionen
-                start();
-                Z_LOG2( "scheduler", "Startskript ist gestartet worden\n" );
+        _module_instance->load();
 
-                result = true;
-                break;
-            }
-
-            default:
-                throw_subsystem_state_error( new_state, __FUNCTION__ );
-        }
+        Z_LOG2( "scheduler", "Scheduler-Skript ist geladen\n" );
+        _subsystem_state = subsys_loaded;
+        result = true;
     }
 
     return result;
 }
 
-//---------------------------------------------------------------------------Scheduler_script::load
-    
-void Scheduler_script::load()
+//-------------------------------------------------------------Scheduler_script::subsystem_activate
+
+void Scheduler_script::subsystem_activate()
 {
-    try
+    bool result = false;
+
+    if( _module.set() )
     {
-        if( _module.set() )
-        {
-            _module.init();
+        Z_LOGI2( "scheduler", "Scheduler-Skript wird gestartet\n" );
+        _subsystem_state = subsys_active;  // Jetzt schon aktiv für die auszuführenden Skript-Funktionen
 
-            Z_LOGI2( "scheduler", "Startskript wird geladen\n" );
-        
-            _module_instance = _module.create_instance();
-          //_module_instance->_title = "Scheduler-Script";
-            _module_instance->init();
+        _module_instance->start();
 
-            _module_instance->add_obj( (IDispatch*)_spooler->_com_spooler, "spooler"     );
-            _module_instance->add_obj( (IDispatch*)_com_log              , "spooler_log" );
+        bool ok = check_result( _module_instance->call_if_exists( spooler_init_name ) );
 
-            _module_instance->load();
-        }
+        _spooler->detect_warning_and_send_mail();
+
+        if( !ok )  z::throw_xc( "SCHEDULER-183" );
+
+        Z_LOG2( "scheduler", "Scheduler-Skript ist gestartet worden\n" );
+        result = true;
     }
-    catch( exception& )
-    {
-        _log->error( message_string( "SCHEDULER-332" ) );
-        throw;
-    }
-}
 
-//--------------------------------------------------------------------------Scheduler_script::start
-
-void Scheduler_script::start()
-{
-    try
-    {
-        if( _module.set() )
-        {
-            _module_instance->start();
-
-            bool ok = check_result( _module_instance->call_if_exists( spooler_init_name ) );
-
-            _spooler->detect_warning_and_send_mail();
-
-            if( !ok )  z::throw_xc( "SCHEDULER-183" );
-        }
-    }
-    catch( exception& )
-    {
-        _log->error( message_string( "SCHEDULER-332" ) );
-        throw;
-    }
+    return result;
 }
 
 //-------------------------------------------------------------------------------------------------
 
 } //namespace scheduler
 } //namespace sos
-

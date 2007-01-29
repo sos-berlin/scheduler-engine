@@ -49,7 +49,9 @@ struct Order_subsystem : Order_subsystem_interface
     // Subsystem
 
     void                        close                       ();
-    bool                        switch_subsystem_state      ( Subsystem_state );
+    bool                        subsystem_initilize         ();
+    bool                        subsystem_load              ();
+    bool                        subsystem_activate          ();
 
 
     // Order_subsystem_interface
@@ -72,8 +74,6 @@ struct Order_subsystem : Order_subsystem_interface
 
     // Privat
 
-    void                        initialize                  ();
-    void                        activate                    ();
     void                        close_job_chains            ();
 
     void                        load_orders_from_database   ();
@@ -429,62 +429,24 @@ void Order_subsystem::close()
     close_job_chains();
 }
 
-//----------------------------------------------------------Order_subsystem::switch_subsystem_state
-
-bool Order_subsystem::switch_subsystem_state( Subsystem_state new_state )
-{
-    bool result = false;
-
-    if( _subsystem_state != new_state )
-    {
-        switch( new_state )
-        {
-            case subsys_initialized:
-            {
-                assert_subsystem_state( subsys_not_initialized, __FUNCTION__ );
-
-                initialize();
-                _subsystem_state = subsys_initialized;
-
-                result = true;
-                break;
-            }
-
-            case subsys_loaded:
-            {
-                assert_subsystem_state( subsys_initialized, __FUNCTION__ );
-
-                load_orders_from_database();
-                _subsystem_state = subsys_loaded;
-
-                result = true;
-                break;
-            }
-
-            case subsys_active:
-            {
-                assert_subsystem_state( subsys_loaded, __FUNCTION__ );
-
-                _subsystem_state = subsys_active;  // Jetzt schon aktiv für die auszuführenden Skript-Funktionen <run_time start_time_function="">
-                activate();
-
-                result = true;
-                break;
-            }
-
-            default:
-                throw_subsystem_state_error( new_state, __FUNCTION__ );
-        }
-    }
-
-    return result;
-}
-
 //----------------------------------------------------------------------Order_subsystem::initialize
 
-void Order_subsystem::initialize()
+bool Order_subsystem::subsystem_initialize()
 {
     init_file_order_sink( _spooler );
+
+    _subsystem_state = subsys_initialized;
+    return true;
+}
+
+//------------------------------------------------------------------Order_subsystem::subsystem_load
+
+bool Order_subsystem::subsystem_load()
+{
+    load_orders_from_database();
+
+    _subsystem_state = subsys_loaded;
+    return true;
 }
 
 //-------------------------------------------------------Order_subsystem::load_orders_from_database
@@ -506,11 +468,12 @@ void Order_subsystem::load_orders_from_database()
     }
 }
 
-//------------------------------------------------------------------------Order_subsystem::activate
+//--------------------------------------------------------------Order_subsystem::subsystem_activate
 
-void Order_subsystem::activate()
+bool Order_subsystem::subsystem_activate()
 {
-    Z_LOGI2( "scheduler", __FUNCTION__ << "\n" );
+    _subsystem_state = subsys_active;  // Jetzt schon aktiv für die auszuführenden Skript-Funktionen <run_time start_time_function="">
+
 
     Z_FOR_EACH( Job_chain_map, _job_chain_map, it ) 
     {
@@ -523,6 +486,8 @@ void Order_subsystem::activate()
         _database_order_detector = Z_NEW( Database_order_detector( _spooler ) );
         _database_order_detector->set_async_manager( _spooler->_connection_manager );
     }
+
+    return true;
 }
 
 //----------------------------------------------------------------Order_subsystem::close_job_chains

@@ -39,8 +39,10 @@ struct Job_subsystem : Job_subsystem_interface
                                 Job_subsystem               ( Scheduler* );
 
     // Subsystem:
-    bool                        switch_subsystem_state      ( Subsystem_state );
     void                        close                       ();
+    bool                        subsystem_initilize         ();
+    bool                        subsystem_load              ();
+    bool                        subsystem_activate          ();
 
     // Job_subsystem_interface:
     void                        close_jobs                  ();
@@ -57,11 +59,6 @@ struct Job_subsystem : Job_subsystem_interface
     bool                        has_any_order               ();
     bool                        is_any_task_queued          ();
     xml::Element_ptr            jobs_dom_element            ( const xml::Document_ptr&, const Show_what& );
-
-  private:
-    void                        initialize_jobs             ();
-    void                        load_jobs                   ();
-    void                        activate_jobs               ();
 };
 
 //--------------------------------------------------------------------------------new_job_subsystem
@@ -87,69 +84,39 @@ void Job_subsystem::close()
     _subsystem_state = subsys_stopped;
 }
 
-//------------------------------------------------------------Job_subsystem::switch_subsystem_state
-    
-bool Job_subsystem::switch_subsystem_state( Subsystem_state new_state )
+//--------------------------------------------------------------Job_subsystem::subsystem_initialize
+
+bool Job_subsystem::subsystem_initialize()
 {
-    bool result = false;
-
-    if( _subsystem_state != new_state )
-    {
-        switch( new_state )
-        {
-            case subsys_initialized:
-            {
-                assert_subsystem_state( subsys_not_initialized, __FUNCTION__ );
-                
-                initialize_jobs();
-                
-                _subsystem_state = subsys_initialized;
-                result = true;
-                break;
-            }
-
-            case subsys_loaded:
-            {
-                assert_subsystem_state( subsys_initialized, __FUNCTION__ );
-                
-                load_jobs();
-                
-                _subsystem_state = subsys_loaded;
-                result = true;
-                break;
-            }
-
-            case subsys_active:
-            {
-                assert_subsystem_state( subsys_loaded, __FUNCTION__ );
-
-                activate_jobs();
-
-                _subsystem_state = subsys_active;
-                result = true;
-                break;
-            }
-
-            default:
-                throw_subsystem_state_error( new_state, __FUNCTION__ );
-        }
-    }
-
-    return result;
+    FOR_EACH_JOB( job )  initialize_job( *job );
+    _subsystem_state = subsys_initialized;
+    return true;
 }
 
-//------------------------------------------------------------------------------Job_subsystem::load
-//
-//void Job_subsystem::load()
-//{
-//}
-//
-//-----------------------------------------------------------------------------Job_subsystem::start
-//
-//void Job_subsystem::start()
-//{
-//}
-//
+//--------------------------------------------------------------------Job_subsystem::subsystem_load
+
+bool Job_subsystem::subsystem_load()
+{
+    Transaction ta ( db() );
+
+    FOR_EACH_JOB( job )  load_job( &ta, *job );
+
+    ta.commit( __FUNCTION__ );
+
+    _subsystem_state = subsys_loaded;
+    return true;
+}
+
+//----------------------------------------------------------------Job_subsystem::subsystem_activate
+
+bool Job_subsystem::subsystem_activate()
+{
+    FOR_EACH_JOB( job )  activate_job( *job );
+
+    _subsystem_state = subsys_active;
+    return true;
+}
+
 //------------------------------------------------------------------Job_subsystem::jobs_dom_element
 
 xml::Element_ptr Job_subsystem::jobs_dom_element( const xml::Document_ptr& document, const Show_what& show )
@@ -265,31 +232,6 @@ void Job_subsystem::activate_job( Job* job )
         _log->error( message_string( "SCHEDULER-330", job->obj_name(), x ) );
         throw;
     }
-}
-
-//-------------------------------------------------------------------Job_subsystem::initialize_jobs
-
-void Job_subsystem::initialize_jobs()
-{
-    FOR_EACH_JOB( job )  initialize_job( *job );
-}
-
-//-------------------------------------------------------------------------Job_subsystem::load_jobs
-
-void Job_subsystem::load_jobs()
-{
-    Transaction ta ( db() );
-
-    FOR_EACH_JOB( job )  load_job( &ta, *job );
-
-    ta.commit( __FUNCTION__ );
-}
-
-//---------------------------------------------------------------------Job_subsystem::activate_jobs
-
-void Job_subsystem::activate_jobs()
-{
-    FOR_EACH_JOB( job )  activate_job( *job );
 }
 
 //------------------------------------------------------------------------Job_subsystem::close_jobs

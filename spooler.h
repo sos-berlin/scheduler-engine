@@ -1,4 +1,4 @@
-// $Id$
+// $Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
 // §1172
 
 #ifndef __SPOOLER_H
@@ -81,7 +81,6 @@ namespace scheduler {
 //--------------------------------------------------------------------------------------------const
     
 extern const char*              temporary_process_class_name;
-extern const char               dtd_string[];
 extern volatile int             ctrl_c_pressed;
 extern const string             xml_schema_path;            // "scheduler.xsd"
 extern const string             scheduler_character_encoding;
@@ -172,6 +171,7 @@ struct Xslt_stylesheet;
 #include "spooler_module_remote.h"
 #include "spooler_module_remote_server.h"
 #include "cluster.h"
+#include "java_subsystem.h"
 
 //-------------------------------------------------------------------------------------------------
 
@@ -389,6 +389,7 @@ struct Spooler : Object,
     Job_subsystem_interface*    job_subsystem               ();
     Job_subsystem_interface*    job_subsystem_or_null       ()                                  { return _job_subsystem; }
     Order_subsystem_interface*  order_subsystem             ();
+    Java_subsystem_interface*   java_subsystem              ()                                  { return _java_subsystem; }
     bool                        has_any_order               ();
     bool                        has_any_task                ();
 
@@ -478,7 +479,6 @@ struct Spooler : Object,
 
     bool                       _has_java;                   // Es gibt ein Java-Modul. Java muss also gestartet werden
     bool                       _has_java_source;            // Es gibt Java-Quell-Code. Wir brauchen ein Arbeitsverzeichnis.
-    ptr<java::Vm>              _java_vm;
     string                     _config_java_class_path;     // <config java_class_path="">
     string                     _config_java_options;        // <config java_config="">
 
@@ -494,6 +494,7 @@ struct Spooler : Object,
     ptr<Task_subsystem>            _task_subsystem;
     ptr<Order_subsystem_interface> _order_subsystem;
     Web_services                   _web_services;
+    ptr<Java_subsystem_interface>  _java_subsystem;
 
     Wait_handles               _wait_handles;
 

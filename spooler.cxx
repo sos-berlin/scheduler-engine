@@ -632,9 +632,8 @@ Spooler::Spooler()
     _job_subsystem           = new_job_subsystem( this );
     _task_subsystem          = Z_NEW( Task_subsystem( this ) );
     _order_subsystem         = new_order_subsystem( this );
+    _java_subsystem          = new_java_subsystem( this );
     _db                      = Z_NEW( Database( this ) );
-
-    _scheduler_script->switch_subsystem_state( subsys_initialized );
 
     _variable_set_map[ variable_set_name_for_substitution ] = _environment;
 
@@ -654,23 +653,9 @@ Spooler::Spooler()
     _variables   = new Com_variable_set();
 
 
-    //_dtd.read( dtd_string );
     if( _validate_xml )  _schema.read( xml::Document_ptr( embedded_files.string_from_embedded_file( xml_schema_path ) ) );
 
 
-#   ifdef __GNUC__
-/*
-        sigset_t sigset;
-    
-        sigemptyset( &sigset );
-        sigaddset( &sigset, SIGINT  );
-        sigaddset( &sigset, SIGTERM );
-
-        fprintf( stderr, "pthread_sigmask\n" );
-        int err = pthread_sigmask( SIG_BLOCK, &sigset, NULL );
-        if( err )  throw_errno( err, "pthread_sigmask" );
-*/
-#   endif
 
 #   ifndef Z_WINDOWS
         ::signal( SIGPIPE, SIG_IGN );    // Fuer Linux eigentlich nicht erforderlich, weil com_remote.cxx() SIGPIPE selbst unterdrueckt
@@ -1321,7 +1306,7 @@ void Spooler::load_arg()
     //if( !_java_vm->running() )  // Für javac ist's egal, ob Java läuft (für scheduler.dll)
     {
       //_java_vm->set_filename      ( subst_env( read_profile_string( _factory_ini, "java"   , "vm"         , _java_vm->filename()       ) ) );
-        _java_vm->prepend_class_path( subst_env( read_profile_string( _factory_ini, "java"   , "class_path" ) ) );
+        _java_subsystem()->java_vm()->prepend_class_path( subst_env( read_profile_string( _factory_ini, "java"   , "class_path" ) ) );
       //_java_vm->set_javac_filename( subst_env( read_profile_string( _factory_ini, "java"   , "javac"      , _java_vm->javac_filename() ) ) );
     }
 
@@ -1489,20 +1474,18 @@ void Spooler::load_arg()
 
 void Spooler::load()
 {
-    assert( current_thread_id() == _thread_id );
-
     _log->init( this );              // Nochmal nach load_argv()
     _log->set_title( "Main log" );
 
     set_state( s_loading );
-    //_log ist noch nicht geöffnet   _log->info( "Spooler::load " + _config_filename );
-
 
     tzset();
 
     _security.clear();             
-    _java_vm = get_java_vm( false );
-    _java_vm->set_destroy_vm( false );   //  Nicht DestroyJavaVM() rufen, denn das hängt manchmal (auch für Dateityp jdbc)
+
+    _java_subsystem->switch_subsystem_state( subsys_initialized );
+    //_java_vm = get_java_vm( false );
+    //_java_vm->set_destroy_vm( false );   //  Nicht DestroyJavaVM() rufen, denn das hängt manchmal (auch für Dateityp jdbc), wahrscheinlich wegen Hostware ~Sos_static.
 
 
     load_arg();
@@ -1574,9 +1557,6 @@ void Spooler::load()
             if( !_waitable_timer )  z::throw_mswin( "CreateWaitableTimer" );
 
             _waitable_timer.add_to( &_wait_handles );
-
-
-            //set_next_daylight_saving_transition();
         }
 #   endif
 }
@@ -1633,6 +1613,7 @@ void Spooler::update_console_title( int level )
 #   endif
 }
 
+//---------------------------------------------------------------------------Spooler::create_window
 
 //void Spooler::create_window()
 //{
@@ -1691,28 +1672,15 @@ void Spooler::start()
     _daylight_saving_time_transition_detector = time::new_daylight_saving_time_transition_detector( this );
     _daylight_saving_time_transition_detector->set_async_manager( _connection_manager );
 
-    //_order_subsystem->start();
-    _web_services.start();                                          // Nicht in Spooler::load(), denn es öffnet schon -log-dir-Dateien (das ist nicht gut für -send-cmd=)
-    _job_subsystem->switch_subsystem_state( subsys_initialized );   // Setzt _has_java_source
+    _web_services.start();                                              // Nicht in Spooler::load(), denn es öffnet schon -log-dir-Dateien (das ist nicht gut für -send-cmd=)
+    _job_subsystem->switch_subsystem_state( subsys_initialized );       // Setzt _has_hava, _has_java_source
+    _scheduler_script->switch_subsystem_state( subsys_initialized );    // Setzt _has_hava, _has_java_source
 
 
     try
     {
-        _java_vm->set_log( _log );
-        _java_vm->prepend_class_path( _config_java_class_path );        // Nicht so gut hier. Bei jedem Reload wird der Pfad verlängert. Aber Reload lässt Java sowieso nicht neu starten.
-        _java_vm->set_options( _config_java_options );
-
-        if( _has_java_source )
-        {
-            string java_work_dir = temp_dir() + Z_DIR_SEPARATOR "java";
-            _java_vm->set_work_dir( java_work_dir );
-            _java_vm->prepend_class_path( java_work_dir );
-        }
-
-        if( _has_java )     // Nur True, wenn Java-Job nicht in separatem Prozess ausgeführt wird.
-        {
-            Java_module_instance::init_java_vm( _java_vm );
-        }
+        _java_subsystem->switch_subsystem_state( subsys_loaded );
+        _java_subsystem->switch_subsystem_state( subsys_active );
     }
     catch( const exception& x )
     {
@@ -1946,7 +1914,7 @@ void Spooler::stop( const exception* )
     //_object_set_class_list.clear();
     _job_subsystem->_job_list.clear();
     _process_class_list.clear();
-
+    _java_subsystem->close();
     //_java_vm.close();  Erneutes _java.init() stürzt ab, deshalb lassen wir Java stehen und schließen es erst am Schluss
 
 
@@ -3410,8 +3378,6 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
             else
             //if( opt.flag      ( "renew-spooler"    ) )  renew_spooler = program_filename();
           //else
-          //if( opt.flag      ( "show-dtd"         ) )  { if( opt.set() )  need_call_scheduler = false, fprintf( stdout, "%s", scheduler::dtd_string ); }
-          //else
             if( opt.with_value( "expand-classpath" ) )  { cout << java::expand_class_path( opt.value() ) << '\n'; need_call_scheduler = false; }
             else
             if( opt.flag      ( "show-xml-schema"  ) )  { if( opt.set() )  need_call_scheduler = false, fprintf( stdout, "%s", scheduler::embedded_files.string_from_embedded_file( scheduler::xml_schema_path ).c_str() ); }
@@ -3513,7 +3479,6 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
 
         Z_LOG2( "scheduler", "Scheduler " VER_PRODUCTVERSION_STR "\n" );
 
-        //sos::scheduler::time::Time::set_current_difference_to_utc( ::time(NULL) );
 
         if( is_scheduler_client )
         {
@@ -3644,6 +3609,7 @@ int sos_main( int argc, char** argv )
 
 #   ifdef SCHEDULER_WITH_HOSTJAVA
 
+        // Wegen Hostware ~Sos_static?
         // HP-UX und eingebundenes Hostjava: Irgendein atexit() stürzt in InterlockedIncrement() (AddRef()?") ab.
         // Deshalb beenden wir den Scheduler hier mit _exit(), schließen aber alle Dateien vorher
 
@@ -3662,24 +3628,4 @@ int sos_main( int argc, char** argv )
 
 } //namespace sos
 
-//-------------------------------------------------------------------------------------------------
-/*
-#ifdef Z_WINDOWS
-
-//extern "C" BOOL WINAPI DllMain( HANDLE hInst, DWORD ul_reason_being_called, void* )
-
-extern "C" int __cdecl mainCRTStartup();
-extern "C" BOOL WINAPI _DllMainCRTStartup( HANDLE hDllHandle, DWORD dwReason, LPVOID lpreserved );
-
-
-extern "C" int __stdcall entry_point( HANDLE hDllHandle, DWORD dwReason, LPVOID lpreserved )
-{
-    MessageBox( NULL, "Hier ist der Scheduler!", "Scheduler", 0 );
-
-    //return mainCRTStartup();
-    return _DllMainCRTStartup( hDllHandle, dwReason, lpreserved );
-}
-
-#endif
-*/
 //-------------------------------------------------------------------------------------------------

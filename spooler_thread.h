@@ -18,7 +18,6 @@ struct Task_subsystem : Subsystem
 
 
     virtual void                close                       ()                                      {}
-    virtual bool                switch_subsystem_state      ( Subsystem_state )                     { return false; }
 
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
     

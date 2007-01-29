@@ -362,6 +362,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\java_subsystem.cxx"
+				>
+			</File>
+			<File
 				RelativePath=".\scheduler_client.cxx"
 				>
 			</File>
@@ -1061,6 +1065,10 @@
 				RelativePath=".\subsystem.cxx"
 				>
 			</File>
+			<File
+				RelativePath=".\task_for_remote_client.cxx"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header-Dateien"
@@ -1068,6 +1076,10 @@
 			>
 			<File
 				RelativePath=".\cluster.h"
+				>
+			</File>
+			<File
+				RelativePath=".\java_subsystem.h"
 				>
 			</File>
 			<File

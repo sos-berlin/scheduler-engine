@@ -1,4 +1,4 @@
-// $Id$
+// $Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H

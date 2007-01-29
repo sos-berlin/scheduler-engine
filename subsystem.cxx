@@ -37,6 +37,81 @@ void Subsystem::assert_subsystem_state( Subsystem_state expected_state, const st
     if( _subsystem_state != expected_state )  throw_subsystem_state_error( expected_state, message_text );
 }
 
+//----------------------------------------------------------------Subsystem::switch_subsystem_state
+
+bool Subsystem::switch_subsystem_state( Subsystem_state new_state )
+{
+    bool result = false;
+    
+    if( _subsystem_state != new_state )
+    {
+        Z_LOGI2( "scheduler", obj_name() << ": switch_subsystem_state " << string_from_subsystem_state ( new_state ) << "\n" );
+
+        try
+        {
+            switch( new_state )
+            {
+                case subsys_initialized:
+                {
+                    assert_subsystem_state( subsys_not_initialized, __FUNCTION__ );
+
+                    result = subsystem_initialize();
+                    break;
+                }
+
+                case subsys_loaded:
+                {
+                    assert_subsystem_state( subsys_initialized, __FUNCTION__ );
+
+                    result = subsystem_load();
+                    break;
+                }
+
+                case subsys_active:
+                {
+                    assert_subsystem_state( subsys_loaded, __FUNCTION__ );
+
+                    result = subsystem_activate();
+                    break;
+                }
+
+                default:
+                    throw_subsystem_state_error( new_state, __FUNCTION__ );
+            }
+
+            Z_LOG2( "scheduler", obj_name() << ": state=" << string_from_subsystem_state( _subsystem_state ) << "\n" );
+        }
+        catch( exception& )
+        {
+            _log->error( scheduler_message( "SCHEDULER-332", obj_name(), string_of_state( new_state ) ) );
+            throw;
+        }
+    }
+
+    return result;
+}
+
+//------------------------------------------------------------------Subsystem::subsystem_initialize
+
+bool Subsystem::subsystem_initialize()
+{
+    z::throw_xc( __FUNCTION__, obj_name(), "not implemented" );
+}
+
+//------------------------------------------------------------------------Subsystem::subsystem_load
+
+bool Subsystem::subsystem_load()
+{
+    z::throw_xc( __FUNCTION__, obj_name(), "not implemented" );
+}
+
+//--------------------------------------------------------------------Subsystem::subsystem_activate
+
+bool Subsystem::subsystem_activate()
+{
+    z::throw_xc( __FUNCTION__, obj_name(), "not implemented" );
+}
+
 //-------------------------------------------------------------------------------------------------
 
 } //namespace scheduler

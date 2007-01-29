@@ -1,4 +1,4 @@
-// $Id$
+// $Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
 /*
     Hier ist implementiert
 
@@ -472,6 +472,26 @@ xml::Element_ptr Command_processor::execute_start_job( const xml::Element_ptr& e
     ptr<Task> task = job->create_task( ptr<spooler_com::Ivariable_set>(pars), task_name, start_at );
     task->set_web_service( web_service_name );
     job->enqueue_task( task );
+
+    xml::Element_ptr result = _answer.createElement( "ok" ); 
+    result.appendChild( task->dom_element( _answer, Show_what() ) );
+    return result;
+}
+
+//-----------------------------------------------------Command_processor::execute_start_remote_task
+
+xml::Element_ptr Command_processor::execute_start_remote_task( const xml::Element_ptr& element )
+{
+    if( _security_level < Security::seclev_no_add )  z::throw_xc( "SCHEDULER-121" );
+    _spooler->assert_is_activated( __FUNCTION__ );
+
+    int tcp_port = element.getAttribute( "tcp_port" );
+
+
+
+
+
+
 
     xml::Element_ptr result = _answer.createElement( "ok" ); 
     result.appendChild( task->dom_element( _answer, Show_what() ) );
@@ -1028,6 +1048,8 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     if( element.nodeName_is( "show_jobs"        ) )  return execute_show_jobs( show );
     else
     if( element.nodeName_is( "start_job"        ) )  return execute_start_job( element );
+    else
+    if( element.nodeName_is( "start_remote_task" ) )  return execute_start_remote_task( element );
     else
     if( element.nodeName_is( "show_cluster"     ) )  return execute_show_cluster( element, show );
     else
