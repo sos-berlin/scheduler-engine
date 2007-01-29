@@ -75,16 +75,22 @@ bool Subsystem::switch_subsystem_state( Subsystem_state new_state )
                     break;
                 }
 
+                case subsys_stopped:
+                {
+                    close();
+                    break;
+                }
+
                 default:
                     throw_subsystem_state_error( new_state, __FUNCTION__ );
             }
 
             Z_LOG2( "scheduler", obj_name() << ": state=" << string_from_subsystem_state( _subsystem_state ) << "\n" );
         }
-        catch( exception& )
+        catch( exception& x )
         {
-            _log->error( scheduler_message( "SCHEDULER-332", obj_name(), string_of_state( new_state ) ) );
-            throw;
+            //_log->error( message_string( "SCHEDULER-332", obj_name(), string_from_subsystem_state( new_state ) ) );
+            z::throw_xc( "SCHEDULER-332", obj_name(), string_from_subsystem_state( new_state ), x );
         }
     }
 

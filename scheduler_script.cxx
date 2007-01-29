@@ -15,7 +15,7 @@ struct Scheduler_script : Scheduler_script_interface
 
     // Subsystem:
     void                        close                       ();
-    bool                        subsystem_initilize         ();
+    bool                        subsystem_initialize        ();
     bool                        subsystem_load              ();
     bool                        subsystem_activate          ();
 
@@ -131,7 +131,7 @@ bool Scheduler_script::subsystem_load()
 
 //-------------------------------------------------------------Scheduler_script::subsystem_activate
 
-void Scheduler_script::subsystem_activate()
+bool Scheduler_script::subsystem_activate()
 {
     bool result = false;
 

@@ -482,20 +482,21 @@ xml::Element_ptr Command_processor::execute_start_job( const xml::Element_ptr& e
 
 xml::Element_ptr Command_processor::execute_start_remote_task( const xml::Element_ptr& element )
 {
-    if( _security_level < Security::seclev_no_add )  z::throw_xc( "SCHEDULER-121" );
-    _spooler->assert_is_activated( __FUNCTION__ );
+    z::throw_xc( __FUNCTION__ );
+    //if( _security_level < Security::seclev_no_add )  z::throw_xc( "SCHEDULER-121" );
+    //_spooler->assert_is_activated( __FUNCTION__ );
 
-    int tcp_port = element.getAttribute( "tcp_port" );
-
-
-
+    //int tcp_port = element.getAttribute( "tcp_port" );
 
 
 
 
-    xml::Element_ptr result = _answer.createElement( "ok" ); 
-    result.appendChild( task->dom_element( _answer, Show_what() ) );
-    return result;
+
+
+
+    //xml::Element_ptr result = _answer.createElement( "ok" ); 
+    //result.appendChild( task->dom_element( _answer, Show_what() ) );
+    //return result;
 }
 
 //---------------------------------------------------------Command_processor::execute_signal_object

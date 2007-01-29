@@ -49,7 +49,7 @@ struct Order_subsystem : Order_subsystem_interface
     // Subsystem
 
     void                        close                       ();
-    bool                        subsystem_initilize         ();
+    bool                        subsystem_initialize        ();
     bool                        subsystem_load              ();
     bool                        subsystem_activate          ();
 

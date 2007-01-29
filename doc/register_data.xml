@@ -302,6 +302,7 @@
 <register_keyword keyword='day'>
     <register_keyword_display><code>day=</code></register_keyword_display>
     <register_entry register_file='xml/day.xml#attribute_day' register_title='&lt;day&gt; (Konfiguration)'  register_keyword='day' type='definition'/>
+    <register_entry register_file='xml/weekday.xml#attribute_day' register_title='&lt;weekday&gt; (Konfiguration)'  register_keyword='day' type='definition'/>
 </register_keyword>
 <register_keyword keyword='db'>
     <register_keyword_display><code>db=</code></register_keyword_display>
@@ -835,6 +836,7 @@
     <register_entry register_file='xml/job.xml#use_element__job' register_title='&lt;job&gt; (Konfiguration)'  register_keyword='job'/>
     <register_entry register_file='xml/process.xml#use_element__job' register_title='&lt;process&gt; (Konfiguration)'  register_keyword='job'/>
     <register_entry register_file='xml/process_class.xml#use_element__job' register_title='&lt;process_class&gt; (Konfiguration)'  register_keyword='job'/>
+    <register_entry register_file='xml/run_time.xml#use_element__job' register_title='&lt;run_time&gt; (Konfiguration)'  register_keyword='job'/>
     <register_entry register_file='xml/show_jobs.xml#use_element__job' register_title='&lt;show_jobs&gt; (Kommando)'  register_keyword='job'/>
     <register_entry register_file='xml/show_state.xml#use_element__job' register_title='&lt;show_state&gt; (Kommando)'  register_keyword='job'/>
     <register_entry register_file='xml/start_job.xml#use_element__job' register_title='&lt;start_job&gt; (Kommando)'  register_keyword='job'/>
@@ -1291,6 +1293,7 @@
     <register_entry register_file='xml.xml#use_element__order' register_title='Alle XML-Elemente'  register_keyword='order'/>
     <register_entry register_file='xml/add_order.xml#use_element__order' register_title='&lt;add_order&gt; (Kommando)'  register_keyword='order'/>
     <register_entry register_file='xml/answer/order.xml#' register_title='&lt;order&gt; (Antwort)'  register_keyword='order' type='definition'/>
+    <register_entry register_file='xml/run_time.xml#use_element__order' register_title='&lt;run_time&gt; (Konfiguration)'  register_keyword='order'/>
     <register_entry register_file='xml/web_service.xml#use_element__order' register_title='&lt;web_service&gt; (Konfiguration)'  register_keyword='order'/>
 </register_keyword>
 <register_keyword keyword='order'>
@@ -1873,6 +1876,10 @@
     <register_keyword_display><code>start_time=</code></register_keyword_display>
     <register_entry register_file='xml/answer/history.entry.xml#attribute_start_time' register_title='&lt;history.entry&gt; (Antwort)'  register_keyword='start_time' type='definition'/>
 </register_keyword>
+<register_keyword keyword='start_time_function'>
+    <register_keyword_display><code>start_time_function=</code></register_keyword_display>
+    <register_entry register_file='xml/run_time.xml#attribute_start_time_function' register_title='&lt;run_time&gt; (Konfiguration)'  register_keyword='start_time_function' type='definition'/>
+</register_keyword>
 <register_keyword keyword='start_when_directory_changed'>
     <register_keyword_display><code>&lt;start_when_directory_changed&gt;</code></register_keyword_display>
     <register_entry register_file='CHANGES.xml#use_element__start_when_directory_changed' register_title='Änderungsprotokoll'  register_keyword='start_when_directory_changed'/>
@@ -2174,6 +2181,11 @@
     <register_entry register_file='xml.xml#use_element__web_services' register_title='Alle XML-Elemente'  register_keyword='web_services'/>
     <register_entry register_file='xml/web_services.xml#' register_title='&lt;web_services&gt; (Konfiguration)'  register_keyword='web_services' type='definition'/>
 </register_keyword>
+<register_keyword keyword='weekday'>
+    <register_keyword_display><code>&lt;weekday&gt;</code></register_keyword_display>
+    <register_entry register_file='CHANGES.xml#use_element__weekday' register_title='Änderungsprotokoll'  register_keyword='weekday'/>
+    <register_entry register_file='xml/weekday.xml#' register_title='&lt;weekday&gt; (Konfiguration)'  register_keyword='weekday' type='definition'/>
+</register_keyword>
 <register_keyword keyword='weekdays'>
     <register_keyword_display><code>&lt;weekdays&gt;</code></register_keyword_display>
     <register_entry register_file='xml.xml#use_element__weekdays' register_title='Alle XML-Elemente'  register_keyword='weekdays'/>
@@ -2190,6 +2202,10 @@
     <register_entry register_file='xml/show_order.xml#attribute_what' register_title='&lt;show_order&gt; (Kommando)'  register_keyword='what' type='definition'/>
     <register_entry register_file='xml/show_state.xml#attribute_what' register_title='&lt;show_state&gt; (Kommando)'  register_keyword='what' type='definition'/>
     <register_entry register_file='xml/show_task.xml#attribute_what' register_title='&lt;show_task&gt; (Kommando)'  register_keyword='what' type='definition'/>
+</register_keyword>
+<register_keyword keyword='which'>
+    <register_keyword_display><code>which=</code></register_keyword_display>
+    <register_entry register_file='xml/weekday.xml#attribute_which' register_title='&lt;weekday&gt; (Konfiguration)'  register_keyword='which' type='definition'/>
 </register_keyword>
 <register_keyword keyword='xercesImpl.jar'>
     <register_entry register_file='xml/web_service.xml' register_title='&lt;web_service&gt; (Konfiguration)'  register_keyword='xercesImpl.jar'/>

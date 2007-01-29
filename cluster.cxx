@@ -58,7 +58,6 @@ struct Cluster : Cluster_subsystem_interface
     // Subsystem
 
     void                        close                       ();
-  //virtual bool            switch_subsystem_state             ( Subsystem_state )                     { z::throw_xc( __FUNCTION__ ); }
     string                      obj_name                    () const;
 
 

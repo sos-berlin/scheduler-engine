@@ -118,7 +118,7 @@ void Com_mail::init()
 {
     if( _msg == NULL )
     {
-        _msg = mail::create_message( _spooler->_java_vm );
+        _msg = mail::create_message( _spooler->java_subsystem()->java_vm() );
     }
 }
 

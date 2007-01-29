@@ -534,8 +534,8 @@ AGAIN:
 
                 if( _server_hostname.empty() )
                 {
-                    params_array[ nr++ ] = "java_class_path=" + _module->_spooler->_java_vm->class_path();
-                    params_array[ nr++ ] = "java_work_dir="   + _module->_spooler->_java_vm->work_dir();
+                    params_array[ nr++ ] = "java_class_path=" + _module->_spooler->java_subsystem()->java_vm()->class_path();
+                    params_array[ nr++ ] = "java_work_dir="   + _module->_spooler->java_subsystem()->java_vm()->work_dir();
                 }
 
                 params_array[ nr++ ] = "recompile="       + as_string( _module->_recompile && !_module->_compiled );

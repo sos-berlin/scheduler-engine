@@ -200,7 +200,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-329", "<copy_params from=\"$1\"/>: requested parameters are not available" },
     { "SCHEDULER-330", "$1 could not be initialized" },
     { "SCHEDULER-331", "Scheduler is terminating after error (see last error line)" },
-    { "SCHEDULER-332", "Error in Scheduler script" },
+    { "SCHEDULER-332", "Error in $1 while switching to state=$2: $3" },
     { "SCHEDULER-333", "\"now+SECONDS\" expected in \"$1\"" },
     { "SCHEDULER-334", "Error when building mail: $1" },
     { "SCHEDULER-335", "Only \"yes\", \"no\" and a number are allowed with $1=\"$2\": $3" },

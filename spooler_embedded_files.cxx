@@ -154,6 +154,7 @@ const char file_scheduler_xsd[] =
     "<xsd:element ref=\"show_task\"/>\n"
     "<xsd:element ref=\"service_request\"/>\n"
     "<xsd:element ref=\"start_job\"/>\n"
+    "<xsd:element ref=\"start_task_for_remote_client\"/>\n"
     "<!--xsd:element ref=\"signal_object\"/-->\n"
     "<xsd:element ref=\"terminate\"/>\n"
     "</xsd:choice>\n"
@@ -677,6 +678,7 @@ const char file_scheduler_xsd[] =
     "<xsd:attribute name=\"name\"              type=\"Name\"/>\n"
     "<xsd:attribute name=\"max_processes\"     type=\"xsd:nonNegativeInteger\"/>\n"
     "<xsd:attribute name=\"spooler_id\"        type=\"Name\"/>\n"
+    "<xsd:attribute name=\"remote_scheduler\"  type=\"String\"/>\n"
     "</xsd:complexType>\n"
     "</xsd:element>\n"
     "</xsd:sequence>\n"
@@ -1074,6 +1076,13 @@ const char file_scheduler_xsd[] =
     "</xsd:element>\n"
     "\n"
     "\n"
+    "<xsd:element name=\"start_task_for_remote_client\">\n"
+    "<xsd:complexType>\n"
+    "<xsd:attribute name=\"tcp_port\"          type=\"xsd:nonNegativeInteger\"   use=\"required\"/>\n"
+    "</xsd:complexType>\n"
+    "</xsd:element>\n"
+    "\n"
+    "\n"
     "<xsd:element name=\"terminate\">\n"
     "<xsd:complexType>\n"
     "<xsd:attribute name=\"all_schedulers\" type=\"Yes_no\"/>\n"
@@ -1395,7 +1404,7 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1169311515 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1170064681 },
     { NULL, NULL, 0 }
 };
 

@@ -40,7 +40,7 @@ struct Job_subsystem : Job_subsystem_interface
 
     // Subsystem:
     void                        close                       ();
-    bool                        subsystem_initilize         ();
+    bool                        subsystem_initialize        ();
     bool                        subsystem_load              ();
     bool                        subsystem_activate          ();
 
@@ -484,7 +484,7 @@ void Job::initialize()
 {
     if( _state < s_initialized )
     {
-        Z_LOGI2( "scheduler", obj_name() << ".load()\n" );
+        Z_LOGI2( "scheduler", obj_name() << ".initialize()\n" );
 
         if( _module->_dom_element )  read_script( _module );
         if( _module->_monitor  &&  _module->_monitor->_dom_element )  read_script( _module->_monitor );

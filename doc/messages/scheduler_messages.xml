@@ -2091,7 +2091,7 @@
         
         <message code="SCHEDULER-332">
             <text xml:lang="en">
-                <title>Error in '<p1/>', setting state='<p2/>', see following lines</title>
+                <title>Error in <p1/> while switching to state=<p2/>: <p3/></title>
             </text>
         </message>
 

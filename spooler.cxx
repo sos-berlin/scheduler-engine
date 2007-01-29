@@ -44,7 +44,6 @@
 #include "../file/stdfile.h"    // make_path
 #include "../kram/licence.h"
 #include "../kram/sos_mail.h"
-#include "../kram/sos_java.h"
 #include "../zschimmer/com_remote.h"
 #include "../zschimmer/xml_end_finder.h"
 #include "../zschimmer/z_signals.h"
@@ -1306,7 +1305,7 @@ void Spooler::load_arg()
     //if( !_java_vm->running() )  // Für javac ist's egal, ob Java läuft (für scheduler.dll)
     {
       //_java_vm->set_filename      ( subst_env( read_profile_string( _factory_ini, "java"   , "vm"         , _java_vm->filename()       ) ) );
-        _java_subsystem()->java_vm()->prepend_class_path( subst_env( read_profile_string( _factory_ini, "java"   , "class_path" ) ) );
+        java_subsystem()->java_vm()->prepend_class_path( subst_env( read_profile_string( _factory_ini, "java"   , "class_path" ) ) );
       //_java_vm->set_javac_filename( subst_env( read_profile_string( _factory_ini, "java"   , "javac"      , _java_vm->javac_filename() ) ) );
     }
 
@@ -1680,7 +1679,7 @@ void Spooler::start()
     try
     {
         _java_subsystem->switch_subsystem_state( subsys_loaded );
-        _java_subsystem->switch_subsystem_state( subsys_active );
+      //_java_subsystem->switch_subsystem_state( subsys_active );
     }
     catch( const exception& x )
     {

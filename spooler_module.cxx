@@ -394,7 +394,7 @@ ptr<Module_instance> Module::create_instance_impl()
     {
         case kind_java:              
         {
-            if( _spooler )  if( !_spooler->_java_vm  ||  !_spooler->_java_vm->running() )  z::throw_xc( "SCHEDULER-177" );
+            if( _spooler )  if( !_spooler->java_subsystem()->java_vm()  ||  !_spooler->java_subsystem()->java_vm()->running() )  z::throw_xc( "SCHEDULER-177" );
 
             _java_vm = get_java_vm( false );
             _java_vm->set_destroy_vm( false );   //  Nicht DestroyJavaVM() rufen, denn das hängt manchmal
