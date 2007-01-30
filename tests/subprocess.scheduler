@@ -27,7 +27,7 @@ spooler_log.mail_on_error = true;  // <kill_task> kann zu einem Fehler in Proces
 if(1)
 {
     var subprocess = spooler_task.create_subprocess();
-    subprocess.start( subprocess.env.substitute( "${MY_HOME}\\1.cmd" ) );
+    subprocess.start( subprocess.env.substitute( "${MY_HOME}\\1.cmd a\\b" ) );
     subprocess.wait_for_termination();
     spooler_log.info( subprocess.exit_code );
 }

@@ -12,10 +12,10 @@
         <script language="javascript">
         <![CDATA[
 
-if( spooler.job_chain( "my_job_chain" ).order_count == 0 )
+if( spooler.job_chain( "order_at.scheduler" ).order_count == 0 )
 {
     // Auftrag soll mit at="" in der Datenbank gehalten werden und bei Scheduler-Neustart berücksichtigt werden
-    var x = spooler.execute_xml( '<add_order id="xml" job_chain="my_job_chain" at="now+60" title="Auftrag per XML"/>' );
+    var x = spooler.execute_xml( '<add_order id="xml" job_chain="order_at.scheduler" at="now+60" title="Auftrag per XML"/>' );
     spooler_log.info( x );
   
     var order = spooler.create_order();
@@ -24,7 +24,7 @@ if( spooler.job_chain( "my_job_chain" ).order_count == 0 )
     order.at    = "now+65";
     //order.params = spooler.create_variable_set();
     order.params.value("my_var") = "my_value";
-    spooler.job_chain( "my_job_chain" ).add_order( order );
+    spooler.job_chain( "order_at.scheduler" ).add_order( order );
 
     try
     {
@@ -59,7 +59,7 @@ my $order = $spooler->create_order();
 $order->LetProperty( 'id'   , "perl" );
 $order->LetProperty( 'title', "Order aus Perl" );
 $order->LetProperty( 'at'   , "now+70" );
-$spooler->job_chain( "my_job_chain" )->add_order( $order );
+$spooler->job_chain( "order_at.scheduler" )->add_order( $order );
 
                     ]]>
                 </script>
@@ -81,13 +81,13 @@ public class My_job  extends sos.spooler.Job_impl
         order.set_id   ( "java string" );
         order.set_title( "Order aus Java, String" );
         order.set_at   ( "now+75" );
-        spooler.job_chain( "my_job_chain" ).add_order( order );
+        spooler.job_chain( "order_at.scheduler" ).add_order( order );
 
         order = spooler.create_order();
         order.set_id   ( "java date" );
         order.set_title( "Order aus Java, Date" );
         order.set_at   ( new Date( new Date().getTime() + 80 * 1000 ) );
-        spooler.job_chain( "my_job_chain" ).add_order( order );
+        spooler.job_chain( "order_at.scheduler" ).add_order( order );
 
         return false;
     }
@@ -119,7 +119,7 @@ function spooler_process()
         
             
         <job_chains>
-            <job_chain name="my_job_chain">
+            <job_chain name="order_at.scheduler">
                 <job_chain_node state="first" job="javascript"/>
                 <job_chain_node state="finished"/>
             </job_chain>

@@ -783,11 +783,11 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
         }
 
         order->db_update( Order::update_anyway );
-        order->close();
+        //Das löscht den Auftrag!  order->close();
     }
     catch( exception& )
     {
-        if( order )  order->close();
+        //Das löscht den Auftrag!  if( order )  order->close();
         throw;
     }
 
