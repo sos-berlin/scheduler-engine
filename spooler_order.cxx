@@ -4627,12 +4627,12 @@ void Order::set_replacement( Order* replaced_order )
 
 void Order::set_replacement( bool b )
 {
+    bool was_replacement = _is_replacement;
+
     _replaced_order_occupator = "";
 
     if( _replacement_for )
     {
-        if( _job_chain_node  &&  _job_chain_node->_job )  _job_chain_node->_job->calculate_next_time_after_modified_order_queue();
-
         _replacement_for->_replaced_by = NULL;
         _replacement_for = NULL;
     }
@@ -4644,6 +4644,8 @@ void Order::set_replacement( bool b )
 
         if( !_is_replacement )  _replacement_for = NULL;
     }
+
+    if( was_replacement  &&  is_processable()  &&  _job_chain_node  &&  _job_chain_node->_job )  _job_chain_node->_job->calculate_next_time_after_modified_order_queue();
 }
 
 //--------------------------------------------------------------------------Order::set_on_blacklist

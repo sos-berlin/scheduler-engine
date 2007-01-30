@@ -2015,6 +2015,8 @@ void Job::calculate_next_time_after_modified_order_queue()
     // _next_time einer Task in s_running_waiting_for_order berechnen
     // oder _next_time des Jobs berechnen
 
+    Z_LOG2( "joacim", __FUNCTION__ << "  " << obj_name() << "\n" );
+
     Time now = Time::now();
 
     FOR_EACH( Task_queue, _task_queue, it )
