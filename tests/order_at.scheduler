@@ -15,8 +15,8 @@
 if( spooler.job_chain( "order_at.scheduler" ).order_count == 0 )
 {
     // Auftrag soll mit at="" in der Datenbank gehalten werden und bei Scheduler-Neustart berücksichtigt werden
-    var x = spooler.execute_xml( '<add_order id="xml" job_chain="order_at.scheduler" at="now+60" title="Auftrag per XML"/>' );
-    spooler_log.info( x );
+    //var x = spooler.execute_xml( '<add_order id="xml" job_chain="order_at.scheduler" at="now+60" title="Auftrag per XML"/>' );
+    //spooler_log.info( x );
   
     var order = spooler.create_order();
     order.id    = "javascript";
@@ -24,12 +24,12 @@ if( spooler.job_chain( "order_at.scheduler" ).order_count == 0 )
     order.at    = "now+65";
     //order.params = spooler.create_variable_set();
     order.params.value("my_var") = "my_value";
-    spooler.job_chain( "order_at.scheduler" ).add_order( order );
+    //spooler.job_chain( "order_at.scheduler" ).add_order( order );
 
     try
     {
-        spooler.job( "perl" ).start();
-        spooler.job( "java" ).start();
+      //spooler.job( "perl" ).start();
+      //spooler.job( "java" ).start();
 
         if( spooler.db_name == "" )  spooler_log.warn( "Der Test funktioniert nur mit Datenbank" );
         //else x = spooler.execute_xml( '<modify_spooler cmd="terminate_and_restart"/>' );
@@ -101,18 +101,30 @@ public class My_job  extends sos.spooler.Job_impl
             </job>
 
 
-            <job name="javascript" order="yes">
+            <job name="javascript" order="yes" idle_timeout="0">
         
-                <script language="JavaScript"><![CDATA[
+                <script language="JavaScript">
+                    <![CDATA[
 
 function spooler_process() 
-{               
-    spooler_log.info( "order.xml=" + spooler_task.order.xml );
+{   
+    var order = spooler_task.order;
+    
+    spooler_log.info( "order.xml=" + order.xml );
+    
+    
+    var new_order = spooler.create_order();
+    new_order.at = "now+30";
+    new_order.title = "Vom Job " + spooler_job.name + " kopiert";
+    new_order.id = order.id;
+    order.job_chain.add_or_replace_order( new_order );
+    
     return true;
 }
 
                 ]]></script>
 
+                <run_time let_run="no"/>
             </job>
         
         </jobs>
@@ -123,7 +135,15 @@ function spooler_process()
                 <job_chain_node state="first" job="javascript"/>
                 <job_chain_node state="finished"/>
             </job_chain>
-        </job_chains>        
+        </job_chains>
+
+        <commands>
+            <add_order job_chain="order_at.scheduler" id="commands" replace="yes">
+                <run_time>
+                    <period start_once="no"/>
+                </run_time>
+            </add_order>
+        </commands>
 
     </config>
 </spooler>

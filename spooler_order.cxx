@@ -3300,7 +3300,7 @@ void Order::close()
         db_release_occupation();
     }
 
-    remove_from_job_chain();
+    remove_from_job_chain();    // Wegen dieses Aufrufs darf <modify_order> nicht close() rufen. Das sollte nicht so sein.
 
     if( _run_time )  _run_time->close(), _run_time = NULL;
 
