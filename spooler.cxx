@@ -242,6 +242,13 @@ static void print_usage()
             "\n";
 }
 
+//----------------------------------------------------------------------------------------self_test
+
+static void self_test()
+{
+    zschimmer::test_file_path();
+}
+
 //---------------------------------------------------------------------------------send_error_email
 
 static void send_error_email( const string& subject, const string& text )
@@ -626,6 +633,8 @@ Spooler::Spooler()
     _environment( variable_set_from_environment() ),
     _holidays(this)
 {
+    Z_DEBUG_ONLY( self_test() );
+
     _scheduler_event_manager = Z_NEW( Scheduler_event_manager( this ) );
     _scheduler_script        = new_scheduler_script( this );
     _job_subsystem           = new_job_subsystem( this );
@@ -1298,7 +1307,7 @@ void Spooler::load_arg()
     _subprocess_own_process_group_default = read_profile_bool( _factory_ini, "spooler", "subprocess.own_process_group", _subprocess_own_process_group_default );
     _log_collect_within = read_profile_uint  ( _factory_ini, "spooler", "log_collect_within", 0 );
     _log_collect_max    = read_profile_uint  ( _factory_ini, "spooler", "log_collect_max"   , 900 );
-    _zschimmer_mode     = read_profile_bool  ( _factory_ini, "spooler", "zschimmer", _zschimmer_mode );
+  //_zschimmer_mode     = read_profile_bool  ( _factory_ini, "spooler", "zschimmer", _zschimmer_mode );
 
     _my_program_filename = _argv? _argv[0] : "(missing program path)";
 
@@ -1401,6 +1410,8 @@ void Spooler::load_arg()
             if( opt.with_value( "env"                    ) )  ;  // Bereits von spooler_main() erledigt
             else
             if( opt.flag      ( "zschimmer"              ) )  _zschimmer_mode = opt.set();
+            else
+            if( opt.flag      ( "test"                   ) )  self_test();
             else
             if( opt.flag      ( "test-summertime"        ) )  time::test_summertime( ( Time::now() + 10 ).as_string() );
             else
@@ -3336,7 +3347,6 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
     bool    kill_pid_file      = false;
     int     kill_pid           = 0;
     string  pid_filename;
-
 
 #   ifdef Z_WINDOWS
         SetErrorMode( SEM_FAILCRITICALERRORS | SEM_NOOPENFILEERRORBOX );    // Das System soll sich Messageboxen verkneifen (auﬂer beim Absturz)

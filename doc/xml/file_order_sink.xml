@@ -38,7 +38,7 @@
             </messages>
         </xml_attribute>
 
-        <xml_attribute name="move_to" type="directory_path">
+        <xml_attribute name="move_to" type="directory_path" subst_env="yes">
             <description>
                 <p>
                     Die Datei wird in das Verzeichnis verschoben. 

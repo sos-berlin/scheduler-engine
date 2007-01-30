@@ -10,6 +10,17 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2007-01-30" version="2.0.163" subversion_revision="4810">
+        <revision type="new" title="&lt;file_order_sink move_to=&quot;&quot; akzeptiert Umgebungsvariablen">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_element name="file_order_sink" attribute="move_to"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+    </change>
 
     <change date="2007-01-27" version="2.0.163" subversion_revision="4793">
         <revision type="new" title="Skript-Funktion für nächste Startzeit">

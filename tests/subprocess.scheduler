@@ -27,7 +27,7 @@ spooler_log.mail_on_error = true;  // <kill_task> kann zu einem Fehler in Proces
 if(1)
 {
     var subprocess = spooler_task.create_subprocess();
-    subprocess.start( subprocess.env.substitute( "${MY_HOME}/my_program" ) );
+    subprocess.start( subprocess.env.substitute( "${MY_HOME}\\1.cmd" ) );
     subprocess.wait_for_termination();
     spooler_log.info( subprocess.exit_code );
 }
@@ -42,7 +42,7 @@ var s = "test1=$test1 TEST1=$TEST1 test2=${test2}";
 spooler_log.info( "substitute: " + s + " ==> " + subprocess.env.substitute( s ) );
 subprocess.ignore_error = true;
 
-//subprocess.start( "sh -c set" );
+subprocess.start( "sh -c set" );
 //subprocess.start( "sleep 30" );
 
 spooler_log.info( "pid=" + subprocess.pid );
@@ -144,7 +144,7 @@ public class My_job  extends sos.spooler.Job_impl
         </jobs>
 
         <commands>
-            <start_job job="java"/>
+            <start_job job="javascript"/>
         </commands>
     </config>
 </spooler>

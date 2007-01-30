@@ -520,7 +520,7 @@ AGAIN:
         // Nächste Operation
 
         {
-            Variant params ( Variant::vt_array, 17 );   // Wichtig: Größe anpassen!
+            Variant params ( Variant::vt_array, 18 );   // Wichtig: Größe anpassen!
 
             {
                 Locked_safearray<Variant> params_array = V_ARRAY( &params );
@@ -534,6 +534,7 @@ AGAIN:
 
                 if( _server_hostname.empty() )
                 {
+                    params_array[ nr++ ] = "javac="           + _module->_spooler->java_subsystem()->java_vm()->javac_filename();
                     params_array[ nr++ ] = "java_class_path=" + _module->_spooler->java_subsystem()->java_vm()->class_path();
                     params_array[ nr++ ] = "java_work_dir="   + _module->_spooler->java_subsystem()->java_vm()->work_dir();
                 }

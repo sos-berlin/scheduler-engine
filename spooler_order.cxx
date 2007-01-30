@@ -1024,7 +1024,7 @@ void Job_chain::set_dom( const xml::Element_ptr& element )
 
             Job_chain_node* node = add_job( job, state, Variant(Variant::vt_missing), Variant(Variant::vt_missing) );
 
-            node->_file_order_sink_move_to.set_directory( e.getAttribute( "move_to" ) );
+            node->_file_order_sink_move_to.set_directory( subst_env( e.getAttribute( "move_to" ) ) );
             node->_file_order_sink_remove  = e.bool_getAttribute( "remove" );
         }
         else

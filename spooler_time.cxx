@@ -1435,11 +1435,17 @@ Period Run_time::call_function( const Time& requested_beginning )
         {
             if( !_spooler->scheduler_script()->module_instance() )  z::throw_xc( "SCHEDULER-395", __FUNCTION__, _start_time_function );
 
-            Variant date_v;
-            V_VT( &date_v ) = VT_DATE;
-            V_DATE( &date_v ) = com::com_date_from_seconds_since_1970( requested_beginning );
+            string date_string = requested_beginning.as_string( Time::without_ms );
+            string param2 = !_host_object? "" :
+                            _host_object->scheduler_type_code() == Scheduler_object::type_order? dynamic_cast<Order*>( +_host_object )->string_id() :
+                            _host_object->scheduler_type_code() == Scheduler_object::type_job  ? dynamic_cast<Job*  >( +_host_object )->name()
+                                                                                               : "";
 
-            Variant v = _spooler->scheduler_script()->module_instance()->call( _start_time_function, date_v, _host_object? _host_object->idispatch() : NULL );
+            Variant v = _spooler->scheduler_script()->module_instance()->call( _start_time_function, date_string, param2 );
+            //Variant date_v;
+            //V_VT( &date_v ) = VT_DATE;
+            //V_DATE( &date_v ) = com::com_date_from_seconds_since_1970( requested_beginning );
+            //Variant v = _spooler->scheduler_script()->module_instance()->call( _start_time_function, date_v, _host_object? _host_object->idispatch() : NULL );
             
             if( !v.is_null_or_empty_string() )
             {
@@ -1617,7 +1623,9 @@ Period Run_time::next_period( const Time& beginning_time, With_single_start sing
     Period result;
     Time   tim   = beginning_time;
     bool   is_no_function_warning_logged = false; 
-
+    Period last_function_result;
+    
+    last_function_result.set_single_start( 0 );
 
     while( tim < Time::never )
     {
@@ -1631,10 +1639,12 @@ Period Run_time::next_period( const Time& beginning_time, With_single_start sing
                 is_no_function_warning_logged = true;
             }
             else
+            if( last_function_result.begin() < tim )
             {
                 try
                 {
-                    result = min( result, call_function( tim ) );
+                    last_function_result = min( result, call_function( tim ) );
+                    result = last_function_result;
                 }
                 catch( exception& x )
                 {
