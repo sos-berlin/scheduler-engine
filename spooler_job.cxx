@@ -2025,13 +2025,11 @@ void Job::calculate_next_time_after_modified_order_queue()
         if( task->state() == Task::s_running_waiting_for_order )
         {
             task->calculate_next_time_after_modified_order_queue();
-            if( task->_next_time <= now )  task->signal( __FUNCTION__ );
             return;
         }
     }
    
     calculate_next_time( now );
-    if( _next_time <= now )  signal( __FUNCTION__ );
 }
 
 //-------------------------------------------------------------------------------Job::request_order
