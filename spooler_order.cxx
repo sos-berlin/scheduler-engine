@@ -4631,6 +4631,8 @@ void Order::set_replacement( bool b )
 
     if( _replacement_for )
     {
+        if( _job_chain_node  &&  _job_chain_node->_job )  _job_chain_node->_job->calculate_next_time_after_modified_order_queue();
+
         _replacement_for->_replaced_by = NULL;
         _replacement_for = NULL;
     }
