@@ -505,7 +505,7 @@ Variant Java_module_instance::call( const string& name_par )
 
 Variant Java_module_instance::call( const string& name, const Variant& param, const Variant& param2 )
 {
-    Env env;
+    Com_env env;
     Local_frame local_frame ( 10 );
     Java_idispatch_stack_frame stack_frame;
 
@@ -518,7 +518,25 @@ Variant Java_module_instance::call( const string& name, const Variant& param, co
         In_call in_call ( this, name );
 
         if( string_ends_with( name, "(Z)Z" )  &&  param2.is_missing() )
+        {
             result = env->CallBooleanMethod( _jobject, method_id, param.as_bool() ) != 0;
+        }
+        else
+        if( string_ends_with( name, "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;" ) )  // Für <run_time start_time_function="">, s. Run_time::call_function
+        {
+            jstring jstr1 = env.jstring_from_variant( param );
+            jstring jstr2 = env.jstring_from_variant( param2 );
+            jstring jstr = static_cast<jstring>( env->CallObjectMethod( _jobject, method_id, jstr1, jstr2 ) );
+
+            Bstr bstr;
+            env.jstring_to_bstr( jstr, &bstr._bstr );
+
+            env->DeleteLocalRef( jstr );
+            env->DeleteLocalRef( jstr1 );
+            env->DeleteLocalRef( jstr2 );
+
+            return bstr;
+        }
         else
         //if( string_ends_with( name, "(Lsos/spooler/Spooler_object;)Z" ) )
         //{

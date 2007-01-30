@@ -22,6 +22,7 @@ struct Scheduler_script : Scheduler_script_interface
 
     // Scheduler_script_interface:
     void                        set_dom_script              ( const xml::Element_ptr& script_element, const Time& xml_mod_time, const string& include_path );
+    Module*                     module                      ()                                      { return &_module; }
     Module_instance*            module_instance             ()                                      { return _module_instance; }
 
 

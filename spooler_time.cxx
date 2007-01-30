@@ -1441,7 +1441,10 @@ Period Run_time::call_function( const Time& requested_beginning )
                             _host_object->scheduler_type_code() == Scheduler_object::type_job  ? dynamic_cast<Job*  >( +_host_object )->name()
                                                                                                : "";
 
-            Variant v = _spooler->scheduler_script()->module_instance()->call( _start_time_function, date_string, param2 );
+            string function_name = _start_time_function;
+            if( _spooler->scheduler_script()->module()->kind() == Module::kind_java )  function_name += "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;";
+
+            Variant v = _spooler->scheduler_script()->module_instance()->call( function_name, date_string, param2 );
             //Variant date_v;
             //V_VT( &date_v ) = VT_DATE;
             //V_DATE( &date_v ) = com::com_date_from_seconds_since_1970( requested_beginning );
@@ -1502,7 +1505,6 @@ void Run_time::set_dom( const xml::Element_ptr& element )
     if( _host_object  &&  _host_object->scheduler_type_code() == Scheduler_object::type_order  &&  !_once )  z::throw_xc( "SCHEDULER-220", "once='no'" );
 
     _start_time_function = element.getAttribute( "start_time_function" );
-
 
     default_period.set_dom( element, NULL );
     default_day = default_period;

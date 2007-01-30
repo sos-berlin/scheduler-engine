@@ -106,6 +106,7 @@ struct Get_events_command_response;
 struct Job;
 struct Job_chain;
 struct Job_subsystem_interface;
+struct Module;
 struct Module_instance;
 struct Order_queue;
 struct Order;
