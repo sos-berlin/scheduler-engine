@@ -39,6 +39,10 @@
     <p>
         Am Ende kommen wir mit drei Events aus: Für TCP, Prozesse und Threads.
     </p>
+    <p>
+        Microsoft empfielt auch <a href="http://msdn2.microsoft.com/en-gb/library/aa363862.aspx"><code>CreateIoCompletionPort()</code></a>: 
+        "<a href="http://msdn.microsoft.com/msdnmag/issues/1000/winsock/">Windows Sockets 2.0: Write Scalable Winsock Apps Using Completion Ports</a>".
+    </p>
 
     
     <h2>Direkte Kopplung der Ereignisse mit asynchronen Objekten</h2>

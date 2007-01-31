@@ -745,6 +745,7 @@ void Communication::bind()
                 _udp_socket._read_socket = socket( AF_INET, SOCK_DGRAM, 0 );
                 if( _udp_socket._read_socket == SOCKET_ERROR )  throw_socket( socket_errno(), "socket" );
 
+                set_socket_not_inheritable( _udp_socket._read_socket );
                 //_udp_socket.set_linger( false );
                 
                 sa.sin_port   = htons( _spooler->udp_port() );
@@ -791,6 +792,7 @@ void Communication::bind()
                 _listen_socket._read_socket = socket( AF_INET, SOCK_STREAM, 0 );
                 if( _listen_socket._read_socket == SOCKET_ERROR )  throw_socket( socket_errno(), "socket" );
 
+                set_socket_not_inheritable( _listen_socket._read_socket );
                 //_listen_socket.set_linger( false );
                 
                 sa.sin_port   = htons( _spooler->tcp_port() );
