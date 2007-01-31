@@ -1298,20 +1298,20 @@ bool Job::Task_queue::has_task_waiting_for_period()
 
 //--------------------------------------------------------------Job::Task_queue::next_at_start_time
 
-Time Job::Task_queue::next_at_start_time( Time now )
-{
-    for( Task_queue::iterator it = _queue.begin(); it != _queue.end(); it++ )
-    {
-        Task* task = *it;
-        if( task->_start_at )  return task->_start_at;
-    }
-
-    return Time::never;
-}
+//Time Job::Task_queue::next_at_start_time()
+//{
+//    for( Task_queue::iterator it = _queue.begin(); it != _queue.end(); it++ )
+//    {
+//        Task* task = *it;
+//        if( task->_start_at )  return task->_start_at;
+//    }
+//
+//    return Time::never;
+//}
 
 //-------------------------------------------------------------------------Job::get_task_from_queue
 
-ptr<Task> Job::get_task_from_queue( Time now )
+ptr<Task> Job::get_task_from_queue( const Time& now )
 {
     ptr<Task> task;
 
@@ -1795,7 +1795,7 @@ string Job::trigger_files( Task* task )
 
 //-------------------------------------------------------------------------------Job::select_period
 
-void Job::select_period( Time now )
+void Job::select_period( const Time& now )
 {
     if( now >= _period.end() )       // Periode abgelaufen?
     {
@@ -1813,14 +1813,14 @@ void Job::select_period( Time now )
 
 //--------------------------------------------------------------------------------Job::is_in_period
 
-bool Job::is_in_period( Time now )
+bool Job::is_in_period( const Time& now )
 {
     return now >= _delay_until  &&  now >= _period.begin()  &&  now < _period.end();
 }
 
 //-------------------------------------------------------------------------Job::set_next_start_time
 
-void Job::set_next_start_time( Time now, bool repeat )
+void Job::set_next_start_time( const Time& now, bool repeat )
 {
     {
         select_period( now );
@@ -1932,7 +1932,7 @@ Time Job::next_start_time()
 //-------------------------------------------------------------------------Job::calculate_next_time
 // Für Task_subsystem
 
-void Job::calculate_next_time( Time now )
+void Job::calculate_next_time( const Time& now )
 {
     if( _state == s_not_initialized )  return;
 
@@ -2007,29 +2007,17 @@ void Job::calculate_next_time( Time now )
     }
 }
 
-//----------------------------------------------Job::calculate_next_time_after_modified_order_queue
+//--------------------------------------------------------------------Job::signal_processable_order
 
-void Job::calculate_next_time_after_modified_order_queue()
+void Job::signal_processable_order( Order* order )
 {
-    // Auftragswarteschlange hat einen neuen Auftrag bekommen (s. spooler_order.cxx)
-    // _next_time einer Task in s_running_waiting_for_order berechnen
-    // oder _next_time des Jobs berechnen
+    Z_LOG2( "scheduler.signal", __FUNCTION__ << "  " << obj_name() << "  " << order->obj_name() << "\n" );
 
-    Z_LOG2( "joacim", __FUNCTION__ << "  " << obj_name() << "\n" );
-
-    Time now = Time::now();
-
-    FOR_EACH( Task_queue, _task_queue, it )
+    if( _next_time > 0 )
     {
-        Task* task = *it;
-        if( task->state() == Task::s_running_waiting_for_order )
-        {
-            task->calculate_next_time_after_modified_order_queue();
-            return;
-        }
+        Time now = Time::now();
+        calculate_next_time( now );
     }
-   
-    calculate_next_time( now );
 }
 
 //-------------------------------------------------------------------------------Job::request_order
@@ -2263,7 +2251,8 @@ bool Job::do_something()
                         {
                             if( task->fetch_and_occupy_order( now, __FUNCTION__ ) )
                             {
-                                task->do_something();
+                                something_done |= task->do_something();
+                                //break;   Jetzt müssten wir doch fertig sein. 2007-01-31
                             }
                         }
                     }

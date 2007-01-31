@@ -138,7 +138,7 @@ void Xml_response::signal_new_data()
 
 //----------------------------------------------------Communication::Listen_socket::async_continue_
 
-bool Communication::Listen_socket::async_continue_( Continue_flags flags )
+bool Communication::Listen_socket::async_continue_( Continue_flags )
 {
     bool something_done = false;
 

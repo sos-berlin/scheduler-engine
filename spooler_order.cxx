@@ -1008,7 +1008,7 @@ void Job_chain::set_dom( const xml::Element_ptr& element )
 
     DOM_FOR_EACH_ELEMENT( element, e )
     {
-        if( e.nodeName_is( "file_order_source" ) )      // Wegen _on_blacklist und _is_virgin
+        if( e.nodeName_is( "file_order_source" ) )      // Wegen _is_on_blacklist und _is_virgin
         {
             ptr<Directory_file_order_source> d = Z_NEW( Directory_file_order_source( this, e ) );
             _order_sources._order_source_list.push_back( +d );
@@ -1340,7 +1340,7 @@ void Job_chain::add_order( Order* order )
     set_visible( true );
 
     Job_chain_node* node = node_from_state( order->_state );
-    if( ( !order->_suspended || !order->_on_blacklist )  &&  !node->_job )  z::throw_xc( "SCHEDULER-149", name(), debug_string_from_variant(order->_state) );
+    if( ( !order->_suspended || !order->_is_on_blacklist )  &&  !node->_job )  z::throw_xc( "SCHEDULER-149", name(), debug_string_from_variant(order->_state) );
     if( node->_job )  assert( node->_job->order_queue() );
 
     order->_job_chain      = this;
@@ -1353,8 +1353,8 @@ void Job_chain::add_order( Order* order )
 
     register_order( order );
 
-    if( order->_on_blacklist || !node->_job )  add_to_blacklist( order );
-                                         else  node->_job->order_queue()->add_order( order );
+    if( order->_is_on_blacklist || !node->_job )  order->set_on_blacklist();
+                                            else  node->_job->order_queue()->add_order( order );
 }
 
 //--------------------------------------------------------------------------Job_chain::remove_order
@@ -1366,9 +1366,9 @@ void Job_chain::remove_order( Order* order )
 
     ptr<Order> hold_order = order;   // Halten
 
-    if( order->_on_blacklist )
+    if( order->_is_on_blacklist )
     {
-        remove_from_blacklist( order );
+        order->remove_from_blacklist();
     }
 
     if( order->_job_chain_node )
@@ -1605,34 +1605,27 @@ void Job_chain::register_order( Order* order )
 
 void Job_chain::unregister_order( Order* order )
 {
-    assert( !order->_on_blacklist );
+    assert( !order->_is_on_blacklist );
 
     Order_map::iterator it = _order_map.find( order->string_id() );
     if( it != _order_map.end() )  _order_map.erase( it );
                             else  Z_LOG2( "scheduler", __FUNCTION__ << " " << order->obj_name() << " ist nicht registriert.\n" );
 }
 
-//----------------------------------------------------------------------Job_chain::add_to_blacklist
+//----------------------------------------------------------------Job_chain::add_order_to_blacklist
 
-void Job_chain::add_to_blacklist( Order* order )
+void Job_chain::add_order_to_blacklist( Order* order )
 {
     //if( order->_suspended || !node_from_state_or_null( order->_state ) || !node_from_state_or_null( order->_state )->_job )  z::throw_xc( __FUNCTION__ );
 
     _blacklist_map[ order->string_id() ] = order;
-
-    order->_on_blacklist = true;
-    order->_order_xml_modified = true;
 }
 
-//-----------------------------------------------------------------Job_chain::remove_from_blacklist
+//-----------------------------------------------------------Job_chain::remove_order_from_blacklist
 
-void Job_chain::remove_from_blacklist( Order* order )
+void Job_chain::remove_order_from_blacklist( Order* order )
 {
-    if( order->_on_blacklist )
-    {
-        _blacklist_map.erase( order->string_id() );
-        order->_on_blacklist = false;
-    }
+    _blacklist_map.erase( order->string_id() );
 }
 
 //-----------------------------------------------------------------------Job_chain::is_on_blacklist
@@ -1994,7 +1987,7 @@ void Order_queue::add_order( Order* order, Do_log do_log )
 
 
     Queue::iterator insert_before = _queue.begin();
-    bool            wake_up       = !order->_task  &&  !has_order( Time::now() );
+    //bool            wake_up       = !order->_task  &&  !has_order( Time::now() );
     
     for(; insert_before != _queue.end(); insert_before++ )
     {
@@ -2015,8 +2008,9 @@ void Order_queue::add_order( Order* order, Do_log do_log )
 
     //update_priorities();
 
-    _job->calculate_next_time_after_modified_order_queue();
-    if( wake_up )  _job->signal( "Order" );
+    order->signal_job_when_order_has_become_processable();
+    //_job->calculate_next_time_after_modified_order_queue();
+    //if( wake_up )  _job->signal( "Order" );
 }
 
 //------------------------------------------------------------------------Order_queue::remove_order
@@ -2515,7 +2509,7 @@ Order::~Order()
         assert( !_is_db_occupied );
         assert( !_task );
         assert( !_job_chain );
-        assert( !_on_blacklist );
+        assert( !_is_on_blacklist );
         assert( !_in_job_queue );
       //assert( !_is_replacement );
         assert( !_replaced_by );
@@ -2610,22 +2604,55 @@ string Order::string_id( const Id& id )
 bool Order::is_immediately_processable( const Time& now )
 {
     // select ... from scheduler_orders  where not suspended and replacement_for is null and setback is null 
-    // scheduler_orders.processable := !_on_blacklist && !_suspende
+    // scheduler_orders.processable := !_is_on_blacklist && !_suspende
 
     return _setback <= now  &&  is_processable();
 }
 
-//----------------------------------------------------------------Order::is_immediately_processable
+//----------------------------------------------------------------------------Order::is_processable
 
 bool Order::is_processable()
 {
-    if( _on_blacklist )    return false;  
+    if( _is_on_blacklist ) return false;  
     if( _suspended )       return false;
     if( _task )            return false;               // Schon in Verarbeitung
     if( _is_replacement )  return false;
     if( _job_chain  &&  _job_chain->state() != Job_chain::s_ready )  return false;   // Jobkette wird nicht gelöscht?
 
     return true;
+}
+
+//-------------------------------------------------------------------Order::check_processable_state
+// Nach Änderung von is_processable() zu rufen!
+
+void Order::check_processable_state()
+{
+    if( !_was_processable )
+    {
+        signal_job_when_order_has_become_processable();
+    }
+    else
+    if( !is_processable() )
+    {
+        _was_processable = false;
+    }
+
+    assert( _was_processable == is_processable() );
+}
+
+//----------------------------------------------Order::signal_job_when_order_has_become_processable
+
+void Order::signal_job_when_order_has_become_processable()
+{
+    if( !_was_processable  &&  is_processable() )
+    {
+        if( Job* job = _job_chain_node? _job_chain_node->_job : NULL )
+        {
+            job->signal_processable_order( this );
+        }
+
+        _was_processable = true;
+    }
 }
 
 //-----------------------------------------------------------------Order::assert_is_not_distributed
@@ -3151,7 +3178,7 @@ string Order::calculate_db_distributed_next_time()
 
     if( _is_distributed )
     {
-        if( _on_blacklist )    result = blacklist_database_distributed_next_time;
+        if( _is_on_blacklist )    result = blacklist_database_distributed_next_time;
         else
         if( _is_replacement )  result = replacement_database_distributed_next_time;
         else
@@ -3535,7 +3562,7 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
     if( _http_operation  &&  _http_operation->web_service_operation_or_null() )
     element.setAttribute( "web_service_operation", _http_operation->web_service_operation_or_null()->id() );
 
-    if( _on_blacklist    )  element.setAttribute( "on_blacklist", "yes" );
+    if( _is_on_blacklist )  element.setAttribute( "on_blacklist", "yes" );
     if( _suspended       )  element.setAttribute( "suspended"   , "yes" );
     if( _is_replacement  )  element.setAttribute( "replacement" , "yes" ),
                             element.setAttribute_optional( "replaced_order_occupator", _replaced_order_occupator );
@@ -3915,7 +3942,7 @@ void Order::set_job_chain_node( Job_chain_node* node, bool is_error_state )
 
 void Order::move_to_node( Job_chain_node* node )
 {
-    if( _on_blacklist )  _job_chain->remove_from_blacklist( this );
+    if( _is_on_blacklist )  remove_from_blacklist();
 
     //THREAD_LOCK( _lock )
     {
@@ -4363,7 +4390,7 @@ void Order::postprocessing2( Job* last_job )
         if( is_file_order()  &&  file_exists( file_path() ) )
         {
             _log->error( message_string( "SCHEDULER-340" ) );
-            if( _job_chain )  _job_chain->add_to_blacklist( this );
+            if( _job_chain )  set_on_blacklist();
         }
 
         try
@@ -4380,7 +4407,7 @@ void Order::postprocessing2( Job* last_job )
     if( _suspended  &&  _job_chain  &&  ( !_job_chain_node  ||  !_job_chain_node->_job ) )
     //if( _suspended  &&  end_state_reached() )
     {
-        _job_chain->add_to_blacklist( this );
+        set_on_blacklist();
     }
 
 
@@ -4394,7 +4421,7 @@ void Order::postprocessing2( Job* last_job )
     {
         try
         {
-            if( !_on_blacklist  &&  finished() )  db_delete( update_and_release_occupation );
+            if( !_is_on_blacklist  &&  finished() )  db_delete( update_and_release_occupation );
                                             else  db_update( update_and_release_occupation );
         }
         catch( exception& x )
@@ -4411,7 +4438,7 @@ void Order::postprocessing2( Job* last_job )
 
     if( finished() )
     {
-        if( !_on_blacklist )  close();
+        if( !_is_on_blacklist )  close();
     }
 }
 
@@ -4426,12 +4453,14 @@ void Order::set_suspended( bool suspended )
         _suspended = suspended;
         _order_xml_modified = true;
 
-        if( _on_blacklist  &&  !suspended )  remove_from_job_chain();
+        if( _is_on_blacklist  &&  !suspended )  remove_from_job_chain();
         else
         if( _in_job_queue )  order_queue()->reinsert_order( this );
 
         if( _suspended )  _log->info( message_string( "SCHEDULER-991" ) );
                     else  _log->info( message_string( "SCHEDULER-992", _setback ) );
+
+        check_processable_state();
     }
 }
 
@@ -4645,7 +4674,7 @@ void Order::set_replacement( bool b )
         if( !_is_replacement )  _replacement_for = NULL;
     }
 
-    if( was_replacement  &&  is_processable()  &&  _job_chain_node  &&  _job_chain_node->_job )  _job_chain_node->_job->calculate_next_time_after_modified_order_queue();
+    if( was_replacement )  signal_job_when_order_has_become_processable();
 }
 
 //--------------------------------------------------------------------------Order::set_on_blacklist
@@ -4654,7 +4683,26 @@ void Order::set_on_blacklist()
 {
     if( !_job_chain )  z::throw_xc( __FUNCTION__, "no _job_chain" );        // Wenn _is_distributed
 
-    _job_chain->add_to_blacklist( this );
+    _job_chain->add_order_to_blacklist( this );
+
+    _is_on_blacklist    = true;
+    _order_xml_modified = true;
+
+    check_processable_state();
+}
+
+//---------------------------------------------------------------------Order::remove_from_blacklist
+
+void Order::remove_from_blacklist()
+{
+    if( _is_on_blacklist )
+    {
+        assert( _job_chain );
+        _job_chain->remove_order_from_blacklist( this );
+        _is_on_blacklist = false;
+    
+        check_processable_state();
+    }
 }
 
 //-------------------------------------------------------------------------------Order::web_service

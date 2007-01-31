@@ -176,7 +176,7 @@ struct Job : Object,
         bool                    remove_task                 ( int task_id, Why_remove );
         void                    remove_task_from_db         ( int task_id );
         bool                    has_task_waiting_for_period ();
-        Time                    next_at_start_time          ( Time now );
+      //Time                    next_at_start_time          ();
 
       private:
         Job* const             _job;
@@ -232,11 +232,11 @@ struct Job : Object,
     void                    set_remove                      ( bool );
     void                    set_replacement_job             ( Job* );
     void                        set_delay_after_error       ( int error_steps, const string& delay );
-    void                        set_delay_after_error       ( int error_steps, Time delay )         { _log->debug9( "delay_after_error["        +as_string(error_steps)+"]="+delay.as_string() ); _delay_after_error[ error_steps ] = delay; }
+    void                        set_delay_after_error       ( int error_steps, const Time& delay )  { _log->debug9( "delay_after_error["        +as_string(error_steps)+"]="+delay.as_string() ); _delay_after_error[ error_steps ] = delay; }
     void                        set_stop_after_error        ( int error_steps )                     { _log->debug9( "delay_after_error["        +as_string(error_steps)+"]=\"STOP\""           ); _delay_after_error[ error_steps ] = Time::never; }
     void                        clear_delay_after_error     ()                                      { _log->debug9( "clear_delay_after_error()" ); _delay_after_error.clear(); }
     void                        set_delay_order_after_setback( int setbacks, const string& delay );
-    void                        set_delay_order_after_setback( int setbacks, Time delay )           { _log->debug9( "delay_order_after_setback["+as_string(setbacks   )+"]="+delay.as_string() ); _delay_order_after_setback[setbacks   ] = delay; }
+    void                        set_delay_order_after_setback( int setbacks, const Time& delay )    { _log->debug9( "delay_order_after_setback["+as_string(setbacks   )+"]="+delay.as_string() ); _delay_order_after_setback[setbacks   ] = delay; }
     Time                        get_delay_order_after_setback( int setback_count );
     void                        set_max_order_setbacks      ( int n )                               { _log->debug9( "max_order_setbacks"+as_string(n) ); _max_order_setbacks = n; }
     int                         max_order_setbacks          () const                                { return _max_order_setbacks; }
@@ -248,7 +248,6 @@ struct Job : Object,
     void                        close                       ();
 
     ptr<Task>                   start                       ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, const Time& = 0 );
-  //Sos_ptr<Task>               start_without_lock          ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, Time = 0, bool log = false );
     void                        enqueue_task                ( Task* );
     void                        start_when_directory_changed( const string& directory_name, const string& filename_pattern );
     void                        clear_when_directory_changed();
@@ -256,8 +255,8 @@ struct Job : Object,
     void                        update_changed_directories  ( Directory_watcher* );
     string                      trigger_files               ( Task* task = NULL );
     void                        interrupt_script            ();
-    void                        select_period               ( Time );
-    bool                        is_in_period                ( Time );
+    void                        select_period               ( const Time& );
+    bool                        is_in_period                ( const Time& );
     bool                        queue_filled                ()                                      { return !_task_queue.empty(); }
     
     void                        on_task_finished            ( Task* );                              // Task::finished() ruft das
@@ -269,7 +268,7 @@ struct Job : Object,
 
     ptr<Task>                   create_task                 ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, const Time& = Time::never );
     ptr<Task>                   create_task                 ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, const Time&, int id );
-    ptr<Task>                   get_task_from_queue         ( Time now );
+    ptr<Task>                   get_task_from_queue         ( const Time& now );
     void                        run_task                    ( const ptr<Task>&  );
 
   //void                        remove_from_task_queue      ( Task*, Log_level );
@@ -279,10 +278,10 @@ struct Job : Object,
   //void                        end                         ();
     void                        stop                        ( bool end_all_tasks );
     void                        stop_after_task_error       ( bool end_all_tasks, const string& error_message );   // _ignore_error verhindert stop()
-    void                        set_next_start_time         ( Time now, bool repeat = false );
-    void                        set_next_time               ( Time );
-    void                        calculate_next_time         ( Time now );
-    void                        calculate_next_time_after_modified_order_queue();
+    void                        set_next_start_time         ( const Time& now, bool repeat = false );
+    void                        set_next_time               ( const Time& );
+    void                        calculate_next_time         ( const Time& now );
+    void                        signal_processable_order    ( Order* );
 
     Time                        next_time                   ()                                      { return _next_time; }
     Time                        next_start_time             ();

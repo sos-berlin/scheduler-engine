@@ -785,12 +785,12 @@ void Task::set_next_time( const Time& next_time )
 
 //---------------------------------------------Task::calculate_next_time_after_modified_order_queue
 
-void Task::calculate_next_time_after_modified_order_queue()
-{
-    assert( _state == s_running_waiting_for_order );
-
-    _next_time = min( _next_time, _job->order_queue()->next_time() );
-}
+//void Task::calculate_next_time_after_modified_order_queue()
+//{
+//    assert( _state == s_running_waiting_for_order );
+//
+//    _next_time = min( _next_time, _job->order_queue()->next_time() );
+//}
 
 //----------------------------------------------------------------------------------Task::next_time
 

@@ -4904,7 +4904,7 @@ STDMETHODIMP Com_order::get_String_next_start_time( BSTR* result )
 
 //-------------------------------------------------------------------------------Com_order::get_Xml
 
-STDMETHODIMP Com_order::get_Xml( BSTR show_what_bstr, BSTR* result )
+STDMETHODIMP Com_order::get_Xml( BSTR, BSTR* result )
 {
     HRESULT hr = NOERROR;
 

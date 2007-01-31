@@ -32,16 +32,16 @@ order.title = "Wir haben einen Auftrag!";
 //order.run_time.xml = '<run_time let_run="no" repeat="20"/>';  // let_run ist unsinn, nur zum test
 
 order.run_time.xml = "<run_time>" +
-                        "<date date='2006-11-30'>" +
-                            "<period begin='14:55:00' end='23:25:30' />" +
-                            "<period single_start='14:55:50' />" +
-                            "<period begin='14:55:30' end='23:34:50' />" +
+                        "<date date='2007-01-30'>" +
+                            "<period begin='18:55:00' end='23:25:30' />" +
+                            "<period single_start='18:55:50' />" +
+                            "<period begin='18:55:30' end='23:34:50' />" +
                         "</date>" +             
-                        "<date date='2006-11-30'>" +
+                        "<date date='2007-02-01'>" +
                             "<period begin='14:55:30' end='21:34:50' />" +
                         "</date>" +
                         "<weekdays>" + 
-                            "<day day='7'>" +
+                            "<day day='sunday'>" +
                                 "<period begin='14:55:40' end='20:00' />" +
                             "</day>" +
                         "</weekdays>" + 
@@ -53,7 +53,7 @@ order.state = "3";
 
 try
 {                     
-    spooler.job_chain( "my_job_chain" ).add_order( order );
+    spooler.job_chain( "order_run_time.scheduler" ).add_order( order );
 }
 catch( x ) { spooler_log.warn( x.toString() ); }
 
@@ -76,7 +76,7 @@ function spooler_process()
 
     var order = spooler_task.order;
     //order.run_time.xml = '<run_time><period single_start="12:37:30"/></run_time>';
-    //spooler.execute_xml( '<modify_order job_chain="my_job_chain" order="1">' +
+    //spooler.execute_xml( '<modify_order job_chain="order_run_time.scheduler" order="1">' +
     //                         '<run_time><period single_start="12:37:30"/></run_time>' +
     //                     '</modify_order>' );
     //spooler_log.info( order.run_time.xml );
@@ -162,7 +162,7 @@ function spooler_process()
 {               
     var order = spooler.create_order();
     order.title = "Wir haben einen Auftrag!";
-    spooler.job_chain( "my_job_chain" ).add_order( order );
+    spooler.job_chain( "order_run_time.scheduler" ).add_order( order );
 
     return false;
 }
@@ -175,7 +175,7 @@ function spooler_process()
         </jobs>
 
         <job_chains>
-            <job_chain name="my_job_chain">
+            <job_chain name="order_run_time.scheduler">
                 <job_chain_node state="1" job="javascript" next_state="2" error_state="999"/>
                 <job_chain_node state="2" job="javascript2" next_state="3" error_state="999"/>
                 <job_chain_node state="3" job="javascript3" next_state="100" error_state="999"/>

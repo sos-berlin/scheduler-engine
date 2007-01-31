@@ -561,6 +561,7 @@
             <xsd:attribute name="state"     type="String"/>
             <xsd:attribute name="setback"   type="No"/>
             <xsd:attribute name="suspended" type="Yes_no"/>
+            <xsd:attribute name="at"        type="Date_time_with_now"/>
         </xsd:complexType>
     </xsd:element>
 

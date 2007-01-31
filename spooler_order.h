@@ -62,8 +62,12 @@ struct Order : Com_order,
     bool                        occupy_for_task         ( Task*, const Time& now );
     void                        assert_no_task          ( const string& debug_text );
     void                        assert_task             ( const string& debug_text );
+
     bool                        is_immediately_processable( const Time& now );
     bool                        is_processable          ();
+    void                        check_processable_state ();
+    void                        signal_job_when_order_has_become_processable();
+
     void                        open_log                ();
 
     void                        print_xml_child_elements_for_event( String_stream*, Scheduler_event* );
@@ -150,6 +154,7 @@ struct Order : Com_order,
     void                    set_suspended               ( bool b = true );
 
     void                        set_on_blacklist        ();
+    void                        remove_from_blacklist   ();
 
     void                        inhibit_distribution    ()                                          { _is_distribution_inhibited = true; }
     void                        assert_is_not_distributed  ( const string& debug_text );
@@ -241,11 +246,9 @@ struct Order : Com_order,
     State                      _initial_state;
     ptr<Web_service>           _web_service;
 
-    bool                       _is_virgin;                  // Noch von keiner Task berührt
-  //bool                       _is_virgin_in_this_run_time; // Wie _is_virgin, wird aber beim Erreichen des Endzustands wieder true gesetzt
-
+    bool                       _is_virgin;              // Noch von keiner Task berührt
     int                        _setback_count;
-    bool                       _on_blacklist;           // assert( _job_chain )
+    bool                       _is_on_blacklist;        // assert( _job_chain )
     bool                       _suspended;
 
     ptr<Run_time>              _run_time;
@@ -288,6 +291,7 @@ struct Order : Com_order,
     State                      _occupied_state;
     bool                       _delay_storing_until_processing;  // Erst in die Datenbank schreiben, wenn die erste Task die Verarbeitung beginnt
     bool                       _end_state_reached;      // Auftrag nach spooler_process() beenden, für <file_order_sink>
+    bool                       _was_processable;
     ptr<http::Operation>       _http_operation;
 };
 
@@ -433,8 +437,8 @@ struct Job_chain : Com_job_chain, Scheduler_object
     bool                        has_order_id            ( Read_transaction*, const Order::Id& );
     void                        register_order          ( Order* );                                 // Um doppelte Auftragskennungen zu entdecken: Fehler SCHEDULER-186
     void                        unregister_order        ( Order* );
-    void                        add_to_blacklist        ( Order* );
-    void                        remove_from_blacklist   ( Order* );
+    void                        add_order_to_blacklist  ( Order* );
+    void                        remove_order_from_blacklist( Order* );
     bool                        is_on_blacklist         ( const string& order_id );
     Order*                      blacklisted_order_or_null( const string& order_id );
     stdext::hash_set<string>    db_blacklist_id_set     ();

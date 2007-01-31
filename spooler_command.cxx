@@ -209,7 +209,7 @@ void Command_processor::get_id_and_next( const xml::Element_ptr& element, int* i
 //---------------------------------------------------------Command_processor::execute_show_calendar
 #ifdef Z_DEBUG
 
-xml::Element_ptr Command_processor::execute_show_calendar( const xml::Element_ptr& element, const Show_what& show_ )
+xml::Element_ptr Command_processor::execute_show_calendar( const xml::Element_ptr& element, const Show_what& )
 {
     if( _security_level < Security::seclev_info )  z::throw_xc( "SCHEDULER-121" );
 
@@ -391,7 +391,7 @@ xml::Element_ptr Command_processor::execute_modify_job( const xml::Element_ptr& 
 
 //----------------------------------------------------------Command_processor::execute_show_cluster
 
-xml::Element_ptr Command_processor::execute_show_cluster( const xml::Element_ptr& element, const Show_what& show )
+xml::Element_ptr Command_processor::execute_show_cluster( const xml::Element_ptr&, const Show_what& show )
 {
     if( _security_level < Security::seclev_info )  z::throw_xc( "SCHEDULER-121" );
 
@@ -903,7 +903,7 @@ xml::Element_ptr Command_processor::execute_service_request( const xml::Element_
 
 //-------------------------------------------------------Command_processor::execute_service_request
 
-xml::Element_ptr Command_processor::execute_get_events( const xml::Element_ptr& get_events_element )
+xml::Element_ptr Command_processor::execute_get_events( const xml::Element_ptr& )
 {
     ptr<Get_events_command_response> response = Z_NEW( Get_events_command_response( _spooler->_scheduler_event_manager ) );
     _response = response;

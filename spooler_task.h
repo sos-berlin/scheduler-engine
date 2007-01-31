@@ -115,7 +115,6 @@ struct Task : Object,
 
     Job*                        job                         ();
     Time                        next_time                   ();
-    void                        calculate_next_time_after_modified_order_queue();
     Task_subsystem*             thread                      ()                                      { return _thread; }
     string                      name                        () const                                { return obj_name(); }
     virtual string              obj_name                    () const                                { return _obj_name; }
