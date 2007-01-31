@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<spooler
+    xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:noNamespaceSchemaLocation = "http://www.zschimmer.com/2006/scheduler.xsd"
+>
+    <config>
+        <base file="$SCHEDULER_TEST/base.scheduler"/>
+        
+        <script language="javascript"><![CDATA[
+        
+//        
+        
+        ]]></script>
+
+        
+        <jobs>
+            <job name="javascript">
+                <script language="javascript"><![CDATA[
+i = 2;
+
+function spooler_process()
+{
+    return --i > 0;
+}
+        
+                ]]></script>
+                
+                <monitor>
+                    <script language="javascript"><![CDATA[ 
+int x;                        
+spooler_log.info( "MONITOR MONITOR MONITOR MONITOR MONITOR MONITOR MONITOR " );
+                        
+function spooler_process_after( return_value ) 
+{
+    spooler_log.info( return_value );
+    return return_value;
+}
+
+
+                    ]]></script>
+                </monitor>
+
+                <run_time once="yes"/>
+                
+            </job>
+
+            
+            <job name="javascript2">
+                <script language="javascript"><![CDATA[
+i = 2;
+
+function spooler_process()
+{
+    return --i > 0;
+}
+        
+                ]]></script>
+
+                <monitor>
+                    <script java_class="spooler_job.My_monitor">
+                <![CDATA[
+
+package spooler_job;
+
+import sos.spooler.*;
+
+public class My_monitor  extends sos.spooler.Monitor_impl
+{   
+    public boolean spooler_process_after( boolean return_value )  throws Exception
+    {
+        spooler_log.info( "MONITOR return_value=" + return_value );
+        return return_value;
+    }
+}
+                ]]></script>
+                </monitor>
+
+                <run_time once="yes"/>
+
+            </job>
+
+        </jobs>
+    </config>
+</spooler>

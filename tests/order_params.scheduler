@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<spooler
+    xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:noNamespaceSchemaLocation = "http://www.zschimmer.com/2006/scheduler.xsd"
+>
+    <config>
+
+        <base file="$SCHEDULER_TEST/base.scheduler"/>
+
+        <process_classes/>
+
+        <script language="javascript">
+        <![CDATA[
+
+var order = spooler.create_order();
+//order.payload = "PAYLOAD";
+//order.params();
+
+order.params("edno") = "ett";
+order.params("dwa" ) = "tva";
+spooler_log.info( order.payload_is_type( "spooler.variable_set" ) );
+spooler_log.info( order.payload_is_type( "hostware.record" ) );
+spooler.job_chain( "order_params.scheduler" ).add_order( order );
+spooler.job_chain("x");
+        
+        ]]></script>
+
+
+        <jobs>
+
+            <job name="javascript" order="yes">
+        
+                <script language="JavaScript">
+                    <![CDATA[
+
+function spooler_process() 
+{               
+    spooler_log.info( "HALLO" );
+    var order = spooler_task.order;
+    spooler_log.info( "order.payload=" + order.payload );
+    spooler_log.info( "edno=" + order.params( "edno" ) );
+    spooler_log.info( "dwa=" + order.params( "dwa" ) );
+    return true;
+}
+
+                ]]></script>
+
+            </job>
+        
+        </jobs>
+        
+            
+        <job_chains>
+            <job_chain name="order_params.scheduler" distributed="yes">
+                <job_chain_node state="first" job="javascript"/>
+                <job_chain_node state="finished"/>
+            </job_chain>
+        </job_chains>        
+
+    </config>
+</spooler>

@@ -10,6 +10,33 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2007-02-01" version="2.0.163" subversion_revision="4829">
+        <revision type="correction" title="Address-in-use-Problem unter Windows gelöst">
+            <description>
+                <p>
+                    Enkel-Prozesse, die der Scheduler nicht kennt und also nicht abbrechen kann,
+                    blockierten bislang die Scheduler-Ports.
+                    Jetzt sind diese nicht mehr vererbbar und könenn von den Enkeln auch nicht mehr blockiert werden.
+                </p>
+                <p>
+                    Die temporären Dateien für stdout und stderr bleiben dagegen unter Windows in einem solchen Fall stehen.
+                </p>
+            </description>
+        </revision>
+
+        <revision type="error" title="Temporäre Dateien bleiben stehen, wenn Enkel-Prozesse noch laufen">
+            <description>
+                <p>
+                    Windows: 
+                    Enkel-Prozesse, die der Scheduler nicht kennt und also nicht abbrechen kann,
+                    blockieren die temporären Dateien für stdout und stderr 
+                    und können deshalb vom Scheduler nicht gelöscht werden.
+                </p>
+            </description>
+        </revision>
+    </change>
+
+    
     <change date="2007-01-30" version="2.0.163" subversion_revision="4810">
         <revision type="new" title="&lt;file_order_sink move_to=&quot;&quot; akzeptiert Umgebungsvariablen">
             <description>
@@ -22,6 +49,7 @@
         </revision>
     </change>
 
+    
     <change date="2007-01-27" version="2.0.163" subversion_revision="4793">
         <revision type="new" title="Skript-Funktion für nächste Startzeit">
             <description>

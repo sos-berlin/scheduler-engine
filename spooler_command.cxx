@@ -479,26 +479,61 @@ xml::Element_ptr Command_processor::execute_start_job( const xml::Element_ptr& e
 }
 
 //-----------------------------------------------------Command_processor::execute_start_remote_task
+#ifdef Z_DEBUG
 
 xml::Element_ptr Command_processor::execute_start_remote_task( const xml::Element_ptr& element )
 {
     z::throw_xc( __FUNCTION__ );
-    //if( _security_level < Security::seclev_no_add )  z::throw_xc( "SCHEDULER-121" );
-    //_spooler->assert_is_activated( __FUNCTION__ );
 
-    //int tcp_port = element.getAttribute( "tcp_port" );
+    if( _security_level < Security::seclev_no_add )  z::throw_xc( "SCHEDULER-121" );
+    _spooler->assert_is_activated( __FUNCTION__ );
+
+    int tcp_port = element.int_getAttribute( "tcp_port" );
+    
+    /*
+        Prozess starten:  zschimmer::Process  -O
+        File-Handle für stdin
+        XML Erzeugen: 
+            <object_server 
+                host="127.0.0.1 oder remotehost" 
+                tcp_port="59999"
+                password="zufall"
+            >
+                <scheduler_task_process ../>
+            </object_server>
+            bisher in com_remote.cxx: -client=59999
+        Per asynchronem Objekt an stdin übergeben
 
 
+        object_server:
+            von stdin XML lesen 
+
+            Bei Fehler stdin schließen, damit Aufruf nicht blockiert, sondern beim Schreiben einen Fehler bekommt
+
+            <object_server> auswerten und Inhalt ungesehen weitergeben.
+
+            connect zum veranlassenden Scheduler
+
+            accept(): Prüfen, dass Verbindung vom richten Rechner kommt
+
+            Erster Aufruf vergleicht Passwort (ist das nicht schon vorgesehen?)
 
 
+        Prozess registrieren
+            TCP-Verbindung bekommt ein Task-Prozess-Register
+            Bei Verbindungsverlust werden alle Prozesse abgebrochen
+            Ebenso bei Scheduler-Ende (also im Scheduler registrieren)
 
 
+        stdout und stderr verbinden (über vorhandene TCP-Verbindung?)
+    */
 
-    //xml::Element_ptr result = _answer.createElement( "ok" ); 
-    //result.appendChild( task->dom_element( _answer, Show_what() ) );
-    //return result;
+
+    xml::Element_ptr result = _answer.createElement( "ok" ); 
+    return result;
 }
 
+#endif
 //---------------------------------------------------------Command_processor::execute_signal_object
 
 //xml::Element_ptr Command_processor::execute_signal_object( const xml::Element_ptr& element )
@@ -1052,8 +1087,10 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     else
     if( element.nodeName_is( "start_job"        ) )  result = execute_start_job( element );
     else
+#ifdef Z_DEBUG
     if( element.nodeName_is( "start_remote_task" ) )  result = execute_start_remote_task( element );
     else
+#endif
     if( element.nodeName_is( "show_cluster"     ) )  result = execute_show_cluster( element, show );
     else
     if( element.nodeName_is( "show_task"        ) )  result = execute_show_task( element, show );
