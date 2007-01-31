@@ -1987,7 +1987,6 @@ void Order_queue::add_order( Order* order, Do_log do_log )
 
 
     Queue::iterator insert_before = _queue.begin();
-    //bool            wake_up       = !order->_task  &&  !has_order( Time::now() );
     
     for(; insert_before != _queue.end(); insert_before++ )
     {
@@ -2008,9 +2007,7 @@ void Order_queue::add_order( Order* order, Do_log do_log )
 
     //update_priorities();
 
-    order->signal_job_when_order_has_become_processable();
-    //_job->calculate_next_time_after_modified_order_queue();
-    //if( wake_up )  _job->signal( "Order" );
+    order->handle_changed_processable_state();
 }
 
 //------------------------------------------------------------------------Order_queue::remove_order
@@ -2528,9 +2525,9 @@ void Order::init()
     _log = Z_NEW( Prefix_log( this ) );
     _log->set_prefix( obj_name() );
 
-    _created   = Time::now();
-    _is_virgin = true;
-    //_is_virgin_in_this_run_time = true;
+    _created       = Time::now();
+    _is_virgin     = true;
+    _old_next_time = Time::never;
 
     set_run_time( NULL );
 }
@@ -2622,37 +2619,22 @@ bool Order::is_processable()
     return true;
 }
 
-//-------------------------------------------------------------------Order::check_processable_state
-// Nach Änderung von is_processable() zu rufen!
+//----------------------------------------------------------Order::handle_changed_processable_state
+// Nach Änderung von next_time(), also _setback und is_processable() zu rufen!
 
-void Order::check_processable_state()
+void Order::handle_changed_processable_state()
 {
-    if( !_was_processable )
-    {
-        signal_job_when_order_has_become_processable();
-    }
-    else
-    if( !is_processable() )
-    {
-        _was_processable = false;
-    }
+    Time new_next_time = next_time();
 
-    assert( _was_processable == is_processable() );
-}
-
-//----------------------------------------------Order::signal_job_when_order_has_become_processable
-
-void Order::signal_job_when_order_has_become_processable()
-{
-    if( !_was_processable  &&  is_processable() )
+    if( new_next_time <= _old_next_time )
     {
         if( Job* job = _job_chain_node? _job_chain_node->_job : NULL )
         {
-            job->signal_processable_order( this );
+            job->signal_earlier_order( this );
         }
-
-        _was_processable = true;
     }
+
+    _old_next_time = new_next_time;
 }
 
 //-----------------------------------------------------------------Order::assert_is_not_distributed
@@ -4460,7 +4442,7 @@ void Order::set_suspended( bool suspended )
         if( _suspended )  _log->info( message_string( "SCHEDULER-991" ) );
                     else  _log->info( message_string( "SCHEDULER-992", _setback ) );
 
-        check_processable_state();
+        handle_changed_processable_state();
     }
 }
 
@@ -4513,6 +4495,8 @@ void Order::set_setback( const Time& start_time_, bool keep_setback_count )
         _setback = start_time;
         _order_xml_modified = true;
         if( _in_job_queue )  order_queue()->reinsert_order( this );
+
+        handle_changed_processable_state();
     }
 
 
@@ -4674,7 +4658,7 @@ void Order::set_replacement( bool b )
         if( !_is_replacement )  _replacement_for = NULL;
     }
 
-    if( was_replacement )  signal_job_when_order_has_become_processable();
+    if( was_replacement != _is_replacement )  handle_changed_processable_state();
 }
 
 //--------------------------------------------------------------------------Order::set_on_blacklist
@@ -4688,7 +4672,7 @@ void Order::set_on_blacklist()
     _is_on_blacklist    = true;
     _order_xml_modified = true;
 
-    check_processable_state();
+    handle_changed_processable_state();
 }
 
 //---------------------------------------------------------------------Order::remove_from_blacklist
@@ -4701,7 +4685,7 @@ void Order::remove_from_blacklist()
         _job_chain->remove_order_from_blacklist( this );
         _is_on_blacklist = false;
     
-        check_processable_state();
+        handle_changed_processable_state();
     }
 }
 

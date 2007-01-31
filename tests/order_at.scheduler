@@ -138,6 +138,7 @@ function spooler_process()
         </job_chains>
 
         <commands>
+            <show_state/>
             <add_order job_chain="order_at.scheduler" id="commands" replace="yes">
                 <run_time>
                     <period start_once="no"/>

@@ -1802,11 +1802,9 @@ void Spooler::execute_config_commands()
         
         DOM_FOR_EACH_ELEMENT( _commands_document.documentElement(), command_element )
         {
-            command_processor.execute_2( command_element, Time::now() );
-            xml::Element_ptr result = command_processor._answer.documentElement();
-            //xml::Element_ptr result = command_processor.execute_command( command_element, Time::now() );
+            xml::Element_ptr result = command_processor.execute_command( command_element, Time::now() );
 
-            if( !result.select_node( "ok [ count(*) = 0  and  count(@*) = 0 ]" ) )
+            if( result  &&  !result.select_node( "ok [ count(*) = 0  and  count(@*) = 0 ]" ) )
             {
                 Message_string m ( "SCHEDULER-966" );
                 m.set_max_insertion_length( INT_MAX );

@@ -949,6 +949,8 @@ void Get_events_command_response::write_event( const Scheduler_event& event )
 
 xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& element, const Time& xml_mod_time )
 {
+    xml::Element_ptr result;
+
     if( _log ) 
     {
         Message_string m ( "SCHEDULER-965" );
@@ -1030,69 +1032,73 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     }
 
     if( element.nodeName_is( "show_state"       ) 
-     || element.nodeName_is( "s"                ) )  return execute_show_state( element, show );
+     || element.nodeName_is( "s"                ) )  result = execute_show_state( element, show );
     else
 #ifdef Z_DEBUG
-    if( element.nodeName_is( "show_calendar"    )  &&  _spooler->_zschimmer_mode )  return execute_show_calendar( element, show );
+    if( element.nodeName_is( "show_calendar"    )  &&  _spooler->_zschimmer_mode )  result = execute_show_calendar( element, show );
     else
 #endif
-    if( element.nodeName_is( "show_history"     ) )  return execute_show_history( element, show );
+    if( element.nodeName_is( "show_history"     ) )  result = execute_show_history( element, show );
     else
-    if( element.nodeName_is( "modify_spooler"   ) )  return execute_modify_spooler( element );
+    if( element.nodeName_is( "modify_spooler"   ) )  result = execute_modify_spooler( element );
     else
-    if( element.nodeName_is( "terminate"        ) )  return execute_terminate( element );
+    if( element.nodeName_is( "terminate"        ) )  result = execute_terminate( element );
     else
-    if( element.nodeName_is( "modify_job"       ) )  return execute_modify_job( element );
+    if( element.nodeName_is( "modify_job"       ) )  result = execute_modify_job( element );
     else
-    if( element.nodeName_is( "show_job"         ) )  return execute_show_job( element, show );
+    if( element.nodeName_is( "show_job"         ) )  result = execute_show_job( element, show );
     else
-    if( element.nodeName_is( "show_jobs"        ) )  return execute_show_jobs( show );
+    if( element.nodeName_is( "show_jobs"        ) )  result = execute_show_jobs( show );
     else
-    if( element.nodeName_is( "start_job"        ) )  return execute_start_job( element );
+    if( element.nodeName_is( "start_job"        ) )  result = execute_start_job( element );
     else
-    if( element.nodeName_is( "start_remote_task" ) )  return execute_start_remote_task( element );
+    if( element.nodeName_is( "start_remote_task" ) )  result = execute_start_remote_task( element );
     else
-    if( element.nodeName_is( "show_cluster"     ) )  return execute_show_cluster( element, show );
+    if( element.nodeName_is( "show_cluster"     ) )  result = execute_show_cluster( element, show );
     else
-    if( element.nodeName_is( "show_task"        ) )  return execute_show_task( element, show );
+    if( element.nodeName_is( "show_task"        ) )  result = execute_show_task( element, show );
     else
-    if( element.nodeName_is( "kill_task"        ) )  return execute_kill_task( element );
+    if( element.nodeName_is( "kill_task"        ) )  result = execute_kill_task( element );
     else
-    if( element.nodeName_is( "add_jobs"         ) )  return execute_add_jobs( element );
+    if( element.nodeName_is( "add_jobs"         ) )  result = execute_add_jobs( element );
     else
-    if( element.nodeName_is( "job"              ) )  return execute_job( element );
+    if( element.nodeName_is( "job"              ) )  result = execute_job( element );
     else
-    if( element.nodeName_is( "job_chain"        ) )  return execute_job_chain( element );
+    if( element.nodeName_is( "job_chain"        ) )  result = execute_job_chain( element );
     else
-    //if( element.nodeName_is( "signal_object"    ) )  return execute_signal_object( element );
+    //if( element.nodeName_is( "signal_object"    ) )  result = execute_signal_object( element );
     //else
-    if( element.nodeName_is( "config"           ) )  return execute_config( element, xml_mod_time );
+    if( element.nodeName_is( "config"           ) )  result = execute_config( element, xml_mod_time );
     else
-    if( element.nodeName_is( "show_job_chains"  ) )  return execute_show_job_chains( element, show );
+    if( element.nodeName_is( "show_job_chains"  ) )  result = execute_show_job_chains( element, show );
     else
-    if( element.nodeName_is( "show_job_chain"   ) )  return execute_show_job_chain( element, show );
+    if( element.nodeName_is( "show_job_chain"   ) )  result = execute_show_job_chain( element, show );
     else
-    if( element.nodeName_is( "show_order"       ) )  return execute_show_order( element, show );
+    if( element.nodeName_is( "show_order"       ) )  result = execute_show_order( element, show );
     else
-    if( element.nodeName_is( "add_order"        ) )  return execute_add_order( element );
+    if( element.nodeName_is( "add_order"        ) )  result = execute_add_order( element );
     else
-    if( element.nodeName_is( "modify_order"     ) )  return execute_modify_order( element );
+    if( element.nodeName_is( "modify_order"     ) )  result = execute_modify_order( element );
   //else
-  //if( element.nodeName_is( "show_order_history" ) )  return execute_show_order_history( element, show );
+  //if( element.nodeName_is( "show_order_history" ) )  result = execute_show_order_history( element, show );
     else
-    if( element.nodeName_is( "register_remote_scheduler" ) )  return execute_register_remote_scheduler( element );
+    if( element.nodeName_is( "register_remote_scheduler" ) )  result = execute_register_remote_scheduler( element );
     else
-    if( element.nodeName_is( "remove_order"     ) )  return execute_remove_order( element );
+    if( element.nodeName_is( "remove_order"     ) )  result = execute_remove_order( element );
     else
-    if( element.nodeName_is( "remove_job_chain" ) )  return execute_remove_job_chain( element );
+    if( element.nodeName_is( "remove_job_chain" ) )  result = execute_remove_job_chain( element );
     else
-    if( element.nodeName_is( "service_request"  ) )  return execute_service_request( element );
+    if( element.nodeName_is( "service_request"  ) )  result = execute_service_request( element );
     else
-    if( _spooler->_zschimmer_mode && element.nodeName_is( "get_events"  ) )  return execute_get_events( element );
+    if( _spooler->_zschimmer_mode && element.nodeName_is( "get_events"  ) )  result = execute_get_events( element );
     else
     {
-        z::throw_xc( "SCHEDULER-105", element.nodeName() ); return xml::Element_ptr();
+        z::throw_xc( "SCHEDULER-105", element.nodeName() );
     }
+
+    if( result )  _answer.documentElement().firstChild().appendChild( result );
+
+    return result;
 }
 
 //------------------------------------------------------------------------------------xml_as_string
@@ -1544,16 +1550,7 @@ void Command_processor::execute_2( const xml::Element_ptr& element, const Time& 
         {
             xml::Element_ptr response_element = execute_command( e, xml_mod_time );
             
-            if( response_element )
-            {
-                _answer.documentElement().firstChild().appendChild( response_element );
-            }
-            else
-            if( _response )
-            {
-                // Rückgabe als asynchrones Command_response (für <get_events>)
-            }
-            else z::throw_xc( "SCHEDULER-353", e.nodeName() );
+            if( !response_element  &&  !_response )  z::throw_xc( "SCHEDULER-353", e.nodeName() );
         }
         
         if( e != element )  // In einer Verschachtelung von <spooler>?
@@ -1574,8 +1571,6 @@ void Command_processor::execute_commands( const xml::Element_ptr& commands_eleme
     {
         xml::Element_ptr response_element = execute_command( node, xml_mod_time );
         if( !response_element )  z::throw_xc( "SCHEDULER-353", node.nodeName() );
-
-        _answer.documentElement().firstChild().appendChild( response_element );
     }
 }
 

@@ -281,7 +281,7 @@ struct Job : Object,
     void                        set_next_start_time         ( const Time& now, bool repeat = false );
     void                        set_next_time               ( const Time& );
     void                        calculate_next_time         ( const Time& now );
-    void                        signal_processable_order    ( Order* );
+    void                        signal_earlier_order        ( Order* );
 
     Time                        next_time                   ()                                      { return _next_time; }
     Time                        next_start_time             ();

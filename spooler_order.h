@@ -65,7 +65,7 @@ struct Order : Com_order,
 
     bool                        is_immediately_processable( const Time& now );
     bool                        is_processable          ();
-    void                        check_processable_state ();
+    void                        handle_changed_processable_state ();
     void                        signal_job_when_order_has_become_processable();
 
     void                        open_log                ();
@@ -291,7 +291,7 @@ struct Order : Com_order,
     State                      _occupied_state;
     bool                       _delay_storing_until_processing;  // Erst in die Datenbank schreiben, wenn die erste Task die Verarbeitung beginnt
     bool                       _end_state_reached;      // Auftrag nach spooler_process() beenden, für <file_order_sink>
-    bool                       _was_processable;
+    Time                       _old_next_time;
     ptr<http::Operation>       _http_operation;
 };
 

@@ -1934,9 +1934,7 @@ Time Job::next_start_time()
 
 void Job::calculate_next_time( const Time& now )
 {
-    if( _state == s_not_initialized )  return;
-
-
+    if( _state > s_not_initialized ) 
     {
         Time next_time = Time::never;
 
@@ -2003,17 +2001,23 @@ void Job::calculate_next_time( const Time& now )
         else
             if( next_time > _period.end() )  next_time = _period.end();          // Das ist, wenn die Periode weder repeat noch single_start hat, also keinen automatischen Start
 
+
+        Time old_next_time = _next_time;
         _next_time = next_time;
+
+        Z_LOG2( "joacim", __FUNCTION__ << " ==> " << _next_time.as_string() << ( _next_time < old_next_time? " < " :
+                                                                                 _next_time > old_next_time? " > " : " = " ) 
+                                                  << " old " << old_next_time << "\n" );
     }
 }
 
-//--------------------------------------------------------------------Job::signal_processable_order
+//------------------------------------------------------------------------Job::signal_earlier_order
 
-void Job::signal_processable_order( Order* order )
+void Job::signal_earlier_order( Order* order )
 {
-    Z_LOG2( "scheduler.signal", __FUNCTION__ << "  " << obj_name() << "  " << order->obj_name() << "\n" );
+    Z_LOG2( "scheduler.signal", __FUNCTION__ << "  " << obj_name() << "  " << order->obj_name() << " " << order->next_time().as_string() << "\n" );
 
-    if( _next_time > 0 )
+    if( _next_time > 0   &&  _next_time > order->next_time() )
     {
         Time now = Time::now();
         calculate_next_time( now );
