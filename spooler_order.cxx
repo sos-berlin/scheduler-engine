@@ -4077,8 +4077,7 @@ void Order::place_in_job_chain( Job_chain* job_chain )
 
 bool Order::try_place_in_job_chain( Job_chain* job_chain )
 {
-    bool result   = false;
-    bool is_known = false;
+    bool is_new = true;
 
 
     if( _id.vt == VT_EMPTY )  set_default_id();
@@ -4087,18 +4086,18 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain )
 
     if( _is_replacement  &&  job_chain->_is_distributed )
     {
-        // Bestehender Auftrag wird ersetzt
+        // Bestehender Auftrag wird in der Datenbank ersetzt (_is_replacement steuert das)
     }
     else
     {
         for( Retry_transaction ta ( db() ); ta.enter_loop(); ta++ ) try
         {
-            is_known = job_chain->has_order_id( &ta, id() );
+            is_new = !job_chain->has_order_id( &ta, id() );
         }
         catch( exception& x ) { ta.reopen_database_after_error( x, __FUNCTION__ ); }
     }
 
-    if( !is_known )
+    if( is_new )
     {
         ptr<Order> hold_me = this;   // Halten für remove_from_job_chain()
         
@@ -4123,22 +4122,20 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain )
         if( _delay_storing_until_processing ) 
         {
             if( _is_distributed )  z::throw_xc( __FUNCTION__, "_delay_storing_until_processing & _is_distributed not possible" );   // db_try_insert() muss Datenbanksatz prüfen können
-            result = true;
         }
         else
         if( job_chain->_orders_recoverable  &&  !_is_in_database )
         {
-            if( db()->opened() )  result = db_try_insert();       // false, falls aus irgendeinem Grund die Order-ID schon vorhanden ist
-                            else  result = true;
+            if( db()->opened() )  is_new = ! db_try_insert();       // false, falls aus irgendeinem Grund die Order-ID schon vorhanden ist
         }
 
-        if( result  &&  !_is_distributed )
+        if( is_new  &&  !_is_distributed )
         {
             job_chain->add_order( this );
         }
     }
 
-    return result;
+    return is_new;
 }
 
 //-------------------------------------------------------------Order::place_or_replace_in_job_chain
