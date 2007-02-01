@@ -781,6 +781,7 @@ void Period::set_dom( const xml::Element_ptr& element, const Period* deflt )
     if( !end.empty() )  dt.set_time( end ), _end = dt;
 
     _start_once = element.bool_getAttribute( "start_once", _start_once );
+    //Wird das schon benutzt? Ist nicht berechnet.  if( _start_once  &&  !_spooler->_zschimmer_mode )  z::throw_xc( __FUNCTION__, "Attribute start_once is not supported" );
 
     check();
 }

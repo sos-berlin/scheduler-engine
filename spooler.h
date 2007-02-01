@@ -35,7 +35,14 @@
 #ifdef SPOOLER_USE_LIBXML2
 #   include "../zschimmer/xml_libxml2.h"
 #   include "../zschimmer/xslt_libxslt.h"
-    using namespace zschimmer::xml_libxml2;
+    //using namespace zschimmer::xml_libxml2;
+    namespace zschimmer
+    {
+        namespace xml
+        {
+            using namespace libxml2;
+        }
+    }
 #endif
 
 #ifndef Z_WINDOWS
@@ -71,6 +78,8 @@
 #include "../zschimmer/z_sql.h"
 #include "../zschimmer/message.h"
 #include "../zschimmer/file_path.h"
+#include "../zschimmer/xml.h"
+#include "../zschimmer/z_io.h"
 
 using namespace zschimmer;
 using namespace zschimmer::com;
@@ -110,6 +119,7 @@ struct Module;
 struct Module_instance;
 struct Order_queue;
 struct Order;
+struct Process;
 struct Process_class;
 struct Remote_scheduler;
 struct Scheduler_object;

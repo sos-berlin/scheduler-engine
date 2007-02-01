@@ -3560,13 +3560,13 @@ void Order::print_xml_child_elements_for_event( String_stream* s, Scheduler_even
     *s << "<order";
     
     if( _job_chain )
-    *s << " job_chain=\"" << xml_encode_attribute_value( _job_chain_name )      << '"';
-    *s << " id=\""        << xml_encode_attribute_value( string_id() )          << '"';
+    *s << " job_chain=\"" << xml::encode_attribute_value( _job_chain_name )      << '"';
+    *s << " id=\""        << xml::encode_attribute_value( string_id() )          << '"';
 
     if( _title != "" )
-    *s << " title=\""     << xml_encode_attribute_value( _title )               << '"';
+    *s << " title=\""     << xml::encode_attribute_value( _title )               << '"';
 
-    *s << " state=\""     << xml_encode_attribute_value( _state.as_string() )   << '"';
+    *s << " state=\""     << xml::encode_attribute_value( _state.as_string() )   << '"';
 
     *s << "/>";
 }
@@ -4081,6 +4081,10 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain )
     bool is_known = false;
 
 
+    if( _id.vt == VT_EMPTY )  set_default_id();
+    _id_locked = true;
+
+
     if( _is_replacement  &&  job_chain->_is_distributed )
     {
         // Bestehender Auftrag wird ersetzt
@@ -4101,9 +4105,6 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain )
         if( _job_chain_name != "" )  remove_from_job_chain();
         assert( !_job_chain );
         
-        if( _id.vt == VT_EMPTY )  set_default_id();
-        _id_locked = true;
-
         if( _state.vt == VT_EMPTY )  set_state2( job_chain->first_node()->_state );     // Auftrag bekommt Zustand des ersten Jobs der Jobkette
 
         job_chain->job_from_state( _state );     // Fehler bei Endzustand. Wir speichern den Auftrag nur, wenn's einen Job zum Zustand gibt

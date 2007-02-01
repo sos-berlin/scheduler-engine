@@ -698,6 +698,8 @@ Spooler::~Spooler()
     // COM-Objekte entkoppeln, falls noch jemand eine Referenz darauf hat:
     if( _com_spooler )  _com_spooler->close();
     if( _com_log     )  _com_log->set_log( NULL );
+
+    update_console_title( 0 );
 }
 
 //------------------------------------------------------------------------------------Spooler::name
@@ -1544,9 +1546,9 @@ void Spooler::load()
             "    <config>\n"
             "        <process_classes/>\n"
             "        <jobs>\n"
-            "            <job name='" << xml_encode_attribute_value( basename_of_path( _config_filename ) ) << "'>\n"
-            "                <script language='" << xml_encode_attribute_value( _configuration_job_script_language ) << "'>\n"
-            "                   <include file='" << xml_encode_attribute_value( _config_filename ) << "'/>\n"
+            "            <job name='" << xml::encode_attribute_value( basename_of_path( _config_filename ) ) << "'>\n"
+            "                <script language='" << xml::encode_attribute_value( _configuration_job_script_language ) << "'>\n"
+            "                   <include file='" << xml::encode_attribute_value( _config_filename ) << "'/>\n"
             "                </script>\n"
             "                <run_time once='yes'/>\n"
             "            </job>\n"
@@ -1594,26 +1596,30 @@ void Spooler::update_console_title( int level )
         if( _has_windows_console )
         {
             S title;
-            title << name() << "  ";
-            title << _config_filename;
-            title << "  pid=" << getpid() << "  ";
-            title << state_name();
-
-            if( level == 2 )    // Aktuelles im laufenden Betrieb zeigen
+            
+            if( level )
             {
-                if( _task_subsystem  &&  _task_subsystem->finished_tasks_count() )
-                {
-                    title << ", " <<_task_subsystem->finished_tasks_count() << " finished tasks";
-                }
+                title << name() << "  ";
+                title << _config_filename;
+                title << "  pid=" << getpid() << "  ";
+                title << state_name();
 
-                if( _order_subsystem  &&  _order_subsystem->finished_orders_count() )
+                if( level == 2 )    // Aktuelles im laufenden Betrieb zeigen
                 {
-                    title << ", " << _order_subsystem->finished_orders_count() << " finished orders";     
-                }
+                    if( _task_subsystem  &&  _task_subsystem->finished_tasks_count() )
+                    {
+                        title << ", " <<_task_subsystem->finished_tasks_count() << " finished tasks";
+                    }
 
-                int process_count = 0;
-                for( int i = 0; i < NO_OF( _process_handles ); i++ )  if( _process_handles[i] )  process_count++;
-                if( _state == s_running  ||  process_count > 0 )  title << ", " << process_count << " processes";
+                    if( _order_subsystem  &&  _order_subsystem->finished_orders_count() )
+                    {
+                        title << ", " << _order_subsystem->finished_orders_count() << " finished orders";     
+                    }
+
+                    int process_count = 0;
+                    for( int i = 0; i < NO_OF( _process_handles ); i++ )  if( _process_handles[i] )  process_count++;
+                    if( _state == s_running  ||  process_count > 0 )  title << ", " << process_count << " processes";
+                }
             }
 
             BOOL ok = SetConsoleTitle( title.to_string().c_str() );
@@ -1808,7 +1814,7 @@ void Spooler::execute_config_commands()
             {
                 Message_string m ( "SCHEDULER-966" );
                 m.set_max_insertion_length( INT_MAX );
-                m.insert( 1, result.xml( true ) );
+                m.insert( 1, result.xml( scheduler_character_encoding, true ) );
                 _log->info( m );
             }
         }

@@ -36,11 +36,28 @@ const int wait_for_port_available = 2*60;   // Soviele Sekunden warten, bis TCP-
 #   define INADDR_NONE (-1)
 #endif
 
+//---------------------------------------Communication::Operation_connection::register_task_process
+
+void Communication::Operation_connection::register_task_process( Process* process )
+{
+    assert( process->pid() );
+    _task_process_register[ process->pid() ] = process;
+}
+
+//-------------------------------------Communication::Operation_connection::unregister_task_process
+
+void Communication::Operation_connection::unregister_task_process( Process* process )
+{
+    assert( process->pid() );
+    _task_process_register.erase( process->pid() );
+}
+
 //-----------------------------------------------Xml_operation_connection::Xml_operation_connection
 
 Xml_operation_connection::Xml_operation_connection( Communication::Connection* connection )
 : 
-    Communication::Operation_connection( connection ) 
+    Communication::Operation_connection( connection ),
+    _zero_(this+1)
 {
     _indent = connection->_read_socket == STDIN_FILENO;
 }

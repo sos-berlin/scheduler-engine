@@ -9,263 +9,15 @@
 #include "../zschimmer/file.h"
 
 using namespace std;
-using namespace zschimmer::xml_libxml2;
-
-
-namespace zschimmer
-{
-
-const int block_size = 4000;
-
-//typedef basic_string<Byte>  string;
-
-//-------------------------------------------------------------------------------------------------
-
-struct Writer : Object
-{
-    virtual void write( char c )
-    {
-        write( string( &c, 1 ) );
-    }
-
-    virtual void write( const string& utf8 ) = 0;
-    virtual void flush() = 0;
-};
-
-//-------------------------------------------------------------------------------------------------
-
-struct Output_stream : Object
-{
-    virtual void write_bytes( const string& bytes ) = 0;
-    virtual void flush() = 0;
-};
-
-//-------------------------------------------------------------------------------------------------
-
-struct Input_stream : Object
-{
-    virtual string read_bytes() = 0;
-};
-
-//-------------------------------------------------------------------------------------------------
-
-struct Output_stream_writer : Writer
-{
-    Output_stream_writer( Output_stream* output_stream ) : _output_stream(output_stream ) {}
-    
-    virtual void write( const string& utf8 ) { _output_stream->write_bytes( utf8 ); }
-    virtual void flush() { _output_stream->flush(); }
-
-    ptr<Output_stream> _output_stream;
-};
-
-//-------------------------------------------------------------------------------------------------
-
-struct Xml_writer : Writer
-{
-    Xml_writer( Writer* writer )
-    : 
-        _writer(writer),
-        _is_tag_open(false)
-    {
-
-    }
-
-    void close_tag()
-    {
-        if( _is_tag_open )
-        {
-            _writer->write( '>' );
-            _is_tag_open = false;
-        }
-    }
-
-
-    void begin_element( const string& element_name )
-    {
-        if( _is_tag_open )  close_tag();
-
-        _writer->write( '<' );
-        _writer->write( element_name );
-        _is_tag_open = true;
-    }
-
-
-    void set_attribute( const string& name, const string& value )
-    {
-        _writer->write( ' ' );
-        _writer->write( name );
-        _writer->write( '=' );
-        _writer->write( '"' );
-        
-        for( const char* p = value.c_str(); *p; p++ )
-        {
-            if( *p == '<' )  _writer->write( "&lt;" );
-            else
-            if( *p == '>' )  _writer->write( "&gt;" );
-            else
-            if( *p == '&' )  _writer->write( "&amp;" );
-            else
-            if( *p == '"' )  _writer->write( "&quot;" );
-            else
-                _writer->write( *p );
-        }
-
-        _writer->write( '"' );
-    }
-
-
-    void set_attribute_optional( const string& name, const string& value )
-    {
-        if( value != "" )  set_attribute( name, value );
-    }
-
-    
-    void end_element( const string& element_name )
-    {
-        if( _is_tag_open )  
-        {
-            _writer->write( '/' );
-            _writer->write( '>' );
-            _is_tag_open = false;
-        }
-        else
-        {
-            _writer->write( '<' );
-            _writer->write( '/' );
-            _writer->write( element_name );
-            _writer->write( '>' );
-        }
-    }
-
-
-    void write( const string& utf8_text )
-    {
-        if( utf8_text.length() > 0 )
-        {
-            if( _is_tag_open )  close_tag();
-
-            for( const char* p = utf8_text.c_str(); *p; p++ )
-            {
-                if( *p == '<' )  _writer->write( "&lt;" );
-                else
-                if( *p == '&' )  _writer->write( "&amp;" );
-                else
-                    _writer->write( *p );
-            }
-        }
-    }
-
-    void write_through( const string& text )
-    {
-        _writer->write( text );
-    }
-
-
-    void flush()
-    {
-        _writer->flush();
-    }
-
-
-    ptr<Writer>             _writer;
-    bool                    _is_tag_open;
-};
-
-//-------------------------------------------------------------------------------------------------
-
-struct Buffered_writer : Writer
-{
-    Buffered_writer( Writer* writer, int byte_count ) 
-    : 
-        _writer(writer), 
-        _buffer_size(byte_count)
-    {
-    }
-
-
-    ~Buffered_writer()
-    {
-        try
-        {
-            flush();
-        }
-        catch( exception& x ) { Z_LOG2( "scheduler", "~Buffered_writer: " << x << '\n' ); }
-    }
-
-
-    void write( const string& text )
-    {
-        if( _buffer.capacity() < _buffer_size )  _buffer.reserve( _buffer_size );
-
-        size_t length = min( text.length(), _buffer_size - _buffer.length() );
-        _buffer.append( text.data(), length );
-
-        if( _buffer.length() == _buffer_size )  flush();
-
-        size_t position = length;
-        while( position < text.length() )
-        {
-            size_t length = min( text.length() - position, _buffer_size - _buffer.length() );
-            _buffer.append( text.data() + position, length );
-            position += length;
-            if( _buffer.length() == _buffer_size )  flush();
-        }
-    }
-
-
-    void flush()
-    {
-        if( _buffer.length() > 0 )  
-        {
-            _writer->write( _buffer );
-            _buffer.erase();
-        }
-    }
-
-
-    ptr<Writer>         _writer;
-    string              _buffer;
-    size_t              _buffer_size;
-};
-
-//-------------------------------------------------------------------------------------------------
-
-struct Socket_stream : Buffered_socket_operation, Input_stream, Output_stream
-{
-    void connect_tcp( const string& address )
-    {
-        set_blocking( true );
-        connect__start( address );
-        async_finish();
-    }
-
-
-    void write_bytes( const string& bytes )
-    {
-        send__start( bytes );
-        async_finish();
-    }
-
-    string read_bytes()
-    {
-        char buffer [ 10000 ];
-        int length = call_recv( buffer, NO_OF( buffer ) );
-        return string( buffer, length );
-    }
-
-    void flush() {}
-};
-
-} //namespace zschimmer
-
-//-------------------------------------------------------------------------------------------------
-
-using namespace std;
 using namespace zschimmer;
+//using namespace zschimmer::xml_libxml2;
+
+//-------------------------------------------------------------------------------------------------
 
 namespace sos {
 namespace scheduler {
+
+const int block_size = 4000;
 
 //-------------------------------------------------------------------------------------------------
 
@@ -465,7 +217,7 @@ struct Client
         _socket_stream.connect_tcp( _scheduler_address );
         
         
-        _xml_writer = Z_NEW( Xml_writer( Z_NEW( Buffered_writer( Z_NEW( Output_stream_writer( &_socket_stream ) ), 10000 ) ) ) );
+        _xml_writer = Z_NEW( xml::Xml_writer( Z_NEW( io::Buffered_writer( Z_NEW( io::Transparent_output_stream_writer( &_socket_stream ) ), 10000 ) ) ) );
 
         _xml_writer->write_through( "<?xml version='1.0'?>\n" );
 
@@ -496,7 +248,7 @@ struct Client
     File                       _stdin;
     Socket_manager             _socket_manager;      // Für WSAStartup
     Socket_stream              _socket_stream;
-    ptr<Xml_writer>            _xml_writer;
+    ptr<xml::Xml_writer>       _xml_writer;
 };
 
 //----------------------------------------------------------------------------scheduler_client_main

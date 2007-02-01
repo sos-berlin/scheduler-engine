@@ -147,10 +147,17 @@ struct Communication
         virtual void            connection_lost_event       ( const exception* )                    {}
         virtual string          connection_type             () const                                = 0;
 
+        void                    register_task_process       ( Process* );
+        void                    unregister_task_process     ( Process* );
+
+
 
 
         Spooler*               _spooler;
         Connection*            _connection;
+
+        typedef map< pid_t, ptr<Process> >  Task_process_register;
+        Task_process_register      _task_process_register;
     };
 
 
@@ -291,6 +298,7 @@ struct Xml_operation_connection : Communication::Operation_connection
     string                      connection_type             () const                                { return "TCP"; }
 
 
+    Fill_zero                  _zero_;
     bool                       _indent;
     ptr<Remote_scheduler>      _remote_scheduler;
 };

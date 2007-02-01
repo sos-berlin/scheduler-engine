@@ -55,7 +55,12 @@ function spooler_process()
                 <job_chain_node state="first" job="javascript"/>
                 <job_chain_node state="finished"/>
             </job_chain>
-        </job_chains>        
+        </job_chains>
+
+        <commands>
+            <add_order job_chain="order_params.scheduler" id="1" replace="yes"/>
+            <add_order job_chain="order_params.scheduler" id="1" replace="yes"/>
+        </commands>
 
     </config>
 </spooler>

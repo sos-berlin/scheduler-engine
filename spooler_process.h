@@ -27,6 +27,7 @@ struct Process : zschimmer::Object, Scheduler_object
 
     bool                        started                     ()                                      { return _connection != NULL; }
 
+    void                    set_task_process_xml            ( const string& xml_text )              { _task_process_xml = xml_text; }
     void                        start                       ();
     object_server::Session*     session                     ()                                      { return _session; }
   //void                    set_event                       ( Event* e )                            { if( _connection )  _connection->set_event( e ); }
@@ -71,6 +72,7 @@ struct Process : zschimmer::Object, Scheduler_object
     Module_instance*           _module_instance;
     Process_class*             _process_class;
     string                     _priority;
+    string                     _task_process_xml;
 };
 
 //-------------------------------------------------------------------------------------Process_list
