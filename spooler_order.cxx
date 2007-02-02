@@ -4126,7 +4126,7 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain )
         else
         if( job_chain->_orders_recoverable  &&  !_is_in_database )
         {
-            if( db()->opened() )  is_new = ! db_try_insert();       // false, falls aus irgendeinem Grund die Order-ID schon vorhanden ist
+            if( db()->opened() )  is_new = db_try_insert();       // false, falls aus irgendeinem Grund die Order-ID schon vorhanden ist
         }
 
         if( is_new  &&  !_is_distributed )
