@@ -349,13 +349,18 @@
         <xml_attribute name="stop_on_error" type="yes|no" initial="yes">
             <description>
                 <p>
-                    <code>stop_on_error="yes"</code> stoppt den Job,
-                    wenn eine Task endet, die eine Fehlermeldung "<code>[ERROR]</code>" in ihrem Task-Protokoll hat.
+                    Die Voreinstellung <code>stop_on_error="yes"</code> stoppt den Job,
+                    wenn eine Task mit Exception oder 
+                    mit einer Fehlermeldung "<code>[ERROR]</code>" in ihrem Task-Protokoll endet.
                     Eine Fehlermeldung kann z.B. mit <scheduler_method class="Log" object="spooler_log" method="error"/> 
                     geschrieben werden.
                 </p>
                 <p>
-                    <code>stop_on_error="no"</code> lässt den Job nicht stoppen, wenn das Task-Protokoll eine Fehlermeldung enthält.
+                    <code>stop_on_error="no"</code> lässt den Job in diesen Fällen nicht stoppen.
+                    Endet 
+                    <scheduler_method class="Job_impl" method="spooler_process"/> mit Exception,
+                    versetzt der Scheduler den Auftrag in den Fehlerzustand
+                    (<scheduler_element name="job_chain_node" attribute="error_state"/>).
                 </p>
                 <p>
                     Die Einstellung hat keine Wirkung, wenn 
@@ -367,6 +372,7 @@
             <messages>
                 <message level="debug3" code="SCHEDULER-977"/>
                 <message level="debug3" code="SCHEDULER-978"/>
+                <message level="warn"   code="SCHEDULER-846"/>
             </messages>
         </xml_attribute>
 

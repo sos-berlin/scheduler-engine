@@ -1146,7 +1146,6 @@ bool Task::do_something()
 
 
                         case s_running_process:
-                            //if( ((Process_task*)this)->signaled() )
                             if( _module_instance->process_has_signaled() )
                             {
                                 _log->info( message_string( "SCHEDULER-915" ) );
@@ -1155,7 +1154,10 @@ bool Task::do_something()
                                 loop = true;
                             }
                             else
-                                _running_state_reached = true;   // Also nicht, wenn der Prozess sich sofort beendet hat (um _min_tasks-Schleife zu vermeiden)
+                            {
+                                _running_state_reached = true;  // Also nicht, wenn der Prozess sich sofort beendet hat (um _min_tasks-Schleife zu vermeiden)
+                                _next_time = Time::never;       // Nach cmd_end(): Warten bis _module_instance->process_has_signaled()
+                            }
 
                             break;
 
@@ -1450,7 +1452,7 @@ bool Task::do_something()
 
                     try
                     {
-                        if( _job )  _job->stop_after_task_error( false, x.what() );
+                        if( _job )  _job->stop_after_task_error( x.what() );
                     }
                     catch( exception& x ) { _log->error( "Job->stop_after_task_error(): " + string( x.what() ) ); }
 
@@ -1584,10 +1586,12 @@ bool Task::step__end()
         if( _order )  postprocess_order( result );
         if( _next_spooler_process )  continue_task = true;
     }
-    catch( const exception& x ) { set_error(x); continue_task = false; }
-
-
-    if( _order )  remove_order_after_error();
+    catch( const exception& x ) 
+    { 
+        set_error(x); 
+        if( _order )  remove_order_after_error();
+        continue_task = false; 
+    }
 
     return continue_task;
 }
@@ -1663,12 +1667,13 @@ Order* Task::fetch_and_occupy_order( const Time& now, const string& cause )
 
 //--------------------------------------------------------------------------Task::postprocess_order
 
-void Task::postprocess_order( bool spooler_process_result )
+void Task::postprocess_order( bool spooler_process_result, bool due_to_exception )
 {
     if( _order )
     {
-        _log->info( message_string( "SCHEDULER-843", _order->obj_name(), _order->state(), _spooler->http_url() ) );
         _order->postprocessing( spooler_process_result );
+        if( due_to_exception )  _log->warn( message_string( "SCHEDULER-846", _order->state().as_string() ) );
+        _log->info( message_string( "SCHEDULER-843", _order->obj_name(), _order->state(), _spooler->http_url() ) );
         remove_order();
     }
 }
@@ -1679,9 +1684,18 @@ void Task::remove_order_after_error()
 {
     if( _order )
     {
-        _log->info( message_string( "SCHEDULER-843", _order->obj_name(), _order->state(), _spooler->http_url(), "after error" ) );
-        _order->processing_error();
-        remove_order();
+        if( _job->stops_on_task_error() )  
+        {
+            _order->processing_error();
+            _log->warn( message_string( "SCHEDULER-845" ) );
+            _log->info( message_string( "SCHEDULER-843", _order->obj_name(), _order->state(), _spooler->http_url() ) );
+            remove_order();
+        }
+        else
+        {
+            postprocess_order( false, true );
+            // _order ist NULL
+        }
     }
 }
 
@@ -1705,21 +1719,18 @@ void Task::finish()
     if( _order )    // Auftrag nicht verarbeitet? spooler_process() nicht ausgeführt, z.B. weil spooler_init() oder spooler_open() false geliefert haben.
     {
         if( !has_error()  &&  _spooler->state() != Spooler::s_stopping )  set_error( Xc( "SCHEDULER-226" ) );
-        remove_order_after_error();  // Nur rufen, wenn der Job stoppt oder verzögert wird! (has_error() == true) Sonst wird der Job wieder und wieder gestartet.
+        remove_order_after_error();  // Nur rufen, wenn _move_order_to_error_state, oder der Job stoppt oder verzögert wird! (has_error() == true) Sonst wird der Job wieder und wieder gestartet.
     }
 
     if( has_error()  &&  _job->repeat() == 0  &&  _job->_delay_after_error.empty() )
     {
-        _job->stop_after_task_error( false, _error.what() );
+        _job->stop_after_task_error( _error.what() );
     }
     else
     if( _job->_temporary  &&  _job->repeat() == 0 )
     {
         _job->stop( false );   // _temporary && s_stopped ==> spooler_thread.cxx entfernt den Job
     }
-
-
-
 
     // Bei mehreren aufeinanderfolgenden Fehlern Wiederholung verzögern?
 
@@ -1756,7 +1767,7 @@ void Task::finish()
                     {
                         _log->error( x.what() );
                         _job->_delay_until = 0;
-                        _job->stop_after_task_error( false, x.what() );
+                        _job->stop_after_task_error( x.what() );
                     }
                 }
             }

@@ -21,6 +21,21 @@
                 </ul>
             </description>
         </revision>
+        
+        <revision type="modification" title="&lt;job stop_on_error='no'> versetzt nach Exception Auftrag in Fehlerzustand">
+            <description>
+                <p>
+                    <scheduler_element name="job" attribute="stop_on_error" value="no"/> 
+                    versetzt nach einem Abbruch der Task mit Exception den Auftrag in den Fehlerzustand
+                    (<scheduler_element name="job_chain_node" attribute="error_state"/>).
+                </p>
+                <p>
+                    Dokumentation geändert: <code>stop_on_error="no"</code> gilt auch für Task-Abbruch mit Exception.
+                </p>
+                <scheduler_message level="warn" code="SCHEDULER-845"/>
+                <scheduler_message level="warn" code="SCHEDULER-846"/>
+            </description>
+        </revision>
     </change>
     
     

@@ -386,6 +386,8 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-842", "Task is going to process $1, state=$2, on Scheduler $3" },
     { "SCHEDULER-843", "Task has ended processing of $1, state=$2, on Scheduler $3" },
     { "SCHEDULER-844", "Scheduler script is not yet active. Operation is executed without the call of function '$1'" },
+    { "SCHEDULER-845", "After task exception, the order remains in job's order queue" },
+    { "SCHEDULER-846", "After task exception and due to stop_on_error='no', the order has been moved to error_state='$1'" },
     {}
 };
 } //namespace sos

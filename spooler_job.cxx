@@ -1434,11 +1434,12 @@ bool Job::read_script( Module* module )
 
 //-----------------------------------------------------------------------Job::stop_after_task_error
 
-void Job::stop_after_task_error( bool end_all_tasks, const string& error_message )
+void Job::stop_after_task_error( const string& error_message )
 {
-    if( _stop_on_error )
+    if( stops_on_task_error() )
     {
         _log->debug3( message_string( "SCHEDULER-978", error_message ) );
+        bool end_all_tasks = false;
         stop( end_all_tasks );
     }
     else  

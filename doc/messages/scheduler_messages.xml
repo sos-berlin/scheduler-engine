@@ -3497,6 +3497,19 @@
                 <title>Scheduler script is not yet active. Operation is executed without the call of function '<p1/>'</title>
             </text>
         </message>
+
+        <message code="SCHEDULER-845" weight="warn">
+            <text xml:lang="en">
+                <title>After task exception, the order remains in job's order queue</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-846" weight="warn">
+            <text xml:lang="en">
+                <title>After task exception and due to stop_on_error='no', the order has been moved to error_state='<p1/>'</title>
+            </text>
+        </message>
+
     </messages>
     
 </messages>

@@ -44,7 +44,7 @@ spooler_log.info( "Dieser Job soll insgesamt zweimal gestartet werden" );
 
 function spooler_open()
 {
-    return true;
+    return false;
 }
 
                     ]]>
