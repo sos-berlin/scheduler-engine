@@ -43,6 +43,19 @@
             </description>
         </xml_attribute>
 
+        <xml_attribute name="history_id" type="integer">
+            <description>
+                <p>
+                    In der Historie können zur selben Auftragskennung mehrere Einträge vorliegen.
+                    Dieses Attribut bestimmt den Eintrag. 
+                    Das Attribut <code>order</code> ist dann nicht erforderlich.
+                </p>
+                <p>
+                    Die Historien-Kennung wird von <scheduler_element name="show_job_chain" attribute="what" value="order_history"/> geliefert.
+                </p>
+            </description>
+        </xml_attribute>
+
         <xml_attribute name="what" same_as_element="show_state"/>
     </xml_attributes>
 

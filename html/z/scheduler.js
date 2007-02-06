@@ -454,8 +454,11 @@ function xslt_format_datetime_diff( datetime_earlier, datetime_later, show_plus 
     var diff = ( date_later.getTime() - date_earlier.getTime() ) / 1000.0;
     var abs  = Math.abs( diff );
     var result;
+    var integer;
+    var fraction = "";
+    var fraction_characters = " ";
 
-    if( abs < 60 )
+    if( abs <= 99 )
     {
         if( show_ms )
         {
@@ -469,15 +472,29 @@ function xslt_format_datetime_diff( datetime_earlier, datetime_later, show_plus 
         result += "s";
     }
     else
-    if( abs <=    99*60 )  result = Math.floor( abs / (       60 ) ) + "m";
+    if( abs <= 99*60 )      result = xslt_short_number( abs / (       60 ) ) + "m";
     else
-    if( abs <= 48*60*60 )  result = Math.floor( abs / (    60*60 ) ) + "h";
+    if( abs <= 48*60*60 )   result = xslt_short_number( abs / (    60*60 ) ) + "h";
     else
-                           result = Math.floor( abs / ( 24*60*60 ) ) + "d";
+                            result = xslt_short_number( abs / ( 24*60*60 ) ) + "d";
 
     return diff < 0             ? "-" + result :
            show_plus && diff > 0? "+" + result
                                 : result;
+}
+
+//----------------------------------------------------------------------------------xslt_short_time
+
+function xslt_short_number( positive_number )
+{
+    var n        = Math.floor( positive_number );
+    var fragment = positive_number - n;
+    
+    return n + ( n >= 10  ||
+                 fragment < 0.25? "" :
+                 fragment < 0.5 ? "¼" :
+                 fragment < 0.75? "½"
+                                : "¾" );
 }
 
 //-----------------------------------------------------------------------date_from_datetime
@@ -891,12 +908,12 @@ function order_menu__onclick( job_chain_name, order_id, x, y )
 
 //----------------------------------------------------------------------history_order_menu__onclick
 
-function history_order_menu__onclick( job_chain_name, order_id, x, y )
+function history_order_menu__onclick( job_chain_name, order_id, history_id, x, y )
 {
     var popup_builder = new Popup_menu_builder();
 
-    popup_builder.add_show_log( "Show log"        , "show_log?job_chain=" + job_chain_name +
-                                                            "&order=" + order_id, "show_log_order_" + job_chain_name + "__" + order_id );
+    popup_builder.add_show_log( "Show log"        , "show_log?job_chain=" + job_chain_name + "&order=" + order_id + "&history_id=" + history_id,
+                                                    "show_log_order_" + job_chain_name + "__" + order_id );
 
     _popup_menu = popup_builder.show_popup_menu( x, y );
 }

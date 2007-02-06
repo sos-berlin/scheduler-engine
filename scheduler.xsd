@@ -454,13 +454,16 @@
                             <xsd:attribute name="next_state"    type="String"/>
                             <xsd:attribute name="error_state"   type="String"/>
                             <xsd:attribute name="suspend"       type="Yes_no"/>
+                            <xsd:attribute name="delay"         type="xsd:nonNegativeInteger"/>
                         </xsd:complexType>
                     </xsd:element>
+
                     <xsd:element name="file_order_sink" maxOccurs="unbounded">
                         <xsd:complexType>
                             <xsd:attribute name="state"         type="String" use="required"/>
                             <xsd:attribute name="remove"        type="Yes_no"/>
                             <xsd:attribute name="move_to"       type="File"/>
+                            <xsd:attribute name="delay"         type="xsd:nonNegativeInteger"/>
                         </xsd:complexType>
                     </xsd:element>
                 </xsd:choice>
@@ -1027,7 +1030,8 @@
     <xsd:element name="show_order">
         <xsd:complexType>
             <xsd:attribute name="job_chain"         type="Name"                     use="required"/>
-            <xsd:attribute name="order"             type="Order_id"                 use="required"/>
+            <xsd:attribute name="order"             type="Order_id"/>
+            <xsd:attribute name="history_id"        type="xsd:nonNegativeInteger"/>
             <xsd:attribute name="what"              type="What"/>
         </xsd:complexType>
     </xsd:element>

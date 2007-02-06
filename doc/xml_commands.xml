@@ -32,6 +32,7 @@
         <scheduler_command name="show_history"       answer="history"/>
         <scheduler_command name="show_job"           answer="job"/>
         <scheduler_command name="show_jobs"          answer="jobs"/>
+        <scheduler_command name="show_job_chain"     answer="job_chain"/>
         <scheduler_command name="show_job_chains"    answer="job_chains"/>
         <scheduler_command name="show_order"         answer="order"/>
         <scheduler_command name="show_state"         answer="state"/>

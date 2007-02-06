@@ -97,6 +97,7 @@
                 <scheduler_element name="remove_job_chain"/><br/>
                 <scheduler_element name="show_history"/><br/>
                 <scheduler_element name="show_job"/><br/>
+                <scheduler_element name="show_job_chain"/><br/>
                 <scheduler_element name="show_job_chains"/><br/>
                 <scheduler_element name="show_jobs"/><br/>
                 <scheduler_element name="show_order"/><br/>

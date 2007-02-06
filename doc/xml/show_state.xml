@@ -99,6 +99,11 @@
                         (<scheduler_element name="log" directory="xml/answer/"/>).
                     </dd>
 
+                    <dt><code>order_history</code></dt>
+                    <dd>
+                        Liefert auch die letzten zwanzig Einträge der Auftragshistorie.
+                    </dd>
+
                     <dt><code>payload</code></dt>
                     <dd>
                         Liefert auch das Element <scheduler_element name="payload"/>.

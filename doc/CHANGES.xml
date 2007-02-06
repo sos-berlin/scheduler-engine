@@ -10,6 +10,20 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    
+    <change date="2007-02-05" version="2.0.165" subversion_revision="4838">
+        <revision type="new" title="&lt;show_order> unterscheidet Historien-Einträge derselben Auftragskennung">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_element name="show_order" attribute="history_id"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+    </change>
+    
+    
     <change date="2007-02-01" version="2.0.163" subversion_revision="4829">
         <revision type="correction" title="Address-in-use-Problem unter Windows gelöst">
             <description>

@@ -463,13 +463,16 @@ const char file_scheduler_xsd[] =
     "<xsd:attribute name=\"next_state\"    type=\"String\"/>\n"
     "<xsd:attribute name=\"error_state\"   type=\"String\"/>\n"
     "<xsd:attribute name=\"suspend\"       type=\"Yes_no\"/>\n"
+    "<xsd:attribute name=\"delay\"         type=\"xsd:nonNegativeInteger\"/>\n"
     "</xsd:complexType>\n"
     "</xsd:element>\n"
+    "\n"
     "<xsd:element name=\"file_order_sink\" maxOccurs=\"unbounded\">\n"
     "<xsd:complexType>\n"
     "<xsd:attribute name=\"state\"         type=\"String\" use=\"required\"/>\n"
     "<xsd:attribute name=\"remove\"        type=\"Yes_no\"/>\n"
     "<xsd:attribute name=\"move_to\"       type=\"File\"/>\n"
+    "<xsd:attribute name=\"delay\"         type=\"xsd:nonNegativeInteger\"/>\n"
     "</xsd:complexType>\n"
     "</xsd:element>\n"
     "</xsd:choice>\n"
@@ -1036,7 +1039,8 @@ const char file_scheduler_xsd[] =
     "<xsd:element name=\"show_order\">\n"
     "<xsd:complexType>\n"
     "<xsd:attribute name=\"job_chain\"         type=\"Name\"                     use=\"required\"/>\n"
-    "<xsd:attribute name=\"order\"             type=\"Order_id\"                 use=\"required\"/>\n"
+    "<xsd:attribute name=\"order\"             type=\"Order_id\"/>\n"
+    "<xsd:attribute name=\"history_id\"        type=\"xsd:nonNegativeInteger\"/>\n"
     "<xsd:attribute name=\"what\"              type=\"What\"/>\n"
     "</xsd:complexType>\n"
     "</xsd:element>\n"
@@ -1405,7 +1409,7 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1170336881 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1170673587 },
     { NULL, NULL, 0 }
 };
 

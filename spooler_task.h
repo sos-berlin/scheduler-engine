@@ -183,7 +183,6 @@ struct Task : Object,
 
     void                        set_cause                   ( Start_cause );
     Start_cause                 cause                       () const                                { return _cause; }
-    string                      string_cause                () const                                { return start_cause_name( _cause ); }
 
     void                        set_history_field           ( const string& name, const Variant& value );
     virtual void                set_close_engine            ( bool )                                {}      // Für Module_task

@@ -1073,7 +1073,7 @@ ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, const
     {
         case s_read_error:  z::throw_xc( "SCHEDULER-132", _name, _error? _error->what() : "" );
         case s_error:       z::throw_xc( "SCHEDULER-204", _name, _error.what() );
-        case s_stopped:     set_state( s_pending );  break;
+        case s_stopped:     if( _spooler->state() != Spooler::s_stopping )  set_state( s_pending );  break;
         default:            if( _state < s_initialized )  z::throw_xc( "SCHEDULER-396", state_name( s_initialized ), __FUNCTION__, state_name() );
     }
 
@@ -1945,7 +1945,7 @@ void Job::calculate_next_time( const Time& now )
         else
         {
             if( _state == s_pending  
-             || _state == s_running   &&  _running_tasks.size() < _max_tasks )
+             || _state == s_running   &&  _running_tasks_count < _max_tasks )
             {
                 bool in_period = is_in_period(now);
 
@@ -1981,7 +1981,7 @@ void Job::calculate_next_time( const Time& now )
                 }
             }
 
-            if( ( _state == s_pending || ( _state == s_running &&  _running_tasks.size() < _max_tasks ) ) &&  _order_queue )
+            if( ( _state == s_pending || ( _state == s_running && _running_tasks_count < _max_tasks ) ) &&  _order_queue )
             {
                 Time next_order_time = _order_queue->next_time();
                 if( next_order_time < _period.begin() )  next_order_time = _period.begin();
@@ -2284,7 +2284,10 @@ bool Job::do_something()
                             calculate_next_time( now );
 
                             task->init();
-                            _log->info( message_string( "SCHEDULER-930", task->id(), task->string_cause() ) );
+
+                            string c = task->cause() == cause_order && task->order()? task->order()->obj_name()
+                                                                                    : start_cause_name( task->cause() );
+                            _log->info( message_string( "SCHEDULER-930", task->id(), c ) );
 
                             if( _min_tasks <= not_ending_tasks_count() )  _start_min_tasks = false;
 

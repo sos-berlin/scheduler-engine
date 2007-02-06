@@ -15,17 +15,32 @@
         <script language="javascript">
             <![CDATA[
 
-//var next_start_time = new Date( new Date().getTime() + 30*1000 );
-var next_start_time_string = "2007-01-30 01:42:00";
+var next_start_time = new Date( new Date().getTime() + 30*1000 );
 
 function my_start_time_function( beginning_time_string, job_name )
 {
     var result;
-    //var beginning_time = Date.parse( beginning_time_string );
-    spooler_log.info( "+++++++++ my_start_time_function_for  " + job_name + "  " + beginning_time_string );
-    if( beginning_time_string < next_start_time_string )  result = next_start_time_string;
+    var result_string;
+    
+    var beginning_time = new Date( beginning_time_string.substr(  0, 4 ),
+                                   beginning_time_string.substr(  5, 2 ),
+                                   beginning_time_string.substr(  8, 2 ),
+                                   beginning_time_string.substr( 11, 2 ),
+                                   beginning_time_string.substr( 14, 2 ),
+                                   beginning_time_string.substr( 17, 2 ) );
+    
+    if( beginning_time < next_start_time )  result = next_start_time;
+    
+    if( result )
+    {
+        result_string = ( result.getFullYear() + "-" + result.getMonth() + "-" + result.getDate() + " " + 
+                          result.getHours() + ":" + result.getMinutes() + ":" + result.getSeconds() ).
+                        replace( /\b(\d)\b/g, "0$1" );
+    }
+    
+    spooler_log.info( "+++++++++ my_start_time_function_for  " + job_name + "  " + beginning_time_string + " " +  beginning_time + " ==> " + result + ", " + result_string );
 
-    return result;
+    return result_string;
 }
 
 var order_next_start_time_string = "2007-01-30 01:42:30";

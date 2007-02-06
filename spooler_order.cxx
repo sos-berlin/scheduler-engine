@@ -1026,6 +1026,7 @@ void Job_chain::set_dom( const xml::Element_ptr& element )
 
             node->_file_order_sink_move_to.set_directory( subst_env( e.getAttribute( "move_to" ) ) );
             node->_file_order_sink_remove  = e.bool_getAttribute( "remove" );
+            node->_delay = e.int_getAttribute( "delay", node->_delay );
         }
         else
         if( e.nodeName_is( "job_chain_node" ) )
@@ -1040,6 +1041,7 @@ void Job_chain::set_dom( const xml::Element_ptr& element )
             Job_chain_node* node = add_job( job, state, e.getAttribute( "next_state" ), e.getAttribute( "error_state" ) );
 
             if( e.bool_getAttribute( "suspend", false ) )  node->_suspend = true;
+            node->_delay = e.int_getAttribute( "delay", node->_delay );
         }
     }
 }
@@ -1089,7 +1091,7 @@ xml::Element_ptr Job_chain::dom_element( const xml::Document_ptr& document, cons
                 Read_transaction ta ( _spooler->_db );
 
                 Any_file sel = ta.open_result_set( 
-                               "select %limit(20) \"ORDER_ID\" as \"ID\", \"JOB_CHAIN\", \"START_TIME\", \"TITLE\", \"STATE\", \"STATE_TEXT\""
+                               "select %limit(20) \"ORDER_ID\" as \"ID\", \"HISTORY_ID\", \"JOB_CHAIN\", \"START_TIME\", \"END_TIME\", \"TITLE\", \"STATE\", \"STATE_TEXT\""
                                " from " + _spooler->_order_history_tablename +
                                " where \"JOB_CHAIN\"=" + sql::quoted( _name ) +
                                  " and \"SPOOLER_ID\"=" + sql::quoted( _spooler->id_for_db() ) +
@@ -1105,9 +1107,12 @@ xml::Element_ptr Job_chain::dom_element( const xml::Document_ptr& document, cons
                     order->set_state     ( record.as_string( "state"      ) );
                     order->set_state_text( record.as_string( "state_text" ) );
                     order->set_title     ( record.as_string( "title"      ) );
+                    order->_start_time.set_datetime( record.as_string( "start_time" ) );
+                    order->_end_time  .set_datetime( record.as_string( "end_time"   ) );
 
                     xml::Element_ptr order_element = order->dom_element( document, show );
-                    order_element.setAttribute_optional( "job_chain", record.as_string( "job_chain"  ) );
+                    order_element.setAttribute_optional( "job_chain" , record.as_string( "job_chain"  ) );
+                    order_element.setAttribute         ( "history_id", record.as_string( "history_id" ) );
 
                     order_history_element.appendChild( order_element );
                 }
@@ -3345,6 +3350,9 @@ void Order::set_dom( const xml::Element_ptr& element, Variable_set_map* variable
     if( element.hasAttribute( "suspended" ) )
         set_suspended( element.bool_getAttribute( "suspended" ) );
 
+    if( element.hasAttribute( "start_time" ) )  _start_time.set_datetime( element.getAttribute( "start_time" ) );
+    if( element.hasAttribute( "end_time"   ) )  _start_time.set_datetime( element.getAttribute( "end_time"   ) );
+
     if( setback != "" )  _setback.set_datetime( setback );
 
 
@@ -3549,6 +3557,9 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
     if( _is_replacement  )  element.setAttribute( "replacement" , "yes" ),
                             element.setAttribute_optional( "replaced_order_occupator", _replaced_order_occupator );
     if( !_is_virgin      )  element.setAttribute( "touched"     , "yes" );
+
+    if( start_time()     )  element.setAttribute( "start_time", start_time().as_string() );
+    if( end_time()       )  element.setAttribute( "end_time"  , end_time  ().as_string() );
     
     return element;
 }
@@ -3862,8 +3873,17 @@ void Order::set_state( const State& state )
 
     if( state != _state )
     {
-        if( _job_chain )  move_to_node( _job_chain->node_from_state( state ) );
-                    else  set_state2( state );
+        if( _job_chain )
+        {
+            move_to_node( _job_chain->node_from_state( state ) );
+
+            if( !_job_chain_node  ||  !_job_chain_node->_job )
+            {
+                handle_end_state();
+            }
+        }
+        else  
+            set_state2( state );
     }
 
     clear_setback();
@@ -3915,7 +3935,11 @@ void Order::set_job_chain_node( Job_chain_node* node, bool is_error_state )
 {
     _job_chain_node = node;
 
-    if( node  &&  node->_suspend )  set_suspended();
+    if( node )
+    {
+        if( node->_suspend )  set_suspended();
+        if( node->_delay  &&  !at() )  set_at( Time::now() + node->_delay );
+    }
 
     set_state2( node? node->_state : empty_variant, is_error_state );
 }
@@ -3935,8 +3959,8 @@ void Order::move_to_node( Job_chain_node* node )
 
         if( _job_chain_node && _in_job_queue )  _job_chain_node->_job->order_queue()->remove_order( this ), _job_chain_node = NULL;
 
-        set_job_chain_node( node );
         clear_setback();
+        set_job_chain_node( node );
 
         if( !_is_distributed && node && node->_job )  node->_job->order_queue()->add_order( this );
     }
@@ -4284,40 +4308,7 @@ void Order::postprocessing( bool success )
                 }
                 else
                 {
-                    // Endzustand erreicht
-
-                    bool is_first_call = _run_time_modified;
-                    _run_time_modified = false;
-                    Time next_start = next_start_time( is_first_call );
-
-                    if( next_start != Time::never )
-                    {
-                        _log->info( message_string( "SCHEDULER-944", _initial_state, next_start ) );        // "Kein weiterer Job in der Jobkette, der Auftrag wird mit state=<p1/> wiederholt um <p2/>"
-
-                        _end_time = Time::now();
-                        _log->close_file();
-                        if( _job_chain  &&  _is_in_database )  _spooler->_db->write_order_history( this );  // Historie schreiben, aber Auftrag beibehalten
-                        _log->close();
-
-                        _start_time = 0;
-                        _end_time = 0;
-                        //_is_virgin_in_this_run_time = true;
-
-                        open_log();
-
-                        try
-                        {
-                            set_state( _initial_state, next_start );
-                        }
-                        catch( exception& x )
-                        {
-                            _log->error( x.what() );
-                        }
-                    }
-                    else
-                    {
-                        _log->info( message_string( "SCHEDULER-945" ) );     // "Kein weiterer Job in der Jobkette, der Auftrag ist erledigt"
-                    }
+                    handle_end_state();
                 }
             }
             else
@@ -4329,6 +4320,46 @@ void Order::postprocessing( bool success )
         }
 
         postprocessing2( last_job );
+    }
+}
+
+//--------------------------------------------------------------------------Order::handle_end_state
+
+void Order::handle_end_state()
+{
+    // Endzustand erreicht
+
+    bool is_first_call = _run_time_modified;
+    _run_time_modified = false;
+    Time next_start = next_start_time( is_first_call );
+
+    if( next_start != Time::never  &&  _state != _initial_state )
+    {
+        _log->info( message_string( "SCHEDULER-944", _initial_state, next_start ) );        // "Kein weiterer Job in der Jobkette, der Auftrag wird mit state=<p1/> wiederholt um <p2/>"
+
+        _end_time = Time::now();
+        _log->close_file();
+        if( _job_chain  &&  _is_in_database )  _spooler->_db->write_order_history( this );  // Historie schreiben, aber Auftrag beibehalten
+        _log->close();
+
+        _start_time = 0;
+        _end_time = 0;
+        //_is_virgin_in_this_run_time = true;
+
+        open_log();
+
+        try
+        {
+            set_state( _initial_state, next_start );
+        }
+        catch( exception& x )
+        {
+            _log->error( x.what() );
+        }
+    }
+    else
+    {
+        _log->info( message_string( "SCHEDULER-945" ) );     // "Kein weiterer Job in der Jobkette, der Auftrag ist erledigt"
     }
 }
 
@@ -4402,7 +4433,7 @@ void Order::postprocessing2( Job* last_job )
         try
         {
             if( !_is_on_blacklist  &&  finished() )  db_delete( update_and_release_occupation );
-                                            else  db_update( update_and_release_occupation );
+                                               else  db_update( update_and_release_occupation );
         }
         catch( exception& x )
         {

@@ -644,6 +644,8 @@ xml::Element_ptr Command_processor::execute_show_job_chain( const xml::Element_p
 
 xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& show_order_element, const Show_what& show_ )
 {
+    xml::Element_ptr result;
+
     if( _security_level < Security::seclev_info )  z::throw_xc( "SCHEDULER-121" );
 
     Show_what show = show_;
@@ -651,23 +653,28 @@ xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& 
 
     string    job_chain_name = show_order_element.getAttribute( "job_chain" );
     Order::Id id             = show_order_element.getAttribute( "order"     );
+    string    history_id     = show_order_element.getAttribute( "history_id" );
     string    id_string      = string_from_variant( id );
 
-    ptr<Job_chain> job_chain = _spooler->order_subsystem()->job_chain( job_chain_name );
-    ptr<Order>     order     = job_chain->order_or_null( id );
-
-    if( order )
+    if( history_id == "" )
     {
-        return order->dom_element( _answer, show );
+        ptr<Job_chain> job_chain = _spooler->order_subsystem()->job_chain( job_chain_name );
+
+        if( ptr<Order> order = job_chain->order_or_null( id ) )
+        {
+            result = order->dom_element( _answer, show );
+        }
     }
-    else
+
+    if( !result )
     {
         if( !_spooler->_db->opened() )  goto NO_ORDER;
-    
-        string history_id;
 
+        Read_transaction ta ( _spooler->_db );
+    
+        if( history_id == "" )
         {
-            Any_file sel = _spooler->_db->transaction()->open_result_set(
+            Any_file sel = ta.open_result_set(
                            " select max(\"HISTORY_ID\") as history_id_max "
                            "  from " + _spooler->_order_history_tablename +
                            "  where \"SPOOLER_ID\"=" + sql::quoted( _spooler->id_for_db() ) + 
@@ -681,35 +688,32 @@ xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& 
             if( history_id == "" )  goto NO_ORDER;
         }
 
-        {
-            Any_file sel = _spooler->_db->transaction()->open_result_set(
-                           "select \"ORDER_ID\" as \"ID\", \"START_TIME\", \"TITLE\", \"STATE\", \"STATE_TEXT\""
-                           "  from " + _spooler->_order_history_tablename +
-                           "  where \"HISTORY_ID\"=" + history_id,
-                           __FUNCTION__ );
+        S select_sql;
+        select_sql <<  "select \"ORDER_ID\" as \"ID\", \"START_TIME\", \"TITLE\", \"STATE\", \"STATE_TEXT\""
+                       "  from " << _spooler->_order_history_tablename <<
+                       "  where \"HISTORY_ID\"=" << history_id;
+        if( id_string != "" )  select_sql << " and `order_id`=" << sql::quoted( id_string ); 
 
-            Record record = sel.get_record();
+        Any_file sel = ta.open_result_set( S() << select_sql, __FUNCTION__ );
 
-            //order = Z_NEW( Order( _spooler, sel.get_record() );
-            order = new Order( _spooler );
-            order->set_id        ( record.as_string( "id"         ) );
-            order->set_state     ( record.as_string( "state"      ) );
-            order->set_state_text( record.as_string( "state_text" ) );
-            order->set_title     ( record.as_string( "title"      ) );
-          //order->set_priority  ( record.as_int   ( "priority"   ) );
-        }
+        if( sel.eof() )  goto NO_ORDER;
+        Record record = sel.get_record();
+
+        //order = Z_NEW( Order( _spooler, sel.get_record() );
+        ptr<Order> order = new Order( _spooler );
+        order->set_id        ( record.as_string( "id"         ) );
+        order->set_state     ( record.as_string( "state"      ) );
+        order->set_state_text( record.as_string( "state_text" ) );
+        order->set_title     ( record.as_string( "title"      ) );
+      //order->set_priority  ( record.as_int   ( "priority"   ) );
+        sel.close();
 
         string log;
 
         if( show.is_set( show_log ) )
         {
-            Transaction ta ( _spooler->_db );
-
-            ta.set_transaction_read();
-            log = file_as_string( GZIP_AUTO + _spooler->_db->db_name() + " -table=" + _spooler->_order_history_tablename + " -blob=\"LOG\"" 
-                                     " where \"HISTORY_ID\"=" + history_id );
-
-            ta.commit( __FUNCTION__ );
+            log = file_as_string( S() << GZIP_AUTO << _spooler->_db->db_name() << " -table=" + _spooler->_order_history_tablename << " -blob=\"LOG\"" 
+                                     " where \"HISTORY_ID\"=" << history_id );
         }
 
         /* Payload steht nicht in der Historie
@@ -784,26 +788,10 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
 
         if( !order )  order = _spooler->order_subsystem()->load_order_from_database( (Transaction*)NULL, job_chain_name, id, Order_subsystem_interface::lo_lock );
 
-        //if( !order )
-        //{
-        //    Transaction ta ( _spooler->db() );
-
-        //    sql::Update_stmt update ( _spooler->database_descriptor(), _spooler->_orders_tablename );
-
-        //    update.and_where_condition( "spooler_id", _spooler->id_for_db() );
-        //    update.and_where_condition( "job_chain" , job_chain_name        );
-        //    update.and_where_condition( "id"        , id().as_string()      );
-        //    update.and_where_condition( "occupying_cluster_member_id", sql::null_value );
-
-        //    if( priority != "" )  update[ "priority" ] = as_int( priority );
-        //    if( state    != "" )  update[ "state"    ] = state;
-
-        //    ta.execute( update );
-
-        //    ta.commit( __FUNCTION__ );
-        //}
-        //else
-
+        if( xml::Element_ptr run_time_element = modify_order_element.select_node( "run_time" ) )
+        {
+            order->set_run_time( run_time_element );
+        }
 
         if( priority != "" )  order->set_priority( as_int( priority ) );
 
@@ -834,12 +822,16 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
             order->set_suspended( modify_order_element.bool_getAttribute( "suspended" ) );
         }
 
-        if( xml::Element_ptr run_time_element = modify_order_element.select_node( "run_time" ) )
+        if( order->finished()  &&  !order->is_on_blacklist() )
         {
-            order->set_run_time( run_time_element );
+            order->remove_from_job_chain();
+            order->close();
+        }
+        else
+        {
+            order->db_update( Order::update_anyway );
         }
 
-        order->db_update( Order::update_anyway );
         //Das löscht den Auftrag!  order->close();
     }
     catch( exception& )
@@ -1257,38 +1249,49 @@ void Command_processor::execute_http( http::Operation* http_operation )
                     else
                     if( http_request->has_parameter( "order" ) )
                     {
-                        string     job_chain_name = http_request->parameter( "job_chain" );
-                        string     order_id       = http_request->parameter( "order" );
-                        ptr<Order> order          = _spooler->order_subsystem()->job_chain( job_chain_name )->order_or_null( order_id );
+                        string job_chain_name = http_request->parameter( "job_chain" );
+                        string order_id       = http_request->parameter( "order" );
+                        string history_id     = http_request->parameter( "history_id" );
+                        
 
-                        if( order )
+                        if( history_id == "" )
                         {
-                            log = order->_log;
-                        }
-                        else
-                        {
-                            Transaction ta ( _spooler->_db );
-
-                            Any_file sel = ta.open_result_set(
-                                           "select max(\"HISTORY_ID\") as history_id_max "
-                                           "  from " + _spooler->_order_history_tablename +
-                                           "  where \"SPOOLER_ID\"=" + sql::quoted( _spooler->id_for_db() ) + 
-                                             " and \"JOB_CHAIN\"="  + sql::quoted( job_chain_name ) +
-                                             " and \"ORDER_ID\"="   + sql::quoted( order_id ),
-                                             __FUNCTION__ );
-
-                            if( !sel.eof() )
+                            if( ptr<Order> order = _spooler->order_subsystem()->job_chain( job_chain_name )->order_or_null( order_id ) )
                             {
-                                string history_id = sel.get_record().as_string( "history_id_max" );
-                                if( history_id != "" )
+                                log = order->_log;
+                            }
+                        }
+
+                        if( !log )
+                        {
+                            Read_transaction ta ( _spooler->_db );
+
+                            if( history_id == "" )
+                            {
+                                S select_sql;
+                                select_sql << "select max(\"HISTORY_ID\") as history_id_max "
+                                               "  from " + _spooler->_order_history_tablename +
+                                               "  where \"SPOOLER_ID\"=" << sql::quoted( _spooler->id_for_db() ) + 
+                                                 " and \"JOB_CHAIN\"=" << sql::quoted( job_chain_name ) +
+                                                 " and \"ORDER_ID\"=" << sql::quoted( order_id );
+                                if( order_id != "" )  select_sql << " and `order_id`=" << sql::quoted( order_id );
+
+                                Any_file sel = ta.open_result_set( select_sql, __FUNCTION__ );
+
+                                if( !sel.eof() )
                                 {
-                                    string log_text = file_as_string( GZIP_AUTO + _spooler->_db->db_name() + " -table=" + _spooler->_order_history_tablename + " -blob=\"LOG\"" 
-                                                                    " where \"HISTORY_ID\"=" + history_id );
-                                    string title = "Auftrag " + order_id;
-                                    //TODO Log wird im Speicher gehalten! Besser: In Datei schreiben, vielleicht sogar Order und Log anlegen
-                                    http_response->set_chunk_reader( Z_NEW( http::Html_chunk_reader( Z_NEW( http::String_chunk_reader( log_text ) ), title ) ) );
-                                    return;
+                                    history_id = sel.get_record().as_string( "history_id_max" );
                                 }
+                            }
+
+                            if( history_id != "" )
+                            {
+                                string log_text = file_as_string( GZIP_AUTO + _spooler->_db->db_name() + " -table=" + _spooler->_order_history_tablename + " -blob=\"LOG\"" 
+                                                                " where \"HISTORY_ID\"=" + history_id );
+                                string title = "Auftrag " + order_id;
+                                //TODO Log wird im Speicher gehalten! Besser: In Datei schreiben, vielleicht sogar Order und Log anlegen
+                                http_response->set_chunk_reader( Z_NEW( http::Html_chunk_reader( Z_NEW( http::String_chunk_reader( log_text ) ), title ) ) );
+                                return;
                             }
 
                             throw http::Http_exception( http::status_404_bad_request, "No order log" );

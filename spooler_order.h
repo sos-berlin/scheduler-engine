@@ -155,6 +155,7 @@ struct Order : Com_order,
 
     void                        set_on_blacklist        ();
     void                        remove_from_blacklist   ();
+    bool                        is_on_blacklist         ()                                          { return _is_on_blacklist; }
 
     void                        inhibit_distribution    ()                                          { _is_distribution_inhibited = true; }
     void                        assert_is_not_distributed  ( const string& debug_text );
@@ -185,6 +186,7 @@ struct Order : Com_order,
     void                        move_to_node            ( Job_chain_node* );
     void                        postprocessing          ( bool success );                           // Verarbeitung nach spooler_process()
     void                        processing_error        ();
+    void                        handle_end_state        ();
 
     void                    set_dom                     ( const xml::Element_ptr&, Variable_set_map* = NULL );
     xml::Element_ptr            dom_element             ( const xml::Document_ptr&, const Show_what&, const string* log = NULL ) const;
@@ -367,6 +369,7 @@ struct Job_chain_node : Com_job_chain_node
     bool                       _file_order_sink_remove; // <file_order_sink remove="yes"/>
     File_path                  _file_order_sink_move_to;// <file_order_sink move_to="..."/>
     bool                       _suspend;                // <job_chain_node suspend="yes"/>
+    int                        _delay;                  // <job_chain_node delay="..."/>  Verzögerung des Auftrags
     int                        _priority;               // Das ist die Entfernung zum letzten Knoten + 1, negativ (also -1, -2, -3, ...)
 };
 

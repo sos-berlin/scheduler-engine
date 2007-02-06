@@ -2388,6 +2388,10 @@
                     <col width="*"/>
                 </xsl:if>
                 
+                <xsl:if test="self::order_history">
+                    <col width="40"/>
+                </xsl:if>
+            
                 <xsl:if test="order/@setback">
                     <col width="40"/>
                 </xsl:if>
@@ -2422,6 +2426,10 @@
                             <td class="head">Title</td>
                         </xsl:if>
 
+                        <xsl:if test="self::order_history">
+                            <td class="head">Finished at</td>
+                        </xsl:if>
+                        
                         <xsl:if test="order/@setback">
                             <td class="head">Start</td>
                         </xsl:if>
@@ -2454,6 +2462,14 @@
                                 <td><xsl:value-of select="@title"/></td>
                             </xsl:if>
 
+                            <xsl:if test="parent::order_history">
+                                <td>
+                                    <span style="white-space: nowrap">
+                                        <xsl:value-of select="@end_time__xslt_date_or_time_with_diff"  disable-output-escaping="yes"/>
+                                    </span>
+                                </td>
+                            </xsl:if>
+                            
                             <xsl:if test="../order/@setback">
                                 <td class="small">
                                     <span style="white-space: nowrap">
@@ -2478,8 +2494,9 @@
                                     </xsl:with-param>
                                     <xsl:with-param name="onclick_param1_str" select="@job_chain"/>
                                     <xsl:with-param name="onclick_param2_str" select="@id"/>
-                                    <xsl:with-param name="onclick_param3"     select="'mouse_x() - 70'"/>
-                                    <xsl:with-param name="onclick_param4"     select="'mouse_y() - 1'"/>
+                                    <xsl:with-param name="onclick_param3_str" select="@history_id"/>
+                                    <xsl:with-param name="onclick_param4"     select="'mouse_x() - 70'"/>
+                                    <xsl:with-param name="onclick_param5"     select="'mouse_y() - 1'"/>
                                 </xsl:call-template>
                             </td>
                         </xsl:element>
