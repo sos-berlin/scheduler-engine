@@ -11,7 +11,7 @@
     <scheduler_keyword keyword="Change log"/>
 
     
-    <change date="2007-02-05" version="2.0.165" subversion_revision="4839">
+    <change date="2007-02-08" version="2.0.165" subversion_revision="4841">
         <revision type="new" title="Verzögernde Jobkettenknoten">
             <description>
                 <ul>
