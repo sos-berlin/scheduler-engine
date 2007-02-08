@@ -59,6 +59,13 @@
             </description>
         </xml_attribute>
 
+        <xml_attribute name="delay" type="seconds" initial="0">
+            <description>
+                <p>
+                    Verzögert den Auftrag vor Übergabe an den Job.
+                </p>
+            </description>
+        </xml_attribute>
 
     </xml_attributes>
 

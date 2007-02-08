@@ -12,53 +12,8 @@
         <script language="javascript">
             <![CDATA[
 
-//var hostware = new ActiveXObject( "hostware.Global" );
-                        
-                        
+//
 
-//var db = hostware.open( "odbc c:/tmp/scheduler/scheduler.mdb" );
-//db.db_execute( "delete from scheduler_orders where job_chain='" + job_chain.name + "'" );
-//db.db_execute( "commit" );
-
-var order = spooler.create_order();
-order.id = 12345678;
-order.title = "Ein ganz ganz langer Titel, um zu sehen, wie die HTML-Oberfläche reagiert";
-//job_chain.add_order( order );
-
-var order = spooler.create_order();
-order.id = "A";
-order.title = "Wir haben einen Auftrag!";
-
-//order.run_time.xml = '<run_time let_run="no" repeat="20"/>';  // let_run ist unsinn, nur zum test
-
-order.run_time.xml = "<run_time>" +
-                        "<date date='2007-01-30'>" +
-                            "<period begin='18:55:00' end='23:25:30' />" +
-                            "<period single_start='18:55:50' />" +
-                            "<period begin='18:55:30' end='23:34:50' />" +
-                        "</date>" +             
-                        "<date date='2007-02-01'>" +
-                            "<period begin='14:55:30' end='21:34:50' />" +
-                        "</date>" +
-                        "<weekdays>" + 
-                            "<day day='sunday'>" +
-                                "<period begin='14:55:40' end='20:00' />" +
-                            "</day>" +
-                        "</weekdays>" + 
-                     "</run_time>";
-
-spooler_log.info( order.run_time.xml );
-
-order.state = "3";
-
-try
-{                     
-    spooler.job_chain( "order_run_time.scheduler" ).add_order( order );
-}
-catch( x ) { spooler_log.warn( x.toString() ); }
-
-spooler_log.info( "---------------------------------------------------------------------------" );
-        
         ]]></script>
 
 
@@ -183,6 +138,14 @@ function spooler_process()
                 <job_chain_node state="999"/>
             </job_chain>
         </job_chains>
+
+        <commands>
+            <add_order job_chain="order_run_time.scheduler" id="1" replace="yes">
+                <run_time>
+                    <period single_start="02:30"/>
+                </run_time>                
+            </add_order>
+        </commands>
 
     </config>
 </spooler>

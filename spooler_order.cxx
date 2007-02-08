@@ -2688,7 +2688,7 @@ bool Order::occupy_for_task( Task* task, const Time& now )
 
     if( !_log->opened() )  open_log();
 
-    if( _delay_storing_until_processing  &&  _job_chain  &&  _job_chain->_orders_recoverable  &&  !_is_in_database )
+    if( _delay_storing_until_processing  &&  _job_chain  &&  _job_chain->_orders_recoverable  &&  !_is_in_database  &&  db()->opened() )
     {
         db_insert();
         _delay_storing_until_processing = false;
@@ -4573,6 +4573,7 @@ Time Order::next_start_time( bool first_call )
 
         if( first_call )
         {
+            //_period = _run_time->next_period( now, time::wss_next_single_start );
             _period = _run_time->next_period( now, time::wss_next_period_or_single_start );
             result = _period.begin();
         }

@@ -188,9 +188,18 @@
             <tr>
                 <td colspan="2">
                     <span>
-                        <xsl:value-of select="state/@time__xslt_datetime"  disable-output-escaping="yes"/>
+                        <xsl:apply-templates mode="time" select="state/@time">
+                            <xsl:with-param name="show" select="'datetime'"/>
+                            <xsl:with-param name="modified_short_attribute" select="state/@time__xslt_datetime"/>
+                        </xsl:apply-templates>
+                        <!--xsl:value-of select="state/@time__xslt_datetime"  disable-output-escaping="yes"/-->
+                        
                         <xsl:text> (</xsl:text>
-                            <xsl:value-of select="state/@spooler_running_since__xslt_datetime_diff"  disable-output-escaping="yes"/>
+                        <xsl:apply-templates mode="time" select="state/@time">
+                            <xsl:with-param name="show" select="'datetime_diff'"/>
+                            <xsl:with-param name="modified_short_attribute" select="state/@spooler_running_since__xslt_datetime_diff"/>
+                        </xsl:apply-templates>
+                        <!--xsl:value-of select="state/@spooler_running_since__xslt_datetime_diff"  disable-output-escaping="yes"/-->
                         <xsl:text>)</xsl:text>
                     </span>
 
@@ -2689,7 +2698,21 @@
 
     </xsl:template>
 
-    <!--~scheduler_url-->
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~time-->
+
+    <xsl:template mode="time" match="*">
+        <xsl:param name="show"/>
+        <xsl:param name="modified_short_attribute"/>
+
+        <xsl:element name="span">
+            <xsl:attribute name="title">
+                <xsl:value-of select="."/>
+            </xsl:attribute>
+            <xsl:value-of select="$modified_short_attribute"  disable-output-escaping="yes"/>
+        </xsl:element>
+    </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_url-->
     <!-- Hängt /z/ an die Scheduler-Url, wenn die eigene diesen Suffix hat -->
     
     <xsl:template name="scheduler_url">
@@ -2706,7 +2729,7 @@
         
     </xsl:template>
 
-    <!--~translate_target-->
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~translate_target-->
     <!-- Für <a target="..."/> -->
     
     <xsl:template name="translate_target">
@@ -2714,7 +2737,7 @@
         <xsl:value-of select="translate( $target, ':/.-', '____' )" />
     </xsl:template>
 
-    <!--~command_menu-->
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~command_menu-->
 
     <xsl:template name="command_menu">
         <xsl:param name="onclick"/>

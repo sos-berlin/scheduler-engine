@@ -11,17 +11,44 @@
     <scheduler_keyword keyword="Change log"/>
 
     
-    <change date="2007-02-05" version="2.0.165" subversion_revision="4838">
-        <revision type="new" title="&lt;show_order> unterscheidet Historien-Einträge derselben Auftragskennung">
+    <change date="2007-02-05" version="2.0.165" subversion_revision="4839">
+        <revision type="new" title="Verzögernde Jobkettenknoten">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_element name="job_chain_node" attribute="delay"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+
+        <revision type="new" title="&lt;show_order> kann Historien-Einträge zum selben Auftrag unterscheiden">
             <description>
                 <ul>
                     <li>
                         <scheduler_element name="show_order" attribute="history_id"/>
                     </li>
                 </ul>
+                <p>
+                    Damit kann die HTML-Oberfläche das richtige Protokoll zeigen, wenn ein Auftrag mehreren Historieneinträge hat.
+                </p>
+                <p>
+                    Das Kommando liefert jetzt auch die neuen Attribute <code>start_time=</code> 
+                    (erste Ausführung) und <code>end_time=</code> (Abschluss des Auftrags).
+                    Die integrierte HTML-Oberfläche (<code>http://</code>host<code>:4444/z</code>) zeigt den Zeitpunkt der Abschlusses.
+                </p>
             </description>
         </revision>
-        
+
+        <revision type="new" title="HTML-Oberfläche zeigt Zeiten genauer">
+            <description>
+                <p>
+                    Die integrierte HTML-Oberfläche (<code>http://</code>host<code>:4444/z</code>)
+                    zeigt Sekundenzeiten bis 99s und darüber hinaus Viertelbruchteile.
+                </p>
+            </description>
+        </revision>
+
         <revision type="modification" title="&lt;job stop_on_error='no'> versetzt nach Exception Auftrag in Fehlerzustand">
             <description>
                 <p>
