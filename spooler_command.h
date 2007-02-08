@@ -6,6 +6,8 @@
 namespace sos {
 namespace scheduler {
 
+struct Http_file_directory;
+
 //-------------------------------------------------------------------------------------------------
 
 const int                   recommended_response_block_size = 100000;
@@ -183,7 +185,7 @@ struct Command_processor
                                ~Command_processor           ();
 
     void                        execute_file                ( const string& xml_filename );
-    void                        execute_http                ( http::Operation* );
+    void                        execute_http                ( http::Operation*, Http_file_directory* );
     ptr<Command_response>       response_execute            ( const string& xml_text, const Time& xml_mod_time, bool indent = false );
     string                      execute                     ( const string& xml_text, const Time& xml_mod_time, bool indent = false );
     xml::Document_ptr           execute                     ( const xml::Document_ptr&, const Time& xml_mod_time = Time::now() );

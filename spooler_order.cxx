@@ -3343,7 +3343,7 @@ void Order::set_dom( const xml::Element_ptr& element, Variable_set_map* variable
     if( id               != "" )  set_id      ( id.c_str() );
     if( title            != "" )  set_title   ( title );
     if( state_name       != "" )  set_state   ( state_name.c_str() );
-    if( web_service_name != "" )  set_web_service( _spooler->_web_services.web_service_by_name( web_service_name ) );
+    if( web_service_name != "" )  set_web_service( _spooler->_web_services->web_service_by_name( web_service_name ) );
     if( at_string        != "" )  set_at      ( Time::time_with_now( at_string ) );
     _is_virgin = !element.bool_getAttribute( "touched" );
 
@@ -3763,7 +3763,7 @@ void Order::set_web_service( const string& name )
     _order_xml_modified = true;
 
     set_web_service( name == ""? NULL 
-                               : _spooler->_web_services.web_service_by_name( name ) );
+                               : _spooler->_web_services->web_service_by_name( name ) );
 }
 
 //---------------------------------------------------------------------------Order::set_web_service

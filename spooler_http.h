@@ -441,17 +441,30 @@ struct Operation : Communication::Operation
     Order*                     _order;
 };
 
-//------------------------------------------------------------------------Operation_connection
+//-----------------------------------------------------------------------------Operation_connection
 
 struct Operation_connection : Communication::Operation_connection
 {
-                                Operation_connection   ( Communication::Connection* c )        : Communication::Operation_connection( c ) {}
+                                Operation_connection        ( Communication::Connection* c )        : Communication::Operation_connection( c ) {}
 
     ptr<Communication::Operation> new_operation             ()                                      { ptr<Operation> result = Z_NEW( Operation( this ) ); 
                                                                                                       return +result; }
 
     string                      connection_type             () const                                { return "HTTP"; }
 };
+
+//----------------------------------------------------------------------------Http_server_interface
+
+struct Http_server_interface : Subsystem
+{
+                                Http_server_interface       ( Scheduler* scheduler, Type_code t )   : Subsystem( scheduler, t ) {}
+
+    virtual void            set_directory                   ( const File_path& )                    = 0;
+    virtual File_path           directory                   () const                                = 0;
+};
+
+
+ptr<Http_server_interface>      new_http_server             ( Scheduler* );
 
 //-------------------------------------------------------------------------------------------------
 

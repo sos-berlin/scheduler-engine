@@ -1246,7 +1246,7 @@
                 <title>Web-Dienst für url_path="<p1/>" ist bereits bekannt</title>
             </text>
             <text xml:lang="en">
-                <title>Web service for url_path="<p1/>" has already been declared</title>
+                <title>Web service or alias for url_path="<p1/>" has already been declared</title>
             </text>
         </message>
 

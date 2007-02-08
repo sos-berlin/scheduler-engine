@@ -347,7 +347,7 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const Time& x
             else
             if( e.nodeName_is( "web_services" ) )
             {
-                _web_services.add_web_services( e );
+                _web_services->set_dom( e );
             }
             else
             if( e.nodeName_is( "process_classes" ) )

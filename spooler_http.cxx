@@ -66,6 +66,31 @@ const Http_status_code_table http_status_code_table[]  =
     {}
 };
 
+//-------------------------------------------------------------------------------------------------
+
+struct Http_server : Http_server_interface 
+{
+                                Http_server                 ( Scheduler* scheduler )                : Http_server_interface( scheduler, type_http_server ), _zero_(this+1) {}
+
+    // Subsystem
+    void                        close                       ()                                      {}
+    bool                        subsystem_initialize        ();
+  //bool                        subsystem_load              ();
+  //bool                        subsystem_activate          ();
+
+    // Http_server_interface
+  //void                        set_dom                     ( const xml::Element_ptr& );
+    void                    set_directory                   ( const File_path& path )               { _base_directory = File_path( path, "" ); }
+    File_path                   directory                   () const                                { return _base_directory; }
+  //File_path                   file_path_from_url_path     ( const string& url_path );
+
+    Fill_zero                  _zero_;
+
+    File_path                  _base_directory;
+    //typedef stdext::hash_map< string, File_path >   Alias_map;
+    //Alias_map                  _alias_map;
+};
+
 //-------------------------------------------------------------------------------------------Z_INIT
 
 Z_INIT( scheduler_http )
@@ -74,6 +99,14 @@ Z_INIT( scheduler_http )
     {
         http_status_messages[ (int)p->_code ] = p->_text;
     }
+}
+
+//----------------------------------------------------------------------------------new_http_server
+
+ptr<Http_server_interface> new_http_server( Scheduler* scheduler )
+{
+    ptr<Http_server> http_server = Z_NEW( Http_server( scheduler ) );
+    return +http_server;
 }
 
 //--------------------------------------------------------------------------------------date_string
@@ -94,7 +127,7 @@ string date_string( time_t t )
     return time_text;
 }
 
-//--------------------------------------------------------------------------get_content_type_parameter
+//-----------------------------------------------------------------------get_content_type_parameter
 
 string get_content_type_parameter( const string& content_type, const string& param_name )
 {
@@ -122,6 +155,54 @@ string get_content_type_parameter( const string& content_type, const string& par
 
     return "";
 }
+
+//--------------------------------------------------------------------------Http_server::initialize
+
+bool Http_server::subsystem_initialize()
+{
+    _base_directory = subst_env( read_profile_string( _spooler->_factory_ini, "spooler", "html_dir" ) );
+    if( _base_directory == "" )  _base_directory = directory_of_path( _spooler->_config_filename ) + "/html";
+
+    _subsystem_state = subsys_initialized;
+    return true;
+}
+
+//-----------------------------------------------------------------------------Http_server::set_dom
+
+//void Http_server::set_dom( const xml::Element_ptr& http_server_element )
+//{
+//    assert( http_server_element.is_node_name( "http_server" ) );
+//
+//    DOM_FOR_EACH_ELEMENT( http_server_element, element )
+//    {
+//        if( element.is_node_name( "alias" ) )
+//        {
+//            _alias_map[ element.getAttribute( "alias" ) ] = subst_env( element.getAttribute( "path" ) );
+//        }
+//    }
+//}
+
+//-------------------------------------------------------------Http_server::file_path_from_url_path
+
+//File_path Http_server::file_path_from_url_path( const string& url_path )
+//{
+//    string result;
+//
+//    if( _base_directory.empty() )  z::throw_xc( "SCHEDULER-212" );
+//    
+//    if( !string_begins_with( url_path, "/" ) )  z::throw_xc( __FUNCTION__ );
+//    size_t slash = url_path.find( '/', 1 );
+//    
+//    if( slash != string::npos )
+//    {
+//        result = url_path;
+//    }
+//    else
+//    {
+//        string directory = url_path.substr( );
+//        Alias_map::iterator it = _alias_map.find( 
+//    }
+//}
 
 //-------------------------------------------------------------------------------------Headers::get
 
@@ -639,16 +720,28 @@ void Operation::begin()
     {
         _request->check();
 
-        if( Web_service* web_service = _spooler->_web_services.web_service_by_url_path_or_null( _request->_path ) )
+        if( Web_service* web_service = _spooler->_web_services->web_service_by_url_path_or_null( _request->_path ) )
         {
             _web_service_operation = web_service->new_operation( this );
             _web_service_operation->begin();
         }
         else
         {
-            Command_processor command_processor ( _spooler, _connection->_security_level, this );
-            command_processor.execute_http( this );
+            string path = _request->_path;
+            if( !string_begins_with( path, "/" ) )  path = "/" + path;
 
+            Http_file_directory* http_file_directory = NULL;
+
+            size_t slash = path.find( "/", 1 );
+            if( slash != string::npos )
+            {
+                slash = path.length();
+                string directory = "/" + path.substr( 1, slash );
+                http_file_directory = _spooler->_web_services->http_file_directory_by_url_path_or_null( directory );
+            }
+
+            Command_processor command_processor ( _spooler, _connection->_security_level, this );
+            command_processor.execute_http( this, http_file_directory );
             _response->set_ready();
         }
     }

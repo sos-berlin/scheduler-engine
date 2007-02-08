@@ -1126,10 +1126,11 @@ const char file_scheduler_xsd[] =
     "\n"
     "\n"
     "<xsd:element name=\"web_services\">\n"
-    "<xsd:complexType>\n"
-    "<xsd:sequence>\n"
-    "<xsd:element name=\"web_service\" type=\"web_service\" minOccurs=\"0\" maxOccurs=\"unbounded\"/>\n"
-    "</xsd:sequence>\n"
+    "<xsd:complexType >\n"
+    "<xsd:choice minOccurs=\"0\" maxOccurs=\"unbounded\">\n"
+    "<xsd:element name=\"web_service\" type=\"web_service\"/>\n"
+    "<xsd:element name=\"http_directory\" type=\"http_directory\"/>\n"
+    "</xsd:choice>\n"
     "</xsd:complexType>\n"
     "\n"
     "<!--libxslt xsd:key name=\"web_service\">\n"
@@ -1163,6 +1164,25 @@ const char file_scheduler_xsd[] =
     "\n"
     "<xsd:attribute name=\"job_chain\"                 type=\"Name\"/>\n"
     "<xsd:attribute name=\"timeout\"                   type=\"xsd:positiveInteger\"/>\n"
+    "</xsd:complexType>\n"
+    "\n"
+    "\n"
+    "<xsd:complexType name=\"http_directory\">\n"
+    "<xsd:attribute name=\"url_path\" use=\"required\">\n"
+    "<xsd:simpleType>\n"
+    "<xsd:restriction base=\"String\">\n"
+    "<xsd:pattern value=\"/[^/]*/\"/>\n"
+    "</xsd:restriction>\n"
+    "</xsd:simpleType>\n"
+    "</xsd:attribute>\n"
+    "\n"
+    "<xsd:attribute name=\"path\" use=\"required\">\n"
+    "<xsd:simpleType>\n"
+    "<xsd:restriction base=\"String\">\n"
+    "<xsd:pattern value=\".+\"/>\n"
+    "</xsd:restriction>\n"
+    "</xsd:simpleType>\n"
+    "</xsd:attribute>\n"
     "</xsd:complexType>\n"
     "\n"
     "<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ATTRIBUT-TYPEN-->\n"
@@ -1409,7 +1429,7 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1170755409 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1170970111 },
     { NULL, NULL, 0 }
 };
 

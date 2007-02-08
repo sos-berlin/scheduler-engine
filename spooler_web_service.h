@@ -11,6 +11,29 @@ namespace scheduler {
 
 struct Web_service_operation;
 
+//struct Web_service_base : Scheduler_object
+//{
+//                                Web_service_base            ( Scheduler* scheduler, IUnknown* iunknown, Type_code type ) : Scheduler_object( scheduler, iunknown, type ) {}
+//    virtual void                activate                    ()                                      = 0;
+//};
+//
+//------------------------------------------------------------------------------Http_file_directory
+
+struct Http_file_directory : Object, Scheduler_object
+{
+                                Http_file_directory         ( Scheduler* scheduler, const string& url_path, const File_path& directory ) : Scheduler_object( scheduler, this, type_http_file_directory ),
+                                                                                                                                            _url_path(url_path), _directory(directory) {}
+
+    string                      url_path                    () const                                { return _url_path; }
+    File_path                   directory                   () const                                { return _url_path; }
+    File_path                   file_path_from_url_path     ( const string& url_path );
+  //void                        execute_request             ();
+
+  private:
+    File_path                  _directory;
+    string                     _url_path;
+};
+
 //--------------------------------------------------------------------------------------Web_service
 
 struct Web_service: idispatch_implementation< Web_service, spooler_com::Iweb_service >,
@@ -46,7 +69,7 @@ struct Web_service: idispatch_implementation< Web_service, spooler_com::Iweb_ser
     // Scheduler_object
     string                      obj_name                    () const                                { return "Web_service " + _name; }
 
-    void                        start                       ();
+    void                        activate                    ();
     void                        check                       ();
     void                    set_url_path                    ( const string& url_path )              { _url_path = url_path; }
     string                      url_path                    () const                                { return _url_path; }
@@ -88,34 +111,23 @@ struct Web_service: idispatch_implementation< Web_service, spooler_com::Iweb_ser
     ptr<Com_variable_set>      _parameters;
 };
 
-//-------------------------------------------------------------------------------------Web_services
+//---------------------------------------------------------------------------Web_services_interface
 
-struct Web_services
+struct Web_services_interface : Subsystem
 {
-    Fill_zero _zero_;
+                                Web_services_interface      ( Scheduler* s, Type_code type )        : Subsystem( s, type ) {}
 
-                                Web_services                ( Spooler* sp )                         : _spooler(sp), _zero_(this+1) {}
+    virtual void                set_dom                     ( const xml::Element_ptr& )             = 0;
+    virtual xml::Element_ptr    dom_element                 ( const xml::Document_ptr&, const Show_what& ) const = 0;
 
-    xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& ) const;
-
-    void                        add_web_services            ( const xml::Element_ptr& web_services_element );
-    void                        add_web_service             ( Web_service* );
-    void                        init                        ();
-    void                        start                       ();
-
-    Web_service*                web_service_by_url_path_or_null( const string& url_path );
-    Web_service*                web_service_by_name         ( const string& name );
-    Web_service*                web_service_by_name_or_null ( const string& name );
-
-  private:
-    Spooler*                   _spooler;
-
-    typedef stdext::hash_map< string, ptr<Web_service> >    Name_web_service_map;
-    Name_web_service_map       _name_web_service_map;
-
-    typedef stdext::hash_map< string, ptr<Web_service> >    Url_web_service_map;
-    Url_web_service_map        _url_web_service_map;
+    virtual Web_service*        web_service_by_url_path_or_null( const string& )                    = 0;
+    virtual Web_service*        web_service_by_name         ( const string& )                       = 0;
+    virtual Web_service*        web_service_by_name_or_null ( const string& )                       = 0;
+    virtual Http_file_directory* http_file_directory_by_url_path_or_null( const string& )           = 0;
 };
+
+
+ptr<Web_services_interface>     new_web_services            ( Scheduler* );
 
 //---------------------------------------------------------------------------Web_service_operation 
 
@@ -145,7 +157,7 @@ struct Web_service_operation : idispatch_implementation< Web_service_operation, 
     STDMETHODIMP            get_Web_service                 ( spooler_com::Iweb_service** result )  { *result = _web_service.copy();  return S_OK; }
     STDMETHODIMP            get_Request                     ( spooler_com::Iweb_service_request** );
     STDMETHODIMP            get_Response                    ( spooler_com::Iweb_service_response** );
-    STDMETHODIMP                Assert_is_usable               ();
+    STDMETHODIMP                Assert_is_usable            ();
     STDMETHODIMP            get_Peer_ip                     ( BSTR* );
     STDMETHODIMP            get_Peer_hostname               ( BSTR* );
 

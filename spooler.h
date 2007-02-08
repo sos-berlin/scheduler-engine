@@ -501,11 +501,12 @@ struct Spooler : Object,
     string                     _xml_cmd;                    // Parameter -cmd, ein zuerst auszuführendes Kommando.
     string                     _pid_filename;
 
-    ptr<Job_subsystem_interface>   _job_subsystem;
-    ptr<Task_subsystem>            _task_subsystem;
-    ptr<Order_subsystem_interface> _order_subsystem;
-    Web_services                   _web_services;
-    ptr<Java_subsystem_interface>  _java_subsystem;
+    ptr<Job_subsystem_interface>     _job_subsystem;
+    ptr<Task_subsystem>              _task_subsystem;
+    ptr<Order_subsystem_interface>   _order_subsystem;
+    ptr<http::Http_server_interface> _http_server;
+    ptr<Web_services_interface>      _web_services;
+    ptr<Java_subsystem_interface>    _java_subsystem;
 
     Wait_handles               _wait_handles;
 
@@ -522,7 +523,6 @@ struct Spooler : Object,
     string                     _config_filename;            // -config=
     bool                       _configuration_is_job_script;        // Als Konfigurationsdatei ist eine Skript-Datei angegeben worden
     string                     _configuration_job_script_language; 
-    string                     _html_directory;
     bool                       _executing_command;          // true: spooler_history wartet nicht auf Datenbank (damit Scheduler nicht blockiert)
     int                        _process_count;
 

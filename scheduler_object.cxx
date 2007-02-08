@@ -19,6 +19,9 @@ string Scheduler_object::name_of_type_code( Scheduler_object::Type_code type_cod
         case type_order:                    return "Order";
         case type_job_chain:                return "Job_chain";
         case type_database:                 return "Database";
+        case type_http_server:              return "Http_server";
+        case type_http_file_directory:      return "Http_file_directory";
+        case type_web_services:             return "Web_services";
         case type_web_service:              return "Web_service";
         case type_web_service_operation:    return "Web_service_operation";
         case type_web_service_request:      return "Web_service_request";

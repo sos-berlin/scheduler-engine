@@ -55,9 +55,54 @@ const Com_method Web_service::_methods[] =
     {}
 };
 
-//-------------------------------------------------------------------Web_services::add_web_services
+//-------------------------------------------------------------------------------------Web_services
 
-void Web_services::add_web_services( const xml::Element_ptr& web_services_element )
+struct Web_services : Web_services_interface
+{
+                                Web_services                ( Spooler* sp )                         : Web_services_interface( sp, type_web_services ), _zero_(this+1) {}
+
+    void                        close                       ()                                      {}
+
+    xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& ) const;
+
+    void                        set_dom                     ( const xml::Element_ptr& web_services_element );
+    void                        add_web_service             ( Web_service* );
+
+    Web_service*                web_service_by_url_path_or_null( const string& url_path );
+    Web_service*                web_service_by_name         ( const string& name );
+    Web_service*                web_service_by_name_or_null ( const string& name );
+
+    Http_file_directory*        http_file_directory_by_url_path_or_null( const string& url_path );
+
+  protected:
+    bool                        subsystem_initialize        ();
+    bool                        subsystem_load              ();
+    bool                        subsystem_activate          ();
+
+  private:
+    Fill_zero                  _zero_;
+
+    typedef stdext::hash_map< string, ptr<Web_service> >    Name_web_service_map;
+    Name_web_service_map       _name_web_service_map;
+
+    typedef stdext::hash_map< string, ptr<Web_service> >    Url_web_service_map;
+    Url_web_service_map        _url_web_service_map;
+
+    typedef stdext::hash_map< string, ptr<Http_file_directory> >   Alias_map;
+    Alias_map                  _alias_map;
+};
+
+//---------------------------------------------------------------------------------new_web_services
+
+ptr<Web_services_interface> new_web_services( Scheduler* scheduler )
+{
+    ptr<Web_services> web_services = Z_NEW( Web_services( scheduler ) );
+    return +web_services;
+}
+
+//----------------------------------------------------------------------------Web_services::set_dom
+
+void Web_services::set_dom( const xml::Element_ptr& web_services_element )
 {
     DOM_FOR_EACH_ELEMENT( web_services_element, e )
     {
@@ -69,6 +114,21 @@ void Web_services::add_web_services( const xml::Element_ptr& web_services_elemen
             web_service->set_dom( e );
             add_web_service( web_service );
         }
+        else
+        if( e.nodeName_is( "http_directory" ) )
+        {
+            string url_path = e.getAttribute( "url_path" );
+
+            if( !string_begins_with( url_path, "/" ) )  z::throw_xc( "SCHEDULER-252", url_path );
+            if( !string_ends_with( url_path, "/" ) )  url_path += "/";
+
+            if( url_path.substr( 0, url_path.length() - 1 ).find( "/", 1 ) != string::npos )  z::throw_xc( __FUNCTION__, "http_files: Only single directory is allowed" );  // Wird vom Schema sichergestellt
+            
+            if( web_service_by_url_path_or_null        ( url_path ) )  z::throw_xc( "SCHEDULER-238", url_path );
+            if( http_file_directory_by_url_path_or_null( url_path ) )  z::throw_xc( "SCHEDULER-238", url_path );
+
+            _alias_map[ url_path ] = Z_NEW( Http_file_directory( _spooler, url_path, subst_env( e.getAttribute( "path" ) ) ) );
+        }
     }
 }
 
@@ -78,16 +138,17 @@ void Web_services::add_web_service( Web_service* web_service )
 {
     if( !string_begins_with( web_service->url_path(), "/" ) )  z::throw_xc( "SCHEDULER-252", web_service->url_path(), web_service->name() );   // siehe auch Web_service::add_web_service
 
-    if( web_service_by_name_or_null    ( web_service->name()     ) )  z::throw_xc( "SCHEDULER-236", web_service->name()     );
-    if( web_service_by_url_path_or_null( web_service->url_path() ) )  z::throw_xc( "SCHEDULER-238", web_service->url_path() );
+    if( web_service_by_name_or_null            ( web_service->name()     ) )  z::throw_xc( "SCHEDULER-236", web_service->name()     );
+    if( web_service_by_url_path_or_null        ( web_service->url_path() ) )  z::throw_xc( "SCHEDULER-238", web_service->url_path() );
+    if( http_file_directory_by_url_path_or_null( web_service->url_path() ) )  z::throw_xc( "SCHEDULER-238", web_service->url_path() );
 
     _name_web_service_map[ web_service->name() ] = web_service;
     _url_web_service_map[ web_service->url_path() ] = web_service;
 }
 
-//-------------------------------------------------------------------------------Web_services::init
+//---------------------------------------------------------------Web_services::subsystem_initialize
 
-void Web_services::init()
+bool Web_services::subsystem_initialize()
 {
     /*
     ptr<Web_service> default_web_service = Z_NEW( Web_service( _spooler ) );
@@ -103,22 +164,36 @@ void Web_services::init()
     command_processor.execute_2( job_xml      , Time::now() );
     command_processor.execute_2( job_chain_xml, Time::now() );
 
+    
+    _subsystem_state = subsys_initialized;
+    return true;
+}
 
+//---------------------------------------------------------------------Web_services::subsystem_load
+
+bool Web_services::subsystem_load()
+{
     Z_FOR_EACH( Url_web_service_map, _url_web_service_map, ws )
     {
         ws->second->check();
     }
+
+    _subsystem_state = subsys_loaded;
+    return true;
 }
 
-//------------------------------------------------------------------------------Web_services::start
+//-----------------------------------------------------------------Web_services::subsystem_activate
 
-void Web_services::start()
+bool Web_services::subsystem_activate()
 {
     Z_FOR_EACH( Url_web_service_map, _url_web_service_map, ws )
     {
         Web_service* web_service = ws->second;
-        web_service->start();
+        web_service->activate();
     }
+
+    _subsystem_state = subsys_active;
+    return true;
 }
 
 //----------------------------------------------------Web_services::web_service_by_url_path_or_null
@@ -137,6 +212,14 @@ Web_service* Web_services::web_service_by_name( const string& name )
     if( !result )  z::throw_xc( "SCHEDULER-235", name );
 
     return result;
+}
+
+//--------------------------------------------Web_services::http_file_directory_by_url_path_or_null
+
+Http_file_directory* Web_services::http_file_directory_by_url_path_or_null( const string& url_path )
+{
+    Alias_map::iterator ws = _alias_map.find( url_path );
+    return ws != _alias_map.end()? ws->second : NULL;
 }
 
 //--------------------------------------------------------Web_services::web_service_by_name_or_null
@@ -180,9 +263,9 @@ Web_service::~Web_service()
 {
 }
 
-//-------------------------------------------------------------------------------Web_service::start
+//----------------------------------------------------------------------------Web_service::activate
 
-void Web_service::start()
+void Web_service::activate()
 {
     _log->set_prefix( obj_name() );
     _log->set_title( obj_name() );
@@ -1008,6 +1091,27 @@ string Web_service_response::obj_name() const
 { 
     return S() << Scheduler_object::obj_name() << " " << _web_service_operation->_web_service->obj_name() << ":" << _web_service_operation->_id; 
 }
+
+
+//-----------------------------------------------------Http_file_directory::file_path_from_url_path
+
+File_path Http_file_directory::file_path_from_url_path( const string& url_path )
+{
+    File_path result;
+
+    if( !string_begins_with( url_path, _url_path ) )  z::throw_xc( __FUNCTION__, url_path, _directory );
+
+    result = _directory + url_path.substr( _url_path.length() );
+    return result;
+}
+
+//-------------------------------------------------------------Http_file_directory::execute_request
+
+//void Http_file_directory::execute_request( const string& url )
+//{
+//    Command_processor command_processor ( _spooler, _connection->_security_level, this );
+//    command_processor.execute_http( this );
+//}
 
 //-------------------------------------------------------------------------------------------------
 

@@ -41,6 +41,9 @@ if( forwarding_job_chain.order_count() == 0 )
 
 
         <web_services>
+            <http_directory url_path="/test/" path="s:/tmp/test"/>
+            <http_directory url_path="/leer/" path="/LEERLEER/"/>
+
             <web_service 
                 name                     = "mein_webdienst" 
                 url_path                 = "/webdienst"

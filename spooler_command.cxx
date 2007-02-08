@@ -1172,7 +1172,7 @@ string xml_as_string( const xml::Document_ptr& document, bool indent )
 //-------------------------------------------------------------------Command_processor::execute_http
 // Könnte als Unterklasse von Web_service_operation implementiert werden
 
-void Command_processor::execute_http( http::Operation* http_operation )
+void Command_processor::execute_http( http::Operation* http_operation, Http_file_directory* http_file_directory )
 {
     http::Request*  http_request            = http_operation->request();
     http::Response* http_response           = http_operation->response();
@@ -1335,9 +1335,6 @@ void Command_processor::execute_http( http::Operation* http_operation )
             }
             else
             {
-                if( _spooler->_html_directory.empty() )  z::throw_xc( "SCHEDULER-212" );
-                if( !string_begins_with( path, "/" ) )  path = "/" + path;
-
                 if( filename_of_path( path ).find( '.' ) == string::npos )      // Kein Punkt: Es muss ein Verzeichnis sein!
                 {
                     if( !string_ends_with( path, "/" )  &&  isalnum( (uint)*path.rbegin() ) )  // '?' am Ende führt zum erneuten GET mit demselben Pfad
@@ -1356,7 +1353,26 @@ void Command_processor::execute_http( http::Operation* http_operation )
                     path += default_filename;
                 }
 
-                string extension = extension_of_path( path );
+
+                string filename;
+
+                if( http_file_directory )
+                {
+                    filename = http_file_directory->file_path_from_url_path( path );
+                }
+                else
+                {
+                    if( _spooler->_http_server->directory().empty() )  z::throw_xc( "SCHEDULER-212" );
+                    filename = File_path( _spooler->_http_server->directory(), path );
+                }
+/*
+                struct stat st;
+                memset( &st, 0, sizeof st );
+                int err = stat( filename.c_str(), &st );
+                if( !err  &&  stat.st_mode & S_IFDIR )
+*/
+
+                string extension = extension_of_path( filename );
              
                 if( extension == "html"  
                  || extension == "htm"  )  response_content_type = "text/html";
@@ -1377,30 +1393,12 @@ void Command_processor::execute_http( http::Operation* http_operation )
               //else
               //if( extension == "jar"  )  response_content_type = "application/x-java-archive";
 
-                string filename = path;
-
-                if( string_begins_with( filename, "/doc/" )
-                 && !file_exists( _spooler->_html_directory + "/doc" ) )
-               //&&  file_exists( _spooler->_html_directory + "/../doc" ) )  überflüssig
-                {
-                    filename = "/.." + filename;
-                }
-
-                string absolute_filename = _spooler->_html_directory + filename;
-/*
-                struct stat st;
-                memset( &st, 0, sizeof st );
-                int err = stat( filename.c_str(), &st );
-                if( !err  &&  stat.st_mode & S_IFDIR )
-*/
-
                 try
                 {
-                    File file ( absolute_filename, "r" );
+                    File file ( filename, "r" );
                     //struct stat s;                                                   
                     //if( fstat( file, &s ) == 0 )  http_response->set_header( "Last-Modified", http::date_string( s.st_mtime ) );
                     response_body = string_from_fileno( file );
-                    //response_body = zschimmer::string_from_file( absolute_filename );
                 }
                 catch( exception& )
                 {                                                        

@@ -2061,7 +2061,7 @@ void Task::set_web_service( const string& name )
     if( _is_in_database )  z::throw_xc( "SCHEDULER-243", "web_service" );
 
     set_web_service( name == ""? NULL 
-                               : _spooler->_web_services.web_service_by_name( name ) );
+                               : _spooler->_web_services->web_service_by_name( name ) );
 }
 
 //----------------------------------------------------------------------------Task::set_web_service

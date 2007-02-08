@@ -627,7 +627,6 @@ Spooler::Spooler()
     _mail_defaults(NULL),
     _mail_on_delay_after_error  ( fl_first_and_last_only ),
     _termination_gmtimeout_at(time_max),
-    _web_services(this),
     _waitable_timer( "waitable_timer" ),
     _validate_xml(true),
     _environment( variable_set_from_environment() ),
@@ -642,6 +641,8 @@ Spooler::Spooler()
     _order_subsystem         = new_order_subsystem( this );
     _java_subsystem          = new_java_subsystem( this );
     _db                      = Z_NEW( Database( this ) );
+    _http_server             = http::new_http_server( this );
+    _web_services            = new_web_services( this );
 
     _variable_set_map[ variable_set_name_for_substitution ] = _environment;
 
@@ -876,7 +877,7 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
     if( _cluster )  state_element.appendChild( _cluster->dom_element( dom, show ) );
     state_element.appendChild( _communication.dom_element( dom, show ) );
     state_element.append_new_text_element( "operations", "\n" + _connection_manager->string_from_operations( "\n" ) + "\n" );
-    state_element.appendChild( _web_services.dom_element( dom, show ) );
+    state_element.appendChild( _web_services->dom_element( dom, show ) );
 
     return state_element;
 }
@@ -1248,7 +1249,6 @@ void Spooler::load_arg()
 
     set_id                      (            read_profile_string    ( _factory_ini, "spooler", "id"                 ) );
     _config_filename            =            read_profile_string    ( _factory_ini, "spooler", "config"             );
-    _html_directory             = subst_env( read_profile_string    ( _factory_ini, "spooler", "html_dir"           ) );
     _log_directory              =            read_profile_string    ( _factory_ini, "spooler", "log-dir"            );  // veraltet
     _log_directory              = subst_env( read_profile_string    ( _factory_ini, "spooler", "log_dir"            , _log_directory ) );  _log_directory_as_option_set = !_log_directory.empty();
     _include_path               =            read_profile_string    ( _factory_ini, "spooler", "include-path"       );  // veraltet
@@ -1471,9 +1471,6 @@ void Spooler::load_arg()
 
         _manual = !_job_name.empty();
         if( _manual  &&  !_log_directory_as_option_set )  _log_directory = "*stderr";
-
-
-        if( _html_directory == "" )  _html_directory = directory_of_path( _config_filename ) + "/html";
     }
     catch( exception& )
     {
@@ -1528,7 +1525,8 @@ void Spooler::load()
 
 
     _order_subsystem->switch_subsystem_state( subsys_initialized );
-    _web_services.init();    // Ein Job und eine Jobkette einrichten, s. spooler_web_service.cxx
+    _http_server    ->switch_subsystem_state( subsys_initialized );
+    _web_services   ->switch_subsystem_state( subsys_initialized );        // Ein Job und eine Jobkette einrichten, s. spooler_web_service.cxx
 
 
     Command_processor cp ( this, Security::seclev_all );
@@ -1688,9 +1686,10 @@ void Spooler::start()
     _daylight_saving_time_transition_detector = time::new_daylight_saving_time_transition_detector( this );
     _daylight_saving_time_transition_detector->set_async_manager( _connection_manager );
 
-    _web_services.start();                                              // Nicht in Spooler::load(), denn es öffnet schon -log-dir-Dateien (das ist nicht gut für -send-cmd=)
-    _job_subsystem->switch_subsystem_state( subsys_initialized );       // Setzt _has_hava, _has_java_source
+    _job_subsystem   ->switch_subsystem_state( subsys_initialized );    // Setzt _has_hava, _has_java_source
     _scheduler_script->switch_subsystem_state( subsys_initialized );    // Setzt _has_hava, _has_java_source
+    
+    _web_services->switch_subsystem_state( subsys_loaded );
 
 
     try
@@ -1790,6 +1789,7 @@ void Spooler::activate()
 
     _job_subsystem  ->switch_subsystem_state( subsys_active );
     _order_subsystem->switch_subsystem_state( subsys_active );
+    _web_services   ->switch_subsystem_state( subsys_active );          // Nicht in Spooler::load(), denn es öffnet schon -log-dir-Dateien (das ist nicht gut für -send-cmd=)
 
     set_state( s_running );
 }

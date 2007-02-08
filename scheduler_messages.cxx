@@ -109,7 +109,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-235", "Unknown web service: \"$1\"" },
     { "SCHEDULER-236", "Web service \"$1\" has already been declared" },
     { "SCHEDULER-237", "XSLT stylesheet \"$1\" does not deliver a result" },
-    { "SCHEDULER-238", "Web service for url_path=\"$1\" has already been declared" },
+    { "SCHEDULER-238", "Web service or alias for url_path=\"$1\" has already been declared" },
     { "SCHEDULER-240", "Order has not been assigned to a web service" },
     { "SCHEDULER-241", "Task has not been assigned to a web service" },
     { "SCHEDULER-242", "forward_xslt_stylesheet $1 does not deliver <service_request>" },
