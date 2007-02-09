@@ -23,7 +23,7 @@
         <xml_attribute name="url_path" type="url_path" subst_env="yes" title="URL-Pfad, unter dem der Web-Dienst ansprechbar ist">
             <description>
                 <p>
-                    Er sollte mit einem Schrägstrich beginnen.
+                    Er soll mit einem Schrägstrich beginnen.
                 </p>
             </description>
         </xml_attribute>

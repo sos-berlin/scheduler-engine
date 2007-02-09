@@ -129,7 +129,8 @@
         &lt;/script>
 
         &lt;<a class="silent" href="xml/web_services.xml">web_services</a>>
-            &lt;<a class="silent" href="xml/web_service.xml">web_service</a> name="…" …>
+            &lt;<a class="silent" href="xml/http_directory.xml">http_directory</a> url_path="…" path="…"/>
+            &lt;<a class="silent" href="xml/web_service.xml">web_service</a> url_path="…" …>
                  &lt;<a class="silent" href="xml/params.xml">params</a>>
                      &lt;<a class="silent" href="xml/param.xml">param</a> name="…" value="…"/>
                      …

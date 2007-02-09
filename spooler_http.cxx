@@ -735,9 +735,11 @@ void Operation::begin()
             size_t slash = path.find( "/", 1 );
             if( slash != string::npos )
             {
-                slash = path.length();
                 string directory = "/" + path.substr( 1, slash );
                 http_file_directory = _spooler->_web_services->http_file_directory_by_url_path_or_null( directory );
+
+                // Statt execute_http() sollte direkt der Zweig von execute_http() aufrufen werden, der Dateien liefert (also nicht "show_log?" etc.)
+                // Auch könnte execute_http() von Command_processor nach Web_service, Http_file_directory oder Http_server verschoben werden.
             }
 
             Command_processor command_processor ( _spooler, _connection->_security_level, this );

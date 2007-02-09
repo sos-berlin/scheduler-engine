@@ -240,7 +240,7 @@
                           class   = "small"
                           style   = "cursor: pointer; text-decoration: underline;">
                     </span-->
-                    <a href="/doc/index.xml" target="scheduler_documentation" onclick="open_url( '/doc/index.xml', 'scheduler_documentation' )" class="small">Doku</a>&#160;
+                    <a href="/doc/" target="scheduler_documentation" onclick="open_url( '/doc/', 'scheduler_documentation' )" class="small">Doku</a>&#160;
                     <!--a href="javascript:void(0)" onclick="open_url( '/doc/index.xml', 'scheduler_documentation' )" target="scheduler_documentation" class="small">Doku</a>&#160;-->
 
                     <xsl:call-template name="command_menu">

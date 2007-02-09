@@ -60,6 +60,7 @@
                 <scheduler_element name="file_order_sink"/><br/>
                 <scheduler_element name="holiday"/><br/>
                 <scheduler_element name="holidays"/><br/>
+                <scheduler_element name="http_directory"/><br/>
                 <scheduler_element name="include"/><br/>
                 <scheduler_element name="job"/><br/>
                 <scheduler_element name="job_chain"/><br/>

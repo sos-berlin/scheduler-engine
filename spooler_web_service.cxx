@@ -127,7 +127,8 @@ void Web_services::set_dom( const xml::Element_ptr& web_services_element )
             if( web_service_by_url_path_or_null        ( url_path ) )  z::throw_xc( "SCHEDULER-238", url_path );
             if( http_file_directory_by_url_path_or_null( url_path ) )  z::throw_xc( "SCHEDULER-238", url_path );
 
-            _alias_map[ url_path ] = Z_NEW( Http_file_directory( _spooler, url_path, subst_env( e.getAttribute( "path" ) ) ) );
+            File_path file_directory ( subst_env( e.getAttribute( "path" ) ), "" );
+            _alias_map[ url_path ] = Z_NEW( Http_file_directory( _spooler, url_path, file_directory ) );
         }
     }
 }

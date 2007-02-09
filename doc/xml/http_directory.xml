@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: web_services.xml 4061 2006-01-30 11:39:23Z jz $-->
+
+<xml_element name     = "http_directory"
+             title    = "HTTP-Dateiverzeichnis"
+             category = "Konfiguration"
+             base_dir = "../"
+             parent_page = "../konfiguration.xml"
+             author   = "$Author: jz $"
+             date     = "$Date: 2006-01-30 12:39:23 +0100 (Mo, 30 Jan 2006) $">
+
+    <xml_parent_elements>
+        <xml_parent_element name="web_services"/>
+    </xml_parent_elements>
+
+    <xml_attributes>
+        <xml_attribute name="url_path" type="url_path" title="Erstes Verzeichnis im URL-Pfad">
+            <description>
+                <p>
+                    Gibt das erste Verzeichnis im URL-Pfad an, 
+                    auf das ein Verzeichnis des Dateisystems abgebildet werden soll.
+                </p>
+                <!-- abbildden -> engl. to map -->
+                <p>
+                    Das Verzeichnis wird mit Schrägstrich am Beginn und am Ende angegeben.
+                </p>
+            </description>
+            <example>
+                <pre>url_path="/doc/"</pre>
+            </example>
+        </xml_attribute>
+
+        <xml_attribute name="path" type="path" subst_env="yes" title="Pfad des Dateisystems">
+            <description>
+                <p>
+                    Der Pfad im Dateisystem, der auf das <code>url_path=""</code> angegebene Verzeichnis abgebildet werden soll.
+                </p>
+            </description>
+            <example>
+                <pre>path="c:\pub\html\doc\"</pre>
+            </example>
+        </xml_attribute>
+    </xml_attributes>
+
+    <behavior_with_xml_element element="base" complete="yes"/>
+
+
+    <description>
+        <p>
+            Bestimmt ein Verzeichnis des Dateisystems,
+            das auf ein Verzeichnis im URL-Pfad abgebildet werden soll.
+        </p>
+        <scheduler_example>
+            <pre>&lt;http_directory url_path="/doc/" path="c:\pub\html\doc\" />
+&lt;http_directory url_path="/jar/" path="$SCHEDULER_HOME/jar/" /></pre>
+        </scheduler_example>
+        <p>
+            Im Beispiel liefert der URL <code style="margin-left: 1ex">http://<i>host</i>:<i>port</i>/doc/xml/http_directory.html</code>
+            <br/>
+            die Datei <code style="margin-left: 1ex">c:\pub\html\doc\xml/http_directory.html</code>.
+        </p>
+    </description>
+</xml_element>

@@ -16,6 +16,7 @@
     </xml_parent_elements>
 
     <xml_child_elements>
+        <xml_child_element name="http_directory" multiple="yes"/>
         <xml_child_element name="web_service" multiple="yes"/>
     </xml_child_elements>
 
