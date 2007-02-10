@@ -287,9 +287,9 @@ int Scheduler_event::send_mail( const Mail_defaults& mail_defaults )
             if( mail_dom  &&  mail_dom.documentElement()  &&  mail_dom.documentElement().bool_getAttribute( "attach_xml" ) )
             {
                 if( event_dom )
-                mail->add_attachment( event_dom.xml(true), "event.xml", "text/xml", "quoted-printable" );
+                mail->add_attachment( event_dom.xml(), "event.xml", "text/xml", "quoted-printable" );
 
-                mail->add_attachment( mail_dom.xml(true), "mail.xml", "text/xml", "quoted-printable" );
+                mail->add_attachment( mail_dom.xml(), "mail.xml", "text/xml", "quoted-printable" );
             }
 
 

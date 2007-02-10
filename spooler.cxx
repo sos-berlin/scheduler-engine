@@ -1814,7 +1814,7 @@ void Spooler::execute_config_commands()
             {
                 Message_string m ( "SCHEDULER-966" );
                 m.set_max_insertion_length( INT_MAX );
-                m.insert( 1, result.xml( true ) );
+                m.insert( 1, result.xml( scheduler_character_encoding, true ) );
                 _log->info( m );
             }
         }

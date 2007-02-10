@@ -351,6 +351,7 @@ struct Job_chain_node : Com_job_chain_node
 
     xml::Element_ptr            dom_element             ( const xml::Document_ptr&, const Show_what&, Job_chain* );
     int                         order_count             ( Read_transaction*, Job_chain* = NULL );
+    bool                        is_end_state            () const                                    { return _job == NULL; }
     bool                        is_file_order_sink      ()                                          { return _file_order_sink_remove || _file_order_sink_move_to != ""; }
 
 

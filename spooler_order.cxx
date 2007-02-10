@@ -485,6 +485,7 @@ bool Order_subsystem::subsystem_activate()
     {
         _database_order_detector = Z_NEW( Database_order_detector( _spooler ) );
         _database_order_detector->set_async_manager( _spooler->_connection_manager );
+        _database_order_detector->async_wake();
     }
 
     return true;
@@ -3843,7 +3844,15 @@ bool Order::finished()
 
 bool Order::end_state_reached()
 {
-    return _end_state_reached  ||  !_job_chain_node  ||  !_job_chain_node->_job;
+    bool result = false;
+
+    if( _end_state_reached )  result = true;
+    else
+    if( job_chain()  &&  job_chain()->node_from_state( _state )->is_end_state() )  result = true;
+    
+    return result;
+
+    //return _end_state_reached  ||  !_job_chain_node  ||  !_job_chain_node->_job;
 }
 
 //-------------------------------------------------------------------------------Order::check_state
@@ -3871,20 +3880,19 @@ void Order::set_state( const State& state )
     //}
     check_state( state );
 
-    if( state != _state )
-    {
-        if( _job_chain )
-        {
-            move_to_node( _job_chain->node_from_state( state ) );
+    bool is_same_state = state == _state;
 
-            if( !_job_chain_node  ||  !_job_chain_node->_job )
-            {
-                handle_end_state();
-            }
+    if( _job_chain )
+    {
+        move_to_node( _job_chain->node_from_state( state ) );
+
+        if( !is_same_state  &&  ( !_job_chain_node  ||  !_job_chain_node->_job ) )
+        {
+            handle_end_state();
         }
-        else  
-            set_state2( state );
     }
+    else  
+        set_state2( state );
 
     clear_setback();
 }
@@ -3948,22 +3956,19 @@ void Order::set_job_chain_node( Job_chain_node* node, bool is_error_state )
 
 void Order::move_to_node( Job_chain_node* node )
 {
+    if( !_job_chain )  z::throw_xc( "SCHEDULER-157", obj_name() );
+
+    bool is_same_node = node == _job_chain_node;
+
     if( _is_on_blacklist )  remove_from_blacklist();
+    if( _task )  _moved = true;
 
-    //THREAD_LOCK( _lock )
-    {
-        if( !_job_chain )  z::throw_xc( "SCHEDULER-157", obj_name() );
+    if( !is_same_node  &&  _job_chain_node  &&  _in_job_queue )  _job_chain_node->_job->order_queue()->remove_order( this ), _job_chain_node = NULL;
 
-        if( _task )  _moved = true;
-        //§1495  _task = NULL;
+    clear_setback();
+    set_job_chain_node( node );
 
-        if( _job_chain_node && _in_job_queue )  _job_chain_node->_job->order_queue()->remove_order( this ), _job_chain_node = NULL;
-
-        clear_setback();
-        set_job_chain_node( node );
-
-        if( !_is_distributed && node && node->_job )  node->_job->order_queue()->add_order( this );
-    }
+    if( !is_same_node  &&  !_is_distributed && node && node->_job )  node->_job->order_queue()->add_order( this );
 }
 
 //------------------------------------------------------------------------------Order::set_priority
@@ -4318,6 +4323,11 @@ void Order::postprocessing( bool success )
                 _order_queue = NULL;
             }
         }
+        else
+        if( _is_distributed  &&  _job_chain_node  &&  _job_chain_node->_job )
+        {
+            _job_chain_node->_job->order_queue()->remove_order( this );
+        }
 
         postprocessing2( last_job );
     }
@@ -4457,19 +4467,22 @@ void Order::postprocessing2( Job* last_job )
 
 void Order::set_suspended( bool suspended )
 {
-    if( suspended  &&  !_job_chain )  z::throw_xc( "SCHEDULER-157", obj_name(), __FUNCTION__ );
+    //if( suspended  &&  !_job_chain )  z::throw_xc( "SCHEDULER-157", obj_name(), __FUNCTION__ );
 
     if( _suspended != suspended )
     {
         _suspended = suspended;
         _order_xml_modified = true;
 
-        if( _is_on_blacklist  &&  !suspended )  remove_from_job_chain();
-        else
-        if( _in_job_queue )  order_queue()->reinsert_order( this );
+        if( _job_chain )
+        {
+            if( _is_on_blacklist  &&  !suspended )  remove_from_job_chain();
+            else
+            if( _in_job_queue )  order_queue()->reinsert_order( this );
 
-        if( _suspended )  _log->info( message_string( "SCHEDULER-991" ) );
-                    else  _log->info( message_string( "SCHEDULER-992", _setback ) );
+            if( _suspended )  _log->info( message_string( "SCHEDULER-991" ) );
+                        else  _log->info( message_string( "SCHEDULER-992", _setback ) );
+        }
 
         handle_changed_processable_state();
     }

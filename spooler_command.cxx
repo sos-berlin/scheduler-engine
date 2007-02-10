@@ -512,7 +512,7 @@ xml::Element_ptr Command_processor::execute_remote_client_start_task( const xml:
     {
         if( element.nodeName_is( "task_process" ) )
         {
-            process->set_task_process_xml( element.ascii_xml() );
+            process->set_task_process_xml( element.xml() );
         }
     }
     
@@ -1004,7 +1004,7 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     {
         Message_string m ( "SCHEDULER-965" );
         //m.set_max_insertion_length( INT_MAX );
-        m.insert( 1, element.xml() );
+        m.insert( 1, element.xml( scheduler_character_encoding ) );
         _log->info( m );
     }
 
@@ -1160,7 +1160,7 @@ string xml_as_string( const xml::Document_ptr& document, bool indent )
 
     try 
     {
-        result = document.xml( indent );
+        result = document.xml( "ASCII", indent );
         if( indent )  result = replace_regex( result, "\n", "\r\n" );      // Für Windows-telnet
     }
     catch( const exception&  ) { return "<?xml version=\"1.0\"?><ERROR/>"; }
@@ -1571,7 +1571,7 @@ void Command_processor::execute_2( const xml::Document_ptr& command_doc, const T
 {
     try 
     {
-        if( !_dont_log_command )  Z_LOG2( "scheduler", "Execute " << replace_regex( command_doc.xml(), "\\?\\>\n", "?>", 1 ) );  // XML endet mit \n
+        if( !_dont_log_command )  Z_LOG2( "scheduler", "Execute " << replace_regex( command_doc.xml( scheduler_character_encoding ), "\\?\\>\n", "?>", 1 ) );  // XML endet mit \n
 
         if( _spooler->_validate_xml  &&  _validate )  
         {
@@ -1584,7 +1584,7 @@ void Command_processor::execute_2( const xml::Document_ptr& command_doc, const T
     catch( const _com_error& com_error ) { throw_com_error( com_error, "DOM/XML" ); }
 
     // Eigentlich nur für einige möglicherweise langlaufende <show_xxx>-Kommandos nötig, z.B. <show_state>, <show_history> (mit Datenbank)
-    if( !_spooler->check_is_active() )  _spooler->cmd_terminate_after_error( __FUNCTION__, command_doc.xml() );
+    if( !_spooler->check_is_active() )  _spooler->cmd_terminate_after_error( __FUNCTION__, command_doc.xml( scheduler_character_encoding ) );
 }
 
 //---------------------------------------------------------------------Command_processor::execute_2
