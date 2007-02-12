@@ -11,7 +11,14 @@
     <scheduler_keyword keyword="Change log"/>
 
     
-    <change date="2007-02-08" version="2.0.165" subversion_revision="4846">
+    <change date="2007-02-12" version="2.0.165" subversion_revision="4846">
+        <revision type="modification" title="Order.state">
+            <description>
+                <p>
+                </p>
+            </description>
+        </revision>
+        
         <revision type="new" title="HTTP-Server mit Alias-Verzeichnissen">
             <description>
                 <ul>
