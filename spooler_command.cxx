@@ -724,9 +724,11 @@ xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& 
             if( payload != "" )  order->set_payload( payload );
         }
         */
+
+        result = order->dom_element( _answer, show, &log );
     }
 
-    return order->dom_element( _answer, show, &log );
+    if( result )  return result;
 
 
 NO_ORDER:
