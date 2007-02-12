@@ -142,7 +142,7 @@ function spooler_process()
         <commands>
             <add_order job_chain="order_run_time.scheduler" id="1" replace="yes">
                 <run_time>
-                    <period single_start="02:30"/>
+                    <period repeat="30"/>
                 </run_time>                
             </add_order>
         </commands>

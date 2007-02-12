@@ -246,7 +246,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-379", "$1 is occupied by Scheduler member '$2'" },
     { "SCHEDULER-380", "job_chain orders_recoverable=\"no\" cannot be combined with distributed=\"yes\", in $1" },
     { "SCHEDULER-381", "Scheduler is not yet active and can not execute the operation" },
-    { "SCHEDULER-383", "This is a non-exclusive Scheduler processing distributed orders, and therefore cannot process non-distributed orders" },
+    { "SCHEDULER-383", "This is a non-exclusive Scheduler processing distributed orders, and therefore cannot process non-distributed orders. Use <job_chain distributed=\"yes\"> or option -exclusive" },
     { "SCHEDULER-384", "$1 is distributed and therefore does not support operation '$2'" },
     { "SCHEDULER-385", "Deletion of order in database has failed" },
     { "SCHEDULER-386", "Last heart beat was $1, $2s ago. Something is delaying Scheduler execution, Scheduler is aborted immediately" },

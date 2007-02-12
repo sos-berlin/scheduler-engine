@@ -1780,10 +1780,12 @@ void Order_queue::close()
 {
     _job = NULL;    // Falls Job gelöscht wird
 
-    for( Queue::iterator it = _queue.begin(); it != _queue.end(); it = _queue.erase( it ) )
+    for( Queue::iterator it = _queue.begin(); it != _queue.end();  )
     {
         Order* order = *it;
         _log->info( message_string( "SCHEDULER-937", order->obj_name() ) );
+        order->_in_job_queue = false;
+        it = _queue.erase( it );
     }
 
     //update_priorities();
@@ -2800,18 +2802,12 @@ void Order::db_insert()
     if( !ok )  z::throw_xc( "SCHEDULER-186", obj_name(), _job_chain_name, "in database" );
 }
 
-//-----------------------------------------------------------------------------Order::db_try_insert
+//-------------------------f----------------------------------------------------Order::db_try_insert
 
 bool Order::db_try_insert()
 {
     bool   insert_ok     = false;
-    string payload_string;
-
-    {
-        Com_variable_set* v = params_or_null();
-        if( !v || !v->is_empty() )  payload_string = payload().as_string();
-    }
-
+    string payload_string = string_payload();
 
     if( db()->opened() )
     for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
@@ -3282,7 +3278,7 @@ void Order::open_log()
 
 //-------------------------------------------------------------------------------------Order::close
 
-void Order::close()
+void Order::close( bool do_remove_from_job_chain )
 {
 /*
     if( !_log->filename().empty() )
@@ -3315,7 +3311,9 @@ void Order::close()
         db_release_occupation();
     }
 
-    remove_from_job_chain();    // Wegen dieses Aufrufs darf <modify_order> nicht close() rufen. Das sollte nicht so sein.
+    if( do_remove_from_job_chain )  remove_from_job_chain();
+    else
+    if( _job_chain )  _job_chain->remove_order( this );
 
     if( _run_time )  _run_time->close(), _run_time = NULL;
 
@@ -3687,6 +3685,9 @@ string Order::string_payload() const
 {
     try
     {
+        if( Com_variable_set* v = params_or_null() )  
+            if( v->is_empty() )  return "";
+
         return !_payload.is_null_or_empty_string()  &&  !_payload.is_missing()? _payload.as_string() 
                                                                               : "";
     }
@@ -3698,14 +3699,9 @@ string Order::string_payload() const
 
 //----------------------------------------------------------------------------Order::params_or_null
 
-ptr<Com_variable_set> Order::params_or_null()
+ptr<Com_variable_set> Order::params_or_null() const
 {
     ptr<spooler_com::Ivariable_set> result;
-
-    if( _payload.is_empty() )
-    {
-        _payload = new Com_variable_set();
-    }
 
     if( _payload.vt != VT_DISPATCH  &&  _payload.vt != VT_UNKNOWN )  return NULL;
     
@@ -3722,6 +3718,11 @@ ptr<Com_variable_set> Order::params_or_null()
 
 ptr<Com_variable_set> Order::params() 
 {
+    if( _payload.is_null_or_empty_string() )   //is_empty() )
+    {
+        _payload = new Com_variable_set();
+    }
+
     ptr<Com_variable_set> result = params_or_null();
     if( !result )  z::throw_xc( "SCHEDULER-338" );
     return result;
@@ -3733,7 +3734,7 @@ void Order::set_param( const string& name, const Variant& value )
 {
     HRESULT hr;
 
-    if( _payload.is_empty() )  _payload = new Com_variable_set();
+    //if( _payload.is_empty() )  _payload = new Com_variable_set();
 
     Variant name_vt = variant_from_string( name );
     hr = params()->put_Value( &name_vt, const_cast<Variant*>( &value ) );
@@ -4454,12 +4455,13 @@ void Order::postprocessing2( Job* last_job )
     if( _is_distributed  &&  _job_chain )
     {
         _job_chain->remove_order( this );
+        close( false );
     }
 
 
     if( finished() )
     {
-        if( !_is_on_blacklist )  close();
+        if( !_is_on_blacklist )  close(); 
     }
 }
 

@@ -2397,7 +2397,7 @@
 
         <message code="SCHEDULER-383">
             <text xml:lang="en">
-                <title>This is a non-exclusive Scheduler processing distributed orders, and therefore cannot process non-distributed orders</title>
+                <title>This is a non-exclusive Scheduler processing distributed orders, and therefore cannot process non-distributed orders. Use &lt;job_chain distributed="yes"> or option -exclusive</title>
             </text>
         </message>
         

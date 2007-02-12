@@ -432,7 +432,7 @@ void Heart_beat_watchdog_thread::kill()
 int Heart_beat_watchdog_thread::thread_main()
 {
 #   ifdef Z_WINDOWS
-        SetThreadPriority( thread_handle(), THREAD_PRIORITY_HIGHEST );
+        SetThreadPriority( thread_handle(), THREAD_PRIORITY_ABOVE_NORMAL );
         Z_LOG2( "scheduler", __FUNCTION__ << "  IsDebuggerPresent() ==> " << IsDebuggerPresent() << "\n" );
 #   else
         // Wie erhöht man die Priorität unter Unix?
@@ -448,16 +448,18 @@ int Heart_beat_watchdog_thread::thread_main()
         
         if( _cluster->_is_active  &&  _cluster->_db_last_heart_beat == heart_beat_time )  
         {
-            //Z_WINDOWS_ONLY( Z_DEBUG_ONLY( DebugBreak() ) );
-            Z_WINDOWS_ONLY( if( !IsDebuggerPresent() ) )
-            {
-                _cluster->_spooler->kill_all_processes();
-                _log->error( message_string( "SCHEDULER-386", my_string_from_time_t( heart_beat_time ), ::time(NULL) - heart_beat_time ) );
-                _cluster->_spooler->abort_immediately( true );
-            }
-        }
+#           ifdef Z_WINDOWS                                                 
+                if( IsDebuggerPresent() )
+                {
+                    Z_LOG( obj_name() << "  IsDebuggerPresen() ==> 1, exiting\n" );
+                    return 1;
+                }
+#           endif
 
-        //Z_DEBUG_ONLY( _log->info( __FUNCTION__ ) );
+            _cluster->_spooler->kill_all_processes();
+            _log->error( message_string( "SCHEDULER-386", my_string_from_time_t( heart_beat_time ), ::time(NULL) - heart_beat_time ) );
+            _cluster->_spooler->abort_immediately( true );
+        }
     }
 
     return 0;

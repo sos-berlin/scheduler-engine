@@ -50,7 +50,8 @@ struct Order : Com_order,
     virtual IDispatch*          idispatch               ()                                          { return this; }
 
 
-    void                        close                   ();
+    void                        close                   ( bool remove_from_job_chain );
+    void                        close                   ()                                          { close( true ); }
 
     void                        init                    ();
     void                        activate                ();
@@ -127,7 +128,7 @@ struct Order : Com_order,
     void                    set_payload                 ( const VARIANT& );
     const Payload&              payload                 ()                                          { return _payload; }
     string                      string_payload          () const;
-    ptr<Com_variable_set>       params_or_null          ();
+    ptr<Com_variable_set>       params_or_null          () const;
     ptr<Com_variable_set>       params                  ();
     void                    set_param                   ( const string& name, const Variant& value );
     Variant                     param                   ( const string& name );
