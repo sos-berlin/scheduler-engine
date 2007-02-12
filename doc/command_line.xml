@@ -319,6 +319,10 @@
                     die sich die Ausführung der Aufträge teilen.
                 </p>
                 <p>
+                    Mit <scheduler_element name="job_chain" attribute="distributed" value="yes"/>
+                    lassen sie eine Jobkette für den verteilten Betrieb zu.
+                </p>
+                <p>
                     Der Scheduler führt nur auftragsgesteuerte Jobs aus (<scheduler_element name="job" attribute="order" value="yes"/>),
                     es sei denn, der exklusive Betrieb mit <scheduler_option name="exclusive"/> ist eingeschaltet.
                     Nur der Scheduler, der der die Exklusivität hat, führt auch nicht auftragsgesteuerte Jobs aus.
