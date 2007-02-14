@@ -15,6 +15,10 @@
         <revision type="modification" title="Order.state">
             <description>
                 <p>
+                    Wenn <scheduler_method class="Order" property="state"/> derselbe Wert zugewiesen wird,
+                    verhindert das wie jeder andere Wert die automatische Weiterschaltung in den Folgezustand 
+                    nach <scheduler_method class="Job_impl" method="spooler_process"/>.
+                    Stattdessen durchläuft der Auftrag denselben Job noch einmal.
                 </p>
             </description>
         </revision>

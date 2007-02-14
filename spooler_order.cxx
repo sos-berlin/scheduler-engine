@@ -4348,6 +4348,12 @@ void Order::handle_end_state()
     {
         _log->info( message_string( "SCHEDULER-944", _initial_state, next_start ) );        // "Kein weiterer Job in der Jobkette, der Auftrag wird mit state=<p1/> wiederholt um <p2/>"
 
+        try
+        {
+            set_state( _initial_state, next_start );
+        }
+        catch( exception& x ) { _log->error( x.what() ); }
+
         _end_time = Time::now();
         _log->close_file();
         if( _job_chain  &&  _is_in_database )  _spooler->_db->write_order_history( this );  // Historie schreiben, aber Auftrag beibehalten
@@ -4358,15 +4364,6 @@ void Order::handle_end_state()
         //_is_virgin_in_this_run_time = true;
 
         open_log();
-
-        try
-        {
-            set_state( _initial_state, next_start );
-        }
-        catch( exception& x )
-        {
-            _log->error( x.what() );
-        }
     }
     else
     {

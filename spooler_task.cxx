@@ -1671,9 +1671,9 @@ void Task::postprocess_order( bool spooler_process_result, bool due_to_exception
 {
     if( _order )
     {
-        _order->postprocessing( spooler_process_result );
         if( due_to_exception )  _log->warn( message_string( "SCHEDULER-846", _order->state().as_string() ) );
         _log->info( message_string( "SCHEDULER-843", _order->obj_name(), _order->state(), _spooler->http_url() ) );
+        _order->postprocessing( spooler_process_result );
         remove_order();
     }
 }
@@ -1686,9 +1686,9 @@ void Task::remove_order_after_error()
     {
         if( _job->stops_on_task_error() )  
         {
-            _order->processing_error();
             _log->warn( message_string( "SCHEDULER-845" ) );
             _log->info( message_string( "SCHEDULER-843", _order->obj_name(), _order->state(), _spooler->http_url() ) );
+            _order->processing_error();
             remove_order();
         }
         else

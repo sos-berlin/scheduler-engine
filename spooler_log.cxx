@@ -651,6 +651,8 @@ void Prefix_log::open()
     //2005-09-22  reset_highest_level();
     //2005-09-22  _highest_msg = "";
     
+    _closed = false;
+
     if( _file != -1 )  return; //z::throw_xc( "SCHEDULER-134", _filename );
 
     if( !_filename.empty() )
@@ -717,7 +719,7 @@ void Prefix_log::close()
         {
             z_unlink( _filename );
         }
-        catch( const exception&  x ) { _spooler->log()->error( message_string( "SCHEDULER-291", x ) ); }
+        catch( const exception&  x ) { _spooler->log()->error( message_string( "SCHEDULER-291", x ) ); }  // Kann bei "http://.../show_log?" passieren
     }
 
     signal_events();
