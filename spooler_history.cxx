@@ -1509,20 +1509,26 @@ void Database::write_order_history( Order* order, Transaction* outer_transaction
 
 
             // Auftragsprotokoll
-            string log_filename = order->log()->filename();
 
-            if( _spooler->_order_history_with_log  &&  !log_filename.empty()  &&  log_filename[0] != '*' )
+            if( _spooler->_order_history_with_log )
             {
-                try 
+                string log_text= order->log()->as_string();
+                if( log_text != "" )
                 {
-                    ta.set_transaction_written();
-                    string blob_filename = db_name() + " -table=" + _spooler->_order_history_tablename + " -blob=log where \"HISTORY_ID\"=" + as_string( history_id );
-                    if( _spooler->_order_history_with_log == arc_gzip )  blob_filename = GZIP + blob_filename;
-                    copy_file( "file -b " + log_filename, blob_filename );
-                }
-                catch( exception& x ) 
-                { 
-                    _log->warn( message_string( "SCHEDULER-267", _spooler->_order_history_tablename, x.what() ) );      // "FEHLER BEIM SCHREIBEN DES LOGS IN DIE TABELLE "
+                    try 
+                    {
+                        ta.set_transaction_written();
+                        string blob_filename = db_name() + " -table=" + _spooler->_order_history_tablename + " -blob=log where \"HISTORY_ID\"=" + as_string( history_id );
+                        if( _spooler->_order_history_with_log == arc_gzip )  blob_filename = GZIP + blob_filename;
+                        //copy_file( "file -b " + log_filename, blob_filename );
+                        Any_file blob_file( "-out -binary " + blob_filename );
+                        blob_file.put( log_text );
+                        blob_file.close();
+                    }
+                    catch( exception& x ) 
+                    { 
+                        _log->warn( message_string( "SCHEDULER-267", _spooler->_order_history_tablename, x.what() ) );      // "FEHLER BEIM SCHREIBEN DES LOGS IN DIE TABELLE "
+                    }
                 }
             }
 

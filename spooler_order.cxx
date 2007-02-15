@@ -3507,10 +3507,10 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
         if( show.is_set( show_run_time ) )  element.appendChild( _run_time->dom_element( document ) );
     }
 
-    if( _is_distributed  ||  !show.is_set( show_for_database_only ) )
+    if( show.is_set( show_log )  ||  show.is_set( show_for_database_only ) )
     {
         Show_what log_show_what = show;
-        if( _is_distributed  &&  show.is_set( show_for_database_only ) )  log_show_what |= show_log;
+        if( show.is_set( show_for_database_only ) )  log_show_what |= show_log;
 
         if( log  &&  show.is_set( show_log ) ) element.append_new_text_element( "log", *log );     // Protokoll aus der Datenbank
         else

@@ -37,7 +37,6 @@ enum Show_what_enum
     show_jobs               = 0x1000,   // <jobs>
     show_tasks              = 0x2000,   // <tasks>
     show_payload            = 0x4000,
-    show_for_database_only  = 0x8000,   // XML-Element nur für Datenbank
   //show_id_only            = 0x10000,
     show_job_commands       = 0x20000,
     show_blacklist          = 0x40000,
@@ -47,8 +46,9 @@ enum Show_what_enum
   //show_web_services       = 0x20000,
   //show_web_service_operations = 0x40000,
 
-    show_all_               = 0x8000,
-    show_all                = 0xFFFF    // Alle Flags und show_all_ (Bei <show_state> ist z.B. show_orders nicht in show_all enthalten)
+    show_all_               = 0x40000000,
+    show_all                = 0x7FFFFFFF,   // Alle Flags und show_all_ (Bei <show_state> ist z.B. show_orders nicht in show_all enthalten)
+    show_for_database_only  = 0x80000000,   // XML-Element nur für Datenbank
 };
 
 inline Show_what_enum operator | ( Show_what_enum a, Show_what_enum b )  { return (Show_what_enum)( (int)a | (int)b ); } 
