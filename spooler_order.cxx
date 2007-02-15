@@ -2517,9 +2517,16 @@ Order::~Order()
         assert( !_is_on_blacklist );
         assert( !_in_job_queue );
       //assert( !_is_replacement );
-        assert( !_replaced_by );
+      //assert( !_replaced_by );
         assert( !_order_queue );
 #   endif
+
+    set_replacement( false );
+
+    if( _replaced_by )  
+    {
+        _replaced_by->set_replacement( false );
+    }
 
     if( _run_time )  _run_time->close();
 }
