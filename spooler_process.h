@@ -101,6 +101,7 @@ struct Process_class : zschimmer::Object
     bool                        need_process                ();
     void                        notify_a_process_is_idle    ();
   //Job*                        first_waiting_job           ()                                      { return _waiting_jobs.begin(); }
+    string                      name                        ()                                      { return _name; }
 
     void                    set_dom                         ( const xml::Element_ptr& );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );

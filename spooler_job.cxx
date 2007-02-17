@@ -486,8 +486,8 @@ void Job::initialize()
     {
         Z_LOGI2( "scheduler", obj_name() << ".initialize()\n" );
 
-        if( _module->_dom_element )  read_script( _module );
-        if( _module->_monitor  &&  _module->_monitor->_dom_element )  read_script( _module->_monitor );
+        if( !_module->_dom_element_list.empty() )  read_script( _module );
+        if( _module->_monitor  &&  !_module->_monitor->_dom_element_list.empty() )  read_script( _module->_monitor );
         if( _module->set() )  _module->init();
 
         _next_start_time = Time::never;
@@ -2139,6 +2139,9 @@ ptr<Task> Job::task_to_start()
             {
                 if( !_waiting_for_process )
                 {
+                    Message_string m ( "SCHEDULER-949", _module->_process_class->name() );   // " ist für einen verfügbaren Prozess vorgemerkt" );
+                    if( task )  m.insert( 2, task->obj_name() );
+                    log()->info( m );
                     _module->_process_class->enqueue_waiting_job( this );
                     _waiting_for_process = true;
                 }

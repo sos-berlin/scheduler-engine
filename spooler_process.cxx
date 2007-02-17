@@ -330,7 +330,6 @@ bool Process_class::process_available( Job* for_job )
 void Process_class::enqueue_waiting_job( Job* job )
 {
     _waiting_jobs.push_back( job );
-    _spooler->log()->info( message_string( "SCHEDULER-949", job->obj_name() ) );   // " ist für einen verfügbaren Prozess vorgemerkt" );
 }
 
 //----------------------------------------------------------------Process_class::remove_waiting_job

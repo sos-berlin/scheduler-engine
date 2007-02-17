@@ -51,8 +51,8 @@ struct Source_part
 struct Source_with_parts
 {
                                 Source_with_parts           ()                                      {}
-                                Source_with_parts           ( const string& text )                  { assign( text); }
-                                Source_with_parts           ( const xml::Element_ptr& dom )         { assign_dom(dom); }
+                              //Source_with_parts           ( const string& text )                  { assign( text); }
+                              //Source_with_parts           ( const xml::Element_ptr& dom )         { assign_dom(dom); }
 
     void                        add                         ( int linenr, const string& text, const Time& mod_time );
     bool                        empty                       () const                                { return _parts.empty(); }
@@ -67,9 +67,11 @@ struct Source_with_parts
     Source_with_parts&          operator =                  ( const string& text )                  { assign( text );  return *this; }
     void                        assign                      ( const string& text )                  { clear(); add( 1, text, Time(0) ); }
 
-    Source_with_parts&          operator =                  ( const xml::Element_ptr& dom )         { assign_dom( dom );  return *this; }
-
+    Source_with_parts&          operator =                  ( const xml::Element_ptr& dom )         { clear(); append_dom( dom );  return *this; }
     void                        assign_dom                  ( const xml::Element_ptr& dom );
+
+    void                        append_dom                  ( const xml::Element_ptr& );
+    void                        append                      ( const Source_with_parts& );
 
 
     typedef list<Source_part>   Parts;
@@ -170,8 +172,7 @@ struct Module : Object
 
     bool                       _dont_remote;
 
-    xml::Document_ptr          _dom_document;
-    xml::Element_ptr           _dom_element;                // <script> aus <config>
+    std::list<xml::Element_ptr> _dom_element_list;
     Time                       _xml_mod_time;
 
     ptr<Module>                _monitor;

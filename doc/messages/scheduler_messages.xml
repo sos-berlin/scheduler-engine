@@ -2897,11 +2897,8 @@
         </message>
 
         <message code="SCHEDULER-949">
-            <text xml:lang="de">
-                <title><p1/> ist für einen verfügbaren Prozess vorgemerkt</title>
-            </text>
             <text xml:lang="en">
-                <title><p1/> will be executed by an available process</title>
+                <title>Job will be executed when a process of process class '<p1/>' becomes available</title>
             </text>
         </message>
 

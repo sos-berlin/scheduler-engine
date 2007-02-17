@@ -92,9 +92,9 @@ xml::Document_ptr Source_with_parts::dom_document() const
 //--------------------------------------------------------------------Source_with_parts::assign_dom
 // Für spooler_module_remote_server.cxx
 
-void Source_with_parts::assign_dom( const xml::Element_ptr& source_element )
+void Source_with_parts::append_dom( const xml::Element_ptr& source_element )
 {
-    clear();
+    //clear();
 
     if( !source_element.nodeName_is( "source" ) )  throw_xc( "Source_with_parts", "dom" );
 
@@ -103,6 +103,13 @@ void Source_with_parts::assign_dom( const xml::Element_ptr& source_element )
         Sos_optional_date_time dt = part.getAttribute( "modtime" );
         add( part.int_getAttribute( "linenr", 1 ), part.getTextContent(), dt.time_as_double() );
     }
+}
+
+//------------------------------------------------------------------------Source_with_parts::append
+
+void Source_with_parts::append( const Source_with_parts& parts )
+{
+    _parts.insert( _parts.end(), parts._parts.begin(), parts._parts.end() );
 }
 
 //---------------------------------------------------------------------------Source_with_parts::add
@@ -207,8 +214,9 @@ void Module::set_dom_without_source( const xml::Element_ptr& element, const Time
 {
     if( !element )  return;
 
-    _dom_document = element.ownerDocument();
-    _dom_element  = element;
+    //_dom_document = element.ownerDocument();
+    //_dom_element  = element;
+    _dom_element_list.push_back( element );
     _xml_mod_time = xml_mod_time;
 
     _source.clear();  //clear();
@@ -238,7 +246,14 @@ void Module::set_dom_without_source( const xml::Element_ptr& element, const Time
 
 void Module::set_dom_source_only( const string& include_path )
 {
-    set_source_only( text_from_xml_with_include( _dom_element, _xml_mod_time, include_path ) );
+    Source_with_parts source;
+
+    Z_FOR_EACH_CONST( list<xml::Element_ptr>, _dom_element_list, it )
+    {
+        source.append( text_from_xml_with_include( *it, _xml_mod_time, include_path )  );
+    }
+
+    set_source_only( source );
 }
 
 //--------------------------------------------------------------------------Module::set_source_only
