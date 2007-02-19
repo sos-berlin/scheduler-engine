@@ -26,7 +26,6 @@ base();
 
             <job name="perl">
                 <script language="perl">
-                    <include file="$SCHEDULER_TEST/expect.pl"/>
                     <![CDATA[
 package main;
 use vars qw($spooler $spooler_log $spooler_job $spooler_task);
