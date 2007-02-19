@@ -174,11 +174,10 @@
     </description>
 
 
-    <behavior_with_xml_element element="base" complete="yes">
+    <behavior_with_xml_element element="base">
         <description>
             <p>
-                Nach dem Start des Schedulers können die Attribute (z.B. <code>language=</code>) nicht mehr geändert werden.
-                Nur das Skript selbst ist änderbar.
+                Das Skript wird dem in einer Basiskonfiguration definierten Skript angehängt.
             </p>
         </description>
     </behavior_with_xml_element>

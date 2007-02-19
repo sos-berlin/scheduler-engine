@@ -650,7 +650,7 @@ db = odbc -db=factory_oracle -user=factory -password=factory
             
             <p>
                 Die Einstellung wirkt nicht, wenn für den Job kein <scheduler_element name="delay_after_error"/>
-                angegeben ist (dann gilt <code>delay_after_error=all</code>).
+                angegeben ist (dann gilt <code>mail_on_delay_after_error=all</code>).
             </p>
         </description>
     </setting>

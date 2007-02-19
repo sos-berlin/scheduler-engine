@@ -11,7 +11,7 @@
     <scheduler_keyword keyword="Change log"/>
 
 
-    <change date="2007-02-18" version="2.0.165" subversion_revision="4851">
+    <change date="2007-02-19" version="2.0.166" subversion_revision="4856">
         <revision type="modification" title="mail_on_delay_after_error wirkt nur noch mit &lt;delay_after_error>">
             <description>
                 <p>
@@ -36,20 +36,25 @@
         </revision>
 
         <revision type="modification" title="&lt;script> und &lt;base>">
-            <p>
-                Das Element <scheduler_element name="script"/>, in einer <scheduler_element name="base"/>-Konfiguration definiert,
-                wird jetzt von der übergeordneten Konfiguration nicht mehr ersetzt, sondern erweitert.
-                (Das funktioniert nicht mit Java wegen dessen Syntax.)
-                Damit können in der <scheduler_element name="base"/>-Konfiguration Funktionen definiert werden,
-                die in einer übergeordneten Konfiguration nutzbar sind.
-            </p>
+            <description>
+                <p>
+                    Das Element <scheduler_element name="script"/>, in einer <scheduler_element name="base"/>-Konfiguration definiert,
+                    wird jetzt von der übergeordneten Konfiguration nicht mehr ersetzt, sondern erweitert.
+                    (Das funktioniert nicht mit Java wegen dessen Syntax.)
+                    Damit können in der <scheduler_element name="base"/>-Konfiguration Funktionen definiert werden,
+                    die in einer übergeordneten Konfiguration nutzbar sind.
+                </p>
+            </description>
         </revision>
 
         <revision type="modification" title="Auftragsprokolle bei Scheduler-Neustart">
-            <p>
-                Die Protokolle nicht abgeschlossener Aufträge werden bei Neustart fortgeschrieben.
-                Dazu werden sie in der Datenbank gespeichert.
-            </p>
+            <description>
+                <p>
+                    Die Protokolle nicht abgeschlossener Aufträge bleiben jetzt bei Scheuler-Neustart erhalten 
+                    und werden fortgeschrieben.
+                    Dazu werden sie in der Datenbank gespeichert.
+                </p>
+            </description>
         </revision>
     </change>
         
