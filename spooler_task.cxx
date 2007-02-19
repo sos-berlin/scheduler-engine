@@ -1922,25 +1922,28 @@ void Task::trigger_event( Scheduler_event* scheduler_event )
             else
             if( _log->_mail_on_warning  &&  _log->has_line_for_level( log_warn ) )  mail_due_to_error_or_warning = true;
 
-#           ifdef Z_DEBUG
-                if( _log->_mail_on_delay_after_error == fl_all ) {
-                    int reason = has_error() || _log->highest_level() >= log_error? -1 : _step_count;
-                    bool old_mail_it =  reason == -1  &&  ( _log->_mail_on_error | _log->_mail_on_warning )
-                                     || reason ==  0  &&  _log->_mail_on_success
-                                     || reason  >  0  &&  ( _log->_mail_on_success || _log->_mail_on_process && reason >= _log->_mail_on_process )
-                                     || _log->_mail_on_warning  &&  _log->_last.find( log_warn ) != _log->_last.end();
-                    assert( mail_due_to_error_or_warning == old_mail_it );
-                }
-#           endif
+//#           ifdef Z_DEBUG
+//                if( _log->_mail_on_delay_after_error == fl_all ) {
+//                    int reason = has_error() || _log->highest_level() >= log_error? -1 : _step_count;
+//                    bool old_mail_it =  reason == -1  &&  ( _log->_mail_on_error | _log->_mail_on_warning )
+//                                     || reason ==  0  &&  _log->_mail_on_success
+//                                     || reason  >  0  &&  ( _log->_mail_on_success || _log->_mail_on_process && reason >= _log->_mail_on_process )
+//                                     || _log->_mail_on_warning  &&  _log->_last.find( log_warn ) != _log->_last.end();
+//                    assert( mail_due_to_error_or_warning == old_mail_it );
+//                }
+//#           endif
 
-            switch( _log->_mail_on_delay_after_error )
+            if( _job->_delay_after_error.size() > 0 )
             {
-                case fl_all:                    break;
-                case fl_first_only:             if( !_is_first_job_delay_after_error )  mail_due_to_error_or_warning = false;  break;
-                case fl_last_only:              if( !_is_last_job_delay_after_error  )  mail_due_to_error_or_warning = false;  break;
-                case fl_first_and_last_only:    if( !_is_first_job_delay_after_error  
-                                                &&  !_is_last_job_delay_after_error  )  mail_due_to_error_or_warning = false;  break;
-                default: z::throw_xc( __FUNCTION__ );
+                switch( _log->_mail_on_delay_after_error )
+                {
+                    case fl_all:                    break;
+                    case fl_first_only:             if( !_is_first_job_delay_after_error )  mail_due_to_error_or_warning = false;  break;
+                    case fl_last_only:              if( !_is_last_job_delay_after_error  )  mail_due_to_error_or_warning = false;  break;
+                    case fl_first_and_last_only:    if( !_is_first_job_delay_after_error  
+                                                    &&  !_is_last_job_delay_after_error  )  mail_due_to_error_or_warning = false;  break;
+                    default: z::throw_xc( __FUNCTION__ );
+                }
             }
 
             mail_it = mail_due_to_error_or_warning;

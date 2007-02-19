@@ -12,6 +12,15 @@
 
 
     <change date="2007-02-18" version="2.0.165" subversion_revision="4851">
+        <revision type="modification" title="mail_on_delay_after_error wirkt nur noch mit &lt;delay_after_error>">
+            <description>
+                <p>
+                    <scheduler_ini_entry file="factory.ini" section="job" entry="mail_on_delay_after_error"/> wirkt nur,
+                    wenn für den Job auch ein <scheduler_element name="delay_after_error"/> gesetzt ist.
+                </p>
+            </description>
+        </revision>
+
         <revision type="modification" title="Meldung SCHEDULER-949">
             <description>
                 <ul>

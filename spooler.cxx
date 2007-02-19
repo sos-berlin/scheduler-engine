@@ -2472,8 +2472,9 @@ void Spooler::signal( const string& signal_name )
     if( _log->log_level() <= log_debug9 )  
     {
         _log->debug9( "Signal \"" + signal_name + "\"" ); 
-        _event.signal( signal_name ); 
     }
+
+    _event.signal( signal_name ); 
 }
 
 //---------------------------------------------------------------------------Spooler::check_cluster
