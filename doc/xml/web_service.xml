@@ -12,7 +12,7 @@
              date     = "$Date$">
 
     <xml_parent_elements>
-        <xml_parent_element name="web_services"/>
+        <xml_parent_element name="http_server"/>
     </xml_parent_elements>
 
 

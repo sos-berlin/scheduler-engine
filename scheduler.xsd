@@ -32,7 +32,11 @@
                             <xsd:element ref="cluster"          minOccurs="0"/>
                             <xsd:element ref="process_classes"  minOccurs="0"/>
                             <xsd:element ref="script"           minOccurs="0"/>
-                            <xsd:element ref="web_services"     minOccurs="0"/>
+
+                            <xsd:choice minOccurs="0">
+                                <xsd:element ref="http_server"/>
+                                <xsd:element ref="web_services"/>   <!-- veraltet -->
+                            </xsd:choice>
 
                             <xsd:choice>
                                 <xsd:element ref="holidays"/>
@@ -1116,7 +1120,7 @@
     </xsd:element>
 
 
-    <xsd:element name="web_services">
+    <xsd:element name="http_server">
         <xsd:complexType >
             <xsd:choice minOccurs="0" maxOccurs="unbounded">
                 <xsd:element name="web_service" type="web_service"/>
@@ -1134,6 +1138,19 @@
             <xsd:field xpath="@url_path"/>
         </xsd:key-->
 
+    </xsd:element>
+
+
+    <xsd:element name="web_services">
+        <xsd:annotation>
+            <xsd:documentation>Deprecated. Use http_server</xsd:documentation>
+        </xsd:annotation>
+        
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="web_service" type="web_service" minOccurs="0" maxOccurs="unbounded"/>
+            </xsd:sequence>
+        </xsd:complexType>
     </xsd:element>
 
 

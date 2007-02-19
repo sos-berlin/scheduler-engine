@@ -40,7 +40,7 @@ if( forwarding_job_chain.order_count() == 0 )
         ]]></script>
 
 
-        <web_services>
+        <http_server>
             <http_directory url_path="/test/" path="s:/tmp/test"/>
             <http_directory url_path="/leer/" path="/LEERLEER/"/>
             <http_directory url_path="/doc/" path="s:/prod/scheduler/doc"/>
@@ -74,7 +74,7 @@ if( forwarding_job_chain.order_count() == 0 )
                     <param name="parameter4" value="PARA'M&quot;ETER ÄÖÜäöü´ßÅå"/>
                 </params>
             </web_service>
-        </web_services>
+        </http_server>
 
 
         <jobs>

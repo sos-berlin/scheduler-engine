@@ -345,7 +345,8 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const Time& x
                 _holidays.set_dom( e);
             }
             else
-            if( e.nodeName_is( "web_services" ) )
+            if( e.nodeName_is( "http_server" ) 
+             || e.nodeName_is( "web_services" ) )
             {
                 _web_services->set_dom( e );
             }

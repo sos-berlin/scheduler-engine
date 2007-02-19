@@ -12,6 +12,16 @@
 
 
     <change date="2007-02-19" version="2.0.166" subversion_revision="4856">
+        <revision type="modification" title="XML-Element web_services heißt jetzt http_server">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_element name="http_server"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+
         <revision type="modification" title="mail_on_delay_after_error wirkt nur noch mit &lt;delay_after_error>">
             <description>
                 <p>
@@ -49,7 +59,7 @@
 
         <revision type="modification" title="Auftragsprokolle bei Scheduler-Neustart">
             <description>
-                <p>
+                <p>                                     l
                     Die Protokolle nicht abgeschlossener Aufträge bleiben jetzt bei Scheuler-Neustart erhalten 
                     und werden fortgeschrieben.
                     Dazu werden sie in der Datenbank gespeichert.
@@ -74,7 +84,7 @@
             <description>
                 <ul>
                     <li>
-                        <scheduler_element name="web_services" child="http_directory"/>
+                        <scheduler_element name="http_server" child="http_directory"/>
                     </li>
                 </ul>
             </description>
@@ -2022,7 +2032,8 @@
             <description>
                 <p>Neue XML-Elemente, neue Attribute:</p>
                 <ul>
-                    <li><scheduler_element name="web_services"/></li>
+                    <!--li><scheduler_element name="web_services"/></li-->
+                    <li><code>&lt;web_services></code></li>
                     <li><scheduler_element name="web_service"/></li>
                     <li><scheduler_element name="add_order" attribute="web_service"/></li>
                     <li><scheduler_element name="start_job" attribute="web_service"/></li>

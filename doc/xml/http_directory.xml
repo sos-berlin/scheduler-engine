@@ -12,7 +12,7 @@
              date     = "$Date: 2006-01-30 12:39:23 +0100 (Mo, 30 Jan 2006) $">
 
     <xml_parent_elements>
-        <xml_parent_element name="web_services"/>
+        <xml_parent_element name="http_server"/>
     </xml_parent_elements>
 
     <xml_attributes>

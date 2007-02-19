@@ -235,7 +235,7 @@ Web_service* Web_services::web_service_by_name_or_null( const string& name )
 
 xml::Element_ptr Web_services::dom_element( const xml::Document_ptr& document, const Show_what& what ) const
 {
-    xml::Element_ptr result = document.createElement( "web_services" );
+    xml::Element_ptr result = document.createElement( "http_server" );
 
     Z_FOR_EACH_CONST( Name_web_service_map, _name_web_service_map, ws )
     {

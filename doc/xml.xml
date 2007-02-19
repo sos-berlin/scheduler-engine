@@ -61,6 +61,7 @@
                 <scheduler_element name="holiday"/><br/>
                 <scheduler_element name="holidays"/><br/>
                 <scheduler_element name="http_directory"/><br/>
+                <scheduler_element name="http_server"/><br/>
                 <scheduler_element name="include"/><br/>
                 <scheduler_element name="job"/><br/>
                 <scheduler_element name="job_chain"/><br/>
@@ -84,7 +85,6 @@
                 <scheduler_element name="ultimos"/><br/>
                 <scheduler_element name="variable"/><br/>
                 <scheduler_element name="web_service"/><br/>
-                <scheduler_element name="web_services"/><br/>
                 <scheduler_element name="weekdays"/><br/>
             </td>
             <td valign="baseline" style="padding-left: 2ex">

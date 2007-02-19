@@ -41,7 +41,11 @@ const char file_scheduler_xsd[] =
     "<xsd:element ref=\"cluster\"          minOccurs=\"0\"/>\n"
     "<xsd:element ref=\"process_classes\"  minOccurs=\"0\"/>\n"
     "<xsd:element ref=\"script\"           minOccurs=\"0\"/>\n"
-    "<xsd:element ref=\"web_services\"     minOccurs=\"0\"/>\n"
+    "\n"
+    "<xsd:choice minOccurs=\"0\">\n"
+    "<xsd:element ref=\"http_server\"/>\n"
+    "<xsd:element ref=\"web_services\"/>   <!-- veraltet -->\n"
+    "</xsd:choice>\n"
     "\n"
     "<xsd:choice>\n"
     "<xsd:element ref=\"holidays\"/>\n"
@@ -1125,7 +1129,7 @@ const char file_scheduler_xsd[] =
     "</xsd:element>\n"
     "\n"
     "\n"
-    "<xsd:element name=\"web_services\">\n"
+    "<xsd:element name=\"http_server\">\n"
     "<xsd:complexType >\n"
     "<xsd:choice minOccurs=\"0\" maxOccurs=\"unbounded\">\n"
     "<xsd:element name=\"web_service\" type=\"web_service\"/>\n"
@@ -1143,6 +1147,19 @@ const char file_scheduler_xsd[] =
     "<xsd:field xpath=\"@url_path\"/>\n"
     "</xsd:key-->\n"
     "\n"
+    "</xsd:element>\n"
+    "\n"
+    "\n"
+    "<xsd:element name=\"web_services\">\n"
+    "<xsd:annotation>\n"
+    "<xsd:documentation>Deprecated. Use http_server</xsd:documentation>\n"
+    "</xsd:annotation>\n"
+    "\n"
+    "<xsd:complexType>\n"
+    "<xsd:sequence>\n"
+    "<xsd:element name=\"web_service\" type=\"web_service\" minOccurs=\"0\" maxOccurs=\"unbounded\"/>\n"
+    "</xsd:sequence>\n"
+    "</xsd:complexType>\n"
     "</xsd:element>\n"
     "\n"
     "\n"
@@ -1429,7 +1446,7 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1170972801 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1171903404 },
     { NULL, NULL, 0 }
 };
 

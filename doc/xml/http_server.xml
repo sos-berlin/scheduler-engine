@@ -3,8 +3,8 @@
 
 <!--$Id$-->
 
-<xml_element name     = "web_services"
-             title    = "Web-Dienste"
+<xml_element name     = "http_server"
+             title    = "HTTP-Server"
              category = "Konfiguration"
              base_dir = "../"
              parent_page = "../konfiguration.xml"
