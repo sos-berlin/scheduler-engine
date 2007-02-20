@@ -388,6 +388,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-844", "Scheduler script is not yet active. Operation is executed without the call of function '$1'" },
     { "SCHEDULER-845", "After task exception, the order remains in job's order queue" },
     { "SCHEDULER-846", "After task exception and due to stop_on_error='no', the order has been moved to error_state='$1'" },
+    { "SCHEDULER-847", "Please use new name '$1' instead of old '$2'" },
     {}
 };
 } //namespace sos

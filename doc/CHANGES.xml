@@ -11,12 +11,15 @@
     <scheduler_keyword keyword="Change log"/>
 
 
-    <change date="2007-02-19" version="2.0.166" subversion_revision="4856">
-        <revision type="modification" title="XML-Element web_services heißt jetzt http_server">
+    <change date="2007-02-19" version="2.0.166" subversion_revision="4860">
+        <revision type="modification" title="XML-Element &lt;web_services> heißt jetzt &lt;http_server>">
             <description>
                 <ul>
                     <li>
                         <scheduler_element name="http_server"/>
+                    </li>
+                    <li>
+                        <scheduler_message level="info" code="SCHEDULER-847"/>
                     </li>
                 </ul>
             </description>
