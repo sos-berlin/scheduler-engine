@@ -7,11 +7,11 @@
 #ifdef _DEBUG       // Nur die Debug-Variante wird als DLL erzeugt
 #ifdef Z_WINDOWS
 
-#ifdef _DEBUG
-#   include "Debug/sos/spooler/Spooler_program.h"
-#else
-#   include "Release/sos/spooler/Spooler_program.h"
-#endif
+//#ifdef _DEBUG
+//#   include "Debug/sos/spooler/Spooler_program.h"
+//#else
+//#   include "Release/sos/spooler/Spooler_program.h"
+//#endif
 
 namespace sos 
 {

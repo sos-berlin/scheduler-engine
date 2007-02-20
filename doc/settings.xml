@@ -618,7 +618,7 @@ db = odbc -db=factory_oracle -user=factory -password=factory
             
             <dl>
                 <dt>
-                    <code>mail_on_error=all</code>
+                    <code>mail_on_delay_after_error=all</code>
                 </dt>
                 <dd>
                     Nach jedem fehlerhaften Job-Lauf wird eine eMail verschickt 
@@ -626,21 +626,21 @@ db = odbc -db=factory_oracle -user=factory -password=factory
                 </dd>
 
                 <dt>
-                    <code>mail_on_error=first_only</code>
+                    <code>mail_on_delay_after_error=first_only</code>
                 </dt>
                 <dd>
                     Nur der erste fehlerhafte Lauf veranlasst eine eMail, nicht aber die Wiederholungen.
                 </dd>
 
                 <dt>
-                    <code>mail_on_error=last_only</code>
+                    <code>mail_on_delay_after_error=last_only</code>
                 </dt>
                 <dd>
                     Nur der letzte fehlerhafte Lauf, der also den Job stoppen lässt, veranlasst eine eMail.
                 </dd>
 
                 <dt>
-                    <code>mail_on_error=first_and_last_only</code>
+                    <code>mail_on_delay_after_error=first_and_last_only</code>
                 </dt>
                 <dd>
                     Nur der erste und der letzte fehlerhafte Lauf veranlassen je eine eMail.

@@ -14,11 +14,11 @@
 #include "../zschimmer/java.h"
 #include "../zschimmer/system_command.h"
 
-#ifdef _DEBUG
-#   include "Debug/sos/spooler/Idispatch.h"
-#else
-#   include "Release/sos/spooler/Idispatch.h"
-#endif
+//#ifdef _DEBUG
+//#   include "Debug/sos/spooler/Idispatch.h"
+//#else
+//#   include "Release/sos/spooler/Idispatch.h"
+//#endif
 
 #include <sys/stat.h>
 
@@ -38,6 +38,11 @@
 
 using namespace std;
 using namespace zschimmer::java;
+
+extern "C"
+//JNIEXPORT
+jobject JNICALL Java_sos_spooler_Idispatch_com_1call( JNIEnv*, jclass, jlong jidispatch, jstring, jobjectArray );
+
 
 namespace sos {
 namespace scheduler {

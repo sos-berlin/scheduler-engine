@@ -3856,7 +3856,15 @@ bool Order::end_state_reached()
 
     if( _end_state_reached )  result = true;
     else
-    if( job_chain()  &&  job_chain()->node_from_state( _state )->is_end_state() )  result = true;
+    if( job_chain() )
+    {
+        if( Job_chain_node* node = job_chain()->node_from_state_or_null( _state ) )
+        {
+            if( node->is_end_state() )  result = true;
+        }
+        else 
+            result = true;
+    }
     
     return result;
 
