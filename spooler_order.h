@@ -128,12 +128,14 @@ struct Order : Com_order,
     void                    set_payload                 ( const VARIANT& );
     const Payload&              payload                 ()                                          { return _payload; }
     string                      string_payload          () const;
+    void                    set_params                  ( const xml::Element_ptr&, Variable_set_map* = NULL );
     ptr<Com_variable_set>       params_or_null          () const;
     ptr<Com_variable_set>       params                  ();
     void                    set_param                   ( const string& name, const Variant& value );
     Variant                     param                   ( const string& name );
 
     void                    set_xml_payload             ( const string& xml );
+    void                    set_xml_payload             ( const xml::Element_ptr& );
     string                      xml_payload             () const                                    { return _xml_payload; }
     void                    set_web_service             ( const string& );
     void                    set_web_service             ( Web_service* );
@@ -159,7 +161,7 @@ struct Order : Com_order,
     bool                        is_on_blacklist         ()                                          { return _is_on_blacklist; }
 
     void                        inhibit_distribution    ()                                          { _is_distribution_inhibited = true; }
-    void                        assert_is_not_distributed  ( const string& debug_text );
+    void                        assert_is_not_distributed( const string& debug_text );
     void                    set_distributed             ( bool = true );
     bool                     is_distributed             () const                                    { return _is_distributed; }
 

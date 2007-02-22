@@ -3382,9 +3382,7 @@ void Order::set_dom( const xml::Element_ptr& element, Variable_set_map* variable
         */
         if( e.nodeName_is( "params" ) )
         { 
-            ptr<Com_variable_set> pars = new Com_variable_set;
-            pars->set_dom( e, variable_set_map );  
-            set_payload( Variant( static_cast<IDispatch*>( pars ) ) );
+            set_params( e );
         }
         else
         if( e.nodeName_is( "payload" ) )
@@ -3393,9 +3391,7 @@ void Order::set_dom( const xml::Element_ptr& element, Variable_set_map* variable
             {
                 if( ee.nodeName_is( "params"  ) )
                 {
-                    ptr<Com_variable_set> pars = new Com_variable_set;
-                    pars->set_dom( ee, variable_set_map );  
-                    set_payload( Variant( static_cast<IDispatch*>( pars ) ) );
+                    set_params( ee, variable_set_map );
                     break;
                 }
             }
@@ -3704,6 +3700,15 @@ string Order::string_payload() const
     }
 }
 
+//--------------------------------------------------------------------------------Order::set_params
+
+void Order::set_params( const xml::Element_ptr& params_element, Variable_set_map* variable_set_map )
+{
+    ptr<Com_variable_set> pars = new Com_variable_set;
+    pars->set_dom( params_element, variable_set_map );  
+    set_payload( Variant( static_cast<IDispatch*>( pars ) ) );
+}
+
 //----------------------------------------------------------------------------Order::params_or_null
 
 ptr<Com_variable_set> Order::params_or_null() const
@@ -3834,10 +3839,24 @@ void Order::set_payload( const VARIANT& payload )
 void Order::set_xml_payload( const string& xml_string )
 { 
     //Z_LOGI2( "scheduler.order", obj_name() << ".xml_payload=" << xml_string << "\n" );
-    
-    xml::Document_ptr doc ( xml_string, scheduler_character_encoding );
 
-    _xml_payload = doc.ascii_xml();     // _xml_payload kann in order_xml <order> eingefügt werden, unabhängig von der Codierung (ist nur 7bit-Ascii)
+    if( xml_string == "" )
+    {
+        _xml_payload = "";
+    }
+    else
+    {
+        xml::Document_ptr doc ( xml_string, scheduler_character_encoding );
+
+        set_xml_payload( doc.documentElement() );
+    }
+}
+
+//---------------------------------------------------------------------------Order::set_xml_payload
+
+void Order::set_xml_payload( const xml::Element_ptr& element )
+{ 
+    _xml_payload = element? element.ascii_xml() : "";     // _xml_payload kann in order_xml <order> eingefügt werden, unabhängig von der Codierung (ist nur 7bit-Ascii)
     _order_xml_modified = true; 
 }
 

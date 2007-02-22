@@ -16,7 +16,7 @@ var order = spooler.create_order();
 //order.payload = "PAYLOAD";
 //order.params();
 
-order.params("edno") = "ett";
+order.params("Edno") = "ett";
 order.params("dwa" ) = "två";
 spooler_log.info( order.payload_is_type( "spooler.variable_set" ) );
 spooler_log.info( order.payload_is_type( "hostware.record" ) );

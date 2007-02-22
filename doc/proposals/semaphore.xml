@@ -4,7 +4,7 @@
 <!--$Id: windows_job_objects.xml 4270 2006-04-21 08:26:33Z jz $-->
 
 <description
-    title               = "Semaphore"
+    title               = "Semaphoren"
     base_dir            = "../"
     parent_page         = "index.xml"
     author              = "$Author: jz $"
@@ -23,7 +23,10 @@
     <p>
         Deklaration:
     </p>
-    <pre>&lt;lock name="<i>lock_name</i>"/></pre>
+    <pre>&lt;locks>
+    &lt;lock name="<i>lock_name</i>"/>
+    …
+&lt;/locks></pre>
 
     <p>
         Anwendung:

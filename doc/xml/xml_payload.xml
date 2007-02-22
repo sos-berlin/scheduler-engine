@@ -13,6 +13,7 @@
     <xml_parent_elements>
         <xml_parent_element directory="xml/answer/" name="order"/>
         <xml_parent_element directory="xml/" name="add_order"/>
+        <xml_parent_element name="modify_order"/>
     </xml_parent_elements>
 
 

@@ -226,13 +226,7 @@
                     </xsd:complexType>
                 </xsd:element>
                 
-                <xsd:element name="xml_payload" minOccurs="0">
-                    <xsd:complexType>
-                        <xsd:sequence>
-                            <xsd:any processContents="skip"/>
-                        </xsd:sequence>
-                    </xsd:complexType>
-                </xsd:element>
+                <xsd:element name="xml_payload" type="Xml_payload" minOccurs="0"/>
             </xsd:sequence>
             
             <xsd:attribute name="job_chain"         type="Name"         use="required"/>
@@ -559,12 +553,15 @@
     <xsd:element name="modify_order">
         <xsd:complexType>
             <xsd:sequence>
-                <xsd:element ref="run_time" minOccurs="0"/>
+                <xsd:element ref="params"                          minOccurs="0"/>
+                <xsd:element name="xml_payload" type="Xml_payload" minOccurs="0"/>
+                <xsd:element ref="run_time"                        minOccurs="0"/>
             </xsd:sequence>
-            
+
             <xsd:attribute name="job_chain" type="Name"         use="required"/>
             <xsd:attribute name="order"     type="Order_id"     use="required"/>
             <xsd:attribute name="priority"  type="xsd:integer"/>
+            <xsd:attribute name="title"     type="String"/>
             <xsd:attribute name="state"     type="String"/>
             <xsd:attribute name="setback"   type="No"/>
             <xsd:attribute name="suspended" type="Yes_no"/>
@@ -1176,13 +1173,7 @@
 
     
     <xsd:complexType name="http_directory">
-        <xsd:attribute name="url_path" use="required">
-            <xsd:simpleType>
-                <xsd:restriction base="String">
-                    <xsd:pattern value="/[^/]*/"/>
-                </xsd:restriction>
-            </xsd:simpleType>
-        </xsd:attribute>
+        <xsd:attribute name="url_path"                  type="Url_path"         use="required"/>
         
         <xsd:attribute name="path" use="required">
             <xsd:simpleType>
@@ -1193,6 +1184,13 @@
         </xsd:attribute>
     </xsd:complexType>
 
+    
+    <xsd:complexType name="Xml_payload">
+        <xsd:sequence minOccurs="0">
+            <xsd:any processContents="skip"/>
+        </xsd:sequence>
+    </xsd:complexType>
+    
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ATTRIBUT-TYPEN-->
 
     <xsd:simpleType name="Yes_no">

@@ -795,6 +795,18 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
             order->set_run_time( run_time_element );
         }
 
+        if( xml::Element_ptr params_element = modify_order_element.select_node( "params" ) )
+        {
+            ptr<Com_variable_set> params = new Com_variable_set;
+            params->set_dom( params_element );
+            order->params()->merge( params );
+        }
+
+        if( xml::Element_ptr xml_payload_element = modify_order_element.select_node( "xml_payload" ) )
+        {
+            order->set_xml_payload( xml_payload_element.first_child_element() );
+        }
+
         if( priority != "" )  order->set_priority( as_int( priority ) );
 
         if( state != "" )  
@@ -822,6 +834,11 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
         if( modify_order_element.hasAttribute( "suspended" ) )
         {
             order->set_suspended( modify_order_element.bool_getAttribute( "suspended" ) );
+        }
+
+        if( modify_order_element.hasAttribute( "title" ) )
+        {
+            order->set_title( modify_order_element.getAttribute( "title" ) );
         }
 
         if( order->finished()  &&  !order->is_on_blacklist() )

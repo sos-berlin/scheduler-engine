@@ -11,6 +11,22 @@
     <scheduler_keyword keyword="Change log"/>
 
 
+    <change date="2007-02-22" version="2.0.167" subversion_revision="4861">
+        <revision type="new" title="XML-Kommando &lt;modify_order> erweitert">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_element name="modify_order"/> kann jetzt auch Parameter, Xml_payload und Titel ändern.
+                    </li>
+                    <li>
+                        <scheduler_element name="xml_payload"/> darf jetzt leer sein.
+                    </li>
+                </ul>
+            </description>
+        </revision>
+    </change>
+    
+    
     <change date="2007-02-19" version="2.0.166" subversion_revision="4860">
         <revision type="modification" title="XML-Element &lt;web_services> heißt jetzt &lt;http_server>">
             <description>
