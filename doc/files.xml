@@ -147,6 +147,7 @@
     <file path="xml/get_events.xml"/>
     <file path="xml/holiday.xml"/>
     <file path="xml/holidays.xml"/>
+    <file path="xml/http_server.xml"/>
     <file path="xml/include.xml"/>
     <file path="xml/job.xml"/>
     <file path="xml/job_chain.xml"/>
@@ -191,7 +192,6 @@
     <file path="xml/ultimos.xml"/>
     <file path="xml/variable.xml"/>
     <file path="xml/web_service.xml"/>
-    <file path="xml/web_services.xml"/>
     <file path="xml/weekdays.xml"/>
     <file path="xml/xml_payload.xml"/>
     <file path="xml_commands.xml"/>

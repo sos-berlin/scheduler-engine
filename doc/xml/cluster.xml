@@ -38,10 +38,10 @@
             <description>
                 <p>
                     Die Einstellung dient zur Selbstkontrolle des Schedulers.
-                    Wenn der eigene Herzschlag sich um diese Frist verspötet,
-                    bricht er Scheduler sofort ab und startet sich neu.
+                    Wenn der eigene Herzschlag sich um diese Frist verspätet,
+                    bricht der Scheduler sofort ab und startet sich neu.
                     Damit kommt der Scheduler der Deaktivierung durch einen anderen Scheduler zuvor,
-                    und verhindert somit den kurzzeitigen Parallelbetrieb wegen verzögerten Herzschlags.
+                    und verhindert den kurzzeitigen Parallelbetrieb wegen verzögerten Herzschlags.
                 </p>
             </description>
             <messages>

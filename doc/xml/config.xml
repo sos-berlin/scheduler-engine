@@ -132,6 +132,8 @@
         <xml_child_element name="security" title="Stellt den Zugriffsschutz ein">
         </xml_child_element>
 
+        <xml_child_element name="cluster"/>
+
         <xml_child_element name="process_classes" title="Jobs in eigenen Prozessen">
             <description>
                 <p>
@@ -171,6 +173,8 @@
             </example>
         </xml_child_element>
 
+        <xml_child_element name="http_server"/>
+
         <xml_child_element name="holidays" title="Feiertage">
             <description>
                 Grundsätzliche Einstellung der Feiertage (an denen Jobs nicht laufen sollen).
@@ -189,6 +193,17 @@
 
 ]]&gt;&lt;/script></pre>
             </example>
+        </xml_child_element>
+
+        <xml_child_element name="job_chains"/>
+
+        <xml_child_element name="commands">
+            <description>
+                <p>
+                    Die Kommandos werden beim Start des Schedulers vor dem Scheduler-Skript ausgeführt.
+                    Ein Fehler führt zum Abbruch des Schedulers.
+                </p>
+            </description>
         </xml_child_element>
 
     </xml_child_elements>

@@ -90,6 +90,7 @@
     &lt;<a class="silent" href="xml/config.xml">config</a> spooler_id          = ""
             main_scheduler       = "hostname:4444"
             port                 = "4444"
+            ip_address           = "…"
             tcp_port             = "4444"
             udp_port             = "4444"
             param                = "…"
@@ -128,7 +129,7 @@
             ]]&gt;
         &lt;/script>
 
-        &lt;<a class="silent" href="xml/web_services.xml">web_services</a>>
+        &lt;<a class="silent" href="xml/http_server.xml">http_server</a>>
             &lt;<a class="silent" href="xml/http_directory.xml">http_directory</a> url_path="…" path="…"/>
             &lt;<a class="silent" href="xml/web_service.xml">web_service</a> url_path="…" …>
                  &lt;<a class="silent" href="xml/params.xml">params</a>>
@@ -137,7 +138,7 @@
                  &lt;/params>
             &lt;/web_service>
             …
-        &lt;/web_services>
+        &lt;/http_server>
 
         &lt;<a class="silent" href="xml/holidays.xml">holidays</a>>
             &lt;<a class="silent" href="xml/holiday.xml">holiday</a> date="…"/>
