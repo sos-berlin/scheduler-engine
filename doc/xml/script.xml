@@ -147,13 +147,13 @@
         </xml_attribute>
 -->
 
-        <xml_attribute name="use_engine" type="scope" initial="task">
+        <!--xml_attribute name="use_engine" type="scope" initial="task">
             <description>
                 <p>
                     Nur <code>use_engine="task"</code> ist möglich.
                 </p>
             </description>
-        </xml_attribute>
+        </xml_attribute-->
 
     </xml_attributes>
 

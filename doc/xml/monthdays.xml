@@ -54,10 +54,14 @@
         &lt;period begin="08:00" end="12:00"/>
         &lt;period begin="15:00" end="18:00"/>
     &lt;/day>
+    &lt;weekday day="monday" which="1">
+        &lt;period single_start="02:00"/>
+    &lt;/weekday>
 &lt;/monthdays></pre>
         <p>
             Setzt die Laufzeiten fest für den Ersten eines Monats 10:00 bis 12:00 und
             für den Zweiten eines Monats 08:00 bis 12:00 und 15:00 bis 18:00.
+            Außerdem wird der Job am jeweils ersten Montag eines Monats um 2 Uhr morgens gestartet.
         </p>
     </example>
 
