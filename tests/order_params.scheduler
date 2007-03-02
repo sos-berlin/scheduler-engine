@@ -21,7 +21,7 @@ order.params("Edno") = "ett";
 order.params("dwa" ) = "två";
 spooler_log.info( order.payload_is_type( "spooler.variable_set" ) );
 spooler_log.info( order.payload_is_type( "hostware.record" ) );
-spooler.job_chain( "order_params.scheduler" ).add_order_or_replace( order );
+spooler.job_chain( "order_params.scheduler" ).add_or_replace_order( order );
         
         ]]></script>
 
