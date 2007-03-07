@@ -139,6 +139,8 @@ struct Web_service_response;
 struct Xslt_stylesheet;
 
 
+typedef stdext::hash_set<string> String_set;
+
 } //namespace scheduler
 
 //namespace http

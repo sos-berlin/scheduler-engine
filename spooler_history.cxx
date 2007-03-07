@@ -1501,9 +1501,7 @@ void Database::write_order_history( Order* order, Transaction* outer_transaction
             insert[ "state_text" ] = order->state_text();
             insert[ "spooler_id" ] = _spooler->id_for_db();
             insert.set_datetime( "start_time", order->start_time().as_string(Time::without_ms) );
-
-            if( order->end_time() )
-            insert.set_datetime( "end_time"  , order->end_time().as_string(Time::without_ms) );
+            insert.set_datetime( "end_time"  , ( order->end_time()? order->end_time() : Time::now() ).as_string(Time::without_ms) );
 
             ta.execute( insert, __FUNCTION__ );
 
@@ -1512,7 +1510,7 @@ void Database::write_order_history( Order* order, Transaction* outer_transaction
 
             if( _spooler->_order_history_with_log )
             {
-                string log_text= order->log()->as_string();
+                string log_text = order->log()->as_string();
                 if( log_text != "" )
                 {
                     try 

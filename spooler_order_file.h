@@ -20,9 +20,10 @@ void                            init_file_order_sink    ( Scheduler* );         
 struct Directory_file_order_source_interface : //idispatch_implementation< Directory_file_order_source, spooler_com::Idirectory_file_order_source >,
                                                Order_source
 {
+                                Directory_file_order_source_interface( Job_chain* job_chain, Type_code t ) : Order_source( job_chain, t ) {}
 };
 
-ptr<Directory_file_order_source_interface> new_directory_file_order_source( Scheduler* scheduler, const xml::Element_ptr& element );
+ptr<Directory_file_order_source_interface> new_directory_file_order_source( Job_chain*, const xml::Element_ptr& );
 
 //-------------------------------------------------------------------------------------------------
 

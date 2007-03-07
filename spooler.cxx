@@ -1927,6 +1927,7 @@ void Spooler::stop( const exception* )
 
     _order_subsystem = NULL;
     //_object_set_class_list.clear();
+    _task_subsystem->close();
     _job_subsystem->_job_list.clear();
     _process_class_list.clear();
     _java_subsystem->close();
@@ -3484,7 +3485,8 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
                 S cmd; cmd << "gzip <" << path << " >" << gz_path;
                 try
                 {
-                    copy_file( path, "gzip | " + gz_path ); //gzip_file( log_filename, log_filename + ".gz" );
+                    //_log->debug( scheduler_message( "SCHEDULER-848", gz_path ) );
+                    copy_file( "file -b " + path, "gzip | " + gz_path ); //gzip_file( log_filename, log_filename + ".gz" );
                 }
                 catch( exception& x ) { cerr << x.what() << ", while " << cmd << "\n"; }
             }

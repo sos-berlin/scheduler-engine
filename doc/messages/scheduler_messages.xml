@@ -3512,6 +3512,12 @@
                 <title>Please use new name '<p1/>' instead of old '<p2/>'</title>
             </text>
         </message>
+
+        <!--message code="SCHEDULER-848" weight="debug3">
+            <text xml:lang="en">
+                <title>Compressing existent file '<p1/>' to '<p2/>'</title>
+            </text>
+        </message-->
     </messages>
     
 </messages>

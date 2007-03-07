@@ -31,6 +31,15 @@ Task_subsystem::~Task_subsystem()
     _task_list.clear();
 }
 
+//----------------------------------------------------------------------------Task_subsystem::close
+
+void Task_subsystem::close() 
+{
+    _prioritized_order_job_array.clear();
+    _task_list.clear();
+    _event = NULL;
+}
+
 //------------------------------------------------Task_subsystem::build_prioritized_order_job_array
 
 void Task_subsystem::build_prioritized_order_job_array()

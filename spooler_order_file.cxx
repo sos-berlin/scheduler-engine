@@ -237,9 +237,9 @@ void init_file_order_sink( Scheduler* scheduler )
 
 //------------------------------------------------------------------new_directory_file_order_source
 
-ptr<Directory_file_order_source_interface> new_directory_file_order_source( Scheduler* scheduler, const xml::Element_ptr& element )
+ptr<Directory_file_order_source_interface> new_directory_file_order_source( Job_chain* job_chain, const xml::Element_ptr& element )
 {
-    ptr<Directory_file_order_source> result = Z_NEW( Directory_file_order_source( scheduler, element ) );
+    ptr<Directory_file_order_source> result = Z_NEW( Directory_file_order_source( job_chain, element ) );
     return +result;
 }
 
@@ -248,7 +248,7 @@ ptr<Directory_file_order_source_interface> new_directory_file_order_source( Sche
 Directory_file_order_source::Directory_file_order_source( Job_chain* job_chain, const xml::Element_ptr& element )
 :
     //Idispatch_implementation( &class_descriptor ),
-    Order_source( job_chain, type_directory_file_order_source ),
+    Directory_file_order_source_interface( job_chain, type_directory_file_order_source ),
     _zero_(this+1),
     _delay_after_error(delay_after_error_default),
     _repeat(directory_file_order_source_repeat_default),
@@ -598,16 +598,6 @@ Order* Directory_file_order_source::read_directory( bool was_notified, const str
 
     _expecting_request_order = result != NULL;  // N‰chstes request_order() abwarten
 
-    int delay = _directory_error        ? delay_after_error() :
-                _expecting_request_order? INT_MAX                // N‰chstes request_order() abwarten
-                                        : _repeat;               // Unter Unix funktioniert's _nur_ durch wiederkehrendes Nachsehen
-
-    if( delay < 1 )  delay = 1;     // Falls ein Spaﬂvogel es geschafft hat, repeat="0" anzugeben
-
-    set_async_delay( delay );
-    //Z_LOG2( "scheduler.file_order", __FUNCTION__  << " set_async_delay(" << delay << ")  _expecting_request_order=" << _expecting_request_order << 
-    //          "   async_next_gmtime" << Time( async_next_gmtime() ).as_string() << "GMT \n" );
-
     return result;
 }
 
@@ -616,6 +606,32 @@ Order* Directory_file_order_source::read_directory( bool was_notified, const str
 Order* Directory_file_order_source::fetch_and_occupy_order( const Time& now, const string&, Task* occupying_task )
 {
     Order* result = NULL;
+
+    String_set known_orders;
+
+
+    if( _job_chain->is_distributed() )
+    {
+        // Eine Optimierung: Damit try_place_in_job_chain() nicht bei jeder Datei feststellen muss, dass es bereits einen Auftrag in der Datenbank gibt.
+
+        S select_sql;
+        select_sql << "select `id`  from " << _spooler->_orders_tablename
+                   << "  where " << _job_chain->db_where_condition();
+                 //<< "  where `distributed_next_time` <= " <<  never_database_distributed_next_time 
+
+        for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
+        {
+            known_orders.clear();
+
+            Any_file result_set = ta.open_result_set( select_sql, __FUNCTION__ );
+            while( !result_set.eof() )
+            {
+                Record record = result_set.get_record();
+                known_orders.insert( record.as_string( 0 ) );
+            }
+        }
+        catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_orders_tablename, x ), __FUNCTION__ ); }
+    }
 
 
     while( !result  &&  _new_files_index < _new_files.size() )
@@ -636,7 +652,12 @@ Order* Directory_file_order_source::fetch_and_occupy_order( const Time& now, con
 
                     string date = Time( new_file->last_write_time() ).as_string( Time::without_ms ) + " UTC";   // localtime_from_gmtime() rechnet alte Sommerzeit-Daten in Winterzeit um
 
-                    bool ok = order->try_place_in_job_chain( _job_chain );
+
+                    bool ok = true;
+
+                    if( ok  &&  _job_chain->is_distributed() )  ok = known_orders.find( order->string_id() ) == known_orders.end();     // Unbekannt?
+
+                    if( ok )  ok = order->try_place_in_job_chain( _job_chain );
                     // !ok ==> Auftrag ist bereits vorhanden
 
                     if( ok  &&  order->is_distributed() ) 
@@ -1015,6 +1036,14 @@ bool Directory_file_order_source::async_continue_( Async_operation::Continue_fla
     read_directory( was_notified, cause );
 
     if( _new_files_index < _new_files.size() )  _next_order_queue->tip_for_new_distributed_order();
+
+
+    int delay = _directory_error        ? delay_after_error() :
+                _expecting_request_order? INT_MAX                // N‰chstes request_order() abwarten
+                                        : _repeat;               // Unter Unix funktioniert's _nur_ durch wiederkehrendes Nachsehen
+    set_async_delay( max( 1, delay ) );     // Falls ein Spaﬂvogel es geschafft hat, repeat="0" anzugeben
+    //Z_LOG2( "scheduler.file_order", __FUNCTION__  << " set_async_delay(" << delay << ")  _expecting_request_order=" << _expecting_request_order << 
+    //          "   async_next_gmtime" << Time( async_next_gmtime() ).as_string() << "GMT \n" );
 
     return true;
 }

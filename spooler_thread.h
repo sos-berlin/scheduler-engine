@@ -17,7 +17,7 @@ struct Task_subsystem : Subsystem
                                ~Task_subsystem              ();
 
 
-    virtual void                close                       ()                                      {}
+    virtual void                close                       ();
 
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
     

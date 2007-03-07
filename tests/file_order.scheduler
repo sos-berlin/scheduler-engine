@@ -142,6 +142,7 @@ public class My_job  extends sos.spooler.Job_impl
         <job_chains>
             <job_chain name="my_job_chain" distributed="yes">
                 <file_order_source directory="$SOS_MOUNT/tmp/x/" regex="^g.*\.ok$"/>
+                <file_order_source directory="$SOS_MOUNT/tmp/y/" regex="^g.*\.ok$"/>
                 <job_chain_node state="edno" job="javascript"/>
                 <job_chain_node state="dwa"  job="javascript2"/>
                 <job_chain_node state="tri"  job="java"/>

@@ -1263,9 +1263,9 @@ void Prefix_log::continue_with_text( const string& text )
 
 string Prefix_log::as_string()
 {
-    if( opened() )
+    if( _started )
     {
-        return string_from_file( filename() );
+        return string_from_file( filename() ) + _log_buffer;
     }
     else
     {

@@ -118,7 +118,7 @@ struct Database_order_detector : Async_operation, Scheduler_object
 
     string                      make_union_select_order_sql ( const string& select_sql_begin, const string& select_sql_end );
     string                      make_where_expression_for_distributed_orders_at_job( Job* );
-    bool                        is_job_requesting_order     ( Job* );
+    bool                        is_job_requesting_order_then_calculate_next     ( Job* );
     int                         read_result_set             ( Read_transaction*, const string& select_sql );
     void                        set_alarm                   ();
     void                        request_order               ();
@@ -197,7 +197,7 @@ string Database_order_detector::async_state_text_() const
 bool Database_order_detector::async_continue_( Continue_flags )
 {
     Z_LOGI2( "scheduler.order", __FUNCTION__ << "  " << async_state_text() << "\n" );
-    _spooler->assert_are_orders_distributed( __FUNCTION__);
+    _spooler->assert_are_orders_distributed( __FUNCTION__ );
 
 
     _now     = Time::now();
@@ -240,7 +240,7 @@ bool Database_order_detector::async_continue_( Continue_flags )
             {
                 Job* job = *job_iterator;
                 
-                if( is_job_requesting_order( job ) )
+                if( is_job_requesting_order_then_calculate_next( job ) )
                 {
                     string job_chain_expression = make_where_expression_for_distributed_orders_at_job( job );
 
@@ -258,15 +258,15 @@ bool Database_order_detector::async_continue_( Continue_flags )
     //if( announced_orders_count )  on_new_order();
 
 
-    _now_utc = ::time(NULL);
+    //_now_utc = ::time(NULL);
 
-    FOR_EACH_JOB( job_iterator )
-    {
-        if( Order_queue* order_queue = (*job_iterator)->order_queue() )
-        {
-            order_queue->calculate_next_distributed_order_check_time( _now_utc );
-        }
-    }
+    //FOR_EACH_JOB( job_iterator )
+    //{
+    //    if( Order_queue* order_queue = (*job_iterator)->order_queue() )
+    //    {
+    //        order_queue->calculate_next_distributed_order_check_time( _now_utc );
+    //    }
+    //}
 
     set_alarm();
 
@@ -284,7 +284,7 @@ string Database_order_detector::make_union_select_order_sql( const string& selec
     {
         Job* job = *job_iterator;
 
-        if( is_job_requesting_order( job ) )
+        if( is_job_requesting_order_then_calculate_next( job ) )
         {
             string job_chains_expression = make_where_expression_for_distributed_orders_at_job( job );
 
@@ -300,16 +300,20 @@ string Database_order_detector::make_union_select_order_sql( const string& selec
     return result;
 }
 
-//-------------------------------------------------Database_order_detector::is_job_requesting_order
+//-----------------------------Database_order_detector::is_job_requesting_order_then_calculate_next
 
-bool Database_order_detector::is_job_requesting_order( Job* job )
+bool Database_order_detector::is_job_requesting_order_then_calculate_next( Job* job )
 {
     bool result = false;
 
     if( Order_queue* order_queue = job->order_queue() )
     {
-        result = order_queue->is_distributed_order_requested( _now_utc )
-                 && order_queue->next_announced_distributed_order_time() > _now;
+        if( order_queue->is_distributed_order_requested( _now_utc ) )
+        {
+            order_queue->calculate_next_distributed_order_check_time( _now_utc );
+
+            result = order_queue->next_announced_distributed_order_time() > _now;
+        }
     }
 
     return result;
@@ -1011,7 +1015,7 @@ void Job_chain::set_dom( const xml::Element_ptr& element )
     {
         if( e.nodeName_is( "file_order_source" ) )      // Wegen _is_on_blacklist und _is_virgin
         {
-            ptr<Directory_file_order_source_interface> d = new_directory_file_order_source( this, e ) );
+            ptr<Directory_file_order_source_interface> d = new_directory_file_order_source( this, e );
             _order_sources._order_source_list.push_back( +d );
         }
         else
@@ -2199,9 +2203,6 @@ Order* Order_queue::first_order( const Time& now ) const
 //--------------------------------------------------------------Order_queue::fetch_and_occupy_order
 
 Order* Order_queue::fetch_and_occupy_order( const Time& now, const string& cause, Task* occupying_task )
-
-// 2. Parameter: const string& cause
-
 {
     assert( occupying_task );
 
