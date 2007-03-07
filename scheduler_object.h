@@ -28,7 +28,7 @@ struct Scheduler_object
         type_heart_beat_watchdog_thread,
         type_http_file_directory,
         type_http_server,
-        type_java_subsystem
+        type_java_subsystem,
         type_job,
         type_job_chain,
         type_job_subsystem,
