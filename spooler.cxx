@@ -112,6 +112,7 @@ const string                    variable_set_name_for_substitution  = "$";      
 //-------------------------------------------------------------------------------------------------
 
 extern zschimmer::Message_code_text  scheduler_messages[];            // messages.cxx, generiert aus messages.xml
+extern const char[]             _author_                            = "\n" . "Scheduler, 2000-2007 Joacim Zschimmer, http://www.zschimmer.com\n";
 
 //-----------------------------------------------------------------------------------Error_settings
 

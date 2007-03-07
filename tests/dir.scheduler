@@ -135,7 +135,8 @@ public class Test extends sos.spooler.Job_impl
 
                                                          
             
-            <start_when_directory_changed directory="/tmp/1" regex="\.data$" />
+            <start_when_directory_changed directory="/tmp/outbound.dbkk" regex="^.*(\.pdf|\.xml)$"/>
+
             <delay_after_error error_count="1" delay="30"/>            
 
             <run_time/>

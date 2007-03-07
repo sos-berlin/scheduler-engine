@@ -1,4 +1,4 @@
-// $Id$
+// $Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
 
 #ifndef __SCHEDULER_OBJECT_H
 #define __SCHEDULER_OBJECT_H
@@ -17,34 +17,35 @@ struct Scheduler_object
     enum Type_code
     {
         type_none,
-        type_scheduler,
-        type_job,
-        type_task,
-        type_order,
-        type_job_chain,
+
+        type_active_schedulers_watchdog,
+        type_cluster_member,
         type_database,
-        type_http_server,
+        type_database_order_detector,
+        type_directory_file_order_source,
+        type_exclusive_scheduler_watchdog,
+        type_heart_beat,
+        type_heart_beat_watchdog_thread,
         type_http_file_directory,
-        type_web_services,
+        type_http_server,
+        type_java_subsystem
+        type_job,
+        type_job_chain,
+        type_job_subsystem,
         type_web_service,
         type_web_service_operation,
         type_web_service_request,
         type_web_service_response,
-        type_process,
-        type_directory_file_order_source,
-        type_scheduler_event_manager,
-        type_cluster_member,
-        type_heart_beat_watchdog_thread,
-        type_heart_beat,
-        type_exclusive_scheduler_watchdog,
-        type_active_schedulers_watchdog,
-        type_database_order_detector,
+        type_web_services,
+        type_order,
         type_order_subsystem,
-        type_xml_client_connection,
+        type_process,
+        type_scheduler,
+        type_scheduler_event_manager,
         type_scheduler_script,
-        type_job_subsystem,
+        type_task,
         type_task_subsystem,
-        type_java_subsystem
+        type_xml_client_connection,
       //type_subprocess_register
     };
 

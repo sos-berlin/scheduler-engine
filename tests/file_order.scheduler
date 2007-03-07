@@ -40,7 +40,6 @@ import java.io.*;
 
 public class Generator  extends sos.spooler.Job_impl
 {   
-    final int n        = 5000;
     int i              = 0;
     int new_file_count = 0;
 
@@ -49,6 +48,7 @@ public class Generator  extends sos.spooler.Job_impl
 
     public boolean spooler_process()  throws Exception
     {     
+        int n            = Integer.parseInt( spooler.param() );
         String sos_mount = spooler_task.params().value( "sos_mount" );
         
         for( int j = 1; j <= 1000; j++ )
@@ -78,17 +78,12 @@ public class Generator  extends sos.spooler.Job_impl
                 <script language="JavaScript">
                     <![CDATA[
 
-//counter = 1*spooler.variables( "n" );
-
 function spooler_process() 
 {               
     var order = spooler_task.order;
     spooler_log.info( "ORDER-ID=" + order.id );
     //spooler_log.info( "order.xml=" + spooler_task.order.xml );
     //spooler_log.info( "spooler_task.trigger_files=" + spooler_task.trigger_files );
-    //new ActiveXObject( "hostware.global" ).sleep( 10 );
-    //spooler.terminate();
-    //if( --counter == 0 )  spooler.terminate();
     //if( spooler_task.order.params( "scheduler_file_order" ) == "/tmp/x/gen9" )  spooler.terminate();
     spooler_task.end();
     return true;
@@ -100,7 +95,7 @@ function spooler_process()
             </job>
 
             
-            <job name="javascript2" order="yes" tasks="2">
+            <job name="javascript2" order="yes" tasks="1">
         
                 <script language="JavaScript"><![CDATA[
 
@@ -110,6 +105,7 @@ function spooler_process()
 {               
     var order = spooler_task.order;     // Prüfen, ob Garbage Collector den Auftrag zu lange offen hält
     spooler_log.info( "ORDER-ID=" + order.id );
+    new ActiveXObject( "hostware.global" ).sleep( 0.5 );
     spooler_task.end();
     return true;
 }
@@ -119,7 +115,7 @@ function spooler_process()
             </job>
         
             
-            <job name="java" order="yes" tasks="3">
+            <job name="java" order="yes" tasks="1">
                 <script java_class="spooler_job.My_job">
                     <![CDATA[
 package spooler_job;
@@ -146,14 +142,10 @@ public class My_job  extends sos.spooler.Job_impl
         <job_chains>
             <job_chain name="my_job_chain" distributed="yes">
                 <file_order_source directory="$SOS_MOUNT/tmp/x/" regex="^g.*\.ok$"/>
-                <!--file_order_source directory="/tmp/yyy/" regex="^g"/-->
-                <!--file_order_source directory="/tmp/y" regex="^g" next_state="second"/-->
-                <!--job_chain_node state="edno" job="javascript"/-->
-                <!--job_chain_node state="dwa" job="javascript2"/-->
-                <job_chain_node state="tri" job="java"/>
+                <job_chain_node state="edno" job="javascript"/>
+                <job_chain_node state="dwa"  job="javascript2"/>
+                <job_chain_node state="tri"  job="java"/>
                 <file_order_sink state="remove" remove="yes"/>
-                <!--file_order_sink state="remove" move_to="/gibsnich/"/-->
-                <!--job_chain_node state="finished"/-->
             </job_chain>
         </job_chains>        
     </config>

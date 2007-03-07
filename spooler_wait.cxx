@@ -577,7 +577,7 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
     //    if( !ok )  z::throw_mswin( "CancelWaitableTimer" );
     //}
 
-    return result;
+    return result;                                          l
 
 #else
 

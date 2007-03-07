@@ -196,7 +196,7 @@ string Database_order_detector::async_state_text_() const
 
 bool Database_order_detector::async_continue_( Continue_flags )
 {
-    Z_LOGI2( "scheduler.cluster", __FUNCTION__ << "  " << async_state_text() << "\n" );
+    Z_LOGI2( "scheduler.order", __FUNCTION__ << "  " << async_state_text() << "\n" );
     _spooler->assert_are_orders_distributed( __FUNCTION__);
 
 
@@ -2137,6 +2137,8 @@ void Order_queue::calculate_next_distributed_order_check_time( time_t now )
 
 void Order_queue::set_next_announced_distributed_order_time( const Time& t, bool is_now )
 { 
+    Z_LOG2( "scheduler.order", _job->obj_name() << "  " << __FUNCTION__ << "(" << t << ( is_now? ",is_now" : "" ) << ")  vorher: " << _next_announced_distributed_order_time << "\n" );
+
     _next_announced_distributed_order_time = t; 
     
     Z_DEBUG_ONLY( assert( is_now? t <= Time::now() : t > Time::now() ) );
@@ -2159,6 +2161,8 @@ Time Order_queue::next_announced_distributed_order_time()
 
 void Order_queue::tip_for_new_distributed_order()
 {
+    Z_LOG2( "scheduler.order", _job->obj_name() << "  " << __FUNCTION__ << "\n" );
+
     if( !_has_tip_for_new_order )  _job->signal( __FUNCTION__ );
     _has_tip_for_new_order = true;
 }
@@ -3357,7 +3361,7 @@ void Order::set_dom( const xml::Element_ptr& element, Variable_set_map* variable
         set_suspended( element.bool_getAttribute( "suspended" ) );
 
     if( element.hasAttribute( "start_time" ) )  _start_time.set_datetime( element.getAttribute( "start_time" ) );
-    if( element.hasAttribute( "end_time"   ) )  _start_time.set_datetime( element.getAttribute( "end_time"   ) );
+    if( element.hasAttribute( "end_time"   ) )  _end_time  .set_datetime( element.getAttribute( "end_time"   ) );
 
     if( setback != "" )  _setback.set_datetime( setback );
 

@@ -1,4 +1,4 @@
-// $Id$
+// $Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
 
 
 #include "spooler.h"
@@ -12,34 +12,37 @@ string Scheduler_object::name_of_type_code( Scheduler_object::Type_code type_cod
 {
     switch( type_code )
     {
-        case type_none:                     return "none";
-        case type_scheduler:                return "Scheduler";
-        case type_job:                      return "Job";
-        case type_task:                     return "Task";
-        case type_order:                    return "Order";
-        case type_job_chain:                return "Job_chain";
-        case type_database:                 return "Database";
-        case type_http_server:              return "Http_server";
-        case type_http_file_directory:      return "Http_file_directory";
-        case type_web_services:             return "Web_services";
-        case type_web_service:              return "Web_service";
-        case type_web_service_operation:    return "Web_service_operation";
-        case type_web_service_request:      return "Web_service_request";
-        case type_web_service_response:     return "Web_service_response";
-        case type_scheduler_event_manager:  return "Scheduler_event_manager";
-        case type_cluster_member:           return "Cluster_member";
-        case type_heart_beat_watchdog_thread: return "Heart_beat_watchdog_thread";
-        case type_heart_beat:               return "Heart_beat";
+        case type_none:                         return "none";
+
+        case type_active_schedulers_watchdog:   return "Active_schedulers_watchdog";
+        case type_cluster_member:               return "Cluster_member";
+        case type_database:                     return "Database";
+        case type_database_order_detector:      return "Database_order_detector";
         case type_exclusive_scheduler_watchdog: return "Exclusive_scheduler_watchdog";
-        case type_active_schedulers_watchdog: return "Active_schedulers_watchdog";
-        case type_database_order_detector:  return "Database_order_detector";
-        case type_order_subsystem:          return "Order_subsystem";
-        case type_xml_client_connection:    return "Xml_client_connection";
-        case type_scheduler_script:         return "Scheduler_script";
-        case type_job_subsystem:            return "Job_subsystem";
-        case type_task_subsystem:           return "Task_subsystem";
-        case type_java_subsystem:           return "Java_subsystem";
-        default:                            return S() << "Type_code(" << type_code << ")";
+        case type_directory_file_order_source:  return "Directory_file_order_source";
+        case type_heart_beat:                   return "Heart_beat";
+        case type_heart_beat_watchdog_thread:   return "Heart_beat_watchdog_thread";
+        case type_http_server:                  return "Http_server";
+        case type_http_file_directory:          return "Http_file_directory";
+        case type_java_subsystem:               return "Java_subsystem";
+        case type_job:                          return "Job";
+        case type_job_chain:                    return "Job_chain";
+        case type_job_subsystem:                return "Job_subsystem";
+        case type_web_service:                  return "Web_service";
+        case type_web_service_operation:        return "Web_service_operation";
+        case type_web_service_request:          return "Web_service_request";
+        case type_web_service_response:         return "Web_service_response";
+        case type_web_services:                 return "Web_services";
+        case type_order:                        return "Order";
+        case type_order_subsystem:              return "Order_subsystem";
+        case type_process:                      return "Process";
+        case type_scheduler_event_manager:      return "Scheduler_event_manager";
+        case type_scheduler_script:             return "Scheduler_script";
+        case type_scheduler:                    return "Scheduler";
+        case type_task:                         return "Task";
+        case type_task_subsystem:               return "Task_subsystem";
+        case type_xml_client_connection:        return "Xml_client_connection";
+        default:                                return S() << "Type_code(" << type_code << ")";
     }
 }
 
