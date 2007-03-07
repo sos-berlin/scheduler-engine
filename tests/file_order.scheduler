@@ -85,7 +85,7 @@ function spooler_process()
     //spooler_log.info( "order.xml=" + spooler_task.order.xml );
     //spooler_log.info( "spooler_task.trigger_files=" + spooler_task.trigger_files );
     //if( spooler_task.order.params( "scheduler_file_order" ) == "/tmp/x/gen9" )  spooler.terminate();
-    spooler_task.end();
+    //spooler_task.end();
     return true;
 }
 
@@ -106,7 +106,7 @@ function spooler_process()
     var order = spooler_task.order;     // Prüfen, ob Garbage Collector den Auftrag zu lange offen hält
     spooler_log.info( "ORDER-ID=" + order.id );
     new ActiveXObject( "hostware.global" ).sleep( 0.5 );
-    spooler_task.end();
+    //spooler_task.end();
     return true;
 }
 

@@ -2038,7 +2038,7 @@ bool Job::request_order( const Time& now, const string& cause )
 
 void Job::withdraw_order_request()
 {
-    Z_LOGI2( "joacim", __FUNCTION__ << "\n" );
+    Z_LOGI2( "joacim", obj_name() << " " << __FUNCTION__ << "\n" );
     assert( _order_queue );
 
     // Jetzt prüfen wir die verteilten Aufträge.

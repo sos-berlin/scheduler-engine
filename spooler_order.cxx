@@ -2057,7 +2057,7 @@ void Order_queue::update_priorities()
 
 bool Order_queue::request_order( const Time& now, const string& cause )
 {
-    Z_LOGI2( "joacim", __FUNCTION__ << "  " << cause << "\n" );
+    // Diese Methode weniger oft aufgerufen werden.  Z_LOGI2( "joacim", _job->obj_name() << " " << __FUNCTION__ << "  " << cause << "\n" );
 
     bool result = false;
 

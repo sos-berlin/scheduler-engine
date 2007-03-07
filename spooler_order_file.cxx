@@ -619,6 +619,7 @@ Order* Directory_file_order_source::fetch_and_occupy_order_from_new_files( const
                 }
 
                 _new_files[ _new_files_index ] = NULL;
+                --_new_files_count;
 
                 if( _bad_map.find( path ) != _bad_map.end() )   // Zurzeit nicht denkbar, weil es nur zu lange Pfade betrifft
                 {
