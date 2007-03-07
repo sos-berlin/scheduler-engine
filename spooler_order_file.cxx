@@ -39,6 +39,82 @@ const int       max_tries                                 = 2;        // Nach Fe
 
 //Directory_file_order_source::Class_descriptor    Directory_file_order_source::class_descriptor ( &typelib, "Spooler.Directory_file_order_source", Directory_file_order_source::_methods );
 
+//----------------------------------------------------------------------Directory_file_order_source
+
+struct Directory_file_order_source : Directory_file_order_source_interface
+{
+    enum State
+    {
+        s_none,
+        s_order_requested
+    };
+
+
+    explicit                    Directory_file_order_source( Job_chain*, const xml::Element_ptr& );
+                               ~Directory_file_order_source();
+
+    // Async_operation:
+    virtual Socket_event*       async_event             ()                                          { return &_notification_event; }
+    virtual bool                async_continue_         ( Continue_flags );
+    virtual bool                async_finished_         () const                                    { return false; }
+    virtual string              async_state_text_       () const;
+
+    // Order_source:
+    void                        close                   ();
+    xml::Element_ptr            dom_element             ( const xml::Document_ptr&, const Show_what& );
+    void                        finish                  ();
+    void                        start                   ();
+    bool                        request_order           ( const string& cause );
+    Order*                      fetch_and_occupy_order  ( const Time& now, const string& cause, Task* occupying_task );
+    void                        withdraw_order_request  ();
+    string                      obj_name                () const;
+
+
+  private:
+    void                        send_mail               ( Scheduler_event_type, const exception* );
+    void                        start_or_continue_notification( bool was_notified );
+    void                        close_notification      ();
+    Order*                      read_directory          ( bool was_notified, const string& cause );
+    void                        read_new_files_and_handle_deleted_files( const string& cause );
+    bool                        read_new_files          ();
+    bool                        clean_up_blacklisted_files();
+  //bool                        clean_up_virgin_orders  ();
+    int                         delay_after_error       ();
+    void                        clear_new_files         ();
+
+    Fill_zero                  _zero_;
+    File_path                  _path;
+    string                     _regex_string;
+    Regex                      _regex;
+    int                        _delay_after_error;
+    int                        _repeat;
+    bool                       _expecting_request_order;
+    Xc_copy                    _directory_error;
+    bool                       _send_recovered_mail;
+    Event                      _notification_event;             // Nur Windows
+    Time                       _notification_event_time;        // Wann wir zuletzt die Benachrichtigung bestellt haben
+    int                        _max_orders;
+
+    vector< ptr<z::File_info> > _new_files;
+    int                        _new_files_index;
+    int                        _new_files_count;        // _new_files.size() ohne NULL-Einträge
+    Time                       _new_files_time;
+
+
+    struct Bad_entry : Object
+    {
+                                Bad_entry               ( const File_path& p, const exception& x )  : _file_path(p), _error(x) {}
+
+        File_path              _file_path;
+        Xc_copy                _error;
+    };
+
+    typedef stdext::hash_map< string, ptr<Bad_entry> >  Bad_map;
+    Bad_map                    _bad_map;
+
+    bool                       _are_blacklisted_orders_cleaned_up;
+};
+
 //------------------------------------------------------------------File_order_sink_module_instance
 
 struct File_order_sink_module_instance : Internal_module_instance
@@ -157,6 +233,14 @@ void init_file_order_sink( Scheduler* scheduler )
     // Der Scheduler führt Tasks des Jobs scheduler_file_order_sink in jedem Scheduler-Schritt aus,
     // damit sich die Aufträge nicht stauen (Der interne Job läuft nicht in einem eigenen Prozess)
     // Siehe Task_subsystem::step().
+}
+
+//------------------------------------------------------------------new_directory_file_order_source
+
+ptr<Directory_file_order_source_interface> new_directory_file_order_source( Scheduler* scheduler, const xml::Element_ptr& element )
+{
+    ptr<Directory_file_order_source> result = Z_NEW( Directory_file_order_source( scheduler, element ) );
+    return +result;
 }
 
 //-----------------------------------------Directory_file_order_source::Directory_file_order_source
@@ -422,23 +506,10 @@ bool Directory_file_order_source::request_order( const string& cause )
 
         if( !result )
         {
-            //if( _job_chain->is_distributed() )
-            //{
-            //    result = read_new_files();
-            //}
-            //else
-            {
-                async_wake();
-            }
+            async_wake();   // Veranlasst Aufruf von async_continue_()
         }
 
         _expecting_request_order = false;
-        //Order* order = read_directory( false, cause );
-        //if( order )  
-        //{
-        //    assert( order->is_immediately_processable( Time::now() ) );
-        //    result = true;
-        //}
     }
     else
     {
@@ -456,31 +527,6 @@ void Directory_file_order_source::withdraw_order_request()
 
     _expecting_request_order = false;
     set_async_next_gmtime( double_time_max );
-}
-
-//---------------------------------------------------------Directory_file_order_source::fetch_order
-
-Order* Directory_file_order_source::fetch_and_occupy_order( const Time& now, const string& cause, Task* occupying_task )
-{
-    Order* result = NULL;
-
-    //while( !result )
-    //{
-        Order* order = fetch_and_occupy_order_from_new_files( now, cause, occupying_task );
-        
-        //if( !order )
-        //{
-        //    read_directory( false, __FUNCTION__ );
-
-        //    order = fetch_and_occupy_order_from_new_files( now, cause, occupying_task );
-        //}
-
-        //if( !order )  break;
-
-        result = order;
-    //}
-
-    return result;
 }
 
 //------------------------------------------------------Directory_file_order_source::read_directory
@@ -565,9 +611,9 @@ Order* Directory_file_order_source::read_directory( bool was_notified, const str
     return result;
 }
 
-//---------------------------------------------Directory_file_order_source::fetch_and_occupy_order_from_new_files
+//----------------------------------------------Directory_file_order_source::fetch_and_occupy_order
 
-Order* Directory_file_order_source::fetch_and_occupy_order_from_new_files( const Time& now, const string&, Task* occupying_task )
+Order* Directory_file_order_source::fetch_and_occupy_order( const Time& now, const string&, Task* occupying_task )
 {
     Order* result = NULL;
 

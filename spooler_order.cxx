@@ -1011,7 +1011,7 @@ void Job_chain::set_dom( const xml::Element_ptr& element )
     {
         if( e.nodeName_is( "file_order_source" ) )      // Wegen _is_on_blacklist und _is_virgin
         {
-            ptr<Directory_file_order_source> d = Z_NEW( Directory_file_order_source( this, e ) );
+            ptr<Directory_file_order_source_interface> d = new_directory_file_order_source( this, e ) );
             _order_sources._order_source_list.push_back( +d );
         }
         else

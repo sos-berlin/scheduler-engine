@@ -13,6 +13,7 @@ struct Order_queue;
 struct Order;
 struct Order_subsystem;
 struct Database_order_detector;
+struct Directory_file_order_source;
 
 //-------------------------------------------------------------------------------------------------
 
