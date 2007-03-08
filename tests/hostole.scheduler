@@ -18,7 +18,7 @@
 
 //spooler.job( "rtf" ).start();            
 //spooler.job( "javascript" ).start();            
-spooler.job( "java" ).start();            
+//spooler.job( "java" ).start();            
            
         ]]>
         </script>
@@ -40,7 +40,7 @@ file.close();
                 ]]>
                 </script>
 
-                <run_time/>
+                <run_time once="yes"/>
             </job>
 
 
@@ -63,7 +63,7 @@ processor.close();
                 ]]>
                 </script>
 
-                <run_time/>
+                <run_time once="yes"/>
             </job>
 
 
@@ -129,7 +129,7 @@ public class My_job  extends sos.spooler.Job_impl
                 ]]>
                 </script>
 
-                <run_time/>
+                <run_time once="yes"/>
             </job>
 
         </jobs>
