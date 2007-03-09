@@ -25,7 +25,7 @@ public class Scheduler_script  extends sos.spooler.Job_impl
     public String my_start_time_function( String time, String what )  throws Exception
     {
         spooler_log.info( "+++++++++++++ my_start_time_function " + time + " " + what );
-        return "2007-01-30 08:14";
+        return "2007-03-30 08:14";
     }
 }
                 ]]>

@@ -7,7 +7,7 @@
 
 
 
-#if defined Z_HPUX && !defined __IA64__
+#if defined Z_HPUX_PARISC
 #   define GZIP_AUTO ""   // gzip -auto liefert ZLIB_STREAM_ERROR mit gcc 3.1, jz 7.5.2003
 #   define GZIP      ""
 #else

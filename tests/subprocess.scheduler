@@ -56,8 +56,6 @@ spooler_log.info( "wait_for_termination ok=" + ok );
 
 if( subprocess.terminated )  spooler_log.info( "exit code=" + subprocess.exit_code ), spooler_log.info( "termination signal=" + subprocess.termination_signal );
 
-subprocess.start( "sh -c set" );
-
 var cmd = "sleep 6";
 var exit_code = system( cmd, 5 );
 spooler_log.info( cmd + " ==> " + exit_code );
