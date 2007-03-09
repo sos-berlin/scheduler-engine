@@ -138,8 +138,8 @@ struct Order : Com_order,
     void                    set_xml_payload             ( const string& xml );
     void                    set_xml_payload             ( const xml::Element_ptr& );
     string                      xml_payload             () const                                    { return _xml_payload; }
-    void                    set_web_service             ( const string& );
-    void                    set_web_service             ( Web_service* );
+    void                    set_web_service             ( const string&, bool force = false );
+    void                    set_web_service             ( Web_service*, bool force = false );
     Web_service*                web_service             () const;
     Web_service*                web_service_or_null     () const                                    { return _web_service; }
     void                    set_http_operation          ( http::Operation* op )                     { _http_operation = op; }

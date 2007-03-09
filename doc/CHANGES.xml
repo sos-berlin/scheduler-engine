@@ -11,6 +11,17 @@
     <scheduler_keyword keyword="Change log"/>
 
 
+    <change date="2007-03-08" version="2.0.167" subversion_revision="4877">
+        <revision type="correction" title="Auftragsprokolle wurden nicht immer in die Historie aufgenommen">
+            <description>
+                <p>
+                    Ein Fehler seit 15. Februar, ist behoben.
+                </p>
+            </description>
+        </revision>
+    </change>
+
+
     <change date="2007-02-22" version="2.0.167" subversion_revision="4861">
         <revision type="new" title="XML-Kommando &lt;modify_order> erweitert">
             <description>
