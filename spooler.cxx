@@ -2816,18 +2816,20 @@ void Spooler::cmd_job( const xml::Element_ptr& element )
 
 //-----------------------------------------------------------------------Spooler::abort_immediately
 
-void Spooler::abort_immediately( const string& message_text )
-{
-    _log->error( message_text );
-    abort_immediately( false );
-}
+//void Spooler::abort_immediately( const string& message_text )
+//{
+//    _log->error( message_text );
+//    abort_immediately( false );
+//}
 
 //-----------------------------------------------------------------------Spooler::abort_immediately
 
-void Spooler::abort_immediately( bool restart )
+void Spooler::abort_immediately( bool restart, const string& message_text )
 {
     try
     { 
+        if( message_text != "" )  _log->error( message_text );
+
         kill_all_processes();
         _log->close(); 
         _communication.close( 0.0 );   // Damit offene HTTP-Logs ordentlich schlieﬂen (denn sonst ersetzt ie6 das Log durch eine Fehlermeldung)
@@ -2869,7 +2871,7 @@ void Spooler::abort_now( bool restart )
         TerminateProcess( GetCurrentProcess(), exit_code );
         _exit( exit_code );
 #    else
-        try_kill_process_group_immediately( _pid );
+        // Das bricht auch den restart-Scheduler ab:  try_kill_process_group_immediately( _pid );
         try_kill_process_immediately( _pid );
         _exit( exit_code );
 #   endif
@@ -3133,21 +3135,47 @@ void spooler_restart( Log* log, bool is_service )
 
 #   else
 
-        switch( fork() )
+        switch( int pid = fork() )
         {
-            case  0:
+            case 0:
             {
-                 int n = sysconf( _SC_OPEN_MAX );
-                 for( int i = 3; i < n; i++ )  close(i);
-                 execv( _argv[0], _argv ); 
-                 fprintf( stderr, "Error in execv %s: %s\n", _argv[0], strerror(errno) ); 
-                 _exit(99);
-            }
+            //    setpgrp();   // Neue process group id
+
+            //    switch( int pid2 = fork() )
+            //    {
+            //        case 0: 
+            //        {
+                        int n = sysconf( _SC_OPEN_MAX );
+                        for( int i = 3; i < n; i++ )  close(i);
+                        ::sleep( 1 );     // Warten bis Aufrufer sich beendet hat
+                        execv( _argv[0], _argv ); 
+                        fprintf( stderr, "Error in execv %s: %s\n", _argv[0], strerror(errno) ); 
+                        _exit(99);
+            //        }
+
+            //        case -1: 
+            //        {
+            //            int errn = errno; 
+            //            sprintf( stderr, "Error %d in fork(): %s\n", errn, strerror( errn ) );
+            //            _exit(1);
+            //        }
+
+            //        default:
+            //        {
+            //            _exit(0);
+            //        }
+            //    }
+            }       
 
             case -1: 
                 throw_errno( errno, "execv", _argv[0] );
 
-            default: ;
+            default: 
+            {
+                Z_LOG2( "scheduler", "waitpid(" << pid << ")  Scheduler restart\n" );
+                //waitpid( pid, NULL, 0 );
+                Z_LOG2( "scheduler", "waitpid(" << pid << ")  OK\n" );
+            }
         }
 
 #   endif

@@ -307,8 +307,7 @@ struct Spooler : Object,
     void                        cmd_job                     ( const xml::Element_ptr& );
 
     void                        abort_immediately_after_distribution_error( const string& debug_text );
-    void                        abort_immediately           ( const string& message_text );
-    void                        abort_immediately           ( bool restart = false );
+    void                        abort_immediately           ( bool restart = false, const string& message_text = "" );
     void                        abort_now                   ( bool restart = false );
     void                        kill_all_processes          ();
 
