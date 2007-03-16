@@ -757,8 +757,13 @@ ptr<zschimmer::File_info> Directory_watcher::Directory_reader::read()
         string pattern = _directory_path + "/*";
 
         memset( &data, 0, sizeof data );
+
+        Z_LOG2( "scheduler", "_findfirst(" << quoted_string(pattern) << ") ...\n" );
+
         _handle = _findfirst( pattern.c_str(), &data ); 
         if( _handle == -1 )  throw_errno( errno, "_findfirst", _directory_path.c_str() );  
+
+        Z_LOG2( "scheduler", "_findfirst(" << quoted_string(pattern) << ") OK\n" );
     }
     else
     {
@@ -816,8 +821,12 @@ ptr<zschimmer::File_info> Directory_watcher::Directory_reader::read()
 { 
     if( !_first_read )
     {
+        Z_LOG2( "scheduler.directory", "opendir(" << quoted_string(_directory_path) << ") ...\n" );
+
         _handle = opendir( _directory_path.c_str() );
         if( !_handle )  throw_errno( errno, "opendir", _directory_path.c_str() );
+
+        Z_LOG2( "scheduler.directory", "opendir(" << quoted_string(_directory_path) << ") OK\n" );
     }
 
     struct dirent* entry = readdir( _handle );

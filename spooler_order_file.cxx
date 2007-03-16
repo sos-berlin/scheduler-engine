@@ -816,7 +816,7 @@ bool Directory_file_order_source::read_new_files()
     {
         if( _spooler->_cluster )  _spooler->_cluster->do_a_heart_beat_when_needed( __FUNCTION__ );    // PROVISORISCH FÜR LANGE VERZEICHNISSE AUF ENTFERNTEM RECHNER, macht bei Bedarf einen Herzschlag
 
-        Z_LOG2( "scheduler.file_order", __FUNCTION__ << "  " << _path << "  " << _new_files.size() << " Dateinamen gelesen\n" );
+        //Z_LOG2( "scheduler.file_order", __FUNCTION__ << "  " << _path << "  " << _new_files.size() << " Dateinamen gelesen\n" );
 
         ptr<z::File_info> file_info = dir.get();
         if( !file_info )  break;
@@ -831,7 +831,7 @@ bool Directory_file_order_source::read_new_files()
         if( is_first_file ) 
         {
             is_first_file = false;
-            Z_LOG2( "scheduler.file_order", __FUNCTION__ << "  Erste Datei: " << file_info->path().name() << "\n" );
+            Z_LOG2( "scheduler.file_order", __FUNCTION__ << "  " << file_info->path() << ", erste Datei\n" );
         }
     }
 
