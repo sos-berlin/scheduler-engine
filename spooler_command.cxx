@@ -399,7 +399,7 @@ xml::Element_ptr Command_processor::execute_show_cluster( const xml::Element_ptr
 
     if( _spooler->_cluster )  result.appendChild( _spooler->_cluster->dom_element( _answer, show ) );
 
-    result.appendChild( _spooler->_remote_scheduler_register.dom_element( _answer, show ) );
+    result.appendChild( _spooler->_supervisor->dom_element( _answer, show ) );
     
     return result;
 }
@@ -478,17 +478,17 @@ xml::Element_ptr Command_processor::execute_start_job( const xml::Element_ptr& e
     return result;
 }
 
-//----------------------------------------------Command_processor::execute_remote_client_start_task
-#ifdef Z_DEBUG
+//------------------------------------Command_processor::execute_remote_scheduler_start_remote_task
 
-xml::Element_ptr Command_processor::execute_remote_client_start_task( const xml::Element_ptr& remote_client_start_task )
+xml::Element_ptr Command_processor::execute_remote_scheduler_start_remote_task( const xml::Element_ptr& start_task_element )
 {
     //z::throw_xc( __FUNCTION__ );
 
     if( _security_level < Security::seclev_no_add )  z::throw_xc( "SCHEDULER-121" );
     _spooler->assert_is_activated( __FUNCTION__ );
 
-    int tcp_port = remote_client_start_task.int_getAttribute( "tcp_port" );
+    int tcp_port = start_task_element.int_getAttribute( "tcp_port" );
+
 
 
     //String_writer string_writer = Z_NEW( String_writer() );
@@ -506,16 +506,16 @@ xml::Element_ptr Command_processor::execute_remote_client_start_task( const xml:
     //xml_writer.end_element( "object_server" );
 
     ptr<Process> process = Z_NEW( Process( _spooler ) );
-    ////stdin koppeln
 
-    DOM_FOR_EACH_ELEMENT( remote_client_start_task, element )
-    {
-        if( element.nodeName_is( "task_process" ) )
-        {
-            process->set_task_process_xml( element.xml() );
-        }
-    }
-    
+    //DOM_FOR_EACH_ELEMENT( start_task_element, element )
+    //{
+    //    if( element.nodeName_is( "task_process" ) )
+    //    {
+    //        process->set_task_process_xml( element.xml() );
+    //    }
+    //}
+
+    process->set_controller_address( Host_and_port( _communication_operation->_connection->_peer_host_and_port._host, tcp_port ) );
     process->start();
 
 
@@ -547,15 +547,45 @@ xml::Element_ptr Command_processor::execute_remote_client_start_task( const xml:
 
 
         stdout und stderr verbinden (über vorhandene TCP-Verbindung?)
+
+        Prozess-Event überwachen (Unix: waitpid), Prozessende bemerken und protokollieren
     */
 
+    if( _log )  _log->info( message_string( "SCHEDULER-848", process->pid() ) );
 
     xml::Element_ptr result = _answer.createElement( "process" ); 
     result.setAttribute( "pid", process->pid() );
     return result;
 }
 
-#endif
+//------------------------------------Command_processor::execute_remote_scheduler_remote_task_close
+
+xml::Element_ptr Command_processor::execute_remote_scheduler_remote_task_close( const xml::Element_ptr& kill_element )
+{
+    if( _security_level < Security::seclev_no_add )  z::throw_xc( "SCHEDULER-121" );
+    _spooler->assert_is_activated( __FUNCTION__ );
+
+    int pid = kill_element.int_getAttribute( "pid" );
+
+    _communication_operation->_operation_connection->unregister_task_process( pid );
+
+    return _answer.createElement( "ok" );
+}
+
+//--------------------------------------------Command_processor::execute_remote_scheduler_task_kill
+
+//xml::Element_ptr Command_processor::execute_remote_scheduler_task_kill( const xml::Element_ptr& kill_element )
+//{
+//    if( _security_level < Security::seclev_no_add )  z::throw_xc( "SCHEDULER-121" );
+//    _spooler->assert_is_activated( __FUNCTION__ );
+//
+//    int pid = kill_element.int_getAttribute( "pid" );
+//
+//    _communication_operation->_operation_connection->unregister_task_process( pid );
+//
+//    return _answer.createElement( "ok" );
+//}
+
 //---------------------------------------------------------Command_processor::execute_signal_object
 
 //xml::Element_ptr Command_processor::execute_signal_object( const xml::Element_ptr& element )
@@ -928,28 +958,14 @@ xml::Element_ptr Command_processor::execute_remove_job_chain( const xml::Element
 
 //---------------------------------------------Command_processor::execute_register_remote_scheduler
 
-xml::Element_ptr Command_processor::execute_register_remote_scheduler( const xml::Element_ptr& register_scheduler_element )
+xml::Element_ptr Command_processor::execute_register_remote_scheduler( const xml::Element_ptr& register_remote_scheduler_element )
 {
-    if( !_communication_operation )  z::throw_xc( "SCHEDULER-222", register_scheduler_element.nodeName() );
-
-    Xml_operation* xml_processor = dynamic_cast<Xml_operation*>( _communication_operation );
-    if( !xml_processor )  z::throw_xc( "SCHEDULER-222", register_scheduler_element.nodeName() );
+    if( !_communication_operation )  z::throw_xc( "SCHEDULER-222", register_remote_scheduler_element.nodeName() );
 
     if( _security_level < Security::seclev_no_add )  z::throw_xc( "SCHEDULER-121" );
 
-    Host_and_port host_and_port ( _communication_operation->_connection->peer_host(), register_scheduler_element.int_getAttribute( "tcp_port" ) );
+    _spooler->_supervisor->execute_register_remote_scheduler( register_remote_scheduler_element, _communication_operation );
 
-    ptr<Remote_scheduler> remote_scheduler = _spooler->_remote_scheduler_register.get_or_null( host_and_port );
-
-    if( !remote_scheduler )  remote_scheduler = Z_NEW( Remote_scheduler );
-
-    remote_scheduler->_host_and_port = host_and_port;
-    remote_scheduler->_host_and_port._host.resolve_name();
-    remote_scheduler->set_dom( register_scheduler_element );
-    
-    xml_processor->_operation_connection->_remote_scheduler = remote_scheduler;        // Remote_scheduler mit TCP-Verbindung verknüpfen
-    _spooler->_remote_scheduler_register.add( remote_scheduler );
-    
     return _answer.createElement( "ok" );
 }
 
@@ -1120,10 +1136,10 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     else
     if( element.nodeName_is( "start_job"        ) )  result = execute_start_job( element );
     else
-#ifdef Z_DEBUG
-    if( element.nodeName_is( "remote_client.start_task" ) )  result = execute_remote_client_start_task( element );
+    if( element.nodeName_is( "remote_scheduler.start_remote_task" ) )  result = execute_remote_scheduler_start_remote_task( element );
     else
-#endif
+    if( element.nodeName_is( "remote_scheduler.remote_task.close" ) )  result = execute_remote_scheduler_remote_task_close( element );
+    else
     if( element.nodeName_is( "show_cluster"     ) )  result = execute_show_cluster( element, show );
     else
     if( element.nodeName_is( "show_task"        ) )  result = execute_show_task( element, show );

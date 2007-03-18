@@ -1809,10 +1809,10 @@
 
         <message code="SCHEDULER-299">
             <text xml:lang="de">
-                <title>Prozess pid=<p1/> wird nach Fehler entfernt</title>
+                <title>Prozess <p1/> wird nach Fehler entfernt</title>
             </text>
             <text xml:lang="en">
-                <title>Removing process pid=<p1/> after error</title>
+                <title>Removing process <p1/> after error</title>
             </text>
         </message>
 
@@ -2889,10 +2889,10 @@
 
         <message code="SCHEDULER-948">
             <text xml:lang="de">
-                <title>Prozess pid=<p1/> gestartet</title>
+                <title>Prozess <p1/> gestartet</title>
             </text>
             <text xml:lang="en">
-                <title>Process pid=<p1/> started</title>
+                <title>Process <p1/> started</title>
             </text>
         </message>
 
@@ -3513,11 +3513,24 @@
             </text>
         </message>
 
+        <message code="SCHEDULER-848" weight="info">
+            <text xml:lang="en">
+                <title>Task pid=<p1/> started for remote scheduler</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-849" weight="warn">
+            <text xml:lang="en">
+                <title>Timeout is not possible for a subprocess running on a remote host (it cannot be killed), pid=<p1/></title>
+            </text>
+        </message>
+
         <!--message code="SCHEDULER-848" weight="debug3">
             <text xml:lang="en">
                 <title>Compressing existent file '<p1/>' to '<p2/>'</title>
             </text>
         </message-->
+
     </messages>
     
 </messages>

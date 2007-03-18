@@ -4,7 +4,7 @@
     Hier sind implementiert
 
     Source_part
-    Source_with_parts
+    Text_with_includes
     Module
     Com_module_instance
 */
@@ -38,93 +38,139 @@ const string spooler_process_after_name  = "spooler_process_after(Z)Z";
 
 const string shell_language_name         = "shell";
 
-//-------------------------------------------------------------------------Source_part::Source_part
+////-------------------------------------------------------------------------Source_part::Source_part
+//
+//Source_part::Source_part( int linenr, const string& text, const Time& mod_time )
+//: 
+//    _linenr(linenr), 
+//    _text(text), 
+//    _modification_time(mod_time) 
+//{
+//}
+//
+////--------------------------------------------------------xml::Element_ptr Source_part::dom_element
+//
+//xml::Element_ptr Source_part::dom_element( const xml::Document_ptr& doc ) const
+//{
+//    xml::Element_ptr part_element = doc.createElement( "part_element" );
+//
+//    part_element.setAttribute( "linenr", as_string( _linenr ) );
+//    part_element.setAttribute( "modtime", _modification_time.as_string( Time::without_ms ) );
+//    part_element.appendChild( doc.createTextNode( _text ) );
+//
+//    return part_element;
+//}
+//
+//------------------------------------------------------------ext_with_includes::Text_with_includes
 
-Source_part::Source_part( int linenr, const string& text, const Time& mod_time )
-: 
-    _linenr(linenr), 
-    _text(text), 
-    _modification_time(mod_time) 
+Text_with_includes::Text_with_includes()
 {
+    _dom_document.load_xml( "<source/>" );
 }
 
-//--------------------------------------------------------xml::Element_ptr Source_part::dom_element
+//--------------------------------------------------------------------Text_with_includes::append_dom
 
-xml::Element_ptr Source_part::dom_element( const xml::Document_ptr& doc ) const
+void Text_with_includes::append_dom( const xml::Element_ptr& element )
 {
-    xml::Element_ptr part_element = doc.createElement( "part_element" );
+    int linenr_base = element.line_number(); //? element.line_number() - 1 : 0;
 
-    part_element.setAttribute( "linenr", as_string( _linenr ) );
-    part_element.setAttribute( "modtime", _modification_time.as_string( Time::without_ms ) );
-    part_element.appendChild( doc.createTextNode( _text ) );
-
-    return part_element;
-}
-
-//-------------------------------------------------xml::Document_ptr Source_with_parts::dom_element
-
-xml::Element_ptr Source_with_parts::dom_element( const xml::Document_ptr& doc ) const
-{
-    xml::Element_ptr source_element = doc.createElement( "source" ); 
-
-    Z_FOR_EACH_CONST( Parts, _parts, part )
+    for( xml::Node_ptr n = element.firstChild(); n; n = n.nextSibling() )
     {
-        xml::Element_ptr part_element = part->dom_element(doc);
-        source_element.appendChild( part_element );
+        if( n.line_number() )  linenr_base = n.line_number();
+
+        string text;
+
+        switch( n.nodeType() )
+        {
+            case xml::CDATA_SECTION_NODE:
+            {
+                xml::CDATASection_ptr c = n;
+                text = c.data();
+                goto TEXT;
+            }
+
+            case xml::TEXT_NODE:
+            {
+                xml::Text_ptr t = n;
+                text = t.data();
+                goto TEXT;
+            }
+
+            TEXT:
+            {
+                xml::Element_ptr e = _dom_document.documentElement().append_new_cdata_or_text_element( "source_part", text );
+
+                e.setAttribute( "linenr", linenr_base );
+              //e.setAttribute( "modtime", _modification_time.as_string( Time::without_ms ) );
+
+                linenr_base += count_if( text.begin(), text.end(), bind2nd( equal_to<char>(), '\n' ) );     // Für MSXML
+                break;
+            }
+
+            case xml::ELEMENT_NODE:     // <include file="..."/>
+            {
+                xml::Element_ptr e = n;
+
+                if( e.nodeName_is( "include" ) )
+                {
+                    xml::Element_ptr include_element = _dom_document.createElement( "include" );
+                    include_element.setAttribute( "file", e.getAttribute( "file" ) );
+                    include_element.setAttribute( "linenr", linenr_base );
+
+                    _dom_document.documentElement().appendChild( include_element );
+                }
+                else
+                    z::throw_xc( __FUNCTION__, e.nodeName() );
+
+                break;
+            }
+
+            default: ;
+        }
+    }
+}
+
+//--------------------------------------------------------------------Text_with_includes::read_text
+
+string Text_with_includes::read_text( const string& include_path ) 
+{
+    String_list result;
+
+    DOM_FOR_EACH_ELEMENT( dom_element(), element )
+    {
+        result.append( read_text_element( element, include_path ) );
     }
 
-    return source_element;
+    return result;
 }
 
-//------------------------------------------------xml::Document_ptr Source_with_parts::dom_document
+//------------------------------------------------------------Text_with_includes::read_text_element
 
-xml::Document_ptr Source_with_parts::dom_document() const
+string Text_with_includes::read_text_element( const xml::Element_ptr& element, const string& include_path )
 {
-    xml::Document_ptr doc;
+    string result;
 
-    doc.create();
-    doc.appendChild( doc.createProcessingInstruction( "xml", "version=\"1.0\" encoding=\"" + scheduler_character_encoding + "\"" ) );
-    doc.appendChild( dom_element(doc) );
-
-    return doc;
-}
-
-//--------------------------------------------------------------------Source_with_parts::assign_dom
-// Für spooler_module_remote_server.cxx
-
-void Source_with_parts::append_dom( const xml::Element_ptr& source_element )
-{
-    //clear();
-
-    if( !source_element.nodeName_is( "source" ) )  throw_xc( "Source_with_parts", "dom" );
-
-    DOM_FOR_EACH_ELEMENT( source_element, part )
+    if( element.nodeName_is( "source_part" ) )
     {
-        Sos_optional_date_time dt = part.getAttribute( "modtime" );
-        add( part.int_getAttribute( "linenr", 1 ), part.getTextContent(), dt.time_as_double() );
+        result = element.text();
     }
-}
-
-//------------------------------------------------------------------------Source_with_parts::append
-
-void Source_with_parts::append( const Source_with_parts& parts )
-{
-    _parts.insert( _parts.end(), parts._parts.begin(), parts._parts.end() );
-}
-
-//---------------------------------------------------------------------------Source_with_parts::add
-
-void Source_with_parts::add( int linenr, const string& text, const Time& mod_time )
-{ 
-    // text ist nicht leer?
-    int i;
-    for( i = 0; i < text.length(); i++ )  if( !isspace( (unsigned char)text[i] ) )  break;
-    if( i < text.length() )
+    else
+    if( element.nodeName_is( "include" ) )
     {
-        _parts.push_back( Source_part( linenr, text, mod_time ) );
+        File_path path ( include_path, subst_env( element.getAttribute( "file" ) ) );
+        result = string_from_file( path );
     }
+    else
+        z::throw_xc( __FUNCTION__, element.nodeName() );
 
-    if( mod_time  &&  _max_modification_time < mod_time )   _max_modification_time = mod_time;
+    return result;
+}
+
+//----------------------------------------------------------Text_with_includes::text_element_linenr
+
+int Text_with_includes::text_element_linenr( const xml::Element_ptr& element )
+{
+    return element.int_getAttribute( "linenr", 0 );
 }
 
 //------------------------------------------------------------------------check_unchanged_attribute
@@ -137,26 +183,28 @@ static void check_unchanged_attribute( const xml::Element_ptr& element, const st
 */
 //-----------------------------------------------------------------------------------Module::Module
 
-Module::Module( Spooler* sp, Prefix_log* log )
+Module::Module( Spooler* sp, const string& include_path, Prefix_log* log )
 : 
     _zero_(_end_), 
     _spooler(sp), 
     _log(log),
-    _process_environment( new Com_variable_set() )
+    _process_environment( new Com_variable_set() ),
+    _include_path(include_path)
 {
     init0();
 }
 
 //-----------------------------------------------------------------------------------Module::Module
     
-Module::Module( Spooler* sp, const xml::Element_ptr& e, const Time& xml_mod_time, const string& include_path )  
+Module::Module( Spooler* sp, const xml::Element_ptr& e, const string& include_path, const Time& xml_mod_time )  
 : 
     _zero_(_end_),
     _spooler(sp),
-    _process_environment( new Com_variable_set() )
+    _process_environment( new Com_variable_set() ),
+    _include_path(include_path)
 { 
     init0();
-    set_dom(e,xml_mod_time,include_path); 
+    set_dom( e, xml_mod_time ); 
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -204,22 +252,30 @@ void Module::set_checked_attribute( string* variable, const xml::Element_ptr& el
 void Module::set_process()
 {
     _language = shell_language_name;
-    _source.clear();
+    //_source.clear();
     _set = true;
 }
 
-//-------------------------------------------------------------------Module::set_dom_without_source
+//----------------------------------------------------------------------------------Module::set_dom
 
-void Module::set_dom_without_source( const xml::Element_ptr& element, const Time& xml_mod_time )
-{
+void Module::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )  
+{ 
+//    set_dom_without_source(e,xml_mod_time); 
+//    set_dom_source_only(include_path); 
+//}
+//
+////-------------------------------------------------------------------Module::set_dom_without_source
+//
+//void Module::set_dom_without_source( const xml::Element_ptr& element, const Time& xml_mod_time )
+//{
     if( !element )  return;
 
-    //_dom_document = element.ownerDocument();
-    //_dom_element  = element;
-    _dom_element_list.push_back( element );
+    _text_with_includes.append_dom( element );
+    //_dom_element_list.push_back( element );
+
     _xml_mod_time = xml_mod_time;
 
-    _source.clear();  //clear();
+    //_source.clear();  //clear();
 
     _recompile = element.bool_getAttribute( "recompile", true );
 
@@ -227,7 +283,7 @@ void Module::set_dom_without_source( const xml::Element_ptr& element, const Time
     set_checked_attribute( &_com_class_name    , element, "com_class" , true );
     set_checked_attribute( &_filename          , element, "filename"         );
     set_checked_attribute( &_java_class_name   , element, "java_class", true );
-    set_checked_attribute( &_process_class_name, element, "process_class" );
+    set_checked_attribute( &_process_class_name, element, "process_class"    );
 
     bool separate_process_default = false;
 
@@ -240,49 +296,76 @@ void Module::set_dom_without_source( const xml::Element_ptr& element, const Time
     else
         z::throw_xc( "SCHEDULER-196", use_engine );
   //if( use_engine == "job"  )  _reuse = reuse_job;
+
+    _set = true;
 }
+
+//-----------------------------------------------------------------------------------Module::script
+
+//Text_with_includes Module::source_with_parts()
+//{
+//    Text_with_includes result;
+//
+//    result.append( text_from_xml_with_include( element, _xml_mod_time, _include_path )  );
+//    //xml::Document_ptr dom_document ( "<script>" + _source_xml.to_string() + "</script>" );
+//
+//    //DOM_FOR_EACH_ELEMENT( dom_document.documentElement(), element )
+//    //{
+//    //    result.append( text_from_xml_with_include( element, _xml_mod_time, _include_path )  );
+//    //}
+//
+//    return result;
+//}
 
 //----------------------------------------------------------------------Module::set_dom_source_only
 
-void Module::set_dom_source_only( const string& include_path )
+//void Module::set_dom_source_only( const string& include_path )
+//{
+//    Text_with_includes source;
+//
+//    Z_FOR_EACH_CONST( list<xml::Element_ptr>, _dom_element_list, it )
+//    {
+//        source.append( text_from_xml_with_include( *it, _xml_mod_time, include_path )  );
+//    }
+//
+//    set_source_only( source );
+//}
+
+//---------------------------------------------------------------Module::set_xml_text_with_includes
+
+void Module::set_xml_text_with_includes( const string& x )
 {
-    Source_with_parts source;
-
-    Z_FOR_EACH_CONST( list<xml::Element_ptr>, _dom_element_list, it )
-    {
-        source.append( text_from_xml_with_include( *it, _xml_mod_time, include_path )  );
-    }
-
-    set_source_only( source );
+    _text_with_includes.set_xml( x );
+    _set = true;
 }
 
 //--------------------------------------------------------------------------Module::set_source_only
 
-void Module::set_source_only( const Source_with_parts& source )
-{
-    //if( _kind == kind_java  &&  _spooler  &&  _spooler->job_subsystem_or_null() )
-    //{
-    //    FOR_EACH_JOB( j )
-    //    {
-    //        Job* job = *j;
-    //        
-    //        if( job->module()  
-    //        &&  job->module()->_kind == kind_java 
-    //        &&  job->module()->_source.empty() | source.empty()
-    //        &&  job->module()->_java_class_name == _java_class_name )
-    //        {
-    //            z::throw_xc( "SCHEDULER-398", _java_class_name, job->obj_name() );
-    //        }
-    //    }
-    //}
-
-    _source = source;
-    _compiled = false;
-
-    clear_java();
-
-    _set = true;
-}
+//void Module::set_source_only( const Text_with_includes& source )
+//{
+//    //if( _kind == kind_java  &&  _spooler  &&  _spooler->job_subsystem_or_null() )
+//    //{
+//    //    FOR_EACH_JOB( j )
+//    //    {
+//    //        Job* job = *j;
+//    //        
+//    //        if( job->module()  
+//    //        &&  job->module()->_kind == kind_java 
+//    //        &&  job->module()->_source.empty() | source.empty()
+//    //        &&  job->module()->_java_class_name == _java_class_name )
+//    //        {
+//    //            z::throw_xc( "SCHEDULER-398", _java_class_name, job->obj_name() );
+//    //        }
+//    //    }
+//    //}
+//
+//    _source = source;
+//    _compiled = false;
+//
+//    clear_java();
+//
+//    _set = true;
+//}
 
 //-------------------------------------------------------------------------------------Module::init
 
@@ -328,7 +411,8 @@ void Module::init()
 
     _real_kind = _kind;
 
-    if( _real_kind == kind_java  &&  !_source.empty()  &&  _spooler )  _spooler->_has_java_source = true;       // work_dir zum Compilieren bereitstellen
+    if( _real_kind == kind_java  &&  has_source_script()  &&  _spooler )  _spooler->_has_java_source = true;       // work_dir zum Compilieren bereitstellen
+  //if( _real_kind == kind_java  &&  !_source.empty()  &&  _spooler )  _spooler->_has_java_source = true;       // work_dir zum Compilieren bereitstellen
 
 
     if( _kind != kind_process  &&  _kind != kind_internal )
@@ -361,14 +445,14 @@ void Module::init()
         case kind_remote:               break;
         case kind_java:                 break;
         
-        case kind_scripting_engine:     if( _source.empty() )  z::throw_xc( "SCHEDULER-173" );
+        case kind_scripting_engine:     if( !has_source_script() )  z::throw_xc( "SCHEDULER-173" );
                                         break;
 
-        case kind_process:              if( _source.empty()  &&  _process_filename.empty() )  z::throw_xc( "SCHEDULER-173" );
+        case kind_process:              if( !has_source_script()  &&  _process_filename.empty() )  z::throw_xc( "SCHEDULER-173" );
                                         break;
 
 #       ifdef Z_WINDOWS
-            case kind_com:              if( !_source.empty() )  z::throw_xc( "SCHEDULER-167" );
+            case kind_com:              if( has_source_script() )  z::throw_xc( "SCHEDULER-167" );
                                         break;
 #       endif
 
@@ -597,7 +681,7 @@ void Module_instance::set_in_call( In_call* in_call, const string& extra )
 
 void Module_instance::attach_task( Task* task, Prefix_log* log )
 {
-  //_task = task;
+    _task = task;
 
     set_log( log );
     _com_task->set_task( task );
@@ -617,6 +701,7 @@ void Module_instance::detach_task()
     _com_task->set_task( NULL );
     _com_log ->set_log ( NULL );
     
+    _task = NULL;
     _task_id = 0;
     //_title = "";
 

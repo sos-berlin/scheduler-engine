@@ -148,7 +148,8 @@ struct Communication
         virtual string          connection_type             () const                                = 0;
 
         void                    register_task_process       ( Process* );
-        void                    unregister_task_process     ( Process* );
+        void                    unregister_task_process     ( pid_t );
+        Process*                get_task_process            ( pid_t );
 
 
 
@@ -300,7 +301,7 @@ struct Xml_operation_connection : Communication::Operation_connection
 
     Fill_zero                  _zero_;
     bool                       _indent;
-    ptr<Remote_scheduler>      _remote_scheduler;
+    ptr<Remote_scheduler_interface>  _remote_scheduler;
 };
 
 //-------------------------------------------------------------------------------------------------

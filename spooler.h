@@ -5,6 +5,7 @@
 #define __SPOOLER_H
 
 #include "../zschimmer/zschimmer.h"
+#include "../zschimmer/string_list.h"
 #include "../kram/sos.h"
 #include "../kram/sysxcept.h"
 #include "../kram/sosopt.h"
@@ -80,6 +81,7 @@
 #include "../zschimmer/file_path.h"
 #include "../zschimmer/xml.h"
 #include "../zschimmer/z_io.h"
+#include "../zschimmer/pipe_collector.h"
 
 using namespace zschimmer;
 using namespace zschimmer::com;
@@ -121,12 +123,14 @@ struct Order_queue;
 struct Order;
 struct Process;
 struct Process_class;
-struct Remote_scheduler;
+struct Remote_scheduler_interface;
 struct Scheduler_object;
 struct Scheduler_event;
 struct Show_what;
 struct Spooler;
 typedef Spooler Scheduler;
+struct Supervisor_interface;
+struct Supervisor_client_interface;
 struct Task_subsystem;
 struct Subprocess;
 struct Subprocess_register;
@@ -136,6 +140,7 @@ struct Web_service;
 struct Web_service_operation;
 struct Web_service_request;
 struct Web_service_response;
+struct Xml_client_connection;
 struct Xslt_stylesheet;
 
 
@@ -173,7 +178,6 @@ typedef stdext::hash_set<string> String_set;
 #include "spooler_history.h"
 #include "spooler_order.h"
 #include "spooler_order_file.h"
-#include "spooler_remote.h"
 #include "spooler_job.h"
 #include "spooler_subprocess.h"
 #include "spooler_task.h"
@@ -185,6 +189,8 @@ typedef stdext::hash_set<string> String_set;
 #include "spooler_module_remote_server.h"
 #include "cluster.h"
 #include "java_subsystem.h"
+#include "supervisor.h"
+#include "xml_client_connection.h"
 
 //-------------------------------------------------------------------------------------------------
 
@@ -198,12 +204,12 @@ extern Spooler*                 spooler_ptr;
 
 //-------------------------------------------------------------------------------------------------
 
-Source_with_parts               text_from_xml_with_include  ( const xml::Element_ptr&, const Time& xml_mod_time, const string& include_path );
+//Source_with_parts               text_from_xml_with_include  ( const xml::Element_ptr&, const Time& xml_mod_time, const string& include_path );
 int                             read_profile_mail_on_process( const string& profile, const string& section, const string& entry, int deflt );
 int                             read_profile_history_on_process( const string& prof, const string& section, const string& entry, int deflt );
 Archive_switch                  read_profile_archive        ( const string& profile, const string& section, const string& entry, Archive_switch deflt );
 With_log_switch                 read_profile_with_log       ( const string& profile, const string& section, const string& entry, Archive_switch deflt );
-First_and_last                read_profile_yes_no_last_both( const string& profile, const string& section, const string& entry, First_and_last deflt );
+First_and_last                  read_profile_yes_no_last_both( const string& profile, const string& section, const string& entry, First_and_last deflt );
 
 //----------------------------------------------------------------------------State_changed_handler
 
@@ -553,8 +559,8 @@ struct Spooler : Object,
   //Object_set_class_list      _object_set_class_list;      // <object_set_classes>
     Communication              _communication;              // TCP und UDP (ein Thread)
 
-    Remote_scheduler_register  _remote_scheduler_register;
-    ptr<Xml_client_connection> _main_scheduler_connection;
+    ptr<Supervisor_interface>  _supervisor;
+    ptr<Supervisor_client_interface> _supervisor_client;
     ptr<Scheduler_event_manager> _scheduler_event_manager;
 
     ptr<Scheduler_script_interface> _scheduler_script;

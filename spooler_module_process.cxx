@@ -110,7 +110,8 @@ bool Process_module_instance::load()
 
         //_shell_file.create_temporary();
         //_shell_file.open( _shell_file.filename(), "w" );
-        _shell_file.print( _module->_source );
+        _shell_file.print( _module->read_source_script() );
+      //_shell_file.print( _module->_source );
         _shell_file.close();
     }
 

@@ -108,11 +108,11 @@ Java_idispatch_stack_frame::~Java_idispatch_stack_frame()
 
 //-------------------------------------------------------------------------------Module::clear_java
 
-void Module::clear_java()
-{
-    _java_class = NULL;
-    _method_map.clear();
-}
+//void Module::clear_java()
+//{
+//    _java_class = NULL;
+//    _method_map.clear();
+//}
 
 //--------------------------------------------------------------------------Module::make_java_class
 // Quellcode compilieren
@@ -137,28 +137,29 @@ bool Module::make_java_class( bool force )
             do_compile = true;
         }
         else
-        if( (time_t)_source._max_modification_time > s.st_mtime )
+        //if( (time_t)_source._max_modification_time > s.st_mtime )
         {
             do_compile = true;
         }
-        else
-        {
-/*
-            source = _source.text();
-
-            Mapped_file m ( java_filename, "r" );
-            if( m.length() != source.length()  ||  memcmp( m.ptr(), source.data(), m.length() ) != 0 )
-            {
-                _log.warn( "Datei " + java_filename + " ist trotz gleichen Zeitstempels verschieden vom Java-Skript" );
-                do_compile = true;
-            }
-*/
-        }
+//        else
+//        {
+///*
+//            source = _source.text();
+//
+//            Mapped_file m ( java_filename, "r" );
+//            if( m.length() != source.length()  ||  memcmp( m.ptr(), source.data(), m.length() ) != 0 )
+//            {
+//                _log.warn( "Datei " + java_filename + " ist trotz gleichen Zeitstempels verschieden vom Java-Skript" );
+//                do_compile = true;
+//            }
+//*/
+//        }
     }
 
     if( do_compile )
     {
-        if( source.empty() )  source = _source.text();
+        if( source.empty() )  source = read_source_script();
+        //if( source.empty() )  source = _source.text();
 
         make_path( directory_of_path( java_filename ) );
 
@@ -186,33 +187,6 @@ bool Module::make_java_class( bool force )
     }
 
     return do_compile;
-}
-
-//--------------------------------------------------------------------------Module::java_method_id
-
-jmethodID Module::java_method_id( const string& name )
-{
-    Env         env;
-    jmethodID   method_id;
-
-    Method_map::iterator it = _method_map.find( name );
-    if( it == _method_map.end() )  
-    {
-        int pos = name.find( '(' );
-        if( pos == string::npos )  pos = name.length();
-        
-        if( !_java_class )  z::throw_xc( "SCHEDULER-197", name );
-        method_id = env->GetMethodID( _java_class, name.substr(0,pos).c_str(), name.c_str()+pos );
-        //if( env->ExceptionCheck() )  env->ExceptionDescribe(), env->ExceptionClear();
-
-        _method_map[name] = method_id;
-    }
-    else
-    {
-        method_id = it->second;
-    }
-
-    return method_id;
 }
 
 //----------------------------------------------------------------------Java_object::QueryInterface
@@ -345,11 +319,11 @@ void Java_module_instance::init()
 
     Module_instance::init();
 
-    if( !_module->_java_class )
+    if( !_java_class )
     {
         string class_name = replace_regex( _module->_java_class_name, "\\.", "/" );
 
-        if( !_module->_source.empty() )
+        if( _module->has_source_script() )
         {
             bool compiled = _module->make_java_class( _module->_recompile & !_module->_compiled );     // Java-Klasse ggfs. übersetzen
             _module->_compiled |= compiled;
@@ -358,7 +332,7 @@ void Java_module_instance::init()
             {
                 try 
                 {
-                    _module->_java_class = env.find_class( class_name.c_str() );
+                    _java_class = env.find_class( class_name.c_str() );
                 }
                 catch( const exception& x )
                 {
@@ -369,14 +343,14 @@ void Java_module_instance::init()
             }
         }
 
-        _module->_java_class = env.find_class( class_name.c_str() );
+        _java_class = env.find_class( class_name.c_str() );
     }
 
-    jmethodID method_id = _module->java_method_id( "<init>()V" );   // Konstruktor
+    jmethodID method_id = java_method_id( "<init>()V" );   // Konstruktor
     if( !method_id )  env.throw_java( "GetMethodID" );
     
     assert( _jobject == NULL );
-    _jobject = env->NewObject( _module->_java_class, method_id );
+    _jobject = env->NewObject( _java_class, method_id );
     if( !_jobject )  env.throw_java( _module->_java_class_name + " Konstruktor" );
 
     try
@@ -474,7 +448,7 @@ Variant Java_module_instance::call( const string& name_par )
 
     if( name[0] == '?' )  is_optional = true,  name.erase( 0, 1 );
 
-    jmethodID method_id = _module->java_method_id( name );
+    jmethodID method_id = java_method_id( name );
     if( !method_id )  
     {
         if( is_optional )  return Variant();
@@ -514,7 +488,7 @@ Variant Java_module_instance::call( const string& name, const Variant& param, co
     Local_frame local_frame ( 10 );
     Java_idispatch_stack_frame stack_frame;
 
-    jmethodID method_id = _module->java_method_id( name );
+    jmethodID method_id = java_method_id( name );
     if( !method_id )  z::throw_xc( "SCHEDULER-174", name, _module->_java_class_name.c_str() );
 
     bool result;
@@ -560,7 +534,34 @@ Variant Java_module_instance::call( const string& name, const Variant& param, co
 
 bool Java_module_instance::name_exists( const string& name )
 {
-    return _module->java_method_id( name ) != NULL;
+    return java_method_id( name ) != NULL;
+}
+
+//-------------------------------------------------------------Java_module_instance::java_method_id
+
+jmethodID Java_module_instance::java_method_id( const string& name )
+{
+    Env         env;
+    jmethodID   method_id;
+
+    Method_map::iterator it = _method_map.find( name );
+    if( it == _method_map.end() )  
+    {
+        int pos = name.find( '(' );
+        if( pos == string::npos )  pos = name.length();
+        
+        if( !_java_class )  z::throw_xc( "SCHEDULER-197", name );
+        method_id = env->GetMethodID( _java_class, name.substr(0,pos).c_str(), name.c_str()+pos );
+        //if( env->ExceptionCheck() )  env->ExceptionDescribe(), env->ExceptionClear();
+
+        _method_map[name] = method_id;
+    }
+    else
+    {
+        method_id = it->second;
+    }
+
+    return method_id;
 }
 
 //-------------------------------------------------------------------------------------------------

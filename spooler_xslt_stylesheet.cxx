@@ -27,7 +27,7 @@ const Com_method Xslt_stylesheet::_methods[] =
 
 //-----------------------------------------------------------------Xslt_stylesheet::Create_instance
     
-HRESULT Xslt_stylesheet::Create_instance( const IID& iid, ptr<IUnknown>* result )
+HRESULT Xslt_stylesheet::Create_instance( zschimmer::com::object_server::Session*, ptr<Object>*, const IID& iid, ptr<IUnknown>* result )
 {
     if( iid == spooler_com::IID_Ixslt_stylesheet )
     {
@@ -50,7 +50,7 @@ Xslt_stylesheet::Xslt_stylesheet()
 
 //-----------------------------------------------------------------Xslt_stylesheet::Create_instance
 /*
-HRESULT Xslt_stylesheet::Create_instance( const IID& iid, ptr<IUnknown>* result )
+HRESULT Xslt_stylesheet::Create_instance( zschimmer::com::object_server::Server*, ptr<Object>*, const IID& iid, ptr<IUnknown>* result )
 {
     if( iid == spooler_com::IID_Ixslt_stylesheetproxy )
     {

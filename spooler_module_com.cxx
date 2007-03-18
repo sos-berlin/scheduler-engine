@@ -267,10 +267,16 @@ bool Scripting_engine_module_instance::load()
     HRESULT hr = _script_site->_script->SetScriptState( SCRIPTSTATE_INITIALIZED );
     if( FAILED( hr ) )  throw_ole( hr, "IActiveScript::SetScriptState", "SCRIPTSTATE_INITIALIZED" );
 
-    Z_FOR_EACH_CONST( Source_with_parts::Parts, _module->_source._parts, it )
+    DOM_FOR_EACH_ELEMENT( _module->_text_with_includes.dom_element(), element )
     {
-        _script_site->parse( it->_text, it->_linenr );
+        _script_site->parse( _module->_text_with_includes.read_text_element( element, _module->_include_path ), 
+                             _module->_text_with_includes.text_element_linenr( element ) );
     }
+
+    //Z_FOR_EACH_CONST( Source_with_parts::Parts, _module->_source._parts, it )
+    //{
+    //    _script_site->parse( it->_text, it->_linenr );
+    //}
 
     _idispatch = _script_site->dispatch();
 

@@ -325,7 +325,7 @@ struct Com_log_proxy: object_server::Proxy
 {
                               //Com_log                     ();
 
-    static HRESULT              Create_instance             ( const IID& iid, ptr<IUnknown>* result );
+    static HRESULT              Create_instance             ( zschimmer::com::object_server::Session*, ptr<Object>*, const IID& iid, ptr<IUnknown>* result );
 
 
     void                    set_property                    ( const string& name, const Variant& value );
@@ -516,7 +516,7 @@ struct Com_task_proxy : object_server::proxy_with_local_methods< Com_task_proxy,
     static const com::Com_method _methods[];
 
 
-    static HRESULT              Create_instance             ( const IID& iid, ptr<IUnknown>* result );
+    static HRESULT              Create_instance             ( zschimmer::com::object_server::Session*, ptr<Object>*, const IID& iid, ptr<IUnknown>* result );
 
 
                                 Com_task_proxy              ();
@@ -644,7 +644,7 @@ struct Com_spooler_proxy : object_server::proxy_with_local_methods< Com_spooler_
     static const com::Com_method _methods[];
 
 
-    static HRESULT              Create_instance             ( const IID& iid, ptr<IUnknown>* result );
+    static HRESULT              Create_instance             ( zschimmer::com::object_server::Session*, ptr<Object>*, const IID& iid, ptr<IUnknown>* result );
 
 
                                 Com_spooler_proxy           ();

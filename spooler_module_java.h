@@ -93,12 +93,17 @@ struct Java_module_instance : Module_instance
     bool                        callable                    ()                                      { return _jobject != NULL; }
 
     void                        make_class                  ();
+    jmethodID                   java_method_id              ( const string& name );                 // in spooler_module_java.cxx
 
     virtual string              obj_name                    () const                                { return "Java_module_instance"; }
 
 
     Fill_zero                  _zero_;
     java::Global_jobject       _jobject;
+
+    java::global_jobject<jclass> _java_class;
+    typedef map<string,jmethodID>  Method_map;
+    Method_map                 _method_map;
 
     typedef list< ptr<z::java::Java_idispatch> >  Added_objects;
     Added_objects              _added_jobjects;

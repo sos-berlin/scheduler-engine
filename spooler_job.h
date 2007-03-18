@@ -128,7 +128,7 @@ struct Job : Object,
         sc_end,                 // s_running                 -> s_pending
         sc_suspend,             // s_running                 -> s_suspended
         sc_continue,            // s_suspended               -> s_running
-        sc_reread,              // Job::_reread = true
+      //sc_reread,              // Job::_reread = true
         sc_remove,              // Spooler::remove_job
         sc__max
     };
@@ -274,7 +274,7 @@ struct Job : Object,
   //void                        remove_from_task_queue      ( Task*, Log_level );
     void                        remove_running_task         ( Task* );
   //void                        close_task                  ();
-    bool                        read_script                 ( Module* );
+  //bool                        read_script                 ( Module* );
   //void                        end                         ();
     void                        stop                        ( bool end_all_tasks );
     void                        stop_after_task_error       ( const string& error_message );   // _ignore_error verhindert stop()
@@ -291,7 +291,7 @@ struct Job : Object,
     void                    set_machine_resumable           ( bool b )                              { _machine_resumable = b; }
 
     bool                        execute_state_cmd           ();
-    void                        reread                      ();
+  //void                        reread                      ();
     ptr<Task>                   task_to_start               ();
     bool                        do_something                ();
     bool                        should_removed              ();

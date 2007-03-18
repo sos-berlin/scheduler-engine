@@ -83,70 +83,70 @@ string optional_single_element_as_text( const xml::Element_ptr& element, const s
 
 //-----------------------------------------------------------------------text_from_xml_with_include
 
-Source_with_parts text_from_xml_with_include( const xml::Element_ptr& element, const Time& mod_time, const string& include_path )
-{
-    Source_with_parts result;
-    string text;
-    string inc              = include_path;
-    int    linenr_base      = element.line_number(); //? element.line_number() - 1 : 0;
-
-    if( !inc.empty() )  { char c = inc[inc.length()-1];  if( c != '/'  &&  c != '\\' )  inc += "/"; }
-
-
-    for( xml::Node_ptr n = element.firstChild(); n; n = n.nextSibling() )
-    {
-        if( n.line_number() )  linenr_base = n.line_number();
-
-        string text;
-
-        switch( n.nodeType() )
-        {
-            case xml::CDATA_SECTION_NODE:
-            {
-                xml::CDATASection_ptr c = n;
-                text = c.data();
-                goto TEXT;
-            }
-
-            case xml::TEXT_NODE:
-            {
-                xml::Text_ptr t = n;
-                text = t.data();
-                goto TEXT;
-            }
-
-            TEXT:
-              //result.add( n.line_number(), text, mod_time );
-                result.add( linenr_base, text, mod_time );
-                linenr_base += count_if( text.begin(), text.end(), bind2nd( equal_to<char>(), '\n' ) );     // Für MSXML
-                break;
-
-            case xml::ELEMENT_NODE:     // <include file="..."/>
-            {
-                xml::Element_ptr e = n;
-                string filename = subst_env( e.getAttribute( "file" ) );
-
-                if( filename.length() >= 1 ) 
-                {
-                    if( filename[0] == '\\' 
-                     || filename[0] == '/' 
-                     || filename.length() >= 2 && filename[1] == ':' )  ; // ok, absoluter Dateiname
-                    else  
-                    {
-                        filename = inc + filename;
-                    }
-                }
-
-                result.add( 0, string_from_file( filename ), modification_time_of_file( filename ) );
-                break;
-            }
-
-            default: ;
-        }
-    }
-
-    return result;
-}
+//Source_with_parts text_from_xml_with_include( const xml::Element_ptr& element, const Time& mod_time, const string& include_path )
+//{
+//    Source_with_parts result;
+//    string text;
+//    string inc              = include_path;
+//    int    linenr_base      = element.line_number(); //? element.line_number() - 1 : 0;
+//
+//    if( !inc.empty() )  { char c = inc[inc.length()-1];  if( c != '/'  &&  c != '\\' )  inc += "/"; }
+//
+//
+//    for( xml::Node_ptr n = element.firstChild(); n; n = n.nextSibling() )
+//    {
+//        if( n.line_number() )  linenr_base = n.line_number();
+//
+//        string text;
+//
+//        switch( n.nodeType() )
+//        {
+//            case xml::CDATA_SECTION_NODE:
+//            {
+//                xml::CDATASection_ptr c = n;
+//                text = c.data();
+//                goto TEXT;
+//            }
+//
+//            case xml::TEXT_NODE:
+//            {
+//                xml::Text_ptr t = n;
+//                text = t.data();
+//                goto TEXT;
+//            }
+//
+//            TEXT:
+//              //result.add( n.line_number(), text, mod_time );
+//                result.add( linenr_base, text, mod_time );
+//                linenr_base += count_if( text.begin(), text.end(), bind2nd( equal_to<char>(), '\n' ) );     // Für MSXML
+//                break;
+//
+//            case xml::ELEMENT_NODE:     // <include file="..."/>
+//            {
+//                xml::Element_ptr e = n;
+//                string filename = subst_env( e.getAttribute( "file" ) );
+//
+//                if( filename.length() >= 1 ) 
+//                {
+//                    if( filename[0] == '\\' 
+//                     || filename[0] == '/' 
+//                     || filename.length() >= 2 && filename[1] == ':' )  ; // ok, absoluter Dateiname
+//                    else  
+//                    {
+//                        filename = inc + filename;
+//                    }
+//                }
+//
+//                result.add( 0, string_from_file( filename ), modification_time_of_file( filename ) );
+//                break;
+//            }
+//
+//            default: ;
+//        }
+//    }
+//
+//    return result;
+//}
 
 //--------------------------------------------------------------------------------Security::set_dom
 
@@ -311,7 +311,7 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const Time& x
       //_free_threading_default = config_element.bool_getAttribute( "free_threading", _free_threading_default );
 
         string host_and_port = config_element.getAttribute( "main_scheduler" );
-        if( host_and_port != "" )  _main_scheduler_connection = Z_NEW( Xml_client_connection( this, host_and_port ) );
+        if( host_and_port != "" )  _supervisor_client = new_supervisor_client( this, host_and_port );
 
         set_mail_xslt_stylesheet_path( subst_env( config_element.getAttribute( "mail_xslt_stylesheet" ) ) );
 
@@ -364,7 +364,7 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const Time& x
             else
             if( e.nodeName_is( "script" ) )
             {
-                _scheduler_script->set_dom_script( e, xml_mod_time, include_path() );
+                _scheduler_script->set_dom_script( e, xml_mod_time );
             }
             else
             if( e.nodeName_is( "jobs" ) )

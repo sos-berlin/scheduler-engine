@@ -1,4 +1,4 @@
-// $Id$
+// $Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
 /*
     Hier sind implementiert
 
@@ -12,8 +12,6 @@
 
 namespace sos {
 namespace scheduler {
-
-using namespace zschimmer::com::object_server;
 
 //--------------------------------------Remote_module_instance_proxy::~Remote_module_instance_proxy
 
@@ -34,7 +32,6 @@ void Remote_module_instance_proxy::close()
 
 void Remote_module_instance_proxy::init()
 {
-    //HRESULT hr;
 /*
     if( getenv( "SPOOLER_SERVER" ) )
     {
@@ -158,21 +155,6 @@ void Remote_module_instance_proxy::add_obj( IDispatch* object, const string& nam
     _object_list.push_back( Object_list_entry( object, name ) );
 }
 
-//--------------------------------------------------------Remote_module_instance_proxy::add_log_obj
-/*
-void Remote_module_instance_proxy::add_log_obj( Com_log* log, const string& name )
-{
-    typedef object_server::Reference_with_properties  Ref;
-    ptr<Ref> remote_ref = Z_NEW( Ref( "sos::scheduler::Log", log ) );
-    
-    int level = 0;
-    log->get_level( &level );
-
-    remote_ref->set_property( "level", level );
-
-    _object_list.push_back( Object_list_entry( remote_ref, name ) );
-}
-*/
 //--------------------------------------------------------Remote_module_instance_proxy::name_exists
 
 bool Remote_module_instance_proxy::name_exists( const string& name )
@@ -194,41 +176,7 @@ Variant Remote_module_instance_proxy::call( const string& name )
 Async_operation* Remote_module_instance_proxy::begin__start()
 {
     Module_instance::init();
-/*
-    Parameters parameters;
-    parameters.push_back( Parameter( "param", "-object-server" ) );
-    parameters.push_back( Parameter( "param", "-title=" + quoted_string( _title ) ) );
 
-    if( !log_filename().empty() )
-    parameters.push_back( Parameter( "param", "-log=" + quoted_string( "+" + log_filename() ) ) );
-*/
-
-/*
-    if( !_process )
-    {
-        if( _process_class_name.empty()  ||  _module->_separate_process )
-        {
-            _process = _spooler->new_temporary_process();
-        }
-        else
-        {
-            _process = Z_NEW( Process( _spooler ) );        
-            //_process = _spooler->process_class( _process_class_name ) -> select_process();
-            //if( !_process )            
-            // Erstmal immer nur eine Task pro Prozess. 
-            // Mehrere Tasks pro Prozess erst, wenn sichergestellt ist, dass jede Operation die Antwort liest (v.a. im Fehlerfall),
-            // sodass nicht eine nicht beendete Operation den Prozess blockiert.
-
-            //_process = _spooler->process_class( _process_class_name ) -> select_process();
-        }
-
-        _process->start();
-        _process->add_module_instance( this );
-    }
-
-    _session = _process->session(); 
-    _pid = _session->connection()->pid();
-*/
     _operation = +Z_NEW( Operation( this, c_begin ) );
 
     return +_operation;
@@ -238,8 +186,6 @@ Async_operation* Remote_module_instance_proxy::begin__start()
 
 bool Remote_module_instance_proxy::begin__end()
 {
-    //if( _call_state != c_begin )  
-
     //_operation->async_check_error();   Nicht hier rufen!  call__end() prüft den Fehler und ruft vorher pop_operation().
 
     ptr<Async_operation> operation = _operation;
@@ -281,7 +227,6 @@ Async_operation* Remote_module_instance_proxy::end__start( bool success )
     if( !_remote_instance )  return &dummy_sync_operation; //NULL;
 
     _end_success = success;
-  //_operation = +Z_NEW( Operation( this, c_end ) );
 
     _operation = _remote_instance->call__start( "end", success );
     
@@ -420,48 +365,50 @@ bool Remote_module_instance_proxy::Operation::begin__end()
 
 bool Remote_module_instance_proxy::try_to_get_process()
 {
-    if( _process )  return true;
-
-    if( _module->_separate_process 
-     || _module->_process_class_name.empty()  && !_spooler->process_class_or_null("") )   // Namenlose Prozessklasse nicht bekannt? Dann temporäre Prozessklasse verwenden
+    if( !_process )
     {
-        _process = _spooler->new_temporary_process();
-    }
-    else
-    {
-        //_process = Z_NEW( Process( _spooler ) );        
-        _process = _spooler->process_class( _module->_process_class_name ) -> select_process_if_available();
-        if( !_process )  return false;
-
-        // Erstmal immer nur eine Task pro Prozess. 
-        // Mehrere Tasks pro Prozess erst, wenn sichergestellt ist, dass jede Operation die Antwort liest (v.a. im Fehlerfall),
-        // sodass nicht eine nicht beendete Operation den Prozess blockiert.
-
-        //_process = _spooler->process_class( _process_class_name ) -> select_process();
-    }
-
-    _process->add_module_instance( this );
-
-    if( !_process->started() )
-    {
-        if( !_server_hostname.empty() )
+        if( _module->_separate_process 
+         || _module->_process_class_name.empty()  && !_spooler->process_class_or_null("") )   // Namenlose Prozessklasse nicht bekannt? Dann temporäre Prozessklasse verwenden
         {
-            _process->set_server( _server_hostname, _server_port );
+            _process = _spooler->new_temporary_process();
+        }
+        else
+        {
+            //_process = Z_NEW( Process( _spooler ) );        
+            _process = _spooler->process_class( _module->_process_class_name ) -> select_process_if_available();
+            if( !_process )  return false;
+
+            // Erstmal immer nur eine Task pro Prozess. 
+            // Mehrere Tasks pro Prozess erst, wenn sichergestellt ist, dass jede Operation die Antwort liest (v.a. im Fehlerfall),
+            // sodass nicht eine nicht beendete Operation den Prozess blockiert.
+
+            //_process = _spooler->process_class( _process_class_name ) -> select_process();
         }
 
-        _process->set_job_name( _job_name );
-        _process->set_task_id ( _task_id  );
-        if( _module->_priority != "" )  _process->set_priority( _module->_priority );
-        _process->start();
+        _process->add_module_instance( this );
+
+        if( !_process->started() )
+        {
+            if( !_server_hostname.empty() )
+            {
+                _process->set_server( _server_hostname, _server_port );
+            }
+
+            _process->set_job_name( _job_name );
+            _process->set_task_id ( _task_id  );
+            if( _module->_priority != "" )  _process->set_priority( _module->_priority );
+
+            _process->start();
+        }
+
+        _session      = _process->session(); 
+        _pid          = _session->connection()->pid();
     }
 
-    _session = _process->session(); 
-    _pid     = _session->connection()->pid();
-
-    return true;
+    return _process->is_started();
 }
 
-//-----------------------------------------Remote_module_instance_proxy::Operation::async_continue_
+//-------------------------------------------Remote_module_instance_proxy::continue_async_operation
 
 bool Remote_module_instance_proxy::continue_async_operation( Operation* operation, Async_operation::Continue_flags )
 { 
@@ -473,14 +420,14 @@ AGAIN:
 
         case c_begin:
         {
-/*
-            if( !_process )
-            {
-                try_to_get_process();
-                if( !_process )  break;
-            }
-*/
-            operation->set_async_child( _session->connect_server__start() );
+            // PROVISORISCH
+            //_remote_scheduler_server = _spooler->_supervisor_connection;        
+            //if( !_remote_scheduler_server  ||  _remote_scheduler_server->state() != Supervisor_client_connection::s_finished )  z::throw_xc( __FUNCTION__, "_remote_scheduler_server" );
+            //_remote_scheduler_server->send__start( "<remote_scheduler.start_task tcp_port='" << tcp_port << "'/>" );
+
+            ptr<Async_operation> connection_operation = _session->connect_server__start();
+            connection_operation->set_async_manager( _spooler->_connection_manager );
+            operation->set_async_child( connection_operation );
 
             operation->_call_state = c_connect;
             break;
@@ -530,17 +477,19 @@ AGAIN:
                 params_array[ nr++ ] = "com_class="       + _module->_com_class_name;
                 params_array[ nr++ ] = "filename="        + _module->_filename;
                 params_array[ nr++ ] = "java_class="      + _module->_java_class_name;
-                params_array[ nr++ ] = "java_options="    + _spooler->_config_java_options + " " + _module->_java_options;
+                params_array[ nr++ ] = "java_options="    + _module->_java_options;
+              //params_array[ nr++ ] = "java_options="    + _spooler->_config_java_options + " " + _module->_java_options;
 
-                if( _server_hostname.empty() )
-                {
-                    params_array[ nr++ ] = "javac="           + _module->_spooler->java_subsystem()->java_vm()->javac_filename();
-                    params_array[ nr++ ] = "java_class_path=" + _module->_spooler->java_subsystem()->java_vm()->class_path();
-                    params_array[ nr++ ] = "java_work_dir="   + _module->_spooler->java_subsystem()->java_vm()->work_dir();
-                }
+                //if( _server_hostname.empty() )
+                //{
+                //    params_array[ nr++ ] = "javac="           + _module->_spooler->java_subsystem()->java_vm()->javac_filename();
+                //    params_array[ nr++ ] = "java_class_path=" + _module->_spooler->java_subsystem()->java_vm()->class_path();
+                //    params_array[ nr++ ] = "java_work_dir="   + _module->_spooler->java_subsystem()->java_vm()->work_dir();
+                //}
 
                 params_array[ nr++ ] = "recompile="       + as_string( _module->_recompile && !_module->_compiled );
-                params_array[ nr++ ] = "script="          + _module->_source.dom_document().xml();
+                params_array[ nr++ ] = "script="          + _module->_text_with_includes.xml();
+              //params_array[ nr++ ] = "script="          + _module->_source.dom_document().xml();
                 params_array[ nr++ ] = "job="             + _job_name;
                 params_array[ nr++ ] = "task_id="         + as_string( _task_id );
 
@@ -551,7 +500,8 @@ AGAIN:
                     params_array[ nr++ ] = "monitor.filename="        + _module->_monitor->_filename;
                     params_array[ nr++ ] = "monitor.java_class="      + _module->_monitor->_java_class_name;
                     params_array[ nr++ ] = "monitor.recompile="       + as_string( _module->_monitor->_recompile && !_module->_monitor->_compiled );
-                    params_array[ nr++ ] = "monitor.script="          + _module->_monitor->_source.dom_document().xml();
+                    params_array[ nr++ ] = "monitor.script="          + _module->_monitor->_text_with_includes.xml();
+                  //params_array[ nr++ ] = "monitor.script="          + _module->_monitor->_source.dom_document().xml();
                 }
             }
 
@@ -672,6 +622,13 @@ AGAIN:
     }
 
     return true;
+}
+
+//-------------------------------------------------------Remote_module_instance_proxy::process_name
+
+string Remote_module_instance_proxy::process_name() const
+{
+    return _process? _process->short_name() : "";
 }
 
 //-----------------------------------------Remote_module_instance_proxy::Operation::async_finished_

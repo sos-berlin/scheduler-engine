@@ -7,46 +7,43 @@ namespace scheduler {
 
 //struct Object_server_processor_channel;
 
-//----------------------------------------------------------------------------Xml_client_connection
+//-------------------------------------------------------------------------Remote_client_connection
 
-struct Xml_client_connection : Async_operation, Scheduler_object
+struct Remote_client_connection : Async_operation, Subsystem
 {
     enum State
     {
-        s_initial,
+        s_not_connected,
         s_connecting,
-        s_finished,
-        s_sending,
-        s_waiting,
-        s_receiving
+        s_registering,
+        s_registered
     };
 
-
-                                Xml_client_connection       ( Spooler*, const Host_and_port& );
-                               ~Xml_client_connection       ();
-
-    virtual string              obj_name                    () const;
-                                
-    void                        set_socket_manager          ( Socket_manager* );
     static string               state_name                  ( State );
+
+
+                                Remote_client_connection    ( Spooler*, const Host_and_port& );
+                               ~Remote_client_connection    ();
+
+    void                        close                       ();
+    virtual string              obj_name                    () const;
+
+    State                       state                       () const                                { return _state; }
+    void                        connect                     ();
 
 
   protected:
     string                      async_state_text_           () const                                { return obj_name(); }
     bool                        async_continue_             ( Continue_flags );
-    bool                        async_finished_             () const                                { return _state == s_initial  
-                                                                                                          || _state == s_finished; }
-    bool                        async_signaled_             ()                                      { return _socket_operation && _socket_operation->async_signaled(); }
+    bool                        async_finished_             () const                                { return _state == s_not_connected  
+                                                                                                          || _state == s_registered; }
+  //bool                        async_signaled_             ()                                      { return _socket_operation && _socket_operation->async_signaled(); }
 
   private:
     Fill_zero                  _zero_;
-    Spooler*                   _spooler;
-    Host_and_port              _host_and_port;
     State                      _state;
-    Socket_manager*            _socket_manager;
-    ptr<Buffered_socket_operation>  _socket_operation;
-    Xml_end_finder             _xml_end_finder;
-    string                     _recv_data;
+    Host_and_port              _host_and_port;
+    ptr<Xml_client_connection> _xml_client_connection;
 };
 
 //------------------------------------------------------------------------Main_scheduler_connection
@@ -70,16 +67,16 @@ struct Main_scheduler_connection : Async_operation
   private:
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
-    Xml_client_connection      _xml_client_connection;
+    Remote_client_connection      _xml_client_connection;
 };
 */
 //-----------------------------------------------------------------------------Xml_client_operation
 /*
 struct Xml_client_operation : Operation
 {
-    Xml_client_operation( Xml_client_connection* conn ) : _connection( conn ) {}
+    Xml_client_operation( Remote_client_connection* conn ) : _connection( conn ) {}
 
-    ptr<Xml_client_connection> _connection;
+    ptr<Remote_client_connection> _connection;
 };
 */
 //-------------------------------------------------------------------------------------------------

@@ -397,7 +397,7 @@ Job::Job( Spooler* spooler, const ptr<Module>& module )
     _visible(true),
     _stop_on_error(true)
 {
-    _module = module? module : Z_NEW( Module( spooler ) );
+    _module = module? module : Z_NEW( Module( spooler, _spooler->include_path() ) );
 
     _log = Z_NEW( Prefix_log( this ) );
     _module->set_log( _log );
@@ -486,8 +486,8 @@ void Job::initialize()
     {
         Z_LOGI2( "scheduler", obj_name() << ".initialize()\n" );
 
-        if( !_module->_dom_element_list.empty() )  read_script( _module );
-        if( _module->_monitor  &&  !_module->_monitor->_dom_element_list.empty() )  read_script( _module->_monitor );
+        //if( !_module->_dom_element_list.empty() )  read_script( _module );
+        //if( _module->_monitor  &&  !_module->_monitor->_dom_element_list.empty() )  read_script( _module->_monitor );
         if( _module->set() )  _module->init();
 
         _next_start_time = Time::never;
@@ -647,7 +647,7 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
         {
             if( e.nodeName_is( "description" ) )
             {
-                try { _description = text_from_xml_with_include( e, xml_mod_time, _spooler->include_path() ); }
+                try { _description = Text_with_includes( e ).read_text( _spooler->include_path() ); }
                 catch( const exception& x  ) { _log->warn( x.what() );  _description = x.what(); }
                 catch( const _com_error& x ) { string d = bstr_as_string(x.Description()); _log->warn(d);  _description = d; }
             }
@@ -660,8 +660,9 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
             {
                 if( _module->_process_filename != "" )  z::throw_xc( "SCHEDULER-234", obj_name() );
 
-                _module->set_dom_without_source( e, xml_mod_time );
-                if( _state >= s_initialized )  _module->set_dom_source_only( include_path() );
+                _module->set_dom( e, xml_mod_time );
+              //_module->set_dom_without_source( e, xml_mod_time );
+              //if( _state >= s_initialized )  _module->set_dom_source_only( include_path() );
 
                 _module->_process_filename     = "";
                 _module->_process_param_raw    = "";
@@ -701,14 +702,15 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
             else
             if( e.nodeName_is( "monitor" ) )
             {
-                if( !_module->_monitor )  _module->_monitor = Z_NEW( Module( _spooler, _log ) );
+                if( !_module->_monitor )  _module->_monitor = Z_NEW( Module( _spooler, _spooler->include_path(), _log ) );
 
                 DOM_FOR_EACH_ELEMENT( e, ee )
                 {
                     if( ee.nodeName_is( "script" ) )  
                     {
-                        _module->_monitor->set_dom_without_source( ee, xml_mod_time );
-                        if( _state >= s_initialized )  _module->_monitor->set_dom_source_only( include_path() );
+                        _module->_monitor->set_dom( ee, xml_mod_time );
+                      //_module->_monitor->set_dom_without_source( ee, xml_mod_time );
+                      //if( _state >= s_initialized )  _module->_monitor->set_dom_source_only( include_path() );
                     }
                 }
             }
@@ -1413,24 +1415,24 @@ void Job::enqueue_task( Task* task )
 
 //---------------------------------------------------------------------------------Job::read_script
 
-bool Job::read_script( Module* module )
-{
-    {
-        try
-        {
-            module->set_dom_source_only( include_path() );
-        }
-        catch( const exception& x ) 
-        { 
-            set_error(x);  
-        //_close_engine = true;  
-            set_state( s_read_error );  
-            return false; 
-        }
-    }
-
-    return true;
-}
+//bool Job::read_script( Module* module )
+//{
+//    {
+//        try
+//        {
+//            module->set_dom_source_only( include_path() );
+//        }
+//        catch( const exception& x ) 
+//        { 
+//            set_error(x);  
+//        //_close_engine = true;  
+//            set_state( s_read_error );  
+//            return false; 
+//        }
+//    }
+//
+//    return true;
+//}
 
 //-----------------------------------------------------------------------Job::stop_after_task_error
 
@@ -1473,12 +1475,12 @@ void Job::stop( bool end_all_tasks )
 
 //--------------------------------------------------------------------------------------Job::reread
 
-void Job::reread()
-{
-    _log->info( message_string( "SCHEDULER-920" ) );
-    read_script( _module );
-    if( _module->_monitor )  read_script( _module->_monitor );
-}
+//void Job::reread()
+//{
+//    _log->info( message_string( "SCHEDULER-920" ) );
+//    read_script( _module );
+//    if( _module->_monitor )  read_script( _module->_monitor );
+//}
 
 //---------------------------------------------------------------------------Job::execute_state_cmd
 
@@ -2177,6 +2179,7 @@ ptr<Task> Job::task_to_start()
                     
                     if( !order  &&  !cause )    // Fehlgeschlagen? Dann die Task vergessen 
                     {
+                        Z_LOG2( "scheduler", obj_name() << ": fetch_and_occupy_order() fehlgeschlagen, Task wird wieder verworfen\n" );
                         task->close(); 
                         task = NULL;
                     }
@@ -2240,7 +2243,7 @@ bool Job::do_something()
             {
                 something_done |= execute_state_cmd();
 
-                if( _reread )  _reread = false,  reread(),  something_done = true;
+              //if( _reread )  _reread = false,  reread(),  something_done = true;
 
                 if( now > _period.end() )
                 {
@@ -2521,9 +2524,9 @@ void Job::set_state_cmd( State_cmd cmd )
                                 signal( state_cmd_name(cmd) );
                                 break;
 
-            case sc_reread:     _reread = true, ok = true;  
-                                signal( state_cmd_name(cmd) );
-                                break;
+            //case sc_reread:     _reread = true, ok = true;  
+            //                    signal( state_cmd_name(cmd) );
+            //                    break;
 
             case sc_remove:     _spooler->job_subsystem()->remove_job( this );
                                 // this ist möglicherweise ungültig
@@ -2618,7 +2621,7 @@ string Job::state_cmd_name( Job::State_cmd cmd )
         case Job::sc_end:      return "end";
         case Job::sc_suspend:  return "suspend";
         case Job::sc_continue: return "continue";
-        case Job::sc_reread:   return "reread";
+      //case Job::sc_reread:   return "reread";
         case Job::sc_remove:   return "remove";
         default:               return as_string( (int)cmd );
     }

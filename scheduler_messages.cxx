@@ -168,7 +168,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-296", "Order's <run_time> does not have a next start time" },
     { "SCHEDULER-297", "Order has been carried out without web_service_operation.send(), operation cancelled" },
     { "SCHEDULER-298", "Ignoring job=$1 because order is removed from job chain" },
-    { "SCHEDULER-299", "Removing process pid=$1 after error" },
+    { "SCHEDULER-299", "Removing process $1 after error" },
     { "SCHEDULER-300", "Watching the directory $1 ends after error: $2" },
     { "SCHEDULER-301", "UDP message from $1 is not allowed" },
     { "SCHEDULER-302", "Error sending e-mail: $1" },
@@ -303,7 +303,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-945", "No further job in job chain - order has been carried out" },
     { "SCHEDULER-946", "setback(): order has been set back $1 times, until $2" },
     { "SCHEDULER-947", "setback(): order has been set back $1 times. This is more than $2 - the maximum for this job" },
-    { "SCHEDULER-948", "Process pid=$1 started" },
+    { "SCHEDULER-948", "Process $1 started" },
     { "SCHEDULER-949", "Job will be executed when a process of process class '$1' becomes available" },
     { "SCHEDULER-950", "Scheduler has been registered" },
     { "SCHEDULER-951", "Daylight saving time has begun" },
@@ -389,6 +389,8 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-845", "After task exception, the order remains in job's order queue" },
     { "SCHEDULER-846", "After task exception and due to stop_on_error='no', the order has been moved to error_state='$1'" },
     { "SCHEDULER-847", "Please use new name '$1' instead of old '$2'" },
+    { "SCHEDULER-848", "Task pid=$1 started for remote scheduler" },
+    { "SCHEDULER-849", "Timeout is not possible for a subprocess running on a remote host (it cannot be killed), pid=$1" },
     {}
 };
 } //namespace sos

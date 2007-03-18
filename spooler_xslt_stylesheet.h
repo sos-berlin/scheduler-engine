@@ -24,7 +24,7 @@ struct Xslt_stylesheet : idispatch_implementation< Xslt_stylesheet, spooler_com:
                               //Xslt_stylesheet             ( const BSTR xml_or_filename );
                                ~Xslt_stylesheet             ();
 
-    static HRESULT              Create_instance             ( const IID&, ptr<IUnknown>* result );  // Für Proxy
+    static HRESULT              Create_instance             ( zschimmer::com::object_server::Session*, ptr<Object>*, const IID&, ptr<IUnknown>* result );  // Für Proxy
 
 
     STDMETHODIMP_(ULONG)        AddRef                      ()                                      { return Idispatch_implementation::AddRef(); }

@@ -644,6 +644,7 @@ Spooler::Spooler()
     _db                      = Z_NEW( Database( this ) );
     _http_server             = http::new_http_server( this );
     _web_services            = new_web_services( this );
+    _supervisor              = new_supervisor( this );
 
     _variable_set_map[ variable_set_name_for_substitution ] = _environment;
 
@@ -874,11 +875,13 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
         state_element.appendChild( subprocesses_element );
     }
 
-    state_element.appendChild( _remote_scheduler_register.dom_element( dom, show ) );
+
+    state_element.appendChild( _supervisor->dom_element( dom, show ) );
     if( _cluster )  state_element.appendChild( _cluster->dom_element( dom, show ) );
-    state_element.appendChild( _communication.dom_element( dom, show ) );
-    state_element.append_new_text_element( "operations", "\n" + _connection_manager->string_from_operations( "\n" ) + "\n" );
     state_element.appendChild( _web_services->dom_element( dom, show ) );
+
+    state_element.appendChild( _communication.dom_element( dom, show ) );
+    state_element.append_new_cdata_or_text_element( "operations", "\n" + _connection_manager->string_from_operations( "\n" ) + "\n" );
 
     return state_element;
 }
@@ -1716,7 +1719,6 @@ void Spooler::start()
     if( _need_db  && _db_name.empty() )  z::throw_xc( "SCHEDULER-205" );
 
     _db->open( _db_name );
-
     _db->spooler_start();
 
 
@@ -1731,7 +1733,7 @@ void Spooler::start()
 
     _communication.start_or_rebind();
 
-    if( _main_scheduler_connection )  _main_scheduler_connection->set_socket_manager( _connection_manager );
+    if( _supervisor_client )  _supervisor_client->switch_subsystem_state( subsys_initialized );
 
     if( _cluster_configuration._are_orders_distributed || _cluster_configuration._demand_exclusiveness ) 
     {
@@ -1940,10 +1942,7 @@ void Spooler::stop( const exception* )
         _cluster = NULL;
     }
 
-    if( _main_scheduler_connection )
-    {
-        //_main_scheduler_connection->logoff( x );
-    }
+    if( _supervisor_client )  _supervisor_client->close();
 
     if( _scheduler_event_manager )  _scheduler_event_manager->close_responses();
     _communication.finish_responses( 5.0 );
@@ -2252,8 +2251,9 @@ void Spooler::run()
                     {
 #                       ifdef Z_WINDOWS
 
-                            object_server::Connection_to_own_server* server = dynamic_cast<object_server::Connection_to_own_server*>( +(*p)->_connection );
-                            if( server  &&  server->_process_handle )  wait_handles.add( &server->_process_handle );        // Signalisiert Prozessende
+                            //object_server::Connection_to_own_server* server = dynamic_cast<object_server::Connection_to_own_server*>( +(*p)->_connection );
+                            if( object_server::Connection* server = (*p)->_connection )
+                                if( server->process_event() )  wait_handles.add( server->process_event() );        // Signalisiert Prozessende
 
 #                        else
 

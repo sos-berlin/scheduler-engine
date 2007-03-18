@@ -32,52 +32,53 @@ struct Module_instance;
 
 //--------------------------------------------------------------------------------------Source_part
 
-struct Source_part
-{
-    Source_part                 ( int linenr, const string& text, const Time& mod_time );
-
-                                operator const string&      () const                                { return _text; }
-    xml::Element_ptr            dom_element                 ( const xml::Document_ptr& ) const;
-  //bool                        empty                       ()                                      { return _text.empty(); }
-
-
-    int                        _linenr;
-    string                     _text;
-    Time                       _modification_time;
-};
-
+//struct Source_part
+//{
+//    Source_part                 ( int linenr, const string& text, const Time& mod_time );
+//
+//                                operator const string&      () const                                { return _text; }
+//    xml::Element_ptr            dom_element                 ( const xml::Document_ptr& ) const;
+//  //bool                        empty                       ()                                      { return _text.empty(); }
+//
+//
+//    int                        _linenr;
+//    string                     _text;
+//    Time                       _modification_time;
+//};
+//
 //-----------------------------------------------------------------------------Source_with_includes
 
-struct Source_with_parts
+struct Text_with_includes
 {
-                                Source_with_parts           ()                                      {}
-                              //Source_with_parts           ( const string& text )                  { assign( text); }
-                              //Source_with_parts           ( const xml::Element_ptr& dom )         { assign_dom(dom); }
+                                Text_with_includes          ();
+                                Text_with_includes          ( const xml::Element_ptr& e )           { append_dom( e ); }
 
-    void                        add                         ( int linenr, const string& text, const Time& mod_time );
-    bool                        empty                       () const                                { return _parts.empty(); }
-    void                        clear                       ()                                      { _parts.clear(); }
+  //void                        add                         ( int linenr, const string& text, const Time& mod_time );
+    bool                        is_empty                    () const                                { return !_dom_document || !_dom_document.documentElement().firstChild(); }
+  //void                        clear                       ()                                      { _parts.clear(); }
 
-    string                      text                        () const                                { return zschimmer::join( SYSTEM_NL, _parts ); }
-                                operator string             () const                                { return text(); }
+    string                      read_text                   ( const string& include_path );
+    string                      read_text_element           ( const xml::Element_ptr&, const string& include_path );
+    int                         text_element_linenr         ( const xml::Element_ptr& );
 
-    xml::Document_ptr           dom_document                () const;
-    xml::Element_ptr            dom_element                 ( const xml::Document_ptr& ) const;
+    //xml::Document_ptr           dom_document                () const;
+    string                      xml                         ()                                      { return _dom_document.ascii_xml(); }
+    void                    set_xml                         ( const string& x )                     { _dom_document.load_xml( x ); }
 
-    Source_with_parts&          operator =                  ( const string& text )                  { assign( text );  return *this; }
-    void                        assign                      ( const string& text )                  { clear(); add( 1, text, Time(0) ); }
+    xml::Element_ptr            dom_element                 ()                                      { return _dom_document.documentElement(); }
 
-    Source_with_parts&          operator =                  ( const xml::Element_ptr& dom )         { clear(); append_dom( dom );  return *this; }
-    void                        assign_dom                  ( const xml::Element_ptr& dom );
+    //Text_with_includes&          operator =                  ( const string& text )                  { assign( text );  return *this; }
+    //void                        assign                      ( const string& text )                  { clear(); add( 1, text, Time(0) ); }
 
-    void                        append_dom                  ( const xml::Element_ptr& );
-    void                        append                      ( const Source_with_parts& );
+    //Text_with_includes&          operator =                  ( const xml::Element_ptr& dom )         { clear(); append_dom( dom );  return *this; }
+    void                        append_dom                  ( const xml::Element_ptr& dom );
+
+    //void                        append                      ( const Text_with_includes& );
 
 
-    typedef list<Source_part>   Parts;
-
-    Parts                      _parts;
-    Time                       _max_modification_time;
+  private:
+    xml::Document_ptr          _dom_document;
+  //Time                       _max_modification_time;
 };
 
 //-------------------------------------------------------------------------------------------Module
@@ -103,15 +104,17 @@ struct Module : Object
 
     Z_GNU_ONLY(                 Module                      (); )
 
-                                Module                      ( Spooler*, Prefix_log* = NULL );
-    explicit                    Module                      ( Spooler*, const xml::Element_ptr&, const Time& xml_mod_time, const string& include_path );
+                                Module                      ( Spooler*, const string& include_path, Prefix_log* = NULL );
+    explicit                    Module                      ( Spooler*, const xml::Element_ptr&, const string& include_path, const Time& xml_mod_time );
                                ~Module                      ()                                      {}
 
     void                        set_log                     ( Prefix_log* log )                     { _log.set_log( log ); }
-    void                        set_dom                     ( const xml::Element_ptr& e, const Time& xml_mod_time, const string& include_path )  { set_dom_without_source(e,xml_mod_time); set_dom_source_only(include_path); }
-    void                        set_dom_without_source      ( const xml::Element_ptr&, const Time& xml_mod_time );
-    void                        set_dom_source_only         ( const string& include_path );
-    void                        set_source_only             ( const Source_with_parts& );
+    void                        set_dom                     ( const xml::Element_ptr&, const Time& xml_mod_time );
+  //void                        set_dom_without_source      ( const xml::Element_ptr&, const Time& xml_mod_time );
+  //void                        set_dom_source_only         ( const string& include_path );
+  //void                        set_source_only             ( const Text_with_includes& );
+    void                        set_xml_text_with_includes  ( const string& xml );
+    Text_with_includes           source_with_parts           ();
     void                        set_process                 ();                                     // Für <process>
     void                        init0                       ();
     void                        init                        ();
@@ -120,11 +123,13 @@ struct Module : Object
     virtual ptr<Module_instance> create_instance_impl       ();
     bool                        set                         ()                                      { return _set; }
     Kind                        kind                        () const                                { return _kind; }
-    void                        clear_java                  ();
+  //void                        clear_java                  ();
     bool                        make_java_class             ( bool force = false );                 // in spooler_module_java.cxx
-    jmethodID                   java_method_id              ( const string& name );                 // in spooler_module_java.cxx
     void                        set_checked_attribute       ( string*, const xml::Element_ptr&, const string&, bool modify_allowed = false );
     void                        set_priority                ( const string& );
+
+    bool                        has_source_script           () const                                { return !_text_with_includes.is_empty(); }
+    string                      read_source_script          ()                                      { return _text_with_includes.read_text( _include_path ); }
 
 
     Fill_zero                  _zero_;
@@ -132,7 +137,9 @@ struct Module : Object
     Delegated_log              _log;
     bool                       _set;
 
-    Source_with_parts          _source;
+    Text_with_includes         _text_with_includes;
+    string                     _include_path;
+  //Text_with_includes          _source;
     Reuse                      _reuse;
     bool                       _separate_process;           // Das Skript soll einem getrennten, eigenen Prozess laufen
     string                     _process_class_name;
@@ -157,10 +164,6 @@ struct Module : Object
     bool                       _recompile;                  // <script recompile="..">    Immer kompilieren
     bool                       _compiled;
 
-    java::global_jobject<jclass> _java_class;
-    typedef map<string,jmethodID>  Method_map;
-    Method_map                 _method_map;
-
     // Process
     string                     _process_filename;           // Job ist ein externes Programm
     string                     _process_param_raw;          // Parameter für das Programm, vor der Variablenersetzung
@@ -172,7 +175,7 @@ struct Module : Object
 
     bool                       _dont_remote;
 
-    std::list<xml::Element_ptr> _dom_element_list;
+  //std::list<xml::Element_ptr> _dom_element_list;
     Time                       _xml_mod_time;
 
     ptr<Module>                _monitor;
@@ -230,6 +233,7 @@ struct Module_instance : Object
     void                        close_monitor               ();
     virtual void                init                        ();
     virtual bool                kill                        ()                                      { return false; }
+    virtual bool                is_remote_host              () const                                { return false; }
     void                    set_log                         ( Prefix_log* );
     void                    set_in_call                     ( In_call* in_call, const string& extra = "" );
     void                    set_close_instance_at_end       ( bool )                                {} // veraltet: _close_instance_at_end = b; }   // Nach spooler_close() Instanz schließen
@@ -254,6 +258,7 @@ struct Module_instance : Object
     virtual bool                loaded                      ()                                      = 0;
     virtual bool                callable                    ()                                      = 0;
     int                         pid                         ()                                      { return _pid; }        // 0, wenn kein Prozess
+    virtual string              process_name                () const                                { return ""; }
 
     virtual bool                try_to_get_process          ()                                      { return true; }
 
@@ -289,6 +294,7 @@ struct Module_instance : Object
     Fill_zero                  _zero_;
 
     string                     _job_name;                   // Wird lokalem Objectserver als -job=... übergeben, für die Prozessliste (ps)
+    Task*                      _task;
     int                        _task_id;                    // Wird lokalem Objectserver als -task-id=... übergeben, für die Prozessliste (ps)
     Spooler*                   _spooler;
     Delegated_log              _log;

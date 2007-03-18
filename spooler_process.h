@@ -18,7 +18,37 @@ struct Process_class;
 
 struct Process : zschimmer::Object, Scheduler_object
 {
-    //typedef object_server::Session Session;
+    struct Async_remote_operation : Async_operation
+    {
+        enum State
+        {
+            s_not_connected,
+            s_connecting,
+            s_starting,
+            s_running,
+            s_closing,
+            s_closed
+        };
+
+        static string           state_name                  ( State );
+
+
+                                Async_remote_operation      ( Process* p ) :                         _zero_(this+1), _process(p) {}
+                               ~Async_remote_operation      ();
+
+        virtual bool            async_continue_             ( Continue_flags f )                    { return _process->async_remote_start_continue( f ); }
+        virtual bool            async_finished_             () const                                { return _state == s_running  ||  _state == s_closed; }
+        virtual string          async_state_text_           () const;
+
+        void                    close_remote_task           ();
+
+
+        Fill_zero              _zero_;
+        State                  _state;
+        Process*               _process;
+    };
+
+
 
                                 Process                     ( Spooler* );
     Z_GNU_ONLY(                 Process                     (); )
@@ -27,8 +57,13 @@ struct Process : zschimmer::Object, Scheduler_object
 
     bool                        started                     ()                                      { return _connection != NULL; }
 
-    void                    set_task_process_xml            ( const string& xml_text )              { _task_process_xml = xml_text; }
+    void                    set_controller_address          ( const Host_and_port& h )              { _controller_address = h; }
+  //void                    set_stdin_data                  ( const string& data )                  { _stdin_data = data; }
     void                        start                       ();
+    void                        start_local                 ();
+    void                        async_remote_start          ();
+    bool                        is_started                  ();
+    bool                        async_remote_start_continue ( Async_operation::Continue_flags );
     object_server::Session*     session                     ()                                      { return _session; }
   //void                    set_event                       ( Event* e )                            { if( _connection )  _connection->set_event( e ); }
     bool                        async_continue              ();
@@ -48,22 +83,25 @@ struct Process : zschimmer::Object, Scheduler_object
     string                      stderr_path                 ();
     string                      stdout_path                 ();
     bool                        connected                   ()                                      { return _connection? _connection->connected() : false; }
+    bool                        is_remote_host              () const;
 
     void                    set_dom                         ( const xml::Element_ptr&, const Time& xml_mod_time );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
-    string                      obj_name                    () const                                { return "Process " + as_string( pid() ); }
+    string                      obj_name                    () const;
+    string                      short_name                  () const;
 
     
 //private:
     Fill_zero                  _zero_;
     string                     _job_name;
     int                        _task_id;
-    Thread_semaphore           _lock;
     string                     _server_hostname;
     int                        _server_port;
+    Host_and_port              _controller_address;
     ptr<object_server::Connection> _connection;             // Verbindung zum Prozess
     ptr<object_server::Session>    _session;                // Wir haben immer nur eine Session pro Verbindung
     Process_handle             _process_handle_copy;
+    bool                       _is_killed;
     int                        _exit_code;
     int                        _termination_signal;
     Time                       _running_since;
@@ -72,7 +110,10 @@ struct Process : zschimmer::Object, Scheduler_object
     Module_instance*           _module_instance;
     Process_class*             _process_class;
     string                     _priority;
-    string                     _task_process_xml;
+    pid_t                      _remote_pid;
+  //string                     _stdin_data;
+    ptr<Async_remote_operation> _async_remote_operation;
+    ptr<Xml_client_connection>  _xml_client_connection;
 };
 
 //-------------------------------------------------------------------------------------Process_list
@@ -84,8 +125,8 @@ typedef list< ptr<Process> >    Process_list;
 
 struct Process_class : zschimmer::Object
 {
-                                Process_class               ( Spooler* sp, const string& name )        : _zero_(this+1), _spooler(sp), _name(name), _lock("Process_class " + name) { init(); }
-    explicit                    Process_class               ( Spooler* sp, const xml::Element_ptr& e ) : _zero_(this+1), _spooler(sp), _lock("Process_class") { init();  set_dom( e ); }
+                                Process_class               ( Spooler* sp, const string& name )        : _zero_(this+1), _spooler(sp), _name(name) { init(); }
+    explicit                    Process_class               ( Spooler* sp, const xml::Element_ptr& e ) : _zero_(this+1), _spooler(sp) { init();  set_dom( e ); }
     Z_GNU_ONLY(                 Process_class               (); )
 
     void                        init                        ();
@@ -102,19 +143,20 @@ struct Process_class : zschimmer::Object
     void                        notify_a_process_is_idle    ();
   //Job*                        first_waiting_job           ()                                      { return _waiting_jobs.begin(); }
     string                      name                        ()                                      { return _name; }
+    bool                        is_remote_host              () const                                { return _remote_scheduler; }
 
     void                    set_dom                         ( const xml::Element_ptr& );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
 
 
     Fill_zero                  _zero_;
-    Thread_semaphore           _lock;
     string                     _name;
     int                        _max_processes;
     Spooler*                   _spooler;
     Process_list               _process_list;
     int                        _module_use_count;
     Job_list                   _waiting_jobs;
+    Host_and_port              _remote_scheduler;
 };
 
 //-------------------------------------------------------------------------------Process_class_list

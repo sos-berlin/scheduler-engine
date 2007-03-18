@@ -1,4 +1,4 @@
-// $Id$
+// $Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
 
 #include "spooler.h"
 
@@ -9,62 +9,42 @@ namespace scheduler {
     
 const int main_scheduler_retry_time = 60;
 
-//-----------------------------------------------------Xml_client_connection::Xml_client_connection
+//-----------------------------------------------------Remote_client_connection::Remote_client_connection
     
-Xml_client_connection::Xml_client_connection( Spooler* sp, const Host_and_port& host_and_port )
+Remote_client_connection::Remote_client_connection( Spooler* sp, const Host_and_port& host_and_port )
 : 
-    Scheduler_object( sp, this, type_xml_client_connection ),
+    Scheduler_object( sp, this, type_remote_client ),
     _zero_(this+1), 
-    _spooler(sp),
     _host_and_port(host_and_port)
 {
-    _log->set_prefix( S() << "Supervisor " << _host_and_port.as_string() );
-    set_async_next_gmtime( (time_t)0 );
-    //set_async_child( &_socket_operation );
+    _log->set_prefix( S() << obj_name() << ' ' << _host_and_port.as_string() );
 }
 
-//----------------------------------------------------Xml_client_connection::~Xml_client_connection
+//----------------------------------------------Remote_client_connection::~Remote_client_connection
 
-Xml_client_connection::~Xml_client_connection()
+Remote_client_connection::~Remote_client_connection()
 {
-}
-
-//--------------------------------------------------------Xml_client_connection::set_socket_manager
-
-void Xml_client_connection::set_socket_manager( Socket_manager* manager )
-{
-    _socket_manager = manager;
-
-    set_async_manager( manager );
-    set_async_next_gmtime( (time_t)0 );     // Sofort starten!
-}
-
-//---------------------------------------------------------Xml_client_connection::async_state_text_
-
-string Xml_client_connection::state_name( State state )
-{
-    switch( state )
+    if( _xml_client_connection )  
     {
-        case s_initial:     return "initial";
-        case s_connecting:  return "connecting";
-        case s_finished:    return "finished";
-        case s_sending:     return "sending";
-        case s_waiting:     return "waiting_for_response";
-        case s_receiving:   return "receiving";
-        default:            return "state=" + as_int( state );
+        _xml_client_connection->set_async_parent( NULL );
+        _xml_client_connection->set_async_manager( NULL );
     }
 }
 
-//------------------------------------------------------------------Xml_client_connection::obj_name
+//----------------------------------------------------------------Remote_client_connection::connect
 
-string Xml_client_connection::obj_name() const
+void Remote_client_connection::connect()
 {
-    return S() << "Xml_client_connection(" << _host_and_port << " " << state_name( _state ) << ")";
+    _xml_client_connection = Z_NEW( Xml_client_connection( _spooler, _host_and_port ) );
+    _xml_client_connection->set_async_manager( _spooler->_connection_manager );
+    _xml_client_connection->set_async_parent( this );
+    _xml_client_connection->connect();
+    _state = s_connecting;
 }
 
-//-----------------------------------------------------------Xml_client_connection::async_continue_
+//--------------------------------------------------------Remote_client_connection::async_continue_
     
-bool Xml_client_connection::async_continue_( Continue_flags flags )
+bool Remote_client_connection::async_continue_( Continue_flags flags )
 {
     Z_DEBUG_ONLY( Z_LOGI2( "joacim", __FUNCTION__ << "\n" ); )
 
@@ -72,45 +52,15 @@ bool Xml_client_connection::async_continue_( Continue_flags flags )
 
     try
     {
-        if( _socket_operation )
-        {
-            if( !_socket_operation->async_finished() ) 
-            {
-                Z_DEBUG_ONLY( Z_LOG2( "scheduler", __FUNCTION__ << " !_socket_operation->async_finished()\n" ); )
-                return false;
-            }
-
-            _socket_operation->async_check_error();
-
-            if( _socket_operation->_eof )  z::throw_xc( "SCHEDULER-224" );
-        }
-
-
         switch( _state )
         {
-            case s_initial:
-                if( !( flags & cont_next_gmtime_reached ) )  
-                { 
-                    Z_DEBUG_ONLY( Z_LOG( "*** " << __FUNCTION__ << " !cont_next_gmtime_reached\n" ); 
-                                  Z_WINDOWS_ONLY( DebugBreak(); ) ) 
-                    return false; 
-                }
-
-                _socket_operation = Z_NEW( Buffered_socket_operation );
-
-                _socket_operation->add_to_socket_manager( _socket_manager );
-                _socket_operation->set_async_parent( this );
-
-                _socket_operation->connect__start( _host_and_port );
-                _socket_operation->set_keepalive( true );
-
-                _state = s_connecting;
-                something_done = true;
+            case s_not_connected:
+                connect();
                 break;
 
             case s_connecting:
             {
-                if( !_socket_operation->async_finished() )  break;
+                if( _xml_client_connection->state() != Xml_client_connection::s_connected )  break;
 
                 S xml;
                 xml << "<register_remote_scheduler";
@@ -119,53 +69,18 @@ bool Xml_client_connection::async_continue_( Continue_flags flags )
                 xml << " version='"      << _spooler->_version     << "'";
                 xml << "/>";
 
-                _socket_operation->send__start( xml );
-                _state = s_sending;
-                //break;
+                _xml_client_connection->send( xml );
+                _state = s_registering;
             }
 
-            case s_sending:
-                if( !_socket_operation->async_finished() )  break;
-                
-                _state = s_waiting;
-                //break;
-
-            case s_waiting:
-                _recv_data = "";
-
-            case s_receiving:
+            case s_registering:
             {
-                _socket_operation->recv__continue();
-                if( _socket_operation->_eof )  z::throw_xc( "SCHEDULER-224" );
+                if( xml::Document_ptr response_document = _xml_client_connection->received_dom_document() )
+                {
+                    log()->info( message_string( "SCHEDULER-950" ) );
+                    _state = s_registered;
+                }
 
-                string data = _socket_operation->recv_data();
-                if( data.length() == 0 )  break;
-
-                _state = s_receiving;
-                something_done = true;
-
-                _socket_operation->recv_clear();
-                _recv_data.append( data );
-                
-
-                if( !_xml_end_finder.is_complete( data.data(), data.length() ) )  break;
-
-                _state = s_finished;
-
-                //log()->info( "ANTWORT: " + _recv_data );
-
-                xml::Document_ptr response_document;
-                response_document.create();
-
-                response_document.load_xml( _recv_data );
-                _recv_data = "";
-
-                DOM_FOR_EACH_ELEMENT( response_document.documentElement(), e1 )
-                    if( e1.nodeName_is( "answer" ) )
-                        DOM_FOR_EACH_ELEMENT( e1, e2 )
-                            if( e2.nodeName_is( "ERROR" ) )  z::throw_xc( "SCHEDULER-223", e2.getAttribute( "text" ) );
-
-                log()->info( message_string( "SCHEDULER-950" ) );   // "Scheduler ist registriert"
                 break;
             }
 
@@ -176,23 +91,39 @@ bool Xml_client_connection::async_continue_( Continue_flags flags )
     {
         log()->warn( x.what() );
 
-        if( _socket_operation )
+        if( _xml_client_connection ) 
         {
-            try
-            {
-                _socket_operation->close();
-            }
-            catch( exception& ) {}
-
-            _socket_operation->async_reset_error();
+            _xml_client_connection->set_async_manager( NULL );
+            _xml_client_connection = NULL;
         }
 
-        _state = s_initial;
-        set_async_next_gmtime( ::time(NULL) + main_scheduler_retry_time );
+        _state = s_not_connected;
+        set_async_delay( main_scheduler_retry_time );
         something_done = true;
     }
 
     return something_done;
+}
+
+//---------------------------------------------------------Remote_client_connection::async_state_text_
+
+string Remote_client_connection::state_name( State state )
+{
+    switch( state )
+    {
+        case s_not_connected:   return "not_connected";
+        case s_connecting:      return "connecting";
+        case s_registering:     return "registering";
+        case s_registered:      return "registered";
+        default:                return "state=" + as_int( state );
+    }
+}
+
+//------------------------------------------------------------------Remote_client_connection::obj_name
+
+string Remote_client_connection::obj_name() const
+{
+    return S() << "Remote_client_connection(" << _host_and_port << " " << state_name( _state ) << ")";
 }
 
 //-----------------------------------------------------------Remote_scheduler_register::get_or_null

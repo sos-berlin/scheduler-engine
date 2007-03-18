@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- $Id: scheduler.xsd 4802 2007-01-29 09:57:57Z jz $ -->
+<!-- $Id: scheduler.xsd 4842 2007-02-08 22:13:15Z jz $ -->
 
 <xsd:schema 
     xmlns:xsd          = "http://www.w3.org/2001/XMLSchema" 
@@ -9,7 +9,7 @@
 
     <xsd:annotation>
         <xsd:documentation xml:lang="de">
-            $Id: scheduler.xsd 4802 2007-01-29 09:57:57Z jz $
+            $Id: scheduler.xsd 4842 2007-02-08 22:13:15Z jz $
             Schema für die Scheduler-Konfiguration,
             s.a. http://www.zschimmer.com/sos/scheduler/konfiguration.html.
         </xsd:documentation>
@@ -145,7 +145,7 @@
             <xsd:element ref="show_task"/>
             <xsd:element ref="service_request"/>
             <xsd:element ref="start_job"/>
-            <xsd:element ref="start_task_for_remote_client"/>
+            <xsd:element ref="remote_client.start_task"/>
             <!--xsd:element ref="signal_object"/-->
             <xsd:element ref="terminate"/>
         </xsd:choice>
@@ -454,13 +454,16 @@
                             <xsd:attribute name="next_state"    type="String"/>
                             <xsd:attribute name="error_state"   type="String"/>
                             <xsd:attribute name="suspend"       type="Yes_no"/>
+                            <xsd:attribute name="delay"         type="xsd:nonNegativeInteger"/>
                         </xsd:complexType>
                     </xsd:element>
+
                     <xsd:element name="file_order_sink" maxOccurs="unbounded">
                         <xsd:complexType>
                             <xsd:attribute name="state"         type="String" use="required"/>
                             <xsd:attribute name="remove"        type="Yes_no"/>
                             <xsd:attribute name="move_to"       type="File"/>
+                            <xsd:attribute name="delay"         type="xsd:nonNegativeInteger"/>
                         </xsd:complexType>
                     </xsd:element>
                 </xsd:choice>
@@ -561,6 +564,7 @@
             <xsd:attribute name="state"     type="String"/>
             <xsd:attribute name="setback"   type="No"/>
             <xsd:attribute name="suspended" type="Yes_no"/>
+            <xsd:attribute name="at"        type="Date_time_with_now"/>
         </xsd:complexType>
     </xsd:element>
 
@@ -1026,7 +1030,8 @@
     <xsd:element name="show_order">
         <xsd:complexType>
             <xsd:attribute name="job_chain"         type="Name"                     use="required"/>
-            <xsd:attribute name="order"             type="Order_id"                 use="required"/>
+            <xsd:attribute name="order"             type="Order_id"/>
+            <xsd:attribute name="history_id"        type="xsd:nonNegativeInteger"/>
             <xsd:attribute name="what"              type="What"/>
         </xsd:complexType>
     </xsd:element>
@@ -1067,7 +1072,7 @@
     </xsd:element>
 
 
-    <xsd:element name="start_task_for_remote_client">
+    <xsd:element name="remote_client.start_task">
         <xsd:complexType>
             <xsd:attribute name="tcp_port"          type="xsd:nonNegativeInteger"   use="required"/>
         </xsd:complexType>
@@ -1109,13 +1114,14 @@
     <xsd:element name="get_events">
         <xsd:complexType/>
     </xsd:element>
-    
-    
+
+
     <xsd:element name="web_services">
-        <xsd:complexType>
-            <xsd:sequence>
-                <xsd:element name="web_service" type="web_service" minOccurs="0" maxOccurs="unbounded"/>
-            </xsd:sequence>
+        <xsd:complexType >
+            <xsd:choice minOccurs="0" maxOccurs="unbounded">
+                <xsd:element name="web_service" type="web_service"/>
+                <xsd:element name="http_directory" type="http_directory"/>
+            </xsd:choice>
         </xsd:complexType>
 
         <!--libxslt xsd:key name="web_service">
@@ -1149,6 +1155,25 @@
 
         <xsd:attribute name="job_chain"                 type="Name"/>
         <xsd:attribute name="timeout"                   type="xsd:positiveInteger"/>
+    </xsd:complexType>
+
+    
+    <xsd:complexType name="http_directory">
+        <xsd:attribute name="url_path" use="required">
+            <xsd:simpleType>
+                <xsd:restriction base="String">
+                    <xsd:pattern value="/[^/]*/"/>
+                </xsd:restriction>
+            </xsd:simpleType>
+        </xsd:attribute>
+        
+        <xsd:attribute name="path" use="required">
+            <xsd:simpleType>
+                <xsd:restriction base="String">
+                    <xsd:pattern value=".+"/>
+                </xsd:restriction>
+            </xsd:simpleType>
+        </xsd:attribute>
     </xsd:complexType>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ATTRIBUT-TYPEN-->

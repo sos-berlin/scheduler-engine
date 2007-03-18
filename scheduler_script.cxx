@@ -21,7 +21,7 @@ struct Scheduler_script : Scheduler_script_interface
 
 
     // Scheduler_script_interface:
-    void                        set_dom_script              ( const xml::Element_ptr& script_element, const Time& xml_mod_time, const string& include_path );
+    void                        set_dom_script              ( const xml::Element_ptr& script_element, const Time& xml_mod_time );
     Module*                     module                      ()                                      { return &_module; }
     Module_instance*            module_instance             ()                                      { return _module_instance; }
 
@@ -47,9 +47,10 @@ Scheduler_script::Scheduler_script( Scheduler* scheduler )
 : 
     Scheduler_script_interface( scheduler, type_scheduler_script ),
     _zero_(this+1),
-    _module(_spooler,_log)
+    _module( scheduler, scheduler->include_path(), _log )
 {
     _module._dont_remote = true;
+
     _com_log = new Com_log( _log );
 }
 
@@ -85,9 +86,9 @@ void Scheduler_script::close()
 
 //-----------------------------------------------------------------Scheduler_script::set_dom_script
 
-void Scheduler_script::set_dom_script( const xml::Element_ptr& script_element, const Time& xml_mod_time, const string& include_path )
+void Scheduler_script::set_dom_script( const xml::Element_ptr& script_element, const Time& xml_mod_time )
 {
-    _module.set_dom( script_element, xml_mod_time, include_path );
+    _module.set_dom( script_element, xml_mod_time );
 }
 
 //-----------------------------------------------------------Scheduler_script::subsystem_initialize

@@ -848,10 +848,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\spooler_remote.cxx"
-				>
-			</File>
-			<File
 				RelativePath="spooler_security.cxx"
 				>
 				<FileConfiguration
@@ -1066,7 +1062,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\supervisor.cxx"
+				>
+			</File>
+			<File
 				RelativePath=".\task_for_remote_client.cxx"
+				>
+			</File>
+			<File
+				RelativePath=".\xml_client_connection.cxx"
 				>
 			</File>
 		</Filter>
@@ -1212,6 +1216,14 @@
 			</File>
 			<File
 				RelativePath=".\subsystem.h"
+				>
+			</File>
+			<File
+				RelativePath=".\supervisor.h"
+				>
+			</File>
+			<File
+				RelativePath=".\xml_client_connection.h"
 				>
 			</File>
 		</Filter>

@@ -46,10 +46,26 @@ void Communication::Operation_connection::register_task_process( Process* proces
 
 //-------------------------------------Communication::Operation_connection::unregister_task_process
 
-void Communication::Operation_connection::unregister_task_process( Process* process )
+void Communication::Operation_connection::unregister_task_process( pid_t pid )
 {
-    assert( process->pid() );
-    _task_process_register.erase( process->pid() );
+    assert( pid );
+
+    Process* process = get_task_process( pid );
+    process->kill();
+
+    _task_process_register.erase( pid );
+}
+
+//-------------------------------------Communication::Operation_connection::unregister_task_process
+
+Process* Communication::Operation_connection::get_task_process( pid_t pid )
+{
+    assert( pid );
+
+    Task_process_register::iterator it = _task_process_register.find( pid );
+    if( it == _task_process_register.end() )  z::throw_xc( __FUNCTION__, "unknown pid", pid );
+
+    return it->second;
 }
 
 //-----------------------------------------------Xml_operation_connection::Xml_operation_connection
@@ -93,7 +109,15 @@ Xml_operation::~Xml_operation()
     
 string Xml_operation::async_state_text_() const
 { 
-    return "Xml_operation " + Operation::async_state_text_();
+    S result;
+    
+    result << "Xml_operation(";
+    result << Operation::async_state_text_();
+
+    if( _request != "" )  result << ", " << quoted_string( truncate_first_line_with_ellipsis( _request, 100 ) );
+    result << ")";
+
+    return result;
 }
 
 //------------------------------------------------------------------Xml_operation::put_request_part
@@ -115,6 +139,7 @@ void Xml_operation::put_request_part( const char* data, int length )
 void Xml_operation::begin()
 {
     Command_processor command_processor ( _spooler, _connection->_security_level, this );
+    command_processor.set_log( &_connection->_log );
 
     //command_processor.set_communication_operation( this );
     //command_processor.set_host( _connection->peer_host() );

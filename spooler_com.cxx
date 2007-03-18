@@ -1583,7 +1583,7 @@ STDMETHODIMP Com_log::Start_new_file()
 
 //-------------------------------------------------------------------Com_log_proxy::Create_instance
 
-HRESULT Com_log_proxy::Create_instance( const IID& iid, ptr<IUnknown>* result )
+HRESULT Com_log_proxy::Create_instance( zschimmer::com::object_server::Session*, ptr<Object>*, const IID& iid, ptr<IUnknown>* result )
 {
     if( iid == object_server::IID_Iproxy )
     {
@@ -2924,7 +2924,7 @@ const Com_method Com_task_proxy::_methods[] =
 
 //------------------------------------------------------------------Com_task_proxy::Create_instance
 
-HRESULT Com_task_proxy::Create_instance( const IID& iid, ptr<IUnknown>* result )
+HRESULT Com_task_proxy::Create_instance( zschimmer::com::object_server::Session*, ptr<Object>*, const IID& iid, ptr<IUnknown>* result )
 {
     if( iid == object_server::IID_Iproxy )
     {
@@ -3749,7 +3749,7 @@ const Com_method Com_spooler_proxy::_methods[] =
 
 //---------------------------------------------------------------Com_spooler_proxy::Create_instance
 
-HRESULT Com_spooler_proxy::Create_instance( const IID& iid, ptr<IUnknown>* result )
+HRESULT Com_spooler_proxy::Create_instance( zschimmer::com::object_server::Session*, ptr<Object>*, const IID& iid, ptr<IUnknown>* result )
 {
     if( iid == object_server::IID_Iproxy )
     {

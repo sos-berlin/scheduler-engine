@@ -1,4 +1,4 @@
-// $Id$
+// $Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
 
 #include "spooler.h"        // Das ist für vorkompilierte Header, sonst sind wir unabhängig von spooler.h
 #include "../zschimmer/zschimmer.h"

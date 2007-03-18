@@ -28,7 +28,7 @@ function spooler_process()
                 
                 <monitor>
                     <script language="javascript"><![CDATA[ 
-int x;                        
+
 spooler_log.info( "MONITOR MONITOR MONITOR MONITOR MONITOR MONITOR MONITOR " );
                         
 function spooler_process_after( return_value ) 

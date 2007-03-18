@@ -361,6 +361,8 @@ xml::Element_ptr Task::dom_element( const xml::Document_ptr& document, const Sho
                 if( t->_module_instance->_in_call )
                 task_element.setAttribute( "calling"         , t->_module_instance->_in_call->name() );
 
+                task_element.setAttribute_optional( "process", t->_module_instance->process_name() );
+
                 int pid = t->_module_instance->pid();
                 if( pid )
                 {
@@ -692,7 +694,7 @@ void Task::set_state( State new_state )
                 S details;
                 if( _next_time )  details << " (" << _next_time << ")";
                 if( new_state == s_starting  &&  _start_at )  details << " (at=" << _start_at << ")";
-                if( new_state == s_starting  &&  _module_instance && _module_instance->pid() )  details << ", pid=" << _module_instance->pid();
+                if( new_state == s_starting  &&  _module_instance && _module_instance->process_name() != "" )  details << ", process " << _module_instance->process_name();
 
                 _log->log( log_level, message_string( "SCHEDULER-918", state_name(), details ) );
             }
@@ -840,20 +842,28 @@ bool Task::check_timeout( const Time& now )
 
 void Task::add_pid( int pid, const Time& timeout_period )
 {
-    Time timeout_at = Time::never;
-
-    if( timeout_period != Time::never )
+    if( _module_instance->is_remote_host() )
     {
-        timeout_at = Time::now() + timeout_period;
-        _log->debug9( message_string( "SCHEDULER-912", pid, timeout_at ) );
+        int REMOTE_SUBPROCESS_KILLEN;
+        _log->warn( message_string( "SCHEDULER-849", pid ) );
     }
+    else
+    {
+        Time timeout_at = Time::never;
 
-    bool is_process_group = false;
-    if( pid < 0 )  pid = -pid, is_process_group = true;
+        if( timeout_period != Time::never )
+        {
+            timeout_at = Time::now() + timeout_period;
+            _log->debug9( message_string( "SCHEDULER-912", pid, timeout_at ) );
+        }
 
-    _registered_pids[ pid ] = Z_NEW( Registered_pid( this, pid, timeout_at, false, false, false, is_process_group, "" ) );
+        bool is_process_group = false;
+        if( pid < 0 )  pid = -pid, is_process_group = true;
 
-    set_subprocess_timeout();
+        _registered_pids[ pid ] = Z_NEW( Registered_pid( this, pid, timeout_at, false, false, false, is_process_group, "" ) );
+
+        set_subprocess_timeout();
+    }
 }
 
 //---------------------------------------------------------------------------------Task::remove_pid
@@ -872,12 +882,20 @@ void Task::add_subprocess( int pid, double timeout, bool ignore_exitcode, bool i
     Z_LOG2( "scheduler", __FUNCTION__ << " " << pid << "," << timeout << "," << ignore_exitcode << "," << ignore_signal << "," << is_process_group << "\n" );
     Z_LOG2( "scheduler", __FUNCTION__ << "   title=" << title << "\n" );   // Getrennt, falls Parameterübergabe fehlerhaftist und es zum Abbruch kommt (com_server.cxx)
     
-    Time timeout_at = timeout < INT_MAX - 1? Time::now() + timeout
-                                           : Time::never;
+    if( _module_instance->is_remote_host() )
+    {
+        int REMOTE_SUBPROCESS_KILLEN;
+        _log->warn( message_string( "SCHEDULER-849", pid ) );
+    }
+    else
+    {
+        Time timeout_at = timeout < INT_MAX - 1? Time::now() + timeout
+                                               : Time::never;
 
-    _registered_pids[ pid ] = Z_NEW( Registered_pid( this, pid, timeout_at, true, ignore_exitcode, ignore_signal, is_process_group, title ) );
+        _registered_pids[ pid ] = Z_NEW( Registered_pid( this, pid, timeout_at, true, ignore_exitcode, ignore_signal, is_process_group, title ) );
 
-    set_subprocess_timeout();
+        set_subprocess_timeout();
+    }
 }
 
 //--------------------------------------------------------------Task::shall_wait_for_registered_pid
@@ -904,7 +922,7 @@ Task::Registered_pid::Registered_pid( Task* task, int pid, const Time& timeout_a
     _title(title),
     _killed(false)
 {
-    _spooler->register_pid( pid, is_process_group );
+    if( !_task->_module_instance->is_remote_host() )  _spooler->register_pid( pid, is_process_group );
 }
 
 //----------------------------------------------------------------------Task::Registered_pid::close
@@ -913,7 +931,7 @@ void Task::Registered_pid::close()
 {
     if( _spooler )
     {
-        _spooler->unregister_pid( _pid );
+        if( !_task->_module_instance->is_remote_host() )  _spooler->unregister_pid( _pid );
         _spooler = NULL;
     }
 }
@@ -922,21 +940,33 @@ void Task::Registered_pid::close()
 
 void Task::Registered_pid::try_kill()
 {
-    if( !_killed )
+    if( !_killed  )
     {
-        try
+        if( _task->_module_instance->is_remote_host() )
         {
-#           ifdef Z_UNIX
-              if( _is_process_group )  kill_process_group_immediately( _pid );
-              else
-#           endif
-                kill_process_immediately( _pid );
-
-            _task->_log->warn( message_string( "SCHEDULER-273", _pid ) );   // "Subprozess " << _pid << " abgebrochen" 
+            int REMOTE_SUBPROCESS_KILLEN;
+            _task->log()->warn( message_string( "SCHEDULER-849", _pid ) );
+            // Asynchron <remote_scheduler.subprocess.kill task="..." pid="..."/>
+            // ohne Ende abzuwarten?
+            // Operation für solche asynchronen XML-Befehle mit Warteschlange
+            // spooler_communication.cxx muss mehrere XML-Dokumente aufeinander empfangen und trennen können.
         }
-        catch( exception& x )
+        else
         {
-            _task->_log->warn( message_string( "SCHEDULER-274", _pid, x ) );   // "Subprozess " << _pid << " lässt sich nicht abbrechen: " << x
+            try
+            {
+#               ifdef Z_UNIX
+                  if( _is_process_group )  kill_process_group_immediately( _pid );
+                  else
+#               endif
+                    kill_process_immediately( _pid );
+
+                _task->_log->warn( message_string( "SCHEDULER-273", _pid ) );   // "Subprozess " << _pid << " abgebrochen" 
+            }
+            catch( exception& x )
+            {
+                _task->_log->warn( message_string( "SCHEDULER-274", _pid, x ) );   // "Subprozess " << _pid << " lässt sich nicht abbrechen: " << x
+            }
         }
 
         _killed = true;
@@ -1110,10 +1140,9 @@ bool Task::do_something()
                         case s_waiting_for_process:
                         {
                             bool ok = !_module_instance || _module_instance->try_to_get_process();
-                            if( ok )  set_state( s_starting ), loop = true;
+                            if( ok )  set_state( s_starting ), something_done = true, loop = true;
                                 else  set_state( s_waiting_for_process );
                             
-                            something_done = true;
                             break;
                         }
 
