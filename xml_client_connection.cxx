@@ -1,0 +1,262 @@
+// $Id: spooler_remote.cxx 4705 2007-01-05 16:20:23Z jz $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
+
+#include "spooler.h"
+
+namespace sos {
+namespace scheduler {
+
+//-----------------------------------------------------Xml_client_connection::Xml_client_connection
+    
+Xml_client_connection::Xml_client_connection( Spooler* sp, const Host_and_port& host_and_port )
+: 
+    Scheduler_object( sp, this, type_xml_client_connection ),
+    _zero_(this+1), 
+    _host_and_port(host_and_port),
+    _spooler(sp)
+{
+    _log->set_prefix( S() << "Xml_client_connection " << _host_and_port.as_string() );
+
+    //set_async_manager( _spooler->_connection_manager );
+}
+
+//----------------------------------------------------Xml_client_connection::~Xml_client_connection
+
+Xml_client_connection::~Xml_client_connection()
+{
+    if( _socket_operation )  
+    {
+        _socket_operation->set_async_parent( NULL );
+        _socket_operation->set_async_manager( NULL );
+    }
+}
+
+//-------------------------------------------------------------------Xml_client_connection::connect
+
+void Xml_client_connection::connect()
+{
+    async_wake(); 
+}
+
+//----------------------------------------------------------Xml_client_connection::is_send_possible
+
+bool Xml_client_connection::is_send_possible()
+{
+    return _state == s_connected;
+}
+
+//----------------------------------------------------------------------Xml_client_connection::send
+
+void Xml_client_connection::send( const string& s )
+{
+    if( !is_send_possible() )  z::throw_xc( __FUNCTION__, "Connection is currently in use" );
+
+    _send_data = s;
+
+    if( _state == s_connected )
+    {
+        async_wake();
+    }
+}
+
+//-----------------------------------------------------Xml_client_connection::received_dom_document
+
+xml::Document_ptr Xml_client_connection::received_dom_document()
+{
+    xml::Document_ptr result;
+
+    if( _state == s_connected  &&  !_received_data.is_empty() )
+    {
+        result.create();
+
+        result.load_xml( _received_data );
+        _received_data.clear();
+
+        DOM_FOR_EACH_ELEMENT( result.documentElement(), e1 )
+            if( e1.nodeName_is( "answer" ) )
+                DOM_FOR_EACH_ELEMENT( e1, e2 )
+                    if( e2.nodeName_is( "ERROR" ) )  z::throw_xc( "SCHEDULER-223", _host_and_port.as_string(), e2.getAttribute( "text" ) );
+    }
+
+    return result;
+}
+
+//-----------------------------------------------------------Xml_client_connection::async_continue_
+    
+bool Xml_client_connection::async_continue_( Continue_flags flags )
+{
+    Z_DEBUG_ONLY( Z_LOGI2( "joacim", __FUNCTION__ << "\n" ); )
+
+    bool something_done = false;
+
+    //try
+    {
+        if( _socket_operation )
+        {
+            _socket_operation->async_check_exception();
+
+            //if( !_socket_operation->async_finished() ) 
+            //{
+            //    Z_DEBUG_ONLY( Z_LOG2( "scheduler", __FUNCTION__ << " !_socket_operation->async_finished()\n" ); )
+            //    return false;
+            //}
+
+            if( _socket_operation->_eof )  z::throw_xc( "SCHEDULER-224", _host_and_port.as_string() );
+        }
+
+
+        for( int again = 0; again >= 0; --again )  
+        switch( _state )
+        {
+            case s_not_connected:
+            {
+                if( !( flags & cont_next_gmtime_reached ) )  
+                { 
+                    Z_DEBUG_ONLY( Z_LOG( "*** " << __FUNCTION__ << " !cont_next_gmtime_reached\n" ); 
+                    Z_WINDOWS_ONLY( DebugBreak(); ) ) 
+                    return false; 
+                }
+
+                _socket_operation = Z_NEW( Buffered_socket_operation );
+
+                _socket_operation->add_to_socket_manager( _spooler->_connection_manager );
+                _socket_operation->set_async_parent( this );
+
+                _socket_operation->connect__start( _host_and_port );
+                _socket_operation->set_keepalive( true );
+
+                _state = s_connecting;
+                something_done = true;
+                break;
+            }
+
+
+            case s_connecting:
+            {
+                if( !_socket_operation->async_finished() )  break;
+
+                _state = s_connected;
+                something_done = true;
+                again = 1;
+                break;
+            }
+
+
+            case s_connected:
+            {
+                if( !_send_data.empty() )
+                {
+                    _socket_operation->send__start( _send_data );
+                    _send_data = "";
+                    _state = s_sending;
+                    again = 1;
+                    something_done = true;
+                }
+
+                break;
+            }
+
+
+            case s_sending:
+                if( !_socket_operation->async_finished() )  break;
+
+                something_done = true;
+                _state = s_waiting;
+
+
+            case s_waiting:
+                _received_data.clear();
+
+
+            case s_receiving:
+            {
+                _socket_operation->recv__continue();
+                if( _socket_operation->_eof )  z::throw_xc( "SCHEDULER-224" );
+
+                string data = _socket_operation->recv_data();
+                if( data.length() == 0 )  break;
+
+                _state = s_receiving;
+                something_done = true;
+
+                _socket_operation->recv_clear();
+                _received_data.append( data );
+                
+
+                if( !_xml_end_finder.is_complete( data.data(), data.length() ) )  break;
+
+                _state = s_connected;
+
+                //log()->info( "ANTWORT: " + _recv_data );
+                //log()->info( message_string( "SCHEDULER-950" ) );   // "Scheduler ist registriert"
+                break;
+            }
+
+
+            default: ;
+        }
+    }
+    //catch( exception& x )
+    //{
+    //    log()->warn( x.what() );
+
+    //    if( _socket_operation )
+    //    {
+    //        try
+    //        {
+    //            _socket_operation->close();
+    //        }
+    //        catch( exception& ) {}
+
+    //        _socket_operation->async_reset_error();
+    //    }
+
+    //    _state = s_not_connected;
+    //    //set_async_next_gmtime( ::time(NULL) + main_scheduler_retry_time );
+    //    something_done = true;
+    //}
+
+    return something_done;
+}
+
+//---------------------------------------------------------Xml_client_connection::async_state_text_
+
+string Xml_client_connection::state_name( State state )
+{
+    switch( state )
+    {
+        case s_not_connected:   return "not_connected";
+        case s_connecting:      return "connecting";
+        case s_connected:       return "connected";
+        default:                return "state=" + as_int( state );
+    }
+}
+
+//------------------------------------------------------------------Xml_client_connection::obj_name
+
+string Xml_client_connection::obj_name() const
+{
+    return S() << "Xml_client_connection(" << _host_and_port << ")";
+}
+
+//---------------------------------------------------------Xml_client_connection::async_state_text_
+
+string Xml_client_connection::async_state_text_() const
+{
+    S result;
+
+    result << "Xml_client_connection(";
+    result << _host_and_port;
+    result << " ";
+    result << state_name( _state );
+
+    if( _send_data != "" )  result << ", " << quoted_string( truncate_first_line_with_ellipsis( _send_data, 100 ) );
+
+    result << ")";
+
+    return result;
+}
+
+//-------------------------------------------------------------------------------------------------
+
+} //namespace scheduler
+} //namespace sos

@@ -1,0 +1,79 @@
+<?xml version="1.0"?>
+<spooler
+    xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
+>
+    <config tcp_port="4444">
+
+        <!--base file="$SCHEDULER_TEST/base.scheduler"/-->
+        <security>
+            <allowed_host host="0.0.0.0" level="all"/>
+        </security>
+
+        <process_classes>
+            <process_class name="remote" remote_scheduler="sos-neu:4444" max_processes="50"/>
+        </process_classes>
+
+        <script language="JavaScript">
+            <![CDATA[
+
+spooler_log.info( "START" );
+
+                ]]>
+        </script>
+
+
+        <jobs>
+
+            <job name="local">
+                <script language="JavaScript">
+                    <![CDATA[
+
+function spooler_process() 
+{               
+    spooler_log.info( "HIER" );
+    var subprocess = spooler_task.create_subprocess( "hostname" );
+    subprocess.wait_for_termination();
+    return false;
+}
+
+                ]]>
+                </script>
+
+            </job>
+
+            
+            <job name="remote" process_class="remote" tasks="50">
+                <script language="JavaScript">
+                    <![CDATA[
+
+function spooler_process() 
+{               
+    var hostware = new ActiveXObject( "hostware.global" );
+    spooler_log.info( "DORT" );
+
+    var subprocess = spooler_task.create_subprocess();
+    subprocess.timeout = 1234.567;
+    subprocess.start( "cmd.exe /c \"dir\"" );
+    subprocess.wait_for_termination();
+    
+    hostware.sleep( 1 );
+
+    var subprocess = spooler_task.create_subprocess( "cmd.exe /c \"hostname >c:\\tmp\\1.txt\"" );
+    subprocess.wait_for_termination();
+    spooler_log.info( hostware.file_as_string( "c:/tmp/1.txt" ) );
+    return false;
+}
+                ]]></script>
+
+            </job>
+        
+        </jobs>
+
+        
+        <commands>
+            <start_job job="remote"/>
+            <!--start_job job="local"/-->
+        </commands>
+    </config>
+</spooler>
