@@ -289,20 +289,28 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
       //if( _server->_module->_monitor )  _server->_module->_monitor->set_source_only( _server->_module->_monitor->_source );
 
 
-        _server->_module->_java_vm = get_java_vm( false );
+        ptr<java::Vm> java_vm = get_java_vm( false );
+        _server->_module->_java_vm = java_vm;
 
         if( !_server->_module->_java_vm->running() )
         {
             // Java einstellen, falls der Job in Java geschrieben ist oder indirekt (über Javascript) Java benutzt.
             //java_vm->set_log( &_log );
-            if( !java_work_dir.empty() )
-            _server->_module->_java_vm->set_work_dir( java_work_dir );
-
             if( !java_class_path.empty() )
             _server->_module->_java_vm->set_class_path( java_class_path );
 
             _server->_module->_java_vm->set_javac_filename( javac );
             _server->_module->_java_vm->set_options( java_options );
+
+            if( !java_work_dir.empty() )
+            {
+                if( _server->_module->_real_kind           == Module::kind_java  &&  _server->_module->has_source_script()  ||
+                    _server->_module->_monitor->_real_kind == Module::kind_java  &&  _server->_module->_monitor->has_source_script() )
+                {
+                    java_vm->set_work_dir( java_work_dir );
+                    java_vm->prepend_class_path( java_work_dir );
+                }
+            }
         }
         else
         {

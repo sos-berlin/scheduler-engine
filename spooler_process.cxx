@@ -198,9 +198,7 @@ void Process::start_local()
         xml_writer.set_attribute_optional( "java_options"   , _spooler->_config_java_options );
         xml_writer.set_attribute_optional( "java_class_path", _spooler->java_subsystem()->java_vm()->class_path() );
         xml_writer.set_attribute_optional( "javac"          , _spooler->java_subsystem()->java_vm()->javac_filename() );
-
-        if( _module_instance  &&  _module_instance->_module->_real_kind == Module::kind_java  &&  _module_instance->_module->has_source_script() )
-            xml_writer.set_attribute_optional( "java_work_dir", _spooler->java_work_dir() );
+        xml_writer.set_attribute_optional( "java_work_dir", _spooler->java_work_dir() );
 
         //if( _controller_address )  
         //    xml_writer.set_attribute_optional( "collect_stdout_stderr", "true" );
