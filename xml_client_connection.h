@@ -24,7 +24,8 @@ struct Xml_client_connection : Async_operation, Scheduler_object
                                ~Xml_client_connection       ();
 
     virtual string              obj_name                    () const;
-                                
+
+    void                    set_wait_for_connection         ( int seconds )                         { _wait_for_connection = seconds; }
     State                       state                       () const                                { return _state; }
 
     void                        connect                     ();
@@ -44,7 +45,7 @@ struct Xml_client_connection : Async_operation, Scheduler_object
     Fill_zero                  _zero_;
     State                      _state;
     Host_and_port              _host_and_port;
-    Spooler*                   _spooler;
+    int                        _wait_for_connection;
     ptr<Buffered_socket_operation>  _socket_operation;
     Xml_end_finder             _xml_end_finder;
     string                     _send_data;

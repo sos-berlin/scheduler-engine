@@ -8,6 +8,10 @@
 namespace sos {
 namespace scheduler {
 
+//--------------------------------------------------------------------------------------------const
+    
+const int connection_retry_time = 60;
+
 //------------------------------------------Process::Async_remote_operation::Async_remote_operation
     
 Process::Async_remote_operation::Async_remote_operation( Process* p ) 
@@ -181,7 +185,7 @@ void Process::start_local()
         parameters.push_back( object_server::Parameter( "param", "-task-id=" + as_string(_task_id) ) );
 
         if( !log_filename().empty() )
-        parameters.push_back( object_server::Parameter( "param", "-log=" + /*quoted_string*/( log_categories_as_string() + " >+" + log_filename() ) ) );   // -log="+xxx" funktioniert in Linux nicht, die Anführungszeichen kommen in log.cxx an
+        parameters.push_back( object_server::Parameter( "param", "-log=" + log_categories_as_string() + " >+" + log_filename() ) );
 
         parameters.push_back( object_server::Parameter( "program", _spooler->_my_program_filename ) );
 
@@ -195,7 +199,7 @@ void Process::start_local()
         xml_writer.set_attribute_optional( "java_class_path", _spooler->java_subsystem()->java_vm()->class_path() );
         xml_writer.set_attribute_optional( "javac"          , _spooler->java_subsystem()->java_vm()->javac_filename() );
 
-        if( _module_instance->_module->_real_kind == Module::kind_java  &&  _module_instance->_module->has_source_script() )
+        if( _module_instance  &&  _module_instance->_module->_real_kind == Module::kind_java  &&  _module_instance->_module->has_source_script() )
             xml_writer.set_attribute_optional( "java_work_dir", _spooler->java_work_dir() );
 
         //if( _controller_address )  
@@ -281,6 +285,7 @@ bool Process::async_remote_start_continue( Async_operation::Continue_flags )
             _xml_client_connection = Z_NEW( Xml_client_connection( _spooler, _process_class->_remote_scheduler ) );
             _xml_client_connection->set_async_parent( _async_remote_operation );
             _xml_client_connection->set_async_manager( _spooler->_connection_manager );
+            _xml_client_connection->set_wait_for_connection( connection_retry_time );
             _xml_client_connection->connect();
 
             something_done = true;

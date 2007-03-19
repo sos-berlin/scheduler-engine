@@ -51,6 +51,7 @@ public class My_job  extends sos.spooler.Job_impl
 {   
     public boolean spooler_process()  throws Exception
     {
+        spooler_log.info( "HALLO" );
         return false;
     }
 }

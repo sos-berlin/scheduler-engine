@@ -2245,12 +2245,12 @@
 
     <xsl:template match="task/@state">
         <xsl:choose>
-            <xsl:when test=".='suspended'">
+            <xsl:when test=". = 'suspended' or . = 'waiting_for_process'">
                 <span class="task_error">
                     <xsl:value-of select="."/>
                 </span>
             </xsl:when>
-            
+
             <xsl:otherwise>
                 <xsl:value-of select="."/>
             </xsl:otherwise>

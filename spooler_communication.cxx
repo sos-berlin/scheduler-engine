@@ -146,7 +146,7 @@ void Xml_operation::begin()
 
     if( string_begins_with( _request, " " ) )  _request = ltrim( _request );
 
-    _connection->_log.info( message_string( "SCHEDULER-932", _request ) );
+    //_connection->_log.info( message_string( "SCHEDULER-932", _request ) );
 
     _response = command_processor.response_execute( _request, Time::now(), _operation_connection->_indent );
     _response->set_connection( _connection );

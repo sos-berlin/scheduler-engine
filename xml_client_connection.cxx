@@ -11,8 +11,7 @@ Xml_client_connection::Xml_client_connection( Spooler* sp, const Host_and_port& 
 : 
     Scheduler_object( sp, this, type_xml_client_connection ),
     _zero_(this+1), 
-    _host_and_port(host_and_port),
-    _spooler(sp)
+    _host_and_port(host_and_port)
 {
     _log->set_prefix( S() << "Xml_client_connection " << _host_and_port.as_string() );
 
@@ -88,7 +87,7 @@ bool Xml_client_connection::async_continue_( Continue_flags flags )
 
     bool something_done = false;
 
-    //try
+    try
     {
         if( _socket_operation )
         {
@@ -195,25 +194,25 @@ bool Xml_client_connection::async_continue_( Continue_flags flags )
             default: ;
         }
     }
-    //catch( exception& x )
-    //{
-    //    log()->warn( x.what() );
+    catch( exception& x )
+    {
+        if( _state == s_connecting  &&  _wait_for_connection )
+        {
+            log()->warn( x.what() );
 
-    //    if( _socket_operation )
-    //    {
-    //        try
-    //        {
-    //            _socket_operation->close();
-    //        }
-    //        catch( exception& ) {}
+            if( _socket_operation )
+            {
+                _socket_operation->close();
+                _socket_operation = NULL;
+            }
 
-    //        _socket_operation->async_reset_error();
-    //    }
-
-    //    _state = s_not_connected;
-    //    //set_async_next_gmtime( ::time(NULL) + main_scheduler_retry_time );
-    //    something_done = true;
-    //}
+            _state = s_not_connected;
+            set_async_delay( _wait_for_connection );
+            something_done = true;
+        }
+        else
+            throw;
+    }
 
     return something_done;
 }

@@ -2733,14 +2733,14 @@
             </text>
         </message>
 
-        <message code="SCHEDULER-932">
+        <!--message code="SCHEDULER-932">
             <text xml:lang="de">
                 <title>Kommando <p1/></title>
             </text>
             <text xml:lang="en">
                 <title>Executing command <p1/></title>
             </text>
-        </message>
+        </message-->
 
         <message code="SCHEDULER-933">
             <text xml:lang="de">

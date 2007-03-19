@@ -287,7 +287,6 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-928", "Next single_start at $1" },
     { "SCHEDULER-930", "Task $1 started, cause: $2" },
     { "SCHEDULER-931", "state=$1" },
-    { "SCHEDULER-932", "Executing command $1" },
     { "SCHEDULER-933", "TCP connection accepted" },
     { "SCHEDULER-934", "Compiling Java source: $1" },
     { "SCHEDULER-935", "$1 orders read from database" },
