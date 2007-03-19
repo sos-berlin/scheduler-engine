@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- $Id: scheduler.xsd 4842 2007-02-08 22:13:15Z jz $ -->
+<!-- $Id: scheduler.xsd 4888 2007-03-18 15:47:33Z jz $ -->
 
 <xsd:schema 
     xmlns:xsd          = "http://www.w3.org/2001/XMLSchema" 
@@ -9,7 +9,7 @@
 
     <xsd:annotation>
         <xsd:documentation xml:lang="de">
-            $Id: scheduler.xsd 4842 2007-02-08 22:13:15Z jz $
+            $Id: scheduler.xsd 4888 2007-03-18 15:47:33Z jz $
             Schema für die Scheduler-Konfiguration,
             s.a. http://www.zschimmer.com/sos/scheduler/konfiguration.html.
         </xsd:documentation>
@@ -32,7 +32,11 @@
                             <xsd:element ref="cluster"          minOccurs="0"/>
                             <xsd:element ref="process_classes"  minOccurs="0"/>
                             <xsd:element ref="script"           minOccurs="0"/>
-                            <xsd:element ref="web_services"     minOccurs="0"/>
+
+                            <xsd:choice minOccurs="0">
+                                <xsd:element ref="http_server"/>
+                                <xsd:element ref="web_services"/>   <!-- veraltet -->
+                            </xsd:choice>
 
                             <xsd:choice>
                                 <xsd:element ref="holidays"/>
@@ -145,7 +149,8 @@
             <xsd:element ref="show_task"/>
             <xsd:element ref="service_request"/>
             <xsd:element ref="start_job"/>
-            <xsd:element ref="remote_client.start_task"/>
+            <xsd:element ref="remote_scheduler.start_remote_task"/>
+            <xsd:element ref="remote_scheduler.remote_task.close"/>
             <!--xsd:element ref="signal_object"/-->
             <xsd:element ref="terminate"/>
         </xsd:choice>
@@ -222,13 +227,7 @@
                     </xsd:complexType>
                 </xsd:element>
                 
-                <xsd:element name="xml_payload" minOccurs="0">
-                    <xsd:complexType>
-                        <xsd:sequence>
-                            <xsd:any processContents="skip"/>
-                        </xsd:sequence>
-                    </xsd:complexType>
-                </xsd:element>
+                <xsd:element name="xml_payload" type="Xml_payload" minOccurs="0"/>
             </xsd:sequence>
             
             <xsd:attribute name="job_chain"         type="Name"         use="required"/>
@@ -555,12 +554,15 @@
     <xsd:element name="modify_order">
         <xsd:complexType>
             <xsd:sequence>
-                <xsd:element ref="run_time" minOccurs="0"/>
+                <xsd:element ref="params"                          minOccurs="0"/>
+                <xsd:element name="xml_payload" type="Xml_payload" minOccurs="0"/>
+                <xsd:element ref="run_time"                        minOccurs="0"/>
             </xsd:sequence>
-            
+
             <xsd:attribute name="job_chain" type="Name"         use="required"/>
             <xsd:attribute name="order"     type="Order_id"     use="required"/>
             <xsd:attribute name="priority"  type="xsd:integer"/>
+            <xsd:attribute name="title"     type="String"/>
             <xsd:attribute name="state"     type="String"/>
             <xsd:attribute name="setback"   type="No"/>
             <xsd:attribute name="suspended" type="Yes_no"/>
@@ -1072,9 +1074,16 @@
     </xsd:element>
 
 
-    <xsd:element name="remote_client.start_task">
+    <xsd:element name="remote_scheduler.start_remote_task">
         <xsd:complexType>
             <xsd:attribute name="tcp_port"          type="xsd:nonNegativeInteger"   use="required"/>
+        </xsd:complexType>
+    </xsd:element>
+
+
+    <xsd:element name="remote_scheduler.remote_task.close">
+        <xsd:complexType>
+            <xsd:attribute name="pid"               type="xsd:integer"   use="required"/>
         </xsd:complexType>
     </xsd:element>
 
@@ -1116,7 +1125,7 @@
     </xsd:element>
 
 
-    <xsd:element name="web_services">
+    <xsd:element name="http_server">
         <xsd:complexType >
             <xsd:choice minOccurs="0" maxOccurs="unbounded">
                 <xsd:element name="web_service" type="web_service"/>
@@ -1134,6 +1143,19 @@
             <xsd:field xpath="@url_path"/>
         </xsd:key-->
 
+    </xsd:element>
+
+
+    <xsd:element name="web_services">
+        <xsd:annotation>
+            <xsd:documentation>Deprecated. Use http_server</xsd:documentation>
+        </xsd:annotation>
+        
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="web_service" type="web_service" minOccurs="0" maxOccurs="unbounded"/>
+            </xsd:sequence>
+        </xsd:complexType>
     </xsd:element>
 
 
@@ -1159,13 +1181,7 @@
 
     
     <xsd:complexType name="http_directory">
-        <xsd:attribute name="url_path" use="required">
-            <xsd:simpleType>
-                <xsd:restriction base="String">
-                    <xsd:pattern value="/[^/]*/"/>
-                </xsd:restriction>
-            </xsd:simpleType>
-        </xsd:attribute>
+        <xsd:attribute name="url_path"                  type="Url_path"         use="required"/>
         
         <xsd:attribute name="path" use="required">
             <xsd:simpleType>
@@ -1176,6 +1192,13 @@
         </xsd:attribute>
     </xsd:complexType>
 
+    
+    <xsd:complexType name="Xml_payload">
+        <xsd:sequence minOccurs="0">
+            <xsd:any processContents="skip"/>
+        </xsd:sequence>
+    </xsd:complexType>
+    
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ATTRIBUT-TYPEN-->
 
     <xsd:simpleType name="Yes_no">

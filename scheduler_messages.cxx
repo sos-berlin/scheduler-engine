@@ -97,8 +97,8 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-220", "<run_time $1> is not possible for an order" },
     { "SCHEDULER-221", "<day day=\"$1\">: only the days from $2 to $3 are possible" },
     { "SCHEDULER-222", "This command <$1> is only executable by way of a TCP connection" },
-    { "SCHEDULER-223", "Logon at main Scheduler failed: $1" },
-    { "SCHEDULER-224", "The main Job Scheduler has closed connection" },
+    { "SCHEDULER-223", "Logon at supervisor scheduler failed: $1" },
+    { "SCHEDULER-224", "The serving scheduler has closed connection" },
     { "SCHEDULER-225", "start_new_file() is only applicable for the main protocol" },
     { "SCHEDULER-226", "Order has not been processed because the task has been terminated before the processing step (spooler_process())" },
     { "SCHEDULER-227", "Scheduler script has logged an error: $1" },
@@ -260,6 +260,8 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-396", "Job has not yet reached state '$1' for operation $2" },
     { "SCHEDULER-397", "A distributed order does not support $1" },
     { "SCHEDULER-398", "After last error, next_start_function='$1' will no longer be executed for this <run_time>" },
+    { "SCHEDULER-399", "Error in <include>: $1" },
+    { "SCHEDULER-400", "Only API-jobs are possible with <process_class remote_scheduler=\"&#8230;\"/>" },
     { "SCHEDULER-900", "Scheduler $1 is starting with $2, pid=$3" },
     { "SCHEDULER-902", "state=$1" },
     { "SCHEDULER-904", "Tasks have $1s to terminate" },
@@ -390,7 +392,6 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-847", "Please use new name '$1' instead of old '$2'" },
     { "SCHEDULER-848", "Task pid=$1 started for remote scheduler" },
     { "SCHEDULER-849", "Timeout is not possible for a subprocess running on a remote host (it cannot be killed), pid=$1" },
-    { "SCHEDULER-850", "Error in <include>: $1" },
     {}
 };
 } //namespace sos

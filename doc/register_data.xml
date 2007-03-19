@@ -53,6 +53,7 @@
     <register_entry register_file='xml.xml#use_element__allowed_host' register_title='Alle XML-Elemente'  register_keyword='allowed_host'/>
     <register_entry register_file='xml/allowed_host.xml#' register_title='&lt;allowed_host&gt; (Konfiguration)'  register_keyword='allowed_host' type='definition'/>
     <register_entry register_file='xml/base.xml#use_element__allowed_host' register_title='&lt;base&gt; (Konfiguration)'  register_keyword='allowed_host'/>
+    <register_entry register_file='xml/process_class.xml#use_element__allowed_host' register_title='&lt;process_class&gt; (Konfiguration)'  register_keyword='allowed_host'/>
 </register_keyword>
 <register_keyword keyword='answer'>
     <register_keyword_display><code>&lt;answer&gt;</code></register_keyword_display>
@@ -211,6 +212,7 @@
     <register_entry register_file='xml/config.xml#' register_title='&lt;config&gt; (Konfiguration)'  register_keyword='config' type='definition'/>
     <register_entry register_file='xml/config.xml#use_element__config' register_title='&lt;config&gt; (Konfiguration)'  register_keyword='config'/>
     <register_entry register_file='xml/job.xml#use_element__config' register_title='&lt;job&gt; (Konfiguration)'  register_keyword='config'/>
+    <register_entry register_file='xml/process_class.xml#use_element__config' register_title='&lt;process_class&gt; (Konfiguration)'  register_keyword='config'/>
     <register_entry register_file='xml/supervisor.xml#use_element__config' register_title='&lt;supervisor&gt; (Konfiguration)'  register_keyword='config'/>
     <register_entry register_file='xml/web_service.xml#use_element__config' register_title='&lt;web_service&gt; (Konfiguration)'  register_keyword='config'/>
 </register_keyword>
@@ -760,6 +762,7 @@
     <register_entry register_file='xml/answer/description.xml#use_element__include' register_title='&lt;description&gt; (Antwort)'  register_keyword='include'/>
     <register_entry register_file='xml/include.xml#' register_title='&lt;include&gt; (Konfiguration)'  register_keyword='include' type='definition'/>
     <register_entry register_file='xml/modify_job.xml#use_element__include' register_title='&lt;modify_job&gt; (Kommando)'  register_keyword='include'/>
+    <register_entry register_file='xml/process_class.xml#use_element__include' register_title='&lt;process_class&gt; (Konfiguration)'  register_keyword='include'/>
 </register_keyword>
 <register_keyword keyword='include-path'>
     <register_keyword_display><code>-include-path=</code></register_keyword_display>
@@ -1456,6 +1459,7 @@
     <register_entry register_file='xml/copy_params.xml#use_element__process' register_title='&lt;copy_params&gt;'  register_keyword='process'/>
     <register_entry register_file='xml/job.xml#use_element__process' register_title='&lt;job&gt; (Konfiguration)'  register_keyword='process'/>
     <register_entry register_file='xml/process.xml#' register_title='&lt;process&gt; (Konfiguration)'  register_keyword='process' type='definition'/>
+    <register_entry register_file='xml/process_class.xml#use_element__process' register_title='&lt;process_class&gt; (Konfiguration)'  register_keyword='process'/>
     <register_entry register_file='xml/script.xml#use_element__process' register_title='&lt;script&gt; (Konfiguration)'  register_keyword='process'/>
 </register_keyword>
 <register_keyword keyword='process-class'>
@@ -1464,9 +1468,16 @@
 </register_keyword>
 <register_keyword keyword='process_class'>
     <register_keyword_display><code>&lt;process_class&gt;</code></register_keyword_display>
+    <register_entry register_file='CHANGES.xml#use_element__process_class' register_title='Änderungsprotokoll'  register_keyword='process_class'/>
+    <register_entry register_file='api/Log.xml#use_element__process_class' register_title='XXX'  register_keyword='process_class'/>
+    <register_entry register_file='api/Subprocess.xml#use_element__process_class' register_title='XXX'  register_keyword='process_class'/>
+    <register_entry register_file='api/Task.xml#use_element__process_class' register_title='XXX'  register_keyword='process_class'/>
     <register_entry register_file='xml.xml#use_element__process_class' register_title='Alle XML-Elemente'  register_keyword='process_class'/>
     <register_entry register_file='xml/answer/process_class.xml#' register_title='&lt;process_class&gt; (Antwort)'  register_keyword='process_class' type='definition'/>
+    <register_entry register_file='xml/include.xml#use_element__process_class' register_title='&lt;include&gt; (Konfiguration)'  register_keyword='process_class'/>
+    <register_entry register_file='xml/process.xml#use_element__process_class' register_title='&lt;process&gt; (Konfiguration)'  register_keyword='process_class'/>
     <register_entry register_file='xml/process_class.xml#' register_title='&lt;process_class&gt; (Konfiguration)'  register_keyword='process_class' type='definition'/>
+    <register_entry register_file='xml/script.xml#use_element__process_class' register_title='&lt;script&gt; (Konfiguration)'  register_keyword='process_class'/>
 </register_keyword>
 <register_keyword keyword='process_class'>
     <register_keyword_display><code>process_class=</code></register_keyword_display>
@@ -1545,6 +1556,10 @@
     <register_keyword_display><code>&lt;remote_scheduler&gt;</code></register_keyword_display>
     <register_entry register_file='xml.xml#use_element__remote_scheduler' register_title='Alle XML-Elemente'  register_keyword='remote_scheduler'/>
     <register_entry register_file='xml/answer/remote_scheduler.xml#' register_title='&lt;remote_scheduler&gt; (Antwort)'  register_keyword='remote_scheduler' type='definition'/>
+</register_keyword>
+<register_keyword keyword='remote_scheduler'>
+    <register_keyword_display><code>remote_scheduler=</code></register_keyword_display>
+    <register_entry register_file='xml/process_class.xml#attribute_remote_scheduler' register_title='&lt;process_class&gt; (Konfiguration)'  register_keyword='remote_scheduler' type='definition'/>
 </register_keyword>
 <register_keyword keyword='remote_schedulers'>
     <register_keyword_display><code>&lt;remote_schedulers&gt;</code></register_keyword_display>
@@ -2079,6 +2094,7 @@
     <register_entry register_file='xml/add_order.xml#attribute_title' register_title='&lt;add_order&gt; (Kommando)'  register_keyword='title' type='definition'/>
     <register_entry register_file='xml/answer/order.xml#attribute_title' register_title='&lt;order&gt; (Antwort)'  register_keyword='title' type='definition'/>
     <register_entry register_file='xml/job.xml#attribute_title' register_title='&lt;job&gt; (Konfiguration)'  register_keyword='title' type='definition'/>
+    <register_entry register_file='xml/modify_order.xml#attribute_title' register_title='&lt;modify_order&gt; (Kommando)'  register_keyword='title' type='definition'/>
 </register_keyword>
 <register_keyword keyword='udp-port'>
     <register_keyword_display><code>-udp-port=</code></register_keyword_display>
@@ -2111,10 +2127,6 @@
     <register_keyword_display><code>url_path=</code></register_keyword_display>
     <register_entry register_file='xml/http_directory.xml#attribute_url_path' register_title='&lt;http_directory&gt; (Konfiguration)'  register_keyword='url_path' type='definition'/>
     <register_entry register_file='xml/web_service.xml#attribute_url_path' register_title='&lt;web_service&gt; (Konfiguration)'  register_keyword='url_path' type='definition'/>
-</register_keyword>
-<register_keyword keyword='use_engine'>
-    <register_keyword_display><code>use_engine=</code></register_keyword_display>
-    <register_entry register_file='xml/script.xml#attribute_use_engine' register_title='&lt;script&gt; (Konfiguration)'  register_keyword='use_engine' type='definition'/>
 </register_keyword>
 <register_keyword keyword='V'>
     <register_keyword_display><code>-V=</code></register_keyword_display>
