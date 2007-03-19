@@ -489,8 +489,6 @@ xml::Element_ptr Command_processor::execute_remote_scheduler_start_remote_task( 
 
     int tcp_port = start_task_element.int_getAttribute( "tcp_port" );
 
-
-
     //String_writer string_writer = Z_NEW( String_writer() );
 
     //xml::Xml_writer xml_writer = Z_NEW( xml::Xml_writer( string_writer ) );
