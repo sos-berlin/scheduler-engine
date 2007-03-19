@@ -457,7 +457,7 @@ AGAIN:
         {
             operation->set_async_child( NULL );
             HRESULT hr = _session->create_instance__end( 1, operation->_multi_qi );
-            if( FAILED(hr) )  throw_com( hr, "create_instance" );
+            if( FAILED(hr) )  throw_com( hr, "create_instance", string_from_clsid( *operation->_multi_qi[ 0 ].pIID ) );
 
             _remote_instance = dynamic_cast<object_server::Proxy*>( operation->_multi_qi[0].pItf );
             _idispatch = _remote_instance;

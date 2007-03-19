@@ -3300,8 +3300,6 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
 //        mtrace();   // Memory leak detectiopn
 //#   endif
 
-    Ole_initialize  ole;
-
     while(1)
     {
         Spooler my_spooler;
@@ -3362,6 +3360,8 @@ int object_server( int argc, char** argv )
 
 int spooler_main( int argc, char** argv, const string& parameter_line )
 {
+    Ole_initialize  ole;
+
     add_message_code_texts( sos::scheduler::scheduler_messages );
 
     set_log_category_default( "scheduler"     , true );

@@ -1066,10 +1066,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\task_for_remote_client.cxx"
-				>
-			</File>
-			<File
 				RelativePath=".\xml_client_connection.cxx"
 				>
 			</File>
