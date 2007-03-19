@@ -62,6 +62,9 @@ function spooler_process()
     var subprocess = spooler_task.create_subprocess( "cmd.exe /c \"hostname >c:\\tmp\\1.txt\"" );
     subprocess.wait_for_termination();
     spooler_log.info( hostware.file_as_string( "c:/tmp/1.txt" ) );
+    
+    spooler_job.start();
+    
     return false;
 }
                 ]]></script>
@@ -72,6 +75,7 @@ function spooler_process()
 
         
         <commands>
+            <start_job job="remote"/>
             <start_job job="remote"/>
             <!--start_job job="local"/-->
         </commands>

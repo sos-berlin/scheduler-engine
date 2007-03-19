@@ -212,11 +212,11 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
     try
     {
         string job_name;
+        string include_path    = _class_data->_task_process_element.getAttribute( "include_path"    );
         string java_options    = _class_data->_task_process_element.getAttribute( "java_options"    );
         string java_class_path = _class_data->_task_process_element.getAttribute( "java_class_path" );
         string javac           = _class_data->_task_process_element.getAttribute( "javac"           );
         string java_work_dir   = _class_data->_task_process_element.getAttribute( "java_work_dir"   );
-        string include_path    = _class_data->_task_process_element.getAttribute( "include_path"    );
         int    task_id         = 0;
 
         Locked_safearray<Variant> params ( safearray );

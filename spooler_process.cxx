@@ -178,6 +178,7 @@ void Process::start_local()
         io::String_writer string_writer;
         xml::Xml_writer xml_writer ( &string_writer );
         xml_writer.begin_element( "task_process" );
+        xml_writer.set_attribute_optional( "include_path"   , _spooler->include_path() );
         xml_writer.set_attribute_optional( "java_options"   , _spooler->_config_java_options );
         xml_writer.set_attribute_optional( "java_class_path", _spooler->java_subsystem()->java_vm()->class_path() );
         xml_writer.set_attribute_optional( "javac"          , _spooler->java_subsystem()->java_vm()->javac_filename() );
