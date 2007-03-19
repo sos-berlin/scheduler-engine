@@ -169,7 +169,7 @@ bool Xml_client_connection::async_continue_( Continue_flags flags )
             case s_receiving:
             {
                 _socket_operation->recv__continue();
-                if( _socket_operation->_eof )  z::throw_xc( "SCHEDULER-224" );
+                if( _socket_operation->_eof )  z::throw_xc( "SCHEDULER-224", _host_and_port.as_string() );
 
                 string data = _socket_operation->recv_data();
                 if( data.length() == 0 )  break;

@@ -1111,7 +1111,7 @@
                 <title>Anmelden beim Haupt-Scheduler gescheitert: <p1/></title>
             </text>
             <text xml:lang="en">
-                <title>Logon at main Scheduler failed: <p1/></title>
+                <title>Logon at supervisor scheduler failed: <p1/></title>
             </text>
         </message>
 
@@ -1120,7 +1120,7 @@
                 <title>Haupt-Scheduler hat Verbindung geschlossen</title>
             </text>
             <text xml:lang="en">
-                <title>The main Job Scheduler has closed connection</title>
+                <title>The serving scheduler has closed connection</title>
             </text>
         </message>
 
