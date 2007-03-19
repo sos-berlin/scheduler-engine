@@ -297,10 +297,10 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
             // Java einstellen, falls der Job in Java geschrieben ist oder indirekt (über Javascript) Java benutzt.
             //java_vm->set_log( &_log );
             if( !java_class_path.empty() )
-            _server->_module->_java_vm->set_class_path( java_class_path );
+            java_vm->set_class_path( java_class_path );
 
-            _server->_module->_java_vm->set_javac_filename( javac );
-            _server->_module->_java_vm->set_options( java_options );
+            java_vm->set_javac_filename( javac );
+            java_vm->set_options( java_options );
 
             if( !java_work_dir.empty() )
             {
