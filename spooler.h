@@ -100,7 +100,7 @@ extern const string             variable_set_name_for_substitution;
 
 
 #ifdef Z_WINDOWS
-    const int                   max_processes                 =    30;    // Summe aller Handles darf MAXIMUM_WAIT_OBJECTS-1=63 nicht überschreiten
+    const int                   max_processes                 =    25;    // Summe aller Handles darf MAXIMUM_WAIT_OBJECTS-1=63 nicht überschreiten
     const int                   max_communication_connections =    28;    // Summe aller Handles darf MAXIMUM_WAIT_OBJECTS-1=63 nicht überschreiten, inkl. udp und listen()
 #else
     const int                   max_processes                 =   200;    // kein Limit (HP-UX erlaubt 64 aktive fork())
@@ -401,6 +401,7 @@ struct Spooler : Object,
     sql::Database_descriptor*   database_descriptor         ()                                  { return db()->database_descriptor(); }
 
     Scheduler_script_interface* scheduler_script            () const                            { return _scheduler_script; }
+    string                      java_work_dir               ()                                  { return temp_dir() + Z_DIR_SEPARATOR "java"; }
 
     Task_subsystem*             task_subsystem              ();
     Task_subsystem*             task_subsystem_or_null      ()                                  { return _task_subsystem; }

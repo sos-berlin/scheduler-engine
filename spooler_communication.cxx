@@ -565,6 +565,16 @@ xml::Element_ptr Communication::Connection::dom_element( const xml::Document_ptr
     if( _operation_connection )
     {
         result.setAttribute( "operation_type", _operation_connection->connection_type() );
+
+        if( !_operation_connection->_task_process_register.empty() )
+        {
+            xml::Element_ptr processes_element = result.append_new_element( "remote_processes" );
+            Z_FOR_EACH( Operation_connection::Task_process_register, _operation_connection->_task_process_register, it )
+            {
+                xml::Element_ptr process_element = processes_element.append_new_element( "remote_process" );
+                process_element.setAttribute( "pid", it->second->pid()) ;
+            }
+        }
     }
 
     if( _operation )

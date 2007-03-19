@@ -6,6 +6,9 @@
     <config>
         <base file="$SCHEDULER_TEST/base.scheduler"/>
 
+        <process_classes>
+            <process_class name="remote" remote_scheduler="lund:4444"/>
+        </process_classes>
 
         <script java_class="spooler_job.Scheduler_script">
             <![CDATA[
@@ -35,7 +38,7 @@ public class Scheduler_script  extends sos.spooler.Job_impl
         <jobs>
 
 
-            <job name="java">
+            <job name="java" process_class="remote">
 
                 <script java_class="spooler_job.My_job">
                     <![CDATA[
@@ -54,7 +57,7 @@ public class My_job  extends sos.spooler.Job_impl
                 ]]>
                 </script>
 
-                <run_time start_time_function="my_start_time_function"/>
+                <run_time once="yes" start_time_function="my_start_time_function"/>
             </job>
 
         </jobs>

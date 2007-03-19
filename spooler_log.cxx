@@ -1,5 +1,4 @@
-
-// $Id$
+// $Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
 
 #include "spooler.h"
 #include "spooler_mail.h"
@@ -413,6 +412,9 @@ void Log::log2( Log_level level, bool log_to_files, const string& prefix, const 
 
     string line = line_;
     for( int i = line.find( '\r' ); i != string::npos; i = line.find( '\r', i+1 ) )  line[i] = ' ';     // Windows scheint sonst doppelte Zeilenwechsel zu schreiben. jz 25.11.03
+
+    //assert( !line.empty() );
+        
     
     THREAD_LOCK( _semaphore )
     {
@@ -444,7 +446,7 @@ void Log::log2( Log_level level, bool log_to_files, const string& prefix, const 
 
 
         int begin = 0;
-        while( begin < line.length() )
+        while(1)
         {
             z::Log_ptr log ( "scheduler" );
 
@@ -475,6 +477,7 @@ void Log::log2( Log_level level, bool log_to_files, const string& prefix, const 
             if( log_to_files )  write( level, extra_log, order_log, line.c_str() + begin, len );       // Text
 
             begin = next;
+            if( begin >= line.length() )  break;
         }
 
         if( line.length() == 0 || line[line.length()-1] != '\n' )  

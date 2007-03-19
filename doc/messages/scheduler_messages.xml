@@ -3525,6 +3525,12 @@
             </text>
         </message>
 
+        <message code="SCHEDULER-850" weight="error">
+            <text xml:lang="en">
+                <title>Error in &lt;include>: <p1/></title>
+            </text>
+        </message>
+
         <!--message code="SCHEDULER-848" weight="debug3">
             <text xml:lang="en">
                 <title>Compressing existent file '<p1/>' to '<p2/>'</title>

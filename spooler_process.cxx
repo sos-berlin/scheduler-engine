@@ -8,10 +8,22 @@
 namespace sos {
 namespace scheduler {
 
+//------------------------------------------Process::Async_remote_operation::Async_remote_operation
+    
+Process::Async_remote_operation::Async_remote_operation( Process* p ) 
+:                        
+    _zero_(this+1), 
+    _process(p) 
+{
+    _process->_spooler->_process_count++;       // Jeder Prozess hat zwei Verbindungen: Zum Prozess und Xml_client_connection zum Scheduler
+}
+
 //-----------------------------------------Process::Async_remote_operation::~Async_remote_operation
     
 Process::Async_remote_operation::~Async_remote_operation()
 {
+    --_process->_spooler->_process_count;
+
     if( _process && _process->_xml_client_connection && _process->_xml_client_connection->async_parent() == this )  
     {
         _process->_xml_client_connection->set_async_parent( NULL );
@@ -182,10 +194,12 @@ void Process::start_local()
         xml_writer.set_attribute_optional( "java_options"   , _spooler->_config_java_options );
         xml_writer.set_attribute_optional( "java_class_path", _spooler->java_subsystem()->java_vm()->class_path() );
         xml_writer.set_attribute_optional( "javac"          , _spooler->java_subsystem()->java_vm()->javac_filename() );
-        xml_writer.set_attribute_optional( "java_work_dir"  , _spooler->java_subsystem()->java_vm()->work_dir() );
 
-        if( _controller_address )  
-            xml_writer.set_attribute_optional( "collect_stdout_stderr", "true" );
+        if( _module_instance->_module->_real_kind == Module::kind_java  &&  _module_instance->_module->has_source_script() )
+            xml_writer.set_attribute_optional( "java_work_dir", _spooler->java_work_dir() );
+
+        //if( _controller_address )  
+        //    xml_writer.set_attribute_optional( "collect_stdout_stderr", "true" );
 
         xml_writer.end_element( "task_process" );
         xml_writer.flush();

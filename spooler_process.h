@@ -33,7 +33,7 @@ struct Process : zschimmer::Object, Scheduler_object
         static string           state_name                  ( State );
 
 
-                                Async_remote_operation      ( Process* p ) :                         _zero_(this+1), _process(p) {}
+                                Async_remote_operation      ( Process* );
                                ~Async_remote_operation      ();
 
         virtual bool            async_continue_             ( Continue_flags f )                    { return _process->async_remote_start_continue( f ); }

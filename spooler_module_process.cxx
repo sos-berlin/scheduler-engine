@@ -187,7 +187,7 @@ void Process_module_instance::close__end()
 
 bool Process_module_instance::begin__end()
 {
-    if( _spooler->_process_count == max_processes )  z::throw_xc( "SCHEDULER-210", max_processes );
+    if( _spooler->_process_count >= max_processes )  z::throw_xc( "SCHEDULER-210", max_processes );
 
     PROCESS_INFORMATION process_info;
     STARTUPINFO         startup_info;
@@ -419,7 +419,7 @@ bool Process_module_instance::Process_event::wait( double seconds )
 
 bool Process_module_instance::begin__end()
 {
-    if( _spooler->_process_count == max_processes )  z::throw_xc( "SCHEDULER-210", max_processes );
+    if( _spooler->_process_count >= max_processes )  z::throw_xc( "SCHEDULER-210", max_processes );
 
     vector<string> string_args;
 

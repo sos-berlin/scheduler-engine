@@ -11,7 +11,7 @@
         </security>
 
         <process_classes>
-            <process_class name="remote" remote_scheduler="sos-neu:4444" max_processes="50"/>
+            <process_class name="remote" remote_scheduler="lund:4444" max_processes="50"/>
         </process_classes>
 
         <script language="JavaScript">
@@ -45,6 +45,7 @@ function spooler_process()
             
             <job name="remote" process_class="remote" tasks="50">
                 <script language="JavaScript">
+
                     <![CDATA[
 
 function spooler_process() 
@@ -61,9 +62,9 @@ function spooler_process()
 
     var subprocess = spooler_task.create_subprocess( "cmd.exe /c \"hostname >c:\\tmp\\1.txt\"" );
     subprocess.wait_for_termination();
-    spooler_log.info( hostware.file_as_string( "c:/tmp/1.txt" ) );
+    spooler_log.info( "c:/tmp/1.txt: " + hostware.file_as_string( "c:/tmp/1.txt" ) );
     
-    spooler_job.start();
+    //spooler_job.start();
     
     return false;
 }
@@ -75,7 +76,6 @@ function spooler_process()
 
         
         <commands>
-            <start_job job="remote"/>
             <start_job job="remote"/>
             <!--start_job job="local"/-->
         </commands>

@@ -80,7 +80,7 @@ bool Java_subsystem::subsystem_load()
 
     if( _spooler->_has_java_source )
     {
-        string java_work_dir = _spooler->temp_dir() + Z_DIR_SEPARATOR "java";
+        string java_work_dir = _spooler->java_work_dir();
         _java_vm->set_work_dir( java_work_dir );
         _java_vm->prepend_class_path( java_work_dir );
     }
