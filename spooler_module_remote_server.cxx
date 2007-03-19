@@ -305,6 +305,7 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
             if( !java_work_dir.empty() )
             {
                 if( _server->_module->_real_kind           == Module::kind_java  &&  _server->_module->has_source_script()  ||
+                    _server->_module->_monitor && 
                     _server->_module->_monitor->_real_kind == Module::kind_java  &&  _server->_module->_monitor->has_source_script() )
                 {
                     java_vm->set_work_dir( java_work_dir );
