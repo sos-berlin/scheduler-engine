@@ -102,7 +102,7 @@ void Com_remote_module_instance_server::Class_data::initialize()
     string stdin_text = File( STDIN_FILENO ).read_all();
     if( stdin_text != "" )
     {
-        Z_DEBUG_ONLY( cerr << "STDIN: " << stdin_text << "\n"; )
+        Z_LOG2( "joacim", __FUNCTION__ << " STDIN: " << stdin_text << "\n" );
         
         _stdin_dom_document.load_xml( stdin_text );
 
