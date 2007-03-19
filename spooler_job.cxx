@@ -1069,6 +1069,7 @@ void Job::signal( const string& signal_name )
 ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, const string& name, const Time& start_at, int id )
 {
     if( !order_controlled() )  _spooler->assert_has_exclusiveness( obj_name() + " create_task" );
+    
     if( _remove )  z::throw_xc( "SCHEDULER-230", obj_name() );
 
     switch( _state )

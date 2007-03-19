@@ -72,7 +72,15 @@
                 Unter Unix kann eine Prozessgruppen-Id als negative pid übergeben werden.
                 Ein <code>kill</code> bricht dann die ganze Prozessgruppe ab.
             </p>
+            <p>
+                Bei Ausführung auf einem entfernten Rechner mit <scheduler_element name="process_class" attribute="remote_scheduler"/>
+                wirkt die Frist nicht.
+            </p>
         </description>
+        
+        <messages>
+            <message level="warn" code="SCHEDULER-849"/>
+        </messages>
     </method>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
@@ -730,6 +738,10 @@ $spooler_log->info( 'order.id=' . $order->id . ', order.title=' . $order->title 
             <p>
                 Der Text in <code>stdout</code> wird derzeit im Zeichensatz ISO-8859-1 interpretiert.
             </p>
+            <p>
+                Bei Ausführung auf einem entfernten Rechner mit <scheduler_element name="process_class" attribute="remote_scheduler"/>
+                liefert der Aufruf nicht das gewünschte Ergebnis.
+            </p>
         </description>
     </property>
 
@@ -754,6 +766,10 @@ $spooler_log->info( 'order.id=' . $order->id . ', order.title=' . $order->title 
         <description>
             <p>
                 Der Text in <code>stdout</code> wird derzeit im Zeichensatz ISO-8859-1 interpretiert.
+            </p>
+            <p>
+                Bei Ausführung auf einem entfernten Rechner mit <scheduler_element name="process_class" attribute="remote_scheduler"/>
+                liefert der Aufruf nicht das gewünschte Ergebnis.
             </p>
         </description>
     </property>
@@ -780,6 +796,10 @@ $spooler_log->info( 'order.id=' . $order->id . ', order.title=' . $order->title 
             <p>
                 Der Text in <code>stderr</code> wird derzeit im Zeichensatz ISO-8859-1 interpretiert.
             </p>
+            <p>
+                Bei Ausführung auf einem entfernten Rechner mit <scheduler_element name="process_class" attribute="remote_scheduler"/>
+                liefert der Aufruf nicht das gewünschte Ergebnis.
+            </p>
         </description>
     </property>
 
@@ -804,6 +824,10 @@ $spooler_log->info( 'order.id=' . $order->id . ', order.title=' . $order->title 
         <description>
             <p>
                 Der Text in <code>stderr</code> wird derzeit im Zeichensatz ISO-8859-1 interpretiert.
+            </p>
+            <p>
+                Bei Ausführung auf einem entfernten Rechner mit <scheduler_element name="process_class" attribute="remote_scheduler"/>
+                liefert der Aufruf nicht das gewünschte Ergebnis.
             </p>
         </description>
     </property>

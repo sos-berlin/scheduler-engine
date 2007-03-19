@@ -119,6 +119,9 @@ spooler.job( "process" ).start( params );
             Beim Start des Jobs, also zu Beginn einer Task, wird ein Prozess eingerichtet.
             Der Spooler überwacht den Prozess und beendet die Task nachdem der Prozess sich beendet hat.
         </p>
+        <p>
+            Das Element kann nicht verwendet werden bei Ausführung auf einem entfernten Rechner mit <scheduler_element name="process_class" attribute="remote_scheduler"/>.
+        </p>
         
         <h3>Exit-Code</h3>
         <ul>
@@ -158,6 +161,7 @@ spooler.job( "process" ).start( params );
 
     <messages>
         <message level="info" code="SCHEDULER-987"/>
+        <message level="error" code="SCHEDULER-400"/>
     </messages>
 
     <behavior_with_xml_element element="base" allowed="no"/>

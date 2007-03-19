@@ -43,6 +43,51 @@
             </description>
         </xml_attribute>
 
+        <xml_attribute name="remote_scheduler" type="host:port" title="Ausführung der Tasks auf entferntem Rechner">
+            <description>
+                <p>
+                    Bestimmt den entfernten Scheduler,
+                    auf dem die Tasks dieser Prozessklasse ausgeführt werden sollen,
+                    durch Hostnamen oder IP-Nummer und TCP-Port
+                    (s. <scheduler_element name="config" attribute="tcp_port"/>).
+                </p>
+                <p>
+                    Der entfernte Scheduler muss den Zugriff mit
+                    <scheduler_element name="allowed_host" attribute="level" value="all"/> erlauben.
+                </p>
+                <p>
+                    Die ausgeführten Tasks kommunizieren über die API mit dem steuernden Scheduler.
+                    Dabei gibt es einige Besonderheiten:
+                </p>
+                <ul>
+                    <li>
+                        Nur API-Jobs sind möglich. 
+                        <scheduler_element name="process"/> und <scheduler_element name="script" attribute="language" value="shell"/>
+                        sind nicht möglich.
+                    </li>
+                    <li>
+                        <scheduler_element name="include"/> innerhalb von <scheduler_element name="script"/> wird vom Task-Prozess ausgeführt.
+                        Die einzuschließende Datei wird also vom Rechner, der die Task ausführt, gelesen.
+                    </li>
+                    <li>
+                        <scheduler_method class="Subprocess" property="timeout"/> und 
+                        <scheduler_method class="Task" object="spooler_task" method="add_pid"/> wirken nicht.
+                        Der Scheduler kann entfernte Subprozesse, deren Frist abgelaufen ist, nicht abbrechen.
+                    </li>
+                    <li>
+                        <scheduler_method class="Log" method="log_file"/> wird,
+                        wie fast alle Methoden, auf dem Rechner des Schedulers ausgeführt,
+                        greift also auf die Dateien des dortigen Dateisystems zu.
+                    </li>
+                    <li>
+                        <scheduler_method class="Task" object="spooler_task" property="stdout_text"/> und
+                        <scheduler_method class="Task" object="spooler_task" property="stderr_text"/> 
+                        funktionieren nicht.
+                    </li>
+                </ul>
+            </description>
+        </xml_attribute>
+
     </xml_attributes>
 
 

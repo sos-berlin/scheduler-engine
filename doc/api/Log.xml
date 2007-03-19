@@ -203,11 +203,11 @@
 </method>
 
 
-<property name="log_file">
+<method name="log_file">
     <com>
-        <com.result name="path">
+        <com.parameter name="path">
             <com.type type="BSTR"/>
-        </com.result>
+        </com.parameter>
     </com>
 
     <java>
@@ -227,10 +227,16 @@
     </title>
 
     <description>
-        Protokolliert den Inhalt der Datei mit Level 0 (info).
-        Ein Fehler beim Zugriff auf die Datei wird als Warnung protokolliert.
+        <p>
+            Protokolliert den Inhalt der Datei mit Level 0 (info).
+            Ein Fehler beim Zugriff auf die Datei wird als Warnung protokolliert.
+        </p>
+        <p>
+            Bei Ausführung auf einem entfernten Rechner mit <scheduler_element name="process_class" attribute="remote_scheduler"/>
+            wird die Datei vom Dateisystem des Schedulers, nicht der Task, gelesen.
+        </p>
     </description>
-</property>
+</method>
 
 
 <property name="mail">

@@ -218,8 +218,18 @@
     </title>
 
     <description>
-        Nach Ablauf der Zeit bricht der Scheduler den Subprozess ab (Unix: mit <code>SIGKILL</code>).
+        <p>
+            Nach Ablauf der Zeit bricht der Scheduler den Subprozess ab (Unix: mit <code>SIGKILL</code>).
+        </p>
+        <p>
+            Bei Ausführung auf einem entfernten Rechner mit <scheduler_element name="process_class" attribute="remote_scheduler"/>
+            wirkt die Frist nicht.
+        </p>
     </description>
+
+    <messages>
+        <message level="warn" code="SCHEDULER-849"/>
+    </messages>
 </property>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
@@ -240,7 +250,7 @@
             Liefert ein <scheduler_method class="Variable_set"/> der Umgebungsvariablen.
         </p>
         <p>
-            Anfänglich ist die Umgebung mit den Umgebungsvariablen des rufenden Prozesses gefüllt.
+            Anfänglich ist die Umgebung mit den Umgebungsvariablen des startenden Prozesses gefüllt.
             Umgebungsvariablen können entfernt werden, indem sie auf <code>""</code> gesetzt werden.
             Der Aufruf <scheduler_method class="Subprocess" method="start"/> übergibt die Umgebungsvariablen
             dem Subprozess.

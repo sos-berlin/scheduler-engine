@@ -162,7 +162,7 @@ string Text_with_includes::read_text_element( const xml::Element_ptr& element, c
             File_path path ( include_path, subst_env( element.getAttribute( "file" ) ) );
             result = string_from_file( path );
         }
-        catch( exception& x )  { z::throw_xc( message_string( "SCHEDULER-850", x ) ); }
+        catch( exception& x )  { z::throw_xc( message_string( "SCHEDULER-399", x ) ); }
     }
     else
         z::throw_xc( __FUNCTION__, element.nodeName() );
@@ -405,6 +405,7 @@ void Module::init()
         if( _process_filename != ""  || _language == shell_language_name )  //   Z_POSIX_ONLY( || _language == ""  &&  string_begins_with( _source, "#!" ) ) )
         {
             _kind = kind_process;
+            if( _process_class  &&  _process_class->_remote_scheduler )  z::throw_xc( "SCHEDULER-400" );
         }
         else
         {

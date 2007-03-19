@@ -84,6 +84,9 @@
                     <dd>
                         Das Verhalten ist dasselbe wie von <scheduler_element name="process"/>.
                     </dd>
+                    <p>
+                        Die Einstellung kann nicht verwendet werden bei Ausführung auf einem entfernten Rechner mit <scheduler_element name="process_class" attribute="remote_scheduler"/>.
+                    </p>
                 </dl>
             </description>
         </xml_attribute>
@@ -173,6 +176,9 @@
         </p>
     </description>
 
+    <messages>
+        <message level="error" code="SCHEDULER-400"/>
+    </messages>
 
     <behavior_with_xml_element element="base">
         <description>

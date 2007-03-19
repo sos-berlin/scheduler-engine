@@ -484,7 +484,7 @@ xml::Element_ptr Command_processor::execute_remote_scheduler_start_remote_task( 
 {
     //z::throw_xc( __FUNCTION__ );
 
-    if( _security_level < Security::seclev_no_add )  z::throw_xc( "SCHEDULER-121" );
+    if( _security_level < Security::seclev_all )  z::throw_xc( "SCHEDULER-121" );
     _spooler->assert_is_activated( __FUNCTION__ );
 
     int tcp_port = start_task_element.int_getAttribute( "tcp_port" );
@@ -560,7 +560,7 @@ xml::Element_ptr Command_processor::execute_remote_scheduler_start_remote_task( 
 
 xml::Element_ptr Command_processor::execute_remote_scheduler_remote_task_close( const xml::Element_ptr& kill_element )
 {
-    if( _security_level < Security::seclev_no_add )  z::throw_xc( "SCHEDULER-121" );
+    if( _security_level < Security::seclev_all )  z::throw_xc( "SCHEDULER-121" );
     _spooler->assert_is_activated( __FUNCTION__ );
 
     int pid = kill_element.int_getAttribute( "pid" );
