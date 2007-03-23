@@ -55,7 +55,7 @@ const Com_method Subprocess::_methods[] =
     COM_PROPERTY_GET( Subprocess, 11, Ignore_error   , VT_BOOL    , 0 ),
     COM_PROPERTY_PUT( Subprocess, 12, Ignore_signal  ,              0, VT_BOOL ),
     COM_PROPERTY_GET( Subprocess, 12, Ignore_signal  , VT_BOOL    , 0 ),
-    COM_PROPERTY_PUT( Subprocess, 13, Timeout        ,              0, VT_R8 ),
+    COM_PROPERTY_PUT( Subprocess, 13, Timeout        ,              0, VT_I4 ),
     COM_METHOD      ( Subprocess, 14, Wait_for_termination, VT_BOOL   , 1, VT_BYREF|VT_VARIANT ),
     COM_METHOD      ( Subprocess, 15, Kill           , VT_EMPTY   , 1, VT_INT  ),
     COM_PROPERTY_PUT( Subprocess, 16, Environment    ,              0, VT_BSTR, VT_BSTR ),
@@ -157,7 +157,8 @@ STDMETHODIMP Subprocess::Start( VARIANT* program_and_parameters )
     // stderr und stdout in temporäre Datei
 
     HRESULT hr = S_OK;
-    
+
+
     _process.assert_not_started();
 
 #   ifdef Z_WINDOWSxxx // Test
@@ -310,7 +311,7 @@ STDMETHODIMP Subprocess::get_Ignore_signal( VARIANT_BOOL* result )
 
 //--------------------------------------------------------------------------Subprocess::put_Timeout
 
-STDMETHODIMP Subprocess::put_Timeout( double timeout )
+STDMETHODIMP Subprocess::put_Timeout( int timeout )
 {
     Z_LOG2( "scheduler", __FUNCTION__ << "=" << timeout << "\n" );
     _timeout = timeout;
@@ -365,7 +366,6 @@ HRESULT Subprocess::Update_register_entry()
             if( !_process.terminated() )
             {
                 vector<Variant> variant_array;
-
                 // Rückwärts!
                 variant_array.push_back( _process.command_line() );
                 variant_array.push_back( _process.own_process_group() );

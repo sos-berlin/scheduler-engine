@@ -235,8 +235,8 @@ struct Itask : IDispatch
     virtual HRESULT     get_Params                      ( Ivariable_set** parameters )          = 0;
     virtual HRESULT     put_Result                      ( VARIANT* value )                      = 0;
     virtual HRESULT     get_Result                      ( VARIANT* value )                      = 0;
-    virtual HRESULT         Wait_until_terminated       ( double wait_time, VARIANT_BOOL* ok )  = 0;
-    virtual HRESULT     put_Repeat                      ( double seconds )                      = 0;
+    virtual HRESULT         Wait_until_terminated       ( double* wait_time, VARIANT_BOOL* ok )  = 0;
+    virtual HRESULT     put_Repeat                      ( double* seconds )                     = 0;
  //?virtual HRESULT     get_Thread                      ( Ithread** result )                    = 0;
     virtual HRESULT         End                         ()                                      = 0;
     virtual HRESULT     put_History_field               ( BSTR name, VARIANT* value )           = 0;
@@ -247,7 +247,7 @@ struct Itask : IDispatch
     virtual HRESULT     get_Stderr_text                 ( BSTR* )                               = 0;
     virtual HRESULT     get_Stdout_text                 ( BSTR* )                               = 0;
     virtual HRESULT         Create_subprocess           ( VARIANT*, Isubprocess** )             = 0;
-    virtual HRESULT         Add_subprocess              ( int, double, VARIANT_BOOL, VARIANT_BOOL, VARIANT_BOOL, BSTR ) = 0;
+    virtual HRESULT         Add_subprocess              ( int, double*, VARIANT_BOOL, VARIANT_BOOL, VARIANT_BOOL, BSTR ) = 0;
     virtual HRESULT     put_Priority                    ( int )                                 = 0;
     virtual HRESULT     get_Priority                    ( int* )                                = 0;
     virtual HRESULT     put_Priority_class              ( BSTR )                                = 0;

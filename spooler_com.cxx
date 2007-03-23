@@ -2168,8 +2168,8 @@ const Com_method Com_task::_methods[] =
     { DISPATCH_PROPERTYGET,  4, "params"                    , (Com_method_ptr)&Com_task::get_Params             , VT_DISPATCH  },
     { DISPATCH_PROPERTYPUT,  5, "result"                    , (Com_method_ptr)&Com_task::put_Result             , VT_EMPTY      , { VT_BYREF|VT_DISPATCH } },
     { DISPATCH_PROPERTYGET,  5, "result"                    , (Com_method_ptr)&Com_task::get_Result             , VT_DISPATCH  },
-    { DISPATCH_METHOD     ,  6, "wait_until_terminated"     , (Com_method_ptr)&Com_task::Wait_until_terminated  , VT_BOOL       , { VT_R8 } },
-    { DISPATCH_PROPERTYPUT,  7, "repeat"                    , (Com_method_ptr)&Com_task::put_Repeat             , VT_EMPTY      , { VT_R8 } },
+    { DISPATCH_METHOD     ,  6, "wait_until_terminated"     , (Com_method_ptr)&Com_task::Wait_until_terminated  , VT_BOOL       , { VT_R8|VT_BYREF } },
+    { DISPATCH_PROPERTYPUT,  7, "repeat"                    , (Com_method_ptr)&Com_task::put_Repeat             , VT_EMPTY      , { VT_R8|VT_BYREF } },
     { DISPATCH_METHOD     ,  8, "end"                       , (Com_method_ptr)&Com_task::End                    },
     { DISPATCH_PROPERTYPUT,  9, "history_field"             , (Com_method_ptr)&Com_task::put_History_field      , VT_EMPTY      , { VT_BSTR, VT_BYREF|VT_VARIANT } },
     { DISPATCH_PROPERTYGET, 10, "id"                        , (Com_method_ptr)&Com_task::get_Id                 , VT_I4         },
@@ -2183,7 +2183,7 @@ const Com_method Com_task::_methods[] =
     { DISPATCH_PROPERTYGET, 18, "stderr_text"               , (Com_method_ptr)&Com_task::get_Stderr_text        , VT_BSTR       },
     { DISPATCH_PROPERTYGET, 19, "stdout_text"               , (Com_method_ptr)&Com_task::get_Stdout_text        , VT_BSTR       },
     { DISPATCH_METHOD     , 20, "Create_subprocess"         , (Com_method_ptr)&Com_task::Create_subprocess      , VT_DISPATCH   , { VT_BYREF|VT_VARIANT }, 1 },
-    { DISPATCH_METHOD     , 21, "Add_subprocess"            , (Com_method_ptr)&Com_task::Add_subprocess         , VT_EMPTY      , { VT_INT, VT_R8, VT_BOOL, VT_BOOL, VT_BOOL, VT_BSTR }, 1 },
+    { DISPATCH_METHOD     , 21, "Add_subprocess"            , (Com_method_ptr)&Com_task::Add_subprocess         , VT_EMPTY      , { VT_INT, VT_R8|VT_BYREF, VT_BOOL, VT_BOOL, VT_BOOL, VT_BSTR }, 1 },
     { DISPATCH_PROPERTYPUT, 22, "Priority_class"            , (Com_method_ptr)&Com_task::put_Priority_class     , VT_EMPTY      , { VT_BSTR } },
     { DISPATCH_PROPERTYGET, 22, "Priority_class"            , (Com_method_ptr)&Com_task::get_Priority_class     , VT_BSTR       },
     { DISPATCH_PROPERTYGET, 23, "Step_count"                , (Com_method_ptr)&Com_task::get_Step_count         , VT_INT        },
@@ -2377,14 +2377,14 @@ STDMETHODIMP Com_task::get_Params( Ivariable_set** result )
 
 //------------------------------------------------------------------Com_task::wait_until_terminated
 
-STDMETHODIMP Com_task::Wait_until_terminated( double wait_time, VARIANT_BOOL* ok )
+STDMETHODIMP Com_task::Wait_until_terminated( double* wait_time, VARIANT_BOOL* ok )
 {
     HRESULT hr = NOERROR;
 
     THREAD_LOCK( _lock )
     try
     {
-        if( _task )  *ok = _task->wait_until_terminated( wait_time );
+        if( _task )  *ok = _task->wait_until_terminated( *wait_time );
                else  *ok = true;
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Task.wait_until_terminated" ); }
@@ -2453,7 +2453,7 @@ STDMETHODIMP Com_task::get_Result( VARIANT* value )
 
 //-----------------------------------------------------------------------------Com_task::put_repeat
 
-STDMETHODIMP Com_task::put_Repeat( double seconds )
+STDMETHODIMP Com_task::put_Repeat( double* seconds )
 {
     HRESULT hr = NOERROR;
 
@@ -2463,7 +2463,7 @@ STDMETHODIMP Com_task::put_Repeat( double seconds )
         if( !_task )  z::throw_xc( "SCHEDULER-122" );
         if( current_thread_id() != _task->_spooler->thread_id() )  return E_ACCESSDENIED;
 
-        _task->_job->set_repeat( seconds );
+        _task->_job->set_repeat( *seconds );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Task.repeat" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Task.repeat" ); }
@@ -2727,7 +2727,7 @@ STDMETHODIMP Com_task::Create_subprocess( VARIANT* program_and_parameters, Isubp
 //--------------------------------------------------------------------Com_task::Register_subprocess
 // Wird aufgerufen von Com_task_proxy
 
-STDMETHODIMP Com_task::Add_subprocess( int pid, double timeout, VARIANT_BOOL ignore_error, VARIANT_BOOL ignore_signal, VARIANT_BOOL is_process_group, BSTR title )
+STDMETHODIMP Com_task::Add_subprocess( int pid, double* timeout, VARIANT_BOOL ignore_error, VARIANT_BOOL ignore_signal, VARIANT_BOOL is_process_group, BSTR title )
 {
     Z_LOG2( "scheduler", __PRETTY_FUNCTION__ << "(" << pid << ',' << timeout << ',' << ignore_error << ',' << ignore_signal << ',' << is_process_group << ',' << string_from_bstr(title) << ")\n" );
     HRESULT hr = S_OK;
@@ -2737,7 +2737,7 @@ STDMETHODIMP Com_task::Add_subprocess( int pid, double timeout, VARIANT_BOOL ign
         if( !_task )  z::throw_xc( "SCHEDULER-122" );
 
         _task->add_subprocess( pid, 
-                               timeout, 
+                               *timeout, 
                                ignore_error? true : false, 
                                ignore_signal? true : false, 
                                is_process_group != 0,

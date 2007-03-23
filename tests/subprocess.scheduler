@@ -108,11 +108,11 @@ public class My_job  extends sos.spooler.Job_impl
     {
         subprocess = spooler_task.create_subprocess();
         
-        subprocess.set_ignore_error( false );
+        subprocess.set_ignore_signal( true );
         subprocess.set_environment( "test1", "ETT" );
         subprocess.set_environment( "test2", "TV" );
         spooler_log.info( subprocess.env().substitute( "test1=$test1" ) );
-        subprocess.set_timeout( 300 );
+        subprocess.set_timeout( 13 );
 
         subprocess.start( new String[]{ "sleep", "20"} );
         //subprocess.start( "sleep 20" );
@@ -142,7 +142,7 @@ public class My_job  extends sos.spooler.Job_impl
         </jobs>
 
         <commands>
-            <start_job job="javascript"/>
+            <start_job job="java"/>
         </commands>
     </config>
 </spooler>

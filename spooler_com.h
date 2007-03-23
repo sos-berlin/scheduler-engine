@@ -467,11 +467,11 @@ struct Com_task : spooler_com::Itask,
     STDMETHODIMP            get_Error                       ( spooler_com::Ierror** );
     STDMETHODIMP            get_Job                         ( spooler_com::Ijob** );
     STDMETHODIMP            get_Params                      ( spooler_com::Ivariable_set** );
-    STDMETHODIMP                Wait_until_terminated       ( double wait_time, VARIANT_BOOL* ok );
+    STDMETHODIMP                Wait_until_terminated       ( double* wait_time, VARIANT_BOOL* ok );
     STDMETHODIMP                End                         ();
     STDMETHODIMP            put_Result                      ( VARIANT* value );
     STDMETHODIMP            get_Result                      ( VARIANT* value );
-    STDMETHODIMP            put_Repeat                      ( double seconds );
+    STDMETHODIMP            put_Repeat                      ( double* seconds );
     STDMETHODIMP            put_History_field               ( BSTR name, VARIANT* value );
     STDMETHODIMP            get_Id                          ( int* value );
     STDMETHODIMP            put_Delay_spooler_process       ( VARIANT* time );
@@ -486,7 +486,7 @@ struct Com_task : spooler_com::Itask,
     STDMETHODIMP            get_Stdout_path                 ( BSTR* );
     STDMETHODIMP            get_Stderr_or_stdout_text_or_path( BSTR*, bool get_stderr, bool get_text );
     STDMETHODIMP                Create_subprocess           ( VARIANT*, spooler_com::Isubprocess** );
-    STDMETHODIMP                Add_subprocess              ( int, double, VARIANT_BOOL, VARIANT_BOOL, VARIANT_BOOL, BSTR );
+    STDMETHODIMP                Add_subprocess              ( int, double*, VARIANT_BOOL, VARIANT_BOOL, VARIANT_BOOL, BSTR );
     STDMETHODIMP            put_Priority                    ( int );
     STDMETHODIMP            get_Priority                    ( int* );
     STDMETHODIMP            put_Priority_class              ( BSTR );

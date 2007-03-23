@@ -59,7 +59,7 @@ struct Subprocess : idispatch_implementation< Subprocess, spooler_com::Isubproce
     STDMETHODIMP            get_Ignore_error                ( VARIANT_BOOL* );
     STDMETHODIMP            put_Ignore_signal               ( VARIANT_BOOL );
     STDMETHODIMP            get_Ignore_signal               ( VARIANT_BOOL* );
-    STDMETHODIMP            put_Timeout                     ( double );
+    STDMETHODIMP            put_Timeout                     ( int );
     STDMETHODIMP            put_Show_window                 ( VARIANT* );
     STDMETHODIMP            put_Own_process_group           ( VARIANT_BOOL b )                      { return _process.put_Own_process_group( b ); }
     STDMETHODIMP            get_Own_process_group           ( VARIANT_BOOL* result )                { return _process.get_Own_process_group( result );}
