@@ -79,7 +79,7 @@
         erhalten bleiben.
         Der neue Scheduler wird also die Aufträge im Jobkettenknoten speichern.
         Die Auftragswarteschlange des Jobs enthält dann nur Verweise.
-        Alternativ: Der Scheduler liest die Aufträge aus der Datenbank, sobald ein fehlender Job hinzugefügt wird.
+        <!--Alternativ: Der Scheduler liest die Aufträge aus der Datenbank, sobald ein fehlender Job hinzugefügt wird.-->
     </p>
     <p>
         Aufträge, die von einem Job verarbeitet werden sollen, der gelöscht ist (oder wird),

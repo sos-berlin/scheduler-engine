@@ -1084,6 +1084,7 @@
     <xsd:element name="remote_scheduler.remote_task.close">
         <xsd:complexType>
             <xsd:attribute name="pid"               type="xsd:integer"   use="required"/>
+            <xsd:attribute name="kill"              type="Yes_no"                      />
         </xsd:complexType>
     </xsd:element>
 

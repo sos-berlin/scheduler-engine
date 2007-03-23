@@ -61,9 +61,9 @@ const string shell_language_name         = "shell";
 //    return part_element;
 //}
 //
-//------------------------------------------------------------ext_with_includes::Text_with_includes
+//-------------------------------------------------------------------Text_with_includes::initialize
 
-Text_with_includes::Text_with_includes()
+void Text_with_includes::initialize()
 {
     _dom_document.load_xml( "<source/>" );
 }
@@ -72,6 +72,8 @@ Text_with_includes::Text_with_includes()
 
 void Text_with_includes::append_dom( const xml::Element_ptr& element )
 {
+    
+
     int linenr_base = element.line_number(); //? element.line_number() - 1 : 0;
 
     for( xml::Node_ptr n = element.firstChild(); n; n = n.nextSibling() )

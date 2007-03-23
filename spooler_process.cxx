@@ -12,6 +12,142 @@ namespace scheduler {
     
 const int connection_retry_time = 60;
 
+//--------------------------------------------------------------------------Process::Close_operation::Close_operation
+
+Process::Close_operation::Close_operation( Process* p, bool run_independently )
+: 
+    _zero_(this+1), 
+    _process(p)
+{
+    if( run_independently )
+    {
+        _hold_self = this;
+    }
+}
+
+//-------------------------------------------------------------------------Process::Close_operation::~Close_operation
+    
+Process::Close_operation::~Close_operation()
+{
+}
+
+//-----------------------------------------------------------------Process::Close_operation::async_continue_
+
+bool Process::Close_operation::async_continue_( Async_operation::Continue_flags )
+{
+    return _process->continue_close_operation( this );
+}
+
+//----------------------------------------------------------------Process::continue_close_operation
+
+bool Process::continue_close_operation( Process::Close_operation* op )
+{
+    bool something_done = false;
+
+    if( op->_state == Close_operation::s_initial )
+    {
+        if( _session )
+        {
+            op->_close_session_operation = _session->close__start();
+    
+            if( !op->_close_session_operation->async_finished() )
+            {
+                op->_close_session_operation->set_async_parent( op );
+                op->_close_session_operation->set_async_manager( _spooler->_connection_manager );
+            }
+
+            something_done = true;
+        }
+
+        op->_state = Close_operation::s_closing_session;
+    }
+
+    if( op->_state == Close_operation::s_closing_session )
+    {
+        if( !op->_close_session_operation  ||  op->_close_session_operation->async_finished() )
+        {
+            if( op->_close_session_operation )
+            {
+                op->_close_session_operation->set_async_parent( NULL );
+                op->_close_session_operation = NULL;
+                _session->close__end();
+                _session = NULL;
+
+                something_done = true;
+            }
+
+            if( _async_remote_operation )
+            {
+                _async_remote_operation->close_remote_task();
+                _async_remote_operation->set_async_parent( op );
+                something_done = true;
+            }
+
+            op->_state = Close_operation::s_closing_remote_process;
+        }
+    }
+
+    if( op->_state == Close_operation::s_closing_remote_process )
+    {
+        if( !_async_remote_operation || _async_remote_operation->async_finished() )
+        {
+            if( _async_remote_operation )  _async_remote_operation->set_async_parent( NULL );
+
+            op->_state = Close_operation::s_finished;
+
+            ptr<Process> process = op->_process;
+            op->_process = NULL;
+
+            if( op->_hold_self )    // run_independently
+            {
+                process->close__end();
+                process->_close_operation = NULL;
+                op->_hold_self = NULL;
+                // this ist jetzt ungültig!
+            }
+
+            something_done = true;
+        }
+    }
+
+    return something_done;
+}
+
+//--------------------------------------------------------Process::Close_operation::async_finished_
+
+bool Process::Close_operation::async_finished_() const
+{
+    return _state == s_finished;
+}
+
+//------------------------------------------------------Process::Close_operation::async_state_text_
+
+string Process::Close_operation::async_state_text_() const
+{
+    S result;
+
+    result << "Process::Close_operation ";
+    result << string_from_state( _state );
+    if( _close_session_operation )  result << " " << _close_session_operation->async_state_text();
+    if( _process  &&  _process->_async_remote_operation )  result << " " << _process->_async_remote_operation->async_state_text();
+
+    return result;
+}
+
+//------------------------------------------------------Process::Close_operation::string_from_state
+    
+string Process::Close_operation::string_from_state( State state )
+{
+    switch( state )
+    {
+        case s_initial:                 return "initial";
+        case s_closing_session:         return "closing_session";
+        case s_closing_remote_process:  return "closing_remote_process";
+        case s_finished:                return "finished";
+        default:                        return S() << "State(" << state << ")";
+    }
+}
+
 //------------------------------------------Process::Async_remote_operation::Async_remote_operation
     
 Process::Async_remote_operation::Async_remote_operation( Process* p ) 
@@ -60,6 +196,7 @@ string Process::Async_remote_operation::async_state_text_() const
 {
     S result;
     result << "Async_remote_operation " << state_name( _state );
+    if( _process )  result << " " << _process->obj_name();
     return result;
 }
 
@@ -84,6 +221,51 @@ Process::~Process()
 
     if( _process_handle_copy )  _spooler->unregister_process_handle( _process_handle_copy );
     if( _xml_client_connection )  _xml_client_connection->set_async_manager( NULL );
+
+    if( _process_class )  _process_class->remove_process( this );
+}
+
+//-----------------------------------------------------------------------------Process::close_async
+
+void Process::close_async()
+{
+    if( !_close_operation )
+    {
+        if( !_async_remote_operation  &&  !is_terminated() )
+        {
+            log()->warn( message_string( "SCHEDULER-850", obj_name()) );
+
+            try
+            {
+                kill();     // Nicht bei _async_remote_operation aufrufen, dass eine TCP-Nachricht starten würde
+            }
+            catch( exception& x ) { _log->warn( x.what() ); }
+        }
+
+
+        close__start( true );
+    }
+}
+
+//----------------------------------------------------------------------------Process::close__start
+
+Async_operation* Process::close__start( bool run_independently )
+{
+    Async_operation* result = NULL;
+
+    _close_operation = Z_NEW( Close_operation( this, run_independently ) );
+    _close_operation->set_async_manager( _spooler->_connection_manager );
+    _close_operation->async_continue();
+
+    return _close_operation;
+}
+
+//------------------------------------------------------------------------------Process::close__end
+
+void Process::close__end()
+{
+    _close_operation = NULL;
+    _session = NULL;
 }
 
 //---------------------------------------------------------------------Process::add_module_instance
@@ -206,10 +388,12 @@ void Process::start_local()
         xml_writer.end_element( "task_process" );
         xml_writer.flush();
         c->set_stdin_data( string_writer.to_string() );
-      //_log->info( string_writer.to_string() );
 
-      //c->set_stdin_data( _stdin_data );
+        //c->set_stdout_file( _stdout_file );
+        //c->set_stderr_file( _stderr_file );
+
         c->set_priority( _priority );
+
         c->start_process( parameters );
 
         _connection = +c;
@@ -354,14 +538,17 @@ bool Process::async_continue()
 
 //-----------------------------------------------Process::Async_remote_operation::close_remote_task
 
-void Process::Async_remote_operation::close_remote_task()
+void Process::Async_remote_operation::close_remote_task( bool kill )
 {
     if( _process->_xml_client_connection  &&  _process->_xml_client_connection->is_send_possible() )
     {
         try
         {
             S xml;
-            xml << "<remote_scheduler.remote_task.close pid='" << _process->_remote_pid << "'/>";
+            xml << "<remote_scheduler.remote_task.close pid='" << _process->_remote_pid << "'";
+            if( kill )  xml << " kill='yes'";
+            xml << "/>";
+
             _process->_xml_client_connection->send( xml );
 
             _state = s_closing;
@@ -385,7 +572,9 @@ bool Process::kill()
             // if( !_kill_task_operation )   _kill_task_operation = Z_NEW( Kill_task_operation );
             // <remote_scheduler.task.close pid=" _remote_pid
 
-            if( _async_remote_operation )  _async_remote_operation->close_remote_task();
+            if( _async_remote_operation  &&  _async_remote_operation->_state != Async_remote_operation::s_closed )
+                _async_remote_operation->close_remote_task( true );
+
             result = true;
         }
         else
@@ -398,6 +587,13 @@ bool Process::kill()
     if( result )  _is_killed = true;
 
     return result;
+}
+
+//---------------------------------------------------------------------------Process::is_terminated
+
+bool Process::is_terminated()
+{
+    return !_connection  ||  _connection->process_terminated();
 }
 
 //-------------------------------------------------------------------------------Process::exit_code

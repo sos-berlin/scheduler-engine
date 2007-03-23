@@ -47,6 +47,73 @@ using namespace std;
 const string default_filename = "index.html";
 extern const Embedded_files embedded_files_z;   // Zschimmers HTML-Dateien (/z/index.html etc.)
 
+//---------------------------------------------------------------Remote_task_close_command_response
+
+struct Remote_task_close_command_response : File_buffered_command_response
+{
+                                Remote_task_close_command_response( Process* p, Communication::Connection* c ) : _zero_(this+1), _process(p), _connection(c) {}
+                               ~Remote_task_close_command_response()                                {}
+
+    // Async_operation
+    virtual bool                async_finished_             () const                                { return _state == s_finished; }
+    virtual string              async_state_text_           () const                                { return "Remote_task_close_command_response"; }
+    virtual bool                async_continue_             ( Continue_flags );
+
+  private:
+    enum State { s_initial, s_waiting, s_finished };
+
+    Fill_zero                  _zero_;
+    pid_t                      _pid;    
+    ptr<Process>               _process;
+    ptr<Communication::Connection>  _connection;
+    ptr<Async_operation>       _operation;
+    State                      _state;
+};
+
+//----------------------------------------------Remote_task_close_command_response::async_continue_
+
+bool Remote_task_close_command_response::async_continue_( Continue_flags )
+{
+    Z_DEBUG_ONLY( if( _operation )  assert( _operation->async_finished() ) );
+
+    bool something_done = false;
+
+    switch( _state )
+    {
+        case s_initial:
+        {
+            _pid = _process->pid();
+            _operation = _process->close__start();
+            _operation->set_async_parent( this );       // Weckt uns, wenn _operation fertig ist
+            _state = s_waiting;
+        }
+
+        case s_waiting:
+        {
+            if( _operation->async_finished() )
+            {
+                _operation  = NULL;
+                _process->close__end();
+
+                append_text( S() << "<ok>" << __FUNCTION__ << "</ok>" );
+                _state = s_finished;
+
+                if( _connection->_operation_connection )  _connection->_operation_connection->unregister_task_process( _pid );
+
+                _process    = NULL;
+                _connection = NULL;
+                
+                something_done = true;
+            }
+            break;
+        }
+
+        default: ;
+    }
+
+    return something_done;
+}
+
 //--------------------------------------------------------------------------dom_append_text_element
 
 void dom_append_text_element( const xml::Element_ptr& element, const char* element_name, const string& text )
@@ -176,12 +243,14 @@ xml::Element_ptr Command_processor::execute_show_process_classes( const Show_wha
 
 //------------------------------------------------------------Command_processor::execute_show_state
 
-xml::Element_ptr Command_processor::execute_show_state( const xml::Element_ptr&, const Show_what& show_ )
+xml::Element_ptr Command_processor::execute_show_state( const xml::Element_ptr& element, const Show_what& show_ )
 {
     if( _security_level < Security::seclev_info )  z::throw_xc( "SCHEDULER-121" );
 
     Show_what show = show_;
     if( show.is_set( show_all_ ) )  show |= Show_what_enum( show_task_queue | show_description | show_remote_schedulers );
+
+    if( element.nodeName_is( "s" ) )  show |= show_operations;
 
 
     return _spooler->state_dom_element( _answer, show );
@@ -482,36 +551,13 @@ xml::Element_ptr Command_processor::execute_start_job( const xml::Element_ptr& e
 
 xml::Element_ptr Command_processor::execute_remote_scheduler_start_remote_task( const xml::Element_ptr& start_task_element )
 {
-    //z::throw_xc( __FUNCTION__ );
-
     if( _security_level < Security::seclev_all )  z::throw_xc( "SCHEDULER-121" );
     _spooler->assert_is_activated( __FUNCTION__ );
 
     int tcp_port = start_task_element.int_getAttribute( "tcp_port" );
 
-    //String_writer string_writer = Z_NEW( String_writer() );
-
-    //xml::Xml_writer xml_writer = Z_NEW( xml::Xml_writer( string_writer ) );
-    //
-    //xml_writer.begin_element( "object_server" );
-    //xml_writer.set_attribute( "host_ip", this->_communication_operation->_connection->peer_host().ip_address() );
-    //xml_writer.set_attribute( "tcp_port", tcp_port );
-    //xml_writer.set_attribute( "password", password );
-
-    //xml_writer.begin_element( "scheduler_task_process" );
-    //xml_writer.end_element( "scheduler_task_process" );
-
-    //xml_writer.end_element( "object_server" );
 
     ptr<Process> process = Z_NEW( Process( _spooler ) );
-
-    //DOM_FOR_EACH_ELEMENT( start_task_element, element )
-    //{
-    //    if( element.nodeName_is( "task_process" ) )
-    //    {
-    //        process->set_task_process_xml( element.xml() );
-    //    }
-    //}
 
     process->set_controller_address( Host_and_port( _communication_operation->_connection->_peer_host_and_port._host, tcp_port ) );
     process->start();
@@ -520,29 +566,10 @@ xml::Element_ptr Command_processor::execute_remote_scheduler_start_remote_task( 
     _communication_operation->_operation_connection->register_task_process( process );
     
     /*
-        Prozess starten:  zschimmer::Process  -O
-        File-Handle für stdin 
-        xml übergeben per asynchronem Objekt an stdin übergeben
-
-        object_server:
-            von stdin XML lesen 
-
-            Bei Fehler stdin schließen, damit Aufruf nicht blockiert, sondern beim Schreiben einen Fehler bekommt
-
-            <object_server> auswerten und Inhalt ungesehen weitergeben.
-
-            connect zum veranlassenden Scheduler
-
-            accept(): Prüfen, dass Verbindung vom richtigen Rechner kommt
-
-            Erster Aufruf vergleicht Passwort (ist das nicht schon vorgesehen?)
-
-
         Prozess registrieren
             TCP-Verbindung bekommt ein Task-Prozess-Register
             Bei Verbindungsverlust werden alle Prozesse abgebrochen
             Ebenso bei Scheduler-Ende (also im Scheduler registrieren)
-
 
         stdout und stderr verbinden (über vorhandene TCP-Verbindung?)
 
@@ -558,28 +585,36 @@ xml::Element_ptr Command_processor::execute_remote_scheduler_start_remote_task( 
 
 //------------------------------------Command_processor::execute_remote_scheduler_remote_task_close
 
-xml::Element_ptr Command_processor::execute_remote_scheduler_remote_task_close( const xml::Element_ptr& kill_element )
+xml::Element_ptr Command_processor::execute_remote_scheduler_remote_task_close( const xml::Element_ptr& close_element )
 {
     if( _security_level < Security::seclev_all )  z::throw_xc( "SCHEDULER-121" );
     _spooler->assert_is_activated( __FUNCTION__ );
 
-    int pid = kill_element.int_getAttribute( "pid" );
+    int  pid  = close_element. int_getAttribute( "pid" );
+    bool kill = close_element.bool_getAttribute( "kill", false );
 
-    _communication_operation->_operation_connection->unregister_task_process( pid );
+    Process* process = _communication_operation->_operation_connection->get_task_process( pid );
 
-    return _answer.createElement( "ok" );
+    if( kill )  process->kill();
+
+    ptr<Command_response> response = Z_NEW( Remote_task_close_command_response( process, _communication_operation->_connection ) );
+    response->set_async_manager( _spooler->_connection_manager );
+    response->async_wake();
+    _response = response;
+
+    return NULL;
 }
 
-//--------------------------------------------Command_processor::execute_remote_scheduler_task_kill
+//-------------------------------------Command_processor::execute_remote_scheduler_remote_task_kill
 
-//xml::Element_ptr Command_processor::execute_remote_scheduler_task_kill( const xml::Element_ptr& kill_element )
+//xml::Element_ptr Command_processor::execute_remote_scheduler_remote_task_kill( const xml::Element_ptr& kill_element )
 //{
-//    if( _security_level < Security::seclev_no_add )  z::throw_xc( "SCHEDULER-121" );
+//    if( _security_level < Security::seclev_all )  z::throw_xc( "SCHEDULER-121" );
 //    _spooler->assert_is_activated( __FUNCTION__ );
 //
 //    int pid = kill_element.int_getAttribute( "pid" );
 //
-//    _communication_operation->_operation_connection->unregister_task_process( pid );
+//    _communication_operation->_operation_connection->get_task_process( pid )->kill();
 //
 //    return _answer.createElement( "ok" );
 //}
@@ -1013,7 +1048,7 @@ void Get_events_command_response::close()
         _closed = true;
 
         append_text( "</events>" );
-        Z_DEBUG_ONLY( int NULL_BYTE_ANHAENGEN );
+        //Z_DEBUG_ONLY( int NULL_BYTE_ANHAENGEN );
     }
 }
 
@@ -1136,6 +1171,8 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     else
     if( element.nodeName_is( "remote_scheduler.start_remote_task" ) )  result = execute_remote_scheduler_start_remote_task( element );
     else
+  //if( element.nodeName_is( "remote_scheduler.remote_task.kill"  ) )  result = execute_remote_scheduler_remote_task_kill ( element );
+  //else
     if( element.nodeName_is( "remote_scheduler.remote_task.close" ) )  result = execute_remote_scheduler_remote_task_close( element );
     else
     if( element.nodeName_is( "show_cluster"     ) )  result = execute_show_cluster( element, show );
@@ -1517,10 +1554,6 @@ ptr<Command_response> Command_processor::response_execute( const string& xml_tex
     if( !result )
     {
         ptr<Synchronous_command_response> r = Z_NEW( Synchronous_command_response( xml_as_string( _answer, indent ) ) );
-        //r->begin();
-        //r->append_text( xml_as_string( _answer.documentElement().firstChild()....(), indent ) );
-        //r->end();
-
         result = +r;
     }
     
@@ -1733,7 +1766,7 @@ File_buffered_command_response::File_buffered_command_response()
 }
 
 //------------------------------------------------------------File_buffered_command_response::close
-    
+                                                                                                
 void File_buffered_command_response::close()
 {
     if( _state == s_ready  &&  _buffer == "" )  _state = s_finished;

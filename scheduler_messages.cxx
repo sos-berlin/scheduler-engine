@@ -392,6 +392,8 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-847", "Please use new name '$1' instead of old '$2'" },
     { "SCHEDULER-848", "Task pid=$1 started for remote scheduler" },
     { "SCHEDULER-849", "Timeout is not possible for a subprocess running on a remote host (it cannot be killed), pid=$1" },
+    { "SCHEDULER-850", "After lost connection to remote scheduler, process $1 is going to be killed" },
+    { "SCHEDULER-851", "After possibly volatile error (number $1), the causing statement will be repeated: $2" },
     {}
 };
 } //namespace sos

@@ -30,53 +30,28 @@ extern const string spooler_api_version_name;
 
 struct Module_instance;
 
-//--------------------------------------------------------------------------------------Source_part
+//-------------------------------------------------------------------------------Text_with_includes
 
-//struct Source_part
-//{
-//    Source_part                 ( int linenr, const string& text, const Time& mod_time );
-//
-//                                operator const string&      () const                                { return _text; }
-//    xml::Element_ptr            dom_element                 ( const xml::Document_ptr& ) const;
-//  //bool                        empty                       ()                                      { return _text.empty(); }
-//
-//
-//    int                        _linenr;
-//    string                     _text;
-//    Time                       _modification_time;
-//};
-//
-//-----------------------------------------------------------------------------Source_with_includes
-
-struct Text_with_includes
+struct Text_with_includes : Non_cloneable
 {
-                                Text_with_includes          ();
-                                Text_with_includes          ( const xml::Element_ptr& e )           { append_dom( e ); }
+                                Text_with_includes          ()                                      { initialize(); }
+                                Text_with_includes          ( const xml::Element_ptr& e )           { initialize(); append_dom( e ); }
 
-  //void                        add                         ( int linenr, const string& text, const Time& mod_time );
     bool                        is_empty                    () const                                { return !_dom_document || !_dom_document.documentElement().firstChild(); }
-  //void                        clear                       ()                                      { _parts.clear(); }
 
     string                      read_text                   ( const string& include_path );
     string                      read_text_element           ( const xml::Element_ptr&, const string& include_path );
     int                         text_element_linenr         ( const xml::Element_ptr& );
 
-    //xml::Document_ptr           dom_document                () const;
     string                      xml                         ()                                      { return _dom_document.ascii_xml(); }
     void                    set_xml                         ( const string& x )                     { _dom_document.load_xml( x ); }
 
     xml::Element_ptr            dom_element                 ()                                      { return _dom_document.documentElement(); }
-
-    //Text_with_includes&          operator =                  ( const string& text )                  { assign( text );  return *this; }
-    //void                        assign                      ( const string& text )                  { clear(); add( 1, text, Time(0) ); }
-
-    //Text_with_includes&          operator =                  ( const xml::Element_ptr& dom )         { clear(); append_dom( dom );  return *this; }
     void                        append_dom                  ( const xml::Element_ptr& dom );
 
-    //void                        append                      ( const Text_with_includes& );
-
-
   private:
+    void                        initialize                  ();
+
     xml::Document_ptr          _dom_document;
   //Time                       _max_modification_time;
 };
@@ -110,9 +85,6 @@ struct Module : Object
 
     void                        set_log                     ( Prefix_log* log )                     { _log.set_log( log ); }
     void                        set_dom                     ( const xml::Element_ptr&, const Time& xml_mod_time );
-  //void                        set_dom_without_source      ( const xml::Element_ptr&, const Time& xml_mod_time );
-  //void                        set_dom_source_only         ( const string& include_path );
-  //void                        set_source_only             ( const Text_with_includes& );
     void                        set_xml_text_with_includes  ( const string& xml );
     Text_with_includes           source_with_parts           ();
     void                        set_process                 ();                                     // Für <process>
@@ -123,7 +95,6 @@ struct Module : Object
     virtual ptr<Module_instance> create_instance_impl       ();
     bool                        set                         ()                                      { return _set; }
     Kind                        kind                        () const                                { return _kind; }
-  //void                        clear_java                  ();
     bool                        make_java_class             ( bool force = false );                 // in spooler_module_java.cxx
     void                        set_checked_attribute       ( string*, const xml::Element_ptr&, const string&, bool modify_allowed = false );
     void                        set_priority                ( const string& );
@@ -139,7 +110,6 @@ struct Module : Object
 
     Text_with_includes         _text_with_includes;
     string                     _include_path;
-  //Text_with_includes          _source;
     Reuse                      _reuse;
     bool                       _separate_process;           // Das Skript soll einem getrennten, eigenen Prozess laufen
     string                     _process_class_name;
@@ -174,10 +144,7 @@ struct Module : Object
     string                     _priority;                   // "", "-20" bis "+20" oder "idle", "below_normal" etc.
 
     bool                       _dont_remote;
-
-  //std::list<xml::Element_ptr> _dom_element_list;
     Time                       _xml_mod_time;
-
     ptr<Module>                _monitor;
 
     Fill_end                   _end_;

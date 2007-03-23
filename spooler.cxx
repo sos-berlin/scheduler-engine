@@ -881,7 +881,11 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
     state_element.appendChild( _web_services->dom_element( dom, show ) );
 
     state_element.appendChild( _communication.dom_element( dom, show ) );
-    state_element.append_new_cdata_or_text_element( "operations", "\n" + _connection_manager->string_from_operations( "\n" ) + "\n" );
+
+    if( show.is_set( show_operations ) )
+    {
+        state_element.append_new_cdata_or_text_element( "operations", "\n" + _connection_manager->string_from_operations( "\n" ) + "\n" );
+    }
 
     return state_element;
 }
@@ -996,13 +1000,13 @@ void Spooler::register_process_handle( Process_handle p )
         }
 #   endif
 
-    _process_count++;
 
     for( int i = 0; i < NO_OF( _process_handles ); i++ )
     {
         if( _process_handles[i] == 0 )  
         { 
             _process_handles[i] = p;  
+            _process_count++;
             break; 
         }
     }
@@ -1016,11 +1020,15 @@ void Spooler::unregister_process_handle( Process_handle p )
 {
     if( p )
     {
-        _process_count--;
 
         for( int i = 0; i < NO_OF( _process_handles ); i++ )
         {
-            if( _process_handles[i] == p )  { _process_handles[i] = 0;  break; }
+            if( _process_handles[i] == p )  
+            { 
+                _process_handles[i] = 0;  
+                _process_count--;
+                break; 
+            }
         }
     }
 

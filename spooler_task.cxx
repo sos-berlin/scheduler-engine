@@ -844,7 +844,7 @@ void Task::add_pid( int pid, const Time& timeout_period )
 {
     if( _module_instance->is_remote_host() )
     {
-        int REMOTE_SUBPROCESS_KILLEN;
+        //int REMOTE_SUBPROCESS_KILLEN;
         _log->warn( message_string( "SCHEDULER-849", pid ) );
     }
     else
@@ -880,12 +880,12 @@ void Task::remove_pid( int pid )
 void Task::add_subprocess( int pid, double timeout, bool ignore_exitcode, bool ignore_signal, bool is_process_group, const string& title )
 {
     Z_LOG2( "scheduler", __FUNCTION__ << " " << pid << "," << timeout << "," << ignore_exitcode << "," << ignore_signal << "," << is_process_group << "\n" );
-    Z_LOG2( "scheduler", __FUNCTION__ << "   title=" << title << "\n" );   // Getrennt, falls Parameterübergabe fehlerhaftist und es zum Abbruch kommt (com_server.cxx)
+    Z_LOG2( "scheduler", __FUNCTION__ << "   title=" << title << "\n" );   // Getrennt, falls Parameterübergabe fehlerhaft ist und es zum Abbruch kommt (com_server.cxx)
     
     if( _module_instance->is_remote_host() )
     {
-        int REMOTE_SUBPROCESS_KILLEN;
-        _log->warn( message_string( "SCHEDULER-849", pid ) );
+        //int REMOTE_SUBPROCESS_KILLEN;
+        //_log->warn( message_string( "SCHEDULER-849", pid ) );
     }
     else
     {
@@ -944,7 +944,7 @@ void Task::Registered_pid::try_kill()
     {
         if( _task->_module_instance->is_remote_host() )
         {
-            int REMOTE_SUBPROCESS_KILLEN;
+            //int REMOTE_SUBPROCESS_KILLEN;
             _task->log()->warn( message_string( "SCHEDULER-849", _pid ) );
             // Asynchron <remote_scheduler.subprocess.kill task="..." pid="..."/>
             // ohne Ende abzuwarten?

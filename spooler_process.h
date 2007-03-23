@@ -18,6 +18,32 @@ struct Process_class;
 
 struct Process : zschimmer::Object, Scheduler_object
 {
+    struct Close_operation : Async_operation
+    {
+        enum State { s_initial, s_closing_session, s_closing_remote_process, s_finished };
+
+
+                                    Close_operation         ( Process*, bool run_independently );
+                                   ~Close_operation         ();
+
+        // Async_operation:
+        bool                        async_continue_         ( Continue_flags );
+        bool                        async_finished_         () const;
+        string                      async_state_text_       () const;
+
+        static string               string_from_state       ( State );
+
+      private:
+        friend struct               Process;
+
+        Fill_zero                  _zero_;
+        State                      _state;
+        ptr<Process>               _process;
+        Async_operation*           _close_session_operation;
+        ptr<Close_operation>       _hold_self;              // Objekt hält sich selbst, wenn es selbstständig, ohne Antwort, den Process schließen soll
+    };
+
+
     struct Async_remote_operation : Async_operation
     {
         enum State
@@ -40,7 +66,7 @@ struct Process : zschimmer::Object, Scheduler_object
         virtual bool            async_finished_             () const                                { return _state == s_running  ||  _state == s_closed; }
         virtual string          async_state_text_           () const;
 
-        void                    close_remote_task           ();
+        void                    close_remote_task           ( bool kill = false );
 
 
         Fill_zero              _zero_;
@@ -53,6 +79,13 @@ struct Process : zschimmer::Object, Scheduler_object
                                 Process                     ( Spooler* );
     Z_GNU_ONLY(                 Process                     (); )
                                ~Process                     ();
+
+
+    void                        close_async                 ();
+    Async_operation*            close__start                ( bool run_independently = false );
+    void                        close__end                  ();
+    bool                     is_closing                     ()                                      { return _close_operation != NULL; }
+    bool                        continue_close_operation    ( Process::Close_operation* );
 
 
     bool                        started                     ()                                      { return _connection != NULL; }
@@ -77,6 +110,7 @@ struct Process : zschimmer::Object, Scheduler_object
     void                    set_server                      ( const string& hostname, int port )    { _server_hostname = hostname;  _server_port = port; }
     void                    set_priority                    ( const string& priority )              { _priority = priority; }
     int                         pid                         () const                                { return _connection? _connection->pid() : 0; }
+    bool                     is_terminated                  ();
     bool                        kill                        ();
     int                         exit_code                   ();
     int                         termination_signal          ();
@@ -114,6 +148,7 @@ struct Process : zschimmer::Object, Scheduler_object
   //string                     _stdin_data;
     ptr<Async_remote_operation> _async_remote_operation;
     ptr<Xml_client_connection>  _xml_client_connection;
+    ptr<Close_operation>       _close_operation;
 };
 
 //-------------------------------------------------------------------------------------Process_list

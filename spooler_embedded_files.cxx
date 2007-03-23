@@ -1093,6 +1093,7 @@ const char file_scheduler_xsd[] =
     "<xsd:element name=\"remote_scheduler.remote_task.close\">\n"
     "<xsd:complexType>\n"
     "<xsd:attribute name=\"pid\"               type=\"xsd:integer\"   use=\"required\"/>\n"
+    "<xsd:attribute name=\"kill\"              type=\"Yes_no\"                      />\n"
     "</xsd:complexType>\n"
     "</xsd:element>\n"
     "\n"
@@ -1452,7 +1453,7 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1174232866 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1174504972 },
     { NULL, NULL, 0 }
 };
 

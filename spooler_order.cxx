@@ -2908,10 +2908,10 @@ bool Order::db_try_insert()
 
                 if( !result_set.eof() )  break;
 
-                S log_line;
-                log_line << "Retry #" << insert_race_retry_count << " after possibly volatile error: " << x.what();
-                ( _job_chain? _job_chain->log() : _spooler->log() ) -> warn( S() << obj_name() << ", " << log_line );
-                _log->debug( log_line );
+int TESTEN;
+                string msg = message_string( "SCHEDULER-851", insert_race_retry_count, x );
+                ( _job_chain? _job_chain->log() : _spooler->log() ) -> info( S() << obj_name() << ":" << msg );
+                _log->debug( msg );
             }
         }
 

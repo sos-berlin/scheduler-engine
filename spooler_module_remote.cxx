@@ -67,6 +67,8 @@ bool Remote_module_instance_proxy::load()
 
 Async_operation* Remote_module_instance_proxy::close__start()
 {
+    Async_operation* result;
+
   //if( _session )  _session->close_current_operation();
     
     if( _remote_instance )
@@ -90,12 +92,16 @@ Async_operation* Remote_module_instance_proxy::close__start()
 
     _idispatch = NULL;
 
-    if( _session )
-    {
-        return _session->close__start();
-    }
+    if( _process )  result = _process->close__start();
+              else  result = &dummy_sync_operation;
 
-    return &dummy_sync_operation;
+
+    //if( _session )
+    //{
+    //    return _session->close__start();
+    //}
+
+    return result;
 }
 
 //---------------------------------------------------------Remote_module_instance_proxy::close__end

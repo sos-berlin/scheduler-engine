@@ -3537,6 +3537,18 @@
             </text>
         </message>
 
+        <message code="SCHEDULER-850" weight="warn">
+            <text xml:lang="en">
+                <title>After lost connection to remote scheduler, process <p1/> is going to be killed</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-851" weight="info">
+            <text xml:lang="en">
+                <title>After possibly volatile error (number <p1/>), the causing statement will be repeated: <p2/></title>
+            </text>
+        </message>
+
         <!--message code="SCHEDULER-848" weight="debug3">
             <text xml:lang="en">
                 <title>Compressing existent file '<p1/>' to '<p2/>'</title>

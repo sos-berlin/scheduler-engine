@@ -147,6 +147,7 @@ struct Communication
         virtual void            connection_lost_event       ( const exception* )                    {}
         virtual string          connection_type             () const                                = 0;
 
+        void                    close                       ();
         void                    register_task_process       ( Process* );
         void                    unregister_task_process     ( pid_t );
         Process*                get_task_process            ( pid_t );
@@ -265,7 +266,7 @@ struct Xml_operation : Communication::Operation
 
 
     void                        close                       ()                                      { _operation_connection = NULL; Communication::Operation::close(); }
-    xml::Element_ptr            dom_element                 ( const xml::Document_ptr& doc, const Show_what& ) const { return doc.createElement( "xml_operation" ); }
+    xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& ) const;
 
     void                        put_request_part            ( const char*, int length );
     bool                        request_is_complete         ()                                      { return _request_is_complete; }

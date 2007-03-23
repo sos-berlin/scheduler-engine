@@ -490,7 +490,6 @@ const Com_method Web_service_operation::_methods[] =
     COM_PROPERTY_GET( Web_service_operation,  4, Response                      , VT_DISPATCH, 0 ),
     COM_PROPERTY_GET( Web_service_operation,  5, Peer_ip                       , VT_BSTR    , 0 ),
     COM_PROPERTY_GET( Web_service_operation,  6, Peer_hostname                 , VT_BSTR    , 0 ),
-  //COM_PROPERTY_GET( Web_service_operation,  5, Execute_stylesheets           , VT_DISPATCH, 0 ),
 #endif
     {}
 };

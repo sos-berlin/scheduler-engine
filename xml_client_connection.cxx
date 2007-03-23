@@ -49,6 +49,7 @@ void Xml_client_connection::send( const string& s )
 {
     if( !is_send_possible() )  z::throw_xc( __FUNCTION__, "Connection is currently in use" );
 
+    _received_data.clear();
     _send_data = s;
 
     if( _state == s_connected )
@@ -145,7 +146,6 @@ bool Xml_client_connection::async_continue_( Continue_flags flags )
                 if( !_send_data.empty() )
                 {
                     _socket_operation->send__start( _send_data );
-                    _send_data = "";
                     _state = s_sending;
                     again = 1;
                     something_done = true;
@@ -183,6 +183,7 @@ bool Xml_client_connection::async_continue_( Continue_flags flags )
 
                 if( !_xml_end_finder.is_complete( data.data(), data.length() ) )  break;
 
+                _send_data = "";
                 _state = s_connected;
 
                 //log()->info( "ANTWORT: " + _recv_data );
@@ -226,7 +227,10 @@ string Xml_client_connection::state_name( State state )
         case s_not_connected:   return "not_connected";
         case s_connecting:      return "connecting";
         case s_connected:       return "connected";
-        default:                return "state=" + as_int( state );
+        case s_sending:         return "sending";
+        case s_waiting:         return "waiting";
+        case s_receiving:       return "receiving";
+        default:                return S() << "state=" << state;
     }
 }
 
@@ -248,7 +252,8 @@ string Xml_client_connection::async_state_text_() const
     result << " ";
     result << state_name( _state );
 
-    if( _send_data != "" )  result << ", " << quoted_string( truncate_first_line_with_ellipsis( _send_data, 100 ) );
+    if( _send_data != ""           )  result << ", sending "   << quoted_string( truncate_first_line_with_ellipsis( _send_data                , 100 ) );
+    if( !_received_data.is_empty() )  result << ", receiving " << quoted_string( truncate_first_line_with_ellipsis( _received_data.to_string(), 100 ) );
 
     result << ")";
 

@@ -245,7 +245,9 @@ struct Itask : IDispatch
     virtual HRESULT     put_Close_engine                ( VARIANT_BOOL close_after_task )       = 0;
     virtual HRESULT     get_Order                       ( Iorder** result )                     = 0;
     virtual HRESULT     get_Stderr_text                 ( BSTR* )                               = 0;
+    virtual HRESULT     get_Stderr_path                 ( BSTR* )                               = 0;
     virtual HRESULT     get_Stdout_text                 ( BSTR* )                               = 0;
+    virtual HRESULT     get_Stdout_path                 ( BSTR* )                               = 0;
     virtual HRESULT         Create_subprocess           ( VARIANT*, Isubprocess** )             = 0;
     virtual HRESULT         Add_subprocess              ( int, double*, VARIANT_BOOL, VARIANT_BOOL, VARIANT_BOOL, BSTR ) = 0;
     virtual HRESULT     put_Priority                    ( int )                                 = 0;
@@ -269,6 +271,10 @@ DEFINE_GUID( CLSID_Task_proxy, 0xfeee47aa, 0x6c1b, 0x11d8, 0x81, 0x03, 0x00, 0x0
 struct Itask_proxy : IDispatch
 {
     virtual HRESULT         Create_subprocess           ( VARIANT* program_and_parameters, Isubprocess** ) = 0;
+    virtual HRESULT     get_Stderr_text                 ( BSTR* )                               = 0;
+    virtual HRESULT     get_Stderr_path                 ( BSTR* )                               = 0;
+    virtual HRESULT     get_Stdout_text                 ( BSTR* )                               = 0;
+    virtual HRESULT     get_Stdout_path                 ( BSTR* )                               = 0;
 };
 
 //---------------------------------------------------------------------------------------Thread

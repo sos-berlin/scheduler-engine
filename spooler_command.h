@@ -43,6 +43,7 @@ enum Show_what_enum
     show_order_source_files = 0x80000,
     show_job_params         = 0x100000,
     show_cluster            = 0x200000,
+    show_operations         = 0x400000,
   //show_web_services       = 0x20000,
   //show_web_service_operations = 0x40000,
 
@@ -98,7 +99,7 @@ struct Command_response : Xml_response
     void                        end                         ();
 };
 
-//-------------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------Synchronous_command_response
 
 struct Synchronous_command_response : Command_response
 {
@@ -120,6 +121,42 @@ struct Synchronous_command_response : Command_response
     string                     _response_text;
 };
 
+//-------------------------------------------------------------------File_buffered_command_response
+//
+//struct Buffered_command_response : Command_response
+//{
+//    enum State
+//    {
+//        s_ready, 
+//        s_congested,
+//        s_finished
+//    };
+//
+//                                Buffered_command_response   ();
+//
+//    // Async_operation
+//    virtual bool                async_continue_             ( Continue_flags );
+//    virtual bool                async_finished_             () const                                { return _state == s_finished; }
+//    virtual string              async_state_text_           () const                                { return "Buffered_xml_response"; }
+//
+//    // Xml_response
+//    string                      get_part                    ();
+//    void                        append_text                 ( const string& );
+//
+//    void                        close                       ();
+//
+//  private:   
+//    Fill_zero                  _zero_;
+//    State                      _state;
+//    int                        _buffer_size;
+//    string                     _buffer;
+//    z::File                    _congestion_file;
+//    bool                       _last_seek_for_read;
+//    int64                      _congestion_file_write_position;
+//    int64                      _congestion_file_read_position;
+//    bool                       _close;
+//};
+//
 //-------------------------------------------------------------------File_buffered_command_response
 
 struct File_buffered_command_response : Command_response
@@ -214,6 +251,7 @@ struct Command_processor
     xml::Element_ptr            execute_start_job           ( const xml::Element_ptr& );
     xml::Element_ptr            execute_remote_scheduler_start_remote_task( const xml::Element_ptr& );
     xml::Element_ptr            execute_remote_scheduler_remote_task_close( const xml::Element_ptr& ); 
+  //xml::Element_ptr            execute_remote_scheduler_remote_task_kill ( const xml::Element_ptr& ); 
     xml::Element_ptr            execute_show_cluster        ( const xml::Element_ptr&, const Show_what& );
     xml::Element_ptr            execute_show_task           ( const xml::Element_ptr&, const Show_what& );
     xml::Element_ptr            execute_kill_task           ( const xml::Element_ptr& );

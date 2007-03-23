@@ -36,6 +36,19 @@ const int wait_for_port_available = 2*60;   // Soviele Sekunden warten, bis TCP-
 #   define INADDR_NONE (-1)
 #endif
 
+//-------------------------------------------------------Communication::Operation_connection::close
+
+void Communication::Operation_connection::close()
+{
+    Z_FOR_EACH( Task_process_register, _task_process_register, it )
+    {
+        Process* process = it->second;
+        process->close_async();
+    }
+
+    _task_process_register.clear();
+}
+
 //---------------------------------------Communication::Operation_connection::register_task_process
 
 void Communication::Operation_connection::register_task_process( Process* process )
@@ -51,12 +64,12 @@ void Communication::Operation_connection::unregister_task_process( pid_t pid )
     assert( pid );
 
     Process* process = get_task_process( pid );
-    process->kill();
+    process->close_async();
 
     _task_process_register.erase( pid );
 }
 
-//-------------------------------------Communication::Operation_connection::unregister_task_process
+//--------------------------------------------Communication::Operation_connection::get_task_process
 
 Process* Communication::Operation_connection::get_task_process( pid_t pid )
 {
@@ -103,6 +116,15 @@ Xml_operation::Xml_operation( Xml_operation_connection* operation_connection )
 Xml_operation::~Xml_operation()
 {
     if( _response )  _response->set_connection( NULL );
+}
+
+//-----------------------------------------------------------------------Xml_operation::dom_element
+
+xml::Element_ptr Xml_operation::dom_element( const xml::Document_ptr& doc, const Show_what& ) const 
+{ 
+    xml::Element_ptr result = doc.createElement( "xml_operation" ); 
+    result.setAttribute( "async_state_text", async_state_text() );  // Debug
+    return result;
 }
 
 //-----------------------------------------------------------------Xml_operation::async_state_text_
@@ -310,10 +332,12 @@ string Communication::Connection::connection_state_name( Connection_state state 
 
 void Communication::Connection::remove_me( const exception* x )
 {
+    ptr<Connection> holder = this;
+
     remove_operation();
     if( _operation_connection )  _operation_connection->connection_lost_event( x );
-
-    _communication->remove_connection( this );
+    
+    _spooler->_communication.remove_connection( this );     // Ruft do_close()
 }
 
 //----------------------------------------------------------------Communication::Connection::terminate
@@ -365,6 +389,8 @@ bool Communication::Connection::do_accept( SOCKET listen_socket )
 
 void Communication::Connection::do_close()
 {
+    if( _operation_connection )  _operation_connection->close();
+
     remove_operation();
     remove_from_socket_manager();
 

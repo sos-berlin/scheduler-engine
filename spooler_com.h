@@ -529,12 +529,18 @@ struct Com_task_proxy : object_server::proxy_with_local_methods< Com_task_proxy,
     STDMETHODIMP            get_Priority                    ( int* );
     STDMETHODIMP            put_Priority_class              ( BSTR );
     STDMETHODIMP            get_Priority_class              ( BSTR* );
+    STDMETHODIMP            get_Stderr_text                 ( BSTR* );
+    STDMETHODIMP            get_Stderr_path                 ( BSTR* );
+    STDMETHODIMP            get_Stdout_text                 ( BSTR* );
+    STDMETHODIMP            get_Stdout_path                 ( BSTR* );
 
     void                        wait_for_subprocesses       ();
 
 
     ptr<Subprocess_register>   _subprocess_register;
     bool                       _subprocess_own_process_group_default;
+    File_path                  _stdout_path;
+    File_path                  _stderr_path;
 };
 
 //---------------------------------------------------------------------------------------Com_thread

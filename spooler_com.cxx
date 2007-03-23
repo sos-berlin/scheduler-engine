@@ -97,7 +97,7 @@ const Com_method Com_error::_methods[] =
 { 
    // _flags              , _name             , _method                                        , _result_type, _types        , _default_arg_count
     { DISPATCH_PROPERTYGET, 1, "Java_class_name" , (Com_method_ptr)&Com_error::get_Java_class_name, VT_BSTR },
-    { DISPATCH_PROPERTYGET, 2, "Is_error"        , (Com_method_ptr)&Com_error::get_Is_error       , VT_BOOL },
+    { DISPATCH_PROPERTYGET, 0, "Is_error"        , (Com_method_ptr)&Com_error::get_Is_error       , VT_BOOL },
     { DISPATCH_PROPERTYGET, 3, "Code"            , (Com_method_ptr)&Com_error::get_Code           , VT_BSTR }, 
     { DISPATCH_PROPERTYGET, 4, "Text"            , (Com_method_ptr)&Com_error::get_Text           , VT_BSTR }, 
     {}
@@ -189,9 +189,9 @@ const Com_method Com_variable::_methods[] =
    // _flags         , dispid, _name                , _method                                           , _result_type  , _types        , _default_arg_count
     { DISPATCH_PROPERTYPUT, 0, "value"              , (Com_method_ptr)&Com_variable::put_Value          , VT_EMPTY      , { VT_BYREF|VT_VARIANT } },
     { DISPATCH_PROPERTYGET, 0, "value"              , (Com_method_ptr)&Com_variable::get_Value          , VT_VARIANT    },
-    { DISPATCH_PROPERTYGET, 1, "name"               , (Com_method_ptr)&Com_variable::get_Name           , VT_BSTR       },
-    { DISPATCH_METHOD     , 2, "Clone"              , (Com_method_ptr)&Com_variable::Clone              , VT_DISPATCH   },
-    { DISPATCH_PROPERTYGET, 3, "java_class_name"    , (Com_method_ptr)&Com_variable::get_Java_class_name, VT_BSTR },
+    { DISPATCH_PROPERTYGET, 1, "java_class_name"    , (Com_method_ptr)&Com_variable::get_Java_class_name, VT_BSTR },
+    { DISPATCH_PROPERTYGET, 2, "name"               , (Com_method_ptr)&Com_variable::get_Name           , VT_BSTR       },
+    { DISPATCH_METHOD     , 3, "Clone"              , (Com_method_ptr)&Com_variable::Clone              , VT_DISPATCH   },
     {}
 };
 
@@ -2248,6 +2248,15 @@ ptr<object_server::Reference_with_properties> Com_task::get_reference_with_prope
 
         result = Z_NEW( object_server::Reference_with_properties( CLSID_Task_proxy, static_cast<Itask*>( this ) ) );
         result->set_property( "subprocess_own_process_group_default", _task->_spooler->_subprocess_own_process_group_default );
+
+        if( Remote_module_instance_proxy* r = dynamic_cast<Remote_module_instance_proxy*>( +_task->_module_instance ) )
+        {
+            if( r->_process )
+            {
+                result->set_property( "stdout_path", r->_process->stdout_path() );
+                result->set_property( "stderr_path", r->_process->stderr_path() );
+            }
+        }
     }
 
     return result;
@@ -2918,6 +2927,10 @@ const Com_method Com_task_proxy::_methods[] =
     COM_PROPERTY_GET( Com_task_proxy, 22, Priority_class        , VT_BSTR     , 0 ),
     COM_PROPERTY_PUT( Com_task_proxy, 29, Priority              ,               0, VT_INT ),
     COM_PROPERTY_GET( Com_task_proxy, 29, Priority              , VT_INT      , 0 ),
+    COM_PROPERTY_GET( Com_task_proxy, 18, Stderr_text           , VT_BSTR     , 0 ),
+    COM_PROPERTY_GET( Com_task_proxy, 19, Stdout_text           , VT_BSTR     , 0 ),
+    COM_PROPERTY_GET( Com_task_proxy, 24, Stderr_path           , VT_BSTR     , 0 ),
+    COM_PROPERTY_GET( Com_task_proxy, 25, Stdout_path           , VT_BSTR     , 0 ),
 #endif
     {}
 };
@@ -2950,6 +2963,10 @@ Com_task_proxy::Com_task_proxy()
 void Com_task_proxy::set_property( const string& name, const Variant& value )
 {
     if( name == "subprocess_own_process_group_default" )  _subprocess_own_process_group_default = value.as_bool();
+    else
+    if( name == "stdout_path" )  _stdout_path = value.as_string();
+    else
+    if( name == "stderr_path" )  _stderr_path = value.as_string();
     else  
         z::throw_xc( __FUNCTION__, name );
 }
@@ -2987,6 +3004,42 @@ STDMETHODIMP Com_task_proxy::put_Priority( int priority )
 STDMETHODIMP Com_task_proxy::get_Priority( int* result )
 {
     Z_COM_IMPLEMENT( hr = zschimmer::Process( getpid() ).get_Priority( result ) );
+}
+
+//------------------------------------------------------------------Com_task_proxy::get_Stderr_text
+
+STDMETHODIMP Com_task_proxy::get_Stderr_text( BSTR* result )
+{
+    Z_LOG2( "scheduler", __PRETTY_FUNCTION__ << "()\n" );
+
+    Z_COM_IMPLEMENT( hr = String_to_bstr( string_from_file( _stderr_path ), result ) );
+}
+
+//------------------------------------------------------------------Com_task_proxy::get_Stderr_path
+
+STDMETHODIMP Com_task_proxy::get_Stderr_path( BSTR* result )
+{
+    Z_LOG2( "scheduler", __PRETTY_FUNCTION__ << "()\n" );
+
+    return String_to_bstr( _stderr_path, result );
+}
+
+//------------------------------------------------------------------Com_task_proxy::get_Stdout_text
+
+STDMETHODIMP Com_task_proxy::get_Stdout_text( BSTR* result )
+{
+    Z_LOG2( "scheduler", __PRETTY_FUNCTION__ << "()\n" );
+
+    Z_COM_IMPLEMENT( hr = String_to_bstr( string_from_file( _stdout_path ), result ) );
+}
+
+//------------------------------------------------------------------Com_task_proxy::get_Stdout_path
+
+STDMETHODIMP Com_task_proxy::get_Stdout_path( BSTR* result )
+{
+    Z_LOG2( "scheduler", __PRETTY_FUNCTION__ << "()\n" );
+
+    return String_to_bstr( _stdout_path, result );
 }
 
 //------------------------------------------------------------Com_task_proxy::wait_for_subprocesses
@@ -3110,8 +3163,8 @@ const Com_method Com_spooler::_methods[] =
     { DISPATCH_PROPERTYGET,  8, "log_dir"                   , (Com_method_ptr)&Com_spooler::get_Log_dir         , VT_BSTR      },
     { DISPATCH_METHOD     ,  9, "let_run_terminate_and_restart", (Com_method_ptr)&Com_spooler::Let_run_terminate_and_restart },
     { DISPATCH_PROPERTYGET, 10, "variables"                 , (Com_method_ptr)&Com_spooler::get_Variables       , VT_DISPATCH  },
-    { DISPATCH_PROPERTYPUT, 11, "var"                       , (Com_method_ptr)&Com_spooler::put_Var             , VT_EMPTY     , { VT_BSTR, VT_BYREF|VT_VARIANT } },
-    { DISPATCH_PROPERTYGET, 11, "var"                       , (Com_method_ptr)&Com_spooler::get_Var             , VT_VARIANT   , { VT_BSTR } },
+    { DISPATCH_PROPERTYPUT,  0, "var"                       , (Com_method_ptr)&Com_spooler::put_Var             , VT_EMPTY     , { VT_BSTR, VT_BYREF|VT_VARIANT } },
+    { DISPATCH_PROPERTYGET,  0, "var"                       , (Com_method_ptr)&Com_spooler::get_Var             , VT_VARIANT   , { VT_BSTR } },
     { DISPATCH_PROPERTYGET, 12, "db_name"                   , (Com_method_ptr)&Com_spooler::get_Db_name         , VT_BSTR      },
     { DISPATCH_METHOD     , 13, "create_job_chain"          , (Com_method_ptr)&Com_spooler::Create_job_chain    , VT_DISPATCH  },
     { DISPATCH_METHOD     , 14, "add_job_chain"             , (Com_method_ptr)&Com_spooler::Add_job_chain       , VT_EMPTY     , { VT_DISPATCH } },
