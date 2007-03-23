@@ -514,8 +514,17 @@ bool Process::async_remote_start_continue( Async_operation::Continue_flags )
             xml::Document_ptr dom_document = _xml_client_connection->received_dom_document();
             if( !dom_document )  break;
 
-            Z_LOG2( "scheduler", __FUNCTION__ << " XML-Antwort: " << dom_document.xml() );
+            Z_LOG2( "joacim", __FUNCTION__ << " XML-Antwort: " << dom_document.xml() );
             //_spooler->log()->debug9( message_string( "SCHEDULER-948", _connection->short_name() ) );  // pid wird auch von Task::set_state(s_starting) mit log_info protokolliert
+
+            _remote_stdout_file.open_temporary( File::open_unlink_later );
+            _remote_stdout_file.print( string_from_hex( dom_document.select_element_strict( "//ok/file [ @name='stdout' and @encoding='hex' ]" ).text() ) );
+            _remote_stdout_file.close();
+
+            _remote_stderr_file.open_temporary( File::open_unlink_later );
+            _remote_stderr_file.print( string_from_hex( dom_document.select_element_strict( "//ok/file [ @name='stderr' and @encoding='hex' ]" ).text() ) );
+            _remote_stderr_file.close();
+
             something_done = true;
             _async_remote_operation->_state = Async_remote_operation::s_closed;
             break;
@@ -623,18 +632,18 @@ bool Process::is_remote_host() const
 
 //-----------------------------------------------------------------------------Process::stdout_path
 
-string Process::stdout_path()
+File_path Process::stdout_path()
 {
     object_server::Connection_to_own_server_process* c = dynamic_cast< object_server::Connection_to_own_server_process* >( +_connection );
-    return c? c->stdout_path() : "";
+    return c? c->stdout_path() : _remote_stdout_file.path();
 }
 
 //-----------------------------------------------------------------------------Process::stderr_path
 
-string Process::stderr_path()
+File_path Process::stderr_path()
 {
     object_server::Connection_to_own_server_process* c = dynamic_cast< object_server::Connection_to_own_server_process* >( +_connection );
-    return c? c->stderr_path() : "";
+    return c? c->stderr_path() : _remote_stderr_file.path();
 }
 
 //-----------------------------------------------------------------------------Process::dom_element

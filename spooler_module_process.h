@@ -48,8 +48,8 @@ struct Process_module_instance : Module_instance
     bool                        process_has_signaled        ();
     int                         exit_code                   ()                                      { return _exit_code; }
     int                         termination_signal          ();
-    string                      stdout_path                 ()                                      { return _stdout_file.path(); }
-    string                      stderr_path                 ()                                      { return _stderr_file.path(); }
+    File_path                   stdout_path                 ()                                      { return _stdout_file.path(); }
+    File_path                   stderr_path                 ()                                      { return _stderr_file.path(); }
 
   private:
     void                        close_handle                ();

@@ -178,6 +178,7 @@ bool Xml_client_connection::async_continue_( Continue_flags flags )
                 something_done = true;
 
                 _socket_operation->recv_clear();
+                Z_LOG2( "scheduler", __FUNCTION__ << ": " << data << "\n" );
                 _received_data.append( data );
                 
 

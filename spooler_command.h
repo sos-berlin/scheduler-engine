@@ -10,7 +10,7 @@ struct Http_file_directory;
 
 //-------------------------------------------------------------------------------------------------
 
-const int                   recommended_response_block_size = 100000;
+const int                       recommended_response_block_size = Z_NDEBUG_DEBUG( 100000, 1000 );
 
 //-------------------------------------------------------------------------------------------------
 
@@ -91,7 +91,7 @@ struct Command_response : Xml_response
 {
                                 Command_response            ();
 
-    virtual void                append_text                 ( const string& )                       = 0;
+    virtual void                write                       ( const io::Char_sequence& )            = 0;
     virtual string              complete_text               ()                                      { z::throw_xc( "SCHEDULER-353" ); }
 
   protected:
@@ -114,7 +114,7 @@ struct Synchronous_command_response : Command_response
     string                      get_part                    ()                                      { string result = _response_text;  _response_text = "";  return result; }
 
     // Command_response
-    void                        append_text                 ( const string& text )                  { _response_text += text; }
+    void                        write                       ( const io::Char_sequence& seq )        { _response_text.append( seq.ptr(), seq.length() ); }
     string                      complete_text               ()                                      { return _response_text; }
 
   private:
@@ -159,7 +159,7 @@ struct Synchronous_command_response : Command_response
 //
 //-------------------------------------------------------------------File_buffered_command_response
 
-struct File_buffered_command_response : Command_response
+struct File_buffered_command_response : Command_response, io::Writer
 {
     enum State
     {
@@ -170,6 +170,11 @@ struct File_buffered_command_response : Command_response
 
                                 File_buffered_command_response();
 
+    // Writer : IUnknown
+    STDMETHODIMP                QueryInterface              ( const IID& iid, void** o )            { return Command_response::QueryInterface( iid, o ); }
+    STDMETHODIMP_(ULONG)        AddRef                      ()                                      { return Command_response::AddRef(); }
+    STDMETHODIMP_(ULONG)        Release                     ()                                      { return Command_response::Release(); }
+
     // Async_operation
     virtual bool                async_continue_             ( Continue_flags );
     virtual bool                async_finished_             () const                                { return _state == s_finished; }
@@ -177,12 +182,17 @@ struct File_buffered_command_response : Command_response
 
     // Xml_response
     string                      get_part                    ();
-    void                        append_text                 ( const string& );
+    void                        write                       ( const io::Char_sequence& );
 
+    // Writer
     void                        close                       ();
+    void                        flush                       ();
+
+  protected:
+    Fill_zero                  _zero_;
+    xml::Xml_writer            _xml_writer;
 
   private:   
-    Fill_zero                  _zero_;
     State                      _state;
     int                        _buffer_size;
     string                     _buffer;

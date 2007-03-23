@@ -142,16 +142,16 @@ int Remote_module_instance_proxy::termination_signal()
 
 //--------------------------------------------------------Remote_module_instance_proxy::stdout_path
 
-string Remote_module_instance_proxy::stdout_path()                                      
+File_path Remote_module_instance_proxy::stdout_path()                                      
 { 
-    return _process? _process->stdout_path() : "";
+    return _process? _process->stdout_path() : File_path();
 }
 
 //--------------------------------------------------------Remote_module_instance_proxy::stderr_path
 
-string Remote_module_instance_proxy::stderr_path()
+File_path Remote_module_instance_proxy::stderr_path()
 { 
-    return _process? _process->stderr_path() : "";
+    return _process? _process->stderr_path() : File_path();
 }
 
 //------------------------------------------------------------Remote_module_instance_proxy::add_obj

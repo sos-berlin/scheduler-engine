@@ -177,7 +177,7 @@ void Xml_operation::begin()
 
     if( Synchronous_command_response* scr = dynamic_cast<Synchronous_command_response*>( +_response ) )
     {
-        scr->append_text( string( "\0", 1 ) );  // Null-Byte terminiert die XML-Antwort
+        scr->write( io::Char_sequence( "\0", 1 ) );  // Null-Byte terminiert die XML-Antwort
     }
     else
     {
@@ -398,6 +398,8 @@ void Communication::Connection::do_close()
 
     if( _read_socket != SOCKET_ERROR  &&  _read_socket != STDIN_FILENO )
     {
+        shutdown( _read_socket, SHUT_WR );
+
         Z_LOG2( "socket.close", "close(" << _read_socket << ")\n" );
         closesocket( _read_socket );
     }

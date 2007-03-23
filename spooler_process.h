@@ -114,8 +114,8 @@ struct Process : zschimmer::Object, Scheduler_object
     bool                        kill                        ();
     int                         exit_code                   ();
     int                         termination_signal          ();
-    string                      stderr_path                 ();
-    string                      stdout_path                 ();
+    File_path                   stderr_path                 ();
+    File_path                   stdout_path                 ();
     bool                        connected                   ()                                      { return _connection? _connection->connected() : false; }
     bool                        is_remote_host              () const;
 
@@ -145,7 +145,8 @@ struct Process : zschimmer::Object, Scheduler_object
     Process_class*             _process_class;
     string                     _priority;
     pid_t                      _remote_pid;
-  //string                     _stdin_data;
+    File                       _remote_stdout_file;
+    File                       _remote_stderr_file;
     ptr<Async_remote_operation> _async_remote_operation;
     ptr<Xml_client_connection>  _xml_client_connection;
     ptr<Close_operation>       _close_operation;

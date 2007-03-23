@@ -2249,14 +2249,14 @@ ptr<object_server::Reference_with_properties> Com_task::get_reference_with_prope
         result = Z_NEW( object_server::Reference_with_properties( CLSID_Task_proxy, static_cast<Itask*>( this ) ) );
         result->set_property( "subprocess_own_process_group_default", _task->_spooler->_subprocess_own_process_group_default );
 
-        if( Remote_module_instance_proxy* r = dynamic_cast<Remote_module_instance_proxy*>( +_task->_module_instance ) )
-        {
-            if( r->_process )
-            {
-                result->set_property( "stdout_path", r->_process->stdout_path() );
-                result->set_property( "stderr_path", r->_process->stderr_path() );
-            }
-        }
+        //if( Remote_module_instance_proxy* r = dynamic_cast<Remote_module_instance_proxy*>( +_task->_module_instance ) )
+        //{
+        //    if( r->_process )
+        //    {
+        //        result->set_property( "stdout_path", r->_process->stdout_path() );
+        //        result->set_property( "stderr_path", r->_process->stderr_path() );
+        //    }
+        //}
     }
 
     return result;
@@ -2963,10 +2963,10 @@ Com_task_proxy::Com_task_proxy()
 void Com_task_proxy::set_property( const string& name, const Variant& value )
 {
     if( name == "subprocess_own_process_group_default" )  _subprocess_own_process_group_default = value.as_bool();
-    else
-    if( name == "stdout_path" )  _stdout_path = value.as_string();
-    else
-    if( name == "stderr_path" )  _stderr_path = value.as_string();
+    //else
+    //if( name == "stdout_path" )  _stdout_path = value.as_string();
+    //else
+    //if( name == "stderr_path" )  _stderr_path = value.as_string();
     else  
         z::throw_xc( __FUNCTION__, name );
 }

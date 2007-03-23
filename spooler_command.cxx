@@ -60,6 +60,8 @@ struct Remote_task_close_command_response : File_buffered_command_response
     virtual bool                async_continue_             ( Continue_flags );
 
   private:
+    void                        write_file                  ( const string& what, const File_path& );
+
     enum State { s_initial, s_waiting, s_finished };
 
     Fill_zero                  _zero_;
@@ -95,7 +97,13 @@ bool Remote_task_close_command_response::async_continue_( Continue_flags )
                 _operation  = NULL;
                 _process->close__end();
 
-                append_text( S() << "<ok>" << __FUNCTION__ << "</ok>" );
+                _xml_writer.begin_element( "ok" );
+                write_file( "stdout", _process->stdout_path() );
+                write_file( "stderr", _process->stderr_path() );
+                _xml_writer.end_element( "ok" );
+
+                _xml_writer.flush();
+
                 _state = s_finished;
 
                 if( _connection->_operation_connection )  _connection->_operation_connection->unregister_task_process( _pid );
@@ -112,6 +120,26 @@ bool Remote_task_close_command_response::async_continue_( Continue_flags )
     }
 
     return something_done;
+}
+
+//---------------------------------------------------Remote_task_close_command_response::write_file
+
+void Remote_task_close_command_response::write_file( const string& name, const File_path& path )
+{
+    string text;
+
+    try
+    {
+        text = string_from_file( path );
+        //for( int i = 0; i < text.length(); i++ )  if( text[i] == '\0' )  text[i] = ' ';
+    }
+    catch( exception& x ) { text = S() << "ERROR: " << x.what(); }
+
+    _xml_writer.begin_element( "file" );
+    _xml_writer.set_attribute( "name", name );
+    _xml_writer.set_attribute( "encoding", "hex" );
+    _xml_writer.write( lcase_hex( (const Byte*)text.data(), text.length() ) );
+    _xml_writer.end_element( "file" );
 }
 
 //--------------------------------------------------------------------------dom_append_text_element
@@ -1027,7 +1055,7 @@ xml::Element_ptr Command_processor::execute_get_events( const xml::Element_ptr& 
 
     _spooler->_scheduler_event_manager->add_get_events_command_response( response );
 
-    _response->append_text( "<events>\n" );
+    _response->write( "<events>\n" );
 
     return NULL;    // Antwort wird asynchron übergeben
 }
@@ -1047,7 +1075,7 @@ void Get_events_command_response::close()
     {
         _closed = true;
 
-        append_text( "</events>" );
+        write( "</events>" );
         //Z_DEBUG_ONLY( int NULL_BYTE_ANHAENGEN );
     }
 }
@@ -1056,10 +1084,10 @@ void Get_events_command_response::close()
 
 void Get_events_command_response::write_event( const Scheduler_event& event )
 {
-    append_text( event.xml() );
+    write( event.xml() );
 
-    if( _append_0_byte )  append_text( string( "\0", 1 ) );       // 0-Byte anhängen
-                    else  append_text( "\n" );
+    if( _append_0_byte )  write( io::Char_sequence( "\0", 1 ) );       // 0-Byte anhängen
+                    else  write( "\n" );
 }
 
 //---------------------------------------------------------------Command_processor::execute_command
@@ -1745,14 +1773,17 @@ Command_response::Command_response()
 
 void Command_response::begin()
 {
-    append_text( "<spooler><answer time=\"" + Time::now().as_string() + "\">" );
+    write( "<spooler><answer time=\"" );
+    write( Time::now().as_string() );
+    write( "\">" );
+    write( "\">" );
 }
 
 //--------------------------------------------------------------------------Command_response::close
 
 void Command_response::end()
 {
-    append_text( "</answer></spooler>" );
+    write( "</answer></spooler>" );
 }
 
 //-----------------------------------File_buffered_command_response::File_buffered_command_response
@@ -1760,7 +1791,8 @@ void Command_response::end()
 File_buffered_command_response::File_buffered_command_response()
 : 
     _zero_(this+1), 
-    _buffer_size(recommended_response_block_size) 
+    _buffer_size(recommended_response_block_size),
+    _xml_writer( this )
 {
     _buffer.reserve( _buffer_size );
 }
@@ -1768,6 +1800,14 @@ File_buffered_command_response::File_buffered_command_response()
 //------------------------------------------------------------File_buffered_command_response::close
                                                                                                 
 void File_buffered_command_response::close()
+{
+    if( _state == s_ready  &&  _buffer == "" )  _state = s_finished;
+    _close = true;
+}
+
+//------------------------------------------------------------File_buffered_command_response::flush
+
+void File_buffered_command_response::flush()
 {
     if( _state == s_ready  &&  _buffer == "" )  _state = s_finished;
     _close = true;
@@ -1781,24 +1821,24 @@ bool File_buffered_command_response::async_continue_( Continue_flags )
     return false;
 }
 
-//------------------------------------------------------File_buffered_command_response::append_text
+//------------------------------------------------------------File_buffered_command_response::write
 
-void File_buffered_command_response::append_text( const string& text )
+void File_buffered_command_response::write( const io::Char_sequence& seq )
 {
     if( _close )
     {
-        Z_LOG( "*** " << __FUNCTION__ << "  closed: " << text << "\n" );
+        Z_LOG( "*** " << __FUNCTION__ << "  closed: " << seq << "\n" );
         return;
     }
 
 
-    if( text.length() == 0 )  return;
+    if( seq.length() == 0 )  return;
 
     if( _state != s_congested )
     {
-        if( _buffer.length() == 0  ||  _buffer.length() + text.length() <= _buffer_size )
+        if( _buffer.length() == 0  ||  _buffer.length() + seq.length() <= _buffer_size )
         {
-            _buffer.append( text );
+            _buffer.append( seq.ptr(), seq.length() );
             signal_new_data();  // Mit Senden beginnen
         }
         else
@@ -1813,6 +1853,8 @@ void File_buffered_command_response::append_text( const string& text )
         {
             _congestion_file.open_temporary();
             _congestion_file.unlink_later();
+            _congestion_file.print( _buffer );
+            _buffer = "";
         }
         
         if( _last_seek_for_read )
@@ -1821,9 +1863,9 @@ void File_buffered_command_response::append_text( const string& text )
             _last_seek_for_read = false;
         }
 
-        _congestion_file.print( text );
+        _congestion_file.print( seq );
         
-        _congestion_file_write_position += text.length();
+        _congestion_file_write_position += seq.length();
     }
 }
 
@@ -1871,7 +1913,12 @@ string File_buffered_command_response::get_part()
 
                 _state = s_ready;
             }
+
+            break;
         }
+
+        case s_finished:
+            break;
 
         default:
             z::throw_xc( __FUNCTION__, _state );

@@ -251,8 +251,8 @@ struct Module_instance : Object
     virtual int                 exit_code                   ()                                      { return _exit_code; }
     void                    set_exit_code                   ( int exit_code )                       { _exit_code = exit_code; }
     virtual int                 termination_signal          ()                                      { return 0; }
-    virtual string              stdout_path                 ()                                      { return ""; }
-    virtual string              stderr_path                 ()                                      { return ""; }
+    virtual File_path           stdout_path                 ()                                      { return File_path(); }
+    virtual File_path           stderr_path                 ()                                      { return File_path(); }
     virtual bool                process_has_signaled        ()                                      { return false; }       // Für Process_module_instance
 
     virtual string              obj_name                    () const                                { return "Module_instance(" + _job_name + ":" + as_string(_task_id) + ")"; }

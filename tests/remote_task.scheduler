@@ -19,7 +19,7 @@
 
 spooler_log.info( "START" );
 
-                ]]>
+            ]]>
         </script>
 
 
@@ -53,12 +53,18 @@ function spooler_process()
     var hostware = new ActiveXObject( "hostware.global" );
     spooler_log.info( "DORT" );
 
+    hostware.open( "-out *stdout" ).put_line( "STDOUT STDOUT STDOUT STDOUT STDOUT STDOUT " );
+    hostware.open( "-out *stderr" ).put_line( "STDERR STDERR STDERR STDERR STDERR STDERR " );
+    
+    spooler_log.info( spooler_task.stdout_path() + ": " + spooler_task.stdout_text() );
+    spooler_log.info( spooler_task.stderr_path() + ": " + spooler_task.stderr_text() );
+
     var subprocess = spooler_task.create_subprocess();
     subprocess.timeout = 1234.567;
     subprocess.start( "cmd.exe /c \"dir\"" );
     subprocess.wait_for_termination();
     
-    hostware.sleep( 15 );
+    //hostware.sleep( 15 );
 
     var subprocess = spooler_task.create_subprocess( "cmd.exe /c \"hostname >c:\\tmp\\1.txt\"" );
     subprocess.wait_for_termination();
