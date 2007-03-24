@@ -148,23 +148,23 @@ Com_remote_module_instance_server::Com_remote_module_instance_server( ptr<Object
 
         *class_object_ptr = _class_data;
 
-#       ifndef Z_DEBUG
-            int STDOUT_STDERR_COLLECTOR_NICHT_IMPLEMENTIERT;
-#       elif 0
-        if( _class_data->_task_process_element.bool_getAttribute( "collect_stdout_stderr" ) )
-        {
-Z_DEBUG_ONLY( assert( !"collect_stdout_stderr" ) );
-            _stdout_stderr_collector = Z_NEW( Stdout_stderr_collector() );
-
-            _stdout_handler = Z_NEW( Stdout_stderr_handler( this, "stdout" ) );
-            _stderr_handler = Z_NEW( Stdout_stderr_handler( this, "stderr" ) );
-
-            _stdout_stderr_collector->set_stdout_handler( _stdout_handler );
-            _stdout_stderr_collector->set_stderr_handler( _stderr_handler );
-
-            _stdout_stderr_collector->start();
-        }
-#       endif
+//#       ifndef Z_DEBUG
+//            int STDOUT_STDERR_COLLECTOR_NICHT_IMPLEMENTIERT;
+//#       elif 0
+//        if( _class_data->_task_process_element.bool_getAttribute( "collect_stdout_stderr" ) )
+//        {
+//Z_DEBUG_ONLY( assert( !"collect_stdout_stderr" ) );
+//            _stdout_stderr_collector = Z_NEW( Stdout_stderr_collector() );
+//
+//            _stdout_handler = Z_NEW( Stdout_stderr_handler( this, "stdout" ) );
+//            _stderr_handler = Z_NEW( Stdout_stderr_handler( this, "stderr" ) );
+//
+//            _stdout_stderr_collector->set_stdout_handler( _stdout_handler );
+//            _stdout_stderr_collector->set_stderr_handler( _stderr_handler );
+//
+//            _stdout_stderr_collector->start();
+//        }
+//#       endif
     }
 }
 
