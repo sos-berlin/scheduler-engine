@@ -11,7 +11,7 @@
     <scheduler_keyword keyword="Change log"/>
 
 
-    <change date="2007-03-19" version="2.0.167" subversion_revision="4906">
+    <change date="2007-03-19" version="2.0.168" subversion_revision="4912">
         <revision type="new" title="Ausführung von Tasks auf entferntem Scheduler">
             <description>
                 <ul>

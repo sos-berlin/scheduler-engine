@@ -79,11 +79,6 @@
                         wie fast alle Methoden, auf dem Rechner des Schedulers ausgeführt,
                         greift also auf die Dateien des dortigen Dateisystems zu.
                     </li>
-                    <li>
-                        <scheduler_method class="Task" object="spooler_task" property="stdout_text"/> und
-                        <scheduler_method class="Task" object="spooler_task" property="stderr_text"/> 
-                        funktionieren nicht.
-                    </li>
                 </ul>
             </description>
         </xml_attribute>
