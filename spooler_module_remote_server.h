@@ -42,18 +42,18 @@ struct Com_remote_module_instance_server : spooler_com::Iremote_module_instance_
     };
 
 
-    struct Stdout_stderr_handler : Object, Stdout_stderr_collector::Handler
-    {
-                                Stdout_stderr_handler       ( Com_remote_module_instance_server* s, const string& prefix ) : _com_server(s), _prefix(prefix) {}
-                               ~Stdout_stderr_handler       ()                                      {}
+    //struct Stdout_stderr_handler : Object, Stdout_stderr_collector::Handler
+    //{
+    //                            Stdout_stderr_handler       ( Com_remote_module_instance_server* s, const string& prefix ) : _com_server(s), _prefix(prefix) {}
+    //                           ~Stdout_stderr_handler       ()                                      {}
 
-        // Stdout_stderr_collector::Handler
-        void                    on_thread_has_received_data ( const string& );
+    //    // Stdout_stderr_collector::Handler
+    //    void                    on_thread_has_received_data ( const string& );
 
-      private:
-        string                             _prefix;
-        Com_remote_module_instance_server* _com_server;
-    };
+    //  private:
+    //    string                             _prefix;
+    //    Com_remote_module_instance_server* _com_server;
+    //};
 
 
                                 Com_remote_module_instance_server( ptr<Object>* );
@@ -77,9 +77,9 @@ struct Com_remote_module_instance_server : spooler_com::Iremote_module_instance_
 
     ptr<Remote_module_instance_server> _server;
     ptr<Class_data>               _class_data;
-    ptr<Stdout_stderr_collector>  _stdout_stderr_collector;
-    ptr<Stdout_stderr_handler>    _stdout_handler;
-    ptr<Stdout_stderr_handler>    _stderr_handler;
+    //ptr<Stdout_stderr_collector>  _stdout_stderr_collector;
+    //ptr<Stdout_stderr_handler>    _stdout_handler;
+    //ptr<Stdout_stderr_handler>    _stderr_handler;
 };
 
 //-------------------------------------------------------------------------------------------------

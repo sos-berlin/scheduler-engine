@@ -535,12 +535,14 @@ struct Com_task_proxy : object_server::proxy_with_local_methods< Com_task_proxy,
     STDMETHODIMP            get_Stdout_path                 ( BSTR* );
 
     void                        wait_for_subprocesses       ();
+  //Com_remote_module_instance_server::Class_data* remote_module_instance_server_class_data();
+    xml::Element_ptr            task_process_element        ();
 
 
     ptr<Subprocess_register>   _subprocess_register;
     bool                       _subprocess_own_process_group_default;
-    File_path                  _stdout_path;
-    File_path                  _stderr_path;
+    //File_path                  _stdout_path;
+    //File_path                  _stderr_path;
 };
 
 //---------------------------------------------------------------------------------------Com_thread
@@ -642,7 +644,7 @@ struct Com_spooler : spooler_com::Ispooler,
     Spooler*                   _spooler;                    // Es gibt nur einen Com_spooler
 };
 
-//-----------------------------------------------------------------------------------Com_task_proxy
+//--------------------------------------------------------------------------------Com_spooler_proxy
 
 struct Com_spooler_proxy : object_server::proxy_with_local_methods< Com_spooler_proxy, spooler_com::Ispooler_proxy >
 {

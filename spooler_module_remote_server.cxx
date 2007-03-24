@@ -113,22 +113,22 @@ void Com_remote_module_instance_server::Class_data::initialize()
 
 //------------Com_remote_module_instance_server::Stdout_stderr_handler::on_thread_has_received_data
 
-void Com_remote_module_instance_server::Stdout_stderr_handler::on_thread_has_received_data( const string& text )
-{
-    int MUTEX_SPERREN;
-    int WAS_MACHEN_WIR_MIT_DER_EXCEPTION;
-
-    if( _com_server  &&  _com_server->_server  &&  _com_server->_server->_module_instance )
-    {
-        if( IDispatch* spooler_log = _com_server->_server->_module_instance->object( "spooler_log", (IDispatch*)NULL ) )
-        {
-            vector<Variant> parameters;
-            parameters.push_back( ( S() << _prefix << ": " << text ).to_string() );
-
-            com_invoke( DISPATCH_METHOD, spooler_log, "info", &parameters );
-        }
-    }
-}
+//void Com_remote_module_instance_server::Stdout_stderr_handler::on_thread_has_received_data( const string& text )
+//{
+//    int MUTEX_SPERREN;
+//    int WAS_MACHEN_WIR_MIT_DER_EXCEPTION;
+//
+//    if( _com_server  &&  _com_server->_server  &&  _com_server->_server->_module_instance )
+//    {
+//        if( IDispatch* spooler_log = _com_server->_server->_module_instance->object( "spooler_log", (IDispatch*)NULL ) )
+//        {
+//            vector<Variant> parameters;
+//            parameters.push_back( ( S() << _prefix << ": " << text ).to_string() );
+//
+//            com_invoke( DISPATCH_METHOD, spooler_log, "info", &parameters );
+//        }
+//    }
+//}
 
 //-----------------------------Com_remote_module_instance_server::Com_remote_module_instance_server
 
@@ -145,6 +145,8 @@ Com_remote_module_instance_server::Com_remote_module_instance_server( ptr<Object
     {
         _class_data = Z_NEW( Class_data );
         _class_data->initialize();
+
+        *class_object_ptr = _class_data;
 
 #       ifndef Z_DEBUG
             int STDOUT_STDERR_COLLECTOR_NICHT_IMPLEMENTIERT;
@@ -297,7 +299,7 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
             // Java einstellen, falls der Job in Java geschrieben ist oder indirekt (über Javascript) Java benutzt.
             //java_vm->set_log( &_log );
             if( !java_class_path.empty() )
-            java_vm->set_class_path( java_class_path );
+                java_vm->set_class_path( java_class_path );
 
             java_vm->set_javac_filename( javac );
             java_vm->set_options( java_options );

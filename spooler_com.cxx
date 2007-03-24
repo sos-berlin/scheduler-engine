@@ -3012,7 +3012,20 @@ STDMETHODIMP Com_task_proxy::get_Stderr_text( BSTR* result )
 {
     Z_LOG2( "scheduler", __PRETTY_FUNCTION__ << "()\n" );
 
-    Z_COM_IMPLEMENT( hr = String_to_bstr( string_from_file( _stderr_path ), result ) );
+    HRESULT hr = NOERROR;
+
+    try
+    {
+        *result = NULL;
+
+        if( xml::Element_ptr task_process_element = this->task_process_element() )
+        {
+            hr = String_to_bstr( string_from_file( task_process_element.getAttribute( "stderr_path" ) ), result );
+        }
+    }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
 }
 
 //------------------------------------------------------------------Com_task_proxy::get_Stderr_path
@@ -3021,7 +3034,20 @@ STDMETHODIMP Com_task_proxy::get_Stderr_path( BSTR* result )
 {
     Z_LOG2( "scheduler", __PRETTY_FUNCTION__ << "()\n" );
 
-    return String_to_bstr( _stderr_path, result );
+    HRESULT hr = NOERROR;
+
+    try
+    {
+        *result = NULL;
+
+        if( xml::Element_ptr task_process_element = this->task_process_element() )
+        {
+            hr = String_to_bstr( task_process_element.getAttribute( "stderr_path" ), result );
+        }
+    }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
 }
 
 //------------------------------------------------------------------Com_task_proxy::get_Stdout_text
@@ -3030,7 +3056,20 @@ STDMETHODIMP Com_task_proxy::get_Stdout_text( BSTR* result )
 {
     Z_LOG2( "scheduler", __PRETTY_FUNCTION__ << "()\n" );
 
-    Z_COM_IMPLEMENT( hr = String_to_bstr( string_from_file( _stdout_path ), result ) );
+    HRESULT hr = NOERROR;
+
+    try
+    {
+        *result = NULL;
+
+        if( xml::Element_ptr task_process_element = this->task_process_element() )
+        {
+            hr = String_to_bstr( string_from_file( task_process_element.getAttribute( "stdout_path" ) ), result );
+        }
+    }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
 }
 
 //------------------------------------------------------------------Com_task_proxy::get_Stdout_path
@@ -3039,8 +3078,48 @@ STDMETHODIMP Com_task_proxy::get_Stdout_path( BSTR* result )
 {
     Z_LOG2( "scheduler", __PRETTY_FUNCTION__ << "()\n" );
 
-    return String_to_bstr( _stdout_path, result );
+    HRESULT hr = NOERROR;
+
+    try
+    {
+        *result = NULL;
+
+        if( xml::Element_ptr task_process_element = this->task_process_element() )
+        {
+            hr = String_to_bstr( task_process_element.getAttribute( "stdout_path" ), result );
+        }
+    }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
 }
+
+//-----------------------------------------Com_task_proxy::remote_module_instance_server_class_data
+
+xml::Element_ptr Com_task_proxy::task_process_element()
+{
+    xml::Element_ptr result;
+
+    Object* o = session()->server()->get_class_object( spooler_com::CLSID_Remote_module_instance_server );
+    if( Com_remote_module_instance_server::Class_data* c = dynamic_cast<Com_remote_module_instance_server::Class_data*>( o ) )
+    {
+        result = c->_task_process_element;
+    }
+
+    return result;
+}
+
+//-----------------------------------------Com_task_proxy::remote_module_instance_server_class_data
+
+//Com_remote_module_instance_server::Class_data* Com_task_proxy::remote_module_instance_server_class_data()
+//{
+//    Com_remote_module_instance_server::Class_data* result = NULL;
+//
+//    Object* o = session()->server()->get_class_object( spooler_com::CLSID_Remote_module_instance_server );
+//    result = dynamic_cast<Com_remote_module_instance_server::Class_data*>( o ) );
+//
+//    return result;
+//}
 
 //------------------------------------------------------------Com_task_proxy::wait_for_subprocesses
 

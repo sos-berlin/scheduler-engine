@@ -349,6 +349,8 @@ void Process::start_local()
     else
     {
         ptr<object_server::Connection_to_own_server_process> c = _spooler->_connection_manager->new_connection_to_own_server_process();
+        c->open_stdout_stderr_files();
+
 
         object_server::Parameters parameters;
 
@@ -371,30 +373,33 @@ void Process::start_local()
 
         parameters.push_back( object_server::Parameter( "program", _spooler->_my_program_filename ) );
 
-        if( _controller_address )  c->set_controller_address( _controller_address );
-        
+       
         io::String_writer string_writer;
         xml::Xml_writer xml_writer ( &string_writer );
         xml_writer.begin_element( "task_process" );
-        xml_writer.set_attribute_optional( "include_path"   , _spooler->include_path() );
-        xml_writer.set_attribute_optional( "java_options"   , _spooler->_config_java_options );
-        xml_writer.set_attribute_optional( "java_class_path", _spooler->java_subsystem()->java_vm()->class_path() );
-        xml_writer.set_attribute_optional( "javac"          , _spooler->java_subsystem()->java_vm()->javac_filename() );
-        xml_writer.set_attribute_optional( "java_work_dir", _spooler->java_work_dir() );
-
-        //if( _controller_address )  
-        //    xml_writer.set_attribute_optional( "collect_stdout_stderr", "true" );
-
+        {
+            xml_writer.set_attribute_optional( "include_path"   , _spooler->include_path() );
+            xml_writer.set_attribute_optional( "java_options"   , _spooler->_config_java_options );
+            xml_writer.set_attribute_optional( "java_class_path", _spooler->java_subsystem()->java_vm()->class_path() );
+            xml_writer.set_attribute_optional( "javac"          , _spooler->java_subsystem()->java_vm()->javac_filename() );
+            xml_writer.set_attribute_optional( "java_work_dir"  , _spooler->java_work_dir() );
+            xml_writer.set_attribute         ( "stdout_path"    , c->stdout_path() );
+            xml_writer.set_attribute         ( "stderr_path"    , c->stderr_path() );
+        }
         xml_writer.end_element( "task_process" );
         xml_writer.flush();
-        c->set_stdin_data( string_writer.to_string() );
 
-        //c->set_stdout_file( _stdout_file );
-        //c->set_stderr_file( _stderr_file );
 
-        c->set_priority( _priority );
+
+        c->set_stdin_data    ( string_writer.to_string() );
+        //c->attach_stdout_file( _stdout_file );
+        //c->attach_stderr_file( _stderr_file );
+        c->set_priority      ( _priority );
+        if( _controller_address )  c->set_controller_address( _controller_address );
+
 
         c->start_process( parameters );
+
 
         _connection = +c;
 
