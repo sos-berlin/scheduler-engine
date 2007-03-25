@@ -89,14 +89,13 @@ string                          xml_as_string               ( const xml::Documen
 
 struct Command_response : Xml_response
 {
-                                Command_response            ();
+                              //Command_response            ();
 
-    virtual void                write                       ( const io::Char_sequence& )            = 0;
-    virtual string              complete_text               ()                                      { z::throw_xc( "SCHEDULER-353" ); }
+    virtual string              complete_text               ()                                      { z::throw_xc( "SCHEDULER-353" ); }  // Nur für Synchronous_command_response
 
   protected:
-    void                        begin                       ();
-    void                        end                         ();
+    void                        begin_standard_response     ();
+    void                        end_standard_response       ();
 };
 
 //---------------------------------------------------------------------Synchronous_command_response
@@ -112,6 +111,7 @@ struct Synchronous_command_response : Command_response
 
     // Xml_response
     string                      get_part                    ()                                      { string result = _response_text;  _response_text = "";  return result; }
+    void                        flush                       ()                                      {}
 
     // Command_response
     void                        write                       ( const io::Char_sequence& seq )        { _response_text.append( seq.ptr(), seq.length() ); }
@@ -159,7 +159,7 @@ struct Synchronous_command_response : Command_response
 //
 //-------------------------------------------------------------------File_buffered_command_response
 
-struct File_buffered_command_response : Command_response, io::Writer
+struct File_buffered_command_response : Command_response
 {
     enum State
     {
@@ -169,11 +169,7 @@ struct File_buffered_command_response : Command_response, io::Writer
     };
 
                                 File_buffered_command_response();
-
-    // Writer : IUnknown
-    STDMETHODIMP                QueryInterface              ( const IID& iid, void** o )            { return Command_response::QueryInterface( iid, o ); }
-    STDMETHODIMP_(ULONG)        AddRef                      ()                                      { return Command_response::AddRef(); }
-    STDMETHODIMP_(ULONG)        Release                     ()                                      { return Command_response::Release(); }
+                               ~File_buffered_command_response();
 
     // Async_operation
     virtual bool                async_continue_             ( Continue_flags );
@@ -190,7 +186,6 @@ struct File_buffered_command_response : Command_response, io::Writer
 
   protected:
     Fill_zero                  _zero_;
-    xml::Xml_writer            _xml_writer;
 
   private:   
     State                      _state;

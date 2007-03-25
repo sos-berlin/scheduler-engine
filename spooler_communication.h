@@ -239,17 +239,28 @@ struct Communication
 
 //-------------------------------------------------------------------------------------------------
 
-struct Xml_response : Async_operation
+struct Xml_response : Async_operation, io::Writer
 {
-                                Xml_response                ()                                      : _zero_(this+1) {}
+                                Xml_response                ()                                      : _zero_(this+1), _xml_writer(this) {}  // close() aufrufen!
+
+    // Writer : IUnknown
+    STDMETHODIMP                QueryInterface              ( const IID& iid, void** o )            { return Async_operation::QueryInterface( iid, o ); }
+    STDMETHODIMP_(ULONG)        AddRef                      ()                                      { return Async_operation::AddRef(); }
+    STDMETHODIMP_(ULONG)        Release                     ()                                      { return Async_operation::Release(); }
+
+    virtual void                close                       ();                                     // Unbedingt rufen, um Zirkel aufzulösen!
+    virtual void                write                       ( const io::Char_sequence& )            = 0;
+    virtual string              get_part                    ()                                      = 0;
 
     void                    set_connection                  ( Communication::Connection* c )        { _connection = c; }
     void                        signal_new_data             ();
 
-    virtual string              get_part                    ()                                      = 0;
+
+  protected:
+    Fill_zero                  _zero_;
+    xml::Xml_writer            _xml_writer;
 
   private:
-    Fill_zero                  _zero_;
     Communication::Connection* _connection;
 };
     
@@ -265,7 +276,7 @@ struct Xml_operation : Communication::Operation
     virtual bool                async_continue_             ( Continue_flags )                      { return _response? _response->async_continue() : false; }
 
 
-    void                        close                       ()                                      { _operation_connection = NULL; Communication::Operation::close(); }
+    virtual void                close                       ();
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& ) const;
 
     void                        put_request_part            ( const char*, int length );

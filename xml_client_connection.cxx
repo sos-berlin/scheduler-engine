@@ -252,8 +252,8 @@ string Xml_client_connection::async_state_text_() const
     result << " ";
     result << state_name( _state );
 
-    if( _send_data != ""           )  result << ", sending "   << quoted_string( truncate_first_line_with_ellipsis( _send_data                , 100 ) );
-    if( !_received_data.is_empty() )  result << ", receiving " << quoted_string( truncate_first_line_with_ellipsis( _received_data.to_string(), 100 ) );
+    if( _send_data != ""           )  result << ", sending "   << quoted_string( truncate_to_one_line_with_ellipsis( _send_data                , 100 ) );
+    if( !_received_data.is_empty() )  result << ", receiving " << quoted_string( truncate_to_one_line_with_ellipsis( _received_data.to_string(), 100 ) );
 
     result << ")";
 

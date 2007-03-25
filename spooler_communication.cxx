@@ -111,11 +111,28 @@ Xml_operation::Xml_operation( Xml_operation_connection* operation_connection )
 {
 }
 
-//---------------------------------------------------------------------ml_operation::~Xml_operation
+//--------------------------------------------------------------------Xml_operation::~Xml_operation
     
 Xml_operation::~Xml_operation()
 {
-    if( _response )  _response->set_connection( NULL );
+    if( _response )  
+    {
+        _response->set_connection( NULL );
+        _response->close();
+    }
+
+    if( _operation_connection )
+    {
+        _operation_connection->close();
+    }
+}
+
+//-----------------------------------------------------------------------------Xml_operation::close
+
+void Xml_operation::close()
+{ 
+    _operation_connection = NULL; 
+    Communication::Operation::close(); 
 }
 
 //-----------------------------------------------------------------------Xml_operation::dom_element
@@ -136,7 +153,7 @@ string Xml_operation::async_state_text_() const
     result << "Xml_operation(";
     result << Operation::async_state_text_();
 
-    if( _request != "" )  result << ", " << quoted_string( truncate_first_line_with_ellipsis( _request, 100 ) );
+    if( _request != "" )  result << ", " << quoted_string( truncate_to_one_line_with_ellipsis( _request, 100 ) );
     result << ")";
 
     return result;
@@ -185,6 +202,13 @@ void Xml_operation::begin()
     }
 
     if( command_processor._error )  _connection->_log.error( command_processor._error->what() );
+}
+
+//------------------------------------------------------------------------------Xml_response::close
+
+void Xml_response::close()
+{
+    _xml_writer.close();        // Zirkel auflösen!
 }
 
 //--------------------------------------------------------------------Xml_response::signal_new_data

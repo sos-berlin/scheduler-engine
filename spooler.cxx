@@ -245,9 +245,16 @@ static void print_usage()
 
 //----------------------------------------------------------------------------------------self_test
 
-static void self_test()
+static void self_test( bool extra = false )
 {
     zschimmer::test_file_path();
+
+    if( extra )
+    {
+#       ifdef Z_DEBUG
+            zschimmer::test_truncate_to_ellipsis();
+#       endif
+    }
 }
 
 //---------------------------------------------------------------------------------send_error_email
@@ -1425,7 +1432,7 @@ void Spooler::load_arg()
             else
             if( opt.flag      ( "zschimmer"              ) )  _zschimmer_mode = opt.set();
             else
-            if( opt.flag      ( "test"                   ) )  self_test();
+            if( opt.flag      ( "test"                   ) )  self_test( true );
             else
             if( opt.flag      ( "test-summertime"        ) )  time::test_summertime( ( Time::now() + 10 ).as_string() );
             else
@@ -1435,7 +1442,7 @@ void Spooler::load_arg()
           //else
           //if( opt.with_value( "now"                    ) )  _clock_difference = Time( Sos_date_time( opt.value() ) ) - Time::now();
             else
-            if( opt.flag      ( "check-memory-leak"     ) )  _check_memory_leak = opt.set();
+            if( opt.flag      ( "check-memory-leak"     ) )  _check_memory_leak = opt.set();  // wird von sos_main0 gelöscht!!
 
 #           ifdef Z_WINDOWS
                 else if( opt.flag( "debug-break"        ) )  assert( !( opt.flag( "debug-break" ) && opt.set() ) );   // Lässt Windows eine Diagbox zeigen

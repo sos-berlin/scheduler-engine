@@ -51,13 +51,15 @@ extern const Embedded_files embedded_files_z;   // Zschimmers HTML-Dateien (/z/i
 
 struct Remote_task_close_command_response : File_buffered_command_response
 {
-                                Remote_task_close_command_response( Process* p, Communication::Connection* c ) : _zero_(this+1), _process(p), _connection(c) {}
+                                Remote_task_close_command_response( Process*, Communication::Connection* );
                                ~Remote_task_close_command_response()                                {}
 
     // Async_operation
     virtual bool                async_finished_             () const                                { return _state == s_finished; }
     virtual string              async_state_text_           () const                                { return "Remote_task_close_command_response"; }
     virtual bool                async_continue_             ( Continue_flags );
+
+    void                        close                       ();
 
   private:
     void                        write_file                  ( const string& what, const File_path& );
@@ -71,6 +73,23 @@ struct Remote_task_close_command_response : File_buffered_command_response
     ptr<Async_operation>       _operation;
     State                      _state;
 };
+
+//----------------------------emote_task_close_command_response::Remote_task_close_command_response
+
+Remote_task_close_command_response::Remote_task_close_command_response( Process* p, Communication::Connection* c )
+: 
+    _zero_(this+1), 
+    _process(p), 
+    _connection(c) 
+{
+}
+
+//--------------------------------------------------------Remote_task_close_command_response::close
+
+void Remote_task_close_command_response::close()
+{
+    File_buffered_command_response::close();
+}
 
 //----------------------------------------------Remote_task_close_command_response::async_continue_
 
@@ -97,6 +116,11 @@ bool Remote_task_close_command_response::async_continue_( Continue_flags )
                 _operation  = NULL;
                 _process->close__end();
 
+
+                // XML-Anwort 
+
+                begin_standard_response();
+
                 _xml_writer.begin_element( "ok" );
                 write_file( "stdout", _process->stdout_path() );
                 write_file( "stderr", _process->stderr_path() );
@@ -104,7 +128,11 @@ bool Remote_task_close_command_response::async_continue_( Continue_flags )
 
                 _xml_writer.flush();
 
+                end_standard_response();
+
+                
                 _state = s_finished;
+
 
                 if( _connection->_operation_connection )  _connection->_operation_connection->unregister_task_process( _pid );
 
@@ -1562,8 +1590,6 @@ void Command_processor::execute_http( http::Operation* http_operation, Http_file
 
 ptr<Command_response> Command_processor::response_execute( const string& xml_text_par, const Time& xml_mod_time, bool indent )
 {
-    //begin_answer();
-
     try 
     {
         _error = NULL;
@@ -1765,23 +1791,29 @@ void Command_processor::append_error_to_answer( const Xc& x )
 
 //---------------------------------------------------------------Command_response::Command_response
 
-Command_response::Command_response()
-{
-}
+//Command_response::Command_response()
+//{
+//}
 
-//--------------------------------------------------------------------------Command_response::begin
+//--------------------------------------------------------------------------Command_response::close
 
-void Command_response::begin()
+//void Command_response::close()
+//{
+//    Xml_response::close();
+//}
+
+//--------------------------------------------------------Command_response::begin_standard_response
+
+void Command_response::begin_standard_response()
 {
     write( "<spooler><answer time=\"" );
     write( Time::now().as_string() );
     write( "\">" );
-    write( "\">" );
 }
 
-//--------------------------------------------------------------------------Command_response::close
+//----------------------------------------------------------Command_response::end_standard_response
 
-void Command_response::end()
+void Command_response::end_standard_response()
 {
     write( "</answer></spooler>" );
 }
@@ -1791,10 +1823,15 @@ void Command_response::end()
 File_buffered_command_response::File_buffered_command_response()
 : 
     _zero_(this+1), 
-    _buffer_size(recommended_response_block_size),
-    _xml_writer( this )
+    _buffer_size(recommended_response_block_size)
 {
     _buffer.reserve( _buffer_size );
+}
+
+//----------------------------------File_buffered_command_response::~File_buffered_command_response
+    
+File_buffered_command_response::~File_buffered_command_response()
+{
 }
 
 //------------------------------------------------------------File_buffered_command_response::close
@@ -1851,8 +1888,7 @@ void File_buffered_command_response::write( const io::Char_sequence& seq )
     {
         if( !_congestion_file.opened() )  
         {
-            _congestion_file.open_temporary();
-            _congestion_file.unlink_later();
+            _congestion_file.open_temporary( File::open_unlink );
             _congestion_file.print( _buffer );
             _buffer = "";
         }
