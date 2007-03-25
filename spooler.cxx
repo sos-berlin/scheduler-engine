@@ -1443,9 +1443,8 @@ void Spooler::load_arg()
           //if( opt.with_value( "now"                    ) )  _clock_difference = Time( Sos_date_time( opt.value() ) ) - Time::now();
             else
             if( opt.flag      ( "check-memory-leak"     ) )  _check_memory_leak = opt.set();  // wird von sos_main0 gelöscht!!
-
 #           ifdef Z_WINDOWS
-                else if( opt.flag( "debug-break"        ) )  assert( !( opt.flag( "debug-break" ) && opt.set() ) );   // Lässt Windows eine Diagbox zeigen
+                else if( opt.flag( "debug-break"        ) )  ;   // Bereits von spooler_main() verarbeitet
 #           endif
             else
                 throw_sos_option_error( opt );
@@ -3432,6 +3431,10 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
         {
             relevant_arg_count++;
 
+#           ifdef Z_WINDOWS
+                if( opt.flag( "debug-break"        ) )  assert( !( opt.flag( "debug-break" ) && opt.set() ) );   // Lässt Windows eine Diagbox zeigen
+                else
+#           endif
             if( opt.with_value( "scheduler" ) )     // Stichwort für scheduler_client
             {
                 is_scheduler_client = true;

@@ -247,6 +247,8 @@ bool Supervisor_client_connection::async_continue_( Continue_flags )
 
     try
     {
+        if( _xml_client_connection )  _xml_client_connection->async_check_exception();
+
         switch( _state )
         {
             case s_not_connected:

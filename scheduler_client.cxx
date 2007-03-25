@@ -180,6 +180,8 @@ struct Client
 
             // Die Optionen hier müssen auch von spooler_main() in spooler.cxx geprüft werden:
 
+            if( strcmp( arg, "-debug-break" ) == 0 );
+            else
             if( get_argv_option( arg, "-scheduler=", &_scheduler_address ) );
             else
             if( get_argv_option( arg, "-language=", &_script_language ) );
@@ -229,6 +231,8 @@ struct Client
                           else start_job_script();
 
         _xml_writer->flush();
+        buffered_writer->flush();
+        tosw->flush();
 
         read_response();
 
