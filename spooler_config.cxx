@@ -310,7 +310,8 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const Time& x
 
       //_free_threading_default = config_element.bool_getAttribute( "free_threading", _free_threading_default );
 
-        string host_and_port = config_element.getAttribute( "main_scheduler" );
+        string host_and_port = config_element.getAttribute( "supervisor" );
+        if( host_and_port == "" )  host_and_port = config_element.getAttribute( "main_scheduler" );
         if( host_and_port != "" )  _supervisor_client = new_supervisor_client( this, host_and_port );
 
         set_mail_xslt_stylesheet_path( subst_env( config_element.getAttribute( "mail_xslt_stylesheet" ) ) );

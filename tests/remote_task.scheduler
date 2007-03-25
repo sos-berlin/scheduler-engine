@@ -3,7 +3,7 @@
     xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
     xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
 >
-    <config tcp_port="4444">
+    <config tcp_port="4444" main_scheduler="sos-neu:4445">
 
         <!--base file="$SCHEDULER_TEST/base.scheduler"/-->
         <security>
@@ -61,7 +61,7 @@ function spooler_process()
 
     var subprocess = spooler_task.create_subprocess();
     subprocess.timeout = 1234.567;
-    subprocess.start( "cmd.exe /c \"dir\"" );
+    subprocess.start( "cmd.exe /c \"echo CMD.EXE \"" );
     subprocess.wait_for_termination();
     
     //hostware.sleep( 15 );
@@ -70,7 +70,7 @@ function spooler_process()
     subprocess.wait_for_termination();
     spooler_log.info( "c:/tmp/1.txt: " + hostware.file_as_string( "c:/tmp/1.txt" ) );
     
-    //spooler_job.start();
+    spooler_job.start();
     
     return false;
 }
@@ -83,6 +83,16 @@ function spooler_process()
         
         <commands>
             <start_job job="remote"/>
+            <start_job job="remote"/>
+            <start_job job="remote"/>
+            <start_job job="remote"/>
+            <start_job job="remote"/>
+            <start_job job="remote"/>
+            <start_job job="remote"/>
+            <start_job job="remote"/>
+            <start_job job="remote"/>
+            <start_job job="remote"/>
+
         </commands>
     </config>
 </spooler>

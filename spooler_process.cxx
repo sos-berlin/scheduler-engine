@@ -516,22 +516,23 @@ bool Process::async_remote_start_continue( Async_operation::Continue_flags )
 
         case Async_remote_operation::s_closing:
         {
-            xml::Document_ptr dom_document = _xml_client_connection->received_dom_document();
-            if( !dom_document )  break;
+            if( xml::Document_ptr dom_document = _xml_client_connection->received_dom_document() )  
+            {
+                Z_LOG2( "joacim", __FUNCTION__ << " XML-Antwort: " << dom_document.xml() );
+                //_spooler->log()->debug9( message_string( "SCHEDULER-948", _connection->short_name() ) );  // pid wird auch von Task::set_state(s_starting) mit log_info protokolliert
 
-            Z_LOG2( "joacim", __FUNCTION__ << " XML-Antwort: " << dom_document.xml() );
-            //_spooler->log()->debug9( message_string( "SCHEDULER-948", _connection->short_name() ) );  // pid wird auch von Task::set_state(s_starting) mit log_info protokolliert
+                _remote_stdout_file.open_temporary( File::open_unlink_later );
+                _remote_stdout_file.print( string_from_hex( dom_document.select_element_strict( "//ok/file [ @name='stdout' and @encoding='hex' ]" ).text() ) );
+                _remote_stdout_file.close();
 
-            _remote_stdout_file.open_temporary( File::open_unlink_later );
-            _remote_stdout_file.print( string_from_hex( dom_document.select_element_strict( "//ok/file [ @name='stdout' and @encoding='hex' ]" ).text() ) );
-            _remote_stdout_file.close();
+                _remote_stderr_file.open_temporary( File::open_unlink_later );
+                _remote_stderr_file.print( string_from_hex( dom_document.select_element_strict( "//ok/file [ @name='stderr' and @encoding='hex' ]" ).text() ) );
+                _remote_stderr_file.close();
 
-            _remote_stderr_file.open_temporary( File::open_unlink_later );
-            _remote_stderr_file.print( string_from_hex( dom_document.select_element_strict( "//ok/file [ @name='stderr' and @encoding='hex' ]" ).text() ) );
-            _remote_stderr_file.close();
+                something_done = true;
+                _async_remote_operation->_state = Async_remote_operation::s_closed;
+            }
 
-            something_done = true;
-            _async_remote_operation->_state = Async_remote_operation::s_closed;
             break;
         }
 
@@ -573,8 +574,8 @@ void Process::Async_remote_operation::close_remote_task( bool kill )
         }
         else
         { 
-            _process->_xml_client_connection->close();
-            _state = s_closed;
+            //_process->_xml_client_connection->close();
+            //_state = s_closed;
         }
     }
 }

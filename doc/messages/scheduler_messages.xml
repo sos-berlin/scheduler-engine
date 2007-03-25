@@ -2487,7 +2487,7 @@
 
         <message code="SCHEDULER-400">
             <text xml:lang="en">
-                <title>Only API-jobs are possible with &lt;process_class remote_scheduler="…"/></title>
+                <title>Only API-jobs are possible with &lt;process_class remote_scheduler="..."/></title>
             </text>
         </message>
 

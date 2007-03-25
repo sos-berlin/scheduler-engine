@@ -68,8 +68,9 @@ const char file_scheduler_xsd[] =
     "<xsd:attribute name=\"include_path\"          type=\"File\"/>\n"
     "<xsd:attribute name=\"java_class_path\"       type=\"String\"/>\n"
     "<xsd:attribute name=\"java_options\"          type=\"String\"/>\n"
-    "<xsd:attribute name=\"main_scheduler\"        type=\"String\"/>\n"
+    "<xsd:attribute name=\"main_scheduler\"        type=\"String\"/>  <!-- veraltet -->\n"
     "<xsd:attribute name=\"mail_xslt_stylesheet\"  type=\"File\"/>\n"
+    "<xsd:attribute name=\"supervisor\"            type=\"String\"/>\n"
     "</xsd:complexType>\n"
     "</xsd:element>\n"
     "\n"
@@ -1453,7 +1454,7 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1174678576 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1174850831 },
     { NULL, NULL, 0 }
 };
 

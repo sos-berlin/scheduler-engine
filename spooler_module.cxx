@@ -407,7 +407,6 @@ void Module::init()
         if( _process_filename != ""  || _language == shell_language_name )  //   Z_POSIX_ONLY( || _language == ""  &&  string_begins_with( _source, "#!" ) ) )
         {
             _kind = kind_process;
-            if( _process_class  &&  _process_class->_remote_scheduler )  z::throw_xc( "SCHEDULER-400" );
         }
         else
         {
@@ -440,6 +439,8 @@ void Module::init()
             _process_class->_module_use_count++;
         }
     }
+    else
+    if( _process_class_name != ""  &&  _spooler->process_class( _process_class_name )->_remote_scheduler )  z::throw_xc( "SCHEDULER-400" );
 
     if( _kind != kind_internal )  if( _separate_process  ||  _use_process_class )   _kind = kind_remote;
 

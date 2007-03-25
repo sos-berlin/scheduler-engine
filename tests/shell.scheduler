@@ -80,7 +80,7 @@ function spooler_process_after( return_value ) {
 echo Hallo
 exit 37
                 </script>
-                <run_time once="no"/>
+                <run_time once="yes"/>
             </job>
         </jobs>
     </config>

@@ -1193,6 +1193,8 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
         else
         if( string_equals_prefix_then_skip( &p, "cluster"          ) )  show |= show_cluster;
         else
+        if( string_equals_prefix_then_skip( &p, "operations"       ) )  show |= show_operations;
+        else
         if( string_equals_prefix_then_skip( &p, "standard"         ) )  ;
         else
             z::throw_xc( "SCHEDULER-164", what );

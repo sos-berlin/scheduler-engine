@@ -188,27 +188,37 @@ bool Xml_client_connection::async_continue_( Continue_flags flags )
             case s_waiting:
             case s_receiving:
             {
-                _socket_operation->recv__continue();
-                if( _socket_operation->_eof )  z::throw_xc( "SCHEDULER-224", _host_and_port.as_string() );
+                while(1)
+                {
+                    _socket_operation->recv__continue();
+                    if( _socket_operation->_eof )  z::throw_xc( "SCHEDULER-224", _host_and_port.as_string() );
 
-                string data = _socket_operation->recv_data();
-                if( data.length() == 0 )  break;
+                    string data = _socket_operation->recv_data();
+                    if( data.length() == 0 )  break;
 
-                _state = s_receiving;
-                something_done = true;
+                    _state = s_receiving;
+                    something_done = true;
 
-                _socket_operation->recv_clear();
-                Z_LOG2( "scheduler", __FUNCTION__ << ": " << data << "\n" );
-                _received_data.append( data );
-                
+                    _socket_operation->recv_clear();
+                    Z_LOG2( "scheduler", __FUNCTION__ << ": " << data << "\n" );
+                    _received_data.append( data );
 
-                if( !_xml_end_finder.is_complete( data.data(), data.length() ) )  break;
+                    if( _xml_end_finder.is_complete( data.data(), data.length() ) )  break;
+                }
 
-                _send_data = "";
-                _state = s_connected;
+                if( _xml_end_finder.is_complete() ) 
+                {
+                    _send_data = "";
+                    _state = s_connected;
 
-                //log()->info( "ANTWORT: " + _recv_data );
-                //log()->info( message_string( "SCHEDULER-950" ) );   // "Scheduler ist registriert"
+                    //log()->info( "ANTWORT: " + _recv_data );
+                    //log()->info( message_string( "SCHEDULER-950" ) );   // "Scheduler ist registriert"
+                }
+                else
+                {
+                    Z_LOG2( "scheduler", __FUNCTION__ << ", waiting for XML-response\n" );
+                }
+
                 break;
             }
 

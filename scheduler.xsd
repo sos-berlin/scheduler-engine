@@ -59,8 +59,9 @@
                         <xsd:attribute name="include_path"          type="File"/>
                         <xsd:attribute name="java_class_path"       type="String"/>
                         <xsd:attribute name="java_options"          type="String"/>
-                        <xsd:attribute name="main_scheduler"        type="String"/>
+                        <xsd:attribute name="main_scheduler"        type="String"/>  <!-- veraltet -->
                         <xsd:attribute name="mail_xslt_stylesheet"  type="File"/>
+                        <xsd:attribute name="supervisor"            type="String"/>
                     </xsd:complexType>
                 </xsd:element>
 

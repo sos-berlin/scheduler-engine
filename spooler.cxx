@@ -3033,7 +3033,7 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line )
                     {
                         Command_processor cp ( this, Security::seclev_all );
                         bool indent = true;
-                        string xml = cp.execute( "<show_state what='task_queue orders remote_schedulers' />", Time::now(), indent );
+                        string xml = cp.execute( "<show_state what='task_queue orders remote_schedulers operations' />", Time::now(), indent );
                         try
                         {
                             _log->info( xml );  // Blockiert bei ENOSPC nicht wegen _state == s_stopping
