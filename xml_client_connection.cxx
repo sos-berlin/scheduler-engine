@@ -22,11 +22,32 @@ Xml_client_connection::Xml_client_connection( Spooler* sp, const Host_and_port& 
 
 Xml_client_connection::~Xml_client_connection()
 {
-    if( _socket_operation )  
+    try
+    {
+        close();
+    }
+    catch( exception& x ) { Z_LOG2( "scheduler", __FUNCTION__ << " ERROR " << x.what() << "\n" ); }
+
+    if( _socket_operation )
     {
         _socket_operation->set_async_parent( NULL );
         _socket_operation->set_async_manager( NULL );
     }
+}
+
+//---------------------------------------------------------------------Xml_client_connection::close
+
+void Xml_client_connection::close()
+{
+    if( _socket_operation )
+    {
+        _socket_operation->set_async_parent( NULL );
+        _socket_operation->set_async_manager( NULL );
+        _socket_operation->close();
+        _socket_operation = NULL;
+    }
+
+    _state = s_closed;
 }
 
 //-------------------------------------------------------------------Xml_client_connection::connect
@@ -230,6 +251,7 @@ string Xml_client_connection::state_name( State state )
         case s_sending:         return "sending";
         case s_waiting:         return "waiting";
         case s_receiving:       return "receiving";
+        case s_closed:          return "closed";
         default:                return S() << "state=" << state;
     }
 }

@@ -536,7 +536,7 @@ bool Process::async_remote_start_continue( Async_operation::Continue_flags )
         }
 
         default:
-            assert(0);
+            break;
     }
 
     return something_done;
@@ -554,20 +554,28 @@ bool Process::async_continue()
 
 void Process::Async_remote_operation::close_remote_task( bool kill )
 {
-    if( _process->_xml_client_connection  &&  _process->_xml_client_connection->is_send_possible() )
+    if( _process->_xml_client_connection )
     {
-        try
+        if( _process->_xml_client_connection->is_send_possible() )
         {
-            S xml;
-            xml << "<remote_scheduler.remote_task.close pid='" << _process->_remote_pid << "'";
-            if( kill )  xml << " kill='yes'";
-            xml << "/>";
+            try
+            {
+                S xml;
+                xml << "<remote_scheduler.remote_task.close pid='" << _process->_remote_pid << "'";
+                if( kill )  xml << " kill='yes'";
+                xml << "/>";
 
-            _process->_xml_client_connection->send( xml );
+                _process->_xml_client_connection->send( xml );
 
-            _state = s_closing;
+                _state = s_closing;
+            }
+            catch( exception& x )  { _process->_log->warn( x.what() ); }
         }
-        catch( exception& x )  { _process->_log->warn( x.what() ); }
+        else
+        { 
+            _process->_xml_client_connection->close();
+            _state = s_closed;
+        }
     }
 }
 

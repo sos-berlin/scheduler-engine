@@ -14,7 +14,8 @@ struct Xml_client_connection : Async_operation, Scheduler_object
         s_connected,
         s_sending,
         s_waiting,
-        s_receiving
+        s_receiving,
+        s_closed
     };
 
     static string               state_name                  ( State );
@@ -23,6 +24,7 @@ struct Xml_client_connection : Async_operation, Scheduler_object
                                 Xml_client_connection       ( Spooler*, const Host_and_port& );
                                ~Xml_client_connection       ();
 
+    void                        close                       ();
     virtual string              obj_name                    () const;
 
     void                    set_wait_for_connection         ( int seconds )                         { _wait_for_connection = seconds; }
@@ -38,7 +40,8 @@ struct Xml_client_connection : Async_operation, Scheduler_object
     string                      async_state_text_           () const;
     bool                        async_continue_             ( Continue_flags );
     bool                        async_finished_             () const                                { return _state == s_not_connected 
-                                                                                                          || _state == s_connected; }
+                                                                                                          || _state == s_connected
+                                                                                                          || _state == s_closed; }
     bool                        async_signaled_             ()                                      { return _socket_operation && _socket_operation->async_signaled(); }
 
   private:
