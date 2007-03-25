@@ -158,14 +158,13 @@ bool Xml_client_connection::async_continue_( Continue_flags flags )
             case s_sending:
                 if( !_socket_operation->async_finished() )  break;
 
+                _received_data.clear();
+                _xml_end_finder = Xml_end_finder();
+
                 something_done = true;
                 _state = s_waiting;
 
-
             case s_waiting:
-                _received_data.clear();
-
-
             case s_receiving:
             {
                 _socket_operation->recv__continue();
