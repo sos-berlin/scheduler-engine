@@ -68,13 +68,13 @@
     </p>
     
     <p>
-        (Das ist ein Read-Write-Lock, s. <a href="http://de.wikipedia.org/wiki/Lock">Wikipedia</a>;
-        "read" und "write" werden hier anders gebraucht, als unsere Jobs das nahelegen).
+        Das ist ein Read-Write-Lock, s. <a href="http://de.wikipedia.org/wiki/Lock">Wikipedia</a><!--;
+        "read" und "write" werden hier anders gebraucht, als unsere Jobs das nahelegen)--> und
         <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/concurrent/locks/ReadWriteLock.html">java.util.concurrent.ReadWriteLock</a>
     </p>
 
 
-    <h2>Variante: Verwendung aller Sperren an einer Stelle beschreiben</h2>
+    <!--h2>Variante: Verwendung aller Sperren an einer Stelle beschreiben</h2>
     <p>
         Vielleicht ist es übersichtlicher, die Verwendung einer Sperre an nur einer Stelle zu beschreiben.
     </p>
@@ -82,10 +82,10 @@
     &lt;apply_lock job="replicate_from_adabase" exclusive="no"/>
     &lt;apply_lock job="replicate_from_as400"   exclusive="no"/>
     &lt;apply_lock job="switch_database">
-&lt;/lock></pre>
+&lt;/lock></pre-->
     
     
-    <h2>Wirkung auf Prozesse</h2>
+    <!--h2>Wirkung auf Prozesse</h2>
     <p>
         <code>sqlldr</code> zum Beispiel läuft in einem eigenen Prozess.
     </p>
@@ -93,17 +93,13 @@
         Wenn der Scheduler neu gestartet worden ist, aber der die Task ausführende Prozess oder ein Subprozess
         noch läuft (das passiert bei kill -9 auf den Scheduler),
         dann ist die Sperre frei, obwohl die zu schützende Operation noch läuft.
-        Unter Windows kann das anscheinend mit den <a href="windows_job_objects.xml">Windows-Jobs</a> 
+        <!- -Unter Windows könnte das anscheinend mit den <a href="windows_job_objects.xml">Windows-Jobs</a> 
         (mit <code>JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE</code>) verhindet werden.
-        Gibt es einen ähnlichen Mechanismus für Unix?
-    </p>
-    <p>
-        Wenn es nur um den Task-Prozess geht, kann der zusätzlich zur im Scheduler implementierten Sperre eine 
-        Sperre des Betriebsystems nutzen, die auch bei einem Neustart des Schedulers bestehen bleibt.
-    </p>
+        Gibt es einen ähnlichen Mechanismus für Unix?- ->
+    </p-->
     
 
-    <h2>Nur einen Jobschritt schützen</h2>
+    <!--h2>Nur einen Jobschritt schützen</h2>
 
     <pre>&lt;job …>&lt;lock lock="<i>lock_name</i>" for="spooler_process"/></pre>
 
@@ -153,6 +149,6 @@
     </p>
     <p>
         Um Deadlocks zu vermeiden, darf keine Sperre gesetzt werden, wenn die Task bereits eine Sperre hat.
-    </p>
+    </p-->
 
 </description>
