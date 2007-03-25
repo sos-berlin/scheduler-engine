@@ -134,7 +134,7 @@ bool Xml_client_connection::async_continue_( Continue_flags flags )
                 { 
                     Z_DEBUG_ONLY( Z_LOG( "*** " << __FUNCTION__ << " !cont_next_gmtime_reached\n" ); 
                     Z_WINDOWS_ONLY( DebugBreak(); ) ) 
-                    return false; 
+                    break;
                 }
 
                 _socket_operation = Z_NEW( Buffered_socket_operation );

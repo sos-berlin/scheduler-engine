@@ -12,7 +12,7 @@ namespace scheduler {
     
 const int connection_retry_time = 60;
 
-//--------------------------------------------------------------------------Process::Close_operation::Close_operation
+//---------------------------------------------------------rocess::Close_operation::Close_operation
 
 Process::Close_operation::Close_operation( Process* p, bool run_independently )
 : 
@@ -25,13 +25,13 @@ Process::Close_operation::Close_operation( Process* p, bool run_independently )
     }
 }
 
-//-------------------------------------------------------------------------Process::Close_operation::~Close_operation
+//--------------------------------------------------------rocess::Close_operation::~Close_operation
     
 Process::Close_operation::~Close_operation()
 {
 }
 
-//-----------------------------------------------------------------Process::Close_operation::async_continue_
+//--------------------------------------------------------Process::Close_operation::async_continue_
 
 bool Process::Close_operation::async_continue_( Async_operation::Continue_flags )
 {
@@ -459,7 +459,7 @@ bool Process::is_started()
 
 bool Process::async_remote_start_continue( Async_operation::Continue_flags )
 {
-    bool something_done = false;
+    bool something_done = true;     // spooler.cxx ruft async_continue() auf
 
     if( _xml_client_connection )  _xml_client_connection->async_check_exception();
 
