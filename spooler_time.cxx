@@ -475,7 +475,7 @@ Time Time::now()
         gettimeofday( &tv, NULL );
         localtime_r( &tv.tv_sec, &local_tm );
 
-        return (double)tv.tv_sec + (double)tv.tv_usec / (double)1e6 - timezone + ( local_tm.tm_isdst? _dstbias : 0 ); // Das ist heuristisch. (Warum nicht -_dstbias?) Im Winter 2003 erneut testen!
+        return (double)tv.tv_sec + (double)tv.tv_usec / (double)1e6 - timezone - ( local_tm.tm_isdst? _dstbias : 0 ); // Das ist heuristisch. (Warum nicht -_dstbias?) Im Winter 2003 erneut testen!
 
         //gettimeofday( &tv, &tz );
         //return (double)tv.tv_sec + (double)tv.tv_usec / (double)1e6 - timezone - ( daylight? _dstbias : 0 );  // dsttime ist im Winter gesetzt? Das ist doch falsch.   - ( tz.tz_dsttime?_dstbias : 0 );

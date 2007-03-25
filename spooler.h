@@ -47,7 +47,7 @@
 #endif
 
 #ifndef Z_WINDOWS
-    const int _dstbias = 3600;
+    const int _dstbias = -3600;
 #endif
 
 #include <stdio.h>
