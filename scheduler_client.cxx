@@ -217,11 +217,14 @@ struct Client
         _socket_stream.connect_tcp( _scheduler_address );
         
         
-        _xml_writer = Z_NEW( xml::Xml_writer( Z_NEW( io::Buffered_writer( Z_NEW( io::Transparent_output_stream_writer( &_socket_stream ) ), 10000 ) ) ) );
+        ptr<io::Transparent_output_stream_writer> tosw            = Z_NEW( io::Transparent_output_stream_writer( &_socket_stream ) );
+        ptr<io::Buffered_writer>                  buffered_writer = Z_NEW( io::Buffered_writer( tosw, 10000 ) );
+        
+        _xml_writer = Z_NEW( xml::Xml_writer( buffered_writer ) );
 
         _xml_writer->write_through( "<?xml version='1.0'?>\n" );
 
-        
+       
         if( _job_chain != "" ) add_order();     
                           else start_job_script();
 
