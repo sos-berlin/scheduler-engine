@@ -183,6 +183,8 @@ void Time::set_current_difference_to_utc( time_t now )
 //
 //#   endif
 
+        string s = S() << __FUNCTION__ << " " << new_difference << " tz=" << timezone << " is_dst=" << is_dst << " dstbias=" << _dstbias << " (old=" << static_current_difference_to_utc << ")\n";
+        fprintf( stderr, "%s", s.c_str() );
     if( static_current_difference_to_utc != new_difference )
     {
         Z_LOG2( "scheduler", __FUNCTION__ << " " << new_difference << " tz=" << timezone << " is_dst=" << is_dst << " dstbias=" << _dstbias << " (old=" << static_current_difference_to_utc << ")\n" );

@@ -584,7 +584,9 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
     {
         Time now = Time::now();
 
-        if( until > now )   Z_LOG2( "scheduler.wait", "wait_until " << until.as_string() << ( wait_for_object? " auf " + wait_for_object->obj_name() : "" ) << " " << as_string() << "\n" );
+        //if( until > now )
+            Z_LOG2( "scheduler.wait", "wait_until " << until.as_string() << " (" << (double)( until - now ) << "s)" <<
+                ( wait_for_object? " auf " + wait_for_object->obj_name() : "" ) << " " << as_string() << "\n" );
 
         ptr<Socket_wait> wait = _spooler->_connection_manager->create_wait();
 

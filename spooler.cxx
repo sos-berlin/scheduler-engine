@@ -1702,8 +1702,11 @@ void Spooler::start()
     _log->info( message_string( "SCHEDULER-900", _version, _config_filename, getpid() ) );
     _spooler_start_time = Time::now();
 
+
+    sos::scheduler::time::Time::set_current_difference_to_utc( ::time(NULL) );
     _daylight_saving_time_transition_detector = time::new_daylight_saving_time_transition_detector( this );
     _daylight_saving_time_transition_detector->set_async_manager( _connection_manager );
+
 
     _job_subsystem   ->switch_subsystem_state( subsys_initialized );    // Setzt _has_hava, _has_java_source
     _scheduler_script->switch_subsystem_state( subsys_initialized );    // Setzt _has_hava, _has_java_source
