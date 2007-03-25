@@ -160,31 +160,6 @@ void Time::set_current_difference_to_utc( time_t now )
     bool is_dst         = is_in_daylight_saving_time( now );
     int  new_difference = timezone + ( is_dst? _dstbias : 0 );
 
-//    int  new_difference;
-//    bool is_dst;
-//
-//#   ifdef Z_WINDOWS
-//
-//        timeb  tm;
-//        ftime( &tm );
-//        new_difference = timezone + ( tm.dstflag? _dstbias : 0 );
-//        is_dst = tm.dstflag != 0;
-//
-//#   else
-//
-//        timeval  tv;
-//        tm       tm;
-//
-//        gettimeofday( &tv, NULL );
-//        localtime_r( &tv.tv_sec, &tm );
-//
-//        new_difference = timezone + ( tm.tm_isdst? _dstbias : 0 );
-//        is_dst = tm.tm_isdst != 0;
-//
-//#   endif
-
-        string s = S() << __FUNCTION__ << " " << new_difference << " tz=" << timezone << " is_dst=" << is_dst << " dstbias=" << _dstbias << " (old=" << static_current_difference_to_utc << ")\n";
-        fprintf( stderr, "%s", s.c_str() );
     if( static_current_difference_to_utc != new_difference )
     {
         Z_LOG2( "scheduler", __FUNCTION__ << " " << new_difference << " tz=" << timezone << " is_dst=" << is_dst << " dstbias=" << _dstbias << " (old=" << static_current_difference_to_utc << ")\n" );
@@ -477,10 +452,7 @@ Time Time::now()
         gettimeofday( &tv, NULL );
         localtime_r( &tv.tv_sec, &local_tm );
 
-        return (double)tv.tv_sec + (double)tv.tv_usec / (double)1e6 - timezone - ( local_tm.tm_isdst? _dstbias : 0 ); // Das ist heuristisch. (Warum nicht -_dstbias?) Im Winter 2003 erneut testen!
-
-        //gettimeofday( &tv, &tz );
-        //return (double)tv.tv_sec + (double)tv.tv_usec / (double)1e6 - timezone - ( daylight? _dstbias : 0 );  // dsttime ist im Winter gesetzt? Das ist doch falsch.   - ( tz.tz_dsttime?_dstbias : 0 );
+        return (double)tv.tv_sec + (double)tv.tv_usec / (double)1e6 - timezone - ( local_tm.tm_isdst? _dstbias : 0 );
 
 #   else
 
