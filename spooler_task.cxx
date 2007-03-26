@@ -1102,8 +1102,8 @@ bool Task::do_something()
                             {
                                 _module_instance_async_error = true;
                                 //z::throw_xc( "SCHEDULER-202", x.what() );
-                                set_error( z::Xc( "SCHEDULER-202", x.what() ) );
-                                set_state( s_ended );
+                                set_error( z::Xc( "SCHEDULER-202", state_name(), x.what() ) );
+                                if( _state < s_ended )  set_state( s_ended );
                             }
                         }
 

@@ -3,7 +3,7 @@
     xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
     xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
 >
-    <config tcp_port="4444" main_scheduler="sos-neu:4445">
+    <config tcp_port="4444" supervisor="sos-neu:4445">
 
         <!--base file="$SCHEDULER_TEST/base.scheduler"/-->
         <security>
@@ -11,7 +11,7 @@
         </security>
 
         <process_classes>
-            <process_class name="remote" remote_scheduler="sos-neu:4445" max_processes="50"/>
+            <process_class name="remote" remote_scheduler="localhost:4445" max_processes="50"/>
         </process_classes>
 
         <script language="JavaScript">
@@ -58,20 +58,22 @@ function spooler_process()
     
     spooler_log.info( spooler_task.stdout_path() + ": " + spooler_task.stdout_text() );
     spooler_log.info( spooler_task.stderr_path() + ": " + spooler_task.stderr_text() );
-
     var subprocess = spooler_task.create_subprocess();
-    subprocess.timeout = 1234.567;
-    subprocess.start( "cmd.exe /c \"echo CMD.EXE \"" );
+
+    subprocess.timeout = 12;
+
+    subprocess.start( "/bin/sh -c 'ls -l'" );
+    //subprocess.start( "cmd.exe /c \"echo CMD.EXE \"" );
     subprocess.wait_for_termination();
     
     //hostware.sleep( 15 );
 
-    var subprocess = spooler_task.create_subprocess( "cmd.exe /c \"hostname >c:\\tmp\\1.txt\"" );
-    subprocess.wait_for_termination();
-    spooler_log.info( "c:/tmp/1.txt: " + hostware.file_as_string( "c:/tmp/1.txt" ) );
+    //var subprocess = spooler_task.create_subprocess( "cmd.exe /c \"hostname >c:\\tmp\\1.txt\"" );
+    //subprocess.wait_for_termination();
+    //spooler_log.info( "c:/tmp/1.txt: " + hostware.file_as_string( "c:/tmp/1.txt" ) );
     
     spooler_job.start();
-    
+
     return false;
 }
                 ]]></script>
