@@ -64,6 +64,10 @@ bool Process::continue_close_operation( Process::Close_operation* op )
 
     if( op->_state == Close_operation::s_closing_session )
     {
+#       ifdef Z_WINDOWS
+            if( op->_close_session_operation )  op->_close_session_operation->async_continue();       // Falls wir wegen Prozess-Event aufgerufen worden sind
+#       endif
+
         if( !op->_close_session_operation  ||  op->_close_session_operation->async_finished() )
         {
             if( op->_close_session_operation )

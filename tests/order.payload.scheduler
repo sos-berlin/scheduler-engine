@@ -78,7 +78,7 @@ public class My_job  extends sos.spooler.Job_impl
         order.set_xml_payload( sb.toString() );    
         spooler_log.info( "####### xml_payload=" + order.xml_payload() );        
         spooler_log.info( "####### order_xml  =" + order.xml() );        
-        //order.set_xml_payload( "<?xml version='1.0' encoding='iso-8859-1'?><my_xml><a>åäöüÅÄÖÜß<![CDATA[åäöüÅÄÖÜß]" + "]></a></my_xml>" );
+        order.set_xml_payload( "<?xml version='1.0' encoding='iso-8859-1'?><my_xml><a>åäöüÅÄÖÜß<![CDATA[åäöüÅÄÖÜß]" + "]></a></my_xml>" );
         
         spooler.job_chain( "order_payload.scheduler" ).add_or_replace_order( order );
 
@@ -100,7 +100,9 @@ function spooler_process()
     var order = spooler.create_order();
     order.id = "javascript";
     order.title = "Order aus Javascript";
-    order.xml_payload = "<?xml version='1.0' encoding='iso-8859-1'?><my_xml><a>åäöüÅÄÖÜß<![CDATA[åäöüÅÄÖÜß]" + "]></a></my_xml>";
+  //order.xml_payload = "<?xml version='1.0' encoding='iso-8859-1'?><my_xml><a>åäöüÅÄÖÜß<![CDATA[åäöüÅÄÖÜß]" + "]></a></my_xml>";
+    order.xml_payload = "<my_xml><a>åäöüÅÄÖÜß<![CDATA[åäöüÅÄÖÜß]" + "]></a></my_xml>";
+    spooler_log.info( order.xml );
     spooler.job_chain( "order_payload.scheduler" ).add_or_replace_order( order );
     return false;
 }

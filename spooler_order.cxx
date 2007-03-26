@@ -3023,7 +3023,7 @@ bool Order::db_update2( Update_option update_option, bool delet, Transaction* ou
                 delete_sql << " and `distributed_next_time` is " << ( _is_distributed? "not null" : " null" );  // update_ok=false, wenn das nicht stimmt
 
                 update_ok = ta.try_execute_single( delete_sql, __FUNCTION__ );
-                if( !update_ok )  update_ok = db_handle_modified_order( &ta );  int DISTRIBUTED_FEHLER_KOENNTE_GEZEIGT_WERDEN; // Zeigen, wenn distributed_next_time falsch ist.
+                if( !update_ok )  update_ok = db_handle_modified_order( &ta );  //int DISTRIBUTED_FEHLER_KOENNTE_GEZEIGT_WERDEN; // Zeigen, wenn distributed_next_time falsch ist.
 
                 db()->write_order_history( this, &ta );
 
@@ -3138,7 +3138,7 @@ bool Order::db_handle_modified_order( Transaction* outer_transaction )
             if( modified_order->_is_replacement )
             {
                 // Der Auftrag in der Datenbank ersetzt unseren, gerade ausgeführten Auftrag.
-                // Unser Auftrag bleibt gelöscht, wie speichern ihn nicht.
+                // Unser Auftrag bleibt gelöscht, wir speichern ihn nicht.
                 // Der neue Auftrag in der Datenbank wird jetzt ausführbar gemacht:
 
                 _log->info( message_string( "SCHEDULER-839" ) );
@@ -3146,6 +3146,14 @@ bool Order::db_handle_modified_order( Transaction* outer_transaction )
                 modified_order->set_replacement( false );
                 result = modified_order->db_update2( update_not_occupied, false, outer_transaction );
             }
+            else
+            {
+                _log->info( message_string( "SCHEDULER-853" ) );
+            }
+        }
+        else
+        {
+            _log->info( message_string( "SCHEDULER-852" ) );
         }
     }
     catch( exception& x ) 
@@ -3861,7 +3869,7 @@ void Order::set_xml_payload( const string& xml_string )
 
 void Order::set_xml_payload( const xml::Element_ptr& element )
 { 
-    _xml_payload = element? element.ascii_xml() : "";     // _xml_payload kann in order_xml <order> eingefügt werden, unabhängig von der Codierung (ist nur 7bit-Ascii)
+    _xml_payload = element? element.xml() : "";     // _xml_payload kann in order_xml <order> eingefügt werden, unabhängig von der Codierung (ist nur 7bit-Ascii)
     _order_xml_modified = true; 
 }
 

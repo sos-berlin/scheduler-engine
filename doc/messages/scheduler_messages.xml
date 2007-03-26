@@ -3549,6 +3549,18 @@
             </text>
         </message>
 
+        <message code="SCHEDULER-852" weight="info">
+            <text xml:lang="en">
+                <title>Order not found in database</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-853" weight="info">
+            <text xml:lang="en">
+                <title>Order in database could not be updated or deleted. </title>
+            </text>
+        </message>
+
         <!--message code="SCHEDULER-848" weight="debug3">
             <text xml:lang="en">
                 <title>Compressing existent file '<p1/>' to '<p2/>'</title>

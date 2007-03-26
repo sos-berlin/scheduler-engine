@@ -78,7 +78,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-199", "Module instance has been closed" },
     { "SCHEDULER-200", "Remote instance has been closed" },
     { "SCHEDULER-201", "Missing working directory when calling Java compiler" },
-    { "SCHEDULER-202", "Connection to task has been lost" },
+    { "SCHEDULER-202", "Connection to task has been lost, state=$1: $2" },
     { "SCHEDULER-203", "Module instance in the server has been closed" },
     { "SCHEDULER-204", "Job \"$1\" is in error state. $2" },
     { "SCHEDULER-205", "No database given (entry db= in factory.ini)" },
@@ -394,6 +394,8 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-849", "Timeout is not possible for a subprocess running on a remote host (it cannot be killed), pid=$1" },
     { "SCHEDULER-850", "After lost connection to remote scheduler, process $1 is going to be killed" },
     { "SCHEDULER-851", "After possibly volatile error (number $1), the causing statement will be repeated: $2" },
+    { "SCHEDULER-852", "Order not found in database" },
+    { "SCHEDULER-853", "Order in database could not be updated or deleted. " },
     {}
 };
 } //namespace sos
