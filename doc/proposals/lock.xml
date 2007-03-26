@@ -70,16 +70,17 @@
     </p>
 
     <p>
-        Jede Task zählt. 
-        Eine exklusive Belegung erlaubt also nur eine Task.
+        Präzisierung: Die Sperren werden von der Task belegt, nicht vom Job.
+        Jede Task zählt also.
+        Eine exklusive Belegung erlaubt damit nur eine Task.
     </p>
     
     <p>
-        Das ist ein Read-Write-Lock, s. <a href="http://de.wikipedia.org/wiki/Lock">Wikipedia</a>,
-        mit zusätzlicher Begrenzung der Anzahl Leser
+        Das ist ein Read-Write-Lock, s. <a href="http://de.wikipedia.org/wiki/Lock">Wikipedia</a>
         <!--;
         "read" und "write" werden hier anders gebraucht, als unsere Jobs das nahelegen)--> und
-        <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/concurrent/locks/ReadWriteLock.html">java.util.concurrent.ReadWriteLock</a>
+        <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/concurrent/locks/ReadWriteLock.html">java.util.concurrent.ReadWriteLock</a>,
+        mit zusätzlicher Begrenzung der Anzahl Leser.
     </p>
 
 
