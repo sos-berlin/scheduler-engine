@@ -931,10 +931,10 @@
 
         <message code="SCHEDULER-202">
             <text xml:lang="de">
-                <title>Verbindung zur Task verloren</title>
+                <title>Verbindung zur Task verloren, state=<p1/>: <p2/></title>
             </text>
             <text xml:lang="en">
-                <title>Connection to task has been lost</title>
+                <title>Connection to task has been lost, state=<p1/>: <p2/></title>
             </text>
         </message>
 

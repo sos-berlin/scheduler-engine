@@ -2571,7 +2571,7 @@ string Cluster::async_state_text_() const
     else  
     if( _exclusive_scheduler_watchdog )
     {
-        result << _exclusive_scheduler_watchdog->async_state_text();
+        result << " -> " << _exclusive_scheduler_watchdog->async_state_text();
     }
 
     return result;

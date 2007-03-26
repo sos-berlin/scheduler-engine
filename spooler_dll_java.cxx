@@ -53,6 +53,7 @@ extern "C" JNIEXPORT void JNICALL JNI_OnUnload( JavaVM*, void* )
 
 //-------------------------------------------------------------sos.spooler.Spooler_program.construct
 
+extern "C"
 JNIEXPORT void JNICALL Java_sos_spooler_Spooler_1program_construct( JNIEnv* jenv, jobject, jstring parameters_jstr )
 {
     try
@@ -65,6 +66,7 @@ JNIEXPORT void JNICALL Java_sos_spooler_Spooler_1program_construct( JNIEnv* jenv
 
 //--------------------------------------------------------sos.spooler.Spooler_program.construct_argv
 
+extern "C"
 JNIEXPORT void JNICALL Java_sos_spooler_Spooler_1program_construct_1argv( JNIEnv* jenv, jobject, jobjectArray jparams )
 {
     char** argv = NULL;
