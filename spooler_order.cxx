@@ -729,7 +729,7 @@ ptr<Order> Order_subsystem::try_load_order_from_database( Transaction* outer_tra
     }
     catch( exception& x ) 
     { 
-        if( result )  result->close(),  result = NULL;
+        if( result )  result->close( Order::cls_dont_remove_from_job_chain ),  result = NULL;
         ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_orders_tablename, x ), __FUNCTION__ ); 
     }
 
@@ -2324,7 +2324,7 @@ Order* Order_queue::load_and_occupy_next_distributed_order_from_database( Task* 
                     }
                 }
 
-                if( order )  order->close(), order = NULL;
+                if( order )  order->close( Order::cls_dont_remove_from_job_chain ), order = NULL;
             }
         //}
         //catch( exception& x )
@@ -3298,7 +3298,7 @@ void Order::open_log()
 
 //-------------------------------------------------------------------------------------Order::close
 
-void Order::close( bool do_remove_from_job_chain )
+void Order::close( Close_flag close_flag )
 {
 /*
     if( !_log->filename().empty() )
@@ -3331,7 +3331,7 @@ void Order::close( bool do_remove_from_job_chain )
         db_release_occupation();
     }
 
-    if( do_remove_from_job_chain )  remove_from_job_chain();
+    if( close_flag == cls_remove_from_job_chain )  remove_from_job_chain();
     else
     if( _job_chain )  _job_chain->remove_order( this );
 
@@ -4499,13 +4499,13 @@ void Order::postprocessing2( Job* last_job )
     if( _is_distributed  &&  _job_chain )
     {
         _job_chain->remove_order( this );
-        close( false );
+        close( Order::cls_dont_remove_from_job_chain );
     }
 
 
     if( finished() )
     {
-        if( !_is_on_blacklist )  close(); 
+        if( !_is_on_blacklist )  close( Order::cls_remove_from_job_chain ); 
     }
 }
 

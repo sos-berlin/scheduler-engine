@@ -264,7 +264,7 @@ void Task::close()
         }
 
         _order_for_task_end = NULL;
-        if( _order )  _order->close();  //remove_order_after_error(); Nicht rufen! Der Auftrag bleibt stehen und der Job startet wieder und wieder.
+        if( _order )  _order->close( Order::cls_remove_from_job_chain );  //remove_order_after_error(); Nicht rufen! Der Auftrag bleibt stehen und der Job startet wieder und wieder.
 
 
         if( _module_instance )

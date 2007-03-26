@@ -51,8 +51,9 @@ struct Order : Com_order,
     virtual IDispatch*          idispatch               ()                                          { return this; }
 
 
-    void                        close                   ( bool remove_from_job_chain );
-    void                        close                   ()                                          { close( true ); }
+    enum Close_flag { cls_dont_remove_from_job_chain, cls_remove_from_job_chain };
+    void                        close                   ( Close_flag );
+  //void                        close                   ()                                          { close( true ); }
 
     void                        init                    ();
     void                        activate                ();

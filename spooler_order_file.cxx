@@ -618,6 +618,7 @@ Order* Directory_file_order_source::fetch_and_occupy_order( const Time& now, con
         {
             File_path  path = new_file->path();
             ptr<Order> order;
+            bool       was_in_job_chain = false;
 
             try
             {
@@ -641,8 +642,12 @@ Order* Directory_file_order_source::fetch_and_occupy_order( const Time& now, con
 
                     if( ok )  ok = known_orders.find( order->string_id() ) == known_orders.end();     // Auftrag ist noch nicht bekannt?
 
-                    if( ok )  ok = order->try_place_in_job_chain( _job_chain );
-                    // !ok ==> Auftrag ist bereits vorhanden
+                    if( ok )
+                    {
+                        was_in_job_chain = order->try_place_in_job_chain( _job_chain );
+                        ok &= was_in_job_chain;
+                        // !ok ==> Auftrag ist bereits vorhanden
+                    }
 
                     if( ok  &&  order->is_distributed() ) 
                     {
@@ -666,7 +671,7 @@ Order* Directory_file_order_source::fetch_and_occupy_order( const Time& now, con
                         log()->info( message_string( "SCHEDULER-983", order->obj_name(), "written at " + date ) );
                     }
 
-                    if( !ok )  order->close(),  order = NULL;
+                    if( !ok )  order->close( was_in_job_chain? Order::cls_dont_remove_from_job_chain : Order::cls_remove_from_job_chain ),  order = NULL;
                 }
 
                 _new_files[ _new_files_index ] = NULL;
@@ -694,7 +699,7 @@ Order* Directory_file_order_source::fetch_and_occupy_order( const Time& now, con
 
                 if( order ) 
                 {
-                    order->close();
+                    order->close( was_in_job_chain? Order::cls_dont_remove_from_job_chain : Order::cls_remove_from_job_chain );
                 }
             }
         }
