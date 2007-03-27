@@ -117,6 +117,8 @@ struct Get_events_command_response;
 struct Job;
 struct Job_chain;
 struct Job_subsystem_interface;
+struct Lock_holder;
+struct Lock_subsystem;
 struct Module;
 struct Module_instance;
 struct Order_queue;
@@ -126,6 +128,7 @@ struct Process_class;
 struct Remote_scheduler_interface;
 struct Scheduler_object;
 struct Scheduler_event;
+struct Scheduler_lock;
 struct Show_what;
 struct Spooler;
 typedef Spooler Scheduler;
@@ -189,6 +192,7 @@ typedef stdext::hash_set<string> String_set;
 #include "spooler_module_remote_server.h"
 #include "cluster.h"
 #include "java_subsystem.h"
+#include "lock.h"
 #include "supervisor.h"
 #include "xml_client_connection.h"
 
@@ -515,6 +519,7 @@ struct Spooler : Object,
     ptr<http::Http_server_interface> _http_server;
     ptr<Web_services_interface>      _web_services;
     ptr<Java_subsystem_interface>    _java_subsystem;
+    ptr<Lock_subsystem>              _lock_subsystem;
 
     Wait_handles               _wait_handles;
 

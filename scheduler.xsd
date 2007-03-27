@@ -31,6 +31,7 @@
                             <xsd:element ref="security"         minOccurs="0"/>
                             <xsd:element ref="cluster"          minOccurs="0"/>
                             <xsd:element ref="process_classes"  minOccurs="0"/>
+                            <xsd:element ref="locks"            minOccurs="0"/>
                             <xsd:element ref="script"           minOccurs="0"/>
 
                             <xsd:choice minOccurs="0">
@@ -282,6 +283,13 @@
                     </xsd:complexType>
                 </xsd:element>
 
+                <xsd:element name="lock.lock" minOccurs="0">
+                    <xsd:complexType>
+                        <xsd:attribute name="lock"                  type="String"       use="required"/>
+                        <xsd:attribute name="exclusive"             type="Yes_no"/>
+                    </xsd:complexType>
+                </xsd:element>
+                
                 <xsd:element ref="params" minOccurs="0"/>
 
                 <xsd:choice minOccurs="0">
@@ -667,7 +675,27 @@
         </xsd:complexType>
     </xsd:element>
 
-    
+
+    <xsd:element name="locks">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="lock" minOccurs="0" maxOccurs="unbounded">
+                    <xsd:complexType>
+                        <xsd:attribute name="name"              type="Name"                     use="required"/>
+                        <xsd:attribute name="max_non_exclusive" type="xsd:nonNegativeInteger"/>
+                    </xsd:complexType>
+                </xsd:element>
+            </xsd:sequence>
+        </xsd:complexType>
+
+        <!--xsd:key name="lock">
+            <xsd:selector xpath="lock"/>
+            <xsd:field xpath="@name"/>
+        </xsd:key-->
+
+    </xsd:element>
+
+
     <xsd:element name="process_classes">
         <xsd:complexType>
             <xsd:sequence>

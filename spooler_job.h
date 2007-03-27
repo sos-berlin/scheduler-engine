@@ -368,6 +368,8 @@ struct Job : Object,
   protected:
     friend struct               Job_history;
 
+    ptr<Lock_holder>           _lock_holder;
+
     string                     _title;                      // <job title="">
     string                     _state_text;                 // spooler_job.state_text = "..."
 

@@ -396,6 +396,9 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-851", "After possibly volatile error (number $1), the causing statement will be repeated: $2" },
     { "SCHEDULER-852", "Order not found in database" },
     { "SCHEDULER-853", "Order in database could not be updated or deleted. " },
+    { "SCHEDULER-854", "Closing lock $1 while held by $2" },
+    { "SCHEDULER-855", "Holding lock" },
+    { "SCHEDULER-856", "Releasing lock" },
     {}
 };
 } //namespace sos

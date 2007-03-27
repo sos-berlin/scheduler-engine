@@ -652,6 +652,7 @@ Spooler::Spooler()
     _db                      = Z_NEW( Database( this ) );
     _http_server             = http::new_http_server( this );
     _web_services            = new_web_services( this );
+    _lock_subsystem          = Z_NEW( Lock_subsystem( this ) );
     _supervisor              = new_supervisor( this );
 
     _variable_set_map[ variable_set_name_for_substitution ] = _environment;
@@ -1546,6 +1547,7 @@ void Spooler::load()
     _order_subsystem->switch_subsystem_state( subsys_initialized );
     _http_server    ->switch_subsystem_state( subsys_initialized );
     _web_services   ->switch_subsystem_state( subsys_initialized );        // Ein Job und eine Jobkette einrichten, s. spooler_web_service.cxx
+    _lock_subsystem ->switch_subsystem_state( subsys_initialized );
 
 
     Command_processor cp ( this, Security::seclev_all );
@@ -1764,34 +1766,12 @@ void Spooler::start()
 
 //--------------------------------------------------------------------------------Spooler::activate
 
-//void Spooler::activate()
-//{
-//    _order_subsystem->load_orders_from_database();
-//    load_jobs();
-//
-//    _task_subsystem = Z_NEW( Task_subsystem( this ) );
-//    _task_subsystem->start( &_event ); 
-//
-//    if( !_xml_cmd.empty() )
-//    {
-//        Command_processor cp ( this, Security::seclev_all );
-//        cout << cp.execute( _xml_cmd, Time::now(), true );                 // Bei einem Fehler Abbruch
-//        _xml_cmd = "";
-//    }
-//
-//    execute_config_commands();
-//
-//    _scheduler_script->switch_subsystem_state( subsys_loaded );
-//    _scheduler_script->switch_subsystem_state( subsys_active );
-//
-//    set_state( s_running );
-//}
-
 void Spooler::activate()
 {
     _job_subsystem->switch_subsystem_state( subsys_loaded );   
     //_task_subsystem->start( &_event ); 
     _order_subsystem->switch_subsystem_state( subsys_loaded );
+    _lock_subsystem ->switch_subsystem_state( subsys_loaded );
 
     if( !_xml_cmd.empty() )
     {
@@ -1811,6 +1791,7 @@ void Spooler::activate()
     _job_subsystem  ->switch_subsystem_state( subsys_active );
     _order_subsystem->switch_subsystem_state( subsys_active );
     _web_services   ->switch_subsystem_state( subsys_active );          // Nicht in Spooler::load(), denn es öffnet schon -log-dir-Dateien (das ist nicht gut für -send-cmd=)
+    _lock_subsystem ->switch_subsystem_state( subsys_active );
 
     set_state( s_running );
 }
@@ -1938,6 +1919,7 @@ void Spooler::stop( const exception* )
     _scheduler_script->close();  // Scheduler-Skript zuerst beenden, damit die Finalizer die Tasks (von Job.start()) und andere Objekte schließen können.
 
 
+    _lock_subsystem->switch_subsystem_state( subsys_stopped );
     if( _order_subsystem )  _order_subsystem->close();
 
     _job_subsystem->close_jobs();

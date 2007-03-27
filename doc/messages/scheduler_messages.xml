@@ -2491,6 +2491,18 @@
             </text>
         </message>
 
+        <message code="SCHEDULER-401">
+            <text xml:lang="en">
+                <title>Unknown lock '<p1/>'</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-402">
+            <text xml:lang="en">
+                <title>Only one lock is allowed: '<p1/>' and '<p2/>'</title>
+            </text>
+        </message>
+
         <!--message code="SCHEDULER-398">
             <text xml:lang="en">
                 <title>Same Java class <p1/> with source code is used in <p2>job</p2></title>
@@ -3558,6 +3570,24 @@
         <message code="SCHEDULER-853" weight="info">
             <text xml:lang="en">
                 <title>Order in database could not be updated or deleted. </title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-854" weight="warn">
+            <text xml:lang="en">
+                <title>Closing lock <p1/> while held by <p2/></title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-855" weight="info">
+            <text xml:lang="en">
+                <title>Holding lock</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-856" weight="info">
+            <text xml:lang="en">
+                <title>Releasing lock</title>
             </text>
         </message>
 

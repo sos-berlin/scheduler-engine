@@ -33,7 +33,7 @@
         Anwendung:
     </p>
     <pre>&lt;job>
-    &lt;lock exclusive="<i>lock_name</i>"/></pre>
+    &lt;lock.lock lock="<i>lock_name</i>"/></pre>
 
     <p>
         Eine Task, die einen Sperre belegt, lässt keine andere Task zu, die dieselbe Sperre beansprucht.
@@ -49,19 +49,24 @@
     <p>
         Die Zahl der nicht-exklusiven Belegungen lässt sich begrenzen:
     </p>
-    
-    <pre>&lt;lock name="<i>lock_name</i>" non_exclusive_locks="2"/></pre>
 
-    
+    <pre>&lt;lock name="<i>lock_name</i>" max_non_exclusive="2"/></pre>
+
+
     <pre>&lt;job name="replicate_from_adabase">
-    &lt;lock lock="<i>lock_name</i>" exclusive="no"/>
+    &lt;lock.lock lock="<i>lock_name</i>" exclusive="no"/>
     …
+&lt;/job>
+
 &lt;job name="replicate_from_as400">
-    &lt;lock lock="<i>lock_name</i>" exclusive="no"/>
+    &lt;lock.lock lock="<i>lock_name</i>" exclusive="no"/>
     …
+&lt;/job>
+
 &lt;job name="switch_database">
-    &lt;lock lock="<i>lock_name</i>"/>
-    …</pre>
+    &lt;lock.lock lock="<i>lock_name</i>"/>
+    …
+&lt;/job></pre>
 
     <p>
         Die ersten beiden Jobs können gleichzeitig laufen, 

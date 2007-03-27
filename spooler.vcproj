@@ -366,6 +366,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\lock.cxx"
+				>
+			</File>
+			<File
 				RelativePath=".\scheduler_client.cxx"
 				>
 			</File>
@@ -1080,6 +1084,10 @@
 			</File>
 			<File
 				RelativePath=".\java_subsystem.h"
+				>
+			</File>
+			<File
+				RelativePath=".\lock.h"
 				>
 			</File>
 			<File

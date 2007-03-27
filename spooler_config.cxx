@@ -363,6 +363,11 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const Time& x
                     load_process_classes_from_dom( e, xml_mod_time );
             }
             else
+            if( e.nodeName_is( "locks" ) )
+            {
+                _lock_subsystem->set_dom( e );
+            }
+            else
             if( e.nodeName_is( "script" ) )
             {
                 _scheduler_script->set_dom_script( e, xml_mod_time );

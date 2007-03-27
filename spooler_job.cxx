@@ -527,6 +527,8 @@ void Job::load( Transaction* ta )
             return;
         }
 
+        if( _lock_holder )  _lock_holder->load();       // Prüft, ob die Sperre definiert ist
+
         if( _spooler->_db->opened()  &&  _spooler->has_exclusiveness() )  load_tasks_from_db( ta );
 
         set_state( s_loaded );
@@ -654,6 +656,19 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
             else
             //if( e.nodeName_is( "object_set" ) )  _object_set_descr = SOS_NEW( Object_set_descr( e ) );
             //else
+            if( e.nodeName_is( "lock" ) )  
+            {
+                if( _lock_holder )  
+                {
+                    string name = e.getAttribute( "name" );
+                    if( name != _lock_holder->name() )  z::throw_xc( "SCHEDULER-402", _lock_holder->name(), name );      // Es kann nur einen geben
+                }
+                else
+                    _lock_holder = Z_NEW( Lock_holder( this ) );
+
+                _lock_holder->set_dom( e );
+            }
+            else
             if( e.nodeName_is( "params"     ) )  _default_params->set_dom( e, &_spooler->_variable_set_map );  
             else
             if( e.nodeName_is( "script"     ) )  
@@ -2083,6 +2098,16 @@ ptr<Task> Job::task_to_start()
     ptr<Task>   task      = NULL;
     bool        has_order = false;
     string      log_line;
+
+
+    // Lock_acquiring lock_acquiring ( _lock_holder );
+    // if( !lock_acquiring.is_possible() )  return NULL;
+    // ...
+    // lock_acquiring.acquire();
+    // ~lock_acquiring();
+    //
+    ///// if( _lock_holder  &&  !_lock_holder->reserve_lock() )  return NULL;
+
 
     task = get_task_from_queue( now );
     if( task )  cause = task->_start_at? cause_queue_at : cause_queue;
