@@ -310,8 +310,11 @@ void Lock_subsystem::close()
 {
     for( Lock_map::iterator it = _lock_map.begin(); it != _lock_map.end(); )
     {
-        it->second->close();
-        it = _lock_map.erase( it );
+        Lock_map::iterator erase_it = it;
+        it++;
+
+        erase_it->second->close();
+        _lock_map.erase( erase_it );
     }
 }
 
