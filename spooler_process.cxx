@@ -559,9 +559,20 @@ bool Process::async_continue()
 
 void Process::Async_remote_operation::close_remote_task( bool kill )
 {
-    if( _process->_xml_client_connection )
+    if( _state <= s_connecting )
     {
-        if( _process->_xml_client_connection->is_send_possible() )
+        if( _process->_xml_client_connection )  
+        {
+            _process->_xml_client_connection->close();
+            _process->_xml_client_connection->set_async_parent( NULL );
+            _process->_xml_client_connection = NULL;
+            _state = s_closed;
+        }
+    }
+    else
+    if( _state >= s_starting  &&  _state < s_closing )
+    {
+        if( _process->_xml_client_connection  &&  _process->_xml_client_connection->is_send_possible() )
         {
             try
             {

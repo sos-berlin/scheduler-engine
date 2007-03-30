@@ -262,6 +262,8 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-398", "After last error, next_start_function='$1' will no longer be executed for this <run_time>" },
     { "SCHEDULER-399", "Error in <include>: $1" },
     { "SCHEDULER-400", "Only API-jobs are possible with <process_class remote_scheduler=\"...\"/>" },
+    { "SCHEDULER-401", "Unknown lock '$1'" },
+    { "SCHEDULER-402", "Only one lock is allowed: '$1' and '$2'" },
     { "SCHEDULER-900", "Scheduler $1 is starting with $2, pid=$3" },
     { "SCHEDULER-902", "state=$1" },
     { "SCHEDULER-904", "Tasks have $1s to terminate" },

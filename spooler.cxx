@@ -404,7 +404,7 @@ First_and_last read_profile_yes_no_last_both( const string& profile, const strin
         {
             ctrl_c_pressed++;
 
-            if( ctrl_c_pressed - ctrl_c_pressed_handled >= 2 )
+            if( ctrl_c_pressed - ctrl_c_pressed_handled > 4 )
             //if( ctrl_c_pressed >= 4 )
             {
                 if( spooler_ptr )  spooler_ptr->abort_now();  
@@ -459,7 +459,7 @@ First_and_last read_profile_yes_no_last_both( const string& profile, const strin
                 fprintf( stderr, "Unknown signal %d\n", sig );
         }
 
-        set_ctrl_c_handler( ctrl_c_pressed < 2 );
+        set_ctrl_c_handler( ctrl_c_pressed < 4 );
     }
 
 #endif
@@ -2620,6 +2620,16 @@ void Spooler::run_check_ctrl_c()
             }
 
             case 3:
+            {
+                string m = message_string( "SCHEDULER-263", signal_text, ctrl_c_pressed, "Ignoring running tasks" );
+                _log->warn( m );
+                if( !_log_to_stderr && !is_daemon )  cerr << m << endl;
+
+                _spooler->_shutdown_ignore_running_tasks = true;
+                break;
+            }
+
+            case 4:
             default:
             {
                 string m = message_string( "SCHEDULER-263", signal_text, ctrl_c_pressed, "ABORTING IMMEDIATELY" );

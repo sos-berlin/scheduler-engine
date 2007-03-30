@@ -413,6 +413,7 @@ struct Spooler : Object,
     Job_subsystem_interface*    job_subsystem_or_null       ()                                  { return _job_subsystem; }
     Order_subsystem_interface*  order_subsystem             ();
     Java_subsystem_interface*   java_subsystem              ()                                  { return _java_subsystem; }
+    Lock_subsystem*             lock_subsystem              ()                                  { return _lock_subsystem; }
     bool                        has_any_order               ();
     bool                        has_any_task                ();
 
