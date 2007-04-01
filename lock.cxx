@@ -37,7 +37,6 @@ void Scheduler_lock::close()
     {
         Lock_holder* holder = *it;
         log()->error( message_string( "SCHEDULER-854", obj_name(), holder->obj_name() ) );
-        it = _holder_set.erase( it );
     }
 
     _waiting_queues.clear();
@@ -106,7 +105,7 @@ bool Scheduler_lock::request_lock_for( Lock_holder* holder )
     if( is_available_for( holder->lock_requestor() ) )
     {        
         _holder_set.insert( holder );
-        result = true; //holder->set_state( Lock_holder::s_is_holding_lock );
+        result = true;
     }
 
     return result;
@@ -116,17 +115,10 @@ bool Scheduler_lock::request_lock_for( Lock_holder* holder )
 
 void Scheduler_lock::release_lock_for( Lock_holder* holder )
 {
-    Z_FOR_EACH( Holder_set, _holder_set, it )
-    {
-        if( *it == holder )
-        {
-            _holder_set.erase( it );
-            goto FOUND;
-        }
-    }
+    Holder_set::iterator it = _holder_set.find( holder );
 
-    Z_DEBUG_ONLY( assert( !"Unbekannte Sperre" ) );
-  FOUND:
+    if( it != _holder_set.end() )  _holder_set.erase( it );
+                             else  Z_DEBUG_ONLY( assert( !"Unbekannte Sperre" ) );
 
     if( !_waiting_queues[ lk_exclusive ].empty() )  
     {
