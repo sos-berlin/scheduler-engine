@@ -1008,6 +1008,10 @@
 <register_keyword keyword='loading'>
     <register_entry register_file='xml/answer/task.xml' register_title='&lt;task&gt; (Antwort)'  register_keyword='loading'/>
 </register_keyword>
+<register_keyword keyword='lock'>
+    <register_keyword_display><code>&lt;lock&gt;</code></register_keyword_display>
+    <register_entry register_file='CHANGES.xml#use_element__lock' register_title='Änderungsprotokoll'  register_keyword='lock'/>
+</register_keyword>
 <register_keyword keyword='log'>
     <register_keyword_display><code>&lt;log&gt;</code></register_keyword_display>
     <register_entry register_file='xml.xml#use_element__log' register_title='Alle XML-Elemente'  register_keyword='log'/>

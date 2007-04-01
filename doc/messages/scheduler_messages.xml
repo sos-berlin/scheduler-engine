@@ -3573,7 +3573,7 @@
             </text>
         </message>
 
-        <message code="SCHEDULER-854" weight="warn">
+        <message code="SCHEDULER-854" weight="error">
             <text xml:lang="en">
                 <title>Closing lock <p1/> while held by <p2/></title>
             </text>

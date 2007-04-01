@@ -11,6 +11,22 @@
     <scheduler_keyword keyword="Change log"/>
 
 
+    <change date="2007-04-01" version="2.0.169" subversion_revision="4940">
+        <revision type="new" title="Sperren">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_element name="lock"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="job"/><scheduler_element name="lock.lock"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+    </change>
+
+
     <change date="2007-03-19" version="2.0.168" subversion_revision="4912">
         <revision type="new" title="Ausführung von Tasks auf entferntem Scheduler">
             <description>
