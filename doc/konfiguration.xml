@@ -119,6 +119,11 @@
             …
         &lt;/process_classes>
 
+        &lt;<a class="silent" href="xml/locks.xml">locks></a>
+            &lt;<a class="silent" href="xml/lock.xml">lock</a> name= "…" …/>
+            …
+        &lt;/locks>
+
         &lt;<a class="silent" href="xml/script.xml">script</a> com_class  = "…"
                 filename   = "…" 
                 java_class = "…"
@@ -167,6 +172,8 @@
 
                 &lt;<a class="silent" href="xml/description.xml">description</a>> … &lt;/description>
 
+                &lt;<a class="silent" href="xml/lock.lock.xml">lock.lock</a> lock="…" …/>
+    
                 &lt;<a class="silent" href="xml/params.xml">params</a>>
                     &lt;<a class="silent" href="xml/param.xml">param</a> name="…" value="…"/>
                     …

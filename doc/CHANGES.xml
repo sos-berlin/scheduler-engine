@@ -14,6 +14,9 @@
     <change date="2007-04-01" version="2.0.169" subversion_revision="4940">
         <revision type="new" title="Sperren">
             <description>
+                <p>
+                    Mit Sperren kann der Ablauf von Tasks serialisiert werden.
+                </p>
                 <ul>
                     <li>
                         <scheduler_element name="lock"/>

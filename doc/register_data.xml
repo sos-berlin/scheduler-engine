@@ -1011,6 +1011,11 @@
 <register_keyword keyword='lock'>
     <register_keyword_display><code>&lt;lock&gt;</code></register_keyword_display>
     <register_entry register_file='CHANGES.xml#use_element__lock' register_title='Änderungsprotokoll'  register_keyword='lock'/>
+    <register_entry register_file='xml/lock.xml#' register_title='&lt;lock&gt; (Konfiguration)'  register_keyword='lock' type='definition'/>
+</register_keyword>
+<register_keyword keyword='lock.lock'>
+    <register_keyword_display><code>&lt;lock.lock&gt;</code></register_keyword_display>
+    <register_entry register_file='xml/lock.xml#use_element__lock.lock' register_title='&lt;lock&gt; (Konfiguration)'  register_keyword='lock.lock'/>
 </register_keyword>
 <register_keyword keyword='log'>
     <register_keyword_display><code>&lt;log&gt;</code></register_keyword_display>
@@ -1171,6 +1176,10 @@
     <register_keyword_display><code>max_db_errors=</code></register_keyword_display>
     <register_ini_entry register_file='datenbank.xml' register_title='Datenbank' file='factory.ini' section='spooler' entry='max_db_errors'/>
 </register_keyword>
+<register_keyword keyword='max_non_exclusive'>
+    <register_keyword_display><code>max_non_exclusive=</code></register_keyword_display>
+    <register_entry register_file='xml/lock.xml#attribute_max_non_exclusive' register_title='&lt;lock&gt; (Konfiguration)'  register_keyword='max_non_exclusive' type='definition'/>
+</register_keyword>
 <register_keyword keyword='max_orders'>
     <register_keyword_display><code>max_orders=</code></register_keyword_display>
     <register_entry register_file='xml/show_job.xml#attribute_max_orders' register_title='&lt;show_job&gt; (Kommando)'  register_keyword='max_orders' type='definition'/>
@@ -1253,6 +1262,7 @@
     <register_entry register_file='xml/answer/task.xml#attribute_name' register_title='&lt;task&gt; (Antwort)'  register_keyword='name' type='definition'/>
     <register_entry register_file='xml/job.xml#attribute_name' register_title='&lt;job&gt; (Konfiguration)'  register_keyword='name' type='definition'/>
     <register_entry register_file='xml/job_chain.xml#attribute_name' register_title='&lt;job_chain&gt; (Konfiguration)'  register_keyword='name' type='definition'/>
+    <register_entry register_file='xml/lock.xml#attribute_name' register_title='&lt;lock&gt; (Konfiguration)'  register_keyword='name' type='definition'/>
     <register_entry register_file='xml/param.xml#attribute_name' register_title='&lt;param&gt;'  register_keyword='name' type='definition'/>
     <register_entry register_file='xml/process_class.xml#attribute_name' register_title='&lt;process_class&gt; (Konfiguration)'  register_keyword='name' type='definition'/>
     <register_entry register_file='xml/start_job.xml#attribute_name' register_title='&lt;start_job&gt; (Kommando)'  register_keyword='name' type='definition'/>

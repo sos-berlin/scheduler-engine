@@ -1,0 +1,132 @@
+<?xml version="1.0"?>
+<spooler
+    xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
+>
+    <config>
+
+        <base file="$SCHEDULER_TEST/base.scheduler"/>
+
+        <locks>
+            <lock name="Georgien" max_non_exclusive="2"/>
+            <lock name="Venezuela"  />
+        </locks>
+
+        <script language="JavaScript">
+            <![CDATA[
+
+spooler_log.info( "START" );
+
+            ]]>
+        </script>
+
+
+        <jobs>
+
+            <job name="A" tasks="2">
+                <lock.lock lock="Georgien"/>
+
+                <script language="JavaScript">
+                    <![CDATA[
+
+function spooler_process() 
+{
+    spooler.job( "B" ).execute_command( "stop" );
+    
+    var hostware = new ActiveXObject( "hostware.global" );
+    hostware.sleep( 10 );
+    return false;
+}
+
+                ]]>
+                </script>
+
+            </job>
+
+            
+            <job name="B">
+                <lock.lock lock="Georgien"/>
+
+                <script language="JavaScript">
+                    <![CDATA[
+
+function spooler_process() 
+{               
+    var hostware = new ActiveXObject( "hostware.global" );
+    hostware.sleep( 10 );
+    return false;
+}
+
+                ]]>
+                </script>
+            </job>
+
+            
+            <job name="C">
+                <lock.lock lock="Georgien" exclusive="no"/>
+
+                <script language="JavaScript">
+                    <![CDATA[
+
+function spooler_process() 
+{               
+    var hostware = new ActiveXObject( "hostware.global" );
+    hostware.sleep( 10 );
+    return false;
+}
+
+                ]]>
+                </script>
+            </job>
+
+
+            <job name="D">
+                <lock.lock lock="Georgien" exclusive="no"/>
+
+                <script language="JavaScript">
+                    <![CDATA[
+
+function spooler_process() 
+{               
+    spooler.job( "A" ).start();
+
+    var hostware = new ActiveXObject( "hostware.global" );
+    hostware.sleep( 10 );
+    
+    return false;
+}
+
+                ]]>
+                </script>
+            </job>
+            
+            
+            <job name="E">
+                <lock.lock lock="Georgien" exclusive="no"/>
+
+                <script language="JavaScript">
+                    <![CDATA[
+
+function spooler_process() 
+{               
+    var hostware = new ActiveXObject( "hostware.global" );
+    hostware.sleep( 10 );
+    return false;
+}
+
+                ]]>
+                </script>
+
+            </job>
+        </jobs>
+
+        
+        <commands>
+            <start_job job="A"/>
+            <start_job job="B"/>
+            <start_job job="C"/>
+            <start_job job="D"/>
+            <start_job job="E"/>
+        </commands>
+    </config>
+</spooler>
