@@ -401,7 +401,8 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-854", "Closing lock $1 while held by $2" },
     { "SCHEDULER-855", "$1 has been $2 acquired" },
     { "SCHEDULER-856", "$1 has been released" },
-    { "SCHEDULER-857", "Waiting for $1" },
+    { "SCHEDULER-857", "Waiting for $1 (place $2)" },
+    { "SCHEDULER-858", "Not longer waiting for $1" },
     {}
 };
 } //namespace sos

@@ -3593,7 +3593,13 @@
 
         <message code="SCHEDULER-857" weight="info">
             <text xml:lang="en">
-                <title>Waiting for <p1>Lock</p1></title>
+                <title>Waiting for <p1>Lock</p1> (place <p2/>)</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-858" weight="info">
+            <text xml:lang="en">
+                <title>Not longer waiting for <p1>Lock</p1></title>
             </text>
         </message>
 

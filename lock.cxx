@@ -43,25 +43,6 @@ void Scheduler_lock::close()
     _waiting_queues.clear();
 }
 
-//--------------------------------------------------------------Scheduler_lock::clear_waiting_queue
-
-//void Scheduler_lock::clear_waiting_queue()
-//{
-//    //for( int lock_mode = lk_non_exclusive; lock_mode <= lk_exclusive; lock_mode++ )
-//    //{
-//    //    Holder_list* list = &_waiting_queue[ lock_mode ];
-//
-//    //    for( Holder_list::iterator it = list->begin(); it != list->end(); )
-//    //    {
-//    //        Lock_requestor* lock_requestor = *it;
-//    //        lock_requestor ->_lock = NULL;
-//    //        it = list->erase( it );
-//    //    }
-//    //}
-//
-//    _waiting_queue.clear();
-//}
-
 //--------------------------------------------------------------------------Scheduler_lock::set_dom
 
 void Scheduler_lock::set_dom( const xml::Element_ptr& lock_element )
@@ -160,9 +141,14 @@ void Scheduler_lock::release_lock_for( Lock_holder* holder )
 
 //-----------------------------------------------------------Scheduler_lock::enqueue_lock_requestor
 
-void Scheduler_lock::enqueue_lock_requestor( Lock_requestor* lock_requestor )
+int Scheduler_lock::enqueue_lock_requestor( Lock_requestor* lock_requestor )
 {
     _waiting_queues[ lock_requestor->lock_mode() ].push_back( lock_requestor );
+
+    int result = _waiting_queues[ lk_exclusive ].size();
+    if( lock_requestor->lock_mode() == lk_non_exclusive )  result += _waiting_queues[ lk_non_exclusive ].size();
+
+    return result;
 }
 
 //-----------------------------------------------------------Scheduler_lock::dequeue_lock_requestor
@@ -247,16 +233,21 @@ void Lock_requestor::enqueue_lock_request()
 { 
     if( _is_enqueued )  z::throw_xc( __FUNCTION__ );
 
-    lock()->enqueue_lock_requestor( this ); 
+    int place = lock()->enqueue_lock_requestor( this ); 
     _is_enqueued = true; 
+
+    _log->info( message_string( "SCHEDULER-857", lock()->obj_name(), place ) );
 }
 
 //-------------------------------------------------------------Lock_requestor::dequeue_lock_request
 
 void Lock_requestor::dequeue_lock_request()
 { 
-    lock()->dequeue_lock_requestor( this ); 
-    _is_enqueued = false; 
+    if( _is_enqueued )
+    {
+        lock()->dequeue_lock_requestor( this ); 
+        _is_enqueued = false; 
+    }
 }
 
 //-----------------------------------------------------------------------------Lock_requestor::lock
@@ -274,7 +265,7 @@ xml::Element_ptr Lock_requestor::dom_element( const xml::Document_ptr& dom_docum
 
     result.setAttribute( "name", _lock_name );
 
-    if( _is_enqueued )  result.setAttribute( "enqueued", true );
+    if( _is_enqueued )  result.setAttribute( "enqueued", "yes" );
 
     return result;
 }
@@ -366,7 +357,7 @@ xml::Element_ptr Lock_holder::dom_element( const xml::Document_ptr& dom_document
     if( _lock_requestor )
     {
         result.setAttribute( "name", _lock_requestor->lock_name() );
-        result.setAttribute( "exclusive", _lock_requestor->lock_mode() == Scheduler_lock::lk_exclusive );
+        result.setAttribute( "exclusive", _lock_requestor->lock_mode() == Scheduler_lock::lk_exclusive? "yes" : "no" );
     }
 
     return result;

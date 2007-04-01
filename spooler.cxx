@@ -858,6 +858,7 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
 //    }
 //#   endif
 
+    if( !lock_subsystem()->is_empty() )  state_element.appendChild( lock_subsystem()->dom_element( dom, show ) );
 
     if( show.is_set( show_jobs ) )  state_element.appendChild( _job_subsystem->jobs_dom_element( dom, show ) );
                               else  state_element.append_new_comment( "<jobs> suppressed. Use what=\"jobs\"." );

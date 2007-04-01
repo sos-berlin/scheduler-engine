@@ -1019,12 +1019,7 @@
                                 </td>
 
                                 <td>
-                                    <xsl:apply-templates select="$job/@state"/>
-
-                                    <xsl:if test="$job/@waiting_for_process='yes'">
-                                        <span style="margin-left: 1ex; color: red">needs process</span>
-                                    </xsl:if>
-
+                                    <xsl:apply-templates mode="job_state_line" select="$job" />
 
                                     <xsl:choose>
                                         <xsl:when test="$job/tasks/@count &gt; 0">
@@ -1166,8 +1161,8 @@
                             </td>
                             
                             <td colspan="3">
-                                <xsl:apply-templates select="$job/@state"/>
-                                
+                                <xsl:apply-templates mode="job_state_line" select="$job" />
+
                                 <xsl:choose>
                                     <xsl:when test="$job/tasks/@count>0">
                                         <xsl:text>, </xsl:text>
@@ -1216,6 +1211,35 @@
             
         </xsl:if>
         
+    </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~job_state_line-->
+
+    <xsl:template mode="job_state_line" match="job">
+        
+        <xsl:apply-templates select="@state"/>
+
+        <xsl:if test="@waiting_for_process='yes'">
+            <xsl:text>, </xsl:text>
+            <span style="color: red; font-weight: bold">needs process</span>
+        </xsl:if>
+
+        <xsl:if test="lock.requestor">
+            <xsl:text>, </xsl:text>
+
+            <xsl:choose>
+                <xsl:when test="lock.requestor[ @enqueued='yes' ]">
+                    <span style="color: red; font-weight: bold;">
+                        <xsl:text>needs lock </xsl:text>
+                        <xsl:value-of select="lock.requestor[ @enqueued='yes' ]/@name"/>
+                    </span>
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:text>lock </xsl:text>
+                    <xsl:value-of select="lock.requestor/@name"/>
+                </xsl:otherwise>
+            </xsl:choose>
+        </xsl:if>
     </xsl:template>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Order in Job chain list-->

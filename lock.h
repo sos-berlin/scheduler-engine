@@ -31,7 +31,7 @@ struct Scheduler_lock : Object, Scheduler_object, Non_cloneable
     bool                        is_available_for            ( const Lock_requestor* );
     bool                        request_lock_for            ( Lock_holder* );
     void                        release_lock_for            ( Lock_holder* );
-    void                        enqueue_lock_requestor      ( Lock_requestor* );
+    int                         enqueue_lock_requestor      ( Lock_requestor* );
     void                        dequeue_lock_requestor      ( Lock_requestor* );
     bool                        is_exclusive                () const;
     string                      obj_name                    () const;
@@ -130,6 +130,7 @@ struct Lock_subsystem : Subsystem
     void                    set_dom                         ( const xml::Element_ptr& );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
 
+    bool                        is_empty                    () const                                { return _lock_map.empty(); }
     Scheduler_lock*             lock                        ( const string& name );
     Scheduler_lock*             lock_or_null                ( const string& name );
 

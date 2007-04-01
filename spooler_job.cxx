@@ -2174,7 +2174,6 @@ ptr<Task> Job::task_to_start()
                 if( !_lock_requestor->is_enqueued() )
                 {
                     _lock_requestor->enqueue_lock_request();
-                    _log->info( message_string( "SCHEDULER-857", _lock_requestor->lock()->obj_name() ) );
                 }
 
                 // Wir können die Task nicht starten, denn die Sperre ist nicht verfügbar
@@ -2282,14 +2281,21 @@ bool Job::do_something()
   //Z_DEBUG_ONLY( _log->debug9( "do_something() state=" + state_name() ); )
 
     bool something_done     = false;       
+    bool task_started       = false;
     Time now                = Time::now();
 
     something_done |= check_for_changed_directory( now );         // Hier prüfen, damit Signal zurückgesetzt wird
 
 
-    if( _state == s_read_error )  return false;
-    if( _state == s_error      )  return false;
-
+    if( _state == s_read_error )  
+    {
+        //
+    }
+    if( _state == s_error )
+    {
+        //
+    }
+    else
     try
     {
         try
@@ -2357,6 +2363,7 @@ bool Job::do_something()
 
                             task->do_something();           // Damit die Task den Prozess startet und die Prozessklasse davon weiß
 
+                            task_started = true;
                             something_done = true;
                         }
                     }
@@ -2392,6 +2399,11 @@ bool Job::do_something()
   //catch( Stop_scheduler_exception& ) { throw; }
     catch( const exception&  x ) { set_error( x );  set_job_error( x );  sos_sleep(1); }     // Bremsen, falls sich der Fehler sofort wiederholt
 
+    if( !task_started  &&  _lock_requestor  &&  _lock_requestor->is_enqueued()  &&  _lock_requestor->is_lock_available() )
+    {
+        _lock_requestor->dequeue_lock_request();
+        _log->debug( message_string( "SCHEDULER-858", _lock_requestor->lock()->obj_name() ) );
+    }
 
     return something_done;
 }
@@ -2532,9 +2544,18 @@ void Job::set_state( State new_state )
                                        else  _log->debug9( message_string( "SCHEDULER-931", state_name() ) );
         }
 
-        if( _waiting_for_process  &&  ( _state != s_pending  ||  _state != s_running ) )
+        if( _state != s_pending  ||  _state != s_running )
         {
-            remove_waiting_job_from_process_list();
+            if( _waiting_for_process )
+            {
+                remove_waiting_job_from_process_list();
+            }
+
+            if( _lock_requestor  &&  _lock_requestor->is_enqueued()  &&  _lock_requestor->is_lock_available() )
+            {
+                _lock_requestor->dequeue_lock_request();
+                _log->debug( message_string( "SCHEDULER-858", _lock_requestor->lock()->obj_name() ) );
+            }
         }
     }
 }

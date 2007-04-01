@@ -73,7 +73,7 @@ namespace scheduler {
                         case log_info:      attributes |= FOREGROUND_INTENSITY | FOREGROUND_BLUE; break;
                         case log_debug1:    attributes |= FOREGROUND_BLUE; break;
                         case log_debug2:    
-                        case log_debug3:    attributes |= FOREGROUND_GREEN; break;
+                        case log_debug3:    attributes |= FOREGROUND_GREEN | FOREGROUND_BLUE; break;
                         case log_debug4:
                         case log_debug5:    
                         case log_debug6:    attributes |= FOREGROUND_RED | FOREGROUND_GREEN; break;
