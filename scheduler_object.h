@@ -34,6 +34,7 @@ struct Scheduler_object
         type_job_subsystem,
         type_lock,
         type_lock_holder,
+        type_lock_requestor,
         type_lock_subsystem,
         type_web_service,
         type_web_service_operation,

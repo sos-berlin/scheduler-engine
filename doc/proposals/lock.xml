@@ -36,7 +36,7 @@
     &lt;lock.lock lock="<i>lock_name</i>"/></pre>
 
     <p>
-        Eine Task, die einen Sperre belegt, lässt keine andere Task zu, die dieselbe Sperre beansprucht.
+        Eine Task, die eine Sperre belegt, lässt keine andere Task zu, die dieselbe Sperre beansprucht.
     </p>
 
 

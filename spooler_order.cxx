@@ -2908,7 +2908,6 @@ bool Order::db_try_insert()
 
                 if( !result_set.eof() )  break;
 
-int TESTEN;
                 string msg = message_string( "SCHEDULER-851", insert_race_retry_count, x );
                 ( _job_chain? _job_chain->log() : _spooler->log() ) -> info( S() << obj_name() << ":" << msg );
                 _log->debug( msg );

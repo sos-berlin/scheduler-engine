@@ -399,8 +399,9 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-852", "Order not found in database" },
     { "SCHEDULER-853", "Order in database could not be updated or deleted. " },
     { "SCHEDULER-854", "Closing lock $1 while held by $2" },
-    { "SCHEDULER-855", "Holding lock" },
-    { "SCHEDULER-856", "Releasing lock" },
+    { "SCHEDULER-855", "$1 has been $2 acquired" },
+    { "SCHEDULER-856", "$1 has been released" },
+    { "SCHEDULER-857", "Waiting for $1" },
     {}
 };
 } //namespace sos

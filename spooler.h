@@ -117,6 +117,7 @@ struct Get_events_command_response;
 struct Job;
 struct Job_chain;
 struct Job_subsystem_interface;
+struct Lock_requestor;
 struct Lock_holder;
 struct Lock_subsystem;
 struct Module;

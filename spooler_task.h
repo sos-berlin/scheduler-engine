@@ -288,7 +288,7 @@ struct Task : Object,
     bool                       _killed;                     // Task abgebrochen (nach do_kill/timeout)
     bool                       _kill_tried;
     bool                       _module_instance_async_error;    // SCHEDULER-202
-    bool                       _is_in_database;                   // Datensatz für diese Task ist in der Datenbank
+    bool                       _is_in_database;             // Datensatz für diese Task ist in der Datenbank
     bool                       _running_state_reached;      // Zustand s_running... erreicht
     bool                       _is_first_job_delay_after_error;
     bool                       _is_last_job_delay_after_error;
@@ -312,6 +312,7 @@ struct Task : Object,
 
     ptr<Module_instance>       _module_instance;            // Nur für Module_task. Hier, damit wir nicht immer wieder casten müssen.
     ptr<Web_service>           _web_service;
+    ptr<Lock_holder>           _lock_holder;
 };
 
 //----------------------------------------------------------------------------------------Task_list

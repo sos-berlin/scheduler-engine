@@ -30,6 +30,7 @@ string Scheduler_object::name_of_type_code( Scheduler_object::Type_code type_cod
         case type_job_subsystem:                return "Job_subsystem";
         case type_lock:                         return "Lock";
         case type_lock_holder:                  return "Lock_holder";
+        case type_lock_requestor:               return "Lock_requestor";
         case type_lock_subsystem:               return "Lock_subsystem";
         case type_web_service:                  return "Web_service";
         case type_web_service_operation:        return "Web_service_operation";

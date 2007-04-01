@@ -3581,13 +3581,19 @@
 
         <message code="SCHEDULER-855" weight="info">
             <text xml:lang="en">
-                <title>Holding lock</title>
+                <title><p1>Lock</p1> has been <p2>exclusively/non-exclusively</p2> acquired</title>
             </text>
         </message>
 
         <message code="SCHEDULER-856" weight="info">
             <text xml:lang="en">
-                <title>Releasing lock</title>
+                <title><p1>Lock</p1> has been released</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-857" weight="info">
+            <text xml:lang="en">
+                <title>Waiting for <p1>Lock</p1></title>
             </text>
         </message>
 

@@ -61,6 +61,19 @@ struct Job_subsystem : Job_subsystem_interface
     xml::Element_ptr            jobs_dom_element            ( const xml::Document_ptr&, const Show_what& );
 };
 
+//-------------------------------------------------------------------------------Job_lock_requestor
+
+struct Job_lock_requestor : Lock_requestor
+{
+                                Job_lock_requestor          ( Job* job )                            : Lock_requestor( job ), _job(job) {}
+
+    // Lock_requestor:
+    void                        on_lock_is_available        ( Scheduler_lock* )                     { _job->signal( __FUNCTION__ ); }
+
+  private:
+    Job*                       _job;
+};
+
 //--------------------------------------------------------------------------------new_job_subsystem
 
 ptr<Job_subsystem_interface> new_job_subsystem( Scheduler* scheduler )
@@ -527,7 +540,7 @@ void Job::load( Transaction* ta )
             return;
         }
 
-        if( _lock_holder )  _lock_holder->load();       // Prüft, ob die Sperre definiert ist
+        if( _lock_requestor )  _lock_requestor->load();       // Prüft, ob die Sperre definiert ist
 
         if( _spooler->_db->opened()  &&  _spooler->has_exclusiveness() )  load_tasks_from_db( ta );
 
@@ -656,19 +669,19 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
             else
             //if( e.nodeName_is( "object_set" ) )  _object_set_descr = SOS_NEW( Object_set_descr( e ) );
             //else
-            //if( e.nodeName_is( "lock" ) )  
-            //{
-            //    if( _lock_holder )  
-            //    {
-            //        string name = e.getAttribute( "name" );
-            //        if( name != _lock_holder->lock_name() )  z::throw_xc( "SCHEDULER-402", _lock_holder->lock_name(), name );      // Es kann nur einen geben
-            //    }
-            //    else
-            //        _lock_holder = Z_NEW( Lock_holder( this ) );
+            if( e.nodeName_is( "lock.lock" ) )  
+            {
+                if( _lock_requestor )  
+                {
+                    string name = e.getAttribute( "name" );
+                    if( name != _lock_requestor->lock_name() )  z::throw_xc( "SCHEDULER-402", _lock_requestor->lock_name(), name );      // Es kann nur einen geben
+                }
+                else
+                    _lock_requestor = Z_NEW( Job_lock_requestor( this ) );
 
-            //    _lock_holder->set_dom( e );
-            //}
-            //else
+                _lock_requestor->set_dom( e );
+            }
+            else
             if( e.nodeName_is( "params"     ) )  _default_params->set_dom( e, &_spooler->_variable_set_map );  
             else
             if( e.nodeName_is( "script"     ) )  
@@ -1957,6 +1970,11 @@ void Job::calculate_next_time( const Time& now )
     {
         Time next_time = Time::never;
 
+        if( _lock_requestor  &&  _lock_requestor->is_enqueued() )
+        {
+            if( _lock_requestor->is_lock_available() )  next_time = 0;
+        }
+        else
         if( _waiting_for_process )
         {
             if( _waiting_for_process_try_again )  next_time = 0;
@@ -2093,22 +2111,13 @@ ptr<Task> Job::task_to_start()
     if( _spooler->state() == Spooler::s_stopping
      || _spooler->state() == Spooler::s_stopping_let_run )  return NULL;
 
-    Time        now       = Time::now();
-    Start_cause cause     = cause_none;
-    ptr<Task>   task      = NULL;
-    bool        has_order = false;
-    string      log_line;
+    Time            now       = Time::now();
+    Start_cause     cause     = cause_none;
+    ptr<Task>       task      = NULL;
+    bool            has_order = false;
+    string          log_line;
 
-
-    // Lock_acquiring lock_acquiring ( _lock_holder );
-    // if( !lock_acquiring.is_possible() )  return NULL;
-    // ...
-    // lock_acquiring.acquire();
-    // ~lock_acquiring();
-    //
-    ///// if( _lock_holder  &&  !_lock_holder->reserve_lock() )  return NULL;
-
-
+    
     task = get_task_from_queue( now );
     if( task )  cause = task->_start_at? cause_queue_at : cause_queue;
         
@@ -2158,6 +2167,22 @@ ptr<Task> Job::task_to_start()
 
     if( cause || has_order )     // Es soll also eine Task gestartet werden.
     {
+        if( _lock_requestor )
+        {
+            if( !_lock_requestor->is_lock_available() )
+            {
+                if( !_lock_requestor->is_enqueued() )
+                {
+                    _lock_requestor->enqueue_lock_request();
+                    _log->info( message_string( "SCHEDULER-857", _lock_requestor->lock()->obj_name() ) );
+                }
+
+                // Wir können die Task nicht starten, denn die Sperre ist nicht verfügbar
+                task = NULL, cause = cause_none, has_order = false;      
+            }
+        }
+
+
         // Ist denn ein Prozess verfügbar?
 
         if( _module->_process_class  &&  !_module->_process_class->process_available( this ) )
@@ -2184,6 +2209,7 @@ ptr<Task> Job::task_to_start()
         {
             remove_waiting_job_from_process_list();
         }
+
 
         if( cause || has_order )
         {
@@ -2231,12 +2257,17 @@ ptr<Task> Job::task_to_start()
         }
     }
 
+    if( task  &&  _lock_requestor )
+    {
+        bool is_locked = task->_lock_holder->request_lock();
+        assert( is_locked );
+
+        if( _lock_requestor->is_enqueued() )  _lock_requestor->dequeue_lock_request();
+    }
+
     if( _waiting_for_process  &&  _module->_process_class->process_available( this ) )
     {
-        // Ob eine Task gestartet wird oder nicht, 
-        //bool notify = _waiting_for_process_try_again;                           // Sind wir mit notify_a_process_is_idle() benachrichtigt worden?
         remove_waiting_job_from_process_list();
-        //if( notify )  _module->_process_class->notify_a_process_is_idle();       // Dieser Job braucht den Prozess nicht mehr. Also nächsten Job benachrichtigen!
     }
 
     if( task )  _start_once = false;
@@ -2738,42 +2769,6 @@ xml::Element_ptr Job::dom_element( const xml::Document_ptr& document, const Show
 
         if( order_controlled() )
         job_element.setAttribute( "job_chain_priority", _job_chain_priority );
-/*
-        if( _state == s_pending )
-        {
-
-            // Versuchen, nächste Startzeit herauszubekommen
-            Period p             = _period;  
-            int    i             = 100;      // Anzahl Perioden, die wir probieren
-            Time   next          = _next_start_time;
-            Time   time          = Time::now();
-            Time   next_at_start = _task_queue.next_at_start_time( time );
-            
-            if( next == Time::never )
-            {
-                //p = _run_time->next_period( p.end() );
-                next = p.begin();
-                if( p.end() != Time::never )  time = p.end();
-
-                while( i-- ) {          
-                    if( p.has_start()  ||  _task_queue.has_task_waiting_for_period() )  break;
-                    p = _run_time->next_period( time, time::wss_next_period_or_single_start );
-                    next = p.begin();
-                    if( next == Time::never        )  break;
-                    if( next > next_at_start      )  break;
-                    if( next > _next_single_start )  break;
-                    time = p.end();
-                }
-                
-                if( i < 0 )  next = Time::never;
-            }
-
-            if( next > _next_single_start )  next = _next_single_start;
-            if( next > next_at_start      )  next = next_at_start;
-            if( _order_queue )  next = min( next, _order_queue->next_time() );
-            if( next < Time::never )  job_element.setAttribute( "next_start_time", next.as_string() );
-        }
-*/
 
         if( show.is_set( show_job_params )  &&  _default_params )  job_element.appendChild( _default_params->dom_element( document, "params", "param" ) );
 
@@ -2781,6 +2776,7 @@ xml::Element_ptr Job::dom_element( const xml::Document_ptr& document, const Show
 
         dom_append_nl( job_element );
 
+        if( _lock_requestor )  job_element.appendChild( _lock_requestor->dom_element( document, show ) );
 
         if( show.is_set( show_tasks ) )
         {

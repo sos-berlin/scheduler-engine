@@ -6,9 +6,12 @@
 namespace sos {
 namespace scheduler {
 
+struct Lock_requestor;
+struct Lock_holder;
+
 //-----------------------------------------------------------------------------------Scheduler_lock
 
-struct Scheduler_lock : Object, Scheduler_object
+struct Scheduler_lock : Object, Scheduler_object, Non_cloneable
 {
     enum Lock_mode
     { 
@@ -25,70 +28,89 @@ struct Scheduler_lock : Object, Scheduler_object
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
 
     string                      name                        () const                                { return _name; }
+    bool                        is_available_for            ( const Lock_requestor* );
     bool                        request_lock_for            ( Lock_holder* );
     void                        release_lock_for            ( Lock_holder* );
-    void                        remove_waiting_holder       ( Lock_holder* );
+    void                        enqueue_lock_requestor      ( Lock_requestor* );
+    void                        dequeue_lock_requestor      ( Lock_requestor* );
     bool                        is_exclusive                () const;
     string                      obj_name                    () const;
 
 
   private:
-    void                        clear_waiting_queue         ();
-    void                        remove_holder               ( Lock_holder* );
+  //void                        clear_waiting_queue         ();
 
 
     Fill_zero                  _zero_;
     string                     _name;
-    typedef list<Lock_holder*>  Holder_list;
-    Holder_list                _holder_list;
-    vector<Holder_list>        _waiting_queue;              // Index: Lock_mode, eine Liste für lk_non_exclusive und eine für lk_exclusive
+    int                        _max_non_exclusive;
+
+    typedef stdext::hash_set<Lock_holder*>  Holder_set;
+    Holder_set                 _holder_set;
+
+    typedef list<Lock_requestor*> Requestor_list;
+    vector<Requestor_list>     _waiting_queues;             // Index: Lock_mode, eine Liste für lk_non_exclusive und eine für lk_exclusive
+
     Lock_subsystem*            _lock_subsystem;
 };
 
-//-------------------------------------------------------------------------------------Lock_holder
-    
-struct Lock_holder : Object, Scheduler_object
+//-----------------------------------------------------------------------------------Lock_requestor
+
+struct Lock_requestor : Object, Scheduler_object, Non_cloneable
 {
-    enum State
-    {
-        s_none,
-        s_is_waiting_for_lock,
-        s_is_holding_lock
-    };
-
-
-                                Lock_holder                 ( Scheduler_object* );
-    virtual                    ~Lock_holder                 ();
+                                Lock_requestor              ( Scheduler_object* );
+                               ~Lock_requestor              ();
 
     void                    set_dom                         ( const xml::Element_ptr& );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
 
-    void                        close                       ();
     void                        load                        ();
-    string                      lock_name                   ()                                      { return _lock_name; }
-    Scheduler_lock*             lock                        () const                                { return _lock; }
-    State                       state                       () const                                { return _state; }
+    string                      lock_name                   () const                                { return _lock_name; }
     Scheduler_lock::Lock_mode   lock_mode                   () const                                { return _lock_mode; }
-    bool                        request_lock                ();
-    void                        release_lock                ();
-    void                        remove_from_waiting_queue   ();
+    Scheduler_lock*             lock                        () const;
+    bool                        is_enqueued                 () const                                { return _is_enqueued; }
+    bool                        is_lock_available           () const                                { return lock()->is_available_for( this ); }
+    void                        enqueue_lock_request        ();
+    void                        dequeue_lock_request        ();
 
     virtual void                on_lock_is_available        ( Scheduler_lock* )                     = 0;
-    virtual Prefix_log*         log                         () const                                = 0;
 
     string                      obj_name                    () const;
 
   private:
-    friend struct               Scheduler_lock;
-    void                        clear_lock_reference        ();
-    void                    set_state                       ( State );
-
     Fill_zero                  _zero_;
     string                     _lock_name;
-    Scheduler_lock*            _lock;
     Scheduler_lock::Lock_mode  _lock_mode;
-    State                      _state;
-    Time                       _state_time;
+    Scheduler_object*          _object;
+    bool                       _is_enqueued;
+};
+
+//-------------------------------------------------------------------------------------Lock_holder
+    
+struct Lock_holder : Object, Scheduler_object, Non_cloneable
+{
+                                Lock_holder                 ( Scheduler_object*, const Lock_requestor* );
+    virtual                    ~Lock_holder                 ();
+
+    xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
+
+    void                        close                       ();
+
+    const Lock_requestor*       lock_requestor              ()                                      { return _lock_requestor; }
+    string                      lock_name                   ()                                      { return _lock_requestor->lock_name(); }
+    Scheduler_lock::Lock_mode   lock_mode                   () const                                { return _lock_requestor->lock_mode(); }
+    Scheduler_lock*             lock                        () const                                { return _lock_requestor->lock(); }
+    bool                        request_lock                ();
+    void                        release_lock                ();
+
+    string                      obj_name                    () const;
+
+  private:
+    Fill_zero                  _zero_;
+    bool                       _is_holding;
+    const Lock_requestor* const _lock_requestor;
+    //string                     _lock_name;
+    //Scheduler_lock::Lock_mode  _lock_mode;
 
   protected:
     Scheduler_object*          _object;

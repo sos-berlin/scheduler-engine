@@ -6,132 +6,15 @@
 namespace sos {
 namespace scheduler {
 
-//-------------------------------------------------------------------------Lock_holder::Lock_holder
-
-Lock_holder::Lock_holder( Scheduler_object* o ) 
-: 
-    Scheduler_object( o->_spooler, this, type_lock_holder ),
-    _zero_(this+1), 
-    _object(o), 
-    _lock_mode(Scheduler_lock::lk_exclusive)
-{
-}
-
-//------------------------------------------------------------------------Lock_holder::~Lock_holder
-    
-Lock_holder::~Lock_holder()
-{
-    try
-    {
-        close();
-    }
-    catch( exception& x ) { Z_LOG2( "scheduler", __FUNCTION__ << " ERROR " << x.what() << "\n" ); }
-}
-
-//-------------------------------------------------------------------------------Lock_holder::close
-
-void Lock_holder::close()
-{
-    if( _state == s_is_holding_lock )
-    {
-        release_lock();
-    }
-
-    if( _state == s_is_waiting_for_lock )
-    {
-        remove_from_waiting_queue();
-    }
-
-    _lock = NULL;
-}
-
-//----------------------------------------------------------------Lock_holder::clear_lock_reference
-
-void Lock_holder::clear_lock_reference()
-{
-    _lock = NULL;
-    set_state( s_none );
-}
-
-//-----------------------------------------------------------------------------Lock_holder::set_dom
-
-void Lock_holder::set_dom( const xml::Element_ptr& lock_element )
-{
-    assert( lock_element.nodeName_is( "lock.lock" ) );
-
-    _lock_name = lock_element.getAttribute( "lock" );
-    
-    _lock_mode = lock_element.bool_getAttribute( "exclusive", _lock_mode == Scheduler_lock::lk_exclusive )? 
-                    Scheduler_lock::lk_exclusive 
-                  : Scheduler_lock::lk_non_exclusive;
-}
-
-//--------------------------------------------------------------------------------Lock_holder::load
-
-void Lock_holder::load()
-{
-    _spooler->lock_subsystem()->lock( _lock_name );
-}
-
-//---------------------------------------------------------------------------Lock_holder::set_state
-
-void Lock_holder::set_state( State new_state )
-{
-    _state = new_state;
-    _state_time = Time::now();
-}
-
-//------------------------------------------------------------------------Lock_holder::request_lock
-
-bool Lock_holder::request_lock()
-{
-    return _lock->request_lock_for( this );
-}
-
-//------------------------------------------------------------------------Lock_holder::release_lock
-
-void Lock_holder::release_lock()
-{
-    if( _state == s_is_holding_lock )
-    {
-        _lock->release_lock_for( this );
-        set_state( s_none );
-    }
-}
-
-//-----------------------------------------------------------Lock_holder::remove_from_waiting_queue
-
-void Lock_holder::remove_from_waiting_queue()
-{
-    if( _state == s_is_waiting_for_lock )
-    {
-        _lock->remove_waiting_holder( this );
-        set_state( s_none );
-    }
-}
-
-//----------------------------------------------------------------------------Lock_holder::obj_name
-
-string Lock_holder::obj_name() const
-{
-    S result;
-
-    result << "Lock_holder(";
-    if( _object )  result << _object->obj_name();
-    result << ",";
-    if( _lock )  result << _lock->obj_name();
-    result << ")";
-
-    return result;
-}
-
 //-------------------------------------------------------------------Scheduler_lock::Scheduler_lock
 
 Scheduler_lock::Scheduler_lock( Lock_subsystem* lock_subsystem )
 :
     Scheduler_object( lock_subsystem->_spooler, this, type_lock ),
     _zero_(this+1),
-    _lock_subsystem(lock_subsystem)
+    _lock_subsystem(lock_subsystem),
+    _max_non_exclusive(INT_MAX),
+    _waiting_queues(2)
 {
 }
 
@@ -150,35 +33,34 @@ Scheduler_lock::~Scheduler_lock()
 
 void Scheduler_lock::close()
 {
-    for( Holder_list::iterator it = _holder_list.begin(); it != _holder_list.end(); )
+    for( Holder_set::iterator it = _holder_set.begin(); it != _holder_set.end(); )
     {
         Lock_holder* holder = *it;
         log()->error( message_string( "SCHEDULER-854", obj_name(), holder->obj_name() ) );
-        holder->clear_lock_reference();
-        it = _holder_list.erase( it );
+        it = _holder_set.erase( it );
     }
 
-    clear_waiting_queue();
+    _waiting_queues.clear();
 }
 
 //--------------------------------------------------------------Scheduler_lock::clear_waiting_queue
 
-void Scheduler_lock::clear_waiting_queue()
-{
-    for( int lock_mode = lk_non_exclusive; lock_mode <= lk_exclusive; lock_mode++ )
-    {
-        Holder_list* list = &_waiting_queue[ lock_mode ];
-
-        for( Holder_list::iterator it = list->begin(); it != list->end(); )
-        {
-            Lock_holder* holder = *it;
-            holder->_lock = NULL;
-            it = list->erase( it );
-        }
-    }
-
-    _waiting_queue.clear();
-}
+//void Scheduler_lock::clear_waiting_queue()
+//{
+//    //for( int lock_mode = lk_non_exclusive; lock_mode <= lk_exclusive; lock_mode++ )
+//    //{
+//    //    Holder_list* list = &_waiting_queue[ lock_mode ];
+//
+//    //    for( Holder_list::iterator it = list->begin(); it != list->end(); )
+//    //    {
+//    //        Lock_requestor* lock_requestor = *it;
+//    //        lock_requestor ->_lock = NULL;
+//    //        it = list->erase( it );
+//    //    }
+//    //}
+//
+//    _waiting_queue.clear();
+//}
 
 //--------------------------------------------------------------------------Scheduler_lock::set_dom
 
@@ -186,7 +68,10 @@ void Scheduler_lock::set_dom( const xml::Element_ptr& lock_element )
 {
     assert( lock_element.nodeName_is( "lock" ) );
 
-    _name = lock_element.getAttribute( "name" );
+    _name              = lock_element.    getAttribute( "name" );
+    _max_non_exclusive = lock_element.int_getAttribute( "max_non_exclusive", _max_non_exclusive );
+
+    _log->set_prefix( obj_name() );
 }
 
 //----------------------------------------------------------------------Scheduler_lock::dom_element
@@ -196,6 +81,35 @@ xml::Element_ptr Scheduler_lock::dom_element( const xml::Document_ptr& dom_docum
     xml::Element_ptr result = dom_document.createElement( "lock" );
 
     result.setAttribute( "name", _name );
+    if( _max_non_exclusive < INT_MAX )  result.setAttribute( "max_non_exclusive", _max_non_exclusive );
+
+    return result;
+}
+
+//-----------------------------------------------------------------Scheduler_lock::request_lock_for
+
+bool Scheduler_lock::is_available_for( const Lock_requestor* lock_requestor )
+{
+    bool result = false;
+
+    if( _waiting_queues[ lock_requestor->lock_mode() ].empty()  ||                       // Warteschlange ist leer?
+       *_waiting_queues[ lock_requestor->lock_mode() ].begin() == lock_requestor )       // Wir sind dran?
+    {
+        if( lock_requestor->lock_mode() == lk_exclusive )
+        {
+            if( _holder_set.empty() )
+            {
+                result = true;
+            }
+        }
+        else 
+        if( _waiting_queues[ lk_exclusive ].empty()  &&      // Keine exklusive Sperre verlangt?
+            !is_exclusive()  &&                             // Nicht exklusive gesperrt?
+            _holder_set.size() < _max_non_exclusive )
+        {
+            result = true;
+        }
+    }
 
     return result;
 }
@@ -204,75 +118,65 @@ xml::Element_ptr Scheduler_lock::dom_element( const xml::Document_ptr& dom_docum
 
 bool Scheduler_lock::request_lock_for( Lock_holder* holder )
 {
-    if( holder->_state == Lock_holder::s_is_holding_lock )  z::throw_xc( __FUNCTION__ );
+    bool result = false;
 
-    if( holder->lock_mode() == lk_exclusive? _holder_list.empty() : 
-                                             !is_exclusive()  &&  _waiting_queue[ lk_exclusive ].empty() )
-    {
-        if( holder->_state == Lock_holder::s_is_waiting_for_lock )
-        {
-            remove_waiting_holder( holder );
-        }
+    //assert( holder->_is_locked _state == Lock_holder::s_is_holding_lock )  z::throw_xc( __FUNCTION__ );
 
-        _holder_list.push_back( holder );
-
-        holder->set_state( Lock_holder::s_is_holding_lock );
-        _log->info( message_string( "SCHEDULER-855", holder->obj_name() ) );
+    if( is_available_for( holder->lock_requestor() ) )
+    {        
+        _holder_set.insert( holder );
+        result = true; //holder->set_state( Lock_holder::s_is_holding_lock );
     }
 
-    if( holder->_state != Lock_holder::s_is_holding_lock ) 
-    {
-        _waiting_queue[ holder->lock_mode() ].push_back( holder );
-    }
-
-    return holder->_state == Lock_holder::s_is_holding_lock;
+    return result;
 }
 
 //-----------------------------------------------------------------Scheduler_lock::release_lock_for
 
 void Scheduler_lock::release_lock_for( Lock_holder* holder )
 {
-    Z_FOR_EACH( Holder_list, _holder_list, it )
+    Z_FOR_EACH( Holder_set, _holder_set, it )
     {
         if( *it == holder )
         {
-            _holder_list.erase( it );
-            holder->set_state( Lock_holder::s_none );
-            _log->info( message_string( "SCHEDULER-856", holder->obj_name() ) );
-            break;
+            _holder_set.erase( it );
+            goto FOUND;
         }
     }
 
-    if( holder->_state == Lock_holder::s_is_holding_lock )  z::throw_xc( __FUNCTION__ );
+    Z_DEBUG_ONLY( assert( !"Unbekannte Sperre" ) );
+  FOUND:
 
-
-    // Was tun wir, wenn Lock_holder die Sperre nicht übernehmen kann?
-
-    if( !_waiting_queue[ lk_exclusive ].empty() )  
+    if( !_waiting_queues[ lk_exclusive ].empty() )  
     {
-        ( *_waiting_queue[ lk_exclusive ].begin() ) -> on_lock_is_available( this );
+        ( *_waiting_queues[ lk_exclusive ].begin() ) -> on_lock_is_available( this );
     }
     else
-    if( !_waiting_queue[ lk_non_exclusive ].empty() )  
+    if( !_waiting_queues[ lk_non_exclusive ].empty() )  
     {
-        ( *_waiting_queue[ lk_non_exclusive ].begin() ) -> on_lock_is_available( this );
+        ( *_waiting_queues[ lk_non_exclusive ].begin() ) -> on_lock_is_available( this );
     }
 }
 
-//------------------------------------------------------------Scheduler_lock::remove_waiting_holder
+//-----------------------------------------------------------Scheduler_lock::enqueue_lock_requestor
 
-void Scheduler_lock::remove_waiting_holder( Lock_holder* holder )
+void Scheduler_lock::enqueue_lock_requestor( Lock_requestor* lock_requestor )
 {
-    for( int lock_mode = lk_non_exclusive; lock_mode <= lk_exclusive; lock_mode++ )
+    _waiting_queues[ lock_requestor->lock_mode() ].push_back( lock_requestor );
+}
+
+//-----------------------------------------------------------Scheduler_lock::dequeue_lock_requestor
+
+void Scheduler_lock::dequeue_lock_requestor( Lock_requestor* lock_requestor )
+{
+    Requestor_list& list = _waiting_queues[ lock_requestor->lock_mode() ];
+
+    Z_FOR_EACH( Requestor_list, list, it )
     {
-        Holder_list* list = &_waiting_queue[ lock_mode ];
-        Z_FOR_EACH( Holder_list, *list, it )
+        if( *it == lock_requestor )  
         {
-            if( *it == holder )  
-            {
-                list->erase( it );
-                return;
-            }
+            list.erase( it );
+            return;
         }
     }
 }
@@ -281,7 +185,7 @@ void Scheduler_lock::remove_waiting_holder( Lock_holder* holder )
 
 bool Scheduler_lock::is_exclusive() const
 { 
-    return _holder_list.size() == 1  &&  (*_holder_list.begin())->lock_mode() == lk_exclusive; 
+    return _holder_set.size() == 1  &&  (*_holder_set.begin())->lock_mode() == lk_exclusive; 
 }
 
 //-------------------------------------------------------------------------Scheduler_lock::obj_name
@@ -291,6 +195,195 @@ string Scheduler_lock::obj_name() const
     S result;
 
     result << "Lock " << _name;
+
+    return result;
+}
+
+//-------------------------------------------------------------------Lock_requestor::Lock_requestor
+
+Lock_requestor::Lock_requestor( Scheduler_object* o ) 
+: 
+    Scheduler_object( o->_spooler, this, type_lock_requestor ),
+    _zero_(this+1), 
+    _object(o),
+    _lock_mode( Scheduler_lock::lk_exclusive )
+{
+    _log = o->_log;
+}
+
+//------------------------------------------------------------------Lock_requestor::~Lock_requestor
+    
+Lock_requestor::~Lock_requestor()
+{ 
+    if( Scheduler_lock* lock = _spooler->lock_subsystem()->lock_or_null( _lock_name ) )
+    {
+        lock->dequeue_lock_requestor( this );
+    }
+}
+
+//--------------------------------------------------------------------------Lock_requestor::set_dom
+
+void Lock_requestor::set_dom( const xml::Element_ptr& lock_element )
+{
+    assert( lock_element.nodeName_is( "lock.lock" ) );
+
+    _lock_name = lock_element.getAttribute( "lock" );
+    
+    _lock_mode = lock_element.bool_getAttribute( "exclusive", _lock_mode == Scheduler_lock::lk_exclusive )? 
+                    Scheduler_lock::lk_exclusive 
+                  : Scheduler_lock::lk_non_exclusive;
+}
+
+//-----------------------------------------------------------------------------Lock_requestor::load
+
+void Lock_requestor::load()
+{
+    _spooler->lock_subsystem()->lock( _lock_name );
+}
+
+//-------------------------------------------------------------Lock_requestor::enqueue_lock_request
+
+void Lock_requestor::enqueue_lock_request()
+{ 
+    if( _is_enqueued )  z::throw_xc( __FUNCTION__ );
+
+    lock()->enqueue_lock_requestor( this ); 
+    _is_enqueued = true; 
+}
+
+//-------------------------------------------------------------Lock_requestor::dequeue_lock_request
+
+void Lock_requestor::dequeue_lock_request()
+{ 
+    lock()->dequeue_lock_requestor( this ); 
+    _is_enqueued = false; 
+}
+
+//-----------------------------------------------------------------------------Lock_requestor::lock
+
+Scheduler_lock* Lock_requestor::lock() const
+{ 
+    return _spooler->lock_subsystem()->lock( _lock_name ); 
+}
+
+//----------------------------------------------------------------------Lock_requestor::dom_element
+
+xml::Element_ptr Lock_requestor::dom_element( const xml::Document_ptr& dom_document, const Show_what& )
+{
+    xml::Element_ptr result = dom_document.createElement( "lock.requestor" );
+
+    result.setAttribute( "name", _lock_name );
+
+    if( _is_enqueued )  result.setAttribute( "enqueued", true );
+
+    return result;
+}
+
+//-------------------------------------------------------------------------Lock_requestor::obj_name
+
+string Lock_requestor::obj_name() const
+{
+    S result;
+    result << "Lock_requestor";
+    
+    if( _lock_mode == Scheduler_lock::lk_exclusive )  result << " exclusive";
+                                                else  result << " non-exclusive";
+
+    if( Scheduler_lock* lock = _spooler->lock_subsystem()->lock_or_null( _lock_name ) )
+    {
+        result << " " << lock->obj_name();
+    }
+
+    return result;
+}
+
+//-------------------------------------------------------------------------Lock_holder::Lock_holder
+
+Lock_holder::Lock_holder( Scheduler_object* o, const Lock_requestor* lock_requestor ) 
+: 
+    Scheduler_object( o->_spooler, this, type_lock_holder ),
+    _zero_(this+1), 
+    _lock_requestor(lock_requestor),
+    _object(o)
+{
+    _log = o->_log;
+}
+
+//------------------------------------------------------------------------Lock_holder::~Lock_holder
+    
+Lock_holder::~Lock_holder()
+{
+    try
+    {
+        close();
+    }
+    catch( exception& x ) { Z_LOG2( "scheduler", __FUNCTION__ << " ERROR " << x.what() << "\n" ); }
+}
+
+//-------------------------------------------------------------------------------Lock_holder::close
+
+void Lock_holder::close()
+{
+    if( _is_holding )
+    {
+        release_lock();
+    }
+}
+
+//------------------------------------------------------------------------Lock_holder::request_lock
+
+bool Lock_holder::request_lock()
+{
+    bool result = lock()->request_lock_for( this );
+
+    if( result )
+    {
+        _is_holding = true;
+        _log->info( message_string( "SCHEDULER-855", lock()->obj_name(), _lock_requestor->lock_mode() == Scheduler_lock::lk_exclusive? "exclusively" : "non-exclusively" ) );
+    }
+
+    return result;
+}
+
+//------------------------------------------------------------------------Lock_holder::release_lock
+
+void Lock_holder::release_lock()
+{
+    if( _is_holding )
+    {
+        lock()->release_lock_for( this );
+        _log->info( message_string( "SCHEDULER-856", lock()->obj_name() ) );
+        _is_holding = false;
+    }
+}
+
+//-------------------------------------------------------------------------Lock_holder::dom_element
+
+xml::Element_ptr Lock_holder::dom_element( const xml::Document_ptr& dom_document, const Show_what& )
+{
+    xml::Element_ptr result = dom_document.createElement( "lock_holder" );
+
+    if( _lock_requestor )
+    {
+        result.setAttribute( "name", _lock_requestor->lock_name() );
+        result.setAttribute( "exclusive", _lock_requestor->lock_mode() == Scheduler_lock::lk_exclusive );
+    }
+
+    return result;
+}
+
+//----------------------------------------------------------------------------Lock_holder::obj_name
+
+string Lock_holder::obj_name() const
+{
+    S result;
+
+    result << "Lock_holder(";
+    if( _object )  result << _object->obj_name();
+    result << ",";
+    if( _lock_requestor )  result << _lock_requestor->obj_name();
+    //if( Scheduler_lock* lock = lock_or_null() )  result << lock->obj_name();
+    result << ")";
 
     return result;
 }
@@ -350,7 +443,7 @@ void Lock_subsystem::set_dom( const xml::Element_ptr& locks_element )
 
     DOM_FOR_EACH_ELEMENT( locks_element, lock_element )
     {
-        ptr<Scheduler_lock> lock = this->lock( lock_element.getAttribute( "name" ) );
+        ptr<Scheduler_lock> lock = this->lock_or_null( lock_element.getAttribute( "name" ) );
         if( !lock )  lock = Z_NEW( Scheduler_lock( this ) );
         lock->set_dom( lock_element );
         _lock_map[ lock->name() ] = lock;

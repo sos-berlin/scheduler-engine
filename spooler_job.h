@@ -368,8 +368,6 @@ struct Job : Object,
   protected:
     friend struct               Job_history;
 
-    ptr<Lock_holder>           _lock_holder;
-
     string                     _title;                      // <job title="">
     string                     _state_text;                 // spooler_job.state_text = "..."
 
@@ -448,6 +446,8 @@ struct Job : Object,
 
     typedef list< pair<string,string> > Start_when_directory_changed_list;  
     Start_when_directory_changed_list  _start_when_directory_changed_list;      // Für <start_when_directory_changed>
+
+    ptr<Lock_requestor>        _lock_requestor;
 };
 
 //--------------------------------------------------------------------------------------Internal_job
