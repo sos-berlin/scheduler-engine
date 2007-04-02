@@ -196,6 +196,7 @@ struct Order : Com_order,
     void                    set_dom                     ( const xml::Element_ptr&, Variable_set_map* = NULL );
     xml::Element_ptr            dom_element             ( const xml::Document_ptr&, const Show_what&, const string* log = NULL ) const;
     xml::Document_ptr           dom                     ( const Show_what& ) const;
+    void                        append_calendar_dom_elements( const xml::Element_ptr&, Show_calendar_options* );
 
     void                    set_run_time                ( const xml::Element_ptr& );
     void                        on_before_modify_run_time();
@@ -459,6 +460,7 @@ struct Job_chain : Com_job_chain, Scheduler_object
 
     void                    set_dom                     ( const xml::Element_ptr& );
     xml::Element_ptr            dom_element             ( const xml::Document_ptr&, const Show_what& );
+    void                        append_calendar_dom_elements( const xml::Element_ptr&, Show_calendar_options* );
 
     Order_subsystem*            order_subsystem         () const;
     string                      obj_name                () const                                    { return "Job_chain " + _name; }
@@ -604,6 +606,7 @@ struct Order_subsystem_interface : Subsystem
     virtual Job_chain*          job_chain                   ( const string& name )                  = 0;
     virtual Job_chain*          job_chain_or_null           ( const string& name )                  = 0;
     virtual xml::Element_ptr    job_chains_dom_element      ( const xml::Document_ptr&, const Show_what& ) = 0;
+    virtual void                append_calendar_dom_elements( const xml::Element_ptr&, Show_calendar_options* ) = 0;
 
     virtual int                 finished_orders_count       () const                                = 0;
     virtual int                 job_chain_map_version       () const                                = 0;

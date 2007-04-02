@@ -437,7 +437,8 @@ struct Run_time : idispatch_implementation< Run_time, spooler_com::Irun_time >,
     void                    set_dom                         ( const xml::Element_ptr& );  // Setzt nicht _xml!
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr& ) const;
     xml::Document_ptr           dom_document                () const;
-    xml::Element_ptr            calendar_dom_element_or_null( const xml::Document_ptr&, const Time& from, const Time& until, int* const limit );
+    void                        append_calendar_dom_elements( const xml::Element_ptr&, Show_calendar_options* );
+
 
     void                        check                       ();                              
 

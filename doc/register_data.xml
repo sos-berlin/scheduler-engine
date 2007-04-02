@@ -523,6 +523,10 @@
     <register_entry register_file='xml/cluster.xml#use_option__exclusive' register_title='&lt;cluster&gt; (Konfiguration)'  register_keyword='exclusive'/>
     <register_entry register_file='xml/terminate.xml#use_option__exclusive' register_title='&lt;terminate&gt; (Kommando)'  register_keyword='exclusive'/>
 </register_keyword>
+<register_keyword keyword='exclusive'>
+    <register_keyword_display><code>exclusive=</code></register_keyword_display>
+    <register_entry register_file='xml/lock.lock.xml#attribute_exclusive' register_title='&lt;lock.lock&gt; (Konfiguration)'  register_keyword='exclusive' type='definition'/>
+</register_keyword>
 <register_keyword keyword='exit'>
     <register_entry register_file='xml/answer/task.xml' register_title='&lt;task&gt; (Antwort)'  register_keyword='exit'/>
 </register_keyword>
@@ -1011,11 +1015,25 @@
 <register_keyword keyword='lock'>
     <register_keyword_display><code>&lt;lock&gt;</code></register_keyword_display>
     <register_entry register_file='CHANGES.xml#use_element__lock' register_title='Änderungsprotokoll'  register_keyword='lock'/>
+    <register_entry register_file='xml.xml#use_element__lock' register_title='Alle XML-Elemente'  register_keyword='lock'/>
+    <register_entry register_file='xml/lock.lock.xml#use_element__lock' register_title='&lt;lock.lock&gt; (Konfiguration)'  register_keyword='lock'/>
     <register_entry register_file='xml/lock.xml#' register_title='&lt;lock&gt; (Konfiguration)'  register_keyword='lock' type='definition'/>
+</register_keyword>
+<register_keyword keyword='lock'>
+    <register_keyword_display><code>lock=</code></register_keyword_display>
+    <register_entry register_file='xml/lock.lock.xml#attribute_lock' register_title='&lt;lock.lock&gt; (Konfiguration)'  register_keyword='lock' type='definition'/>
 </register_keyword>
 <register_keyword keyword='lock.lock'>
     <register_keyword_display><code>&lt;lock.lock&gt;</code></register_keyword_display>
+    <register_entry register_file='xml.xml#use_element__lock.lock' register_title='Alle XML-Elemente'  register_keyword='lock.lock'/>
+    <register_entry register_file='xml/lock.lock.xml#' register_title='&lt;lock.lock&gt; (Konfiguration)'  register_keyword='lock.lock' type='definition'/>
     <register_entry register_file='xml/lock.xml#use_element__lock.lock' register_title='&lt;lock&gt; (Konfiguration)'  register_keyword='lock.lock'/>
+</register_keyword>
+<register_keyword keyword='locks'>
+    <register_keyword_display><code>&lt;locks&gt;</code></register_keyword_display>
+    <register_entry register_file='xml.xml#use_element__locks' register_title='Alle XML-Elemente'  register_keyword='locks'/>
+    <register_entry register_file='xml/lock.lock.xml#use_element__locks' register_title='&lt;lock.lock&gt; (Konfiguration)'  register_keyword='locks'/>
+    <register_entry register_file='xml/locks.xml#' register_title='&lt;locks&gt; (Konfiguration)'  register_keyword='locks' type='definition'/>
 </register_keyword>
 <register_keyword keyword='log'>
     <register_keyword_display><code>&lt;log&gt;</code></register_keyword_display>

@@ -332,32 +332,34 @@ void Command_processor::get_id_and_next( const xml::Element_ptr& element, int* i
 }
 
 //---------------------------------------------------------Command_processor::execute_show_calendar
-#ifdef Z_DEBUG
 
-xml::Element_ptr Command_processor::execute_show_calendar( const xml::Element_ptr& element, const Show_what& )
+xml::Element_ptr Command_processor::execute_show_calendar( const xml::Element_ptr& element, const Show_what& show_what )
 {
     if( _security_level < Security::seclev_info )  z::throw_xc( "SCHEDULER-121" );
 
-    Time from  = Time::now();
-    Time until = Time::never;
-    int  limit = element.int_getAttribute( "limit", 100 );
+    Show_calendar_options options;
 
-    if( element.hasAttribute( "from"  ) )  from .set_datetime( element.getAttribute( "from"  ) );
-    if( element.hasAttribute( "until" ) )  until.set_datetime( element.getAttribute( "until" ) );
+    options._from  = Time::now();
+    options._until = Time::never;
+    options._limit = element.int_getAttribute( "limit", 100 );
+
+    if( element.hasAttribute( "from"  ) )  options._from .set_datetime( element.getAttribute( "from"  ) );
+    if( element.hasAttribute( "until" ) )  options._until.set_datetime( element.getAttribute( "until" ) );
+
+
+
 
     xml::Element_ptr calendar_element = _answer.createElement( "calendar" );
 
-    FOR_EACH_JOB( j )
-    {
-        Job* job = *j;
-        if( xml::Element_ptr e = job->calendar_dom_element_or_null( _answer, from, until, &limit ) )  calendar_element.appendChild( e );
-        if( limit <= 0 )  break;
-    }
+    if( show_what.is_set( show_jobs )  &&  options._limit > 0 )
+        _spooler->job_subsystem()->append_calendar_dom_elements( calendar_element, &options );
+
+    if( show_what.is_set( show_orders )  &&  options._limit > 0 )
+        _spooler->order_subsystem()->append_calendar_dom_elements( calendar_element, &options );
 
     return calendar_element;
 }
 
-#endif
 //----------------------------------------------------------Command_processor::execute_show_history
 
 xml::Element_ptr Command_processor::execute_show_history( const xml::Element_ptr& element, const Show_what& show_ )
@@ -660,20 +662,6 @@ xml::Element_ptr Command_processor::execute_remote_scheduler_remote_task_close( 
 
     return NULL;
 }
-
-//-------------------------------------Command_processor::execute_remote_scheduler_remote_task_kill
-
-//xml::Element_ptr Command_processor::execute_remote_scheduler_remote_task_kill( const xml::Element_ptr& kill_element )
-//{
-//    if( _security_level < Security::seclev_all )  z::throw_xc( "SCHEDULER-121" );
-//    _spooler->assert_is_activated( __FUNCTION__ );
-//
-//    int pid = kill_element.int_getAttribute( "pid" );
-//
-//    _communication_operation->_operation_connection->get_task_process( pid )->kill();
-//
-//    return _answer.createElement( "ok" );
-//}
 
 //---------------------------------------------------------Command_processor::execute_signal_object
 
@@ -1209,10 +1197,8 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     if( element.nodeName_is( "show_state"       ) 
      || element.nodeName_is( "s"                ) )  result = execute_show_state( element, show );
     else
-#ifdef Z_DEBUG
-    if( element.nodeName_is( "show_calendar"    )  &&  _spooler->_zschimmer_mode )  result = execute_show_calendar( element, show );
+    if( element.nodeName_is( "show_calendar"    ) )  result = execute_show_calendar( element, show );
     else
-#endif
     if( element.nodeName_is( "show_history"     ) )  result = execute_show_history( element, show );
     else
     if( element.nodeName_is( "modify_spooler"   ) )  result = execute_modify_spooler( element );
@@ -1229,8 +1215,6 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     else
     if( element.nodeName_is( "remote_scheduler.start_remote_task" ) )  result = execute_remote_scheduler_start_remote_task( element );
     else
-  //if( element.nodeName_is( "remote_scheduler.remote_task.kill"  ) )  result = execute_remote_scheduler_remote_task_kill ( element );
-  //else
     if( element.nodeName_is( "remote_scheduler.remote_task.close" ) )  result = execute_remote_scheduler_remote_task_close( element );
     else
     if( element.nodeName_is( "show_cluster"     ) )  result = execute_show_cluster( element, show );

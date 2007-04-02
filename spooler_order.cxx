@@ -68,6 +68,7 @@ struct Order_subsystem : Order_subsystem_interface
     Job_chain*                  job_chain                   ( const string& name );
     Job_chain*                  job_chain_or_null           ( const string& name );
     xml::Element_ptr            job_chains_dom_element      ( const xml::Document_ptr&, const Show_what& );
+    void                        append_calendar_dom_elements( const xml::Element_ptr&, Show_calendar_options* );
 
     int                         finished_orders_count       () const                                { return _finished_orders_count; }
 
@@ -528,6 +529,59 @@ xml::Element_ptr Order_subsystem::job_chains_dom_element( const xml::Document_pt
     }
 
     return job_chains_element;
+}
+
+//----------------------------------------------------Order_subsystem::append_calendar_dom_elements
+
+void Order_subsystem::append_calendar_dom_elements( const xml::Element_ptr& element, Show_calendar_options* options )
+{
+    FOR_EACH( Job_chain_map, _job_chain_map, it )
+    {
+        if( options->_count >= options->_limit )  break;
+
+        Job_chain* job_chain = it->second;
+
+        if( !are_orders_distributed()  ||  job_chain->is_distributed() )
+            job_chain->append_calendar_dom_elements( element, options );
+    }
+
+
+    if( options->_count < options->_limit  &&  are_orders_distributed()  
+     &&  _spooler->db()  &&  _spooler->db()->opened()  &&  !_spooler->db()->is_in_transaction() )
+    {
+        Read_transaction ta ( _spooler->db() );
+
+        S select_sql;
+        select_sql << "select %limit(" << ( options->_limit - options->_count ) << ") " 
+                   << order_select_database_columns << ", `job_chain`"
+                      "  from " << _spooler->_orders_tablename <<
+                    "  where `spooler_id`=" << sql::quoted(_spooler->id_for_db());
+        if( options->_from              )  select_sql << " and `distributed_next_time` > {ts'" << options->_from << "'}";
+        if( !options->_until.is_never() )  select_sql << " and `distributed_next_time` <= {ts'" << options->_until << "'}";
+        else
+        if( !options->_from             )  select_sql << " and `distributed_next_time` is not null ";
+        
+        //select_sql << "  order by `distributed_next_time`";
+
+        Any_file result_set = ta.open_result_set( select_sql, __FUNCTION__ ); 
+
+        while( options->_count < options->_limit  &&  !result_set.eof() )
+        {
+            Record record = result_set.get_record();
+
+            try
+            {
+                string job_chain_name = record.as_string( "job_chain" );
+
+                ptr<Order> order = new Order( _spooler, record, job_chain_name );
+                order->load_order_xml_blob( &ta );
+                
+                if( order->run_time() )
+                    order->run_time()->append_calendar_dom_elements( element, options );
+            }
+            catch( exception& x ) { Z_LOG2( "scheduler", __FUNCTION__ << "  " << x.what() << "\n" ); }  // Auftrag kann inzwischen gelöscht worden sein
+        }
+    }
 }
 
 //-------------------------------------------------------------------Order_subsystem::add_job_chain
@@ -1150,6 +1204,25 @@ xml::Element_ptr Job_chain::dom_element( const xml::Document_ptr& document, cons
     }
 
     return element;
+}
+
+//----------------------------------------------------------Job_chain::append_calendar_dom_elements
+
+void Job_chain::append_calendar_dom_elements( const xml::Element_ptr& element, Show_calendar_options* options )
+{
+    FOR_EACH( Order_map, _order_map, it )
+    {
+        if( options->_count >= options->_limit )  break;
+
+        Order* order = it->second;
+        order->append_calendar_dom_elements( element, options );
+    }
+
+
+    //if( _is_distributed  &&  options->_count < options->_limit )
+    //{
+    //    Ist bereit von Order_subsystem::append_calendar_dom_elements() gelesen worden
+    //}
 }
 
 //---------------------------------------------------------------------------------normalized_state
@@ -3576,6 +3649,31 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
     if( end_time()       )  element.setAttribute( "end_time"  , end_time  ().as_string() );
     
     return element;
+}
+
+//--------------------------------------------------------------Order::append_calendar_dom_elements
+
+void Order::append_calendar_dom_elements( const xml::Element_ptr& element, Show_calendar_options* options )
+{
+    if( _run_time )
+    {
+        xml::Node_ptr node_before = element.lastChild();
+
+
+        _run_time->append_calendar_dom_elements( element, options );
+
+
+        for( xml::Simple_node_ptr node = node_before? node_before.nextSibling() : element.firstChild();
+             node;
+             node = node.nextSibling() )
+        {
+            if( xml::Element_ptr e = xml::Element_ptr( node, xml::Element_ptr::no_xc ) )
+            {
+                if( _job_chain_name != "" )  e.setAttribute( "job_chain", _job_chain_name );
+                e.setAttribute( "order_id", string_id() );
+            }
+        }
+    }
 }
 
 //--------------------------------------------------------Order::print_xml_child_elements_for_event

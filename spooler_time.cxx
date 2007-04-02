@@ -1665,38 +1665,31 @@ Period Run_time::next_period( const Time& beginning_time, With_single_start sing
     return result;
 }
 
-//-----------------------------------------------------------Run_time::calendar_dom_element_or_null
-#ifdef Z_DEBUG
+//-----------------------------------------------------------Run_time::append_calendar_dom_elements
 
-xml::Element_ptr Run_time::calendar_dom_element_or_null( const xml::Document_ptr& dom_document, const Time& from, const Time& until, int* const limit )
+void Run_time::append_calendar_dom_elements( const xml::Element_ptr& element, Show_calendar_options* options )
 {
-    assert( limit );
-
-    xml::Element_ptr result;
-    Time             t     = from;
+    Time t = options->_from;
 
     if( _once )
     {
-        //ONCE_YES_BERUECKSICHTIGEN;
+        int ONCE_YES_BERUECKSICHTIGEN;
     }
 
-    while( *limit > 0  &&  t <= until )
+    while( options->_count < options->_limit  &&  t <= options->_until )
     {
         Period period = next_period( t, wss_next_any_start );  
-        if( period.begin() > until  ||  period.begin() == Time::never )  break;
+        if( period.begin() > options->_until  ||  period.begin() == Time::never )  break;
 
-        if( !result )  result = dom_document.createElement( "run_time_calendar" );
+        //if( !result )  result = dom_document.createElement( "run_time_calendar" );
 
-        result.appendChild( period.dom_element( dom_document ) );
-        --(*limit);
+        element.appendChild( period.dom_element( element.ownerDocument() ) );
+        options->_count++;
 
         t = period._single_start? period.begin() + 1 : period.end();
     }
-
-    return result;
 }
 
-#endif
 //----------------------------------------------------------------------------------Run_time::print
 
 void Run_time::print( ostream& s ) const

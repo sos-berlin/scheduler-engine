@@ -202,7 +202,7 @@ struct Job : Object,
     void                    set_dom                         ( const xml::Element_ptr&, const Time& mod_time );
     void                        add_on_exit_commands_element( const xml::Element_ptr& commands_element, const Time& mod_time );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what&, Job_chain* = NULL );
-    xml::Element_ptr            calendar_dom_element_or_null( const xml::Document_ptr&, const Time& from, const Time& until, int* const limit );
+    void                        append_calendar_dom_elements( const xml::Element_ptr&, Show_calendar_options* );
 
 
     void                        initialize                  ();                                     // Wird vor Spooler-Skript gerufen
@@ -216,6 +216,7 @@ struct Job : Object,
 
     void                    set_name                        ( const string& );
     const string&               name                        () const                                { return _name; }
+    string                      path                        () const                                { return _name; }
     State_cmd                   state_cmd                   () const                                { return _state_cmd; }
     State                       state                       () const                                { return _state; }
   //Object_set_descr*           object_set_descr            () const                                { return _object_set_descr; }
@@ -483,6 +484,7 @@ struct Job_subsystem_interface : Subsystem
     virtual bool                has_any_order               ()                                      = 0;
     virtual bool                is_any_task_queued          ()                                      = 0;
     virtual xml::Element_ptr    jobs_dom_element            ( const xml::Document_ptr&, const Show_what& ) = 0;
+    virtual void                append_calendar_dom_elements( const xml::Element_ptr&, Show_calendar_options* ) = 0;
 
 
     Job_list                   _job_list;                   // Das ist offen zugänglich für FOR_EACH_JOB

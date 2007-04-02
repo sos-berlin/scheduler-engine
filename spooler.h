@@ -112,6 +112,7 @@ extern const string             variable_set_name_for_substitution;
 using namespace ::std;
 
 
+struct Show_calendar_options;
 struct Communication;
 struct Get_events_command_response;
 struct Job;

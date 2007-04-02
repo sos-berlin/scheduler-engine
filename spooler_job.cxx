@@ -59,6 +59,7 @@ struct Job_subsystem : Job_subsystem_interface
     bool                        has_any_order               ();
     bool                        is_any_task_queued          ();
     xml::Element_ptr            jobs_dom_element            ( const xml::Document_ptr&, const Show_what& );
+    void                        append_calendar_dom_elements( const xml::Element_ptr&, Show_calendar_options* );
 };
 
 //-------------------------------------------------------------------------------Job_lock_requestor
@@ -148,6 +149,19 @@ xml::Element_ptr Job_subsystem::jobs_dom_element( const xml::Document_ptr& docum
     }
 
     return jobs_element;
+}
+
+//------------------------------------------------------Job_subsystem::append_calendar_dom_elements
+
+void Job_subsystem::append_calendar_dom_elements( const xml::Element_ptr& element, Show_calendar_options* options )
+{
+    FOR_EACH_JOB( j )
+    {
+        if( options->_count >= options->_limit )  break;
+
+        Job* job = *j;
+        job->append_calendar_dom_elements( element, options );
+    }
 }
 
 //----------------------------------------------------------------Job_subsystem::load_jobs_from_xml
@@ -2884,31 +2898,35 @@ xml::Element_ptr Job::dom_element( const xml::Document_ptr& document, const Show
     return job_element;
 }
 
-//----------------------------------------------------------------Job::calendar_dom_element_or_null
-#ifdef Z_DEBUG
+//---------------------------------------------------------------Job::append_calendar_dom_elements
 
-xml::Element_ptr Job::calendar_dom_element_or_null( const xml::Document_ptr& dom_document, const Time& from, const Time& until, int* const limit )
+void Job::append_calendar_dom_elements( const xml::Element_ptr& element, Show_calendar_options* options )
 {
-    assert( limit );
+    xml::Node_ptr node_before = element.lastChild();
 
 
-    xml::Element_ptr result;
+    _run_time->append_calendar_dom_elements( element, options );
 
-    if( xml::Element_ptr& run_times_element = _run_time->calendar_dom_element_or_null( dom_document, from, until, limit ) )
+
+    for( xml::Simple_node_ptr node = node_before? node_before.nextSibling() : element.firstChild();
+         node;
+         node = node.nextSibling() )
     {
-        if( !result )
+        if( xml::Element_ptr e = xml::Element_ptr( node, xml::Element_ptr::no_xc ) )
         {
-            result = dom_document.createElement( "job" );
-            result.setAttribute( "name", name() );
+            e.setAttribute( "job", path() );
         }
-
-        result.appendChild( run_times_element );
     }
 
-    return result;
+    //if( xml::Element_ptr& run_times_element = _run_time->calendar_dom_element_or_null( dom_document, options ) )
+    //{
+    //    xml::Element_ptr job_element = element.append_new_element( "job" );
+    //    job_element.setAttribute( "path", path() );
+
+    //    job_element.appendChild( run_times_element );
+    //}
 }
 
-#endif
 //------------------------------------------------------------------------Job::commands_dom_element
 /*
 xml::Element_ptr Job::commands_dom_element(  const xml::Document_ptr& document, const Show_what& show )
