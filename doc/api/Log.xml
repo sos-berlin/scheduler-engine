@@ -288,12 +288,55 @@
 </property>
 
 
-<property name="level" setting="log_level">
+<property name="level" setting="log_level" title="Schwelle für Protokollausgaben">
     <com>
         <com.result>
             <com.type type="int"/>
         </com.result>
     </com>
+
+    <description>
+        <p>
+            Nur Meldungen ab dem Level werden ausgegeben.
+        </p>
+        <p>
+            Dabei bedeutet die numerische Angabe:
+        </p>
+        <div style="margin-top: 1ex; margin-left: 4ex">
+            <table cellspacing="0" cellpadding="0">
+                <tr>
+                    <td style="padding-right: 1ex">-9 bis -2:</td>
+                    <td>
+                        <code>debug9</code> bis <code>debug2</code>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding-right: 1ex">-1:</td>
+                    <td>
+                        <code>debug</code>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding-right: 1ex">0:</td>
+                    <td>
+                        <code>info</code>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding-right: 1ex">1:</td>
+                    <td>
+                        <code>warn</code>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding-right: 1ex">2:</td>
+                    <td>
+                        <code>error</code>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </description>
 </property>
 
 
