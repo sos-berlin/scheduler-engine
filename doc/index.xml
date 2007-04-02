@@ -235,6 +235,12 @@
                         <dd>
                             Der Scheduler startet einen Job, wenn eine Datei einem Verzeichnis hinzugefügt wird.
                         </dd>
+                        <dt>
+                            <scheduler_a href="distributed_orders.xml">Verteilte Aufträge</scheduler_a>
+                        </dt>
+                        <dd>
+                            Aufträge werden auf mehrere Hosts verteilt.
+                        </dd>
 
                     </dl>
                 </div>
