@@ -3655,13 +3655,18 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
 
 void Order::append_calendar_dom_elements( const xml::Element_ptr& element, Show_calendar_options* options )
 {
+    xml::Node_ptr    node_before     = element.lastChild();
+    xml::Element_ptr setback_element;
+
+    if( is_processable()  &&  !_setback.is_never() )
+    {
+        setback_element = new_calendar_dom_element( element.ownerDocument(), _setback );
+        element.appendChild( setback_element );
+    }
+
     if( _run_time )
     {
-        xml::Node_ptr node_before = element.lastChild();
-
-
         _run_time->append_calendar_dom_elements( element, options );
-
 
         for( xml::Simple_node_ptr node = node_before? node_before.nextSibling() : element.firstChild();
              node;
@@ -3669,8 +3674,17 @@ void Order::append_calendar_dom_elements( const xml::Element_ptr& element, Show_
         {
             if( xml::Element_ptr e = xml::Element_ptr( node, xml::Element_ptr::no_xc ) )
             {
+                if( setback_element  &&                                           // Duplikat?
+                    e != setback_element  && 
+                    e.nodeName_is( setback_element.nodeName() )  &&  
+                    e.getAttribute( "at" ) == setback_element.getAttribute( "at" ) )
+                {
+                    element.removeChild( setback_element );
+                    setback_element = NULL;
+                }
+
                 if( _job_chain_name != "" )  e.setAttribute( "job_chain", _job_chain_name );
-                e.setAttribute( "order_id", string_id() );
+                e.setAttribute( "order", string_id() );
             }
         }
     }

@@ -351,10 +351,10 @@ xml::Element_ptr Command_processor::execute_show_calendar( const xml::Element_pt
 
     xml::Element_ptr calendar_element = _answer.createElement( "calendar" );
 
-    if( show_what.is_set( show_jobs )  &&  options._limit > 0 )
+    if( show_what.is_set( show_jobs )  &&  options._count < options._limit )
         _spooler->job_subsystem()->append_calendar_dom_elements( calendar_element, &options );
 
-    if( show_what.is_set( show_orders )  &&  options._limit > 0 )
+    if( show_what.is_set( show_orders )  &&  options._count < options._limit )
         _spooler->order_subsystem()->append_calendar_dom_elements( calendar_element, &options );
 
     return calendar_element;

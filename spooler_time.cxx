@@ -127,6 +127,17 @@ Time time_from_string( const string& str )
         return as_double( str );
 }
 
+//-------------------------------------------------------------------------new_calendar_dom_element
+
+xml::Element_ptr new_calendar_dom_element( const xml::Document_ptr& dom_document, const Time& t )
+{
+    xml::Element_ptr result = dom_document.createElement( "at" );
+
+    result.setAttribute( "at", t.xml_value( Time::without_ms ) );
+
+    return result;
+}
+ 
 //------------------------------------------------------------------------------insert_into_message
 
 void insert_into_message( Message_string* m, int index, const Time& time ) throw()
@@ -1671,20 +1682,26 @@ void Run_time::append_calendar_dom_elements( const xml::Element_ptr& element, Sh
 {
     Time t = options->_from;
 
-    if( _once )
-    {
-        int ONCE_YES_BERUECKSICHTIGEN;
-    }
+    //bool check_for_once = _once;
 
-    while( options->_count < options->_limit  &&  t <= options->_until )
+    while( options->_count < options->_limit )
     {
         Period period = next_period( t, wss_next_any_start );  
         if( period.begin() > options->_until  ||  period.begin() == Time::never )  break;
 
-        //if( !result )  result = dom_document.createElement( "run_time_calendar" );
+        //if( period._start_once  ||
+        //    period._single_start  ||     
+        //    _host_object->scheduler_type_code() == Scheduler_object::type_order ||
+        //    check_for_once 
+        {
+            //check_for_once = false;
 
-        element.appendChild( period.dom_element( element.ownerDocument() ) );
-        options->_count++;
+            if( period.begin() >= options->_from )
+            {
+                element.appendChild( period.dom_element( element.ownerDocument() ) );
+                options->_count++;
+            }
+        }
 
         t = period._single_start? period.begin() + 1 : period.end();
     }

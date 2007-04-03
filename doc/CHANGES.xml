@@ -11,6 +11,22 @@
     <scheduler_keyword keyword="Change log"/>
 
 
+    <change date="2007-04-03" version="2.0.170" subversion_revision="4946">
+        <revision type="new" title="&lt;show_calendar>">
+            <description>
+                <p>
+                    Ein neues Kommando liefert die Startzeiten der Jobs und Aufträge.
+                </p>
+                <ul>
+                    <li>
+                        <scheduler_element name="show_calendar"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+    </change>
+
+
     <change date="2007-04-01" version="2.0.169" subversion_revision="4940">
         <revision type="new" title="Sperren">
             <description>

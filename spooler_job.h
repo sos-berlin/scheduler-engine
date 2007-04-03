@@ -177,6 +177,7 @@ struct Job : Object,
         void                    remove_task_from_db         ( int task_id );
         bool                    has_task_waiting_for_period ();
       //Time                    next_at_start_time          ();
+        void                    append_calendar_dom_elements( const xml::Element_ptr&, Show_calendar_options* );
 
       private:
         Job* const             _job;

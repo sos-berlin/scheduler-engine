@@ -67,7 +67,7 @@ spooler_log.info( "hallo" );
                             <period single_start="00:00"/>
                         </day>
                         <day day="3">
-                            <period single_start="03:00"/>
+                            <period begin="01:11" end="02:22" repeat="00:00:33"/>
                         </day>
                     </ultimos>
                 </run_time>

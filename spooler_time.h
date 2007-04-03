@@ -496,6 +496,7 @@ struct Run_time : idispatch_implementation< Run_time, spooler_com::Irun_time >,
 
 Time                            time_from_string            ( const string& );
 void                            test_summertime             ( const string& date_time );
+xml::Element_ptr                new_calendar_dom_element    ( const xml::Document_ptr&, const Time& );
 
 //-------------------------------------------------------------------------------------------------
 

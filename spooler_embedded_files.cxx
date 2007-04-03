@@ -1014,6 +1014,7 @@ const char file_scheduler_xsd[] =
     "<xsd:attribute name=\"from\"              type=\"xsd:dateTime\"/>\n"
     "<xsd:attribute name=\"until\"             type=\"xsd:dateTime\"/>\n"
     "<xsd:attribute name=\"limit\"             type=\"xsd:nonNegativeInteger\"/>\n"
+    "<xsd:attribute name=\"what\"              type=\"What\"/>\n"
     "</xsd:complexType>\n"
     "</xsd:element>\n"
     "\n"
@@ -1482,7 +1483,7 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1175021597 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1175589073 },
     { NULL, NULL, 0 }
 };
 

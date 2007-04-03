@@ -25,6 +25,7 @@
     <register_entry register_file='CHANGES.xml#use_element__add_order' register_title='Änderungsprotokoll'  register_keyword='add_order'/>
     <register_entry register_file='api/Order.xml#use_element__add_order' register_title='XXX'  register_keyword='add_order'/>
     <register_entry register_file='command_line.xml#use_element__add_order' register_title='Kommandozeilenoptionen'  register_keyword='add_order'/>
+    <register_entry register_file='distributed_orders.xml#use_element__add_order' register_title='Verteilte Aufträge'  register_keyword='add_order'/>
     <register_entry register_file='order.xml#use_element__add_order' register_title='Aufträge'  register_keyword='add_order'/>
     <register_entry register_file='xml.xml#use_element__add_order' register_title='Alle XML-Elemente'  register_keyword='add_order'/>
     <register_entry register_file='xml/add_order.xml#' register_title='&lt;add_order&gt; (Kommando)'  register_keyword='add_order' type='definition'/>
@@ -412,6 +413,7 @@
     <register_entry register_file='CHANGES.xml#use_option__distributed-orders' register_title='Änderungsprotokoll'  register_keyword='distributed-orders'/>
     <register_entry register_file='command_line.xml#option_distributed-orders' register_title='Kommandozeilenoptionen'  register_keyword='distributed-orders' type='definition'/>
     <register_entry register_file='command_line.xml#use_option__distributed-orders' register_title='Kommandozeilenoptionen'  register_keyword='distributed-orders'/>
+    <register_entry register_file='distributed_orders.xml#use_option__distributed-orders' register_title='Verteilte Aufträge'  register_keyword='distributed-orders'/>
     <register_entry register_file='xml/cluster.xml#use_option__distributed-orders' register_title='&lt;cluster&gt; (Konfiguration)'  register_keyword='distributed-orders'/>
     <register_entry register_file='xml/job_chain.xml#use_option__distributed-orders' register_title='&lt;job_chain&gt; (Konfiguration)'  register_keyword='distributed-orders'/>
 </register_keyword>
@@ -520,6 +522,7 @@
     <register_entry register_file='backupscheduler.xml#use_option__exclusive' register_title='Backup Job Scheduler'  register_keyword='exclusive'/>
     <register_entry register_file='command_line.xml#option_exclusive' register_title='Kommandozeilenoptionen'  register_keyword='exclusive' type='definition'/>
     <register_entry register_file='command_line.xml#use_option__exclusive' register_title='Kommandozeilenoptionen'  register_keyword='exclusive'/>
+    <register_entry register_file='distributed_orders.xml#use_option__exclusive' register_title='Verteilte Aufträge'  register_keyword='exclusive'/>
     <register_entry register_file='xml/cluster.xml#use_option__exclusive' register_title='&lt;cluster&gt; (Konfiguration)'  register_keyword='exclusive'/>
     <register_entry register_file='xml/terminate.xml#use_option__exclusive' register_title='&lt;terminate&gt; (Kommando)'  register_keyword='exclusive'/>
 </register_keyword>
@@ -555,6 +558,7 @@
 <register_keyword keyword='file_order_source'>
     <register_keyword_display><code>&lt;file_order_source&gt;</code></register_keyword_display>
     <register_entry register_file='CHANGES.xml#use_element__file_order_source' register_title='Änderungsprotokoll'  register_keyword='file_order_source'/>
+    <register_entry register_file='distributed_orders.xml#use_element__file_order_source' register_title='Verteilte Aufträge'  register_keyword='file_order_source'/>
     <register_entry register_file='file_orders.xml#use_element__file_order_source' register_title='Verzeichnisüberwachung mit Dateiaufträgen'  register_keyword='file_order_source'/>
     <register_entry register_file='xml.xml#use_element__file_order_source' register_title='Alle XML-Elemente'  register_keyword='file_order_source'/>
     <register_entry register_file='xml/file_order_sink.xml#use_element__file_order_source' register_title='&lt;file_order_sink&gt; (Konfiguration)'  register_keyword='file_order_source'/>

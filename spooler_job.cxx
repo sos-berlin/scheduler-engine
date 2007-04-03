@@ -902,7 +902,7 @@ void Job::prepare_on_exit_commands()
                 if( xml::Element_ptr wrong_copy_params_element = commands_element.select_node( 
                         "( start_job/params/copy_params | add_order/params/copy_params | add_order/payload/params/copy_params ) [ not( " + from_condition + ") ]" 
                   ) )  
-                  throw_xc( "SCHEDULER-329", wrong_copy_params_element.getAttribute( "from" ) );
+                    throw_xc( "SCHEDULER-329", wrong_copy_params_element.getAttribute( "from" ) );
             }
         }
     }
@@ -1353,6 +1353,30 @@ bool Job::Task_queue::has_task_waiting_for_period()
 //
 //    return Time::never;
 //}
+
+//----------------------------------------------------Job::Task_queue::append_calendar_dom_elements
+
+void Job::Task_queue::append_calendar_dom_elements( const xml::Element_ptr& element, Show_calendar_options* options )
+{
+    Z_FOR_EACH( Queue, _queue, it )
+    {
+        Task* task = *it;
+
+        if( options->_count > options->_limit )  break;
+        if( task->_start_at > options->_until ) break;
+        
+        if( task->_start_at >= options->_from )
+        {
+
+            xml::Element_ptr e = new_calendar_dom_element( element.ownerDocument(), task->_start_at );
+            element.appendChild( e );
+            e.setAttribute( "job", _job->path() );
+            e.setAttribute( "task", task->id() );
+
+            options->_count++;
+        }
+    }
+}
 
 //-------------------------------------------------------------------------Job::get_task_from_queue
 
@@ -2902,29 +2926,24 @@ xml::Element_ptr Job::dom_element( const xml::Document_ptr& document, const Show
 
 void Job::append_calendar_dom_elements( const xml::Element_ptr& element, Show_calendar_options* options )
 {
-    xml::Node_ptr node_before = element.lastChild();
-
-
-    _run_time->append_calendar_dom_elements( element, options );
-
-
-    for( xml::Simple_node_ptr node = node_before? node_before.nextSibling() : element.firstChild();
-         node;
-         node = node.nextSibling() )
+    if( _state == s_pending  ||  _state == s_running )
     {
-        if( xml::Element_ptr e = xml::Element_ptr( node, xml::Element_ptr::no_xc ) )
+        xml::Node_ptr node_before = element.lastChild();
+
+        _run_time->append_calendar_dom_elements( element, options );
+
+        for( xml::Simple_node_ptr node = node_before? node_before.nextSibling() : element.firstChild();
+             node;
+             node = node.nextSibling() )
         {
-            e.setAttribute( "job", path() );
+            if( xml::Element_ptr e = xml::Element_ptr( node, xml::Element_ptr::no_xc ) )
+            {
+                e.setAttribute( "job", path() );
+            }
         }
+
+        _task_queue.append_calendar_dom_elements( element, options );
     }
-
-    //if( xml::Element_ptr& run_times_element = _run_time->calendar_dom_element_or_null( dom_document, options ) )
-    //{
-    //    xml::Element_ptr job_element = element.append_new_element( "job" );
-    //    job_element.setAttribute( "path", path() );
-
-    //    job_element.appendChild( run_times_element );
-    //}
 }
 
 //------------------------------------------------------------------------Job::commands_dom_element
