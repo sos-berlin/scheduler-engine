@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: windows_job_objects.xml 4270 2006-04-21 08:26:33Z jz $-->
+
+<description
+    title               = "Sperren"
+    base_dir            = "../"
+    parent_page         = "index.xml"
+    author              = "$Author: jz $"
+    date                = "$Date: 2006-04-21 10:26:33 +0200 (Fr, 21 Apr 2006) $"
+>
+    <p>
+        Das Problem:
+        Zwei Jobs dürfen parallel dieselbe Datenbank laden. 
+        Ein dritter Job schaltet die Datenbank um.
+        Er darf das nur tun, wenn die ersten beiden Jobs nicht laufen.
+    </p>
+
+    
+    <h2>Exklusives Sperren</h2>
+
+    <p>
+        Deklaration:
+    </p>
+    <pre>&lt;config>
+    &lt;locks>
+        &lt;lock name="<i>lock_name</i>"/>
+        …
+    &lt;/locks></pre>
+
+    <p>
+        Anwendung:
+    </p>
+    <pre>&lt;job>
+    &lt;lock.lock lock="<i>lock_name</i>"/></pre>
+
+    <p>
+        Eine Task, die eine Sperre belegt, lässt keine andere Task zu, die dieselbe Sperre beansprucht.
+    </p>
+
+
+    <h2>Nicht exklusives Sperren</h2>
+
+    <p>
+        Eine Sperre kann entweder exklusiv von nur einem Job oder
+        nicht exklusiv von vielen Jobs belegt werden.
+    </p>
+    <p>
+        Die Zahl der nicht-exklusiven Belegungen lässt sich begrenzen:
+    </p>
+
+    <pre>&lt;lock name="<i>lock_name</i>" max_non_exclusive="2"/></pre>
+
+
+    <pre>&lt;job name="replicate_from_adabase">
+    &lt;lock.lock lock="<i>lock_name</i>" exclusive="no"/>
+    …
+&lt;/job>
+
+&lt;job name="replicate_from_as400">
+    &lt;lock.lock lock="<i>lock_name</i>" exclusive="no"/>
+    …
+&lt;/job>
+
+&lt;job name="switch_database">
+    &lt;lock.lock lock="<i>lock_name</i>"/>
+    …
+&lt;/job></pre>
+
+    <p>
+        Die ersten beiden Jobs können gleichzeitig laufen, 
+        aber keine der ersten beiden Jobs kann mit dem dritten zusammen laufen,
+        der die Sperre exklusiv beansprucht.
+    </p>
+
+    <p>
+        Präzisierung: Die Sperren werden von der Task belegt, nicht vom Job.
+        Jede Task zählt also.
+        Eine exklusive Belegung erlaubt damit nur eine Task.
+    </p>
+    
+    <p>
+        Das ist ein Read-Write-Lock, s. <a href="http://de.wikipedia.org/wiki/Lock">Wikipedia</a>
+        <!--;
+        "read" und "write" werden hier anders gebraucht, als unsere Jobs das nahelegen)--> und
+        <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/concurrent/locks/ReadWriteLock.html">java.util.concurrent.ReadWriteLock</a>,
+        mit zusätzlicher Begrenzung der Anzahl Leser.
+    </p>
+
+
+    <!--h2>Variante: Verwendung aller Sperren an einer Stelle beschreiben</h2>
+    <p>
+        Vielleicht ist es übersichtlicher, die Verwendung einer Sperre an nur einer Stelle zu beschreiben.
+    </p>
+    <pre>&lt;lock name="<i>lock_name</i>" non_exclusive_locks="2"
+    &lt;apply_lock job="replicate_from_adabase" exclusive="no"/>
+    &lt;apply_lock job="replicate_from_as400"   exclusive="no"/>
+    &lt;apply_lock job="switch_database">
+&lt;/lock></pre-->
+    
+    
+    <!--h2>Wirkung auf Prozesse</h2>
+    <p>
+        <code>sqlldr</code> zum Beispiel läuft in einem eigenen Prozess.
+    </p>
+    <p>
+        Wenn der Scheduler neu gestartet worden ist, aber der die Task ausführende Prozess oder ein Subprozess
+        noch läuft (das passiert bei kill -9 auf den Scheduler),
+        dann ist die Sperre frei, obwohl die zu schützende Operation noch läuft.
+        <!- -Unter Windows könnte das anscheinend mit den <a href="windows_job_objects.xml">Windows-Jobs</a> 
+        (mit <code>JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE</code>) verhindet werden.
+        Gibt es einen ähnlichen Mechanismus für Unix?- ->
+    </p-->
+    
+
+    <!--h2>Nur einen Jobschritt schützen</h2>
+
+    <pre>&lt;job …>&lt;lock lock="<i>lock_name</i>" for="spooler_process"/></pre>
+
+
+    <h2>Aufträge?</h2>
+
+    <p>
+        Auch einzelne Aufträge könnten Sperren zugeordnet werden. 
+        Die Sperren wirken auf <scheduler_method class="Job_impl" method="spooler_process"/> oder die ganze Task.
+    </p>
+
+
+    <h2>API (nicht ausgereift)</h2>
+
+    <pre>boolean spooler_process()
+{
+    if( !spooler_task.try_lock( "my_lock" ) )  return true;
+    
+    ... operation
+}</pre>
+    
+    <p>
+        Task.lock_exclusive() wartet nicht, sondern liefert <code>true</code>,
+        wenn die Sperre gesetzt werden konnte. 
+        Wenn der Aufruf <code>false</code> liefert, 
+        verlässt man spooler_process(). 
+        Der Scheduler wiederholt den Aufruf von spooler_process(), 
+        sobald die Sperre frei ist. 
+        Die Sperre wird freigegeben, 
+        wenn die Task kein weiteres spooler_process() ausführt (return false, Task.end(), Task.delay_next_process()). 
+        Eine Task, die die Sperre erhalten hat,
+        behält sie damit für alle weiteren spooler_process(). 
+        Wenn diese Task nicht endet, verhungern die wartenden Tasks. 
+        Das könnte man mit einem geeigneten Algorithmus verhindern: 
+        Jede wartende Task kommt einmal ran. 
+        Aber ich denke, die erste Task sollte zu Ende laufen (man kann das später einstellbar machen).
+    </p>
+    <p>
+        Der gleiche Mechanismus gilt für spooler_init() und spooler_open(), 
+        die Sperre wird aber erst bei Task-Ende freigegeben.
+    </p>
+    <p>
+        Mehrere sperren könnte man mit einem Aufruf lock_mutexes sperren. 
+        Der Aufruf bekommt alle Sperren in einem Array. 
+        Im Allgemeinen kommt man aber mit einer Sperre aus.
+
+    </p>
+    <p>
+        Um Deadlocks zu vermeiden, darf keine Sperre gesetzt werden, wenn die Task bereits eine Sperre hat.
+    </p-->
+
+</description>

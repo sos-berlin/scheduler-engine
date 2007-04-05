@@ -66,6 +66,7 @@
             <description>
                 <p>
                     Liefert nur Kalendereintrag vor dem Zeitpunkt.
+                    Voreinstellung ist eine Woche nach <code>from=</code> oder nach heute.
                 </p>
             </description>
         </xml_attribute>

@@ -345,6 +345,7 @@ xml::Element_ptr Command_processor::execute_show_calendar( const xml::Element_pt
 
     if( element.hasAttribute( "from"   ) )  options._from  .set_datetime( element.getAttribute( "from"  ) );
     if( element.hasAttribute( "before" ) )  options._before.set_datetime( element.getAttribute( "before" ) );
+                                      else  options._before = options._from.midnight() + 7*24*3600 + 1;                 // Default: eine Woche
 
 
 

@@ -219,17 +219,6 @@
 
 
     <p>
-        <a href="lock.xml">Sperren</a>
-    </p>
-    <div class="indent">
-        <p style="margin-top: 0px">
-            Zwei Jobs dürfen gleichzeitig laufen, aber nicht zusammen mit einem dritten.
-            Dafür gibt es Sperren.
-        </p>
-    </div>
-
-    
-    <p>
         <a href="order_source_directory.xml">Verzeichnisüberwachung mit Aufträgen</a>
     </p>
     <div class="indent">
