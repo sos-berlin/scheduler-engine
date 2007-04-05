@@ -841,7 +841,6 @@ void Period::print( ostream& s ) const
 }
 
 //------------------------------------------------------------------------------Period::dom_element
-#ifdef Z_DEBUG
 
 xml::Element_ptr Period::dom_element( const xml::Document_ptr& dom_document )
 {
@@ -865,7 +864,6 @@ xml::Element_ptr Period::dom_element( const xml::Document_ptr& dom_document )
     return result;
 }
 
-#endif
 //---------------------------------------------------------------------------------Period::obj_name
 
 string Period::obj_name() const

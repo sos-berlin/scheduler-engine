@@ -864,6 +864,7 @@
     <register_entry register_file='api/Task.xml#use_element__job' register_title='XXX'  register_keyword='job'/>
     <register_entry register_file='command_line.xml#use_element__job' register_title='Kommandozeilenoptionen'  register_keyword='job'/>
     <register_entry register_file='job.xml#use_element__job' register_title='Was ist ein Job?'  register_keyword='job'/>
+    <register_entry register_file='lock.xml#use_element__job' register_title='Sperren'  register_keyword='job'/>
     <register_entry register_file='order.xml#use_element__job' register_title='Aufträge'  register_keyword='job'/>
     <register_entry register_file='xml.xml#use_element__job' register_title='Alle XML-Elemente'  register_keyword='job'/>
     <register_entry register_file='xml/add_order.xml#use_element__job' register_title='&lt;add_order&gt; (Kommando)'  register_keyword='job'/>
@@ -1038,6 +1039,9 @@
 <register_keyword keyword='loading'>
     <register_entry register_file='xml/answer/task.xml' register_title='&lt;task&gt; (Antwort)'  register_keyword='loading'/>
 </register_keyword>
+<register_keyword keyword='Lock'>
+    <register_entry register_file='lock.xml' register_title='Sperren'  register_keyword='Lock'/>
+</register_keyword>
 <register_keyword keyword='lock'>
     <register_keyword_display><code>&lt;lock&gt;</code></register_keyword_display>
     <register_entry register_file='CHANGES.xml#use_element__lock' register_title='Änderungsprotokoll'  register_keyword='lock'/>
@@ -1057,6 +1061,7 @@
 </register_keyword>
 <register_keyword keyword='locks'>
     <register_keyword_display><code>&lt;locks&gt;</code></register_keyword_display>
+    <register_entry register_file='lock.xml#use_element__locks' register_title='Sperren'  register_keyword='locks'/>
     <register_entry register_file='xml.xml#use_element__locks' register_title='Alle XML-Elemente'  register_keyword='locks'/>
     <register_entry register_file='xml/lock.lock.xml#use_element__locks' register_title='&lt;lock.lock&gt; (Konfiguration)'  register_keyword='locks'/>
     <register_entry register_file='xml/locks.xml#' register_title='&lt;locks&gt; (Konfiguration)'  register_keyword='locks' type='definition'/>
@@ -1297,6 +1302,9 @@
 </register_keyword>
 <register_keyword keyword='Mozilla'>
     <register_entry register_file='script_language_javascript.xml' register_title='Skripte in JavaScript'  register_keyword='Mozilla'/>
+</register_keyword>
+<register_keyword keyword='Mutex'>
+    <register_entry register_file='lock.xml' register_title='Sperren'  register_keyword='Mutex'/>
 </register_keyword>
 <register_keyword keyword='name'>
     <register_keyword_display><code>name=</code></register_keyword_display>
@@ -1785,6 +1793,9 @@
     <register_keyword_display><code>&lt;select_events&gt;</code></register_keyword_display>
     <register_entry register_file='xml/select_events.xml#' register_title='&lt;select_events&gt; (Kommando)'  register_keyword='select_events' type='definition'/>
 </register_keyword>
+<register_keyword keyword='Semaphor'>
+    <register_entry register_file='lock.xml' register_title='Sperren'  register_keyword='Semaphor'/>
+</register_keyword>
 <register_keyword keyword='send-cmd'>
     <register_keyword_display><code>-send-cmd=</code></register_keyword_display>
     <register_entry register_file='CHANGES.xml#use_option__send-cmd' register_title='Änderungsprotokoll'  register_keyword='send-cmd'/>
@@ -1938,6 +1949,9 @@
 <register_keyword keyword='source'>
     <register_keyword_display><code>source=</code></register_keyword_display>
     <register_entry register_file='xml/answer/ERROR.xml#attribute_source' register_title='&lt;ERROR&gt; (Antwort)'  register_keyword='source' type='definition'/>
+</register_keyword>
+<register_keyword keyword='Sperre'>
+    <register_entry register_file='lock.xml' register_title='Sperren'  register_keyword='Sperre'/>
 </register_keyword>
 <register_keyword keyword='Spidermonkey'>
     <register_entry register_file='script_language_javascript.xml' register_title='Skripte in JavaScript'  register_keyword='Spidermonkey'/>
