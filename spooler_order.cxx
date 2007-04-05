@@ -556,10 +556,10 @@ void Order_subsystem::append_calendar_dom_elements( const xml::Element_ptr& elem
                    << order_select_database_columns << ", `job_chain`"
                       "  from " << _spooler->_orders_tablename <<
                     "  where `spooler_id`=" << sql::quoted(_spooler->id_for_db());
-        if( options->_from              )  select_sql << " and `distributed_next_time` > {ts'" << options->_from << "'}";
-        if( !options->_until.is_never() )  select_sql << " and `distributed_next_time` <= {ts'" << options->_until << "'}";
+        if(  options->_from              )  select_sql << " and `distributed_next_time` >= {ts'" << options->_from   << "'}";
+        if( !options->_before.is_never() )  select_sql << " and `distributed_next_time` < {ts'"  << options->_before << "'}";
         else
-        if( !options->_from             )  select_sql << " and `distributed_next_time` is not null ";
+        if( !options->_from              )  select_sql << " and `distributed_next_time` is not null ";
         
         //select_sql << "  order by `distributed_next_time`";
 

@@ -339,12 +339,12 @@ xml::Element_ptr Command_processor::execute_show_calendar( const xml::Element_pt
 
     Show_calendar_options options;
 
-    options._from  = Time::now();
-    options._until = Time::never;
-    options._limit = element.int_getAttribute( "limit", 100 );
+    options._from   = Time::now();
+    options._before = Time::never;
+    options._limit  = element.int_getAttribute( "limit", 100 );
 
-    if( element.hasAttribute( "from"  ) )  options._from .set_datetime( element.getAttribute( "from"  ) );
-    if( element.hasAttribute( "until" ) )  options._until.set_datetime( element.getAttribute( "until" ) );
+    if( element.hasAttribute( "from"   ) )  options._from  .set_datetime( element.getAttribute( "from"  ) );
+    if( element.hasAttribute( "before" ) )  options._before.set_datetime( element.getAttribute( "before" ) );
 
 
 

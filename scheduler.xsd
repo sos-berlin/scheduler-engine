@@ -1003,7 +1003,7 @@
     <xsd:element name="show_calendar">
         <xsd:complexType>
             <xsd:attribute name="from"              type="xsd:dateTime"/>
-            <xsd:attribute name="until"             type="xsd:dateTime"/>
+            <xsd:attribute name="before"            type="xsd:dateTime"/>
             <xsd:attribute name="limit"             type="xsd:nonNegativeInteger"/>
             <xsd:attribute name="what"              type="What"/>
         </xsd:complexType>

@@ -1687,7 +1687,7 @@ void Run_time::append_calendar_dom_elements( const xml::Element_ptr& element, Sh
     while( options->_count < options->_limit )
     {
         Period period = next_period( t, wss_next_any_start );  
-        if( period.begin() > options->_until  ||  period.begin() == Time::never )  break;
+        if( period.begin() >= options->_before  ||  period.begin() == Time::never )  break;
 
         //if( period._start_once  ||
         //    period._single_start  ||     

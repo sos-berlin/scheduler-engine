@@ -99,6 +99,7 @@
                 <scheduler_element name="modify_spooler"/><br/>
                 <scheduler_element name="remove_order"/><br/>
                 <scheduler_element name="remove_job_chain"/><br/>
+                <scheduler_element name="show_calendar"/><br/>
                 <scheduler_element name="show_history"/><br/>
                 <scheduler_element name="show_job"/><br/>
                 <scheduler_element name="show_job_chain"/><br/>
@@ -112,6 +113,7 @@
             </td>
             <td valign="baseline" style="padding-left: 2ex">
                 <scheduler_element directory="xml/answer/" name="answer"/><br/>
+                <scheduler_element directory="xml/answer/" name="at"/><br/>
                 <scheduler_element directory="xml/answer/" name="description"/><br/>
                 <scheduler_element directory="xml/answer/" name="ERROR"/><br/>
                 <scheduler_element directory="xml/answer/" name="history.entry"/><br/>
@@ -125,6 +127,7 @@
                 <scheduler_element directory="xml/answer/" name="ok"/><br/>
                 <scheduler_element directory="xml/answer/" name="order"/><br/>
                 <scheduler_element directory="xml/answer/" name="order_queue"/><br/>
+                <scheduler_element directory="xml/answer/" name="period"/><br/>
                 <scheduler_element directory="xml/answer/" name="process"/><br/>
                 <scheduler_element directory="xml/answer/" name="process_class"/><br/>
                 <scheduler_element directory="xml/answer/" name="process_classes"/><br/>

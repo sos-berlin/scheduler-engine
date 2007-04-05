@@ -68,6 +68,7 @@
             <description>
                 <p>
                     Das Attribut kann nur für Jobs, nicht für Aufträge angegeben werden.
+                    Für auftragsgesteuerte Jobs sollte Einstellung <code>let_run="no"</code> eingestellt werden.
                 </p>
                 <p>
                     <code>let_run="yes"</code> gibt an, dass der Scheduler die Task weiterlaufen lassen soll,

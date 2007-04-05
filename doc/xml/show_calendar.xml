@@ -46,7 +46,9 @@
                     Begrenzt die Anzahl der Kalendereinträge, die zurückgeliefert werden.
                     Weil die Kalendereinträge nicht nach Zeit geordnet sind, 
                     liefert das Kommando auch nicht die nächsten 100 Einträge, sondern irgendwelche.
-                    Das Limit sollte also groß genug eingestellt werden, 
+                </p>
+                <p>
+                    Das Limit sollte also groß genug eingestellt werden,
                     so dass kein Eintrag verloren geht.
                 </p>
             </description>

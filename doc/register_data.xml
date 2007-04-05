@@ -120,6 +120,10 @@
     <register_entry register_file='xml/commands.xml#use_element__base' register_title='&lt;commands&gt;'  register_keyword='base'/>
     <register_entry register_file='xml/web_service.xml#use_element__base' register_title='&lt;web_service&gt; (Konfiguration)'  register_keyword='base'/>
 </register_keyword>
+<register_keyword keyword='before'>
+    <register_keyword_display><code>before=</code></register_keyword_display>
+    <register_entry register_file='xml/show_calendar.xml#attribute_before' register_title='&lt;show_calendar&gt; (Kommando)'  register_keyword='before' type='definition'/>
+</register_keyword>
 <register_keyword keyword='begin'>
     <register_keyword_display><code>begin=</code></register_keyword_display>
     <register_entry register_file='xml/period.xml#attribute_begin' register_title='&lt;period&gt; (Konfiguration)'  register_keyword='begin' type='definition'/>
@@ -582,6 +586,7 @@
 <register_keyword keyword='from'>
     <register_keyword_display><code>from=</code></register_keyword_display>
     <register_entry register_file='xml/copy_params.xml#attribute_from' register_title='&lt;copy_params&gt;'  register_keyword='from' type='definition'/>
+    <register_entry register_file='xml/show_calendar.xml#attribute_from' register_title='&lt;show_calendar&gt; (Kommando)'  register_keyword='from' type='definition'/>
 </register_keyword>
 <register_keyword keyword='get_events'>
     <register_keyword_display><code>&lt;get_events&gt;</code></register_keyword_display>
@@ -1008,6 +1013,10 @@
     <register_keyword_display><code>level=</code></register_keyword_display>
     <register_entry register_file='xml/allowed_host.xml#attribute_level' register_title='&lt;allowed_host&gt; (Konfiguration)'  register_keyword='level' type='definition'/>
     <register_entry register_file='xml/answer/log.xml#attribute_level' register_title='&lt;log&gt; (Antwort)'  register_keyword='level' type='definition'/>
+</register_keyword>
+<register_keyword keyword='limit'>
+    <register_keyword_display><code>limit=</code></register_keyword_display>
+    <register_entry register_file='xml/show_calendar.xml#attribute_limit' register_title='&lt;show_calendar&gt; (Kommando)'  register_keyword='limit' type='definition'/>
 </register_keyword>
 <register_keyword keyword='line'>
     <register_keyword_display><code>line=</code></register_keyword_display>
@@ -1815,6 +1824,11 @@
     <register_entry register_file='command_line.xml#use_option__show-xml-schema' register_title='Kommandozeilenoptionen'  register_keyword='show-xml-schema'/>
     <register_entry register_file='konfiguration.xml#use_option__show-xml-schema' register_title='Konfiguration in XML'  register_keyword='show-xml-schema'/>
 </register_keyword>
+<register_keyword keyword='show_calendar'>
+    <register_keyword_display><code>&lt;show_calendar&gt;</code></register_keyword_display>
+    <register_entry register_file='CHANGES.xml#use_element__show_calendar' register_title='Änderungsprotokoll'  register_keyword='show_calendar'/>
+    <register_entry register_file='xml/show_calendar.xml#' register_title='&lt;show_calendar&gt; (Kommando)'  register_keyword='show_calendar' type='definition'/>
+</register_keyword>
 <register_keyword keyword='show_history'>
     <register_keyword_display><code>&lt;show_history&gt;</code></register_keyword_display>
     <register_entry register_file='datenbank.xml#use_element__show_history' register_title='Datenbank'  register_keyword='show_history'/>
@@ -2270,6 +2284,7 @@
 </register_keyword>
 <register_keyword keyword='what'>
     <register_keyword_display><code>what=</code></register_keyword_display>
+    <register_entry register_file='xml/show_calendar.xml#attribute_what' register_title='&lt;show_calendar&gt; (Kommando)'  register_keyword='what' type='definition'/>
     <register_entry register_file='xml/show_history.xml#attribute_what' register_title='&lt;show_history&gt; (Kommando)'  register_keyword='what' type='definition'/>
     <register_entry register_file='xml/show_job.xml#attribute_what' register_title='&lt;show_job&gt; (Kommando)'  register_keyword='what' type='definition'/>
     <register_entry register_file='xml/show_job_chain.xml#attribute_what' register_title='&lt;show_job_chain&gt; (Kommando)'  register_keyword='what' type='definition'/>

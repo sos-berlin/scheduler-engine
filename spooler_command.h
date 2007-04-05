@@ -85,7 +85,7 @@ struct Show_calendar_options
 
     Fill_zero                  _zero_;
     Time                       _from;
-    Time                       _until;
+    Time                       _before;
     int                        _limit;
     int                        _count;
 };

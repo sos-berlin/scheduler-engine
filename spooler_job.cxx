@@ -1362,8 +1362,8 @@ void Job::Task_queue::append_calendar_dom_elements( const xml::Element_ptr& elem
     {
         Task* task = *it;
 
-        if( options->_count > options->_limit )  break;
-        if( task->_start_at > options->_until ) break;
+        if( options->_count >  options->_limit )  break;
+        if( task->_start_at >= options->_before ) break;
         
         if( task->_start_at >= options->_from )
         {

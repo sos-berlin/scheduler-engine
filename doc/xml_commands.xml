@@ -29,6 +29,7 @@
         <scheduler_command name="modify_spooler"     answer="ok"/>
         <scheduler_command name="remove_job_chain"   answer="ok"/>
         <scheduler_command name="remove_order"       answer="ok"/>
+        <scheduler_command name="show_calendar"      answer="calendar"/>
         <scheduler_command name="show_history"       answer="history"/>
         <scheduler_command name="show_job"           answer="job"/>
         <scheduler_command name="show_jobs"          answer="jobs"/>
