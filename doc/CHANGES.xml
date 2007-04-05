@@ -31,7 +31,8 @@
         <revision type="new" title="Sperren">
             <description>
                 <p>
-                    Mit Sperren kann der Ablauf von Tasks serialisiert werden.
+                    Mit Sperren kann der Ablauf von Tasks serialisiert werden, 
+                    siehe Kapitel <scheduler_a href="lock.xml" quote="yes"/>.
                 </p>
                 <ul>
                     <li>

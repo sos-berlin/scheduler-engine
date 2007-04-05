@@ -154,6 +154,12 @@
     -->
 
 
+    <h2>Sperren</h2>
+    <p>
+        Jobs können mit Sperren versehen werden, um den gleichzeitigen Lauf zweier Tasks zu verhindern.
+        Siehe <scheduler_a href="lock.xml" quote="yes"/>.
+    </p>
+
     <h2>Verzeichnisüberwachung</h2>
     <p>
         Der Scheduler kann einen Job starten, wenn sich in einem Dateiverzeichnis etwas tut.

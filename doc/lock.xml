@@ -1,20 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+<?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
 
 <!--$Id: windows_job_objects.xml 4270 2006-04-21 08:26:33Z jz $-->
 
 <description
     title               = "Sperren"
-    base_dir            = "../"
-    parent_page         = "index.xml"
+    base_dir            = ""
     author              = "$Author: jz $"
     date                = "$Date: 2006-04-21 10:26:33 +0200 (Fr, 21 Apr 2006) $"
 >
+    <scheduler_keyword keyword="Sperre"/>
+    <scheduler_keyword keyword="Lock"/>
+    <scheduler_keyword keyword="Mutex"/>
+    <scheduler_keyword keyword="Semaphor"/>
+
+    
     <p>
-        Das Problem:
-        Zwei Jobs dürfen parallel dieselbe Datenbank laden. 
-        Ein dritter Job schaltet die Datenbank um.
-        Er darf das nur tun, wenn die ersten beiden Jobs nicht laufen.
+        Ein beispielhaftes Problem:
+        Jobs benutzen eine Dateinbank.
+        Ein weiterer Job aber schaltet die Datenbank um.
+        Er darf das nur tun, wenn die ersten Jobs nicht laufen.
     </p>
 
     
@@ -24,47 +29,43 @@
         Deklaration:
     </p>
     <pre>&lt;config>
-    &lt;locks>
-        &lt;lock name="<i>lock_name</i>"/>
+    <scheduler_element name="locks"/>
+        &lt;<a href="xml/lock.xml">lock</a> name="<i>lock_name</i>"/>
         …
     &lt;/locks></pre>
 
     <p>
         Anwendung:
     </p>
-    <pre>&lt;job>
-    &lt;lock.lock lock="<i>lock_name</i>"/></pre>
+    <pre><scheduler_element name="job"/>
+    &lt;<a href="xml/lock.lock.xml">lock.lock</a> lock="<i>lock_name</i>"/></pre>
 
     <p>
         Eine Task, die eine Sperre belegt, lässt keine andere Task zu, die dieselbe Sperre beansprucht.
+        Das ist exklusives Sperren.
     </p>
 
 
     <h2>Nicht exklusives Sperren</h2>
 
     <p>
-        Eine Sperre kann entweder exklusiv von nur einem Job oder
-        nicht exklusiv von vielen Jobs belegt werden.
-    </p>
-    <p>
-        Die Zahl der nicht-exklusiven Belegungen lässt sich begrenzen:
+        Eine Sperre kann nicht-exklusiv von vielen Jobs belegt werden.
     </p>
 
-    <pre>&lt;lock name="<i>lock_name</i>" max_non_exclusive="2"/></pre>
 
 
-    <pre>&lt;job name="replicate_from_adabase">
-    &lt;lock.lock lock="<i>lock_name</i>" exclusive="no"/>
+    <pre><scheduler_element name="job" attribute="name" value="my_database_job"/>
+    &lt;<a href="xml/lock.lock.xml">lock.lock</a> lock="<i>lock_name</i>" exclusive="no"/>
     …
 &lt;/job>
 
-&lt;job name="replicate_from_as400">
-    &lt;lock.lock lock="<i>lock_name</i>" exclusive="no"/>
+<scheduler_element name="job" attribute="name" value="my_other_database_job"/>
+    &lt;<a href="xml/lock.lock.xml">lock.lock</a> lock="<i>lock_name</i>" exclusive="no"/>
     …
 &lt;/job>
 
-&lt;job name="switch_database">
-    &lt;lock.lock lock="<i>lock_name</i>"/>
+<scheduler_element name="job" attribute="name" value="switch_database"/>
+    &lt;<a href="xml/lock.lock.xml">lock.lock</a> lock="<i>lock_name</i>"/>
     …
 &lt;/job></pre>
 
@@ -75,10 +76,16 @@
     </p>
 
     <p>
-        Präzisierung: Die Sperren werden von der Task belegt, nicht vom Job.
-        Jede Task zählt also.
-        Eine exklusive Belegung erlaubt damit nur eine Task.
+        Die Belegung einer Sperre beginnt mit dem Start einer Task und endet mit ihr.
+        Eine exklusive Sperre erlaubt nur eine Task.
     </p>
+
+    <p>
+        Die Zahl der nicht-exklusiven Belegungen lässt sich begrenzen:
+    </p>
+    <pre>&lt;<a href="xml/lock.xml">lock</a> name="<i>lock_name</i>" max_non_exclusive="2"/></pre>
+
+    <p>&#160;</p>
     
     <p>
         Das ist ein Read-Write-Lock, s. <a href="http://de.wikipedia.org/wiki/Lock">Wikipedia</a>
