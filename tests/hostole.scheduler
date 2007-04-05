@@ -100,8 +100,8 @@ public class My_job  extends sos.spooler.Job_impl
         try
         {
             count = 2*count;
-            processor.set_template_filename( "/tmp/vorlage.txt" );
-            processor.set_document_filename( "/tmp/doc.txt" );
+            processor.set_template_filename( "/tmp/vorlage.rtf" );
+            processor.set_document_filename( "/tmp/doc.rtf" );
           //processor.set_param( "-suppress-script" );
             processor.set_param( "-var-char='$'" );
             processor.set_language( "javascript" );
@@ -123,7 +123,7 @@ public class My_job  extends sos.spooler.Job_impl
             processor.close();
         }
 
-        return true;
+        return false;
     }
 }
                 ]]>
