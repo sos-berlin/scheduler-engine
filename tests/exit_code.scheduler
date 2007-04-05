@@ -121,12 +121,12 @@ spooler_log.info( "initial_exit_code=" + initial_exit_code + "  wished_exit_code
                 </commands>
 
                 <commands on_exit_code="3 7">
-                    <add_order job_chain="my_job_chain" at="now">
-                        <!--params>
+                    <add_order job_chain="exit_code.scheduler" at="now">
+                        <params>
                             <param name="param" value="3 7"/>
-                            <param name="a"     value="aaa (sollte überschrieben werden)"/>
                             <copy_params from="task"/>
-                        </params-->
+                            <param name="a"     value="aaa vom Auftrag"/>
+                        </params>
                     </add_order>
                 </commands>
             </job>
@@ -228,7 +228,7 @@ function spooler_process()
         </jobs>
 
         <job_chains>
-            <job_chain name="my_job_chain">
+            <job_chain name="exit_code.scheduler">
                 <job_chain_node state="begin" job="order"/>
                 <job_chain_node state="finished"/>
             </job_chain>

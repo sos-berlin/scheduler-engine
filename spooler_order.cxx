@@ -3467,7 +3467,7 @@ void Order::set_dom( const xml::Element_ptr& element, Variable_set_map* variable
         */
         if( e.nodeName_is( "params" ) )
         { 
-            set_params( e );
+            set_params( e, variable_set_map );
         }
         else
         if( e.nodeName_is( "payload" ) )
