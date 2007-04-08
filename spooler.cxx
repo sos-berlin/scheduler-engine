@@ -390,7 +390,7 @@ First_and_last read_profile_yes_no_last_both( const string& profile, const strin
     else
     if( s == "first_and_last_only" )  result = fl_first_and_last_only;
     else
-        z::throw_xc( "SCHEDULER-391", s, entry, "all, first_only, last_only, first_and_last_only" );
+        z::throw_xc( "SCHEDULER-391", entry, s, "all, first_only, last_only, first_and_last_only" );
 
     return result;
 }

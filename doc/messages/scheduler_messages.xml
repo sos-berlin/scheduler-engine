@@ -2503,6 +2503,12 @@
             </text>
         </message>
 
+        <message code="SCHEDULER-403">
+            <text xml:lang="en">
+                <title>There is no valid state for job chain node state='<p1/>', action='next_state' (circular next_state)</title>
+            </text>
+        </message>
+
         <!--message code="SCHEDULER-398">
             <text xml:lang="en">
                 <title>Same Java class <p1/> with source code is used in <p2>job</p2></title>
@@ -3600,6 +3606,12 @@
         <message code="SCHEDULER-858" weight="info">
             <text xml:lang="en">
                 <title>Not longer waiting for <p1>Lock</p1></title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-859" weight="info">
+            <text xml:lang="en">
+                <title>Due to action='next_state' the state '<p2/>' is skipped. Next state is '<p1/>'</title>
             </text>
         </message>
 

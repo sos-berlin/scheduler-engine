@@ -264,6 +264,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-400", "Only API-jobs are possible with <process_class remote_scheduler=\"...\"/>" },
     { "SCHEDULER-401", "Unknown lock '$1'" },
     { "SCHEDULER-402", "Only one lock is allowed: '$1' and '$2'" },
+    { "SCHEDULER-403", "There is no valid state for job chain node state='$1', action='next_state' (circular next_state)" },
     { "SCHEDULER-900", "Scheduler $1 is starting with $2, pid=$3" },
     { "SCHEDULER-902", "state=$1" },
     { "SCHEDULER-904", "Tasks have $1s to terminate" },
@@ -403,6 +404,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-856", "$1 has been released" },
     { "SCHEDULER-857", "Waiting for $1 (place $2)" },
     { "SCHEDULER-858", "Not longer waiting for $1" },
+    { "SCHEDULER-859", "Due to action='next_state' the state '$2' is skipped. Next state is '$1'" },
     {}
 };
 } //namespace sos

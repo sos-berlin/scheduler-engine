@@ -5,7 +5,7 @@
 >
     <config 
         tcp_port="4444" 
-        main_scheduler="lillerud.zschimmer:6310"
+        main_scheduler="lillerud-vm.zschimmer:6310"
     >
 
         <security>

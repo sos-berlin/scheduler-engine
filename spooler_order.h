@@ -108,8 +108,9 @@ struct Order : Com_order,
     Job*                        job                     () const;
 
     void                    set_job_chain_node          ( Job_chain_node*, bool is_error_state = false );
-    void                    set_state                   ( const State& );
     void                    set_state                   ( const State&, const Time& );
+    void                    set_state                   ( const State& );
+    void                    set_state1                  ( const State& );
     void                    set_state2                  ( const State&, bool is_error_state = false );
     State                       state                   ()                                          { return _state; }
     bool                        state_is_equal          ( const State& state )                      { return _state == state; }
@@ -353,12 +354,25 @@ struct Order_sources
 
 struct Job_chain_node : Com_job_chain_node 
 {
+    enum Action
+    {
+        act_process, 
+        act_stop, 
+        act_next_state
+    };
+
+    static Action               action_from_string      ( const string& );
+    static string               string_from_action      ( Action );
+
+
                                 Job_chain_node          ()                                          : _zero_(this+1) {}
 
     xml::Element_ptr            dom_element             ( const xml::Document_ptr&, const Show_what&, Job_chain* );
     int                         order_count             ( Read_transaction*, Job_chain* = NULL );
+    void                    set_action                  ( const string& );
     bool                        is_end_state            () const                                    { return _job == NULL; }
     bool                        is_file_order_sink      ()                                          { return _file_order_sink_remove || _file_order_sink_move_to != ""; }
+    string                      string_action           () const                                    { return string_from_action( _action ); }
 
 
     Fill_zero                  _zero_;
@@ -377,6 +391,7 @@ struct Job_chain_node : Com_job_chain_node
     File_path                  _file_order_sink_move_to;// <file_order_sink move_to="..."/>
     bool                       _suspend;                // <job_chain_node suspend="yes"/>
     int                        _delay;                  // <job_chain_node delay="..."/>  Verzögerung des Auftrags
+    Action                     _action;
     int                        _priority;               // Das ist die Entfernung zum letzten Knoten + 1, negativ (also -1, -2, -3, ...)
 };
 
@@ -388,6 +403,7 @@ struct Job_chain : Com_job_chain, Scheduler_object
     {
         s_under_construction,   // add_job() gesperrt, add_order() frei
         s_ready,                // in Betrieb
+        s_stopped,              // Angehalten
         s_removing,             // Wird entfernt, aber ein Auftrag wird noch verarbeitet
         s_closed                
     };
@@ -429,10 +445,12 @@ struct Job_chain : Com_job_chain, Scheduler_object
                                                           const Order::State& next_state  = Variant(Variant::vt_missing), 
                                                           const Order::State& error_state = Variant(Variant::vt_missing) );
     void                        finish                  ();
+    void                        check_job_chain_node    ( Job_chain_node* );
     bool                        contains_job            ( Job* );
 
   //Job*                        first_job               ();
     Job_chain_node*             first_node              ();
+    Job_chain_node*             referenced_node_from_state( const Order::State& );
     Job_chain_node*             node_from_state         ( const Order::State& );
     Job_chain_node*             node_from_state_or_null ( const Order::State& );
     Job_chain_node*             node_from_job           ( Job* );

@@ -463,7 +463,16 @@
                             <xsd:attribute name="error_state"   type="String"/>
                             <xsd:attribute name="suspend"       type="Yes_no"/>
                             <xsd:attribute name="delay"         type="xsd:nonNegativeInteger"/>
-                            <!--xsd:attribute name="action"        type="xsd:String"/-->
+                            
+                            <xsd:attribute name="action">
+                                <xsd:simpleType>
+                                    <xsd:restriction base="String">
+                                        <xsd:enumeration value="process"/>
+                                        <xsd:enumeration value="stop"/>
+                                        <xsd:enumeration value="next_state"/>
+                                    </xsd:restriction>
+                                </xsd:simpleType>
+                            </xsd:attribute>
                         </xsd:complexType>
                     </xsd:element>
 

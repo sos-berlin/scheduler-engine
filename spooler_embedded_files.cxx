@@ -472,7 +472,16 @@ const char file_scheduler_xsd[] =
     "<xsd:attribute name=\"error_state\"   type=\"String\"/>\n"
     "<xsd:attribute name=\"suspend\"       type=\"Yes_no\"/>\n"
     "<xsd:attribute name=\"delay\"         type=\"xsd:nonNegativeInteger\"/>\n"
-    "<!--xsd:attribute name=\"action\"        type=\"xsd:String\"/-->\n"
+    "\n"
+    "<xsd:attribute name=\"action\">\n"
+    "<xsd:simpleType>\n"
+    "<xsd:restriction base=\"String\">\n"
+    "<xsd:enumeration value=\"process\"/>\n"
+    "<xsd:enumeration value=\"stop\"/>\n"
+    "<xsd:enumeration value=\"next_state\"/>\n"
+    "</xsd:restriction>\n"
+    "</xsd:simpleType>\n"
+    "</xsd:attribute>\n"
     "</xsd:complexType>\n"
     "</xsd:element>\n"
     "\n"
@@ -1484,7 +1493,7 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1175806702 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1176037209 },
     { NULL, NULL, 0 }
 };
 
