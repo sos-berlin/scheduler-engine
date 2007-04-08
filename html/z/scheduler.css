@@ -72,7 +72,7 @@ a:active                { background-color: inherit; color: #0000a0; }
 a:visited               { background-color: inherit; color: #0000a0; }
 a:hover                 { background-color: #e0e0FF }
 
-.menu_click             { cursor: pointer; text-decoration: underline; margin-left: 4pt; font-weight: normal; font-size: 8pt; }
+.menu_click             { cursor: pointer; margin-left: 4pt; font-weight: normal; font-size: 8pt; }
 .menu_click:link        { color: #0000a0; background-color: inherit; cursor: pointer; }
 .menu_click:active      { color: #0000a0; background-color: inherit; }
 .menu_click:visited     { color: #0000a0; background-color: inherit; }

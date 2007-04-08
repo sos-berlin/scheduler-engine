@@ -2433,7 +2433,7 @@
 
         <message code="SCHEDULER-391">
             <text xml:lang="en">
-                <title>Invalid value '<p1/>' for setting '<p2/>'. Allowed values are: <p3/></title>
+                <title>Invalid value '<p2/>' for setting '<p1/>'. Allowed values are: <p3/></title>
             </text>
         </message>
 
@@ -2509,7 +2509,25 @@
             </text>
         </message>
 
+        <message code="SCHEDULER-404">
+            <text xml:lang="en">
+                <title>action='<p1/>' is not possible on a distributed job chain</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-405">
+            <text xml:lang="en">
+                <title>Setting state='<p1/>' is not possible while job chain is in state '<p2/>'</title>
+            </text>
+        </message>
+
         <!--message code="SCHEDULER-398">
+        <message code="SCHEDULER-404">
+            <text xml:lang="en">
+                <title>action='<p1/>' is not possible on a distributed job chain</title>
+            </text>
+        </message>
+
             <text xml:lang="en">
                 <title>Same Java class <p1/> with source code is used in <p2>job</p2></title>
             </text>

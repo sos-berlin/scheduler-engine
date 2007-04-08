@@ -762,6 +762,12 @@ struct Com_job_chain_node : spooler_com::Ijob_chain_node,
     STDMETHODIMP            get_Job                     ( spooler_com::Ijob** );
     STDMETHODIMP            get_Next_state              ( VARIANT* );
     STDMETHODIMP            get_Error_state             ( VARIANT* );
+    STDMETHODIMP            put_Action                  ( BSTR );
+    STDMETHODIMP            get_Action                  ( BSTR* );
+
+    virtual void            set_action                  ( const string& )                           = 0;
+    virtual string       string_action                  () const                                    = 0;
+
 };
 
 //----------------------------------------------------------------------------------------Com_order

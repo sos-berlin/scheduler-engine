@@ -1195,6 +1195,19 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
         if( *p == 0 )  break;
     }
 
+
+    string element_name = element.nodeName();
+    
+    if( string_begins_with( element_name, "job_chain_node." ) )
+    {
+        result = _spooler->order_subsystem()->job_chain( element.getAttribute( "job_chain" ) )->node_from_state( "state" )->execute_xml( this, element, show );
+    }
+    else
+    if( string_begins_with( element_name, "job_chain." ) )
+    {
+        result = _spooler->order_subsystem()->job_chain( element.getAttribute( "job_chain" ) )->execute_xml( this, element, show );
+    }
+    else
     if( element.nodeName_is( "show_state"       ) 
      || element.nodeName_is( "s"                ) )  result = execute_show_state( element, show );
     else

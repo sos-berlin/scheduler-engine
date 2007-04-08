@@ -134,6 +134,8 @@
             <xsd:element ref="modify_job"/>
             <xsd:element ref="modify_order"/>
             <xsd:element ref="modify_spooler"/>
+            <xsd:element ref="job_chain.modify"/>
+            <xsd:element ref="job_chain_node.modify"/>
             <xsd:element ref="register_remote_scheduler"/>
             <xsd:element ref="remove_job_chain"/>
             <xsd:element ref="remove_order"/>
@@ -464,15 +466,7 @@
                             <xsd:attribute name="suspend"       type="Yes_no"/>
                             <xsd:attribute name="delay"         type="xsd:nonNegativeInteger"/>
                             
-                            <xsd:attribute name="action">
-                                <xsd:simpleType>
-                                    <xsd:restriction base="String">
-                                        <xsd:enumeration value="process"/>
-                                        <xsd:enumeration value="stop"/>
-                                        <xsd:enumeration value="next_state"/>
-                                    </xsd:restriction>
-                                </xsd:simpleType>
-                            </xsd:attribute>
+                            <xsd:attribute name="action"        type="Job_chain_node.Action"/>
                         </xsd:complexType>
                     </xsd:element>
 
@@ -569,7 +563,34 @@
         </xsd:complexType>
     </xsd:element>
 
-    
+
+
+    <xsd:element name="job_chain.modify">
+        <xsd:complexType>
+            <xsd:attribute name="job_chain" type="Name"         use="required"/>
+            <xsd:attribute name="state"     type="String"       use="required"/>
+        </xsd:complexType>
+    </xsd:element>
+
+
+
+    <xsd:element name="job_chain_node.modify">
+        <xsd:complexType>
+            <xsd:attribute name="job_chain" type="Name"         use="required"/>
+            
+            <xsd:attribute name="state">
+                <xsd:simpleType>
+                    <xsd:restriction base="String">
+                        <xsd:enumeration value="running"/>
+                        <xsd:enumeration value="stopped"/>
+                    </xsd:restriction>
+                </xsd:simpleType>
+            </xsd:attribute>
+        </xsd:complexType>
+    </xsd:element>
+
+
+
     <xsd:element name="modify_order">
         <xsd:complexType>
             <xsd:sequence>
@@ -1241,6 +1262,14 @@
     </xsd:complexType>
     
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ATTRIBUT-TYPEN-->
+
+    <xsd:simpleType name="Job_chain_node.Action">
+        <xsd:restriction base="String">
+            <xsd:enumeration value="process"/>
+            <xsd:enumeration value="stop"/>
+            <xsd:enumeration value="next_state"/>
+        </xsd:restriction>
+    </xsd:simpleType>
 
     <xsd:simpleType name="Yes_no">
         <xsd:restriction base="xsd:NMTOKEN">

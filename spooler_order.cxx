@@ -598,7 +598,7 @@ void Order_subsystem::add_job_chain( Job_chain* job_chain )
         _job_chain_map[lname] = job_chain;
         _job_chain_map_version++;
 
-        job_chain->set_state( Job_chain::s_ready );
+        job_chain->set_state( Job_chain::s_running );
 
         /*
         THREAD_LOCK( _prioritized_order_job_array )
@@ -990,6 +990,8 @@ xml::Element_ptr Job_chain_node::dom_element( const xml::Document_ptr& document,
             }
         }
 
+        if( _action != act_process )  element.setAttribute( "action", string_action() );
+
     return element;
 }
 
@@ -1036,11 +1038,75 @@ int Job_chain_node::order_count( Read_transaction* ta, Job_chain* job_chain )
 
 //-----------------------------------------------------------------------Job_chain_node::set_action
 
-void Job_chain_node::set_action( const string& action )
+void Job_chain_node::set_action( const string& action_string )
 {
-    _action = action_from_string( action );
+    Action action = action_from_string( action_string );
+    
+    if( _job_chain->is_distributed()  &&  action != act_process )  z::throw_xc( "SCHEDULER-404", action_string );
+    
+    if( _action != action )
+    {
+        _action = action;
+        
+        if( _job_chain->state() >= Job_chain::s_running )
+        {
+            _job_chain->check_job_chain_node( this );
 
-    if( _job_chain->state() > Job_chain::s_under_construction )  _job_chain->check_job_chain_node( this );
+            switch( _action )
+            {
+                case act_process:
+                {
+                    if( _job )
+                    {
+                        if( Order* order = _job->order_queue()->first_order( Time(0) ) )
+                        {
+                            _job->signal_earlier_order( order );
+                        }
+                    }
+
+                    break;
+                }
+
+                case act_next_state:
+                {
+                    Order::State next_state = _job_chain->referenced_node_from_state( _state )->_state;
+
+                    if( _job )
+                    {
+                        list<Order*> order_list;
+                        Order_queue* order_queue = _job->order_queue();
+                        
+                        Z_FOR_EACH( Order_queue::Queue, order_queue->_queue, o )
+                            if( (*o)->state() == _state  &&  !(*o)->task() )  order_list.push_back( *o );
+
+                        Z_FOR_EACH( list<Order*>, order_list, o )
+                            (*o)->set_state1( next_state );
+                    }
+
+                    break;
+                }                            
+
+                default: ;
+            }
+        }
+    }
+}
+
+//----------------------------------------------------------------------Job_chain_node::execute_xml
+
+xml::Element_ptr Job_chain_node::execute_xml( Command_processor* command_processor, const xml::Element_ptr& element, const Show_what& )
+{
+    xml::Element_ptr result;
+
+    if( element.nodeName_is( "job_chain_node.modify" ) )
+    {
+        string action = element.getAttribute( "action" );
+        if( action != "" )  set_action( action );
+
+        return command_processor->_answer.createElement( "ok" );
+    }
+    else
+        z::throw_xc( "SCHEDULER-105", element.nodeName() );
 }
 
 //-----------------------------------------------------------------------------Job_chain::Job_chain
@@ -1087,7 +1153,7 @@ string Job_chain::state_name( State state )
     switch( state )
     {
         case s_under_construction:  return "under_construction";
-        case s_ready:               return "ready";
+        case s_running:             return "running";
         case s_stopped:             return "stopped";
         case s_removing:            return "removing";
         default:                    return S() << "State(" << state << ")";
@@ -1151,10 +1217,40 @@ void Job_chain::set_dom( const xml::Element_ptr& element )
             {
                 node->_suspend = e.bool_getAttribute( "suspend", node->_suspend );
                 node->_delay   = e. int_getAttribute( "delay"  , node->_delay   );
-                node->set_action( e.getAttribute( "action", node->string_action() ) );
+                node->set_action( e.getAttribute( "action", node->string_action() ) );      // Hiernach _is_distributed nicht mehr setzen!
             }
         }
     }
+}
+
+//---------------------------------------------------------------------------Job_chain::execute_xml
+
+xml::Element_ptr Job_chain::execute_xml( Command_processor* command_processor, const xml::Element_ptr& element, const Show_what& )
+{
+    xml::Element_ptr result;
+
+    if( element.nodeName_is( "job_chain.modify" ) )
+    {
+        string new_state = element.getAttribute( "state" );
+        
+        if( new_state == "running" )
+        {
+            if( _state == s_stopped  ||  _state == s_running )  set_state( s_running );
+            else  z::throw_xc( "SCHEDULER-405", new_state, state_name( state() ) );
+        }
+        else
+        if( new_state == "stopped" )
+        {
+            if( _state == s_stopped  ||  _state == s_running )  set_state( s_stopped );
+            else  z::throw_xc( "SCHEDULER-405", new_state, state_name( state() ) );
+        }
+        else
+            z::throw_xc( "SCHEDULER-391", "state", new_state, "running, stopped" );
+
+        return command_processor->_answer.createElement( "ok" );
+    }
+    else
+        z::throw_xc( "SCHEDULER-105", element.nodeName() );
 }
 
 //----------------------------------------------------------xml::Element_ptr Job_chain::dom_element
@@ -1177,7 +1273,7 @@ xml::Element_ptr Job_chain::dom_element( const xml::Document_ptr& document, cons
         if( !_visible ) element.setAttribute( "visible", _visible );
         element.setAttribute( "orders_recoverable", _orders_recoverable );
 
-        if( _state >= s_ready )
+        if( _state >= s_running )
         {
             FOR_EACH( Order_sources::Order_source_list, _order_sources._order_source_list, it )
             {
@@ -1503,7 +1599,7 @@ void Job_chain::add_order( Order* order )
 {
     assert( order->_is_distributed == order->_is_db_occupied );
     assert( !order->_is_distributed || _is_distributed );
-    if( state() != s_ready  &&  state() != s_stopped )  z::throw_xc( "SCHEDULER-151" );
+    if( state() != s_running  &&  state() != s_stopped )  z::throw_xc( "SCHEDULER-151" );
     if( !order->_is_distributed  &&  !_spooler->has_exclusiveness() )  z::throw_xc( "SCHEDULER-383", order->obj_name() );
     
     if( has_order_id( (Read_transaction*)NULL, order->id() ) )  z::throw_xc( "SCHEDULER-186", order->obj_name(), name() );
@@ -1874,7 +1970,7 @@ bool Job_chain::tip_for_new_distributed_order( const Order::State& state, const 
 
 void Job_chain::remove()
 {
-    if( _state < s_ready )  z::throw_xc( "SCHEDULER-151" );
+    if( _state < s_running )  z::throw_xc( "SCHEDULER-151" );
 
     remove_all_pending_orders( true );
     
@@ -2805,7 +2901,7 @@ bool Order::is_processable()
 
     if( _job_chain )
     {
-        if( _job_chain->state() != Job_chain::s_ready   )  return false;   // Jobkette wird nicht gelöscht oder ist gestopped (s_stopped)?
+        if( _job_chain->state() != Job_chain::s_running )  return false;   // Jobkette wird nicht gelöscht oder ist gestopped (s_stopped)?
 
         if( Job_chain_node* node = job_chain_node() )
             if( node->_action != Job_chain_node::act_process )  return false;
@@ -4142,8 +4238,11 @@ void Order::set_state( const State& state, const Time& start_time )
 
 void Order::set_state( const State& state )
 {
-    set_state1( state );
+    check_state( state );
+
     clear_setback();
+    if( _is_on_blacklist )  remove_from_blacklist();
+    set_state1( state );
 }
 
 //--------------------------------------------------------------------------------Order::set_state1
@@ -4230,12 +4329,11 @@ void Order::move_to_node( Job_chain_node* node )
 
     bool is_same_node = node == _job_chain_node;
 
-    if( _is_on_blacklist )  remove_from_blacklist();
     if( _task )  _moved = true;
 
     if( !is_same_node  &&  _job_chain_node  &&  _in_job_queue )  _job_chain_node->_job->order_queue()->remove_order( this ), _job_chain_node = NULL;
 
-    clear_setback();
+    //clear_setback();
     set_job_chain_node( node );
 
     if( !is_same_node  &&  !_is_distributed && node && node->_job )  node->_job->order_queue()->add_order( this );
@@ -4602,6 +4700,10 @@ void Order::postprocessing( bool success )
         if( _is_distributed  &&  _job_chain_node  &&  _job_chain_node->_job )
         {
             _job_chain_node->_job->order_queue()->remove_order( this );
+        }
+        else
+        {
+            set_state1( _state );       // Job_chain_node._action, ._suspend und ._delay berücksichtigen
         }
 
         postprocessing2( last_job );

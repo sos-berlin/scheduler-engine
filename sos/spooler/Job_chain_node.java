@@ -134,4 +134,12 @@ public class Job_chain_node extends Idispatch
      *  
      */
     public String           error_state         ()                                  { return (String)        com_call( "<error_state" ); }
+
+
+    public final static String ACTION_PROCESS    = "process";
+    public final static String ACTION_STOP       = "stop";
+    public final static String ACTION_NEXT_STATE = "next_state";
+    
+    public void             set_action          ( String action )                   {                        com_call( ">action", action ); }
+    public String           action              ()                                  { return (String)        com_call( "<action"         ); }
 }

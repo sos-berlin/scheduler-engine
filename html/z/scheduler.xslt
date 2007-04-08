@@ -26,14 +26,14 @@
                                         <xsl:attribute name="title">Version  <xsl:value-of select="state/@version"/>&#10;pid=<xsl:value-of select="state/@pid"/>&#10;db=<xsl:value-of select="state/@db"/></xsl:attribute>
                                         Scheduler
 
-                                    <xsl:value-of select="state/@host" />:<xsl:value-of select="state/@tcp_port" />
-                                    
-                                    <xsl:if test="state/@id!=''">
-                                        <xsl:text>&#160;</xsl:text>
-                                        <span style="white-space: nowrap">-id=<xsl:value-of select="state/@id"/></span>
-                                        &#160;
-                                    </xsl:if>
-                                </xsl:element>
+                                        <xsl:value-of select="state/@host" />:<xsl:value-of select="state/@tcp_port" />
+                                        
+                                        <xsl:if test="state/@id!=''">
+                                            <xsl:text>&#160;</xsl:text>
+                                            <span style="white-space: nowrap">-id=<xsl:value-of select="state/@id"/></span>
+                                            &#160;
+                                        </xsl:if>
+                                    </xsl:element>
                                 </b>
                             </td>
                         </tr>
@@ -829,7 +829,7 @@
                                 <xsl:choose>
                                     <xsl:when test="not( @state )"/>
                                     <xsl:when test="@state='under_construction'"/>
-                                    <xsl:when test="@state='ready'"/>
+                                    <xsl:when test="@state='running'"/>
                                     <xsl:otherwise>
                                         <span class="job_chain_error">
                                             state=<xsl:value-of select="@state"/>
@@ -1009,7 +1009,27 @@
                                 </xsl:if>
 
                                 <td style="padding-left: 2ex">
-                                    <xsl:value-of select="@state"/>
+                                    <!--span style="position: relative; left: -6pt; color: red">&#x2022;</span-->
+                                    
+                                    <xsl:choose>
+                                        <xsl:when test="@action='stop'">
+                                            <span style="color: red" title="Job chain node is stopped (action='stop')">
+                                                <xsl:value-of select="@state"/>
+                                            </span>
+                                        </xsl:when>
+                                        
+                                        <xsl:when test="@action='next_state'">
+                                            <span title="Orders skip this job chain node (action='next_state')">
+                                                <xsl:text>(</xsl:text>
+                                                <xsl:value-of select="@state"/>
+                                                <xsl:text>)</xsl:text>
+                                            </span>
+                                        </xsl:when>
+                                        
+                                        <xsl:otherwise>
+                                            <xsl:value-of select="@state"/>
+                                        </xsl:otherwise>
+                                    </xsl:choose>
                                 </td>
 
                                 <td colspan="1">
@@ -2764,6 +2784,9 @@
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~command_menu-->
 
     <xsl:template name="command_menu">
+        <xsl:param name="value">
+            <u>Menu</u>
+        </xsl:param>
         <xsl:param name="onclick"/>
         <xsl:param name="onclick_call"/>
         <xsl:param name="onclick_param1"/>
@@ -2821,7 +2844,7 @@
                 </xsl:choose>
             </xsl:attribute>
 
-            <xsl:text>Menu</xsl:text>
+            <xsl:copy-of select="$value"/>
 
         </xsl:element>
     </xsl:template>

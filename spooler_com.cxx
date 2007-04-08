@@ -4168,7 +4168,7 @@ STDMETHODIMP Com_job_chain::Add_order( VARIANT* order_or_payload, spooler_com::I
     try
     {
         if( !_job_chain )  return E_POINTER;
-        if( _job_chain->state() != Job_chain::s_ready )  z::throw_xc( "SCHEDULER-151" );
+        if( _job_chain->state() != Job_chain::s_running )  z::throw_xc( "SCHEDULER-151" );
 
         ptr<spooler_com::Iorder> iorder = order_from_order_or_payload( _job_chain->_spooler, *order_or_payload );
         if( !iorder )  return E_POINTER;
@@ -4202,7 +4202,7 @@ STDMETHODIMP Com_job_chain::Add_or_replace_order( spooler_com::Iorder* iorder )
     try
     {
         if( !_job_chain )  return E_POINTER;
-        if( _job_chain->state() != Job_chain::s_ready )  z::throw_xc( "SCHEDULER-151" );
+        if( _job_chain->state() != Job_chain::s_running )  z::throw_xc( "SCHEDULER-151" );
 
         Order* order = dynamic_cast<Order*>( &*iorder );
         if( !order )  return E_INVALIDARG;
@@ -4230,7 +4230,7 @@ STDMETHODIMP Com_job_chain::Try_add_order( Iorder* iorder, VARIANT_BOOL* result 
     try
     {
         if( !_job_chain )  return E_POINTER;
-        if( _job_chain->state() != Job_chain::s_ready )  z::throw_xc( "SCHEDULER-151" );
+        if( _job_chain->state() != Job_chain::s_running )  z::throw_xc( "SCHEDULER-151" );
         if( !iorder )  return E_POINTER;
 
         Order* order = dynamic_cast<Order*>( &*iorder );
@@ -4257,7 +4257,7 @@ STDMETHODIMP Com_job_chain::get_Order_queue( VARIANT* state, Iorder_queue** resu
     try
     {
         if( !_job_chain )  return E_POINTER;
-        if( _job_chain->state() < Job_chain::s_ready )  z::throw_xc( "SCHEDULER-151" );
+        if( _job_chain->state() < Job_chain::s_running )  z::throw_xc( "SCHEDULER-151" );
 
         *result = _job_chain->node_from_state( *state )->_job->order_queue();
         if( *result )  (*result)->AddRef();
@@ -4278,7 +4278,7 @@ STDMETHODIMP Com_job_chain::get_Node( VARIANT* state, Ijob_chain_node** result )
     try
     {
         if( !_job_chain )  return E_POINTER;
-        if( _job_chain->state() < Job_chain::s_ready )  z::throw_xc( "SCHEDULER-151" );
+        if( _job_chain->state() < Job_chain::s_running )  z::throw_xc( "SCHEDULER-151" );
 
         *result = _job_chain->node_from_state( *state );
         if( *result )  (*result)->AddRef();
@@ -4366,7 +4366,9 @@ const Com_method Com_job_chain_node::_methods[] =
     { DISPATCH_PROPERTYGET,  4, "job"                       , (Com_method_ptr)&Com_job_chain_node::get_Job          , VT_DISPATCH  },
     { DISPATCH_PROPERTYGET,  5, "next_state"                , (Com_method_ptr)&Com_job_chain_node::get_Next_state   , VT_VARIANT   },
     { DISPATCH_PROPERTYGET,  6, "error_state"               , (Com_method_ptr)&Com_job_chain_node::get_Error_state  , VT_VARIANT   },
-    { DISPATCH_PROPERTYGET,  7, "java_class_name"           , (Com_method_ptr)&Com_job_chain_node::get_Java_class_name, VT_BSTR },
+    { DISPATCH_PROPERTYGET,  7, "java_class_name"           , (Com_method_ptr)&Com_job_chain_node::get_Java_class_name, VT_BSTR    },
+    { DISPATCH_PROPERTYPUT,  8, "Action"                    , (Com_method_ptr)&Com_job_chain_node::put_Action       , VT_EMPTY     , { VT_BSTR } },
+    { DISPATCH_PROPERTYGET,  8, "Action"                    , (Com_method_ptr)&Com_job_chain_node::get_Action       , VT_BSTR      },
     {}
 };
 
@@ -4434,6 +4436,36 @@ STDMETHODIMP Com_job_chain_node::get_Job( Ijob** result )
     *result = ((Job_chain_node*)(this))->_job->com_job(); 
     if( *result )  (*result)->AddRef();
     return S_OK;
+}
+
+//-------------------------------------------------------------------Com_job_chain_node::put_Action
+
+STDMETHODIMP Com_job_chain_node::put_Action( BSTR action_bstr )
+{
+    HRESULT hr = NOERROR;
+
+    try
+    {
+        set_action( string_from_bstr( action_bstr ) );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+
+//-------------------------------------------------------------------Com_job_chain_node::get_Action
+
+STDMETHODIMP Com_job_chain_node::get_Action( BSTR* result )
+{
+    HRESULT hr = NOERROR;
+
+    try
+    {
+        hr = String_to_bstr( string_action(), result );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
 }
 
 //------------------------------------------------------------------------------Com_order::_methods

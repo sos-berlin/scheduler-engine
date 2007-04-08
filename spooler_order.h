@@ -148,6 +148,8 @@ struct Order : Com_order,
     Web_service_operation*      web_service_operation        () const;
     Web_service_operation*      web_service_operation_or_null() const                               { return _http_operation? _http_operation->web_service_operation_or_null() : NULL; }
 
+    Task*                       task                    () const                                    { return _task; }
+
     Run_time*                   run_time                ()                                          { return _run_time; }
 
     Com_job*                    com_job                 ();
@@ -369,10 +371,13 @@ struct Job_chain_node : Com_job_chain_node
 
     xml::Element_ptr            dom_element             ( const xml::Document_ptr&, const Show_what&, Job_chain* );
     int                         order_count             ( Read_transaction*, Job_chain* = NULL );
+
     void                    set_action                  ( const string& );
+    string               string_action                  () const                                    { return string_from_action( _action ); }
+
     bool                        is_end_state            () const                                    { return _job == NULL; }
     bool                        is_file_order_sink      ()                                          { return _file_order_sink_remove || _file_order_sink_move_to != ""; }
-    string                      string_action           () const                                    { return string_from_action( _action ); }
+    xml::Element_ptr            execute_xml             ( Command_processor*, const xml::Element_ptr&, const Show_what& );
 
 
     Fill_zero                  _zero_;
@@ -402,7 +407,7 @@ struct Job_chain : Com_job_chain, Scheduler_object
     enum State
     {
         s_under_construction,   // add_job() gesperrt, add_order() frei
-        s_ready,                // in Betrieb
+        s_running,              // in Betrieb
         s_stopped,              // Angehalten
         s_removing,             // Wird entfernt, aber ein Auftrag wird noch verarbeitet
         s_closed                
@@ -478,6 +483,7 @@ struct Job_chain : Com_job_chain, Scheduler_object
 
     void                    set_dom                     ( const xml::Element_ptr& );
     xml::Element_ptr            dom_element             ( const xml::Document_ptr&, const Show_what& );
+    xml::Element_ptr            execute_xml             ( Command_processor*, const xml::Element_ptr&, const Show_what& );
     void                        append_calendar_dom_elements( const xml::Element_ptr&, Show_calendar_options* );
 
     Order_subsystem*            order_subsystem         () const;
@@ -572,6 +578,7 @@ struct Order_queue : Com_order_queue
 
   private:
     friend struct               Directory_file_order_source;        // Darf _queue lesen
+    friend struct               Job_chain_node;                     // Darf _queue lesen
 
     Job*                       _job;
     Prefix_log*                _log;

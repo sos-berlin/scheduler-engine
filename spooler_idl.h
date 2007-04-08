@@ -517,6 +517,9 @@ struct Ijob_chain_node : IDispatch
     virtual HRESULT     get_Error_node              ( Ijob_chain_node** result ) = 0;
 
     virtual HRESULT     get_Job                     ( Ijob** result )                               = 0;
+
+    virtual HRESULT     put_Action                  ( BSTR )                                        = 0;
+    virtual HRESULT     get_Action                  ( BSTR* )                                       = 0;
 };
 
 //-------------------------------------------------------------------------------------Job_chain

@@ -897,6 +897,12 @@ library Spooler
 
         [id(6),propget]
         HRESULT                 Error_state             ( [out,retval] VARIANT* Result );
+
+        [id(8),propput]
+        HRESULT                 Action                  ( [in] BSTR );
+
+        [id(8),propget]
+        HRESULT                 Action                  ( [out,retval] BSTR* );
     }
 
     [
