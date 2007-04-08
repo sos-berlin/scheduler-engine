@@ -4702,7 +4702,11 @@ void Order::postprocessing( bool success )
             _job_chain_node->_job->order_queue()->remove_order( this );
         }
         else
+        if( !_moved )
         {
+            if( _job_chain_node  &&  _job_chain_node->_action == Job_chain_node::act_next_state )
+                clear_setback();
+
             set_state1( _state );       // Job_chain_node._action, ._suspend und ._delay berücksichtigen
         }
 

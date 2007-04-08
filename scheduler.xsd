@@ -568,16 +568,7 @@
     <xsd:element name="job_chain.modify">
         <xsd:complexType>
             <xsd:attribute name="job_chain" type="Name"         use="required"/>
-            <xsd:attribute name="state"     type="String"       use="required"/>
-        </xsd:complexType>
-    </xsd:element>
 
-
-
-    <xsd:element name="job_chain_node.modify">
-        <xsd:complexType>
-            <xsd:attribute name="job_chain" type="Name"         use="required"/>
-            
             <xsd:attribute name="state">
                 <xsd:simpleType>
                     <xsd:restriction base="String">
@@ -586,6 +577,16 @@
                     </xsd:restriction>
                 </xsd:simpleType>
             </xsd:attribute>
+        </xsd:complexType>
+    </xsd:element>
+
+
+
+    <xsd:element name="job_chain_node.modify">
+        <xsd:complexType>
+            <xsd:attribute name="job_chain" type="Name"         use="required"/>
+            <xsd:attribute name="state"     type="String"       use="required"/>
+            <xsd:attribute name="action"    type="Job_chain_node.Action"/>
         </xsd:complexType>
     </xsd:element>
 

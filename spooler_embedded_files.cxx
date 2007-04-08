@@ -577,15 +577,6 @@ const char file_scheduler_xsd[] =
     "<xsd:element name=\"job_chain.modify\">\n"
     "<xsd:complexType>\n"
     "<xsd:attribute name=\"job_chain\" type=\"Name\"         use=\"required\"/>\n"
-    "<xsd:attribute name=\"state\"     type=\"String\"       use=\"required\"/>\n"
-    "</xsd:complexType>\n"
-    "</xsd:element>\n"
-    "\n"
-    "\n"
-    "\n"
-    "<xsd:element name=\"job_chain_node.modify\">\n"
-    "<xsd:complexType>\n"
-    "<xsd:attribute name=\"job_chain\" type=\"Name\"         use=\"required\"/>\n"
     "\n"
     "<xsd:attribute name=\"state\">\n"
     "<xsd:simpleType>\n"
@@ -595,6 +586,16 @@ const char file_scheduler_xsd[] =
     "</xsd:restriction>\n"
     "</xsd:simpleType>\n"
     "</xsd:attribute>\n"
+    "</xsd:complexType>\n"
+    "</xsd:element>\n"
+    "\n"
+    "\n"
+    "\n"
+    "<xsd:element name=\"job_chain_node.modify\">\n"
+    "<xsd:complexType>\n"
+    "<xsd:attribute name=\"job_chain\" type=\"Name\"         use=\"required\"/>\n"
+    "<xsd:attribute name=\"state\"     type=\"String\"       use=\"required\"/>\n"
+    "<xsd:attribute name=\"action\"    type=\"Job_chain_node.Action\"/>\n"
     "</xsd:complexType>\n"
     "</xsd:element>\n"
     "\n"
@@ -1522,7 +1523,7 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1176054129 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1176057534 },
     { NULL, NULL, 0 }
 };
 
