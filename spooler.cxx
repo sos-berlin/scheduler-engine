@@ -1759,9 +1759,6 @@ void Spooler::start()
     if( _cluster_configuration._are_orders_distributed || _cluster_configuration._demand_exclusiveness ) 
     {
         start_cluster();
-        //wait_for_cluster();
-        //execute_state_cmd();
-        //if( _shutdown_cmd )  return;
     }
 }
 
@@ -1890,10 +1887,6 @@ void Spooler::stop( const exception* )
 {
     assert( current_thread_id() == _thread_id );
 
-    //set_state( _state_cmd == sc_let_run_terminate_and_restart? s_stopping_let_run : s_stopping );
-
-    //_log->msg( "Spooler::stop" );
-
     if( _cluster )
     {
         _assert_is_active = false;
@@ -1917,33 +1910,32 @@ void Spooler::stop( const exception* )
         }
     }
 
-    _scheduler_script->close();  // Scheduler-Skript zuerst beenden, damit die Finalizer die Tasks (von Job.start()) und andere Objekte schließen können.
+    _scheduler_script->switch_subsystem_state( subsys_stopped ); // Scheduler-Skript zuerst beenden, damit die Finalizer die Tasks (von Job.start()) und andere Objekte schließen können.
 
+
+    _job_subsystem->close_jobs();       // Löst die Sperren ( Job::_lock_requestor=NULL)
 
     _lock_subsystem->switch_subsystem_state( subsys_stopped );
-    if( _order_subsystem )  _order_subsystem->close();
-
-    _job_subsystem->close_jobs();
+    if( _order_subsystem )  _order_subsystem->switch_subsystem_state( subsys_stopped );
 
     if( _shutdown_ignore_running_tasks )  _spooler->kill_all_processes();   // Übriggebliebene Prozesse killen
 
 
     _order_subsystem = NULL;
-    //_object_set_class_list.clear();
-    _task_subsystem->close();
-    _job_subsystem->_job_list.clear();
+    _task_subsystem->switch_subsystem_state( subsys_stopped );
+    _job_subsystem ->switch_subsystem_state( subsys_stopped );
     _process_class_list.clear();
-    _java_subsystem->close();
+    _java_subsystem->switch_subsystem_state( subsys_stopped );
     //_java_vm.close();  Erneutes _java.init() stürzt ab, deshalb lassen wir Java stehen und schließen es erst am Schluss
 
 
     if( _cluster )
     {
-        _cluster->close();
+        _cluster->switch_subsystem_state( subsys_stopped );
         _cluster = NULL;
     }
 
-    if( _supervisor_client )  _supervisor_client->close();
+    if( _supervisor_client )  _supervisor_client->switch_subsystem_state( subsys_stopped );
 
     if( _scheduler_event_manager )  _scheduler_event_manager->close_responses();
     _communication.finish_responses( 5.0 );

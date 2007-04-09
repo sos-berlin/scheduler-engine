@@ -61,6 +61,8 @@ struct Lock_requestor : Object, Scheduler_object, Non_cloneable
                                 Lock_requestor              ( Scheduler_object* );
                                ~Lock_requestor              ();
 
+    void                        close                       ();
+
     void                    set_dom                         ( const xml::Element_ptr& );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
 

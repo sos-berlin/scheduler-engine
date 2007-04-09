@@ -193,6 +193,17 @@ Lock_requestor::Lock_requestor( Scheduler_object* o )
     
 Lock_requestor::~Lock_requestor()
 { 
+    try
+    {
+        close();
+    }
+    catch( exception& x ) { Z_LOG2( "scheduler", __FUNCTION__ << "  ERROR " << x.what() << "\n" ); }
+}
+
+//----------------------------------------------------------------------------Lock_requestor::close
+
+void Lock_requestor::close()
+{ 
     if( Scheduler_lock* lock = _spooler->lock_subsystem()->lock_or_null( _lock_name ) )
     {
         lock->dequeue_lock_requestor( this );

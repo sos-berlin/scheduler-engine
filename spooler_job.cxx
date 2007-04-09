@@ -95,6 +95,7 @@ Job_subsystem::Job_subsystem( Scheduler* scheduler )
     
 void Job_subsystem::close()
 {
+    _job_list.clear();
     _subsystem_state = subsys_stopped;
 }
 
@@ -503,6 +504,8 @@ void Job::close()
     if( _com_job  )  _com_job->close(), _com_job  = NULL;
 
     if( _run_time )  _run_time->close();
+
+    _lock_requestor = NULL;
 }
 
 //----------------------------------------------------------------------------------Job::initialize
