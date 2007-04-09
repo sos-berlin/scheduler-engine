@@ -2061,6 +2061,7 @@ void Order_queue::close()
     {
         Order* order = *it;
         _log->info( message_string( "SCHEDULER-937", order->obj_name() ) );
+        order->close( Order::cls_dont_remove_from_job_chain );
         order->_in_job_queue = false;
         it = _queue.erase( it );
     }
