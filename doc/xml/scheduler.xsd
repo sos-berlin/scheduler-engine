@@ -465,8 +465,6 @@
                             <xsd:attribute name="error_state"   type="String"/>
                             <xsd:attribute name="suspend"       type="Yes_no"/>
                             <xsd:attribute name="delay"         type="xsd:nonNegativeInteger"/>
-                            
-                            <xsd:attribute name="action"        type="Job_chain_node.Action"/>
                         </xsd:complexType>
                     </xsd:element>
 

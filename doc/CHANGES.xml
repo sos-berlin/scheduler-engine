@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <?xml-stylesheet href="changes.xsl" type="text/xsl"?>
 
-<!--$Id$-->
+<!--$Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com -->
 
 <changes title    = "Änderungsprotokoll"
          author   = "$Author$"
@@ -9,6 +9,32 @@
 
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
+
+
+    <change date="2007-04-09" version="2.0.171" subversion_revision="4961">
+        <revision type="new" title="Jobkette und Jobkettenknoten stoppen">
+            <description>
+                <p>
+                    Eine Jobkette kann gestoppt werden, so dass keine Aufträge mehr ausgeführt werden.
+                </p>
+                <p>
+                    Ein Jobkettenknoten kann gestoppt werden, so dass Aufträge nicht mehr ausgeführt werden.
+                    Oder die Aufträge überspringen den Jobkettenknoten.
+                </p>
+                <ul>
+                    <li>
+                        <scheduler_element name="job_chain.modify"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="job_chain_node.modify"/>
+                    </li>
+                    <li>
+                        <scheduler_method class="Job_chain_node" property="action"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+    </change>
 
 
     <change date="2007-04-03" version="2.0.170" subversion_revision="4951">

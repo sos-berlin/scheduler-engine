@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!-- $Id$ -->
+<!--$Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com -->
 
 <?xml-stylesheet href="api-default_language.xsl" type="text/xsl"?>
 
@@ -142,6 +142,74 @@ spooler_log.debug( "error state=" + job_chain_node.error_node().state() );   // 
 spooler_log.debug( "error state=" + job_chain_node.error_node.state );       // "error state=999"</pre>
     </example>
 </property>
+
+
+
+    <property name="action">
+        <com>
+            <com.result>
+                <com.type type="BSTR"/>
+            </com.result>
+        </com>
+
+        <title>Jobkettenknoten stoppen oder überspringen</title>
+
+        <description>
+            <p>
+                Für eine verteilte Jobkette nicht möglich.
+            </p>
+            <p>
+                Mögliche Angaben sind
+            </p>
+            
+            <dl>
+                <dt><code>action="process"</code></dt>
+                <dd>
+                    Das ist die Voreinstellung. Aufträge werden ausgeführt.
+                </dd>
+                
+                <dt><code>action="stop"</code></dt>
+                <dd>
+                    Aufträge werden nicht ausgeführt, sie sammeln sich in der Auftragswarteschlange an.
+                </dd>
+                
+                <dt><code>action="next_state"</code></dt>
+                <dd>
+                    Aufträge werden sofort dem mit <code>next_state</code> bestimmten Folgeknoten übergeben.
+                </dd>
+            </dl>
+            <p>
+                Siehe auch <scheduler_element name="job_chain_node.modify" attribute="action"/>.
+            </p>
+        </description>
+
+        <description programming_language="java">
+            <p>
+                In Java sind für Zeichenketten Konstanten definiert:
+            </p>
+            <ul>
+                <li><code>Job_chain_node.ACTION_PROCESS</code></li>
+                <li><code>Job_chain_node.ACTION_STOP</code></li>
+                <li><code>Job_chain_node.ACTION_NEXT_STATE</code></li>
+            </ul>
+        </description>
+
+        <example programming_language="java">
+            <pre>Job_chain_node job_chain_node = spooler.job_chain( "my_job_chain" ).node( 100 );
+job_chain_node.set_action( Job_chain_node.ACTION_NEXT_STATE );</pre>
+        </example>
+
+        <example programming_language="javascript">
+            <pre>var job_chain_node = spooler.job_chain( "my_job_chain" ).node( 100 );
+job_chain_node.action = "next_state";</pre>
+        </example>
+
+        <messages>
+            <message level="error" code="SCHEDULER-384"/>
+            <message level="error" code="SCHEDULER-403"/>
+            <message level="error" code="SCHEDULER-404"/>
+        </messages>
+    </property>
 
 
 <description>

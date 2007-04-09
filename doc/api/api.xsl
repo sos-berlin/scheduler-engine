@@ -27,7 +27,8 @@
         </xsl:call-template>
 
         <body>
-            <xsl:apply-templates select="description"/>
+            <xsl:apply-templates select="." mode="api.description"/>
+            <!--xsl:apply-templates select="description"/-->
         </body>
     </html>
 
@@ -277,17 +278,7 @@
                         </xsl:if>
 
                         <xsl:apply-templates select="." mode="example"/>
-
-                        <xsl:if test="description [ not ( @programming_language ) ]">
-                            <p>&#160;</p>
-                            <!--p style="margin-top: 0em">&#160;</p-->
-                            <xsl:apply-templates select="description [ not ( @programming_language ) ]"/>
-                        </xsl:if>
-
-                        <xsl:if test="description [ @programming_language = $selected_programming_language ]">
-                            <p style="margin-top: 0em">&#160;</p>
-                            <xsl:apply-templates select="description [ @programming_language = $selected_programming_language ]"/>
-                        </xsl:if>
+                        <xsl:apply-templates select="." mode="api.description"/>
 
                         <p style="margin-top: 0em">&#160;</p>
 
@@ -308,7 +299,22 @@
     </html>
 </xsl:template>
 
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~api.description-->
 
+<xsl:template mode="api.description" match="*">
+    <xsl:if test="description [ not ( @programming_language ) ]">
+        <p>&#160;</p>
+        <!--p style="margin-top: 0em">&#160;</p-->
+        <xsl:apply-templates select="description [ not ( @programming_language ) ]"/>
+    </xsl:if>
+
+    <xsl:if test="description [ @programming_language = $selected_programming_language ]">
+        <p style="margin-top: 0em">&#160;</p>
+        <xsl:apply-templates select="description [ @programming_language = $selected_programming_language ]"/>
+    </xsl:if>
+</xsl:template>
+    
+    
 <!--
 <xsl:template match="api.class [ @programming_language ]">
 
@@ -884,10 +890,11 @@
     <xsl:apply-templates select="." mode="example"/>
 
 
-    <xsl:if test="description">
+    <xsl:apply-templates select="." mode="api.description"/>
+    <!--xsl:if test="description">
         <p>&#160;</p>
         <xsl:apply-templates select="description"/>
-    </xsl:if>
+    </xsl:if-->
 
 
     <!-- Bei einer <property access="write" (oder write und read) ist <com.result> der Parameter, die rechte Seite der Zuweisung -->

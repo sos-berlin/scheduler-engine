@@ -20,6 +20,10 @@
     <register_keyword_display><code>abort_immediately_and_restart()</code></register_keyword_display>
     <register_entry register_file='api/Spooler.xml#method__abort_immediately_and_restart' register_title='Spooler.abort_immediately_and_restart()' register_keyword='abort_immediately_and_restart()' type='definition'/>
 </register_keyword>
+<register_keyword keyword='action (property)'>
+    <register_keyword_display><code>action</code> (property)</register_keyword_display>
+    <register_entry register_file='api/Job_chain_node.xml#method__action' register_title='Job_chain_node.action' register_keyword='action' type='definition'/>
+</register_keyword>
 <register_keyword keyword='add_end_state'>
     <register_keyword_display><code>add_end_state()</code></register_keyword_display>
     <register_entry register_file='api/Job_chain.xml#method__add_end_state' register_title='Job_chain.add_end_state()' register_keyword='add_end_state()' type='definition'/>
@@ -1381,6 +1385,10 @@
     <register_entry register_file='api/Order.xml#method__job_chain' register_title='Order.job_chain' register_keyword='job_chain' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__job_chain' register_title='Spooler.job_chain' register_keyword='job_chain' type='definition'/>
 </register_keyword>
+<register_keyword keyword='job_chain.modify'>
+    <register_keyword_display><code>&lt;job_chain.modify&gt;</code></register_keyword_display>
+    <register_entry register_file='CHANGES.xml#use_element__job_chain.modify' register_title='Änderungsprotokoll'  register_keyword='job_chain.modify'/>
+</register_keyword>
 <register_keyword keyword='job_chain_exists'>
     <register_keyword_display><code>job_chain_exists()</code></register_keyword_display>
     <register_entry register_file='api/Spooler.xml#method__job_chain_exists' register_title='Spooler.job_chain_exists()' register_keyword='job_chain_exists()' type='definition'/>
@@ -1406,6 +1414,10 @@
 <register_keyword keyword='job_chain_node (property)'>
     <register_keyword_display><code>job_chain_node</code> (property)</register_keyword_display>
     <register_entry register_file='api/Order.xml#method__job_chain_node' register_title='Order.job_chain_node' register_keyword='job_chain_node' type='definition'/>
+</register_keyword>
+<register_keyword keyword='job_chain_node.modify'>
+    <register_keyword_display><code>&lt;job_chain_node.modify&gt;</code></register_keyword_display>
+    <register_entry register_file='CHANGES.xml#use_element__job_chain_node.modify' register_title='Änderungsprotokoll'  register_keyword='job_chain_node.modify'/>
 </register_keyword>
 <register_keyword keyword='job_chains'>
     <register_keyword_display><code>&lt;job_chains&gt;</code></register_keyword_display>

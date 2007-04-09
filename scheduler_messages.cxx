@@ -267,6 +267,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-403", "There is no valid state for job chain node state='$1', action='next_state' (circular next_state)" },
     { "SCHEDULER-404", "action='$1' is not possible on a distributed job chain" },
     { "SCHEDULER-405", "Setting state='$1' is not possible while job chain is in state '$2'" },
+    { "SCHEDULER-406", "Error in job chain node state='$1': $2" },
     { "SCHEDULER-900", "Scheduler $1 is starting with $2, pid=$3" },
     { "SCHEDULER-902", "state=$1" },
     { "SCHEDULER-904", "Tasks have $1s to terminate" },

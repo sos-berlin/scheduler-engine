@@ -1217,7 +1217,7 @@ void Job_chain::set_dom( const xml::Element_ptr& element )
             {
                 node->_suspend = e.bool_getAttribute( "suspend", node->_suspend );
                 node->_delay   = e. int_getAttribute( "delay"  , node->_delay   );
-                node->set_action( e.getAttribute( "action", node->string_action() ) );      // Hiernach _is_distributed nicht mehr setzen!
+                //node->set_action( e.getAttribute( "action", node->string_action() ) );      // Hiernach _is_distributed nicht mehr setzen!
             }
         }
     }
@@ -1497,15 +1497,22 @@ void Job_chain::finish()
 
 void Job_chain::check_job_chain_node( Job_chain_node* node )
 {
-    stdext::hash_set<Job_chain_node*> node_set;
-    Job_chain_node*                   n       = node;
-
-    while( n->_action == Job_chain_node::act_next_state )
+    try
     {
-        node_set.insert( n );
+        stdext::hash_set<Job_chain_node*> node_set;
+        Job_chain_node*                   n       = node;
 
-        n = node_from_state( n->_next_state );
-        if( node_set.find( n ) != node_set.end() )  z::throw_xc( "SCHEDULER-403", node->_state );
+        while( n->_action == Job_chain_node::act_next_state )
+        {
+            node_set.insert( n );
+
+            n = node_from_state( n->_next_state );
+            if( node_set.find( n ) != node_set.end() )  z::throw_xc( "SCHEDULER-403", node->_state );
+        }
+    }
+    catch( exception& x )
+    {
+        z::throw_xc( "SCHEDULER-406", node->_state, x );
     }
 }
 
@@ -4199,9 +4206,9 @@ bool Order::end_state_reached()
 
     if( _end_state_reached )  result = true;
     else
-    if( job_chain() )
+    if( Job_chain* job_chain = this->job_chain() )
     {
-        if( Job_chain_node* node = job_chain()->node_from_state_or_null( _state ) )
+        if( Job_chain_node* node = job_chain->node_from_state_or_null( _state ) )
         {
             if( node->is_end_state() )  result = true;
         }
@@ -4210,8 +4217,6 @@ bool Order::end_state_reached()
     }
     
     return result;
-
-    //return _end_state_reached  ||  !_job_chain_node  ||  !_job_chain_node->_job;
 }
 
 //-------------------------------------------------------------------------------Order::check_state
@@ -4258,11 +4263,11 @@ void Order::set_state1( const State& state )
     //}
     check_state( state );
 
-    State previous_state = _state;
-
     if( _job_chain )
     {
-        Job_chain_node* node = NULL;
+        ptr<Order>      hold_me        = this;
+        State           previous_state = _state;
+        Job_chain_node* node           = NULL;
         
         if( !state.is_empty() )
         {
@@ -4754,8 +4759,11 @@ void Order::handle_end_state()
         open_log();
     }
     else
+    if( !_is_on_blacklist )
     {
         _log->info( message_string( "SCHEDULER-945" ) );     // "Kein weiterer Job in der Jobkette, der Auftrag ist erledigt"
+        remove_from_job_chain();
+        close( cls_dont_remove_from_job_chain );
     }
 }
 

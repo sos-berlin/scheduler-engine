@@ -474,8 +474,6 @@ const char file_scheduler_xsd[] =
     "<xsd:attribute name=\"error_state\"   type=\"String\"/>\n"
     "<xsd:attribute name=\"suspend\"       type=\"Yes_no\"/>\n"
     "<xsd:attribute name=\"delay\"         type=\"xsd:nonNegativeInteger\"/>\n"
-    "\n"
-    "<xsd:attribute name=\"action\"        type=\"Job_chain_node.Action\"/>\n"
     "</xsd:complexType>\n"
     "</xsd:element>\n"
     "\n"
@@ -1523,7 +1521,7 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1176060632 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1176106021 },
     { NULL, NULL, 0 }
 };
 
