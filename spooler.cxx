@@ -1913,10 +1913,11 @@ void Spooler::stop( const exception* )
     _scheduler_script->switch_subsystem_state( subsys_stopped ); // Scheduler-Skript zuerst beenden, damit die Finalizer die Tasks (von Job.start()) und andere Objekte schließen können.
 
 
+    if( _order_subsystem )  _order_subsystem->switch_subsystem_state( subsys_stopped );
+
     _job_subsystem->close_jobs();       // Löst die Sperren ( Job::_lock_requestor=NULL)
 
     _lock_subsystem->switch_subsystem_state( subsys_stopped );
-    if( _order_subsystem )  _order_subsystem->switch_subsystem_state( subsys_stopped );
 
     if( _shutdown_ignore_running_tasks )  _spooler->kill_all_processes();   // Übriggebliebene Prozesse killen
 
