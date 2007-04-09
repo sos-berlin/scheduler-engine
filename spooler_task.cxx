@@ -937,7 +937,7 @@ void Task::Registered_pid::close()
 {
     if( _spooler )
     {
-        if( !_task->_module_instance->is_remote_host() )  _spooler->unregister_pid( _pid );
+        if( _task->_module_instance  &&  !_task->_module_instance->is_remote_host() )  _spooler->unregister_pid( _pid );
         _spooler = NULL;
     }
 }
