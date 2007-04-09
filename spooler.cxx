@@ -1998,7 +1998,9 @@ void Spooler::nichts_getan( int anzahl, const string& str )
         }
         if( jobs.length() == 0 )  jobs << "no jobs";
 
-        _log->log( anzahl <= 1? log_info : log_warn,
+        _log->log( anzahl <= 1? log_debug9
+                   anzahl <= 2? log_info
+                              : log_warn,
                   message_string( "SCHEDULER-261", str, _connection_manager->string_from_operations(), tasks, jobs ) );  // "Nichts getan, state=$1, _wait_handles=$2"
 
         // Wenn's ein System-Ereignis ist, das, jedenfalls unter Windows, immer wieder signalisiert wird,
