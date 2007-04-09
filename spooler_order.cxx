@@ -1231,6 +1231,8 @@ xml::Element_ptr Job_chain::execute_xml( Command_processor* command_processor, c
 
     if( element.nodeName_is( "job_chain.modify" ) )
     {
+        if( _is_distributed )  z::throw_xc( "SCHEDULER-384", "job_chain.modify" );
+
         string new_state = element.getAttribute( "state" );
         
         if( new_state == "running" )
@@ -4260,8 +4262,13 @@ void Order::set_state1( const State& state )
 
     if( _job_chain )
     {
-        Job_chain_node* node = _job_chain->referenced_node_from_state( state );
-        if( node != _job_chain->node_from_state( state ) )  _log->info( message_string( "SCHEDULER-859", node->_state.as_string(), state ) );
+        Job_chain_node* node = NULL;
+        
+        if( !state.is_empty() )
+        {
+            node = _job_chain->referenced_node_from_state( state );
+            if( node != _job_chain->node_from_state( state ) )  _log->info( message_string( "SCHEDULER-859", node->_state.as_string(), state ) );
+        }
 
         move_to_node( node );
 
@@ -4327,7 +4334,8 @@ void Order::move_to_node( Job_chain_node* node )
 {
     if( !_job_chain )  z::throw_xc( "SCHEDULER-157", obj_name() );
 
-    bool is_same_node = node == _job_chain_node;
+    bool       is_same_node = node == _job_chain_node;
+    ptr<Order> hold_me      = this;
 
     if( _task )  _moved = true;
 

@@ -2522,12 +2522,6 @@
         </message>
 
         <!--message code="SCHEDULER-398">
-        <message code="SCHEDULER-404">
-            <text xml:lang="en">
-                <title>action='<p1/>' is not possible on a distributed job chain</title>
-            </text>
-        </message>
-
             <text xml:lang="en">
                 <title>Same Java class <p1/> with source code is used in <p2>job</p2></title>
             </text>

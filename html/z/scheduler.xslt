@@ -828,11 +828,16 @@
 
                                 <xsl:choose>
                                     <xsl:when test="not( @state )"/>
-                                    <xsl:when test="@state='under_construction'"/>
+                                    <!--xsl:when test="@state='under_construction'"/-->
                                     <xsl:when test="@state='running'"/>
+                                    <xsl:when test="@state='stopped'">
+                                        <span class="job_chain_error" title="Whole job chain is stopped">
+                                            <xsl:value-of select="@state"/>
+                                        </span>
+                                    </xsl:when>
                                     <xsl:otherwise>
                                         <span class="job_chain_error">
-                                            state=<xsl:value-of select="@state"/>
+                                            <xsl:value-of select="@state"/>
                                         </span>
                                     </xsl:otherwise>
                                 </xsl:choose>
