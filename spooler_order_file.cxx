@@ -182,9 +182,9 @@ struct File_order_sink_module_instance : Internal_module_instance
 
                 if( result == false )  order->set_on_blacklist();
             }
-
-            order->set_end_state_reached();
         }
+
+        order->set_end_state_reached();
 
         return result;
     }
