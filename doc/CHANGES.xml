@@ -65,7 +65,7 @@
                         <scheduler_element name="lock"/>
                     </li>
                     <li>
-                        <scheduler_element name="job"/><scheduler_element name="lock.lock"/>
+                        <scheduler_element name="job"/><scheduler_element name="lock.use"/>
                     </li>
                 </ul>
             </description>

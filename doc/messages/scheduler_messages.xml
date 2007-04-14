@@ -2385,7 +2385,7 @@
 
         <message code="SCHEDULER-381">
             <text xml:lang="en">
-                <title>Scheduler is not yet active and can not execute the operation</title>
+                <title>Scheduler is not yet active and cannot execute the operation</title>
             </text>
         </message>
 
@@ -2499,7 +2499,7 @@
 
         <message code="SCHEDULER-402">
             <text xml:lang="en">
-                <title>Only one lock is allowed: '<p1/>' and '<p2/>'</title>
+                <title>New max_non_exclusive=<p1/> cannot be lower than number of actual lock holders = <p2/></title>
             </text>
         </message>
 
@@ -3617,7 +3617,7 @@
 
         <message code="SCHEDULER-857" weight="info">
             <text xml:lang="en">
-                <title>Waiting for <p1>Lock</p1> (place <p2/>)</title>
+                <title>Waiting for locks <p1>locks</p1></title>
             </text>
         </message>
 

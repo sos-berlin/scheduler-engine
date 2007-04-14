@@ -449,7 +449,7 @@ struct Job : Object,
     typedef list< pair<string,string> > Start_when_directory_changed_list;  
     Start_when_directory_changed_list  _start_when_directory_changed_list;      // Für <start_when_directory_changed>
 
-    ptr<Lock_requestor>        _lock_requestor;
+    ptr<lock::Requestor>       _lock_requestor;
 };
 
 //--------------------------------------------------------------------------------------Internal_job

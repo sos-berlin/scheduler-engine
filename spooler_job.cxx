@@ -64,12 +64,12 @@ struct Job_subsystem : Job_subsystem_interface
 
 //-------------------------------------------------------------------------------Job_lock_requestor
 
-struct Job_lock_requestor : Lock_requestor
+struct Job_lock_requestor : lock::Requestor
 {
-                                Job_lock_requestor          ( Job* job )                            : Lock_requestor( job ), _job(job) {}
+                                Job_lock_requestor          ( Job* job )                            : Requestor( job ), _job(job) {}
 
-    // Lock_requestor:
-    void                        on_lock_is_available        ( Scheduler_lock* )                     { _job->signal( __FUNCTION__ ); }
+    // Requestor:
+    void                        on_locks_are_available      ()                                      { _job->signal( __FUNCTION__ ); }
 
   private:
     Job*                       _job;
@@ -686,16 +686,9 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
             else
             //if( e.nodeName_is( "object_set" ) )  _object_set_descr = SOS_NEW( Object_set_descr( e ) );
             //else
-            if( e.nodeName_is( "lock.lock" ) )  
+            if( e.nodeName_is( "lock.use" ) )  
             {
-                if( _lock_requestor )  
-                {
-                    string name = e.getAttribute( "name" );
-                    if( name != _lock_requestor->lock_name() )  z::throw_xc( "SCHEDULER-402", _lock_requestor->lock_name(), name );      // Es kann nur einen geben
-                }
-                else
-                    _lock_requestor = Z_NEW( Job_lock_requestor( this ) );
-
+                if( !_lock_requestor )  _lock_requestor = Z_NEW( Job_lock_requestor( this ) );
                 _lock_requestor->set_dom( e );
             }
             else
@@ -2013,7 +2006,7 @@ void Job::calculate_next_time( const Time& now )
 
         if( _lock_requestor  &&  _lock_requestor->is_enqueued() )
         {
-            if( _lock_requestor->is_lock_available() )  next_time = 0;
+            if( _lock_requestor->locks_are_available() )  next_time = 0;
         }
         else
         if( _waiting_for_process )
@@ -2210,11 +2203,11 @@ ptr<Task> Job::task_to_start()
     {
         if( _lock_requestor )
         {
-            if( !_lock_requestor->is_lock_available() )
+            if( !_lock_requestor->locks_are_available() )
             {
                 if( !_lock_requestor->is_enqueued() )
                 {
-                    _lock_requestor->enqueue_lock_request();
+                    _lock_requestor->enqueue_lock_requests();
                 }
 
                 // Wir können die Task nicht starten, denn die Sperre ist nicht verfügbar
@@ -2299,10 +2292,10 @@ ptr<Task> Job::task_to_start()
 
     if( task  &&  _lock_requestor )
     {
-        bool is_locked = task->_lock_holder->request_lock();
-        assert( is_locked );
+        bool hold_locks = task->_lock_holder->request_locks();
+        assert( hold_locks );
 
-        if( _lock_requestor->is_enqueued() )  _lock_requestor->dequeue_lock_request();
+        if( _lock_requestor->is_enqueued() )  _lock_requestor->dequeue_lock_requests( log_none );
     }
 
     if( _waiting_for_process  &&  _module->_process_class->process_available( this ) )
@@ -2437,13 +2430,11 @@ bool Job::do_something()
         }
         catch( const _com_error& x )  { throw_com_error( x ); }
     }
-  //catch( Stop_scheduler_exception& ) { throw; }
     catch( const exception&  x ) { set_error( x );  set_job_error( x );  sos_sleep(1); }     // Bremsen, falls sich der Fehler sofort wiederholt
 
-    if( !task_started  &&  _lock_requestor  &&  _lock_requestor->is_enqueued()  &&  _lock_requestor->is_lock_available() )
+    if( !task_started  &&  _lock_requestor  &&  _lock_requestor->is_enqueued()  &&  _lock_requestor->locks_are_available() )
     {
-        _lock_requestor->dequeue_lock_request();
-        _log->debug( message_string( "SCHEDULER-858", _lock_requestor->lock()->obj_name() ) );
+        _lock_requestor->dequeue_lock_requests();
     }
 
     return something_done;
@@ -2592,10 +2583,9 @@ void Job::set_state( State new_state )
                 remove_waiting_job_from_process_list();
             }
 
-            if( _lock_requestor  &&  _lock_requestor->is_enqueued()  &&  _lock_requestor->is_lock_available() )
+            if( _lock_requestor  &&  _lock_requestor->is_enqueued()  &&  _lock_requestor->locks_are_available() )
             {
-                _lock_requestor->dequeue_lock_request();
-                _log->debug( message_string( "SCHEDULER-858", _lock_requestor->lock()->obj_name() ) );
+                _lock_requestor->dequeue_lock_requests();
             }
         }
     }

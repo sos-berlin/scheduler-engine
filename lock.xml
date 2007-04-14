@@ -33,7 +33,7 @@
         Anwendung:
     </p>
     <pre>&lt;job>
-    &lt;lock.lock lock="<i>lock_name</i>"/></pre>
+    &lt;lock.use lock="<i>lock_name</i>"/></pre>
 
     <p>
         Eine Task, die eine Sperre belegt, lässt keine andere Task zu, die dieselbe Sperre beansprucht.
@@ -54,17 +54,17 @@
 
 
     <pre>&lt;job name="replicate_from_adabase">
-    &lt;lock.lock lock="<i>lock_name</i>" exclusive="no"/>
+    &lt;lock.use lock="<i>lock_name</i>" exclusive="no"/>
     …
 &lt;/job>
 
 &lt;job name="replicate_from_as400">
-    &lt;lock.lock lock="<i>lock_name</i>" exclusive="no"/>
+    &lt;lock.use lock="<i>lock_name</i>" exclusive="no"/>
     …
 &lt;/job>
 
 &lt;job name="switch_database">
-    &lt;lock.lock lock="<i>lock_name</i>"/>
+    &lt;lock.use lock="<i>lock_name</i>"/>
     …
 &lt;/job></pre>
 

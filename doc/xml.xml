@@ -70,7 +70,7 @@
                 <scheduler_element name="jobs"/><br/>
                 <scheduler_element name="locks"/><br/>
                 <scheduler_element name="lock"/><br/>
-                <scheduler_element name="lock.lock"/><br/>
+                <scheduler_element name="lock.use"/><br/>
                 <scheduler_element name="monitor"/><br/>
                 <scheduler_element name="monthdays"/><br/>
                 <scheduler_element name="param"/><br/>

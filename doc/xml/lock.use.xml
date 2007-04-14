@@ -3,7 +3,7 @@
 
 <!--$Id: web_service.xml 4858 2007-02-19 17:32:03Z jz $-->
 
-<xml_element name     = "lock.lock"
+<xml_element name     = "lock.use"
              title    = "Deklaration einer Sperre"
              category = "Konfiguration"
              base_dir = "../"
@@ -58,7 +58,7 @@
     
     <messages>
         <message code="SCHEDULER-401" level="error"/>
-        <message code="SCHEDULER-402" level="error"/>
+        <!--message code="SCHEDULER-402" level="error"/-->
         <message code="SCHEDULER-855" level="info"/>
         <message code="SCHEDULER-856" level="info"/>
         <message code="SCHEDULER-857" level="info"/>

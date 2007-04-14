@@ -25,7 +25,7 @@
                 <p>
                     Die Voreinstellung ist unbegrenzt, 
                     es können also mit 
-                    <scheduler_element name="lock.lock" attribute="exclusive" value="no"/> 
+                    <scheduler_element name="lock.use" attribute="exclusive" value="no"/> 
                     beliebig viele nicht-exklusive Tasks gestartet werden
                     (aber nur eine exklusive).
                 </p>
@@ -53,7 +53,7 @@
             mit zusätzlicher Begrenzung der Anzahl Leser.
         </p>
         <p>
-            Zur Verwendung einer Sperre siehe <scheduler_element name="lock.lock"/>
+            Zur Verwendung einer Sperre siehe <scheduler_element name="lock.use"/>
         </p>
     </description>
     

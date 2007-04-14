@@ -212,7 +212,7 @@ Task::Task( Job* job )
 
     _idle_timeout_at = Time::never;
 
-    if( _job->_lock_requestor )  _lock_holder = Z_NEW( Lock_holder( this, _job->_lock_requestor ) );
+    if( _job->_lock_requestor )  _lock_holder = Z_NEW( lock::Holder( this, _job->_lock_requestor ) );
     
     set_subprocess_timeout();
 
@@ -304,7 +304,7 @@ void Task::close()
         _history.end();    // DB-Operation, kann Exception auslösen
     }
 
-    if( _lock_holder )  _lock_holder->release_lock(),  _lock_holder = NULL;
+    if( _lock_holder )  _lock_holder->release_locks(),  _lock_holder = NULL;
 
     set_state( s_closed );
 }
@@ -385,7 +385,7 @@ xml::Element_ptr Task::dom_element( const xml::Document_ptr& document, const Sho
             }
         }
 
-        if( _lock_holder )  task_element.appendChild( _lock_holder->dom_element( document, show ) );
+      //if( _lock_holder )  task_element.appendChild( _lock_holder->dom_element( document, show ) );
 
         if( Order* order = _order? _order : _order_for_task_end )  dom_append_nl( task_element ),  task_element.appendChild( order->dom_element( document, show ) );
         if( _error )  dom_append_nl( task_element ),  append_error_element( task_element, _error );

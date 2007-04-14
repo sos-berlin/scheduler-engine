@@ -312,7 +312,7 @@ struct Task : Object,
 
     ptr<Module_instance>       _module_instance;            // Nur für Module_task. Hier, damit wir nicht immer wieder casten müssen.
     ptr<Web_service>           _web_service;
-    ptr<Lock_holder>           _lock_holder;
+    ptr<lock::Holder>          _lock_holder;
 };
 
 //----------------------------------------------------------------------------------------Task_list

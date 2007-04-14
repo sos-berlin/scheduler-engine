@@ -113,7 +113,7 @@ const string                    variable_set_name_for_substitution  = "$";      
 //-------------------------------------------------------------------------------------------------
 
 extern zschimmer::Message_code_text  scheduler_messages[];            // messages.cxx, generiert aus messages.xml
-extern const char               _author_[]                          = "\n" "Scheduler, 2000-2007 Joacim Zschimmer, http://www.zschimmer.com\n";
+extern const char               _author_[]                          = "\n\n" "Scheduler, 2000-2007 Joacim Zschimmer, Zschimer GmbH, http://www.zschimmer.com\n\n";
 
 //-----------------------------------------------------------------------------------Error_settings
 
@@ -652,7 +652,7 @@ Spooler::Spooler()
     _db                      = Z_NEW( Database( this ) );
     _http_server             = http::new_http_server( this );
     _web_services            = new_web_services( this );
-    _lock_subsystem          = Z_NEW( Lock_subsystem( this ) );
+    _lock_subsystem          = Z_NEW( lock::Lock_subsystem( this ) );
     _supervisor              = new_supervisor( this );
 
     _variable_set_map[ variable_set_name_for_substitution ] = _environment;
@@ -1915,7 +1915,7 @@ void Spooler::stop( const exception* )
 
     if( _order_subsystem )  _order_subsystem->switch_subsystem_state( subsys_stopped );
 
-    _job_subsystem->close_jobs();       // Löst die Sperren ( Job::_lock_requestor=NULL)
+    _job_subsystem->close_jobs();       // Löst die Sperren ( Job::_requestor=NULL)
 
     _lock_subsystem->switch_subsystem_state( subsys_stopped );
 

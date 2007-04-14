@@ -118,8 +118,8 @@ struct Get_events_command_response;
 struct Job;
 struct Job_chain;
 struct Job_subsystem_interface;
-struct Lock_requestor;
-struct Lock_holder;
+struct Holder;
+struct Requestor;
 struct Lock_subsystem;
 struct Module;
 struct Module_instance;
@@ -130,7 +130,6 @@ struct Process_class;
 struct Remote_scheduler_interface;
 struct Scheduler_object;
 struct Scheduler_event;
-struct Scheduler_lock;
 struct Show_what;
 struct Spooler;
 typedef Spooler Scheduler;
@@ -148,6 +147,13 @@ struct Web_service_response;
 struct Xml_client_connection;
 struct Xslt_stylesheet;
 
+namespace lock
+{
+    struct Lock_subsystem;
+    struct Lock;
+    struct Requestor;
+    struct Holder;
+}
 
 typedef stdext::hash_set<string> String_set;
 
@@ -415,7 +421,7 @@ struct Spooler : Object,
     Job_subsystem_interface*    job_subsystem_or_null       ()                                  { return _job_subsystem; }
     Order_subsystem_interface*  order_subsystem             ();
     Java_subsystem_interface*   java_subsystem              ()                                  { return _java_subsystem; }
-    Lock_subsystem*             lock_subsystem              ()                                  { return _lock_subsystem; }
+    lock::Lock_subsystem*       lock_subsystem              ()                                  { return _lock_subsystem; }
     bool                        has_any_order               ();
     bool                        has_any_task                ();
 
@@ -522,7 +528,7 @@ struct Spooler : Object,
     ptr<http::Http_server_interface> _http_server;
     ptr<Web_services_interface>      _web_services;
     ptr<Java_subsystem_interface>    _java_subsystem;
-    ptr<Lock_subsystem>              _lock_subsystem;
+    ptr<lock::Lock_subsystem>        _lock_subsystem;
 
     Wait_handles               _wait_handles;
 

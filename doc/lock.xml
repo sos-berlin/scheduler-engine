@@ -38,7 +38,7 @@
         Anwendung:
     </p>
     <pre><scheduler_element name="job"/>
-    &lt;<a href="xml/lock.lock.xml">lock.lock</a> lock="<i>lock_name</i>"/></pre>
+    &lt;<a href="xml/lock.use.xml">lock.use</a> lock="<i>lock_name</i>"/></pre>
 
     <p>
         Eine Task, die eine Sperre belegt, lässt keine andere Task zu, die dieselbe Sperre beansprucht.
@@ -55,17 +55,17 @@
 
 
     <pre><scheduler_element name="job" attribute="name" value="my_database_job"/>
-    &lt;<a href="xml/lock.lock.xml">lock.lock</a> lock="<i>lock_name</i>" exclusive="no"/>
+    &lt;<a href="xml/lock.use.xml">lock.use</a> lock="<i>lock_name</i>" exclusive="no"/>
     …
 &lt;/job>
 
 <scheduler_element name="job" attribute="name" value="my_other_database_job"/>
-    &lt;<a href="xml/lock.lock.xml">lock.lock</a> lock="<i>lock_name</i>" exclusive="no"/>
+    &lt;<a href="xml/lock.use.xml">lock.use</a> lock="<i>lock_name</i>" exclusive="no"/>
     …
 &lt;/job>
 
 <scheduler_element name="job" attribute="name" value="switch_database"/>
-    &lt;<a href="xml/lock.lock.xml">lock.lock</a> lock="<i>lock_name</i>"/>
+    &lt;<a href="xml/lock.use.xml">lock.use</a> lock="<i>lock_name</i>"/>
     …
 &lt;/job></pre>
 

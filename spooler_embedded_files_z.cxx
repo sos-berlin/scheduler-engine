@@ -579,7 +579,7 @@ const char file_html_z_translation_de_js[] =
     "\xbe\x7e\x01\x2b\x60\x8d\x2e\x0a\x03\x00\x00";
 
 const char file_html_z_scheduler_xslt[] = 
-    "\x1f\x8b\x08\x00\xac\xeb\x19\x46\x00\x03\xed\x7d\xdd\x72\x24\xb7\x91\xee\xfd\x46\xec\x3b\x40\x6d\xae\x49\x2a\x48\x36\xc9\x99\xb1"
+    "\x1f\x8b\x08\x00\x14\x3d\x1d\x46\x00\x03\xed\x7d\xdd\x72\x24\xb7\x91\xee\xfd\x46\xec\x3b\x40\x6d\xae\x49\x2a\x48\x36\xc9\x99\xb1"
     "\x2d\xce\xb0\x35\xb2\x7e\xd6\xf2\xb1\x2d\x85\x46\x5e\x9f\x58\x1d\x45\x45\x75\x37\xba\xbb\x34\xdd\x55\xed\xaa\xea\x21\x39\xb1\xe1"
     "\xd8\x77\xd8\x07\x38\x37\xfb\x0c\xe7\xca\x77\x7a\x93\x7d\x92\x83\xbf\x42\x15\x0a\x7f\x89\xaa\xea\x1e\x8e\xac\x0e\xc5\x88\x6c\x02"
     "\x89\x44\x02\x48\x24\x12\x5f\x26\x5e\x7c\x7c\xbf\x59\xa3\x37\x38\x2f\x92\x2c\xbd\x3d\xbe\xba\xb8\x3c\x46\x38\x9d\x65\xf3\x24\x5d"
@@ -1064,7 +1064,7 @@ const char file_html_z_scheduler_xslt[] =
     "\x92\xff\x0f\x2b\xbf\x6d\x18\x0c\x1c\x02\x00";
 
 const char file_html_z_scheduler_css[] = 
-    "\x1f\x8b\x08\x00\x20\x35\x19\x46\x00\x03\xb5\x58\x51\x6f\xe2\x46\x10\x7e\x47\xe2\x3f\x8c\x94\x7b\x68\xd1\x19\x96\x84\x5c\x1c\x53"
+    "\x1f\x8b\x08\x00\x14\x3d\x1d\x46\x00\x03\xb5\x58\x51\x6f\xe2\x46\x10\x7e\x47\xe2\x3f\x8c\x94\x7b\x68\xd1\x19\x96\x84\x5c\x1c\x53"
     "\x55\x4a\xef\x40\x77\x55\x54\x55\xe1\x5a\xa9\xf7\x82\xd6\xf6\x18\xf6\x30\xbb\x68\x6d\x20\x97\x28\xff\xb4\xbf\xa3\x4f\x7d\xe8\xee"
     "\xda\x18\x63\x2f\x14\x92\x8b\x91\x92\xb0\x9e\xf9\x66\x76\xe6\xdb\xd9\x99\x74\x5a\x00\x6f\x3e\x85\x1e\x24\xc1\x14\xc3\x65\x8c\xb2"
     "\x1d\x24\x09\xf4\xae\x2f\x5d\x38\x27\xe4\xca\x21\x3d\x87\xb8\xd0\x75\xbd\x8b\xae\xd7\xeb\x7e\x81\xaf\x0f\xf0\x06\x9a\x8d\x66\x03"
@@ -1157,7 +1157,7 @@ const char file_html_z_job_scheduler_rabbit_circle_45x45_gif[] =
     "\x5f\x19\x6f\x63\x71\xe5\x69\x61\x81\x58\xea\xbf\x3d\xb7\x49\x9a\xa7\x06\x00\x00";
 
 const char file_scheduler_xsd[] = 
-    "\x1f\x8b\x08\x00\x3b\xfc\x19\x46\x00\x03\xed\x3d\xed\x72\xdc\x36\x92\xff\xb7\x6a\xdf\x01\x3b\xd9\xda\x92\x13\x6b\x24\x39\xde\x24"
+    "\x1f\x8b\x08\x00\x12\x3d\x1d\x46\x00\x03\xed\x3d\xed\x72\xdc\x36\x92\xff\xb7\x6a\xdf\x01\x3b\xd9\xda\x92\x13\x6b\x24\x39\xde\x24"
     "\x56\xd6\xce\x39\xb6\x1c\x6b\x63\x4b\x3e\x4b\x4a\xb2\x89\x53\x2c\x0c\x89\x99\x61\xc4\x01\x67\x09\x52\x23\xe5\x76\xef\x55\xee\x4f"
     "\x1e\x23\xff\xfc\x62\x07\xf0\x9b\xc4\x07\x01\x90\x1c\xd9\xae\x65\xa5\x62\x0d\x09\x34\x1a\x8d\x46\xa3\xd1\xdd\x68\xfc\xed\xab\xeb"
     "\x55\x00\xae\x50\x44\xfc\x10\x3f\x9c\x1c\x4c\xf7\x27\x00\x61\x37\xf4\x7c\xbc\x78\x38\xb9\x38\x7f\xb6\xfb\xc5\xe4\xab\x47\x7f\xfc"
@@ -1383,19 +1383,19 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "html/favicon.ico", file_html_favicon_ico, sizeof file_html_favicon_ico - 1, 1111077427 },
-    { "html/z/details_frame.html", file_html_z_details_frame_html, sizeof file_html_z_details_frame_html - 1, 1169196088 },
-    { "html/z/index.html", file_html_z_index_html, sizeof file_html_z_index_html - 1, 1169196088 },
-    { "html/z/left_frame.html", file_html_z_left_frame_html, sizeof file_html_z_left_frame_html - 1, 1169470494 },
+    { "html/favicon.ico", file_html_favicon_ico, sizeof file_html_favicon_ico - 1, 1111073827 },
+    { "html/z/details_frame.html", file_html_z_details_frame_html, sizeof file_html_z_details_frame_html - 1, 1169192488 },
+    { "html/z/index.html", file_html_z_index_html, sizeof file_html_z_index_html - 1, 1169192488 },
+    { "html/z/left_frame.html", file_html_z_left_frame_html, sizeof file_html_z_left_frame_html - 1, 1169466894 },
     { "html/z/browser_dependencies.js", file_html_z_browser_dependencies_js, sizeof file_html_z_browser_dependencies_js - 1, 1162032882 },
     { "html/z/popup_menu.js", file_html_z_popup_menu_js, sizeof file_html_z_popup_menu_js - 1, 1162032882 },
-    { "html/z/scheduler.js", file_html_z_scheduler_js, sizeof file_html_z_scheduler_js - 1, 1170759008 },
+    { "html/z/scheduler.js", file_html_z_scheduler_js, sizeof file_html_z_scheduler_js - 1, 1170755408 },
     { "html/z/show_log.js", file_html_z_show_log_js, sizeof file_html_z_show_log_js - 1, 1162032882 },
     { "html/z/translation_de.js", file_html_z_translation_de_js, sizeof file_html_z_translation_de_js - 1, 1162032882 },
-    { "html/z/scheduler.xslt", file_html_z_scheduler_xslt, sizeof file_html_z_scheduler_xslt - 1, 1176103852 },
-    { "html/z/scheduler.css", file_html_z_scheduler_css, sizeof file_html_z_scheduler_css - 1, 1176057120 },
-    { "html/z/job_scheduler_rabbit_circle_45x45.gif", file_html_z_job_scheduler_rabbit_circle_45x45_gif, sizeof file_html_z_job_scheduler_rabbit_circle_45x45_gif - 1, 1164981349 },
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1176108091 },
+    { "html/z/scheduler.xslt", file_html_z_scheduler_xslt, sizeof file_html_z_scheduler_xslt - 1, 1176321300 },
+    { "html/z/scheduler.css", file_html_z_scheduler_css, sizeof file_html_z_scheduler_css - 1, 1176321300 },
+    { "html/z/job_scheduler_rabbit_circle_45x45.gif", file_html_z_job_scheduler_rabbit_circle_45x45_gif, sizeof file_html_z_job_scheduler_rabbit_circle_45x45_gif - 1, 1164977749 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1176321298 },
     { NULL, NULL, 0 }
 };
 
