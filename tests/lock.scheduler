@@ -24,7 +24,8 @@ spooler_log.info( "START" );
         <jobs>
 
             <job name="A" tasks="2">
-                <lock.lock lock="Georgien"/>
+                <lock.use lock="Georgien"/>
+                <lock.use lock="Venezuela"/>
 
                 <script language="JavaScript">
                     <![CDATA[
@@ -45,7 +46,8 @@ function spooler_process()
 
             
             <job name="B">
-                <lock.lock lock="Georgien"/>
+                <lock.use lock="Georgien"/>
+                <lock.use lock="Venezuela"/>
 
                 <script language="JavaScript">
                     <![CDATA[
@@ -63,7 +65,8 @@ function spooler_process()
 
             
             <job name="C">
-                <lock.lock lock="Georgien" exclusive="no"/>
+                <lock.use lock="Georgien" exclusive="no"/>
+                <lock.use lock="Venezuela"/>
 
                 <script language="JavaScript">
                     <![CDATA[
@@ -81,7 +84,7 @@ function spooler_process()
 
 
             <job name="D">
-                <lock.lock lock="Georgien" exclusive="no"/>
+                <lock.use lock="Georgien" exclusive="no"/>
 
                 <script language="JavaScript">
                     <![CDATA[
@@ -102,7 +105,7 @@ function spooler_process()
             
             
             <job name="E">
-                <lock.lock lock="Georgien" exclusive="no"/>
+                <lock.use lock="Georgien" exclusive="no"/>
 
                 <script language="JavaScript">
                     <![CDATA[

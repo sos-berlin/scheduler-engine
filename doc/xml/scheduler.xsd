@@ -285,7 +285,7 @@
                     </xsd:complexType>
                 </xsd:element>
 
-                <xsd:element name="lock.lock" minOccurs="0">
+                <xsd:element name="lock.use" minOccurs="0" maxOccurs="unbounded">
                     <xsd:complexType>
                         <xsd:attribute name="lock"                  type="String"       use="required"/>
                         <xsd:attribute name="exclusive"             type="Yes_no"/>

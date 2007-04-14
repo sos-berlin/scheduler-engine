@@ -3617,11 +3617,11 @@
 
         <message code="SCHEDULER-857" weight="info">
             <text xml:lang="en">
-                <title>Waiting for locks <p1>locks</p1></title>
+                <title>Waiting for lock <p1>locks</p1></title>
             </text>
         </message>
 
-        <message code="SCHEDULER-858" weight="info">
+        <message code="SCHEDULER-858" weight="debug3">
             <text xml:lang="en">
                 <title>Not longer waiting for <p1>Lock</p1></title>
             </text>

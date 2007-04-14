@@ -399,7 +399,7 @@ void Use::close()
 
 void Use::set_dom( const xml::Element_ptr& lock_element )
 {
-    assert( lock_element.nodeName_is( "lock.lock_use" ) );
+    assert( lock_element.nodeName_is( "lock.use" ) );
 
     _lock_mode = lock_element.bool_getAttribute( "exclusive", _lock_mode == Lock::lk_exclusive )? 
                     Lock::lk_exclusive 
@@ -427,6 +427,7 @@ xml::Element_ptr Use::dom_element( const xml::Document_ptr& dom_document, const 
     xml::Element_ptr result = dom_document.createElement( "lock.use" );
 
     result.setAttribute( "lock", _lock_name );
+    result.setAttribute( "exclusive", _lock_mode == Lock::lk_exclusive? "yes" : "no" );
 
     return result;
 }

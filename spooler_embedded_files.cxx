@@ -294,7 +294,7 @@ const char file_scheduler_xsd[] =
     "</xsd:complexType>\n"
     "</xsd:element>\n"
     "\n"
-    "<xsd:element name=\"lock.lock\" minOccurs=\"0\">\n"
+    "<xsd:element name=\"lock.use\" minOccurs=\"0\" maxOccurs=\"unbounded\">\n"
     "<xsd:complexType>\n"
     "<xsd:attribute name=\"lock\"                  type=\"String\"       use=\"required\"/>\n"
     "<xsd:attribute name=\"exclusive\"             type=\"Yes_no\"/>\n"
@@ -1521,7 +1521,7 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1176321298 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1176575536 },
     { NULL, NULL, 0 }
 };
 
