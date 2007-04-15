@@ -65,8 +65,8 @@ function spooler_process()
 
             
             <job name="C">
-                <lock.use lock="Georgien" exclusive="no"/>
                 <lock.use lock="Venezuela"/>
+                <lock.use lock="Georgien" exclusive="no"/>
 
                 <script language="JavaScript">
                     <![CDATA[
@@ -84,7 +84,8 @@ function spooler_process()
 
 
             <job name="D">
-                <lock.use lock="Georgien" exclusive="no"/>
+                <lock.use lock="Georgien"/>
+                <lock.use lock="Venezuela" exclusive="no"/>
 
                 <script language="JavaScript">
                     <![CDATA[

@@ -80,6 +80,13 @@ IDispatch* Scheduler_object::idispatch()
     z::throw_xc( __FUNCTION__, obj_name() );
 }
 
+//-------------------------------------------------------Scheduler_object::write_element_attributes
+
+void Scheduler_object::write_element_attributes( const xml::Element_ptr& ) const
+{
+    Z_DEBUG_ONLY( assert( !"Scheduler_object::write_element_attributes" ) );
+}
+
 //-----------------------------------------------------------Scheduler_object::mail_xslt_stylesheet
     
 ptr<Xslt_stylesheet> Scheduler_object::mail_xslt_stylesheet()

@@ -460,6 +460,14 @@ xml::Document_ptr Task::dom( const Show_what& show ) const
     return document;
 }
 
+//-------------------------------------------------------------------Task::write_element_attributes
+
+void Task::write_element_attributes( const xml::Element_ptr& element ) const 
+{ 
+    element.setAttribute( "job" , _job->path() ); 
+    element.setAttribute( "task", _id );
+}
+
 //----------------------------------------------------------------------------------------Task::job
 
 Job* Task::job()

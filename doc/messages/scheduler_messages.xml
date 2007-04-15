@@ -3605,7 +3605,7 @@
 
         <message code="SCHEDULER-855" weight="info">
             <text xml:lang="en">
-                <title><p1>Lock</p1> has been <p2>exclusively/non-exclusively</p2> acquired</title>
+                <title>Is now holding <p1>Lock</p1> <p2>exclusively/non-exclusively</p2></title>
             </text>
         </message>
 
@@ -3623,13 +3623,19 @@
 
         <message code="SCHEDULER-858" weight="debug3">
             <text xml:lang="en">
-                <title>Not longer waiting for <p1>Lock</p1></title>
+                <title>Not longer waiting for lock <p1>locknames</p1></title>
             </text>
         </message>
 
         <message code="SCHEDULER-859" weight="info">
             <text xml:lang="en">
                 <title>Due to action='next_state' the state '<p2/>' is skipped. Next state is '<p1/>'</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-860" weight="info">
+            <text xml:lang="en">
+                <title><p1>Lock</p1> has been released, <p2/> non-exclusive holders remaining</title>
             </text>
         </message>
 

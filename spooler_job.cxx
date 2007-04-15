@@ -2203,7 +2203,11 @@ ptr<Task> Job::task_to_start()
     {
         if( _lock_requestor )
         {
-            if( !_lock_requestor->locks_are_available() )
+            if( _lock_requestor->locks_are_available() )
+            {
+                Z_LOG2( "scheduler", obj_name() << ": Locks are available\n" );
+            }
+            else
             {
                 if( !_lock_requestor->is_enqueued() )
                 {

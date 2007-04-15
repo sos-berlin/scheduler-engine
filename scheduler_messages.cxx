@@ -403,11 +403,12 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-852", "Order not found in database" },
     { "SCHEDULER-853", "Order in database could not be updated or deleted. " },
     { "SCHEDULER-854", "Closing lock $1 while held by $2" },
-    { "SCHEDULER-855", "$1 has been $2 acquired" },
+    { "SCHEDULER-855", "Is now holding $1 $2" },
     { "SCHEDULER-856", "$1 has been released" },
-    { "SCHEDULER-857", "Waiting for locks $1" },
-    { "SCHEDULER-858", "Not longer waiting for $1" },
+    { "SCHEDULER-857", "Waiting for lock $1" },
+    { "SCHEDULER-858", "Not longer waiting for lock $1" },
     { "SCHEDULER-859", "Due to action='next_state' the state '$2' is skipped. Next state is '$1'" },
+    { "SCHEDULER-860", "$1 has been released, $2 non-exclusive holders remaining" },
     {}
 };
 } //namespace sos

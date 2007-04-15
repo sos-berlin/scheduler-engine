@@ -17,8 +17,8 @@ struct Lock : Object, Scheduler_object, Non_cloneable
 {
     enum Lock_mode
     { 
-        lk_non_exclusive = 0, 
-        lk_exclusive     = 1
+        lk_exclusive     = 0,   // Index für _waiting_queues
+        lk_non_exclusive = 1 
     };
 
 
@@ -31,11 +31,13 @@ struct Lock : Object, Scheduler_object, Non_cloneable
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
 
     string                      name                        () const                                { return _name; }
-    bool                        is_available_for            ( const Use* );
-    bool                        hold_lock_for               ( Holder*, Use* );
+    bool                        its_my_turn                 ( const Use* );
+    bool                        require_lock_for            ( Holder*, Use* );
     void                        release_lock_for            ( Holder* );
     int                         enqueue_lock_use            ( Use* );
     void                        dequeue_lock_use            ( Use* );
+    int                         non_exclusive_holders       () const                                { return _lock_mode == lk_non_exclusive? _holder_set.size() : 0; }
+    bool                        is_free_for                 ( Lock_mode );
     string                      obj_name                    () const;
 
 
@@ -98,6 +100,7 @@ struct Requestor : Object, Scheduler_object, Non_cloneable
     bool                        locks_are_available         () const;
     void                        enqueue_lock_requests       ();
     void                        dequeue_lock_requests       ( Log_level = log_debug3 );
+    Scheduler_object*           object                      () const                                { return _object; }
 
     virtual void                on_locks_are_available      ()                                      = 0;
 
@@ -126,6 +129,7 @@ struct Holder : Object, Scheduler_object, Non_cloneable
   //bool                        is_exclusive                () const;
     bool                        request_locks               ();
     void                        release_locks               ();
+    Scheduler_object*           object                      () const                                { return _object; }
 
     string                      obj_name                    () const;
 

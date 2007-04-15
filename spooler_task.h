@@ -99,6 +99,10 @@ struct Task : Object,
                                 Task                        ( Job* );
                                ~Task                        ();
 
+    // Scheduler_object::
+    void                        write_element_attributes    ( const xml::Element_ptr& element ) const;
+
+
     int                         id                          ()                                      { return _id; }
 
     void                        cmd_end                     ( bool kill_immediately = false );
