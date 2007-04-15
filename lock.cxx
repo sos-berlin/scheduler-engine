@@ -49,7 +49,8 @@ void Lock::close()
 
 void Lock::prepare_remove()
 {
-    if( !is_free() )  z::throw_xc( "SCHEDULER-410", path(), string_from_holders() );
+    if( !is_free()        )  z::throw_xc( "SCHEDULER-410", path(), string_from_holders() );
+    if( !_use_set.empty() )  z::throw_xc( "SCHEDULER-411", path(), string_from_uses() );
 
     typedef stdext::hash_set< Requestor* >  Requestor_set;
     Requestor_set requestor_set;
@@ -259,6 +260,23 @@ string Lock::string_from_holders() const
 
         if( !result.empty() )  result << ", ";
         result << holder->object()->obj_name();
+    }
+
+    return result;
+}
+
+//---------------------------------------------------------------------------Lock::string_from_uses
+
+string Lock::string_from_uses() const
+{
+    S result;
+
+    Z_FOR_EACH_CONST( Use_set, _use_set, it )
+    {
+        Use* lock_use = *it;
+
+        if( !result.empty() )  result << ", ";
+        result << lock_use->requestor()->object()->obj_name();
     }
 
     return result;

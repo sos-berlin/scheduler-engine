@@ -2551,6 +2551,12 @@
             </text>
         </message>
         
+        <message code="SCHEDULER-410">
+            <text xml:lang="en">
+                <title><p1>lock</p1> cannot be removed, it is used by <p2/></title>
+            </text>
+        </message>
+        
         
         <!--message code="SCHEDULER-398">
             <text xml:lang="en">

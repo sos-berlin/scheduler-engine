@@ -34,6 +34,8 @@ struct Lock : Object, Scheduler_object, Non_cloneable
     string                      name                        () const                                { return _name; }
     string                      path                        () const                                { return _name; }
     bool                        its_my_turn                 ( const Use* );
+    void                        register_lock_use           ( Use* lock_use )                       { _use_set.insert( lock_use ); }
+    void                        unregister_lock_use         ( Use* lock_use )                       { _use_set.erase( lock_use ); }
     void                        require_lock_for            ( Holder*, Use* );
     void                        release_lock_for            ( Holder* );
     int                         enqueue_lock_use            ( Use* );
@@ -43,6 +45,7 @@ struct Lock : Object, Scheduler_object, Non_cloneable
     bool                        is_free                     () const                                { return _holder_set.empty(); }             
     string                      obj_name                    () const;
     string                      string_from_holders         () const;
+    string                      string_from_uses            () const;
 
 
   private:
@@ -56,6 +59,9 @@ struct Lock : Object, Scheduler_object, Non_cloneable
 
     typedef list<Use*>          Use_list;
     vector<Use_list>           _waiting_queues;             // Index: Lock_mode, eine Liste für lk_non_exclusive und eine für lk_exclusive
+
+    typedef stdext::hash_set<Use*>  Use_set;
+    Use_set                        _use_set;
 
     Lock_subsystem*            _lock_subsystem;
 };
