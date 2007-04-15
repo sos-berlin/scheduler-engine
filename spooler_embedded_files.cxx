@@ -140,6 +140,8 @@ const char file_scheduler_xsd[] =
     "<xsd:element ref=\"add_jobs\"/>\n"
     "<xsd:element ref=\"add_order\"/>\n"
     "<xsd:element ref=\"kill_task\"/>\n"
+    "<xsd:element ref=\"lock\"/>\n"
+    "<xsd:element ref=\"lock.remove\"/>\n"
     "<xsd:element ref=\"modify_job\"/>\n"
     "<xsd:element ref=\"modify_order\"/>\n"
     "<xsd:element ref=\"modify_spooler\"/>\n"
@@ -642,6 +644,21 @@ const char file_scheduler_xsd[] =
     "</xsd:element>\n"
     "\n"
     "\n"
+    "<xsd:element name=\"lock\">\n"
+    "<xsd:complexType>\n"
+    "<xsd:attribute name=\"name\"              type=\"Name\"                     use=\"required\"/>\n"
+    "<xsd:attribute name=\"max_non_exclusive\" type=\"xsd:nonNegativeInteger\"/>\n"
+    "</xsd:complexType>\n"
+    "</xsd:element>\n"
+    "\n"
+    "\n"
+    "<xsd:element name=\"lock.remove\">\n"
+    "<xsd:complexType>\n"
+    "<xsd:attribute name=\"lock\"              type=\"Name\"                     use=\"required\"/>\n"
+    "</xsd:complexType>\n"
+    "</xsd:element>\n"
+    "\n"
+    "\n"
     "<xsd:element name=\"note\">\n"
     "<xsd:annotation>\n"
     "<xsd:documentation>additional note in HTML</xsd:documentation>\n"
@@ -718,12 +735,7 @@ const char file_scheduler_xsd[] =
     "<xsd:element name=\"locks\">\n"
     "<xsd:complexType>\n"
     "<xsd:sequence>\n"
-    "<xsd:element name=\"lock\" minOccurs=\"0\" maxOccurs=\"unbounded\">\n"
-    "<xsd:complexType>\n"
-    "<xsd:attribute name=\"name\"              type=\"Name\"                     use=\"required\"/>\n"
-    "<xsd:attribute name=\"max_non_exclusive\" type=\"xsd:nonNegativeInteger\"/>\n"
-    "</xsd:complexType>\n"
-    "</xsd:element>\n"
+    "<xsd:element ref=\"lock\" minOccurs=\"0\" maxOccurs=\"unbounded\"/>\n"
     "</xsd:sequence>\n"
     "</xsd:complexType>\n"
     "\n"
@@ -1521,7 +1533,7 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1176579541 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1176646940 },
     { NULL, NULL, 0 }
 };
 

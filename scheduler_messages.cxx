@@ -270,6 +270,8 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-406", "Error in job chain node state='$1': $2" },
     { "SCHEDULER-407", "Attribute $1 is empty" },
     { "SCHEDULER-408", "<$1 $2=...> cannot be changed" },
+    { "SCHEDULER-409", "XML tag <$1> expected, instead of <$2>" },
+    { "SCHEDULER-410", "$1 cannot be removed, it is held by $2" },
     { "SCHEDULER-900", "Scheduler $1 is starting with $2, pid=$3" },
     { "SCHEDULER-902", "state=$1" },
     { "SCHEDULER-904", "Tasks have $1s to terminate" },

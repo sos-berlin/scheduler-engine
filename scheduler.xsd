@@ -131,6 +131,8 @@
             <xsd:element ref="add_jobs"/>
             <xsd:element ref="add_order"/>
             <xsd:element ref="kill_task"/>
+            <xsd:element ref="lock"/>
+            <xsd:element ref="lock.remove"/>
             <xsd:element ref="modify_job"/>
             <xsd:element ref="modify_order"/>
             <xsd:element ref="modify_spooler"/>
@@ -633,6 +635,21 @@
     </xsd:element>
 
 
+    <xsd:element name="lock">
+        <xsd:complexType>
+            <xsd:attribute name="name"              type="Name"                     use="required"/>
+            <xsd:attribute name="max_non_exclusive" type="xsd:nonNegativeInteger"/>
+        </xsd:complexType>
+    </xsd:element>
+
+
+    <xsd:element name="lock.remove">
+        <xsd:complexType>
+            <xsd:attribute name="lock"              type="Name"                     use="required"/>
+        </xsd:complexType>
+    </xsd:element>
+
+
     <xsd:element name="note">
         <xsd:annotation>
             <xsd:documentation>additional note in HTML</xsd:documentation>
@@ -709,12 +726,7 @@
     <xsd:element name="locks">
         <xsd:complexType>
             <xsd:sequence>
-                <xsd:element name="lock" minOccurs="0" maxOccurs="unbounded">
-                    <xsd:complexType>
-                        <xsd:attribute name="name"              type="Name"                     use="required"/>
-                        <xsd:attribute name="max_non_exclusive" type="xsd:nonNegativeInteger"/>
-                    </xsd:complexType>
-                </xsd:element>
+                <xsd:element ref="lock" minOccurs="0" maxOccurs="unbounded"/>
             </xsd:sequence>
         </xsd:complexType>
 

@@ -26,19 +26,23 @@ struct Lock : Object, Scheduler_object, Non_cloneable
                                ~Lock                        ();
 
     void                        close                       ();
+    void                        prepare_remove              ();
 
     void                    set_dom                         ( const xml::Element_ptr& );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
 
     string                      name                        () const                                { return _name; }
+    string                      path                        () const                                { return _name; }
     bool                        its_my_turn                 ( const Use* );
     void                        require_lock_for            ( Holder*, Use* );
     void                        release_lock_for            ( Holder* );
     int                         enqueue_lock_use            ( Use* );
     void                        dequeue_lock_use            ( Use* );
     int                         count_exclusive_holders     () const                                { return _lock_mode == lk_non_exclusive? _holder_set.size() : 0; }
-    bool                        is_free_for                 ( Lock_mode );
+    bool                        is_free_for                 ( Lock_mode ) const;
+    bool                        is_free                     () const                                { return _holder_set.empty(); }             
     string                      obj_name                    () const;
+    string                      string_from_holders         () const;
 
 
   private:
@@ -155,6 +159,9 @@ struct Lock_subsystem : Subsystem
 
     void                    set_dom                         ( const xml::Element_ptr& );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
+    xml::Element_ptr            execute_xml                 ( Command_processor*, const xml::Element_ptr&, const Show_what& );
+    void                        execute_xml_lock            ( const xml::Element_ptr& );
+    void                        execute_xml_lock_remove     ( const xml::Element_ptr& );
 
     bool                        is_empty                    () const                                { return _lock_map.empty(); }
     Lock*                       lock                        ( const string& name );

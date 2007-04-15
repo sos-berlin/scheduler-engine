@@ -45,58 +45,36 @@ void Lock::close()
     _waiting_queues.clear();
 }
 
-//------------------------------------------------------------------------------------Lock::set_dom
+//-----------------------------------------------------------------------------Lock::prepare_remove
 
-void Lock::set_dom( const xml::Element_ptr& lock_element )
+void Lock::prepare_remove()
 {
-    Z_DEBUG_ONLY( assert( lock_element.nodeName_is( "lock" ) ) );
+    if( !is_free() )  z::throw_xc( "SCHEDULER-410", path(), string_from_holders() );
 
-
-    int max_non_exclusive = lock_element.int_getAttribute( "max_non_exclusive", _max_non_exclusive );
-
-    if( max_non_exclusive < count_exclusive_holders() )  z::throw_xc( "SCHEDULER-402", max_non_exclusive, _holder_set.size() );
-}
-
-//--------------------------------------------------------------------------------Lock::dom_element
-
-xml::Element_ptr Lock::dom_element( const xml::Document_ptr& dom_document, const Show_what& )
-{
-    xml::Element_ptr result = dom_document.createElement( "lock" );
-
-    result.setAttribute( "name", _name );
-    if( _max_non_exclusive < INT_MAX )  result.setAttribute( "max_non_exclusive", _max_non_exclusive );
-
-    xml::Element_ptr holders_element = result.append_new_element( "lock.holders" );
-    Z_FOR_EACH( Holder_set, _holder_set, it )
-    {
-        Holder* holder = *it;
-
-        xml::Element_ptr holder_element = holders_element.append_new_element( "lock.holder" );
-        holder->object()->write_element_attributes( holder_element );
-    }
+    typedef stdext::hash_set< Requestor* >  Requestor_set;
+    Requestor_set requestor_set;
 
     for( int lk = lk_exclusive; lk <= lk_non_exclusive; lk++ )
     {
-        xml::Element_ptr queue_element = result.append_new_element( "lock.queue" );
-        queue_element.setAttribute( "exclusive", lk == lk_exclusive? "yes" : "no" );
-
-        Use_list& queue = _waiting_queues[ lk ];
-        Z_FOR_EACH( Use_list, queue, it )
+        Z_FOR_EACH( Use_list, _waiting_queues[ lk ], it )
         {
             Use* lock_use = *it;
-            xml::Element_ptr entry_element = queue_element.append_new_element( "lock.queue.entry" );
-
-            Scheduler_object* object = lock_use->requestor()->object();
-            object->write_element_attributes( entry_element );
+            requestor_set.insert( lock_use->requestor() );
         }
     }
 
-    return result;
+    Z_FOR_EACH( Requestor_set, requestor_set, it )
+    {
+        Requestor* requestor = *it;
+        requestor->dequeue_lock_requests();
+    }
+
+    close();
 }
 
 //--------------------------------------------------------------------------------Lock::is_free_for
 
-bool Lock::is_free_for( Lock_mode lock_mode )
+bool Lock::is_free_for( Lock_mode lock_mode ) const
 { 
     return _holder_set.empty()  ||  
            lock_mode == lk_non_exclusive  &&  count_exclusive_holders() < _max_non_exclusive;
@@ -218,6 +196,72 @@ void Lock::dequeue_lock_use( Use* lock_use )
             break;
         }
     }
+}
+
+//------------------------------------------------------------------------------------Lock::set_dom
+
+void Lock::set_dom( const xml::Element_ptr& lock_element )
+{
+    Z_DEBUG_ONLY( assert( lock_element.nodeName_is( "lock" ) ) );
+
+
+    int max_non_exclusive = lock_element.int_getAttribute( "max_non_exclusive", _max_non_exclusive );
+
+    if( max_non_exclusive < count_exclusive_holders() )  z::throw_xc( "SCHEDULER-402", max_non_exclusive, _holder_set.size() );
+}
+
+//--------------------------------------------------------------------------------Lock::dom_element
+
+xml::Element_ptr Lock::dom_element( const xml::Document_ptr& dom_document, const Show_what& )
+{
+    xml::Element_ptr result = dom_document.createElement( "lock" );
+
+    result.setAttribute( "name", _name );
+    if( _max_non_exclusive < INT_MAX )  result.setAttribute( "max_non_exclusive", _max_non_exclusive );
+
+    xml::Element_ptr holders_element = result.append_new_element( "lock.holders" );
+    Z_FOR_EACH( Holder_set, _holder_set, it )
+    {
+        Holder* holder = *it;
+
+        xml::Element_ptr holder_element = holders_element.append_new_element( "lock.holder" );
+        holder->object()->write_element_attributes( holder_element );
+    }
+
+    for( int lk = lk_exclusive; lk <= lk_non_exclusive; lk++ )
+    {
+        xml::Element_ptr queue_element = result.append_new_element( "lock.queue" );
+        queue_element.setAttribute( "exclusive", lk == lk_exclusive? "yes" : "no" );
+
+        Use_list& queue = _waiting_queues[ lk ];
+        Z_FOR_EACH( Use_list, queue, it )
+        {
+            Use* lock_use = *it;
+            xml::Element_ptr entry_element = queue_element.append_new_element( "lock.queue.entry" );
+
+            Scheduler_object* object = lock_use->requestor()->object();
+            object->write_element_attributes( entry_element );
+        }
+    }
+
+    return result;
+}
+
+//------------------------------------------------------------------------Lock::string_from_holders
+
+string Lock::string_from_holders() const
+{
+    S result;
+
+    Z_FOR_EACH_CONST( Holder_set, _holder_set, it )
+    {
+        Holder* holder = *it;
+
+        if( !result.empty() )  result << ", ";
+        result << holder->object()->obj_name();
+    }
+
+    return result;
 }
 
 //-----------------------------------------------------------------------------------Lock::obj_name
@@ -692,39 +736,6 @@ bool Lock_subsystem::subsystem_activate()
     return true;
 }
 
-//--------------------------------------------------------------------------Lock_subsystem::set_dom
-
-void Lock_subsystem::set_dom( const xml::Element_ptr& locks_element )
-{
-    assert( locks_element.nodeName_is( "locks" ) );
-
-    DOM_FOR_EACH_ELEMENT( locks_element, lock_element )
-    {
-        string lock_name = lock_element.getAttribute( "name" );
-        
-        ptr<Lock> lock = lock_or_null( lock_name );
-        if( !lock )  lock = Z_NEW( Lock( this, lock_name ) );
-
-        lock->set_dom( lock_element );
-        _lock_map[ lock->name() ] = lock;
-    }
-}
-
-//----------------------------------------------------------------------Lock_subsystem::dom_element
-
-xml::Element_ptr Lock_subsystem::dom_element( const xml::Document_ptr& dom_document, const Show_what& show_what )
-{
-    xml::Element_ptr result = dom_document.createElement( "locks" );
-
-    Z_FOR_EACH( Lock_map, _lock_map, it )
-    {
-        Lock* lock = it->second;
-        result.appendChild( lock->dom_element( dom_document, show_what ) );
-    }
-
-    return result;
-}
-
 //-----------------------------------------------------------------------------Lock_subsystem::lock
 
 Lock* Lock_subsystem::lock( const string& name )
@@ -740,6 +751,77 @@ Lock* Lock_subsystem::lock_or_null( const string& name )
 {
     Lock_map::iterator it = _lock_map.find( name );
     return it == _lock_map.end()? NULL : it->second;
+}
+
+//--------------------------------------------------------------------------Lock_subsystem::set_dom
+
+void Lock_subsystem::set_dom( const xml::Element_ptr& locks_element )
+{
+    assert( locks_element.nodeName_is( "locks" ) );
+
+    DOM_FOR_EACH_ELEMENT( locks_element, lock_element )
+    {
+        execute_xml_lock( lock_element );
+    }
+}
+
+//-----------------------------------------------------------------Lock_subsystem::execute_xml_lock
+
+void Lock_subsystem::execute_xml_lock( const xml::Element_ptr& lock_element )
+{
+    if( !lock_element.nodeName_is( "lock" ) )  z::throw_xc( "SCHEDULER-409", "lock", lock_element.nodeName() );
+
+    string lock_name = lock_element.getAttribute( "name" );
+    
+    ptr<Lock> lock = lock_or_null( lock_name );
+    if( !lock )  lock = Z_NEW( Lock( this, lock_name ) );
+
+    lock->set_dom( lock_element );
+    _lock_map[ lock->name() ] = lock;
+}
+
+//----------------------------------------------------------Lock_subsystem::execute_xml_lock_remove
+
+void Lock_subsystem::execute_xml_lock_remove( const xml::Element_ptr& lock_remove_element )
+{
+    if( !lock_remove_element.nodeName_is( "lock.remove" ) )  z::throw_xc( "SCHEDULER-409", "lock.remove", lock_remove_element.nodeName() );
+
+    string lock_path = lock_remove_element.getAttribute( "lock" );
+    
+    Lock* lock = this->lock( lock_path );
+
+    lock->prepare_remove();
+    _lock_map.erase( lock_path );
+}
+
+//----------------------------------------------------------------------Lock_subsystem::execute_xml
+
+xml::Element_ptr Lock_subsystem::execute_xml( Command_processor* command_processor, const xml::Element_ptr& element, const Show_what& )
+{
+    xml::Element_ptr result;
+
+    if( element.nodeName_is( "lock"        ) )  execute_xml_lock( element );
+    else
+    if( element.nodeName_is( "lock.remove" ) )  execute_xml_lock_remove( element );
+    else
+        z::throw_xc( "SCHEDULER-113", element.nodeName() );
+
+    return command_processor->_answer.createElement( "ok" );
+}
+
+//----------------------------------------------------------------------Lock_subsystem::dom_element
+
+xml::Element_ptr Lock_subsystem::dom_element( const xml::Document_ptr& dom_document, const Show_what& show_what )
+{
+    xml::Element_ptr result = dom_document.createElement( "locks" );
+
+    Z_FOR_EACH( Lock_map, _lock_map, it )
+    {
+        Lock* lock = it->second;
+        result.appendChild( lock->dom_element( dom_document, show_what ) );
+    }
+
+    return result;
 }
 
 //-------------------------------------------------------------------------------------------------
