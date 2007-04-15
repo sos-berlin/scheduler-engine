@@ -2296,8 +2296,7 @@ ptr<Task> Job::task_to_start()
 
     if( task  &&  _lock_requestor )
     {
-        bool hold_locks = task->_lock_holder->request_locks();
-        assert( hold_locks );
+        task->_lock_holder->hold_locks();
 
         if( _lock_requestor->is_enqueued() )  _lock_requestor->dequeue_lock_requests( log_none );
     }

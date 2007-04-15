@@ -268,6 +268,8 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-404", "action='$1' is not possible on a distributed job chain" },
     { "SCHEDULER-405", "Setting state='$1' is not possible while job chain is in state '$2'" },
     { "SCHEDULER-406", "Error in job chain node state='$1': $2" },
+    { "SCHEDULER-407", "Attribute $1 is empty" },
+    { "SCHEDULER-408", "<$1 $2=...> cannot be changed" },
     { "SCHEDULER-900", "Scheduler $1 is starting with $2, pid=$3" },
     { "SCHEDULER-902", "state=$1" },
     { "SCHEDULER-904", "Tasks have $1s to terminate" },
@@ -405,10 +407,10 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-854", "Closing lock $1 while held by $2" },
     { "SCHEDULER-855", "Is now holding $1 $2" },
     { "SCHEDULER-856", "$1 has been released" },
-    { "SCHEDULER-857", "Waiting for lock $1" },
+    { "SCHEDULER-857", "$1 has been released, $2 non-exclusive holders remaining" },
     { "SCHEDULER-858", "Not longer waiting for lock $1" },
     { "SCHEDULER-859", "Due to action='next_state' the state '$2' is skipped. Next state is '$1'" },
-    { "SCHEDULER-860", "$1 has been released, $2 non-exclusive holders remaining" },
+    { "SCHEDULER-860", "Waiting for lock $1" },
     {}
 };
 } //namespace sos

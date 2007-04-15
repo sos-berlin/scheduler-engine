@@ -2527,6 +2527,18 @@
             </text>
         </message>
 
+        <message code="SCHEDULER-407">
+            <text xml:lang="en">
+                <title>Attribute <p1/> is empty</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-408">
+            <text xml:lang="en">
+                <title>&lt;<p1/> <p2/>=...> cannot be changed</title>
+            </text>
+        </message>
+
         <!--message code="SCHEDULER-398">
             <text xml:lang="en">
                 <title>Same Java class <p1/> with source code is used in <p2>job</p2></title>
@@ -3617,7 +3629,7 @@
 
         <message code="SCHEDULER-857" weight="info">
             <text xml:lang="en">
-                <title>Waiting for lock <p1>locks</p1></title>
+                <title><p1>Lock</p1> has been released, <p2/> non-exclusive holders remaining</title>
             </text>
         </message>
 
@@ -3635,7 +3647,7 @@
 
         <message code="SCHEDULER-860" weight="info">
             <text xml:lang="en">
-                <title><p1>Lock</p1> has been released, <p2/> non-exclusive holders remaining</title>
+                <title>Waiting for lock <p1>locks</p1></title>
             </text>
         </message>
 

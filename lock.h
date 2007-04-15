@@ -32,11 +32,11 @@ struct Lock : Object, Scheduler_object, Non_cloneable
 
     string                      name                        () const                                { return _name; }
     bool                        its_my_turn                 ( const Use* );
-    bool                        require_lock_for            ( Holder*, Use* );
+    void                        require_lock_for            ( Holder*, Use* );
     void                        release_lock_for            ( Holder* );
     int                         enqueue_lock_use            ( Use* );
     void                        dequeue_lock_use            ( Use* );
-    int                         non_exclusive_holders       () const                                { return _lock_mode == lk_non_exclusive? _holder_set.size() : 0; }
+    int                         count_exclusive_holders     () const                                { return _lock_mode == lk_non_exclusive? _holder_set.size() : 0; }
     bool                        is_free_for                 ( Lock_mode );
     string                      obj_name                    () const;
 
@@ -60,7 +60,7 @@ struct Lock : Object, Scheduler_object, Non_cloneable
 
 struct Use : Object, Scheduler_object, Non_cloneable
 {
-                                Use                         ( Requestor*, const string& lock_name );
+                                Use                         ( Requestor* );
                                ~Use                         ();
 
     void                        close                       ();
@@ -70,14 +70,16 @@ struct Use : Object, Scheduler_object, Non_cloneable
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
 
     Lock*                       lock                        () const;
+    Lock*                       lock_or_null                () const;
     Requestor*                  requestor                   () const                                { return _requestor; }
-    string                      lock_name                   () const                                { return _lock_name; }
+    string                      lock_path                   () const                                { return _lock_path; }
     Lock::Lock_mode             lock_mode                   () const                                { return _lock_mode; }
 
     string                      obj_name                    () const;
 
+  private:
     Fill_zero                  _zero_;
-    string                     _lock_name;
+    string                     _lock_path;
     Lock::Lock_mode            _lock_mode;
     Requestor* const           _requestor;
 };
@@ -89,10 +91,9 @@ struct Requestor : Object, Scheduler_object, Non_cloneable
                                 Requestor                   ( Scheduler_object* );
                                ~Requestor                   ();
 
-    void                    set_dom                         ( const xml::Element_ptr& );            // Für <lock.use>, Use
     void                        close                       ();
 
-
+    void                    set_dom                         ( const xml::Element_ptr& );            // Für <lock.use>, Use
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
 
     void                        load                        ();
@@ -126,8 +127,7 @@ struct Holder : Object, Scheduler_object, Non_cloneable
     void                        close                       ();
 
     const Requestor*            requestor                   ()                                      { return _requestor; }
-  //bool                        is_exclusive                () const;
-    bool                        request_locks               ();
+    void                        hold_locks                  ();
     void                        release_locks               ();
     Scheduler_object*           object                      () const                                { return _object; }
 

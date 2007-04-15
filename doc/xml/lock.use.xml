@@ -58,11 +58,14 @@
     
     <messages>
         <message code="SCHEDULER-401" level="error"/>
+        <message code="SCHEDULER-407" level="error"/>
+        <message code="SCHEDULER-408" level="error"/>
         <!--message code="SCHEDULER-402" level="error"/-->
         <message code="SCHEDULER-855" level="info"/>
         <message code="SCHEDULER-856" level="info"/>
         <message code="SCHEDULER-857" level="info"/>
         <message code="SCHEDULER-858" level="info"/>
+        <message code="SCHEDULER-860" level="info"/>
     </messages>
 
     <example>
