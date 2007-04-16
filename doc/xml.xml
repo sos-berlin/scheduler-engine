@@ -96,6 +96,7 @@
                 <scheduler_element name="kill_task"/><br/>
                 <scheduler_element name="job_chain.modify"/><br/>
                 <scheduler_element name="job_chain_node.modify"/><br/>
+                <scheduler_element name="lock.remove"/><br/>
                 <scheduler_element name="modify_job"/><br/>
                 <scheduler_element name="modify_order"/><br/>
                 <scheduler_element name="modify_spooler"/><br/>

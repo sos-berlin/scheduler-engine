@@ -263,7 +263,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-399", "Error in <include>: $1" },
     { "SCHEDULER-400", "Only API-jobs are possible with <process_class remote_scheduler=\"...\"/>" },
     { "SCHEDULER-401", "Unknown lock '$1'" },
-    { "SCHEDULER-402", "New max_non_exclusive=$1 cannot be lower than number of actual lock holders = $2" },
+    { "SCHEDULER-402", "Too many lock holders for smaller max_non_exclusive=$1: $3" },
     { "SCHEDULER-403", "There is no valid state for job chain node state='$1', action='next_state' (circular next_state)" },
     { "SCHEDULER-404", "action='$1' is not possible on a distributed job chain" },
     { "SCHEDULER-405", "Setting state='$1' is not possible while job chain is in state '$2'" },
@@ -272,7 +272,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-408", "<$1 $2=...> cannot be changed" },
     { "SCHEDULER-409", "XML tag <$1> expected, instead of <$2>" },
     { "SCHEDULER-410", "$1 cannot be removed, it is held by $2" },
-    { "SCHEDULER-410", "$1 cannot be removed, it is used by $2" },
+    { "SCHEDULER-411", "$1 cannot be removed, it is used by $2" },
     { "SCHEDULER-900", "Scheduler $1 is starting with $2, pid=$3" },
     { "SCHEDULER-902", "state=$1" },
     { "SCHEDULER-904", "Tasks have $1s to terminate" },
@@ -414,6 +414,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-858", "Not longer waiting for lock $1" },
     { "SCHEDULER-859", "Due to action='next_state' the state '$2' is skipped. Next state is '$1'" },
     { "SCHEDULER-860", "Waiting for lock $1" },
+    { "SCHEDULER-861", "$1 has been removed" },
     {}
 };
 } //namespace sos

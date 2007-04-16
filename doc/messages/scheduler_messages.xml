@@ -2499,7 +2499,7 @@
 
         <message code="SCHEDULER-402">
             <text xml:lang="en">
-                <title>New max_non_exclusive=<p1/> cannot be lower than number of actual lock holders = <p2/></title>
+                <title>Too many lock holders for smaller max_non_exclusive=<p1/>: <p3>holders</p3></title>
             </text>
         </message>
 
@@ -2551,7 +2551,7 @@
             </text>
         </message>
         
-        <message code="SCHEDULER-410">
+        <message code="SCHEDULER-411">
             <text xml:lang="en">
                 <title><p1>lock</p1> cannot be removed, it is used by <p2/></title>
             </text>
@@ -3667,6 +3667,12 @@
         <message code="SCHEDULER-860" weight="info">
             <text xml:lang="en">
                 <title>Waiting for lock <p1>locks</p1></title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-861" weight="info">
+            <text xml:lang="en">
+                <title><p1>lock</p1> has been removed</title>
             </text>
         </message>
 

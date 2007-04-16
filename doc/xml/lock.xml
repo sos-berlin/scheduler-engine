@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id: web_service.xml 4858 2007-02-19 17:32:03Z jz $-->
+<!--$Id: web_service.xml 4858 2007-02-19 17:32:03Z jz $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com -->
 
 <xml_element name     = "lock"
              title    = "Deklaration einer Sperre"
@@ -58,6 +58,7 @@
     </description>
     
     <messages>
+        <message level="error" code="SCHEDULER-402"/>
         <!--message code="SCHEDULER-854" level="error"/   sollte nie auftreten -->
     </messages>
 

@@ -49,8 +49,8 @@ void Lock::close()
 
 void Lock::prepare_remove()
 {
-    if( !is_free()        )  z::throw_xc( "SCHEDULER-410", path(), string_from_holders() );
-    if( !_use_set.empty() )  z::throw_xc( "SCHEDULER-411", path(), string_from_uses() );
+    if( !is_free()        )  z::throw_xc( "SCHEDULER-410", obj_name(), string_from_holders() );
+    if( !_use_set.empty() )  z::throw_xc( "SCHEDULER-411", obj_name(), string_from_uses() );
 
     typedef stdext::hash_set< Requestor* >  Requestor_set;
     Requestor_set requestor_set;
@@ -78,7 +78,7 @@ void Lock::prepare_remove()
 bool Lock::is_free_for( Lock_mode lock_mode ) const
 { 
     return _holder_set.empty()  ||  
-           lock_mode == lk_non_exclusive  &&  count_exclusive_holders() < _max_non_exclusive;
+           lock_mode == lk_non_exclusive  &&  count_non_exclusive_holders() < _max_non_exclusive;
 }
 
 //--------------------------------------------------------------------------------Lock::its_my_turn
@@ -208,7 +208,7 @@ void Lock::set_dom( const xml::Element_ptr& lock_element )
 
     int max_non_exclusive = lock_element.int_getAttribute( "max_non_exclusive", _max_non_exclusive );
 
-    if( max_non_exclusive < count_exclusive_holders() )  z::throw_xc( "SCHEDULER-402", max_non_exclusive, _holder_set.size() );
+    if( max_non_exclusive < count_non_exclusive_holders() )  z::throw_xc( "SCHEDULER-402", max_non_exclusive, string_from_holders() );
 }
 
 //--------------------------------------------------------------------------------Lock::dom_element
@@ -288,7 +288,7 @@ string Lock::obj_name() const
 {
     S result;
 
-    result << "Lock " << _name;
+    result << "Lock " << path();
 
     return result;
 }
@@ -511,6 +511,7 @@ void Use::close()
     if( Lock* lock = lock_or_null() )
     {
         lock->dequeue_lock_use( this );
+        lock->unregister_lock_use( this );
     }
 }
 
@@ -543,7 +544,8 @@ void Use::set_dom( const xml::Element_ptr& lock_use_element )
 
 void Use::load()
 {
-    lock();     // Liefert die Sperre, stellt also sicher, dass sie bekannt ist.
+    Lock* lock = this->lock();     // Liefert die Sperre, stellt also sicher, dass sie bekannt ist.
+    lock->register_lock_use( this );
 }
 
 //----------------------------------------------------------------------------------------Use::lock
@@ -660,7 +662,7 @@ void Holder::release_locks()
 
                 lock->release_lock_for( this );
 
-                if( int remaining = lock->count_exclusive_holders() )
+                if( int remaining = lock->count_non_exclusive_holders() )
                 {
                     log()->info( message_string( "SCHEDULER-857", lock->obj_name(), remaining ) );
                 }
@@ -809,6 +811,7 @@ void Lock_subsystem::execute_xml_lock_remove( const xml::Element_ptr& lock_remov
     Lock* lock = this->lock( lock_path );
 
     lock->prepare_remove();
+    lock->log()->info( message_string( "SCHEDULER-861" ) );
     _lock_map.erase( lock_path );
 }
 

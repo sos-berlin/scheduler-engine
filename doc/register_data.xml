@@ -1067,12 +1067,19 @@
     <register_keyword_display><code>&lt;lock&gt;</code></register_keyword_display>
     <register_entry register_file='CHANGES.xml#use_element__lock' register_title='Änderungsprotokoll'  register_keyword='lock'/>
     <register_entry register_file='xml.xml#use_element__lock' register_title='Alle XML-Elemente'  register_keyword='lock'/>
+    <register_entry register_file='xml/lock.remove.xml#use_element__lock' register_title='&lt;lock.remove&gt; (Kommando)'  register_keyword='lock'/>
     <register_entry register_file='xml/lock.use.xml#use_element__lock' register_title='&lt;lock.use&gt; (Konfiguration)'  register_keyword='lock'/>
     <register_entry register_file='xml/lock.xml#' register_title='&lt;lock&gt; (Konfiguration)'  register_keyword='lock' type='definition'/>
 </register_keyword>
 <register_keyword keyword='lock'>
     <register_keyword_display><code>lock=</code></register_keyword_display>
+    <register_entry register_file='xml/lock.remove.xml#attribute_lock' register_title='&lt;lock.remove&gt; (Kommando)'  register_keyword='lock' type='definition'/>
     <register_entry register_file='xml/lock.use.xml#attribute_lock' register_title='&lt;lock.use&gt; (Konfiguration)'  register_keyword='lock' type='definition'/>
+</register_keyword>
+<register_keyword keyword='lock.remove'>
+    <register_keyword_display><code>&lt;lock.remove&gt;</code></register_keyword_display>
+    <register_entry register_file='xml.xml#use_element__lock.remove' register_title='Alle XML-Elemente'  register_keyword='lock.remove'/>
+    <register_entry register_file='xml/lock.remove.xml#' register_title='&lt;lock.remove&gt; (Kommando)'  register_keyword='lock.remove' type='definition'/>
 </register_keyword>
 <register_keyword keyword='lock.use'>
     <register_keyword_display><code>&lt;lock.use&gt;</code></register_keyword_display>

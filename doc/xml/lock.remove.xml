@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: add_jobs.xml 4336 2006-06-06 18:03:24Z jz $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com -->
+
+<xml_element name     = "lock.remove"
+             parent_page = "../xml_commands.xml"
+             category = "Kommando"
+             base_dir = "../"
+             author   = "$Author: jz $"
+             date     = "$Date: 2006-06-06 20:03:24 +0200 (Di, 06 Jun 2006) $">
+
+
+    <description>
+        <p>
+            Entfernt eine Sperre.
+        </p>
+    </description>
+
+
+    <xml_parent_elements>
+        <xml_parent_element name="commands"/>
+    </xml_parent_elements>
+
+
+    <xml_attributes>
+        <xml_attribute name="lock" type="path" title="Name der Sperre">
+            <description>
+                <p>
+                    Die Sperre muss mit <scheduler_element name="lock"/> deklariert worden sein.
+                </p>
+            </description>
+        </xml_attribute>
+    </xml_attributes>
+
+
+    <xml_answer element="ok"/>
+
+    <messages>
+        <message code="SCHEDULER-401" level="error"/>
+        <message code="SCHEDULER-410" level="error"/>
+        <message code="SCHEDULER-411" level="error"/>
+        <message code="SCHEDULER-861" level="info"/>
+    </messages>
+    
+</xml_element>

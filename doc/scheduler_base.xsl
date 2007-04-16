@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding="utf-8"?>
-<!-- $Id$ -->
+<!-- $Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com -->
 
 <!--
     Änderungswünsche:

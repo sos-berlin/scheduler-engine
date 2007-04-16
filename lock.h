@@ -1,4 +1,4 @@
-// $Id: spooler_job.h 4888 2007-03-18 15:47:33Z jz $
+// $Id: spooler_job.h 4888 2007-03-18 15:47:33Z jz $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com 
 
 #ifndef __SCHEDULER_LOCK_H
 #define __SCHEDULER_LOCK_H
@@ -40,7 +40,7 @@ struct Lock : Object, Scheduler_object, Non_cloneable
     void                        release_lock_for            ( Holder* );
     int                         enqueue_lock_use            ( Use* );
     void                        dequeue_lock_use            ( Use* );
-    int                         count_exclusive_holders     () const                                { return _lock_mode == lk_non_exclusive? _holder_set.size() : 0; }
+    int                         count_non_exclusive_holders () const                                { return _lock_mode == lk_non_exclusive? _holder_set.size() : 0; }
     bool                        is_free_for                 ( Lock_mode ) const;
     bool                        is_free                     () const                                { return _holder_set.empty(); }             
     string                      obj_name                    () const;

@@ -201,7 +201,7 @@ void Xml_operation::begin()
         Z_DEBUG_ONLY( int NULL_BYTE_ANHAENGEN; )
     }
 
-    if( command_processor._error )  _connection->_log.error( command_processor._error->what() );
+    //set_log() hat das bereits ausgegeben:  if( command_processor._error )  _connection->_log.error( command_processor._error->what() );
 }
 
 //------------------------------------------------------------------------------Xml_response::close
