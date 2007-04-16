@@ -55,6 +55,9 @@
         <p>
             Zur Verwendung einer Sperre siehe <scheduler_element name="lock.use"/>
         </p>
+        <p>
+            Siehe auch <scheduler_element name="lock.remove"/>.
+        </p>
     </description>
     
     <messages>

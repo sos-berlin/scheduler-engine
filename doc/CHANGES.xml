@@ -11,6 +11,26 @@
     <scheduler_keyword keyword="Change log"/>
 
 
+    <change date="2007-04-16" version="2.0.171" subversion_revision="4978">
+        <revision type="new" title="Mehrere Sperren und &lt;lock.remove>">
+            <description>
+                <p>
+                    Ein Job kann mehrere Sperren setzen und Sperren können gelöscht werden.
+                </p>
+                <ul>
+                    <li>
+                        <scheduler_element name="lock.remove"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="job"/>
+                        <scheduler_element name="lock.use"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+    </change>
+
+
     <change date="2007-04-09" version="2.0.171" subversion_revision="4961">
         <revision type="new" title="Jobkette und Jobkettenknoten stoppen">
             <description>
