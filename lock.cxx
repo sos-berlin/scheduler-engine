@@ -209,6 +209,8 @@ void Lock::set_dom( const xml::Element_ptr& lock_element )
     int max_non_exclusive = lock_element.int_getAttribute( "max_non_exclusive", _max_non_exclusive );
 
     if( max_non_exclusive < count_non_exclusive_holders() )  z::throw_xc( "SCHEDULER-402", max_non_exclusive, string_from_holders() );
+
+    _max_non_exclusive = max_non_exclusive;
 }
 
 //--------------------------------------------------------------------------------Lock::dom_element

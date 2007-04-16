@@ -157,6 +157,7 @@
             </description>
         </xml_child_element>
 
+        <xml_child_element name="lock.requestor"/>
         <xml_child_element name="queued_tasks"/>
         <xml_child_element name="history"/>
         <xml_child_element name="order_queue"/>

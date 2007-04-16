@@ -195,6 +195,7 @@
     </xml_attributes>
 
     <xml_child_elements>
+        <xml_child_element name="locks"/>
         <xml_child_element name="jobs"/>
         <xml_child_element name="job_chains"/>
         <xml_child_element name="process_classes"/>

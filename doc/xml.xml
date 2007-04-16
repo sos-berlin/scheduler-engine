@@ -127,6 +127,13 @@
                 <scheduler_element directory="xml/answer/" name="job_chains"/><br/>
                 <scheduler_element directory="xml/answer/" name="jobs"/><br/>
                 <scheduler_element directory="xml/answer/" name="log"/><br/>
+                <scheduler_element directory="xml/answer/" name="lock.holder"/><br/>
+                <scheduler_element directory="xml/answer/" name="lock.holders"/><br/>
+                <scheduler_element directory="xml/answer/" name="lock.queue"/><br/>
+                <scheduler_element directory="xml/answer/" name="lock.queue.entry"/><br/>
+                <scheduler_element directory="xml/answer/" name="lock.requestor"/><br/>
+                <scheduler_element directory="xml/answer/" name="lock.use"/><br/>
+                <scheduler_element directory="xml/answer/" name="locks"/><br/>
                 <scheduler_element directory="xml/answer/" name="ok"/><br/>
                 <scheduler_element directory="xml/answer/" name="order"/><br/>
                 <scheduler_element directory="xml/answer/" name="order_queue"/><br/>
