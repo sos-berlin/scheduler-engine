@@ -544,6 +544,8 @@
 </register_keyword>
 <register_keyword keyword='exclusive'>
     <register_keyword_display><code>exclusive=</code></register_keyword_display>
+    <register_entry register_file='xml/answer/lock.requestor.xml#attribute_exclusive' register_title='&lt;lock.requestor&gt; (Antwort)'  register_keyword='exclusive' type='definition'/>
+    <register_entry register_file='xml/answer/lock.use.xml#attribute_exclusive' register_title='&lt;lock.use&gt; (Antwort)'  register_keyword='exclusive' type='definition'/>
     <register_entry register_file='xml/lock.use.xml#attribute_exclusive' register_title='&lt;lock.use&gt; (Konfiguration)'  register_keyword='exclusive' type='definition'/>
 </register_keyword>
 <register_keyword keyword='exit'>
@@ -681,6 +683,10 @@
     <register_ini_entry register_file='datenbank.xml' register_title='Datenbank' file='factory.ini' section='spooler' entry='history_with_log'/>
     <register_ini_entry register_file='protokolle.xml' register_title='Protokolle' file='factory.ini' section='job' entry='history_with_log'/>
     <register_ini_entry register_file='protokolle.xml' register_title='Protokolle' file='factory.ini' section='spooler' entry='history_with_log'/>
+</register_keyword>
+<register_keyword keyword='holder'>
+    <register_keyword_display><code>&lt;holder&gt;</code></register_keyword_display>
+    <register_entry register_file='xml/answer/lock.holder.xml#' register_title='&lt;holder&gt; (Antwort)'  register_keyword='holder' type='definition'/>
 </register_keyword>
 <register_keyword keyword='holiday'>
     <register_keyword_display><code>&lt;holiday&gt;</code></register_keyword_display>
@@ -890,6 +896,8 @@
     <register_entry register_file='xml/add_order.xml#attribute_job' register_title='&lt;add_order&gt; (Kommando)'  register_keyword='job' type='definition'/>
     <register_entry register_file='xml/answer/at.xml#attribute_job' register_title='&lt;at&gt; (Antwort)'  register_keyword='job' type='definition'/>
     <register_entry register_file='xml/answer/job.xml#attribute_job' register_title='&lt;job&gt; (Antwort)'  register_keyword='job' type='definition'/>
+    <register_entry register_file='xml/answer/lock.holder.xml#attribute_job' register_title='&lt;holder&gt; (Antwort)'  register_keyword='job' type='definition'/>
+    <register_entry register_file='xml/answer/lock.queue.entry.xml#attribute_job' register_title='&lt;lock.queue.entry&gt; (Antwort)'  register_keyword='job' type='definition'/>
     <register_entry register_file='xml/answer/order.xml#attribute_job' register_title='&lt;order&gt; (Antwort)'  register_keyword='job' type='definition'/>
     <register_entry register_file='xml/answer/period.xml#attribute_job' register_title='&lt;period&gt; (Antwort)'  register_keyword='job' type='definition'/>
     <register_entry register_file='xml/answer/process.xml#attribute_job' register_title='&lt;process&gt; (Antwort)'  register_keyword='job' type='definition'/>
@@ -1067,14 +1075,40 @@
     <register_keyword_display><code>&lt;lock&gt;</code></register_keyword_display>
     <register_entry register_file='CHANGES.xml#use_element__lock' register_title='Änderungsprotokoll'  register_keyword='lock'/>
     <register_entry register_file='xml.xml#use_element__lock' register_title='Alle XML-Elemente'  register_keyword='lock'/>
+    <register_entry register_file='xml/answer/lock.holder.xml#use_element__lock' register_title='&lt;holder&gt; (Antwort)'  register_keyword='lock'/>
+    <register_entry register_file='xml/answer/lock.holders.xml#use_element__lock' register_title='&lt;lock.holders&gt; (Antwort)'  register_keyword='lock'/>
+    <register_entry register_file='xml/answer/lock.queue.entry.xml#use_element__lock' register_title='&lt;lock.queue.entry&gt; (Antwort)'  register_keyword='lock'/>
+    <register_entry register_file='xml/answer/lock.queue.xml#use_element__lock' register_title='&lt;lock.queue&gt; (Antwort)'  register_keyword='lock'/>
+    <register_entry register_file='xml/answer/lock.xml#' register_title='&lt;lock&gt; (Antwort)'  register_keyword='lock' type='definition'/>
+    <register_entry register_file='xml/answer/lock.xml#use_element__lock' register_title='&lt;lock&gt; (Antwort)'  register_keyword='lock'/>
     <register_entry register_file='xml/lock.remove.xml#use_element__lock' register_title='&lt;lock.remove&gt; (Kommando)'  register_keyword='lock'/>
     <register_entry register_file='xml/lock.use.xml#use_element__lock' register_title='&lt;lock.use&gt; (Konfiguration)'  register_keyword='lock'/>
     <register_entry register_file='xml/lock.xml#' register_title='&lt;lock&gt; (Konfiguration)'  register_keyword='lock' type='definition'/>
 </register_keyword>
 <register_keyword keyword='lock'>
     <register_keyword_display><code>lock=</code></register_keyword_display>
+    <register_entry register_file='xml/answer/lock.use.xml#attribute_lock' register_title='&lt;lock.use&gt; (Antwort)'  register_keyword='lock' type='definition'/>
     <register_entry register_file='xml/lock.remove.xml#attribute_lock' register_title='&lt;lock.remove&gt; (Kommando)'  register_keyword='lock' type='definition'/>
     <register_entry register_file='xml/lock.use.xml#attribute_lock' register_title='&lt;lock.use&gt; (Konfiguration)'  register_keyword='lock' type='definition'/>
+</register_keyword>
+<register_keyword keyword='lock.holder'>
+    <register_keyword_display><code>&lt;lock.holder&gt;</code></register_keyword_display>
+    <register_entry register_file='xml.xml#use_element__lock.holder' register_title='Alle XML-Elemente'  register_keyword='lock.holder'/>
+</register_keyword>
+<register_keyword keyword='lock.holders'>
+    <register_keyword_display><code>&lt;lock.holders&gt;</code></register_keyword_display>
+    <register_entry register_file='xml.xml#use_element__lock.holders' register_title='Alle XML-Elemente'  register_keyword='lock.holders'/>
+    <register_entry register_file='xml/answer/lock.holders.xml#' register_title='&lt;lock.holders&gt; (Antwort)'  register_keyword='lock.holders' type='definition'/>
+</register_keyword>
+<register_keyword keyword='lock.queue'>
+    <register_keyword_display><code>&lt;lock.queue&gt;</code></register_keyword_display>
+    <register_entry register_file='xml.xml#use_element__lock.queue' register_title='Alle XML-Elemente'  register_keyword='lock.queue'/>
+    <register_entry register_file='xml/answer/lock.queue.xml#' register_title='&lt;lock.queue&gt; (Antwort)'  register_keyword='lock.queue' type='definition'/>
+</register_keyword>
+<register_keyword keyword='lock.queue.entry'>
+    <register_keyword_display><code>&lt;lock.queue.entry&gt;</code></register_keyword_display>
+    <register_entry register_file='xml.xml#use_element__lock.queue.entry' register_title='Alle XML-Elemente'  register_keyword='lock.queue.entry'/>
+    <register_entry register_file='xml/answer/lock.queue.entry.xml#' register_title='&lt;lock.queue.entry&gt; (Antwort)'  register_keyword='lock.queue.entry' type='definition'/>
 </register_keyword>
 <register_keyword keyword='lock.remove'>
     <register_keyword_display><code>&lt;lock.remove&gt;</code></register_keyword_display>
@@ -1083,10 +1117,18 @@
     <register_entry register_file='xml/lock.remove.xml#' register_title='&lt;lock.remove&gt; (Kommando)'  register_keyword='lock.remove' type='definition'/>
     <register_entry register_file='xml/lock.xml#use_element__lock.remove' register_title='&lt;lock&gt; (Konfiguration)'  register_keyword='lock.remove'/>
 </register_keyword>
+<register_keyword keyword='lock.requestor'>
+    <register_keyword_display><code>&lt;lock.requestor&gt;</code></register_keyword_display>
+    <register_entry register_file='xml.xml#use_element__lock.requestor' register_title='Alle XML-Elemente'  register_keyword='lock.requestor'/>
+    <register_entry register_file='xml/answer/lock.requestor.xml#' register_title='&lt;lock.requestor&gt; (Antwort)'  register_keyword='lock.requestor' type='definition'/>
+</register_keyword>
 <register_keyword keyword='lock.use'>
     <register_keyword_display><code>&lt;lock.use&gt;</code></register_keyword_display>
     <register_entry register_file='CHANGES.xml#use_element__lock.use' register_title='Änderungsprotokoll'  register_keyword='lock.use'/>
     <register_entry register_file='xml.xml#use_element__lock.use' register_title='Alle XML-Elemente'  register_keyword='lock.use'/>
+    <register_entry register_file='xml/answer/lock.requestor.xml#use_element__lock.use' register_title='&lt;lock.requestor&gt; (Antwort)'  register_keyword='lock.use'/>
+    <register_entry register_file='xml/answer/lock.use.xml#' register_title='&lt;lock.use&gt; (Antwort)'  register_keyword='lock.use' type='definition'/>
+    <register_entry register_file='xml/answer/lock.use.xml#use_element__lock.use' register_title='&lt;lock.use&gt; (Antwort)'  register_keyword='lock.use'/>
     <register_entry register_file='xml/lock.remove.xml#use_element__lock.use' register_title='&lt;lock.remove&gt; (Kommando)'  register_keyword='lock.use'/>
     <register_entry register_file='xml/lock.use.xml#' register_title='&lt;lock.use&gt; (Konfiguration)'  register_keyword='lock.use' type='definition'/>
     <register_entry register_file='xml/lock.xml#use_element__lock.use' register_title='&lt;lock&gt; (Konfiguration)'  register_keyword='lock.use'/>
@@ -1095,6 +1137,7 @@
     <register_keyword_display><code>&lt;locks&gt;</code></register_keyword_display>
     <register_entry register_file='lock.xml#use_element__locks' register_title='Sperren'  register_keyword='locks'/>
     <register_entry register_file='xml.xml#use_element__locks' register_title='Alle XML-Elemente'  register_keyword='locks'/>
+    <register_entry register_file='xml/answer/locks.xml#' register_title='&lt;locks&gt; (Antwort)'  register_keyword='locks' type='definition'/>
     <register_entry register_file='xml/lock.use.xml#use_element__locks' register_title='&lt;lock.use&gt; (Konfiguration)'  register_keyword='locks'/>
     <register_entry register_file='xml/locks.xml#' register_title='&lt;locks&gt; (Konfiguration)'  register_keyword='locks' type='definition'/>
     <register_entry register_file='xml/locks~.xml#' register_title='&lt;locks&gt; (Konfiguration)'  register_keyword='locks' type='definition'/>
@@ -1260,6 +1303,7 @@
 </register_keyword>
 <register_keyword keyword='max_non_exclusive'>
     <register_keyword_display><code>max_non_exclusive=</code></register_keyword_display>
+    <register_entry register_file='xml/answer/lock.xml#attribute_max_non_exclusive' register_title='&lt;lock&gt; (Antwort)'  register_keyword='max_non_exclusive' type='definition'/>
     <register_entry register_file='xml/lock.xml#attribute_max_non_exclusive' register_title='&lt;lock&gt; (Konfiguration)'  register_keyword='max_non_exclusive' type='definition'/>
 </register_keyword>
 <register_keyword keyword='max_orders'>
@@ -1342,6 +1386,7 @@
 <register_keyword keyword='name'>
     <register_keyword_display><code>name=</code></register_keyword_display>
     <register_entry register_file='xml/answer/job_chain.xml#attribute_name' register_title='&lt;job_chain&gt; (Antwort)'  register_keyword='name' type='definition'/>
+    <register_entry register_file='xml/answer/lock.xml#attribute_name' register_title='&lt;lock&gt; (Antwort)'  register_keyword='name' type='definition'/>
     <register_entry register_file='xml/answer/process_class.xml#attribute_name' register_title='&lt;process_class&gt; (Antwort)'  register_keyword='name' type='definition'/>
     <register_entry register_file='xml/answer/queued_task.xml#attribute_name' register_title='&lt;queued_task&gt; (Antwort)'  register_keyword='name' type='definition'/>
     <register_entry register_file='xml/answer/task.xml#attribute_name' register_title='&lt;task&gt; (Antwort)'  register_keyword='name' type='definition'/>
@@ -2136,6 +2181,7 @@
 <register_keyword keyword='task'>
     <register_keyword_display><code>task=</code></register_keyword_display>
     <register_entry register_file='xml/answer/history.entry.xml#attribute_task' register_title='&lt;history.entry&gt; (Antwort)'  register_keyword='task' type='definition'/>
+    <register_entry register_file='xml/answer/lock.holder.xml#attribute_task' register_title='&lt;holder&gt; (Antwort)'  register_keyword='task' type='definition'/>
     <register_entry register_file='xml/answer/order.xml#attribute_task' register_title='&lt;order&gt; (Antwort)'  register_keyword='task' type='definition'/>
     <register_entry register_file='xml/answer/process.xml#attribute_task' register_title='&lt;process&gt; (Antwort)'  register_keyword='task' type='definition'/>
     <register_entry register_file='xml/answer/queued_task.xml#attribute_task' register_title='&lt;queued_task&gt; (Antwort)'  register_keyword='task' type='definition'/>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: state.xml 4367 2006-06-19 07:57:00Z jz $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com -->
+
+<xml_element name          = "lock.queue"
+             title         = "Warteschlange der Sperranforderungen"
+             category      = "Antwort"
+             sub_directory = "answer/"
+             base_dir      = "../../"
+             parent_page   = "../../xml_commands.xml"
+             author        = "$Author: jz $"
+             date          = "$Date: 2006-06-19 09:57:00 +0200 (Mo, 19 Jun 2006) $">
+
+    <xml_parent_elements>
+        <xml_parent_element name="lock"/>
+    </xml_parent_elements>
+
+    <xml_child_elements>
+        <xml_child_element name="lock.queue.entry"/>
+    </xml_child_elements>
+
+    <description>
+        <p>
+           Siehe Definition einer Sperre: <scheduler_element name="lock"/>.
+        </p>
+    </description>
+
+</xml_element>
