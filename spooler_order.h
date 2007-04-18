@@ -392,6 +392,7 @@ struct Job_chain_node : Com_job_chain_node
     Job_chain*                 _job_chain;
 
     ptr<Job>                   _job;                    // NULL: Kein Job, Auftrag endet
+    string                     _job_chain_name;         // Wenn's eine untergeordnete Jobkette ist
     bool                       _file_order_sink_remove; // <file_order_sink remove="yes"/>
     File_path                  _file_order_sink_move_to;// <file_order_sink move_to="..."/>
     bool                       _suspend;                // <job_chain_node suspend="yes"/>

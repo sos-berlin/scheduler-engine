@@ -478,16 +478,17 @@ Job* Task::job()
 
 //------------------------------------------------------------------------------------Task::cmd_end
 
-void Task::cmd_end( bool kill_immediately )
+void Task::cmd_end( End_mode end_mode )
 {
+    assert( end_mode != end_none );
+
     THREAD_LOCK_DUMMY( _lock )
     {
-        if( kill_immediately )  _log->warn( message_string( "SCHEDULER-282" ) );    // Kein Fehler, damit ignore_signals="SIGKILL" den Stopp verhindern kann
+        if( _end == end_kill_immediately )  _log->warn( message_string( "SCHEDULER-282" ) );    // Kein Fehler, damit ignore_signals="SIGKILL" den Stopp verhindern kann
         else
         if( _state < s_ending )  _log->info( message_string( "SCHEDULER-914" ) );
 
-        _end = true;
-        _kill_immediately = kill_immediately;
+        if( _end != end_kill_immediately )  _end = end_mode;
         if( !_ending_since )  _ending_since = Time::now();
         signal( "end" );
 
@@ -817,7 +818,7 @@ Time Task::next_time()
 
     Time result;
 
-    if( _kill_immediately  &&  !_kill_tried )
+    if( _end == end_kill_immediately  &&  !_kill_tried )
     {
         result = Time(0);
     }
@@ -1059,7 +1060,7 @@ bool Task::do_something()
 
     _signaled = false;
 
-    if( _kill_immediately  &&  !_kill_tried )
+    if( _end == end_kill_immediately  &&  !_kill_tried )
     {
         _log->warn( message_string( "SCHEDULER-277" ) );   // Kein Fehler, damit ignore_signals="SIGKILL" den Stopp verhindern kann
         return try_kill();
@@ -1123,9 +1124,11 @@ bool Task::do_something()
 
                         if( _state < s_ending  &&  _end )      // Task beenden?
                         {
-                            if( _state <= s_running  &&  _order  &&  _step_count == 0 )   // SCHEDULER-226 (s.u.) nach SCHEDULER-271 (Task-Ende wegen Prozessmangels)
+                            if( _end == end_nice  &&  _state <= s_running  &&  _order  &&  _step_count == 0  &&   // SCHEDULER-226 (s.u.) nach SCHEDULER-271 (Task-Ende wegen Prozessmangels)
+                                !_scheduler_815_logged )
                             {
                                 _log->info( message_string( "SCHEDULER-815", _order->obj_name() ) );    // Task einen Schritt machen lassen, um den Auftrag auszuführen
+                                _scheduler_815_logged = true;
                             }
                             else
                             if( !loaded() )         set_state( s_ended );
@@ -1266,7 +1269,7 @@ bool Task::do_something()
                                 if( _job->_force_idle_timeout  ||  _job->above_min_tasks() )
                                 {
                                     _log->debug9( message_string( "SCHEDULER-916" ) );   // "idle_timeout ist abgelaufen, Task beendet sich" 
-                                    _end = true;
+                                    _end = end_normal;
                                     loop = true;
                                 }
                                 else
@@ -1479,7 +1482,7 @@ bool Task::do_something()
 
                 if( error_count == 0  &&  _state < s_ending )
                 {
-                    _end = true;
+                    _end = end_normal;
                     loop = true;
                 }
                 else

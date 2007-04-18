@@ -1202,15 +1202,26 @@ void Job_chain::set_dom( const xml::Element_ptr& element )
             else
             if( e.nodeName_is( "job_chain_node" ) )
             {
-                string job_name = e.getAttribute( "job" );
-                string state    = e.getAttribute( "state" );
+                string job_name       = e.getAttribute( "job" );
+                string job_chain_name = e.getAttribute( "job_chain" );
+                string state          = e.getAttribute( "state" );
 
                 bool can_be_not_initialized = true;
                 Job* job = job_name == ""? NULL : _spooler->job_subsystem()->get_job( job_name, can_be_not_initialized );
                 if( state == "" )  z::throw_xc( "SCHEDULER-231", "job_chain_node", "state" );
 
                 node = add_job( job, state, e.getAttribute( "next_state" ), e.getAttribute( "error_state" ) );
+            }
+            else
+            if( e.nodeName_is( "job_chain_node.job_chain" ) )
+            {
+                string job_chain_name = e.getAttribute( "job_chain" );
+                string state          = e.getAttribute( "state" );
 
+                Job_chain* job_chain = _spooler->order_subsystem()->job_chain( job_chain_name );
+                if( state == "" )  z::throw_xc( "SCHEDULER-231", "job_chain_node.job_chain", "state" );
+
+                //node = add_job_chain( job, state, e.getAttribute( "next_state" ), e.getAttribute( "error_state" ) );
             }
 
             if( node )
@@ -4734,6 +4745,36 @@ void Order::handle_end_state()
 {
     // Endzustand erreicht
 
+
+    //if( _outer_job_chain_name != "" )
+    //{
+    //    Job_chain* outer_job_chain = order_subsystem()->job_chain( _outer_job_chain_name );     int EXCEPTION;
+    //    Job_chain_node* outer_job_chain_node = outer_job_chain_name->node_from_state( _outer_job_chain_state );        // EXCEPTION
+    //    Job_chain_node* next_outer_job_chain_node = _order->_is_in_error_state? outer_job_chain_node->_error_node : outer_job_chain_node->_next_node;
+    //    if( next_outer_job_chain_node  &&  next_outer_job_chain_node->_job_chain_name != "" )
+    //    {
+    //        Job_chain* next_job_chain = order_subsystem()->job_chain( next_outer_job_chain_node->_job_chain_name );     // EXCEPTION
+    //        //Job_chain_node* next_job_chain_node = next_job_chain->first_node();   // IST DAS RICHTIG? Ist <file_order_source> nicht auch ein knoten? Gemeint ist: Erster Zustand
+
+    //        place_in_job_chain( next_job_chain_node );  // EXCEPTION: Endzustand, Doppelte Auftragskennung    // Entfernt Auftrag aus der bisherigen Jobkette
+    //    }
+    //    else
+    //    {
+    //        // Bei <run_time> Auftrag an den Anfang der ersten Jobkette setzen
+    //    }
+
+    //    /*
+    //        Oder:
+    //        Aufträge in Job_chain_node aufbewaren: hash_set< ptr<Order> > _order_set;
+    //        Order_queue::Queue:  list<Order*>, beides strikt gleich halten, solange der Job da ist.
+
+    //        Dann Auftrag in aller Ruhe in Knoten der äußeren Jobkette verschieben.  ==> Extra Datenbankzugriff
+    //    */
+    //}
+
+
+
+
     bool is_first_call = _run_time_modified;
     _run_time_modified = false;
     Time next_start = next_start_time( is_first_call );
@@ -4744,7 +4785,17 @@ void Order::handle_end_state()
 
         try
         {
-            set_state( _initial_state, next_start );
+            //if( _outer_job_chain_name != "" )
+            //{
+            //    string frist_job_chain_name = order_subsystem()->job_chain( _outer_job_chain_name )->first_node()->_job_chain_name;
+            //    remove_from_job_chain();
+            //    set_state( _initial_state, next_start );
+            //    place_in_job_chain( order_subsystem()->job_chain( first_job_chain_name ) );
+            //}
+            //else
+            {
+                set_state( _initial_state, next_start );
+            }
         }
         catch( exception& x ) { _log->error( x.what() ); }
 

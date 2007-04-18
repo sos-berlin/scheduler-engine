@@ -79,22 +79,36 @@ function spooler_process()
                 ]]></script>
 
             </job>
-        
+
+
+
+            <job name="remote_order" process_class="remote" order="yes">
+                <script language="JavaScript">
+
+                    <![CDATA[
+
+function spooler_process() 
+{               
+    spooler_log.info( "REMOTE_ORDER" );
+    return false;
+}
+                ]]>
+                </script>
+
+            </job>
+
+            
         </jobs>
 
+        <job_chains>
+            <job_chain name="remote_task.scheduler">
+                <job_chain_node state="1" job="remote_order"/>
+            </job_chain>
+        </job_chains>
         
         <commands>
             <start_job job="remote"/>
-            <start_job job="remote"/>
-            <start_job job="remote"/>
-            <start_job job="remote"/>
-            <start_job job="remote"/>
-            <start_job job="remote"/>
-            <start_job job="remote"/>
-            <start_job job="remote"/>
-            <start_job job="remote"/>
-            <start_job job="remote"/>
-
+            <add_order job_chain="remote_task.scheduler" title="Wir haben einen Auftrag1"/>
         </commands>
     </config>
 </spooler>

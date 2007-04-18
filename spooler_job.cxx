@@ -2981,7 +2981,7 @@ void Job::kill_task( int id, bool immediately )
         {
             if( (*t)->_id == id )  
             { 
-                (*t)->cmd_end( immediately );       // Ruft kill_queued_task()
+                (*t)->cmd_end( immediately? Task::end_kill_immediately : Task::end_normal );       // Ruft kill_queued_task()
                 return;
             }
         }

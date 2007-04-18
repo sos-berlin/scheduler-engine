@@ -17,7 +17,7 @@
     
     <p>
         Ein beispielhaftes Problem:
-        Jobs benutzen eine Dateinbank.
+        Jobs benutzen eine Datenbank.
         Ein weiterer Job aber schaltet die Datenbank um.
         Er darf das nur tun, wenn die ersten Jobs nicht laufen.
     </p>

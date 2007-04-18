@@ -557,8 +557,7 @@ bool Termination_async_operation::async_continue_( Continue_flags flags )
 
             Z_FOR_EACH( Task_list, _spooler->_task_subsystem->_task_list, t )
             {
-                bool kill_immediately = true;
-                (*t)->cmd_end( kill_immediately );      // Wirkt erst beim nächsten Task::do_something()
+                (*t)->cmd_end( Task::end_kill_immediately );      // Wirkt erst beim nächsten Task::do_something()
             }
 
             //_spooler->kill_all_processes();           Es reicht, wenn die Tasks gekillt werden. Die killen dann ihre abhängigigen Prozesse.

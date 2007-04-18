@@ -438,6 +438,18 @@ const char file_scheduler_xsd[] =
     "\n"
     "<xsd:element name=\"job_chain\">\n"
     "<xsd:complexType>\n"
+    "<xsd:choice>\n"
+    "<xsd:sequence>\n"
+    "<xsd:element name=\"job_chain_node.job_chain\" maxOccurs=\"unbounded\">\n"
+    "<xsd:complexType>\n"
+    "<xsd:attribute name=\"state\"         type=\"String\" use=\"required\"/>\n"
+    "<xsd:attribute name=\"job_chain\"     type=\"Name\"/>\n"
+    "<xsd:attribute name=\"next_state\"    type=\"String\"/>\n"
+    "<xsd:attribute name=\"error_state\"   type=\"String\"/>\n"
+    "</xsd:complexType>\n"
+    "</xsd:element>\n"
+    "</xsd:sequence>\n"
+    "\n"
     "<xsd:sequence>\n"
     "<xsd:element name=\"note\" minOccurs=\"0\" maxOccurs=\"unbounded\"/>\n"
     "\n"
@@ -489,6 +501,7 @@ const char file_scheduler_xsd[] =
     "</xsd:element>\n"
     "</xsd:choice>\n"
     "</xsd:sequence>\n"
+    "</xsd:choice>\n"
     "\n"
     "<xsd:attribute name=\"name\"               type=\"Name\"     use=\"required\"/>\n"
     "<xsd:attribute name=\"visible\"            type=\"Yes_no\"/>\n"
@@ -1533,7 +1546,7 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1176654192 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1176835394 },
     { NULL, NULL, 0 }
 };
 
