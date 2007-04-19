@@ -7,6 +7,10 @@
 
         <base file="$SCHEDULER_TEST/base.scheduler"/>
 
+        <process_classes>
+            <process_class max_processes="1"/>
+        </process_classes>
+        
         <locks>
             <lock name="Georgien" max_non_exclusive="2"/>
             <lock name="Venezuela"  />

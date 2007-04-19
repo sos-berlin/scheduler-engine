@@ -2218,8 +2218,11 @@ ptr<Task> Job::task_to_start()
                 task = NULL, cause = cause_none, has_order = false;      
             }
         }
+    }
 
 
+    if( cause || has_order )
+    {
         // Ist denn ein Prozess verfügbar?
 
         if( _module->_process_class  &&  !_module->_process_class->process_available( this ) )
