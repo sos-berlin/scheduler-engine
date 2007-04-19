@@ -185,10 +185,12 @@ struct Order : Com_order,
     void                        set_next_start_time     ();
 
     // Auftrag in einer Jobkette:
-    void                        place_in_job_chain      ( Job_chain* );
+    enum Job_chain_stack_option { jc_remove_from_job_chain_stack, jc_leave_in_job_chain_stack };
+    void                        place_in_job_chain      ( Job_chain*, Job_chain_stack_option = jc_remove_from_job_chain_stack );
     void                        place_or_replace_in_job_chain( Job_chain* );
-    bool                        try_place_in_job_chain  ( Job_chain* );
-    void                        remove_from_job_chain   ();
+    bool                        try_place_in_job_chain  ( Job_chain*, Job_chain_stack_option = jc_remove_from_job_chain_stack );
+    void                        remove_from_job_chain   ( Job_chain_stack_option = jc_remove_from_job_chain_stack );
+    void                        remove_from_job_chain_stack();
     void                        remove_from_job         ();
     bool                        tip_own_job_for_new_distributed_order_state();
     void                        move_to_node            ( Job_chain_node* );
@@ -243,6 +245,7 @@ struct Order : Com_order,
 
     Id                         _id;
     State                      _state;
+    bool                       _is_success_state;       // Rückgabe des letzten Prozessschritts
 
     bool                       _id_locked;              // Einmal gesperrt, immer gesperrt
     string                     _state_text;
@@ -252,6 +255,8 @@ struct Order : Com_order,
     string                     _title;
     bool                       _title_modified;
     string                     _job_chain_name;
+    string                     _outer_job_chain_name;
+    State                      _outer_job_chain_state;
     Payload                    _payload;
     string                     _xml_payload;
     State                      _initial_state;
@@ -407,7 +412,7 @@ struct Job_chain : Com_job_chain, Scheduler_object
 {
     enum State
     {
-        s_under_construction,   // add_job() gesperrt, add_order() frei
+        s_under_construction,   // add_node() gesperrt, add_order() frei
         s_running,              // in Betrieb
         s_stopped,              // Angehalten
         s_removing,             // Wird entfernt, aber ein Auftrag wird noch verarbeitet
@@ -443,13 +448,24 @@ struct Job_chain : Com_job_chain, Scheduler_object
     int                         load_orders_from_result_set   ( Read_transaction*, Any_file* result_set );
     Order*                      add_order_from_database_record( Read_transaction*, const Record& );
 
-    bool                        tip_for_new_distributed_order       ( const Order::State& state, const Time& at );
+    bool                        tip_for_new_distributed_order( const Order::State& state, const Time& at );
 
     int                         remove_all_pending_orders( bool leave_in_database = false );
 
-    Job_chain_node*             add_job                 ( Job*, const Order::State& input_state, 
+    Job_chain_node*             add_job_node            ( Job*, const Order::State& input_state, 
                                                           const Order::State& next_state  = Variant(Variant::vt_missing), 
                                                           const Order::State& error_state = Variant(Variant::vt_missing) );
+    
+    Job_chain_node*             add_job_chain_node      ( const string& job_chain_name, const Order::State& input_state, 
+                                                          const Order::State& next_state  = Variant(Variant::vt_missing), 
+                                                          const Order::State& error_state = Variant(Variant::vt_missing) );
+    
+    Job_chain_node*             add_node                ( const Order::State& input_state, 
+                                                          const Order::State& next_state, 
+                                                          const Order::State& error_state );
+    
+    Job_chain_node*             add_end_node            ( const Order::State& input_state );
+
     void                        finish                  ();
     void                        check_job_chain_node    ( Job_chain_node* );
     bool                        contains_job            ( Job* );

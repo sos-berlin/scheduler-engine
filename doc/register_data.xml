@@ -1672,6 +1672,7 @@
     <register_entry register_file='xml/answer/lock.requestor.xml#use_element__lock.use' register_title='&lt;lock.requestor&gt; (Antwort)'  register_keyword='lock.use'/>
     <register_entry register_file='xml/answer/lock.use.xml#' register_title='&lt;lock.use&gt; (Antwort)'  register_keyword='lock.use' type='definition'/>
     <register_entry register_file='xml/answer/lock.use.xml#use_element__lock.use' register_title='&lt;lock.use&gt; (Antwort)'  register_keyword='lock.use'/>
+    <register_entry register_file='xml/job.xml#use_element__lock.use' register_title='&lt;job&gt; (Konfiguration)'  register_keyword='lock.use'/>
     <register_entry register_file='xml/lock.remove.xml#use_element__lock.use' register_title='&lt;lock.remove&gt; (Kommando)'  register_keyword='lock.use'/>
     <register_entry register_file='xml/lock.use.xml#' register_title='&lt;lock.use&gt; (Konfiguration)'  register_keyword='lock.use' type='definition'/>
     <register_entry register_file='xml/lock.xml#use_element__lock.use' register_title='&lt;lock&gt; (Konfiguration)'  register_keyword='lock.use'/>

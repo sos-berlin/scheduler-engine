@@ -68,7 +68,13 @@
 
         <xml_attribute name="tasks" type="zahl" initial="1" title="Maximale Anzahl Tasks">
             <description>
-                Von einem Job können mehrere Tasks gleichzeitig laufen. Dieses Attribut begrenzt deren Anzahl.
+                <p>
+                    Von einem Job können mehrere Tasks gleichzeitig laufen. Dieses Attribut begrenzt deren Anzahl.
+                </p>
+                <p>
+                    <scheduler_element name="lock.use"/>: Zusammen mit einer exklusiven Sperre ist nur <code>tasks="1"</code> sinnvoll,
+                    sie erlaubt nur eine Task.
+                </p>
             </description>
         </xml_attribute>
 

@@ -4109,7 +4109,7 @@ STDMETHODIMP Com_job_chain::Add_job( VARIANT* job_or_jobname, VARIANT* begin_sta
             default: return DISP_E_TYPEMISMATCH;
         }
 
-        _job_chain->add_job( job, *begin_state, *end_state, *error_state );
+        _job_chain->add_job_node( job, *begin_state, *end_state, *error_state );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Job_chain.add_job" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Job_chain.add_job" ); }
@@ -4129,7 +4129,7 @@ STDMETHODIMP Com_job_chain::Add_end_state( VARIANT* state )
         if( !_job_chain )  return E_POINTER;
 
         VARIANT error; VariantInit( &error );  error.vt = VT_ERROR;  error.scode = DISP_E_PARAMNOTFOUND;
-        _job_chain->add_job( NULL, *state, error, error );
+        _job_chain->add_end_node( *state );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Job_chain.add_end_state" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Job_chain.add_end_state" ); }

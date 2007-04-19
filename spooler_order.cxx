@@ -1194,7 +1194,7 @@ void Job_chain::set_dom( const xml::Element_ptr& element )
                 Job* job = _spooler->job_subsystem()->get_job( file_order_sink_job_name, can_be_not_initialized );
                 job->set_visible( true );
 
-                node = add_job( job, state, Variant(Variant::vt_missing), Variant(Variant::vt_missing) );
+                node = add_job_node( job, state, Variant(Variant::vt_missing), Variant(Variant::vt_missing) );
 
                 node->_file_order_sink_move_to.set_directory( subst_env( e.getAttribute( "move_to" ) ) );
                 node->_file_order_sink_remove  = e.bool_getAttribute( "remove" );
@@ -1207,21 +1207,35 @@ void Job_chain::set_dom( const xml::Element_ptr& element )
                 string state          = e.getAttribute( "state" );
 
                 bool can_be_not_initialized = true;
-                Job* job = job_name == ""? NULL : _spooler->job_subsystem()->get_job( job_name, can_be_not_initialized );
+
                 if( state == "" )  z::throw_xc( "SCHEDULER-231", "job_chain_node", "state" );
 
-                node = add_job( job, state, e.getAttribute( "next_state" ), e.getAttribute( "error_state" ) );
+                if( job_name != "" )
+                {
+                    Job* job = _spooler->job_subsystem()->get_job( job_name, can_be_not_initialized );
+                    node = add_job_node( job, state, e.getAttribute( "next_state" ), e.getAttribute( "error_state" ) );
+                }
+                else
+                {
+                    add_end_node( state );
+                }
             }
             else
             if( e.nodeName_is( "job_chain_node.job_chain" ) )
             {
-                string job_chain_name = e.getAttribute( "job_chain" );
-                string state          = e.getAttribute( "state" );
+                node = add_job_chain_node( e.getAttribute( "job_chain" ), 
+                                           e.getAttribute( "state" ), 
+                                           e.getAttribute( "next_state" ), 
+                                           e.getAttribute( "error_state" ) );
+            }
+            else
+            if( e.nodeName_is( "job_chain_node.end" ) )
+            {
+                string state = e.getAttribute( "state" );
 
-                Job_chain* job_chain = _spooler->order_subsystem()->job_chain( job_chain_name );
-                if( state == "" )  z::throw_xc( "SCHEDULER-231", "job_chain_node.job_chain", "state" );
+                if( state == "" )  z::throw_xc( "SCHEDULER-231", "job_chain_node.end ", "state" );
 
-                //node = add_job_chain( job, state, e.getAttribute( "next_state" ), e.getAttribute( "error_state" ) );
+                node = add_end_node( state );
             }
 
             if( node )
@@ -1400,25 +1414,60 @@ Order::State normalized_state( const Order::State& state )
     }
 }
 
-//-------------------------------------------------------------------------------Job_chain::add_job
+//--------------------------------------------------------------------------Job_chain::add_job_node
 
-Job_chain_node* Job_chain::add_job( Job* job, const Order::State& state, const Order::State& next_state, const Order::State& error_state )
+Job_chain_node* Job_chain::add_job_node( Job* job, const Order::State& state_, const Order::State& next_state, const Order::State& error_state )
 {
+    if( job  &&  !job->order_queue() )  z::throw_xc( "SCHEDULER-147", job->name() );
+
+    Order::State state = state_;
+
+    if( state.is_missing() )  state = job->name();      // Parameter state nicht angegeben? Default ist der Jobname
+
+    Job_chain_node* result = add_node( state, next_state, error_state );
+    result->_job = job;
+
+    job->set_job_chain_priority( _chain.size() );   // Weiter hinten stehende Jobs werden vorrangig ausgeführt
+
+    return result;
+}
+
+//--------------------------------------------------------------------Job_chain::add_job_chain_node
+
+Job_chain_node* Job_chain::add_job_chain_node( const string& job_chain_name, const Order::State& state, const Order::State& next_state, const Order::State& error_state )
+{
+    if( _is_distributed )  z::throw_xc( "SCHEDULER-413" );
+
+    Job_chain* job_chain = order_subsystem()->job_chain( job_chain_name );
+    if( job_chain->is_distributed() )  z::throw_xc( "SCHEDULER-413" );
+
+    if( job_chain == this )  z::throw_xc( "SCHEDULER-414", S() << job_chain_name << "->" << job_chain_name );
+    if( state.is_null_or_empty_string() )  z::throw_xc( "SCHEDULER-231", "job_chain_node.job_chain", "state" );
+
+    Job_chain_node* result = add_node( state, next_state, error_state );
+
+    result->_job_chain_name = job_chain_name;
+
+    return result;
+}
+
+//------------------------------------------------------------------------------Job_chain::add_node
+
+Job_chain_node* Job_chain::add_node( const Order::State& state, const Order::State& next_state, const Order::State& error_state )
+{
+    if( _state != s_under_construction )  z::throw_xc( "SCHEDULER-148" );
+
     Order::check_state( state );
     if( !next_state.is_missing() )  Order::check_state( next_state );
     if( !error_state.is_missing() )  Order::check_state( error_state );
 
-    if( job  &&  !job->order_queue() )  z::throw_xc( "SCHEDULER-147", job->name() );
-
-    if( _state != s_under_construction )  z::throw_xc( "SCHEDULER-148" );
+    if( node_from_state_or_null( state ) )  z::throw_xc( "SCHEDULER-150", debug_string_from_variant( state ), name() );
 
     ptr<Job_chain_node> node = new Job_chain_node;
 
     node->_job_chain = this;
-    node->_job       = job;
     node->_state     = state;
 
-    if( node->_state.is_missing() )  node->_state = job->name();      // Parameter state nicht angegeben? Default ist der Jobname
 
     node->_next_state  = normalized_state( next_state );
     node->_error_state = normalized_state( error_state );
@@ -1426,18 +1475,32 @@ Job_chain_node* Job_chain::add_job( Job* job, const Order::State& state, const O
     // Bis finish() bleibt nicht angegebener Zustand als VT_ERROR/is_missing() (fehlender Parameter) stehen.
     // finish() unterscheidet dann die nicht angegebenen Zustände von VT_ERROR und setzt Defaults oder VT_EMPTY (außer <file_order_sink>)
 
-    //THREAD_LOCK( _lock )
+    _chain.push_back( node );
+
+    return node;
+}
+
+//------------------------------------------------------------------------------Job_chain::add_node
+
+Job_chain_node* Job_chain::add_end_node( const Order::State& state )
+{
+    if( _state != s_under_construction )  z::throw_xc( "SCHEDULER-148" );
+
+    Order::check_state( state );
+
+    ptr<Job_chain_node> node = node_from_state_or_null( state );
+    
+    if( !node )
     {
-        if( Job_chain_node* n = node_from_state_or_null( node->_state ) )
-        {
-            if( !job  &&  next_state.is_missing()  &&  error_state.is_missing() )  return n;     // job_chain.add_end_state() darf mehrfach gerufen werden.
-            z::throw_xc( "SCHEDULER-150", debug_string_from_variant(node->_state), name() );
-        }
+        node = new Job_chain_node;
 
-        _chain.push_back( node );
-
-        if( job )  job->set_job_chain_priority( _chain.size() );   // Weiter hinten stehende Jobs werden vorrangig ausgeführt
+        node->_job_chain = this;
+        node->_state     = state;
+        node->_next_state  = normalized_state( "" );
+        node->_error_state = normalized_state( "" );
     }
+
+    _chain.push_back( node );
 
     return node;
 }
@@ -1453,7 +1516,7 @@ void Job_chain::finish()
         if( !_chain.empty() )
         {
             Job_chain_node* n = *_chain.rbegin();
-            if( n->_job  &&  n->_next_state.is_missing() )  add_job( NULL, default_end_state_name );    // Endzustand fehlt? Dann hinzufügen
+            if( n->_job  &&  n->_next_state.is_missing() )  add_end_node( default_end_state_name );    // Endzustand fehlt? Dann hinzufügen
         }
 
         for( Chain::iterator it = _chain.begin(); it != _chain.end(); it++ )
@@ -1467,7 +1530,8 @@ void Job_chain::finish()
             }
             else
             {
-                if( n->_next_state.is_missing()  &&  next != _chain.end()  &&  n->_job )  n->_next_state = (*next)->_state;
+                if( n->_next_state.is_missing()  &&  next != _chain.end()  &&  ( n->_job || n->_job_chain_name != "" ) )
+                    n->_next_state = (*next)->_state;
 
                 if( !n->_next_state.is_missing() )  n->_next_node  = node_from_state( n->_next_state );
                                               else  n->_next_state = empty_variant;
@@ -2529,7 +2593,11 @@ Order* Order_queue::fetch_and_occupy_order( const Time& now, const string& cause
     _next_announced_distributed_order_time = Time::never;
     _has_tip_for_new_order = false;
 
-    if( order )  order->assert_task( __FUNCTION__ );
+    if( order ) 
+    {
+        order->assert_task( __FUNCTION__ );
+        order->_is_success_state = true;
+    }
 
     return order;
 }
@@ -3720,6 +3788,16 @@ void Order::set_dom( const xml::Element_ptr& element, Variable_set_map* variable
             assert( !_log->opened() );
             _log->continue_with_text( e.text() );
         }
+        else
+        if( e.nodeName_is( "order.job_chain_stack" ) )
+        {
+            xml::Element_ptr e2 = e.select_element_strict( "order.job_chain_stack.entry" );
+            _outer_job_chain_name  = e2.getAttribute( "job_chain", _outer_job_chain_name );
+            _outer_job_chain_state = e2.getAttribute( "state" );
+
+            // Nicht prüfen, weil Äußere Jobkette später definiert werden kann
+            //order_subsystem()->job_chain( _outer_job_chain_name )->node_from_state( _outer_job_chain_state );   // Prüfen
+        }
     }
 }
 
@@ -3866,6 +3944,14 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
 
     if( start_time()     )  element.setAttribute( "start_time", start_time().as_string() );
     if( end_time()       )  element.setAttribute( "end_time"  , end_time  ().as_string() );
+
+    if( _outer_job_chain_name != "" )
+    {
+        xml::Element_ptr e  = element.append_new_element( "order.job_chain_stack" );
+        xml::Element_ptr e2 = e.append_new_element( "order.job_chain_stack.entry" );
+        e2.setAttribute( "job_chain", _outer_job_chain_name );
+        e2.setAttribute( "state"    , _outer_job_chain_state.as_string() );
+    }
     
     return element;
 }
@@ -4456,7 +4542,7 @@ void Order::add_to_order_queue( Order_queue* order_queue )
 
 //---------------------------------------------------------------------Order::remove_from_job_chain
 
-void Order::remove_from_job_chain()
+void Order::remove_from_job_chain( Job_chain_stack_option job_chain_stack_option )
 {
     ptr<Order> me = this;        // Halten
 
@@ -4485,19 +4571,29 @@ void Order::remove_from_job_chain()
 
     _job_chain = NULL;
     _job_chain_name = "";
+
+    if( job_chain_stack_option == jc_remove_from_job_chain_stack )  remove_from_job_chain_stack();
 }
 
-//--------------------------------------------------------------------------Order::place_in_job_chain
+//---------------------------------------------------------------Order::remove_from_job_chain_stack
 
-void Order::place_in_job_chain( Job_chain* job_chain )
+void Order::remove_from_job_chain_stack()
 {
-    bool ok = try_place_in_job_chain( job_chain );
+    _outer_job_chain_name = "";
+    _outer_job_chain_state.clear();
+}
+
+//------------------------------------------------------------------------Order::place_in_job_chain
+
+void Order::place_in_job_chain( Job_chain* job_chain,  Job_chain_stack_option job_chain_stack_option )
+{
+    bool ok = try_place_in_job_chain( job_chain, job_chain_stack_option );
     if( !ok )  z::throw_xc( "SCHEDULER-186", obj_name(), job_chain->name() );
 }
 
 //----------------------------------------------------------------------Order::try_place_in_job_chain
 
-bool Order::try_place_in_job_chain( Job_chain* job_chain )
+bool Order::try_place_in_job_chain( Job_chain* job_chain,  Job_chain_stack_option job_chain_stack_option )
 {
     bool is_new = true;
 
@@ -4523,13 +4619,29 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain )
     {
         ptr<Order> hold_me = this;   // Halten für remove_from_job_chain()
         
-        if( _job_chain_name != "" )  remove_from_job_chain();
+        if( _job_chain_name != "" )  remove_from_job_chain( job_chain_stack_option );
         assert( !_job_chain );
         
         if( _state.vt == VT_EMPTY )  set_state2( job_chain->first_node()->_state );     // Auftrag bekommt Zustand des ersten Jobs der Jobkette
 
-        job_chain->job_from_state( _state );     // Fehler bei Endzustand. Wir speichern den Auftrag nur, wenn's einen Job zum Zustand gibt
+
         Job_chain_node* node = job_chain->node_from_state( _state );
+
+
+        if( job_chain_stack_option == jc_remove_from_job_chain_stack )  remove_from_job_chain_stack();
+
+        if( node->_job_chain_name != "" )   // Verschachtelte Jobkette?
+        {
+            if( _outer_job_chain_name != "" )  z::throw_xc( "SCHEDULER-412" );      // Mehrfache Verschachtelung nicht möglich
+
+            _outer_job_chain_name  = job_chain->name();
+            _outer_job_chain_state = _state;
+            job_chain = order_subsystem()->job_chain( node->_job_chain_name );
+            _state = job_chain->first_node()->_state;     // Auftrag bekommt Zustand des ersten Jobs der Jobkette        
+        }
+
+
+        job_chain->job_from_state( _state );     // Fehler bei Endzustand. Wir speichern den Auftrag nur, wenn's einen Job zum Zustand gibt
 
         if( node->_suspend )  _suspended = true;
 
@@ -4658,6 +4770,8 @@ Job_chain* Order::job_chain_for_api() const
 
 void Order::postprocessing( bool success )
 {
+    _is_success_state = success;
+
     Job* last_job = _task? _task->job() : NULL;
 
     //THREAD_LOCK( _lock )
@@ -4680,7 +4794,7 @@ void Order::postprocessing( bool success )
 
 
 
-        if( !is_setback() && !_moved && !_end_state_reached  ||  force_error_state )
+        if( !is_setback()  &&  !_moved  &&  !_end_state_reached  ||  force_error_state )
         {
             if( _job_chain_node )
             {
@@ -4743,79 +4857,118 @@ void Order::postprocessing( bool success )
 
 void Order::handle_end_state()
 {
-    // Endzustand erreicht
+    // Endzustand erreicht. 
+    // Möglicherweise nur der Endzustand in einer verschachtelten Jobkette. Dann beachten wir die übergeordnete Jobkette.
+
+    bool is_real_end_state = false;
 
 
-    //if( _outer_job_chain_name != "" )
-    //{
-    //    Job_chain* outer_job_chain = order_subsystem()->job_chain( _outer_job_chain_name );     int EXCEPTION;
-    //    Job_chain_node* outer_job_chain_node = outer_job_chain_name->node_from_state( _outer_job_chain_state );        // EXCEPTION
-    //    Job_chain_node* next_outer_job_chain_node = _order->_is_in_error_state? outer_job_chain_node->_error_node : outer_job_chain_node->_next_node;
-    //    if( next_outer_job_chain_node  &&  next_outer_job_chain_node->_job_chain_name != "" )
-    //    {
-    //        Job_chain* next_job_chain = order_subsystem()->job_chain( next_outer_job_chain_node->_job_chain_name );     // EXCEPTION
-    //        //Job_chain_node* next_job_chain_node = next_job_chain->first_node();   // IST DAS RICHTIG? Ist <file_order_source> nicht auch ein knoten? Gemeint ist: Erster Zustand
-
-    //        place_in_job_chain( next_job_chain_node );  // EXCEPTION: Endzustand, Doppelte Auftragskennung    // Entfernt Auftrag aus der bisherigen Jobkette
-    //    }
-    //    else
-    //    {
-    //        // Bei <run_time> Auftrag an den Anfang der ersten Jobkette setzen
-    //    }
-
-    //    /*
-    //        Oder:
-    //        Aufträge in Job_chain_node aufbewaren: hash_set< ptr<Order> > _order_set;
-    //        Order_queue::Queue:  list<Order*>, beides strikt gleich halten, solange der Job da ist.
-
-    //        Dann Auftrag in aller Ruhe in Knoten der äußeren Jobkette verschieben.  ==> Extra Datenbankzugriff
-    //    */
-    //}
-
-
-
-
-    bool is_first_call = _run_time_modified;
-    _run_time_modified = false;
-    Time next_start = next_start_time( is_first_call );
-
-    if( next_start != Time::never  &&  _state != _initial_state )
+    if( _outer_job_chain_name == "" )
     {
-        _log->info( message_string( "SCHEDULER-944", _initial_state, next_start ) );        // "Kein weiterer Job in der Jobkette, der Auftrag wird mit state=<p1/> wiederholt um <p2/>"
+        is_real_end_state = true;
+    }
+    else
+    {
+        // Oben sicherstellen, dass es kein verteilter Auftrag ist!
+        assert( !_is_distributed );
+
+        //// Was tun mit _end_state_reached?  
+        //// Auf <file_order_sink> folgt kein Endzustand, der mit set_state1() erreicht würde, und wir kommen nicht nach handle_end_state()
+        //// ==> if( !_end_state_reached )  set_state1();  
+        ////                          else  handle_end_state();       // Funktionieren die Dateiaufträge ohne diesen Aufruf?
 
         try
         {
-            //if( _outer_job_chain_name != "" )
-            //{
-            //    string frist_job_chain_name = order_subsystem()->job_chain( _outer_job_chain_name )->first_node()->_job_chain_name;
-            //    remove_from_job_chain();
-            //    set_state( _initial_state, next_start );
-            //    place_in_job_chain( order_subsystem()->job_chain( first_job_chain_name ) );
-            //}
-            //else
+            Job_chain*      outer_job_chain           = order_subsystem()->job_chain( _outer_job_chain_name );
+            Job_chain_node* outer_job_chain_node      = outer_job_chain->node_from_state( _outer_job_chain_state );
+            State           next_outer_job_chain_state = _is_success_state? outer_job_chain_node->_next_state 
+                                                                          : outer_job_chain_node->_error_state;
+
+            Job_chain_node* next_outer_job_chain_node = outer_job_chain->node_from_state_or_null( next_outer_job_chain_state );
+            
+
+            if( next_outer_job_chain_node  &&  next_outer_job_chain_node->_job_chain_name != "" )
             {
-                set_state( _initial_state, next_start );
+                Job_chain* next_job_chain = order_subsystem()->job_chain( next_outer_job_chain_node->_job_chain_name );
+
+                _state.clear();     // Lässt place_in_job_chain() den ersten Zustand der Jobkette nehmen
+                place_in_job_chain( next_job_chain, jc_leave_in_job_chain_stack );  // Entfernt Auftrag aus der bisherigen Jobkette
+                _outer_job_chain_name = outer_job_chain->name();  // place_in_job_chain() hat's gelöscht
             }
+            else
+            {
+                // Bei <run_time> Auftrag an den Anfang der ersten Jobkette setzen
+                is_real_end_state = true;
+            }
+
+            _outer_job_chain_state = next_outer_job_chain_state;
         }
-        catch( exception& x ) { _log->error( x.what() ); }
+        catch( exception& x ) 
+        { 
+            _log->error( message_string( "SCHEDULER-???", x ) );  
+            _end_state_reached = true;
+            is_real_end_state = true;
+        }
 
-        _end_time = Time::now();
-        _log->close_file();
-        if( _job_chain  &&  _is_in_database )  _spooler->_db->write_order_history( this );  // Historie schreiben, aber Auftrag beibehalten
-        _log->close();
+        /*
+            Oder:
+            Aufträge in Job_chain_node aufbewahren: hash_set< ptr<Order> > _order_set;
+            Order_queue::Queue:  list<Order*>, beides strikt gleich halten, solange der Job da ist.
 
-        _start_time = 0;
-        _end_time = 0;
-        //_is_virgin_in_this_run_time = true;
+            Dann Auftrag in aller Ruhe in Knoten der äußeren Jobkette verschieben.  ==> Extra Datenbankzugriff
+        */
+    }
 
-        open_log();
+
+
+    if( !is_real_end_state )
+    {
+        _end_state_reached = false;
     }
     else
-    if( !_is_on_blacklist )
     {
-        _log->info( message_string( "SCHEDULER-945" ) );     // "Kein weiterer Job in der Jobkette, der Auftrag ist erledigt"
-        remove_from_job_chain();
-        close( cls_dont_remove_from_job_chain );
+        bool is_first_call = _run_time_modified;
+        _run_time_modified = false;
+        Time next_start = next_start_time( is_first_call );
+
+        if( next_start != Time::never  &&  _state != _initial_state )
+        {
+            _log->info( message_string( "SCHEDULER-944", _initial_state, next_start ) );        // "Kein weiterer Job in der Jobkette, der Auftrag wird mit state=<p1/> wiederholt um <p2/>"
+
+            try
+            {
+                if( _outer_job_chain_name != "" )
+                {
+                    string first_job_chain_name = order_subsystem()->job_chain( _outer_job_chain_name )->first_node()->_job_chain_name;
+                    remove_from_job_chain( jc_leave_in_job_chain_stack );
+                    set_state( _initial_state, next_start );
+                    place_in_job_chain( order_subsystem()->job_chain( first_job_chain_name ), jc_leave_in_job_chain_stack );
+                }
+                else
+                {
+                    set_state( _initial_state, next_start );
+                }
+            }
+            catch( exception& x ) { _log->error( x.what() ); }
+
+            _end_time = Time::now();
+            _log->close_file();
+            if( _job_chain  &&  _is_in_database )  _spooler->_db->write_order_history( this );  // Historie schreiben, aber Auftrag beibehalten
+            _log->close();
+
+            _start_time = 0;
+            _end_time = 0;
+            //_is_virgin_in_this_run_time = true;
+
+            open_log();
+        }
+        else
+        if( !_is_on_blacklist )
+        {
+            _log->info( message_string( "SCHEDULER-945" ) );     // "Kein weiterer Job in der Jobkette, der Auftrag ist erledigt"
+            remove_from_job_chain();
+            close( cls_dont_remove_from_job_chain );
+        }
     }
 }
 

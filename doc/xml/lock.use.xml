@@ -73,26 +73,29 @@
 &lt;/lock>    
         
 &lt;job name="my_file_reader" tasks="3">
-    &lt;lock lock="my_file" exclusive="no"/>
+    &lt;lock.use lock="my_file" exclusive="no"/>
     …
 &lt;/job>    
 
 &lt;job name="my_other_file_reader">
-    &lt;lock lock="my_file" exclusive="no"/>
+    &lt;lock.use lock="my_file" exclusive="no"/>
     …
 &lt;/job>    
 
 &lt;job name="my_file_writer">
-    &lt;lock lock="my_file"/>
+    &lt;lock.use lock="my_file"/>
     …
 &lt;/job></pre>
         
         <p>
-            Die Jobs my_file_reader und my_other_file_reads belegen die Sperre nicht exklusive und können gleichzeitig mit mehreren Tasks laufen.
+            Die Jobs <code>my_file_reader</code> und <code>my_other_file_reads</code> belegen die Sperre nicht-exklusiv 
+            und können gleichzeitig mit mehreren Tasks laufen.
         </p>
         <p>
-            Der Job my_file_writer setzt die Sperre exklusiv und startet nur, wenn keine anderer Job läuft.
-            Der Job kann einen Datenbestand ändern, und sich darauf verlassen, dass währenddessen keiner der anderen Jobs den Datenbestand liest.
+            Der Job <code>my_file_writer</code> setzt die Sperre exklusiv und startet nur, 
+            wenn kein anderer Job läuft.
+            Der Job kann einen Datenbestand ändern und sich darauf verlassen, 
+            dass währenddessen keiner der beiden anderen Jobs den Datenbestand liest.
         </p>
         
     </example>

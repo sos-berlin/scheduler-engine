@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- $Id: scheduler.xsd 4975 2007-04-15 16:22:41Z jz $ -->
+<!-- $Id: scheduler.xsd 4982 2007-04-18 04:40:44Z jz $ -->
 
 <xsd:schema 
     xmlns:xsd          = "http://www.w3.org/2001/XMLSchema" 
@@ -9,7 +9,7 @@
 
     <xsd:annotation>
         <xsd:documentation xml:lang="de">
-            $Id: scheduler.xsd 4975 2007-04-15 16:22:41Z jz $
+            $Id: scheduler.xsd 4982 2007-04-18 04:40:44Z jz $
             Schema für die Scheduler-Konfiguration,
             s.a. http://www.zschimmer.com/sos/scheduler/konfiguration.html.
         </xsd:documentation>
@@ -429,70 +429,72 @@
 
     <xsd:element name="job_chain">
         <xsd:complexType>
-            <xsd:choice>
-                <xsd:sequence>
-                    <xsd:element name="job_chain_node.job_chain" maxOccurs="unbounded">
-                        <xsd:complexType>
-                            <xsd:attribute name="state"         type="String" use="required"/>
-                            <xsd:attribute name="job_chain"     type="Name"/>
-                            <xsd:attribute name="next_state"    type="String"/>
-                            <xsd:attribute name="error_state"   type="String"/>
-                        </xsd:complexType>
-                    </xsd:element>
-                </xsd:sequence>
-                
-                <xsd:sequence>
-                    <xsd:element name="note" minOccurs="0" maxOccurs="unbounded"/>
-                    
-                    <xsd:element name="file_order_source" minOccurs="0" maxOccurs="unbounded">
-                        <xsd:complexType>
-                            <xsd:attribute name="directory"         type="String" use="required"/>
-                            <xsd:attribute name="regex"             type="Name"/>
-                            <xsd:attribute name="delay_after_error" type="xsd:positiveInteger"/>
-                            
-                            <xsd:attribute name="repeat">
-                                <xsd:simpleType>
-                                    <xsd:union>
-                                        <xsd:simpleType>
-                                            <xsd:restriction base="xsd:NMTOKEN">
-                                                <xsd:enumeration value="no"/>
-                                            </xsd:restriction>
-                                        </xsd:simpleType>
-                                        <xsd:simpleType>
-                                            <xsd:restriction base="xsd:positiveInteger"/>
-                                        </xsd:simpleType>
-                                    </xsd:union>
-                                </xsd:simpleType>
-                            </xsd:attribute>
-                            
-                            <xsd:attribute name="max"               type="xsd:positiveInteger"/>
-                            <xsd:attribute name="next_state"        type="String"/>
-                        </xsd:complexType>
-                    </xsd:element>
+            <xsd:sequence>
+                <xsd:element name="note" minOccurs="0" maxOccurs="unbounded"/>
 
-                    <xsd:choice maxOccurs="unbounded">
-                        <xsd:element name="job_chain_node" maxOccurs="unbounded">
+                <xsd:choice>
+                    <xsd:sequence>
+                        <xsd:element name="job_chain_node.job_chain" type="job_chain_node.job_chain"/>
+
+                        <xsd:choice maxOccurs="unbounded">
+                            <xsd:element name="job_chain_node.job_chain" type="job_chain_node.job_chain"/>
+                            <xsd:element name="job_chain_node.end"       type="job_chain_node.end"/>
+                        </xsd:choice>
+                    </xsd:sequence>
+
+                    <xsd:sequence>
+                        <xsd:element name="file_order_source" minOccurs="0" maxOccurs="unbounded">
                             <xsd:complexType>
-                                <xsd:attribute name="state"         type="String" use="required"/>
-                                <xsd:attribute name="job"           type="Name"/>
-                                <xsd:attribute name="next_state"    type="String"/>
-                                <xsd:attribute name="error_state"   type="String"/>
-                                <xsd:attribute name="suspend"       type="Yes_no"/>
-                                <xsd:attribute name="delay"         type="xsd:nonNegativeInteger"/>
+                                <xsd:attribute name="directory"         type="String" use="required"/>
+                                <xsd:attribute name="regex"             type="Name"/>
+                                <xsd:attribute name="delay_after_error" type="xsd:positiveInteger"/>
+                                
+                                <xsd:attribute name="repeat">
+                                    <xsd:simpleType>
+                                        <xsd:union>
+                                            <xsd:simpleType>
+                                                <xsd:restriction base="xsd:NMTOKEN">
+                                                    <xsd:enumeration value="no"/>
+                                                </xsd:restriction>
+                                            </xsd:simpleType>
+                                            <xsd:simpleType>
+                                                <xsd:restriction base="xsd:positiveInteger"/>
+                                            </xsd:simpleType>
+                                        </xsd:union>
+                                    </xsd:simpleType>
+                                </xsd:attribute>
+                                
+                                <xsd:attribute name="max"               type="xsd:positiveInteger"/>
+                                <xsd:attribute name="next_state"        type="String"/>
                             </xsd:complexType>
                         </xsd:element>
 
-                        <xsd:element name="file_order_sink" maxOccurs="unbounded">
-                            <xsd:complexType>
-                                <xsd:attribute name="state"         type="String" use="required"/>
-                                <xsd:attribute name="remove"        type="Yes_no"/>
-                                <xsd:attribute name="move_to"       type="File"/>
-                                <xsd:attribute name="delay"         type="xsd:nonNegativeInteger"/>
-                            </xsd:complexType>
-                        </xsd:element>
-                    </xsd:choice>
-                </xsd:sequence>
-            </xsd:choice>
+                        <xsd:choice maxOccurs="unbounded">
+                            <xsd:element name="job_chain_node">
+                                <xsd:complexType>
+                                    <xsd:attribute name="state"         type="String" use="required"/>
+                                    <xsd:attribute name="job"           type="Name"/>
+                                    <xsd:attribute name="next_state"    type="String"/>
+                                    <xsd:attribute name="error_state"   type="String"/>
+                                    <xsd:attribute name="suspend"       type="Yes_no"/>
+                                    <xsd:attribute name="delay"         type="xsd:nonNegativeInteger"/>
+                                </xsd:complexType>
+                            </xsd:element>
+
+                            <xsd:element name="file_order_sink">
+                                <xsd:complexType>
+                                    <xsd:attribute name="state"         type="String" use="required"/>
+                                    <xsd:attribute name="remove"        type="Yes_no"/>
+                                    <xsd:attribute name="move_to"       type="File"/>
+                                    <xsd:attribute name="delay"         type="xsd:nonNegativeInteger"/>
+                                </xsd:complexType>
+                            </xsd:element>
+
+                            <xsd:element name="job_chain_node.end" type="job_chain_node.end"/>
+                        </xsd:choice>
+                    </xsd:sequence>
+                </xsd:choice>
+            </xsd:sequence>
 
             <xsd:attribute name="name"               type="Name"     use="required"/>
             <xsd:attribute name="visible"            type="Yes_no"/>
@@ -515,6 +517,19 @@
             <xsd:field xpath="@error_state"/>
         </xsd:keyref-->
     </xsd:element>
+
+
+    <xsd:complexType name="job_chain_node.job_chain">
+        <xsd:attribute name="state"         type="String" use="required"/>
+        <xsd:attribute name="job_chain"     type="Name"/>
+        <xsd:attribute name="next_state"    type="String"/>
+        <xsd:attribute name="error_state"   type="String"/>
+    </xsd:complexType>
+
+    
+    <xsd:complexType name="job_chain_node.end">
+        <xsd:attribute name="state"         type="String" use="required"/>
+    </xsd:complexType>
 
     
     <xsd:element name="job_chains">

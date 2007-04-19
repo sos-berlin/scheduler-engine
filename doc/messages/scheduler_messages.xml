@@ -2557,7 +2557,25 @@
             </text>
         </message>
         
-        
+        <message code="SCHEDULER-412">
+            <text xml:lang="en">
+                <title>Job chains can only be nested once</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-413">
+            <text xml:lang="en">
+                <title>Nested job chains cannot be combined with distributed orders</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-414">
+            <text xml:lang="en">
+                <title>There is a circular nesting of job chains: <p2/></title>
+            </text>
+        </message>
+
+
         <!--message code="SCHEDULER-398">
             <text xml:lang="en">
                 <title>Same Java class <p1/> with source code is used in <p2>job</p2></title>
