@@ -303,7 +303,7 @@
                 />
                 …
             &lt;/job_chain>
-            &lt;<a class="silent" href="xml/job_chain.job_chain.xml">job_chain</a> name="…"/>
+            &lt;<a class="silent" href="xml/job_chain_node.job_chain.xml">job_chain</a> name="…"/>
                 &lt;<a class="silent" href="xml/job_chain_node.job_chain.xml">job_chain_node.job_chain</a>
                     job_chain   = "…"  
                     error_state = "…"

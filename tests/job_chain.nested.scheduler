@@ -1,0 +1,68 @@
+<?xml version="1.0"?>
+<spooler
+    xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
+>
+    <config>
+
+        <base file="$SCHEDULER_TEST/base.scheduler"/>
+
+        <process_classes/>
+
+        <script language="javascript">
+        <![CDATA[
+
+//
+
+        ]]></script>
+
+
+        <jobs>
+
+            <job name="javascript" order="yes">
+                <script language="JavaScript">
+                    <![CDATA[
+
+function spooler_process() 
+{               
+    spooler_log.info( spooler_task.order.title );
+    return false;
+}
+
+                ]]>
+                </script>
+            </job>
+
+        </jobs>
+        
+            
+        <job_chains>
+            <job_chain name="job_chain.nested.scheduler.A">
+                <job_chain_node state="111" job="javascript" error_state="222"/>
+                <job_chain_node state="222" job="javascript" error_state="finished"/>
+                <job_chain_node state="finished"/>
+            </job_chain>
+
+            <job_chain name="job_chain.nested.scheduler.B">
+                <job_chain_node state="111" job="javascript"/>
+            </job_chain>
+
+            <job_chain name="job_chain.nested.scheduler.C">
+                <job_chain_node state="111" job="javascript"/>
+                <job_chain_node state="finished"/>
+            </job_chain>
+
+            <job_chain name="job_chain.nested.scheduler">
+                <job_chain_node.job_chain state="AAA" job_chain="job_chain.nested.scheduler.A" error_state="CCC"/>
+                <job_chain_node.job_chain state="BBB" job_chain="job_chain.nested.scheduler.B"/>
+                <job_chain_node.job_chain state="CCC" job_chain="job_chain.nested.scheduler.C"/>
+                <job_chain_node.end       state="finished"/>
+            </job_chain>
+        </job_chains>
+
+        <commands>
+            <add_order job_chain="job_chain.nested.scheduler" id="1" title="Wir haben einen Auftrag!" replace="yes"/>
+        </commands>
+
+    </config>
+</spooler>

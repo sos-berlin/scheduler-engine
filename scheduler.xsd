@@ -259,12 +259,10 @@
     
     <xsd:element name="holidays">
         <xsd:complexType>
-            <xsd:sequence>
-                <xsd:choice minOccurs="0" maxOccurs="unbounded">
-                    <xsd:element ref="holiday"/>
-                    <xsd:element ref="include"/>
-                </xsd:choice>
-            </xsd:sequence>
+            <xsd:choice minOccurs="0" maxOccurs="unbounded">
+                <xsd:element ref="holiday"/>
+                <xsd:element ref="include"/>
+            </xsd:choice>
         </xsd:complexType>
     </xsd:element>
 
