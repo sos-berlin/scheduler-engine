@@ -944,53 +944,63 @@ xml::Element_ptr Job_chain_node::dom_element( const xml::Document_ptr& document,
 {
     Read_transaction ta ( _job_chain->_spooler->_db );
 
-    xml::Element_ptr element = document.createElement( "job_chain_node" );
+    xml::Element_ptr element;
 
-        element.setAttribute( "state", debug_string_from_variant( _state ) );
+    if( _job_chain_name != "" )
+    {
+        element = document.createElement( "job_chain_node.job_chain" );
+        element.setAttribute( "job_chain", _job_chain_name );
+    }
+    else
+    {
+        element = document.createElement( "job_chain_node" );
+    }
 
-        if( !is_file_order_sink() )
+    element.setAttribute( "state", debug_string_from_variant( _state ) );
+
+    if( !is_file_order_sink() )
+    {
+        if( !_next_state.is_empty()  )  element.setAttribute( "next_state" , debug_string_from_variant( _next_state  ) );
+        if( !_error_state.is_empty() )  element.setAttribute( "error_state", debug_string_from_variant( _error_state ) );
+    }
+
+    if( is_file_order_sink() )
+    {
+        xml::Element_ptr file_order_sink_element = document.createElement( "file_order_sink" );
+
+        if( _file_order_sink_remove )  file_order_sink_element.setAttribute( "remove", "yes" );
+        file_order_sink_element.setAttribute_optional( "move_to", _file_order_sink_move_to );
+
+        element.appendChild( file_order_sink_element );
+    }
+
+    if( _job )
+    {
+        element.setAttribute( "orders", order_count( &ta, job_chain ) );
+        element.setAttribute( "job"   , _job->name() );
+        
+        //if( _job->order_queue()->is_order_requested() )
+        //    element.setAttribute( "is_order_requested", "yes" );
+
+        if( show.is_set( show_job_chain_jobs ) )
         {
-            if( !_next_state.is_empty()  )  element.setAttribute( "next_state" , debug_string_from_variant( _next_state  ) );
-            if( !_error_state.is_empty() )  element.setAttribute( "error_state", debug_string_from_variant( _error_state ) );
+            dom_append_nl( element );
+            element.appendChild( _job->dom_element( document, show, job_chain ) );
+            dom_append_nl( element );
         }
-
-        if( is_file_order_sink() )
+        else
+        if( show.is_set( show_job_chain_orders ) )
         {
-            xml::Element_ptr file_order_sink_element = document.createElement( "file_order_sink" );
+            // Nur Aufträge im Job zeigen, sonst nichts vom Job (der wird bereits von <show_state> in <jobs> gezeigt)
+            xml::Element_ptr job_element = document.createElement( "job" );
+            job_element.setAttribute( "name", _job->name() );
 
-            if( _file_order_sink_remove )  file_order_sink_element.setAttribute( "remove", "yes" );
-            file_order_sink_element.setAttribute_optional( "move_to", _file_order_sink_move_to );
-
-            element.appendChild( file_order_sink_element );
+            element.appendChild( job_element );
+            job_element.appendChild( _job->order_queue()->dom_element( document, show | show_orders, job_chain ) );
         }
+    }
 
-        if( _job )
-        {
-            element.setAttribute( "orders", order_count( &ta, job_chain ) );
-            element.setAttribute( "job"   , _job->name() );
-            
-            //if( _job->order_queue()->is_order_requested() )
-            //    element.setAttribute( "is_order_requested", "yes" );
-
-            if( show.is_set( show_job_chain_jobs ) )
-            {
-                dom_append_nl( element );
-                element.appendChild( _job->dom_element( document, show, job_chain ) );
-                dom_append_nl( element );
-            }
-            else
-            if( show.is_set( show_job_chain_orders ) )
-            {
-                // Nur Aufträge im Job zeigen, sonst nichts vom Job (der wird bereits von <show_state> in <jobs> gezeigt)
-                xml::Element_ptr job_element = document.createElement( "job" );
-                job_element.setAttribute( "name", _job->name() );
-
-                element.appendChild( job_element );
-                job_element.appendChild( _job->order_queue()->dom_element( document, show | show_orders, job_chain ) );
-            }
-        }
-
-        if( _action != act_process )  element.setAttribute( "action", string_action() );
+    if( _action != act_process )  element.setAttribute( "action", string_action() );
 
     return element;
 }

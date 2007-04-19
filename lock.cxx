@@ -78,7 +78,7 @@ void Lock::prepare_remove()
 bool Lock::is_free_for( Lock_mode lock_mode ) const
 { 
     return _holder_set.empty()  ||  
-           lock_mode == lk_non_exclusive  &&  count_non_exclusive_holders() < _max_non_exclusive;
+           lock_mode == lk_non_exclusive  &&  _lock_mode == lk_non_exclusive  &&  count_non_exclusive_holders() < _max_non_exclusive;
 }
 
 //--------------------------------------------------------------------------------Lock::its_my_turn
