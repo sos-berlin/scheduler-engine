@@ -11,6 +11,23 @@
     <scheduler_keyword keyword="Change log"/>
 
 
+    <change date="2007-04-16" version="2.0.172" subversion_revision="4983">
+        <revision type="new" title="Verschachtelte Jobketten">
+            <description>
+                <p>
+                    Ein Auftrag kann nacheinander durch mehrere Jobketten geschleust werden.
+                    Diese Jobketten werden in einer eigenen, übergeordneten Jobkette aufgeführt.
+                </p>
+                <ul>
+                    <li>
+                        <scheduler_element name="job_chain_node.job_chain"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+    </change>
+
+
     <change date="2007-04-16" version="2.0.171" subversion_revision="4981">
         <revision type="new" title="Mehrere Sperren und &lt;lock.remove>">
             <description>

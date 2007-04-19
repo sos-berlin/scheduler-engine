@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+<!--$Id: job_chain_node.xml 4840 2007-02-08 08:43:17Z jz $-->
+
+<xml_element name     = "job_chain_node.job_chain"
+             title    = "Jobkettenknoten"
+             category = "Konfiguration"
+             base_dir = "../"
+             parent_page = "../konfiguration.xml"
+             author   = "$Author: jz $"
+             date     = "$Date: 2007-02-08 09:43:17 +0100 (Do, 08 Feb 2007) $">
+
+    <scheduler_keyword keyword="Jobkettenknoten"/>
+
+    <xml_parent_elements>
+        <xml_parent_element name="job_chain"/>
+    </xml_parent_elements>
+
+    <xml_attributes>
+        <xml_attribute name="state" type="string">
+            <description>
+                <p>
+                    Zustand, für den dieser Jobkettenknoten gilt.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="job_chain" type="job_chain_name">
+            <description>
+                <p>
+                    Jobkette, der der Auftrag übergeben werden soll, wenn er den Zustand erreicht.
+                </p>
+            </description>
+        </xml_attribute>
+
+
+        <xml_attribute name="next_state" type="string">
+            <description>
+                <p>
+                    <scheduler_method class="Job_impl" method="spooler_process"/> mit <code>return true</code> des zuletzt durchlaufenden Jobs 
+                    versetzt einen Auftrag in diesen Folgezustand.
+                </p>
+                <p>
+                    Voreingestellt ist der Wert des Attributes <code>state=</code> des folgenden Jobkettenknotens.
+                </p>
+            </description>
+        </xml_attribute>
+
+
+        <xml_attribute name="error_state" type="string">
+            <description>
+                <p>
+                    <scheduler_method class="Job_impl" method="spooler_process"/> mit <code>return false</code> des zuletzt durchlaufenden Jobs
+                    versetzt einen Auftrag in diesen Fehlerzustand.
+                </p>
+            </description>
+        </xml_attribute>
+
+    </xml_attributes>
+
+
+
+    <description>
+        <p>
+            Fügt einer Kette von Jobketten einen neuen Jobkettenknoten hinzu.
+        </p>
+    </description>
+</xml_element>

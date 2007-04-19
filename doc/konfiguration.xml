@@ -293,7 +293,6 @@
                 &lt;<a class="silent" href="xml/job_chain_node.xml">job_chain_node</a>
                     job         = "…"  
                     error_state = "…"
-                    name        = "…"  
                     next_state  = "…"  
                     state       = "…"  
                 />
@@ -301,6 +300,19 @@
                 &lt;<a class="silent" href="xml/file_order_sink.xml">file_order_sink</a> 
                     move_to     = "…"
                     remove      = "yes"
+                />
+                …
+            &lt;/job_chain>
+            &lt;<a class="silent" href="xml/job_chain.job_chain.xml">job_chain</a> name="…"/>
+                &lt;<a class="silent" href="xml/job_chain_node.job_chain.xml">job_chain_node.job_chain</a>
+                    job_chain   = "…"  
+                    error_state = "…"
+                    next_state  = "…"  
+                    state       = "…"  
+                />
+                …
+                &lt;<a class="silent" href="xml/job_chain_node.end.xml">job_chain_node.end</a> 
+                    state       = "…"
                 />
                 …
             &lt;/job_chain>

@@ -91,6 +91,8 @@
         <xml_child_element name="file_order_source" multiple="yes"/>
         <xml_child_element name="job_chain_node" multiple="yes"/>
         <xml_child_element name="file_order_sink" multiple="yes"/>
+        <xml_child_element name="job_chain_node.job_chain" multiple="yes"/>
+        <xml_child_element name="job_chain_node.end" multiple="yes"/>
     </xml_child_elements>
 
 
@@ -103,6 +105,26 @@
             <scheduler_method class="Job_chain"/>,
             <scheduler_method class="Spooler" method="create_job_chain"/> 
             und <scheduler_method class="Spooler" method="add_job_chain"/> 
+        </p>
+
+        <h3>Einfache Jobkette - Eine Kette von Jobs</h3>
+        <p>
+            Einfache Jobketten enthalten Jobs und werden mit den XML-Elementen 
+            <scheduler_element name="job_chain_node"/>,
+            <scheduler_element name="file_order_source"/> und
+            <scheduler_element name="file_order_sink"/>
+            beschrieben.
+        </p>
+
+        <h3>Übergeordente Jobkette - Eine Kette von Jobketten</h3>
+        <p>
+            Übergeordnete Jobketten verweisen auf andere Jobketten und werden mit den XML-Elementen
+            <scheduler_element name="job_chain_node.job_chain"/>.
+            <scheduler_element name="job_chain_node.end"/> beschrieben.
+            Die aufgeführten Jobketten müssen einfache Jobketten sein.
+        </p>
+        <p>
+            Übergeordnete Jobketten arbeiten nicht mit verteilten Aufträgen.
         </p>
     </description>
 
@@ -129,6 +151,19 @@ Das ist dasselbe wie folgendes Scheduler-Skript:
 ]]&gt;&lt;/script></pre>
     </example>
 
+    <example>
+<pre>&lt;job_chains>
+    &lt;job_chain name="superchain">
+        &lt;job_chain_node.job_chain state="A" job_chain="job_chain_a" 
+                                  next_state="B" error_state="ERROR" />            
+        &lt;job_chain_node.job_chain state="B" job_chain="job_chain_b" 
+                                  next_state="OK" error_state="ERROR" />            
+        &lt;job_chain_node.end state="OK" />
+        &lt;job_chain_node.end state="ERROR" />
+    &lt;/job_chain>
+&lt;/job_chains></pre>
+    </example>
+    
     <behavior_with_xml_element element="base" allowed="no">
         <description>
             <code>&lt;job_chain name="</code>Name<code>"></code> mit verschiedenen Namen können hinzugefügt werden.

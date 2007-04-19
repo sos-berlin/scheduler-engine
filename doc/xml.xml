@@ -66,6 +66,8 @@
                 <scheduler_element name="job"/><br/>
                 <scheduler_element name="job_chain"/><br/>
                 <scheduler_element name="job_chain_node"/><br/>
+                <scheduler_element name="job_chain_node.end"/><br/>
+                <scheduler_element name="job_chain_node.job_chain"/><br/>
                 <scheduler_element name="job_chains"/><br/>
                 <scheduler_element name="jobs"/><br/>
                 <scheduler_element name="locks"/><br/>
