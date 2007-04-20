@@ -1619,8 +1619,9 @@ bool Task::step__end()
         else
         {
             continue_task = result = check_result( spooler_process_result );
-            if( _job->order_queue() )  continue_task = true;           // Auftragsgesteuerte Task immer fortsetzen ( _order kann wieder null sein wegen set_state(), §1495 )
         }
+
+        if( _job->order_queue() )  continue_task = true;           // Auftragsgesteuerte Task immer fortsetzen ( _order kann wieder null sein wegen set_state(), §1495 )
 
         if( has_step_count()  ||  _step_count == 0 )        // Bei kind_process nur einen Schritt zählen
         {

@@ -4879,13 +4879,7 @@ void Order::handle_end_state()
     }
     else
     {
-        // Oben sicherstellen, dass es kein verteilter Auftrag ist!
-        assert( !_is_distributed );
-
-        //// Was tun mit _end_state_reached?  
-        //// Auf <file_order_sink> folgt kein Endzustand, der mit set_state1() erreicht würde, und wir kommen nicht nach handle_end_state()
-        //// ==> if( !_end_state_reached )  set_state1();  
-        ////                          else  handle_end_state();       // Funktionieren die Dateiaufträge ohne diesen Aufruf?
+        Z_DEBUG_ONLY( assert( !_is_distributed ) );
 
         try
         {
@@ -4919,14 +4913,6 @@ void Order::handle_end_state()
             _end_state_reached = true;
             is_real_end_state = true;
         }
-
-        /*
-            Oder:
-            Aufträge in Job_chain_node aufbewahren: hash_set< ptr<Order> > _order_set;
-            Order_queue::Queue:  list<Order*>, beides strikt gleich halten, solange der Job da ist.
-
-            Dann Auftrag in aller Ruhe in Knoten der äußeren Jobkette verschieben.  ==> Extra Datenbankzugriff
-        */
     }
 
 
@@ -4973,11 +4959,30 @@ void Order::handle_end_state()
             open_log();
         }
         else
-        if( !_is_on_blacklist )
         {
-            _log->info( message_string( "SCHEDULER-945" ) );     // "Kein weiterer Job in der Jobkette, der Auftrag ist erledigt"
-            remove_from_job_chain();
-            close( cls_dont_remove_from_job_chain );
+            if( _job_chain )
+            {
+                if( is_file_order()  &&  file_exists( file_path() ) )
+                {
+                    _log->error( message_string( "SCHEDULER-340" ) );
+                    set_on_blacklist();
+                }
+
+                if( _suspended )
+                {
+                    set_on_blacklist();
+                }
+            }
+
+            _end_time = Time::now();
+            order_subsystem()->count_finished_orders();
+
+            if( !_is_on_blacklist )
+            {
+                _log->info( message_string( "SCHEDULER-945" ) );     // "Kein weiterer Job in der Jobkette, der Auftrag ist erledigt"
+                remove_from_job_chain();
+                close( cls_dont_remove_from_job_chain );
+            }
         }
     }
 }
@@ -5017,11 +5022,11 @@ void Order::postprocessing2( Job* last_job )
 
     if( finished() )
     {
-        if( is_file_order()  &&  file_exists( file_path() ) )
-        {
-            _log->error( message_string( "SCHEDULER-340" ) );
-            if( _job_chain )  set_on_blacklist();
-        }
+        //if( is_file_order()  &&  file_exists( file_path() ) )
+        //{
+        //    _log->error( message_string( "SCHEDULER-340" ) );
+        //    if( _job_chain )  set_on_blacklist();
+        //}
 
         try
         {
@@ -5034,31 +5039,44 @@ void Order::postprocessing2( Job* last_job )
     }
 
 
-    if( _suspended  &&  _job_chain  &&  ( !_job_chain_node  ||  !_job_chain_node->_job ) )
-    //if( _suspended  &&  end_state_reached() )
-    {
-        set_on_blacklist();
-    }
+    //if( _suspended  &&  _job_chain  &&  ( !_job_chain_node  ||  !_job_chain_node->_job ) )
+    ////if( _suspended  &&  end_state_reached() )
+    //{
+    //    set_on_blacklist();
+    //}
 
 
-    if( finished() )
-    {
-        _end_time = Time::now();
-        order_subsystem()->count_finished_orders();
-    }
+    //if( finished() )
+    //{
+    //    _end_time = Time::now();
+    //    order_subsystem()->count_finished_orders();
+    //}
 
-    if( _job_chain  &&  ( _is_in_database || finished() ) )
+    if( _job_chain  &&  _is_in_database )
     {
         try
         {
-            if( !_is_on_blacklist  &&  finished() )  db_delete( update_and_release_occupation );
-                                               else  db_update( update_and_release_occupation );
+            //if( !_is_on_blacklist  &&  finished() )  db_delete( update_and_release_occupation );
+            //                                   else  
+            db_update( update_and_release_occupation );
         }
         catch( exception& x )
         {
             _log->error( message_string( "SCHEDULER-313", x ) );
         }
     }
+    //if( _job_chain  &&  ( _is_in_database || finished() ) )
+    //{
+    //    try
+    //    {
+    //        if( !_is_on_blacklist  &&  finished() )  db_delete( update_and_release_occupation );
+    //                                           else  db_update( update_and_release_occupation );
+    //    }
+    //    catch( exception& x )
+    //    {
+    //        _log->error( message_string( "SCHEDULER-313", x ) );
+    //    }
+    //}
 
     if( _is_distributed  &&  _job_chain )
     {
@@ -5067,10 +5085,10 @@ void Order::postprocessing2( Job* last_job )
     }
 
 
-    if( finished() )
-    {
-        if( !_is_on_blacklist )  close( Order::cls_remove_from_job_chain ); 
-    }
+    //if( finished() )
+    //{
+    //    if( !_is_on_blacklist )  close( Order::cls_remove_from_job_chain ); 
+    //}
 }
 
 //-----------------------------------------------------------------------------Order::set_suspended

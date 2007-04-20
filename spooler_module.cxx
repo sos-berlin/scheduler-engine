@@ -944,7 +944,7 @@ Variant Module_instance::step__end()
             }
 
             Variant result = _monitor_instance->call_if_exists( spooler_process_after_name, check_result( ok ) );
-            if( !result.is_missing() )  ok = result;
+            if( result.vt != VT_ERROR  &&  V_ERROR( &result ) != DISP_E_UNKNOWNNAME )  ok = result;
         }
     }
 

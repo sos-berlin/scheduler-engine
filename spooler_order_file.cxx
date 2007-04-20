@@ -871,7 +871,7 @@ bool Directory_file_order_source::clean_up_blacklisted_files()
 
             for( int i = 0; i < _new_files.size(); i++ )
             {
-                if( z::File_info* new_file = _new_files[ _new_files_index ] )
+                if( z::File_info* new_file = _new_files[ i ] )
                     removed_blacklisted_files.erase( new_file->path() );
             }
 
