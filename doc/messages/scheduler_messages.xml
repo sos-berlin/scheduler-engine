@@ -3684,7 +3684,8 @@
 
         <message code="SCHEDULER-860" weight="info">
             <text xml:lang="en">
-                <title>Waiting for lock <p1>locks</p1></title>
+                <title>Waiting for <p1>lock</p1>, <p2>exclusive</p2>, on place <p3/> (<p4>current holders</p4>)</title>
+                <!--title>Waiting for lock <p1>locks</p1></title-->
             </text>
         </message>
 

@@ -416,7 +416,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-857", "$1 has been released, $2 non-exclusive holders remaining" },
     { "SCHEDULER-858", "Not longer waiting for lock $1" },
     { "SCHEDULER-859", "Due to action='next_state' the state '$2' is skipped. Next state is '$1'" },
-    { "SCHEDULER-860", "Waiting for lock $1" },
+    { "SCHEDULER-860", "Waiting for $1, $2, on place $3 ($4)" },
     { "SCHEDULER-861", "$1 has been removed" },
     {}
 };

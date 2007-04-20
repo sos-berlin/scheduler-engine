@@ -77,7 +77,7 @@ void Lock::prepare_remove()
 
 bool Lock::is_free_for( Lock_mode lock_mode ) const
 { 
-    return _holder_set.empty()  ||  
+    return _holder_set.empty()  ||   //deadlock? &&  ( _waiting_queues[ lk_exclusive ].empty() || lock_mode == lk_exclusive )  ||  
            lock_mode == lk_non_exclusive  &&  _lock_mode == lk_non_exclusive  &&  count_non_exclusive_holders() < _max_non_exclusive;
 }
 
@@ -256,12 +256,21 @@ string Lock::string_from_holders() const
 {
     S result;
 
-    Z_FOR_EACH_CONST( Holder_set, _holder_set, it )
+    if( _holder_set.empty() )  // ||  lock_mode == lk_non_exclusive  &&  _lock_mode == lk_non_exclusive )
     {
-        Holder* holder = *it;
+        result << "free";
+    }
+    else
+    {
+        result << ( _lock_mode == lk_exclusive? "exclusive holder " : "non-exclusive holder " );
 
-        if( !result.empty() )  result << ", ";
-        result << holder->object()->obj_name();
+        Z_FOR_EACH_CONST( Holder_set, _holder_set, it )
+        {
+            Holder* holder = *it;
+
+            if( it != _holder_set.begin() )  result << ", "; 
+            result << holder->object()->obj_name();
+        }
     }
 
     return result;
@@ -402,20 +411,23 @@ void Requestor::enqueue_lock_requests()
     if( _is_enqueued )  z::throw_xc( __FUNCTION__ );
     _is_enqueued = true; 
 
-    S lock_names;
+    //S lock_names;
 
     Z_FOR_EACH( Use_list, _use_list, it )
     {
-        Use* lock_use = *it;
-        int place = lock_use->lock()->enqueue_lock_use( lock_use ); 
+        Use*  lock_use = *it;
+        Lock* lock     = lock_use->lock();
+        int   place    = lock->enqueue_lock_use( lock_use );    // Bei _use_list.size() > 1 kann die Sperre frei sein. Wir tragen uns trotzdem in die Warteschlange ein
         
-        if( !lock_names.empty() )  lock_names << ", ";
-        lock_names << lock_use->lock_path() << " (";
-        lock_names << ( lock_use->lock_mode() == Lock::lk_exclusive? "exclusive" : "non-exclusive" );
-        lock_names << ", at place " << place << ")";
+        //if( !lock_names.empty() )  lock_names << ", ";
+        //lock_names << lock_use->lock_path() << " (";
+        //lock_names << ( lock_use->lock_mode() == Lock::lk_exclusive? "exclusive" : "non-exclusive" );
+        //lock_names << ", at place " << place << ")";
+        _log->info( message_string( "SCHEDULER-860", lock->obj_name(), lock_use->lock_mode() == Lock::lk_exclusive? "exclusive" : "non-exclusive", 
+                                                     place, lock->string_from_holders() ) );
     }
     
-    _log->info( message_string( "SCHEDULER-860", lock_names ) );
+    //_log->info( message_string( "SCHEDULER-860", lock_names ) );
 }
 
 //-----------------------------------------------------------------Requestor::dequeue_lock_requests

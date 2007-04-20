@@ -2004,14 +2004,17 @@ void Job::calculate_next_time( const Time& now )
     {
         Time next_time = Time::never;
 
+        //is_waiting |= _lock_requestor  &&  _lock_requestor->is_enqueued()  &&  ! _lock_requestor->locks_are_available();
+        //is_waiting |= _waiting_for_process && !_waiting_for_process_try_again;
+
         if( _lock_requestor  &&  _lock_requestor->is_enqueued() )
         {
-            if( _lock_requestor->locks_are_available() )  next_time = 0;
+            if( _lock_requestor->locks_are_available() )  next_time = 0;    // task_to_start() ruft _lock_requestor->dequeue_lock_requests
         }
         else
         if( _waiting_for_process )
         {
-            if( _waiting_for_process_try_again )  next_time = 0;
+            if( _waiting_for_process_try_again )  next_time = 0;            // task_to_start() ruft remove_waiting_job_from_process_list()
         }
         else
         {
@@ -2076,9 +2079,9 @@ void Job::calculate_next_time( const Time& now )
         Time old_next_time = _next_time;
         _next_time = next_time;
 
-        Z_LOG2( "joacim", __FUNCTION__ << " ==> " << _next_time.as_string() << ( _next_time < old_next_time? " < " :
-                                                                                 _next_time > old_next_time? " > " : " = " ) 
-                                                  << "old " << old_next_time << "\n" );
+        Z_LOG2( "joacim", obj_name() << "  " << __FUNCTION__ << " ==> " << _next_time.as_string() << ( _next_time < old_next_time? " < " :
+                                                                                                       _next_time > old_next_time? " > " : " = " ) 
+                                                                        << "old " << old_next_time << "\n" );
     }
 }
 
@@ -2209,13 +2212,10 @@ ptr<Task> Job::task_to_start()
             }
             else
             {
-                if( !_lock_requestor->is_enqueued() )
-                {
-                    _lock_requestor->enqueue_lock_requests();
-                }
-
                 // Wir können die Task nicht starten, denn die Sperre ist nicht verfügbar
                 task = NULL, cause = cause_none, has_order = false;      
+
+                if( !_lock_requestor->is_enqueued() )  _lock_requestor->enqueue_lock_requests();
             }
         }
     }
@@ -2243,7 +2243,7 @@ ptr<Task> Job::task_to_start()
                 _spooler->try_to_free_process( this, _module->_process_class, now );     // Beendet eine Task in s_running_waiting_for_order
             }
 
-            cause = cause_none, has_order = false;      // Wir können die Task nicht starten, denn kein Prozess ist verfügbar
+            task = NULL, cause = cause_none, has_order = false;      // Wir können die Task nicht starten, denn kein Prozess ist verfügbar
         }
         else
         {
@@ -2300,7 +2300,6 @@ ptr<Task> Job::task_to_start()
     if( task  &&  _lock_requestor )
     {
         task->_lock_holder->hold_locks();
-
         if( _lock_requestor->is_enqueued() )  _lock_requestor->dequeue_lock_requests( log_none );
     }
 
@@ -2311,7 +2310,8 @@ ptr<Task> Job::task_to_start()
 
     if( task )  _start_once = false;
 
-    return cause? task : NULL;
+    return task;
+    //return cause? task : NULL;
 }
 
 //--------------------------------------------------------------------------------Job::do_something
