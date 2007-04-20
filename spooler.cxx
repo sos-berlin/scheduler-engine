@@ -696,6 +696,8 @@ Spooler::~Spooler()
     set_ctrl_c_handler( false );
 
     _task_subsystem = NULL;
+    _job_subsystem  = NULL;
+    _lock_subsystem = NULL;
     //_object_set_class_list.clear();
     _security.clear();
 
@@ -2992,7 +2994,7 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line )
         //_module._dont_remote = true;                _scheduler_script
         //if( _module.set() )  _module.init();
 
-        if( _send_cmd != "" )  { send_cmd();  return 0; }
+        if( _send_cmd != "" )  { send_cmd();  stop(); return 0; }
 
         start();
 
