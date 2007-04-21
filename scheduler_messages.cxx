@@ -275,8 +275,8 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-411", "$1 cannot be removed, it is used by $2" },
     { "SCHEDULER-412", "Job chains can only be nested once" },
     { "SCHEDULER-413", "Nested job chains cannot be combined with distributed orders" },
-    { "SCHEDULER-414", "There is a circular nesting of job chains: $2" },
-    { "SCHEDULER-415", "Error when trying to continue in next job chain: $2" },
+    { "SCHEDULER-414", "There is a circular nesting of job chains: $1" },
+    { "SCHEDULER-415", "Error when trying to continue in next job chain: $1" },
     { "SCHEDULER-900", "Scheduler $1 is starting with $2, pid=$3" },
     { "SCHEDULER-902", "state=$1" },
     { "SCHEDULER-904", "Tasks have $1s to terminate" },
@@ -420,6 +420,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-860", "Waiting for $1, $2, on place $3 ($4)" },
     { "SCHEDULER-861", "$1 has been removed" },
     { "SCHEDULER-862", "Continuing in $1" },
+    { "SCHEDULER-863", "Continuing from $1" },
     {}
 };
 } //namespace sos
