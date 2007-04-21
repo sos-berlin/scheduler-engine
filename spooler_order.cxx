@@ -2012,13 +2012,28 @@ Order* Job_chain::blacklisted_order_or_null( const string& order_id )
     return it != _blacklist_map.end()? it->second : NULL;
 }
 
-//-------------------------------------------------------------------Job_chain::db_blacklist_id_set
+//--------------------------------------------------------------------------------file_path_matches
 
-hash_set<string> Job_chain::db_blacklist_id_set()
+bool file_path_matches( const File_path& path, const File_path& directory, const Regex& regex )
+{
+    bool result = false;
+
+    if( path.directory() == File_path( directory, "" ).directory() )
+    {
+        if( regex.match( path.name() ) )  result = true;
+    }
+
+    return result;
+}
+
+//-------------------------------------------------------Job_chain::db_get_blacklisted_order_id_set
+
+hash_set<string> Job_chain::db_get_blacklisted_order_id_set( const File_path& directory, const Regex& regex )
 {
     hash_set<string> result;
 
-    Z_FOR_EACH( Blacklist_map, _blacklist_map, it )  result.insert( it->first );
+    Z_FOR_EACH( Blacklist_map, _blacklist_map, it )  
+        if( file_path_matches( it->first, directory, regex ) )  result.insert( it->first );
     
     if( _is_distributed )
     {
@@ -2031,7 +2046,8 @@ hash_set<string> Job_chain::db_blacklist_id_set()
         for( Any_file result_set = ta.open_result_set( select_sql, __FUNCTION__ ); !result_set.eof(); )
         {
             Record record = result_set.get_record();
-            result.insert( record.as_string( 0 ) );
+            File_path path = record.as_string( 0 );
+            if( file_path_matches( path, directory, regex ) )  result.insert( path );
         }
     }
 
@@ -4844,6 +4860,11 @@ void Order::postprocessing( bool success )
                 _order_queue->remove_order( this );
                 _order_queue = NULL;
             }
+        }
+        else
+        if( _end_state_reached )
+        {
+            handle_end_state();
         }
         else
         if( _is_distributed  &&  _job_chain_node  &&  _job_chain_node->_job )

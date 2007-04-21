@@ -491,7 +491,7 @@ struct Job_chain : Com_job_chain, Scheduler_object
     void                        remove_order_from_blacklist( Order* );
     bool                        is_on_blacklist         ( const string& order_id );
     Order*                      blacklisted_order_or_null( const string& order_id );
-    stdext::hash_set<string>    db_blacklist_id_set     ();
+    stdext::hash_set<string>    db_get_blacklisted_order_id_set( const File_path& directory, const Regex& );
 
     int                         order_count             ( Read_transaction* );
     bool                        has_order               () const;

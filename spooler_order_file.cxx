@@ -860,9 +860,9 @@ bool Directory_file_order_source::clean_up_blacklisted_files()
 
         try
         {
-            blacklisted_files = _job_chain->db_blacklist_id_set();
+            blacklisted_files = _job_chain->db_get_blacklisted_order_id_set( _path, _regex );
         }
-        catch( exception& x )  { _log->error( S() << x.what() << ", in " << __FUNCTION__ << ", db_blacklist_id_set()\n" ); }
+        catch( exception& x )  { _log->error( S() << x.what() << ", in " << __FUNCTION__ << ", db_get_blacklisted_order_id_set()\n" ); }
 
 
         if( !blacklisted_files.empty() )
@@ -886,6 +886,7 @@ bool Directory_file_order_source::clean_up_blacklisted_files()
                     {
                         order->log()->info( message_string( "SCHEDULER-981" ) );   // "File has been removed"
                         order->remove_from_job_chain();   
+                        order->close( Order::cls_dont_remove_from_job_chain );
                     }
                     else
                     if( _job_chain->is_distributed() )
@@ -893,7 +894,11 @@ bool Directory_file_order_source::clean_up_blacklisted_files()
                         Transaction ta ( _spooler->_db ); 
 
                         ptr<Order> order = order_subsystem()->try_load_order_from_database( &ta, _job_chain->name(), path, Order_subsystem_interface::lo_blacklisted_lock );
-                        order->db_delete( Order::update_not_occupied, &ta );
+                        if( order )
+                        {
+                            order->log()->info( message_string( "SCHEDULER-981" ) );   // "File has been removed"
+                            order->db_delete( Order::update_not_occupied, &ta );
+                        }
 
                         ta.commit( __FUNCTION__ );
                     }
