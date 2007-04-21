@@ -2571,7 +2571,13 @@
 
         <message code="SCHEDULER-414">
             <text xml:lang="en">
-                <title>There is a circular nesting of job chains: <p2/></title>
+                <title>There is a circular nesting of job chains: <p1/></title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-415">
+            <text xml:lang="en">
+                <title>Error when trying to continue in next job chain: <p1/></title>
             </text>
         </message>
 
@@ -3692,6 +3698,18 @@
         <message code="SCHEDULER-861" weight="info">
             <text xml:lang="en">
                 <title><p1>lock</p1> has been removed</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-862" weight="info">
+            <text xml:lang="en">
+                <title>Continuing in <p1>job chain</p1></title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-863" weight="info">
+            <text xml:lang="en">
+                <title>Continuing from <p1>job chain</p1></title>
             </text>
         </message>
 

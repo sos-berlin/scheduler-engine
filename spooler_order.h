@@ -212,6 +212,7 @@ struct Order : Com_order,
     bool                        db_occupy_for_processing();
     bool                        db_release_occupation   ();
     void                        db_fill_stmt            ( sql::Write_stmt* );
+    void                        close_log_and_write_history();
     string                      calculate_db_distributed_next_time();
 
     enum Update_option { update_anyway, update_not_occupied, update_and_release_occupation };

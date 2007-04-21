@@ -59,6 +59,12 @@
     </xml_attributes>
 
 
+    <messages>
+        <message level="error" code="SCHEDULER-415"/>
+        <message level="info"  code="SCHEDULER-862"/>
+        <message level="info"  code="SCHEDULER-863"/>
+    </messages>
+    
 
     <description>
         <p>

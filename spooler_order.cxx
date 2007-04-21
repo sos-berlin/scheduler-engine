@@ -3559,6 +3559,16 @@ void Order::db_fill_stmt( sql::Write_stmt* stmt )
     if( stmt->is_update()  ||  t != "" )  stmt->set_datetime( "distributed_next_time", t );
 }
 
+//---------------------------------------------------------------Order::close_log_and_write_history
+
+void Order::close_log_and_write_history()
+{
+    _end_time = Time::now();
+    _log->close_file();
+    if( _job_chain  &&  _is_in_database )  _spooler->_db->write_order_history( this );  // Historie schreiben, aber Auftrag beibehalten
+    _log->close();
+}
+
 //--------------------------------------------------------Order::calculate_db_distributed_next_time
 
 string Order::calculate_db_distributed_next_time()
@@ -4892,6 +4902,7 @@ void Order::handle_end_state()
     // Möglicherweise nur der Endzustand in einer verschachtelten Jobkette. Dann beachten wir die übergeordnete Jobkette.
 
     bool is_real_end_state = false;
+    bool reopen_log = false;
 
 
     if( _outer_job_chain_name == "" )
@@ -4904,8 +4915,8 @@ void Order::handle_end_state()
 
         try
         {
-            Job_chain*      outer_job_chain           = order_subsystem()->job_chain( _outer_job_chain_name );
-            Job_chain_node* outer_job_chain_node      = outer_job_chain->node_from_state( _outer_job_chain_state );
+            Job_chain*      outer_job_chain            = order_subsystem()->job_chain( _outer_job_chain_name );
+            Job_chain_node* outer_job_chain_node       = outer_job_chain->node_from_state( _outer_job_chain_state );
             State           next_outer_job_chain_state = _is_success_state? outer_job_chain_node->_next_state 
                                                                           : outer_job_chain_node->_error_state;
 
@@ -4915,6 +4926,15 @@ void Order::handle_end_state()
             if( next_outer_job_chain_node  &&  next_outer_job_chain_node->_job_chain_name != "" )
             {
                 Job_chain* next_job_chain = order_subsystem()->job_chain( next_outer_job_chain_node->_job_chain_name );
+
+                _log->info( message_string( "SCHEDULER-862", next_job_chain->obj_name() ) );
+
+                close_log_and_write_history();// Historie schreiben, aber Auftrag beibehalten
+                _start_time = 0;
+                _end_time = 0;
+                open_log();
+
+                _log->info( message_string( "SCHEDULER-863", _job_chain->obj_name() ) );
 
                 _state.clear();     // Lässt place_in_job_chain() den ersten Zustand der Jobkette nehmen
                 place_in_job_chain( next_job_chain, jc_leave_in_job_chain_stack );  // Entfernt Auftrag aus der bisherigen Jobkette
@@ -4930,8 +4950,7 @@ void Order::handle_end_state()
         }
         catch( exception& x ) 
         { 
-            _log->error( message_string( "SCHEDULER-???", x ) );  
-            _end_state_reached = true;
+            _log->error( message_string( "SCHEDULER-415", x ) );  
             is_real_end_state = true;
         }
     }
@@ -4968,15 +4987,9 @@ void Order::handle_end_state()
             }
             catch( exception& x ) { _log->error( x.what() ); }
 
-            _end_time = Time::now();
-            _log->close_file();
-            if( _job_chain  &&  _is_in_database )  _spooler->_db->write_order_history( this );  // Historie schreiben, aber Auftrag beibehalten
-            _log->close();
-
+            close_log_and_write_history();// Historie schreiben, aber Auftrag beibehalten
             _start_time = 0;
             _end_time = 0;
-            //_is_virgin_in_this_run_time = true;
-
             open_log();
         }
         else
@@ -4988,7 +5001,7 @@ void Order::handle_end_state()
                     _log->error( message_string( "SCHEDULER-340" ) );
                     set_on_blacklist();
                 }
-
+                
                 if( _suspended )
                 {
                     set_on_blacklist();
@@ -5005,6 +5018,13 @@ void Order::handle_end_state()
                 close( cls_dont_remove_from_job_chain );
             }
         }
+    }
+
+    if( reopen_log )
+    {
+        _start_time = 0;
+        _end_time = 0;
+        open_log();
     }
 }
 
