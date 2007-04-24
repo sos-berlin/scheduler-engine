@@ -3600,7 +3600,7 @@
 
         <message code="SCHEDULER-845" weight="warn">
             <text xml:lang="en">
-                <title>After task exception, the order remains in job's order queue</title>
+                <title>Task ended without processing the order. The order remains in job's order queue in the same state</title>
             </text>
         </message>
 

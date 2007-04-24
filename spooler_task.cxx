@@ -506,7 +506,7 @@ void Task::cmd_nice_end( Job* for_job )
 {
     _log->info( message_string( "SCHEDULER-271", for_job->name() ) );   //"Task wird dem Job " + for_job->name() + " zugunsten beendet" );
 
-    cmd_end();
+    cmd_end( end_nice );
 }
 
 //--------------------------------------------------------------------------Task::set_error_xc_only
@@ -1124,11 +1124,13 @@ bool Task::do_something()
 
                         if( _state < s_ending  &&  _end )      // Task beenden?
                         {
-                            if( _end == end_nice  &&  _state <= s_running  &&  _order  &&  _step_count == 0  &&   // SCHEDULER-226 (s.u.) nach SCHEDULER-271 (Task-Ende wegen Prozessmangels)
-                                !_scheduler_815_logged )
+                            if( _end == end_nice  &&  _state <= s_running  &&  _order  &&  _step_count == 0 )   // SCHEDULER-226 (s.u.) nach SCHEDULER-271 (Task-Ende wegen Prozessmangels)
                             {
-                                _log->info( message_string( "SCHEDULER-815", _order->obj_name() ) );    // Task einen Schritt machen lassen, um den Auftrag auszuführen
-                                _scheduler_815_logged = true;
+                                if( !_scheduler_815_logged )
+                                {
+                                    _log->info( message_string( "SCHEDULER-815", _order->obj_name() ) );    // Task einen Schritt machen lassen, um den Auftrag auszuführen
+                                    _scheduler_815_logged = true;
+                                }
                             }
                             else
                             if( !loaded() )         set_state( s_ended );

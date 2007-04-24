@@ -95,9 +95,10 @@
             <td valign="baseline" style="padding-left: 2ex">
                 <scheduler_element name="add_jobs"/><br/>
                 <scheduler_element name="add_order"/><br/>
-                <scheduler_element name="kill_task"/><br/>
                 <scheduler_element name="job_chain.modify"/><br/>
                 <scheduler_element name="job_chain_node.modify"/><br/>
+                <scheduler_element name="kill_task"/><br/>
+             <!--scheduler_element name="lock"/><br/  Darf das doppelt auftreten? Könnte Problem in variable_substituion.xsl machen -->
                 <scheduler_element name="lock.remove"/><br/>
                 <scheduler_element name="modify_job"/><br/>
                 <scheduler_element name="modify_order"/><br/>
