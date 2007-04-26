@@ -455,9 +455,9 @@ struct Operation_connection : Communication::Operation_connection
 
 //----------------------------------------------------------------------------Http_server_interface
 
-struct Http_server_interface : Subsystem
+struct Http_server_interface: Object, Subsystem
 {
-                                Http_server_interface       ( Scheduler* scheduler, Type_code t )   : Subsystem( scheduler, t ) {}
+                                Http_server_interface       ( Scheduler* scheduler, Type_code t )  : Subsystem( scheduler, this, t ) {}
 
     virtual void            set_directory                   ( const File_path& )                    = 0;
     virtual File_path           directory                   () const                                = 0;

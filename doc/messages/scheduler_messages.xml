@@ -2581,6 +2581,18 @@
             </text>
         </message>
 
+        <message code="SCHEDULER-416">
+            <text xml:lang="en">
+                <title><p1/> is already known</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-417">
+            <text xml:lang="en">
+                <title>Invalid name: '<p1/>'</title>
+            </text>
+        </message>
+
 
         <!--message code="SCHEDULER-398">
             <text xml:lang="en">

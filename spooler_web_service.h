@@ -113,9 +113,9 @@ struct Web_service: idispatch_implementation< Web_service, spooler_com::Iweb_ser
 
 //---------------------------------------------------------------------------Web_services_interface
 
-struct Web_services_interface : Subsystem
+struct Web_services_interface: Object, Subsystem
 {
-                                Web_services_interface      ( Scheduler* s, Type_code type )        : Subsystem( s, type ) {}
+                                Web_services_interface      ( Scheduler* s, Type_code type )       : Subsystem( s, this, type ) {}
 
     virtual void                set_dom                     ( const xml::Element_ptr& )             = 0;
     virtual xml::Element_ptr    dom_element                 ( const xml::Document_ptr&, const Show_what& ) const = 0;

@@ -620,7 +620,7 @@ struct Order_queue : Com_order_queue
 
 //------------------------------------------------------------------------Order_subsystem_interface
 
-struct Order_subsystem_interface : Subsystem
+struct Order_subsystem_interface: Object, Subsystem
 {
     enum Load_order_flags
     {

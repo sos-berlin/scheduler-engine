@@ -362,6 +362,9 @@ struct Spooler : Object,
     void                        run                         ();
     bool                        run_continue                ( const Time& now );
 
+    bool                        name_is_valid               ( const string& name );
+    void                        check_name                  ( const string& name );
+
     // Cluster
     void                        start_cluster               ();
     void                        check_cluster               ();

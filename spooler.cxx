@@ -1075,6 +1075,25 @@ void Spooler::unregister_pid( int pid )
     }
 }
 
+//---------------------------------------------------------------------------Spooler::name_is_valid
+
+bool Spooler::name_is_valid( const string& name )
+{
+    bool result = true;
+
+    if( name == ""                       )  result = false;
+    if( name.find( '/' ) != string::npos )  result = false;
+
+    return result;
+}
+
+//------------------------------------------------------------------------------Spooler::check_name
+
+void Spooler::check_name( const string& name )
+{
+    if( !name_is_valid( name ) )  z::throw_xc( "SCHEDULER-417", name );
+}
+
 //-------------------------------------------------------------------------Spooler::order_subsystem
 
 Order_subsystem_interface* Spooler::order_subsystem()

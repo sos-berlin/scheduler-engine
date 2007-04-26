@@ -19,7 +19,7 @@ namespace scheduler {
 
 Task_subsystem::Task_subsystem( Spooler* spooler )
 :
-    Subsystem( spooler, type_task_subsystem ),
+    Subsystem( spooler, this, type_task_subsystem ),
     _zero_(this+1)
 {
 }

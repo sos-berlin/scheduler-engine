@@ -5,9 +5,9 @@ namespace scheduler {
 
 //-----------------------------------------------------------------------------Supervisor_interface
     
-struct Supervisor_interface : Subsystem
+struct Supervisor_interface: Object, Subsystem
 {
-                                Supervisor_interface        ( Scheduler* scheduler, Type_code tc )  : Subsystem( scheduler, tc ) {}
+                                Supervisor_interface        ( Scheduler* scheduler, Type_code tc )  : Subsystem( scheduler, this, tc ) {}
 
     virtual xml::Element_ptr    dom_element                 ( const xml::Document_ptr&, const Show_what& ) = 0;
     virtual void                execute_register_remote_scheduler( const xml::Element_ptr&, Communication::Operation* ) = 0;
@@ -25,9 +25,9 @@ struct Remote_scheduler_interface : zschimmer::Object
 
 //----------------------------------------------------------------------Supervisor_client_interface
 
-struct Supervisor_client_interface : Subsystem
+struct Supervisor_client_interface: Object, Subsystem
 {
-                                Supervisor_client_interface ( Scheduler* scheduler, Type_code tc )  : Subsystem( scheduler, tc ) {}
+                                Supervisor_client_interface ( Scheduler* scheduler, Type_code tc )  : Subsystem( scheduler, this, tc ) {}
 };
 
 

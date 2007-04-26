@@ -8,9 +8,9 @@ namespace scheduler {
 
 //-----------------------------------------------------------------------Java_subsystem_interface
 
-struct Java_subsystem_interface : Subsystem
+struct Java_subsystem_interface : Object, Subsystem
 {
-                                Java_subsystem_interface    ( Scheduler* scheduler, Type_code t )   : Subsystem( scheduler, t ) {}
+                                Java_subsystem_interface    ( Scheduler* scheduler, Type_code t )   : Subsystem( scheduler, this, t ) {}
 
     virtual java::Vm*           java_vm                     ()                                      = 0;
 };

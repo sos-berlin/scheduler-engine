@@ -84,6 +84,7 @@ struct Supervisor_client : Supervisor_client_interface
     // Subsystem
     void                        close                       ();
     bool                        subsystem_initialize        ();
+                                Subsystem::obj_name;
 
   private:
     Fill_zero                  _zero_;

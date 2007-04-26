@@ -17,6 +17,8 @@ library Spooler
   //import "../zschimmer/xslt_stylesheet.odl";
 
     interface Ivariable_set;
+    interface Ilock;
+    interface Ilocks;
     interface Ilog;
     interface Itask;
   //interface Ithread;
@@ -688,6 +690,9 @@ library Spooler
 
         [id(36),propput]
         HRESULT                 Suspend_after_resume    ( [in] VARIANT_BOOL );
+
+        [id(37),propget]        
+        HRESULT                 Locks                   ( [out,retval] Ilocks** );
     }
 
     [
@@ -1682,14 +1687,68 @@ library Spooler
         [id(8),propget]
         HRESULT                 Charset_name            ( [out,retval] BSTR* );
     };
+
+    //---------------------------------------------------------------------------------------Ilocks
+    
+    [
+        uuid       ( feee47b5-6c1b-11d8-8103-000476ee8afb ),
+        odl,
+        dual
+    ]
+    interface Ilocks : IDispatch
+    {
+        [id(1),propget]
+        HRESULT                 Java_class_name         ( [out,retval] BSTR* );                 // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
+                                                                                                // Für den Objectserver
+        [id(2),propget]
+        HRESULT                 Lock                    ( [in] BSTR, [out,retval] Ilock** );
+
+        [id(3),propget]
+        HRESULT                 Lock_or_null            ( [in] BSTR, [out,retval] Ilock** );
+
+        [id(4)]
+        HRESULT                 Create_lock             ( [out,retval] Ilock** );
+
+        [id(5)]
+        HRESULT                 Add_lock                ( [in] Ilock* );
+    };
+
+    //----------------------------------------------------------------------------------------Ilock
+    
+    [
+        uuid       ( feee47b6-6c1b-11d8-8103-000476ee8afb ),
+        odl,
+        dual
+    ]
+    interface Ilock : IDispatch
+    {
+        [id(1),propget]
+        HRESULT                 Java_class_name         ( [out,retval] BSTR* );                 // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
+                                                                                                // Für den Objectserver
+        [id(2),propput]
+        HRESULT                 Name                    ( [in] BSTR );
+
+        [id(2),propget]
+        HRESULT                 Name                    ( [out,retval] BSTR* );
+
+        [id(3),propput]
+        HRESULT                 Max_non_exclusive       ( [in] int );
+
+        [id(3),propget]
+        HRESULT                 Max_non_exclusive       ( [out,retval] int* );
+
+        [id(4)]
+        HRESULT                 Remove                  ();
+    };
+
+    //---------------------------------------------------------------------------------------------
+
 };
 
 //-------------------------------------------------------------------------------------------------
 /*
 Ein paar freie GUIDs:
 
-feee47b5-6c1b-11d8-8103-000476ee8afb
-feee47b6-6c1b-11d8-8103-000476ee8afb
 feee47b7-6c1b-11d8-8103-000476ee8afb
 feee47b8-6c1b-11d8-8103-000476ee8afb
 feee47b9-6c1b-11d8-8103-000476ee8afb

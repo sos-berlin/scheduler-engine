@@ -412,7 +412,7 @@ ptr<Order_subsystem_interface> new_order_subsystem( Scheduler* scheduler )
 
 Order_subsystem_interface::Order_subsystem_interface( Scheduler* scheduler ) 
 : 
-    Subsystem( scheduler, Scheduler_object::type_order_subsystem )
+    Subsystem( scheduler, this, Scheduler_object::type_order_subsystem )
 {
 }
 

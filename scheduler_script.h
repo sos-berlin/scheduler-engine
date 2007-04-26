@@ -8,7 +8,7 @@ namespace scheduler {
 
 //-----------------------------------------------------------------------Scheduler_script_interface
 
-struct Scheduler_script_interface : Subsystem
+struct Scheduler_script_interface : Object, Subsystem
 {
     virtual void                set_dom_script              ( const xml::Element_ptr& script_element, const Time& xml_mod_time ) = 0;
 
@@ -16,7 +16,7 @@ struct Scheduler_script_interface : Subsystem
     virtual Module_instance*    module_instance             ()                                      = 0;
 
   protected:                  
-                                Scheduler_script_interface  ( Scheduler* scheduler, Type_code t )   : Subsystem( scheduler, t ) {}
+                                Scheduler_script_interface  ( Scheduler* scheduler, Type_code t )  : Subsystem( scheduler, this, t ) {}
 };
 
 //-------------------------------------------------------------------------------------------------

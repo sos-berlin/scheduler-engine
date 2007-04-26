@@ -129,6 +129,60 @@ function spooler_process()
                 </script>
 
             </job>
+
+            
+            <job name="java">
+
+                <script java_class="spooler_job.My_job">
+                    <![CDATA[
+
+package spooler_job;
+
+import sos.spooler.*;
+
+public class My_job  extends sos.spooler.Job_impl
+{   
+    public boolean spooler_process()  throws Exception
+    {
+        Locks locks = spooler.locks();
+        
+        try
+        {
+            locks.lock( "Gibt's nicht" );
+            spooler_log.error( "spooler_lock( \"Gibt's nicht\" )  versagt" );
+        }
+        catch( Exception x ) { spooler_log.info( "OK: " + x ); }
+        
+        Lock lock = locks.lock( "Georgien" );
+        spooler_log.info( "lock.name=" + lock.name() );
+        spooler_log.info( "lock.max_non_exclusive=" + lock.max_non_exclusive() );
+        
+        lock = locks.create_lock();
+        lock.set_name( "neu" );
+        lock.set_name( "neu" );
+        
+        try
+        {
+            lock.set_name( "anders" );
+            spooler_log.error( "lock.set_name( \"anders\" )  versagt" );
+        }
+        catch( Exception x ) { spooler_log.info( "OK: " + x ); }
+
+        lock.set_max_non_exclusive( 10 );
+        spooler_log.info( "lock.name=" + lock.name() );
+        spooler_log.info( "lock.max_non_exclusive=" + lock.max_non_exclusive() );
+        locks.add_lock( lock );
+        
+        locks.lock( "neu" );
+        
+        return false;
+    }
+}
+                ]]>
+                </script>
+
+                <run_time once="yes" start_time_function="my_start_time_function"/>
+            </job>
         </jobs>
 
         
@@ -138,6 +192,7 @@ function spooler_process()
             <start_job job="C"/>
             <start_job job="D"/>
             <start_job job="E"/>
+            <start_job job="java"/>
         </commands>
     </config>
 </spooler>

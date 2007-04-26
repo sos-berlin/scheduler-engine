@@ -44,9 +44,9 @@ struct Configuration
 
 //----------------------------------------------------------------------Cluster_subsystem_interface
 
-struct Cluster_subsystem_interface : Subsystem
+struct Cluster_subsystem_interface : Object, Subsystem
 {
-                                Cluster_subsystem_interface ( Scheduler* scheduler, Type_code t )   : Subsystem( scheduler, t ) {}
+                                Cluster_subsystem_interface ( Scheduler* scheduler, Type_code t )   :  Subsystem( scheduler, this, t ) {}
 
 
     virtual void            set_configuration               ( const Configuration& )                = 0;

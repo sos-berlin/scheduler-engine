@@ -13,7 +13,9 @@ struct Use;
 
 //---------------------------------------------------------------------------------------------Lock
 
-struct Lock : Object, Scheduler_object, Non_cloneable
+struct Lock : idispatch_implementation< Lock, spooler_com::Ilock>, 
+              Scheduler_object, 
+              Non_cloneable
 {
     enum Lock_mode
     { 
@@ -22,7 +24,7 @@ struct Lock : Object, Scheduler_object, Non_cloneable
     };
 
 
-                                Lock                        ( Lock_subsystem*, const string& name );
+                                Lock                        ( Lock_subsystem*, const string& name = "" );
                                ~Lock                        ();
 
     void                        close                       ();
@@ -30,7 +32,10 @@ struct Lock : Object, Scheduler_object, Non_cloneable
 
     void                    set_dom                         ( const xml::Element_ptr& );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
+    void                        execute_xml                 ( const xml::Element_ptr&, const Show_what& );
 
+    void                    set_max_non_exclusive           ( int );
+    void                    set_name                        ( const string& );
     string                      name                        () const                                { return _name; }
     string                      path                        () const                                { return _name; }
     bool                        its_my_turn                 ( const Use* );
@@ -43,10 +48,21 @@ struct Lock : Object, Scheduler_object, Non_cloneable
     int                         count_non_exclusive_holders () const                                { return _lock_mode == lk_non_exclusive? _holder_set.size() : 0; }
     bool                        is_free_for                 ( Lock_mode ) const;
     bool                        is_free                     () const                                { return _holder_set.empty(); }             
+    bool                        is_added                    () const;
+    void                        remove                      ();
     string                      obj_name                    () const;
     string                      string_from_holders         () const;
     string                      string_from_uses            () const;
 
+
+    // Ilock:
+    STDMETHODIMP            get_Java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
+    STDMETHODIMP_(char*)  const_java_class_name             ()                                      { return (char*)"sos.spooler.Lock"; }
+    STDMETHODIMP            put_Name                        ( BSTR );     
+    STDMETHODIMP            get_Name                        ( BSTR* result )                        { return String_to_bstr( _name, result ); }
+    STDMETHODIMP            put_Max_non_exclusive           ( int );
+    STDMETHODIMP            get_Max_non_exclusive           ( int* result )                         { *result = _max_non_exclusive;  return S_OK; }
+    STDMETHODIMP                Remove                      ();
 
   private:
     Fill_zero                  _zero_;
@@ -64,6 +80,10 @@ struct Lock : Object, Scheduler_object, Non_cloneable
     Use_set                        _use_set;
 
     Lock_subsystem*            _lock_subsystem;
+
+
+    static Class_descriptor     class_descriptor;
+    static const Com_method     _methods[];
 };
 
 //----------------------------------------------------------------------------------------------Use
@@ -154,7 +174,8 @@ struct Holder : Object, Scheduler_object, Non_cloneable
 
 //-----------------------------------------------------------------------------------Lock_subsystem
 
-struct Lock_subsystem : Subsystem
+struct Lock_subsystem : idispatch_implementation< Lock_subsystem, spooler_com::Ilocks>, 
+                        Subsystem
 {
                                 Lock_subsystem              ( Scheduler* );
 
@@ -167,15 +188,27 @@ struct Lock_subsystem : Subsystem
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
     xml::Element_ptr            execute_xml                 ( Command_processor*, const xml::Element_ptr&, const Show_what& );
     void                        execute_xml_lock            ( const xml::Element_ptr& );
-    void                        execute_xml_lock_remove     ( const xml::Element_ptr& );
 
+    void                        add_lock                    ( Lock* );
+    void                        remove_lock                 ( Lock* );
     bool                        is_empty                    () const                                { return _lock_map.empty(); }
     Lock*                       lock                        ( const string& name );
     Lock*                       lock_or_null                ( const string& name );
 
+    STDMETHODIMP            get_Java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
+    STDMETHODIMP_(char*)  const_java_class_name             ()                                      { return (char*)"sos.spooler.Locks"; }
+    STDMETHODIMP            get_Lock                        ( BSTR, spooler_com::Ilock** );
+    STDMETHODIMP            get_Lock_or_null                ( BSTR, spooler_com::Ilock** );
+    STDMETHODIMP                Create_lock                 ( spooler_com::Ilock** );
+    STDMETHODIMP                Add_lock                    ( spooler_com::Ilock* );
+
   private:
     typedef map< string, ptr<Lock> > Lock_map;
     Lock_map                   _lock_map;
+
+
+    static Class_descriptor     class_descriptor;
+    static const Com_method     _methods[];
 };
 
 //-------------------------------------------------------------------------------------------------

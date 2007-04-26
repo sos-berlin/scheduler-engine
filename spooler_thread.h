@@ -8,7 +8,7 @@ namespace scheduler {
 
 //-----------------------------------------------------------------------------------Task_subsystem
 
-struct Task_subsystem : Subsystem
+struct Task_subsystem: Object, Subsystem
 {
     Fill_zero                  _zero_;
 

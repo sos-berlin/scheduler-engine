@@ -147,4 +147,6 @@ public class Spooler extends Idispatch
     public Xslt_stylesheet  create_xslt_stylesheet( String xml )                    { Xslt_stylesheet stylesheet = (Xslt_stylesheet)com_call( "Create_xslt_stylesheet" );
                                                                                       stylesheet.load_xml( xml );
                                                                                       return stylesheet; }
+                                                                                      
+    public Locks            locks()                                                 { return (Locks)        com_call( "<locks" ); }                                                                                      
 }

@@ -632,6 +632,7 @@ struct Com_spooler : spooler_com::Ispooler,
     STDMETHODIMP            get_Udp_port                    ( int* );
     STDMETHODIMP                Create_xslt_stylesheet      ( spooler_com::Ixslt_stylesheet** );
     STDMETHODIMP            put_Suspend_after_resume        ( VARIANT_BOOL );
+    STDMETHODIMP            get_Locks                       ( spooler_com::Ilocks** );
 
 
     void                        close                       ()                                      { THREAD_LOCK(_lock)  _spooler = NULL; }

@@ -468,9 +468,9 @@ typedef list< ptr<Job> >    Job_list;
 
 //---------------------------------------------------------------------------Job_subsystem_interface
 
-struct Job_subsystem_interface : Subsystem
+struct Job_subsystem_interface: Object, Subsystem
 {
-                                Job_subsystem_interface     ( Scheduler* scheduler, Type_code t )   : Subsystem( scheduler, t ) {}
+                                Job_subsystem_interface     ( Scheduler* scheduler, Type_code t )   : Subsystem( scheduler, this, t ) {}
 
     virtual void                close_jobs                  ()                                      = 0;
     virtual void                initialize_job              ( Job* )                                = 0;

@@ -21,9 +21,9 @@ string                          string_from_subsystem_state ( Subsystem_state );
 
 //----------------------------------------------------------------------------------------Subsystem
 
-struct Subsystem : Object, Non_cloneable, Scheduler_object
+struct Subsystem : Scheduler_object, Non_cloneable
 {
-                                Subsystem                   ( Spooler* spooler, Type_code t )       : Scheduler_object( spooler, this, t ), _zero_(this+1) {}
+                                Subsystem                   ( Spooler* spooler, IUnknown* iunknown, Type_code t ) : Scheduler_object( spooler, iunknown, t ), _zero_(this+1) {}
 
               Scheduler_object::obj_name;
 
