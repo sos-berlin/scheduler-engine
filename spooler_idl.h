@@ -24,6 +24,8 @@ DEFINE_GUID( LIBID_spooler_com, 0xED57B226, 0xCD4F, 0x490a, 0xB4, 0x7E, 0xE7, 0x
 struct IXMLDOMDocument;
 
 struct Ivariable_set;
+struct Ilocks;
+struct Ilock;
 struct Ilog;
 struct Itask;
 //struct Ithread;
@@ -780,7 +782,7 @@ struct Ilocks : IDispatch
 
 //--------------------------------------------------------------------------------------------Ilock
 
-DEFINE_GUID( IID_Ilocks, 0xfeee47b6, 0x6c1b, 0x11d8, 0x81, 0x03, 0x00, 0x04, 0x76, 0xee, 0x8a, 0xfb );   // {feee47b6-6c1b-11d8-8103-000476ee8afb}
+DEFINE_GUID( IID_Ilock, 0xfeee47b6, 0x6c1b, 0x11d8, 0x81, 0x03, 0x00, 0x04, 0x76, 0xee, 0x8a, 0xfb );   // {feee47b6-6c1b-11d8-8103-000476ee8afb}
 
 struct Ilock : IDispatch
 {
