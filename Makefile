@@ -67,6 +67,8 @@ java_classes=\
  sos/spooler/Job_chain.class\
  sos/spooler/Job_chain_node.class\
  sos/spooler/Job_impl.class\
+ sos/spooler/Lock.class\
+ sos/spooler/Locks.class\
  sos/spooler/Log.class\
  sos/spooler/Mail.class\
  sos/spooler/Monitor_impl.class\

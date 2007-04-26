@@ -21,7 +21,7 @@ const Com_method Lock_subsystem::_methods[] =
     COM_PROPERTY_GET( Lock_subsystem,  2, Lock                , VT_DISPATCH, 0 ),
     COM_PROPERTY_GET( Lock_subsystem,  3, Lock_or_null        , VT_DISPATCH, 0 ),
     COM_METHOD      ( Lock_subsystem,  4, Create_lock         , VT_DISPATCH, 0 ),
-    COM_METHOD      ( Lock_subsystem,  5, Remove              , VT_EMPTY   , 0 ),
+    COM_METHOD      ( Lock_subsystem,  5, Add_lock            , VT_EMPTY   , 0 ),
 #endif
     {}
 };
@@ -31,12 +31,12 @@ const Com_method Lock_subsystem::_methods[] =
 const Com_method Lock::_methods[] =
 { 
 #ifdef COM_METHOD
-    COM_PROPERTY_GET( Lock_subsystem,  1, Java_class_name     , VT_BSTR    , 0 ),
-    COM_PROPERTY_PUT( Lock_subsystem,  2, Name                ,            , 0, VT_BSTR ),
-    COM_PROPERTY_GET( Lock_subsystem,  2, Name                , VT_BSTR    , 0 ),
-    COM_PROPERTY_PUT( Lock_subsystem,  3, Max_non_exclusive   ,            , 0, VT_INT ),
-    COM_PROPERTY_GET( Lock_subsystem,  3, Max_non_exclusive   , VT_INT     , 0 ),
-    COM_METHOD      ( Lock_subsystem,  4, Remove              , VT_EMPTY   , 0 ),
+    COM_PROPERTY_GET( Lock,  1, Java_class_name     , VT_BSTR    , 0 ),
+    COM_PROPERTY_PUT( Lock,  2, Name                ,            , 0, VT_BSTR ),
+    COM_PROPERTY_GET( Lock,  2, Name                , VT_BSTR    , 0 ),
+    COM_PROPERTY_PUT( Lock,  3, Max_non_exclusive   ,            , 0, VT_INT ),
+    COM_PROPERTY_GET( Lock,  3, Max_non_exclusive   , VT_INT     , 0 ),
+    COM_METHOD      ( Lock,  4, Remove              , VT_EMPTY   , 0 ),
 #endif
     {}
 };
@@ -563,7 +563,7 @@ void Requestor::dequeue_lock_requests( Log_level log_level )
 
             if( Lock* lock = lock_use->lock_or_null() )
             {
-                lock_use->lock()->dequeue_lock_use( lock_use ); 
+                lock->dequeue_lock_use( lock_use ); 
             }
             else
                 lock_names << " (missing)";
