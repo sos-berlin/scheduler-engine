@@ -78,6 +78,14 @@
                     </xsl:apply-templates>
                 <!--/xsl:if-->
 
+                <xsl:if test="state/locks">
+                    <xsl:apply-templates mode="card_selector" select="/spooler">
+                        <xsl:with-param name="name"  select="'locks'"/>
+                        <xsl:with-param name="title" select="'Locks'"/>
+                        <xsl:with-param name="class" select="'lock'"/>
+                    </xsl:apply-templates>
+                </xsl:if>
+
                 <xsl:apply-templates mode="card_selector" select="/spooler">
                     <xsl:with-param name="name"  select="'process_classes'"/>
                     <xsl:with-param name="title" select="'Process classes'"/>
@@ -109,6 +117,10 @@
 
         <xsl:if test="/spooler/@my_show_card='job_chains'">
             <xsl:apply-templates select="state/job_chains"/>
+        </xsl:if>
+
+        <xsl:if test="/spooler/@my_show_card='locks'">
+            <xsl:apply-templates select="state/locks"/>
         </xsl:if>
 
         <xsl:if test="/spooler/@my_show_card='process_classes'">
@@ -1256,14 +1268,25 @@
                 <xsl:when test="lock.requestor[ @enqueued='yes' ]">
                     <span style="color: red; font-weight: bold;">
                         <xsl:text>needs lock </xsl:text>
-                        <xsl:value-of select="lock.requestor[ @enqueued='yes' ]/@name"/>
                     </span>
                 </xsl:when>
                 <xsl:otherwise>
                     <xsl:text>lock </xsl:text>
-                    <xsl:value-of select="lock.requestor/@name"/>
                 </xsl:otherwise>
             </xsl:choose>
+
+            <xsl:if test="lock.requestor/lock.use">
+                <xsl:for-each select="lock.requestor/lock.use">
+                    <xsl:if test="position()>1">
+                        <xsl:text>, </xsl:text>
+                    </xsl:if>
+                    
+                    <xsl:value-of select="@lock"/>
+                    <xsl:if test="@exclusive='no'">
+                        <span class="small"> non-excl.</span>
+                    </xsl:if>
+                </xsl:for-each>
+            </xsl:if>
         </xsl:if>
     </xsl:template>
 
@@ -1453,6 +1476,143 @@
                 </xsl:element>
 
             </xsl:for-each>
+        </table>
+    </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~locks-->
+
+    <xsl:template match="locks">
+        <table width="100%" cellpadding="0" cellspacing="0" class="lock">
+
+            <xsl:for-each select="lock">
+                <tr>
+                    <td style="line-height: 5pt">&#160;</td>
+                </tr>
+
+                <tr>
+                    <td style="padding-right: 2ex">
+                        <span style="font-weight: bold">
+                            <xsl:text>Lock </xsl:text>
+                            <xsl:value-of select="@name"/>
+                        </span>
+                    </td>
+                    
+                    <td>
+                        <xsl:if test="not( lock.holders/lock.holder )">
+                            <xsl:text>free</xsl:text>
+                        </xsl:if>
+                        <!--xsl:if test="lock.holders/lock.holder">
+                            <xsl:value-of select="count( lock.holders/lock.holder )"/>
+                            <xsl:choose>
+                                <xsl:when test="lock.holders/@exclusive='no'">
+                                    <xsl:text> non-exclusive holders</xsl:text>
+                                </xsl:when>
+                                <xsl:otherwise>
+                                    <xsl:text> exclusive holders</xsl:text>
+                                </xsl:otherwise>
+                            </xsl:choose>
+                        </xsl:if>
+
+                        <xsl:if test="lock.queue [ @exclusive='yes' ]/lock.queue.entry">
+                            <xsl:text>, </xsl:text>
+                            <xsl:value-of select="count( lock.queue[ @exclusive='yes' ]/lock.queue.entry )"/>
+                            <xsl:text> exclusive waiting</xsl:text>
+                        </xsl:if>
+
+                        <xsl:if test="lock.queue [ @exclusive='no' ]/lock.queue.entry">
+                            <xsl:text>, </xsl:text>
+                            <xsl:value-of select="count( lock.queue[ @exclusive='no' ]/lock.queue.entry )"/>
+                            <xsl:text> non-exclusive waiting</xsl:text>
+                        </xsl:if-->
+                    </td>
+                </tr>
+
+                <tr>
+                    <td colspan="99" style="padding-left: 2ex">
+                        <xsl:if test="lock.queue [ @exclusive='no' ]/lock.queue.entry">
+                            <xsl:value-of select="count( lock.queue[ @exclusive='no' ]/lock.queue.entry )"/>
+                            <xsl:text> waiting non-exclusive uses:</xsl:text>
+                            <div style="margin-left: 2ex">
+                                <xsl:apply-templates select="lock.queue [ @exclusive='no' ]"/>
+                            </div>
+                        </xsl:if>
+                        
+                        <xsl:if test="lock.queue [ not( @exclusive='no' ) ]/lock.queue.entry">
+                            <xsl:value-of select="count( lock.queue[ not( @exclusive='yes' ) ]/lock.queue.entry )"/>
+                            <xsl:text>waiting exclusive uses:</xsl:text>
+                            <div style="margin-left: 2ex">
+                                <xsl:apply-templates select="lock.queue [ not( @exclusive='no' ) ] "/>
+                            </div>
+                        </xsl:if>
+
+                        <xsl:if test="lock.holders/lock.holder">
+                            
+                            <xsl:choose>
+                                <xsl:when test="lock.holders/@exclusive='no'">
+                                    <xsl:value-of select="count( lock.holders/lock.holder )"/>
+                                    <xsl:text> non-exclusive holders</xsl:text>
+                                </xsl:when>
+                                <xsl:otherwise>
+                                    <xsl:text>Exclusive holder</xsl:text>
+                                </xsl:otherwise>
+                            </xsl:choose>
+
+                            <div style="margin-left: 2ex">
+                                <xsl:apply-templates select="lock.holders"/>
+                            </div>
+                        </xsl:if>
+                    </td>
+                </tr>
+            </xsl:for-each>
+
+        </table>
+    </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~lock.queue-->
+
+    <xsl:template match="lock.queue">
+        <table width="100%" cellpadding="0" cellspacing="0" class="lock">
+
+            <xsl:for-each select="lock.queue.entry">
+                <tr>
+                    <td>
+                        <xsl:element name="span">
+                            <xsl:attribute name="class"  >job</xsl:attribute>
+                            <xsl:attribute name="style"  >cursor: pointer; </xsl:attribute>
+                            <xsl:attribute name="onclick">call_error_checked( show_job_details, '<xsl:value-of select="@job"/>' )</xsl:attribute>
+                            
+                            <xsl:text>Job </xsl:text>
+                            <xsl:value-of select="@job"/>
+                        </xsl:element>
+                    </td>
+                </tr>
+
+            </xsl:for-each>
+
+        </table>
+    </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~lock.queue-->
+
+    <xsl:template match="lock.holders">
+        <table width="100%" cellpadding="0" cellspacing="0" class="lock">
+
+            <xsl:for-each select="lock.holder">
+                <tr>
+                    <td>
+                        <xsl:element name="span">
+                            <xsl:attribute name="class"  >task</xsl:attribute>
+                            <xsl:attribute name="style"  >cursor: pointer; </xsl:attribute>
+                            <xsl:attribute name="onclick">call_error_checked( show_task_details, '<xsl:value-of select="@job"/>', '<xsl:value-of select="@task"/>' )</xsl:attribute>
+
+                            <xsl:text>Task </xsl:text>
+                            <xsl:value-of select="@job"/>:<xsl:value-of select="@task"/>
+                        </xsl:element>
+                    </td>
+                </tr>
+
+            </xsl:for-each>
+
         </table>
     </xsl:template>
 

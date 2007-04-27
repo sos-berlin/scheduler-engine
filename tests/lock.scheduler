@@ -20,7 +20,13 @@
         <script language="JavaScript">
             <![CDATA[
 
-spooler_log.info( "START" );
+var locks = spooler.locks;
+var lock = locks.create_lock();
+lock.name = "Island";
+lock.max_non_exclusive = 10;
+spooler_log.info( "lock.name=" + lock.name );
+spooler_log.info( "lock.max_non_exclusive=" + lock.max_non_exclusive );
+locks.add_lock( lock );
 
             ]]>
         </script>
@@ -175,13 +181,16 @@ public class My_job  extends sos.spooler.Job_impl
         
         locks.lock( "neu" );
         
+        String xml = spooler.execute_xml( "<job name='neu'><lock.use lock='neu'/><script language='javascript'>spooler_log.info( 'NEU' );</script><run_time once='yes'/></job>" );
+        spooler_log.info( xml );
+        
         return false;
     }
 }
                 ]]>
                 </script>
 
-                <run_time once="yes" start_time_function="my_start_time_function"/>
+                <run_time once="yes"/>
             </job>
         </jobs>
 

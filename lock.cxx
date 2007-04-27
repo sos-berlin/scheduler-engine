@@ -274,28 +274,37 @@ xml::Element_ptr Lock::dom_element( const xml::Document_ptr& dom_document, const
     result.setAttribute( "name", _name );
     if( _max_non_exclusive < INT_MAX )  result.setAttribute( "max_non_exclusive", _max_non_exclusive );
 
-    xml::Element_ptr holders_element = result.append_new_element( "lock.holders" );
-    Z_FOR_EACH( Holder_set, _holder_set, it )
+    if( !_holder_set.empty() )
     {
-        Holder* holder = *it;
+        xml::Element_ptr holders_element = result.append_new_element( "lock.holders" );
+        holders_element.setAttribute( "exclusive", _lock_mode == lk_exclusive? "yes" : "no" );
 
-        xml::Element_ptr holder_element = holders_element.append_new_element( "lock.holder" );
-        holder->object()->write_element_attributes( holder_element );
+        Z_FOR_EACH( Holder_set, _holder_set, it )
+        {
+            Holder* holder = *it;
+
+            xml::Element_ptr holder_element = holders_element.append_new_element( "lock.holder" );
+            holder->object()->write_element_attributes( holder_element );
+        }
     }
 
     for( int lk = lk_exclusive; lk <= lk_non_exclusive; lk++ )
     {
-        xml::Element_ptr queue_element = result.append_new_element( "lock.queue" );
-        queue_element.setAttribute( "exclusive", lk == lk_exclusive? "yes" : "no" );
-
         Use_list& queue = _waiting_queues[ lk ];
-        Z_FOR_EACH( Use_list, queue, it )
-        {
-            Use* lock_use = *it;
-            xml::Element_ptr entry_element = queue_element.append_new_element( "lock.queue.entry" );
 
-            Scheduler_object* object = lock_use->requestor()->object();
-            object->write_element_attributes( entry_element );
+        if( !queue.empty() )
+        {
+            xml::Element_ptr queue_element = result.append_new_element( "lock.queue" );
+            queue_element.setAttribute( "exclusive", lk == lk_exclusive? "yes" : "no" );
+
+            Z_FOR_EACH( Use_list, queue, it )
+            {
+                Use* lock_use = *it;
+                xml::Element_ptr entry_element = queue_element.append_new_element( "lock.queue.entry" );
+
+                Scheduler_object* object = lock_use->requestor()->object();
+                object->write_element_attributes( entry_element );
+            }
         }
     }
 
