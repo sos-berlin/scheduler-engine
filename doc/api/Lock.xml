@@ -92,6 +92,10 @@
             </p>
         </description>
 
+        <example programming_language="javascript">
+            <pre>spooler.locks.lock( "my_lock" ).remove();</pre>
+        </example>
+        
         <messages>
             <message code="SCHEDULER-401" level="error"/>
             <message code="SCHEDULER-410" level="error"/>
@@ -107,5 +111,12 @@
             Siehe auch <scheduler_element name="lock" attribute="name"/>.
         </p>
     </description>
+
+    <example programming_language="javascript">
+        <pre>var locks = spooler.locks;
+var lock = locks.create_lock();
+lock.name = "my_lock";
+locks.add_lock( lock );</pre>
+    </example>
 
 </api.class>

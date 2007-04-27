@@ -233,7 +233,8 @@
         <revision type="modification" title="Order.state">
             <description>
                 <p>
-                    Wenn <scheduler_method class="Order" property="state"/> derselbe Wert zugewiesen wird,
+                    Wenn <scheduler_method class="Order" property="state"/> der bisherige Wert zugewiesen wird,
+                    der Zustand also nicht verändet wird,
                     verhindert das wie jeder andere Wert die automatische Weiterschaltung in den Folgezustand 
                     nach <scheduler_method class="Job_impl" method="spooler_process"/>.
                     Stattdessen durchläuft der Auftrag denselben Job noch einmal.
@@ -485,10 +486,10 @@
             <description>
                 <ul>
                     <li>
-                        <scheduler_option name="?"/> zeigt die Usage-Klausel
+                        <scheduler_option name="?"/> zeigt die möglichen Optionen
                     </li>
                     <li>
-                        <scheduler_option name="h"/> zeigt ebenfalls die Usage-Klausel
+                        <scheduler_option name="h"/> zeigt ebenfalls möglichen Optionen
                     </li>
                     <li>
                         <scheduler_option name="V"/> zeigt die Versionsnummer.

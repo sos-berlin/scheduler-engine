@@ -35,10 +35,12 @@
             </com.result>
         </com>
 
+        <title>Richtet eine neue Sperre ein</title>
+
         <description>
             <p>
                 Liefert eine neues <scheduler_method class="Lock"/>.
-                Diese Sperre kann, 
+                Diese Sperre kann 
                 mit <scheduler_method class="Locks" method="add_lock"/>
                 dem Scheduler hinzugefügt werden.
             </p>
