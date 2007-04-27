@@ -263,7 +263,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-399", "Error in <include>: $1" },
     { "SCHEDULER-400", "Only API-jobs are possible with <process_class remote_scheduler=\"...\"/>" },
     { "SCHEDULER-401", "Unknown lock '$1'" },
-    { "SCHEDULER-402", "Too many lock holders for smaller max_non_exclusive=$1: $3" },
+    { "SCHEDULER-402", "Too many lock holders for smaller max_non_exclusive=$1: $2" },
     { "SCHEDULER-403", "There is no valid state for job chain node state='$1', action='next_state' (circular next_state)" },
     { "SCHEDULER-404", "action='$1' is not possible on a distributed job chain" },
     { "SCHEDULER-405", "Setting state='$1' is not possible while job chain is in state '$2'" },

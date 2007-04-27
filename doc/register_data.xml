@@ -14,12 +14,10 @@
 </register_keyword>
 <register_keyword keyword='abort_immediately'>
     <register_keyword_display><code>abort_immediately()</code></register_keyword_display>
-    <register_entry register_file='api/Locks.xml#method__abort_immediately' register_title='Spooler.abort_immediately()' register_keyword='abort_immediately()' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__abort_immediately' register_title='Spooler.abort_immediately()' register_keyword='abort_immediately()' type='definition'/>
 </register_keyword>
 <register_keyword keyword='abort_immediately_and_restart'>
     <register_keyword_display><code>abort_immediately_and_restart()</code></register_keyword_display>
-    <register_entry register_file='api/Locks.xml#method__abort_immediately_and_restart' register_title='Spooler.abort_immediately_and_restart()' register_keyword='abort_immediately_and_restart()' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__abort_immediately_and_restart' register_title='Spooler.abort_immediately_and_restart()' register_keyword='abort_immediately_and_restart()' type='definition'/>
 </register_keyword>
 <register_keyword keyword='action'>
@@ -48,7 +46,6 @@
 </register_keyword>
 <register_keyword keyword='add_job_chain'>
     <register_keyword_display><code>add_job_chain()</code></register_keyword_display>
-    <register_entry register_file='api/Locks.xml#method__add_job_chain' register_title='Spooler.add_job_chain()' register_keyword='add_job_chain()' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__add_job_chain' register_title='Spooler.add_job_chain()' register_keyword='add_job_chain()' type='definition'/>
 </register_keyword>
 <register_keyword keyword='add_jobs'>
@@ -58,6 +55,10 @@
     <register_entry register_file='xml/add_jobs.xml#' register_title='&lt;add_jobs&gt; (Kommando)'  register_keyword='add_jobs' type='definition'/>
     <register_entry register_file='xml/allowed_host.xml#use_element__add_jobs' register_title='&lt;allowed_host&gt; (Konfiguration)'  register_keyword='add_jobs'/>
     <register_entry register_file='xml/job.xml#use_element__add_jobs' register_title='&lt;job&gt; (Konfiguration)'  register_keyword='add_jobs'/>
+</register_keyword>
+<register_keyword keyword='add_lock'>
+    <register_keyword_display><code>add_lock()</code></register_keyword_display>
+    <register_entry register_file='api/Locks.xml#method__add_lock' register_title='Locks.add_lock()' register_keyword='add_lock()' type='definition'/>
 </register_keyword>
 <register_keyword keyword='add_or_replace_order'>
     <register_keyword_display><code>add_or_replace_order()</code></register_keyword_display>
@@ -89,7 +90,6 @@
 </register_keyword>
 <register_keyword keyword='all_schedulers'>
     <register_keyword_display><code>all_schedulers</code></register_keyword_display>
-    <register_entry register_file='api/Locks.xml#method__terminate' register_title='Spooler.terminate()' register_keyword='all_schedulers'/>
     <register_entry register_file='api/Spooler.xml#method__terminate' register_title='Spooler.terminate()' register_keyword='all_schedulers'/>
 </register_keyword>
 <register_keyword keyword='all_schedulers'>
@@ -395,7 +395,6 @@
 </register_keyword>
 <register_keyword keyword='continue_exclusive_operation'>
     <register_keyword_display><code>continue_exclusive_operation</code></register_keyword_display>
-    <register_entry register_file='api/Locks.xml#method__terminate' register_title='Spooler.terminate()' register_keyword='continue_exclusive_operation'/>
     <register_entry register_file='api/Spooler.xml#method__terminate' register_title='Spooler.terminate()' register_keyword='continue_exclusive_operation'/>
 </register_keyword>
 <register_keyword keyword='continue_exclusive_operation'>
@@ -424,12 +423,14 @@
 </register_keyword>
 <register_keyword keyword='create_job_chain'>
     <register_keyword_display><code>create_job_chain()</code></register_keyword_display>
-    <register_entry register_file='api/Locks.xml#method__create_job_chain' register_title='Spooler.create_job_chain()' register_keyword='create_job_chain()' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__create_job_chain' register_title='Spooler.create_job_chain()' register_keyword='create_job_chain()' type='definition'/>
+</register_keyword>
+<register_keyword keyword='create_lock'>
+    <register_keyword_display><code>create_lock()</code></register_keyword_display>
+    <register_entry register_file='api/Locks.xml#method__create_lock' register_title='Locks.create_lock()' register_keyword='create_lock()' type='definition'/>
 </register_keyword>
 <register_keyword keyword='create_order'>
     <register_keyword_display><code>create_order()</code></register_keyword_display>
-    <register_entry register_file='api/Locks.xml#method__create_order' register_title='Spooler.create_order()' register_keyword='create_order()' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__create_order' register_title='Spooler.create_order()' register_keyword='create_order()' type='definition'/>
 </register_keyword>
 <register_keyword keyword='create_subprocess'>
@@ -438,12 +439,10 @@
 </register_keyword>
 <register_keyword keyword='create_variable_set'>
     <register_keyword_display><code>create_variable_set()</code></register_keyword_display>
-    <register_entry register_file='api/Locks.xml#method__create_variable_set' register_title='Spooler.create_variable_set()' register_keyword='create_variable_set()' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__create_variable_set' register_title='Spooler.create_variable_set()' register_keyword='create_variable_set()' type='definition'/>
 </register_keyword>
 <register_keyword keyword='create_xslt_stylesheet'>
     <register_keyword_display><code>create_xslt_stylesheet()</code></register_keyword_display>
-    <register_entry register_file='api/Locks.xml#method__create_xslt_stylesheet' register_title='Spooler.create_xslt_stylesheet()' register_keyword='create_xslt_stylesheet()' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__create_xslt_stylesheet' register_title='Spooler.create_xslt_stylesheet()' register_keyword='create_xslt_stylesheet()' type='definition'/>
 </register_keyword>
 <register_keyword keyword='created'>
@@ -509,7 +508,6 @@
 </register_keyword>
 <register_keyword keyword='db_history_table_name (property)'>
     <register_keyword_display><code>db_history_table_name</code> (property)</register_keyword_display>
-    <register_entry register_file='api/Locks.xml#method__db_history_table_name' register_title='Spooler.db_history_table_name' register_keyword='db_history_table_name' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__db_history_table_name' register_title='Spooler.db_history_table_name' register_keyword='db_history_table_name' type='definition'/>
 </register_keyword>
 <register_keyword keyword='db_members_table'>
@@ -518,7 +516,6 @@
 </register_keyword>
 <register_keyword keyword='db_name (property)'>
     <register_keyword_display><code>db_name</code> (property)</register_keyword_display>
-    <register_entry register_file='api/Locks.xml#method__db_name' register_title='Spooler.db_name' register_keyword='db_name' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__db_name' register_title='Spooler.db_name' register_keyword='db_name' type='definition'/>
 </register_keyword>
 <register_keyword keyword='db_order_history_table'>
@@ -529,7 +526,6 @@
 </register_keyword>
 <register_keyword keyword='db_order_history_table_name (property)'>
     <register_keyword_display><code>db_order_history_table_name</code> (property)</register_keyword_display>
-    <register_entry register_file='api/Locks.xml#method__db_order_history_table_name' register_title='Spooler.db_order_history_table_name' register_keyword='db_order_history_table_name' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__db_order_history_table_name' register_title='Spooler.db_order_history_table_name' register_keyword='db_order_history_table_name' type='definition'/>
 </register_keyword>
 <register_keyword keyword='db_orders_table'>
@@ -539,7 +535,6 @@
 </register_keyword>
 <register_keyword keyword='db_orders_table_name (property)'>
     <register_keyword_display><code>db_orders_table_name</code> (property)</register_keyword_display>
-    <register_entry register_file='api/Locks.xml#method__db_orders_table_name' register_title='Spooler.db_orders_table_name' register_keyword='db_orders_table_name' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__db_orders_table_name' register_title='Spooler.db_orders_table_name' register_keyword='db_orders_table_name' type='definition'/>
 </register_keyword>
 <register_keyword keyword='db_tasks_table'>
@@ -549,7 +544,6 @@
 </register_keyword>
 <register_keyword keyword='db_tasks_table_name (property)'>
     <register_keyword_display><code>db_tasks_table_name</code> (property)</register_keyword_display>
-    <register_entry register_file='api/Locks.xml#method__db_tasks_table_name' register_title='Spooler.db_tasks_table_name' register_keyword='db_tasks_table_name' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__db_tasks_table_name' register_title='Spooler.db_tasks_table_name' register_keyword='db_tasks_table_name' type='definition'/>
 </register_keyword>
 <register_keyword keyword='db_variables_table'>
@@ -559,7 +553,6 @@
 </register_keyword>
 <register_keyword keyword='db_variables_table_name (property)'>
     <register_keyword_display><code>db_variables_table_name</code> (property)</register_keyword_display>
-    <register_entry register_file='api/Locks.xml#method__db_variables_table_name' register_title='Spooler.db_variables_table_name' register_keyword='db_variables_table_name' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__db_variables_table_name' register_title='Spooler.db_variables_table_name' register_keyword='db_variables_table_name' type='definition'/>
 </register_keyword>
 <register_keyword keyword='db_waiting'>
@@ -689,7 +682,6 @@
 </register_keyword>
 <register_keyword keyword='directory (property)'>
     <register_keyword_display><code>directory</code> (property)</register_keyword_display>
-    <register_entry register_file='api/Locks.xml#method__directory' register_title='Spooler.directory' register_keyword='directory' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__directory' register_title='Spooler.directory' register_keyword='directory' type='definition'/>
 </register_keyword>
 <register_keyword keyword='directory_path'>
@@ -786,7 +778,6 @@
 </register_keyword>
 <register_keyword keyword='ERROR'>
     <register_keyword_display><code>&lt;ERROR&gt;</code></register_keyword_display>
-    <register_entry register_file='api/Locks.xml#use_element__ERROR' register_title='Spooler'  register_keyword='ERROR'/>
     <register_entry register_file='api/Spooler.xml#use_element__ERROR' register_title='Spooler'  register_keyword='ERROR'/>
     <register_entry register_file='xml.xml#use_element__ERROR' register_title='Alle XML-Elemente'  register_keyword='ERROR'/>
     <register_entry register_file='xml/answer/ERROR.xml#' register_title='&lt;ERROR&gt; (Antwort)'  register_keyword='ERROR' type='definition'/>
@@ -865,7 +856,6 @@
 <register_keyword keyword='exclusive'>
     <register_keyword_display><code>-exclusive=</code></register_keyword_display>
     <register_entry register_file='CHANGES.xml#use_option__exclusive' register_title='Änderungsprotokoll'  register_keyword='exclusive'/>
-    <register_entry register_file='api/Locks.xml#use_option__exclusive' register_title='Spooler'  register_keyword='exclusive'/>
     <register_entry register_file='api/Spooler.xml#use_option__exclusive' register_title='Spooler'  register_keyword='exclusive'/>
     <register_entry register_file='backupscheduler.xml#use_option__exclusive' register_title='Backup Job Scheduler'  register_keyword='exclusive'/>
     <register_entry register_file='command_line.xml#option_exclusive' register_title='Kommandozeilenoptionen'  register_keyword='exclusive' type='definition'/>
@@ -882,7 +872,6 @@
 </register_keyword>
 <register_keyword keyword='execute_xml'>
     <register_keyword_display><code>execute_xml()</code></register_keyword_display>
-    <register_entry register_file='api/Locks.xml#method__execute_xml' register_title='Spooler.execute_xml()' register_keyword='execute_xml()' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__execute_xml' register_title='Spooler.execute_xml()' register_keyword='execute_xml()' type='definition'/>
 </register_keyword>
 <register_keyword keyword='exit'>
@@ -1107,7 +1096,6 @@
 </register_keyword>
 <register_keyword keyword='hostname (property)'>
     <register_keyword_display><code>hostname</code> (property)</register_keyword_display>
-    <register_entry register_file='api/Locks.xml#method__hostname' register_title='Spooler.hostname' register_keyword='hostname' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__hostname' register_title='Spooler.hostname' register_keyword='hostname' type='definition'/>
 </register_keyword>
 <register_keyword keyword='HTML'>
@@ -1153,7 +1141,6 @@
 </register_keyword>
 <register_keyword keyword='id (property)'>
     <register_keyword_display><code>id</code> (property)</register_keyword_display>
-    <register_entry register_file='api/Locks.xml#method__id' register_title='Spooler.id' register_keyword='id' type='definition'/>
     <register_entry register_file='api/Order.xml#method__id' register_title='Order.id' register_keyword='id' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__id' register_title='Spooler.id' register_keyword='id' type='definition'/>
     <register_entry register_file='api/Task.xml#method__id' register_title='Task.id' register_keyword='id' type='definition'/>
@@ -1227,7 +1214,6 @@
 <register_keyword keyword='include_path (property)'>
     <register_keyword_display><code>include_path</code> (property)</register_keyword_display>
     <register_entry register_file='api/Job.xml#method__include_path' register_title='Job.include_path' register_keyword='include_path' type='definition'/>
-    <register_entry register_file='api/Locks.xml#method__include_path' register_title='Spooler.include_path' register_keyword='include_path' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__include_path' register_title='Spooler.include_path' register_keyword='include_path' type='definition'/>
 </register_keyword>
 <register_keyword keyword='info'>
@@ -1236,7 +1222,6 @@
 </register_keyword>
 <register_keyword keyword='ini'>
     <register_keyword_display><code>-ini=</code></register_keyword_display>
-    <register_entry register_file='api/Locks.xml#use_option__ini' register_title='Spooler'  register_keyword='ini'/>
     <register_entry register_file='api/Spooler.xml#use_option__ini' register_title='Spooler'  register_keyword='ini'/>
     <register_entry register_file='command_line.xml#option_ini' register_title='Kommandozeilenoptionen'  register_keyword='ini' type='definition'/>
     <register_entry register_file='command_line.xml#use_option__ini' register_title='Kommandozeilenoptionen'  register_keyword='ini'/>
@@ -1245,7 +1230,6 @@
 </register_keyword>
 <register_keyword keyword='ini_path (property)'>
     <register_keyword_display><code>ini_path</code> (property)</register_keyword_display>
-    <register_entry register_file='api/Locks.xml#method__ini_path' register_title='Spooler.ini_path' register_keyword='ini_path' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__ini_path' register_title='Spooler.ini_path' register_keyword='ini_path' type='definition'/>
 </register_keyword>
 <register_keyword keyword='input_state'>
@@ -1281,7 +1265,6 @@
 </register_keyword>
 <register_keyword keyword='is_service (property)'>
     <register_keyword_display><code>is_service</code> (property)</register_keyword_display>
-    <register_entry register_file='api/Locks.xml#method__is_service' register_title='Spooler.is_service' register_keyword='is_service' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__is_service' register_title='Spooler.is_service' register_keyword='is_service' type='definition'/>
 </register_keyword>
 <register_keyword keyword='java'>
@@ -1372,7 +1355,6 @@
     <register_entry register_file='api/Job.xml' register_keyword='Job' type='definition'/>
     <register_entry register_file='api/Job_chain_node.xml#method__job' register_title='Job_chain_node.job' register_keyword='Job'/>
     <register_entry register_file='api/Job_impl.xml#method__spooler_job' register_title='Job_impl.spooler_job' register_keyword='Job'/>
-    <register_entry register_file='api/Locks.xml#method__job' register_title='Spooler.job' register_keyword='Job'/>
     <register_entry register_file='api/Monitor_impl.xml#method__spooler_job' register_title='Monitor_impl.spooler_job' register_keyword='Job'/>
     <register_entry register_file='api/Order.xml#method__job' register_title='Order.job' register_keyword='Job'/>
     <register_entry register_file='api/Spooler.xml#method__job' register_title='Spooler.job' register_keyword='Job'/>
@@ -1381,7 +1363,6 @@
 <register_keyword keyword='job (property)'>
     <register_keyword_display><code>job</code> (property)</register_keyword_display>
     <register_entry register_file='api/Job_chain_node.xml#method__job' register_title='Job_chain_node.job' register_keyword='job' type='definition'/>
-    <register_entry register_file='api/Locks.xml#method__job' register_title='Spooler.job' register_keyword='job' type='definition'/>
     <register_entry register_file='api/Order.xml#method__job' register_title='Order.job' register_keyword='job' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__job' register_title='Spooler.job' register_keyword='job' type='definition'/>
     <register_entry register_file='api/Task.xml#method__job' register_title='Task.job' register_keyword='job' type='definition'/>
@@ -1394,7 +1375,6 @@
     <register_keyword_display><code>&lt;job_chain&gt;</code></register_keyword_display>
     <register_entry register_file='CHANGES.xml#use_element__job_chain' register_title='Änderungsprotokoll'  register_keyword='job_chain'/>
     <register_entry register_file='api/Job_chain.xml#use_element__job_chain' register_title='Job_chain'  register_keyword='job_chain'/>
-    <register_entry register_file='api/Locks.xml#use_element__job_chain' register_title='Spooler'  register_keyword='job_chain'/>
     <register_entry register_file='api/Spooler.xml#use_element__job_chain' register_title='Spooler'  register_keyword='job_chain'/>
     <register_entry register_file='command_line.xml#use_element__job_chain' register_title='Kommandozeilenoptionen'  register_keyword='job_chain'/>
     <register_entry register_file='file_orders.xml#use_element__job_chain' register_title='Verzeichnisüberwachung mit Dateiaufträgen'  register_keyword='job_chain'/>
@@ -1424,9 +1404,6 @@
 <register_keyword keyword='Job_chain (class)'>
     <register_keyword_display><code>Job_chain</code> (class)</register_keyword_display>
     <register_entry register_file='api/Job_chain.xml' register_keyword='Job_chain' type='definition'/>
-    <register_entry register_file='api/Locks.xml#method__add_job_chain' register_title='Spooler.add_job_chain()' register_keyword='Job_chain'/>
-    <register_entry register_file='api/Locks.xml#method__create_job_chain' register_title='Spooler.create_job_chain()' register_keyword='Job_chain'/>
-    <register_entry register_file='api/Locks.xml#method__job_chain' register_title='Spooler.job_chain' register_keyword='Job_chain'/>
     <register_entry register_file='api/Order.xml#method__job_chain' register_title='Order.job_chain' register_keyword='Job_chain'/>
     <register_entry register_file='api/Spooler.xml#method__add_job_chain' register_title='Spooler.add_job_chain()' register_keyword='Job_chain'/>
     <register_entry register_file='api/Spooler.xml#method__create_job_chain' register_title='Spooler.create_job_chain()' register_keyword='Job_chain'/>
@@ -1434,7 +1411,6 @@
 </register_keyword>
 <register_keyword keyword='job_chain (property)'>
     <register_keyword_display><code>job_chain</code> (property)</register_keyword_display>
-    <register_entry register_file='api/Locks.xml#method__job_chain' register_title='Spooler.job_chain' register_keyword='job_chain' type='definition'/>
     <register_entry register_file='api/Order.xml#method__job_chain' register_title='Order.job_chain' register_keyword='job_chain' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__job_chain' register_title='Spooler.job_chain' register_keyword='job_chain' type='definition'/>
 </register_keyword>
@@ -1447,7 +1423,6 @@
 </register_keyword>
 <register_keyword keyword='job_chain_exists'>
     <register_keyword_display><code>job_chain_exists()</code></register_keyword_display>
-    <register_entry register_file='api/Locks.xml#method__job_chain_exists' register_title='Spooler.job_chain_exists()' register_keyword='job_chain_exists()' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__job_chain_exists' register_title='Spooler.job_chain_exists()' register_keyword='job_chain_exists()' type='definition'/>
 </register_keyword>
 <register_keyword keyword='job_chain_node'>
@@ -1510,7 +1485,6 @@
 <register_keyword keyword='job_name'>
     <register_keyword_display><code>job_name</code></register_keyword_display>
     <register_entry register_file='api/Job_chain.xml#method__add_job' register_title='Job_chain.add_job()' register_keyword='job_name'/>
-    <register_entry register_file='api/Locks.xml#method__job' register_title='Spooler.job' register_keyword='job_name'/>
     <register_entry register_file='api/Spooler.xml#method__job' register_title='Spooler.job' register_keyword='job_name'/>
 </register_keyword>
 <register_keyword keyword='job_name'>
@@ -1612,7 +1586,6 @@
 </register_keyword>
 <register_keyword keyword='let_run_terminate_and_restart'>
     <register_keyword_display><code>let_run_terminate_and_restart()</code></register_keyword_display>
-    <register_entry register_file='api/Locks.xml#method__let_run_terminate_and_restart' register_title='Spooler.let_run_terminate_and_restart()' register_keyword='let_run_terminate_and_restart()' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__let_run_terminate_and_restart' register_title='Spooler.let_run_terminate_and_restart()' register_keyword='let_run_terminate_and_restart()' type='definition'/>
 </register_keyword>
 <register_keyword keyword='level'>
@@ -1675,6 +1648,7 @@
 <register_keyword keyword='lock'>
     <register_keyword_display><code>&lt;lock&gt;</code></register_keyword_display>
     <register_entry register_file='CHANGES.xml#use_element__lock' register_title='Änderungsprotokoll'  register_keyword='lock'/>
+    <register_entry register_file='api/Lock.xml#use_element__lock' register_title='Lock'  register_keyword='lock'/>
     <register_entry register_file='xml.xml#use_element__lock' register_title='Alle XML-Elemente'  register_keyword='lock'/>
     <register_entry register_file='xml/answer/lock.holder.xml#use_element__lock' register_title='&lt;holder&gt; (Antwort)'  register_keyword='lock'/>
     <register_entry register_file='xml/answer/lock.holders.xml#use_element__lock' register_title='&lt;lock.holders&gt; (Antwort)'  register_keyword='lock'/>
@@ -1691,6 +1665,17 @@
     <register_entry register_file='xml/answer/lock.use.xml#attribute_lock' register_title='&lt;lock.use&gt; (Antwort)'  register_keyword='lock' type='definition'/>
     <register_entry register_file='xml/lock.remove.xml#attribute_lock' register_title='&lt;lock.remove&gt; (Kommando)'  register_keyword='lock' type='definition'/>
     <register_entry register_file='xml/lock.use.xml#attribute_lock' register_title='&lt;lock.use&gt; (Konfiguration)'  register_keyword='lock' type='definition'/>
+</register_keyword>
+<register_keyword keyword='Lock (class)'>
+    <register_keyword_display><code>Lock</code> (class)</register_keyword_display>
+    <register_entry register_file='api/Lock.xml' register_keyword='Lock' type='definition'/>
+    <register_entry register_file='api/Locks.xml#method__create_lock' register_title='Locks.create_lock()' register_keyword='Lock'/>
+    <register_entry register_file='api/Locks.xml#method__lock' register_title='Locks.lock' register_keyword='Lock'/>
+    <register_entry register_file='api/Locks.xml#method__lock_or_null' register_title='Locks.lock_or_null' register_keyword='Lock'/>
+</register_keyword>
+<register_keyword keyword='lock (property)'>
+    <register_keyword_display><code>lock</code> (property)</register_keyword_display>
+    <register_entry register_file='api/Locks.xml#method__lock' register_title='Locks.lock' register_keyword='lock' type='definition'/>
 </register_keyword>
 <register_keyword keyword='lock.holder'>
     <register_keyword_display><code>&lt;lock.holder&gt;</code></register_keyword_display>
@@ -1714,6 +1699,7 @@
 <register_keyword keyword='lock.remove'>
     <register_keyword_display><code>&lt;lock.remove&gt;</code></register_keyword_display>
     <register_entry register_file='CHANGES.xml#use_element__lock.remove' register_title='Änderungsprotokoll'  register_keyword='lock.remove'/>
+    <register_entry register_file='api/Lock.xml#use_element__lock.remove' register_title='Lock'  register_keyword='lock.remove'/>
     <register_entry register_file='xml.xml#use_element__lock.remove' register_title='Alle XML-Elemente'  register_keyword='lock.remove'/>
     <register_entry register_file='xml/lock.remove.xml#' register_title='&lt;lock.remove&gt; (Kommando)'  register_keyword='lock.remove' type='definition'/>
     <register_entry register_file='xml/lock.xml#use_element__lock.remove' register_title='&lt;lock&gt; (Konfiguration)'  register_keyword='lock.remove'/>
@@ -1726,6 +1712,7 @@
 <register_keyword keyword='lock.use'>
     <register_keyword_display><code>&lt;lock.use&gt;</code></register_keyword_display>
     <register_entry register_file='CHANGES.xml#use_element__lock.use' register_title='Änderungsprotokoll'  register_keyword='lock.use'/>
+    <register_entry register_file='api/Lock.xml#use_element__lock.use' register_title='Lock'  register_keyword='lock.use'/>
     <register_entry register_file='xml.xml#use_element__lock.use' register_title='Alle XML-Elemente'  register_keyword='lock.use'/>
     <register_entry register_file='xml/answer/lock.requestor.xml#use_element__lock.use' register_title='&lt;lock.requestor&gt; (Antwort)'  register_keyword='lock.use'/>
     <register_entry register_file='xml/answer/lock.use.xml#' register_title='&lt;lock.use&gt; (Antwort)'  register_keyword='lock.use' type='definition'/>
@@ -1734,6 +1721,15 @@
     <register_entry register_file='xml/lock.remove.xml#use_element__lock.use' register_title='&lt;lock.remove&gt; (Kommando)'  register_keyword='lock.use'/>
     <register_entry register_file='xml/lock.use.xml#' register_title='&lt;lock.use&gt; (Konfiguration)'  register_keyword='lock.use' type='definition'/>
     <register_entry register_file='xml/lock.xml#use_element__lock.use' register_title='&lt;lock&gt; (Konfiguration)'  register_keyword='lock.use'/>
+</register_keyword>
+<register_keyword keyword='lock_name'>
+    <register_keyword_display><code>lock_name</code></register_keyword_display>
+    <register_entry register_file='api/Locks.xml#method__lock' register_title='Locks.lock' register_keyword='lock_name'/>
+    <register_entry register_file='api/Locks.xml#method__lock_or_null' register_title='Locks.lock_or_null' register_keyword='lock_name'/>
+</register_keyword>
+<register_keyword keyword='lock_or_null (property)'>
+    <register_keyword_display><code>lock_or_null</code> (property)</register_keyword_display>
+    <register_entry register_file='api/Locks.xml#method__lock_or_null' register_title='Locks.lock_or_null' register_keyword='lock_or_null' type='definition'/>
 </register_keyword>
 <register_keyword keyword='locks'>
     <register_keyword_display><code>&lt;locks&gt;</code></register_keyword_display>
@@ -1745,12 +1741,11 @@
 </register_keyword>
 <register_keyword keyword='Locks (class)'>
     <register_keyword_display><code>Locks</code> (class)</register_keyword_display>
-    <register_entry register_file='api/Locks.xml#method__locks' register_title='Spooler.locks' register_keyword='Locks'/>
+    <register_entry register_file='api/Locks.xml' register_keyword='Locks' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__locks' register_title='Spooler.locks' register_keyword='Locks'/>
 </register_keyword>
 <register_keyword keyword='locks (property)'>
     <register_keyword_display><code>locks</code> (property)</register_keyword_display>
-    <register_entry register_file='api/Locks.xml#method__locks' register_title='Spooler.locks' register_keyword='locks' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__locks' register_title='Spooler.locks' register_keyword='locks' type='definition'/>
 </register_keyword>
 <register_keyword keyword='log'>
@@ -1776,14 +1771,12 @@
 <register_keyword keyword='Log (class)'>
     <register_keyword_display><code>Log</code> (class)</register_keyword_display>
     <register_entry register_file='api/Job_impl.xml#method__spooler_log' register_title='Job_impl.spooler_log' register_keyword='Log'/>
-    <register_entry register_file='api/Locks.xml#method__log' register_title='Spooler.log' register_keyword='Log'/>
     <register_entry register_file='api/Log.xml' register_keyword='Log' type='definition'/>
     <register_entry register_file='api/Monitor_impl.xml#method__spooler_log' register_title='Monitor_impl.spooler_log' register_keyword='Log'/>
     <register_entry register_file='api/Spooler.xml#method__log' register_title='Spooler.log' register_keyword='Log'/>
 </register_keyword>
 <register_keyword keyword='log (property)'>
     <register_keyword_display><code>log</code> (property)</register_keyword_display>
-    <register_entry register_file='api/Locks.xml#method__log' register_title='Spooler.log' register_keyword='log' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__log' register_title='Spooler.log' register_keyword='log' type='definition'/>
 </register_keyword>
 <register_keyword keyword='Log-Datei'>
@@ -1817,7 +1810,6 @@
 </register_keyword>
 <register_keyword keyword='log_dir (property)'>
     <register_keyword_display><code>log_dir</code> (property)</register_keyword_display>
-    <register_entry register_file='api/Locks.xml#method__log_dir' register_title='Spooler.log_dir' register_keyword='log_dir' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__log_dir' register_title='Spooler.log_dir' register_keyword='log_dir' type='definition'/>
 </register_keyword>
 <register_keyword keyword='log_file'>
@@ -2018,6 +2010,10 @@
     <register_entry register_file='xml/answer/lock.xml#attribute_max_non_exclusive' register_title='&lt;lock&gt; (Antwort)'  register_keyword='max_non_exclusive' type='definition'/>
     <register_entry register_file='xml/lock.xml#attribute_max_non_exclusive' register_title='&lt;lock&gt; (Konfiguration)'  register_keyword='max_non_exclusive' type='definition'/>
 </register_keyword>
+<register_keyword keyword='max_non_exclusive (property)'>
+    <register_keyword_display><code>max_non_exclusive</code> (property)</register_keyword_display>
+    <register_entry register_file='api/Lock.xml#method__max_non_exclusive' register_title='Lock.max_non_exclusive' register_keyword='max_non_exclusive' type='definition'/>
+</register_keyword>
 <register_keyword keyword='max_order_setbacks (property)'>
     <register_keyword_display><code>max_order_setbacks</code> (property)</register_keyword_display>
     <register_entry register_file='api/Job.xml#method__max_order_setbacks' register_title='Job.max_order_setbacks' register_keyword='max_order_setbacks' type='definition'/>
@@ -2071,7 +2067,6 @@
 <register_keyword keyword='modify_spooler'>
     <register_keyword_display><code>&lt;modify_spooler&gt;</code></register_keyword_display>
     <register_entry register_file='CHANGES.xml#use_element__modify_spooler' register_title='Änderungsprotokoll'  register_keyword='modify_spooler'/>
-    <register_entry register_file='api/Locks.xml#use_element__modify_spooler' register_title='Spooler'  register_keyword='modify_spooler'/>
     <register_entry register_file='api/Spooler.xml#use_element__modify_spooler' register_title='Spooler'  register_keyword='modify_spooler'/>
     <register_entry register_file='termination.xml#use_element__modify_spooler' register_title='Beendigung des Schedulers'  register_keyword='modify_spooler'/>
     <register_entry register_file='xml.xml#use_element__modify_spooler' register_title='Alle XML-Elemente'  register_keyword='modify_spooler'/>
@@ -2110,9 +2105,6 @@
 </register_keyword>
 <register_keyword keyword='name'>
     <register_keyword_display><code>name</code></register_keyword_display>
-    <register_entry register_file='api/Locks.xml#method__job_chain' register_title='Spooler.job_chain' register_keyword='name'/>
-    <register_entry register_file='api/Locks.xml#method__job_chain_exists' register_title='Spooler.job_chain_exists()' register_keyword='name'/>
-    <register_entry register_file='api/Locks.xml#method__var' register_title='Spooler.var' register_keyword='name'/>
     <register_entry register_file='api/Spooler.xml#method__job_chain' register_title='Spooler.job_chain' register_keyword='name'/>
     <register_entry register_file='api/Spooler.xml#method__job_chain_exists' register_title='Spooler.job_chain_exists()' register_keyword='name'/>
     <register_entry register_file='api/Spooler.xml#method__var' register_title='Spooler.var' register_keyword='name'/>
@@ -2144,6 +2136,7 @@
     <register_keyword_display><code>name</code> (property)</register_keyword_display>
     <register_entry register_file='api/Job.xml#method__name' register_title='Job.name' register_keyword='name' type='definition'/>
     <register_entry register_file='api/Job_chain.xml#method__name' register_title='Job_chain.name' register_keyword='name' type='definition'/>
+    <register_entry register_file='api/Lock.xml#method__name' register_title='Lock.name' register_keyword='name' type='definition'/>
     <register_entry register_file='api/Variable.xml#method__name' register_title='Variable.name' register_keyword='name' type='definition'/>
     <register_entry register_file='api/Web_service.xml#method__name' register_title='Web_service.name' register_keyword='name' type='definition'/>
 </register_keyword>
@@ -2247,7 +2240,6 @@
     <register_keyword_display><code>Order</code> (class)</register_keyword_display>
     <register_entry register_file='api/Job_chain.xml#method__add_or_replace_order' register_title='Job_chain.add_or_replace_order()' register_keyword='Order'/>
     <register_entry register_file='api/Job_chain.xml#method__add_order' register_title='Job_chain.add_order()' register_keyword='Order'/>
-    <register_entry register_file='api/Locks.xml#method__create_order' register_title='Spooler.create_order()' register_keyword='Order'/>
     <register_entry register_file='api/Order.xml' register_keyword='Order' type='definition'/>
     <register_entry register_file='api/Order_queue.xml#method__length' register_title='Order_queue.length' register_keyword='Order'/>
     <register_entry register_file='api/Spooler.xml#method__create_order' register_title='Spooler.create_order()' register_keyword='Order'/>
@@ -2338,7 +2330,6 @@
 </register_keyword>
 <register_keyword keyword='param (property)'>
     <register_keyword_display><code>param</code> (property)</register_keyword_display>
-    <register_entry register_file='api/Locks.xml#method__param' register_title='Spooler.param' register_keyword='param' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__param' register_title='Spooler.param' register_keyword='param' type='definition'/>
 </register_keyword>
 <register_keyword keyword='params'>
@@ -2597,6 +2588,7 @@
     <register_keyword_display><code>remove()</code></register_keyword_display>
     <register_entry register_file='api/Job.xml#method__remove' register_title='Job.remove()' register_keyword='remove()' type='definition'/>
     <register_entry register_file='api/Job_chain.xml#method__remove' register_title='Job_chain.remove()' register_keyword='remove()' type='definition'/>
+    <register_entry register_file='api/Lock.xml#method__remove' register_title='Lock.remove()' register_keyword='remove()' type='definition'/>
 </register_keyword>
 <register_keyword keyword='remove'>
     <register_keyword_display><code>remove=</code></register_keyword_display>
@@ -2682,7 +2674,6 @@
 </register_keyword>
 <register_keyword keyword='restart'>
     <register_keyword_display><code>restart</code></register_keyword_display>
-    <register_entry register_file='api/Locks.xml#method__terminate' register_title='Spooler.terminate()' register_keyword='restart'/>
     <register_entry register_file='api/Spooler.xml#method__terminate' register_title='Spooler.terminate()' register_keyword='restart'/>
 </register_keyword>
 <register_keyword keyword='restart'>
@@ -2996,7 +2987,6 @@
 <register_keyword keyword='Spooler (class)'>
     <register_keyword_display><code>Spooler</code> (class)</register_keyword_display>
     <register_entry register_file='api/Job_impl.xml#method__spooler' register_title='Job_impl.spooler' register_keyword='Spooler'/>
-    <register_entry register_file='api/Locks.xml' register_keyword='Spooler' type='definition'/>
     <register_entry register_file='api/Monitor_impl.xml#method__spooler' register_title='Monitor_impl.spooler' register_keyword='Spooler'/>
     <register_entry register_file='api/Spooler.xml' register_keyword='Spooler' type='definition'/>
 </register_keyword>
@@ -3333,7 +3323,6 @@
 </register_keyword>
 <register_keyword keyword='tcp_port (property)'>
     <register_keyword_display><code>tcp_port</code> (property)</register_keyword_display>
-    <register_entry register_file='api/Locks.xml#method__tcp_port' register_title='Spooler.tcp_port' register_keyword='tcp_port' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__tcp_port' register_title='Spooler.tcp_port' register_keyword='tcp_port' type='definition'/>
 </register_keyword>
 <register_keyword keyword='temporary'>
@@ -3351,12 +3340,10 @@
 </register_keyword>
 <register_keyword keyword='terminate'>
     <register_keyword_display><code>terminate()</code></register_keyword_display>
-    <register_entry register_file='api/Locks.xml#method__terminate' register_title='Spooler.terminate()' register_keyword='terminate()' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__terminate' register_title='Spooler.terminate()' register_keyword='terminate()' type='definition'/>
 </register_keyword>
 <register_keyword keyword='terminate_and_restart'>
     <register_keyword_display><code>terminate_and_restart()</code></register_keyword_display>
-    <register_entry register_file='api/Locks.xml#method__terminate_and_restart' register_title='Spooler.terminate_and_restart()' register_keyword='terminate_and_restart()' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__terminate_and_restart' register_title='Spooler.terminate_and_restart()' register_keyword='terminate_and_restart()' type='definition'/>
 </register_keyword>
 <register_keyword keyword='terminated (property)'>
@@ -3387,8 +3374,6 @@
 </register_keyword>
 <register_keyword keyword='timeout'>
     <register_keyword_display><code>timeout</code></register_keyword_display>
-    <register_entry register_file='api/Locks.xml#method__terminate' register_title='Spooler.terminate()' register_keyword='timeout'/>
-    <register_entry register_file='api/Locks.xml#method__terminate_and_restart' register_title='Spooler.terminate_and_restart()' register_keyword='timeout'/>
     <register_entry register_file='api/Spooler.xml#method__terminate' register_title='Spooler.terminate()' register_keyword='timeout'/>
     <register_entry register_file='api/Spooler.xml#method__terminate_and_restart' register_title='Spooler.terminate_and_restart()' register_keyword='timeout'/>
     <register_entry register_file='api/Task.xml#method__add_pid' register_title='Task.add_pid()' register_keyword='timeout'/>
@@ -3448,7 +3433,6 @@
 </register_keyword>
 <register_keyword keyword='udp_port (property)'>
     <register_keyword_display><code>udp_port</code> (property)</register_keyword_display>
-    <register_entry register_file='api/Locks.xml#method__udp_port' register_title='Spooler.udp_port' register_keyword='udp_port' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__udp_port' register_title='Spooler.udp_port' register_keyword='udp_port' type='definition'/>
 </register_keyword>
 <register_keyword keyword='ultimos'>
@@ -3504,7 +3488,6 @@
 </register_keyword>
 <register_keyword keyword='var (property)'>
     <register_keyword_display><code>var</code> (property)</register_keyword_display>
-    <register_entry register_file='api/Locks.xml#method__var' register_title='Spooler.var' register_keyword='var' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__var' register_title='Spooler.var' register_keyword='var' type='definition'/>
     <register_entry register_file='api/Variable_set.xml#method__var' register_title='Variable_set.var' register_keyword='var' type='definition'/>
 </register_keyword>
@@ -3520,8 +3503,6 @@
 <register_keyword keyword='Variable_set (class)'>
     <register_keyword_display><code>Variable_set</code> (class)</register_keyword_display>
     <register_entry register_file='api/Job.xml#method__start' register_title='Job.start()' register_keyword='Variable_set'/>
-    <register_entry register_file='api/Locks.xml#method__create_variable_set' register_title='Spooler.create_variable_set()' register_keyword='Variable_set'/>
-    <register_entry register_file='api/Locks.xml#method__variables' register_title='Spooler.variables' register_keyword='Variable_set'/>
     <register_entry register_file='api/Order.xml#method__params' register_title='Order.params' register_keyword='Variable_set'/>
     <register_entry register_file='api/Order.xml#method__payload' register_title='Order.payload' register_keyword='Variable_set'/>
     <register_entry register_file='api/Spooler.xml#method__create_variable_set' register_title='Spooler.create_variable_set()' register_keyword='Variable_set'/>
@@ -3534,7 +3515,6 @@
 </register_keyword>
 <register_keyword keyword='variables (property)'>
     <register_keyword_display><code>variables</code> (property)</register_keyword_display>
-    <register_entry register_file='api/Locks.xml#method__variables' register_title='Spooler.variables' register_keyword='variables' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__variables' register_title='Spooler.variables' register_keyword='variables' type='definition'/>
 </register_keyword>
 <register_keyword keyword='version'>
@@ -3702,8 +3682,6 @@
 </register_keyword>
 <register_keyword keyword='xml'>
     <register_keyword_display><code>xml</code></register_keyword_display>
-    <register_entry register_file='api/Locks.xml#method__create_xslt_stylesheet' register_title='Spooler.create_xslt_stylesheet()' register_keyword='xml'/>
-    <register_entry register_file='api/Locks.xml#method__execute_xml' register_title='Spooler.execute_xml()' register_keyword='xml'/>
     <register_entry register_file='api/Spooler.xml#method__create_xslt_stylesheet' register_title='Spooler.create_xslt_stylesheet()' register_keyword='xml'/>
     <register_entry register_file='api/Spooler.xml#method__execute_xml' register_title='Spooler.execute_xml()' register_keyword='xml'/>
     <register_entry register_file='api/Xslt_stylesheet.xml#method__apply_xml' register_title='Xslt_stylesheet.apply_xml()' register_keyword='xml'/>
@@ -3738,7 +3716,6 @@
 </register_keyword>
 <register_keyword keyword='Xslt_stylesheet (class)'>
     <register_keyword_display><code>Xslt_stylesheet</code> (class)</register_keyword_display>
-    <register_entry register_file='api/Locks.xml#method__create_xslt_stylesheet' register_title='Spooler.create_xslt_stylesheet()' register_keyword='Xslt_stylesheet'/>
     <register_entry register_file='api/Mail.xml#method__xslt_stylesheet' register_title='Mail.xslt_stylesheet' register_keyword='Xslt_stylesheet'/>
     <register_entry register_file='api/Spooler.xml#method__create_xslt_stylesheet' register_title='Spooler.create_xslt_stylesheet()' register_keyword='Xslt_stylesheet'/>
     <register_entry register_file='api/Xslt_stylesheet.xml' register_keyword='Xslt_stylesheet' type='definition'/>

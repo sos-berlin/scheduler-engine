@@ -16,6 +16,8 @@
                          sos/spooler/Job_chain.java,
                          sos/spooler/Job_chain_node.java,
                          sos/spooler/Job_impl.java,
+                         sos/spooler/Lock.java,
+                         sos/spooler/Locks.java,
                          sos/spooler/Log.java,
                          sos/spooler/Mail.java,
                          sos/spooler/Monitor_impl.java,

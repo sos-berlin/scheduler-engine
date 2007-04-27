@@ -2499,7 +2499,7 @@
 
         <message code="SCHEDULER-402">
             <text xml:lang="en">
-                <title>Too many lock holders for smaller max_non_exclusive=<p1/>: <p3>holders</p3></title>
+                <title>Too many lock holders for smaller max_non_exclusive=<p1/>: <p2>holders</p2></title>
             </text>
         </message>
 
