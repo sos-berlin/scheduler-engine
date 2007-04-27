@@ -451,6 +451,18 @@
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
+<property name="locks" access="read">
+    <com>
+        <com.result>
+            <com.type class="Locks"/>
+        </com.result>
+    </com>
+
+    <title>Liefert die Locks</title>
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
 <property name="log" access="read">
     <com>
         <com.result>

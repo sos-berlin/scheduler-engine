@@ -13,6 +13,8 @@
     <class_reference class="Job_chain"/>
     <class_reference class="Job_chain_node"/>
     <class_reference class="Job_impl"/>
+    <class_reference class="Lock"/>
+    <class_reference class="Locks"/>
     <class_reference class="Log"/>
     <class_reference class="Mail"/>
     <class_reference class="Monitor_impl"/>

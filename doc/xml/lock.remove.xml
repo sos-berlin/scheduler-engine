@@ -27,11 +27,14 @@
     <xml_attributes>
         <xml_attribute name="lock" type="path" title="Name der Sperre">
             <description>
-                <p>
+                <!--p>
                     Die Sperre muss mit <scheduler_element name="lock"/> deklariert worden sein.
-                </p>
+                </p-->
                 <p>
                     Die Sperre kann nur gelöscht werden, wenn sie von keiner Task belegt und von keinem Job gebraucht (<scheduler_element name="lock.use"/>) wird.
+                </p>
+                <p>
+                    Siehe auch <scheduler_method class="Lock" method="remove"/>.
                 </p>
             </description>
         </xml_attribute>

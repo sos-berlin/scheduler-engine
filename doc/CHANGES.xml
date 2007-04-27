@@ -11,6 +11,25 @@
     <scheduler_keyword keyword="Change log"/>
 
 
+    <change date="2007-04-27" version="2.0.174" subversion_revision="5001">
+        <revision type="new" title="API für Sperren">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_method class="Spooler" property="locks"/>
+                    </li>
+                    <li>
+                        <scheduler_method class="Locks"/>
+                    </li>
+                    <li>
+                        <scheduler_method class="Lock"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+    </change>
+
+
     <change date="2007-04-16" version="2.0.172" subversion_revision="4983">
         <revision type="new" title="Verschachtelte Jobketten">
             <description>
