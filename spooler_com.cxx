@@ -3268,7 +3268,7 @@ const Com_method Com_spooler::_methods[] =
     { DISPATCH_METHOD     , 33, "Create_xslt_stylesheet"    , (Com_method_ptr)&Com_spooler::Create_xslt_stylesheet, VT_DISPATCH },
     { DISPATCH_METHOD     , 34, "Terminate"                 , (Com_method_ptr)&Com_spooler::Terminate            , VT_EMPTY     , { VT_BYREF|VT_VARIANT, VT_BYREF|VT_VARIANT, VT_BYREF|VT_VARIANT, VT_BYREF|VT_VARIANT }, 4 },
     { DISPATCH_METHOD     , 35, "Terminate_and_restart"     , (Com_method_ptr)&Com_spooler::Terminate_and_restart, VT_EMPTY     , { VT_BYREF|VT_VARIANT }, 1 },
-    { DISPATCH_METHOD     , 37, "Locks"                     , (Com_method_ptr)&Com_spooler::get_Locks            , VT_EMPTY     },
+    { DISPATCH_PROPERTYGET, 37, "Locks"                     , (Com_method_ptr)&Com_spooler::get_Locks            , VT_DISPATCH  },
     {}
 };
 
