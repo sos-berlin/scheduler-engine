@@ -2493,7 +2493,7 @@
 
         <message code="SCHEDULER-401">
             <text xml:lang="en">
-                <title>Unknown lock '<p1/>'</title>
+                <title>Unknown '<p1/>'</title>
             </text>
         </message>
 
@@ -2593,6 +2593,17 @@
             </text>
         </message>
 
+        <message code="SCHEDULER-418">
+            <text xml:lang="en">
+                <title><p1/> is not added, cannot be removed</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-419">
+            <text xml:lang="en">
+                <title>New Process_class.max_processes=<p1/> is below current number of processes=<p2/></title>
+            </text>
+        </message>
 
         <!--message code="SCHEDULER-398">
             <text xml:lang="en">

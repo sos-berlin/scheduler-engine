@@ -887,7 +887,21 @@ db = odbc -db=factory_oracle -user=factory -password=factory
         </description>
     </setting>
 
-    
+    <setting setting = "tmp"
+             type    = "path"
+             title   = "Verzeichnis der temporären Dateien">
+        <description>
+            <p>
+                Voreinstellung ist die Umgebungsvariable <code>TMP</code>,
+                unter Windows auch <code>TEMP</code>.
+            </p>
+            <p>
+                Unter Unix wird <code>/tmp/</code> verwendet, wenn die Umgebungsvariable nicht gesetzt ist.
+            </p>
+        </description>
+    </setting>
+
+
     <!--
     <setting setting = "run_time_begin"
              type    = "hh:mm[:ss]"

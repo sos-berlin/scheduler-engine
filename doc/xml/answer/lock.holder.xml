@@ -24,10 +24,10 @@
 
     <description>
         <p>
-            Zeígt die Task an, die gerade die Sperre hält.
+            Zeigt die Task an, die gerade die Sperre hält.
         </p>
         <p>
-           Siehe Definition einer Sperre: <scheduler_element name="lock"/>.
+            Siehe Definition einer Sperre: <scheduler_element name="lock"/>.
         </p>
     </description>
 

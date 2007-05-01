@@ -80,7 +80,34 @@
                         greift also auf die Dateien des dortigen Dateisystems zu.
                     </li>
                 </ul>
+                <p>
+                    Einige Einstellungen werden vom entfernten statt vom eigenen Scheduler übernommen:
+                </p>
+                <ul>
+                    <li>
+                        <scheduler_ini_entry file="sos.ini" section="java" entry="javac"/>
+                    </li>
+                    <li>
+                        <scheduler_ini_entry file="factory.ini" section="spooler" entry="tmp"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="config" attribute="java_options"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="config" attribute="java_class_path"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="config" attribute="include_path"/>
+                    </li>
+                </ul>
+                
             </description>
+
+            <messages>
+                <message level="info" code="SCHEDULER-848"/>
+                <message level="warn" code="SCHEDULER-849"/>
+                <message level="warn" code="SCHEDULER-850"/>
+            </messages>
         </xml_attribute>
 
     </xml_attributes>

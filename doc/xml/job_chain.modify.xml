@@ -57,6 +57,7 @@
                     <scheduler_element name="job_chain_node.modify" attribute="action" value="stop"/>.
                 </p>
             </description>
+
             <messages>
                 <message level="error" code="SCHEDULER-384"/>
                 <message level="error" code="SCHEDULER-405"/>

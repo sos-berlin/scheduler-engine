@@ -46,9 +46,11 @@
         <xml_attribute name="history_id" type="integer">
             <description>
                 <p>
-                    In der Historie können zur selben Auftragskennung mehrere Einträge vorliegen.
-                    Dieses Attribut bestimmt den Eintrag. 
-                    Das Attribut <code>order</code> ist dann nicht erforderlich.
+                    Abschlossene Aufträge werden in der Historie der Scheduler-Datenbank gespeichert.
+                    Dabei können zur selben Auftragskennung mehrere Einträge vorliegen,
+                    z.B. wenn der Auftrag wegen <scheduler_element name="run_time"/> wiederholt ausgeführt wird.
+                    Jeder Historien-Eintrag hat eine Historien-Kennung, über die er diesem Attribut abgerufen werden kann. 
+                    Das Attribut <code>order=</code> ist dann nicht erforderlich.
                 </p>
                 <p>
                     Die Historien-Kennung wird von <scheduler_element name="show_job_chain" attribute="what" value="order_history"/> geliefert.

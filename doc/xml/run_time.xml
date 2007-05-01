@@ -25,7 +25,8 @@
                     Gibt gibt den Namen einer Funktion im Scheduler-Skript an, die die nächste Startzeit liefert.
                 </p>
                 <p>
-                    Im ersten Parameter übergibt der Scheduler den Zeitpunkt, ab dem die Funktion eine Startzeit liefern soll,
+                    Der Scheduler übergibt der Funktion im ersten Parameter den Zeitpunkt, 
+                    ab dem sie eine Startzeit liefern soll,
                     als Zeichenkette im Format <code>"yyyy-mm-dd HH:MM:SS"</code>.
                 </p>
                 <p>

@@ -28,7 +28,9 @@
                 </p>
             </description>
             <example>
-                <pre>url_path="/doc/"</pre>
+                <pre>&lt;http_directory url_path="/doc/" path="c:/html/my_doc/" /></pre>
+                Bildet das Verzeichnis <code>c:/html/my_doc/</code> ab auf URL-Pfade, 
+                die mit <code>/doc/</code> beginnen.
             </example>
         </xml_attribute>
 

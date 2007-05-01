@@ -45,7 +45,12 @@
                     <scheduler_element name="job_chain.modify" attribute="state" value="stopped"/>.
                 </p>
             </description>
+
+            <messages>
+                <message level="info" code="SCHEDULER-859"/>
+            </messages>
         </xml_attribute>
+        
     </xml_attributes>
 
 
