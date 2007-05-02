@@ -87,13 +87,13 @@
 
     <p>&#160;</p>
     
-    <p>
+    <!--p>
         Das ist ein Read-Write-Lock, s. <a href="http://de.wikipedia.org/wiki/Lock">Wikipedia</a>
-        <!--;
-        "read" und "write" werden hier anders gebraucht, als unsere Jobs das nahelegen)--> und
+        <!- -;
+        "read" und "write" werden hier anders gebraucht, als unsere Jobs das nahelegen)- -> und
         <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/concurrent/locks/ReadWriteLock.html">java.util.concurrent.ReadWriteLock</a>,
         mit zusätzlicher Begrenzung der Anzahl Leser.
-    </p>
+    </p-->
 
 
     <!--h2>Variante: Verwendung aller Sperren an einer Stelle beschreiben</h2>

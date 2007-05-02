@@ -59,12 +59,15 @@
             Mit einer Sperre kann verhindert werden, dass zwei Tasks gleichzeitig laufen.
         </p>
         <p>
+            Siehe <scheduler_a href="../lock.xml" quote="yes"/>.
+        </p>
+        <!--p>
             Das ist ein Read-Write-Lock,
             s. <a href="http://de.wikipedia.org/wiki/Lock">Wikipedia</a>
             und die Java-Klasse
             <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/concurrent/locks/ReadWriteLock.html">java.util.concurrent.ReadWriteLock</a>,
             mit zusätzlicher Begrenzung der Anzahl Leser.
-        </p>
+        </p-->
         <p>
             Zur Verwendung einer Sperre siehe <scheduler_element name="lock.use"/>
         </p>

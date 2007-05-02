@@ -1316,6 +1316,7 @@
     <register_entry register_file='job.xml#use_element__job' register_title='Was ist ein Job?'  register_keyword='job'/>
     <register_entry register_file='lock.xml#use_element__job' register_title='Sperren'  register_keyword='job'/>
     <register_entry register_file='order.xml#use_element__job' register_title='Aufträge'  register_keyword='job'/>
+    <register_entry register_file='remote_execution.xml#use_element__job' register_title='Externe Jobverarbeitung" base_dir="" author="$Author$" date="$Date$'  register_keyword='job'/>
     <register_entry register_file='xml.xml#use_element__job' register_title='Alle XML-Elemente'  register_keyword='job'/>
     <register_entry register_file='xml/add_order.xml#use_element__job' register_title='&lt;add_order&gt; (Kommando)'  register_keyword='job'/>
     <register_entry register_file='xml/answer/history.entry.xml#use_element__job' register_title='&lt;history.entry&gt; (Antwort)'  register_keyword='job'/>
@@ -2487,6 +2488,7 @@
     <register_entry register_file='api/Log.xml#use_element__process_class' register_title='Log'  register_keyword='process_class'/>
     <register_entry register_file='api/Subprocess.xml#use_element__process_class' register_title='Subprocess'  register_keyword='process_class'/>
     <register_entry register_file='api/Task.xml#use_element__process_class' register_title='Task'  register_keyword='process_class'/>
+    <register_entry register_file='remote_execution.xml#use_element__process_class' register_title='Externe Jobverarbeitung" base_dir="" author="$Author$" date="$Date$'  register_keyword='process_class'/>
     <register_entry register_file='xml.xml#use_element__process_class' register_title='Alle XML-Elemente'  register_keyword='process_class'/>
     <register_entry register_file='xml/answer/process_class.xml#' register_title='&lt;process_class&gt; (Antwort)'  register_keyword='process_class' type='definition'/>
     <register_entry register_file='xml/include.xml#use_element__process_class' register_title='&lt;include&gt; (Konfiguration)'  register_keyword='process_class'/>
