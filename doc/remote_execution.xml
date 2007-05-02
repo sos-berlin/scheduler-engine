@@ -169,11 +169,17 @@
 		
 		<h2>Protokolldateien</h2>
 		
-		Protokollausgaben werden in die Dateien des lokalen, aufrufenden Job Schedulers geschrieben. Das betrifft sowohl das Order-Log als auch das Task-Log.
-		Ausgaben nach Standard-Out werden in die Protokolldateien des lokalen, aufrufenden Job Schedulers übernommen. 
-		Andere Protokollausgaben, die der Scheduler protokolliert, werden in die Protokolldatei des entfernten Schedulers geschrieben.
+		<p>
+			Protokollausgaben werden in die Dateien des lokalen, aufrufenden Job Schedulers geschrieben. 
+			Das betrifft sowohl das Order-Log als auch das Task-Log.
+			Ausgaben nach Standard-Out werden in die Protokolldateien des lokalen, 
+			aufrufenden Job Schedulers übernommen. 
+			Andere Protokollausgaben, die der Scheduler protokolliert, 
+			werden in die Protokolldatei des entfernten Schedulers geschrieben.
+		</p>
 		
-
+		
+		
 		<h2>Shellscripte auf einem entfernten Rechner ausführen</h2>
 		
 		<p>
