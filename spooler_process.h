@@ -280,7 +280,6 @@ struct Process_class_subsystem : idispatch_implementation< Process_class_subsyst
 
   private:
     Fill_zero                  _zero_;
-    ptr<Process_class>         _temporary_process_class;
 
   public:
     typedef map< string, ptr<Process_class> > Process_class_map;

@@ -154,7 +154,11 @@ void Wait_handles::close()
     {
         FOR_EACH( Event_vector, _events, it )  
         {
-            if( *it )  _log->warn( "Closing Wait_handles before " + (*it)->as_text() );
+            if( *it )  
+            {
+                _log->warn( "Closing Wait_handles before " + (*it)->as_text() );
+                Z_WINDOWS_ONLY( Z_DEBUG_ONLY( assert( !"Closing Wait_handles before ..." ) ) );
+            }
         }
     }
 }
@@ -228,6 +232,7 @@ void Wait_handles::add( System_event* event )
     //THREAD_LOCK( _lock )
     {
 #       ifdef Z_WINDOWS
+            assert( event->handle() );
             _handles.push_back( event->handle() );
 #       endif
 
