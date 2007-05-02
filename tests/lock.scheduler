@@ -53,12 +53,15 @@ function spooler_process()
                 ]]>
                 </script>
 
+                <run_time once="yes" repeat="10"/>
+
             </job>
 
             
             <job name="B">
                 <lock.use lock="Georgien"/>
                 <lock.use lock="Venezuela"/>
+                <lock.use lock="Bulgarien"/>
 
                 <script language="JavaScript">
                     <![CDATA[
@@ -72,6 +75,8 @@ function spooler_process()
 
                 ]]>
                 </script>
+
+                <run_time once="yes" repeat="10"/>
             </job>
 
             
@@ -91,6 +96,8 @@ function spooler_process()
 
                 ]]>
                 </script>
+
+                <run_time once="yes" repeat="10"/>
             </job>
 
 
@@ -113,6 +120,8 @@ function spooler_process()
 
                 ]]>
                 </script>
+
+                <run_time once="yes" repeat="10"/>
             </job>
             
             
@@ -134,6 +143,7 @@ function spooler_process()
                 ]]>
                 </script>
 
+                <run_time once="yes" repeat="10"/>
             </job>
 
             
@@ -192,18 +202,18 @@ public class My_job  extends sos.spooler.Job_impl
                 ]]>
                 </script>
 
-                <run_time once="yes"/>
+                <run_time once="yes" repeat="10"/>
             </job>
         </jobs>
 
         
         <commands>
-            <start_job job="A"/>
+            <!--start_job job="A"/>
             <start_job job="B"/>
             <start_job job="C"/>
             <start_job job="D"/>
             <start_job job="E"/>
-            <start_job job="java"/>
+            <start_job job="java"/-->
         </commands>
     </config>
 </spooler>

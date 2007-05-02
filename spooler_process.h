@@ -9,9 +9,10 @@
 namespace sos {
 namespace scheduler {
 
+//-------------------------------------------------------------------------------------------------
 
 struct Process_class;
-
+struct Process_class_subsystem;
 
 //------------------------------------------------------------------------------------------Process
 // Ein Prozess, in dem ein Module oder eine Task ablaufen kann.
@@ -159,16 +160,20 @@ typedef list< ptr<Process> >    Process_list;
 //------------------------------------------------------------------------------------Process_class
 // <process_class>
 
-struct Process_class : zschimmer::Object
+struct Process_class : idispatch_implementation< Process_class, spooler_com::Iprocess_class >,
+                       Scheduler_object
 {
-                                Process_class               ( Spooler* sp, const string& name )        : _zero_(this+1), _spooler(sp), _name(name) { init(); }
-    explicit                    Process_class               ( Spooler* sp, const xml::Element_ptr& e ) : _zero_(this+1), _spooler(sp) { init();  set_dom( e ); }
+                                Process_class               ( Process_class_subsystem*, const string& name = "" );
+  //explicit                    Process_class               ( Spooler* sp, const xml::Element_ptr& e ) : _zero_(this+1), _spooler(sp) { init();  set_dom( e ); }
     Z_GNU_ONLY(                 Process_class               (); )
+                               ~Process_class               ();
 
     void                        init                        ();
+    void                        prepare_remove              ();
 
     void                        add_process                 ( Process* );
     void                        remove_process              ( Process* );
+
 
     Process*                    new_process                 ();
     Process*                    select_process_if_available ();                                     // Startet bei Bedarf. Bei _max_processes: return NULL
@@ -177,27 +182,114 @@ struct Process_class : zschimmer::Object
     void                        remove_waiting_job          ( Job* );
     bool                        need_process                ();
     void                        notify_a_process_is_idle    ();
-  //Job*                        first_waiting_job           ()                                      { return _waiting_jobs.begin(); }
-    string                      name                        ()                                      { return _name; }
+    void                    set_name                        ( const string& );
+    string                      name                        () const                                { return _name; }
+    string                      path                        () const                                { return _name; }
+    void                    set_max_processes               ( int );
+    void                    set_remote_scheduler            ( const Host_and_port& );
+    const Host_and_port&        remote_scheduler            () const                                { return _remote_scheduler; }
+
     bool                        is_remote_host              () const                                { return _remote_scheduler; }
+    bool                        is_added                    () const;
+    void                        remove                      ();
+
+    //void                        register_module             ( Remote_module_instance_proxy* module ){ _module_set.insert( module ); }
+    //void                      unregister_module             ( Remote_module_instance_proxy* module ){ _module_set.erase( module ); }
+    //bool                        is_any_module_registered    () const                                { return !_module_set.empty(); }
 
     void                    set_dom                         ( const xml::Element_ptr& );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
+    void                        execute_xml                 ( const xml::Element_ptr&, const Show_what& );
+
+    string                      obj_name                    () const;
 
 
+    // spooler_com::Iprocess_class:
+    STDMETHODIMP            get_Java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
+    STDMETHODIMP_(char*)  const_java_class_name             ()                                      { return (char*)"sos.spooler.Process_class"; }
+    STDMETHODIMP            put_Name                        ( BSTR );
+    STDMETHODIMP            get_Name                        ( BSTR* result )                        { return String_to_bstr( _name, result ); }
+    STDMETHODIMP            put_Remote_scheduler            ( BSTR );
+    STDMETHODIMP            get_Remote_scheduler            ( BSTR* result )                        { return String_to_bstr( _remote_scheduler.as_string(), result ); }
+    STDMETHODIMP            put_Max_processes               ( int );
+    STDMETHODIMP            get_Max_processes               ( int* result )                         { *result = _max_processes;  return S_OK; }
+    STDMETHODIMP                Remove                      ();
+
+
+    // Subsystem:
+    void                        close                       ();
+    bool                        subsystem_initialize        ();
+    bool                        subsystem_load              ();
+    bool                        subsystem_activate          ();
+
+  private:
     Fill_zero                  _zero_;
     string                     _name;
     int                        _max_processes;
-    Spooler*                   _spooler;
-    Process_list               _process_list;
-    int                        _module_use_count;
+    
+    //typedef stdext::hash_set<Remote_module_instance_proxy*> Module_set
+    //Module_set                 _module_set;
+
     Job_list                   _waiting_jobs;
     Host_and_port              _remote_scheduler;
+
+  public:
+    Process_list               _process_list;
+
+
+    static Class_descriptor     class_descriptor;
+    static const Com_method     _methods[];
 };
 
-//-------------------------------------------------------------------------------Process_class_list
+//--------------------------------------------------------------------------Process_class_subsystem
 
-typedef list< ptr<Process_class> >   Process_class_list;
+struct Process_class_subsystem : idispatch_implementation< Process_class_subsystem, spooler_com::Iprocess_classes>, 
+                                 Subsystem
+{
+                                Process_class_subsystem     ( Scheduler* );
+
+    void                        close                       ();
+    bool                        subsystem_initialize        ();
+    bool                        subsystem_load              ();
+    bool                        subsystem_activate          ();
+
+    void                        add_process_class           ( Process_class* );
+    void                        remove_process_class        ( Process_class* );
+  //bool                        is_empty                    () const                                { return _lock_map.empty(); }
+    Process_class*              process_class               ( const string& name );
+    Process_class*              process_class_or_null       ( const string& name );
+    Process*                    new_temporary_process       ();
+    Process_class*              temporary_process_class     ()                                      { return _temporary_process_class; }
+    bool                        has_process_classes         ()                                      { return _process_class_map.size() > 1; }   // Eine ist _temporary_process_class
+    bool                        try_to_free_process         ( Job* for_job, Process_class*, const Time& now );
+    bool                        async_continue              ();
+
+    void                    set_dom                         ( const xml::Element_ptr& );
+    xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
+    xml::Element_ptr            execute_xml                 ( Command_processor*, const xml::Element_ptr&, const Show_what& );
+    void                        execute_xml_process_class   ( const xml::Element_ptr& );
+
+    // spooler_com::Iprocess_classes
+    STDMETHODIMP            get_Java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
+    STDMETHODIMP_(char*)  const_java_class_name             ()                                      { return (char*)"sos.spooler.Process_classes"; }
+    STDMETHODIMP            get_Process_class               ( BSTR, spooler_com::Iprocess_class** );
+    STDMETHODIMP            get_Process_class_or_null       ( BSTR, spooler_com::Iprocess_class** );
+    STDMETHODIMP                Create_process_class        ( spooler_com::Iprocess_class** );
+    STDMETHODIMP                Add_process_class           ( spooler_com::Iprocess_class* );
+
+
+  private:
+    Fill_zero                  _zero_;
+    ptr<Process_class>         _temporary_process_class;
+
+  public:
+    typedef map< string, ptr<Process_class> > Process_class_map;
+    Process_class_map                        _process_class_map;
+
+
+    static Class_descriptor     class_descriptor;
+    static const Com_method     _methods[];
+};
 
 //-------------------------------------------------------------------------------------------------
 

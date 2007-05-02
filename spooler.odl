@@ -26,6 +26,8 @@ library Spooler
     interface Ijob_chain;
     interface Iorder_queue;
     interface Iorder;
+    interface Iprocess_class;
+    interface Iprocess_classes;
     interface Isubprocess;
     interface Iweb_service;
     interface Iweb_service_operation;
@@ -1741,6 +1743,65 @@ library Spooler
         HRESULT                 Remove                  ();
     };
 
+    //-----------------------------------------------------------------------------Iprocess_classes
+    
+    [
+        uuid       ( feee47b7-6c1b-11d8-8103-000476ee8afb ),
+        odl,
+        dual
+    ]
+    interface Iprocess_classes : IDispatch
+    {
+        [id(1),propget]
+        HRESULT                 Java_class_name         ( [out,retval] BSTR* );                 // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
+                                                                                                // Für den Objectserver
+        [id(2),propget]
+        HRESULT                 Process_class           ( [in] BSTR, [out,retval] Iprocess_class** );
+
+        [id(3),propget]
+        HRESULT                 Process_class_or_null   ( [in] BSTR, [out,retval] Iprocess_class** );
+
+        [id(4)]
+        HRESULT                 Create_process_class    ( [out,retval] Iprocess_class** );
+
+        [id(5)]
+        HRESULT                 Add_process_class       ( [in] Iprocess_class* );
+    };
+
+    //-------------------------------------------------------------------------------Iprocess_class
+    
+    [
+        uuid       ( feee47b8-6c1b-11d8-8103-000476ee8afb ),
+        odl,
+        dual
+    ]
+    interface Iprocess_class : IDispatch
+    {
+        [id(1),propget]
+        HRESULT                 Java_class_name         ( [out,retval] BSTR* );                 // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
+                                                                                                // Für den Objectserver
+        [id(2),propput]
+        HRESULT                 Name                    ( [in] BSTR );
+
+        [id(2),propget]
+        HRESULT                 Name                    ( [out,retval] BSTR* );
+
+        [id(3),propput]
+        HRESULT                 Remote_scheduler        ( [in] BSTR );
+
+        [id(3),propget]
+        HRESULT                 Remote_scheduler        ( [out,retval] BSTR* );
+
+        [id(4),propput]
+        HRESULT                 Max_processes           ( [in] int );
+
+        [id(4),propget]
+        HRESULT                 Max_processes           ( [out,retval] int* );
+
+        [id(5)]
+        HRESULT                 Remove                  ();
+    };
+
     //---------------------------------------------------------------------------------------------
 
 };
@@ -1749,8 +1810,6 @@ library Spooler
 /*
 Ein paar freie GUIDs:
 
-feee47b7-6c1b-11d8-8103-000476ee8afb
-feee47b8-6c1b-11d8-8103-000476ee8afb
 feee47b9-6c1b-11d8-8103-000476ee8afb
 feee47ba-6c1b-11d8-8103-000476ee8afb
 feee47bb-6c1b-11d8-8103-000476ee8afb

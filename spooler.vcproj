@@ -370,6 +370,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\register.cxx"
+				>
+			</File>
+			<File
 				RelativePath=".\scheduler_client.cxx"
 				>
 			</File>
@@ -1088,6 +1092,10 @@
 			</File>
 			<File
 				RelativePath=".\lock.h"
+				>
+			</File>
+			<File
+				RelativePath=".\register.h"
 				>
 			</File>
 			<File

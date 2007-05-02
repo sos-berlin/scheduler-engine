@@ -102,6 +102,9 @@ struct Module : Object
     bool                        has_source_script           () const                                { return !_text_with_includes.is_empty(); }
     string                      read_source_script          ()                                      { return _text_with_includes.read_text( _include_path ); }
 
+    Process_class*              process_class               () const;
+    Process_class*              process_class_or_null       () const;
+
 
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
@@ -112,8 +115,7 @@ struct Module : Object
     string                     _include_path;
     Reuse                      _reuse;
     bool                       _separate_process;           // Das Skript soll einem getrennten, eigenen Prozess laufen
-    string                     _process_class_name;
-    Process_class*             _process_class;
+    string                     _process_class_path;
     bool                       _use_process_class;
     Kind                       _kind;
     Kind                       _real_kind;                  // Falls _kind == kind_remote

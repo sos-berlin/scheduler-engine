@@ -121,9 +121,9 @@ void Lock::set_name( const string& name )
       //if( is_added() )  z::throw_xc( "SCHEDULER-243", "Lock.name" );
 
         _name = name;
-
-        _log->set_prefix( obj_name() );
     }
+
+    _log->set_prefix( obj_name() );
 }
 
 //----------------------------------------------------------------------Lock::set_max_non_exclusive
@@ -710,6 +710,11 @@ xml::Element_ptr Use::dom_element( const xml::Document_ptr& dom_document, const 
     result.setAttribute( "lock"     , _lock_path );
     result.setAttribute( "exclusive", _lock_mode == Lock::lk_exclusive? "yes" : "no" );
 
+    if( _requestor->is_enqueued() )
+    {
+        result.setAttribute( "is_available", lock()->is_free_for( _lock_mode )? "yes" : "no" );
+    }
+
     return result;
 }
 
@@ -855,7 +860,6 @@ Lock_subsystem::Lock_subsystem( Scheduler* scheduler )
     Idispatch_implementation( &class_descriptor ),
     Subsystem( scheduler, static_cast<spooler_com::Ilocks*>( this ), type_lock_subsystem )
 {
-    close();
 }
 
 //----------------------------------------------------------------------------Lock_subsystem::close
@@ -901,7 +905,7 @@ bool Lock_subsystem::subsystem_activate()
 Lock* Lock_subsystem::lock( const string& name )
 {
     Lock* result = lock_or_null( name );
-    if( !result )  z::throw_xc( "SCHEDULER-401", name );
+    if( !result )  z::throw_xc( "SCHEDULER-401", "lock " + name );
     return result;
 }
 
@@ -920,7 +924,7 @@ void Lock_subsystem::remove_lock( Lock* lock )
     string             path = lock->path();
     Lock_map::iterator it   = _lock_map.find( path );
 
-    if( it->second != lock )  z::throw_xc( "SCHEDULER-401", path, "Duplicate lock already removed" );
+    if( it->second != lock )  z::throw_xc( "SCHEDULER-418", lock->obj_name() );
 
     lock->prepare_remove();
     _lock_map.erase( it );
@@ -993,6 +997,7 @@ void Lock_subsystem::add_lock( Lock* lock )
     if( !lock )  z::throw_xc( __FUNCTION__ );
 
     if( lock->is_added() )  z::throw_xc( "SCHEDULER-416", lock->obj_name() );
+    _spooler->check_name( lock->name() );
 
     _lock_map[ lock->name() ] = lock;
 }

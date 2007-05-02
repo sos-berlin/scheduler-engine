@@ -294,7 +294,7 @@ xml::Element_ptr Command_processor::execute_show_process_classes( const Show_wha
 {
     if( _security_level < Security::seclev_info )  z::throw_xc( "SCHEDULER-121" );
 
-    return _spooler->process_classes_dom_element( _answer, show );
+    return _spooler->process_class_subsystem()->dom_element( _answer, show );
 }
 
 //------------------------------------------------------------Command_processor::execute_show_state

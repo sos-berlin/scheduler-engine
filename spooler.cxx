@@ -644,6 +644,7 @@ Spooler::Spooler()
 
     _scheduler_event_manager = Z_NEW( Scheduler_event_manager( this ) );
     _scheduler_script        = new_scheduler_script( this );
+    _process_class_subsystem = Z_NEW( Process_class_subsystem( this ) );
     _job_subsystem           = new_job_subsystem( this );
     _task_subsystem          = Z_NEW( Task_subsystem( this ) );
     _order_subsystem         = new_order_subsystem( this );
@@ -864,7 +865,7 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
     if( show.is_set( show_jobs ) )  state_element.appendChild( _job_subsystem->jobs_dom_element( dom, show ) );
                               else  state_element.append_new_comment( "<jobs> suppressed. Use what=\"jobs\"." );
 
-    state_element.appendChild( process_classes_dom_element( dom, show ) );
+    if( _process_class_subsystem )  state_element.appendChild( _process_class_subsystem->dom_element( dom, show ) );
     
     if( _order_subsystem )
     state_element.appendChild( _order_subsystem->job_chains_dom_element( dom, show ) );
@@ -908,96 +909,6 @@ void Spooler::print_xml_child_elements_for_event( String_stream* s, Scheduler_ev
     *s << "<state";
     *s << " state=\"" << state_name() << '"';
     *s << "/>";
-}
-
-//-----------------------------------------------------------Spooler::load_process_classes_from_dom
-
-void Spooler::load_process_classes_from_dom( const xml::Element_ptr& element, const Time& )
-{
-    if( !process_class_or_null( "" ) )
-    {
-        add_process_class( Z_NEW( Process_class( this, "" ) ) );
-    }
-
-    DOM_FOR_EACH_ELEMENT( element, e )
-    {
-        if( e.nodeName_is( "process_class" ) )
-        {
-            string spooler_id = e.getAttribute( "spooler_id" );
-
-            if( spooler_id.empty() || spooler_id == id() )
-            {
-                string process_class_name = e.getAttribute( "name" );
-                ptr<Process_class> process_class = process_class_or_null( process_class_name );
-                if( process_class )
-                {
-                    process_class->set_dom( e );
-                }
-                else
-                {
-                    add_process_class( Z_NEW( Process_class( this, e ) ) );
-                }
-            }
-        }
-    }
-}
-
-//-------------------------------------------------------------Spooler::process_classes_dom_element
-
-xml::Element_ptr Spooler::process_classes_dom_element( const xml::Document_ptr& document, const Show_what& show )
-{
-    xml::Element_ptr element = document.createElement( "process_classes" );
-
-    FOR_EACH( Process_class_list, _process_class_list, it )
-    {
-        if( (*it)->_module_use_count > 0 )  element.appendChild( (*it)->dom_element( document, show ) );
-    }
-
-    return element;
-}
-
-//-------------------------------------------------------------------Spooler::process_class_or_null
-
-Process_class* Spooler::process_class_or_null( const string& name )
-{
-    FOR_EACH( Process_class_list, _process_class_list, pc )  if( (*pc)->_name == name )  return *pc;
-    return NULL;
-}
-
-//-------------------------------------------------------------------Spooler::process_class_or_null
-
-Process_class* Spooler::process_class( const string& name )
-{
-    Process_class* pc = process_class_or_null( name );
-    if( !pc )  z::throw_xc( "SCHEDULER-195", name );
-    return pc;
-}
-
-//-------------------------------------------------------------------Spooler::new_temporary_process
-
-Process* Spooler::new_temporary_process()
-{
-    ptr<Process> process = Z_NEW( Process( this ) );
-
-    process->set_temporary( true );
-
-    temporary_process_class()->add_process( process );
-
-    return process;
-}
-
-//-----------------------------------------------------------------------Spooler::add_process_class
-
-void Spooler::add_process_class( Process_class* process_class )
-{
-    _process_class_list.push_back( process_class );         
-}
-
-//---------------------------------------------------------------------Spooler::try_to_free_process
-
-bool Spooler::try_to_free_process( Job* for_job, Process_class* process_class, const Time& now )
-{
-    return _task_subsystem->try_to_free_process( for_job, process_class, now );
 }
 
 //-----------------------------------------------------------------Spooler::register_process_handle
@@ -1092,6 +1003,16 @@ bool Spooler::name_is_valid( const string& name )
 void Spooler::check_name( const string& name )
 {
     if( !name_is_valid( name ) )  z::throw_xc( "SCHEDULER-417", name );
+}
+
+//-----------------------------------------------------------------Spooler::process_class_subsystem
+
+Process_class_subsystem* Spooler::process_class_subsystem()
+{
+    assert( _process_class_subsystem ); 
+    if( !_process_class_subsystem )  z::throw_xc( __FUNCTION__, "Process_class subsystem is not initialized" );
+
+    return _process_class_subsystem; 
 }
 
 //-------------------------------------------------------------------------Spooler::order_subsystem
@@ -1558,17 +1479,11 @@ void Spooler::load()
     _short_hostname = hostname;
     _complete_hostname = complete_computer_name();
     
-
-
-    // Die erste Prozessklasse ist die Klasse für temporäre Prozesse
-    ptr<Process_class> process_class = Z_NEW( Process_class( this, temporary_process_class_name ) );
-    _process_class_list.push_back( process_class );         
-
-
-    _order_subsystem->switch_subsystem_state( subsys_initialized );
-    _http_server    ->switch_subsystem_state( subsys_initialized );
-    _web_services   ->switch_subsystem_state( subsys_initialized );        // Ein Job und eine Jobkette einrichten, s. spooler_web_service.cxx
-    _lock_subsystem ->switch_subsystem_state( subsys_initialized );
+    _process_class_subsystem->switch_subsystem_state( subsys_initialized );
+    _order_subsystem        ->switch_subsystem_state( subsys_initialized );
+    _http_server            ->switch_subsystem_state( subsys_initialized );
+    _web_services           ->switch_subsystem_state( subsys_initialized );        // Ein Job und eine Jobkette einrichten, s. spooler_web_service.cxx
+    _lock_subsystem         ->switch_subsystem_state( subsys_initialized );
 
 
     Command_processor cp ( this, Security::seclev_all );
@@ -1943,10 +1858,10 @@ void Spooler::stop( const exception* )
 
 
     _order_subsystem = NULL;
-    _task_subsystem->switch_subsystem_state( subsys_stopped );
-    _job_subsystem ->switch_subsystem_state( subsys_stopped );
-    _process_class_list.clear();
-    _java_subsystem->switch_subsystem_state( subsys_stopped );
+    _task_subsystem         ->switch_subsystem_state( subsys_stopped );
+    _job_subsystem          ->switch_subsystem_state( subsys_stopped );
+    _process_class_subsystem->switch_subsystem_state( subsys_stopped );
+    _java_subsystem         ->switch_subsystem_state( subsys_stopped );
     //_java_vm.close();  Erneutes _java.init() stürzt ab, deshalb lassen wir Java stehen und schließen es erst am Schluss
 
 
@@ -2261,9 +2176,9 @@ void Spooler::run()
 #               ifndef Z_WINDOWS
                     if( wait_until > 0 )
 #               endif 
-                FOR_EACH( Process_class_list, _process_class_list, pc )
+                FOR_EACH( Process_class_subsystem::Process_class_map, _process_class_subsystem->_process_class_map, pc )
                 {
-                    FOR_EACH( Process_list, (*pc)->_process_list, p )
+                    FOR_EACH( Process_list, pc->second->_process_list, p )
                     {
 #                       ifdef Z_WINDOWS
 
@@ -2459,17 +2374,9 @@ bool Spooler::run_continue( const Time& now )
     if( _state != Spooler::s_paused )
     {
         // PROZESSE FORTSETZEN
-
-        FOR_EACH( Process_class_list, _process_class_list, pc )
-        {
-            FOR_EACH( Process_list, (*pc)->_process_list, p )
-            {
-                something_done |= (*p)->async_continue();
-            }
-        }
+        something_done |= _process_class_subsystem->async_continue();
 
         // TASKS FORTSETZEN
-
         if( _task_subsystem )  something_done |= _task_subsystem->process( now );    
     }
 

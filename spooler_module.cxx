@@ -289,7 +289,9 @@ void Module::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time 
     set_checked_attribute( &_com_class_name    , element, "com_class" , true );
     set_checked_attribute( &_filename          , element, "filename"         );
     set_checked_attribute( &_java_class_name   , element, "java_class", true );
-    set_checked_attribute( &_process_class_name, element, "process_class"    );
+
+    if( _use_process_class )
+    set_checked_attribute( &_process_class_path, element, "process_class"    );
 
     bool separate_process_default = false;
 
@@ -423,24 +425,22 @@ void Module::init()
 
     if( _kind != kind_process  &&  _kind != kind_internal )
     {
-        if( _spooler )  _use_process_class = _spooler->has_process_classes();
+        if( _spooler )  _use_process_class = _spooler->process_class_subsystem()->has_process_classes();
 
-        if( _dont_remote )  _separate_process = false, _use_process_class = false, _process_class_name = "";
+        if( _dont_remote )  _separate_process = false, _use_process_class = false, _process_class_path = "";
 
         if( _separate_process )
         {
-            if( _process_class_name != "" )  z::throw_xc( "SCHEDULER-194" );
-            //_process_class_name = temporary_process_class_name;
+            if( _process_class_path != "" )  z::throw_xc( "SCHEDULER-194" );
         }
 
         if( _use_process_class )  
         {
-            _process_class = _spooler->process_class( _process_class_name );     // Fehler, wenn der Name nicht bekannt ist.
-            _process_class->_module_use_count++;
+            _spooler->process_class_subsystem()->process_class( _process_class_path );     // Fehler, wenn der Name nicht bekannt ist. (Könnte auch eine Warnung sein)
         }
     }
     else
-    if( _process_class_name != ""  &&  _spooler->process_class( _process_class_name )->_remote_scheduler )  z::throw_xc( "SCHEDULER-400" );
+    if( _process_class_path != ""  &&  process_class()->remote_scheduler() )  z::throw_xc( "SCHEDULER-400" );
 
     if( _kind != kind_internal )  if( _separate_process  ||  _use_process_class )   _kind = kind_remote;
 
@@ -558,6 +558,23 @@ ptr<Module_instance> Module::create_instance_impl()
     }
 
     return result;
+}
+
+//--------------------------------------------------------------------Module::process_class_or_null
+
+Process_class* Module::process_class_or_null() const
+{ 
+    return _use_process_class? _spooler->process_class_subsystem()->process_class_or_null( _process_class_path ) 
+                             : NULL;
+}
+
+//----------------------------------------------------------------------------Module::process_class
+
+Process_class* Module::process_class() const
+{ 
+    if( !_use_process_class )  z::throw_xc( "NO_PROCESS_CLASS", __FUNCTION__ );
+
+    return _spooler->process_class_subsystem()->process_class( _process_class_path );
 }
 
 //----------------------------------------------------------------Module_instance::In_call::In_call

@@ -614,8 +614,8 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
         _title      = element.     getAttribute( "title"        , _title      );
         _log_append = element.bool_getAttribute( "log_append"   , _log_append );
         order       = element.bool_getAttribute( "order"        );
-        _module->_process_class_name 
-                    = element.     getAttribute( "process_class", _module->_process_class_name );
+        _module->_process_class_path 
+                    = element.     getAttribute( "process_class", _module->_process_class_path );
         _module->_java_options += " " + subst_env( 
                       element.     getAttribute( "java_options" ) );
         _min_tasks  = element.uint_getAttribute( "min_tasks"    , _min_tasks );
@@ -2120,7 +2120,7 @@ void Job::withdraw_order_request()
     _order_queue->withdraw_order_request(); 
 }
 
-//-------------------------------------------------------------------Job::notify_a_process_is_idle
+//--------------------------------------------------------------------Job::notify_a_process_is_idle
 
 void Job::notify_a_process_is_idle()
 {
@@ -2135,7 +2135,9 @@ void Job::remove_waiting_job_from_process_list()
     if( _waiting_for_process )
     {
         _waiting_for_process = false;
-        _module->_process_class->remove_waiting_job( this );
+
+        if( Process_class* process_class = _module->process_class_or_null() )
+            process_class->remove_waiting_job( this );
     }
 
     _waiting_for_process_try_again = false;
@@ -2225,22 +2227,25 @@ ptr<Task> Job::task_to_start()
     {
         // Ist denn ein Prozess verfügbar?
 
-        if( _module->_process_class  &&  !_module->_process_class->process_available( this ) )
+        Process_class* process_class = _module->_use_process_class? _module->process_class()        // Fehler, wenn Prozessklasse fehlt
+                                                                  : NULL;
+
+        if( process_class  &&  !process_class->process_available( this ) )
         {
             if( cause != cause_min_tasks  
              &&  ( !_waiting_for_process  ||  _waiting_for_process_try_again ) )
             {
                 if( !_waiting_for_process )
                 {
-                    Message_string m ( "SCHEDULER-949", _module->_process_class->name() );   // " ist für einen verfügbaren Prozess vorgemerkt" );
+                    Message_string m ( "SCHEDULER-949", _module->_process_class_path );   // " ist für einen verfügbaren Prozess vorgemerkt" );
                     if( task )  m.insert( 2, task->obj_name() );
                     log()->info( m );
-                    _module->_process_class->enqueue_waiting_job( this );
+                    process_class->enqueue_waiting_job( this );
                     _waiting_for_process = true;
                 }
 
                 _waiting_for_process_try_again = false;
-                _spooler->try_to_free_process( this, _module->_process_class, now );     // Beendet eine Task in s_running_waiting_for_order
+                _spooler->task_subsystem()->try_to_free_process( this, process_class, now );     // Beendet eine Task in s_running_waiting_for_order
             }
 
             task = NULL, cause = cause_none, has_order = false;      // Wir können die Task nicht starten, denn kein Prozess ist verfügbar
@@ -2303,9 +2308,11 @@ ptr<Task> Job::task_to_start()
         if( _lock_requestor->is_enqueued() )  _lock_requestor->dequeue_lock_requests( log_none );
     }
 
-    if( _waiting_for_process  &&  _module->_process_class->process_available( this ) )
+    if( _waiting_for_process  &&  _module->process_class()->process_available( this ) )
     {
-        remove_waiting_job_from_process_list();
+        Process_class* process_class = _module->process_class_or_null();
+        if( !process_class  ||  process_class->process_available( this ) )
+            remove_waiting_job_from_process_list();
     }
 
     if( task )  _start_once = false;
@@ -2376,7 +2383,7 @@ bool Job::do_something()
                 if( _state == s_pending 
                  || _state == s_running  &&  _running_tasks.size() < _max_tasks )
                 {
-                    if( !_waiting_for_process  ||  _waiting_for_process_try_again  ||  _module->_process_class->process_available( this ) )    // Optimierung
+                    if( !_waiting_for_process  ||  _waiting_for_process_try_again  ||  _module->process_class()->process_available( this ) )    // Optimierung
                     {
                         ptr<Task> task = task_to_start();
                         if( task )

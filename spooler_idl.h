@@ -794,6 +794,35 @@ struct Ilock : IDispatch
     virtual HRESULT             Remove                      ()                                      = 0;
 };
 
+//-------------------------------------------------------------------------------------------Ilocks
+
+DEFINE_GUID( IID_Iprocess_classes, 0xfeee47b7, 0x6c1b, 0x11d8, 0x81, 0x03, 0x00, 0x04, 0x76, 0xee, 0x8a, 0xfb );   // {feee47b5-6c1b-11d8-8103-000476ee8afb}
+
+struct Ilocks : IDispatch
+{
+    virtual HRESULT         get_Java_class_name             ( BSTR* )                               = 0;
+    virtual HRESULT         get_Process_class               ( BSTR, Ilock** )                       = 0;
+    virtual HRESULT         get_Process_class_or_null       ( BSTR, Ilock** )                       = 0;
+    virtual HRESULT             Create_process_class        ( Ilock** )                             = 0;
+    virtual HRESULT             Add_process_class           ( Ilock* )                              = 0;
+};
+
+//--------------------------------------------------------------------------------------------Ilock
+
+DEFINE_GUID( IID_Iprocess_class, 0xfeee47b8, 0x6c1b, 0x11d8, 0x81, 0x03, 0x00, 0x04, 0x76, 0xee, 0x8a, 0xfb );   // {feee47b6-6c1b-11d8-8103-000476ee8afb}
+
+struct Ilock : IDispatch
+{
+    virtual HRESULT         get_Java_class_name             ( BSTR* )                               = 0;
+    virtual HRESULT         put_Name                        ( BSTR )                                = 0;
+    virtual HRESULT         get_Name                        ( BSTR* )                               = 0;
+    virtual HRESULT         put_Remote_scheduler            ( BSTR )                                = 0;
+    virtual HRESULT         get_Remote_scheduler            ( BSTR* )                               = 0;
+    virtual HRESULT         put_Max_processes               ( int )                                 = 0;
+    virtual HRESULT         get_Max_processes               ( int* )                                = 0;
+    virtual HRESULT             Remove                      ()                                      = 0;
+};
+
 //-------------------------------------------------------------------------------------------------
 
 } //namespace spooler_com

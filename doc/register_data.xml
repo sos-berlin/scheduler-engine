@@ -1294,6 +1294,10 @@
     <register_entry register_file='xml/config.xml#attribute_java_options' register_title='&lt;config&gt; (Konfiguration)'  register_keyword='java_options' type='definition'/>
     <register_entry register_file='xml/job.xml#attribute_java_options' register_title='&lt;job&gt; (Konfiguration)'  register_keyword='java_options' type='definition'/>
 </register_keyword>
+<register_keyword keyword='javac'>
+    <register_keyword_display><code>javac=</code></register_keyword_display>
+    <register_ini_entry register_file='xml/process_class.xml' register_title='&lt;process_class&gt; (Konfiguration)' file='sos.ini' section='java' entry='javac'/>
+</register_keyword>
 <register_keyword keyword='JavaScript'>
     <register_entry register_file='script_language_javascript.xml' register_title='Skripte in JavaScript'  register_keyword='JavaScript'/>
 </register_keyword>
@@ -2701,6 +2705,7 @@
     <register_entry register_file='xml/job.xml#use_element__run_time' register_title='&lt;job&gt; (Konfiguration)'  register_keyword='run_time'/>
     <register_entry register_file='xml/modify_job.xml#use_element__run_time' register_title='&lt;modify_job&gt; (Kommando)'  register_keyword='run_time'/>
     <register_entry register_file='xml/run_time.xml#' register_title='&lt;run_time&gt; (Konfiguration)'  register_keyword='run_time' type='definition'/>
+    <register_entry register_file='xml/show_order.xml#use_element__run_time' register_title='&lt;show_order&gt; (Kommando)'  register_keyword='run_time'/>
     <register_entry register_file='xml/start_job.xml#use_element__run_time' register_title='&lt;start_job&gt; (Kommando)'  register_keyword='run_time'/>
     <register_entry register_file='xml/start_when_directory_changed.xml#use_element__run_time' register_title='&lt;start_when_directory_changed&gt; (Konfiguration)'  register_keyword='run_time'/>
 </register_keyword>
@@ -3408,6 +3413,11 @@
     <register_keyword_display><code>title</code> (property)</register_keyword_display>
     <register_entry register_file='api/Job.xml#method__title' register_title='Job.title' register_keyword='title' type='definition'/>
     <register_entry register_file='api/Order.xml#method__title' register_title='Order.title' register_keyword='title' type='definition'/>
+</register_keyword>
+<register_keyword keyword='tmp'>
+    <register_keyword_display><code>tmp=</code></register_keyword_display>
+    <register_entry register_file='factory_ini_spooler.xml#entry_tmp' register_title='file factory.ini, section [spooler]'  register_keyword='tmp' type='definition'/>
+    <register_ini_entry register_file='xml/process_class.xml' register_title='&lt;process_class&gt; (Konfiguration)' file='factory.ini' section='spooler' entry='tmp'/>
 </register_keyword>
 <register_keyword keyword='to (property)'>
     <register_keyword_display><code>to</code> (property)</register_keyword_display>

@@ -174,6 +174,7 @@ typedef stdext::hash_set<string> String_set;
 #include "spooler_log.h"
 #include "scheduler_object.h"
 #include "subsystem.h"
+#include "register.h"
 #include "scheduler_script.h"
 #include "spooler_event.h"
 #include "spooler_security.h"
@@ -391,17 +392,6 @@ struct Spooler : Object,
     void                        send_cmd                    ();
 
     // Prozesse
-    void                        load_process_classes_from_dom( const xml::Element_ptr&, const Time& xml_mod_time );
-    void                        add_process_class           ( Process_class* );
-    Process_class*              process_class_or_null       ( const string& name );
-    Process_class*              process_class               ( const string& name );
-    xml::Element_ptr            process_classes_dom_element ( const xml::Document_ptr&, const Show_what& );
-    Process*                    new_temporary_process       ();
-    void                        init_process_classes        ();
-    Process_class*              temporary_process_class     ()                                  { return *_process_class_list.begin(); }
-    bool                        has_process_classes         ()                                  { return _process_class_list.size() > 1; }   // Die erste ist nur für temporäre Prozesse
-    bool                        try_to_free_process         ( Job* for_job, Process_class*, const Time& now );
-
     void                        register_process_handle     ( Process_handle );                 // Für abort_immediately()
     void                        unregister_process_handle   ( Process_handle );                 // Für abort_immediately()
     void                        register_pid                ( int, bool is_process_group = false ); // Für abort_immediately()
@@ -418,6 +408,7 @@ struct Spooler : Object,
     Scheduler_script_interface* scheduler_script            () const                            { return _scheduler_script; }
     string                      java_work_dir               ()                                  { return temp_dir() + Z_DIR_SEPARATOR "java"; }
 
+    Process_class_subsystem*    process_class_subsystem     ();
     Task_subsystem*             task_subsystem              ();
     Task_subsystem*             task_subsystem_or_null      ()                                  { return _task_subsystem; }
     Job_subsystem_interface*    job_subsystem               ();
@@ -525,6 +516,7 @@ struct Spooler : Object,
     string                     _xml_cmd;                    // Parameter -cmd, ein zuerst auszuführendes Kommando.
     string                     _pid_filename;
 
+    ptr<Process_class_subsystem>     _process_class_subsystem;
     ptr<Job_subsystem_interface>     _job_subsystem;
     ptr<Task_subsystem>              _task_subsystem;
     ptr<Order_subsystem_interface>   _order_subsystem;
@@ -583,7 +575,6 @@ struct Spooler : Object,
 
     ptr<Scheduler_script_interface> _scheduler_script;
 
-    Process_class_list         _process_class_list;
     Process_list               _process_list;
     bool                       _ignore_process_classes;
 

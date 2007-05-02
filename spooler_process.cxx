@@ -12,7 +12,41 @@ namespace scheduler {
     
 const int connection_retry_time = 60;
 
-//---------------------------------------------------------rocess::Close_operation::Close_operation
+Process_class_subsystem::Class_descriptor    Process_class_subsystem::class_descriptor ( &typelib, "Spooler.Process_classes", Process_class_subsystem::_methods );
+Process_class          ::Class_descriptor    Process_class          ::class_descriptor ( &typelib, "Spooler.Process_class"  , Process_class          ::_methods );
+
+//----------------------------------------------------------------Process_class_subsystem::_methods
+
+const Com_method Process_class_subsystem::_methods[] =
+{ 
+#ifdef COM_METHOD
+    COM_PROPERTY_GET( Process_class_subsystem,  1, Java_class_name      , VT_BSTR    , 0 ),
+    COM_PROPERTY_GET( Process_class_subsystem,  2, Process_class        , VT_DISPATCH, 0, VT_BSTR ),
+    COM_PROPERTY_GET( Process_class_subsystem,  3, Process_class_or_null, VT_DISPATCH, 0, VT_BSTR ),
+    COM_METHOD      ( Process_class_subsystem,  4, Create_process_class , VT_DISPATCH, 0 ),
+    COM_METHOD      ( Process_class_subsystem,  5, Add_process_class    , VT_EMPTY   , 0, VT_DISPATCH ),
+#endif
+    {}
+};
+
+//--------------------------------------------------------------------------Process_class::_methods
+
+const Com_method Process_class::_methods[] =
+{ 
+#ifdef COM_METHOD
+    COM_PROPERTY_GET( Process_class,  1, Java_class_name     , VT_BSTR    , 0 ),
+    COM_PROPERTY_PUT( Process_class,  2, Name                ,              0, VT_BSTR ),
+    COM_PROPERTY_GET( Process_class,  2, Name                , VT_BSTR    , 0 ),
+    COM_PROPERTY_PUT( Process_class,  3, Remote_scheduler    ,              0, VT_BSTR ),
+    COM_PROPERTY_GET( Process_class,  3, Remote_scheduler    , VT_BSTR    , 0 ),
+    COM_PROPERTY_PUT( Process_class,  4, Max_processes       ,              0, VT_INT ),
+    COM_PROPERTY_GET( Process_class,  4, Max_processes       , VT_INT    , 0 ),
+    COM_METHOD      ( Process_class,  5, Remove              , VT_EMPTY   , 0 ),
+#endif
+    {}
+};
+
+//--------------------------------------------------------Process::Close_operation::Close_operation
 
 Process::Close_operation::Close_operation( Process* p, bool run_independently )
 : 
@@ -422,7 +456,7 @@ void Process::async_remote_start()
 
   //c->set_stdin_data( _task_process_xml );
     assert( _process_class );
-    c->set_remote_host( _process_class->_remote_scheduler._host );
+    c->set_remote_host( _process_class->remote_scheduler()._host );
     c->listen_on_tcp_port( INADDR_ANY );
 
 
@@ -473,7 +507,7 @@ bool Process::async_remote_start_continue( Async_operation::Continue_flags )
         {
             // Hier fehlt noch das Register für gemeinsame Benutzung
 
-            _xml_client_connection = Z_NEW( Xml_client_connection( _spooler, _process_class->_remote_scheduler ) );
+            _xml_client_connection = Z_NEW( Xml_client_connection( _spooler, _process_class->remote_scheduler() ) );
             _xml_client_connection->set_async_parent( _async_remote_operation );
             _xml_client_connection->set_async_manager( _spooler->_connection_manager );
             _xml_client_connection->set_wait_for_connection( connection_retry_time );
@@ -656,7 +690,7 @@ int Process::termination_signal()
 
 bool Process::is_remote_host() const
 { 
-    return _process_class &&  _process_class->_remote_scheduler; 
+    return _process_class &&  _process_class->remote_scheduler(); 
 }
 
 //-----------------------------------------------------------------------------Process::stdout_path
@@ -728,11 +762,50 @@ string Process::short_name() const
     return result;
 }
 
+//----------------------------------------------------------------------rocess_class::Process_class
+
+Process_class::Process_class( Process_class_subsystem* process_class_subsystem, const string& name )
+: 
+    Idispatch_implementation( &class_descriptor ),
+    Scheduler_object( process_class_subsystem->_spooler, static_cast< spooler_com::Iprocess_class* >( this ), type_process_class ),
+    _zero_(this+1)
+{ 
+    init(); 
+    set_name( name );
+}
+
+//--------------------------------------------------------------------Process_class::~Process_class
+    
+Process_class::~Process_class()
+{
+}
+
 //------------------------------------------------------------------------------Process_class::init
 
 void Process_class::init()
 {
     _max_processes = 10;
+}
+
+//-----------------------------------------------------------------------------Process_class::close
+
+void Process_class::close()
+{
+    int PROCESS_CLASS_CLOSE;
+}
+
+//--------------------------------------------------------------------Process_class::prepare_remove
+
+void Process_class::prepare_remove()
+{
+    int FEHLERCODES;
+
+    //if( is_any_module_registered() )  z::throw_xc( __FUNCTION__ );
+
+    int WAITING_JOBS_AUFLOESEN;
+    if( !_waiting_jobs.empty() )  z::throw_xc( __FUNCTION__ );
+
+    if( !_process_list.empty() )  z::throw_xc( __FUNCTION__ );
 }
 
 //-----------------------------------------------------------------------Process_class::add_process
@@ -870,6 +943,63 @@ void Process_class::notify_a_process_is_idle()
     if( !_waiting_jobs.empty() )  (*_waiting_jobs.begin())->notify_a_process_is_idle();
 }
 
+//--------------------------------------------------------------------------Process_class::is_added
+
+bool Process_class::is_added() const
+{
+    bool result = false;
+
+    if( Process_class* process_class = _spooler->process_class_subsystem()->process_class_or_null( path() ) )
+    {
+        if( process_class == this )  result = true;
+    }
+
+    return result;
+}
+
+//--------------------------------------------------------------------------Process_class::set_name
+
+void Process_class::set_name( const string& name )
+{
+    //Evtl. nicht kompatibel.  _spooler->check_name( name );
+
+    if( name != _name )
+    {
+        if( _name != "" )  z::throw_xc( "SCHEDULER-243", "Process_class.name" );
+      //if( is_added() )  z::throw_xc( "SCHEDULER-243", "Process_class.name" );
+
+        _name = name;
+    }
+
+    _log->set_prefix( obj_name() );
+}
+
+//-----------------------------------------------------------------Process_class::set_max_processes
+
+void Process_class::set_max_processes( int max_processes )
+{
+    if( is_added() )  z::throw_xc( "SCHEDULER-243", "Process_class.name" );
+
+    if( _process_list.size() > max_processes )  _log->warn( message_string( "SCHEDULER-419", max_processes, _process_list.size() ) );
+
+    _max_processes = max_processes;
+}
+
+//--------------------------------------------------------------Process_class::set_remote_scheduler
+
+void Process_class::set_remote_scheduler( const Host_and_port& remote_scheduler )
+{
+    _remote_scheduler = remote_scheduler;
+    if( _remote_scheduler._host  &&  _remote_scheduler._port == 0 )  _remote_scheduler._port = _spooler->_tcp_port;
+}
+
+//----------------------------------------------------------------------------Process_class::remove
+
+void Process_class::remove()
+{
+    _spooler->process_class_subsystem()->remove_process_class( this );
+}
+
 //---------------------------------------------------------------------------Process_class::set_dom
 
 void Process_class::set_dom( const xml::Element_ptr& e )
@@ -881,10 +1011,8 @@ void Process_class::set_dom( const xml::Element_ptr& e )
         _name = e.getAttribute( "name" );
     }
 
-    _max_processes = (int)e.uint_getAttribute( "max_processes", _max_processes );
-
-    _remote_scheduler = e.getAttribute( "remote_scheduler", _remote_scheduler.as_string() );
-    if( _remote_scheduler._host  &&  _remote_scheduler._port == 0 )  _remote_scheduler._port = _spooler->_tcp_port;
+    set_max_processes   ( (int)e.uint_getAttribute( "max_processes"   , _max_processes ) );
+    set_remote_scheduler(      e.     getAttribute( "remote_scheduler", _remote_scheduler.as_string() ) );
 }
 
 //----------------------------------------------------------------------------------Spooler::as_dom
@@ -919,6 +1047,310 @@ xml::Element_ptr Process_class::dom_element( const xml::Document_ptr& document, 
 
     return element;
 }
+
+//--------------------------------------------------------------------------Process_class::put_Name
+
+STDMETHODIMP Process_class::put_Name( BSTR name_bstr )
+{
+    HRESULT hr = S_OK;
+
+    try
+    {
+        set_name( string_from_bstr( name_bstr ) );
+    }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+
+//-------------------------------------------------------------Process_class::put_Remote_scheduler
+
+STDMETHODIMP Process_class::put_Remote_scheduler( BSTR remote_scheduler_bstr )
+{
+    HRESULT hr = S_OK;
+
+    try
+    {
+        set_remote_scheduler( string_from_bstr( remote_scheduler_bstr ) );
+    }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+
+//-----------------------------------------------------------------Process_class::put_Max_processes
+
+STDMETHODIMP Process_class::put_Max_processes( int max_processes )
+{
+    HRESULT hr = S_OK;
+
+    try
+    {
+        set_max_processes( max_processes );
+    }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+
+//----------------------------------------------------------------------------Process_class::Remove
+
+STDMETHODIMP Process_class::Remove()
+{
+    HRESULT hr = S_OK;
+
+    try
+    {
+        remove();
+    }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+
+//--------------------------------------------------------------------------Process_class::obj_name
+
+string Process_class::obj_name() const
+{
+    S result;
+
+    result << "Process_class " << _name;
+
+    return result;
+}
+
+//-------------------------------------------------Process_class_subsystem::Process_class_subsystem
+
+Process_class_subsystem::Process_class_subsystem( Scheduler* scheduler )
+:
+    _zero_(this+1),
+    Idispatch_implementation( &class_descriptor ),
+    Subsystem( scheduler, static_cast<Iprocess_classes*>( this ), type_process_class_subsystem )
+{
+}
+
+//----------------------------------------------------Process_class_subsystem::subsystem_initialize
+
+bool Process_class_subsystem::subsystem_initialize()
+{
+    add_process_class( Z_NEW( Process_class( this, temporary_process_class_name ) ) );
+
+    set_subsystem_state( subsys_initialized );
+    return true;
+}
+
+//----------------------------------------------------------Process_class_subsystem::subsystem_load
+
+bool Process_class_subsystem::subsystem_load()
+{
+    set_subsystem_state( subsys_loaded );
+    return true;
+}
+
+//------------------------------------------------------Process_class_subsystem::subsystem_activate
+
+bool Process_class_subsystem::subsystem_activate()
+{
+    set_subsystem_state( subsys_active );
+    return true;
+}
+
+//-------------------------------------------------------------------Process_class_subsystem::close
+
+void Process_class_subsystem::close()
+{
+    _process_class_map.clear();
+}
+
+//----------------------------------------------------------Process_class_subsystem::async_continue
+
+bool Process_class_subsystem::async_continue()
+{
+    bool something_done = false;
+
+    FOR_EACH( Process_class_map, _process_class_map, pc )
+    {
+        FOR_EACH( Process_list, pc->second->_process_list, p )
+        {
+            something_done |= (*p)->async_continue();
+        }
+    }
+
+    return something_done;
+}
+
+//-------------------------------------------------------------Process_class_subsystem::dom_element
+
+xml::Element_ptr Process_class_subsystem::dom_element( const xml::Document_ptr& document, const Show_what& show )
+{
+    xml::Element_ptr element = document.createElement( "process_classes" );
+
+    FOR_EACH( Process_class_map, _process_class_map, it )
+    {
+        //if( it->second->module_use_count() > 0 )
+            element.appendChild( it->second->dom_element( document, show ) );
+    }
+
+    return element;
+}
+
+//---------------------------------------------------Process_class_subsystem::process_class_or_null
+
+Process_class* Process_class_subsystem::process_class_or_null( const string& name )
+{
+    Process_class_map::iterator it = _process_class_map.find( name );
+    return it == _process_class_map.end()? NULL: it->second;
+}
+
+//-----------------------------------------------------------Process_class_subsystem::process_class
+
+Process_class* Process_class_subsystem::process_class( const string& name )
+{
+    Process_class* pc = process_class_or_null( name );
+    if( !pc )  z::throw_xc( "SCHEDULER-195", name );
+    return pc;
+}
+
+//---------------------------------------------------Process_class_subsystem::new_temporary_process
+
+Process* Process_class_subsystem::new_temporary_process()
+{
+    ptr<Process> process = Z_NEW( Process( _spooler ) );
+
+    process->set_temporary( true );
+    temporary_process_class()->add_process( process );
+
+    return process;
+}
+
+//-------------------------------------------------------Process_class_subsystem::add_process_class
+
+void Process_class_subsystem::add_process_class( Process_class* process_class )
+{
+    if( !process_class )  z::throw_xc( __FUNCTION__ );
+
+    if( process_class->is_added() )  z::throw_xc( "SCHEDULER-416", process_class->obj_name() );
+    //Evtl. Nicht kompatibel:  _spooler->check_name( process_class->name() );
+    _process_class_map[ process_class->name() ] = process_class;         
+}
+
+//----------------------------------------------------Process_class_subsystem::remove_process_class
+
+void Process_class_subsystem::remove_process_class( Process_class* process_class )
+{
+    string                      path = process_class->path();
+    Process_class_map::iterator it   = _process_class_map.find( path );
+
+    if( it->second != process_class )  z::throw_xc( "SCHEDULER-418", process_class->obj_name() );
+
+    process_class->prepare_remove();
+    _process_class_map.erase( it );
+}
+
+//-----------------------------------------------------------------Process_class_subsystem::set_dom
+
+void Process_class_subsystem::set_dom( const xml::Element_ptr& element )
+{
+    if( !process_class_or_null( "" ) )
+    {
+        // has_process_classes() => true
+        add_process_class( Z_NEW( Process_class( this, "" ) ) );
+    }
+
+    DOM_FOR_EACH_ELEMENT( element, e )
+    {
+        if( e.nodeName_is( "process_class" ) )
+        {
+            string spooler_id = e.getAttribute( "spooler_id" );
+
+            if( spooler_id.empty() || spooler_id == _spooler->id() )
+            {
+                string process_class_name = e.getAttribute( "name" );
+
+                if( ptr<Process_class> process_class = process_class_or_null( process_class_name ) )
+                {
+                    process_class->set_dom( e );
+                }
+                else
+                {
+                    process_class = Z_NEW( Process_class( this ) );
+                    process_class->set_dom( e );
+                    add_process_class( process_class );
+                }
+            }
+        }
+    }
+}
+
+//-------------------------------------------------------Process_class_subsystem::get_Process_class
+
+STDMETHODIMP Process_class_subsystem::get_Process_class( BSTR path_bstr, spooler_com::Iprocess_class** result )
+{
+    HRESULT hr = S_OK;
+
+    try
+    {
+        *result = process_class( string_from_bstr( path_bstr ) );
+        if( result )  (*result)->AddRef();
+    }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+
+//-----------------------------------------------Process_class_subsystem::get_Process_class_or_null
+
+STDMETHODIMP Process_class_subsystem::get_Process_class_or_null( BSTR path_bstr, spooler_com::Iprocess_class** result )
+{
+    HRESULT hr = S_OK;
+
+    try
+    {
+        *result = process_class_or_null( string_from_bstr( path_bstr ) );
+        if( result )  (*result)->AddRef();
+    }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+
+//----------------------------------------------------Process_class_subsystem::Create_process_class
+
+STDMETHODIMP Process_class_subsystem::Create_process_class( spooler_com::Iprocess_class** result )
+{
+    HRESULT hr = S_OK;
+
+    try
+    {
+        ptr<Process_class> process_class = Z_NEW( Process_class( this ) );
+        *result = process_class.take();
+    }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+
+//-------------------------------------------------------Process_class_subsystem::Add_process_class
+
+STDMETHODIMP Process_class_subsystem::Add_process_class( spooler_com::Iprocess_class* process_class )
+{
+    HRESULT hr = S_OK;
+
+    try
+    {
+        add_process_class( dynamic_cast<Process_class*>( process_class ) );
+    }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+
+//-----------------------------------------------------Process_class_subsystem::try_to_free_process
+
+//bool Process_class_subsystem::try_to_free_process( Job* for_job, Process_class* process_class, const Time& now )
+//{
+//    return _spooler->task_subsystem()->try_to_free_process( for_job, process_class, now );
+//}
 
 //-------------------------------------------------------------------------------------------------
 

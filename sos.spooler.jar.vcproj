@@ -322,6 +322,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
+						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
 						Outputs="$(IntDir)sos\spooler\$(InputName).class"
@@ -332,6 +333,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
+						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
 						Outputs="$(IntDir)sos\spooler\$(InputName).class"
@@ -346,6 +348,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
+						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
 						Outputs="$(IntDir)sos\spooler\$(InputName).class"
@@ -356,6 +359,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
+						Description=""
 						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
 						Outputs="$(IntDir)sos\spooler\$(InputName).class"
@@ -468,6 +472,58 @@
 			</File>
 			<File
 				RelativePath=".\sos\spooler\Order_queue.java"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description=""
+						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
+						Outputs="$(IntDir)sos\spooler\$(InputName).class"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description=""
+						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
+						Outputs="$(IntDir)sos\spooler\$(InputName).class"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\sos\spooler\Process_class.java"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description=""
+						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
+						Outputs="$(IntDir)sos\spooler\$(InputName).class"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description=""
+						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
+						Outputs="$(IntDir)sos\spooler\$(InputName).class"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\sos\spooler\Process_classes.java"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"

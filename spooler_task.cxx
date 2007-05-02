@@ -700,7 +700,8 @@ void Task::set_state( State new_state )
             State old_state = _state;
             _state = new_state;
 
-            if( is_idle()  &&  _job->_module->_process_class )  _job->_module->_process_class->notify_a_process_is_idle();
+            if( is_idle() )
+                if( Process_class* process_class = _job->_module->process_class_or_null() )  process_class->notify_a_process_is_idle();
 
 
             Log_level log_level = new_state == s_starting || new_state == s_closed? log_info : log_debug9;

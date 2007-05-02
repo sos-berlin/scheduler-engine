@@ -41,6 +41,8 @@ string Scheduler_object::name_of_type_code( Scheduler_object::Type_code type_cod
         case type_order:                        return "Order";
         case type_order_subsystem:              return "Order_subsystem";
         case type_process:                      return "Process";
+        case type_process_class:                return "Process_class";
+        case type_process_class_subsystem:      return "Process_class_subsystem";
         case type_scheduler_event_manager:      return "Scheduler_event_manager";
         case type_scheduler_script:             return "Scheduler_script";
         case type_scheduler:                    return "Scheduler";

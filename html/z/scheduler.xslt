@@ -654,13 +654,7 @@
                             </xsl:when>
                             <xsl:otherwise>
                                 <td>
-                                    <xsl:apply-templates select="@state" />
-                                    <xsl:text> </xsl:text>
-                                    <xsl:if test="@in_process_since!=''">
-                                        <span class="small">
-                                            (<xsl:value-of select="@in_process_since__xslt_datetime_diff"  disable-output-escaping="yes"/> in step)
-                                        </span>
-                                    </xsl:if>
+                                    <xsl:apply-templates select="." mode="task_line"/>
                                 </td>
                             </xsl:otherwise>
                         </xsl:choose>
@@ -670,7 +664,19 @@
         </xsl:for-each>
     </xsl:template>
 
-    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Job_chains-->
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~task-->
+
+    <xsl:template match="task" mode="task_line">
+        <xsl:apply-templates select="@state" />
+        <xsl:text> </xsl:text>
+        <xsl:if test="@in_process_since!=''">
+            <span class="small">
+                (<xsl:value-of select="@in_process_since__xslt_datetime_diff"  disable-output-escaping="yes"/> in step)
+            </span>
+        </xsl:if>
+    </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Job_chains-->
 
     <xsl:template match="job_chains">
         <xsl:call-template name="job_chains">
@@ -1169,8 +1175,8 @@
                     </tr>
 
                     <tr>
-                        <td colspan="99" style="padding-top: 4pt; border-top: 1px solid gray">
-                            no-order jobs:
+                        <td colspan="99" class="label" style="padding-top: 4pt; border-top: 1px solid gray">
+                            no-order jobs
                         </td>
                     </tr>
 
@@ -1280,15 +1286,62 @@
                     <xsl:if test="position()>1">
                         <xsl:text>, </xsl:text>
                     </xsl:if>
-                    
-                    <xsl:value-of select="@lock"/>
-                    <xsl:if test="@exclusive='no'">
-                        <span class="small"> non-excl.</span>
-                    </xsl:if>
+
+                    <xsl:apply-templates select="." mode="short"/>
                 </xsl:for-each>
             </xsl:if>
         </xsl:if>
     </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~lock.use-->
+
+    <xsl:template match="lock.use" mode="short">
+
+        <xsl:variable name="lock" select="/spooler/answer/state/locks/lock [ @name = current()/@lock ]"/>  <!-- Im rechten Fenster leer -->
+
+        <xsl:element name="span">
+            <xsl:if test="@is_available='no'">
+                <xsl:attribute name="class">lock_locked</xsl:attribute>
+            </xsl:if>
+            
+            <xsl:value-of select="@lock"/>
+
+            <xsl:if test="@exclusive='no'">
+                <span class="small"> non-excl.</span>
+            </xsl:if>
+        </xsl:element>
+
+    </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~lock.use-->
+    <!-- <locks> ist im rechten Fenster nicht bekannt, nur <job>.-->
+
+    <!--xsl:template match="lock.use" mode="long">
+
+        <xsl:apply-templates select="." mode="short"/>
+
+        <xsl:variable name="lock" select="/spooler/answer/state/locks/lock [ @name = current()/@lock ]"/>
+
+        <xsl:choose>
+            <xsl:when test="$lock/lock.holders/lock.holder">
+                <xsl:text> </xsl:text>
+                <xsl:choose>
+                    <xsl:when test="lock.holders/@exclusive='no'">
+                        <xsl:value-of select="count( lock.holders/lock.holder )"/>
+                        <xsl:text> non-exclusive holders</xsl:text>
+                    </xsl:when>
+                    <xsl:otherwise>
+                        <xsl:text> exclusively held</xsl:text>
+                    </xsl:otherwise>
+                </xsl:choose>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:text> (free)</xsl:text>
+            </xsl:otherwise>
+
+        </xsl:choose>
+
+    </xsl:template-->
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Order in Job chain list-->
 
@@ -1490,17 +1543,39 @@
                 </tr>
 
                 <tr>
-                    <td style="padding-right: 2ex">
-                        <span style="font-weight: bold">
-                            <xsl:text>Lock </xsl:text>
+                    <td style="padding-right: 2ex; width: 10ex">
+                        <xsl:element name="span">
+                            <xsl:if test="lock.holders/lock.holder">
+                                <xsl:attribute name="class">lock_locked</xsl:attribute>
+                            </xsl:if>
+                            
+                            <xsl:attribute name="style">
+                                <xsl:text>font-weight: bold; white-space: nowrap;</xsl:text>
+                            </xsl:attribute>
+
                             <xsl:value-of select="@name"/>
-                        </span>
+                        </xsl:element>
                     </td>
                     
                     <td>
-                        <xsl:if test="not( lock.holders/lock.holder )">
-                            <xsl:text>free</xsl:text>
-                        </xsl:if>
+                        <xsl:choose>
+                            <xsl:when test="lock.holders/lock.holder">
+                                <span class="lock_locked">
+                                    <xsl:choose>
+                                        <xsl:when test="lock.holders/@exclusive='no'">
+                                            <!--xsl:value-of select="count( lock.holders/lock.holder )"/-->
+                                            <xsl:text> non-exclusively locked</xsl:text>
+                                        </xsl:when>
+                                        <xsl:otherwise>
+                                            <xsl:text> locked</xsl:text>
+                                        </xsl:otherwise>
+                                    </xsl:choose>
+                                </span>
+                            </xsl:when>
+                            <xsl:otherwise>
+                                <span>free</span>
+                            </xsl:otherwise>
+                        </xsl:choose>
                         <!--xsl:if test="lock.holders/lock.holder">
                             <xsl:value-of select="count( lock.holders/lock.holder )"/>
                             <xsl:choose>
@@ -1528,38 +1603,39 @@
                 </tr>
 
                 <tr>
-                    <td colspan="99" style="padding-left: 2ex">
-                        <xsl:if test="lock.queue [ @exclusive='no' ]/lock.queue.entry">
-                            <xsl:value-of select="count( lock.queue[ @exclusive='no' ]/lock.queue.entry )"/>
-                            <xsl:text> waiting non-exclusive uses:</xsl:text>
-                            <div style="margin-left: 2ex">
-                                <xsl:apply-templates select="lock.queue [ @exclusive='no' ]"/>
-                            </div>
-                        </xsl:if>
-                        
-                        <xsl:if test="lock.queue [ not( @exclusive='no' ) ]/lock.queue.entry">
-                            <xsl:value-of select="count( lock.queue[ not( @exclusive='yes' ) ]/lock.queue.entry )"/>
-                            <xsl:text>waiting exclusive uses:</xsl:text>
-                            <div style="margin-left: 2ex">
-                                <xsl:apply-templates select="lock.queue [ not( @exclusive='no' ) ] "/>
-                            </div>
-                        </xsl:if>
-
+                    <td colspan="99" style="padding-left: 4ex">
                         <xsl:if test="lock.holders/lock.holder">
-                            
-                            <xsl:choose>
-                                <xsl:when test="lock.holders/@exclusive='no'">
-                                    <xsl:value-of select="count( lock.holders/lock.holder )"/>
-                                    <xsl:text> non-exclusive holders</xsl:text>
-                                </xsl:when>
-                                <xsl:otherwise>
-                                    <xsl:text>Exclusive holder</xsl:text>
-                                </xsl:otherwise>
-                            </xsl:choose>
-
-                            <div style="margin-left: 2ex">
-                                <xsl:apply-templates select="lock.holders"/>
+                            <div class="label">
+                                <xsl:choose>
+                                    <xsl:when test="lock.holders/@exclusive='no'">
+                                        <!--xsl:value-of select="count( lock.holders/lock.holder )"/-->
+                                        <xsl:text>Holders (non-exclusive)</xsl:text>
+                                    </xsl:when>
+                                    <xsl:otherwise>
+                                        <xsl:text>Holder</xsl:text>
+                                    </xsl:otherwise>
+                                </xsl:choose>
                             </div>
+
+                            <xsl:apply-templates select="lock.holders"/>
+                        </xsl:if>
+
+                        <xsl:if test="lock.queue [ not( @exclusive='no' ) ]/lock.queue.entry">
+                            <div class="label" style="margin-top: 5pt;">
+                                <!--xsl:value-of select="count( lock.queue[ not( @exclusive='no' ) ]/lock.queue.entry )"/-->
+                                <xsl:text>Waiting jobs</xsl:text>
+                            </div>
+
+                            <xsl:apply-templates select="lock.queue [ not( @exclusive='no' ) ] "/>
+                        </xsl:if>
+
+                        <xsl:if test="lock.queue [ @exclusive='no' ]/lock.queue.entry">
+                            <div class="label" style="margin-top: 5pt;">
+                                <!--xsl:value-of select="count( lock.queue[ @exclusive='no' ]/lock.queue.entry )"/-->
+                                <xsl:text>Waiting jobs (non-exclusive)</xsl:text>
+                            </div>
+
+                            <xsl:apply-templates select="lock.queue [ @exclusive='no' ]"/>
                         </xsl:if>
                     </td>
                 </tr>
@@ -1574,18 +1650,27 @@
         <table width="100%" cellpadding="0" cellspacing="0" class="lock">
 
             <xsl:for-each select="lock.queue.entry">
-                <tr>
-                    <td>
-                        <xsl:element name="span">
-                            <xsl:attribute name="class"  >job</xsl:attribute>
-                            <xsl:attribute name="style"  >cursor: pointer; </xsl:attribute>
-                            <xsl:attribute name="onclick">call_error_checked( show_job_details, '<xsl:value-of select="@job"/>' )</xsl:attribute>
-                            
-                            <xsl:text>Job </xsl:text>
-                            <xsl:value-of select="@job"/>
-                        </xsl:element>
-                    </td>
-                </tr>
+                <xsl:variable name="tr_id" select="concat( 'scheduler_tr_lock_', parent::lock/@name, '_job_', @job )"/>
+                <xsl:element name="tr">
+                    <xsl:attribute name="id">
+                        <xsl:value-of select="$tr_id"/>
+                    </xsl:attribute>
+
+                    <xsl:element name="td">
+                        <xsl:attribute name="class"  >job</xsl:attribute>
+                        <xsl:attribute name="style"  >cursor: pointer; </xsl:attribute>
+                        <xsl:attribute name="onclick">call_error_checked( show_job_details, '<xsl:value-of select="@job"/>' )</xsl:attribute>
+                        <xsl:attribute name="onmouseover">
+                            this.className = document.getElementById( "<xsl:value-of select="$tr_id"/>" ).className = "job_hover";
+                        </xsl:attribute>
+                        <xsl:attribute name="onmouseout" >
+                            this.className = document.getElementById( "<xsl:value-of select="$tr_id"/>" ).className = "job"
+                        </xsl:attribute>
+
+                        <xsl:text>Job </xsl:text>
+                        <xsl:value-of select="@job"/>
+                    </xsl:element>
+                </xsl:element>
 
             </xsl:for-each>
 
@@ -1598,19 +1683,34 @@
         <table width="100%" cellpadding="0" cellspacing="0" class="lock">
 
             <xsl:for-each select="lock.holder">
-                <tr>
-                    <td>
-                        <xsl:element name="span">
-                            <xsl:attribute name="class"  >task</xsl:attribute>
-                            <xsl:attribute name="style"  >cursor: pointer; </xsl:attribute>
-                            <xsl:attribute name="onclick">call_error_checked( show_task_details, '<xsl:value-of select="@job"/>', '<xsl:value-of select="@task"/>' )</xsl:attribute>
+                <xsl:variable name="tr_id" select="concat( 'scheduler_tr_lock_', parent::lock.holders/parent::lock/@name, '_task_', @job, ':', @task )"/>
+                <xsl:element name="tr">
+                    <xsl:attribute name="id">
+                        <xsl:value-of select="$tr_id"/>
+                    </xsl:attribute>
 
+                    <xsl:element name="td">
+                        <xsl:attribute name="class"  >task</xsl:attribute>
+                        <xsl:attribute name="style"  >cursor: pointer; </xsl:attribute>
+                        <xsl:attribute name="onclick">
+                            call_error_checked( show_task_details, '<xsl:value-of select="@job"/>', '<xsl:value-of select="@task"/>' )
+                        </xsl:attribute>
+                        <xsl:attribute name="onmouseover">
+                            this.className = document.getElementById( "<xsl:value-of select="$tr_id"/>" ).className = "task_hover";
+                        </xsl:attribute>
+                        <xsl:attribute name="onmouseout" >
+                            this.className = document.getElementById( "<xsl:value-of select="$tr_id"/>" ).className = "task"
+                        </xsl:attribute>
+
+                        <span style="padding-right: 2ex">
                             <xsl:text>Task </xsl:text>
                             <xsl:value-of select="@job"/>:<xsl:value-of select="@task"/>
-                        </xsl:element>
-                    </td>
-                </tr>
-
+                        </span>
+                        <span>
+                            <xsl:apply-templates select="/spooler/answer/state/jobs/job [ @job=current()/@job ]/tasks/task[ @task=current()/@task ]" mode="task_line"/>
+                        </span>
+                    </xsl:element>
+                </xsl:element>
             </xsl:for-each>
 
         </table>
@@ -2154,6 +2254,22 @@
                     </xsl:otherwise>
                 </xsl:choose>
             </tr>
+
+            <tr>
+                <td>
+                    <span class="label">locks:</span>
+                </td>
+                <td colspan="3">
+                    <xsl:for-each select="lock.requestor/lock.use">
+                        <xsl:if test="position()>1">
+                            <xsl:text>, </xsl:text>
+                        </xsl:if>
+
+                        <xsl:apply-templates select="." mode="short"/>  <!-- Für mode="long" fehlt /state/locks -->
+                    </xsl:for-each>
+                </td>
+            </tr>
+
 
             <tr>
                 <td><span class="label">next start:</span></td>

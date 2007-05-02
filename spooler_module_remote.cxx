@@ -374,21 +374,21 @@ bool Remote_module_instance_proxy::try_to_get_process()
     if( !_process )
     {
         if( _module->_separate_process 
-         || _module->_process_class_name.empty()  && !_spooler->process_class_or_null("") )   // Namenlose Prozessklasse nicht bekannt? Dann temporäre Prozessklasse verwenden
+         || _module->_process_class_path.empty()  && !_spooler->process_class_subsystem()->process_class_or_null("") )   // Namenlose Prozessklasse nicht bekannt? Dann temporäre Prozessklasse verwenden
         {
-            _process = _spooler->new_temporary_process();
+            _process = _spooler->process_class_subsystem()->new_temporary_process();
         }
         else
         {
             //_process = Z_NEW( Process( _spooler ) );        
-            _process = _spooler->process_class( _module->_process_class_name ) -> select_process_if_available();
+            _process = _spooler->process_class_subsystem()->process_class( _module->_process_class_path ) -> select_process_if_available();
             if( !_process )  return false;
 
             // Erstmal immer nur eine Task pro Prozess. 
             // Mehrere Tasks pro Prozess erst, wenn sichergestellt ist, dass jede Operation die Antwort liest (v.a. im Fehlerfall),
             // sodass nicht eine nicht beendete Operation den Prozess blockiert.
 
-            //_process = _spooler->process_class( _process_class_name ) -> select_process();
+            //_process = _spooler->process_class( _process_class_path ) -> select_process();
         }
 
         _process->add_module_instance( this );
