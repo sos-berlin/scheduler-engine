@@ -3269,6 +3269,7 @@ const Com_method Com_spooler::_methods[] =
     { DISPATCH_METHOD     , 34, "Terminate"                 , (Com_method_ptr)&Com_spooler::Terminate            , VT_EMPTY     , { VT_BYREF|VT_VARIANT, VT_BYREF|VT_VARIANT, VT_BYREF|VT_VARIANT, VT_BYREF|VT_VARIANT }, 4 },
     { DISPATCH_METHOD     , 35, "Terminate_and_restart"     , (Com_method_ptr)&Com_spooler::Terminate_and_restart, VT_EMPTY     , { VT_BYREF|VT_VARIANT }, 1 },
     { DISPATCH_PROPERTYGET, 37, "Locks"                     , (Com_method_ptr)&Com_spooler::get_Locks            , VT_DISPATCH  },
+    { DISPATCH_PROPERTYGET, 38, "Process_classes"           , (Com_method_ptr)&Com_spooler::get_Process_classes  , VT_DISPATCH  },
     {}
 };
 
@@ -3879,6 +3880,24 @@ STDMETHODIMP Com_spooler::get_Locks( Ilocks** result )
     try
     {
         *result = _spooler->lock_subsystem();
+        if( *result )  (*result)->AddRef();
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+
+//-----------------------------------------------------------------Com_spooler::get_Process_classes
+
+STDMETHODIMP Com_spooler::get_Process_classes( Iprocess_classes** result )
+{
+    HRESULT hr = S_OK;
+
+    if( !_spooler )  return E_POINTER;
+
+    try
+    {
+        *result = _spooler->process_class_subsystem();
         if( *result )  (*result)->AddRef();
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }

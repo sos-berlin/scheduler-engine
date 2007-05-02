@@ -2184,7 +2184,7 @@ void Spooler::run()
 
                             //object_server::Connection_to_own_server* server = dynamic_cast<object_server::Connection_to_own_server*>( +(*p)->_connection );
                             if( object_server::Connection* server = (*p)->_connection )
-                                if( server->process_event() )  wait_handles.add( server->process_event() );        // Signalisiert Prozessende
+                                if( server->process_event() && *server->process_event() )  wait_handles.add( server->process_event() );        // Signalisiert Prozessende
 
 #                        else
 

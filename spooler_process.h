@@ -259,7 +259,7 @@ struct Process_class_subsystem : idispatch_implementation< Process_class_subsyst
     Process_class*              process_class               ( const string& name );
     Process_class*              process_class_or_null       ( const string& name );
     Process*                    new_temporary_process       ();
-    Process_class*              temporary_process_class     ()                                      { return _temporary_process_class; }
+    Process_class*              temporary_process_class     ()                                      { return process_class( temporary_process_class_name ); }
     bool                        has_process_classes         ()                                      { return _process_class_map.size() > 1; }   // Eine ist _temporary_process_class
     bool                        try_to_free_process         ( Job* for_job, Process_class*, const Time& now );
     bool                        async_continue              ();

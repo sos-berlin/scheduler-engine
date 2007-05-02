@@ -695,6 +695,9 @@ library Spooler
 
         [id(37),propget]        
         HRESULT                 Locks                   ( [out,retval] Ilocks** );
+
+        [id(38),propget]        
+        HRESULT                 Process_classes         ( [out,retval] Iprocess_classes** );
     }
 
     [

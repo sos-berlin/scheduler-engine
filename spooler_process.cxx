@@ -1027,10 +1027,11 @@ xml::Element_ptr Process_class::dom_element( const xml::Document_ptr& document, 
     element.setAttribute         ( "max_processes"   , _max_processes );
     element.setAttribute_optional( "remote_scheduler", _remote_scheduler.as_string() );
 
-    xml::Element_ptr processes_element = document.createElement( "processes" );
-    element.appendChild( processes_element );
-
-    FOR_EACH( Process_list, _process_list, it )  processes_element.appendChild( (*it)->dom_element( document, show ) );
+    if( !_process_list.empty() )
+    {
+        xml::Element_ptr processes_element = element.append_new_element( "processes" );
+        FOR_EACH( Process_list, _process_list, it )  processes_element.appendChild( (*it)->dom_element( document, show ) );
+    }
 
     if( !_waiting_jobs.empty() )
     {

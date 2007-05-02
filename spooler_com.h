@@ -633,6 +633,7 @@ struct Com_spooler : spooler_com::Ispooler,
     STDMETHODIMP                Create_xslt_stylesheet      ( spooler_com::Ixslt_stylesheet** );
     STDMETHODIMP            put_Suspend_after_resume        ( VARIANT_BOOL );
     STDMETHODIMP            get_Locks                       ( spooler_com::Ilocks** );
+    STDMETHODIMP            get_Process_classes             ( spooler_com::Iprocess_classes** );
 
 
     void                        close                       ()                                      { THREAD_LOCK(_lock)  _spooler = NULL; }
