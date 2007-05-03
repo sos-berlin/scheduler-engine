@@ -2605,6 +2605,24 @@
             </text>
         </message>
 
+        <message code="SCHEDULER-420">
+            <text xml:lang="en">
+                <title>Negative value is not allowed for <p1/></title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-421">
+            <text xml:lang="en">
+                <title><p1/> is being removed and not longer modifiable</title>
+            </text>
+        </message>
+
+        <!--message code="SCHEDULER-422">
+            <text xml:lang="en">
+                <title><p1>object</p1> is in use, property <p2/> cannot be changed</title>
+            </text>
+        </message-->
+
         <!--message code="SCHEDULER-398">
             <text xml:lang="en">
                 <title>Same Java class <p1/> with source code is used in <p2>job</p2></title>
@@ -3736,11 +3754,35 @@
             </text>
         </message>
 
-        <!--message code="SCHEDULER-848" weight="debug3">
+        <message code="SCHEDULER-867" weight="info" object="Process_class">
             <text xml:lang="en">
-                <title>Compressing existent file '<p1/>' to '<p2/>'</title>
+                <title>Process class is in use, it will be removed later</title>
             </text>
-        </message-->
+        </message>
+
+        <message code="SCHEDULER-868" weight="info" object="Process_class">
+            <text xml:lang="en">
+                <title><p1>process_class</p1> is removed</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-869" weight="info" object="Process_class">
+            <text xml:lang="en">
+                <title>Process class is replaced</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-870" weight="info" object="Process_class">
+            <text xml:lang="en">
+                <title>Process class is added</title>
+            </text>
+        </message>
+        
+        <message code="SCHEDULER-871" weight="info" object="Process_class">
+            <text xml:lang="en">
+                <title>Process class is in use, it will be replaced later</title>
+            </text>
+        </message>
 
     </messages>
     

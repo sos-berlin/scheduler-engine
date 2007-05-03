@@ -2178,7 +2178,7 @@ void Spooler::run()
 #               endif 
                 FOR_EACH( Process_class_subsystem::Process_class_map, _process_class_subsystem->_process_class_map, pc )
                 {
-                    FOR_EACH( Process_list, pc->second->_process_list, p )
+                    FOR_EACH( Process_class::Process_set, pc->second->_process_set, p )
                     {
 #                       ifdef Z_WINDOWS
 

@@ -23,6 +23,7 @@
       
         <messages>
             <message level="error" code="SCHEDULER-416"/>
+            <message level="error" code="SCHEDULER-420"/>
         </messages>
     </method>
 

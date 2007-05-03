@@ -18,10 +18,10 @@ const Com_method Lock_subsystem::_methods[] =
 { 
 #ifdef COM_METHOD
     COM_PROPERTY_GET( Lock_subsystem,  1, Java_class_name     , VT_BSTR    , 0 ),
-    COM_PROPERTY_GET( Lock_subsystem,  2, Lock                , VT_DISPATCH, 0, VT_BSTR ),
-    COM_PROPERTY_GET( Lock_subsystem,  3, Lock_or_null        , VT_DISPATCH, 0, VT_BSTR ),
-    COM_METHOD      ( Lock_subsystem,  4, Create_lock         , VT_DISPATCH, 0 ),
-    COM_METHOD      ( Lock_subsystem,  5, Add_lock            , VT_EMPTY   , 0, VT_DISPATCH ),
+    COM_PROPERTY_GET( Lock_subsystem,  0, Lock                , VT_DISPATCH, 0, VT_BSTR ),
+    COM_PROPERTY_GET( Lock_subsystem,  2, Lock_or_null        , VT_DISPATCH, 0, VT_BSTR ),
+    COM_METHOD      ( Lock_subsystem,  3, Create_lock         , VT_DISPATCH, 0 ),
+    COM_METHOD      ( Lock_subsystem,  4, Add_lock            , VT_EMPTY   , 0, VT_DISPATCH ),
 #endif
     {}
 };
@@ -996,8 +996,8 @@ void Lock_subsystem::add_lock( Lock* lock )
 {
     if( !lock )  z::throw_xc( __FUNCTION__ );
 
-    if( lock->is_added() )  z::throw_xc( "SCHEDULER-416", lock->obj_name() );
     _spooler->check_name( lock->name() );
+    if( lock_or_null( lock->path() ) )  z::throw_xc( "SCHEDULER-416", lock->obj_name() );
 
     _lock_map[ lock->name() ] = lock;
 }

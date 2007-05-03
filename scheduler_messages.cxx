@@ -281,6 +281,8 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-417", "Invalid name: '$1'" },
     { "SCHEDULER-418", "$1 is not added, cannot be removed" },
     { "SCHEDULER-419", "New Process_class.max_processes=$1 is below current number of processes=$2" },
+    { "SCHEDULER-420", "Negative value is not allowed for $1" },
+    { "SCHEDULER-421", "$1 is being removed and not longer modifiable" },
     { "SCHEDULER-900", "Scheduler $1 is starting with $2, pid=$3" },
     { "SCHEDULER-902", "state=$1" },
     { "SCHEDULER-904", "Tasks have $1s to terminate" },
@@ -425,6 +427,11 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-861", "$1 has been removed" },
     { "SCHEDULER-862", "Continuing in $1" },
     { "SCHEDULER-863", "Continuing from $1" },
+    { "SCHEDULER-867", "Process class is in use, it will be removed later" },
+    { "SCHEDULER-868", "$1 is removed" },
+    { "SCHEDULER-869", "Process class is replaced" },
+    { "SCHEDULER-870", "Process class is added" },
+    { "SCHEDULER-871", "Process class is in use, it will be replaced later" },
     {}
 };
 } //namespace sos

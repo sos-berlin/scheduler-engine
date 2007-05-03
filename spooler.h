@@ -575,7 +575,7 @@ struct Spooler : Object,
 
     ptr<Scheduler_script_interface> _scheduler_script;
 
-    Process_list               _process_list;
+  //Process_list               _process_list;
     bool                       _ignore_process_classes;
 
 

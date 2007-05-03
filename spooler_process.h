@@ -108,7 +108,7 @@ struct Process : zschimmer::Object, Scheduler_object
     void                    set_temporary                   ( bool t )                              { _temporary = t; }
     void                    set_job_name                    ( const string& job_name )              { _job_name = job_name; }
     void                    set_task_id                     ( int id )                              { _task_id = id; }
-    void                    set_server                      ( const string& hostname, int port )    { _server_hostname = hostname;  _server_port = port; }
+  //void                    set_server                      ( const string& hostname, int port )    { _server_hostname = hostname;  _server_port = port; }
     void                    set_priority                    ( const string& priority )              { _priority = priority; }
     int                         pid                         () const                                { return _connection? _connection->pid() : 0; }
     bool                     is_terminated                  ();
@@ -130,8 +130,8 @@ struct Process : zschimmer::Object, Scheduler_object
     Fill_zero                  _zero_;
     string                     _job_name;
     int                        _task_id;
-    string                     _server_hostname;
-    int                        _server_port;
+  //string                     _server_hostname;
+  //int                        _server_port;
     Host_and_port              _controller_address;
     ptr<object_server::Connection> _connection;             // Verbindung zum Prozess
     ptr<object_server::Session>    _session;                // Wir haben immer nur eine Session pro Verbindung
@@ -145,6 +145,7 @@ struct Process : zschimmer::Object, Scheduler_object
     Module_instance*           _module_instance;
     Process_class*             _process_class;
     string                     _priority;
+    Host_and_port              _remote_scheduler;
     pid_t                      _remote_pid;
     File                       _remote_stdout_file;
     File                       _remote_stderr_file;
@@ -152,10 +153,6 @@ struct Process : zschimmer::Object, Scheduler_object
     ptr<Xml_client_connection>  _xml_client_connection;
     ptr<Close_operation>       _close_operation;
 };
-
-//-------------------------------------------------------------------------------------Process_list
-
-typedef list< ptr<Process> >    Process_list;
 
 //------------------------------------------------------------------------------------Process_class
 // <process_class>
@@ -169,7 +166,8 @@ struct Process_class : idispatch_implementation< Process_class, spooler_com::Ipr
                                ~Process_class               ();
 
     void                        init                        ();
-    void                        prepare_remove              ();
+    bool                        prepare_remove              ();
+    bool                        is_removable_now            ();
 
     void                        add_process                 ( Process* );
     void                        remove_process              ( Process* );
@@ -223,22 +221,23 @@ struct Process_class : idispatch_implementation< Process_class, spooler_com::Ipr
     bool                        subsystem_activate          ();
 
   private:
+    friend struct               Process_class_subsystem;
+
     Fill_zero                  _zero_;
     string                     _name;
     int                        _max_processes;
-    
-    //typedef stdext::hash_set<Remote_module_instance_proxy*> Module_set
-    //Module_set                 _module_set;
-
-    Job_list                   _waiting_jobs;
     Host_and_port              _remote_scheduler;
+    bool                       _remove;                     // Löschen, sobald is_removable()
+    ptr<Process_class>         _new_process_class;          // Prozessklasse ersetzen, sobald is_removable()
+    Job_list                   _waiting_jobs;
 
   public:
-    Process_list               _process_list;
+    typedef stdext::hash_set< ptr<Process> >  Process_set;
+    Process_set                _process_set;
 
 
     static Class_descriptor     class_descriptor;
-    static const Com_method     _methods[];
+    static const Com_method    _methods[];
 };
 
 //--------------------------------------------------------------------------Process_class_subsystem

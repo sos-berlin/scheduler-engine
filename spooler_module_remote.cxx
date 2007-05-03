@@ -32,13 +32,12 @@ void Remote_module_instance_proxy::close()
 
 void Remote_module_instance_proxy::init()
 {
-/*
-    if( getenv( "SPOOLER_SERVER" ) )
-    {
-        _server_hostname = getenv( "SPOOLER_SERVER" );
-        _server_port     = 9000;
-    }
-*/
+    //if( getenv( "SPOOLER_SERVER" ) )
+    //{
+    //    _server_hostname = getenv( "SPOOLER_SERVER" );
+    //    _server_port     = 9000;
+    //}
+
     Module_instance::init();
 
     if( _module->_reuse != Module::reuse_task )  z::throw_xc( "SCHEDULER-192" );         // Problem u.a.: synchrones Release(), wenn Job gestoppt wird
@@ -395,10 +394,10 @@ bool Remote_module_instance_proxy::try_to_get_process()
 
         if( !_process->started() )
         {
-            if( !_server_hostname.empty() )
-            {
-                _process->set_server( _server_hostname, _server_port );
-            }
+            //if( !_server_hostname.empty() )
+            //{
+            //    _process->set_server( _server_hostname, _server_port );
+            //}
 
             _process->set_job_name( _job_name );
             _process->set_task_id ( _task_id  );

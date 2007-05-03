@@ -33,6 +33,8 @@ struct Imail;
 struct Ijob_chain;
 struct Iorder_queue;
 struct Iorder;
+struct Iprocess_class;
+struct Iprocess_classes;
 struct Isubprocess;
 struct Iweb_service;
 struct Iweb_service_operation;
@@ -794,24 +796,24 @@ struct Ilock : IDispatch
     virtual HRESULT             Remove                      ()                                      = 0;
 };
 
-//-------------------------------------------------------------------------------------------Ilocks
+//---------------------------------------------------------------------------------Iprocess_classes
 
 DEFINE_GUID( IID_Iprocess_classes, 0xfeee47b7, 0x6c1b, 0x11d8, 0x81, 0x03, 0x00, 0x04, 0x76, 0xee, 0x8a, 0xfb );   // {feee47b5-6c1b-11d8-8103-000476ee8afb}
 
-struct Ilocks : IDispatch
+struct Iprocess_classes : IDispatch
 {
     virtual HRESULT         get_Java_class_name             ( BSTR* )                               = 0;
-    virtual HRESULT         get_Process_class               ( BSTR, Ilock** )                       = 0;
-    virtual HRESULT         get_Process_class_or_null       ( BSTR, Ilock** )                       = 0;
-    virtual HRESULT             Create_process_class        ( Ilock** )                             = 0;
-    virtual HRESULT             Add_process_class           ( Ilock* )                              = 0;
+    virtual HRESULT         get_Process_class               ( BSTR, Iprocess_class** )              = 0;
+    virtual HRESULT         get_Process_class_or_null       ( BSTR, Iprocess_class** )              = 0;
+    virtual HRESULT             Create_process_class        ( Iprocess_class** )                    = 0;
+    virtual HRESULT             Add_process_class           ( Iprocess_class* )                     = 0;
 };
 
-//--------------------------------------------------------------------------------------------Ilock
+//-----------------------------------------------------------------------------------Iprocess_class
 
 DEFINE_GUID( IID_Iprocess_class, 0xfeee47b8, 0x6c1b, 0x11d8, 0x81, 0x03, 0x00, 0x04, 0x76, 0xee, 0x8a, 0xfb );   // {feee47b6-6c1b-11d8-8103-000476ee8afb}
 
-struct Ilock : IDispatch
+struct Iprocess_class : IDispatch
 {
     virtual HRESULT         get_Java_class_name             ( BSTR* )                               = 0;
     virtual HRESULT         put_Name                        ( BSTR )                                = 0;

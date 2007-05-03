@@ -21,10 +21,10 @@ const Com_method Process_class_subsystem::_methods[] =
 { 
 #ifdef COM_METHOD
     COM_PROPERTY_GET( Process_class_subsystem,  1, Java_class_name      , VT_BSTR    , 0 ),
-    COM_PROPERTY_GET( Process_class_subsystem,  2, Process_class        , VT_DISPATCH, 0, VT_BSTR ),
-    COM_PROPERTY_GET( Process_class_subsystem,  3, Process_class_or_null, VT_DISPATCH, 0, VT_BSTR ),
-    COM_METHOD      ( Process_class_subsystem,  4, Create_process_class , VT_DISPATCH, 0 ),
-    COM_METHOD      ( Process_class_subsystem,  5, Add_process_class    , VT_EMPTY   , 0, VT_DISPATCH ),
+    COM_PROPERTY_GET( Process_class_subsystem,  0, Process_class        , VT_DISPATCH, 0, VT_BSTR ),
+    COM_PROPERTY_GET( Process_class_subsystem,  2, Process_class_or_null, VT_DISPATCH, 0, VT_BSTR ),
+    COM_METHOD      ( Process_class_subsystem,  3, Create_process_class , VT_DISPATCH, 0 ),
+    COM_METHOD      ( Process_class_subsystem,  4, Add_process_class    , VT_EMPTY   , 0, VT_DISPATCH ),
 #endif
     {}
 };
@@ -337,9 +337,10 @@ void Process::remove_module_instance( Module_instance* )
             _session = NULL;
         }
 
-        if( _process_class )  
+        if( Process_class* process_class = _process_class )  
         {
-            _process_class->remove_process( this );
+            _process_class = NULL;
+            process_class->remove_process( this );
         }
     }
 }
@@ -348,6 +349,8 @@ void Process::remove_module_instance( Module_instance* )
 
 void Process::start()
 {
+    _remote_scheduler = _process_class->_remote_scheduler;
+
     if( is_remote_host() )
     {
         assert( _process_class );
@@ -377,14 +380,14 @@ void Process::start_local()
     if( started() )  throw_xc( __FUNCTION__ );
 
 
-    if( !_server_hostname.empty() )
-    {
-        assert(0); // War ein experiment
-        //_connection = Z_NEW( object_server::Connection( _spooler->_connection_manager ) );
-        //_connection->connect( _server_hostname, _server_port );
-        //_connection->set_async();
-    }
-    else
+    //if( !_server_hostname.empty() )
+    //{
+    //    assert(0); // War ein experiment
+    //    //_connection = Z_NEW( object_server::Connection( _spooler->_connection_manager ) );
+    //    //_connection->connect( _server_hostname, _server_port );
+    //    //_connection->set_async();
+    //}
+    //else
     {
         ptr<object_server::Connection_to_own_server_process> c = _spooler->_connection_manager->new_connection_to_own_server_process();
         c->open_stdout_stderr_files();
@@ -456,7 +459,7 @@ void Process::async_remote_start()
 
   //c->set_stdin_data( _task_process_xml );
     assert( _process_class );
-    c->set_remote_host( _process_class->remote_scheduler()._host );
+    c->set_remote_host( _remote_scheduler._host );
     c->listen_on_tcp_port( INADDR_ANY );
 
 
@@ -507,7 +510,7 @@ bool Process::async_remote_start_continue( Async_operation::Continue_flags )
         {
             // Hier fehlt noch das Register für gemeinsame Benutzung
 
-            _xml_client_connection = Z_NEW( Xml_client_connection( _spooler, _process_class->remote_scheduler() ) );
+            _xml_client_connection = Z_NEW( Xml_client_connection( _spooler, _remote_scheduler ) );
             _xml_client_connection->set_async_parent( _async_remote_operation );
             _xml_client_connection->set_async_manager( _spooler->_connection_manager );
             _xml_client_connection->set_wait_for_connection( connection_retry_time );
@@ -690,7 +693,7 @@ int Process::termination_signal()
 
 bool Process::is_remote_host() const
 { 
-    return _process_class &&  _process_class->remote_scheduler(); 
+    return _remote_scheduler; 
 }
 
 //-----------------------------------------------------------------------------Process::stdout_path
@@ -727,6 +730,7 @@ xml::Element_ptr Process::dom_element( const xml::Document_ptr& document, const 
     if( _task_id )
     process_element.setAttribute( "task"             , _task_id ),
     process_element.setAttribute( "task_id"          , _task_id );          // VERALTET!
+    process_element.setAttribute_optional( "remote_scheduler", _remote_scheduler.as_string() );
 
     if( _connection )
     {
@@ -796,16 +800,27 @@ void Process_class::close()
 
 //--------------------------------------------------------------------Process_class::prepare_remove
 
-void Process_class::prepare_remove()
+bool Process_class::prepare_remove()
 {
-    int FEHLERCODES;
+    bool result = false;
 
-    //if( is_any_module_registered() )  z::throw_xc( __FUNCTION__ );
+    if( is_removable_now() )
+    {
+        result = true;
+    }
+    else
+    {
+        _remove = true;
+    }
 
-    int WAITING_JOBS_AUFLOESEN;
-    if( !_waiting_jobs.empty() )  z::throw_xc( __FUNCTION__ );
+    return result;
+}
 
-    if( !_process_list.empty() )  z::throw_xc( __FUNCTION__ );
+//--------------------------------------------------------------------Process_class::prepare_remove
+
+bool Process_class::is_removable_now()
+{
+    return _process_set.empty();
 }
 
 //-----------------------------------------------------------------------Process_class::add_process
@@ -813,32 +828,30 @@ void Process_class::prepare_remove()
 void Process_class::add_process( Process* process )
 {
     process->_process_class = this;
-    _process_list.push_back( process );
+    _process_set.insert( process );
 }
 
 //--------------------------------------------------------------------------Spooler::remove_process
 
 void Process_class::remove_process( Process* process )
 {
-    FOR_EACH( Process_list, _process_list, p )
+    Process_set::iterator it = _process_set.find( process );
+    if( it == _process_set.end() )  z::throw_xc( __FUNCTION__ );
+
+    process->_process_class = NULL; 
+    _process_set.erase( it ); 
+
+    if( _remove  &&  is_removable_now() )
     {
-        if( *p == process )  
-        { 
-            process->_process_class = NULL; 
-            _process_list.erase( p ); 
-
-            if( !_waiting_jobs.empty() )
-            {
-                Job* job = *_waiting_jobs.rbegin();
-                job->notify_a_process_is_idle();
-                //job->signal( S() << __FUNCTION__  << "  " << process->obj_name() );
-            }
-
-            return; 
-        }
+        remove();
+        // this ist ungültig!
     }
-
-    throw_xc( "Process_class::remove_process" );
+    else
+    if( !_waiting_jobs.empty() )
+    {
+        Job* job = *_waiting_jobs.rbegin();
+        job->notify_a_process_is_idle();
+    }
 }
 
 //------------------------------------------------------------------------Process_class::new_process
@@ -863,26 +876,29 @@ Process* Process_class::select_process_if_available()
 {
     Process* process = NULL;
 
-    FOR_EACH( Process_list, _process_list, p )
+    if( !_remove )      // remove_process() könnte sonst Process_class löschen.
     {
-        if( (*p)->_module_instance_count == 0 )  { process = *p; break; }
-    }
-
-    if( process )
-    {
-        if( process->_connection && process->_connection->has_error() )
+        FOR_EACH( Process_set, _process_set, p )
         {
-            _spooler->log()->warn( message_string( "SCHEDULER-299", process->short_name() ) );   // "Prozess pid=$1 wird nach Fehler entfernt"
-
-            process->kill();
-            remove_process( process );
-            process = NULL;
+            if( (*p)->_module_instance_count == 0 )  { process = *p; break; }
         }
-    }
 
-    if( !process  
-     && _process_list.size()      < _max_processes  
-     && _spooler->_process_count  < max_processes  )  return new_process();
+        if( process )
+        {
+            if( process->_connection && process->_connection->has_error() )
+            {
+                _spooler->log()->warn( message_string( "SCHEDULER-299", process->short_name() ) );   // "Prozess pid=$1 wird nach Fehler entfernt"
+
+                process->kill();
+                remove_process( process );
+                process = NULL;
+            }
+        }
+
+        if( !process  
+         && _process_set.size()      < _max_processes  
+         && _spooler->_process_count < max_processes  )  return new_process();
+    }
 
     return process;
 }
@@ -891,7 +907,7 @@ Process* Process_class::select_process_if_available()
 
 bool Process_class::process_available( Job* for_job )
 { 
-    if( _process_list.size()     >= _max_processes )  return false;
+    if( _process_set.size()      >= _max_processes )  return false;
     if( _spooler->_process_count >= max_processes )  return false;
 
     if( _waiting_jobs.empty() )  return true;
@@ -914,7 +930,7 @@ void Process_class::remove_waiting_job( Job* waiting_job )
 {
     _waiting_jobs.remove( waiting_job );
 
-    if( _process_list.size() < _max_processes  &&  !_waiting_jobs.empty() )
+    if( _process_set.size() < _max_processes  &&  !_waiting_jobs.empty() )
     {
         Job* job = *_waiting_jobs.rbegin();
         //job->signal( S() << __FUNCTION__ << "  " << waiting_job->obj_name() );
@@ -963,6 +979,8 @@ void Process_class::set_name( const string& name )
 {
     //Evtl. nicht kompatibel.  _spooler->check_name( name );
 
+    if( _remove )  z::throw_xc( "SCHEDULER-421", obj_name() );
+
     if( name != _name )
     {
         if( _name != "" )  z::throw_xc( "SCHEDULER-243", "Process_class.name" );
@@ -978,9 +996,10 @@ void Process_class::set_name( const string& name )
 
 void Process_class::set_max_processes( int max_processes )
 {
-    if( is_added() )  z::throw_xc( "SCHEDULER-243", "Process_class.name" );
+    if( max_processes < 0 )  z::throw_xc( "SCHEDULER-420", "Process_class.max_processes", max_processes );
+    if( _remove )  z::throw_xc( "SCHEDULER-421", obj_name() );
 
-    if( _process_list.size() > max_processes )  _log->warn( message_string( "SCHEDULER-419", max_processes, _process_list.size() ) );
+    if( _process_set.size() > max_processes )  log()->warn( message_string( "SCHEDULER-419", max_processes, _process_set.size() ) );
 
     _max_processes = max_processes;
 }
@@ -989,6 +1008,9 @@ void Process_class::set_max_processes( int max_processes )
 
 void Process_class::set_remote_scheduler( const Host_and_port& remote_scheduler )
 {
+    if( _remove )  z::throw_xc( "SCHEDULER-421", obj_name() );
+    //if( !_process_set.empty() )  z::throw_xc( "SCHEDULER-422", obj_name(), "remote_scheduler" );
+
     _remote_scheduler = remote_scheduler;
     if( _remote_scheduler._host  &&  _remote_scheduler._port == 0 )  _remote_scheduler._port = _spooler->_tcp_port;
 }
@@ -1006,11 +1028,7 @@ void Process_class::set_dom( const xml::Element_ptr& e )
 {
     if( !e )  return;
 
-    if( _name.empty() )     // neu?
-    {
-        _name = e.getAttribute( "name" );
-    }
-
+    set_name            (      e.     getAttribute( "name"            , _name          ) );
     set_max_processes   ( (int)e.uint_getAttribute( "max_processes"   , _max_processes ) );
     set_remote_scheduler(      e.     getAttribute( "remote_scheduler", _remote_scheduler.as_string() ) );
 }
@@ -1023,14 +1041,14 @@ xml::Element_ptr Process_class::dom_element( const xml::Document_ptr& document, 
     xml::Element_ptr element = document.createElement( "process_class" );
         
     element.setAttribute         ( "name"            , _name );
-    element.setAttribute         ( "processes"       , (int)_process_list.size() );
+    element.setAttribute         ( "processes"       , (int)_process_set.size() );
     element.setAttribute         ( "max_processes"   , _max_processes );
     element.setAttribute_optional( "remote_scheduler", _remote_scheduler.as_string() );
 
-    if( !_process_list.empty() )
+    if( !_process_set.empty() )
     {
         xml::Element_ptr processes_element = element.append_new_element( "processes" );
-        FOR_EACH( Process_list, _process_list, it )  processes_element.appendChild( (*it)->dom_element( document, show ) );
+        FOR_EACH( Process_set, _process_set, it )  processes_element.appendChild( (*it)->dom_element( document, show ) );
     }
 
     if( !_waiting_jobs.empty() )
@@ -1115,7 +1133,7 @@ string Process_class::obj_name() const
 {
     S result;
 
-    result << "Process_class " << _name;
+    result << "Process_class " << path();
 
     return result;
 }
@@ -1171,7 +1189,7 @@ bool Process_class_subsystem::async_continue()
 
     FOR_EACH( Process_class_map, _process_class_map, pc )
     {
-        FOR_EACH( Process_list, pc->second->_process_list, p )
+        FOR_EACH( Process_class::Process_set, pc->second->_process_set, p )
         {
             something_done |= (*p)->async_continue();
         }
@@ -1205,10 +1223,10 @@ Process_class* Process_class_subsystem::process_class_or_null( const string& nam
 
 //-----------------------------------------------------------Process_class_subsystem::process_class
 
-Process_class* Process_class_subsystem::process_class( const string& name )
+Process_class* Process_class_subsystem::process_class( const string& path )
 {
-    Process_class* pc = process_class_or_null( name );
-    if( !pc )  z::throw_xc( "SCHEDULER-195", name );
+    Process_class* pc = process_class_or_null( path );
+    if( !pc )  z::throw_xc( "SCHEDULER-195", path );
     return pc;
 }
 
@@ -1230,9 +1248,20 @@ void Process_class_subsystem::add_process_class( Process_class* process_class )
 {
     if( !process_class )  z::throw_xc( __FUNCTION__ );
 
-    if( process_class->is_added() )  z::throw_xc( "SCHEDULER-416", process_class->obj_name() );
     //Evtl. Nicht kompatibel:  _spooler->check_name( process_class->name() );
-    _process_class_map[ process_class->name() ] = process_class;         
+
+    if( Process_class* other_process_class = process_class_or_null( process_class->path() ) )
+    {
+        if( !other_process_class->_remove )  z::throw_xc( "SCHEDULER-416", process_class->obj_name() );
+        other_process_class->_new_process_class = process_class;
+        other_process_class->log()->info( message_string( "SCHEDULER-871" ) );
+    }
+    else
+    {
+        _process_class_map[ process_class->name() ] = process_class; 
+
+        if( _spooler->state() > Spooler::s_loading )  process_class->log()->info( message_string( "SCHEDULER-870" ) );
+    }
 }
 
 //----------------------------------------------------Process_class_subsystem::remove_process_class
@@ -1244,8 +1273,20 @@ void Process_class_subsystem::remove_process_class( Process_class* process_class
 
     if( it->second != process_class )  z::throw_xc( "SCHEDULER-418", process_class->obj_name() );
 
-    process_class->prepare_remove();
-    _process_class_map.erase( it );
+    bool ok = process_class->prepare_remove();
+    if( ok )  
+    {
+        if( ptr<Process_class> new_process_class = process_class->_new_process_class )
+        {
+            process_class->log()->info( message_string( "SCHEDULER-869" ) );
+            it->second = new_process_class;
+        }
+        else
+        {
+            process_class->log()->info( message_string( "SCHEDULER-868" ) );
+            _process_class_map.erase( it );
+        }
+    }
 }
 
 //-----------------------------------------------------------------Process_class_subsystem::set_dom

@@ -1705,16 +1705,16 @@ library Spooler
         [id(1),propget]
         HRESULT                 Java_class_name         ( [out,retval] BSTR* );                 // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
                                                                                                 // Für den Objectserver
-        [id(2),propget]
+        [id(0),propget]
         HRESULT                 Lock                    ( [in] BSTR, [out,retval] Ilock** );
 
-        [id(3),propget]
+        [id(2),propget]
         HRESULT                 Lock_or_null            ( [in] BSTR, [out,retval] Ilock** );
 
-        [id(4)]
+        [id(3)]
         HRESULT                 Create_lock             ( [out,retval] Ilock** );
 
-        [id(5)]
+        [id(4)]
         HRESULT                 Add_lock                ( [in] Ilock* );
     };
 
@@ -1758,16 +1758,16 @@ library Spooler
         [id(1),propget]
         HRESULT                 Java_class_name         ( [out,retval] BSTR* );                 // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
                                                                                                 // Für den Objectserver
-        [id(2),propget]
+        [id(0),propget]
         HRESULT                 Process_class           ( [in] BSTR, [out,retval] Iprocess_class** );
 
-        [id(3),propget]
+        [id(2),propget]
         HRESULT                 Process_class_or_null   ( [in] BSTR, [out,retval] Iprocess_class** );
 
-        [id(4)]
+        [id(3)]
         HRESULT                 Create_process_class    ( [out,retval] Iprocess_class** );
 
-        [id(5)]
+        [id(4)]
         HRESULT                 Add_process_class       ( [in] Iprocess_class* );
     };
 

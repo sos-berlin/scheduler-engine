@@ -2035,6 +2035,10 @@
     <register_entry register_file='xml/answer/process_class.xml#attribute_max_processes' register_title='&lt;process_class&gt; (Antwort)'  register_keyword='max_processes' type='definition'/>
     <register_entry register_file='xml/process_class.xml#attribute_max_processes' register_title='&lt;process_class&gt; (Konfiguration)'  register_keyword='max_processes' type='definition'/>
 </register_keyword>
+<register_keyword keyword='max_processes (property)'>
+    <register_keyword_display><code>max_processes</code> (property)</register_keyword_display>
+    <register_entry register_file='api/Process_class.xml#method__max_processes' register_title='Process_class.max_processes' register_keyword='max_processes' type='definition'/>
+</register_keyword>
 <register_keyword keyword='max_task_history'>
     <register_keyword_display><code>max_task_history=</code></register_keyword_display>
     <register_entry register_file='xml/show_job.xml#attribute_max_task_history' register_title='&lt;show_job&gt; (Kommando)'  register_keyword='max_task_history' type='definition'/>
@@ -2142,6 +2146,7 @@
     <register_entry register_file='api/Job.xml#method__name' register_title='Job.name' register_keyword='name' type='definition'/>
     <register_entry register_file='api/Job_chain.xml#method__name' register_title='Job_chain.name' register_keyword='name' type='definition'/>
     <register_entry register_file='api/Lock.xml#method__name' register_title='Lock.name' register_keyword='name' type='definition'/>
+    <register_entry register_file='api/Process_class.xml#method__name' register_title='Process_class.name' register_keyword='name' type='definition'/>
     <register_entry register_file='api/Variable.xml#method__name' register_title='Variable.name' register_keyword='name' type='definition'/>
     <register_entry register_file='api/Web_service.xml#method__name' register_title='Web_service.name' register_keyword='name' type='definition'/>
 </register_keyword>
@@ -2486,6 +2491,7 @@
     <register_keyword_display><code>&lt;process_class&gt;</code></register_keyword_display>
     <register_entry register_file='CHANGES.xml#use_element__process_class' register_title='Änderungsprotokoll'  register_keyword='process_class'/>
     <register_entry register_file='api/Log.xml#use_element__process_class' register_title='Log'  register_keyword='process_class'/>
+    <register_entry register_file='api/Process_class.xml#use_element__process_class' register_title='Process_class'  register_keyword='process_class'/>
     <register_entry register_file='api/Subprocess.xml#use_element__process_class' register_title='Subprocess'  register_keyword='process_class'/>
     <register_entry register_file='api/Task.xml#use_element__process_class' register_title='Task'  register_keyword='process_class'/>
     <register_entry register_file='remote_execution.xml#use_element__process_class' register_title='Externe Jobverarbeitung" base_dir="" author="$Author$" date="$Date$'  register_keyword='process_class'/>
@@ -2500,6 +2506,18 @@
     <register_keyword_display><code>process_class=</code></register_keyword_display>
     <register_entry register_file='xml/job.xml#attribute_process_class' register_title='&lt;job&gt; (Konfiguration)'  register_keyword='process_class' type='definition'/>
     <register_entry register_file='xml/script.xml#attribute_process_class' register_title='&lt;script&gt; (Konfiguration)'  register_keyword='process_class' type='definition'/>
+</register_keyword>
+<register_keyword keyword='Process_class (class)'>
+    <register_keyword_display><code>Process_class</code> (class)</register_keyword_display>
+    <register_entry register_file='api/Process_class.xml' register_keyword='Process_class' type='definition'/>
+</register_keyword>
+<register_keyword keyword='process_class.remove'>
+    <register_keyword_display><code>&lt;process_class.remove&gt;</code></register_keyword_display>
+    <register_entry register_file='api/Process_class.xml#use_element__process_class.remove' register_title='Process_class'  register_keyword='process_class.remove'/>
+</register_keyword>
+<register_keyword keyword='process_class.use'>
+    <register_keyword_display><code>&lt;process_class.use&gt;</code></register_keyword_display>
+    <register_entry register_file='api/Process_class.xml#use_element__process_class.use' register_title='Process_class'  register_keyword='process_class.use'/>
 </register_keyword>
 <register_keyword keyword='process_classes'>
     <register_keyword_display><code>&lt;process_classes&gt;</code></register_keyword_display>
@@ -2595,6 +2613,7 @@
     <register_entry register_file='api/Job.xml#method__remove' register_title='Job.remove()' register_keyword='remove()' type='definition'/>
     <register_entry register_file='api/Job_chain.xml#method__remove' register_title='Job_chain.remove()' register_keyword='remove()' type='definition'/>
     <register_entry register_file='api/Lock.xml#method__remove' register_title='Lock.remove()' register_keyword='remove()' type='definition'/>
+    <register_entry register_file='api/Process_class.xml#method__remove' register_title='Process_class.remove()' register_keyword='remove()' type='definition'/>
 </register_keyword>
 <register_keyword keyword='remove'>
     <register_keyword_display><code>remove=</code></register_keyword_display>
