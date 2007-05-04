@@ -1213,6 +1213,11 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
         result = _spooler->lock_subsystem()->execute_xml( this, element, show );
     }
     else
+    if( element_name == "process_class"  ||  string_begins_with( element_name, "process_class." ) )
+    {
+        result = _spooler->process_class_subsystem()->execute_xml( this, element, show );
+    }
+    else
     if( element.nodeName_is( "show_state"       ) 
      || element.nodeName_is( "s"                ) )  result = execute_show_state( element, show );
     else

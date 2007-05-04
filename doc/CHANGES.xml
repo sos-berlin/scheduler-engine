@@ -11,6 +11,31 @@
     <scheduler_keyword keyword="Change log"/>
 
 
+    <change date="2007-05-04" version="2.0.175" subversion_revision="5017">
+        <revision type="new" title="XML-Kommandos und API für Prozessklassen">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_method class="Spooler" property="process_classes"/>
+                    </li>
+                    <li>
+                        <scheduler_method class="Process_classes"/>
+                    </li>
+                    <li>
+                        <scheduler_method class="Process_class"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="process_class"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="process_class.remove"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+    </change>
+
+
     <change date="2007-04-27" version="2.0.174" subversion_revision="5001">
         <revision type="new" title="API für Sperren">
             <description>

@@ -84,6 +84,10 @@
     <register_keyword_display><code>add_pid()</code></register_keyword_display>
     <register_entry register_file='api/Task.xml#method__add_pid' register_title='Task.add_pid()' register_keyword='add_pid()' type='definition'/>
 </register_keyword>
+<register_keyword keyword='add_process_class'>
+    <register_keyword_display><code>add_process_class()</code></register_keyword_display>
+    <register_entry register_file='api/Process_classes.xml#method__add_process_class' register_title='Process_classes.add_process_class()' register_keyword='add_process_class()' type='definition'/>
+</register_keyword>
 <register_keyword keyword='after'>
     <register_keyword_display><code>after=</code></register_keyword_display>
     <register_entry register_file='xml/start_job.xml#attribute_after' register_title='&lt;start_job&gt; (Kommando)'  register_keyword='after' type='definition'/>
@@ -432,6 +436,10 @@
 <register_keyword keyword='create_order'>
     <register_keyword_display><code>create_order()</code></register_keyword_display>
     <register_entry register_file='api/Spooler.xml#method__create_order' register_title='Spooler.create_order()' register_keyword='create_order()' type='definition'/>
+</register_keyword>
+<register_keyword keyword='create_process_class'>
+    <register_keyword_display><code>create_process_class()</code></register_keyword_display>
+    <register_entry register_file='api/Process_classes.xml#method__create_process_class' register_title='Process_classes.create_process_class()' register_keyword='create_process_class()' type='definition'/>
 </register_keyword>
 <register_keyword keyword='create_subprocess'>
     <register_keyword_display><code>create_subprocess()</code></register_keyword_display>
@@ -2510,6 +2518,13 @@
 <register_keyword keyword='Process_class (class)'>
     <register_keyword_display><code>Process_class</code> (class)</register_keyword_display>
     <register_entry register_file='api/Process_class.xml' register_keyword='Process_class' type='definition'/>
+    <register_entry register_file='api/Process_classes.xml#method__create_process_class' register_title='Process_classes.create_process_class()' register_keyword='Process_class'/>
+    <register_entry register_file='api/Process_classes.xml#method__process_class' register_title='Process_classes.process_class' register_keyword='Process_class'/>
+    <register_entry register_file='api/Process_classes.xml#method__process_class_or_null' register_title='Process_classes.process_class_or_null' register_keyword='Process_class'/>
+</register_keyword>
+<register_keyword keyword='process_class (property)'>
+    <register_keyword_display><code>process_class</code> (property)</register_keyword_display>
+    <register_entry register_file='api/Process_classes.xml#method__process_class' register_title='Process_classes.process_class' register_keyword='process_class' type='definition'/>
 </register_keyword>
 <register_keyword keyword='process_class.remove'>
     <register_keyword_display><code>&lt;process_class.remove&gt;</code></register_keyword_display>
@@ -2519,6 +2534,15 @@
     <register_keyword_display><code>&lt;process_class.use&gt;</code></register_keyword_display>
     <register_entry register_file='api/Process_class.xml#use_element__process_class.use' register_title='Process_class'  register_keyword='process_class.use'/>
 </register_keyword>
+<register_keyword keyword='process_class_name'>
+    <register_keyword_display><code>process_class_name</code></register_keyword_display>
+    <register_entry register_file='api/Process_classes.xml#method__process_class' register_title='Process_classes.process_class' register_keyword='process_class_name'/>
+    <register_entry register_file='api/Process_classes.xml#method__process_class_or_null' register_title='Process_classes.process_class_or_null' register_keyword='process_class_name'/>
+</register_keyword>
+<register_keyword keyword='process_class_or_null (property)'>
+    <register_keyword_display><code>process_class_or_null</code> (property)</register_keyword_display>
+    <register_entry register_file='api/Process_classes.xml#method__process_class_or_null' register_title='Process_classes.process_class_or_null' register_keyword='process_class_or_null' type='definition'/>
+</register_keyword>
 <register_keyword keyword='process_classes'>
     <register_keyword_display><code>&lt;process_classes&gt;</code></register_keyword_display>
     <register_entry register_file='api/Task.xml#use_element__process_classes' register_title='Task'  register_keyword='process_classes'/>
@@ -2527,6 +2551,10 @@
     <register_entry register_file='xml/job.xml#use_element__process_classes' register_title='&lt;job&gt; (Konfiguration)'  register_keyword='process_classes'/>
     <register_entry register_file='xml/process_classes.xml#' register_title='&lt;process_classes&gt; (Konfiguration)'  register_keyword='process_classes' type='definition'/>
     <register_entry register_file='xml/script.xml#use_element__process_classes' register_title='&lt;script&gt; (Konfiguration)'  register_keyword='process_classes'/>
+</register_keyword>
+<register_keyword keyword='Process_classes (class)'>
+    <register_keyword_display><code>Process_classes</code> (class)</register_keyword_display>
+    <register_entry register_file='api/Process_classes.xml' register_keyword='Process_classes' type='definition'/>
 </register_keyword>
 <register_keyword keyword='processes'>
     <register_keyword_display><code>&lt;processes&gt;</code></register_keyword_display>

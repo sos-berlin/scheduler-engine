@@ -5,8 +5,8 @@
 
 
 <api.class
-    name        = "Locks"
-    object_name = "locks"
+    name        = "Process_classes"
+    object_name = "process_classs"
     base_dir    = "../"
     author      = "$Author: jz $"
     date        = "$Date: 2007-01-23 22:30:13 +0100 (Di, 23 Jan 2007) $"
@@ -14,11 +14,11 @@
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-    <method name="add_lock">
+    <method name="add_process_class">
         <com/>
 
         <title>
-            Fügt dem Scheduler eine Sperre hinzu
+            Fügt dem Scheduler eine Prozessklasse hinzu
         </title>
       
         <messages>
@@ -29,20 +29,20 @@
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-    <method name="create_lock">
+    <method name="create_process_class">
         <com>
             <com.result>
-                <com.type class="Lock"/>
+                <com.type class="Process_class"/>
             </com.result>
         </com>
 
-        <title>Richtet eine neue Sperre ein</title>
+        <title>Legt eine neue Prozesklasse ein</title>
 
         <description>
             <p>
-                Liefert eine neues <scheduler_method class="Lock"/>.
-                Diese Sperre kann 
-                mit <scheduler_method class="Locks" method="add_lock"/>
+                Liefert eine neues <scheduler_method class="Process_class"/>.
+                Diese Prozessklasse kann 
+                mit <scheduler_method class="Process_classes" method="add_process_class"/>
                 dem Scheduler hinzugefügt werden.
             </p>
         </description>
@@ -50,23 +50,23 @@
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-    <property name="lock" access="read">
+    <property name="process_class" access="read">
         <com>
-            <com.parameter name="lock_name">
+            <com.parameter name="process_class_name">
                 <com.type type="BSTR"/>
             </com.parameter>
 
             <com.result>
-                <com.type class="Lock"/>
+                <com.type class="Process_class"/>
             </com.result>
         </com>
         
         <title>
-            Liefert eine Sperre
+            Liefert eine Prozessklasse
         </title>
         
         <description>
-            Wenn die Sperre nicht bekannt ist, wird eine Exception geliefert.
+            Wenn die Prozessklasse nicht bekannt ist, wird eine Exception geliefert.
         </description>
 
         <messages>
@@ -76,22 +76,22 @@
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-    <property name="lock_or_null" access="read">
+    <property name="process_class_or_null" access="read">
         <com>
-            <com.parameter name="lock_name">
+            <com.parameter name="process_class_name">
                 <com.type type="BSTR"/>
             </com.parameter>
 
             <com.result>
-                <com.type class="Lock"/>
+                <com.type class="Process_class"/>
                 <description>
-                    <api.null/>, wenn die Sperre nicht bekannt ist.
+                    <api.null/>, wenn die Prozessklasse nicht bekannt ist.
                 </description>
             </com.result>
         </com>
         
         <title>
-            Liefert eine Sperre
+            Liefert eine Prozessklasse
         </title>
     </property>
 

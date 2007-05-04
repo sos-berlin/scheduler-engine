@@ -23,6 +23,8 @@
                          sos/spooler/Monitor_impl.java,
                          sos/spooler/Order.java,
                          sos/spooler/Order_queue.java,
+                         sos/spooler/Process_class.java,
+                         sos/spooler/Process_classes.java,
                          sos/spooler/Run_time.java,
                          sos/spooler/Spooler.java,
                          sos/spooler/Spooler_program.java,

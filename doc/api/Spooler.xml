@@ -507,6 +507,18 @@
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
+<property name="process_classes" access="read">
+    <com>
+        <com.result>
+            <com.type class="Process_classes"/>
+        </com.result>
+    </com>
+
+    <title>Liefert die Prozessklassen</title>
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
 <method name="terminate">
     <title>
         Scheduler mit allen Tasks ordentlich beenden

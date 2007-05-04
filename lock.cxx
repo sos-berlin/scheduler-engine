@@ -995,6 +995,7 @@ xml::Element_ptr Lock_subsystem::dom_element( const xml::Document_ptr& dom_docum
 void Lock_subsystem::add_lock( Lock* lock )
 {
     if( !lock )  z::throw_xc( __FUNCTION__ );
+    if( lock->is_added() )  z::throw_xc( "SCHEDULER-422", lock->obj_name() );
 
     _spooler->check_name( lock->name() );
     if( lock_or_null( lock->path() ) )  z::throw_xc( "SCHEDULER-416", lock->obj_name() );

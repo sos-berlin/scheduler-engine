@@ -154,24 +154,80 @@ struct Process : zschimmer::Object, Scheduler_object
     ptr<Close_operation>       _close_operation;
 };
 
+//----------------------------------------------------------------------Process_class_configuration
+
+struct Process_class_configuration : idispatch_implementation< Process_class, spooler_com::Iprocess_class >,
+                                     Scheduler_object
+{
+                                Process_class_configuration ( Process_class_subsystem*, const string& name = "" );
+
+
+    virtual void            set_name                        ( const string& );
+    string                      name                        () const                                { return _name; }
+    string                      path                        () const                                { return _name; }
+
+    virtual void            set_max_processes               ( int );
+    int                         max_processes               () const                                { return _max_processes; }
+    virtual void          check_max_processes               ( int ) const                           {}
+
+    virtual void            set_remote_scheduler            ( const Host_and_port& );
+    const Host_and_port&        remote_scheduler            () const                                { return _remote_scheduler; }
+    virtual void          check_remote_scheduler            ( const Host_and_port& ) const          {}
+
+    bool                        is_remote_host              () const                                { return _remote_scheduler; }
+
+    bool                        is_added                    () const;
+    virtual void                remove                      ()                                      { z::throw_xc( "SCHEDULER-418", obj_name() ); }
+    string                      obj_name                    () const;
+
+    void                    set_dom                         ( const xml::Element_ptr& );
+    xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
+
+    // spooler_com::Iprocess_class:
+    STDMETHODIMP            get_Java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
+    STDMETHODIMP_(char*)  const_java_class_name             ()                                      { return (char*)"sos.spooler.Process_class"; }
+    STDMETHODIMP                Remove                      ();
+    STDMETHODIMP            put_Name                        ( BSTR );
+    STDMETHODIMP            get_Name                        ( BSTR* result )                        { return String_to_bstr( _name, result ); }
+    STDMETHODIMP            put_Remote_scheduler            ( BSTR );
+    STDMETHODIMP            get_Remote_scheduler            ( BSTR* result )                        { return String_to_bstr( _remote_scheduler.as_string(), result ); }
+    STDMETHODIMP            put_Max_processes               ( int );
+    STDMETHODIMP            get_Max_processes               ( int* result )                         { *result = _max_processes;  return S_OK; }
+
+  protected: 
+    Fill_zero                  _zero_;
+
+    string                     _name;
+    int                        _max_processes;
+    Host_and_port              _remote_scheduler;
+    bool                       _remove;                     // Löschen, sobald is_removable()
+
+
+    static Class_descriptor     class_descriptor;
+    static const Com_method    _methods[];
+};
+
 //------------------------------------------------------------------------------------Process_class
 // <process_class>
 
-struct Process_class : idispatch_implementation< Process_class, spooler_com::Iprocess_class >,
-                       Scheduler_object
+struct Process_class : Process_class_configuration
 {
                                 Process_class               ( Process_class_subsystem*, const string& name = "" );
-  //explicit                    Process_class               ( Spooler* sp, const xml::Element_ptr& e ) : _zero_(this+1), _spooler(sp) { init();  set_dom( e ); }
     Z_GNU_ONLY(                 Process_class               (); )
                                ~Process_class               ();
 
-    void                        init                        ();
+
+    void                        close                       ();
+    void                    set_configuration               ( const Process_class_configuration& );
+    void                  check_max_processes               ( int ) const;
+    void                    set_max_processes               ( int );
+    void                  check_remote_scheduler            ( const Host_and_port& ) const;
+
     bool                        prepare_remove              ();
     bool                        is_removable_now            ();
 
     void                        add_process                 ( Process* );
     void                        remove_process              ( Process* );
-
 
     Process*                    new_process                 ();
     Process*                    select_process_if_available ();                                     // Startet bei Bedarf. Bei _max_processes: return NULL
@@ -180,64 +236,27 @@ struct Process_class : idispatch_implementation< Process_class, spooler_com::Ipr
     void                        remove_waiting_job          ( Job* );
     bool                        need_process                ();
     void                        notify_a_process_is_idle    ();
-    void                    set_name                        ( const string& );
-    string                      name                        () const                                { return _name; }
-    string                      path                        () const                                { return _name; }
-    void                    set_max_processes               ( int );
-    void                    set_remote_scheduler            ( const Host_and_port& );
-    const Host_and_port&        remote_scheduler            () const                                { return _remote_scheduler; }
-
-    bool                        is_remote_host              () const                                { return _remote_scheduler; }
-    bool                        is_added                    () const;
     void                        remove                      ();
 
     //void                        register_module             ( Remote_module_instance_proxy* module ){ _module_set.insert( module ); }
     //void                      unregister_module             ( Remote_module_instance_proxy* module ){ _module_set.erase( module ); }
     //bool                        is_any_module_registered    () const                                { return !_module_set.empty(); }
 
-    void                    set_dom                         ( const xml::Element_ptr& );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
-    void                        execute_xml                 ( const xml::Element_ptr&, const Show_what& );
+    xml::Element_ptr            execute_xml                 ( Command_processor*, const xml::Element_ptr&, const Show_what& );
 
-    string                      obj_name                    () const;
-
-
-    // spooler_com::Iprocess_class:
-    STDMETHODIMP            get_Java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
-    STDMETHODIMP_(char*)  const_java_class_name             ()                                      { return (char*)"sos.spooler.Process_class"; }
-    STDMETHODIMP            put_Name                        ( BSTR );
-    STDMETHODIMP            get_Name                        ( BSTR* result )                        { return String_to_bstr( _name, result ); }
-    STDMETHODIMP            put_Remote_scheduler            ( BSTR );
-    STDMETHODIMP            get_Remote_scheduler            ( BSTR* result )                        { return String_to_bstr( _remote_scheduler.as_string(), result ); }
-    STDMETHODIMP            put_Max_processes               ( int );
-    STDMETHODIMP            get_Max_processes               ( int* result )                         { *result = _max_processes;  return S_OK; }
-    STDMETHODIMP                Remove                      ();
-
-
-    // Subsystem:
-    void                        close                       ();
-    bool                        subsystem_initialize        ();
-    bool                        subsystem_load              ();
-    bool                        subsystem_activate          ();
+    
 
   private:
     friend struct               Process_class_subsystem;
 
     Fill_zero                  _zero_;
-    string                     _name;
-    int                        _max_processes;
-    Host_and_port              _remote_scheduler;
-    bool                       _remove;                     // Löschen, sobald is_removable()
-    ptr<Process_class>         _new_process_class;          // Prozessklasse ersetzen, sobald is_removable()
+  //ptr<Process_class>         _new_process_class;          // Prozessklasse ersetzen, sobald is_removable()
     Job_list                   _waiting_jobs;
 
   public:
     typedef stdext::hash_set< ptr<Process> >  Process_set;
     Process_set                _process_set;
-
-
-    static Class_descriptor     class_descriptor;
-    static const Com_method    _methods[];
 };
 
 //--------------------------------------------------------------------------Process_class_subsystem
@@ -247,6 +266,7 @@ struct Process_class_subsystem : idispatch_implementation< Process_class_subsyst
 {
                                 Process_class_subsystem     ( Scheduler* );
 
+    // Subsystem
     void                        close                       ();
     bool                        subsystem_initialize        ();
     bool                        subsystem_load              ();
@@ -254,7 +274,6 @@ struct Process_class_subsystem : idispatch_implementation< Process_class_subsyst
 
     void                        add_process_class           ( Process_class* );
     void                        remove_process_class        ( Process_class* );
-  //bool                        is_empty                    () const                                { return _lock_map.empty(); }
     Process_class*              process_class               ( const string& name );
     Process_class*              process_class_or_null       ( const string& name );
     Process*                    new_temporary_process       ();
@@ -266,7 +285,7 @@ struct Process_class_subsystem : idispatch_implementation< Process_class_subsyst
     void                    set_dom                         ( const xml::Element_ptr& );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
     xml::Element_ptr            execute_xml                 ( Command_processor*, const xml::Element_ptr&, const Show_what& );
-    void                        execute_xml_process_class   ( const xml::Element_ptr& );
+    xml::Element_ptr            execute_xml_process_class   ( Command_processor*, const xml::Element_ptr& );
 
     // spooler_com::Iprocess_classes
     STDMETHODIMP            get_Java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }

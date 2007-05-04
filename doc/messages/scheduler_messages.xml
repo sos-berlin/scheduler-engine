@@ -2496,7 +2496,7 @@
 
         <message code="SCHEDULER-401">
             <text xml:lang="en">
-                <title>Unknown '<p1/>'</title>
+                <title>Unknown '<p1>object</p1>'</title>
             </text>
         </message>
 
@@ -2586,7 +2586,7 @@
 
         <message code="SCHEDULER-416">
             <text xml:lang="en">
-                <title><p1/> is already known</title>
+                <title>'<p1/>' is already known</title>
             </text>
         </message>
 
@@ -2598,7 +2598,7 @@
 
         <message code="SCHEDULER-418">
             <text xml:lang="en">
-                <title><p1/> is not added, cannot be removed</title>
+                <title>'<p1/>' is not added, cannot be removed</title>
             </text>
         </message>
 
@@ -2616,7 +2616,13 @@
 
         <message code="SCHEDULER-421">
             <text xml:lang="en">
-                <title><p1/> is being removed and not longer modifiable</title>
+                <title>'<p1/>' is being removed and not longer modifiable</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-422">
+            <text xml:lang="en">
+                <title>'<p1>object</p1>' has already been added</title>
             </text>
         </message>
 
@@ -3734,56 +3740,50 @@
 
         <message code="SCHEDULER-860" weight="info">
             <text xml:lang="en">
-                <title>Waiting for <p1>lock</p1>, <p2>exclusive</p2>, on place <p3/> (<p4>current holders</p4>)</title>
+                <title>Waiting for '<p1>lock</p1>', <p2>exclusive</p2>, on place <p3/> (<p4>current holders</p4>)</title>
                 <!--title>Waiting for lock <p1>locks</p1></title-->
             </text>
         </message>
 
         <message code="SCHEDULER-861" weight="info">
             <text xml:lang="en">
-                <title><p1>lock</p1> has been removed</title>
+                <title>'<p1>object</p1>' has been removed</title>
             </text>
         </message>
 
         <message code="SCHEDULER-862" weight="info">
             <text xml:lang="en">
-                <title>Continuing in <p1>job chain</p1></title>
+                <title>Continuing in '<p1>job chain</p1>'</title>
             </text>
         </message>
 
         <message code="SCHEDULER-863" weight="info">
             <text xml:lang="en">
-                <title>Continuing from <p1>job chain</p1></title>
+                <title>Continuing from '<p1>job chain</p1>'</title>
             </text>
         </message>
 
-        <message code="SCHEDULER-867" weight="info" object="Process_class">
+        <message code="SCHEDULER-867" weight="info">
             <text xml:lang="en">
-                <title>Process class is in use, it will be removed later</title>
+                <title>'<p1>object</p1>' is in use, it will be removed later</title>
             </text>
         </message>
 
         <message code="SCHEDULER-868" weight="info" object="Process_class">
             <text xml:lang="en">
-                <title>Process class is removed</title>
+                <title>Process class has been removed</title>
             </text>
         </message>
 
         <message code="SCHEDULER-869" weight="info" object="Process_class">
             <text xml:lang="en">
-                <title>Process class is replaced</title>
+                <title>Process class has been replaced</title>
             </text>
         </message>
 
         <message code="SCHEDULER-870" weight="info" object="Process_class">
             <text xml:lang="en">
-                <title>Process class is added</title>
-            </text>
-        </message>
-        
-        <message code="SCHEDULER-871" weight="info" object="Process_class">
-            <text xml:lang="en">
-                <title>Process class is in use, it will be replaced later</title>
+                <title>Process class has been added</title>
             </text>
         </message>
 
