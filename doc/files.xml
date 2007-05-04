@@ -18,6 +18,8 @@
     <file path="api/Monitor_impl.xml"/>
     <file path="api/Order.xml"/>
     <file path="api/Order_queue.xml"/>
+    <file path="api/Process_class.xml"/>
+    <file path="api/Process_classes.xml"/>
     <file path="api/Run_time.xml"/>
     <file path="api/Spooler.xml"/>
     <file path="api/Spooler_program.xml"/>
