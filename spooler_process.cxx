@@ -29,19 +29,19 @@ const Com_method Process_class_subsystem::_methods[] =
     {}
 };
 
-//--------------------------------------------------------------------------Process_class::_methods
+//------------------------------------------------------------Process_class_configuration::_methods
 
-const Com_method Process_class::_methods[] =
+const Com_method Process_class_configuration::_methods[] =
 { 
 #ifdef COM_METHOD
-    COM_PROPERTY_GET( Process_class,  1, Java_class_name     , VT_BSTR    , 0 ),
-    COM_PROPERTY_PUT( Process_class,  2, Name                ,              0, VT_BSTR ),
-    COM_PROPERTY_GET( Process_class,  2, Name                , VT_BSTR    , 0 ),
-    COM_PROPERTY_PUT( Process_class,  3, Remote_scheduler    ,              0, VT_BSTR ),
-    COM_PROPERTY_GET( Process_class,  3, Remote_scheduler    , VT_BSTR    , 0 ),
-    COM_PROPERTY_PUT( Process_class,  4, Max_processes       ,              0, VT_INT ),
-    COM_PROPERTY_GET( Process_class,  4, Max_processes       , VT_INT    , 0 ),
-    COM_METHOD      ( Process_class,  5, Remove              , VT_EMPTY   , 0 ),
+    COM_PROPERTY_GET( Process_class_configuration,  1, Java_class_name     , VT_BSTR    , 0 ),
+    COM_PROPERTY_PUT( Process_class_configuration,  2, Name                ,              0, VT_BSTR ),
+    COM_PROPERTY_GET( Process_class_configuration,  2, Name                , VT_BSTR    , 0 ),
+    COM_PROPERTY_PUT( Process_class_configuration,  3, Remote_scheduler    ,              0, VT_BSTR ),
+    COM_PROPERTY_GET( Process_class_configuration,  3, Remote_scheduler    , VT_BSTR    , 0 ),
+    COM_PROPERTY_PUT( Process_class_configuration,  4, Max_processes       ,              0, VT_INT ),
+    COM_PROPERTY_GET( Process_class_configuration,  4, Max_processes       , VT_INT    , 0 ),
+    COM_METHOD      ( Process_class_configuration,  5, Remove              , VT_EMPTY   , 0 ),
 #endif
     {}
 };
