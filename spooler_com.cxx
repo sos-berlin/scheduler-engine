@@ -1788,6 +1788,7 @@ const Com_method Com_job::_methods[] =
     { DISPATCH_METHOD     , 15, "clear_delay_after_error"       , (Com_method_ptr)&Com_job::Clear_delay_after_error     , VT_EMPTY      },
     { DISPATCH_METHOD     , 16, "Remove"                        , (Com_method_ptr)&Com_job::Remove                      , VT_EMPTY      },
     { DISPATCH_METHOD     , 17, "Execute_command"               , (Com_method_ptr)&Com_job::Execute_command             , VT_EMPTY      , { VT_BSTR } },
+    { DISPATCH_PROPERTYGET, 19, "Process_class"                 , (Com_method_ptr)&Com_job::get_Process_class           , VT_DISPATCH   },
     {}
 };
 

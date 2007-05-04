@@ -120,7 +120,7 @@ public class My_job  extends sos.spooler.Job_impl
         try
         {
             process_classes.add_process_class( process_class );
-            spooler_log.error( "add_process_classes hätte scheitern sollen" );
+            spooler_log.error( "add_process_classes haette scheitern sollen" );
         }
         catch( Exception x )
         {
