@@ -65,7 +65,7 @@
                 </description>
             </text>
             <text xml:lang="en">
-                <title>There is an error such as start time is later than end time in the begin="<p1/>" and end="<p2/>" attributes</title>
+                <title>There is an error such as the start time set in the begin="<p1/>" attribute is later than the end time set in end="<p2/>"</title>
                 <description>
                     <p>
                         <i>- Example -</i>
@@ -105,7 +105,7 @@
                 <title>Unbekanntes Kommando an eine Task: <p1/></title>
             </text>
             <text xml:lang="en">
-                <title>Unknown command for a task: <p1/></title>
+                <title>Unknown command for task: <p1/></title>
             </text>
         </message>
 
@@ -129,7 +129,7 @@
 
         <message code="SCHEDULER-109">
             <text xml:lang="en">
-                <title>Job '<p1/>' is not initialized</title>
+                <title>Job '<p1/>' has not been initialized</title>
             </text>
         </message>
 
@@ -622,7 +622,7 @@
                 <title>&lt;show_... what="<p1/>">: Ungültige Angabe für Attribut what</title>
             </text>
             <text xml:lang="en">
-                <title>&lt;show_... what="<p1/>">: Invalid value for attribute what=</title>
+                <title>&lt;show_... what="<p1/>">: invalid value for attribute what=</title>
             </text>
         </message>
 
@@ -1084,7 +1084,7 @@
                 <title>&lt;run_time <p1/>> ist für einen Auftrag nicht möglich</title>
             </text>
             <text xml:lang="en">
-                <title>&lt;run_time <p1/>> is not possible for an order</title>
+                <title>&lt;run_time <p1/>> cannot be carried out for an order</title>
             </text>
         </message>
 
@@ -1120,7 +1120,7 @@
                 <title>Haupt-Scheduler hat Verbindung geschlossen</title>
             </text>
             <text xml:lang="en">
-                <title>The serving scheduler has closed connection</title>
+                <title>The serving scheduler has closed the connection</title>
             </text>
         </message>
 
@@ -1406,16 +1406,16 @@
                 <title><p1/> Tasks haben sich nicht beendet trotz kill vor <p2/>s. Die <p3/>s lange Nachfrist läuft weiter</title>
             </text>
             <text xml:lang="en">
-                <title><p1/> tasks did not terminate in spite of kill <p2/>s ago. Extending deadline for <p3/>s</title>
+                <title><p1/> tasks did not terminate in spite of kill <p2/> seconds ago. Extending deadline for <p3/>s</title>
             </text>
         </message>
         
         <message code="SCHEDULER-255">
             <text xml:lang="de">
-                <title><p1/> Tasks haben sich nicht beendet trotz kill vor <p2/>s. Scheduler bricht ab</title>
+                <title><p1/> Tasks haben sich nicht beendet trotz kill vor <p2/> seconds. Scheduler bricht ab</title>
             </text>
             <text xml:lang="en">
-                <title><p1/> tasks did not terminate in spite of kill <p2/>s ago. Scheduler is aborting</title>
+                <title><p1/> tasks did not terminate in spite of kill <p2/> seconds ago. Scheduler is aborting</title>
             </text>
         </message>
 
@@ -1514,7 +1514,7 @@
                 <title>Fehler beim Schreiben des Protokolls in die Tabelle <p1/>: <p2/></title>
             </text>
             <text xml:lang="en">
-                <title>Error when storing the protocol in table <p1/>: <p2/></title>
+                <title>Error when storing the log in table <p1/>: <p2/></title>
             </text>
         </message>
 
@@ -1523,7 +1523,7 @@
                 <title>Protokoll der Task <p1/> lässt sich nicht aus der Datenbank lesen: <p2/></title>
             </text>
             <text xml:lang="en">
-                <title>Protocol of task <p1/> is not readable from database: <p2/></title>
+                <title>Log of task <p1/> is not readable from database: <p2/></title>
             </text>
         </message>
 
@@ -1703,7 +1703,7 @@
                 <title>-reuse-port (SO_REUSEADDR): <p1/> wird verwendet, auch wenn er schon von einer anderen Anwendung belegt ist</title>
             </text>
             <text xml:lang="en">
-                <title>-reuse-port (SO_REUSEADDR): Using <p1/>, but another application can use it too</title>
+                <title>-reuse-port (SO_REUSEADDR): using <p1/>, but another application can use it too</title>
             </text>
         </message>
 
@@ -1821,7 +1821,7 @@
                 <title>Überwachung des Verzeichnisses <p1/> wird nach Fehler beendet: <p2/></title>
             </text>
             <text xml:lang="en">
-                <title>Watching the directory <p1/> ends after error: <p2/></title>
+                <title>Monitoring of directory <p1/> has ended after error: <p2/></title>
             </text>
         </message>
 
@@ -1927,10 +1927,10 @@
             <text xml:lang="en">
                 <title>Variable "<p1/>" (vt=<p2/>) cannot be converted to Text: <p3/></title>
                 <p2>
-                    <description>Variantentyp der Variablen</description>
+                    <description>Variable variant type</description>
                 </p2>
                 <p3>
-                    <description>Der Fehler, der bei der Konvertierung aufgetreten ist</description>
+                    <description>The error which occured during conversion</description>
                 </p3>
             </text>
         </message>
@@ -1985,7 +1985,7 @@
         
         <message code="SCHEDULER-321">
             <text xml:lang="en">
-                <title>Mail has been sent, but an error occurred when processing then mail queue: <p1/></title>
+                <title>Mail has been sent, but an error occurred when processing the mail queue: <p1/></title>
             </text>
         </message>
         
@@ -2169,7 +2169,7 @@
 
         <message code="SCHEDULER-345">
             <text xml:lang="en">
-                <title>order.id has more than <p2/> characters, the limit of your database column <p3/>: <p1/></title>
+                <title>order.id has more than <p2/> characters, the limit of your database column <p3/> is: <p1/></title>
             </text>
         </message>
 
@@ -2229,7 +2229,7 @@
 
         <message code="SCHEDULER-355">
             <text xml:lang="en">
-                <title>SQL update statement did not updates excactly one record, instead <p1>count</p1>: <p2>statement</p2></title>
+                <title>SQL update statement changed more than one record, <p1>count</p1>: <p2>statement</p2></title>
             </text>
         </message>
 
@@ -2265,7 +2265,7 @@
 
         <message code="SCHEDULER-362">
             <text xml:lang="en">
-                <title>Scheduler aborts because it has become inactive</title>
+                <title>Scheduler is aborting because it has become inactive</title>
             </text>
         </message>
 
@@ -2301,7 +2301,7 @@
 
         <message code="SCHEDULER-367">
             <text xml:lang="en">
-                <title>Scheduler aborts because it has lost its exclusiveness</title>
+                <title>Scheduler is aborting because it has lost its exclusivity</title>
             </text>
         </message>
 
@@ -2313,7 +2313,7 @@
 
         <message code="SCHEDULER-369">
             <text xml:lang="en">
-                <title>Option <p1/> conflicts <p2/></title>
+                <title>Option <p1/> conflicts with <p2/></title>
             </text>
         </message>
 
@@ -2331,7 +2331,7 @@
 
         <message code="SCHEDULER-372">
             <text xml:lang="en">
-                <title>Exclusiveness has been stolen by Scheduler member '<p1/>'</title>
+                <title>Exclusivity has been stolen by Scheduler member '<p1/>'</title>
             </text>
         </message>
 
@@ -2367,7 +2367,8 @@
 
         <message code="SCHEDULER-378">
             <text xml:lang="en">
-                <title>After own late heart beat, this Scheduler has been deactived and the occupied orders are freed by Scheduler member '<p1/>'</title>
+                <title>After own late heart beat, this Scheduler has been deactived and 
+                the occupied orders have been freed by Scheduler member '<p1/>'</title>
             </text>
         </message>
 
@@ -2415,7 +2416,8 @@
 
         <message code="SCHEDULER-386">
             <text xml:lang="en">
-                <title>Last heart beat was <p1>time</p1>, <p2/>s ago. Something is delaying Scheduler execution, Scheduler is aborted immediately</title>
+                <title>Last heart beat was <p1>time</p1>, <p2/> seconds ago. Something is delaying Scheduler execution, 
+                the Scheduler is aborted immediately</title>
             </text>
         </message>
 
@@ -2439,7 +2441,8 @@
 
         <message code="SCHEDULER-392">
             <text xml:lang="en">
-                <title>heart_beat_warn_timeout=<p1/>s has to be lower than heart_beat_own_timeout=<p2/>, which has to be lower than heart_beat_warn_timeout=<p3/>s</title>
+                <title>heart_beat_warn_timeout=<p1/> seconds has to be lower than heart_beat_own_timeout=<p2/>, 
+                which has to be lower than heart_beat_warn_timeout=<p3/> seconds</title>
             </text>
         </message>
 
@@ -2487,7 +2490,7 @@
 
         <message code="SCHEDULER-400">
             <text xml:lang="en">
-                <title>Only API-jobs are possible with &lt;process_class remote_scheduler="..."/></title>
+                <title>Only API jobs are allowed with &lt;process_class remote_scheduler="..."/></title>
             </text>
         </message>
 
@@ -2517,7 +2520,7 @@
 
         <message code="SCHEDULER-405">
             <text xml:lang="en">
-                <title>Setting state='<p1/>' is not possible while job chain is in state '<p2/>'</title>
+                <title>Setting state='<p1/>' is not possible while job chain has state '<p2/>'</title>
             </text>
         </message>
 
@@ -2660,7 +2663,7 @@
                 <title>Die Tasks haben <p1/>s sich zu beenden</title>
             </text>
             <text xml:lang="en">
-                <title>Tasks have <p1/>s to terminate</title>
+                <title>Tasks have <p1/> seconds to terminate</title>
             </text>
         </message>
 
@@ -2864,7 +2867,7 @@
                 <title>Task <p1/> gestartet, Anlass: <p2/></title>
             </text>
             <text xml:lang="en">
-                <title>Task <p1/> started, cause: <p2/></title>
+                <title>Task <p1/> started - cause: <p2/></title>
             </text>
         </message>
 
@@ -3205,7 +3208,7 @@
 
         <message code="SCHEDULER-969">
             <text xml:lang="en">
-                <title>Less than <code>min_tasks</code>=<p1/> are running. New tasks will be started. Cause: <p2/></title>
+                <title>Less than <code>min_tasks</code>=<p1/> are running. New tasks will be started. Reason: <p2/></title>
             </text>
         </message>
 
@@ -3361,19 +3364,19 @@
 
         <message code="SCHEDULER-994">
             <text xml:lang="en">
-                <title>No heart beat since <p2/>s (<p1>time</p1>), expecting heart beat within <p3/>s</title>
+                <title>No heart beat for <p2/> seconds (<p1>time</p1>), expecting heart beat within <p3/> seconds</title>
             </text>
         </message>
 
         <message code="SCHEDULER-995">
             <text xml:lang="en">
-                <title>No heart beat since <p2/>s (<p1>time</p1>), ignored for <p3/>s because of recent database reconnect</title>
+                <title>No heart beat for <p2/> seconds (<p1>time</p1>), ignored for <p3/> seconds because of recent database reconnect</title>
             </text>
         </message>
 
         <message code="SCHEDULER-996">
             <text xml:lang="en">
-                <title>No heart beat since <p2/>s (<p1>time</p1>), Scheduler seems to be dead</title>
+                <title>No heart beat for <p2/> seconds (<p1>time</p1>) - Scheduler seems to be dead</title>
             </text>
         </message>
 
@@ -3460,7 +3463,7 @@
 
         <message code="SCHEDULER-815">
             <text xml:lang="en">
-                <title>Task should end, but it has just been started with an order attached, so one step will be done</title>
+                <title>Task should end but it has just been started with an order attached, so one step will be done</title>
             </text>
         </message>
 
@@ -3532,7 +3535,7 @@
 
         <message code="SCHEDULER-827">
             <text xml:lang="en">
-                <title>Own heart beat is late: next_heart_beat has been announced for <p1/> (this is <p2/>s late)</title>
+                <title>Own heart beat is late: next_heart_beat has been announced for <p1/> (this is <p2/>seconds late)</title>
             </text>
         </message>
 
@@ -3550,7 +3553,7 @@
 
         <message code="SCHEDULER-830">
             <text xml:lang="en">
-                <title>Because all Scheduler tasks are killed, the order in database is not updated. Only the occupation is released</title>
+                <title>Because all Scheduler tasks have been killed, the order in database has not been updated. Only the occupation has been released</title>
             </text>
         </message>
 
@@ -3581,7 +3584,7 @@
 
         <message code="SCHEDULER-835" weight="info">
             <text xml:lang="en">
-                <title>This Scheduler becomes exclusive now</title>
+                <title>This Scheduler is becoming exclusive now</title>
             </text>
         </message>
 
@@ -3617,7 +3620,7 @@
         
         <message code="SCHEDULER-841" weight="info">
             <text xml:lang="en">
-                <title>It's requested, that the exclusive operation will not be continued</title>
+                <title>It has been requested that the exclusive operation will not be continued</title>
             </text>
         </message>
 
@@ -3677,7 +3680,7 @@
 
         <message code="SCHEDULER-851" weight="info">
             <text xml:lang="en">
-                <title>After possibly volatile error (number <p1/>), the causing SQL statement will be repeated: <p2/></title>
+                <title>After possibly volatile error (number <p1/>), the statement which caused the error will be repeated: <p2/></title>
             </text>
         </message>
 
@@ -3725,7 +3728,7 @@
 
         <message code="SCHEDULER-859" weight="info">
             <text xml:lang="en">
-                <title>Due to action='next_state' the state '<p2/>' is skipped. Next state is '<p1/>'</title>
+                <title>Due to action='next_state' the state '<p2/>' has been skipped. Next state is '<p1/>'</title>
             </text>
         </message>
 
