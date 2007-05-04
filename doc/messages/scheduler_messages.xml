@@ -3367,7 +3367,7 @@
 
         <message code="SCHEDULER-995">
             <text xml:lang="en">
-                <title>No heart beat since <p2/>s (<p1>time</p1>), ignored within <p3/>s because of recent database reconnect</title>
+                <title>No heart beat since <p2/>s (<p1>time</p1>), ignored for <p3/>s because of recent database reconnect</title>
             </text>
         </message>
 
@@ -3677,7 +3677,7 @@
 
         <message code="SCHEDULER-851" weight="info">
             <text xml:lang="en">
-                <title>After possibly volatile error (number <p1/>), the causing statement will be repeated: <p2/></title>
+                <title>After possibly volatile error (number <p1/>), the causing SQL statement will be repeated: <p2/></title>
             </text>
         </message>
 
@@ -3762,7 +3762,7 @@
 
         <message code="SCHEDULER-868" weight="info" object="Process_class">
             <text xml:lang="en">
-                <title><p1>process_class</p1> is removed</title>
+                <title>Process class is removed</title>
             </text>
         </message>
 

@@ -31,7 +31,20 @@
                             <xsd:element ref="security"         minOccurs="0"/>
                             <xsd:element ref="cluster"          minOccurs="0"/>
                             <xsd:element ref="process_classes"  minOccurs="0"/>
-                            <xsd:element ref="locks"            minOccurs="0"/>
+
+                            <xsd:element name="locks" minOccurs="0">
+                                <xsd:complexType>
+                                    <xsd:sequence>
+                                        <xsd:element name="lock" type="lock" minOccurs="0" maxOccurs="unbounded"/>
+                                    </xsd:sequence>
+                                </xsd:complexType>
+
+                                <!--xsd:key name="lock">
+                                    <xsd:selector xpath="lock"/>
+                                    <xsd:field xpath="@name"/>
+                                </xsd:key-->
+                            </xsd:element>
+                            
                             <xsd:element ref="script"           minOccurs="0"/>
 
                             <xsd:choice minOccurs="0">
@@ -131,13 +144,15 @@
             <xsd:element ref="add_jobs"/>
             <xsd:element ref="add_order"/>
             <xsd:element ref="kill_task"/>
-            <xsd:element ref="lock"/>
-            <xsd:element ref="lock.remove"/>
+            <xsd:element name="lock"                        type="lock"/>
+            <xsd:element name="lock.remove"                 type="lock.remove"/>
             <xsd:element ref="modify_job"/>
             <xsd:element ref="modify_order"/>
             <xsd:element ref="modify_spooler"/>
             <xsd:element ref="job_chain.modify"/>
             <xsd:element ref="job_chain_node.modify"/>
+            <xsd:element name="process_class"               type="process_class"/>
+            <xsd:element name="process_class.remove"        type="process_class.remove"/>
             <xsd:element ref="register_remote_scheduler"/>
             <xsd:element ref="remove_job_chain"/>
             <xsd:element ref="remove_order"/>
@@ -661,19 +676,6 @@
     </xsd:element>
 
 
-    <xsd:element name="lock">
-        <xsd:complexType>
-            <xsd:attribute name="name"              type="Name"                     use="required"/>
-            <xsd:attribute name="max_non_exclusive" type="xsd:nonNegativeInteger"/>
-        </xsd:complexType>
-    </xsd:element>
-
-
-    <xsd:element name="lock.remove">
-        <xsd:complexType>
-            <xsd:attribute name="lock"              type="Name"                     use="required"/>
-        </xsd:complexType>
-    </xsd:element>
 
 
     <xsd:element name="note">
@@ -749,33 +751,15 @@
     </xsd:element>
 
 
-    <xsd:element name="locks">
-        <xsd:complexType>
-            <xsd:sequence>
-                <xsd:element ref="lock" minOccurs="0" maxOccurs="unbounded"/>
-            </xsd:sequence>
-        </xsd:complexType>
-
-        <!--xsd:key name="lock">
-            <xsd:selector xpath="lock"/>
-            <xsd:field xpath="@name"/>
-        </xsd:key-->
-
-    </xsd:element>
-
+    <xsd:element name="process_class"               type="process_class"/>
+    <xsd:element name="process_class.remove"        type="process_class.remove"/>
 
     <xsd:element name="process_classes">
         <xsd:complexType>
             <xsd:sequence>
-                <xsd:element name="process_class" minOccurs="0" maxOccurs="unbounded">
-                    <xsd:complexType>
-                        <xsd:attribute name="name"              type="Name"/>
-                        <xsd:attribute name="max_processes"     type="xsd:nonNegativeInteger"/>
-                        <xsd:attribute name="spooler_id"        type="Name"/>
-                        <xsd:attribute name="remote_scheduler"  type="String"/>
-                    </xsd:complexType>
-                </xsd:element>
+                <xsd:element name="process_class" type="process_class" minOccurs="0" maxOccurs="unbounded"/>
             </xsd:sequence>
+            
             <xsd:attribute name="ignore"        type="Yes_no"/>
         </xsd:complexType>
 
@@ -1260,11 +1244,53 @@
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ELEMENT-TYPEN-->
 
+    <xsd:complexType name="http_directory">
+        <xsd:attribute name="url_path"                  type="Url_path"         use="required"/>
+        
+        <xsd:attribute name="path" use="required">
+            <xsd:simpleType>
+                <xsd:restriction base="String">
+                    <xsd:pattern value=".+"/>
+                </xsd:restriction>
+            </xsd:simpleType>
+        </xsd:attribute>
+    </xsd:complexType>
+
+
+
+    <xsd:complexType name="lock">
+        <xsd:attribute name="name"                      type="Name"                     use="required"/>
+        <xsd:attribute name="max_non_exclusive"         type="xsd:nonNegativeInteger"/>
+    </xsd:complexType>
+
+
+    
+    <xsd:complexType name="lock.remove">
+        <xsd:attribute name="lock"                      type="Name"                     use="required"/>
+    </xsd:complexType>
+
+    
+    
+    <xsd:complexType name="process_class">
+        <xsd:attribute name="name"                      type="Name"/>
+        <xsd:attribute name="max_processes"             type="xsd:nonNegativeInteger"/>
+        <xsd:attribute name="spooler_id"                type="Name"/>
+        <xsd:attribute name="remote_scheduler"          type="String"/>
+    </xsd:complexType>
+
+
+
+    <xsd:complexType name="process_class.remove">
+        <xsd:attribute name="process_class"             type="Name"/>
+    </xsd:complexType>
+
+
+
     <xsd:complexType name="web_service">
         <xsd:sequence>
             <xsd:element ref="params" minOccurs="0"/>
         </xsd:sequence>
-        
+
         <xsd:attribute name="name"                      type="Name"             use="required"/>
         <xsd:attribute name="url_path"                  type="Url_path"         use="required"/>
         <xsd:attribute name="debug"                     type="Yes_no"/>
@@ -1278,18 +1304,6 @@
         <xsd:attribute name="timeout"                   type="xsd:positiveInteger"/>
     </xsd:complexType>
 
-    
-    <xsd:complexType name="http_directory">
-        <xsd:attribute name="url_path"                  type="Url_path"         use="required"/>
-        
-        <xsd:attribute name="path" use="required">
-            <xsd:simpleType>
-                <xsd:restriction base="String">
-                    <xsd:pattern value=".+"/>
-                </xsd:restriction>
-            </xsd:simpleType>
-        </xsd:attribute>
-    </xsd:complexType>
 
     
     <xsd:complexType name="Xml_payload">
@@ -1297,7 +1311,7 @@
             <xsd:any processContents="skip"/>
         </xsd:sequence>
     </xsd:complexType>
-    
+
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ATTRIBUT-TYPEN-->
 
     <xsd:simpleType name="Job_chain_node.Action">
@@ -1333,6 +1347,11 @@
         <!-- Eine engere Beschränkung wäre gut: Buchstabe gefolgt von (Buchstabe, Ziffer, _ und vielleicht -)*  -->
         <xsd:restriction base="String">
         </xsd:restriction>
+    </xsd:simpleType>
+
+
+    <xsd:simpleType name="Path">
+        <xsd:restriction base="Name"/>
     </xsd:simpleType>
 
 
