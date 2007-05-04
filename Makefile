@@ -74,6 +74,8 @@ java_classes=\
  sos/spooler/Monitor_impl.class\
  sos/spooler/Order.class\
  sos/spooler/Order_queue.class\
+ sos/spooler/Process_class.class\
+ sos/spooler/Process_classes.class\
  sos/spooler/Spooler.class\
  sos/spooler/Spooler_program.class\
  sos/spooler/Subprocess.class\
