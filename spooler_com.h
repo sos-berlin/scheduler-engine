@@ -424,6 +424,7 @@ struct Com_job : spooler_com::Ijob,
     STDMETHODIMP                Remove                      ();
     STDMETHODIMP                Execute_command             ( BSTR );
     STDMETHODIMP            put_Machine_resumable           ( VARIANT_BOOL );
+    STDMETHODIMP            get_Process_class               ( spooler_com::Iprocess_class** );
 
 
   private:

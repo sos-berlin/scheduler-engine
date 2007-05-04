@@ -1274,8 +1274,10 @@
     <xsd:complexType name="process_class">
         <xsd:attribute name="name"                      type="Name"/>
         <xsd:attribute name="max_processes"             type="xsd:nonNegativeInteger"/>
-        <xsd:attribute name="spooler_id"                type="Name"/>
         <xsd:attribute name="remote_scheduler"          type="String"/>
+
+        <xsd:attribute name="spooler_id"                type="Name"/>
+        <xsd:attribute name="replace"                   type="Yes_no"/>
     </xsd:complexType>
 
 

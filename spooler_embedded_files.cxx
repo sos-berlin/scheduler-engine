@@ -1283,8 +1283,10 @@ const char file_scheduler_xsd[] =
     "<xsd:complexType name=\"process_class\">\n"
     "<xsd:attribute name=\"name\"                      type=\"Name\"/>\n"
     "<xsd:attribute name=\"max_processes\"             type=\"xsd:nonNegativeInteger\"/>\n"
-    "<xsd:attribute name=\"spooler_id\"                type=\"Name\"/>\n"
     "<xsd:attribute name=\"remote_scheduler\"          type=\"String\"/>\n"
+    "\n"
+    "<xsd:attribute name=\"spooler_id\"                type=\"Name\"/>\n"
+    "<xsd:attribute name=\"replace\"                   type=\"Yes_no\"/>\n"
     "</xsd:complexType>\n"
     "\n"
     "\n"
@@ -1578,7 +1580,7 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1178278978 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1178286153 },
     { NULL, NULL, 0 }
 };
 

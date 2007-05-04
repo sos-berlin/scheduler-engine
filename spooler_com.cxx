@@ -2155,6 +2155,25 @@ STDMETHODIMP Com_job::put_Machine_resumable( VARIANT_BOOL machine_resumable )
     return hr;
 }
 
+//-----------------------------------------------------------------------Com_job::get_Process_class
+
+STDMETHODIMP Com_job::get_Process_class( spooler_com::Iprocess_class** result )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_job )  z::throw_xc( "SCHEDULER-122" );
+
+        *result = _job->module()->process_class();
+        if( *result )  (*result)->AddRef();
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+
 //-------------------------------------------------------------------------------Com_task::_methods
 #ifdef Z_COM
 

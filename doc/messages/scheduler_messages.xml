@@ -3765,7 +3765,7 @@
 
         <message code="SCHEDULER-867" weight="info">
             <text xml:lang="en">
-                <title>'<p1>object</p1>' is in use, it will be removed later</title>
+                <title>Process_class is in use, it will be removed later</title>
             </text>
         </message>
 

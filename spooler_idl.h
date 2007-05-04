@@ -218,6 +218,7 @@ struct Ijob : IDispatch
     virtual HRESULT         Clear_delay_after_error     ()                                      = 0;
     virtual HRESULT         Remove                      ()                                      = 0;
     virtual HRESULT         Execute_command             ( BSTR )                                = 0;
+    virtual HRESULT     get_Process_class               ( Iprocess_class** )                    = 0;
 };
 
 //--------------------------------------------------------------------------------------------Itask

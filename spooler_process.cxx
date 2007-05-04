@@ -1299,7 +1299,7 @@ Process* Process_class_subsystem::new_temporary_process()
 
 //-------------------------------------------------------Process_class_subsystem::add_process_class
 
-void Process_class_subsystem::add_process_class( Process_class* process_class )
+void Process_class_subsystem::add_process_class( Process_class* process_class, bool replace )
 {
     if( !process_class )  z::throw_xc( __FUNCTION__ );
     if( process_class->is_added() )  z::throw_xc( "SCHEDULER-422", process_class->obj_name() );
@@ -1307,7 +1307,7 @@ void Process_class_subsystem::add_process_class( Process_class* process_class )
 
     if( Process_class* other_process_class = process_class_or_null( process_class->path() ) )
     {
-        if( !other_process_class->_remove )  z::throw_xc( "SCHEDULER-416", other_process_class->obj_name() );
+        if( !replace  &&  !other_process_class->_remove )  z::throw_xc( "SCHEDULER-416", other_process_class->obj_name() );
         other_process_class->_remove = false;
         other_process_class->set_configuration( *process_class );
         if( _spooler->state() > Spooler::s_loading )  other_process_class->log()->info( message_string( "SCHEDULER-869" ) );
@@ -1404,9 +1404,12 @@ xml::Element_ptr Process_class_subsystem::execute_xml_process_class( Command_pro
 {
     if( !element.nodeName_is( "process_class" ) )  z::throw_xc( "SCHEDULER-409", "process_class", element.nodeName() );
 
-    string process_class_name = element.getAttribute( "name" );
+    string process_class_name = element.     getAttribute( "name"    );
+    bool   replace            = element.bool_getAttribute( "replace" );
     
-    if( ptr<Process_class> process_class = process_class_or_null( process_class_name ) )
+    ptr<Process_class> process_class = process_class_or_null( process_class_name );
+
+    if( process_class  &&  !replace )
     {
         process_class->set_dom( element );
     }
@@ -1414,7 +1417,7 @@ xml::Element_ptr Process_class_subsystem::execute_xml_process_class( Command_pro
     {
         process_class = Z_NEW( Process_class( this ) );
         process_class->set_dom( element );
-        add_process_class( process_class );
+        add_process_class( process_class, replace );
     }
 
     return command_processor->_answer.createElement( "ok" );
@@ -1429,7 +1432,7 @@ STDMETHODIMP Process_class_subsystem::get_Process_class( BSTR path_bstr, spooler
     try
     {
         *result = process_class( string_from_bstr( path_bstr ) );
-        if( result )  (*result)->AddRef();
+        if( *result )  (*result)->AddRef();
     }
     catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
 
@@ -1445,7 +1448,7 @@ STDMETHODIMP Process_class_subsystem::get_Process_class_or_null( BSTR path_bstr,
     try
     {
         *result = process_class_or_null( string_from_bstr( path_bstr ) );
-        if( result )  (*result)->AddRef();
+        if( *result )  (*result)->AddRef();
     }
     catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
 

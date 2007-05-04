@@ -597,6 +597,28 @@ spooler_job.max_order_setbacks = 5;                      // Die 5. Rückstellung
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
+    <property name="process_class" access="read">
+        <com>
+            <com.result>
+                <com.type class="Process_class"/>
+            </com.result>
+        </com>
+
+        <title>Die Prozessklasse</title>
+
+        <description>
+            <p>
+                Siehe <scheduler_element name="job" attribute="process_class"/>.
+            </p>
+        </description>
+
+        <messages>
+            <message level="error" code="SCHEDULER-401"/>
+        </messages>
+    </property>
+    
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
     <method name="remove">
         <com/>
 

@@ -25,6 +25,9 @@
                         <scheduler_method class="Process_class"/>
                     </li>
                     <li>
+                        <scheduler_method class="Job" property="process_class"/>
+                    </li>
+                    <li>
                         <scheduler_element name="process_class"/>
                     </li>
                     <li>

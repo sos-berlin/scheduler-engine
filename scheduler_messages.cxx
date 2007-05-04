@@ -428,7 +428,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-861", "'$1' has been removed" },
     { "SCHEDULER-862", "Continuing in '$1'" },
     { "SCHEDULER-863", "Continuing from '$1'" },
-    { "SCHEDULER-867", "'$1' is in use, it will be removed later" },
+    { "SCHEDULER-867", "Process_class is in use, it will be removed later" },
     { "SCHEDULER-868", "Process class has been removed" },
     { "SCHEDULER-869", "Process class has been replaced" },
     { "SCHEDULER-870", "Process class has been added" },

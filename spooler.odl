@@ -335,6 +335,8 @@ library Spooler
         [id(18),propput]                                                                               
         HRESULT                 Machine_resumable           ( [in] VARIANT_BOOL );              // Für Joacim 2006-06-15
 
+        [id(19),propget]                                                                               
+        HRESULT                 Process_class               ( [out,retval] Iprocess_class** );
     }
 
     [

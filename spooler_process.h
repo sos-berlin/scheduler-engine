@@ -200,6 +200,8 @@ struct Process_class_configuration : idispatch_implementation< Process_class, sp
     string                     _name;
     int                        _max_processes;
     Host_and_port              _remote_scheduler;
+    // Neue Einstellungen in Process_class::set_configuration() berücksichtigen!
+
     bool                       _remove;                     // Löschen, sobald is_removable()
 
 
@@ -272,7 +274,7 @@ struct Process_class_subsystem : idispatch_implementation< Process_class_subsyst
     bool                        subsystem_load              ();
     bool                        subsystem_activate          ();
 
-    void                        add_process_class           ( Process_class* );
+    void                        add_process_class           ( Process_class*, bool replace = false );
     void                        remove_process_class        ( Process_class* );
     Process_class*              process_class               ( const string& name );
     Process_class*              process_class_or_null       ( const string& name );

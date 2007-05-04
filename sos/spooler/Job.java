@@ -309,4 +309,6 @@ public class Job extends Idispatch
       * Auftragsjobs ( &lt;job order="yes">) können nicht entfernt werden.
      */
     public void             remove              ()                                  {                     com_call( "remove"                        ); }
+
+    public Process_class    process_class       ()                                  { return (Process_class)com_call( "<process_class"              ); }
 }

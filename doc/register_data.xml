@@ -2518,6 +2518,7 @@
 </register_keyword>
 <register_keyword keyword='Process_class (class)'>
     <register_keyword_display><code>Process_class</code> (class)</register_keyword_display>
+    <register_entry register_file='api/Job.xml#method__process_class' register_title='Job.process_class' register_keyword='Process_class'/>
     <register_entry register_file='api/Process_class.xml' register_keyword='Process_class' type='definition'/>
     <register_entry register_file='api/Process_classes.xml#method__create_process_class' register_title='Process_classes.create_process_class()' register_keyword='Process_class'/>
     <register_entry register_file='api/Process_classes.xml#method__process_class' register_title='Process_classes.process_class' register_keyword='Process_class'/>
@@ -2525,6 +2526,7 @@
 </register_keyword>
 <register_keyword keyword='process_class (property)'>
     <register_keyword_display><code>process_class</code> (property)</register_keyword_display>
+    <register_entry register_file='api/Job.xml#method__process_class' register_title='Job.process_class' register_keyword='process_class' type='definition'/>
     <register_entry register_file='api/Process_classes.xml#method__process_class' register_title='Process_classes.process_class' register_keyword='process_class' type='definition'/>
 </register_keyword>
 <register_keyword keyword='process_class.remove'>
