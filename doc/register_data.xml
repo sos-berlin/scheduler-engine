@@ -2513,6 +2513,7 @@
 <register_keyword keyword='process_class'>
     <register_keyword_display><code>process_class=</code></register_keyword_display>
     <register_entry register_file='xml/job.xml#attribute_process_class' register_title='&lt;job&gt; (Konfiguration)'  register_keyword='process_class' type='definition'/>
+    <register_entry register_file='xml/process_class.remove.xml#attribute_process_class' register_title='&lt;process_class.remove&gt; (Kommando)'  register_keyword='process_class' type='definition'/>
     <register_entry register_file='xml/script.xml#attribute_process_class' register_title='&lt;script&gt; (Konfiguration)'  register_keyword='process_class' type='definition'/>
 </register_keyword>
 <register_keyword keyword='Process_class (class)'>
@@ -2528,11 +2529,10 @@
 </register_keyword>
 <register_keyword keyword='process_class.remove'>
     <register_keyword_display><code>&lt;process_class.remove&gt;</code></register_keyword_display>
+    <register_entry register_file='CHANGES.xml#use_element__process_class.remove' register_title='Änderungsprotokoll'  register_keyword='process_class.remove'/>
     <register_entry register_file='api/Process_class.xml#use_element__process_class.remove' register_title='Process_class'  register_keyword='process_class.remove'/>
-</register_keyword>
-<register_keyword keyword='process_class.use'>
-    <register_keyword_display><code>&lt;process_class.use&gt;</code></register_keyword_display>
-    <register_entry register_file='api/Process_class.xml#use_element__process_class.use' register_title='Process_class'  register_keyword='process_class.use'/>
+    <register_entry register_file='xml.xml#use_element__process_class.remove' register_title='Alle XML-Elemente'  register_keyword='process_class.remove'/>
+    <register_entry register_file='xml/process_class.remove.xml#' register_title='&lt;process_class.remove&gt; (Kommando)'  register_keyword='process_class.remove' type='definition'/>
 </register_keyword>
 <register_keyword keyword='process_class_name'>
     <register_keyword_display><code>process_class_name</code></register_keyword_display>
@@ -2555,6 +2555,11 @@
 <register_keyword keyword='Process_classes (class)'>
     <register_keyword_display><code>Process_classes</code> (class)</register_keyword_display>
     <register_entry register_file='api/Process_classes.xml' register_keyword='Process_classes' type='definition'/>
+    <register_entry register_file='api/Spooler.xml#method__process_classes' register_title='Spooler.process_classes' register_keyword='Process_classes'/>
+</register_keyword>
+<register_keyword keyword='process_classes (property)'>
+    <register_keyword_display><code>process_classes</code> (property)</register_keyword_display>
+    <register_entry register_file='api/Spooler.xml#method__process_classes' register_title='Spooler.process_classes' register_keyword='process_classes' type='definition'/>
 </register_keyword>
 <register_keyword keyword='processes'>
     <register_keyword_display><code>&lt;processes&gt;</code></register_keyword_display>
