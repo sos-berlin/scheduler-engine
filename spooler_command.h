@@ -239,7 +239,7 @@ struct Command_processor
                                 Command_processor           ( Spooler*, Security::Level, Communication::Operation* cp = NULL );
                                ~Command_processor           ();
 
-    void                        execute_file                ( const string& xml_filename );
+    void                        execute_config_file         ( const string& xml_filename );
     void                        execute_http                ( http::Operation*, Http_file_directory* );
     ptr<Command_response>       response_execute            ( const string& xml_text, const Time& xml_mod_time, bool indent = false );
     string                      execute                     ( const string& xml_text, const Time& xml_mod_time, bool indent = false );

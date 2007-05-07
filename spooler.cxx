@@ -1514,7 +1514,7 @@ void Spooler::load()
         cp.execute( configuration, Time::now() );
     }
     else
-        cp.execute_file( _config_filename );
+        cp.execute_config_file( _config_filename );
 
 
 #   ifdef Z_WINDOWS

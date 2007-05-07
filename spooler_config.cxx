@@ -258,7 +258,7 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const Time& x
                 
                 Command_processor cp ( this, Security::seclev_all );
                 cp._load_config_immediately = true;
-                cp.execute_file( config_filename );
+                cp.execute_config_file( config_filename );
 
 
                 // Für http://.../show_config?:   Das Basisdokument in <base> ablegen, damit wir eine große Konfiguration bekommen. Nur für HTTP.

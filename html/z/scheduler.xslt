@@ -107,7 +107,11 @@
                         <xsl:with-param name="class" select="'remote_scheduler'"/>
                     </xsl:apply-templates>
                 </xsl:if>
-            </tr>
+
+                <td style="margin-bottom: 0pt; padding: 1ex 0pt 2px 0pt;">
+                    <span style="padding-left: 3pt; padding-bottom: 2pt; border-bottom: 1px solid gray;">&#160;&#160;&#160;&#160;&#160;&#160;</span>
+                </td>
+             </tr>
         </table>
 
 
@@ -145,22 +149,27 @@
         <xsl:param name="title"/>
         <xsl:param name="class"/>
 
-        <td style="margin-bottom: 0pt; padding: 1ex 0pt 2px 5pt">
+        <td style="margin-bottom: 0pt; padding: 1ex 0pt 2px 0pt;">
         <!--    onmouseover="this.className='hover'"
             onmouseout ="this.className=''"-->
 
+            <span style="padding-left: 3pt; padding-bottom: 2pt; border-bottom: 1px solid gray;">&#160;</span>
+
             <xsl:element name="span">
                 <xsl:attribute name="onclick">call_error_checked( show_card, '<xsl:value-of select="$name"/>' )</xsl:attribute>
-                <xsl:attribute name="style"  >cursor: pointer; padding: 1pt 4pt 2px 4pt</xsl:attribute>
                 <xsl:attribute name="class"><xsl:value-of select="$class"/></xsl:attribute>
-                <xsl:element name="span">
-                    <xsl:if test="@my_show_card=$name ">
-                        <xsl:attribute name="style">font-weight: bold</xsl:attribute>
-                    </xsl:if>
-                    <span class="translate" style="white-space: nowrap">
-                        <xsl:value-of select="$title"/>
-                    </span>
-                </xsl:element>
+                <xsl:choose>
+                    <xsl:when test="@my_show_card=$name ">
+                        <xsl:attribute name="style">cursor: pointer; padding: 1pt 4pt 2px 4pt; font-weight: bold; border-top: 1px solid gray; border-left: 1px solid gray; border-right: 1px solid gray;</xsl:attribute>
+                    </xsl:when>
+                    <xsl:otherwise>
+                        <xsl:attribute name="style">cursor: pointer; padding: 1pt 2pt 2px 4pt; font-size: 8pt; border: 1px solid gray; </xsl:attribute>
+                    </xsl:otherwise>
+                </xsl:choose>
+    
+                <span class="translate" style="white-space: nowrap">
+                    <xsl:value-of select="$title"/>
+                </span>
             </xsl:element>
         </td>
     </xsl:template>
@@ -170,7 +179,7 @@
 
     <xsl:template name="card_top">
         <tr>
-            <td colspan="99"><p style="margin-top: 0px; line-height: 5px;">&#160;</p></td>
+            <td colspan="5"><p style="margin-top: 0px; line-height: 5px;">&#160;</p></td>
         </tr>
     </xsl:template>
 
@@ -725,7 +734,7 @@
 
                 <xsl:if test="$single">
                     <tr>
-                        <td colspan="99">
+                        <td colspan="5">
                             Job chain&#160; 
                             <b>
                                 <xsl:value-of select="@name"/>
@@ -786,14 +795,14 @@
                     </td>
                 </tr>
                 <tr>
-                    <td colspan="99" class="after_head_space">&#160;</td>
+                    <td colspan="5" class="after_head_space">&#160;</td>
                 </tr>
             </thead>
 
             <tbody class="job_chain">
                 <xsl:if test="not( $job_chain_select )">
                     <tr>
-                        <td colspan="99">
+                        <td colspan="5">
                             (no job chains)
                         </td>
                     </tr>
@@ -805,7 +814,7 @@
 
                     <xsl:if test="( /spooler/@show_job_chain_orders_checkbox or /spooler/@show_job_chain_jobs_checkbox ) and position() &gt; 1">
                         <tr>
-                            <td colspan="99">
+                            <td colspan="5">
                                 <hr style="color: black" size="1"/>
                             </td>
                         </tr>
@@ -929,7 +938,7 @@
                             <xsl:if test="ERROR">
                                 <tr>
                                     <td> </td>
-                                    <td colspan="99">
+                                    <td colspan="5">
                                         <xsl:apply-templates select="ERROR"/>
                                     </td>
                                 </tr>
@@ -941,7 +950,7 @@
                                     <xsl:variable name="remaining" select="files/@count - count( $limited_files )"/>
                                     <tr>
                                         <td> </td>
-                                        <td colspan="99">
+                                        <td colspan="4">
                                             <span style="font-size: 8pt">
                                                 <xsl:text>(</xsl:text>
                                                 <xsl:value-of select="$remaining"/>
@@ -988,10 +997,10 @@
 
                             <xsl:if test="$show_orders">
                                 <tr class="order">
-                                    <td colspan="99" style="font-size: 4pt">&#160;</td>
+                                    <td colspan="5" style="font-size: 4pt">&#160;</td>
                                 </tr>
                                 <tr class="order">
-                                    <td colspan="99">
+                                    <td colspan="5">
                                         <xsl:apply-templates select="job/order_queue" mode="job_chain_list">
                                             <xsl:with-param name="orders" 
                                                 select="job/order_queue/order[ @job_chain = current()/parent::job_chain/@name  and  @state = current()/@state ]"/>
@@ -1135,7 +1144,7 @@
                         <xsl:if test="blacklist/@count >= 1">
 
                             <tr>
-                                <td colspan="99" style="line-height: 1ex">&#160;</td>
+                                <td colspan="5" style="line-height: 1ex">&#160;</td>
                             </tr>
 
                             <xsl:element name="tr">
@@ -1154,7 +1163,7 @@
 
                             <xsl:if test="/spooler/@show_job_chain_orders_checkbox or $single">
                                 <tr class="order">
-                                    <td colspan="99">
+                                    <td colspan="5">
                                         <xsl:apply-templates select="blacklist" mode="job_chain_list">
                                             <xsl:with-param name="orders" select="blacklist/order[ @job_chain = current()/@name ]"/>
                                             <xsl:with-param name="max_orders" select="$max_orders"/>
@@ -1171,11 +1180,11 @@
 
                 <xsl:if test="/spooler/@show_job_chain_jobs_checkbox and not( $single ) and /spooler/answer/state/jobs/job [ not( @order='yes' ) ]">
                     <tr>
-                        <td colspan="99" style="line-height: 8pt">&#160;</td>
+                        <td colspan="5" style="line-height: 8pt">&#160;</td>
                     </tr>
 
                     <tr>
-                        <td colspan="99" class="label" style="padding-top: 4pt; border-top: 1px solid gray">
+                        <td colspan="5" class="label" style="padding-top: 4pt; border-top: 1px solid gray">
                             no-order jobs
                         </td>
                     </tr>
@@ -1603,7 +1612,7 @@
                 </tr>
 
                 <tr>
-                    <td colspan="99" style="padding-left: 4ex">
+                    <td colspan="5" style="padding-left: 4ex">
                         <xsl:if test="lock.holders/lock.holder">
                             <div class="label">
                                 <xsl:choose>

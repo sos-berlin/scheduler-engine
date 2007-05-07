@@ -1446,7 +1446,7 @@
     <xsl:template match="scheduler_message" mode="description">
 
         <xsl:choose>
-            <xsl:when test="ancestor::p">
+            <xsl:when test="ancestor::p or normalize-space( preceding-sibling::text() ) != '' or normalize-space( following-sibling::text() ) != ''">
                 <span class="message">
                     <xsl:call-template name="scheduler_message">
                         <xsl:with-param name="level"     select="@level"/>

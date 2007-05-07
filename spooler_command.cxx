@@ -1648,18 +1648,30 @@ xml::Document_ptr Command_processor::execute( const xml::Document_ptr& command_d
     return _answer;
 }
 
-//------------------------------------------------------------------Command_processor::execute_file
+//-----------------------------------------------------------Command_processor::execute_config_file
 
-void Command_processor::execute_file( const string& filename )
+void Command_processor::execute_config_file( const string& filename )
 {
-    _source_filename = filename;
+    try
+    {
+        _source_filename = filename;
 
-    string content = string_from_file( filename );
+        Time   xml_mod_time = modification_time_of_file( filename );
+        string content      = string_from_file( filename );
 
-    Z_LOGI2( "scheduler", __FUNCTION__ << "\n" << filename << ":\n" << content << "\n" );
-    _dont_log_command = true;
+        Z_LOGI2( "scheduler", __FUNCTION__ << "\n" << filename << ":\n" << content << "\n" );
 
-    execute_2( content, modification_time_of_file( filename ) );
+        xml::Document_ptr dom_document = dom_from_xml( content );
+        dom_document.select_node_strict( "/spooler/config" );
+
+        _dont_log_command = true;
+        execute_2( dom_document, xml_mod_time );
+    }
+    catch( zschimmer::Xc& x )
+    {
+        x.append_text( "in configuration file " + filename );
+        throw;
+    }
 }
 
 //------------------------------------------------------------------Command_processor::dom_from_xml

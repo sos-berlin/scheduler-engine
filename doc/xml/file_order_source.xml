@@ -130,9 +130,9 @@
     <example>
         <pre>&lt;job_chain name="my_job_chain">
     &lt;file_order_source directory="/tmp/input"/>
-    &lt;job_chain_node state="first" job="process_file" error_state="ERROR" />
+    &lt;job_chain_node state="first" job="process_file" error_state="ERROR"/>
     &lt;file_order_sink state="remove" remove="yes"/>
-    &lt;file_order_sink state="ERROR" move_to=/tmp/input.error"/>
+    &lt;file_order_sink state="ERROR" move_to="/tmp/input.error"/>
 &lt;/job_chain></pre>
     </example>
 
