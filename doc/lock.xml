@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿ml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
 
 <!--$Id: windows_job_objects.xml 4270 2006-04-21 08:26:33Z jz $-->
@@ -15,9 +15,11 @@
     <scheduler_keyword keyword="Semaphor"/>
 
     <p>
-    Sperren im Scheduler verhindern die Ausführung eines Jobs, solange eine bestimmte Sperre von einem oder mehreren anderen Job(s) belegt ist. 
-    Sperren stehen für Jobs in Jobketten und für einzelne Jobs zur Verfügung. Wartet ein Job auf die Freigabe einer Sperre, wird er automatisch gestartet,
-    sobald die Sperre freigegeben wird.
+			Sperren im Scheduler verhindern die Ausführung eines Jobs, 
+			solange eine bestimmte Sperre von einem oder mehreren anderen Job(s) belegt ist. 
+			Sperren stehen für Jobs in Jobketten und für einzelne Jobs zur Verfügung. 
+			Wartet ein Job auf die Freigabe einer Sperre, wird er automatisch gestartet,
+			sobald die Sperre freigegeben wird.
     </p>
     <p>
         Ein beispielhaftes Problem:
@@ -28,7 +30,9 @@
 
     <h2>Konfiguration</h2>
     
-    <p>Damit Jobs Sperren belegen können, müssen sie zunächst bekanntgemacht werden. </p>
+    <p>
+      Damit Jobs Sperren belegen können, müssen sie zunächst bekanntgemacht werden.
+    </p>
     <pre>&lt;config>
     <scheduler_element name="locks"/>
         &lt;<a href="xml/lock.xml">lock</a> name="<i>lock_name</i>"/>
@@ -36,25 +40,35 @@
         …
     &lt;/locks></pre>   
     
-    <p>Beim einzelnen Job werden die anzuwendenden Sperren deklariert</p>
+    <p>
+      Beim einzelnen Job werden die anzuwendenden Sperren deklariert
+    </p>
     <pre><scheduler_element name="job"/>
     &lt;<a href="xml/lock.use.xml">lock.use</a> lock="<i>lock_name</i>"/>
     &lt;<a href="xml/lock.use.xml">lock.use</a> lock="<i>lock_name2</i>"/>
     
     </pre>
-
-    <p>Sperren können exklusiv und nicht exklusiv verwendet werden. Bei nicht exklusiver Verwendung einer Sperre kann 
-    die Zahl der nicht exklusiven Belegungen begrenzt werden. 
-    Die Voreinstellung für die Verwendung einer Sperre ist die exklusive Belegung</p>  
-    
-    <p>Wenn eine Sperre verwendet wird, die nicht deklariert wurde, startet der Scheduler nicht.</p>
-    <p><b>Achtung:</b> Bei Namen von Sperren wird Groß- und Kleinschreibung unterschieden! </p>
     
     <p>
-        Die Belegung einer Sperre beginnt mit dem Start einer Task und endet mit ihr.
-        Eine exklusive Sperre erlaubt nur eine Task.
+      Sperren können exklusiv und nicht exklusiv verwendet werden. Bei nicht exklusiver Verwendung einer Sperre kann 
+      die Zahl der nicht exklusiven Belegungen begrenzt werden. 
+      Die Voreinstellung für die Verwendung einer Sperre ist die exklusive Belegung
     </p>
-  
+    
+    <p>
+      Wenn eine Sperre verwendet wird, die nicht deklariert wurde, startet der Scheduler nicht.
+    </p>
+    
+    <p>
+      <b>Achtung:</b> Bei Namen von Sperren wird Groß- und Kleinschreibung unterschieden!
+    </p>
+    
+    <p>
+      Die Belegung einer Sperre beginnt mit dem Start einer Task und endet mit ihr.
+      Eine exklusive Sperre erlaubt nur eine Task.
+    </p>
+    
+    
     <p><b>Exklusives Sperren</b></p>
 
     <p>
@@ -64,6 +78,7 @@
     <p>
         Deklaration:
     </p>
+    
     <pre>&lt;config>
     <scheduler_element name="locks"/>
         &lt;<a href="xml/lock.xml">lock</a> name="<i>lock_name</i>"/>
@@ -84,7 +99,7 @@
         Eine Sperre kann nicht-exklusiv von vielen Jobs belegt werden.
     </p>
     <p>
-        Die Zahl der nicht-exklusiven Belegungen lässt sich begrenzen.             
+        Die Zahl der nicht-exklusiven Belegungen lässt sich begrenzen.
         <pre>&lt;<a href="xml/lock.xml">lock</a> name="<i>lock_name</i>" max_non_exclusive="2"/></pre>
     </p>
 
@@ -103,20 +118,22 @@
         aber keine der ersten beiden Jobs kann mit dem dritten zusammen laufen,
         der die Sperre exklusiv beansprucht.
     </p>
-
-  
+    
+    
     <h2>Sperren in Jobketten</h2>
+    
     <p>Da Sperren von Tasks belegt werden, können sie in Jobketten verwendet werden, wenn  
        die Tasks der einzelnen Jobknoten sich nach Ausführung beenden. Dazu muss das Attribut 
-       idle_timeout idealerweise auf 0 gesetzt sein.       
+       idle_timeout idealerweise auf 0 gesetzt sein.
     </p>
+    
     <p>&#160;</p>
     
     
-     
     
     
-   
+    
+    
     
     
     
