@@ -1,15 +1,20 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSPY v5 rel. 3 U (http://www.xmlspy.com) by Andreas Pueschel (APL Software GmbH) -->
+
 <?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
 <!--$Id: job.xml 4950 2007-04-12 06:39:59Z fs $-->
-<description title="Externe Jobverarbeitung" base_dir="" author="$Author: fs,ur $" date="$Date: 2007-04-20 16:39:59 +0200 (Fr, 20 Apr 2007) $">
+
+<description	title="Externe Jobverarbeitung"
+							base_dir=""
+							author="$Author: fs,ur $"
+							date="$Date: 2007-04-20 16:39:59 +0200 (Fr, 20 Apr 2007) $">
 
     <scheduler_keyword keyword="Remote Execution"/>
     <scheduler_keyword keyword="Remote"/>
     <scheduler_keyword keyword="remote_scheduler"/>
 
 
-	<p>
+		<p>
 			API-Jobs können auf einem entfernten Job Scheduler ausgeführt werden. 
 		</p>
 		
@@ -192,4 +197,5 @@
 			Ein beim Job angegebener <scheduler_element name="job" attribute="timeout"/> wird nicht ausgewertet, 
 			d.h. die Task wird nicht abgebrochen, wenn der bei Timeout angegebene Wert erreicht ist.
 		</p>
+		
 </description>
