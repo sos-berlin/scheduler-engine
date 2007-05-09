@@ -2628,6 +2628,15 @@
 <register_keyword keyword='release'>
     <register_entry register_file='xml/answer/task.xml' register_title='&lt;task&gt; (Antwort)'  register_keyword='release'/>
 </register_keyword>
+<register_keyword keyword='Remote'>
+    <register_entry register_file='remote_execution.xml' register_title='XXX'  register_keyword='Remote'/>
+</register_keyword>
+<register_keyword keyword='Remote Execution'>
+    <register_entry register_file='remote_execution.xml' register_title='XXX'  register_keyword='Remote Execution'/>
+</register_keyword>
+<register_keyword keyword='remote_scheduler'>
+    <register_entry register_file='remote_execution.xml' register_title='XXX'  register_keyword='remote_scheduler'/>
+</register_keyword>
 <register_keyword keyword='remote_scheduler'>
     <register_keyword_display><code>&lt;remote_scheduler&gt;</code></register_keyword_display>
     <register_entry register_file='xml.xml#use_element__remote_scheduler' register_title='Alle XML-Elemente'  register_keyword='remote_scheduler'/>

@@ -416,6 +416,7 @@ struct Spooler : Object,
     Order_subsystem_interface*  order_subsystem             ();
     Java_subsystem_interface*   java_subsystem              ()                                  { return _java_subsystem; }
     lock::Lock_subsystem*       lock_subsystem              ()                                  { return _lock_subsystem; }
+    Supervisor_client_interface*supervisor_client           ();
     bool                        has_any_order               ();
     bool                        has_any_task                ();
 

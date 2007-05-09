@@ -5,10 +5,6 @@
 namespace sos {
 namespace scheduler {
 
-//--------------------------------------------------------------------------------------------const
-    
-const int main_scheduler_retry_time = 60;
-
 //-------------------------------------------------------------------------------------------------
 
 struct Supervisor_client_connection;
@@ -58,7 +54,7 @@ struct Remote_scheduler_register
 
 struct Supervisor : Supervisor_interface
 {
-                                Supervisor                  ( Scheduler* scheduler )                : Supervisor_interface( scheduler, type_supervisor ), _zero_(this+1) {}
+                                Supervisor                  ( Scheduler* );
 
     // Subsystem
     void                        close                       ();
@@ -86,9 +82,18 @@ struct Supervisor_client : Supervisor_client_interface
     bool                        subsystem_initialize        ();
                                 Subsystem::obj_name;
 
+    // IDispatch_implementation
+    STDMETHODIMP            get_Java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
+    STDMETHODIMP_(char*)  const_java_class_name             ()                                      { return (char*)"sos.spooler.Supervisor_client"; }
+    STDMETHODIMP            get_Hostname                    ( BSTR* );
+    STDMETHODIMP            get_Tcp_port                    ( int* );
+
   private:
     Fill_zero                  _zero_;
     ptr<Supervisor_client_connection> _client_connection;
+
+    static Class_descriptor     class_descriptor;
+    static const Com_method     _methods[];
 };
 
 //---------------------------------------------------------------------Supervisor_client_connection
@@ -112,8 +117,8 @@ struct Supervisor_client_connection : Async_operation, Scheduler_object
     virtual string              obj_name                    () const;
 
     State                       state                       () const                                { return _state; }
-
     void                        connect                     ();
+    const Host_and_port&        host_and_port               () const                                { return _host_and_port; }
 
 
   protected:
@@ -204,7 +209,34 @@ struct Object_server_processor_channel : Communication::Operation_channel
     ptr<object_server::Session> _session;
 };
 */
-//-----------------------------------------------------Supervisor_client_connection::Supervisor_client_connection
+
+//--------------------------------------------------------------------------------------------const
+    
+const int                               main_scheduler_retry_time           = 60;
+Supervisor_client::Class_descriptor     Supervisor_client::class_descriptor ( &typelib, "Spooler.Supervisor", Supervisor_client::_methods );
+
+//----------------------------------------------------------------------Supervisor_client::_methods
+
+const Com_method Supervisor_client::_methods[] =
+{ 
+#ifdef COM_METHOD
+    COM_PROPERTY_GET( Supervisor_client,  1, Java_class_name     , VT_BSTR    , 0 ),
+    COM_PROPERTY_GET( Supervisor_client,  2, Hostname            , VT_BSTR    , 0 ),
+    COM_PROPERTY_GET( Supervisor_client,  3, Tcp_port            , VT_INT     , 0 ),
+#endif
+    {}
+};
+
+//-----------------------------------------Supervisor_client_interface::Supervisor_client_interface
+
+Supervisor_client_interface::Supervisor_client_interface( Scheduler* scheduler, Type_code tc, Class_descriptor* class_descriptor )  
+: 
+    Idispatch_implementation( class_descriptor ),
+    Subsystem( scheduler, static_cast<IDispatch*>( this ), tc ) 
+{
+}
+
+//---------------------------------------Supervisor_client_connection::Supervisor_client_connection
     
 Supervisor_client_connection::Supervisor_client_connection( Supervisor_client* supervisor_client, const Host_and_port& host_and_port )
 : 
@@ -438,6 +470,15 @@ ptr<Supervisor_interface> new_supervisor( Scheduler* scheduler )
     return +supervisor;
 }
 
+//---------------------------------------------------------------------------Supervisor::Supervisor
+
+Supervisor::Supervisor( Scheduler* scheduler )            
+: 
+    Supervisor_interface( scheduler, type_supervisor ), 
+    _zero_(this+1) 
+{
+}
+
 //--------------------------------------------------------------------------------Supervisor::close
 
 void Supervisor::close()
@@ -484,7 +525,7 @@ ptr<Supervisor_client_interface> new_supervisor_client( Scheduler* scheduler, co
 
 Supervisor_client::Supervisor_client( Scheduler* scheduler, const Host_and_port& host_and_port )
 : 
-    Supervisor_client_interface( scheduler, type_supervisor_client ),
+    Supervisor_client_interface( scheduler, type_supervisor_client, &class_descriptor ),
     _zero_(this+1)
 {
     _log->set_prefix( S() << obj_name() << ' ' << host_and_port.as_string() );
@@ -528,6 +569,38 @@ bool Supervisor_client::subsystem_initialize()
 //    _subsystem_state = subsys_activated;
 //    return true;
 //}
+
+//-----------------------------------------------------------------Supervisor_client::get_Hostname
+
+STDMETHODIMP Supervisor_client::get_Hostname( BSTR* result )
+{
+    HRESULT hr = S_OK;
+
+    try
+    {
+        string hostname = _client_connection->host_and_port().host().name();
+        if( hostname == "" )  hostname = _client_connection->host_and_port().host().ip_string();
+        hr = String_to_bstr( hostname, result );
+    }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+
+//-----------------------------------------------------------------Supervisor_client::get_Tcp_port
+
+STDMETHODIMP Supervisor_client::get_Tcp_port( int* result )
+{
+    HRESULT hr = S_OK;
+
+    try
+    {
+        *result = _client_connection->host_and_port().port();
+    }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
 
 //-------------------------------------------------------------------------------------------------
 

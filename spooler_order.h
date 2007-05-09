@@ -232,6 +232,7 @@ struct Order : Com_order,
     int                         db_get_ordering         ( Transaction* ta = NULL );
     Database*                   db                      ();
     Order_subsystem*            order_subsystem         () const;
+    Com_log*                    com_log                 () const                                    { return _com_log; }
 
 
   private:
@@ -310,6 +311,7 @@ struct Order : Com_order,
     bool                       _end_state_reached;      // Auftrag nach spooler_process() beenden, für <file_order_sink>
     Time                       _old_next_time;
     ptr<http::Operation>       _http_operation;
+    ptr<Com_log>               _com_log;                // COM-Hülle für Log
 };
 
 //-------------------------------------------------------------------------------------------------

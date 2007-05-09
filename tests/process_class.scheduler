@@ -20,6 +20,7 @@ var process_class = process_classes.create_process_class();
 process_class.name = "Reykjavik";
 spooler_log.info( "process_class.max_processes=" + process_class.max_processes );
 process_class.max_processes = 7;
+if( process_class.max_processes != 7 )  spooler_log.error( "process_class.max_processes != 7" );
 spooler_log.info( "process_class.max_processes=" + process_class.max_processes );
 spooler_log.info( "process_class.name=" + process_class.name );
 

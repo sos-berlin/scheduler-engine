@@ -229,4 +229,6 @@ public class Order extends Idispatch
     
     public void         set_suspended           ( boolean b )                       {                        com_call( ">suspended", b ); }
     public boolean          suspended           ()                                  { return         boolean_com_call( "<suspended" ); }
+    
+    public Log              log                 ()                                  { return (Log)           com_call( "<log" ); }
 }

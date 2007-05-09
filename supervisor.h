@@ -5,7 +5,7 @@ namespace scheduler {
 
 //-----------------------------------------------------------------------------Supervisor_interface
     
-struct Supervisor_interface: Object, Subsystem
+struct Supervisor_interface : Subsystem, Object
 {
                                 Supervisor_interface        ( Scheduler* scheduler, Type_code tc )  : Subsystem( scheduler, this, tc ) {}
 
@@ -25,9 +25,10 @@ struct Remote_scheduler_interface : zschimmer::Object
 
 //----------------------------------------------------------------------Supervisor_client_interface
 
-struct Supervisor_client_interface: Object, Subsystem
+struct Supervisor_client_interface: idispatch_implementation< Supervisor_client_interface, spooler_com::Isupervisor_client >,
+                                    Subsystem
 {
-                                Supervisor_client_interface ( Scheduler* scheduler, Type_code tc )  : Subsystem( scheduler, this, tc ) {}
+                                Supervisor_client_interface ( Scheduler*, Type_code, Class_descriptor* );
 };
 
 

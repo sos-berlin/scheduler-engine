@@ -2913,6 +2913,7 @@ Order::~Order()
     }
 
     if( _run_time )  _run_time->close();
+    if( _com_log  )  _com_log->set_log( NULL );
 }
 
 //--------------------------------------------------------------------------------------Order::init
@@ -2923,6 +2924,9 @@ void Order::init()
 
     _log = Z_NEW( Prefix_log( this ) );
     _log->set_prefix( obj_name() );
+
+    _com_log = new Com_log;
+    _com_log->set_log( _log );
 
     _created       = Time::now();
     _is_virgin     = true;
@@ -3758,7 +3762,6 @@ void Order::set_dom( const xml::Element_ptr& element, Variable_set_map* variable
     if( title            != "" )  set_title   ( title );
     if( state_name       != "" )  set_state   ( state_name.c_str() );
     if( web_service_name != "" )  set_web_service( _spooler->_web_services->web_service_by_name( web_service_name ), true );
-    if( at_string        != "" )  set_at      ( Time::time_with_now( at_string ) );
     _is_virgin = !element.bool_getAttribute( "touched" );
 
     if( element.hasAttribute( "suspended" ) )
@@ -3814,7 +3817,7 @@ void Order::set_dom( const xml::Element_ptr& element, Variable_set_map* variable
             }
         }
         else
-        if( e.nodeName_is( "run_time" ) )
+        if( e.nodeName_is( "run_time" ) )       // Attribut at="..." setzt nächste Startzeit
         { 
             set_run_time( e );
         }
@@ -3835,6 +3838,8 @@ void Order::set_dom( const xml::Element_ptr& element, Variable_set_map* variable
             //order_subsystem()->job_chain( _outer_job_chain_name )->node_from_state( _outer_job_chain_state );   // Prüfen
         }
     }
+
+    if( at_string != "" )  set_at( Time::time_with_now( at_string ) );
 }
 
 //-------------------------------------------------------------------------------Order::dom_element

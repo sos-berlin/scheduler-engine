@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <spooler
     xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
-    xsi:noNamespaceSchemaLocation = "http://www.zschimmer.com/2006/scheduler.xsd"
+    xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
 >
     <config>
 
@@ -9,8 +9,7 @@
 
         <process_classes/>
     
-        <script language="javascript">
-        <![CDATA[
+        <script language="javascript"><![CDATA[
 
 if( spooler.job_chain( "order_at.scheduler" ).order_count == 0 )
 {
@@ -109,6 +108,7 @@ public class My_job  extends sos.spooler.Job_impl
 function spooler_process() 
 {   
     var order = spooler_task.order;
+    order.log.warn( "EINE WARNUNG NUR IM ORDER-LOG" );
     
     spooler_log.info( "order.xml=" + order.xml );
     
@@ -118,6 +118,8 @@ function spooler_process()
     new_order.title = "Vom Job " + spooler_job.name + " kopiert";
     new_order.id = order.id;
     order.job_chain.add_or_replace_order( new_order );
+    
+    spooler_log.info( "order.log.filename=" + order.log.filename );
     
     return true;
 }
@@ -138,13 +140,16 @@ function spooler_process()
         </job_chains>
 
         <commands>
-            <show_state/>
             <add_order job_chain="order_at.scheduler" id="commands" replace="yes">
                 <run_time>
                     <period start_once="no"/>
                 </run_time>
             </add_order>
+            <add_order job_chain='order_at.scheduler' id="commands2" replace="yes" at='2007-05-09 09:28'>
+                <run_time>
+                    <period single_start='23:00'/>
+                </run_time>
+            </add_order>
         </commands>
-
     </config>
 </spooler>

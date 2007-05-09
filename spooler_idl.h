@@ -36,6 +36,7 @@ struct Iorder;
 struct Iprocess_class;
 struct Iprocess_classes;
 struct Isubprocess;
+struct Isupervisor_client;
 struct Iweb_service;
 struct Iweb_service_operation;
 struct Iweb_service_request;
@@ -345,6 +346,8 @@ struct Ispooler : IDispatch
     virtual HRESULT         Create_xslt_stylesheet      ( Ixslt_stylesheet** )                  = 0;
     virtual HRESULT         Terminate                   ( VARIANT*, VARIANT*,VARIANT*, VARIANT* )   = 0;
     virtual HRESULT     get_Locks                       ( spooler_com::Ilocks** )               = 0;
+    virtual HRESULT     get_Process_classes             ( spooler_com::Iprocess_classes** )     = 0;
+    virtual HRESULT     get_Supervisor_client           ( spooler_com::Isupervisor_client** )   = 0;
 };
 
 //-------------------------------------------------------------------------------Ispooler_proxy 
@@ -645,7 +648,7 @@ struct Iorder : IDispatch
     virtual HRESULT     put_Suspended               ( VARIANT_BOOL )                                = 0;
     virtual HRESULT     get_Suspended               ( VARIANT_BOOL* )                               = 0;
 
-  //virtual HRESULT         Start_now               ()                                              = 0;
+    virtual HRESULT     get_Log                     ( Ilog** )                                      = 0;
 };
 
 //--------------------------------------------------------------------Remote_module_instance_server
@@ -799,7 +802,7 @@ struct Ilock : IDispatch
 
 //---------------------------------------------------------------------------------Iprocess_classes
 
-DEFINE_GUID( IID_Iprocess_classes, 0xfeee47b7, 0x6c1b, 0x11d8, 0x81, 0x03, 0x00, 0x04, 0x76, 0xee, 0x8a, 0xfb );   // {feee47b5-6c1b-11d8-8103-000476ee8afb}
+DEFINE_GUID( IID_Iprocess_classes, 0xfeee47b7, 0x6c1b, 0x11d8, 0x81, 0x03, 0x00, 0x04, 0x76, 0xee, 0x8a, 0xfb );   // {feee47b7-6c1b-11d8-8103-000476ee8afb}
 
 struct Iprocess_classes : IDispatch
 {
@@ -812,7 +815,7 @@ struct Iprocess_classes : IDispatch
 
 //-----------------------------------------------------------------------------------Iprocess_class
 
-DEFINE_GUID( IID_Iprocess_class, 0xfeee47b8, 0x6c1b, 0x11d8, 0x81, 0x03, 0x00, 0x04, 0x76, 0xee, 0x8a, 0xfb );   // {feee47b6-6c1b-11d8-8103-000476ee8afb}
+DEFINE_GUID( IID_Iprocess_class, 0xfeee47b8, 0x6c1b, 0x11d8, 0x81, 0x03, 0x00, 0x04, 0x76, 0xee, 0x8a, 0xfb );   // {feee47b8-6c1b-11d8-8103-000476ee8afb}
 
 struct Iprocess_class : IDispatch
 {
@@ -824,6 +827,17 @@ struct Iprocess_class : IDispatch
     virtual HRESULT         put_Max_processes               ( int )                                 = 0;
     virtual HRESULT         get_Max_processes               ( int* )                                = 0;
     virtual HRESULT             Remove                      ()                                      = 0;
+};
+
+//-------------------------------------------------------------------------------Isupervisor_client
+
+DEFINE_GUID( IID_Isupervisor_client, 0xfeee47b9, 0x6c1b, 0x11d8, 0x81, 0x03, 0x00, 0x04, 0x76, 0xee, 0x8a, 0xfb );   // {feee47b9-6c1b-11d8-8103-000476ee8afb}
+
+struct Isupervisor_client: IDispatch
+{
+    virtual HRESULT         get_Java_class_name             ( BSTR* )                               = 0;
+    virtual HRESULT         get_Hostname                    ( BSTR* )                               = 0;
+    virtual HRESULT         get_Tcp_port                    ( BSTR* )                               = 0;
 };
 
 //-------------------------------------------------------------------------------------------------

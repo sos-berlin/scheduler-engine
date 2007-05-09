@@ -635,6 +635,7 @@ struct Com_spooler : spooler_com::Ispooler,
     STDMETHODIMP            put_Suspend_after_resume        ( VARIANT_BOOL );
     STDMETHODIMP            get_Locks                       ( spooler_com::Ilocks** );
     STDMETHODIMP            get_Process_classes             ( spooler_com::Iprocess_classes** );
+    STDMETHODIMP            get_Supervisor_client           ( spooler_com::Isupervisor_client** );
 
 
     void                        close                       ()                                      { THREAD_LOCK(_lock)  _spooler = NULL; }
@@ -851,6 +852,8 @@ struct Com_order : spooler_com::Iorder,
 
     STDMETHODIMP            put_Suspended               ( VARIANT_BOOL );
     STDMETHODIMP            get_Suspended               ( VARIANT_BOOL* );
+
+    STDMETHODIMP            get_Log                     ( spooler_com::Ilog** );
 
   private:
     Fill_zero                  _zero_;

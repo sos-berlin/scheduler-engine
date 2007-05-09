@@ -2626,6 +2626,12 @@
             </text>
         </message>
 
+        <message code="SCHEDULER-423">
+            <text xml:lang="en">
+                <title>There is no supervisor</title>
+            </text>
+        </message>
+
         <!--message code="SCHEDULER-422">
             <text xml:lang="en">
                 <title><p1>object</p1> is in use, property <p2/> cannot be changed</title>

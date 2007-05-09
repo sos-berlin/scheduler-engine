@@ -1045,6 +1045,15 @@ Task_subsystem* Spooler::task_subsystem()
     return _task_subsystem; 
 }
 
+//-------------------------------------------------------------------------Spooler::order_subsystem
+
+Supervisor_client_interface* Spooler::supervisor_client()
+{ 
+    if( !_supervisor_client )  z::throw_xc( "SCHEDULER-432" );
+
+    return _supervisor_client;
+}
+
 //---------------------------------------------------------------------------Spooler::has_any_order
 
 bool Spooler::has_any_order()

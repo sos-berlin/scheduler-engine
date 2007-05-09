@@ -29,6 +29,7 @@ library Spooler
     interface Iprocess_class;
     interface Iprocess_classes;
     interface Isubprocess;
+    interface Isupervisor_client;
     interface Iweb_service;
     interface Iweb_service_operation;
     interface Iweb_service_request;
@@ -700,6 +701,9 @@ library Spooler
 
         [id(38),propget]        
         HRESULT                 Process_classes         ( [out,retval] Iprocess_classes** );
+
+        [id(39),propget]        
+        HRESULT                 Supervisor_client       ( [out,retval] Isupervisor_client** );
     }
 
     [
@@ -1118,9 +1122,6 @@ library Spooler
         [id(17),propget]
         HRESULT                 String_next_start_time  ( [out,retval] BSTR* );
 
-      //[propget]
-      //HRESULT                 Log                     ( [out,retval] Ilog* );                     // Für Joacim, 2005-08-28
-
         [id(18),propget]
         HRESULT                 Xml                     ( [in,defaultvalue("")] BSTR options, [out,retval] BSTR* );
 
@@ -1153,6 +1154,9 @@ library Spooler
 
         [id(25),propget]
         HRESULT                 Suspended               ( [out,retval] VARIANT_BOOL* );
+
+        [id(26),propget]
+        HRESULT                 Log                     ( [out,retval] Ilog** );
 
       //[id(26)]
       //HRESULT                 Start_now               ();
@@ -1807,6 +1811,25 @@ library Spooler
         HRESULT                 Remove                  ();
     };
 
+    //---------------------------------------------------------------------------Isupervisor_client
+    
+    [
+        uuid       ( feee47b9-6c1b-11d8-8103-000476ee8afb ),
+        odl,
+        dual
+    ]
+    interface Isupervisor_client : IDispatch
+    {
+        [id(1),propget]
+        HRESULT                 Java_class_name         ( [out,retval] BSTR* );                 // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
+                                                                                                // Für den Objectserver
+        [id(2),propget]
+        HRESULT                 Hostname                ( [out,retval] BSTR* );
+
+        [id(3),propget]
+        HRESULT                 Tcp_port                ( [out,retval] int* );
+    };
+
     //---------------------------------------------------------------------------------------------
 
 };
@@ -1815,7 +1838,6 @@ library Spooler
 /*
 Ein paar freie GUIDs:
 
-feee47b9-6c1b-11d8-8103-000476ee8afb
 feee47ba-6c1b-11d8-8103-000476ee8afb
 feee47bb-6c1b-11d8-8103-000476ee8afb
 feee47bc-6c1b-11d8-8103-000476ee8afb

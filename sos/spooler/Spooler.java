@@ -151,4 +151,6 @@ public class Spooler extends Idispatch
     public Locks            locks()                                                 { return (Locks)        com_call( "<locks" ); }                                                                                      
     
     public Process_classes  process_classes()                                       { return (Process_classes)com_call( "<process_classes" ); }                                                                                      
+    
+    public Supervisor_client supervisor_client()                                    { return (Supervisor_client)com_call( "<supervisor_client" ); }
 }

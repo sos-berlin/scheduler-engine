@@ -284,6 +284,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-420", "Negative value is not allowed for $1" },
     { "SCHEDULER-421", "'$1' is being removed and not longer modifiable" },
     { "SCHEDULER-422", "'$1' has already been added" },
+    { "SCHEDULER-423", "There is no supervisor" },
     { "SCHEDULER-900", "Scheduler $1 is starting with $2, pid=$3" },
     { "SCHEDULER-902", "state=$1" },
     { "SCHEDULER-904", "Tasks have $1 seconds to terminate" },

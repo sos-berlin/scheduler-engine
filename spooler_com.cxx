@@ -3290,6 +3290,7 @@ const Com_method Com_spooler::_methods[] =
     { DISPATCH_METHOD     , 35, "Terminate_and_restart"     , (Com_method_ptr)&Com_spooler::Terminate_and_restart, VT_EMPTY     , { VT_BYREF|VT_VARIANT }, 1 },
     { DISPATCH_PROPERTYGET, 37, "Locks"                     , (Com_method_ptr)&Com_spooler::get_Locks            , VT_DISPATCH  },
     { DISPATCH_PROPERTYGET, 38, "Process_classes"           , (Com_method_ptr)&Com_spooler::get_Process_classes  , VT_DISPATCH  },
+    { DISPATCH_PROPERTYGET, 39, "Supervisor_client"         , (Com_method_ptr)&Com_spooler::get_Supervisor_client, VT_DISPATCH  },
     {}
 };
 
@@ -3918,6 +3919,24 @@ STDMETHODIMP Com_spooler::get_Process_classes( Iprocess_classes** result )
     try
     {
         *result = _spooler->process_class_subsystem();
+        if( *result )  (*result)->AddRef();
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+
+//---------------------------------------------------------------Com_spooler::get_Supervisor_client
+
+STDMETHODIMP Com_spooler::get_Supervisor_client( Isupervisor_client** result )
+{
+    HRESULT hr = S_OK;
+
+    if( !_spooler )  return E_POINTER;
+
+    try
+    {
+        *result = _spooler->supervisor_client();
         if( *result )  (*result)->AddRef();
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
@@ -4571,6 +4590,7 @@ const Com_method Com_order::_methods[] =
     { DISPATCH_PROPERTYGET, 24, "Params"                    , (Com_method_ptr)&Com_order::get_Params            , VT_DISPATCH   },
     { DISPATCH_PROPERTYPUT, 25, "Suspended"                 , (Com_method_ptr)&Com_order::put_Suspended         , VT_EMPTY      , { VT_BOOL } },
     { DISPATCH_PROPERTYGET, 25, "Suspended"                 , (Com_method_ptr)&Com_order::get_Suspended         , VT_BOOL       },
+    { DISPATCH_PROPERTYGET, 26, "Log"                       , (Com_method_ptr)&Com_order::get_Log               , VT_DISPATCH   },
   //{ DISPATCH_METHOD     , 26, "Start_now"                 , (Com_method_ptr)&Com_order::Start_now             , VT_EMPTY      },
     {}
 };
@@ -5218,25 +5238,6 @@ STDMETHODIMP Com_order::get_Web_service_operation_or_null( Iweb_service_operatio
     return hr;
 }
 
-//-------------------------------------------------------------------------------Com_order::get_Log
-/*
-STDMETHODIMP Com_order::get_Log( Ilog** result )
-{
-    HRESULT hr = NOERROR;
-
-    THREAD_LOCK( _lock )
-    try
-    {
-        if( !_order )  return E_POINTER;
-
-        *result = _order->_com_log;
-        if( *result )  (*com_log)->AddRef();
-    }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
-
-    return hr;
-}
-*/
 //-----------------------------------------------------------------------Com_order::put_Xml_payload
 
 STDMETHODIMP Com_order::put_Xml_payload( BSTR xml_payload )
@@ -5348,6 +5349,25 @@ STDMETHODIMP Com_order::get_Suspended( VARIANT_BOOL* result )
         if( !_order )  return E_POINTER;
 
         *result = _order->suspended()? VARIANT_TRUE : VARIANT_FALSE;
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+
+//-------------------------------------------------------------------------Com_order::get_Suspended
+
+STDMETHODIMP Com_order::get_Log( Ilog** result )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_order )  return E_POINTER;
+
+        *result = _order->com_log();
+        if( *result )  (*result)->AddRef();
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
 
