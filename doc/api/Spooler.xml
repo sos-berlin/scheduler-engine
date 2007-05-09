@@ -517,6 +517,22 @@
     <title>Liefert die Prozessklassen</title>
 </property>
 
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="supervisor_client" access="read">
+        <com>
+            <com.result>
+                <com.type class="Supervisor_client"/>
+            </com.result>
+        </com>
+
+        <title>Liefert den Supervisor_client</title>
+
+        <messages>
+            <message level="error" code="SCHEDULER-432"/>
+        </messages>
+    </property>
+
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <method name="terminate">

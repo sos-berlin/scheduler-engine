@@ -26,6 +26,7 @@
                          sos/spooler/Process_class.java,
                          sos/spooler/Process_classes.java,
                          sos/spooler/Run_time.java,
+                         sos/spooler/Supervisor_client.java,
                          sos/spooler/Spooler.java,
                          sos/spooler/Spooler_program.java,
                          sos/spooler/Subprocess.java,

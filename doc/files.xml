@@ -24,6 +24,7 @@
     <file path="api/Spooler.xml"/>
     <file path="api/Spooler_program.xml"/>
     <file path="api/Subprocess.xml"/>
+    <file path="api/Supervisor_client.xml"/>
     <file path="api/Task.xml"/>
     <file path="api/Variable.xml"/>
     <file path="api/Variable_set.xml"/>

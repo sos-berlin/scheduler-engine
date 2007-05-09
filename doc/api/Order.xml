@@ -719,6 +719,29 @@ $spooler->job_chain( "my_job_chain" )->add_order( $order );</pre>
         </description>
     </property>
 
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="log" access="read">
+        <com>
+            <com.result>
+                <com.type class="Log"/>
+            </com.result>
+        </com>
+
+        <title>
+            Auftragsprotokoll
+        </title>
+
+        <description>
+        </description>
+
+        <example>
+            <pre>spooler_task.order.log.info( "Only for order log, not for task log" );
+spooler_log.info( "For both order log and task log" );</pre>
+        </example>
+
+    </property>
+    
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <title>

@@ -10,6 +10,31 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2007-05-09" version="2.0.175" subversion_revision="5031">
+        <revision type="new" title="Neue Eigenschaft Order.log">
+            <description>
+                <p>
+                    <scheduler_method class="Order" property="log"/>
+                    liefert das Auftragsprotokoll.
+                </p>
+            </description>
+        </revision>
+
+        <revision type="new" title="Neue Klasse Supervisor_client">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_method class="Spooler" property="supervisor_client"/>
+                    </li>
+                    <li>
+                        <scheduler_method class="Supervisor_client"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+    </change>
+
+
 
     <change date="2007-05-04" version="2.0.175" subversion_revision="5024">
         <revision type="new" title="XML-Kommandos und API für Prozessklassen">

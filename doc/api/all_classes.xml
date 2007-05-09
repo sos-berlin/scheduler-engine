@@ -26,6 +26,7 @@
     <class_reference class="Spooler"/>
     <class_reference class="Spooler_program"/>
     <class_reference class="Subprocess"/>
+    <class_reference class="Supervisor_client"/>
     <class_reference class="Task"/>
     <class_reference class="Variable"/>
     <class_reference class="Variable_set"/>
