@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<spooler
+    xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
+>
+    <config>
+        <base file="$SCHEDULER_TEST/base.scheduler"/>
+
+        <script language="JavaScript">
+            <![CDATA[
+
+spooler_log.info( "spooler.supervisor_client.hostname=" + spooler.supervisor_client.hostname );
+spooler_log.info( "spooler.supervisor_client.tcp_port=" + spooler.supervisor_client.tcp_port );
+
+            ]]>
+        </script>
+
+
+        <jobs>
+
+            <job name="java">
+
+                <script java_class="spooler_job.My_job">
+                    <![CDATA[
+
+package spooler_job;
+
+import sos.spooler.*;
+
+public class My_job  extends sos.spooler.Job_impl
+{   
+    public boolean spooler_process()  throws Exception
+    {
+        spooler_log.info( "spooler.supervisor_client.hostname=" + spooler.supervisor_client().hostname() );
+        spooler_log.info( "spooler.supervisor_client.tcp_port=" + spooler.supervisor_client().tcp_port() );
+        return false;
+    }
+}
+                    ]]>
+                </script>
+
+                <run_time once="yes"/>
+            </job>
+        </jobs>
+    </config>
+</spooler>
