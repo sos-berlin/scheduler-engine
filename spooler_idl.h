@@ -837,7 +837,7 @@ struct Isupervisor_client: IDispatch
 {
     virtual HRESULT         get_Java_class_name             ( BSTR* )                               = 0;
     virtual HRESULT         get_Hostname                    ( BSTR* )                               = 0;
-    virtual HRESULT         get_Tcp_port                    ( BSTR* )                               = 0;
+    virtual HRESULT         get_Tcp_port                    ( int* )                                = 0;
 };
 
 //-------------------------------------------------------------------------------------------------
