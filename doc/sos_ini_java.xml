@@ -54,6 +54,15 @@
             </description>
         </ini_entry>
 
+        <ini_entry name="javac" type="path" initial="javac" title="Pfad zum Java-Compiler">
+            <description>
+                <p>
+                    Wenn zum Entwickeln von Java-Jobs der Quell-Code direkt in <scheduler_element name="script"/> notiert wird,
+                    übersetzt der Scheduler mit dem hier eingestellten Java-Compiler.
+                </p>
+            </description>
+        </ini_entry>
+
     </ini_entries>
 
     <description>
