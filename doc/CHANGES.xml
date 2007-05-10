@@ -11,12 +11,25 @@
     <scheduler_keyword keyword="Change log"/>
 
     <change date="2007-05-09" version="2.0.175" subversion_revision="5031">
-        <revision type="new" title="Neue Eigenschaft Order.log">
+        <revision type="modification" title="&lt;add_order at='...'>">
             <description>
                 <p>
-                    <scheduler_method class="Order" property="log"/>
-                    liefert das Auftragsprotokoll.
+                    Die mit dem Auftrag übergebene Startzeit 
+                    <scheduler_element name="add_order" attribute="at"/> 
+                    wird nicht mehr durch
+                    <scheduler_element name="add_order" child="run_time"/> überschrieben.
                 </p>
+            </description>
+        </revision>
+
+        <revision type="new" title="Neue Eigenschaft Order.log">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_method class="Order" property="log"/>
+                        liefert das Auftragsprotokoll.
+                    </li>
+                </ul>
             </description>
         </revision>
 
@@ -32,11 +45,7 @@
                 </ul>
             </description>
         </revision>
-    </change>
 
-
-
-    <change date="2007-05-04" version="2.0.175" subversion_revision="5024">
         <revision type="new" title="XML-Kommandos und API für Prozessklassen">
             <description>
                 <ul>
