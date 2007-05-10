@@ -45,9 +45,7 @@
     </p>
     <pre><scheduler_element name="job"/>
     &lt;<a href="xml/lock.use.xml">lock.use</a> lock="<i>lock_name</i>"/>
-    &lt;<a href="xml/lock.use.xml">lock.use</a> lock="<i>lock_name2</i>"/>
-    
-    </pre>
+    &lt;<a href="xml/lock.use.xml">lock.use</a> lock="<i>lock_name2</i>"/></pre>
     
     <p>
       Sperren können exklusiv und nicht exklusiv verwendet werden. Bei nicht exklusiver Verwendung einer Sperre kann 
