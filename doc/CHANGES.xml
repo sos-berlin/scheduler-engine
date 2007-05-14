@@ -10,7 +10,7 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2007-05-09" version="2.0.175" subversion_revision="5043">
+    <change date="2007-05-09" version="2.0.175" subversion_revision="5045">
         <revision type="modification" title="MySQL-Tabellen werden für InnoDB angelegt">
             <description>
                 <p>
