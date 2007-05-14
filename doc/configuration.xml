@@ -1,0 +1,68 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
+
+
+<!--$Id: konfiguration.xml 4986 2007-04-19 15:37:57Z jz $-->
+
+<description
+    title    = "Konfiguration"
+    base_dir = ""
+    author   = "$Author: jz $"
+    date     = "$Date: 2007-04-19 17:37:57 +0200 (Do, 19 Apr 2007) $"
+>
+
+    <scheduler_keyword keyword="Konfiguration"/>
+
+    <dl>
+        <dt>
+            <scheduler_a href="konfiguration.xml"/>
+        </dt>
+        <dd>
+            <p>
+                Die <scheduler_a href="konfiguration.xml"/> enthält
+                die Beschreibungen der Jobs,
+                deren Startzeiten,
+                die Jobketten
+                usw.
+            </p>
+        </dd>
+
+        <dt>
+            <scheduler_a href="factory_ini.xml">Datei factory.ini</scheduler_a>
+        </dt>
+        <dd>
+            <p>
+                Die Einstellungen in der
+                <scheduler_a href="factory_ini.xml"/>
+                haben Vorrang vor den Einstellungen in der XML-Konfiguration.
+            </p>
+        </dd>
+
+
+        <dt>
+            <scheduler_a href="sos_ini.xml">Datei sos.ini</scheduler_a>
+        </dt>
+        <dd>
+            <p>
+                In der <scheduler_a href="sos_ini.xml"/>
+                werden nur wenige Einstellungen vorgenommen.
+                <!--Hier können einige Einstellungen vorgenommen werden,
+                                die auch andere Produkte als den Scheduler betreffen.-->
+            </p>
+        </dd>
+
+
+        <dt>
+            <scheduler_a href="command_line.xml"/>
+        </dt>
+        <dd>
+            <p>
+                Die <scheduler_a href="command_line.xml">Optionen beim Start des Schedulers</scheduler_a>
+                haben Vorrang vor den Einstellungen
+                in der <scheduler_a href="factory_ini.xml"/> und
+                der <scheduler_a href="konfiguration.xml"/>.
+            </p>
+        </dd>
+    </dl>
+
+</description>

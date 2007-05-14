@@ -37,6 +37,7 @@
     <file path="api/api.xml"/>
     <file path="backupscheduler.xml"/>
     <file path="command_line.xml"/>
+    <file path="configuration.xml"/>
     <file path="datenbank.xml"/>
     <file path="directory_watch.xml"/>
     <file path="distributed_orders.xml"/>
@@ -91,6 +92,7 @@
     <file path="proposals/xml_api.xml"/>
     -->
     <file path="protokolle.xml"/>
+    <file path="remote_execution.xml"/>
     <!--file path="register.xml"/>
     <file path="register_data.xml"/-->
     <file path="script_language_javascript.xml"/>

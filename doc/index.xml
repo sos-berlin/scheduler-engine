@@ -53,21 +53,21 @@
 
     <h1 style="text-align: left; font-size: 18pt; margin-bottom: 2ex">Der Scheduler</h1>
 
-    <table cellspacing="0" cellpadding="0" style="width: 100%">
+    <p style="max-width: none">
+        Der Scheduler startet Jobs und überwacht sie.
+        Die Starts können zeitgesteuert, durch Änderung eines Verzeichnisses, durch einen Auftrag oder durch ein Kommando erfolgen.
+        Der Scheduler kennt Aufträge, die durch Jobketten geschleust werden.
+        Er läuft auf Windows, Linux, Solaris und HP-UX.
+        Hier sind wichtige Teile des Schedulers beschrieben.
+    </p>
+    <!--table cellspacing="0" cellpadding="0" style="width: 100%">
         <tr>
             <td>
-                <p>
-                    Der Scheduler startet Jobs und überwacht sie.
-                    Die Starts können zeitgesteuert, durch Änderung eines Verzeichnisses, durch einen Auftrag oder durch ein Kommando erfolgen.
-                    Der Scheduler kennt Aufträge, die durch Jobketten geschleust werden.
-                    Er läuft auf Windows, Linux, Solaris und HP-UX.
-                    Hier sind wichtige Teile des Schedulers beschrieben.
-                </p>
             </td>
             <td style="width: 30ex; vertical-align: top; padding-left: 1em;" align="right">
             </td>
         </tr>
-    </table>
+    </table-->
 
 
 
@@ -75,49 +75,16 @@
         <tr>
             <td class="first_page">
                 <div class="box">
-                    <h2>Einstellungen und Datenbank</h2>
+                    <h2>Start</h2>
 
                     <dl>
                         <dt>
-                            <scheduler_a href="konfiguration.xml"/>
+                            <scheduler_a href="configuration.xml"/>
                         </dt>
                         <dd>
                             <p>
-                                Die <scheduler_a href="konfiguration.xml"/> enthält 
-                                die Beschreibungen der Jobs, 
-                                deren Startzeiten,
-                                die Jobketten
-                                usw.
-                            </p>
-                        </dd>
-
-                        <dt>
-                            Dateien
-                            <scheduler_a href="factory_ini.xml">factory.ini</scheduler_a> und
-                            <scheduler_a href="sos_ini.xml">sos.ini</scheduler_a>
-                        </dt>
-                        <dd>
-                            <p>
-                                Die Einstellungen in der
-                                <scheduler_a href="factory_ini.xml"/>
-                                haben Vorrang vor den Einstellungen in der XML-Konfiguration.
-                                In der <scheduler_a href="sos_ini.xml"/>
-                                werden nur wenige Einstellungen vorgenommen.
-                                <!--Hier können einige Einstellungen vorgenommen werden,
-                                die auch andere Produkte als den Scheduler betreffen.-->
-                            </p>
-                        </dd>
-
-
-                        <dt>
-                            <scheduler_a href="command_line.xml"/>
-                        </dt>
-                        <dd>
-                            <p>
-                                Die <scheduler_a href="command_line.xml">Optionen beim Start des Schedulers</scheduler_a>
-                                haben Vorrang vor den Einstellungen
-                                in der <scheduler_a href="factory_ini.xml"/> und
-                                der <scheduler_a href="konfiguration.xml"/>.
+                                Der Scheduler wird mit <scheduler_a href="konfiguration.xml">XML-</scheduler_a> und .ini-Dateien konfiguriert
+                                und kennt <scheduler_a href="command_line.xml">Kommandozeilenoptionen</scheduler_a>.
                             </p>
                         </dd>
 
@@ -127,8 +94,8 @@
                         </dt>
                         <dd>
                             <p>
-                                Der Scheduler kann seine Task- und Auftragswarteschlangen in einer 
-                                <scheduler_a href="datenbank.xml">Datenbank</scheduler_a> 
+                                Der Scheduler kann seine Task- und Auftragswarteschlangen in einer
+                                <scheduler_a href="datenbank.xml">Datenbank</scheduler_a>
                                 halten.
                                 Und er führt darin eine <scheduler_a href="history.xml">Historie</scheduler_a>,
                                 die auch die einzelnen
@@ -136,14 +103,8 @@
                                 enthält.
                             </p>
                         </dd>
-                    </dl>
-                </div>
 
-
-                <div class="box">
-                    <h2>Start</h2>
-
-                    <dl>
+                        
                         <dt>
                             <scheduler_a href="service.xml">Dienst</scheduler_a>
                         </dt>
@@ -161,6 +122,14 @@
                         </dt>
                         <dd>
                             Ausfallsicherer Betrieb
+                        </dd>
+                        
+                        
+                        <dt>
+                            <scheduler_a href="distributed_orders.xml"/>
+                        </dt>
+                        <dd>
+                            Aufträge können auf mehreren Rechnern ausgeführt werden.
                         </dd>
                     </dl>
                 </div>
@@ -190,10 +159,25 @@
                             <scheduler_a href="api/api-perl.xml">Perl</scheduler_a>
                             nutzen können.
                         </dd>
+                        
+                        <dt>
+                            <scheduler_a href="lock.xml"/>
+                        </dt>
+                        <dd>
+                            Mit Sperren lässt sich der Zugriff mehrerer Jobs auf dieselben Ressourcen regeln.
+                        </dd>
+                        
+                        
+                        <dt>
+                            <scheduler_a href="remote_execution.xml"/>
+                        </dt>
+                        <dd>
+                            Jobs lassen sich auf einen fernen Scheduler ausführen.
+                        </dd>
                     </dl>
                 </div>
 
-                
+
                 <table style="margin-top: 1em">
                     <tr>
                         <td style="font-size: 8pt">
