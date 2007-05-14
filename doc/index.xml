@@ -123,14 +123,6 @@
                         <dd>
                             Ausfallsicherer Betrieb
                         </dd>
-                        
-                        
-                        <dt>
-                            <scheduler_a href="distributed_orders.xml"/>
-                        </dt>
-                        <dd>
-                            Aufträge können auf mehreren Rechnern ausgeführt werden.
-                        </dd>
                     </dl>
                 </div>
 

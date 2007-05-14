@@ -344,6 +344,7 @@
 <register_keyword keyword='config'>
     <register_keyword_display><code>&lt;config&gt;</code></register_keyword_display>
     <register_entry register_file='CHANGES.xml#use_element__config' register_title='Änderungsprotokoll'  register_keyword='config'/>
+    <register_entry register_file='api/Supervisor_client.xml#use_element__config' register_title='Supervisor_client'  register_keyword='config'/>
     <register_entry register_file='directory_watch.xml#use_element__config' register_title='Verzeichnisüberwachung'  register_keyword='config'/>
     <register_entry register_file='email.xml#use_element__config' register_title='eMail-Versand'  register_keyword='config'/>
     <register_entry register_file='http.xml#use_element__config' register_title='HTTP-Server und Web-Services'  register_keyword='config'/>
@@ -1105,6 +1106,7 @@
 <register_keyword keyword='hostname (property)'>
     <register_keyword_display><code>hostname</code> (property)</register_keyword_display>
     <register_entry register_file='api/Spooler.xml#method__hostname' register_title='Spooler.hostname' register_keyword='hostname' type='definition'/>
+    <register_entry register_file='api/Supervisor_client.xml#method__hostname' register_title='Supervisor_client.hostname' register_keyword='hostname' type='definition'/>
 </register_keyword>
 <register_keyword keyword='HTML'>
     <register_entry register_file='http.xml' register_title='HTTP-Server und Web-Services'  register_keyword='HTML'/>
@@ -1304,6 +1306,7 @@
 </register_keyword>
 <register_keyword keyword='javac'>
     <register_keyword_display><code>javac=</code></register_keyword_display>
+    <register_entry register_file='sos_ini_java.xml#entry_javac' register_title='file sos.ini, section [java]'  register_keyword='javac' type='definition'/>
     <register_ini_entry register_file='xml/process_class.xml' register_title='&lt;process_class&gt; (Konfiguration)' file='sos.ini' section='java' entry='javac'/>
 </register_keyword>
 <register_keyword keyword='JavaScript'>
@@ -1554,6 +1557,7 @@
     <register_entry register_file='command_line.xml' register_title='Kommandozeilenoptionen'  register_keyword='Kommandozeile'/>
 </register_keyword>
 <register_keyword keyword='Konfiguration'>
+    <register_entry register_file='configuration.xml' register_title='Konfiguration'  register_keyword='Konfiguration'/>
     <register_entry register_file='konfiguration.xml' register_title='Konfiguration in XML'  register_keyword='Konfiguration'/>
     <register_entry register_file='settings.xml' register_title='Einstellungen'  register_keyword='Konfiguration'/>
     <register_entry register_file='xml/base.xml' register_title='&lt;base&gt; (Konfiguration)'  register_keyword='Konfiguration'/>
@@ -1786,10 +1790,12 @@
     <register_entry register_file='api/Job_impl.xml#method__spooler_log' register_title='Job_impl.spooler_log' register_keyword='Log'/>
     <register_entry register_file='api/Log.xml' register_keyword='Log' type='definition'/>
     <register_entry register_file='api/Monitor_impl.xml#method__spooler_log' register_title='Monitor_impl.spooler_log' register_keyword='Log'/>
+    <register_entry register_file='api/Order.xml#method__log' register_title='Order.log' register_keyword='Log'/>
     <register_entry register_file='api/Spooler.xml#method__log' register_title='Spooler.log' register_keyword='Log'/>
 </register_keyword>
 <register_keyword keyword='log (property)'>
     <register_keyword_display><code>log</code> (property)</register_keyword_display>
+    <register_entry register_file='api/Order.xml#method__log' register_title='Order.log' register_keyword='log' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__log' register_title='Spooler.log' register_keyword='log' type='definition'/>
 </register_keyword>
 <register_keyword keyword='Log-Datei'>
@@ -2837,6 +2843,7 @@
     <register_entry register_file='api/Task.xml#use_element__script' register_title='Task'  register_keyword='script'/>
     <register_entry register_file='command_line.xml#use_element__script' register_title='Kommandozeilenoptionen'  register_keyword='script'/>
     <register_entry register_file='script_language_javascript.xml#use_element__script' register_title='Skripte in JavaScript'  register_keyword='script'/>
+    <register_entry register_file='sos_ini_java.xml#use_element__script' register_title='file sos.ini, section [java]'  register_keyword='script'/>
     <register_entry register_file='xml.xml#use_element__script' register_title='Alle XML-Elemente'  register_keyword='script'/>
     <register_entry register_file='xml/answer/job.xml#use_element__script' register_title='&lt;job&gt; (Antwort)'  register_keyword='script'/>
     <register_entry register_file='xml/copy_params.xml#use_element__script' register_title='&lt;copy_params&gt;'  register_keyword='script'/>
@@ -3332,6 +3339,15 @@
     <register_keyword_display><code>&lt;supervisor&gt;</code></register_keyword_display>
     <register_entry register_file='xml/supervisor.xml#' register_title='&lt;supervisor&gt; (Konfiguration)'  register_keyword='supervisor' type='definition'/>
 </register_keyword>
+<register_keyword keyword='Supervisor_client (class)'>
+    <register_keyword_display><code>Supervisor_client</code> (class)</register_keyword_display>
+    <register_entry register_file='api/Spooler.xml#method__supervisor_client' register_title='Spooler.supervisor_client' register_keyword='Supervisor_client'/>
+    <register_entry register_file='api/Supervisor_client.xml' register_keyword='Supervisor_client' type='definition'/>
+</register_keyword>
+<register_keyword keyword='supervisor_client (property)'>
+    <register_keyword_display><code>supervisor_client</code> (property)</register_keyword_display>
+    <register_entry register_file='api/Spooler.xml#method__supervisor_client' register_title='Spooler.supervisor_client' register_keyword='supervisor_client' type='definition'/>
+</register_keyword>
 <register_keyword keyword='supervisor_proxy'>
     <register_keyword_display><code>&lt;supervisor_proxy&gt;</code></register_keyword_display>
     <register_entry register_file='xml/supervisor_proxy.xml#' register_title='&lt;supervisor_proxy&gt; (Konfiguration)'  register_keyword='supervisor_proxy' type='definition'/>
@@ -3399,6 +3415,7 @@
 <register_keyword keyword='tcp_port (property)'>
     <register_keyword_display><code>tcp_port</code> (property)</register_keyword_display>
     <register_entry register_file='api/Spooler.xml#method__tcp_port' register_title='Spooler.tcp_port' register_keyword='tcp_port' type='definition'/>
+    <register_entry register_file='api/Supervisor_client.xml#method__tcp_port' register_title='Supervisor_client.tcp_port' register_keyword='tcp_port' type='definition'/>
 </register_keyword>
 <register_keyword keyword='temporary'>
     <register_keyword_display><code>temporary=</code></register_keyword_display>
