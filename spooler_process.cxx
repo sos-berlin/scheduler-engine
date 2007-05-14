@@ -349,7 +349,7 @@ void Process::remove_module_instance( Module_instance* )
 
 void Process::start()
 {
-    _remote_scheduler = _process_class->remote_scheduler();
+    if( _process_class )  _remote_scheduler = _process_class->remote_scheduler();
 
     if( is_remote_host() )
     {
@@ -956,7 +956,13 @@ void Process_class::set_configuration( const Process_class_configuration& config
 
 void Process_class::close()
 {
-    int PROCESS_CLASS_CLOSE;
+    Z_FOR_EACH( Process_set, _process_set, it )
+    {
+        if( Process* process = *it )
+        {
+            log()->warn( message_string( "SCHEDULER-871", process->obj_name() ) );      // Das sollte nicht passieren
+        }
+    }
 }
 
 //---------------------------------------------------------------Process_class::check_max_processes

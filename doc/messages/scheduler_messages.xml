@@ -3793,6 +3793,11 @@
             </text>
         </message>
 
+        <message code="SCHEDULER-871" weight="warn" object="Process_class">
+            <text xml:lang="en">
+                <title>Closing process class before <p1>process</p1></title>
+            </text>
+        </message>
     </messages>
     
 </messages>
