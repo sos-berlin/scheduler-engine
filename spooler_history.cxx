@@ -670,7 +670,13 @@ void Database::create_table_when_needed( Transaction* ta, const string& tablenam
         try
         {
             ta->intermediate_commit( __FUNCTION__ ); 
-            ta->execute( "CREATE TABLE " + tablename + " (" + fields + ") ", __FUNCTION__ );
+
+            S create_table;
+            create_table << "CREATE TABLE " << tablename << " (" << fields << ")";
+            if( dbms_kind() == dbms_mysql )  create_table << " Type=InnoDB";
+
+            ta->execute( create_table, __FUNCTION__ );
+
             ta->intermediate_commit( __FUNCTION__ ); 
         }
         catch( exception& x )

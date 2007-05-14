@@ -10,7 +10,19 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2007-05-09" version="2.0.175" subversion_revision="5042">
+    <change date="2007-05-09" version="2.0.175" subversion_revision="5043">
+        <revision type="modification" title="MySQL-Tabellen werden für InnoDB angelegt">
+            <description>
+                <p>
+                    Wenn der Scheduler eine SQL-Tabelle in einer MySQL-Datenbank automatisch anlegt,
+                    verwendet er jetzt den transaktions-sicheren Typ InnoDB.
+                </p>
+                <p>
+                    Der Scheduler läuft nur korrekt mit transaktions-gesicherten Datenbanken.
+                </p>
+            </description>
+        </revision>
+
         <revision type="modification" title="&lt;add_order at='...'>">
             <description>
                 <p>
