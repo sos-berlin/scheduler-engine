@@ -641,6 +641,8 @@ const char file_scheduler_xsd[] =
     "</xsd:element>\n"
     "\n"
     "\n"
+    "<xsd:element name=\"lock\" type=\"lock\"/>\n"
+    "\n"
     "\n"
     "<xsd:element name=\"modify_order\">\n"
     "<xsd:complexType>\n"
@@ -1580,7 +1582,7 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1178292357 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1179150590 },
     { NULL, NULL, 0 }
 };
 

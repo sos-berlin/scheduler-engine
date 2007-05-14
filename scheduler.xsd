@@ -631,6 +631,8 @@
         </xsd:complexType>
     </xsd:element>
 
+    
+    <xsd:element name="lock" type="lock"/>
 
 
     <xsd:element name="modify_order">

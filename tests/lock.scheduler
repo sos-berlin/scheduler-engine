@@ -194,6 +194,9 @@ public class My_job  extends sos.spooler.Job_impl
         String xml = spooler.execute_xml( "<job name='neu'><lock.use lock='neu'/><script language='javascript'>spooler_log.info( 'NEU' );</script><run_time once='yes'/></job>" );
         spooler_log.info( xml );
         
+        xml = spooler.execute_xml( "<lock name='Usbekistan'/>" );
+        spooler_log.info( xml );
+        
         lock.remove();
         
         return false;
@@ -208,6 +211,7 @@ public class My_job  extends sos.spooler.Job_impl
 
         
         <commands>
+            <lock name="Kirgisien"/>
             <!--start_job job="A"/>
             <start_job job="B"/>
             <start_job job="C"/>

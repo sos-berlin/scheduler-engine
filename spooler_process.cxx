@@ -289,8 +289,6 @@ void Process::close_async()
 
 Async_operation* Process::close__start( bool run_independently )
 {
-    Async_operation* result = NULL;
-
     _close_operation = Z_NEW( Close_operation( this, run_independently ) );
     _close_operation->set_async_manager( _spooler->_connection_manager );
     _close_operation->async_continue();
