@@ -167,14 +167,15 @@
             muss der Zustand in der Jobkette vorhanden sein.
         </p>
         <p>
-            Während der Ausführung des Auftrags durch einen Job
-            macht die Änderung des Zustands den in der Jobkette festgelegten Folgezustand 
-            (<scheduler_element name="job_chain_node"/>)
+            Wenn der Auftrag gerade von einem Job ausgeführt wird,
+            wird der in der Jobkette festgelegte Folgezustand
+            (<scheduler_element name="job_chain_node" attribute="next_state"/>)
             wirkungslos.
-            Ebenso sind dann die Rückgabewerte von
+            Die Rückgabewerte von
             <scheduler_method class="Job_impl" method="spooler_process"/> und
             <scheduler_method class="Monitor_impl" method="spooler_process_after"/>
-            ohne Bedeutung.
+            sind ohne Bedeutung.
+            Mit <scheduler_method class="Order" property="state"/> kann also ein Job den Folgezustand frei bestimmen.
         </p>
         <p>
             Der Auftrag wird in die Auftragswarteschlange des Jobs eingereiht,
