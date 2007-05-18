@@ -33,7 +33,7 @@
                 <title>
                     XML-Dokument als String.
                     Jedes Zeichen des Strings wird als ein Byte interpretiert.
-                    Der String sollte beginnen mit <code>&lt;?xml encoding="iso-8859-1"?></code>.
+                    Der String sollte beginnen mit <code>&lt;?xml version="1.0" encoding="iso-8859-1"?></code>.
                 </title>
             </com.parameter>
         </com>
@@ -85,7 +85,7 @@
                 <title>
                     XML-Dokument als String.
                     Jedes Zeichen des Strings wird als ein Byte interpretiert.
-                    Der String sollte beginnen mit <code>&lt;?xml encoding="iso-8859-1"?></code>.
+                    Der String sollte beginnen mit <code>&lt;?xml version="1.0" encoding="iso-8859-1"?></code>.
                 </title>
             </com.parameter>
 

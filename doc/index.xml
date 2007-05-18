@@ -164,7 +164,7 @@
                             <scheduler_a href="remote_execution.xml"/>
                         </dt>
                         <dd>
-                            Jobs lassen sich auf einen fernen Scheduler ausführen.
+                            Jobs lassen sich auf fernen Schedulern ausführen.
                         </dd>
                     </dl>
                 </div>
