@@ -13,8 +13,7 @@
         <description>
             <p>
                 Der Programmdateiname <code>scheduler</code> muss absolut und vollständig angegeben werden.
-                In Windows mit der Endung "<code>.exe</code>"
-                (warum? weil der Scheduler den vollständigen Dateinamen braucht, um einen Job oder sich selbst neu zu starten).
+                Für Windows muss die Endung "<code>.exe</code>" angegeben werden, da der Scheduler den vollständigen Dateinamen braucht, um einen Job oder sich selbst neu zu starten.
             </p>
         </description>
 
@@ -681,13 +680,14 @@
 
     <description>
         <p>
-            Der Scheduler wird durch einfachen Aufruf gestartet.
+            Der Scheduler kann durch einen einfachen Aufruf gestartet werden:
         </p>
-        <pre>C:\>…<i>installation path</i>…\scheduler.exe …\my_scheduler_configuration.xml …</pre>
-        <pre>user@host:~> …<i>installation path</i>…/scheduler …/my_scheduler_configuration.xml …</pre>
+        <pre>C:\>…<i>installation path</i>…\bin\scheduler.exe …\my_scheduler_configuration.xml …</pre>
+        <pre>user@host:~>…<i>installation path</i>…/bin/scheduler …/my_scheduler_configuration.xml …</pre>
         <p>
-            In der Regel müssen vorher noch einige Umgebungsvariablen gesetzt sein,
-            siehe das Handbuch »Installation und Konfiguration«.
+            In der Regel müssen vorher noch einige Umgebungsvariablen gesetzt sein, siehe das Handbuch »Installation und Konfiguration«.
+            <br/>
+            Wenn das in der Auslieferung enthaltene Startskript verwendet wird, sind die Umgebungsvariablen bereits richtig gesetzt.
 
             <!-- TODO Welche? Das sollte hier kurz aufgeführt werden und steht jetzt sicher ausführlich in einer Installationsbeschreibung.
                  Pfad für JVM, javac, libstdc++, libspidermonkey.so, libjavascript.so -->
