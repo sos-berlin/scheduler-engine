@@ -1,0 +1,166 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
+<description
+    title               = "Job Scheduler Editor"
+    base_dir            = ""
+    author              = "$Author: ts $"
+    date                = "$Date: 2007-03-29 11:45:00 +0200 (Do, 05 Okt 2006) $"
+>
+
+<h2>GUI für Konfiguration und Dokumentation</h2>
+
+<p>
+Der Job Scheduler liest seine Konfiguration aus XML-Dateien, die mit einem Text-Editor erstellt und bearbeitet werden können.
+<br/><br/>
+Alternativ kann die XML-Konfiguration mit dem Job Scheduler Editor gepflegt werden. Der Editor stellt eine grafische Benutzeroberfläche
+mit Formularen für alle Elemente der Scheduler-Konfiguration zur Verfügung. Anwender werden durch Tooltips und Wizards unterstützt.
+</p>
+<p>
+Der Scheduler Editor erzeugt für jeden Eintrag in eines seiner Formulare das entsprechende XML-Element der Scheduler-Konfiguration. Beim Speichern wird jeweils die 
+Konfigurationsdatei des Schedulers, in der Regel die Datei <em>scheduler.xml</em>, neu geschrieben. Der Editor validiert alle Einträge mit dem
+aktuellen Schema des Schedulers - Fehler in der XML-Konfiguration werden sofort bemerkt.
+</p>
+
+<p>Scheduler Jobs können mit dem Editor dokumentiert werden - der Editor generiert die Dokumentation in einem XML-Format, das über ein 
+entsprechendes Stylesheet als HTML mit Navigationselementen im Browser dargestellt werden kann.
+</p>
+
+<h3>Aufruf Scheduler Editor</h3>
+
+<p>Der Scheduler Editor gehört zur Standard-Auslieferung des Job Schedulers. Das Installationsverzeichnis des Schedulers enthält die Datei <em>bin/jobeditor.cmd</em> zum Aufruf des Editors. 
+In dieser Datei ist für INSTALL_PATH das Scheduler-Installationsverzeichnis einzutragen.</p>
+
+<h3>Scheduler Konfiguration erstellen </h3>
+
+<p>
+Um eine neue Konfiguration zu erstellen, wählen Sie den Menüpunkt <em>File/New Configuration</em>:
+<br/>
+<img src="images/editor_menu_file_configuration.jpg" style="margin: 20px 0px ; border:1px solid gray;"/>
+</p>
+
+<p>
+Der Editor öffnet sein Hauptfenster mit einer Baumansicht für einzelne Elemente, z.B. <em>Config</em>, <em>Jobs</em>, <em>Job Chains</em> etc.
+<br/>
+<img src="images/editor_config.jpg" style="margin: 20px 0px ; border:1px solid gray;"/>
+</p>
+<p>Für alle Formularfelder und Steuerelemente sind Tooltips verfügbar. Mit der Taste <strong>F1</strong> wird als Hilfe die XML-Dokumentation des 
+Schedulers angezeigt, die Hilfe ist auf den Kontext bezogen und steuert das XML-Element an, das gerade im Formular bearbeitet wird.
+<br/><br/>
+Ein Beispiel:
+<br/><br/>
+Das Formular zur Konfiguration eines Jobs ist geöffnet:
+<br/>
+<img src="images/editor_job.jpg" style="margin: 20px 0px ; border:1px solid gray;"/>
+<br/>
+Mit <strong>F1</strong> erreichen Sie die Dokumentation des XML-Elements <em>&lt;job&gt;</em>:
+<br/>
+<img src="images/editor_help_job.jpg" style="margin: 20px 0px ; border:1px solid gray;"/>
+</p>
+
+<h3>Vorhandene Konfigurationsdatei öffnen</h3>
+<p>
+Existierende Konfigurationsdateien öffnen Sie mit dem Menüpunkt <em>File/Open Configuration</em>:
+<br/>
+<img src="images/editor_menu_file_configuration_open.jpg" style="margin: 20px 0px ; border:1px solid gray;"/>
+</p>
+<p>
+Beispiel - Öffnen der Datei <em>scheduler.xml</em> aus der Auslieferung, Ansicht der Base-File Konfiguration:
+<br/>
+     <img src="images/editor_menu_file_open_scheduler_xml.jpg" style="margin: 20px 0px ; border:1px solid gray;"/>
+</p>
+
+
+
+<h3>Empfohlene Vorgehensweise  </h3>
+<p>
+<ul>
+  <li>
+  Öffnen Sie die Konfigurationsdatei <em>scheduler.xml</em> der Auslieferung.
+  <br/><br/>
+  </li>
+  <li>
+  Tragen Sie im Formular <em>Security</em> die Rechner bzw. Netzwerke ein, die per TCP und UDP Kommandos ausführen dürfen.
+  <br/><br/>
+  </li>
+  <li>
+  <p>
+  Tragen Sie im Formular <em>Jobs</em> die Jobs mit den Job-Parametern ein, die der Scheduler ausführen soll. 
+
+  Der Editor erstellt für jeden Job einen Zweig in der Baumansicht aller Jobs.
+  Jeder Job hat zusätzliche Formulare, in die weitere Eigenschaften, z.B. der auszuführende Programm-Code, die Startzeiten etc. einzutragen sind. 
+
+  Sie können zum Erstellen eines Jobs auf Basis eines Standard-Jobs auch den Job Wizard verwenden.
+  <br/>
+  Hinweis: wenn Jobs in XML-Dateien definiert werden sollen, die mit &lt;base&gt; inkludiert werden,
+  ist die inkludierte XML-Datei mit den Job-Definitionen im Editor zu öffnen.
+  <br/><br/>
+  </p>
+  </li>  
+  <li>
+  <p>
+  Wenn Jobs innerhalb einer Job-Kette ausgeführt werden sollen, tragen Sie die Job-Kette im Formular <em>Job Chains</em> ein. Für jede Job-Kette
+  sind die einzelnen Job-Ketten-Knoten zu definieren. Jedem Job-Ketten-Knoten ist ein Job zuzuordnen.
+  <br/>
+  Hinweis: wenn Job-Ketten in XML-Dateien definiert werden sollen, die mit &lt;base&gt; inkludiert werden, ist die inkludierte XML-Datei
+  mit den Job-Ketten Definitionen zu öffnen.
+  <br/><br/>
+  </p>
+  </li>  
+  <li>  
+    Wenn Sie auftragsgesteuerte Jobs in Job-Ketten verwenden, muss festgelegt werden, wie die Aufträge entstehen:
+    <br/><br/>
+    Aufträge können durch Verzeichnisüberwachung erzeugt werdenn - definieren Sie hierfür Dateiaufträge im Formualar <em>Job Chains</em>.
+    <br/><br/>
+    Sie können Aufträge direkt mit einem &lt;add_order&gt;-Kommando erstellen - definieren Sie solche Aufträge im Formular <em>Orders</em>.
+    Der Editor generiert aus diesem Eintrag ein &lt;add_order&gt;-Element, das Sie sich über das Formular <em>Commands</em> anzeigen lassen können.
+  <br/><br/>
+  </li>  
+</ul>
+</p>
+
+<h3>Job Wizard</h3>
+<p> 
+Mit dem Job Wizard kann ein neuer Job auf Basis eines bereits dokumentierten Standards-Jobs erstellt werden.
+<br/><br/>
+Vorhandene Job-Dokumentationen liegen als XML-Dateien im Unterverzeichnis <em>/jobs</em> des Scheduler-Installationsverzeichnisses.
+Mit der Scheduler-Auslieferung steht bereits eine Reihe von dokumentierten Standard-Jobs zur Verfügung.
+<br/><br/>
+Der Job Wizard liest das <em>/jobs</em>-Verzeichnis und bietet alle Jobs zum Import an. Ein importierter Job hat die gleichen Eigenschaften wie 
+das Vorbild, insbesondere die Sprache der Implementierung. Job-Parameter werden ebenfalls übernommen, können aber editiert werden. 
+Weitere Eigenschaften wie die Anzahl der Tasks, Startzeiten, Timeout-Einstellungen etc. können Schritt für Schritt erfolgen. 
+Dabei unterstützt der Wizard die Eingaben durch erläuternden Text.
+<br/><br/>
+Um den Assistenten zu starten, wählen Sie <em>Job Wizard</em> im Formular <em>Jobs</em>:
+<br/>
+<img src="images/editor_job_wizard.jpg" style="margin: 20px 0px ; border:1px solid gray;"/>
+<br/>
+Der Wizard erstellt einen neuen Job in folgenden Schritten:
+<br/>
+<img src="images/editor_job_wizard_overview.jpg" style="margin: 20px 0px ; border:1px solid gray;"/>
+</p> 
+
+
+<h3>Scheduler Job Dokumentation erstellen </h3>
+<p>
+Für jeden Scheduler-Job kann eine Dokumentation in einem festgelegten XML-Format erstellt werden. 
+<br/><br/>
+Die Dokumentation wird in der Regel vom Entwickler eines Jobs erstellt und dient dem Anwender/ Deployer, 
+die Job-Konfiguration für konkrete Job-Implementierungen vorzunehmen. 
+<br/><br/>
+Mit dem Editor können Sie die XML-Datei zur Job-Dokumentation formularbasiert erstellen, ohne das XML-Format zu kennen. 
+Mit Hilfe eines Stylesheets <em>scheduler_job_documentation.xsl</em> kann die Dokumentation für den Anwender im Browser als HTML-Seite angezeigt werden. 
+<br/><br/>
+Ein dokumentierter Job wird im <em>/jobs</em>-Verzeichnis des Schedulers gespeichert und ist damit als Vorbild für neue Jobs mit Hilfe des Job Wizards verfügbar. 
+<br/><br/>
+Wählen Sie den Menüpunkt <em>File/New Documentation</em>:
+<br/>
+<img src="images/editor_menu_file_documentation.jpg" style="margin: 20px 0px ; border:1px solid gray;"/>
+<br/><br/>
+
+Zu jedem Formular ist eine kontextbezogene Hilfe mit <strong>F1</strong> erreichbar:
+<br/>
+<img src="images/editor_help_documentation.jpg" style="margin: 20px 0px ; border:1px solid gray;"/>
+
+</p>
+
+</description>
