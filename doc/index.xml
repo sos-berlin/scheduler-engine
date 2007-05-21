@@ -88,6 +88,13 @@
                             </p>
                         </dd>
 
+                        <dt>
+                            <scheduler_a href="scheduler_editor.xml"/>
+                        </dt>
+                        <dd>
+                            GUI für Konfiguration und Dokumentation
+                        </dd>                                                                        
+                        
 
                         <dt>
                             <scheduler_a href="datenbank.xml">Datenbank und Historie</scheduler_a>
