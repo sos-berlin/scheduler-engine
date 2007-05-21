@@ -56,7 +56,7 @@
     in der Datei <code>hallo_welt.xml</code> abgelegt ist, können Sie den Scheduler so starten:
 </p>
 
-<pre>scheduler hallo_welt.xml</pre>
+<pre>…<i>installation path</i>…\bin\scheduler.exe -config=hallo_welt.xml</pre>
 
 <p>
     Sie können den Scheduler mit Ctrl-C abbrechen.
@@ -79,11 +79,11 @@
 <p>
     Der Scheduler prüft die XML-Konfiguration gegen das 
     <a href="xml/scheduler.xsd" type="text/plain" charset="utf-8">XML-Schema des Schedulers</a>.
-    Das Schema können Sie sich mit der Kommandozeilenoption <scheduler_option name="show-xml-schema"/> ausgeben lassen.
+    Beim Aufruf des Schedulers über die Kommandozeile können Sie sich das Schema mit der Option <scheduler_option name="show-xml-schema"/> ausgeben lassen:
 </p>
-
+<pre>…<i>installation path</i>…\bin\scheduler.exe -show-xml-schema</pre>
 <p>
-    Klicken Sie auf ein Element des Schemas, um dessen Beschreibung zu sehen.
+    Klicken Sie auf ein XML-Element, um dessen Beschreibung zu sehen.
 </p>
 
 <pre>&lt;<a class="silent" href="xml/spooler.xml">spooler</a>>
