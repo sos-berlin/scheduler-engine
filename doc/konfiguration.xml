@@ -15,8 +15,7 @@
 <scheduler_keyword keyword="XML-Konfiguration"/>
 
 <p>
-    Beim Start des Scheduler geben Sie die Datei an,
-    die die in XML formulierte Konfiguration enthält.
+    Beim Start des Scheduler geben Sie die Datei an, die die mit XML formulierte Konfiguration enthält.
 </p>
 
 <h2>Beispiel</h2>
@@ -59,7 +58,7 @@
 <pre>…<i>installation path</i>…\bin\scheduler.exe -config=hallo_welt.xml</pre>
 
 <p>
-    Sie können den Scheduler mit Ctrl-C abbrechen.
+    Ein gestarteter Scheduler kann mit Ctrl-C abgebrochen werden.
 </p>
 
 
